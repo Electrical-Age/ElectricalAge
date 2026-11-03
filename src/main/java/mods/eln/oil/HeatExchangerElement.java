@@ -249,9 +249,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     private FluidNode node(double[] saved) {
         FluidNode n = new FluidNode(desc.sideVolume, node.coordonate.y, 1.0, false);
         if (saved != null) {
-            n.mWater = saved[0];
-            n.mAir = saved[1];
-            n.energy = saved[2];
+            mods.eln.fluid.FluidSaves.restore(n, saved);
             n.update();
         } else n.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         return n;
@@ -320,6 +318,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
                 nbt.putDouble(s[0] + "W", (float) n.mWater);
                 nbt.putDouble(s[0] + "A", (float) n.mAir);
                 nbt.putDouble(s[0] + "U", (float) n.energy);
+                mods.eln.fluid.FluidSaves.putExtra(nbt, s[0] + "S", n);
             }
         }
     }

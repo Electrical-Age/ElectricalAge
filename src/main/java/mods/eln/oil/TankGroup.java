@@ -35,18 +35,13 @@ public final class TankGroup {
         this.sx = sx;
         this.sy = sy;
         this.sz = sz;
-        double volume = 0, w = 0, a = 0, u = 0, loss = 0;
+        double volume = 0, loss = 0;
         for (TankElement m : members) {
             volume += m.own.volume;
-            w += m.own.mWater;
-            a += m.own.mAir;
-            u += m.own.energy;
             loss += m.own.lossWPerK;
         }
         node = new FluidNode(volume, y0, sy, false);
-        node.mWater = w;
-        node.mAir = a;
-        node.energy = u;
+        for (TankElement m : members) node.addShareOf(m.own, 1);   // (every species: the blocks' contents summed)
         node.lossWPerK = loss;
         node.update();
     }
@@ -63,10 +58,7 @@ public final class TankGroup {
     /** Write the vessel's contents back into its blocks' shares, by volume. */
     void writeBack() {
         for (TankElement m : members) {
-            double share = m.own.volume / node.volume;
-            m.own.mWater = node.mWater * share;
-            m.own.mAir = node.mAir * share;
-            m.own.energy = node.energy * share;
+            m.own.setShareOf(node, m.own.volume / node.volume);
             m.own.update();
         }
     }

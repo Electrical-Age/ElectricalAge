@@ -34,6 +34,11 @@ public final class FluidSaves {
         nbt.putDouble(key + "W", n.mWater);
         nbt.putDouble(key + "A", n.mAir);
         nbt.putDouble(key + "U", n.energy);
+        putExtra(nbt, key + "S", n);
+    }
+
+    /** Only the other species, under tag (nothing if it holds none). */
+    public static void putExtra(CompoundTag nbt, String tag, FluidNode n) {
         if (n.extra == null) return;
         CompoundTag s = null;
         SpeciesRegistry reg = SpeciesRegistry.get();
@@ -42,14 +47,41 @@ public final class FluidSaves {
             if (s == null) s = new CompoundTag();
             s.putDouble(reg.byId(i + 2).key, n.extra[i]);
         }
-        if (s != null) nbt.put(key + "S", s);
+        if (s != null) nbt.put(tag, s);
     }
 
     /** The contents saved under key, or null if there are none. */
     public static Saved get(CompoundTag nbt, String key) {
         if (!nbt.contains(key + "W")) return null;
+        return new Saved(nbt.getDoubleOr(key + "W", 0), nbt.getDoubleOr(key + "A", 0), nbt.getDoubleOr(key + "U", 0), extra(nbt, key + "S"));
+    }
+
+    /**
+     * The contents saved under key as the devices keep them until their nodes exist: {water, air, energy} followed by
+     * the other species (index 3 + i is species i + 2) if it held any; null if nothing is saved there.
+     */
+    public static double[] array(CompoundTag nbt, String key) {
+        Saved s = get(nbt, key);
+        if (s == null) return null;
+        double[] wau = s.wau();
+        if (s.extra() == null) return wau;
+        double[] out = java.util.Arrays.copyOf(wau, 3 + s.extra().length);
+        System.arraycopy(s.extra(), 0, out, 3, s.extra().length);
+        return out;
+    }
+
+    /** Set n's contents to what array() gave (no update: the caller does it). */
+    public static void restore(FluidNode n, double[] saved) {
+        n.mWater = saved[0];
+        n.mAir = saved[1];
+        n.energy = saved[2];
+        n.extra = saved.length > 3 ? java.util.Arrays.copyOfRange(saved, 3, saved.length) : null;
+    }
+
+    /** The other species saved under tag (extra[i] is species i + 2), or null. */
+    public static double[] extra(CompoundTag nbt, String tag) {
         double[] extra = null;
-        var s = nbt.getCompound(key + "S");
+        var s = nbt.getCompound(tag);
         if (s.isPresent()) {
             SpeciesRegistry reg = SpeciesRegistry.get();
             for (String k : s.get().keySet()) {
@@ -59,6 +91,6 @@ public final class FluidSaves {
                 extra[id - 2] += s.get().getDoubleOr(k, 0);
             }
         }
-        return new Saved(nbt.getDoubleOr(key + "W", 0), nbt.getDoubleOr(key + "A", 0), nbt.getDoubleOr(key + "U", 0), extra);
+        return extra;
     }
 }

@@ -210,9 +210,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         v.initialize(c.y, mods.eln.sim.Ambient.kelvin(c));
         tubes = new mods.eln.sim.fluid.FluidNode(TUBES_VOLUME, c.y, 0.25, false);
         if (loadedTubes != null) {
-            tubes.mWater = loadedTubes[0];
-            tubes.mAir = loadedTubes[1];
-            tubes.energy = loadedTubes[2];
+            mods.eln.fluid.FluidSaves.restore(tubes, loadedTubes);
             tubes.update();
         } else tubes.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(c));
         makePorts();

@@ -264,9 +264,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         own = new FluidNode(desc.volume, node.coordonate.y, 1.0, false);
         own.lossWPerK = LOSS_W_PER_K;
         if (loaded != null) {
-            own.mWater = loaded[0];
-            own.mAir = loaded[1];
-            own.energy = loaded[2];
+            mods.eln.fluid.FluidSaves.restore(own, loaded);
             own.update();
         } else own.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         vessel = own;
@@ -338,6 +336,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             nbt.putDouble("vesselW", (float) own.mWater);
             nbt.putDouble("vesselA", (float) own.mAir);
             nbt.putDouble("vesselU", (float) own.energy);
+            mods.eln.fluid.FluidSaves.putExtra(nbt, "vesselS", own);
         }
     }
 
@@ -345,7 +344,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         if (nbt.contains("vesselW"))
-            loaded = new double[]{nbt.getDoubleOr("vesselW", 0), nbt.getDoubleOr("vesselA", 0), nbt.getDoubleOr("vesselU", 0)};
+            loaded = mods.eln.fluid.FluidSaves.array(nbt, "vessel");
     }
 
     @Override

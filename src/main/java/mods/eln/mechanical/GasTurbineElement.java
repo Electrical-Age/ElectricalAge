@@ -181,9 +181,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     public void initialize() {
         exhaust = new FluidNode(0.004, node.coordonate.y, 1.0, false);
         if (loadedEx != null) {
-            exhaust.mWater = loadedEx[0];
-            exhaust.mAir = loadedEx[1];
-            exhaust.energy = loadedEx[2];
+            mods.eln.fluid.FluidSaves.restore(exhaust, loadedEx);
             exhaust.update();
         } else exhaust.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         makePorts();
@@ -234,9 +232,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         nbt.putDouble("gate", gate);
         nbt.putBoolean("tripped", tripped);
         if (exhaust != null) {
-            nbt.putDouble("exhaustW", exhaust.mWater);
-            nbt.putDouble("exhaustA", exhaust.mAir);
-            nbt.putDouble("exhaustU", exhaust.energy);
+            mods.eln.fluid.FluidSaves.put(nbt, "exhaust", exhaust);
         }
     }
 
@@ -247,7 +243,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         gate = nbt.getDoubleOr("gate", 0);
         tripped = nbt.getBooleanOr("tripped", false);
         if (nbt.contains("exhaustW"))
-            loadedEx = new double[]{nbt.getDoubleOr("exhaustW", 0), nbt.getDoubleOr("exhaustA", 0), nbt.getDoubleOr("exhaustU", 0)};
+            loadedEx = mods.eln.fluid.FluidSaves.array(nbt, "exhaust");
     }
 
     /** What it is doing, or what stops it, first (Baughn 2026-10-29: Jade says why). */

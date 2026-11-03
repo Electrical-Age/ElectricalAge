@@ -245,18 +245,14 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         var c = node.coordonate;
         vessel = new FluidNode(VOLUME, c.y, 1.0, false);
         if (loaded != null) {
-            vessel.mWater = loaded[0];
-            vessel.mAir = loaded[1];
-            vessel.energy = loaded[2];
+            mods.eln.fluid.FluidSaves.restore(vessel, loaded);
             vessel.update();
         } else fromTanks(tanks.water(), tanks.steam());
         showTanks();
         long pos = c.pos().asLong();
         feed = new FluidNode(FEED_VOLUME, c.y + FEED_DRAW, 0.1, false);
         if (loadedFeed != null) {
-            feed.mWater = loadedFeed[0];
-            feed.mAir = loadedFeed[1];
-            feed.energy = loadedFeed[2];
+            mods.eln.fluid.FluidSaves.restore(feed, loadedFeed);
             feed.update();
         } else feed.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         feed.lumpable = true;   // (it merges into the pipe on its flange: no stub to fill first)
@@ -307,14 +303,10 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         tanks.writeToNBT(nbt, "boiler");
         nbt.putBoolean("liquidAtProbe", liquidAtProbe);
         if (vessel != null) {
-            nbt.putDouble("vesselW", vessel.mWater);
-            nbt.putDouble("vesselA", vessel.mAir);
-            nbt.putDouble("vesselU", vessel.energy);
+            mods.eln.fluid.FluidSaves.put(nbt, "vessel", vessel);
         }
         if (feed != null) {
-            nbt.putDouble("feedW", feed.mWater);
-            nbt.putDouble("feedA", feed.mAir);
-            nbt.putDouble("feedU", feed.energy);
+            mods.eln.fluid.FluidSaves.put(nbt, "feed", feed);
             nbt.putDouble("feedV", FEED_VOLUME);
         }
     }
@@ -325,10 +317,10 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         tanks.readFromNBT(nbt, "boiler");
         liquidAtProbe = nbt.getBooleanOr("liquidAtProbe", false);
         if (nbt.contains("vesselW"))
-            loaded = new double[]{nbt.getDoubleOr("vesselW", 0), nbt.getDoubleOr("vesselA", 0), nbt.getDoubleOr("vesselU", 0)};
+            loaded = mods.eln.fluid.FluidSaves.array(nbt, "vessel");
         // (saved for a stub of another size, e.g. the first 0.5 L one: its contents would not fit; it starts empty)
         if (nbt.contains("feedW") && nbt.getDoubleOr("feedV", 0) == FEED_VOLUME)
-            loadedFeed = new double[]{nbt.getDoubleOr("feedW", 0), nbt.getDoubleOr("feedA", 0), nbt.getDoubleOr("feedU", 0)};
+            loadedFeed = mods.eln.fluid.FluidSaves.array(nbt, "feed");
     }
 
     @Override

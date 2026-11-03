@@ -380,9 +380,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
 
     private static void load(FluidNode n, double[] saved, double T) {
         if (saved != null) {
-            n.mWater = saved[0];
-            n.mAir = saved[1];
-            n.energy = saved[2];
+            mods.eln.fluid.FluidSaves.restore(n, saved);
             n.update();
         } else n.fill(0, Water.P_ATM, T);   // (new, or the old capability turbine: its tank is dropped)
     }
@@ -437,9 +435,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
 
     private static void save(CompoundTag nbt, String key, FluidNode n) {
         if (n == null) return;
-        nbt.putDouble(key + "W", n.mWater);
-        nbt.putDouble(key + "A", n.mAir);
-        nbt.putDouble(key + "U", n.energy);
+        mods.eln.fluid.FluidSaves.put(nbt, key, n);
     }
 
     @Override
@@ -454,7 +450,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
 
     private static double[] read(CompoundTag nbt, String key) {
         if (!nbt.contains(key + "W")) return null;
-        return new double[]{nbt.getDoubleOr(key + "W", 0), nbt.getDoubleOr(key + "A", 0), nbt.getDoubleOr(key + "U", 0)};
+        return mods.eln.fluid.FluidSaves.array(nbt, key);
     }
 
     /** What it is doing, or what stops it, first (Baughn 2026-10-29: Jade says why). */

@@ -142,10 +142,12 @@ public final class FluidNode {
         mWater = src.mWater * share;
         mAir = src.mAir * share;
         energy = src.energy * share;
-        if (src.extra == null) extra = null;
+        double[] from = src.extra;   // (src may be this node: read before replacing)
+        if (from == null) extra = null;
         else {
-            extra = new double[src.extra.length];
-            for (int i = 0; i < extra.length; i++) extra[i] = src.extra[i] * share;
+            double[] to = new double[from.length];
+            for (int i = 0; i < to.length; i++) to[i] = from[i] * share;
+            extra = to;
         }
     }
 

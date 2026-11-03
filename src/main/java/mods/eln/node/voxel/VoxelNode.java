@@ -538,12 +538,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (want.intersects(others)) return "something is in the way";
             PipePart[] halves = pipe.splitAt(x, y, z);
             if (halves == null) return "the pipe ends here";
-            double[] saved = pipe.fluid == null ? null : new double[]{pipe.fluid.mWater, pipe.fluid.mAir, pipe.fluid.energy};
+            mods.eln.sim.fluid.FluidNode saved = pipe.fluid;
             parts.remove(i);
             for (PipePart hp : halves) {
                 double share = hp.length() / (double) Math.max(1, pipe.length());
                 hp.burst = pipe.burst;
-                hp.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
+                hp.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), saved, share);
                 parts.add(hp);
             }
             parts.add(new ValvePart(x, y, z, axis, pipe.bore(), mode));
@@ -1087,12 +1087,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         want.andNot(around);
         if (want.intersects(used)) return "something is in the way";
         PipePart[] halves = old.splitAt(x, y, z);
-        double[] saved = old.fluid == null ? null : new double[]{old.fluid.mWater, old.fluid.mAir, old.fluid.energy};
+        mods.eln.sim.fluid.FluidNode saved = old.fluid;
         if (halves != null) {
             parts.remove(target);
             for (PipePart hp : halves) {
                 double share = hp.length() / (double) Math.max(1, old.length());
-                hp.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), saved == null ? null : new double[]{saved[0] * share, saved[1] * share, saved[2] * share});
+                hp.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), saved, share);
                 parts.add(hp);
             }
         }

@@ -158,9 +158,7 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
         var c = node.coordonate;
         outlet = new FluidNode(OUTLET_VOLUME, c.y + 0.5, 0.5, false);
         if (loaded != null) {
-            outlet.mWater = loaded[0];
-            outlet.mAir = loaded[1];
-            outlet.energy = loaded[2];
+            mods.eln.fluid.FluidSaves.restore(outlet, loaded);
             outlet.update();
         } else outlet.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         outlet.lumpable = true;   // (it merges into the pipe on its flange)
@@ -180,9 +178,7 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         if (outlet != null) {
-            nbt.putDouble("outletW", outlet.mWater);
-            nbt.putDouble("outletA", outlet.mAir);
-            nbt.putDouble("outletU", outlet.energy);
+            mods.eln.fluid.FluidSaves.put(nbt, "outlet", outlet);
             nbt.putDouble("outletV", OUTLET_VOLUME);
         }
     }
@@ -192,7 +188,7 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
         super.readFromNBT(nbt);
         // (saved for an outlet of another size, e.g. the first 0.5 L one: its contents would not fit; it starts empty)
         if (nbt.contains("outletW") && nbt.getDoubleOr("outletV", 0) == OUTLET_VOLUME)
-            loaded = new double[]{nbt.getDoubleOr("outletW", 0), nbt.getDoubleOr("outletA", 0), nbt.getDoubleOr("outletU", 0)};
+            loaded = mods.eln.fluid.FluidSaves.array(nbt, "outlet");
     }
 
     @Override

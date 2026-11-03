@@ -97,9 +97,7 @@ public final class CondenserVessel {
                 n.mAir = Math.min(saved[1], Water.P_ATM * (volume - n.mWater / Water.RHO_L) / (Water.R_AIR * T));
                 n.energy = mods.eln.sim.fluid.Flash.energyAt(n.mWater, n.mAir, volume, T);
             } else {
-                n.mWater = saved[0];
-                n.mAir = saved[1];
-                n.energy = saved[2];
+                mods.eln.fluid.FluidSaves.restore(n, saved);
             }
             n.update();
         } else n.fill(0, Water.P_ATM, ambientK);
@@ -193,13 +191,11 @@ public final class CondenserVessel {
     }
 
     static void put(CompoundTag nbt, String key, FluidNode n) {
-        nbt.putDouble(key + "W", n.mWater);
-        nbt.putDouble(key + "A", n.mAir);
-        nbt.putDouble(key + "U", n.energy);
+        mods.eln.fluid.FluidSaves.put(nbt, key, n);
     }
 
     static double[] get(CompoundTag nbt, String key) {
-        return nbt.contains(key + "W") ? new double[]{nbt.getDoubleOr(key + "W", 0), nbt.getDoubleOr(key + "A", 0), nbt.getDoubleOr(key + "U", 0)} : null;
+        return nbt.contains(key + "W") ? mods.eln.fluid.FluidSaves.array(nbt, key) : null;
     }
 
     /** Read what was saved; savedVolume: the vessel's volume then (m^3), or 0 if it is its own. */
