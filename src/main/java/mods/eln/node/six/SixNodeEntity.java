@@ -56,6 +56,16 @@ public class SixNodeEntity extends NodeBlockEntity {
         return mask;
     }
 
+    /** The descriptor of the element in slot, or null: server from the node, client from the last publish. */
+    public @javax.annotation.Nullable SixNodeDescriptor descriptorAt(int slot) {
+        if (slot < 0 || slot >= SixNode.SLOTS) return null;
+        if (level != null && !level.isClientSide()) {
+            SixNodeElement e = getNode() instanceof SixNode s ? s.sideElementList[slot] : null;
+            return e == null ? null : e.sixNodeElementDescriptor;
+        }
+        return elementRenderIdList[slot] == 0 ? null : Eln.sixNodeItem.getDescriptor(elementRenderIdList[slot]);
+    }
+
     /** How many devices the block holds (every slot): server from the node, client from the last publish. */
     public int deviceCount() {
         int n = 0;

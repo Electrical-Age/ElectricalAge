@@ -85,6 +85,12 @@ public abstract class NodeBlock extends Block implements EntityBlock {
         return e.isProvidingWeakPower(Direction.fromIntMinecraftSide(side.get3DDataValue()));
     }
 
+    /** A pickaxe breaks machines fast (BreakTool); the six-node and voxel blocks pick the tool by the part aimed at. */
+    @Override
+    protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
+        return BreakTool.progress(state, player, level, pos, BreakTool.Kind.PICKAXE);
+    }
+
     @Override
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
         super.onPlace(state, level, pos, oldState, movedByPiston);

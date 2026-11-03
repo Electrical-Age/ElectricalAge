@@ -221,6 +221,9 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   GuideME optional). Book + 4 copper cables; every player gets one once, when a slot is free (persisted NBT
   `eln_handbook_given`). EA ships a stub start page; a content mod adds pages under `guides/eln/handbook/` in its own
   namespace and calls `Handbook.setStartPage` (`mods/eln/handbook`, `HandbookCases`).
+- Tools (Baughn 2026-11-03): a pickaxe breaks machines, devices and pipes as fast as stone, shears break cables as fast
+  as wool; in a block holding both, the part under the crosshair decides. No part breaks in under two ticks, so with
+  vanilla's pause after each block it is at best one part per 7 ticks (`node/BreakTool`, `BreakToolCases`).
 
 ### Multi-fluid pipes (2026-11-03)
 - Baughn: EA pipes carry oil "the complex way": fluids are data (datapack species JSON), Raoult mixing within a
