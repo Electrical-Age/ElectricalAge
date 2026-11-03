@@ -99,10 +99,7 @@ public final class FluidWorld implements IProcess {
         FluidNode lump = INSTANCE.lumpOf.get(piece);
         if (lump == null) return;
         for (FluidNode m : INSTANCE.lumps.get(lump)) {
-            double share = m.volume / lump.volume;
-            m.mWater = lump.mWater * share;
-            m.mAir = lump.mAir * share;
-            m.energy = lump.energy * share;
+            m.setShareOf(lump, m.volume / lump.volume);
             m.update();
         }
     }
@@ -139,10 +136,7 @@ public final class FluidWorld implements IProcess {
         for (var e : lumps.entrySet()) {
             FluidNode lump = e.getKey();
             for (FluidNode m : e.getValue()) {
-                double share = m.volume / lump.volume;
-                m.mWater = lump.mWater * share;
-                m.mAir = lump.mAir * share;
-                m.energy = lump.energy * share;
+                m.setShareOf(lump, m.volume / lump.volume);
                 m.update();
             }
         }
@@ -205,20 +199,15 @@ public final class FluidWorld implements IProcess {
         for (FluidNode n : runParent.keySet()) runs.computeIfAbsent(find(n, runParent), r -> new ArrayList<>()).add(n);
         Map<FluidNode, Double> runR = new IdentityHashMap<>();
         for (List<FluidNode> ms : runs.values()) {
-            double V = 0, w = 0, a = 0, u = 0, zLo = Double.MAX_VALUE, zHi = -Double.MAX_VALUE, R = 0;
+            double V = 0, zLo = Double.MAX_VALUE, zHi = -Double.MAX_VALUE, R = 0;
             for (FluidNode m : ms) {
                 V += m.volume;
-                w += m.mWater;
-                a += m.mAir;
-                u += m.energy;
                 zLo = Math.min(zLo, m.z);
                 zHi = Math.max(zHi, m.z + m.height);
                 R += m.resistance;
             }
             FluidNode lump = new FluidNode(V, zLo, Math.max(0.01, zHi - zLo), false);
-            lump.mWater = w;
-            lump.mAir = a;
-            lump.energy = u;
+            for (FluidNode m : ms) lump.addShareOf(m, 1);   // (every species: the run's contents summed)
             lump.update();
             lumps.put(lump, ms);
             for (FluidNode m : ms) lumpOf.put(m, lump);

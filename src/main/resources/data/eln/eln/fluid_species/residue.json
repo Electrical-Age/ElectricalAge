@@ -1,0 +1,11 @@
+{
+  "kind": "none",
+  "group": "hydrocarbon",
+  "density": 1050,
+  "cp_liquid": 1800,
+  "cp_vapour": 1600,
+  "molar_mass": 0.6,
+  "viscosity": [[293, 50], [423, 0.5]],
+  "colour": "#2A2826",
+  "fluids": {"liquid": ["eln:residue"], "vapour": []}
+}

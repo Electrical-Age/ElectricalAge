@@ -1,0 +1,15 @@
+{
+  "kind": "curve",
+  "group": "hydrocarbon",
+  "density": 950,
+  "cp_liquid": 1900,
+  "cp_vapour": 1700,
+  "molar_mass": 0.35,
+  "boiling_point": 650,
+  "latent_heat": 220000,
+  "critical_temperature": 850,
+  "viscosity": [[293, 0.2], [373, 0.015]],
+  "vapour_viscosity": 7e-6,
+  "colour": "#6B3A1C",
+  "fluids": {"liquid": ["eln:heavyoil"], "vapour": []}
+}

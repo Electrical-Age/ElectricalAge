@@ -64,6 +64,14 @@ tar sand separator out of its back, the oil pump out of its discharge flange on 
 takes fluid (another mod's pipe, a column base, a flare stack, an EA tank for water). The rest offer their tanks on
 every face for pipes to draw from or fill.
 
+### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)
+- Datapack JSON `data/<ns>/eln/fluid_species/<name>.json` defines species `<ns>:<name>` for the fluid core (fields in
+  the loader's javadoc: kind curve/none/gas, group, density, heat capacities, molar mass, boiling point, latent heat,
+  critical temperature, liquid viscosity at two temperatures, colour, the NeoForge fluids it is). Water and air are
+  built in. EA ships crude_oil, gasoline, diesel, heavy_oil (hydrocarbons, one group), residue (never boils, denser
+  than water) and natural_gas. A modpack can add species or retune these; a file that fails its checks (the vapour's
+  energy must stay above the liquid's below the critical point) is skipped with a log line.
+
 ## Entities
 
 The electric bike (`bike/ElectricBike`, `ElnRegistry.ELECTRIC_BIKE_ENTITY`, item `ELECTRIC_BIKE`; Baughn 2026-10-28):

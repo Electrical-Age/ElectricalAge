@@ -29,11 +29,17 @@ public final class FluidEdge {
     public double power;
     public static final double TURBINE_EFFICIENCY = 0.40;
 
-    /** This step's flow a -> b (kg/s; negative: b -> a), and what it carried: liquid, vapour, air (kg/s), enthalpy (W). */
+    /**
+     * This step's flow a -> b (kg/s; negative: b -> a), and what it carried: liquid water, water vapour, air (kg/s),
+     * enthalpy (W); fSpecies[id]: each species, both phases (kg/s, a -> b; null until it has carried something).
+     */
     public double flow, fLiquid, fVapour, fAir, fEnthalpy;
+    public double[] fSpecies;
     // the solve's coefficient and upstream properties (per step)
     double g, rho, head, sA, sB, xl;
     boolean fromA;
+    /** This step's packets each end gives (FluidNetwork.packet; cached: node states hold still until the step ends). */
+    FluidNetwork.Packet pkA, pkB;
 
     public FluidEdge(FluidNode a, double portA, FluidNode b, double portB, double k) {
         this.a = a;

@@ -135,9 +135,20 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
 
 ## Other simulators (pointers)
 
-- Fluids: `src/main/java/mods/eln/sim/fluid/` (`FluidNetwork` implicit pressure solve, `Flash`, `Water`, `EaUnits`),
-  stepped by `src/main/java/mods/eln/fluid/FluidWorld.java` as a slow process; devices join with their node's
-  connectJob. Tests: `FluidCoreTest`, `FluidPropertyTest`. See content.md for pipes/oil.
+- Fluids: `src/main/java/mods/eln/sim/fluid/` (`FluidNetwork` implicit pressure solve, `Flash`, `Water`, `EaUnits`,
+  `Species`, `SpeciesRegistry`), stepped by `src/main/java/mods/eln/fluid/FluidWorld.java` as a slow process; devices
+  join with their node's connectJob. Tests: `FluidCoreTest`, `FluidPropertyTest`, `MultiFluidTest`,
+  `MultiFluidPropertyTest`. See content.md for pipes/oil.
+  Species (Baughn 2026-11-03: fluids are data): water (id 0) and air (1) are built in on `Water`'s numbers; others come
+  from datapack JSON (`SpeciesLoader`, content.md). A node holds `mWater`, `mAir` and `extra[id - 2]`, plus energy.
+  `Flash` splits each condensable species at T by Raoult within its miscibility group, from the node's whole
+  composition (non-iterative: the gas space is the root of one piecewise-linear equation); liquids stack in layers by
+  density (one per group); `pressureAt` weighs the layers above a port. A port draws the gas above the liquid, else the
+  layer at its height, blended across a band at each interface. Liquid counts by volume against a node's room; each
+  layer's volume moves at most half a band a step; a node gives at most half of each layer (and of its gas) a step.
+  With water and air alone every step is bit-identical to the two-species core it replaced (checked on 400 random
+  networks), and `mLiquid()`, `mVapour()`, `pVapour()` and `FluidEdge.fLiquid/fVapour/fAir` stay water's and air's;
+  `FluidEdge.fSpecies` carries every species.
   Per step (20 Hz): heat in; one compressibility per phase per node (the stiffer of a small and a 2% flash step); an
   implicit pressure solve, repeated if a check valve runs backwards or a flow runs against the side its packet was
   taken from; limiters bound nodes by their neighbours' solved pressures and cap liquid level moves; each node gives at
