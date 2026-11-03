@@ -119,6 +119,13 @@ public final class FluidNode {
         return state.vapour(id);
     }
 
+    /** The liquid layer species id is in (0 the bottom), or -1 if it has no liquid here. */
+    public int layerOf(int id) {
+        if (state.liquid(id) <= 0) return -1;
+        for (int l = 0; l < state.layers; l++) if (state.inLayer(id, l)) return l;
+        return -1;
+    }
+
     /** Volume of all its liquid (m^3). */
     public double liquidVolume() {
         return state.vLiquid;

@@ -68,4 +68,48 @@ public final class EaUnits {
         n.energy += m * (vapour ? Water.hVapour(T) : Water.hLiquid(T));
         n.update();
     }
+
+    /** The vapour of species id a node can give out (kg): what is above what 1 atm would hold (water: steamAvailable). */
+    public static double vapourAvailable(FluidNode n, int id) {
+        if (id == SpeciesRegistry.WATER) return steamAvailable(n);
+        double p = n.P();
+        return p <= Water.P_ATM ? 0 : n.vapour(id) * (1 - Water.P_ATM / p);
+    }
+
+    /** Put m kg of species id in at temperature T, as liquid or vapour (water: addWater). */
+    public static void add(FluidNode n, int id, double m, double T, boolean vapour) {
+        if (id == SpeciesRegistry.WATER) {
+            addWater(n, m, T, vapour);
+            return;
+        }
+        if (m <= 0) return;
+        Species s = SpeciesRegistry.get().byId(id);
+        n.addMass(id, m);
+        n.energy += m * (vapour || s.gas() ? s.hVapour(T) : s.hLiquid(T));
+        n.update();
+    }
+
+    /** Take up to m kg of species id's liquid out of n, with its enthalpy; returns what it took. */
+    public static double drainLiquid(FluidNode n, int id, double m) {
+        if (id == SpeciesRegistry.WATER) return drainLiquid(n, m);
+        m = Math.min(m, n.liquid(id));
+        if (m <= 0) return 0;
+        n.addMass(id, -m);
+        n.energy -= m * SpeciesRegistry.get().byId(id).hLiquid(n.T());
+        n.update();
+        return m;
+    }
+
+    /** Take up to m kg of species id's vapour out of n, with its enthalpy. */
+    public static void drainVapour(FluidNode n, int id, double m) {
+        if (id == SpeciesRegistry.WATER) {
+            drainVapour(n, m);
+            return;
+        }
+        m = Math.min(m, n.vapour(id));
+        if (m <= 0) return;
+        n.addMass(id, -m);
+        n.energy -= m * SpeciesRegistry.get().byId(id).hVapour(n.T());
+        n.update();
+    }
 }

@@ -40,6 +40,7 @@ public final class PipeCases {
         cases.add(new Burst());
         cases.add(new Valve());
         cases.add(new Adapter());
+        cases.add(new AdapterOil());
         cases.add(new ValveByPlayer());
         cases.add(new KitPickupMerges());
         cases.add(new PipeRoutePreview());
@@ -940,6 +941,67 @@ public final class PipeCases {
             boolean back = cache.getCapability() != null;
             ctx.check("pipe: a held capability cache follows the adapter out and back in", held && gone && back && err == null,
                 "held " + held + ", gone " + gone + ", back " + back + (err == null ? "" : ", " + err));
+        }
+    }
+
+    /**
+     * A pipe adapter takes any fluid a species is (Baughn 2026-11-03: data-driven fluids): crude oil put in goes into the
+     * run as crude, comes back out as crude, and a fluid no species is (lava) is refused.
+     */
+    static final class AdapterOil implements TestCase {
+        BlockPos at;
+        int put, lava;
+        double crudeAfterPut = -1;
+
+        public String id() {
+            return "pipe_adapter_oil";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+            at = ctx.at(2, 1, 1);
+            ctx.level().setBlock(ctx.at(1, 1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
+            var item = new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get());
+            var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(ctx.at(1, 1, 1)),
+                net.minecraft.core.Direction.EAST, ctx.at(1, 1, 1), false);
+            item.useOn(new net.minecraft.world.item.context.UseOnContext(ctx.level(), null, net.minecraft.world.InteractionHand.MAIN_HAND, item, hit));
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
+            if (cap == null) return;
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                put = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Oil.CRUDE.get()), 120, tx);
+                lava = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.LAVA), 100, tx);
+                tx.commit();
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            VoxelNode n = node(ctx, at);
+            if (n == null) {
+                ctx.check("pipe: an oil adapter goes on the stone's face", false, "");
+                return;
+            }
+            PipePart stub = null;
+            for (VoxelPart p : n.parts) if (p instanceof PipePart pp) stub = pp;
+            int crude = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
+            var run = stub == null ? null : mods.eln.fluid.FluidWorld.nodeFor(stub.fluid);
+            double inRun = run == null || crude < 0 ? 0 : run.mass(crude) / mods.eln.fluid.FluidSpecies.kgPerMb(crude, false);
+            ctx.check("pipe: 120 mB of crude oil went in through the adapter", put == 120, put + " mB");
+            ctx.check("pipe: it is crude oil in the run", inRun > 119 && inRun < 121, inRun + " mB, water " + (run == null ? 0 : run.mWater));
+            ctx.check("pipe: lava (no species) is refused", lava == 0, lava + " mB");
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
+            int took;
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                took = cap.extract(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Oil.CRUDE.get()), 50, tx);
+                tx.commit();
+            }
+            ctx.check("pipe: crude oil comes back out through it", took == 50, took + " mB");
         }
     }
 
