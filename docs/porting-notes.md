@@ -42,8 +42,17 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   pumps 6 / 15 bar. `oil_steam_turbine*`.
 - Steam condensers (new, Baughn 2026-10-26): against a turbine's exhaust side (right of its front); a vessel cooled
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
-  turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
+  turbine's shaft out of its front flange, makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- Condensate pump curve (Baughn 2026-11-03: a turbine at its rated pressure works on its own, an overclocked one needs
+  a pipe pump). Both condensers' pumps follow Q = speed x Qmax x sqrt(1 - dp / H0) (`CondensatePump`), dp the outlet
+  over the vessel: H0 = 1.3 x the turbine's rated inlet, and 1.5 x its condensate at full power against the rating.
+  Small/Steam Condenser (50V/200V turbines, 10 bar): shut-off 13 bar, ~3.0 / 11.9 g/s at 10 bar (6.2 / 24.8 g/s free;
+  their turbines condense ~2.0 / 7.9 g/s), short of full-power condensate above ~12 bar. Plant Steam Condenser (HP,
+  20 bar): shut-off 26 bar, 59 g/s at 20 bar (123 free; a full HP makes 39.5 g/s); it was 15 bar and 0.1 kg/s, which
+  couldn't feed the HP's own 20 bar boiler. Its motor load now goes with the pressure it really pumps against. Speed
+  still scales the flow only (the head stays at any speed). Was a straight line to a 15 bar shut-off for all.
+  `CondensatePumpTest`, `oil_condensate_return_*`, `plant_condenser_pump_into_*`.
 - Shaft redo, part 1 (Baughn 2026-10-29: the old shaft turbines had no steam input; redo them on the new steam logic).
   The shaft Steam Turbine (same id) takes steam by EA pipe on top and lets it out of its back (piped on, or into the
   air); work = 0.75 x the isentropic drop from the inlet to the exhaust's pressure, onto the shaft; 16 kW at 20 bar

@@ -14,16 +14,17 @@ import java.util.List;
  * cooled vessel at the saturation pressure of its water (~0.1 bar at 46 C), so the steam expands further and gives
  * nearly twice the work per kg. Cooled to the local ambient by its own air cooler (sized for its turbine at full power),
  * plus whatever a thermal cable on a side takes. Its air ejector keeps air out; its condensate pump, driven by the
- * turbine's shaft, pushes the water out of its front flange (up to PUMP_PA) back to the boiler's feed. Water comes in
+ * turbine's shaft, pushes the water out of its front flange back to the boiler's feed (CondensatePump: enough for a
+ * boiler at the turbine's rated 10 bar; shut off at 13 bar over the vessel: past the rating, an Inline Pump after it). Water comes in
  * (makeup) by the flange on top. Model: mods.eln.cad.models.Condenser.
  */
 public class CondenserDescriptor extends TransparentNodeDescriptor {
     /** Heat (W) it rejects at its turbine's full power on a 10 bar inlet (0.1 bar, condensate at 46 C). */
     public final double nominalHeat;
-    /** Its turbine's power (W), the vessel (m^3), and the condensate (kg/s) its pump moves against 1 atm. */
-    public final double turbineP, volume, pumpKgPerS;
-    /** The condensate pump's shutoff head (Pa, absolute; a boiler at a turbine's 25 bar burst can't be fed past it). */
-    public static final double PUMP_PA = 15e5;
+    /** Its turbine's power (W), the vessel (m^3), and the condensate (kg/s) at full power on a 10 bar inlet. */
+    public final double turbineP, volume, condensateKgPerS;
+    /** The condensate pump: sized to the turbine's rated 10 bar inlet and its condensate. */
+    public final CondensatePump pump;
     /** The vessel's temperature over its shell's, and the shell's over ambient, at nominal heat (K). */
     public static final double DT_VESSEL = 6, DT_SHELL = 20;
     /** The air ejector's time constant (s): the air in it falls by e in this time. */
@@ -42,7 +43,8 @@ public class CondenserDescriptor extends TransparentNodeDescriptor {
         double tIn = Water.tsat(SteamGeneratorDescriptor.NOMINAL_PA), drop = Water.isentropicDrop(tIn, SteamGeneratorDescriptor.NOMINAL_PA, 0.1e5);
         double kgPerS = turbineP / (eta * drop);
         this.nominalHeat = kgPerS * (Water.hVapour(tIn) - eta * drop - Water.hLiquid(Water.tsat(0.1e5)));
-        this.pumpKgPerS = 2 * kgPerS;
+        this.condensateKgPerS = kgPerS;
+        this.pump = CondensatePump.forTurbine(SteamGeneratorDescriptor.NOMINAL_PA, kgPerS);
         this.obj = Eln.obj.getObj(model);
     }
 
@@ -63,5 +65,7 @@ public class CondenserDescriptor extends TransparentNodeDescriptor {
         list.add("Nearly twice the work per kg of steam, if kept cool");
         list.add(String.format("Rejects %.1f kW of heat at full power; more with a thermal cable", nominalHeat / 1000));
         list.add("Condensate out of its front (to the boiler's feed), makeup water in on top");
+        list.add(String.format("Its pump feeds a %.0f bar boiler; shut off at %.0f bar: above the rating, fit an Inline Pump after it",
+            pump.ratedPa / 1e5, pump.shutoffPa / 1e5));
     }
 }

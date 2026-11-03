@@ -12,7 +12,7 @@ import net.minecraft.nbt.CompoundTag;
  * A condenser's vessel and what works on it, shared by the 50V/200V turbines' condensers (CondenserElement) and the
  * Plant Steam Condenser (PlantCondenserElement; Baughn's standing rule: share code rather than copy it). The vessel sits
  * at the saturation pressure of its water; its shell (an EA thermal load) takes its heat; an air ejector pulls the air
- * out; a condensate pump pushes water from its bottom to an outlet node; makeup water comes in through a float valve,
+ * out; a condensate pump (CondensatePump's curve) pushes water from its bottom to an outlet node; makeup water comes in through a float valve,
  * open below MAKEUP_OPEN of its volume as water, shut by MAKEUP_SHUT. How hard the pump and the ejector run is the
  * owner's (a turbine's shaft, or a shaft motor).
  */
@@ -21,7 +21,9 @@ public final class CondenserVessel {
     public static final double MAKEUP_OPEN = 0.15, MAKEUP_SHUT = 0.25;
     public static final double OUTLET_VOLUME = 0.00002, PORT_K = BoilerElement.PORT_K;
     public final NbtThermalLoad shell;
-    public final double volume, nominalHeat, pumpKgPerS;
+    public final double volume, nominalHeat;
+    /** The condensate pump's curve (sized to the owner's turbine). */
+    public final CondensatePump curve;
     public FluidNode vessel, outlet, inlet;
     public FluidDevice.Link pump, makeup;
     double[] loaded, loadedOut, loadedIn;
@@ -29,15 +31,19 @@ public final class CondenserVessel {
     boolean oldTank;
     /** Heat the shell took from the vessel (W, averaged) and condensate pumped (mB/s), for WAILA. */
     public double heatW, pumped;
-    /** Totals since loaded (GameTests): condensate pumped (kg), air the ejector took (kg). */
-    public double totalPumpedKg, totalAirKg;
+    /** Totals since loaded (GameTests): condensate pumped (kg), air the ejector took (kg), steam exhausted into it (kg). */
+    public double totalPumpedKg, totalAirKg, totalSteamKg;
     double meterHeat, meterPump, meterTime;
+    /** The pump's back-pressure (Pa over the vessel's bottom) and its outlet's pressure (Pa), at the last step. */
+    public double backPa, outletPa;
+    /** The pump's speed (0..1.2 of its rating). */
+    public double speed;
 
-    public CondenserVessel(NbtThermalLoad shell, double volume, double nominalHeat, double pumpKgPerS) {
+    public CondenserVessel(NbtThermalLoad shell, double volume, double nominalHeat, CondensatePump curve) {
         this.shell = shell;
         this.volume = volume;
         this.nominalHeat = nominalHeat;
-        this.pumpKgPerS = pumpKgPerS;
+        this.curve = curve;
     }
 
     /** Liquid as a share of the vessel. */
@@ -50,6 +56,7 @@ public final class CondenserVessel {
         if (vessel == null || m <= 0 && air <= 0) return;
         vessel.mWater += m;
         vessel.mAir += air;
+        totalSteamKg += Math.max(0, m);
         vessel.energy += m * hSteam + air * Water.hAir(tAir);
         vessel.update();
     }
@@ -70,10 +77,9 @@ public final class CondenserVessel {
         inlet.resistance = 1 / PORT_K;
         // (into the vessel's top: the makeup falls in, it doesn't run back out)
         makeup = new FluidDevice.Link(inlet, 0, vessel, 1.0, PORT_K).kind(FluidEdge.Kind.CHECK);
-        // g = rho k / mu: its condensate flow against 1 atm, none at the shutoff
-        double dp = CondenserDescriptor.PUMP_PA - Water.P_ATM;
-        pump = new FluidDevice.Link(vessel, 0, outlet, 0, pumpKgPerS / dp * Water.MU_L / Water.RHO_L).kind(FluidEdge.Kind.CHECK);
-        pump.boost = dp;
+        // g = rho k / mu x open: k for Qmax / H0; open carries the speed and the curve's chord (before)
+        pump = new FluidDevice.Link(vessel, 0, outlet, 0, curve.freeKgPerS / curve.shutoffPa * Water.MU_L / Water.RHO_L).kind(FluidEdge.Kind.CHECK);
+        pump.boost = curve.boost(0);
         pump.open = 0;
     }
 
@@ -119,9 +125,28 @@ public final class CondenserVessel {
         // the makeup's float valve
         if (makeup != null) makeup.open = Math.max(0, Math.min(1, (MAKEUP_SHUT - floodShare()) / (MAKEUP_SHUT - MAKEUP_OPEN)));
         if (pump != null) {
-            pump.open = Math.max(0, Math.min(1.2, pumpOpen));
-            pump.boost = CondenserDescriptor.PUMP_PA - Water.P_ATM;
+            // the curve's chord through where it runs now (CondensatePump): speed scales the flow, the head stays
+            backPa = backPressure();
+            speed = Math.max(0, Math.min(1.2, pumpOpen));
+            pump.open = speed * curve.chordShare(backPa);
+            pump.boost = curve.boost(backPa);
         }
+    }
+
+    /**
+     * The pressure the pump works against now (Pa): its outlet's run over the vessel's bottom, less the fall between
+     * them (both lumped as the network steps them: the outlet's own node is stale once it is part of a pipe run).
+     */
+    double backPressure() {
+        FluidNode a = mods.eln.fluid.FluidWorld.nodeFor(vessel), b = mods.eln.fluid.FluidWorld.nodeFor(outlet);
+        double pa = a.pressureAt(pump.drawA), pb = b.pressureAt(pump.drawB);
+        outletPa = pb;
+        return pb - pa - Water.RHO_L * mods.eln.sim.fluid.FluidNetwork.G * (a.z + pump.drawA * a.height - b.z - pump.drawB * b.height);
+    }
+
+    /** The pump's flow now against its back-pressure, at its speed, as a share of its rated (free) flow; 0: shut off. */
+    public double flowShare() {
+        return speed * curve.share(backPa);
     }
 
     /** After a fluid step: the meters; returns the condensate pumped this step (kg). */

@@ -49,7 +49,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
     public CondenserElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
         desc = (CondenserDescriptor) d;
-        v = new CondenserVessel(shell, desc.volume, desc.nominalHeat, desc.pumpKgPerS);
+        v = new CondenserVessel(shell, desc.volume, desc.nominalHeat, desc.pump);
         thermalLoadList.add(shell);
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         slowProcessList.add(t -> findTurbine());
@@ -223,7 +223,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         if (makeup != null) info.put(I18N.tr("Makeup valve"), makeup.open >= 0.99 ? I18N.tr("open") : makeup.open <= 0.01 ? I18N.tr("shut (full enough)")
             : String.format("%.0f%% open", makeup.open * 100));
         // (Baughn: on a cold start nothing said why no water reached the boiler: the pump turns with the turbine)
-        double open = v.pump == null ? 0 : v.pump.open;
+        double open = v.speed;   // (pump.open also carries its curve's chord)
         info.put(I18N.tr("Condensate pump"), turbine == null ? I18N.tr("stopped: no turbine")
             : open <= 0.01 ? I18N.tr("stopped: it turns with the turbine; feed the boiler directly to start")
             : String.format("%.0f%%, %.0f mB/s", Math.min(1, open) * 100, pumped));

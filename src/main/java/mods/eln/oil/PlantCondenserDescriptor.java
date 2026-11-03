@@ -18,17 +18,19 @@ import java.util.List;
  * and it cools less; full, water backs up its exhaust pipe into the turbine. Model: mods.eln.cad.models.PlantCondenser.
  */
 public class PlantCondenserDescriptor extends TransparentNodeDescriptor {
-    public final double volume, nominalHeat, pumpKgPerS;
+    public final double volume, nominalHeat;
+    /** The condensate pump: sized to the turbine it serves (its rated inlet pressure, the boiler's, and its steam). */
+    public final CondensatePump pump;
     /** Air leaking in at full vacuum (kg/s), the ejector's and pump's shaft power (W at full speed; the pump's per its
      *  flow), and the flooded share past which its tubes drown. */
     public static final double AIR_LEAK_KG_PER_S = 2e-6, EJECTOR_W = 150, PUMP_EFFICIENCY = 0.6, FLOOD = 0.5;
     final Obj3D obj;
 
-    public PlantCondenserDescriptor(String name, double volume, double nominalHeat, double pumpKgPerS, String model) {
+    public PlantCondenserDescriptor(String name, double volume, double nominalHeat, mods.eln.mechanical.SteamTurbineSpec turbine, String model) {
         super(name, PlantCondenserElement.class, PlantCondenserRender.class);
         this.volume = volume;
         this.nominalHeat = nominalHeat;
-        this.pumpKgPerS = pumpKgPerS;
+        this.pump = CondensatePump.forTurbine(turbine.nominalPa, turbine.nominalKgPerS);
         this.obj = Eln.obj.getObj(model);
     }
 
@@ -58,5 +60,7 @@ public class PlantCondenserDescriptor extends TransparentNodeDescriptor {
         list.add("Condensate out low on its front; makeup water in high on its left.");
         list.add("Its pump and air ejector run on a Shaft Motor against its side: no motor, no vacuum.");
         list.add(String.format("Rejects %.0f kW at a 20 K rise of its shell; more with thermal cables on its sides.", nominalHeat / 1000));
+        list.add(String.format("Its pump feeds a %.0f bar boiler (an HP turbine's rating); shut off at %.0f bar: above, fit an Inline Pump after it.",
+            pump.ratedPa / 1e5, pump.shutoffPa / 1e5));
     }
 }
