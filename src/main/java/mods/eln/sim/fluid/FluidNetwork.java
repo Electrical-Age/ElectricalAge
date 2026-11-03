@@ -99,7 +99,7 @@ public final class FluidNetwork {
             for (FluidEdge e : edges) {
                 if (e.g == 0) continue;
                 // flow a->b = g (Pa' - Pb' + c), c = the port offsets and the head
-                double c = e.a.pressureAt(e.portA) - e.a.P() - (e.b.pressureAt(e.portB) - e.b.P()) + e.head;
+                double c = e.a.pressureOver(e.portA, e.spanA) - e.a.P() - (e.b.pressureOver(e.portB, e.spanB) - e.b.P()) + e.head;
                 Integer ia = idx.get(e.a), ib = idx.get(e.b);
                 for (int end = 0; end < 2; end++) {
                     Integer i = end == 0 ? ia : ib;
@@ -117,7 +117,7 @@ public final class FluidNetwork {
             boolean again = false;
             for (FluidEdge e : edges) {
                 double pa = e.a.fixed ? e.a.P() : P[idx.get(e.a)], pb = e.b.fixed ? e.b.P() : P[idx.get(e.b)];
-                double offA = e.a.pressureAt(e.portA) - e.a.P(), offB = e.b.pressureAt(e.portB) - e.b.P();
+                double offA = e.a.pressureOver(e.portA, e.spanA) - e.a.P(), offB = e.b.pressureOver(e.portB, e.spanB) - e.b.P();
                 e.flow = e.g * (pa + offA - pb - offB + e.head);
                 if (e.oneWay() && e.flow < 0 && e.g != 0) {
                     e.g = 0;
@@ -196,16 +196,23 @@ public final class FluidNetwork {
     /** The packet the upstream end u of e gives this step (cached on the edge). */
     static Packet packet(FluidEdge e, FluidNode u) {
         if (u == e.a) {
-            if (e.pkA == null) e.pkA = packet(e.a, e.portA);
+            if (e.pkA == null) e.pkA = packet(e.a, e.portA, e.spanA);
             return e.pkA;
         }
-        if (e.pkB == null) e.pkB = packet(e.b, e.portB);
+        if (e.pkB == null) e.pkB = packet(e.b, e.portB, e.spanB);
         return e.pkB;
     }
 
-    /** The port window's liquid share for a liquid top at fraction top (a smooth step a band wide). */
-    private static double window(double top, double port) {
-        double x = Math.max(0, Math.min(1, (top - Math.min(port, 1 - BAND)) / BAND));
+    /**
+     * The port window's liquid share for a liquid top at fraction top: a smooth step a band wide over a point port, or as
+     * tall as an opening (span) over it, wet as far as the liquid reaches up it.
+     */
+    private static double window(double top, double port, double span) {
+        double x;
+        if (span > BAND) {
+            double lo = Math.max(0, port - span / 2), hi = Math.min(1, port + span / 2);
+            x = hi > lo ? Math.max(0, Math.min(1, (top - lo) / (hi - lo))) : (top >= port ? 1 : 0);
+        } else x = Math.max(0, Math.min(1, (top - Math.min(port, 1 - BAND)) / BAND));
         return x * x * (3 - 2 * x);
     }
 
@@ -215,6 +222,11 @@ public final class FluidNetwork {
      * chattered): each layer's share is the window at its top less the window at its bottom.
      */
     static Packet packet(FluidNode u, double port) {
+        return packet(u, port, 0);
+    }
+
+    /** The same through an opening span tall (a share of u's height, centred on port): FluidPort.span. */
+    static Packet packet(FluidNode u, double port, double span) {
         Packet pk = new Packet();
         pk.node = u;
         Flash st = u.state;
@@ -244,7 +256,7 @@ public final class FluidNetwork {
                 double below = 0, sum = 0;
                 for (int l = 0; l < L; l++) {
                     double top = L == 1 ? u.level() : st.layerTop[l];
-                    double wt = window(top, port);
+                    double wt = window(top, port, span);
                     wk[l] = wt - below;
                     below = wt;
                     sum += wk[l];
@@ -260,7 +272,7 @@ public final class FluidNetwork {
                 double below = 0;
                 for (int l = 0; l < L; l++) {
                     double top = L == 1 ? u.level() : st.layerTop[l];
-                    double wt = window(top, port);
+                    double wt = window(top, port, span);
                     wk[l] = wt - below;
                     below = wt;
                 }
@@ -414,7 +426,7 @@ public final class FluidNetwork {
 
     /** Which end the flow comes from (by the current pressures and the head), and what it carries. */
     void chooseUpstream(FluidEdge e) {
-        double pa = e.a.pressureAt(e.portA), pb = e.b.pressureAt(e.portB);
+        double pa = e.a.pressureOver(e.portA, e.spanA), pb = e.b.pressureOver(e.portB, e.spanB);
         boolean fromA = pa >= pb;
         for (int t = 0; t < 2; t++) {
             props(e, fromA);
@@ -432,7 +444,7 @@ public final class FluidNetwork {
         e.rho = pk.rho;
         e.xl = pk.xl;
         e.head = pk.rhoHead * G * (e.zA() - e.zB()) + e.boost;
-        e.g = e.area > 0 ? orificeG(e, e.a.pressureAt(e.portA) - e.b.pressureAt(e.portB) + e.head) : pk.rho * e.k * e.open / pk.mu;
+        e.g = e.area > 0 ? orificeG(e, e.a.pressureOver(e.portA, e.spanA) - e.b.pressureOver(e.portB, e.spanB) + e.head) : pk.rho * e.k * e.open / pk.mu;
     }
 
     /**
@@ -462,7 +474,7 @@ public final class FluidNetwork {
         var r = rises(dt);
         for (FluidEdge e : edges) {
             if (e.flow == 0) continue;
-            double d = e.a.pressureAt(e.portA) - e.b.pressureAt(e.portB) + e.head;
+            double d = e.a.pressureOver(e.portA, e.spanA) - e.b.pressureOver(e.portB, e.spanB) + e.head;
             // (a flow against the starting drive is the implicit solve's answer to what the step does at the other
             // end: left alone; only an overshoot past the even point is cut back)
             if (d == 0 || (d > 0) != (e.flow > 0)) continue;
@@ -478,7 +490,7 @@ public final class FluidNetwork {
             for (FluidEdge e : edges) {
                 if (e.a != n && e.b != n) continue;
                 if (e.oneWay() && e.g == 0) continue;   // (a shut check valve pushes nothing either way)
-                double offA = e.a.pressureAt(e.portA) - e.a.P(), offB = e.b.pressureAt(e.portB) - e.b.P();
+                double offA = e.a.pressureOver(e.portA, e.spanA) - e.a.P(), offB = e.b.pressureOver(e.portB, e.spanB) - e.b.P();
                 // the pressure this edge pushes n towards (where its drive would be zero), by the other end's pressure at
                 // the end of the step as solved (by its start, a boiler couldn't feed a pipe its valve was emptying)
                 double pa = solved.getOrDefault(e.a, e.a.P()), pb = solved.getOrDefault(e.b, e.b.P());

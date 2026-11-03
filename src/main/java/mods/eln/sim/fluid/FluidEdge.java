@@ -11,6 +11,8 @@ public final class FluidEdge {
     public final FluidNode a, b;
     /** Port heights on a and b (fractions of each node's height). */
     public final double portA, portB;
+    /** How tall each end's opening is (a share of its node's height, centred on the port; 0: a point): FluidPort.span. */
+    public double spanA, spanB;
     /** Geometric conductance (m^3; Q = k / mu x dP). */
     public double k;
     /** 0 closed .. 1 open (a valve). */

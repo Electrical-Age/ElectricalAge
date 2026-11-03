@@ -32,7 +32,8 @@ public final class OilCases {
         cases.add(new Separator());
         cases.add(new Outlet(true));
         cases.add(new Outlet(false));
-        cases.add(new PumpIntoPipe());
+        cases.add(new PumpIntoPipe(1000));
+        cases.add(new PumpIntoPipe(120));
         for (String v : OilOnPipes.VARIANTS) cases.add(new OilOnPipes(v));
         cases.add(new Basin());
         cases.add(new Pump(false));
@@ -304,12 +305,19 @@ public final class OilCases {
      * low side port. Its crude goes along the pipe into the tank, as crude.
      */
     static final class PumpIntoPipe implements TestCase {
+        /** What the pump has to give (mB): 1000, or 120, less than half the pipe (Baughn 2026-11-03: a part-full run
+         *  held its puddle until it was half full, its open end drawing from mid-bore; now some reaches the tank). */
+        final int mB;
         mods.eln.oil.OilPumpElement pump;
         mods.eln.oil.TankElement tank;
         String err;
 
+        PumpIntoPipe(int mB) {
+            this.mB = mB;
+        }
+
         public String id() {
-            return "oil_pump_into_pipe";
+            return mB == 1000 ? "oil_pump_into_pipe" : "oil_pump_into_pipe_little";
         }
 
         public int width() {
@@ -338,11 +346,17 @@ public final class OilCases {
                 var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, a, java.util.List.of(), b);
                 err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
             }
-            ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 1000), true);
+            ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), mB), true);
         }
 
         public void measure(TestContext ctx) {
             ctx.check("oil pump: a pipe goes from its discharge flange to the tank", err == null, "" + err);
+            if (mB != 1000) {
+                int crude = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
+                double inTank = tank.vessel == null ? 0 : tank.vessel.mass(crude) / mods.eln.fluid.FluidSpecies.kgPerMb(crude, false);
+                ctx.check("oil pump: a little crude, less than half the pipe holds, still reaches the tank", inTank > 20, String.format("%.1f of %d mB in the tank", inTank, mB));
+                return;
+            }
             int crude = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
             int left = ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).getFluidAmount();
             double inTank = tank.vessel == null ? 0 : tank.vessel.mass(crude) / mods.eln.fluid.FluidSpecies.kgPerMb(crude, false);

@@ -181,7 +181,10 @@ public final class PipePart extends VoxelPart {
             int face = faceOf(x, y, z);
             if (face < 0) continue;
             double draw = heightVoxels() == bore() ? 0.5 : (y - minY()) / (double) heightVoxels();
-            out.add(new FluidDevice.FluidPort(fluid, pos, face, draw, k, spot(face, x, y, z)));
+            // (an end on a side face is an opening as tall as the bore: liquid goes out as far as it is wet, not only once
+            // it is over mid-bore; Baughn 2026-11-03, a half-full run held its puddle. One opening up or down is level.)
+            double span = face <= 1 ? 0 : Math.min(1, bore() / (double) heightVoxels());
+            out.add(new FluidDevice.FluidPort(fluid, pos, face, draw, k, spot(face, x, y, z), span));
         }
         return out;
     }

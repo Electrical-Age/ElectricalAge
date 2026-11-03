@@ -144,7 +144,11 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   `Flash` splits each condensable species at T by Raoult within its miscibility group, from the node's whole
   composition (non-iterative: the gas space is the root of one piecewise-linear equation); liquids stack in layers by
   density (one per group); `pressureAt` weighs the layers above a port. A port draws the gas above the liquid, else the
-  layer at its height, blended across a band at each interface. Liquid counts by volume against a node's room; each
+  layer at its height, blended across a band at each interface. A pipe's open end on a side face is an opening as tall
+  as its bore (`FluidPort.span`, `FluidEdge.spanA/B`): it passes liquid as far as it is wet, and the pressure through it
+  is the mean over it (`FluidNode.pressureOver`), so a part-full run delivers at its far end (Baughn 2026-11-03: it held
+  its puddle until half full). Device flanges are points. Still one stream per edge: a dead-ended pipe can't let gas
+  back in as its liquid leaves. Liquid counts by volume against a node's room; each
   layer's volume moves at most half a band a step; a node gives at most half of each layer (and of its gas) a step.
   With water and air alone every step is bit-identical to the two-species core it replaced (checked on 400 random
   networks), and `mLiquid()`, `mVapour()`, `pVapour()` and `FluidEdge.fLiquid/fVapour/fAir` stay water's and air's;

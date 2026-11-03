@@ -244,7 +244,9 @@ public final class FluidWorld implements IProcess {
             if (a == b) continue;   // (inside one run)
             // a run's end: its draw on the lump, and half the run's resistance instead of the piece's own
             double rA = a != p.node() ? runR.get(a) / 2 : 1 / p.k(), rB = b != q.node() ? runR.get(b) / 2 : 1 / q.k();
-            byRoot.get(find(a, parent)).connect(a, drawOn(a, p.node(), p.draw()), b, drawOn(b, q.node(), q.draw()), 1 / (rA + rB));   // (in series)
+            var edge = byRoot.get(find(a, parent)).connect(a, drawOn(a, p.node(), p.draw()), b, drawOn(b, q.node(), q.draw()), 1 / (rA + rB));   // (in series)
+            edge.spanA = spanOn(a, p.node(), p.span());
+            edge.spanB = spanOn(b, q.node(), q.span());
         }
         for (FluidDevice.Link l : allLinks) {
             FluidNode a = repr.apply(l.a), b = repr.apply(l.b);
@@ -273,6 +275,12 @@ public final class FluidWorld implements IProcess {
         if (rep == n) return draw;
         double z = n.z + draw * n.height;
         return Math.max(0, Math.min(1, (z - rep.z) / rep.height));
+    }
+
+    /** An opening's height as a share of its run's lump, from its share of its own piece. */
+    private static double spanOn(FluidNode rep, FluidNode n, double span) {
+        if (rep == n || span <= 0) return span;
+        return Math.min(1, span * n.height / rep.height);
     }
 
     private static void addNode(FluidNode n, Map<FluidNode, FluidNode> parent, List<FluidNode> all, Map<FluidNode, Object> levelOf, Object level) {

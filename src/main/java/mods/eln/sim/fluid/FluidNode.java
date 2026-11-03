@@ -216,6 +216,27 @@ public final class FluidNode {
         return p;
     }
 
+    /**
+     * The mean pressure over an opening span tall (a share of its height) centred at f: what pushes through a pipe's open
+     * end, wet as far as the liquid reaches up it. span 0: pressureAt(f).
+     */
+    public double pressureOver(double f, double span) {
+        if (span <= 0) return pressureAt(f);
+        double lo = Math.max(0, f - span / 2), hi = Math.min(1, f + span / 2);
+        if (hi <= lo) return pressureAt(f);
+        if (state.layers <= 1) {
+            double rho = state.layers == 1 ? state.layerRho[0] : Water.RHO_L, L = level();
+            double mean;   // (the mean depth under the level over lo..hi, in shares of the height)
+            if (L <= lo) mean = 0;
+            else if (L >= hi) mean = L - (lo + hi) / 2;
+            else mean = (L - lo) * (L - lo) / (2 * (hi - lo));
+            return state.P + rho * FluidNetwork.G * mean * height;
+        }
+        double sum = 0;
+        for (int i = 0; i < 8; i++) sum += pressureAt(lo + (hi - lo) * (i + 0.5) / 8);
+        return sum / 8;
+    }
+
     /** Split off a fraction of this node's contents into a new node of volume fraction*volume (for a run being cut). */
     public FluidNode splitOff(double fraction, double z, double height) {
         FluidNode n = new FluidNode(volume * fraction, z, height, false);
