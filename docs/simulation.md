@@ -148,7 +148,10 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   layer's volume moves at most half a band a step; a node gives at most half of each layer (and of its gas) a step.
   With water and air alone every step is bit-identical to the two-species core it replaced (checked on 400 random
   networks), and `mLiquid()`, `mVapour()`, `pVapour()` and `FluidEdge.fLiquid/fVapour/fAir` stay water's and air's;
-  `FluidEdge.fSpecies` carries every species.
+  `FluidEdge.fSpecies` carries every species. Devices save a node with `FluidSaves` (W/A/U plus `<prefix>S`); fluids map
+  to species in `fluid/FluidSpecies` (with kg per mB); `EaUnits.add/drainLiquid/drainVapour/vapourAvailable` move a
+  species in and out; `FluidNode.energyAt(T)` is a node's whole contents' energy (heat exchange). Tanks' sight glasses
+  draw each liquid layer in its species' colour.
   Per step (20 Hz): heat in; one compressibility per phase per node (the stiffer of a small and a 2% flash step); an
   implicit pressure solve, repeated if a check valve runs backwards or a flow runs against the side its packet was
   taken from; limiters bound nodes by their neighbours' solved pressures and cap liquid level moves; each node gives at

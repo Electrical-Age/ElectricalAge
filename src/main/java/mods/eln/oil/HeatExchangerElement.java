@@ -80,8 +80,18 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         // and feed at 178 C, 9.5 bar of its 16, held an economizer to 1.6 kW of 5)
         if (ml > 1e-6 && mv > 1e-6 && n.pVapour() > 0.9 * n.P() && Math.abs(n.T() - Water.tsat(Math.max(1000, n.pVapour()))) < 2) return BOILING;
         double m = mw + ma;
-        if (m <= 0) return 1005;
-        return (ml * Water.CP_L + mv * Water.CP_V + ma * 1005) / m;
+        double other = 0, otherCp = 0;   // (other species: liquids at their cp, gases and vapours at their cp_vapour)
+        if (mods.eln.sim.fluid.EaUnits.holdsOthers(n)) {
+            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+            for (int id = 2; id < n.speciesBound(); id++) {
+                var s = reg.byId(id);
+                other += n.mass(id);
+                otherCp += n.liquid(id) * s.cpL + n.vapour(id) * (s.gas() ? s.cpV + s.r : s.cpV);
+            }
+        }
+        if (m + other <= 0) return 1005;
+        if (other == 0) return (ml * Water.CP_L + mv * Water.CP_V + ma * 1005) / m;
+        return (ml * Water.CP_L + mv * Water.CP_V + ma * 1005 + otherCp) / (m + other);
     }
 
     @Override

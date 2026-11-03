@@ -41,6 +41,36 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     /** The water's share of its volume, and whether its gas is mostly steam, last published (the sight glass). */
     float shownFill = -1;
     boolean shownSteam;
+    int shownLayers;
+
+    /** Its liquid layers for the sight glass, from the bottom: each one's top (share of the volume) and colour. */
+    float[] layerTops() {
+        float[] t = new float[vessel.layers()];
+        for (int l = 0; l < t.length; l++) t[l] = (float) vessel.layerTop(l);
+        return t;
+    }
+
+    int[] layerColours() {
+        var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+        int[] c = new int[vessel.layers()];
+        for (int l = 0; l < c.length; l++) {
+            int best = -1;
+            double most = 0;
+            for (int id = 0; id < vessel.speciesBound(); id++)
+                if (vessel.layerOf(id) == l && vessel.liquid(id) > most) { best = id; most = vessel.liquid(id); }
+            c[l] = best < 0 ? 0 : reg.byId(best).colour;
+        }
+        return c;
+    }
+
+    /** What the sight glass's layers look like, to publish when it changes: their count and colours, tops to 2 %. */
+    int layerSignature() {
+        if (vessel == null || vessel.layers() <= 1) return 0;
+        int h = vessel.layers();
+        for (float t : layerTops()) h = 31 * h + Math.round(t * 50);
+        for (int c : layerColours()) h = 31 * h + c;
+        return h;
+    }
     /**
      * Which of its ports have something coupled to them (Baughn: a flange only where a pipe meets it; 2026-10-29 for a
      * merged box, 2026-11-03 for a lone tank too): bit 2 * face + (0 low, 1 high) for the side faces (Direction 3D
@@ -57,7 +87,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             if (vessel.P() > desc.burstPa)
                 new mods.eln.sim.process.destruct.Failure(TankElement.this).pressureVessel(() -> vessel.energy - vessel.mWater * Water.uLiquid(Water.TB))
                     .fail(mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE, vessel.P());
-            if (Math.abs(fill() - shownFill) > 0.02 || steamy() != shownSteam) needPublish();
+            if (Math.abs(fill() - shownFill) > 0.02 || steamy() != shownSteam || layerSignature() != shownLayers) needPublish();
             // a lone tank whose neighbours fill a box with it re-forms the box (AdventurAgent 2026-10-29: a 2 x 2 x 2 iron
             // tank came back from a server restart as eight one-block tanks; not reproduced in a reload test: the log line
             // says when this catches one)
@@ -322,6 +352,15 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             stream.writeFloat(shownFill);
             shownSteam = steamy();
             stream.writeBoolean(shownSteam);
+            // (its layers: none for one liquid, which the glass draws as before)
+            shownLayers = layerSignature();
+            float[] tops = shownLayers == 0 ? new float[0] : layerTops();
+            int[] cols = shownLayers == 0 ? new int[0] : layerColours();
+            stream.writeByte(tops.length);
+            for (int l = 0; l < tops.length; l++) {
+                stream.writeFloat(tops[l]);
+                stream.writeInt(cols[l]);
+            }
             // the box: whether it draws it (its lowest corner), and its size (a lone tank: 1 1 1)
             boolean draws = group == null || group.master() == this;
             stream.writeBoolean(draws);

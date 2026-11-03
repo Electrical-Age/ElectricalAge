@@ -126,6 +126,15 @@ public final class FluidNode {
         return -1;
     }
 
+    /** How many liquid layers it holds (one per miscibility group with liquid), and the top of layer l (share of its volume). */
+    public int layers() {
+        return state.layers;
+    }
+
+    public double layerTop(int l) {
+        return state.layerTop[l];
+    }
+
     /** Volume of all its liquid (m^3). */
     public double liquidVolume() {
         return state.vLiquid;

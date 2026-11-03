@@ -45,9 +45,14 @@ mods must address a multiblock's master block), simple nodes (gone; the exporter
   `BoilerElement`, `SteamGeneratorElement`, `OilPumpElement`, `FlareStackElement`, `ColumnBaseElement`,
   `ColumnSegmentElement`.
 - Buckets: `TransparentNode.onBlockActivated` -> `fluid/FluidBuckets.use` on the same handler.
-- Pipe adapter: `AdapterPart.Tanks` (water `WATER_MB` 8000, steam `STEAM_MB` 32000) is a view of the pipe run behind
-  the adapter's face; what other mods' pipes put in or take out is synced into the run at the next fluid step
-  (`VoxelNode.syncAdapters`) and before a save. EA's own voxel pipes do not use the capability; they couple through
+- Pipe adapter: `AdapterPart.Tanks` is a view of the pipe run behind the adapter's face: tank 0 its liquid (the top
+  layer's main species; up to `WATER_MB` 8000), tank 1 its main vapour that is a fluid (steam for water; `STEAM_MB`
+  32000), tank 2 an intake that takes any fluid a species is (`fluid/FluidSpecies`: minecraft:water and eln:steam are
+  water, the rest from the datapack species' fluid lists); other fluids are refused (Baughn 2026-11-03). What other
+  mods' pipes put in or take out is synced into the run at the next fluid step (`VoxelNode.syncAdapters`) and before a
+  save. Room is in mB of any liquid (they go by volume: `FluidSpecies.kgPerMb`).
+- Tank: `oil/TankLiquid`, tank 0 the vessel's top liquid layer's main species, tank 1 an intake for any liquid a species
+  is; synced at the next fluid step (`TankElement.syncWater`). Buckets use it. EA's own voxel pipes do not use the capability; they couple through
   `fluid/FluidWorld` ports.
 - Consumer: `sixnode/Scanner.kt` reads `Fluid.BLOCK` for fill level (items through `Container` only).
 
@@ -93,6 +98,8 @@ burn state, so it needs no invalidation on burn.
   stick, aborted insert, hopper feed, closed devices (power capacitor, power inductor, DC-DC converter), egg incubator,
   burnt macerator clears a held `BlockCapabilityCache` and repair restores it.
 - `autominer_drop_capability`: autominer fills a macerator below; a refused stick stays queued.
+- `pipe_adapter_oil` (`PipeCases`): crude oil in and out through an adapter as crude; lava refused.
+  `tank_takes_oil` (`PlumbingCases`): gasoline into a tank, water settles under it, the capability gives the gasoline.
 - `pipe_adapter_capability` (`gametest/cases/PipeCases.java`): water in and out through the adapter face, only there;
   a held `BlockCapabilityCache` clears when the adapter is removed and comes back when it is added again.
 - `port26 fluid handler` (`gametest/cases/PortHelperCases.java`): tank semantics; fuel heat furnace exposes its tank.
