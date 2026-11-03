@@ -31,14 +31,20 @@ public class TankDescriptor extends TransparentNodeDescriptor {
         return buckets * 1000 * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / mods.eln.sim.fluid.Water.RHO_L;
     }
 
-    /** The vessel and the water in its sight glass, filled to `fill` (0..1); a box's render scales it to the box. */
-    void draw(float fill) {
-        if (obj == null) return;
-        for (String part : new String[]{"shell", "glass"}) {
-            var m = obj.getPart(part);
-            if (m != null) m.draw();
-        }
-        drawLevel(fill);
+    /** The vessel's shell (a box's render scales it to the box). */
+    void drawShell() {
+        drawPart("shell");
+    }
+
+    /**
+     * The sight glass: the water filled to `fill` (0..1) and above it steam (a vessel whose gas is mostly steam) or the
+     * dark of the empty glass (air).
+     */
+    void drawGlass(float fill, boolean steam) {
+        drawPart("glass");
+        fill = Math.max(0, Math.min(1, fill));
+        if (fill > 0.005f) drawScaled("level", GLASS_Y0, fill);
+        if (steam && fill < 0.995f) drawScaled("vapour", GLASS_Y1, 1 - fill);
     }
 
     void drawPart(String name) {
@@ -46,16 +52,18 @@ public class TankDescriptor extends TransparentNodeDescriptor {
         if (p != null) p.draw();
     }
 
-    void drawLevel(float fill) {
-        if (obj == null) return;
-        var l = obj.getPart("level");
-        if (l == null || fill <= 0.005f) return;
-        // (the glass runs 2..14 px: scale the water about its foot)
-        float foot = 2 / 16f - 0.5f;
+    /** The sight glass's window's ends (px; mods.eln.cad.models.Tank GLASS_Y0, GLASS_Y1). */
+    static final float GLASS_Y0 = 2, GLASS_Y1 = 14;
+
+    /** A part of the window's whole height, scaled in y by `share` about `about` (px). */
+    void drawScaled(String name, float about, float share) {
+        var l = obj == null ? null : obj.getPart(name);
+        if (l == null) return;
+        float at = about / 16f - 0.5f;
         mods.eln.gl.GL11.glPushMatrix();
-        mods.eln.gl.GL11.glTranslatef(0, foot, 0);
-        mods.eln.gl.GL11.glScalef(1, Math.min(1, fill), 1);
-        mods.eln.gl.GL11.glTranslatef(0, -foot, 0);
+        mods.eln.gl.GL11.glTranslatef(0, at, 0);
+        mods.eln.gl.GL11.glScalef(1, share, 1);
+        mods.eln.gl.GL11.glTranslatef(0, -at, 0);
         l.draw();
         mods.eln.gl.GL11.glPopMatrix();
     }

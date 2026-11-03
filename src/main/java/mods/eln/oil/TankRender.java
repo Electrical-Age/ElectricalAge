@@ -7,12 +7,14 @@ import mods.eln.node.transparent.TransparentNodeEntity;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-/** The tank: its vessel, the water in its sight glass (TankElement's fill, published) and its ports' flanges. */
+/** The tank: its vessel, its sight glass (TankElement's fill and steam, published) and its ports' flanges. */
 public class TankRender extends TransparentNodeElementRender {
     final TankDescriptor desc;
-    float fill;
+    public float fill;
+    /** Whether its gas is mostly steam (the sight glass shows it over the water). */
+    public boolean steam;
     /** Whether it draws the tank (a lone tank, or a box's lowest corner), and the box's size. */
-    boolean draws = true;
+    public boolean draws = true;
     public int sx = 1, sy = 1, sz = 1;
     /** Its ports with a pipe on them (TankElement.coupled): a flange each; its place in the box (0 alone). */
     public int coupled, ox, oy, oz;
@@ -65,15 +67,23 @@ public class TankRender extends TransparentNodeElementRender {
         if (!draws) return;
         if (sx == 1 && sy == 1 && sz == 1) {
             front.glRotateXnRef();
-            desc.draw(fill);
+            desc.drawShell();
+            desc.drawGlass(fill, steam);
             return;
         }
         // a box (TankGroup): one shell and sight glass over all of it, from its lowest corner (Baughn 2026-10-29)
         mods.eln.gl.GL11.glTranslatef((sx - 1) / 2f, (sy - 1) / 2f, (sz - 1) / 2f);
         front.glRotateXnRef();
         boolean alongX = front == mods.eln.misc.Direction.XN || front == mods.eln.misc.Direction.XP;
-        mods.eln.gl.GL11.glScalef(alongX ? sx : sz, sy, alongX ? sz : sx);
-        desc.draw(fill);
+        float across = alongX ? sx : sz;
+        mods.eln.gl.GL11.glPushMatrix();
+        mods.eln.gl.GL11.glScalef(across, sy, alongX ? sz : sx);
+        desc.drawShell();
+        mods.eln.gl.GL11.glPopMatrix();
+        // the sight glass on the scaled shell's front, the box's height but its own width (Baughn 2026-11-03)
+        mods.eln.gl.GL11.glTranslatef(-(across - 1) * SHELL_R / 16f, 0, 0);
+        mods.eln.gl.GL11.glScalef(1, sy, 1);
+        desc.drawGlass(fill, steam);
     }
 
     /**
@@ -120,6 +130,7 @@ public class TankRender extends TransparentNodeElementRender {
         super.networkUnserialize(stream);
         try {
             fill = stream.readFloat();
+            steam = stream.readBoolean();
             draws = stream.readBoolean();
             sx = stream.readByte();
             sy = stream.readByte();

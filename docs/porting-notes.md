@@ -81,6 +81,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   how many are piped. Each flange's nozzle runs in past the shell all round its bore and is closed at its end (it was
   cut at the shell's centre line, so the curving shell left gaps at its sides one could look into).
   `tank_flanges_where_piped`.
+- Tank sight glass (Baughn 2026-11-03: "a viewglass"): a 3 px window in brass on the tank's front (was a 1.5 px slit
+  in a texture half pale), the water in blue to its level and, when the vessel's gas is mostly steam, steam above it
+  (else the dark of an empty glass: air). A box draws one glass on its front, the box's height but its own width.
+  Tanks hold only water, steam and air (the fluid core's species), so there is no other liquid to colour. The render
+  reads the fill and a steam flag (published when either changes). `tank_sight_glass`.
 - Pipe sizes (Baughn 2026-10-29): iron and alloy pipes drawn at a quarter of their old 4 and 6 voxels (1 and 1.5) and
   taking 2 voxels on the grid (occupancy, hitbox, routing; even, so centred on the lattice; their physics unchanged);
   the Large Alloy Pipe (tier 2) drawn and taking 6, 16 x the alloy's inner area (Baughn): volume 16 x, conductance

@@ -35,6 +35,7 @@ public final class PlumbingCases {
         cases.add(new TankBox());
         cases.add(new TankBoxSplits());
         cases.add(new TankFlanges());
+        cases.add(new TankSightGlass());
         cases.add(new HotWaterIntoShortPipe());
         cases.add(new ValveMeters());
         cases.add(new LiquidStaysIncompressible());
@@ -397,6 +398,44 @@ public final class PlumbingCases {
             r.sx = r.sz = 1;
             r.ox = r.oz = 0;
             ctx.check("tank flanges: a lone tank's top nozzle reaches below its flat top (15 px)", 16 - r.topNozzle() < 15, String.format("%.2f px", 16 - r.topNozzle()));
+        }
+    }
+
+    /**
+     * Baughn 2026-11-03: a viewglass. What a tank's render reads for its sight glass: the water's share and whether its
+     * gas is steam. A hot tank half full at 10 bar shows half and steam; a cold one a third full shows a third and air; a
+     * box of two stacked tanks shows its one level from its lowest block, which draws it the box's height (the other
+     * block draws none).
+     */
+    static final class TankSightGlass extends Big {
+        TankElement hot, cold, low, high;
+
+        public String id() {
+            return "tank_sight_glass";
+        }
+
+        public void build(TestContext ctx) {
+            hot = tank(ctx, ALLOY_TANK, ctx.at(1, 1, 1), Direction.XN);
+            cold = tank(ctx, IRON_TANK, ctx.at(3, 1, 1), Direction.XN);
+            low = (TankElement) ctx.placeTransparent(IRON_TANK, ctx.at(5, 1, 1));
+            high = (TankElement) ctx.placeTransparent(IRON_TANK, ctx.at(5, 2, 1));
+            fill(hot.vessel, 0.5 * hot.vessel.volume * Water.RHO_L, 10e5, Water.tsat(10e5));
+            fill(cold.vessel, cold.vessel.volume * Water.RHO_L / 3, Water.P_ATM, 293.15);
+            if (low.group != null) fill(low.group.node, 0.75 * low.group.node.volume * Water.RHO_L, Water.P_ATM, 293.15);
+        }
+
+        public void measure(TestContext ctx) {
+            var rh = TankFlanges.render(hot);
+            var rc = TankFlanges.render(cold);
+            var rl = TankFlanges.render(low);
+            var ru = TankFlanges.render(high);
+            ctx.check("sight glass: a hot tank half full shows half, and steam over it", Math.abs(rh.fill - 0.5) < 0.05 && rh.steam,
+                String.format("%.3f, steam %b", rh.fill, rh.steam));
+            ctx.check("sight glass: a cold tank a third full shows a third, and air over it", Math.abs(rc.fill - 1 / 3f) < 0.03 && !rc.steam,
+                String.format("%.3f, steam %b", rc.fill, rc.steam));
+            ctx.check("sight glass: a box of two shows its level once, from its lowest block, two blocks high",
+                low.group != null && rl.draws && !ru.draws && rl.sy == 2 && Math.abs(rl.fill - 0.75) < 0.03,
+                String.format("group %s, draws %b/%b, sy %d, %.3f", low.group != null, rl.draws, ru.draws, rl.sy, rl.fill));
         }
     }
 

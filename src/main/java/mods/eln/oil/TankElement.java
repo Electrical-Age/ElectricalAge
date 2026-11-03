@@ -38,8 +38,9 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     public TankGroup group;
     private double[] loaded;
     private List<FluidPort> ports = List.of();
-    /** The water's share of its volume, last published (the sight glass). */
+    /** The water's share of its volume, and whether its gas is mostly steam, last published (the sight glass). */
     float shownFill = -1;
+    boolean shownSteam;
     /**
      * Which of its ports have something coupled to them (Baughn: a flange only where a pipe meets it; 2026-10-29 for a
      * merged box, 2026-11-03 for a lone tank too): bit 2 * face + (0 low, 1 high) for the side faces (Direction 3D
@@ -56,7 +57,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             if (vessel.P() > desc.burstPa)
                 new mods.eln.sim.process.destruct.Failure(TankElement.this).pressureVessel(() -> vessel.energy - vessel.mWater * Water.uLiquid(Water.TB))
                     .fail(mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE, vessel.P());
-            if (Math.abs(fill() - shownFill) > 0.02) needPublish();
+            if (Math.abs(fill() - shownFill) > 0.02 || steamy() != shownSteam) needPublish();
             // a lone tank whose neighbours fill a box with it re-forms the box (AdventurAgent 2026-10-29: a 2 x 2 x 2 iron
             // tank came back from a server restart as eight one-block tanks; not reproduced in a reload test: the log line
             // says when this catches one)
@@ -79,6 +80,11 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     /** The water's share of its volume. */
     public double fill() {
         return vessel == null ? 0 : Math.min(1, vessel.mLiquid() / Water.RHO_L / vessel.volume);
+    }
+
+    /** Whether its gas is mostly steam (over half its pressure; else air, or nothing to see): the sight glass shows it. */
+    public boolean steamy() {
+        return vessel != null && vessel.mVapour() > 1e-7 && vessel.pVapour() > 0.5 * vessel.P();
     }
 
     /** Its water as a fluid capability (buckets; another mod's pipes): a view of its vessel (TankWater). */
@@ -304,6 +310,8 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         try {
             shownFill = (float) fill();
             stream.writeFloat(shownFill);
+            shownSteam = steamy();
+            stream.writeBoolean(shownSteam);
             // the box: whether it draws it (its lowest corner), and its size (a lone tank: 1 1 1)
             boolean draws = group == null || group.master() == this;
             stream.writeBoolean(draws);
