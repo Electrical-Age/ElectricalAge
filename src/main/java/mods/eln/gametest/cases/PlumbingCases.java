@@ -242,7 +242,10 @@ public final class PlumbingCases {
             double moved = b.vessel.mLiquid() - bWater0;
             ctx.line("inline pump" + (boiling ? " (boiling feed)" : "") + ": " + p.getWaila() + "; A " + a.getWaila() + "; B " + b.getWaila());
             if (!boiling) {
-                ctx.check("pump: cold water goes from A to B", moved > 0.05, String.format("%.3f kg", moved));
+                // (both tanks are sealed: A's air thins and B's compresses until the pump's 0.5 bar head and the fall
+                // balance them; with gas able to come back through a pipe's opening, ~0.04 kg reaches B, the rest fills
+                // the lines. One stream per edge let 0.2 kg over against 1.1 bar, more than the pump can make.)
+                ctx.check("pump: cold water goes from A to B", moved > 0.025, String.format("%.3f kg", moved));
                 ctx.check("pump: it draws power doing it", maxW > 50, String.format("%.0f W", maxW));
                 ctx.check("pump: it primed itself (passed the line's air on) and then pumped water", p.totalKg > 0.05, String.format("%.3f kg", p.totalKg));
                 ctx.check("pump: Jade calls air at its inlet priming", airJade.contains("priming"), airJade);

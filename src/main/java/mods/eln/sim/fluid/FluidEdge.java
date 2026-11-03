@@ -13,6 +13,12 @@ public final class FluidEdge {
     public final double portA, portB;
     /** How tall each end's opening is (a share of its node's height, centred on the port; 0: a point): FluidPort.span. */
     public double spanA, spanB;
+    /**
+     * An entry edge into an opening (FluidWorld: the second of an opening's two edges, b the opening's node, entrySpan its
+     * height): liquid coming in meets the opening as the liquid going out does (its wet mean), gas meets it at its
+     * height as a point (it bubbles in over the liquid); so liquid can't circulate out and back in through the pair.
+     */
+    public double entrySpan;
     /** Geometric conductance (m^3; Q = k / mu x dP). */
     public double k;
     /** 0 closed .. 1 open (a valve). */

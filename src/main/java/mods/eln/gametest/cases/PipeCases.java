@@ -41,6 +41,7 @@ public final class PipeCases {
         cases.add(new Valve());
         cases.add(new Adapter());
         cases.add(new AdapterOil());
+        cases.add(new SealedRunDrains());
         cases.add(new ValveByPlayer());
         cases.add(new KitPickupMerges());
         cases.add(new PipeRoutePreview());
@@ -1002,6 +1003,64 @@ public final class PipeCases {
                 tx.commit();
             }
             ctx.check("pipe: crude oil comes back out through it", took == 50, took + " mB");
+        }
+    }
+
+    /**
+     * A horizontal pipe a third full of water, capped at one end, its open end sealed onto an empty two-block tank's low
+     * side port at the same height: the water runs out under the opening while the tank's air comes back over it (Baughn
+     * 2026-11-03: counter-flow; with one stream per edge it stopped after a few pascals, 0.3 of 8 g).
+     */
+    static final class SealedRunDrains implements TestCase {
+        BlockPos at;
+        mods.eln.oil.TankElement tank;
+        double before;
+
+        public String id() {
+            return "pipe_sealed_run_drains";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 100;
+        }
+
+        PipePart pipe(TestContext ctx) {
+            for (VoxelPart p : node(ctx, at).parts) if (p instanceof PipePart pp) return pp;
+            return null;
+        }
+
+        public void build(TestContext ctx) {
+            at = ctx.at(2, 1, 1);
+            lay(ctx, at, 0, 2, 4, 8, 16, 4, 8);   // (a capped inner end at x 2, open at the east face, 4 px up)
+            // (a two-block tank box: its side ports draw at their own height, 4 px up the lower block's side, in its gas;
+            // a lone tank's low port draws off its floor, a dip tube)
+            tank = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, ctx.at(3, 1, 1));
+            var upper = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, ctx.at(3, 2, 1));
+            tank.front = mods.eln.misc.Direction.XP;
+            upper.front = mods.eln.misc.Direction.XP;
+            tank.reconnect();
+            upper.reconnect();
+            tank.reconnect();
+            PipePart pipe = pipe(ctx);
+            pipe.fluid.fill(0.33 * pipe.fluid.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 293);
+            before = pipe.fluid.mWater;
+        }
+
+        public void measure(TestContext ctx) {
+            double inTank = tank.vessel == null ? 0 : tank.vessel.mWater;
+            var run = mods.eln.fluid.FluidWorld.nodeFor(pipe(ctx).fluid);
+            StringBuilder es = new StringBuilder();
+            for (var e : mods.eln.fluid.FluidWorld.edgesOf(pipe(ctx).fluid))
+                es.append(String.format(" [%s %s spanA %.2f spanB %.2f flow %.6f liquid %.6f air %.6f]", e.kind, e.a == run ? "out" : "in", e.spanA, e.spanB, e.flow, e.fLiquid, e.fAir));
+            ctx.line(String.format("sealed run: P %.1f level %.3f water %.5f | tank P %.1f water %.5f |%s", run.P(), run.level(), run.mWater, tank.vessel.P(), inTank, es));
+            ctx.check("pipe: a sealed third-full run drains into the tank under its opening", inTank > 0.5 * before,
+                String.format("%.4f of %.4f kg went over", inTank, before));
+            ctx.check("pipe: the tank's air came back over it (the pressures even out)", Math.abs(run.P() - tank.vessel.P()) < 60,
+                String.format("run %.0f Pa, tank %.0f Pa", run.P(), tank.vessel.P()));
         }
     }
 

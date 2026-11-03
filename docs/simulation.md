@@ -147,8 +147,10 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   layer at its height, blended across a band at each interface. A pipe's open end on a side face is an opening as tall
   as its bore (`FluidPort.span`, `FluidEdge.spanA/B`): it passes liquid as far as it is wet, and the pressure through it
   is the mean over it (`FluidNode.pressureOver`), so a part-full run delivers at its far end (Baughn 2026-11-03: it held
-  its puddle until half full). Device flanges are points. Still one stream per edge: a dead-ended pipe can't let gas
-  back in as its liquid leaves. Liquid counts by volume against a node's room; each
+  its puddle until half full). Device flanges are points. An opening coupled to a point port is two one-way edges
+  (FluidWorld): out of the opening its wetted mix at the wet mean, into it what the other port gives (liquid at the wet
+  mean, gas at the opening's height as a point: `FluidEdge.entrySpan`), so a dead-ended pipe drains while gas comes
+  back over its liquid (Baughn 2026-11-03; `pipe_sealed_run_drains`). Liquid counts by volume against a node's room; each
   layer's volume moves at most half a band a step; a node gives at most half of each layer (and of its gas) a step.
   With water and air alone every step is bit-identical to the two-species core it replaced (checked on 400 random
   networks), and `mLiquid()`, `mVapour()`, `pVapour()` and `FluidEdge.fLiquid/fVapour/fAir` stay water's and air's;

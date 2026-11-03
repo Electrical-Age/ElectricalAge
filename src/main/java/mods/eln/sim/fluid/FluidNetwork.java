@@ -99,7 +99,7 @@ public final class FluidNetwork {
             for (FluidEdge e : edges) {
                 if (e.g == 0) continue;
                 // flow a->b = g (Pa' - Pb' + c), c = the port offsets and the head
-                double c = e.a.pressureOver(e.portA, e.spanA) - e.a.P() - (e.b.pressureOver(e.portB, e.spanB) - e.b.P()) + e.head;
+                double c = e.a.pressureOver(e.portA, e.spanA) - e.a.P() - (pressureB(e) - e.b.P()) + e.head;
                 Integer ia = idx.get(e.a), ib = idx.get(e.b);
                 for (int end = 0; end < 2; end++) {
                     Integer i = end == 0 ? ia : ib;
@@ -117,7 +117,7 @@ public final class FluidNetwork {
             boolean again = false;
             for (FluidEdge e : edges) {
                 double pa = e.a.fixed ? e.a.P() : P[idx.get(e.a)], pb = e.b.fixed ? e.b.P() : P[idx.get(e.b)];
-                double offA = e.a.pressureOver(e.portA, e.spanA) - e.a.P(), offB = e.b.pressureOver(e.portB, e.spanB) - e.b.P();
+                double offA = e.a.pressureOver(e.portA, e.spanA) - e.a.P(), offB = pressureB(e) - e.b.P();
                 e.flow = e.g * (pa + offA - pb - offB + e.head);
                 if (e.oneWay() && e.flow < 0 && e.g != 0) {
                     e.g = 0;
@@ -424,9 +424,15 @@ public final class FluidNetwork {
         return e.xl * sL + (1 - e.xl) * sG;
     }
 
+    /** The pressure at e's b end: its opening's, or for an entry edge carrying liquid, the opening's wet mean. */
+    static double pressureB(FluidEdge e) {
+        if (e.entrySpan > 0 && packet(e, e.a).xl > 0.5) return e.b.pressureOver(e.portB, e.entrySpan);
+        return e.b.pressureOver(e.portB, e.spanB);
+    }
+
     /** Which end the flow comes from (by the current pressures and the head), and what it carries. */
     void chooseUpstream(FluidEdge e) {
-        double pa = e.a.pressureOver(e.portA, e.spanA), pb = e.b.pressureOver(e.portB, e.spanB);
+        double pa = e.a.pressureOver(e.portA, e.spanA), pb = pressureB(e);
         boolean fromA = pa >= pb;
         for (int t = 0; t < 2; t++) {
             props(e, fromA);
@@ -444,7 +450,7 @@ public final class FluidNetwork {
         e.rho = pk.rho;
         e.xl = pk.xl;
         e.head = pk.rhoHead * G * (e.zA() - e.zB()) + e.boost;
-        e.g = e.area > 0 ? orificeG(e, e.a.pressureOver(e.portA, e.spanA) - e.b.pressureOver(e.portB, e.spanB) + e.head) : pk.rho * e.k * e.open / pk.mu;
+        e.g = e.area > 0 ? orificeG(e, e.a.pressureOver(e.portA, e.spanA) - pressureB(e) + e.head) : pk.rho * e.k * e.open / pk.mu;
     }
 
     /**
@@ -474,7 +480,7 @@ public final class FluidNetwork {
         var r = rises(dt);
         for (FluidEdge e : edges) {
             if (e.flow == 0) continue;
-            double d = e.a.pressureOver(e.portA, e.spanA) - e.b.pressureOver(e.portB, e.spanB) + e.head;
+            double d = e.a.pressureOver(e.portA, e.spanA) - pressureB(e) + e.head;
             // (a flow against the starting drive is the implicit solve's answer to what the step does at the other
             // end: left alone; only an overshoot past the even point is cut back)
             if (d == 0 || (d > 0) != (e.flow > 0)) continue;
@@ -490,7 +496,7 @@ public final class FluidNetwork {
             for (FluidEdge e : edges) {
                 if (e.a != n && e.b != n) continue;
                 if (e.oneWay() && e.g == 0) continue;   // (a shut check valve pushes nothing either way)
-                double offA = e.a.pressureOver(e.portA, e.spanA) - e.a.P(), offB = e.b.pressureOver(e.portB, e.spanB) - e.b.P();
+                double offA = e.a.pressureOver(e.portA, e.spanA) - e.a.P(), offB = pressureB(e) - e.b.P();
                 // the pressure this edge pushes n towards (where its drive would be zero), by the other end's pressure at
                 // the end of the step as solved (by its start, a boiler couldn't feed a pipe its valve was emptying)
                 double pa = solved.getOrDefault(e.a, e.a.P()), pb = solved.getOrDefault(e.b, e.b.P());
