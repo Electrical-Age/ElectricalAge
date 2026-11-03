@@ -30,6 +30,9 @@ public final class OilCases {
         cases.add(new CatchUp());
         cases.add(new LakeSizes());
         cases.add(new Separator());
+        cases.add(new Outlet(true));
+        cases.add(new Outlet(false));
+        cases.add(new Basin());
         cases.add(new Pump(false));
         cases.add(new Pump(true));
         cases.add(new Boiler());
@@ -41,6 +44,11 @@ public final class OilCases {
         cases.add(new TurbineHoldsPressure());
         cases.add(new CondenserFloods());
         cases.add(new CondenserMakeupFloat());
+        cases.add(new CondenserLegacyLoad());
+        cases.add(new CondenserMakeupSignal());
+        cases.add(new CondensateReturn(10e5, false));
+        cases.add(new CondensateReturn(14e5, false));
+        cases.add(new CondensateReturn(14e5, true));
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -241,6 +249,75 @@ public final class OilCases {
             ctx.check("oil: 100 mB crude in its tank", tank.getFluidAmount() == 100, tank.getFluidAmount() + " mB");
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, sep.node.coordonate.pos(), null);
             ctx.check("oil: the tank is the block's fluid capability (pipes can drain it)", cap == tank, "" + cap);
+        }
+    }
+
+    /**
+     * Baughn 2026-11-03: the separator lacked a pipe output, though one is drawn on its back; the oil pump's discharge
+     * flange (its right) did nothing either. Each pushes its tank out of that face into whatever takes it: here a second
+     * separator's crude tank (as another mod's pipe or a column base would take it). One beside it on another face gets
+     * nothing.
+     */
+    static final class Outlet implements TestCase {
+        final boolean separator;
+        mods.eln.fluid.ElementFluidHandler from, into, beside;
+
+        Outlet(boolean separator) {
+            this.separator = separator;
+        }
+
+        public String id() {
+            return separator ? "oil_separator_outlet" : "oil_pump_discharge";
+        }
+
+        /** (1000 mB at 200 mB/s: 5 s) */
+        public int ticks() {
+            return 140;
+        }
+
+        public void build(TestContext ctx) {
+            var p = ctx.at(3, 1, 1);
+            var e = ctx.placeTransparent(separator ? 0 + (80 << 6) : 0 + (81 << 6), p);
+            mods.eln.misc.Direction out = separator ? ((mods.eln.transparentnode.electricalmachine.OilSeparatorElement) e).outlet()
+                : ((mods.eln.oil.OilPumpElement) e).discharge();
+            from = (mods.eln.fluid.ElementFluidHandler) e.getFluidHandler();
+            from.fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 1000), true);
+            into = (mods.eln.fluid.ElementFluidHandler) ctx.placeTransparent(0 + (80 << 6), p.relative(out.toEnumFacing())).getFluidHandler();
+            beside = (mods.eln.fluid.ElementFluidHandler) ctx.placeTransparent(0 + (80 << 6), p.relative(out.left().toEnumFacing())).getFluidHandler();
+        }
+
+        public void measure(TestContext ctx) {
+            String what = separator ? "separator outlet" : "pump discharge";
+            ctx.check("oil: the " + what + " pushed its crude into the block there", from.getFluidAmount() == 0 && into.getFluidAmount() == 1000,
+                from.getFluidAmount() + " mB left, " + into.getFluidAmount() + " mB there");
+            ctx.check("oil: nothing out of its other faces", beside.getFluidAmount() == 0, beside.getFluidAmount() + " mB");
+        }
+    }
+
+    /**
+     * Baughn 2026-11-03: the separator's basin shows its oil rising as its tank fills. Half a tank (nothing at its
+     * outlet) publishes a basin half full, the last float of its packet (what ElectricalMachineRender.basin reads).
+     */
+    static final class Basin implements TestCase {
+        mods.eln.transparentnode.electricalmachine.OilSeparatorElement sep;
+
+        public String id() {
+            return "oil_separator_basin";
+        }
+
+        public void build(TestContext ctx) {
+            sep = (mods.eln.transparentnode.electricalmachine.OilSeparatorElement) ctx.placeTransparent(0 + (80 << 6), ctx.at(3, 1, 1));
+            ((mods.eln.fluid.ElementFluidHandler) sep.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(),
+                mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor.TANK_MB / 2), true);
+        }
+
+        public void measure(TestContext ctx) {
+            var bos = new java.io.ByteArrayOutputStream();
+            sep.networkSerialize(new java.io.DataOutputStream(bos));
+            byte[] b = bos.toByteArray();
+            float published = java.nio.ByteBuffer.wrap(b, b.length - 4, 4).getFloat();
+            ctx.check("oil: half a tank, the basin drawn half full", Math.abs(sep.basin() - 0.5f) < 1e-6 && published == sep.basin(),
+                sep.basin() + ", published " + published);
         }
     }
 
@@ -681,7 +758,9 @@ public final class OilCases {
             var alone = condenserOf(ctx, ctx.at(0, 1, 0));
             ctx.check("oil: a condenser on its own keeps a sensible state (AdventurAgent: it showed -193 C)", alone != null && alone.turbine == null
                 && alone.vessel.T() > 273 && alone.vessel.T() < 320 && Math.abs(alone.heatW) < 50, alone == null ? "none" : alone.getWaila().toString());
-            ctx.check("oil: its condensate pump runs with the shaft", c.pumped > 0 || c.floodShare() < 0.01, String.format("%.0f mB/s pumped", c.pumped));
+            // (its outlet is dead-ended: it pumps, or stands at its shut-off head)
+            ctx.check("oil: its condensate pump runs with the shaft", c.v.speed > 0.9 && (c.pumped > 0 || c.floodShare() < 0.01
+                || c.v.backPa > 0.95 * c.v.curve.shutoffPa), String.format("%.0f%% speed, %.0f mB/s pumped against %.2f bar", c.v.speed * 100, c.pumped, c.v.backPa / 1e5));
             // Jade says whether the pump runs, and why not (Baughn: a cold start gave no hint)
             String running = c.getWaila().get(mods.eln.i18n.I18N.tr("Condensate pump")), idle = alone.getWaila().get(mods.eln.i18n.I18N.tr("Condensate pump"));
             ctx.check("oil: Jade: the running condenser's pump shows its share and flow", running != null && running.endsWith("mB/s"), "" + running);
@@ -741,8 +820,240 @@ public final class OilCases {
             mods.eln.Eln.simulator.removeSlowProcess(feed);
             ctx.check("oil: makeup at 10 bar: a condenser 30 % full takes none (float valve shut)", full != null
                 && full.vessel.mWater <= full0 + 1e-6, full == null ? "none" : String.format("%.4f -> %.4f kg; %s", full0, full.vessel.mWater, full.getWaila()));
+            ctx.check("oil: Jade: no signal, its float valve alone", low != null && ("" + low.getWaila().get(mods.eln.i18n.I18N.tr("Makeup valve"))).endsWith("no signal: its float valve alone"),
+                low == null ? "none" : "" + low.getWaila());
             ctx.check("oil: makeup at 10 bar: one 5 % full takes it in", low != null
                 && low.vessel.mWater > low0 + 0.001, low == null ? "none" : String.format("%.4f -> %.4f kg; %s", low0, low.vessel.mWater, low.getWaila()));
+        }
+    }
+
+    /**
+     * The condensate pump's curve (Baughn 2026-11-03: a turbine at its rated pressure works on its own, an overclocked
+     * one needs a pipe pump): a loaded 50V turbine on steam at boilerPa into a Small Steam Condenser whose front feeds a
+     * boiler held at boilerPa (a fixed node, half water). At the rating (10 bar) the pump returns what the turbine
+     * exhausts and the level holds; at 14 bar (past its 13 bar shut-off) it returns nothing and the vessel fills; with a
+     * 200V Inline Pump between them at 14 bar it keeps up again.
+     */
+    static final class CondensateReturn extends PlumbingCases.Big {
+        final double boilerPa;
+        final boolean inlinePump;
+        mods.eln.oil.SteamGeneratorElement t;
+        mods.eln.oil.CondenserElement c;
+        mods.eln.oil.InlinePumpElement pump;
+        mods.eln.sim.fluid.FluidDevice boiler;
+        mods.eln.sim.IProcess feed;
+        boolean primed;
+        int tick;
+        double steam0, pumped0, fill0;
+
+        CondensateReturn(double boilerPa, boolean inlinePump) {
+            this.boilerPa = boilerPa;
+            this.inlinePump = inlinePump;
+        }
+
+        public String id() {
+            return String.format("oil_condensate_return_%.0f_bar%s", boilerPa / 1e5, inlinePump ? "_inline_pump" : "");
+        }
+
+        public int ticks() {
+            return 900;
+        }
+
+        public void build(TestContext ctx) {
+            // turbine (front XN, its exhaust side +z) with its load east, the condenser south of it facing west
+            BlockPos tp = ctx.at(5, 1, 3), cp = tp.south();
+            t = (mods.eln.oil.SteamGeneratorElement) ctx.placeTransparent(12 + (82 << 6), tp);
+            t.front = mods.eln.misc.Direction.XN;
+            t.reconnect();
+            var h = (mods.eln.oil.ElectricHeaterElement) ctx.placeTransparent(0 + (82 << 6), tp.east());
+            h.front = mods.eln.misc.Direction.ZN;
+            h.reconnect();
+            c = (mods.eln.oil.CondenserElement) ctx.placeTransparent(28 + (82 << 6), cp);
+            for (int i = 0; i < 4 && c.front != mods.eln.misc.Direction.XN; i++) mods.eln.fluid.FluidPlacement.turn(c);
+            BlockPos boilerAt = cp.west();
+            int spot = mods.eln.sim.fluid.FluidDevice.FluidPort.CENTRE;
+            if (inlinePump) {
+                // condenser -> pipe (down to the pump's low line) -> pump -> the boiler
+                PipeCases.lay(ctx, cp.west(), 0, 16, 8, 8, 8, 8, 8, 8, 4, 8, 0, 4, 8);
+                BlockPos pp = cp.west().west();
+                pump = (mods.eln.oil.InlinePumpElement) ctx.placeTransparent(PlumbingCases.PUMP, pp);
+                for (var f : new mods.eln.misc.Direction[]{mods.eln.misc.Direction.ZN, mods.eln.misc.Direction.ZP})
+                    if (f.left() == mods.eln.misc.Direction.XP) pump.front = f;
+                pump.reconnect();
+                BlockPos cable = pump.front == mods.eln.misc.Direction.ZN ? pp.north() : pp.south();
+                BlockPos src = pump.front == mods.eln.misc.Direction.ZN ? cable.north() : cable.south();
+                ctx.placeSix(Ids.six("Medium Voltage Cable"), cable);
+                var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) ctx.placeSix(Wp11Cases.SOURCE, src);
+                s.networkUnserialize(ctx.stream(out -> {
+                    out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                    out.writeFloat(200f);
+                }));
+                boilerAt = pp.west();
+                spot = mods.eln.oil.TankElement.sideSpot(5, mods.eln.oil.InlinePumpElement.LINE_Y);
+            }
+            var b = new mods.eln.sim.fluid.FluidNode(1.0, boilerAt.getY(), 1.0, true).fill(0.5 * mods.eln.sim.fluid.Water.RHO_L, boilerPa, 320);
+            var level = c.fluidLevel();
+            var ports = List.of(new mods.eln.sim.fluid.FluidDevice.FluidPort(b, boilerAt.asLong(), 5, 0.0, mods.eln.oil.CondenserVessel.PORT_K, spot));
+            boiler = new mods.eln.sim.fluid.FluidDevice() {
+                public Object fluidLevel() {
+                    return level;
+                }
+
+                public List<FluidPort> fluidPorts() {
+                    return ports;
+                }
+            };
+            mods.eln.fluid.FluidWorld.add(boiler);
+            mods.eln.Eln.simulator.addSlowProcess(feed = dt -> {
+                if (t.inlet == null || c.vessel == null || inlinePump && pump.inlet == null) return;
+                if (!primed) {
+                    primed = true;
+                    // (20 % water: the pump's port draws liquid; under the float valve's shut level)
+                    mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.2 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 320, false);
+                    if (inlinePump) for (var n : new mods.eln.sim.fluid.FluidNode[]{pump.inlet, pump.outlet}) {
+                        var m = mods.eln.fluid.FluidWorld.nodeFor(n);
+                        m.fill(0.95 * m.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 300);
+                        m.update();
+                    }
+                }
+                if (!t.isBurnt()) steam(t, boilerPa);
+                if (++tick == 300) {
+                    steam0 = c.v.totalSteamKg;
+                    pumped0 = c.v.totalPumpedKg;
+                    fill0 = c.floodShare();
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            mods.eln.fluid.FluidWorld.remove(boiler);
+            double steam = c.v.totalSteamKg - steam0, pumped = c.v.totalPumpedKg - pumped0, fill = c.floodShare();
+            String id = String.format("condensate into %.0f bar%s", boilerPa / 1e5, inlinePump ? " via an inline pump" : "");
+            ctx.line(String.format("%s: %.1f g condensed, %.1f g pumped in 30 s; fill %.1f%% -> %.1f%%; back-pressure %.2f bar; curve %.1f bar shut-off, "
+                    + "%.2f g/s free, %.2f g/s at %.0f bar; condenser %s; turbine %s", id, steam * 1000, pumped * 1000, fill0 * 100, fill * 100,
+                c.v.backPa / 1e5, c.v.curve.shutoffPa / 1e5, c.v.curve.freeKgPerS * 1000, c.v.curve.kgPerS(c.v.curve.ratedPa) * 1000,
+                c.v.curve.ratedPa / 1e5, c.getWaila(), t.getWaila()));
+            if (inlinePump) ctx.line(id + ": pump " + pump.getWaila());
+            String jade = "" + c.getWaila().get(mods.eln.i18n.I18N.tr("Pump outlet"));
+            ctx.check(id + ": the turbine ran on its load (over 1 g/s of steam)", !t.isBurnt() && steam > 0.03, String.format("%.1f g", steam * 1000));
+            if (boilerPa <= mods.eln.oil.SteamGeneratorDescriptor.NOMINAL_PA || inlinePump) {
+                ctx.check(id + ": its condensate goes back to the boiler (over 90 %)", pumped > 0.9 * steam,
+                    String.format("%.1f of %.1f g", pumped * 1000, steam * 1000));
+                ctx.check(id + ": the level holds (no rise, under the float valve's shut level)", fill <= fill0 + 0.01 && fill < mods.eln.oil.CondenserVessel.MAKEUP_SHUT,
+                    String.format("%.1f%% -> %.1f%%", fill0 * 100, fill * 100));
+                ctx.check(id + ": Jade: the pump's back-pressure and its share of rated flow", jade.startsWith("against") && jade.endsWith("of its rated flow"), jade);
+            } else {
+                ctx.check(id + ": past its shut-off the pump returns next to nothing (under 10 %)", pumped < 0.1 * steam,
+                    String.format("%.1f of %.1f g", pumped * 1000, steam * 1000));
+                ctx.check(id + ": and the vessel fills", fill > fill0 + 0.005, String.format("%.1f%% -> %.1f%%", fill0 * 100, fill * 100));
+                ctx.check(id + ": Jade: shut off, needs a pipe pump", jade.startsWith("against 14") && jade.endsWith("shut off, needs a pipe pump"), jade);
+            }
+        }
+    }
+
+    /**
+     * A Steam Condenser saved with its old 20 L vessel (no "tank3" tag), 40 % water at 50 C under 1 atm of air, loads into
+     * the 12-bucket one (Baughn 2026-11-03): its water down to the float valve's shut level, its air to 1 atm's worth, at
+     * the temperature it had; one saved since keeps all it had.
+     */
+    static final class CondenserLegacyLoad implements TestCase {
+        public String id() {
+            return "oil_condenser_old_save_trimmed";
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        static mods.eln.oil.CondenserVessel load(double savedVolume, double liquidShare, double T) {
+            var n = new mods.eln.sim.fluid.FluidNode(savedVolume, 64, 1.0, false).fill(liquidShare * savedVolume * mods.eln.sim.fluid.Water.RHO_L,
+                mods.eln.sim.fluid.Water.P_ATM, T);
+            n.update();
+            var nbt = new net.minecraft.nbt.CompoundTag();
+            nbt.putDouble("vesselW", n.mWater);
+            nbt.putDouble("vesselA", n.mAir);
+            nbt.putDouble("vesselU", n.energy);
+            var d = mods.eln.oil.CondenserDescriptor.VOLUME;
+            var v = new mods.eln.oil.CondenserVessel(new mods.eln.sim.nbt.NbtThermalLoad("shell"), d, 1000,
+                mods.eln.oil.CondensatePump.forTurbine(10e5, 0.002));
+            v.read(nbt, savedVolume == d ? 0 : savedVolume);
+            v.initialize(64, 293);
+            return v;
+        }
+
+        public void measure(TestContext ctx) {
+            double T = 323.15;
+            var old = load(0.02, 0.4, T);
+            var now = load(mods.eln.oil.CondenserDescriptor.VOLUME, 0.2, T);
+            ctx.line(String.format("old save: %.1f%% water, %.3f bar, %.1f C; current save: %.1f%% water", old.floodShare() * 100, old.vessel.P() / 1e5,
+                old.vessel.T() - mods.eln.sim.fluid.Water.T0, now.floodShare() * 100));
+            ctx.check("condenser: an old save's water is trimmed to the float valve's shut level", Math.abs(old.floodShare() - mods.eln.oil.CondenserVessel.MAKEUP_SHUT) < 0.01,
+                String.format("%.1f%%", old.floodShare() * 100));
+            ctx.check("condenser: at its temperature, its air at about 1 atm", Math.abs(old.vessel.T() - T) < 1 && old.vessel.P() < 1.3e5,
+                String.format("%.1f C, %.3f bar", old.vessel.T() - mods.eln.sim.fluid.Water.T0, old.vessel.P() / 1e5));
+            ctx.check("condenser: a current save keeps its water", Math.abs(now.floodShare() - 0.2) < 0.005, String.format("%.1f%%", now.floodShare() * 100));
+        }
+    }
+
+    /**
+     * The makeup's signal (Baughn 2026-11-03: the boiler's fill through a comparator says when the plant wants water):
+     * two condensers 5 % full with makeup water at 10 bar on top, a signal source on each one's left flank: at 0 V its
+     * makeup stays shut, at 50 V the float valve lets it in. Jade says which.
+     */
+    static final class CondenserMakeupSignal extends PlumbingCases.Big {
+        mods.eln.oil.CondenserElement off, on;
+        mods.eln.sim.IProcess feed;
+        double off0, on0;
+        boolean primed;
+
+        public String id() {
+            return "oil_condenser_makeup_signal";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        mods.eln.oil.CondenserElement place(TestContext ctx, BlockPos p, double u) {
+            var c = (mods.eln.oil.CondenserElement) ctx.placeTransparent(28 + (82 << 6), p);
+            for (int i = 0; i < 4 && c.front != mods.eln.misc.Direction.XN; i++) mods.eln.fluid.FluidPlacement.turn(c);
+            Wp9cCases.signal(ctx, Wp10aCases.off(p, c.front.left()), u);
+            return c;
+        }
+
+        public void build(TestContext ctx) {
+            off = place(ctx, ctx.at(3, 1, 5), 0);
+            on = place(ctx, ctx.at(6, 1, 5), 50);
+            mods.eln.Eln.simulator.addSlowProcess(feed = x -> {
+                if (off.inlet == null || on.inlet == null) return;
+                if (!primed) {
+                    primed = true;
+                    for (var c : new mods.eln.oil.CondenserElement[]{off, on})
+                        mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.05 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 300, false);
+                    off0 = off.vessel.mWater;
+                    on0 = on.vessel.mWater;
+                }
+                // (makeup water kept at 10 bar behind each one's valve, in the run's lump: CondenserMakeupFloat)
+                for (var c : new mods.eln.oil.CondenserElement[]{off, on}) {
+                    var n = mods.eln.fluid.FluidWorld.nodeFor(c.inlet);
+                    for (int k = 0; k < 100 && n.P() < 10e5; k++) mods.eln.sim.fluid.EaUnits.addWater(n, 2e-5, 300, false);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            String jOff = "" + off.getWaila().get(mods.eln.i18n.I18N.tr("Makeup valve")), jOn = "" + on.getWaila().get(mods.eln.i18n.I18N.tr("Makeup valve"));
+            ctx.line("makeup signal: 0 V " + off.getWaila() + "; 50 V " + on.getWaila());
+            ctx.check("condenser: its left flank takes the signal", off.signalled() && on.signalled(), "");
+            ctx.check("condenser: makeup signal at 0 V: none comes in", off.vessel.mWater <= off0 + 1e-6, String.format("%.4f -> %.4f kg", off0, off.vessel.mWater));
+            ctx.check("condenser: at 50 V the float valve lets it in", on.vessel.mWater > on0 + 0.001, String.format("%.4f -> %.4f kg", on0, on.vessel.mWater));
+            ctx.check("condenser: Jade: shut by its signal", jOff.startsWith("shut by its signal") && jOff.contains("signal 0%"), jOff);
+            ctx.check("condenser: Jade: the signal lets it", jOn.contains("signal 100%") && !jOn.startsWith("shut by"), jOn);
         }
     }
 
@@ -788,7 +1099,11 @@ public final class OilCases {
 
     /** Saturated steam into a turbine's inlet while it is under the rating (10 bar): as a boiler at 10 bar would. */
     static void steam(mods.eln.oil.SteamGeneratorElement t) {
-        double pa = mods.eln.oil.SteamGeneratorDescriptor.NOMINAL_PA;
+        steam(t, mods.eln.oil.SteamGeneratorDescriptor.NOMINAL_PA);
+    }
+
+    /** ... or under pa (an overclocked boiler). */
+    static void steam(mods.eln.oil.SteamGeneratorElement t, double pa) {
         if (t.inlet.P() < pa) mods.eln.sim.fluid.EaUnits.addWater(t.inlet, 5e-4, mods.eln.sim.fluid.Water.tsat(pa), true);
     }
 

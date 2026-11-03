@@ -88,6 +88,7 @@ final class GoldenCase implements TestCase {
     static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163",
         "eln:six_node@5955", "eln:six_node@5956",   // the three-channel data logger, the tilted terminal (Baughn 2026-10-30, board #45)
         "eln:six_node@7489",   // the Bus I/O Module (the field bus)
+        "eln:six_node@6402", "eln:six_node@6403", "eln:six_node@6404",   // the pipe sensors as devices (Baughn 2026-11-02)
         "eln:transparent_node@5120", "eln:transparent_node@5124",   // 26.x oil: tar sand separators
         "eln:transparent_node@5184", "eln:transparent_node@5188",   // 26.x oil: pumps
         "eln:transparent_node@5192", "eln:transparent_node@5196",   // submersible pumps (Baughn 2026-10-25)

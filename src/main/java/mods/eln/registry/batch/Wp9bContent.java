@@ -139,6 +139,13 @@ public class Wp9bContent implements ElnContent {
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
+        {
+            // the pipe sensors as devices on a face (Baughn 2026-11-02), beside the probes whose model they wear: placed by
+            // the pipe sensor items, so no items of their own in the creative tab
+            String[] names = {"Pipe Pressure Sensor", "Pipe Temperature Sensor", "Pipe Steam Quality Sensor"};
+            for (int s = 0; s < 3; s++)
+                sixNodeItem.addWithoutRegistry(mods.eln.sixnode.pipetransmitter.PipeTransmitterDescriptor.FIRST_ID + s, new mods.eln.sixnode.pipetransmitter.PipeTransmitterDescriptor(TR_NAME(Type.NONE, names[s]), s));
+        }
 
     }
 

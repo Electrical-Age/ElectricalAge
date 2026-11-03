@@ -1295,6 +1295,24 @@
   "kind": "six_node",
   "name": "voltage_probe"
  },
+ "eln:six_node@6402": {
+  "descriptor": "PipeTransmitterDescriptor",
+  "display": "Pipe Pressure Sensor",
+  "kind": "six_node",
+  "name": "pipe_pressure_transmitter"
+ },
+ "eln:six_node@6403": {
+  "descriptor": "PipeTransmitterDescriptor",
+  "display": "Pipe Temperature Sensor",
+  "kind": "six_node",
+  "name": "pipe_temperature_transmitter"
+ },
+ "eln:six_node@6404": {
+  "descriptor": "PipeTransmitterDescriptor",
+  "display": "Pipe Steam Quality Sensor",
+  "kind": "six_node",
+  "name": "pipe_quality_transmitter"
+ },
  "eln:six_node@6464": {
   "descriptor": "ThermalSensorDescriptor",
   "display": "Thermal Probe",

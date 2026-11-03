@@ -129,6 +129,17 @@ and the FE exporter. Tests: `api/ElementHostTest`, `MachineApiCases`, `Wp11Cases
   (Baughn): one failure per network per tick, so a short burns the weakest cable, not the whole run.
 - `Failure.outcome(kind, cause, ...)`: burn in place (`IBurnable`, repair via `Repair`) or pop/arc flash/explode.
 - Element NBT: `burnt` (cause ordinal + 1), `burntKind`.
+- Burnt (`IBurnable.isBurnt`; Baughn: a damaged machine should tick, but should stop doing useful things): the node
+  calls the element's `connectBurntJob` instead of `connectJob`. Only its thermal loads and the thermal connections
+  with both ends among them join the simulation, so it cools to ambient through Rp; no process, watchdog or electrical
+  part runs, and its faces carry nothing. Elements that run a process from `initialize` skip it while burnt (heat
+  furnace, electrical furnace). Its light goes out. Right-click: a meter reads it, anything else repairs it or says
+  the repair part (`Repair.onActivated`); `hasGui` is false, `NodeMenus.menu` refuses, an open screen closes
+  (`ElnNodeMenu.stillValid`). Client: no looped sounds, no render `refresh` (animation, particles). `BurntCases`.
+- Repair part (`Repair.defaultPart`): the descriptor's `repairPart` (item name) if set, else by kind: ELECTRONICS and
+  electrical MACHINE failures a Cheap Chip, other MACHINE failures a Copper Thermal Cable, TRANSFORMER a Cheap
+  Ferromagnetic Core, CAPACITOR a Dielectric, ROTATING an Electrical Motor, the rest one of the same item. Jade shows
+  the cause and the part on a burnt device.
 
 ## NBT of sim parts
 
@@ -151,7 +162,9 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   taken from; limiters bound nodes by their neighbours' solved pressures and cap liquid level moves; each node gives at
   most half of each phase it holds, net of inflow, and the rest of its outflow is its inflow passed through, with the
   mix and enthalpy from an implicit upwind solve (so pipe volume doesn't limit throughput or stability); then the
-  transfer and a flash per node. Pumps are one-way edges from a sump with a head (`FluidEdge.boost`). Iron pipe holds
+  transfer and a flash per node. Pumps are one-way edges from a sump with a head (`FluidEdge.boost`); a curved pump
+  (the condensers' `CondensatePump`) is set each step to its curve's chord from free flow through where it runs now
+  (boost and open, with a slope bounded up to its shut-off; `CondensatePumpTest`). Iron pipe holds
   0.03 L per block (tunable, not geometry); saves record the volume and older ones are rescaled on load.
 - `src/main/java/mods/eln/solver/Equation.java`: expression parser/evaluator for the math chip (`ElectricalMathElement`)
   and `AnalogChips.kt`; not part of the MNA.

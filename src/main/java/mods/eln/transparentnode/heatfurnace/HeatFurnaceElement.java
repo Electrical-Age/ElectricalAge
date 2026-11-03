@@ -116,7 +116,7 @@ public class HeatFurnaceElement extends TransparentNodeElement {
 
         connect();
 
-        inventoryProcess.process(1 / 20.0);
+        if (!isBurnt()) inventoryProcess.process(1 / 20.0);   // (burnt: it takes no fuel, loaded or not)
     }
 
     @Override

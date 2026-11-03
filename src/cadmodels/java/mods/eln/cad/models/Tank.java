@@ -9,17 +9,17 @@ import static mods.eln.cad.models.Mc.box;
 import static mods.eln.cad.models.Mc.prism;
 import static mods.eln.cad.models.Mc.tube;
 import static mods.eln.cad.models.OilKit.boltRing;
-import static mods.eln.cad.models.OilKit.turned;
 
 /**
  * Pipe tanks (Iron Tank / Alloy Tank; Baughn 2026-10-29, the shaft redo): an upright riveted vessel on a skid with a
  * sight glass on its front. Ports (an iron pipe's flange): the top centre (vapour), and on each side face a low one
  * (liquid, 4 px up) and a high one (vapour, 12 px up); the bottom port is a plain opening under the skid.
  * <p>
- * Parts: shell, ports (the flanges), glass (the sight glass) and level: the water in it, 2..14 px, which TankRender
- * scales to the fill; for a merged box, disc_* (a flange where a pipe meets it) and nozzle_* (a stub of large pipe,
- * 1 px long, which TankRender stretches from the flange in to the scaled shell). A box of tanks (TankGroup) is drawn
- * as one: shell, glass and level scaled to the box. Front XN (x = 0).
+ * Parts: shell; glass (the sight glass), level and vapour: the water and the steam in its window, 2..14 px, which
+ * TankRender scales to the fill; disc_* (a flange, drawn only where a pipe meets the port: Baughn 2026-11-03, a lone
+ * tank with all seven looked silly) and nozzle_* (a stub of large pipe, 1 px long, which TankRender stretches from the
+ * flange in past the shell). A box of tanks (TankGroup) is drawn as one: the shell scaled to the box, the sight glass
+ * only to its height. Front XN (x = 0).
  */
 public final class Tank {
     private Tank() {
@@ -33,17 +33,6 @@ public final class Tank {
         new Tier("alloy", "paint_tankalloy", "steel", "paint"));
     static final double C = 8.0, R = 5.5;
 
-    /**
-     * A large alloy pipe's flange (its ports take one; smaller pipes meet it too) on the x = 0 face at height y, with a
-     * stub to the shell: the pipe renderer's flange is its drawn radius (3) + 0.75.
-     */
-    static List<Mesh> flangeX0(double y) {
-        List<Mesh> ms = new ArrayList<>(List.of(prism('x', y, C, 3.75, 0.0, 0.75, "steel", 14, true, false),
-            prism('x', y, C, 3.0, 0.75, C - R + 0.5, "steel", 12, false, false)));
-        ms.addAll(boltRing('x', y, C, 3.3, 0.75, 1.0, 6, "brass", 0.25, 0));
-        return ms;
-    }
-
     static List<Mesh> shellPart(Tier t) {
         List<Mesh> m = new ArrayList<>();
         m.add(box(1.5, 0, 1.5, 14.5, 1.0, 14.5, "darksteel", "nsewu"));
@@ -54,23 +43,7 @@ public final class Tank {
         return m;
     }
 
-    /** The flanges: top port, and a low (liquid) and high (vapour) one on each face but the front (the sight glass). */
-    static List<Mesh> portsPart() {
-        List<Mesh> m = new ArrayList<>();
-        // (the checker: this stub's sides z-fought the merged box's top nozzle, which has the same bore over y 15..15.25;
-        // the stub is 0.1 px narrower, r 2.9)
-        m.add(prism('y', C, C, 2.9, 14.5, 15.25, "steel", 12, false, false));
-        m.add(prism('y', C, C, 3.75, 15.25, 16.0, "steel", 14));
-        m.addAll(boltRing('y', C, C, 3.3, 15.0, 15.25, 6, "brass", 0.25, 0));
-        for (int k : new int[]{1, 2, 3})
-            for (double y : new double[]{4.0, 12.0}) m.addAll(turned(flangeX0(y), k));
-        // (the checker: the flanges are separate pieces in this part; their stubs reach into the shell, which is drawn
-        // with them, so they are checked as one body with part shell)
-        for (Mesh s : m) s.body = "shell";
-        return m;
-    }
-
-    /** A flange disc alone on the x = 0 face at height y (a merged box's port with a pipe on it: TankRender turns it to the face). */
+    /** A flange disc alone on the x = 0 face at height y (a port with a pipe on it: TankRender turns it to the face). */
     static List<Mesh> discPart(double y) {
         List<Mesh> m = new ArrayList<>();
         m.add(prism('x', y, C, 3.75, 0.0, 0.75, "steel", 14, true, true));
@@ -86,27 +59,45 @@ public final class Tank {
     }
 
     /**
-     * A box's nozzle on the x = 0 face at height y: a large pipe's bore, 1 px long from x = 0 (TankRender stretches it
-     * from behind the flange disc in to the scaled shell: a merged box's shell sits well inside its faces).
+     * A port's nozzle on the x = 0 face at height y: a large pipe's bore, 1 px long from x = 0 (TankRender stretches it
+     * from behind the flange disc in past the shell's surface: a merged box's shell sits well inside its faces). Its
+     * inner end is closed (Baughn 2026-11-03: a nozzle ending short of the curved shell showed its open end).
      */
     static List<Mesh> nozzlePart(double y, Tier t) {
-        return List.of(prism('x', y, C, 3.0, 0.0, 1.0, t.shell, 12, false, false));
+        return List.of(prism('x', y, C, 3.0, 0.0, 1.0, t.shell, 12, false, true));
     }
 
-    /** The top port's nozzle, 1 px long down from y = 16 (stretched down to the shell's top). */
+    /** The top port's nozzle, 1 px long down from y = 16 (stretched down into the shell's top), closed below. */
     static List<Mesh> nozzleTopPart(Tier t) {
-        return List.of(prism('y', C, C, 3.0, 15.0, 16.0, t.shell, 12, false, false));
+        return List.of(prism('y', C, C, 3.0, 15.0, 16.0, t.shell, 12, true, false));
     }
 
-    /** The sight glass on the front: brass frame, dark backing, 1.5..14.5 px. */
+    /** The sight glass's window: GLASS_W px wide, y 2..14 (TankRender scales its contents about these ends). */
+    static final double GLASS_W = 3.0, GLASS_Y0 = 2.0, GLASS_Y1 = 14.0;
+
+    /**
+     * The sight glass on the front (Baughn 2026-11-03: there was no seeing what's inside; the old one was a 1.5 px slit):
+     * brass rails and end caps, sunk into the shell, round a window with a dark backing (empty: air).
+     */
     static List<Mesh> glassPart() {
-        return List.of(box(C - R - 0.75, 1.5, C - 1.25, C - R + 0.5, 14.5, C - 0.75, "brass"),
-            box(C - R - 0.75, 1.5, C + 0.75, C - R + 0.5, 14.5, C + 1.25, "brass"),
-            box(C - R - 0.6, 1.5, C - 0.75, C - R - 0.5, 14.5, C + 0.75, "darksteel", "w"));   // (behind the water)
+        double h = GLASS_W / 2, x0 = C - R - 0.75, x1 = C - R + 1.1;
+        return List.of(box(x0, GLASS_Y0 - 0.5, C - h - 0.75, x1, GLASS_Y1 + 0.5, C - h, "brass"),
+            box(x0, GLASS_Y0 - 0.5, C + h, x1, GLASS_Y1 + 0.5, C + h + 0.75, "brass"),
+            box(x0, GLASS_Y0 - 0.5, C - h, x1, GLASS_Y0, C + h, "brass", "wud"),
+            box(x0, GLASS_Y1, C - h, x1, GLASS_Y1 + 0.5, C + h, "brass", "wud"),
+            box(C - R - 0.5, GLASS_Y0, C - h, C - R - 0.4, GLASS_Y1, C + h, "darksteel", "w"));   // (behind the contents)
     }
 
+    /** The liquid in the window, its whole height: TankRender scales it about its foot to the fill. */
     static List<Mesh> levelPart() {
-        return List.of(box(C - R - 0.8, 2.0, C - 0.7, C - R - 0.65, 14.0, C + 0.7, "water", "w"));
+        return List.of(box(C - R - 0.7, GLASS_Y0, C - GLASS_W / 2, C - R - 0.55, GLASS_Y1, C + GLASS_W / 2, "gaugewater", "w"));
+    }
+
+    /** Steam over the liquid (a vessel whose gas is mostly steam), its whole height: scaled about its top. */
+    static List<Mesh> vapourPart() {
+        // (the checker: modelled full height, it z-fought the level's face; drawn they never overlap, but it sits 0.1 px
+        // further back, x 1.9)
+        return List.of(box(C - R - 0.6, GLASS_Y0, C - GLASS_W / 2, C - R - 0.55, GLASS_Y1, C + GLASS_W / 2, "gaugesteam", "w"));
     }
 
     public static List<NodeModel> models() {
@@ -114,9 +105,9 @@ public final class Tank {
         for (Tier t : TIERS) {
             NodeModel n = new NodeModel("tank" + t.name, t.paint);
             n.part("shell", shellPart(t));
-            n.part("ports", portsPart());
             n.part("glass", glassPart());
             n.part("level", levelPart());
+            n.part("vapour", vapourPart());
             n.part("disc_low", discPart(4.0));
             n.part("disc_high", discPart(12.0));
             n.part("disc_top", topDiscPart());

@@ -42,8 +42,28 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   pumps 6 / 15 bar. `oil_steam_turbine*`.
 - Steam condensers (new, Baughn 2026-10-26): against a turbine's exhaust side (right of its front); a vessel cooled
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
-  turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
+  turbine's shaft out of its front flange, makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- Condensate pump curve (Baughn 2026-11-03: a turbine at its rated pressure works on its own, an overclocked one needs
+  a pipe pump). Both condensers' pumps follow Q = speed x Qmax x sqrt(1 - dp / H0) (`CondensatePump`), dp the outlet
+  over the vessel: H0 = 1.3 x the turbine's rated inlet, and 1.5 x its condensate at full power against the rating.
+  Small/Steam Condenser (50V/200V turbines, 10 bar): shut-off 13 bar, ~3.0 / 11.9 g/s at 10 bar (6.2 / 24.8 g/s free;
+  their turbines condense ~2.0 / 7.9 g/s), short of full-power condensate above ~12 bar. Plant Steam Condenser (HP,
+  20 bar): shut-off 26 bar, 59 g/s at 20 bar (123 free; a full HP makes 39.5 g/s); it was 15 bar and 0.1 kg/s, which
+  couldn't feed the HP's own 20 bar boiler. Its motor load now goes with the pressure it really pumps against. Speed
+  still scales the flow only (the head stays at any speed). Was a straight line to a 15 bar shut-off for all.
+  `CondensatePumpTest`, `oil_condensate_return_*`, `plant_condenser_pump_into_*`.
+  Jade on both condensers, "Pump outlet": the pressure it works against and its flow there as a share of its rated
+  (free) flow at its speed, or "shut off, needs a pipe pump" (Baughn 2026-11-03).
+- Small Steam Condenser / Steam Condenser vessels hold 12 buckets, as a tank block (Baughn 2026-11-03: "133 m^3 is a
+  bit much for a 1m^3 block"); they were 5 / 20 L (74 000 / 296 000 mB). Saves without the "tank3" tag load trimmed:
+  water over the float valve's shut level (25 %) and air over 1 atm's worth go, at the temperature they had (kept, a
+  full old vessel was over FLOOD at once and burnt its turbine). The Plant Steam Condenser keeps its 60 L
+  (~889 000 mB, 74 buckets). `oil_condenser_old_save_trimmed`.
+- Steam condenser makeup signal (Baughn 2026-11-03: no interlock to the boiler, which the condenser can't know; the
+  boiler's analog fill, through a comparator, can say when the plant wants water): a 0-50 V input on its left flank
+  scales what its float valve lets in, 0 V shut; unconnected, the float valve alone as before. That flank takes no
+  thermal cable now. Jade's Makeup valve says whether its signal holds it. `oil_condenser_makeup_signal`.
 - Shaft redo, part 1 (Baughn 2026-10-29: the old shaft turbines had no steam input; redo them on the new steam logic).
   The shaft Steam Turbine (same id) takes steam by EA pipe on top and lets it out of its back (piped on, or into the
   air); work = 0.75 x the isentropic drop from the inlet to the exhaust's pressure, onto the shaft; 16 kW at 20 bar
@@ -76,6 +96,23 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   to float precision), so a broken block takes its share and saved state survives; the box draws as one tank from its
   lowest corner (shell, sight glass and water scaled; no flanges). Plant condenser: cooling-water tubes in low on its
   left, out low on its right, UA 4 kW/K. `tank_box_*`, `plant_condenser_cooling_water_full_hp`.
+- Tank flanges (Baughn 2026-11-03): a tank, lone or a box, draws a flange only on a port a pipe or device meets (a lone
+  tank drew all seven); the ports themselves are unchanged (kits still end at them) and Jade lists where they are and
+  how many are piped. Each flange's nozzle runs in past the shell all round its bore and is closed at its end (it was
+  cut at the shell's centre line, so the curving shell left gaps at its sides one could look into).
+  `tank_flanges_where_piped`.
+- Tank sight glass (Baughn 2026-11-03: "a viewglass"): a 3 px window in brass on the tank's front (was a 1.5 px slit
+  in a texture half pale), the water in blue to its level and, when the vessel's gas is mostly steam, steam above it
+  (else the dark of an empty glass: air). A box draws one glass on its front, the box's height but its own width.
+  Tanks hold only water, steam and air (the fluid core's species), so there is no other liquid to colour. The render
+  reads the fill and a steam flag (published when either changes). `tank_sight_glass`.
+- Oil outlets (Baughn 2026-11-03: "the oil separator lacks a pipe output"): the tar sand separator pushes its crude out
+  of the outlet pipe drawn on its back, and the oil pump out of its discharge flange (its right), up to 200 mB/s into
+  whatever block there takes fluid (`fluid/FluidExport`). EA pipes still don't carry oil (the fluid core is water,
+  steam and air), so the outlet feeds other mods' pipes or the next device directly. `oil_separator_outlet`,
+  `oil_pump_discharge`.
+- Tar sand separator basin (Baughn 2026-11-03): the trough is drawn open, its oil rising from the floor to the froth
+  line as its crude tank fills (the fill is published after the machine's own data). `oil_separator_basin`.
 - Pipe sizes (Baughn 2026-10-29): iron and alloy pipes drawn at a quarter of their old 4 and 6 voxels (1 and 1.5) and
   taking 2 voxels on the grid (occupancy, hitbox, routing; even, so centred on the lattice; their physics unchanged);
   the Large Alloy Pipe (tier 2) drawn and taking 6, 16 x the alloy's inner area (Baughn): volume 16 x, conductance
@@ -128,6 +165,21 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   like the safety valve, one per block; the run's absolute pressure or temperature as 0-50 V on every signal cable in the
   block (full scale stepped by an empty-hand right-click: 2-100 bar, 100-500 C); the dial goes green to red.
   `pipe_pressure_and_temperature_sensors`.
+- Pipe sensors as devices (Baughn 2026-11-02: fitted on a pipe the sensor ended up in mid-air, where signal cables
+  can't go): the three pipe sensor items now place a small device (`sixnode/pipetransmitter`, hidden six-node ids
+  `6402`-`6404` beside the probes) anywhere on a floor, wall or ceiling of a voxel block, its centre on the pipe
+  routers' 4-voxel lattice. It has a pale signal pin on its front and a pipe port 4 voxels over its centre; a pipe kit
+  route starts or ends at the port when the device is clicked (`PipePlacer.devicePort`), and the pipe ends capped
+  there. It reads the run of the pipe through or ending at its port, same modes, full scales, right-click stepping and
+  0-50 V as before; without a pipe it says "not connected to a pipe" and gives 0 V. It holds no fluid, so the fluid
+  sim is unchanged; breaking it drops the sensor item and leaves the pipe (the player's own, paid for from the kit).
+  Chosen over a stub the device would lay and own: a free stub dropped a pipe kit when mined (free pipe each place and
+  break), had to reach a block face with free space to start a route, and lost its identity once a route joined it.
+  Wears the Voltage Probe's model with a drawn iron stem up to the port. The items no longer fit a sensor on a pipe;
+  sensors already fitted keep working. After the first client check: refused where it would touch a pipe, the device
+  wins the crosshair over the pipe end at its port, a second route to a piped port is refused, each kind carries a
+  coloured plate with a letter (P, T, Q), Jade's headline is reading, volts and full scale, and its own items are out of
+  JEI. `pipe_transmitter_*`.
 - Battery protection chips (Baughn 2026-10-27, after a protected, nearly empty battery burnt on a 50 V bus): the
   overheating chip is a charge limiter, run every electrical step (BatteryInventoryProcess.Step): charging held to the
   rated current (electricalStdI) by the cut switch's resistance, tapering to none as it nears the cut; the cut is at
@@ -221,6 +273,21 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Meters, probes and power sockets no longer burn at their (former slot) cable's voltage: those watchdogs are off.
 - Fires lag their setting (coal ~3 min, oil ~20 s), go out below 15%, take time to relight (`sim/Fire.java`, `FireTest`).
 - Battery wear divided by `batteryLifeFactor` (default 25), doubled every 10 C above ambient, up to 4x at low charge.
+- Burnt devices (Baughn: they kept their temperature, made their sounds and opened their GUI) keep only
+  their thermal loads in the simulation: they cool to ambient and do nothing else, make no working sound or
+  animation, give no light, and a right-click only says what repairs them (a meter still reads them); no GUI.
+  Contents drop when broken. See simulation.md "Failures"; `BurntCases`.
+- Repair parts cost less than the device (Baughn: a stone heat furnace took a Machine Block, which cost more than the
+  furnace). Jade shows a burnt device's cause and repair part.
+
+  | Device | Old repair part | New |
+  |---|---|---|
+  | Stone Heat Furnace, Fuel Heat Furnace | Machine Block | Combustion Chamber (4 stone) |
+  | 50V / 200V Electric Heater | Cheap Chip (overvoltage), Machine Block (overheat) | its 50V / 200V Copper Heating Corp |
+  | Large Rheostat | Machine Block | Power Resistor |
+  | Other machines that overheat (thermal dissipators, smelter, boiler, column base, compact steam turbine, heat turbines) | Machine Block | Copper Thermal Cable |
+  | Machines on overvoltage (macerator, compressor, magnetizer, plate machine, exporter, pumps, ...) | Cheap Chip | unchanged |
+  | Electronics, transformers, capacitors, shaft machines, cables, batteries, HV gear | by kind | unchanged |
 - The FE exporter is a transparent node: it burns out in place and can be repaired instead of vanishing; old
   simple-node saves are upgraded on load (`transparentnode/energyconverter/ExporterSaveUpgrade.java`,
   `ExporterSaveUpgradeTest`). `SimpleNode` and its block/BE/item are gone.

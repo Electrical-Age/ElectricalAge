@@ -29,6 +29,7 @@ public final class ClientRenders {
         ElnRenders.six(mods.eln.sixnode.electricalredstoneoutput.ElectricalRedstoneOutputDescriptor.class, mods.eln.sixnode.electricalredstoneoutput.ElectricalRedstoneOutputRender::new);
         ElnRenders.six(mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor.class, mods.eln.sixnode.electricalrelay.ElectricalRelayRender::new);
         ElnRenders.six(mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor.class, mods.eln.sixnode.electricalsensor.ElectricalSensorRender::new);
+        ElnRenders.six(mods.eln.sixnode.pipetransmitter.PipeTransmitterDescriptor.class, mods.eln.sixnode.pipetransmitter.PipeTransmitterRender::new);
         ElnRenders.six(mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor.class, mods.eln.sixnode.electricalsource.ElectricalSourceRender::new);
         ElnRenders.six(mods.eln.sixnode.electricalswitch.ElectricalSwitchDescriptor.class, mods.eln.sixnode.electricalswitch.ElectricalSwitchRender::new);
         ElnRenders.six(mods.eln.sixnode.electricaltimeout.ElectricalTimeoutDescriptor.class, mods.eln.sixnode.electricaltimeout.ElectricalTimeoutRender::new);

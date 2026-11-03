@@ -75,6 +75,18 @@ public class ElnJeiPlugin implements IModPlugin {
             registration.addRecipes(ResinCategory.TYPE, List.of(new ResinCategory.Resin(collector, resin)));
     }
 
+    /** The pipe sensor devices' own items are internal (the pipe sensor items place them): kept out of the list, so each
+     *  sensor's name shows once (a lab test found two of each). */
+    @Override
+    public void onRuntimeAvailable(mezz.jei.api.runtime.IJeiRuntime runtime) {
+        List<ItemStack> hidden = new java.util.ArrayList<>();
+        for (int s = 0; s < 3; s++) {
+            var d = mods.eln.node.voxel.PipeSensorItem.device(s);
+            if (d != null && d.parentItem != null) hidden.add(new ItemStack(d.parentItem));
+        }
+        if (!hidden.isEmpty()) runtime.getIngredientManager().removeIngredientsAtRuntime(mezz.jei.api.constants.VanillaTypes.ITEM_STACK, hidden);
+    }
+
     /** The bike trunk's panel lies right of the trunk's rectangle: JEI keeps its ingredient list off it (AdventurAgent). */
     @Override
     public void registerGuiHandlers(mezz.jei.api.registration.IGuiHandlerRegistration registration) {

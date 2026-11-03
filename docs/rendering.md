@@ -63,7 +63,8 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 - Publish header bit `HEADER_BURNT` (in `SixNodeElement` / `TransparentNodeElement`) -> render field `burnt`.
 - BER draws the device, then draws it again with `frame.soot = true`: everything recorded goes to `Blend.MULTIPLY` in the soot colour (`GlFrame.SOOT`); additive/faint-alpha parts are skipped so glow doesn't darken air.
 - `SixNodeElementRender.drawBurnt()` returning true replaces both passes (electrical cables draw their own burnt-through look).
-- `NodeBlockEntity.burntSmoke()`: occasional smoke particle.
+- `NodeBlockEntity.burntSmoke()`: occasional smoke particle; the entity skips the render's `refresh` while burnt (no
+  animation, no working particles), and `LoopedSoundPlayer` plays no loop of a burnt render.
 
 ## Cables
 

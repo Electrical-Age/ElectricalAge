@@ -566,7 +566,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     /** The pipe passing through a point of this block, or null. */
-    PipePart pipeAt(int x, int y, int z) {
+    public PipePart pipeAt(int x, int y, int z) {
         for (VoxelPart p : parts) if (p instanceof PipePart pipe && pipe.fluid != null && pipe.passes(x, y, z)) return pipe;
         return null;
     }
@@ -631,6 +631,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     public Aimed aimed(double x, double y, double z) {
+        // a pipe sensor device wins over the end of the pipe laid to its port, which covers its body from most angles
+        // (a lab test: Jade showed "Iron Pipe")
+        for (int i = 6; i < SLOTS; i++)
+            if (sideElementList[i] instanceof mods.eln.sixnode.pipetransmitter.PipeTransmitterElement t)
+                for (int[] b : t.aimBoxes(elementBoxes(i).get(0))) if (VoxelPart.contains(b, x, y, z, 0.05)) return new Aimed(i, -1);
         int el = elementAt(x, y, z, 0), pi = partAt(x, y, z);
         if (el < 0 && pi < 0) el = elementAt(x, y, z, 2);
         return new Aimed(el, pi);
@@ -992,6 +997,23 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (!back.isEmpty() && player != null && !player.isCreative() && !player.getInventory().add(back)) dropItem(back);
         }
         return null;
+    }
+
+    /**
+     * A device of this stack off centre exactly at (ox, oy, oz) on face, turned to front, in a slot past the faces even
+     * at the face's centre (PipeSensorItem: its port must stay where it was put). Null if placed, else why not.
+     */
+    String placeOffCentre(ItemStack stack, Direction face, int ox, int oy, int oz, LRDU front, Player player) {
+        int slot = freeSlot();
+        if (slot < 0) return "No more devices fit in this block";
+        String err = placeErrorAt(stack, slot, face, ox, oy, oz, front);
+        if (err != null) return err;
+        placingFront = front;
+        try {
+            return createSubBlockAt(stack, slot, face, ox, oy, oz, player) ? null : "Can't place that";
+        } finally {
+            placingFront = null;
+        }
     }
 
     /** The front of the device being placed by placeAnywhere (its plan), else null: the player's facing. */
@@ -1829,7 +1851,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     @Override
     public void recalculateLightValue() {
         int light = cables.glowLight();
-        for (mods.eln.node.six.SixNodeElement e : sideElementList) if (e != null) light = Math.max(light, e.getLightValue());
+        for (mods.eln.node.six.SixNodeElement e : sideElementList) if (e != null && !e.isBurnt()) light = Math.max(light, e.getLightValue());
         setLightValue(light);
     }
 

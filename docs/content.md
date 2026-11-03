@@ -58,6 +58,12 @@ Over half the lakes (a fixed roll on the lake's key) a small surface pond, its o
 with tar sand, is dug once the chunks over the lake's middle are loaded, in new and old worlds alike (`oil/OilPonds`,
 Baughn 2026-10-28; none where the ground isn't flat, dry and natural). Tests: `gametest/cases/OilCases`. The tar sand separator's list is `Eln.separatorRecipes`.
 
+Oil moves between devices only through the NeoForge fluid capability (EA's pipes and the fluid core carry water,
+steam and air). Devices with a drawn outlet push their tank out of it (`fluid/FluidExport`, Baughn 2026-11-03): the
+tar sand separator out of its back, the oil pump out of its discharge flange on its right, into whatever block there
+takes fluid (another mod's pipe, a column base, a flare stack, an EA tank for water). The rest offer their tanks on
+every face for pipes to draw from or fill.
+
 ## Entities
 
 The electric bike (`bike/ElectricBike`, `ElnRegistry.ELECTRIC_BIKE_ENTITY`, item `ELECTRIC_BIKE`; Baughn 2026-10-28):

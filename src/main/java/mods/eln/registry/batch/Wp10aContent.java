@@ -65,10 +65,15 @@ public class Wp10aContent implements ElnContent {
 
     /** 26.x oil & steam: electric heaters and the boiler (placeholder models). */
     public static void registerSteam(int id) {
-        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "50V Electric Heater"),
-            LVU, 1000, lowVoltageCableDescriptor, "electricheater50v"));
-        transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "200V Electric Heater"),
-            MVU, 4000, meduimVoltageCableDescriptor, "electricheater200v"));
+        // (a burnt heater gets a new heating corp, overvoltage or overheat)
+        var heater50 = new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "50V Electric Heater"),
+            LVU, 1000, lowVoltageCableDescriptor, "electricheater50v");
+        heater50.repairPart = "50V Copper Heating Corp";
+        transparentNodeItem.addDescriptor(0 + (id << 6), heater50);
+        var heater200 = new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "200V Electric Heater"),
+            MVU, 4000, meduimVoltageCableDescriptor, "electricheater200v");
+        heater200.repairPart = "200V Copper Heating Corp";
+        transparentNodeItem.addDescriptor(4 + (id << 6), heater200);
         transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.BoilerDescriptor(TR_NAME(Type.NONE, "Boiler"), "boiler"));
         // Baughn: small steam turbines with the generator built in; they replace the heat turbines (now uncraftable)
         transparentNodeItem.addDescriptor(12 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "50V Steam Turbine"),
@@ -79,7 +84,7 @@ public class Wp10aContent implements ElnContent {
         transparentNodeItem.addDescriptor(20 + (id << 6), new mods.eln.oil.SteamOvenDescriptor(TR_NAME(Type.NONE, "Steam Oven"), "steamoven"));
         // the turbines' condensers (Baughn 2026-10-26: optional, beside the turbine, the models join); model mods.eln.cad.models.Condenser
         transparentNodeItem.addDescriptor(28 + (id << 6), new mods.eln.oil.CondenserDescriptor(TR_NAME(Type.NONE, "Small Steam Condenser"),
-            1000, 0.005, "condenser50v"));
+            1000, 0.005, "condenser50v"));   // (0.005, 0.02: the vessels before 12 buckets, for old saves)
         transparentNodeItem.addDescriptor(32 + (id << 6), new mods.eln.oil.CondenserDescriptor(TR_NAME(Type.NONE, "Steam Condenser"),
             4000, 0.02, "condenser200v"));
         // the bootstrap turbine (Baughn 2026-10-27): heat and water in, 50 V out, its control and condenser built in
@@ -94,7 +99,7 @@ public class Wp10aContent implements ElnContent {
             MVU, meduimVoltageCableDescriptor, "inlinepump200v"));
         // ... and the plant condenser for the shaft turbines (the add-on condensers above stay as they are)
         transparentNodeItem.addDescriptor(52 + (id << 6), new mods.eln.oil.PlantCondenserDescriptor(TR_NAME(Type.NONE, "Plant Steam Condenser"),
-            0.06, 40000, 0.1, "plantcondenser"));
+            0.06, 40000, mods.eln.mechanical.SteamTurbineSpec.HP, "plantcondenser"));
         // the counterflow heat exchanger (economizer, reheater, steam raiser: Baughn 2026-10-29): 12.5 W/K a block, 50 a 2 x 2 slice; 8 L a side a block
         transparentNodeItem.addDescriptor(56 + (id << 6), new mods.eln.oil.HeatExchangerDescriptor(TR_NAME(Type.NONE, "Counterflow Heat Exchanger"),
             mods.eln.oil.HeatExchangerDescriptor.SLICE_UA / 4, 0.008, "heatexchanger"));

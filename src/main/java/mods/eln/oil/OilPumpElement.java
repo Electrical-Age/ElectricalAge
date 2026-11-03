@@ -28,7 +28,11 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import java.util.HashMap;
 import java.util.Map;
 
-/** The pump (OilPumpDescriptor): electrical load + resistor; a slow process finds its source and moves fluid. */
+/**
+ * The pump (OilPumpDescriptor): electrical load + resistor; a slow process finds its source and moves fluid into its
+ * tank, and its discharge line on its right pushes the tank into whatever takes it there (Baughn 2026-11-03: the oil
+ * devices' drawn outlets did nothing).
+ */
 public class OilPumpElement extends TransparentNodeElement {
     final OilPumpDescriptor desc;
     final NbtElectricalLoad load = new NbtElectricalLoad("load");
@@ -52,8 +56,20 @@ public class OilPumpElement extends TransparentNodeElement {
         electricalLoadList.add(load);
         electricalComponentList.add(resistor);
         slowProcessList.add(new Pumping());
+        slowProcessList.add(time -> {
+            if (node.coordonate.world() instanceof ServerLevel level)
+                mods.eln.fluid.FluidExport.push(tank, level, node.coordonate.pos(), discharge().toEnumFacing(), (int) Math.ceil(DISCHARGE_MB_PER_S * time));
+        });
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         slowProcessList.add(watchdog.set(load).setUNominal(desc.nominalU).set(new Failure(this).machine()));
+    }
+
+    /** How fast its discharge pushes out what it pumped (mB/s): far more than it pumps. */
+    static final double DISCHARGE_MB_PER_S = 200;
+
+    /** Its discharge: the right side, where the model's discharge line ends in a flange (mods.eln.cad.models.OilPump). */
+    public Direction discharge() {
+        return front.right();
     }
 
     class Pumping implements IProcess {
@@ -195,6 +211,7 @@ public class OilPumpElement extends TransparentNodeElement {
         if (lake != null) info.put(I18N.tr("Lake"), lake);
         info.put(I18N.tr("Flow"), String.format("%.1f mB/s", rate));
         info.put(I18N.tr("Tank"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB");
+        info.put(I18N.tr("Discharge"), I18N.tr("the flange on its right"));
         info.put(I18N.tr("Power consumption"), Utils.plotPower("", resistor.getP()));
         return info;
     }

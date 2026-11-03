@@ -194,8 +194,9 @@ public class SixNodeEntity extends NodeBlockEntity {
     public void clientRefresh(float deltaT) {
         for (SixNodeElementRender e : elementRenderList) {
             if (e == null) continue;
-            e.refresh(deltaT);
+            // burnt: no animation or working particles, only the smoke (Baughn: a damaged machine stops working)
             if (e.burnt) burntSmoke();
+            else e.refresh(deltaT);
         }
     }
 

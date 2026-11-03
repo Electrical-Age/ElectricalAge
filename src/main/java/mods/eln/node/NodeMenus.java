@@ -57,13 +57,13 @@ public final class NodeMenus {
         Container inventory;
         if (node instanceof SixNode six) {
             SixNodeElement e = six.getElement(slot);
-            if (e == null) return null;
+            if (e == null || e.isBurnt()) return null;   // (Baughn: a burnt device's screen doesn't open)
             kind = ElnNodeMenu.SIX;
             descriptor = e.sixNodeElementDescriptor;
             id = e.sixNodeElementDescriptor.parentItemDamage;
             inventory = e.getInventory();
         } else if (node instanceof TransparentNode t) {
-            if (t.element == null) return null;
+            if (t.element == null || t.element.isBurnt()) return null;
             kind = ElnNodeMenu.TRANSPARENT;
             descriptor = t.element.transparentNodeDescriptor;
             id = t.element.transparentNodeDescriptor.parentItemDamage;
@@ -75,6 +75,15 @@ public final class NodeMenus {
         if (inventory == null || inventory.getContainerSize() < spec.inventorySize())
             inventory = new SimpleContainer(Math.max(1, spec.inventorySize())); // a spec slot past the element inventory: 1.12 would crash
         return new ElnNodeMenu(containerId, player.getInventory(), inventory, spec, node, node.coordonate.pos(), slot, kind, id);
+    }
+
+    /** Is the element behind a node's menu at slot burnt out? Its open screen closes (ElnNodeMenu.stillValid). */
+    public static boolean burnt(NodeBase node, int slot) {
+        if (node instanceof SixNode six) {
+            SixNodeElement e = six.getElement(slot);
+            return e != null && e.isBurnt();
+        }
+        return node instanceof TransparentNode t && t.element != null && t.element.isBurnt();
     }
 
     /** GameTests: told of every menu opened (a FakePlayer's openMenu does nothing). */
