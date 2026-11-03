@@ -176,7 +176,26 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
         BlockState host = e == null ? null : e.host();
         if (host != null && aimed(e, pos, player) == 2) return host.getDestroyProgress(player, level, pos);
-        return super.getDestroyProgress(state, player, level, pos);
+        return mods.eln.node.BreakTool.progress(state, player, level, pos, e == null ? mods.eln.node.BreakTool.Kind.PICKAXE : toolFor(e, pos, player));
+    }
+
+    /** The tool for what the player aims at (BreakTool): shears for a cable, a pickaxe for a pipe, its fittings and
+     *  devices. In the order breaking picks them (onDestroyedByPlayer, VoxelNode.partAt): a device, then a part, then
+     *  a part within the outline's 2 extra voxels. */
+    static mods.eln.node.BreakTool.Kind toolFor(VoxelNodeEntity e, BlockPos pos, net.minecraft.world.entity.player.Player player) {
+        var pick = player.pick(player.blockInteractionRange() + 1, 1f, false);
+        if (pick instanceof net.minecraft.world.phys.BlockHitResult bh && bh.getBlockPos().equals(pos)) {
+            var h = bh.getLocation();
+            double x = h.x - pos.getX(), y = h.y - pos.getY(), z = h.z - pos.getZ();
+            for (int[] b : e.deviceBoxes()) if (b != null && VoxelPart.contains(b, x, y, z, 0.05)) return mods.eln.node.BreakTool.Kind.PICKAXE;
+            var parts = e.parts();
+            for (double eps : new double[]{0.05, 2.05})
+                for (int i = parts.size() - 1; i >= 0; i--)
+                    for (int[] b : parts.get(i).boxes())
+                        if (VoxelPart.contains(b, x, y, z, eps))
+                            return parts.get(i) instanceof CablePart ? mods.eln.node.BreakTool.Kind.SHEARS : mods.eln.node.BreakTool.Kind.PICKAXE;
+        }
+        return mods.eln.node.BreakTool.Kind.PICKAXE;
     }
 
 

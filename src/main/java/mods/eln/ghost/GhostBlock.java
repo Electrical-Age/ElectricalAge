@@ -55,6 +55,12 @@ public class GhostBlock extends Block {
         }
     }
 
+    /** A machine's other blocks break as the machine does: fast with a pickaxe (BreakTool). */
+    @Override
+    protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
+        return mods.eln.node.BreakTool.progress(state, player, level, pos, mods.eln.node.BreakTool.Kind.PICKAXE);
+    }
+
     @Override
     protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.INVISIBLE;

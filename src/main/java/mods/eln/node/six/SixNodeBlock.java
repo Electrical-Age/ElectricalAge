@@ -111,6 +111,19 @@ public class SixNodeBlock extends NodeBlock implements net.minecraft.world.level
         return side;
     }
 
+    /** The tool for the element under the crosshair (BreakTool): shears for a cable, a pickaxe for the rest. */
+    @Override
+    protected float getDestroyProgress(BlockState state, net.minecraft.world.entity.player.Player player, BlockGetter level, BlockPos pos) {
+        SixNodeEntity e = tileAt(level, pos, SixNodeEntity.class);
+        mods.eln.node.BreakTool.Kind kind = mods.eln.node.BreakTool.Kind.PICKAXE;
+        if (e != null && player.pick(player.blockInteractionRange() + 1, 1f, false) instanceof net.minecraft.world.phys.BlockHitResult bh
+                && bh.getBlockPos().equals(pos)) {
+            Direction side = sideAt(e, pos, bh);
+            if (side != null) kind = mods.eln.node.BreakTool.of(e.descriptorAt(side.getInt()));
+        }
+        return mods.eln.node.BreakTool.progress(state, player, level, pos, kind);
+    }
+
     /**
      * Breaking takes only the element the player is looking at (1.12 removedByPlayer: the 26.x port lost this, so a
      * pickaxe removed every face of the block and nothing dropped). Its item and inventory drop (SixNodeElement.destroy);
