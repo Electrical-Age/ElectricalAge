@@ -76,6 +76,23 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   to float precision), so a broken block takes its share and saved state survives; the box draws as one tank from its
   lowest corner (shell, sight glass and water scaled; no flanges). Plant condenser: cooling-water tubes in low on its
   left, out low on its right, UA 4 kW/K. `tank_box_*`, `plant_condenser_cooling_water_full_hp`.
+- Tank flanges (Baughn 2026-11-03): a tank, lone or a box, draws a flange only on a port a pipe or device meets (a lone
+  tank drew all seven); the ports themselves are unchanged (kits still end at them) and Jade lists where they are and
+  how many are piped. Each flange's nozzle runs in past the shell all round its bore and is closed at its end (it was
+  cut at the shell's centre line, so the curving shell left gaps at its sides one could look into).
+  `tank_flanges_where_piped`.
+- Tank sight glass (Baughn 2026-11-03: "a viewglass"): a 3 px window in brass on the tank's front (was a 1.5 px slit
+  in a texture half pale), the water in blue to its level and, when the vessel's gas is mostly steam, steam above it
+  (else the dark of an empty glass: air). A box draws one glass on its front, the box's height but its own width.
+  Tanks hold only water, steam and air (the fluid core's species), so there is no other liquid to colour. The render
+  reads the fill and a steam flag (published when either changes). `tank_sight_glass`.
+- Oil outlets (Baughn 2026-11-03: "the oil separator lacks a pipe output"): the tar sand separator pushes its crude out
+  of the outlet pipe drawn on its back, and the oil pump out of its discharge flange (its right), up to 200 mB/s into
+  whatever block there takes fluid (`fluid/FluidExport`). EA pipes still don't carry oil (the fluid core is water,
+  steam and air), so the outlet feeds other mods' pipes or the next device directly. `oil_separator_outlet`,
+  `oil_pump_discharge`.
+- Tar sand separator basin (Baughn 2026-11-03): the trough is drawn open, its oil rising from the floor to the froth
+  line as its crude tank fills (the fill is published after the machine's own data). `oil_separator_basin`.
 - Pipe sizes (Baughn 2026-10-29): iron and alloy pipes drawn at a quarter of their old 4 and 6 voxels (1 and 1.5) and
   taking 2 voxels on the grid (occupancy, hitbox, routing; even, so centred on the lattice; their physics unchanged);
   the Large Alloy Pipe (tier 2) drawn and taking 6, 16 x the alloy's inner area (Baughn): volume 16 x, conductance

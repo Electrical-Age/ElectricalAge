@@ -30,6 +30,9 @@ public final class OilCases {
         cases.add(new CatchUp());
         cases.add(new LakeSizes());
         cases.add(new Separator());
+        cases.add(new Outlet(true));
+        cases.add(new Outlet(false));
+        cases.add(new Basin());
         cases.add(new Pump(false));
         cases.add(new Pump(true));
         cases.add(new Boiler());
@@ -242,6 +245,75 @@ public final class OilCases {
             ctx.check("oil: 100 mB crude in its tank", tank.getFluidAmount() == 100, tank.getFluidAmount() + " mB");
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, sep.node.coordonate.pos(), null);
             ctx.check("oil: the tank is the block's fluid capability (pipes can drain it)", cap == tank, "" + cap);
+        }
+    }
+
+    /**
+     * Baughn 2026-11-03: the separator lacked a pipe output, though one is drawn on its back; the oil pump's discharge
+     * flange (its right) did nothing either. Each pushes its tank out of that face into whatever takes it: here a second
+     * separator's crude tank (as another mod's pipe or a column base would take it). One beside it on another face gets
+     * nothing.
+     */
+    static final class Outlet implements TestCase {
+        final boolean separator;
+        mods.eln.fluid.ElementFluidHandler from, into, beside;
+
+        Outlet(boolean separator) {
+            this.separator = separator;
+        }
+
+        public String id() {
+            return separator ? "oil_separator_outlet" : "oil_pump_discharge";
+        }
+
+        /** (1000 mB at 200 mB/s: 5 s) */
+        public int ticks() {
+            return 140;
+        }
+
+        public void build(TestContext ctx) {
+            var p = ctx.at(3, 1, 1);
+            var e = ctx.placeTransparent(separator ? 0 + (80 << 6) : 0 + (81 << 6), p);
+            mods.eln.misc.Direction out = separator ? ((mods.eln.transparentnode.electricalmachine.OilSeparatorElement) e).outlet()
+                : ((mods.eln.oil.OilPumpElement) e).discharge();
+            from = (mods.eln.fluid.ElementFluidHandler) e.getFluidHandler();
+            from.fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 1000), true);
+            into = (mods.eln.fluid.ElementFluidHandler) ctx.placeTransparent(0 + (80 << 6), p.relative(out.toEnumFacing())).getFluidHandler();
+            beside = (mods.eln.fluid.ElementFluidHandler) ctx.placeTransparent(0 + (80 << 6), p.relative(out.left().toEnumFacing())).getFluidHandler();
+        }
+
+        public void measure(TestContext ctx) {
+            String what = separator ? "separator outlet" : "pump discharge";
+            ctx.check("oil: the " + what + " pushed its crude into the block there", from.getFluidAmount() == 0 && into.getFluidAmount() == 1000,
+                from.getFluidAmount() + " mB left, " + into.getFluidAmount() + " mB there");
+            ctx.check("oil: nothing out of its other faces", beside.getFluidAmount() == 0, beside.getFluidAmount() + " mB");
+        }
+    }
+
+    /**
+     * Baughn 2026-11-03: the separator's basin shows its oil rising as its tank fills. Half a tank (nothing at its
+     * outlet) publishes a basin half full, the last float of its packet (what ElectricalMachineRender.basin reads).
+     */
+    static final class Basin implements TestCase {
+        mods.eln.transparentnode.electricalmachine.OilSeparatorElement sep;
+
+        public String id() {
+            return "oil_separator_basin";
+        }
+
+        public void build(TestContext ctx) {
+            sep = (mods.eln.transparentnode.electricalmachine.OilSeparatorElement) ctx.placeTransparent(0 + (80 << 6), ctx.at(3, 1, 1));
+            ((mods.eln.fluid.ElementFluidHandler) sep.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(),
+                mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor.TANK_MB / 2), true);
+        }
+
+        public void measure(TestContext ctx) {
+            var bos = new java.io.ByteArrayOutputStream();
+            sep.networkSerialize(new java.io.DataOutputStream(bos));
+            byte[] b = bos.toByteArray();
+            float published = java.nio.ByteBuffer.wrap(b, b.length - 4, 4).getFloat();
+            ctx.check("oil: half a tank, the basin drawn half full", Math.abs(sep.basin() - 0.5f) < 1e-6 && published == sep.basin(),
+                sep.basin() + ", published " + published);
         }
     }
 

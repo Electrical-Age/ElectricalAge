@@ -38,12 +38,13 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     public TankGroup group;
     private double[] loaded;
     private List<FluidPort> ports = List.of();
-    /** The water's share of its volume, last published (the sight glass). */
+    /** The water's share of its volume, and whether its gas is mostly steam, last published (the sight glass). */
     float shownFill = -1;
+    boolean shownSteam;
     /**
-     * In a box: which of its ports have something coupled to them (Baughn 2026-10-29: a merged box draws a flange only
-     * where a pipe meets it): bit 2 * face + (0 low, 1 high) for the side faces (Direction 3D values 2..5), bit 12 the
-     * top. Published when it changes.
+     * Which of its ports have something coupled to them (Baughn: a flange only where a pipe meets it; 2026-10-29 for a
+     * merged box, 2026-11-03 for a lone tank too): bit 2 * face + (0 low, 1 high) for the side faces (Direction 3D
+     * values 2..5), bit 12 the top. Published when it changes.
      */
     public int coupled;
 
@@ -56,7 +57,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             if (vessel.P() > desc.burstPa)
                 new mods.eln.sim.process.destruct.Failure(TankElement.this).pressureVessel(() -> vessel.energy - vessel.mWater * Water.uLiquid(Water.TB))
                     .fail(mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE, vessel.P());
-            if (Math.abs(fill() - shownFill) > 0.02) needPublish();
+            if (Math.abs(fill() - shownFill) > 0.02 || steamy() != shownSteam) needPublish();
             // a lone tank whose neighbours fill a box with it re-forms the box (AdventurAgent 2026-10-29: a 2 x 2 x 2 iron
             // tank came back from a server restart as eight one-block tanks; not reproduced in a reload test: the log line
             // says when this catches one)
@@ -66,7 +67,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
                 TankGroup.regroup(seeds, null);
                 if (group != null) mods.eln.Eln.LOG.info("Electrical Age: tank box at {} re-formed late ({} tanks)", node.coordonate, group.members.size());
             }
-            int c = group == null ? 0 : coupledPorts();
+            int c = coupledPorts();
             if (c != coupled) {
                 coupled = c;
                 needPublish();
@@ -79,6 +80,11 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     /** The water's share of its volume. */
     public double fill() {
         return vessel == null ? 0 : Math.min(1, vessel.mLiquid() / Water.RHO_L / vessel.volume);
+    }
+
+    /** Whether its gas is mostly steam (over half its pressure; else air, or nothing to see): the sight glass shows it. */
+    public boolean steamy() {
+        return vessel != null && vessel.mVapour() > 1e-7 && vessel.pVapour() > 0.5 * vessel.P();
     }
 
     /** Its water as a fluid capability (buckets; another mod's pipes): a view of its vessel (TankWater). */
@@ -304,13 +310,15 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         try {
             shownFill = (float) fill();
             stream.writeFloat(shownFill);
+            shownSteam = steamy();
+            stream.writeBoolean(shownSteam);
             // the box: whether it draws it (its lowest corner), and its size (a lone tank: 1 1 1)
             boolean draws = group == null || group.master() == this;
             stream.writeBoolean(draws);
             stream.writeByte(group == null ? 1 : group.sx);
             stream.writeByte(group == null ? 1 : group.sy);
             stream.writeByte(group == null ? 1 : group.sz);
-            stream.writeShort(group == null ? 0 : coupled);
+            stream.writeShort(coupled);
             // (its place in the box, for the nozzles from its flanges in to the box's shell)
             var c = node.coordonate;
             stream.writeByte(group == null ? 0 : c.x - group.x0);
@@ -348,6 +356,10 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         info.put(I18N.tr("Water"), String.format("%.0f mB, %.0f%% full", vessel.mLiquid() / EaUnits.KG_PER_MB_WATER, fill() * 100));
         info.put(I18N.tr("Vessel"), group == null ? I18N.tr("one block") : String.format("%d x %d x %d blocks, %.0f buckets", group.sx, group.sy, group.sz,
             vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER / 1000));
+        // (its ports are drawn only where a pipe meets them: say where they are)
+        info.put(I18N.tr("Ports"), group == null ? I18N.tr("steam: top, and 12 px up on the sides; water: bottom, and 4 px up on the sides (not the glass's)")
+            : I18N.tr("on its outer faces: steam: top, and 12 px up a side; water: bottom, and 4 px up a side"));
+        info.put(I18N.tr("Piped"), String.format("%d of %d ports here", Integer.bitCount(coupled), ports.stream().filter(p -> p.face() != 0).count()));
         if (vessel.mVapour() > 1e-7) info.put(I18N.tr("Steam"), EaUnits.steamGrams(vessel.mVapour() / EaUnits.KG_PER_MB_STEAM));
         if (vessel.P() > desc.workingPa) info.put(I18N.tr("Warning"), String.format("over its %.0f bar working pressure", desc.workingPa / 1e5));
         return info;

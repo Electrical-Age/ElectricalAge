@@ -18,7 +18,7 @@ dial, handwheel, bolt ring, composed preview); `Mc` is unchanged. Each script wr
 | electricheater50v / 200v | main | 708 / 814 | ElectricHeaterDescriptor (draws main/dissipator/body if present) | largerheostat |
 | boiler | main | 1236 | BoilerDescriptor (draws main/body/furnace if present) | electricfurnace |
 | oilpump50v / 200v | main | 1426 / 1462 | OilPumpDescriptor (draws main) | compressora / compressorb |
-| tarsandseparator50v / 200v | main, rot1, rot2 (+ .txt origins) | 1576 / 1684 | OilSeparatorDescriptor = MaceratorDescriptor draw, unchanged | maceratora / maceratorb |
+| tarsandseparator50v / 200v | main, rot1, rot2, oil (+ .txt origins) | ~1600 / ~1700 | OilSeparatorDescriptor (the oil, then MaceratorDescriptor's draw) | maceratora / maceratorb |
 
 ## Electric heater (`ElectricHeater`)
 Power on the two side faces (model z = 0 / 16), heat out of the back (XP), nothing on the front. Front: framed window,
@@ -49,8 +49,10 @@ A heated twin-shaft paddle trough (conditioning mixer). Designed for MaceratorDe
   (`.txt`): rot1 x -0.140625 (50V) / -0.15625 (200V), rot2 the mirror, y 0.09375 / 0.109375. The gears are phased by
   half a tooth, so they stay meshed at every angle (checked over a full turn, no overlap); everything that turns stays
   inside the block and clear of `main`.
-- The trough top is open (froth surface below the shafts' tops, paddles break through it): the input item shows
-  above the froth. Under the trough a sand spout and a sand tray with a pile, between the legs: the output item sits on it.
+- The trough is an open basin (jacket walls, a dark liner and floor, a steel band up to the froth line; Baughn
+  2026-11-03): part `oil` is its oil full (its surface at the froth line, just over the shafts, so paddles break
+  through it), origin at the basin's floor; OilSeparatorDescriptor scales it in y about that to the crude tank's fill
+  (ElectricalMachineRender.basin). The input item shows above it. Under the trough a sand spout and a sand tray with a pile, between the legs: the output item sits on it.
 - Power on the z faces (powerLrdu: not front/back): floor terminal plates there. Tier-painted heating jacket with
   element terminals on the front, feed chute on the front rim, motor standing on a gearbox at the z+ end, froth
   overflow launder + oil outlet pipe with valve on the back (x+).

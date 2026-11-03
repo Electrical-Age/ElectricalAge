@@ -54,6 +54,11 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
         voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(cable);
     }
 
+    /** Whether its element publishes a basin's fill after the machine's own data (ElectricalMachineRender.basin). */
+    boolean publishesBasin() {
+        return false;
+    }
+
     public ElectricalMachineDescriptor setRunningSound(String runningSound) {
         this.runningSound = runningSound;
         return this;

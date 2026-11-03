@@ -76,6 +76,9 @@ public final class Palette {
         // the device models' own materials (ported from their scripts' atlases, board #44)
         // (Tank)
         put("paint_tankalloy", 150, 112, 52, 8, null);
+        // (Tank: its sight glass's contents, a plain colour each, as they are scaled to the level)
+        put("gaugewater", 52, 104, 176, 6, null);
+        put("gaugesteam", 214, 220, 226, 8, null);
         // (CapacitorBank)
         put("can", 64, 92, 150, 6, (x, y) -> all(x == 3 || x == 4 ? 24 : x == 12 || x == 13 ? -14 : 0));   // blue sleeve, a highlight
         // (CapacitorBank)

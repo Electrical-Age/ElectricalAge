@@ -30,6 +30,8 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
     private float processStatePerSecond;
 
     float UFactor;
+    /** A basin's fill (0..1; the oil separator's crude tank), if its descriptor publishes one. */
+    public float basin;
 
     public ElectricalMachineRender(TransparentNodeEntity tileEntity, final TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
@@ -87,6 +89,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
             processStatePerSecond = stream.readFloat();
             eConn.deserialize(stream);
             UFactor = stream.readFloat();
+            if (descriptor.publishesBasin()) basin = stream.readFloat();
             connectionType = null;
         } catch (IOException e) {
             e.printStackTrace();
