@@ -19,7 +19,8 @@ import net.minecraft.world.phys.Vec3;
  * What comes out of a burst pipe or a blowing safety valve (Baughn: walking through a jet of superheated steam
  * should kill you; numbers from the second opinion, notes/pipes/a-overpressure.md): a jet along dir, as long as its
  * heat flux carries it (up to MAX_LENGTH blocks, stopped by solid blocks), seen and heard, scalding what stands in it.
- * The heat flux counts only what's above 55 C (warm water doesn't scald). Damage every DAMAGE_EVERY ticks, through
+ * The heat flux counts only what's above 55 C (warm water doesn't scald); other species by their own enthalpy, and a
+ * liquid jet of oil sprays in its colour. Damage every DAMAGE_EVERY ticks, through
  * armour: DAMAGE_PER_10KW hearts' worth at point-blank for each 10 kW, less along the jet.
  */
 public final class SteamJet {
@@ -34,13 +35,48 @@ public final class SteamJet {
     static double heatFlux(FluidEdge e) {
         if (e == null) return 0;
         double m = Math.abs(e.fLiquid) + Math.abs(e.fVapour) + Math.abs(e.fAir);
-        return Math.max(0, Math.abs(e.fEnthalpy) - m * Water.hLiquid(SCALD_K));
+        double ref = m * Water.hLiquid(SCALD_K);
+        // (other species, Baughn 2026-11-03: hot oil burns as hot water does; each counted over its own enthalpy at 55 C)
+        if (e.fSpecies != null) {
+            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+            for (int i = 2; i < e.fSpecies.length; i++) {
+                double f = Math.abs(e.fSpecies[i]);
+                if (f == 0) continue;
+                var sp = reg.byId(i);
+                ref += f * (sp.gas() ? sp.hVapour(SCALD_K) : sp.hLiquid(SCALD_K));
+            }
+        }
+        return Math.max(0, Math.abs(e.fEnthalpy) - ref);
     }
 
-    /** The share of what flows out that is gas (whistle or sputter). */
+    /** The share of what flows out that is gas (whistle or sputter): other species count as liquid unless a gas. */
     static double gasShare(FluidEdge e) {
-        double m = Math.abs(e.fLiquid) + Math.abs(e.fVapour) + Math.abs(e.fAir);
-        return m <= 0 ? 0 : (Math.abs(e.fVapour) + Math.abs(e.fAir)) / m;
+        double m = Math.abs(e.fLiquid) + Math.abs(e.fVapour) + Math.abs(e.fAir), g = Math.abs(e.fVapour) + Math.abs(e.fAir);
+        if (e.fSpecies != null) {
+            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+            for (int i = 2; i < e.fSpecies.length; i++) {
+                double f = Math.abs(e.fSpecies[i]);
+                m += f;
+                if (reg.byId(i).gas()) g += f;
+            }
+        }
+        return m <= 0 ? 0 : g / m;
+    }
+
+    /** The colour (0xRRGGBB) of the main other species a liquid jet carries, or -1 if it is mostly water. */
+    static int liquidColour(FluidEdge e) {
+        if (e.fSpecies == null) return -1;
+        var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+        int best = -1;
+        double most = Math.abs(e.fLiquid);
+        for (int i = 2; i < e.fSpecies.length; i++) {
+            double f = Math.abs(e.fSpecies[i]);
+            if (f > most && !reg.byId(i).gas()) {
+                most = f;
+                best = reg.byId(i).colour;
+            }
+        }
+        return best;
     }
 
     /**
@@ -65,9 +101,12 @@ public final class SteamJet {
         long t = level.getGameTime();
         if (len > 0) {
             int n = (int) Math.ceil(len * 3);
+            int colour = gas ? -1 : liquidColour(edge);   // (oil sprays in its colour, water splashes)
             for (int i = 0; i < n; i++) {
                 Vec3 p = origin.add(step.scale(len * (i + 0.5) / n));
-                level.sendParticles(gas ? ParticleTypes.CLOUD : ParticleTypes.SPLASH, p.x, p.y, p.z, 1, 0.08, 0.08, 0.08,
+                if (colour >= 0)
+                    level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(colour, 1.2f), p.x, p.y, p.z, 2, 0.08, 0.08, 0.08, 0.3);
+                else level.sendParticles(gas ? ParticleTypes.CLOUD : ParticleTypes.SPLASH, p.x, p.y, p.z, 1, 0.08, 0.08, 0.08,
                     gas ? 0.08 : 0.3);
             }
         }
