@@ -281,6 +281,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   50 V for its controls on a side; smelts at the electrical oven's rate for its temperature (same PfT table), drawing
   that heat; hoppers: top/sides in, bottom out. Model `mods.eln.cad.models.Smelter`. Test `wp10a_smelter`.
 
+- Stone heat furnace remodelled as a coal oven (Baughn 2026-11-03, model `mods.eln.cad.models.HeatFurnace`, id
+  `stonefurnace`): a firebrick oven with a cast-iron firebox door whose glass window shows the fire, as high as its
+  burn level and from dull red to orange-yellow with its power (against all four chambers' 3 kW), an ash door, and a
+  flue to an iron pipe's flange at the top face's centre (drawn only; no port yet). The 1.12 drawer that opened when a
+  player came near, and the fuel item drawn in it, are gone. Test `wp10b heat furnace model`.
+
 - New: the Steam Oven (`oil/SteamOven*`, Baughn 2026-10-23): steam into a port on top (as the turbine's), a 10 W fan
   on 50 V; cooks food only, at up to 280 W (twice the electrical oven's best food speed), condensing 280 W / 25% of the
   steam's heat (~500 mB/s at full speed; the rest vents as a plume); hoppers: sides in, bottom out. Model

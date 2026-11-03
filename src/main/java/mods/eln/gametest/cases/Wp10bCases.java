@@ -98,6 +98,7 @@ public final class Wp10bCases {
         cases.add(new IdleCase());
         cases.add(new HeatFurnaceExternalCase());
         cases.add(new HeatFurnaceTrimmerCase());
+        cases.add(new HeatFurnaceModelCase());
     }
 
     // ------------------------------------------------------------------ helpers
@@ -534,6 +535,29 @@ public final class Wp10bCases {
             ctx.check("wp10b teleporter broken: ghosts removed, node gone", left == 0
                 && NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p.getX(), p.getY(), p.getZ(), ctx.world())) == null,
                 left + " ghost(s) left");
+        }
+    }
+
+    /**
+     * The stone heat furnace's coal oven model (Baughn 2026-11-03, mods.eln.cad.models.HeatFurnace): it loads with its
+     * body, the fire bed behind the window and the window's pane, its hitbox is the model's, and the fire's full
+     * brightness is at the power of all four chambers.
+     */
+    static final class HeatFurnaceModelCase implements TestCase {
+        public String name() {
+            return "wp10b heat furnace model";
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            var obj = mods.eln.Eln.obj.getObj("stonefurnace");
+            ctx.check("wp10b heat furnace model: parts main, glow and glass", obj != null && obj.getPart("main") != null
+                && obj.getPart("glow") != null && obj.getPart("glass") != null, "" + obj);
+            var d = (mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor) mods.eln.Eln.transparentNodeItem.getDescriptor(HEAT_FURNACE);
+            ctx.check("wp10b heat furnace model: the model's hitbox", d.modelHitbox() != null, "" + d.modelHitbox());
+            within(ctx, "wp10b heat furnace model: the glow's full power [W]", d.maxPower(), 3000, 1e-6);
         }
     }
 
