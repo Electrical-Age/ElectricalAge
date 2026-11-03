@@ -26,6 +26,7 @@ public class OilSeparatorElement extends ElectricalMachineElement {
         slowProcessList.add(time -> {
             if (node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)
                 mods.eln.fluid.FluidExport.push(tank, level, node.coordonate.pos(), outlet().toEnumFacing(), (int) Math.ceil(OilSeparatorDescriptor.OUTLET_MB_PER_S * time));
+            if (Math.abs(basin() - shownBasin) > 0.02) needPublish();
         });
     }
 
@@ -38,6 +39,24 @@ public class OilSeparatorElement extends ElectricalMachineElement {
     public void done(ElectricalStackMachineProcess who) {
         tank.fill(new FluidStack(mods.eln.oil.Oil.CRUDE.get(), OilSeparatorDescriptor.CRUDE_PER_ITEM), true);
         super.done(who);
+    }
+
+    /** Its crude tank's fill (0..1): the oil in its basin, drawn; last published. */
+    public float basin() {
+        return (float) tank.getFluidAmount() / tank.getCapacity();
+    }
+
+    float shownBasin = -1;
+
+    @Override
+    public void networkSerialize(java.io.DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            shownBasin = basin();
+            stream.writeFloat(shownBasin);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

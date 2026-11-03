@@ -91,6 +91,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   whatever block there takes fluid (`fluid/FluidExport`). EA pipes still don't carry oil (the fluid core is water,
   steam and air), so the outlet feeds other mods' pipes or the next device directly. `oil_separator_outlet`,
   `oil_pump_discharge`.
+- Tar sand separator basin (Baughn 2026-11-03): the trough is drawn open, its oil rising from the floor to the froth
+  line as its crude tank fills (the fill is published after the machine's own data). `oil_separator_basin`.
 - Pipe sizes (Baughn 2026-10-29): iron and alloy pipes drawn at a quarter of their old 4 and 6 voxels (1 and 1.5) and
   taking 2 voxels on the grid (occupancy, hitbox, routing; even, so centred on the lattice; their physics unchanged);
   the Large Alloy Pipe (tier 2) drawn and taking 6, 16 x the alloy's inner area (Baughn): volume 16 x, conductance

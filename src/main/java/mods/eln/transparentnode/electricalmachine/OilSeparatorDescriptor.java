@@ -21,5 +21,32 @@ public class OilSeparatorDescriptor extends MaceratorDescriptor {
         super(name, modelName, nominalU, nominalP, maximalU, thermal, cable, recipe);
         ElementClass = OilSeparatorElement.class;
         cableTerminals = mods.eln.cable.CableTerminals.FLANKS;   // mods.eln.cad.models.TarSandSeparator terminal plates
+        var obj = mods.eln.Eln.obj.getObj(modelName);
+        oil = obj == null ? null : obj.getPart("oil");
+    }
+
+    /** The oil in its basin (the model's part oil, full, its origin at the basin's floor). */
+    private final mods.eln.misc.Obj3D.Obj3DPart oil;
+
+    /** The machine, its basin's oil risen to the crude tank's fill (Baughn 2026-11-03), published as render.basin. */
+    @Override
+    void draw(ElectricalMachineRender render, Object handle, net.minecraft.world.entity.item.ItemEntity inEntity,
+              net.minecraft.world.entity.item.ItemEntity outEntity, float powerFactor, float processState) {
+        if (oil != null && render != null && render.basin > 0.005f) {   // (no render: the item)
+            // (a sliver over the floor at the least, not in its plane)
+            float share = 0.05f + 0.95f * Math.min(1, render.basin), oy = oil.getFloat("originY");
+            mods.eln.gl.GL11.glPushMatrix();
+            mods.eln.gl.GL11.glTranslatef(0, oy, 0);
+            mods.eln.gl.GL11.glScalef(1, share, 1);
+            mods.eln.gl.GL11.glTranslatef(0, -oy, 0);
+            oil.draw();
+            mods.eln.gl.GL11.glPopMatrix();
+        }
+        super.draw(render, handle, inEntity, outEntity, powerFactor, processState);
+    }
+
+    @Override
+    boolean publishesBasin() {
+        return true;
     }
 }

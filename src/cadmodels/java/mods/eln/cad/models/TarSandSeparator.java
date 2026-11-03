@@ -23,9 +23,10 @@ import static mods.eln.cad.models.OilKit.turned;
  * froth) and the output item ~2.4 px up (on the sand tray under the trough, between the legs).
  * <p>
  * Front XN (x = 0); power is on the two z faces (powerLrdu: not front/back), so the floor terminal plates are on z = 0
- * and z = 16. Trough (tier-painted heating jacket, steel rims) on four legs, froth surface with paddles breaking
- * through it, feed hopper on the front rim, motor standing on a gearbox at the z+ end, froth overflow launder and oil
- * outlet pipe with valve on the back (x+), sand spout and sand tray under the trough.
+ * and z = 16. Open trough (tier-painted heating jacket, steel rims) on four legs, its oil (part oil, which
+ * OilSeparatorDescriptor scales to the fill) with paddles breaking through it, feed hopper on the front rim, motor
+ * standing on a gearbox at the z+ end, froth overflow launder and oil outlet pipe with valve on the back (x+), sand
+ * spout and sand tray under the trough.
  */
 public final class TarSandSeparator {
     private TarSandSeparator() {
@@ -125,11 +126,28 @@ public final class TarSandSeparator {
             for (double x : new double[]{x0 + 0.5, x1 - 1.5}) m.add(box(x, 1.0, z + 0.1, x + 1.0, yb, z + 1.15, "darksteel"));
             m.add(box(x0 + 1.5, 3.0, z + 0.4, x1 - 1.5, 3.6, z + 0.85, "darksteel"));
         }
-        // trough: heated jacket (tier paint) below the froth line, solid inside (the froth hides it), steel rims above
-        m.add(box(x0, yb, z0, x1, yf - 0.6, z1, "paint"));
-        m.add(box(x0 + 0.1, yf - 0.6, z0 + 0.1, x1 - 0.1, yf, z1 - 0.1, "steel", "nsewd"));
-        m.add(box(x0 + w, yf - 0.6, z0 + w, x1 - w, yf, z1 - w, "froth", "u"));
-        m.add(box(x0 - 0.15, yb + 1.0, z0 - 0.15, x1 + 0.15, yb + 1.6, z1 + 0.15, "darksteel", "nsewud"));   // jacket band
+        // trough: an open basin (Baughn 2026-11-03: its oil rises as the tank fills; part oil): heated jacket walls (tier
+        // paint) on a floor, a dark liner inside, a steel band to the froth line, steel rims above
+        double yt = yf - 0.6, fl = yb + 0.6;
+        m.add(box(x0, yb, z0, x0 + w, yt, z1, "paint", "wnsdu"));
+        m.add(box(x1 - w, yb, z0, x1, yt, z1, "paint", "ensdu"));
+        m.add(box(x0 + w, yb, z0, x1 - w, yt, z0 + w, "paint", "ndu"));
+        m.add(box(x0 + w, yb, z1 - w, x1 - w, yt, z1, "paint", "sdu"));
+        m.add(box(x0 + w, yb, z0 + w, x1 - w, fl, z1 - w, "darksteel", "ud"));                               // floor
+        m.add(box(x0 + w - 0.1, fl, z0 + w, x0 + w, yt, z1 - w, "darksteel", "e"));                          // liner
+        m.add(box(x1 - w, fl, z0 + w, x1 - w + 0.1, yt, z1 - w, "darksteel", "w"));
+        m.add(box(x0 + w, fl, z0 + w - 0.1, x1 - w, yt, z0 + w, "darksteel", "s"));
+        m.add(box(x0 + w, fl, z1 - w, x1 - w, yt, z1 - w + 0.1, "darksteel", "n"));
+        m.add(box(x0 + 0.1, yt, z0 + 0.1, x0 + w, yf, z1 - 0.1, "steel", "wnsde"));
+        m.add(box(x1 - w, yt, z0 + 0.1, x1 - 0.1, yf, z1 - 0.1, "steel", "ensdw"));
+        m.add(box(x0 + w, yt, z0 + 0.1, x1 - w, yf, z0 + w, "steel", "nsd"));
+        m.add(box(x0 + w, yt, z1 - w, x1 - w, yf, z1 - 0.1, "steel", "snd"));
+        // jacket band, round the walls
+        double b0 = yb + 1.0, b1 = yb + 1.6;
+        m.add(box(x0 - 0.15, b0, z0 - 0.15, x0 + 0.3, b1, z1 + 0.15, "darksteel", "wnsud"));
+        m.add(box(x1 - 0.3, b0, z0 - 0.15, x1 + 0.15, b1, z1 + 0.15, "darksteel", "ensud"));
+        m.add(box(x0 + 0.3, b0, z0 - 0.15, x1 - 0.3, b1, z0 + 0.3, "darksteel", "nud"));
+        m.add(box(x0 + 0.3, b0, z1 - 0.3, x1 - 0.3, b1, z1 + 0.15, "darksteel", "sud"));
         double[][] rims = {{x0 + 0.1, z0 + 0.1, x0 + w, z1 - 0.1}, {x1 - w, z0 + 0.1, x1 - 0.1, z1 - 0.1},
             {x0 + w, z0 + 0.1, x1 - w, z0 + w}, {x0 + w, z1 - w, x1 - w, z1 - 0.1}};
         for (double[] r : rims) m.add(box(r[0], yf, r[1], r[2], yr, r[3], "steel"));
@@ -214,6 +232,15 @@ public final class TarSandSeparator {
         return m;
     }
 
+    /**
+     * The oil in the basin, full: its surface at the froth line. OilSeparatorDescriptor scales it in y about its foot
+     * (the basin's floor; the part's origin) to the separator's crude tank's fill.
+     */
+    static List<Mesh> oil(Tier t) {
+        double w = 0.6, x0 = t.tx[0], x1 = t.tx[1], z0 = t.tz[0], z1 = t.tz[1];
+        return List.of(box(x0 + w, t.ty[0] + 0.6, z0 + w, x1 - w, t.ty[1], z1 - w, "oil", "u"));
+    }
+
     public static List<NodeModel> models() {
         List<NodeModel> out = new ArrayList<>();
         for (Tier t : TIERS) {
@@ -221,7 +248,8 @@ public final class TarSandSeparator {
             n.part("main", body(t));
             n.part("rot1", rotor(t, 0));
             n.part("rot2", rotor(t, 1));
-            n.origin("rot1", t.sx[0], t.sy, 8.0).origin("rot2", t.sx[1], t.sy, 8.0);
+            n.part("oil", oil(t));
+            n.origin("rot1", t.sx[0], t.sy, 8.0).origin("rot2", t.sx[1], t.sy, 8.0).origin("oil", 8.0, t.ty[0] + 0.6, 8.0);
             out.add(n);
         }
         return out;

@@ -32,6 +32,7 @@ public final class OilCases {
         cases.add(new Separator());
         cases.add(new Outlet(true));
         cases.add(new Outlet(false));
+        cases.add(new Basin());
         cases.add(new Pump(false));
         cases.add(new Pump(true));
         cases.add(new Boiler());
@@ -286,6 +287,33 @@ public final class OilCases {
             ctx.check("oil: the " + what + " pushed its crude into the block there", from.getFluidAmount() == 0 && into.getFluidAmount() == 1000,
                 from.getFluidAmount() + " mB left, " + into.getFluidAmount() + " mB there");
             ctx.check("oil: nothing out of its other faces", beside.getFluidAmount() == 0, beside.getFluidAmount() + " mB");
+        }
+    }
+
+    /**
+     * Baughn 2026-11-03: the separator's basin shows its oil rising as its tank fills. Half a tank (nothing at its
+     * outlet) publishes a basin half full, the last float of its packet (what ElectricalMachineRender.basin reads).
+     */
+    static final class Basin implements TestCase {
+        mods.eln.transparentnode.electricalmachine.OilSeparatorElement sep;
+
+        public String id() {
+            return "oil_separator_basin";
+        }
+
+        public void build(TestContext ctx) {
+            sep = (mods.eln.transparentnode.electricalmachine.OilSeparatorElement) ctx.placeTransparent(0 + (80 << 6), ctx.at(3, 1, 1));
+            ((mods.eln.fluid.ElementFluidHandler) sep.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(),
+                mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor.TANK_MB / 2), true);
+        }
+
+        public void measure(TestContext ctx) {
+            var bos = new java.io.ByteArrayOutputStream();
+            sep.networkSerialize(new java.io.DataOutputStream(bos));
+            byte[] b = bos.toByteArray();
+            float published = java.nio.ByteBuffer.wrap(b, b.length - 4, 4).getFloat();
+            ctx.check("oil: half a tank, the basin drawn half full", Math.abs(sep.basin() - 0.5f) < 1e-6 && published == sep.basin(),
+                sep.basin() + ", published " + published);
         }
     }
 
