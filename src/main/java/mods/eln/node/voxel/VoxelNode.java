@@ -1917,6 +1917,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         // (Baughn: say what the pressure is of; steam in grams)
         out.put("Pressure", String.format("%.2f bar of %s, %.0f °C", n.P() / 1e5, EaUnits.contents(n), n.T() - 273.15));
         if (n.mVapour() > 1e-7) out.put("Steam", EaUnits.steamGrams(n.mVapour() / EaUnits.KG_PER_MB_STEAM));
+        for (String[] o : EaUnits.others(n, id -> mods.eln.fluid.FluidSpecies.kgPerMb(id, false)))
+            out.put(Character.toUpperCase(o[0].charAt(0)) + o[0].substring(1), o[1]);
         for (VoxelPart p : parts)
             if (p instanceof ValvePart v) out.put(switch (v.mode) {
                 case ValvePart.CONTROL -> "Control valve";
@@ -1951,7 +1953,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (pipe == null) return "";
         var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
         double lq = n.mLiquid() / EaUnits.KG_PER_MB_WATER, st = n.mVapour() / EaUnits.KG_PER_MB_STEAM;
-        return String.format("%.2f bar of %s  water %.0f mB  steam %s%s  ", n.P() / 1e5, EaUnits.contents(n), lq, EaUnits.steamGrams(st), pipe.burst ? "  BURST" : "");
+        StringBuilder others = new StringBuilder();
+        for (String[] o : EaUnits.others(n, id -> mods.eln.fluid.FluidSpecies.kgPerMb(id, false))) others.append("  ").append(o[0]).append(' ').append(o[1]);
+        return String.format("%.2f bar of %s  water %.0f mB  steam %s%s%s  ", n.P() / 1e5, EaUnits.contents(n), lq, EaUnits.steamGrams(st), others, pipe.burst ? "  BURST" : "");
     }
 
     /** The thermometer on a part: its cable's or its pipe run's temperature. */

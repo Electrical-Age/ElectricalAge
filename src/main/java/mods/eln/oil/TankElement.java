@@ -77,9 +77,9 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
 
     private int boxCheck;
 
-    /** The water's share of its volume. */
+    /** The liquid's share of its volume (all its liquids). */
     public double fill() {
-        return vessel == null ? 0 : Math.min(1, vessel.mLiquid() / Water.RHO_L / vessel.volume);
+        return vessel == null ? 0 : Math.min(1, vessel.liquidVolume() / vessel.volume);
     }
 
     /** Whether its gas is mostly steam (over half its pressure; else air, or nothing to see): the sight glass shows it. */
@@ -372,6 +372,8 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             : I18N.tr("on its outer faces: steam: top, and 12 px up a side; water: bottom, and 4 px up a side"));
         info.put(I18N.tr("Piped"), String.format("%d of %d ports here", Integer.bitCount(coupled), ports.stream().filter(p -> p.face() != 0).count()));
         if (vessel.mVapour() > 1e-7) info.put(I18N.tr("Steam"), EaUnits.steamGrams(vessel.mVapour() / EaUnits.KG_PER_MB_STEAM));
+        for (String[] o : EaUnits.others(vessel, id -> mods.eln.fluid.FluidSpecies.kgPerMb(id, false)))
+            info.put(Character.toUpperCase(o[0].charAt(0)) + o[0].substring(1), o[1]);
         if (vessel.P() > desc.workingPa) info.put(I18N.tr("Warning"), String.format("over its %.0f bar working pressure", desc.workingPa / 1e5));
         return info;
     }

@@ -182,6 +182,12 @@ public final class Species {
         return null;
     }
 
+    /** A name for players: the key's path in words ("eln:crude_oil": crude oil; water and air as such). */
+    public String displayName() {
+        String path = key.substring(key.indexOf(':') + 1);
+        return path.replace('_', ' ');
+    }
+
     @Override
     public String toString() {
         return key + "#" + id;

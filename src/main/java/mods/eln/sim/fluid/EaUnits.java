@@ -16,11 +16,52 @@ public final class EaUnits {
         return String.format(g < 10 ? "%.2f g" : "%.1f g", g);
     }
 
-    /** What a node's pressure is of, for its label: water when it is full of it, else its gas (steam, air or both). */
+    /** Does it hold any species but water and air. */
+    public static boolean holdsOthers(FluidNode n) {
+        if (n.extra == null) return false;
+        for (double m : n.extra) if (m > 0) return true;
+        return false;
+    }
+
+    /**
+     * What a node's pressure is of, for its label: water when it is full of it, else its gas (steam, air or both); with
+     * other species, the liquids it is full of, or the gases that make most of its pressure.
+     */
     public static String contents(FluidNode n) {
+        if (holdsOthers(n)) return contentsOfAll(n);
         if (n.mLiquid() / Water.RHO_L > 0.95 * n.volume) return "water";
         double share = n.P() > 0 ? n.pVapour() / n.P() : 0;
         return share > 0.9 ? "steam" : share < 0.1 ? "air" : "steam and air";
+    }
+
+    private static String contentsOfAll(FluidNode n) {
+        SpeciesRegistry reg = SpeciesRegistry.get();
+        StringBuilder b = new StringBuilder();
+        if (n.liquidVolume() > 0.95 * n.volume) {
+            for (int id = 0; id < n.speciesBound(); id++)
+                if (n.liquid(id) > 0.05 * n.liquidVolume() * reg.byId(id).rhoL) b.append(b.length() == 0 ? "" : " and ").append(reg.byId(id).displayName());
+            return b.length() == 0 ? "liquid" : b.toString();
+        }
+        double p = n.P();
+        for (int id = 0; id < n.speciesBound(); id++) {
+            double pi = n.vapour(id) * reg.byId(id).r * n.T() / Math.max(1e-12, n.state.vGas);
+            if (p > 0 && pi > 0.1 * p) b.append(b.length() == 0 ? "" : " and ").append(id == SpeciesRegistry.WATER ? "steam" : reg.byId(id).displayName());
+        }
+        return b.length() == 0 ? "gas" : b.toString();
+    }
+
+    /** A node's other species for players, one per entry: name, then liquid mB and gas grams (empty if it holds none). */
+    public static java.util.List<String[]> others(FluidNode n, java.util.function.ToDoubleFunction<Integer> kgPerMbLiquid) {
+        java.util.List<String[]> out = new java.util.ArrayList<>();
+        if (!holdsOthers(n)) return out;
+        SpeciesRegistry reg = SpeciesRegistry.get();
+        for (int id = 2; id < n.speciesBound(); id++) {
+            if (n.mass(id) <= 0) continue;
+            String liq = n.liquid(id) > 0 ? String.format("%.0f mB", n.liquid(id) / kgPerMbLiquid.applyAsDouble(id)) : "";
+            String gas = n.vapour(id) > 1e-7 ? String.format("%.1f g gas", n.vapour(id) * 1000) : "";
+            out.add(new String[]{reg.byId(id).displayName(), liq.isEmpty() ? gas : gas.isEmpty() ? liq : liq + ", " + gas});
+        }
+        return out;
     }
 
     /** The vapour a node can give out (kg): what is above what 1 atm would hold. */
