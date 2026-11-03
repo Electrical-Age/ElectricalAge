@@ -66,7 +66,7 @@ cable's small Rs), signal gates, resistor (or source) go into the element's list
 2. the electrical step;
 3. slow processes: the machine's `afterStep` (inserted first in the element's list: it books the step's energy,
    updates the state, runs trip listeners), then the element's own processes, where the owner takes or gives;
-4. queued failures: a `burnsOnOvervoltage` trip burns the element through `Failure` (kind MACHINE). An element back
+4. queued failures: a `burnsOnOvervoltage(Machines.BURNS_OUT)` trip burns the element through `Failure` (kind MACHINE). An element back
    in the simulation unburnt (repaired, or the burn called off for a worse failure nearby) repairs its machine.
 
 So the owner works between `afterStep` and the next `beforeStep`, as `MachineCore` wants, whatever order the element

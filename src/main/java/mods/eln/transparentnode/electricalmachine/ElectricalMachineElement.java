@@ -89,7 +89,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         for (RelativeFace f : RelativeFace.values())
             if (descriptor.powerLrdu(mods.eln.api.impl.Faces.resolve(f, Direction.XN), Direction.XN)) faces.add(f);
         return MachineSpec.consumer(descriptor.nominalU).ratedWatts(descriptor.nominalP * speedUp)
-            .onBrownout(Brownout.SLOW).burnsOnOvervoltage().power(faces.toArray(new RelativeFace[0])).build();
+            .onBrownout(Brownout.SLOW).burnsOnOvervoltage(Machines.BURNS_OUT).power(faces.toArray(new RelativeFace[0])).build();
     }
 
     @Override

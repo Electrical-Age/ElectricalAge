@@ -150,9 +150,9 @@ public final class MachineCore implements MachineView {
         if (!next.signalsIn().equals(spec.signalsIn())) differs.add("signal inputs");
         if (!next.signalsOut().equals(spec.signalsOut())) differs.add("signal outputs");
         if (!next.busFace().equals(spec.busFace())) differs.add("bus face");
-        // (a host checks the burn when it is made: a burn handler can't come or go after)
-        if (next.burnsOnOvervoltage() != spec.burnsOnOvervoltage()
-            || next.burnHandler().isPresent() != spec.burnHandler().isPresent()) differs.add("overvoltage burn");
+        // (a host checks the burn when it is made: EA's burn-out can't come or go after; a handler may be a new object)
+        if (next.burnsOnOvervoltage() != spec.burnsOnOvervoltage() || ElementBurn.of(next) != ElementBurn.of(spec))
+            differs.add("overvoltage burn");
         if (!differs.isEmpty())
             throw new IllegalArgumentException("respec changes ratings only; " + next + " differs from " + spec
                 + " in its " + String.join(", ", differs));

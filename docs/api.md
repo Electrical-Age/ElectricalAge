@@ -361,11 +361,8 @@ static void burn(BurnHandler.Burn burn) {
   The burn is saved, so a reload doesn't bring it back or call the handler again. Only a new block entity starts afresh.
 - A handler that does nothing is allowed: the block stays, dead, as a broken machine would.
 - A handler that throws is logged; the machine stays burnt.
-- `burnsOnOvervoltage()` without a handler is for EA's own elements, which burn out EA's way until repaired. A machine at
-  another mod's block entity whose spec burns without a handler is refused when its machine is made: `of()` throws
-  `IllegalStateException`, and a block entity hosted as it loads logs the error and stays `DETACHED`. This can't be
-  checked earlier, because the spec comes from your function when each block entity is hosted. An element refuses a
-  handler with `IllegalArgumentException`.
+- There is no burn without a handler: a spec can't burn your block with nothing to say what that does.
+- EA's own elements pass EA's burn-out handler, which only they accept. They burn out EA's way until repaired.
 - On a bench there is no world, so a burn only latches the trip.
 
 ## Reading a machine: views, tooltips, meters

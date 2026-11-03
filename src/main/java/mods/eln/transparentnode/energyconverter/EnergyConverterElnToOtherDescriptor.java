@@ -33,7 +33,7 @@ public class EnergyConverterElnToOtherDescriptor extends TransparentNodeDescript
      */
     public mods.eln.api.MachineSpec machineSpec() {
         return mods.eln.api.MachineSpec.consumer(eln.nominalU).ratedWatts(eln.maxP).onBrownout(mods.eln.api.Brownout.SLOW)
-            .burnsOnOvervoltage().power(mods.eln.api.RelativeFace.FRONT).build();
+            .burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).power(mods.eln.api.RelativeFace.FRONT).build();
     }
 
     void applyTo(EnergyConverterElnToOtherElement element) {

@@ -97,7 +97,7 @@ public final class HostedMachines implements MachineRegistry {
         if (level != null && level.isClientSide()) return client(be);
         ServerThread.check();
         MachineData d = be.getData(DATA.get());
-        if (d.handle == null) d.handle = new HostedMachine(hostedSpec(be), name(be.getType()) + " at " + be.getBlockPos());
+        if (d.handle == null) d.handle = new HostedMachine(spec(be), name(be.getType()) + " at " + be.getBlockPos());
         if (d.node == null && !be.isRemoved() && level instanceof ServerLevel) host(be, d);
         return d.handle;
     }
@@ -121,23 +121,6 @@ public final class HostedMachines implements MachineRegistry {
             + " returned null for the block entity at " + be.getBlockPos());
         return s;
     }
-
-    /**
-     * The server's spec for be: spec(be), refused (IllegalStateException) if it burns without a burn handler. A burn
-     * can't be checked at build() or register() (the spec is the registered function's, per block entity), so it is
-     * checked here, as the machine is made: of() throws, the hosting queue logs it and leaves the machine detached.
-     * Not on the client, whose view never burns anything.
-     */
-    private MachineSpec hostedSpec(BlockEntity be) {
-        MachineSpec s = spec(be);
-        if (s.burnsOnOvervoltage() && s.burnHandler().isEmpty())
-            throw new IllegalStateException(NO_HANDLER + " (" + name(be.getType()) + " at " + be.getBlockPos() + ", " + s + ")");
-        return s;
-    }
-
-    /** The message for a hosted spec that burns without a handler. */
-    public static final String NO_HANDLER = "a machine at another mod's block entity burns only with a handler: "
-        + "use burnsOnOvervoltage(handler) to say what a burn does to the block (EA can't burn it in place)";
 
     /** A type's registry name, for messages. */
     static String name(BlockEntityType<?> t) {
@@ -166,7 +149,7 @@ public final class HostedMachines implements MachineRegistry {
             MachineData d = be.getData(DATA.get());
             if (d.node != null) continue;
             try {
-                if (d.handle == null) d.handle = new HostedMachine(hostedSpec(be), name(be.getType()) + " at " + be.getBlockPos());
+                if (d.handle == null) d.handle = new HostedMachine(spec(be), name(be.getType()) + " at " + be.getBlockPos());
                 host(be, d);
             } catch (RuntimeException e) {
                 LOG.error("Electrical Age: hosting the machine of {} at {} failed; it stays detached", name(be.getType()), be.getBlockPos(), e);

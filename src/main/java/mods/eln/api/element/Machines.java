@@ -1,8 +1,10 @@
 package mods.eln.api.element;
 
 import mods.eln.Eln;
+import mods.eln.api.BurnHandler;
 import mods.eln.api.MachineSpec;
 import mods.eln.api.TripCause;
+import mods.eln.api.impl.ElementBurn;
 import mods.eln.api.impl.ElementHost;
 import mods.eln.api.impl.ElementSite;
 import mods.eln.api.impl.MnaMachine;
@@ -31,20 +33,26 @@ public final class Machines {
     }
 
     /**
+     * The overvoltage burn of an EA element: the spec's burnsOnOvervoltage(Machines.BURNS_OUT). The element burns out
+     * as EA's devices do (a repair brings it back); forElement accepts no other handler.
+     */
+    public static final BurnHandler BURNS_OUT = ElementBurn.INSTANCE;
+
+    /**
      * A machine on a transparent-node element: its power terminal (a small-resistance node, as a cable's), signal
      * gates and processes join the element's lists; its state saves under the element's "api.machine." keys. One
      * per element (a second throws IllegalStateException). A bus face throws IllegalArgumentException: transparent
-     * nodes have no bus port. A burnsOnOvervoltage machine burns out as an EA machine does (a repair brings it back);
-     * a burn handler (burnsOnOvervoltage(handler), for other mods' blocks) throws IllegalArgumentException.
+     * nodes have no bus port. A machine that burns (burnsOnOvervoltage(BURNS_OUT)) burns out as an EA machine does (a
+     * repair brings it back); another burn handler (for other mods' blocks) throws IllegalArgumentException.
      */
     public static ElementMachine forElement(TransparentNodeElement element, MachineSpec spec) {
         Objects.requireNonNull(element, "element");
         Objects.requireNonNull(spec, "spec");
         if (spec.busFace().isPresent())
             throw new IllegalArgumentException(spec + ": a transparent node has no bus port; drop .bus(...) from the spec");
-        if (spec.burnHandler().isPresent())
+        if (spec.burnsOnOvervoltage() && !ElementBurn.of(spec))
             throw new IllegalArgumentException(spec + ": an EA element burns out EA's way (a repair brings it back); "
-                + "use burnsOnOvervoltage() without a handler");
+                + "use burnsOnOvervoltage(Machines.BURNS_OUT)");
         if (Eln.simulator != null) MnaMachine.checkSimulator(Eln.simulator);
         ElementSite site = new ElementSite() {
             @Override

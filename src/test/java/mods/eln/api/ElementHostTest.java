@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class ElementHostTest {
     static final MachineSpec MACERATOR = MachineSpec.consumer(Tier.V50).ratedWatts(200).onBrownout(Brownout.SLOW)
-        .burnsOnOvervoltage().power(RelativeFace.LEFT, RelativeFace.RIGHT, RelativeFace.UP, RelativeFace.DOWN).build();
+        .burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).power(RelativeFace.LEFT, RelativeFace.RIGHT, RelativeFace.UP, RelativeFace.DOWN).build();
 
     /** An element's lists and a stub site. */
     static final class Element implements ElementSite {

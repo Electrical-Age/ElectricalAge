@@ -33,9 +33,7 @@ import java.util.function.Function;
  * data attachment (eln:machine), and restored when the node is made again; nothing to save by hand.</li>
  * <li>EA can't burn another mod's block in place, so a spec that burns says what a burn does:
  * burnsOnOvervoltage(handler), called once on the server thread; the machine stays OVERVOLTAGE_TRIPPED for good.
- * A spec that burns without a handler is refused as its machine is made (of() throws IllegalStateException; a
- * block entity hosted as it loads logs the error and stays DETACHED). Baughn: "a callback. Let the API user choose
- * how to handle it".</li>
+ * The builder has no burn without a handler. Baughn: "a callback. Let the API user choose how to handle it".</li>
  * </ul>
  * Server thread only on the server (other threads throw IllegalStateException); on the client of() is a read-only
  * view, synced from the server (state at once, the numbers at most once a second).

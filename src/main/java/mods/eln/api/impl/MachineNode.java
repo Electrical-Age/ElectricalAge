@@ -316,8 +316,8 @@ public final class MachineNode extends GhostNode implements BusPeer {
         }
 
         /**
-         * EA can't burn another mod's block in place: the spec's burn handler says what a burn does (HostedMachines
-         * refuses a burning spec without one). Called once, at the end of the tick, if the block entity is still there.
+         * EA can't burn another mod's block in place: the spec's burn handler (a burning spec always has one) says
+         * what a burn does. Called once, at the end of the tick, if the block entity is still there.
          */
         @Override
         public void burn(TripCause cause, double severity) {

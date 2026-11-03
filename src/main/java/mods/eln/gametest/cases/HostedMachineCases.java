@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * DETACHED; its block entity saved, unloaded and loaded again gets its state back and its cable relinked; two in a
  * line with a cable between don't pass power through each other; its bus face links to a voxel bus cable; the
  * eln:machine capability answers for it and for an EA element machine; calls off the server thread throw; a spec
- * that burns calls its burn handler once and stays tripped, and one that burns without a handler is refused.
+ * that burns calls its burn handler once and stays tripped, and one with EA's element burn-out is hosted without a throw.
  */
 public final class HostedMachineCases {
     private HostedMachineCases() {
@@ -479,8 +479,9 @@ public final class HostedMachineCases {
      * Source, MV cable (an LV cable would burn at 80 V), the fixture with BURNING_SPEC: 80 V on it burns it, its
      * handler is called once with the trip and leaves the block, and back at 50 V it stays tripped past the cooldown,
      * also saved and loaded again (and its handler isn't called again).
-     * Beside it, a fixture whose spec burns without a handler is refused as it is hosted (and removed at once, before
-     * its own ticker asks for its machine).
+     * Beside it, a fixture with EA's element burn-out (Machines.BURNS_OUT, the nearest a spec gets to a burn without a
+     * handler: the builder has none) is hosted by of() without a throw (and removed at once, before its own ticker
+     * asks for its machine).
      */
     static final class Burns implements TestCase {
         BlockPos pos;
@@ -488,6 +489,7 @@ public final class HostedMachineCases {
         MachineState before;
         double workAtBurn = -1, workBeforeReload = -2;
         Throwable refused;
+        MachineState elementBurn;
         List<mods.eln.api.TripCause> causesBeforeReload = List.of();
 
         public String id() {
@@ -505,9 +507,9 @@ public final class HostedMachineCases {
             pos = machine(c, 3, Direction.EAST);
             entity(c, pos).useSpec(ApiTestMachines.BURNING_SPEC);
             BlockPos q = machine(c, 6, Direction.EAST);
-            entity(c, q).useSpec(MachineSpec.consumer(50).ratedWatts(100).burnsOnOvervoltage().build());
+            entity(c, q).useSpec(MachineSpec.consumer(50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
             try {
-                ElnApi.machines().of(entity(c, q));
+                elementBurn = ElnApi.machines().of(entity(c, q)).state();
             } catch (Throwable x) {
                 refused = x;
             }
@@ -531,8 +533,8 @@ public final class HostedMachineCases {
         }
 
         public void measure(TestContext c) {
-            c.check("burn: refused without a handler", refused instanceof IllegalStateException
-                && refused.getMessage().contains("burnsOnOvervoltage(handler)"), String.valueOf(refused));
+            c.check("burn: of() hosts a spec with EA's element burn-out without a throw", refused == null
+                && elementBurn != null && elementBurn != MachineState.DETACHED, refused + " " + elementBurn);
             ApiTestMachineEntity e = entity(c, pos);
             c.check("burn: the block and its block entity stay (the handler leaves them)", e != null, "");
             if (e == null) return;

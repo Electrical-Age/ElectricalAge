@@ -74,7 +74,7 @@ public final class MachineSpec {
         minVoltageRatio = b.brownout == Brownout.SLOW ? 0 : b.minVoltageRatio;
         brownout = b.brownout;
         tripCooldownSeconds = b.tripCooldownSeconds;
-        burnsOnOvervoltage = b.burnsOnOvervoltage;
+        burnsOnOvervoltage = b.burnHandler != null;
         burnHandler = b.burnHandler;
         thermal = b.heatSet ? new Thermal(b.heatCapacityJPerK, b.heatLossWPerK, b.overheatCelsius, b.overheatResetKelvin) : null;
         this.powerFaces = Collections.unmodifiableSet(EnumSet.copyOf(powerFaces));
@@ -138,14 +138,14 @@ public final class MachineSpec {
     }
 
     /**
-     * Overvoltage burns the machine instead of tripping it: it stays OVERVOLTAGE_TRIPPED for good (an EA element until
-     * repaired), with or without a burnHandler.
+     * Overvoltage burns the machine instead of tripping it (burnsOnOvervoltage(handler)): it stays OVERVOLTAGE_TRIPPED
+     * for good (an EA element until repaired).
      */
     public boolean burnsOnOvervoltage() {
         return burnsOnOvervoltage;
     }
 
-    /** What a machine at another mod's block entity does when it burns (burnsOnOvervoltage(handler)); empty for none. */
+    /** What a burn does to the machine's block (burnsOnOvervoltage(handler)); present exactly when it burns. */
     public Optional<BurnHandler> burnHandler() {
         return Optional.ofNullable(burnHandler);
     }
@@ -185,7 +185,7 @@ public final class MachineSpec {
         private double ratedWatts, idleWatts = 0, minVoltageRatio = 0.75, tripCooldownSeconds = 3;
         private double heatCapacityJPerK = Double.NaN, heatLossWPerK = Double.NaN, overheatCelsius = Double.NaN;
         private double overheatResetKelvin = OVERHEAT_RESET_KELVIN;
-        private boolean ratedSet, idleSet, minSet, heatSet, resetSet, burnsOnOvervoltage, burnTwice;
+        private boolean ratedSet, idleSet, minSet, heatSet, resetSet, burnTwice;
         private BurnHandler burnHandler;
         private Brownout brownout = Brownout.STOP;
         private boolean brownoutSet;
@@ -235,26 +235,14 @@ public final class MachineSpec {
         }
 
         /**
-         * For EA's own elements (Machines.forElement): overvoltage burns the machine out as EA's devices burn, until a
-         * repair, instead of tripping it. A machine at another mod's block entity needs burnsOnOvervoltage(handler):
-         * hosting it with this one throws. Off by default.
-         */
-        public Builder burnsOnOvervoltage() {
-            if (burnsOnOvervoltage) burnTwice = true;
-            burnsOnOvervoltage = true;
-            return this;
-        }
-
-        /**
-         * For a machine at another mod's block entity (ElnApi.machines()): overvoltage burns it instead of tripping
-         * it. It stays OVERVOLTAGE_TRIPPED for good (saved so), and handler is called once, on the server thread,
-         * to do what a burn means for the block: break it, drop it, set it on fire, or nothing. Baughn: "a callback.
-         * Let the API user choose how to handle it". EA's elements burn their own way and refuse a handler. Off by
-         * default.
+         * Overvoltage burns the machine instead of tripping it. It stays OVERVOLTAGE_TRIPPED for good (saved so), and
+         * handler is called once, on the server thread, to do what a burn means for the block: break it, drop it, set
+         * it on fire, or nothing. Baughn: "a callback. Let the API user choose how to handle it". There is no burn
+         * without a handler, so a machine at another mod's block entity can't burn with nothing to say what that does
+         * (EA's own elements pass EA's burn-out, which they alone accept). Off by default.
          */
         public Builder burnsOnOvervoltage(BurnHandler handler) {
-            if (burnsOnOvervoltage) burnTwice = true;
-            burnsOnOvervoltage = true;
+            if (burnHandler != null) burnTwice = true;
             burnHandler = Objects.requireNonNull(handler, "handler");
             return this;
         }
@@ -397,7 +385,7 @@ public final class MachineSpec {
                 claim(roles, s.face(), s.position(), "signal '" + s.name() + "'", errors);
             }
             if (busTwice) errors.add("bus is given twice; a machine has one bus port");
-            if (burnTwice) errors.add("burnsOnOvervoltage is given twice; give it once, with the handler or without");
+            if (burnTwice) errors.add("burnsOnOvervoltage is given twice; give it once");
             if (busFace != null) claim(roles, busFace, CablePosition.ANY, "the bus", errors);
             Set<RelativeFace> powerFaces;
             if (power != null) {

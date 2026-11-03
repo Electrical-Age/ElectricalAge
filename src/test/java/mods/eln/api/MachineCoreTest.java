@@ -154,7 +154,7 @@ public class MachineCoreTest {
 
     @Test
     void burnsOnOvervoltageNeverResets() {
-        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage().build());
+        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
         double[] ohms = {Double.POSITIVE_INFINITY};
         step(c, 70, ohms);
         assertTrue(c.burnt());
@@ -421,7 +421,7 @@ public class MachineCoreTest {
     /** A burnt core repaired by its host starts again UNPOWERED and runs once the line holds. */
     @Test
     void repairUnburns() {
-        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage().build());
+        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
         double[] ohms = {Double.POSITIVE_INFINITY};
         step(c, 70, ohms);
         assertTrue(c.burnt());
@@ -454,17 +454,26 @@ public class MachineCoreTest {
         assertFalse(plain.burnt());
     }
 
-    /** respec may not add, drop or change the overvoltage burn: the host checked it when the machine was made. */
+    /**
+     * respec may not add, drop or change the overvoltage burn: the host checked it when the machine was made. Another
+     * handler object of the same kind is fine (a spec function may make a new lambda each time).
+     */
     @Test
     void respecKeepsTheBurn() {
         MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).build());
         String m = assertThrows(IllegalArgumentException.class,
-            () -> c.respec(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage().build())).getMessage();
+            () -> c.respec(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build())).getMessage();
         assertTrue(m.contains("overvoltage burn"), m);
-        MachineCore b = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage().build());
+        MachineCore b = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
         assertThrows(IllegalArgumentException.class,
             () -> b.respec(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(x -> {
             }).build()));
-        b.respec(MachineSpec.consumer(Tier.V50).ratedWatts(200).burnsOnOvervoltage().build());
+        b.respec(MachineSpec.consumer(Tier.V50).ratedWatts(200).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
+        MachineCore hosted = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(x -> {
+        }).build());
+        hosted.respec(MachineSpec.consumer(Tier.V50).ratedWatts(200).burnsOnOvervoltage(x -> {
+        }).build());
+        assertThrows(IllegalArgumentException.class,
+            () -> hosted.respec(MachineSpec.consumer(Tier.V50).ratedWatts(200).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build()));
     }
 }

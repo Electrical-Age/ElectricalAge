@@ -147,10 +147,10 @@ Kotlin vs Java: there is no separate Kotlin tree. ~46 `.kt` files sit next to th
 - Burn (Baughn: "a callback. Let the API user choose how to handle it"): the spec's `burnsOnOvervoltage(handler)`.
   `MachineNode`'s site queues the handler through the simulator's destruct queue (end of the tick; skipped if the block
   entity went; a throw is logged). The core stays burnt (`OVERVOLTAGE_TRIPPED`), saved as `api.machine.burnt` and
-  restored with the site's `burning` set before the first step, so the handler runs once per block entity.
-  `HostedMachines.hostedSpec` refuses a spec that burns without a handler as the machine is made (the spec is per block
-  entity, so neither `build()` nor `register()` can check it); `Machines.forElement` refuses a handler; `respec` can't
-  change the burn.
+  restored with the site's `burning` set before the first step, so the handler runs once per block entity. The builder
+  has no burn without a handler, so `of()` has nothing to refuse; EA's elements pass `Machines.BURNS_OUT` (EA's
+  burn-out, `ElementBurn`), the one handler `forElement` accepts (at a block entity it does nothing: the machine stays
+  burnt). `respec` can't change the burn, nor swap EA's burn-out for another handler.
 - Not saved: `mustBeSaved()` is false (the GameTest persistence pass skips such nodes); its state lives in the
   block entity's `eln:machine` attachment (persistence.md), synced to clients (networking-gui.md).
 - The capability `eln:machine` (capabilities.md) reads `of(be).view()`.

@@ -189,19 +189,25 @@ public class MachineSpecTest {
         assertThrows(IllegalArgumentException.class, () -> new TripCause(MachineState.RUNNING, 0, 0, false));
     }
 
-    /** A burn with a handler (another mod's block) or without (EA's elements); never both, never a null handler. */
+    /**
+     * A burn always has a handler: the builder has no burn without one (so a machine at another mod's block entity
+     * can't burn with nothing to say what that does), and a null handler throws; given once only.
+     */
     @Test
-    void burnHandler() {
+    void burnHandler() throws NoSuchMethodException {
         BurnHandler h = burn -> {
         };
         MachineSpec with = MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(h).build();
         assertTrue(with.burnsOnOvervoltage());
         assertEquals(h, with.burnHandler().orElseThrow());
-        MachineSpec without = MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage().build();
-        assertTrue(without.burnsOnOvervoltage());
-        assertTrue(without.burnHandler().isEmpty());
+        MachineSpec none = MachineSpec.consumer(Tier.V50).ratedWatts(100).build();
+        assertFalse(none.burnsOnOvervoltage());
+        assertTrue(none.burnHandler().isEmpty());
+        for (var m : MachineSpec.Builder.class.getMethods())
+            assertFalse(m.getName().equals("burnsOnOvervoltage") && m.getParameterCount() == 0, "a burn without a handler: " + m);
+        assertEquals(MachineSpec.Builder.class, MachineSpec.Builder.class.getMethod("burnsOnOvervoltage", BurnHandler.class).getReturnType());
         assertThrows(NullPointerException.class, () -> MachineSpec.consumer(Tier.V50).burnsOnOvervoltage(null));
-        assertError(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage().burnsOnOvervoltage(h),
+        assertError(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(h).burnsOnOvervoltage(h),
             "burnsOnOvervoltage is given twice");
     }
 }
