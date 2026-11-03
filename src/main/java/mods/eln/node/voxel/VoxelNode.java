@@ -1175,42 +1175,13 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             double freeL = Math.max(0, 0.9 * run.volume - run.liquidVolume());
             double gasRoom = Math.max(0, 9e5 - run.P()) * Math.max(1e-6, freeL) / (mods.eln.sim.fluid.Water.R_V * Math.max(300, run.T()));
             // the liquid: the top layer's main species that is a fluid; the gas: the main vapour that is one
-            int liq = topLiquid(run), gas = mainVapour(run);
+            int liq = mods.eln.fluid.FluidSpecies.topLiquid(run), gas = mods.eln.fluid.FluidSpecies.mainVapour(run);
             int liqMb = liq < 0 ? 0 : (int) Math.floor(run.liquid(liq) / mods.eln.fluid.FluidSpecies.kgPerMb(liq, false));
             int gasMb = gas < 0 ? 0 : (int) Math.floor(EaUnits.vapourAvailable(run, gas) / mods.eln.fluid.FluidSpecies.kgPerMb(gas, true));
             a.tanks.show(mods.eln.fluid.FluidSpecies.fluid(liq < 0 ? mods.eln.sim.fluid.SpeciesRegistry.WATER : liq, false), liqMb,
                 mods.eln.fluid.FluidSpecies.fluid(gas < 0 ? mods.eln.sim.fluid.SpeciesRegistry.WATER : gas, true), gasMb,
                 (int) (freeL * mods.eln.sim.fluid.Water.RHO_L / EaUnits.KG_PER_MB_WATER), (int) (gasRoom / EaUnits.KG_PER_MB_STEAM));
         }
-    }
-
-    /** The species of a node's top liquid layer with the most liquid there that is a fluid, or -1. */
-    static int topLiquid(mods.eln.sim.fluid.FluidNode n) {
-        int best = -1;
-        double most = 0;
-        int top = -1;
-        for (int id = 0; id < n.speciesBound(); id++) {
-            if (n.liquid(id) <= 0 || mods.eln.fluid.FluidSpecies.fluid(id, false) == null) continue;
-            int layer = n.layerOf(id);
-            if (layer > top || layer == top && n.liquid(id) > most) {
-                top = layer;
-                best = id;
-                most = n.liquid(id);
-            }
-        }
-        return best;
-    }
-
-    /** The species with the most vapour in a node that is a fluid as a vapour (steam for water), or -1. */
-    static int mainVapour(mods.eln.sim.fluid.FluidNode n) {
-        int best = -1;
-        double most = 0;
-        for (int id = 0; id < n.speciesBound(); id++) {
-            if (id == mods.eln.sim.fluid.SpeciesRegistry.AIR || n.vapour(id) <= most || mods.eln.fluid.FluidSpecies.fluid(id, true) == null) continue;
-            best = id;
-            most = n.vapour(id);
-        }
-        return best;
     }
 
     @Override

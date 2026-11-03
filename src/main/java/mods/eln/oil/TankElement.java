@@ -87,32 +87,44 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         return vessel != null && vessel.mVapour() > 1e-7 && vessel.pVapour() > 0.5 * vessel.P();
     }
 
-    /** Its water as a fluid capability (buckets; another mod's pipes): a view of its vessel (TankWater). */
-    public final TankWater water = new TankWater();
+    /** Its liquid as a fluid capability (buckets; another mod's pipes): a view of its vessel (TankLiquid). */
+    public final TankLiquid water = new TankLiquid();
 
     @Override
     public Object getFluidHandler() {
         return water;
     }
 
-    /** The vessel takes what a bucket or a pipe put in or took out since the last step, then shows its water again. */
+    /** The vessel takes what a bucket or a pipe put in or took out since the last step, then shows its liquid again. */
     public void syncWater() {
         if (vessel == null) return;
-        int d = water.change();
-        double kg = Math.abs(d) * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
-        if (d > 0) EaUnits.addWater(vessel, kg, mods.eln.sim.Ambient.kelvin(node.coordonate), false);   // (at the ambient)
-        else if (d < 0) {
-            double got = EaUnits.drainLiquid(vessel, kg);
-            if (got < kg && vessel.T() < Water.TB) EaUnits.drainVapour(vessel, kg - got);   // (the rest condensed: see bucketable)
+        for (var ch : water.change()) {
+            var ph = mods.eln.fluid.FluidSpecies.of(ch.getKey());
+            if (ph == null || ph.vapour()) continue;
+            int d = ch.getValue();
+            double kg = Math.abs(d) * mods.eln.fluid.FluidSpecies.kgPerMb(ph.id(), false);
+            if (ph.id() == mods.eln.sim.fluid.SpeciesRegistry.WATER) {
+                if (d > 0) EaUnits.addWater(vessel, kg, mods.eln.sim.Ambient.kelvin(node.coordonate), false);   // (at the ambient)
+                else if (d < 0) {
+                    double got = EaUnits.drainLiquid(vessel, kg);
+                    if (got < kg && vessel.T() < Water.TB) EaUnits.drainVapour(vessel, kg - got);   // (the rest condensed: see bucketable)
+                }
+            } else if (d > 0) EaUnits.add(vessel, ph.id(), kg, mods.eln.sim.Ambient.kelvin(node.coordonate), false);
+            else EaUnits.drainLiquid(vessel, ph.id(), kg);
         }
         showWater();
     }
 
     void showWater() {
         if (vessel == null) return;
-        // (to the nearest mB; cold, its vapour counts too: a bucket poured into a box comes back 999 mB, a little of it
-        // evaporated into the box's air, and an empty bucket wants a whole 1000)
-        water.show((int) Math.round(bucketable() / EaUnits.KG_PER_MB_WATER), (int) Math.floor(vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER));
+        // (to the nearest mB; cold, water's vapour counts too: a bucket poured into a box comes back 999 mB, a little of
+        // it evaporated into the box's air, and an empty bucket wants a whole 1000)
+        int top = mods.eln.fluid.FluidSpecies.topLiquid(vessel);
+        int id = top < 0 ? mods.eln.sim.fluid.SpeciesRegistry.WATER : top;
+        double kg = id == mods.eln.sim.fluid.SpeciesRegistry.WATER ? bucketable() : vessel.liquid(id);
+        int capacity = (int) Math.floor(vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
+        int room = (int) Math.floor(Math.max(0, vessel.volume - vessel.liquidVolume()) * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
+        water.show(mods.eln.fluid.FluidSpecies.fluid(id, false), (int) Math.round(kg / mods.eln.fluid.FluidSpecies.kgPerMb(id, false)), capacity, room);
     }
 
     /** The water a bucket can take (kg): its liquid, and while it's under boiling its vapour (it would condense). */
