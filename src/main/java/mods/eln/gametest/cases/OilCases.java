@@ -375,15 +375,19 @@ public final class OilCases {
      * flare_in: a tank of crude into a flare stack's front flange, which burns it;
      * turbine_fuel: a tank of gasoline (one block up) along a pipe down into a gas turbine's top fuel flange;
      * separator_out: the tar sand separator's crude out of its back flange (4 px up, off centre) into a tank;
-     * fuel_furnace_in: a tank of gasoline into the fuel heat furnace's front flange (4 px up), into its tank.
+     * fuel_furnace_in: a tank of gasoline into the fuel heat furnace's front flange (4 px up), into its tank;
+     * fuel_furnace_crude: the same with crude oil (Baughn: it burns every EA oil that makes sense in it);
+     * fuel_furnace_buckets: a bucket's worth of each EA oil a burner fires goes into an empty one (Baughn: by bucket).
      */
     static final class OilOnPipes implements TestCase {
-        static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel", "separator_out", "fuel_furnace_in"};
+        static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel", "separator_out", "fuel_furnace_in", "fuel_furnace_crude", "fuel_furnace_buckets"};
         final String variant;
         mods.eln.node.transparent.TransparentNodeElement west, east;
         mods.eln.oil.TankElement tank;
         String err;
         int before;
+        String bucketed = "";
+        boolean allBuckets = true;
 
         OilOnPipes(String variant) {
             this.variant = variant;
@@ -492,13 +496,30 @@ public final class OilCases {
                     }
                     ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 2000), true);
                 }
-                case "fuel_furnace_in" -> {
+                case "fuel_furnace_in", "fuel_furnace_crude" -> {
                     tank = tank(ctx, w, XP);
                     east = ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, e);
                     east.front = XN;   // (its front, with the fuel flange 4 px up, west)
                     east.reconnect();
                     lay(ctx, mid, 0, 4, 8, 16, 4, 8);
-                    put(ctx, w, Oil.Cut.GASOLINE.source.get(), 6000);
+                    put(ctx, w, variant.equals("fuel_furnace_crude") ? Oil.CRUDE.get() : Oil.Cut.GASOLINE.source.get(), 6000);
+                }
+                case "fuel_furnace_buckets" -> {
+                    east = ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, e);
+                    for (var f : new net.minecraft.world.level.material.Fluid[]{Oil.Cut.GASOLINE.source.get(), Oil.Cut.DIESEL.source.get(),
+                        Oil.Cut.HEAVYOIL.source.get(), Oil.Cut.RESIDUE.source.get(), Oil.CRUDE.get()}) {
+                        // (each into an empty one, a bucket's worth, as a bucket pours it: FluidBuckets)
+                        var p = ctx.at(0, 1, 0);
+                        var fe = ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, p);
+                        var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, p, net.minecraft.core.Direction.UP);
+                        int got;
+                        try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                            got = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(f), 1000, tx);
+                        }
+                        bucketed += net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(f).getPath() + "=" + got + " ";
+                        if (got != 1000) allBuckets = false;
+                        ctx.level().removeBlock(p, false);
+                    }
                 }
                 default -> throw new IllegalStateException(variant);
             }
@@ -535,7 +556,8 @@ public final class OilCases {
                     ctx.check("oil on pipes: the separator's crude went into the tank", got > 500,
                         String.format("%.0f mB in the tank, %d left in the separator", got, ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).getFluidAmount()));
                 }
-                case "fuel_furnace_in" -> {
+                case "fuel_furnace_buckets" -> ctx.check("oil: the fuel heat furnace takes a bucket of every EA oil a burner fires", allBuckets, bucketed);
+                case "fuel_furnace_in", "fuel_furnace_crude" -> {
                     var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, ctx.at(3, 1, 1), net.minecraft.core.Direction.UP);
                     long got = cap == null ? 0 : cap.getAmountAsLong(0);
                     ctx.check("oil on pipes: the fuel heat furnace's tank filled from the pipe on its front flange", got > 10, got + " mB, " + east.getWaila());

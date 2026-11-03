@@ -143,7 +143,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private val thermalLoad = NbtThermalLoad("thermalLoad")
     private val controlLoad = NbtElectricalGateInput("commandLoad")
 
-    private val tank = PreciseElementFluidHandler(25)
+    /** Its fuel tank: two buckets (Baughn 2026-11-03: it fills by bucket; the 1.12 tank held 25 mB, under a bucket). */
+    private val tank = PreciseElementFluidHandler(2000)
 
     /** On EA pipes (Baughn 2026-11-03): fuel in on the flange low on its front (mods.eln.cad.models.FuelHeater). */
     private val fuelIn = mods.eln.fluid.PortBridge("fuelIn", mods.eln.fluid.PortBridge.Mode.IN, 50.0, 0.0)
