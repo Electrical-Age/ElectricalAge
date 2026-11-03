@@ -50,7 +50,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     public PlantCondenserElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
         desc = (PlantCondenserDescriptor) d;
-        v = new CondenserVessel(shell, desc.volume, desc.nominalHeat, desc.pumpKgPerS);
+        v = new CondenserVessel(shell, desc.volume, desc.nominalHeat, desc.pump);
         thermalLoadList.add(shell);
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         slowProcessList.add(t -> findMotor());
@@ -145,7 +145,8 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
                 if (e.b == t && e.flow > 0 || e.a == t && e.flow < 0) totalCoolingKg += Math.abs(e.flow) * dt;
         }
         // the motor turns them: the pump's power for what it moved, the ejector's while it runs
-        pumpW = kg / dt / Water.RHO_L * (CondenserDescriptor.PUMP_PA - Water.P_ATM) / PlantCondenserDescriptor.PUMP_EFFICIENCY
+        // (by the head it really works against: the solver's boost is the curve's chord, not a head)
+        pumpW = kg / dt / Water.RHO_L * Math.max(0, v.backPa) / PlantCondenserDescriptor.PUMP_EFFICIENCY
             + PlantCondenserDescriptor.EJECTOR_W * Math.min(1, motorShare);
         if (motor != null && motorShare > 0) motor.takeShaftPower(pumpW, dt);
     }
@@ -260,7 +261,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        v.read(nbt, false);
+        v.read(nbt, 0);
         loadedTubes = CondenserVessel.get(nbt, "tubes");
     }
 
@@ -289,6 +290,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         info.put(I18N.tr("Heat rejected"), Utils.plotPower("", v.heatW) + I18N.tr(" by its shell, ") + Utils.plotPower("", tubesW) + I18N.tr(" to its cooling water"));
         info.put(I18N.tr("Motor"), motor == null ? I18N.tr("none: put a Shaft Motor against its side")
             : String.format("%.0f%% speed, pumping %.0f mB/s, %.0f W off its shaft", motorShare * 100, v.pumped, pumpW));
+        if (v.pump != null) info.put(I18N.tr("Pump outlet"), v.outletStatus());
         return info;
     }
 }

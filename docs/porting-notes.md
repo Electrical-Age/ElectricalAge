@@ -42,8 +42,28 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   pumps 6 / 15 bar. `oil_steam_turbine*`.
 - Steam condensers (new, Baughn 2026-10-26): against a turbine's exhaust side (right of its front); a vessel cooled
   through its shell (own air cooler to the ambient, thermal cables on its sides), air ejector, condensate pump on the
-  turbine's shaft out of its front flange (15 bar), makeup in on top; the models join (turbine parts vent / exhaust,
+  turbine's shaft out of its front flange, makeup in on top; the models join (turbine parts vent / exhaust,
   condenser ducts). Over half full it floods the turbine. `oil_steam_turbine_condenser`, `oil_condenser_floods`.
+- Condensate pump curve (Baughn 2026-11-03: a turbine at its rated pressure works on its own, an overclocked one needs
+  a pipe pump). Both condensers' pumps follow Q = speed x Qmax x sqrt(1 - dp / H0) (`CondensatePump`), dp the outlet
+  over the vessel: H0 = 1.3 x the turbine's rated inlet, and 1.5 x its condensate at full power against the rating.
+  Small/Steam Condenser (50V/200V turbines, 10 bar): shut-off 13 bar, ~3.0 / 11.9 g/s at 10 bar (6.2 / 24.8 g/s free;
+  their turbines condense ~2.0 / 7.9 g/s), short of full-power condensate above ~12 bar. Plant Steam Condenser (HP,
+  20 bar): shut-off 26 bar, 59 g/s at 20 bar (123 free; a full HP makes 39.5 g/s); it was 15 bar and 0.1 kg/s, which
+  couldn't feed the HP's own 20 bar boiler. Its motor load now goes with the pressure it really pumps against. Speed
+  still scales the flow only (the head stays at any speed). Was a straight line to a 15 bar shut-off for all.
+  `CondensatePumpTest`, `oil_condensate_return_*`, `plant_condenser_pump_into_*`.
+  Jade on both condensers, "Pump outlet": the pressure it works against and its flow there as a share of its rated
+  (free) flow at its speed, or "shut off, needs a pipe pump" (Baughn 2026-11-03).
+- Small Steam Condenser / Steam Condenser vessels hold 12 buckets, as a tank block (Baughn 2026-11-03: "133 m^3 is a
+  bit much for a 1m^3 block"); they were 5 / 20 L (74 000 / 296 000 mB). Saves without the "tank3" tag load trimmed:
+  water over the float valve's shut level (25 %) and air over 1 atm's worth go, at the temperature they had (kept, a
+  full old vessel was over FLOOD at once and burnt its turbine). The Plant Steam Condenser keeps its 60 L
+  (~889 000 mB, 74 buckets). `oil_condenser_old_save_trimmed`.
+- Steam condenser makeup signal (Baughn 2026-11-03: no interlock to the boiler, which the condenser can't know; the
+  boiler's analog fill, through a comparator, can say when the plant wants water): a 0-50 V input on its left flank
+  scales what its float valve lets in, 0 V shut; unconnected, the float valve alone as before. That flank takes no
+  thermal cable now. Jade's Makeup valve says whether its signal holds it. `oil_condenser_makeup_signal`.
 - Shaft redo, part 1 (Baughn 2026-10-29: the old shaft turbines had no steam input; redo them on the new steam logic).
   The shaft Steam Turbine (same id) takes steam by EA pipe on top and lets it out of its back (piped on, or into the
   air); work = 0.75 x the isentropic drop from the inlet to the exhaust's pressure, onto the shaft; 16 kW at 20 bar

@@ -34,6 +34,8 @@ public final class ShaftPlantCases {
         cases.add(new PlantGain());
         cases.add(new CondenserVacuum(true));
         cases.add(new CondenserVacuum(false));
+        cases.add(new PumpCurve(20e5));
+        cases.add(new PumpCurve(27e5));
         cases.add(new WetSteam(true));
         cases.add(new WetSteam(false));
         cases.add(new Flooding());
@@ -337,6 +339,82 @@ public final class ShaftPlantCases {
             ctx.check("large crossover: the HP runs at about full steam (over 33 g/s)", steam > 0.033, String.format("%.1f g/s", steam * 1000));
             ctx.check("large crossover: the LP does real work (over 5 kW)", wl / window > 5000, String.format("%.1f kW", wl / window / 1000));
             ctx.check("large crossover: the condenser holds its vacuum (under 0.3 bar)", pSum / window < 0.3e5, String.format("%.2f bar", pSum / window / 1e5));
+        }
+    }
+
+    /**
+     * The plant condenser's condensate pump curve (Baughn 2026-11-03: sized to the HP turbine's 20 bar): primed with
+     * water, its motor running, its front feeding a boiler held at boilerPa (a fixed node, half water). At 20 bar it
+     * returns more than a full HP's ~39 g/s; at 27 bar (past its 26 bar shut-off) nothing.
+     */
+    static final class PumpCurve extends PlumbingCases.Big {
+        final double boilerPa;
+        PlantCondenserElement c;
+        mods.eln.sim.fluid.FluidDevice boiler;
+        IProcess watch;
+        boolean primed;
+        int tick;
+        double kg0, kg, window;
+
+        PumpCurve(double boilerPa) {
+            this.boilerPa = boilerPa;
+        }
+
+        public String id() {
+            return String.format("plant_condenser_pump_into_%.0f_bar", boilerPa / 1e5);
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos cp = ctx.at(5, 1, 5), at = cp.west();
+            c = condenser(ctx, cp, true);
+            var b = new mods.eln.sim.fluid.FluidNode(1.0, at.getY(), 1.0, true).fill(0.5 * Water.RHO_L, boilerPa, 320);
+            var level = c.fluidLevel();
+            var ports = List.of(new mods.eln.sim.fluid.FluidDevice.FluidPort(b, at.asLong(), 5, 0.0, mods.eln.oil.CondenserVessel.PORT_K,
+                mods.eln.oil.TankElement.sideSpot(5, mods.eln.oil.TankElement.LOW)));
+            boiler = new mods.eln.sim.fluid.FluidDevice() {
+                public Object fluidLevel() {
+                    return level;
+                }
+
+                public List<FluidPort> fluidPorts() {
+                    return ports;
+                }
+            };
+            mods.eln.fluid.FluidWorld.add(boiler);
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                if (c.v.vessel == null) return;
+                if (!primed) {
+                    primed = true;
+                    mods.eln.sim.fluid.EaUnits.addWater(c.v.vessel, 0.2 * c.v.vessel.volume * Water.RHO_L, 320, false);
+                }
+                if (++tick == 100) kg0 = c.v.totalPumpedKg;
+                if (tick > 100) {
+                    window += dt;
+                    kg = c.v.totalPumpedKg - kg0;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            mods.eln.fluid.FluidWorld.remove(boiler);
+            double rate = kg / Math.max(1e-9, window), hp = mods.eln.mechanical.SteamTurbineSpec.HP.nominalKgPerS;
+            String id = String.format("plant condenser into %.0f bar", boilerPa / 1e5);
+            ctx.line(String.format("%s: %.1f g/s pumped (a full HP makes %.1f g/s); back-pressure %.2f bar; curve %.1f bar shut-off, %.1f g/s free, "
+                    + "%.1f g/s at %.0f bar; motor %.0f%%; %s", id, rate * 1000, hp * 1000, c.v.backPa / 1e5, c.v.curve.shutoffPa / 1e5,
+                c.v.curve.freeKgPerS * 1000, c.v.curve.kgPerS(c.v.curve.ratedPa) * 1000, c.v.curve.ratedPa / 1e5, c.motorShare * 100, c.getWaila()));
+            String jade = "" + c.getWaila().get(mods.eln.i18n.I18N.tr("Pump outlet"));
+            if (boilerPa <= mods.eln.mechanical.SteamTurbineSpec.HP.nominalPa) {
+                ctx.check(id + ": it returns more than a full HP's condensate", rate > hp, String.format("%.1f g/s", rate * 1000));
+                ctx.check(id + ": Jade: the pump's back-pressure and its share of rated flow", jade.startsWith("against 20") && jade.endsWith("of its rated flow"), jade);
+            } else {
+                ctx.check(id + ": past its shut-off it returns nothing (under 1 g/s)", rate < 0.001, String.format("%.2f g/s", rate * 1000));
+                ctx.check(id + ": Jade: shut off, needs a pipe pump", jade.startsWith("against 27") && jade.endsWith("shut off, needs a pipe pump"), jade);
+            }
         }
     }
 
