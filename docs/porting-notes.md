@@ -60,6 +60,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   water over the float valve's shut level (25 %) and air over 1 atm's worth go, at the temperature they had (kept, a
   full old vessel was over FLOOD at once and burnt its turbine). The Plant Steam Condenser keeps its 60 L
   (~889 000 mB, 74 buckets). `oil_condenser_old_save_trimmed`.
+- Steam condenser makeup signal (Baughn 2026-11-03: no interlock to the boiler, which the condenser can't know; the
+  boiler's analog fill, through a comparator, can say when the plant wants water): a 0-50 V input on its left flank
+  scales what its float valve lets in, 0 V shut; unconnected, the float valve alone as before. That flank takes no
+  thermal cable now. Jade's Makeup valve says whether its signal holds it. `oil_condenser_makeup_signal`.
 - Shaft redo, part 1 (Baughn 2026-10-29: the old shaft turbines had no steam input; redo them on the new steam logic).
   The shaft Steam Turbine (same id) takes steam by EA pipe on top and lets it out of its back (piped on, or into the
   air); work = 0.75 x the isentropic drop from the inlet to the exhaust's pressure, onto the shaft; 16 kW at 20 bar

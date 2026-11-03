@@ -36,6 +36,9 @@ public final class CondenserVessel {
     double meterHeat, meterPump, meterTime;
     /** The pump's back-pressure (Pa over the vessel's bottom) and its outlet's pressure (Pa), at the last step. */
     public double backPa, outletPa;
+    /** What the owner lets the makeup take (0..1, a signal: 0 shut, 1 as the float valve has it), and the float valve's
+     *  own opening (0..1). */
+    public double makeupGate = 1, floatOpen;
     /** The pump's speed (0..1.2 of its rating). */
     public double speed;
 
@@ -130,7 +133,8 @@ public final class CondenserVessel {
             totalAirKg += air;
         }
         // the makeup's float valve
-        if (makeup != null) makeup.open = Math.max(0, Math.min(1, (MAKEUP_SHUT - floodShare()) / (MAKEUP_SHUT - MAKEUP_OPEN)));
+        floatOpen = Math.max(0, Math.min(1, (MAKEUP_SHUT - floodShare()) / (MAKEUP_SHUT - MAKEUP_OPEN)));
+        if (makeup != null) makeup.open = floatOpen * Math.max(0, Math.min(1, makeupGate));
         if (pump != null) {
             // the curve's chord through where it runs now (CondensatePump): speed scales the flow, the head stays
             backPa = backPressure();

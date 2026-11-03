@@ -29,11 +29,15 @@ import java.util.Map;
  * Each fluid step: the shell takes the vessel's heat, the air ejector pulls air out, the condensate pump (open as far as
  * the turbine turns) pushes water from the vessel's bottom to the front flange. Makeup water by the flange on top,
  * through a float valve: open below MAKEUP_OPEN of its volume as water, shut by MAKEUP_SHUT (Baughn's makeup pump
- * filled one to the flood line).
+ * filled one to the flood line). A signal on its left flank (0-50 V) holds the makeup: 0 V shut, full as the float valve
+ * has it, unconnected as the float valve has it (Baughn 2026-11-03: the boiler's fill, through a comparator, can then
+ * say when the plant wants water; the condenser can't know which boiler it feeds).
  */
 public class CondenserElement extends TransparentNodeElement implements FluidDevice, mods.eln.fluid.FluidPlacement.Turnable {
     final CondenserDescriptor desc;
     public final NbtThermalLoad shell = new NbtThermalLoad("shell");
+    /** The makeup's signal input, on its left flank. */
+    public final mods.eln.sim.nbt.NbtElectricalGateInput makeupSignal = new mods.eln.sim.nbt.NbtElectricalGateInput("makeup");
     /** The vessel, its pump, ejector and makeup (shared with the plant condenser). */
     public final CondenserVessel v;
     public FluidNode vessel, outlet, inlet;
@@ -51,6 +55,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         desc = (CondenserDescriptor) d;
         v = new CondenserVessel(shell, desc.volume, desc.nominalHeat, desc.pump);
         thermalLoadList.add(shell);
+        electricalLoadList.add(makeupSignal);
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         slowProcessList.add(t -> findTurbine());
     }
@@ -100,6 +105,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
     /** The condensate pump turns with the turbine's shaft; the ejector always works (its steam jet). */
     @Override
     public void beforeFluidStep(double dt) {
+        v.makeupGate = signalled() ? makeupSignal.getNormalized() : 1;
         v.before(dt, 1, 1, turbine == null ? 0 : turbine.omega);
     }
 
@@ -123,26 +129,32 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         FluidWorld.remove(this);
     }
 
-    @Override
-    public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-        return null;
+    /** Is a signal wired to its makeup input? */
+    public boolean signalled() {
+        return !makeupSignal.getConnectedComponents().isEmpty();
     }
 
-    /** Thermal cables on its sides (not its front, the condensate flange; not the turbine's side). */
+    /** The makeup signal on its left flank. */
+    @Override
+    public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
+        return lrdu == LRDU.Down && side == front.left() ? makeupSignal : null;
+    }
+
+    /** Thermal cables on its sides (not its front, the condensate flange; not its left, the signal; not the turbine's side). */
     @Override
     public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-        return side == front || side.getInt() == turbineSide ? null : shell;
+        return side == front || side == front.left() || side.getInt() == turbineSide ? null : shell;
     }
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down || side == Direction.YN || side == Direction.YP || side == front) return 0;
-        return NodeBase.maskThermal;
+        return side == front.left() ? NodeBase.maskElectricalInputGate : NodeBase.maskThermal;
     }
 
     @Override
     public String multiMeterString(Direction side) {
-        return "";
+        return side == front.left() ? Utils.plotSignal(makeupSignal.getU(), makeupSignal.getCurrent()) : "";
     }
 
     @Override
@@ -222,8 +234,14 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         }
         info.put(I18N.tr("Heat rejected"), Utils.plotPower("", heatW));
         var makeup = v.makeup;
-        if (makeup != null) info.put(I18N.tr("Makeup valve"), makeup.open >= 0.99 ? I18N.tr("open") : makeup.open <= 0.01 ? I18N.tr("shut (full enough)")
-            : String.format("%.0f%% open", makeup.open * 100));
+        if (makeup != null) {
+            // (Baughn 2026-11-03: whether its signal holds it)
+            String state = makeup.open >= 0.99 ? I18N.tr("open") : v.floatOpen <= 0.01 ? I18N.tr("shut (full enough)")
+                : v.makeupGate <= 0.01 ? I18N.tr("shut by its signal") : String.format("%.0f%% open", makeup.open * 100);
+            String held = !signalled() ? I18N.tr("; no signal: its float valve alone")
+                : String.format(I18N.tr("; signal %.0f%%"), Math.max(0, Math.min(1, v.makeupGate)) * 100);
+            info.put(I18N.tr("Makeup valve"), state + held);
+        }
         // (Baughn: on a cold start nothing said why no water reached the boiler: the pump turns with the turbine)
         double open = v.speed;   // (pump.open also carries its curve's chord)
         info.put(I18N.tr("Condensate pump"), turbine == null ? I18N.tr("stopped: no turbine")

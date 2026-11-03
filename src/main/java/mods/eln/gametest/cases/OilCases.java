@@ -42,6 +42,7 @@ public final class OilCases {
         cases.add(new CondenserFloods());
         cases.add(new CondenserMakeupFloat());
         cases.add(new CondenserLegacyLoad());
+        cases.add(new CondenserMakeupSignal());
         cases.add(new CondensateReturn(10e5, false));
         cases.add(new CondensateReturn(14e5, false));
         cases.add(new CondensateReturn(14e5, true));
@@ -748,6 +749,8 @@ public final class OilCases {
             mods.eln.Eln.simulator.removeSlowProcess(feed);
             ctx.check("oil: makeup at 10 bar: a condenser 30 % full takes none (float valve shut)", full != null
                 && full.vessel.mWater <= full0 + 1e-6, full == null ? "none" : String.format("%.4f -> %.4f kg; %s", full0, full.vessel.mWater, full.getWaila()));
+            ctx.check("oil: Jade: no signal, its float valve alone", low != null && ("" + low.getWaila().get(mods.eln.i18n.I18N.tr("Makeup valve"))).endsWith("no signal: its float valve alone"),
+                low == null ? "none" : "" + low.getWaila());
             ctx.check("oil: makeup at 10 bar: one 5 % full takes it in", low != null
                 && low.vessel.mWater > low0 + 0.001, low == null ? "none" : String.format("%.4f -> %.4f kg; %s", low0, low.vessel.mWater, low.getWaila()));
         }
@@ -922,6 +925,64 @@ public final class OilCases {
             ctx.check("condenser: at its temperature, its air at about 1 atm", Math.abs(old.vessel.T() - T) < 1 && old.vessel.P() < 1.3e5,
                 String.format("%.1f C, %.3f bar", old.vessel.T() - mods.eln.sim.fluid.Water.T0, old.vessel.P() / 1e5));
             ctx.check("condenser: a current save keeps its water", Math.abs(now.floodShare() - 0.2) < 0.005, String.format("%.1f%%", now.floodShare() * 100));
+        }
+    }
+
+    /**
+     * The makeup's signal (Baughn 2026-11-03: the boiler's fill through a comparator says when the plant wants water):
+     * two condensers 5 % full with makeup water at 10 bar on top, a signal source on each one's left flank: at 0 V its
+     * makeup stays shut, at 50 V the float valve lets it in. Jade says which.
+     */
+    static final class CondenserMakeupSignal extends PlumbingCases.Big {
+        mods.eln.oil.CondenserElement off, on;
+        mods.eln.sim.IProcess feed;
+        double off0, on0;
+        boolean primed;
+
+        public String id() {
+            return "oil_condenser_makeup_signal";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        mods.eln.oil.CondenserElement place(TestContext ctx, BlockPos p, double u) {
+            var c = (mods.eln.oil.CondenserElement) ctx.placeTransparent(28 + (82 << 6), p);
+            for (int i = 0; i < 4 && c.front != mods.eln.misc.Direction.XN; i++) mods.eln.fluid.FluidPlacement.turn(c);
+            Wp9cCases.signal(ctx, Wp10aCases.off(p, c.front.left()), u);
+            return c;
+        }
+
+        public void build(TestContext ctx) {
+            off = place(ctx, ctx.at(3, 1, 5), 0);
+            on = place(ctx, ctx.at(6, 1, 5), 50);
+            mods.eln.Eln.simulator.addSlowProcess(feed = x -> {
+                if (off.inlet == null || on.inlet == null) return;
+                if (!primed) {
+                    primed = true;
+                    for (var c : new mods.eln.oil.CondenserElement[]{off, on})
+                        mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.05 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 300, false);
+                    off0 = off.vessel.mWater;
+                    on0 = on.vessel.mWater;
+                }
+                // (makeup water kept at 10 bar behind each one's valve, in the run's lump: CondenserMakeupFloat)
+                for (var c : new mods.eln.oil.CondenserElement[]{off, on}) {
+                    var n = mods.eln.fluid.FluidWorld.nodeFor(c.inlet);
+                    for (int k = 0; k < 100 && n.P() < 10e5; k++) mods.eln.sim.fluid.EaUnits.addWater(n, 2e-5, 300, false);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            String jOff = "" + off.getWaila().get(mods.eln.i18n.I18N.tr("Makeup valve")), jOn = "" + on.getWaila().get(mods.eln.i18n.I18N.tr("Makeup valve"));
+            ctx.line("makeup signal: 0 V " + off.getWaila() + "; 50 V " + on.getWaila());
+            ctx.check("condenser: its left flank takes the signal", off.signalled() && on.signalled(), "");
+            ctx.check("condenser: makeup signal at 0 V: none comes in", off.vessel.mWater <= off0 + 1e-6, String.format("%.4f -> %.4f kg", off0, off.vessel.mWater));
+            ctx.check("condenser: at 50 V the float valve lets it in", on.vessel.mWater > on0 + 0.001, String.format("%.4f -> %.4f kg", on0, on.vessel.mWater));
+            ctx.check("condenser: Jade: shut by its signal", jOff.startsWith("shut by its signal") && jOff.contains("signal 0%"), jOff);
+            ctx.check("condenser: Jade: the signal lets it", jOn.contains("signal 100%") && !jOn.startsWith("shut by"), jOn);
         }
     }
 
