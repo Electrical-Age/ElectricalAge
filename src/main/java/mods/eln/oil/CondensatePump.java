@@ -4,13 +4,19 @@ package mods.eln.oil;
  * A condenser's condensate pump curve (Baughn 2026-11-03: a centrifugal curve; "a steam turbine running at nominal
  * pressure should work on its own, while an 'overclocked' one would need a pipe pump"). Flow against a back-pressure dp
  * (Pa over the vessel) is Q = speed x Qmax x sqrt(1 - dp / H0): flat near free flow, steep near the shut-off head H0.
- * Sized from its turbine's rated inlet pressure (the boiler it feeds) and its condensate at full power: against that
- * pressure it passes RATED_MARGIN times the condensate, and it shuts off at SHUTOFF_OVER_NOMINAL times it. Speed scales
+ * Sized from its turbine's rated inlet pressure and its condensate at full power: against RATED_OVER_NOMINAL times that
+ * pressure (the boiler a governed turbine runs from) it passes RATED_MARGIN times the condensate, and it shuts off at
+ * SHUTOFF_OVER_NOMINAL times it. Speed scales
  * the flow only; the shut-off head stays (pending Baughn: affinity laws would cut a slow turbine's head to nothing).
  */
 public final class CondensatePump {
-    /** Shut-off head over the turbine's rated inlet pressure, and the flow against that pressure over its condensate. */
-    public static final double SHUTOFF_OVER_NOMINAL = 1.3, RATED_MARGIN = 1.5;
+    /**
+     * Shut-off head over the turbine's rated inlet pressure; the back-pressure (over that rating) at which it still passes
+     * RATED_MARGIN times the condensate. A governed turbine throttles, so its boiler sits well above its rating (a 10 bar
+     * turbine's at ~14 bar, AdventurAgent on live): a turbine at its rating returns its own condensate while its boiler
+     * stays under ~1.5x, and an "overclocked" boiler past ~1.8x needs an inline pump (Baughn).
+     */
+    public static final double SHUTOFF_OVER_NOMINAL = 2.0, RATED_OVER_NOMINAL = 1.5, RATED_MARGIN = 1.5;
     /** Shut-off head (Pa over the vessel), the rated back-pressure (Pa) and free flow (kg/s at full speed, no head). */
     public final double shutoffPa, ratedPa, freeKgPerS;
 
@@ -22,8 +28,8 @@ public final class CondensatePump {
 
     /** The pump for a turbine rated at nominalPa (its boiler's pressure) making condensateKgPerS at full power. */
     public static CondensatePump forTurbine(double nominalPa, double condensateKgPerS) {
-        double h0 = SHUTOFF_OVER_NOMINAL * nominalPa;
-        return new CondensatePump(h0, nominalPa, RATED_MARGIN * condensateKgPerS / Math.sqrt(1 - nominalPa / h0));
+        double h0 = SHUTOFF_OVER_NOMINAL * nominalPa, rated = RATED_OVER_NOMINAL * nominalPa;
+        return new CondensatePump(h0, rated, RATED_MARGIN * condensateKgPerS / Math.sqrt(1 - rated / h0));
     }
 
     /** Flow at full speed against dp (Pa), as a share of the free flow: 1 at no head, 0 at the shut-off and past it. */

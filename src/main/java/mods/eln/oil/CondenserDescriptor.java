@@ -15,7 +15,7 @@ import java.util.List;
  * nearly twice the work per kg. Cooled to the local ambient by its own air cooler (sized for its turbine at full power),
  * plus whatever a thermal cable on a side takes. Its air ejector keeps air out; its condensate pump, driven by the
  * turbine's shaft, pushes the water out of its front flange back to the boiler's feed (CondensatePump: enough for a
- * boiler at the turbine's rated 10 bar; shut off at 13 bar over the vessel: past the rating, an Inline Pump after it). Water comes in
+ * boiler up to 1.5x the turbine's rated 10 bar; shut off at 20 bar over the vessel: past ~18 bar, an Inline Pump after it). Water comes in
  * (makeup) by the flange on top. Model: mods.eln.cad.models.Condenser.
  */
 public class CondenserDescriptor extends TransparentNodeDescriptor {

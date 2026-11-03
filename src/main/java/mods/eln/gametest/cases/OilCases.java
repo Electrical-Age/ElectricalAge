@@ -48,7 +48,8 @@ public final class OilCases {
         cases.add(new CondenserMakeupSignal());
         cases.add(new CondensateReturn(10e5, false));
         cases.add(new CondensateReturn(14e5, false));
-        cases.add(new CondensateReturn(14e5, true));
+        cases.add(new CondensateReturn(21e5, false));
+        cases.add(new CondensateReturn(21e5, true));
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -831,8 +832,9 @@ public final class OilCases {
      * The condensate pump's curve (Baughn 2026-11-03: a turbine at its rated pressure works on its own, an overclocked
      * one needs a pipe pump): a loaded 50V turbine on steam at boilerPa into a Small Steam Condenser whose front feeds a
      * boiler held at boilerPa (a fixed node, half water). At the rating (10 bar) the pump returns what the turbine
-     * exhausts and the level holds; at 14 bar (past its 13 bar shut-off) it returns nothing and the vessel fills; with a
-     * 200V Inline Pump between them at 14 bar it keeps up again.
+     * exhausts and the level holds, and so at 14 bar (a governed 10 bar turbine's boiler, AdventurAgent on live: the
+     * first cut's 13 bar shut-off flooded it); at 21 bar (past its 20 bar shut-off) it returns nothing and the vessel
+     * fills; with a 200V Inline Pump between them at 21 bar it keeps up again.
      */
     static final class CondensateReturn extends PlumbingCases.Big {
         final double boilerPa;
@@ -937,7 +939,8 @@ public final class OilCases {
             if (inlinePump) ctx.line(id + ": pump " + pump.getWaila());
             String jade = "" + c.getWaila().get(mods.eln.i18n.I18N.tr("Pump outlet"));
             ctx.check(id + ": the turbine ran on its load (over 1 g/s of steam)", !t.isBurnt() && steam > 0.03, String.format("%.1f g", steam * 1000));
-            if (boilerPa <= mods.eln.oil.SteamGeneratorDescriptor.NOMINAL_PA || inlinePump) {
+            // a governed turbine's boiler sits above its rating (~14 bar for 10: AdventurAgent on live): the pump covers it
+            if (boilerPa <= mods.eln.oil.CondensatePump.RATED_OVER_NOMINAL * mods.eln.oil.SteamGeneratorDescriptor.NOMINAL_PA || inlinePump) {
                 ctx.check(id + ": its condensate goes back to the boiler (over 90 %)", pumped > 0.9 * steam,
                     String.format("%.1f of %.1f g", pumped * 1000, steam * 1000));
                 ctx.check(id + ": the level holds (no rise, under the float valve's shut level)", fill <= fill0 + 0.01 && fill < mods.eln.oil.CondenserVessel.MAKEUP_SHUT,
@@ -947,7 +950,7 @@ public final class OilCases {
                 ctx.check(id + ": past its shut-off the pump returns next to nothing (under 10 %)", pumped < 0.1 * steam,
                     String.format("%.1f of %.1f g", pumped * 1000, steam * 1000));
                 ctx.check(id + ": and the vessel fills", fill > fill0 + 0.005, String.format("%.1f%% -> %.1f%%", fill0 * 100, fill * 100));
-                ctx.check(id + ": Jade: shut off, needs a pipe pump", jade.startsWith("against 14") && jade.endsWith("shut off, needs a pipe pump"), jade);
+                ctx.check(id + ": Jade: shut off, needs a pipe pump", jade.startsWith("against 21") && jade.endsWith("shut off, needs a pipe pump"), jade);
             }
         }
     }
