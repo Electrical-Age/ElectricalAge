@@ -36,6 +36,7 @@ public final class OilCases {
         cases.add(new PumpIntoPipe(120));
         for (String v : OilOnPipes.VARIANTS) cases.add(new OilOnPipes(v));
         cases.add(new Basin());
+        cases.add(new Coke());
         cases.add(new Pump(false));
         cases.add(new Pump(true));
         cases.add(new Boiler());
@@ -567,6 +568,75 @@ public final class OilCases {
                     ctx.check("oil on pipes: the gas turbine's fuel tank filled from the pipe", f > 500, f + " mB of fuel, tank " + tank.getWaila());
                 }
             }
+        }
+    }
+
+    /**
+     * Baughn 2026-11-03: burning crude cokes the fuel heat furnace's burner, wool cleans it. Four big-burner furnaces at
+     * full manual control: crude (its burner cokes, black smoke), gasoline (no coke), gasoline on a half-coked burner
+     * (half the heat of the clean one), and crude half coked, cleaned by a right click with wool (one used).
+     */
+    static final class Coke implements TestCase {
+        mods.eln.transparentnode.FuelHeatFurnaceElement crude, clean, coked, wooled;
+
+        public String id() {
+            return "fuel_furnace_coke";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        mods.eln.transparentnode.FuelHeatFurnaceElement furnace(TestContext ctx, int x, net.minecraft.world.level.material.Fluid fuel, double coke) {
+            var f = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(x, 1, 1));
+            f.getInventory().setItem(mods.eln.transparentnode.FuelHeatFurnaceContainer.Companion.getFuelBurnerSlot(),
+                mods.eln.Eln.sharedItemStackOne.getDescriptor(2 + (124 << 6)).newItemStack());
+            f.inventoryChange(f.getInventory());
+            f.networkUnserialize(ctx.stream(o -> o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getMainSwitchToggleEvent())));
+            f.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getSetManualControlValueEvent());
+                o.writeFloat(1f);
+            }));
+            ((mods.eln.fluid.ElementFluidHandler) f.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(fuel, 2000), true);
+            f.setCoke(coke);
+            return f;
+        }
+
+        public void build(TestContext ctx) {
+            crude = furnace(ctx, 0, Oil.CRUDE.get(), 0);
+            clean = furnace(ctx, 2, Oil.Cut.GASOLINE.source.get(), 0);
+            coked = furnace(ctx, 4, Oil.Cut.GASOLINE.source.get(), 0.5);
+            wooled = furnace(ctx, 6, Oil.CRUDE.get(), 0.5);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("oil: crude cokes the fuel heat furnace's burner", crude.getCoke() > 0 && crude.heatPower() > 0,
+                crude.getCoke() + ", " + crude.heatPower() + " W");
+            ctx.check("oil: gasoline doesn't coke it", clean.getCoke() == 0 && clean.heatPower() > 0, clean.getCoke() + ", " + clean.heatPower() + " W");
+            ctx.check("oil: a half-coked burner gives half the heat", Math.abs(coked.heatPower() / clean.heatPower() - 0.5) < 0.02,
+                coked.heatPower() + " W against " + clean.heatPower() + " W");
+            var player = new net.minecraft.world.entity.player.Player(ctx.level(), new com.mojang.authlib.GameProfile(
+                java.util.UUID.nameUUIDFromBytes("eln-coke".getBytes()), "coke")) {
+                @Override
+                public net.minecraft.world.level.GameType gameMode() {
+                    return net.minecraft.world.level.GameType.SURVIVAL;
+                }
+
+                @Override
+                public boolean isClientAuthoritative() {
+                    return false;
+                }
+            };
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.level.block.Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE), 3));
+            boolean used = wooled.onBlockActivated(player, mods.eln.misc.Direction.YP, 0.5f, 0.5f, 0.5f);
+            ctx.check("oil: wool cleans a coked burner, one used", used && wooled.getCoke() == 0 && player.getMainHandItem().getCount() == 2,
+                used + ", " + wooled.getCoke() + ", " + player.getMainHandItem());
+            boolean again = wooled.onBlockActivated(player, mods.eln.misc.Direction.YP, 0.5f, 0.5f, 0.5f);
+            ctx.check("oil: wool on a clean burner does nothing", !again && player.getMainHandItem().getCount() == 2, again + "");
         }
     }
 
