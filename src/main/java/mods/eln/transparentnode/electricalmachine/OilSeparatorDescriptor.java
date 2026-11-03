@@ -7,11 +7,14 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 /**
  * 26.x oil (design: notes/oil): the tar sand separator, hot-water extraction. A macerator-style machine (for now on
  * the macerator's model) whose recipe turns tar sand into sand and puts 100 mB of crude into its tank; it stops when
- * the tank can't take the next 100 mB. Pipes (Pipez, Energized Power...) drain the tank through the fluid capability.
+ * the tank can't take the next 100 mB. Pipes (Pipez, Energized Power...) drain the tank through the fluid capability,
+ * and its outlet on the back pushes the crude into whatever takes it there (OUTLET_MB_PER_S).
  */
 public class OilSeparatorDescriptor extends MaceratorDescriptor {
     public static final int CRUDE_PER_ITEM = 100;
     public static final int TANK_MB = 4000;
+    /** How fast its outlet pushes crude out (mB/s): far more than it makes. */
+    public static final double OUTLET_MB_PER_S = 200;
 
     public OilSeparatorDescriptor(String name, String modelName, double nominalU, double nominalP, double maximalU,
                                   ThermalLoadInitializer thermal, ElectricalCableDescriptor cable, RecipesList recipe) {
