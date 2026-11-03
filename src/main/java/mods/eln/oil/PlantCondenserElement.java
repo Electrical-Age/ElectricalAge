@@ -145,7 +145,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
                 if (e.b == t && e.flow > 0 || e.a == t && e.flow < 0) totalCoolingKg += Math.abs(e.flow) * dt;
         }
         // the motor turns them: the pump's power for what it moved, the ejector's while it runs
-        // (by the head it really works against: the solver's boost is the curve's chord, not a head)
+        // (by the head it really works against: the solver's boost is the curve's tangent, not a head)
         pumpW = kg / dt / Water.RHO_L * Math.max(0, v.backPa) / PlantCondenserDescriptor.PUMP_EFFICIENCY
             + PlantCondenserDescriptor.EJECTOR_W * Math.min(1, motorShare);
         if (motor != null && motorShare > 0) motor.takeShaftPower(pumpW, dt);

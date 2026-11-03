@@ -80,7 +80,7 @@ public final class CondenserVessel {
         inlet.resistance = 1 / PORT_K;
         // (into the vessel's top: the makeup falls in, it doesn't run back out)
         makeup = new FluidDevice.Link(inlet, 0, vessel, 1.0, PORT_K).kind(FluidEdge.Kind.CHECK);
-        // g = rho k / mu x open: k for Qmax / H0; open carries the speed and the curve's chord (before)
+        // g = rho k / mu x open: k for Qmax / H0; open carries the speed and the curve's tangent (before)
         pump = new FluidDevice.Link(vessel, 0, outlet, 0, curve.freeKgPerS / curve.shutoffPa * Water.MU_L / Water.RHO_L).kind(FluidEdge.Kind.CHECK);
         pump.boost = curve.boost(0);
         pump.open = 0;
@@ -136,10 +136,10 @@ public final class CondenserVessel {
         floatOpen = Math.max(0, Math.min(1, (MAKEUP_SHUT - floodShare()) / (MAKEUP_SHUT - MAKEUP_OPEN)));
         if (makeup != null) makeup.open = floatOpen * Math.max(0, Math.min(1, makeupGate));
         if (pump != null) {
-            // the curve's chord through where it runs now (CondensatePump): speed scales the flow, the head stays
+            // the curve's tangent where it runs now (CondensatePump): speed scales the flow, the head stays
             backPa = backPressure();
             speed = Math.max(0, Math.min(1.2, pumpOpen));
-            pump.open = speed * curve.chordShare(backPa);
+            pump.open = speed * curve.lineShare(backPa);
             pump.boost = curve.boost(backPa);
         }
     }
