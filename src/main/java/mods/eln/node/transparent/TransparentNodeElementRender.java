@@ -217,13 +217,14 @@ public abstract class TransparentNodeElementRender {
         if (renderPreProcess == null) renderPreProcess = CableRender.connectionType(tileEntity, connection, side);
         GL11.glPushMatrix();
         glCableTransforme(side);
-        render.bindCableTexture();
 
         for (LRDU lrdu : LRDU.values()) {
             Utils.setGlColorFromDye(renderPreProcess.otherdry[lrdu.toInt()]);
             if (connection.get(lrdu) == false) continue;
             maskTempDraw.set(1 << lrdu.toInt());
-            CableRender.drawCable(render, maskTempDraw, renderPreProcess);
+            CableRenderDescriptor stub = CableRender.stub(render, renderPreProcess, lrdu);   // (as the cable it meets)
+            stub.bindCableTexture();
+            CableRender.drawCable(stub, maskTempDraw, renderPreProcess);
         }
         GL11.glPopMatrix();
         GL11.glColor3f(1f, 1f, 1f);

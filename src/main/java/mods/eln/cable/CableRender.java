@@ -26,6 +26,36 @@ public class CableRender {
 	static final int connectionExtend = 5;
 	*/
 
+    /**
+     * 26.x: the voxel cable in the neighbouring block other (toward the stub's edge) that lies on face and runs up to
+     * this block, or null: a device's stub is drawn as that cable (Baughn: stubs didn't match the cable they meet).
+     */
+    static CableRenderDescriptor voxelCable(BlockEntity other, Direction face, Direction toward) {
+        if (!(other instanceof mods.eln.node.voxel.VoxelNodeEntity v)) return null;
+        Direction back = toward.getInverse();
+        return v.getCableRender(back, back.getLRDUGoingTo(face));
+    }
+
+    /** Is r a cable (six-node electrical or thermal), not a device with stubs of its own? */
+    static boolean isCable(SixNodeElementRender r) {
+        return r instanceof mods.eln.sixnode.electricalcable.ElectricalCableRender || r instanceof mods.eln.sixnode.thermalcable.ThermalCableRender;
+    }
+
+    /** The cable (element or voxel cable) of the entity e at (side, lrdu), as getCableRender(side, lrdu) finds it, or null. */
+    static CableRenderDescriptor cableOf(BlockEntity e, Direction side, LRDU lrdu) {
+        if (!(e instanceof SixNodeEntity s)) return null;
+        SixNodeElementRender r = s.elementRenderList[side.applyLRDU(lrdu).getInt()];
+        if (r == null && e instanceof mods.eln.node.voxel.VoxelNodeEntity v) return v.getCableRender(side, lrdu);   // (a voxel cable)
+        return isCable(r) ? r.getCableRender(lrdu) : null;
+    }
+
+    /** The render a device's stub toward l is drawn with: the cable it meets there if any, else its own. */
+    public static CableRenderDescriptor stub(CableRenderDescriptor own, CableRenderType type, LRDU l) {
+        if (own == null || type == null) return own;
+        CableRenderDescriptor other = type.cable[l.toInt()];
+        return other != null ? other : own;
+    }
+
     public static CableRenderType connectionType(NodeBlockEntity entity, LRDUMask connectedSide, Direction side) {
         Block block;
         int x2, y2, z2;
@@ -73,9 +103,12 @@ public class CableRender {
                     Direction otherSide = side.applyLRDU(lrdu);
                     connectionTypeBuild.otherdry[lrdu.dir] = sixNodeEntity.getCableDry(otherSide, otherSide.getLRDUGoingTo(side));
                     connectionTypeBuild.otherRender[lrdu.dir] = sixNodeEntity.getCableRender(otherSide, otherSide.getLRDUGoingTo(side));
+                    connectionTypeBuild.cable[lrdu.dir] = cableOf(sixNodeEntity, otherSide, otherSide.getLRDUGoingTo(side));
                     continue;
                 }
             }
+            CableRenderDescriptor voxel = voxelCable(otherTileEntity, side, sideLrdu);
+            if (voxel != null) connectionTypeBuild.otherRender[lrdu.dir] = connectionTypeBuild.cable[lrdu.dir] = voxel;
 
             //no wrappeConection ?
             if (!NodeBase.isBlockWrappable(entity.getLevel().getBlockState(new net.minecraft.core.BlockPos(x2, y2, z2)), entity.getLevel(), new net.minecraft.core.BlockPos(x2, y2, z2))) {
@@ -136,6 +169,7 @@ public class CableRender {
                         connectionTypeBuild.endAt[lrdu.dir] = render.heightPixel;
                         connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
                         connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection, otherLRDU);
+                        connectionTypeBuild.cable[lrdu.dir] = cableOf(otherNode, otherDirection, otherLRDU);
                         //	=  += (connectionExtend + (render.heightPixel<<4))<<(lrdu.dir*8) ;
                         continue;
                     }
@@ -148,6 +182,7 @@ public class CableRender {
                         }
                         connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
                         connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection, otherLRDU);
+                        connectionTypeBuild.cable[lrdu.dir] = cableOf(otherNode, otherDirection, otherLRDU);
                         continue;
                     }
                     if (render.width < otherRender.width) {
@@ -155,6 +190,7 @@ public class CableRender {
                         connectionTypeBuild.endAt[lrdu.dir] = otherRender.heightPixel;
                         connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
                         connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection, otherLRDU);
+                        connectionTypeBuild.cable[lrdu.dir] = cableOf(otherNode, otherDirection, otherLRDU);
                         //connectionTypeBuild += (connectionExtend + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
                         continue;
                     }
@@ -196,6 +232,7 @@ public class CableRender {
                     }
                     connectionTypeBuild.otherdry[lrdu.dir] = otherElement.getCableDry(otherLRDU);
                     connectionTypeBuild.otherRender[lrdu.dir] = otherElement.getCableRender(otherLRDU);
+                    if (isCable(otherElement)) connectionTypeBuild.cable[lrdu.dir] = connectionTypeBuild.otherRender[lrdu.dir];
                     continue;
                 }
 
@@ -204,11 +241,13 @@ public class CableRender {
                     connectionTypeBuild.endAt[lrdu.dir] = otherRender.heightPixel;
                     connectionTypeBuild.otherdry[lrdu.dir] = otherElement.getCableDry(otherLRDU);
                     connectionTypeBuild.otherRender[lrdu.dir] = otherElement.getCableRender(otherLRDU);
+                    if (isCable(otherElement)) connectionTypeBuild.cable[lrdu.dir] = connectionTypeBuild.otherRender[lrdu.dir];
                     //connectionTypeBuild += (connectionInternal + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
                     continue;
                 }
                 connectionTypeBuild.otherdry[lrdu.dir] = otherElement.getCableDry(otherLRDU);
                 connectionTypeBuild.otherRender[lrdu.dir] = otherElement.getCableRender(otherLRDU);
+                    if (isCable(otherElement)) connectionTypeBuild.cable[lrdu.dir] = connectionTypeBuild.otherRender[lrdu.dir];
                 continue;
             }
 
@@ -246,9 +285,12 @@ public class CableRender {
                 if (sixNodeEntity.elementRenderList[side.getInt()] != null) {
                     connectionTypeBuild.otherdry[lrdu.dir] = sixNodeEntity.elementRenderList[side.getInt()].getCableDry(lrdu.inverse());
                     connectionTypeBuild.otherRender[lrdu.dir] = sixNodeEntity.elementRenderList[side.getInt()].getCableRender(lrdu.inverse());
+                    if (isCable(sixNodeEntity.elementRenderList[side.getInt()])) connectionTypeBuild.cable[lrdu.dir] = connectionTypeBuild.otherRender[lrdu.dir];
                     continue;
                 }
             }
+            CableRenderDescriptor voxel = voxelCable(otherTileEntity, side, sideLrdu);
+            if (voxel != null) connectionTypeBuild.otherRender[lrdu.dir] = connectionTypeBuild.cable[lrdu.dir] = voxel;
 
             // 26.x: a floor cable ending at a device's terminal plate gets a lug (drawn by the cable, see drawKnuckle)
             if (side == Direction.YN && !sideLrdu.isY()) {
@@ -306,6 +348,7 @@ public class CableRender {
                         connectionTypeBuild.endAt[lrdu.dir] = render.heightPixel;
                         connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
                         connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection, otherLRDU);
+                        connectionTypeBuild.cable[lrdu.dir] = cableOf(otherNode, otherDirection, otherLRDU);
                         //connectionTypeBuild += (connectionExtend + (render.heightPixel<<4))<<(lrdu.dir*8) ;
                         continue;
                     }
@@ -318,6 +361,7 @@ public class CableRender {
                         }
                         connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
                         connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection, otherLRDU);
+                        connectionTypeBuild.cable[lrdu.dir] = cableOf(otherNode, otherDirection, otherLRDU);
                         continue;
                     }
                     if (render.width < otherRender.width) {
@@ -325,11 +369,13 @@ public class CableRender {
                         connectionTypeBuild.endAt[lrdu.dir] = otherRender.heightPixel;
                         connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
                         connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection, otherLRDU);
+                        connectionTypeBuild.cable[lrdu.dir] = cableOf(otherNode, otherDirection, otherLRDU);
                         //connectionTypeBuild += (connectionExtend + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
                         continue;
                     }
                     connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
                     connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection, otherLRDU);
+                        connectionTypeBuild.cable[lrdu.dir] = cableOf(otherNode, otherDirection, otherLRDU);
                     continue;
                 }
 				

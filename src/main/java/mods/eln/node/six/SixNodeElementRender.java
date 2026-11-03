@@ -100,7 +100,7 @@ public abstract class SixNodeElementRender {
             newConnectionType(connectionType);
             if (drawCableAuto() && slot < 6) {   // (a device off centre has pins, no stubs to the block's edges)
                 for (int idx = 0; idx < 4; idx++) {
-                    CableRenderDescriptor render = getCableRender(LRDU.fromInt(idx));
+                    CableRenderDescriptor render = CableRender.stub(getCableRender(LRDU.fromInt(idx)), connectionType, LRDU.fromInt(idx));
                     cableListReady[idx] = false;
                     if (render != null && (connectedSide.mask & (1 << idx)) != 0) {
                         GL11.glNewList(cableList[idx], GL11.GL_COMPILE);
@@ -115,7 +115,7 @@ public abstract class SixNodeElementRender {
         for (int idx = 0; idx < 4; idx++) {
             Utils.setGlColorFromDye(connectionType.otherdry[idx]);
             if (cableListReady[idx]) {
-                UtilsClient.bindTexture(getCableRender(LRDU.fromInt(idx)).cableTexture);
+                UtilsClient.bindTexture(CableRender.stub(getCableRender(LRDU.fromInt(idx)), connectionType, LRDU.fromInt(idx)).cableTexture);
                 GL11.glCallList(cableList[idx]);
             }
         }
