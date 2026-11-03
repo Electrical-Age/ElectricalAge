@@ -280,7 +280,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             next = seg.retarget(t0, target, vlim, a);
         } else if (moving && sinceRetarget >= LinearServoDriveDescriptor.RETARGET_TICKS) {
             double share = LinearServoDriveDescriptor.RETARGET_SHARE;
-            // up only when it costs nothing (lowering) or energy is piling up: else the energy's limit holds it back
+            // up only when it costs nothing (moving with the net weight) or energy is piling up: else the energy's limit holds it back
             boolean free = forceN * (target - p) <= 0;
             boolean spare = machine.bufferJoules() >= LinearServoDriveDescriptor.SPARE_SHARE * machine.bufferCapacityJoules();
             if (vlim < (1 - share) * seg.vmax() || vlim > (1 + share) * seg.vmax() && (free || spare))

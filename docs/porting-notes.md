@@ -183,9 +183,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     to a share of the travel, to the nearest block).
   - Electrics: a Machine API consumer (`Machines.forElement`, the API's first new device): 200 V, rated ~3 kW (40 W
     idle plus lifting 120 kg net, two riders over the counterweight, at full speed; tsugumi-lab's choice),
-    `Brownout.SLOW`. Each tick it asks for its step's lifting work over 80 % (a counterweight balances the car and 40
-    kg; players count 80 kg, other creatures by size; lowering costs only the idle draw) and moves only as far as what
-    it got pays for: short, it goes on from there at the speed paid for, its new top speed what the line keeps
+    `Brownout.SLOW`. Each tick it asks for its step's work against the net weight over 80 % (a counterweight balances
+    the car and 40 kg; players count 80 kg, other creatures by size): a car carrying more than 40 kg pays to go up, an
+    empty or lighter one pays to go down (it lifts the counterweight), and the other way costs only the idle draw. It
+    moves only as far as what it got pays for: short, it goes on from there at the speed paid for, its new top speed what the line keeps
     delivering (continuous in position; the speed steps down, a lift braked by its load). So a weak or starved line, or
     a load over its rating, makes a slower car that still arrives; the machine's buffer (two ticks of rated power) can
     pay for a faster first second. Top speed also follows the line: 2 m/s at 200 V, 1 m/s^2, a sag or recovery

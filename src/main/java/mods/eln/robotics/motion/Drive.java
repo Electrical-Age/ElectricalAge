@@ -3,8 +3,9 @@ package mods.eln.robotics.motion;
 /**
  * A servo drive's electrics and what its energy pays for (one 200 V tier, Baughn). Its top speed follows the line
  * voltage, so a sagging supply makes the axis slow and below the stall share it holds; and it never moves further in a
- * tick than the energy it got pays for: lifting costs the work over the efficiency, lowering costs nothing (idle losses
- * are the machine's own draw, not counted here). Pure numbers: positions in metres, segment speeds in m/tick.
+ * tick than the energy it got pays for: moving against the net force (the load less the counterweight) costs the work
+ * over the efficiency, moving with it costs nothing (idle losses are the machine's own draw, not counted here). Pure
+ * numbers: positions in metres, segment speeds in m/tick.
  * <p>
  * ratedLoadKg is the net load (over the counterweight) it lifts at full speed on its rated power; heavier, it gets
  * no more power and goes slower.
@@ -35,7 +36,7 @@ public record Drive(double nominalVolts, double vmaxNominal, double accel, doubl
 
     /**
      * The energy (J) to move dx metres along the axis against forceN (the force it must hold along the axis: positive
-     * when a net weight pulls back along it), over the efficiency; 0 when the load does the work (lowering).
+     * when a net weight pulls back along it), over the efficiency; 0 when the net weight does the work.
      */
     public double joules(double dx, double forceN) {
         double work = forceN * dx;
