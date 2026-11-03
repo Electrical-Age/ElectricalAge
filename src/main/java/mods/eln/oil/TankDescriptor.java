@@ -61,10 +61,12 @@ public class TankDescriptor extends TransparentNodeDescriptor {
                 if (top - below > 0.005f) {
                     int c = colours[l];
                     boolean water = c == mods.eln.sim.fluid.SpeciesRegistry.get().byId(mods.eln.sim.fluid.SpeciesRegistry.WATER).colour;
-                    if (!water) mods.eln.gl.GL11.glColor4f(((c >> 16) & 255) / 255f * 1.6f, ((c >> 8) & 255) / 255f * 1.6f, (c & 255) / 255f * 1.6f, 1);
+                    // (the window's water is blue; other liquids are the white "liquid" part, tinted by their colour: tinting the
+                    // blue made gasoline teal, AdventurAgent)
+                    if (!water) mods.eln.gl.GL11.glColor4f(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f, 1);
                     mods.eln.gl.GL11.glPushMatrix();
                     mods.eln.gl.GL11.glTranslatef(0, below * window, 0);
-                    drawScaled("level", GLASS_Y0, top - below);
+                    drawScaled(water ? "level" : "liquid", GLASS_Y0, top - below);
                     mods.eln.gl.GL11.glPopMatrix();
                     if (!water) mods.eln.gl.GL11.glColor4f(1, 1, 1, 1);
                 }

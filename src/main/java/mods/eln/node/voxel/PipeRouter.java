@@ -75,6 +75,83 @@ public final class PipeRouter {
     }
 
     static Result routeUntil(Space space, int bore, End start, List<End> waypoints, End end, long deadline) {
+        // (a port off the lattice, a device's drawn flange between its points: straight out, then across onto it)
+        List<long[]> head = jog(space, bore, start), tail = jog(space, bore, end);
+        if (head != null) {
+            long[] r = head.get(head.size() - 1);
+            start = new End(r[0], r[1], r[2], -1);
+        }
+        if (tail != null) {
+            long[] r = tail.get(tail.size() - 1);
+            end = new End(r[0], r[1], r[2], -1);
+        }
+        Result inner = routeLegs(space, bore, start, waypoints, end, deadline);
+        if (inner.error != null || head == null && tail == null) return inner;
+        List<long[]> pts = new ArrayList<>();
+        if (head != null) pts.addAll(head.subList(0, head.size() - 1));
+        pts.addAll(inner.points);
+        if (tail != null) for (int i = tail.size() - 2; i >= 0; i--) pts.add(tail.get(i));
+        return new Result(simplify(pts), null);
+    }
+
+    /**
+     * For a port off the lattice (only across its direction): the points from it one lattice step straight out, then
+     * across to the nearest lattice point a pipe of this bore can reach, ending there; null if it is on the lattice
+     * (or no such point is free: the route then fails as before).
+     */
+    static List<long[]> jog(Space space, int bore, End e) {
+        if (e.dir() < 0) return null;
+        long[] p = {e.x(), e.y(), e.z()};
+        int along = e.dir() / 2;
+        boolean off = false;
+        for (int a = 0; a < 3; a++) if (Math.floorMod(p[a], LATTICE) != 0) off = true;
+        if (!off || Math.floorMod(p[along], LATTICE) != 0) return null;
+        long[] q = {p[0] + D[e.dir()][0] * LATTICE, p[1] + D[e.dir()][1] * LATTICE, p[2] + D[e.dir()][2] * LATTICE};
+        if (segmentBlocked(space, bore, p, q)) return null;
+        // the cross axes' lattice points either side, nearest first
+        int[] cross = new int[2];
+        int n = 0;
+        for (int a = 0; a < 3; a++) if (a != along) cross[n++] = a;
+        List<long[]> options = new ArrayList<>();
+        for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 2; j++) {
+                long[] r = q.clone();
+                for (int c = 0; c < 2; c++) {
+                    int a = cross[c];
+                    long m = Math.floorMod(r[a], LATTICE);
+                    if (m == 0) continue;
+                    r[a] = (c == 0 ? i : j) == 0 ? r[a] - m : r[a] - m + LATTICE;
+                }
+                options.add(r);
+            }
+        options.sort(java.util.Comparator.comparingLong(r -> Math.abs(r[cross[0]] - q[cross[0]]) + Math.abs(r[cross[1]] - q[cross[1]])));
+        for (long[] r : options) {
+            long[] mid = q.clone();
+            mid[cross[0]] = r[cross[0]];
+            if (segmentBlocked(space, bore, q, mid) || segmentBlocked(space, bore, mid, r)) continue;
+            List<long[]> out = new ArrayList<>(List.of(p, q));
+            if (!java.util.Arrays.equals(mid, q) && !java.util.Arrays.equals(mid, r)) out.add(mid);
+            if (!java.util.Arrays.equals(r, q)) out.add(r);
+            return out;
+        }
+        return null;
+    }
+
+    /** Does a pipe of this bore along the straight segment a..b hit anything (across the bore; along it, the segment)? */
+    static boolean segmentBlocked(Space space, int bore, long[] a, long[] b) {
+        if (java.util.Arrays.equals(a, b)) return false;
+        long h = bore / 2;
+        int axis = a[0] != b[0] ? 0 : a[1] != b[1] ? 1 : 2;
+        long[] lo = new long[3], hi = new long[3];
+        for (int i = 0; i < 3; i++) {
+            long e = i == axis ? 0 : h;
+            lo[i] = Math.min(a[i], b[i]) - e;
+            hi[i] = Math.max(a[i], b[i]) + e;
+        }
+        return space.blocked(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
+    }
+
+    static Result routeLegs(Space space, int bore, End start, List<End> waypoints, End end, long deadline) {
         List<End> stops = new ArrayList<>();
         stops.add(start);
         stops.addAll(waypoints);

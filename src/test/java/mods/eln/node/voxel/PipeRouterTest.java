@@ -150,4 +150,29 @@ public class PipeRouterTest {
         for (int i = 0; i < 3; i++) if (q[i] < Math.min(a[i], b[i]) || q[i] > Math.max(a[i], b[i])) return false;
         return true;
     }
+
+    /**
+     * A port off the lattice (the oil pump's discharge flange, 6 px up; the separator's outlet, 6 px across: AdventurAgent
+     * 2026-11-03 found no route reached them): the route leaves it straight out one lattice step, steps across onto the
+     * lattice, and goes on from there.
+     */
+    @Test
+    void reachesAPortOffTheLattice() {
+        var blocks = Set.of(List.of(0L, 0L, 0L), List.of(4L, 0L, 0L));   // (the two devices)
+        var from = new PipeRouter.End(16, 6, 8, 1);   // (east face of block 0, 6 px up)
+        var r = PipeRouter.route(solid(blocks), 2, from, List.of(), face(4, 0, 0, 0));
+        assertNull(r.error, r.error);
+        assertArrayEquals(new long[]{16, 6, 8}, r.points.get(0), "starts at the flange");
+        assertArrayEquals(new long[]{20, 6, 8}, r.points.get(1), "straight out one step");
+        assertEquals(4 * 16 + 0, r.points.get(r.points.size() - 1)[0], "ends at the far port");
+        for (int i = 1; i < r.points.size(); i++) {
+            int axes = 0;
+            for (int a = 0; a < 3; a++) if (r.points.get(i)[a] != r.points.get(i - 1)[a]) axes++;
+            assertEquals(1, axes, "axis-aligned");
+        }
+        // and the same as the end of a route
+        var back = PipeRouter.route(solid(blocks), 2, face(4, 0, 0, 0), List.of(), from);
+        assertNull(back.error, back.error);
+        assertArrayEquals(new long[]{16, 6, 8}, back.points.get(back.points.size() - 1), "ends at the flange");
+    }
 }

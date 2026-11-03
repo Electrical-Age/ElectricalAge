@@ -299,8 +299,9 @@ public final class OilCases {
     }
 
     /**
-     * The oil pump's discharge on an EA pipe (Baughn 2026-11-03: data-driven multi-fluid pipes): an iron pipe from the
-     * flange on its right, 6 px up, into a tank's low side port. Its crude goes along the pipe into the tank, as crude.
+     * The oil pump's discharge on an EA pipe (Baughn 2026-11-03: data-driven multi-fluid pipes): an iron pipe routed from
+     * the flange on its right, 6 px up (off the router's lattice: AdventurAgent found no route reached it), into a tank's
+     * low side port. Its crude goes along the pipe into the tank, as crude.
      */
     static final class PumpIntoPipe implements TestCase {
         mods.eln.oil.OilPumpElement pump;
@@ -328,10 +329,14 @@ public final class OilCases {
             tank = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, ctx.at(3, 1, 1));
             tank.front = mods.eln.misc.Direction.XP;   // (its back, with a low side port, to the west)
             tank.reconnect();
-            try {
-                PipeCases.lay(ctx, ctx.at(2, 1, 1), 0, 0, 6, 8, 8, 6, 8, 8, 4, 8, 16, 4, 8);
-            } catch (IllegalStateException e) {
-                err = e.getMessage();
+            // (routed as a player's pipe kit routes it: the flange is 6 px up, off the router's lattice)
+            var level = ctx.level();
+            var a = mods.eln.node.voxel.PipePlacer.portAtForTests(level, p, net.minecraft.core.Direction.EAST);
+            var b = mods.eln.node.voxel.PipePlacer.portAtForTests(level, ctx.at(3, 1, 1), net.minecraft.core.Direction.WEST);
+            if (a == null || b == null) err = "ports not found: " + a + " " + b;
+            else {
+                var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, a, java.util.List.of(), b);
+                err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
             }
             ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 1000), true);
         }
@@ -462,8 +467,14 @@ public final class OilCases {
                     tank = tank(ctx, e, XN);
                     int at = mods.eln.fluid.PortBridge.endSpot(XN, XP, mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor.OUTLET_Y,
                         mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor.OUTLET_Z);
-                    int y = at / 17, z = at % 17;
-                    lay(ctx, mid, 0, y, z, 8, y, z, 8, 4, 8, 16, 4, 8);
+                    // (routed as a player's pipe kit routes it: the flange is 6 px across, off the router's lattice)
+                    var a = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), w, net.minecraft.core.Direction.EAST);
+                    var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
+                    if (a == null || b == null || a.y() % 16 != at / 17) err = "ports: " + a + " " + b;
+                    else {
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
+                    }
                     ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 2000), true);
                 }
                 default -> throw new IllegalStateException(variant);
