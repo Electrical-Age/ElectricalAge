@@ -32,6 +32,7 @@ public final class OilCases {
         cases.add(new Separator());
         cases.add(new Outlet(true));
         cases.add(new Outlet(false));
+        cases.add(new PumpIntoPipe());
         cases.add(new Basin());
         cases.add(new Pump(false));
         cases.add(new Pump(true));
@@ -293,6 +294,55 @@ public final class OilCases {
             ctx.check("oil: the " + what + " pushed its crude into the block there", from.getFluidAmount() == 0 && into.getFluidAmount() == 1000,
                 from.getFluidAmount() + " mB left, " + into.getFluidAmount() + " mB there");
             ctx.check("oil: nothing out of its other faces", beside.getFluidAmount() == 0, beside.getFluidAmount() + " mB");
+        }
+    }
+
+    /**
+     * The oil pump's discharge on an EA pipe (Baughn 2026-11-03: data-driven multi-fluid pipes): an iron pipe from the
+     * flange on its right, 6 px up, into a tank's low side port. Its crude goes along the pipe into the tank, as crude.
+     */
+    static final class PumpIntoPipe implements TestCase {
+        mods.eln.oil.OilPumpElement pump;
+        mods.eln.oil.TankElement tank;
+        String err;
+
+        public String id() {
+            return "oil_pump_into_pipe";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 140;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(1, 1, 1);
+            pump = (mods.eln.oil.OilPumpElement) ctx.placeTransparent(0 + (81 << 6), p);
+            for (var f : new mods.eln.misc.Direction[]{mods.eln.misc.Direction.XN, mods.eln.misc.Direction.ZN, mods.eln.misc.Direction.XP, mods.eln.misc.Direction.ZP})
+                if (f.right() == mods.eln.misc.Direction.XP) pump.front = f;
+            pump.reconnect();
+            tank = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, ctx.at(3, 1, 1));
+            tank.front = mods.eln.misc.Direction.XP;   // (its back, with a low side port, to the west)
+            tank.reconnect();
+            try {
+                PipeCases.lay(ctx, ctx.at(2, 1, 1), 0, 0, 6, 8, 8, 6, 8, 8, 4, 8, 16, 4, 8);
+            } catch (IllegalStateException e) {
+                err = e.getMessage();
+            }
+            ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 1000), true);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("oil pump: a pipe goes from its discharge flange to the tank", err == null, "" + err);
+            int crude = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
+            int left = ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).getFluidAmount();
+            double inTank = tank.vessel == null ? 0 : tank.vessel.mass(crude) / mods.eln.fluid.FluidSpecies.kgPerMb(crude, false);
+            ctx.line("oil pump into pipe: " + left + " mB left in the pump, tank " + tank.getWaila());
+            ctx.check("oil pump: its crude went into the pipe", left < 500, left + " mB left");
+            ctx.check("oil pump: and along it into the tank, as crude", inTank > 200, String.format("%.0f mB of crude in the tank", inTank));
         }
     }
 

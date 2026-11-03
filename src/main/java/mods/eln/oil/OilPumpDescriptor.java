@@ -22,6 +22,9 @@ public class OilPumpDescriptor extends TransparentNodeDescriptor {
     public static final double CRUDE_J_PER_MB = 38e6 * LITRES_PER_MB, OVERHEAD = 0.05;
     public static final double WATER_J_PER_MB = 20;
     public static final int TANK_MB = 8000;
+    /** Its discharge on an EA pipe: the flange's height on its right face (px), and the head it pumps against (Pa). */
+    public static final int DISCHARGE_Y = 6;
+    public static final double DISCHARGE_HEAD_PA = 6e5;
 
     final double nominalU, nominalP, resistorR;
     final ElectricalCableDescriptor cable;

@@ -1,0 +1,134 @@
+package mods.eln.fluid;
+
+import mods.eln.sim.fluid.EaUnits;
+import mods.eln.sim.fluid.FluidDevice;
+import mods.eln.sim.fluid.FluidNode;
+import mods.eln.sim.fluid.Water;
+import net.minecraft.nbt.CompoundTag;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+
+/**
+ * A device's own tank on an EA pipe (Baughn 2026-11-03: the oil devices on EA pipes, the fluids data): one small port
+ * node on a flange, merged into the pipe that meets it (lumpable), and each step either OUT (what the device made goes
+ * from its tank into the pipe: a pump with a shut-off head) or IN (what the pipe holds that the tank takes goes into
+ * it). Works on any ResourceHandler of fluids, so the devices' own tank classes stay as they are. Not piped, it does
+ * nothing (the device's outlet then pushes into the next block, FluidExport); it acts on the run the port is part of
+ * (FluidWorld.nodeFor), never the stub alone.
+ */
+public final class PortBridge {
+    public static final double STUB_VOLUME = 0.00002, PORT_K = 6e-11;
+
+    public enum Mode { IN, OUT }
+
+    final String key;
+    public final Mode mode;
+    /** mB per second it moves at most, and (OUT) the run pressure it stops at (Pa). */
+    public final double ratePerS, headPa;
+    /** The stub: its own small node (null until the device makes it). */
+    public FluidNode stub;
+    private double[] loaded;
+    private double carry;
+
+    public PortBridge(String key, Mode mode, double ratePerS, double headPa) {
+        this.key = key;
+        this.mode = mode;
+        this.ratePerS = ratePerS;
+        this.headPa = headPa;
+    }
+
+    /** Make the stub at height z (m) in a block, restoring what was saved. */
+    public void make(double z, double ambientK) {
+        stub = new FluidNode(STUB_VOLUME, z, 0.1, false);
+        if (loaded != null) {
+            FluidSaves.restore(stub, loaded);
+            stub.update();
+        } else stub.fill(0, Water.P_ATM, ambientK);
+        stub.lumpable = true;   // (it merges into the pipe on its flange)
+        stub.resistance = 1 / PORT_K;
+    }
+
+    /** Its port on face (MC 3D value) at spot at, of the block at pos (BlockPos.asLong). */
+    public FluidDevice.FluidPort port(long pos, int face, int at) {
+        return new FluidDevice.FluidPort(stub, pos, face, 0.5, PORT_K, at);
+    }
+
+    /** Whether a pipe meets it. */
+    public boolean piped() {
+        return stub != null && !FluidWorld.edgesOf(stub).isEmpty();
+    }
+
+    /** Before a fluid step: move between the tank and the pipe (mB moved). T: what goes into the pipe is at T (K). */
+    public int step(ResourceHandler<FluidResource> tank, double dt, double T) {
+        if (!piped()) return 0;
+        carry += ratePerS * dt;
+        int budget = (int) Math.floor(carry);
+        if (budget <= 0) return 0;
+        carry -= budget;
+        FluidNode run = FluidWorld.nodeFor(stub);
+        return mode == Mode.OUT ? push(tank, run, budget, T) : pull(tank, run, budget);
+    }
+
+    private int push(ResourceHandler<FluidResource> tank, FluidNode run, int budget, double T) {
+        if (run.P() > headPa) return 0;
+        // (liquids up to 90 % of the run, in mB of any liquid: they go by volume)
+        int liquidRoom = (int) Math.floor(Math.max(0, 0.9 * run.volume - run.liquidVolume()) * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
+        int moved = 0;
+        for (int i = 0; i < tank.size() && moved < budget; i++) {
+            FluidResource r = tank.getResource(i);
+            if (r.isEmpty()) continue;
+            var ph = FluidSpecies.of(r.getFluid());
+            if (ph == null) continue;
+            int want = Math.min(budget - moved, ph.vapour() ? Integer.MAX_VALUE : liquidRoom);
+            if (want <= 0) continue;
+            int got;
+            try (var tx = Transaction.openRoot()) {
+                got = tank.extract(i, r, want, tx);
+                tx.commit();
+            }
+            if (got <= 0) continue;
+            EaUnits.add(run, ph.id(), got * FluidSpecies.kgPerMb(ph.id(), ph.vapour()), T, ph.vapour());
+            moved += got;
+            if (!ph.vapour()) liquidRoom -= got;
+        }
+        return moved;
+    }
+
+    private int pull(ResourceHandler<FluidResource> tank, FluidNode run, int budget) {
+        int moved = 0;
+        for (int id = 0; id < run.speciesBound() && moved < budget; id++) {
+            for (boolean vapour : new boolean[]{false, true}) {
+                if (moved >= budget) break;
+                double kg = vapour ? EaUnits.vapourAvailable(run, id) : run.liquid(id);
+                var f = FluidSpecies.fluid(id, vapour);
+                if (f == null || kg <= 0) continue;
+                double per = FluidSpecies.kgPerMb(id, vapour);
+                int have = (int) Math.floor(kg / per);
+                int want = Math.min(budget - moved, have);
+                if (want <= 0) continue;
+                int put;
+                try (var tx = Transaction.openRoot()) {
+                    put = tank.insert(FluidResource.of(f), want, tx);
+                    tx.commit();
+                }
+                if (put <= 0) continue;
+                if (vapour) EaUnits.drainVapour(run, id, put * per);
+                else EaUnits.drainLiquid(run, id, put * per);
+                moved += put;
+            }
+        }
+        return moved;
+    }
+
+    public void write(CompoundTag nbt) {
+        if (stub != null) {
+            FluidWorld.writeBackOf(stub);
+            FluidSaves.put(nbt, key, stub);
+        }
+    }
+
+    public void read(CompoundTag nbt) {
+        loaded = FluidSaves.array(nbt, key);
+    }
+}

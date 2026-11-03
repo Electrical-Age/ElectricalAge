@@ -33,7 +33,7 @@ import java.util.Map;
  * tank, and its discharge line on its right pushes the tank into whatever takes it there (Baughn 2026-11-03: the oil
  * devices' drawn outlets did nothing).
  */
-public class OilPumpElement extends TransparentNodeElement {
+public class OilPumpElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice {
     final OilPumpDescriptor desc;
     final NbtElectricalLoad load = new NbtElectricalLoad("load");
     final Resistor resistor = new Resistor(load, null);
@@ -57,7 +57,8 @@ public class OilPumpElement extends TransparentNodeElement {
         electricalComponentList.add(resistor);
         slowProcessList.add(new Pumping());
         slowProcessList.add(time -> {
-            if (node.coordonate.world() instanceof ServerLevel level)
+            // (an EA pipe on its flange takes it, PortBridge; else whatever takes fluid on that face)
+            if (!dischargePort.piped() && node.coordonate.world() instanceof ServerLevel level)
                 mods.eln.fluid.FluidExport.push(tank, level, node.coordonate.pos(), discharge().toEnumFacing(), (int) Math.ceil(DISCHARGE_MB_PER_S * time));
         });
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
@@ -66,6 +67,40 @@ public class OilPumpElement extends TransparentNodeElement {
 
     /** How fast its discharge pushes out what it pumped (mB/s): far more than it pumps. */
     static final double DISCHARGE_MB_PER_S = 200;
+
+    /** Its discharge on an EA pipe: up to DISCHARGE_MB_PER_S, against up to OilPumpDescriptor.DISCHARGE_HEAD_PA. */
+    final mods.eln.fluid.PortBridge dischargePort = new mods.eln.fluid.PortBridge("discharge", mods.eln.fluid.PortBridge.Mode.OUT,
+        DISCHARGE_MB_PER_S, OilPumpDescriptor.DISCHARGE_HEAD_PA);
+
+    @Override
+    public Object fluidLevel() {
+        return node.coordonate.dimention;
+    }
+
+    /** The flange at the end of its discharge line: the right face, 6 px up (mods.eln.cad.models.OilPump). */
+    @Override
+    public java.util.List<FluidPort> fluidPorts() {
+        if (dischargePort.stub == null) return java.util.List.of();
+        int face = discharge().toEnumFacing().get3DDataValue();
+        return java.util.List.of(dischargePort.port(node.coordonate.pos().asLong(), face, TankElement.sideSpot(face, OilPumpDescriptor.DISCHARGE_Y)));
+    }
+
+    @Override
+    public void beforeFluidStep(double dt) {
+        dischargePort.step(tank, dt, mods.eln.sim.Ambient.kelvin(node.coordonate));
+    }
+
+    @Override
+    public void connectJob() {
+        super.connectJob();
+        if (dischargePort.stub != null) mods.eln.fluid.FluidWorld.add(this);
+    }
+
+    @Override
+    public void disconnectJob() {
+        super.disconnectJob();
+        mods.eln.fluid.FluidWorld.remove(this);
+    }
 
     /** Its discharge: the right side, where the model's discharge line ends in a flange (mods.eln.cad.models.OilPump). */
     public Direction discharge() {
@@ -177,6 +212,7 @@ public class OilPumpElement extends TransparentNodeElement {
     public void initialize() {
         desc.cable.applyTo(load);
         resistor.setR(desc.resistorR);
+        dischargePort.make(node.coordonate.y + OilPumpDescriptor.DISCHARGE_Y / 16.0, mods.eln.sim.Ambient.kelvin(node.coordonate));
         connect();
     }
 
@@ -195,6 +231,7 @@ public class OilPumpElement extends TransparentNodeElement {
         super.writeToNBT(nbt);
         tank.writeToNBT(nbt, "tank");
         nbt.putDouble("carry", carry);
+        dischargePort.write(nbt);
     }
 
     @Override
@@ -202,6 +239,7 @@ public class OilPumpElement extends TransparentNodeElement {
         super.readFromNBT(nbt);
         tank.readFromNBT(nbt, "tank");
         carry = nbt.getDoubleOr("carry", 0);
+        dischargePort.read(nbt);
     }
 
     @Override
@@ -211,7 +249,7 @@ public class OilPumpElement extends TransparentNodeElement {
         if (lake != null) info.put(I18N.tr("Lake"), lake);
         info.put(I18N.tr("Flow"), String.format("%.1f mB/s", rate));
         info.put(I18N.tr("Tank"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB");
-        info.put(I18N.tr("Discharge"), I18N.tr("the flange on its right"));
+        info.put(I18N.tr("Discharge"), dischargePort.piped() ? I18N.tr("the flange on its right, into the pipe") : I18N.tr("the flange on its right"));
         info.put(I18N.tr("Power consumption"), Utils.plotPower("", resistor.getP()));
         return info;
     }

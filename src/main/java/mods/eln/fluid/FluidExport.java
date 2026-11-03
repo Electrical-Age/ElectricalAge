@@ -10,8 +10,8 @@ import net.neoforged.neoforge.transfer.transaction.Transaction;
 /**
  * A device's outlet (Baughn 2026-11-03: the oil devices' drawn outlets did nothing): it pushes its tank into whatever
  * takes fluid through the face it is drawn on, as the block there offers it (Capabilities.Fluid.BLOCK): another mod's
- * pipe, a column base, a flare stack, an EA tank for water. EA pipes carry only water, steam and air (the fluid core),
- * so crude goes into other mods' pipes or straight into the next device.
+ * pipe, a column base, a flare stack, an EA tank. An EA pipe on the device's flange takes it instead (PortBridge: the
+ * fluid core carries any species since 2026-11-03).
  */
 public final class FluidExport {
     private FluidExport() {
