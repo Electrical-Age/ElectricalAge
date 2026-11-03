@@ -261,7 +261,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        v.read(nbt, false);
+        v.read(nbt, 0);
         loadedTubes = CondenserVessel.get(nbt, "tubes");
     }
 

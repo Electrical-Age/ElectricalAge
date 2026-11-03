@@ -55,6 +55,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `CondensatePumpTest`, `oil_condensate_return_*`, `plant_condenser_pump_into_*`.
   Jade on both condensers, "Pump outlet": the pressure it works against and its flow there as a share of its rated
   (free) flow at its speed, or "shut off, needs a pipe pump" (Baughn 2026-11-03).
+- Small Steam Condenser / Steam Condenser vessels hold 12 buckets, as a tank block (Baughn 2026-11-03: "133 m^3 is a
+  bit much for a 1m^3 block"); they were 5 / 20 L (74 000 / 296 000 mB). Saves without the "tank3" tag load trimmed:
+  water over the float valve's shut level (25 %) and air over 1 atm's worth go, at the temperature they had (kept, a
+  full old vessel was over FLOOD at once and burnt its turbine). The Plant Steam Condenser keeps its 60 L
+  (~889 000 mB, 74 buckets). `oil_condenser_old_save_trimmed`.
 - Shaft redo, part 1 (Baughn 2026-10-29: the old shaft turbines had no steam input; redo them on the new steam logic).
   The shaft Steam Turbine (same id) takes steam by EA pipe on top and lets it out of its back (piped on, or into the
   air); work = 0.75 x the isentropic drop from the inlet to the exhaust's pressure, onto the shaft; 16 kW at 20 bar

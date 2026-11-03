@@ -27,8 +27,8 @@ public final class CondenserVessel {
     public FluidNode vessel, outlet, inlet;
     public FluidDevice.Link pump, makeup;
     double[] loaded, loadedOut, loadedIn;
-    /** Saved before the tanks shrank (CondenserElement: no "tank2" tag): its water is trimmed once on load. */
-    boolean oldTank;
+    /** The volume it was saved with, if bigger than its own (m^3; 0: saved as it is): trimmed once on load. */
+    double savedVolume;
     /** Heat the shell took from the vessel (W, averaged) and condensate pumped (mB/s), for WAILA. */
     public double heatW, pumped;
     /** Totals since loaded (GameTests): condensate pumped (kg), air the ejector took (kg), steam exhausted into it (kg). */
@@ -85,12 +85,19 @@ public final class CondenserVessel {
 
     private void restore(FluidNode n, double[] saved, double ambientK, boolean isVessel) {
         if (saved != null) {
-            // (a vessel saved before Baughn's smaller tanks, fuller than the float valve's level of its new one: the excess
-            // water goes, with its share of the energy; else it was over FLOOD at once, and the turbine took water damage)
-            double max = isVessel && oldTank ? MAKEUP_SHUT * volume * Water.RHO_L : Double.MAX_VALUE, keep = saved[0] > max ? max / saved[0] : 1;
-            n.mWater = saved[0] * keep;
-            n.mAir = saved[1];
-            n.energy = saved[2] * keep;
+            if (isVessel && savedVolume > volume) {
+                // (a vessel saved bigger, before Baughn's smaller tanks: its water over the float valve's shut level of the
+                // new one goes, and its air over 1 atm's worth, at the temperature it had; else it was over FLOOD at once
+                // and the turbine took water damage, or its air stood at many bar against the turbine's exhaust)
+                double T = new mods.eln.sim.fluid.Flash().solve(saved[0], saved[1], saved[2], savedVolume, 300).T;
+                n.mWater = Math.min(saved[0], MAKEUP_SHUT * volume * Water.RHO_L);
+                n.mAir = Math.min(saved[1], Water.P_ATM * (volume - n.mWater / Water.RHO_L) / (Water.R_AIR * T));
+                n.energy = mods.eln.sim.fluid.Flash.energyAt(n.mWater, n.mAir, volume, T);
+            } else {
+                n.mWater = saved[0];
+                n.mAir = saved[1];
+                n.energy = saved[2];
+            }
             n.update();
         } else n.fill(0, Water.P_ATM, ambientK);
     }
@@ -191,8 +198,9 @@ public final class CondenserVessel {
         return nbt.contains(key + "W") ? new double[]{nbt.getDoubleOr(key + "W", 0), nbt.getDoubleOr(key + "A", 0), nbt.getDoubleOr(key + "U", 0)} : null;
     }
 
-    public void read(CompoundTag nbt, boolean oldTank) {
-        this.oldTank = oldTank;
+    /** Read what was saved; savedVolume: the vessel's volume then (m^3), or 0 if it is its own. */
+    public void read(CompoundTag nbt, double savedVolume) {
+        this.savedVolume = savedVolume;
         loaded = get(nbt, "vessel");
         loadedOut = get(nbt, "outlet");
         loadedIn = get(nbt, "inlet");

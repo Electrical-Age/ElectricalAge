@@ -41,6 +41,7 @@ public final class OilCases {
         cases.add(new TurbineHoldsPressure());
         cases.add(new CondenserFloods());
         cases.add(new CondenserMakeupFloat());
+        cases.add(new CondenserLegacyLoad());
         cases.add(new CondensateReturn(10e5, false));
         cases.add(new CondensateReturn(14e5, false));
         cases.add(new CondensateReturn(14e5, true));
@@ -874,6 +875,53 @@ public final class OilCases {
                 ctx.check(id + ": and the vessel fills", fill > fill0 + 0.005, String.format("%.1f%% -> %.1f%%", fill0 * 100, fill * 100));
                 ctx.check(id + ": Jade: shut off, needs a pipe pump", jade.startsWith("against 14") && jade.endsWith("shut off, needs a pipe pump"), jade);
             }
+        }
+    }
+
+    /**
+     * A Steam Condenser saved with its old 20 L vessel (no "tank3" tag), 40 % water at 50 C under 1 atm of air, loads into
+     * the 12-bucket one (Baughn 2026-11-03): its water down to the float valve's shut level, its air to 1 atm's worth, at
+     * the temperature it had; one saved since keeps all it had.
+     */
+    static final class CondenserLegacyLoad implements TestCase {
+        public String id() {
+            return "oil_condenser_old_save_trimmed";
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        static mods.eln.oil.CondenserVessel load(double savedVolume, double liquidShare, double T) {
+            var n = new mods.eln.sim.fluid.FluidNode(savedVolume, 64, 1.0, false).fill(liquidShare * savedVolume * mods.eln.sim.fluid.Water.RHO_L,
+                mods.eln.sim.fluid.Water.P_ATM, T);
+            n.update();
+            var nbt = new net.minecraft.nbt.CompoundTag();
+            nbt.putDouble("vesselW", n.mWater);
+            nbt.putDouble("vesselA", n.mAir);
+            nbt.putDouble("vesselU", n.energy);
+            var d = mods.eln.oil.CondenserDescriptor.VOLUME;
+            var v = new mods.eln.oil.CondenserVessel(new mods.eln.sim.nbt.NbtThermalLoad("shell"), d, 1000,
+                mods.eln.oil.CondensatePump.forTurbine(10e5, 0.002));
+            v.read(nbt, savedVolume == d ? 0 : savedVolume);
+            v.initialize(64, 293);
+            return v;
+        }
+
+        public void measure(TestContext ctx) {
+            double T = 323.15;
+            var old = load(0.02, 0.4, T);
+            var now = load(mods.eln.oil.CondenserDescriptor.VOLUME, 0.2, T);
+            ctx.line(String.format("old save: %.1f%% water, %.3f bar, %.1f C; current save: %.1f%% water", old.floodShare() * 100, old.vessel.P() / 1e5,
+                old.vessel.T() - mods.eln.sim.fluid.Water.T0, now.floodShare() * 100));
+            ctx.check("condenser: an old save's water is trimmed to the float valve's shut level", Math.abs(old.floodShare() - mods.eln.oil.CondenserVessel.MAKEUP_SHUT) < 0.01,
+                String.format("%.1f%%", old.floodShare() * 100));
+            ctx.check("condenser: at its temperature, its air at about 1 atm", Math.abs(old.vessel.T() - T) < 1 && old.vessel.P() < 1.3e5,
+                String.format("%.1f C, %.3f bar", old.vessel.T() - mods.eln.sim.fluid.Water.T0, old.vessel.P() / 1e5));
+            ctx.check("condenser: a current save keeps its water", Math.abs(now.floodShare() - 0.2) < 0.005, String.format("%.1f%%", now.floodShare() * 100));
         }
     }
 

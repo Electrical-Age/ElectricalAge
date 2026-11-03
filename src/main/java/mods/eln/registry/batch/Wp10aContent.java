@@ -79,7 +79,7 @@ public class Wp10aContent implements ElnContent {
         transparentNodeItem.addDescriptor(20 + (id << 6), new mods.eln.oil.SteamOvenDescriptor(TR_NAME(Type.NONE, "Steam Oven"), "steamoven"));
         // the turbines' condensers (Baughn 2026-10-26: optional, beside the turbine, the models join); model mods.eln.cad.models.Condenser
         transparentNodeItem.addDescriptor(28 + (id << 6), new mods.eln.oil.CondenserDescriptor(TR_NAME(Type.NONE, "Small Steam Condenser"),
-            1000, 0.005, "condenser50v"));
+            1000, 0.005, "condenser50v"));   // (0.005, 0.02: the vessels before 12 buckets, for old saves)
         transparentNodeItem.addDescriptor(32 + (id << 6), new mods.eln.oil.CondenserDescriptor(TR_NAME(Type.NONE, "Steam Condenser"),
             4000, 0.02, "condenser200v"));
         // the bootstrap turbine (Baughn 2026-10-27): heat and water in, 50 V out, its control and condenser built in

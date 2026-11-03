@@ -23,6 +23,10 @@ public class CondenserDescriptor extends TransparentNodeDescriptor {
     public final double nominalHeat;
     /** Its turbine's power (W), the vessel (m^3), and the condensate (kg/s) at full power on a 10 bar inlet. */
     public final double turbineP, volume, condensateKgPerS;
+    /** The vessel saves made before "tank3" had (m^3): 5 L (Small), 20 L (Steam Condenser). */
+    public final double legacyVolume;
+    /** Its vessel (Baughn 2026-11-03: 12 buckets, as a tank block; it was 5 / 20 L, 74 000 / 296 000 mB). */
+    public static final double VOLUME = TankDescriptor.bucketsVolume(12);
     /** The condensate pump: sized to the turbine's rated 10 bar inlet and its condensate. */
     public final CondensatePump pump;
     /** The vessel's temperature over its shell's, and the shell's over ambient, at nominal heat (K). */
@@ -35,10 +39,11 @@ public class CondenserDescriptor extends TransparentNodeDescriptor {
     public static final double FLOOD = 0.5;
     final Obj3D obj;
 
-    public CondenserDescriptor(String name, double turbineP, double volume, String model) {
+    public CondenserDescriptor(String name, double turbineP, double legacyVolume, String model) {
         super(name, CondenserElement.class, CondenserRender.class);
         this.turbineP = turbineP;
-        this.volume = volume;
+        this.volume = VOLUME;
+        this.legacyVolume = legacyVolume;
         double eta = SteamGeneratorDescriptor.ETA;
         double tIn = Water.tsat(SteamGeneratorDescriptor.NOMINAL_PA), drop = Water.isentropicDrop(tIn, SteamGeneratorDescriptor.NOMINAL_PA, 0.1e5);
         double kgPerS = turbineP / (eta * drop);

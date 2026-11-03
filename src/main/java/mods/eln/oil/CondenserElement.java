@@ -200,13 +200,15 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putBoolean("tank2", true);
+        nbt.putBoolean("tank3", true);
         v.write(nbt);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        v.read(nbt, !nbt.contains("tank2"));
+        // (no "tank3": saved with the 5 / 20 L vessels, trimmed to 12 buckets; no "tank2" either: bigger still, trimmed as those)
+        v.read(nbt, nbt.contains("tank3") ? 0 : desc.legacyVolume);
     }
 
     @Override
