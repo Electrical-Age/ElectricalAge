@@ -117,12 +117,12 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         // in, colder than the warm water the economizer holds, which held it to 1.6 kW of 5)
         double ta = flowing ? inA : a.T(), tb = flowing ? inB : b.T();
         if (heat > 0) {
-            double fromA = (a.energy - mods.eln.sim.fluid.Flash.energyAt(a.mWater, a.mAir, a.volume, tb)) / dt;
-            double intoB = (mods.eln.sim.fluid.Flash.energyAt(b.mWater, b.mAir, b.volume, ta) - b.energy) / dt;
+            double fromA = (a.energy - a.energyAt(tb)) / dt;
+            double intoB = (b.energyAt(ta) - b.energy) / dt;
             heat = fromA <= 0 || intoB <= 0 ? 0 : Math.min(heat, 0.9 / (1 / fromA + 1 / intoB));
         } else {
-            double fromB = (b.energy - mods.eln.sim.fluid.Flash.energyAt(b.mWater, b.mAir, b.volume, ta)) / dt;
-            double intoA = (mods.eln.sim.fluid.Flash.energyAt(a.mWater, a.mAir, a.volume, tb) - a.energy) / dt;
+            double fromB = (b.energy - b.energyAt(ta)) / dt;
+            double intoA = (a.energyAt(tb) - a.energy) / dt;
             heat = fromB <= 0 || intoA <= 0 ? 0 : Math.max(heat, -0.9 / (1 / fromB + 1 / intoA));
         }
         // (what leaves each side: a gas, its inlet less the heat over its flow, since a few litres of gas swing within a

@@ -148,7 +148,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         // (at most half the way to the shell's temperature in a step, as the condenser: a boiler boiled dry holds only
         // a little air and vapour, next to no heat capacity, and the explicit step overshot it to 1300 C and on into its
         // pipes, with the pressure swinging 0.5-3.6 bar: AdventurAgent)
-        double toShell = (mods.eln.sim.fluid.Flash.energyAt(vessel.mWater, vessel.mAir, vessel.volume, shellK) - vessel.energy) / dt;
+        double toShell = (vessel.energyAt(shellK) - vessel.energy) / dt;
         q = toShell >= 0 ? Math.max(0, Math.min(q, 0.5 * toShell)) : Math.min(0, Math.max(q, 0.5 * toShell));
         vessel.heat += q;
         thermal.moveEnergyTo(-q * dt);

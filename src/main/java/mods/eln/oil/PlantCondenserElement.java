@@ -125,8 +125,8 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         // the tube bundle: the vessel's heat into the cooling water (drowned tubes still work: they are in the water)
         if (tubes != null) {
             double tv = n.T(), tt = tubes.T(), q = TUBES_UA * (tv - tt);
-            double fromVessel = (n.energy - mods.eln.sim.fluid.Flash.energyAt(n.mWater, n.mAir, n.volume, tt)) / dt;
-            double intoTubes = (mods.eln.sim.fluid.Flash.energyAt(tubes.mWater, tubes.mAir, tubes.volume, tv) - tubes.energy) / dt;
+            double fromVessel = (n.energy - n.energyAt(tt)) / dt;
+            double intoTubes = (tubes.energyAt(tv) - tubes.energy) / dt;
             q = q >= 0 ? Math.max(0, Math.min(q, Math.min(0.5 * fromVessel, 0.5 * intoTubes))) : 0;
             n.heat -= q;
             tubes.heat += q;
