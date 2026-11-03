@@ -41,9 +41,9 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     /** The water's share of its volume, last published (the sight glass). */
     float shownFill = -1;
     /**
-     * In a box: which of its ports have something coupled to them (Baughn 2026-10-29: a merged box draws a flange only
-     * where a pipe meets it): bit 2 * face + (0 low, 1 high) for the side faces (Direction 3D values 2..5), bit 12 the
-     * top. Published when it changes.
+     * Which of its ports have something coupled to them (Baughn: a flange only where a pipe meets it; 2026-10-29 for a
+     * merged box, 2026-11-03 for a lone tank too): bit 2 * face + (0 low, 1 high) for the side faces (Direction 3D
+     * values 2..5), bit 12 the top. Published when it changes.
      */
     public int coupled;
 
@@ -66,7 +66,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
                 TankGroup.regroup(seeds, null);
                 if (group != null) mods.eln.Eln.LOG.info("Electrical Age: tank box at {} re-formed late ({} tanks)", node.coordonate, group.members.size());
             }
-            int c = group == null ? 0 : coupledPorts();
+            int c = coupledPorts();
             if (c != coupled) {
                 coupled = c;
                 needPublish();
@@ -310,7 +310,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             stream.writeByte(group == null ? 1 : group.sx);
             stream.writeByte(group == null ? 1 : group.sy);
             stream.writeByte(group == null ? 1 : group.sz);
-            stream.writeShort(group == null ? 0 : coupled);
+            stream.writeShort(coupled);
             // (its place in the box, for the nozzles from its flanges in to the box's shell)
             var c = node.coordonate;
             stream.writeByte(group == null ? 0 : c.x - group.x0);
@@ -348,6 +348,10 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         info.put(I18N.tr("Water"), String.format("%.0f mB, %.0f%% full", vessel.mLiquid() / EaUnits.KG_PER_MB_WATER, fill() * 100));
         info.put(I18N.tr("Vessel"), group == null ? I18N.tr("one block") : String.format("%d x %d x %d blocks, %.0f buckets", group.sx, group.sy, group.sz,
             vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER / 1000));
+        // (its ports are drawn only where a pipe meets them: say where they are)
+        info.put(I18N.tr("Ports"), group == null ? I18N.tr("steam: top, and 12 px up on the sides; water: bottom, and 4 px up on the sides (not the glass's)")
+            : I18N.tr("on its outer faces: steam: top, and 12 px up a side; water: bottom, and 4 px up a side"));
+        info.put(I18N.tr("Piped"), String.format("%d of %d ports here", Integer.bitCount(coupled), ports.stream().filter(p -> p.face() != 0).count()));
         if (vessel.mVapour() > 1e-7) info.put(I18N.tr("Steam"), EaUnits.steamGrams(vessel.mVapour() / EaUnits.KG_PER_MB_STEAM));
         if (vessel.P() > desc.workingPa) info.put(I18N.tr("Warning"), String.format("over its %.0f bar working pressure", desc.workingPa / 1e5));
         return info;

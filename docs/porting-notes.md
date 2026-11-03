@@ -76,6 +76,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   to float precision), so a broken block takes its share and saved state survives; the box draws as one tank from its
   lowest corner (shell, sight glass and water scaled; no flanges). Plant condenser: cooling-water tubes in low on its
   left, out low on its right, UA 4 kW/K. `tank_box_*`, `plant_condenser_cooling_water_full_hp`.
+- Tank flanges (Baughn 2026-11-03): a tank, lone or a box, draws a flange only on a port a pipe or device meets (a lone
+  tank drew all seven); the ports themselves are unchanged (kits still end at them) and Jade lists where they are and
+  how many are piped. Each flange's nozzle runs in past the shell all round its bore and is closed at its end (it was
+  cut at the shell's centre line, so the curving shell left gaps at its sides one could look into).
+  `tank_flanges_where_piped`.
 - Pipe sizes (Baughn 2026-10-29): iron and alloy pipes drawn at a quarter of their old 4 and 6 voxels (1 and 1.5) and
   taking 2 voxels on the grid (occupancy, hitbox, routing; even, so centred on the lattice; their physics unchanged);
   the Large Alloy Pipe (tier 2) drawn and taking 6, 16 x the alloy's inner area (Baughn): volume 16 x, conductance

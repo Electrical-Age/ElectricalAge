@@ -34,6 +34,7 @@ public final class PlumbingCases {
         cases.add(new QualitySensor());
         cases.add(new TankBox());
         cases.add(new TankBoxSplits());
+        cases.add(new TankFlanges());
         cases.add(new HotWaterIntoShortPipe());
         cases.add(new ValveMeters());
         cases.add(new LiquidStaysIncompressible());
@@ -314,6 +315,88 @@ public final class PlumbingCases {
             }
             ctx.check("tank box: flanges only where pipes meet it (two blocks: the top one, the east low one)",
                 withPipes == 2 && top == 1 << 12 && east == 1 << 10, String.format("%d blocks; top %x, east %x", withPipes, top, east));
+        }
+    }
+
+    /**
+     * Baughn 2026-11-03: a lone tank showed all seven flanges, and a flange's nozzle stopped short of the curved shell (one
+     * could look into it). A tank draws a flange only where a pipe meets the port: lone tank A with no pipe has none;
+     * tanks B and C piped low port to low port have one each, on the facing sides, as their renders read it. And every
+     * side nozzle, in any box up to 3 x 3 x 3, reaches inside the shell all round its bore (unless its port is so near
+     * the box's corner that the bore passes beside the shell).
+     */
+    static final class TankFlanges extends Big {
+        TankElement a, b, c;
+
+        public String id() {
+            return "tank_flanges_where_piped";
+        }
+
+        public void build(TestContext ctx) {
+            a = tank(ctx, IRON_TANK, ctx.at(1, 1, 6), Direction.XN);
+            b = tank(ctx, ALLOY_TANK, ctx.at(2, 1, 1), Direction.XN);   // (its back, +x, faces the pipe)
+            c = tank(ctx, ALLOY_TANK, ctx.at(4, 1, 1), Direction.XP);   // (its back, -x, faces the pipe)
+            PipeCases.lay(ctx, ctx.at(3, 1, 1), 1, 0, 4, 8, 16, 4, 8);
+        }
+
+        static mods.eln.oil.TankRender render(TankElement t) {
+            var bos = new java.io.ByteArrayOutputStream();
+            t.networkSerialize(new java.io.DataOutputStream(bos));
+            var r = new mods.eln.oil.TankRender(null, t.getDescriptor());
+            r.networkUnserialize(new java.io.DataInputStream(new java.io.ByteArrayInputStream(bos.toByteArray())));
+            return r;
+        }
+
+        /** Whether (u, v) (px, box coordinates across the box's floor) is inside the shell of a box sx x sz (its flats' ellipse). */
+        static boolean inShell(double u, double v, int sx, int sz) {
+            double r = mods.eln.oil.TankRender.SHELL_R * Math.cos(Math.PI / 14);
+            double du = (u - sx * 8.0) / (r * sx), dv = (v - sz * 8.0) / (r * sz);
+            return du * du + dv * dv < 1;
+        }
+
+        public void measure(TestContext ctx) {
+            var ra = render(a);
+            var rb = render(b);
+            var rc = render(c);
+            ctx.check("tank flanges: a lone tank with no pipe draws none", a.coupled == 0 && ra.coupled == 0, Integer.toHexString(ra.coupled));
+            ctx.check("tank flanges: B draws one, its east low port (the pipe's)", rb.coupled == 1 << 10, Integer.toHexString(rb.coupled));
+            ctx.check("tank flanges: C draws one, its west low port (the pipe's)", rc.coupled == 1 << 8, Integer.toHexString(rc.coupled));
+            ctx.check("tank flanges: the ports still work (kits end at them): seven on a lone tank", b.fluidPorts().size() == 8 && a.getWaila().containsKey(mods.eln.i18n.I18N.tr("Ports")),
+                b.fluidPorts().size() + " ports");
+            // every side nozzle of a box up to 3 x 3 x 3, on every outer face of its blocks: its bore's end inside the shell
+            var r = rb;
+            String bad = "";
+            int checked = 0;
+            for (int sx = 1; sx <= 3; sx++)
+                for (int sz = 1; sz <= 3; sz++)
+                    for (int ox = 0; ox < sx; ox++)
+                        for (int oz = 0; oz < sz; oz++)
+                            for (int face = 2; face <= 5; face++) {
+                                boolean alongX = face >= 4, high = face == 3 || face == 5;
+                                int o = alongX ? ox : oz, n = alongX ? sx : sz;
+                                if (o != (high ? n - 1 : 0)) continue;   // (an outer face only)
+                                r.sx = sx;
+                                r.sz = sz;
+                                r.ox = ox;
+                                r.oz = oz;
+                                int nAcross = alongX ? sz : sx, oAcross = alongX ? oz : ox;
+                                double across = oAcross * 16 + 8, half = mods.eln.oil.TankRender.SHELL_R * Math.cos(Math.PI / 14) * nAcross;
+                                if (Math.abs(across - nAcross * 8.0) + mods.eln.oil.TankRender.NOZZLE_R > 0.95 * half) continue;   // (beside the shell)
+                                double faceAt = high ? (o + 1) * 16 : o * 16, end = high ? faceAt - r.nozzle(face) : faceAt + r.nozzle(face);
+                                for (int k = 0; k < 24; k++) {
+                                    double w = across + mods.eln.oil.TankRender.NOZZLE_R * Math.cos(2 * Math.PI * k / 24);
+                                    boolean in = alongX ? inShell(end, w, sx, sz) : inShell(w, end, sx, sz);
+                                    if (!in) {
+                                        bad += String.format(" %dx%d (%d,%d) face %d;", sx, sz, ox, oz, face);
+                                        break;
+                                    }
+                                }
+                                checked++;
+                            }
+            ctx.check("tank flanges: every side nozzle reaches inside the shell all round its bore", bad.isEmpty() && checked > 20, checked + " nozzles;" + bad);
+            r.sx = r.sz = 1;
+            r.ox = r.oz = 0;
+            ctx.check("tank flanges: a lone tank's top nozzle reaches below its flat top (15 px)", 16 - r.topNozzle() < 15, String.format("%.2f px", 16 - r.topNozzle()));
         }
     }
 
