@@ -108,19 +108,10 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
         return Utils.plotCelsius("T:", thermalLoad.Tc);
     }
 
-    /**
-     * Its flue (Baughn 2026-11-03: a coal oven, its hot smoke out of a pipe flange on top, or out of the flue if nothing
-     * is piped there): HEAT_SHARE of the fire's power heats its load, and the smoke carries SMOKE_SHARE of it over the
-     * ambient, so a heat exchanger on the flue gets back a fair bonus (20 % lost, 15 % more on top).
-     */
-    public static final double HEAT_SHARE = 0.8, SMOKE_SHARE = 0.35;
-    /** The smoke leaves the fire at this temperature (K); a flue choked over this pressure (Pa) vents at the oven. */
-    public static final double SMOKE_K = 573.15, CHOKED_PA = 3e5;
-    static final double FLUE_VOLUME = 0.002;
-    mods.eln.sim.fluid.FluidNode flue;
-    private double[] loadedFlue;
+    /** Its flue: smoke out of the flange on top of its stack (mods.eln.cad.models.HeatFurnace), or up the stack. */
+    final mods.eln.fluid.Flue flue = new mods.eln.fluid.Flue("flue");
     private java.util.List<FluidPort> fluePorts = java.util.List.of();
-    /** Smoke going up its flue into the air this step (not piped, burning): drawn as smoke. */
+    /** Smoke going up its stack this step (published): drawn as smoke. */
     boolean smoking;
 
     @Override
@@ -135,35 +126,19 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
 
     @Override
     public void beforeFluidStep(double dt) {
-        if (flue == null) return;
-        int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:flue_gas");
-        boolean piped = !mods.eln.fluid.FluidWorld.edgesOf(flue).isEmpty();
-        double q = SMOKE_SHARE * furnaceProcess.getP();
-        var run = mods.eln.fluid.FluidWorld.nodeFor(flue);
-        if (id >= 2 && piped && q > 0 && run.P() < CHOKED_PA) {
-            var sp = mods.eln.sim.fluid.SpeciesRegistry.get().byId(id);
-            double amb = mods.eln.sim.Ambient.kelvin(node.coordonate);
-            double m = q * dt / Math.max(1, sp.hVapour(SMOKE_K) - sp.hVapour(amb));
-            run.addMass(id, m);
-            run.energy += m * sp.hVapour(SMOKE_K);
-            run.update();
-        }
-        boolean was = smoking;
-        smoking = !piped && q > 0;
-        if (smoking != was) needPublish();
+        if (flue.step(furnaceProcess.getP(), dt, mods.eln.sim.Ambient.kelvin(node.coordonate))) needPublish();
+        smoking = flue.smoking;
     }
 
     @Override
     public void afterFluidStep(double dt) {
-        // (nothing piped: what it held goes up the flue; as the gas turbine's exhaust)
-        if (flue != null && mods.eln.fluid.FluidWorld.edgesOf(flue).isEmpty())
-            flue.fill(0, mods.eln.sim.fluid.Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        flue.afterStep(mods.eln.sim.Ambient.kelvin(node.coordonate));
     }
 
     @Override
     public void connectJob() {
         super.connectJob();
-        if (flue != null) mods.eln.fluid.FluidWorld.add(this);
+        if (flue.node != null) mods.eln.fluid.FluidWorld.add(this);
     }
 
     @Override
@@ -176,15 +151,10 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
     public void initialize() {
         descriptor.applyTo(thermalLoad);
         descriptor.applyTo(furnaceProcess);
-        furnaceProcess.heatShare = HEAT_SHARE;
+        furnaceProcess.heatShare = mods.eln.fluid.Flue.HEAT_SHARE;
         computeInventory();
-        flue = new mods.eln.sim.fluid.FluidNode(FLUE_VOLUME, node.coordonate.y + 0.75, 0.25, false);
-        if (loadedFlue != null) {
-            mods.eln.fluid.FluidSaves.restore(flue, loadedFlue);
-            flue.update();
-        } else flue.fill(0, mods.eln.sim.fluid.Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
-        // (the flange on top of its stack, the top face's centre: mods.eln.cad.models.HeatFurnace)
-        fluePorts = java.util.List.of(new FluidPort(flue, node.coordonate.pos().asLong(), 1, 1.0, mods.eln.fluid.PortBridge.PORT_K));
+        flue.make(node.coordonate.y + 0.75, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        fluePorts = java.util.List.of(flue.port(node.coordonate.pos().asLong()));   // (mods.eln.cad.models.HeatFurnace's stack)
 
         connect();
 
@@ -306,7 +276,7 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
 
         nbt.putBoolean("takeFuel", takeFuel);
         nbt.putBoolean("controlExternal", controlExternal);
-        if (flue != null) mods.eln.fluid.FluidSaves.put(nbt, "flue", flue);
+        flue.write(nbt);
     }
 
     @Override
@@ -314,7 +284,7 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
         super.readFromNBT(nbt);
         takeFuel = nbt.getBooleanOr("takeFuel", false);
         controlExternal = nbt.getBooleanOr("controlExternal", false);
-        loadedFlue = mods.eln.fluid.FluidSaves.array(nbt, "flue");
+        flue.read(nbt);
     }
 
     @Override
@@ -322,8 +292,7 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
         info.put(I18N.tr("Set temperature"), Utils.plotCelsius("", regulator.getTarget()));
-        if (flue != null) info.put(I18N.tr("Flue"), mods.eln.fluid.FluidWorld.edgesOf(flue).isEmpty() ? I18N.tr("smoke out of its stack (a pipe on its top flange takes it)")
-            : String.format(I18N.tr("piped, %.2f bar"), mods.eln.fluid.FluidWorld.nodeFor(flue).P() / 1e5));
+        if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade());
         return info;
     }
 }

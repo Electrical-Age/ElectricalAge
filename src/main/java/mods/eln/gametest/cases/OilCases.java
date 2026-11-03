@@ -374,10 +374,11 @@ public final class OilCases {
      * segment_out: a column segment's gasoline out of its front nozzle into a tank;
      * flare_in: a tank of crude into a flare stack's front flange, which burns it;
      * turbine_fuel: a tank of gasoline (one block up) along a pipe down into a gas turbine's top fuel flange;
-     * separator_out: the tar sand separator's crude out of its back flange (4 px up, off centre) into a tank.
+     * separator_out: the tar sand separator's crude out of its back flange (4 px up, off centre) into a tank;
+     * fuel_furnace_in: a tank of gasoline into the fuel heat furnace's front flange (4 px up), into its tank.
      */
     static final class OilOnPipes implements TestCase {
-        static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel", "separator_out"};
+        static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel", "separator_out", "fuel_furnace_in"};
         final String variant;
         mods.eln.node.transparent.TransparentNodeElement west, east;
         mods.eln.oil.TankElement tank;
@@ -491,6 +492,14 @@ public final class OilCases {
                     }
                     ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 2000), true);
                 }
+                case "fuel_furnace_in" -> {
+                    tank = tank(ctx, w, XP);
+                    east = ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, e);
+                    east.front = XN;   // (its front, with the fuel flange 4 px up, west)
+                    east.reconnect();
+                    lay(ctx, mid, 0, 4, 8, 16, 4, 8);
+                    put(ctx, w, Oil.Cut.GASOLINE.source.get(), 6000);
+                }
                 default -> throw new IllegalStateException(variant);
             }
         }
@@ -525,6 +534,11 @@ public final class OilCases {
                     double got = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
                     ctx.check("oil on pipes: the separator's crude went into the tank", got > 500,
                         String.format("%.0f mB in the tank, %d left in the separator", got, ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).getFluidAmount()));
+                }
+                case "fuel_furnace_in" -> {
+                    var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, ctx.at(3, 1, 1), net.minecraft.core.Direction.UP);
+                    long got = cap == null ? 0 : cap.getAmountAsLong(0);
+                    ctx.check("oil on pipes: the fuel heat furnace's tank filled from the pipe on its front flange", got > 10, got + " mB, " + east.getWaila());
                 }
                 case "turbine_fuel" -> {
                     int f = ((mods.eln.mechanical.GasTurbineElement) east).tank.getFluidAmount();

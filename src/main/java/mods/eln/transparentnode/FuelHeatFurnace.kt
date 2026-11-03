@@ -132,7 +132,7 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
 }
 
 class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: TransparentNodeDescriptor) :
-    TransparentNodeElement(transparentNode, descriptor) {
+    TransparentNodeElement(transparentNode, descriptor), mods.eln.sim.fluid.FluidDevice {
     companion object {
         val ExternalControlledToggleEvent: Byte = 0
         val MainSwitchToggleEvent: Byte = 1
@@ -144,6 +144,42 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private val controlLoad = NbtElectricalGateInput("commandLoad")
 
     private val tank = PreciseElementFluidHandler(25)
+
+    /** On EA pipes (Baughn 2026-11-03): fuel in on the flange low on its front (mods.eln.cad.models.FuelHeater). */
+    private val fuelIn = mods.eln.fluid.PortBridge("fuelIn", mods.eln.fluid.PortBridge.Mode.IN, 50.0, 0.0)
+    /** Its flue: smoke out of the flange on top of its stack, or up the stack (as the coal oven's). */
+    private val flue = mods.eln.fluid.Flue("flue")
+    private var smoking = false
+
+    override fun fluidLevel(): Any = node!!.coordonate.dimention
+
+    override fun fluidPorts(): List<mods.eln.sim.fluid.FluidDevice.FluidPort> {
+        if (fuelIn.stub == null || flue.node == null) return listOf()
+        val pos = node!!.coordonate.pos().asLong()
+        val f = front.toEnumFacing().get3DDataValue()
+        return listOf(fuelIn.port(pos, f, mods.eln.fluid.PortBridge.endSpot(front, front, 4, 8)), flue.port(pos))
+    }
+
+    override fun beforeFluidStep(dt: Double) {
+        val amb = mods.eln.sim.Ambient.kelvin(node!!.coordonate)
+        fuelIn.step(tank, dt, amb)
+        if (flue.step(actualHeatPower, dt, amb)) needPublish()
+        smoking = flue.smoking
+    }
+
+    override fun afterFluidStep(dt: Double) {
+        flue.afterStep(mods.eln.sim.Ambient.kelvin(node!!.coordonate))
+    }
+
+    override fun connectJob() {
+        super.connectJob()
+        if (flue.node != null) mods.eln.fluid.FluidWorld.add(this)
+    }
+
+    override fun disconnectJob() {
+        super.disconnectJob()
+        mods.eln.fluid.FluidWorld.remove(this)
+    }
 
     private val inventory_ = TransparentNodeElementInventory(2, 1, this)
 
@@ -180,7 +216,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             val f = mods.eln.ElnConfig.heatFurnaceFuelFactor
             val availableEnergy = tank.drainEnergy(fire.level * nominalPower * time / f) * f
             actualHeatPower = availableEnergy / time
-            thermalLoad.PcTemp += actualHeatPower
+            thermalLoad.PcTemp += mods.eln.fluid.Flue.HEAT_SHARE * actualHeatPower   // (the rest leaves in the smoke: Flue)
         }
 
         override fun getHit() = thermalLoad.Tc
@@ -233,6 +269,9 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     override fun initialize() {
         (descriptor as FuelHeatFurnaceDescriptor).thermal.applyTo(thermalLoad)
         inventoryChange(inventory_)
+        val amb = mods.eln.sim.Ambient.kelvin(node!!.coordonate)
+        fuelIn.make(node!!.coordonate.y + 4 / 16.0, amb)
+        flue.make(node!!.coordonate.y + 0.75, amb)
         connect()
     }
 
@@ -249,6 +288,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         stream.writeInt(FuelBurnerDescriptor.getDescriptor(inventory_.getItem(FuelHeatFurnaceContainer.FuelBurnerSlot))?.type ?: -1)
         stream.writeFloat(fire.level.toFloat())
         stream.writeBoolean(fire.lighting())
+        stream.writeBoolean(smoking)
     }
 
     override fun networkUnserialize(stream: DataInputStream): Byte {
@@ -280,6 +320,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         nbt.putDouble("setTemperature", setTemperature)
         nbt.putDouble("actualHeatPower", actualHeatPower)
         fire.write(nbt, "")
+        fuelIn.write(nbt)
+        flue.write(nbt)
     }
 
     override fun readFromNBT(nbt: CompoundTag) {
@@ -292,6 +334,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         setTemperature = nbt.getDoubleOr("setTemperature", 0.0)
         actualHeatPower = nbt.getDoubleOr("actualHeatPower", 0.0)
         if (nbt.contains("fire")) fire.read(nbt, "") else fire.level = heaterControlValue
+        fuelIn.read(nbt)
+        flue.read(nbt)
     }
 
     override fun hasGui() = true
@@ -300,6 +344,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val info = HashMap<String, String>()
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))
         info.put(I18N.tr("Power"), Utils.plotPower("", actualHeatPower))
+        if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade())
+        if (fuelIn.piped()) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its front flange"))
         return info
     }
 
@@ -334,6 +380,9 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     var actualTemperature = 0f
     var fire = 0f
     var lighting = false
+    /** Smoke up its stack (burning, nothing piped on its flue's flange). */
+    var smoking = false
+    private var smokeDue = 0f
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
         override fun getPitch() = FuelBurnerDescriptor.pitchForType(type)
@@ -357,6 +406,17 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
 
     override fun refresh(deltaT: Float) {
         flicker = (flicker + deltaT * 11) % (20 * Math.PI).toFloat()
+        val level = tileEntity.level ?: return
+        if (!smoking) return
+        // (smoke out of the stack's open flange, more of it the harder it burns)
+        smokeDue += deltaT * (2 + 10 * fire)
+        val p = tileEntity.blockPos
+        while (smokeDue >= 1) {
+            smokeDue -= 1
+            val jx = (Math.random() - 0.5) * 0.12
+            val jz = (Math.random() - 0.5) * 0.12
+            level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, p.x + 0.5 + jx, p.y + 1.02, p.z + 0.5 + jz, 0.0, 0.06, 0.0)
+        }
     }
 
     override fun networkUnserialize(stream: DataInputStream) {
@@ -375,6 +435,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
         }
         fire = stream.readFloat()
         lighting = stream.readBoolean()
+        smoking = stream.readBoolean()
     }
 
 }
