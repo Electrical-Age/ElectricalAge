@@ -222,6 +222,15 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `eln_handbook_given`). EA ships a stub start page; a content mod adds pages under `guides/eln/handbook/` in its own
   namespace and calls `Handbook.setStartPage` (`mods/eln/handbook`, `HandbookCases`).
 
+### Multi-fluid pipes (2026-11-03)
+- Baughn: EA pipes carry oil "the complex way": fluids are data (datapack species JSON), Raoult mixing within a
+  miscibility group, fluids no species names refused at EA's capabilities, viscosity depending on temperature now
+  (solidifying later, if ever), crude as one species, fire from hot leaks as a last phase.
+- The fluid core carries any species (simulation.md); water and air alone are bit-identical to the two-species core.
+- Oil devices on EA pipes through PortBridge (content.md, Oil). The separator's outlet flange moved from 2.7 to 4 px up
+  so a pipe end can meet it (Baughn: "definitely move it"); the pipe router reaches flanges off its lattice by a jog.
+- A pipe's open end passes liquid as far as it is wet (Baughn: a part-full run held its puddle; water too).
+
 ## Behaviour changes vs 1.12
 
 - Meters, probes and power sockets no longer burn at their (former slot) cable's voltage: those watchdogs are off.
