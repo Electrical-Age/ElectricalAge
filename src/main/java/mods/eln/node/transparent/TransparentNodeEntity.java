@@ -100,8 +100,9 @@ public class TransparentNodeEntity extends NodeBlockEntity {
     @Override
     public void clientRefresh(float deltaT) {
         if (elementRender != null) {
-            elementRender.refresh(deltaT);
+            // burnt: no animation or working particles, only the smoke (Baughn: a damaged machine stops working)
             if (elementRender.burnt) burntSmoke();
+            else elementRender.refresh(deltaT);
         }
     }
 

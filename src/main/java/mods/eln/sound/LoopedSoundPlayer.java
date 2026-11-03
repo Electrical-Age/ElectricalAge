@@ -72,11 +72,12 @@ public final class LoopedSoundPlayer {
         }
     }
 
+    /** The loops of a block's renders; none of a burnt one (Baughn: a damaged machine shouldn't keep making sounds). */
     static List<LoopedSound> loops(NodeBlockEntity be) {
         List<LoopedSound> out = new ArrayList<>();
         if (be instanceof SixNodeEntity six) {
-            for (SixNodeElementRender r : six.elementRenderList) if (r != null) out.addAll(r.loopedSounds);
-        } else if (be instanceof TransparentNodeEntity t && t.elementRender != null) {
+            for (SixNodeElementRender r : six.elementRenderList) if (r != null && !r.burnt) out.addAll(r.loopedSounds);
+        } else if (be instanceof TransparentNodeEntity t && t.elementRender != null && !t.elementRender.burnt) {
             out.addAll(t.elementRender.loopedSounds);
         }
         return out;
