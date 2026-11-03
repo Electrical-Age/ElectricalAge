@@ -287,6 +287,13 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   flue to an iron pipe's flange at the top face's centre (drawn only; no port yet). The 1.12 drawer that opened when a
   player came near, and the fuel item drawn in it, are gone. Test `wp10b heat furnace model`.
 
+- Fuel heat furnace remodelled as a small oil-fired heater (Baughn 2026-11-03, model `mods.eln.cad.models.FuelHeater`,
+  id `fuelheater`, parts renamed lower case): a painted housing with a cast-iron front plate, the installed burner gun
+  (big, medium or small) on a mounting flange, the power and heat lamps above it, a sight port whose flame shows as
+  high as the fire and from dull orange to bright yellow-white with the power (against the big burner), an iron pipe's
+  flange for the fuel low on the front (centre y 4, z 8) and a flue to one at the top face's centre (both drawn only;
+  no ports yet). Test `wp10b fuel heat furnace model`.
+
 - New: the Steam Oven (`oil/SteamOven*`, Baughn 2026-10-23): steam into a port on top (as the turbine's), a 10 W fan
   on 50 V; cooks food only, at up to 280 W (twice the electrical oven's best food speed), condensing 280 W / 25% of the
   steam's heat (~500 mB/s at full speed; the rest vents as a plume); hoppers: sides in, bottom out. Model

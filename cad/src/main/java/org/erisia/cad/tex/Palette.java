@@ -73,6 +73,7 @@ public final class Palette {
         put("paint_plain", 90, 96, 104, 8, null);
         put("paint_condenser", 60, 120, 130, 8, null);
         put("paint_hx", 120, 110, 60, 8, null);
+        put("paint_heater", 70, 98, 82, 8, null);   // the fuel heat furnace's green enamel
         // the device models' own materials (ported from their scripts' atlases, board #44)
         // (Tank)
         put("paint_tankalloy", 150, 112, 52, 8, null);

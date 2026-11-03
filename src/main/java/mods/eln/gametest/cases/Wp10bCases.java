@@ -100,6 +100,7 @@ public final class Wp10bCases {
         cases.add(new HeatFurnaceExternalCase());
         cases.add(new HeatFurnaceTrimmerCase());
         cases.add(new HeatFurnaceModelCase());
+        cases.add(new FuelHeatFurnaceModelCase());
     }
 
     // ------------------------------------------------------------------ helpers
@@ -559,6 +560,31 @@ public final class Wp10bCases {
             var d = (mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor) mods.eln.Eln.transparentNodeItem.getDescriptor(HEAT_FURNACE);
             ctx.check("wp10b heat furnace model: the model's hitbox", d.modelHitbox() != null, "" + d.modelHitbox());
             within(ctx, "wp10b heat furnace model: the glow's full power [W]", d.maxPower(), 3000, 1e-6);
+        }
+    }
+
+    /**
+     * The fuel heat furnace's oil heater model (Baughn 2026-11-03, mods.eln.cad.models.FuelHeater): it loads with its
+     * housing, a burner gun of each size, both lamps, the flame behind the sight port and the port's pane, its hitbox is
+     * the model's, and the flame's full brightness is the big burner's power (type 0, the strongest).
+     */
+    static final class FuelHeatFurnaceModelCase implements TestCase {
+        public String name() {
+            return "wp10b fuel heat furnace model";
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            var d = (mods.eln.transparentnode.FuelHeatFurnaceDescriptor) mods.eln.Eln.transparentNodeItem.getDescriptor(FUEL_HEAT_FURNACE);
+            ctx.check("wp10b fuel heat furnace model: its parts", d.hasParts("main", "burnerbig", "burnermedium", "burnersmall", "powerled",
+                "heatled", "glow", "glass"), "" + mods.eln.Eln.obj.getObj("fuelheater"));
+            ctx.check("wp10b fuel heat furnace model: the model's hitbox", d.modelHitbox() != null, "" + d.modelHitbox());
+            double big = mods.eln.item.FuelBurnerDescriptor.Companion.powerForType(0), medium = mods.eln.item.FuelBurnerDescriptor.Companion.powerForType(1),
+                small = mods.eln.item.FuelBurnerDescriptor.Companion.powerForType(2);
+            ctx.check("wp10b fuel heat furnace model: the big burner is the strongest", big > medium && medium > small && small > 0,
+                big + " " + medium + " " + small);
         }
     }
 
