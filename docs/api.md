@@ -328,7 +328,12 @@ hot one too. The kiln above trips at 300 C at 20 C ambient, and at 370 C in the 
 | `DETACHED` | The machine is in no circuit: its block entity went, or its type was never registered. |
 
 `Brownout.SLOW` has no floor. The machine keeps running on whatever arrives, with its draw capped at
-rated x (U/U_nom)^2. On a weak line it never pulls past the line's maximum power, so it can't collapse its own line.
+rated x (U/U_nom)^2. Alone on a line weaker than it, it never pulls past the line's maximum power, so it can't collapse
+its own line. It learns the line from its own steps, and doesn't know its neighbours. Several `SLOW` machines on a weak
+line share it as resistors at their ratings would, in proportion to their ratings. A machine heavier than the line takes
+the most it can with the others drawing. If the machines are each lighter than the line but heavier together, they settle
+at their rated resistances, past the line's maximum power, as EA's resistor machines always did. None draws less than it
+would as such a resistor.
 Choose `SLOW` for loads that can run slower; `STOP` is the honest default.
 
 `onTrip(listener)` is called once per trip, on the server thread, with a `TripCause`. The cause gives the measured

@@ -201,6 +201,156 @@ public class BenchTest {
         assertEquals(MachineState.RUNNING, m.state());
     }
 
+    /**
+     * Several Brownout.SLOW machines of mixed ratings on one weak line, each learning the line from its own steps
+     * while its neighbours start and stop (every converted macerator is SLOW, so a row of them on one line is the
+     * common case). Switched on one by one, the last off and on again, the largest switching every 8 ticks, the line
+     * weakened under load, then made stiff. At every tick the line is no lower than resistors at the machines'
+     * ratings would hold it, and none draws less than its resistor would (no learnt line starves it); each phase settles (no oscillation), shared in proportion to the
+     * ratings while no machine alone is heavier than the line; the switching leaves nothing behind; and on the stiff
+     * line every machine draws its rating again. A row lighter than its line one by one but heavier together settles
+     * at the machines' rated resistances, as resistors (and 1.12's machines) do: past the line's maximum power.
+     */
+    @Test
+    void slowConsumersShareAWeakLine() {
+        slowRow(new double[]{500, 1000, 2000}, 8);
+        slowRow(new double[]{500, 1000, 2000, 3000}, 8);
+        slowRow(new double[]{300, 800, 1500, 2000, 3000}, 5);
+        slowRow(new double[]{2000, 2000, 2000, 2000}, 12);
+        slowRow(new double[]{3000, 200, 400}, 20);
+    }
+
+    /** A row of SLOW machines rated (W at 200 V) on a line of lineOhms; see slowConsumersShareAWeakLine. */
+    private static void slowRow(double[] rated, double lineOhms) {
+        SlowRow r = new SlowRow(rated, lineOhms);
+        int n = rated.length, big = 0;
+        for (int i = 0; i < n; i++) {
+            if (rated[i] > rated[big]) big = i;
+            r.on[i] = true;
+            r.run(60);
+            r.settled("on " + (i + 1));
+        }
+        double[] all = r.last();
+        r.on[n - 1] = false;
+        r.run(60);
+        r.settled("last off");
+        r.on[n - 1] = true;
+        r.run(60);
+        r.settled("last on again");
+        for (int t = 0; t < 120; t++) {
+            if (t % 8 == 0) r.on[big] = !r.on[big];
+            r.run(1);
+        }
+        r.on[big] = true;
+        r.run(60);
+        r.settled("after the switching");
+        double[] again = r.last();
+        for (int i = 0; i < n; i++)
+            assertEquals(all[i], again[i], 0.005 * all[i], r.what("the switching left machine " + i + " where it was"));
+        r.line(lineOhms * 2.5);
+        r.run(60);
+        r.settled("line weakened");
+        r.line(0.1);
+        r.run(40);
+        for (int i = 0; i < n; i++)
+            assertTrue(r.ms.get(i).watts() > 0.95 * rated[i], r.what("on the stiff line machine " + i + " draws its rating"));
+    }
+
+    /** A bench with a row of SLOW machines whose owners ask a tick's rated work while on; checks every tick. */
+    private static final class SlowRow {
+        final double[] rated;
+        final boolean[] on;
+        final int[] onFor, offFor;
+        final Bench b;
+        final List<BenchMachine> ms = new ArrayList<>();
+        final List<double[]> watts = new ArrayList<>();
+        double lineOhms;
+        /** Ticks since the line last changed: a machine plans on the line it saw, so it may take a few to follow. */
+        int sinceLine = 1000;
+
+        SlowRow(double[] rated, double lineOhms) {
+            this.rated = rated;
+            this.lineOhms = lineOhms;
+            on = new boolean[rated.length];
+            onFor = new int[rated.length];
+            offFor = new int[rated.length];
+            b = ElnTestKit.bench().supply(200, 0.01).line(lineOhms);
+            for (int i = 0; i < rated.length; i++) {
+                int k = i;
+                ms.add(b.add(MachineSpec.consumer(Tier.V200).ratedWatts(rated[i]).idleWatts(rated[i] / 100)
+                    .onBrownout(Brownout.SLOW).build()).owner(m -> m.takeJoules(on[k] ? m.ratedJoulesPerTick() : 0)));
+            }
+        }
+
+        void line(double ohms) {
+            lineOhms = ohms;
+            sinceLine = 0;
+            b.line(ohms);
+        }
+
+        /** n ticks, each checked against the resistor model: the line and every machine on for a second. */
+        void run(int n) {
+            for (int t = 0; t < n; t++) {
+                b.tick();
+                sinceLine++;
+                double u = b.volts(), g = 0;
+                double[] w = new double[rated.length];
+                for (int i = 0; i < rated.length; i++) {
+                    onFor[i] = on[i] ? onFor[i] + 1 : 0;
+                    offFor[i] = on[i] ? 0 : offFor[i] + 1;
+                    w[i] = ms.get(i).watts();
+                    // (a machine just switched off still draws a tick or two; one off draws its idle watts)
+                    g += offFor[i] < 5 ? rated[i] / (200 * 200) : rated[i] / 100 / (u * u);
+                }
+                watts.add(w);
+                double ur = 200 / (1 + g * (lineOhms + 0.01));   // (the machines as resistors at their ratings)
+                assertTrue(u > 0.98 * ur, what("the line held at least where resistors would: " + u + " V vs " + ur));
+                double total = 0, model = 0;
+                for (int i = 0; i < rated.length; i++) {
+                    if (onFor[i] <= 20 || sinceLine <= 10) continue;
+                    double r = ur * ur * rated[i] / (200 * 200);
+                    total += w[i];
+                    model += r;
+                    assertTrue(w[i] > 0.99 * r, what("machine " + i + " draws at least what a resistor at its rating would: " + w[i] + " W, as a resistor " + r + " W"));
+                }
+                assertTrue(total >= 0.99 * model, what("together they draw at least what resistors would: " + total + " W vs " + model));
+            }
+        }
+
+        /**
+         * The last 40 ticks: every machine's draw flat, and, while each machine alone is lighter than the line (its rated
+         * resistance over the line's), those on sharing in proportion to their ratings, as resistors would. A heavier
+         * one takes the most its line gives with the others drawing (its own learnt maximum power), which is less than
+         * its share but more than a resistor's (run's checks).
+         */
+        void settled(String phase) {
+            double least = Double.POSITIVE_INFINITY, most = 0;
+            boolean light = true;
+            for (int i = 0; i < rated.length; i++) light &= !on[i] || 200 * 200 / rated[i] > lineOhms;
+            for (int i = 0; i < rated.length; i++) {
+                double lo = Double.POSITIVE_INFINITY, hi = 0;
+                for (double[] w : watts.subList(watts.size() - 40, watts.size())) {
+                    lo = Math.min(lo, w[i]);
+                    hi = Math.max(hi, w[i]);
+                }
+                assertTrue(hi - lo <= 0.01 * hi + 1e-6, what(phase + ": machine " + i + " settled, " + lo + ".." + hi + " W"));
+                if (!on[i]) continue;
+                least = Math.min(least, hi / rated[i]);
+                most = Math.max(most, hi / rated[i]);
+            }
+            if (light) assertTrue(most <= 1.01 * least, what(phase + ": they share in proportion to their ratings: " + least + ".." + most + " W/W"));
+        }
+
+        double[] last() {
+            return watts.get(watts.size() - 1).clone();
+        }
+
+        String what(String check) {
+            return java.util.Arrays.toString(rated) + " W on " + lineOhms + " ohm, tick " + b.tickCount() + ": " + check
+                + "\n" + b.trace().lines().skip(Math.max(0, b.tickCount() - 30)).collect(java.util.stream.Collectors.joining("\n"));
+        }
+    }
+
     /** The bench sets the ambient its machines' heat models start at and cool to. */
     @Test
     void benchAmbient() {

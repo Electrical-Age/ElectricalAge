@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  * most a quarter of a tick's rated work (held back a second when the line can't keep up), but never more than the buffer's
  * room, and none without demand; all capped at rated x (U/U_nom)^2 and at rated. An idle machine draws its idle
  * watts only. A Brownout.SLOW consumer on a soft line plans against the line as it is (see LINE_MODEL_SAG): never
- * past the line's maximum power, so it can't pull its own line down to its rated resistance. Delivered energy pays the idle watts first; the rest goes to the buffer, and what doesn't fit (the
+ * past the line's maximum power as it sees it, so alone it can't pull its line down to its rated resistance. Delivered energy pays the idle watts first; the rest goes to the buffer, and what doesn't fit (the
  * line rose) is heat. joulesIn() == joulesOut() + bufferJoules() + joulesLost() at all times (for a producer too).
  * <p>
  * Producer: the buffer is the queue of given energy, at most two ticks of rated output. The source is on while the
@@ -78,7 +78,10 @@ public final class MachineCore implements MachineView {
      * resistance. When the learnt line would sag over LINE_MODEL_SAG at the planned power, the plan is capped at the
      * line's maximum power E^2 / 4R and its resistance solved on the line's stiff side; below that the old rule
      * stands. Brownout.STOP machines keep the old rule: a source that can't carry their demand stops them (Baughn: the
-     * starved-supply behaviour is the spec's choice).
+     * starved-supply behaviour is the spec's choice). With neighbours on the line, what it learns is the line as it
+     * sees it (the others drawing too); the plan never goes under its rated resistance, so a row of machines each
+     * lighter than the line settles at their rated resistances, as resistors would, even when the row together is
+     * heavier (BenchTest.slowConsumersShareAWeakLine).
      */
     public static final double LINE_LEARN_SHARE = 0.02, LINE_MODEL_SAG = 0.01;
     /** A producer's open-circuit voltage, share of nominal. */
