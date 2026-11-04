@@ -60,17 +60,27 @@ public final class ModelHitbox {
         });
     }
 
-    /** A box (0..1, front XN) turned as glRotateXnRef turns the model about the block's centre line: XP 180 degrees about
-     *  y, ZP 90, ZN 270 ((x, z) -> (z, -x) for 90, centred). Vertical fronts aren't turned (shaft parts face sideways). */
+    /**
+     * A box (0..1, front XN) turned as glRotateXnRef turns the model about the block's centre: XP 180 degrees about y,
+     * ZP 90 ((x, z) -> (z, -x)), ZN 270, YP -90 about z ((x, y) -> (y, -x)), YN 90 about z after a (1, -1, -1) scale
+     * ((x, y, z) -> (y, x, -z)). Up and down fronts were left unturned before (a device facing up, such as an antenna,
+     * got its sideways box).
+     */
     static double[] turned(double[] b, Direction f) {
-        double x0 = b[0] - 0.5, x1 = b[3] - 0.5, z0 = b[2] - 0.5, z1 = b[5] - 0.5;
-        double nx0, nx1, nz0, nz1;
-        switch (f) {
-            case XP -> { nx0 = -x1; nx1 = -x0; nz0 = -z1; nz1 = -z0; }
-            case ZP -> { nx0 = z0; nx1 = z1; nz0 = -x1; nz1 = -x0; }
-            case ZN -> { nx0 = -z1; nx1 = -z0; nz0 = x0; nz1 = x1; }
-            default -> { nx0 = x0; nx1 = x1; nz0 = z0; nz1 = z1; }
-        }
-        return new double[]{nx0 + 0.5, b[1], nz0 + 0.5, nx1 + 0.5, b[4], nz1 + 0.5};
+        double[] p = turnedPoint(b[0] - 0.5, b[1] - 0.5, b[2] - 0.5, f), q = turnedPoint(b[3] - 0.5, b[4] - 0.5, b[5] - 0.5, f);
+        return new double[]{Math.min(p[0], q[0]) + 0.5, Math.min(p[1], q[1]) + 0.5, Math.min(p[2], q[2]) + 0.5,
+            Math.max(p[0], q[0]) + 0.5, Math.max(p[1], q[1]) + 0.5, Math.max(p[2], q[2]) + 0.5};
+    }
+
+    /** A point about the block's centre turned as glRotateXnRef turns the model (see turned). */
+    static double[] turnedPoint(double x, double y, double z, Direction f) {
+        return switch (f) {
+            case XP -> new double[]{-x, y, -z};
+            case ZP -> new double[]{z, y, -x};
+            case ZN -> new double[]{-z, y, x};
+            case YP -> new double[]{y, -x, z};
+            case YN -> new double[]{y, x, -z};
+            default -> new double[]{x, y, z};
+        };
     }
 }
