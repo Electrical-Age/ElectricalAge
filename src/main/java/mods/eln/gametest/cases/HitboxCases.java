@@ -20,7 +20,7 @@ public final class HitboxCases {
     }
 
     public static List<TestCase> cases() {
-        return List.of(new Survey());
+        return List.of(new Survey(), new WallDevices());
     }
 
     static final class Survey implements TestCase {
@@ -109,6 +109,55 @@ public final class HitboxCases {
             }
             ctx.line("hitbox: " + with + " computed or hand-written, " + empty + " without (multiblocks and models outside their block)");
             ctx.check("hitbox: every drawn triangle in its block lies in the outline", lostIn.isEmpty(), String.join(", ", lostIn));
+        }
+    }
+
+    /**
+     * Wall and floor devices (todo #140, #159): a device in a plain six-node block is outlined at its model's box on its
+     * face, not the 3/16 plate every element had; a cable keeps the plate. A suspended lamp socket's footprint is a column
+     * its socket's width (its halo plane left out); the anemometer's leaves out its undrawn ground base.
+     */
+    static final class WallDevices implements TestCase {
+        net.minecraft.core.BlockPos chip;
+
+        public String id() {
+            return "hitbox_wall_devices";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 4;
+        }
+
+        public void build(TestContext ctx) {
+            chip = ctx.at(1, 1, 1);
+            ctx.placeSix(Ids.six("NOT Chip"), chip);
+        }
+
+        public void measure(TestContext ctx) {
+            var lamp = Eln.sixNodeItem.getDescriptor(Ids.six("Suspended Lamp Socket"));
+            int[] fp = lamp.footprint();
+            ctx.check("suspended lamp socket: a column its socket's width", fp[0] == 2 && fp[1] == 16, java.util.Arrays.toString(fp));
+            var wind = (mods.eln.sixnode.electricalwindsensor.ElectricalWindSensorDescriptor) Eln.sixNodeItem.getDescriptor(Ids.six("Electrical Anemometer Sensor"));
+            int[] wf = wind.footprint();
+            // (its height is its drawn parts', the wall base and the cups: the ground base, never drawn, is left out)
+            var m = Eln.obj.getObj("Anemometer");
+            double drawn = Math.max(m.getPart("base_wall").boundingBox().max.x, m.getPart("anemometer").boundingBox().max.x);
+            double ground = m.getPart("base_ground").boundingBox().max.x;
+            ctx.line(String.format("anemometer parts: drawn to %.3f, ground base to %.3f", drawn, ground));
+            ctx.check("anemometer: its footprint is its drawn parts' height", wf[1] == (int) Math.ceil(drawn * 16 - 0.01), java.util.Arrays.toString(wf));
+            var shape = ctx.level().getBlockState(chip).getShape(ctx.level(), chip);
+            var chipDesc = Eln.sixNodeItem.getDescriptor(Ids.six("NOT Chip"));
+            int[] b = chipDesc.footprintBox(mods.eln.misc.Direction.YN.getInt());
+            var bounds = shape.bounds();
+            ctx.line("wall devices: lamp " + java.util.Arrays.toString(fp) + ", anemometer " + java.util.Arrays.toString(wf) + ", chip outline " + bounds
+                + " vs its footprint " + java.util.Arrays.toString(b));
+            ctx.check("a NOT chip on the floor is outlined at its model's box, not the plate",
+                chipDesc.footprintFromModel() && Math.abs(bounds.maxY - b[4] / 16.0) < 1e-9 && Math.abs(bounds.minX - b[0] / 16.0) < 1e-9,
+                bounds + " vs " + java.util.Arrays.toString(b));
         }
     }
 }

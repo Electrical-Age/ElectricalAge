@@ -32,6 +32,16 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 
     public boolean paintable = false;
 
+    /**
+     * A suspended socket hangs its chain down through its whole block (and on below: only its own block is outlined),
+     * so its footprint is a column the socket's width (todo #140: the {2, 16} column; its halo left out by name).
+     */
+    @Override
+    public int[] footprint() {
+        int[] f = super.footprint();
+        return render instanceof LampSocketSuspendedObjRender ? new int[]{f[0], 16} : f;
+    }
+
     public LampSocketDescriptor(String name, LampSocketObjRender render,
                                 LampSocketType socketType,
                                 boolean paintable,

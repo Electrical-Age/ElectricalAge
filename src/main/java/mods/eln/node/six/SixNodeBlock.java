@@ -75,8 +75,27 @@ public class SixNodeBlock extends NodeBlock implements net.minecraft.world.level
         if (e == null) return Shapes.block();
         VoxelShape s = Shapes.empty();
         int mask = e.getSideMask();
-        for (int i = 0; i < 6; i++) if ((mask & (1 << i)) != 0) s = Shapes.or(s, PLATES[i]);
+        for (int i = 0; i < 6; i++) if ((mask & (1 << i)) != 0) s = Shapes.or(s, boxOf(e.descriptorAt(i), i));
         return s.isEmpty() ? Shapes.block() : s;
+    }
+
+    private static final java.util.Map<SixNodeDescriptor, VoxelShape[]> BOXES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * The outline of a device d on side i: its model's box on that face (SixNodeDescriptor.footprintBox, as a device
+     * hosted in a voxel block is outlined; Baughn 2026-10-30: hitboxes from geometry, and every element had the same
+     * 3/16 plate), or the plate for one drawn without a model (a cable) or not known yet.
+     */
+    public static VoxelShape boxOf(@Nullable SixNodeDescriptor d, int i) {
+        if (d == null || !d.footprintFromModel()) return PLATES[i];
+        return BOXES.computeIfAbsent(d, k -> {
+            VoxelShape[] a = new VoxelShape[6];
+            for (int f = 0; f < 6; f++) {
+                int[] b = k.footprintBox(f);
+                a[f] = box(b[0], b[1], b[2], b[3], b[4], b[5]);
+            }
+            return a;
+        })[i];
     }
 
     /**
@@ -95,19 +114,19 @@ public class SixNodeBlock extends NodeBlock implements net.minecraft.world.level
             ? net.minecraft.world.InteractionResult.SUCCESS : net.minecraft.world.InteractionResult.PASS;
     }
 
-    /** The element whose plate holds the hit point, or null. */
+    /** The element whose outline holds the hit point, or null. */
     public static @Nullable Direction sideAt(SixNodeEntity e, BlockPos pos, net.minecraft.world.phys.BlockHitResult hit) {
-        return sideAt(e.getSideMask(), pos, hit);
+        return sideAt(e.getSideMask(), i -> boxOf(e.descriptorAt(i), i), pos, hit);
     }
 
-    /** The same, from a mask of the faces that hold an element (bit = Direction.getInt()). */
-    public static @Nullable Direction sideAt(int mask, BlockPos pos, net.minecraft.world.phys.BlockHitResult hit) {
+    /** The same, from a mask of the faces that hold an element (bit = Direction.getInt()) and their outlines. */
+    public static @Nullable Direction sideAt(int mask, java.util.function.IntFunction<VoxelShape> box, BlockPos pos, net.minecraft.world.phys.BlockHitResult hit) {
         double x = hit.getLocation().x - pos.getX(), y = hit.getLocation().y - pos.getY(), z = hit.getLocation().z - pos.getZ();
         Direction side = null;
         Direction facing = Direction.fromIntMinecraftSide(hit.getDirection().getOpposite().get3DDataValue());
-        if ((mask & (1 << facing.getInt())) != 0 && PLATES[facing.getInt()].bounds().inflate(0.002).contains(x, y, z)) side = facing;
+        if ((mask & (1 << facing.getInt())) != 0 && box.apply(facing.getInt()).bounds().inflate(0.002).contains(x, y, z)) side = facing;
         for (int i = 0; side == null && i < 6; i++)
-            if ((mask & (1 << i)) != 0 && PLATES[i].bounds().inflate(0.002).contains(x, y, z)) side = Direction.fromInt(i);
+            if ((mask & (1 << i)) != 0 && box.apply(i).bounds().inflate(0.002).contains(x, y, z)) side = Direction.fromInt(i);
         return side;
     }
 

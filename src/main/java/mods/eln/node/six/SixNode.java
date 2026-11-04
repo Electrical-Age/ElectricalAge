@@ -70,7 +70,8 @@ public class SixNode extends Node {
     public net.minecraft.world.item.ItemStack pickItem(net.minecraft.world.phys.BlockHitResult hit, net.minecraft.world.level.LevelReader level) {
         int mask = 0;
         for (Direction d : Direction.values()) if (getElement(d) != null) mask |= 1 << d.getInt();
-        Direction side = hit == null ? null : SixNodeBlock.sideAt(mask, coordonate.pos(), hit);
+        Direction side = hit == null ? null : SixNodeBlock.sideAt(mask,
+            i -> SixNodeBlock.boxOf(sideElementList[i] == null ? null : sideElementList[i].sixNodeElementDescriptor, i), coordonate.pos(), hit);
         for (int i = 0; side == null && i < 6; i++) if ((mask & (1 << i)) != 0) side = Direction.fromInt(i);
         return side == null ? net.minecraft.world.item.ItemStack.EMPTY : getElement(side).getDropItemStack();
     }

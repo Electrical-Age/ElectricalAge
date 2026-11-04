@@ -123,6 +123,12 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor {
         return boundsOf(baseWall, anemometer);
     }
 
+    /** Its ground base is loaded but never drawn (it goes on walls only): not in its footprint (todo #140). */
+    @Override
+    protected java.util.Set<Obj3DPart> footprintIgnores() {
+        return baseGround == null ? java.util.Set.of() : java.util.Set.of(baseGround);
+    }
+
     /** Walls only (canBePlacedOnSide), without telling anyone: the placement preview asks every tick. */
     @Override
     public boolean allowedOnSide(mods.eln.misc.Direction side) {

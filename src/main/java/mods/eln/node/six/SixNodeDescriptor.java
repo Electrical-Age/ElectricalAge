@@ -266,6 +266,14 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
         return footprint;
     }
 
+    private boolean footprintFromModel;
+
+    /** Is footprint() its model's (else the old plate's, for a device drawn without a model: a cable)? */
+    public boolean footprintFromModel() {
+        footprint();
+        return footprintFromModel;
+    }
+
     /** Model parts left out of the footprint: hinged ones, whose raw geometry is drawn open (Baughn: a lamp supply's
      *  and a signal processor's open door made their box almost a full block). */
     protected java.util.Set<Obj3D.Obj3DPart> footprintIgnores() {
@@ -278,6 +286,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
         collectModels(this, 0, boxes, any, footprintIgnores());
         BoundingBox b = any[0] ? boxes[0] : any[1] ? boxes[1] : null;
         if (b == null || !(b.max.x > b.min.x)) return new int[]{6, 3};
+        footprintFromModel = true;
         double across = Math.max(Math.max(-b.min.y, b.max.y), Math.max(-b.min.z, b.max.z)) * modelScale;
         int half = (int) Math.ceil(across * 16 - 0.01), height = (int) Math.ceil(b.max.x * modelScale * 16 - 0.01);
         return new int[]{Math.max(2, Math.min(8, half)), Math.max(1, Math.min(16, height))};
@@ -295,18 +304,20 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
                 } catch (ReflectiveOperationException | RuntimeException e) {
                     continue;
                 }
+                // (see-through light planes are left out, as from a full-block machine's hitbox: a suspended lamp's halo
+                // spanned the whole face)
                 if (v instanceof Obj3D.Obj3DPart part) {
-                    if (ignore.contains(part)) continue;
+                    if (ignore.contains(part) || Obj3D.isLightPlane(part.name())) continue;
                     boxes[0] = boxes[0].merge(part.boundingBox());
                     any[0] = true;
                 } else if (v instanceof Obj3D.Obj3DPart[] a) {
                     for (var part : a)
-                        if (part != null && !ignore.contains(part)) {
+                        if (part != null && !ignore.contains(part) && !Obj3D.isLightPlane(part.name())) {
                             boxes[0] = boxes[0].merge(part.boundingBox());
                             any[0] = true;
                         }
                 } else if (v instanceof Obj3D m) {
-                    for (var part : m.parts()) boxes[1] = boxes[1].merge(part.boundingBox());
+                    for (var part : m.parts()) if (!Obj3D.isLightPlane(m.nameOf(part))) boxes[1] = boxes[1].merge(part.boundingBox());
                     any[1] |= !m.parts().isEmpty();
                 } else if (depth == 0 && v != null && !(v instanceof GenericItemBlockUsingDamageDescriptor) && !v.getClass().isEnum()
                     && v.getClass().getName().startsWith("mods.eln.sixnode.")) {
