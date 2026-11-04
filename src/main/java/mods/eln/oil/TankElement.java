@@ -128,38 +128,12 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     /** The vessel takes what a bucket or a pipe put in or took out since the last step, then shows its liquid again. */
     public void syncWater() {
         if (vessel == null) return;
-        for (var ch : water.change()) {
-            var ph = mods.eln.fluid.FluidSpecies.of(ch.getKey());
-            if (ph == null || ph.vapour()) continue;
-            int d = ch.getValue();
-            double kg = Math.abs(d) * mods.eln.fluid.FluidSpecies.kgPerMb(ph.id(), false);
-            if (ph.id() == mods.eln.sim.fluid.SpeciesRegistry.WATER) {
-                if (d > 0) EaUnits.addWater(vessel, kg, mods.eln.sim.Ambient.kelvin(node.coordonate), false);   // (at the ambient)
-                else if (d < 0) {
-                    double got = EaUnits.drainLiquid(vessel, kg);
-                    if (got < kg && vessel.T() < Water.TB) EaUnits.drainVapour(vessel, kg - got);   // (the rest condensed: see bucketable)
-                }
-            } else if (d > 0) EaUnits.add(vessel, ph.id(), kg, mods.eln.sim.Ambient.kelvin(node.coordonate), false);
-            else EaUnits.drainLiquid(vessel, ph.id(), kg);
-        }
+        water.sync(vessel, mods.eln.sim.Ambient.kelvin(node.coordonate));   // (at the ambient)
         showWater();
     }
 
-    void showWater() {
-        if (vessel == null) return;
-        // (to the nearest mB; cold, water's vapour counts too: a bucket poured into a box comes back 999 mB, a little of
-        // it evaporated into the box's air, and an empty bucket wants a whole 1000)
-        int top = mods.eln.fluid.FluidSpecies.topLiquid(vessel);
-        int id = top < 0 ? mods.eln.sim.fluid.SpeciesRegistry.WATER : top;
-        double kg = id == mods.eln.sim.fluid.SpeciesRegistry.WATER ? bucketable() : vessel.liquid(id);
-        int capacity = (int) Math.floor(vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
-        int room = (int) Math.floor(Math.max(0, vessel.volume - vessel.liquidVolume()) * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
-        water.show(mods.eln.fluid.FluidSpecies.fluid(id, false), (int) Math.round(kg / mods.eln.fluid.FluidSpecies.kgPerMb(id, false)), capacity, room);
-    }
-
-    /** The water a bucket can take (kg): its liquid, and while it's under boiling its vapour (it would condense). */
-    double bucketable() {
-        return vessel.T() < Water.TB ? vessel.mWater : vessel.mLiquid();
+    public void showWater() {
+        if (vessel != null) water.show(vessel);
     }
 
     @Override

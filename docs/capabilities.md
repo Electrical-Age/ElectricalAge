@@ -45,15 +45,23 @@ mods must address a multiblock's master block), simple nodes (gone; the exporter
   `BoilerElement`, `SteamGeneratorElement`, `OilPumpElement`, `FlareStackElement`, `ColumnBaseElement`,
   `ColumnSegmentElement`.
 - Buckets: `TransparentNode.onBlockActivated` -> `fluid/FluidBuckets.use` on the same handler.
-- Pipe adapter: `AdapterPart.Tanks` is a view of the pipe run behind the adapter's face: tank 0 its liquid (the top
-  layer's main species; up to `WATER_MB` 8000), tank 1 its main vapour that is a fluid (steam for water; `STEAM_MB`
-  32000), tank 2 an intake that takes any fluid a species is (`fluid/FluidSpecies`: minecraft:water and eln:steam are
-  water, the rest from the datapack species' fluid lists); other fluids are refused (Baughn 2026-11-03). What other
-  mods' pipes put in or take out is synced into the run at the next fluid step (`VoxelNode.syncAdapters`) and before a
-  save. Room is in mB of any liquid (they go by volume: `FluidSpecies.kgPerMb`).
-- Tank: `oil/TankLiquid`, tank 0 the vessel's top liquid layer's main species, tank 1 an intake for any liquid a species
-  is; synced at the next fluid step (`TankElement.syncWater`). Buckets use it. EA's own voxel pipes do not use the capability; they couple through
-  `fluid/FluidWorld` ports.
+- Node-backed devices: one view, `fluid/NodeFluidView` (Baughn 2026-11-04: "make it structurally impossible" after an
+  overfilled boiler showed "8000 / 8000"). It has no capacity of its own: slots show the node's real contents, uncapped
+  (LIQUID the top layer's main liquid that is a fluid, GAS the main vapour that is one, INTAKE takes any fluid a species
+  is: `fluid/FluidSpecies`; other fluids are refused, Baughn 2026-11-03), and the room it offers is the node's real free
+  liquid volume up to a share of it (`Spec.liquidShare`), one budget for every slot (in mB of any liquid: they go by
+  volume). What other mods put in or take out goes into the node at the next fluid step (`sync`), then `show`.
+  - Pipe adapter: `AdapterPart.Tanks`, the run behind the face; liquid to 90 % of the run, gas to about 9 bar
+    (`VoxelNode.syncAdapters`, `showAdapters`).
+  - Tank: `oil/TankLiquid`, liquid and intake, to the vessel's full volume (`TankElement.syncWater`). Buckets use it.
+  - Boiler: `oil/BoilerTanks`, water in to its rated fill (`BoilerElement.RATED_KG`, the mark its feed float closes
+    at), steam out once it boils.
+  - Steam oven: steam in to 5 bar.
+  - `FluidViewCases` places every transparent `FluidDevice` by enumeration: its capability must be a NodeFluidView over
+    its own node, none, or an int tank on that file's list (devices whose store is the tank, filled through a
+    PortBridge that inserts only what it takes); flooded at 8 bar through every port, its view shows the node's real
+    contents and takes no more than the node's free volume over every slot and face. Gauges may clamp; quantities may
+    not. EA's own voxel pipes do not use the capability; they couple through `fluid/FluidWorld` ports.
 - Consumer: `sixnode/Scanner.kt` reads `Fluid.BLOCK` for fill level (items through `Container` only).
 
 ## Item (414cc625, "Hoppers and pipes can feed and empty EA machines")

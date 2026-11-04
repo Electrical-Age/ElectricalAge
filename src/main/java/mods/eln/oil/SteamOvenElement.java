@@ -49,11 +49,13 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
     final TransparentNodeElementInventory inventory = new SteamOvenInventory(2, 64, this);
     final NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
     final Resistor fan = new Resistor(electricalLoad, null);
-    public final PreciseElementFluidHandler tank = new PreciseElementFluidHandler(
-        (int) Math.ceil(2 * SteamOvenDescriptor.maxSteamKgPerS() / EaUnits.KG_PER_MB_STEAM));
+    /** Other mods' steam into its inlet (NodeFluidView, up to INLET_MAX_PA); it gives none back out. */
+    public final mods.eln.fluid.NodeFluidView tank = new mods.eln.fluid.NodeFluidView(new mods.eln.fluid.NodeFluidView.Spec()
+        .liquid(false, false).liquids(id -> false).gas(true, false, INLET_MAX_PA, false));
+    /** Other mods' pipes fill its inlet up to this (Pa): about the 5 bar it is sized for. */
+    static final double INLET_MAX_PA = 5e5;
     public FluidNode inlet;
     private double[] loaded;
-    private int shown;
     private List<FluidPort> ports = List.of();
 
     double energyCounter, cookW, steamRate, meterSteam, meterTime;
@@ -62,7 +64,6 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
 
     public SteamOvenElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
-        tank.setFilter(new Fluid[]{Oil.STEAM.get()});
         electricalLoadList.add(electricalLoad);
         electricalComponentList.add(fan);
         slowProcessList.add(process);
@@ -147,9 +148,7 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
     }
 
     void syncTank() {
-        int n = tank.getFluidAmount() - shown;
-        if (n > 0) EaUnits.addWater(inlet, n * EaUnits.KG_PER_MB_STEAM, Water.TB, true);
-        shown = tank.getFluidAmount();
+        tank.sync(inlet, Water.TB);
     }
 
     @Override
@@ -163,10 +162,7 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
     }
 
     private void show() {
-        int n = (int) Math.min(tank.getCapacity(), Math.floor(EaUnits.steamAvailable(inlet) / EaUnits.KG_PER_MB_STEAM));
-        if (tank.getFluidAmount() > 0) tank.drain(tank.getFluidAmount(), true);
-        if (n > 0) tank.fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.STEAM.get(), n), true);
-        shown = tank.getFluidAmount();
+        tank.show(inlet);
     }
 
     @Override
@@ -273,14 +269,13 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
             show();
             mods.eln.fluid.FluidSaves.put(nbt, "inlet", inlet);
         }
-        tank.writeToNBT(nbt, "tank");
         nbt.putDouble("energyCounter", energyCounter);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        tank.readFromNBT(nbt, "tank");
+        // (its old "tank" key was a view of the inlet, saved again as the inlet's own contents: ignored)
         energyCounter = nbt.getDoubleOr("energyCounter", 0);
         lastIn = inventory.getItem(inSlotId).copy();
         if (nbt.contains("inletW"))

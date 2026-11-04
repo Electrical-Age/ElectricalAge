@@ -57,6 +57,8 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
      * tank, eight times its rated fill, and the boiler had all that to heat.
      */
     public static final double FEED_FLOAT_BAND = 0.1;
+    /** Its rated fill (kg of water): the gauge glass's full mark, where its feed float closes and its view stops taking. */
+    public static final double RATED_KG = BoilerTanks.WATER_MB * EaUnits.KG_PER_MB_WATER;
     private double[] loaded, loadedFeed;
     private List<FluidPort> ports = List.of();
     private final List<Vent> vents = new java.util.ArrayList<>();
@@ -133,16 +135,13 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     /** How full it is, as its gauge glass shows it: liquid against the water tank's capacity (0..1; the vessel's
      *  own volume is mostly steam space). */
     public double fill() {
-        return vessel.mLiquid() / (BoilerTanks.WATER_MB * EaUnits.KG_PER_MB_WATER);
+        return vessel.mLiquid() / RATED_KG;
     }
 
     /** Take in what pipes put in or took out since the last step (each step, and before saving). */
     public void syncTanks() {
-        int in = tanks.takeWaterIn();
-        if (in > 0) EaUnits.addWater(vessel, in * EaUnits.KG_PER_MB_WATER, ambient + mods.eln.sim.PhysicalConstant.Tref, false);   // (piped water: at the ambient)
-        int out = tanks.takeSteamOut();
-        if (out > 0) EaUnits.drainVapour(vessel, out * EaUnits.KG_PER_MB_STEAM);
-        meterSteam += out;
+        meterSteam += tanks.takenOut(BoilerTanks.GAS);
+        tanks.sync(vessel, ambient + mods.eln.sim.PhysicalConstant.Tref);   // (piped water: at the ambient)
     }
 
     @Override
@@ -200,8 +199,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
      * evaporated, cooled the water below ambient and fed a turbine with it (Baughn).
      */
     public void showTanks() {
-        int steam = vessel.T() >= Water.TB ? (int) Math.floor(EaUnits.steamAvailable(vessel) / EaUnits.KG_PER_MB_STEAM) : 0;
-        tanks.show((int) Math.floor(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER), steam);
+        tanks.show(vessel);
     }
 
     @Override
@@ -275,7 +273,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
         var hand = player.getMainHandItem();
         if (!hand.is(net.minecraft.world.item.Items.WATER_BUCKET)) return false;
-        if (BoilerTanks.WATER_MB - tanks.water() < 1000) return false;
+        if (!tanks.fits(1000)) return false;
         tanks.fillWater(1000);
         if (!player.isCreative()) player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BUCKET));
         player.level().playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.BUCKET_EMPTY, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);

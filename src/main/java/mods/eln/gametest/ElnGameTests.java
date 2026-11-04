@@ -61,6 +61,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.TransparentSupportCases.addTo(l);
         mods.eln.gametest.cases.AgeFixCases.addTo(l);
         mods.eln.gametest.cases.OilCases.addTo(l);
+        mods.eln.gametest.cases.FluidViewCases.addTo(l);
         mods.eln.gametest.cases.OilLakeCases.addTo(l);
         mods.eln.gametest.cases.ReservoirCases.addTo(l);
         mods.eln.gametest.cases.MinerCableCases.addTo(l);
