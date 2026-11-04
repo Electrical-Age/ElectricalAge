@@ -24,6 +24,8 @@ public final class FluidNetwork {
     public static final double G = 9.81;
     /** Outflow per step is capped at this share of what the upstream node holds of that phase. */
     static final double DRAIN_CAP = 0.5;
+    /** Pressure solves a step may take (check valves shut one at a time, valves' orifice laws, upstream flips). */
+    static final int MAX_PASSES = 16;
 
     public final List<FluidNode> nodes = new ArrayList<>();
     public final List<FluidEdge> edges = new ArrayList<>();
@@ -89,7 +91,11 @@ public final class FluidNetwork {
         //    then takes its packet from the other side: a short pipe drained by its valve draws from its boiler even
         //    when it started the step at a higher pressure)
         double[] P = new double[N];
-        for (int pass = 0; pass < 8; pass++) {
+        // (the one-way edges the solve shut this step: one at a time, the worst back-flow first, and opened again if the
+        // drive across one turns forward; shutting them all at once, a feed valve back-flowing from its boiler also shut
+        // the pump pushing into the same pipe, and the pipe sat under the pump's shut-off with nothing flowing)
+        java.util.Set<FluidEdge> shut = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        for (int pass = 0; pass < MAX_PASSES; pass++) {
             double[][] A = new double[N][N];
             double[] rhs = new double[N];
             for (int i = 0; i < N; i++) {
@@ -115,13 +121,19 @@ public final class FluidNetwork {
             }
             P = solve(A, rhs);
             boolean again = false;
+            FluidEdge worst = null;
             for (FluidEdge e : edges) {
                 double pa = e.a.fixed ? e.a.P() : P[idx.get(e.a)], pb = e.b.fixed ? e.b.P() : P[idx.get(e.b)];
                 double offA = e.a.pressureOver(e.portA, e.spanA) - e.a.P(), offB = pressureB(e) - e.b.P();
-                e.flow = e.g * (pa + offA - pb - offB + e.head);
+                double drive = pa + offA - pb - offB + e.head;
+                e.flow = e.g * drive;
                 if (e.oneWay() && e.flow < 0 && e.g != 0) {
-                    e.g = 0;
-                    e.flow = 0;
+                    if (worst == null || e.flow < worst.flow) worst = e;
+                } else if (e.g == 0 && drive > 0 && shut.remove(e) && pass < MAX_PASSES - 1) {
+                    props(e, true);
+                    Integer ja = idx.get(e.a), jb = idx.get(e.b);
+                    e.sA = ja == null ? 0 : response(e, sL[ja], rhoL[ja], sG[ja]);
+                    e.sB = jb == null ? 0 : response(e, sL[jb], rhoL[jb], sG[jb]);
                     again = true;
                 } else if (e.area > 0 && e.g != 0 && pass < 7) {
                     // a valve's orifice law, at the drop just solved (between its guess and this, for a quiet fixed point)
@@ -139,7 +151,17 @@ public final class FluidNetwork {
                     again = true;
                 }
             }
+            if (worst != null) {
+                worst.g = 0;
+                shut.add(worst);
+                again = true;
+            }
             if (!again) break;
+        }
+        // (out of passes: no one-way edge runs back)
+        for (FluidEdge e : edges) if (e.oneWay() && e.flow < 0) {
+            e.g = 0;
+            e.flow = 0;
         }
         // 6. no node's pressure may be driven past the pressures its neighbours push it towards (the linearized solve
         //    can overshoot when a node changes phase or an edge's upstream side flips; a maximum principle); then cap
@@ -440,8 +462,12 @@ public final class FluidNetwork {
             if ((drive >= 0) == fromA) break;
             fromA = !fromA;
         }
-        props(e, fromA);
-        if (e.oneWay() && !fromA) e.g = 0;
+        // a check valve (or turbine) only ever carries a's packet: it stays open into the solve, which closes it if the flow
+        // at the new pressures runs back. Closed for the whole step on its starting drive, a feed valve into a boiler,
+        // fed by a pump into a liquid-full pipe, sat on the edge: each step it ended a few Pa under the boiler, stayed shut
+        // the next while the pump raised the stiff pipe 2 bar, then opened and drained it under again (Baughn
+        // 2026-11-04: the condensate line flipping 11 <-> 13 bar every step)
+        props(e, fromA || e.oneWay());
     }
 
     private static void props(FluidEdge e, boolean fromA) {
