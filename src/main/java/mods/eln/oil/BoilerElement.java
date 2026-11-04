@@ -330,13 +330,14 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
+        Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
         if (vessel != null) {
-            // (dry, it is the gas's: AdventurAgent read "Water temperature" with no water)
-            info.put(vessel.mLiquid() > 1e-6 ? I18N.tr("Water temperature") : I18N.tr("Gas temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
             info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", vessel.P() / 1e5, EaUnits.contents(vessel)));
+            info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
         }
+        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
+        if (vessel != null)   // (dry, it is the gas's: AdventurAgent read "Water temperature" with no water)
+            info.put(vessel.mLiquid() > 1e-6 ? I18N.tr("Water temperature") : I18N.tr("Gas temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
         // (the vessel's own water, not the capability's view capped at the rating: an overfilled boiler showed 8000)
         int water = vessel != null ? (int) Math.floor(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER) : tanks.water();
         info.put(I18N.tr("Water"), water + " / " + BoilerTanks.WATER_MB + " mB" + (water > BoilerTanks.WATER_MB ? I18N.tr(": overfull") : ""));

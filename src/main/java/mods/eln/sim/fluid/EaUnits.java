@@ -50,6 +50,42 @@ public final class EaUnits {
         return b.length() == 0 ? "gas" : b.toString();
     }
 
+    /**
+     * Everything that makes up more than 1% of a node's volume, by name and compact, liquids in litres and gases in
+     * grams: "2.1 g of steam, 2.0 L of water" (Baughn 2026-11-04: Jade named only the gas that made the pressure; one
+     * line for every fluid container). A gas's share is its partial pressure's share of the space above the liquid; "empty" if none counts.
+     */
+    public static String composition(FluidNode n) {
+        SpeciesRegistry reg = SpeciesRegistry.get();
+        Flash s = n.state;
+        double pSum = 0, vGas = Math.max(0, n.volume - n.liquidVolume());   // (not the flash's floor: a full pipe holds no gas)
+        for (int id = 0; id < n.speciesBound(); id++) if (s.vapour(id) > 0) pSum += s.vapour(id) * reg.byId(id).r;
+        var parts = new java.util.TreeMap<String, String>();
+        for (int id = 0; id < n.speciesBound(); id++) {
+            Species sp = reg.byId(id);
+            double liq = s.liquid(id), vap = s.vapour(id);
+            if (liq > 0 && liq / sp.rhoL > 0.01 * n.volume) parts.put(sp.displayName(), litres(liq / sp.rhoL * 1000) + " of " + sp.displayName());
+            if (vap > 0 && pSum > 0 && vap * sp.r / pSum * vGas > 0.01 * n.volume) {
+                String name = id == SpeciesRegistry.WATER ? "steam" : sp.gas() || liq <= 0 ? sp.displayName() : sp.displayName() + " vapour";
+                parts.put(name, grams(vap * 1000) + " of " + name);
+            }
+        }
+        return parts.isEmpty() ? "empty" : String.join(", ", parts.values());
+    }
+
+    /** Two significant figures or so: 0.012, 0.12, 1.2, 12, 120. */
+    private static String compact(double v) {
+        return String.format(v >= 10 ? "%.0f" : v >= 1 ? "%.1f" : v >= 0.1 ? "%.2f" : "%.3f", v);
+    }
+
+    private static String litres(double l) {
+        return l >= 1000 ? compact(l / 1000) + " m³" : compact(l) + " L";
+    }
+
+    private static String grams(double g) {
+        return g >= 1000 ? compact(g / 1000) + " kg" : compact(g) + " g";
+    }
+
     /** A node's other species for players, one per entry: name, then liquid mB and gas grams (empty if it holds none). */
     public static java.util.List<String[]> others(FluidNode n, java.util.function.ToDoubleFunction<Integer> kgPerMbLiquid) {
         java.util.List<String[]> out = new java.util.ArrayList<>();

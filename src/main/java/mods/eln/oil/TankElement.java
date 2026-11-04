@@ -374,9 +374,10 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
+        Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
         if (vessel == null) return info;
         info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s, %.0f °C", vessel.P() / 1e5, EaUnits.contents(vessel), vessel.T() - Water.T0));
+        info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
         info.put(I18N.tr("Water"), String.format("%.0f mB, %.0f%% full", vessel.mLiquid() / EaUnits.KG_PER_MB_WATER, fill() * 100));
         info.put(I18N.tr("Vessel"), group == null ? I18N.tr("one block") : String.format("%d x %d x %d blocks, %.0f buckets", group.sx, group.sy, group.sz,
             vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER / 1000));
@@ -384,9 +385,6 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         info.put(I18N.tr("Ports"), group == null ? I18N.tr("steam: top, and 12 px up on the sides; water: bottom, and 4 px up on the sides (not the glass's)")
             : I18N.tr("on its outer faces: steam: top, and 12 px up a side; water: bottom, and 4 px up a side"));
         info.put(I18N.tr("Piped"), String.format("%d of %d ports here", Integer.bitCount(coupled), ports.stream().filter(p -> p.face() != 0).count()));
-        if (vessel.mVapour() > 1e-7) info.put(I18N.tr("Steam"), EaUnits.steamGrams(vessel.mVapour() / EaUnits.KG_PER_MB_STEAM));
-        for (String[] o : EaUnits.others(vessel, id -> mods.eln.fluid.FluidSpecies.kgPerMb(id, false)))
-            info.put(Character.toUpperCase(o[0].charAt(0)) + o[0].substring(1), o[1]);
         if (vessel.P() > desc.workingPa) info.put(I18N.tr("Warning"), String.format("over its %.0f bar working pressure", desc.workingPa / 1e5));
         return info;
     }
