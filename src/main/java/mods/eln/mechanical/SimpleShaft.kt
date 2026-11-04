@@ -72,11 +72,6 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     override fun getFrontFromPlace(side: Direction?, entityLiving: net.minecraft.world.entity.LivingEntity?): Direction? =
         if (entityLiving == null) Direction.XN else Utils.entityLivingHorizontalViewDirection(entityLiving).inverse
 
-    /** Its model's hitbox (NAME.hitbox, docs/models/shaft.md), turned with its front. */
-    private val hitbox by lazy { mods.eln.node.transparent.ModelHitbox.of(obj) }
-
-    override fun modelHitbox() = hitbox
-
     override fun hasItemDraw() = true
 
     override fun drawItem(entity: Boolean) {

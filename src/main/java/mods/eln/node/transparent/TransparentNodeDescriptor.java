@@ -16,6 +16,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
@@ -171,9 +172,74 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         return 0;
     }
 
-    /** Its model's hitbox, turned with its front (ModelHitbox), or null: then addCollisionBoxesToList's boxes. */
+    private ModelHitbox computedHitbox;
+    private boolean hitboxTried;
+
+    /**
+     * Its model's hitbox, turned with its front (ModelHitbox), or null: then addCollisionBoxesToList's boxes. By default
+     * computed from its model's geometry (Baughn 2026-10-30: "hitboxes should be computed from geometry"), with a
+     * model's hand-written NAME.hitbox added where it has one (the CAD library's shaft parts, furnaces, condensers), once.
+     */
     public ModelHitbox modelHitbox() {
-        return null;
+        if (!hitboxTried) {
+            hitboxTried = true;
+            // (a multiblock's model spans its ghost blocks, which have shapes of their own: its block keeps the old one)
+            if (ghostGroup != null) return null;
+            List<double[]> t = hitboxTriangles();
+            ModelHitbox hand = null;
+            for (var m : heldModels()) if (hand == null) hand = ModelHitbox.of(m);
+            computedHitbox = ModelHitbox.union(hand, t.isEmpty() ? null : ModelHitbox.computed(t));
+        }
+        return computedHitbox;
+    }
+
+    /** The models its fields hold. */
+    List<mods.eln.misc.Obj3D> heldModels() {
+        List<mods.eln.misc.Obj3D> out = new ArrayList<>();
+        for (Class<?> c = getClass(); c != null && c != Object.class; c = c.getSuperclass())
+            for (var f : c.getDeclaredFields()) {
+                if (java.lang.reflect.Modifier.isStatic(f.getModifiers()) || f.getType() != mods.eln.misc.Obj3D.class) continue;
+                try {
+                    f.setAccessible(true);
+                    if (f.get(this) instanceof mods.eln.misc.Obj3D m) out.add(m);
+                } catch (ReflectiveOperationException | RuntimeException e) {
+                    // (not readable: skipped)
+                }
+            }
+        return out;
+    }
+
+    /**
+     * The triangles its hitbox is computed from, in block units with the block's corner at the origin, front XN: the
+     * model parts its fields hold (else the whole models they hold), drawn about the block's centre as the transparent
+     * node render draws them, see-through light planes left out (Obj3D.isLightPlane). A descriptor whose render moves or
+     * repeats parts gives its own.
+     */
+    public List<double[]> hitboxTriangles() {
+        java.util.LinkedHashSet<mods.eln.misc.Obj3D.Obj3DPart> parts = new java.util.LinkedHashSet<>(), whole = new java.util.LinkedHashSet<>();
+        for (Class<?> c = getClass(); c != null && c != Object.class; c = c.getSuperclass())
+            for (var f : c.getDeclaredFields()) {
+                if (java.lang.reflect.Modifier.isStatic(f.getModifiers()) || f.getType().isPrimitive()) continue;
+                Object v;
+                try {
+                    f.setAccessible(true);
+                    v = f.get(this);
+                } catch (ReflectiveOperationException | RuntimeException e) {
+                    continue;
+                }
+                if (v instanceof mods.eln.misc.Obj3D.Obj3DPart p) {
+                    parts.add(p);
+                } else if (v instanceof mods.eln.misc.Obj3D.Obj3DPart[] a) {
+                    for (var p : a) if (p != null) parts.add(p);
+                } else if (v instanceof mods.eln.misc.Obj3D m) {
+                    whole.addAll(m.parts());
+                }
+            }
+        List<double[]> out = new ArrayList<>();
+        // (the parts it holds when it holds any: a legacy model also has other variants' parts, a battery all six)
+        for (var p : parts.isEmpty() ? whole : parts) if (!mods.eln.misc.Obj3D.isLightPlane(p.name())) p.triangles(out);
+        for (double[] t : out) for (int i = 0; i < 9; i++) t[i] += 0.5;
+        return out;
     }
 
     public void addCollisionBoxesToList(AABB par5AxisAlignedBB, List list, Level world, int x, int y, int z) {

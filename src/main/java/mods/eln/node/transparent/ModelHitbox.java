@@ -20,11 +20,40 @@ import java.util.Map;
  * render turns the model (Direction.glRotateXnRef) and cached per front.
  */
 public final class ModelHitbox {
-    private final List<double[]> boxes;
-    private final Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);
+    private final List<double[]> boxes, collisionBoxes;
+    private final Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class), collisions = new EnumMap<>(Direction.class);
 
-    private ModelHitbox(List<double[]> boxes) {
+    private ModelHitbox(List<double[]> boxes, List<double[]> collisionBoxes) {
         this.boxes = boxes;
+        this.collisionBoxes = collisionBoxes;
+    }
+
+    /**
+     * From a model's triangles (block units, front XN, the block's corner at the origin): the outline on the fine grid
+     * and the collision on the coarse one, gaps closed (ModelShape; Baughn 2026-11-04, collision choice A); null if
+     * nothing of it is in the block.
+     */
+    public static ModelHitbox computed(List<double[]> triangles) {
+        List<double[]> outline = mods.eln.misc.ModelShape.outline(triangles);
+        if (outline.isEmpty()) return null;
+        return new ModelHitbox(outline, mods.eln.misc.ModelShape.collision(triangles));
+    }
+
+    /**
+     * Both: a model's hand-written hitbox (drawn generously on purpose, a shaft part clickable along its whole length)
+     * with its computed one (which holds what the hand boxes missed). Either may be null.
+     */
+    public static ModelHitbox union(ModelHitbox hand, ModelHitbox computed) {
+        if (hand == null || computed == null) return hand == null ? computed : hand;
+        List<double[]> outline = new ArrayList<>(hand.boxes), collision = new ArrayList<>(hand.collisionBoxes);
+        outline.addAll(computed.boxes);
+        collision.addAll(computed.collisionBoxes);
+        return new ModelHitbox(outline, collision);
+    }
+
+    /** Its outline boxes (block units, front XN). */
+    public List<double[]> boxes() {
+        return boxes;
     }
 
     /** The model's hitbox, or null (no .hitbox file, or no model). */
@@ -42,22 +71,29 @@ public final class ModelHitbox {
                 for (int i = 0; i < 6; i++) b[i] = Double.parseDouble(w[i]) / 16.0;
                 boxes.add(b);
             }
-            return boxes.isEmpty() ? null : new ModelHitbox(boxes);
+            return boxes.isEmpty() ? null : new ModelHitbox(boxes, boxes);
         } catch (Exception e) {
             return null;
         }
     }
 
-    /** Its boxes turned onto FRONT (block coordinates 0..1). */
+    /** Its outline turned onto FRONT (block coordinates 0..1). */
     public synchronized VoxelShape shape(Direction front) {
-        return shapes.computeIfAbsent(front, f -> {
-            VoxelShape s = Shapes.empty();
-            for (double[] b : boxes) {
-                double[] r = turned(b, f);
-                s = Shapes.or(s, Shapes.box(r[0], r[1], r[2], r[3], r[4], r[5]));
-            }
-            return s.optimize();
-        });
+        return shapes.computeIfAbsent(front, f -> turnedShape(boxes, f));
+    }
+
+    /** Its collision turned onto FRONT (the outline's, for a hand-written hitbox). */
+    public synchronized VoxelShape collision(Direction front) {
+        return collisions.computeIfAbsent(front, f -> turnedShape(collisionBoxes, f));
+    }
+
+    static VoxelShape turnedShape(List<double[]> boxes, Direction f) {
+        VoxelShape s = Shapes.empty();
+        for (double[] b : boxes) {
+            double[] r = turned(b, f);
+            s = Shapes.or(s, Shapes.box(r[0], r[1], r[2], r[3], r[4], r[5]));
+        }
+        return s.optimize();
     }
 
     /**

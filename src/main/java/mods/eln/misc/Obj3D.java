@@ -244,6 +244,25 @@ public class Obj3D {
             }
         }
 
+        /** The model it belongs to, and its name there. */
+        public Obj3D model() {
+            return Obj3D.this;
+        }
+
+        public String name() {
+            return Obj3D.this.nameOf(this);
+        }
+
+        /** Its triangles (9 coordinates each, model units) added to out: geometry for hitboxes (ModelShape). */
+        public void triangles(List<double[]> out) {
+            for (FaceGroup fg : faceGroup)
+                for (Face f : fg.face) {
+                    Vertex[] v = f.vertex;
+                    for (int i = 1; i + 1 < v.length; i++)
+                        out.add(new double[]{v[0].x, v[0].y, v[0].z, v[i].x, v[i].y, v[i].z, v[i + 1].x, v[i + 1].y, v[i + 1].z});
+                }
+        }
+
         public void draw() {
             if (locked) return;
 
@@ -599,6 +618,23 @@ public class Obj3D {
         }
 
         return true;
+    }
+
+    /** The name a part has in this model, or null. */
+    public String nameOf(Obj3DPart part) {
+        for (var e : nameToPartHash.entrySet()) if (e.getValue() == part) return e.getKey();
+        return null;
+    }
+
+    /**
+     * Is a part named so a see-through light plane (a halo, a glow, a reflection), which a hitbox leaves out? From the
+     * 281 part names of the legacy models: alpha, halo, nodepth, reflection, and the LED glows leda0.. (the solid LEDs,
+     * led*, ledp*, stay).
+     */
+    public static boolean isLightPlane(String name) {
+        if (name == null) return false;
+        String n = name.toLowerCase(java.util.Locale.ROOT);
+        return n.contains("alpha") || n.contains("halo") || n.contains("nodepth") || n.contains("reflection") || n.matches("leda\\d+.*");
     }
 
     /** 26.x: every part (placeholder models that draw a whole 1.12 model). */

@@ -107,14 +107,6 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
         }
     }
 
-    private ModelHitbox hitbox;
-
-    /** Its model's hitbox (mods.eln.cad.models.HeatFurnace), turned with its front. */
-    @Override
-    public ModelHitbox modelHitbox() {
-        if (hitbox == null && obj != null) hitbox = ModelHitbox.of(obj);
-        return hitbox;
-    }
 
     @Override
     public boolean hasItemDraw() {

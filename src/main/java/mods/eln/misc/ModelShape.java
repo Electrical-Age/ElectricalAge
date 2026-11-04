@@ -77,18 +77,27 @@ public final class ModelShape {
                             any = true;
                         }
             if (any) continue;
-            // on cell faces only: the cells it touches, unless one of them is solid already (a face of a filled body)
-            List<Integer> touched = new ArrayList<>();
-            boolean held = false;
+            // on cell faces only: the cells it touches across its plane, each unless its partner on the other side is solid
+            // already (that part is a face of a filled body; the rest of it, a panel standing out, still counts)
+            double[] nrm = cross(sub(new double[]{t[3], t[4], t[5]}, new double[]{t[0], t[1], t[2]}),
+                sub(new double[]{t[6], t[7], t[8]}, new double[]{t[0], t[1], t[2]}));
+            int ax = Math.abs(nrm[0]) >= Math.abs(nrm[1]) && Math.abs(nrm[0]) >= Math.abs(nrm[2]) ? 0 : Math.abs(nrm[1]) >= Math.abs(nrm[2]) ? 1 : 2;
+            // (the cells grown across its plane only: shrunk in it, so a face's edge on a grid line doesn't touch the cells
+            // past it)
+            double[] half = {h / 2 - eps, h / 2 - eps, h / 2 - eps};
+            half[ax] = h / 2 + eps;
+            java.util.Set<Integer> touched = new java.util.HashSet<>();
             for (int x = r[0]; x <= r[3]; x++)
                 for (int y = r[1]; y <= r[4]; y++)
                     for (int z = r[2]; z <= r[5]; z++)
-                        if (overlaps(t, (x + 0.5) * h, (y + 0.5) * h, (z + 0.5) * h, h / 2 + eps)) {
-                            int i = (x * n + y) * n + z;
-                            touched.add(i);
-                            held |= solid[i];
-                        }
-            if (!held) for (int i : touched) solid[i] = true;
+                        if (overlaps(t, (x + 0.5) * h, (y + 0.5) * h, (z + 0.5) * h, half)) touched.add((x * n + y) * n + z);
+            int step = ax == 0 ? n * n : ax == 1 ? n : 1;
+            List<Integer> mark = new ArrayList<>();
+            for (int i : touched) {
+                boolean backed = touched.contains(i - step) && solid[i - step] || touched.contains(i + step) && solid[i + step];
+                if (!backed && !solid[i]) mark.add(i);
+            }
+            for (int i : mark) solid[i] = true;
         }
         return solid;
     }
@@ -144,20 +153,25 @@ public final class ModelShape {
         return k;
     }
 
-    /** Does triangle t meet the cube of half side e about (cx, cy, cz)? (Separating axes, Akenine-Moller.) */
+    /** Does triangle t meet the cube of half side e about (cx, cy, cz)? */
     static boolean overlaps(double[] t, double cx, double cy, double cz, double e) {
+        return overlaps(t, cx, cy, cz, new double[]{e, e, e});
+    }
+
+    /** Does triangle t meet the box of half sides e about (cx, cy, cz)? (Separating axes, Akenine-Moller.) */
+    static boolean overlaps(double[] t, double cx, double cy, double cz, double[] e) {
         double[] v0 = {t[0] - cx, t[1] - cy, t[2] - cz}, v1 = {t[3] - cx, t[4] - cy, t[5] - cz}, v2 = {t[6] - cx, t[7] - cy, t[8] - cz};
-        for (int a = 0; a < 3; a++)   // the cube's faces
-            if (Math.min(v0[a], Math.min(v1[a], v2[a])) > e || Math.max(v0[a], Math.max(v1[a], v2[a])) < -e) return false;
+        for (int a = 0; a < 3; a++)   // the box's faces
+            if (Math.min(v0[a], Math.min(v1[a], v2[a])) > e[a] || Math.max(v0[a], Math.max(v1[a], v2[a])) < -e[a]) return false;
         double[][] edges = {sub(v1, v0), sub(v2, v1), sub(v0, v2)};
         double[] nrm = cross(edges[0], edges[1]);
-        double r0 = e * (Math.abs(nrm[0]) + Math.abs(nrm[1]) + Math.abs(nrm[2]));
+        double r0 = e[0] * Math.abs(nrm[0]) + e[1] * Math.abs(nrm[1]) + e[2] * Math.abs(nrm[2]);
         if (Math.abs(dot(nrm, v0)) > r0) return false;   // the triangle's plane
         for (double[] f : edges)
-            for (int a = 0; a < 3; a++) {   // the edges against the cube's axes
+            for (int a = 0; a < 3; a++) {   // the edges against the box's axes
                 double[] ax = cross(unit(a), f);
                 double p0 = dot(ax, v0), p1 = dot(ax, v1), p2 = dot(ax, v2);
-                double r = e * (Math.abs(ax[0]) + Math.abs(ax[1]) + Math.abs(ax[2]));
+                double r = e[0] * Math.abs(ax[0]) + e[1] * Math.abs(ax[1]) + e[2] * Math.abs(ax[2]);
                 if (Math.min(p0, Math.min(p1, p2)) > r || Math.max(p0, Math.max(p1, p2)) < -r) return false;
             }
         return true;

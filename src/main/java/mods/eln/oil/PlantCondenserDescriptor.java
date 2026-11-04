@@ -34,15 +34,6 @@ public class PlantCondenserDescriptor extends TransparentNodeDescriptor {
         this.obj = Eln.obj.getObj(model);
     }
 
-    private mods.eln.node.transparent.ModelHitbox hitbox;
-
-    /** Its model's hitbox (mods.eln.cad.models.PlantCondenser), turned with its front. */
-    @Override
-    public mods.eln.node.transparent.ModelHitbox modelHitbox() {
-        if (hitbox == null && obj != null) hitbox = mods.eln.node.transparent.ModelHitbox.of(obj);
-        return hitbox;
-    }
-
     /** The condenser, and its drive coupling on the side a motor drives it from (1 left, 2 front; mods.eln.cad.models.PlantCondenser). */
     void draw(int motorSide) {
         if (obj == null) return;

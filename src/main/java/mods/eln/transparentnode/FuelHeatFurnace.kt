@@ -105,13 +105,6 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
         }
     }
 
-    private var hitbox: ModelHitbox? = null
-
-    /** Its model's hitbox (mods.eln.cad.models.FuelHeater), turned with its front. */
-    override fun modelHitbox(): ModelHitbox? {
-        if (hitbox == null) hitbox = ModelHitbox.of(obj)
-        return hitbox
-    }
 
     override fun hasItemDraw() = true
 
