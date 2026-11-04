@@ -66,8 +66,11 @@ draw-off (front; natural gas as a gas); into the column base's crude nozzle (rig
 gas turbine's fuel flange (top). Out-ports push up to 200 mB/s against up to 6 bar (constants in each descriptor).
 With no EA pipe on the flange, a device with a drawn outlet pushes its tank into whatever block there takes fluid
 (`fluid/FluidExport`: another mod's pipe, a column base, a flare stack, an EA tank), and every device offers its
-tanks on every face. The fuel heat furnace has no flange (capability only). Tests: `OilCases` oil_pump_into_pipe*,
-oil_on_pipes_*.
+tanks on every face. The fuel heat furnace takes fuel on a flange low on its front into a two-bucket tank (gasoline,
+diesel, heavy oil, residue, crude). Crude cokes its burner (residue at half that rate), and a coked burner fires that
+much less: half after an hour at full power on crude, at most 90 % coked. A right click with wool cleans it. Burning
+crude or residue puts out black smoke (Baughn 2026-11-03). Tests: `OilCases` oil_pump_into_pipe*, oil_on_pipes_*,
+fuel_furnace_coke.
 
 ### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)
 - Datapack JSON `data/<ns>/eln/fluid_species/<name>.json` defines species `<ns>:<name>` for the fluid core (fields in

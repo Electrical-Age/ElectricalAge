@@ -128,38 +128,12 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     /** The vessel takes what a bucket or a pipe put in or took out since the last step, then shows its liquid again. */
     public void syncWater() {
         if (vessel == null) return;
-        for (var ch : water.change()) {
-            var ph = mods.eln.fluid.FluidSpecies.of(ch.getKey());
-            if (ph == null || ph.vapour()) continue;
-            int d = ch.getValue();
-            double kg = Math.abs(d) * mods.eln.fluid.FluidSpecies.kgPerMb(ph.id(), false);
-            if (ph.id() == mods.eln.sim.fluid.SpeciesRegistry.WATER) {
-                if (d > 0) EaUnits.addWater(vessel, kg, mods.eln.sim.Ambient.kelvin(node.coordonate), false);   // (at the ambient)
-                else if (d < 0) {
-                    double got = EaUnits.drainLiquid(vessel, kg);
-                    if (got < kg && vessel.T() < Water.TB) EaUnits.drainVapour(vessel, kg - got);   // (the rest condensed: see bucketable)
-                }
-            } else if (d > 0) EaUnits.add(vessel, ph.id(), kg, mods.eln.sim.Ambient.kelvin(node.coordonate), false);
-            else EaUnits.drainLiquid(vessel, ph.id(), kg);
-        }
+        water.sync(vessel, mods.eln.sim.Ambient.kelvin(node.coordonate));   // (at the ambient)
         showWater();
     }
 
-    void showWater() {
-        if (vessel == null) return;
-        // (to the nearest mB; cold, water's vapour counts too: a bucket poured into a box comes back 999 mB, a little of
-        // it evaporated into the box's air, and an empty bucket wants a whole 1000)
-        int top = mods.eln.fluid.FluidSpecies.topLiquid(vessel);
-        int id = top < 0 ? mods.eln.sim.fluid.SpeciesRegistry.WATER : top;
-        double kg = id == mods.eln.sim.fluid.SpeciesRegistry.WATER ? bucketable() : vessel.liquid(id);
-        int capacity = (int) Math.floor(vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
-        int room = (int) Math.floor(Math.max(0, vessel.volume - vessel.liquidVolume()) * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
-        water.show(mods.eln.fluid.FluidSpecies.fluid(id, false), (int) Math.round(kg / mods.eln.fluid.FluidSpecies.kgPerMb(id, false)), capacity, room);
-    }
-
-    /** The water a bucket can take (kg): its liquid, and while it's under boiling its vapour (it would condense). */
-    double bucketable() {
-        return vessel.T() < Water.TB ? vessel.mWater : vessel.mLiquid();
+    public void showWater() {
+        if (vessel != null) water.show(vessel);
     }
 
     @Override
@@ -400,9 +374,10 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
+        Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
         if (vessel == null) return info;
         info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s, %.0f °C", vessel.P() / 1e5, EaUnits.contents(vessel), vessel.T() - Water.T0));
+        info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
         info.put(I18N.tr("Water"), String.format("%.0f mB, %.0f%% full", vessel.mLiquid() / EaUnits.KG_PER_MB_WATER, fill() * 100));
         info.put(I18N.tr("Vessel"), group == null ? I18N.tr("one block") : String.format("%d x %d x %d blocks, %.0f buckets", group.sx, group.sy, group.sz,
             vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER / 1000));
@@ -410,9 +385,6 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         info.put(I18N.tr("Ports"), group == null ? I18N.tr("steam: top, and 12 px up on the sides; water: bottom, and 4 px up on the sides (not the glass's)")
             : I18N.tr("on its outer faces: steam: top, and 12 px up a side; water: bottom, and 4 px up a side"));
         info.put(I18N.tr("Piped"), String.format("%d of %d ports here", Integer.bitCount(coupled), ports.stream().filter(p -> p.face() != 0).count()));
-        if (vessel.mVapour() > 1e-7) info.put(I18N.tr("Steam"), EaUnits.steamGrams(vessel.mVapour() / EaUnits.KG_PER_MB_STEAM));
-        for (String[] o : EaUnits.others(vessel, id -> mods.eln.fluid.FluidSpecies.kgPerMb(id, false)))
-            info.put(Character.toUpperCase(o[0].charAt(0)) + o[0].substring(1), o[1]);
         if (vessel.P() > desc.workingPa) info.put(I18N.tr("Warning"), String.format("over its %.0f bar working pressure", desc.workingPa / 1e5));
         return info;
     }

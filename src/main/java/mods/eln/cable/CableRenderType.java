@@ -8,6 +8,8 @@ public class CableRenderType {
     public float[] startAt = new float[4];
     public int[] otherdry = new int[4];
     public CableRenderDescriptor[] otherRender = new CableRenderDescriptor[4];
+    /** 26.x: the cable (not a device) met at each edge, if any: a device draws its stub as it (CableRender.stub). */
+    public CableRenderDescriptor[] cable = new CableRenderDescriptor[4];
     /** 26.x: floor cable ending at a device's terminal plate: conductor height in px (0 = no lug). See CableTerminals. */
     public float[] knuckle = new float[4];
 

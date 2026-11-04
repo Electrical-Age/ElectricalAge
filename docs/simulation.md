@@ -179,7 +179,10 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   draw each liquid layer in its species' colour.
   Per step (20 Hz): heat in; one compressibility per phase per node (the stiffer of a small and a 2% flash step); an
   implicit pressure solve, repeated if a check valve runs backwards or a flow runs against the side its packet was
-  taken from; limiters bound nodes by their neighbours' solved pressures and cap liquid level moves; each node gives at
+  taken from (a check valve enters every solve open, carrying its upstream side's packet; the solve shuts the worst
+  back-flowing one per pass and opens a shut one again if its drive turns forward, so a feed valve on the edge of
+  opening neither stays shut for a whole step on its starting drive nor shuts the pump feeding the same pipe:
+  `BoilerFeedTest`, Baughn 2026-11-04); limiters bound nodes by their neighbours' solved pressures and cap liquid level moves; each node gives at
   most half of each phase it holds, net of inflow, and the rest of its outflow is its inflow passed through, with the
   mix and enthalpy from an implicit upwind solve (so pipe volume doesn't limit throughput or stability); then the
   transfer and a flash per node. Pumps are one-way edges from a sump with a head (`FluidEdge.boost`); a curved pump

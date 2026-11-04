@@ -89,6 +89,15 @@
             }
         ]
     },
+    "separator": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:separator",
+                "stream": false
+            }
+        ]
+    },
     "plate_machine": {
         "category": "block",
         "sounds": [

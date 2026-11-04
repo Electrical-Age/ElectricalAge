@@ -51,6 +51,14 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     public FluidNode feed;
     private FluidDevice.Link feedCheck;
     public static final double FEED_VOLUME = 0.00002, FEED_DRAW = 0.3;
+    /**
+     * The feed inlet's float valve (Baughn 2026-11-04: a boiler shouldn't overfill): it closes over this band of the
+     * gauge glass below full (fill() 1). Without it a condensate pump fed the boiler everything its makeup drew from a
+     * tank, eight times its rated fill, and the boiler had all that to heat.
+     */
+    public static final double FEED_FLOAT_BAND = 0.1;
+    /** Its rated fill (kg of water): the gauge glass's full mark, where its feed float closes and its view stops taking. */
+    public static final double RATED_KG = BoilerTanks.WATER_MB * EaUnits.KG_PER_MB_WATER;
     private double[] loaded, loadedFeed;
     private List<FluidPort> ports = List.of();
     private final List<Vent> vents = new java.util.ArrayList<>();
@@ -127,21 +135,19 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     /** How full it is, as its gauge glass shows it: liquid against the water tank's capacity (0..1; the vessel's
      *  own volume is mostly steam space). */
     public double fill() {
-        return vessel.mLiquid() / (BoilerTanks.WATER_MB * EaUnits.KG_PER_MB_WATER);
+        return vessel.mLiquid() / RATED_KG;
     }
 
     /** Take in what pipes put in or took out since the last step (each step, and before saving). */
     public void syncTanks() {
-        int in = tanks.takeWaterIn();
-        if (in > 0) EaUnits.addWater(vessel, in * EaUnits.KG_PER_MB_WATER, ambient + mods.eln.sim.PhysicalConstant.Tref, false);   // (piped water: at the ambient)
-        int out = tanks.takeSteamOut();
-        if (out > 0) EaUnits.drainVapour(vessel, out * EaUnits.KG_PER_MB_STEAM);
-        meterSteam += out;
+        meterSteam += tanks.takenOut(BoilerTanks.GAS);
+        tanks.sync(vessel, ambient + mods.eln.sim.PhysicalConstant.Tref);   // (piped water: at the ambient)
     }
 
     @Override
     public void beforeFluidStep(double dt) {
         syncTanks();
+        if (feedCheck != null) feedCheck.open = Math.max(0, Math.min(1, (1 - fill()) / FEED_FLOAT_BAND));
         // the shell heats the water (EA thermal temperatures are relative to the ambient, Tref)
         double shellK = thermal.Tc + mods.eln.sim.PhysicalConstant.Tref;
         double q = (shellK - vessel.T()) / SHELL_TO_WATER_K_PER_W * heatingShare();
@@ -193,8 +199,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
      * evaporated, cooled the water below ambient and fed a turbine with it (Baughn).
      */
     public void showTanks() {
-        int steam = vessel.T() >= Water.TB ? (int) Math.floor(EaUnits.steamAvailable(vessel) / EaUnits.KG_PER_MB_STEAM) : 0;
-        tanks.show((int) Math.floor(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER), steam);
+        tanks.show(vessel);
     }
 
     @Override
@@ -268,7 +273,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
         var hand = player.getMainHandItem();
         if (!hand.is(net.minecraft.world.item.Items.WATER_BUCKET)) return false;
-        if (BoilerTanks.WATER_MB - tanks.water() < 1000) return false;
+        if (!tanks.fits(1000)) return false;
         tanks.fillWater(1000);
         if (!player.isCreative()) player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BUCKET));
         player.level().playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.BUCKET_EMPTY, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);
@@ -325,14 +330,17 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
+        Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
         if (vessel != null) {
-            // (dry, it is the gas's: AdventurAgent read "Water temperature" with no water)
-            info.put(vessel.mLiquid() > 1e-6 ? I18N.tr("Water temperature") : I18N.tr("Gas temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
             info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", vessel.P() / 1e5, EaUnits.contents(vessel)));
+            info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
         }
-        info.put(I18N.tr("Water"), tanks.water() + " / " + BoilerTanks.WATER_MB + " mB");
+        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
+        if (vessel != null)   // (dry, it is the gas's: AdventurAgent read "Water temperature" with no water)
+            info.put(vessel.mLiquid() > 1e-6 ? I18N.tr("Water temperature") : I18N.tr("Gas temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
+        // (the vessel's own water, not the capability's view capped at the rating: an overfilled boiler showed 8000)
+        int water = vessel != null ? (int) Math.floor(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER) : tanks.water();
+        info.put(I18N.tr("Water"), water + " / " + BoilerTanks.WATER_MB + " mB" + (water > BoilerTanks.WATER_MB ? I18N.tr(": overfull") : ""));
         // (Baughn: steam in grams, not mB)
         info.put(I18N.tr("Steam to give"), EaUnits.steamGrams(tanks.steam()));
         info.put(I18N.tr("Steam made"), EaUnits.steamGrams(steamRate) + "/s");

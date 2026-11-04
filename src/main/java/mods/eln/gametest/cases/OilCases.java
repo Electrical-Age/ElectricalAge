@@ -36,6 +36,8 @@ public final class OilCases {
         cases.add(new PumpIntoPipe(120));
         for (String v : OilOnPipes.VARIANTS) cases.add(new OilOnPipes(v));
         cases.add(new Basin());
+        cases.add(new Coke());
+        cases.add(new SeparatorSound());
         cases.add(new Pump(false));
         cases.add(new Pump(true));
         cases.add(new Boiler());
@@ -53,6 +55,7 @@ public final class OilCases {
         cases.add(new CondensateReturn(14e5, false));
         cases.add(new CondensateReturn(21e5, false));
         cases.add(new CondensateReturn(21e5, true));
+        cases.add(new ClosedPlant());
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -569,6 +572,101 @@ public final class OilCases {
         }
     }
 
+    /** Baughn 2026-11-03: both tar sand separators run to his recording (eln:separator), not the macerator's sound. */
+    static final class SeparatorSound implements TestCase {
+        public String id() {
+            return "oil_separator_sound";
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            for (int sub : new int[]{0, 4}) {
+                Object d = mods.eln.Eln.transparentNodeItem.getDescriptor(sub + (80 << 6));
+                String s = Batch1Cases.field(d, "runningSound");
+                ctx.check("oil: the separator runs to its own sound (" + sub + ")", "eln:separator".equals(s), "" + s);
+            }
+            boolean asset = OilCases.class.getResource("/assets/eln/sounds/separator.ogg") != null;
+            String json = "";
+            try (var in = OilCases.class.getResourceAsStream("/assets/eln/sounds.json")) {
+                if (in != null) json = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            } catch (java.io.IOException e) {
+                json = e.toString();
+            }
+            ctx.check("oil: the separator's sound is shipped and listed", asset && json.contains("\"eln:separator\""), asset + "");
+        }
+    }
+
+    /**
+     * Baughn 2026-11-03: burning crude cokes the fuel heat furnace's burner, wool cleans it. Four big-burner furnaces at
+     * full manual control: crude (its burner cokes, black smoke), gasoline (no coke), gasoline on a half-coked burner
+     * (half the heat of the clean one), and crude half coked, cleaned by a right click with wool (one used).
+     */
+    static final class Coke implements TestCase {
+        mods.eln.transparentnode.FuelHeatFurnaceElement crude, clean, coked, wooled;
+
+        public String id() {
+            return "fuel_furnace_coke";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        mods.eln.transparentnode.FuelHeatFurnaceElement furnace(TestContext ctx, int x, net.minecraft.world.level.material.Fluid fuel, double coke) {
+            var f = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(x, 1, 1));
+            f.getInventory().setItem(mods.eln.transparentnode.FuelHeatFurnaceContainer.Companion.getFuelBurnerSlot(),
+                mods.eln.Eln.sharedItemStackOne.getDescriptor(2 + (124 << 6)).newItemStack());
+            f.inventoryChange(f.getInventory());
+            f.networkUnserialize(ctx.stream(o -> o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getMainSwitchToggleEvent())));
+            f.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getSetManualControlValueEvent());
+                o.writeFloat(1f);
+            }));
+            ((mods.eln.fluid.ElementFluidHandler) f.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(fuel, 2000), true);
+            f.setCoke(coke);
+            return f;
+        }
+
+        public void build(TestContext ctx) {
+            crude = furnace(ctx, 0, Oil.CRUDE.get(), 0);
+            clean = furnace(ctx, 2, Oil.Cut.GASOLINE.source.get(), 0);
+            coked = furnace(ctx, 4, Oil.Cut.GASOLINE.source.get(), 0.5);
+            wooled = furnace(ctx, 6, Oil.CRUDE.get(), 0.5);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("oil: crude cokes the fuel heat furnace's burner", crude.getCoke() > 0 && crude.heatPower() > 0,
+                crude.getCoke() + ", " + crude.heatPower() + " W");
+            ctx.check("oil: gasoline doesn't coke it", clean.getCoke() == 0 && clean.heatPower() > 0, clean.getCoke() + ", " + clean.heatPower() + " W");
+            ctx.check("oil: a half-coked burner gives half the heat", Math.abs(coked.heatPower() / clean.heatPower() - 0.5) < 0.02,
+                coked.heatPower() + " W against " + clean.heatPower() + " W");
+            var player = new net.minecraft.world.entity.player.Player(ctx.level(), new com.mojang.authlib.GameProfile(
+                java.util.UUID.nameUUIDFromBytes("eln-coke".getBytes()), "coke")) {
+                @Override
+                public net.minecraft.world.level.GameType gameMode() {
+                    return net.minecraft.world.level.GameType.SURVIVAL;
+                }
+
+                @Override
+                public boolean isClientAuthoritative() {
+                    return false;
+                }
+            };
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.level.block.Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE), 3));
+            boolean used = wooled.onBlockActivated(player, mods.eln.misc.Direction.YP, 0.5f, 0.5f, 0.5f);
+            ctx.check("oil: wool cleans a coked burner, one used", used && wooled.getCoke() == 0 && player.getMainHandItem().getCount() == 2,
+                used + ", " + wooled.getCoke() + ", " + player.getMainHandItem());
+            boolean again = wooled.onBlockActivated(player, mods.eln.misc.Direction.YP, 0.5f, 0.5f, 0.5f);
+            ctx.check("oil: wool on a clean burner does nothing", !again && player.getMainHandItem().getCount() == 2, again + "");
+        }
+    }
+
     /**
      * Baughn 2026-11-03: the separator's basin shows its oil rising as its tank fills. Half a tank (nothing at its
      * outlet) publishes a basin half full, the last float of its packet (what ElectricalMachineRender.basin reads).
@@ -793,6 +891,10 @@ public final class OilCases {
             return "oil_steam_turbine";
         }
 
+        public boolean checkLimitCycles() {
+            return false;   // (steam() tops the inlet up 0.5 g at a time under 10 bar: a sawtooth by design)
+        }
+
         public int width() {
             return 7;
         }
@@ -853,6 +955,10 @@ public final class OilCases {
 
         public String id() {
             return "oil_steam_turbine_low_pressure";
+        }
+
+        public boolean checkLimitCycles() {
+            return false;   // (steam() tops the inlet up 0.5 g at a time under 10 bar: a sawtooth by design)
         }
 
         public int width() {
@@ -995,6 +1101,10 @@ public final class OilCases {
 
         public String id() {
             return "oil_steam_turbine_condenser";
+        }
+
+        public boolean checkLimitCycles() {
+            return false;   // (steam() tops the inlet up 0.5 g at a time under 10 bar: a sawtooth by design)
         }
 
         public int width() {
@@ -1230,6 +1340,110 @@ public final class OilCases {
     }
 
     /**
+     * A closed steam plant (Baughn 2026-11-04: no GameTest built one, so the boiler feed valve's limit cycle passed them
+     * all): a heated boiler, an iron pipe from its top to a loaded 50V turbine, a Small Steam Condenser on the turbine's
+     * exhaust, and an iron pipe from the condenser's pump back into the boiler's feed flange. Its firing steps from
+     * 4 kW to 7 kW halfway (under what the turbine can take, so the boiler stays under the pump's shut-off head). The feed pipe holds one pressure (no step-to-step flips), the condensate goes back to the
+     * boiler, the condenser doesn't flood, the boiler neither boils dry nor overfills, and the turbine makes power.
+     */
+    static final class ClosedPlant implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.SteamGeneratorElement turbine;
+        mods.eln.oil.CondenserElement c;
+        mods.eln.sim.IProcess fire;
+        BlockPos feedAt;
+        int tick, flips, steps;
+        double heat = 8000, p1 = Double.NaN, p2 = Double.NaN, lo = 1e9, hi, steam0, pumped0, fillLo = 1e9, fillHi, floodHi, power;
+        static final int STEP = 1400, WATCH = 2200;
+
+        public String id() {
+            return "fluid_closed_plant_feed_loop";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 2800;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            boiler.front = mods.eln.misc.Direction.XN;   // (feed flange south)
+            boiler.reconnect();
+            boiler.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.fromTanks(5600, 0);
+            boiler.showTanks();
+            turbine = plant(l, 4, true)[0];
+            c = condenserOf(ctx, ctx.at(4, 1, 2));
+            for (int i = 0; i < 4 && c.front != mods.eln.misc.Direction.XN; i++) mods.eln.fluid.FluidPlacement.turn(c);
+            // steam: up out of the boiler, east, down into the turbine (as pipe_boiler_to_turbine)
+            PipeCases.lay(ctx, ctx.at(1, 2, 1), 0, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(2, 2, 1), 0, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(3, 2, 1), 0, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(4, 2, 1), 0, 0, 8, 8, 8, 8, 8, 8, 0, 8);
+            // condensate: west out of the condenser's front, along, then north into the boiler's feed flange
+            feedAt = ctx.at(2, 1, 2);
+            PipeCases.lay(ctx, ctx.at(3, 1, 2), 0, 16, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, feedAt, 0, 16, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, ctx.at(1, 1, 2), 0, 16, 8, 8, 8, 8, 8, 8, 8, 0);
+            for (int x = 1; x <= 3; x++) l.used.add(ctx.at(x, 1, 2));
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
+                if (c.vessel == null || boiler.vessel == null) return;
+                if (tick == 0) {   // (20 % water: the pump's port draws liquid; under the makeup float's shut level)
+                    mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.2 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 320, false);
+                    // the feed run full of water, as a plant that has run a while: a liquid-full pipe is stiff, the case
+                    // where a check valve decided at the step's start flipped it (Baughn's base)
+                    var run = mods.eln.fluid.FluidWorld.nodeFor(boiler.feed);
+                    run.fill(0.995 * run.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 300);
+                    run.update();
+                }
+                if (++tick == STEP) heat = 10000;
+                boiler.thermal.moveEnergyTo(heat * t);
+                if (tick == WATCH) {
+                    steam0 = c.v.totalSteamKg;
+                    pumped0 = c.v.totalPumpedKg;
+                }
+                if (tick > WATCH) {
+                    // the feed pipe, step to step: a flip is a turn back by over 0.05 bar both ways
+                    // (the run is lumped with the boiler's feed stub)
+                    double p = mods.eln.fluid.FluidWorld.nodeFor(boiler.feed).P();
+                    if (!Double.isNaN(p2) && (p - p1) * (p1 - p2) < 0 && Math.abs(p - p1) > 5e3 && Math.abs(p1 - p2) > 5e3) flips++;
+                    steps++;
+                    p2 = p1;
+                    p1 = p;
+                    lo = Math.min(lo, p);
+                    hi = Math.max(hi, p);
+                    fillLo = Math.min(fillLo, boiler.fill());
+                    fillHi = Math.max(fillHi, boiler.fill());
+                    floodHi = Math.max(floodHi, c.floodShare());
+                    power += turbine.source.getEffectiveP() / (ticks() - WATCH);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            double steam = c.v.totalSteamKg - steam0, pumped = c.v.totalPumpedKg - pumped0;
+            ctx.line(String.format("closed plant: feed pipe %.2f..%.2f bar, %d flips in %d steps; %.1f g condensed, %.1f g pumped; boiler fill %.0f..%.0f%%, "
+                    + "condenser up to %.0f%%; %.0f W; boiler %s; turbine %s; condenser %s", lo / 1e5, hi / 1e5, flips, steps, steam * 1000, pumped * 1000,
+                fillLo * 100, fillHi * 100, floodHi * 100, power, boiler.getWaila(), turbine.getWaila(), c.getWaila()));
+            boolean joined = false;
+            for (var q : c.fluidPorts()) joined |= mods.eln.fluid.FluidWorld.networkOf(q.node()) == mods.eln.fluid.FluidWorld.networkOf(boiler.feed);
+            ctx.check("closed plant: the condenser's pump feeds the boiler (one network)", joined && mods.eln.fluid.FluidWorld.networkOf(boiler.feed) != null, "");
+            ctx.check("closed plant: the turbine makes power after the firing step", power > 300, String.format("%.0f W", power));
+            ctx.check("closed plant: the feed pipe holds one pressure (no step-to-step flips)", steps > 100 && flips < steps / 10,
+                flips + " of " + steps + String.format(", %.2f..%.2f bar", lo / 1e5, hi / 1e5));
+            ctx.check("closed plant: the condensate goes back to the boiler (90 %+)", steam > 0.02 && pumped > 0.9 * steam,
+                String.format("%.1f of %.1f g", pumped * 1000, steam * 1000));
+            ctx.check("closed plant: the condenser doesn't flood", floodHi < mods.eln.oil.CondenserVessel.MAKEUP_SHUT, String.format("%.0f%%", floodHi * 100));
+            ctx.check("closed plant: the boiler neither boils dry nor overfills", fillLo > 0.3 && fillHi < 1.02, String.format("%.0f..%.0f%%", fillLo * 100, fillHi * 100));
+        }
+    }
+
+    /**
      * A Steam Condenser saved with its old 20 L vessel (no "tank3" tag), 40 % water at 50 C under 1 atm of air, loads into
      * the 12-bucket one (Baughn 2026-11-03): its water down to the float valve's shut level, its air to 1 atm's worth, at
      * the temperature it had; one saved since keeps all it had.
@@ -1443,6 +1657,10 @@ public final class OilCases {
 
         public String id() {
             return "oil_steam_turbine_floods";
+        }
+
+        public boolean checkLimitCycles() {
+            return false;   // (steam() tops the inlet up 0.5 g at a time under 10 bar: a sawtooth by design)
         }
 
         public int width() {

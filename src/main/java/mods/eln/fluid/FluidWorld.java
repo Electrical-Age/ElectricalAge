@@ -126,9 +126,144 @@ public final class FluidWorld implements IProcess {
             l.edge.boost = l.boost;
         }
         for (FluidNetwork n : networks) n.step(time);
+        if (traceSteps > 0 && traceNode != null) trace();
+        if (scanSteps > 0) scan();
+        if (watchAll) watch();
         writeBack();
         burstThisStep.clear();
         for (FluidDevice d : stepping) if (devices.contains(d)) d.afterFluidStep(time);
+    }
+
+    /** Keep a rolling record of every node's step-to-step flips (the GameTest harness's limit-cycle check). */
+    public static boolean watchAll;
+    /** Per node: {P(t-1), P(t-2), flip history bits (1: it turned back by over 0.05 bar that step), the step last seen}. */
+    private static final Map<FluidNode, double[]> watched = new IdentityHashMap<>();
+    private static long watchStep;
+
+    private void watch() {
+        watchStep++;
+        // (nodes of removed devices: dropped once they have been gone 100 steps)
+        if (watchStep % 100 == 0) watched.values().removeIf(r -> r[3] < watchStep - 100);
+        for (FluidNetwork net : networks)
+            for (FluidNode n : net.nodes) {
+                if (n.fixed) continue;
+                double p = n.P();
+                double[] r = watched.computeIfAbsent(n, k -> new double[]{Double.NaN, Double.NaN, 0, 0});
+                long bits = (long) r[2] << 1;
+                if (!Double.isNaN(r[1])) {
+                    double d1 = p - r[0], d0 = r[0] - r[1];
+                    if (d1 * d0 < 0 && Math.abs(d1) > 5e3 && Math.abs(d0) > 5e3) bits |= 1;
+                }
+                r[2] = bits & 0xFFFFF;
+                r[1] = r[0];
+                r[0] = p;
+                r[3] = watchStep;
+            }
+    }
+
+    /** How many of a node's (its run's) last 20 steps it flipped, while watchAll. */
+    public static int recentFlips(FluidNode n) {
+        double[] r = watched.get(nodeFor(n));
+        return r == null ? 0 : Long.bitCount((long) r[2]);
+    }
+
+    /** The devices in the world now (a copy). */
+    public static List<FluidDevice> devices() {
+        return new ArrayList<>(INSTANCE.devices);
+    }
+
+    /** /elnlab fluidscan: steps left to watch, and per node its last two pressures and flip / swing tallies. */
+    public static int scanSteps;
+    private static final Map<FluidNode, double[]> scanned = new IdentityHashMap<>();
+
+    /** Start a scan of every network for n steps (a fresh tally). */
+    public static void startScan(int n) {
+        scanned.clear();
+        scanSteps = n;
+    }
+
+    /**
+     * Per node: {P(t-1), P(t-2), steps seen, flips (the pressure turned back each step by over 0.05 bar), biggest swing}.
+     * A period-2 limit cycle (the boiler feed valve's of 2026-11-04, before check valves entered the solve open) flips every step.
+     */
+    private void scan() {
+        scanSteps--;
+        for (FluidNetwork net : networks)
+            for (FluidNode n : net.nodes) {
+                if (n.fixed) continue;
+                double p = n.P();
+                // (5 min, 6 max, 7 the last turning point's pressure, 8 its direction (+1 rising, -1 falling), 9 slow reversals
+                // of over 0.1 bar: a hunting loop swings back and forth over many steps)
+                double[] r = scanned.computeIfAbsent(n, k -> new double[]{Double.NaN, Double.NaN, 0, 0, 0, p, p, p, 0, 0});
+                r[5] = Math.min(r[5], p);
+                r[6] = Math.max(r[6], p);
+                if (r[8] >= 0 && p < r[7] - 1e4) {
+                    if (r[8] > 0) r[9]++;
+                    r[8] = -1;
+                    r[7] = p;
+                } else if (r[8] <= 0 && p > r[7] + 1e4) {
+                    if (r[8] < 0) r[9]++;
+                    r[8] = 1;
+                    r[7] = p;
+                } else if (r[8] > 0 ? p > r[7] : p < r[7]) r[7] = p;
+                if (!Double.isNaN(r[1])) {
+                    double d1 = p - r[0], d0 = r[0] - r[1];
+                    if (d1 * d0 < 0 && Math.abs(d1) > 5e3 && Math.abs(d0) > 5e3) r[3]++;
+                    r[4] = Math.max(r[4], Math.abs(d1));
+                }
+                r[1] = r[0];
+                r[0] = p;
+                r[2]++;
+            }
+        if (scanSteps == 0) scanReport();
+    }
+
+    /** Log the nodes that flipped most steps, with where their devices are. */
+    private void scanReport() {
+        Map<FluidNode, String> where = new IdentityHashMap<>();
+        for (FluidDevice d : devices)
+            for (FluidDevice.FluidPort p : d.fluidPorts()) {
+                var b = BlockPos.of(p.pos());
+                where.putIfAbsent(nodeFor(p.node()), d.getClass().getSimpleName() + " " + b.getX() + "," + b.getY() + "," + b.getZ());
+            }
+        List<Map.Entry<FluidNode, double[]>> hits = new ArrayList<>();
+        for (var e : scanned.entrySet()) {
+            double[] r = e.getValue();
+            if (r[2] > 4 && (r[3] / (r[2] - 2) > 0.5 || r[9] >= 4)) hits.add(e);
+        }
+        hits.sort((a, b) -> Double.compare(b.getValue()[4], a.getValue()[4]));
+        StringBuilder b = new StringBuilder(String.format("fluidscan: %d nodes watched, %d flip most steps or hunt", scanned.size(), hits.size()));
+        for (var e : hits)
+            b.append(String.format("%n  %s: flips %.0f of %.0f steps (step swing up to %.3f bar), %.0f slow reversals over %.3f..%.3f bar, P now %.3f bar, V %.5f m3",
+                where.getOrDefault(e.getKey(), "?"), e.getValue()[3], e.getValue()[2] - 2, e.getValue()[4] / 1e5, e.getValue()[9],
+                e.getValue()[5] / 1e5, e.getValue()[6] / 1e5, e.getKey().P() / 1e5, e.getKey().volume));
+        mods.eln.Eln.LOG.info(b.toString());
+        scanned.clear();
+    }
+
+    /** /elnlab fluidtrace: the node whose network is logged after each step, for traceSteps more steps. */
+    public static FluidNode traceNode;
+    public static int traceSteps;
+
+    /** One line per node (pressure, z, volume, water, air, T) and per edge (ends, kind, open, boost, flow) of traceNode's network. */
+    private void trace() {
+        FluidNetwork net = networkOf(nodeFor(traceNode));
+        traceSteps--;
+        if (net == null) {
+            mods.eln.Eln.LOG.info("fluidtrace: the node is in no network");
+            return;
+        }
+        StringBuilder b = new StringBuilder("fluidtrace step (" + traceSteps + " left)");
+        for (int i = 0; i < net.nodes.size(); i++) {
+            FluidNode n = net.nodes.get(i);
+            b.append(String.format("%n  n%d%s P=%.4f bar z=%.2f h=%.2f V=%.5f w=%.6f a=%.3g E=%.6g T=%.2f", i, n.fixed ? " fixed" : "", n.P() / 1e5,
+                n.z, n.height, n.volume, n.mWater, n.mAir, n.energy, n.T() - 273.15));
+        }
+        for (FluidEdge e : net.edges)
+            b.append(String.format("%n  e n%d->n%d %s open=%.4f boost=%.3f bar flow=%.5f liq=%.5f k=%.4g pA=%.3f pB=%.3f spanA=%.3f spanB=%.3f %s",
+                net.nodes.indexOf(e.a), net.nodes.indexOf(e.b), e.kind, e.open, e.boost / 1e5, e.flow, e.fLiquid, e.k, e.portA, e.portB,
+                e.spanA, e.spanB, e.debug()));
+        mods.eln.Eln.LOG.info(b.toString());
     }
 
     /** Each lumped run's contents back into its members, by volume (they are what is saved and what is rebuilt from). */

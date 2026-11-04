@@ -126,7 +126,8 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(I18N.tr("Generates heat when supplied with fuel."))
-        list.add(I18N.tr("Burns gasoline, diesel, heavy oil and residue."))
+        list.add(I18N.tr("Burns gasoline, diesel, heavy oil, residue and crude oil."))
+        list.add(I18N.tr("Crude oil and residue coke its burner: clean it with wool."))
         list.add(Utils.plotCelsius(I18N.tr("  Max. temperature: "), thermal.warmLimit))
     }
 }
@@ -138,6 +139,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val MainSwitchToggleEvent: Byte = 1
         val SetManualControlValueEvent: Byte = 2
         val SetTemperatureEvent: Byte = 3
+        /** The most a burner cokes: it still fires a tenth. */
+        const val COKE_MAX = 0.9
     }
 
     private val thermalLoad = NbtThermalLoad("thermalLoad")
@@ -195,6 +198,16 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     val fire = mods.eln.sim.Fire(mods.eln.sim.Fire.OIL)
     private var actualHeatPower by published(0.0)
 
+    /**
+     * How coked its burner is (0..COKE_MAX; Baughn 2026-11-03: crude burns, but at a cost): burning crude (residue at
+     * half the rate) cokes it, and a coked burner fires that much less (half after an hour at its full power on crude).
+     * A right click with wool cleans it.
+     */
+    var coke = 0.0
+
+    /** Its burner's heat power now (W), before the flue takes its share. */
+    fun heatPower() = actualHeatPower
+
     private val controlProcess = object : RegulatorProcess("controller") {
         override fun process(time: Double) {
             val nominalPower = if (mainSwitch)
@@ -215,8 +228,12 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             fire.step(heaterControlValue, nominalPower > 0 && tank.fluidAmount > 0, time)
             // (each mB gives heatFurnaceFuelFactor times its heat value: Baughn 2026-10-26, with turbines by the expansion)
             val f = mods.eln.ElnConfig.heatFurnaceFuelFactor
-            val availableEnergy = tank.drainEnergy(fire.level * nominalPower * time / f) * f
+            val fuel = tank.getFluid()
+            val availableEnergy = tank.drainEnergy(fire.level * nominalPower * (1 - coke) * time / f) * f
             actualHeatPower = availableEnergy / time
+            // (the coking: per second at its full power on crude, 1 / (2 h); residue at half that)
+            val rate = cokeRate(fuel)
+            if (rate > 0 && nominalPower > 0) coke = Math.min(COKE_MAX, coke + rate * actualHeatPower / nominalPower * time / (2 * 3600))
             thermalLoad.PcTemp += mods.eln.fluid.Flue.HEAT_SHARE * actualHeatPower   // (the rest leaves in the smoke: Flue)
         }
 
@@ -276,7 +293,28 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         connect()
     }
 
-    override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
+    /** Wool on a coked burner: it's cleaned, and the wool used (Baughn 2026-11-03). Otherwise the screen opens. */
+    override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
+        val held = entityPlayer?.mainHandItem ?: return false
+        if (coke <= 0.01 || !held.`is`(net.minecraft.tags.ItemTags.WOOL)) return false
+        coke = 0.0
+        if (!entityPlayer.isCreative) held.shrink(1)
+        needPublish()
+        return true
+    }
+
+    /** Coking per second at full power, as a share of COKE per (2 h): crude 1, residue 0.5, refined fuels 0. */
+    private fun cokeRate(fuel: net.neoforged.neoforge.fluids.FluidStack): Double {
+        if (fuel.isEmpty) return 0.0
+        return when {
+            fuel.fluid.isSame(mods.eln.oil.Oil.CRUDE.get()) -> 1.0
+            fuel.fluid.isSame(mods.eln.oil.Oil.Cut.RESIDUE.source.get()) -> 0.5
+            else -> 0.0
+        }
+    }
+
+    /** Thick black smoke while it burns crude or residue. */
+    private fun sooty() = cokeRate(tank.getFluid()) > 0
 
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
@@ -290,6 +328,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         stream.writeFloat(if (isBurnt()) 0f else fire.level.toFloat())
         stream.writeBoolean(fire.lighting())
         stream.writeBoolean(smoking && !isBurnt())
+        stream.writeBoolean(sooty())
     }
 
     override fun networkUnserialize(stream: DataInputStream): Byte {
@@ -323,6 +362,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         fire.write(nbt, "")
         fuelIn.write(nbt)
         flue.write(nbt)
+        nbt.putDouble("coke", coke)
     }
 
     override fun readFromNBT(nbt: CompoundTag) {
@@ -337,6 +377,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         if (nbt.contains("fire")) fire.read(nbt, "") else fire.level = heaterControlValue
         fuelIn.read(nbt)
         flue.read(nbt)
+        coke = nbt.getDoubleOr("coke", 0.0)
     }
 
     override fun hasGui() = true
@@ -345,6 +386,10 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val info = HashMap<String, String>()
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))
         info.put(I18N.tr("Power"), Utils.plotPower("", if (isBurnt()) 0.0 else actualHeatPower))
+        // (what's in its tank: Baughn 2026-11-03, Jade said nothing of it)
+        val f = tank.getFluid()
+        info.put(I18N.tr("Fuel tank"), if (f.isEmpty) I18N.tr("empty") else "${tank.fluidAmount} / ${tank.capacity} mB ${f.hoverName.string}")
+        if (coke > 0.01) info.put(I18N.tr("Burner"), String.format(I18N.tr("%.0f%% coked: fires %.0f%% (right-click with wool to clean)"), coke * 100, (1 - coke) * 100))
         if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade())
         if (fuelIn.piped()) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its front flange"))
         return info
@@ -383,6 +428,8 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     var lighting = false
     /** Smoke up its stack (burning, nothing piped on its flue's flange). */
     var smoking = false
+    /** Burning crude or residue: thick black smoke. */
+    var sooty = false
     private var smokeDue = 0f
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
@@ -416,7 +463,8 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
             smokeDue -= 1
             val jx = (Math.random() - 0.5) * 0.12
             val jz = (Math.random() - 0.5) * 0.12
-            level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, p.x + 0.5 + jx, p.y + 1.02, p.z + 0.5 + jz, 0.0, 0.06, 0.0)
+            level.addParticle(if (sooty) net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE else net.minecraft.core.particles.ParticleTypes.SMOKE,
+                p.x + 0.5 + jx, p.y + 1.02, p.z + 0.5 + jz, 0.0, 0.06, 0.0)
         }
     }
 
@@ -437,6 +485,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
         fire = stream.readFloat()
         lighting = stream.readBoolean()
         smoking = stream.readBoolean()
+        sooty = stream.readBoolean()
     }
 
 }

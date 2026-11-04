@@ -69,11 +69,11 @@ public final class PipeCases {
     /**
      * The feedwater flange on the boiler's right flank (Baughn: a water input): water under pressure in a pipe there
      * goes into a cold, empty boiler; a hot boiler's pressure doesn't push water back out into an empty feed pipe (the
-     * check valve).
+     * check valve); a full boiler takes none (its feed float valve, Baughn 2026-11-04: it shouldn't overfill).
      */
     static final class BoilerFeed implements TestCase {
-        mods.eln.oil.BoilerElement cold, hot;
-        PipePart coldPipe, hotPipe;
+        mods.eln.oil.BoilerElement cold, hot, full;
+        PipePart coldPipe, hotPipe, fullPipe;
         mods.eln.sim.IProcess fire;
         double m0;
 
@@ -82,7 +82,7 @@ public final class PipeCases {
         }
 
         public int width() {
-            return 5;
+            return 7;
         }
 
         public int ticks() {
@@ -93,21 +93,26 @@ public final class PipeCases {
             Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
             cold = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
             hot = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 3, 1);
-            for (var b : new mods.eln.oil.BoilerElement[]{cold, hot}) {
+            full = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 5, 1);
+            for (var b : new mods.eln.oil.BoilerElement[]{cold, hot, full}) {
                 b.front = mods.eln.misc.Direction.XN;   // (its right: ZP, south)
                 b.reconnect();
             }
             cold.fromTanks(0, 0);
             hot.fromTanks(4000, 0);
+            full.fromTanks(mods.eln.oil.BoilerTanks.WATER_MB, 0);
             hot.thermal.Tc = 170;
             mods.eln.Eln.simulator.addSlowProcess(fire = t -> hot.thermal.moveEnergyTo(3000 * t));
             lay(ctx, ctx.at(1, 1, 2), 0, 8, 8, 0, 8, 8, 8);
             lay(ctx, ctx.at(3, 1, 2), 0, 8, 8, 0, 8, 8, 8);
             coldPipe = (PipePart) node(ctx, ctx.at(1, 1, 2)).parts.get(0);
             hotPipe = (PipePart) node(ctx, ctx.at(3, 1, 2)).parts.get(0);
+            lay(ctx, ctx.at(5, 1, 2), 0, 8, 8, 0, 8, 8, 8);
+            fullPipe = (PipePart) node(ctx, ctx.at(5, 1, 2)).parts.get(0);
             // the cold boiler's pipe: full of water at 10 bar (a feed pump's pressure)
             m0 = coldPipe.fluid.volume * mods.eln.sim.fluid.Water.RHO_L * 0.9;
             coldPipe.fluid.fill(m0, 10e5, mods.eln.sim.fluid.Water.T_AMBIENT);
+            fullPipe.fluid.fill(m0, 10e5, mods.eln.sim.fluid.Water.T_AMBIENT);
         }
 
         public void measure(TestContext ctx) {
@@ -120,6 +125,10 @@ public final class PipeCases {
                 && mods.eln.fluid.FluidWorld.networkOf(cold.vessel) == mods.eln.fluid.FluidWorld.networkOf(coldPipe.fluid), String.format("%.4f kg", cold.vessel.mLiquid()));
             ctx.check("feed: the hot boiler is under pressure", hot.vessel.P() > 1.5e5, String.format("%.2f bar", hot.vessel.P() / 1e5));
             ctx.check("feed: nothing came back out through the check valve", back < 1, String.format("%.1f mB", back));
+            // (the pipe's run is lumped with the boiler's feed stub: the run holds its water)
+            double run = mods.eln.fluid.FluidWorld.nodeFor(fullPipe.fluid).mLiquid();
+            ctx.check("feed: a full boiler takes no more (its float valve)", full.fill() < 1.01 && run > 0.9 * m0,
+                String.format("%.3f full, its feed run %.4f of %.4f kg", full.fill(), run, m0));
         }
     }
 

@@ -1139,48 +1139,15 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         for (VoxelPart p : parts) {
             if (!(p instanceof AdapterPart a)) continue;
             PipePart stub = stubOf(a);
-            if (stub == null) continue;
-            var run = mods.eln.fluid.FluidWorld.nodeFor(stub.fluid);
-            for (var ch : a.tanks.take()) {
-                var ph = mods.eln.fluid.FluidSpecies.of(ch.getKey());
-                if (ph == null) continue;
-                int mb = ch.getValue();
-                double kg = Math.abs(mb) * mods.eln.fluid.FluidSpecies.kgPerMb(ph.id(), ph.vapour());
-                if (ph.id() == mods.eln.sim.fluid.SpeciesRegistry.WATER) {
-                    if (mb > 0 && !ph.vapour()) EaUnits.addWater(run, kg, mods.eln.sim.Ambient.kelvin(coordonate), false);   // (other mods' water: at the ambient)
-                    else if (mb < 0 && !ph.vapour()) drainLiquid(run, kg);
-                    else if (mb > 0) EaUnits.addWater(run, kg, mods.eln.sim.fluid.Water.TB, true);
-                    else EaUnits.drainVapour(run, kg);
-                } else if (mb > 0) EaUnits.add(run, ph.id(), kg, mods.eln.sim.Ambient.kelvin(coordonate), ph.vapour());
-                else if (ph.vapour()) EaUnits.drainVapour(run, ph.id(), kg);
-                else EaUnits.drainLiquid(run, ph.id(), kg);
-            }
+            if (stub != null) a.tanks.sync(mods.eln.fluid.FluidWorld.nodeFor(stub.fluid), mods.eln.sim.Ambient.kelvin(coordonate));   // (other mods' fluids: at the ambient)
         }
-    }
-
-    static void drainLiquid(mods.eln.sim.fluid.FluidNode n, double m) {
-        m = Math.min(m, n.mLiquid());
-        if (m <= 0) return;
-        n.mWater -= m;
-        n.energy -= m * mods.eln.sim.fluid.Water.hLiquid(n.T());
-        n.update();
     }
 
     private void showAdapters() {
         for (VoxelPart p : parts) {
             if (!(p instanceof AdapterPart a)) continue;
             PipePart stub = stubOf(a);
-            if (stub == null) continue;
-            var run = mods.eln.fluid.FluidWorld.nodeFor(stub.fluid);
-            double freeL = Math.max(0, 0.9 * run.volume - run.liquidVolume());
-            double gasRoom = Math.max(0, 9e5 - run.P()) * Math.max(1e-6, freeL) / (mods.eln.sim.fluid.Water.R_V * Math.max(300, run.T()));
-            // the liquid: the top layer's main species that is a fluid; the gas: the main vapour that is one
-            int liq = mods.eln.fluid.FluidSpecies.topLiquid(run), gas = mods.eln.fluid.FluidSpecies.mainVapour(run);
-            int liqMb = liq < 0 ? 0 : (int) Math.floor(run.liquid(liq) / mods.eln.fluid.FluidSpecies.kgPerMb(liq, false));
-            int gasMb = gas < 0 ? 0 : (int) Math.floor(EaUnits.vapourAvailable(run, gas) / mods.eln.fluid.FluidSpecies.kgPerMb(gas, true));
-            a.tanks.show(mods.eln.fluid.FluidSpecies.fluid(liq < 0 ? mods.eln.sim.fluid.SpeciesRegistry.WATER : liq, false), liqMb,
-                mods.eln.fluid.FluidSpecies.fluid(gas < 0 ? mods.eln.sim.fluid.SpeciesRegistry.WATER : gas, true), gasMb,
-                (int) (freeL * mods.eln.sim.fluid.Water.RHO_L / EaUnits.KG_PER_MB_WATER), (int) (gasRoom / EaUnits.KG_PER_MB_STEAM));
+            a.tanks.show(stub == null ? null : mods.eln.fluid.FluidWorld.nodeFor(stub.fluid));
         }
     }
 
@@ -1927,9 +1894,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         out.put("Pipe", PipePart.TIER_NAME[pipe.tier] + (pipe.burst ? ", BURST" : ""));
         // (Baughn: say what the pressure is of; steam in grams)
         out.put("Pressure", String.format("%.2f bar of %s, %.0f °C", n.P() / 1e5, EaUnits.contents(n), n.T() - 273.15));
-        if (n.mVapour() > 1e-7) out.put("Steam", EaUnits.steamGrams(n.mVapour() / EaUnits.KG_PER_MB_STEAM));
-        for (String[] o : EaUnits.others(n, id -> mods.eln.fluid.FluidSpecies.kgPerMb(id, false)))
-            out.put(Character.toUpperCase(o[0].charAt(0)) + o[0].substring(1), o[1]);
+        out.put("Contents", EaUnits.composition(n));
         for (VoxelPart p : parts)
             if (p instanceof ValvePart v) out.put(switch (v.mode) {
                 case ValvePart.CONTROL -> "Control valve";
@@ -1963,10 +1928,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         PipePart pipe = pipeOf(part);
         if (pipe == null) return "";
         var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
-        double lq = n.mLiquid() / EaUnits.KG_PER_MB_WATER, st = n.mVapour() / EaUnits.KG_PER_MB_STEAM;
-        StringBuilder others = new StringBuilder();
-        for (String[] o : EaUnits.others(n, id -> mods.eln.fluid.FluidSpecies.kgPerMb(id, false))) others.append("  ").append(o[0]).append(' ').append(o[1]);
-        return String.format("%.2f bar of %s  water %.0f mB  steam %s%s%s  ", n.P() / 1e5, EaUnits.contents(n), lq, EaUnits.steamGrams(st), others, pipe.burst ? "  BURST" : "");
+        return String.format("%.2f bar of %s  %s%s  ", n.P() / 1e5, EaUnits.contents(n), EaUnits.composition(n), pipe.burst ? "  BURST" : "");
     }
 
     /** The thermometer on a part: its cable's or its pipe run's temperature. */

@@ -1,80 +1,50 @@
 package mods.eln.oil;
 
+import mods.eln.fluid.NodeFluidView;
+import mods.eln.sim.fluid.EaUnits;
+import mods.eln.sim.fluid.SpeciesRegistry;
+import mods.eln.sim.fluid.Water;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
-import net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler;
-import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 /**
- * The boiler's two tanks as one fluid capability: water goes in (tank 0), steam comes out (tank 1). Since the pipes
- * phase-2 work they are a view of the boiler's vessel (a fluid-core node): each fluid step takes in what pipes put in
- * or took out since the last one, then shows the vessel's water and the steam it can give.
+ * The boiler's vessel as a fluid capability (NodeFluidView): water goes in (LIQUID) up to its rated fill, steam comes
+ * out (GAS) once it boils. It holds nothing of its own; WATER_MB is the rating (the gauge glass's full mark), the same
+ * mark its feed float closes at (BoilerElement.RATED_KG). The 1.12 boiler was two int tanks with these caps; saves from
+ * before the vessel still carry their amounts (readFromNBT), which a new vessel is filled from.
  */
-public class BoilerTanks extends FluidStacksResourceHandler {
-    public static final int WATER_MB = 8000, STEAM_MB = 32000;
+public class BoilerTanks extends NodeFluidView {
+    public static final int WATER_MB = 8000;
 
     public BoilerTanks() {
-        super(2, STEAM_MB);
-    }
-
-    @Override
-    public boolean isValid(int index, FluidResource resource) {
-        if (resource.isEmpty()) return false;
-        return index == 0 ? resource.getFluid().isSame(Fluids.WATER) : resource.getFluid().isSame(Oil.STEAM.get());
-    }
-
-    @Override
-    protected int getCapacity(int index, FluidResource resource) {
-        return index == 0 ? WATER_MB : STEAM_MB;
-    }
-
-    @Override
-    public int insert(int index, FluidResource resource, int amount, TransactionContext tx) {
-        return index == 0 ? super.insert(index, resource, amount, tx) : 0;   // steam only comes out
-    }
-
-    @Override
-    public int extract(int index, FluidResource resource, int amount, TransactionContext tx) {
-        return index == 1 ? super.extract(index, resource, amount, tx) : 0;  // water stays in
-    }
-
-    private void put(int index, net.minecraft.world.level.material.Fluid fluid, int amount) {
-        set(index, amount > 0 ? FluidResource.of(fluid) : FluidResource.EMPTY, Math.max(0, amount));
+        super(new Spec().liquids(id -> id == SpeciesRegistry.WATER).liquid(true, false).gas(false, true, 0, true)
+            .liquidShare(WATER_MB * EaUnits.KG_PER_MB_WATER / Water.RHO_L / BoilerElement.VOLUME));
     }
 
     public int water() {
-        return stacks.get(0).getAmount();
+        return amount(LIQUID);
     }
 
     public int steam() {
-        return stacks.get(1).getAmount();
+        return amount(GAS);
     }
 
-    /** What the vessel showed at the last fluid step: pipes' inserts and extracts since are the differences. */
-    private int shownWater, shownSteam;
-
-    /** Water pipes put in since the last step (mB), taken: the vessel gets it. */
-    int takeWaterIn() {
-        int d = Math.max(0, water() - shownWater);
-        shownWater = water();
-        return d;
+    /** Pour water in as a bucket or a test would (mB): what fits up to the rated fill; returns what went in. */
+    public int fillWater(int mB) {
+        try (var tx = Transaction.openRoot()) {
+            int n = insert(LIQUID, FluidResource.of(Fluids.WATER), mB, tx);
+            tx.commit();
+            return n;
+        }
     }
 
-    /** Steam pipes took since the last step (mB). */
-    int takeSteamOut() {
-        int d = Math.max(0, shownSteam - steam());
-        shownSteam = steam();
-        return d;
-    }
-
-    /** Show the vessel's contents (after a step): its liquid water, and the steam it can give (above 1 atm). */
-    void show(int water, int steam) {
-        put(0, Fluids.WATER, Math.min(WATER_MB, water));
-        put(1, Oil.STEAM.get(), Math.min(STEAM_MB, steam));
-        shownWater = water();
-        shownSteam = steam();
+    /** Whether mB more water would fit (a bucket's worth). */
+    public boolean fits(int mB) {
+        try (var tx = Transaction.openRoot()) {
+            return insert(LIQUID, FluidResource.of(Fluids.WATER), mB, tx) >= mB;
+        }
     }
 
     public void writeToNBT(CompoundTag nbt, String prefix) {
@@ -82,19 +52,9 @@ public class BoilerTanks extends FluidStacksResourceHandler {
         nbt.putInt(prefix + "steam", steam());
     }
 
+    /** The amounts saved (a save from before the vessel: what a new vessel is filled from). */
     public void readFromNBT(CompoundTag nbt, String prefix) {
-        put(0, Fluids.WATER, nbt.getIntOr(prefix + "water", 0));
-        put(1, Oil.STEAM.get(), nbt.getIntOr(prefix + "steam", 0));
-    }
-
-    /** Tests and the 1.12-style API: fill water. */
-    public int fillWater(int mB) {
-        int n = Math.min(mB, WATER_MB - water());
-        if (n > 0) put(0, Fluids.WATER, water() + n);
-        return n;
-    }
-
-    public FluidStack steamStack() {
-        return stacks.get(1).copy();
+        put(LIQUID, Fluids.WATER, nbt.getIntOr(prefix + "water", 0));
+        put(GAS, Oil.STEAM.get(), nbt.getIntOr(prefix + "steam", 0));
     }
 }
