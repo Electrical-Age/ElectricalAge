@@ -99,6 +99,7 @@ public final class Wp10bCases {
         cases.add(new IdleCase());
         cases.add(new HeatFurnaceExternalCase());
         cases.add(new HeatFurnaceToggleKeepsSettings());
+        cases.add(new SteamExplained());
         cases.add(new HeatFurnaceTrimmerCase());
         cases.add(new HeatFurnaceModelCase());
         cases.add(new FuelHeatFurnaceModelCase());
@@ -636,6 +637,46 @@ public final class Wp10bCases {
             within(ctx, "wp10b heat furnace: full signal on its right side, full gain", off.furnaceProcess.getGain(), 1.0, 0.05);
             ctx.check("wp10b heat furnace: a signal takes fuel (left and right)", half.getTakeFuel() && off.getTakeFuel(),
                 "left " + half.getTakeFuel() + ", right " + off.getTakeFuel());
+        }
+    }
+
+    /**
+     * Steam explained in game (Erisi's chat review of 2026-10-27, todo #111): a stone heat furnace's Jade says its power
+     * now and at full fire with its combustion chambers counted, and what controls it; a boiler's says at what
+     * temperature its water boils at its pressure.
+     */
+    static final class SteamExplained implements TestCase {
+        HeatFurnaceElement f;
+        mods.eln.oil.BoilerElement b;
+
+        public String name() {
+            return "wp10b steam explained in jade";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            BlockPos p = ctx.at(1, 1, 1);
+            f = (HeatFurnaceElement) ctx.placeTransparent(HEAT_FURNACE, p);
+            l.used.add(p);
+            f.getInventory().setItem(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer.combustrionChamberId, mods.eln.Eln.findItemStack("Combustion Chamber", 2));
+            b = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 3, 1);
+            b.fromTanks(4000, 0);
+        }
+
+        public void measure(TestContext ctx) {
+            var w = f.getWaila();
+            ctx.line("steam explained: furnace " + w + "; boiler " + b.getWaila());
+            ctx.check("furnace Jade: power with its combustion chambers counted", String.valueOf(w.get("Power")).contains("(2 of 4 combustion chambers)"), "" + w.get("Power"));
+            ctx.check("furnace Jade: without a regulator, its gauge controls it", String.valueOf(w.get("Control")).startsWith("its gauge"), "" + w.get("Control"));
+            ctx.check("boiler Jade: where its water boils at its pressure", String.valueOf(b.getWaila().get("Boils at")).contains("°C at its"), "" + b.getWaila().get("Boils at"));
         }
     }
 

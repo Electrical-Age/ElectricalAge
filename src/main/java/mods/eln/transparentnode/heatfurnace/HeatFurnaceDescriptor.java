@@ -130,8 +130,12 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Generates heat when supplied with fuel."));
-        list.add("  " + tr("Nominal power: %1$W", Utils.plotValue(nominalPower)));
-        list.add("  " + tr("Max. temperature: %1$°C", Utils.plotValue(thermal.warmLimit)));
+        // (Erisi's chat review: players didn't know how its temperature, a regulator and combustion chambers relate)
+        list.add(tr("Burns fuel into heat, out of its back into a thermal cable or a boiler."));
+        list.add("  " + tr("Power: %1$W, +%2$W per Combustion Chamber in its slot (up to %3$: %4$W)", Utils.plotValue(nominalPower),
+            Utils.plotValue(combustionChamberPower), combustionChamberMax, Utils.plotValue(maxPower())));
+        list.add("  " + tr("Without a regulator its gauge sets the fire; a regulator item holds a set temperature,"));
+        list.add("  " + tr("which it reaches only while its power beats the heat taken from it."));
+        list.add("  " + tr("Its sides take a control signal (External control). Max. temperature: %1$°C", Utils.plotValue(thermal.warmLimit)));
     }
 }

@@ -328,9 +328,23 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
+        // (in order: Jade's headline is the first lines. Erisi's chat review: what its temperature, the regulator and
+        // combustion chambers have to do with each other)
+        Map<String, String> info = new java.util.LinkedHashMap<>();
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
-        info.put(I18N.tr("Set temperature"), Utils.plotCelsius("", regulator.getTarget()));
+        ItemStack chambers = inventory.getItem(HeatFurnaceContainer.combustrionChamberId);
+        int n = Utils.isEmpty(chambers) ? 0 : chambers.getCount();
+        info.put(I18N.tr("Power"), I18N.tr("%1$W now, %2$W at full fire (%3$ of %4$ combustion chambers)",
+            Utils.plotValue(isBurnt() ? 0 : furnaceProcess.getP()), Utils.plotValue(furnaceProcess.nominalPower), n, descriptor.combustionChamberMax));
+        boolean regulated = !Utils.isEmpty(inventory.getItem(HeatFurnaceContainer.regulatorId)) && !controlExternal;
+        info.put(I18N.tr("Control"), controlExternal ? I18N.tr("by the signal on its sides")
+            : regulated ? I18N.tr("its regulator holds %1$", Utils.plotCelsius("", regulator.getTarget()))
+            : I18N.tr("its gauge, at %1$%", Math.round(furnaceProcess.getGain() * 100)));
+        // (Erisi: "the set point is never reached")
+        if (regulated && thermalLoad.Tc < regulator.getTarget() - 5 && furnaceProcess.fire.level > 0.95)
+            info.put(I18N.tr("Short of heat"), n < descriptor.combustionChamberMax
+                ? I18N.tr("at full fire and still under its set point: add combustion chambers or take less heat")
+                : I18N.tr("at full fire and still under its set point: take less heat from it"));
         if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade());
         return info;
     }

@@ -338,6 +338,10 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
         if (vessel != null)   // (dry, it is the gas's: AdventurAgent read "Water temperature" with no water)
             info.put(vessel.mLiquid() > 1e-6 ? I18N.tr("Water temperature") : I18N.tr("Gas temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
+        // (Erisi's chat review: how the heater's temperature and the pressure relate: it boils only under its shell's)
+        if (vessel != null && vessel.mLiquid() > 1e-6)
+            info.put(I18N.tr("Boils at"), String.format(I18N.tr("%.0f °C at its %.1f bar: the shell must be hotter to make steam"),
+                Water.tsat(Math.max(vessel.P(), Water.P_ATM)) - Water.T0, vessel.P() / 1e5));
         // (the vessel's own water, not the capability's view capped at the rating: an overfilled boiler showed 8000)
         int water = vessel != null ? (int) Math.floor(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER) : tanks.water();
         info.put(I18N.tr("Water"), water + " / " + BoilerTanks.WATER_MB + " mB" + (water > BoilerTanks.WATER_MB ? I18N.tr(": overfull") : ""));

@@ -67,7 +67,10 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
         list.add("Water in by pipe (right flank), heat in from a heater or furnace on the back or a flank, steam out by pipe");
-        list.add("Front: signal high while the water is above half the gauge glass");
+        list.add("Front: the gauge glass's level as a signal, 0 V empty to 50 V full");
+        // (Erisi's chat review: how heater temperature and boiler pressure relate)
+        list.add("Its pressure follows its water's temperature: 1 bar boils at 100 °C, 10 bar at 180 °C;");
+        list.add("the heater must be hotter than that to keep it boiling");
         list.add("1 bucket of water + 175 kJ: 67.5 buckets of steam");
     }
 }
