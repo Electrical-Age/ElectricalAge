@@ -71,19 +71,18 @@ public final class MachineCore implements MachineView {
     public static final double REFILL_KEPT_UP = 0.95;
     public static final int REFILL_HOLDOFF_TICKS = 20;
     /**
-     * Brownout.SLOW consumers learn their line's Thevenin resistance from two steps whose current differs by more
-     * than LINE_LEARN_SHARE (the rest of the circuit unchanged in between: R = -dU/dI, and none if that isn't
-     * positive). Planning on the last volts alone (R = U^2 / P) assumes a stiff line: asked for more than a weak line
-     * can carry, it lowers its resistance past the line's maximum power and the line collapses to its rated
-     * resistance. When the learnt line would sag over LINE_MODEL_SAG at the planned power, the plan is capped at the
-     * line's maximum power E^2 / 4R and its resistance solved on the line's stiff side; below that the old rule
-     * stands. Brownout.STOP machines keep the old rule: a source that can't carry their demand stops them (Baughn: the
-     * starved-supply behaviour is the spec's choice). With neighbours on the line, what it learns is the line as it
-     * sees it (the others drawing too); the plan never goes under its rated resistance, so a row of machines each
-     * lighter than the line settles at their rated resistances, as resistors would, even when the row together is
-     * heavier (BenchTest.slowConsumersShareAWeakLine).
+     * Brownout.SLOW consumers plan against their line's Thevenin equivalent, which the host reads from the solver after
+     * each step (lineSeen: the circuit's resistance at the terminal, its own load left out; E = U + I R). Planning on
+     * the last volts alone (R = U^2 / P) assumes a stiff line: asked for more than a weak line can carry, it lowers its
+     * resistance past the line's maximum power and the line collapses to its rated resistance. When the line would sag
+     * over LINE_MODEL_SAG at the planned power, the plan is capped at the line's maximum power E^2 / 4R and its
+     * resistance solved on the line's stiff side; below that the old rule stands. Brownout.STOP machines keep the old
+     * rule: a source that can't carry their demand stops them (Baughn: the starved-supply behaviour is the spec's
+     * choice). With neighbours on the line, the line is as it sees it (the others drawing too); the plan never goes
+     * under its rated resistance, so a row of machines each lighter than the line settles at their rated resistances,
+     * as resistors would, even when the row together is heavier (BenchTest.slowConsumersShareAWeakLine).
      */
-    public static final double LINE_LEARN_SHARE = 0.02, LINE_MODEL_SAG = 0.01;
+    public static final double LINE_MODEL_SAG = 0.01;
     /** A producer's open-circuit voltage, share of nominal. */
     public static final double DROOP_OPEN_RATIO = 1.05;
     /**
@@ -114,7 +113,7 @@ public final class MachineCore implements MachineView {
 
     // consumer
     private double demand, failedTry, previousDemand, idleCommand, workCommand, loadOhms = Double.POSITIVE_INFINITY;
-    private double lineOhms, lineVolts, prevVolts = Double.NaN, prevAmps = Double.NaN;
+    private double lineOhms, lineVolts;
     private int keptUpTicks = REFILL_HOLDOFF_TICKS, shortSteps;
     // producer
     private boolean sourceOn;
@@ -261,7 +260,6 @@ public final class MachineCore implements MachineView {
             double work = joules - idle;
             shortSteps = work >= REFILL_KEPT_UP * workCommand * TICK_SECONDS ? 0 : shortSteps + 1;
             keptUpTicks = shortSteps >= 2 ? 0 : Math.min(keptUpTicks + 1, REFILL_HOLDOFF_TICKS);
-            if (spec.brownout() == mods.eln.api.Brownout.SLOW) learnLine(a, amps);
             double stored = Math.max(0, Math.min(work, capacity - buffer));
             buffer += stored;
             joulesLost += joules - stored;
@@ -320,19 +318,16 @@ public final class MachineCore implements MachineView {
         return p;
     }
 
-    /** The line's resistance as last learnt (see LINE_LEARN_SHARE), from a step at u volts drawing i amps. */
-    private void learnLine(double u, double i) {
-        double di = i - prevAmps;
-        if (Double.isFinite(prevVolts) && Math.abs(di) > LINE_LEARN_SHARE * Math.max(i, prevAmps)) {
-            double r = (prevVolts - u) / di;
-            lineOhms = r > 0 && Double.isFinite(r) ? r : 0;
-        }
-        prevVolts = u;
-        prevAmps = i;
+    /**
+     * Before afterStep: the circuit's resistance at the machine's terminal in the step just run, its own load left out
+     * (ohm; a Brownout.SLOW consumer's host reads it from the solver). Not positive and finite: a stiff line, the old rule.
+     */
+    public void lineSeen(double theveninOhms) {
+        lineOhms = theveninOhms > 0 && Double.isFinite(theveninOhms) ? theveninOhms : 0;
     }
 
     /**
-     * The most the learnt line can deliver, E^2 / 4R, W, while the plan uses it (a Brownout.SLOW consumer on a soft
+     * The most the line as last seen can deliver, E^2 / 4R, W, while the plan uses it (a Brownout.SLOW consumer on a soft
      * line); infinite otherwise.
      */
     public double lineWattsLimit() {

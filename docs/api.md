@@ -334,7 +334,8 @@ the machine tripped until it cools.
 
 `Brownout.SLOW` has no floor. The machine keeps running on whatever arrives, with its draw capped at
 rated x (U/U_nom)^2. Alone on a line weaker than it, it never pulls past the line's maximum power, so it can't collapse
-its own line. It learns the line from its own steps, and doesn't know its neighbours. Several `SLOW` machines on a weak
+its own line. EA reads the line it sees from the circuit solver after every step (its Thevenin equivalent, the
+neighbours included as they drew), so it never has to guess it. Several `SLOW` machines on a weak
 line share it as resistors at their ratings would, in proportion to their ratings. A machine heavier than the line takes
 the most it can with the others drawing. If the machines are each lighter than the line but heavier together, they settle
 at their rated resistances, past the line's maximum power, as EA's resistor machines always did. None draws less than it

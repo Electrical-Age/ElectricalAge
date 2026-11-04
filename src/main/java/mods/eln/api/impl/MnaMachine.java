@@ -141,12 +141,26 @@ public final class MnaMachine implements IRootSystemPreStepProcess {
     }
 
     /**
+     * The circuit's resistance at the terminal without the machine's own resistor, ohm, as of the step just run: from
+     * the driving-point resistance z (which includes it, conductance g) as z / (1 - z g). Exact, from the solver's
+     * matrix, so the core never has to guess its line (Baughn 2026-11-04); NaN when the matrix isn't at hand.
+     */
+    double theveninOhms() {
+        SubSystem s = terminal.getSubSystem();
+        double z = s == null ? Double.NaN : s.drivingPointOhms(terminal), g = resistor.getRInv();
+        if (!(z > 0) || !Double.isFinite(z)) return Double.NaN;
+        double d = 1 - z * g;
+        return d > 1e-9 ? z / d : Double.POSITIVE_INFINITY;
+    }
+
+    /**
      * After the step: hands the core the terminal's volts and the energy moved. Producer: source volts x current
      * out x dt, 0 if the current ran backwards or the source was off (leakage through the open resistor is ignored).
      */
     public void readAfterStep() {
         double u = terminal.getU(), dt = MachineCore.TICK_SECONDS;
         if (source == null) {
+            if (core.spec().brownout() == mods.eln.api.Brownout.SLOW) core.lineSeen(theveninOhms());
             core.afterStep(u, u * u * resistor.getRInv() * dt);
         } else {
             double joules = core.sourceOn() ? source.getU() * Math.max(0, resistor.getCurrent()) * dt : 0;

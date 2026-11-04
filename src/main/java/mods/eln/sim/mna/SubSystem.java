@@ -463,6 +463,16 @@ public class SubSystem {
         return dt;
     }
 
+    /**
+     * The resistance the circuit presents at s, everything in it included (the driving-point resistance: the inverse
+     * matrix's diagonal), ohm, from the matrix as last built; NaN if it isn't built, or is singular. No solve.
+     */
+    public double drivingPointOhms(State s) {
+        if (!matrixValid || singularMatrix || AInvdata == null) return Double.NaN;
+        int i = s.getId();
+        return i >= 0 && i < AInvdata.length ? AInvdata[i][i] : Double.NaN;
+    }
+
     static public class Th {
         public double R, U;
 
