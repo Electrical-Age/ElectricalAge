@@ -129,7 +129,7 @@ public class MachineCorePropertyTest {
             .idleWatts(spec.idleWatts()).tripCooldownSeconds(spec.tripCooldownSeconds());
         if (spec.brownout() == Brownout.SLOW) b.onBrownout(Brownout.SLOW);
         else b.minVoltageRatio(spec.minVoltageRatio());
-        spec.thermal().ifPresent(t -> b.heatCapacityJPerK(t.heatCapacityJPerK()).heatLossWPerK(t.heatLossWPerK()).overheatRiseKelvin(t.overheatRiseKelvin()));
+        spec.thermal().ifPresent(t -> b.heatCapacityJPerK(t.heatCapacityJPerK()).heatLossWPerK(t.heatLossWPerK()).overheatRiseKelvin(t.overheatKelvin()));   // (the generated specs' trips are rises)
         if (spec.idleWatts() >= spec.ratedWatts() * factor) return; // (not a valid spec)
         MachineSpec next = b.build();
         int at = history.size() / 2;

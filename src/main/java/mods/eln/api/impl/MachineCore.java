@@ -528,11 +528,11 @@ public final class MachineCore implements MachineView {
     }
 
     /**
-     * The temperature that trips it, degrees C: its ambient plus the spec's overheatRiseKelvin (NaN without a heat
-     * model). Relative, so a hot biome (the Nether's 90 C) doesn't leave a machine at or over its trip when idle.
+     * The temperature that trips it, degrees C: the spec's absolute trip point, or its ambient plus its rise (NaN
+     * without a heat model).
      */
     public double overheatCelsius() {
-        return thermal == null ? Double.NaN : ambientCelsius + thermal.overheatRiseKelvin();
+        return thermal == null ? Double.NaN : thermal.overheatCelsius(ambientCelsius);
     }
 
     /** Overvoltage burnt it (burnsOnOvervoltage): it never resets; only its host's repair() brings it back. */
@@ -553,8 +553,9 @@ public final class MachineCore implements MachineView {
         if (state.tripped()) {
             boolean clear = switch (state) {
                 case OVERVOLTAGE_TRIPPED -> r < OVERVOLTAGE_RESET_RATIO;
-                // the reset band under the trip point, or halfway down to ambient if that is nearer
-                default -> celsius < overheatCelsius() - Math.min(thermal.overheatResetKelvin(), thermal.overheatRiseKelvin() / 2);
+                // the reset band under the trip point, or halfway down to ambient if that is nearer (an ambient at or
+                // over an absolute trip point keeps it tripped)
+                default -> celsius < overheatCelsius() - Math.min(thermal.overheatResetKelvin(), Math.max(0, (overheatCelsius() - ambientCelsius) / 2));
             };
             tripTimer = clear ? tripTimer + 1 : 0;
             if (tripTimer < cooldownTicks) return;

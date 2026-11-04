@@ -43,7 +43,7 @@ What is in the jars:
 
 - They hold the API alone. `mods.eln.api.spi` is how the API finds EA's implementation, and you don't use it.
 - EA keeps some packages out of the jars. These are `mods.eln.api.impl` and `mods.eln.api.element`, which hosts
-  machines on EA's own elements (see [Another mod's block entity, or an EA element](#another-mods-block-entity-or-an-ea-element)).
+  machines on EA's own elements (see [Machines inside EA itself](#machines-inside-ea-itself)).
 - The API's classes are compiled against Minecraft and NeoForge alone, so no signature can name an EA internal.
 - The build also compiles this page's samples and EA's hidden test machine against the jars alone, as another mod
   would (`compileApiConsumer`, `compileApiConsumerTest`). `ApiJarTest` checks that no class in the jars names an EA
@@ -290,7 +290,7 @@ public static void tick(Machine m) {
 public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V200).ratedWatts(4000)
     .heatCapacityJPerK(20000)      // J/K: with the loss, a time constant of 20000 / 50 = 400 s
     .heatLossWPerK(50)             // W/K to the ambient where it stands
-    .overheatRiseKelvin(280)       // K over its ambient: trips OVERHEAT_TRIPPED; resets 10 K under that
+    .overheatAbsoluteCelsius(300)  // trips OVERHEAT_TRIPPED at 300 C, whatever its ambient; resets 10 K under that
     .build();
 
 public static void tick(Machine m) {
@@ -302,7 +302,11 @@ public static void tick(Machine m) {
 The heat model is first order, and its settings are named:
 
 - Heat capacity (J/K) and loss to ambient (W/K). Their ratio is the time constant.
-- The trip point, `overheatRiseKelvin`: how far over its ambient the machine trips, in K, not degrees C.
+- The trip point, given once, as one of two kinds (you choose; neither is the default):
+  - absolute, `overheatAbsoluteCelsius` or `overheatAbsoluteKelvin`: the temperature at which it trips, whatever its
+    ambient. A machine rated for 300 C trips at 300 C, in a cool place or in the Nether.
+  - relative, `overheatRiseCelsius` or `overheatRiseKelvin` (the same number: a rise of 1 C is 1 K): how far over its
+    ambient it trips, so a machine that runs in a cool place runs in a hot one too.
 - `overheatResetKelvin`, how far under the trip point the trip resets after its cooldown. The default is 10 K, or halfway
   down to ambient if that is nearer.
 
@@ -313,8 +317,9 @@ Heat comes from three places:
 - `heatJoules`: your own losses.
 
 The model cools to the ambient where the machine stands, which EA sets by biome and depth. `celsius()` reads the
-machine's temperature in degrees C. The trip is a rise over that ambient, so a machine that runs in a cool place runs in a
-hot one too. The kiln above trips at 300 C at 20 C ambient, and at 370 C in the Nether (90 C).
+machine's temperature in degrees C. The kiln above trips at 300 C anywhere. With `overheatRiseKelvin(280)` instead it
+would trip at 300 C at 20 C ambient, and at 370 C in the Nether (90 C). An ambient at or over an absolute trip point keeps
+the machine tripped until it cools.
 
 ## States, trips and the energy books
 
@@ -324,7 +329,7 @@ hot one too. The kiln above trips at 300 C at 20 C ambient, and at 370 C in the 
 | `UNPOWERED` | No line (under 2% of nominal), or the line came back less than half a second ago. |
 | `UNDERVOLTAGE` | `Brownout.STOP` only: the line is under the floor. The machine draws idle watts only and takes return 0. It runs again once the line has held above the recovery threshold for half a second, so a line that sags under the machine's own load doesn't flip it every tick. |
 | `OVERVOLTAGE_TRIPPED` | The line went over 1.3 x nominal. It resets after the cooldown spent below 1.1 x nominal, or never if the spec burns (see [Burning](#burning)). |
-| `OVERHEAT_TRIPPED` | The machine went over its trip point (its ambient plus `overheatRiseKelvin`). It resets after the cooldown spent under the reset point. |
+| `OVERHEAT_TRIPPED` | The machine went over its trip point (the absolute one, or its ambient plus its rise). It resets after the cooldown spent under the reset point. |
 | `DETACHED` | The machine is in no circuit: its block entity went, or its type was never registered. |
 
 `Brownout.SLOW` has no floor. The machine keeps running on whatever arrives, with its draw capped at
@@ -387,7 +392,8 @@ public static MachineView viewAt(Level level, BlockPos pos) {
 ```
 
 With Jade installed, a machine at your block shows EA's lines without any code of yours: its voltage, power, state and
-buffer (and temperature, with a heat model), read on the server.
+buffer (and temperature, with a heat model), read on the server. If your mod shows its own, turn EA's off in the spec
+with `.jadeLines(false)`.
 
 `Meters` formats readings as EA's meters, Jade lines and tooltips do: three significant digits with an SI prefix.
 It has `volts`, `amps`, `watts`, `joules`, `ohms`, `kelvin` and `celsius`.
@@ -401,9 +407,15 @@ public static List<String> tooltip(MachineView v) {
 }
 ```
 
-## Another mod's block entity, or an EA element
+## Machines inside EA itself
 
-| | Another mod's block entity | One of EA's own elements |
+Everything above is for a machine on your own block entity: that is the only kind another mod can make. EA's own
+devices can be machines too (the Linear Servo Drive is one). They are written inside EA, on EA's element classes, with
+`mods.eln.api.element`, which is not in the eln-api jar. This section is for EA's developers; you can skip it.
+
+The two kinds compared:
+
+| | A machine on your block entity | A machine on an EA element |
 |---|---|---|
 | Made by | `ElnApi.machines().register(type, be -> spec)` at common setup | `Machines.forElement(this, spec)` in the element's constructor (`mods.eln.api.element`, which is EA-internal and not in the eln-api jar) |
 | Handle | `ElnApi.machines().of(be)`, a `Machine` | the returned `ElementMachine` |
@@ -612,38 +624,3 @@ Some things are left out of the low level on purpose:
 - Two-terminal sources, capacitors, inductors and thermal parts.
 
 On a bench, `bench.attach(circuit)` and `bench.connect(circuit, load)` run a circuit in JUnit.
-
-## Porting from the age-series v1 API
-
-The age-series API (`mods.eln.api.v1.electrical.ElectricalIntegration`, Minecraft 1.7.10) wrapped EA's circuit parts
-in a similar way. There is no binary compatibility and no shim. The low level is named after its types where they fit:
-
-| age-series v1 | Here |
-|---|---|
-| `Load`, `createAndRegisterLoad`, `registerLoad` | `circuit.load(name)`; parts join with their circuit (`hostAt`), no register calls |
-| `SignalLoad`, `SignalLevels.toNormalized` | `circuit.signalLoad(name)`, `level()` (0..1, never volts) |
-| `SignalSource.setNormalized` / `setVoltage` / `setHighImpedance` | `SignalSource.setLevel(0..1)` / `release()` |
-| `VoltageSource(positive, negative, volts)`, ideal | `circuit.voltageSource(name, out, volts, ohms)`, always behind ohms, against ground |
-| `ResistorLoad(a, b, R)`, `setResistance`, `highImpedance`, `pullDown` | `circuit.resistor` / `resistorToGround`, `setOhms(ohms or +infinity)` |
-| `GroundedResistorSink` | `resistorToGround` plus `hostAt`, or a Machine API consumer |
-| `NodeLoadRef`, `resolveNodeLoad`, `resolveNodeLoadOrNull` | `PortRef` plus `circuit.connect`: a `PortLink`, resolved before every step, with a typed `PortStatus` (never null on failure) |
-| `connectLoadToNode`, `createNodeConnection`, `NodeConnectedResistorLoad` | `circuit.connect(load, port)`; a resistor between your loads for a resistive link |
-| `BlockNode`, `createHostedBlockNode`, `FaceConnection(load, mask)` | `circuit.hostAt(blockEntity, new FaceConnection(face, load))`, the kind from the load |
-| `BlockFace`, `RelativeBlockFace`, `NodePort`, `ElectricalMasks` | `net.minecraft.core.Direction`, `RelativeFace`, `PortPosition`, `PortKind` |
-| `SignalBusLoad`, `SignalBusSource`, `SignalBusFaceConnection` | the Machine API's `bus(face)` and `Machine.bus()` (16 channels, 0..1) |
-| `createVoltageWatchdog`, `createPowerWatchdog`, `WatchdogDestroyAction` | `circuit.watchdogs().volts / amps / watts(...).onTrip(listener)` |
-| `writeNbt` / `readNbt`, `ElectricalLoadRef`, `NodeConnectionState`, `LoadLookup` | nothing to save: build the circuit on load; `PortRef.CODEC` for a port |
-| `formatVoltage`, `formatCurrent`, `formatPower` | `Meters.volts`, `amps`, `watts` (also `joules`, `ohms`, `kelvin`, `celsius`) |
-| `debug.logging.enabled` (apiDebug) | `-Deln.api.debug=true` |
-
-Some age-series pitfalls are designed out:
-
-- Docs that call internal constructors: here every sample compiles against the public API.
-- Two names for one operation (`writeNbt` / `writeToNbt`): here one name per operation.
-- NBT keys built from load names: here part names are never saved.
-- `resolveOrNull` swallowing exceptions: here every failure has a typed status.
-- Ideal sources that are singular in parallel: here every source has an internal resistance.
-- Absolute signal volts: here signals are levels.
-
-Most age-series devices were consumers or producers of power. On the Machine API they lose their circuit code and gain
-brownout, trips, saving and a client view.

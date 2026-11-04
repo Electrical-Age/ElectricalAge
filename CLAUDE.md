@@ -65,5 +65,5 @@ JDKs: Gradle and the mod use JDK 25, and NeoForge's data and game-test runs also
 - [docs/content.md](docs/content.md): items, ores and worldgen, oil, recipes and machine recipe lists, datagen, tags, config, tools/ and script/.
 - [docs/testing.md](docs/testing.md): unit/property tests, the GameTest harness, golden data, the cable benchmark, how to add a test.
 - [docs/cad.md](docs/cad.md): the checked model library (cad/): solids, emitters, the checker, textures, previews.
-- [docs/api.md](docs/api.md): the Machine API and its low level for other mods: task-oriented guide, compiled samples, testing, porting from age-series v1.
+- [docs/api.md](docs/api.md): the Machine API and its low level for other mods: task-oriented guide, compiled samples, testing.
 - [docs/porting-notes.md](docs/porting-notes.md): 26.x decisions, differences from 1.12, gameplay changes, deferred work.

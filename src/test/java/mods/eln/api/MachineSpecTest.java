@@ -112,7 +112,7 @@ public class MachineSpecTest {
     void thermal() {
         MachineSpec s = MachineSpec.consumer(Tier.V200).ratedWatts(100)
             .heatCapacityJPerK(1000).heatLossWPerK(2).overheatRiseKelvin(60).build();
-        assertEquals(new MachineSpec.Thermal(1000, 2, 60, MachineSpec.OVERHEAT_RESET_KELVIN), s.thermal().orElseThrow());
+        assertEquals(new MachineSpec.Thermal(1000, 2, 60, true, MachineSpec.OVERHEAT_RESET_KELVIN), s.thermal().orElseThrow());
         assertEquals(30, MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(1000).heatLossWPerK(2).overheatRiseKelvin(60)
             .overheatResetKelvin(30).build().thermal().orElseThrow().overheatResetKelvin());
         assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(2).overheatRiseKelvin(60)
@@ -129,7 +129,30 @@ public class MachineSpecTest {
             "overheatRiseKelvin must be more than the 10.0 K reset band (it is K over the ambient");
         // the three go together
         String m = error(ok.heatCapacityJPerK(10));
-        assertTrue(m.contains("heatLossWPerK must be positive and finite (not set)") && m.contains("overheatRiseKelvin must be more than"), m);
+        assertTrue(m.contains("heatLossWPerK must be positive and finite (not set)") && m.contains("the heat model needs a trip point"), m);
+        // absolute or rise, chosen explicitly, once (Baughn 2026-11-04); Celsius variants
+        var abs = MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(1000).heatLossWPerK(2).overheatAbsoluteCelsius(300).build()
+            .thermal().orElseThrow();
+        assertFalse(abs.overheatRelative());
+        assertEquals(573.15, abs.overheatKelvin(), 1e-9);
+        assertEquals(300, abs.overheatCelsius(20), 1e-9);
+        assertEquals(300, abs.overheatCelsius(290), 1e-9);
+        var rise = MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(1000).heatLossWPerK(2).overheatRiseCelsius(80).build()
+            .thermal().orElseThrow();
+        assertTrue(rise.overheatRelative());
+        assertEquals(170, rise.overheatCelsius(90), 1e-9);
+        assertEquals(573.15, MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(1000).heatLossWPerK(2)
+            .overheatAbsoluteKelvin(573.15).build().thermal().orElseThrow().overheatKelvin(), 1e-9);
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(1000).heatLossWPerK(2).overheatRiseKelvin(60)
+            .overheatAbsoluteCelsius(300), "give one trip point");
+        assertError(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(1000).heatLossWPerK(2).overheatAbsoluteKelvin(80),
+            "overheatAbsoluteKelvin must be a temperature above 0 C");
+    }
+
+    @Test
+    void jadeLines() {
+        assertTrue(MachineSpec.consumer(Tier.V200).ratedWatts(100).build().jadeLines(), "on by default");
+        assertFalse(MachineSpec.consumer(Tier.V200).ratedWatts(100).jadeLines(false).build().jadeLines());
     }
 
     @Test

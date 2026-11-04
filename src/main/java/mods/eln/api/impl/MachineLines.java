@@ -39,14 +39,14 @@ public final class MachineLines {
     }
 
     /**
-     * Server: the hosted lines of the machine at pos by the eln:machine capability, or none: for no machine, and for
-     * EA's own blocks, whose Jade lines (an element machine's among them) are their node's.
+     * Server: the hosted lines of the machine at pos by the eln:machine capability, or none: for no machine, for one
+     * whose spec turned them off, and for EA's own blocks, whose Jade lines (an element machine's among them) are their node's.
      */
     public static Map<String, String> at(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
         var be = level.getBlockEntity(pos);
         if (be == null || be instanceof mods.eln.node.NodeBlockEntity) return Map.of();
         MachineView v = level.getCapability(mods.eln.api.ElnApi.MACHINE, pos, be.getBlockState(), be, null);
-        return v == null ? Map.of() : hosted(v);
+        return v == null || !v.spec().jadeLines() ? Map.of() : hosted(v);   // (jadeLines(false): the mod shows its own)
     }
 
     /** "overvoltage tripped", translated. */

@@ -10,7 +10,7 @@ public final class Kiln {
     public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V200).ratedWatts(4000)
         .heatCapacityJPerK(20000)      // J/K: with the loss, a time constant of 20000 / 50 = 400 s
         .heatLossWPerK(50)             // W/K to the ambient where it stands
-        .overheatRiseKelvin(280)       // K over its ambient: trips OVERHEAT_TRIPPED; resets 10 K under that
+        .overheatAbsoluteCelsius(300)  // trips OVERHEAT_TRIPPED at 300 C, whatever its ambient; resets 10 K under that
         .build();
 
     public static void tick(Machine m) {

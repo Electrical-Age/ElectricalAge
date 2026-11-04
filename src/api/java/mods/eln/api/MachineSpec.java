@@ -34,15 +34,26 @@ public final class MachineSpec {
     }
 
     /**
-     * A first-order heat model: heat capacity (J/K), loss to ambient (W/K), how far over its ambient (K) the machine
-     * trips and how far under that (K) a trip resets. The time constant is heatCapacityJPerK / heatLossWPerK seconds.
-     * Heat in: a consumer's idle watts and the delivered energy its buffer couldn't hold, a producer's droop loss, and
-     * Machine.heatJoules. It starts at and cools to the ambient where the machine stands (EA's Ambient, by biome and
-     * depth, for an element: the Nether is 90 C; the bench's setting on a Bench), and trips at that ambient plus
-     * overheatRiseKelvin, so a machine that runs in a cool place runs in a hot one too.
+     * A first-order heat model: heat capacity (J/K), loss to ambient (W/K), the trip point and how far under it (K) a
+     * trip resets. The time constant is heatCapacityJPerK / heatLossWPerK seconds. Heat in: a consumer's idle watts and
+     * the delivered energy its buffer couldn't hold, a producer's droop loss, and Machine.heatJoules. It starts at and
+     * cools to the ambient where the machine stands (EA's Ambient, by biome and depth, for an element: the Nether is
+     * 90 C; the bench's setting on a Bench).
+     * <p>
+     * The trip point is either absolute (overheatKelvin is a temperature, K: a machine that trips at 300 C does so
+     * whatever its ambient) or relative (overheatKelvin is a rise over the ambient, K: it runs in a hot place as in a
+     * cool one). The builder makes its user choose (Baughn 2026-11-04: neither is the default).
      */
-    public record Thermal(double heatCapacityJPerK, double heatLossWPerK, double overheatRiseKelvin, double overheatResetKelvin) {
+    public record Thermal(double heatCapacityJPerK, double heatLossWPerK, double overheatKelvin, boolean overheatRelative,
+                          double overheatResetKelvin) {
+        /** The temperature that trips it, degrees C, where the ambient is ambientCelsius. */
+        public double overheatCelsius(double ambientCelsius) {
+            return overheatRelative ? ambientCelsius + overheatKelvin : overheatKelvin - KELVIN_AT_0_CELSIUS;
+        }
     }
+
+    /** 0 C in K, for the Celsius variants of the trip point. */
+    public static final double KELVIN_AT_0_CELSIUS = 273.15;
 
     /** The nominal ambient, degrees C: a machine's temperature before it knows its own (and a Bench's default). */
     public static final double AMBIENT_CELSIUS = 20;
@@ -58,7 +69,7 @@ public final class MachineSpec {
 
     private final Kind kind;
     private final double nominalVolts, ratedWatts, idleWatts, minVoltageRatio, tripCooldownSeconds;
-    private final boolean burnsOnOvervoltage;
+    private final boolean burnsOnOvervoltage, jadeLines;
     private final BurnHandler burnHandler;
     private final Brownout brownout;
     private final Thermal thermal;
@@ -76,8 +87,9 @@ public final class MachineSpec {
         brownout = b.brownout;
         tripCooldownSeconds = b.tripCooldownSeconds;
         burnsOnOvervoltage = b.burnHandler != null;
+        jadeLines = b.jadeLines;
         burnHandler = b.burnHandler;
-        thermal = b.heatSet ? new Thermal(b.heatCapacityJPerK, b.heatLossWPerK, b.overheatRiseKelvin, b.overheatResetKelvin) : null;
+        thermal = b.heatSet ? new Thermal(b.heatCapacityJPerK, b.heatLossWPerK, b.overheatKelvin, b.overheatRelative, b.overheatResetKelvin) : null;
         this.powerFaces = Collections.unmodifiableSet(EnumSet.copyOf(powerFaces));
         signalsIn = List.copyOf(b.signalsIn);
         signalsOut = List.copyOf(b.signalsOut);
@@ -146,6 +158,11 @@ public final class MachineSpec {
         return burnsOnOvervoltage;
     }
 
+    /** Does EA add its Jade lines at the machine's block (Builder.jadeLines). */
+    public boolean jadeLines() {
+        return jadeLines;
+    }
+
     /** What a burn does to the machine's block (burnsOnOvervoltage(handler)); present exactly when it burns. */
     public Optional<BurnHandler> burnHandler() {
         return Optional.ofNullable(burnHandler);
@@ -184,12 +201,14 @@ public final class MachineSpec {
         private final Kind kind;
         private final double nominalVolts;
         private double ratedWatts, idleWatts = 0, minVoltageRatio = 0.75, tripCooldownSeconds = 3;
-        private double heatCapacityJPerK = Double.NaN, heatLossWPerK = Double.NaN, overheatRiseKelvin = Double.NaN;
+        private double heatCapacityJPerK = Double.NaN, heatLossWPerK = Double.NaN, overheatKelvin = Double.NaN;
+        private boolean overheatRelative;
+        private int overheatSet;
         private double overheatResetKelvin = OVERHEAT_RESET_KELVIN;
         private boolean ratedSet, idleSet, minSet, heatSet, resetSet, burnTwice;
         private BurnHandler burnHandler;
         private Brownout brownout = Brownout.STOP;
-        private boolean brownoutSet;
+        private boolean brownoutSet, jadeLines = true;
         private Set<RelativeFace> power;
         private boolean powerTwice, busTwice;
         private final List<SignalIn> signalsIn = new ArrayList<>();
@@ -229,6 +248,16 @@ public final class MachineSpec {
             return this;
         }
 
+        /**
+         * Whether EA adds its Jade lines (voltage, power, state, buffer, temperature) at the machine's block; default
+         * true. Give false when your mod shows its own (Baughn 2026-11-04). An EA element machine's lines are always
+         * its element's to place (ElementMachine.wailaLines).
+         */
+        public Builder jadeLines(boolean show) {
+            jadeLines = show;
+            return this;
+        }
+
         /** How long a trip waits after its cause is gone, s, at least 0.5; default 3. */
         public Builder tripCooldownSeconds(double seconds) {
             tripCooldownSeconds = seconds;
@@ -249,8 +278,9 @@ public final class MachineSpec {
         }
 
         /**
-         * The heat model's heat capacity, J/K. The heat model (see Thermal) needs this, heatLossWPerK and
-         * overheatRiseKelvin together; without it heatJoules is ignored and celsius() reads ambient.
+         * The heat model's heat capacity, J/K. The heat model (see Thermal) needs this, heatLossWPerK and one trip point
+         * (overheatAbsoluteKelvin or overheatRiseKelvin, or their Celsius variants) together; without it heatJoules is
+         * ignored and celsius() reads ambient.
          */
         public Builder heatCapacityJPerK(double jPerK) {
             heatCapacityJPerK = jPerK;
@@ -266,11 +296,37 @@ public final class MachineSpec {
         }
 
         /**
+         * The temperature (K) at which the machine trips OVERHEAT_TRIPPED, whatever its ambient: 573.15 trips at 300 C,
+         * in a cool place or in the Nether alike, and an ambient over it keeps it tripped. Give this or
+         * overheatRiseKelvin (or a Celsius variant), once; see heatCapacityJPerK.
+         */
+        public Builder overheatAbsoluteKelvin(double kelvin) {
+            return overheat(kelvin, false);
+        }
+
+        /** overheatAbsoluteKelvin in degrees C: overheatAbsoluteCelsius(300) trips at 300 C. */
+        public Builder overheatAbsoluteCelsius(double celsius) {
+            return overheat(celsius + KELVIN_AT_0_CELSIUS, false);
+        }
+
+        /**
          * How far over its ambient (K) the machine trips OVERHEAT_TRIPPED: at 20 C ambient a rise of 80 trips at
-         * 100 C, in the Nether (90 C) at 170 C. More than the reset band (see heatCapacityJPerK).
+         * 100 C, in the Nether (90 C) at 170 C. More than the reset band. Give this or overheatAbsoluteKelvin (or a
+         * Celsius variant), once; see heatCapacityJPerK.
          */
         public Builder overheatRiseKelvin(double kelvin) {
-            overheatRiseKelvin = kelvin;
+            return overheat(kelvin, true);
+        }
+
+        /** overheatRiseKelvin in degrees C (the same number: a rise of 1 C is 1 K). */
+        public Builder overheatRiseCelsius(double celsius) {
+            return overheat(celsius, true);
+        }
+
+        private Builder overheat(double kelvin, boolean relative) {
+            overheatKelvin = kelvin;
+            overheatRelative = relative;
+            overheatSet++;
             heatSet = true;
             return this;
         }
@@ -365,11 +421,19 @@ public final class MachineSpec {
                     errors.add("heatLossWPerK must be positive and finite" + got(heatLossWPerK));
                 if (!(Double.isFinite(overheatResetKelvin) && overheatResetKelvin > 0))
                     errors.add("overheatResetKelvin must be positive and finite, got " + overheatResetKelvin);
-                else if (!(Double.isFinite(overheatRiseKelvin) && overheatRiseKelvin > overheatResetKelvin))
+                else if (overheatSet == 0)
+                    errors.add("the heat model needs a trip point: overheatAbsoluteKelvin (a temperature) or overheatRiseKelvin "
+                        + "(a rise over the ambient), or their Celsius variants");
+                else if (overheatSet > 1)
+                    errors.add("give one trip point: overheatAbsolute* or overheatRise*, once");
+                else if (overheatRelative && !(Double.isFinite(overheatKelvin) && overheatKelvin > overheatResetKelvin))
                     errors.add("overheatRiseKelvin must be more than the " + overheatResetKelvin
-                        + " K reset band (it is K over the ambient where the machine stands, not degrees C)" + got(overheatRiseKelvin));
+                        + " K reset band (it is K over the ambient where the machine stands, not degrees C)" + got(overheatKelvin));
+                else if (!overheatRelative && !(Double.isFinite(overheatKelvin) && overheatKelvin > KELVIN_AT_0_CELSIUS))
+                    errors.add("overheatAbsoluteKelvin must be a temperature above 0 C (273.15 K; for degrees C use "
+                        + "overheatAbsoluteCelsius)" + got(overheatKelvin));
             } else if (resetSet) errors.add("overheatResetKelvin is part of the heat model: set heatCapacityJPerK, "
-                + "heatLossWPerK and overheatRiseKelvin too");
+                + "heatLossWPerK and a trip point too");
 
             // signal names, then one role per face (or per cable position on it)
             Set<String> names = new HashSet<>();

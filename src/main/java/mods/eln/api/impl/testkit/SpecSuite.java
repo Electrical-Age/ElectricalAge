@@ -393,7 +393,8 @@ final class SpecSuite {
 
     /**
      * Heated past its trip point it trips, holds while over the reset point and runs again a cooldown after: at the
-     * nominal ambient and at HOT_AMBIENT_CELSIUS (the trip is a rise over ambient), the latter named with its ambient.
+     * nominal ambient and at HOT_AMBIENT_CELSIUS, the latter named with its ambient. An absolute trip point at or under
+     * the hot ambient keeps the machine tripped there: that run is skipped.
      */
     private void overheat(double amb) {
         var th = spec.thermal().orElse(null);
@@ -401,7 +402,12 @@ final class SpecSuite {
             if (amb == MachineSpec.AMBIENT_CELSIUS) skip("overheat", "no heat model");
             return;
         }
-        double delta = th.overheatRiseKelvin(), tau = th.heatCapacityJPerK() / th.heatLossWPerK(), limitC = amb + delta;
+        double limitC = th.overheatCelsius(amb), delta = limitC - amb, tau = th.heatCapacityJPerK() / th.heatLossWPerK();
+        if (delta <= th.overheatResetKelvin()) {
+            skip(String.format(Locale.ROOT, "overheat at %.0f C ambient", amb), String.format(Locale.ROOT,
+                "its absolute trip point (%.1f C) is within its reset band of that ambient", limitC));
+            return;
+        }
         double heatW = 1.5 * th.heatLossWPerK() * delta / (1 - Math.exp(-5 / tau)); // over the trip point in about 5 s
         double resetC = limitC - Math.min(th.overheatResetKelvin(), delta / 2);
         String where = amb == MachineSpec.AMBIENT_CELSIUS ? "" : String.format(Locale.ROOT, " at %.0f C ambient", amb);

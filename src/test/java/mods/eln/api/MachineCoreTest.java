@@ -228,6 +228,42 @@ public class MachineCoreTest {
         }
     }
 
+    /**
+     * An absolute trip point (Baughn 2026-11-04: a machine that trips at 300 C does so whatever its ambient): at 20 C
+     * and at 290 C ambient it trips at 300 C; at 310 C ambient it is tripped from the start and stays so.
+     */
+    @Test
+    void overheatAtAnAbsoluteTemperature() {
+        MachineSpec spec = MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1)
+            .overheatAbsoluteCelsius(300).build();
+        for (double ambient : new double[]{20, 290}) {
+            MachineCore c = new MachineCore(spec);
+            c.setAmbientCelsius(ambient);
+            assertEquals(300, c.overheatCelsius(), 1e-9);
+            for (int i = 0; i < MachineCore.UNDERVOLTAGE_RECOVERY_TICKS; i++) c.afterStep(200, 0);
+            assertEquals(MachineState.RUNNING, c.state(), ambient + " C");
+            while (c.state() == MachineState.RUNNING) {
+                c.heatJoules(100);
+                c.afterStep(200, 0);
+            }
+            TripCause t = c.lastTrip().orElseThrow();
+            assertEquals(MachineState.OVERHEAT_TRIPPED, t.state());
+            assertEquals(300, t.limit(), 1e-9, ambient + " C: the limit is the absolute trip point");
+            int cool = 0;
+            while (c.state() == MachineState.OVERHEAT_TRIPPED && cool < 2_000_000) {
+                c.afterStep(200, 0);
+                cool++;
+            }
+            assertEquals(MachineState.RUNNING, c.state(), ambient + " C: it cools and resets");
+            // (at 290 C the reset is halfway down to ambient, 295 C, nearer than the 10 K band)
+            assertTrue(c.celsius() < (ambient == 290 ? 295 : 290), ambient + " C: reset at " + c.celsius());
+        }
+        MachineCore hot = new MachineCore(spec);
+        hot.setAmbientCelsius(310);
+        for (int i = 0; i < 2000; i++) hot.afterStep(200, 0);
+        assertEquals(MachineState.OVERHEAT_TRIPPED, hot.state(), "an ambient over the trip point keeps it tripped");
+    }
+
     /** Brownout.SLOW: a 200 V machine on a 100 V line runs, on a quarter of its rated power. */
     @Test
     void slowRunsOnWhatArrives() {
