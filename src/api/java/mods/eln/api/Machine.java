@@ -5,12 +5,11 @@ import java.util.function.Consumer;
 /**
  * The owner's handle on a machine: take or give energy, read the line, use signals and the bus. Each tick EA steps
  * the circuit first, then the owner's tick runs; what a consumer asks for in a tick sizes its load for the next one
- * (exactly one tick later), and a machine that asks for nothing draws only its idle watts.
+ * (exactly one tick later).
  * <p>
- * So work starts a tick after the first ask: an idle machine's buffer isn't refilled, and the first take of a run
- * gets only what was left in it (often nothing). That is inherent, not a fault: start the work a tick late, ask in
- * the tick before the energy is needed, or keep asking while ready. Once asks continue, the buffer (two ticks of
- * rated energy, bufferCapacityJoules()) stays ahead of them.
+ * An idle machine keeps its buffer (two ticks of rated energy, bufferCapacityJoules()) full, then draws only its idle
+ * watts, so the first take of a run is served at once; right after power-up, or on a line that can't keep up, the
+ * buffer may not be full yet, and a take gets what it holds. Once asks continue, the buffer stays ahead of them.
  * <p>
  * Server thread only: calls from another thread throw IllegalStateException. Amounts must be finite and not
  * negative, else IllegalArgumentException. Taking on a producer, or giving on a consumer, throws

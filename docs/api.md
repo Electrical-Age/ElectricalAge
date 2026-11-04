@@ -188,7 +188,7 @@ Faces are relative to the block's `facing` (or `horizontal_facing`) property, an
 Every face is a leaf: power never passes through your block from one face to another. The machine's state (buffer,
 temperature, a trip) is saved in the block entity's `eln:machine` data attachment, so you don't save anything by hand.
 
-## Timing: the one-tick start
+## Timing
 
 The order inside one game tick is:
 
@@ -200,18 +200,23 @@ The order inside one game tick is:
 So what a consumer asks for in tick N sizes its load for tick N+1, exactly one tick later. The buffer holds two ticks
 of rated energy.
 
-A machine that asks for nothing draws only its idle watts and doesn't refill its buffer. The first ask of a run
-therefore gets only what was left in the buffer, which is often nothing, and **work starts a tick after the first
-ask**. This is not a fault: the step that would pay for that ask has already run. You have three ways to handle it:
+A machine keeps its buffer full while idle: it refills at up to a quarter of a tick's rated energy per tick, then
+draws only its idle watts. So the first ask of a run is served from the buffer in the same tick, and the next step
+draws for it. A buffer is full about 8 ticks after power-up on a healthy line. Until then, or after a long run of
+asks bigger than the line can carry, a first ask gets what is in the buffer.
 
-- Start the work a tick late. The Linear Servo Drive stands still for a tick, then goes on.
-- Ask in the tick before you need the energy.
-- Keep asking a little while ready.
+The refill gives way to the line:
 
-Once asks continue, the buffer stays ahead of them.
+- After power-up it eases in over a few ticks, so a row of machines powered up together doesn't pull its line down.
+- When a step delivers noticeably less than the machine planned (a source that can't keep up), the refill stops at
+  once and comes back after a short random wait, eased in. Machines that fell short together don't retry together,
+  so a line shared by several doesn't ring.
 
-When asks stop, the draw falls within two ticks: the first step after the last ask is planned on half of it. A machine
-loaded from a save runs on at its first step if its line is in range, with no power-up hold.
+When asks stop, the draw falls within two ticks to the refill, then to idle once the buffer is full. A machine loaded
+from a save runs on at its first step if its line is in range, with no power-up hold.
+
+If a step delivers more than planned (the line rose after the plan), the machine keeps all of it, even past the
+buffer's capacity, and plans no more work until it is back under. No energy is clamped away.
 
 ## A producer
 
@@ -310,10 +315,9 @@ The heat model is first order, and its settings are named:
 - `overheatResetKelvin`, how far under the trip point the trip resets after its cooldown. The default is 10 K, or halfway
   down to ambient if that is nearer.
 
-Heat comes from three places:
+Heat comes from two places:
 
 - A consumer's idle watts.
-- Delivered energy the full buffer couldn't hold.
 - `heatJoules`: your own losses.
 
 The model cools to the ambient where the machine stands, which EA sets by biome and depth. `celsius()` reads the
@@ -347,11 +351,11 @@ value, the limit, and whether the machine burns.
 
 The energy books are exact at every tick:
 
-- A consumer: `joulesDelivered() == joulesTaken() + bufferJoules() + joulesLost()`.
+- A consumer: `joulesDelivered() == joulesTaken() + bufferJoules() + joulesLost()`. `joulesLost()` is its idle watts.
 - A producer: `joulesGiven() == joulesDelivered() + bufferJoules() + joulesLost()`.
 
 `respec(spec)` swaps in other ratings while the machine runs, for upgrades. The faces, signals and burn must stay the
-same.
+same. A buffer over the new capacity is kept and drawn down, not cut.
 
 ### Burning
 

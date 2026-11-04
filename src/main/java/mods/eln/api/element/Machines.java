@@ -94,6 +94,12 @@ public final class Machines {
             }
 
             @Override
+            public long jitterSeed() {
+                var c = element.node == null ? null : element.node.coordonate;
+                return c == null ? 0 : c.pos().asLong() * 31 + c.hashCode();
+            }
+
+            @Override
             public double signalRs() {
                 return ElnDeviceRegistry.signalCableDescriptor.electricalRs;
             }

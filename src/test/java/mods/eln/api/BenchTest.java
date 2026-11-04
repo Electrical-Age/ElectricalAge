@@ -220,10 +220,45 @@ public class BenchTest {
         slowRow(new double[]{3000, 200, 400}, 20);
     }
 
+    /**
+     * Idle machines on a weak line refill their buffers without ringing (Baughn 2026-11-04): three STOP and three
+     * SLOW machines powered up at once on 8 ohm, none asking, their refills together (1750 W) more than the line can
+     * carry (1250 W). From power-up on, the line never drops more than 10 % in a tick (it rises when a buffer
+     * is full and its refill stops, as when any load switches off), no machine leaves RUNNING
+     * (no STOP machine falls under its floor), every buffer is full within 10 s, and the line is flat after.
+     */
+    @Test
+    void idleMachinesRefillTogetherOnAWeakLine() {
+        Bench b = ElnTestKit.bench().supply(200, 0.01).line(8);
+        List<BenchMachine> ms = new ArrayList<>();
+        for (double w : new double[]{500, 1000, 2000}) {
+            ms.add(b.add(MachineSpec.consumer(Tier.V200).ratedWatts(w).idleWatts(w / 100).build()));
+            ms.add(b.add(MachineSpec.consumer(Tier.V200).ratedWatts(w).idleWatts(w / 100).onBrownout(Brownout.SLOW).build()));
+        }
+        b.ticks(10);   // (the power-up hold)
+        double last = b.volts();
+        for (int t = 0; t < 200; t++) {
+            b.tick();
+            assertTrue(b.volts() > 0.9 * last, "no drop over 10 %, tick " + t + "\n" + b.trace());
+            last = b.volts();
+            for (int i = 0; i < ms.size(); i++)
+                assertEquals(MachineState.RUNNING, ms.get(i).state(), "machine " + i + " keeps running, tick " + t + "\n" + b.trace());
+        }
+        for (int i = 0; i < ms.size(); i++)
+            assertTrue(ms.get(i).bufferJoules() >= ms.get(i).bufferCapacityJoules() * (1 - 1e-6),
+                "machine " + i + " full within 10 s\n" + b.trace());
+        double u = b.volts();
+        for (int t = 0; t < 40; t++) {
+            b.tick();
+            assertEquals(u, b.volts(), 1e-6 * u, "the line stays flat, tick " + t + "\n" + b.trace());
+        }
+    }
+
     /** A row of SLOW machines rated (W at 200 V) on a line of lineOhms; see slowConsumersShareAWeakLine. */
     private static void slowRow(double[] rated, double lineOhms) {
         SlowRow r = new SlowRow(rated, lineOhms);
         int n = rated.length, big = 0;
+        r.run(60);   // (powered up a while before: their buffers refill on the weak line, then they idle)
         for (int i = 0; i < n; i++) {
             if (rated[i] > rated[big]) big = i;
             r.on[i] = true;
@@ -232,7 +267,7 @@ public class BenchTest {
         }
         double[] all = r.last();
         r.on[n - 1] = false;
-        r.run(60);
+        r.run(80);   // (the one switched off refills its buffer first, slowly on a sagging line)
         r.settled("last off");
         r.on[n - 1] = true;
         r.run(60);
@@ -242,7 +277,7 @@ public class BenchTest {
             r.run(1);
         }
         r.on[big] = true;
-        r.run(60);
+        r.run(100);   // (it refills its buffer after the last off, slowly on a sagging line)
         r.settled("after the switching");
         double[] again = r.last();
         for (int i = 0; i < n; i++)
@@ -263,6 +298,7 @@ public class BenchTest {
         final int[] onFor, offFor;
         final Bench b;
         final List<BenchMachine> ms = new ArrayList<>();
+        int[] fullFor;
         final List<double[]> watts = new ArrayList<>();
         double lineOhms;
         /** Ticks since the line last changed: a machine plans on the line it saw, so it may take a few to follow. */
@@ -274,6 +310,7 @@ public class BenchTest {
             on = new boolean[rated.length];
             onFor = new int[rated.length];
             offFor = new int[rated.length];
+            fullFor = new int[rated.length];
             b = ElnTestKit.bench().supply(200, 0.01).line(lineOhms);
             for (int i = 0; i < rated.length; i++) {
                 int k = i;
@@ -299,8 +336,13 @@ public class BenchTest {
                     onFor[i] = on[i] ? onFor[i] + 1 : 0;
                     offFor[i] = on[i] ? 0 : offFor[i] + 1;
                     w[i] = ms.get(i).watts();
-                    // (a machine just switched off still draws a tick or two; one off draws its idle watts)
-                    g += offFor[i] < 5 ? rated[i] / (200 * 200) : rated[i] / 100 / (u * u);
+                    // (a machine just switched off still draws a tick or two, and one off refills its buffer until it is
+                    // full (a quarter of its rating at most, slower on a sagging line): at most a resistor at its rating;
+                    // then it draws its idle watts)
+                    var m = ms.get(i);
+                    boolean full = m.bufferJoules() >= 0.999 * m.bufferCapacityJoules();
+                    fullFor[i] = full ? fullFor[i] + 1 : 0;   // (the step that filled it still drew)
+                    g += offFor[i] < 5 || fullFor[i] < 2 ? rated[i] / (200 * 200) : rated[i] / 100 / (u * u);
                 }
                 watts.add(w);
                 double ur = 200 / (1 + g * (lineOhms + 0.01));   // (the machines as resistors at their ratings)

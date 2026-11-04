@@ -36,7 +36,7 @@ public final class MachineSpec {
     /**
      * A first-order heat model: heat capacity (J/K), loss to ambient (W/K), the trip point and how far under it (K) a
      * trip resets. The time constant is heatCapacityJPerK / heatLossWPerK seconds. Heat in: a consumer's idle watts and
-     * the delivered energy its buffer couldn't hold, a producer's droop loss, and Machine.heatJoules. It starts at and
+     * a producer's droop loss, and Machine.heatJoules. It starts at and
      * cools to the ambient where the machine stands (EA's Ambient, by biome and depth, for an element: the Nether is
      * 90 C; the bench's setting on a Bench).
      * <p>

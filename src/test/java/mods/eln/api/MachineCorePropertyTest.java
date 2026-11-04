@@ -112,8 +112,11 @@ public class MachineCorePropertyTest {
             assertEquals(c.joulesIn(), c.joulesOut() + c.bufferJoules() + c.joulesLost(), eps,
                 "tick " + i + ": delivered != taken + buffered + lost");
             assertTrue(c.joulesLost() >= 0, "tick " + i + ": lost " + c.joulesLost());
-            assertTrue(c.bufferJoules() >= 0 && c.bufferJoules() <= c.bufferCapacityJoules() * (1 + 1e-12),
-                "tick " + i + ": buffer " + c.bufferJoules() + " outside 0.." + c.bufferCapacityJoules());
+            assertTrue(c.bufferJoules() >= 0, "tick " + i + ": buffer " + c.bufferJoules() + " under 0");
+            // over capacity (a step over-delivered), it plans no work until it is back under: so it stays bounded
+            if (c.bufferJoules() > c.bufferCapacityJoules() * (1 + 1e-12))
+                assertTrue(p <= spec.idleWatts() * (1 + 1e-9) + 1e-12, "tick " + i + ": planned " + p + " W over its idle with the buffer at "
+                    + c.bufferJoules() + " of " + c.bufferCapacityJoules());
             if (state != MachineState.RUNNING) assertEquals(0, got, "tick " + i + ": took while " + state);
         });
     }
@@ -145,7 +148,7 @@ public class MachineCorePropertyTest {
             ohms = c.loadOhms();
             double eps = 1e-9 * (1 + c.joulesIn());
             assertEquals(c.joulesIn(), c.joulesOut() + c.bufferJoules() + c.joulesLost(), eps, "tick " + i);
-            assertTrue(c.bufferJoules() >= 0 && c.bufferJoules() <= c.bufferCapacityJoules() * (1 + 1e-12), "tick " + i);
+            assertTrue(c.bufferJoules() >= 0, "tick " + i);   // (over the new capacity is kept: drawn down, not cut)
             assertTrue(p <= c.spec().ratedWatts() * (1 + 1e-9), "tick " + i + ": " + p + " W over rated " + c.spec().ratedWatts());
         }
     }
@@ -271,7 +274,9 @@ public class MachineCorePropertyTest {
             else {
                 assertTrue(pB >= pA, "the bigger ask planned less: " + pB + " < " + pA);
                 double cap = spec.ratedWatts() * Math.pow(u / spec.nominalVolts(), 2);
-                if (running && pA < Math.min(Math.min(cap, spec.ratedWatts()), a.lineWattsLimit()) * (1 - 1e-9))
+                // (unless b's buffer is still over its capacity after the extra take: a step over-delivered, it plans no work)
+                if (running && pA < Math.min(Math.min(cap, spec.ratedWatts()), a.lineWattsLimit()) * (1 - 1e-9)
+                    && b.bufferJoules() < b.bufferCapacityJoules())
                     assertTrue(pB > pA, "the bigger ask planned no more: " + pB + " = " + pA);
             }
         }

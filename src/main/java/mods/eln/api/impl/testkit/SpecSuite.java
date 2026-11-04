@@ -143,8 +143,9 @@ final class SpecSuite {
                 double lhs = m.joulesDelivered(), rhs = m.joulesTaken() + m.bufferJoules() + m.joulesLost();
                 if (Math.abs(lhs - rhs) > 1e-9 * Math.max(1, lhs))
                     return at("books: delivered %.6g J != taken + buffer + lost %.6g J", lhs, rhs);
-                if (m.bufferJoules() < -1e-12 || m.bufferJoules() > cap * (1 + 1e-9) + 1e-12)
-                    return at("buffer %.6g J outside 0..%.6g J", m.bufferJoules(), cap);
+                // (over capacity only by what a step over-delivered on a risen line, at most a tick at ~1.7 x nominal)
+                if (m.bufferJoules() < -1e-12 || m.bufferJoules() > cap + 2 * ratedJ * (1 + 1e-9) + 1e-12)
+                    return at("buffer %.6g J outside 0..%.6g J (its capacity plus two ticks' over-delivery)", m.bufferJoules(), cap + 2 * ratedJ);
                 double max = rated * (v / un) * (v / un);
                 if (m.watts() > max * (1 + 1e-5) + 1e-9) return at("draws %.6g W, over rated x (U/U_nom)^2 = %.6g W", m.watts(), max);
                 if (supplied && !loaded) {
@@ -269,7 +270,11 @@ final class SpecSuite {
         }
     }
 
-    /** Asks every tick, none for 20 ticks, then again: the rise one tick after the ask, the fall within two, idle in between. */
+    /**
+     * Asks every tick, none for 20 ticks, then again: with the asks gone the buffer refills (at most a quarter of a
+     * tick's rated work a tick) and the draw falls to idle once it is full; the first ask again is served from the
+     * buffer in its own tick, and the draw rises the next.
+     */
     private void stepLoads() {
         Run run = new Run(1);
         run.run(30);
@@ -279,15 +284,21 @@ final class SpecSuite {
         run.run(20);
         // readings: index i is after tick i+1's step; the owner's ask in that tick sizes the next step
         // (asks stop in the owner's tick of index 30: the step of index 31 is planned on half the last ask and the
-        // refill, the next on none; they resume in the owner's tick of index 50, which sizes the step of index 51)
+        // refill, then the refill alone until the buffer is full; they resume in the owner's tick of index 50, which is
+        // served from the buffer and sizes the step of index 51)
         double idleMax = idle * 1.01 + 1e-6 * rated + leakW(un);
-        boolean idles = true;
-        for (int i = 32; i <= 50; i++) idles &= run.watts.get(i) <= idleMax;
+        double refillMax = idleMax + MachineCore.REFILL_SHARE * (rated - idle) * 1.01;
+        boolean refills = true, idles = true;
+        for (int i = 32; i <= 50; i++) refills &= run.watts.get(i) <= refillMax;
+        // (a buffer of two ticks at a quarter tick a tick: full in 8 steps, then idle)
+        for (int i = 41; i <= 50; i++) idles &= run.watts.get(i) <= idleMax;
+        boolean served = run.got.get(50) >= 0.99 * ratedJ;
         boolean rises = run.watts.get(51) >= idle + 0.99 * (rated - idle);
-        run.focus = idles ? 51 : 32;
-        check("step loads", run, run.states.get(29) == MachineState.RUNNING && idles && rises,
-            "asks stop: %.4g W, then %.4g W (idle %.4g W); asks resume: %.4g W in the tick of the ask, %.4g W the next (rated %.4g W)",
-            run.watts.get(31), run.watts.get(32), idle, run.watts.get(50), run.watts.get(51), rated);
+        run.focus = !refills || !idles ? 32 : !served ? 50 : 51;
+        check("step loads", run, run.states.get(29) == MachineState.RUNNING && refills && idles && served && rises,
+            "asks stop: %.4g W, then %.4g W refilling (at most %.4g W), %.4g W once full (idle %.4g W); asks resume: %.4g J "
+                + "served in the tick of the ask (asked %.4g J), %.4g W drawn the next (rated %.4g W)",
+            run.watts.get(31), run.watts.get(32), refillMax, run.watts.get(45), idle, run.got.get(50), ratedJ, run.watts.get(51), rated);
     }
 
     /** tryTakeJoules takes all or nothing, and a step bigger than the buffer throws. */

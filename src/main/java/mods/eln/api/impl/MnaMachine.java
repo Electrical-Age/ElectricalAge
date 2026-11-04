@@ -160,7 +160,7 @@ public final class MnaMachine implements IRootSystemPreStepProcess {
     public void readAfterStep() {
         double u = terminal.getU(), dt = MachineCore.TICK_SECONDS;
         if (source == null) {
-            if (core.spec().brownout() == mods.eln.api.Brownout.SLOW) core.lineSeen(theveninOhms());
+            core.lineSeen(theveninOhms());
             core.afterStep(u, u * u * resistor.getRInv() * dt);
         } else {
             double joules = core.sourceOn() ? source.getU() * Math.max(0, resistor.getCurrent()) * dt : 0;

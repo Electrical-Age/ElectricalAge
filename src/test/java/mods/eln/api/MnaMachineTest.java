@@ -47,9 +47,9 @@ public class MnaMachineTest {
         sim.addElectricalComponent(new Resistor(emf, bus).setR(2));
         MnaMachine m = new MnaMachine(new MachineCore(BenchTest.MILL), bus);
         m.addTo(sim);
-        double[] ohms = run(m, c -> c.takeJoules(50), 200); // (the sag holds the refill back a second, then it fills the buffer)
-        for (int i = 100; i < 200; i++) assertEquals(ohms[99], ohms[i], "tick " + i);
-        assertTrue(ohms[99] < 100, "a real load: " + ohms[99]);
+        double[] ohms = run(m, c -> c.takeJoules(50), 300); // (the sag slows the refill down, then it fills the buffer)
+        for (int i = 200; i < 300; i++) assertEquals(ohms[199], ohms[i], "tick " + i);
+        assertTrue(ohms[199] < 100, "a real load: " + ohms[199]);
         // still exact: the books read the resistor as it is
         MachineCore c = m.core();
         assertEquals(c.joulesIn(), c.joulesOut() + c.bufferJoules() + c.joulesLost(), 1e-9 * c.joulesIn());

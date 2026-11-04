@@ -166,6 +166,7 @@ public final class BenchImpl implements Bench {
     public BenchMachine add(MachineSpec spec) {
         checkThread();
         MachineCore core = new MachineCore(spec);
+        core.seedJitter(machines.size() + 1);   // (by its place: a bench run is the same every time)
         core.setAmbientCelsius(ambientCelsius);
         MnaMachine mna = new MnaMachine(core, bus);
         mna.addTo(sim);

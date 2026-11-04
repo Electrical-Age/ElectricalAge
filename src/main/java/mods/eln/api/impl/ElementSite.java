@@ -36,6 +36,11 @@ public interface ElementSite {
     /** The ambient where the element stands, degrees C (EA's Ambient; known once the element is in the simulation). */
     double ambientCelsius();
 
+    /** A number fixed for this machine (its position's hash): seeds its refill jitter, so a world replays the same. */
+    default long jitterSeed() {
+        return 0;
+    }
+
     /** The series resistance of a signal gate, ohm. */
     double signalRs();
 

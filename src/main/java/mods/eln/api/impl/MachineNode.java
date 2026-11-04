@@ -356,6 +356,11 @@ public final class MachineNode extends GhostNode implements BusPeer {
         }
 
         @Override
+        public long jitterSeed() {
+            return coordonate == null ? 0 : coordonate.pos().asLong() * 31 + coordonate.hashCode();
+        }
+
+        @Override
         public double signalRs() {
             return ElnDeviceRegistry.signalCableDescriptor.electricalRs;
         }

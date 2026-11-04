@@ -74,15 +74,18 @@ public class MachineCoreTest {
         double[] ohms = {Double.POSITIVE_INFINITY};
         powerUp(c, 200, ohms);
         assertEquals(0, c.joulesIn()); // nothing drawn while powering up
-        assertEquals(20, plan(c, ohms), 1e-9);
+        // with no ask, it refills its empty buffer (Baughn 2026-11-04: a first ask is then served at once), the refill
+        // eased in from power-up, a quarter of the gap a tick (its first RUNNING plan was powerUp's last: none)
+        double e = MachineCore.REFILL_EASE, refill = MachineCore.REFILL_SHARE * c.ratedJoulesPerTick();
+        double r1 = e * refill, r2 = (1 - (1 - e) * (1 - e)) * refill;
+        assertEquals(20 + r1 / DT, plan(c, ohms), 1e-9);
         step(c, 200, ohms);
-        assertEquals(20 * DT, c.joulesIn(), 1e-9);
-        assertEquals(0, c.bufferJoules(), 1e-12);
-        assertFalse(c.tryTakeJoules(40)); // nothing buffered yet, but the ask counts
-        double refill = MachineCore.REFILL_SHARE * c.ratedJoulesPerTick();
-        assertEquals(20 + (40 + refill) / DT, plan(c, ohms), 1e-9);
+        assertEquals((20 + r1 / DT) * DT, c.joulesIn(), 1e-9);
+        assertEquals(r1, c.bufferJoules(), 1e-12);
+        assertFalse(c.tryTakeJoules(40)); // not enough buffered yet, but the ask counts
+        assertEquals(20 + (40 + r2) / DT, plan(c, ohms), 1e-9);
         step(c, 200, ohms);
-        assertEquals(40 + refill, c.bufferJoules(), 1e-9);
+        assertEquals(40 + r1 + r2, c.bufferJoules(), 1e-9);
         assertTrue(c.tryTakeJoules(40));
         // steady asks: the buffer fills to its capacity and the draw settles at the ask
         for (int i = 0; i < 20; i++) {
@@ -102,7 +105,31 @@ public class MachineCoreTest {
         assertEquals(0, c.bufferJoules(), 1e-9);
         plan(c, ohms);
         step(c, 200, ohms);
-        assertEquals(20 + (c.ratedJoulesPerTick() / 2 + refill) / DT, plan(c, ohms), 1e-6);
+        assertEquals(20 + (c.ratedJoulesPerTick() / 2 + refill) / DT, plan(c, ohms), 1);   // (the eased refill, within 0.1 % of its share by now)
+    }
+
+    /**
+     * A step that over-delivers (the line rose after the plan) is held in the buffer, over its capacity, not lost as
+     * heat (Baughn 2026-11-04: one clamp less); it plans no work until it is back under.
+     */
+    @Test
+    void overDeliveryIsHeld() {
+        MachineCore c = new MachineCore(MILL);
+        double[] ohms = {Double.POSITIVE_INFINITY};
+        powerUp(c, 200, ohms);
+        for (int i = 0; i < 20; i++) {   // (idle: it refills to full)
+            step(c, 200, ohms);
+            plan(c, ohms);
+        }
+        assertEquals(c.bufferCapacityJoules(), c.bufferJoules(), 1e-9);
+        c.takeJoules(40);
+        plan(c, ohms);
+        double lost = c.joulesLost();
+        step(c, 250, ohms);   // (the line rose: 1.56 x the planned watts arrive)
+        assertTrue(c.bufferJoules() > c.bufferCapacityJoules(), "held over capacity: " + c.bufferJoules());
+        assertEquals(20 * DT, c.joulesLost() - lost, 1e-9, "only its idle watts are lost");
+        assertEquals(c.joulesIn(), c.joulesOut() + c.bufferJoules() + c.joulesLost(), 1e-9);
+        assertEquals(20, plan(c, ohms), 1e-6, "over capacity: idle only");
     }
 
     @Test
@@ -316,7 +343,7 @@ public class MachineCoreTest {
         MachineCore c = new MachineCore(MILL);
         double[] ohms = {Double.POSITIVE_INFINITY};
         powerUp(c, 200, ohms);
-        double refill = MachineCore.REFILL_SHARE * c.ratedJoulesPerTick();
+        double refill = MachineCore.REFILL_EASE * MachineCore.REFILL_SHARE * c.ratedJoulesPerTick();   // (eased in: see askSizesTheNextTick)
         assertFalse(c.tryTakeJoules(40));
         assertFalse(c.tryTakeJoules(40));
         assertFalse(c.tryTakeJoules(30));
@@ -394,9 +421,12 @@ public class MachineCoreTest {
             c.takeJoules(5);    // a quarter of a tick: the buffer fills
             plan(c, ohms);
         }
-        assertTrue(c.bufferJoules() > small.ratedWatts() * 2 * DT, "buffer " + c.bufferJoules());
+        double before = c.bufferJoules();
+        assertTrue(before > small.ratedWatts() * 2 * DT, "buffer " + before);
         c.respec(small);
-        assertEquals(small.ratedWatts() * 2 * DT, c.bufferJoules(), 1e-9);
+        // (over the smaller capacity it is kept, not cut, and drawn down: no work planned until it is under)
+        assertEquals(before, c.bufferJoules(), 1e-9);
+        assertEquals(0, plan(c, ohms), 1e-9);
         assertEquals(c.joulesIn(), c.joulesOut() + c.bufferJoules() + c.joulesLost(), 1e-9);
         assertEquals(10, c.ratedJoulesPerTick(), 1e-12);
         c.respec(big);

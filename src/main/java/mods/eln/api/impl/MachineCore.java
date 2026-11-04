@@ -26,11 +26,13 @@ import java.util.function.Consumer;
  * </ol>
  * Consumer: the buffer holds at most two ticks of rated work energy. The next step's load is idle watts plus work:
  * the demand smoothed over two ticks (fast attack: a rise counts at once, a fall halves first) plus a refill of at
- * most a quarter of a tick's rated work (held back a second when the line can't keep up), but never more than the buffer's
- * room, and none without demand; all capped at rated x (U/U_nom)^2 and at rated. An idle machine draws its idle
- * watts only. A Brownout.SLOW consumer on a soft line plans against the line as it is (see LINE_MODEL_SAG): never
- * past the line's maximum power as it sees it, so alone it can't pull its line down to its rated resistance. Delivered energy pays the idle watts first; the rest goes to the buffer, and what doesn't fit (the
- * line rose) is heat. joulesIn() == joulesOut() + bufferJoules() + joulesLost() at all times (for a producer too).
+ * most a quarter of a tick's rated work (scaled down while the line delivers short of the plans, see REFILL_BACKOFF),
+ * but never more than the buffer's room; all capped at rated x (U/U_nom)^2 and at rated. With no demand it still
+ * refills (Baughn 2026-11-04), so a first ask is served from a full buffer at once; full, it draws its idle watts only. A Brownout.SLOW consumer on a soft line plans against the line as it is (see LINE_MODEL_SAG): never
+ * past the line's maximum power as it sees it, so alone it can't pull its line down to its rated resistance. Delivered energy pays the idle watts first; the rest goes to the buffer, all of it: a step that
+ * over-delivers (the line rose) leaves it over its capacity, and it draws no work until it is back under (Baughn
+ * 2026-11-04: hold it, one clamp less). joulesIn() == joulesOut() + bufferJoules() + joulesLost() at all times (for a
+ * producer too).
  * <p>
  * Producer: the buffer is the queue of given energy, at most two ticks of rated output. The source is on while the
  * queue holds energy (and SOURCE_HOLD_TICKS after, feeding nothing), behind the droop resistance 0.05 U_nom^2 / rated (1.05 U_nom open, rated watts at U_nom);
@@ -63,22 +65,28 @@ public final class MachineCore implements MachineView {
     /** The buffer refill, as a share of rated work power. */
     public static final double REFILL_SHARE = 0.25;
     /**
-     * The refill stops for REFILL_HOLDOFF_TICKS when two steps in a row deliver less than this share of the work
-     * they planned: on a source that can't keep up (a starved producer) it waits instead of pulling the voltage
-     * down further, which would collapse it. One short step is only a resistive line sagging under a new load (the
-     * next plan, made at the sagged volts, is met).
+     * The refill backs off while the line delivers short of the plans: on a source that can't keep up (a starved
+     * producer, whose limit the circuit's matrix doesn't show) it would pull the voltage down further and collapse
+     * it. The share of planned work the last step delivered counts at once when it falls, and is averaged in when it
+     * rises (weight REFILL_BACKOFF_WEIGHT for the newest, so the refill comes back over a few ticks); the refill is
+     * scaled from all of it at REFILL_FULL_AT down to none at REFILL_NONE_AT: smoothly, so machines on one line settle
+     * together instead of all stopping and retrying in step. A soft resistive line delivers what was planned (its
+     * resistance is solved against the line), so only a source that can't keep up makes it back off.
      */
-    public static final double REFILL_KEPT_UP = 0.95;
-    public static final int REFILL_HOLDOFF_TICKS = 20;
+    public static final double REFILL_FULL_AT = 0.98, REFILL_NONE_AT = 0.90, REFILL_BACKOFF_WEIGHT = 0.5;
+    /** The refill eases up by this share of the gap each tick (after power-up and after a back-off). */
+    public static final double REFILL_EASE = 0.25;
+    /** After a short step the refill waits REFILL_HOLD_TICKS plus a random 0 .. REFILL_HOLD_SPREAD - 1 ticks. */
+    public static final int REFILL_HOLD_TICKS = 2, REFILL_HOLD_SPREAD = 12;
     /**
-     * Brownout.SLOW consumers plan against their line's Thevenin equivalent, which the host reads from the solver after
-     * each step (lineSeen: the circuit's resistance at the terminal, its own load left out; E = U + I R). Planning on
-     * the last volts alone (R = U^2 / P) assumes a stiff line: asked for more than a weak line can carry, it lowers its
-     * resistance past the line's maximum power and the line collapses to its rated resistance. When the line would sag
-     * over LINE_MODEL_SAG at the planned power, the plan is capped at the line's maximum power E^2 / 4R and its
-     * resistance solved on the line's stiff side; below that the old rule stands. Brownout.STOP machines keep the old
-     * rule: a source that can't carry their demand stops them (Baughn: the starved-supply behaviour is the spec's
-     * choice). With neighbours on the line, the line is as it sees it (the others drawing too); the plan never goes
+     * Consumers plan against their line's Thevenin equivalent, which the host reads from the solver after each step
+     * (lineSeen: the circuit's resistance at the terminal, its own load left out; E = U + I R). Planning on the last
+     * volts alone (R = U^2 / P) assumes a stiff line: on a soft one the step delivers less than planned, and asked for
+     * more than a weak line can carry, it lowers its resistance past the line's maximum power and the line collapses to
+     * its rated resistance. When the line would sag over LINE_MODEL_SAG at the planned power, the resistance is solved
+     * on the line's stiff side, so the step delivers the plan; below that the old rule stands. A Brownout.SLOW plan is
+     * capped at the line's maximum power E^2 / 4R; a Brownout.STOP plan over it keeps the old rule: a source that can't
+     * carry its demand stops it (Baughn: the starved-supply behaviour is the spec's choice). With neighbours on the line, the line is as it sees it (the others drawing too); the plan never goes
      * under its rated resistance, so a row of machines each lighter than the line settles at their rated resistances,
      * as resistors would, even when the row together is heavier (BenchTest.slowConsumersShareAWeakLine).
      */
@@ -114,7 +122,11 @@ public final class MachineCore implements MachineView {
     // consumer
     private double demand, failedTry, previousDemand, idleCommand, workCommand, loadOhms = Double.POSITIVE_INFINITY;
     private double lineOhms, lineVolts;
-    private int keptUpTicks = REFILL_HOLDOFF_TICKS, shortSteps;
+    /** The averaged share of planned work the steps delivered (see REFILL_FULL_AT). */
+    private double keptUp = 1, refillJoules;
+    /** Ticks the refill stays backed off after a short step (random, see REFILL_HOLD_TICKS), and the jitter's state. */
+    private int refillHold;
+    private long jitter = 0x9E3779B97F4A7C15L;
     // producer
     private boolean sourceOn;
     private int emptyTicks = SOURCE_HOLD_TICKS; // a producer never given anything starts open
@@ -165,12 +177,7 @@ public final class MachineCore implements MachineView {
             state = MachineState.UNPOWERED;
             tripTimer = 0;
         }
-        if (buffer > capacity) {
-            double excess = buffer - capacity;
-            buffer = capacity;
-            joulesLost += excess;
-            if (!producer) heatPending += excess;
-        }
+        // (a buffer over the new capacity is kept, not cut: it is drawn down, or fed out, as after over-delivery)
     }
 
     /**
@@ -204,7 +211,8 @@ public final class MachineCore implements MachineView {
      */
     public void restore(Saved saved) {
         if (ticks > 0) throw new IllegalStateException("restore on a core that has already stepped");
-        double b = Double.isFinite(saved.bufferJoules()) ? Math.min(saved.bufferJoules(), capacity) : 0;
+        // (a buffer saved over its capacity, after over-delivery, is kept: drawn down as it would have been)
+        double b = Double.isFinite(saved.bufferJoules()) ? saved.bufferJoules() : 0;
         buffer = producer ? b : Math.max(0, b);
         joulesIn += buffer;
         if (thermal != null && Double.isFinite(saved.celsius())) celsius = saved.celsius();
@@ -258,12 +266,20 @@ public final class MachineCore implements MachineView {
             amps = a > 0 ? watts / a : 0;
             double idle = Math.min(joules, idleCommand * TICK_SECONDS);
             double work = joules - idle;
-            shortSteps = work >= REFILL_KEPT_UP * workCommand * TICK_SECONDS ? 0 : shortSteps + 1;
-            keptUpTicks = shortSteps >= 2 ? 0 : Math.min(keptUpTicks + 1, REFILL_HOLDOFF_TICKS);
-            double stored = Math.max(0, Math.min(work, capacity - buffer));
-            buffer += stored;
-            joulesLost += joules - stored;
-            heat += joules - stored;
+            double planned = workCommand * TICK_SECONDS;
+            // (fast attack, slow release: a short step counts at once, the recovery is averaged; with nothing planned
+            // it recovers too, or a refill backed off to none would never be tried again)
+            double share = planned > 1e-9 * ratedJoulesPerTick ? Math.min(1, work / planned) : 1;
+            if (share < REFILL_FULL_AT) {
+                // a short step: back off at once, and wait a random few ticks before easing back in (Baughn
+                // 2026-11-04: randomised reclosing), so machines that fell short together don't retry together
+                keptUp = Math.min(keptUp, share);
+                refillHold = REFILL_HOLD_TICKS + nextJitter(REFILL_HOLD_SPREAD);
+            } else if (refillHold > 0) refillHold--;
+            else keptUp += REFILL_BACKOFF_WEIGHT * (share - keptUp);
+            buffer += work;   // (all of it, over capacity if the line rose: drawn down before more is planned)
+            joulesLost += idle;
+            heat += idle;
         }
         if (thermal != null) {
             double k = thermal.heatLossWPerK();
@@ -292,8 +308,15 @@ public final class MachineCore implements MachineView {
             if (state == MachineState.RUNNING) {
                 double asked = Math.min(ratedJoulesPerTick, demand + failedTry);
                 double smoothed = Math.max(asked, (asked + previousDemand) / 2);
-                double refill = keptUpTicks >= REFILL_HOLDOFF_TICKS ? REFILL_SHARE * ratedJoulesPerTick : 0;
-                double joules = smoothed > 0 ? Math.min(capacity - buffer, smoothed + refill) : 0;
+                double scale = Math.max(0, Math.min(1, (keptUp - REFILL_NONE_AT) / (REFILL_FULL_AT - REFILL_NONE_AT)));
+                // (eased in, from none at power-up too: neighbours that start refilling in one tick each solve against
+                // the others' old draw and fall short together, and a row powered up at once would pull its line down)
+                // (down at once; up eased, from this plan's level: the first plan after power-up or a back-off has none)
+                double target = scale * REFILL_SHARE * ratedJoulesPerTick;
+                if (target < refillJoules) refillJoules = target;
+                double refill = refillJoules;
+                refillJoules += REFILL_EASE * (target - refillJoules);
+                double joules = Math.min(capacity - buffer, smoothed + refill);
                 work = Math.max(0, Math.min(joules / TICK_SECONDS, Math.min(workWatts, cap - idle)));
             }
         }
@@ -302,8 +325,12 @@ public final class MachineCore implements MachineView {
         failedTry = 0;
         double p = idle + work;
         lineVolts = Math.abs(volts) + amps * lineOhms;
-        if (p > 0 && lineOhms > 0 && p * lineOhms > LINE_MODEL_SAG * lineVolts * lineVolts) {
-            // a soft line: no more than its maximum power, the resistance that draws p on its stiff side
+        boolean slow = spec.brownout() == mods.eln.api.Brownout.SLOW;
+        if (p > 0 && lineOhms > 0 && p * lineOhms > LINE_MODEL_SAG * lineVolts * lineVolts
+            && (slow || 4 * p * lineOhms <= lineVolts * lineVolts)) {
+            // a soft line: the resistance that draws p on its stiff side, so the step delivers what was planned (and the
+            // refill doesn't read a sag as a starved source); a SLOW machine no more than its maximum power, a STOP
+            // machine past it keeps the old rule (a source that can't carry it stops it)
             double e = lineVolts, r = lineOhms;
             p = Math.min(p, e * e / (4 * r));
             double ohms = Math.max((e * e - 2 * p * r + e * Math.sqrt(Math.max(0, e * e - 4 * p * r))) / (2 * p),
@@ -318,9 +345,23 @@ public final class MachineCore implements MachineView {
         return p;
     }
 
+    /** Seeds the refill's reclosing jitter (hosts give each machine its own, so neighbours don't retry in step). */
+    public void seedJitter(long seed) {
+        jitter = seed ^ 0x9E3779B97F4A7C15L;
+        if (jitter == 0) jitter = 1;
+    }
+
+    /** 0 .. n - 1 from the jitter (xorshift64). */
+    private int nextJitter(int n) {
+        jitter ^= jitter << 13;
+        jitter ^= jitter >>> 7;
+        jitter ^= jitter << 17;
+        return (int) Long.remainderUnsigned(jitter, n);
+    }
+
     /**
      * Before afterStep: the circuit's resistance at the machine's terminal in the step just run, its own load left out
-     * (ohm; a Brownout.SLOW consumer's host reads it from the solver). Not positive and finite: a stiff line, the old rule.
+     * (ohm; a consumer's host reads it from the solver). Not positive and finite: a stiff line, the old rule.
      */
     public void lineSeen(double theveninOhms) {
         lineOhms = theveninOhms > 0 && Double.isFinite(theveninOhms) ? theveninOhms : 0;
@@ -514,8 +555,7 @@ public final class MachineCore implements MachineView {
     }
 
     /**
-     * Consumer: delivered joules that never reached the buffer (idle watts, what didn't fit, what a respec cut), J.
-     * Producer: given joules a respec cut from the queue.
+     * Consumer: delivered joules that never reached the buffer: its idle watts, J. Producer: none (nothing is cut).
      */
     @Override
     public double joulesLost() {

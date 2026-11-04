@@ -77,6 +77,7 @@ public final class ElementHost implements ElementMachine {
         for (IProcess p : slow)
             if (p instanceof AfterStep) throw new IllegalStateException("one machine per element: this one already has " + ((AfterStep) p).host().spec());
         core = new MachineCore(Objects.requireNonNull(spec, "spec"));
+        core.seedJitter(site.jitterSeed());   // (by its position: neighbours differ, a world replays the same)
         view = new ReadOnlyView(core);
         power = new NbtElectricalLoad("power", NBT_PREFIX + "power");
         power.setRs(site.powerRs());
