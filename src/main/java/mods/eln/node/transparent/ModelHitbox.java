@@ -34,9 +34,14 @@ public final class ModelHitbox {
      * nothing of it is in the block.
      */
     public static ModelHitbox computed(List<double[]> triangles) {
-        List<double[]> outline = mods.eln.misc.ModelShape.outline(triangles);
+        return computedParts(List.of(triangles));
+    }
+
+    /** The same from a model's parts, each tested on its own for an inside (ModelShape). */
+    public static ModelHitbox computedParts(List<List<double[]>> parts) {
+        List<double[]> outline = mods.eln.misc.ModelShape.outlineOfParts(parts);
         if (outline.isEmpty()) return null;
-        return new ModelHitbox(outline, mods.eln.misc.ModelShape.collision(triangles));
+        return new ModelHitbox(outline, mods.eln.misc.ModelShape.collisionOfParts(parts));
     }
 
     /**

@@ -185,10 +185,10 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
             hitboxTried = true;
             // (a multiblock's model spans its ghost blocks, which have shapes of their own: its block keeps the old one)
             if (ghostGroup != null) return null;
-            List<double[]> t = hitboxTriangles();
+            List<List<double[]>> parts = hitboxParts();
             ModelHitbox hand = null;
             for (var m : heldModels()) if (hand == null) hand = ModelHitbox.of(m);
-            computedHitbox = ModelHitbox.union(hand, t.isEmpty() ? null : ModelHitbox.computed(t));
+            computedHitbox = ModelHitbox.union(hand, parts.isEmpty() ? null : ModelHitbox.computedParts(parts));
         }
         return computedHitbox;
     }
@@ -216,6 +216,13 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
      * repeats parts gives its own.
      */
     public List<double[]> hitboxTriangles() {
+        List<double[]> out = new ArrayList<>();
+        for (List<double[]> p : hitboxParts()) out.addAll(p);
+        return out;
+    }
+
+    /** hitboxTriangles part by part (each tested on its own for an inside: ModelShape). */
+    public List<List<double[]>> hitboxParts() {
         java.util.LinkedHashSet<mods.eln.misc.Obj3D.Obj3DPart> parts = new java.util.LinkedHashSet<>(), whole = new java.util.LinkedHashSet<>();
         for (Class<?> c = getClass(); c != null && c != Object.class; c = c.getSuperclass())
             for (var f : c.getDeclaredFields()) {
@@ -235,10 +242,15 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
                     whole.addAll(m.parts());
                 }
             }
-        List<double[]> out = new ArrayList<>();
+        List<List<double[]>> out = new ArrayList<>();
         // (the parts it holds when it holds any: a legacy model also has other variants' parts, a battery all six)
-        for (var p : parts.isEmpty() ? whole : parts) if (!mods.eln.misc.Obj3D.isLightPlane(p.name())) p.triangles(out);
-        for (double[] t : out) for (int i = 0; i < 9; i++) t[i] += 0.5;
+        for (var p : parts.isEmpty() ? whole : parts) {
+            if (mods.eln.misc.Obj3D.isLightPlane(p.name())) continue;
+            List<double[]> t = new ArrayList<>();
+            p.triangles(t);
+            for (double[] tri : t) for (int i = 0; i < 9; i++) tri[i] += 0.5;
+            if (!t.isEmpty()) out.add(t);
+        }
         return out;
     }
 

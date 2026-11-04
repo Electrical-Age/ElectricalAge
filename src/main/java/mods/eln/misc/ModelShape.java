@@ -6,8 +6,10 @@ import java.util.List;
 /**
  * A device's shape from its model's triangles (Baughn 2026-10-30: "hitboxes should be computed from geometry"): the
  * triangles are voxelised on a grid over the block (0..1), and the solid cells merged into a few boxes. A cell is solid
- * when its centre is inside the mesh (two of three axis rays cross it an odd number of times, so an open flap doesn't
- * fill a half-space) or a triangle passes through it; a triangle that lies on cell faces only (a panel on a grid line)
+ * when a triangle passes through it, or its centre is inside one of the model's closed parts (two of three axis rays
+ * cross that part an odd number of times). Parts are tested one by one: overlapping parts (a battery body sunk into its
+ * base) cancelled each other's crossings, and an open part (a decal, a flap) has no inside, so only its surface counts
+ * (AdventurAgent saw a battery's outline with a slab the model hasn't); a triangle that lies on cell faces only (a panel on a grid line)
  * fills the cells beside it. With closing (a dilation then an erosion by one cell), gaps up to two cells wide and inner
  * corners are filled (Baughn's collision choice A: players stand on what they see without slipping into slots or
  * snagging on bolts). Over maxBoxes boxes, the grid is halved. Pure.
@@ -16,40 +18,85 @@ public final class ModelShape {
     private ModelShape() {
     }
 
-    /** Collision and outline grids (cells a block) and the most boxes a shape keeps before it coarsens. */
-    public static final int FINE = 16, COARSE = 8, MAX_BOXES = 24;
+    /** Collision and outline grids (cells a block), and the most boxes an outline / a collision keeps before it coarsens. */
+    public static final int FINE = 16, COARSE = 8, MAX_BOXES = 48, MAX_COLLISION_BOXES = 24;
 
     /**
      * The boxes (x0 y0 z0 x1 y1 z1, block units) of triangles (9 coordinates each, block units; what lies outside
      * 0..1 is cut off) on a grid of n cells a block, coarsened while over maxBoxes; empty for no triangles.
      */
     public static List<double[]> boxes(List<double[]> triangles, int n, boolean close, int maxBoxes) {
+        return boxesOfParts(List.of(triangles), n, close, maxBoxes);
+    }
+
+    /** The same for a model's parts, each a list of triangles (see the class comment). */
+    public static List<double[]> boxesOfParts(List<List<double[]>> parts, int n, boolean close, int maxBoxes) {
         for (int g = n; ; g /= 2) {
-            List<double[]> b = boxesAt(triangles, g, close);
+            List<double[]> b = boxesAt(parts, g, close);
             if (b.size() <= maxBoxes || g <= 2) return b;
         }
     }
 
     /** The outline: fine grid, no closing. */
     public static List<double[]> outline(List<double[]> triangles) {
-        return boxes(triangles, FINE, false, MAX_BOXES);
+        return outlineOfParts(List.of(triangles));
+    }
+
+    public static List<double[]> outlineOfParts(List<List<double[]>> parts) {
+        return boxesOfParts(parts, FINE, false, MAX_BOXES);
     }
 
     /** The collision: coarse grid (2 px cells), gaps up to two cells closed. */
     public static List<double[]> collision(List<double[]> triangles) {
-        return boxes(triangles, COARSE, true, MAX_BOXES);
+        return collisionOfParts(List.of(triangles));
     }
 
-    static List<double[]> boxesAt(List<double[]> triangles, int n, boolean close) {
-        boolean[] solid = voxels(triangles, n);
+    public static List<double[]> collisionOfParts(List<List<double[]>> parts) {
+        return boxesOfParts(parts, COARSE, true, MAX_COLLISION_BOXES);
+    }
+
+    static List<double[]> boxesAt(List<List<double[]>> parts, int n, boolean close) {
+        boolean[] solid = new boolean[n * n * n];
+        List<double[]> all = new ArrayList<>();
+        for (List<double[]> p : parts) {
+            all.addAll(p);
+            if (closed(p)) inside(p, n, solid);
+        }
+        surface(all, n, solid);
         if (close) solid = erode(dilate(solid, n), n);
         return merge(solid, n);
     }
 
-    /** The solid cells (index (x * n + y) * n + z). */
+    /** Is a part closed: every edge (by its ends' positions) shared by an even number of its triangles? */
+    static boolean closed(List<double[]> tris) {
+        if (tris.isEmpty()) return false;
+        java.util.Map<String, Integer> edges = new java.util.HashMap<>();
+        for (double[] t : tris)
+            for (int e = 0; e < 3; e++) {
+                int a = e * 3, b = ((e + 1) % 3) * 3;
+                String ka = key(t[a], t[a + 1], t[a + 2]), kb = key(t[b], t[b + 1], t[b + 2]);
+                if (ka.equals(kb)) continue;
+                edges.merge(ka.compareTo(kb) < 0 ? ka + "|" + kb : kb + "|" + ka, 1, Integer::sum);
+            }
+        for (int c : edges.values()) if ((c & 1) == 1) return false;
+        return true;
+    }
+
+    static String key(double x, double y, double z) {
+        return Math.round(x * 1e5) + "," + Math.round(y * 1e5) + "," + Math.round(z * 1e5);
+    }
+
+    /** The solid cells (index (x * n + y) * n + z) of one model taken as a single closed part (tests). */
     static boolean[] voxels(List<double[]> tris, int n) {
         boolean[] solid = new boolean[n * n * n];
         if (tris.isEmpty()) return solid;
+        inside(tris, n, solid);
+        surface(tris, n, solid);
+        return solid;
+    }
+
+    /** Marks the cells whose centres are inside the closed part tris. */
+    static void inside(List<double[]> tris, int n, boolean[] solid) {
         // rays: along each axis from each cell centre column, the triangles whose shadow on the other two axes holds it
         List<List<double[]>>[] bins = binned(tris, n);
         double h = 1.0 / n;
@@ -64,6 +111,11 @@ public final class ModelShape {
                     if (odd < 2 && (crossings(bins[2].get(x * n + y), 2, cx, cy, cz) & 1) == 1) odd++;
                     if (odd >= 2) solid[(x * n + y) * n + z] = true;
                 }
+    }
+
+    /** Marks the cells the triangles pass through (see the class comment for those lying on cell faces). */
+    static void surface(List<double[]> tris, int n, boolean[] solid) {
+        double h = 1.0 / n;
         double eps = 1e-6 * h;
         for (double[] t : tris) {
             int[] r = range(t, n);
@@ -99,7 +151,6 @@ public final class ModelShape {
             }
             for (int i : mark) solid[i] = true;
         }
-        return solid;
     }
 
     /** For each axis a, the triangles by the cell column (of the other two axes) their shadow touches. */

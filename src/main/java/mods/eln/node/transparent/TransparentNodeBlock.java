@@ -70,13 +70,12 @@ public class TransparentNodeBlock extends NodeBlock implements net.minecraft.wor
     }
 
     /** Its model's hitbox turned to the device's front (read from the block entity, as SixNodeBlock reads its faces),
-     *  if it has one and the front is known; else shape(). */
+     *  if it has one; else shape(). */
     net.minecraft.world.phys.shapes.VoxelShape shape(net.minecraft.world.level.BlockGetter level, BlockPos pos) {
         ModelHitbox h = descriptor.modelHitbox();
-        if (h != null && level.getBlockEntity(pos) instanceof TransparentNodeEntity e) {
-            mods.eln.misc.Direction front = e.front();
-            if (front != null) return h.shape(front);
-        }
+        // (a device without a front, or before the client knows it, takes its model's own: front XN. The small solar
+        // panel fell back to its old half-block box: AdventurAgent)
+        if (h != null && level.getBlockEntity(pos) instanceof TransparentNodeEntity e) return h.shape(frontOr(e));
         return shape();
     }
 
@@ -91,11 +90,13 @@ public class TransparentNodeBlock extends NodeBlock implements net.minecraft.wor
     protected net.minecraft.world.phys.shapes.VoxelShape getCollisionShape(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos,
                                                                             net.minecraft.world.phys.shapes.CollisionContext context) {
         ModelHitbox h = descriptor.modelHitbox();
-        if (h != null && level.getBlockEntity(pos) instanceof TransparentNodeEntity e) {
-            mods.eln.misc.Direction front = e.front();
-            if (front != null) return h.collision(front);
-        }
+        if (h != null && level.getBlockEntity(pos) instanceof TransparentNodeEntity e) return h.collision(frontOr(e));
         return shape();
+    }
+
+    static mods.eln.misc.Direction frontOr(TransparentNodeEntity e) {
+        mods.eln.misc.Direction f = e.front();
+        return f == null ? mods.eln.misc.Direction.XN : f;
     }
 
     @Override

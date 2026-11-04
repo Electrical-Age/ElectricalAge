@@ -20,7 +20,7 @@ public final class HitboxCases {
     }
 
     public static List<TestCase> cases() {
-        return List.of(new Survey(), new WallDevices());
+        return List.of(new Survey(), new WallDevices(), new Turned());
     }
 
     static final class Survey implements TestCase {
@@ -158,6 +158,58 @@ public final class HitboxCases {
             ctx.check("a NOT chip on the floor is outlined at its model's box, not the plate",
                 chipDesc.footprintFromModel() && Math.abs(bounds.maxY - b[4] / 16.0) < 1e-9 && Math.abs(bounds.minX - b[0] / 16.0) < 1e-9,
                 bounds + " vs " + java.util.Arrays.toString(b));
+        }
+    }
+
+    /**
+     * A legacy machine's outline follows its front (AdventurAgent 1567681129606156308: a battery's looked a quarter turn off;
+     * it was parts cancelling each other's inside test, fixed in ModelShape):
+     * the Cost Oriented Battery's body is deeper than wide in its model (z 0.68, x 0.51), so facing ZP its outline is
+     * wider (x) than deep, and facing XN deeper than wide, as the render turns it.
+     */
+    static final class Turned implements TestCase {
+        net.minecraft.core.BlockPos zp, xn;
+
+        public String id() {
+            return "hitbox_legacy_turned_with_front";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 4;
+        }
+
+        public void build(TestContext ctx) {
+            zp = ctx.at(1, 1, 1);
+            xn = ctx.at(3, 1, 1);
+            var a = ctx.placeTransparent(Ids.transparent("Cost Oriented Battery"), zp);
+            var b = ctx.placeTransparent(Ids.transparent("Cost Oriented Battery"), xn);
+            a.front = mods.eln.misc.Direction.ZP;
+            b.front = mods.eln.misc.Direction.XN;
+        }
+
+        /** The width (x) and depth (z) of the outline at half height (its body). */
+        static double[] body(net.minecraft.world.phys.shapes.VoxelShape s) {
+            double x0 = 1, x1 = 0, z0 = 1, z1 = 0;
+            for (var b : s.toAabbs())
+                if (b.minY < 0.5 && b.maxY > 0.5) {
+                    x0 = Math.min(x0, b.minX);
+                    x1 = Math.max(x1, b.maxX);
+                    z0 = Math.min(z0, b.minZ);
+                    z1 = Math.max(z1, b.maxZ);
+                }
+            return new double[]{x1 - x0, z1 - z0};
+        }
+
+        public void measure(TestContext ctx) {
+            var sz = body(ctx.level().getBlockState(zp).getShape(ctx.level(), zp));
+            var sx = body(ctx.level().getBlockState(xn).getShape(ctx.level(), xn));
+            ctx.line(String.format("battery body: facing ZP %.2f wide x %.2f deep, facing XN %.2f x %.2f", sz[0], sz[1], sx[0], sx[1]));
+            ctx.check("battery facing ZP: wider than deep", sz[0] > sz[1], "");
+            ctx.check("battery facing XN: deeper than wide", sx[1] > sx[0], "");
         }
     }
 }
