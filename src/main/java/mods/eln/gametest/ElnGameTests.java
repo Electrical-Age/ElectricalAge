@@ -149,8 +149,8 @@ public final class ElnGameTests {
             } catch (RuntimeException e) {
                 ctx.check(c.id() + " measure", false, e.toString());
             }
+            if (c.checkLimitCycles()) limitCycles(helper, ctx);   // (before the round trip: reloaded nodes start a fresh record)
             persistence(helper, ctx);
-            limitCycles(helper, ctx);
             ctx.finish();
         });
     }

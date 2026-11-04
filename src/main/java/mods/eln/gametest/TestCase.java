@@ -37,6 +37,11 @@ public interface TestCase {
         return 40;
     }
 
+    /** Does the harness fail it on a fluid limit cycle (false: the test itself tops a node up in bursts, a sawtooth). */
+    default boolean checkLimitCycles() {
+        return true;
+    }
+
     void build(TestContext ctx);
 
     void measure(TestContext ctx);
