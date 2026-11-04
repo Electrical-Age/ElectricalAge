@@ -9,6 +9,7 @@ device menus (`eln:node`), screens and the JSON layout engine. Node internals: a
 |---|---|---|
 | `src/main/java/mods/eln/network/ElnNet.java` | both | One payload `ElnNet.Data(byte[])`, id `eln:data`, `playBidirectional`, version `"1+<build commit>"` (`BuildInfo`: the commit baked into the jar by build.gradle, so a client built from another commit is refused at login; Baughn 2026-10-25). The bytes are the 1.12 packet unchanged: first byte = EA packet id, then whatever a `DataOutputStream` wrote. |
 | `src/main/java/mods/eln/bike/BikeCrash.java` | both | `eln:bike_crash`, client -> server on the same channel: the rider's client says it crashed the bike it rides (`docs/bike.md`). |
+| `src/main/java/mods/eln/robotics/servo/SegmentPayload.java` | both | `eln:servo_segment`, server -> client (`playToClient` in `ElnNet`): an elevator car's motion, (entity id, origin of position 0, axis, rail side, segment from/v0/to/vmax/accel, ticks already elapsed). Sent with `PacketDistributor.sendToPlayersTrackingEntity` when a move starts or changes (call, sag retarget, stop, fault: a zero-velocity segment where it stopped), and in the car's pairing bundle (`ElevatorCar.sendPairingData`, after its spawn packet) so a player who starts tracking it sees the move. The client counts on from `elapsed` by its own clock (`robotics/client/CarCarry`); the car has no vanilla position sync (no update interval, its interpolation handler swallows position packets). Handler: `SegmentPayload.clientHandler`, set by `robotics/client/RoboticsClient`. |
 | `src/main/java/mods/eln/network/ServerPacketHandler.java` | server | Sets `ElnNet.serverHandler`; hops to the server thread, then `handle()`. |
 | `src/main/java/mods/eln/client/ClientPacketHandler.java` | client | `packetRx`, set as `ElnNet.clientHandler` by `client/ElnClient`; runs on the client thread. |
 
@@ -50,6 +51,18 @@ under `"elnDescription"` (`NodeBlockEntity.DESCRIPTION_KEY`); `getUpdatePacket` 
 The client's `handleUpdateTag` / `onDataPacket` replay it through `applyDescription` (header check, then
 `serverPublishUnserialize`). If `level` is still null it is kept in `pendingDescription` and applied in `onLoad`.
 That key exists only in the network tag and is never saved to disk.
+
+## Machines at other mods' block entities: attachment sync
+
+A hosted machine (`ElnApi.machines()`) has no EA block entity to publish through (`MachineNode.publishToAllPlayer` only
+clears the flag). Its client view comes from NeoForge's attachment sync of `eln:machine` (`MachineData.SYNC`):
+initial data rides with the chunk, and `MachineNode` calls `be.syncData` after a step when the state changed, else at
+most once a second (20 ticks) while a number moved more than 1% (`Snapshot.near`). Payload: a boolean (hosted), then
+the state ordinal, volts, voltage ratio, amps, watts, buffer, buffer capacity, celsius (doubles) and the last trip
+(boolean, state, measured, limit, burns). Chosen over an EA payload for its initial sync and tracking for free; the
+cost: `syncData` goes through `blockChanged`, so each sync also sends a block update and the block entity's own update
+packet (vanilla furnaces have none), hence the throttle. Client: `of(be)` is a `ClientMachine` over the snapshot
+(UNPOWERED and zeros before the first); takes, gives, signals, bus and respec throw.
 
 ## Client -> server: GUI packets
 

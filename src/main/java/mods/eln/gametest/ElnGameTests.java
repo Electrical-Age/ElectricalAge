@@ -45,6 +45,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.Wp10bCases.addTo(l);
         mods.eln.gametest.cases.WorldSensorCases.addTo(l);
         mods.eln.gametest.cases.Wp11Cases.addTo(l);
+        mods.eln.gametest.cases.MachineApiCases.addTo(l);
         mods.eln.gametest.cases.ShaftMoreCases.addTo(l);
         mods.eln.gametest.cases.ShaftSteamCases.addTo(l);
         mods.eln.gametest.cases.PlumbingCases.addTo(l);
@@ -91,6 +92,9 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.IncandescenceCases.addTo(l);
         mods.eln.gametest.cases.HandbookCases.addTo(l);
         mods.eln.gametest.cases.OilPondCases.addTo(l);
+        mods.eln.gametest.cases.ServoCases.addTo(l);
+        mods.eln.gametest.cases.HostedMachineCases.addTo(l);
+        mods.eln.gametest.cases.LowLevelCases.addTo(l);
         return l;
     }
 
@@ -149,6 +153,7 @@ public final class ElnGameTests {
             } catch (RuntimeException e) {
                 ctx.check(c.id() + " measure", false, e.toString());
             }
+            mods.eln.introspect.DescribeCheck.run(helper.getLevel(), helper.getBounds(), ctx::check);
             if (c.checkLimitCycles()) limitCycles(helper, ctx);   // (before the round trip: reloaded nodes start a fresh record)
             persistence(helper, ctx);
             ctx.finish();
@@ -189,7 +194,7 @@ public final class ElnGameTests {
     }
 
     /**
-     * Save/load round trip of every node in the test's bounds, in the state the case left it (1.12 selftest
+     * Save/load round trip of every saved node (mustBeSaved) in the test's bounds, in the state the case left it (1.12 selftest
      * persistence pass): only live sim state (voltages, switch-resistor states) may differ.
      */
     static void persistence(GameTestHelper helper, GameTestContext ctx) {
@@ -198,6 +203,7 @@ public final class ElnGameTests {
         for (mods.eln.node.NodeBase n : new java.util.ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
             if (n.isDestructing() || n.coordonate.dimention != mods.eln.misc.Dimensions.id(helper.getLevel())) continue;
             if (!bounds.contains(n.coordonate.x + .5, n.coordonate.y + .5, n.coordonate.z + .5)) continue;
+            if (!n.mustBeSaved()) continue;   // (ghost and hosted-machine nodes: never in a save, nothing to round-trip)
             total++;
             try {
                 Reload r = Reload.node(helper.getLevel(), n.coordonate.pos());

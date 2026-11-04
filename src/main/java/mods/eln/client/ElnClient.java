@@ -26,6 +26,7 @@ public final class ElnClient {
         mods.eln.sound.SoundCommand.clientPlayer = mods.eln.sound.SoundClient::play;
         UtilsClient.hooks = new ClientHooks();
         ClientRenders.registerAll();
+        mods.eln.robotics.client.RoboticsClient.register(modBus);
         // oil: crude (still/flowing) and lake oil, opaque (AdventurAgent: tinted water textures let the lake bed show through)
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterFluidModelsEvent.class, e -> {
             var tint = net.neoforged.neoforge.client.fluid.FluidTintSources.constant(0xFFFFFFFF);
@@ -101,6 +102,7 @@ public final class ElnClient {
         });
         mods.eln.bike.ElectricBike.clientSound = mods.eln.client.entity.BikeSound::tick;
         mods.eln.bike.ElectricBike.clientCrash = b -> net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new mods.eln.bike.BikeCrash(b.getId()));
+        mods.eln.introspect.client.ClientIntrospect.register(); // the client half of device reports (agent tools)
         if (mods.eln.handbook.Handbook.guideAvailable())
             modBus.addListener(net.neoforged.neoforge.client.event.AddClientReloadListenersEvent.class, HandbookGuide::onAddReloadListeners);
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);

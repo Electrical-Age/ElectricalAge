@@ -63,6 +63,8 @@ public final class Wp11Cases {
         cases.add(new PoleCase());
         cases.add(new EnergyConverterCase());
         cases.add(new LegacyExporterCase());
+        cases.add(new ExporterFeCase());
+        cases.add(new ExporterOldSaveCase());
     }
 
     // ---- helpers ----
@@ -316,25 +318,24 @@ public final class Wp11Cases {
             ctx.check("wp11 converter front faces the feed cable (XP)", node.getFront() == Direction.XP, String.valueOf(node.getFront()));
             ctx.checkValue("wp11 converter input power factor (GUI packet)", node.inPowerFactor, 0.2);
             ctx.check("wp11 converter publishes the factor (GUI slider)", publishedFactor(node) == 0.2f, String.valueOf(publishedFactor(node)));
-            Resistor in = field(node, "powerInResistor");
             double buffer = node.energyBuffer, max = node.energyBufferMax;
             ctx.checkValue("wp11 converter buffer max [J] (2 * LVP)", max, 2 * lvp);
             double factor = Math.min(1, (max - buffer) / max * 2);
-            double rExp = U * U / (factor * lvp * 0.2);
-            double i = U / (4 * r + rExp);
-            double p = i * i * rExp;
-            ctx.line(String.format("wp11 converter model: LVP = %.1f W, factor %.3f, R = U^2/(factor*LVP*0.2) = %.4f ohm, I = %.5f A, P = %.3f W",
-                lvp, factor, rExp, i, p));
+            // the resistor it had, U^2 / (factor * LVP * 0.2) at nominal volts, drew factor * LVP * 0.2 * (V / U)^2
+            double v = node.machine.volts(), p = factor * lvp * 0.2 * (v / U) * (v / U);
+            ctx.line(String.format("wp11 converter model: LVP = %.1f W, factor %.3f, at %.3f V: P = %.3f W (machine %.3f W, %s)",
+                lvp, factor, v, p, node.machine.watts(), node.machine.state()));
             if (factor >= 1) {
-                ctx.checkValue("wp11 converter input resistor [ohm]", in.getR(), rExp);
-                ctx.checkValue("wp11 converter input power [W]", in.getP(), p);
+                ctx.check("wp11 converter input power [W] (+-2%)", Math.abs(node.machine.watts() - p) <= 0.02 * p,
+                    String.format("%.3f, expected %.3f", node.machine.watts(), p));
+                // (the machine waits half a second for a steady line before it takes anything)
                 long ticks = ctx.world().getGameTime() - builtAt;
-                double lo = p * 0.05 * (ticks - 2), hi = p * 0.05 * (ticks + 1);
+                double lo = p * 0.05 * (ticks - 2 - mods.eln.api.impl.MachineCore.UNDERVOLTAGE_RECOVERY_TICKS - 2), hi = p * 0.05 * (ticks + 1);
                 ctx.check("wp11 converter buffer = P * elapsed time [J]", buffer >= lo && buffer <= hi,
                     String.format("%.2f J, expected %.2f..%.2f (%d ticks of %.3f W)", buffer, lo, hi, ticks, p));
             } else {
-                ctx.check("wp11 converter input resistor [ohm] (buffer above half: factor < 1, +-5%)", Math.abs(in.getR() - rExp) <= 0.05 * rExp,
-                    String.format("%.4f, expected %.4f", in.getR(), rExp));
+                ctx.check("wp11 converter input power (buffer above half: factor < 1, +-5%)", Math.abs(node.machine.watts() - p) <= 0.05 * p,
+                    String.format("%.3f, expected %.3f", node.machine.watts(), p));
             }
             int stateFront = ctx.world().getBlockState(pos).getValue(EnergyConverterElnToOtherBlock.FRONT);
             ctx.check("wp11 converter block state FRONT = east (the node's front)", stateFront == net.minecraft.core.Direction.EAST.get3DDataValue(), "FRONT " + stateFront);
@@ -487,6 +488,142 @@ public final class Wp11Cases {
                 ctx.world().removeBlock(pos, false);
                 ctx.check("legacy exporter removed (own cleanup)",
                     NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos, ctx.world())) == null, "");
+            }
+        }
+    }
+
+    /** An LVU exporter at (1,1,1) facing XP, fed 50 V at (2..3,1,1), with a test sink behind it at (0,1,1). */
+    static EnergyConverterElnToOtherElement exporter(TestContext ctx, BlockPos pos) {
+        feed(ctx, ctx.at(2, 1, 1), ctx.at(3, 1, 1));
+        EnergyConverterElnToOtherDescriptor d = Wp11Content.elnToOtherLvu;
+        if (d == null) throw new IllegalStateException("energy converters disabled (ElnToOtherEnergyConverterEnable)");
+        net.neoforged.neoforge.common.util.FakePlayer player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.world());
+        float yaw = player.getYRot(), pitch = player.getXRot();
+        player.setYRot(90f);
+        player.setXRot(0f);
+        try {
+            ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, ctx.world(), pos, Direction.YN);
+        } finally {
+            player.setYRot(yaw);
+            player.setXRot(pitch);
+        }
+        return element(ctx, pos);
+    }
+
+    static EnergyConverterElnToOtherElement element(TestContext ctx, BlockPos pos) {
+        NodeBase n = NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos, ctx.world()));
+        if (!(n instanceof mods.eln.node.transparent.TransparentNode t) || !(t.element instanceof EnergyConverterElnToOtherElement e))
+            throw new IllegalStateException("no exporter at " + pos + ": " + n);
+        return e;
+    }
+
+    /**
+     * The exporter on the Machine API gives the same FE per joule as before: every joule it took from the line is FE
+     * at the config ratio (pushed into the block behind, or still in its buffer), and it draws what its resistor drew,
+     * the slider's share of its maximum power times (U / Unom)^2.
+     */
+    static final class ExporterFeCase implements TestCase {
+        BlockPos pos, sinkPos;
+        EnergyConverterElnToOtherElement e;
+        net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler sink;
+
+        public String name() {
+            return "wp11 exporter FE per joule";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            pos = ctx.at(1, 1, 1);
+            sinkPos = ctx.at(0, 1, 1);
+            ctx.world().setBlock(sinkPos, mods.eln.gametest.TestEnergySinks.BLOCK.defaultBlockState(), 3);
+            sink = mods.eln.gametest.TestEnergySinks.put(sinkPos, 10_000_000);
+            e = exporter(ctx, pos);
+        }
+
+        public void measure(TestContext ctx) {
+            try {
+                double ratio = Eln.ElnToTeConversionRatio;
+                var core = e.machine;
+                double taken = core.joulesTaken(), line = core.joulesDelivered();
+                long fe = sink.getAmountAsLong();
+                ctx.line(String.format("exporter: line %.1f J, taken %.1f J (machine buffer %.1f J), %d FE pushed, %.1f J left; ratio %.4f FE/J",
+                    line, taken, core.bufferJoules(), fe, e.energyBuffer, ratio));
+                ctx.check("exporter: FE out + buffer = joules taken x ratio", Math.abs(fe + e.energyBuffer * ratio - taken * ratio) < 1e-6 * taken * ratio + 1e-6,
+                    fe + " FE + " + e.energyBuffer + " J vs " + taken + " J");
+                ctx.check("exporter: pushes FE behind", fe > 0.9 * taken * ratio - 2 * Eln.LVP() * ratio, fe + " FE of " + taken * ratio);
+                ctx.check("exporter: what it took is what the line gave, but for its machine's small buffer (2 ticks)",
+                    line - taken <= 2 * Eln.LVP() * 0.05 + 1e-6, (line - taken) + " J");
+                double v = e.machine.volts(), p = 0.5 * Eln.LVP() * (v / U) * (v / U);
+                ctx.check("exporter: draws its resistor's power, slider 0.5 x LVP x (U/Unom)^2 (+-2%)", Math.abs(e.machine.watts() - p) < 0.02 * p,
+                    e.machine.watts() + " W vs " + p);
+            } finally {
+                mods.eln.gametest.TestEnergySinks.remove(sinkPos);
+                ctx.world().removeBlock(sinkPos, false);
+                ctx.world().removeBlock(pos, false);
+            }
+        }
+    }
+
+    /**
+     * An exporter saved by the version before the Machine API (its element as that writeToNBT wrote it: loadUc,
+     * powerInResistorR, energyBuffer, inPowerFactor, others) loads with its buffer, slider and front, and pushes FE.
+     */
+    static final class ExporterOldSaveCase implements TestCase {
+        static final double BUFFER = 400, FACTOR = 0.3;
+        BlockPos pos, sinkPos;
+        EnergyConverterElnToOtherElement e;
+        double bufferAtLoad, factorAtLoad;
+        Direction frontAtLoad;
+        net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler sink;
+
+        public String name() {
+            return "wp11 exporter old save";
+        }
+
+        public int ticks() {
+            return 10;
+        }
+
+        public void build(TestContext ctx) {
+            pos = ctx.at(1, 1, 1);
+            sinkPos = ctx.at(0, 1, 1);
+            exporter(ctx, pos);
+            net.minecraft.nbt.CompoundTag old = new net.minecraft.nbt.CompoundTag();
+            old.putFloat("loadUc", 49.9f);
+            old.putDouble("powerInResistorR", 12.5);
+            old.putDouble("energyBuffer", BUFFER);
+            old.putDouble("inPowerFactor", FACTOR);
+            old.putByte("others", (byte) (Direction.XP.getInt() + 8));
+            try {
+                mods.eln.gametest.Reload.node(ctx.world(), pos, t -> {
+                    t.put("element", old);
+                    return t;
+                });
+            } catch (ReflectiveOperationException ex) {
+                throw new RuntimeException(ex);
+            }
+            e = element(ctx, pos);
+            bufferAtLoad = e.energyBuffer;
+            factorAtLoad = e.inPowerFactor;
+            frontAtLoad = e.getFront();
+            ctx.world().setBlock(sinkPos, mods.eln.gametest.TestEnergySinks.BLOCK.defaultBlockState(), 3);
+            sink = mods.eln.gametest.TestEnergySinks.put(sinkPos, 1_000_000);
+        }
+
+        public void measure(TestContext ctx) {
+            try {
+                ctx.checkValue("exporter old save: buffer kept [J]", bufferAtLoad, BUFFER);
+                ctx.checkValue("exporter old save: slider kept", factorAtLoad, FACTOR);
+                ctx.check("exporter old save: front kept", frontAtLoad == Direction.XP, "" + frontAtLoad);
+                ctx.check("exporter old save: its buffer goes out as FE", sink.getAmountAsLong() >= (long) (BUFFER * Eln.ElnToTeConversionRatio) - 1,
+                    sink.getAmountAsLong() + " FE");
+            } finally {
+                mods.eln.gametest.TestEnergySinks.remove(sinkPos);
+                ctx.world().removeBlock(sinkPos, false);
+                ctx.world().removeBlock(pos, false);
             }
         }
     }

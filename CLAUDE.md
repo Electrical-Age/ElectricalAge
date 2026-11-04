@@ -15,6 +15,7 @@ JDKs: Gradle and the mod use JDK 25, and NeoForge's data and game-test runs also
 |---|---|
 | Build the jar (`build/libs/eln-26.3-0.1.0-port.jar`) | `./gradlew build` |
 | Unit and property tests (JUnit 5 + vintage, jqwik) | `./gradlew test` |
+| The API jars for other mods (`build/libs/eln-api-*.jar`, `eln-api-testkit-*.jar`, sources, javadoc; also in `build`) and their leak check | `./gradlew apiJar apiTestkitJar compileApiConsumerTest` |
 | All GameTests headless (exit code = number of failed tests) | `./gradlew runGameTestServer` |
 | Cable benchmark instead of the tests | `./gradlew runGameTestServer -PelnBench=result.json [-PelnBenchLabel=name]` |
 | Datagen: lang, tags, recipes, item models into `src/generated/resources` | `./gradlew runClientData` |
@@ -64,4 +65,5 @@ JDKs: Gradle and the mod use JDK 25, and NeoForge's data and game-test runs also
 - [docs/content.md](docs/content.md): items, ores and worldgen, oil, recipes and machine recipe lists, datagen, tags, config, tools/ and script/.
 - [docs/testing.md](docs/testing.md): unit/property tests, the GameTest harness, golden data, the cable benchmark, how to add a test.
 - [docs/cad.md](docs/cad.md): the checked model library (cad/): solids, emitters, the checker, textures, previews.
+- [docs/api.md](docs/api.md): the Machine API and its low level for other mods: task-oriented guide, compiled samples, testing.
 - [docs/porting-notes.md](docs/porting-notes.md): 26.x decisions, differences from 1.12, gameplay changes, deferred work.

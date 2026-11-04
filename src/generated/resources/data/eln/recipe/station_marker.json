@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "#eln:high_quality_plates/iron",
+    "minecraft:stone_button",
+    "eln:signal_cable"
+  ],
+  "result": {
+    "id": "eln:station_marker"
+  }
+}

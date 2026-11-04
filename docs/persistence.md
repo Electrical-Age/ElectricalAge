@@ -16,6 +16,7 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 | Oil ponds done | vanilla SavedData `eln:oil_ponds` (codec key `lakes`: the oil lakes whose pond was placed or skipped) | `oil/OilPonds` |
 | Tutorial sign texts | `<world>/EA/tutorialSign.txt`, read only (the `.xml` reader is commented out) | `sixnode/tutorialsign/TutorialSignElement` via `Utils.readMapFile` |
 | Block entities | nothing persistent | `node/NodeBlockEntity` |
+| Machines at other mods' block entities (Machine API) | that block entity's NeoForge data attachment `eln:machine`, in the chunk | `api/impl/MachineData` |
 
 - `<dim>` = `misc/Dimensions.id(level)`: overworld 0, nether -1, end 1, others the hash of the dimension id.
 - Block entities (`NodeBlockEntity`, `SixNodeEntity`, `TransparentNodeEntity`, `VoxelNodeEntity`) have no
@@ -129,6 +130,39 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - Data logger: per channel n `busc<n>`, a byte, the bus channel 0-15 it records (absent, or any other value: its
   wire), claimed again on load. The unreleased named `bus<n>` is ignored.
 
+- Machine API (`api/impl/ElementHost`, any element with `Machines.forElement`): `api.machine.bufferJ` (energy
+  delivered and not yet used, J), `api.machine.celsius` (with a heat model), `api.machine.trip` and
+  `api.machine.tripTicks` (a trip in its cooldown), `api.machine.running` (true when saved running: it runs on at
+  once if the line is in range at the first step, no power-up hold), `api.machine.lastTrip`, `...lastTripMeasured`, `...lastTripLimit`,
+  `...lastTripBurns`, `api.machine.burnt` (true when it burnt and wasn't repaired: loaded, it is burnt again, if its
+  spec still burns; absent: not burnt); its parts: `api.machine.powerUc`, signal gates `api.machine.in<i>Uc`, `api.machine.out<i>Uc`,
+  `api.machine.drive<i>highImpedance` / `U`, a producer's `api.machine.emfUc` / `U` / `Istate`. Taken back at the
+  first tick (after the element's own ratings); absent keys: a fresh machine.
+- Machines at other mods' block entities (`ElnApi.machines()`): no node is saved (`MachineNode` is unsaved). The
+  block entity's attachment `eln:machine` (under NeoForge's `neoforge:attachments`) holds a compound `state` with the
+  machine keys above (`api.machine.bufferJ`, `celsius`, `trip`, `tripTicks`, `running`, `lastTrip*`, `burnt`; not the parts'
+  `...Uc`, which live in the node). It is written from the live machine whenever the chunk saves
+  (`MachineData.SERIALIZER`; the node marks the chunk unsaved when the state moved, without `setChanged`, which would
+  update comparators), or from the state kept when the node went; nothing is written for a block entity never hosted.
+  Loaded with the block entity and taken back at the node's first step, as an element's.
+- Electrical machines (macerator, compressor, magnetizer, plate machine, tar sand separator) since the Machine API:
+  `powerOn`, `progressJ` (the item in hand, J; absent before: it starts from 0), and the machine keys above;
+  `electricalLoadUc` is no longer written or read (a node voltage, solved again on the first step).
+- FE exporter since the Machine API: `energyBuffer`, `inPowerFactor`, and the machine keys; `loadUc` and
+  `powerInResistorR` (its resistor, now the machine) are no longer read. Both its older saves load
+  (`wp11_legacy_exporter_save`, `wp11_exporter_old_save`).
+- Linear Servo Drive (`robotics/servo/LinearServoDriveElement`): `clock` (long, the drive's own tick count; segments
+  start on it, and it stops while its chunks are unloaded), the current segment `segStart` (long), `segFrom`, `segV0`,
+  `segTo`, `segVmax`, `segAccel` (blocks and ticks), `target`, `fault` (byte: 0 none, 1 obstructed, 2 overheat, 3 no
+  rail, 4 overvoltage), `proportional`, `carMost`/`carLeast` (the car's UUID); its power, heat and signals are a
+  Machine API machine (the `api.machine.*` keys above: buffer, temperature, a trip, running; parts `powerUc`,
+  `in0Uc` setpoint, `in1Uc` enable, `out0Uc`/`drive0*` in-position, `out1Uc`/`drive1*` fault). Before the API (never
+  shipped, no upgrade path) it wrote `powerUc`, `setpointUc`, `enableUc`, `inPositionUc`, `faultOutUc`, `thermalTc`
+  and `inPositionProcess*`/`faultProcess*`; a save with those loads with a fresh machine. The elevator car
+  entity is not saved (`noSave`, `shouldBeSaved` false): the drive finds it by UUID within a session, else spawns it
+  again where its segment says. A stopped car's floor ghost (GhostBlock tFloor, UUID 0x5E7A, observer the drive) is an
+  ordinary saved ghost, so a player logging in on a car mid-shaft stands on it before the car is back.
+
 ## Ids that must never change
 
 - `src/main/resources/eln-ids.json`: `"<1.12 item>@<damage>"` (e.g. `eln:six_node@<id>`, `eln:transparent_node@<id>`,
@@ -138,6 +172,9 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - The 1.12 damage id is the device id: `eid` / `EID<n>` in node NBT and in client packets
   (`node/DescriptorRegistry.getDescriptor(int legacyDamage)`). Renumbering a device orphans every saved copy.
 - Descriptor keys of 1.12 (`EnergyConverterElnToOther*`) are only read by `ExporterSaveUpgrade`; keep them.
+- 26.x additions follow the same rule: e.g. `eln:transparent_node@5504` (`linear_servo_drive`, group 86), the blocks
+  `eln:servo_rail`, `eln:station_marker` and the entity `eln:elevator_car` (`robotics/Robotics`; not yet in a release,
+  so they may still change before shipping).
 - Block-entity alias: `eln:energy_converter_eln_to_other_entity` -> `eln:transparent_node` (`ElnRegistry`), for
   chunks saved while the exporter had its own BE type.
 

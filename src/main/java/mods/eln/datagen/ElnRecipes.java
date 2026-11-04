@@ -2111,6 +2111,27 @@ public final class ElnRecipes extends ElnRecipesBase {
             'I', stack(Items.IRON_INGOT),
             'm', findItemStack("Electrical Motor"),
             'R', "itemRubber");
+        // the servo layer (Baughn 2026-11-02: 200 V only): the Linear Servo Drive is an electrical motor in a machine block,
+        // fed by a 200 V cable, with its signal wiring; rails are iron posts; a station marker is a button on an iron plate
+        addRecipe(findItemStack("Linear Servo Drive", 1),
+            "pmp",
+            "SBS",
+            "pVp",
+            'p', "plateIron",
+            'm', findItemStack("Electrical Motor"),
+            'S', findItemStack("Signal Cable"),
+            'B', findItemStack("Machine Block"),
+            'V', findItemStack("Medium Voltage Cable"));
+        addRecipe(stack(mods.eln.robotics.Robotics.SERVO_RAIL_ITEM.get(), 8),
+            "IpI",
+            "IpI",
+            "IpI",
+            'I', stack(Items.IRON_INGOT),
+            'p', "plateIron");
+        addShapelessRecipe(stack(mods.eln.robotics.Robotics.STATION_MARKER_ITEM.get(), 1),
+            "plateIron",
+            stack(Items.STONE_BUTTON),
+            findItemStack("Signal Cable"));
         // the terrain bike (Baughn 2026-10-29: much dearer): an electric bike rebuilt round a 200 V motor in an advanced
         // machine block, alloy plates for its frame, more rubber for its tyres
         addRecipe(stack(mods.eln.registry.ElnRegistry.TERRAIN_BIKE.get()),

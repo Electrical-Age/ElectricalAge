@@ -1,6 +1,11 @@
 package mods.eln.transparentnode.electricalmachine;
 
 import mods.eln.Eln;
+import mods.eln.api.Brownout;
+import mods.eln.api.element.ElementMachine;
+import mods.eln.api.MachineSpec;
+import mods.eln.api.element.Machines;
+import mods.eln.api.RelativeFace;
 import mods.eln.i18n.I18N;
 import mods.eln.item.MachineBoosterDescriptor;
 import mods.eln.misc.Direction;
@@ -17,10 +22,6 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalStackMachineProcess;
 import mods.eln.sim.ElectricalStackMachineProcess.ElectricalStackMachineProcessObserver;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.mna.component.Resistor;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.process.destruct.VoltageStateWatchDog;
-import mods.eln.sim.process.destruct.Failure;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.Container;
@@ -31,12 +32,19 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The macerator, compressor, magnetizer and plate machine (and the tar sand separator): a machine on the Machine API
+ * (Machines.forElement). Its spec is the descriptor's nominal volts and power times its speed-up (boosters, an
+ * acceleration field), redone with respec when that changes; it runs slower on a sagging line (Brownout.SLOW, as its
+ * resistor did) and burns on overvoltage, as before. The recipe work (ElectricalStackMachineProcess) takes a tick's
+ * rated energy each tick it runs.
+ */
 public class ElectricalMachineElement extends TransparentNodeElement implements ElectricalStackMachineProcessObserver {
     private final TransparentNodeElementInventory inventory;
     AutoAcceptInventoryProxy booterAccepter;
 
-    private final NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
-    final Resistor electricalResistor = new Resistor(electricalLoad, null);
+    /** The machine; its parts are in this element's lists. */
+    public final ElementMachine machine;
 
     protected final ElectricalStackMachineProcess slowRefreshProcess;
 
@@ -47,8 +55,6 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     public final int outSlotId = 0;
     private int boosterSlotId = 1;
 
-    private final VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
-
     public ElectricalMachineElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
         super(transparentNode, descriptor);
         this.descriptor = (ElectricalMachineDescriptor) descriptor;
@@ -58,21 +64,32 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         booterAccepter = new AutoAcceptInventoryProxy(inventory)
             .acceptIfIncrement(this.descriptor.outStackCount + 1, 5, MachineBoosterDescriptor.class);
 
+        machine = Machines.forElement(this, spec(1));
         slowRefreshProcess = new ElectricalStackMachineProcess(
-            inventory, inSlotId, outSlotId, this.descriptor.outStackCount,
-            electricalResistor, Double.POSITIVE_INFINITY, this.descriptor.recipe);
+            inventory, inSlotId, outSlotId, this.descriptor.outStackCount, machine, this.descriptor.recipe);
 
-        electricalLoadList.add(electricalLoad);
-        electricalComponentList.add(electricalResistor);
         slowProcessList.add(slowRefreshProcess);
         slowProcessList.add(slowProcess);
         slowProcessList.add(fieldSpeedProcess);
         slowRefreshProcess.setObserver(this);
         slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2, 1));
+    }
 
-        Failure exp = new Failure(this).machine();
-        // (a resistor to ground on one pin shared by every side: either polarity runs it; Baughn: fed negative it burned)
-        slowProcessList.add(voltageWatchdog.set(electricalLoad).setUMaxMin(this.descriptor.nominalU).set(exp));
+    /**
+     * The spec at a speed-up: nominal power times speedUp. Power on the descriptor's power faces. Either polarity
+     * runs it, and either burns over 1.3 x nominal (Baughn: fed negative it burned as "overvoltage").
+     */
+    public MachineSpec spec(double speedUp) {
+        return spec(descriptor, speedUp);
+    }
+
+    /** The spec of a machine of descriptor at a speed-up (see spec(double)). */
+    public static MachineSpec spec(ElectricalMachineDescriptor descriptor, double speedUp) {
+        java.util.List<RelativeFace> faces = new java.util.ArrayList<>();
+        for (RelativeFace f : RelativeFace.values())
+            if (descriptor.powerLrdu(mods.eln.api.impl.Faces.resolve(f, Direction.XN), Direction.XN)) faces.add(f);
+        return MachineSpec.consumer(descriptor.nominalU).ratedWatts(descriptor.nominalP * speedUp)
+            .onBrownout(Brownout.SLOW).burnsOnOvervoltage(Machines.BURNS_OUT).power(faces.toArray(new RelativeFace[0])).build();
     }
 
     @Override
@@ -87,7 +104,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-        return electricalLoad;
+        return machine.powerLoad();
     }
 
     @Override
@@ -98,13 +115,12 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return 0;
-        if (!descriptor.powerLrdu(side, front)) return 0;
-        return NodeBase.maskElectricalPower;
+        return machine.connectionMask(side);
     }
 
     @Override
     public String multiMeterString(Direction side) {
-        return Utils.plotUIP(electricalLoad.getU(), electricalLoad.getCurrent());
+        return Utils.plotUIP(machine.volts(), machine.amps());
     }
 
     @Override
@@ -150,10 +166,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         }
         double speedUp = Math.pow(descriptor.boosterSpeedUp, boosterCount) * fieldSpeed;   // (an acceleration field: NodeBase.timeScale)
         slowRefreshProcess.setEfficiency(Math.pow(descriptor.boosterEfficiency, boosterCount));
-        slowRefreshProcess.setSpeedUp(speedUp);
-
-        descriptor.applyTo(electricalLoad);
-        descriptor.applyTo(slowRefreshProcess);
+        if (machine.spec().ratedWatts() != descriptor.nominalP * speedUp) machine.respec(spec(speedUp));
     }
 
     @Override
@@ -163,8 +176,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
     public void networkSerialize(java.io.DataOutputStream stream) {
         super.networkSerialize(stream);
-        double fPower = electricalResistor.getP() / descriptor.nominalP;
-        if (electricalResistor.getP() < 11) fPower = 0.0;
+        double fPower = machine.watts() / descriptor.nominalP;
+        if (machine.watts() < 11) fPower = 0.0;
         if (fPower > 1.9) fPower = 1.9;
         try {
             stream.writeByte((int) (fPower * 64));
@@ -173,7 +186,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
             stream.writeFloat((float) slowRefreshProcess.processState());
             stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
             node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
-            stream.writeFloat((float) (electricalLoad.getU() / descriptor.nominalU));
+            stream.writeFloat((float) (machine.volts() / descriptor.nominalU));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -183,12 +196,15 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putBoolean("powerOn", powerOn);
+        double progress = slowRefreshProcess.progressJoules();
+        if (progress > 0) nbt.putDouble("progressJ", progress);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         powerOn = nbt.getBooleanOr("powerOn", false);
+        slowRefreshProcess.resume(nbt.getDoubleOr("progressJ", 0)); // (saves before 26.x's machine API kept no progress)
     }
 
     @Override
@@ -201,10 +217,9 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Power consumption"), Utils.plotPower("", slowRefreshProcess.getPower()));
-        info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalLoad.getU()));
+        info.putAll(machine.wailaLines());   // volts, the power drawn, and the machine's state when it isn't running
         if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Power provided"), Utils.plotPower("", electricalLoad.getI() * electricalLoad.getU()));
+            info.put(I18N.tr("Power provided"), Utils.plotPower("", machine.watts()));
         }
         return info;
     }

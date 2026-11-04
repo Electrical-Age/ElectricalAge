@@ -145,7 +145,7 @@ public class ExporterSaveUpgradeTest {
             assertEquals(Direction.fromInt(2), e.getFront());
             assertEquals(120.0, e.energyBuffer);
             assertEquals(0.25, e.inPowerFactor);
-            assertEquals(3f, (float) e.load.getU());
+            assertEquals(0.0, e.machine.bufferJoules()); // (loadUc, a node voltage solved again on the first step, is not read)
 
             CompoundTag saved = new CompoundTag();
             nm.saveToNbt(saved, 0);

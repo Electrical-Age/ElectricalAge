@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "eln:block/station_marker",
+      "x": 90
+    },
+    "facing=east": {
+      "model": "eln:block/station_marker",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "eln:block/station_marker"
+    },
+    "facing=south": {
+      "model": "eln:block/station_marker",
+      "y": 180
+    },
+    "facing=up": {
+      "model": "eln:block/station_marker",
+      "x": 270
+    },
+    "facing=west": {
+      "model": "eln:block/station_marker",
+      "y": 270
+    }
+  }
+}

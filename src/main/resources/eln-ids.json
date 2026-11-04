@@ -2110,5 +2110,11 @@
   "display": "Capacitor Bank",
   "kind": "transparent_node",
   "name": "capacitor_bank"
+ },
+ "eln:transparent_node@5504": {
+  "descriptor": "LinearServoDriveDescriptor",
+  "display": "Linear Servo Drive",
+  "kind": "transparent_node",
+  "name": "linear_servo_drive"
  }
 }

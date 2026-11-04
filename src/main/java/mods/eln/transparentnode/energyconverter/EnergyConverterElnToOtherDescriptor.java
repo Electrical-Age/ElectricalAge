@@ -27,6 +27,15 @@ public class EnergyConverterElnToOtherDescriptor extends TransparentNodeDescript
         cableTerminals = mods.eln.cable.CableTerminals.FRONT; // terminal plate on the EA side (model)
     }
 
+    /**
+     * The exporter's electrics on the Machine API: a consumer at its nominal volts and maximum power, on its front.
+     * Slower on a sagging line, as its resistor was; burns over 1.3 x nominal, as its watchdog had it.
+     */
+    public mods.eln.api.MachineSpec machineSpec() {
+        return mods.eln.api.MachineSpec.consumer(eln.nominalU).ratedWatts(eln.maxP).onBrownout(mods.eln.api.Brownout.SLOW)
+            .burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).power(mods.eln.api.RelativeFace.FRONT).build();
+    }
+
     void applyTo(EnergyConverterElnToOtherElement element) {
         element.inStdVoltage = eln.nominalU;
         element.inPowerMax = eln.maxP;

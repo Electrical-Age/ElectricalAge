@@ -38,6 +38,11 @@ public final class GameTestContext implements TestContext {
     }
 
     @Override
+    public void after(int ticks, Runnable r) {
+        helper.runAfterDelay(ticks, r);
+    }
+
+    @Override
     public void line(String text) {
         mods.eln.Eln.LOG.info("[{}] {}", id, text);
     }

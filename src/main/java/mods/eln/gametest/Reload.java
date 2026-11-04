@@ -40,9 +40,14 @@ public final class Reload {
     }
 
     public static Reload node(ServerLevel w, BlockPos p) throws ReflectiveOperationException {
+        return node(w, p, java.util.function.UnaryOperator.identity());
+    }
+
+    /** As node(w, p), loading edit(the saved tag) instead: a tag as an older version wrote it, say. */
+    public static Reload node(ServerLevel w, BlockPos p, java.util.function.UnaryOperator<CompoundTag> edit) throws ReflectiveOperationException {
         NodeBase old = NodeManager.instance.getNodeFromCoordonate(new Coordonate(p, w));
         if (old == null) throw new IllegalStateException("no node at " + p);
-        CompoundTag before = save(old);
+        CompoundTag before = edit.apply(save(old));
         byte[] pb = publish(old);
         old.unload();
         NodeManager.instance.removeNode(old);

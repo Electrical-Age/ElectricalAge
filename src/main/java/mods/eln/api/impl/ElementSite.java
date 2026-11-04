@@ -1,0 +1,51 @@
+package mods.eln.api.impl;
+
+import mods.eln.api.TripCause;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
+
+/** What an ElementHost needs of the element it is on (an adapter per element kind; a stub in unit tests). */
+public interface ElementSite {
+    /** The element's front, or null before it is placed or loaded. */
+    Direction front();
+
+    /** Something is connected to the element on side at cable position lrdu (a cable or a device). */
+    boolean connected(Direction side, LRDU lrdu);
+
+    /** Something is connected to the element on side, at any position. */
+    default boolean connected(Direction side) {
+        for (LRDU l : LRDU.values()) if (connected(side, l)) return true;
+        return false;
+    }
+
+    /** Throws IllegalStateException off the server thread. */
+    void checkThread();
+
+    /** The element is burnt out (out of the simulation until repaired). */
+    boolean burnt();
+
+    /**
+     * Queues the burn for cause, to run at the end of the tick: an element's burn-out (EA's failure path), a hosted
+     * machine's burn handler.
+     */
+    void burn(TripCause cause, double severity);
+
+    /** The series resistance of the power terminal, ohm (what a cable's node has). */
+    double powerRs();
+
+    /** The ambient where the element stands, degrees C (EA's Ambient; known once the element is in the simulation). */
+    double ambientCelsius();
+
+    /** A number fixed for this machine (its position's hash): seeds its refill jitter, so a world replays the same. */
+    default long jitterSeed() {
+        return 0;
+    }
+
+    /** The series resistance of a signal gate, ohm. */
+    double signalRs();
+
+    /** Where the element is, for messages and the debug trace. */
+    default String where() {
+        return "an element";
+    }
+}

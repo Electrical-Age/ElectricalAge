@@ -34,6 +34,7 @@ electricfurnace/electricfurnace.obj
 electricheater200v/electricheater200v.obj
 electricheater50v/electricheater50v.obj
 eletored/eletored.obj
+elevatorcar/elevatorcar.obj
 emergencyexitlighting/emergencyexitlighting.obj
 energymeter/energymeter.obj
 fieldlogger/fieldlogger.obj
@@ -94,6 +95,7 @@ robustlampsuspended/robustlampsuspended.obj
 rtu/rtu.obj
 scanner/scanner.obj
 sconcelamp/sconcelamp.obj
+servodrive/servodrive.obj
 shaftflywheel/shaftflywheel.obj
 shaftgas/shaftgas.obj
 shaftgen4kw/shaftgen4kw.obj

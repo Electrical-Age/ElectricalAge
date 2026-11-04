@@ -3,11 +3,8 @@ package mods.eln.transparentnode.electricalmachine;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
-import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.ElectricalStackMachineProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
-import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
 import mods.eln.wiki.Data;
@@ -87,18 +84,6 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Nominal power: %1$W", Utils.plotValue(nominalP)));
-    }
-
-    public void applyTo(ElectricalLoad load) {
-        cable.applyTo(load);
-    }
-
-    public void applyTo(Resistor resistor) {
-        resistor.setR(resistorR);
-    }
-
-    public void applyTo(ElectricalStackMachineProcess machine) {
-        machine.setResistorValue(resistorR);
     }
 
     public void applyTo(ThermalLoad load) {

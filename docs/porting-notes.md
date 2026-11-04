@@ -221,6 +221,54 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   GuideME optional). Book + 4 copper cables; every player gets one once, when a slot is free (persisted NBT
   `eln_handbook_given`). EA ships a stub start page; a content mod adds pages under `guides/eln/handbook/` in its own
   namespace and calls `Handbook.setStartPage` (`mods/eln/handbook`, `HandbookCases`).
+- New in 26.x: the servo layer (`mods/eln/robotics`; Baughn 2026-11-02: the servo layer first, 200 V only, players ride
+  the carriage now: "an elevator would be the earliest truly useful output"). The first device is an elevator:
+  - A Linear Servo Drive (`eln:transparent_node@5504`) with a Servo Rail mast on its top, 2 to 32 blocks, moves an
+    elevator car (an entity, a 1x1 floor plate with a frame) up and down on the drive's front side. The car's floor
+    stops level with the drive's foot at the bottom and with the top rail block at the top.
+  - Stops: Station Markers fixed to the mast's side (or the drive's), one per floor, each a stop at its own height;
+    clicking one calls the car. With no markers, up to eight stops spread evenly. Riding, the car's panel sends it a
+    station up (top half) or down (bottom half). Every planned stop is on a whole block.
+  - Connections: 200 V on the back. Seen from the car's side, the left flank takes the setpoint on a floor cable and
+    gives in-position on a ceiling cable; the right flank takes enable on a floor cable (unconnected counts as enabled)
+    and gives the fault signal on a ceiling cable. Two signals a flank because the front is the shaft (on the Machine
+    API: signals at cable positions, `CablePosition.FLOOR`/`CEILING`). A connected
+    setpoint overrides the markers and the panel (its eight bands pick stations; an empty hand on the drive switches it
+    to a share of the travel, to the nearest block).
+  - Electrics: a Machine API consumer (`Machines.forElement`, the API's first new device): 200 V, rated ~3 kW (40 W
+    idle plus lifting 120 kg net, two riders over the counterweight, at full speed; tsugumi-lab's choice),
+    `Brownout.SLOW`. Each tick it asks for its step's work against the net weight over 80 % (a counterweight balances
+    the car and 40 kg; players count 80 kg, other creatures by size): a car carrying more than 40 kg pays to go up, an
+    empty or lighter one pays to go down (it lifts the counterweight), and the other way costs only the idle draw. It
+    moves only as far as what it got pays for: short, it goes on from there at the speed paid for, its new top speed what the line keeps
+    delivering (continuous in position; the speed steps down, a lift braked by its load). So a weak or starved line, or
+    a load over its rating, makes a slower car that still arrives; the machine's buffer (two ticks of rated power) can
+    pay for a faster first second. Top speed also follows the line: 2 m/s at 200 V, 1 m/s^2, a sag or recovery
+    mid-move retargets it (up only once energy piles up in the buffer, so a starved car doesn't surge and fall back);
+    below 30 % of 200 V it holds, and runs again after half a second over 35 %. On a line weaker than it, the API keeps
+    it at the line's maximum power (about half the volts) instead of pulling the line down.
+  - Heat and trips (the API's heat model): 4 kJ/K, 4 W/K to the ambient where it stands (EA's Ambient), heated by
+    the idle draw and the motor's losses; 80 K over its ambient (as the old drive: 100 C at 20 C, 170 C in the
+    Nether, where it idles at 100 C) it trips, faults and holds, and runs again 3 s after it is 30 K under that (as the
+    old drive's 50 K over ambient). The API's trip is a rise over ambient, so a hot biome costs it no margin. Over 1.3x 200 V it trips (fault "overvoltage") and
+    holds until the line has been under 1.1x for 3 s: a servo amplifier's protection, so it never burns. A trip stops
+    the car dead, as any fault; a dead line brakes it where it can (lifting, it stops at once). Reloaded mid-move, its machine runs
+    on (the API keeps a running machine's state).
+  - Safety: before each step the car and its riders are swept to the next position; a block or a creature that isn't
+    riding stops it dead (fault; it clears on the next call or an enable toggle). Disabled, it stops at the next whole
+    block it can; a dead line brakes it where it can.
+  - Sync (design: Argon's review): the drive owns the motion (a Segment on its own saved clock, which stops while its
+    chunks are unloaded) and places the car on the server; clients get the segment (`SegmentPayload`) and run it on a
+    local clock, carrying their own player after its tick. The car has no vanilla position sync and is not saved. On
+    the server it is solid to mobs and items, which it carries, but not to players, whose positions there are a round
+    trip late. A stopped car has a floor ghost under its plate (a player logging in on it stands on that). A mixin
+    keeps a rider from the floating kick when allow-flight is off.
+  - Departures from the design: the panel is a part entity (the car's collider is only its plate, so the plate can't
+    also be the panel's hitbox; its id is the server's entity counter's, sent in the car's spawn packet, never assumed
+    to be the car's + 1); joiners get the segment in the car's pairing bundle rather than in startSeenByPlayer
+    (which runs after the spawn bundle); on the server, riders' sweep is clipped to the car's column (a rider's
+    overhang meets the landing, it doesn't fault the car) and a player up to 1 m off the top (a round trip late) still counts as a rider.
+  - Tests: `ServoCases`, `DriveTest`, `SegmentPropertyTest`, `StationsTest`, `RidersTest`, `SegmentPayloadTest`.
 - Tools (Baughn 2026-11-03): a pickaxe breaks machines, devices and pipes as fast as stone, shears break cables as fast
   as wool; in a block holding both, the part under the crosshair decides. No part breaks in under two ticks, so with
   vanilla's pause after each block it is at best one part per 7 ticks (`node/BreakTool`, `BreakToolCases`).
@@ -323,6 +371,26 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Logic and analog chips are drawn at 0.75 (a case 6 voxels across; Baughn) and, in voxel blocks, go anywhere on a
   face; pins that touch connect (docs/voxel-cables.md, devices off centre).
 
+- The macerator, compressor, magnetizer and plate machine (50 V and 200 V; the tar sand separator shares their
+  element) and the FE exporter run on the Machine API (`Machines.forElement`; Baughn: the four main machines and the
+  exporter first, to test the API). Same nominal volts, rated power, energy per item and FE per joule; at or under
+  nominal volts they draw exactly what their resistor drew (`MachineApiCases` runs that model alongside, at 1x and
+  0.7x the line). Differences: above nominal volts they no longer speed up past their rating (the exporter takes no more than its
+  maximum power); they start half a
+  second after power comes (the API's power-up hold); overvoltage (over 1.3x nominal, either polarity for the
+  machines) burns them at once instead of after the watchdog's budget, and a repair brings them back; the exporter
+  no longer burns on a reverse voltage under -0.2x nominal; its machine holds up to two ticks of power in front of
+  the FE buffer (lost when it is broken, as the buffer is). A machine's progress on the item in hand is saved now
+  (it restarted on every load). Jade's "Power consumption" is the power drawn (it showed the power times the
+  boosters' efficiency). Their terminal's series resistance is the LV cable's for every voltage: a 200 V machine's is
+  0.025 instead of the MV cable's 0.1 ohm, at its 10 A 0.75 V less drop (under 1% more power).
+  On a line weaker than the machine (its resistance above the machine's), they now draw the line's maximum power at
+  about half its volts instead of their resistor's power far below that: the API's slow consumers plan on the line
+  the solver shows them (its Thevenin equivalent at their terminal, read after each step), so alone they never pull it down past its maximum power (found with the Linear Servo Drive). A row of
+  them on one weak line shares it as their resistors did (in proportion to their ratings, settling at their rated
+  resistances when only the row together is heavier than the line); one heavier than the line takes the most it can
+  beside the others (`BenchTest.slowConsumersShareAWeakLine`).
+
 ## Bugs fixed
 
 - Shafts stored mass^2 x 0.25 J per rad/s (linear in speed): a line's inertia grew with the square of its total mass,
@@ -370,6 +438,9 @@ In the port:
 - Config: the rest of the 1.12 balancing values.
 - Chunk baking of static device geometry (voxel nodes are already baked into the chunk mesh); only if playtests need it.
 - In-game wiki guide (`wiki/Data.java` only collects descriptor groups), ore regeneration.
+- Servo layer: horizontal rails (the car and its payload carry an axis; the drive only scans up), larger platforms, bus
+  I/O on the drive, the drive's own screen. Other players and mobs riding a car are drawn by vanilla's interpolation,
+  so they may trail the car by a tick or two; only the local player is carried in step with it.
 
 ## Open questions
 

@@ -75,6 +75,11 @@ public interface TestContext {
         void write(java.io.DataOutputStream out) throws java.io.IOException;
     }
 
+    /** Runs r ticks from now, as the test's own measure runs (outside the simulator's tick: a node may be reloaded). */
+    default void after(int ticks, Runnable r) {
+        throw new UnsupportedOperationException("this context can't schedule (only game tests can)");
+    }
+
     void line(String text);
 
     void check(String what, boolean ok, String detail);
