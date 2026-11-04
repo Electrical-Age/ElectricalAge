@@ -304,7 +304,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   frame; Baughn), and the egg sits higher and larger in the nest (it was half sunk in the bowl).
 - Boiler: a feedwater pipe flange at the centre of its right flank (`front.right()`), into the vessel through a check
   valve (Baughn). Device links can be check valves now (`FluidDevice.Link.kind`); a shut one is left out of the
-  network's pressure limiter (`boiler_feedwater_flange`, `FluidCoreTest.checkValvePassesOneWayOnly`).
+  network's pressure limiter (`boiler_feedwater_flange`, `FluidCoreTest.checkValvePassesOneWayOnly`). A float valve on
+  that inlet closes over the last 10 % of the gauge glass (Baughn 2026-11-04: a boiler shouldn't overfill; a condensate
+  pump had fed one eight times its rated fill from a makeup tank). Jade shows the vessel's real water, "overfull" past
+  the rating.
 - Boiler: a level signal on its front (Baughn: where the dials are), analog since 2026-11-01 (Baughn: so a boiler can
   in principle run on little water, with the real downsides): the gauge glass's reading (fill of the 8 B tank) as a
   share of the signal range, which a logic input still reads high above half. Below a quarter full its heating surface

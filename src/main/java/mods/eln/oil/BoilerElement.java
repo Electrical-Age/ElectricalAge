@@ -51,6 +51,12 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     public FluidNode feed;
     private FluidDevice.Link feedCheck;
     public static final double FEED_VOLUME = 0.00002, FEED_DRAW = 0.3;
+    /**
+     * The feed inlet's float valve (Baughn 2026-11-04: a boiler shouldn't overfill): it closes over this band of the
+     * gauge glass below full (fill() 1). Without it a condensate pump fed the boiler everything its makeup drew from a
+     * tank, eight times its rated fill, and the boiler had all that to heat.
+     */
+    public static final double FEED_FLOAT_BAND = 0.1;
     private double[] loaded, loadedFeed;
     private List<FluidPort> ports = List.of();
     private final List<Vent> vents = new java.util.ArrayList<>();
@@ -142,6 +148,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     @Override
     public void beforeFluidStep(double dt) {
         syncTanks();
+        if (feedCheck != null) feedCheck.open = Math.max(0, Math.min(1, (1 - fill()) / FEED_FLOAT_BAND));
         // the shell heats the water (EA thermal temperatures are relative to the ambient, Tref)
         double shellK = thermal.Tc + mods.eln.sim.PhysicalConstant.Tref;
         double q = (shellK - vessel.T()) / SHELL_TO_WATER_K_PER_W * heatingShare();
@@ -332,7 +339,9 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
             info.put(vessel.mLiquid() > 1e-6 ? I18N.tr("Water temperature") : I18N.tr("Gas temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
             info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", vessel.P() / 1e5, EaUnits.contents(vessel)));
         }
-        info.put(I18N.tr("Water"), tanks.water() + " / " + BoilerTanks.WATER_MB + " mB");
+        // (the vessel's own water, not the capability's view capped at the rating: an overfilled boiler showed 8000)
+        int water = vessel != null ? (int) Math.floor(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER) : tanks.water();
+        info.put(I18N.tr("Water"), water + " / " + BoilerTanks.WATER_MB + " mB" + (water > BoilerTanks.WATER_MB ? I18N.tr(": overfull") : ""));
         // (Baughn: steam in grams, not mB)
         info.put(I18N.tr("Steam to give"), EaUnits.steamGrams(tanks.steam()));
         info.put(I18N.tr("Steam made"), EaUnits.steamGrams(steamRate) + "/s");
