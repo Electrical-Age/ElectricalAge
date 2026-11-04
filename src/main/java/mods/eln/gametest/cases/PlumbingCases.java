@@ -108,7 +108,7 @@ public final class PlumbingCases {
             }
             ctx.check("tank: it shows the top layer, gasoline, and gives it back", took == 500, took + " mB, shown " + shownAfter);
             var info = t.getWaila();
-            ctx.check("tank: Jade lists the gasoline", String.valueOf(info.get("Contents")).contains(" L of gasoline"), "" + info.get("Contents"));
+            ctx.check("tank: Jade lists the gasoline", String.valueOf(info.get("Contents")).contains(" mB of gasoline"), "" + info.get("Contents"));
         }
     }
 
