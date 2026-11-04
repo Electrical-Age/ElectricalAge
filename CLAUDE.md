@@ -29,8 +29,8 @@ JDKs: Gradle and the mod use JDK 25, and NeoForge's data and game-test runs also
 
 ## Commits and branches
 
-- Work on `port-26` (or a topic branch off it). Push with `git push upstream HEAD:ports/26.3`; upstream is
-  github.com/Electrical-Age/ElectricalAge.
+- Work on `develop` (or a topic branch off it), which is the most up-to-date branch (Baughn 2026-11-04). Push with
+  `git push upstream HEAD:develop`; upstream is github.com/Electrical-Age/ElectricalAge.
 - One logical change per commit. Messages are plain English: a short subject that says what changed for the
   player or the code (e.g. "Keep nodes this version cannot load instead of deleting them"), then a body that
   says why and notes any save-format or gameplay impact. Note Baughn's decisions where they drove the change.

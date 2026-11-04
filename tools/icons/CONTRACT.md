@@ -1,7 +1,7 @@
 # ELN icon production contract
 
 Production of two icon sets for Electrical Age, Minecraft 26.3 / NeoForge port
-(this repo, branch ports/26.3). Decided by the project owner on 2026-10-11.
+(this repo, branch develop). Decided by the project owner on 2026-10-11.
 
 ## The two sets
 - **vanilla** — "Vanilla-native 16px".

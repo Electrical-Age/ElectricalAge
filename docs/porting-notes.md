@@ -381,7 +381,7 @@ In the port:
 
 ## History and next steps
 
-The 1.12 tree is `upstream/ports/1.12` (local `port-1.12`); this port is pushed as `ports/26.3`. Phase Q (after
+The 1.12 tree is `upstream/ports/1.12` (local `port-1.12`); this port lives on `develop` (it was `ports/26.3` until 2026-11-04). Phase Q (after
 parity and Baughn's sign-off): port the age-series fork's features (github.com/age-series/ElectricalAge, ~654 commits
 on 1.7.10) onto 26.x.
 
