@@ -126,9 +126,35 @@ public final class FluidWorld implements IProcess {
             l.edge.boost = l.boost;
         }
         for (FluidNetwork n : networks) n.step(time);
+        if (traceSteps > 0 && traceNode != null) trace();
         writeBack();
         burstThisStep.clear();
         for (FluidDevice d : stepping) if (devices.contains(d)) d.afterFluidStep(time);
+    }
+
+    /** /elnlab fluidtrace: the node whose network is logged after each step, for traceSteps more steps. */
+    public static FluidNode traceNode;
+    public static int traceSteps;
+
+    /** One line per node (pressure, z, volume, water, air, T) and per edge (ends, kind, open, boost, flow) of traceNode's network. */
+    private void trace() {
+        FluidNetwork net = networkOf(nodeFor(traceNode));
+        traceSteps--;
+        if (net == null) {
+            mods.eln.Eln.LOG.info("fluidtrace: the node is in no network");
+            return;
+        }
+        StringBuilder b = new StringBuilder("fluidtrace step (" + traceSteps + " left)");
+        for (int i = 0; i < net.nodes.size(); i++) {
+            FluidNode n = net.nodes.get(i);
+            b.append(String.format("%n  n%d%s P=%.4f bar z=%.2f h=%.2f V=%.5f w=%.6f a=%.3g E=%.6g T=%.2f", i, n.fixed ? " fixed" : "", n.P() / 1e5,
+                n.z, n.height, n.volume, n.mWater, n.mAir, n.energy, n.T() - 273.15));
+        }
+        for (FluidEdge e : net.edges)
+            b.append(String.format("%n  e n%d->n%d %s open=%.4f boost=%.3f bar flow=%.5f liq=%.5f k=%.4g pA=%.3f pB=%.3f spanA=%.3f spanB=%.3f %s",
+                net.nodes.indexOf(e.a), net.nodes.indexOf(e.b), e.kind, e.open, e.boost / 1e5, e.flow, e.fLiquid, e.k, e.portA, e.portB,
+                e.spanA, e.spanB, e.debug()));
+        mods.eln.Eln.LOG.info(b.toString());
     }
 
     /** Each lumped run's contents back into its members, by volume (they are what is saved and what is rebuilt from). */

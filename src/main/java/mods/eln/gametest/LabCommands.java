@@ -130,6 +130,9 @@ public final class LabCommands {
                 .then(Commands.literal("spmodules").executes(c -> demo(c.getSource(), () -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("tilted").executes(c -> demo(c.getSource(), () -> tilted(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("threelogger").executes(c -> demo(c.getSource(), () -> threeLogger(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("fluidtrace").then(Commands.argument("pos", BlockPosArgument.blockPos())
+                    .then(Commands.argument("n", IntegerArgumentType.integer(1, 200))
+                        .executes(c -> fluidtrace(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "n"))))))
                 .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> inspect(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("machines").then(Commands.argument("n", IntegerArgumentType.integer(1, 500))
@@ -506,6 +509,20 @@ public final class LabCommands {
                 e.sixNode.setNeedPublish(true);
                 return;
             }
+    }
+
+    /** Log the fluid network of the device at pos (its first port's node) after each of the next n steps (FluidWorld.trace). */
+    static int fluidtrace(CommandSourceStack src, BlockPos pos, int n) {
+        var node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, src.getLevel()));
+        Object dev = node instanceof mods.eln.node.transparent.TransparentNode tn ? tn.element : node;
+        if (!(dev instanceof mods.eln.sim.fluid.FluidDevice d) || d.fluidPorts().isEmpty()) {
+            src.sendFailure(Component.literal("no fluid device at " + pos));
+            return 0;
+        }
+        mods.eln.fluid.FluidWorld.traceNode = d.fluidPorts().get(0).node();
+        mods.eln.fluid.FluidWorld.traceSteps = n;
+        src.sendSuccess(() -> Component.literal("tracing " + n + " steps (server log, 'fluidtrace')"), false);
+        return n;
     }
 
     public static int inspect(CommandSourceStack src, BlockPos pos) {

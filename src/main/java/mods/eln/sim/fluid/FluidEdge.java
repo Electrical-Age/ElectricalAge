@@ -46,6 +46,11 @@ public final class FluidEdge {
     // the solve's coefficient and upstream properties (per step)
     double g, rho, head, sA, sB, xl;
     boolean fromA;
+    /** The solve's per-step coefficients, for /elnlab fluidtrace. */
+    public String debug() {
+        return String.format("g=%.4g head=%.4g sA=%.4g sB=%.4g xl=%.3f fromA=%s", g, head, sA, sB, xl, fromA);
+    }
+
     /** This step's packets each end gives (FluidNetwork.packet; cached: node states hold still until the step ends). */
     FluidNetwork.Packet pkA, pkB;
 
