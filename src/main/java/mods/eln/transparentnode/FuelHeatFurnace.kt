@@ -382,6 +382,19 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 
     override fun hasGui() = true
 
+    /**
+     * Repaired, its burner stays off until the player switches it on (Baughn 2026-11-04, todo #218: a repair relit it
+     * at the old setting and, with nothing taking its heat, it burnt out again; a burnt device opens no GUI).
+     */
+    /** Is its burner switched on (its main switch)? */
+    fun burnerOn() = mainSwitch
+
+    override fun repair() {
+        val was = isBurnt()
+        super.repair()
+        if (was) mainSwitch = false
+    }
+
     override fun getWaila(): MutableMap<String, String> {
         val info = HashMap<String, String>()
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))

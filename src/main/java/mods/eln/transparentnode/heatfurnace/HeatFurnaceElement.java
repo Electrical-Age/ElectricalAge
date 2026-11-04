@@ -257,6 +257,20 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
         computeInventory();
     }
 
+    /**
+     * Repaired, it declines fuel until the player takes it again (Baughn 2026-11-04, todo #218: a repair relit it at
+     * the old setting, and with nothing taking its heat it burnt out again; a burnt device opens no GUI to turn it down).
+     */
+    @Override
+    public void repair() {
+        boolean was = isBurnt();
+        super.repair();
+        if (was) {
+            setTakeFuel(false);
+            internalTakeFuel = false;
+        }
+    }
+
     public boolean getTakeFuel() {
         return takeFuel;
     }

@@ -45,6 +45,7 @@ public final class BurntCases {
 
     static final class FurnaceCase implements TestCase {
         HeatFurnaceElement burnt, spare;
+        mods.eln.transparentnode.FuelHeatFurnaceElement fuel;
         ItemStack part;
 
         public String name() {
@@ -72,7 +73,11 @@ public final class BurntCases {
             burnt = fed(ctx, 1);
             burnt.burn(FailureCause.OVERHEAT, Failure.Kind.MACHINE);
             spare = (HeatFurnaceElement) ctx.placeTransparent(Wp10bCases.HEAT_FURNACE, ctx.at(5, 1, 1));
+            spare.setTakeFuel(true);   // (it was taking fuel when it burnt: the repair leaves it declining, todo #218)
             spare.burn(FailureCause.OVERHEAT, Failure.Kind.MACHINE);
+            fuel = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(3, 1, 1));
+            fuel.networkUnserialize(ctx.stream(o -> o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getMainSwitchToggleEvent())));
+            fuel.burn(FailureCause.OVERHEAT, Failure.Kind.MACHINE);
             part = spare.getRepairPart();
         }
 
@@ -93,6 +98,12 @@ public final class BurntCases {
                 boolean repaired = Repair.onActivated(spare, fp);
                 ctx.check("a right-click with a Combustion Chamber repairs it and uses one", repaired && !spare.isBurnt() && held.getCount() == 1,
                     "repaired " + repaired + ", burnt " + spare.isBurnt() + ", left " + held.getCount());
+                // (Baughn 2026-11-04, todo #218: repaired, a furnace stays off until the player relights it)
+                ctx.check("stone heat furnace: repaired, it declines fuel", !spare.getTakeFuel(), "");
+                boolean wasOn = fuel.burnerOn();
+                fuel.repair();
+                ctx.check("fuel heat furnace: repaired, its burner is off (it was on when it burnt)", wasOn && !fuel.burnerOn() && !fuel.isBurnt(),
+                    "on before " + wasOn + ", after " + fuel.burnerOn());
             } finally {
                 fp.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
             }
