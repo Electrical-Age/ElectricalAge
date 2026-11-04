@@ -375,9 +375,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         double volume = desc.nominalSteam() * SteamGeneratorDescriptor.TANK_SECONDS * EaUnits.KG_PER_MB_STEAM / INLET_RHO;
         inlet = new FluidNode(volume, c.y, 1.0, false);
         if (loaded != null) {
-            inlet.mWater = loaded[0];
-            inlet.mAir = loaded[1];
-            inlet.energy = loaded[2];
+            mods.eln.fluid.FluidSaves.restore(inlet, loaded);
             inlet.update();
         } else {
             // new, or saved before the inlet: air, and the old tank's steam
@@ -421,9 +419,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         controls.writeToNBT(nbt);
         if (placer != null) nbt.putString("placer", placer.toString());
         if (inlet != null) {
-            nbt.putDouble("inletW", inlet.mWater);
-            nbt.putDouble("inletA", inlet.mAir);
-            nbt.putDouble("inletU", inlet.energy);
+            mods.eln.fluid.FluidSaves.put(nbt, "inlet", inlet);
         }
     }
 
@@ -442,7 +438,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             placer = null;
         }
         if (nbt.contains("inletW"))
-            loaded = new double[]{nbt.getDoubleOr("inletW", 0), nbt.getDoubleOr("inletA", 0), nbt.getDoubleOr("inletU", 0)};
+            loaded = mods.eln.fluid.FluidSaves.array(nbt, "inlet");
     }
 
     @Override

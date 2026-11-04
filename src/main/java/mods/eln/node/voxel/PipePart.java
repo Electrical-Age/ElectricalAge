@@ -146,6 +146,14 @@ public final class PipePart extends VoxelPart {
     }
 
     /** The same, new air at the ambient T (K; Ambient). */
+    /** The same, holding share of src's contents (a pipe split: each piece its share by length). */
+    void makeNode(int blockY, double T, mods.eln.sim.fluid.FluidNode src, double share) {
+        makeNode(blockY, T, null);
+        if (src == null) return;
+        fluid.setShareOf(src, share);
+        fluid.update();
+    }
+
     void makeNode(int blockY, double T, double[] saved) {
         double volume = Math.max(1e-7, length() / 16.0 * VOLUME_PER_BLOCK[tier]);
         double z = blockY + (minY() - (heightVoxels() == bore() ? bore() / 2.0 : 0)) / 16.0;
@@ -173,7 +181,10 @@ public final class PipePart extends VoxelPart {
             int face = faceOf(x, y, z);
             if (face < 0) continue;
             double draw = heightVoxels() == bore() ? 0.5 : (y - minY()) / (double) heightVoxels();
-            out.add(new FluidDevice.FluidPort(fluid, pos, face, draw, k, spot(face, x, y, z)));
+            // (an end on a side face is an opening as tall as the bore: liquid goes out as far as it is wet, not only once
+            // it is over mid-bore; Baughn 2026-11-03, a half-full run held its puddle. One opening up or down is level.)
+            double span = face <= 1 ? 0 : Math.min(1, bore() / (double) heightVoxels());
+            out.add(new FluidDevice.FluidPort(fluid, pos, face, draw, k, spot(face, x, y, z), span));
         }
         return out;
     }
@@ -209,6 +220,7 @@ public final class PipePart extends VoxelPart {
             t.putDouble("a", fluid.mAir);
             t.putDouble("u", fluid.energy);
             t.putDouble("v", fluid.volume);
+            mods.eln.fluid.FluidSaves.putExtra(t, "s", fluid);
         }
     }
 
@@ -218,15 +230,17 @@ public final class PipePart extends VoxelPart {
         p.burstDir = t.getIntOr("burstDir", -1);
         double[] saved = t.contains("w") ? new double[]{t.getDoubleOr("w", 0), t.getDoubleOr("a", 0), t.getDoubleOr("u", 0)} : null;
         p.makeNode(blockY, saved);
+        if (saved != null) {
+            p.fluid.extra = mods.eln.fluid.FluidSaves.extra(t, "s");
+            p.fluid.update();
+        }
         // contents saved for another volume (before 2026-10-25 iron pipe held 0.15 L per block, now 0.03): kept at the
         // same state (pressure, temperature, mix), scaled to the new volume, or they'd load at 5x the pressure
         if (saved != null) {
             double v0 = t.getDoubleOr("v", Math.max(1e-7, p.length() / 16.0 * OLD_VOLUME_PER_BLOCK[p.tier]));
             if (v0 > 0 && Math.abs(v0 - p.fluid.volume) > 1e-12) {
                 double f = p.fluid.volume / v0;
-                p.fluid.mWater *= f;
-                p.fluid.mAir *= f;
-                p.fluid.energy *= f;
+                p.fluid.setShareOf(p.fluid, f);
                 p.fluid.update();
             }
         }

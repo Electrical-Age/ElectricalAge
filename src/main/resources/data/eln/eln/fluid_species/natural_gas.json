@@ -1,0 +1,11 @@
+{
+  "kind": "gas",
+  "group": "natural_gas",
+  "density": 0.7,
+  "cp_vapour": 1700,
+  "molar_mass": 0.016,
+  "vapour_viscosity": 1.1e-5,
+  "colour": "#D8E4F0",
+  "fluids": {"liquid": [], "vapour": ["eln:naturalgas"]},
+  "flammable": {"flash_point": 0, "autoignition": 853}
+}

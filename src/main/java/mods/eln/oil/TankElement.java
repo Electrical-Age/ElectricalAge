@@ -41,6 +41,36 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     /** The water's share of its volume, and whether its gas is mostly steam, last published (the sight glass). */
     float shownFill = -1;
     boolean shownSteam;
+    int shownLayers;
+
+    /** Its liquid layers for the sight glass, from the bottom: each one's top (share of the volume) and colour. */
+    float[] layerTops() {
+        float[] t = new float[vessel.layers()];
+        for (int l = 0; l < t.length; l++) t[l] = (float) vessel.layerTop(l);
+        return t;
+    }
+
+    int[] layerColours() {
+        var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+        int[] c = new int[vessel.layers()];
+        for (int l = 0; l < c.length; l++) {
+            int best = -1;
+            double most = 0;
+            for (int id = 0; id < vessel.speciesBound(); id++)
+                if (vessel.layerOf(id) == l && vessel.liquid(id) > most) { best = id; most = vessel.liquid(id); }
+            c[l] = best < 0 ? 0 : reg.byId(best).colour;
+        }
+        return c;
+    }
+
+    /** What the sight glass's layers look like, to publish when it changes: their count and colours, tops to 2 %. */
+    int layerSignature() {
+        if (vessel == null || vessel.layers() <= 1) return 0;
+        int h = vessel.layers();
+        for (float t : layerTops()) h = 31 * h + Math.round(t * 50);
+        for (int c : layerColours()) h = 31 * h + c;
+        return h;
+    }
     /**
      * Which of its ports have something coupled to them (Baughn: a flange only where a pipe meets it; 2026-10-29 for a
      * merged box, 2026-11-03 for a lone tank too): bit 2 * face + (0 low, 1 high) for the side faces (Direction 3D
@@ -57,7 +87,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             if (vessel.P() > desc.burstPa)
                 new mods.eln.sim.process.destruct.Failure(TankElement.this).pressureVessel(() -> vessel.energy - vessel.mWater * Water.uLiquid(Water.TB))
                     .fail(mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE, vessel.P());
-            if (Math.abs(fill() - shownFill) > 0.02 || steamy() != shownSteam) needPublish();
+            if (Math.abs(fill() - shownFill) > 0.02 || steamy() != shownSteam || layerSignature() != shownLayers) needPublish();
             // a lone tank whose neighbours fill a box with it re-forms the box (AdventurAgent 2026-10-29: a 2 x 2 x 2 iron
             // tank came back from a server restart as eight one-block tanks; not reproduced in a reload test: the log line
             // says when this catches one)
@@ -77,9 +107,9 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
 
     private int boxCheck;
 
-    /** The water's share of its volume. */
+    /** The liquid's share of its volume (all its liquids). */
     public double fill() {
-        return vessel == null ? 0 : Math.min(1, vessel.mLiquid() / Water.RHO_L / vessel.volume);
+        return vessel == null ? 0 : Math.min(1, vessel.liquidVolume() / vessel.volume);
     }
 
     /** Whether its gas is mostly steam (over half its pressure; else air, or nothing to see): the sight glass shows it. */
@@ -87,32 +117,44 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         return vessel != null && vessel.mVapour() > 1e-7 && vessel.pVapour() > 0.5 * vessel.P();
     }
 
-    /** Its water as a fluid capability (buckets; another mod's pipes): a view of its vessel (TankWater). */
-    public final TankWater water = new TankWater();
+    /** Its liquid as a fluid capability (buckets; another mod's pipes): a view of its vessel (TankLiquid). */
+    public final TankLiquid water = new TankLiquid();
 
     @Override
     public Object getFluidHandler() {
         return water;
     }
 
-    /** The vessel takes what a bucket or a pipe put in or took out since the last step, then shows its water again. */
+    /** The vessel takes what a bucket or a pipe put in or took out since the last step, then shows its liquid again. */
     public void syncWater() {
         if (vessel == null) return;
-        int d = water.change();
-        double kg = Math.abs(d) * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
-        if (d > 0) EaUnits.addWater(vessel, kg, mods.eln.sim.Ambient.kelvin(node.coordonate), false);   // (at the ambient)
-        else if (d < 0) {
-            double got = EaUnits.drainLiquid(vessel, kg);
-            if (got < kg && vessel.T() < Water.TB) EaUnits.drainVapour(vessel, kg - got);   // (the rest condensed: see bucketable)
+        for (var ch : water.change()) {
+            var ph = mods.eln.fluid.FluidSpecies.of(ch.getKey());
+            if (ph == null || ph.vapour()) continue;
+            int d = ch.getValue();
+            double kg = Math.abs(d) * mods.eln.fluid.FluidSpecies.kgPerMb(ph.id(), false);
+            if (ph.id() == mods.eln.sim.fluid.SpeciesRegistry.WATER) {
+                if (d > 0) EaUnits.addWater(vessel, kg, mods.eln.sim.Ambient.kelvin(node.coordonate), false);   // (at the ambient)
+                else if (d < 0) {
+                    double got = EaUnits.drainLiquid(vessel, kg);
+                    if (got < kg && vessel.T() < Water.TB) EaUnits.drainVapour(vessel, kg - got);   // (the rest condensed: see bucketable)
+                }
+            } else if (d > 0) EaUnits.add(vessel, ph.id(), kg, mods.eln.sim.Ambient.kelvin(node.coordonate), false);
+            else EaUnits.drainLiquid(vessel, ph.id(), kg);
         }
         showWater();
     }
 
     void showWater() {
         if (vessel == null) return;
-        // (to the nearest mB; cold, its vapour counts too: a bucket poured into a box comes back 999 mB, a little of it
-        // evaporated into the box's air, and an empty bucket wants a whole 1000)
-        water.show((int) Math.round(bucketable() / EaUnits.KG_PER_MB_WATER), (int) Math.floor(vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER));
+        // (to the nearest mB; cold, water's vapour counts too: a bucket poured into a box comes back 999 mB, a little of
+        // it evaporated into the box's air, and an empty bucket wants a whole 1000)
+        int top = mods.eln.fluid.FluidSpecies.topLiquid(vessel);
+        int id = top < 0 ? mods.eln.sim.fluid.SpeciesRegistry.WATER : top;
+        double kg = id == mods.eln.sim.fluid.SpeciesRegistry.WATER ? bucketable() : vessel.liquid(id);
+        int capacity = (int) Math.floor(vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
+        int room = (int) Math.floor(Math.max(0, vessel.volume - vessel.liquidVolume()) * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
+        water.show(mods.eln.fluid.FluidSpecies.fluid(id, false), (int) Math.round(kg / mods.eln.fluid.FluidSpecies.kgPerMb(id, false)), capacity, room);
     }
 
     /** The water a bucket can take (kg): its liquid, and while it's under boiling its vapour (it would condense). */
@@ -264,9 +306,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         own = new FluidNode(desc.volume, node.coordonate.y, 1.0, false);
         own.lossWPerK = LOSS_W_PER_K;
         if (loaded != null) {
-            own.mWater = loaded[0];
-            own.mAir = loaded[1];
-            own.energy = loaded[2];
+            mods.eln.fluid.FluidSaves.restore(own, loaded);
             own.update();
         } else own.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         vessel = own;
@@ -312,6 +352,15 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             stream.writeFloat(shownFill);
             shownSteam = steamy();
             stream.writeBoolean(shownSteam);
+            // (its layers: none for one liquid, which the glass draws as before)
+            shownLayers = layerSignature();
+            float[] tops = shownLayers == 0 ? new float[0] : layerTops();
+            int[] cols = shownLayers == 0 ? new int[0] : layerColours();
+            stream.writeByte(tops.length);
+            for (int l = 0; l < tops.length; l++) {
+                stream.writeFloat(tops[l]);
+                stream.writeInt(cols[l]);
+            }
             // the box: whether it draws it (its lowest corner), and its size (a lone tank: 1 1 1)
             boolean draws = group == null || group.master() == this;
             stream.writeBoolean(draws);
@@ -338,6 +387,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             nbt.putDouble("vesselW", (float) own.mWater);
             nbt.putDouble("vesselA", (float) own.mAir);
             nbt.putDouble("vesselU", (float) own.energy);
+            mods.eln.fluid.FluidSaves.putExtra(nbt, "vesselS", own);
         }
     }
 
@@ -345,7 +395,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         if (nbt.contains("vesselW"))
-            loaded = new double[]{nbt.getDoubleOr("vesselW", 0), nbt.getDoubleOr("vesselA", 0), nbt.getDoubleOr("vesselU", 0)};
+            loaded = mods.eln.fluid.FluidSaves.array(nbt, "vessel");
     }
 
     @Override
@@ -361,6 +411,8 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             : I18N.tr("on its outer faces: steam: top, and 12 px up a side; water: bottom, and 4 px up a side"));
         info.put(I18N.tr("Piped"), String.format("%d of %d ports here", Integer.bitCount(coupled), ports.stream().filter(p -> p.face() != 0).count()));
         if (vessel.mVapour() > 1e-7) info.put(I18N.tr("Steam"), EaUnits.steamGrams(vessel.mVapour() / EaUnits.KG_PER_MB_STEAM));
+        for (String[] o : EaUnits.others(vessel, id -> mods.eln.fluid.FluidSpecies.kgPerMb(id, false)))
+            info.put(Character.toUpperCase(o[0].charAt(0)) + o[0].substring(1), o[1]);
         if (vessel.P() > desc.workingPa) info.put(I18N.tr("Warning"), String.format("over its %.0f bar working pressure", desc.workingPa / 1e5));
         return info;
     }

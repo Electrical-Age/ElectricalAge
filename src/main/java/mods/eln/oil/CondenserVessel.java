@@ -80,7 +80,7 @@ public final class CondenserVessel {
         inlet.resistance = 1 / PORT_K;
         // (into the vessel's top: the makeup falls in, it doesn't run back out)
         makeup = new FluidDevice.Link(inlet, 0, vessel, 1.0, PORT_K).kind(FluidEdge.Kind.CHECK);
-        // g = rho k / mu x open: k for Qmax / H0; open carries the speed and the curve's chord (before)
+        // g = rho k / mu x open: k for Qmax / H0; open carries the speed and the curve's chord to its shut-off (before)
         pump = new FluidDevice.Link(vessel, 0, outlet, 0, curve.freeKgPerS / curve.shutoffPa * Water.MU_L / Water.RHO_L).kind(FluidEdge.Kind.CHECK);
         pump.boost = curve.boost(0);
         pump.open = 0;
@@ -97,9 +97,7 @@ public final class CondenserVessel {
                 n.mAir = Math.min(saved[1], Water.P_ATM * (volume - n.mWater / Water.RHO_L) / (Water.R_AIR * T));
                 n.energy = mods.eln.sim.fluid.Flash.energyAt(n.mWater, n.mAir, volume, T);
             } else {
-                n.mWater = saved[0];
-                n.mAir = saved[1];
-                n.energy = saved[2];
+                mods.eln.fluid.FluidSaves.restore(n, saved);
             }
             n.update();
         } else n.fill(0, Water.P_ATM, ambientK);
@@ -116,7 +114,7 @@ public final class CondenserVessel {
         double q = cooling * (vessel.T() - shellK) / (CondenserDescriptor.DT_VESSEL / nominalHeat);
         // (at most half the way to the shell's temperature in a step: a vessel of thin air has next to no heat capacity,
         // and the explicit step overshot to -193 C: AdventurAgent)
-        double toShell = (vessel.energy - mods.eln.sim.fluid.Flash.energyAt(vessel.mWater, vessel.mAir, vessel.volume, shellK)) / dt;
+        double toShell = (vessel.energy - vessel.energyAt(shellK)) / dt;
         q = toShell >= 0 ? Math.max(0, Math.min(q, 0.5 * toShell)) : Math.min(0, Math.max(q, 0.5 * toShell));
         vessel.heat -= q;
         shell.moveEnergyTo(q * dt);
@@ -136,10 +134,10 @@ public final class CondenserVessel {
         floatOpen = Math.max(0, Math.min(1, (MAKEUP_SHUT - floodShare()) / (MAKEUP_SHUT - MAKEUP_OPEN)));
         if (makeup != null) makeup.open = floatOpen * Math.max(0, Math.min(1, makeupGate));
         if (pump != null) {
-            // the curve's chord through where it runs now (CondensatePump): speed scales the flow, the head stays
+            // the chord from where it runs now to the shut-off (CondensatePump): speed scales the flow, the head stays
             backPa = backPressure();
             speed = Math.max(0, Math.min(1.2, pumpOpen));
-            pump.open = speed * curve.chordShare(backPa);
+            pump.open = speed * curve.lineShare(backPa);
             pump.boost = curve.boost(backPa);
         }
     }
@@ -193,13 +191,11 @@ public final class CondenserVessel {
     }
 
     static void put(CompoundTag nbt, String key, FluidNode n) {
-        nbt.putDouble(key + "W", n.mWater);
-        nbt.putDouble(key + "A", n.mAir);
-        nbt.putDouble(key + "U", n.energy);
+        mods.eln.fluid.FluidSaves.put(nbt, key, n);
     }
 
     static double[] get(CompoundTag nbt, String key) {
-        return nbt.contains(key + "W") ? new double[]{nbt.getDoubleOr(key + "W", 0), nbt.getDoubleOr(key + "A", 0), nbt.getDoubleOr(key + "U", 0)} : null;
+        return nbt.contains(key + "W") ? mods.eln.fluid.FluidSaves.array(nbt, key) : null;
     }
 
     /** Read what was saved; savedVolume: the vessel's volume then (m^3), or 0 if it is its own. */

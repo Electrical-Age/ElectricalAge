@@ -1,0 +1,16 @@
+{
+  "kind": "curve",
+  "group": "hydrocarbon",
+  "density": 740,
+  "cp_liquid": 2200,
+  "cp_vapour": 1700,
+  "molar_mass": 0.1,
+  "boiling_point": 370,
+  "latent_heat": 350000,
+  "critical_temperature": 560,
+  "viscosity": [[293, 0.0006], [353, 0.00035]],
+  "vapour_viscosity": 7e-6,
+  "colour": "#F4E27A",
+  "fluids": {"liquid": ["eln:gasoline"], "vapour": []},
+  "flammable": {"flash_point": 230, "autoignition": 520}
+}

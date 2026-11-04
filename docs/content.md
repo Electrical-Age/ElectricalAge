@@ -58,11 +58,27 @@ Over half the lakes (a fixed roll on the lake's key) a small surface pond, its o
 with tar sand, is dug once the chunks over the lake's middle are loaded, in new and old worlds alike (`oil/OilPonds`,
 Baughn 2026-10-28; none where the ground isn't flat, dry and natural). Tests: `gametest/cases/OilCases`. The tar sand separator's list is `Eln.separatorRecipes`.
 
-Oil moves between devices only through the NeoForge fluid capability (EA's pipes and the fluid core carry water,
-steam and air). Devices with a drawn outlet push their tank out of it (`fluid/FluidExport`, Baughn 2026-11-03): the
-tar sand separator out of its back, the oil pump out of its discharge flange on its right, into whatever block there
-takes fluid (another mod's pipe, a column base, a flare stack, an EA tank for water). The rest offer their tanks on
-every face for pipes to draw from or fill.
+Oil goes on EA pipes (Baughn 2026-11-03: data-driven multi-fluid pipes; species in "Fluid species" below): each oil
+device keeps its own tank and puts it on a pipe through a small port node on its drawn flange (`fluid/PortBridge`):
+out of the oil pump's discharge (right, 6 px up), the tar sand separator's outlet (back, 4 px up, 6 across), the
+column base's residue nozzle (left; at the column's temperature: cold residue barely flows) and each segment's
+draw-off (front; natural gas as a gas); into the column base's crude nozzle (right), the flare stack (front) and the
+gas turbine's fuel flange (top). Out-ports push up to 200 mB/s against up to 6 bar (constants in each descriptor).
+With no EA pipe on the flange, a device with a drawn outlet pushes its tank into whatever block there takes fluid
+(`fluid/FluidExport`: another mod's pipe, a column base, a flare stack, an EA tank), and every device offers its
+tanks on every face. The fuel heat furnace has no flange (capability only). Tests: `OilCases` oil_pump_into_pipe*,
+oil_on_pipes_*.
+
+### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)
+- Datapack JSON `data/<ns>/eln/fluid_species/<name>.json` defines species `<ns>:<name>` for the fluid core (fields in
+  the loader's javadoc: kind curve/none/gas, group, density, heat capacities, molar mass, boiling point, latent heat,
+  critical temperature, liquid viscosity at two temperatures, colour, the NeoForge fluids it is). Water and air are
+  built in. EA ships crude_oil, gasoline, diesel, heavy_oil (hydrocarbons, one group), residue (never boils, denser
+  than water) and natural_gas. A modpack can add species or retune these; a file that fails its checks (the vapour's
+  energy must stay above the liquid's below the critical point) is skipped with a log line. Optional `flammable`
+  {flash_point, autoignition} (K): a leak's jet (`node/voxel/SteamJet.burn`) of a species that burns catches by itself
+  at its autoignition temperature, over its flash point from a flame within 2 blocks (fire, lava, a torch, a lit
+  campfire, furnace or candle), and sets fire along the jet and to what stands in it (Baughn 2026-11-03).
 
 ## Entities
 

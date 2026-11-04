@@ -1,0 +1,16 @@
+{
+  "kind": "curve",
+  "group": "hydrocarbon",
+  "density": 840,
+  "cp_liquid": 2000,
+  "cp_vapour": 1700,
+  "molar_mass": 0.2,
+  "boiling_point": 530,
+  "latent_heat": 250000,
+  "critical_temperature": 720,
+  "viscosity": [[293, 0.0035], [373, 0.001]],
+  "vapour_viscosity": 7e-6,
+  "colour": "#C8862A",
+  "fluids": {"liquid": ["eln:diesel"], "vapour": []},
+  "flammable": {"flash_point": 330, "autoignition": 530}
+}

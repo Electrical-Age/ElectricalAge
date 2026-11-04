@@ -32,10 +32,14 @@ import java.util.*
 
 class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: ThermalLoadInitializerByPowerDrop) :
     TransparentNodeDescriptor(name, FuelHeatFurnaceElement::class.java, null) {
-    private val main = model.getPart("Main")
-    private val burners = arrayOf(model.getPart("BurnerA"), model.getPart("BurnerB"), model.getPart("BurnerC"))
-    private val powerLED = model.getPart("PowerLED")
-    private val heatLED = model.getPart("HeatLED")
+    private val obj = model
+    private val main = model.getPart("main")
+    /** The burner guns by FuelBurnerDescriptor.type: 0 big, 1 medium, 2 small. */
+    private val burners = arrayOf(model.getPart("burnerbig"), model.getPart("burnermedium"), model.getPart("burnersmall"))
+    private val powerLED = model.getPart("powerled")
+    private val heatLED = model.getPart("heatled")
+    private val glow = model.getPart("glow")
+    private val glass = model.getPart("glass")
 
     init {
         thermal.setMaximalPower(2000.0)
@@ -47,17 +51,25 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
         Data.addThermal(newItemStack())
     }
 
-    fun draw(installedBurner: Int? = null, on: Boolean = false, heating: Boolean = false) {
+    /** True if the model has these parts (mods.eln.cad.models.FuelHeater; GameTest wp10b fuel heat furnace model). */
+    fun hasParts(vararg names: String) = names.all { obj.getPart(it) != null }
+
+    /**
+     * The oil heater (mods.eln.cad.models.FuelHeater): the housing, the installed burner gun, the power and heat lamps,
+     * then the flame behind the sight port, as high as the fire's level (0..1) and from dull orange at no power to bright
+     * yellow-white at full (power 0..1, against the big burner), unlit, and the port's pane over it, see-through.
+     */
+    fun draw(installedBurner: Int? = null, on: Boolean = false, heating: Boolean = false, fire: Float = 0f, power: Float = 0f) {
         main?.draw()
         if (installedBurner != null) {
-            burners[installedBurner]?.draw()
+            burners.getOrNull(installedBurner)?.draw()
         }
 
         if (on) {
             GL11.glColor3f(0f, 1f, 0f)
             UtilsClient.drawLight(powerLED)
         } else {
-            GL11.glColor3f(0f, 0.5f, 0f)
+            GL11.glColor3f(0.05f, 0.18f, 0.05f)   // (off: dark glass; it looked lit at half green, AdventurAgent)
             powerLED?.draw()
         }
 
@@ -65,18 +77,51 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
             GL11.glColor3f(1f, 0f, 0f)
             UtilsClient.drawLight(heatLED)
         } else {
-            GL11.glColor3f(0.5f, 0f, 0f)
+            GL11.glColor3f(0.2f, 0.04f, 0.04f)
             heatLED?.draw()
         }
         GL11.glColor3f(1f, 1f, 1f)
+
+        if (glow != null && heating && fire > 0.01f) {   // (only a burning flame: not while it kindles, nor when burnt out)
+            val k = power.coerceIn(0f, 1f)
+            UtilsClient.disableLight()
+            GL11.glColor4f(0.85f + 0.15f * k, 0.38f + 0.54f * k, 0.08f + 0.67f * k * k, 1f)
+            val at = WINDOW_Y0 / 16f - 0.5f
+            GL11.glPushMatrix()
+            GL11.glTranslatef(0f, at, 0f)
+            GL11.glScalef(1f, Math.min(1f, fire), 1f)
+            GL11.glTranslatef(0f, -at, 0f)
+            glow.draw()
+            GL11.glPopMatrix()
+            GL11.glColor4f(1f, 1f, 1f, 1f)
+            UtilsClient.enableLight()
+        }
+        if (glass != null) {
+            UtilsClient.enableBlend()
+            GL11.glColor4f(1f, 1f, 1f, 0.3f)
+            glass.draw()
+            GL11.glColor4f(1f, 1f, 1f, 1f)
+            UtilsClient.disableBlend()
+        }
     }
 
+    private var hitbox: ModelHitbox? = null
 
-    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
-    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+    /** Its model's hitbox (mods.eln.cad.models.FuelHeater), turned with its front. */
+    override fun modelHitbox(): ModelHitbox? {
+        if (hitbox == null) hitbox = ModelHitbox.of(obj)
+        return hitbox
+    }
+
     override fun hasItemDraw() = true
 
-    override fun drawItem(entity: Boolean) = draw()
+    /** The item: a medium burner, off. */
+    override fun drawItem(entity: Boolean) = draw(1)
+
+    companion object {
+        /** The foot of the sight port (px; mods.eln.cad.models.FuelHeater WIN_Y0): the flame is scaled about it. */
+        const val WINDOW_Y0 = 6.5f
+    }
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
@@ -87,7 +132,7 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
 }
 
 class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: TransparentNodeDescriptor) :
-    TransparentNodeElement(transparentNode, descriptor) {
+    TransparentNodeElement(transparentNode, descriptor), mods.eln.sim.fluid.FluidDevice {
     companion object {
         val ExternalControlledToggleEvent: Byte = 0
         val MainSwitchToggleEvent: Byte = 1
@@ -98,7 +143,44 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private val thermalLoad = NbtThermalLoad("thermalLoad")
     private val controlLoad = NbtElectricalGateInput("commandLoad")
 
-    private val tank = PreciseElementFluidHandler(25)
+    /** Its fuel tank: two buckets (Baughn 2026-11-03: it fills by bucket; the 1.12 tank held 25 mB, under a bucket). */
+    private val tank = PreciseElementFluidHandler(2000)
+
+    /** On EA pipes (Baughn 2026-11-03): fuel in on the flange low on its front (mods.eln.cad.models.FuelHeater). */
+    private val fuelIn = mods.eln.fluid.PortBridge("fuelIn", mods.eln.fluid.PortBridge.Mode.IN, 50.0, 0.0)
+    /** Its flue: smoke out of the flange on top of its stack, or up the stack (as the coal oven's). */
+    private val flue = mods.eln.fluid.Flue("flue")
+    private var smoking = false
+
+    override fun fluidLevel(): Any = node!!.coordonate.dimention
+
+    override fun fluidPorts(): List<mods.eln.sim.fluid.FluidDevice.FluidPort> {
+        if (fuelIn.stub == null || flue.node == null) return listOf()
+        val pos = node!!.coordonate.pos().asLong()
+        val f = front.toEnumFacing().get3DDataValue()
+        return listOf(fuelIn.port(pos, f, mods.eln.fluid.PortBridge.endSpot(front, front, 4, 8)), flue.port(pos))
+    }
+
+    override fun beforeFluidStep(dt: Double) {
+        val amb = mods.eln.sim.Ambient.kelvin(node!!.coordonate)
+        fuelIn.step(tank, dt, amb)
+        if (flue.step(if (isBurnt()) 0.0 else actualHeatPower, dt, amb)) needPublish()   // (burnt: its fire is out)
+        smoking = flue.smoking
+    }
+
+    override fun afterFluidStep(dt: Double) {
+        flue.afterStep(mods.eln.sim.Ambient.kelvin(node!!.coordonate))
+    }
+
+    override fun connectJob() {
+        super.connectJob()
+        if (flue.node != null) mods.eln.fluid.FluidWorld.add(this)
+    }
+
+    override fun disconnectJob() {
+        super.disconnectJob()
+        mods.eln.fluid.FluidWorld.remove(this)
+    }
 
     private val inventory_ = TransparentNodeElementInventory(2, 1, this)
 
@@ -135,7 +217,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             val f = mods.eln.ElnConfig.heatFurnaceFuelFactor
             val availableEnergy = tank.drainEnergy(fire.level * nominalPower * time / f) * f
             actualHeatPower = availableEnergy / time
-            thermalLoad.PcTemp += actualHeatPower
+            thermalLoad.PcTemp += mods.eln.fluid.Flue.HEAT_SHARE * actualHeatPower   // (the rest leaves in the smoke: Flue)
         }
 
         override fun getHit() = thermalLoad.Tc
@@ -188,6 +270,9 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     override fun initialize() {
         (descriptor as FuelHeatFurnaceDescriptor).thermal.applyTo(thermalLoad)
         inventoryChange(inventory_)
+        val amb = mods.eln.sim.Ambient.kelvin(node!!.coordonate)
+        fuelIn.make(node!!.coordonate.y + 4 / 16.0, amb)
+        flue.make(node!!.coordonate.y + 0.75, amb)
         connect()
     }
 
@@ -199,11 +284,12 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         stream.writeBoolean(mainSwitch)
         stream.writeFloat(heaterControlValue.toFloat())
         stream.writeFloat(setTemperature.toFloat())
-        stream.writeFloat(actualHeatPower.toFloat())
+        stream.writeFloat(if (isBurnt()) 0f else actualHeatPower.toFloat())   // (burnt out: no flame, whatever it last made)
         stream.writeFloat(thermalLoad.Tc.toFloat())
         stream.writeInt(FuelBurnerDescriptor.getDescriptor(inventory_.getItem(FuelHeatFurnaceContainer.FuelBurnerSlot))?.type ?: -1)
-        stream.writeFloat(fire.level.toFloat())
+        stream.writeFloat(if (isBurnt()) 0f else fire.level.toFloat())
         stream.writeBoolean(fire.lighting())
+        stream.writeBoolean(smoking && !isBurnt())
     }
 
     override fun networkUnserialize(stream: DataInputStream): Byte {
@@ -235,6 +321,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         nbt.putDouble("setTemperature", setTemperature)
         nbt.putDouble("actualHeatPower", actualHeatPower)
         fire.write(nbt, "")
+        fuelIn.write(nbt)
+        flue.write(nbt)
     }
 
     override fun readFromNBT(nbt: CompoundTag) {
@@ -247,6 +335,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         setTemperature = nbt.getDoubleOr("setTemperature", 0.0)
         actualHeatPower = nbt.getDoubleOr("actualHeatPower", 0.0)
         if (nbt.contains("fire")) fire.read(nbt, "") else fire.level = heaterControlValue
+        fuelIn.read(nbt)
+        flue.read(nbt)
     }
 
     override fun hasGui() = true
@@ -254,7 +344,9 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     override fun getWaila(): MutableMap<String, String> {
         val info = HashMap<String, String>()
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))
-        info.put(I18N.tr("Power"), Utils.plotPower("", actualHeatPower))
+        info.put(I18N.tr("Power"), Utils.plotPower("", if (isBurnt()) 0.0 else actualHeatPower))
+        if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade())
+        if (fuelIn.piped()) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its front flange"))
         return info
     }
 
@@ -289,6 +381,9 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     var actualTemperature = 0f
     var fire = 0f
     var lighting = false
+    /** Smoke up its stack (burning, nothing piped on its flue's flange). */
+    var smoking = false
+    private var smokeDue = 0f
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
         override fun getPitch() = FuelBurnerDescriptor.pitchForType(type)
@@ -301,7 +396,28 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
 
     override fun draw() {
         front.glRotateXnRef()
-        (transparentNodedescriptor as FuelHeatFurnaceDescriptor).draw(type, mainSwitch, heatPower != 0f)
+        // the flame's brightness by its power against the big burner's, with a slight flicker
+        val big = FuelBurnerDescriptor.powerForType(0)
+        val k = (if (big > 0) (heatPower / big).toFloat() else fire) * (0.92f + 0.08f * Math.sin(flicker.toDouble()).toFloat() * Math.sin(flicker * 2.7).toFloat())
+        (transparentNodedescriptor as FuelHeatFurnaceDescriptor).draw(type, mainSwitch, heatPower != 0f, fire, k)
+    }
+
+    /** A quick flicker of the oil flame's brightness (radians). */
+    var flicker = 0f
+
+    override fun refresh(deltaT: Float) {
+        flicker = (flicker + deltaT * 11) % (20 * Math.PI).toFloat()
+        val level = tileEntity.level ?: return
+        if (!smoking) return
+        // (smoke out of the stack's open flange, more of it the harder it burns)
+        smokeDue += deltaT * (2 + 10 * fire)
+        val p = tileEntity.blockPos
+        while (smokeDue >= 1) {
+            smokeDue -= 1
+            val jx = (Math.random() - 0.5) * 0.12
+            val jz = (Math.random() - 0.5) * 0.12
+            level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, p.x + 0.5 + jx, p.y + 1.02, p.z + 0.5 + jz, 0.0, 0.06, 0.0)
+        }
     }
 
     override fun networkUnserialize(stream: DataInputStream) {
@@ -320,6 +436,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
         }
         fire = stream.readFloat()
         lighting = stream.readBoolean()
+        smoking = stream.readBoolean()
     }
 
 }

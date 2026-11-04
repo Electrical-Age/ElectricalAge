@@ -46,19 +46,28 @@ public final class CondensatePump {
         return Math.max(0, Math.min(1, dp / shutoffPa));
     }
 
+    /** The steepest the solver's line may be, as a share of Qmax / H0 (it runs to infinity at H0). */
+    static final double MAX_LINE_SHARE = 1000;
+
     /**
-     * The solver's line for this step (its edges are linear: Q = g (boost - dp)): the chord from free flow through the
-     * curve at dp, so it meets the curve where the pump runs now and its slope stays bounded (Qmax / 2H0 .. Qmax / H0)
-     * up to the shut-off, where it turns into the line through it (past it the check valve shuts). Returns the
-     * conductance as a share of Qmax / H0 (0.5 .. 1); boost() is H0 over that.
+     * The solver's line for this step (its edges are linear: Q = g (boost - dp)): the chord from where the pump runs now
+     * on its curve to the shut-off point (no flow at H0), its slope capped at MAX_LINE_SHARE. Returns the conductance as
+     * a share of Qmax / H0; boost() is H0.
+     * <p>
+     * The pump is linearised before each step, on the back-pressure the step starts from. The chord is steeper than the
+     * curve between where it runs and the shut-off and meets it at both ends, so a step can neither overshoot the
+     * settled point nor pump past the shut-off: the error shrinks by at least half each step, from one side. A chord from
+     * free flow (flatter than the curve near the shut-off) overshot every step against a feed that passes little, and the
+     * pipe to the boiler flipped between two pressures (Baughn 2026-11-03: 10.5..12.5 bar); the curve's tangent overshot
+     * past the shut-off (CondensatePumpPropertyTest).
      */
-    public double chordShare(double dp) {
-        double x = x(dp);
-        return x < 1e-6 ? 0.5 + x / 8 : (1 - Math.sqrt(1 - x)) / x;
+    public double lineShare(double dp) {
+        if (dp >= shutoffPa) return MAX_LINE_SHARE;
+        return Math.min(MAX_LINE_SHARE, share(dp) * shutoffPa / (shutoffPa - dp));
     }
 
-    /** The chord's boost (Pa) at dp: Q = chordShare x Qmax / H0 x (boost - dp). */
+    /** The line's boost (Pa): Q = lineShare x Qmax / H0 x (boost - dp) is 0 at the shut-off and meets the curve at dp. */
     public double boost(double dp) {
-        return shutoffPa / chordShare(dp);
+        return shutoffPa;
     }
 }

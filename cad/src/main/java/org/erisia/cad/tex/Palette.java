@@ -73,12 +73,14 @@ public final class Palette {
         put("paint_plain", 90, 96, 104, 8, null);
         put("paint_condenser", 60, 120, 130, 8, null);
         put("paint_hx", 120, 110, 60, 8, null);
+        put("paint_heater", 70, 98, 82, 8, null);   // the fuel heat furnace's green enamel
         // the device models' own materials (ported from their scripts' atlases, board #44)
         // (Tank)
         put("paint_tankalloy", 150, 112, 52, 8, null);
         // (Tank: its sight glass's contents, a plain colour each, as they are scaled to the level)
         put("gaugewater", 52, 104, 176, 6, null);
         put("gaugesteam", 214, 220, 226, 8, null);
+        put("gaugeliquid", 236, 236, 236, 6, null);   // (any other liquid: white, tinted by its species' colour as drawn)
         // (CapacitorBank)
         put("can", 64, 92, 150, 6, (x, y) -> all(x == 3 || x == 4 ? 24 : x == 12 || x == 13 ? -14 : 0));   // blue sleeve, a highlight
         // (CapacitorBank)

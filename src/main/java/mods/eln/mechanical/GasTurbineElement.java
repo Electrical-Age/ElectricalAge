@@ -48,6 +48,16 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     public FluidNode exhaust;
     private double[] loadedEx;
     private List<FluidPort> ports = List.of();
+    /** On EA pipes: fuel in on its small top flange (mods.eln.cad.models.ShaftGas), into its fuel tank. */
+    final mods.eln.fluid.PortBridge fuelIn = new mods.eln.fluid.PortBridge("fuelIn", mods.eln.fluid.PortBridge.Mode.IN, FUEL_PIPE_MB_PER_S, 0);
+
+    /** What its fuel flange takes from a pipe each second at most (mB): far more than it burns. */
+    static final double FUEL_PIPE_MB_PER_S = 200;
+
+    @Override
+    public void beforeFluidStep(double dt) {
+        fuelIn.step(tank, dt, mods.eln.sim.Ambient.kelvin(node.coordonate));
+    }
     public double gate;
     public boolean tripped, burning, exhaustPiped;
     /** Fuel heat (W), shaft power (W), averaged a second; totals since loaded (J). */
@@ -158,8 +168,10 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     }
 
     void makePorts() {
-        ports = List.of(new FluidPort(exhaust, node.coordonate.pos().asLong(), front.back().toEnumFacing().get3DDataValue(), 0.5,
-            mods.eln.node.voxel.PipePart.LARGE_END_K));   // (its exhaust: a large pipe's flange)
+        var exhaustPort = new FluidPort(exhaust, node.coordonate.pos().asLong(), front.back().toEnumFacing().get3DDataValue(), 0.5,
+            mods.eln.node.voxel.PipePart.LARGE_END_K);   // (its exhaust: a large pipe's flange)
+        ports = fuelIn.stub == null ? List.of(exhaustPort)
+            : List.of(exhaustPort, fuelIn.port(node.coordonate.pos().asLong(), 1, FluidPort.CENTRE));
     }
 
     @Override
@@ -181,11 +193,10 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     public void initialize() {
         exhaust = new FluidNode(0.004, node.coordonate.y, 1.0, false);
         if (loadedEx != null) {
-            exhaust.mWater = loadedEx[0];
-            exhaust.mAir = loadedEx[1];
-            exhaust.energy = loadedEx[2];
+            mods.eln.fluid.FluidSaves.restore(exhaust, loadedEx);
             exhaust.update();
         } else exhaust.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        fuelIn.make(node.coordonate.y + 1, mods.eln.sim.Ambient.kelvin(node.coordonate));
         makePorts();
         super.initialize();
     }
@@ -234,10 +245,9 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         nbt.putDouble("gate", gate);
         nbt.putBoolean("tripped", tripped);
         if (exhaust != null) {
-            nbt.putDouble("exhaustW", exhaust.mWater);
-            nbt.putDouble("exhaustA", exhaust.mAir);
-            nbt.putDouble("exhaustU", exhaust.energy);
+            mods.eln.fluid.FluidSaves.put(nbt, "exhaust", exhaust);
         }
+        fuelIn.write(nbt);
     }
 
     @Override
@@ -247,7 +257,8 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         gate = nbt.getDoubleOr("gate", 0);
         tripped = nbt.getBooleanOr("tripped", false);
         if (nbt.contains("exhaustW"))
-            loadedEx = new double[]{nbt.getDoubleOr("exhaustW", 0), nbt.getDoubleOr("exhaustA", 0), nbt.getDoubleOr("exhaustU", 0)};
+            loadedEx = mods.eln.fluid.FluidSaves.array(nbt, "exhaust");
+        fuelIn.read(nbt);
     }
 
     /** What it is doing, or what stops it, first (Baughn 2026-10-29: Jade says why). */

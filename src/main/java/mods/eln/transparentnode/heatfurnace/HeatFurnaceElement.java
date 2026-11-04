@@ -33,7 +33,7 @@ import java.util.Map;
 /* 5s/item @ 500 C
  */
 
-public class HeatFurnaceElement extends TransparentNodeElement {
+public class HeatFurnaceElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice {
 
     public NbtElectricalGateInput electricalCmdLoad = new NbtElectricalGateInput("electricalCmdLoad");
     public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
@@ -108,11 +108,53 @@ public class HeatFurnaceElement extends TransparentNodeElement {
         return Utils.plotCelsius("T:", thermalLoad.Tc);
     }
 
+    /** Its flue: smoke out of the flange on top of its stack (mods.eln.cad.models.HeatFurnace), or up the stack. */
+    final mods.eln.fluid.Flue flue = new mods.eln.fluid.Flue("flue");
+    private java.util.List<FluidPort> fluePorts = java.util.List.of();
+    /** Smoke going up its stack this step (published): drawn as smoke. */
+    boolean smoking;
+
+    @Override
+    public Object fluidLevel() {
+        return node.coordonate.dimention;
+    }
+
+    @Override
+    public java.util.List<FluidPort> fluidPorts() {
+        return fluePorts;
+    }
+
+    @Override
+    public void beforeFluidStep(double dt) {
+        if (flue.step(isBurnt() ? 0 : furnaceProcess.getP(), dt, mods.eln.sim.Ambient.kelvin(node.coordonate))) needPublish();   // (burnt: its fire is out)
+        smoking = flue.smoking;
+    }
+
+    @Override
+    public void afterFluidStep(double dt) {
+        flue.afterStep(mods.eln.sim.Ambient.kelvin(node.coordonate));
+    }
+
+    @Override
+    public void connectJob() {
+        super.connectJob();
+        if (flue.node != null) mods.eln.fluid.FluidWorld.add(this);
+    }
+
+    @Override
+    public void disconnectJob() {
+        super.disconnectJob();
+        mods.eln.fluid.FluidWorld.remove(this);
+    }
+
     @Override
     public void initialize() {
         descriptor.applyTo(thermalLoad);
         descriptor.applyTo(furnaceProcess);
+        furnaceProcess.heatShare = mods.eln.fluid.Flue.HEAT_SHARE;
         computeInventory();
+        flue.make(node.coordonate.y + 0.75, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        fluePorts = java.util.List.of(flue.port(node.coordonate.pos().asLong()));   // (mods.eln.cad.models.HeatFurnace's stack)
 
         connect();
 
@@ -133,11 +175,12 @@ public class HeatFurnaceElement extends TransparentNodeElement {
             stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
             stream.writeFloat((float) furnaceProcess.getGain());
             stream.writeFloat((float) regulator.getTarget());
-            stream.writeShort((int) furnaceProcess.getP());
-            stream.writeFloat((float) furnaceProcess.fire.level);
+            stream.writeShort(isBurnt() ? 0 : (int) furnaceProcess.getP());   // (burnt out: no glow, whatever it last burnt)
+            stream.writeFloat(isBurnt() ? 0f : (float) furnaceProcess.fire.level);
             stream.writeBoolean(furnaceProcess.fire.lighting());
 
             serialiseItemStack(stream, inventory.getItem(HeatFurnaceContainer.combustibleId));
+            stream.writeBoolean(smoking);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -233,6 +276,7 @@ public class HeatFurnaceElement extends TransparentNodeElement {
 
         nbt.putBoolean("takeFuel", takeFuel);
         nbt.putBoolean("controlExternal", controlExternal);
+        flue.write(nbt);
     }
 
     @Override
@@ -240,6 +284,7 @@ public class HeatFurnaceElement extends TransparentNodeElement {
         super.readFromNBT(nbt);
         takeFuel = nbt.getBooleanOr("takeFuel", false);
         controlExternal = nbt.getBooleanOr("controlExternal", false);
+        flue.read(nbt);
     }
 
     @Override
@@ -247,6 +292,7 @@ public class HeatFurnaceElement extends TransparentNodeElement {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
         info.put(I18N.tr("Set temperature"), Utils.plotCelsius("", regulator.getTarget()));
+        if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade());
         return info;
     }
 }

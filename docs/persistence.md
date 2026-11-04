@@ -117,6 +117,10 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - Bus I/O Module: per terminal n (0-8) `t<n>bus`, a byte, its channel 0-15 (absent, or any other value: unused), and
   `t<n>out` (absent: in). The named channels' `t<n>name` of the unreleased first field bus is ignored. Bus values are not
   saved: the writers put them back one tick after load.
+- Fluid node contents (`FluidSaves.put/get`): `<prefix>W`, `<prefix>A`, `<prefix>U` (water and air kg, energy J) as
+  always, plus `<prefix>S`, a compound of the other species by key (`{"eln:crude_oil": kg}`), only when the node holds
+  any. Saves without it load as water and air. A key that names no defined species loads as a placeholder liquid under
+  that key (`SpeciesRegistry.forSave`, logged once) and is written back unchanged, so a removed datapack loses nothing.
 - Pipe sensor devices (`PipeTransmitterElement`, ids `eln:six_node@6402`-`6404`: pressure, temperature, steam
   quality, hidden items `pipe_*_transmitter`; placed by the pipe sensor items): `scale` (full scale, double), plus the
   gate output's keys. Pipe sensors fitted on pipes before 2026-11-02 stay `PipeSensorPart`s (voxel part kind

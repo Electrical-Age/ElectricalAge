@@ -11,6 +11,14 @@ public final class FluidEdge {
     public final FluidNode a, b;
     /** Port heights on a and b (fractions of each node's height). */
     public final double portA, portB;
+    /** How tall each end's opening is (a share of its node's height, centred on the port; 0: a point): FluidPort.span. */
+    public double spanA, spanB;
+    /**
+     * An entry edge into an opening (FluidWorld: the second of an opening's two edges, b the opening's node, entrySpan its
+     * height): liquid coming in meets the opening as the liquid going out does (its wet mean), gas meets it at its
+     * height as a point (it bubbles in over the liquid); so liquid can't circulate out and back in through the pair.
+     */
+    public double entrySpan;
     /** Geometric conductance (m^3; Q = k / mu x dP). */
     public double k;
     /** 0 closed .. 1 open (a valve). */
@@ -29,11 +37,17 @@ public final class FluidEdge {
     public double power;
     public static final double TURBINE_EFFICIENCY = 0.40;
 
-    /** This step's flow a -> b (kg/s; negative: b -> a), and what it carried: liquid, vapour, air (kg/s), enthalpy (W). */
+    /**
+     * This step's flow a -> b (kg/s; negative: b -> a), and what it carried: liquid water, water vapour, air (kg/s),
+     * enthalpy (W); fSpecies[id]: each species, both phases (kg/s, a -> b; null until it has carried something).
+     */
     public double flow, fLiquid, fVapour, fAir, fEnthalpy;
+    public double[] fSpecies;
     // the solve's coefficient and upstream properties (per step)
     double g, rho, head, sA, sB, xl;
     boolean fromA;
+    /** This step's packets each end gives (FluidNetwork.packet; cached: node states hold still until the step ends). */
+    FluidNetwork.Packet pkA, pkB;
 
     public FluidEdge(FluidNode a, double portA, FluidNode b, double portB, double k) {
         this.a = a;

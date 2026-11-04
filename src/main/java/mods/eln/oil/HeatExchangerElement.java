@@ -80,8 +80,18 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         // and feed at 178 C, 9.5 bar of its 16, held an economizer to 1.6 kW of 5)
         if (ml > 1e-6 && mv > 1e-6 && n.pVapour() > 0.9 * n.P() && Math.abs(n.T() - Water.tsat(Math.max(1000, n.pVapour()))) < 2) return BOILING;
         double m = mw + ma;
-        if (m <= 0) return 1005;
-        return (ml * Water.CP_L + mv * Water.CP_V + ma * 1005) / m;
+        double other = 0, otherCp = 0;   // (other species: liquids at their cp, gases and vapours at their cp_vapour)
+        if (mods.eln.sim.fluid.EaUnits.holdsOthers(n)) {
+            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+            for (int id = 2; id < n.speciesBound(); id++) {
+                var s = reg.byId(id);
+                other += n.mass(id);
+                otherCp += n.liquid(id) * s.cpL + n.vapour(id) * (s.gas() ? s.cpV + s.r : s.cpV);
+            }
+        }
+        if (m + other <= 0) return 1005;
+        if (other == 0) return (ml * Water.CP_L + mv * Water.CP_V + ma * 1005) / m;
+        return (ml * Water.CP_L + mv * Water.CP_V + ma * 1005 + otherCp) / (m + other);
     }
 
     @Override
@@ -117,12 +127,12 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         // in, colder than the warm water the economizer holds, which held it to 1.6 kW of 5)
         double ta = flowing ? inA : a.T(), tb = flowing ? inB : b.T();
         if (heat > 0) {
-            double fromA = (a.energy - mods.eln.sim.fluid.Flash.energyAt(a.mWater, a.mAir, a.volume, tb)) / dt;
-            double intoB = (mods.eln.sim.fluid.Flash.energyAt(b.mWater, b.mAir, b.volume, ta) - b.energy) / dt;
+            double fromA = (a.energy - a.energyAt(tb)) / dt;
+            double intoB = (b.energyAt(ta) - b.energy) / dt;
             heat = fromA <= 0 || intoB <= 0 ? 0 : Math.min(heat, 0.9 / (1 / fromA + 1 / intoB));
         } else {
-            double fromB = (b.energy - mods.eln.sim.fluid.Flash.energyAt(b.mWater, b.mAir, b.volume, ta)) / dt;
-            double intoA = (mods.eln.sim.fluid.Flash.energyAt(a.mWater, a.mAir, a.volume, tb) - a.energy) / dt;
+            double fromB = (b.energy - b.energyAt(ta)) / dt;
+            double intoA = (a.energyAt(tb) - a.energy) / dt;
             heat = fromB <= 0 || intoA <= 0 ? 0 : Math.max(heat, -0.9 / (1 / fromB + 1 / intoA));
         }
         // (what leaves each side: a gas, its inlet less the heat over its flow, since a few litres of gas swing within a
@@ -249,9 +259,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     private FluidNode node(double[] saved) {
         FluidNode n = new FluidNode(desc.sideVolume, node.coordonate.y, 1.0, false);
         if (saved != null) {
-            n.mWater = saved[0];
-            n.mAir = saved[1];
-            n.energy = saved[2];
+            mods.eln.fluid.FluidSaves.restore(n, saved);
             n.update();
         } else n.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         return n;
@@ -320,6 +328,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
                 nbt.putDouble(s[0] + "W", (float) n.mWater);
                 nbt.putDouble(s[0] + "A", (float) n.mAir);
                 nbt.putDouble(s[0] + "U", (float) n.energy);
+                mods.eln.fluid.FluidSaves.putExtra(nbt, s[0] + "S", n);
             }
         }
     }

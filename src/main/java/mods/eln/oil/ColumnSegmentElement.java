@@ -16,7 +16,39 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** A column segment: one cut's tank, filled by the base below; pipes and buckets take from it. */
-public class ColumnSegmentElement extends TransparentNodeElement {
+public class ColumnSegmentElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice {
+    /** On EA pipes: its cut out of the draw-off nozzle on its front (mods.eln.cad.models.Column); natural gas as a gas. */
+    final mods.eln.fluid.PortBridge drawOff = new mods.eln.fluid.PortBridge("drawOff", mods.eln.fluid.PortBridge.Mode.OUT, ColumnDescriptor.PIPE_MB_PER_S, ColumnDescriptor.PIPE_HEAD_PA);
+
+    @Override
+    public Object fluidLevel() {
+        return node.coordonate.dimention;
+    }
+
+    @Override
+    public java.util.List<FluidPort> fluidPorts() {
+        if (drawOff.stub == null) return java.util.List.of();
+        int face = front.toEnumFacing().get3DDataValue();
+        return java.util.List.of(drawOff.port(node.coordonate.pos().asLong(), face, TankElement.sideSpot(face, 8)));
+    }
+
+    @Override
+    public void beforeFluidStep(double dt) {
+        drawOff.step(tank, dt, mods.eln.sim.Ambient.kelvin(node.coordonate));
+    }
+
+    @Override
+    public void connectJob() {
+        super.connectJob();
+        if (drawOff.stub != null) mods.eln.fluid.FluidWorld.add(this);
+    }
+
+    @Override
+    public void disconnectJob() {
+        super.disconnectJob();
+        mods.eln.fluid.FluidWorld.remove(this);
+    }
+
     public final OutputTank tank = new OutputTank(ColumnDescriptor.SEGMENT_MB);
     /** Set by the base on its scan: which cut this segment gets (null: not on a base). */
     Oil.Cut cut;
@@ -58,6 +90,7 @@ public class ColumnSegmentElement extends TransparentNodeElement {
             : mods.eln.node.NodeManager.instance.getNodeFromCoordonate(node.coordonate.newWithOffset(0, -1, 0));
         if (below instanceof TransparentNode tn && (tn.element instanceof ColumnBaseElement || tn.element instanceof ColumnSegmentElement))
             front = tn.element.front;
+        drawOff.make(node.coordonate.y + 0.5, mods.eln.sim.Ambient.kelvin(node.coordonate));
         connect();
     }
 
@@ -74,12 +107,14 @@ public class ColumnSegmentElement extends TransparentNodeElement {
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
+        drawOff.write(nbt);
         tank.writeToNBT(nbt, "tank");
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
+        drawOff.read(nbt);
         tank.readFromNBT(nbt, "tank");
     }
 

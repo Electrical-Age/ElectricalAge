@@ -116,9 +116,7 @@ public class SteamInjectionElement extends TransparentNodeElement implements Flu
     public void initialize() {
         inlet = new FluidNode(INLET_VOLUME, node.coordonate.y, 1.0, false);
         if (loaded != null) {
-            inlet.mWater = loaded[0];
-            inlet.mAir = loaded[1];
-            inlet.energy = loaded[2];
+            mods.eln.fluid.FluidSaves.restore(inlet, loaded);
             inlet.update();
         } else inlet.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         connect();

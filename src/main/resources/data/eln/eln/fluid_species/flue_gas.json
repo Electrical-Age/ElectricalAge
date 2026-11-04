@@ -1,0 +1,10 @@
+{
+  "kind": "gas",
+  "group": "flue_gas",
+  "density": 1.2,
+  "cp_vapour": 780,
+  "molar_mass": 0.0295,
+  "vapour_viscosity": 2.5e-5,
+  "colour": "#5A5652",
+  "fluids": {"liquid": [], "vapour": []}
+}

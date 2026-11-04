@@ -7,6 +7,8 @@ public class FurnaceProcess implements IProcess {
     public double nominalCombustibleEnergy = 1;
     public double nominalPower = 1;
     private double gain = 1.0;
+    /** The share of the fire's power that heats its load (the rest leaves in the smoke: HeatFurnaceElement's flue). */
+    public double heatShare = 1.0;
     private double gainMin = 0.0;
 
     public FurnaceProcess(ThermalLoad load) {
@@ -23,7 +25,7 @@ public class FurnaceProcess implements IProcess {
         fire.step(Math.min(gain, fuelShare()), combustibleEnergy > 0, time);
         double energyConsumed = getP() * time;
         combustibleEnergy -= energyConsumed;
-        load.PcTemp += energyConsumed / time;
+        load.PcTemp += heatShare * energyConsumed / time;
     }
 
     public void setGain(double gain) {

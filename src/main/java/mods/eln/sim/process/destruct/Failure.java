@@ -296,7 +296,7 @@ public class Failure implements IDestructable {
     }
 
     /** Set fire to air next to the device where there's something to burn; wide = oil fire, burns even on stone. */
-    static void ignite(Level w, BlockPos pos, boolean wide) {
+    public static void ignite(Level w, BlockPos pos, boolean wide) {
         for (BlockPos p : BlockPos.betweenClosed(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
             if (!w.isEmptyBlock(p)) continue;
             boolean fuel = wide && p.getY() >= pos.getY() && w.getBlockState(p.below()).isFaceSturdy(w, p.below(), Direction.UP);

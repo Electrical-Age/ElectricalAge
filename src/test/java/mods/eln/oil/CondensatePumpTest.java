@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** The condensate pump's centrifugal curve (Baughn 2026-11-03) and the chord the fluid solver steps it on. */
+/** The condensate pump's centrifugal curve (Baughn 2026-11-03) and the line the fluid solver steps it on. */
 public class CondensatePumpTest {
     /** A 50V turbine's: 10 bar rated, ~2 g/s of condensate. */
     final CondensatePump p = CondensatePump.forTurbine(10e5, 0.002);
@@ -43,15 +43,34 @@ public class CondensatePumpTest {
     }
 
     @Test
-    void theSolversChordMeetsTheCurveWithABoundedSlope() {
+    void theSolversLineRunsFromTheCurveToTheShutoff() {
         double g0 = p.freeKgPerS / p.shutoffPa;
-        for (double dp = 0; dp <= 20e5; dp += 0.25e5) {
-            double s = p.chordShare(dp), g = s * g0;
-            assertTrue(s >= 0.5 - 1e-9 && s <= 1 + 1e-9, "share " + s + " at " + dp);
-            assertEquals(p.kgPerS(dp), g * (p.boost(dp) - dp), 1e-9, "at " + dp);
-            assertEquals(p.freeKgPerS, g * p.boost(dp), 1e-9, "through free flow at " + dp);
+        for (double dp = -1e5; dp <= 20e5; dp += 0.25e5) {
+            double s = p.lineShare(dp), g = s * g0;
+            assertTrue(s > 0 && s <= CondensatePump.MAX_LINE_SHARE + 1e-9, "share " + s + " at " + dp);
+            assertEquals(p.shutoffPa, p.boost(dp), 1e-6, "no flow at the shut-off, from " + dp);
+            if (dp < 19.99e5) assertEquals(p.kgPerS(dp), g * (p.boost(dp) - dp), 1e-9, "meets the curve at " + dp);
+            // steeper than the curve's tangent wherever it runs (so a step can't overshoot)
+            if (dp > 0.1e5 && dp < 19e5) {
+                double slope = (p.kgPerS(dp - 100) - p.kgPerS(dp + 100)) / 200;
+                assertTrue(g >= slope, "steeper than the tangent at " + dp);
+            }
         }
         // past the shut-off: the line through it, pushing back (the check valve shuts)
-        assertTrue(p.chordShare(22e5) * g0 * (p.boost(22e5) - 22e5) < 0);
+        assertTrue(p.lineShare(22e5) * g0 * (p.boost(22e5) - 22e5) < 0);
+    }
+
+    /**
+     * Stepped against a liquid-full pipe that feeds a boiler through a tight valve, near the shut-off, the pump settles
+     * on one pressure (Baughn 2026-11-03: the pipe from a condenser to its boiler swung 10.5..12.5 bar; the chord the
+     * pump was stepped on overshot every step and the pipe flipped between two pressures).
+     */
+    @Test
+    void settlesNearTheShutoffAgainstATightFeed() {
+        for (double boilerPa : new double[]{11.5e5, 12.5e5, 17e5, 18.5e5}) {
+            double shutoff = boilerPa < 15e5 ? 13e5 : 20e5;
+            double[] r = PumpLoop.run(shutoff, boilerPa, 6e-15);
+            assertTrue(r[1] - r[0] < 0.01e5, "pipe " + r[0] / 1e5 + ".." + r[1] / 1e5 + " bar into " + boilerPa / 1e5);
+        }
     }
 }

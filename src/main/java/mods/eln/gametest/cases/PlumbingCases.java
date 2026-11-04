@@ -39,9 +39,78 @@ public final class PlumbingCases {
         cases.add(new HotWaterIntoShortPipe());
         cases.add(new ValveMeters());
         cases.add(new LiquidStaysIncompressible());
+        cases.add(new TankTakesOil());
     }
 
     static final int IRON_TANK = 40 + (82 << 6), ALLOY_TANK = 44 + (82 << 6), PUMP = 48 + (82 << 6);
+
+    /**
+     * A tank takes any liquid a species is through its fluid capability (Baughn 2026-11-03: data-driven fluids):
+     * gasoline goes in as gasoline, water put in after it settles under it (denser), the capability then shows the top
+     * layer (gasoline) and gives it back out; lava (no species) is refused.
+     */
+    static final class TankTakesOil implements TestCase {
+        BlockPos at;
+        TankElement t;
+        int putGas, putWater, lava, took = -1;
+        String shownAfter = "";
+
+        public String id() {
+            return "tank_takes_oil";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 30;
+        }
+
+        net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.fluid.FluidResource> cap(TestContext ctx) {
+            return ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.UP);
+        }
+
+        public void build(TestContext ctx) {
+            at = ctx.at(1, 1, 1);
+            t = tank(ctx, IRON_TANK, at, Direction.XN);
+            var cap = cap(ctx);
+            if (cap == null) return;
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                putGas = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Oil.Cut.GASOLINE.source.get()), 2000, tx);
+                lava = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.LAVA), 1000, tx);
+                tx.commit();
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            var cap = cap(ctx);
+            ctx.check("tank: it has a fluid capability", cap != null, "");
+            if (cap == null || t.vessel == null) return;
+            int gas = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:gasoline");
+            double inTank = t.vessel.mass(gas) / mods.eln.fluid.FluidSpecies.kgPerMb(gas, false);
+            ctx.check("tank: 2000 mB of gasoline went in", putGas == 2000, putGas + " mB");
+            ctx.check("tank: it is gasoline in the vessel", inTank > 1990 && inTank < 2001, inTank + " mB");
+            ctx.check("tank: lava (no species) is refused", lava == 0, lava + " mB");
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                putWater = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 1000, tx);
+                tx.commit();
+            }
+            t.syncWater();
+            t.vessel.update();
+            ctx.check("tank: water goes in beside it", putWater == 1000, putWater + " mB");
+            ctx.check("tank: the water settles under the gasoline", t.vessel.layerOf(mods.eln.sim.fluid.SpeciesRegistry.WATER) == 0 && t.vessel.layerOf(gas) == 1,
+                "water layer " + t.vessel.layerOf(mods.eln.sim.fluid.SpeciesRegistry.WATER) + ", gasoline " + t.vessel.layerOf(gas));
+            shownAfter = String.valueOf(cap.getResource(0).getFluid());
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                took = cap.extract(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Oil.Cut.GASOLINE.source.get()), 500, tx);
+                tx.commit();
+            }
+            ctx.check("tank: it shows the top layer, gasoline, and gives it back", took == 500, took + " mB, shown " + shownAfter);
+            var info = t.getWaila();
+            ctx.check("tank: Jade lists the gasoline", info.containsKey("Gasoline") && info.get("Gasoline").contains(" mB"), "" + info.get("Gasoline"));
+        }
+    }
 
     /** A big test box (10 x 5 x 10, floored). */
     abstract static class Big implements TestCase {
@@ -173,7 +242,10 @@ public final class PlumbingCases {
             double moved = b.vessel.mLiquid() - bWater0;
             ctx.line("inline pump" + (boiling ? " (boiling feed)" : "") + ": " + p.getWaila() + "; A " + a.getWaila() + "; B " + b.getWaila());
             if (!boiling) {
-                ctx.check("pump: cold water goes from A to B", moved > 0.05, String.format("%.3f kg", moved));
+                // (both tanks are sealed: A's air thins and B's compresses until the pump's 0.5 bar head and the fall
+                // balance them; with gas able to come back through a pipe's opening, ~0.04 kg reaches B, the rest fills
+                // the lines. One stream per edge let 0.2 kg over against 1.1 bar, more than the pump can make.)
+                ctx.check("pump: cold water goes from A to B", moved > 0.025, String.format("%.3f kg", moved));
                 ctx.check("pump: it draws power doing it", maxW > 50, String.format("%.0f W", maxW));
                 ctx.check("pump: it primed itself (passed the line's air on) and then pumped water", p.totalKg > 0.05, String.format("%.3f kg", p.totalKg));
                 ctx.check("pump: Jade calls air at its inlet priming", airJade.contains("priming"), airJade);

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 /** ColumnDescriptor (base): distils crude into the segments stacked on it, by the heat on its sides. */
-public class ColumnBaseElement extends TransparentNodeElement {
+public class ColumnBaseElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice {
     /** Cuts per segment count, top to bottom (MACHINES-PLAN); the residue always stays in the base. */
     static final Oil.Cut[][] CUTS = {
         {},
@@ -40,6 +40,44 @@ public class ColumnBaseElement extends TransparentNodeElement {
 
     public final NbtThermalLoad thermal = new NbtThermalLoad("thermal");
     public final ColumnBaseTanks tanks = new ColumnBaseTanks();
+    /** On EA pipes: crude in on its right flange, residue out of its left one (mods.eln.cad.models.Column's nozzles). */
+    final mods.eln.fluid.PortBridge crudeIn = new mods.eln.fluid.PortBridge("crudeIn", mods.eln.fluid.PortBridge.Mode.IN,
+        ColumnDescriptor.PIPE_MB_PER_S, 0);
+    final mods.eln.fluid.PortBridge residueOut = new mods.eln.fluid.PortBridge("residueOut", mods.eln.fluid.PortBridge.Mode.OUT,
+        ColumnDescriptor.PIPE_MB_PER_S, ColumnDescriptor.PIPE_HEAD_PA);
+
+    @Override
+    public Object fluidLevel() {
+        return node.coordonate.dimention;
+    }
+
+    @Override
+    public java.util.List<FluidPort> fluidPorts() {
+        if (crudeIn.stub == null) return java.util.List.of();
+        long pos = node.coordonate.pos().asLong();
+        int in = front.right().toEnumFacing().get3DDataValue(), out = front.left().toEnumFacing().get3DDataValue();
+        return java.util.List.of(crudeIn.port(pos, in, TankElement.sideSpot(in, 8)), residueOut.port(pos, out, TankElement.sideSpot(out, 8)));
+    }
+
+    @Override
+    public void beforeFluidStep(double dt) {
+        double T = mods.eln.sim.Ambient.kelvin(node.coordonate);
+        crudeIn.step(tanks, dt, T);
+        // (the residue leaves at the column's temperature: cold residue barely flows, Baughn: heat tracing is a thing)
+        residueOut.step(tanks, dt, Math.max(T, thermal.Tc + mods.eln.sim.PhysicalConstant.Tref));
+    }
+
+    @Override
+    public void connectJob() {
+        super.connectJob();
+        if (crudeIn.stub != null) mods.eln.fluid.FluidWorld.add(this);
+    }
+
+    @Override
+    public void disconnectJob() {
+        super.disconnectJob();
+        mods.eln.fluid.FluidWorld.remove(this);
+    }
     /** Segments above, bottom to top, from the last scan. */
     final List<ColumnSegmentElement> segments = new ArrayList<>();
     final double[] carry = new double[Oil.Cut.values().length];
@@ -192,6 +230,9 @@ public class ColumnBaseElement extends TransparentNodeElement {
     public void initialize() {
         // ~0.4 kJ/K of steel and crude (a 1 kW heater gets it to 350 C in ~4 min); well lagged (~90 W lost at 350 C)
         thermal.set(0.01, 4.0, 400);
+        double T = mods.eln.sim.Ambient.kelvin(node.coordonate);
+        crudeIn.make(node.coordonate.y + 0.5, T);
+        residueOut.make(node.coordonate.y + 0.5, T);
         connect();
     }
 
@@ -209,12 +250,16 @@ public class ColumnBaseElement extends TransparentNodeElement {
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         tanks.writeToNBT(nbt, "column");
+        crudeIn.write(nbt);
+        residueOut.write(nbt);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         tanks.readFromNBT(nbt, "column");
+        crudeIn.read(nbt);
+        residueOut.read(nbt);
     }
 
     @Override

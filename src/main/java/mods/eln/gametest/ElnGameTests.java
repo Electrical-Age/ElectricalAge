@@ -58,6 +58,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.LampLightCases.addTo(l);
         mods.eln.gametest.cases.CableSlotCases.addTo(l);
         mods.eln.gametest.cases.SixNodeBreakCases.addTo(l);
+        mods.eln.gametest.cases.BreakToolCases.addTo(l);
         mods.eln.gametest.cases.TransparentSupportCases.addTo(l);
         mods.eln.gametest.cases.AgeFixCases.addTo(l);
         mods.eln.gametest.cases.OilCases.addTo(l);
@@ -70,6 +71,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.AmbientCases.addTo(l);
         mods.eln.gametest.cases.PipeCases.addTo(l);
         mods.eln.gametest.cases.PipeTransmitterCases.addTo(l);
+        mods.eln.gametest.cases.FluidSpeciesCases.addTo(l);
         mods.eln.gametest.cases.CableCases.addTo(l);
         mods.eln.gametest.cases.VoxelDeviceCases.addTo(l);
         mods.eln.gametest.cases.Wp12Cases.addTo(l);

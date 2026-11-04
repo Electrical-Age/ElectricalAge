@@ -41,18 +41,10 @@ public final class HeatExchangerGroup {
     }
 
     private FluidNode merged(boolean sideA) {
-        double volume = 0, w = 0, air = 0, u = 0;
-        for (HeatExchangerElement m : members) {
-            FluidNode o = sideA ? m.ownA : m.ownB;
-            volume += o.volume;
-            w += o.mWater;
-            air += o.mAir;
-            u += o.energy;
-        }
+        double volume = 0;
+        for (HeatExchangerElement m : members) volume += (sideA ? m.ownA : m.ownB).volume;
         FluidNode n = new FluidNode(volume, y0, sy, false);
-        n.mWater = w;
-        n.mAir = air;
-        n.energy = u;
+        for (HeatExchangerElement m : members) n.addShareOf(sideA ? m.ownA : m.ownB, 1);   // (every species)
         n.update();
         return n;
     }
@@ -80,10 +72,7 @@ public final class HeatExchangerGroup {
     }
 
     private static void share(FluidNode whole, FluidNode own) {
-        double f = own.volume / whole.volume;
-        own.mWater = whole.mWater * f;
-        own.mAir = whole.mAir * f;
-        own.energy = whole.energy * f;
+        own.setShareOf(whole, own.volume / whole.volume);
         own.update();
     }
 

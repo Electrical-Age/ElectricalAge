@@ -280,7 +280,9 @@ public class Eln {
             serverEventListener.clear();
             nodeManager.clear();
             ghostManager.clear();
+            mods.eln.sim.fluid.SpeciesRegistry.get().reset();   // (the next world loads its own datapacks' species)
         });
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.AddServerReloadListenersEvent.class, mods.eln.fluid.SpeciesLoader::onAddListeners);
         // 1.12 ran the simulator in ServerTickEvent phase START
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Pre.class, e -> simulator.tick());
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre.class, mods.eln.node.voxel.KitItem::onPickup);

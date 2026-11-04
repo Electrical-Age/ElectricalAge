@@ -99,10 +99,7 @@ public final class FluidWorld implements IProcess {
         FluidNode lump = INSTANCE.lumpOf.get(piece);
         if (lump == null) return;
         for (FluidNode m : INSTANCE.lumps.get(lump)) {
-            double share = m.volume / lump.volume;
-            m.mWater = lump.mWater * share;
-            m.mAir = lump.mAir * share;
-            m.energy = lump.energy * share;
+            m.setShareOf(lump, m.volume / lump.volume);
             m.update();
         }
     }
@@ -139,10 +136,7 @@ public final class FluidWorld implements IProcess {
         for (var e : lumps.entrySet()) {
             FluidNode lump = e.getKey();
             for (FluidNode m : e.getValue()) {
-                double share = m.volume / lump.volume;
-                m.mWater = lump.mWater * share;
-                m.mAir = lump.mAir * share;
-                m.energy = lump.energy * share;
+                m.setShareOf(lump, m.volume / lump.volume);
                 m.update();
             }
         }
@@ -205,20 +199,15 @@ public final class FluidWorld implements IProcess {
         for (FluidNode n : runParent.keySet()) runs.computeIfAbsent(find(n, runParent), r -> new ArrayList<>()).add(n);
         Map<FluidNode, Double> runR = new IdentityHashMap<>();
         for (List<FluidNode> ms : runs.values()) {
-            double V = 0, w = 0, a = 0, u = 0, zLo = Double.MAX_VALUE, zHi = -Double.MAX_VALUE, R = 0;
+            double V = 0, zLo = Double.MAX_VALUE, zHi = -Double.MAX_VALUE, R = 0;
             for (FluidNode m : ms) {
                 V += m.volume;
-                w += m.mWater;
-                a += m.mAir;
-                u += m.energy;
                 zLo = Math.min(zLo, m.z);
                 zHi = Math.max(zHi, m.z + m.height);
                 R += m.resistance;
             }
             FluidNode lump = new FluidNode(V, zLo, Math.max(0.01, zHi - zLo), false);
-            lump.mWater = w;
-            lump.mAir = a;
-            lump.energy = u;
+            for (FluidNode m : ms) lump.addShareOf(m, 1);   // (every species: the run's contents summed)
             lump.update();
             lumps.put(lump, ms);
             for (FluidNode m : ms) lumpOf.put(m, lump);
@@ -255,7 +244,25 @@ public final class FluidWorld implements IProcess {
             if (a == b) continue;   // (inside one run)
             // a run's end: its draw on the lump, and half the run's resistance instead of the piece's own
             double rA = a != p.node() ? runR.get(a) / 2 : 1 / p.k(), rB = b != q.node() ? runR.get(b) / 2 : 1 / q.k();
-            byRoot.get(find(a, parent)).connect(a, drawOn(a, p.node(), p.draw()), b, drawOn(b, q.node(), q.draw()), 1 / (rA + rB));   // (in series)
+            double sA = spanOn(a, p.node(), p.span()), sB = spanOn(b, q.node(), q.span());
+            double dA = drawOn(a, p.node(), p.draw()), dB = drawOn(b, q.node(), q.draw()), k = 1 / (rA + rB);   // (in series)
+            var net = byRoot.get(find(a, parent));
+            if ((sA > 0) != (sB > 0)) {
+                // an opening (a pipe's open end) on a point port: two one-way edges, so liquid can run out under it while
+                // gas comes back over it (Baughn 2026-11-03: counter-flow; one stream per edge stopped a sealed part-full
+                // pipe draining). Out of the opening: its wetted mix at the mean pressure over it. Into it: what the
+                // other side's port gives: liquid meeting the opening as the outgoing liquid does, gas at the opening's
+                // height as a point (FluidEdge.entrySpan). Usually one of the two carries a one-way flow; both run only
+                // as liquid goes out and gas comes back. Vents and links stay single edges.
+                FluidNode o = sA > 0 ? a : b, d = sA > 0 ? b : a;
+                double dO = sA > 0 ? dA : dB, dD = sA > 0 ? dB : dA, span = Math.max(sA, sB);
+                net.connect(o, dO, d, dD, k).kind(FluidEdge.Kind.CHECK).spanA = span;
+                net.connect(d, dD, o, dO, k).kind(FluidEdge.Kind.CHECK).entrySpan = span;
+            } else {
+                var edge = net.connect(a, dA, b, dB, k);
+                edge.spanA = sA;
+                edge.spanB = sB;
+            }
         }
         for (FluidDevice.Link l : allLinks) {
             FluidNode a = repr.apply(l.a), b = repr.apply(l.b);
@@ -284,6 +291,12 @@ public final class FluidWorld implements IProcess {
         if (rep == n) return draw;
         double z = n.z + draw * n.height;
         return Math.max(0, Math.min(1, (z - rep.z) / rep.height));
+    }
+
+    /** An opening's height as a share of its run's lump, from its share of its own piece. */
+    private static double spanOn(FluidNode rep, FluidNode n, double span) {
+        if (rep == n || span <= 0) return span;
+        return Math.min(1, span * n.height / rep.height);
     }
 
     private static void addNode(FluidNode n, Map<FluidNode, FluidNode> parent, List<FluidNode> all, Map<FluidNode, Object> levelOf, Object level) {

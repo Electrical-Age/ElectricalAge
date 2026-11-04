@@ -6,7 +6,9 @@ import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;
+import mods.eln.node.transparent.ModelHitbox;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.FurnaceProcess;
 import mods.eln.sim.ThermalLoad;
@@ -23,19 +25,13 @@ import static mods.eln.i18n.I18N.tr;
 public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
 
     Obj3D obj;
-    Obj3DPart tiroir, main;
-    float alphaClose, alphaOpen;
+    Obj3DPart main, glow, glass;
 
     double nominalPower;
     double nominalCombustibleEnergy;
     public int combustionChamberMax;
     double combustionChamberPower;
     ThermalLoadInitializerByPowerDrop thermal;
-
-    double flameStartX, flameStartY, flameStartZ;
-    double flameEndX, flameEndY, flameEndZ;
-    double flameDeltaX, flameDeltaY, flameDeltaZ;
-    double flamePopRate;
 
     public HeatFurnaceDescriptor(String name, String modelName,
                                  double nominalPower, double nominalCombustibleEnergy,
@@ -49,28 +45,9 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
         this.nominalPower = nominalPower;
         obj = Eln.obj.getObj(modelName);
         if (obj != null) {
-            tiroir = obj.getPart("tiroir");
             main = obj.getPart("main");
-
-            if (tiroir != null) {
-                alphaClose = tiroir.getFloat("alphaClose");
-                alphaOpen = tiroir.getFloat("alphaOpen");
-            }
-
-            if (main != null) {
-                flameStartX = main.getFloat("flameStartX");
-                flameStartY = main.getFloat("flameStartY");
-                flameStartZ = main.getFloat("flameStartZ");
-
-                flameEndX = main.getFloat("flameEndX");
-                flameEndY = main.getFloat("flameEndY");
-                flameEndZ = main.getFloat("flameEndZ");
-
-                flameDeltaX = flameEndX - flameStartX;
-                flameDeltaY = flameEndY - flameStartY;
-                flameDeltaZ = flameEndZ - flameStartZ;
-                flamePopRate = main.getFloat("flamePopRate");
-            }
+            glow = obj.getPart("glow");
+            glass = obj.getPart("glass");
         }
         thermal.setMaximalPower(nominalPower);
 
@@ -92,30 +69,62 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
         process.nominalPower = nominalPower;
     }
 
-    void draw(float tiroirFactor) {
-        //GL11.glDisable(GL11.GL_T4$5EXTURE_2D);
-        //GL11.glDisable(GL11.GL_CULL_FACE);
-        //GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-        //	GL11.glColor3f(0.5f, 0.5f, 0.5f);
-        if (main != null) main.draw();
-        if (tiroir != null) tiroir.draw(alphaClose + tiroirFactor * (alphaOpen - alphaClose), 0f, 0f, 1f);
-        //GL11.glEnable(GL11.GL_TEXTURE_2D);
-        //GL11.glCullFace(GL11.GL_BACK);
+    /** The foot of the firebox window (px; mods.eln.cad.models.HeatFurnace WIN_Y0): the glow is scaled about it. */
+    static final float WINDOW_Y0 = 5.25f;
+
+    /** Its highest power: the furnace's own and every combustion chamber's (the glow's full brightness). */
+    public double maxPower() {
+        return nominalPower + combustionChamberMax * combustionChamberPower;
     }
 
-    // 26.x port: handleRenderType() removed (client rendering; redone in P3)
+    /**
+     * The oven (mods.eln.cad.models.HeatFurnace): the body, then the fire bed seen through the firebox window, as high as
+     * the fire's level (0..1) and from dull dark red at no power to bright orange-yellow at full (power 0..1), unlit, and
+     * the window's pane over it, see-through.
+     */
+    void draw(float fire, float power) {
+        if (main != null) main.draw();
+        if (glow != null && fire > 0.01f) {
+            float k = Math.max(0, Math.min(1, power));
+            UtilsClient.disableLight();
+            GL11.glColor4f(0.45f + 0.55f * Math.min(1, k * 1.6f), 0.08f + 0.77f * k, 0.03f + 0.32f * k * k, 1);
+            float at = WINDOW_Y0 / 16f - 0.5f;
+            GL11.glPushMatrix();
+            GL11.glTranslatef(0, at, 0);
+            GL11.glScalef(1, Math.min(1, fire), 1);
+            GL11.glTranslatef(0, -at, 0);
+            glow.draw();
+            GL11.glPopMatrix();
+            GL11.glColor4f(1, 1, 1, 1);
+            UtilsClient.enableLight();
+        }
+        if (glass != null) {
+            UtilsClient.enableBlend();
+            GL11.glColor4f(1, 1, 1, 0.3f);
+            glass.draw();
+            GL11.glColor4f(1, 1, 1, 1);
+            UtilsClient.disableBlend();
+        }
+    }
 
-    // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)
+    private ModelHitbox hitbox;
+
+    /** Its model's hitbox (mods.eln.cad.models.HeatFurnace), turned with its front. */
+    @Override
+    public ModelHitbox modelHitbox() {
+        if (hitbox == null && obj != null) hitbox = ModelHitbox.of(obj);
+        return hitbox;
+    }
 
     @Override
     public boolean hasItemDraw() {
         return true;
     }
 
+    /** The item: a moderate fire behind the window. */
     @Override
     public void drawItem(boolean entity) {
-        draw(1.0f);
-
+        draw(0.6f, 0.5f);
     }
 
     @Override

@@ -221,9 +221,7 @@ public class CompactTurbineElement extends TransparentNodeElement implements Flu
 
     private void restore(FluidNode n, double[] saved) {
         if (saved != null) {
-            n.mWater = saved[0];
-            n.mAir = saved[1];
-            n.energy = saved[2];
+            mods.eln.fluid.FluidSaves.restore(n, saved);
             n.update();
         } else n.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
     }
@@ -259,12 +257,8 @@ public class CompactTurbineElement extends TransparentNodeElement implements Flu
         super.writeToNBT(nbt);
         nbt.putDouble("water", water);
         if (well != null) {
-            nbt.putDouble("inletW", inlet.mWater);
-            nbt.putDouble("inletA", inlet.mAir);
-            nbt.putDouble("inletU", inlet.energy);
-            nbt.putDouble("wellW", well.mWater);
-            nbt.putDouble("wellA", well.mAir);
-            nbt.putDouble("wellU", well.energy);
+            mods.eln.fluid.FluidSaves.put(nbt, "inlet", inlet);
+            mods.eln.fluid.FluidSaves.put(nbt, "well", well);
         }
     }
 
@@ -273,9 +267,9 @@ public class CompactTurbineElement extends TransparentNodeElement implements Flu
         super.readFromNBT(nbt);
         water = nbt.getDoubleOr("water", 0);
         if (nbt.contains("inletW"))
-            loadedIn = new double[]{nbt.getDoubleOr("inletW", 0), nbt.getDoubleOr("inletA", 0), nbt.getDoubleOr("inletU", 0)};
+            loadedIn = mods.eln.fluid.FluidSaves.array(nbt, "inlet");
         if (nbt.contains("wellW"))
-            loadedWell = new double[]{nbt.getDoubleOr("wellW", 0), nbt.getDoubleOr("wellA", 0), nbt.getDoubleOr("wellU", 0)};
+            loadedWell = mods.eln.fluid.FluidSaves.array(nbt, "well");
     }
 
     /** What it is doing, in a line (Jade). */

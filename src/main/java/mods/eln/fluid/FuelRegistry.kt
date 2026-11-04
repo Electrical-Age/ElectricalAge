@@ -26,7 +26,8 @@ object FuelRegistry {
      * The values represent the heating value (energy) for 1L of the fuel IRL.
      */
     private val heavyFuels = mapOf(
-        "residue" to 41700000.0     // a column's bottoms, as residual fuel oil (No. 6): ~41.7 MJ/l
+        "residue" to 41700000.0,    // a column's bottoms, as residual fuel oil (No. 6): ~41.7 MJ/l
+        "crude_oil" to 38500000.0   // crude as it comes up (Baughn 2026-11-03: the fuel furnace burns every EA oil that makes sense): ~45 MJ/kg at 0.85 kg/l
     )
     val heavyList = heavyFuels.keys.toTypedArray()
 

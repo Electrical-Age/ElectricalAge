@@ -40,6 +40,11 @@ public final class PipeCases {
         cases.add(new Burst());
         cases.add(new Valve());
         cases.add(new Adapter());
+        cases.add(new AdapterOil());
+        cases.add(new SealedRunDrains());
+        cases.add(new LeakFire(0));
+        cases.add(new LeakFire(1));
+        cases.add(new LeakFire(2));
         cases.add(new ValveByPlayer());
         cases.add(new KitPickupMerges());
         cases.add(new PipeRoutePreview());
@@ -943,6 +948,125 @@ public final class PipeCases {
         }
     }
 
+    /**
+     * A pipe adapter takes any fluid a species is (Baughn 2026-11-03: data-driven fluids): crude oil put in goes into the
+     * run as crude, comes back out as crude, and a fluid no species is (lava) is refused.
+     */
+    static final class AdapterOil implements TestCase {
+        BlockPos at;
+        int put, lava;
+        double crudeAfterPut = -1;
+
+        public String id() {
+            return "pipe_adapter_oil";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+            at = ctx.at(2, 1, 1);
+            ctx.level().setBlock(ctx.at(1, 1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
+            var item = new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get());
+            var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(ctx.at(1, 1, 1)),
+                net.minecraft.core.Direction.EAST, ctx.at(1, 1, 1), false);
+            item.useOn(new net.minecraft.world.item.context.UseOnContext(ctx.level(), null, net.minecraft.world.InteractionHand.MAIN_HAND, item, hit));
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
+            if (cap == null) return;
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                put = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Oil.CRUDE.get()), 120, tx);
+                lava = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.LAVA), 100, tx);
+                tx.commit();
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            VoxelNode n = node(ctx, at);
+            if (n == null) {
+                ctx.check("pipe: an oil adapter goes on the stone's face", false, "");
+                return;
+            }
+            PipePart stub = null;
+            for (VoxelPart p : n.parts) if (p instanceof PipePart pp) stub = pp;
+            int crude = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
+            var run = stub == null ? null : mods.eln.fluid.FluidWorld.nodeFor(stub.fluid);
+            double inRun = run == null || crude < 0 ? 0 : run.mass(crude) / mods.eln.fluid.FluidSpecies.kgPerMb(crude, false);
+            ctx.check("pipe: 120 mB of crude oil went in through the adapter", put == 120, put + " mB");
+            ctx.check("pipe: it is crude oil in the run", inRun > 119 && inRun < 121, inRun + " mB, water " + (run == null ? 0 : run.mWater));
+            ctx.check("pipe: lava (no species) is refused", lava == 0, lava + " mB");
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
+            int took;
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                took = cap.extract(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Oil.CRUDE.get()), 50, tx);
+                tx.commit();
+            }
+            ctx.check("pipe: crude oil comes back out through it", took == 50, took + " mB");
+        }
+    }
+
+    /**
+     * A horizontal pipe a third full of water, capped at one end, its open end sealed onto an empty two-block tank's low
+     * side port at the same height: the water runs out under the opening while the tank's air comes back over it (Baughn
+     * 2026-11-03: counter-flow; with one stream per edge it stopped after a few pascals, 0.3 of 8 g).
+     */
+    static final class SealedRunDrains implements TestCase {
+        BlockPos at;
+        mods.eln.oil.TankElement tank;
+        double before;
+
+        public String id() {
+            return "pipe_sealed_run_drains";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 100;
+        }
+
+        PipePart pipe(TestContext ctx) {
+            for (VoxelPart p : node(ctx, at).parts) if (p instanceof PipePart pp) return pp;
+            return null;
+        }
+
+        public void build(TestContext ctx) {
+            at = ctx.at(2, 1, 1);
+            lay(ctx, at, 0, 2, 4, 8, 16, 4, 8);   // (a capped inner end at x 2, open at the east face, 4 px up)
+            // (a two-block tank box: its side ports draw at their own height, 4 px up the lower block's side, in its gas;
+            // a lone tank's low port draws off its floor, a dip tube)
+            tank = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, ctx.at(3, 1, 1));
+            var upper = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, ctx.at(3, 2, 1));
+            tank.front = mods.eln.misc.Direction.XP;
+            upper.front = mods.eln.misc.Direction.XP;
+            tank.reconnect();
+            upper.reconnect();
+            tank.reconnect();
+            PipePart pipe = pipe(ctx);
+            pipe.fluid.fill(0.33 * pipe.fluid.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 293);
+            before = pipe.fluid.mWater;
+        }
+
+        public void measure(TestContext ctx) {
+            double inTank = tank.vessel == null ? 0 : tank.vessel.mWater;
+            var run = mods.eln.fluid.FluidWorld.nodeFor(pipe(ctx).fluid);
+            StringBuilder es = new StringBuilder();
+            for (var e : mods.eln.fluid.FluidWorld.edgesOf(pipe(ctx).fluid))
+                es.append(String.format(" [%s %s spanA %.2f spanB %.2f flow %.6f liquid %.6f air %.6f]", e.kind, e.a == run ? "out" : "in", e.spanA, e.spanB, e.flow, e.fLiquid, e.fAir));
+            ctx.line(String.format("sealed run: P %.1f level %.3f water %.5f | tank P %.1f water %.5f |%s", run.P(), run.level(), run.mWater, tank.vessel.P(), inTank, es));
+            ctx.check("pipe: a sealed third-full run drains into the tank under its opening", inTank > 0.5 * before,
+                String.format("%.4f of %.4f kg went over", inTank, before));
+            ctx.check("pipe: the tank's air came back over it (the pressures even out)", Math.abs(run.P() - tank.vessel.P()) < 60,
+                String.format("run %.0f Pa, tank %.0f Pa", run.P(), tank.vessel.P()));
+        }
+    }
+
     /** A valve between a pressurised run and an empty one: shut, it holds; open, the pressures even out. */
     static final class Valve implements TestCase {
         BlockPos a, b, c;
@@ -1114,6 +1238,72 @@ public final class PipeCases {
             n.removePart(0, true);
             var items = ctx.level().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(a).inflate(3));
             ctx.check("pipe: a burst piece drops nothing", items.isEmpty(), items.size() + " items");
+        }
+    }
+
+    /**
+     * Fire from a hot flammable leak (Baughn 2026-11-03): an iron run of heavy oil at 430 C (over its autoignition, 680 K)
+     * under air past its burst rating bursts, and its jet catches; the same run of diesel at 20 C (under its flash point)
+     * only sprays; gasoline at 20 C (over its flash point, under its autoignition) catches from torches beside it.
+     */
+    static final class LeakFire implements TestCase {
+        /** 0 hot heavy oil, 1 cold diesel, 2 gasoline beside torches. */
+        final int mode;
+        final boolean hot;
+        BlockPos a, b;
+
+        LeakFire(int mode) {
+            this.mode = mode;
+            this.hot = mode != 1;
+        }
+
+        public String id() {
+            return mode == 0 ? "pipe_hot_oil_leak_catches_fire" : mode == 1 ? "pipe_cold_diesel_leak_no_fire" : "pipe_gasoline_leak_catches_from_a_torch";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 120;
+        }
+
+        public void build(TestContext ctx) {
+            a = ctx.at(1, 1, 1);
+            b = ctx.at(2, 1, 1);
+            lay(ctx, a, 0, 0, 8, 8, 16, 8, 8);
+            lay(ctx, b, 0, 0, 8, 8, 16, 8, 8);
+            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+            int id = reg.id(mode == 0 ? "eln:heavy_oil" : mode == 1 ? "eln:diesel" : "eln:gasoline");
+            double T = mode == 0 ? 703 : 293.15;
+            if (mode == 2)   // (torches round the run: whichever way it bursts, its jet passes within reach of one)
+                for (BlockPos p : new BlockPos[]{ctx.at(1, 1, 0), ctx.at(2, 1, 2), ctx.at(0, 1, 1), ctx.at(3, 1, 1)})
+                    ctx.level().setBlock(p, net.minecraft.world.level.block.Blocks.TORCH.defaultBlockState(), 3);
+            for (BlockPos p : new BlockPos[]{a, b}) {
+                VoxelNode n = node(ctx, p);
+                var f = ((PipePart) n.parts.get(0)).fluid;
+                f.fill(0, 45e5, T);
+                f.addMass(id, 0.6 * f.volume * reg.byId(id).rhoL);
+                f.energy = f.energyAt(T);
+                f.update();
+                mods.eln.fluid.FluidWorld.changed(n);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            PipePart pa = (PipePart) node(ctx, a).parts.get(0), pb = (PipePart) node(ctx, b).parts.get(0);
+            ctx.check("leak fire: the run burst", pa.burst || pb.burst, pa.burst + " " + pb.burst);
+            int fires = 0;
+            for (BlockPos p : BlockPos.betweenClosed(ctx.at(0, 0, 0), ctx.at(3, 3, 2)))
+                if (ctx.level().getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.BaseFireBlock) fires++;
+            if (mode == 0) ctx.check("leak fire: hot heavy oil over its autoignition catches", fires > 0, fires + " fire blocks");
+            else if (mode == 2) ctx.check("leak fire: gasoline over its flash point catches from a torch", fires > 0, fires + " fire blocks");
+            else ctx.check("leak fire: cold diesel under its flash point only sprays", fires == 0, fires + " fire blocks");
+            // (out, for the next test and the round trip)
+            for (BlockPos p : BlockPos.betweenClosed(ctx.at(0, 0, 0), ctx.at(3, 3, 2)))
+                if (ctx.level().getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.BaseFireBlock)
+                    ctx.level().setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
         }
     }
 

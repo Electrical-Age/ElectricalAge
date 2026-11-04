@@ -79,10 +79,20 @@ final class GoldenCase implements TestCase {
     /** Fields changed on purpose (golden/README.md): name -> field -> why. */
     static final Map<String, Map<String, String>> CHANGED = Map.of(
         "Lead Ore", Map.of("spawnRate", "lead generates on 26.x (Baughn 2026-10-11): no other mod brings lead"),
-        "Stone Heat Furnace", Map.of("combustionChamberMax", "4 combustion chambers, was 2 (Baughn 2026-10-26: steam turbines by the expansion)"),
+        "Stone Heat Furnace", stoneHeatFurnace(),
         "Generator", Map.of("sound", "no single shaft loop: GeneratorRender plays MachineSounds' hum, rotor and air (Baughn 2026-10-28)"),
         "Power Capacitor", Map.of("dischargeTao", "leaks with RC 30 min, as the capacitor bank (Baughn 2026-10-28: batteries stay the bulk store)"),
         "Signal Processor", Map.of("alphaOff", "restyled with a logger screen on top, no door (Baughn 2026-10-30, board #45)"));
+
+    /** The Stone Heat Furnace's changes: more chambers, and the coal oven model's fields (its 1.12 drawer and flame are gone). */
+    static Map<String, String> stoneHeatFurnace() {
+        Map<String, String> m = new java.util.LinkedHashMap<>();
+        m.put("combustionChamberMax", "4 combustion chambers, was 2 (Baughn 2026-10-26: steam turbines by the expansion)");
+        String model = "remodelled as a coal oven with a firebox window, no opening drawer (Baughn 2026-11-03)";
+        for (String f : new String[]{"alphaClose", "alphaOpen", "flameStartX", "flameStartY", "flameStartZ", "flameEndX", "flameEndY",
+            "flameEndZ", "flameDeltaX", "flameDeltaY", "flameDeltaZ", "flamePopRate"}) m.put(f, model);
+        return m;
+    }
 
     /** Items new in 26.x (no 1.12 twin): Copper Coil, the thin winding wire (Baughn 2026-10-13). */
     static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163",

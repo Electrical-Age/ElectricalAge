@@ -269,6 +269,18 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     (which runs after the spawn bundle); on the server, riders' sweep is clipped to the car's column (a rider's
     overhang meets the landing, it doesn't fault the car) and a player up to 1 m off the top (a round trip late) still counts as a rider.
   - Tests: `ServoCases`, `DriveTest`, `SegmentPropertyTest`, `StationsTest`, `RidersTest`, `SegmentPayloadTest`.
+- Tools (Baughn 2026-11-03): a pickaxe breaks machines, devices and pipes as fast as stone, shears break cables as fast
+  as wool; in a block holding both, the part under the crosshair decides. No part breaks in under two ticks, so with
+  vanilla's pause after each block it is at best one part per 7 ticks (`node/BreakTool`, `BreakToolCases`).
+
+### Multi-fluid pipes (2026-11-03)
+- Baughn: EA pipes carry oil "the complex way": fluids are data (datapack species JSON), Raoult mixing within a
+  miscibility group, fluids no species names refused at EA's capabilities, viscosity depending on temperature now
+  (solidifying later, if ever), crude as one species, fire from hot leaks as a last phase.
+- The fluid core carries any species (simulation.md); water and air alone are bit-identical to the two-species core.
+- Oil devices on EA pipes through PortBridge (content.md, Oil). The separator's outlet flange moved from 2.7 to 4 px up
+  so a pipe end can meet it (Baughn: "definitely move it"); the pipe router reaches flanges off its lattice by a jog.
+- A pipe's open end passes liquid as far as it is wet (Baughn: a part-full run held its puddle; water too).
 
 ## Behaviour changes vs 1.12
 
@@ -316,6 +328,19 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - New: the Smelter (`transparentnode/smelter`, Baughn 2026-10-23): heat from a thermal cable on its back, 20 W of
   50 V for its controls on a side; smelts at the electrical oven's rate for its temperature (same PfT table), drawing
   that heat; hoppers: top/sides in, bottom out. Model `mods.eln.cad.models.Smelter`. Test `wp10a_smelter`.
+
+- Stone heat furnace remodelled as a coal oven (Baughn 2026-11-03, model `mods.eln.cad.models.HeatFurnace`, id
+  `stonefurnace`): a firebrick oven with a cast-iron firebox door whose glass window shows the fire, as high as its
+  burn level and from dull red to orange-yellow with its power (against all four chambers' 3 kW), an ash door, and a
+  flue to an iron pipe's flange at the top face's centre (drawn only; no port yet). The 1.12 drawer that opened when a
+  player came near, and the fuel item drawn in it, are gone. Test `wp10b heat furnace model`.
+
+- Fuel heat furnace remodelled as a small oil-fired heater (Baughn 2026-11-03, model `mods.eln.cad.models.FuelHeater`,
+  id `fuelheater`, parts renamed lower case): a painted housing with a cast-iron front plate, the installed burner gun
+  (big, medium or small) on a mounting flange, the power and heat lamps above it, a sight port whose flame shows as
+  high as the fire and from dull orange to bright yellow-white with the power (against the big burner), an iron pipe's
+  flange for the fuel low on the front (centre y 4, z 8) and a flue to one at the top face's centre (both drawn only;
+  no ports yet). Test `wp10b fuel heat furnace model`.
 
 - New: the Steam Oven (`oil/SteamOven*`, Baughn 2026-10-23): steam into a port on top (as the turbine's), a 10 W fan
   on 50 V; cooks food only, at up to 280 W (twice the electrical oven's best food speed), condensing 280 W / 25% of the

@@ -225,9 +225,7 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
         var c = node.coordonate;
         inlet = new FluidNode(2 * SteamOvenDescriptor.maxSteamKgPerS() / INLET_RHO, c.y, 1.0, false);
         if (loaded != null) {
-            inlet.mWater = loaded[0];
-            inlet.mAir = loaded[1];
-            inlet.energy = loaded[2];
+            mods.eln.fluid.FluidSaves.restore(inlet, loaded);
             inlet.update();
         } else inlet.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         show();
@@ -273,9 +271,7 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
         if (inlet != null) {
             syncTank();
             show();
-            nbt.putDouble("inletW", inlet.mWater);
-            nbt.putDouble("inletA", inlet.mAir);
-            nbt.putDouble("inletU", inlet.energy);
+            mods.eln.fluid.FluidSaves.put(nbt, "inlet", inlet);
         }
         tank.writeToNBT(nbt, "tank");
         nbt.putDouble("energyCounter", energyCounter);
@@ -288,7 +284,7 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
         energyCounter = nbt.getDoubleOr("energyCounter", 0);
         lastIn = inventory.getItem(inSlotId).copy();
         if (nbt.contains("inletW"))
-            loaded = new double[]{nbt.getDoubleOr("inletW", 0), nbt.getDoubleOr("inletA", 0), nbt.getDoubleOr("inletU", 0)};
+            loaded = mods.eln.fluid.FluidSaves.array(nbt, "inlet");
     }
 
     @Override

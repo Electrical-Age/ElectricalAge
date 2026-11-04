@@ -29,6 +29,9 @@ import static mods.eln.cad.models.OilKit.turned;
  * spout and sand tray under the trough.
  */
 public final class TarSandSeparator {
+    /** The oil outlet's centre on the back face (px): OilSeparatorDescriptor.OUTLET_Y and OUTLET_Z match it. */
+    public static final double OUTLET_Y = 4, OUTLET_Z = 6;
+
     private TarSandSeparator() {
     }
 
@@ -204,7 +207,7 @@ public final class TarSandSeparator {
         m.add(box(mx - mr - 0.9, sy + 3.0, mz - 0.8, mx - mr + 0.2, sy + 4.4, mz + 0.8, "steel"));
         m.add(box(gx0 - 0.6, 0.5, mz - 0.35, gx0, sy + 3.0, mz + 0.35, "darksteel"));
         // oil outlet: froth overflow launder on the back rim, down pipe, valve, outlet stub through the back face
-        double lz0 = 4.5, lz1 = 7.5, lc = (lz0 + lz1) / 2;
+        double lz0 = 4.5, lz1 = 7.5, lc = (lz0 + lz1) / 2;   // (lc = OUTLET_Z)
         // (the checker: the launder stood 0.25 px clear of the back rim and the whole outlet with it floated; it reaches
         // the rim, from x1 - 0.1)
         m.add(box(x1 - 0.1, yf, lz0, 15.2, yf + 0.5, lz1, "darksteel"));
@@ -212,13 +215,15 @@ public final class TarSandSeparator {
         m.add(box(x1 - 0.1, yf + 0.5, lz1 - 0.3, 15.2, yf + 1.2, lz1, "darksteel"));
         m.add(box(x1 - 0.1, yf + 0.5, lz0 + 0.3, 15.2, yf + 0.6, lz1 - 0.3, "oil", "u"));
         double px = 14.5;
-        m.add(prism('y', px, lc, 0.55, 3.0, yf, "darksteel", 6, false, false));
+        // (Baughn 2026-11-03: the outlet at OUTLET_Y, a whole voxel, so an EA pipe's end meets its flange: it was 2.7)
+        double oy = OUTLET_Y;
+        m.add(prism('y', px, lc, 0.55, oy + 0.3, yf, "darksteel", 6, false, false));
         m.add(box(px - 0.8, 5.0, lc - 0.8, px + 0.8, 6.4, lc + 0.8, "castiron"));                           // valve body
         m.add(prism('z', px, 5.7, 0.25, lc + 0.8, lc + 1.6, "darksteel", 6, false, false));
         m.addAll(handwheel(px, 5.7, lc + 1.7, 0.9, 'z'));
-        m.add(prism('y', px, lc, 0.7, 2.4, 3.0, "darksteel", 6, true, false));                              // elbow
-        m.add(prism('x', 2.7, lc, 0.55, px, 15.9, "darksteel", 6, false, true));
-        m.add(prism('x', 2.7, lc, 0.95, 15.3, 15.8, "steel", 8));                                           // outlet flange
+        m.add(prism('y', px, lc, 0.7, oy - 0.3, oy + 0.3, "darksteel", 6, true, false));                    // elbow
+        m.add(prism('x', oy, lc, 0.55, px, 15.9, "darksteel", 6, false, true));
+        m.add(prism('x', oy, lc, 0.95, 15.3, 15.8, "steel", 8));                                            // outlet flange
         // nameplate on the front of the jacket
         // (the checker: its back, on the jacket, z-fought an element terminal's insulator end there; dropped, unseen)
         m.add(box(x0 - 0.1, yb + 2.4, 7.0, x0, yb + 3.4, 9.5, "brass", "nswud"));

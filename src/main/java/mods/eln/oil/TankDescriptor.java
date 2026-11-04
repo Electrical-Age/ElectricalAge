@@ -41,9 +41,38 @@ public class TankDescriptor extends TransparentNodeDescriptor {
      * dark of the empty glass (air).
      */
     void drawGlass(float fill, boolean steam) {
+        drawGlass(fill, steam, new float[0], new int[0]);
+    }
+
+    /**
+     * The sight glass: its liquid to fill, or with layers (oil over water, Baughn 2026-11-03: data-driven fluids) each
+     * layer in its species' colour over the window's own (water's), then the steam above if it's mostly steam.
+     */
+    void drawGlass(float fill, boolean steam, float[] tops, int[] colours) {
         drawPart("glass");
         fill = Math.max(0, Math.min(1, fill));
-        if (fill > 0.005f) drawScaled("level", GLASS_Y0, fill);
+        if (tops.length <= 1) {
+            if (fill > 0.005f) drawScaled("level", GLASS_Y0, fill);
+        } else {
+            float below = 0;
+            float window = (GLASS_Y1 - GLASS_Y0) / 16f;
+            for (int l = 0; l < tops.length; l++) {
+                float top = Math.max(below, Math.min(1, tops[l]));
+                if (top - below > 0.005f) {
+                    int c = colours[l];
+                    boolean water = c == mods.eln.sim.fluid.SpeciesRegistry.get().byId(mods.eln.sim.fluid.SpeciesRegistry.WATER).colour;
+                    // (the window's water is blue; other liquids are the white "liquid" part, tinted by their colour: tinting the
+                    // blue made gasoline teal, AdventurAgent)
+                    if (!water) mods.eln.gl.GL11.glColor4f(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f, 1);
+                    mods.eln.gl.GL11.glPushMatrix();
+                    mods.eln.gl.GL11.glTranslatef(0, below * window, 0);
+                    drawScaled(water ? "level" : "liquid", GLASS_Y0, top - below);
+                    mods.eln.gl.GL11.glPopMatrix();
+                    if (!water) mods.eln.gl.GL11.glColor4f(1, 1, 1, 1);
+                }
+                below = top;
+            }
+        }
         if (steam && fill < 0.995f) drawScaled("vapour", GLASS_Y1, 1 - fill);
     }
 

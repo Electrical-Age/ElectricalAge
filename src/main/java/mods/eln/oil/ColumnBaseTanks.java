@@ -48,7 +48,7 @@ public class ColumnBaseTanks extends FluidStacksResourceHandler {
         put(0, Oil.CRUDE.get(), Math.min(ColumnDescriptor.CRUDE_MB, mB));
     }
 
-    void setResidue(int mB) {
+    public void setResidue(int mB) {
         put(1, Oil.Cut.RESIDUE.source.get(), Math.min(ColumnDescriptor.RESIDUE_MB, mB));
     }
 

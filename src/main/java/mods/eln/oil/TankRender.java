@@ -11,6 +11,9 @@ import java.io.IOException;
 public class TankRender extends TransparentNodeElementRender {
     final TankDescriptor desc;
     public float fill;
+    /** Its liquid layers when it holds more than one (each one's top and colour; empty: one liquid, drawn as before). */
+    float[] layerTops = new float[0];
+    int[] layerColours = new int[0];
     /** Whether its gas is mostly steam (the sight glass shows it over the water). */
     public boolean steam;
     /** Whether it draws the tank (a lone tank, or a box's lowest corner), and the box's size. */
@@ -68,7 +71,7 @@ public class TankRender extends TransparentNodeElementRender {
         if (sx == 1 && sy == 1 && sz == 1) {
             front.glRotateXnRef();
             desc.drawShell();
-            desc.drawGlass(fill, steam);
+            desc.drawGlass(fill, steam, layerTops, layerColours);
             return;
         }
         // a box (TankGroup): one shell and sight glass over all of it, from its lowest corner (Baughn 2026-10-29)
@@ -83,7 +86,7 @@ public class TankRender extends TransparentNodeElementRender {
         // the sight glass on the scaled shell's front, the box's height but its own width (Baughn 2026-11-03)
         mods.eln.gl.GL11.glTranslatef(-(across - 1) * SHELL_R / 16f, 0, 0);
         mods.eln.gl.GL11.glScalef(1, sy, 1);
-        desc.drawGlass(fill, steam);
+        desc.drawGlass(fill, steam, layerTops, layerColours);
     }
 
     /**
@@ -131,6 +134,13 @@ public class TankRender extends TransparentNodeElementRender {
         try {
             fill = stream.readFloat();
             steam = stream.readBoolean();
+            int n = stream.readByte();
+            layerTops = new float[n];
+            layerColours = new int[n];
+            for (int l = 0; l < n; l++) {
+                layerTops[l] = stream.readFloat();
+                layerColours[l] = stream.readInt();
+            }
             draws = stream.readBoolean();
             sx = stream.readByte();
             sy = stream.readByte();

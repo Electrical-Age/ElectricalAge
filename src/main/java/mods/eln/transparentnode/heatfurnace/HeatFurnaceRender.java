@@ -1,9 +1,6 @@
 package mods.eln.transparentnode.heatfurnace;
 
-import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
-import mods.eln.misc.PhysicalInterpolator;
-import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
@@ -21,6 +18,9 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
     /** The fire's real burn level (it lags the setting) and whether it's being lit. */
     public float fire;
     public boolean lighting;
+    /** Smoke up its stack (burning, nothing piped on its flue's flange). */
+    boolean smoking;
+    private float smokeDue;
 
 
     double temperature;
@@ -32,21 +32,15 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 
     HeatFurnaceDescriptor descriptor;
 
-    Coordonate coord;
-    PhysicalInterpolator interpolator;
-
-    float counter = 0;
-
-
-    boolean boot = true;
-
+    /** The fuel slot's stack (sent by the element; not drawn: the firebox is closed). */
     ItemEntity entityItemIn;
+
+    /** A slow flicker of the fire's brightness (radians). */
+    float flicker = 0;
 
     public HeatFurnaceRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
         this.descriptor = (HeatFurnaceDescriptor) descriptor;
-        interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
-        coord = new Coordonate(tileEntity);
         // the fire roars and crackles as hard as it burns
         addLoopedSound(new mods.eln.sound.LoopedSound("eln:heat_furnace_fire", coordonate()) {
             @Override
@@ -64,23 +58,24 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
     @Override
     public void draw() {
         front.glRotateXnRef();
-        descriptor.draw(interpolator.get());
-
-        if (entityItemIn != null)
-            drawEntityItem(entityItemIn, -0.1, -0.30, 0, counter, 0.8f);
+        // the fire's brightness by its power against the furnace's highest (all chambers), with a slight flicker
+        float k = (float) (power / descriptor.maxPower()) * (0.94f + 0.06f * (float) Math.sin(flicker) * (float) Math.sin(flicker * 2.3f));
+        descriptor.draw(fire, k);
     }
 
     @Override
     public void refresh(float deltaT) {
-        if (!Utils.isPlayerAround(tileEntity.getLevel(), coord.getAxisAlignedBB(1)))
-            interpolator.setTarget(0f);
-        else
-            interpolator.setTarget(1f);
-        interpolator.step(deltaT);
-
-        counter += deltaT * 60;
-        if (counter >= 360f)
-            counter -= 360;
+        flicker = (flicker + deltaT * 7) % (float) (20 * Math.PI);
+        var level = tileEntity.getLevel();
+        if (!smoking || level == null) return;
+        // (smoke out of the stack's open flange, more of it the harder it burns)
+        smokeDue += deltaT * (2 + 10 * fire);
+        var p = tileEntity.getBlockPos();
+        while (smokeDue >= 1) {
+            smokeDue -= 1;
+            double jx = (Math.random() - 0.5) * 0.12, jz = (Math.random() - 0.5) * 0.12;
+            level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, p.getX() + 0.5 + jx, p.getY() + 1.02, p.getZ() + 0.5 + jz, 0, 0.06, 0);
+        }
     }
 
     @Override
@@ -108,12 +103,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
             lighting = stream.readBoolean();
 
             entityItemIn = unserializeItemStackToEntityItem(stream, entityItemIn);
-
-            if (boot) {
-                coord.move(front);
-                //coord.move(front);
-                boot = false;
-            }
+            smoking = stream.readBoolean();
         } catch (IOException e) {
             e.printStackTrace();
         }

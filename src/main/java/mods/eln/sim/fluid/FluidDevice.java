@@ -75,13 +75,19 @@ public interface FluidDevice {
      * 5 east); draw is where on the node it draws from (0 bottom .. 1 top: a dome draws steam whatever face it opens
      * on); k its conductance (m^3; two coupled ports are in series); at where on the face its centre is, in voxels
      * (0..16 along the face's two other axes in x, y, z order, packed u * 17 + v; the face centre is CENTRE): two ports
-     * couple only at the same spot.
+     * couple only at the same spot. span: how tall the opening is, as a share of the node's height, centred on draw (0: a
+     * point, as a device's flange on its vessel; a pipe's open end on a side face is as tall as its bore: it passes
+     * liquid as far as it is wet, Baughn 2026-11-03).
      */
-    record FluidPort(FluidNode node, long pos, int face, double draw, double k, int at) {
+    record FluidPort(FluidNode node, long pos, int face, double draw, double k, int at, double span) {
         public static final int CENTRE = 8 * 17 + 8;
 
         public FluidPort(FluidNode node, long pos, int face, double draw, double k) {
             this(node, pos, face, draw, k, CENTRE);
+        }
+
+        public FluidPort(FluidNode node, long pos, int face, double draw, double k, int at) {
+            this(node, pos, face, draw, k, at, 0);
         }
     }
 

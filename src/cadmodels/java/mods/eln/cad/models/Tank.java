@@ -15,7 +15,8 @@ import static mods.eln.cad.models.OilKit.boltRing;
  * sight glass on its front. Ports (an iron pipe's flange): the top centre (vapour), and on each side face a low one
  * (liquid, 4 px up) and a high one (vapour, 12 px up); the bottom port is a plain opening under the skid.
  * <p>
- * Parts: shell; glass (the sight glass), level and vapour: the water and the steam in its window, 2..14 px, which
+ * Parts: shell; glass (the sight glass), level, liquid and vapour: the water, any other liquid (white, tinted as
+ * drawn) and the steam in its window, 2..14 px, which
  * TankRender scales to the fill; disc_* (a flange, drawn only where a pipe meets the port: Baughn 2026-11-03, a lone
  * tank with all seven looked silly) and nozzle_* (a stub of large pipe, 1 px long, which TankRender stretches from the
  * flange in past the shell). A box of tanks (TankGroup) is drawn as one: the shell scaled to the box, the sight glass
@@ -85,7 +86,7 @@ public final class Tank {
             box(x0, GLASS_Y0 - 0.5, C + h, x1, GLASS_Y1 + 0.5, C + h + 0.75, "brass"),
             box(x0, GLASS_Y0 - 0.5, C - h, x1, GLASS_Y0, C + h, "brass", "wud"),
             box(x0, GLASS_Y1, C - h, x1, GLASS_Y1 + 0.5, C + h, "brass", "wud"),
-            box(C - R - 0.5, GLASS_Y0, C - h, C - R - 0.4, GLASS_Y1, C + h, "darksteel", "w"));   // (behind the contents)
+            box(C - R - 0.4, GLASS_Y0, C - h, C - R - 0.3, GLASS_Y1, C + h, "darksteel", "w"));   // (behind the contents)
     }
 
     /** The liquid in the window, its whole height: TankRender scales it about its foot to the fill. */
@@ -93,11 +94,17 @@ public final class Tank {
         return List.of(box(C - R - 0.7, GLASS_Y0, C - GLASS_W / 2, C - R - 0.55, GLASS_Y1, C + GLASS_W / 2, "gaugewater", "w"));
     }
 
+    /** Any other liquid's layer (oil...), its whole height: white, TankRender tints it by the species' colour. */
+    static List<Mesh> liquidPart() {
+        // (the checker: in the level's plane it z-fought it; 0.1 px further back, the steam and the backing 0.1 px behind that)
+        return List.of(box(C - R - 0.6, GLASS_Y0, C - GLASS_W / 2, C - R - 0.55, GLASS_Y1, C + GLASS_W / 2, "gaugeliquid", "w"));
+    }
+
     /** Steam over the liquid (a vessel whose gas is mostly steam), its whole height: scaled about its top. */
     static List<Mesh> vapourPart() {
         // (the checker: modelled full height, it z-fought the level's face; drawn they never overlap, but it sits 0.1 px
         // further back, x 1.9)
-        return List.of(box(C - R - 0.6, GLASS_Y0, C - GLASS_W / 2, C - R - 0.55, GLASS_Y1, C + GLASS_W / 2, "gaugesteam", "w"));
+        return List.of(box(C - R - 0.5, GLASS_Y0, C - GLASS_W / 2, C - R - 0.45, GLASS_Y1, C + GLASS_W / 2, "gaugesteam", "w"));
     }
 
     public static List<NodeModel> models() {
@@ -108,6 +115,7 @@ public final class Tank {
             n.part("glass", glassPart());
             n.part("level", levelPart());
             n.part("vapour", vapourPart());
+            n.part("liquid", liquidPart());
             n.part("disc_low", discPart(4.0));
             n.part("disc_high", discPart(12.0));
             n.part("disc_top", topDiscPart());

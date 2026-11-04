@@ -125,8 +125,8 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         // the tube bundle: the vessel's heat into the cooling water (drowned tubes still work: they are in the water)
         if (tubes != null) {
             double tv = n.T(), tt = tubes.T(), q = TUBES_UA * (tv - tt);
-            double fromVessel = (n.energy - mods.eln.sim.fluid.Flash.energyAt(n.mWater, n.mAir, n.volume, tt)) / dt;
-            double intoTubes = (mods.eln.sim.fluid.Flash.energyAt(tubes.mWater, tubes.mAir, tubes.volume, tv) - tubes.energy) / dt;
+            double fromVessel = (n.energy - n.energyAt(tt)) / dt;
+            double intoTubes = (tubes.energyAt(tv) - tubes.energy) / dt;
             q = q >= 0 ? Math.max(0, Math.min(q, Math.min(0.5 * fromVessel, 0.5 * intoTubes))) : 0;
             n.heat -= q;
             tubes.heat += q;
@@ -145,7 +145,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
                 if (e.b == t && e.flow > 0 || e.a == t && e.flow < 0) totalCoolingKg += Math.abs(e.flow) * dt;
         }
         // the motor turns them: the pump's power for what it moved, the ejector's while it runs
-        // (by the head it really works against: the solver's boost is the curve's chord, not a head)
+        // (by the head it really works against: the solver's boost is the shut-off head)
         pumpW = kg / dt / Water.RHO_L * Math.max(0, v.backPa) / PlantCondenserDescriptor.PUMP_EFFICIENCY
             + PlantCondenserDescriptor.EJECTOR_W * Math.min(1, motorShare);
         if (motor != null && motorShare > 0) motor.takeShaftPower(pumpW, dt);
@@ -210,9 +210,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         v.initialize(c.y, mods.eln.sim.Ambient.kelvin(c));
         tubes = new mods.eln.sim.fluid.FluidNode(TUBES_VOLUME, c.y, 0.25, false);
         if (loadedTubes != null) {
-            tubes.mWater = loadedTubes[0];
-            tubes.mAir = loadedTubes[1];
-            tubes.energy = loadedTubes[2];
+            mods.eln.fluid.FluidSaves.restore(tubes, loadedTubes);
             tubes.update();
         } else tubes.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(c));
         makePorts();
