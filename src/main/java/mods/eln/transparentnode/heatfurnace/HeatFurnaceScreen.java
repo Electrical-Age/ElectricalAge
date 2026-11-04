@@ -32,14 +32,17 @@ public class HeatFurnaceScreen extends ElnScreen {
         // (states, as the other toggles: Baughn read "Decline fuel" as the button's action)
         fuel = button("fuel", () -> render.takeFuel ? tr("Taking fuel") : tr("Declining fuel"), render::clientToogleTakeFuel);
         gain = slider("gain", 0.1, 1.0, 0.01, render.gainSyncValue,
-            v -> Component.literal(tr("Control gauge at %1$%", (int) Math.round(v * 100)) + "  (" + tr("Power: %1$W", render.power) + ")"),
+            v -> Component.literal(tr("Control gauge at %1$%", (int) Math.round(v * 100)) + "  (" + (regulator() && !render.controleExternal
+                ? tr("the regulator sets it") : tr("Power: %1$W", render.power)) + ")"),
             v -> render.clientSetGain((float) v));
         text("fire", () -> !render.takeFuel && render.fire <= 0 ? tr("Fire: out (declining fuel: click \"Declining fuel\" to take it)")
             : fireLine(render.fire, render.gainSyncValue, render.lighting, mods.eln.sim.Fire.COAL, refuels()));
         heat = slider("heat", 0, 980, 10, render.temperatureTargetSyncValue,
             // (in °C, as Jade shows them: the simulation's temperatures are above the 20 °C reference; Baughn saw the GUI
             // and Jade disagree by that much)
-            v -> Component.literal(tr("Set point: %1$°C", (int) Math.round(v + C0)) + "  (" + tr("Actual: %1$°C", Utils.plotValue(render.temperature + C0)) + ")"),
+            // (AdventurAgent found it inactive under internal control: it needs a regulator in its slot; say so)
+            v -> Component.literal(tr("Set point: %1$°C", (int) Math.round(v + C0)) + "  (" + (!regulator() && !render.controleExternal
+                ? tr("needs a regulator in its slot") : tr("Actual: %1$°C", Utils.plotValue(render.temperature + C0))) + ")"),
             v -> render.clientSetTemperatureTarget((float) v));
         render.gainSyncNew = render.temperatureTargetSyncNew = false;
         update();
@@ -68,9 +71,14 @@ public class HeatFurnaceScreen extends ElnScreen {
         return tr("Fire: burning at %1$%", (int) Math.round(fire * 100)) + trend;
     }
 
+    /** A regulator in its slot (it then follows the set point; without one, the gauge). */
+    boolean regulator() {
+        return !deviceItem(HeatFurnaceContainer.regulatorId).isEmpty();
+    }
+
     @Override
     protected void update() {
-        boolean regulator = !deviceItem(HeatFurnaceContainer.regulatorId).isEmpty();
+        boolean regulator = regulator();
         fuel.active = !render.controleExternal;
         gain.active = !regulator && !render.controleExternal;
         heat.active = regulator && !render.controleExternal;

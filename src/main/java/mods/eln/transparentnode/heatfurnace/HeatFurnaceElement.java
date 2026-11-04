@@ -54,6 +54,13 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
     public static final byte unserializeToogleTakeFuelId = 4;
 
     public boolean controlExternal = false, takeFuel = false;
+    /**
+     * The player's settings under internal control, kept while the signal drives it (external control sets the gauge
+     * and the fuel intake itself): toggling back gives them back (AdventurAgent: the gauge came back at 10 %, the fuel
+     * declined, the set point at 0).
+     */
+    double internalGain = 0.1, internalTarget;
+    boolean internalTakeFuel;
 
     public HeatFurnaceElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
         super(transparentNode, descriptor);
@@ -215,8 +222,18 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
                 needPublish();
                 break;
                 case unserializeToogleControlExternalId:
-                    regulator.setTarget(0);
-                    setControlExternal(!getControlExternal());
+                    if (!getControlExternal()) {
+                        internalGain = furnaceProcess.getGain();
+                        internalTarget = regulator.getTarget();
+                        internalTakeFuel = getTakeFuel();
+                        regulator.setTarget(0);
+                        setControlExternal(true);
+                    } else {
+                        setControlExternal(false);
+                        furnaceProcess.setGain(internalGain);
+                        regulator.setTarget(internalTarget);
+                        setTakeFuel(internalTakeFuel);
+                    }
                     break;
                 case unserializeToogleTakeFuelId:
                     setTakeFuel(!getTakeFuel());
@@ -276,6 +293,11 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
 
         nbt.putBoolean("takeFuel", takeFuel);
         nbt.putBoolean("controlExternal", controlExternal);
+        if (controlExternal) {   // (the settings to give back: only meaningful while the signal drives it)
+            nbt.putDouble("internalGain", internalGain);
+            nbt.putDouble("internalTarget", internalTarget);
+            nbt.putBoolean("internalTakeFuel", internalTakeFuel);
+        }
         flue.write(nbt);
     }
 
@@ -284,6 +306,9 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
         super.readFromNBT(nbt);
         takeFuel = nbt.getBooleanOr("takeFuel", false);
         controlExternal = nbt.getBooleanOr("controlExternal", false);
+        internalGain = nbt.getDoubleOr("internalGain", 0.1);
+        internalTarget = nbt.getDoubleOr("internalTarget", 0);
+        internalTakeFuel = nbt.getBooleanOr("internalTakeFuel", false);
         flue.read(nbt);
     }
 

@@ -98,6 +98,7 @@ public final class Wp10bCases {
         cases.add(new TeleporterCase());
         cases.add(new IdleCase());
         cases.add(new HeatFurnaceExternalCase());
+        cases.add(new HeatFurnaceToggleKeepsSettings());
         cases.add(new HeatFurnaceTrimmerCase());
         cases.add(new HeatFurnaceModelCase());
         cases.add(new FuelHeatFurnaceModelCase());
@@ -635,6 +636,60 @@ public final class Wp10bCases {
             within(ctx, "wp10b heat furnace: full signal on its right side, full gain", off.furnaceProcess.getGain(), 1.0, 0.05);
             ctx.check("wp10b heat furnace: a signal takes fuel (left and right)", half.getTakeFuel() && off.getTakeFuel(),
                 "left " + half.getTakeFuel() + ", right " + off.getTakeFuel());
+        }
+    }
+
+    /**
+     * Toggling to external control and back gives the player's settings back (AdventurAgent 1567270870605504572: the
+     * gauge came back at 10 % and the fuel declined): gauge 60 %, taking fuel; external with no signal (it declines fuel,
+     * gauge at its 10 % floor); internal again: 60 %, taking fuel.
+     */
+    static final class HeatFurnaceToggleKeepsSettings implements TestCase {
+        HeatFurnaceElement f;
+        int tick;
+        double inExternal = Double.NaN;
+        boolean fuelInExternal = true;
+        mods.eln.sim.IProcess watch;
+
+        public String name() {
+            return "wp10b heat furnace control toggle keeps the settings";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            BlockPos p = ctx.at(1, 1, 1);
+            f = (HeatFurnaceElement) ctx.placeTransparent(HEAT_FURNACE, p);
+            l.used.add(p);
+            f.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(HeatFurnaceElement.unserializeGain);
+                o.writeFloat(0.6f);
+            }));
+            f.networkUnserialize(ctx.stream(o -> o.writeByte(HeatFurnaceElement.unserializeToogleTakeFuelId)));
+            f.networkUnserialize(ctx.stream(o -> o.writeByte(HeatFurnaceElement.unserializeToogleControlExternalId)));
+            mods.eln.Eln.simulator.addSlowProcess(watch = dt -> {
+                if (++tick == 20) {   // (the signal has driven it a while: read, then back to internal control)
+                    inExternal = f.furnaceProcess.getGain();
+                    fuelInExternal = f.getTakeFuel();
+                    f.networkUnserialize(ctx.stream(o -> o.writeByte(HeatFurnaceElement.unserializeToogleControlExternalId)));
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(watch);
+            within(ctx, "wp10b heat furnace: external, no signal: the gauge at its floor", inExternal, 0.1, 0.01);
+            ctx.check("wp10b heat furnace: external, no signal: it declines fuel", !fuelInExternal, "");
+            ctx.check("wp10b heat furnace: back to internal control", !f.getControlExternal(), "");
+            within(ctx, "wp10b heat furnace: internal again: the gauge where the player left it", f.furnaceProcess.getGain(), 0.6, 0.001);
+            ctx.check("wp10b heat furnace: internal again: taking fuel, as the player left it", f.getTakeFuel(), "");
         }
     }
 
