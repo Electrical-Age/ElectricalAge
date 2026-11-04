@@ -130,6 +130,12 @@ public final class LabCommands {
                 .then(Commands.literal("spmodules").executes(c -> demo(c.getSource(), () -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("tilted").executes(c -> demo(c.getSource(), () -> tilted(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("threelogger").executes(c -> demo(c.getSource(), () -> threeLogger(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("fluidscan").then(Commands.argument("n", IntegerArgumentType.integer(5, 2000))
+                    .executes(c -> {
+                        mods.eln.fluid.FluidWorld.startScan(IntegerArgumentType.getInteger(c, "n"));
+                        c.getSource().sendSuccess(() -> Component.literal("scanning every fluid network (server log, 'fluidscan')"), false);
+                        return 1;
+                    })))
                 .then(Commands.literal("fluidtrace").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .then(Commands.argument("n", IntegerArgumentType.integer(1, 200))
                         .executes(c -> fluidtrace(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "n"))))))

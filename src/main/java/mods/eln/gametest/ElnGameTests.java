@@ -150,11 +150,32 @@ public final class ElnGameTests {
                 ctx.check(c.id() + " measure", false, e.toString());
             }
             persistence(helper, ctx);
+            limitCycles(helper, ctx);
             ctx.finish();
         });
     }
 
+    /**
+     * No fluid node of a device in the test's bounds flips its pressure back and forth every step at the end (a solver
+     * limit cycle, as the boiler feed valve's of 2026-11-04). It needs the case to have run 20 fluid steps.
+     */
+    static void limitCycles(GameTestHelper helper, GameTestContext ctx) {
+        net.minecraft.world.phys.AABB bounds = helper.getBounds();
+        java.util.Set<mods.eln.sim.fluid.FluidNode> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        for (var d : mods.eln.fluid.FluidWorld.devices())
+            for (var p : d.fluidPorts()) {
+                var b = net.minecraft.core.BlockPos.of(p.pos());
+                if (!bounds.contains(b.getX() + .5, b.getY() + .5, b.getZ() + .5)) continue;
+                var n = mods.eln.fluid.FluidWorld.nodeFor(p.node());
+                if (!seen.add(n)) continue;
+                int f = mods.eln.fluid.FluidWorld.recentFlips(n);
+                if (f >= 15) ctx.check("fluid: no limit cycle (a node flipping every step)", false,
+                    d.getClass().getSimpleName() + " at " + b.toShortString() + ": " + f + " of the last 20 steps, P " + String.format("%.3f bar", n.P() / 1e5));
+            }
+    }
+
     static void registerTests(RegisterGameTestsEvent event) {
+        mods.eln.fluid.FluidWorld.watchAll = true;
         Holder<TestEnvironmentDefinition<?>> env = event.registerEnvironment(
             Identifier.fromNamespaceAndPath(Eln.MODID, "default"), new TestEnvironmentDefinition.AllOf(List.of()));
         for (TestCase c : cases()) {
