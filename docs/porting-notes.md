@@ -556,6 +556,16 @@ on 1.7.10) onto 26.x.
   the channels in use as `3 light_blue  12.5V` with writer clashes, Jade on a module lists `Terminal 5: 3 light_blue,
   in 30V`. The pins themselves carry no number tag yet. Tests `BusNetTest`, `BusNetPropertyTest`, `BusChannelTest`,
   GameTest `bus_cable_across_blocks`.
+- Field bus packets (Baughn 2026-11-05: the bus becomes an RS485 bus). A packet is `[target][source][type][payload]`
+  (`Packet`, `PacketType`): target 0 is a broadcast, 1..16 the colour channels (dye id + 1), 17..255 devices; source
+  is the sender's address. Each type has a fixed payload (an index byte, a float, or both): 1 signal, 2 press,
+  3 power, 4 write, 5 read, 6 reply, 7 fault, 8 arrive; `Packet.decode` drops unknown types and wrong lengths. What
+  ports send in a tick is delivered at the start of the next (`Bus.swap`), ordered by source, then by order of
+  sending, at most `Bus.CAP` (64) a bus a tick; the rest are dropped and counted (Jade on the cable: `Packets`). A
+  packet reaches every listening port it is for except its sender: a broadcast all of them, a channel's the ports
+  claiming that channel, a device's the port with that address (`BusPort.setAddress`, 17..255 only). Packets wait in
+  a port's inbox (64, oldest dropped first) until polled, so a device needn't run every tick; packets still queued
+  move with their sender when the bus is rebuilt. Tests `PacketTest`, `BusNetPropertyTest`.
 - Bus I/O Module (the field bus, `mods.eln.bus`; Baughn: 9 terminals), id `1 + (117 << 6)` beside the Modbus RTU,
   whose model it wears without the door (a proper model later). On a face, its front edge takes Field Bus Cable; its
   left, back and right edges hold three signal terminals each, numbered 1 to 9 round from the bus edge, pins 4 voxels

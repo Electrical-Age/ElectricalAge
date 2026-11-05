@@ -1879,6 +1879,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                         out.put("  " + mods.eln.bus.BusChannel.label(c), mods.eln.misc.Utils.plotVolt("", b.value(c) * mods.eln.Eln.SVU)
                             + (w > 1 ? " from " + w + " writers" : w == 0 ? " unwritten" : ""));
                     }
+                    if (b.delivered() > 0 || b.droppedTotal() > 0)   // packets (Baughn: an RS485 bus)
+                        out.put("Packets", b.delivered() + " this tick" + (b.droppedTotal() > 0
+                            ? ", " + b.droppedTotal() + " dropped (over " + mods.eln.bus.Bus.CAP + " a tick)" : ""));
                     continue;
                 }
                 if (k.load == null) {   // (the thermal cable)

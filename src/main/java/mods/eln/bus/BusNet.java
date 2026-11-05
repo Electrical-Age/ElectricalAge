@@ -90,8 +90,13 @@ public final class BusNet {
                     nb.writers[c] += o.writers[c];
                     nb.nextWriters[c] += o.nextWriters[c];
                 }
+            for (Bus o : old) nb.droppedTotal += o.droppedTotal;
             made.add(nb);
         }
+        // packets still queued go with their sender to its new bus (a sender no bus reaches now: dropped)
+        for (Bus o : BUSES)
+            for (Bus.Queued e : o.outbox)
+                if (e.from() != null && seen.contains(e.from())) e.from().bus.outbox.add(e);
         // ports no bus reaches now (no links left) leave their old bus
         for (Bus o : BUSES) for (BusPort p : o.ports) if (!seen.contains(p)) p.bus = null;
         BUSES.clear();
@@ -100,6 +105,7 @@ public final class BusNet {
 
     /** World start and stop: forget everything (the GameTest server and lab clones load several worlds in one JVM). */
     public static void clear() {
+        Bus.sequence = 0;
         ALL.clear();
         BUSES.clear();
         dirty = false;
