@@ -180,4 +180,43 @@ class StdlibTest {
         tick(80, "42\n");
         assertTrue(out.toString().contains("Running A:/main.janet"), out.toString());
     }
+
+    /** Editor frames from the computer, collected over ticks until one with op arrives. */
+    String[] editorReply(String op) {
+        mods.eln.robotics.computer.EditorFrames frames = new mods.eln.robotics.computer.EditorFrames();
+        for (int t = 0; t < 40; t++) {
+            m.tick();
+            m.run(1_000_000);
+            for (String[] f : frames.feed(m.editor.take())) if (f[0].equals(op)) return f;
+        }
+        fail("no " + op + " reply; terminal: " + out + new String(m.terminal.take(), StandardCharsets.UTF_8));
+        return null;
+    }
+
+    void ask(String... fields) {
+        m.editor.give(mods.eln.robotics.computer.EditorFrames.encode(fields));
+    }
+
+    @Test
+    void theEditorOpensSavesListsAndRefusesStaleSaves() {
+        m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), null, false));
+        type("(disk/format :a)");
+        tick(60, "\n> ");
+        ask("save", "1", "a:/t.janet", "", "(print \"edited\")");
+        String[] saved = editorReply("saved");
+        assertEquals("1", saved[1]);
+        ask("open", "2", "a:/t.janet", "", "");
+        String[] file = editorReply("file");
+        assertEquals("(print \"edited\")", file[4]);
+        assertEquals(saved[3], file[3], "the same revision");
+        ask("save", "3", "a:/t.janet", "stale", "(print 1)");
+        assertEquals("conflict", editorReply("conflict")[0]);
+        ask("list", "4", "a:/", "", "");
+        assertEquals("t.janet", editorReply("list")[4]);
+        ask("run", "5", "a:/t.janet", "", "");
+        editorReply("ran");
+        tick(10, "edited\n");
+        ask("open", "6", "a:/nothing", "", "");
+        assertTrue(editorReply("error")[4].contains("no such file"));
+    }
 }

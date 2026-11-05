@@ -80,4 +80,4 @@ trap_entry:
 
     .section .rodata
 no_ram_msg:
-    .asciz "Janet needs at least 2 MB of RAM: full RAM chips in slots 1 and 2.\n"
+    .asciz "Janet needs at least 2 MB of RAM: RAM chips in slots 2 and 3.\n"

@@ -49,9 +49,9 @@ public class ComputerElement extends TransparentNodeElement {
     /** Its state, for the lamp, the screen and Jade. */
     public static final byte OFF = 0, RUNNING = 1, SLEEPING = 2, HALTED = 3, NO_CHIPS = 4;
     /** Screen packets. */
-    public static final byte TYPE_ID = 1, RESET_ID = 2, SET_ADDRESS_ID = 3, BREAK_ID = 4, WATCH_ID = 5;
-    /** Server-to-screen packets: terminal bytes, or the whole terminal again. */
-    public static final byte TERMINAL_ID = 1, TERMINAL_ALL_ID = 2;
+    public static final byte TYPE_ID = 1, RESET_ID = 2, SET_ADDRESS_ID = 3, BREAK_ID = 4, EDITOR_ID = 6;
+    /** Server-to-screen packets: terminal bytes, the whole terminal again, an editor reply. */
+    public static final byte TERMINAL_ID = 1, TERMINAL_ALL_ID = 2, EDITOR_REPLY_ID = 3;
     /** Terminal output kept for a screen that opens later, and the most sent to screens a tick. */
     static final int SCROLLBACK = 8192, MAX_SEND = 4096;
 
@@ -70,6 +70,10 @@ public class ComputerElement extends TransparentNodeElement {
     final UUID[] mountedDisk = new UUID[2];
     final Floppy[] floppies = new Floppy[2];
     final double[] levels = new double[BusChannel.COUNT];
+    /** Editor requests in flight: their id -> the player who asked (replies go to them alone). */
+    final Map<Integer, UUID> editorAsked = new LinkedHashMap<>();
+    int editorNext = 1;
+    final EditorFrames editorFrames = new EditorFrames();
 
     public ComputerElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
@@ -216,6 +220,8 @@ public class ComputerElement extends TransparentNodeElement {
             for (Packet p : runner.takePackets()) port.send(p);
             byte[] out = runner.takeTerminal();
             if (out.length > 0) terminalOut(out);
+            byte[] ed = runner.takeEditor();
+            if (ed.length > 0) for (String[] f : editorFrames.feed(ed)) editorReply(f);
             if (powered) machine.takeJoules(machine.ratedJoulesPerTick() * Math.min(1.0, runner.lastRan() / (double) runner.budget));
         }
         watch();
@@ -281,6 +287,46 @@ public class ComputerElement extends TransparentNodeElement {
         return b;
     }
 
+    /** A screen's editor request (op, path, revision, body) on to the computer; it answers on its editor channel. */
+    void editorRequest(ServerPlayer player, String op, String path, String rev, String body) {
+        if (runner == null || status == OFF || status == HALTED) {
+            if (player != null) sendEditor(player, new String[]{"error", "0", path, "", I18N.tr("The computer isn't running.")});
+            return;
+        }
+        int id = editorNext++;
+        if (player != null) editorAsked.put(id, player.getUUID());
+        while (editorAsked.size() > 32) editorAsked.remove(editorAsked.keySet().iterator().next());
+        runner.toEditor(EditorFrames.encode(op, String.valueOf(id), path, rev, body));
+    }
+
+    void editorReply(String[] f) {
+        UUID who;
+        try {
+            who = editorAsked.remove(Integer.parseInt(f[1]));
+        } catch (NumberFormatException e) {
+            return;
+        }
+        if (who == null) return;
+        for (ServerPlayer p : viewers()) if (p.getUUID().equals(who)) sendEditor(p, f);
+    }
+
+    void sendEditor(ServerPlayer p, String[] f) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(256);
+        DataOutputStream o = new DataOutputStream(bos);
+        preparePacketForClient(o);
+        try {
+            o.writeByte(EDITOR_REPLY_ID);
+            for (int i = 0; i < EditorFrames.FIELDS; i++) {
+                byte[] b = f[i].getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                o.writeInt(b.length);
+                o.write(b);
+            }
+        } catch (IOException e) {
+            return;
+        }
+        node.sendPacketToClient(bos, p);
+    }
+
     void sendTerminal(ServerPlayer p, byte kind, byte[] bytes) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length + 64);
         DataOutputStream o = new DataOutputStream(bos);
@@ -328,6 +374,10 @@ public class ComputerElement extends TransparentNodeElement {
                 }
                 case BREAK_ID -> {
                     if (runner != null) runner.pressBreak();
+                }
+                case EDITOR_ID -> {
+                    String op = stream.readUTF(), path = stream.readUTF(), rev = stream.readUTF(), body = stream.readUTF();
+                    if (body.length() <= EditorFrames.MAX_BODY && path.length() <= 256) editorRequest(player, op, path, rev, body);
                 }
                 case SET_ADDRESS_ID -> {
                     port.setAddress(Math.round(stream.readFloat()));

@@ -77,22 +77,48 @@ JANET_FN(cfun_input, "(ea/input)", "The terminal's typed bytes waiting, as a str
     return janet_stringv(buf, n);
 }
 
+JANET_FN(cfun_editor_input, "(ea/editor-input)", "Bytes from the screen's editor waiting, as a string.") {
+    janet_fixarity(argc, 0);
+    (void) argv;
+    uint8_t buf[512];
+    int32_t n = 0;
+    while (n < (int32_t) sizeof buf && (CON_STATUS(EDITOR) & 1)) {
+        int32_t c = (int32_t) CON_RX(EDITOR);
+        if (c < 0) break;
+        buf[n++] = (uint8_t) c;
+    }
+    return janet_stringv(buf, n);
+}
+
+JANET_FN(cfun_editor_write, "(ea/editor-write bytes &opt start)",
+         "Send bytes to the screen's editor from start; returns how many went (its buffer may be full).") {
+    janet_arity(argc, 1, 2);
+    JanetByteView b = janet_getbytes(argv, 0);
+    int32_t i = argc > 1 ? janet_getinteger(argv, 1) : 0;
+    int32_t from = i;
+    while (i < b.len && (CON_STATUS(EDITOR) & 2)) CON_TX(EDITOR) = b.bytes[i++];
+    return janet_wrap_integer(i - from);
+}
+
 JANET_FN(cfun_wait, "(ea/wait &opt until)",
          "Sleep until a packet or a keystroke arrives, Break is pressed, or the tick count reaches until.") {
     janet_arity(argc, 0, 1);
     uint64_t until = argc > 0 && !janet_checktype(argv[0], JANET_NIL) ? (uint64_t) janet_getnumber(argv, 0) : UINT64_MAX;
-    if (break_seen || BUS_RX_COUNT || (CON_STATUS(CONSOLE) & 1) || ticks() >= until) return janet_wrap_nil();
+    if (break_seen || BUS_RX_COUNT || (CON_STATUS(CONSOLE) & 1) || (CON_STATUS(EDITOR) & 1) || ticks() >= until)
+        return janet_wrap_nil();
     TIMER_CMP_HI = 0xFFFFFFFFu;
     TIMER_CMP_LO = (uint32_t) until;
     TIMER_CMP_HI = (uint32_t) (until >> 32);
     BUS_IRQ = 1;
     CON_IRQ(CONSOLE) = 1;
+    CON_IRQ(EDITOR) = 1;
     /* WFI wakes on any enabled pending interrupt; the handler (ea_irq) turns the line off again */
     __asm__ volatile("csrs mie, %0" ::"r"((1u << 11) | (1u << 7)));
     __asm__ volatile("wfi");
     __asm__ volatile("csrc mie, %0" ::"r"((1u << 11) | (1u << 7)));
     BUS_IRQ = 0;
     CON_IRQ(CONSOLE) = 0;
+    CON_IRQ(EDITOR) = 0;
     TIMER_CMP_HI = 0xFFFFFFFFu;
     TIMER_CMP_LO = 0xFFFFFFFFu;
     return janet_wrap_nil();
@@ -155,6 +181,7 @@ void ea_register(JanetTable *env) {
         JANET_REG("ea/send", cfun_send), JANET_REG("ea/recv", cfun_recv), JANET_REG("ea/level", cfun_level),
         JANET_REG("ea/address", cfun_address), JANET_REG("ea/ticks", cfun_ticks), JANET_REG("ea/input", cfun_input),
         JANET_REG("ea/wait", cfun_wait), JANET_REG("ea/run", cfun_run), JANET_REG("ea/break?", cfun_break),
+        JANET_REG("ea/editor-input", cfun_editor_input), JANET_REG("ea/editor-write", cfun_editor_write),
         JANET_REG("ea/halt", cfun_halt), JANET_REG("ea/reset", cfun_reset), JANET_REG_END};
     janet_cfuns_ext(env, "ea", fns);
 }

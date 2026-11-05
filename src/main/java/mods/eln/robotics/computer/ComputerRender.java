@@ -14,6 +14,8 @@ public class ComputerRender extends TransparentNodeElementRender {
     public int address;
     public boolean onBus;
     public final TerminalText terminal = new TerminalText();
+    /** Editor replies not yet taken by the screen: op, id, path, revision, body. */
+    public final java.util.ArrayDeque<String[]> editorReplies = new java.util.ArrayDeque<>();
 
     public ComputerRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
@@ -38,6 +40,23 @@ public class ComputerRender extends TransparentNodeElementRender {
         }
     }
 
+    /** Ask the computer's editor task: op (list, open, save, run), path, revision, body. */
+    public void editorSend(String op, String path, String rev, String body) {
+        try {
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            java.io.DataOutputStream o = new java.io.DataOutputStream(bos);
+            preparePacketForServer(o);
+            o.writeByte(ComputerElement.EDITOR_ID);
+            o.writeUTF(op);
+            o.writeUTF(path);
+            o.writeUTF(rev);
+            o.writeUTF(body);
+            sendPacketToServer(bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /** Its state in words (the screen). */
     public String stateTextClient() {
         return switch (status) {
@@ -54,6 +73,19 @@ public class ComputerRender extends TransparentNodeElementRender {
     public void serverPacketUnserialize(DataInputStream stream) {
         try {
             byte kind = stream.readByte();
+            if (kind == ComputerElement.EDITOR_REPLY_ID) {
+                String[] f = new String[EditorFrames.FIELDS];
+                for (int i = 0; i < f.length; i++) {
+                    int len = stream.readInt();
+                    if (len < 0 || len > 4 * EditorFrames.MAX_BODY) return;
+                    byte[] b = new byte[len];
+                    stream.readFully(b);
+                    f[i] = new String(b, java.nio.charset.StandardCharsets.UTF_8);
+                }
+                editorReplies.add(f);
+                while (editorReplies.size() > 16) editorReplies.poll();
+                return;
+            }
             int n = stream.readInt();
             if (n < 0 || n > 1 << 16) return;
             byte[] b = new byte[n];

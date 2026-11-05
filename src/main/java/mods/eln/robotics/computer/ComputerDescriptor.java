@@ -51,13 +51,17 @@ public class ComputerDescriptor extends TransparentNodeDescriptor {
         if (m != null) m.draw();
         var lamp = obj.getPart("lamp");
         if (lamp == null) return;
+        // a lamp glows: drawn unlit while on, so it shows at night (AdventurAgent's check)
+        boolean on = status == ComputerElement.RUNNING || status == ComputerElement.SLEEPING || status == ComputerElement.HALTED;
         switch (status) {
-            case ComputerElement.RUNNING -> mods.eln.gl.GL11.glColor4f(0.3f, 1f, 0.3f, 1f);
-            case ComputerElement.SLEEPING -> mods.eln.gl.GL11.glColor4f(0.15f, 0.5f, 0.15f, 1f);
+            case ComputerElement.RUNNING -> mods.eln.gl.GL11.glColor4f(0.35f, 1f, 0.35f, 1f);
+            case ComputerElement.SLEEPING -> mods.eln.gl.GL11.glColor4f(0.15f, 0.6f, 0.15f, 1f);
             case ComputerElement.HALTED -> mods.eln.gl.GL11.glColor4f(1f, 0.15f, 0.1f, 1f);
             default -> mods.eln.gl.GL11.glColor4f(0.25f, 0.25f, 0.25f, 1f);
         }
+        if (on) mods.eln.misc.UtilsClient.disableLight();
         lamp.draw();
+        if (on) mods.eln.misc.UtilsClient.enableLight();
         mods.eln.gl.GL11.glColor4f(1f, 1f, 1f, 1f);
     }
 

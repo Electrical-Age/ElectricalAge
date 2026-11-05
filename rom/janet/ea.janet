@@ -19,6 +19,8 @@
 (def- typed @"")       # keystrokes not yet read
 (var- input-fiber nil) # the task waiting for keystrokes
 (var- repl-eval nil)   # the REPL's form being evaluated (Break stops it)
+(def- editor-in @"")   # bytes from the screen's editor not yet taken
+(var- editor-fiber nil) # the editor task, waiting for them
 
 (defn ticks "The computer's clock: game ticks it has run (20 a second)." [] (ea/ticks))
 (defn now "The computer's clock in seconds." [] (/ (ea/ticks) 20))
@@ -49,6 +51,7 @@
     [:sleep until] (array/push sleepers [until f])
     [:packet pred until] (array/push waiters [pred f until])
     [:input] (set input-fiber f)
+    [:editor] (if (empty? editor-in) (set editor-fiber f) (array/push ready [f nil]))
     [:join g] (if (= :new (fiber/status g)) (put joiners g f)
                 (if (index-of (fiber/status g) [:dead :error :user8 :interrupted])
                   (array/push ready [f [:ok nil]])
@@ -109,6 +112,12 @@
     (when (ea/break?) (on-break))
     (while (def t (ea/recv)) (deliver (packet t)))
     (buffer/push typed (ea/input))
+    (def e (ea/editor-input))
+    (unless (empty? e)
+      (buffer/push editor-in e)
+      (when editor-fiber
+        (array/push ready [editor-fiber nil])
+        (set editor-fiber nil)))
     (when (and input-fiber (not (empty? typed)))
       (def f input-fiber)
       (set input-fiber nil)
@@ -254,6 +263,50 @@
       (print "parse error: " (parser/error p))
       (parser/flush p))))
 
+# ---- the screen's editor: framed requests on the editor channel, "LENGTH\n" then fields joined by NUL:
+# op, id, path, revision, body. The revision is the file's hash, so a save over a file changed meanwhile is refused.
+
+(defn- editor-send [& fields]
+  (def payload (string/join (map string fields) "\0"))
+  (def frame (string (length payload) "\n" payload))
+  (var i 0)
+  (while (< i (length frame))
+    (+= i (ea/editor-write frame i))
+    (when (< i (length frame)) (sleep 0.05))))
+
+(defn- revision [text] (string (hash text)))
+
+(defn- editor-handle [env op id path rev body]
+  (try
+    (case op
+      "list" (editor-send "list" id path "" (string/join (disk/list path) "\n"))
+      "open" (do
+               (unless (disk/exists? path) (error (string "no such file: " path " (" (ea/disk-why) ")")))
+               (def t (string (slurp path)))
+               (editor-send "file" id path (revision t) t))
+      "save" (do
+               (def now (if (disk/exists? path) (string (slurp path))))
+               (if (and now (not= rev "") (not= rev (revision now)))
+                 (editor-send "conflict" id path (revision now) "")
+                 (do (spit path body) (editor-send "saved" id path (revision body) ""))))
+      "run" (do (spawn (fn [] (dofile path :env (make-env env)))) (editor-send "ran" id path "" ""))
+      (editor-send "error" id path "" (string "unknown request " op)))
+    ([err] (editor-send "error" id path "" (string err)))))
+
+(defn- editor [env]
+  (forever
+    (yield [:editor])
+    (forever
+      (def nl (string/find "\n" editor-in))
+      (unless nl (break))
+      (def n (scan-number (string/slice editor-in 0 nl)))
+      (unless (and n (>= (length editor-in) (+ nl 1 n))) (break))
+      (def fields (string/split "\0" (string/slice editor-in (+ nl 1) (+ nl 1 n)) 0 5))
+      (def rest (string/slice editor-in (+ nl 1 n)))
+      (buffer/clear editor-in)
+      (buffer/push editor-in rest)
+      (when (= 5 (length fields)) (editor-handle env ;fields)))))
+
 (defn- autorun [env]
   (each p ["A:/main.janet" "B:/main.janet"]
     (when (disk/exists? p)
@@ -267,5 +320,6 @@
   []
   (def env (make-env (curenv)))
   (autorun env)
+  (spawn editor env)
   (spawn repl env)
   (run))
