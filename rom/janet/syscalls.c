@@ -22,7 +22,11 @@ static void wait_irq(uint32_t mask) {
     CON_IRQ(CONSOLE) = 0;
 }
 
+int file_read(int fd, char *buf, int n);
+int file_write(int fd, const char *buf, int n);
+
 int _write(int fd, const char *buf, int n) {
+    if (fd >= 3) return file_write(fd, buf, n);
     if (fd != 1 && fd != 2) {
         errno = EBADF;
         return -1;
@@ -35,6 +39,7 @@ int _write(int fd, const char *buf, int n) {
 }
 
 int _read(int fd, char *buf, int n) {
+    if (fd >= 3) return file_read(fd, buf, n);
     if (fd != 0) {
         errno = EBADF;
         return -1;
@@ -67,19 +72,7 @@ void _exit(int code) {
     for (;;) POWER_CTRL = 1;
 }
 
-int _close(int fd) { (void) fd; return 0; }
-int _isatty(int fd) { return fd >= 0 && fd <= 2; }
-int _fstat(int fd, struct stat *st) {
-    if (fd < 0 || fd > 2) { errno = EBADF; return -1; }
-    st->st_mode = S_IFCHR;
-    return 0;
-}
-int _lseek(int fd, int off, int whence) { (void) fd; (void) off; (void) whence; errno = ESPIPE; return -1; }
-int _open(const char *path, int flags, int mode) { (void) path; (void) flags; (void) mode; errno = ENOENT; return -1; }
-int _stat(const char *path, struct stat *st) { (void) path; (void) st; errno = ENOENT; return -1; }
-int _unlink(const char *path) { (void) path; errno = ENOENT; return -1; }
 int _link(const char *a, const char *b) { (void) a; (void) b; errno = EMLINK; return -1; }
-int _rename(const char *a, const char *b) { (void) a; (void) b; errno = ENOENT; return -1; }
 int _kill(int pid, int sig) { (void) pid; (void) sig; errno = EINVAL; return -1; }
 int _getpid(void) { return 1; }
 

@@ -6,6 +6,7 @@
 
 extern const char ea_janet_src[];
 void ea_register(JanetTable *env);
+void ea_register_disk(JanetTable *env);
 void ea_irq(uint32_t cause);
 void ea_trap(uint32_t cause, uint32_t epc, uint32_t tval);
 
@@ -31,6 +32,7 @@ int main(void) {
     janet_init();
     JanetTable *env = janet_core_env(NULL);
     ea_register(env);
+    ea_register_disk(env);
     printf("Janet %s on Electrical Age\n", JANET_VERSION);
     if (janet_dostring(env, ea_janet_src, "ea.janet", NULL) == 0)
         janet_dostring(env, "(ea/start)", "boot", NULL);

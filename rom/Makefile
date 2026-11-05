@@ -6,7 +6,7 @@ CROSS ?= riscv32-none-elf-
 CC_X = $(CROSS)gcc
 OBJCOPY = $(CROSS)objcopy
 JANET_SRC ?= $(error set JANET_SRC to a Janet 1.41.2 source tree)
-CFLAGS = -Os -ffunction-sections -fdata-sections -Wall -Wno-unused-function -Ibuild -Ijanet
+CFLAGS = -Os -ffunction-sections -fdata-sections -Wall -Wno-unused-function -Ibuild -Ijanet -Ifatfs
 LDFLAGS = -nostartfiles --specs=nosys.specs -Wl,--gc-sections -Wl,-Map,build/janet.map
 
 all: build/janet.rom
@@ -19,8 +19,8 @@ build/janet.c build/janet.h: janet/janetconf.h
 	cp build/janet-src/build/c/janet.c build/janet.c
 	cp build/janet-src/src/include/janet.h build/janet.h
 
-build/janet.elf: janet/start.S janet/blob.S janet/ea.janet janet/syscalls.c janet/main.c janet/ea.c janet/link.ld build/janet.c build/janet.h common/devices.h
-	$(CC_X) $(CFLAGS) -T janet/link.ld $(LDFLAGS) janet/start.S janet/blob.S janet/syscalls.c janet/main.c janet/ea.c build/janet.c -lm -o $@
+build/janet.elf: janet/start.S janet/blob.S janet/ea.janet janet/syscalls.c janet/main.c janet/ea.c janet/files.c janet/diskio.c fatfs/ff.c fatfs/ffunicode.c fatfs/ffconf.h janet/link.ld build/janet.c build/janet.h common/devices.h
+	$(CC_X) $(CFLAGS) -T janet/link.ld $(LDFLAGS) janet/start.S janet/blob.S janet/syscalls.c janet/main.c janet/ea.c janet/files.c janet/diskio.c fatfs/ff.c fatfs/ffunicode.c build/janet.c -lm -o $@
 
 # The slot image: the boot vector is at offset 0x400
 build/janet.rom: build/janet.elf

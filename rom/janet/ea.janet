@@ -204,6 +204,21 @@
     (sleep 0.1))
   height)
 
+# ---- the floppies (A: and B:, FAT12): slurp, spit, file/open and import work on their paths, e.g. "a:/main.janet"
+
+(defn disk/format "Format the floppy in drive (:a or :b), erasing it; label it if given (11 letters at most)."
+  [drive &opt label]
+  (if label (ea/disk-format drive label) (ea/disk-format drive)))
+(defn disk/list "The names in a directory of a floppy (default A:/); directories end in /." [&opt path]
+  (ea/disk-list (or path "A:/")))
+(defn disk/label "The floppy's label, or nil." [drive] (ea/disk-label drive))
+(defn disk/free "Bytes free on the floppy." [drive] (ea/disk-free drive))
+(defn disk/delete "Delete a file (or an empty directory)." [path] (ea/disk-delete path))
+(defn disk/rename "Rename or move a file on its floppy." [from to] (ea/disk-rename from to))
+(defn disk/mkdir "Make a directory." [path] (ea/disk-mkdir path))
+(defn disk/exists? "Is there a file at path?" [path]
+  (try (do (file/close (file/open path :rb)) true) ([_] false)))
+
 # ---- the terminal
 
 (defn alarm "Say something is wrong, on the terminal." [& msg]
@@ -239,9 +254,18 @@
       (print "parse error: " (parser/error p))
       (parser/flush p))))
 
+(defn- autorun [env]
+  (each p ["A:/main.janet" "B:/main.janet"]
+    (when (disk/exists? p)
+      (print "Running " p)
+      (spawn (fn [] (dofile p :env (make-env env))))
+      (break))))
+
 (defn ea/start
-  "Start the scheduler with the REPL on the terminal (the ROM does this at boot)."
+  "Start the scheduler: a floppy's main.janet (A: first, then B:) if there is one, and the REPL on the terminal (the
+  ROM does this at boot)."
   []
   (def env (make-env (curenv)))
+  (autorun env)
   (spawn repl env)
   (run))

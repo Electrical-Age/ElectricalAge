@@ -78,13 +78,14 @@ class DevicesTest {
         m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), img, false));
         m.floppy.write(FloppyController.IRQ, 1);
         cmd(m.floppy, 0, 10, Memory.SLOT_BYTES, 100, 1);
-        assertEquals(1, m.floppy.read(FloppyController.STATUS) & 1, "busy");
+        assertEquals(1, m.floppy.read(FloppyController.STATUS) & 1, "busy: 64 sectors moved at once, this tick's share");
+        assertEquals(73, m.mem.load8(Memory.SLOT_BYTES + 63 * Floppy.SECTOR));
         m.tick();
-        assertFalse(m.floppy.interrupt(), "64 sectors a tick: not done after one");
-        m.tick();
-        assertTrue(m.floppy.interrupt());
+        assertTrue(m.floppy.interrupt(), "the rest at the next tick");
         assertEquals(10, m.mem.load8(Memory.SLOT_BYTES));
         assertEquals(109, m.mem.load8(Memory.SLOT_BYTES + 99 * Floppy.SECTOR));
+        cmd(m.floppy, 0, 0, Memory.SLOT_BYTES, 1, 1);
+        assertEquals(2, m.floppy.read(FloppyController.STATUS) & 3, "a small read is done at once");
     }
 
     @Test
@@ -97,7 +98,6 @@ class DevicesTest {
         assertEquals(FloppyController.ERR_PROTECTED, m.floppy.read(FloppyController.ERROR));
         f.writeProtected = false;
         cmd(m.floppy, 1, 3, Memory.SLOT_BYTES, 1, 2);
-        m.tick();
         assertTrue(f.dirty());
         assertEquals(0x5A, f.snapshot()[3 * Floppy.SECTOR]);
         assertFalse(f.dirty());
@@ -108,10 +108,8 @@ class DevicesTest {
         Machine m = withRam();
         m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), null, false));
         cmd(m.floppy, 0, 0, 2 * Memory.SLOT_BYTES, 1, 1);   // the ROM in slot 2
-        m.tick();
         assertEquals(FloppyController.ERR_MEMORY, m.floppy.read(FloppyController.ERROR));
         cmd(m.floppy, 0, 0, 0, 1, 1);                       // the NULL guard
-        m.tick();
         assertEquals(FloppyController.ERR_MEMORY, m.floppy.read(FloppyController.ERROR));
         cmd(m.floppy, 0, 2879, Memory.SLOT_BYTES, 2, 1);    // off the end of the disk
         assertEquals(FloppyController.ERR_RANGE, m.floppy.read(FloppyController.ERROR));

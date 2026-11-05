@@ -45,6 +45,17 @@
 #define BUS_DROPPED       EA_IO(3, 0x4C)
 #define BUS_LEVEL(c)      EA_IO(3, 0x80 + 4 * (c))   /* float bits, as of the tick's start */
 
+/* the floppy drives (A = 0, B = 1) */
+#define FD_DRIVE          EA_IO(4, 0x00)
+#define FD_LBA            EA_IO(4, 0x04)
+#define FD_ADDR           EA_IO(4, 0x08)   /* RAM only */
+#define FD_COUNT          EA_IO(4, 0x0C)   /* sectors of 512 bytes */
+#define FD_CMD            EA_IO(4, 0x10)   /* write 1: read the disk into RAM, 2: write RAM to the disk */
+#define FD_STATUS         EA_IO(4, 0x14)   /* bit 0 busy, 1 done, 2 error, 3/4 a disk in A/B, 5/6 A/B write-protected; write: clear done */
+#define FD_IRQ            EA_IO(4, 0x18)   /* bit 0: interrupt when done */
+#define FD_ERROR          EA_IO(4, 0x1C)   /* 1 no disk, 2 out of range, 3 not RAM, 4 write-protected, 5 busy, 6 bad command */
+#define FD_CHANGED        EA_IO(4, 0x20)   /* bit per drive: its disk changed; write bits to clear */
+
 /* power */
 #define POWER_CTRL        EA_IO(5, 0x00)   /* write 1: halt (power off), 2: reset */
 #define POWER_BREAK       EA_IO(5, 0x04)   /* read: 1 if Break was pressed (the software interrupt); write: clear it */

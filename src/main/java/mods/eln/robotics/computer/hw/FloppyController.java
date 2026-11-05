@@ -5,7 +5,8 @@ import mods.eln.robotics.computer.cpu.Trap;
 
 /**
  * Two floppy drives, A (0) and B (1). A transfer: set DRIVE, LBA, ADDR (RAM), COUNT (sectors), then write CMD = 1
- * (read the disk into RAM) or 2 (write RAM to the disk). It moves SECTORS_PER_TICK sectors at each tick and then
+ * (read the disk into RAM) or 2 (write RAM to the disk). It moves SECTORS_PER_TICK sectors a tick, starting at once
+ * with what is left of this tick's share (so a small read is done before the program's next instruction), and then
  * sets done, which raises the interrupt if enabled. A range that leaves the disk or touches anything but RAM fails
  * with an error code and moves nothing more.
  */
@@ -22,6 +23,7 @@ public final class FloppyController implements Device {
     private int cmd;              // the transfer in progress: 0 none, 1 read, 2 write
     private int done;             // sectors moved of it
     private boolean finished;
+    private int movedThisTick;
 
     FloppyController(Memory mem) {
         this.mem = mem;
@@ -76,6 +78,7 @@ public final class FloppyController implements Device {
         else {
             cmd = c;
             done = 0;
+            move(SECTORS_PER_TICK - movedThisTick);
         }
     }
 
@@ -85,15 +88,22 @@ public final class FloppyController implements Device {
         finished = true;
     }
 
-    /** One tick: move up to SECTORS_PER_TICK sectors of the transfer in progress. */
+    /** One tick: a new share of sectors, moved for the transfer in progress. */
     void tick() {
-        if (cmd == 0) return;
+        movedThisTick = 0;
+        move(SECTORS_PER_TICK);
+    }
+
+    /** Move up to max sectors of the transfer in progress. */
+    private void move(int max) {
+        if (cmd == 0 || max <= 0) return;
         Floppy f = drives[drive];
         if (f == null) {
             fail(ERR_NO_DISK);
             return;
         }
-        int n = Math.min(SECTORS_PER_TICK, count - done);
+        int n = Math.min(max, count - done);
+        movedThisTick += n;
         try {
             for (int s = 0; s < n; s++) {
                 int sector = lba + done, base = addr + done * Floppy.SECTOR, off = sector * Floppy.SECTOR;

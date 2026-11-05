@@ -132,4 +132,52 @@ class StdlibTest {
         type("(bus/level :red)");
         tick(5, "\n0.75\n> ");
     }
+
+    @Test
+    void floppiesFormatWriteReadList() {
+        Floppy f = new Floppy(java.util.UUID.randomUUID(), null, false);
+        m.floppy.insert(0, f);
+        type("(do (disk/format :a \"WORK\") (spit \"a:/notes.txt\" \"hello\") (disk/mkdir \"a:/lib\") :ok)");
+        tick(60, ":ok\n> ");
+        type("[(slurp \"a:/notes.txt\") (disk/list) (disk/label :a)]");
+        tick(20, "\n> ");
+        assertTrue(out.toString().contains("(@\"hello\" @[\"notes.txt\" \"lib/\"] \"WORK\")"), out.toString());
+        assertTrue(f.dirty());
+    }
+
+    @Test
+    void noDiskAndUnformattedSaySo() {
+        type("(slurp \"a:/x\")");
+        tick(20, "\n> ");
+        type("(disk/list)");
+        tick(20, "no disk in the drive");
+        m.floppy.insert(1, new Floppy(java.util.UUID.randomUUID(), null, false));
+        type("(disk/list \"b:/\")");
+        tick(20, "isn't formatted");
+    }
+
+    @Test
+    void writeProtectedDisksRefuseWrites() {
+        Floppy f = new Floppy(java.util.UUID.randomUUID(), null, false);
+        m.floppy.insert(0, f);
+        type("(disk/format :a)");
+        tick(60, "\n> ");
+        f.writeProtected = true;
+        type("(spit \"a:/x.txt\" \"no\")");
+        tick(20, "\n> ");
+        type("(disk/exists? \"a:/x.txt\")");
+        tick(20, "\nfalse\n> ");
+    }
+
+    @Test
+    void mainJanetRunsAtBoot() {
+        Floppy f = new Floppy(java.util.UUID.randomUUID(), null, false);
+        m.floppy.insert(0, f);
+        type("(do (disk/format :a) (spit \"a:/main.janet\" \"(spawn (fn [] (sleep 0.2) (print (+ 40 2))))\") :ok)");
+        tick(60, ":ok\n> ");
+        m.reset(Machine.RESET_POWER);
+        out.setLength(0);
+        tick(80, "42\n");
+        assertTrue(out.toString().contains("Running A:/main.janet"), out.toString());
+    }
 }
