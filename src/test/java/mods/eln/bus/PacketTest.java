@@ -195,4 +195,14 @@ class PacketTest {
         assertEquals(java.util.Map.of(17, 1, 20, 2), a.bus().addresses());
         assertEquals(List.of(17, 20), List.copyOf(a.bus().addresses().keySet()), "in order");
     }
+
+    @Test
+    void aPortLinkedThisTickSendsAtTheNext() {
+        BusPort a = device(17), rx = device(18);
+        BusNet.link(a, rx);
+        assertNull(a.bus());
+        assertTrue(a.send(new Packet(18, 17, PacketType.PRESS, 1, 0)), "kept until the rebuild");
+        BusNet.tick();
+        assertEquals(1, rx.pending());
+    }
 }

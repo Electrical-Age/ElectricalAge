@@ -115,8 +115,14 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
 
     /** Its registers on the bus. */
     public static final int REG_TARGET = 0, REG_POSITION = 1, REG_SPEED_LIMIT = 2, REG_STATE = 3, REG_LOAD = 4;
-    /** Screen packet: its bus address (a float; anything but 17..255: none). */
-    public static final byte setAddressId = 1;
+    /** Screen packets: its bus address, the car panel's first address (floats; anything but 17..255: none). */
+    public static final byte setAddressId = 1, setPanelBaseId = 2;
+
+    // the car's panel (ElevatorPanel): what each slot holds, the first slot's address, which lamps are lit (saved);
+    // a bus port per filled slot, its address panelBase + slot, on the drive's bus (the travelling cable)
+    public final int[] panel = new int[ElevatorPanel.SLOTS];
+    public int panelBase, panelLit;
+    final BusPort[] slotPorts = new BusPort[ElevatorPanel.SLOTS];
 
     public LinearServoDriveElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
@@ -187,9 +193,109 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         needPublish();
     }
 
-    /** A rider pressed the car's panel (it has no buttons of its own: Baughn 2026-11-05, no magic stepping). */
-    public void panel(Player player, boolean up) {
-        say(player, wiredUp() ? I18N.tr("This elevator follows its setpoint wire") : I18N.tr("This elevator is driven over its RS485 bus"));
+    // ---- the car's panel
+
+    /**
+     * A rider clicked slot i of the car's panel: with an Addressable Button or Light in hand, an empty slot takes it;
+     * sneaking with an empty hand, a full one gives it back; an empty hand presses a button (`press` to everyone, from
+     * the slot's address).
+     */
+    public void panelClicked(Player player, int i) {
+        if (i < 0 || i >= panel.length) return;
+        var hand = player.getMainHandItem();
+        int kind = kindOf(hand);
+        if (panel[i] == ElevatorCar.PANEL_NONE) {
+            if (kind == ElevatorCar.PANEL_NONE) {
+                say(player, I18N.tr("Put an Addressable Button or Light here"));
+                return;
+            }
+            panel[i] = kind;
+            if (!player.getAbilities().instabuild) hand.shrink(1);
+            if (panelBase == 0) say(player, I18N.tr("Set the panel's first address in the drive's screen"));
+        } else if (player.isShiftKeyDown() && hand.isEmpty()) {
+            player.getInventory().add(stackOf(panel[i]));
+            panel[i] = ElevatorCar.PANEL_NONE;
+            panelLit &= ~(1 << i);
+        } else if (panel[i] == ElevatorCar.PANEL_BUTTON && hand.isEmpty()) {
+            if (slotPorts[i] != null) slotPorts[i].send(new Packet(Packet.BROADCAST, slotPorts[i].address(), PacketType.PRESS, 0, 0));
+            player.level().playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.STONE_BUTTON_CLICK_ON,
+                net.minecraft.sounds.SoundSource.BLOCKS, 0.4f, 1.2f);
+            return;
+        } else return;
+        panelPorts();
+        showPanel();
+        needPublish();
+    }
+
+    /** What an item would be in the panel: PANEL_BUTTON, PANEL_LIGHT or PANEL_NONE. */
+    static int kindOf(net.minecraft.world.item.ItemStack s) {
+        if (!(s.getItem() instanceof mods.eln.node.six.SixNodeItem si)) return ElevatorCar.PANEL_NONE;
+        if (si.descriptor instanceof mods.eln.sixnode.busdevice.AddressableButtonDescriptor) return ElevatorCar.PANEL_BUTTON;
+        if (si.descriptor instanceof mods.eln.sixnode.busdevice.AddressableLightDescriptor) return ElevatorCar.PANEL_LIGHT;
+        return ElevatorCar.PANEL_NONE;
+    }
+
+    /** The item a slot holds. */
+    static net.minecraft.world.item.ItemStack stackOf(int kind) {
+        String name = kind == ElevatorCar.PANEL_BUTTON ? "Addressable Button" : "Addressable Light";
+        return Eln.findItemStack(name, 1);
+    }
+
+    /** Slot i's address: panelBase + i, or 0 (no panel address, or past 255). */
+    public int slotAddress(int i) {
+        int a = panelBase + i;
+        return panelBase != 0 && Packet.deviceAddress(a) ? a : 0;
+    }
+
+    /** A port for each filled slot, at its address, on the drive's bus; none for an empty one. */
+    void panelPorts() {
+        for (int i = 0; i < panel.length; i++) {
+            if (panel[i] == ElevatorCar.PANEL_NONE) {
+                if (slotPorts[i] != null) mods.eln.bus.BusNet.detach(List.of(slotPorts[i]));
+                slotPorts[i] = null;
+                continue;
+            }
+            if (slotPorts[i] == null) {
+                slotPorts[i] = new BusPort();
+                slotPorts[i].listen(true);
+            }
+            slotPorts[i].setAddress(slotAddress(i));
+            mods.eln.bus.BusNet.link(port, slotPorts[i]);
+        }
+    }
+
+    /** The packets for the panel's slots: `power` sets a lamp (over half: lit). */
+    void servePanel() {
+        int lit = panelLit;
+        for (int i = 0; i < panel.length; i++) {
+            BusPort sp = slotPorts[i];
+            if (sp == null) continue;
+            for (Packet k; (k = sp.poll()) != null; )
+                if (k.type() == PacketType.POWER && sp.address() != 0 && k.target() == sp.address())
+                    lit = k.value() > 0.5f ? lit | 1 << i : lit & ~(1 << i);
+        }
+        if (lit != panelLit) {
+            panelLit = lit;
+            showPanel();
+        }
+    }
+
+    void showPanel() {
+        if (car != null) car.showPanel(panel, panelLit);
+    }
+
+    @Override
+    public void connectJob() {
+        super.connectJob();
+        panelPorts();   // (the travelling cable: the slots on the drive's bus again)
+    }
+
+    @Override
+    public void disconnectJob() {
+        super.disconnectJob();
+        List<BusPort> ps = new ArrayList<>();
+        for (BusPort p : slotPorts) if (p != null) ps.add(p);
+        mods.eln.bus.BusNet.detach(ps);
     }
 
     // ---- the bus
@@ -250,6 +356,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         clock++;
         if (travel < 0 || clock % 20 == 0) scan(level);
         serveBus();
+        servePanel();
         Drive drive = LinearServoDriveDescriptor.drive;
         double ratio = machine.voltageRatio();
         if (machine.state() == MachineState.RUNNING) {
@@ -406,6 +513,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             car = c;
         }
         setup(car);
+        showPanel();
         return car;
     }
 
@@ -512,6 +620,13 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
 
     @Override
     public void onBreakElement() {
+        for (int i = 0; i < panel.length; i++)   // (the panel's parts come back)
+            if (panel[i] != ElevatorCar.PANEL_NONE && world() instanceof ServerLevel l) {
+                BlockPos p = node.coordonate.pos();
+                net.minecraft.world.Containers.dropItemStack(l, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, stackOf(panel[i]));
+                panel[i] = ElevatorCar.PANEL_NONE;
+            }
+        panelPorts();
         if (car != null) car.discard();
         else if (carId != null && world() instanceof ServerLevel l && l.getEntity(carId) instanceof ElevatorCar c) c.discard();
         Eln.ghostManager.removeObserver(node.coordonate);
@@ -544,9 +659,15 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
     @Override
     public byte networkUnserialize(java.io.DataInputStream stream) {
         byte id = super.networkUnserialize(stream);
-        if (id == setAddressId) {
+        if (id == setAddressId || id == setPanelBaseId) {
             try {
-                setAddress(Math.round(stream.readFloat()));
+                int a = Math.round(stream.readFloat());
+                if (id == setAddressId) setAddress(a);
+                else {
+                    panelBase = Packet.deviceAddress(a) ? a : 0;
+                    panelPorts();
+                    needPublish();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -593,6 +714,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             stream.writeByte(status());
             stream.writeByte(port.address());
             stream.writeBoolean(port.bus() != null);
+            stream.writeByte(panelBase);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -612,6 +734,9 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         nbt.putByte("fault", fault);
         if (speedLimit > 0) nbt.putDouble("speedLimit", speedLimit);
         if (port.address() != 0) nbt.putInt("addr", port.address());
+        if (panelBase != 0) nbt.putInt("panelBase", panelBase);
+        nbt.putIntArray("panel", panel);
+        if (panelLit != 0) nbt.putInt("panelLit", panelLit);
         if (carId != null) {
             nbt.putLong("carMost", carId.getMostSignificantBits());
             nbt.putLong("carLeast", carId.getLeastSignificantBits());
@@ -629,6 +754,11 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         fault = nbt.getByteOr("fault", NO_FAULT);
         speedLimit = Math.max(0, nbt.getDoubleOr("speedLimit", 0));   // ("proportional" of before 2026-11-05 is ignored: always)
         port.setAddress(nbt.getIntOr("addr", 0));
+        panelBase = nbt.getIntOr("panelBase", 0);
+        int[] p = nbt.getIntArray("panel").orElse(new int[0]);
+        for (int i = 0; i < panel.length; i++) panel[i] = i < p.length && p[i] >= 0 && p[i] <= 2 ? p[i] : ElevatorCar.PANEL_NONE;
+        panelLit = nbt.getIntOr("panelLit", 0);
+        panelPorts();
         carId = nbt.contains("carMost") ? new UUID(nbt.getLongOr("carMost", 0), nbt.getLongOr("carLeast", 0)) : null;
     }
 
@@ -641,6 +771,11 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         info.put(I18N.tr("Target"), String.format("%.0f m", target));
         info.put(I18N.tr("Speed"), String.format("%.2f m/s", Math.abs(speed)));
         info.put(I18N.tr("Address"), port.address() == 0 ? I18N.tr("none (set it in its screen)") : String.valueOf(port.address()));
+        int buttons = 0, lights = 0;
+        for (int k : panel) if (k == ElevatorCar.PANEL_BUTTON) buttons++; else if (k == ElevatorCar.PANEL_LIGHT) lights++;
+        if (buttons + lights > 0)
+            info.put(I18N.tr("Car panel"), I18N.tr("%1$ buttons, %2$ lights", buttons, lights) + ", " + (panelBase == 0 ? I18N.tr("no address")
+                : I18N.tr("addresses %1$ to %2$", panelBase, Math.min(255, panelBase + ElevatorPanel.SLOTS - 1))));
         info.put(I18N.tr("State"), stateText());
         return info;
     }

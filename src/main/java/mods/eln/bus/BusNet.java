@@ -48,6 +48,7 @@ public final class BusNet {
             }
             if (!p.links.isEmpty() || p.bus != null) dirty = true;
             p.links.clear();
+            p.early = null;
             ALL.remove(p);
         }
     }
@@ -88,6 +89,11 @@ public final class BusNet {
             for (Bus o : old)
                 for (int c = 0; c < BusChannel.COUNT; c++) if ((held >> c & 1) != 0) nb.level[c] = Math.max(nb.level[c], o.level[c]);
             for (Bus o : old) nb.droppedTotal += o.droppedTotal;
+            for (BusPort p : nb.ports)
+                if (p.early != null) {   // (sent before the port was on a bus)
+                    nb.outbox.addAll(p.early);
+                    p.early = null;
+                }
             made.add(nb);
         }
         // packets still queued go with their sender to its new bus (a sender no bus reaches now: dropped)

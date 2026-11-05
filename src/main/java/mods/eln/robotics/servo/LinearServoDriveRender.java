@@ -14,6 +14,8 @@ public class LinearServoDriveRender extends TransparentNodeElementRender impleme
     /** Its bus address (0: none), and whether its bus pin is on a bus (its screen). */
     public int address;
     public boolean onBus;
+    /** The car panel's first address (0: none). */
+    public int panelBase;
 
     public LinearServoDriveRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
@@ -33,6 +35,7 @@ public class LinearServoDriveRender extends TransparentNodeElementRender impleme
             status = stream.readByte();
             address = stream.readByte() & 0xFF;
             onBus = stream.readBoolean();
+            panelBase = stream.readByte() & 0xFF;
         } catch (IOException e) {
             e.printStackTrace();
         }

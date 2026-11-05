@@ -180,16 +180,42 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         return false;
     }
 
-    /** Server: a rider pressed the panel (top half: up a station, bottom half: down). */
-    void panelPressed(Player player, boolean up) {
+    /** Server: a rider clicked a slot of the panel. */
+    void panelClicked(Player player, int slot) {
         LinearServoDriveElement e = owner();
-        if (e != null) e.panel(player, up);
+        if (e != null) e.panelClicked(player, slot);
+    }
+
+    /** The panel's slots, 2 bits each (PANEL_NONE, PANEL_BUTTON, PANEL_LIGHT), and which are lit (a bit each): synced. */
+    static final net.minecraft.network.syncher.EntityDataAccessor<Integer> PANEL_KINDS =
+        SynchedEntityData.defineId(ElevatorCar.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+    static final net.minecraft.network.syncher.EntityDataAccessor<Integer> PANEL_LIT =
+        SynchedEntityData.defineId(ElevatorCar.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+    public static final int PANEL_NONE = 0, PANEL_BUTTON = 1, PANEL_LIGHT = 2;
+
+    /** Server: show the panel's slots (kinds) and lamps (a lit bit each). */
+    void showPanel(int[] kinds, int lit) {
+        int k = 0;
+        for (int i = 0; i < kinds.length && i < 16; i++) k |= (kinds[i] & 3) << 2 * i;
+        if (entityData.get(PANEL_KINDS) != k) entityData.set(PANEL_KINDS, k);
+        if (entityData.get(PANEL_LIT) != lit) entityData.set(PANEL_LIT, lit);
+    }
+
+    /** What slot i holds (PANEL_NONE, PANEL_BUTTON, PANEL_LIGHT). */
+    public int panelKind(int i) {
+        return entityData.get(PANEL_KINDS) >> 2 * i & 3;
+    }
+
+    public boolean panelLit(int i) {
+        return (entityData.get(PANEL_LIT) >> i & 1) != 0;
     }
 
     // ---- vanilla plumbing
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder data) {
+        data.define(PANEL_KINDS, 0);
+        data.define(PANEL_LIT, 0);
     }
 
     @Override

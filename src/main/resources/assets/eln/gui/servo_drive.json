@@ -1,0 +1,41 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Linear Servo Drive"
+  },
+  {
+   "row": [
+    {
+     "text": "addressl",
+     "sample": "Car panel from"
+    },
+    {
+     "field": "address",
+     "chars": 5,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "panell",
+     "sample": "Car panel from"
+    },
+    {
+     "field": "panel",
+     "chars": 5,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "status",
+   "sample": "No address"
+  }
+ ],
+ "gap": 4
+}

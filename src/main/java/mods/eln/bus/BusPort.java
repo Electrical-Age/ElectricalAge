@@ -107,12 +107,22 @@ public final class BusPort {
         return inbox != null;
     }
 
-    /** Send a packet, delivered next tick; false: this port is on no bus. */
+    /**
+     * Send a packet, delivered next tick; false: this port is on no bus. A port linked since the last rebuild (no bus
+     * yet) keeps it until the rebuild puts it on one, at the next tick's start.
+     */
     public boolean send(Packet p) {
-        if (bus == null || p == null) return false;
-        bus.send(this, p);
+        if (p == null) return false;
+        if (bus != null) bus.send(this, p);
+        else if (!links.isEmpty()) {
+            if (early == null) early = new java.util.ArrayList<>();
+            early.add(new Bus.Queued(p, this, Bus.sequence++));
+        } else return false;
         return true;
     }
+
+    /** Packets sent before it was on a bus (send). */
+    java.util.List<Bus.Queued> early;
 
     /** The oldest packet waiting, or null. */
     public Packet poll() {

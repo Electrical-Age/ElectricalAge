@@ -230,7 +230,14 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     entities (`CabinWall`, thin boxes from the car's frame), solid as the plate is: on the client to its own player,
     on the server to every creature but players. The whole cabin sweeps the shaft (a block or a creature outside it in
     the way stops it); creatures already in the cabin go with it. A stopped car has floor ghosts under all 9 blocks.
-    GameTest `servo_elevator_cabin_walls_hold`. The car's floor
+    GameTest `servo_elevator_cabin_walls_hold`.
+  - The car's panel (`ElevatorPanel`, a thin board inside the back wall; Baughn 2026-11-05: real parts in it): 3 x 4
+    slots, each empty or holding an Addressable Button or Light, put in by clicking a slot with one in hand (sneak with
+    an empty hand: it comes back). Slot i's address is the panel's first address (the drive's screen, "Car panel
+    from") plus i, left to right and top to bottom as a rider sees them. A button slot sends `press` from its address
+    when clicked; `power` to a slot's address lights its lamp. The drive keeps the slots (NBT `panel`, `panelBase`,
+    `panelLit`; they drop when it's broken) and a bus port per filled slot on its own bus (the travelling cable:
+    nothing moves block to block); the car shows them (synced entity data). GameTest `servo_elevator_car_panel`. The car's floor
     stops level with the drive's foot at the bottom and with the top rail block at the top.
   - Commands (Baughn 2026-11-05: the drive is a plain actuator, an addressed RS485 device; no Station Markers, no
     setpoint bands, no panel stepping): its setpoint wire, a share of the travel to the nearest block, while connected;

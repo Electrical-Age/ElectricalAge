@@ -22,8 +22,8 @@ import static mods.eln.cad.models.OilKit.turned;
  * tinted by the render).</li>
  * <li>elevatorcar (node model, drawn by the car's entity renderer; +x toward the rail, centred on the middle of its
  * 3 x 3 blocks): the cabin, 3 x 3 x 3 outside (Baughn 2026-11-05): a 1 px tread plate (the car's collider is that
- * thick), 1 px walls on the rail side and both flanks, a 1 px roof, the front open; corner posts, a crosshead on the
- * rail side with guide shoes on the rail's fin, and the call panel inside the back wall.</li>
+ * thick), 1 px walls on the rail side and both flanks, a 1 px roof, the front open; corner posts and a lintel, guide
+ * shoes on the rail's fin, and the panel's board inside the back wall (its parts drawn by the renderer).</li>
  * <li>servo_rail (block model, pointing up): a square post with four guide fins.</li>
  * <li>station_marker (block model, pointing north, its back on the south face): a call box with one button.</li>
  * </ul>
@@ -72,9 +72,8 @@ public final class ServoParts {
         m.add(box(lo, top - 2.5, lo + 2.5, lo + 1.5, top - 1, hi - 2.5, "paint")); // the lintel over the opening
         m.add(box(hi, 3, 6.5, hi + 1.5, 6, 9.5, "darksteel"));                    // guide shoes on the rail's fin
         m.add(box(hi, top - 6, 6.5, hi + 1.5, top - 3, 9.5, "darksteel"));
-        m.add(box(hi - 2, 14, 5, hi - 1, 23, 11, "darksteel"));                   // the call panel, inside the back wall
-        m.add(box(hi - 2.4, 19.5, 7, hi - 2, 21.5, 9, "paint_green"));
-        m.add(box(hi - 2.4, 15.5, 7, hi - 2, 17.5, 9, "red"));
+        m.add(box(hi - 3, 12, 2, hi - 1, 28, 14, "darksteel"));                   // the panel's board, inside the back wall
+        // (ElevatorPanel: 3 x 4 slots of 4 px, its bottom 12 px up; the parts in them are drawn by the renderer)
         return m;
     }
 

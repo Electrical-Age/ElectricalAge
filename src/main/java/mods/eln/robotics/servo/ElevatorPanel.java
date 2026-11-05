@@ -12,18 +12,25 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.PartEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The car's call panel, on the rail side at chest height: a part of the car (as a dragon's head is of the dragon) that
- * can be clicked but not stood on. Its top half sends the car up a station, its bottom half down one.
+ * The car's panel, inside the cabin's back wall at chest height: a part of the car (as a dragon's head is of the dragon)
+ * that can be clicked but not stood on. It has SLOTS places, COLS across and ROWS down (slot 0 at the top left as a
+ * rider facing it sees it), each empty or holding an Addressable Button or Light put in by hand (Baughn 2026-11-05:
+ * real parts in the car's panel); the drive keeps them (LinearServoDriveElement.panelClicked).
  */
 public class ElevatorPanel extends PartEntity<ElevatorCar> {
-    /** Width and height (m), and where it sits: toward the rail and up from the plate's bottom centre. */
-    static final float W = 0.4f, H = 0.6f;
-    static final double OUT = ElevatorCar.HALF - ElevatorCar.WALL - 0.2, UP = 0.85;   // (inside the back wall)
+    /** Its slots: COLS across, ROWS down, each CELL square (m). */
+    public static final int COLS = 3, ROWS = 4, SLOTS = COLS * ROWS;
+    public static final double CELL = 0.25;
+    /** Width, height and depth (m), and where it sits: toward the rail (on the back wall's inside) and up from the plate. */
+    public static final float W = (float) (COLS * CELL), H = (float) (ROWS * CELL);
+    public static final double D = 2 / 16.0, OUT = ElevatorCar.HALF - ElevatorCar.WALL - D / 2;
+    public static final double UP = 0.75;
     final EntityDimensions size = EntityDimensions.fixed(W, H);
 
     public ElevatorPanel(ElevatorCar car) {
@@ -41,10 +48,31 @@ public class ElevatorPanel extends PartEntity<ElevatorCar> {
         zo = zOld = p.z;
     }
 
+    /** A thin board on the wall, W across and D deep (not the square of its dimensions). */
+    @Override
+    protected AABB makeBoundingBox(Vec3 at) {
+        ElevatorCar c = getParent();
+        if (c == null || c.railSide == null) return super.makeBoundingBox(at);
+        var right = c.railSide.getClockWise();
+        double hx = Math.abs(right.getStepX()) * W / 2 + Math.abs(c.railSide.getStepX()) * D / 2;
+        double hz = Math.abs(right.getStepZ()) * W / 2 + Math.abs(c.railSide.getStepZ()) * D / 2;
+        return new AABB(at.x - hx, at.y, at.z - hz, at.x + hx, at.y + H, at.z + hz);
+    }
+
+    /** The slot at a hit (relative to its position: the board's bottom centre), or -1. */
+    int slotAt(Vec3 location) {
+        var right = getParent().railSide.getClockWise();
+        double across = location.x * right.getStepX() + location.z * right.getStepZ();
+        int col = (int) Math.floor((across + W / 2) / CELL), row = (int) Math.floor((H - location.y) / CELL);
+        return col < 0 || col >= COLS || row < 0 || row >= ROWS ? -1 : row * COLS + col;
+    }
+
     @Override
     public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
-        if (!level().isClientSide()) getParent().panelPressed(player, location.y > H / 2);
+        int slot = slotAt(location);
+        if (slot < 0) return InteractionResult.PASS;
+        if (!level().isClientSide()) getParent().panelClicked(player, slot);
         return InteractionResult.SUCCESS;
     }
 

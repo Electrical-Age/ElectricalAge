@@ -39,6 +39,7 @@ public final class ServoCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new OverTheBus());
         cases.add(new ByTheWire());
+        cases.add(new CarPanel());
         cases.add(new Sag());
         cases.add(new Obstruction());
         cases.add(new SaveMidMove());
@@ -234,6 +235,86 @@ public final class ServoCases {
             ctx.check("servo bus: introspect lists its ports by the spec's names", ports.keySet().containsAll(
                     List.of("power", "setpoint", "enable", "in_position", "fault", "position"))
                 && ports.get("setpoint") == mods.eln.introspect.Port.Kind.SIGNAL && ports.keySet().stream().noneMatch(n -> n.startsWith("api_machine")), ports.toString());
+        }
+    }
+
+    /**
+     * The car's panel (Baughn 2026-11-05: real parts in it): an Addressable Button put in slot 0 by hand and a Light in
+     * slot 5, the panel's first address 50 set in the drive's screen. A press on the button reaches a computer on the
+     * drive's bus from address 50 (the travelling cable); power sent to 50 and 55 lights them, on the car too (synced);
+     * sneaking with an empty hand takes the light back.
+     */
+    static final class CarPanel extends Room {
+        Shaft s;
+        mods.eln.bus.BusPort pc;
+        final List<mods.eln.bus.Packet> heard = new java.util.ArrayList<>();
+        boolean took, litButton, litLight, carShows, gaveBack;
+
+        public String id() {
+            return "servo_elevator_car_panel";
+        }
+
+        public int ticks() {
+            return 50;
+        }
+
+        public void build(TestContext ctx) {
+            s = new Shaft(ctx, ctx.at(5, 1, 4), 0);
+            var d = s.drive(ctx);
+            d.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(LinearServoDriveElement.setPanelBaseId);
+                o.writeFloat(50);
+            }));
+            BlockPos beside = pinCable(ctx, s.head, d.front.right(), -4, mods.eln.node.voxel.CablePart.BUS);
+            pc = new mods.eln.bus.BusPort();
+            pc.setAddress(200);
+            pc.listen(true);
+            watch(dt -> {
+                ++tick;
+                var p = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+                var dr = s.drive(ctx);
+                if (tick == 5) {
+                    var v = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(beside, ctx.level()));
+                    mods.eln.bus.BusNet.link(pc, v.busPorts().get(0));
+                    p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, mods.eln.Eln.findItemStack("Addressable Button", 1));
+                    dr.panelClicked(p, 0);
+                    p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, mods.eln.Eln.findItemStack("Addressable Light", 1));
+                    dr.panelClicked(p, 5);
+                    took = dr.panel[0] == ElevatorCar.PANEL_BUTTON && dr.panel[5] == ElevatorCar.PANEL_LIGHT;
+                    p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+                    dr.panelClicked(p, 0);   // (a press)
+                }
+                if (tick > 5 && tick < 20) for (mods.eln.bus.Packet k; (k = pc.poll()) != null; ) heard.add(k);
+                if (tick == 20) {
+                    pc.send(new mods.eln.bus.Packet(50, 200, mods.eln.bus.PacketType.POWER, 0, 1));
+                    pc.send(new mods.eln.bus.Packet(55, 200, mods.eln.bus.PacketType.POWER, 0, 0.8f));
+                }
+                if (tick == 25) {
+                    litButton = (dr.panelLit & 1) != 0;
+                    litLight = (dr.panelLit >> 5 & 1) != 0;
+                    ElevatorCar c = s.car(ctx);
+                    carShows = c != null && c.panelKind(0) == ElevatorCar.PANEL_BUTTON && c.panelKind(5) == ElevatorCar.PANEL_LIGHT
+                        && c.panelLit(0) && c.panelLit(5) && c.panelKind(1) == ElevatorCar.PANEL_NONE;
+                    p.setShiftKeyDown(true);
+                    p.getInventory().clearContent();
+                    dr.panelClicked(p, 5);
+                    p.setShiftKeyDown(false);
+                    gaveBack = dr.panel[5] == ElevatorCar.PANEL_NONE && p.getInventory().countItem(mods.eln.Eln.findItemStack("Addressable Light", 1).getItem()) == 1;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            mods.eln.bus.BusNet.detach(List.of(pc));
+            ctx.check("servo panel: the slots take a button and a light", took, "");
+            ctx.check("servo panel: a press reaches the computer from the slot's address", heard.stream().anyMatch(k ->
+                k.type() == mods.eln.bus.PacketType.PRESS && k.source() == 50 && k.target() == mods.eln.bus.Packet.BROADCAST), heard.toString());
+            ctx.check("servo panel: power sent to a slot's address lights it", litButton && litLight, litButton + " " + litLight);
+            ctx.check("servo panel: the car shows the slots and lamps", carShows, "");
+            ctx.check("servo panel: sneaking with an empty hand takes the light back", gaveBack, "");
+            var w = s.drive(ctx).getWaila();
+            ctx.check("servo panel: Jade on the drive sums the panel up", "1 buttons, 0 lights, addresses 50 to 61".equals(w.get("Car panel")), w.toString());
         }
     }
 

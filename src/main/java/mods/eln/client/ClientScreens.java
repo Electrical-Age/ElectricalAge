@@ -23,7 +23,7 @@ final class ClientScreens {
         layout("sixnode.busmodule.BusModuleDescriptor", "bus_module");
         layout("sixnode.busdevice.AddressableButtonDescriptor", "bus_address");
         layout("sixnode.busdevice.AddressableLightDescriptor", "bus_address");
-        layout("robotics.servo.LinearServoDriveDescriptor", "bus_address");
+        layout("robotics.servo.LinearServoDriveDescriptor", "servo_drive");
         layout("sixnode.electricalalarm.ElectricalAlarmDescriptor", "electrical_alarm");
         layout("sixnode.electricalrelay.ElectricalRelayDescriptor", "electrical_relay");
         layout("sixnode.electricalgatesource.ElectricalGateSourceDescriptor", "gate_source");
