@@ -59,6 +59,8 @@ public class ElnModels implements DataProvider {
         if (name.endsWith("electric_heater")) return itemTexture("large_rheostat", item);
         if (name.endsWith("_transmitter") && name.startsWith("pipe_")) return itemTexture(name.replace("_transmitter", "_sensor"), item);   // (the pipe sensor devices: their items' icons)
         if (name.equals("boiler")) return itemTexture("electrical_furnace", item);
+        if (name.equals("addressable_button")) return itemTexture("signal_button", item);   // (until their own icons)
+        if (name.equals("addressable_light")) return itemTexture("led_vumeter", item);
         if (name.startsWith("fractionating_column")) return itemTexture("fuel_heat_furnace", item);
         if (name.equals("flare_stack")) return itemTexture("fuel_heat_furnace", item);
         if (name.endsWith("compact_steam_turbine")) return itemTexture("50v_turbine", item);   // (until its own icon)

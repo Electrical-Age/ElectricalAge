@@ -1,4 +1,4 @@
-// 26.3	2026-11-02T13:57:50.780666188	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-05T03:17:15.122827202	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -63,6 +63,8 @@ e66dc6bbecb715722e880e211fe59913fadcbedb data/eln/advancement/recipes/misc/50v_s
 80062b4f9d51ddc94f07ab57dcc4e3c6a3457591 data/eln/advancement/recipes/misc/800v_electrical_age_to_other_energy_exporter.json
 5efa0377fe291ce95e997e762d12ae33a202dd39 data/eln/advancement/recipes/misc/8kw_generator.json
 2129118260babb35c71c3abaa9e0cf9a0c2f3c90 data/eln/advancement/recipes/misc/8kw_generator_2.json
+2007c62000752cff5aaf2af4386805307f313111 data/eln/advancement/recipes/misc/addressable_button.json
+68861d8d427d3c6ce1c815773d54fd6347312c7a data/eln/advancement/recipes/misc/addressable_light.json
 79496b983ba9ed522455a9d984138a4452a98a45 data/eln/advancement/recipes/misc/advanced_chip.json
 77337270d3bcb51cd04bcfbbe92d2b91205082b0 data/eln/advancement/recipes/misc/advanced_electrical_motor.json
 3a619981495eb6f8bd59182f26cbc226b1dd4a70 data/eln/advancement/recipes/misc/advanced_energy_meter.json
@@ -426,6 +428,8 @@ a2699653d83e94fba3176fed07eb9bc947098d52 data/eln/recipe/50v_submersible_pump.js
 5503d8a4e479f03cd3c832b392fb5e93b78b7a44 data/eln/recipe/800v_electrical_age_to_other_energy_exporter.json
 b3b8ebbb856ae9ded0fbf671a186c8a3ce40f64b data/eln/recipe/8kw_generator.json
 4477cf450de2cf8492975fc1c1f3d14b2eacd62a data/eln/recipe/8kw_generator_2.json
+891330455503b65f892eed662eff4ed1cd487ed0 data/eln/recipe/addressable_button.json
+75ab5fb23b7b97569b3c3319e4272def18855c7f data/eln/recipe/addressable_light.json
 7ea06e3dd79c15911fb0a5e5b0dee923286aabfc data/eln/recipe/advanced_chip.json
 cc4e6d7b00eee3b561d0c68aaa1e8bf2a24be60f data/eln/recipe/advanced_electrical_motor.json
 ebc391934a2473c53d31289ac62a39b93aca573f data/eln/recipe/advanced_energy_meter.json

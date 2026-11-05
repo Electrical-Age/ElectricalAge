@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:signal_button",
+    "#c:circuits/basic",
+    "eln:field_bus_cable"
+  ],
+  "result": {
+    "id": "eln:addressable_button"
+  }
+}

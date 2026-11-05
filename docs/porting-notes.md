@@ -575,6 +575,13 @@ on 1.7.10) onto 26.x.
   Jade on a bus cable lists the device addresses on the bus (`Devices: 17, 30 (2x, DUPLICATE)`). A Bus I/O Module's
   terminal pins wear their channel's dye, so tuning one in the screen recolours the module (Baughn); unused ones stay
   signal-cable white.
+- Addressable Button and Addressable Light (RS485 bus devices, Baughn 2026-11-05; `sixnode/busdevice`, ids
+  `2 + (117 << 6)` and `3 + (117 << 6)`): a bus pin on the front edge in a voxel block (none in a plain block), and an
+  address, 17..255, set in a small screen (`gui/bus_address.json`, NBT `addr`; anything else means none). The button
+  wears the Signal Button's model: a click sends `press` (index 0) to every device from its address, and its lamp shows
+  the last `power` sent to it (over half: lit, NBT `lit`); sneaking opens its screen, as the wrench turns it. The light
+  wears the LED vuMeter's model and shines as bright as the last `power` sent to it, block light up to 7 (NBT `level`).
+  Recipes: the Signal Button or LED vuMeter, a cheap chip and Field Bus Cable, shapeless. GameTests `bus_device_*`.
 - Bus I/O Module (the field bus, `mods.eln.bus`; Baughn: 9 terminals), id `1 + (117 << 6)` beside the Modbus RTU,
   whose model it wears without the door (a proper model later). On a face, its front edge takes Field Bus Cable; its
   left, back and right edges hold three signal terminals each, numbered 1 to 9 round from the bus edge, pins 4 voxels

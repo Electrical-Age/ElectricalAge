@@ -1439,6 +1439,18 @@
   "kind": "six_node",
   "name": "bus_io_module"
  },
+ "eln:six_node@7490": {
+  "descriptor": "AddressableButtonDescriptor",
+  "display": "Addressable Button",
+  "kind": "six_node",
+  "name": "addressable_button"
+ },
+ "eln:six_node@7491": {
+  "descriptor": "AddressableLightDescriptor",
+  "display": "Addressable Light",
+  "kind": "six_node",
+  "name": "addressable_light"
+ },
  "eln:six_node@7492": {
   "descriptor": "ElectricalWatchDescriptor",
   "display": "Analog watch",

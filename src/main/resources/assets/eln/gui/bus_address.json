@@ -1,0 +1,27 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Addressable Button"
+  },
+  {
+   "row": [
+    {
+     "text": "addressl",
+     "sample": "Address"
+    },
+    {
+     "field": "address",
+     "chars": 5,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "status",
+   "sample": "No address"
+  }
+ ],
+ "gap": 4
+}

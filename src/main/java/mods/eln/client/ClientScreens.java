@@ -21,6 +21,8 @@ final class ClientScreens {
         layout("sixnode.wirelesssignal.source.WirelessSignalSourceDescriptor", "wireless_source");
         layout("sixnode.wirelesssignal.rx.WirelessSignalRxDescriptor", "wireless_rx");
         layout("sixnode.busmodule.BusModuleDescriptor", "bus_module");
+        layout("sixnode.busdevice.AddressableButtonDescriptor", "bus_address");
+        layout("sixnode.busdevice.AddressableLightDescriptor", "bus_address");
         layout("sixnode.electricalalarm.ElectricalAlarmDescriptor", "electrical_alarm");
         layout("sixnode.electricalrelay.ElectricalRelayDescriptor", "electrical_relay");
         layout("sixnode.electricalgatesource.ElectricalGateSourceDescriptor", "gate_source");
@@ -73,6 +75,8 @@ final class ClientScreens {
         reg(mods.eln.sixnode.wirelesssignal.source.WirelessSignalSourceDescriptor.class, mods.eln.sixnode.wirelesssignal.source.WirelessSignalSourceScreen::new);
         reg(mods.eln.sixnode.wirelesssignal.rx.WirelessSignalRxDescriptor.class, mods.eln.sixnode.wirelesssignal.rx.WirelessSignalRxScreen::new);
         reg(mods.eln.sixnode.busmodule.BusModuleDescriptor.class, mods.eln.sixnode.busmodule.BusModuleScreen::new);
+        reg(mods.eln.sixnode.busdevice.AddressableButtonDescriptor.class, mods.eln.sixnode.busdevice.BusAddressScreen::new);
+        reg(mods.eln.sixnode.busdevice.AddressableLightDescriptor.class, mods.eln.sixnode.busdevice.BusAddressScreen::new);
         reg(mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor.class, mods.eln.sixnode.electricalalarm.ElectricalAlarmScreen::new);
         reg(mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor.class, mods.eln.sixnode.electricalrelay.ElectricalRelayScreen::new);
         reg(mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor.class, mods.eln.sixnode.electricalgatesource.ElectricalGateSourceScreen::new);

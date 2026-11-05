@@ -1,4 +1,4 @@
-// 26.3	2026-11-03T02:45:18.259210093	eln-global/EA models
+// 26.3	2026-11-05T03:17:15.119463499	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -155,6 +155,8 @@ d3f7ed94b2c39ca208659c9b74b19a8f69852e0c assets/eln/items/50v_tar_sand_separator
 9dc9ea2ce20f8d70da5568f96a0960921b137ecf assets/eln/items/50v_turbine.json
 1998f593a0942b5dbc02fb68c54a4dce6e4aa99e assets/eln/items/800v_defence_turret.json
 4f5b5b7ff1ba79dbf11d64241c7e60513a2be893 assets/eln/items/8kw_generator.json
+2577c0af6e69ddc9b4a70a3bb9e9d36ecdb5e588 assets/eln/items/addressable_button.json
+9c0b279263d7e6f5ef115ad6f345ed313b366ec6 assets/eln/items/addressable_light.json
 abd143b4b826f1e308beb65242dfe3da13fb1920 assets/eln/items/advanced_chip.json
 c4e228fc0a55e7e20a2be28757a7a9b278f15af3 assets/eln/items/advanced_electrical_motor.json
 166cdd600a982afbb966c7e731c062dce3219ddf assets/eln/items/advanced_energy_meter.json
@@ -562,6 +564,10 @@ a67e6dcb8020e78ad48a94d67e13e7f5ad1c5fc6 assets/eln/models/item/50v_turbine.json
 75fbd54de4f60b17c45ad244767a1439a5e692bf assets/eln/models/item/800v_defence_turret_3d.json
 10a32a4bc319f2527e93ed103eb4455ecf4de7c9 assets/eln/models/item/8kw_generator.json
 75e9fe18745976132a3f870e7354b46c8e568ff5 assets/eln/models/item/8kw_generator_3d.json
+68614ddbcee32d03505a26baad11c078114237db assets/eln/models/item/addressable_button.json
+0fb9ded444e29c09608ec9f24ff8951c3a23f916 assets/eln/models/item/addressable_button_3d.json
+32d1f487d3e1daf3704432de277743bf0105e6fe assets/eln/models/item/addressable_light.json
+5cc58cbd509a873e72d14a463ab5ae89a8ab9367 assets/eln/models/item/addressable_light_3d.json
 6123ef3f5ec626f1c23c8a736ced676d2f70da6f assets/eln/models/item/advanced_chip.json
 2d26ebbda988c734f20532a2df23ddada008508f assets/eln/models/item/advanced_electrical_motor.json
 af735f3de534b39a0ff0f69bec96cd3787b8de50 assets/eln/models/item/advanced_energy_meter.json

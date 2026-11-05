@@ -48,7 +48,8 @@ final class MenusOpenCase implements TestCase {
     }
 
     /** A click toggles these; their screen opens with the wrench key held (GuiPacketCase). */
-    static final java.util.Set<String> CLICK_TOGGLES = java.util.Set.of("Wireless Button", "Wireless Switch");
+    static final java.util.Set<String> CLICK_TOGGLES = java.util.Set.of("Wireless Button", "Wireless Switch",
+        "Addressable Button");   // (a click presses it; sneaking opens its screen)
 
     public void measure(TestContext ctx) {
         FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());

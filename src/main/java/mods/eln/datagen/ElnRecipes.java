@@ -2290,6 +2290,12 @@ public final class ElnRecipes extends ElnRecipesBase {
             'b', stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get()),
             'c', findItemStack("Signal Cable"),
             'C', dictCheapChip);
+
+        // RS485 devices with an address: the plain part, a chip and the bus cable (Baughn 2026-11-05)
+        addShapelessRecipe(findItemStack("Addressable Button", 1),
+            findItemStack("Signal Button"), dictCheapChip, stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get()));
+        addShapelessRecipe(findItemStack("Addressable Light", 1),
+            findItemStack("LED vuMeter"), dictCheapChip, stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get()));
     }
 
     public static void recipeElectricalRedstone() {

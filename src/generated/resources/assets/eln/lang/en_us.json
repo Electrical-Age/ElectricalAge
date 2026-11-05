@@ -227,6 +227,8 @@
   "item.eln.50v_turbine": "50V Turbine",
   "item.eln.800v_defence_turret": "800V Defence Turret",
   "item.eln.8kw_generator": "8kW Generator",
+  "item.eln.addressable_button": "Addressable Button",
+  "item.eln.addressable_light": "Addressable Light",
   "item.eln.advanced_chip": "Advanced Chip",
   "item.eln.advanced_electrical_motor": "Advanced Electrical Motor",
   "item.eln.advanced_energy_meter": "Advanced Energy Meter",

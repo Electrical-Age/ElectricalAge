@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:led_vumeter",
+    "#c:circuits/basic",
+    "eln:field_bus_cable"
+  ],
+  "result": {
+    "id": "eln:addressable_light"
+  }
+}
