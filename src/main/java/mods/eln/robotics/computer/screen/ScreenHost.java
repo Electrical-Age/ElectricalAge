@@ -11,7 +11,8 @@ import java.util.Set;
  * The server's side of a computer's screen (Argon's review: the host keeps the scene). It reads the display channel's
  * messages into a Scene, turns console bytes into a Console tab (tab 0), and batches what to send to the players
  * watching: per tick, coalesced (a text or box redrawn many times in a tick goes once: Mosh's idea), or the whole
- * scene again when a batch would be too big. It also checks what clients send before it reaches the computer.
+ * scene again when a batch would be too big. It also checks what clients send before it reaches the computer. Its
+ * methods are synchronized: the computer's output comes from the pool, events from the network thread.
  */
 public final class ScreenHost {
     /** A tick's batch at most; past it, viewers get the scene again instead. */
@@ -28,7 +29,7 @@ public final class ScreenHost {
     private boolean overflow;
 
     /** Bytes from the computer's display channel: whole lines become messages. */
-    public void fromComputer(byte[] display) {
+    public synchronized void fromComputer(byte[] display) {
         if (display.length == 0) return;
         partial.append(new String(display, StandardCharsets.UTF_8));
         int nl;
@@ -41,7 +42,7 @@ public final class ScreenHost {
     }
 
     /** Bytes from the console (boot messages, traps, eprint): a Console tab, made when it first has something. */
-    public void console(byte[] bytes) {
+    public synchronized void console(byte[] bytes) {
         if (bytes.length == 0) return;
         if (!scene.tabs.containsKey(CONSOLE_TAB)) {
             take(List.of(new Form.Symbol("tab"), (long) CONSOLE_TAB, "Console"));
@@ -52,7 +53,7 @@ public final class ScreenHost {
     }
 
     /** The computer restarted: everyone's screen empties (a half-sent line is forgotten). */
-    public void reset() {
+    public synchronized void reset() {
         partial.setLength(0);
         take(List.of(new Form.Symbol("reset"), (long) Scene.DEFAULT_W, (long) Scene.DEFAULT_H));
     }
@@ -71,7 +72,7 @@ public final class ScreenHost {
      * What to send every watching player this tick: the batch's lines, coalesced. Null when it was too big: send each
      * the replay() instead. Empty when there is nothing.
      */
-    public List<String> takeBatch() {
+    public synchronized List<String> takeBatch() {
         if (overflow) {
             overflow = false;
             batch.clear();
@@ -102,12 +103,12 @@ public final class ScreenHost {
     }
 
     /** The messages that rebuild the screen from nothing, for a player who just opened it. */
-    public List<String> replay() {
+    public synchronized List<String> replay() {
         return scene.replay();
     }
 
     /** Rebuild from saved replay lines (the screen as it was when the world was saved). */
-    public void load(List<String> lines) {
+    public synchronized void load(List<String> lines) {
         for (String l : lines) {
             List<Object> m = Form.parse(l);
             if (m != null) scene.apply(m);
@@ -118,7 +119,7 @@ public final class ScreenHost {
      * A client's event checked (Argon's review: clients are untrusted): the line to pass to the computer, or null to
      * drop it. Its verb must be an event's, its tab and id numbers, and it must fit the size limits.
      */
-    public String check(String line) {
+    public synchronized String check(String line) {
         if (line == null || line.length() > MAX_SAVE) return null;
         List<Object> m = Form.parse(line);
         if (m == null) return null;

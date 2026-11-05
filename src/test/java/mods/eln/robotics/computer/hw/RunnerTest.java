@@ -100,17 +100,47 @@ class RunnerTest {
     void aKickAnswersWithinTheTick() throws IOException, InterruptedException {
         Runner r = new Runner(JanetRomTest.machine(2));
         ScreenProbe s = new ScreenProbe();
-        until(r, s, s::ready);
-        r.awaitIdle();
         java.util.concurrent.CountDownLatch done = new java.util.concurrent.CountDownLatch(1);
-        r.afterSlice = done::countDown;
+        // the screen's output as it is made, in order, from whichever thread holds the machine (the host's way)
+        r.screenOut = (resets, d, t) -> {
+            synchronized (s) {
+                s.feed(d, t);
+                if (s.log().contains("> (+ 40 2)\n42\n")) done.countDown();
+            }
+        };
+        for (int t = 0; t < 2000 && !s.ready(); t++) {
+            r.tick(true);
+            assertEquals(0, r.takeEditor().length, "nothing left for the exchange's buffers");
+            Thread.sleep(1);
+        }
+        assertTrue(s.ready(), "booted to the REPL through screenOut alone; console: " + s.console);
+        r.awaitIdle();
+        r.tick(true);   // (a new tick's budget: the boot's last slice may have used up its own)
+        r.awaitIdle();
         // no tick() from here: the kick alone runs the computer, on what is left of this tick's budget
         r.toEditor(s.submit("(+ 40 2)"));
         r.kick();
-        assertTrue(done.await(5, java.util.concurrent.TimeUnit.SECONDS), "a slice ran");
-        r.awaitIdle();
-        assertTrue(r.collectScreen());
-        s.feed(r.takeEditor(), r.takeTerminal());
-        assertTrue(s.log().contains("> (+ 40 2)\n42\n"), s.log());
+        assertTrue(done.await(5, java.util.concurrent.TimeUnit.SECONDS), s.log());
+    }
+
+    @Test
+    void holdAndStopKeepKicksOff() throws IOException {
+        Runner r = new Runner(JanetRomTest.machine(2));
+        ScreenProbe s = new ScreenProbe();
+        until(r, s, s::ready);
+        int[] pcs = new int[2];
+        r.hold(() -> {
+            pcs[0] = r.machine.cpu.pc;
+            r.toEditor(s.submit("(+ 1 1)"));
+            r.kick();   // (held: it must not run)
+            pcs[1] = r.machine.cpu.pc;
+        });
+        assertEquals(pcs[0], pcs[1]);
+        r.stop();
+        r.toEditor(s.submit("(+ 2 2)"));
+        r.kick();
+        assertFalse(r.tick(true), "a stopped runner doesn't exchange");
+        r.hold(() -> {
+        });   // (runs inline on a stopped runner rather than waiting forever)
     }
 }

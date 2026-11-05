@@ -62,7 +62,8 @@ public class ComputerRender extends TransparentNodeElementRender {
 
     /** Send a screen protocol event (one message) to the computer. */
     public void screenEvent(Object... parts) {
-        clientSendString(ComputerElement.SCREEN_EVENT_ID, Form.print(parts));
+        net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(
+            new ScreenEventPayload(tileEntity.getBlockPos(), Form.print(parts)));
     }
 
     /** Protocol lines from the server, applied to this copy of the scene. */

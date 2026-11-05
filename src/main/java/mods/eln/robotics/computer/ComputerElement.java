@@ -67,8 +67,9 @@ public class ComputerElement extends TransparentNodeElement {
     boolean loadPending = true;
     byte status = OFF;
     public final mods.eln.robotics.computer.screen.ScreenHost screen = new mods.eln.robotics.computer.screen.ScreenHost();
-    final java.util.Set<UUID> watchers = new java.util.HashSet<>();
-    final Map<UUID, Integer> eventsThisTick = new java.util.HashMap<>();
+    /** The players watching the screen, as watch() last saw them (read by the pool and network threads). */
+    volatile List<ServerPlayer> watching = List.of();
+    final Map<UUID, Integer> eventsThisTick = new java.util.concurrent.ConcurrentHashMap<>();
     int seenResets = -1;
     /** Its power switch (Baughn: power on/off beside Reset). Off: it stops and its RAM is lost; on: a cold boot. */
     boolean switchedOn = true;
@@ -105,7 +106,7 @@ public class ComputerElement extends TransparentNodeElement {
     void rebuild() {
         String now = chipsNow();
         if (runner != null) {
-            runner.awaitIdle();
+            runner.stop();
             unmountAll();
         }
         runner = null;
@@ -126,9 +127,11 @@ public class ComputerElement extends TransparentNodeElement {
         }
         if (!any) return;
         m.reset(Machine.RESET_POWER);
+        synchronized (screen) {
+            screen.reset();
+            seenResets = m.resets();
+        }
         runner = newRunner(m);
-        screen.reset();
-        seenResets = runner.machine.resets();
         syncDisks();
     }
 
@@ -166,10 +169,13 @@ public class ComputerElement extends TransparentNodeElement {
     void eject(int d) {
         if (mountedDisk[d] == null) return;
         if (runner != null) {
-            runner.awaitIdle();
-            runner.insert(d, null);
-        }
-        saveDisk(d);
+            Runner r = runner;
+            r.insert(d, null);
+            r.hold(() -> {
+                r.machine.floppy.insert(d, null);
+                saveDisk(d);
+            });
+        } else saveDisk(d);
         ComputerStore.unmount(mountedDisk[d]);
         mountedDisk[d] = null;
         floppies[d] = null;
@@ -203,6 +209,8 @@ public class ComputerElement extends TransparentNodeElement {
         if (loadPending) {
             loadPending = false;
             resume();
+            var l = node.coordonate.world();
+            if (l != null) ScreenEventPayload.add(l, node.coordonate.pos(), this);
         }
         if (runner == null) {
             setStatus(chipsNow().replace("-,", "").isEmpty() ? NO_CHIPS : OFF);
@@ -214,19 +222,13 @@ public class ComputerElement extends TransparentNodeElement {
         if (!in.isEmpty()) runner.deliver(in);
         for (int c = 0; c < levels.length; c++) levels[c] = port.read(c);
         runner.busState(port.address(), port.bus() != null, levels);
-        if (runner.tick(powered)) {
+        if (runner.tick(powered)) {   // (its screen output went to screenOutput)
             for (Packet p : runner.takePackets()) port.send(p);
-            if (runner.machine.resets() != seenResets) {
-                seenResets = runner.machine.resets();
-                screen.reset();
-            }
-            screen.console(runner.takeTerminal());
-            screen.fromComputer(runner.takeEditor());
             if (powered) machine.takeJoules(machine.ratedJoulesPerTick() * Math.min(1.0, runner.lastRan() / (double) runner.budget));
         }
         watch();
         eventsThisTick.clear();
-        Machine m = runner.machine;
+        Machine m = runner.machine;   // (halted is volatile)
         setStatus(!powered ? OFF : m.halted() ? HALTED : runner.running() || runner.lastRan() > 0 ? RUNNING : SLEEPING);
     }
 
@@ -242,12 +244,16 @@ public class ComputerElement extends TransparentNodeElement {
         rebuild();
         MinecraftServer s = server();
         if (runner == null || s == null) return;
+        Runner old = runner;
+        old.stop();
         Machine.Saved saved = ComputerStore.loadMachine(s, id);
-        if (saved != null && runner.machine.load(saved)) {
-            screen.load(ComputerStore.loadScreen(s, id));   // (the computer won't redraw: its scene was saved)
-            seenResets = runner.machine.resets();
+        if (saved != null && old.machine.load(saved)) {
+            synchronized (screen) {
+                screen.load(ComputerStore.loadScreen(s, id));   // (the computer won't redraw: its scene was saved)
+                seenResets = old.machine.resets();
+            }
         }
-        runner = newRunner(runner.machine);
+        runner = newRunner(old.machine);
         for (int d = 0; d < 2; d++) if (floppies[d] != null) runner.insert(d, floppies[d]);
     }
 
@@ -262,18 +268,20 @@ public class ComputerElement extends TransparentNodeElement {
         return l;
     }
 
-    /** New viewers get the whole scene; the others this tick's batch; viewers who left are forgotten. */
+    /**
+     * New viewers get the whole scene; the others what is left of this tick's batch; viewers who left are forgotten.
+     * Under the screen's lock, so a new viewer's replay and the pool's batches (screenOutput) can't miss each other.
+     */
     void watch() {
         List<ServerPlayer> v = viewers();
-        List<String> batch = screen.takeBatch();
-        java.util.Set<UUID> now = new java.util.HashSet<>();
-        for (ServerPlayer p : v) {
-            now.add(p.getUUID());
-            if (!watchers.contains(p.getUUID()) || batch == null) sendScreen(p, screen.replay());
-            else if (!batch.isEmpty()) sendScreen(p, batch);
+        synchronized (screen) {
+            List<String> batch = screen.takeBatch();
+            java.util.Set<ServerPlayer> before = new java.util.HashSet<>(watching);
+            for (ServerPlayer p : v)
+                if (!before.contains(p) || batch == null) sendScreen(p, screen.replay());
+                else if (!batch.isEmpty()) sendScreen(p, batch);
+            watching = List.copyOf(v);
         }
-        watchers.clear();
-        watchers.addAll(now);
     }
 
     void sendScreen(ServerPlayer p, List<String> lines) {
@@ -291,56 +299,72 @@ public class ComputerElement extends TransparentNodeElement {
         node.sendPacketToClient(bos, p);
     }
 
-    /** A player's screen event: checked, counted, and passed on to the computer (Break is the host's). */
     /** How long each screen event takes to answer, at debug level (debug.log): latency checks. */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("eln.computer");
-    long tracedAt;
+    volatile long tracedAt;
 
-    void screenEvent(ServerPlayer player, String line) {
+    /**
+     * A player's screen event (on the network thread: ScreenEventPayload): checked, counted, and passed on to the
+     * computer at once, without waiting for the server thread. Only players watching the screen may send them.
+     */
+    public void screenEvent(ServerPlayer player, String line) {
         if (LOG.isDebugEnabled()) {
             tracedAt = System.nanoTime();
-            LOG.debug("screen event {} (runner {})", line.length() > 60 ? line.substring(0, 60) : line, runner == null ? "none" : runner.running() ? "running" : "idle");
+            LOG.debug("screen event {}", line.length() > 60 ? line.substring(0, 60) : line);
         }
-        if (runner == null) return;
-        if (player != null && eventsThisTick.merge(player.getUUID(), 1, Integer::sum) > EVENTS_PER_TICK) return;
+        Runner r = runner;
+        if (r == null) return;
+        if (player != null) {
+            if (!watching.contains(player)) return;
+            if (eventsThisTick.merge(player.getUUID(), 1, Integer::sum) > EVENTS_PER_TICK) return;
+        }
         String ok = screen.check(line);
         if (ok == null) return;
-        if (ok.startsWith("(break ")) runner.pressBreak();   // (the interrupt stops a running task; the event says whose tab)
-        runner.toEditor((ok + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        runner.kick();
+        if (ok.startsWith("(break ")) r.pressBreak();   // (the interrupt stops a running task; the event says whose tab)
+        r.toEditor((ok + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        r.kick();
     }
 
-    /** The fast path's other half: after a slice, its screen output goes to the viewers at once (on the server thread). */
-    void flushScreen(Runner r) {
-        if (r != runner || !r.collectScreen()) return;
-        screen.console(r.takeTerminal());
-        screen.fromComputer(r.takeEditor());
-        if (tracedAt != 0 && LOG.isDebugEnabled()) {
-            LOG.debug("screen flushed {} ms after the event", (System.nanoTime() - tracedAt) / 1e6);
-            tracedAt = 0;
+    /**
+     * The computer's screen output, as it is made (on the pool thread after a slice, or the server thread at an
+     * exchange; the Machine held, so in order): into the scene, and to the players watching at once.
+     */
+    void screenOutput(int resets, byte[] display, byte[] console) {
+        synchronized (screen) {
+            if (resets != seenResets) {
+                seenResets = resets;
+                screen.reset();
+            }
+            screen.console(console);
+            screen.fromComputer(display);
+            List<String> batch = screen.takeBatch();
+            if (batch != null && batch.isEmpty()) return;
+            for (ServerPlayer p : watching) sendScreen(p, batch == null ? screen.replay() : batch);
+            if (tracedAt != 0 && LOG.isDebugEnabled()) {
+                LOG.debug("screen sent {} ms after the event", (System.nanoTime() - tracedAt) / 1e6);
+                tracedAt = 0;
+            }
         }
-        watch();
     }
 
-    /** A new runner, flushing its screen after every slice. */
+    /** A new runner, its screen output going to screenOutput. */
     Runner newRunner(Machine m) {
         Runner r = new Runner(m);
-        r.afterSlice = () -> {
-            MinecraftServer s = server();
-            if (s != null) s.execute(() -> flushScreen(r));
-        };
+        r.screenOut = this::screenOutput;
         return r;
     }
 
     /** What the REPL's log and the console hold, as text (GameTests read it). */
     public String screenText() {
         StringBuilder b = new StringBuilder();
-        for (var tab : screen.scene.tabs.values())
-            for (var e : tab.elements.values())
-                for (var line : e.lines) {
-                    for (var r : line) b.append(r.text());
-                    b.append('\n');
-                }
+        synchronized (screen) {
+            for (var tab : screen.scene.tabs.values())
+                for (var e : tab.elements.values())
+                    for (var line : e.lines) {
+                        for (var r : line) b.append(r.text());
+                        b.append('\n');
+                    }
+        }
         return b.toString();
     }
 
@@ -369,15 +393,17 @@ public class ComputerElement extends TransparentNodeElement {
                     switchedOn = !switchedOn;
                     if (switchedOn) rebuild();   // (a cold boot: the RAM lost what it held while off)
                     else if (runner != null) {
-                        runner.awaitIdle();
+                        runner.powerOff();
+                        runner.hold(() -> {
+                        });   // (waits out a slice, whose output goes before the screen empties)
                         screen.reset();
                     }
                     needPublish();
                 }
                 case RESET_ID -> {
                     if (runner != null) {
-                        runner.awaitIdle();
-                        runner.machine.reset(Machine.RESET_POWER);
+                        Runner r = runner;
+                        r.hold(() -> r.machine.reset(Machine.RESET_POWER));
                     }
                 }
                 case BREAK_ID -> {
@@ -457,10 +483,12 @@ public class ComputerElement extends TransparentNodeElement {
         if (port.address() != 0) nbt.putInt("addr", port.address());
         MinecraftServer s = server();
         if (runner != null && s != null && !loadPending) {
-            runner.awaitIdle();
-            ComputerStore.saveMachine(s, id, runner.machine.save());
-            ComputerStore.saveScreen(s, id, screen.replay());
-            for (int d = 0; d < 2; d++) saveDisk(d);
+            Runner r = runner;
+            r.hold(() -> {
+                ComputerStore.saveMachine(s, id, r.machine.save());
+                ComputerStore.saveScreen(s, id, screen.replay());
+                for (int d = 0; d < 2; d++) saveDisk(d);
+            });
         }
     }
 
@@ -480,7 +508,8 @@ public class ComputerElement extends TransparentNodeElement {
     @Override
     public void unload() {
         super.unload();
-        if (runner != null) runner.awaitIdle();
+        unlist();
+        if (runner != null) runner.stop();
         for (int d = 0; d < 2; d++) {
             saveDisk(d);
             if (mountedDisk[d] != null) ComputerStore.unmount(mountedDisk[d]);
@@ -489,12 +518,18 @@ public class ComputerElement extends TransparentNodeElement {
 
     @Override
     public void onBreakElement() {
-        if (runner != null) runner.awaitIdle();
+        unlist();
+        if (runner != null) runner.stop();
         unmountAll();
         MinecraftServer s = server();
         if (s != null) ComputerStore.deleteMachine(s, id);
         runner = null;
         super.onBreakElement();
+    }
+
+    void unlist() {
+        var l = node.coordonate.world();
+        if (l != null) ScreenEventPayload.remove(l, node.coordonate.pos(), this);
     }
 
     public byte status() {

@@ -57,6 +57,11 @@ public final class ElnNet {
             // an elevator car's motion (robotics.servo): the client places the car by it
             .playToClient(mods.eln.robotics.servo.SegmentPayload.TYPE, mods.eln.robotics.servo.SegmentPayload.CODEC,
                 (mods.eln.robotics.servo.SegmentPayload p, IPayloadContext ctx) -> mods.eln.robotics.servo.SegmentPayload.clientHandler.accept(p)));
+        // a computer screen's events, on the network thread (only this one: the others stay on the server thread)
+        modBus.addListener(RegisterPayloadHandlersEvent.class, e -> e.registrar(BuildInfo.channelVersion("1"))
+            .executesOn(net.neoforged.neoforge.network.registration.HandlerThread.NETWORK)
+            .playToServer(mods.eln.robotics.computer.ScreenEventPayload.TYPE, mods.eln.robotics.computer.ScreenEventPayload.CODEC,
+                mods.eln.robotics.computer.ScreenEventPayload::handle));
     }
 
     public static void sendToPlayer(ServerPlayer player, ByteArrayOutputStream bos) {
