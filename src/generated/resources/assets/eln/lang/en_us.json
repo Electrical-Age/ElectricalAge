@@ -323,6 +323,7 @@
   "item.eln.electrical_source": "Electrical Source",
   "item.eln.electrical_timer": "Electrical Timer",
   "item.eln.electrical_weather_sensor": "Electrical Weather Sensor",
+  "item.eln.elevator_disk": "Floppy Disk: Elevator",
   "item.eln.energy_converter_eln_to_other_hvublock": "800V Electrical Age to other energy exporter",
   "item.eln.energy_converter_eln_to_other_lvublock": "50V Electrical Age to other energy exporter",
   "item.eln.energy_converter_eln_to_other_mvublock": "200V Electrical Age to other energy exporter",

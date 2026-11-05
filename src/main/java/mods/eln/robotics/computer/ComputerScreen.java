@@ -29,6 +29,8 @@ public class ComputerScreen extends ElnScreen {
     EditBox input;
     final List<String> history = new ArrayList<>();
     int historyAt = -1;
+    /** Lines scrolled back from the end of the terminal (the wheel). */
+    int scrollBack;
     // the Files tab (kept across re-inits: a resize mustn't lose an edit)
     static final JanetLanguage JANET = new JanetLanguage();
     boolean files;
@@ -49,8 +51,9 @@ public class ComputerScreen extends ElnScreen {
         terminalWidgets.clear();
         fileWidgets.clear();
         super.init();
-        button(WIDTH - 118, 2, 56, () -> tr("Terminal"), () -> setFiles(false));
-        button(WIDTH - 60, 2, 55, () -> tr("Files"), () -> setFiles(true),
+        // (beside the title: inventory mods put their sort buttons at the top right)
+        button(64, 2, 56, () -> tr("Terminal"), () -> setFiles(false));
+        button(122, 2, 50, () -> tr("Files"), () -> setFiles(true),
             tr("Edit the files on the floppies (the computer must be running Janet)."));
 
         input = new EditBox(font, leftPos + TERM_X, topPos + TERM_Y + TERM_H + 4, TERM_W, 14, Component.literal("input"));
@@ -152,6 +155,7 @@ public class ComputerScreen extends ElnScreen {
             if (k == com.mojang.blaze3d.platform.InputConstants.KEY_RETURN || k == com.mojang.blaze3d.platform.InputConstants.KEY_NUMPADENTER) {
                 String line = input.getValue();
                 render.clientSendString(ComputerElement.TYPE_ID, line + "\n");
+                scrollBack = 0;
                 if (!line.isEmpty()) history.add(line);
                 historyAt = -1;
                 input.setValue("");
@@ -167,12 +171,26 @@ public class ComputerScreen extends ElnScreen {
         return super.keyPressed(event);
     }
 
+    /** The wheel over the terminal scrolls it back. */
+    @Override
+    public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+        if (!files && x >= leftPos + TERM_X && x < leftPos + TERM_X + TERM_W && y >= topPos + TERM_Y && y < topPos + TERM_Y + TERM_H) {
+            scrollBack += scrollY > 0 ? 3 : -3;
+            scrollBack = Math.max(0, scrollBack);
+            return true;
+        }
+        return super.mouseScrolled(x, y, scrollX, scrollY);
+    }
+
     @Override
     protected void extractDevice(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
         int x0 = leftPos + TERM_X, y0 = topPos + TERM_Y;
         if (!files) {
             g.fill(x0, y0, x0 + TERM_W, y0 + TERM_H, 0xFF101418);
-            List<String> lines = render.terminal.tail(ROWS);
+            int total = render.terminal.lineCount();
+            scrollBack = Math.max(0, Math.min(scrollBack, total - ROWS));
+            List<String> lines = new ArrayList<>();
+            for (int i = Math.max(0, total - ROWS - scrollBack); i < total - scrollBack; i++) lines.add(render.terminal.line(i));
             for (int r = 0; r < lines.size(); r++) {
                 String s = lines.get(r);
                 int y = y0 + 4 + r * LINE;

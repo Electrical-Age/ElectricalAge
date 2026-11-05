@@ -63,8 +63,8 @@
   (case (fiber/status f)
     :dead (finish f [:ok r])
     :error (finish f [:error r f])
-    :user8 (finish f [:error "interrupted (Break)" f])
-    :interrupted (finish f [:error "interrupted (Break)" f])
+    :user8 (finish f [:error "stopped by Break" f])
+    :interrupted (finish f [:error "stopped by Break" f])
     (park f r)))
 
 (defn- drop-fiber [f]
@@ -77,7 +77,7 @@
   (when (and repl-eval (not (index-of (fiber/status repl-eval) [:dead :error :user8 :interrupted])))
     (def f repl-eval)
     (drop-fiber f)
-    (finish f [:error "interrupted (Break)" f])))
+    (finish f [:error "stopped by Break" f])))
 
 (defn- packet [t]
   {:target (t 0) :source (t 1) :type (get bus/types (t 2) (t 2)) :index (t 3) :value (t 4)})
@@ -206,9 +206,10 @@
   (device/write address 0 height)
   (sleep 0.1)
   (forever
-    (def s (drive/state address))
+    # (a reply lost to a bus being rebuilt, as the car's parts come and go, is asked again)
+    (def s (try (drive/state address) ([_] :no-reply)))
     (when (= s :fault) (error (string "drive " address ": fault")))
-    (when (and (= s :in-position) (< (math/abs (- (drive/position address) height)) 0.01)) (break))
+    (when (and (= s :in-position) (< (math/abs (- (try (drive/position address) ([_] math/inf)) height)) 0.01)) (break))
     (when (> (now) until) (error (string "drive " address ": stalled")))
     (sleep 0.1))
   height)
@@ -218,8 +219,9 @@
 (defn disk/format "Format the floppy in drive (:a or :b), erasing it; label it if given (11 letters at most)."
   [drive &opt label]
   (if label (ea/disk-format drive label) (ea/disk-format drive)))
-(defn disk/list "The names in a directory of a floppy (default A:/); directories end in /." [&opt path]
-  (ea/disk-list (or path "A:/")))
+(defn disk/list "The names in a directory of a floppy (a path, or :a or :b; default A:/); directories end in /."
+  [&opt path]
+  (ea/disk-list (case path nil "A:/" :a "A:/" :b "B:/" path)))
 (defn disk/label "The floppy's label, or nil." [drive] (ea/disk-label drive))
 (defn disk/free "Bytes free on the floppy." [drive] (ea/disk-free drive))
 (defn disk/delete "Delete a file (or an empty directory)." [path] (ea/disk-delete path))
@@ -227,6 +229,18 @@
 (defn disk/mkdir "Make a directory." [path] (ea/disk-mkdir path))
 (defn disk/exists? "Is there a file at path?" [path]
   (try (do (file/close (file/open path :rb)) true) ([_] false)))
+
+# file/open, slurp and spit say why a floppy refused (no disk, not formatted, write-protected)
+(def- core-open file/open)
+(defn file/open "Open a file (see the core file/open); on a floppy, an error says why it failed."
+  [path &opt mode buffer-size]
+  (def f (try (core-open path (or mode :r) ;(if buffer-size [buffer-size] []))
+           ([err] (error (string err ": " (ea/disk-why))))))
+  (or f (error (string "could not open " path ": " (ea/disk-why)))))
+(defn slurp "Read a whole file into a buffer." [path]
+  (with [f (file/open path :rb)] (file/read f :all)))
+(defn spit "Write contents to a file (mode :wb, or :ab to append)." [path contents &opt mode]
+  (with [f (file/open path (or mode :wb))] (file/write f contents)) nil)
 
 # ---- the terminal
 
@@ -276,12 +290,29 @@
 
 (defn- revision [text] (string (hash text)))
 
+(defn run-file
+  "Run a Janet file's forms one after another in this task, so the program may sleep and wait on the bus at its top
+  level (dofile would treat a wait as the end of a form). A fresh environment unless env is given."
+  [path &opt env]
+  (default env (make-env (curenv)))
+  (def p (parser/new))
+  (parser/consume p (slurp path))
+  (parser/eof p)
+  (while (parser/has-more p)
+    (def form (parser/produce p))
+    (def thunk (compile form env path))
+    (if (function? thunk) (thunk)
+      (error (string path ":" (get thunk :line "?") ": " (get thunk :error)))))
+  (when (= :error (parser/status p)) (error (string path ": " (parser/error p)))))
+
 (defn- editor-handle [env op id path rev body]
   (try
     (case op
       "list" (editor-send "list" id path "" (string/join (disk/list path) "\n"))
       "open" (do
-               (unless (disk/exists? path) (error (string "no such file: " path " (" (ea/disk-why) ")")))
+               (unless (disk/exists? path)
+                 (def why (ea/disk-why))
+                 (error (if (= why "no such file") (string "no such file: " path) (string path ": " why))))
                (def t (string (slurp path)))
                (editor-send "file" id path (revision t) t))
       "save" (do
@@ -289,7 +320,7 @@
                (if (and now (not= rev "") (not= rev (revision now)))
                  (editor-send "conflict" id path (revision now) "")
                  (do (spit path body) (editor-send "saved" id path (revision body) ""))))
-      "run" (do (spawn (fn [] (dofile path :env (make-env env)))) (editor-send "ran" id path "" ""))
+      "run" (do (spawn run-file path (make-env env)) (editor-send "ran" id path "" ""))
       (editor-send "error" id path "" (string "unknown request " op)))
     ([err] (editor-send "error" id path "" (string err)))))
 
@@ -311,7 +342,7 @@
   (each p ["A:/main.janet" "B:/main.janet"]
     (when (disk/exists? p)
       (print "Running " p)
-      (spawn (fn [] (dofile p :env (make-env env))))
+      (spawn run-file p (make-env env))
       (break))))
 
 (defn ea/start

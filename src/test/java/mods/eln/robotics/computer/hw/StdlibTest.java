@@ -66,7 +66,7 @@ class StdlibTest {
         tick(3, null);
         assertTrue(m.runnable(), "busy");
         m.pressBreak();
-        tick(5, "interrupted (Break)");
+        tick(5, "stopped by Break");
         tick(5, "\n> ");
         type("(+ 2 2)");
         tick(5, "\n4\n> ");
@@ -77,7 +77,7 @@ class StdlibTest {
         type("(sleep 1000)");
         tick(3, null);
         m.pressBreak();
-        tick(5, "interrupted (Break)");
+        tick(5, "stopped by Break");
         tick(5, "\n> ");
     }
 
@@ -165,6 +165,7 @@ class StdlibTest {
         f.writeProtected = true;
         type("(spit \"a:/x.txt\" \"no\")");
         tick(20, "\n> ");
+        assertTrue(out.toString().contains("write-protected"), out.toString());
         type("(disk/exists? \"a:/x.txt\")");
         tick(20, "\nfalse\n> ");
     }
@@ -173,7 +174,7 @@ class StdlibTest {
     void mainJanetRunsAtBoot() {
         Floppy f = new Floppy(java.util.UUID.randomUUID(), null, false);
         m.floppy.insert(0, f);
-        type("(do (disk/format :a) (spit \"a:/main.janet\" \"(spawn (fn [] (sleep 0.2) (print (+ 40 2))))\") :ok)");
+        type("(do (disk/format :a) (spit \"a:/main.janet\" \"(def x (do (sleep 0.2) 40)) (print (+ x 2))\") :ok)");
         tick(60, ":ok\n> ");
         m.reset(Machine.RESET_POWER);
         out.setLength(0);
@@ -218,5 +219,13 @@ class StdlibTest {
         tick(10, "edited\n");
         ask("open", "6", "a:/nothing", "", "");
         assertTrue(editorReply("error")[4].contains("no such file"));
+    }
+
+    @Test
+    void waitingInsideTryWorks() {
+        type("(try (device/read 40 1) ([e] (string \"caught \" e)))");
+        tick(40, "caught no reply from 40");
+        type("(do (var x (try (device/read 40 1) ([_] 7))) x)");
+        tick(40, "\n7\n> ");
     }
 }

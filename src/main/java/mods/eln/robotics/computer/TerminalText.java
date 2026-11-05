@@ -8,7 +8,7 @@ package mods.eln.robotics.computer;
 public final class TerminalText {
     public static final int COLS = 52, LINES = 300;
 
-    private final java.util.ArrayDeque<StringBuilder> lines = new java.util.ArrayDeque<>();
+    private final java.util.ArrayList<StringBuilder> lines = new java.util.ArrayList<>();
     private StringBuilder cur = new StringBuilder();
     private int col;
     private final java.io.ByteArrayOutputStream pending = new java.io.ByteArrayOutputStream();
@@ -79,7 +79,7 @@ public final class TerminalText {
         cur = new StringBuilder();
         col = 0;
         lines.add(cur);
-        while (lines.size() > LINES) lines.poll();
+        if (lines.size() > LINES) lines.subList(0, lines.size() - LINES).clear();
     }
 
     public int lineCount() {
@@ -88,9 +88,7 @@ public final class TerminalText {
 
     /** Line i, 0 the oldest kept. */
     public String line(int i) {
-        int k = 0;
-        for (StringBuilder l : lines) if (k++ == i) return l.toString();
-        return "";
+        return i >= 0 && i < lines.size() ? lines.get(i).toString() : "";
     }
 
     /** The last n lines (fewer if there aren't). */

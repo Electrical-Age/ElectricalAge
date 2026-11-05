@@ -147,6 +147,7 @@ public class ComputerElement extends TransparentNodeElement {
                     // a blank disk, or a clone of one in another drive: it gets a disk of its own
                     UUID fresh = UUID.randomUUID();
                     if (want != null) ComputerStore.copyFloppy(s, want, fresh);
+                    else if (st.getItem() instanceof ProgramDiskItem pd && pd.image() != null) ComputerStore.saveFloppy(s, fresh, pd.image());
                     FloppyItem.setDisk(st, fresh);
                     want = fresh;
                     ComputerStore.mount(want);

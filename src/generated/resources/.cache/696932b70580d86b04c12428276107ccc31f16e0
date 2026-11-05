@@ -1,4 +1,4 @@
-// 26.3	2026-11-05T16:51:47.083736888	eln-global/EA models
+// 26.3	2026-11-05T17:37:47.93569703	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -245,6 +245,7 @@ b55ce47bf903d34bce21b06aba4f26656a73dd86 assets/eln/items/electrical_fuse_holder
 f942550f664d04b885e57c320fd2af40a7bb3e82 assets/eln/items/electrical_source.json
 9467d92a7d419dceb1e6c80e9635aefe5c897adf assets/eln/items/electrical_timer.json
 53b25454ae320761ea47496243bb9dc0d65d5721 assets/eln/items/electrical_weather_sensor.json
+c33ee3b1d3c4738709c2a5afb8393dce3fb6aa61 assets/eln/items/elevator_disk.json
 ec7b744ea49046485991028bdd2746e7b4def5be assets/eln/items/energy_converter_eln_to_other_hvublock.json
 acbc0e531ae04cea489392df8a08464ab0b3a179 assets/eln/items/energy_converter_eln_to_other_lvublock.json
 ca36c6f6ee1a11e8922ed285329e5e23fe4f3776 assets/eln/items/energy_converter_eln_to_other_mvublock.json
@@ -689,6 +690,7 @@ c04872bc0c835da539077fbec53ae42763f6af8b assets/eln/models/item/electrical_timer
 5403650102791e57aee15fdd9fc71af28f54da77 assets/eln/models/item/electrical_timer_3d.json
 bffdbb6499243f14dd2150076aea126c7648fd8c assets/eln/models/item/electrical_weather_sensor.json
 b0093880a455f0a49efadae010c013653441350d assets/eln/models/item/electrical_weather_sensor_3d.json
+b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/elevator_disk.json
 6edb5048179e10d620501d80d5c96e6811ddfc71 assets/eln/models/item/energy_meter.json
 e6afb16e4b0ce8dc4b31b2a6c51aae12c13d5bee assets/eln/models/item/energy_meter_3d.json
 7b6f9e3604c7a31e4ec7c9b0d3c4a845a9b02247 assets/eln/models/item/experimental_transporter.json

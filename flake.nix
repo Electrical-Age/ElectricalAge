@@ -21,10 +21,10 @@
             rev = "v1.41.2";
             hash = "sha256-sNRhcGG8JysmPHHXeRkYCt7qA75U6flptUEWWun+rDs=";
           };
-          nativeBuildInputs = [ pkgs.pkgsCross.riscv32-embedded.buildPackages.gcc ];
+          nativeBuildInputs = [ pkgs.pkgsCross.riscv32-embedded.buildPackages.gcc pkgs.mtools ];
           hardeningDisable = [ "all" ];
           buildPhase = "make JANET_SRC=$janet";
-          installPhase = "mkdir -p $out && cp build/*.rom $out/";
+          installPhase = "mkdir -p $out && cp build/*.rom build/*.img $out/";
         };
       });
 
