@@ -48,7 +48,8 @@ public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implem
     public static final double RETARGET_SHARE = 0.1, SPARE_SHARE = 0.75;
     public static final int RETARGET_TICKS = 10;
     /** Its signals (Machine API names). */
-    public static final String SETPOINT = "setpoint", ENABLE = "enable", IN_POSITION = "in_position", FAULT = "fault";
+    public static final String SETPOINT = "setpoint", ENABLE = "enable", IN_POSITION = "in_position", FAULT = "fault",
+        POSITION = "position";
     final Obj3D obj;
 
     public LinearServoDriveDescriptor(String name, String model) {
@@ -63,8 +64,11 @@ public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implem
      * the axis slow), and the API never pulls a weak line past its maximum power; the drive itself holds below the
      * stall share (with a band: LinearServoDriveElement.step). Brownout.STOP would stop it whenever the supply can't
      * carry its ask, a stop-and-go car on any weak line. Overvoltage trips rather than burns (a servo amplifier's
-     * protection; the car holds and faults). Power on the back; on each flank the input on the floor cable and the
-     * output on the ceiling cable, as before the API.
+     * protection; the car holds and faults). Power on the back. Every pin is on a flank's floor edge (Baughn
+     * 2026-11-05: a ceiling pin can't be wired, the rail is on top; several pins per edge, as the displays): the left
+     * flank has the setpoint in the middle, in-position on its left and position on its right; the right flank enable
+     * in the middle, fault on its left and the RS485 bus on its right (left and right as seen facing the flank). A
+     * plain cable meets only the middles.
      */
     public static MachineSpec spec() {
         return MachineSpec.consumer(drive.nominalVolts()).ratedWatts(drive.ratedWatts()).idleWatts(drive.idleWatts())
@@ -72,8 +76,10 @@ public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implem
             .heatCapacityJPerK(HEAT_CAPACITY_J_PER_K).heatLossWPerK(HEAT_LOSS_W_PER_K).overheatRiseKelvin(OVERHEAT_RISE_K)
             .overheatResetKelvin(OVERHEAT_RESET_K)
             .power(RelativeFace.BACK)
-            .signalIn(SETPOINT, RelativeFace.LEFT, CablePosition.FLOOR, 0).signalOut(IN_POSITION, RelativeFace.LEFT, CablePosition.CEILING)
-            .signalIn(ENABLE, RelativeFace.RIGHT, CablePosition.FLOOR, 1).signalOut(FAULT, RelativeFace.RIGHT, CablePosition.CEILING)
+            .signalIn(SETPOINT, RelativeFace.LEFT, CablePosition.FLOOR, 0)
+            .signalOut(IN_POSITION, RelativeFace.LEFT, CablePosition.FLOOR_LEFT).signalOut(POSITION, RelativeFace.LEFT, CablePosition.FLOOR_RIGHT)
+            .signalIn(ENABLE, RelativeFace.RIGHT, CablePosition.FLOOR, 1).signalOut(FAULT, RelativeFace.RIGHT, CablePosition.FLOOR_LEFT)
+            .bus(RelativeFace.RIGHT, CablePosition.FLOOR_RIGHT)
             .build();
     }
 

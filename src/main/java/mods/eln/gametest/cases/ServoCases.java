@@ -11,7 +11,6 @@ import mods.eln.robotics.Robotics;
 import mods.eln.robotics.servo.ElevatorCar;
 import mods.eln.robotics.servo.LinearServoDriveDescriptor;
 import mods.eln.robotics.servo.LinearServoDriveElement;
-import mods.eln.robotics.servo.StationMarkerBlock;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.electricalsource.ElectricalSourceElement;
 import mods.eln.sixnode.resistor.ResistorElement;
@@ -28,15 +27,16 @@ import java.util.List;
 
 /**
  * The servo layer's elevator (mods.eln.robotics; Baughn: the servo layer first, 200 V only, players ride the carriage):
- * a Linear Servo Drive with a six-block Servo Rail mast, stations at 0, 3 and 6, fed 200 V from the back. The drive is
- * placed looking south, so its front (the car's shaft) is north.
+ * a Linear Servo Drive with a six-block Servo Rail mast, fed 200 V from the back, commanded directly (command) or over
+ * its RS485 bus. The drive is placed looking south, so its front (the car's shaft) is north.
  */
 public final class ServoCases {
     private ServoCases() {
     }
 
     public static void addTo(List<TestCase> cases) {
-        cases.add(new ToStation());
+        cases.add(new OverTheBus());
+        cases.add(new ByTheWire());
         cases.add(new Sag());
         cases.add(new Obstruction());
         cases.add(new SaveMidMove());
@@ -49,22 +49,18 @@ public final class ServoCases {
 
     static final int TRAVEL = 6;
 
-    /** A drive at p with its mast, markers at the given stops, 200 V through a Power Resistor of `coal` core items (0: none). */
+    /** A drive at p with its mast, 200 V through a Power Resistor of `coal` core items (0: none). */
     static final class Shaft {
         LinearServoDriveElement d;
         BlockPos head;
         Direction front;
 
-        Shaft(TestContext ctx, BlockPos p, int[] marks, int coal) {
+        Shaft(TestContext ctx, BlockPos p, int coal) {
             d = (LinearServoDriveElement) ShaftArtCases.placeLooking(ctx, Robotics.DRIVE_ID, p, ShaftArtCases.SOUTH);
             if (d == null) throw new IllegalStateException("no drive at " + p);
             head = d.node.coordonate.pos();
             front = d.front;
             for (int i = 1; i <= TRAVEL; i++) ctx.level().setBlockAndUpdate(head.above(i), Robotics.SERVO_RAIL.get().defaultBlockState());
-            var left = front.left().toEnumFacing();
-            for (int m : marks)
-                ctx.level().setBlockAndUpdate(head.above(m).relative(left),
-                    Robotics.STATION_MARKER.get().defaultBlockState().setValue(StationMarkerBlock.FACING, left));
             var back = front.back().toEnumFacing();
             BlockPos at = head.relative(back);
             ctx.placeSix(Ids.six("Medium Voltage Cable"), at);
@@ -87,15 +83,25 @@ public final class ServoCases {
             return LinearServoDriveElement.at(ctx.level(), head);
         }
 
-        /** The volts on the in-position output (the left flank's ceiling cable) and the fault output (the right one's). */
+        /** The volts on the in-position output (the left flank's floor, on its left) and the fault output (the right flank's). */
         double inPositionVolts(TestContext ctx) {
-            var d = drive(ctx);
-            return d.machine.electricalLoad(d.front.left(), LRDU.Up).getU();
+            return pinVolts(ctx, drive(ctx).front.left(), 4);
         }
 
         double faultVolts(TestContext ctx) {
-            var d = drive(ctx);
-            return d.machine.electricalLoad(d.front.right(), LRDU.Up).getU();
+            return pinVolts(ctx, drive(ctx).front.right(), 4);
+        }
+
+        /** The position output (the left flank's floor, on its right). */
+        double positionVolts(TestContext ctx) {
+            return pinVolts(ctx, drive(ctx).front.left(), -4);
+        }
+
+        /** The volts on the floor pin of side at leftward. */
+        double pinVolts(TestContext ctx, mods.eln.misc.Direction side, int leftward) {
+            for (var pin : drive(ctx).facePins(side))
+                if (pin.lrdu() == LRDU.Down && pin.leftward() == leftward && pin.load() != null) return pin.load().getU();
+            return Double.NaN;
         }
 
         /** The drive's machine (its energy books). */
@@ -103,18 +109,9 @@ public final class ServoCases {
             return drive(ctx).machine;
         }
 
-        BlockPos marker(int m) {
-            return head.above(m).relative(front.left().toEnumFacing());
-        }
-
-        /** A click on the marker of stop m. */
+        /** Go to stop m (as its bus or wire would command it). */
         void call(TestContext ctx, int m) {
-            var level = ctx.level();
-            var state = level.getBlockState(marker(m));
-            Player p = FakePlayerFactory.getMinecraft(level);
-            LinearServoDriveElement e = StationMarkerBlock.driveOf(level, marker(m), state);
-            if (e == null) throw new IllegalStateException("the marker at " + m + " finds no drive");
-            e.callTo(p, marker(m));
+            drive(ctx).command(m);
         }
 
         ElevatorCar car(TestContext ctx) {
@@ -162,12 +159,20 @@ public final class ServoCases {
         }
     }
 
-    /** Called to its middle station, the car goes there and the drive says it's in position; a floor ghost holds it. */
-    static final class ToStation extends Room {
+    /**
+     * Driven over its RS485 bus (Baughn 2026-11-05): a bus cable on the floor beside its right flank, ending at the bus
+     * pin (the floor edge's right), and a port for a computer on it. Written its target (register 0) of 3 m, the car goes
+     * there; read back, its state (register 3) is in position and its position (register 1) 3 m; the position wire
+     * gives half its 50 V, in-position is high; a floor ghost holds the car.
+     */
+    static final class OverTheBus extends Room {
         Shaft s;
+        mods.eln.bus.BusPort pc;
+        final List<mods.eln.bus.Packet> replies = new java.util.ArrayList<>();
+        boolean onBus;
 
         public String id() {
-            return "servo_elevator_goes_to_a_station";
+            return "servo_elevator_driven_over_the_bus";
         }
 
         public int ticks() {
@@ -175,30 +180,104 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), new int[]{0, 3, 6}, 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
+            var d = s.drive(ctx);
+            d.networkUnserialize(ctx.stream(o -> {   // (its screen's packet)
+                o.writeByte(LinearServoDriveElement.setAddressId);
+                o.writeFloat(40);
+            }));
+            BlockPos beside = pinCable(ctx, s.head, d.front.right(), -4, mods.eln.node.voxel.CablePart.BUS);
+            pc = new mods.eln.bus.BusPort();
+            pc.setAddress(200);
+            pc.listen(true);
+            var v = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(beside, ctx.level()));
+            mods.eln.bus.BusNet.link(pc, v.busPorts().get(0));
             watch(dt -> {
-                if (++tick == 10) s.call(ctx, 3);
+                ++tick;
+                if (tick == 10) pc.send(new mods.eln.bus.Packet(40, 200, mods.eln.bus.PacketType.WRITE, LinearServoDriveElement.REG_TARGET, 3));
+                if (tick == 125) {
+                    onBus = s.drive(ctx).port.bus() != null && s.drive(ctx).port.bus() == pc.bus();
+                    pc.send(new mods.eln.bus.Packet(40, 200, mods.eln.bus.PacketType.READ, LinearServoDriveElement.REG_STATE, 0));
+                    pc.send(new mods.eln.bus.Packet(40, 200, mods.eln.bus.PacketType.READ, LinearServoDriveElement.REG_POSITION, 0));
+                    pc.send(new mods.eln.bus.Packet(40, 200, mods.eln.bus.PacketType.READ, 77, 0));   // (no such register: no reply)
+                }
+                if (tick > 125) for (mods.eln.bus.Packet k; (k = pc.poll()) != null; ) if (k.type() == mods.eln.bus.PacketType.REPLY) replies.add(k);
             });
         }
 
         public void measure(TestContext ctx) {
             unwatch();
+            mods.eln.bus.BusNet.detach(List.of(pc));
             var d = s.drive(ctx);
-            ctx.line("servo to a station: " + d.getWaila() + " stations " + java.util.Arrays.toString(d.stations) + " car floor " + s.carFloor(ctx));
-            ctx.check("servo: it reads the mast (6 blocks) and the markers' stations", d.travel == TRAVEL
-                && java.util.Arrays.equals(d.stations, new int[]{0, 3, 6}), d.travel + " " + java.util.Arrays.toString(d.stations));
-            ctx.check("servo: one car, standing at the called station", s.cars(ctx).size() == 1 && Math.abs(s.carFloor(ctx) - 3) < 1e-6,
+            ctx.line("servo over the bus: " + d.getWaila() + " car floor " + s.carFloor(ctx) + " replies " + replies);
+            ctx.check("servo bus: it reads the mast (6 blocks)", d.travel == TRAVEL, "" + d.travel);
+            ctx.check("servo bus: its bus pin is on the computer's bus", onBus, "");
+            ctx.check("servo bus: one car, standing at the target written", s.cars(ctx).size() == 1 && Math.abs(s.carFloor(ctx) - 3) < 1e-6,
                 s.cars(ctx).size() + " cars, floor " + s.carFloor(ctx));
-            ctx.check("servo: in position (status and output)", d.status() == LinearServoDriveElement.IN_POSITION
+            ctx.check("servo bus: replies to the asker: in position, at 3 m, and none for no register", replies.size() == 2
+                && replies.get(0).target() == 200 && replies.get(0).source() == 40
+                && replies.get(0).index() == LinearServoDriveElement.REG_STATE && replies.get(0).value() == LinearServoDriveElement.IN_POSITION
+                && replies.get(1).index() == LinearServoDriveElement.REG_POSITION && Math.abs(replies.get(1).value() - 3) < 1e-4, replies.toString());
+            ctx.check("servo bus: in position (status and output)", d.status() == LinearServoDriveElement.IN_POSITION
                 && s.inPositionVolts(ctx) > 40 && s.faultVolts(ctx) < 10, d.status() + " " + s.inPositionVolts(ctx) + " V");
-            ctx.check("servo: a floor ghost under the stopped car", d.ghostAt(3), "");
+            Wp9cCases.within(ctx, "servo bus: the position wire gives its share of the travel [V]", s.positionVolts(ctx), 25, 0.5);
+            ctx.check("servo bus: a floor ghost under the stopped car", d.ghostAt(3), "");
+            ctx.check("servo bus: Jade shows its address", "40".equals(d.getWaila().get("Address")), d.getWaila().toString());
             var ports = new java.util.TreeMap<String, mods.eln.introspect.Port.Kind>();
             for (var r : mods.eln.introspect.Describe.at(ctx.level(), d.node.coordonate.pos()))
                 for (var p : r.ports()) ports.put(p.name(), p.kind());
-            ctx.check("servo: introspect lists its ports by the spec's names", ports.keySet().containsAll(
-                    List.of("power", "setpoint", "enable", "in_position", "fault"))
+            ctx.check("servo bus: introspect lists its ports by the spec's names", ports.keySet().containsAll(
+                    List.of("power", "setpoint", "enable", "in_position", "fault", "position"))
                 && ports.get("setpoint") == mods.eln.introspect.Port.Kind.SIGNAL && ports.keySet().stream().noneMatch(n -> n.startsWith("api_machine")), ports.toString());
         }
+    }
+
+    /**
+     * Driven by its setpoint wire: a voxel signal cable beside its left flank, ending at the floor edge's middle pin,
+     * fed 25 V (half the travel: 3 m) by a Signal Source beyond it. The car goes there.
+     */
+    static final class ByTheWire extends Room {
+        Shaft s;
+
+        public String id() {
+            return "servo_elevator_follows_its_setpoint_wire";
+        }
+
+        public int ticks() {
+            return 140;
+        }
+
+        public void build(TestContext ctx) {
+            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
+            var d = s.drive(ctx);
+            BlockPos beside = pinCable(ctx, s.head, d.front.left(), 0, mods.eln.node.voxel.CablePart.tierOf("Signal Cable"));
+            var out = d.front.left();
+            BusModuleCases.source(ctx, beside.relative(out.toEnumFacing()), out.getInverse(), 25);
+        }
+
+        public void measure(TestContext ctx) {
+            var d = s.drive(ctx);
+            ctx.check("servo wire: the setpoint pin is wired", d.machine.signalConnected(LinearServoDriveDescriptor.SETPOINT), "");
+            Wp9cCases.within(ctx, "servo wire: it reads half its setpoint [0..1]", d.machine.signal(LinearServoDriveDescriptor.SETPOINT), 0.5, 0.01);
+            ctx.check("servo wire: the car stands at half the travel", Math.abs(s.carFloor(ctx) - 3) < 1e-6 && d.status() == LinearServoDriveElement.IN_POSITION,
+                s.carFloor(ctx) + " " + d.status());
+        }
+    }
+
+    /**
+     * A voxel cable of tier on the floor of the block beside the drive at head toward side, straight across it to the
+     * drive's face and ending at the floor pin at leftward (voxels left of the middle, seen facing that face); its block.
+     */
+    static BlockPos pinCable(TestContext ctx, BlockPos head, mods.eln.misc.Direction side, int leftward, int tier) {
+        var out = side.toEnumFacing();
+        BlockPos at = head.relative(out);
+        var fwd = out.getOpposite();   // (from the cable's block toward the drive)
+        int lx = fwd.getStepZ(), lz = -fwd.getStepX();
+        int lateral = 8 + leftward * (lx != 0 ? lx : lz);
+        int[] pts = fwd.getAxis() == net.minecraft.core.Direction.Axis.X
+            ? new int[]{0, 0, lateral, 16, 0, lateral} : new int[]{lateral, 0, 0, lateral, 0, 16};
+        CableCases.voxel(ctx, at, List.of(new mods.eln.node.voxel.CablePart(tier, 0, pts)));
+        return at;
     }
 
     /**
@@ -222,8 +301,8 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            stiff = new Shaft(ctx, ctx.at(2, 1, 1), new int[]{0, 6}, 0);
-            weak = new Shaft(ctx, ctx.at(8, 1, 1), new int[]{0, 6}, 42);   // (42 core items: 33 ohm)
+            stiff = new Shaft(ctx, ctx.at(2, 1, 1), 0);
+            weak = new Shaft(ctx, ctx.at(8, 1, 1), 42);   // (42 core items: 33 ohm)
             watch(dt -> {
                 tick++;
                 if (tick == 10) {
@@ -274,7 +353,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), new int[]{0, 3, 6}, 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
             stone = s.head.above(4).relative(s.front.toEnumFacing());   // in the shaft, a block below the top station
             ctx.level().setBlockAndUpdate(stone, Blocks.STONE.defaultBlockState());
             watch(dt -> {
@@ -319,7 +398,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), new int[]{0, 6}, 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
             watch(dt -> {
                 tick++;
                 if (tick == 10) s.call(ctx, 6);
@@ -385,7 +464,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), new int[]{0, 6}, 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
             watch(dt -> {
                 tick++;
                 var d = s.drive(ctx);
@@ -422,7 +501,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), new int[]{0, 6}, 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
             watch(dt -> {
                 tick++;
                 if (tick == 5) {
@@ -466,7 +545,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), new int[]{0, 6}, 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
             watch(dt -> {
                 if (++tick != 20 || s.car(ctx) == null) return;
                 for (int i = 0; i < 3; i++) {   // (the entities made right after the car)
@@ -543,8 +622,8 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            stiff = new Shaft(ctx, ctx.at(2, 1, 1), new int[]{0, 6}, 0);
-            weak = new Shaft(ctx, ctx.at(8, 1, 1), new int[]{0, 6}, 44);   // (44 core items: 47 ohm)
+            stiff = new Shaft(ctx, ctx.at(2, 1, 1), 0);
+            weak = new Shaft(ctx, ctx.at(8, 1, 1), 44);   // (44 core items: 47 ohm)
             watch(dt -> {
                 tick++;
                 if (tick == 10) {
@@ -613,7 +692,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), new int[]{0, 6}, 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
             watch(dt -> {
                 tick++;
                 var c = s.core(ctx);

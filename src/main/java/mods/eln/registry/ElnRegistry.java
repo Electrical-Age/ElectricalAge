@@ -56,6 +56,8 @@ public final class ElnRegistry {
 
     /** Every EA item, in 1.12 id order (creative tab, tests). */
     public static final List<DeferredItem<? extends Item>> ALL_ITEMS = new ArrayList<>();
+    /** Items kept registered (and in the data) but out of the tab: no longer made. */
+    public static final java.util.Set<DeferredItem<? extends Item>> RETIRED_ITEMS = new java.util.HashSet<>();
 
     public static final DeferredBlock<SixNodeBlock> SIX_NODE_BLOCK = BLOCKS.registerBlock("six_node", SixNodeBlock::new,
         p -> p.mapColor(MapColor.METAL).strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion().dynamicShape());
@@ -347,7 +349,7 @@ public final class ElnRegistry {
             .title(Component.literal("Electrical Age"))
             .icon(() -> new ItemStack(tabIcon.get()))
             .displayItems((params, out) -> ALL_ITEMS.forEach(i -> {
-                if (i != tabIcon && !mods.eln.node.DescriptorRegistry.isHiddenItem(i.get())) out.accept(i.get()); // 1.12 addWithoutRegistry
+                if (i != tabIcon && !RETIRED_ITEMS.contains(i) && !mods.eln.node.DescriptorRegistry.isHiddenItem(i.get())) out.accept(i.get()); // 1.12 addWithoutRegistry
             }))
             .build());
         BLOCKS.register(modBus);

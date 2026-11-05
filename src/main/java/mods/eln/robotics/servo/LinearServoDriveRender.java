@@ -11,6 +11,9 @@ import java.io.IOException;
 public class LinearServoDriveRender extends TransparentNodeElementRender implements mods.eln.introspect.ClientDescribable {
     final LinearServoDriveDescriptor desc;
     public byte status;
+    /** Its bus address (0: none), and whether its bus pin is on a bus (its screen). */
+    public int address;
+    public boolean onBus;
 
     public LinearServoDriveRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
@@ -28,6 +31,8 @@ public class LinearServoDriveRender extends TransparentNodeElementRender impleme
         super.networkUnserialize(stream);
         try {
             status = stream.readByte();
+            address = stream.readByte() & 0xFF;
+            onBus = stream.readBoolean();
         } catch (IOException e) {
             e.printStackTrace();
         }

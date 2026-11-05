@@ -226,15 +226,21 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   - A Linear Servo Drive (`eln:transparent_node@5504`) with a Servo Rail mast on its top, 2 to 32 blocks, moves an
     elevator car (an entity, a 1x1 floor plate with a frame) up and down on the drive's front side. The car's floor
     stops level with the drive's foot at the bottom and with the top rail block at the top.
-  - Stops: Station Markers fixed to the mast's side (or the drive's), one per floor, each a stop at its own height;
-    clicking one calls the car. With no markers, up to eight stops spread evenly. Riding, the car's panel sends it a
-    station up (top half) or down (bottom half). Every planned stop is on a whole block.
-  - Connections: 200 V on the back. Seen from the car's side, the left flank takes the setpoint on a floor cable and
-    gives in-position on a ceiling cable; the right flank takes enable on a floor cable (unconnected counts as enabled)
-    and gives the fault signal on a ceiling cable. Two signals a flank because the front is the shaft (on the Machine
-    API: signals at cable positions, `CablePosition.FLOOR`/`CEILING`). A connected
-    setpoint overrides the markers and the panel (its eight bands pick stations; an empty hand on the drive switches it
-    to a share of the travel, to the nearest block).
+  - Commands (Baughn 2026-11-05: the drive is a plain actuator, an addressed RS485 device; no Station Markers, no
+    setpoint bands, no panel stepping): its setpoint wire, a share of the travel to the nearest block, while connected;
+    else its registers on the bus: 0 target (blocks above its foot), 1 position, 2 speed limit (m/s, 0 none), 3 state
+    (idle, in position, moving, fault), 4 load (kg). It takes `write` (0 and 2), answers `read` with `reply` to the
+    asker, and sends `fault` (its code) to everyone when a fault starts. Its address (17..255, NBT `addr`) is set in
+    its screen (an empty hand). Every planned stop is on a whole block. The Station Marker stays registered (worlds
+    that hold one load cleanly) but has no recipe, isn't in the tab, and a click says it's no longer used; the old
+    `proportional` NBT key is ignored. The car's panel says how the elevator is driven (it has no buttons yet).
+  - Connections: 200 V on the back. Every pin is on a flank's floor edge (Baughn 2026-11-05: a ceiling pin can't be
+    wired with the rail on top; several pins per edge, as the displays): seen facing the flank, the left flank has the
+    setpoint in the middle, in-position on its left and position (share of the travel) on its right; the right flank
+    enable in the middle (unconnected counts as enabled), fault on its left and the bus on its right. A plain cable
+    meets only the middles; voxel cables meet each pin (Machine API 1.1: `CablePosition.FLOOR_LEFT`/`FLOOR_RIGHT`,
+    `bus(face, position)`, `FacePins`, `VoxelNode.connectPeerPins`). GameTests `servo_elevator_driven_over_the_bus`,
+    `servo_elevator_follows_its_setpoint_wire`.
   - Electrics: a Machine API consumer (`Machines.forElement`, the API's first new device): 200 V, rated ~3 kW (40 W
     idle plus lifting 120 kg net, two riders over the counterweight, at full speed; tsugumi-lab's choice),
     `Brownout.SLOW`. Each tick it asks for its step's work against the net weight over 80 % (a counterweight balances

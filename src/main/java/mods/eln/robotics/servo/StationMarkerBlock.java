@@ -23,9 +23,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.Map;
 
 /**
- * A Station Marker: a call box fixed to the side of a Servo Rail (or of its drive), its back on the rail. It makes a
- * stop of the car at its own height (the car's floor level with the marker's block), and a click calls the car there.
- * FACING points away from the rail.
+ * A Station Marker, no longer used (Baughn 2026-11-05: the drive is a plain actuator; floors are a program's, or
+ * Floor Sensors'). Kept registered so worlds and inventories that hold one load cleanly; it has no recipe and isn't in
+ * the tab, and a click says so. FACING points away from the rail.
  */
 public class StationMarkerBlock extends DirectionalBlock {
     static final Map<Direction, VoxelShape> SHAPES = Shapes.rotateAll(Block.box(3, 3, 14, 13, 13, 16));
@@ -74,9 +74,7 @@ public class StationMarkerBlock extends DirectionalBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
-        LinearServoDriveElement d = driveOf(level, pos, state);
-        if (d == null) player.sendOverlayMessage(Component.literal(I18N.tr("Not on the rail of a Linear Servo Drive")));
-        else d.callTo(player, pos);
+        player.sendOverlayMessage(Component.literal(I18N.tr("Station markers are no longer used: drive the elevator over its RS485 bus")));
         return InteractionResult.SUCCESS;
     }
 }

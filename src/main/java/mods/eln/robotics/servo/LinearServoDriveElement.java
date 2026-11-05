@@ -4,6 +4,9 @@ import mods.eln.Eln;
 import mods.eln.api.element.ElementMachine;
 import mods.eln.api.MachineState;
 import mods.eln.api.element.Machines;
+import mods.eln.bus.BusPort;
+import mods.eln.bus.Packet;
+import mods.eln.bus.PacketType;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;
@@ -58,6 +61,12 @@ import java.util.UUID;
  * far as what it got pays for (Drive.afterPaying), so a starved supply makes a slower car; its top speed also follows
  * the line voltage, and a move under way is retargeted when the line sags or recovers. Below the stall share, too hot
  * or overvolted it holds (the last two are faults; it never burns).
+ * <p>
+ * Commands: its setpoint wire (a share of the travel) while connected (Baughn: wires override), else its registers
+ * on the RS485 bus (Baughn 2026-11-05: a plain actuator, an addressed device): 0 target (blocks above its foot), 1
+ * position, 2 speed limit (m/s; 0: none), 3 state (STATUS_NAMES' order), 4 load (kg). It takes `write` (0 and 2),
+ * answers `read` with `reply` to the asker, and sends `fault` (its code, FAULT_NAMES' order) to everyone when a fault
+ * starts.
  */
 public class LinearServoDriveElement extends TransparentNodeElement implements mods.eln.introspect.Describable {
     /** What it shows (publish, lamp, Jade). */
@@ -78,15 +87,14 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
     /** Where the car is to go (whole blocks from the bottom). */
     public double target;
     public byte fault = NO_FAULT;
-    /** The setpoint spans the travel (else its eight bands pick stations). */
-    public boolean proportional;
+    /** The speed limit written to register 2 (m/s; 0: none). */
+    public double speedLimit;
     /** The car entity's UUID (it isn't saved with the world: found again within a session, else spawned anew). */
     public @Nullable UUID carId;
 
     // live
-    /** The rail's length (blocks; -1 not scanned yet) and the stations on it. */
+    /** The rail's length (blocks; -1 not scanned yet). */
     public int travel = -1;
-    public int[] stations = new int[0];
     @Nullable ElevatorCar car;
     /** The setpoint wire's last command (NaN: not wired), whether enable was high last tick. */
     double wired = Double.NaN;
@@ -100,11 +108,22 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
     /** Load on the car (kg), the force it holds along the axis (N), speed (m/s, + along the axis) this tick. */
     public double loadKg, forceN, speed;
     byte status = IDLE;
+    /** The fault last sent on the bus. */
+    byte faultSent = NO_FAULT;
+    /** Its RS485 port (the right flank's floor, on its right). */
+    public final BusPort port;
+
+    /** Its registers on the bus. */
+    public static final int REG_TARGET = 0, REG_POSITION = 1, REG_SPEED_LIMIT = 2, REG_STATE = 3, REG_LOAD = 4;
+    /** Screen packet: its bus address (a float; anything but 17..255: none). */
+    public static final byte setAddressId = 1;
 
     public LinearServoDriveElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
         desc = (LinearServoDriveDescriptor) d;
         machine = Machines.forElement(this, LinearServoDriveDescriptor.spec());
+        port = machine.busPort();
+        port.listen(true);
         slowProcessList.add(this::step);
     }
 
@@ -132,7 +151,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         return new Vec3(c.getX() + 0.5, c.getY(), c.getZ() + 0.5);
     }
 
-    /** Blocks of rail from the drive along its axis (0..MAX_TRAVEL), and the stations marked beside it. */
+    /** Blocks of rail from the drive along its axis (0..MAX_TRAVEL). */
     void scan(Level level) {
         var ax = axis();
         BlockPos p = node.coordonate.pos();
@@ -143,18 +162,6 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             n++;
         }
         travel = n;
-        List<Integer> marks = new ArrayList<>();
-        for (int i = 0; i <= n; i++) {
-            BlockPos r = p.relative(ax, i);
-            for (var d : net.minecraft.core.Direction.values()) {
-                if (d.getAxis() == ax.getAxis() || d == carSide()) continue;
-                BlockPos m = r.relative(d);
-                if (!level.isLoaded(m)) return;   // (a marker's chunk not there: keep the stations as they were)
-                var s = level.getBlockState(m);
-                if (s.getBlock() instanceof StationMarkerBlock && s.getValue(StationMarkerBlock.FACING) == d) marks.add(i);
-            }
-        }
-        stations = Stations.of(marks.stream().mapToInt(Integer::intValue).toArray(), n);
     }
 
     /** Position (blocks along the axis) and velocity (m/tick) at clock tick t. */
@@ -180,29 +187,47 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         needPublish();
     }
 
-    /** A Station Marker at pos was clicked. */
-    public void callTo(Player player, BlockPos pos) {
-        BlockPos d = pos.subtract(node.coordonate.pos());
-        var ax = axis();
-        int i = d.getX() * ax.getStepX() + d.getY() * ax.getStepY() + d.getZ() * ax.getStepZ();
-        if (wiredUp()) say(player, I18N.tr("This elevator follows its setpoint wire"));
-        else if (i < 0 || i > travel) say(player, I18N.tr("This station is off the rail"));
-        else {
-            command(i);
-            say(player, I18N.tr("Elevator called"));
+    /** A rider pressed the car's panel (it has no buttons of its own: Baughn 2026-11-05, no magic stepping). */
+    public void panel(Player player, boolean up) {
+        say(player, wiredUp() ? I18N.tr("This elevator follows its setpoint wire") : I18N.tr("This elevator is driven over its RS485 bus"));
+    }
+
+    // ---- the bus
+
+    /** The packets for it: register writes and reads (see the class comment). */
+    void serveBus() {
+        for (Packet k; (k = port.poll()) != null; ) {
+            if (k.target() != port.address() || port.address() == 0) continue;   // (broadcasts: nothing for it yet)
+            switch (k.type()) {
+                case WRITE -> {
+                    if (k.index() == REG_TARGET && !wiredUp() && Double.isFinite(k.value())) command(k.value());
+                    else if (k.index() == REG_SPEED_LIMIT) speedLimit = Math.max(0, k.value());
+                }
+                case READ -> {
+                    double v = register(k.index());
+                    if (!Double.isNaN(v)) port.send(new Packet(k.source(), port.address(), PacketType.REPLY, k.index(), (float) v));
+                }
+                default -> {
+                }
+            }
         }
     }
 
-    /** A rider pressed the car's panel: up or down a station. */
-    public void panel(Player player, boolean up) {
-        if (wiredUp()) {
-            say(player, I18N.tr("This elevator follows its setpoint wire"));
-            return;
-        }
-        double p = posAt(clock);
-        int s = up ? Stations.above(p, stations) : Stations.below(p, stations);
-        if (s < 0) say(player, up ? I18N.tr("Top station") : I18N.tr("Bottom station"));
-        else command(s);
+    /** Register r's value, or NaN: no such register. */
+    public double register(int r) {
+        return switch (r) {
+            case REG_TARGET -> target;
+            case REG_POSITION -> posAt(clock);
+            case REG_SPEED_LIMIT -> speedLimit;
+            case REG_STATE -> status();
+            case REG_LOAD -> loadKg;
+            default -> Double.NaN;
+        };
+    }
+
+    public void setAddress(int a) {
+        port.setAddress(a);
+        needPublish();
     }
 
     static void say(Player p, String text) {
@@ -224,6 +249,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         long t0 = clock;
         clock++;
         if (travel < 0 || clock % 20 == 0) scan(level);
+        serveBus();
         Drive drive = LinearServoDriveDescriptor.drive;
         double ratio = machine.voltageRatio();
         if (machine.state() == MachineState.RUNNING) {
@@ -236,6 +262,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             }
         }
         double vlim = stalled ? 0 : drive.vmaxAt(ratio) / 20, a = LinearServoDriveDescriptor.accelPerTick();
+        if (speedLimit > 0) vlim = Math.min(vlim, speedLimit / 20);
         double p = posAt(t0), v = seg.velocity(t0 - seg.startTick());
         boolean moving = movingAt(t0);
 
@@ -251,7 +278,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         // commands from the wires
         if (wiredUp() && travel >= 0) {
             double in = machine.signal(LinearServoDriveDescriptor.SETPOINT);
-            double want = proportional ? Stations.proportional(in, travel) : Stations.band(in, stations);
+            double want = Stations.proportional(in, travel);
             if (want != wired) {
                 wired = want;
                 command(want);
@@ -344,6 +371,11 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         boolean there = stopped && fault == NO_FAULT && Math.abs(p1 - target) < 1e-6 && railOk;
         machine.setSignal(LinearServoDriveDescriptor.IN_POSITION, there ? 1 : 0);
         machine.setSignal(LinearServoDriveDescriptor.FAULT, fault != NO_FAULT ? 1 : 0);
+        machine.setSignal(LinearServoDriveDescriptor.POSITION, travel > 0 ? Math.max(0, Math.min(1, p1 / travel)) : 0);
+        if (fault != faultSent) {   // (a fault starting: everyone hears it)
+            if (fault != NO_FAULT) port.send(new Packet(Packet.BROADCAST, port.address(), PacketType.FAULT, fault, 0));
+            faultSent = fault;
+        }
         byte st = status();
         if (st != status) {
             status = st;
@@ -478,19 +510,43 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         super.onBreakElement();
     }
 
-    /** An empty hand switches what the setpoint means: stations, or a share of the travel. */
+    /** An empty hand opens its screen. */
     @Override
     public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
-        if (!player.getMainHandItem().isEmpty()) return false;
-        if (player.level().isClientSide()) return true;
-        proportional = !proportional;
-        wired = Double.NaN;
-        say(player, proportional ? I18N.tr("The setpoint spans the travel") : I18N.tr("The setpoint selects a station"));
-        needPublish();
+        return false;
+    }
+
+    /** Its screen: the bus address. */
+    @Override
+    public boolean hasGui() {
         return true;
     }
 
-    /** Power on the back; the signals at their flanks' floor and ceiling cables (LinearServoDriveDescriptor.spec). */
+    @Override
+    public BusPort busPortOn(Direction side) {
+        return machine.busPortOn(side);
+    }
+
+    @Override
+    public List<mods.eln.node.FacePins.FacePin> facePins(Direction side) {
+        return machine.facePins(side);
+    }
+
+    @Override
+    public byte networkUnserialize(java.io.DataInputStream stream) {
+        byte id = super.networkUnserialize(stream);
+        if (id == setAddressId) {
+            try {
+                setAddress(Math.round(stream.readFloat()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return unserializeNulldId;
+        }
+        return id;
+    }
+
+    /** Power on the back; the signals on their flanks' floor edges (LinearServoDriveDescriptor.spec). */
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
         return machine.electricalLoad(side, lrdu);
@@ -526,6 +582,8 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         super.networkSerialize(stream);
         try {
             stream.writeByte(status());
+            stream.writeByte(port.address());
+            stream.writeBoolean(port.bus() != null);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -543,7 +601,8 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         nbt.putDouble("segAccel", seg.accel());
         nbt.putDouble("target", target);
         nbt.putByte("fault", fault);
-        nbt.putBoolean("proportional", proportional);
+        if (speedLimit > 0) nbt.putDouble("speedLimit", speedLimit);
+        if (port.address() != 0) nbt.putInt("addr", port.address());
         if (carId != null) {
             nbt.putLong("carMost", carId.getMostSignificantBits());
             nbt.putLong("carLeast", carId.getLeastSignificantBits());
@@ -559,7 +618,8 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             nbt.getDoubleOr("segTo", 0), vmax > 0 ? vmax : 1, accel > 0 ? accel : 1);
         target = nbt.getDoubleOr("target", 0);
         fault = nbt.getByteOr("fault", NO_FAULT);
-        proportional = nbt.getBooleanOr("proportional", false);
+        speedLimit = Math.max(0, nbt.getDoubleOr("speedLimit", 0));   // ("proportional" of before 2026-11-05 is ignored: always)
+        port.setAddress(nbt.getIntOr("addr", 0));
         carId = nbt.contains("carMost") ? new UUID(nbt.getLongOr("carMost", 0), nbt.getLongOr("carLeast", 0)) : null;
     }
 
@@ -571,7 +631,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         info.put(I18N.tr("Position"), String.format("%.1f m", p));
         info.put(I18N.tr("Target"), String.format("%.0f m", target));
         info.put(I18N.tr("Speed"), String.format("%.2f m/s", Math.abs(speed)));
-        info.put(I18N.tr("Setpoint"), proportional ? I18N.tr("share of the travel") : I18N.tr("station"));
+        info.put(I18N.tr("Address"), port.address() == 0 ? I18N.tr("none (set it in its screen)") : String.valueOf(port.address()));
         info.put(I18N.tr("State"), stateText());
         return info;
     }
@@ -611,10 +671,8 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         st.choice("machine_state", machine.state());
         st.num(mods.eln.introspect.Keys.LOAD, loadKg, mods.eln.introspect.Unit.KG);
         st.integer("travel", travel);
-        List<mods.eln.introspect.Value> at = new ArrayList<>();
-        for (int s : stations) at.add(new mods.eln.introspect.Value.Int(s));
-        st.list("stations", at);
-        st.choice("setpoint_mode", proportional ? "proportional" : "station", java.util.List.of("station", "proportional"));
+        st.integer("address", port.address());
+        st.num("speed_limit", speedLimit, mods.eln.introspect.Unit.M_PER_S);
         st.bool(mods.eln.introspect.Keys.ENABLED, enabled());
         st.num("clock", clock, mods.eln.introspect.Unit.TICK);
         if (carId != null) st.ref("car", carId.toString());

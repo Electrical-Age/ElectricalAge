@@ -62,5 +62,6 @@ public final class Robotics implements ElnContent {
         ENTITY_TYPES.register(modBus);
         ElnRegistry.ALL_ITEMS.add(SERVO_RAIL_ITEM);
         ElnRegistry.ALL_ITEMS.add(STATION_MARKER_ITEM);
+        ElnRegistry.RETIRED_ITEMS.add(STATION_MARKER_ITEM);   // (no longer used, Baughn 2026-11-05: out of the tab)
     }
 }
