@@ -223,6 +223,10 @@
   (def until (+ (now) (or timeout 60)))
   (device/write address 0 height)
   (sleep 0.1)
+  # a wire on the drive's setpoint pin overrides the bus (AdventurAgent's rig kept its trimmer): say so
+  (def t (try (device/read address 0) ([_] nil)))
+  (when (and t (> (math/abs (- t height)) 0.01))
+    (error (string "drive " address " keeps target " t ": a wire on its setpoint pin overrides the bus")))
   (forever
     # (a reply lost to a bus being rebuilt, as the car's parts come and go, is asked again)
     (def s (try (drive/state address) ([_] :no-reply)))

@@ -31,6 +31,18 @@ int main(void) {
     __asm__ volatile("csrs mstatus, %0" ::"r"(1u << 3));  /* interrupts on */
     janet_init();
     JanetTable *env = janet_core_env(NULL);
+    /* Janet collects after gc_interval bytes of allocation, 4 MB by default: more than the whole heap of a small
+       machine, so it ran out of memory before ever collecting (AdventurAgent's elevator, 2 MB). An eighth of the
+       heap, at least 128 KB. */
+    {
+        extern char _end[];
+        extern uint32_t __ram_top;
+        int32_t heap = (int32_t) (__ram_top - (uint32_t) (uintptr_t) _end) - 256 * 1024;
+        int32_t interval = heap / 8 < 128 * 1024 ? 128 * 1024 : heap / 8;
+        char buf[48];
+        snprintf(buf, sizeof buf, "(gcsetinterval %ld)", (long) interval);
+        janet_dostring(env, buf, "boot", NULL);
+    }
     ea_register(env);
     ea_register_disk(env);
     printf("Janet %s on Electrical Age\n", JANET_VERSION);
