@@ -81,6 +81,11 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         Eln.simulator.addAllThermalFastProcess(thermalFastProcessList);
     }
 
+    /** Its pins on side's edges with several pins (FacePins), or none. */
+    public java.util.List<mods.eln.node.FacePins.FacePin> facePins(mods.eln.misc.Direction side) {
+        return java.util.List.of();
+    }
+
     /** Its field bus port on side, or null (TransparentNode links it to a voxel bus cable on that face). */
     public mods.eln.bus.BusPort busPortOn(mods.eln.misc.Direction side) {
         return null;

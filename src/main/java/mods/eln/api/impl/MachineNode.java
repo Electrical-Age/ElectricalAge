@@ -41,7 +41,7 @@ import java.util.List;
  * over (chosen between steps). Signals use the host's gates; the bus face links to a voxel bus cable beside it
  * (BusPeer), never as a NodeConnection.
  */
-public final class MachineNode extends GhostNode implements BusPeer {
+public final class MachineNode extends GhostNode implements BusPeer, mods.eln.node.FacePins {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("eln");
     /** The node's own uuid (in no save; publishing is off). */
     public static final String UUID = "h";
@@ -191,7 +191,12 @@ public final class MachineNode extends GhostNode implements BusPeer {
 
     @Override
     public BusPort busPortOn(Direction side) {
-        return busPort != null && faceOf(side) == spec.busFace().orElse(null) ? busPort : null;
+        return busPort != null && spec.busPosition() == mods.eln.api.CablePosition.ANY && faceOf(side) == spec.busFace().orElse(null) ? busPort : null;
+    }
+
+    @Override
+    public List<FacePin> facePins(Direction side) {
+        return host.facePins(side);
     }
 
     @Override
@@ -205,11 +210,13 @@ public final class MachineNode extends GhostNode implements BusPeer {
         for (NbtElectricalLoad l : loads) Eln.simulator.addElectricalLoad(l);
         super.connectJob();
         select();
-        if (busPort != null) {
+        if (busPort != null && spec.busPosition() == mods.eln.api.CablePosition.ANY) {
             Direction side = Faces.resolve(spec.busFace().orElseThrow(), front);
             if (getNeighbor(side) instanceof VoxelNode v && v.isAdded())
                 for (LRDU l : LRDU.values()) BusNet.link(busPort, v.busPortAt(side.getInverse(), l));
         }
+        for (Direction side : Direction.values())   // (its pins: the voxel cables ending at them)
+            if (getNeighbor(side) instanceof VoxelNode v && v.isAdded()) v.connectPeerPins(side.getInverse(), this);
         if (ApiTrace.enabled()) ApiTrace.log("connect machine %s at %s: %s", spec, coordonate.pos().toShortString(), lineState());
     }
 

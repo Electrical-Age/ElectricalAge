@@ -21,7 +21,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
-public class TransparentNode extends Node implements mods.eln.bus.BusPeer {
+public class TransparentNode extends Node implements mods.eln.bus.BusPeer, mods.eln.node.FacePins {
 
     public TransparentNodeElement element;
 
@@ -234,8 +234,11 @@ public class TransparentNode extends Node implements mods.eln.bus.BusPeer {
             element.connectJob();
             // its bus ports: linked to a voxel bus cable on their face (the cable links back from its side)
             for (Direction side : Direction.values())
-                if (element.busPortOn(side) instanceof mods.eln.bus.BusPort bp && getNeighbor(side) instanceof mods.eln.node.voxel.VoxelNode v && v.isAdded())
-                    for (mods.eln.misc.LRDU l : mods.eln.misc.LRDU.values()) mods.eln.bus.BusNet.link(bp, v.busPortAt(side.getInverse(), l));
+                if (getNeighbor(side) instanceof mods.eln.node.voxel.VoxelNode v && v.isAdded()) {
+                    if (element.busPortOn(side) instanceof mods.eln.bus.BusPort bp)
+                        for (mods.eln.misc.LRDU l : mods.eln.misc.LRDU.values()) mods.eln.bus.BusNet.link(bp, v.busPortAt(side.getInverse(), l));
+                    v.connectPeerPins(side.getInverse(), this);   // (its pins: the voxel cables ending at them)
+                }
         }
     }
 
@@ -245,13 +248,21 @@ public class TransparentNode extends Node implements mods.eln.bus.BusPeer {
         if (element.isBurnt()) element.disconnectBurntJob();
         else element.disconnectJob();
         java.util.Set<mods.eln.bus.BusPort> ports = new java.util.HashSet<>();
-        for (Direction side : Direction.values()) if (element.busPortOn(side) instanceof mods.eln.bus.BusPort bp) ports.add(bp);
+        for (Direction side : Direction.values()) {
+            if (element.busPortOn(side) instanceof mods.eln.bus.BusPort bp) ports.add(bp);
+            for (var pin : element.facePins(side)) if (pin.bus() != null) ports.add(pin.bus());
+        }
         if (!ports.isEmpty()) mods.eln.bus.BusNet.detach(ports);
     }
 
     @Override
     public mods.eln.bus.BusPort busPortOn(Direction side) {
         return element == null || element.isBurnt() ? null : element.busPortOn(side);
+    }
+
+    @Override
+    public java.util.List<FacePin> facePins(Direction side) {
+        return element == null || element.isBurnt() ? java.util.List.of() : element.facePins(side);
     }
 
     @Override

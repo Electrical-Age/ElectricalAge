@@ -281,10 +281,14 @@ public static void tick(Machine m) {
 - An output floats (high impedance) until it is first set. `releaseSignal` lets it float again.
 - `CablePosition.FLOOR` or `CEILING` puts a signal on one cable position of a side face, so two signals can share a
   face.
+- An edge can hold three pins (API 1.1): `FLOOR_LEFT`, `FLOOR`, `FLOOR_RIGHT` (and the `CEILING_` ones), a quarter
+  block apart, left and right as seen facing that face from outside. Only a voxel cable meets the side pins: one lying
+  on that floor of a voxel block beside the face and ending at the pin. A plain six-node cable meets only the middle.
 
 **The bus:**
 
-- `bus(face)` gives the machine a field bus port that links to a voxel bus cable.
+- `bus(face)` gives the machine a field bus port that links to a voxel bus cable; `bus(face, position)` puts it on one
+  pin of an edge (API 1.1).
 - It has 16 channels, numbered like the dyes (0 is white), with levels 0..1.
 - What you write in a tick is read in the next, and a write lasts one tick.
 - With several writers on one channel, the last change wins; when a writer stops, the others' levels come back.

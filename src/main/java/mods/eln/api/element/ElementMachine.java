@@ -38,8 +38,14 @@ public interface ElementMachine extends Machine {
     /** The face side is on, relative to the element's front; empty before the element is placed. */
     java.util.Optional<RelativeFace> relativeFace(Direction side);
 
-    /** The bus port on side (the spec's bus face), or null; the element returns it from busPortOn. */
+    /** The bus port on side (the spec's bus face, at ANY position), or null; the element returns it from busPortOn. */
     mods.eln.bus.BusPort busPortOn(Direction side);
+
+    /** Its bus port wherever it is (null: no bus face), for an element that speaks packets on it. */
+    mods.eln.bus.BusPort busPort();
+
+    /** The pins on side's edges that have side pins or the bus pin (FacePins); the element returns them from facePins. */
+    java.util.List<mods.eln.node.FacePins.FacePin> facePins(Direction side);
 
     /** The power terminal, for the element's meters. */
     ElectricalLoad powerLoad();

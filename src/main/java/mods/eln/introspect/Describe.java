@@ -163,6 +163,10 @@ public final class Describe {
                 for (LRDU l : LRDU.values())
                     p.add(d.name().toLowerCase(Locale.ROOT) + "_" + l.name().toLowerCase(Locale.ROOT),
                         e.getConnectionMask(d, l), e.getElectricalLoad(d, l), e.getThermalLoad(d, l));
+            for (mods.eln.misc.Direction d : mods.eln.misc.Direction.values())   // (pins off an edge's middle: FacePins)
+                for (var pin : e.facePins(d))
+                    if (pin.load() != null) p.add(d.name().toLowerCase(Locale.ROOT) + "_" + pin.lrdu().name().toLowerCase(Locale.ROOT)
+                        + (pin.leftward() > 0 ? "_left" : pin.leftward() < 0 ? "_right" : ""), pin.mask(), pin.load(), null);
             p.to(r);
         });
         guard(r, () -> legacy(r, e.getWaila()));

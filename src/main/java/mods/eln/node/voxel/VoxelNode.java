@@ -1271,10 +1271,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 connectPinsAcross(dir, v);
             }
             else {
+                // (legacy() gives no cable on an edge with several pins: connectPeerPins links those)
                 for (LRDU lrdu : LRDU.values()) tryConnectTwoNode(this, dir, lrdu, other, dir.getInverse(), lrdu.inverseIfLR());
                 // a bus port on the face toward a bus cable here (a machine at another mod's block): a bus link
                 if (other instanceof mods.eln.bus.BusPeer peer && peer.busPortOn(dir.getInverse()) instanceof mods.eln.bus.BusPort bp)
                     for (LRDU lrdu : LRDU.values()) mods.eln.bus.BusNet.link(bp, busPortAt(dir, lrdu));
+                connectPeerPins(dir, other);
             }
         }
         // only blocks with pipes in the fluid world (it steps every device every tick)
@@ -1634,6 +1636,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         mods.eln.node.NodeBase other = getNeighbor(side);
         if (other == null || other instanceof VoxelNode) return null;
         int f = side.toEnumFacing().get3DDataValue(), a = side.applyLRDU(lrdu).toEnumFacing().get3DDataValue();
+        if (other instanceof mods.eln.node.FacePins fp)   // an edge with several pins: only by pin (connectPeerPins)
+            for (var pin : fp.facePins(side.getInverse()))
+                if (side.getInverse().applyLRDU(pin.lrdu()).toEnumFacing().get3DDataValue() == a) return null;
         for (CableNet.Conductor k : cables.live())
             for (CablePart c : k.parts) {
                 List<CablePart.Port> ps = c.cablePorts();
@@ -1644,6 +1649,46 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 }
             }
         return null;
+    }
+
+    /**
+     * Links the pins of the neighbour toward dir (FacePins) to the cables here that end at them: a cable lying on the
+     * pin's edge (the floor or ceiling here), with an end on the face toward the neighbour at the pin's point along the
+     * edge (8 voxels plus its leftward, toward the left of someone here facing the neighbour). A bus pin takes a bus
+     * link, the others an electrical one (kept by both nodes, dropped when either disconnects; never twice).
+     */
+    public void connectPeerPins(Direction dir, mods.eln.node.NodeBase other) {
+        if (!(other instanceof mods.eln.node.FacePins fp) || isDestructing()) return;
+        var fwd = dir.toEnumFacing();
+        if (fwd.getAxis().isVertical()) return;   // (positions are on side faces)
+        int lx = fwd.getStepZ(), lz = -fwd.getStepX();   // (left = up x forward)
+        int f = fwd.get3DDataValue();
+        for (var pin : fp.facePins(dir.getInverse())) {
+            int a = dir.getInverse().applyLRDU(pin.lrdu()).toEnumFacing().get3DDataValue();
+            int along = 8 + pin.leftward() * (lx != 0 ? lx : lz);
+            for (CableNet.Conductor k : cables.live()) {
+                if (k.face != a) continue;
+                boolean ends = false;
+                for (CablePart c : k.parts)
+                    for (CablePart.Port p : c.cablePorts())
+                        ends |= !c.isKnuckle() && p.face() == f && (lx != 0 ? p.x() : p.z()) == along;
+                if (!ends) continue;
+                if (pin.bus() != null) {
+                    if (k.port != null) mods.eln.bus.BusNet.link(pin.bus(), k.port);
+                    continue;
+                }
+                if (k.load == null || pin.load() == null || !compareConnectionMask(pin.mask(), k.mask())) continue;
+                boolean already = false;
+                for (var c : nodeConnectionList) already |= c.electrical() != null && c.electrical().joins(k.load, pin.load());
+                if (already) continue;
+                var e = new mods.eln.sim.ElectricalConnection(k.load, pin.load());
+                Eln.simulator.addElectricalComponent(e);
+                var c = new mods.eln.node.NodeConnection(this, dir, LRDU.Up, other, dir.getInverse(), pin.lrdu(), e, null);
+                nodeConnectionList.add(c);
+                other.nodeConnectionList.add(c);
+                other.setNeedPublish(true);
+            }
+        }
     }
 
     /** The bus port of the cable taking EA's (side, edge) connection toward a non-voxel neighbour (see legacy), or null. */

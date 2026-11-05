@@ -13,6 +13,11 @@ public class NodeConnection {
     ElectricalConnection EC;
     ThermalConnection TC;
 
+    /** Its electrical link, or null. */
+    public ElectricalConnection electrical() {
+        return EC;
+    }
+
     /** The node at the other end from n. */
     public NodeBase other(NodeBase n) {
         return n == N1 ? N2 : N1;

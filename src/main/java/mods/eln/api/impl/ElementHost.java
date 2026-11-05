@@ -341,7 +341,48 @@ public final class ElementHost implements ElementMachine {
         if (front == null) return false;
         Direction side = Faces.resolve(s.face(), front);
         LRDU at = Faces.lrdu(s.position());
+        if (at != null && pinEdge(s.face(), at)) return linked(inputs[i]);   // (a voxel cable's link: FacePins)
         return at == null ? site.connected(side) : site.connected(side, at);
+    }
+
+    /** Has the load a live link to a cable? */
+    private static boolean linked(ElectricalLoad l) {
+        for (var c : l.getConnectedComponents()) if (c instanceof mods.eln.sim.ElectricalConnection) return true;
+        return false;
+    }
+
+    /** Has edge lrdu of face f a side pin or the bus pin (then only voxel cables meet its pins, FacePins)? */
+    private boolean pinEdge(RelativeFace f, LRDU lrdu) {
+        MachineSpec spec = core.spec();
+        if (spec.busFace().orElse(null) == f && spec.busPosition() != CablePosition.ANY && Faces.lrdu(spec.busPosition()) == lrdu)
+            return true;
+        for (MachineSpec.SignalIn s : spec.signalsIn()) if (s.face() == f && s.position().side() && Faces.lrdu(s.position()) == lrdu) return true;
+        for (MachineSpec.SignalOut s : spec.signalsOut()) if (s.face() == f && s.position().side() && Faces.lrdu(s.position()) == lrdu) return true;
+        return false;
+    }
+
+    @Override
+    public List<mods.eln.node.FacePins.FacePin> facePins(Direction side) {
+        RelativeFace f = relativeFace(side).orElse(null);
+        if (f == null) return List.of();
+        MachineSpec spec = core.spec();
+        List<mods.eln.node.FacePins.FacePin> pins = new java.util.ArrayList<>();
+        for (LRDU edge : new LRDU[]{LRDU.Down, LRDU.Up}) {
+            if (!pinEdge(f, edge)) continue;
+            for (int i = 0; i < inputs.length; i++) {
+                MachineSpec.SignalIn s = spec.signalsIn().get(i);
+                if (s.face() == f && Faces.lrdu(s.position()) == edge)
+                    pins.add(new mods.eln.node.FacePins.FacePin(edge, Faces.leftward(s.position()), NodeBase.maskElectricalInputGate, inputs[i], null));
+            }
+            for (int i = 0; i < outputLoads.length; i++) {
+                MachineSpec.SignalOut s = spec.signalsOut().get(i);
+                if (s.face() == f && Faces.lrdu(s.position()) == edge)
+                    pins.add(new mods.eln.node.FacePins.FacePin(edge, Faces.leftward(s.position()), NodeBase.maskElectricalOutputGate, outputLoads[i], null));
+            }
+            if (busPort != null && spec.busFace().orElse(null) == f && Faces.lrdu(spec.busPosition()) == edge)
+                pins.add(new mods.eln.node.FacePins.FacePin(edge, Faces.leftward(spec.busPosition()), NodeBase.maskRs485, null, busPort));
+        }
+        return pins;
     }
 
     private int inputIndex(String name) {
@@ -397,8 +438,13 @@ public final class ElementHost implements ElementMachine {
     }
 
     @Override
+    public mods.eln.bus.BusPort busPort() {
+        return busPort;
+    }
+
+    @Override
     public mods.eln.bus.BusPort busPortOn(Direction side) {
-        if (busPort == null || site.front() == null) return null;
+        if (busPort == null || site.front() == null || core.spec().busPosition() != CablePosition.ANY) return null;   // (else a pin: facePins)
         return Faces.resolve(core.spec().busFace().orElseThrow(), site.front()) == side ? busPort : null;
     }
 

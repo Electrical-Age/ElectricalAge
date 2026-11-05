@@ -77,6 +77,7 @@ public final class MachineSpec {
     private final List<SignalIn> signalsIn;
     private final List<SignalOut> signalsOut;
     private final RelativeFace busFace;
+    private final CablePosition busPosition;
 
     private MachineSpec(Builder b, Set<RelativeFace> powerFaces) {
         kind = b.kind;
@@ -94,6 +95,7 @@ public final class MachineSpec {
         signalsIn = List.copyOf(b.signalsIn);
         signalsOut = List.copyOf(b.signalsOut);
         busFace = b.busFace;
+        busPosition = b.busPosition;
     }
 
     /** A machine that draws power at one of EA's cable voltages. ratedWatts is required. */
@@ -191,6 +193,11 @@ public final class MachineSpec {
         return Optional.ofNullable(busFace);
     }
 
+    /** Where on its face the bus cable meets it (ANY: anywhere). */
+    public CablePosition busPosition() {
+        return busPosition;
+    }
+
     @Override
     public String toString() {
         return String.format(Locale.ROOT, "%s %.0f V %.0f W", kind.name().toLowerCase(Locale.ROOT), nominalVolts, ratedWatts);
@@ -214,6 +221,7 @@ public final class MachineSpec {
         private final List<SignalIn> signalsIn = new ArrayList<>();
         private final List<SignalOut> signalsOut = new ArrayList<>();
         private RelativeFace busFace;
+        private CablePosition busPosition = CablePosition.ANY;
 
         private Builder(Kind kind, double nominalVolts) {
             this.kind = kind;
@@ -384,8 +392,14 @@ public final class MachineSpec {
 
         /** The face with a field bus port (one per machine). */
         public Builder bus(RelativeFace face) {
+            return bus(face, CablePosition.ANY);
+        }
+
+        /** The field bus port, where its cable meets face at position (one per machine; a voxel bus cable only). */
+        public Builder bus(RelativeFace face, CablePosition position) {
             if (busFace != null) busTwice = true;
             busFace = Objects.requireNonNull(face, "face");
+            busPosition = Objects.requireNonNull(position, "position");
             return this;
         }
 
@@ -451,7 +465,7 @@ public final class MachineSpec {
             }
             if (busTwice) errors.add("bus is given twice; a machine has one bus port");
             if (burnTwice) errors.add("burnsOnOvervoltage is given twice; give it once");
-            if (busFace != null) claim(roles, busFace, CablePosition.ANY, "the bus", errors);
+            if (busFace != null) claim(roles, busFace, busPosition, "the bus", errors);
             Set<RelativeFace> powerFaces;
             if (power != null) {
                 if (powerTwice) errors.add("power faces are given twice");
