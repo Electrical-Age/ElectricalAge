@@ -213,11 +213,13 @@ public final class Memory {
      */
     public int[][] snapshotRam() {
         int[][] snap = new int[PAGES][];
-        for (int p = 0; p < PAGES; p++)
-            if (kind[p] == RAM && writable[p] != null) {
-                snap[p] = writable[p];
-                writable[p] = null;   // still readable; the next write copies
-            }
+        for (int p = 0; p < PAGES; p++) {
+            if (kind[p] != RAM) continue;
+            int[] data = p == 0 ? page0 : pages[p];
+            if (data == null || data == ZERO) continue;
+            snap[p] = data;           // every page that holds anything, written since the last snapshot or not
+            writable[p] = null;       // still readable; the next write copies
+        }
         return snap;
     }
 

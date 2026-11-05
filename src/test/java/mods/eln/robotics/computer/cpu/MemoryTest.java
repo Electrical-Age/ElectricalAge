@@ -114,4 +114,20 @@ class MemoryTest {
         assertArrayEquals(new int[]{7, 1, 0xFF}, last);
         assertEquals(Trap.LOAD_FAULT, cause(() -> m.load32(Memory.IO_BASE + 2)), "misaligned I/O");
     }
+
+    @Test
+    void aSecondSnapshotHasThePagesNotWrittenSince() {
+        Memory m = new Memory();
+        m.setRam(1, MB);
+        m.store32(MB, 1);
+        m.store32(MB + 8192, 2);
+        m.snapshotRam();
+        m.store32(MB + 8192, 3);   // only this page is written after the first snapshot
+        int[][] snap = m.snapshotRam();
+        Memory n = new Memory();
+        n.setRam(1, MB);
+        n.restoreRam(snap);
+        assertEquals(1, n.load32(MB), "a page untouched since the first snapshot is in the second");
+        assertEquals(3, n.load32(MB + 8192));
+    }
 }

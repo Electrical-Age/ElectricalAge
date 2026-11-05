@@ -75,4 +75,22 @@ class RunnerTest {
         assertFalse(other.load(saved));
         assertEquals(0x400, other.cpu.pc);
     }
+
+    @Test
+    void aChangedRomColdBootsAndRunsJanetAgain() throws IOException {
+        Machine m = JanetRomTest.machine(2);
+        StringBuilder out = new StringBuilder();
+        Runner r = new Runner(m);
+        until(r, out, "\n> ");
+        r.awaitIdle();
+        Machine.Saved saved = m.save();
+        // the same chips, but the ROM image changed (a mod update): one byte of padding past its end
+        byte[] rom = JanetRomTest.class.getResourceAsStream("/eln/computer/rom/janet.rom").readAllBytes();
+        Machine other = new Machine();
+        other.mem.setRom(0, new mods.eln.robotics.computer.cpu.Rom(java.util.Arrays.copyOf(rom, rom.length + 4)));
+        other.mem.setRam(1, Machine.RAM_CHIP);
+        other.mem.setRam(2, Machine.RAM_CHIP);
+        assertFalse(other.load(saved));
+        until(new Runner(other), new StringBuilder(), "Janet 1.41.2 on Electrical Age");
+    }
 }
