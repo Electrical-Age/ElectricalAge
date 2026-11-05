@@ -124,6 +124,9 @@ public class Wp9cContent implements ElnContent {
             subId = 3;
             name = TR_NAME(Type.NONE, "Addressable Light");
             sixNodeItem.addDescriptor(subId + (id << 6), new mods.eln.sixnode.busdevice.AddressableLightDescriptor(name, obj.getObj("Led")));
+            subId = 6;
+            name = TR_NAME(Type.NONE, "Floor Sensor");
+            sixNodeItem.addDescriptor(subId + (id << 6), new mods.eln.sixnode.busdevice.FloorSensorDescriptor(name, obj.getObj("ProximitySensor")));
         }
         {
             subId = 8;

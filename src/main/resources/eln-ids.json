@@ -1463,6 +1463,12 @@
   "kind": "six_node",
   "name": "digital_watch"
  },
+ "eln:six_node@7494": {
+  "descriptor": "FloorSensorDescriptor",
+  "display": "Floor Sensor",
+  "kind": "six_node",
+  "name": "floor_sensor"
+ },
  "eln:six_node@7496": {
   "descriptor": "TutorialSignDescriptor",
   "display": "Tutorial Sign",

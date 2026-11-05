@@ -237,7 +237,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     from") plus i, left to right and top to bottom as a rider sees them. A button slot sends `press` from its address
     when clicked; `power` to a slot's address lights its lamp. The drive keeps the slots (NBT `panel`, `panelBase`,
     `panelLit`; they drop when it's broken) and a bus port per filled slot on its own bus (the travelling cable:
-    nothing moves block to block); the car shows them (synced entity data). GameTest `servo_elevator_car_panel`. The car's floor
+    nothing moves block to block); the car shows them (synced entity data). GameTest `servo_elevator_car_panel`.
+  - Floor Sensor (`sixnode/busdevice`, id `6 + (117 << 6)`; Baughn 2026-11-05: floors found by sensors, not markers):
+    the proximity sensor's model, an address in its screen, a bus pin in a voxel block. Register 0 is 1 while a car
+    stands with its floor level with the floor of the sensor's block, up to 4 blocks across; when that starts it sends
+    `arrive` (index 0) to everyone from its address. Recipe: an Electrical Entity Sensor, a cheap chip and Field Bus
+    Cable. GameTest `servo_elevator_floor_sensor`. The car's floor
     stops level with the drive's foot at the bottom and with the top rail block at the top.
   - Commands (Baughn 2026-11-05: the drive is a plain actuator, an addressed RS485 device; no Station Markers, no
     setpoint bands, no panel stepping): its setpoint wire, a share of the travel to the nearest block, while connected;

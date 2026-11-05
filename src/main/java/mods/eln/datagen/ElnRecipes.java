@@ -2292,6 +2292,8 @@ public final class ElnRecipes extends ElnRecipesBase {
             findItemStack("Signal Button"), dictCheapChip, stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get()));
         addShapelessRecipe(findItemStack("Addressable Light", 1),
             findItemStack("LED vuMeter"), dictCheapChip, stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get()));
+        addShapelessRecipe(findItemStack("Floor Sensor", 1),
+            findItemStack("Electrical Entity Sensor"), dictCheapChip, stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get()));
     }
 
     public static void recipeElectricalRedstone() {

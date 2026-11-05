@@ -17,6 +17,7 @@ public final class ClientRenders {
         ElnRenders.six(mods.eln.sixnode.busmodule.BusModuleDescriptor.class, mods.eln.sixnode.busmodule.BusModuleRender::new);
         ElnRenders.six(mods.eln.sixnode.busdevice.AddressableButtonDescriptor.class, mods.eln.sixnode.busdevice.AddressableButtonRender::new);
         ElnRenders.six(mods.eln.sixnode.busdevice.AddressableLightDescriptor.class, mods.eln.sixnode.busdevice.AddressableLightRender::new);
+        ElnRenders.six(mods.eln.sixnode.busdevice.FloorSensorDescriptor.class, mods.eln.sixnode.busdevice.FloorSensorRender::new);
         ElnRenders.six(mods.eln.sixnode.batterycharger.BatteryChargerDescriptor.class, mods.eln.sixnode.batterycharger.BatteryChargerRender::new);
         ElnRenders.six(mods.eln.sixnode.diode.DiodeDescriptor.class, mods.eln.sixnode.diode.DiodeRender::new);
         ElnRenders.six(mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor.class, mods.eln.sixnode.electricalalarm.ElectricalAlarmRender::new);

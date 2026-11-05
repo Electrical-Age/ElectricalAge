@@ -1,4 +1,4 @@
-// 26.3	2026-11-05T03:45:41.093356526	eln-global/EA models
+// 26.3	2026-11-05T04:45:17.087895217	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -253,6 +253,7 @@ d579fd2af476ff519ec84e7e704251ce31b104ab assets/eln/items/ferrite_ingot.json
 f231450e1ec972989bf51336e77fc68029b7f993 assets/eln/items/field_bus_cable.json
 ddc607965cfb890c82537469702f0e1b834bcfe4 assets/eln/items/flare_stack.json
 2a95d3003f54ea1bc6db84d8c4c2ec039bc769c1 assets/eln/items/flat_lamp_socket.json
+185c238d2687fe5deaf088963754726037d77a1b assets/eln/items/floor_sensor.json
 eaeabb81f8f3ce34a04ca742e056c6aa8c581081 assets/eln/items/fluorescent_lamp_socket.json
 063a7a8b175e5e59b2f7890dc4a59d0b3cd0552d assets/eln/items/flywheel.json
 9f20a5510e2d394a6d6d49ee411ed09a1a09f041 assets/eln/items/fractionating_column_base.json
@@ -691,6 +692,8 @@ e6afb16e4b0ce8dc4b31b2a6c51aae12c13d5bee assets/eln/models/item/energy_meter_3d.
 256b9deac7b3597fbaca6cd86bcd1bf83db5ac5e assets/eln/models/item/flare_stack.json
 93d8fcdda08d24ff11c965e098b40cecee5c53c3 assets/eln/models/item/flat_lamp_socket.json
 feb389f761dc6ea894ab26bc00ddd80bc82b5c33 assets/eln/models/item/flat_lamp_socket_3d.json
+262a8acf2d4aa5b9e40cb4fa46241133c0dfc82c assets/eln/models/item/floor_sensor.json
+7979804401bed5e13648c926409b0308c890022b assets/eln/models/item/floor_sensor_3d.json
 5a5152b14a7f8f8e42ec32d2978e429bf2170496 assets/eln/models/item/fluorescent_lamp_socket.json
 6ac53b24ea215ee00901e1ff5fe39148ff4e4a32 assets/eln/models/item/fluorescent_lamp_socket_3d.json
 63c0c6cc448a474bd2d053f47794a8a6d5c27988 assets/eln/models/item/flywheel.json

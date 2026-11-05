@@ -98,7 +98,7 @@ final class GoldenCase implements TestCase {
     static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163",
         "eln:six_node@5955", "eln:six_node@5956",   // the three-channel data logger, the tilted terminal (Baughn 2026-10-30, board #45)
         "eln:six_node@7489",   // the Bus I/O Module (the field bus)
-        "eln:six_node@7490", "eln:six_node@7491",   // the Addressable Button and Light (RS485, Baughn 2026-11-05)
+        "eln:six_node@7490", "eln:six_node@7491", "eln:six_node@7494",   // the Addressable Button and Light, the Floor Sensor (RS485, Baughn 2026-11-05)
         "eln:six_node@6402", "eln:six_node@6403", "eln:six_node@6404",   // the pipe sensors as devices (Baughn 2026-11-02)
         "eln:transparent_node@5120", "eln:transparent_node@5124",   // 26.x oil: tar sand separators
         "eln:transparent_node@5184", "eln:transparent_node@5188",   // 26.x oil: pumps
@@ -126,7 +126,7 @@ final class GoldenCase implements TestCase {
         "Electrical Anvil",   // (their screen: Baughn 2026-10-26)
         "Three-Channel Data Logger", "Tilted Terminal Logger",   // (Baughn 2026-10-30, board #45)
         "Bus I/O Module",   // (the field bus)
-        "Addressable Button", "Addressable Light", "Linear Servo Drive",   // (their address screen)
+        "Addressable Button", "Addressable Light", "Floor Sensor", "Linear Servo Drive",   // (their address screen)
         "Steam Turbine", "LP Steam Turbine");   // (the shaft ones' controls, as the 50V/200V's: Baughn 2026-10-29)
 
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {

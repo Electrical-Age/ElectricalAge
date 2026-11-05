@@ -31,7 +31,7 @@ public final class BusDeviceCases {
         cases.add(new Addresses());
     }
 
-    static final int BUTTON = 2 + (117 << 6), LIGHT = 3 + (117 << 6);
+    static final int BUTTON = 2 + (117 << 6), LIGHT = 3 + (117 << 6), FLOOR_SENSOR = 6 + (117 << 6);
 
     /** A device on the floor of a voxel block at p, its bus edge toward dir. */
     static BusDeviceElement device(TestContext c, int id, BlockPos p, Direction dir) {

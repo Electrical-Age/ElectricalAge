@@ -61,9 +61,10 @@ public class CabinWall extends PartEntity<ElevatorCar> {
         return getParent().canBeCollidedWith(other);
     }
 
+    /** Picked (a click or the crosshair stops at it), so nobody inside reaches blocks behind the walls. */
     @Override
     public boolean isPickable() {
-        return false;
+        return !getParent().isRemoved();
     }
 
     @Override

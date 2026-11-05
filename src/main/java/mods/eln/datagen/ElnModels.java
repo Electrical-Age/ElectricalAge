@@ -61,6 +61,7 @@ public class ElnModels implements DataProvider {
         if (name.equals("boiler")) return itemTexture("electrical_furnace", item);
         if (name.equals("addressable_button")) return itemTexture("signal_button", item);   // (until their own icons)
         if (name.equals("addressable_light")) return itemTexture("led_vumeter", item);
+        if (name.equals("floor_sensor")) return itemTexture("electrical_entity_sensor", item);
         if (name.startsWith("fractionating_column")) return itemTexture("fuel_heat_furnace", item);
         if (name.equals("flare_stack")) return itemTexture("fuel_heat_furnace", item);
         if (name.endsWith("compact_steam_turbine")) return itemTexture("50v_turbine", item);   // (until its own icon)

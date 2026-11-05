@@ -180,6 +180,13 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         return false;
     }
 
+    /** Standing still (its segment arrived; on the server by the drive's clock, on a client by its own). */
+    public boolean stopped() {
+        if (segment == null) return true;
+        long t = level().isClientSide() ? clientT : serverNow - segment.startTick();
+        return segment.arrived(t);
+    }
+
     /** Server: a rider clicked a slot of the panel. */
     void panelClicked(Player player, int slot) {
         LinearServoDriveElement e = owner();

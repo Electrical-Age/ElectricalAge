@@ -40,6 +40,7 @@ public final class ServoCases {
         cases.add(new OverTheBus());
         cases.add(new ByTheWire());
         cases.add(new CarPanel());
+        cases.add(new FloorSensor());
         cases.add(new Sag());
         cases.add(new Obstruction());
         cases.add(new SaveMidMove());
@@ -315,6 +316,54 @@ public final class ServoCases {
             ctx.check("servo panel: sneaking with an empty hand takes the light back", gaveBack, "");
             var w = s.drive(ctx).getWaila();
             ctx.check("servo panel: Jade on the drive sums the panel up", "1 buttons, 0 lights, addresses 50 to 61".equals(w.get("Car panel")), w.toString());
+        }
+    }
+
+    /**
+     * A Floor Sensor on the ground beside the cabin (Baughn 2026-11-05: floors found by sensors, not markers): level while
+     * the car stands at stop 0, not while it's at 3, level again when it's back, sending `arrive` each time it comes.
+     */
+    static final class FloorSensor extends Room {
+        Shaft s;
+        mods.eln.sixnode.busdevice.FloorSensorElement sensor;
+        mods.eln.bus.BusPort pc;
+        boolean atStart, away = true;
+        int heard;
+
+        public String id() {
+            return "servo_elevator_floor_sensor";
+        }
+
+        public int ticks() {
+            return 260;
+        }
+
+        public void build(TestContext ctx) {
+            s = new Shaft(ctx, ctx.at(5, 1, 4), 0);
+            sensor = (mods.eln.sixnode.busdevice.FloorSensorElement) BusDeviceCases.device(ctx, BusDeviceCases.FLOOR_SENSOR, ctx.at(8, 1, 2), Direction.XP);
+            sensor.setAddress(60);
+            pc = new mods.eln.bus.BusPort();
+            pc.listen(true);
+            mods.eln.bus.BusNet.link(pc, sensor.port);
+            watch(dt -> {
+                ++tick;
+                for (mods.eln.bus.Packet k; (k = pc.poll()) != null; ) if (k.type() == mods.eln.bus.PacketType.ARRIVE && k.source() == 60) heard++;
+                if (tick == 10) atStart = sensor.level();
+                if (tick == 12) s.call(ctx, 3);
+                if (tick == 120) {
+                    away = sensor.level();
+                    s.call(ctx, 0);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            mods.eln.bus.BusNet.detach(List.of(pc));
+            ctx.check("servo floor sensor: level with the standing car", atStart, "");
+            ctx.check("servo floor sensor: not while the car is at 3", !away, "");
+            ctx.check("servo floor sensor: level again when it's back", sensor.level(), "");
+            ctx.check("servo floor sensor: arrive sent each time it came (twice)", heard == 2 && sensor.arrivals == 2, heard + " " + sensor.arrivals);
         }
     }
 

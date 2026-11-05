@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:electrical_entity_sensor",
+    "#c:circuits/basic",
+    "eln:field_bus_cable"
+  ],
+  "result": {
+    "id": "eln:floor_sensor"
+  }
+}
