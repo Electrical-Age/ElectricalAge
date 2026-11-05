@@ -61,6 +61,12 @@ class StdlibTest {
         return max;
     }
 
+    /** The Break button on tab t, as the host passes it on: the interrupt, then the event. */
+    void breakTab(int t) {
+        m.pressBreak();
+        m.editor.give(("(break " + t + ")\n").getBytes(StandardCharsets.UTF_8));
+    }
+
     void type(String s) {
         mark();
         m.editor.give(screen.submit(s));
@@ -88,7 +94,7 @@ class StdlibTest {
         type("(while true)");
         tick(3, null);
         assertTrue(m.runnable(), "busy");
-        m.pressBreak();
+        breakTab(1);
         tick(5, "stopped by Break");
         tick(5, "\n> ");
         type("(+ 2 2)");
@@ -99,7 +105,7 @@ class StdlibTest {
     void breakStopsALongSleep() {
         type("(sleep 1000)");
         tick(3, null);
-        m.pressBreak();
+        breakTab(1);
         tick(5, "stopped by Break");
         tick(5, "\n> ");
     }
@@ -201,8 +207,10 @@ class StdlibTest {
         tick(60, ":ok\n> ");
         m.reset(Machine.RESET_POWER);
         mark();
-        tick(80, "42\n");
-        assertTrue(out.toString().contains("Running A:/main.janet"), out.toString());
+        tick(80, "Running A:/main.janet");
+        for (int t = 0; t < 40 && !screen.log(2).contains("42"); t++) tick(1, null);
+        assertTrue(screen.log(2).contains("42"), "it prints in its own tab: " + screen.log(2));
+        assertEquals("main.janet", screen.scene.tabs.get(2).title);
     }
 
     @Test
@@ -218,7 +226,7 @@ class StdlibTest {
         type("(do (spawn (fn [] (forever (sleep 0.2) (print \"tick\")))) (bus/on :press (fn [p] (print \"press\"))) :started)");
         tick(10, ":started\n> ");
         tick(10, "tick");
-        m.pressBreak();
+        breakTab(1);
         tick(5, "stopped 1 task and the bus handlers");
         mark();
         m.bus.give(List.of(new Packet(0, 23, PacketType.PRESS, 0, 0)));
@@ -226,5 +234,21 @@ class StdlibTest {
         assertFalse(out.toString().contains("tick") || out.toString().contains("press"), out.toString());
         type("(+ 1 1)");
         tick(5, "\n2\n> ");
+    }
+
+    @Test
+    void processesHaveTabsAndBreakStopsTheirs() {
+        type("(proc/start \"ticker\" (fn [] (forever (print \"tick\") (sleep 0.2))))");
+        tick(10, "\n2\n> ");
+        for (int t = 0; t < 20 && !screen.log(2).contains("tick"); t++) tick(1, null);
+        assertTrue(screen.log(2).contains("tick"), screen.log(2));
+        breakTab(2);
+        tick(5, null);
+        assertTrue(screen.log(2).contains("Break: stopped 1 task"), screen.log(2));
+        type("(proc/list)");
+        tick(5, "@[(2 \"ticker\" 0)]\n> ");
+        m.editor.give("(close 2)\n".getBytes(StandardCharsets.UTF_8));
+        tick(3, null);
+        assertNull(screen.scene.tabs.get(2), "closed");
     }
 }

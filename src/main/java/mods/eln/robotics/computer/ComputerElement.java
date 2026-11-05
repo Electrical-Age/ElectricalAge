@@ -295,11 +295,9 @@ public class ComputerElement extends TransparentNodeElement {
         if (player != null && eventsThisTick.merge(player.getUUID(), 1, Integer::sum) > EVENTS_PER_TICK) return;
         String ok = screen.check(line);
         if (ok == null) return;
-        if (ok.startsWith("(break ")) runner.pressBreak();
-        else {
-            runner.toEditor((ok + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
-            runner.kick();
-        }
+        if (ok.startsWith("(break ")) runner.pressBreak();   // (the interrupt stops a running task; the event says whose tab)
+        runner.toEditor((ok + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        runner.kick();
     }
 
     /** The fast path's other half: after a slice, its screen output goes to the viewers at once (on the server thread). */

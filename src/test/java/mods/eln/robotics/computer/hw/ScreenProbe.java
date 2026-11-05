@@ -34,7 +34,12 @@ final class ScreenProbe {
 
     /** The REPL's log as text. */
     String log() {
-        Scene.Tab t = scene.tabs.get(1);
+        return log(1);
+    }
+
+    /** Tab t's log (element 1) as text. */
+    String log(int tab) {
+        Scene.Tab t = scene.tabs.get(tab);
         Scene.Element e = t == null ? null : t.elements.get(1);
         if (e == null) return "";
         StringBuilder b = new StringBuilder();

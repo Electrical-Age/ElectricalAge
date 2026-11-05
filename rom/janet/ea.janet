@@ -21,6 +21,9 @@
 (var- repl-eval nil)   # the REPL's form being evaluated (Break stops it)
 (def- tasks @{})       # every task alive -> true
 (var- broke nil)       # a Break already stopped the task that was running
+(var- break-pending nil) # Break was pressed; the screen's (break tab) says for which tab
+(def- procs @{})       # tab -> @{:name :env :tab}: processes, each with a tab of its own
+(var- root-env-of-os nil) # the environment the stdlib was compiled in (processes start from it)
 (def- system @{})      # the REPL task, which Break leaves alone
 (def- display-in @"")  # bytes from the screen not yet read as lines
 (def- display-out @"") # messages for the screen not yet sent (its channel was full)
@@ -79,8 +82,18 @@
   (keep waiters 1)
   (when (= input-fiber f) (set input-fiber nil)))
 
+(defn- stop-tasks [stop]
+  (each f stop
+    (drop-fiber f)
+    (put tasks f nil)
+    (put joiners f nil))
+  (def keep (filter |(not (index-of ($ 0) stop)) ready))
+  (array/clear ready)
+  (array/concat ready keep))
+
 (defn- on-break
-  "Break stops the REPL's form if it has one running; else every program's task, and the bus handlers they set."
+  "The REPL's Break (tab 1): it stops the REPL's form if one is running; else every program's task, and the bus
+  handlers they set. A Break that interrupted a running task has already stopped it."
   []
   (if broke (set broke nil)
   (if (and repl-eval (get tasks repl-eval))
@@ -89,13 +102,7 @@
       (finish f [:error "stopped by Break" f]))
     (do
       (def stop (filter |(not (get system $)) (keys tasks)))
-      (each f stop
-        (drop-fiber f)
-        (put tasks f nil)
-        (put joiners f nil))
-      (def keep (filter |(not (index-of ($ 0) stop)) ready))
-      (array/clear ready)
-      (array/concat ready keep)
+      (stop-tasks stop)
       (array/clear handlers)
       (print "\nBreak: stopped " (length stop) " task" (if (= 1 (length stop)) "" "s") " and the bus handlers.")
       (flush)))))
@@ -169,6 +176,41 @@
       (buffer/clear buf)
       (ui/send 'append t id colour s))))
 
+(defn- env-of? [f env]
+  (var e (fiber/getenv f))
+  (var found false)
+  (while e
+    (when (= e env) (set found true) (break))
+    (set e (table/getproto e)))
+  found)
+
+(defn- proc-stop "Stop every task of the process in tab t." [t]
+  (def p (get procs t))
+  (when p
+    (def stop (filter |(env-of? $ (p :env)) (keys tasks)))
+    (stop-tasks stop)
+    (length stop)))
+
+(defn- proc-close "Stop the process in tab t and remove its tab." [t]
+  (proc-stop t)
+  (def p (get procs t))
+  (put procs t nil)
+  (def keep (filter |(not= t ($ 1)) outputs))
+  (array/clear outputs)
+  (array/concat outputs keep)
+  (eachk k ui-handlers (when (= t (k 0)) (put ui-handlers k nil)))
+  (ui/send 'untab t))
+
+(defn- screen-break "Break for tab t: the REPL's (tab 1) or a process's." [t]
+  (set break-pending nil)
+  (if (get procs t)
+    (do
+      (if broke (set broke nil))
+      (def n (proc-stop t))
+      (def p (get procs t))
+      (buffer/push ((p :env) :err) (string "\nBreak: stopped " n " task" (if (= 1 n) "" "s") ".\n")))
+    (on-break)))
+
 (defn- screen-event [m]
   (when (and (tuple? m) (> (length m) 2) (number? (m 1)) (number? (m 2)))
     (def f (get ui-handlers [(m 1) (m 2)]))
@@ -176,6 +218,11 @@
       'submit (when (and f (string? (get m 4))) (spawn f (m 4) (get m 3 0)))
       'press (when f (spawn f))
       'select (when (and f (number? (get m 3))) (spawn f (m 3)))
+      nil))
+  (when (and (tuple? m) (> (length m) 1) (number? (m 1)))
+    (case (m 0)
+      'break (screen-break (m 1))
+      'close (when (get procs (m 1)) (proc-close (m 1)))
       nil)))
 
 (defn- screen-events "Read the screen's events and run their handlers as tasks." []
@@ -192,7 +239,7 @@
 
 (defn- run []
   (forever
-    (when (ea/break?) (on-break))
+    (when (ea/break?) (set break-pending true))
     (while (def t (ea/recv)) (deliver (packet t)))
     (buffer/push typed (ea/input))
     (screen-events)
@@ -202,13 +249,13 @@
       (array/push ready [f (string typed)])
       (buffer/clear typed))
     (wake (ea/ticks))
+    (flush-outputs)
+    (display-drain)
     (if (empty? ready)
       (ea/wait (next-deadline))
       (let [batch (array/slice ready)]
         (array/clear ready)
-        (each [f v] batch (step f v))))
-    (flush-outputs)
-    (display-drain)))
+        (each [f v] batch (step f v))))))
 
 # ---- the bus
 
@@ -442,18 +489,44 @@
       (error (string path ":" (get thunk :line "?") ": " (get thunk :error)))))
   (when (= :error (parser/status p)) (error (string path ": " (parser/error p)))))
 
+(defn proc/start
+  "Start a process: (f ;args) as its first task, in an environment of its own, with a tab of its own (a log over the
+  whole tab) where what it prints goes. Returns its tab. Break on that tab stops its tasks; closing the tab ends it."
+  [name f & args]
+  (var t 2)
+  (while (or (get procs t) (= t 1)) (++ t))
+  (when (> t 255) (error "too many processes"))
+  (def env (make-env root-env-of-os))
+  (put procs t @{:name name :env env :tab t})
+  (ui/tab t name)
+  (ui/log t 1 0 0 ui/width ui/height)
+  (ui/output env t 1)
+  (spawn-in env f ;args)
+  t)
+
+(defn proc/list "The processes: [tab name tasks] each." []
+  (seq [[t p] :pairs procs] [t (p :name) (length (filter |(env-of? $ (p :env)) (keys tasks)))]))
+
+(defn proc/stop "Stop every task of the process in tab t (its tab stays)." [t] (proc-stop t))
+(defn proc/close "End the process in tab t and remove its tab." [t] (proc-close t))
+
+(defn proc/tab "The tab of the process this task belongs to, or nil (the REPL's own tasks: 1)." []
+  (var found nil)
+  (eachp [t p] procs (when (env-of? (fiber/current) (p :env)) (set found t)))
+  found)
+
 (defn- autorun [env]
   (each p ["A:/startup.janet" "B:/startup.janet" "A:/main.janet" "B:/main.janet"]
     (when (disk/exists? p)
-      (buffer/push (env :out) (string "Running " p "\n"))
-      (def e (make-env env))
-      (spawn-in e run-file p e)
+      (buffer/push (env :out) (string "Running " p " (its own tab)\n"))
+      (proc/start (last (string/split "/" p)) run-file p)
       (break))))
 
 (defn ea/start
   "Start the scheduler: the REPL tab, and a floppy's startup.janet (A: first, then B:) if there is one (the ROM does
   this at boot)."
   []
+  (set root-env-of-os (curenv))
   (def env (make-env (curenv)))
   (ui/send 'screen ui/width ui/height)
   (repl-tab env)

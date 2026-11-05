@@ -293,8 +293,12 @@ public class ComputerScreen extends ElnScreen {
             String title = en.getValue().title.isEmpty() ? String.valueOf(en.getKey()) : en.getValue().title;
             int w = font.width(title) + 8;
             if (mx >= x && mx < x + w && my >= topPos + 5 && my < topPos + 17) {
-                tab = en.getKey();
-                focusId = -1;
+                if (ev.button() == InputConstants.MOUSE_BUTTON_RIGHT && en.getKey() > 1)
+                    render.screenEvent(new Form.Symbol("close"), (long) en.getKey());   // (right-click closes a process's tab)
+                else {
+                    tab = en.getKey();
+                    focusId = -1;
+                }
                 return true;
             }
             x += w + 2;
