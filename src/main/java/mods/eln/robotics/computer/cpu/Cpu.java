@@ -32,7 +32,7 @@ public final class Cpu {
 
     public Cpu(Memory mem) {
         this.mem = mem;
-        reset(Memory.ROM_BASE);
+        reset(Memory.BOOT_VECTOR);
     }
 
     /** Registers cleared, pc at the reset vector, FPU off, interrupts off. Memory is left alone. */

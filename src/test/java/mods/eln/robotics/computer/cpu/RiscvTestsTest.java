@@ -14,11 +14,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * The official riscv-tests (rv32ui/um/ua/uf/ud/uc/mi, "p" environment) on the CPU. Each image is loaded at RAM_BASE
- * and run until it writes tohost: 1 is a pass, (n << 1) | 1 a failure of its test case n. The images are built by
- * tools/rv32/build-riscv-tests.sh.
+ * The official riscv-tests (rv32ui/um/ua/uf/ud/uc/mi, "p" environment) on the CPU. Each image is linked for and
+ * loaded into a RAM chip in slot 1, and run until it writes tohost: 1 is a pass, (n << 1) | 1 a failure of its test
+ * case n. The images are built by tools/rv32/build-riscv-tests.sh.
  */
 class RiscvTestsTest {
+    static final int BASE = Memory.SLOT_BYTES;
+
     /** Tests this CPU doesn't run, with why. */
     static final java.util.Map<String, String> SKIP = java.util.Map.of(
             "rv32mi-p-breakpoint", "no debug triggers (tselect/tdata are optional)",
@@ -46,11 +48,12 @@ class RiscvTestsTest {
         try (InputStream in = RiscvTestsTest.class.getResourceAsStream("/riscv-tests/" + name + ".bin")) {
             image = in.readAllBytes();
         }
-        Memory mem = new Memory(null, 1 << 20);
-        mem.loadRam(Memory.RAM_BASE, image);
+        Memory mem = new Memory();
+        mem.setRam(1, Memory.SLOT_BYTES);
+        mem.loadRam(BASE, image);
         Cpu cpu = new Cpu(mem);
-        cpu.reset(Memory.RAM_BASE);
-        int host = Memory.RAM_BASE + tohost;
+        cpu.reset(BASE);
+        int host = BASE + tohost;
         for (int i = 0; i < 2000; i++) {
             cpu.run(1000);
             int v = mem.load32(host);
