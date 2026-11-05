@@ -2313,7 +2313,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             dictAdvancedChip, findItemStack("Silicon Ingot"), stack(Items.BOOK));
         addShapelessRecipe(stack(mods.eln.robotics.Robotics.BOOT_ROM.get(), 1),
             dictCheapChip, findItemStack("Silicon Ingot"), stack(Items.PAPER));
-        addShapelessRecipe(stack(mods.eln.robotics.Robotics.FLOPPY_DISK.get(), 2),
+        addShapelessRecipe(stack(mods.eln.robotics.Robotics.FLOPPY_DISK.get(), 1),
             stack(Items.PAPER), stack(Items.IRON_NUGGET), stack(Items.IRON_NUGGET), "itemRubber");
         addShapelessRecipe(stack(mods.eln.robotics.Robotics.ELEVATOR_DISK.get(), 1),
             stack(mods.eln.robotics.Robotics.FLOPPY_DISK.get()), stack(mods.eln.robotics.Robotics.SERVO_RAIL_ITEM.get()));

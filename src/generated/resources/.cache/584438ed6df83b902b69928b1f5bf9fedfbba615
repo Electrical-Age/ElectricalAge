@@ -1,4 +1,4 @@
-// 26.3	2026-11-05T18:08:39.72138145	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-05T18:17:55.907069801	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -516,7 +516,7 @@ c69701fc0715e23ae06919546a43dbd77b2991b2 data/eln/recipe/field_bus_cable.json
 cb117cca2d60183ceb605b7c516744be0b07ec15 data/eln/recipe/flare_stack.json
 566930bc1d495eba2162396b25dc0a79d0919023 data/eln/recipe/flat_lamp_socket.json
 f0cefb55712b68278fc4f9e691981e04a0170e81 data/eln/recipe/floor_sensor.json
-941d1de76b96158ecda37be16e1e160987f7345a data/eln/recipe/floppy_disk.json
+662f55c31c2ab80819542243dcc6d3dd68cf1b1e data/eln/recipe/floppy_disk.json
 dcac5b388078066d6313cefb6951a595b5afe2dd data/eln/recipe/fluorescent_lamp_socket.json
 d6f7bffa2f89a8f70b83ca846b9e79c8d9de798b data/eln/recipe/flywheel.json
 f40d83e7a9b182e47c01049007e072cf2b632b8d data/eln/recipe/fractionating_column_base.json
