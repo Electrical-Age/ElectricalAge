@@ -1,5 +1,6 @@
 /* The ea module: Janet's view of the computer's devices (the stdlib in ea.janet builds on it). */
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include "janet.h"
 #include "../common/devices.h"
@@ -77,7 +78,7 @@ JANET_FN(cfun_input, "(ea/input)", "The terminal's typed bytes waiting, as a str
     return janet_stringv(buf, n);
 }
 
-JANET_FN(cfun_editor_input, "(ea/editor-input)", "Bytes from the screen's editor waiting, as a string.") {
+JANET_FN(cfun_editor_input, "(ea/display-input)", "Bytes from the screen (the display channel) waiting, as a string.") {
     janet_fixarity(argc, 0);
     (void) argv;
     uint8_t buf[512];
@@ -90,8 +91,8 @@ JANET_FN(cfun_editor_input, "(ea/editor-input)", "Bytes from the screen's editor
     return janet_stringv(buf, n);
 }
 
-JANET_FN(cfun_editor_write, "(ea/editor-write bytes &opt start)",
-         "Send bytes to the screen's editor from start; returns how many went (its buffer may be full).") {
+JANET_FN(cfun_editor_write, "(ea/display-write bytes &opt start)",
+         "Send bytes to the screen (the display channel) from start; returns how many went (its buffer may be full).") {
     janet_arity(argc, 1, 2);
     JanetByteView b = janet_getbytes(argv, 0);
     int32_t i = argc > 1 ? janet_getinteger(argv, 1) : 0;
@@ -161,6 +162,53 @@ JANET_FN(cfun_reset, "(ea/reset)", "Start the computer again from slot 1's chip.
     for (;;) POWER_CTRL = 2;
 }
 
+JANET_FN(cfun_quote, "(ea/quote s)", "s as a quoted string the screen reads: \\ \" \\n \\t \\r and \\xNN for other control bytes.") {
+    janet_fixarity(argc, 1);
+    JanetByteView v = janet_getbytes(argv, 0);
+    JanetBuffer *b = janet_buffer(v.len + 2);
+    janet_buffer_push_u8(b, '"');
+    static const char hex[] = "0123456789abcdef";
+    for (int32_t i = 0; i < v.len; i++) {
+        uint8_t c = v.bytes[i];
+        switch (c) {
+            case '"': janet_buffer_push_cstring(b, "\\\""); break;
+            case '\\': janet_buffer_push_cstring(b, "\\\\"); break;
+            case '\n': janet_buffer_push_cstring(b, "\\n"); break;
+            case '\t': janet_buffer_push_cstring(b, "\\t"); break;
+            case '\r': janet_buffer_push_cstring(b, "\\r"); break;
+            default:
+                if (c < 32) {
+                    janet_buffer_push_cstring(b, "\\x");
+                    janet_buffer_push_u8(b, (uint8_t) hex[c >> 4]);
+                    janet_buffer_push_u8(b, (uint8_t) hex[c & 15]);
+                } else janet_buffer_push_u8(b, c);
+        }
+    }
+    janet_buffer_push_u8(b, '"');
+    return janet_stringv(b->data, b->count);
+}
+
+static int cmp_str(const void *a, const void *b) {
+    return strcmp((const char *) janet_unwrap_string(*(const Janet *) a), (const char *) janet_unwrap_string(*(const Janet *) b));
+}
+
+JANET_FN(cfun_names, "(ea/names env)",
+         "The public names defined in an environment table (not its prototypes), sorted: for completion. Native, as "
+         "sorting several hundred strings in Janet took the computer a second.") {
+    janet_fixarity(argc, 1);
+    JanetTable *t = janet_gettable(argv, 0);
+    JanetArray *a = janet_array(t->count);
+    Janet private = janet_ckeywordv("private");
+    for (int32_t i = 0; i < t->capacity; i++) {
+        JanetKV kv = t->data[i];
+        if (!janet_checktype(kv.key, JANET_SYMBOL)) continue;
+        if (janet_checktype(kv.value, JANET_TABLE) && janet_truthy(janet_table_get(janet_unwrap_table(kv.value), private))) continue;
+        janet_array_push(a, janet_wrap_string(janet_string(janet_unwrap_symbol(kv.key), janet_string_length(janet_unwrap_symbol(kv.key)))));
+    }
+    qsort(a->data, (size_t) a->count, sizeof(Janet), cmp_str);
+    return janet_wrap_array(a);
+}
+
 /* Interrupts: Break (the software interrupt) stops a running task; the others only end a WFI. */
 void ea_irq(uint32_t cause) {
     if (cause == 3) {
@@ -181,7 +229,7 @@ void ea_register(JanetTable *env) {
         JANET_REG("ea/send", cfun_send), JANET_REG("ea/recv", cfun_recv), JANET_REG("ea/level", cfun_level),
         JANET_REG("ea/address", cfun_address), JANET_REG("ea/ticks", cfun_ticks), JANET_REG("ea/input", cfun_input),
         JANET_REG("ea/wait", cfun_wait), JANET_REG("ea/run", cfun_run), JANET_REG("ea/break?", cfun_break),
-        JANET_REG("ea/editor-input", cfun_editor_input), JANET_REG("ea/editor-write", cfun_editor_write),
-        JANET_REG("ea/halt", cfun_halt), JANET_REG("ea/reset", cfun_reset), JANET_REG_END};
+        JANET_REG("ea/display-input", cfun_editor_input), JANET_REG("ea/display-write", cfun_editor_write),
+        JANET_REG("ea/names", cfun_names), JANET_REG("ea/quote", cfun_quote), JANET_REG("ea/halt", cfun_halt), JANET_REG("ea/reset", cfun_reset), JANET_REG_END};
     janet_cfuns_ext(env, "ea", fns);
 }

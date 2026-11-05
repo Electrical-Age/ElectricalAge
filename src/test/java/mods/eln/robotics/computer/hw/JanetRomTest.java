@@ -40,21 +40,33 @@ class JanetRomTest {
         return null;
     }
 
+    /** Ticks until cond holds for the screen (or fail after maxTicks). */
+    static void until(Machine m, ScreenProbe s, java.util.function.BooleanSupplier cond, int maxTicks, String what) {
+        for (int t = 0; t < maxTicks; t++) {
+            m.tick();
+            m.run(1_000_000);
+            s.feed(m);
+            if (cond.getAsBoolean()) return;
+        }
+        fail(what + "; log: " + s.log() + "; console: " + s.console);
+    }
+
     @Test
     void bootsToTheReplAndEvaluates() throws IOException {
         Machine m = machine(3);
-        StringBuilder out = new StringBuilder();
-        until(m, out, "\n> ", 60);
-        assertTrue(out.indexOf("Janet 1.41.2 on Electrical Age") >= 0, out.toString());
-        m.terminal.give("(print \"hi\") (+ 1 2)\n".getBytes(StandardCharsets.UTF_8));
-        String s = until(m, out, "\n3\n> ", 40);
-        assertTrue(s.contains("> (print \"hi\") (+ 1 2)\nhi\nnil\n3\n> "), "echoed, then each form's output and value: " + s);
+        ScreenProbe s = new ScreenProbe();
+        until(m, s, s::ready, 80, "the REPL's tab");
+        assertTrue(s.console.indexOf("Janet 1.41.2 on Electrical Age") >= 0, s.console.toString());
+        m.editor.give(s.submit("(print \"hi\") (+ 1 2)"));
+        until(m, s, s::done, 40, "the submission done");
+        assertEquals("> (print \"hi\") (+ 1 2)\nhi\nnil\n3\n", s.log(), "echoed, then each form's output and value");
     }
 
     @Test
     void sleepsWhileWaitingForInput() throws IOException {
         Machine m = machine(2);
-        until(m, new StringBuilder(), "\n> ", 60);
+        ScreenProbe s = new ScreenProbe();
+        until(m, s, s::ready, 80, "the REPL's tab");
         m.tick();
         m.run(1_000_000);
         m.tick();
@@ -72,10 +84,11 @@ class JanetRomTest {
     @Test
     void aWildPointerTrapsAndHalts() throws IOException {
         Machine m = machine(2);
+        ScreenProbe s = new ScreenProbe();
+        until(m, s, s::ready, 80, "the REPL's tab");
         StringBuilder out = new StringBuilder();
-        until(m, out, "\n> ", 60);
-        // no FFI, so poke the CPU instead: wake it with a keystroke and jump to address 0 (the NULL guard)
-        m.terminal.give(new byte[]{'\n'});
+        // no FFI, so poke the CPU instead: wake it with a submission and jump to address 0 (the NULL guard)
+        m.editor.give(s.submit("1"));
         m.cpu.pc = 0;
         until(m, out, "Trap: cause 00000001 at 00000000", 2);
         assertTrue(m.halted());

@@ -41,19 +41,21 @@ import java.util.UUID;
  * The robotics computer (ComputerDescriptor). Slots 0..7 hold its chips (slot k's chip at k MB), 8 and 9 its floppies
  * (drives A and B). Changing a chip rebuilds the machine and cold-boots it (Baughn: RAM is volatile; a chip pulled
  * from a running computer resets it). Each tick its Runner exchanges with it: bus packets in and out, the colour
- * channels' levels, keystrokes, terminal output to the players with its screen open. Saving takes its RAM
- * copy-on-write and writes it beside the world (ComputerStore); the NBT keeps only its id.
+ * channels' levels, and the screen: the display channel's messages go into a ScreenHost, which keeps the scene
+ * (players opening the screen get it from there, without asking the computer) and batches what the players watching
+ * get; their events go the other way, checked. Saving takes its RAM copy-on-write and writes it, and the scene, beside
+ * the world (ComputerStore); the NBT keeps only its id.
  */
 public class ComputerElement extends TransparentNodeElement {
     public static final int CHIP_SLOTS = 8, DRIVE_A = 8, DRIVE_B = 9;
     /** Its state, for the lamp, the screen and Jade. */
     public static final byte OFF = 0, RUNNING = 1, SLEEPING = 2, HALTED = 3, NO_CHIPS = 4;
-    /** Screen packets. */
-    public static final byte TYPE_ID = 1, RESET_ID = 2, SET_ADDRESS_ID = 3, BREAK_ID = 4, EDITOR_ID = 6;
-    /** Server-to-screen packets: terminal bytes, the whole terminal again, an editor reply. */
-    public static final byte TERMINAL_ID = 1, TERMINAL_ALL_ID = 2, EDITOR_REPLY_ID = 3;
-    /** Terminal output kept for a screen that opens later, and the most sent to screens a tick. */
-    static final int SCROLLBACK = 8192, MAX_SEND = 4096;
+    /** Screen packets: reset, its address, Break, a screen protocol event (one line). */
+    public static final byte RESET_ID = 2, SET_ADDRESS_ID = 3, BREAK_ID = 4, SCREEN_EVENT_ID = 7;
+    /** Server-to-screen packets: protocol lines to apply. */
+    public static final byte SCREEN_ID = 4;
+    /** Events a player may send a tick (Argon's review: clients are untrusted). */
+    static final int EVENTS_PER_TICK = 20;
 
     final ElementMachine machine;
     public final BusPort port;
@@ -64,16 +66,13 @@ public class ComputerElement extends TransparentNodeElement {
     String builtFrom = "";
     boolean loadPending = true;
     byte status = OFF;
-    final byte[] scrollback = new byte[SCROLLBACK];
-    int scrollStart, scrollLen;
+    public final mods.eln.robotics.computer.screen.ScreenHost screen = new mods.eln.robotics.computer.screen.ScreenHost();
     final java.util.Set<UUID> watchers = new java.util.HashSet<>();
+    final Map<UUID, Integer> eventsThisTick = new java.util.HashMap<>();
+    int seenResets = -1;
     final UUID[] mountedDisk = new UUID[2];
     final Floppy[] floppies = new Floppy[2];
     final double[] levels = new double[BusChannel.COUNT];
-    /** Editor requests in flight: their id -> the player who asked (replies go to them alone). */
-    final Map<Integer, UUID> editorAsked = new LinkedHashMap<>();
-    int editorNext = 1;
-    final EditorFrames editorFrames = new EditorFrames();
 
     public ComputerElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
@@ -125,14 +124,10 @@ public class ComputerElement extends TransparentNodeElement {
         }
         if (!any) return;
         m.reset(Machine.RESET_POWER);
-        runner = new Runner(m);
-        clearScrollback();
+        runner = newRunner(m);
+        screen.reset();
+        seenResets = runner.machine.resets();
         syncDisks();
-    }
-
-    void clearScrollback() {
-        scrollStart = scrollLen = 0;
-        for (ServerPlayer p : viewers()) sendTerminal(p, TERMINAL_ALL_ID, new byte[0]);
     }
 
     /** Put the floppies in the drive slots into the drives (and take out what left). */
@@ -219,13 +214,16 @@ public class ComputerElement extends TransparentNodeElement {
         runner.busState(port.address(), port.bus() != null, levels);
         if (runner.tick(powered)) {
             for (Packet p : runner.takePackets()) port.send(p);
-            byte[] out = runner.takeTerminal();
-            if (out.length > 0) terminalOut(out);
-            byte[] ed = runner.takeEditor();
-            if (ed.length > 0) for (String[] f : editorFrames.feed(ed)) editorReply(f);
+            if (runner.machine.resets() != seenResets) {
+                seenResets = runner.machine.resets();
+                screen.reset();
+            }
+            screen.console(runner.takeTerminal());
+            screen.fromComputer(runner.takeEditor());
             if (powered) machine.takeJoules(machine.ratedJoulesPerTick() * Math.min(1.0, runner.lastRan() / (double) runner.budget));
         }
         watch();
+        eventsThisTick.clear();
         Machine m = runner.machine;
         setStatus(!powered ? OFF : m.halted() ? HALTED : runner.running() || runner.lastRan() > 0 ? RUNNING : SLEEPING);
     }
@@ -243,8 +241,11 @@ public class ComputerElement extends TransparentNodeElement {
         MinecraftServer s = server();
         if (runner == null || s == null) return;
         Machine.Saved saved = ComputerStore.loadMachine(s, id);
-        if (saved != null) runner.machine.load(saved);
-        runner = new Runner(runner.machine);
+        if (saved != null && runner.machine.load(saved)) {
+            screen.load(ComputerStore.loadScreen(s, id));   // (the computer won't redraw: its scene was saved)
+            seenResets = runner.machine.resets();
+        }
+        runner = newRunner(runner.machine);
         for (int d = 0; d < 2; d++) if (floppies[d] != null) runner.insert(d, floppies[d]);
     }
 
@@ -259,87 +260,76 @@ public class ComputerElement extends TransparentNodeElement {
         return l;
     }
 
-    /** New viewers get the scrollback; viewers who left are forgotten. */
+    /** New viewers get the whole scene; the others this tick's batch; viewers who left are forgotten. */
     void watch() {
         List<ServerPlayer> v = viewers();
+        List<String> batch = screen.takeBatch();
         java.util.Set<UUID> now = new java.util.HashSet<>();
         for (ServerPlayer p : v) {
             now.add(p.getUUID());
-            if (!watchers.contains(p.getUUID())) sendTerminal(p, TERMINAL_ALL_ID, scrollbackBytes());
+            if (!watchers.contains(p.getUUID()) || batch == null) sendScreen(p, screen.replay());
+            else if (!batch.isEmpty()) sendScreen(p, batch);
         }
         watchers.clear();
         watchers.addAll(now);
     }
 
-    void terminalOut(byte[] out) {
-        for (byte b : out) {
-            scrollback[(scrollStart + scrollLen) % SCROLLBACK] = b;
-            if (scrollLen < SCROLLBACK) scrollLen++;
-            else scrollStart = (scrollStart + 1) % SCROLLBACK;
-        }
-        byte[] send = out.length > MAX_SEND ? java.util.Arrays.copyOfRange(out, out.length - MAX_SEND, out.length) : out;
-        for (ServerPlayer p : viewers()) if (watchers.contains(p.getUUID())) sendTerminal(p, TERMINAL_ID, send);
-    }
-
-    /** The terminal output kept for screens (tests read it too). */
-    public byte[] scrollbackBytes() {
-        byte[] b = new byte[scrollLen];
-        for (int i = 0; i < scrollLen; i++) b[i] = scrollback[(scrollStart + i) % SCROLLBACK];
-        return b;
-    }
-
-    /** A screen's editor request (op, path, revision, body) on to the computer; it answers on its editor channel. */
-    void editorRequest(ServerPlayer player, String op, String path, String rev, String body) {
-        if (runner == null || status == OFF || status == HALTED) {
-            if (player != null) sendEditor(player, new String[]{"error", "0", path, "", I18N.tr("The computer isn't running.")});
-            return;
-        }
-        int id = editorNext++;
-        if (player != null) editorAsked.put(id, player.getUUID());
-        while (editorAsked.size() > 32) editorAsked.remove(editorAsked.keySet().iterator().next());
-        runner.toEditor(EditorFrames.encode(op, String.valueOf(id), path, rev, body));
-    }
-
-    void editorReply(String[] f) {
-        UUID who;
-        try {
-            who = editorAsked.remove(Integer.parseInt(f[1]));
-        } catch (NumberFormatException e) {
-            return;
-        }
-        if (who == null) return;
-        for (ServerPlayer p : viewers()) if (p.getUUID().equals(who)) sendEditor(p, f);
-    }
-
-    void sendEditor(ServerPlayer p, String[] f) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(256);
+    void sendScreen(ServerPlayer p, List<String> lines) {
+        byte[] text = String.join("\n", lines).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(text.length + 64);
         DataOutputStream o = new DataOutputStream(bos);
         preparePacketForClient(o);
         try {
-            o.writeByte(EDITOR_REPLY_ID);
-            for (int i = 0; i < EditorFrames.FIELDS; i++) {
-                byte[] b = f[i].getBytes(java.nio.charset.StandardCharsets.UTF_8);
-                o.writeInt(b.length);
-                o.write(b);
-            }
+            o.writeByte(SCREEN_ID);
+            o.writeInt(text.length);
+            o.write(text);
         } catch (IOException e) {
             return;
         }
         node.sendPacketToClient(bos, p);
     }
 
-    void sendTerminal(ServerPlayer p, byte kind, byte[] bytes) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length + 64);
-        DataOutputStream o = new DataOutputStream(bos);
-        preparePacketForClient(o);
-        try {
-            o.writeByte(kind);
-            o.writeInt(bytes.length);
-            o.write(bytes);
-        } catch (IOException e) {
-            return;
+    /** A player's screen event: checked, counted, and passed on to the computer (Break is the host's). */
+    void screenEvent(ServerPlayer player, String line) {
+        if (runner == null) return;
+        if (player != null && eventsThisTick.merge(player.getUUID(), 1, Integer::sum) > EVENTS_PER_TICK) return;
+        String ok = screen.check(line);
+        if (ok == null) return;
+        if (ok.startsWith("(break ")) runner.pressBreak();
+        else {
+            runner.toEditor((ok + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            runner.kick();
         }
-        node.sendPacketToClient(bos, p);
+    }
+
+    /** The fast path's other half: after a slice, its screen output goes to the viewers at once (on the server thread). */
+    void flushScreen(Runner r) {
+        if (r != runner || !r.collectScreen()) return;
+        screen.console(r.takeTerminal());
+        screen.fromComputer(r.takeEditor());
+        watch();
+    }
+
+    /** A new runner, flushing its screen after every slice. */
+    Runner newRunner(Machine m) {
+        Runner r = new Runner(m);
+        r.afterSlice = () -> {
+            MinecraftServer s = server();
+            if (s != null) s.execute(() -> flushScreen(r));
+        };
+        return r;
+    }
+
+    /** What the REPL's log and the console hold, as text (GameTests read it). */
+    public String screenText() {
+        StringBuilder b = new StringBuilder();
+        for (var tab : screen.scene.tabs.values())
+            for (var e : tab.elements.values())
+                for (var line : e.lines) {
+                    for (var r : line) b.append(r.text());
+                    b.append('\n');
+                }
+        return b.toString();
     }
 
     @Override
@@ -362,23 +352,15 @@ public class ComputerElement extends TransparentNodeElement {
         byte id = super.networkUnserialize(stream, player);
         try {
             switch (id) {
-                case TYPE_ID -> {
-                    String s = stream.readUTF();
-                    if (runner != null && s.length() <= 1024) runner.type(s.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                }
+                case SCREEN_EVENT_ID -> screenEvent(player, stream.readUTF());
                 case RESET_ID -> {
                     if (runner != null) {
                         runner.awaitIdle();
                         runner.machine.reset(Machine.RESET_POWER);
-                        clearScrollback();
                     }
                 }
                 case BREAK_ID -> {
                     if (runner != null) runner.pressBreak();
-                }
-                case EDITOR_ID -> {
-                    String op = stream.readUTF(), path = stream.readUTF(), rev = stream.readUTF(), body = stream.readUTF();
-                    if (body.length() <= EditorFrames.MAX_BODY && path.length() <= 256) editorRequest(player, op, path, rev, body);
                 }
                 case SET_ADDRESS_ID -> {
                     port.setAddress(Math.round(stream.readFloat()));
@@ -454,6 +436,7 @@ public class ComputerElement extends TransparentNodeElement {
         if (runner != null && s != null && !loadPending) {
             runner.awaitIdle();
             ComputerStore.saveMachine(s, id, runner.machine.save());
+            ComputerStore.saveScreen(s, id, screen.replay());
             for (int d = 0; d < 2; d++) saveDisk(d);
         }
     }

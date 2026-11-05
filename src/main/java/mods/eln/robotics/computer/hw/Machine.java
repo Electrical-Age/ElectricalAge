@@ -91,8 +91,16 @@ public final class Machine implements Mmio {
         return c instanceof Integer i ? i : c instanceof Rom r ? r.bytes : 0;
     }
 
+    /** Resets so far (the host empties the screen when this changes). */
+    int resets;
+
+    public int resets() {
+        return resets;
+    }
+
     /** Start from the boot vector: registers cleared, RAM kept (a reset doesn't clear chips). */
     public void reset(int cause) {
+        resets++;
         cpu.reset(Memory.BOOT_VECTOR);
         halted = false;
         resetCause = cause;

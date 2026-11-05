@@ -20,9 +20,12 @@
 (var- input-fiber nil) # the task waiting for keystrokes
 (var- repl-eval nil)   # the REPL's form being evaluated (Break stops it)
 (def- tasks @{})       # every task alive -> true
-(def- system @{})      # the REPL and editor tasks, which Break leaves alone
-(def- editor-in @"")   # bytes from the screen's editor not yet taken
-(var- editor-fiber nil) # the editor task, waiting for them
+(var- broke nil)       # a Break already stopped the task that was running
+(def- system @{})      # the REPL task, which Break leaves alone
+(def- display-in @"")  # bytes from the screen not yet read as lines
+(def- display-out @"") # messages for the screen not yet sent (its channel was full)
+(def- outputs @[])     # [buffer tab log colour]: print output to move into a log
+(def- ui-handlers @{}) # [tab id] -> the function for its events
 
 (defn ticks "The computer's clock: game ticks it has run (20 a second)." [] (ea/ticks))
 (defn now "The computer's clock in seconds." [] (/ (ea/ticks) 20))
@@ -55,7 +58,6 @@
     [:sleep until] (array/push sleepers [until f])
     [:packet pred until] (array/push waiters [pred f until])
     [:input] (set input-fiber f)
-    [:editor] (if (empty? editor-in) (set editor-fiber f) (array/push ready [f nil]))
     [:join g] (if (= :new (fiber/status g)) (put joiners g f)
                 (if (index-of (fiber/status g) [:dead :error :user8 :interrupted])
                   (array/push ready [f [:ok nil]])
@@ -67,8 +69,8 @@
   (case (fiber/status f)
     :dead (finish f [:ok r])
     :error (finish f [:error r f])
-    :user8 (finish f [:error "stopped by Break" f])
-    :interrupted (finish f [:error "stopped by Break" f])
+    :user8 (do (set broke true) (finish f [:error "stopped by Break" f]))
+    :interrupted (do (set broke true) (finish f [:error "stopped by Break" f]))
     (park f r)))
 
 (defn- drop-fiber [f]
@@ -80,6 +82,7 @@
 (defn- on-break
   "Break stops the REPL's form if it has one running; else every program's task, and the bus handlers they set."
   []
+  (if broke (set broke nil)
   (if (and repl-eval (get tasks repl-eval))
     (let [f repl-eval]
       (drop-fiber f)
@@ -95,7 +98,7 @@
       (array/concat ready keep)
       (array/clear handlers)
       (print "\nBreak: stopped " (length stop) " task" (if (= 1 (length stop)) "" "s") " and the bus handlers.")
-      (flush))))
+      (flush)))))
 
 (defn- packet [t]
   {:target (t 0) :source (t 1) :type (get bus/types (t 2) (t 2)) :index (t 3) :value (t 4)})
@@ -125,17 +128,74 @@
   (each x waiters (when (and (x 2) (or (nil? d) (< (x 2) d))) (set d (x 2))))
   d)
 
+# ---- the screen's channel (the display protocol: one Janet form per line, both ways; the handbook's "The Screen
+# Protocol"). Defined before the scheduler, which drains it.
+
+(defn- display-drain "Send what is waiting for the screen, as far as its channel has room." []
+  (unless (empty? display-out)
+    (def n (ea/display-write display-out))
+    (def rest (buffer/slice display-out n))
+    (buffer/clear display-out)
+    (buffer/push display-out rest)))
+
+(def- quote-str ea/quote)
+
+(defn- fmt [x]
+  (cond
+    (or (string? x) (buffer? x)) (quote-str x)
+    (keyword? x) (string ":" x)
+    (number? x) (string/format "%d" (math/round x))
+    (= x true) "true"
+    (= x false) "false"
+    (nil? x) "nil"
+    (indexed? x) (string "[" (string/join (map fmt x) " ") "]")
+    (quote-str (string x))))
+
+(defn ui/send
+  "Send one message to the screen, e.g. (ui/send 'text 1 2 0 0 :white \"hi\"). Messages queue in RAM while the
+  screen's channel is full; a task sending a lot waits for it to drain."
+  [verb & args]
+  (buffer/push display-out "(" (string verb))
+  (each a args (buffer/push display-out " " (fmt a)))
+  (buffer/push display-out ")\n")
+  (display-drain)
+  (when (and (> (length display-out) 32768) (fiber/current) (get tasks (fiber/current)))
+    (while (> (length display-out) 4096) (sleep 0.05))))
+
+(defn- flush-outputs "Move what tasks printed into their logs." []
+  (each [buf t id colour] outputs
+    (unless (empty? buf)
+      (def s (string buf))
+      (buffer/clear buf)
+      (ui/send 'append t id colour s))))
+
+(defn- screen-event [m]
+  (when (and (tuple? m) (> (length m) 2) (number? (m 1)) (number? (m 2)))
+    (def f (get ui-handlers [(m 1) (m 2)]))
+    (case (m 0)
+      'submit (when (and f (string? (get m 4))) (spawn f (m 4) (get m 3 0)))
+      'press (when f (spawn f))
+      'select (when (and f (number? (get m 3))) (spawn f (m 3)))
+      nil)))
+
+(defn- screen-events "Read the screen's events and run their handlers as tasks." []
+  (buffer/push display-in (ea/display-input))
+  (forever
+    (def nl (string/find "\n" display-in))
+    (unless nl (break))
+    (def line (string/slice display-in 0 nl))
+    (def rest (string/slice display-in (+ nl 1)))
+    (buffer/clear display-in)
+    (buffer/push display-in rest)
+    (def [ok m] (protect (parse line)))
+    (when ok (screen-event m))))
+
 (defn- run []
   (forever
     (when (ea/break?) (on-break))
     (while (def t (ea/recv)) (deliver (packet t)))
     (buffer/push typed (ea/input))
-    (def e (ea/editor-input))
-    (unless (empty? e)
-      (buffer/push editor-in e)
-      (when editor-fiber
-        (array/push ready [editor-fiber nil])
-        (set editor-fiber nil)))
+    (screen-events)
     (when (and input-fiber (not (empty? typed)))
       (def f input-fiber)
       (set input-fiber nil)
@@ -146,7 +206,9 @@
       (ea/wait (next-deadline))
       (let [batch (array/slice ready)]
         (array/clear ready)
-        (each [f v] batch (step f v))))))
+        (each [f v] batch (step f v))))
+    (flush-outputs)
+    (display-drain)))
 
 # ---- the bus
 
@@ -264,51 +326,104 @@
 (defn spit "Write contents to a file (mode :wb, or :ab to append)." [path contents &opt mode]
   (with [f (file/open path (or mode :wb))] (file/write f contents)) nil)
 
-# ---- the terminal
+# ---- the screen's elements (see the handbook's "The Screen Protocol")
 
-(defn alarm "Say something is wrong, on the terminal." [& msg]
-  (print "ALARM: " ;msg)
-  (flush))
+(def ui/width "The screen's width in character cells." 52)
+(def ui/height "The screen's height in character cells." 17)
 
-(defn read-line "Wait for a line typed on the terminal." []
+(defn ui/tab "Add tab t (1-255), or rename it." [t title] (ui/send 'tab t title))
+(defn ui/untab "Remove tab t." [t]
+  (eachk k ui-handlers (when (= t (k 0)) (put ui-handlers k nil)))
+  (ui/send 'untab t))
+(defn ui/focus "Bring tab t forward." [t] (ui/send 'focus t))
+(defn ui/clear "Empty tab t." [t] (ui/send 'clear t))
+(defn ui/box "A filled rectangle, in cells." [t id x y w h colour] (ui/send 'box t id x y w h colour))
+(defn ui/text "A line of text; bg: a background colour." [t id x y colour s &opt bg]
+  (if bg (ui/send 'text t id x y colour s bg) (ui/send 'text t id x y colour s)))
+(defn ui/log "A scrolling transcript." [t id x y w h] (ui/send 'log t id x y w h))
+(defn ui/append "Add text to a log (it may hold newlines)." [t id colour s] (ui/send 'append t id colour s))
+(defn ui/line
+  "An editable line: the player edits it on their own client; Enter calls (on-submit text seq) as a task."
+  [t id x y w prompt on-submit]
+  (put ui-handlers [t id] on-submit)
+  (ui/send 'line t id x y w prompt))
+(defn ui/busy "A line's busy mark for submission seq." [t id seq on] (ui/send 'busy t id seq on))
+(defn ui/button "A button: a click calls (on-press) as a task." [t id x y w label on-press]
+  (put ui-handlers [t id] on-press)
+  (ui/send 'button t id x y w label))
+(defn ui/list "A list of rows: a click calls (on-select index) as a task." [t id x y w h items on-select]
+  (put ui-handlers [t id] on-select)
+  (ui/send 'list t id x y w h items))
+(defn ui/remove "Remove an element." [t id]
+  (put ui-handlers [t id] nil)
+  (ui/send 'remove t id))
+(defn ui/dict "Names the screen may complete in tab t (0: every tab)." [t names] (ui/send 'dict t names))
+(defn ui/output
+  "Send what tasks running in env print (and eprint, in red) into log id of tab t."
+  [env t id]
+  (def out @"")
+  (def err @"")
+  (put env :out out)
+  (put env :err err)
+  (array/push outputs [out t id :white] [err t id :red])
+  env)
+
+(defn alarm "Say something is wrong, in red." [& msg]
+  (eprint "ALARM: " ;msg))
+
+(defn read-line "Wait for a line typed on the console." []
   (yield [:input]))
+
+(defn spawn-in
+  "Run (f ;args) as a task whose environment (its definitions, where it prints) is env."
+  [env f & args]
+  (def fib (spawn f ;args))
+  (fiber/setenv fib env)
+  fib)
 
 (defn- eval-form [form env]
   (def thunk (compile form env "repl"))
   (if (function? thunk) (thunk) (error (get thunk :error))))
 
-(defn- repl [env]
+(defn- core-names [] (ea/names root-env))
+
+(defn- repl-tab
+  "The REPL: tab 1, a log over an editable line. The line is edited on the player's client; Enter sends it, the OS
+  echoes it into the log, evaluates each form as a task, and prints the value."
+  [env]
+  (def t 1)
   (def p (parser/new))
-  (forever
-    (def open (parser/state p :delimiters))
-    (prin (if (empty? open) "> " (string open "> ")))
-    (flush)
-    (def s (yield [:input]))
-    (prin s)
-    (flush)
-    (parser/consume p s)
+  (ui/output env t 1)
+  (ui/tab t "REPL")
+  (ui/log t 1 0 0 ui/width (- ui/height 1))
+  (var taken false)
+  (defn on-submit [text seq]
+    (put system (fiber/current) true)   # the REPL's own machinery: Break stops what it runs, not it
+    (while taken (sleep 0.05))   # one submission at a time, in order
+    (set taken true)
+    (ui/busy t 2 seq true)
+    (ui/append t 1 :gray (string (if (empty? (parser/state p :delimiters)) "> " "  ") text "\n"))
+    (parser/consume p (string text "\n"))
     (while (parser/has-more p)
       (def form (parser/produce p))
-      (set repl-eval (spawn eval-form form env))
+      (set repl-eval (spawn-in env eval-form form env))
       (def res (yield [:join repl-eval]))
       (set repl-eval nil)
+      (flush-outputs)
       (match res
-        [:ok v] (do (put env '_ @{:value v}) (pp v))
-        [:error e f] (print-error e f)))
+        [:ok v] (do (put env '_ @{:value v}) (buffer/push (env :out) (string/format "%q\n" v)))
+        [:error e f] (with-dyns [:err (env :err)] (debug/stacktrace f e ""))))
     (when (= :error (parser/status p))
-      (print "parse error: " (parser/error p))
-      (parser/flush p))))
-
-# ---- the screen's editor: framed requests on the editor channel, "LENGTH\n" then fields joined by NUL:
-# op, id, path, revision, body. The revision is the file's hash, so a save over a file changed meanwhile is refused.
-
-(defn- editor-send [& fields]
-  (def payload (string/join (map string fields) "\0"))
-  (def frame (string (length payload) "\n" payload))
-  (var i 0)
-  (while (< i (length frame))
-    (+= i (ea/editor-write frame i))
-    (when (< i (length frame)) (sleep 0.05))))
+      (buffer/push (env :err) (string "parse error: " (parser/error p) "\n"))
+      (parser/flush p))
+    (flush-outputs)
+    (def open (parser/state p :delimiters))
+    (ui/line t 2 0 (- ui/height 1) ui/width (if (empty? open) "> " (string open "> ")) on-submit)
+    (ui/busy t 2 seq false)
+    (set taken false)
+    (put system (fiber/current) nil))
+  (ui/dict 0 (core-names))
+  (ui/line t 2 0 (- ui/height 1) ui/width "> " on-submit))
 
 (defn- revision [text] (string (hash text)))
 
@@ -327,52 +442,20 @@
       (error (string path ":" (get thunk :line "?") ": " (get thunk :error)))))
   (when (= :error (parser/status p)) (error (string path ": " (parser/error p)))))
 
-(defn- editor-handle [env op id path rev body]
-  (try
-    (case op
-      "list" (editor-send "list" id path "" (string/join (disk/list path) "\n"))
-      "open" (do
-               (unless (disk/exists? path)
-                 (def why (ea/disk-why))
-                 (error (if (= why "no such file") (string "no such file: " path) (string path ": " why))))
-               (def t (string (slurp path)))
-               (editor-send "file" id path (revision t) t))
-      "save" (do
-               (def now (if (disk/exists? path) (string (slurp path))))
-               (if (and now (not= rev "") (not= rev (revision now)))
-                 (editor-send "conflict" id path (revision now) "")
-                 (do (spit path body) (editor-send "saved" id path (revision body) ""))))
-      "run" (do (spawn run-file path (make-env env)) (editor-send "ran" id path "" ""))
-      (editor-send "error" id path "" (string "unknown request " op)))
-    ([err] (editor-send "error" id path "" (string err)))))
-
-(defn- editor [env]
-  (forever
-    (yield [:editor])
-    (forever
-      (def nl (string/find "\n" editor-in))
-      (unless nl (break))
-      (def n (scan-number (string/slice editor-in 0 nl)))
-      (unless (and n (>= (length editor-in) (+ nl 1 n))) (break))
-      (def fields (string/split "\0" (string/slice editor-in (+ nl 1) (+ nl 1 n)) 0 5))
-      (def rest (string/slice editor-in (+ nl 1 n)))
-      (buffer/clear editor-in)
-      (buffer/push editor-in rest)
-      (when (= 5 (length fields)) (editor-handle env ;fields)))))
-
 (defn- autorun [env]
-  (each p ["A:/main.janet" "B:/main.janet"]
+  (each p ["A:/startup.janet" "B:/startup.janet" "A:/main.janet" "B:/main.janet"]
     (when (disk/exists? p)
-      (print "Running " p)
-      (spawn run-file p (make-env env))
+      (buffer/push (env :out) (string "Running " p "\n"))
+      (def e (make-env env))
+      (spawn-in e run-file p e)
       (break))))
 
 (defn ea/start
-  "Start the scheduler: a floppy's main.janet (A: first, then B:) if there is one, and the REPL on the terminal (the
-  ROM does this at boot)."
+  "Start the scheduler: the REPL tab, and a floppy's startup.janet (A: first, then B:) if there is one (the ROM does
+  this at boot)."
   []
   (def env (make-env (curenv)))
+  (ui/send 'screen ui/width ui/height)
+  (repl-tab env)
   (autorun env)
-  (put system (spawn editor env) true)
-  (put system (spawn repl env) true)
   (run))

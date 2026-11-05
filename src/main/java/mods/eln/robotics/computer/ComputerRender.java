@@ -3,19 +3,23 @@ package mods.eln.robotics.computer;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
+import mods.eln.robotics.computer.screen.Form;
+import mods.eln.robotics.computer.screen.Scene;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
-/** The computer (ComputerDescriptor): its cabinet and run lamp, and its terminal's text for the screen. */
+/** The computer (ComputerDescriptor): its cabinet and run lamp, and this client's copy of its screen (Scene). */
 public class ComputerRender extends TransparentNodeElementRender {
     final ComputerDescriptor desc;
     public byte status;
     public int address;
     public boolean onBus;
-    public final TerminalText terminal = new TerminalText();
-    /** Editor replies not yet taken by the screen: op, id, path, revision, body. */
-    public final java.util.ArrayDeque<String[]> editorReplies = new java.util.ArrayDeque<>();
+    /** The screen as the server sent it; the screen class draws it and keeps what is only this player's (edits). */
+    public final Scene scene = new Scene();
+    /** Bumped when the scene changes, so the screen can see it. */
+    public int sceneVersion;
 
     public ComputerRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
@@ -40,23 +44,6 @@ public class ComputerRender extends TransparentNodeElementRender {
         }
     }
 
-    /** Ask the computer's editor task: op (list, open, save, run), path, revision, body. */
-    public void editorSend(String op, String path, String rev, String body) {
-        try {
-            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
-            java.io.DataOutputStream o = new java.io.DataOutputStream(bos);
-            preparePacketForServer(o);
-            o.writeByte(ComputerElement.EDITOR_ID);
-            o.writeUTF(op);
-            o.writeUTF(path);
-            o.writeUTF(rev);
-            o.writeUTF(body);
-            sendPacketToServer(bos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     /** Its state in words (the screen). */
     public String stateTextClient() {
         return switch (status) {
@@ -68,30 +55,26 @@ public class ComputerRender extends TransparentNodeElementRender {
         };
     }
 
-    /** Terminal output from the server, or the whole terminal again (the screen just opened, or a reset). */
+    /** Send a screen protocol event (one message) to the computer. */
+    public void screenEvent(Object... parts) {
+        clientSendString(ComputerElement.SCREEN_EVENT_ID, Form.print(parts));
+    }
+
+    /** Protocol lines from the server, applied to this copy of the scene. */
     @Override
     public void serverPacketUnserialize(DataInputStream stream) {
         try {
             byte kind = stream.readByte();
-            if (kind == ComputerElement.EDITOR_REPLY_ID) {
-                String[] f = new String[EditorFrames.FIELDS];
-                for (int i = 0; i < f.length; i++) {
-                    int len = stream.readInt();
-                    if (len < 0 || len > 4 * EditorFrames.MAX_BODY) return;
-                    byte[] b = new byte[len];
-                    stream.readFully(b);
-                    f[i] = new String(b, java.nio.charset.StandardCharsets.UTF_8);
-                }
-                editorReplies.add(f);
-                while (editorReplies.size() > 16) editorReplies.poll();
-                return;
-            }
+            if (kind != ComputerElement.SCREEN_ID) return;
             int n = stream.readInt();
-            if (n < 0 || n > 1 << 16) return;
+            if (n < 0 || n > 1 << 20) return;
             byte[] b = new byte[n];
             stream.readFully(b);
-            if (kind == ComputerElement.TERMINAL_ALL_ID) terminal.clear();
-            terminal.append(b);
+            for (String line : new String(b, StandardCharsets.UTF_8).split("\n")) {
+                var m = Form.parse(line);
+                if (m != null) scene.apply(m);
+            }
+            sceneVersion++;
         } catch (IOException e) {
             e.printStackTrace();
         }

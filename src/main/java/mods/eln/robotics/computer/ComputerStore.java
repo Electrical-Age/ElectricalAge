@@ -82,11 +82,33 @@ public final class ComputerStore {
         }
     }
 
+    static Path screenFile(MinecraftServer s, UUID id) {
+        return dir(s, "eln_computers").resolve(id + ".screen");
+    }
+
+    /** The screen's scene as replay lines (the host keeps it; the computer doesn't redraw after a load). */
+    public static void saveScreen(MinecraftServer s, UUID id, java.util.List<String> lines) {
+        byte[] text = String.join("\n", lines).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        writeAsync(screenFile(s, id), o -> o.write(text));
+    }
+
+    public static java.util.List<String> loadScreen(MinecraftServer s, UUID id) {
+        flush();
+        Path f = screenFile(s, id);
+        try {
+            return Files.exists(f) ? Files.readAllLines(f, java.nio.charset.StandardCharsets.UTF_8) : java.util.List.of();
+        } catch (IOException e) {
+            LOG.error("could not read {}", f, e);
+            return java.util.List.of();
+        }
+    }
+
     public static void deleteMachine(MinecraftServer s, UUID id) {
-        Path f = machineFile(s, id);
+        Path f = machineFile(s, id), g = screenFile(s, id);
         WRITER.execute(() -> {
             try {
                 Files.deleteIfExists(f);
+                Files.deleteIfExists(g);
             } catch (IOException e) {
                 LOG.error("could not delete {}", f, e);
             }

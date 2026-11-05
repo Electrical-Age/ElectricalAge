@@ -15,32 +15,55 @@ import static org.junit.jupiter.api.Assertions.*;
 /** The Janet ROM's stdlib (rom/janet/ea.janet) at its REPL: tasks, sleeping, Break, the bus. */
 class StdlibTest {
     Machine m;
+    final ScreenProbe screen = new ScreenProbe();
+    /** The REPL's log and the console since the last mark(). */
     final StringBuilder out = new StringBuilder();
+    int logMark, consoleMark;
     final List<Packet> sent = new ArrayList<>();
 
     @BeforeEach
     void boot() throws IOException {
         m = JanetRomTest.machine(3);
         m.bus.setState(200, true, null);
-        tick(60, "\n> ");
+        for (int t = 0; t < 80 && !screen.ready(); t++) {
+            m.tick();
+            m.run(1_000_000);
+            screen.feed(m);
+        }
+        assertTrue(screen.ready(), "the REPL's tab is up");
+        mark();
     }
 
-    /** Ticks of 1M instructions until the terminal shows want; returns the ticks taken. */
+    void mark() {
+        logMark = screen.log().length();
+        consoleMark = screen.console.length();
+        out.setLength(0);
+    }
+
+    /**
+     * Ticks of 1M instructions until the log (or console) shows want; returns the ticks taken. A want ending in "> " (the
+     * old prompt) also waits for the submission to finish.
+     */
     int tick(int max, String want) {
+        boolean prompt = want != null && want.endsWith("\n> ");
+        String w = prompt ? want.substring(0, want.length() - 2) : want;
         for (int t = 1; t <= max; t++) {
             m.tick();
             m.run(1_000_000);
-            out.append(new String(m.terminal.take(), StandardCharsets.UTF_8));
+            screen.feed(m);
             sent.addAll(m.bus.take());
-            if (want != null && out.indexOf(want) >= 0) return t;
+            String log = screen.log();
+            out.setLength(0);
+            out.append(log, Math.min(logMark, log.length()), log.length()).append(screen.console.substring(consoleMark));
+            if (want != null && (w.equals("\n") || out.indexOf(w) >= 0) && (!prompt || screen.done())) return t;
         }
-        if (want != null) fail("no \"" + want + "\"; got: " + out);
+        if (want != null) fail("no \"" + want + "\"; got: " + out + " [log " + screen.log() + "] [tabs " + screen.scene.tabs.keySet() + " done " + screen.done() + "]");
         return max;
     }
 
     void type(String s) {
-        out.setLength(0);
-        m.terminal.give((s + "\n").getBytes(StandardCharsets.UTF_8));
+        mark();
+        m.editor.give(screen.submit(s));
     }
 
     @Test
@@ -57,7 +80,7 @@ class StdlibTest {
         type("(do (spawn (fn [] (sleep 0.5) (print \"second\"))) (print \"first\") (sleep 1) :done)");
         tick(40, ":done\n> ");
         String s = out.toString();
-        assertTrue(s.endsWith("\nfirst\nsecond\n:done\n> "), s);
+        assertTrue(s.endsWith("\nfirst\nsecond\n:done\n"), s);
     }
 
     @Test
@@ -177,48 +200,9 @@ class StdlibTest {
         type("(do (disk/format :a) (spit \"a:/main.janet\" \"(def x (do (sleep 0.2) 40)) (print (+ x 2))\") :ok)");
         tick(60, ":ok\n> ");
         m.reset(Machine.RESET_POWER);
-        out.setLength(0);
+        mark();
         tick(80, "42\n");
         assertTrue(out.toString().contains("Running A:/main.janet"), out.toString());
-    }
-
-    /** Editor frames from the computer, collected over ticks until one with op arrives. */
-    String[] editorReply(String op) {
-        mods.eln.robotics.computer.EditorFrames frames = new mods.eln.robotics.computer.EditorFrames();
-        for (int t = 0; t < 40; t++) {
-            m.tick();
-            m.run(1_000_000);
-            for (String[] f : frames.feed(m.editor.take())) if (f[0].equals(op)) return f;
-        }
-        fail("no " + op + " reply; terminal: " + out + new String(m.terminal.take(), StandardCharsets.UTF_8));
-        return null;
-    }
-
-    void ask(String... fields) {
-        m.editor.give(mods.eln.robotics.computer.EditorFrames.encode(fields));
-    }
-
-    @Test
-    void theEditorOpensSavesListsAndRefusesStaleSaves() {
-        m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), null, false));
-        type("(disk/format :a)");
-        tick(60, "\n> ");
-        ask("save", "1", "a:/t.janet", "", "(print \"edited\")");
-        String[] saved = editorReply("saved");
-        assertEquals("1", saved[1]);
-        ask("open", "2", "a:/t.janet", "", "");
-        String[] file = editorReply("file");
-        assertEquals("(print \"edited\")", file[4]);
-        assertEquals(saved[3], file[3], "the same revision");
-        ask("save", "3", "a:/t.janet", "stale", "(print 1)");
-        assertEquals("conflict", editorReply("conflict")[0]);
-        ask("list", "4", "a:/", "", "");
-        assertEquals("t.janet", editorReply("list")[4]);
-        ask("run", "5", "a:/t.janet", "", "");
-        editorReply("ran");
-        tick(10, "edited\n");
-        ask("open", "6", "a:/nothing", "", "");
-        assertTrue(editorReply("error")[4].contains("no such file"));
     }
 
     @Test
@@ -236,7 +220,7 @@ class StdlibTest {
         tick(10, "tick");
         m.pressBreak();
         tick(5, "stopped 1 task and the bus handlers");
-        out.setLength(0);
+        mark();
         m.bus.give(List.of(new Packet(0, 23, PacketType.PRESS, 0, 0)));
         tick(20, null);
         assertFalse(out.toString().contains("tick") || out.toString().contains("press"), out.toString());

@@ -19,6 +19,12 @@ public final class Runner implements Runnable {
     private final java.util.concurrent.atomic.AtomicInteger state = new java.util.concurrent.atomic.AtomicInteger(IDLE);
     private volatile int ran;
     public int budget = 1_000_000;
+    /** Instructions run this tick so far (slices and kicks), and what the slice now running may run. */
+    private int ranThisTick;
+    private volatile int sliceBudget;
+    private boolean powered;
+    /** Called on the pool thread after every slice (the host flushes the screen at once from it). */
+    public volatile Runnable afterSlice;
 
     // input gathered for the next exchange
     private final java.util.List<Packet> packetsIn = new java.util.ArrayList<>();
@@ -86,21 +92,48 @@ public final class Runner implements Runnable {
      */
     public boolean tick(boolean powered) {
         hostTicks++;
+        this.powered = powered;
         if (state.get() == RUNNING) {
             late++;
             return false;
         }
         exchange();
+        ranThisTick = 0;
         if (powered && machine.runnable()) {
+            sliceBudget = budget;
             state.set(RUNNING);
             ComputerPool.get().execute(this);
         } else ran = 0;
         return true;
     }
 
+    /**
+     * Screen input arrived (the fast path, Baughn: latency): if the computer is between slices and has budget left this
+     * tick, it gets the input now and runs on what is left, instead of waiting for the next tick. It never runs more
+     * than its budget a tick (Argon's review). The bus, disks and power still change only at the tick's exchange.
+     */
+    public void kick() {
+        if (state.get() == RUNNING) return;
+        give(machine.editor, editorIn);
+        machine.lines();
+        if (powered && ranThisTick < budget && machine.runnable()) {
+            sliceBudget = budget - ranThisTick;
+            state.set(RUNNING);
+            ComputerPool.get().execute(this);
+        }
+    }
+
+    /** Between slices: collect the screen's output now (takeEditor/takeTerminal then give it); false if running. */
+    public boolean collectScreen() {
+        if (state.get() == RUNNING) return false;
+        terminalOut.writeBytes(machine.terminal.take());
+        editorOut.writeBytes(machine.editor.take());
+        return true;
+    }
+
     private void exchange() {
         Machine m = machine;
-        lastRan = ran;
+        lastRan = ranThisTick;
         m.advance((int) Math.min(Integer.MAX_VALUE, hostTicks - machineTicks));
         machineTicks = hostTicks;
         m.bus.setState(address, onBus, levels);
@@ -140,13 +173,16 @@ public final class Runner implements Runnable {
     @Override
     public void run() {
         try {
-            ran = machine.run(budget);
+            ran = machine.run(sliceBudget);
+            ranThisTick += ran;
         } catch (RuntimeException e) {
             machine.halted = true;   // an emulator bug must not kill the pool thread; the computer stops
             ran = 0;
         } finally {
             state.set(IDLE);
         }
+        Runnable a = afterSlice;
+        if (a != null) a.run();
     }
 
     // --- output, after tick() ---

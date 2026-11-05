@@ -50,8 +50,22 @@ public final class ComputerCases {
         return n instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof ComputerElement c ? c : null;
     }
 
+    /** What its screen's logs hold (the console tab and the REPL). */
     static String terminal(ComputerElement c) {
-        return new String(c.scrollbackBytes(), StandardCharsets.UTF_8);
+        return c.screenText();
+    }
+
+    /** A player's line submitted to the REPL (tab 1, line 2), as the screen sends it. */
+    static void submit(TestContext ctx, ComputerElement e, long seq, String text) {
+        e.networkUnserialize(ctx.stream(o -> {
+            o.writeByte(ComputerElement.SCREEN_EVENT_ID);
+            o.writeUTF(mods.eln.robotics.computer.screen.Form.print(new mods.eln.robotics.computer.screen.Form.Symbol("submit"), 1L, 2L, seq, text));
+        }), null);
+    }
+
+    static boolean replUp(ComputerElement e) {
+        var t = e.screen.scene.tabs.get(1);
+        return t != null && t.elements.containsKey(2);
     }
 
     /**
@@ -62,7 +76,8 @@ public final class ComputerCases {
         BlockPos p;
         String afterBoot = "", afterTyping = "";
         byte asleep = -1;
-        boolean onBus;
+        boolean onBus, up;
+        int upAt = -1;
         mods.eln.sim.IProcess watch;
         int tick;
 
@@ -87,7 +102,7 @@ public final class ComputerCases {
         }
 
         public int ticks() {
-            return 100;   // (Janet boots in about 26M instructions: 26 slices, longer while the JIT warms up)
+            return 180;
         }
 
         public void build(TestContext ctx) {
@@ -106,15 +121,17 @@ public final class ComputerCases {
                 ComputerElement e = at(ctx, p);
                 if (e == null) return;
                 if (tick == 20) onBus = e.port.bus() != null && e.port.bus().portCount() > 1;
-                if (tick == 60) {
+                // (boot takes about 40 slices, longer while the JIT warms up: wait for the REPL, then a few ticks more)
+                if (upAt < 0 && replUp(e)) {
+                    upAt = tick;
                     afterBoot = terminal(e);
-                    asleep = e.status();
-                    e.networkUnserialize(ctx.stream(o -> {
-                        o.writeByte(ComputerElement.TYPE_ID);
-                        o.writeUTF("(* 6 7)\n");
-                    }), null);
+                    up = true;
                 }
-                if (tick == 90) afterTyping = terminal(e);
+                if (upAt > 0 && tick == upAt + 5) {
+                    asleep = e.status();
+                    submit(ctx, e, 1, "(* 6 7)");
+                }
+                if (upAt > 0 && tick == upAt + 35) afterTyping = terminal(e);
             });
         }
 
@@ -122,9 +139,9 @@ public final class ComputerCases {
             mods.eln.Eln.simulator.removeSlowProcess(watch);
             ComputerElement c = at(ctx, p);
             ctx.line("computer: " + c.getWaila() + " terminal " + afterTyping.replace("\n", "|"));
-            ctx.check("computer: boots to Janet's REPL", afterBoot.contains("Janet 1.41.2 on Electrical Age") && afterBoot.endsWith("\n> "), afterBoot);
+            ctx.check("computer: boots to Janet's REPL", afterBoot.contains("Janet 1.41.2 on Electrical Age") && up, afterBoot);
             ctx.check("computer: asleep at the prompt", asleep == ComputerElement.SLEEPING, "" + asleep);
-            ctx.check("computer: answers what is typed", afterTyping.endsWith("> (* 6 7)\n42\n> "), afterTyping);
+            ctx.check("computer: answers what is typed", afterTyping.contains("> (* 6 7)\n42\n"), afterTyping);
             ctx.check("computer: a bus kit ends at its bus pin and links it", onBus, "");
             ctx.check("computer: a blank floppy got a disk id", FloppyItem.disk(c.getInventory().getItem(ComputerElement.DRIVE_A)) != null, "");
         }
@@ -212,7 +229,7 @@ public final class ComputerCases {
 
         @Override
         public int ticks() {
-            return 120;
+            return 140;
         }
 
         @Override
@@ -228,18 +245,13 @@ public final class ComputerCases {
                 tick++;
                 ComputerElement e = at(ctx, p);
                 if (e == null) return;
-                if (tick == 40) e.networkUnserialize(ctx.stream(o -> {
-                    o.writeByte(ComputerElement.TYPE_ID);
-                    o.writeUTF("(def x 99)\n");
-                }), null);
-                if (tick == 50) volts(ctx, source, 0);
-                if (tick == 65) cut = e.status();
-                if (tick == 66) volts(ctx, source, 50);
-                if (tick == 85) e.networkUnserialize(ctx.stream(o -> {
-                    o.writeByte(ComputerElement.TYPE_ID);
-                    o.writeUTF("(+ x 1)\n");
-                }), null);
-                if (tick == 110) after = terminal(e);
+                if (tick == 50 && !replUp(e)) tick--;   // (wait for the REPL, then cut the power)
+                if (tick == 50) submit(ctx, e, 1, "(def x 99)");
+                if (tick == 60) volts(ctx, source, 0);
+                if (tick == 75) cut = e.status();
+                if (tick == 76) volts(ctx, source, 50);
+                if (tick == 95) submit(ctx, e, 2, "(+ x 1)");
+                if (tick == 125) after = terminal(e);
             });
         }
 
@@ -247,7 +259,7 @@ public final class ComputerCases {
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(watch);
             ctx.check("computer power: off while the line is dead", cut == ComputerElement.OFF, "" + cut);
-            ctx.check("computer power: goes on where it was (x still 99)", after.endsWith("> (+ x 1)\n100\n> "), after);
+            ctx.check("computer power: goes on where it was (x still 99)", after.contains("> (+ x 1)\n100\n"), after);
         }
     }
 }
