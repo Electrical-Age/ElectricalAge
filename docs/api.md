@@ -428,7 +428,7 @@ The two kinds compared:
 | Faces | each face is a leaf terminal; the first live one draws | one power terminal on every power face (the element may pass power through) |
 | Saved | the `eln:machine` data attachment | the element's NBT, under `api.machine.*` |
 | Burn | the spec's burn handler; the machine stays tripped (see [Burning](#burning)) | EA's own burn-out and repair |
-| Bus face | linked to a voxel bus cable | not supported (transparent nodes have no bus port) |
+| Bus face | linked to a voxel bus cable | linked to a voxel bus cable on that face (the element returns `machine.busPortOn(side)` from `busPortOn`) |
 
 An EA element delegates its faces and Jade lines to the machine. This sample is the only one on the page that names EA's
 own types:

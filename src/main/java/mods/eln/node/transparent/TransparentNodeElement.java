@@ -81,6 +81,11 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         Eln.simulator.addAllThermalFastProcess(thermalFastProcessList);
     }
 
+    /** Its field bus port on side, or null (TransparentNode links it to a voxel bus cable on that face). */
+    public mods.eln.bus.BusPort busPortOn(mods.eln.misc.Direction side) {
+        return null;
+    }
+
     /** The ambient where it stands, on the Tc scale (Ambient; stamped on its thermal loads in connectJob). */
     public double ambient;
 

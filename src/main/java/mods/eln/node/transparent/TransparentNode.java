@@ -21,7 +21,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
-public class TransparentNode extends Node {
+public class TransparentNode extends Node implements mods.eln.bus.BusPeer {
 
     public TransparentNodeElement element;
 
@@ -230,7 +230,13 @@ public class TransparentNode extends Node {
         super.connectJob();
         // A burnt element keeps only its thermal loads in the simulation (see TransparentNodeElement.connectBurntJob).
         if (element.isBurnt()) element.connectBurntJob();
-        else element.connectJob();
+        else {
+            element.connectJob();
+            // its bus ports: linked to a voxel bus cable on their face (the cable links back from its side)
+            for (Direction side : Direction.values())
+                if (element.busPortOn(side) instanceof mods.eln.bus.BusPort bp && getNeighbor(side) instanceof mods.eln.node.voxel.VoxelNode v && v.isAdded())
+                    for (mods.eln.misc.LRDU l : mods.eln.misc.LRDU.values()) mods.eln.bus.BusNet.link(bp, v.busPortAt(side.getInverse(), l));
+        }
     }
 
     @Override
@@ -238,6 +244,14 @@ public class TransparentNode extends Node {
         super.disconnectJob();
         if (element.isBurnt()) element.disconnectBurntJob();
         else element.disconnectJob();
+        java.util.Set<mods.eln.bus.BusPort> ports = new java.util.HashSet<>();
+        for (Direction side : Direction.values()) if (element.busPortOn(side) instanceof mods.eln.bus.BusPort bp) ports.add(bp);
+        if (!ports.isEmpty()) mods.eln.bus.BusNet.detach(ports);
+    }
+
+    @Override
+    public mods.eln.bus.BusPort busPortOn(Direction side) {
+        return element == null || element.isBurnt() ? null : element.busPortOn(side);
     }
 
     @Override

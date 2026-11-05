@@ -71,7 +71,7 @@ cable's small Rs), signal gates, resistor (or source) go into the element's list
 
 So the owner works between `afterStep` and the next `beforeStep`, as `MachineCore` wants, whatever order the element
 adds its processes in. Faces: `RelativeFace` against the element's `front` (`api/impl/Faces`). One machine per
-element; a transparent node has no bus port (a spec with one is refused). Converted so far: the electrical machines
+element; a bus face gives it a bus port, which `TransparentNode` links to a voxel bus cable on that face. Converted so far: the electrical machines
 and the FE exporter. Tests: `api/ElementHostTest`, `MachineApiCases`, `Wp11Cases` (exporter).
 
 ## MNA (`src/main/java/mods/eln/sim/mna/`)

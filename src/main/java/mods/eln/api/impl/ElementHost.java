@@ -58,6 +58,7 @@ public final class ElementHost implements ElementMachine {
     };
     private double ambient = Double.NaN;
     private MachineCore.Saved saved;
+    private final mods.eln.bus.BusPort busPort;
 
     /**
      * Builds the machine and adds its parts: loads and components to the element's lists, afterStep first in slow,
@@ -74,6 +75,7 @@ public final class ElementHost implements ElementMachine {
                        List<? super Component> components, List<IProcess> slow, List<IProcess> slowPre) {
         this.site = Objects.requireNonNull(site, "site");
         bus = busPort != null && spec.busFace().isPresent() ? new PortBus(busPort) : null;
+        this.busPort = bus == null ? null : busPort;
         for (IProcess p : slow)
             if (p instanceof AfterStep) throw new IllegalStateException("one machine per element: this one already has " + ((AfterStep) p).host().spec());
         core = new MachineCore(Objects.requireNonNull(spec, "spec"));
@@ -391,7 +393,13 @@ public final class ElementHost implements ElementMachine {
         if (bus != null) return bus;
         if (core.spec().busFace().isEmpty())
             throw new IllegalStateException(core.spec() + " has no bus face: add .bus(face) to its spec");
-        throw new IllegalStateException(core.spec() + " has no bus port here: an element machine has none yet");
+        throw new IllegalStateException(core.spec() + " has no bus port here");
+    }
+
+    @Override
+    public mods.eln.bus.BusPort busPortOn(Direction side) {
+        if (busPort == null || site.front() == null) return null;
+        return Faces.resolve(core.spec().busFace().orElseThrow(), site.front()) == side ? busPort : null;
     }
 
     @Override

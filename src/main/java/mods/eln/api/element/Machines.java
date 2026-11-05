@@ -41,15 +41,13 @@ public final class Machines {
     /**
      * A machine on a transparent-node element: its power terminal (a small-resistance node, as a cable's), signal
      * gates and processes join the element's lists; its state saves under the element's "api.machine." keys. One
-     * per element (a second throws IllegalStateException). A bus face throws IllegalArgumentException: transparent
-     * nodes have no bus port. A machine that burns (burnsOnOvervoltage(BURNS_OUT)) burns out as an EA machine does (a
+     * per element (a second throws IllegalStateException). A bus face gives it a bus port there: the element returns
+     * machine.busPortOn(side) from its busPortOn, and the node links it to a voxel bus cable on that face. A machine that burns (burnsOnOvervoltage(BURNS_OUT)) burns out as an EA machine does (a
      * repair brings it back); another burn handler (for other mods' blocks) throws IllegalArgumentException.
      */
     public static ElementMachine forElement(TransparentNodeElement element, MachineSpec spec) {
         Objects.requireNonNull(element, "element");
         Objects.requireNonNull(spec, "spec");
-        if (spec.busFace().isPresent())
-            throw new IllegalArgumentException(spec + ": a transparent node has no bus port; drop .bus(...) from the spec");
         if (spec.burnsOnOvervoltage() && !ElementBurn.of(spec))
             throw new IllegalArgumentException(spec + ": an EA element burns out EA's way (a repair brings it back); "
                 + "use burnsOnOvervoltage(Machines.BURNS_OUT)");
@@ -109,7 +107,8 @@ public final class Machines {
                 return element.getClass().getSimpleName() + (element.node == null ? "" : " at " + element.node.coordonate);
             }
         };
-        return new ElementHost(spec, site, element.electricalLoadList, element.electricalComponentList,
+        return new ElementHost(spec, site, spec.busFace().isPresent() ? new mods.eln.bus.BusPort() : null,
+            element.electricalLoadList, element.electricalComponentList,
             element.slowProcessList, element.slowPreProcessList);
     }
 }
