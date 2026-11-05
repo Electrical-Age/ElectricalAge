@@ -228,4 +228,19 @@ class StdlibTest {
         type("(do (var x (try (device/read 40 1) ([_] 7))) x)");
         tick(40, "\n7\n> ");
     }
+
+    @Test
+    void breakWithNothingAtTheReplStopsThePrograms() {
+        type("(do (spawn (fn [] (forever (sleep 0.2) (print \"tick\")))) (bus/on :press (fn [p] (print \"press\"))) :started)");
+        tick(10, ":started\n> ");
+        tick(10, "tick");
+        m.pressBreak();
+        tick(5, "stopped 1 task and the bus handlers");
+        out.setLength(0);
+        m.bus.give(List.of(new Packet(0, 23, PacketType.PRESS, 0, 0)));
+        tick(20, null);
+        assertFalse(out.toString().contains("tick") || out.toString().contains("press"), out.toString());
+        type("(+ 1 1)");
+        tick(5, "\n2\n> ");
+    }
 }

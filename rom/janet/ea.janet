@@ -19,6 +19,8 @@
 (def- typed @"")       # keystrokes not yet read
 (var- input-fiber nil) # the task waiting for keystrokes
 (var- repl-eval nil)   # the REPL's form being evaluated (Break stops it)
+(def- tasks @{})       # every task alive -> true
+(def- system @{})      # the REPL and editor tasks, which Break leaves alone
 (def- editor-in @"")   # bytes from the screen's editor not yet taken
 (var- editor-fiber nil) # the editor task, waiting for them
 
@@ -29,6 +31,7 @@
   "Run (f ;args) as a task of its own, beside the others; returns its fiber."
   [f & args]
   (def fib (fiber/new (fn [] (f ;args)) :yeri))   # yields, errors, Break (user8); its env inherited
+  (put tasks fib true)
   (array/push ready [fib nil])
   fib)
 
@@ -42,6 +45,7 @@
   (flush))
 
 (defn- finish [f result]
+  (put tasks f nil)
   (if-let [j (get joiners f)]
     (do (put joiners f nil) (array/push ready [j result]))
     (when (= :error (result 0)) (print-error (result 1) (result 2)))))
@@ -73,11 +77,25 @@
   (keep waiters 1)
   (when (= input-fiber f) (set input-fiber nil)))
 
-(defn- on-break []
-  (when (and repl-eval (not (index-of (fiber/status repl-eval) [:dead :error :user8 :interrupted])))
-    (def f repl-eval)
-    (drop-fiber f)
-    (finish f [:error "stopped by Break" f])))
+(defn- on-break
+  "Break stops the REPL's form if it has one running; else every program's task, and the bus handlers they set."
+  []
+  (if (and repl-eval (get tasks repl-eval))
+    (let [f repl-eval]
+      (drop-fiber f)
+      (finish f [:error "stopped by Break" f]))
+    (do
+      (def stop (filter |(not (get system $)) (keys tasks)))
+      (each f stop
+        (drop-fiber f)
+        (put tasks f nil)
+        (put joiners f nil))
+      (def keep (filter |(not (index-of ($ 0) stop)) ready))
+      (array/clear ready)
+      (array/concat ready keep)
+      (array/clear handlers)
+      (print "\nBreak: stopped " (length stop) " task" (if (= 1 (length stop)) "" "s") " and the bus handlers.")
+      (flush))))
 
 (defn- packet [t]
   {:target (t 0) :source (t 1) :type (get bus/types (t 2) (t 2)) :index (t 3) :value (t 4)})
@@ -351,6 +369,6 @@
   []
   (def env (make-env (curenv)))
   (autorun env)
-  (spawn editor env)
-  (spawn repl env)
+  (put system (spawn editor env) true)
+  (put system (spawn repl env) true)
   (run))

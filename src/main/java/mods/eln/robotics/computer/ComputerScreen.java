@@ -80,7 +80,7 @@ public class ComputerScreen extends ElnScreen {
         button(9, by, 60, () -> tr("Reset"), () -> render.clientSendId(ComputerElement.RESET_ID),
             tr("Start again from slot 1's chip (the RAM keeps what it held)."));
         button(9 + 62, by, 50, () -> tr("Break"), () -> render.clientSendId(ComputerElement.BREAK_ID),
-            tr("Stop what the REPL is running (a loop that never ends, a long sleep)."));
+            tr("Stop what the REPL is running (a loop that never ends, a long sleep); with nothing running there, stop every program's tasks."));
         field(230, by, 36, () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
             float f = EaField.parse(v);
             render.clientSendFloat(ComputerElement.SET_ADDRESS_ID, Float.isNaN(f) ? 0 : Math.round(f));
