@@ -62,6 +62,7 @@ public final class ComputerCases {
         BlockPos p;
         String afterBoot = "", afterTyping = "";
         byte asleep = -1;
+        boolean onBus;
         mods.eln.sim.IProcess watch;
         int tick;
 
@@ -97,10 +98,14 @@ public final class ComputerCases {
             c.getInventory().setItem(2, new ItemStack(Robotics.RAM_CHIP.get()));
             c.getInventory().setItem(ComputerElement.DRIVE_A, new ItemStack(Robotics.FLOPPY_DISK.get()));
             c.getInventory().setChanged();
+            // a bus kit from its bus pin (right flank, floor edge, right end), as a player lays one (AdventurAgent:
+            // "No connector there" when the flank had nothing but the bus)
+            ServoCases.kitCable(ctx, p, c.front.right(), -4, mods.eln.node.voxel.CablePart.BUS);
             mods.eln.Eln.simulator.addSlowProcess(watch = dt -> {
                 tick++;
                 ComputerElement e = at(ctx, p);
                 if (e == null) return;
+                if (tick == 20) onBus = e.port.bus() != null && e.port.bus().portCount() > 1;
                 if (tick == 60) {
                     afterBoot = terminal(e);
                     asleep = e.status();
@@ -120,6 +125,7 @@ public final class ComputerCases {
             ctx.check("computer: boots to Janet's REPL", afterBoot.contains("Janet 1.41.2 on Electrical Age") && afterBoot.endsWith("\n> "), afterBoot);
             ctx.check("computer: asleep at the prompt", asleep == ComputerElement.SLEEPING, "" + asleep);
             ctx.check("computer: answers what is typed", afterTyping.endsWith("> (* 6 7)\n42\n> "), afterTyping);
+            ctx.check("computer: a bus kit ends at its bus pin and links it", onBus, "");
             ctx.check("computer: a blank floppy got a disk id", FloppyItem.disk(c.getInventory().getItem(ComputerElement.DRIVE_A)) != null, "");
         }
     }

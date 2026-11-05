@@ -54,9 +54,24 @@ def floppy(arrow=False):
             rect(px, 4, y, 11, y, (150, 150, 160))
     return im
 
+def computer():
+    """The block's front: a green cabinet, two drive slots, the vent and the run lamp (ComputerParts)."""
+    im = blank(); px = im.load()
+    rect(px, 1, 1, 14, 14, (70, 140, 80))            # the cabinet (50 V green)
+    rect(px, 1, 1, 14, 1, (100, 170, 110))
+    rect(px, 1, 14, 14, 14, (40, 90, 50))
+    rect(px, 2, 3, 10, 4, (25, 30, 35))              # the status strip
+    rect(px, 12, 3, 13, 4, (90, 230, 90))            # the lamp
+    for x0 in (2, 8):                                 # the drives
+        rect(px, x0, 7, x0 + 5, 9, (45, 48, 55))
+        rect(px, x0 + 1, 8, x0 + 4, 8, (150, 155, 165))
+    for y in (11, 13):                                # the vent
+        rect(px, 3, y, 12, y, (45, 90, 55))
+    return im
+
 if __name__ == "__main__":
     out = os.path.join(sys.argv[1], "assets", "eln", "textures", "item")
     os.makedirs(out, exist_ok=True)
-    for name, im in (("ram_chip", ram()), ("janet_rom_chip", rom()), ("boot_rom_chip", rom((220, 130, 40))), ("floppy_disk", floppy()), ("elevator_disk", floppy(True))):
+    for name, im in (("computer", computer()), ("ram_chip", ram()), ("janet_rom_chip", rom()), ("boot_rom_chip", rom((220, 130, 40))), ("floppy_disk", floppy()), ("elevator_disk", floppy(True))):
         im.save(os.path.join(out, name + ".png"))
         print(name)

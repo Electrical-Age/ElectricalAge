@@ -282,6 +282,11 @@ public final class ElementHost implements ElementMachine {
             if (s.face() == f && meets(s.position(), lrdu)) return NodeBase.maskElectricalInputGate;
         for (MachineSpec.SignalOut s : spec.signalsOut())
             if (s.face() == f && meets(s.position(), lrdu)) return NodeBase.maskElectricalOutputGate;
+        // the bus pin: a connector too, so a bus kit can end there on a face with nothing else (the computer's right
+        // flank: AdventurAgent's "No connector there")
+        if (spec.busFace().orElse(null) == f
+            && (lrdu == null || spec.busPosition() == CablePosition.ANY || Faces.lrdu(spec.busPosition()) == lrdu))
+            return NodeBase.maskRs485;
         return 0;
     }
 

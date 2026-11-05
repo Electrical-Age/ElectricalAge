@@ -36,7 +36,13 @@
     (when (< (math/abs (- (floors f) h)) (math/abs (- (floors best) h))) (set best f)))
   best)
 
-(var here (try (nearest-floor (drive/position drive)) ([_] 0)))
+(var here 0)
+(forever
+  (def pos (try (drive/position drive) ([_] nil)))
+  (when pos (set here (nearest-floor pos)) (break))
+  (alarm "elevator: drive " drive " doesn't answer. Is the computer's bus pin on the drive's bus, and is the drive's "
+         "address " drive "? Trying again in 10 s.")
+  (sleep 10))
 (var going :up)
 
 (defn ahead [dir]

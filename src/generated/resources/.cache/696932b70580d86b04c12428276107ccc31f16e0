@@ -1,4 +1,4 @@
-// 26.3	2026-11-05T18:08:39.717935271	eln-global/EA models
+// 26.3	2026-11-05T18:52:33.935691156	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -633,8 +633,8 @@ bf73432e1181339472b745af9693c30e46be8c6d assets/eln/models/item/cheap_chip.json
 a9953e6a49c74c057dac9d99d58d72189660a69d assets/eln/models/item/coal_dust.json
 1a3ffec747ee0cb6fefbabbee0ea304386be4ba8 assets/eln/models/item/coal_plate.json
 f16f7b5d2c22adfcaf93131b9f4f2f6466a8a3c1 assets/eln/models/item/combustion_chamber.json
-b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/computer.json
-bda6e369ab0719a6a951d6919f38e4c49467cdda assets/eln/models/item/computer_3d.json
+b9a42005abd3ac5a90258ca99f67ebc5840a9d89 assets/eln/models/item/computer.json
+847887cd8d7c38b0d2b70999427a784a2b180b74 assets/eln/models/item/computer_3d.json
 72abba8490493d1217c47c09117189166e059315 assets/eln/models/item/configurable_summing_unit.json
 6f64b32d806b6b88065d6a746cebd3f504de1c8c assets/eln/models/item/configurable_summing_unit_3d.json
 fb40085ecb61dbf766b2e1c018e194c092a403d2 assets/eln/models/item/copper_cable.json
