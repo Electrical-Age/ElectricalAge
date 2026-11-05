@@ -25,8 +25,29 @@
 #define CONSOLE 2
 #define EDITOR 7
 
+/* the RS485 port */
+#define BUS_TX_TARGET     EA_IO(3, 0x00)
+#define BUS_TX_SOURCE     EA_IO(3, 0x04)
+#define BUS_TX_TYPE       EA_IO(3, 0x08)
+#define BUS_TX_INDEX      EA_IO(3, 0x0C)
+#define BUS_TX_VALUE      EA_IO(3, 0x10)   /* float bits */
+#define BUS_SEND          EA_IO(3, 0x14)   /* write 1: send as itself, 2: send as TX_SOURCE */
+#define BUS_RX_COUNT      EA_IO(3, 0x20)
+#define BUS_RX_POP        EA_IO(3, 0x24)   /* write: the oldest packet into the RX registers */
+#define BUS_RX_TARGET     EA_IO(3, 0x28)
+#define BUS_RX_SOURCE     EA_IO(3, 0x2C)
+#define BUS_RX_TYPE       EA_IO(3, 0x30)
+#define BUS_RX_INDEX      EA_IO(3, 0x34)
+#define BUS_RX_VALUE      EA_IO(3, 0x38)
+#define BUS_ADDRESS       EA_IO(3, 0x40)
+#define BUS_IRQ           EA_IO(3, 0x44)   /* bit 0: interrupt while packets wait */
+#define BUS_STATUS        EA_IO(3, 0x48)   /* bit 0: packets wait; bit 1: room to send; bit 2: on a bus */
+#define BUS_DROPPED       EA_IO(3, 0x4C)
+#define BUS_LEVEL(c)      EA_IO(3, 0x80 + 4 * (c))   /* float bits, as of the tick's start */
+
 /* power */
 #define POWER_CTRL        EA_IO(5, 0x00)   /* write 1: halt (power off), 2: reset */
+#define POWER_BREAK       EA_IO(5, 0x04)   /* read: 1 if Break was pressed (the software interrupt); write: clear it */
 
 #define SLOT_BYTES 0x100000u
 #endif

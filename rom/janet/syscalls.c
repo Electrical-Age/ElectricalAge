@@ -12,10 +12,13 @@ extern char _end[];
 static char *brk = _end;
 
 static void wait_irq(uint32_t mask) {
-    /* WFI wakes on a pending enabled interrupt even with interrupts off (mstatus.MIE = 0), which is all we need */
+    /* the interrupt handler turns the line off again (ea_irq), so it is turned on before each WFI */
     CON_IRQ(CONSOLE) = mask;
-    __asm__ volatile("csrs mie, %0" ::"r"(1u << 11));
-    while (!(CON_STATUS(CONSOLE) & mask)) __asm__ volatile("wfi");
+    while (!(CON_STATUS(CONSOLE) & mask)) {
+        __asm__ volatile("csrs mie, %0" ::"r"(1u << 11));
+        __asm__ volatile("wfi");
+    }
+    __asm__ volatile("csrc mie, %0" ::"r"(1u << 11));
     CON_IRQ(CONSOLE) = 0;
 }
 

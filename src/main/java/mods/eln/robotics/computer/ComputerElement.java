@@ -327,11 +327,7 @@ public class ComputerElement extends TransparentNodeElement {
                     }
                 }
                 case BREAK_ID -> {
-                    // (the stdlib's break handling comes with the scheduler; for now a break is a reset)
-                    if (runner != null) {
-                        runner.awaitIdle();
-                        runner.machine.reset(Machine.RESET_POWER);
-                    }
+                    if (runner != null) runner.pressBreak();
                 }
                 case SET_ADDRESS_ID -> {
                     port.setAddress(Math.round(stream.readFloat()));

@@ -19,8 +19,8 @@ build/janet.c build/janet.h: janet/janetconf.h
 	cp build/janet-src/build/c/janet.c build/janet.c
 	cp build/janet-src/src/include/janet.h build/janet.h
 
-build/janet.elf: janet/start.S janet/syscalls.c janet/main.c janet/link.ld build/janet.c build/janet.h common/devices.h
-	$(CC_X) $(CFLAGS) -T janet/link.ld $(LDFLAGS) janet/start.S janet/syscalls.c janet/main.c build/janet.c -lm -o $@
+build/janet.elf: janet/start.S janet/blob.S janet/ea.janet janet/syscalls.c janet/main.c janet/ea.c janet/link.ld build/janet.c build/janet.h common/devices.h
+	$(CC_X) $(CFLAGS) -T janet/link.ld $(LDFLAGS) janet/start.S janet/blob.S janet/syscalls.c janet/main.c janet/ea.c build/janet.c -lm -o $@
 
 # The slot image: the boot vector is at offset 0x400
 build/janet.rom: build/janet.elf

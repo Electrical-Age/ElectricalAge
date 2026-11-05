@@ -29,7 +29,7 @@ public final class Runner implements Runnable {
     private int address;
     private boolean onBus;
     private double[] levels;
-    private boolean saveWanted;
+    private boolean saveWanted, breakWanted;
 
     // output from the last exchange
     private final java.util.List<Packet> packetsOut = new java.util.ArrayList<>();
@@ -68,6 +68,11 @@ public final class Runner implements Runnable {
         this.levels = levels;
     }
 
+    /** Press Break at the next exchange. */
+    public void pressBreak() {
+        breakWanted = true;
+    }
+
     /** Take a save at the next exchange (see saved()). */
     public void requestSave() {
         saveWanted = true;
@@ -102,6 +107,10 @@ public final class Runner implements Runnable {
         if (!packetsIn.isEmpty()) {
             m.bus.give(packetsIn);
             packetsIn.clear();
+        }
+        if (breakWanted) {
+            m.pressBreak();
+            breakWanted = false;
         }
         give(m.terminal, keys);
         give(m.editor, editorIn);

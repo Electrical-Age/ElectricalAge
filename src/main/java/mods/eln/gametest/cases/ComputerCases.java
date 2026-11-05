@@ -107,9 +107,9 @@ public final class ComputerCases {
             mods.eln.Eln.simulator.removeSlowProcess(watch);
             ComputerElement c = at(ctx, p);
             ctx.line("computer: " + c.getWaila() + " terminal " + afterTyping.replace("\n", "|"));
-            ctx.check("computer: boots to Janet's REPL", afterBoot.contains("Janet 1.41.2 on Electrical Age") && afterBoot.contains("repl:1:>"), afterBoot);
+            ctx.check("computer: boots to Janet's REPL", afterBoot.contains("Janet 1.41.2 on Electrical Age") && afterBoot.endsWith("\n> "), afterBoot);
             ctx.check("computer: asleep at the prompt", asleep == ComputerElement.SLEEPING, "" + asleep);
-            ctx.check("computer: answers what is typed", afterTyping.contains("42") && afterTyping.contains("repl:2:>"), afterTyping);
+            ctx.check("computer: answers what is typed", afterTyping.endsWith("> (* 6 7)\n42\n> "), afterTyping);
             ctx.check("computer: a blank floppy got a disk id", FloppyItem.disk(c.getInventory().getItem(ComputerElement.DRIVE_A)) != null, "");
         }
     }

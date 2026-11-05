@@ -44,18 +44,19 @@ class JanetRomTest {
     void bootsToTheReplAndEvaluates() throws IOException {
         Machine m = machine(3);
         StringBuilder out = new StringBuilder();
-        until(m, out, "repl:1:> ", 40);
+        until(m, out, "\n> ", 60);
         assertTrue(out.indexOf("Janet 1.41.2 on Electrical Age") >= 0, out.toString());
         m.terminal.give("(print \"hi\") (+ 1 2)\n".getBytes(StandardCharsets.UTF_8));
-        String s = until(m, out, "repl:2:> ", 40);
-        assertTrue(s.contains("hi\n"), s);
-        assertTrue(s.contains("3"), s);
+        String s = until(m, out, "\n3\n> ", 40);
+        assertTrue(s.contains("> (print \"hi\") (+ 1 2)\nhi\nnil\n3\n> "), "echoed, then each form's output and value: " + s);
     }
 
     @Test
     void sleepsWhileWaitingForInput() throws IOException {
         Machine m = machine(2);
-        until(m, new StringBuilder(), "repl:1:> ", 40);
+        until(m, new StringBuilder(), "\n> ", 60);
+        m.tick();
+        m.run(1_000_000);
         m.tick();
         assertEquals(0, m.run(1_000_000), "parked on WFI with no input");
         assertTrue(m.cpu.waiting());
@@ -72,7 +73,7 @@ class JanetRomTest {
     void aWildPointerTrapsAndHalts() throws IOException {
         Machine m = machine(2);
         StringBuilder out = new StringBuilder();
-        until(m, out, "repl:1:> ", 40);
+        until(m, out, "\n> ", 60);
         // no FFI, so poke the CPU instead: wake it with a keystroke and jump to address 0 (the NULL guard)
         m.terminal.give(new byte[]{'\n'});
         m.cpu.pc = 0;

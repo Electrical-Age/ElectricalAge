@@ -31,9 +31,9 @@ class RunnerTest {
     void bootsOnThePoolAndAnswers() throws IOException {
         Runner r = new Runner(JanetRomTest.machine(2));
         StringBuilder out = new StringBuilder();
-        until(r, out, "repl:1:> ");
+        until(r, out, "\n> ");
         r.type("(* 6 7)\n".getBytes(StandardCharsets.UTF_8));
-        assertTrue(until(r, out, "repl:2:> ").contains("42"));
+        until(r, out, "\n42\n> ");
         r.awaitIdle();
         assertFalse(r.machine.runnable(), "asleep waiting for input");
     }
@@ -42,9 +42,9 @@ class RunnerTest {
     void aSaveResumesMidSession() throws IOException {
         Runner r = new Runner(JanetRomTest.machine(2));
         StringBuilder out = new StringBuilder();
-        until(r, out, "repl:1:> ");
+        until(r, out, "\n> ");
         r.type("(def answer 1234)\n".getBytes(StandardCharsets.UTF_8));
-        until(r, out, "repl:2:> ");
+        until(r, out, "\n1234\n> ");
         r.awaitIdle();
         r.requestSave();
         r.tick(false);
@@ -52,7 +52,7 @@ class RunnerTest {
         assertNotNull(saved);
         // the running computer goes on and changes its RAM; the save mustn't see that
         r.type("(def answer 99)\n".getBytes(StandardCharsets.UTF_8));
-        until(r, out, "repl:3:> ");
+        until(r, out, "\n99\n> ");
 
         ByteArrayOutputStream file = new ByteArrayOutputStream();
         saved.write(file);
@@ -61,7 +61,7 @@ class RunnerTest {
         Runner back = new Runner(m);
         back.type("answer\n".getBytes(StandardCharsets.UTF_8));
         StringBuilder out2 = new StringBuilder();
-        assertTrue(until(back, out2, "repl:3:> ").contains("1234"), out2.toString());
+        until(back, out2, "\n1234\n> ");
     }
 
     @Test

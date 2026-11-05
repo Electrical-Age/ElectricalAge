@@ -9,7 +9,8 @@ import mods.eln.robotics.computer.cpu.Trap;
 /**
  * A computer without the world: CPU, memory, chips and devices, pure Java. The host calls tick() once per game tick
  * the computer is loaded and powered (advance() for several at once), then run() for its slice. Device pages from
- * Memory.IO_BASE, 4 KB each: 0 info, 1 timer, 2 terminal, 3 bus, 4 floppy drives, 5 power, 7 editor channel.
+ * Memory.IO_BASE, 4 KB each: 0 info, 1 timer, 2 terminal, 3 bus, 4 floppy drives, 5 power (and Break), 7 editor
+ * channel.
  */
 public final class Machine implements Mmio {
     public static final int INFO = 0, TIMER = 1, TERMINAL = 2, BUS = 3, FLOPPY = 4, POWER = 5, EDITOR = 7;
@@ -25,6 +26,8 @@ public final class Machine implements Mmio {
     long ticks, timerCmp = -1;
     boolean halted;
     int resetCause;
+    /** Break was pressed and the program hasn't taken it yet (the software interrupt line). */
+    boolean breakPending;
 
     public Machine() {
         mem.setIo(this);
@@ -65,11 +68,12 @@ public final class Machine implements Mmio {
         devices[POWER] = new Device() {
             @Override
             public int read(int off) {
-                return 0;
+                return off == 4 && breakPending ? 1 : 0;
             }
 
             @Override
             public void write(int off, int v) {
+                if (off == 4) breakPending = false;
                 if (off != 0) return;
                 if (v == 1) halted = true;
                 else if (v == 2) reset(RESET_PROGRAM);
@@ -93,6 +97,7 @@ public final class Machine implements Mmio {
         halted = false;
         resetCause = cause;
         timerCmp = -1;
+        breakPending = false;
     }
 
     public boolean halted() {
@@ -143,6 +148,13 @@ public final class Machine implements Mmio {
         for (Device d : devices) if (d != null && d.interrupt()) ext = true;
         cpu.setPending(Cpu.IRQ_EXTERNAL, ext);
         cpu.setPending(Cpu.IRQ_TIMER, Long.compareUnsigned(ticks, timerCmp) >= 0);
+        cpu.setPending(Cpu.IRQ_SOFT, breakPending);
+    }
+
+    /** The Break key: the program's software interrupt (the Janet ROM stops the running task). */
+    public void pressBreak() {
+        breakPending = true;
+        lines();
     }
 
     @Override

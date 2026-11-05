@@ -39,6 +39,8 @@ public class ComputerScreen extends ElnScreen {
         int by = TERM_Y + TERM_H + 22;
         button(9, by, 60, () -> tr("Reset"), () -> render.clientSendId(ComputerElement.RESET_ID),
             tr("Start again from slot 1's chip (the RAM keeps what it held)."));
+        button(9 + 62, by, 50, () -> tr("Break"), () -> render.clientSendId(ComputerElement.BREAK_ID),
+            tr("Stop what the REPL is running (a loop that never ends, a long sleep)."));
         field(230, by, 36, () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
             float f = EaField.parse(v);
             render.clientSendFloat(ComputerElement.SET_ADDRESS_ID, Float.isNaN(f) ? 0 : Math.round(f));
@@ -84,7 +86,7 @@ public class ComputerScreen extends ElnScreen {
         label(g, 9, SLOTS_Y - 11, tr("Chips (slot 1 to 8)"));
         label(g, 9 + 8 * 18 + 14, SLOTS_Y - 11, tr("Drives A, B"));
         int sy = TERM_Y + TERM_H + 28;
-        label(g, 76, sy, render.stateTextClient());
+        label(g, 128, sy, render.stateTextClient());
         label(g, 190, sy, tr("Address"));
     }
 }
