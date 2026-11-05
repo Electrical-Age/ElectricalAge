@@ -121,6 +121,13 @@ public final class Bus {
         return ports.size();
     }
 
+    /** The device addresses on this bus, in order, each with how many ports have it (two or more: a duplicate). */
+    public java.util.SortedMap<Integer, Integer> addresses() {
+        java.util.SortedMap<Integer, Integer> m = new java.util.TreeMap<>();
+        for (BusPort p : ports) if (p.address != 0) m.merge(p.address, 1, Integer::sum);
+        return m;
+    }
+
     /** Packets delivered at the start of this tick. */
     public int delivered() {
         return delivered;

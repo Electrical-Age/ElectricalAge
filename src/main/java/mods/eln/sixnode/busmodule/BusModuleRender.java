@@ -58,7 +58,11 @@ public class BusModuleRender extends SixNodeElementRender {
             GL11.glPushMatrix();
             if (a == LRDU.Left || a == LRDU.Right) GL11.glTranslatef(0, 0, s);
             else GL11.glTranslatef(0, s, 0);
-            pinColour(l);
+            int c = channels[i];   // a tuned terminal wears its channel's dye (Baughn: the screen recolours the modem)
+            if (mods.eln.bus.BusChannel.valid(c)) {
+                int rgb = mods.eln.bus.BusChannel.rgb(c);
+                GL11.glColor3f((rgb >> 16 & 0xFF) / 255f, (rgb >> 8 & 0xFF) / 255f, (rgb & 0xFF) / 255f);
+            } else pinColour(l);
             drawPinBox(l, from, to, 1.8f / 16, 1 / 16f);
             GL11.glPopMatrix();
         }

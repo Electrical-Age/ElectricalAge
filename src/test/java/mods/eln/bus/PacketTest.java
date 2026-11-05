@@ -184,4 +184,15 @@ class PacketTest {
         assertNull(rx.poll());
         assertFalse(rx.listening());
     }
+
+    @Test
+    void theBusListsAddressesAndDuplicates() {
+        BusPort a = device(20), b = device(17), c = device(20), cable = new BusPort();
+        BusNet.link(a, cable);
+        BusNet.link(cable, b);
+        BusNet.link(cable, c);
+        BusNet.tick();
+        assertEquals(java.util.Map.of(17, 1, 20, 2), a.bus().addresses());
+        assertEquals(List.of(17, 20), List.copyOf(a.bus().addresses().keySet()), "in order");
+    }
 }

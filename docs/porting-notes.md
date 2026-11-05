@@ -572,6 +572,9 @@ on 1.7.10) onto 26.x.
   or 1, or when asked again; a port holds the channels it writes, and a tick without a write lets go: then the other
   holders send theirs again, or the channel falls to 0. A dropped signal is sent again, and every writer sends again
   on a rebuilt bus. Tests `BusNetTest`, GameTest `bus_module_last_writer_wins` (was `bus_module_highest_writer_wins`).
+  Jade on a bus cable lists the device addresses on the bus (`Devices: 17, 30 (2x, DUPLICATE)`). A Bus I/O Module's
+  terminal pins wear their channel's dye, so tuning one in the screen recolours the module (Baughn); unused ones stay
+  signal-cable white.
 - Bus I/O Module (the field bus, `mods.eln.bus`; Baughn: 9 terminals), id `1 + (117 << 6)` beside the Modbus RTU,
   whose model it wears without the door (a proper model later). On a face, its front edge takes Field Bus Cable; its
   left, back and right edges hold three signal terminals each, numbered 1 to 9 round from the bus edge, pins 4 voxels

@@ -66,6 +66,17 @@ public final class BusCases {
             w = b.getWaila(true);
             c.check("bus: Jade lists a channel in use by number and name", w.containsKey("  3 light_blue") && w.get("  3 light_blue").contains("V"), w.toString());
             c.check("bus: and only the channels in use", w.keySet().stream().filter(k -> k.startsWith("  ")).count() == 1, w.toString());
+            // devices by address (RS485): two ports at 30 and one at 17, the duplicate flagged
+            BusPort d30 = new BusPort(), d17 = new BusPort();
+            d30.setAddress(30);
+            d17.setAddress(17);
+            dev.setAddress(30);
+            BusNet.link(d30, b.busPorts().get(0));
+            BusNet.link(d17, b.busPorts().get(0));
+            BusNet.refresh();
+            w = b.getWaila(true);
+            c.check("bus: Jade lists devices by address, duplicates flagged", "17, 30 (2x, DUPLICATE)".equals(w.get("Devices")), w.toString());
+            BusNet.detach(List.of(d30, d17));
             BusNet.detach(List.of(dev));
             // the middle block gone: the ends are apart
             b.disconnect();
