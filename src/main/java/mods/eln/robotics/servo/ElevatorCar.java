@@ -43,6 +43,9 @@ import java.util.function.Consumer;
 public class ElevatorCar extends Entity implements mods.eln.introspect.Describable, mods.eln.introspect.ClientDescribable {
     /** The plate's thickness (m): a floor ghost's (GhostBlock.tFloor). */
     public static final double THICK = 1 / 16.0;
+    /** The cabin outside (m): a 3 x 3 plate, walls and roof 3 high (Baughn 2026-11-05: 3x3x3, about 2.5 inside); a
+     *  wall's and the roof's thickness; half the plate's width. */
+    public static final double CABIN = 3, WALL = 1 / 16.0, HALF = CABIN / 2;
     /** Client: the cars in the client's level (the carry ticks them). */
     public static final Set<ElevatorCar> CLIENT = Collections.newSetFromMap(new WeakHashMap<>());
 
@@ -58,12 +61,19 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     public @Nullable BlockPos head;
     int checkIn = 40;
     public final ElevatorPanel panel;
+    /** The cabin's back wall (on the rail side), its left and right walls, and its roof; the front is open. */
+    public final CabinWall[] walls;
 
     public ElevatorCar(EntityType<? extends ElevatorCar> type, Level level) {
         super(type, level);
         // (on the server the panel, an Entity, takes its own id from the level's entity counter, so no other entity
         // ever has it; a client learns it from the spawn packet: recreateFromPacket)
         panel = new ElevatorPanel(this);
+        walls = new CabinWall[]{
+            new CabinWall(this, -HALF, HALF, THICK, CABIN - WALL, -HALF, -HALF + WALL),
+            new CabinWall(this, -HALF, -HALF + WALL, THICK, CABIN - WALL, -HALF + WALL, HALF),
+            new CabinWall(this, HALF - WALL, HALF, THICK, CABIN - WALL, -HALF + WALL, HALF),
+            new CabinWall(this, -HALF, HALF, CABIN - WALL, CABIN, -HALF, HALF)};
         setNoGravity(true);
         blocksBuilding = true;
     }
@@ -80,6 +90,12 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         return getDimensions(getPose()).makeBoundingBox(at(s));
     }
 
+    /** The whole cabin's box at position s: the plate's, CABIN high. */
+    public AABB cabinBox(double s) {
+        AABB b = boxAt(s);
+        return b.setMaxY(b.minY + CABIN);
+    }
+
     /** Puts the plate (and its panel) at position s, with no interpolation from where it was. */
     public void placeAt(double s) {
         Vec3 p = at(s);
@@ -88,6 +104,7 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         yo = yOld = p.y;
         zo = zOld = p.z;
         panel.follow();
+        for (CabinWall w : walls) w.follow();
     }
 
     /** Client: its position at t ticks into the segment (NaN without one). */
@@ -215,7 +232,7 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
 
     @Override
     public net.neoforged.neoforge.entity.PartEntity<?>[] getParts() {
-        return new net.neoforged.neoforge.entity.PartEntity<?>[]{panel};
+        return new net.neoforged.neoforge.entity.PartEntity<?>[]{panel, walls[0], walls[1], walls[2], walls[3]};
     }
 
     /**
@@ -233,6 +250,7 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         super.recreateFromPacket(packet);
         panel.setId(packet.getData());
         panel.follow();
+        for (CabinWall w : walls) w.follow();
     }
 
     /** Position packets do nothing: the segment places it. */

@@ -22,53 +22,8 @@ public class LinearServoDriveRender extends TransparentNodeElementRender impleme
 
     @Override
     public void draw() {
-        drawPins();
         front.glRotateXnRef();
         desc.draw(status);
-    }
-
-    /**
-     * Its floor pins, where cables meet them (LinearServoDriveDescriptor.spec): on each flank, three small tabs on the
-     * floor edge a quarter block apart, white for signals and violet for the bus (in block coordinates, before the
-     * model's turn; left as seen facing the flank: up x (into the flank)).
-     */
-    void drawPins() {
-        if (front == null) return;
-        mods.eln.misc.UtilsClient.disableTexture();
-        for (int flank = 0; flank < 2; flank++) {
-            var out = (flank == 0 ? front.left() : front.right()).toEnumFacing();
-            float ox = out.getStepX(), oz = out.getStepZ();
-            float lx = -oz, lz = ox;   // (left = up x forward, forward = -out)
-            for (int pin = -1; pin <= 1; pin++) {
-                boolean bus = flank == 1 && pin == -1;   // (the right flank's right pin)
-                if (bus) mods.eln.gl.GL11.glColor3f(0.62f, 0.38f, 0.80f);
-                else mods.eln.gl.GL11.glColor3f(0.9f, 0.9f, 0.86f);
-                float cx = 0.5f * ox + pin * 0.25f * lx, cz = 0.5f * oz + pin * 0.25f * lz;
-                box(cx, cz, ox, oz, lx, lz);
-            }
-        }
-        mods.eln.misc.UtilsClient.enableTexture();
-        mods.eln.gl.GL11.glColor3f(1f, 1f, 1f);
-    }
-
-    /** A tab 2/16 wide, 1/16 high and 1/32 proud of the face, its centre on the face at (cx, cz), on the floor. */
-    static void box(float cx, float cz, float ox, float oz, float lx, float lz) {
-        float w = 1 / 16f, d = 1 / 32f, y0 = -0.5f, y1 = -0.5f + 1 / 16f;
-        float[][] c = new float[4][];   // the footprint: inner left, outer left, outer right, inner right
-        c[0] = new float[]{cx + lx * w, cz + lz * w};
-        c[1] = new float[]{cx + lx * w + ox * d, cz + lz * w + oz * d};
-        c[2] = new float[]{cx - lx * w + ox * d, cz - lz * w + oz * d};
-        c[3] = new float[]{cx - lx * w, cz - lz * w};
-        mods.eln.gl.GL11.glBegin(mods.eln.gl.GL11.GL_QUADS);
-        for (float y : new float[]{y1}) for (int i = 0; i < 4; i++) mods.eln.gl.GL11.glVertex3f(c[i][0], y, c[i][1]);
-        for (int i = 0; i < 4; i++) {   // the sides
-            float[] a = c[i], b = c[(i + 1) % 4];
-            mods.eln.gl.GL11.glVertex3f(a[0], y0, a[1]);
-            mods.eln.gl.GL11.glVertex3f(a[0], y1, a[1]);
-            mods.eln.gl.GL11.glVertex3f(b[0], y1, b[1]);
-            mods.eln.gl.GL11.glVertex3f(b[0], y0, b[1]);
-        }
-        mods.eln.gl.GL11.glEnd();
     }
 
     @Override

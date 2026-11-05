@@ -17,11 +17,13 @@ import static mods.eln.cad.models.OilKit.turned;
  * Rail and the Station Marker.
  * <ul>
  * <li>servodrive (node model, front XN): a painted cabinet with the rail's foot on top, a motor bell on the back over
- * the 200 V terminal plate, signal plates on the flanks (floor: inputs, high: outputs) and the status lamp in front
- * (part "lamp", tinted by the render).</li>
- * <li>elevatorcar (node model, drawn by the car's entity renderer; +x toward the rail): a 1 px tread plate (the car's
- * collider is that thick), a crosshead frame on the rail side with guide shoes on the rail's fin, and the call panel
- * (up button over down).</li>
+ * the 200 V terminal plate, three pin plates on each flank's floor edge, a quarter block apart (Baughn 2026-11-05:
+ * several pins per edge; the right flank's right one violet, the bus) and the status lamp in front (part "lamp",
+ * tinted by the render).</li>
+ * <li>elevatorcar (node model, drawn by the car's entity renderer; +x toward the rail, centred on the middle of its
+ * 3 x 3 blocks): the cabin, 3 x 3 x 3 outside (Baughn 2026-11-05): a 1 px tread plate (the car's collider is that
+ * thick), 1 px walls on the rail side and both flanks, a 1 px roof, the front open; corner posts, a crosshead on the
+ * rail side with guide shoes on the rail's fin, and the call panel inside the back wall.</li>
  * <li>servo_rail (block model, pointing up): a square post with four guide fins.</li>
  * <li>station_marker (block model, pointing north, its back on the south face): a call box with one button.</li>
  * </ul>
@@ -39,34 +41,40 @@ public final class ServoParts {
         m.add(prism('x', 9.5, 8, 3.5, 14.5, 15.9, "steel", 16));                 // the motor's end bell, on the back
         m.add(prism('x', 9.5, 8, 1.2, 15.9, 16.0, "darksteel", 12));             // its bearing cap
         m.addAll(turned(terminalPlate(OilKit.PAINT_200V), 2));                   // 200 V, low on the back
-        m.addAll(turned(signalPlate(), 1));                                      // inputs: floor plates on the flanks
-        m.addAll(turned(signalPlate(), 3));
-        for (int k : new int[]{1, 3}) m.addAll(turned(outputPlate(), k));        // outputs: high on the flanks
+        // three pins on each flank's floor edge, at z 4, 8, 12 on the x = 0 face before the turn (LinearServoDriveDescriptor.spec)
+        for (int k : new int[]{1, 3})
+            for (double dz : new double[]{-4, 0, 4})
+                m.addAll(turned(pinPlate(dz, k == 1 && dz == 4 ? "paint_bus" : "darksteel"), k));   // (k 1: the right flank, z = 16; +dz its right seen from outside)
         return m;
     }
 
-    /** A signal plate high on the x = 0 face, for a cable on the neighbour's ceiling. */
-    static List<Mesh> outputPlate() {
-        return new ArrayList<>(List.of(box(0.1, 10.5, 6.5, 0.85, 14, 9.5, "steel", "nsewd"), box(0.1, 10.1, 6.5, 0.85, 10.5, 9.5, "darksteel", "nsewd"),
-            box(0.0, 11.9, 7.6, 0.1, 12.6, 8.4, "copper", "nsewd")));
+    /** A pin plate on the x = 0 face's floor edge, dz from the middle: the signal plate, its cap in `cap`. */
+    static List<Mesh> pinPlate(double dz, String cap) {
+        return new ArrayList<>(List.of(box(0.1, 0, 6.5 + dz, 0.85, 3.5, 9.5 + dz, "steel", "nsewu"), box(0.1, 3.5, 6.5 + dz, 0.85, 3.9, 9.5 + dz, cap, "nsewu"),
+            box(0.0, 1.9, 7.6 + dz, 0.1, 2.6, 8.4 + dz, "copper", "nsewu")));
     }
 
     static List<Mesh> lamp() {
         return new ArrayList<>(List.of(box(0.35, 8, 6, 0.85, 11, 10, "white")));
     }
 
+    /** The cabin (px, 3 x 3 blocks centred on x, z = 8; +x toward the rail; ElevatorCar.CABIN, WALL, THICK). */
     static List<Mesh> car() {
+        double lo = -16, hi = 32, top = 48;
         List<Mesh> m = new ArrayList<>();
-        m.add(box(0, 0, 0, 16, 1, 16, "plate"));                                  // the tread plate
-        m.add(box(14.5, 1, 1, 16, 26, 2.5, "paint"));                             // the crosshead's posts
-        m.add(box(14.5, 1, 13.5, 16, 26, 15, "paint"));
-        m.add(box(15, 1, 2.5, 16, 26, 13.5, "steel"));                            // its back plate between them
-        m.add(box(14.5, 26, 1, 16, 27.5, 15, "paint"));                           // the top beam
-        m.add(box(16, 3, 6.5, 17.5, 6, 9.5, "darksteel"));                        // guide shoes on the rail's fin
-        m.add(box(16, 21, 6.5, 17.5, 24, 9.5, "darksteel"));
-        m.add(box(14, 14, 5, 15, 23, 11, "darksteel"));                           // the call panel
-        m.add(box(13.6, 19.5, 7, 14, 21.5, 9, "paint_green"));                    // up
-        m.add(box(13.6, 15.5, 7, 14, 17.5, 9, "red"));                            // down
+        m.add(box(lo, 0, lo, hi, 1, hi, "plate"));                                // the tread plate
+        m.add(box(hi - 1, 1, lo + 1, hi, top - 1, hi - 1, "steel"));              // the back wall, on the rail side
+        m.add(box(lo, 1, lo, hi - 1, top - 1, lo + 1, "steel"));                  // the flank walls
+        m.add(box(lo, 1, hi - 1, hi - 1, top - 1, hi, "steel"));
+        m.add(box(lo, top - 1, lo, hi, top, hi, "steel"));                        // the roof
+        m.add(box(lo, 1, lo + 1, lo + 1.5, top - 1, lo + 2.5, "paint"));        // posts at the open front's corners
+        m.add(box(lo, 1, hi - 2.5, lo + 1.5, top - 1, hi - 1, "paint"));
+        m.add(box(lo, top - 2.5, lo + 2.5, lo + 1.5, top - 1, hi - 2.5, "paint")); // the lintel over the opening
+        m.add(box(hi, 3, 6.5, hi + 1.5, 6, 9.5, "darksteel"));                    // guide shoes on the rail's fin
+        m.add(box(hi, top - 6, 6.5, hi + 1.5, top - 3, 9.5, "darksteel"));
+        m.add(box(hi - 2, 14, 5, hi - 1, 23, 11, "darksteel"));                   // the call panel, inside the back wall
+        m.add(box(hi - 2.4, 19.5, 7, hi - 2, 21.5, 9, "paint_green"));
+        m.add(box(hi - 2.4, 15.5, 7, hi - 2, 17.5, 9, "red"));
         return m;
     }
 

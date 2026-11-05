@@ -117,9 +117,9 @@ load; one circuit per block entity, none on a machine's).
 
 A case can run code part way (`ctx.after(ticks, r)`, as its measure runs: outside the simulator's tick) and reload a
 node from an edited tag (`Reload.node(level, pos, tag -> ...)`: a save as an older version wrote it).
-`ServoCases` (the elevator: to a station and in position, slower on a sagging line, slower on a starved one and
-still arriving, the energy books of a lift, stopped by an obstruction, reloaded mid-move with its machine, floor
-ghost, a mob carried; structure `floor_11x10x5`).
+`ServoCases` (the elevator: driven over its RS485 bus and by its setpoint wire, slower on a sagging line, slower on a
+starved one and still arriving, the energy books of a lift, stopped by an obstruction, reloaded mid-move with its
+machine, floor ghost, a mob carried, the cabin's walls; structure `floor_11x12x9`).
 
 ### Golden data (`golden/1.12/*.json`, see `golden/README.md`)
 

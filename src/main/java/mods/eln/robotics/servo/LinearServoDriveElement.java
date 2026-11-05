@@ -145,9 +145,9 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         return front.toEnumFacing();
     }
 
-    /** The plate's bottom centre at position 0: in front of the drive, level with its foot. */
+    /** The plate's bottom centre at position 0: the middle of the 3 x 3 blocks in front of the drive, level with its foot. */
     Vec3 origin() {
-        BlockPos c = node.coordonate.pos().relative(carSide());
+        BlockPos c = node.coordonate.pos().relative(carSide(), 2);
         return new Vec3(c.getX() + 0.5, c.getY(), c.getZ() + 0.5);
     }
 
@@ -423,20 +423,22 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             && !e.isPassenger() && (e instanceof Player ? Riders.playerOnTop(e.getBoundingBox(), box0, tol) : Riders.onTop(e.getBoundingBox(), box0, tol)));
     }
 
-    /** Is anything in the way of the car (and its riders) going from p to p1: a block, or a creature not riding it? */
+    /** Is anything in the way of the car's cabin (and its riders) going from p to p1: a block, or a creature not in it? */
     static boolean blocked(ServerLevel level, ElevatorCar c, List<Entity> riders, double p, double p1) {
-        AABB b0 = c.boxAt(p), b1 = c.boxAt(p1);
+        AABB b0 = c.cabinBox(p), b1 = c.cabinBox(p1);   // (the whole cabin sweeps the shaft)
         Vec3 d = c.at(p1).subtract(c.at(p));
         List<AABB> swept = new ArrayList<>();
         swept.add(b0.minmax(b1).deflate(1e-4));
         for (Entity e : riders) {   // (clipped to the car: a rider's overhang meets the landing, not the car)
-            AABB s = Riders.standing(e.getBoundingBox(), b0).deflate(1e-4);
+            AABB s = Riders.standing(e.getBoundingBox(), c.boxAt(p)).deflate(1e-4);
             swept.add(s.minmax(s.move(d)));
         }
         for (AABB s : swept) if (!level.noBlockCollision(null, s)) return true;
         AABB all = swept.get(0);
         for (AABB s : swept) all = all.minmax(s);
-        for (Entity e : level.getEntities(c, all, e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && !riders.contains(e)))
+        // (a creature in the cabin already, jumping or not on the plate, goes with it: only what the cabin moves into is in the way)
+        for (Entity e : level.getEntities(c, all, e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && !riders.contains(e)
+            && !b0.contains(e.getBoundingBox().getCenter())))
             for (AABB s : swept) if (e.getBoundingBox().intersects(s)) return true;
         return false;
     }
@@ -459,14 +461,21 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         return BlockPos.containing(c.at(s).add(0, 0.01, 0));
     }
 
-    /** Stopped on a whole block: a solid floor plate ghost under the car's (so nobody falls through before it's back). */
+    /**
+     * Stopped on a whole block: solid floor plate ghosts under the car's 3 x 3 plate (so nobody falls through before
+     * it's back).
+     */
     void floorGhost(ServerLevel level, ElevatorCar c, double s) {
-        BlockPos g = floorBlock(c, s);
-        Coordonate gc = new Coordonate(g, level);
-        if (Eln.ghostManager.getGhost(gc) != null) return;
-        if (!Eln.ghostManager.canCreateGhostAt(level, g.getX(), g.getY(), g.getZ())) return;
-        Eln.ghostManager.createGhost(gc, node.coordonate, FLOOR_GHOST, Eln.ghostBlock, GhostBlock.tFloor);
-        ghostUp = true;
+        BlockPos mid = floorBlock(c, s);
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dz = -1; dz <= 1; dz++) {
+                BlockPos g = mid.offset(dx, 0, dz);
+                Coordonate gc = new Coordonate(g, level);
+                if (Eln.ghostManager.getGhost(gc) != null) continue;
+                if (!Eln.ghostManager.canCreateGhostAt(level, g.getX(), g.getY(), g.getZ())) continue;
+                Eln.ghostManager.createGhost(gc, node.coordonate, FLOOR_GHOST, Eln.ghostBlock, GhostBlock.tFloor);
+                ghostUp = true;
+            }
     }
 
     void removeGhost() {

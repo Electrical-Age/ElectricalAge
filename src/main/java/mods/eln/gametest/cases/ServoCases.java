@@ -15,6 +15,8 @@ import mods.eln.sim.IProcess;
 import mods.eln.sixnode.electricalsource.ElectricalSourceElement;
 import mods.eln.sixnode.resistor.ResistorElement;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.animal.pig.Pig;
@@ -42,6 +44,7 @@ public final class ServoCases {
         cases.add(new SaveMidMove());
         cases.add(new GhostFloor());
         cases.add(new CarriesAMob());
+        cases.add(new CabinWalls());
         cases.add(new PanelId());
         cases.add(new Starved());
         cases.add(new EnergyBooks());
@@ -139,15 +142,15 @@ public final class ServoCases {
         }
 
         public int height() {
-            return 10;
+            return 12;   // (the cabin's roof 3 m over its floor at the top station)
         }
 
         public int depth() {
-            return 5;
+            return 9;   // (the cabin in front of the drive: 3 blocks; power behind it)
         }
 
         public int floorDepth() {
-            return 5;
+            return 9;
         }
 
         void watch(IProcess p) {
@@ -180,7 +183,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 4), 0);
             var d = s.drive(ctx);
             d.networkUnserialize(ctx.stream(o -> {   // (its screen's packet)
                 o.writeByte(LinearServoDriveElement.setAddressId);
@@ -190,10 +193,12 @@ public final class ServoCases {
             pc = new mods.eln.bus.BusPort();
             pc.setAddress(200);
             pc.listen(true);
-            var v = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(beside, ctx.level()));
-            mods.eln.bus.BusNet.link(pc, v.busPorts().get(0));
             watch(dt -> {
                 ++tick;
+                if (tick == 5 || tick == 124) {   // (the car's floor ghosts beside the cable's block reconnect it as they come and go)
+                    var v = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(beside, ctx.level()));
+                    mods.eln.bus.BusNet.link(pc, v.busPorts().get(0));
+                }
                 if (tick == 10) pc.send(new mods.eln.bus.Packet(40, 200, mods.eln.bus.PacketType.WRITE, LinearServoDriveElement.REG_TARGET, 3));
                 if (tick == 125) {
                     onBus = s.drive(ctx).port.bus() != null && s.drive(ctx).port.bus() == pc.bus();
@@ -248,7 +253,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 4), 0);
             var d = s.drive(ctx);
             BlockPos beside = pinCable(ctx, s.head, d.front.left(), 0, mods.eln.node.voxel.CablePart.tierOf("Signal Cable"));
             var out = d.front.left();
@@ -301,8 +306,8 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            stiff = new Shaft(ctx, ctx.at(2, 1, 1), 0);
-            weak = new Shaft(ctx, ctx.at(8, 1, 1), 42);   // (42 core items: 33 ohm)
+            stiff = new Shaft(ctx, ctx.at(2, 1, 4), 0);
+            weak = new Shaft(ctx, ctx.at(8, 1, 4), 42);   // (42 core items: 33 ohm)
             watch(dt -> {
                 tick++;
                 if (tick == 10) {
@@ -353,8 +358,8 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
-            stone = s.head.above(4).relative(s.front.toEnumFacing());   // in the shaft, a block below the top station
+            s = new Shaft(ctx, ctx.at(5, 1, 4), 0);
+            stone = s.head.above(7).relative(s.front.toEnumFacing());   // in the shaft, where the roof would be 2 m before the top
             ctx.level().setBlockAndUpdate(stone, Blocks.STONE.defaultBlockState());
             watch(dt -> {
                 tick++;
@@ -373,7 +378,7 @@ public final class ServoCases {
             unwatch();
             ctx.line("servo obstruction: held at " + heldAt + ", then " + s.drive(ctx).getWaila());
             ctx.check("servo: a block in the way faults it (fault output, status)", faulted, "");
-            ctx.check("servo: ... and it stopped short of the block", heldAt > 2 && heldAt + ElevatorCar.THICK <= 4 + 1e-6, "" + heldAt);
+            ctx.check("servo: ... and it stopped short of the block (the roof under it)", heldAt > 2 && heldAt + ElevatorCar.CABIN <= 7 + 1e-6, "" + heldAt);
             ctx.check("servo: cleared and called again, it goes on to the top", Math.abs(s.carFloor(ctx) - 6) < 1e-6
                 && s.drive(ctx).fault == LinearServoDriveElement.NO_FAULT, "" + s.carFloor(ctx));
         }
@@ -398,7 +403,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 4), 0);
             watch(dt -> {
                 tick++;
                 if (tick == 10) s.call(ctx, 6);
@@ -464,7 +469,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 4), 0);
             watch(dt -> {
                 tick++;
                 var d = s.drive(ctx);
@@ -472,7 +477,7 @@ public final class ServoCases {
                 if (tick == 10) s.call(ctx, 6);
                 if (tick == 40) {
                     whileMoving = d.ghostAt(0) || d.ghostAt(6);
-                    airWhileMoving = ctx.level().getBlockState(s.head.relative(s.front.toEnumFacing())).isAir();
+                    airWhileMoving = ctx.level().getBlockState(s.head.relative(s.front.toEnumFacing(), 2)).isAir();
                 }
             });
         }
@@ -483,6 +488,72 @@ public final class ServoCases {
             ctx.check("servo ghost: there under the standing car", atStart, "");
             ctx.check("servo ghost: gone while it moves", !whileMoving && airWhileMoving, whileMoving + " " + airWhileMoving);
             ctx.check("servo ghost: back where it stops", d.ghostAt(6) && !d.ghostAt(0), "");
+        }
+    }
+
+    /**
+     * The cabin's walls hold (Baughn 2026-11-05: a 3x3x3 cabin): a pig in the middle of the plate, pushed 3 m toward
+     * each wall and the roof (its own move, as walking or jumping would), stays inside, against the wall; toward the
+     * open front it walks out.
+     */
+    static final class CabinWalls extends Room {
+        Shaft s;
+        final List<String> results = new java.util.ArrayList<>();
+        boolean held = true, outFront;
+
+        public String id() {
+            return "servo_elevator_cabin_walls_hold";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext ctx) {
+            s = new Shaft(ctx, ctx.at(5, 1, 4), 0);
+            watch(dt -> {
+                if (++tick != 20) return;
+                ElevatorCar c = s.car(ctx);
+                if (c == null) {
+                    held = false;
+                    results.add("no car");
+                    return;
+                }
+                AABB cabin = c.cabinBox(0);
+                net.minecraft.core.Direction rail = c.railSide, across = rail.getClockWise();
+                Vec3[] pushes = {Vec3.atLowerCornerOf(rail.getUnitVec3i()).scale(3), Vec3.atLowerCornerOf(across.getUnitVec3i()).scale(3),
+                    Vec3.atLowerCornerOf(across.getOpposite().getUnitVec3i()).scale(3), new Vec3(0, 3, 0)};
+                for (Vec3 push : pushes) {
+                    Pig pig = pig(ctx, c);
+                    pig.move(MoverType.SELF, push);
+                    boolean in = cabin.contains(pig.getBoundingBox().getCenter()) && pig.getBoundingBox().maxY <= cabin.maxY;
+                    results.add(push + " -> " + pig.position());
+                    held &= in;
+                    pig.discard();
+                }
+                Pig pig = pig(ctx, c);
+                pig.move(MoverType.SELF, Vec3.atLowerCornerOf(rail.getOpposite().getUnitVec3i()).scale(3));
+                outFront = !cabin.contains(pig.getBoundingBox().getCenter());
+                results.add("front -> " + pig.position());
+                pig.discard();
+            });
+        }
+
+        static Pig pig(TestContext ctx, ElevatorCar c) {
+            Pig pig = net.minecraft.world.entity.EntityTypes.PIG.create(ctx.level(), EntitySpawnReason.TRIGGERED);
+            pig.setNoAi(true);
+            pig.setNoGravity(true);
+            Vec3 at = c.at(0);
+            pig.snapTo(at.x, at.y + ElevatorCar.THICK + 0.01, at.z, 0, 0);
+            ctx.level().addFreshEntity(pig);
+            return pig;
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            ctx.line("servo cabin walls: " + results);
+            ctx.check("servo cabin: a pig pushed at the back, side walls and roof stays inside", held, results.toString());
+            ctx.check("servo cabin: ... and walks out of the open front", outFront, results.toString());
         }
     }
 
@@ -501,7 +572,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 4), 0);
             watch(dt -> {
                 tick++;
                 if (tick == 5) {
@@ -545,7 +616,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 4), 0);
             watch(dt -> {
                 if (++tick != 20 || s.car(ctx) == null) return;
                 for (int i = 0; i < 3; i++) {   // (the entities made right after the car)
@@ -622,8 +693,8 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            stiff = new Shaft(ctx, ctx.at(2, 1, 1), 0);
-            weak = new Shaft(ctx, ctx.at(8, 1, 1), 44);   // (44 core items: 47 ohm)
+            stiff = new Shaft(ctx, ctx.at(2, 1, 4), 0);
+            weak = new Shaft(ctx, ctx.at(8, 1, 4), 44);   // (44 core items: 47 ohm)
             watch(dt -> {
                 tick++;
                 if (tick == 10) {
@@ -692,7 +763,7 @@ public final class ServoCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(5, 1, 1), 0);
+            s = new Shaft(ctx, ctx.at(5, 1, 4), 0);
             watch(dt -> {
                 tick++;
                 var c = s.core(ctx);

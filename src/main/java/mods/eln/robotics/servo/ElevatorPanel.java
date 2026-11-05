@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
 public class ElevatorPanel extends PartEntity<ElevatorCar> {
     /** Width and height (m), and where it sits: toward the rail and up from the plate's bottom centre. */
     static final float W = 0.4f, H = 0.6f;
-    static final double OUT = 0.3, UP = 0.85;
+    static final double OUT = ElevatorCar.HALF - ElevatorCar.WALL - 0.2, UP = 0.85;   // (inside the back wall)
     final EntityDimensions size = EntityDimensions.fixed(W, H);
 
     public ElevatorPanel(ElevatorCar car) {

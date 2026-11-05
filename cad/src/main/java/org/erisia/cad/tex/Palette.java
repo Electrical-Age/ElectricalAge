@@ -65,6 +65,7 @@ public final class Palette {
         put("paint_green", 56, 156, 84, 8, null);
         put("paint_blue", 52, 102, 176, 8, null);
         put("paint_orange", 226, 132, 44, 8, null);
+        put("paint_bus", 158, 97, 204, 8, null);   // (the field bus cable's violet)
         put("paint_boiler", 122, 44, 36, 8, null);
         // the shaft machines' paints
         put("paint_lp", 40, 84, 150, 8, null);

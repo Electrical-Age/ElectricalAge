@@ -42,10 +42,10 @@ public final class Robotics implements ElnContent {
     public static final DeferredItem<BlockItem> SERVO_RAIL_ITEM = ITEMS.registerSimpleBlockItem(SERVO_RAIL);
     public static final DeferredItem<BlockItem> STATION_MARKER_ITEM = ITEMS.registerSimpleBlockItem(STATION_MARKER);
 
-    /** The car: a 1 x 1/16 plate; no vanilla position sync (no update interval, no deltas), not saved, not summoned. */
+    /** The car: a 3 x 3 x 1/16 plate (its cabin's walls are parts); no vanilla position sync (no update interval, no deltas), not saved, not summoned. */
     public static final DeferredHolder<EntityType<?>, EntityType<ElevatorCar>> ELEVATOR_CAR = ENTITY_TYPES.register("elevator_car",
         () -> EntityType.Builder.<ElevatorCar>of(ElevatorCar::new, MobCategory.MISC)
-            .sized(1.0f, (float) ElevatorCar.THICK).noLootTable().noSave().noSummon().fireImmune()
+            .sized((float) ElevatorCar.CABIN, (float) ElevatorCar.THICK).noLootTable().noSave().noSummon().fireImmune()
             .clientTrackingRange(8).noUpdateInterval().dontTrackDeltas()
             .build(ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Eln.MODID, "elevator_car"))));
 

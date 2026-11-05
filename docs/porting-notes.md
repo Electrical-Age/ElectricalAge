@@ -224,7 +224,13 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - New in 26.x: the servo layer (`mods/eln/robotics`; Baughn 2026-11-02: the servo layer first, 200 V only, players ride
   the carriage now: "an elevator would be the earliest truly useful output"). The first device is an elevator:
   - A Linear Servo Drive (`eln:transparent_node@5504`) with a Servo Rail mast on its top, 2 to 32 blocks, moves an
-    elevator car (an entity, a 1x1 floor plate with a frame) up and down on the drive's front side. The car's floor
+    elevator car up and down on the drive's front side: a cabin 3 x 3 x 3 outside (Baughn 2026-11-05; about 2.5
+    inside) over the 3 x 3 blocks in front of the drive, its back wall on the rail side, the side walls and roof solid,
+    the front (away from the rail) open. The plate is the car entity (3 x 3 x 1/16); the walls and roof are its part
+    entities (`CabinWall`, thin boxes from the car's frame), solid as the plate is: on the client to its own player,
+    on the server to every creature but players. The whole cabin sweeps the shaft (a block or a creature outside it in
+    the way stops it); creatures already in the cabin go with it. A stopped car has floor ghosts under all 9 blocks.
+    GameTest `servo_elevator_cabin_walls_hold`. The car's floor
     stops level with the drive's foot at the bottom and with the top rail block at the top.
   - Commands (Baughn 2026-11-05: the drive is a plain actuator, an addressed RS485 device; no Station Markers, no
     setpoint bands, no panel stepping): its setpoint wire, a share of the travel to the nearest block, while connected;
