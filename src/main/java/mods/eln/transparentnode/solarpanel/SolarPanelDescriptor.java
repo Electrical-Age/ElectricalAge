@@ -139,15 +139,23 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
         if (canRotate) list.add(tr("Can be geared towards the sun."));
     }
 
+    /**
+     * Not from its model: it draws turned by glRotateZnRef, offset and tilted to the sun, unlike the other machines, so the
+     * computed hitbox floated over it (AdventurAgent 1567695106474119288). Its boxes below are its shape.
+     */
+    @Override
+    public mods.eln.node.transparent.ModelHitbox modelHitbox() {
+        return null;
+    }
+
     @Override
     public void addCollisionBoxesToList(AABB par5AxisAlignedBB, List list, Level world, int x, int y, int z) {
         if (canRotate) {
             super.addCollisionBoxesToList(par5AxisAlignedBB, list, world, x, y, z);
             return;
         }
-        // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute), then maxY -= 0.5 (AABB is immutable now)
-        AABB bb = new AABB(x, y, z, x + 1, y + 1, z + 1);
-        bb = bb.setMaxY(bb.maxY - 0.5);
+        // a fixed panel: as flat as its drawn frame, 3/16 (it was half a block, from 1.7.10's maxY -= 0.5)
+        AABB bb = new AABB(x, y, z, x + 1, y + 3 / 16.0, z + 1);
         if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 }

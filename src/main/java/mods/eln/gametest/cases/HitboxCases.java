@@ -168,14 +168,14 @@ public final class HitboxCases {
      * wider (x) than deep, and facing XN deeper than wide, as the render turns it.
      */
     static final class Turned implements TestCase {
-        net.minecraft.core.BlockPos zp, xn;
+        net.minecraft.core.BlockPos zp, xn, solar;
 
         public String id() {
             return "hitbox_legacy_turned_with_front";
         }
 
         public int width() {
-            return 5;
+            return 7;
         }
 
         public int ticks() {
@@ -187,6 +187,8 @@ public final class HitboxCases {
             xn = ctx.at(3, 1, 1);
             var a = ctx.placeTransparent(Ids.transparent("Cost Oriented Battery"), zp);
             var b = ctx.placeTransparent(Ids.transparent("Cost Oriented Battery"), xn);
+            solar = ctx.at(5, 1, 1);
+            ctx.placeTransparent(Ids.transparent("Small Solar Panel"), solar);
             a.front = mods.eln.misc.Direction.ZP;
             b.front = mods.eln.misc.Direction.XN;
         }
@@ -210,6 +212,9 @@ public final class HitboxCases {
             ctx.line(String.format("battery body: facing ZP %.2f wide x %.2f deep, facing XN %.2f x %.2f", sz[0], sz[1], sx[0], sx[1]));
             ctx.check("battery facing ZP: wider than deep", sz[0] > sz[1], "");
             ctx.check("battery facing XN: deeper than wide", sx[1] > sx[0], "");
+            // (the small solar panel keeps its own box: its render turns and tilts it unlike the rest; AdventurAgent)
+            double top = ctx.level().getBlockState(solar).getShape(ctx.level(), solar).max(net.minecraft.core.Direction.Axis.Y);
+            ctx.check("small solar panel: outlined as flat as its frame, 3/16", Math.abs(top - 3 / 16.0) < 1e-9, "" + top);
         }
     }
 }
