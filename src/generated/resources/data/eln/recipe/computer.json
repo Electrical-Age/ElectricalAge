@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "#c:circuits/advanced",
+    "B": "eln:advanced_machine_block",
+    "L": "eln:low_voltage_cable",
+    "b": "eln:field_bus_cable",
+    "p": "#eln:high_quality_plates/iron"
+  },
+  "pattern": [
+    "pAp",
+    "bBL",
+    "pAp"
+  ],
+  "result": {
+    "id": "eln:computer"
+  }
+}

@@ -2294,6 +2294,27 @@ public final class ElnRecipes extends ElnRecipesBase {
             findItemStack("LED vuMeter"), dictCheapChip, stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get()));
         addShapelessRecipe(findItemStack("Floor Sensor", 1),
             findItemStack("Electrical Entity Sensor"), dictCheapChip, stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get()));
+
+        // the computer (robotics phase 3, Baughn 2026-11-05): two advanced chips in an advanced machine block, its bus
+        // and 50 V; chips from silicon and EA's chips (Janet's ROM: a book's worth of language); floppies from paper
+        // in an iron sleeve; the Elevator floppy: a floppy and a servo rail
+        addRecipe(findItemStack("Computer", 1),
+            "pAp",
+            "bBL",
+            "pAp",
+            'p', "plateIron",
+            'A', dictAdvancedChip,
+            'b', stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get()),
+            'B', findItemStack("Advanced Machine Block"),
+            'L', findItemStack("Low Voltage Cable"));
+        addShapelessRecipe(stack(mods.eln.robotics.Robotics.RAM_CHIP.get(), 1),
+            dictCheapChip, dictCheapChip, dictCheapChip, findItemStack("Silicon Ingot"), stack(Items.GOLD_NUGGET));
+        addShapelessRecipe(stack(mods.eln.robotics.Robotics.JANET_ROM.get(), 1),
+            dictAdvancedChip, findItemStack("Silicon Ingot"), stack(Items.BOOK));
+        addShapelessRecipe(stack(mods.eln.robotics.Robotics.FLOPPY_DISK.get(), 2),
+            stack(Items.PAPER), stack(Items.IRON_NUGGET), stack(Items.IRON_NUGGET), "itemRubber");
+        addShapelessRecipe(stack(mods.eln.robotics.Robotics.ELEVATOR_DISK.get(), 1),
+            stack(mods.eln.robotics.Robotics.FLOPPY_DISK.get()), stack(mods.eln.robotics.Robotics.SERVO_RAIL_ITEM.get()));
     }
 
     public static void recipeElectricalRedstone() {

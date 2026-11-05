@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "#c:circuits/advanced",
+    "eln:silicon_ingot",
+    "minecraft:book"
+  ],
+  "result": {
+    "id": "eln:janet_rom_chip"
+  }
+}

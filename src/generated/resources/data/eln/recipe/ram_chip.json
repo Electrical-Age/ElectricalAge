@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "#c:circuits/basic",
+    "#c:circuits/basic",
+    "#c:circuits/basic",
+    "eln:silicon_ingot",
+    "minecraft:gold_nugget"
+  ],
+  "result": {
+    "id": "eln:ram_chip"
+  }
+}
