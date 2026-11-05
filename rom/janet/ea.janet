@@ -24,6 +24,7 @@
 (var- break-pending nil) # Break was pressed; the screen's (break tab) says for which tab
 (def- procs @{})       # tab -> @{:name :env :tab}: processes, each with a tab of its own
 (var- root-env-of-os nil) # the environment the stdlib was compiled in (processes start from it)
+(var- repl-env nil)    # the REPL's environment (tab 1)
 (def- system @{})      # the REPL task, which Break leaves alone
 (def- display-in @"")  # bytes from the screen not yet read as lines
 (def- display-out @"") # messages for the screen not yet sent (its channel was full)
@@ -50,11 +51,16 @@
   (if fib (debug/stacktrace fib err "") (eprint "error: " err))
   (flush))
 
+(def- failed @[])      # [fiber error] of tasks that failed with nobody waiting: kept for the inspector (the last 10)
+
 (defn- finish [f result]
   (put tasks f nil)
   (if-let [j (get joiners f)]
     (do (put joiners f nil) (array/push ready [j result]))
-    (when (= :error (result 0)) (print-error (result 1) (result 2)))))
+    (when (= :error (result 0))
+      (print-error (result 1) (result 2))
+      (array/push failed [f (result 1)])
+      (when (> (length failed) 10) (array/remove failed 0)))))
 
 (defn- park [f req]
   (match req
@@ -438,11 +444,11 @@
 (defn- repl-tab
   "The REPL: tab 1, a log over an editable line. The line is edited on the player's client; Enter sends it, the OS
   echoes it into the log, evaluates each form as a task, and prints the value."
-  [env]
-  (def t 1)
+  [env &opt t name]
+  (default t 1)
   (def p (parser/new))
   (ui/output env t 1)
-  (ui/tab t "REPL")
+  (ui/tab t (or name "REPL"))
   (ui/log t 1 0 0 ui/width (- ui/height 1))
   (var taken false)
   (defn on-submit [text seq]
@@ -505,6 +511,7 @@
   t)
 
 (defn proc/env "The environment of the process in tab t." [t] (get-in procs [t :env]))
+(defn- proc-env-of [t] (if (= t 1) repl-env (proc/env t)))
 
 (defn proc/start
   "Start a process: (f ;args) as its first task, in an environment of its own, with a tab of its own (a log over the
@@ -590,6 +597,85 @@
   (show dir)
   t)
 
+# ---- the inspector: processes, tasks, their stacks, locals and values, Smalltalk-style (Baughn)
+
+(defn- short "A value in a few characters, never walking a big structure (Argon's review)." [v]
+  (def s (case (type v)
+           :table (string "@{...} " (length v) " keys")
+           :struct (string "{...} " (length v) " keys")
+           :array (string "@[...] " (length v))
+           :tuple (string "[...] " (length v))
+           :buffer (string "@\"" (string/slice v 0 (min 30 (length v))) "\"")
+           :string (string/format "%j" (string/slice v 0 (min 30 (length v))))
+           :function (string "<function " (or (disasm v :name) "?") ">")
+           :cfunction "<cfunction>"
+           :fiber (string "<task " (fiber/status v) ">")
+           (string/format "%j" v)))
+  (if (> (length s) 48) (string (string/slice s 0 45) "...") s))
+
+(defn- frames [f] (try (debug/stack f) ([_] @[])))
+
+(defn- frame-line [i fr]
+  (string "#" i " " (or (fr :name) "?") "  " (or (fr :source) "") ":" (or (fr :source-line) "?")))
+
+(defn- task-line [f]
+  (def top (first (frames f)))
+  (string (fiber/status f) "  " (if top (string (or (top :name) "?") " line " (or (top :source-line) "?")) "")))
+
+(defn inspect
+  "The inspector: a tab of the processes and their tasks (and tasks that failed), their stacks, each frame's locals
+  and what is inside values; Back goes up, REPL here opens a REPL in the selected process's environment."
+  []
+  (def t (proc/new-tab "inspect"))
+  (def path @[])                   # the views, from the top: [kind value label]
+  (var rows @[])                   # what the list's rows stand for
+  (defn show []
+    (def [kind v label] (or (last path) [:top nil "processes and tasks"]))
+    (set rows @[])
+    (def items @[])
+    (defn row [text what] (array/push items text) (array/push rows what))
+    (case kind
+      :top (do
+             (row "REPL (tab 1)" [:env (proc-env-of 1) "REPL"])
+             (eachp [pt p] procs
+               (row (string (p :name) " (tab " pt ")") [:env (p :env) (p :name)])
+               (each f (keys tasks)
+                 (when (env-of? f (p :env)) (row (string "  task " (task-line f)) [:task f "task"]))))
+             (each [f err] failed (row (string "failed: " (short err)) [:task f (string "failed: " err)])))
+      :env (do
+             (each f (keys tasks) (when (env-of? f v) (row (string "task " (task-line f)) [:task f "task"])))
+             (each k (sort (seq [k :keys v :when (symbol? k)] k))
+               (row (string k " = " (short (get-in v [k :value]))) [:value (get-in v [k :value]) (string k)])))
+      :task (eachp [i fr] (frames v) (row (frame-line i fr) [:frame fr (frame-line i fr)]))
+      :frame (do
+               (def slots (or (v :slots) []))
+               (eachp [i x] slots (row (string "slot " i " = " (short x)) [:value x (string "slot " i)])))
+      :value (case (type v)
+               :table (each k (take 200 (sort (keys v))) (row (string (short k) " = " (short (get v k))) [:value (get v k) (short k)]))
+               :struct (each k (take 200 (sort (keys v))) (row (string (short k) " = " (short (get v k))) [:value (get v k) (short k)]))
+               :array (eachp [i x] (take 200 v) (row (string i ": " (short x)) [:value x (string i)]))
+               :tuple (eachp [i x] (take 200 v) (row (string i ": " (short x)) [:value x (string i)]))
+               :function (let [d (disasm v)]
+                           (row (short v) nil)
+                           (row (string "arity " (d :arity) (if (d :vararg) " and more" "")) nil)
+                           (row (string "source " (or (d :source) "?")) nil))
+               :fiber (row (string "task " (task-line v)) [:task v "task"])
+               (row (short v) nil)))
+    (ui/text t 1 0 0 :light-gray (string/slice (string (if (empty? path) "" (string (length path) ": ")) label) 0 (min (- ui/width 24) (length (string label)))))
+    (ui/list t 2 0 1 ui/width (- ui/height 1) items
+             (fn [i]
+               (def what (get rows i))
+               (when what (array/push path what) (show)))))
+  (ui/button t 3 (- ui/width 24) 0 6 "Back" (fn [] (unless (empty? path) (array/pop path)) (show)))
+  (ui/button t 4 (- ui/width 17) 0 11 "REPL here"
+             (fn []
+               (def e (or (find |(= :env ($ 0)) (reverse path)) [:env (proc-env-of 1) "REPL"]))
+               (def nt (proc/new-tab (string "repl " (e 2))))
+               (repl-tab (e 1) nt (string "repl " (e 2)))))
+  (ui/button t 5 (- ui/width 6) 0 6 "Close" (fn [] (proc/close t)))
+  (show)
+  t)
+
 (defn- autorun [env]
   (each p ["A:/startup.janet" "B:/startup.janet" "A:/main.janet" "B:/main.janet"]
     (when (disk/exists? p)
@@ -603,6 +689,7 @@
   []
   (set root-env-of-os (curenv))
   (def env (make-env (curenv)))
+  (set repl-env env)
   (ui/send 'screen ui/width ui/height)
   (repl-tab env)
   (autorun env)

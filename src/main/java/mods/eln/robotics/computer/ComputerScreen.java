@@ -79,8 +79,7 @@ public class ComputerScreen extends ElnScreen {
         button(9, BOTTOM_Y, 50, () -> tr("Reset"), () -> render.clientSendId(ComputerElement.RESET_ID),
             tr("Start again from slot 1's chip (the RAM keeps what it held)."));
         button(61, BOTTOM_Y, 62, () -> render.switchedOn ? tr("Power off") : tr("Power on"),
-            () -> render.clientSendId(ComputerElement.POWER_ID),
-            tr("Its power switch. Off, it stops and its RAM forgets; on, it starts from slot 1's chip."));
+            () -> render.clientSendId(ComputerElement.POWER_ID));
         field(268, BOTTOM_Y, 36, () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
             float f = EaField.parse(v);
             render.clientSendFloat(ComputerElement.SET_ADDRESS_ID, Float.isNaN(f) ? 0 : Math.round(f));

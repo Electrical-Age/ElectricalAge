@@ -286,4 +286,25 @@ class StdlibTest {
         }
         assertTrue(conflict);
     }
+
+    @Test
+    void theInspectorShowsTasksStacksAndValues() {
+        type("(proc/start \"sleeper\" (fn [] (var secret 42) (sleep 100) secret))");
+        tick(20, "\n2\n> ");
+        type("(inspect)");
+        tick(20, "\n3\n> ");
+        var list = screen.scene.tabs.get(3).elements.get(2);
+        String rows = list.msg.get(7).toString();
+        assertTrue(rows.contains("sleeper (tab 2)") && rows.contains("task pending"), rows);
+        // select the task row (the third: REPL, sleeper, its task), then its frames, then a frame's slots
+        int task = ((java.util.List<?>) list.msg.get(7)).indexOf(((java.util.List<?>) list.msg.get(7)).stream().filter(r -> r.toString().startsWith("  task")).findFirst().get());
+        m.editor.give(("(select 3 2 " + task + ")\n").getBytes(StandardCharsets.UTF_8));
+        tick(5, null);
+        String frames = screen.scene.tabs.get(3).elements.get(2).msg.get(7).toString();
+        assertTrue(frames.contains("#0 sleep") && frames.contains("#1"), frames);
+        m.editor.give("(select 3 2 1)\n".getBytes(StandardCharsets.UTF_8));
+        tick(5, null);
+        String slots = screen.scene.tabs.get(3).elements.get(2).msg.get(7).toString();
+        assertTrue(slots.contains("= 42"), slots);
+    }
 }
