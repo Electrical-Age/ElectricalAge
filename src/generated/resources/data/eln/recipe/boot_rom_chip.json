@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "#c:circuits/basic",
+    "eln:silicon_ingot",
+    "minecraft:paper"
+  ],
+  "result": {
+    "id": "eln:boot_rom_chip"
+  }
+}

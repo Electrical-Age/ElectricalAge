@@ -2,7 +2,7 @@
 """The robotics computer's items (16x16): RAM chip (a green board with four black chips and gold contacts), Janet ROM
 chip (a black chip with a quartz window and a purple label), floppy disk (3.5": dark body, metal shutter, white
 label) and the Elevator floppy (the label shows an up/down arrow).
-Usage: computer.py RESOURCES_DIR -> assets/eln/textures/item/{ram_chip,janet_rom_chip,floppy_disk,elevator_disk}.png"""
+Usage: computer.py RESOURCES_DIR -> assets/eln/textures/item/{ram_chip,janet_rom_chip,boot_rom_chip,floppy_disk,elevator_disk}.png"""
 import os, sys
 from PIL import Image
 
@@ -26,7 +26,7 @@ def ram():
         rect(px, x, 10, x, 11, (220, 180, 60))
     return im
 
-def rom():
+def rom(label=(140, 70, 190)):
     im = blank(); px = im.load()
     rect(px, 2, 3, 13, 12, (34, 34, 38))            # the package
     rect(px, 2, 3, 13, 3, (70, 70, 78))
@@ -34,7 +34,7 @@ def rom():
         px[1, y] = (190, 190, 200, 255); px[14, y] = (190, 190, 200, 255)
     rect(px, 5, 5, 10, 8, (150, 160, 175))           # the quartz window
     rect(px, 6, 6, 9, 7, (190, 200, 215))
-    rect(px, 4, 10, 11, 11, (140, 70, 190))          # the purple label (Janet)
+    rect(px, 4, 10, 11, 11, label)                    # the label: purple Janet, orange Floppy Boot
     return im
 
 def floppy(arrow=False):
@@ -57,6 +57,6 @@ def floppy(arrow=False):
 if __name__ == "__main__":
     out = os.path.join(sys.argv[1], "assets", "eln", "textures", "item")
     os.makedirs(out, exist_ok=True)
-    for name, im in (("ram_chip", ram()), ("janet_rom_chip", rom()), ("floppy_disk", floppy()), ("elevator_disk", floppy(True))):
+    for name, im in (("ram_chip", ram()), ("janet_rom_chip", rom()), ("boot_rom_chip", rom((220, 130, 40))), ("floppy_disk", floppy()), ("elevator_disk", floppy(True))):
         im.save(os.path.join(out, name + ".png"))
         print(name)

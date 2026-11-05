@@ -9,7 +9,7 @@ JANET_SRC ?= $(error set JANET_SRC to a Janet 1.41.2 source tree)
 CFLAGS = -Os -ffunction-sections -fdata-sections -Wall -Wno-unused-function -Ibuild -Ijanet -Ifatfs
 LDFLAGS = -nostartfiles --specs=nosys.specs -Wl,--gc-sections -Wl,-Map,build/janet.map
 
-all: build/janet.rom build/elevator.img
+all: build/janet.rom build/boot.rom build/elevator.img
 
 # Janet's amalgamation, its boot image regenerated with our configuration (no ev, threads, net, FFI, ...)
 build/janet.c build/janet.h: janet/janetconf.h
@@ -26,6 +26,14 @@ build/janet.elf: janet/start.S janet/blob.S janet/ea.janet janet/syscalls.c jane
 build/janet.rom: build/janet.elf
 	$(OBJCOPY) -O binary $< build/janet.bin
 	( head -c 1024 /dev/zero; cat build/janet.bin ) > $@
+	@ls -l $@
+
+# The Floppy Boot ROM: a few instructions, no C
+build/boot.rom: boot/boot.S boot/link.ld
+	mkdir -p build
+	$(CC_X) -nostdlib -nostartfiles -T boot/link.ld boot/boot.S -o build/boot.elf
+	$(OBJCOPY) -O binary build/boot.elf build/boot.bin
+	( head -c 1024 /dev/zero; cat build/boot.bin ) > $@
 	@ls -l $@
 
 # Canned floppies (FAT12, 1.44 MB): the files in disks/NAME. A fixed serial and the sources' times make them reproducible.

@@ -52,6 +52,7 @@ public final class Robotics implements ElnContent {
     /** The computer's chips and floppies. */
     public static final DeferredItem<ChipItem> RAM_CHIP = ITEMS.registerItem("ram_chip", p -> new ChipItem(ChipItem.Kind.RAM, p));
     public static final DeferredItem<ChipItem> JANET_ROM = ITEMS.registerItem("janet_rom_chip", p -> new ChipItem(ChipItem.Kind.JANET, p));
+    public static final DeferredItem<ChipItem> BOOT_ROM = ITEMS.registerItem("boot_rom_chip", p -> new ChipItem(ChipItem.Kind.BOOT, p));
     public static final DeferredItem<FloppyItem> FLOPPY_DISK = ITEMS.registerItem("floppy_disk", FloppyItem::new);
     public static final DeferredItem<ProgramDiskItem> ELEVATOR_DISK = ITEMS.registerItem("elevator_disk",
         p -> new ProgramDiskItem("elevator", "An elevator controller for a Linear Servo Drive: edit a:/main.janet for your shaft", p));
@@ -86,6 +87,7 @@ public final class Robotics implements ElnContent {
         ElnRegistry.ALL_ITEMS.add(STATION_MARKER_ITEM);
         ElnRegistry.ALL_ITEMS.add(RAM_CHIP);
         ElnRegistry.ALL_ITEMS.add(JANET_ROM);
+        ElnRegistry.ALL_ITEMS.add(BOOT_ROM);
         ElnRegistry.ALL_ITEMS.add(FLOPPY_DISK);
         ElnRegistry.ALL_ITEMS.add(ELEVATOR_DISK);
         ElnRegistry.RETIRED_ITEMS.add(STATION_MARKER_ITEM);   // (no longer used, Baughn 2026-11-05: out of the tab)

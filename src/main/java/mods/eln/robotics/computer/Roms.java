@@ -7,7 +7,7 @@ public final class Roms {
     private Roms() {
     }
 
-    private static volatile Rom janet;
+    private static volatile Rom janet, boot;
 
     /** The Janet ROM, or null if the image is missing from the jar. */
     public static Rom janet() {
@@ -16,6 +16,18 @@ public final class Roms {
             synchronized (Roms.class) {
                 if (janet == null) janet = load("/eln/computer/rom/janet.rom");
                 r = janet;
+            }
+        }
+        return r;
+    }
+
+    /** The Floppy Boot ROM, or null if the image is missing from the jar. */
+    public static Rom boot() {
+        Rom r = boot;
+        if (r == null) {
+            synchronized (Roms.class) {
+                if (boot == null) boot = load("/eln/computer/rom/boot.rom");
+                r = boot;
             }
         }
         return r;

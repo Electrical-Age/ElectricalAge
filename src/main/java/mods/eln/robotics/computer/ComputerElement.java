@@ -116,8 +116,8 @@ public class ComputerElement extends TransparentNodeElement {
             if (!(st.getItem() instanceof ChipItem c)) continue;
             switch (c.kind) {
                 case RAM -> m.mem.setRam(s, Machine.RAM_CHIP);
-                case JANET -> {
-                    Rom r = Roms.janet();
+                case JANET, BOOT -> {
+                    Rom r = c.kind == ChipItem.Kind.JANET ? Roms.janet() : Roms.boot();
                     if (r != null) m.mem.setRom(s, r);
                 }
             }

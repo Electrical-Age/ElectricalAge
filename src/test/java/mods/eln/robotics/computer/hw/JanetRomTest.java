@@ -80,4 +80,26 @@ class JanetRomTest {
         until(m, out, "Trap: cause 00000001 at 00000000", 2);
         assertTrue(m.halted());
     }
+
+    @Test
+    void floppyBootRunsSectorZero() throws IOException {
+        Rom boot;
+        try (InputStream in = JanetRomTest.class.getResourceAsStream("/eln/computer/rom/boot.rom")) {
+            boot = new Rom(in.readAllBytes());
+        }
+        Machine m = new Machine();
+        m.mem.setRom(0, boot);
+        m.mem.setRam(1, Machine.RAM_CHIP);
+        m.reset(0);
+        StringBuilder out = new StringBuilder();
+        until(m, out, "no disk in drive A", 2);
+        // a boot sector: print "OK" on the terminal and spin
+        int[] code = {0x100022b7, 0x04f00313, 0x0062a023, 0x04b00313, 0x0062a023, 0x00a00313, 0x0062a023, 0x0000006f};
+        byte[] img = new byte[Floppy.BYTES];
+        for (int i = 0; i < code.length; i++)
+            for (int b = 0; b < 4; b++) img[4 * i + b] = (byte) (code[i] >>> (8 * b));
+        m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), img, false));
+        m.reset(0);
+        until(m, new StringBuilder(), "OK\n", 2);
+    }
 }
