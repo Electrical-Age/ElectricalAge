@@ -46,6 +46,8 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     /** The cabin outside (m): a 3 x 3 plate, walls and roof 3 high (Baughn 2026-11-05: 3x3x3, about 2.5 inside); a
      *  wall's and the roof's thickness; half the plate's width. */
     public static final double CABIN = 3, WALL = 1 / 16.0, HALF = CABIN / 2;
+    /** Client: the ids of the cabin's walls (negative: the server's are positive). */
+    static final java.util.concurrent.atomic.AtomicInteger CLIENT_PART_IDS = new java.util.concurrent.atomic.AtomicInteger();
     /** Client: the cars in the client's level (the carry ticks them). */
     public static final Set<ElevatorCar> CLIENT = Collections.newSetFromMap(new WeakHashMap<>());
 
@@ -74,6 +76,10 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
             new CabinWall(this, -HALF, -HALF + WALL, THICK, CABIN - WALL, -HALF + WALL, HALF),
             new CabinWall(this, HALF - WALL, HALF, THICK, CABIN - WALL, -HALF + WALL, HALF),
             new CabinWall(this, -HALF, HALF, CABIN - WALL, CABIN, -HALF, HALF)};
+        // (a client level gives no entity ids, and its part list compares parts by id: without one, the car leaving
+        // the client threw and disconnected it, AdventurAgent 2026-11-05. Nothing is sent to a wall, so a client-only
+        // id, below every id a server gives, will do.)
+        if (level.isClientSide()) for (CabinWall w : walls) w.setId(CLIENT_PART_IDS.decrementAndGet());
         setNoGravity(true);
         blocksBuilding = true;
     }
