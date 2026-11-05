@@ -53,7 +53,7 @@ public final class FunctionReference {
         new Entry("Utility", "# text", "A comment.", "# my notes", "# "),
         new Entry("Field bus", "bus.colour", "Reads a channel of the field bus on its pin beside the output: 0 to 1 for 0 to 50 V, as the tick began. "
             + "The 16 channels are the dye colours, numbered 0 to 15, each listed below.", "bus.light_blue < 0.3", "bus."),
-        new Entry("Field bus", "bus.colour = expression", "Writes a channel, once a tick; with several writers the highest wins. It may be the last line: then the output wire gives 0 V.",
+        new Entry("Field bus", "bus.colour = expression", "Writes a channel, once a tick; with several writers the last change wins. It may be the last line: then the output wire gives 0 V.",
             "bus.red = rs(A, B)", "bus.red = ")));
 
     /** The entries, then one per bus channel, so the 16 read as a list (Baughn: not one paragraph). */

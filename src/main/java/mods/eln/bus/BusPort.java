@@ -17,6 +17,10 @@ public final class BusPort {
     int claims;
     Bus bus;
     int address;
+    /** Channels held, written through write() since the last tick, and in the tick before. */
+    int held, writing, writes;
+    private final float[] sent = new float[BusChannel.COUNT];
+    private Bus sentOn;
     private java.util.ArrayDeque<Packet> inbox;
     private long overflow;
 
@@ -36,14 +40,51 @@ public final class BusPort {
         if (bus != null) bus.reclaim();
     }
 
-    /** The level of a channel, 0..1 (0: no bus, no such channel, or nobody wrote it last tick). */
+    /** The level of a channel, 0..1 (0: no bus, no such channel, or nobody holds it). */
     public double read(int c) {
         return bus == null ? 0 : bus.read(c);
     }
 
-    /** Write a channel for the next tick (the highest of this tick's writes wins). */
+    /**
+     * Write a channel, every tick it should hold it: a signal packet goes out when the level changes (by DEADBAND or
+     * more, or onto or off 0 or 1) or the bus asks again, and it shows next tick (the last write wins). A tick without a
+     * write lets go of the channel.
+     */
     public void write(int c, double v) {
-        if (bus != null) bus.write(c, v);
+        if (bus == null || !BusChannel.valid(c)) return;
+        if (sentOn != bus) {   // a new bus: everything again
+            java.util.Arrays.fill(sent, Float.NaN);
+            sentOn = bus;
+        }
+        float f = (float) Math.max(0, Math.min(1, Double.isFinite(v) ? v : 0));
+        writing |= 1 << c;
+        float s = sent[c];
+        if (s == s && (f == s || Math.abs(f - s) < DEADBAND && f != 0 && f != 1 && s != 0 && s != 1)) return;
+        sent[c] = f;
+        bus.send(this, Packet.signal(address, c, f));
+    }
+
+    /** Level changes smaller than this (5 mV of 50 V) aren't sent: an analog wire's noise would fill the bus. */
+    public static final float DEADBAND = 1e-4f;
+
+    /** The channels this port holds (its signal was the last delivered, or it writes them). */
+    public int held() {
+        return held;
+    }
+
+    /** The start of a tick: the channels written through write() last tick but not since, which it lets go. */
+    int sweep() {
+        int stopped = writes & ~writing;
+        writes = writing;
+        writing = 0;
+        held &= ~stopped;
+        for (int c = 0, m = stopped; m != 0; c++, m >>>= 1) if ((m & 1) != 0) sent[c] = Float.NaN;
+        return stopped;
+    }
+
+    /** Send channel c again at the next write (a holder let go, or the packet was dropped). */
+    void resend(int c) {
+        sent[c] = Float.NaN;
     }
 
     /** Its device address (17..255), or 0: none. */

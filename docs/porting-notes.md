@@ -566,6 +566,12 @@ on 1.7.10) onto 26.x.
   claiming that channel, a device's the port with that address (`BusPort.setAddress`, 17..255 only). Packets wait in
   a port's inbox (64, oldest dropped first) until polled, so a device needn't run every tick; packets still queued
   move with their sender when the bus is rebuilt. Tests `PacketTest`, `BusNetPropertyTest`.
+  Colour channels are held levels set by signal packets, and the last write wins (Baughn 2026-11-05; it was the
+  highest of each tick's writes, cleared every tick). Writers (Bus I/O terminals, signal processors, `MachineBus`)
+  still write every tick, but `BusPort.write` sends a signal only on a change of 1e-4 (5 mV) or more, onto or off 0
+  or 1, or when asked again; a port holds the channels it writes, and a tick without a write lets go: then the other
+  holders send theirs again, or the channel falls to 0. A dropped signal is sent again, and every writer sends again
+  on a rebuilt bus. Tests `BusNetTest`, GameTest `bus_module_last_writer_wins` (was `bus_module_highest_writer_wins`).
 - Bus I/O Module (the field bus, `mods.eln.bus`; Baughn: 9 terminals), id `1 + (117 << 6)` beside the Modbus RTU,
   whose model it wears without the door (a proper model later). On a face, its front edge takes Field Bus Cable; its
   left, back and right edges hold three signal terminals each, numbered 1 to 9 round from the bus edge, pins 4 voxels

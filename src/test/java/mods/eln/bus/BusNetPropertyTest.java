@@ -71,10 +71,11 @@ class BusNetPropertyTest {
                 BusNet.tick();
                 for (int i = 0; i < n; i++) {
                     boolean reach = !adj.get(w).isEmpty() && !adj.get(i).isEmpty() && comp[i] == comp[w];
-                    assertEquals(reach ? v : 0, ports.get(i).read(5), 1e-9, "port " + i + " after port " + w + " wrote (step " + step + ")");
-                    Packet got = ports.get(i).poll();
-                    assertEquals(reach && i != w, got != null && got.index() == step, "port " + i + " after port " + w + " broadcast (step " + step + ")");
-                    assertNull(ports.get(i).poll(), "once");
+                    assertEquals(reach ? v : 0, ports.get(i).read(5), 1e-6, "port " + i + " after port " + w + " wrote (step " + step + ")");
+                    int presses = 0;   // (the inbox also has the channel's signals: the ports claim it)
+                    for (Packet got; (got = ports.get(i).poll()) != null; )
+                        if (got.type() == PacketType.PRESS) presses += got.index() == step ? 1 : 100;
+                    assertEquals(reach && i != w ? 1 : 0, presses, "port " + i + " after port " + w + " broadcast, once (step " + step + ")");
                 }
             }
         } finally {

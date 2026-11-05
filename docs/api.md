@@ -287,7 +287,7 @@ public static void tick(Machine m) {
 - `bus(face)` gives the machine a field bus port that links to a voxel bus cable.
 - It has 16 channels, numbered like the dyes (0 is white), with levels 0..1.
 - What you write in a tick is read in the next, and a write lasts one tick.
-- With several writers on one channel, the highest wins.
+- With several writers on one channel, the last change wins; when a writer stops, the others' levels come back.
 
 ## Heat
 

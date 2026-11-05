@@ -14,7 +14,7 @@ import java.util.Set;
  * The field buses: links between ports, and the buses they make. Nodes link their ports as they connect and detach
  * them as they disconnect (never a NodeConnection: that would merge unrelated circuits' fault networks). The buses are
  * found again by a flood at the start of the next simulator tick (Simulator.tick calls tick()), a rebuilt bus starting
- * from its members' old values, so a cable placed nearby never shows running logic a 0. Server thread only.
+ * from its members' old levels, so a cable placed nearby never shows running logic a 0. Server thread only.
  */
 public final class BusNet {
     private BusNet() {
@@ -52,14 +52,14 @@ public final class BusNet {
         }
     }
 
-    /** Once a simulator tick, before anything else runs: find the buses again if links changed, then swap buffers. */
+    /** Once a simulator tick, before anything else runs: find the buses again if links changed, then deliver. */
     public static void tick() {
         if (dirty) rebuild();
         for (Bus b : BUSES) b.swap();
     }
 
-    /** Find the buses again now if links changed, without swapping (tests: a swap mid-tick would drop every bus's
-     *  pending writes, the other tests' too). */
+    /** Find the buses again now if links changed, without delivering (tests: a delivery mid-tick would let go of the
+     *  channels every other test's ports write). */
     public static void refresh() {
         if (dirty) rebuild();
     }
@@ -82,14 +82,11 @@ public final class BusNet {
             }
             for (BusPort p : nb.ports) p.bus = nb;
             nb.reclaim();
-            // seeded from the old buses: the highest per channel, now and pending
+            // seeded from the old buses: the channels its ports hold keep their level (merged buses: the highest)
+            int held = 0;
+            for (BusPort p : nb.ports) held |= p.held;
             for (Bus o : old)
-                for (int c = 0; c < BusChannel.COUNT; c++) {
-                    nb.cur[c] = Math.max(nb.cur[c], o.cur[c]);
-                    nb.next[c] = Math.max(nb.next[c], o.next[c]);
-                    nb.writers[c] += o.writers[c];
-                    nb.nextWriters[c] += o.nextWriters[c];
-                }
+                for (int c = 0; c < BusChannel.COUNT; c++) if ((held >> c & 1) != 0) nb.level[c] = Math.max(nb.level[c], o.level[c]);
             for (Bus o : old) nb.droppedTotal += o.droppedTotal;
             made.add(nb);
         }
@@ -97,8 +94,11 @@ public final class BusNet {
         for (Bus o : BUSES)
             for (Bus.Queued e : o.outbox)
                 if (e.from() != null && seen.contains(e.from())) e.from().bus.outbox.add(e);
-        // ports no bus reaches now (no links left) leave their old bus
-        for (Bus o : BUSES) for (BusPort p : o.ports) if (!seen.contains(p)) p.bus = null;
+        // ports no bus reaches now (no links left) leave their old bus, and their channels
+        for (Bus o : BUSES) for (BusPort p : o.ports) if (!seen.contains(p)) {
+            p.bus = null;
+            p.held = 0;
+        }
         BUSES.clear();
         BUSES.addAll(made);
     }

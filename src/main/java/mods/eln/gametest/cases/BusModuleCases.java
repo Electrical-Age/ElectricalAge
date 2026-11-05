@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * The Bus I/O Module (mods.eln.bus): two modules on one bus carry a signal from a wire to a wire; two writers on one
- * channel, the higher wins; its nine terminals' channels and directions survive a save and load and are claimed again;
+ * channel, the last write wins and the other's comes back when it stops; its nine terminals' channels and directions survive a save and load and are claimed again;
  * its screen's packet tunes a terminal, and a value that is no channel leaves it unused; a brush tunes the terminal
  * nearest the click.
  */
@@ -27,7 +27,7 @@ public final class BusModuleCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new Across());
-        cases.add(new HighestWins());
+        cases.add(new LastWins());
         cases.add(new Saved());
         cases.add(new Tuned());
         cases.add(new Brushed());
@@ -123,13 +123,23 @@ public final class BusModuleCases {
         }
     }
 
-    /** Two modules write one channel from sources at 10 V and 40 V: the bus has 40 V, from two writers. */
-    static final class HighestWins implements TestCase {
+    /**
+     * Two modules write one channel, from sources at 10 V and 40 V: the last write wins, and the other's comes back
+     * when it stops (Baughn 2026-11-05; this was bus_module_highest_writer_wins, which pinned the highest of a tick's
+     * writes winning). A starts alone; B joins at tick 20 and leaves at tick 50.
+     */
+    static final class LastWins implements TestCase {
         BusModuleElement a, b;
         String why = "";
+        double alone = -1, both = -1, bothOut = -1;
+        int writersBoth = -1;
 
         public String id() {
-            return "bus_module_highest_writer_wins";
+            return "bus_module_last_writer_wins";
+        }
+
+        public int ticks() {
+            return 80;
         }
 
         public void build(TestContext c) {
@@ -142,29 +152,40 @@ public final class BusModuleCases {
                 across(c, c.at(5, 1, 1), SIGNAL);
                 source(c, c.at(6, 1, 1), Direction.XN, 40);
                 a.setChannel(BACK_MIDDLE, RED);
-                b.setChannel(BACK_MIDDLE, RED);
                 // A also reads it back on a free terminal
                 a.setChannel(0, RED);
                 a.setOut(0, true);
             } catch (RuntimeException e) {
                 why = String.valueOf(e.getMessage());
+                return;
             }
+            c.after(18, () -> alone = a.port.bus() == null ? -1 : a.port.bus().value(RED));
+            c.after(20, () -> b.setChannel(BACK_MIDDLE, RED));
+            c.after(45, () -> {
+                var bus = a.port.bus();
+                both = bus == null ? -1 : bus.value(RED);
+                writersBoth = bus == null ? -1 : bus.writers(RED);
+                bothOut = a.volts(0);
+            });
+            c.after(50, () -> b.setChannel(BACK_MIDDLE, UNUSED));
         }
 
         public void measure(TestContext c) {
-            c.check("bus module highest: built", why.isEmpty(), why);
+            c.check("bus module last: built", why.isEmpty(), why);
             if (!why.isEmpty()) return;
             var bus = a.port.bus();
-            c.check("bus module highest: one bus", bus != null && bus == b.port.bus(), bus + " " + b.port.bus());
+            c.check("bus module last: one bus", bus != null && bus == b.port.bus(), bus + " " + b.port.bus());
             if (bus == null) return;
-            Wp9cCases.within(c, "bus module highest: the channel has the higher, 40 V [0..1]", bus.value(RED), 0.8, 0.01);
-            c.check("bus module highest: two writers", bus.writers(RED) == 2, "" + bus.writers(RED));
-            Wp9cCases.within(c, "bus module highest: an out terminal on it gives 40 V [V]", a.volts(0), 40, 0.5);
-            Wp9cCases.within(c, "bus module highest: the 10 V wire stays at 10 V [V]", a.volts(BACK_MIDDLE), 10, 0.5);
+            Wp9cCases.within(c, "bus module last: A alone puts its 10 V on it [0..1]", alone, 0.2, 0.01);
+            Wp9cCases.within(c, "bus module last: B wrote last, 40 V [0..1]", both, 0.8, 0.01);
+            c.check("bus module last: two writers", writersBoth == 2, "" + writersBoth);
+            Wp9cCases.within(c, "bus module last: an out terminal on it gave 40 V [V]", bothOut, 40, 0.5);
+            Wp9cCases.within(c, "bus module last: B stopped, A's 10 V is back [0..1]", bus.value(RED), 0.2, 0.01);
+            c.check("bus module last: one writer", bus.writers(RED) == 1, "" + bus.writers(RED));
+            Wp9cCases.within(c, "bus module last: the 10 V wire stays at 10 V [V]", a.volts(BACK_MIDDLE), 10, 0.5);
         }
     }
 
-    /** A module with all nine terminals set, saved and loaded: the same channels and directions, claimed on its bus again. */
     static final class Saved implements TestCase {
         BusModuleElement m;
         static final int[] CHANNELS = {WHITE, UNUSED, LIME, LIGHT_BLUE, BLACK, UNUSED, CYAN, WHITE, RED};
