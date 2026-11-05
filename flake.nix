@@ -8,6 +8,26 @@
       systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
       forAll = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
     in {
+      # The computer's ROM images (rom/): `nix build .#roms`, then copy result/*.rom to
+      # src/main/resources/eln/computer/rom/. Janet is pinned here, not taken from nixpkgs.
+      packages = forAll (pkgs: {
+        roms = pkgs.stdenv.mkDerivation {
+          pname = "eln-computer-roms";
+          version = "1";
+          src = ./rom;
+          janet = pkgs.fetchFromGitHub {
+            owner = "janet-lang";
+            repo = "janet";
+            rev = "v1.41.2";
+            hash = "sha256-sNRhcGG8JysmPHHXeRkYCt7qA75U6flptUEWWun+rDs=";
+          };
+          nativeBuildInputs = [ pkgs.pkgsCross.riscv32-embedded.buildPackages.gcc ];
+          hardeningDisable = [ "all" ];
+          buildPhase = "make JANET_SRC=$janet";
+          installPhase = "mkdir -p $out && cp build/*.rom $out/";
+        };
+      });
+
       devShells = forAll (pkgs:
         let
           # Gradle runs on JAVA_HOME (25, the mod's toolchain); NeoForge's data and game-test runs also
