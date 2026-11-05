@@ -119,7 +119,7 @@ public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implem
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Moves an elevator car along a Servo Rail\nset on its top, %1$ to %2$ blocks long.\nThe car rides on its front side.\n200V power on the back.\nSeen from the car's side, left flank:\nsetpoint in on a floor cable,\nin position out on a ceiling cable.\nRight flank: enable in on a floor cable,\nfault out on a ceiling cable.",
+        Collections.addAll(list, tr("Moves an elevator car along a Servo Rail\nset on its top, %1$ to %2$ blocks long.\nThe car rides on its front side.\n200V power on the back.\nThree pins on each flank's floor edge\n(left to right, facing the flank):\nleft flank (seen from the car): in position,\nsetpoint, position; right flank: fault,\nenable, RS485 bus. Plain cables reach the middles.\nDriven over the bus by its registers:\n0 target, 1 position, 2 speed limit, 3 state, 4 load.",
             MIN_TRAVEL, MAX_TRAVEL).split("\n"));
     }
 
