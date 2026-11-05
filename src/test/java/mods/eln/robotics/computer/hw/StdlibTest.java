@@ -307,4 +307,15 @@ class StdlibTest {
         String slots = screen.scene.tabs.get(3).elements.get(2).msg.get(7).toString();
         assertTrue(slots.contains("= 42"), slots);
     }
+
+    @Test
+    void filesOpensAnEditor() {
+        m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), null, false));
+        type("(do (disk/format :a) (spit \"a:/x.janet\" \"(print 1)\") (files))");
+        tick(60, "\n2\n> ");
+        m.editor.give("(select 2 2 0)\n".getBytes(StandardCharsets.UTF_8));
+        for (int t = 0; t < 20 && screen.scene.tabs.get(3) == null; t++) tick(1, null);
+        assertNotNull(screen.scene.tabs.get(3), "an editor tab; console: " + screen.console);
+        assertEquals("(print 1)", screen.scene.tabs.get(3).elements.get(4).msg.get(10));
+    }
 }

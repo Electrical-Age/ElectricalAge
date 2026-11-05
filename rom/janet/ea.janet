@@ -522,6 +522,7 @@
   (ui/log t 1 0 0 ui/width ui/height)
   (ui/output env t 1)
   (spawn-in env f ;args)
+  (ui/focus t)
   t)
 
 (defn proc/list "The processes: [tab name tasks] each." []
@@ -579,6 +580,7 @@
                  (ui/send 'saved t 4 seq rev))))
            ([err] (ui/text t 1 0 0 :red (string path ": " err))))))
   (ui/send 'editor t 4 0 1 ui/width (- ui/height 1) :janet path rev text)
+  (ui/focus t)
   t)
 
 (defn files
@@ -595,6 +597,7 @@
                (when n
                  (if (string/has-suffix? "/" n) (show (string dir n)) (edit (string dir n)))))))
   (show dir)
+  (ui/focus t)
   t)
 
 # ---- the inspector: processes, tasks, their stacks, locals and values, Smalltalk-style (Baughn)
@@ -674,6 +677,7 @@
                (repl-tab (e 1) nt (string "repl " (e 2)))))
   (ui/button t 5 (- ui/width 6) 0 6 "Close" (fn [] (proc/close t)))
   (show)
+  (ui/focus t)
   t)
 
 (defn- autorun [env]

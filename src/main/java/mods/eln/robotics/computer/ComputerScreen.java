@@ -49,6 +49,8 @@ public class ComputerScreen extends ElnScreen {
 
     /** An editor element's state on this client: the revision and text it was opened at, the text now, a save. */
     static final class EditorState {
+        /** The editor message this state was made from (a new one is a new opening: the state starts again). */
+        Object opened;
         String baseRev, baseText = "", text = "", savingText, status = "";
         long savingSeq;
     }
@@ -103,16 +105,14 @@ public class ComputerScreen extends ElnScreen {
                 want.add(k);
                 List<Object> m = e.msg;
                 EditorState st = editorState(tab, en.getKey());
-                String rev = Form.str(m, 9, ""), text = Form.str(m, 10, "");
                 boolean replaced = false;
-                if (!rev.equals(st.baseRev)) {
-                    boolean clean = st.baseRev == null || st.text.equals(st.baseText);
-                    st.baseRev = rev;
-                    st.baseText = text;
-                    if (clean) {
-                        st.text = text;
-                        replaced = true;
-                    }
+                if (st.opened != m) {
+                    // a new editor message: the file opened again (a reused tab number, AdventurAgent): start from it
+                    st.opened = m;
+                    st.baseRev = Form.str(m, 9, "");
+                    st.baseText = st.text = Form.str(m, 10, "");
+                    st.status = "";
+                    replaced = true;
                 }
                 var w = editorWidgets.get(k);
                 if (w == null) {
@@ -126,6 +126,8 @@ public class ComputerScreen extends ElnScreen {
                     editorWidgets.put(k, addRenderableWidget(w));
                 } else if (replaced && !w.buffer.text().equals(st.text)) w.buffer.setText(st.text);
             }
+        // states of editors whose tab is gone are forgotten
+        render.screenState.keySet().removeIf(key -> key.startsWith("ed/") && !scene().tabs.containsKey(Integer.parseInt(key.split("/")[1])));
         for (var it = editorWidgets.entrySet().iterator(); it.hasNext(); ) {
             var en = it.next();
             if (!want.contains(en.getKey())) {
@@ -295,11 +297,18 @@ public class ComputerScreen extends ElnScreen {
         label(g, 222, BOTTOM_Y + 6, tr("Address"));
     }
 
+    /** A tab's title, shortened when there are many (the bar must stop short of inventory mods' sort buttons). */
+    String tabTitle(int t, Scene.Tab tab, int count) {
+        String title = tab.title.isEmpty() ? String.valueOf(t) : tab.title;
+        int max = count <= 3 ? 14 : count <= 5 ? 9 : 5;
+        return title.length() > max ? title.substring(0, max - 1) + "." : title;
+    }
+
     /** The tabs, beside the title (inventory mods draw their sort buttons at the top right). */
     void drawTabs(GuiGraphicsExtractor g, Scene s) {
         int x = leftPos + 60;
         for (Map.Entry<Integer, Scene.Tab> en : s.tabs.entrySet()) {
-            String title = en.getValue().title.isEmpty() ? String.valueOf(en.getKey()) : en.getValue().title;
+            String title = tabTitle(en.getKey(), en.getValue(), s.tabs.size());
             int w = font.width(title) + 8;
             boolean on = en.getKey() == tab;
             g.fill(x, topPos + 5, x + w, topPos + 17, on ? 0xFF101418 : 0xFF8B8B8B);
@@ -422,7 +431,7 @@ public class ComputerScreen extends ElnScreen {
         double mx = ev.x(), my = ev.y();
         int x = leftPos + 60;
         for (Map.Entry<Integer, Scene.Tab> en : s.tabs.entrySet()) {
-            String title = en.getValue().title.isEmpty() ? String.valueOf(en.getKey()) : en.getValue().title;
+            String title = tabTitle(en.getKey(), en.getValue(), s.tabs.size());
             int w = font.width(title) + 8;
             if (mx >= x && mx < x + w && my >= topPos + 5 && my < topPos + 17) {
                 if (ev.button() == InputConstants.MOUSE_BUTTON_RIGHT && en.getKey() > 1)

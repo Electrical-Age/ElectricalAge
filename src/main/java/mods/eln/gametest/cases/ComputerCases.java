@@ -231,7 +231,7 @@ public final class ComputerCases {
 
         @Override
         public int ticks() {
-            return 140;
+            return 260;
         }
 
         @Override
@@ -247,19 +247,23 @@ public final class ComputerCases {
                 tick++;
                 ComputerElement e = at(ctx, p);
                 if (e == null) return;
-                if (tick == 50 && !replUp(e)) tick--;   // (wait for the REPL, then cut the power)
-                if (tick == 50) submit(ctx, e, 1, "(def x 99)");
-                if (tick == 60) volts(ctx, source, 0);
-                if (tick == 75) cut = e.status();
-                if (tick == 76) volts(ctx, source, 50);
-                if (tick == 95) submit(ctx, e, 2, "(+ x 1)");
-                if (tick == 125) after = terminal(e);
+                if (upAt < 0 && replUp(e)) {   // (wait for the REPL, then cut the power)
+                    upAt = tick;
+                    submit(ctx, e, 1, "(def x 99)");
+                }
+                if (upAt < 0) return;
+                if (tick == upAt + 10) volts(ctx, source, 0);
+                if (tick == upAt + 25) cut = e.status();
+                if (tick == upAt + 26) volts(ctx, source, 50);
+                if (tick == upAt + 45) submit(ctx, e, 2, "(+ x 1)");
+                if (tick == upAt + 75) after = terminal(e);
             });
         }
 
         @Override
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(watch);
+            ctx.line("computer power: screen " + after.replace("\n", "|"));
             ctx.check("computer power: off while the line is dead", cut == ComputerElement.OFF, "" + cut);
             ctx.check("computer power: goes on where it was (x still 99)", after.contains("> (+ x 1)\n100\n"), after);
         }
