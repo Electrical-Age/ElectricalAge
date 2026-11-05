@@ -62,9 +62,24 @@ public final class ModelShape {
             all.addAll(p);
             if (closed(p)) inside(p, n, solid);
         }
-        surface(all, n, solid);
-        if (close) solid = erode(dilate(solid, n), n);
+        for (List<double[]> p : parts) surface(p, n, solid, centre(p));
+        if (close) solid = closed(solid, n);
         return merge(solid, n);
+    }
+
+    /**
+     * A closing (dilation then erosion by one cell) on the grid padded with a cell of empty space all round, then cropped:
+     * the space outside the block is empty, so a body doesn't spread to the block's top or sides (the first cut counted
+     * outside as solid: a battery collided as a full block, AdventurAgent), while one against a side keeps its outer cells.
+     */
+    static boolean[] closed(boolean[] s, int n) {
+        int m = n + 2;
+        boolean[] p = new boolean[m * m * m];
+        for (int x = 0; x < n; x++) for (int y = 0; y < n; y++) for (int z = 0; z < n; z++) p[((x + 1) * m + y + 1) * m + z + 1] = s[(x * n + y) * n + z];
+        p = erode(dilate(p, m), m);
+        boolean[] o = new boolean[s.length];
+        for (int x = 0; x < n; x++) for (int y = 0; y < n; y++) for (int z = 0; z < n; z++) o[(x * n + y) * n + z] = p[((x + 1) * m + y + 1) * m + z + 1];
+        return o;
     }
 
     /** Is a part closed: every edge (by its ends' positions) shared by an even number of its triangles? */
@@ -113,8 +128,26 @@ public final class ModelShape {
                 }
     }
 
+    /** The centre of a part's bounding box. */
+    static double[] centre(List<double[]> tris) {
+        double[] lo = {9, 9, 9}, hi = {-9, -9, -9};
+        for (double[] t : tris) for (int v = 0; v < 9; v++) {
+            lo[v % 3] = Math.min(lo[v % 3], t[v]);
+            hi[v % 3] = Math.max(hi[v % 3], t[v]);
+        }
+        return new double[]{(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2};
+    }
+
     /** Marks the cells the triangles pass through (see the class comment for those lying on cell faces). */
     static void surface(List<double[]> tris, int n, boolean[] solid) {
+        surface(tris, n, solid, null);
+    }
+
+    /**
+     * The same; a face lying on a grid line fills the cell on the side towards the part's centre c (an open part's wall
+     * filled both sides, so an egg incubator's outline stood a cell out: AdventurAgent), both for a flat part or no c.
+     */
+    static void surface(List<double[]> tris, int n, boolean[] solid, double[] c) {
         double h = 1.0 / n;
         double eps = 1e-6 * h;
         for (double[] t : tris) {
@@ -145,9 +178,13 @@ public final class ModelShape {
                         if (overlaps(t, (x + 0.5) * h, (y + 0.5) * h, (z + 0.5) * h, half)) touched.add((x * n + y) * n + z);
             int step = ax == 0 ? n * n : ax == 1 ? n : 1;
             List<Integer> mark = new ArrayList<>();
+            double plane = t[ax], towards = c == null ? 0 : c[ax] - plane;
             for (int i : touched) {
                 boolean backed = touched.contains(i - step) && solid[i - step] || touched.contains(i + step) && solid[i + step];
-                if (!backed && !solid[i]) mark.add(i);
+                if (backed || solid[i]) continue;
+                int k = ax == 0 ? i / (n * n) : ax == 1 ? (i / n) % n : i % n;
+                double side = (k + 0.5) * h - plane;
+                if (Math.abs(towards) < 1e-6 || side * towards > 0) mark.add(i);
             }
             for (int i : mark) solid[i] = true;
         }
@@ -245,7 +282,7 @@ public final class ModelShape {
         return o;
     }
 
-    /** Erosion in the grid (the block's sides count as solid, so a body against them keeps its outer cells). */
+    /** Erosion in the grid (cells past its edge count as solid; closed() pads the grid so that they are outside the block). */
     static boolean[] erode(boolean[] s, int n) {
         boolean[] o = new boolean[s.length];
         for (int x = 0; x < n; x++)

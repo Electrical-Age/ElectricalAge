@@ -81,6 +81,21 @@ class ModelShapeTest {
     }
 
     @Test
+    void collisionStaysUnderTheTopAndInsideTheSides() {
+        // a body 3/4 high on a full slab: its collision ends at 3/4 (AdventurAgent stood at 16/16 on a battery) and a
+        // body 1/4 in from a side doesn't reach it
+        List<double[]> t = new ArrayList<>(cube(0, 0, 0, 1, 0.25, 1));
+        t.addAll(cube(0.25, 0.25, 0.25, 0.75, 0.75, 0.75));
+        double top = 0, x1 = 0;
+        for (double[] b : ModelShape.collision(t)) {
+            top = Math.max(top, b[4]);
+            if (b[4] > 0.5) x1 = Math.max(x1, b[3]);
+        }
+        assertEquals(0.75, top, 1e-12);
+        assertEquals(0.75, x1, 1e-12);
+    }
+
+    @Test
     void manyBoxesCoarsen() {
         // a staircase of 16 one-voxel steps in z and x: too many boxes at 1/16
         List<double[]> t = new ArrayList<>();

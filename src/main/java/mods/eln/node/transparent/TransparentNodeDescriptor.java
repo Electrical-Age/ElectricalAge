@@ -184,7 +184,7 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         if (!hitboxTried) {
             hitboxTried = true;
             // (a multiblock's model spans its ghost blocks, which have shapes of their own: its block keeps the old one)
-            if (ghostGroup != null) return null;
+            if (ghostGroup != null && ghostGroup.size() > 0) return null;   // (the small solar panel has an empty one)
             List<List<double[]>> parts = hitboxParts();
             ModelHitbox hand = null;
             for (var m : heldModels()) if (hand == null) hand = ModelHitbox.of(m);
