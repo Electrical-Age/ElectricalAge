@@ -191,7 +191,7 @@ public final class ServoCases {
                 o.writeByte(LinearServoDriveElement.setAddressId);
                 o.writeFloat(40);
             }));
-            BlockPos beside = pinCable(ctx, s.head, d.front.right(), -4, mods.eln.node.voxel.CablePart.BUS);
+            BlockPos beside = kitCable(ctx, s.head, d.front.right(), -4, mods.eln.node.voxel.CablePart.BUS);
             pc = new mods.eln.bus.BusPort();
             pc.setAddress(200);
             pc.listen(true);
@@ -397,6 +397,27 @@ public final class ServoCases {
             ctx.check("servo wire: the car stands at half the travel", Math.abs(s.carFloor(ctx) - 3) < 1e-6 && d.status() == LinearServoDriveElement.IN_POSITION,
                 s.carFloor(ctx) + " " + d.status());
         }
+    }
+
+    /**
+     * A cable of tier laid by a kit (as a player would) from the floor two blocks out to the drive's face toward side,
+     * clicked near its floor pin at leftward (voxels left of the middle, seen facing that face): the kit snaps to the
+     * pin (AdventurAgent: it used to end at the middle one). The block beside the drive.
+     */
+    static BlockPos kitCable(TestContext ctx, BlockPos head, mods.eln.misc.Direction side, int leftward, int tier) {
+        var out = side.toEnumFacing();
+        int lx = -out.getStepZ(), lz = out.getStepX();   // (left, seen facing the face from outside)
+        var hit = new Vec3(head.getX() + 0.5 + out.getStepX() * 0.5 + lx * leftward / 16.0, head.getY() + 0.1,
+            head.getZ() + 0.5 + out.getStepZ() * 0.5 + lz * leftward / 16.0);
+        var end = mods.eln.node.voxel.CablePlacer.endAtForTests(ctx.level(), head, out, hit, false, new long[1][], tier);
+        BlockPos far = head.relative(out, 2).below();
+        long[][] join = new long[1][];
+        var start = mods.eln.node.voxel.CablePlacer.endAtForTests(ctx.level(), far, net.minecraft.core.Direction.UP,
+            new Vec3(far.getX() + 0.5, far.getY() + 1, far.getZ() + 0.5), true, join, tier);
+        String err = start == null || end == null ? "no end: " + start + " " + end
+            : mods.eln.node.voxel.CablePlacer.routeAndLayJoinedForTests(ctx.level(), tier, start, join[0], end, null);
+        if (err != null) throw new IllegalStateException("kit cable: " + err);
+        return head.relative(out);
     }
 
     /**

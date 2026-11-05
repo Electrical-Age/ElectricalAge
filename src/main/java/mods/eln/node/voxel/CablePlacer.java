@@ -262,6 +262,22 @@ public final class CablePlacer {
             p[ga] = base[ga] + (edge % 2 == 0 ? 0 : 16);
             int w = 3 - fa - ga;
             p[w] = base[w] + 8;   // (the middle of the edge: the connector's centre, where a terminal plate's lug sits, Baughn)
+            // an edge with several pins (FacePins: the servo drive's flanks): the pin of the kit's kind nearest the click,
+            // a quarter block either side of the middle (AdventurAgent: a bus kit always ended at the middle pin)
+            if (n instanceof mods.eln.node.FacePins fp) {
+                double best = Double.MAX_VALUE;
+                int lw = w == 0 ? -face.getStepZ() : w == 2 ? face.getStepX() : 0;   // (left, seen facing the face from outside)
+                for (var pin : fp.facePins(side)) {
+                    if (side.applyLRDU(pin.lrdu()).toEnumFacing().get3DDataValue() != edge) continue;
+                    if (tier >= 0 && !mods.eln.node.NodeBase.compareConnectionMask(pin.mask(), DevicePlacer.tierMask(tier))) continue;
+                    int at = 8 + pin.leftward() * lw;
+                    double d = Math.abs(at - h[w] * 16);
+                    if (d < best) {
+                        best = d;
+                        p[w] = base[w] + at;
+                    }
+                }
+            }
             return new CableRouter.End(p[0], p[1], p[2], edge, start ? f : CableRouter.reverse(f));
         }
         CableRouter.End snapped = snapToPort(level, pos, face, hx, hy, hz, start, join, tier);
