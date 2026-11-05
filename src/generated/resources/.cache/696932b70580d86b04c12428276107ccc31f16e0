@@ -1,4 +1,4 @@
-// 26.3	2026-11-05T04:45:17.087895217	eln-global/EA models
+// 26.3	2026-11-05T16:51:47.083736888	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -37,6 +37,7 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/capacitor_bank.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/capacity_oriented_battery.json
 f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/computer.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/cost_oriented_battery.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/counterflow_heat_exchanger.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/current_oriented_battery.json
@@ -205,6 +206,7 @@ f560f5eda8ce5d031e9132c276204bb60b71dcd0 assets/eln/items/cinnabar_dust.json
 0b10ab2c3df4347ff01ac48252cef9fcb2483a35 assets/eln/items/coal_dust.json
 95e1215b35afc42a351197cc27f48657dc179d4e assets/eln/items/coal_plate.json
 dcec7d729a81b7afd3021b053bf6d59a56a9f13e assets/eln/items/combustion_chamber.json
+aa353fc25d3f2e30e18685e3e57fdd60416b244d assets/eln/items/computer.json
 1d2ea77488a8b50b8a4ac1993103676e162f29e0 assets/eln/items/configurable_summing_unit.json
 9ca40de6a4baa7074c6045668bff98ef9dfc205d assets/eln/items/copper_cable.json
 b01ecca3f3ec4b91a29e92cd48c43a2203625944 assets/eln/items/copper_coil.json
@@ -254,6 +256,7 @@ f231450e1ec972989bf51336e77fc68029b7f993 assets/eln/items/field_bus_cable.json
 ddc607965cfb890c82537469702f0e1b834bcfe4 assets/eln/items/flare_stack.json
 2a95d3003f54ea1bc6db84d8c4c2ec039bc769c1 assets/eln/items/flat_lamp_socket.json
 185c238d2687fe5deaf088963754726037d77a1b assets/eln/items/floor_sensor.json
+4b5159dbc141ca384069092204f293d46057480f assets/eln/items/floppy_disk.json
 eaeabb81f8f3ce34a04ca742e056c6aa8c581081 assets/eln/items/fluorescent_lamp_socket.json
 063a7a8b175e5e59b2f7890dc4a59d0b3cd0552d assets/eln/items/flywheel.json
 9f20a5510e2d394a6d6d49ee411ed09a1a09f041 assets/eln/items/fractionating_column_base.json
@@ -281,6 +284,7 @@ fd0aa72d3eb5d1bf7b04f632242dd9119a2253ff assets/eln/items/industrial_data_logger
 b7ccc528e7b56155ebfa04c3b65da5f3c2f55163 assets/eln/items/iron_plate.json
 2d91d6dcaea0a879b84c660b6f8470e065211712 assets/eln/items/iron_tank.json
 6355860b214ca3c0facb911d90b1c0cb53b124aa assets/eln/items/item_creative_tab.json
+10a959873574968476c1d9717293091725d73d22 assets/eln/items/janet_rom_chip.json
 22ac598464e4198151e2bdfb0fd34766e3d90ee3 assets/eln/items/jk_flip_flop_chip.json
 f5a23da41bb10218fa75a13c9fcfb768fca462f4 assets/eln/items/joint.json
 ddfd8ed2bdcafbca54e67237e525a57e085c7254 assets/eln/items/joint_hub.json
@@ -370,6 +374,7 @@ bb572d18678811390e465d1b9223a2c06e17e29f assets/eln/items/power_inductor.json
 9a7bd0ce4042310543d384df8d2700dd4cd536d0 assets/eln/items/power_inductor_block.json
 bf068de505375f5f9ec04a78ee5c2a83a7a011cf assets/eln/items/power_resistor.json
 3a1476cc2dba50c9b42511ef68a4cf4aaecd7df6 assets/eln/items/purple_brush.json
+3fd274036114b0913031bb0ec940b2bf225da10b assets/eln/items/ram_chip.json
 b55edeb01df76c93f21f29619f8d26165b99d00c assets/eln/items/raw_lead.json
 1757624c1c4d7bf6ec569ae4203ce86e55daa84e assets/eln/items/raw_tungsten.json
 bae9dca6e3c95a2105471e125019ac19ad43290e assets/eln/items/red_brush.json
@@ -625,6 +630,8 @@ bf73432e1181339472b745af9693c30e46be8c6d assets/eln/models/item/cheap_chip.json
 a9953e6a49c74c057dac9d99d58d72189660a69d assets/eln/models/item/coal_dust.json
 1a3ffec747ee0cb6fefbabbee0ea304386be4ba8 assets/eln/models/item/coal_plate.json
 f16f7b5d2c22adfcaf93131b9f4f2f6466a8a3c1 assets/eln/models/item/combustion_chamber.json
+b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/computer.json
+bda6e369ab0719a6a951d6919f38e4c49467cdda assets/eln/models/item/computer_3d.json
 72abba8490493d1217c47c09117189166e059315 assets/eln/models/item/configurable_summing_unit.json
 6f64b32d806b6b88065d6a746cebd3f504de1c8c assets/eln/models/item/configurable_summing_unit_3d.json
 fb40085ecb61dbf766b2e1c018e194c092a403d2 assets/eln/models/item/copper_cable.json
@@ -694,6 +701,7 @@ e6afb16e4b0ce8dc4b31b2a6c51aae12c13d5bee assets/eln/models/item/energy_meter_3d.
 feb389f761dc6ea894ab26bc00ddd80bc82b5c33 assets/eln/models/item/flat_lamp_socket_3d.json
 262a8acf2d4aa5b9e40cb4fa46241133c0dfc82c assets/eln/models/item/floor_sensor.json
 7979804401bed5e13648c926409b0308c890022b assets/eln/models/item/floor_sensor_3d.json
+b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/floppy_disk.json
 5a5152b14a7f8f8e42ec32d2978e429bf2170496 assets/eln/models/item/fluorescent_lamp_socket.json
 6ac53b24ea215ee00901e1ff5fe39148ff4e4a32 assets/eln/models/item/fluorescent_lamp_socket_3d.json
 63c0c6cc448a474bd2d053f47794a8a6d5c27988 assets/eln/models/item/flywheel.json
@@ -731,6 +739,7 @@ b5949fe001bb7915d5c219a56ec8a8aa59abd64a assets/eln/models/item/iron_dust.json
 6ee852843c5ce8c9b8ee81b3593e09311b85c931 assets/eln/models/item/iron_plate.json
 dd1f8509979e613f461e441306a3dd80acfd43d3 assets/eln/models/item/iron_tank.json
 8c73426f3430842b5c382fd4e2b88340bfb87d28 assets/eln/models/item/item_creative_tab.json
+b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/janet_rom_chip.json
 cbea44e4b7bd2d1574780c49e7921f3b9dcfa444 assets/eln/models/item/jk_flip_flop_chip.json
 36bcebe9fefb0162bccbdf26fb48897dbfe4f164 assets/eln/models/item/jk_flip_flop_chip_3d.json
 4aba3864b20757addf3ed6274a891e25b7bd5163 assets/eln/models/item/joint.json
@@ -855,6 +864,7 @@ c584a778d4d7dd7e8ab18175e81630ed884060c3 assets/eln/models/item/portable_electri
 4fafcb0c1d0860c264fd81adea6645e0f828f815 assets/eln/models/item/power_resistor.json
 ab73c04b31e34c1972906b95e3757e8d30d947d1 assets/eln/models/item/power_resistor_3d.json
 abf755dac3070db29b726f36643ea6abf1b54a77 assets/eln/models/item/purple_brush.json
+b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/ram_chip.json
 9ff7a48979d0ffbb4cf0c12db3760518b492c528 assets/eln/models/item/raw_lead.json
 be4f1cab9ac17f083d360b956d4cd60acd2c42a7 assets/eln/models/item/raw_tungsten.json
 0a113881abc061d241fb12ea6cb381ff3b9523c3 assets/eln/models/item/red_brush.json

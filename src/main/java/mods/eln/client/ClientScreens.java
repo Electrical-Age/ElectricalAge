@@ -81,6 +81,7 @@ final class ClientScreens {
         reg(mods.eln.sixnode.busdevice.AddressableLightDescriptor.class, mods.eln.sixnode.busdevice.BusAddressScreen::new);
         reg(mods.eln.sixnode.busdevice.FloorSensorDescriptor.class, mods.eln.sixnode.busdevice.BusAddressScreen::new);
         reg(mods.eln.robotics.servo.LinearServoDriveDescriptor.class, mods.eln.robotics.servo.LinearServoDriveScreen::new);
+        reg(mods.eln.robotics.computer.ComputerDescriptor.class, mods.eln.robotics.computer.ComputerScreen::new);
         reg(mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor.class, mods.eln.sixnode.electricalalarm.ElectricalAlarmScreen::new);
         reg(mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor.class, mods.eln.sixnode.electricalrelay.ElectricalRelayScreen::new);
         reg(mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor.class, mods.eln.sixnode.electricalgatesource.ElectricalGateSourceScreen::new);

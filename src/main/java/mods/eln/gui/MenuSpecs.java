@@ -144,6 +144,20 @@ public final class MenuSpecs {
             SlotSpec.filter(mods.eln.anvil.ElectricalAnvilElement.TOOL, 28, 25, 1, s -> s.isDamageableItem() || s.getMaxStackSize() == 1, BIG, tr("Tool")),
             SlotSpec.filter(mods.eln.anvil.ElectricalAnvilElement.MATERIAL, 86, 25, 64, mods.eln.anvil.ElectricalAnvilElement::materialMayGo, MEDIUM,
                 tr("Repair material"))).publishing(1).inventoryAt(150));
+        // the robotics computer (Baughn 2026-11-05): 8 chip slots of 1 MB under its terminal, then floppy drives A and B
+        put(mods.eln.robotics.computer.ComputerDescriptor.class, d -> {
+            java.util.List<SlotSpec> slots = new java.util.ArrayList<>();
+            int y = mods.eln.robotics.computer.ComputerScreen.SLOTS_Y;
+            for (int k = 0; k < mods.eln.robotics.computer.ComputerElement.CHIP_SLOTS; k++)
+                slots.add(SlotSpec.filter(k, 9 + 18 * k, y, 1, mods.eln.robotics.computer.ComputerElement::chipMayGo, MEDIUM,
+                    k == 0 ? tr("Chip slot 1: the computer starts here (a ROM)") : tr("Chip slot %1$: RAM or ROM", k + 1)));
+            for (int k = 0; k < 2; k++)
+                slots.add(SlotSpec.filter(mods.eln.robotics.computer.ComputerElement.DRIVE_A + k, 9 + 18 * 8 + 14 + 18 * k, y, 1,
+                    mods.eln.robotics.computer.ComputerElement::floppyMayGo, MEDIUM, k == 0 ? tr("Drive A") : tr("Drive B")));
+            return MenuSpec.of(slots.toArray(new SlotSpec[0])).panel(mods.eln.robotics.computer.ComputerScreen.WIDTH,
+                mods.eln.robotics.computer.ComputerScreen.HEIGHT, mods.eln.robotics.computer.ComputerScreen.INV_X,
+                mods.eln.robotics.computer.ComputerScreen.INV_Y);
+        });
         put(mods.eln.oil.SteamOvenDescriptor.class, d -> MenuSpec.of(
             SlotSpec.output(mods.eln.oil.SteamOvenElement.outSlotId, 86, 25, BIG),
             SlotSpec.smeltable(mods.eln.oil.SteamOvenElement.inSlotId, 28, 25, MEDIUM, tr("Input"))).publishing(1).inventoryAt(122));

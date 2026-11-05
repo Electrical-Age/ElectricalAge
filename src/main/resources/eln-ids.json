@@ -2134,5 +2134,11 @@
   "display": "Linear Servo Drive",
   "kind": "transparent_node",
   "name": "linear_servo_drive"
+ },
+ "eln:transparent_node@5568": {
+  "descriptor": "ComputerDescriptor",
+  "display": "Computer",
+  "kind": "transparent_node",
+  "name": "computer"
  }
 }

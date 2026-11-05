@@ -17,6 +17,7 @@ columnsegment/columnsegment.obj
 compactturbine50v/compactturbine50v.obj
 compressora/compressora.obj
 compressorb/compressorb.obj
+computer/computer.obj
 condenser200v/condenser200v.obj
 condenser50v/condenser50v.obj
 dataloggercrtfloor/dataloggercrtfloor.obj

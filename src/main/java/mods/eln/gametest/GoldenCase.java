@@ -118,6 +118,7 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5304",   // the counterflow heat exchanger (Baughn 2026-10-29)
         "eln:transparent_node@5200",   // the steam injection wellhead (oil lakes, todo #138; Baughn 2026-10-30)
         "eln:transparent_node@5504",   // the Linear Servo Drive (the servo layer, Baughn 2026-11-02)
+        "eln:transparent_node@5568",   // the computer (robotics phase 3, Baughn 2026-11-05)
         "eln:ore@7");   // Deepslate Lead Ore: lead in deepslate's middle (Baughn 2026-10-20)
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
     static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator",
@@ -127,6 +128,7 @@ final class GoldenCase implements TestCase {
         "Three-Channel Data Logger", "Tilted Terminal Logger",   // (Baughn 2026-10-30, board #45)
         "Bus I/O Module",   // (the field bus)
         "Addressable Button", "Addressable Light", "Floor Sensor", "Linear Servo Drive",   // (their address screen)
+        "Computer",   // (its terminal, chips and drives)
         "Steam Turbine", "LP Steam Turbine");   // (the shaft ones' controls, as the 50V/200V's: Baughn 2026-10-29)
 
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
