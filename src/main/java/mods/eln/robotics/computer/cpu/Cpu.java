@@ -53,6 +53,11 @@ public final class Cpu {
         return waiting;
     }
 
+    /** An enabled interrupt is pending: WFI would end now. */
+    public boolean wakeable() {
+        return (mip & mie) != 0;
+    }
+
     public long instret() {
         return instret;
     }
@@ -398,5 +403,46 @@ public final class Cpu {
         mem.store32(a, v);
         if (reservation == a) reservation = -1;
         x[rd] = old;
+    }
+
+    /** The hart's whole state (not memory), for saving. */
+    public void save(java.io.DataOutput o) throws java.io.IOException {
+        for (int v : x) o.writeInt(v);
+        for (long v : f) o.writeLong(v);
+        o.writeInt(pc);
+        o.writeInt(mstatus);
+        o.writeInt(mie);
+        o.writeInt(mtvec);
+        o.writeInt(mepc);
+        o.writeInt(mcause);
+        o.writeInt(mtval);
+        o.writeInt(mscratch);
+        o.writeInt(fflags);
+        o.writeInt(frm);
+        o.writeLong(cycle);
+        o.writeLong(instret);
+        o.writeBoolean(waiting);
+        o.writeInt(reservation);
+    }
+
+    /** Back to a state save() wrote; mip is left to the devices. */
+    public void load(java.io.DataInput in) throws java.io.IOException {
+        for (int i = 0; i < 32; i++) x[i] = in.readInt();
+        for (int i = 0; i < 32; i++) f[i] = in.readLong();
+        x[0] = 0;
+        pc = in.readInt();
+        mstatus = in.readInt() & (MSTATUS_MIE | MSTATUS_MPIE | MSTATUS_FS) | MSTATUS_MPP;
+        mie = in.readInt() & (1 << IRQ_SOFT | 1 << IRQ_TIMER | 1 << IRQ_EXTERNAL);
+        mtvec = in.readInt();
+        mepc = in.readInt();
+        mcause = in.readInt();
+        mtval = in.readInt();
+        mscratch = in.readInt();
+        fflags = in.readInt() & 0x1F;
+        frm = in.readInt() & 7;
+        cycle = in.readLong();
+        instret = in.readLong();
+        waiting = in.readBoolean();
+        reservation = in.readInt();
     }
 }
