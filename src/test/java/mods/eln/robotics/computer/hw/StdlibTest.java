@@ -251,4 +251,39 @@ class StdlibTest {
         tick(3, null);
         assertNull(screen.scene.tabs.get(2), "closed");
     }
+
+    @Test
+    void editorTabsSaveHunksAndRefuseStaleRevisions() {
+        m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), null, false));
+        type("(do (disk/format :a) (spit \"a:/t.janet\" \"one\\ntwo\\nthree\") (edit \"a:/t.janet\"))");
+        tick(60, "\n2\n> ");
+        var ed = screen.scene.tabs.get(2).elements.get(4);
+        assertEquals("editor", ed.kind);
+        assertEquals("one\ntwo\nthree", ed.msg.get(10));
+        String rev = (String) ed.msg.get(9);
+        // the client replaced line 1 ("two") with two lines
+        m.editor.give(("(save 2 4 7 \"" + rev + "\" [[1 1 [\"TWO\" \"2b\"]]])\n").getBytes(StandardCharsets.UTF_8));
+        String newRev = null;
+        for (int t = 0; t < 20 && newRev == null; t++) {
+            byte[] d = m.editor.take();
+            String text = new String(d, StandardCharsets.UTF_8);
+            screen.feed(d, m.terminal.take());
+            int k = text.indexOf("(saved 2 4 7 ");
+            if (k >= 0) newRev = text.substring(k + 13, text.indexOf(")", k));
+            m.tick();
+            m.run(1_000_000);
+        }
+        assertNotNull(newRev, "saved");
+        type("(slurp \"a:/t.janet\")");
+        tick(10, "@\"one\\nTWO\\n2b\\nthree\"\n> ");
+        // a save against the old revision is refused, with the file as it is now
+        m.editor.give(("(save 2 4 8 \"" + rev + "\" [[0 1 []]])\n").getBytes(StandardCharsets.UTF_8));
+        boolean conflict = false;
+        for (int t = 0; t < 20 && !conflict; t++) {
+            m.tick();
+            m.run(1_000_000);
+            conflict = new String(m.editor.take(), StandardCharsets.UTF_8).contains("(conflict 2 4 8 ");
+        }
+        assertTrue(conflict);
+    }
 }

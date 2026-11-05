@@ -47,6 +47,15 @@ public class ComputerScreen extends ElnScreen {
     static long seq;
     String hint = "";
 
+    /** An editor element's state on this client: the revision and text it was opened at, the text now, a save. */
+    static final class EditorState {
+        String baseRev, baseText = "", text = "", savingText, status = "";
+        long savingSeq;
+    }
+
+    final Map<String, mods.eln.client.gui.CodeEditor> editorWidgets = new HashMap<>();
+    static final JanetLanguage JANET = new JanetLanguage();
+
     static final class LineEdit {
         final StringBuilder text = new StringBuilder();
         int cursor;
@@ -77,6 +86,112 @@ public class ComputerScreen extends ElnScreen {
             render.clientSendFloat(ComputerElement.SET_ADDRESS_ID, Float.isNaN(f) ? 0 : Math.round(f));
         }, tr("Its RS485 address, 17 to 255: the source of the packets it sends."));
         Minecraft.getInstance().onTextInputFocusChange(this, true);
+    }
+
+    EditorState editorState(int t, int id) {
+        return (EditorState) render.screenState.computeIfAbsent("ed/" + t + "/" + id, k -> new EditorState());
+    }
+
+    /** The current tab's editor elements as code editor widgets (made, moved, removed to match the scene). */
+    void syncEditors() {
+        Scene.Tab t = currentTab();
+        java.util.Set<String> want = new java.util.HashSet<>();
+        if (t != null)
+            for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
+                Scene.Element e = en.getValue();
+                if (!e.kind.equals("editor")) continue;
+                String k = tab + "/" + en.getKey();
+                want.add(k);
+                List<Object> m = e.msg;
+                EditorState st = editorState(tab, en.getKey());
+                String rev = Form.str(m, 9, ""), text = Form.str(m, 10, "");
+                boolean replaced = false;
+                if (!rev.equals(st.baseRev)) {
+                    boolean clean = st.baseRev == null || st.text.equals(st.baseText);
+                    st.baseRev = rev;
+                    st.baseText = text;
+                    if (clean) {
+                        st.text = text;
+                        replaced = true;
+                    }
+                }
+                var w = editorWidgets.get(k);
+                if (w == null) {
+                    int ex = (int) Form.num(m, 3, 0), ey = (int) Form.num(m, 4, 0), ew = (int) Form.num(m, 5, 10), eh = (int) Form.num(m, 6, 5);
+                    boolean janet = "janet".equals(Form.kwName(m, 7, ""));
+                    w = new mods.eln.client.gui.CodeEditor(cx(ex), cy(ey), ew * CELL, eh * LINE, st.text, 32768,
+                        janet ? JANET : PLAIN, s2 -> {
+                            st.text = s2;
+                            st.status = "";
+                        });
+                    editorWidgets.put(k, addRenderableWidget(w));
+                } else if (replaced && !w.buffer.text().equals(st.text)) w.buffer.setText(st.text);
+            }
+        for (var it = editorWidgets.entrySet().iterator(); it.hasNext(); ) {
+            var en = it.next();
+            if (!want.contains(en.getKey())) {
+                removeWidget(en.getValue());
+                it.remove();
+            }
+        }
+    }
+
+    /** Plain text (no colours, no checks). */
+    static final mods.eln.gui.code.LanguageAdapter PLAIN = new mods.eln.gui.code.LanguageAdapter() {
+        @Override
+        public List<List<Token>> tokenize(String text) {
+            List<List<Token>> out = new ArrayList<>();
+            for (String l : text.split("\n", -1)) out.add(List.of());
+            return out;
+        }
+
+        @Override
+        public List<Diagnostic> validate(String text) {
+            return List.of();
+        }
+    };
+
+    @Override
+    protected void containerTick() {
+        super.containerTick();
+        syncEditors();
+        for (List<Object> m; (m = render.replies.poll()) != null; ) {
+            int t = (int) Form.num(m, 1, -1), id = (int) Form.num(m, 2, -1);
+            EditorState st = editorState(t, id);
+            if (Form.num(m, 3, -1) != st.savingSeq) continue;
+            if (Form.verb(m).equals("saved")) {
+                st.baseRev = Form.str(m, 4, "");
+                st.baseText = st.savingText;
+                st.status = tr("Saved");
+            } else {   // conflict: keep the player's text; a second save overwrites (Argon's review)
+                st.baseRev = Form.str(m, 4, "");
+                st.baseText = Form.str(m, 5, "");
+                st.status = tr("Changed on the disk meanwhile: Ctrl+S again overwrites it");
+            }
+        }
+    }
+
+    /** Ctrl+S in an editor: its changes as hunks against the revision it was opened (or last saved) at. */
+    void save(String key) {
+        String[] tid = key.split("/");
+        int t = Integer.parseInt(tid[0]), id = Integer.parseInt(tid[1]);
+        EditorState st = editorState(t, id);
+        st.savingSeq = ++seq;
+        st.savingText = st.text;
+        st.status = tr("Saving...");
+        render.screenEvent(new Form.Symbol("save"), (long) t, (long) id, st.savingSeq, st.baseRev == null ? "" : st.baseRev,
+            hunks(st.baseText, st.text));
+    }
+
+    /** One hunk covering what changed between the common first and last lines (none if nothing did). */
+    static List<Object> hunks(String base, String now) {
+        String[] a = base.split("\n", -1), b = now.split("\n", -1);
+        int p = 0;
+        while (p < a.length && p < b.length && a[p].equals(b[p])) p++;
+        if (p == a.length && p == b.length) return List.of();
+        int q = 0;
+        while (q < a.length - p && q < b.length - p && a[a.length - 1 - q].equals(b[b.length - 1 - q])) q++;
+        return List.of(List.of((long) p, (long) (a.length - p - q), List.of(java.util.Arrays.copyOfRange(b, p, b.length - q))));
     }
 
     @Override
@@ -224,7 +339,15 @@ public class ComputerScreen extends ElnScreen {
                 for (int r = 0; r < h && off + r < items.size(); r++)
                     cells(g, String.valueOf(items.get(off + r)), x, y + r, w, 0xFFD0D0D0);
             }
-            default -> cells(g, "[" + e.kind + "]", x, y, 20, 0xFF707070);   // (editors and raw areas come next)
+            case "editor" -> {
+                EditorState st = editorState(tab, id);
+                if (!st.status.isEmpty()) {
+                    int ey = y + (int) Form.num(m, 6, 1) - 1, ew = (int) Form.num(m, 5, 1);
+                    g.fill(cx(x), cy(ey), cx(x + ew), cy(ey + 1), 0xFF2A2E38);
+                    cells(g, st.status, x, ey, ew, 0xFFE0C060);
+                }
+            }
+            default -> cells(g, "[" + e.kind + "]", x, y, 20, 0xFF707070);   // (raw areas come next)
         }
     }
 
@@ -309,6 +432,7 @@ public class ComputerScreen extends ElnScreen {
                     tab = en.getKey();
                     chose = true;
                     focusId = -1;
+                    syncEditors();
                 }
                 return true;
             }
@@ -366,6 +490,8 @@ public class ComputerScreen extends ElnScreen {
 
     @Override
     public boolean charTyped(CharacterEvent event) {
+        String ed = focusedEditor();
+        if (ed != null) return editorWidgets.get(ed).charTyped(event);
         Scene.Tab t = currentTab();
         Scene.Element line = focusedLine(t);
         if (line == null || !event.isAllowedChatCharacter() || fieldHasKeys()) return super.charTyped(event);
@@ -379,9 +505,20 @@ public class ComputerScreen extends ElnScreen {
         return true;
     }
 
+    String focusedEditor() {
+        for (var en : editorWidgets.entrySet()) if (en.getValue().isFocused()) return en.getKey();
+        return null;
+    }
+
     @Override
     public boolean keyPressed(KeyEvent ev) {
         if (fieldHasKeys()) return super.keyPressed(ev);
+        String ed = focusedEditor();
+        if (ed != null && ev.key() != InputConstants.KEY_ESCAPE) {
+            if (ev.key() == InputConstants.KEY_S && ev.hasControlDownWithQuirk()) save(ed);
+            else editorWidgets.get(ed).keyPressed(ev);
+            return true;
+        }
         Scene.Tab t = currentTab();
         Scene.Element line = focusedLine(t);
         int k = ev.key();

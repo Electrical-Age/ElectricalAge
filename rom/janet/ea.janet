@@ -218,6 +218,7 @@
       'submit (when (and f (string? (get m 4))) (spawn f (m 4) (get m 3 0)))
       'press (when f (spawn f))
       'select (when (and f (number? (get m 3))) (spawn f (m 3)))
+      'save (when (and f (string? (get m 4)) (indexed? (get m 5))) (spawn f (get m 3 0) (m 4) (m 5)))
       nil))
   (when (and (tuple? m) (> (length m) 1) (number? (m 1)))
     (case (m 0)
@@ -469,6 +470,7 @@
     (def open (parser/state p :delimiters))
     (ui/line t 2 0 (- ui/height 1) ui/width (if (empty? open) "> " (string open "> ")) on-submit)
     (ui/busy t 2 seq false)
+    (ui/dict t (ea/names env))   # the REPL's own definitions, for completion
     (set taken false)
     (put system (fiber/current) nil))
   (ui/dict 0 (core-names))
@@ -491,16 +493,25 @@
       (error (string path ":" (get thunk :line "?") ": " (get thunk :error)))))
   (when (= :error (parser/status p)) (error (string path ": " (parser/error p)))))
 
+(defn proc/new-tab
+  "A tab for a process of its own, empty (proc/start puts a log in it): returns its number. The process's environment
+  is ((proc/env t))."
+  [name]
+  (var t 2)
+  (while (or (get procs t) (= t 1)) (++ t))
+  (when (> t 255) (error "too many processes"))
+  (put procs t @{:name name :env (make-env root-env-of-os) :tab t})
+  (ui/tab t name)
+  t)
+
+(defn proc/env "The environment of the process in tab t." [t] (get-in procs [t :env]))
+
 (defn proc/start
   "Start a process: (f ;args) as its first task, in an environment of its own, with a tab of its own (a log over the
   whole tab) where what it prints goes. Returns its tab. Break on that tab stops its tasks; closing the tab ends it."
   [name f & args]
-  (var t 2)
-  (while (or (get procs t) (= t 1)) (++ t))
-  (when (> t 255) (error "too many processes"))
-  (def env (make-env root-env-of-os))
-  (put procs t @{:name name :env env :tab t})
-  (ui/tab t name)
+  (def t (proc/new-tab name))
+  (def env ((get procs t) :env))
   (ui/log t 1 0 0 ui/width ui/height)
   (ui/output env t 1)
   (spawn-in env f ;args)
@@ -516,6 +527,68 @@
   (var found nil)
   (eachp [t p] procs (when (env-of? (fiber/current) (p :env)) (set found t)))
   found)
+
+# ---- editing files: an editor tab (the editor runs on the player's client; a save sends hunks against a revision)
+
+(defn- apply-hunks
+  "Apply hunks [start deleted [lines...]] to text: line numbers of the text they were made against (0-based), top to
+  bottom; each replaces deleted whole lines with its lines. Out of order or out of range: an error."
+  [text hunks]
+  (def lines (string/split "\n" text))
+  (def out @[])
+  (var at 0)
+  (each h hunks
+    (def [start del ins] h)
+    (unless (and (number? start) (number? del) (indexed? ins) (<= at start) (>= del 0) (<= (+ start del) (length lines)))
+      (error "a hunk out of range"))
+    (array/concat out (array/slice lines at start))
+    (each l ins (array/push out (string l)))
+    (set at (+ start del)))
+  (array/concat out (array/slice lines at))
+  (string/join out "\n"))
+
+(defn edit
+  "Open a file in an editor tab (a new file if there is none). The player edits it on their own client; Ctrl+S saves
+  (refused once if the file changed on the disk meanwhile), Run runs the saved file as a process, Close closes."
+  [path]
+  (def text (if (disk/exists? path) (string (slurp path)) ""))
+  (when (> (length text) 32768) (error (string path " is too big to edit (32 KB at most)")))
+  (def t (proc/new-tab (last (string/split "/" path))))
+  (var rev (revision text))
+  (ui/text t 1 0 0 :light-gray (string path " (Ctrl+S saves)"))
+  (ui/button t 2 (- ui/width 13) 0 6 "Run" (fn [] (proc/start (last (string/split "/" path)) run-file path)))
+  (ui/button t 3 (- ui/width 6) 0 6 "Close" (fn [] (proc/close t)))
+  (put ui-handlers [t 4]
+       (fn [seq base hunks]
+         (try
+           (do
+             (def now (if (disk/exists? path) (string (slurp path)) ""))
+             (if (not= base (revision now))
+               (ui/send 'conflict t 4 seq (revision now) now)
+               (do
+                 (def new (apply-hunks now hunks))
+                 (spit path new)
+                 (set rev (revision new))
+                 (ui/send 'saved t 4 seq rev))))
+           ([err] (ui/text t 1 0 0 :red (string path ": " err))))))
+  (ui/send 'editor t 4 0 1 ui/width (- ui/height 1) :janet path rev text)
+  t)
+
+(defn files
+  "A tab listing a floppy's files (default A:/): pick one to edit it, or a directory to go into it."
+  [&opt dir]
+  (default dir "A:/")
+  (def t (proc/new-tab (string "files " dir)))
+  (defn show [dir]
+    (def names (try (disk/list dir) ([e] @[(string e)])))
+    (ui/text t 1 0 0 :light-gray (string dir "  (" (length names) ")"))
+    (ui/list t 2 0 1 ui/width (- ui/height 1) names
+             (fn [i]
+               (def n (get names i))
+               (when n
+                 (if (string/has-suffix? "/" n) (show (string dir n)) (edit (string dir n)))))))
+  (show dir)
+  t)
 
 (defn- autorun [env]
   (each p ["A:/startup.janet" "B:/startup.janet" "A:/main.janet" "B:/main.janet"]

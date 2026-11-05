@@ -292,15 +292,14 @@ public class ComputerElement extends TransparentNodeElement {
     }
 
     /** A player's screen event: checked, counted, and passed on to the computer (Break is the host's). */
-    /** -Deln.computer.trace=true: log how long each screen event takes to answer (latency checks). */
-    static final boolean TRACE = Boolean.getBoolean("eln.computer.trace");
+    /** How long each screen event takes to answer, at debug level (debug.log): latency checks. */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("eln.computer");
     long tracedAt;
 
     void screenEvent(ServerPlayer player, String line) {
-        if (TRACE) {
+        if (LOG.isDebugEnabled()) {
             tracedAt = System.nanoTime();
-            LOG.info("screen event {} (runner {})", line.length() > 60 ? line.substring(0, 60) : line, runner == null ? "none" : runner.running() ? "running" : "idle");
+            LOG.debug("screen event {} (runner {})", line.length() > 60 ? line.substring(0, 60) : line, runner == null ? "none" : runner.running() ? "running" : "idle");
         }
         if (runner == null) return;
         if (player != null && eventsThisTick.merge(player.getUUID(), 1, Integer::sum) > EVENTS_PER_TICK) return;
@@ -316,8 +315,8 @@ public class ComputerElement extends TransparentNodeElement {
         if (r != runner || !r.collectScreen()) return;
         screen.console(r.takeTerminal());
         screen.fromComputer(r.takeEditor());
-        if (TRACE && tracedAt != 0) {
-            LOG.info("screen flushed {} ms after the event", (System.nanoTime() - tracedAt) / 1e6);
+        if (tracedAt != 0 && LOG.isDebugEnabled()) {
+            LOG.debug("screen flushed {} ms after the event", (System.nanoTime() - tracedAt) / 1e6);
             tracedAt = 0;
         }
         watch();

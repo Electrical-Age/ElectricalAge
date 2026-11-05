@@ -20,6 +20,8 @@ public class ComputerRender extends TransparentNodeElementRender {
     public final Scene scene = new Scene();
     /** The screen's own state that outlives one opening of it (each line's half-typed text and history). */
     public final java.util.Map<String, Object> screenState = new java.util.HashMap<>();
+    /** Replies to editors' saves, for the screen to take. */
+    public final java.util.ArrayDeque<java.util.List<Object>> replies = new java.util.ArrayDeque<>();
     /** Bumped when the scene changes, so the screen can see it. */
     public int sceneVersion;
 
@@ -75,7 +77,12 @@ public class ComputerRender extends TransparentNodeElementRender {
             stream.readFully(b);
             for (String line : new String(b, StandardCharsets.UTF_8).split("\n")) {
                 var m = Form.parse(line);
-                if (m != null) scene.apply(m);
+                if (m == null || !scene.apply(m)) continue;
+                String v = Form.verb(m);
+                if (v.equals("saved") || v.equals("conflict")) {   // (for the screen's editors)
+                    replies.add(m);
+                    while (replies.size() > 16) replies.poll();
+                }
             }
             sceneVersion++;
         } catch (IOException e) {
