@@ -15,9 +15,11 @@ public class ComputerRender extends TransparentNodeElementRender {
     final ComputerDescriptor desc;
     public byte status;
     public int address;
-    public boolean onBus;
+    public boolean onBus, switchedOn = true;
     /** The screen as the server sent it; the screen class draws it and keeps what is only this player's (edits). */
     public final Scene scene = new Scene();
+    /** The screen's own state that outlives one opening of it (each line's half-typed text and history). */
+    public final java.util.Map<String, Object> screenState = new java.util.HashMap<>();
     /** Bumped when the scene changes, so the screen can see it. */
     public int sceneVersion;
 
@@ -39,6 +41,7 @@ public class ComputerRender extends TransparentNodeElementRender {
             status = stream.readByte();
             address = stream.readByte() & 0xFF;
             onBus = stream.readBoolean();
+            switchedOn = stream.readBoolean();
         } catch (IOException e) {
             e.printStackTrace();
         }

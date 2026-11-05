@@ -51,7 +51,7 @@ public class ComputerElement extends TransparentNodeElement {
     /** Its state, for the lamp, the screen and Jade. */
     public static final byte OFF = 0, RUNNING = 1, SLEEPING = 2, HALTED = 3, NO_CHIPS = 4;
     /** Screen packets: reset, its address, Break, a screen protocol event (one line). */
-    public static final byte RESET_ID = 2, SET_ADDRESS_ID = 3, BREAK_ID = 4, SCREEN_EVENT_ID = 7;
+    public static final byte RESET_ID = 2, SET_ADDRESS_ID = 3, BREAK_ID = 4, SCREEN_EVENT_ID = 7, POWER_ID = 8;
     /** Server-to-screen packets: protocol lines to apply. */
     public static final byte SCREEN_ID = 4;
     /** Events a player may send a tick (Argon's review: clients are untrusted). */
@@ -70,6 +70,8 @@ public class ComputerElement extends TransparentNodeElement {
     final java.util.Set<UUID> watchers = new java.util.HashSet<>();
     final Map<UUID, Integer> eventsThisTick = new java.util.HashMap<>();
     int seenResets = -1;
+    /** Its power switch (Baughn: power on/off beside Reset). Off: it stops and its RAM is lost; on: a cold boot. */
+    boolean switchedOn = true;
     final UUID[] mountedDisk = new UUID[2];
     final Floppy[] floppies = new Floppy[2];
     final double[] levels = new double[BusChannel.COUNT];
@@ -206,7 +208,7 @@ public class ComputerElement extends TransparentNodeElement {
             setStatus(chipsNow().replace("-,", "").isEmpty() ? NO_CHIPS : OFF);
             return;
         }
-        boolean powered = machine.state() == MachineState.RUNNING;
+        boolean powered = switchedOn && machine.state() == MachineState.RUNNING;
         List<Packet> in = new ArrayList<>();
         for (Packet k; (k = port.poll()) != null; ) in.add(k);
         if (!in.isEmpty()) runner.deliver(in);
@@ -290,7 +292,16 @@ public class ComputerElement extends TransparentNodeElement {
     }
 
     /** A player's screen event: checked, counted, and passed on to the computer (Break is the host's). */
+    /** -Deln.computer.trace=true: log how long each screen event takes to answer (latency checks). */
+    static final boolean TRACE = Boolean.getBoolean("eln.computer.trace");
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("eln.computer");
+    long tracedAt;
+
     void screenEvent(ServerPlayer player, String line) {
+        if (TRACE) {
+            tracedAt = System.nanoTime();
+            LOG.info("screen event {} (runner {})", line.length() > 60 ? line.substring(0, 60) : line, runner == null ? "none" : runner.running() ? "running" : "idle");
+        }
         if (runner == null) return;
         if (player != null && eventsThisTick.merge(player.getUUID(), 1, Integer::sum) > EVENTS_PER_TICK) return;
         String ok = screen.check(line);
@@ -305,6 +316,10 @@ public class ComputerElement extends TransparentNodeElement {
         if (r != runner || !r.collectScreen()) return;
         screen.console(r.takeTerminal());
         screen.fromComputer(r.takeEditor());
+        if (TRACE && tracedAt != 0) {
+            LOG.info("screen flushed {} ms after the event", (System.nanoTime() - tracedAt) / 1e6);
+            tracedAt = 0;
+        }
         watch();
     }
 
@@ -351,6 +366,15 @@ public class ComputerElement extends TransparentNodeElement {
         try {
             switch (id) {
                 case SCREEN_EVENT_ID -> screenEvent(player, stream.readUTF());
+                case POWER_ID -> {
+                    switchedOn = !switchedOn;
+                    if (switchedOn) rebuild();   // (a cold boot: the RAM lost what it held while off)
+                    else if (runner != null) {
+                        runner.awaitIdle();
+                        screen.reset();
+                    }
+                    needPublish();
+                }
                 case RESET_ID -> {
                     if (runner != null) {
                         runner.awaitIdle();
@@ -420,6 +444,7 @@ public class ComputerElement extends TransparentNodeElement {
             stream.writeByte(status);
             stream.writeByte(port.address());
             stream.writeBoolean(port.bus() != null);
+            stream.writeBoolean(switchedOn);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -429,6 +454,7 @@ public class ComputerElement extends TransparentNodeElement {
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putString("cid", id.toString());
+        if (!switchedOn) nbt.putBoolean("off", true);
         if (port.address() != 0) nbt.putInt("addr", port.address());
         MinecraftServer s = server();
         if (runner != null && s != null && !loadPending) {
@@ -448,6 +474,7 @@ public class ComputerElement extends TransparentNodeElement {
             id = UUID.randomUUID();
         }
         port.setAddress(nbt.getIntOr("addr", 0));
+        switchedOn = !nbt.getBooleanOr("off", false);
         loadPending = true;
     }
 

@@ -25,8 +25,8 @@ import static mods.eln.i18n.I18N.tr;
  * The computer's screen: this client's copy of its scene (ComputerRender.scene), drawn in character cells (Baughn:
  * the client draws everything, the prompt included, so typing never waits for the network). Tabs sit beside the title
  * and switch here, without asking the computer. Lines are edited here, with history and completion from the names the
- * computer sent; Enter sends the line and shows it greyed until the computer has taken it. Logs and lists scroll here.
- * Under it: Reset, Break, its state and address, the chip slots and drives.
+ * computer sent; Enter sends the line and shows it greyed until the computer has taken it; Ctrl+C is Break for the tab
+ * (Baughn). Logs and lists scroll here. Under it: Reset, its state and address, the chip slots and drives.
  */
 public class ComputerScreen extends ElnScreen {
     public static final int WIDTH = 330, HEIGHT = 346, CELL = 6, LINE = 10;
@@ -39,8 +39,10 @@ public class ComputerScreen extends ElnScreen {
     /** The tab shown, and the element with the keyboard. */
     int tab = -1, focusId = -1;
     int seenFocus = -1;
+    /** The player picked the tab shown (the Console tab is only the default while there is no REPL). */
+    boolean chose;
     /** What only this player has: each line's edit, each log's and list's scroll. */
-    final Map<String, LineEdit> edits = new HashMap<>();
+    final Map<String, LineEdit> edits;
     final Map<String, Integer> scrolls = new HashMap<>();
     static long seq;
     String hint = "";
@@ -58,6 +60,8 @@ public class ComputerScreen extends ElnScreen {
     public ComputerScreen(ElnNodeMenu menu, Inventory inventory, Component title, Object render) {
         super(menu, inventory, title, WIDTH, HEIGHT);
         this.render = (ComputerRender) render;
+        @SuppressWarnings("unchecked") Map<String, LineEdit> e = (Map<String, LineEdit>) (Map<?, ?>) this.render.screenState;
+        edits = e;   // (kept in the render: a half-typed line survives closing the screen, AdventurAgent)
     }
 
     @Override
@@ -65,9 +69,9 @@ public class ComputerScreen extends ElnScreen {
         super.init();
         button(9, BOTTOM_Y, 50, () -> tr("Reset"), () -> render.clientSendId(ComputerElement.RESET_ID),
             tr("Start again from slot 1's chip (the RAM keeps what it held)."));
-        button(61, BOTTOM_Y, 44, () -> tr("Break"), () -> {
-            if (tab >= 0) render.screenEvent(new Form.Symbol("break"), (long) tab);
-        }, tr("Stop what this tab's program runs (a loop that never ends, a long sleep); with nothing running at the REPL, stop every program's tasks."));
+        button(61, BOTTOM_Y, 62, () -> render.switchedOn ? tr("Power off") : tr("Power on"),
+            () -> render.clientSendId(ComputerElement.POWER_ID),
+            tr("Its power switch. Off, it stops and its RAM forgets; on, it starts from slot 1's chip."));
         field(268, BOTTOM_Y, 36, () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
             float f = EaField.parse(v);
             render.clientSendFloat(ComputerElement.SET_ADDRESS_ID, Float.isNaN(f) ? 0 : Math.round(f));
@@ -93,7 +97,7 @@ public class ComputerScreen extends ElnScreen {
             seenFocus = s.focus;
             tab = s.focus;
         }
-        if (!s.tabs.containsKey(tab)) {
+        if (!s.tabs.containsKey(tab) || (tab == 0 && !chose && s.tabs.containsKey(1))) {
             tab = s.tabs.containsKey(1) ? 1 : s.tabs.isEmpty() ? -1 : s.tabs.keySet().iterator().next();
             focusId = -1;
         }
@@ -165,9 +169,15 @@ public class ComputerScreen extends ElnScreen {
             g.fill(cx(0), cy(s.h - 2), cx(s.w), cy(s.h - 1), 0xFF2A2E38);
             g.text(font, font.plainSubstrByWidth(hint, s.w * CELL), cx(0) + 1, cy(s.h - 2) + 1, 0xFFB0B0C0, false);
         }
-        label(g, 9, SLOTS_Y - 11, tr("Chips (slot 1 to 8)"));
-        label(g, 9 + 8 * 18 + 14, SLOTS_Y - 11, tr("Drives A, B"));
-        label(g, 112, BOTTOM_Y + 6, render.stateTextClient());
+        label(g, 9, SLOTS_Y - 11, tr("Expansion modules"));
+        label(g, 9 + 8 * 18 + 14, SLOTS_Y - 11, tr("Floppy drives"));
+        // the module slots as ISA-style edge connectors (Baughn), under the item slots
+        for (int k = 0; k < ComputerElement.CHIP_SLOTS; k++) {
+            int sx = leftPos + 9 + 18 * k, sy = topPos + SLOTS_Y + 11;   // (inside the slot, under the module)
+            g.fill(sx + 1, sy, sx + 15, sy + 4, 0xFF2A2A2A);
+            for (int p = 0; p < 6; p++) g.fill(sx + 2 + 2 * p, sy + 1, sx + 3 + 2 * p, sy + 3, 0xFFC8A040);
+        }
+        label(g, 127, BOTTOM_Y + 6, render.stateTextClient());
         label(g, 222, BOTTOM_Y + 6, tr("Address"));
     }
 
@@ -297,6 +307,7 @@ public class ComputerScreen extends ElnScreen {
                     render.screenEvent(new Form.Symbol("close"), (long) en.getKey());   // (right-click closes a process's tab)
                 else {
                     tab = en.getKey();
+                    chose = true;
                     focusId = -1;
                 }
                 return true;
@@ -374,6 +385,10 @@ public class ComputerScreen extends ElnScreen {
         Scene.Tab t = currentTab();
         Scene.Element line = focusedLine(t);
         int k = ev.key();
+        if (k == InputConstants.KEY_C && ev.hasControlDownWithQuirk() && !ev.hasShiftDown()) {
+            if (tab >= 0) render.screenEvent(new Form.Symbol("break"), (long) tab);   // (on any tab, a line or not)
+            return true;
+        }
         if (line == null || k == InputConstants.KEY_ESCAPE) return super.keyPressed(ev);
         LineEdit le = edit(focusId);
         var clip = Minecraft.getInstance().keyboardHandler;
@@ -384,8 +399,17 @@ public class ComputerScreen extends ElnScreen {
             le.cursor += p.length();
             return true;
         }
-        if (ev.isCopy()) {
+        // Ctrl+C is Break for this tab, as in a terminal (Baughn, above); Ctrl+Shift+C copies the line
+        if (k == InputConstants.KEY_C && ev.hasControlDownWithQuirk()) {
             clip.setClipboard(le.text.toString());
+            return true;
+        }
+        if (k == InputConstants.KEY_A && ev.hasControlDownWithQuirk()) {   // (start of the line, as readline)
+            le.cursor = 0;
+            return true;
+        }
+        if (k == InputConstants.KEY_E && ev.hasControlDownWithQuirk()) {
+            le.cursor = le.text.length();
             return true;
         }
         switch (k) {
@@ -451,6 +475,7 @@ public class ComputerScreen extends ElnScreen {
         }
         le.text.insert(le.cursor, common.substring(word.length()));
         le.cursor += common.length() - word.length();
-        hint = found.size() == 1 ? "" : String.join(" ", found.subList(0, Math.min(found.size(), 12)));
+        hint = found.size() == 1 ? "" : found.size() + ": " + String.join(" ", found.subList(0, Math.min(found.size(), 12)))
+            + (found.size() > 12 ? " ..." : "");
     }
 }

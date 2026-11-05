@@ -74,7 +74,7 @@ public final class ComputerCases {
      */
     static class BootsJanet implements TestCase {
         BlockPos p;
-        String afterBoot = "", afterTyping = "";
+        String afterBoot = "", afterTyping = "", nextTick = "";
         byte asleep = -1;
         boolean onBus, up;
         int upAt = -1;
@@ -131,6 +131,7 @@ public final class ComputerCases {
                     asleep = e.status();
                     submit(ctx, e, 1, "(* 6 7)");
                 }
+                if (upAt > 0 && tick == upAt + 6) nextTick = terminal(e);
                 if (upAt > 0 && tick == upAt + 35) afterTyping = terminal(e);
             });
         }
@@ -142,6 +143,7 @@ public final class ComputerCases {
             ctx.check("computer: boots to Janet's REPL", afterBoot.contains("Janet 1.41.2 on Electrical Age") && up, afterBoot);
             ctx.check("computer: asleep at the prompt", asleep == ComputerElement.SLEEPING, "" + asleep);
             ctx.check("computer: answers what is typed", afterTyping.contains("> (* 6 7)\n42\n"), afterTyping);
+            ctx.check("computer: answers by the next tick (the fast path)", nextTick.contains("> (* 6 7)\n42\n"), nextTick);
             ctx.check("computer: a bus kit ends at its bus pin and links it", onBus, "");
             ctx.check("computer: a blank floppy got a disk id", FloppyItem.disk(c.getInventory().getItem(ComputerElement.DRIVE_A)) != null, "");
         }

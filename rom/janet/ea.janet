@@ -459,7 +459,9 @@
       (flush-outputs)
       (match res
         [:ok v] (do (put env '_ @{:value v}) (buffer/push (env :out) (string/format "%q\n" v)))
-        [:error e f] (with-dyns [:err (env :err)] (debug/stacktrace f e ""))))
+        [:error e f] (if (= e "stopped by Break")
+                       (buffer/push (env :err) "stopped by Break\n")
+                       (with-dyns [:err (env :err)] (debug/stacktrace f e "")))))
     (when (= :error (parser/status p))
       (buffer/push (env :err) (string "parse error: " (parser/error p) "\n"))
       (parser/flush p))
