@@ -774,7 +774,8 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         int buttons = 0, lights = 0;
         for (int k : panel) if (k == ElevatorCar.PANEL_BUTTON) buttons++; else if (k == ElevatorCar.PANEL_LIGHT) lights++;
         if (buttons + lights > 0)
-            info.put(I18N.tr("Car panel"), I18N.tr("%1$ buttons, %2$ lights", buttons, lights) + ", " + (panelBase == 0 ? I18N.tr("no address")
+            info.put(I18N.tr("Car panel"), (buttons == 1 ? I18N.tr("1 button") : I18N.tr("%1$ buttons", buttons)) + ", "
+                + (lights == 1 ? I18N.tr("1 light") : I18N.tr("%1$ lights", lights)) + ", " + (panelBase == 0 ? I18N.tr("no address")
                 : I18N.tr("addresses %1$ to %2$", panelBase, Math.min(255, panelBase + ElevatorPanel.SLOTS - 1))));
         info.put(I18N.tr("State"), stateText());
         return info;

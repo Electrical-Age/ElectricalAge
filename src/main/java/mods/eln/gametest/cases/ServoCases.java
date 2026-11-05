@@ -315,7 +315,7 @@ public final class ServoCases {
             ctx.check("servo panel: the car shows the slots and lamps", carShows, "");
             ctx.check("servo panel: sneaking with an empty hand takes the light back", gaveBack, "");
             var w = s.drive(ctx).getWaila();
-            ctx.check("servo panel: Jade on the drive sums the panel up", "1 buttons, 0 lights, addresses 50 to 61".equals(w.get("Car panel")), w.toString());
+            ctx.check("servo panel: Jade on the drive sums the panel up", "1 button, 0 lights, addresses 50 to 61".equals(w.get("Car panel")), w.toString());
         }
     }
 
