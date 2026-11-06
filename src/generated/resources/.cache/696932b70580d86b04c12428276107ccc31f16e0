@@ -1,4 +1,4 @@
-// 26.3	2026-11-06T19:44:10.648491509	eln-global/EA models
+// 26.3	2026-11-06T22:21:15.457556431	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -475,6 +475,7 @@ bc2933874335a5fdddc8f8ee1b2793b8c49663b1 assets/eln/items/water_turbine.json
 da76d2e869662c4cfd75df2ef03e6b4655667ed6 assets/eln/items/weak_50v_battery_charger.json
 65b0f8a477a355f4801d824fd27046b5160d2948 assets/eln/items/white_brush.json
 f2bd52b7c43159d18ce0e2808fed7075bb85484b assets/eln/items/wind_turbine.json
+01be098520b07b5d8a6b72bd8b82ad1e873b03b1 assets/eln/items/winding.json
 4ea80249f65d900479f369e6c89c1c9fc166ba2e assets/eln/items/wireless_analyzer.json
 01c41df4900702b8c6a84f02b7fab63b9a1af4c8 assets/eln/items/wireless_button.json
 d2a78cd0d9f9e67e4de5020587414a71264286f3 assets/eln/items/wireless_signal_receiver.json
@@ -1018,6 +1019,7 @@ d026402349bd1c2bd42e820c09cc5bcdba6b0cd3 assets/eln/models/item/weak_50v_battery
 0f26665d91cd67934b1d2b03b3c048e3bc82f8a6 assets/eln/models/item/white_brush.json
 f2187f0ed8e4c6c2b6ed24ea0159339e75c0f971 assets/eln/models/item/wind_turbine.json
 f1b2e6da3fad6668fdbce71ca86176d9b1d9e3af assets/eln/models/item/wind_turbine_3d.json
+f8c7a091938c43f21b5bf2862ee478e7f30c0766 assets/eln/models/item/winding.json
 be170e66e563ed299d3d5173cb44b485205d4a20 assets/eln/models/item/wireless_analyzer.json
 370f5507720395a48aed6d940ebf081a63c82f1c assets/eln/models/item/wireless_button.json
 40fbfa51cd78a3c7db802b801e81e4828855e461 assets/eln/models/item/wireless_button_3d.json

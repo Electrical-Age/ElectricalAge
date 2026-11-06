@@ -95,6 +95,7 @@ public final class Wp10aCases {
         cases.add(new TransformerRewoundCase());
         cases.add(new TransformerSaturatesCase());
         cases.add(new TransformerLegacyCase());
+        cases.add(new TransformerWindingCase());
         cases.add(new VariableTransformerCase());
         cases.add(new CapacitorCase());
         cases.add(new InductorCase());
@@ -962,6 +963,51 @@ public final class Wp10aCases {
             ctx.check("converter: loaded from an old save, it is as built", legacyAfterLoad, "");
             ctx.check("converter: ... and doesn't saturate (2:1 on a cheap core at 48 V)", !saturatedAsLegacy && !tr.isBurnt(), "");
             ctx.check("converter: changed by a player, it is an ordinary converter", !legacyAfterEdit, "");
+        }
+    }
+
+    /**
+     * Machine-made windings (Wires stage 4): 20 turns of 2.5 mm² 48 V wire in, 10 out, on a cheap core: half the voltage;
+     * the primary's resistance is its wire's for 20 eighth-blocks (x the core's loss factor). A 100-turn secondary
+     * (20 x 2.5 + 100 x 2.5 = 300 mm² turns) overfills the cheap core's 150: the converter disconnects.
+     */
+    static class TransformerWindingCase extends TransformerCase {
+        static final mods.eln.node.voxel.CableSpec LV_WIRE = new mods.eln.node.voxel.CableSpec(4, mods.eln.node.voxel.CableSpec.BROWN);
+
+        @Override
+        public String name() {
+            return "wp10a transformer wound with windings";
+        }
+
+        @Override
+        public void build(TestContext ctx) {
+            super.build(ctx);
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, mods.eln.node.voxel.WindingItem.make(1, LV_WIRE, 20));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, mods.eln.node.voxel.WindingItem.make(1, LV_WIRE, 10));
+            tr.getInventory().setChanged();
+        }
+
+        @Override
+        public void measure(TestContext ctx) {
+            if (!core) {
+                ctx.line("SKIP wp10a transformer wound with windings: Cheap Ferromagnetic Core not registered (wp12)");
+                return;
+            }
+            ctx.checkValue("converter: windings 20:10, secondary open-circuit voltage [V]", loadU(secondary), U / 2);
+            double rs = ((mods.eln.sim.ElectricalLoad) field(tr, "primaryLoad")).getRs();
+            double want = 20 * mods.eln.node.voxel.WindingItem.BLOCKS_PER_TURN * LV_WIRE.ohmsPerBlock() / 2 * 10;
+            ctx.check("converter: a winding's resistance is its wire's", Math.abs(rs - want) < 1e-9 + 1e-6 * want, rs + " vs " + want);
+            ctx.check("converter: 20:10 of 2.5 mm² fits a cheap core", !tr.windowFull(), "");
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, mods.eln.node.voxel.WindingItem.make(1, LV_WIRE, 100));
+            tr.getInventory().setChanged();
+            ctx.check("converter: 20:100 of 2.5 mm² overfills a cheap core", tr.windowFull(), "");
+            ctx.check("converter: ... and it disconnects", tr.getElectricalLoad(tr.front.right(), mods.eln.misc.LRDU.Down) == null, "");
+            // cables are not held to the window (converters built before windings keep working)
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(64));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(64));
+            tr.getInventory().setChanged();
+            ctx.check("converter: 64:64 cables on a cheap core still connect", !tr.windowFull()
+                && tr.getElectricalLoad(tr.front.right(), mods.eln.misc.LRDU.Down) != null, "");
         }
     }
 

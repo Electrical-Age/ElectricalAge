@@ -277,6 +277,7 @@ public class Wp12aContent implements ElnContent {
                 // name,
                 10);
             element.voltsPerTurn = 4;   // (Baughn 2026-11-06: saturation)
+            element.window = 150;   // (turns x mm² of both windings, Wires stage 4)
             sharedItem.addElement(completId, element);
         }
         {
@@ -287,6 +288,7 @@ public class Wp12aContent implements ElnContent {
                 // name,
                 4);
             element.voltsPerTurn = 8;   // (Baughn 2026-11-06: saturation)
+            element.window = 300;   // (turns x mm² of both windings, Wires stage 4)
             sharedItem.addElement(completId, element);
         }
         {
@@ -297,6 +299,7 @@ public class Wp12aContent implements ElnContent {
                 // name,
                 1);
             element.voltsPerTurn = 16;   // (Baughn 2026-11-06: saturation)
+            element.window = 800;   // (turns x mm² of both windings, Wires stage 4)
             sharedItem.addElement(completId, element);
         }
         // the better cores' intermediates (Baughn 2026-11-06: three separate recipes, the better cores costly)

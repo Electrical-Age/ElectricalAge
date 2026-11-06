@@ -126,9 +126,8 @@ public class TransformerElement extends TransparentNodeElement {
      * electrical link waits for it to be complete.
      */
     boolean complete() {
-        return !Utils.isEmpty(inventory.getItem(TransformerContainer.primaryCableSlotId))
-            && !Utils.isEmpty(inventory.getItem(TransformerContainer.secondaryCableSlotId))
-            && !Utils.isEmpty(inventory.getItem(TransformerContainer.ferromagneticSlotId));
+        return primaryWire() != null && secondaryWire() != null
+            && !Utils.isEmpty(inventory.getItem(TransformerContainer.ferromagneticSlotId)) && !windowFull();
     }
 
     @Override
@@ -179,18 +178,69 @@ public class TransformerElement extends TransparentNodeElement {
         connect();
     }
 
+    /** A winding: its turns, its wire's constants, its resistance (Rs as a load counts it) and cross-section, mm². */
+    record Wire(int turns, ElectricalCableDescriptor d, double rs, double mm2) {
+    }
+
+    /**
+     * The winding in a slot: a stack of six-node power cables (one a turn, each the whole cable's Rs, as in 1.12: so 1.12
+     * converters keep their losses) or a machine-made winding (Wires stage 4: its wire's resistance for its length); null
+     * if empty.
+     */
+    static Wire wire(ItemStack s) {
+        if (Utils.isEmpty(s)) return null;
+        if (mods.eln.node.voxel.WindingItem.is(s))
+            return new Wire(mods.eln.node.voxel.WindingItem.turns(s), mods.eln.node.voxel.WindingItem.descriptor(s),
+                mods.eln.node.voxel.WindingItem.rs(s), mods.eln.node.voxel.WindingItem.spec(s).squareMillimetres());
+        if (!(Eln.sixNodeItem.getDescriptor(s) instanceof ElectricalCableDescriptor d)) return null;
+        int tier = mods.eln.node.voxel.CablePart.tierOf(d.name);
+        double mm2 = mods.eln.node.voxel.CableSpec.power(tier) ? mods.eln.node.voxel.CableSpec.preset(tier).squareMillimetres() : 0.5;
+        return new Wire(s.getCount(), d, d.electricalRs, mm2);
+    }
+
+    Wire primaryWire() {
+        return wire(inventory.getItem(TransformerContainer.primaryCableSlotId));
+    }
+
+    Wire secondaryWire() {
+        return wire(inventory.getItem(TransformerContainer.secondaryCableSlotId));
+    }
+
+    int primaryTurns() {
+        Wire w = primaryWire();
+        return w == null ? 0 : w.turns();
+    }
+
+    /** Turns x mm² of both windings, against the core's window (Wires stage 4); 0 if a slot is empty. */
+    double windowUsed() {
+        Wire p = primaryWire(), s = secondaryWire();
+        return p == null || s == null ? 0 : p.turns() * p.mm2() + s.turns() * s.mm2();
+    }
+
+    double window() {
+        ItemStack core = inventory.getItem(TransformerContainer.ferromagneticSlotId);
+        return Utils.isEmpty(core) ? 0 : ((FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core)).window;
+    }
+
+    /**
+     * The windings don't fit the core. Only a machine-made winding is held to the window: converters wound with cables
+     * keep working as built (their stacks stop at 64 turns anyway).
+     */
+    public boolean windowFull() {
+        return !legacy && window() > 0 && windowUsed() > window() && hasWinding();
+    }
+
+    boolean hasWinding() {
+        return mods.eln.node.voxel.WindingItem.is(inventory.getItem(TransformerContainer.primaryCableSlotId))
+            || mods.eln.node.voxel.WindingItem.is(inventory.getItem(TransformerContainer.secondaryCableSlotId));
+    }
+
     private void computeInventory() {
         ItemStack primaryCable = inventory.getItem(TransformerContainer.primaryCableSlotId);
         ItemStack secondaryCable = inventory.getItem(TransformerContainer.secondaryCableSlotId);
         ItemStack core = inventory.getItem(TransformerContainer.ferromagneticSlotId);
-        ElectricalCableDescriptor primaryCableDescriptor = null, secondaryCableDescriptor = null;
-
-        if (!Utils.isEmpty(primaryCable)) {
-            primaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(primaryCable);
-        }
-        if (!Utils.isEmpty(secondaryCable)) {
-            secondaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(secondaryCable);
-        }
+        Wire pw = wire(primaryCable), sw = wire(secondaryCable);
+        ElectricalCableDescriptor primaryCableDescriptor = pw == null ? null : pw.d(), secondaryCableDescriptor = sw == null ? null : sw.d();
 
         if (primaryCableDescriptor != null)
             voltagePrimaryWatchdog.setUNominal(primaryCableDescriptor.electricalNominalVoltage);
@@ -209,25 +259,25 @@ public class TransformerElement extends TransparentNodeElement {
             coreFactor = coreDescriptor.cableMultiplicator;
         }
 
-        if (Utils.isEmpty(primaryCable) || Utils.isEmpty(core)) {
+        if (pw == null || Utils.isEmpty(core)) {
             primaryLoad.highImpedance();
             primaryMaxCurrent = 0;
         } else {
-            primaryCableDescriptor.applyTo(primaryLoad, coreFactor);
+            primaryLoad.setRs(pw.rs() * coreFactor);
             primaryMaxCurrent = (float) primaryCableDescriptor.electricalMaximalCurrent;
         }
 
-        if (Utils.isEmpty(secondaryCable) || Utils.isEmpty(core)) {
+        if (sw == null || Utils.isEmpty(core)) {
             secondaryLoad.highImpedance();
             secondaryMaxCurrent = 0;
         } else {
-            secondaryCableDescriptor.applyTo(secondaryLoad, coreFactor);
+            secondaryLoad.setRs(sw.rs() * coreFactor);
             secondaryMaxCurrent = (float) secondaryCableDescriptor.electricalMaximalCurrent;
         }
 
-        if (!Utils.isEmpty(primaryCable) && !Utils.isEmpty(secondaryCable)) {
-            transformer.setRatio(1.0 * secondaryTurns() / primaryCable.getCount());
-            interSystemProcess.setRatio(1.0 * secondaryTurns() / primaryCable.getCount());
+        if (pw != null && sw != null) {
+            transformer.setRatio(1.0 * secondaryTurns() / pw.turns());
+            interSystemProcess.setRatio(1.0 * secondaryTurns() / pw.turns());
         } else {
             transformer.setRatio(1);
             interSystemProcess.setRatio(1);
@@ -257,8 +307,8 @@ public class TransformerElement extends TransparentNodeElement {
 
     /** The turns of the secondary in use (the variable converter taps it). */
     int secondaryTurns() {
-        ItemStack s = inventory.getItem(TransformerContainer.secondaryCableSlotId);
-        return Utils.isEmpty(s) ? 0 : s.getCount();
+        Wire w = secondaryWire();
+        return w == null ? 0 : w.turns();
     }
 
     /** The core's volts per turn now: the larger of the two windings', 0 if it is incomplete. */
@@ -266,7 +316,7 @@ public class TransformerElement extends TransparentNodeElement {
         ItemStack p = inventory.getItem(TransformerContainer.primaryCableSlotId);
         int ns = secondaryTurns();
         if (!complete() || ns == 0) return 0;
-        return Math.max(Math.abs(primaryLoad.getU()) / p.getCount(), Math.abs(secondaryLoad.getU()) / ns);
+        return Math.max(Math.abs(primaryLoad.getU()) / primaryTurns(), Math.abs(secondaryLoad.getU()) / ns);
     }
 
     double coreLimit() {
@@ -443,6 +493,7 @@ public class TransformerElement extends TransparentNodeElement {
         ItemStack p = inventory.getItem(TransformerContainer.primaryCableSlotId);
         ItemStack s = inventory.getItem(TransformerContainer.secondaryCableSlotId);
         if (Utils.isEmpty(p) || Utils.isEmpty(s)) return;
+        if (mods.eln.node.voxel.WindingItem.is(p) || mods.eln.node.voxel.WindingItem.is(s)) return;   // (windings are newer than the rewind)
         int[] turns = rewound(p.getCount(), s.getCount(), cableVolts(p), cableVolts(s));
         if (turns == null) return;
         p.setCount(turns[0]);
@@ -494,6 +545,8 @@ public class TransformerElement extends TransparentNodeElement {
             info.put(I18N.tr("Volts per turn"), Utils.plotValue(voltsPerTurn()) + " / " + Utils.plotValue(limit)
                 + (saturated ? " " + I18N.tr("SATURATED") : legacy ? " " + I18N.tr("(as built before 48 V)") : ""));
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", heat.Tc));
+        if (window() > 0 && hasWinding() && primaryWire() != null && secondaryWire() != null)
+            info.put(I18N.tr("Window"), Math.round(windowUsed()) + " / " + Math.round(window()) + " mm² turns" + (windowFull() ? " " + I18N.tr("FULL: no room") : ""));
         info.put(I18N.tr("Isolated"), isIsolator ? I18N.tr("Yes") : I18N.tr("No"));
         if (Eln.wailaEasyMode) {
             FerromagneticCoreDescriptor core =

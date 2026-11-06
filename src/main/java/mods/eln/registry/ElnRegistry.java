@@ -118,6 +118,8 @@ public final class ElnRegistry {
         ITEMS.registerItem("cable_kit_vhv", p -> new mods.eln.node.voxel.CableKitItem(4, p)),
         ITEMS.registerItem("cable_kit_thermal", p -> new mods.eln.node.voxel.CableKitItem(5, p)),
         ITEMS.registerItem("cable_kit_bus", p -> new mods.eln.node.voxel.CableKitItem(6, p)));
+    /** A transformer winding (Wires stage 4, Baughn 2026-11-06): N turns of a wire, made by a wire-drawing machine. */
+    public static final DeferredItem<mods.eln.node.voxel.WindingItem> WINDING = ITEMS.registerItem("winding", mods.eln.node.voxel.WindingItem::new);
     /** Raw lead and tungsten: what their ores drop, like raw iron (Baughn 2026-10-19: they dropped the ore block, as in
      *  1.7); smelted or blasted to ingots, macerated to dust. */
     public static final DeferredItem<Item> RAW_LEAD = ITEMS.registerSimpleItem("raw_lead");
@@ -341,6 +343,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(CHISEL);
         ALL_ITEMS.add(HANDBOOK);
         ALL_ITEMS.add(FIELD_BUS_CABLE);
+        ALL_ITEMS.add(WINDING);
         ALL_ITEMS.add(RAW_LEAD);
         ALL_ITEMS.add(RAW_TUNGSTEN);
         ALL_ITEMS.add(CHARCOAL_NUGGET);

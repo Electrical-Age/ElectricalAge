@@ -32,6 +32,12 @@ public final class MenuSpecs {
     }
 
     /** The menu of a device descriptor (the closest registered class), or SCREEN_ONLY. Called on both sides. */
+    /** A converter's winding slot: a six-node power cable (one a turn) or a machine-made winding (Wires stage 4). */
+    static final java.util.function.Predicate<net.minecraft.world.item.ItemStack> WINDING_OR_CABLE = s ->
+        mods.eln.node.voxel.WindingItem.is(s)
+            || s.getItem() instanceof mods.eln.node.six.SixNodeItem i && i.getEaDescriptor() != null
+            && i.getEaDescriptor().getClass() == mods.eln.sixnode.electricalcable.ElectricalCableDescriptor.class;
+
     public static MenuSpec of(Object descriptor) {
         for (Class<?> c = descriptor.getClass(); c != null; c = c.getSuperclass()) {
             Function<Object, MenuSpec> f = BY_DESCRIPTOR.get(c);
@@ -207,11 +213,11 @@ public final class MenuSpecs {
             descriptor(mods.eln.transparentnode.solarpanel.SolarPanelContainer.trackerSlotId, 176 / 2 - 20, 35, 1,
                 SolarTrackerDescriptor.class, MEDIUM, tr("Solar tracker slot"))).publishing(0));
         put(mods.eln.transparentnode.transformer.TransformerDescriptor.class, d -> MenuSpec.of(
-            // up to 64 turns a side (Baughn 2026-11-06; 1.12: 4), one cable a turn
-            six(mods.eln.transparentnode.transformer.TransformerContainer.primaryCableSlotId, 58, 30, 64, CABLE, MEDIUM,
-                tr("Electrical cable slot")),
-            six(mods.eln.transparentnode.transformer.TransformerContainer.secondaryCableSlotId, 100, 30, 64, CABLE, MEDIUM,
-                tr("Electrical cable slot")),
+            // up to 64 turns a side (Baughn 2026-11-06; 1.12: 4), one cable a turn; or one machine-made winding
+            SlotSpec.filter(mods.eln.transparentnode.transformer.TransformerContainer.primaryCableSlotId, 58, 30, 64, WINDING_OR_CABLE, MEDIUM,
+                tr("Winding slot: cables (one a turn) or a winding")),
+            SlotSpec.filter(mods.eln.transparentnode.transformer.TransformerContainer.secondaryCableSlotId, 100, 30, 64, WINDING_OR_CABLE, MEDIUM,
+                tr("Winding slot: cables (one a turn) or a winding")),
             descriptor(mods.eln.transparentnode.transformer.TransformerContainer.ferromagneticSlotId, 58 + (100 - 58) / 2, 30, 1,
                 FerromagneticCoreDescriptor.class, MEDIUM, tr("Ferromagnetic core slot")),
             descriptor(mods.eln.transparentnode.transformer.TransformerContainer.CasingSlotId, 130, 74, 1, CaseItemDescriptor.class,

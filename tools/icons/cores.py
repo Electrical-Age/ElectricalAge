@@ -36,3 +36,22 @@ if __name__ == "__main__":
     for name, im in (("silicon_steel_laminations", laminations()), ("nanocrystalline_core_blank", ring())):
         im.save(os.path.join(out, name + ".png"))
         print(name)
+
+
+def winding():
+    """A transformer winding: copper turns on a grey bobbin."""
+    im = blank(); px = im.load()
+    for y in range(2, 14):
+        for x in (2, 3, 12, 13):
+            px[x, y] = (110, 112, 120, 255)                      # the bobbin's cheeks
+    for y in range(4, 12):
+        for x in range(4, 12):
+            v = 150 + 40 * ((y + x // 3) % 2)
+            px[x, y] = (v, int(v * 0.55), int(v * 0.32), 255)     # copper turns, banded
+    return im
+
+
+if __name__ == "__main__":
+    out = os.path.join(sys.argv[1], "assets", "eln", "textures", "item")
+    winding().save(os.path.join(out, "winding.png"))
+    print("winding")

@@ -55,10 +55,9 @@ public class VariableTransformerElement extends TransformerElement {
         if (want == tapTurns || sinceTap < 5) return;
         tapTurns = want;
         sinceTap = 0;
-        ItemStack p = inventory.getItem(TransformerContainer.primaryCableSlotId);
-        if (!Utils.isEmpty(p)) {
-            interSystemProcess.setRatio(1.0 * secondaryTurns() / p.getCount());
-            transformer.setRatio(1.0 * secondaryTurns() / p.getCount());
+        if (primaryTurns() > 0) {
+            interSystemProcess.setRatio(1.0 * secondaryTurns() / primaryTurns());
+            transformer.setRatio(1.0 * secondaryTurns() / primaryTurns());
         }
         needPublish();
     }

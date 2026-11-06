@@ -18,6 +18,8 @@ public class FerromagneticCoreDescriptor extends GenericItemUsingDamageDescripto
      * transformers): 230 V needs 58 turns on a cheap core, 15 on an optimal one.
      */
     public double voltsPerTurn = 16;
+    /** How much winding it holds: turns x mm² summed over both windings (Wires stage 4; set per core). */
+    public double window = 800;
     public Obj3DPart feroPart;
     Obj3D obj;
 
@@ -39,5 +41,6 @@ public class FerromagneticCoreDescriptor extends GenericItemUsingDamageDescripto
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Cable loss factor: %1$", cableMultiplicator));
         list.add(tr("Up to %1$ V per turn", mods.eln.misc.Utils.plotValue(voltsPerTurn)));
+        list.add(tr("Holds %1$ mm² turns of winding", (int) window));
     }
 }
