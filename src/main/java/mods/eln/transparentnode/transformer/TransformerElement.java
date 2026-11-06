@@ -315,20 +315,56 @@ public class TransformerElement extends TransparentNodeElement {
     }
 
     /**
-     * Once, for a converter saved before the real-world voltages (no "tierGen"): one wound 1:4 or 4:1 (1.12's 50 V <-> 200 V)
-     * is rewound 5:24 or 24:5, so 48 V still makes 230 V (230.4 V). Coils are only added, never taken. Baughn 2026-11-06.
+     * Once, for a converter saved before the real-world voltages (no "tierGen"): one wound for 1.12's tiers is rewound for
+     * today's (Baughn 2026-11-06). Its windings' cables say which tiers it joined: a converter whose turns ratio was exactly
+     * the old ratio of its two windings' tiers (1:4 for 50 V -> 200 V, 4:1 for 800 V -> 200 V...) gets the turns closest to
+     * the new ratio (5:24 for 48 V -> 230 V, 26:15 for 400 V -> 230 V, 2:55 for 400 V -> 11 kV). Windings of one tier wound 1:4 or 4:1 are taken
+     * for 48 V <-> 230 V. Coils are only added, never taken; anything else is left as it is.
      */
     void rewindForRealVoltages() {
         ItemStack p = inventory.getItem(TransformerContainer.primaryCableSlotId);
         ItemStack s = inventory.getItem(TransformerContainer.secondaryCableSlotId);
         if (Utils.isEmpty(p) || Utils.isEmpty(s)) return;
-        if (s.getCount() == 4 * p.getCount()) {
-            p.setCount(5);
-            s.setCount(24);
-        } else if (p.getCount() == 4 * s.getCount()) {
-            p.setCount(24);
-            s.setCount(5);
-        }
+        int[] turns = rewound(p.getCount(), s.getCount(), cableVolts(p), cableVolts(s));
+        if (turns == null) return;
+        p.setCount(turns[0]);
+        s.setCount(turns[1]);
+    }
+
+    static double cableVolts(ItemStack cable) {
+        return Eln.sixNodeItem.getDescriptor(cable) instanceof ElectricalCableDescriptor d ? d.electricalNominalVoltage : 0;
+    }
+
+    /** 1.12's voltage of today's tier (48 -> 50, 230 -> 200, 400 -> 800, 11000 -> 3200), or 0. */
+    static double oldTier(double u) {
+        if (u == Eln.LVU) return 50;
+        if (u == Eln.MVU) return 200;
+        if (u == Eln.HVU) return 800;
+        if (u == Eln.VVU) return 3200;
+        return 0;
+    }
+
+    /** The new turns [primary, secondary] for an old converter of turns p:s between windings rated up and us, or null: as is. */
+    static int[] rewound(int p, int s, double up, double us) {
+        double oldP = oldTier(up), oldS = oldTier(us);
+        double want;
+        if (oldP > 0 && oldS > 0 && oldP != oldS && Math.abs((double) s / p - oldS / oldP) < 1e-9) want = us / up;
+        else if (s == 4 * p) want = Eln.MVU / Eln.LVU;
+        else if (p == 4 * s) want = Eln.LVU / Eln.MVU;
+        else return null;
+        // the fewest turns within 0.5 % of the new ratio (5:24 is 0.17 % over 230 V), else the closest
+        int[] fewest = null, closest = null;
+        double err = Double.MAX_VALUE;
+        for (int np = p; np <= 64; np++)
+            for (int ns = s; ns <= 64; ns++) {
+                double e = Math.abs((double) ns / np / want - 1);
+                if (e <= 0.005 && (fewest == null || np + ns < fewest[0] + fewest[1])) fewest = new int[]{np, ns};
+                if (e < err) {
+                    err = e;
+                    closest = new int[]{np, ns};
+                }
+            }
+        return fewest != null ? fewest : closest;
     }
 
     @Override
