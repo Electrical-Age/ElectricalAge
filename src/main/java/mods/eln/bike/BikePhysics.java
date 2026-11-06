@@ -19,6 +19,8 @@ public final class BikePhysics {
     public static final double GRAVITY = 0.08, AIR_DRAG = 0.98;
     /** Half slabs, stairs, snow layers ride; a full block doesn't. */
     public static volatile float STEP_HEIGHT = 0.6f;
+    /** How far a floor can sit below a full block's top and still count as level for the step: 1/8 (mud, soul sand) and a margin. */
+    public static final float SUNKEN = 0.13f;
     /** Running into something at more than 3 b/s throws you off (Baughn: a full-block step; walls too, by default). */
     public static volatile double CRASH_SPEED = 0.15;
     /** Upward speed of a full-charge jump: peaks a little over one block (BikePhysicsTest computes it). */
@@ -145,5 +147,16 @@ public final class BikePhysics {
     /** Whether running into something at horizontal speed v (b/t) throws the rider off. */
     public static boolean crashes(double v) {
         return Math.abs(v) > CRASH_SPEED;
+    }
+
+    /**
+     * Whether a tick that ran into something throws the rider off: it was meant to go forward b/t along its heading,
+     * went along, and is on the ground after the move. What counts is the speed lost along the heading, so brushing a
+     * wall or a tree with the side of the bike doesn't throw you (only the part of the speed into it is lost), while
+     * riding into it head-on does. In the air nothing throws you: the bike stops against the block, lands, and then
+     * rides up it if it's a step (vanilla only steps on the ground), or throws you next tick if it isn't.
+     */
+    public static boolean crashes(boolean onGround, double forward, double along) {
+        return onGround && crashes(forward - along);
     }
 }

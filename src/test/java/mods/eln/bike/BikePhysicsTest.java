@@ -75,9 +75,10 @@ public class BikePhysicsTest {
     void theTerrainBikeJumpsTwoAndAHalfAndStepsAWholeBlock() {
         double peak = BikePhysics.jumpPeak(BikePhysics.jumpVelocity(1, BikeType.TERRAIN.jumpVy()));
         assertTrue(peak > 2.3 && peak < 2.7, "peak " + peak);
-        assertEquals(1.0f, BikeType.TERRAIN.stepHeight(), 1e-6);
+        assertEquals(1.0f + BikePhysics.SUNKEN, BikeType.TERRAIN.stepHeight(), 1e-6);
         assertEquals(150, BikePhysics.motorWatts(BikePhysics.VMAX_POWERED, BikeType.TERRAIN.motorWatts()), 1e-9);
-        assertEquals(BikePhysics.STEP_HEIGHT, BikeType.ELECTRIC.stepHeight(), 1e-6);
+        assertEquals(BikePhysics.STEP_HEIGHT + BikePhysics.SUNKEN, BikeType.ELECTRIC.stepHeight(), 1e-6);
+        assertTrue(BikeType.TERRAIN.stepHeight() < 1.5f && BikeType.ELECTRIC.stepHeight() < 1.0f);   // (a fence, a full block)
     }
 
     @Test
@@ -95,6 +96,13 @@ public class BikePhysicsTest {
     void crashesOnlyAboveThreeBlocksASecond() {
         assertFalse(BikePhysics.crashes(2.9 / 20));
         assertTrue(BikePhysics.crashes(3.1 / 20));
+        double v = BikePhysics.VMAX_POWERED;
+        assertTrue(BikePhysics.crashes(true, v, 0));                       // head-on into a wall
+        assertFalse(BikePhysics.crashes(false, v, 0));                     // in the air: it lands, then steps or crashes
+        double c = Math.cos(Math.toRadians(30));
+        assertFalse(BikePhysics.crashes(true, v, v * c * c));              // brushing a wall at 30 degrees
+        assertTrue(BikePhysics.crashes(true, v, v * 0.25));                // at 60 degrees, most of the speed is lost
+        assertFalse(BikePhysics.crashes(true, 0.1, 0));                    // slower than 3 b/s
         assertEquals(BikePhysics.MOTOR_WATTS, BikePhysics.motorWatts(BikePhysics.VMAX_POWERED), 1e-9);
         assertEquals(BikePhysics.MOTOR_WATTS / 4, BikePhysics.motorWatts(BikePhysics.VMAX_POWERED / 2), 1e-9);
     }

@@ -220,8 +220,10 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         }
         float yr = getYRot() * Mth.DEG_TO_RAD;
         setDeltaMovement(-Mth.sin(yr) * forward, vy, Mth.cos(yr) * forward);
+        double x0 = getX(), z0 = getZ();
         move(MoverType.SELF, getDeltaMovement());
-        if (level().isClientSide() && horizontalCollision && BikePhysics.crashes(forward)) {
+        double along = -Mth.sin(yr) * (getX() - x0) + Mth.cos(yr) * (getZ() - z0);
+        if (level().isClientSide() && horizontalCollision && BikePhysics.crashes(onGround(), forward, along)) {
             physics.reset();
             clientCrash.accept(this);
         }

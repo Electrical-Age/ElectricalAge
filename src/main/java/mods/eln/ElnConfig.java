@@ -69,11 +69,11 @@ public final class ElnConfig {
             .defineInRange("tipOverDelaySeconds", 5.0, 0.0, 3600.0);
         BIKE_TIP_CHANCE = b.comment("Chance per second, after that, that it falls over with its rider (0 never).")
             .defineInRange("tipOverChancePerSecond", 0.1, 0.0, 1.0);
-        BIKE_CRASH = b.comment("Running into a full block or a wall faster than this (blocks per second) throws the rider off.")
+        BIKE_CRASH = b.comment("Losing more than this much speed (blocks per second) against a block or wall while on the ground throws the rider off; brushing past or bumping in the air doesn't.")
             .defineInRange("crashSpeed", 3.0, 0.0, 100.0);
         BIKE_JUMP = b.comment("Height of a full-charge jump, blocks (1.31: one block with room, never 1.5).")
             .defineInRange("jumpHeight", 1.31, 0.0, 5.0);
-        BIKE_STEP = b.comment("Height it rides up without jumping, blocks (0.6: slabs and stairs; 1 or more climbs full blocks).")
+        BIKE_STEP = b.comment("Height it rides up without jumping, blocks, counted from a full block (0.6: slabs and stairs; 1 or more climbs full blocks). From a dirt path, farmland or mud it rides up to 0.13 more.")
             .defineInRange("stepHeight", 0.6, 0.0, 2.0);
         BIKE_TURN = b.comment("How fast it swings round to where the rider looks when slow, degrees per tick.")
             .defineInRange("turnRate", 12.0, 0.5, 180.0);
@@ -81,7 +81,7 @@ public final class ElnConfig {
             .defineInRange("turnRateAtTopSpeed", 5.0, 0.5, 180.0);
         BIKE_LAMP = b.comment("The front lamp's draw from the trunk battery, W (both bikes; a flashlight's is 20-50).")
             .defineInRange("lampWatts", 20.0, 0.0, 1000.0);
-        TERRAIN_STEP = b.comment("The terrain bike: height it rides up without jumping, blocks (1: a whole block; 2-block walls stop it).")
+        TERRAIN_STEP = b.comment("The terrain bike: height it rides up without jumping, blocks, counted from a full block (1: a whole block, also from a path or mud; 1.5 stops it).")
             .defineInRange("terrainStepHeight", 1.0, 0.0, 2.0);
         TERRAIN_JUMP = b.comment("The terrain bike: height of a full-charge jump, blocks.")
             .defineInRange("terrainJumpHeight", 2.5, 0.0, 6.0);

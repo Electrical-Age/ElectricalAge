@@ -485,6 +485,14 @@ public final class BikeCases {
             ctx.level().setBlockAndUpdate(ctx.at(1, 1, 3), Blocks.STONE.defaultBlockState());
             ctx.level().setBlockAndUpdate(ctx.at(4, 1, 3), Blocks.STONE.defaultBlockState());
             ctx.level().setBlockAndUpdate(ctx.at(4, 2, 3), Blocks.STONE.defaultBlockState());
+            // a whole block from a dirt path (Baughn 2026-11-06: it threw him riding over grass and paths), from mud;
+            // a block with a slab on it stops it
+            for (int z = 0; z < 3; z++) ctx.level().setBlockAndUpdate(ctx.at(2, 0, z), Blocks.DIRT_PATH.defaultBlockState());
+            ctx.level().setBlockAndUpdate(ctx.at(2, 1, 3), Blocks.STONE.defaultBlockState());
+            for (int z = 0; z < 3; z++) ctx.level().setBlockAndUpdate(ctx.at(3, 0, z), Blocks.MUD.defaultBlockState());
+            ctx.level().setBlockAndUpdate(ctx.at(3, 1, 3), Blocks.STONE.defaultBlockState());
+            ctx.level().setBlockAndUpdate(ctx.at(6, 1, 3), Blocks.STONE.defaultBlockState());
+            ctx.level().setBlockAndUpdate(ctx.at(6, 2, 3), Blocks.SMOOTH_STONE_SLAB.defaultBlockState());
         }
 
         double ride(TestContext ctx, int x) {
@@ -507,6 +515,10 @@ public final class BikeCases {
             double one = ride(ctx, 1), two = ride(ctx, 4);
             ctx.check("the terrain bike rides up a whole block", one > 5.9, "went " + one);
             ctx.check("a two-block wall stops it", two < 1.2, "went " + two);
+            double path = ride(ctx, 2), mud = ride(ctx, 3), slab = ride(ctx, 6);
+            ctx.check("it rides up a whole block from a dirt path", path > 5.9, "went " + path);
+            ctx.check("...and from mud", mud > 5.9, "went " + mud);
+            ctx.check("a block and a half stops it", slab < 1.2, "went " + slab);
             double peak = BikePhysics.jumpPeak(BikePhysics.jumpVelocity(1, T.jumpVy()));
             ctx.check("its full jump peaks at about 2.5 blocks", peak > 2.3 && peak < 2.7, "" + peak);
             ctx.check("its motor draws 150 W at full speed, the same top speed", Math.abs(BikePhysics.motorWatts(BikePhysics.VMAX_POWERED, T.motorWatts()) - 150) < 1e-6, "");
@@ -690,6 +702,11 @@ ctx.check("it saves as eln:terrain_bike (what it loads back as)", id.equals("eln
         public void build(TestContext ctx) {
             ctx.level().setBlockAndUpdate(ctx.at(1, 1, 3), Blocks.SMOOTH_STONE_SLAB.defaultBlockState());
             ctx.level().setBlockAndUpdate(ctx.at(4, 1, 3), Blocks.STONE.defaultBlockState());
+            // a slab from a dirt path (15/16 high), from mud (7/8)
+            for (int z = 0; z < 3; z++) ctx.level().setBlockAndUpdate(ctx.at(7, 0, z), Blocks.DIRT_PATH.defaultBlockState());
+            ctx.level().setBlockAndUpdate(ctx.at(7, 1, 3), Blocks.SMOOTH_STONE_SLAB.defaultBlockState());
+            for (int z = 0; z < 3; z++) ctx.level().setBlockAndUpdate(ctx.at(8, 0, z), Blocks.MUD.defaultBlockState());
+            ctx.level().setBlockAndUpdate(ctx.at(8, 1, 3), Blocks.SMOOTH_STONE_SLAB.defaultBlockState());
         }
 
         String last = "";
@@ -715,9 +732,15 @@ ctx.check("it saves as eln:terrain_bike (what it loads back as)", id.equals("eln
             double slab = ride(ctx, 1);
             String a = last;
             double stone = ride(ctx, 4);
+            String b = last;
+            double path = ride(ctx, 7);
+            String c = last;
+            double mud = ride(ctx, 8);
             ctx.check("a half slab is a step it rides over", slab > 5.9, a);
-            ctx.check("a full block stops it", stone < 1.2, last);
+            ctx.check("a full block stops it", stone < 1.2, b);
             ctx.check("its step height is under a block", BikePhysics.STEP_HEIGHT < 1, "");
+            ctx.check("a half slab from a dirt path is a step too", path > 5.9, c);
+            ctx.check("...and from mud", mud > 5.9, last);
         }
     }
 

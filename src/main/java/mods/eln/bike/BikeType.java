@@ -27,8 +27,13 @@ public enum BikeType {
         this.defaults = defaults;
     }
 
+    /**
+     * The step it rides up (vanilla maxUpStep): the configured height, which counts from a full block's top, plus
+     * BikePhysics.SUNKEN for floors that sit lower (a dirt path or farmland 1/16, mud or soul sand 1/8). Without it the
+     * terrain bike's whole block from a path is 1 1/16 and throws the rider (Baughn 2026-11-06: falls on grass and paths).
+     */
     public float stepHeight() {
-        return this == TERRAIN ? terrainStep : BikePhysics.STEP_HEIGHT;
+        return (this == TERRAIN ? terrainStep : BikePhysics.STEP_HEIGHT) + BikePhysics.SUNKEN;
     }
 
     /** Upward speed of a full-charge jump (b/t). */
