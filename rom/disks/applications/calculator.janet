@@ -25,14 +25,22 @@
   (defn value [] (scan-number entry))
   (defn tape [colour s] (ui/append t 30 colour (string s "\n")))
   (defn draw []
-    (def shown (if (> (length entry) 16) (string/slice entry 0 16) entry))
-    (ui/text t 3 1 2 :white (string/format "%17s" shown) :black)
-    (ui/text t 4 1 1 :gray (string/format "%-4s%13s" (if (zero? memory) "" "M")
+    (ui/text t 3 1 2 :white (string/format "%34s" entry) :black)   # (right-aligned, as on a calculator)
+    (ui/text t 4 1 1 :gray (string/format "%-4s%30s" (if (zero? memory) "" "M")
                                          (if pending (string (show-number acc) " " pending) "")) :black))
 
   (defn set-entry [x]
     (set entry (show-number x))
     (set fresh true))
+
+  (defn unary
+    "f of the number shown, onto the tape as name(x) = result."
+    [name f]
+    (def x (value))
+    (def r (f x))
+    (tape :light-gray (string name "(" (show-number x) ")"))
+    (tape (if (nan? r) :red :white) (string "= " (show-number r)))
+    (set-entry r))
 
   (defn operate [a op b]
     (case op "+" (+ a b) "-" (- a b) "*" (* a b) "/" (if (zero? b) math/nan (/ a b))))
@@ -73,9 +81,9 @@
       (= k "=") (finish)
       (= k "+/-") (set entry (if (string/has-prefix? "-" entry) (string/slice entry 1)
                                (if (= entry "0") entry (string "-" entry))))
-      (= k "sqrt") (set-entry (if (neg? (value)) math/nan (math/sqrt (value))))
-      (= k "1/x") (set-entry (if (zero? (value)) math/nan (/ 1 (value))))
-      (= k "%") (set-entry (if (and pending (index-of pending ["+" "-"])) (/ (* acc (value)) 100) (/ (value) 100)))
+      (= k "sqrt") (unary "sqrt" |(if (neg? $) math/nan (math/sqrt $)))
+      (= k "1/x") (unary "1/x" |(if (zero? $) math/nan (/ 1 $)))
+      (= k "%") (unary "%" |(if (and pending (index-of pending ["+" "-"])) (/ (* acc $) 100) (/ $ 100)))
       (= k "MC") (set memory 0)
       (= k "MR") (set-entry memory)
       (= k "M+") (do (set memory (+ memory (value))) (set fresh true))

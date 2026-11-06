@@ -30,6 +30,7 @@
 (def- ui-handlers @{}) # [tab id] -> the function for its events
 (def- line-waiters @{}) # tab -> the task waiting in getline for a line typed there
 (def- repl-tabs @{})   # tabs with a REPL (their line is element 2)
+(def- line-taken @{})  # tab -> the last submission a getline took there
 
 (defn ticks "The computer's clock: game ticks it has run (20 a second)." [] (ea/ticks))
 (defn now "The computer's clock in seconds." [] (/ (ea/ticks) 20))
@@ -230,6 +231,7 @@
       'submit (when (string? (get m 4))
                 (if-let [w (get line-waiters (m 1))]
                   (do (put line-waiters (m 1) nil)   # a getline was waiting for it
+                      (put line-taken (m 1) (get m 3 0))
                       (ui/send 'busy (m 1) (m 2) (get m 3 0) true)
                       (ui/send 'busy (m 1) (m 2) (get m 3 0) false)
                       (array/push ready [w (m 4)]))
@@ -496,7 +498,8 @@
     (flush-outputs)
     (def open (parser/state p :delimiters))
     (ui/line t 2 0 (- ui/height 1) ui/width (if (empty? open) "> " (string open "> ")) on-submit)
-    (ui/busy t 2 seq false)
+    # (a getline in the form may have taken a later line: the screen shows a line's latest mark, so end with that one)
+    (ui/busy t 2 (max seq (get line-taken t 0)) false)
     (ui/dict t (ea/names env))   # the REPL's own definitions, for completion
     (set taken false)
     (put system (fiber/current) nil))

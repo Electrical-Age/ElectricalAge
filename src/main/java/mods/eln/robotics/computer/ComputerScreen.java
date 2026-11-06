@@ -212,6 +212,7 @@ public class ComputerScreen extends ElnScreen {
         Scene s = scene();
         if (s.focusSeq != seenFocus && s.tabs.containsKey(s.focus)) {
             seenFocus = s.focusSeq;
+            if (tab != s.focus) focusId = -1;   // (an element id of the old tab means nothing in this one)
             tab = s.focus;
         }
         if (!s.tabs.containsKey(tab)) chose = false;   // (gone, e.g. after a reset: back to the REPL once it is up)
@@ -234,7 +235,7 @@ public class ComputerScreen extends ElnScreen {
     Scene.Element focusedRaw(Scene.Tab t) {
         if (t == null) return null;
         Scene.Element e = t.elements.get(focusId);
-        if (e != null) return e.kind.equals("raw") ? e : null;
+        if (e != null && (e.kind.equals("raw") || e.kind.equals("line"))) return e.kind.equals("raw") ? e : null;
         Scene.Element raw = null;
         for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
             if (en.getValue().kind.equals("line")) return null;
@@ -273,7 +274,7 @@ public class ComputerScreen extends ElnScreen {
         if (t == null) return null;
         Scene.Element e = t.elements.get(focusId);
         if (e != null && e.kind.equals("line")) return e;
-        if (e != null && e.kind.equals("raw")) return null;
+        if (e != null && e.kind.equals("raw")) return null;   // (anything else focused: the tab's first line)
         for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet())
             if (en.getValue().kind.equals("line")) {
                 focusId = en.getKey();

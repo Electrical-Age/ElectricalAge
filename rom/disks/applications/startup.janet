@@ -14,4 +14,4 @@
 (eachp [i [name file about]] programs
   (ui/button t (+ 10 i) 1 (+ 3 (* 2 i)) 12 name (fn [] (proc/start name run-file (string dir file))))
   (ui/text t (+ 20 i) 14 (+ 3 (* 2 i)) :light-gray about))
-(ui/text t 2 1 (- ui/height 2) :gray "Games: click the field first, so it gets the keys.")
+(ui/text t 2 1 (- ui/height 2) :gray "Snake and Gorillas: click the field first.")

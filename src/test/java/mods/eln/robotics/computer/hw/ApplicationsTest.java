@@ -57,7 +57,7 @@ class ApplicationsTest extends StdlibTest {
         m.editor.give(screen.submit("Ada"));
         tick(20, "@\"Ada\\n\"");
         assertTrue(out.toString().contains("name? Ada"), out.toString());
-        tick(10, null);   // (the getline's line has a later busy mark than the form's: done() can't tell)
+        tick(20, "\n> ");   // (the form's last busy mark covers the line getline took: the screen shows no pending line)
         type("(+ 1 2)");
         tick(20, "\n3\n> ");
     }
