@@ -126,6 +126,7 @@ public final class LabCommands {
                     if (n == 0) c.getSource().sendFailure(Component.literal("no tilted terminal logger there"));
                     return n;
                 })))
+                .then(Commands.literal("computers").executes(c -> demo(c.getSource(), () -> computers(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("loggerdemo").executes(c -> demo(c.getSource(), () -> loggerDemo(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("spmodules").executes(c -> demo(c.getSource(), () -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("tilted").executes(c -> demo(c.getSource(), () -> tilted(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -425,6 +426,86 @@ public final class LabCommands {
             src.sendFailure(Component.literal("demo not built: " + e.getMessage() + " (clear the area, or stand elsewhere)"));
             return 0;
         }
+    }
+
+    /**
+     * Two computers on one field bus, for trying programs that talk (the Applications floppy's BBS and Gorillas): each
+     * powered at 50 V from a source behind it, with Janet, 2 RAM and an Applications floppy, at addresses 60 and 61. They
+     * face opposite ways 4 blocks apart, so their bus pins face each other, and a bus cable joins the pins.
+     */
+    static int computers(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        int id = mods.eln.robotics.Robotics.COMPUTER_ID;
+        var a = placeComputer(level, player, id, pos, 0, 60);
+        var toB = a.front.right().toEnumFacing();
+        BlockPos pb = pos.relative(toB, 4);
+        var b = placeComputer(level, player, id, pb, 180, 61);
+        if (b.front.right().toEnumFacing() != toB.getOpposite()) throw new IllegalStateException("the second computer faces the wrong way");
+        long[][] join = new long[1][];
+        var start = mods.eln.node.voxel.CablePlacer.endAtForTests(level, pos, toB, pinHit(pos, toB), true, join, mods.eln.node.voxel.CablePart.BUS);
+        var end = mods.eln.node.voxel.CablePlacer.endAtForTests(level, pb, toB.getOpposite(), pinHit(pb, toB.getOpposite()), false, new long[1][],
+            mods.eln.node.voxel.CablePart.BUS);
+        String err = start == null || end == null ? "no pin end: " + start + " " + end
+            : mods.eln.node.voxel.CablePlacer.routeAndLayJoinedForTests(level, mods.eln.node.voxel.CablePart.BUS, start, join[0], end, null);
+        if (err != null) throw new IllegalStateException("bus cable: " + err);
+        src.sendSuccess(() -> Component.literal("computers 60 at " + pos.toShortString() + " and 61 at " + pb.toShortString() + ", on one bus"), false);
+        return 1;
+    }
+
+    /** Where a click lands on a computer's bus pin: the floor edge of its flank out, 4 voxels right of the middle. */
+    static net.minecraft.world.phys.Vec3 pinHit(BlockPos head, net.minecraft.core.Direction out) {
+        int lx = -out.getStepZ(), lz = out.getStepX();   // (left, seen facing the face from outside)
+        return new net.minecraft.world.phys.Vec3(head.getX() + 0.5 + out.getStepX() * 0.5 - lx * 4 / 16.0, head.getY() + 0.1,
+            head.getZ() + 0.5 + out.getStepZ() * 0.5 - lz * 4 / 16.0);
+    }
+
+    static mods.eln.robotics.computer.ComputerElement placeComputer(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.player.Player player,
+                                                               int id, BlockPos p, float yaw, int address) {
+        var d = mods.eln.Eln.transparentNodeItem.getDescriptor(id);
+        float y0 = player.getYRot(), x0 = player.getXRot();
+        player.setYRot(yaw);
+        player.setXRot(0);
+        mods.eln.node.transparent.TransparentNode node;
+        try {
+            node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, p, mods.eln.misc.Direction.YN);
+        } finally {
+            player.setYRot(y0);
+            player.setXRot(x0);
+        }
+        if (node == null || !(node.element instanceof mods.eln.robotics.computer.ComputerElement c)) throw new IllegalStateException("no room for a computer at " + p);
+        var back = c.front.back().toEnumFacing();
+        host(level, player, 4 + (32 << 6), p.relative(back));   // a low voltage cable
+        var source = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, p.relative(back, 2));
+        source.networkUnserialize(packet(o -> {
+            o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+            o.writeFloat(50f);
+        }));
+        c.getInventory().setItem(0, new net.minecraft.world.item.ItemStack(mods.eln.robotics.Robotics.JANET_ROM.get()));
+        c.getInventory().setItem(1, new net.minecraft.world.item.ItemStack(mods.eln.robotics.Robotics.RAM_CHIP.get()));
+        c.getInventory().setItem(2, new net.minecraft.world.item.ItemStack(mods.eln.robotics.Robotics.RAM_CHIP.get()));
+        c.getInventory().setItem(mods.eln.robotics.computer.ComputerElement.DRIVE_A,
+            new net.minecraft.world.item.ItemStack(mods.eln.robotics.Robotics.APPLICATIONS_DISK.get()));
+        c.getInventory().setChanged();
+        c.networkUnserialize(packet(o -> {
+            o.writeByte(mods.eln.robotics.computer.ComputerElement.SET_ADDRESS_ID);
+            o.writeFloat(address);
+        }), null);
+        return c;
+    }
+
+    interface PacketWriter {
+        void write(java.io.DataOutputStream o) throws java.io.IOException;
+    }
+
+    static java.io.DataInputStream packet(PacketWriter w) {
+        var bytes = new java.io.ByteArrayOutputStream();
+        try {
+            w.write(new java.io.DataOutputStream(bytes));
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException(e);
+        }
+        return new java.io.DataInputStream(new java.io.ByteArrayInputStream(bytes.toByteArray()));
     }
 
     static int loggerDemo(CommandSourceStack src, BlockPos pos) {
