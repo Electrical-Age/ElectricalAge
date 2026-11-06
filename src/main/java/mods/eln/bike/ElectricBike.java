@@ -293,38 +293,25 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         if (player.getVehicle() instanceof ElectricBike b && b.getControllingPassenger() == player) b.toggleLamp();
     }
 
-    /** How far the beam reaches (blocks), its light, and where the lamp sits on the bike (forward, up). */
+    /** How far the beam reaches without a client-drawn beam (blocks), its light, and where the lamp sits on the bike (forward, up). */
     static final double LAMP_RANGE = 12, LAMP_FORWARD = 0.55, LAMP_UP = 0.85;
-    static final int LAMP_LIGHT = 14;
+    public static final int LAMP_LIGHT = 14;
 
     /**
-     * Server, each tick the lamp is on: light blocks along the beam, as EA's flashlight places them (LampItem: short-lived
-     * light blocks in the air the beam crosses, every third step back from where it stops), from the lamp along the
-     * bike's heading, dipped a little.
+     * Server, each tick the lamp is on: the rider casts the beam as a flashlight or headlamp does (LampItem.light: with
+     * a client drawing beams, Stasis Delvers, one light block at the eyes; else 1.12's trail of light blocks), and
+     * LampItem.beamLight counts the lamp for its rider. Baughn 2026-11-06: no more trail of light blocks of its own,
+     * which lagged. Parked with it on, one light block at the lamp.
      */
     void lightTheWay() {
+        if (getControllingPassenger() instanceof Player p) {
+            mods.eln.item.electricalitem.LampItem.light(level(), p, LAMP_LIGHT, (int) LAMP_RANGE);
+            return;
+        }
         float yr = getYRot() * Mth.DEG_TO_RAD;
-        double dip = Math.toRadians(8);
-        Vec3 dir = new Vec3(-Mth.sin(yr) * Math.cos(dip), -Math.sin(dip), Mth.cos(yr) * Math.cos(dip)).scale(0.5);
-        Vec3 p = position().add(-Mth.sin(yr) * LAMP_FORWARD, LAMP_UP, Mth.cos(yr) * LAMP_FORWARD);
-        int steps = 0;
-        for (int i = 0; i < LAMP_RANGE / 0.5; i++) {
-            Vec3 q = p.add(dir);
-            BlockPos b = BlockPos.containing(q);
-            if (!mods.eln.compat.WorldCompat.isAir(level(), b.getX(), b.getY(), b.getZ())) break;   // (a light block is air)
-            p = q;
-            steps++;
-        }
-        while (steps > 0) {
-            BlockPos at = BlockPos.containing(p);
-            int stride = 1;
-            if (mods.eln.compat.WorldCompat.isAir(level(), at.getX(), at.getY(), at.getZ())) {
-                mods.eln.sixnode.lampsocket.LightBlockEntity.addLight(level(), at.getX(), at.getY(), at.getZ(), LAMP_LIGHT, 5);
-                stride = 3;
-            }
-            p = p.subtract(dir.scale(stride));
-            steps -= stride;
-        }
+        BlockPos at = BlockPos.containing(position().add(-Mth.sin(yr) * LAMP_FORWARD, LAMP_UP, Mth.cos(yr) * LAMP_FORWARD));
+        if (mods.eln.compat.WorldCompat.isAir(level(), at.getX(), at.getY(), at.getZ()))
+            mods.eln.sixnode.lampsocket.LightBlockEntity.addLight(level(), at.getX(), at.getY(), at.getZ(), LAMP_LIGHT, 5);
     }
 
     /** The motor's draw from the trunk's battery (server), by the speed it went this tick; POWERED for both sides. */

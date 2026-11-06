@@ -35,7 +35,7 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
 
         /**
          * The beam an entity casts (the one light for every EA lamp, Baughn 2026-10-31): the brightest lit flashlight in
-         * either hand or the worn headlamp, else 0. For the client's beam drawing (Stasis Delvers' FlashlightPost).
+         * either hand, the worn headlamp, or the front lamp of the bike it rides, else 0. For the client's beam drawing (Stasis Delvers' FlashlightPost).
          */
         @JvmStatic
         fun beamLight(entity: Entity): Int {
@@ -49,6 +49,9 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
                 val head = mods.eln.item.headlamp.HeadlampItem.worn(entity)
                 if (head.item is mods.eln.item.headlamp.HeadlampItem) best = maxOf(best, (head.item as mods.eln.item.headlamp.HeadlampItem).light(head))
             }
+            val bike = entity.vehicle
+            if (bike is mods.eln.bike.ElectricBike && bike.lampOn() && bike.controllingPassenger === entity)
+                best = maxOf(best, mods.eln.bike.ElectricBike.LAMP_LIGHT)
             return best
         }
 

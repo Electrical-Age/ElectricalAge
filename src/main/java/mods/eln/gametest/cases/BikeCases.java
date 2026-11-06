@@ -375,11 +375,18 @@ public final class BikeCases {
     }
 
     /**
-     * The front lamp (Baughn 2026-10-29: like EA's flashlight): its rider switches it on, only with charge; it lights
-     * the air ahead with short-lived light blocks, draws its watts from the trunk battery even standing, and goes out
+     * The front lamp (Baughn 2026-10-29: like EA's flashlight): its rider switches it on, only with charge; the rider
+     * casts its beam as with a flashlight (one light block where clients draw beams), draws its watts from the trunk battery even standing, and goes out
      * when the battery is flat.
      */
     static final class Lamp implements TestCase {
+        static int lights(TestContext ctx, BlockPos a, BlockPos b) {
+            int n = 0;
+            for (BlockPos q : BlockPos.betweenClosed(a, b))
+                if (ctx.level().getBlockState(q).is(ElnRegistry.LIGHT_BLOCK.get())) n++;
+            return n;
+        }
+
         public String id() {
             return "bike_front_lamp";
         }
@@ -423,14 +430,30 @@ public final class BikeCases {
                 ctx.check("with charge, the rider's toggle turns it on", bike.lampOn(), "");
                 var bb = BatteryBeltItem.battery(bike.trunk.getItem(0));
                 double e0 = bb.getEnergy(bike.trunk.getItem(0));
-                for (int t = 0; t < 100; t++) bike.serverTick();   // 5 s, standing still
-                double used = e0 - bb.getEnergy(bike.trunk.getItem(0));
-                ctx.check("it draws its " + BikePhysics.LAMP_WATTS + " W standing still (5 s)", Math.abs(used - BikePhysics.LAMP_WATTS * 5) < 5, used + " J");
-                int lit = 0;
+                p.setYRot(0);
+                p.setXRot(0);
+                bike.positionRider(p);
+                var beam = mods.eln.item.electricalitem.LampItem.clientBeam;
                 BlockPos at = bike.blockPosition();
-                for (BlockPos q : BlockPos.betweenClosed(at.offset(-2, -1, 1), at.offset(2, 2, 9)))
-                    if (ctx.level().getBlockState(q).is(ElnRegistry.LIGHT_BLOCK.get())) lit++;
-                ctx.check("the air ahead is lit", lit > 0, lit + " light blocks ahead");
+                int near, ahead;
+                try {
+                    // with a client drawing the beam (Stasis Delvers), the rider casts it: one light block, at the eyes
+                    mods.eln.item.electricalitem.LampItem.clientBeam = e -> true;
+                    for (int t = 0; t < 80; t++) bike.serverTick();   // 4 s, standing still (at 5 s it may tip over with the rider)
+                    near = lights(ctx, at.offset(-3, -1, -3), at.offset(3, 4, 12));
+                    ctx.check("the rider casts the lamp's beam, as with a flashlight", mods.eln.item.electricalitem.LampItem.beamLight(p) == ElectricBike.LAMP_LIGHT,
+                        "" + mods.eln.item.electricalitem.LampItem.beamLight(p));
+                    ctx.check("with a client-drawn beam, one light block (Baughn: no trail of them)", near == 1, near + " light blocks");
+                } finally {
+                    mods.eln.item.electricalitem.LampItem.clientBeam = beam;
+                }
+                double used = e0 - bb.getEnergy(bike.trunk.getItem(0));
+                ctx.check("it draws its " + BikePhysics.LAMP_WATTS + " W standing still (4 s)", Math.abs(used - BikePhysics.LAMP_WATTS * 4) < 5, used + " J");
+                if (beam == null) {
+                    bike.serverTick();
+                    ahead = lights(ctx, at.offset(-2, -1, 1), at.offset(2, 3, 12));
+                    ctx.check("without one, the flashlight's trail lights the air ahead", ahead > 0, ahead + " light blocks ahead");
+                }
                 bb.setEnergy(bike.trunk.getItem(0), 0);
                 bike.serverTick();
                 ctx.check("flat, it goes out", !bike.lampOn(), "");
