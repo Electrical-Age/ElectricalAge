@@ -214,7 +214,8 @@
       (if broke (set broke nil))
       (def n (proc-stop t))
       (def p (get procs t))
-      (buffer/push ((p :env) :err) (string "\nBreak: stopped " n " task" (if (= 1 n) "" "s") ".\n")))
+      (when-let [err ((p :env) :err)]   # (a proc/new-tab process may print nowhere)
+        (buffer/push err (string "\nBreak: stopped " n " task" (if (= 1 n) "" "s") ".\n"))))
     (on-break)))
 
 (defn- screen-event [m]
@@ -244,7 +245,8 @@
     (buffer/clear display-in)
     (buffer/push display-in rest)
     (def [ok m] (protect (parse line)))
-    (when ok (screen-event m))))
+    (when ok   # (a bad event must not stop the scheduler: it says so on the console)
+      (try (screen-event m) ([e] (eprint "screen event " line ": " e))))))
 
 (defn- run []
   (forever

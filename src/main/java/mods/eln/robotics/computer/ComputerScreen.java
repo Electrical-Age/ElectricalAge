@@ -65,7 +65,7 @@ public class ComputerScreen extends ElnScreen {
         int historyAt = -1;
         /** A submission not yet taken by the computer (shown greyed), and its number. */
         String pending;
-        long pendingSeq;
+        long pendingSeq, pendingAt;
     }
 
     public ComputerScreen(ElnNodeMenu menu, Inventory inventory, Component title, Object render) {
@@ -461,6 +461,12 @@ public class ComputerScreen extends ElnScreen {
         LineEdit le = edit(id);
         // the computer took the pending submission: it is in the log now
         if (le.pending != null && e.busySeq >= le.pendingSeq) le.pending = null;
+        if (le.pending != null && System.currentTimeMillis() - le.pendingAt > 10_000) {
+            // never taken (the computer is off, stuck, or refused it): the text comes back to edit and send again
+            if (le.text.isEmpty()) le.text.append(le.pending);
+            le.cursor = le.text.length();
+            le.pending = null;
+        }
         boolean busy = le.pending != null || (e.busy && le.pendingSeq > 0 && e.busySeq >= le.pendingSeq);
         cells(g, prompt, x, y, w, 0xFF8FB0FF);
         int px = prompt.codePointCount(0, prompt.length());
@@ -599,8 +605,9 @@ public class ComputerScreen extends ElnScreen {
         }
         if (k != InputConstants.KEY_ESCAPE && focusedRaw(t) != null) {
             // (characters come through charTyped; Escape still closes the screen)
-            String name = keyName(k, (ev.modifiers() & 6) != 0);
-            if (name != null) render.screenEvent(new Form.Symbol("key"), (long) tab, (long) focusId, name, (long) (ev.modifiers() & 7));
+            int mods = (ev.hasShiftDown() ? 1 : 0) | (ev.hasControlDown() ? 2 : 0) | (ev.hasAltDown() ? 4 : 0);
+            String name = keyName(k, (mods & 6) != 0);
+            if (name != null) render.screenEvent(new Form.Symbol("key"), (long) tab, (long) focusId, name, (long) mods);
             return true;
         }
         if (line == null || k == InputConstants.KEY_ESCAPE) return super.keyPressed(ev);
@@ -659,6 +666,7 @@ public class ComputerScreen extends ElnScreen {
         String text = le.text.toString();
         le.pendingSeq = ++seq;
         le.pending = text;
+        le.pendingAt = System.currentTimeMillis();
         if (!text.isBlank() && (le.history.isEmpty() || !le.history.getLast().equals(text))) le.history.add(text);
         le.historyAt = -1;
         le.text.setLength(0);

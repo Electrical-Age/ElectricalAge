@@ -18,7 +18,7 @@ public final class ScreenHost {
     /** A tick's batch at most; past it, viewers get the scene again instead. */
     public static final int BATCH_MAX = 16 * 1024;
     /** The longest event a client may send: a save; the others are short. */
-    public static final int MAX_SAVE = 40 * 1024, MAX_EVENT = 256;
+    public static final int MAX_SAVE = 40 * 1024, MAX_SUBMIT = 8192, MAX_EVENT = 256;
     static final Set<String> EVENTS = Set.of("submit", "press", "select", "save", "key", "click", "doc?", "close", "break");
     public static final int CONSOLE_TAB = 0, CONSOLE_LOG = 1;
 
@@ -125,7 +125,7 @@ public final class ScreenHost {
         if (m == null) return null;
         String v = Form.verb(m);
         if (!EVENTS.contains(v)) return null;
-        if (!v.equals("save") && line.length() > MAX_EVENT) return null;
+        if (line.length() > (v.equals("save") ? MAX_SAVE : v.equals("submit") ? MAX_SUBMIT : MAX_EVENT)) return null;
         if (!(m.size() > 1 && m.get(1) instanceof Long t && scene.tabs.containsKey((int) (long) t))) return null;
         if (!v.equals("break") && !v.equals("close") && !(m.size() > 2 && m.get(2) instanceof Long)) return null;
         return Form.print(m);
