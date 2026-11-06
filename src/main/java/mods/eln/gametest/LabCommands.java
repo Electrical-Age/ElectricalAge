@@ -126,6 +126,7 @@ public final class LabCommands {
                     if (n == 0) c.getSource().sendFailure(Component.literal("no tilted terminal logger there"));
                     return n;
                 })))
+                .then(Commands.literal("converters").executes(c -> demo(c.getSource(), () -> converters(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("computers").executes(c -> demo(c.getSource(), () -> computers(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("loggerdemo").executes(c -> demo(c.getSource(), () -> loggerDemo(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("spmodules").executes(c -> demo(c.getSource(), () -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -451,6 +452,77 @@ public final class LabCommands {
         if (err != null) throw new IllegalStateException("bus cable: " + err);
         src.sendSuccess(() -> Component.literal("computers 60 at " + pos.toShortString() + " and 61 at " + pb.toShortString() + ", on one bus"), false);
         return 1;
+    }
+
+    /**
+     * DC-DC converter rigs for a client check of the realistic converter (Baughn 2026-11-06), in a row along x, 5 apart,
+     * each fed 48 V on its left: (a) 2:1 LV on a cheap core (saturates and burns), (b) 14:7 cheap (fine), (c) 13:62 LV:MV
+     * cheap (~229 V), (d) 5:24 LV:MV optimal (230.4 V), (e) the Variable converter 14:28 LV:MV cheap with a Signal Trimmer on
+     * its front at 50 %, (f) 14:7 cheap with its secondary shorted to ground (overheats).
+     */
+    static int converters(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        int lv = 4 + (32 << 6), mv = 8 + (32 << 6);
+        Object[][] rigs = {
+            {"DC-DC Converter", lv, 2, lv, 1, "Cheap Ferromagnetic Core", false},
+            {"DC-DC Converter", lv, 14, lv, 7, "Cheap Ferromagnetic Core", false},
+            {"DC-DC Converter", lv, 13, mv, 62, "Cheap Ferromagnetic Core", false},
+            {"DC-DC Converter", lv, 5, mv, 24, "Optimal Ferromagnetic Core", false},
+            {"Variable DC-DC Converter", lv, 14, mv, 28, "Cheap Ferromagnetic Core", false},
+            {"DC-DC Converter", lv, 14, lv, 7, "Cheap Ferromagnetic Core", true},
+        };
+        StringBuilder where = new StringBuilder();
+        for (int i = 0; i < rigs.length; i++) {
+            Object[] r = rigs[i];
+            BlockPos p = pos.offset(5 * i, 0, 0);
+            var d = mods.eln.Eln.transparentNodeItem.getDescriptor(transparentId((String) r[0]));
+            float y0 = player.getYRot(), x0 = player.getXRot();
+            player.setYRot(0);
+            player.setXRot(0);
+            mods.eln.node.transparent.TransparentNode node;
+            try {
+                node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, p, mods.eln.misc.Direction.YN);
+            } finally {
+                player.setYRot(y0);
+                player.setXRot(x0);
+            }
+            if (node == null || !(node.element instanceof mods.eln.transparentnode.transformer.TransformerElement t))
+                throw new IllegalStateException("no room for a converter at " + p);
+            mods.eln.misc.Direction left = t.front.left(), right = t.front.right();
+            host(level, player, lv, step(p, left));
+            var feed = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, step(step(p, left), left));
+            orient(feed, l -> l, right);
+            feed.networkUnserialize(packet(o -> {
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat((float) mods.eln.Eln.LVU);
+            }));
+            host(level, player, (int) r[3], step(p, right));
+            if ((boolean) r[6]) host(level, player, sixId("Ground Cable"), step(step(p, right), right));
+            if (t instanceof mods.eln.transparentnode.transformer.VariableTransformerElement) {
+                var trim = (mods.eln.sixnode.electricalgatesource.ElectricalGateSourceElement) host(level, player, sixId("Signal Trimmer"),
+                    step(p, t.front));
+                orient(trim, l -> l, t.front.back());
+                trim.networkUnserialize(packet(o -> {
+                    o.writeByte(mods.eln.sixnode.electricalgatesource.ElectricalGateSourceElement.setVoltagerId);
+                    o.writeFloat((float) (mods.eln.Eln.SVU / 2));
+                }));
+            }
+            t.getInventory().setItem(mods.eln.transparentnode.transformer.TransformerContainer.primaryCableSlotId,
+                mods.eln.Eln.sixNodeItem.getDescriptor((int) r[1]).newItemStack((int) r[2]));
+            t.getInventory().setItem(mods.eln.transparentnode.transformer.TransformerContainer.secondaryCableSlotId,
+                mods.eln.Eln.sixNodeItem.getDescriptor((int) r[3]).newItemStack((int) r[4]));
+            t.getInventory().setItem(mods.eln.transparentnode.transformer.TransformerContainer.ferromagneticSlotId,
+                mods.eln.Eln.findItemStack((String) r[5], 1));
+            t.getInventory().setChanged();
+            where.append((char) ('a' + i)).append(' ').append(p.toShortString()).append("; ");
+        }
+        src.sendSuccess(() -> Component.literal("converters: " + where), false);
+        return 1;
+    }
+
+    static BlockPos step(BlockPos p, mods.eln.misc.Direction d) {
+        return p.relative(d.toEnumFacing());
     }
 
     /** Where a click lands on a computer's bus pin: the floor edge of its flank out, 4 voxels right of the middle. */
