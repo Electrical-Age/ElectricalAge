@@ -34,7 +34,8 @@ public class AnnealCategory extends AbstractRecipeCategory<AnnealCategory.Anneal
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder b, Anneal r, IFocusGroup focuses) {
         b.addRecipeArrow().setPosition(40, 6);
+        // (Baughn: snappy; the furnace is the page's catalyst, and the laminations' tooltip tells of spoiling)
         b.addText(Component.translatable("jei.eln.anneal.how", (int) ElectricalFurnaceProcess.ANNEAL_MIN_C, (int) ElectricalFurnaceProcess.ANNEAL_MAX_C,
-            (int) (ElectricalFurnaceProcess.ANNEAL_ENERGY / 1000), (int) ElectricalFurnaceProcess.ANNEAL_SPOIL_C), 150, 32).setPosition(0, 28);
+            (int) (ElectricalFurnaceProcess.ANNEAL_ENERGY / 1000)), 150, 32).setPosition(0, 28);
     }
 }
