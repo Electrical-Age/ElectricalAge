@@ -40,7 +40,12 @@ public record SlotSpec(String kind, int index, int x, int y, int limit, Predicat
 
     /** A furnace's input: what vanilla's furnace would smelt (the recipe property set, known on both sides; ElnSlot). */
     public static SlotSpec smeltable(int index, int x, int y, String skin, String... comment) {
-        return new SlotSpec("Smeltable", index, x, y, 64, s -> true, skin, comment);
+        return smeltable(index, x, y, s -> false, skin, comment);
+    }
+
+    /** ... and what also accepts besides (the Electrical Furnace: laminations to anneal). */
+    public static SlotSpec smeltable(int index, int x, int y, java.util.function.Predicate<net.minecraft.world.item.ItemStack> also, String skin, String... comment) {
+        return new SlotSpec("Smeltable", index, x, y, 64, also, skin, comment);
     }
 
     /** 1.12 GenericItemUsingDamageSlot: shared items only, descriptor class or a subclass. */

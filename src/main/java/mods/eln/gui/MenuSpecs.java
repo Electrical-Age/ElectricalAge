@@ -134,7 +134,8 @@ public final class MenuSpecs {
         // P4b layout (ElectricalFurnaceScreen): input -> arrow -> output, heater and regulator to the right
         put(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor.class, d -> MenuSpec.of(
             SlotSpec.output(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.outSlotId, 86, 25, BIG),
-            SlotSpec.smeltable(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.inSlotId, 28, 25, MEDIUM, tr("Input")),
+            SlotSpec.smeltable(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.inSlotId, 28, 25,
+                s -> s.is(mods.eln.Eln.findItemStack("Silicon Steel Laminations").getItem()), MEDIUM, tr("Input")),   // (annealed: Baughn 2026-11-06)
             descriptor(2, 130, 25, 1, HeatingCorpElement.class, MEDIUM, tr("Heating element slot")),
             descriptor(3, 80 + 18, -2000, 1, ThermalIsolatorElement.class, MEDIUM, tr("Thermal isolator slot")),
             regulator(4, 150, 25, 1, new RegulatorType[]{RegulatorType.OnOff, RegulatorType.Analog}, MEDIUM,

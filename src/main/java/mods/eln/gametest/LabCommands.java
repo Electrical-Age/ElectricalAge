@@ -569,7 +569,7 @@ public final class LabCommands {
                 f.getInventory().setItem(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.thermalRegulatorSlotId,
                     mods.eln.Eln.findItemStack("Analogic Regulator", 1));
                 f.getInventory().setChanged();
-                float target = i == 0 ? 650 : 500;
+                float target = (float) ((i == 0 ? 650 : 500) - mods.eln.sim.PhysicalConstant.Tamb);   // (the screen shows the target plus the room)
                 f.networkUnserialize(packet(o -> {
                     o.writeByte(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.unserializeTemperatureTarget);
                     o.writeFloat(target);

@@ -24,7 +24,8 @@ public class ElnSlot extends Slot {
     @Override
     public boolean mayPlace(ItemStack stack) {
         if ("Smeltable".equals(spec.kind()))
-            return level == null || level.recipeAccess().propertySet(net.minecraft.world.item.crafting.RecipePropertySet.FURNACE_INPUT).test(stack);
+            return level == null || spec.filter().test(stack)
+                || level.recipeAccess().propertySet(net.minecraft.world.item.crafting.RecipePropertySet.FURNACE_INPUT).test(stack);
         return spec.filter().test(stack);
     }
 
