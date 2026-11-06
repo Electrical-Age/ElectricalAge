@@ -26,7 +26,7 @@ public final class FunctionReference {
         new Entry("Arithmetic", "a ^ b   pow(a, b)", "a to the power b; 2 ^ 3 ^ 2 is 2 ^ 9.", "A ^ 2", " ^ "),
         new Entry("Arithmetic", "abs(x)", "x without its sign.", "abs(A - B)", "abs(A)"),
         new Entry("Comparison and logic", "a > b   a < b   a >= b   a <= b", "1 when true, else 0.", "A > 0.5", " > "),
-        new Entry("Comparison and logic", "a == b   a != b", "Equal or not, within 0.01 (0.5 V).", "A == B", " == "),
+        new Entry("Comparison and logic", "a == b   a != b", "Equal or not, within 0.01 (0.05 V).", "A == B", " == "),
         new Entry("Comparison and logic", "a & b   a | b", "And, or: each on above 0.5; 1 or 0.", "A > 0.2 & B", " & "),
         new Entry("Comparison and logic", "!a", "Not: 1 while a is off (0.5 or below), else 0.", "!A", "!"),
         new Entry("Comparison and logic", "Order", "^, then * /, then + -, then comparisons, then !, then &, then |. Brackets change it.",
