@@ -355,7 +355,7 @@ class StdlibTest {
         tick(20, "> ");
         type("(defn down [t] (-- n) (show t))");
         tick(20, "> ");
-        type("(defn counter [] (def t (proc/tab)) (ui/clear t) (ui/button t 3 2 3 5 \"+1\" |(up t)) (ui/button t 4 8 3 5 \"-1\" |(down t)) (show t) (forever (sleep 60)))");
+        type("(defn counter [] (def t (proc/tab)) (ui/clear t) (ui/button t 3 2 3 5 \"+1\" |(up t)) (ui/button t 4 8 3 5 \"-1\" |(down t)) (show t))");
         tick(20, "> ");
         type("(proc/start \"counter\" counter)");
         tick(20, "\n2\n> ");
