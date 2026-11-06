@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "D": "eln:dielectric",
+    "P": "#eln:high_quality_plates/iron",
+    "S": "eln:silicon_plate"
+  },
+  "pattern": [
+    "PSP",
+    "PDP",
+    "PSP"
+  ],
+  "result": {
+    "id": "eln:silicon_steel_laminations"
+  }
+}

@@ -68,7 +68,11 @@ final class GoldenRecipesCase implements TestCase {
      * 1.12 outputs dropped on purpose: copper tools and armour, vanilla since 1.21.9 (Baughn, 2026-10-11); the heat
      * turbines, replaced by the 50V/200V steam turbines (Baughn, 2026-10-14).
      */
-    static final Set<String> REMOVED = Set.of("eln:copper_sword", "eln:copper_hoe", "eln:copper_shovel", "eln:copper_pickaxe",
+    static final Set<String> REMOVED = Set.of(
+        // made by machines now (Baughn 2026-11-06): the Average core annealed in the Electrical Furnace, the Optimal one
+        // field-annealed in the Magnetizer, from their own crafted intermediates
+        "eln:average_ferromagnetic_core", "eln:optimal_ferromagnetic_core",
+        "eln:copper_sword", "eln:copper_hoe", "eln:copper_shovel", "eln:copper_pickaxe",
         "eln:copper_axe", "eln:copper_helmet", "eln:copper_chestplate", "eln:copper_leggings", "eln:copper_boots",
         "eln:50_v_turbine", "eln:200_v_turbine");
 

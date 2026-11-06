@@ -299,6 +299,34 @@ public class Wp12aContent implements ElnContent {
             element.voltsPerTurn = 16;   // (Baughn 2026-11-06: saturation)
             sharedItem.addElement(completId, element);
         }
+        // the better cores' intermediates (Baughn 2026-11-06: three separate recipes, the better cores costly)
+        {
+            subId = 3;
+            completId = subId + (id << 6);
+            sharedItem.addElement(completId, new mods.eln.generic.GenericItemUsingDamageDescriptor(
+                TR_NAME(Type.NONE, "Silicon Steel Laminations")) {
+                @Override
+                public void addInformation(net.minecraft.world.item.ItemStack s, net.minecraft.world.entity.player.Player p, java.util.List list, boolean b) {
+                    super.addInformation(s, p, list, b);
+                    java.util.Collections.addAll(list, mods.eln.i18n.I18N.tr("Anneal in an Electrical Furnace between\n%1$ and %2$ °C to make an Average\nFerromagnetic Core. Above %3$ °C they spoil.",
+                        (int) mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.ANNEAL_MIN_C,
+                        (int) mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.ANNEAL_MAX_C,
+                        (int) mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.ANNEAL_SPOIL_C).split("\n"));
+                }
+            });
+        }
+        {
+            subId = 4;
+            completId = subId + (id << 6);
+            sharedItem.addElement(completId, new mods.eln.generic.GenericItemUsingDamageDescriptor(
+                TR_NAME(Type.NONE, "Nanocrystalline Core Blank")) {
+                @Override
+                public void addInformation(net.minecraft.world.item.ItemStack s, net.minecraft.world.entity.player.Player p, java.util.List list, boolean b) {
+                    super.addInformation(s, p, list, b);
+                    java.util.Collections.addAll(list, mods.eln.i18n.I18N.tr("Anneal it in a magnetic field: a long\npass through a Magnetizer makes an\nOptimal Ferromagnetic Core.").split("\n"));
+                }
+            });
+        }
     }
 
     public static void registerIngot(int id) {

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:iron_dust",
+    "eln:iron_dust",
+    "eln:iron_dust",
+    "eln:iron_dust",
+    "eln:silicon_dust",
+    "eln:silicon_dust",
+    "eln:copper_dust",
+    "eln:tungsten_dust",
+    "eln:alloy_plate"
+  ],
+  "result": {
+    "id": "eln:nanocrystalline_core_blank"
+  }
+}

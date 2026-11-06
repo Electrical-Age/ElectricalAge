@@ -197,6 +197,9 @@ public final class ElnMachineRecipes {
             new ItemStack[]{findItemStack("Basic Magnet")}, 5000.0));
         add(magnetiserRecipes, new Recipe(findItemStack("Alloy Ingot", 2),
             new ItemStack[]{findItemStack("Advanced Magnet")}, 15000.0));
+        // field annealing (Baughn 2026-11-06, after Argon): the big energy draw of the Optimal core, on the grid
+        add(magnetiserRecipes, new Recipe(findItemStack("Nanocrystalline Core Blank"),
+            new ItemStack[]{findItemStack("Optimal Ferromagnetic Core")}, 200000.0));
     }
 
     public static void recipeMaceratorModOres() {

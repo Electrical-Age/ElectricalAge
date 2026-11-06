@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "eln:cheap_ferromagnetic_core"
+            "items": "eln:iron_dust"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "eln:average_ferromagnetic_core"
+        "recipes": "eln:nanocrystalline_core_blank"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "eln:average_ferromagnetic_core"
+      "eln:nanocrystalline_core_blank"
     ]
   }
 }

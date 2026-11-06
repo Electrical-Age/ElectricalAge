@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "eln:average_ferromagnetic_core"
+            "items": "#eln:high_quality_plates/iron"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "eln:optimal_ferromagnetic_core"
+        "recipes": "eln:silicon_steel_laminations"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "eln:optimal_ferromagnetic_core"
+      "eln:silicon_steel_laminations"
     ]
   }
 }

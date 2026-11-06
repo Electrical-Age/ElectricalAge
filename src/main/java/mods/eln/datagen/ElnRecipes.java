@@ -1408,17 +1408,21 @@ public final class ElnRecipes extends ElnRecipesBase {
             "LLL",
             'L', Items.IRON_INGOT);
 
-        addRecipe(findItemStack("Average Ferromagnetic Core"),
-            "PCP",
-            'C', findItemStack("Cheap Ferromagnetic Core"),
-            'P', "plateIron");
-
-        addRecipe(findItemStack("Optimal Ferromagnetic Core"),
-            "P",
-            "C",
-            "P",
-            'C', findItemStack("Average Ferromagnetic Core"),
-            'P', "plateIron");
+        // Baughn 2026-11-06 (after Argon): three separate recipes, the better cores costly. Average: laminated silicon steel,
+        // the sheets coated with Dielectric (inorganic: it survives the anneal), annealed in the Electrical Furnace.
+        addRecipe(findItemStack("Silicon Steel Laminations"),
+            "PSP",
+            "PDP",
+            "PSP",
+            'P', "plateIron",
+            'S', findItemStack("Silicon Plate"),
+            'D', findItemStack("Dielectric"));
+        // Optimal: a nanocrystalline core (iron, silicon, a little copper and tungsten for niobium, an alloy former),
+        // field-annealed in the Magnetizer (ElnMachineRecipes.recipeMagnetizer)
+        addShapelessRecipe(findItemStack("Nanocrystalline Core Blank"),
+            findItemStack("Iron Dust"), findItemStack("Iron Dust"), findItemStack("Iron Dust"), findItemStack("Iron Dust"),
+            findItemStack("Silicon Dust"), findItemStack("Silicon Dust"), findItemStack("Copper Dust"),
+            findItemStack("Tungsten Dust"), findItemStack("Alloy Plate"));
     }
 
     public static void recipeIngot() {

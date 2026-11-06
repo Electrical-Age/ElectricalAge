@@ -81,6 +81,7 @@ public final class Wp10aCases {
         cases.add(new EggIncubatorCase());
         cases.add(new FurnaceCase());
         cases.add(new FurnaceCharCase());
+        cases.add(new FurnaceAnnealCase());
         cases.add(new SmelterCase());
         cases.add(new MachinesCase());
         cases.add(new MaceratorProcessCase());
@@ -324,6 +325,76 @@ public final class Wp10aCases {
 
         public void measure(TestContext ctx) {
             ctx.check("wp10a oven: beef cooks at 250 C, chars at 270 C over the room; ore smelts; a nugget burns 400 ticks", ok, got);
+        }
+    }
+
+    /**
+     * Annealing (Baughn 2026-11-06, after Argon): Silicon Steel Laminations in an Electrical Furnace on 230 V with a 230V
+     * Tungsten Heating Corp, Thermal Insulation and an Analogic Regulator set to 650 C anneal into an Average
+     * Ferromagnetic Core; laminations below 550 C make no progress, and above 750 C spoil to Iron Dust.
+     */
+    static final class FurnaceAnnealCase implements TestCase {
+        ElectricalFurnaceElement furnace;
+        String probe = "";
+        boolean probeOk, items;
+        double hottest;
+        int tick;
+        mods.eln.sim.IProcess watch;
+
+        public String name() {
+            return "wp10a electrical furnace anneals laminations";
+        }
+
+        public int ticks() {
+            return 2000;
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            furnace = (ElectricalFurnaceElement) l.device(FURNACE, 3);
+            l.feed(ctx.at(3, 1, 1), furnace.front.getInverse(), 8 + (32 << 6), Eln.MVU);   // a Medium Voltage Cable
+            ItemStack lam = Eln.findItemStack("Silicon Steel Laminations"), corp = Eln.findItemStack("230V Tungsten Heating Corp"),
+                ins = Eln.findItemStack("Thermal Insulation"), reg = Eln.findItemStack("Analogic Regulator");
+            items = !lam.isEmpty() && !corp.isEmpty() && !ins.isEmpty() && !reg.isEmpty();
+            if (!items) return;
+            // the rules, at set temperatures, on the furnace's own process
+            mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess pr = field(furnace, "slowRefreshProcess");
+            ThermalLoad t = field(furnace, "thermalLoad");
+            furnace.getInventory().setItem(ElectricalFurnaceElement.inSlotId, lam.copy());
+            double tamb = mods.eln.sim.PhysicalConstant.Tamb;
+            t.Tc = 500 - tamb;
+            boolean cold = !pr.annealProgresses();
+            t.Tc = 620 - tamb;
+            ItemStack warm = pr.getSmeltResult();
+            boolean warmGoes = pr.annealProgresses();
+            t.Tc = 800 - tamb;
+            ItemStack hot = pr.getSmeltResult();
+            t.Tc = 0;
+            probe = "500 C progresses " + !cold + ", 620 C " + warm + " progresses " + warmGoes + ", 800 C " + hot;
+            probeOk = cold && warmGoes && warm.is(Eln.findItemStack("Average Ferromagnetic Core").getItem()) && hot.is(Eln.findItemStack("Iron Dust").getItem());
+            furnace.getInventory().setItem(ElectricalFurnaceElement.heatingCorpSlotId, corp);
+            furnace.getInventory().setItem(ElectricalFurnaceElement.thermalIsolatorSlotId, ins);
+            furnace.getInventory().setItem(ElectricalFurnaceElement.thermalRegulatorSlotId, reg);
+            furnace.getInventory().setChanged();
+            furnace.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(ElectricalFurnaceElement.unserializeTemperatureTarget);
+                o.writeFloat(650f);
+            }));
+            Eln.simulator.addSlowProcess(watch = dt -> hottest = Math.max(hottest, t.Tc + tamb));
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            if (!items) {
+                ctx.line("SKIP wp10a anneal: an item isn't registered");
+                return;
+            }
+            ItemStack out = furnace.getInventory().getItem(ElectricalFurnaceElement.outSlotId);
+            ctx.line("anneal: " + probe + "; hottest " + Math.round(hottest) + " C, out " + out + ", in "
+                + furnace.getInventory().getItem(ElectricalFurnaceElement.inSlotId));
+            ctx.check("anneal: no progress at 500 C, anneals at 620 C, spoils at 800 C", probeOk, probe);
+            ctx.check("anneal: a regulated tungsten furnace makes an Average core", out.is(Eln.findItemStack("Average Ferromagnetic Core").getItem()), out.toString());
+            ctx.check("anneal: ... without overshooting into spoiling", hottest < mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.ANNEAL_SPOIL_C, "" + hottest);
         }
     }
 

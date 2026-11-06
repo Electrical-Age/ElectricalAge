@@ -1,4 +1,4 @@
-// 26.3	2026-11-06T18:22:21.141486865	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-06T19:44:10.652539089	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -84,7 +84,6 @@ deef8d780422f077177f1d8075d975640f319ae2 data/eln/advancement/recipes/misc/analo
 7419d9a95e1ba352b8558df04a97a5b86d0e1a70 data/eln/advancement/recipes/misc/applications_disk.json
 e397443c98e6b42bdb11364d1b6ce472b87c0a04 data/eln/advancement/recipes/misc/auto_miner.json
 9923be029e64dd1fabfd662d1f17778ee17721f6 data/eln/advancement/recipes/misc/average_electrical_drill.json
-95c342338728eb6fd711b224aeb60ab9c76f2ca1 data/eln/advancement/recipes/misc/average_ferromagnetic_core.json
 f289486095d89988f698c37c5d367dc83b161c16 data/eln/advancement/recipes/misc/big_fuel_burner.json
 2501e5ea88438b2af90471608116cac06a6e26e8 data/eln/advancement/recipes/misc/black_brush.json
 99ae0efd8c0ccafddc9ab9361155ecf7fa6da6a7 data/eln/advancement/recipes/misc/blasting_raw_lead_2.json
@@ -218,13 +217,13 @@ a27e31349b09577ad4c188f22d768cc06e79fa07 data/eln/advancement/recipes/misc/mediu
 610c33e376abf2f1d751476431a162f19c57bd8b data/eln/advancement/recipes/misc/monster_filter.json
 c212ab04301e827265d0e3361f91fb4211732103 data/eln/advancement/recipes/misc/multimeter.json
 1196464f2fb1ff0e8a9e7e0f8db5ef00bb7f2040 data/eln/advancement/recipes/misc/nand_chip.json
+1d236df7f23f5be7583b96db41bc9e826337c466 data/eln/advancement/recipes/misc/nanocrystalline_core_blank.json
 524e2572a2e04111a2fe6e7a0a00597ea57df809 data/eln/advancement/recipes/misc/nor_chip.json
 703ffb6ea8945986ce700e548603b5ef5b1ef339 data/eln/advancement/recipes/misc/not_chip.json
 b4326dd5965cc5affa39c7894205a3d6ff268395 data/eln/advancement/recipes/misc/nuclear_alarm.json
 64f0418eef262ed30539a691f6af7c5d33ac6d82 data/eln/advancement/recipes/misc/on_off_regulator_10_percent.json
 6361e58a3e43bbc1eb59863240b72c7380b2bf6e data/eln/advancement/recipes/misc/on_off_regulator_1_percent.json
 0c4f64d917051bd1baabd8061f7f25acc5367c91 data/eln/advancement/recipes/misc/opamp.json
-469230ae39ef296200dd8b8aea1c7637ddc0b918 data/eln/advancement/recipes/misc/optimal_ferromagnetic_core.json
 75a7511157f8baff9627dff11cff75ea078bcd34 data/eln/advancement/recipes/misc/or_chip.json
 731b6736dd1887792d873dc219ef131c6d05f0d2 data/eln/advancement/recipes/misc/orange_brush.json
 a7ec87d7df2857bee7cb762f948868f4ec098ff8 data/eln/advancement/recipes/misc/ore_scanner.json
@@ -264,6 +263,7 @@ ab4847f73790968a91aa4f849fd84b789956ac48 data/eln/advancement/recipes/misc/signa
 25d0b66acbad74d69739bb1291e615fffcba74f8 data/eln/advancement/recipes/misc/signal_relay.json
 b9fa2f9cdd84c95e651e0a3451016824cab4306c data/eln/advancement/recipes/misc/signal_switch.json
 40a9e6c716aaa3ce35b067313806b4424c6df055 data/eln/advancement/recipes/misc/signal_trimmer.json
+b174ec8d1a1520b7bbf9b044b5d3d7193f19eda1 data/eln/advancement/recipes/misc/silicon_steel_laminations.json
 e80c61360089710f1963815c85fc9bb6cf61b854 data/eln/advancement/recipes/misc/silver_brush.json
 08101a72ef887ffebdfd668d954057d5a5aa18d5 data/eln/advancement/recipes/misc/simple_lamp_socket.json
 809e721d7853cc599c22b8e9d4499b051bb1cee6 data/eln/advancement/recipes/misc/single_use_battery.json
@@ -457,7 +457,6 @@ f08a17f8c96555319fad60d61b2788c122fbf087 data/eln/recipe/and_chip.json
 758f782c4e7515c313ee5e6810ae2ee5a739ca17 data/eln/recipe/applications_disk.json
 e1b3870485515b24146953a51d534596cf57c58d data/eln/recipe/auto_miner.json
 035486821d9fa0d6a29ddf339b77c7a9c7034581 data/eln/recipe/average_electrical_drill.json
-6780dccc16e12e4195e173b9be3a0394a5c8222e data/eln/recipe/average_ferromagnetic_core.json
 9602844551f3d1dc111c860b342998dcc2d5e4e2 data/eln/recipe/big_fuel_burner.json
 1400d68edba46e673564ca9489831bad2b19be47 data/eln/recipe/black_brush.json
 c0fbc37fef711710f071e961fde22bae501d6883 data/eln/recipe/blasting_raw_lead_2.json
@@ -591,13 +590,13 @@ ebd63e9a5f900366c5a0004356905112cd008098 data/eln/recipe/modern_data_logger.json
 b937a3eff0a8f08a2d43f6bc97d126a15a5689fa data/eln/recipe/monster_filter.json
 8d83f9c1dee7864768cf6ca50fb939e1a46589e2 data/eln/recipe/multimeter.json
 98d357e0e3bb9c3b4f91a0301d5901f9a928265c data/eln/recipe/nand_chip.json
+b1089dca5ccb0c94aa3d42d1cc0b0d7f2e14a134 data/eln/recipe/nanocrystalline_core_blank.json
 2d6aaedb23ad30856db9e2788c70b180151f0b34 data/eln/recipe/nor_chip.json
 11cc97c623a3b67aaf6e7d785ffedf176c92c6f7 data/eln/recipe/not_chip.json
 6a8443ff46feb21355c0ec89ee3589657f29157b data/eln/recipe/nuclear_alarm.json
 5d09df78c6b1742f9347b3725cd4b2b9fa5fb9ee data/eln/recipe/on_off_regulator_10_percent.json
 e1002b490861ef609fd891be5541cbe66a1dee3b data/eln/recipe/on_off_regulator_1_percent.json
 706f4e67261f255c0ffb7ac708203090ce92ef3f data/eln/recipe/opamp.json
-9e8ffc258616baf24af204bdaa55c18c185b5296 data/eln/recipe/optimal_ferromagnetic_core.json
 2199cc4f8a183059ecc2810dd4eee211353ab327 data/eln/recipe/or_chip.json
 2cb83a0b4c0ba61a881abc66ffbefb56dc290593 data/eln/recipe/orange_brush.json
 6b119addbc0e95c1e03b96c03a5a0db4d489bcea data/eln/recipe/ore_scanner.json
@@ -637,6 +636,7 @@ adad48cd9d9f462c2e3a5dcf4cf01bdfc515cb0e data/eln/recipe/sample_and_hold.json
 429256bbec6c5dce28be7b7dcc320c5ce2613aad data/eln/recipe/signal_relay.json
 54e1527988778b7951b8a4c2355549fbbc2664ed data/eln/recipe/signal_switch.json
 e371cfb3570f38a97380ab2754acb9f7c34f6739 data/eln/recipe/signal_trimmer.json
+70d3d1c5e4ccab37baaa0dcab884f253d2547cec data/eln/recipe/silicon_steel_laminations.json
 8062f3b65578eab153b9d22123835f9807934819 data/eln/recipe/silver_brush.json
 c3083279a9092abb386e52142d77440229c42890 data/eln/recipe/simple_lamp_socket.json
 a46d6a073fd86a647a43109ec61e2b2109a872d1 data/eln/recipe/single_use_battery.json

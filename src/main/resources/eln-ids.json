@@ -305,6 +305,18 @@
   "kind": "shared_item",
   "name": "turbine_blade_set"
  },
+ "eln:shared_item@451": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Silicon Steel Laminations",
+  "kind": "shared_item",
+  "name": "silicon_steel_laminations"
+ },
+ "eln:shared_item@452": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Nanocrystalline Core Blank",
+  "kind": "shared_item",
+  "name": "nanocrystalline_core_blank"
+ },
  "eln:shared_item@448": {
   "descriptor": "FerromagneticCoreDescriptor",
   "display": "Cheap Ferromagnetic Core",

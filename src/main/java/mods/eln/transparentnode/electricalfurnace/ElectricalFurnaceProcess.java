@@ -43,7 +43,9 @@ public class ElectricalFurnaceProcess implements IProcess {
             itemStackInOld = itemStackIn;
         }
 
-        if (smeltInProcess) {
+        if (smeltInProcess && annealing() && !ItemStack.isSameItem(resultAtInit, getSmeltResult()))
+            smeltInit();   // (laminations: annealing turned to spoiling, or back)
+        if (smeltInProcess && (!annealing() || annealProgresses())) {
             energyCounter += getPower() * time;
             if (energyCounter > energyNeeded) {
                 energyCounter -= energyNeeded;
@@ -85,9 +87,35 @@ public class ElectricalFurnaceProcess implements IProcess {
             energyCounter = 0.0;
         } else {
             smeltInProcess = true;
-            energyNeeded = energyNeededPerSmelt;
+            resultAtInit = getSmeltResult().copy();
+            energyNeeded = annealing() && resultAtInit.is(mods.eln.Eln.findItemStack("Average Ferromagnetic Core").getItem())
+                ? ANNEAL_ENERGY : energyNeededPerSmelt;
             energyCounter = 0.0;
         }
+    }
+
+    ItemStack resultAtInit = ItemStack.EMPTY;
+
+    // ---- annealing Silicon Steel Laminations into an Average Ferromagnetic Core (Baughn 2026-11-06, after Argon): it
+    // progresses between ANNEAL_MIN_C and ANNEAL_MAX_C, waits up to ANNEAL_SPOIL_C, and spoils to Iron Dust above it
+
+    public static final double ANNEAL_MIN_C = 550, ANNEAL_MAX_C = 700, ANNEAL_SPOIL_C = 750;
+    /** Energy an anneal takes (J): about 40 s at the furnace's smelting power there. */
+    public static final double ANNEAL_ENERGY = 40000;
+
+    /** Is the input Silicon Steel Laminations? */
+    boolean annealing() {
+        ItemStack in = inventory.getItem(ElectricalFurnaceElement.inSlotId);
+        return !Utils.isEmpty(in) && in.is(mods.eln.Eln.findItemStack("Silicon Steel Laminations").getItem());
+    }
+
+    double celsius() {
+        return furnace.thermalLoad.Tc + mods.eln.sim.PhysicalConstant.Tamb;
+    }
+
+    public boolean annealProgresses() {
+        double t = celsius();
+        return t >= ANNEAL_MIN_C && t <= ANNEAL_MAX_C || t > ANNEAL_SPOIL_C;   // (spoiling is quick: it takes a smelt's energy)
     }
 
     /**
@@ -114,6 +142,8 @@ public class ElectricalFurnaceProcess implements IProcess {
     public ItemStack getSmeltResult() {
         ItemStack in = inventory.getItem(ElectricalFurnaceElement.inSlotId);
         if (chars(furnace.thermalLoad.Tc) && charrable(in)) return new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get());
+        if (annealing())
+            return celsius() > ANNEAL_SPOIL_C ? mods.eln.Eln.findItemStack("Iron Dust", 4) : mods.eln.Eln.findItemStack("Average Ferromagnetic Core");
         return Utils.smeltResult(furnace.node.coordonate.world(), in);
     }
 

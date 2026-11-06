@@ -1,4 +1,4 @@
-// 26.3	2026-11-06T18:22:21.137976444	eln-global/EA models
+// 26.3	2026-11-06T19:44:10.648491509	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -333,6 +333,7 @@ bbb446e6ac07c8300f67392f59722958bf5eb17e assets/eln/items/modbus_rtu.json
 920b57df350e64c59a1e8ef80334d9759a80395a assets/eln/items/monster_filter.json
 5f25bc2b1c10b44a0eb5e667c54dbf97c3c2cbcb assets/eln/items/multimeter.json
 10d80d181c61ba9bb744ff3172c96ea5fc8f6156 assets/eln/items/nand_chip.json
+4ce04ac62ded981f23a244172bfdbe521cbf5fc1 assets/eln/items/nanocrystalline_core_blank.json
 183597043fb1705f6cb000a42b30d3f0aa0691cc assets/eln/items/nor_chip.json
 e363d24aaf57486aefd22d95779993fba7fe0bc9 assets/eln/items/not_chip.json
 3c80ace7c9bea6e5eaaac4653ce61a2e50337c06 assets/eln/items/nuclear_alarm.json
@@ -408,6 +409,7 @@ acffa9d25d64c01c3f9bf6e4749d5246cfb1889b assets/eln/items/signal_source.json
 d1e6b8345453c3a1932f9d38f66c635848607e2c assets/eln/items/silicon_dust.json
 76cbeb75a4e4fcc772cfd5afdf9230a18dc4c3cf assets/eln/items/silicon_ingot.json
 f978ebc08bba04be33fb94b65fa5ca7ecde3f1ef assets/eln/items/silicon_plate.json
+230031609d53bb16ccd2d4babaceccf55c3d3511 assets/eln/items/silicon_steel_laminations.json
 5664379036a51ea87bddbaf64d4f9437cd7226fc assets/eln/items/silver_brush.json
 2e3447c41d709fccf2138aa15eb9ff227111776d assets/eln/items/simple_lamp_socket.json
 2e0245007ec44e315f1172c72e291846ebff8076 assets/eln/items/single_use_battery.json
@@ -815,6 +817,7 @@ a3fd926cee4d09c0778c737c9d9fda3bbabf566d assets/eln/models/item/monster_filter.j
 f500cdb7712b1e3a349d4f535227bf835549c032 assets/eln/models/item/multimeter.json
 a6e994e7a725f435fa8a13475f0b6189ff4c295e assets/eln/models/item/nand_chip.json
 1f9390714830412dfbea06ac8e42077a89d80765 assets/eln/models/item/nand_chip_3d.json
+d57dbef467a311ebc4b78403f25da48a1dd713cf assets/eln/models/item/nanocrystalline_core_blank.json
 e9ed1e2f19161af4d90545acff52c0643a0dcc6c assets/eln/models/item/nor_chip.json
 d3e8359053ed228ded559115be2a2fdb71181ea8 assets/eln/models/item/nor_chip_3d.json
 bfd130360a8dc182432023570f100d4cd57e7764 assets/eln/models/item/not_chip.json
@@ -917,6 +920,7 @@ b884dfaed18f20f37384283ead6740c15e337934 assets/eln/models/item/signal_switch_wi
 00a28575f386856c3cc870f6e54f51ddd7581839 assets/eln/models/item/silicon_dust.json
 c876a3177c7bc498c5a07fcf055f715df04223c6 assets/eln/models/item/silicon_ingot.json
 d29967a42cbf0f8a0172ac572da5ea3ccec16df2 assets/eln/models/item/silicon_plate.json
+b4491799de34fb7d5b5e55fad3854a8c35295381 assets/eln/models/item/silicon_steel_laminations.json
 c8b4216be6ce34e8b29adb036b16f13b0e96eea4 assets/eln/models/item/silver_brush.json
 9f66a5fa0eff39bbfab3f7ad8b75d1914cdf5782 assets/eln/models/item/simple_lamp_socket.json
 fd51d7d0b92401007aa083679118985836927a6b assets/eln/models/item/simple_lamp_socket_3d.json

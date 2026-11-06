@@ -50,3 +50,6 @@ power limits are unchanged), switches, chargers, batteries, turbines, antennas, 
 the Generator (400 V instead of 3200 V). Board #55.
 `golden_slots` (`GoldenSlotsCase`): the DC-DC Converter's two winding slots take 64 (1.12: 4), for 5:24 (48 V to 230 V)
 and the like (Baughn 2026-11-06, board #55).
+`golden_recipes` (`GoldenRecipesCase.REMOVED`): the Average and Optimal Ferromagnetic Cores aren't crafted from the core
+below any more (Baughn 2026-11-06, board #55): Silicon Steel Laminations annealed in the Electrical Furnace make the
+Average one, a Nanocrystalline Core Blank field-annealed in the Magnetizer the Optimal one.
