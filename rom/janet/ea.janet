@@ -629,6 +629,11 @@
   "The inspector: a tab of the processes and their tasks (and tasks that failed), their stacks, each frame's locals
   and what is inside values; Back goes up, REPL here opens a REPL in the selected process's environment."
   []
+  (def open (find |(get-in procs [$ :inspector]) (keys procs)))
+  (when open                       # one inspector: bring it forward, back at its top
+    ((get-in procs [open :inspector]))
+    (ui/focus open)
+    (break open))
   (def t (proc/new-tab "inspect"))
   (def path @[])                   # the views, from the top: [kind value label]
   (var rows @[])                   # what the list's rows stand for
@@ -677,6 +682,7 @@
                (def nt (proc/new-tab (string "repl " (e 2))))
                (repl-tab (e 1) nt (string "repl " (e 2)))))
   (ui/button t 5 (- ui/width 7) 0 7 "Close" (fn [] (proc/close t)))
+  (put (procs t) :inspector (fn [] (array/clear path) (show)))
   (show)
   (ui/focus t)
   t)

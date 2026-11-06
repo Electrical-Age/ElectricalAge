@@ -315,6 +315,11 @@ class StdlibTest {
         m.editor.give("(press 3 3)\n".getBytes(StandardCharsets.UTF_8));
         tick(5, null);
         assertTrue(screen.scene.tabs.get(3).elements.get(2).msg.get(7).toString().contains("sleeper (tab 2)"));
+        // (inspect) again brings the same tab forward instead of opening another
+        type("(inspect)");
+        tick(20, "\n3\n> ");
+        assertNull(screen.scene.tabs.get(4));
+        assertEquals(3, screen.scene.focus);
     }
 
     @Test
