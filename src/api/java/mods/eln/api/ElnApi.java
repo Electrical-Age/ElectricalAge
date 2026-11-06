@@ -20,7 +20,7 @@ public final class ElnApi {
      * A constant: javac copies it into your classes, so it is the version you compiled against; apiVersion() is the
      * installed EA's.
      */
-    public static final String API_VERSION = "1.1.0";
+    public static final String API_VERSION = "1.2.0";
 
     /** The installed EA's API version (API_VERSION as EA was built). */
     public static String apiVersion() {

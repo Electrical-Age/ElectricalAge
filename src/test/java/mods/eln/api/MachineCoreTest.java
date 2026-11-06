@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /** MachineCore by example: misuse, the one-tick lag, the refill, and each trip with its cooldown. */
 public class MachineCoreTest {
     static final double DT = MachineCore.TICK_SECONDS;
-    static final MachineSpec MILL = MachineSpec.consumer(Tier.V200).ratedWatts(2000).idleWatts(20).build();
-    static final MachineSpec DYNAMO = MachineSpec.producer(Tier.V200).ratedWatts(1000).build();
+    static final MachineSpec MILL = MachineSpec.consumer(200).ratedWatts(2000).idleWatts(20).build();
+    static final MachineSpec DYNAMO = MachineSpec.producer(200).ratedWatts(1000).build();
 
     /** One tick on an ideal line at volts: the step delivers what the last plan draws at those volts. */
     static double step(MachineCore c, double volts, double[] ohms) {
@@ -181,7 +181,7 @@ public class MachineCoreTest {
 
     @Test
     void burnsOnOvervoltageNeverResets() {
-        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
+        MachineCore c = new MachineCore(MachineSpec.consumer(50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
         double[] ohms = {Double.POSITIVE_INFINITY};
         step(c, 70, ohms);
         assertTrue(c.burnt());
@@ -192,7 +192,7 @@ public class MachineCoreTest {
 
     @Test
     void overheatTripsAndCools() {
-        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1).overheatRiseKelvin(40).build());
+        MachineCore c = new MachineCore(MachineSpec.consumer(200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1).overheatRiseKelvin(40).build());
         for (int i = 0; i < MachineCore.UNDERVOLTAGE_RECOVERY_TICKS; i++) c.afterStep(200, 0);
         assertEquals(MachineSpec.AMBIENT_CELSIUS, c.celsius(), 1e-9);
         int n = 0;
@@ -211,7 +211,7 @@ public class MachineCoreTest {
         assertEquals(MachineState.RUNNING, c.state());
         assertTrue(c.celsius() < 50);
         // exact first-order decay: tau = 100 s
-        MachineCore d = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1).overheatRiseKelvin(40).build());
+        MachineCore d = new MachineCore(MachineSpec.consumer(200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1).overheatRiseKelvin(40).build());
         d.heatJoules(1000); // 20 kW for one tick: +10 K in the limit of a short pulse
         d.afterStep(200, 0);
         assertEquals(10, d.celsius() - 20, 0.01);
@@ -225,7 +225,7 @@ public class MachineCoreTest {
     void overheatIsARiseOverItsAmbient() {
         for (double ambient : new double[]{40, 90}) {
             for (double band : new double[]{30, 15}) {
-                MachineSpec spec = MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1)
+                MachineSpec spec = MachineSpec.consumer(200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1)
                     .overheatRiseKelvin(40).overheatResetKelvin(band).build();
                 MachineCore c = new MachineCore(spec);
                 c.setAmbientCelsius(ambient);
@@ -261,7 +261,7 @@ public class MachineCoreTest {
      */
     @Test
     void overheatAtAnAbsoluteTemperature() {
-        MachineSpec spec = MachineSpec.consumer(Tier.V200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1)
+        MachineSpec spec = MachineSpec.consumer(200).ratedWatts(1000).heatCapacityJPerK(100).heatLossWPerK(1)
             .overheatAbsoluteCelsius(300).build();
         for (double ambient : new double[]{20, 290}) {
             MachineCore c = new MachineCore(spec);
@@ -294,7 +294,7 @@ public class MachineCoreTest {
     /** Brownout.SLOW: a 200 V machine on a 100 V line runs, on a quarter of its rated power. */
     @Test
     void slowRunsOnWhatArrives() {
-        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(2000).idleWatts(20)
+        MachineCore c = new MachineCore(MachineSpec.consumer(200).ratedWatts(2000).idleWatts(20)
             .onBrownout(Brownout.SLOW).build());
         double[] ohms = {Double.POSITIVE_INFINITY};
         powerUp(c, 100, ohms);
@@ -314,7 +314,7 @@ public class MachineCoreTest {
     /** Even with the highest floor, a sagged machine runs again once the line is back at nominal. */
     @Test
     void undervoltageRecoversWithAHighFloor() {
-        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V200).ratedWatts(2000).minVoltageRatio(0.95).build());
+        MachineCore c = new MachineCore(MachineSpec.consumer(200).ratedWatts(2000).minVoltageRatio(0.95).build());
         double[] ohms = {Double.POSITIVE_INFINITY};
         powerUp(c, 200, ohms);
         step(c, 185, ohms);
@@ -411,8 +411,8 @@ public class MachineCoreTest {
     /** respec changes ratings only: a booster doubles the draw from the next plan; a buffer over the new size is cut and booked lost. */
     @Test
     void respecChangesRatingsOnly() {
-        MachineSpec small = MachineSpec.consumer(Tier.V50).ratedWatts(200).onBrownout(Brownout.SLOW).power(RelativeFace.LEFT).build();
-        MachineSpec big = MachineSpec.consumer(Tier.V50).ratedWatts(400).onBrownout(Brownout.SLOW).power(RelativeFace.LEFT).build();
+        MachineSpec small = MachineSpec.consumer(50).ratedWatts(200).onBrownout(Brownout.SLOW).power(RelativeFace.LEFT).build();
+        MachineSpec big = MachineSpec.consumer(50).ratedWatts(400).onBrownout(Brownout.SLOW).power(RelativeFace.LEFT).build();
         MachineCore c = new MachineCore(big);
         double[] ohms = {Double.POSITIVE_INFINITY};
         powerUp(c, 50, ohms);
@@ -433,16 +433,16 @@ public class MachineCoreTest {
         c.takeJoules(c.ratedJoulesPerTick());
         assertEquals(400, plan(c, ohms), 1e-6);
         // other faces, signals or kind: a different machine, not a respec
-        MachineSpec moved = MachineSpec.consumer(Tier.V50).ratedWatts(400).onBrownout(Brownout.SLOW).power(RelativeFace.RIGHT).build();
+        MachineSpec moved = MachineSpec.consumer(50).ratedWatts(400).onBrownout(Brownout.SLOW).power(RelativeFace.RIGHT).build();
         String m = assertThrows(IllegalArgumentException.class, () -> c.respec(moved)).getMessage();
         assertTrue(m.contains("power faces"), m);
-        assertThrows(IllegalArgumentException.class, () -> c.respec(MachineSpec.producer(Tier.V50).ratedWatts(400).power(RelativeFace.LEFT).build()));
+        assertThrows(IllegalArgumentException.class, () -> c.respec(MachineSpec.producer(50).ratedWatts(400).power(RelativeFace.LEFT).build()));
     }
 
     /** A snapshot taken back on a fresh core: buffer (booked as delivered), heat, a trip in its cooldown, the last trip. */
     @Test
     void snapshotRestores() {
-        MachineSpec hot = MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(40).build();
+        MachineSpec hot = MachineSpec.consumer(50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(40).build();
         MachineCore c = new MachineCore(hot);
         double[] ohms = {Double.POSITIVE_INFINITY};
         powerUp(c, 50, ohms);
@@ -467,7 +467,7 @@ public class MachineCoreTest {
      */
     @Test
     void savedRunningRunsOn() {
-        MachineSpec spec = MachineSpec.consumer(Tier.V50).ratedWatts(100).build();
+        MachineSpec spec = MachineSpec.consumer(50).ratedWatts(100).build();
         MachineCore c = new MachineCore(spec);
         double[] ohms = {Double.POSITIVE_INFINITY};
         powerUp(c, 50, ohms);
@@ -489,7 +489,7 @@ public class MachineCoreTest {
     /** A burnt core repaired by its host starts again UNPOWERED and runs once the line holds. */
     @Test
     void repairUnburns() {
-        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
+        MachineCore c = new MachineCore(MachineSpec.consumer(50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
         double[] ohms = {Double.POSITIVE_INFINITY};
         step(c, 70, ohms);
         assertTrue(c.burnt());
@@ -503,7 +503,7 @@ public class MachineCoreTest {
     /** A burnt core's snapshot says so; restored, it is burnt again and stays tripped; a spec that no longer burns starts afresh. */
     @Test
     void burntSurvivesASave() {
-        MachineSpec burns = MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(b -> {
+        MachineSpec burns = MachineSpec.consumer(50).ratedWatts(100).burnsOnOvervoltage(b -> {
         }).build();
         MachineCore c = new MachineCore(burns);
         double[] ohms = {Double.POSITIVE_INFINITY};
@@ -517,7 +517,7 @@ public class MachineCoreTest {
         for (int i = 0; i < 200; i++) step(r, 50, ohms);
         assertEquals(MachineState.OVERVOLTAGE_TRIPPED, r.state(), "a burn never resets");
         assertEquals(0, r.takeJoules(1), 0);
-        MachineCore plain = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).build());
+        MachineCore plain = new MachineCore(MachineSpec.consumer(50).ratedWatts(100).build());
         plain.restore(s);
         assertFalse(plain.burnt());
     }
@@ -528,20 +528,20 @@ public class MachineCoreTest {
      */
     @Test
     void respecKeepsTheBurn() {
-        MachineCore c = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).build());
+        MachineCore c = new MachineCore(MachineSpec.consumer(50).ratedWatts(100).build());
         String m = assertThrows(IllegalArgumentException.class,
-            () -> c.respec(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build())).getMessage();
+            () -> c.respec(MachineSpec.consumer(50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build())).getMessage();
         assertTrue(m.contains("overvoltage burn"), m);
-        MachineCore b = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
+        MachineCore b = new MachineCore(MachineSpec.consumer(50).ratedWatts(100).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
         assertThrows(IllegalArgumentException.class,
-            () -> b.respec(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(x -> {
+            () -> b.respec(MachineSpec.consumer(50).ratedWatts(100).burnsOnOvervoltage(x -> {
             }).build()));
-        b.respec(MachineSpec.consumer(Tier.V50).ratedWatts(200).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
-        MachineCore hosted = new MachineCore(MachineSpec.consumer(Tier.V50).ratedWatts(100).burnsOnOvervoltage(x -> {
+        b.respec(MachineSpec.consumer(50).ratedWatts(200).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
+        MachineCore hosted = new MachineCore(MachineSpec.consumer(50).ratedWatts(100).burnsOnOvervoltage(x -> {
         }).build());
-        hosted.respec(MachineSpec.consumer(Tier.V50).ratedWatts(200).burnsOnOvervoltage(x -> {
+        hosted.respec(MachineSpec.consumer(50).ratedWatts(200).burnsOnOvervoltage(x -> {
         }).build());
         assertThrows(IllegalArgumentException.class,
-            () -> hosted.respec(MachineSpec.consumer(Tier.V50).ratedWatts(200).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build()));
+            () -> hosted.respec(MachineSpec.consumer(50).ratedWatts(200).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build()));
     }
 }

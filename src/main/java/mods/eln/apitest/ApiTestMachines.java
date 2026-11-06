@@ -27,7 +27,7 @@ public final class ApiTestMachines {
     static final String MODID = "eln";
 
     /** 50 V, 100 W (no idle draw): power at the front and back; "enable" on the left reads 1 unwired; the bus on the right. */
-    public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V50).ratedWatts(100)
+    public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V48).ratedWatts(100)
         .power(RelativeFace.FRONT, RelativeFace.BACK)
         .signalIn("enable", RelativeFace.LEFT, 1).bus(RelativeFace.RIGHT).build();
 
@@ -35,7 +35,7 @@ public final class ApiTestMachines {
      * SPEC, burning on overvoltage: its handler books the burn on the block entity and leaves the block in place (the
      * machine stays tripped). For a block entity told to useSpec it before it is hosted.
      */
-    public static final MachineSpec BURNING_SPEC = MachineSpec.consumer(Tier.V50).ratedWatts(100)
+    public static final MachineSpec BURNING_SPEC = MachineSpec.consumer(Tier.V48).ratedWatts(100)
         .power(RelativeFace.FRONT, RelativeFace.BACK)
         .signalIn("enable", RelativeFace.LEFT, 1).bus(RelativeFace.RIGHT)
         .burnsOnOvervoltage(burn -> ((ApiTestMachineEntity) burn.blockEntity()).burnt(burn.cause()))

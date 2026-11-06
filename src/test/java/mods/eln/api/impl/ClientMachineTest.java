@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** The client's machine: a synced snapshot read back whole; before any, UNPOWERED and zeros; writes throw. */
 public class ClientMachineTest {
-    static final MachineSpec SPEC = MachineSpec.consumer(Tier.V50).ratedWatts(100).build();
+    static final MachineSpec SPEC = MachineSpec.consumer(50).ratedWatts(100).build();
 
     @Test
     void showsWhatTheServerSynced() {

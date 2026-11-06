@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * order in a bare Simulator (slow pre-processes, the step, slow processes), NBT and the burn path.
  */
 public class ElementHostTest {
-    static final MachineSpec MACERATOR = MachineSpec.consumer(Tier.V50).ratedWatts(200).onBrownout(Brownout.SLOW)
+    static final MachineSpec MACERATOR = MachineSpec.consumer(50).ratedWatts(200).onBrownout(Brownout.SLOW)
         .burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).power(RelativeFace.LEFT, RelativeFace.RIGHT, RelativeFace.UP, RelativeFace.DOWN).build();
 
     /** An element's lists and a stub site. */
@@ -111,7 +111,7 @@ public class ElementHostTest {
     @Test
     void masksAndLoadsFollowTheFront() {
         Element e = new Element();
-        MachineSpec spec = MachineSpec.consumer(Tier.V50).ratedWatts(100).power(RelativeFace.LEFT, RelativeFace.RIGHT)
+        MachineSpec spec = MachineSpec.consumer(50).ratedWatts(100).power(RelativeFace.LEFT, RelativeFace.RIGHT)
             .signalIn("run", RelativeFace.FRONT, 1).signalOut("done", RelativeFace.BACK).build();
         ElementHost m = e.machine(spec);
         for (Direction front : Direction.values()) {
@@ -152,7 +152,7 @@ public class ElementHostTest {
     @Test
     void signalsShareAFaceAtCablePositions() {
         Element e = new Element();
-        MachineSpec spec = MachineSpec.consumer(Tier.V200).ratedWatts(100).power(RelativeFace.BACK)
+        MachineSpec spec = MachineSpec.consumer(200).ratedWatts(100).power(RelativeFace.BACK)
             .signalIn("set", RelativeFace.LEFT, CablePosition.FLOOR, 0.5).signalOut("there", RelativeFace.LEFT, CablePosition.CEILING)
             .signalIn("run", RelativeFace.RIGHT, 1).build();
         ElementHost m = e.machine(spec);
@@ -290,13 +290,13 @@ public class ElementHostTest {
     @Test
     void hostedJadeLines() {
         Element e = new Element();
-        ElementHost m = e.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).build());
+        ElementHost m = e.machine(MachineSpec.consumer(50).ratedWatts(100).build());
         assertEquals(List.of("Voltage", "Power consumption", "Machine", "Buffer"),
             List.copyOf(mods.eln.api.impl.MachineLines.hosted(m.view()).keySet()));
         assertEquals("unpowered", mods.eln.api.impl.MachineLines.hosted(m.view()).get("Machine"));
         assertEquals("0J / 10.0J", mods.eln.api.impl.MachineLines.hosted(m.view()).get("Buffer"));
         Element h = new Element();
-        ElementHost hot = h.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(40).build());
+        ElementHost hot = h.machine(MachineSpec.consumer(50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(40).build());
         assertTrue(mods.eln.api.impl.MachineLines.hosted(hot.view()).containsKey("Temperature"));
         assertEquals(mods.eln.api.impl.MachineLines.element(m.view()), m.wailaLines());
     }
@@ -305,7 +305,7 @@ public class ElementHostTest {
     @Test
     void signalLoadsAreNamedBySpecAndSavedByIndex() {
         Element e = new Element();
-        ElementHost m = e.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).power(RelativeFace.BACK)
+        ElementHost m = e.machine(MachineSpec.consumer(50).ratedWatts(100).power(RelativeFace.BACK)
             .signalIn("setpoint", RelativeFace.LEFT).signalOut("in_position", RelativeFace.RIGHT).build());
         e.front = Direction.XN;
         var in = (mods.eln.sim.nbt.NbtElectricalLoad) m.electricalLoad(Faces.resolve(RelativeFace.LEFT, e.front));
@@ -325,7 +325,7 @@ public class ElementHostTest {
     void heatFollowsTheElementsAmbient() {
         Element e = new Element();
         e.ambient = -10;   // snowy peaks
-        ElementHost m = e.machine(MachineSpec.consumer(Tier.V50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(40).build());
+        ElementHost m = e.machine(MachineSpec.consumer(50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(40).build());
         e.slowPre.get(0).process(0.05);
         assertEquals(-10, m.celsius(), 1e-12);
     }
@@ -392,7 +392,7 @@ public class ElementHostTest {
         try {
             Element e = new Element();
             mods.eln.bus.BusPort port = new mods.eln.bus.BusPort(), other = new mods.eln.bus.BusPort();
-            MachineSpec spec = MachineSpec.consumer(Tier.V50).ratedWatts(100).bus(RelativeFace.BACK).build();
+            MachineSpec spec = MachineSpec.consumer(50).ratedWatts(100).bus(RelativeFace.BACK).build();
             ElementHost m = new ElementHost(spec, e, port, e.loads, e.components, e.slow, e.slowPre);
             mods.eln.bus.BusNet.link(port, other);
             mods.eln.bus.BusNet.tick();

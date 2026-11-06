@@ -21,8 +21,8 @@ public final class Mill {
     }
 
     // doc:begin spec
-    public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V200)
-        .ratedWatts(2000)                        // the most it draws at 200 V, idle included
+    public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V230)
+        .ratedWatts(2000)                        // the most it draws at 230 V, idle included
         .idleWatts(20)                           // drawn whenever it is powered
         .power(RelativeFace.BACK, RelativeFace.DOWN)
         .build();                                // checks every setting, lists every problem at once

@@ -9,7 +9,7 @@ import mods.eln.api.Tier;
 /** docs/api.md's signals and bus: a sorter that runs while enabled and says when it is busy. */
 public final class Gate {
     // doc:begin spec
-    public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V50).ratedWatts(200)
+    public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V48).ratedWatts(200)
         .signalIn("enable", RelativeFace.LEFT, 1)    // reads 1 while no cable is connected there
         .signalOut("busy", RelativeFace.RIGHT)       // floats (high impedance) until first set
         .signalIn("speed", RelativeFace.FRONT, CablePosition.FLOOR, 1)

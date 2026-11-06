@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Machines in EA's real simulator (ElnTestKit.bench()): supplies, weak lines, wrong tiers, trips, producers. */
 public class BenchTest {
-    static final MachineSpec MILL = MachineSpec.consumer(Tier.V200).ratedWatts(2000).idleWatts(20).build();
-    static final MachineSpec DYNAMO = MachineSpec.producer(Tier.V200).ratedWatts(1500).build();
+    static final MachineSpec MILL = MachineSpec.consumer(200).ratedWatts(2000).idleWatts(20).build();
+    static final MachineSpec DYNAMO = MachineSpec.producer(200).ratedWatts(1500).build();
 
     /** An owner that asks for joules every tick and keeps what it got. */
     static final class Taker {
@@ -158,7 +158,7 @@ public class BenchTest {
             Bench b = ElnTestKit.bench();
             BenchMachine dynamo = b.add(DYNAMO).owner(m -> m.giveJoules(40));
             Taker t = new Taker(50);
-            MachineSpec.Builder spec = MachineSpec.consumer(Tier.V200).ratedWatts(2000).idleWatts(20);
+            MachineSpec.Builder spec = MachineSpec.consumer(200).ratedWatts(2000).idleWatts(20);
             BenchMachine mill = b.add(spec.onBrownout(mode).build()).owner(t::tick);
             b.ticks(200);
             List<String> states = b.trace().lines().skip(100).map(l -> l.substring(l.lastIndexOf(' ') + 1)).toList();
@@ -187,7 +187,7 @@ public class BenchTest {
     void slowConsumerStopsAtTheLinesMaximumPower() {
         Bench b = ElnTestKit.bench().supply(200, 0.01).line(47);
         Taker t = new Taker(50); // 1000 W
-        BenchMachine m = b.add(MachineSpec.consumer(Tier.V200).ratedWatts(3000).idleWatts(40).onBrownout(Brownout.SLOW).build())
+        BenchMachine m = b.add(MachineSpec.consumer(200).ratedWatts(3000).idleWatts(40).onBrownout(Brownout.SLOW).build())
             .owner(t::tick);
         b.ticks(40);
         double lowest = Double.POSITIVE_INFINITY;
@@ -232,8 +232,8 @@ public class BenchTest {
         Bench b = ElnTestKit.bench().supply(200, 0.01).line(8);
         List<BenchMachine> ms = new ArrayList<>();
         for (double w : new double[]{500, 1000, 2000}) {
-            ms.add(b.add(MachineSpec.consumer(Tier.V200).ratedWatts(w).idleWatts(w / 100).build()));
-            ms.add(b.add(MachineSpec.consumer(Tier.V200).ratedWatts(w).idleWatts(w / 100).onBrownout(Brownout.SLOW).build()));
+            ms.add(b.add(MachineSpec.consumer(200).ratedWatts(w).idleWatts(w / 100).build()));
+            ms.add(b.add(MachineSpec.consumer(200).ratedWatts(w).idleWatts(w / 100).onBrownout(Brownout.SLOW).build()));
         }
         b.ticks(10);   // (the power-up hold)
         double last = b.volts();
@@ -314,7 +314,7 @@ public class BenchTest {
             b = ElnTestKit.bench().supply(200, 0.01).line(lineOhms);
             for (int i = 0; i < rated.length; i++) {
                 int k = i;
-                ms.add(b.add(MachineSpec.consumer(Tier.V200).ratedWatts(rated[i]).idleWatts(rated[i] / 100)
+                ms.add(b.add(MachineSpec.consumer(200).ratedWatts(rated[i]).idleWatts(rated[i] / 100)
                     .onBrownout(Brownout.SLOW).build()).owner(m -> m.takeJoules(on[k] ? m.ratedJoulesPerTick() : 0)));
             }
         }
@@ -397,7 +397,7 @@ public class BenchTest {
     @Test
     void benchAmbient() {
         Bench b = ElnTestKit.bench().supply(200, 0.01).ambientCelsius(35);
-        BenchMachine m = b.add(MachineSpec.consumer(Tier.V200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(60).build());
+        BenchMachine m = b.add(MachineSpec.consumer(200).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(60).build());
         b.ticks(5);
         assertEquals(35, m.celsius(), 1e-9);
         b.ambientCelsius(0);
@@ -468,7 +468,7 @@ public class BenchTest {
     @Test
     void ownerRules() {
         Bench b = ElnTestKit.bench().supply(200, 0.01);
-        BenchMachine m = b.add(MachineSpec.consumer(Tier.V200).ratedWatts(100)
+        BenchMachine m = b.add(MachineSpec.consumer(200).ratedWatts(100)
             .signalIn("enable", RelativeFace.UP, 1).signalOut("done", RelativeFace.DOWN).build());
         assertEquals(1, m.signal("enable"));
         assertFalse(m.signalConnected("enable"));
@@ -512,7 +512,7 @@ public class BenchTest {
     @Test
     void busIsDoubleBuffered() {
         Bench b = ElnTestKit.bench();
-        BenchMachine m = b.add(MachineSpec.consumer(Tier.V50).ratedWatts(100).bus(RelativeFace.BACK).build());
+        BenchMachine m = b.add(MachineSpec.consumer(50).ratedWatts(100).bus(RelativeFace.BACK).build());
         m.owner(x -> x.bus().write(3, 0.5));
         b.tick();
         assertEquals(0, m.bus().read(3));

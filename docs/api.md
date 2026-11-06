@@ -112,8 +112,8 @@ There are two ways to get this wrong:
 A spec says what the machine is, electrically:
 
 ```java src/test/java/mods/eln/api/docs/Mill.java#spec
-public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V200)
-    .ratedWatts(2000)                        // the most it draws at 200 V, idle included
+public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V230)
+    .ratedWatts(2000)                        // the most it draws at 230 V, idle included
     .idleWatts(20)                           // drawn whenever it is powered
     .power(RelativeFace.BACK, RelativeFace.DOWN)
     .build();                                // checks every setting, lists every problem at once
@@ -223,7 +223,7 @@ buffer's capacity, and plans no more work until it is back under. No energy is c
 A producer feeds the line. The owner gives energy, and the machine feeds it in from the next tick:
 
 ```java src/test/java/mods/eln/api/docs/Dynamo.java#dynamo
-public static final MachineSpec SPEC = MachineSpec.producer(Tier.V200).ratedWatts(1500).build();
+public static final MachineSpec SPEC = MachineSpec.producer(Tier.V230).ratedWatts(1500).build();
 
 /** Energy left in the fuel, J. */
 private double fuelJoules;
@@ -250,7 +250,7 @@ rated output) and returns what it took; keep the rest. Only a trip stops a produ
 ## Signals and the bus
 
 ```java src/test/java/mods/eln/api/docs/Gate.java#spec
-public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V50).ratedWatts(200)
+public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V48).ratedWatts(200)
     .signalIn("enable", RelativeFace.LEFT, 1)    // reads 1 while no cable is connected there
     .signalOut("busy", RelativeFace.RIGHT)       // floats (high impedance) until first set
     .signalIn("speed", RelativeFace.FRONT, CablePosition.FLOOR, 1)
@@ -296,7 +296,7 @@ public static void tick(Machine m) {
 ## Heat
 
 ```java src/test/java/mods/eln/api/docs/Kiln.java#kiln
-public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V200).ratedWatts(4000)
+public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V230).ratedWatts(4000)
     .heatCapacityJPerK(20000)      // J/K: with the loss, a time constant of 20000 / 50 = 400 s
     .heatLossWPerK(50)             // W/K to the ambient where it stands
     .overheatAbsoluteCelsius(300)  // trips OVERHEAT_TRIPPED at 300 C, whatever its ambient; resets 10 K under that
@@ -367,7 +367,7 @@ By default overvoltage only trips a machine. A spec can make it burn instead. EA
 so you choose what a burn does to your block (Baughn: "a callback. Let the API user choose how to handle it"):
 
 ```java src/test/java/mods/eln/api/docs/Press.java#burn
-public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V200).ratedWatts(3000)
+public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V230).ratedWatts(3000)
     .burnsOnOvervoltage(Press::burn)   // overvoltage burns it: it never resets
     .build();
 
@@ -438,7 +438,7 @@ An EA element delegates its faces and Jade lines to the machine. This sample is 
 own types:
 
 ```java src/test/java/mods/eln/api/docs/HeaterElement.java#element
-static final MachineSpec SPEC = MachineSpec.consumer(Tier.V50).ratedWatts(500).build();
+static final MachineSpec SPEC = MachineSpec.consumer(Tier.V48).ratedWatts(500).build();
 
 final ElementMachine machine;
 
@@ -507,7 +507,7 @@ A bench is a supply behind its resistance, a line, and machines on it, stepped t
 ```java src/test/java/mods/eln/api/docs/MillTest.java#bench
 @Test
 void millGrindsAboutThreeItemsInFiveSecondsAtNominal() {
-    Bench bench = ElnTestKit.bench().supply(200, 0.05);   // 200 V behind 0.05 ohm
+    Bench bench = ElnTestKit.bench().supply(230, 0.05);   // 230 V behind 0.05 ohm
     Mill.Work work = new Mill.Work();
     int[] items = {0};
     BenchMachine mill = bench.add(Mill.SPEC).owner(m -> {
@@ -553,7 +553,7 @@ public final Watchdog guard;
 public LoadBank(BlockPos probeAt) {
     circuit = Circuit.create("load bank");
     in = circuit.load("in");
-    bank = circuit.resistorToGround("bank", in, 100);         // 400 W at 200 V
+    bank = circuit.resistorToGround("bank", in, 100);         // 529 W at 230 V
     guard = circuit.watchdogs().volts(in, -10, 250)
         .onTrip(trip -> bank.setOhms(Double.POSITIVE_INFINITY)); // a trip only calls you: open the bank
     probe = circuit.load("probe");

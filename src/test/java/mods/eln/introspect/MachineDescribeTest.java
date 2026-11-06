@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /** A machine on the API in a report: its spec and state under "machine", a trip as a fault, ports from the spec. */
 class MachineDescribeTest {
-    static final MachineSpec SPEC = MachineSpec.consumer(Tier.V50).ratedWatts(100)
+    static final MachineSpec SPEC = MachineSpec.consumer(50).ratedWatts(100)
         .power(RelativeFace.FRONT, RelativeFace.BACK)
         .signalIn("enable", RelativeFace.LEFT, 1).signalOut("busy", RelativeFace.UP).bus(RelativeFace.RIGHT).build();
 

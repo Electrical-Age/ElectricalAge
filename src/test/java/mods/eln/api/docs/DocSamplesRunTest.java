@@ -18,7 +18,7 @@ public class DocSamplesRunTest {
         ElnTestKit.verifySpec(Dynamo.SPEC);
         Dynamo d = new Dynamo();
         d.addFuel(1e6);
-        Bench b = ElnTestKit.bench().load(200.0 * 200 / 1500);   // a load that takes 1.5 kW at 200 V
+        Bench b = ElnTestKit.bench().load(230.0 * 230 / 1500);   // a load that takes 1.5 kW at 230 V
         b.add(Dynamo.SPEC).owner(d::tick);
         b.ticks(60);
         assertEquals(1500, b.loadWatts(), 1500 * 0.02);
@@ -48,7 +48,7 @@ public class DocSamplesRunTest {
     @Test
     void thePressBurnsForGood() {
         ElnTestKit.verifySpec(Press.SPEC);
-        Bench b = ElnTestKit.bench().supply(280, 0.01);
+        Bench b = ElnTestKit.bench().supply(320, 0.01);
         BenchMachine p = b.add(Press.SPEC).owner(m -> m.takeJoules(m.ratedJoulesPerTick()));
         b.ticks(5);
         assertEquals(mods.eln.api.MachineState.OVERVOLTAGE_TRIPPED, p.state());
@@ -58,7 +58,7 @@ public class DocSamplesRunTest {
     @Test
     void theKilnKeepsItsContractAndWarms() {
         ElnTestKit.verifySpec(Kiln.SPEC);
-        Bench b = ElnTestKit.bench().supply(200, 0.01);
+        Bench b = ElnTestKit.bench().supply(230, 0.01);
         BenchMachine k = b.add(Kiln.SPEC).owner(Kiln::tick);
         b.ticks(600);   // 30 s of a 400 s time constant, toward about 24 K over ambient
         assertTrue(k.celsius() > 21, "it warms: " + k.celsius());
@@ -67,9 +67,9 @@ public class DocSamplesRunTest {
     @Test
     void theLoadBankDrawsAndItsGuardOpensItOverTheLimit() {
         LoadBank bank = new LoadBank(null);
-        Bench b = ElnTestKit.bench().supply(200, 0.01).attach(bank.circuit).connect(bank.circuit, bank.in);
+        Bench b = ElnTestKit.bench().supply(230, 0.01).attach(bank.circuit).connect(bank.circuit, bank.in);
         b.ticks(3);
-        assertEquals(400, bank.bank.watts(), 400 * 0.01);
+        assertEquals(230.0 * 230 / 100, bank.bank.watts(), 529 * 0.01);
         assertEquals("no probe", bank.probeReading());
         assertFalse(bank.guard.tripped());
         b.supplyVolts(300);
@@ -83,7 +83,7 @@ public class DocSamplesRunTest {
 
     @Test
     void theTooltipReadsLikeEasMeters() {
-        Bench b = ElnTestKit.bench().supply(200, 0.05);
+        Bench b = ElnTestKit.bench().supply(230, 0.05);
         BenchMachine m = b.add(Mill.SPEC).owner(x -> x.takeJoules(x.ratedJoulesPerTick()));
         b.ticks(40);
         java.util.List<String> lines = Mill.tooltip(m.view());

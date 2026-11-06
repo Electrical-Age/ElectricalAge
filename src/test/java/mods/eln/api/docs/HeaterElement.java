@@ -18,7 +18,7 @@ import java.util.Map;
 /** docs/api.md's EA element on the Machine API (EA's own devices; these name EA types). */
 public class HeaterElement extends TransparentNodeElement {
     // doc:begin element
-    static final MachineSpec SPEC = MachineSpec.consumer(Tier.V50).ratedWatts(500).build();
+    static final MachineSpec SPEC = MachineSpec.consumer(Tier.V48).ratedWatts(500).build();
 
     final ElementMachine machine;
 

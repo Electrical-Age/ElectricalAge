@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * once and whatever its own draw; with a resistor beside it, the Thevenin equivalent of the two.
  */
 public class LineSeenTest {
-    static final MachineSpec SLOW = MachineSpec.consumer(Tier.V200).ratedWatts(2000).onBrownout(Brownout.SLOW).build();
+    static final MachineSpec SLOW = MachineSpec.consumer(200).ratedWatts(2000).onBrownout(Brownout.SLOW).build();
 
     @Test
     void theLineAsTheSolverSeesIt() {

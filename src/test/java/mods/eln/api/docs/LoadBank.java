@@ -23,7 +23,7 @@ public final class LoadBank {
     public LoadBank(BlockPos probeAt) {
         circuit = Circuit.create("load bank");
         in = circuit.load("in");
-        bank = circuit.resistorToGround("bank", in, 100);         // 400 W at 200 V
+        bank = circuit.resistorToGround("bank", in, 100);         // 529 W at 230 V
         guard = circuit.watchdogs().volts(in, -10, 250)
             .onTrip(trip -> bank.setOhms(Double.POSITIVE_INFINITY)); // a trip only calls you: open the bank
         probe = circuit.load("probe");

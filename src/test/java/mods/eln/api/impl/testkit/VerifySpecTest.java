@@ -26,17 +26,17 @@ public class VerifySpecTest {
     }
 
     static final List<MachineSpec> SPECS = List.of(
-        MachineSpec.consumer(Tier.V50).ratedWatts(100).build(),
-        MachineSpec.consumer(Tier.V200).ratedWatts(2000).idleWatts(20).build(),
-        MachineSpec.consumer(Tier.V50).ratedWatts(200).onBrownout(Brownout.SLOW).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT)
+        MachineSpec.consumer(50).ratedWatts(100).build(),
+        MachineSpec.consumer(200).ratedWatts(2000).idleWatts(20).build(),
+        MachineSpec.consumer(50).ratedWatts(200).onBrownout(Brownout.SLOW).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT)
             .power(RelativeFace.LEFT, RelativeFace.RIGHT, RelativeFace.UP, RelativeFace.DOWN).build(),   // EA's macerator's shape
-        MachineSpec.consumer(Tier.V200).ratedWatts(1000).onBrownout(Brownout.SLOW).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).power(RelativeFace.FRONT).build(),
-        MachineSpec.consumer(Tier.V800).ratedWatts(10000).idleWatts(500).minVoltageRatio(0.9).tripCooldownSeconds(1).build(),
-        MachineSpec.consumer(Tier.V3200).ratedWatts(50000).heatCapacityJPerK(2000).heatLossWPerK(50).overheatRiseKelvin(70).build(),
+        MachineSpec.consumer(200).ratedWatts(1000).onBrownout(Brownout.SLOW).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).power(RelativeFace.FRONT).build(),
+        MachineSpec.consumer(800).ratedWatts(10000).idleWatts(500).minVoltageRatio(0.9).tripCooldownSeconds(1).build(),
+        MachineSpec.consumer(3200).ratedWatts(50000).heatCapacityJPerK(2000).heatLossWPerK(50).overheatRiseKelvin(70).build(),
         MachineSpec.consumer(12).ratedWatts(5).idleWatts(1).onBrownout(Brownout.SLOW).build(),
-        MachineSpec.producer(Tier.V200).ratedWatts(1500).build(),
-        MachineSpec.producer(Tier.V50).ratedWatts(300).heatCapacityJPerK(500).heatLossWPerK(5).overheatRiseKelvin(40).build(),
-        MachineSpec.producer(Tier.V800).ratedWatts(20000).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
+        MachineSpec.producer(200).ratedWatts(1500).build(),
+        MachineSpec.producer(50).ratedWatts(300).heatCapacityJPerK(500).heatLossWPerK(5).overheatRiseKelvin(40).build(),
+        MachineSpec.producer(800).ratedWatts(20000).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
 
     @Test
     void easSpecsAndASpreadOfOthersPass() {
@@ -70,24 +70,24 @@ public class VerifySpecTest {
 
     @Test
     void aMachineThatDoesntMatchItsSpecFailsWithTheTraceInTheReport() {
-        MachineSpec claimed = MachineSpec.consumer(Tier.V200).ratedWatts(2000).build();
+        MachineSpec claimed = MachineSpec.consumer(200).ratedWatts(2000).build();
         // a higher undervoltage floor than claimed: it stops at 0.8 x nominal where the spec says it runs
-        SpecReport floor = SpecSuite.run(claimed, MachineSpec.consumer(Tier.V200).ratedWatts(2000).minVoltageRatio(0.9).build());
+        SpecReport floor = SpecSuite.run(claimed, MachineSpec.consumer(200).ratedWatts(2000).minVoltageRatio(0.9).build());
         assertFalse(floor.passed());
         assertTrue(floor.failures().stream().anyMatch(c -> c.name().equals("sweep 0.80 x nominal") && c.detail().contains("expected RUNNING")),
             floor::toString);
         // less power than claimed: the work at nominal falls short
-        SpecReport weak = SpecSuite.run(claimed, MachineSpec.consumer(Tier.V200).ratedWatts(1500).build());
+        SpecReport weak = SpecSuite.run(claimed, MachineSpec.consumer(200).ratedWatts(1500).build());
         assertTrue(weak.failures().stream().anyMatch(c -> c.name().equals("sweep 1.00 x nominal")), weak::toString);
         // burns where the spec says it trips and resets
-        SpecReport burns = SpecSuite.run(claimed, MachineSpec.consumer(Tier.V200).ratedWatts(2000).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
+        SpecReport burns = SpecSuite.run(claimed, MachineSpec.consumer(200).ratedWatts(2000).burnsOnOvervoltage(mods.eln.api.element.Machines.BURNS_OUT).build());
         assertTrue(burns.failures().stream().anyMatch(c -> c.name().equals("overvoltage trip and cooldown")), burns::toString);
         // a slower cooldown than claimed
-        SpecReport slow = SpecSuite.run(claimed, MachineSpec.consumer(Tier.V200).ratedWatts(2000).tripCooldownSeconds(5).build());
+        SpecReport slow = SpecSuite.run(claimed, MachineSpec.consumer(200).ratedWatts(2000).tripCooldownSeconds(5).build());
         assertTrue(slow.failures().stream().anyMatch(c -> c.name().equals("overvoltage trip and cooldown")), slow::toString);
         // a producer weaker than claimed
-        SpecReport dynamo = SpecSuite.run(MachineSpec.producer(Tier.V200).ratedWatts(1500).build(),
-            MachineSpec.producer(Tier.V200).ratedWatts(1000).build());
+        SpecReport dynamo = SpecSuite.run(MachineSpec.producer(200).ratedWatts(1500).build(),
+            MachineSpec.producer(200).ratedWatts(1000).build());
         assertTrue(dynamo.failures().stream().anyMatch(c -> c.name().equals("droop: rated power at nominal volts")), dynamo::toString);
         String text = floor.toString();
         assertTrue(text.startsWith("verifySpec(consumer 200 V 2000 W): "), text);
@@ -98,8 +98,8 @@ public class VerifySpecTest {
     @Test
     void verifySpecThrowsTheReport() {
         // (verifySpec checks the spec against itself; a failure is shown here through the seam's report)
-        SpecReport bad = SpecSuite.run(MachineSpec.consumer(Tier.V200).ratedWatts(2000).build(),
-            MachineSpec.consumer(Tier.V200).ratedWatts(2000).minVoltageRatio(0.9).build());
+        SpecReport bad = SpecSuite.run(MachineSpec.consumer(200).ratedWatts(2000).build(),
+            MachineSpec.consumer(200).ratedWatts(2000).minVoltageRatio(0.9).build());
         ElnTestKit.SpecFailure f = new ElnTestKit.SpecFailure(bad);
         assertTrue(f instanceof AssertionError);
         assertEquals(bad.toString(), f.getMessage());

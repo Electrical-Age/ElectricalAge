@@ -548,7 +548,7 @@ public final class HostedMachineCases {
             if (causes.size() != 1) return;
             mods.eln.api.TripCause t = causes.get(0);
             c.check("burn: with the overvoltage that burnt it", t.state() == MachineState.OVERVOLTAGE_TRIPPED && t.burns()
-                && Math.abs(t.limit() - 65) < 1e-9 && t.measured() > 65, t.toString());
+                && Math.abs(t.limit() - 1.3 * ApiTestMachines.BURNING_SPEC.nominalVolts()) < 1e-9 && t.measured() > t.limit(), t.toString());
             c.check("burn: reloaded, it stays tripped at 50 V past the cooldown", m.state() == MachineState.OVERVOLTAGE_TRIPPED
                 && m.lastTrip().map(t::equals).orElse(false), m.state() + " " + m.lastTrip());
             c.check("burn: no work after the burn, nor after the reload", workAtBurn >= 0 && workBeforeReload == workAtBurn

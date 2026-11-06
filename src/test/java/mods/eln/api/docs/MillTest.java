@@ -21,7 +21,7 @@ public class MillTest {
     // doc:begin bench
     @Test
     void millGrindsAboutThreeItemsInFiveSecondsAtNominal() {
-        Bench bench = ElnTestKit.bench().supply(200, 0.05);   // 200 V behind 0.05 ohm
+        Bench bench = ElnTestKit.bench().supply(230, 0.05);   // 230 V behind 0.05 ohm
         Mill.Work work = new Mill.Work();
         int[] items = {0};
         BenchMachine mill = bench.add(Mill.SPEC).owner(m -> {

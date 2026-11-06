@@ -7,7 +7,7 @@ import mods.eln.api.Tier;
 /** docs/api.md's burn: a press that overvoltage burns, and its handler, which breaks the block. */
 public final class Press {
     // doc:begin burn
-    public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V200).ratedWatts(3000)
+    public static final MachineSpec SPEC = MachineSpec.consumer(Tier.V230).ratedWatts(3000)
         .burnsOnOvervoltage(Press::burn)   // overvoltage burns it: it never resets
         .build();
 

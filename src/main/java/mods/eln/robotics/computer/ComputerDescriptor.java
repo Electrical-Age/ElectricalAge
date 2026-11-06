@@ -39,7 +39,7 @@ public class ComputerDescriptor extends TransparentNodeDescriptor {
      * comes back (a sag shouldn't cost a program its state).
      */
     public static MachineSpec spec() {
-        return MachineSpec.consumer(Tier.V50).ratedWatts(RATED_WATTS).idleWatts(IDLE_WATTS).onBrownout(Brownout.STOP)
+        return MachineSpec.consumer(Tier.V48).ratedWatts(RATED_WATTS).idleWatts(IDLE_WATTS).onBrownout(Brownout.STOP)
             .power(RelativeFace.BACK)
             .bus(RelativeFace.RIGHT, CablePosition.FLOOR_RIGHT)
             .build();

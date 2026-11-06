@@ -7,7 +7,7 @@ import mods.eln.api.Tier;
 /** docs/api.md's producer: a dynamo that burns fuel. */
 public final class Dynamo {
     // doc:begin dynamo
-    public static final MachineSpec SPEC = MachineSpec.producer(Tier.V200).ratedWatts(1500).build();
+    public static final MachineSpec SPEC = MachineSpec.producer(Tier.V230).ratedWatts(1500).build();
 
     /** Energy left in the fuel, J. */
     private double fuelJoules;
