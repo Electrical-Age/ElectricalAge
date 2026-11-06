@@ -59,6 +59,8 @@ public class ElnJeiPlugin implements IModPlugin {
         }
         ItemStack collector = Eln.findItemStack("Tree Resin Collector", 1);
         if (!collector.isEmpty()) registration.addRecipeCategories(new ResinCategory(registration.getJeiHelpers().getGuiHelper(), collector));
+        ItemStack furnace = Eln.findItemStack("Electrical Furnace", 1);
+        if (!furnace.isEmpty()) registration.addRecipeCategories(new AnnealCategory(registration.getJeiHelpers().getGuiHelper(), furnace));
     }
 
     @Override
@@ -73,6 +75,8 @@ public class ElnJeiPlugin implements IModPlugin {
         ItemStack collector = Eln.findItemStack("Tree Resin Collector", 1), resin = Eln.findItemStack("Tree Resin", 1);
         if (!collector.isEmpty() && !resin.isEmpty())
             registration.addRecipes(ResinCategory.TYPE, List.of(new ResinCategory.Resin(collector, resin)));
+        ItemStack lam = Eln.findItemStack("Silicon Steel Laminations", 1), core = Eln.findItemStack("Average Ferromagnetic Core", 1);
+        if (!lam.isEmpty() && !core.isEmpty()) registration.addRecipes(AnnealCategory.TYPE, List.of(new AnnealCategory.Anneal(lam, core)));
     }
 
     /** The pipe sensor devices' own items are internal (the pipe sensor items place them): kept out of the list, so each
@@ -108,5 +112,7 @@ public class ElnJeiPlugin implements IModPlugin {
         }
         ItemStack collector = Eln.findItemStack("Tree Resin Collector", 1);
         if (!collector.isEmpty()) registration.addCraftingStation(ResinCategory.TYPE, collector);
+        ItemStack furnace = Eln.findItemStack("Electrical Furnace", 1);
+        if (!furnace.isEmpty()) registration.addCraftingStation(AnnealCategory.TYPE, furnace);
     }
 }

@@ -568,6 +568,8 @@
   "item.eln.xor_chip": "XOR Chip",
   "item.eln.yellow_brush": "Yellow Brush",
   "itemGroup.eln": "Electrical Age",
+  "jei.eln.anneal": "Annealing (Electrical Furnace)",
+  "jei.eln.anneal.how": "Held between %s and %s °C: %s kJ. Above %s °C it spoils to Iron Dust.",
   "jei.eln.machine.compressor": "Compressor",
   "jei.eln.machine.extra": "(sometimes more)",
   "jei.eln.machine.macerator": "Macerator",

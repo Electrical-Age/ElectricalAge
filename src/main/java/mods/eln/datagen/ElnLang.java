@@ -54,6 +54,8 @@ public class ElnLang extends LanguageProvider {
         add("item.eln.handbook.no_guideme", "The Ledger's pages are blank: it needs the GuideME mod.");
         // JEI (compat/jei/ResinCategory)
         add("jei.eln.tree_resin_collector", "Tree Resin Collector");
+        add("jei.eln.anneal", "Annealing (Electrical Furnace)");
+        add("jei.eln.anneal.how", "Held between %s and %s °C: %s kJ. Above %s °C it spoils to Iron Dust.");
         add("jei.eln.machine.macerator", "Macerator");
         add("jei.eln.machine.compressor", "Compressor");
         add("jei.eln.machine.plate_machine", "Plate Machine");

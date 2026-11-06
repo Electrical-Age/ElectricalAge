@@ -126,6 +126,7 @@ public final class LabCommands {
                     if (n == 0) c.getSource().sendFailure(Component.literal("no tilted terminal logger there"));
                     return n;
                 })))
+                .then(Commands.literal("cores").executes(c -> demo(c.getSource(), () -> cores(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("converters").executes(c -> demo(c.getSource(), () -> converters(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("computers").executes(c -> demo(c.getSource(), () -> computers(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("loggerdemo").executes(c -> demo(c.getSource(), () -> loggerDemo(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -518,6 +519,65 @@ public final class LabCommands {
             where.append((char) ('a' + i)).append(' ').append(p.toShortString()).append("; ");
         }
         src.sendSuccess(() -> Component.literal("converters: " + where), false);
+        return 1;
+    }
+
+    /**
+     * Rigs for the ferromagnetic cores' recipes (Baughn 2026-11-06), 5 apart along x, each on 230 V: (a) an Electrical
+     * Furnace with a 230V Tungsten Heating Corp, Thermal Insulation and an Analogic Regulator at 650 C, (b) the same at
+     * 500 C (too cold to anneal), (c) a 230V Magnetizer.
+     */
+    static int cores(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        StringBuilder where = new StringBuilder();
+        String[] names = {"Electrical Furnace", "Electrical Furnace", "230V Magnetizer"};
+        for (int i = 0; i < names.length; i++) {
+            BlockPos p = pos.offset(5 * i, 0, 0);
+            var d = mods.eln.Eln.transparentNodeItem.getDescriptor(transparentId(names[i]));
+            float y0 = player.getYRot(), x0 = player.getXRot();
+            player.setYRot(0);
+            player.setXRot(0);
+            mods.eln.node.transparent.TransparentNode node;
+            try {
+                node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, p, mods.eln.misc.Direction.YN);
+            } finally {
+                player.setYRot(y0);
+                player.setXRot(x0);
+            }
+            if (node == null || node.element == null) throw new IllegalStateException("no room at " + p);
+            var e = node.element;
+            mods.eln.misc.Direction side = null;
+            for (mods.eln.misc.Direction dir : new mods.eln.misc.Direction[]{e.front.getInverse(), e.front.left(), e.front.right(), e.front})
+                if ((e.getConnectionMask(dir, mods.eln.misc.LRDU.Down) & mods.eln.node.NodeBase.maskElectricalPower) != 0) {
+                    side = dir;
+                    break;
+                }
+            if (side == null) throw new IllegalStateException("no power side on " + names[i]);
+            host(level, player, 8 + (32 << 6), step(p, side));   // a Medium Voltage Cable
+            var feed = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, step(step(p, side), side));
+            orient(feed, l -> l, side.getInverse());
+            feed.networkUnserialize(packet(o -> {
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat((float) mods.eln.Eln.MVU);
+            }));
+            if (e instanceof mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement f) {
+                f.getInventory().setItem(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.heatingCorpSlotId,
+                    mods.eln.Eln.findItemStack("230V Tungsten Heating Corp", 1));
+                f.getInventory().setItem(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.thermalIsolatorSlotId,
+                    mods.eln.Eln.findItemStack("Thermal Insulation", 1));
+                f.getInventory().setItem(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.thermalRegulatorSlotId,
+                    mods.eln.Eln.findItemStack("Analogic Regulator", 1));
+                f.getInventory().setChanged();
+                float target = i == 0 ? 650 : 500;
+                f.networkUnserialize(packet(o -> {
+                    o.writeByte(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.unserializeTemperatureTarget);
+                    o.writeFloat(target);
+                }));
+            }
+            where.append((char) ('a' + i)).append(' ').append(names[i]).append(' ').append(p.toShortString()).append(" (power ").append(side).append("); ");
+        }
+        src.sendSuccess(() -> Component.literal("cores: " + where), false);
         return 1;
     }
 
