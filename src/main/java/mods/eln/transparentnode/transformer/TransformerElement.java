@@ -304,12 +304,31 @@ public class TransformerElement extends TransparentNodeElement {
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putBoolean("isIsolated", isIsolator);
+        nbt.putInt("tierGen", 1);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         isIsolator = nbt.getBooleanOr("isIsolated", false);
+        if (nbt.getIntOr("tierGen", 0) < 1) rewindForRealVoltages();
+    }
+
+    /**
+     * Once, for a converter saved before the real-world voltages (no "tierGen"): one wound 1:4 or 4:1 (1.12's 50 V <-> 200 V)
+     * is rewound 5:24 or 24:5, so 48 V still makes 230 V (230.4 V). Coils are only added, never taken. Baughn 2026-11-06.
+     */
+    void rewindForRealVoltages() {
+        ItemStack p = inventory.getItem(TransformerContainer.primaryCableSlotId);
+        ItemStack s = inventory.getItem(TransformerContainer.secondaryCableSlotId);
+        if (Utils.isEmpty(p) || Utils.isEmpty(s)) return;
+        if (s.getCount() == 4 * p.getCount()) {
+            p.setCount(5);
+            s.setCount(24);
+        } else if (p.getCount() == 4 * s.getCount()) {
+            p.setCount(24);
+            s.setCount(5);
+        }
     }
 
     @Override

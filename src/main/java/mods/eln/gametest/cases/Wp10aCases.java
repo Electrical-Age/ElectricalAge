@@ -91,6 +91,7 @@ public final class Wp10aCases {
         cases.add(new LowVoltageDisconnectCase(false));
         cases.add(new TransformerCase());
         cases.add(new TransformerIncompleteCase());
+        cases.add(new TransformerRewoundCase());
         cases.add(new CapacitorCase());
         cases.add(new InductorCase());
         cases.add(new AutoMinerCase());
@@ -762,7 +763,7 @@ public final class Wp10aCases {
      * DC-DC converter: primary (left) 2 LV cables, secondary (right) 1 LV cable, cheap core (wp12); secondary open:
      * U2 = U1 * n2/n1 = 25 V. Without a core both windings are open: only the primary side is checked.
      */
-    static final class TransformerCase implements TestCase {
+    static class TransformerCase implements TestCase {
         TransformerElement tr;
         SixNodeElement primary, secondary;
         boolean core;
@@ -792,6 +793,60 @@ public final class Wp10aCases {
                 return;
             }
             ctx.checkValue("wp10a transformer secondary open-circuit voltage [V] (U1 * 1/2)", loadU(secondary), U / 2);
+        }
+    }
+
+    /**
+     * Real-world voltages (Baughn 2026-11-06): a converter saved before them (no "tierGen") wound 1:4 (1.12's 50 V to
+     * 200 V) comes back 5:24 (48 V up to 230.4 V); one saved since is left as it is; a winding holds 64.
+     */
+    static final class TransformerRewoundCase extends TransformerCase {
+        int oldP, oldS, keptP, keptS, bigS;
+
+        @Override
+        public String name() {
+            return "wp10a transformer rewound for real voltages";
+        }
+
+        @Override
+        public void build(TestContext ctx) {
+            super.build(ctx);
+            if (!core) return;
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(1));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(4));
+            net.minecraft.nbt.CompoundTag nbt = new net.minecraft.nbt.CompoundTag();
+            tr.writeToNBT(nbt);
+            nbt.remove("tierGen");   // as saved by an older EA
+            tr.readFromNBT(nbt);
+            oldP = tr.getInventory().getItem(TransformerContainer.primaryCableSlotId).getCount();
+            oldS = tr.getInventory().getItem(TransformerContainer.secondaryCableSlotId).getCount();
+            nbt = new net.minecraft.nbt.CompoundTag();
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(1));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(4));
+            tr.writeToNBT(nbt);   // saved since: with tierGen, untouched
+            tr.readFromNBT(nbt);
+            keptP = tr.getInventory().getItem(TransformerContainer.primaryCableSlotId).getCount();
+            keptS = tr.getInventory().getItem(TransformerContainer.secondaryCableSlotId).getCount();
+            // (back to 2:1: 230 V on its LV windings would burn it)
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(2));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(1));
+            tr.getInventory().setChanged();
+            // 64 a side fits
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(64));
+            bigS = tr.getInventory().getItem(TransformerContainer.secondaryCableSlotId).getCount();
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(1));
+            tr.getInventory().setChanged();
+        }
+
+        @Override
+        public void measure(TestContext ctx) {
+            if (!core) {
+                ctx.line("SKIP wp10a transformer rewound: Cheap Ferromagnetic Core not registered (wp12)");
+                return;
+            }
+            ctx.check("converter: an old 1:4 comes back 5:24", oldP == 5 && oldS == 24, oldP + ":" + oldS);
+            ctx.check("converter: one saved since keeps 1:4", keptP == 1 && keptS == 4, keptP + ":" + keptS);
+            ctx.check("converter: a winding holds 64", bigS == 64, "" + bigS);
         }
     }
 

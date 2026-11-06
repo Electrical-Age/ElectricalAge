@@ -75,6 +75,9 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
     }
 
     void draw(Obj3DPart fero, int priCableNbr, int secCableNbr, boolean hasCasing, float doorOpen) {
+        // (a winding model per cable, as in 1.12, but at most four a side: a 64-turn winding would stand 8 blocks tall)
+        priCableNbr = Math.min(priCableNbr, 4);
+        secCableNbr = Math.min(secCableNbr, 4);
         if (main != null) main.draw();
         if (fero != null) {
             fero.draw();

@@ -206,9 +206,10 @@ public final class MenuSpecs {
             descriptor(mods.eln.transparentnode.solarpanel.SolarPanelContainer.trackerSlotId, 176 / 2 - 20, 35, 1,
                 SolarTrackerDescriptor.class, MEDIUM, tr("Solar tracker slot"))).publishing(0));
         put(mods.eln.transparentnode.transformer.TransformerDescriptor.class, d -> MenuSpec.of(
-            six(mods.eln.transparentnode.transformer.TransformerContainer.primaryCableSlotId, 58, 30, 4, CABLE, MEDIUM,
+            // up to 64 turns a side (Baughn 2026-11-06; 1.12: 4), one cable a turn
+            six(mods.eln.transparentnode.transformer.TransformerContainer.primaryCableSlotId, 58, 30, 64, CABLE, MEDIUM,
                 tr("Electrical cable slot")),
-            six(mods.eln.transparentnode.transformer.TransformerContainer.secondaryCableSlotId, 100, 30, 4, CABLE, MEDIUM,
+            six(mods.eln.transparentnode.transformer.TransformerContainer.secondaryCableSlotId, 100, 30, 64, CABLE, MEDIUM,
                 tr("Electrical cable slot")),
             descriptor(mods.eln.transparentnode.transformer.TransformerContainer.ferromagneticSlotId, 58 + (100 - 58) / 2, 30, 1,
                 FerromagneticCoreDescriptor.class, MEDIUM, tr("Ferromagnetic core slot")),

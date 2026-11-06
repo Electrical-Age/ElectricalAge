@@ -48,3 +48,5 @@ table (Baughn, 2026-10-25): coal ore is no longer 3 coal.
 (13 A; 1.12's 200 V cable 2 kW). Every descriptor whose numbers follow a tier differs: cables (Rs follows U^2/P, so
 power limits are unchanged), switches, chargers, batteries, turbines, antennas, the 48/230 V machines, heaters, lamps,
 the Generator (400 V instead of 3200 V). Board #55.
+`golden_slots` (`GoldenSlotsCase`): the DC-DC Converter's two winding slots take 64 (1.12: 4), for 5:24 (48 V to 230 V)
+and the like (Baughn 2026-11-06, board #55).
