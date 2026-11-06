@@ -208,9 +208,10 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5200",   // the steam injection wellhead (oil lakes, todo #138; Baughn 2026-10-30)
         "eln:transparent_node@5504",   // the Linear Servo Drive (the servo layer, Baughn 2026-11-02)
         "eln:transparent_node@5568",   // the computer (robotics phase 3, Baughn 2026-11-05)
+        "eln:transparent_node@129",   // the Variable DC-DC Converter (real-world voltages, Baughn 2026-11-06)
         "eln:ore@7");   // Deepslate Lead Ore: lead in deepslate's middle (Baughn 2026-10-20)
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
-    static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("48V Tar Sand Separator", "230V Tar Sand Separator",
+    static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("48V Tar Sand Separator", "230V Tar Sand Separator", "Variable DC-DC Converter",
         "48V Electric Heater", "230V Electric Heater", "Smelter", "Steam Oven", "Small Steam Condenser", "Steam Condenser",
         "48V Steam Turbine", "230V Steam Turbine", "48V Compact Steam Turbine",
         "Electrical Anvil",   // (their screen: Baughn 2026-10-26)

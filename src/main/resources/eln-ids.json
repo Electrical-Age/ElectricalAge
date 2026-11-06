@@ -1655,6 +1655,12 @@
   "kind": "transparent_node",
   "name": "dc_dc_converter"
  },
+ "eln:transparent_node@129": {
+  "descriptor": "VariableTransformerDescriptor",
+  "display": "Variable DC-DC Converter",
+  "kind": "transparent_node",
+  "name": "variable_dc_dc_converter"
+ },
  "eln:transparent_node@192": {
   "descriptor": "HeatFurnaceDescriptor",
   "display": "Stone Heat Furnace",

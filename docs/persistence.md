@@ -167,8 +167,12 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 
 The tiers moved from 50/200/800/3200 V to 48/230/400 V and 11 kV, signals from 0-50 V to 0-5 V (Baughn). Nothing in
 the save format changed: cable and device numbers follow from the constants on load. A DC-DC converter writes
-`tierGen` = 1; one read without it (saved by an older EA) and wound exactly 1:4 or 4:1 is rewound 5:24 or 24:5 once
-(`TransformerElement.rewindForRealVoltages`; coils are only added). Player settings saved in volts (breaker trips,
+`tierGen` = 1; one read without it (saved by an older EA) is rewound once by its windings' tiers
+(`TransformerElement.rewindForRealVoltages`: 50 -> 200 V wound 1:4 becomes 5:24, 800 -> 200 V 26:15, 800 -> 3200 V 2:55;
+coils are only added) and marked `legacyCore` (the inventory as loaded): it doesn't saturate until a player changes its
+windings or core. The Variable DC-DC Converter saves `tapTurns`. An isolated converter reads `isIsolated` before the
+base reads its components, so its two sources' states load (they were dropped before).
+Player settings saved in volts (breaker trips,
 source targets, signal levels) are left as they were (Baughn).
 
 ## Ids that must never change

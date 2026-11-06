@@ -189,6 +189,14 @@ public class Wp10aContent implements ElnContent {
                 obj.getObj("feromagneticcorea"), obj.getObj("transformatorCase"), 0.5f);
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
+        {
+            // Baughn 2026-11-06: a signal on its front taps the secondary
+            subId = 1;
+            name = TR_NAME(Type.NONE, "Variable DC-DC Converter");
+            TransformerDescriptor desc = new mods.eln.transparentnode.transformer.VariableTransformerDescriptor(name,
+                obj.getObj("transformator"), obj.getObj("feromagneticcorea"), obj.getObj("transformatorCase"), 0.5f);
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
 
     }
 

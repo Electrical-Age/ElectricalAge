@@ -13,6 +13,11 @@ import static mods.eln.i18n.I18N.tr;
 public class FerromagneticCoreDescriptor extends GenericItemUsingDamageDescriptorUpgrade {
 
     public double cableMultiplicator;
+    /**
+     * The most volts a turn of a winding on it may carry before it saturates (Baughn 2026-11-06: converters like real
+     * transformers): 230 V needs 58 turns on a cheap core, 15 on an optimal one.
+     */
+    public double voltsPerTurn = 16;
     public Obj3DPart feroPart;
     Obj3D obj;
 
@@ -33,5 +38,6 @@ public class FerromagneticCoreDescriptor extends GenericItemUsingDamageDescripto
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Cable loss factor: %1$", cableMultiplicator));
+        list.add(tr("Up to %1$ V per turn", mods.eln.misc.Utils.plotValue(voltsPerTurn)));
     }
 }

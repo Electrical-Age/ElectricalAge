@@ -694,6 +694,9 @@ public final class ElnRecipes extends ElnRecipesBase {
             "III",
             'C', findItemStack("Copper Coil"),
             'I', stack(Items.IRON_INGOT));
+        // Baughn 2026-11-06: a dearer converter whose tap a signal sets
+        addShapelessRecipe(findItemStack("Variable DC-DC Converter", 1),
+            findItemStack("DC-DC Converter"), dictAdvancedChip, findItemStack("Signal Cable"));
     }
 
     public static void recipeHeatFurnace() {

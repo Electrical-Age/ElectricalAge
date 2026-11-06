@@ -20,7 +20,12 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
     public final float minimalLoadToHum;
 
     public TransformerDescriptor(String name, Obj3D obj, Obj3D defaultFeroObj, Obj3D casing, float minimalLoadToHum) {
-        super(name, TransformerElement.class, null);
+        this(name, TransformerElement.class, obj, defaultFeroObj, casing, minimalLoadToHum);
+    }
+
+    protected TransformerDescriptor(String name, Class<? extends TransformerElement> element, Obj3D obj, Obj3D defaultFeroObj,
+                                    Obj3D casing, float minimalLoadToHum) {
+        super(name, element, null);
         this.minimalLoadToHum = minimalLoadToHum;
 
         if (obj != null) {
@@ -57,6 +62,7 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Transforms an input voltage to\nan output voltage.").split("\n"));
         Collections.addAll(list, tr("The voltage ratio is proportional\nto the cable stacks count ratio.").split("\n"));
+        Collections.addAll(list, tr("Each cable is a turn, up to 64 a side.\nThe core takes so many volts a turn:\npast that it saturates, heats and burns.").split("\n"));
     }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)

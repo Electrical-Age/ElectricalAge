@@ -306,6 +306,13 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   so a pipe end can meet it (Baughn: "definitely move it"); the pipe router reaches flanges off its lattice by a jog.
 - A pipe's open end passes liquid as far as it is wet (Baughn: a part-full run held its puddle; water too).
 
+- **Real-world voltages and realistic converters** (2026-11-06, board #55): tiers 48 V / 230 V / 400 V / 11 kV (1.12: 50 /
+  200 / 800 / 3200 V), signals 0-5 V (1.12: 0-50 V), names follow ("48V Macerator"); the 230 V cable carries 3 kW. DC-DC
+  converters take up to 64 turns a side; a core has a volts-per-turn limit (cheap 4, average 8, optimal 16 V): past it the
+  core saturates, draws a magnetising current and heats, and the converter burns; a winding over 1.3 x its cable's
+  current heats it too. The Variable DC-DC Converter taps its secondary by a signal on its front. Old converters are
+  rewound once and kept as built (no saturation) until changed (docs/persistence.md).
+
 ## Behaviour changes vs 1.12
 
 - Meters, probes and power sockets no longer burn at their (former slot) cable's voltage: those watchdogs are off.

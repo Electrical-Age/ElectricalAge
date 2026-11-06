@@ -276,6 +276,7 @@ public class Wp12aContent implements ElnContent {
                 TR_NAME(Type.NONE, "Cheap Ferromagnetic Core"), obj.getObj("feromagneticcorea"),// iconId,
                 // name,
                 10);
+            element.voltsPerTurn = 4;   // (Baughn 2026-11-06: saturation)
             sharedItem.addElement(completId, element);
         }
         {
@@ -285,6 +286,7 @@ public class Wp12aContent implements ElnContent {
                 TR_NAME(Type.NONE, "Average Ferromagnetic Core"), obj.getObj("feromagneticcorea"),// iconId,
                 // name,
                 4);
+            element.voltsPerTurn = 8;   // (Baughn 2026-11-06: saturation)
             sharedItem.addElement(completId, element);
         }
         {
@@ -294,6 +296,7 @@ public class Wp12aContent implements ElnContent {
                 TR_NAME(Type.NONE, "Optimal Ferromagnetic Core"), obj.getObj("feromagneticcorea"),// iconId,
                 // name,
                 1);
+            element.voltsPerTurn = 16;   // (Baughn 2026-11-06: saturation)
             sharedItem.addElement(completId, element);
         }
     }

@@ -92,6 +92,9 @@ public final class Wp10aCases {
         cases.add(new TransformerCase());
         cases.add(new TransformerIncompleteCase());
         cases.add(new TransformerRewoundCase());
+        cases.add(new TransformerSaturatesCase());
+        cases.add(new TransformerLegacyCase());
+        cases.add(new VariableTransformerCase());
         cases.add(new CapacitorCase());
         cases.add(new InductorCase());
         cases.add(new AutoMinerCase());
@@ -760,8 +763,8 @@ public final class Wp10aCases {
     }
 
     /**
-     * DC-DC converter: primary (left) 2 LV cables, secondary (right) 1 LV cable, cheap core (wp12); secondary open:
-     * U2 = U1 * n2/n1 = 25 V. Without a core both windings are open: only the primary side is checked.
+     * DC-DC converter: primary (left) 14 LV cables, secondary (right) 7 LV cables, cheap core (wp12; 4 V a turn: 48 V needs
+     * 12 turns at least, Baughn 2026-11-06); secondary open: U2 = U1 * n2/n1 = 24 V. Without a core both windings are open: only the primary side is checked.
      */
     static class TransformerCase implements TestCase {
         TransformerElement tr;
@@ -778,8 +781,8 @@ public final class Wp10aCases {
             tr = (TransformerElement) l.device(TRANSFORMER, 3);
             primary = l.feed(p, tr.front.left())[1];
             secondary = l.six(LV_CABLE, off(p, tr.front.right()));
-            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(2));
-            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(1));
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(14));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(7));
             ItemStack c = shared(CORE_CHEAP, FerromagneticCoreDescriptor.class, 1);
             core = !c.isEmpty();
             if (core) tr.getInventory().setItem(TransformerContainer.ferromagneticSlotId, c);
@@ -793,6 +796,185 @@ public final class Wp10aCases {
                 return;
             }
             ctx.checkValue("wp10a transformer secondary open-circuit voltage [V] (U1 * 1/2)", loadU(secondary), U / 2);
+        }
+    }
+
+    /**
+     * A core past its volts per turn saturates (Baughn 2026-11-06: like real transformers): 2:1 LV windings on a cheap core
+     * (4 V a turn) at 48 V carry 24 V a turn. It draws its magnetising current, heats, and burns within the test.
+     */
+    static class TransformerSaturatesCase extends TransformerCase {
+        boolean sawSaturated;
+        mods.eln.sim.IProcess watch;
+
+        @Override
+        public String name() {
+            return "wp10a transformer saturates and burns";
+        }
+
+        @Override
+        public int ticks() {
+            return 600;
+        }
+
+        @Override
+        public void build(TestContext ctx) {
+            super.build(ctx);
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(2));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(1));
+            tr.getInventory().setChanged();
+            Eln.simulator.addSlowProcess(watch = dt -> sawSaturated |= tr.saturated);
+        }
+
+        @Override
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            if (!core) {
+                ctx.line("SKIP wp10a transformer saturates: Cheap Ferromagnetic Core not registered (wp12)");
+                return;
+            }
+            ctx.check("converter: 24 V a turn on a 4 V core saturates it", sawSaturated, "");
+            ctx.check("converter: ... and it burns", tr.isBurnt(), tr.getWaila().toString());
+        }
+    }
+
+    /**
+     * A converter saved before the real-world voltages keeps working as built: 2:1 on a cheap core at 48 V (it would
+     * saturate) doesn't saturate after loading, until its windings change.
+     */
+    static class TransformerLegacyCase extends TransformerCase {
+        boolean legacyAfterLoad, saturatedAsLegacy, legacyAfterEdit;
+        mods.eln.sim.IProcess watch;
+        int tick;
+
+        @Override
+        public String name() {
+            return "wp10a transformer as built before 48 V";
+        }
+
+        @Override
+        public int ticks() {
+            return 300;
+        }
+
+        @Override
+        public void build(TestContext ctx) {
+            super.build(ctx);
+            if (!core) return;
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(2));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(1));
+            net.minecraft.nbt.CompoundTag nbt = new net.minecraft.nbt.CompoundTag();
+            tr.writeToNBT(nbt);
+            nbt.remove("tierGen");   // as saved by an older EA
+            tr.readFromNBT(nbt);
+            legacyAfterLoad = tr.legacy;
+            tr.getInventory().setChanged();
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                tick++;
+                if (tick < 150) saturatedAsLegacy |= tr.saturated;
+                if (tick == 150) {   // a player rewinds it: as any converter now (14:7 is within the cheap core)
+                    tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(14));
+                    tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(7));
+                    tr.getInventory().setChanged();
+                }
+                if (tick == 160) legacyAfterEdit = tr.legacy;
+            });
+        }
+
+        @Override
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            if (!core) {
+                ctx.line("SKIP wp10a transformer as built before 48 V: Cheap Ferromagnetic Core not registered (wp12)");
+                return;
+            }
+            ctx.check("converter: loaded from an old save, it is as built", legacyAfterLoad, "");
+            ctx.check("converter: ... and doesn't saturate (2:1 on a cheap core at 48 V)", !saturatedAsLegacy && !tr.isBurnt(), "");
+            ctx.check("converter: changed by a player, it is an ordinary converter", !legacyAfterEdit, "");
+        }
+    }
+
+    /**
+     * The Variable DC-DC Converter (Baughn 2026-11-06): 14 LV turns in, 28 MV turns out, cheap core; the signal on its front
+     * taps the secondary: half of SVU -> 14 turns, 48 V out; all of SVU -> 28 turns, 96 V.
+     */
+    static ElectricalSourceElement source(TestContext ctx, BlockPos at, double volts) {
+        ElectricalSourceElement src = (ElectricalSourceElement) ctx.placeSix(SOURCE, at);
+        src.networkUnserialize(ctx.stream(out -> {
+            out.writeByte(ElectricalSourceElement.setVoltageId);
+            out.writeFloat((float) volts);
+        }));
+        return src;
+    }
+
+    static class VariableTransformerCase implements TestCase {
+        mods.eln.transparentnode.transformer.VariableTransformerElement tr;
+        SixNodeElement secondary;
+        mods.eln.sim.mna.component.VoltageSource signal;
+        boolean core;
+        double half = Double.NaN, full = Double.NaN;
+        int tick;
+        mods.eln.sim.IProcess watch;
+
+        public String name() {
+            return "wp10a variable transformer follows its signal";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public int width() {
+            return 9;   // (floor_9x7x7: room for the signal feed on its front)
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        public int floorDepth() {
+            return 7;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(4, 1, 3);
+            tr = (mods.eln.transparentnode.transformer.VariableTransformerElement) ctx.placeTransparent(TRANSFORMER + 1, p);
+            // (placed by hand: Layout's platform is 3 deep, and the signal comes in on the front)
+            ctx.placeSix(LV_CABLE, off(p, tr.front.left()));
+            source(ctx, off(off(p, tr.front.left()), tr.front.left()), U);
+            secondary = ctx.placeSix(8 + (32 << 6), off(p, tr.front.right()));   // a Medium Voltage Cable
+            // the signal: a source straight on its gate load (the harness's own wiring, as PipeCases drives a pin)
+            signal = new mods.eln.sim.mna.component.VoltageSource("tap signal", tr.tap, null);
+            signal.setU(Eln.SVU / 2);
+            Eln.simulator.addElectricalComponent(signal);
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(14));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, Eln.sixNodeItem.getDescriptor(8 + (32 << 6)).newItemStack(28));
+            ItemStack c = shared(CORE_CHEAP, FerromagneticCoreDescriptor.class, 1);
+            core = !c.isEmpty();
+            if (core) tr.getInventory().setItem(TransformerContainer.ferromagneticSlotId, c);
+            tr.getInventory().setChanged();
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                tick++;
+                if (tick == 100) signal.setU(Eln.SVU);
+                if (tick == 90) half = loadU(secondary);
+                if (tick == 190) full = loadU(secondary);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            Eln.simulator.removeElectricalComponent(signal);
+            if (!core) {
+                ctx.line("SKIP wp10a variable transformer: Cheap Ferromagnetic Core not registered (wp12)");
+                return;
+            }
+            ctx.line("variable converter: " + tr.getWaila());
+            ctx.checkValue("variable converter: half signal taps 14 of 28 turns: 48 V [V]", half, U);
+            ctx.checkValue("variable converter: full signal taps all 28: 96 V [V]", full, 2 * U);
         }
     }
 
@@ -827,14 +1009,14 @@ public final class Wp10aCases {
             tr.readFromNBT(nbt);
             keptP = tr.getInventory().getItem(TransformerContainer.primaryCableSlotId).getCount();
             keptS = tr.getInventory().getItem(TransformerContainer.secondaryCableSlotId).getCount();
-            // (back to 2:1: 230 V on its LV windings would burn it)
-            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(2));
-            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(1));
+            // (back to 14:7: 230 V on its LV windings would burn it)
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(14));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(7));
             tr.getInventory().setChanged();
             // 64 a side fits
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(64));
             bigS = tr.getInventory().getItem(TransformerContainer.secondaryCableSlotId).getCount();
-            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(1));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(7));
             tr.getInventory().setChanged();
         }
 

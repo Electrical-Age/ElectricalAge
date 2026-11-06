@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:dc_dc_converter",
+    "#c:circuits/advanced",
+    "eln:signal_cable"
+  ],
+  "result": {
+    "id": "eln:variable_dc_dc_converter"
+  }
+}

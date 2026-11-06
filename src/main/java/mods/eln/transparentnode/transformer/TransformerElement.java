@@ -14,7 +14,12 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.ElectricalResistorHeatThermalLoad;
+import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.Transformer;
+import mods.eln.sim.nbt.NbtThermalLoad;
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
+import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.TransformerInterSystemProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -34,23 +39,46 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TransformerElement extends TransparentNodeElement {
-    private final NbtElectricalLoad primaryLoad = new NbtElectricalLoad("primaryLoad");
-    private final NbtElectricalLoad secondaryLoad = new NbtElectricalLoad("secondaryLoad");
+    final NbtElectricalLoad primaryLoad = new NbtElectricalLoad("primaryLoad");
+    final NbtElectricalLoad secondaryLoad = new NbtElectricalLoad("secondaryLoad");
 
     private final VoltageSource primaryVoltageSource = new VoltageSource("primaryVoltageSource");
     private final VoltageSource secondaryVoltageSource = new VoltageSource("secondaryVoltageSource");
 
-    private final TransformerInterSystemProcess interSystemProcess =
+    final TransformerInterSystemProcess interSystemProcess =
         new TransformerInterSystemProcess(primaryLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource);
-    private final Transformer transformer = new Transformer();
+    final Transformer transformer = new Transformer();
 
-    private final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(4, 64, this);
+    final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(4, 64, this);
 
     private float primaryMaxCurrent = 0;
     private float secondaryMaxCurrent = 0;
     private final TransformerDescriptor transformerDescriptor;
 
-    private boolean isIsolator = false;
+    boolean isIsolator = false;
+
+    // ---- realistic converter (Baughn 2026-11-06: "like real-world transformers"): heat of the windings and the core
+
+    /** The windings' and core's heat: a winding over its current, or a saturated core, heats it until it burns. */
+    final NbtThermalLoad heat = new NbtThermalLoad("heat");
+    private final ThermalLoadWatchDog heatWatchdog = new ThermalLoadWatchDog();
+    /** Across the primary while the core saturates: the magnetising current, which heats the core. */
+    final Resistor magnetizing = new Resistor();
+    /** The core is saturated (switched with a margin: entered above its volts per turn, left below 97 % of it). */
+    public boolean saturated;
+    private int dwell;
+    /**
+     * Saved before the real-world voltages: it keeps working as it was (no saturation) until a player changes its windings
+     * or core (legacyKey records them as loaded).
+     */
+    public boolean legacy;
+    String legacyKey;
+    /** Temperature it burns at (C), how far over ambient that is at 1.3 x its windings' rated current, its time constant (s). */
+    static final double WARM_LIMIT = 100, BURN_RISE = 80, TAU = 30;
+    /** A saturated core heats this many times as fast as windings at their burning current: it burns in about 10 s. */
+    static final double SATURATION_HEAT = 4;
+    /** Heat of the windings at their burning current (W), from the last inventory (0: incomplete). */
+    double burnHeat;
 
     public TransformerElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
         super(transparentNode, descriptor);
@@ -60,6 +88,15 @@ public class TransformerElement extends TransparentNodeElement {
         Failure exp = new Failure(this).transformer();
         slowProcessList.add(voltagePrimaryWatchdog.set(primaryLoad).set(exp));
         slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp));
+
+        thermalLoadList.add(heat);
+        thermalFastProcessList.add(new ElectricalLoadHeatThermalLoad(primaryLoad, heat));
+        thermalFastProcessList.add(new ElectricalLoadHeatThermalLoad(secondaryLoad, heat));
+        thermalFastProcessList.add(new ElectricalResistorHeatThermalLoad(magnetizing, heat));
+        magnetizing.connectTo(primaryLoad, null);
+        electricalComponentList.add(magnetizing);
+        slowProcessList.add(heatWatchdog.set(heat).setTMax(WARM_LIMIT).set(exp));
+        slowProcessList.add(dt -> checkSaturation());
 
         transformerDescriptor = (TransformerDescriptor) descriptor;
 
@@ -189,12 +226,82 @@ public class TransformerElement extends TransparentNodeElement {
         }
 
         if (!Utils.isEmpty(primaryCable) && !Utils.isEmpty(secondaryCable)) {
-            transformer.setRatio(1.0 * secondaryCable.getCount() / primaryCable.getCount());
-            interSystemProcess.setRatio(1.0 * secondaryCable.getCount() / primaryCable.getCount());
+            transformer.setRatio(1.0 * secondaryTurns() / primaryCable.getCount());
+            interSystemProcess.setRatio(1.0 * secondaryTurns() / primaryCable.getCount());
         } else {
             transformer.setRatio(1);
             interSystemProcess.setRatio(1);
         }
+
+        // its heat: at 1.3 x the windings' rated current it settles BURN_RISE over ambient, with a TAU time constant
+        burnHeat = 0;
+        if (complete()) {
+            double ip = 1.3 * primaryCableDescriptor.electricalMaximalCurrent, is = 1.3 * secondaryCableDescriptor.electricalMaximalCurrent;
+            burnHeat = Math.max(ip * ip * primaryLoad.getRs() * 2, is * is * secondaryLoad.getRs() * 2);
+        }
+        if (burnHeat > 0) {
+            heat.Rp = BURN_RISE / burnHeat;
+            heat.C = TAU / heat.Rp;
+        } else {
+            heat.Rp = 1;
+            heat.C = 100;
+        }
+        heat.setRsByTao(TAU);
+        setSaturated(false);
+    }
+
+    /** Whether its screen's isolation toggle works (the variable converter is always isolated). */
+    boolean canToggleIsolation() {
+        return true;
+    }
+
+    /** The turns of the secondary in use (the variable converter taps it). */
+    int secondaryTurns() {
+        ItemStack s = inventory.getItem(TransformerContainer.secondaryCableSlotId);
+        return Utils.isEmpty(s) ? 0 : s.getCount();
+    }
+
+    /** The core's volts per turn now: the larger of the two windings', 0 if it is incomplete. */
+    double voltsPerTurn() {
+        ItemStack p = inventory.getItem(TransformerContainer.primaryCableSlotId);
+        int ns = secondaryTurns();
+        if (!complete() || ns == 0) return 0;
+        return Math.max(Math.abs(primaryLoad.getU()) / p.getCount(), Math.abs(secondaryLoad.getU()) / ns);
+    }
+
+    double coreLimit() {
+        ItemStack core = inventory.getItem(TransformerContainer.ferromagneticSlotId);
+        return Utils.isEmpty(core) ? 0 : ((FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core)).voltsPerTurn;
+    }
+
+    String inventoryKey() {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            ItemStack st = inventory.getItem(i);
+            b.append(Utils.isEmpty(st) ? "-" : st.getItem() + "x" + st.getCount()).append(';');
+        }
+        return b.toString();
+    }
+
+    /** Every slow step: the core saturates past its volts per turn (not a legacy converter's, until it is changed). */
+    void checkSaturation() {
+        if (legacy && !inventoryKey().equals(legacyKey)) legacy = false;
+        double limit = coreLimit(), vpt = voltsPerTurn();
+        boolean want = !legacy && limit > 0 && burnHeat > 0 && (saturated ? vpt > 0.97 * limit : vpt > limit);
+        if (dwell > 0) dwell--;
+        else if (want != saturated) {
+            setSaturated(want);
+            dwell = 20;   // (a second at least each way: a weak line sagging under the draw mustn't chatter)
+        }
+    }
+
+    /** Switch the magnetising draw: SATURATION_HEAT x the windings' burning heat at the primary's voltage now. */
+    void setSaturated(boolean on) {
+        saturated = on;
+        double u = Math.abs(primaryLoad.getU());
+        if (on && u > 1e-3 && burnHeat > 0) magnetizing.setR(Math.max(0.01, u * u / (SATURATION_HEAT * burnHeat)));
+        else magnetizing.highImpedance();
+        needPublish();
     }
 
     private void applyIsolation() {
@@ -256,6 +363,7 @@ public class TransformerElement extends TransparentNodeElement {
     public byte networkUnserialize(DataInputStream stream) {
         switch (super.networkUnserialize(stream)) {
             case toogleIsIsolator:
+                if (!canToggleIsolation()) break;
                 disconnect();
                 isIsolator = !isIsolator;
                 applyIsolation();
@@ -305,13 +413,23 @@ public class TransformerElement extends TransparentNodeElement {
         super.writeToNBT(nbt);
         nbt.putBoolean("isIsolated", isIsolator);
         nbt.putInt("tierGen", 1);
+        if (legacy) nbt.putString("legacyCore", legacyKey);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
+        // (isolation first: its two sources must be in the component list when the base reads their saved states)
+        isIsolator = nbt.getBooleanOr("isIsolated", false) || !canToggleIsolation();
+        applyIsolation();
         super.readFromNBT(nbt);
-        isIsolator = nbt.getBooleanOr("isIsolated", false);
-        if (nbt.getIntOr("tierGen", 0) < 1) rewindForRealVoltages();
+        if (nbt.getIntOr("tierGen", 0) < 1) {
+            rewindForRealVoltages();
+            legacy = true;
+            legacyKey = inventoryKey();
+        } else if (nbt.contains("legacyCore")) {
+            legacy = true;
+            legacyKey = nbt.getStringOr("legacyCore", "");
+        }
     }
 
     /**
@@ -371,6 +489,11 @@ public class TransformerElement extends TransparentNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Ratio"), Utils.plotValue(transformer.getRatio()));
+        double limit = coreLimit();
+        if (limit > 0 && complete())
+            info.put(I18N.tr("Volts per turn"), Utils.plotValue(voltsPerTurn()) + " / " + Utils.plotValue(limit)
+                + (saturated ? " " + I18N.tr("SATURATED") : legacy ? " " + I18N.tr("(as built before 48 V)") : ""));
+        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", heat.Tc));
         info.put(I18N.tr("Isolated"), isIsolator ? I18N.tr("Yes") : I18N.tr("No"));
         if (Eln.wailaEasyMode) {
             FerromagneticCoreDescriptor core =

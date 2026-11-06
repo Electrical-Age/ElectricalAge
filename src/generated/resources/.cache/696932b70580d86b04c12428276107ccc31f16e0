@@ -1,4 +1,4 @@
-// 26.3	2026-11-06T13:51:57.497128874	eln-global/EA models
+// 26.3	2026-11-06T18:22:21.137976444	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -95,6 +95,7 @@ d1ded4e12a77c8c2a0166508f6ac2db69ab99c80 assets/eln/blockstates/servo_rail.json
 b33b278bbc3903861507ad0512c9ffa4ba8866b8 assets/eln/blockstates/tungsten_ore.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/utility_pole.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/utility_pole_w_dc_dc_converter.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/variable_dc_dc_converter.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/voltage_oriented_battery.json
 3a711ac8deabdfe57fe66a276b56b122a6f5f25e assets/eln/blockstates/voxel_node.json
 3a711ac8deabdfe57fe66a276b56b122a6f5f25e assets/eln/blockstates/voxel_node_fence.json
@@ -458,6 +459,7 @@ cc97206c950244d6a8d7e8f1f205d276c4aca492 assets/eln/items/tungsten_ore.json
 b41edace2ece4946cef42068eb21182f7d3ffebd assets/eln/items/universal_meter.json
 07284b5fa3ce85c54eb209577958dbfa4c37839b assets/eln/items/utility_pole.json
 d1651d12134a8a7caa8f8ccdf966cbb23ef86b0f assets/eln/items/utility_pole_w_dc_dc_converter.json
+6b3aa17dcbe84379ee3fdd9ca75d25a795c10cbd assets/eln/items/variable_dc_dc_converter.json
 0e1e332e9e88e1e0701d633dec0723dcfd6cfd9b assets/eln/items/very_high_voltage_cable.json
 ea9db9e6fa3ac8cc392fbc1f3f95adc99b317292 assets/eln/items/very_high_voltage_relay.json
 da7da1fa73f52180d24316a46b7e59507e937997 assets/eln/items/very_high_voltage_switch.json
@@ -987,6 +989,8 @@ b11cee6e3e98894426df042fd7cc530a796809d7 assets/eln/models/item/utility_pole.jso
 d1f41a03c6327ea90dc560980dfb5eaf61478054 assets/eln/models/item/utility_pole_3d.json
 a0ce898b04fad77f6c8fbc4daf5a8d77323c1d2b assets/eln/models/item/utility_pole_w_dc_dc_converter.json
 895de7cc7152c77402393e8ea1efa5a962531573 assets/eln/models/item/utility_pole_w_dc_dc_converter_3d.json
+b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/variable_dc_dc_converter.json
+bda6e369ab0719a6a951d6919f38e4c49467cdda assets/eln/models/item/variable_dc_dc_converter_3d.json
 7a5234d52e6df02ac3a4dbac252a5c1b7b8b689e assets/eln/models/item/very_high_voltage_cable.json
 35fc58425356983ad33e0163ddbca11ebdb2e625 assets/eln/models/item/very_high_voltage_relay.json
 854507146f69b26e5ff6fa4774083ac69024b285 assets/eln/models/item/very_high_voltage_relay_3d.json
