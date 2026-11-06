@@ -88,7 +88,7 @@ public class Wp11Content implements ElnContent {
         }
         {
             subId = 10;
-            float nominalRads = 800, nominalU = 3200;
+            float nominalRads = 800, nominalU = (float) mods.eln.Eln.HVU;   // (Baughn 2026-11-06: a realistic voltage for its size: 4-8 kW is a 400 V machine; 1.12 had 3200 V)
             float nominalP = 4000;
             GeneratorDescriptor desc = new GeneratorDescriptor(
                 TR_NAME(Type.NONE, "Generator"),
@@ -104,7 +104,7 @@ public class Wp11Content implements ElnContent {
         {
             // Baughn 2026-10-29: an 8 kW generator beside the 4 kW one (four 4 kW per 16 kW turbine is intended)
             subId = 16;
-            float nominalRads = 800, nominalU = 3200;
+            float nominalRads = 800, nominalU = (float) mods.eln.Eln.HVU;   // (Baughn 2026-11-06: a realistic voltage for its size: 4-8 kW is a 400 V machine; 1.12 had 3200 V)
             float nominalP = 8000;
             GeneratorDescriptor desc = new GeneratorDescriptor(
                 TR_NAME(Type.NONE, "8kW Generator"),

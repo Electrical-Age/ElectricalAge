@@ -42,3 +42,9 @@ about like Fortune II (iron/gold 1-3, mean 1.75; copper 3-8), and each chunk int
 (Baughn, 2026-10-10). 1.12 gave two dust per ore block and had no chunks. Every other ore block (in `c:ores`; coal,
 redstone, lapis, diamond, emerald, quartz, other mods' ores) gives what a Fortune II pickaxe gets from it, from its loot
 table (Baughn, 2026-10-25): coal ore is no longer 3 coal.
+
+`golden_descriptors` (`GoldenCase.CHANGED`, `TIERS`): real-world voltages (Baughn 2026-11-06). The tiers are 48 V, 230 V,
+400 V and 11 kV instead of 50, 200, 800 and 3200 V; signals are 0-5 V instead of 0-50 V; the 230 V cable carries 3 kW
+(13 A; 1.12's 200 V cable 2 kW). Every descriptor whose numbers follow a tier differs: cables (Rs follows U^2/P, so
+power limits are unchanged), switches, chargers, batteries, turbines, antennas, the 48/230 V machines, heaters, lamps,
+the Generator (400 V instead of 3200 V). Board #55.

@@ -166,7 +166,7 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
                 else if (pin.stateHigh()) "1" else "?").append(", ")
             }
         }
-        builder.append(I18N.tr(" O: ")).append(if (outputProcess.u == 50.0) "1" else "0")
+        builder.append(I18N.tr(" O: ")).append(if (outputProcess.u == Eln.SVU) "1" else "0")
         return builder.toString()
     }
 
@@ -355,7 +355,8 @@ open class VoltageControlledSawtoothOscillator : AnalogFunction() {
     private var out = 0.0
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
-        out += Math.pow(50.0, (inputs[0] ?: 0.0) / 50) * 2 * deltaTime
+        // (1.12's rates on its 0-50 V scale, kept in cycles per second on today's SVU: 0.04 Hz at 0 to 2 Hz at full)
+        out += Math.pow(50.0, (inputs[0] ?: 0.0) / Eln.SVU) * 2 * (Eln.SVU / 50) * deltaTime
         if (out > Eln.SVU) {
             out = 0.0
         }
@@ -373,7 +374,7 @@ open class VoltageControlledSawtoothOscillator : AnalogFunction() {
 
 class VoltageControlledSineOscillator : VoltageControlledSawtoothOscillator() {
     override fun process(inputs: Array<Double?>, deltaTime: Double) =
-        25.0 + 25.0 * Math.sin(Math.PI * super.process(inputs, deltaTime) / 25.0)
+        Eln.SVU / 2 + Eln.SVU / 2 * Math.sin(2 * Math.PI * super.process(inputs, deltaTime) / Eln.SVU)
 }
 
 class Amplifier : AnalogFunction() {
@@ -457,11 +458,14 @@ class VoltageControlledAmplifier : AnalogFunction() {
     override val inputCount = 2
     override val infos = I18N.tr("A voltage-controlled amplifier (VCA)\nis an electronic amplifier that varies\nits gain depending on the control voltage.")
 
-    override fun process(inputs: Array<Double?>, deltaTime: Double) = (inputs[1] ?: 5.0) / 5.0 * (inputs[0] ?: 0.0)
+    // gain 0 to 10 over the control's range (1 at a tenth of SVU, the default when unconnected)
+    override fun process(inputs: Array<Double?>, deltaTime: Double) = gain(inputs) * (inputs[0] ?: 0.0)
+
+    private fun gain(inputs: Array<Double?>) = (inputs[1] ?: (Eln.SVU / 10)) / (Eln.SVU / 10)
 
     override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
         val info = super.getWaila(inputs, output)
-        info["Gain"] = Utils.plotValue((inputs[1] ?: 5.0) / 5.0)
+        info["Gain"] = Utils.plotValue(gain(inputs))
         return info
     }
 }
@@ -588,7 +592,7 @@ class Filter: AnalogFunction() {
     private var output = 0.0
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
-        output = Utils.limit(output + ((inputs[0] ?: 0.0) - output) * feedback * deltaTime, 0.0, 50.0)
+        output = Utils.limit(output + ((inputs[0] ?: 0.0) - output) * feedback * deltaTime, 0.0, Eln.SVU)
         return output
     }
 

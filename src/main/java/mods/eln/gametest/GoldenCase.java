@@ -77,12 +77,99 @@ final class GoldenCase implements TestCase {
         "Gas Turbine", java.util.Set.of());
 
     /** Fields changed on purpose (golden/README.md): name -> field -> why. */
-    static final Map<String, Map<String, String>> CHANGED = Map.of(
-        "Lead Ore", Map.of("spawnRate", "lead generates on 26.x (Baughn 2026-10-11): no other mod brings lead"),
-        "Stone Heat Furnace", stoneHeatFurnace(),
-        "Generator", Map.of("sound", "no single shaft loop: GeneratorRender plays MachineSounds' hum, rotor and air (Baughn 2026-10-28)"),
-        "Power Capacitor", Map.of("dischargeTao", "leaks with RC 30 min, as the capacitor bank (Baughn 2026-10-28: batteries stay the bulk store)"),
-        "Signal Processor", Map.of("alphaOff", "restyled with a logger screen on top, no door (Baughn 2026-10-30, board #45)"));
+    static final Map<String, Map<String, String>> CHANGED = changed();
+
+    static Map<String, Map<String, String>> changed() {
+        Map<String, Map<String, String>> m = new HashMap<>();
+        m.put("Lead Ore", Map.of("spawnRate", "lead generates on 26.x (Baughn 2026-10-11): no other mod brings lead"));
+        m.put("Stone Heat Furnace", stoneHeatFurnace());
+        m.put("Generator", Map.of("sound", "no single shaft loop: GeneratorRender plays MachineSounds' hum, rotor and air (Baughn 2026-10-28)"));
+        m.put("Power Capacitor", Map.of("dischargeTao", "leaks with RC 30 min, as the capacitor bank (Baughn 2026-10-28: batteries stay the bulk store)"));
+        m.put("Signal Processor", Map.of("alphaOff", "restyled with a logger screen on top, no door (Baughn 2026-10-30, board #45)"));
+        // the voltage tiers (Eln.LVU, MVU, HVU, VVU, SVU; MVP 3 kW) and every number derived from them
+        tier(m, "Signal Cable", "electricalNominalRs", "electricalNominalVoltage", "electricalNominalPower", "electricalNominalPowerDropFactor", "electricalMaximalVoltage", "electricalRs", "thermalRp", "thermalRs", "thermalC", "electricalRsMin", "dielectricBreakOhm", "dielectricVoltage", "dielectricBreakOhmMin");
+        tier(m, "Low Voltage Cable", "electricalNominalRs", "electricalNominalVoltage", "electricalMaximalVoltage", "electricalMaximalCurrent", "electricalRs", "electricalMaximalI", "electricalRsMin", "dielectricBreakOhm", "dielectricVoltage", "dielectricBreakOhmMin");
+        tier(m, "Medium Voltage Cable", "electricalNominalRs", "electricalNominalVoltage", "electricalNominalPower", "electricalMaximalVoltage", "electricalMaximalCurrent", "electricalRs", "thermalRp", "thermalRs", "thermalC", "electricalMaximalI", "electricalRsMin", "dielectricBreakOhm", "dielectricVoltage", "dielectricBreakOhmMin");
+        tier(m, "High Voltage Cable", "electricalNominalRs", "electricalNominalVoltage", "electricalMaximalVoltage", "electricalMaximalCurrent", "electricalRs", "electricalMaximalI", "electricalRsMin", "dielectricBreakOhm", "dielectricVoltage", "dielectricBreakOhmMin");
+        tier(m, "Very High Voltage Cable", "electricalNominalRs", "electricalNominalVoltage", "electricalMaximalVoltage", "electricalMaximalCurrent", "electricalRs", "electricalMaximalI", "electricalRsMin", "dielectricBreakOhm", "dielectricVoltage", "dielectricBreakOhmMin");
+        tier(m, "Weak 50V Battery Charger", "nominalVoltage", "Rp");
+        tier(m, "50V Battery Charger", "nominalVoltage", "Rp");
+        tier(m, "200V Battery Charger", "nominalVoltage", "Rp");
+        tier(m, "High Voltage Switch", "electricalRs", "nominalVoltage", "maximalVoltage");
+        tier(m, "Low Voltage Switch", "electricalRs", "nominalVoltage", "maximalVoltage");
+        tier(m, "Medium Voltage Switch", "electricalRs", "nominalVoltage", "nominalPower", "maximalVoltage", "maximalPower");
+        tier(m, "Signal Switch", "nominalVoltage", "nominalPower", "maximalVoltage", "maximalPower");
+        tier(m, "Very High Voltage Switch", "electricalRs", "nominalVoltage", "maximalVoltage");
+        tier(m, "Signal Switch with LED", "nominalVoltage", "nominalPower", "maximalVoltage", "maximalPower");
+        tier(m, "50V Turbine", "powerOutPerDeltaU", "nominalU", "electricalRs");
+        tier(m, "200V Turbine", "powerOutPerDeltaU", "nominalU", "electricalRs");
+        tier(m, "Low Power Transmitter Antenna", "electricalNominalVoltage", "electricalMaximalVoltage", "electricalNominalInputR");
+        tier(m, "Low Power Receiver Antenna", "electricalNominalVoltage", "electricalMaximalVoltage");
+        tier(m, "Medium Power Transmitter Antenna", "electricalNominalVoltage", "electricalMaximalVoltage", "electricalNominalInputR");
+        tier(m, "Medium Power Receiver Antenna", "electricalNominalVoltage", "electricalMaximalVoltage");
+        tier(m, "High Power Transmitter Antenna", "electricalNominalVoltage", "electricalMaximalVoltage", "electricalNominalInputR");
+        tier(m, "High Power Receiver Antenna", "electricalNominalVoltage", "electricalMaximalVoltage");
+        tier(m, "Cost Oriented Battery", "electricalU", "electricalStdI", "electricalQ", "electricalRs", "lifeNominalCurrent", "IMax", "currentDropVoltage");
+        tier(m, "Capacity Oriented Battery", "electricalU", "electricalStdI", "electricalQ", "electricalRs", "lifeNominalCurrent", "IMax", "currentDropVoltage");
+        tier(m, "Voltage Oriented Battery", "electricalU", "electricalStdI", "electricalQ", "electricalRs", "lifeNominalCurrent", "IMax", "currentDropVoltage");
+        tier(m, "Current Oriented Battery", "electricalU", "electricalStdI", "electricalQ", "electricalRs", "lifeNominalCurrent", "IMax", "currentDropVoltage");
+        tier(m, "Life Oriented Battery", "electricalU", "electricalStdI", "electricalQ", "electricalRs", "lifeNominalCurrent", "IMax", "currentDropVoltage");
+        tier(m, "Single-use Battery", "electricalU", "electricalStdI", "electricalQ", "electricalRs", "lifeNominalCurrent", "IMax");
+        tier(m, "50V Macerator", "nominalU", "resistorR");
+        tier(m, "200V Macerator", "nominalU", "resistorR");
+        tier(m, "50V Compressor", "nominalU", "resistorR");
+        tier(m, "200V Compressor", "nominalU", "resistorR");
+        tier(m, "50V Magnetizer", "nominalU", "resistorR");
+        tier(m, "200V Magnetizer", "nominalU", "resistorR");
+        tier(m, "50V Plate Machine", "nominalU", "resistorR");
+        tier(m, "200V Plate Machine", "nominalU", "resistorR");
+        tier(m, "50V Egg Incubator", "nominalVoltage", "Rp");
+        tier(m, "Auto Miner", "nominalVoltage", "pipeOperationRp");
+        tier(m, "Wind Turbine", "maxVoltage");
+        tier(m, "Water Turbine", "maxVoltage");
+        tier(m, "Small Active Thermal Dissipator", "nominalElectricalU", "electricalRp");
+        tier(m, "200V Active Thermal Dissipator", "nominalElectricalU", "electricalRp");
+        tier(m, "50V Fuel Generator", "maxVoltage");
+        tier(m, "200V Fuel Generator", "maxVoltage");
+        tier(m, "Small 50V Copper Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "50V Copper Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "Small 200V Copper Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "200V Copper Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "Small 50V Iron Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "50V Iron Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "Small 200V Iron Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "200V Iron Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "Small 50V Tungsten Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "50V Tungsten Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "Small 200V Tungsten Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "200V Tungsten Heating Corp", "electricalNominalU", "electricalR", "Umax");
+        tier(m, "Small 50V Incandescent Light Bulb", "nominalU", "minimalU");
+        tier(m, "50V Incandescent Light Bulb", "nominalU", "minimalU");
+        tier(m, "200V Incandescent Light Bulb", "nominalU", "minimalU");
+        tier(m, "Small 50V Carbon Incandescent Light Bulb", "nominalU", "minimalU");
+        tier(m, "50V Carbon Incandescent Light Bulb", "nominalU", "minimalU");
+        tier(m, "Small 50V Economic Light Bulb", "nominalU", "minimalU", "stableU");
+        tier(m, "50V Economic Light Bulb", "nominalU", "minimalU", "stableU");
+        tier(m, "200V Economic Light Bulb", "nominalU", "minimalU", "stableU");
+        tier(m, "50V Farming Lamp", "nominalU", "minimalU");
+        tier(m, "200V Farming Lamp", "nominalU", "minimalU");
+        tier(m, "50V LED Bulb", "nominalU", "minimalU");
+        tier(m, "200V LED Bulb", "nominalU", "minimalU");
+        tier(m, "Dielectric", "uNominal");
+        // generators at HVU, not 1.12's 3200 V (Baughn 2026-11-06: 4-8 kW is a 400 V machine)
+        tier(m, "Generator", "nominalU", "powerOutPerDeltaU");
+        return Map.copyOf(m);
+    }
+
+    /** Why the tier-derived fields differ: Eln's voltage levels are real-world values now. */
+    static final String TIERS = "real-world voltages (Baughn 2026-11-06)";
+
+    /** Records fields of the descriptor called name as changed by the voltage tiers (added to what it already has). */
+    static void tier(Map<String, Map<String, String>> m, String name, String... fields) {
+        Map<String, String> f = new java.util.LinkedHashMap<>(m.getOrDefault(name, Map.of()));
+        for (String field : fields) f.putIfAbsent(field, TIERS);
+        m.put(name, f);
+    }
 
     /** The Stone Heat Furnace's changes: more chambers, and the coal oven model's fields (its 1.12 drawer and flame are gone). */
     static Map<String, String> stoneHeatFurnace() {

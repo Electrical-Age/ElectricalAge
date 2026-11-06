@@ -250,9 +250,9 @@ public final class VoxelDeviceCases {
     }
 
     /**
-     * Relays off centre, gate north: a 50 V source west, a Power Resistor east (then ground), a Signal Source north on the
-     * gate pin. Gate at 50 V: the LV relay closes and the resistor carries the current; gate at 0 V: none. A Signal Relay
-     * at 5 V closes: its far contact at the signal source's voltage.
+     * Relays off centre, gate north: an LVU source west, a Power Resistor east (then ground), a Signal Source north on the
+     * gate pin. Gate at SVU: the LV relay closes and the resistor carries the current; gate at 0 V: none. A Signal Relay
+     * at SVU closes: its far contact at the signal source's voltage.
      */
     static final class RelaysCase implements TestCase {
         mods.eln.sixnode.electricalrelay.ElectricalRelayElement on, off, sig;
@@ -285,7 +285,7 @@ public final class VoxelDeviceCases {
             cableOut(c, v, p, e, Direction.XN, tier, FLOOR);
             cableOut(c, v, p, e, Direction.XP, tier, FLOOR);
             cableOut(c, v, p, e, Direction.ZN, SIGNAL, FLOOR);
-            source(c, power ? Wp9aCases.SOURCE : Wp9aCases.SIGNAL_SOURCE, c.at(0, 1, z), power ? 50 : mods.eln.Eln.SVU);
+            source(c, power ? Wp9aCases.SOURCE : Wp9aCases.SIGNAL_SOURCE, c.at(0, 1, z), power ? mods.eln.Eln.LVU : mods.eln.Eln.SVU);
             source(c, Wp9aCases.SIGNAL_SOURCE, c.at(1, 1, z - 1), gate);
             if (z == 1) vOn = v;
             return e;
@@ -308,9 +308,9 @@ public final class VoxelDeviceCases {
                 java.util.Arrays.toString(w) + " " + java.util.Arrays.toString(e) + " " + java.util.Arrays.toString(n));
             c.check("relay: its three pins are linked to the cables", linked(on, Direction.XN) && linked(on, Direction.XP) && linked(on, Direction.ZN),
                 "mask " + on.slotMask.mask);
-            c.check("relay: gate 50 V on its pin: closed", on.getSwitchState(), fmt("gate %.2f V", u(on, Direction.ZN)));
+            c.check("relay: gate SVU on its pin: closed", on.getSwitchState(), fmt("gate %.2f V", u(on, Direction.ZN)));
             double i = Wp9aCases.current(rOn);
-            Wp9cCases.within(c, "relay: closed, the resistor east of it carries the 50 V source's current [A]", i, 50 / rOn.nominalRs, 0.05 * 50 / rOn.nominalRs);
+            Wp9cCases.within(c, "relay: closed, the resistor east of it carries the LVU source's current [A]", i, mods.eln.Eln.LVU / rOn.nominalRs, 0.05 * mods.eln.Eln.LVU / rOn.nominalRs);
             c.check("relay: gate 0 V: open, no current", !off.getSwitchState() && Math.abs(Wp9aCases.current(rOff)) < 1e-3,
                 fmt("%s, %.4f A", off.getSwitchState(), Wp9aCases.current(rOff)));
             c.check("relay: a Signal Relay closes on signal cables", sig.getSwitchState() && Math.abs(u(sig, Direction.XP) - mods.eln.Eln.SVU) < 0.2,
@@ -319,8 +319,9 @@ public final class VoxelDeviceCases {
     }
 
     /**
-     * Probes off centre, signal pin north. An Electrical Probe between a 50 V source (west) and a Power Resistor (east) to
-     * ground: its signal pin's cable at 50 V's share of SVU. A Voltage Probe whose cable pin (south) is on a 30 V source.
+     * Probes off centre, signal pin north. An Electrical Probe between a half-LVU source (west) and a Power Resistor (east) to
+     * ground: its signal pin's cable at its voltage's share of SVU over its default 0..LVU range. A Voltage Probe whose
+     * cable pin (south) is on a 0.6 LVU source.
      */
     static final class ProbesCase implements TestCase {
         SixNodeElement probe, volt;
@@ -351,7 +352,7 @@ public final class VoxelDeviceCases {
             cableOut(c, vProbe, pProbe, probe, Direction.XN, LV, FLOOR);
             cableOut(c, vProbe, pProbe, probe, Direction.XP, LV, FLOOR);
             cableOut(c, vProbe, pProbe, probe, Direction.ZN, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
+            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 0.5 * mods.eln.Eln.LVU);
             resistor(c, c.at(2, 1, 1), Direction.XN, 48);
             c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 1));
             pVolt = c.at(1, 1, 4);
@@ -359,7 +360,7 @@ public final class VoxelDeviceCases {
             volt = put(c, vVolt, "Voltage Probe", Direction.YN, 2, 0, 0, Direction.ZN);
             cableOut(c, vVolt, pVolt, volt, Direction.ZP, LV, FLOOR);
             cableOut(c, vVolt, pVolt, volt, Direction.ZN, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SOURCE, c.at(1, 1, 5), 30);
+            source(c, Wp9aCases.SOURCE, c.at(1, 1, 5), 0.6 * mods.eln.Eln.LVU);
         }
 
         static double cableU(VoxelNode v, int[] t, Direction dir) {
@@ -377,12 +378,12 @@ public final class VoxelDeviceCases {
                 java.util.Arrays.toString(s) + " " + java.util.Arrays.toString(w));
             c.check("probe: its three pins linked", linked(probe, Direction.XN) && linked(probe, Direction.XP) && linked(probe, Direction.ZN), "mask " + probe.slotMask.mask);
             double a = u(probe, Direction.XN), out = u(probe, Direction.ZN);
-            Wp9cCases.within(c, fmt("probe: the signal on its pin's cable is %.2f V / 50 V of SVU [V]", a), cableU(vProbe, s, Direction.ZN), a / 50 * mods.eln.Eln.SVU, 0.05);
-            c.check("probe: it sees the source through its pin (> 45 V)", a > 45, fmt("%.2f V, out %.2f V", a, out));
+            Wp9cCases.within(c, fmt("probe: the signal on its pin's cable is %.2f V / LVU of SVU [V]", a), cableU(vProbe, s, Direction.ZN), a / mods.eln.Eln.LVU * mods.eln.Eln.SVU, 0.01 * mods.eln.Eln.SVU);
+            c.check("probe: it sees the source through its pin (> 0.45 LVU)", a > 0.45 * mods.eln.Eln.LVU, fmt("%.2f V, out %.2f V", a, out));
             int[] f = tip(vVolt, volt, Direction.ZN), b = tip(vVolt, volt, Direction.ZP);
             c.check("voltage probe: its signal pin 6 voxels out on the long side, its cable pin 4 on the short (centre 10,8)",
                 f != null && b != null && f[2] == 2 && b[2] == 12 && f[0] == 10, java.util.Arrays.toString(f) + " " + java.util.Arrays.toString(b));
-            Wp9cCases.within(c, "voltage probe: 30 V on its cable pin -> 0.6 SVU on its signal pin's cable [V]", cableU(vVolt, f, Direction.ZN), 0.6 * mods.eln.Eln.SVU, 0.05);
+            Wp9cCases.within(c, "voltage probe: 0.6 LVU on its cable pin -> 0.6 SVU on its signal pin's cable [V]", cableU(vVolt, f, Direction.ZN), 0.6 * mods.eln.Eln.SVU, 0.01 * mods.eln.Eln.SVU);
         }
     }
 
@@ -490,7 +491,7 @@ public final class VoxelDeviceCases {
     }
 
     /**
-     * Signal devices off centre: a Wireless Signal Transmitter fed 35 V on its pin and a Receiver whose pin's cable carries
+     * Signal devices off centre: a Wireless Signal Transmitter fed 0.7 SVU on its pin and a Receiver whose pin's cable carries
      * it; a Repeater; an Electrical Timer whose input pin is held high (its output pin's cable high); a LED vuMeter and a
      * Signal Switch with LED (closed) on a Signal Source.
      */
@@ -517,12 +518,12 @@ public final class VoxelDeviceCases {
         public void build(TestContext c) {
             for (int x = 0; x < 14; x++) for (int z = 0; z < 4; z++) c.floor(c.at(x, 0, z));
             String channel = "eln voxel " + System.nanoTime();
-            // transmitter: its input pin north, a 35 V signal source beyond
+            // transmitter: its input pin north, a 0.7 SVU signal source beyond
             BlockPos pt = c.at(1, 1, 2);
             var vt = block(c, pt);
             tx = put(c, vt, "Wireless Signal Transmitter", Direction.YN, 2, 0, 0, Direction.ZN);
             cableOut(c, vt, pt, tx, Direction.ZN, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(1, 1, 1), 35);
+            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(1, 1, 1), 0.7 * mods.eln.Eln.SVU);
             tx.networkUnserialize(c.stream(o -> {
                 o.writeByte(mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement.setChannelId);
                 o.writeUTF(channel);
@@ -546,12 +547,12 @@ public final class VoxelDeviceCases {
             cableOut(c, vTimer, pm, timer, Direction.ZN, SIGNAL, FLOOR);
             cableOut(c, vTimer, pm, timer, Direction.ZP, SIGNAL, FLOOR);
             source(c, Wp9aCases.SIGNAL_SOURCE, c.at(8, 1, 1), mods.eln.Eln.SVU);
-            // LED vuMeter, its input north on 30 V
+            // LED vuMeter, its input north on 0.6 SVU
             BlockPos pv = c.at(10, 1, 2);
             var vv = block(c, pv);
             vu = put(c, vv, "LED vuMeter", Direction.YN, -2, 0, 0, Direction.ZN);
             cableOut(c, vv, pv, vu, Direction.ZN, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(10, 1, 1), 30);
+            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(10, 1, 1), 0.6 * mods.eln.Eln.SVU);
             // LED switch, closed: north on SVU, its south contact follows
             BlockPos ps = c.at(12, 1, 2);
             var vs = block(c, ps);
@@ -565,12 +566,12 @@ public final class VoxelDeviceCases {
         public void measure(TestContext c) {
             c.check("wireless: transmitter's and receiver's pins linked, repeater placed with its pin linked", linked(tx, Direction.ZN) && linked(rx, Direction.ZN)
                 && linked(rep, Direction.XP), tx.slotMask.mask + " " + rx.slotMask.mask + " " + rep.slotMask.mask);
-            Wp9cCases.within(c, "wireless: 35 V on the transmitter's pin, out of the receiver's pin [V]", u(rx, Direction.ZN), 35, 0.1);
-            Wp9cCases.within(c, "wireless: the receiver's pin's cable [V]", ProbesCase.cableU(vRx, tip(vRx, rx, Direction.ZN), Direction.ZN), 35, 0.1);
+            Wp9cCases.within(c, "wireless: 0.7 SVU on the transmitter's pin, out of the receiver's pin [V]", u(rx, Direction.ZN), 0.7 * mods.eln.Eln.SVU, 0.01 * mods.eln.Eln.SVU);
+            Wp9cCases.within(c, "wireless: the receiver's pin's cable [V]", ProbesCase.cableU(vRx, tip(vRx, rx, Direction.ZN), Direction.ZN), 0.7 * mods.eln.Eln.SVU, 0.01 * mods.eln.Eln.SVU);
             c.check("timer: both pins linked", linked(timer, Direction.ZN) && linked(timer, Direction.ZP), "mask " + timer.slotMask.mask);
             Wp9cCases.within(c, "timer: input pin held high: its output pin's cable high [V]",
                 ProbesCase.cableU(vTimer, tip(vTimer, timer, Direction.ZP), Direction.ZP), mods.eln.Eln.SVU, 0.1);
-            Wp9cCases.within(c, "LED vuMeter: 30 V on its pin [V]", u(vu, Direction.ZN), 30, 0.1);
+            Wp9cCases.within(c, "LED vuMeter: 0.6 SVU on its pin [V]", u(vu, Direction.ZN), 0.6 * mods.eln.Eln.SVU, 0.01 * mods.eln.Eln.SVU);
             c.check("LED switch: both pins linked; closed, its south contact at the source's SVU", linked(sw, Direction.ZN) && linked(sw, Direction.ZP)
                 && Math.abs(u(sw, Direction.ZP) - mods.eln.Eln.SVU) < 0.2, fmt("mask %d, %.2f V", sw.slotMask.mask, u(sw, Direction.ZP)));
         }

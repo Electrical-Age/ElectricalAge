@@ -936,7 +936,7 @@ public final class CableCases {
             Wp9aCases.orient(b, l -> l, xp);
             // over chip a: no room
             String over = v.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.3, 0, 0.5, player);
-            // a NOT placed at a click; a Signal Source (50 V) in the next block west, a floor cable to the chip's input
+            // a NOT placed at a click; a Signal Source (SVU) in the next block west, a floor cable to the chip's input
             var w = block(c, c.at(4, 1, 1));
             String err = w.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.52, 0, 0.47, player);
             e = w.getElement(yn);
@@ -945,7 +945,7 @@ public final class CableCases {
             var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(c, Wp9aCases.SIGNAL_SOURCE, c.at(3, 1, 1), yn);
             src.networkUnserialize(c.stream(o -> {
                 o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                o.writeFloat(50f);
+                o.writeFloat((float) mods.eln.Eln.SVU);
             }));
             placed = "click: " + err + ", slot " + (e == null ? -1 : e.slot) + " at " + (e == null ? "-" : e.ox + "," + e.oy + "," + e.oz);
             placedOk = err == null && e != null && e.slot == yn.getInt();   // (the middle of a free face: its own slot)
@@ -980,13 +980,13 @@ public final class CableCases {
             c.check("chips: four fit a face (pins met along x, two voxels of air along z)", fourOk, four);
             c.checkValue("chips: the first NOT (input open) [V]", Wp9cCases.out(a), mods.eln.Eln.SVU);
             Wp9cCases.within(c, "chips: the second NOT, its input on the first's output pin [V]", Wp9cCases.out(b), 0, 0.5);
-            Wp9cCases.within(c, "chips: a NOT whose input pin touches a cable from 50 V [V]", e == null ? -1 : Wp9cCases.out(e), 0, 0.5);
+            Wp9cCases.within(c, "chips: a NOT whose input pin touches a cable from SVU [V]", e == null ? -1 : Wp9cCases.out(e), 0, 0.1 * mods.eln.Eln.SVU);
         }
     }
 
     /**
      * Other small devices go anywhere on a face too (Baughn), the redstone converters stay centred: a Signal Trimmer off
-     * centre at 50 V, its output pin on a NOT chip's input pin: low.
+     * centre at SVU, its output pin on a NOT chip's input pin: low.
      */
     static final class SmallDevicesAnywhereCase implements TestCase {
         mods.eln.node.six.SixNodeElement not;
@@ -1074,7 +1074,7 @@ public final class CableCases {
         }
     }
 
-    /** The cable kit from a Signal Source (50 V) to a NOT chip placed at a click: a click on the chip ends the route at its
+    /** The cable kit from a Signal Source (SVU) to a NOT chip placed at a click: a click on the chip ends the route at its
      *  nearest pin (its input), and the laid cable drives it: low. */
     static final class CableToChipCase implements TestCase {
         mods.eln.node.six.SixNodeElement chip;
@@ -1096,7 +1096,7 @@ public final class CableCases {
             var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(c, Wp9aCases.SIGNAL_SOURCE, c.at(1, 1, 1), yn);
             src.networkUnserialize(c.stream(o -> {
                 o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                o.writeFloat(50f);
+                o.writeFloat((float) mods.eln.Eln.SVU);
             }));
             var v = ChipsPackedCase.block(c, c.at(5, 1, 1));
             err = String.valueOf(v.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.4, 0, 0.5, player));   // (two voxels off centre)
@@ -1113,7 +1113,7 @@ public final class CableCases {
 
         public void measure(TestContext c) {
             c.line(err);
-            Wp9cCases.within(c, "cable to chip: the NOT's input on the laid cable from 50 V [V]", chip == null ? -1 : Wp9cCases.out(chip), 0, 0.5);
+            Wp9cCases.within(c, "cable to chip: the NOT's input on the laid cable from SVU [V]", chip == null ? -1 : Wp9cCases.out(chip), 0, 0.1 * mods.eln.Eln.SVU);
         }
     }
 

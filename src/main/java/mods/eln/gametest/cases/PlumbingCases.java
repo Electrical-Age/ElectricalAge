@@ -181,7 +181,7 @@ public final class PlumbingCases {
     }
 
     /**
-     * The inline pump on 200 V: tank A's low port -> pipe -> pump -> pipe -> tank B's low port. With cold water in A it
+     * The inline pump on MVU: tank A's low port -> pipe -> pump -> pipe -> tank B's low port. With cold water in A it
      * moves it to B and draws power; with A full of water at its boiling point (1 atm, 100 C) it cavitates and moves
      * next to nothing.
      */
@@ -220,7 +220,7 @@ public final class PlumbingCases {
             var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) ctx.placeSix(SOURCE, src);
             s.networkUnserialize(ctx.stream(out -> {
                 out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                out.writeFloat(200f);
+                out.writeFloat((float) mods.eln.Eln.MVU);
             }));
             double T = boiling ? Water.TB : Water.T_AMBIENT;
             fill(a.vessel, 0.8 * a.vessel.volume * Water.RHO_L, Water.P_ATM, T);

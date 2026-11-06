@@ -206,7 +206,7 @@ public final class Wp9aCases {
         }
     }
 
-    /** Rheostat 100 ohm nominal, control gate at 25 V (Signal Source): R = Rnom * (0.5 + 0.01) / 1.01. */
+    /** Rheostat 100 ohm nominal, control gate at half of SVU (Signal Source): R = Rnom * (0.5 + 0.01) / 1.01. */
     static final class RheostatCase implements TestCase {
         ElectricalSourceElement src;
         ResistorElement r;
@@ -222,7 +222,7 @@ public final class Wp9aCases {
 
         public void build(TestContext ctx) {
             src = source(ctx, SOURCE, 0, 1, U);
-            source(ctx, SIGNAL_SOURCE, 1, 0, 25.0);
+            source(ctx, SIGNAL_SOURCE, 1, 0, 0.5 * Eln.SVU);
             r = resistor(ctx, RHEOSTAT, 1, 1, 48);
             orient(r, f -> f, Direction.ZN); // control gate (front) toward the signal source; terminals stay on X
             gnd = ctx.placeSix(GROUND, ctx.at(2, 1, 1));
@@ -233,7 +233,7 @@ public final class Wp9aCases {
             double rt = link(src, r) + rEff + link(r, gnd);
             double i = U / rt;
             double drop = load(r, Direction.XN).getU() - load(r, Direction.XP).getU();
-            ctx.line(f("wp9a rheostat model: control 25 V -> 0.5, R = 100 * 0.51 / 1.01 = %.4f ohm, I = %.5f A", rEff, i));
+            ctx.line(f("wp9a rheostat model: control SVU / 2 -> 0.5, R = 100 * 0.51 / 1.01 = %.4f ohm, I = %.5f A", rEff, i));
             ctx.checkValue("wp9a rheostat control [normalized]", r.control.getNormalized(), 0.5);
             ctx.checkValue("wp9a rheostat voltage drop [V]", drop, i * rEff);
             ctx.checkValue("wp9a rheostat resistance U/I [ohm]", drop / (U - drop) * (rt - rEff), rEff);

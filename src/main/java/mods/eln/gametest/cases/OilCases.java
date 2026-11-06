@@ -1272,7 +1272,7 @@ public final class OilCases {
                 var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) ctx.placeSix(Wp11Cases.SOURCE, src);
                 s.networkUnserialize(ctx.stream(out -> {
                     out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                    out.writeFloat(200f);
+                    out.writeFloat((float) mods.eln.Eln.MVU);
                 }));
                 boilerAt = pp.west();
                 spot = mods.eln.oil.TankElement.sideSpot(5, mods.eln.oil.InlinePumpElement.LINE_Y);
@@ -1493,7 +1493,7 @@ public final class OilCases {
     /**
      * The makeup's signal (Baughn 2026-11-03: the boiler's fill through a comparator says when the plant wants water):
      * two condensers 5 % full with makeup water at 10 bar on top, a signal source on each one's left flank: at 0 V its
-     * makeup stays shut, at 50 V the float valve lets it in. Jade says which.
+     * makeup stays shut, at SVU the float valve lets it in. Jade says which.
      */
     static final class CondenserMakeupSignal extends PlumbingCases.Big {
         mods.eln.oil.CondenserElement off, on;
@@ -1518,7 +1518,7 @@ public final class OilCases {
 
         public void build(TestContext ctx) {
             off = place(ctx, ctx.at(3, 1, 5), 0);
-            on = place(ctx, ctx.at(6, 1, 5), 50);
+            on = place(ctx, ctx.at(6, 1, 5), mods.eln.Eln.SVU);
             mods.eln.Eln.simulator.addSlowProcess(feed = x -> {
                 if (off.inlet == null || on.inlet == null) return;
                 if (!primed) {
@@ -1539,10 +1539,10 @@ public final class OilCases {
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(feed);
             String jOff = "" + off.getWaila().get(mods.eln.i18n.I18N.tr("Makeup valve")), jOn = "" + on.getWaila().get(mods.eln.i18n.I18N.tr("Makeup valve"));
-            ctx.line("makeup signal: 0 V " + off.getWaila() + "; 50 V " + on.getWaila());
+            ctx.line("makeup signal: 0 V " + off.getWaila() + "; SVU " + on.getWaila());
             ctx.check("condenser: its left flank takes the signal", off.signalled() && on.signalled(), "");
             ctx.check("condenser: makeup signal at 0 V: none comes in", off.vessel.mWater <= off0 + 1e-6, String.format("%.4f -> %.4f kg", off0, off.vessel.mWater));
-            ctx.check("condenser: at 50 V the float valve lets it in", on.vessel.mWater > on0 + 0.001, String.format("%.4f -> %.4f kg", on0, on.vessel.mWater));
+            ctx.check("condenser: at SVU the float valve lets it in", on.vessel.mWater > on0 + 0.001, String.format("%.4f -> %.4f kg", on0, on.vessel.mWater));
             ctx.check("condenser: Jade: shut by its signal", jOff.startsWith("shut by its signal") && jOff.contains("signal 0%"), jOff);
             ctx.check("condenser: Jade: the signal lets it", jOn.contains("signal 100%") && !jOn.startsWith("shut by"), jOn);
         }

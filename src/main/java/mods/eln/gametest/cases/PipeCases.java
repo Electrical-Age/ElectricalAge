@@ -563,9 +563,9 @@ public final class PipeCases {
             ctx.line(String.format("pipe sensors: run %.2f bar %.0f C; pressure sensor %.2f bar -> %.2f V; temperature sensor %.0f C -> %.2f V; %s",
                 n.P() / 1e5, n.T() - 273.15, ps.reading, ps.out.getU(), ts.reading, ts.out.getU(), node(ctx, a).getWaila(false)));
             ctx.check("pressure sensor reads the run (absolute)", Math.abs(ps.reading - n.P() / 1e5) < 0.05 && ps.reading > 2, String.format("%.2f", ps.reading));
-            ctx.check("pressure sensor: its signal is the reading over 25 bar", Math.abs(ps.out.getU() - ps.reading / 25 * 50) < 0.5, String.format("%.2f V", ps.out.getU()));
+            ctx.check("pressure sensor: its signal is the reading over 25 bar", Math.abs(ps.out.getU() - ps.reading / 25 * mods.eln.Eln.SVU) < 0.01 * mods.eln.Eln.SVU, String.format("%.2f V", ps.out.getU()));
             ctx.check("temperature sensor reads the run", Math.abs(ts.reading - (n.T() - 273.15)) < 1 && ts.reading > 50, String.format("%.0f", ts.reading));
-            ctx.check("temperature sensor: its signal is the reading over 200 C (50 V over it)", Math.abs(ts.out.getU() - Math.min(1, ts.reading / 200) * 50) < 0.5, String.format("%.2f V", ts.out.getU()));
+            ctx.check("temperature sensor: its signal is the reading over 200 C (SVU over it)", Math.abs(ts.out.getU() - Math.min(1, ts.reading / 200) * mods.eln.Eln.SVU) < 0.01 * mods.eln.Eln.SVU, String.format("%.2f V", ts.out.getU()));
             // a cable kit clicked on the sensor lays to the floor under it (AdventurAgent: "not a place for a cable")
             int[] db = ps.boxes().get(0);
             var end = mods.eln.node.voxel.CablePlacer.endAtForTests(ctx.level(), a, net.minecraft.core.Direction.UP,
@@ -1119,7 +1119,7 @@ public final class PipeCases {
     /**
      * The two valves Baughn asked for (2026-10-26): three runs of three blocks, 5 bar on one end, a valve in the middle.
      * A throttle valve set to 0 holds; one set to 100% by its screen's packet (VoxelNode.PART_PACKET) passes; a control
-     * valve with 50 V on its signal passes, and one with none holds.
+     * valve with SVU on its signal passes, and one with none holds.
      */
     static final class ThrottleAndControlValves implements TestCase {
         BlockPos[][] runs = new BlockPos[4][];
@@ -1177,7 +1177,7 @@ public final class PipeCases {
             } catch (java.io.IOException e) {
                 err += e;
             }
-            // run 2: 50 V on the control valve's signal
+            // run 2: SVU on the control valve's signal
             control = valve(ctx, runs[2][1]);
             source = new mods.eln.sim.mna.component.VoltageSource("test", control.signal, null).setU(mods.eln.Eln.SVU);
             mods.eln.Eln.simulator.addElectricalComponent(source);
@@ -1196,11 +1196,11 @@ public final class PipeCases {
             ctx.check("pipe: throttle and control valves fit", err.isEmpty(), err);
             if (!err.isEmpty()) return;
             double[] a = p(ctx, 0), b = p(ctx, 1), c = p(ctx, 2), d = p(ctx, 3);
-            ctx.line(String.format("valves: throttle 0%% %.2f/%.2f, throttle 100%% %.2f/%.2f, control 50 V %.2f/%.2f (%.0f%%), control 0 V %.2f/%.2f bar",
+            ctx.line(String.format("valves: throttle 0%% %.2f/%.2f, throttle 100%% %.2f/%.2f, control SVU %.2f/%.2f (%.0f%%), control 0 V %.2f/%.2f bar",
                 a[0] / 1e5, a[1] / 1e5, b[0] / 1e5, b[1] / 1e5, c[0] / 1e5, c[1] / 1e5, control.opening() * 100, d[0] / 1e5, d[1] / 1e5));
             ctx.check("pipe: a throttle valve at 0% holds", a[0] > 3e5 && a[1] < 1.5e5, "");
             ctx.check("pipe: a throttle valve set to 100% by its screen passes", valve(ctx, runs[1][1]).setting == 1 && Math.abs(b[0] - b[1]) < 0.3e5, "");
-            ctx.check("pipe: a control valve on 50 V is open and passes", control.opening() > 0.95 && Math.abs(c[0] - c[1]) < 0.3e5, "");
+            ctx.check("pipe: a control valve on SVU is open and passes", control.opening() > 0.95 && Math.abs(c[0] - c[1]) < 0.3e5, "");
             ctx.check("pipe: a control valve without a signal holds", d[0] > 3e5 && d[1] < 1.5e5, "");
             // a cable kit clicked on a control valve lays to the floor under it (AdventurAgent: "not a place for a cable")
             var pos = runs[3][1];

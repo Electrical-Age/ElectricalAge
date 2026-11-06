@@ -387,7 +387,7 @@ public final class ElnDeviceRegistry {
             name = TR_NAME(Type.NONE, "Voltage Oriented Battery");
 
             BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", meduimVoltageCableDescriptor, 0.5, true, true, voltageFunction, stdU * 4,
+                "BatteryBig", meduimVoltageCableDescriptor, 0.5, true, true, voltageFunction, MVU,
                 stdP * 1.2, 0.000, // electricalU,
                 // electricalPMax,electricalDischargeRate
                 stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,

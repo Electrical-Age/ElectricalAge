@@ -104,12 +104,12 @@ public final class ElnConfig {
         ANVIL_GAP = b.comment("Seconds of rest between bursts, at least; it also waits for the line to be back at resumeFraction.")
             .defineInRange("burstGapSeconds", 3.0, 0.0, 600.0);
         b.pop();
-        // the capacitor bank (Baughn 2026-10-28): one carries one anvil burst (20 kJ from 800 V down to 720 V)
+        // the capacitor bank (Baughn 2026-10-28): one carries one anvil burst (20 kJ from 400 V down to 360 V)
         b.push("capacitorBank");
-        BANK_FARADS = b.comment("The capacitor bank's capacitance, F (0.36: one anvil burst from 800 V to 720 V needs 0.33).")
-            .defineInRange("farads", 0.36, 0.001, 100.0);
-        BANK_VOLTS = b.comment("Its rating, V: it pops above 1.3 times it, as the Power Capacitor does.").defineInRange("ratedVolts", 1000.0, 1.0, 100000.0);
-        BANK_LEAK = b.comment("Its leakage time constant R C, s (1800: at 800 V it leaks ~130 W, and keeps 2% of its charge after an hour).",
+        BANK_FARADS = b.comment("The capacitor bank's capacitance, F (1.44: one anvil burst from 400 V to 360 V needs 1.32).")
+            .defineInRange("capacitanceFarads", 1.44, 0.001, 100.0);   // (renamed from 1.12-era "farads" = 0.36 at 800 V, so old configs don't keep it)
+        BANK_VOLTS = b.comment("Its rating, V: it pops above 1.3 times it, as the Power Capacitor does.").defineInRange("ratingVolts", 500.0, 1.0, 100000.0);   // (renamed from "ratedVolts" = 1000)
+        BANK_LEAK = b.comment("Its leakage time constant R C, s (1800: at 400 V it leaks ~130 W, and keeps 2% of its charge after an hour).",
                 "Batteries are for keeping energy (Baughn); this is for bursts.").defineInRange("leakTauSeconds", 1800.0, 1.0, 1e9);
         POWER_CAP_LEAK = b.comment("The six-node Power Capacitor's leakage time constant R C, s (1800, as the bank; 1.12 had 120000). With four",
                 "Dielectrics a sand a row of them was a cheap bulk store (Baughn 2026-10-28: batteries stay the only sensible one).")

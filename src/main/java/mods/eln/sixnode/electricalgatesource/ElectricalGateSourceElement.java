@@ -171,7 +171,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
         try {
             switch (stream.readByte()) {
                 case setVoltagerId:
-                    outputGateProcess.setU(stream.readFloat());
+                    outputGateProcess.setU(Math.max(0, Math.min(mods.eln.Eln.SVU, stream.readFloat())));   // (a signal: 0 to SVU)
                     needPublish();
                     break;
             }

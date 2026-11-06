@@ -223,9 +223,9 @@ public final class Wp10bCases {
     }
 
     /**
-     * Large Rheostat (core: 24 coal dust -> E12 from 1 ohm, index 24 = 100 ohm), control pin at 50 V (normalized 1 ->
-     * R = (1 + 0.01) / 1.01 * 100 = 100 ohm), between a 50 V source (LV cable) and a ground cable.
-     * I = 50 / (Rs(src) + 2 Rs(cable) + Rs(a) + R + Rs(b) + Rs(ground)); heat = I^2 R into its thermal load.
+     * Large Rheostat (core: 24 coal dust -> E12 from 1 ohm, index 24 = 100 ohm), control pin at SVU (normalized 1 ->
+     * R = (1 + 0.01) / 1.01 * 100 = 100 ohm), between an LVU source (LV cable) and a ground cable.
+     * I = LVU / (Rs(src) + 2 Rs(cable) + Rs(a) + R + Rs(b) + Rs(ground)); heat = I^2 R into its thermal load.
      */
     static final class LargeRheostatCase implements TestCase {
         LargeRheostatElement rh;
@@ -257,7 +257,7 @@ public final class Wp10bCases {
             ElectricalSourceElement s = (ElectricalSourceElement) l.six(SIGNAL_SOURCE, cp);
             s.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(ElectricalSourceElement.setVoltageId);
-                o.writeFloat(50F);
+                o.writeFloat((float) Eln.SVU);
             }));
         }
 
@@ -265,10 +265,10 @@ public final class Wp10bCases {
             LargeRheostatDescriptor d = (LargeRheostatDescriptor) rh.getDescriptor();
             ctx.checkValue("wp10b large rheostat nominal R [ohm] (E12 index 24 = 100)", rh.getNominalRs(), 100);
             Resistor r = rh.getResistor();
-            ctx.checkValue("wp10b large rheostat R at control 50 V [ohm] ((1 + 0.01) / 1.01 * nominal)", r.getR(), rh.getNominalRs());
+            ctx.checkValue("wp10b large rheostat R at control SVU [ohm] ((1 + 0.01) / 1.01 * nominal)", r.getR(), rh.getNominalRs());
             double rt = src.getElectricalLoad(LRDU.Up).getRs() + 2 * cable.getElectricalLoad(LRDU.Up).getRs()
                 + tload(rh, rh.front.right()).getRs() + r.getR() + tload(rh, rh.front.left()).getRs() + gnd.getElectricalLoad(LRDU.Up).getRs();
-            ctx.checkValue("wp10b large rheostat current [A] (50 V / R_total)", Math.abs(r.getI()), 50 / rt);
+            ctx.checkValue("wp10b large rheostat current [A] (LVU / R_total)", Math.abs(r.getI()), Eln.LVU / rt);
             ctx.check("wp10b large rheostat heats (I^2 R > 0 into its thermal load)", rh.getThermalLoad().Tc > 0,
                 f("T %.4f K above ambient, %s", rh.getThermalLoad().Tc, d.name));
         }
@@ -276,7 +276,7 @@ public final class Wp10bCases {
 
     /**
      * 50V Turbine, warm side set to 150 K above the cool side, nothing connected (open circuit): the source voltage is
-     * the descriptor's TtoU(dT) (table scaled to nominal dT 250 K / 50 V: dT 150 K -> 50 V), evaluated at the measured
+     * the descriptor's TtoU(dT) (table scaled to nominal dT 250 K / LVU: dT 150 K -> LVU), evaluated at the measured
      * dT; no current -> no heat drawn.
      */
     static final class TurbineCase implements TestCase {
@@ -299,13 +299,13 @@ public final class Wp10bCases {
         public void measure(TestContext ctx) {
             TurbineDescriptor d = (TurbineDescriptor) turbine.getDescriptor();
             double dT = turbine.warmLoad.Tc - turbine.coolLoad.Tc;
-            ctx.checkValue("wp10b turbine table TtoU(150 K) [V] (= nominal 50 V)", d.TtoU.getValue(150), 50);
+            ctx.checkValue("wp10b turbine table TtoU(150 K) [V] (= nominal LVU)", d.TtoU.getValue(150), Eln.LVU);
             ctx.checkValue(f("wp10b turbine open-circuit voltage [V] (TtoU(dT = %.2f K))", dT), turbine.positiveLoad.getU(), d.TtoU.getValue(dT));
         }
     }
 
     /**
-     * 50V Fuel Generator (nominal 300 W * fuelGeneratorPowerFactor, Umax = 52.5 V, tank 2 buckets, tank energy =
+     * 50V Fuel Generator (nominal 300 W * fuelGeneratorPowerFactor, Umax = 1.05 LVU, tank 2 buckets, tank energy =
      * tank seconds * nominal P). Lava is no fuel: a lava bucket is refused (tank 0, bucket kept). A bucket of a
      * registered gasoline fuel (if any and bucketable) fills half the tank and comes back empty. With fuel, a click
      * starts it: open circuit -> U = Umax; tank drains at the minimum load 0.1 * P_nom with efficiency factor 1.375:
@@ -358,10 +358,10 @@ public final class Wp10bCases {
                     Math.abs(level0 - 0.5) < 1e-9 && afterFuel.getItem() == Items.BUCKET, "level " + level0 + ", hand " + afterFuel);
             }
             boolean on = (Boolean) callPrefix(gen, "getOn");
-            double umax = 50 * 1.05;
+            double umax = Eln.LVU * 1.05;
             ElectricalLoad pos = field(gen, "positiveLoad");
             ctx.check("wp10b fuel generator running", on, "on " + on);
-            ctx.checkValue("wp10b fuel generator open-circuit voltage [V] (Umax = 1.05 * 50)", pos.getU(), umax);
+            ctx.checkValue("wp10b fuel generator open-circuit voltage [V] (Umax = 1.05 * LVU)", pos.getU(), umax);
             double pNom = 300 * Eln.fuelGeneratorPowerFactor;
             double rate = 1.375 * 0.1 * pNom / (Eln.fuelGeneratorTankCapacity * pNom);
             double level = field(gen, "tankLevel");

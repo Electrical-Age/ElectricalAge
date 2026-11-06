@@ -73,10 +73,10 @@ public final class ShaftSteamCases {
         return e;
     }
 
-    /** A resistor drawing about `watts` at 3200 V from a generator's terminals (added to the simulator). */
+    /** A resistor drawing about `watts` at HVU (the generators' nominal volts) from a generator's terminals (added to the simulator). */
     static Resistor load(GeneratorElement g, double watts) {
         ElectricalLoad in = field(g, "inputLoad");
-        Resistor r = new Resistor(in, null).setR(3200.0 * 3200.0 / watts);
+        Resistor r = new Resistor(in, null).setR(mods.eln.Eln.HVU * mods.eln.Eln.HVU / watts);
         Eln.simulator.addElectricalComponent(r);
         return r;
     }
@@ -359,7 +359,7 @@ public final class ShaftSteamCases {
                 double w = shaft(t).getRads();
                 if (tick == 600) {
                     before = w;
-                    r.setR(3200.0 * 3200.0 / 8000);
+                    r.setR(mods.eln.Eln.HVU * mods.eln.Eln.HVU / 8000);
                 }
                 if (tick > 600) {
                     min = Math.min(min, w);

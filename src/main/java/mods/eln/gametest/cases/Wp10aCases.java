@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Selftest cases of device batch Wp10a (registry/batch/Wp10aContent). Every case feeds its device from a 50 V
+ * Selftest cases of device batch Wp10a (registry/batch/Wp10aContent). Every case feeds its device from an LVU
  * electrical source through one LV cable laid on the side the device takes power from (read from the placed
  * element's front, so the cases don't depend on the fake player's facing). Model as in SelfTest.measure: two loads
  * connect through Rs(a) + Rs(b); source, LV cable and every load set by lowVoltageCableDescriptor/applySmallRs have
@@ -75,7 +75,7 @@ public final class Wp10aCases {
     static final int CORE_OPTIMAL = 2 + (7 << 6);  // cableMultiplicator 1
     static final int COPPER_CABLE = 0 + (65 << 6);
     static final int DIELECTRIC = 52 + (120 << 6);
-    static final double U = 50.0;
+    static final double U = Eln.LVU;
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new EggIncubatorCase());
@@ -193,7 +193,7 @@ public final class Wp10aCases {
             return ctx.placeSix(damage, p);
         }
 
-        /** LV cable on `side` of the device at p, and the 50 V source next to it. Returns {source, cable}. */
+        /** LV cable on `side` of the device at p, and the LVU source next to it. Returns {source, cable}. */
         public SixNodeElement[] feed(BlockPos device, Direction side) {
             return feed(device, side, LV_CABLE, U);
         }
@@ -214,7 +214,7 @@ public final class Wp10aCases {
 
     // ---- cases ----
 
-    /** Egg incubator: with an egg its resistor is Rp = Unom^2/Pnom = 50 ohm (50 V, 50 W). */
+    /** Egg incubator: with an egg its resistor is Rp = Unom^2/Pnom (LVU, 50 W). */
     static final class EggIncubatorCase implements TestCase {
         EggIncubatorElement inc;
         SixNodeElement cable;
@@ -235,7 +235,7 @@ public final class Wp10aCases {
             double rp = U * U / 50.0, r = rs();
             // src(rs)-cable(rs): 2rs; cable(rs)-incubator powerLoad(rs, LV cable): 2rs; Rp to ground
             double i = U / (4 * r + rp);
-            ctx.line(String.format("wp10a egg incubator model: Rp = 50 ohm, I = U/(4Rs+Rp) = %.5f A, P = %.4f W", i, i * i * rp));
+            ctx.line(String.format("wp10a egg incubator model: Rp = LVU^2 / 50 W, I = U/(4Rs+Rp) = %.5f A, P = %.4f W", i, i * i * rp));
             ctx.checkValue("wp10a egg incubator R [ohm]", inc.powerResistor.getR(), rp);
             ctx.checkValue("wp10a egg incubator voltage [V]", inc.powerLoad.getU(), i * rp);
             ctx.checkValue("wp10a egg incubator power [W]", inc.powerResistor.getP(), i * i * rp);
@@ -246,7 +246,7 @@ public final class Wp10aCases {
     /**
      * Electrical furnace, fed on its back: cobblestone (vanilla smelting recipe) in the input slot makes the
      * auto-shutdown logic switch it on. With the Small 50V heating corp (wp12): regulator "none" keeps
-     * R = Unom^2/Pnom = 2500/150 ohm and the thermal load warms up.
+     * R = Unom^2/Pnom = LVU^2/150 ohm and the thermal load warms up.
      */
     static final class FurnaceCase implements TestCase {
         ElectricalFurnaceElement furnace;
@@ -537,7 +537,7 @@ public final class Wp10aCases {
 
     /**
      * Baughn 2026-10-27, a live Cost Oriented Battery with both protection chips burnt (OVERHEAT, 76): nearly empty (1.5%,
-     * ~4 V) on a 50 V bus. Here: the same battery at 1.5%, both chips fitted, 50 V on its positive side, its negative
+     * ~4 V) on a 50 V bus. Here: the same battery at 1.5%, both chips fitted, LVU on its positive side, its negative
      * grounded. It must not burn, and must stay under its warm limit.
      */
     static final class ProtectedEmptyBatteryCase implements TestCase {
@@ -548,7 +548,7 @@ public final class Wp10aCases {
         boolean wasCut, limited;
 
         public String name() {
-            return "battery protection: an empty battery put on 50 V";
+            return "battery protection: an empty battery put on LVU";
         }
 
         public int width() {
@@ -568,7 +568,7 @@ public final class Wp10aCases {
             SixNodeElement[] plus = l.feed(ctx.at(3, 1, 1), battery.front.left());
             ((ElectricalSourceElement) plus[0]).networkUnserialize(ctx.stream(out -> {
                 out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat(50f);
+                out.writeFloat((float) Eln.LVU);
             }));
             SixNodeElement[] minus = l.feed(ctx.at(3, 1, 1), battery.front.right());
             ((ElectricalSourceElement) minus[0]).networkUnserialize(ctx.stream(out -> {
@@ -589,7 +589,7 @@ public final class Wp10aCases {
             mods.eln.Eln.simulator.removeSlowProcess(watch);
             ctx.line(String.format("battery protection: peak Tc %.1f (warm limit %.0f), %d cuts, charge %.3f, burnt %s, current %.1f A",
                 peak, battery.descriptor.thermalWarmLimit, cuts, battery.batteryProcess.getCharge(), battery.isBurnt(), battery.batteryProcess.getDischargeCurrent()));
-            ctx.check("battery protection: an empty protected battery on 50 V doesn't burn", !battery.isBurnt(), "");
+            ctx.check("battery protection: an empty protected battery on LVU doesn't burn", !battery.isBurnt(), "");
             ctx.check("battery protection: it stays under its cut (no cut needed)", peak < battery.descriptor.thermalWarmLimit * 2 / 3, String.format("peak %.1f, %d cuts", peak, cuts));
             ctx.check("battery protection: the chip limits the charge current to about the rated current", limited
                 && peakCharge < battery.descriptor.electricalStdI * 1.3, String.format("peak %.1f A, rated %.1f A", peakCharge, battery.descriptor.electricalStdI));
@@ -660,7 +660,7 @@ public final class Wp10aCases {
     }
 
     /**
-     * The macerator fed -50 V (Baughn: a generator on one side and a ground cable on the other burned one as "overvoltage"):
+     * The macerator fed -LVU (Baughn: a generator on one side and a ground cable on the other burned one as "overvoltage"):
      * a resistor to ground on one pin, so either polarity runs it: it processes the copper and isn't burnt; and a
      * voltage watchdog tripped below its minimum names the cause reverse voltage.
      */

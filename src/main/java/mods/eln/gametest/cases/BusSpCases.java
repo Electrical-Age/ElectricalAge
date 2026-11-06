@@ -87,7 +87,7 @@ public final class BusSpCases {
     }
 
     /**
-     * A Signal Source at 30 V (x 0) into module A's in terminal on 4 yellow (x 2); bus cable (x 3) on to module B (z 0),
+     * A Signal Source at 0.6 SVU (x 0) into module A's in terminal on 4 yellow (x 2); bus cable (x 3) on to module B (z 0),
      * whose out terminal takes 1 orange, and to the processor (x 4, output west), whose bus pin is off its output's middle:
      * the cable bends to meet it. Program: bus.orange = bus.yellow / 2, output bus.yellow, on a signal cable in x 3 that
      * meets the output terminal.
@@ -104,7 +104,7 @@ public final class BusSpCases {
 
         public void build(TestContext c) {
             try {
-                BusModuleCases.source(c, c.at(0, 1, 1), Direction.XP, 30);
+                BusModuleCases.source(c, c.at(0, 1, 1), Direction.XP, 0.6 * mods.eln.Eln.SVU);
                 BusModuleCases.across(c, c.at(1, 1, 1), SIGNAL);
                 a = BusModuleCases.module(c, c.at(2, 1, 1), Direction.XP);
                 b = BusModuleCases.module(c, c.at(3, 1, 0), Direction.ZP);
@@ -134,10 +134,10 @@ public final class BusSpCases {
             Wp9cCases.within(c, "bus sp: writes half of it [0..1]", sp.port.read(ORANGE), 0.3, 0.01);
             c.check("bus sp: one writer on its channel", sp.port.bus() != null && sp.port.bus().writers(ORANGE) == 1,
                 sp.port.bus() == null ? "no bus" : "" + sp.port.bus().writers(ORANGE));
-            Wp9cCases.within(c, "bus sp: module B's out terminal drives it [V]", b.volts(BACK_MIDDLE), 15, 0.5);
+            Wp9cCases.within(c, "bus sp: module B's out terminal drives it [V]", b.volts(BACK_MIDDLE), 0.3 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
             Object[] k = ((VoxelNode) BusCases.node(c, 3, 1, 1)).cableAt(14, 0, 8);
             double u = k == null || k[0] == null ? Double.NaN : ((mods.eln.sim.ElectricalLoad) k[0]).getU();
-            Wp9cCases.within(c, "bus sp: its output wire beside the bus pin still gives the output [V]", u, 30, 0.5);
+            Wp9cCases.within(c, "bus sp: its output wire beside the bus pin still gives the output [V]", u, 0.6 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
             c.check("bus sp: its output edge has no circuit link to the bus", sp.edgePins().get(1).load() == null, "");
             // a bus kit aimed at the bus pin ends there, a signal kit at the output beside it (AdventurAgent: a bus kit
             // found no place on the processor)
@@ -155,7 +155,7 @@ public final class BusSpCases {
 
     /**
      * A program whose last line is a bus definition (x 1, output east) feeds module B's out terminal (x 3) through bus
-     * cable (x 2) bent from the processor's bus pin to the module's: 0.4 on the channel, 20 V on the module's wire, and
+     * cable (x 2) bent from the processor's bus pin to the module's: 0.4 on the channel, 0.4 SVU on the module's wire, and
      * 0 V on the processor's output, which has no expression.
      */
     static final class EndsWithBus implements TestCase {
@@ -184,7 +184,7 @@ public final class BusSpCases {
             if (!why.isEmpty()) return;
             c.check("bus sp ends: a program ending with a bus definition compiles", valid(sp), error(sp));
             Wp9cCases.within(c, "bus sp ends: the channel has 0.4 [0..1]", sp.port.read(LIME), 0.4, 1e-6);
-            Wp9cCases.within(c, "bus sp ends: the module's out terminal gives 20 V [V]", b.volts(BACK_MIDDLE), 20, 0.5);
+            Wp9cCases.within(c, "bus sp ends: the module's out terminal gives 0.4 SVU [V]", b.volts(BACK_MIDDLE), 0.4 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
             Wp9cCases.within(c, "bus sp ends: no output expression, 0 V on the output [V]", Wp9cCases.out(sp), 0, 0.01);
         }
     }
@@ -263,7 +263,7 @@ public final class BusSpCases {
 
     /**
      * A Three-Channel Data Logger (front north, in a voxel block) whose channel B records bus channel 3 light_blue: module A's
-     * in terminal puts a 20 V Signal Source on it, through bus cable to the logger's bus pin (x 4; the rest east or west
+     * in terminal puts a 0.4 SVU Signal Source on it, through bus cable to the logger's bus pin (x 4; the rest east or west
      * of it, as busEdge says). B records 0.4, A and C their open wires; saved and loaded, B still takes it, claimed again.
      */
     static final class LoggerOnBus implements TestCase {
@@ -293,7 +293,7 @@ public final class BusSpCases {
                 BusModuleCases.across(c, c.at(lx + s, 1, 1), BUS);
                 a = BusModuleCases.module(c, c.at(lx + 2 * s, 1, 1), s > 0 ? Direction.XN : Direction.XP);
                 BusModuleCases.across(c, c.at(lx + 3 * s, 1, 1), SIGNAL);
-                BusModuleCases.source(c, c.at(lx + 4 * s, 1, 1), s > 0 ? Direction.XN : Direction.XP, 20);
+                BusModuleCases.source(c, c.at(lx + 4 * s, 1, 1), s > 0 ? Direction.XN : Direction.XP, 0.4 * mods.eln.Eln.SVU);
                 a.setChannel(BACK_MIDDLE, LIGHT_BLUE);
                 // as its screen sends it
                 logger.networkUnserialize(c.stream(o -> {

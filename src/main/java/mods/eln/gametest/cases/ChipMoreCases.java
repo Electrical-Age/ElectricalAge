@@ -47,33 +47,34 @@ public final class ChipMoreCases {
 
     static final double N = Double.NaN;
 
-    /** Sawtooth VCO at 0 V input: +2 V/s from 0, wrapping at SVU. */
+    /** Sawtooth VCO at 0 V input: 1.12's 0.04 Hz, +2 V/s x SVU / 50 from 0, wrapping at SVU. */
     static double saw(double t) {
-        return (2 * t) % SVU;
+        return (2 * SVU / 50 * t) % SVU;
     }
 
     /**
      * Schmitt trigger (0 below 0.2 SVU, 1 from 0.6 SVU, else unchanged from 0). D flip-flop (D = input 0, clock =
      * input 1; a constant high clock is one rising edge at start). JK (clock = input 0, J = 1, K = 2; toggle from 0).
      * OpAmp 10000 * (in0 - in1), clamped to 0..SVU. Sample and hold (clock = input 1, high from the start: samples
-     * once). Lowpass filter (5 Hz): settled. Sawtooth VCO at 0 V: 2 V/s; sine VCO: 25 + 25 sin(pi * saw / 25).
+     * once). Lowpass filter (5 Hz): settled. Sawtooth VCO at 0 V: 2 V/s x SVU / 50; sine VCO: centred on SVU / 2, full scale,
+     * one period per sawtooth ramp.
      */
     static final Lane[] LANES = {
-        lane("Schmitt Trigger Chip", "Schmitt(40 V)", 40, N, N, SVU),
-        lane("Schmitt Trigger Chip", "Schmitt(5 V)", 5, N, N, 0),
-        lane("Schmitt Trigger Chip", "Schmitt(25 V, from 0)", 25, N, N, 0),
+        lane("Schmitt Trigger Chip", "Schmitt(0.8 SVU)", 0.8 * SVU, N, N, SVU),
+        lane("Schmitt Trigger Chip", "Schmitt(0.1 SVU)", 0.1 * SVU, N, N, 0),
+        lane("Schmitt Trigger Chip", "Schmitt(0.5 SVU, from 0)", 0.5 * SVU, N, N, 0),
         lane("D Flip Flop Chip", "D flip-flop D=1", SVU, SVU, N, SVU),
         lane("D Flip Flop Chip", "D flip-flop D=0", 0, SVU, N, 0),
         lane("JK Flip Flop Chip", "JK J=1 K=0", SVU, SVU, 0, SVU),
         lane("JK Flip Flop Chip", "JK J=0 K=1", SVU, 0, SVU, 0),
         lane("JK Flip Flop Chip", "JK J=1 K=1 (toggle)", SVU, SVU, SVU, SVU),
-        lane("OpAmp", "OpAmp(30, 20) (saturated)", 30, 20, N, SVU),
-        lane("OpAmp", "OpAmp(20, 30)", 20, 30, N, 0),
-        lane("Sample and hold", "sample and hold 30 V", 30, SVU, N, 30),
-        lane("Lowpass filter", "lowpass filter 30 V (settled)", 30, N, N, 30),
-        new Lane("Voltage controlled sawtooth oscillator", "sawtooth VCO at 0 V (2 V/s)", 0, N, N, ChipMoreCases::saw, 0.3),
+        lane("OpAmp", "OpAmp(0.6 SVU, 0.4 SVU) (saturated)", 0.6 * SVU, 0.4 * SVU, N, SVU),
+        lane("OpAmp", "OpAmp(0.4 SVU, 0.6 SVU)", 0.4 * SVU, 0.6 * SVU, N, 0),
+        lane("Sample and hold", "sample and hold 0.6 SVU", 0.6 * SVU, SVU, N, 0.6 * SVU),
+        lane("Lowpass filter", "lowpass filter 0.6 SVU (settled)", 0.6 * SVU, N, N, 0.6 * SVU),
+        new Lane("Voltage controlled sawtooth oscillator", "sawtooth VCO at 0 V (SVU / 25 per s)", 0, N, N, ChipMoreCases::saw, 0.006 * SVU),
         new Lane("Voltage controlled sine oscillator", "sine VCO at 0 V", 0, N, N,
-            t -> 25 + 25 * Math.sin(Math.PI * saw(t) / 25), 1.0),
+            t -> SVU / 2 + SVU / 2 * Math.sin(2 * Math.PI * saw(t) / SVU), 0.02 * SVU),
     };
 
     public static void addTo(List<TestCase> cases) {

@@ -134,10 +134,11 @@ public class Eln {
     /** 26.x, server -> client: open a throttle valve's screen (x, y, z, part index, setting; node.voxel.VoxelNode). */
     public static final byte packetValveScreen = 26;
 
-    // Voltage / power levels, as in 1.12
+    // Voltage / power levels: real-world values (Baughn 2026-11-06: 48 V, 230 V, 400 V and 11 kV replace 1.12's 50, 200,
+    // 800 and 3200 V; signals are 0-5 V instead of 0-50 V). Cable resistances follow from U and P, so power limits stay.
     public static final double gateOutputCurrent = 0.100;
-    public static final double SVU = 50, SVII = gateOutputCurrent / 50, SVUinv = 1.0 / SVU;
-    public static final double LVU = 50, MVU = 200, HVU = 800, VVU = 3200;
+    public static final double SVU = 5, SVII = gateOutputCurrent / SVU, SVUinv = 1.0 / SVU;
+    public static final double LVU = 48, MVU = 230, HVU = 400, VVU = 11000;
     public static final double SVP = gateOutputCurrent * SVU;
     /** config balancing.cablePowerFactor (1.12 default 1.0; config arrives with the ModConfigSpec) */
     public static double cablePowerFactor = 1.0;
@@ -146,8 +147,9 @@ public class Eln {
         return 1000 * cablePowerFactor;
     }
 
+    /** 13 A at 230 V (Baughn: 3 kW; 1.12's 200 V tier carried 2 kW). */
     public static double MVP() {
-        return 2000 * cablePowerFactor;
+        return 3000 * cablePowerFactor;
     }
 
     public static double HVP() {

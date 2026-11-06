@@ -96,7 +96,7 @@ public final class GasPlantCases {
         /** Switch the load on once it burns (a peaker's start: spin, light, then take the load). */
         void tick() {
             if (!loaded && gt.burning && gt.getShaft().getRads() > 760) {
-                load.setR(3200.0 * 3200.0 / loadW);
+                load.setR(mods.eln.Eln.HVU * mods.eln.Eln.HVU / loadW);   // (the generator's nominal volts)
                 loaded = true;
             }
         }

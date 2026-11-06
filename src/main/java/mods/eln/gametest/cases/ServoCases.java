@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * The servo layer's elevator (mods.eln.robotics; Baughn: the servo layer first, 200 V only, players ride the carriage):
- * a Linear Servo Drive with a six-block Servo Rail mast, fed 200 V from the back, commanded directly (command) or over
+ * a Linear Servo Drive with a six-block Servo Rail mast, fed MVU from the back, commanded directly (command) or over
  * its RS485 bus. The drive is placed looking south, so its front (the car's shaft) is north.
  */
 public final class ServoCases {
@@ -54,7 +54,7 @@ public final class ServoCases {
 
     static final int TRAVEL = 6;
 
-    /** A drive at p with its mast, 200 V through a Power Resistor of `coal` core items (0: none). */
+    /** A drive at p with its mast, MVU through a Power Resistor of `coal` core items (0: none). */
     static final class Shaft {
         LinearServoDriveElement d;
         BlockPos head;
@@ -79,7 +79,7 @@ public final class ServoCases {
             ElectricalSourceElement s = (ElectricalSourceElement) ctx.placeSix(Wp11Cases.SOURCE, at.relative(back));
             s.networkUnserialize(ctx.stream(out -> {
                 out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat(200f);
+                out.writeFloat((float) mods.eln.Eln.MVU);
             }));
         }
 
@@ -168,7 +168,7 @@ public final class ServoCases {
      * Driven over its RS485 bus (Baughn 2026-11-05): a bus cable on the floor beside its right flank, ending at the bus
      * pin (the floor edge's right), and a port for a computer on it. Written its target (register 0) of 3 m, the car goes
      * there; read back, its state (register 3) is in position and its position (register 1) 3 m; the position wire
-     * gives half its 50 V, in-position is high; a floor ghost holds the car.
+     * gives half of SVU, in-position is high; a floor ghost holds the car.
      */
     static final class OverTheBus extends Room {
         Shaft s;
@@ -226,8 +226,8 @@ public final class ServoCases {
                 && replies.get(0).index() == LinearServoDriveElement.REG_STATE && replies.get(0).value() == LinearServoDriveElement.IN_POSITION
                 && replies.get(1).index() == LinearServoDriveElement.REG_POSITION && Math.abs(replies.get(1).value() - 3) < 1e-4, replies.toString());
             ctx.check("servo bus: in position (status and output)", d.status() == LinearServoDriveElement.IN_POSITION
-                && s.inPositionVolts(ctx) > 40 && s.faultVolts(ctx) < 10, d.status() + " " + s.inPositionVolts(ctx) + " V");
-            Wp9cCases.within(ctx, "servo bus: the position wire gives its share of the travel [V]", s.positionVolts(ctx), 25, 0.5);
+                && s.inPositionVolts(ctx) > 0.8 * mods.eln.Eln.SVU && s.faultVolts(ctx) < 0.2 * mods.eln.Eln.SVU, d.status() + " " + s.inPositionVolts(ctx) + " V");
+            Wp9cCases.within(ctx, "servo bus: the position wire gives its share of the travel [V]", s.positionVolts(ctx), 0.5 * mods.eln.Eln.SVU, 0.01 * mods.eln.Eln.SVU);
             ctx.check("servo bus: a floor ghost under the stopped car", d.ghostAt(3), "");
             ctx.check("servo bus: Jade shows its address", "40".equals(d.getWaila().get("Address")), d.getWaila().toString());
             var ports = new java.util.TreeMap<String, mods.eln.introspect.Port.Kind>();
@@ -369,7 +369,7 @@ public final class ServoCases {
 
     /**
      * Driven by its setpoint wire: a voxel signal cable beside its left flank, ending at the floor edge's middle pin,
-     * fed 25 V (half the travel: 3 m) by a Signal Source beyond it. The car goes there.
+     * fed half of SVU (half the travel: 3 m) by a Signal Source beyond it. The car goes there.
      */
     static final class ByTheWire extends Room {
         Shaft s;
@@ -387,7 +387,7 @@ public final class ServoCases {
             var d = s.drive(ctx);
             BlockPos beside = pinCable(ctx, s.head, d.front.left(), 0, mods.eln.node.voxel.CablePart.tierOf("Signal Cable"));
             var out = d.front.left();
-            BusModuleCases.source(ctx, beside.relative(out.toEnumFacing()), out.getInverse(), 25);
+            BusModuleCases.source(ctx, beside.relative(out.toEnumFacing()), out.getInverse(), 0.5 * mods.eln.Eln.SVU);
         }
 
         public void measure(TestContext ctx) {
@@ -485,7 +485,7 @@ public final class ServoCases {
             unwatch();
             ctx.line(String.format("servo sag: top speed down %.2f m/s stiff, %.2f m/s weak; %d weak segments; weak %s", maxStiff, maxWeak,
                 weakSegments, weak.drive(ctx).getWaila()));
-            ctx.check("servo: on a stiff 200 V line it goes 2 m/s", Math.abs(maxStiff - 2.0) < 0.05, "" + maxStiff);
+            ctx.check("servo: on a stiff MVU line it goes 2 m/s", Math.abs(maxStiff - 2.0) < 0.05, "" + maxStiff);
             ctx.check("servo: on a sagging line it goes slower", maxWeak < 0.8 * maxStiff && maxWeak > 0.5, maxWeak + " vs " + maxStiff);
             ctx.check("servo: ... slowing mid-move (the sag retargets it)", weakSegments >= 2, weakSegments + " segments");
             ctx.check("servo: both arrive at the bottom", Math.abs(stiff.carFloor(ctx)) < 1e-6 && Math.abs(weak.carFloor(ctx)) < 1e-6,
@@ -517,7 +517,7 @@ public final class ServoCases {
                 if (tick == 10) s.call(ctx, 6);
                 if (tick == 120) {
                     var d = s.drive(ctx);
-                    faulted = d.fault == LinearServoDriveElement.OBSTRUCTED && s.faultVolts(ctx) > 40 && d.status() == LinearServoDriveElement.FAULT;
+                    faulted = d.fault == LinearServoDriveElement.OBSTRUCTED && s.faultVolts(ctx) > 0.8 * mods.eln.Eln.SVU && d.status() == LinearServoDriveElement.FAULT;
                     heldAt = s.carFloor(ctx);
                     ctx.level().removeBlock(stone, false);
                     s.call(ctx, 6);

@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * The electrical anvil (Baughn 2026-10-28): repair with material, no XP, the penalty never raised and annealed, credit
- * kept for fractions, repair only (books and enchanted copies refused), engraving, and the 800 V pulse.
+ * kept for fractions, repair only (books and enchanted copies refused), engraving, and the HVU pulse.
  */
 public final class AnvilCases {
     private AnvilCases() {
@@ -36,9 +36,9 @@ public final class AnvilCases {
     }
 
     /**
-     * A bank on a weak plant: an 800 V source behind a 100 ohm Power Resistor, a capacitor bank on the line. The bank's
-     * leak levels the line off near 784 V, below the old 98% start, where the desk waited forever (AdventurAgent); now it
-     * welds. The bank starts charged to 780 V to save the test a minute and a half.
+     * A bank on a weak plant: an HVU source behind a 100 ohm Power Resistor, a capacitor bank on the line. The bank's
+     * leak levels the line off near 98% of HVU, below the old 98% start, where the desk waited forever (AdventurAgent); now it
+     * welds. The bank starts charged to 97.5% of HVU to save the test a minute and a half.
      */
     static final class WeakPlant implements TestCase {
         public String id() {
@@ -78,11 +78,11 @@ public final class AnvilCases {
             BlockPos line = ctx.at(3 + sx, 1, 3);
             ctx.placeSix(HV_CABLE, line);
             Batch1Cases.resistor(ctx, 3 + 2 * sx, 3, 48);   // 100 ohm
-            Batch1Cases.source(ctx, 3 + 3 * sx, 3, 800);
+            Batch1Cases.source(ctx, 3 + 3 * sx, 3, mods.eln.Eln.HVU);
             a = (ElectricalAnvilElement) ctx.placeTransparent(ANVIL, Wp10aCases.off(line, bank.front));
             put(a, pick(ctx, 1500, 0, false), new ItemStack(Items.DIAMOND, 4));
-            bank.positiveLoad.setU(780);
-            bank.cellLoad.setU(780);
+            bank.positiveLoad.setU(0.975 * mods.eln.Eln.HVU);
+            bank.cellLoad.setU(0.975 * mods.eln.Eln.HVU);
         }
 
         public void measure(TestContext ctx) {
@@ -94,7 +94,7 @@ public final class AnvilCases {
     }
 
     /**
-     * A line that can't carry it: the pulse stops below 90% of 800 V, keeps its progress, and waits a second before it
+     * A line that can't carry it: the pulse stops below 90% of HVU, keeps its progress, and waits a second before it
      * tries again (no chattering); it starts at 95%, or on a line levelled off above 93%. The line's voltage is set by hand, tick by tick.
      */
     static final class Sag implements TestCase {
@@ -125,32 +125,32 @@ public final class AnvilCases {
         }
 
         public void measure(TestContext ctx) {
-            tick(740, 60);
-            ctx.check("anvil: at 740 V (92.5%), level for 3 s, it doesn't start", !a.welding && a.status == ElectricalAnvilElement.WAITING && a.energy == 0, "" + a.status);
-            tick(750, 45);
-            ctx.check("anvil: a line levelled off at 750 V (93.75%) starts it after 2 s", a.welding, "" + a.status);
+            tick(0.925 * mods.eln.Eln.HVU, 60);
+            ctx.check("anvil: at 92.5% of HVU, level for 3 s, it doesn't start", !a.welding && a.status == ElectricalAnvilElement.WAITING && a.energy == 0, "" + a.status);
+            tick(0.9375 * mods.eln.Eln.HVU, 45);
+            ctx.check("anvil: a line levelled off at 93.75% of HVU starts it after 2 s", a.welding, "" + a.status);
             ItemStack t = tool(a);   // (take the tool out and back: the step starts afresh)
             a.getInventory().setItem(ElectricalAnvilElement.TOOL, ItemStack.EMPTY);
-            tick(800, 1);
+            tick(mods.eln.Eln.HVU, 1);
             a.getInventory().setItem(ElectricalAnvilElement.TOOL, t);
-            tick(800, 20);
+            tick(mods.eln.Eln.HVU, 20);
             double e = a.energy;
-            ctx.check("anvil: at 800 V it welds (1 s: ~5 kJ)", a.welding && Math.abs(e - 5000) < 300, a.welding + " " + e);
-            tick(600, 1);
-            ctx.check("anvil: a sag to 600 V pauses it, keeping its progress", !a.welding && a.status == ElectricalAnvilElement.SAGGING
+            ctx.check("anvil: at HVU it welds (1 s: ~5 kJ)", a.welding && Math.abs(e - 5000) < 300, a.welding + " " + e);
+            tick(0.75 * mods.eln.Eln.HVU, 1);
+            ctx.check("anvil: a sag to 75% of HVU pauses it, keeping its progress", !a.welding && a.status == ElectricalAnvilElement.SAGGING
                 && a.energy == e, a.status + " " + a.energy);
-            tick(800, 10);
-            ctx.check("anvil: back at 800 V it holds off for a second", !a.welding && a.energy == e, "" + a.welding);
-            tick(800, 12);
+            tick(mods.eln.Eln.HVU, 10);
+            ctx.check("anvil: back at HVU it holds off for a second", !a.welding && a.energy == e, "" + a.welding);
+            tick(mods.eln.Eln.HVU, 12);
             ctx.check("anvil: ... then welds on from where it was", a.welding && a.energy > e, a.welding + " " + a.energy);
             // half a unit (20 kJ) is a burst: then it rests at least burstGapSeconds (3 s), however good the line
             int n = 0;
-            while (a.welding && n++ < 400) tick(800, 1);
+            while (a.welding && n++ < 400) tick(mods.eln.Eln.HVU, 1);
             ctx.check("anvil: after a 20 kJ burst it rests between bursts", !a.welding && a.recovering && a.status == ElectricalAnvilElement.RECOVERING
                 && Math.abs(a.energy - 20000) < 300, a.status + " " + a.energy);
-            tick(800, 50);
+            tick(mods.eln.Eln.HVU, 50);
             ctx.check("anvil: ... for 3 s, even on a full line", !a.welding, "" + a.welding);
-            tick(800, 12);
+            tick(mods.eln.Eln.HVU, 12);
             ctx.check("anvil: ... then the second burst", a.welding && !a.recovering, "" + a.welding);
             a.getInventory().setItem(ElectricalAnvilElement.TOOL, ItemStack.EMPTY);
             tick(0, 1);
@@ -271,7 +271,7 @@ public final class AnvilCases {
         }
     }
 
-    /** The 800 V pulse: on a stiff 800 V line a unit (40 kJ) takes 8 s at 5 kW; below 784 V it waits. */
+    /** The HVU pulse: on a stiff HVU line a unit (40 kJ) takes 8 s at 5 kW; below 98% of HVU it waits. */
     static final class Pulse implements TestCase {
         public String id() {
             return "anvil_800v_pulse";
@@ -317,16 +317,16 @@ public final class AnvilCases {
         }
 
         public void build(TestContext ctx) {
-            fed = desk(ctx, 2, 800);
-            weak = desk(ctx, 6, 700);
+            fed = desk(ctx, 2, mods.eln.Eln.HVU);
+            weak = desk(ctx, 6, 0.875 * mods.eln.Eln.HVU);
         }
 
         public void measure(TestContext ctx) {
             ctx.line("anvil pulse: fed " + fed.getWaila() + " damage " + tool(fed).getDamageValue() + "; weak " + weak.getWaila());
-            ctx.check("anvil: on 800 V it welds (one quarter in two bursts, at ~5 kW)", tool(fed).getDamageValue() == 1500 - 390 && fed.welding
+            ctx.check("anvil: on HVU it welds (one quarter in two bursts, at ~5 kW)", tool(fed).getDamageValue() == 1500 - 390 && fed.welding
                 && fed.powerNow() > 4500 && fed.powerNow() < 5100, tool(fed).getDamageValue() + " " + fed.powerNow() + " W");
             ctx.check("anvil: ... and is part way into the next", fed.progress() > 0.2 && fed.progress() < 0.6, "" + fed.progress());
-            ctx.check("anvil: on 700 V it waits for the line (no load, no progress)", !weak.welding && weak.status == ElectricalAnvilElement.WAITING
+            ctx.check("anvil: on 87.5% of HVU it waits for the line (no load, no progress)", !weak.welding && weak.status == ElectricalAnvilElement.WAITING
                 && weak.progress() == 0 && tool(weak).getDamageValue() == 1500, weak.status + " " + weak.progress());
         }
     }

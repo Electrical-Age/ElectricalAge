@@ -83,7 +83,7 @@ public final class WirelessMoreCases {
     }
 
     /**
-     * Signal Source 35 V -> transmitter (range 32) and two receivers 56 blocks away on its channel: one with a
+     * Signal Source 0.7 SVU -> transmitter (range 32) and two receivers 56 blocks away on its channel: one with a
      * repeater (range 32) halfway, one without. Only the repeated one hears it.
      */
     static final class RepeaterCase implements TestCase {
@@ -104,7 +104,7 @@ public final class WirelessMoreCases {
         public void build(TestContext ctx) {
             String ch = "eln selftest repeater " + System.nanoTime();
             ctx.floor(ctx.at(0, 0, 1));
-            signal(ctx, ctx.at(0, 1, 1), 35);
+            signal(ctx, ctx.at(0, 1, 1), 0.7 * SVU);
             WirelessSignalTxElement tx = (WirelessSignalTxElement) six(ctx, WIRELESS_TX, ctx.at(1, 1, 1));
             Wp9aCases.orient(tx, l -> l, mods.eln.misc.Direction.XN); // input (front) toward the source at x0, as in Wp9c
             channel(ctx, tx, WirelessSignalTxElement.setChannelId, ch);
@@ -114,7 +114,7 @@ public final class WirelessMoreCases {
         }
 
         public void measure(TestContext ctx) {
-            within(ctx, "wireless repeater: receiver 56 blocks away via a repeater [V] (35 V)", out(repeated), 35, 0.02 * SVU);
+            within(ctx, "wireless repeater: receiver 56 blocks away via a repeater [V] (0.7 SVU)", out(repeated), 0.7 * SVU, 0.02 * SVU);
             within(ctx, "wireless repeater: receiver out of range, no repeater [V] (0)", out(far), 0, 0.01 * SVU);
         }
     }

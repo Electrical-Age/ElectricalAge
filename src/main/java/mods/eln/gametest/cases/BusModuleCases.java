@@ -73,7 +73,7 @@ public final class BusModuleCases {
     }
 
     /**
-     * A Signal Source at 30 V (x 0) through a signal cable (x 1) to module A's back middle terminal, set in (x 2); bus
+     * A Signal Source at 0.6 SVU (x 0) through a signal cable (x 1) to module A's back middle terminal, set in (x 2); bus
      * cable (x 3, 4) to module B (x 5), whose back middle terminal, set out on the same channel, drives a signal cable
      * (x 6).
      */
@@ -87,7 +87,7 @@ public final class BusModuleCases {
 
         public void build(TestContext c) {
             try {
-                source(c, c.at(0, 1, 1), Direction.XP, 30);
+                source(c, c.at(0, 1, 1), Direction.XP, 0.6 * mods.eln.Eln.SVU);
                 across(c, c.at(1, 1, 1), SIGNAL);
                 a = module(c, c.at(2, 1, 1), Direction.XP);
                 across(c, c.at(3, 1, 1), BUS);
@@ -109,12 +109,12 @@ public final class BusModuleCases {
                 along(a, BACK_MIDDLE) + " " + along(b, BACK_MIDDLE));
             c.check("bus module: both on one bus", a.port.bus() != null && a.port.bus() == b.port.bus(), a.port.bus() + " " + b.port.bus());
             c.check("bus module: its bus edge has no circuit link", a.getElectricalLoad(a.busEdge()) == null, "");
-            Wp9cCases.within(c, "bus module: A's in terminal sees the source [V]", a.volts(BACK_MIDDLE), 30, 0.5);
+            Wp9cCases.within(c, "bus module: A's in terminal sees the source [V]", a.volts(BACK_MIDDLE), 0.6 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
             Wp9cCases.within(c, "bus module: the channel carries it [0..1]", a.port.read(LIGHT_BLUE), 0.6, 0.01);
-            Wp9cCases.within(c, "bus module: B's out terminal drives it [V]", b.volts(BACK_MIDDLE), 30, 0.5);
+            Wp9cCases.within(c, "bus module: B's out terminal drives it [V]", b.volts(BACK_MIDDLE), 0.6 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
             Object[] k = ((VoxelNode) BusCases.node(c, 6, 1, 1)).cableAt(8, 0, 8);
             double u = k == null || k[0] == null ? Double.NaN : ((mods.eln.sim.ElectricalLoad) k[0]).getU();
-            Wp9cCases.within(c, "bus module: the signal wire past B reads it [V]", u, 30, 0.5);
+            Wp9cCases.within(c, "bus module: the signal wire past B reads it [V]", u, 0.6 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
             var w = a.getWaila();
             c.check("bus module: Jade shows the terminal, its channel's number and name, direction and volts",
                 w.containsKey("Terminal 5") && w.get("Terminal 5").startsWith("3 light_blue, in"), w.toString());
@@ -124,7 +124,7 @@ public final class BusModuleCases {
     }
 
     /**
-     * Two modules write one channel, from sources at 10 V and 40 V: the last write wins, and the other's comes back
+     * Two modules write one channel, from sources at 0.2 SVU and 0.8 SVU: the last write wins, and the other's comes back
      * when it stops (Baughn 2026-11-05; this was bus_module_highest_writer_wins, which pinned the highest of a tick's
      * writes winning). A starts alone; B joins at tick 20 and leaves at tick 50.
      */
@@ -144,13 +144,13 @@ public final class BusModuleCases {
 
         public void build(TestContext c) {
             try {
-                source(c, c.at(0, 1, 1), Direction.XP, 10);
+                source(c, c.at(0, 1, 1), Direction.XP, 0.2 * mods.eln.Eln.SVU);
                 across(c, c.at(1, 1, 1), SIGNAL);
                 a = module(c, c.at(2, 1, 1), Direction.XP);
                 across(c, c.at(3, 1, 1), BUS);
                 b = module(c, c.at(4, 1, 1), Direction.XN);
                 across(c, c.at(5, 1, 1), SIGNAL);
-                source(c, c.at(6, 1, 1), Direction.XN, 40);
+                source(c, c.at(6, 1, 1), Direction.XN, 0.8 * mods.eln.Eln.SVU);
                 a.setChannel(BACK_MIDDLE, RED);
                 // A also reads it back on a free terminal
                 a.setChannel(0, RED);
@@ -176,13 +176,13 @@ public final class BusModuleCases {
             var bus = a.port.bus();
             c.check("bus module last: one bus", bus != null && bus == b.port.bus(), bus + " " + b.port.bus());
             if (bus == null) return;
-            Wp9cCases.within(c, "bus module last: A alone puts its 10 V on it [0..1]", alone, 0.2, 0.01);
-            Wp9cCases.within(c, "bus module last: B wrote last, 40 V [0..1]", both, 0.8, 0.01);
+            Wp9cCases.within(c, "bus module last: A alone puts its 0.2 SVU on it [0..1]", alone, 0.2, 0.01);
+            Wp9cCases.within(c, "bus module last: B wrote last, 0.8 SVU [0..1]", both, 0.8, 0.01);
             c.check("bus module last: two writers", writersBoth == 2, "" + writersBoth);
-            Wp9cCases.within(c, "bus module last: an out terminal on it gave 40 V [V]", bothOut, 40, 0.5);
-            Wp9cCases.within(c, "bus module last: B stopped, A's 10 V is back [0..1]", bus.value(RED), 0.2, 0.01);
+            Wp9cCases.within(c, "bus module last: an out terminal on it gave 0.8 SVU [V]", bothOut, 0.8 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
+            Wp9cCases.within(c, "bus module last: B stopped, A's 0.2 SVU is back [0..1]", bus.value(RED), 0.2, 0.01);
             c.check("bus module last: one writer", bus.writers(RED) == 1, "" + bus.writers(RED));
-            Wp9cCases.within(c, "bus module last: the 10 V wire stays at 10 V [V]", a.volts(BACK_MIDDLE), 10, 0.5);
+            Wp9cCases.within(c, "bus module last: the 0.2 SVU wire stays at 0.2 SVU [V]", a.volts(BACK_MIDDLE), 0.2 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
         }
     }
 

@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * The pipe sensors as devices on a face (Baughn 2026-11-02): placed by the pipe sensor items on a floor, wall or
- * ceiling, pipe laid from the device's port to the run to measure, 0-50 V out on its signal pin.
+ * ceiling, pipe laid from the device's port to the run to measure, 0-SVU out on its signal pin.
  */
 public final class PipeTransmitterCases {
     private PipeTransmitterCases() {
@@ -84,7 +84,7 @@ public final class PipeTransmitterCases {
     /**
      * A pressure sensor clicked onto the middle of a floor, a pipe kit's route laid from its port (aimed at the device) to
      * the open end of a two-block run, the run full of steam: it reads the run's absolute pressure, and its signal cable
-     * carries reading / 25 bar x 50 V. An empty-hand right-click steps the full scale to 50 bar, which a save keeps.
+     * carries reading / 25 bar x SVU. An empty-hand right-click steps the full scale to 50 bar, which a save keeps.
      */
     static final class FloorPressure implements TestCase {
         BlockPos a, b, c2;
@@ -134,7 +134,7 @@ public final class PipeTransmitterCases {
                 run.P() / 1e5, t.reading, t.connected, t.outputGate.getU(), u, t.getWaila()));
             c.check("pipe transmitter: connected through the routed pipe", t.connected && t.pipe() != null, "");
             c.check("pipe transmitter: reads the run's absolute pressure", Math.abs(t.reading - run.P() / 1e5) < 0.05 && t.reading > 2, String.format("%.2f", t.reading));
-            Wp9cCases.within(c, "pipe transmitter: its signal cable carries reading / 25 bar x 50 V", u, t.reading / 25 * 50, 0.5);
+            Wp9cCases.within(c, "pipe transmitter: its signal cable carries reading / 25 bar x SVU", u, t.reading / 25 * mods.eln.Eln.SVU, 0.01 * mods.eln.Eln.SVU);
             c.check("pipe transmitter: Jade gives mode, reading, full scale and volts", t.getWaila().containsKey("Pressure sensor")
                 && t.getWaila().containsKey("Full scale") && t.getWaila().containsKey("Output"), "" + t.getWaila());
             // an empty-hand right-click steps the full scale; it survives the element's NBT
@@ -152,7 +152,7 @@ public final class PipeTransmitterCases {
 
     /**
      * A temperature sensor on a wall (its signal pin down the wall), pipe laid from its port along the wall into the next
-     * block, both full of steam at 150 C: it reads the run's temperature, its cable carries reading / 200 C x 50 V. One on a
+     * block, both full of steam at 150 C: it reads the run's temperature, its cable carries reading / 200 C x SVU. One on a
      * ceiling goes there too, its port 4 voxels under the ceiling, and reads "not connected" without a pipe.
      */
     static final class WallTemperature implements TestCase {
@@ -206,7 +206,7 @@ public final class PipeTransmitterCases {
                 run.T() - 273.15, t.reading, t.outputGate.getU(), u));
             c.check("pipe transmitter: its signal pin points down the wall", out(t) == Direction.YN, "" + out(t));
             c.check("pipe transmitter: reads the run's temperature", Math.abs(t.reading - (run.T() - 273.15)) < 1 && t.reading > 50, String.format("%.0f", t.reading));
-            Wp9cCases.within(c, "pipe transmitter: its signal cable carries reading / 200 C x 50 V", u, Math.min(1, t.reading / 200) * 50, 0.5);
+            Wp9cCases.within(c, "pipe transmitter: its signal cable carries reading / 200 C x SVU", u, Math.min(1, t.reading / 200) * mods.eln.Eln.SVU, 0.01 * mods.eln.Eln.SVU);
         }
     }
 

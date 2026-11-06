@@ -29,7 +29,7 @@ import java.util.Map;
  * Capacitor's over-voltage watchdog (1.3 x the rating). The ESR's I^2 R and the leak heat it (a thermal load, cooled to
  * ambient); past WARM it fails as past its voltage does: it explodes, by the energy it held (Baughn 2026-10-28: at
  * this size, realistic). The anvil's bursts warm it by watts; a stiff line's inrush puts most of the bank's 115 kJ into
- * the ESR in a moment. No inrush limit: an empty bank straight on a stiff 800 V line draws hundreds of amps and burns its cable
+ * the ESR in a moment. No inrush limit: an empty bank straight on a stiff 400 V line draws hundreds of amps and burns its cable
  * (Baughn 2026-10-28: "inrush current is supposed to be a problem"); charge it through a resistor or from a soft plant.
  * Its charge is the loads' voltages, saved with them (NbtElectricalLoad), so it keeps it over a restart.
  */

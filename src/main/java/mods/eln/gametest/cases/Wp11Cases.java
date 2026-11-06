@@ -34,7 +34,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 /**
- * Selftest cases of device batch Wp11 (registry/batch/Wp11Content). Feeds use a 50 V electrical source and one LV
+ * Selftest cases of device batch Wp11 (registry/batch/Wp11Content). Feeds use an LVU electrical source and one LV
  * cable on the platform floor; model as SelfTest.measure: two loads connect through Rs(a) + Rs(b), and the source,
  * the LV cable and every load set by lowVoltageCableDescriptor/applySmallRs have Rs = rs = Rs(LV cable).
  * Not tested: steam/gas turbine power (needs a steam/gas fluid in the tank; only the idle case is checked), grid
@@ -54,7 +54,7 @@ public final class Wp11Cases {
     static final int FLYWHEEL = 14 + (4 << 6);
     static final int UTILITY_POLE = 4 + (123 << 6);
     static final int UTILITY_POLE_DCDC = 5 + (123 << 6);
-    static final double U = 50.0;
+    static final double U = Eln.LVU;
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new ShaftNetworkCase());
@@ -95,7 +95,7 @@ public final class Wp11Cases {
         throw new IllegalStateException("no field " + name + " in " + o.getClass());
     }
 
-    /** 50 V source at `src` feeding an LV cable at `cable` (both on the floor). */
+    /** LVU source at `src` feeding an LV cable at `cable` (both on the floor). */
     static SixNodeElement feed(TestContext ctx, BlockPos cable, BlockPos src) {
         SixNodeElement c = ctx.placeSix(LV_CABLE, cable);
         ElectricalSourceElement s = (ElectricalSourceElement) ctx.placeSix(SOURCE, src);
@@ -155,7 +155,7 @@ public final class Wp11Cases {
 
     /**
      * Generator + flywheel spun to 400 rad/s, generator electrically open: its source sets the open-circuit EMF
-     * U = RtoU(rads) = 3200 V * rads / 800 rad/s (= 4 V per rad/s), seen unchanged on the input load (no current).
+     * U = RtoU(rads) = HVU * rads / 800 rad/s (= 0.5 V per rad/s), seen unchanged on the input load (no current).
      * Its drag (1.5 % of its rating at 800 rad/s, as the speed squared) slows it only slightly.
      * WP16b thermal: sized for 4000 (1/0.95 - 1) + 0.015 * 4000 * 0.05 = 213.5 W at 65 % of the 130 K warm limit
      * (Rp = 130 / (213.5 / 0.65) = 0.3958 K/W); open circuit the only heat is the drag's share, 5 % of it.
@@ -181,8 +181,8 @@ public final class Wp11Cases {
             ctx.check("wp11 generator shaft slowed by drag only (400 > rads > 200)", rads < 400.0 && rads > 200.0, String.format("%.3f rad/s", rads));
             ctx.checkValue("wp11 generator + flywheel inertia [kg m^2] (1.5 s of 4 kW + 12.5 s of 16 kW, at 800 rad/s)", s.getInertia(),
                 mods.eln.mechanical.ShaftNetworkKt.inertiaOf(1.5, 4000.0, 800.0) + mods.eln.mechanical.ShaftNetworkKt.inertiaOf(12.5, 16000.0, 800.0));
-            ctx.checkValue("wp11 generator open-circuit voltage [V] (3200 * rads / 800)", input.getU(), d.getRtoU().getValue(rads));
-            ctx.checkValue("wp11 generator open-circuit voltage = 4 V per rad/s [V]", input.getU(), 4.0 * rads);
+            ctx.checkValue("wp11 generator open-circuit voltage [V] (HVU * rads / 800)", input.getU(), d.getRtoU().getValue(rads));
+            ctx.checkValue("wp11 generator open-circuit voltage = HVU / 800 V per rad/s [V]", input.getU(), Eln.HVU / 800 * rads);
             mods.eln.sim.ThermalLoad th = field(gen, "thermal");
             ctx.checkValue("wp11 generator thermal Rp [K/W] (130 / (213.5 W / 0.65))", th.Rp, 130 / (d.nominalHeatPower() / 0.65));
             double heat = th.Pc + (th.Tc - th.Pc * 0.05 / th.C) / th.Rp; // heat in the last slow step, before the Rp leak
@@ -211,8 +211,8 @@ public final class Wp11Cases {
     }
 
     /**
-     * Utility pole w/DC-DC converter fed 50 V on its ground side (LV cable + source), grid side open: the transformer
-     * process gives grid U = ground U / ratio(0.25) = 200 V (no current: ground U = 50 V). Both poles get their 3 ghost
+     * Utility pole w/DC-DC converter fed LVU on its ground side (LV cable + source), grid side open: the transformer
+     * process gives grid U = ground U / ratio(0.25) = 4 LVU (no current: ground U = LVU). Both poles get their 3 ghost
      * blocks above; the TOP ghost lookup resolves a ghost to the pole's item. Plain utility pole: placement + ghosts.
      */
     static final class PoleCase implements TestCase {
@@ -247,8 +247,8 @@ public final class Wp11Cases {
         public void measure(TestContext ctx) {
             ghosts(ctx, "DC-DC pole", dcdcPos, UTILITY_POLE_DCDC);
             ghosts(ctx, "utility pole", plainPos, UTILITY_POLE);
-            ctx.checkValue("wp11 DC-DC pole ground side [V] (no current: = 50)", dcdc.secondaryLoad.getU(), U);
-            ctx.checkValue("wp11 DC-DC pole grid side [V] (ground / 0.25 = 200)", dcdc.electricalLoad.getU(), U / 0.25);
+            ctx.checkValue("wp11 DC-DC pole ground side [V] (no current: = LVU)", dcdc.secondaryLoad.getU(), U);
+            ctx.checkValue("wp11 DC-DC pole grid side [V] (ground / 0.25 = 4 LVU)", dcdc.electricalLoad.getU(), U / 0.25);
             ctx.check("wp11 utility pole has no ground connection (no transformer)", plain.secondaryLoad == null && plain.getConnectionMask(Direction.XP, LRDU.Down) == 0, "");
         }
     }
@@ -492,7 +492,7 @@ public final class Wp11Cases {
         }
     }
 
-    /** An LVU exporter at (1,1,1) facing XP, fed 50 V at (2..3,1,1), with a test sink behind it at (0,1,1). */
+    /** An LVU exporter at (1,1,1) facing XP, fed LVU at (2..3,1,1), with a test sink behind it at (0,1,1). */
     static EnergyConverterElnToOtherElement exporter(TestContext ctx, BlockPos pos) {
         feed(ctx, ctx.at(2, 1, 1), ctx.at(3, 1, 1));
         EnergyConverterElnToOtherDescriptor d = Wp11Content.elnToOtherLvu;

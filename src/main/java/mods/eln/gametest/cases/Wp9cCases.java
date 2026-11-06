@@ -53,7 +53,7 @@ import static mods.eln.gametest.cases.Batch1Cases.off;
  * <p>
  * Signal devices are driven by core Signal Sources (voltage set through the GUI packet) and every gate output is
  * loaded by a signal cable. Gates are turned (element.front, as a wrench does) so that the output faces +X; side
- * inputs sit on whichever Z side the gate's left/right pin points to. SVU = 50 V (signal full scale); a logic
+ * inputs sit on whichever Z side the gate's left/right pin points to. SVU = 5 V (signal full scale); a logic
  * "1" output is SVU, "0" is 0 V; analog chips see raw volts. Time-dependent checks use the elapsed simulated time
  * between build and measure (world ticks * 0.05 s) with a +-1.5 tick tolerance, so they hold for any tick count.
  * Power circuits use the wp9a model: connection(a, b) = Rs(a) + Rs(b), 100 ohm Power Resistor as the load.
@@ -190,7 +190,7 @@ public final class Wp9cCases {
 
     /**
      * Three lanes along +X at z=1: Signal Source -> gate (output +X) -> signal cable, side input from a second source.
-     * AND(50 V, 50 V) = 1 -> 50 V; XOR(50 V, 50 V) = 0 -> 0 V; NOT(0 V) = 1 -> 50 V. Inputs are digital at
+     * AND(SVU, SVU) = 1 -> SVU; XOR(SVU, SVU) = 0 -> 0 V; NOT(0 V) = 1 -> SVU. Inputs are digital at
      * normalized <= 0.2 (0) / >= 0.6 (1).
      */
     static final class LogicCase implements TestCase {
@@ -230,8 +230,8 @@ public final class Wp9cCases {
     }
 
     /**
-     * Amplifier, gain 0.5 by GUI packet, input 30 V -> 15 V. Summing unit (gains 1, 1, 1), inputs 10 V (back) +
-     * 20 V (left) + unconnected (right) -> 30 V. VCA: in 20 V, control 2.5 V -> 20 * 2.5 / 5 = 10 V.
+     * Amplifier, gain 0.5 by GUI packet, input 0.6 SVU -> 0.3 SVU. Summing unit (gains 1, 1, 1), inputs 0.2 SVU (back) +
+     * 0.4 SVU (left) + unconnected (right) -> 0.6 SVU. VCA: in 0.4 SVU, control 0.2 SVU -> gain 2 (gain 0..10 over 0..SVU) -> 0.8 SVU.
      */
     static final class AnalogCase implements TestCase {
         SixNodeElement amp, sum, vca;
@@ -255,28 +255,28 @@ public final class Wp9cCases {
         }
 
         public void build(TestContext ctx) {
-            amp = chip(ctx, AMPLIFIER, 1, 30, -1);
+            amp = chip(ctx, AMPLIFIER, 1, 0.6 * SVU, -1);
             amp.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(1); // AmplifierElement.GainChangedEvent
                 o.writeFloat(0.5F);
             }));
-            sum = chip(ctx, SUMMING, 5, 10, 20);
-            vca = chip(ctx, VCA, 9, 20, 2.5);
+            sum = chip(ctx, SUMMING, 5, 0.2 * SVU, 0.4 * SVU);
+            vca = chip(ctx, VCA, 9, 0.4 * SVU, 0.2 * SVU);
         }
 
         public void measure(TestContext ctx) {
             ctx.check("wp9c analog chip elements", amp instanceof AmplifierElement && sum instanceof SummingUnitElement
                 && vca instanceof AnalogChipElement, amp + ", " + sum + ", " + vca);
-            ctx.checkValue("wp9c amplifier output [V] (0.5 * 30)", out(amp), 15);
-            ctx.checkValue("wp9c summing unit output [V] (10 + 20 + 0)", out(sum), 30);
-            ctx.checkValue("wp9c VCA output [V] (20 * 2.5 / 5)", out(vca), 10);
+            ctx.checkValue("wp9c amplifier output [V] (0.5 * 0.6 SVU)", out(amp), 0.3 * SVU);
+            ctx.checkValue("wp9c summing unit output [V] (0.2 SVU + 0.4 SVU + 0)", out(sum), 0.6 * SVU);
+            ctx.checkValue("wp9c VCA output [V] (0.4 SVU * gain 0.2 SVU / (SVU / 10))", out(vca), 0.8 * SVU);
         }
     }
 
     /**
-     * Signal Processor, expression "A*0.5" (GUI packet), A (right pin) = 40 V -> normalized 0.8 -> 0.4 -> 20 V. A second
+     * Signal Processor, expression "A*0.5" (GUI packet), A (right pin) = 0.8 SVU -> normalized 0.8 -> 0.4 SVU. A second
      * without chips in its slot outputs 0 V (Baughn 2026-10-30: ceil(operators / 4) cheap chips). A third runs a program
-     * with named components, "half = A*0.5; half + half" -> 40 V, its parts paid for once. A fourth, saved with 8 redstone
+     * with named components, "half = A*0.5; half + half" -> 0.8 SVU, its parts paid for once. A fourth, saved with 8 redstone
      * in its slot (before 2026-10-30), loads with 2 cheap chips. A fifth, "1", still offers all three inputs. A sixth gives
      * A and B defaults: A's cable overrides its default, B (no cable) reads its default.
      */
@@ -304,7 +304,7 @@ public final class Wp9cCases {
                 m.getInventory().setItem(0, mods.eln.Eln.findItemStack("Cheap Chip", chips));
                 m.getInventory().setChanged();
             }
-            signal(ctx, beside(m, p, m.front.right()), 40);
+            signal(ctx, beside(m, p, m.front.right()), 0.8 * SVU);
             ctx.placeSix(SIGNAL_CABLE, ctx.at(x + 1, 1, 1));
             return m;
         }
@@ -315,7 +315,7 @@ public final class Wp9cCases {
             program = math(ctx, 9, 1, "half = A*0.5; half + half");
             migrated = math(ctx, 13, 0, "A*0.5");
             constant = math(ctx, 17, 0, "1");
-            // A has a cable (40 V) and a default: the cable wins; B has none: its default is read (Baughn 2026-10-30)
+            // A has a cable (0.8 SVU) and a default: the cable wins; B has none: its default is read (Baughn 2026-10-30)
             defaults = math(ctx, 20, 1, "A = 0.1\nB = 0.3\nA * 0.5 + B");
             // as a processor saved before 2026-10-30 holds redstone: saved and loaded, it holds cheap chips
             migrated.getInventory().setItem(0, new ItemStack(Items.REDSTONE, 8));
@@ -336,19 +336,19 @@ public final class Wp9cCases {
             boolean ready = field(withChips, "chipsReady");
             ctx.check("wp9c signal processor: A*0.5 valid, a chip ready", valid && ready && required == 1,
                 "valid " + valid + ", requires " + required + " chips, ready " + ready);
-            ctx.checkValue("wp9c signal processor output [V] (A = 40 V -> 0.8 * 0.5 * SVU)", out(withChips), 20);
+            ctx.checkValue("wp9c signal processor output [V] (A = 0.8 SVU -> 0.8 * 0.5 * SVU)", out(withChips), 0.4 * SVU);
             boolean ready2 = field(without, "chipsReady");
             within(ctx, "wp9c signal processor without chips: not ready, output 0 V", ready2 ? 999 : out(without), 0, 0.01);
             boolean pvalid = field(program, "equationIsValid");
             int preq = field(program, "chipsRequired");
             ctx.check("wp9c signal processor: a program with a named part, one chip (2 operators)", pvalid && preq == 1, "valid " + pvalid + ", " + preq + " chips");
-            ctx.checkValue("wp9c signal processor program output [V] (half = 0.4; half + half = 0.8 * SVU)", out(program), 40);
+            ctx.checkValue("wp9c signal processor program output [V] (half = 0.4; half + half = 0.8 * SVU)", out(program), 0.8 * SVU);
             // the inputs connect though "1" reads none of them (Baughn 2026-10-30)
             var f = constant.front;
             boolean all = constant.getConnectionMask(f.right()) != 0 && constant.getConnectionMask(f.inverse()) != 0 && constant.getConnectionMask(f.left()) != 0;
             ctx.check("wp9c signal processor: A, B and C connect whatever the program reads", all, "");
             ctx.check("wp9c signal processor: an old program's rs(reset, set) loads as rs(set, reset)", upgraded.equals("rs(A, 0)"), upgraded);
-            ctx.checkValue("wp9c signal processor: defaults, A wired (0.8), B not (default 0.3): A * 0.5 + B [V]", out(defaults), 35);
+            ctx.checkValue("wp9c signal processor: defaults, A wired (0.8), B not (default 0.3): A * 0.5 + B [V]", out(defaults), 0.7 * SVU);
             // its logger graphs what the program read: A from the cable, B its default, and the output
             var lv = defaults.logger.view();
             ctx.check("wp9c signal processor: the logger graphs A 0.8, B's default 0.3, out 0.7",
@@ -362,8 +362,8 @@ public final class Wp9cCases {
     }
 
     /**
-     * Timer A: input held high by a 50 V source, timeout 0.5 s (GUI packet) -> output 50 V, counter held at 0.5 s.
-     * Timer B: no input, timeout 0.5 s, started by the GUI "set" packet -> output 50 V while counter = 0.5 - t > 0,
+     * Timer A: input held high by an SVU source, timeout 0.5 s (GUI packet) -> output SVU, counter held at 0.5 s.
+     * Timer B: no input, timeout 0.5 s, started by the GUI "set" packet -> output SVU while counter = 0.5 - t > 0,
      * then 0 V. B is judged only away from the edge (t outside 0.35..0.65 s).
      */
     static final class TimerCase implements TestCase {
@@ -416,8 +416,8 @@ public final class Wp9cCases {
     }
 
     /**
-     * Signal Trimmer set to 30 V (GUI packet) -> 30 V. Signal Switch, one right click -> 50 V. Signal Button, one right
-     * click -> 50 V, back to 0 V after its 0.21 s auto reset (judged when t > 0.35 s, else expected still 50 V).
+     * Signal Trimmer set to 0.6 SVU (GUI packet) -> 0.6 SVU. Signal Switch, one right click -> SVU. Signal Button, one right
+     * click -> SVU, back to 0 V after its 0.21 s auto reset (judged when t > 0.35 s, else expected still SVU).
      */
     static final class GateSourceCase implements TestCase {
         ElectricalGateSourceElement trimmer, sw, button;
@@ -442,7 +442,7 @@ public final class Wp9cCases {
             trimmer = place(ctx, SIGNAL_TRIMMER, 0);
             trimmer.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(ElectricalGateSourceElement.setVoltagerId);
-                o.writeFloat(30F);
+                o.writeFloat((float) (0.6 * SVU));
             }));
             sw = place(ctx, SIGNAL_SWITCH, 3);
             Wp9aCases.use(ctx, sw, ItemStack.EMPTY);
@@ -453,7 +453,7 @@ public final class Wp9cCases {
 
         public void measure(TestContext ctx) {
             double t = elapsed(ctx, t0);
-            ctx.checkValue("wp9c signal trimmer output [V] (set 30 V)", trimmer.outputGate.getU(), 30);
+            ctx.checkValue("wp9c signal trimmer output [V] (set 0.6 SVU)", trimmer.outputGate.getU(), 0.6 * SVU);
             ctx.checkValue("wp9c signal switch after one click [V] (= SVU)", sw.outputGate.getU(), SVU);
             if (t > 0.35)
                 within(ctx, f("wp9c signal button %.2f s after a click [V] (auto reset after 0.21 s)", t), button.outputGate.getU(), 0, 0.01);
@@ -463,9 +463,9 @@ public final class Wp9cCases {
     }
 
     /**
-     * Source 50 V -> LV cable -> Hub (LV cables in the slots facing -X and +X; default grid connects left-right and
+     * Source LVU -> LV cable -> Hub (LV cables in the slots facing -X and +X; default grid connects left-right and
      * down-up) -> 100 ohm Power Resistor -> Ground. Hub internal resistor = Rs(cable a) + Rs(cable b).
-     * I = 50 / (link(src, cable) + link(cable, hub) + R_hub + link(hub, R) + 100 + link(R, ground)).
+     * I = LVU / (link(src, cable) + link(cable, hub) + R_hub + link(hub, R) + 100 + link(R, ground)).
      */
     static final class HubCase implements TestCase {
         SixNodeElement src, cable, gnd;
@@ -481,7 +481,7 @@ public final class Wp9cCases {
         }
 
         public void build(TestContext ctx) {
-            src = Wp9aCases.source(ctx, SOURCE, 0, 1, 50);
+            src = Wp9aCases.source(ctx, SOURCE, 0, 1, Eln.LVU);
             cable = ctx.placeSix(LV_CABLE, ctx.at(1, 1, 1));
             hub = (HubElement) ctx.placeSix(HUB, ctx.at(2, 1, 1));
             for (Direction d : new Direction[]{Direction.XN, Direction.XP}) {
@@ -496,7 +496,7 @@ public final class Wp9cCases {
         public void measure(TestContext ctx) {
             double rHub = 2 * mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs;
             double rt = link(src, cable) + link(cable, hub) + rHub + link(hub, r) + r.nominalRs + link(r, gnd);
-            ctx.checkValue("wp9c hub: current through hub + 100 ohm [A] (50 V / R_total)", Wp9aCases.current(r), 50 / rt);
+            ctx.checkValue("wp9c hub: current through hub + 100 ohm [A] (LVU / R_total)", Wp9aCases.current(r), Eln.LVU / rt);
             LRDU zSide = hub.side.getLRDUGoingTo(Direction.ZP);
             ctx.check("wp9c hub: no cable in the +Z slot -> no connection there", hub.getConnectionMask(zSide) == 0
                 && hub.getElectricalLoad(zSide) == null, "mask " + hub.getConnectionMask(zSide));
@@ -504,8 +504,8 @@ public final class Wp9cCases {
     }
 
     /**
-     * Source 50 V -> Energy Meter (LV cable in its slot, shunt closed by the GUI toggle packet, a = front toward the
-     * source) -> 100 ohm -> Ground. I = 50 / R_total with the shunt at its small Rs; counted energy / counted time =
+     * Source LVU -> Energy Meter (LV cable in its slot, shunt closed by the GUI toggle packet, a = front toward the
+     * source) -> 100 ohm -> Ground. I = LVU / R_total with the shunt at its small Rs; counted energy / counted time =
      * U(a) * I (time counter runs 72x: timeCounter / 72 = simulated seconds), +-1.5 ticks of power for the start.
      */
     static final class EnergyMeterCase implements TestCase {
@@ -522,7 +522,7 @@ public final class Wp9cCases {
         }
 
         public void build(TestContext ctx) {
-            src = Wp9aCases.source(ctx, SOURCE, 0, 1, 50);
+            src = Wp9aCases.source(ctx, SOURCE, 0, 1, Eln.LVU);
             meter = (EnergyMeterElement) ctx.placeSix(ENERGY_METER, ctx.at(1, 1, 1));
             orient(meter, l -> l, Direction.XN);
             // no cable in a slot: built-in LV cable (Baughn 2026-10-17)
@@ -535,7 +535,7 @@ public final class Wp9cCases {
             double rt = link(src, meter) + meter.shunt.getR() + link(meter, r) + r.nominalRs + link(r, gnd);
             double i = Math.abs(meter.aLoad.getCurrent());
             ctx.check("wp9c energy meter shunt closed by the toggle packet", meter.shunt.getState(), "state " + meter.shunt.getState());
-            ctx.checkValue("wp9c energy meter current [A] (50 V / R_total)", i, 50 / rt);
+            ctx.checkValue("wp9c energy meter current [A] (LVU / R_total)", i, Eln.LVU / rt);
             double energy = field(meter, "energyStack");
             double time = (double) field(meter, "timeCounter") / 72.0;
             double p = meter.aLoad.getU() * i;
@@ -546,9 +546,9 @@ public final class Wp9cCases {
     }
 
     /**
-     * Signal Source 35 V -> Wireless Transmitter (front = input) ... 3 blocks ... Wireless Receiver (front = output)
+     * Signal Source 0.7 SVU -> Wireless Transmitter (front = input) ... 3 blocks ... Wireless Receiver (front = output)
      * -> signal cable, both on a private channel (GUI packets). Receiver output = transmitter value (normalized input
-     * + lightning glitch offset, 0 without lightning) * SVU = 35 V.
+     * + lightning glitch offset, 0 without lightning) * SVU = 0.7 SVU.
      */
     static final class WirelessCase implements TestCase {
         WirelessSignalTxElement tx;
@@ -564,7 +564,7 @@ public final class Wp9cCases {
 
         public void build(TestContext ctx) {
             String channel = "eln selftest " + System.nanoTime();
-            signal(ctx, ctx.at(0, 1, 1), 35);
+            signal(ctx, ctx.at(0, 1, 1), 0.7 * SVU);
             tx = (WirelessSignalTxElement) ctx.placeSix(WIRELESS_TX, ctx.at(1, 1, 1));
             orient(tx, l -> l, Direction.XN);
             rx = (WirelessSignalRxElement) ctx.placeSix(WIRELESS_RX, ctx.at(4, 1, 1));
@@ -584,7 +584,7 @@ public final class Wp9cCases {
             boolean connection = field(rx, "connection");
             ctx.check("wp9c wireless receiver connected on the private channel", connection && tx.channel.equals(rx.channel),
                 "connection " + connection + ", channels " + tx.channel + " / " + rx.channel);
-            ctx.checkValue("wp9c wireless transmitter value (35 V / SVU)", tx.getValue(), 35 / SVU);
+            ctx.checkValue("wp9c wireless transmitter value (0.7 SVU / SVU)", tx.getValue(), 0.7);
             ctx.checkValue("wp9c wireless receiver output [V] (= tx value * SVU)", out(rx), tx.getValue() * SVU);
         }
     }
@@ -592,12 +592,12 @@ public final class Wp9cCases {
     /**
      * The three-channel data logger (Baughn 2026-10-30, board #45) on the floor of a voxel block, its back edge west: its
      * three inputs are pins on that edge at z 4, 8 and 12. Three floor cables in the block west of it meet them, each
-     * from its own Signal Source (10, 25, 40 V) in a block round it: one through to the block further west, two turning
+     * from its own Signal Source (0.2, 0.5, 0.8 SVU) in a block round it: one through to the block further west, two turning
      * north and south. Each channel must record its own source's signal.
      */
     static final class ThreeChannelLoggerCase implements TestCase {
         ElectricalDataLoggerElement logger;
-        final double[] volts = {10, 25, 40};
+        final double[] volts = {0.2 * SVU, 0.5 * SVU, 0.8 * SVU};
         /** Which source (by volts index) each channel's pin is cabled to. */
         final int[] cabled = new int[3];
         String why = "";
@@ -652,7 +652,7 @@ public final class Wp9cCases {
             ctx.check("wp9c three-channel logger: three inputs on its back edge", logger.edgePins().size() == 3, logger.edgePins().size() + " pins");
             var v = logger.view();
             for (int c = 0; c < 3; c++)
-                ctx.checkValue(f("wp9c three-channel logger: channel %c records its own cable's source (%.0f V) [signal]", (char) ('A' + c), volts[cabled[c]]),
+                ctx.checkValue(f("wp9c three-channel logger: channel %c records its own cable's source (%.1f V) [signal]", (char) ('A' + c), volts[cabled[c]]),
                     v.size() > 0 ? v.mean(c, 0) : -1, volts[cabled[c]] / SVU);
         }
     }
@@ -693,7 +693,7 @@ public final class Wp9cCases {
     }
 
     /**
-     * The logger demo's wall processor (AdventurAgent 2026-10-31: 0 V for "0.9" where a lone one gave 45 V): built as
+     * The logger demo's wall processor (AdventurAgent 2026-10-31: 0 V for "0.9" where a lone one gave 0.9 SVU): built as
      * /elnlab loggerdemo builds it, on a wall in a voxel block with a cable along its floor and a knuckle, beside a lone
      * one on a wall; both run "0.9". And the demo builds again where it stood (it threw: the face was taken).
      */
@@ -733,8 +733,8 @@ public final class Wp9cCases {
         }
 
         public void measure(TestContext ctx) {
-            ctx.checkValue("wp9c demo wall processor: the lone one on a wall, \"0.9\" [V]", out(lone), 45);
-            ctx.checkValue("wp9c demo wall processor: the demo's, with its cable, \"0.9\" [V]", out(demo), 45);
+            ctx.checkValue("wp9c demo wall processor: the lone one on a wall, \"0.9\" [V]", out(lone), 0.9 * SVU);
+            ctx.checkValue("wp9c demo wall processor: the demo's, with its cable, \"0.9\" [V]", out(demo), 0.9 * SVU);
             ctx.check("wp9c demo wall processor: a device hosted again where one stood replaces it", rebuilt.equals("ok"), rebuilt);
         }
     }
@@ -921,8 +921,8 @@ public final class Wp9cCases {
     }
 
     /**
-     * Signal Source 30 V -> Data Logger A (input = back pin): it records a mean every tick, so after the test's 2 s it
-     * holds about 40 ticks and its newest 0.5 s point reads 30 V / SVU. Paper in the paper slot + the GUI print
+     * Signal Source 0.6 SVU -> Data Logger A (input = back pin): it records a mean every tick, so after the test's 2 s it
+     * holds about 40 ticks and its newest 0.5 s point reads 0.6. Paper in the paper slot + the GUI print
      * packet -> one Data Logger Print in the print slot. Logger B gets 600 ticks of history before the test; at the
      * end its period goes 0.5 s -> 5 s -> 0.5 s by GUI packets and the 0.5 s view must come back unchanged, the 5 s
      * view reading the same history coarser (board #45). Logger C loads a save from before 2026-10-30 (a byte log of 20
@@ -947,7 +947,7 @@ public final class Wp9cCases {
         }
 
         ElectricalDataLoggerElement logger(TestContext ctx, int x, boolean input) {
-            if (input) signal(ctx, ctx.at(x - 1, 1, 1), 30);
+            if (input) signal(ctx, ctx.at(x - 1, 1, 1), 0.6 * SVU);
             ElectricalDataLoggerElement l = (ElectricalDataLoggerElement) ctx.placeSix(DATA_LOGGER, ctx.at(x, 1, 1));
             orient(l, LRDU::inverse, Direction.XN);
             return l;
@@ -993,7 +993,7 @@ public final class Wp9cCases {
             double t = elapsed(ctx, t0);
             within(ctx, f("wp9c data logger ticks recorded after %.2f s (t / 0.05)", t), logger.store.ticks(), t / 0.05, 3);
             DataLogs v = logger.view();
-            ctx.checkValue("wp9c data logger newest point (30 V / SVU)", v.size() > 0 ? v.mean(0, 0) : -1, 30 / SVU);
+            ctx.checkValue("wp9c data logger newest point (0.6 SVU / SVU)", v.size() > 0 ? v.mean(0, 0) : -1, 0.6);
             ItemStack paper = logger.getInventory().getItem(ElectricalDataLoggerContainer.paperSlotId);
             ItemStack print = logger.getInventory().getItem(ElectricalDataLoggerContainer.printSlotId);
             GenericItemUsingDamageDescriptor pd = print.isEmpty() ? null : Eln.sharedItem.getDescriptor(print);
@@ -1020,10 +1020,10 @@ public final class Wp9cCases {
     }
 
     /**
-     * 50V Emergency Lamps (battery 6000 J, starts at half = 3000 J; consumption 5 W; charge power 10 W at 50 V
-     * through R = 50^2 / 10 = 250 ohm; light 6). Lamp A: private channel, no lamp supply, no cable -> on, light 6,
-     * charge = 3000 - 5 t. Lamp B: powered by cable (GUI toggle packet), 50 V source on its left pin -> off, charging,
-     * charge = 3000 + U^2 / 250 * t. Tolerance: 1.5 ticks of the power.
+     * 50V Emergency Lamps (battery 6000 J, starts at half = 3000 J; consumption 5 W; charge power 10 W at LVU
+     * through R = LVU^2 / 10; light 6). Lamp A: private channel, no lamp supply, no cable -> on, light 6,
+     * charge = 3000 - 5 t. Lamp B: powered by cable (GUI toggle packet), an LVU source on its left pin -> off, charging,
+     * charge = 3000 + U^2 / R * t. Tolerance: 1.5 ticks of the power.
      */
     static final class EmergencyLampCase implements TestCase {
         EmergencyLampElement a, b;
@@ -1044,7 +1044,7 @@ public final class Wp9cCases {
                 o.writeByte(2); // Event.SET_CHANNEL
                 o.writeUTF(channel);
             }));
-            Wp9aCases.source(ctx, SOURCE, 4, 1, 50);
+            Wp9aCases.source(ctx, SOURCE, 4, 1, Eln.LVU);
             b = (EmergencyLampElement) ctx.placeSix(EMERGENCY_LAMP_50V, ctx.at(5, 1, 1));
             orient(b, LRDU::left, Direction.XN);
             b.networkUnserialize(ctx.stream(o -> o.writeByte(1))); // Event.TOGGLE_POWERED_BY_CABLE
@@ -1057,11 +1057,11 @@ public final class Wp9cCases {
                 "on " + a.getOn() + ", light " + a.sixNode.getLightValue());
             within(ctx, f("wp9c emergency lamp discharge [J] after %.2f s (-5 W * t)", t), a.getCharge() - 3000, -5 * t, 5 * 1.5 * TICK);
             double u = b.getLoad().getU();
-            double p = u * u / 250;
+            double p = u * u / (Eln.LVU * Eln.LVU / 10);
             ctx.check("wp9c emergency lamp on cable power: off, charging", !b.getOn() && b.getChargingResistor().getState()
                 && b.getPoweredByCable(), "on " + b.getOn() + ", charging " + b.getChargingResistor().getState() + ", U " + u);
-            ctx.checkValue("wp9c emergency lamp charging power [W] (U^2 / 250 ohm)", b.getChargingResistor().getP(), p);
-            within(ctx, f("wp9c emergency lamp charge gained [J] after %.2f s (U^2 / 250 * t)", t), b.getCharge() - 3000, p * t,
+            ctx.checkValue("wp9c emergency lamp charging power [W] (U^2 / (LVU^2 / 10 W))", b.getChargingResistor().getP(), p);
+            within(ctx, f("wp9c emergency lamp charge gained [J] after %.2f s (U^2 / R * t)", t), b.getCharge() - 3000, p * t,
                 p * 1.5 * TICK + p * t * 0.01);
         }
     }

@@ -56,7 +56,7 @@ public class ElectricalSensorElement extends SixNodeElement {
     byte dirType = dirNone;
     static final byte powerType = 0, currantType = 1, voltageType = 2;
     int typeOfSensor = voltageType;
-    float lowValue = 0, highValue = 50;
+    float lowValue = 0, highValue = (float) mods.eln.Eln.LVU;   // (the default range: the 48 V tier)
 
     public static final byte setTypeOfSensorId = 1;
     public static final byte setValueId = 2;
