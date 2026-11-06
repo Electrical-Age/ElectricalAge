@@ -224,6 +224,8 @@
       'submit (when (and f (string? (get m 4))) (spawn f (m 4) (get m 3 0)))
       'press (when f (spawn f))
       'select (when (and f (number? (get m 3))) (spawn f (m 3)))
+      'key (when (and (struct? f) (f :key) (string? (get m 3))) (spawn (f :key) (m 3) (get m 4 0)))
+      'click (when (and (struct? f) (f :click) (number? (get m 3)) (number? (get m 4))) (spawn (f :click) (m 3) (m 4)))
       'save (when (and f (string? (get m 4)) (indexed? (get m 5))) (spawn f (get m 3 0) (m 4) (m 5)))
       nil))
   (when (and (tuple? m) (> (length m) 1) (number? (m 1)))
@@ -408,6 +410,15 @@
 (defn ui/list "A list of rows: a click calls (on-select index) as a task." [t id x y w h items on-select]
   (put ui-handlers [t id] on-select)
   (ui/send 'list t id x y w h items))
+(defn ui/raw
+  "An area of w by h cells for full-screen programs (games, editors of your own): once clicked, it gets the keyboard.
+  A key calls (on-key key mods) as a task: key is the character typed, or a name (\"enter\" \"backspace\" \"tab\"
+  \"delete\" \"left\" \"right\" \"up\" \"down\" \"home\" \"end\" \"pageup\" \"pagedown\" \"insert\" \"f1\" .. \"f12\"), or a letter
+  with Ctrl or Alt held; mods adds 1 for Shift, 2 for Ctrl, 4 for Alt (0 for a typed character). A click calls (on-click x y), in cells from
+  the area's corner. Draw on it with ui/text and ui/box made after it."
+  [t id x y w h on-key &opt on-click]
+  (put ui-handlers [t id] {:key on-key :click on-click})
+  (ui/send 'raw t id x y w h))
 (defn ui/remove "Remove an element." [t id]
   (put ui-handlers [t id] nil)
   (ui/send 'remove t id))

@@ -332,4 +332,15 @@ class StdlibTest {
         assertNotNull(screen.scene.tabs.get(3), "an editor tab; console: " + screen.console);
         assertEquals("(print 1)", screen.scene.tabs.get(3).elements.get(4).msg.get(10));
     }
+
+    @Test
+    void aRawAreaGetsKeysAndClicks() {
+        type("(do (def t (proc/new-tab \"game\")) (ui/raw t 1 0 0 20 5 (fn [k m] (ui/text t 2 0 0 :white (string \"key \" k \" \" m))) (fn [x y] (ui/text t 3 0 1 :white (string \"click \" x \" \" y)))) t)");
+        tick(20, "\n2\n> ");
+        assertEquals("raw", screen.scene.tabs.get(2).elements.get(1).kind);
+        m.editor.give("(key 2 1 \"left\" 2)\n(click 2 1 4 3)\n".getBytes(StandardCharsets.UTF_8));
+        tick(5, null);
+        assertEquals("key left 2", screen.scene.tabs.get(2).elements.get(2).msg.get(6));
+        assertEquals("click 4 3", screen.scene.tabs.get(2).elements.get(3).msg.get(6));
+    }
 }

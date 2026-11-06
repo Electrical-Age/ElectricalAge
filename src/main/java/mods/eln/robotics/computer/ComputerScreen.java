@@ -230,11 +230,50 @@ public class ComputerScreen extends ElnScreen {
         return edits.computeIfAbsent(key(tab, id), k -> new LineEdit());
     }
 
+    /** The raw area that has the keyboard: the one clicked last, or the tab's first if it has no line. */
+    Scene.Element focusedRaw(Scene.Tab t) {
+        if (t == null) return null;
+        Scene.Element e = t.elements.get(focusId);
+        if (e != null) return e.kind.equals("raw") ? e : null;
+        Scene.Element raw = null;
+        for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
+            if (en.getValue().kind.equals("line")) return null;
+            if (raw == null && en.getValue().kind.equals("raw")) {
+                raw = en.getValue();
+                focusId = en.getKey();
+            }
+        }
+        return raw;
+    }
+
+    /** A raw area's name for a key that types no character (null: none, or one charTyped sends). */
+    static String keyName(int k, boolean ctrlOrAlt) {
+        if (ctrlOrAlt && k >= InputConstants.KEY_A && k <= InputConstants.KEY_Z) return String.valueOf((char) ('a' + k - InputConstants.KEY_A));
+        if (k >= InputConstants.KEY_F1 && k <= InputConstants.KEY_F12) return "f" + (k - InputConstants.KEY_F1 + 1);
+        return switch (k) {
+            case InputConstants.KEY_RETURN, InputConstants.KEY_NUMPADENTER -> "enter";
+            case InputConstants.KEY_BACKSPACE -> "backspace";
+            case InputConstants.KEY_TAB -> "tab";
+            case InputConstants.KEY_DELETE -> "delete";
+            case InputConstants.KEY_INSERT -> "insert";
+            case InputConstants.KEY_LEFT -> "left";
+            case InputConstants.KEY_RIGHT -> "right";
+            case InputConstants.KEY_UP -> "up";
+            case InputConstants.KEY_DOWN -> "down";
+            case InputConstants.KEY_HOME -> "home";
+            case InputConstants.KEY_END -> "end";
+            case InputConstants.KEY_PAGEUP -> "pageup";
+            case InputConstants.KEY_PAGEDOWN -> "pagedown";
+            default -> null;
+        };
+    }
+
     /** The focused line, or the tab's first line. */
     Scene.Element focusedLine(Scene.Tab t) {
         if (t == null) return null;
         Scene.Element e = t.elements.get(focusId);
         if (e != null && e.kind.equals("line")) return e;
+        if (e != null && e.kind.equals("raw")) return null;
         for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet())
             if (en.getValue().kind.equals("line")) {
                 focusId = en.getKey();
@@ -280,8 +319,9 @@ public class ComputerScreen extends ElnScreen {
         if (t == null) {
             cells(g, render.status == ComputerElement.NO_CHIPS ? tr("No chips") : render.status == ComputerElement.OFF ? tr("Off") : "...", 1, 1, s.w, 0xFF6A7A6A);
         } else {
-            Scene.Element line = focusedLine(t);
-            for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) draw(g, en.getKey(), en.getValue(), en.getValue() == line);
+            Scene.Element line = focusedLine(t), raw = line == null ? focusedRaw(t) : null;
+            for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet())
+                draw(g, en.getKey(), en.getValue(), en.getValue() == line || en.getValue() == raw);
         }
         if (!hint.isEmpty()) {   // the completion choices, over the row above the line
             g.fill(cx(0), cy(s.h - 2), cx(s.w), cy(s.h - 1), 0xFF2A2E38);
@@ -364,7 +404,12 @@ public class ComputerScreen extends ElnScreen {
                     cells(g, st.status, x, ey, ew, 0xFFE0C060);
                 }
             }
-            default -> cells(g, "[" + e.kind + "]", x, y, 20, 0xFF707070);   // (raw areas come next)
+            case "raw" -> {
+                int w = (int) Form.num(m, 5, 1), h = (int) Form.num(m, 6, 1);
+                g.fill(cx(x), cy(y), cx(x + w), cy(y + h), 0xFF0C0E10);
+                if (focused) g.outline(cx(x) - 1, cy(y) - 1, w * CELL + 2, h * LINE + 2, 0xFF3A4A3A);
+            }
+            default -> cells(g, "[" + e.kind + "]", x, y, 20, 0xFF707070);
         }
     }
 
@@ -458,7 +503,8 @@ public class ComputerScreen extends ElnScreen {
         Scene.Tab t = currentTab();
         if (t != null && mx >= cx(0) && my >= cy(0) && mx < cx(s.w) && my < cy(s.h)) {
             int col = (int) ((mx - cx(0)) / CELL), row = (int) ((my - cy(0)) / LINE);
-            for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
+            // (the last made is drawn on top, so it is hit first: a button over a raw area)
+            for (Map.Entry<Integer, Scene.Element> en : new ArrayList<>(t.elements.entrySet()).reversed()) {
                 Scene.Element e = en.getValue();
                 List<Object> m = e.msg;
                 int ex = e.x(), ey = e.y(), w = (int) Form.num(m, 5, 1);
@@ -466,6 +512,10 @@ public class ComputerScreen extends ElnScreen {
                 if (col < ex || col >= ex + w || row < ey || row >= ey + h) continue;
                 switch (e.kind) {
                     case "line" -> focusId = en.getKey();
+                    case "raw" -> {
+                        focusId = en.getKey();
+                        render.screenEvent(new Form.Symbol("click"), (long) tab, (long) en.getKey(), (long) (col - ex), (long) (row - ey));
+                    }
                     case "button" -> render.screenEvent(new Form.Symbol("press"), (long) tab, (long) en.getKey());
                     case "list" -> {
                         int index = row - ey + scrolls.getOrDefault(key(tab, en.getKey()), 0);
@@ -510,6 +560,10 @@ public class ComputerScreen extends ElnScreen {
         String ed = focusedEditor();
         if (ed != null) return editorWidgets.get(ed).charTyped(event);
         Scene.Tab t = currentTab();
+        if (!fieldHasKeys() && focusedRaw(t) != null) {
+            render.screenEvent(new Form.Symbol("key"), (long) tab, (long) focusId, event.codepointAsString(), 0L);   // (Shift is in the character)
+            return true;
+        }
         Scene.Element line = focusedLine(t);
         if (line == null || !event.isAllowedChatCharacter() || fieldHasKeys()) return super.charTyped(event);
         LineEdit le = edit(focusId);
@@ -541,6 +595,12 @@ public class ComputerScreen extends ElnScreen {
         int k = ev.key();
         if (k == InputConstants.KEY_C && ev.hasControlDownWithQuirk() && !ev.hasShiftDown()) {
             if (tab >= 0) render.screenEvent(new Form.Symbol("break"), (long) tab);   // (on any tab, a line or not)
+            return true;
+        }
+        if (k != InputConstants.KEY_ESCAPE && focusedRaw(t) != null) {
+            // (characters come through charTyped; Escape still closes the screen)
+            String name = keyName(k, (ev.modifiers() & 6) != 0);
+            if (name != null) render.screenEvent(new Form.Symbol("key"), (long) tab, (long) focusId, name, (long) (ev.modifiers() & 7));
             return true;
         }
         if (line == null || k == InputConstants.KEY_ESCAPE) return super.keyPressed(ev);
