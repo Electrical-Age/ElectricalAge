@@ -343,4 +343,15 @@ class StdlibTest {
         assertEquals("key left 2", screen.scene.tabs.get(2).elements.get(2).msg.get(6));
         assertEquals("click 4 3", screen.scene.tabs.get(2).elements.get(3).msg.get(6));
     }
+
+    /** The handbook's example (janet.md, "Drawing your own screen"), as printed there. */
+    @Test
+    void theHandbookCounterWorks() {
+        type("(proc/start \"counter\" (fn [] (def t (proc/tab)) (var n 0) (defn show [] (ui/text t 2 2 1 :yellow (string \"count: \" n))) (ui/clear t) (ui/button t 3 2 3 5 \"+1\" (fn [] (++ n) (show))) (ui/button t 4 8 3 5 \"-1\" (fn [] (-- n) (show))) (show) (forever (sleep 60))))");
+        tick(20, "\n2\n> ");
+        assertEquals("count: 0", screen.scene.tabs.get(2).elements.get(2).msg.get(6));
+        m.editor.give("(press 2 3)\n(press 2 3)\n(press 2 4)\n".getBytes(StandardCharsets.UTF_8));
+        tick(5, null);
+        assertEquals("count: 1", screen.scene.tabs.get(2).elements.get(2).msg.get(6));
+    }
 }
