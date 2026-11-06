@@ -21,6 +21,7 @@ public final class ComputerCases {
         cases.add(new BootsJanet());
         cases.add(new RunsTheElevator());
         cases.add(new PausesWithoutPower());
+        cases.add(new TalkInDataPackets());
     }
 
     /** The source behind the last computer powered() placed. */
@@ -215,6 +216,84 @@ public final class ComputerCases {
             ctx.check("elevator disk: the button's lamp lit, then went out on arrival", lamp.size() >= 2 && lamp.contains(1f)
                 && lamp.get(lamp.size() - 1) == 0f, lamp.toString());
             ctx.check("elevator disk: no alarms", !terminal.contains("ALARM"), terminal);
+        }
+    }
+
+    /**
+     * Two computers on one bus talk in data packets (Baughn, for the BBS): A, with the Applications floppy, opens its
+     * menu at boot; B waits for a packet, and A broadcasts one with 40 bytes. B gets it, bytes and all.
+     */
+    static final class TalkInDataPackets implements TestCase {
+        BlockPos pa, pb;
+        String ta = "", tb = "";
+        int tick, upAt = -1;
+        mods.eln.sim.IProcess watch;
+
+        public String id() {
+            return "computers_talk_in_data_packets";
+        }
+
+        public int width() {
+            return 9;   // (floor_9x7x7: an existing structure)
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        public int floorDepth() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        static ComputerElement janet(TestContext ctx, BlockPos p, int address, ItemStack floppy) {
+            ComputerElement c = powered(ctx, p);
+            c.getInventory().setItem(0, new ItemStack(Robotics.JANET_ROM.get()));
+            c.getInventory().setItem(1, new ItemStack(Robotics.RAM_CHIP.get()));
+            c.getInventory().setItem(2, new ItemStack(Robotics.RAM_CHIP.get()));
+            if (floppy != null) c.getInventory().setItem(ComputerElement.DRIVE_A, floppy);
+            c.getInventory().setChanged();
+            c.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(ComputerElement.SET_ADDRESS_ID);
+                o.writeFloat(address);
+            }), null);
+            return c;
+        }
+
+        public void build(TestContext ctx) {
+            pa = ctx.at(1, 1, 3);
+            pb = ctx.at(7, 1, 3);
+            janet(ctx, pa, 40, new ItemStack(Robotics.APPLICATIONS_DISK.get()));
+            janet(ctx, pb, 41, null);
+            mods.eln.Eln.simulator.addSlowProcess(watch = dt -> {
+                tick++;
+                ComputerElement a = at(ctx, pa), b = at(ctx, pb);
+                if (a == null || b == null) return;
+                if (a.port.bus() == null || a.port.bus() != b.port.bus()) mods.eln.bus.BusNet.link(a.port, b.port);
+                if (upAt < 0 && replUp(a) && replUp(b)) {
+                    upAt = tick;
+                    submit(ctx, b, 1, "(get (bus/wait |(= :data ($ :type))) :value)");
+                }
+                if (upAt > 0 && tick == upAt + 10) submit(ctx, a, 1, "(bus/send 0 :data 3 (string/repeat \"bus!\" 10))");
+                ta = terminal(a);
+                tb = terminal(b);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(watch);
+            ComputerElement a = at(ctx, pa);
+            ctx.line("data: A " + ta.replace("\n", "|") + " B " + tb.replace("\n", "|"));
+            ctx.check("applications floppy: its menu opened at boot", ta.contains("Running A:/startup.janet")
+                && a.screen.scene.tabs.values().stream().anyMatch(t -> t.elements.size() > 5), ta);
+            ctx.check("data packets: B got A's 40 bytes", tb.contains("\"" + "bus!".repeat(10) + "\""), tb);
         }
     }
 

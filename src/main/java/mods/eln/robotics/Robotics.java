@@ -56,6 +56,8 @@ public final class Robotics implements ElnContent {
     public static final DeferredItem<FloppyItem> FLOPPY_DISK = ITEMS.registerItem("floppy_disk", FloppyItem::new);
     public static final DeferredItem<ProgramDiskItem> ELEVATOR_DISK = ITEMS.registerItem("elevator_disk",
         p -> new ProgramDiskItem("elevator", "An elevator controller for a Linear Servo Drive: edit a:/main.janet for your shaft", p));
+    public static final DeferredItem<ProgramDiskItem> APPLICATIONS_DISK = ITEMS.registerItem("applications_disk",
+        p -> new ProgramDiskItem("applications", "A calculator, a BBS, Snake and Gorillas, with a menu", p));
 
     /** The car: a 3 x 3 x 1/16 plate (its cabin's walls are parts); no vanilla position sync (no update interval, no deltas), not saved, not summoned. */
     public static final DeferredHolder<EntityType<?>, EntityType<ElevatorCar>> ELEVATOR_CAR = ENTITY_TYPES.register("elevator_car",
@@ -90,6 +92,7 @@ public final class Robotics implements ElnContent {
         ElnRegistry.ALL_ITEMS.add(BOOT_ROM);
         ElnRegistry.ALL_ITEMS.add(FLOPPY_DISK);
         ElnRegistry.ALL_ITEMS.add(ELEVATOR_DISK);
+        ElnRegistry.ALL_ITEMS.add(APPLICATIONS_DISK);
         ElnRegistry.RETIRED_ITEMS.add(STATION_MARKER_ITEM);   // (no longer used, Baughn 2026-11-05: out of the tab)
     }
 }

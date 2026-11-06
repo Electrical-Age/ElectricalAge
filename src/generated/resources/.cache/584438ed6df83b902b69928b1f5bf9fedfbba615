@@ -1,4 +1,4 @@
-// 26.3	2026-11-05T18:17:55.907069801	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-06T13:51:57.500920277	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 eec3c1c366864c7878f19ac15a5f100cf33e19ac data/eln/advancement/recipes/misc/200v_active_thermal_dissipator.json
 a8cd6e94097f2bd1af3e628eba95d44e7aed79ca data/eln/advancement/recipes/misc/200v_battery_charger.json
@@ -81,6 +81,7 @@ b212cca0dd14ced77939d219b39336d3c698ee0f data/eln/advancement/recipes/misc/analo
 deef8d780422f077177f1d8075d975640f319ae2 data/eln/advancement/recipes/misc/analogic_regulator.json
 8adbb5fbd9a464b1637d56c80bac249461b0b459 data/eln/advancement/recipes/misc/and_chip.json
 9d88219c37e884c57072d6522173a6259b65b7ac data/eln/advancement/recipes/misc/animal_filter.json
+7419d9a95e1ba352b8558df04a97a5b86d0e1a70 data/eln/advancement/recipes/misc/applications_disk.json
 e397443c98e6b42bdb11364d1b6ce472b87c0a04 data/eln/advancement/recipes/misc/auto_miner.json
 9923be029e64dd1fabfd662d1f17778ee17721f6 data/eln/advancement/recipes/misc/average_electrical_drill.json
 95c342338728eb6fd711b224aeb60ab9c76f2ca1 data/eln/advancement/recipes/misc/average_ferromagnetic_core.json
@@ -452,6 +453,7 @@ f8bb79bdca45cf72f71e9c34109d2cd1f0ea3f7c data/eln/recipe/analog_watch.json
 8fd7923bf8a68d3d9b30fe0eb4eb4ba90ee7d117 data/eln/recipe/analogic_regulator.json
 f08a17f8c96555319fad60d61b2788c122fbf087 data/eln/recipe/and_chip.json
 805798fa44f9f1beb943bfdbbcaf390d5e5a0861 data/eln/recipe/animal_filter.json
+758f782c4e7515c313ee5e6810ae2ee5a739ca17 data/eln/recipe/applications_disk.json
 e1b3870485515b24146953a51d534596cf57c58d data/eln/recipe/auto_miner.json
 035486821d9fa0d6a29ddf339b77c7a9c7034581 data/eln/recipe/average_electrical_drill.json
 6780dccc16e12e4195e173b9be3a0394a5c8222e data/eln/recipe/average_ferromagnetic_core.json

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """The robotics computer's items (16x16): RAM chip (a green board with four black chips and gold contacts), Janet ROM
 chip (a black chip with a quartz window and a purple label), floppy disk (3.5": dark body, metal shutter, white
-label) and the Elevator floppy (the label shows an up/down arrow).
-Usage: computer.py RESOURCES_DIR -> assets/eln/textures/item/{ram_chip,janet_rom_chip,boot_rom_chip,floppy_disk,elevator_disk}.png"""
+label), the Elevator floppy (the label shows an up/down arrow) and the Applications floppy (four coloured squares).
+Usage: computer.py RESOURCES_DIR -> assets/eln/textures/item/{ram_chip,janet_rom_chip,boot_rom_chip,floppy_disk,elevator_disk,applications_disk}.png"""
 import os, sys
 from PIL import Image
 
@@ -37,7 +37,7 @@ def rom(label=(140, 70, 190)):
     rect(px, 4, 10, 11, 11, label)                    # the label: purple Janet, orange Floppy Boot
     return im
 
-def floppy(arrow=False):
+def floppy(arrow=False, apps=False):
     im = blank(); px = im.load()
     rect(px, 1, 1, 14, 14, (40, 50, 70))            # the body
     rect(px, 1, 1, 14, 1, (70, 80, 105))
@@ -49,6 +49,9 @@ def floppy(arrow=False):
     if arrow:
         for (x, y) in ((7, 9), (6, 10), (7, 10), (8, 10), (7, 11), (7, 12), (6, 12), (8, 12), (7, 13)):
             px[x, y] = (200, 60, 50, 255)
+    elif apps:
+        for (x0, y0, c) in ((5, 9, (200, 60, 50)), (8, 9, (60, 150, 70)), (5, 12, (60, 90, 200)), (8, 12, (220, 170, 40))):
+            rect(px, x0, y0, x0 + 1, y0 + 1, c)
     else:
         for y in (10, 12):
             rect(px, 4, y, 11, y, (150, 150, 160))
@@ -72,6 +75,6 @@ def computer():
 if __name__ == "__main__":
     out = os.path.join(sys.argv[1], "assets", "eln", "textures", "item")
     os.makedirs(out, exist_ok=True)
-    for name, im in (("computer", computer()), ("ram_chip", ram()), ("janet_rom_chip", rom()), ("boot_rom_chip", rom((220, 130, 40))), ("floppy_disk", floppy()), ("elevator_disk", floppy(True))):
+    for name, im in (("computer", computer()), ("ram_chip", ram()), ("janet_rom_chip", rom()), ("boot_rom_chip", rom((220, 130, 40))), ("floppy_disk", floppy()), ("elevator_disk", floppy(True)), ("applications_disk", floppy(apps=True))):
         im.save(os.path.join(out, name + ".png"))
         print(name)

@@ -1,4 +1,4 @@
-// 26.3	2026-11-05T18:52:33.935691156	eln-global/EA models
+// 26.3	2026-11-06T13:51:57.497128874	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -173,6 +173,7 @@ d220e455ade1e4531735554c5d302efc4604128e assets/eln/items/analog_gauge.json
 b4266523d7f04444657cf1ac0fa4014c036fdee3 assets/eln/items/analogic_regulator.json
 f1b439b4872961c132440fde0c2da04142ebe0dd assets/eln/items/and_chip.json
 03e8e18e1f18922b51e25a1c29ea81d7fef61f0d assets/eln/items/animal_filter.json
+21e2ec894391324efe752d05a9c40cd661d5f1d4 assets/eln/items/applications_disk.json
 24fa46a88bc0e9157aeb354bf3de0cd1b87c8685 assets/eln/items/auto_miner.json
 baa0cd956442fa677d9e0ab1592afcab01987080 assets/eln/items/average_electrical_drill.json
 cfc7d310bae170bdd71866984830ffe65cc3ec79 assets/eln/items/average_ferromagnetic_core.json
@@ -596,6 +597,7 @@ b8e344a77ae8690f2f8e3ff265585185306fc77d assets/eln/models/item/analog_watch_3d.
 7f3dfb36e09d470c20d0cab8a8df67c446c66371 assets/eln/models/item/and_chip.json
 4a086703f1abb7ce99361e6e754b9ed824991e8f assets/eln/models/item/and_chip_3d.json
 d6582993701d030fe87342eaede2d81e2a49c4d1 assets/eln/models/item/animal_filter.json
+240065e7edeec9e7b19e44b628da16646a94e00b assets/eln/models/item/applications_disk.json
 4915e17d616760ea1bfb199f76b42fa4bc90b55e assets/eln/models/item/auto_miner.json
 4418f93f8e53346f69fc0923ca90c8b4e2d8cb35 assets/eln/models/item/auto_miner_3d.json
 c455a84370f11dc398c16d1dc12df534fdf26d2d assets/eln/models/item/average_electrical_drill.json

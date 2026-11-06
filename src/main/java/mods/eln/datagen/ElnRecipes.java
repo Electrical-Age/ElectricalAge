@@ -2317,6 +2317,8 @@ public final class ElnRecipes extends ElnRecipesBase {
             stack(Items.PAPER), stack(Items.IRON_NUGGET), stack(Items.IRON_NUGGET), "itemRubber");
         addShapelessRecipe(stack(mods.eln.robotics.Robotics.ELEVATOR_DISK.get(), 1),
             stack(mods.eln.robotics.Robotics.FLOPPY_DISK.get()), stack(mods.eln.robotics.Robotics.SERVO_RAIL_ITEM.get()));
+        addShapelessRecipe(stack(mods.eln.robotics.Robotics.APPLICATIONS_DISK.get(), 1),
+            stack(mods.eln.robotics.Robotics.FLOPPY_DISK.get()), stack(Items.BOOK));
     }
 
     public static void recipeElectricalRedstone() {
