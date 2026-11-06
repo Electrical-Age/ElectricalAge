@@ -314,6 +314,9 @@ public class TransformerElement extends TransparentNodeElement {
         return Math.max(Math.abs(primaryLoad.getU()) / primaryTurns(), Math.abs(secondaryLoad.getU()) / ns);
     }
 
+    /** Saturation starts this far over the core's rated volts per turn. */
+    static final double SATURATES_AT = 1.1;
+
     double coreLimit() {
         ItemStack core = inventory.getItem(TransformerContainer.ferromagneticSlotId);
         return Utils.isEmpty(core) ? 0 : ((FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core)).voltsPerTurn;
@@ -332,7 +335,9 @@ public class TransformerElement extends TransparentNodeElement {
     void checkSaturation() {
         if (legacy && !inventoryKey().equals(legacyKey)) legacy = false;
         double limit = coreLimit(), vpt = voltsPerTurn();
-        boolean want = !legacy && limit > 0 && burnHeat > 0 && (saturated ? vpt > 0.97 * limit : vpt > limit);
+        // (the core's rating is its working flux: it saturates 10 % over it, so a converter wound for 48 V doesn't saturate
+        // on a line a volt high, as a real one has headroom)
+        boolean want = !legacy && limit > 0 && burnHeat > 0 && (saturated ? vpt > 1.07 * limit : vpt > SATURATES_AT * limit);
         if (dwell > 0) dwell--;
         else if (want != saturated) {
             setSaturated(want);
@@ -535,13 +540,13 @@ public class TransformerElement extends TransparentNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade shows the first lines unsneaked)
         info.put(I18N.tr("Ratio"), Utils.plotValue(transformer.getRatio()));
+        if (window() > 0 && primaryWire() != null && secondaryWire() != null)
+            info.put(I18N.tr("Window"), Math.round(windowUsed()) + " / " + Math.round(window()) + " mm² turns" + (windowFull() ? " " + I18N.tr("FULL: no room") : ""));
         double limit = coreLimit();
         if (limit > 0 && complete())
             info.put(I18N.tr("Volts per turn"), Utils.plotValue(voltsPerTurn()) + " / " + Utils.plotValue(limit)
                 + (saturated ? " " + I18N.tr("SATURATED") : legacy ? " " + I18N.tr("(as built before 48 V)") : ""));
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", heat.Tc));
-        if (window() > 0 && primaryWire() != null && secondaryWire() != null)
-            info.put(I18N.tr("Window"), Math.round(windowUsed()) + " / " + Math.round(window()) + " mm² turns" + (windowFull() ? " " + I18N.tr("FULL: no room") : ""));
         info.put(I18N.tr("Isolated"), isIsolator ? I18N.tr("Yes") : I18N.tr("No"));
         if (Eln.wailaEasyMode) {
             FerromagneticCoreDescriptor core =
