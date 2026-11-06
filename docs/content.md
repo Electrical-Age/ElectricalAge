@@ -98,9 +98,9 @@ cable kits of any `CableSpec` and into Windings (`eln:winding`, `node/voxel/Wind
 custom data). The 48 V machine makes up to 6 mm² and 230 V insulation, the 230 V machine everything. Costs per block of
 wire (a turn is 1/8 block): copper 1/3 ingot x mm²/2.5, rubber 2/3 x insulation layers (1, 1.5, 2, 4) x
 sqrt(mm²/2.5), energy 1 kJ x sqrt(mm²/2.5). Whole items go into buffers (saved `copper`, `rubber`) that keep the
-fractions; progress is `done` (blocks). A DC-DC converter slot takes cables (one a turn) or one Winding. A converter
-with a Winding must fit its core's window (turns x mm² over both sides: 150 cheap, 300 average, 800 optimal); one wound
-only with cables is not held to it. JEI: `compat/jei/WireDrawingCategory`.
+fractions; progress is `done` (blocks). A DC-DC converter slot takes cables (one a turn) or one Winding. Every converter
+must fit its core's window (turns x mm² over both sides, a cable counting its tier's preset cross-section: 150 cheap,
+300 average, 800 optimal), or it disconnects until corrected (Baughn: old converters too). JEI: `compat/jei/WireDrawingCategory`.
 
 The servo layer (`robotics`, Baughn 2026-11-02: the servo layer first, 200 V only): the Linear Servo Drive (transparent
 node `eln:transparent_node@5504`, `linear_servo_drive`), `eln:servo_rail` and `eln:station_marker` (plain blocks with

@@ -223,16 +223,11 @@ public class TransformerElement extends TransparentNodeElement {
     }
 
     /**
-     * The windings don't fit the core. Only a machine-made winding is held to the window: converters wound with cables
-     * keep working as built (their stacks stop at 64 turns anyway).
+     * The windings don't fit the core: it disconnects until they do. Cables count as well as windings, and a converter
+     * built before the window is held to it too (Baughn 2026-11-06: they disconnect until corrected).
      */
     public boolean windowFull() {
-        return !legacy && window() > 0 && windowUsed() > window() && hasWinding();
-    }
-
-    boolean hasWinding() {
-        return mods.eln.node.voxel.WindingItem.is(inventory.getItem(TransformerContainer.primaryCableSlotId))
-            || mods.eln.node.voxel.WindingItem.is(inventory.getItem(TransformerContainer.secondaryCableSlotId));
+        return window() > 0 && windowUsed() > window();
     }
 
     private void computeInventory() {
@@ -545,7 +540,7 @@ public class TransformerElement extends TransparentNodeElement {
             info.put(I18N.tr("Volts per turn"), Utils.plotValue(voltsPerTurn()) + " / " + Utils.plotValue(limit)
                 + (saturated ? " " + I18N.tr("SATURATED") : legacy ? " " + I18N.tr("(as built before 48 V)") : ""));
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", heat.Tc));
-        if (window() > 0 && hasWinding() && primaryWire() != null && secondaryWire() != null)
+        if (window() > 0 && primaryWire() != null && secondaryWire() != null)
             info.put(I18N.tr("Window"), Math.round(windowUsed()) + " / " + Math.round(window()) + " mm² turns" + (windowFull() ? " " + I18N.tr("FULL: no room") : ""));
         info.put(I18N.tr("Isolated"), isIsolator ? I18N.tr("Yes") : I18N.tr("No"));
         if (Eln.wailaEasyMode) {

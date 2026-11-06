@@ -969,7 +969,7 @@ public final class Wp10aCases {
     /**
      * Machine-made windings (Wires stage 4): 20 turns of 2.5 mm² 48 V wire in, 10 out, on a cheap core: half the voltage;
      * the primary's resistance is its wire's for 20 eighth-blocks (x the core's loss factor). A 100-turn secondary
-     * (20 x 2.5 + 100 x 2.5 = 300 mm² turns) overfills the cheap core's 150: the converter disconnects.
+     * (20 x 2.5 + 100 x 2.5 = 300 mm² turns) overfills the cheap core's 150: the converter disconnects. Cables count too.
      */
     static class TransformerWindingCase extends TransformerCase {
         static final mods.eln.node.voxel.CableSpec LV_WIRE = new mods.eln.node.voxel.CableSpec(4, mods.eln.node.voxel.CableSpec.BROWN);
@@ -1002,11 +1002,16 @@ public final class Wp10aCases {
             tr.getInventory().setChanged();
             ctx.check("converter: 20:100 of 2.5 mm² overfills a cheap core", tr.windowFull(), "");
             ctx.check("converter: ... and it disconnects", tr.getElectricalLoad(tr.front.right(), mods.eln.misc.LRDU.Down) == null, "");
-            // cables are not held to the window (converters built before windings keep working)
+            // cables are held to the window too (Baughn: they disconnect until corrected)
             tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(64));
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(64));
             tr.getInventory().setChanged();
-            ctx.check("converter: 64:64 cables on a cheap core still connect", !tr.windowFull()
+            ctx.check("converter: 64:64 LV cables (320 mm² turns) overfill a cheap core and disconnect", tr.windowFull()
+                && tr.getElectricalLoad(tr.front.right(), mods.eln.misc.LRDU.Down) == null, "");
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(14));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(7));
+            tr.getInventory().setChanged();
+            ctx.check("converter: ... and reconnect when corrected (14:7)", !tr.windowFull()
                 && tr.getElectricalLoad(tr.front.right(), mods.eln.misc.LRDU.Down) != null, "");
         }
     }
