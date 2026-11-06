@@ -2438,25 +2438,12 @@ public final class ElnRecipes extends ElnRecipesBase {
             "i",
             'i', stack(Items.IRON_INGOT));
 
-        addRecipe(findItemStack("Lead Fuse for low voltage cables", 4),
+        // one fuse for every cable, its rating set in the holder (Baughn 2026-11-06); the 1.12 fuses for the other tiers
+        // are no longer made (old ones still work, at their cable's rating until set)
+        addRecipe(findItemStack("Lead Fuse", 4),
             "rcr",
             'r', findItemStack("itemRubber"),
             'c', findItemStack("Low Voltage Cable"));
-
-        addRecipe(findItemStack("Lead Fuse for medium voltage cables", 4),
-            "rcr",
-            'r', findItemStack("itemRubber"),
-            'c', findItemStack("Medium Voltage Cable"));
-
-        addRecipe(findItemStack("Lead Fuse for high voltage cables", 4),
-            "rcr",
-            'r', findItemStack("itemRubber"),
-            'c', findItemStack("High Voltage Cable"));
-
-        addRecipe(findItemStack("Lead Fuse for very high voltage cables", 4),
-            "rcr",
-            'r', findItemStack("itemRubber"),
-            'c', findItemStack("Very High Voltage Cable"));
 
     }
 

@@ -39,6 +39,22 @@
          "sample": "V"
         }
        ]
+      },
+      {
+       "row": [
+        {
+         "text": "tripl",
+         "sample": "trip"
+        },
+        {
+         "field": "trip",
+         "chars": 7
+        },
+        {
+         "text": "tripu",
+         "sample": "A"
+        }
+       ]
       }
      ]
     },

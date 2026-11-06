@@ -28,6 +28,7 @@ final class ClientScreens {
         layout("sixnode.electricalalarm.ElectricalAlarmDescriptor", "electrical_alarm");
         layout("sixnode.electricalrelay.ElectricalRelayDescriptor", "electrical_relay");
         layout("sixnode.electricalgatesource.ElectricalGateSourceDescriptor", "gate_source");
+        layout("sixnode.ElectricalFuseHolderDescriptor", "fuse_holder");
         layout("sixnode.electricaltimeout.ElectricalTimeoutDescriptor", "electrical_timeout");
         layout("sixnode.electricalbreaker.ElectricalBreakerDescriptor", "electrical_breaker");
         layout("sixnode.batterycharger.BatteryChargerDescriptor", "battery_charger");
@@ -85,6 +86,7 @@ final class ClientScreens {
         reg(mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor.class, mods.eln.sixnode.electricalalarm.ElectricalAlarmScreen::new);
         reg(mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor.class, mods.eln.sixnode.electricalrelay.ElectricalRelayScreen::new);
         reg(mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor.class, mods.eln.sixnode.electricalgatesource.ElectricalGateSourceScreen::new);
+        reg(mods.eln.sixnode.ElectricalFuseHolderDescriptor.class, mods.eln.sixnode.ElectricalFuseHolderScreen::new);
         reg(mods.eln.sixnode.electricaltimeout.ElectricalTimeoutDescriptor.class, mods.eln.sixnode.electricaltimeout.ElectricalTimeoutScreen::new);
         // S1c
         reg(mods.eln.sixnode.electricalmath.ElectricalMathDescriptor.class, mods.eln.sixnode.electricalmath.ElectricalMathScreen::new);

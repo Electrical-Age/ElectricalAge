@@ -339,7 +339,7 @@ public class Wp9aContent implements ElnContent {
         {
             subId = 7;
 
-            name = TR_NAME(Type.NONE, "Lead Fuse for low voltage cables");
+            name = TR_NAME(Type.NONE, "Lead Fuse");   // (1.12: "Lead Fuse for low voltage cables"; its rating is set in the holder now)
 
             ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, lowVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
             sharedItem.addElement(subId + (id << 6), desc);

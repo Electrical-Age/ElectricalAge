@@ -53,3 +53,6 @@ and the like (Baughn 2026-11-06, board #55).
 `golden_recipes` (`GoldenRecipesCase.REMOVED`): the Average and Optimal Ferromagnetic Cores aren't crafted from the core
 below any more (Baughn 2026-11-06, board #55): Silicon Steel Laminations annealed in the Electrical Furnace make the
 Average one, a Nanocrystalline Core Blank field-annealed in the Magnetizer the Optimal one.
+`golden_recipes` (`GoldenRecipesCase.REMOVED`) and `golden_descriptors` (`GoldenCase.renamed`): one Lead Fuse for every
+cable, its rating set in the holder (Baughn 2026-11-06): "Lead Fuse for low voltage cables" is "Lead Fuse", and the
+fuses for the other tiers are no longer made (old ones still work).

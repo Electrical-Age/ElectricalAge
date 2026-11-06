@@ -1,0 +1,36 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Electrical Fuse Holder"
+  },
+  {
+   "row": [
+    {
+     "text": "ratingl",
+     "sample": "rating"
+    },
+    {
+     "field": "rating",
+     "chars": 7
+    },
+    {
+     "text": "ratingu",
+     "sample": "A"
+    }
+   ]
+  },
+  {
+   "text": "state",
+   "sample": "No fuse: right-click the holder with one"
+  },
+  {
+   "button": "out",
+   "sample": [
+    "Take the fuse out"
+   ],
+   "width": 110
+  }
+ ],
+ "gap": 4
+}

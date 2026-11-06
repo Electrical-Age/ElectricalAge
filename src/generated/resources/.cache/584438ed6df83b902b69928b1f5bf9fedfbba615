@@ -1,4 +1,4 @@
-// 26.3	2026-11-06T19:44:10.652539089	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-06T21:23:50.515697901	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -179,10 +179,7 @@ ff770d82fed48e779e22e4fd14615d03adb00d06 data/eln/advancement/recipes/misc/joint
 32b3c166b438a27868bd920fddcaf86fe9cb6dd9 data/eln/advancement/recipes/misc/lamp_socket_b_projector.json
 7e78cc35fd761625e94b932f241f2759655eefdd data/eln/advancement/recipes/misc/lamp_supply.json
 e1474de512f11c17eefe20ef125d348a17f44813 data/eln/advancement/recipes/misc/large_rheostat.json
-742545bf4ff2aa3b041ee56578a9a0ff484773dd data/eln/advancement/recipes/misc/lead_fuse_for_high_voltage_cables.json
-788fa1526657c4577d742ec3a18e6285e899164c data/eln/advancement/recipes/misc/lead_fuse_for_low_voltage_cables.json
-da0b62134f24b081c0fe23415fa59f1077af0142 data/eln/advancement/recipes/misc/lead_fuse_for_medium_voltage_cables.json
-f52e8a423e6b06cd5cc438a6bce4266e1067d969 data/eln/advancement/recipes/misc/lead_fuse_for_very_high_voltage_cables.json
+e6084bcb87beb312c3c7e54af126352353824e7b data/eln/advancement/recipes/misc/lead_fuse.json
 3e4e40a4ab1ebce58266031e5ae91a50bf12692e data/eln/advancement/recipes/misc/led_vumeter.json
 291f00b6d3db8c95d35be1d04bae73a6b8261cb3 data/eln/advancement/recipes/misc/led_vumeter_2.json
 a23b7f35fa3088ae52d68292135c73518f7582c7 data/eln/advancement/recipes/misc/led_vumeter_3.json
@@ -552,10 +549,7 @@ d7f8bdad98b05b6430a6362df244cd3a333ca6a5 data/eln/recipe/lamp_socket_a.json
 b90ec63e04d89ed1c2d7121a7a74ae912a6cc9f5 data/eln/recipe/lamp_socket_b_projector.json
 31b32598f2a28b91bcfd9dfec823966fb62504df data/eln/recipe/lamp_supply.json
 f85c8f50ce0422ca92a56a52d510ab5341f9ccb7 data/eln/recipe/large_rheostat.json
-9e0d47a2d07c01983d5db65e954b56a8b520a021 data/eln/recipe/lead_fuse_for_high_voltage_cables.json
-1771a52b5cf577c86e55ab70326eebc653251f72 data/eln/recipe/lead_fuse_for_low_voltage_cables.json
-28c6a853cdc46b49074336f99ac747ad9e32a758 data/eln/recipe/lead_fuse_for_medium_voltage_cables.json
-2d0d240bc969dc3c255b8dde11e60bd9ea1222d6 data/eln/recipe/lead_fuse_for_very_high_voltage_cables.json
+1771a52b5cf577c86e55ab70326eebc653251f72 data/eln/recipe/lead_fuse.json
 bafa184500fd9b5f87410bece2c1fa2c195da2ed data/eln/recipe/led_vumeter.json
 096e1711e2ee86f95d31b185c48ca0fe8f102f05 data/eln/recipe/led_vumeter_2.json
 dae1f3a6acbfed0befa3b5fe34d4db8acb0a8562 data/eln/recipe/led_vumeter_3.json

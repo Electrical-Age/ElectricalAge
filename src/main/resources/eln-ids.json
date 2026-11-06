@@ -397,7 +397,7 @@
  },
  "eln:shared_item@6279": {
   "descriptor": "ElectricalFuseDescriptor",
-  "display": "Lead Fuse for low voltage cables",
+  "display": "Lead Fuse",
   "kind": "shared_item",
   "name": "lead_fuse_for_low_voltage_cables"
  },

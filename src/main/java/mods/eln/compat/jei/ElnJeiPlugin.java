@@ -88,6 +88,11 @@ public class ElnJeiPlugin implements IModPlugin {
             var d = mods.eln.node.voxel.PipeSensorItem.device(s);
             if (d != null && d.parentItem != null) hidden.add(new ItemStack(d.parentItem));
         }
+        // the 1.12 fuses for the other tiers: no longer made, one Lead Fuse rated in its holder (Baughn 2026-11-06)
+        for (String n : new String[]{"Lead Fuse for medium voltage cables", "Lead Fuse for high voltage cables", "Lead Fuse for very high voltage cables"}) {
+            ItemStack f = Eln.findItemStack(n, 1);
+            if (!f.isEmpty()) hidden.add(f);
+        }
         if (!hidden.isEmpty()) runtime.getIngredientManager().removeIngredientsAtRuntime(mezz.jei.api.constants.VanillaTypes.ITEM_STACK, hidden);
     }
 

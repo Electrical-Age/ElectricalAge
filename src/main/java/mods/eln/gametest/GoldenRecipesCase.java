@@ -72,6 +72,8 @@ final class GoldenRecipesCase implements TestCase {
         // made by machines now (Baughn 2026-11-06): the Average core annealed in the Electrical Furnace, the Optimal one
         // field-annealed in the Magnetizer, from their own crafted intermediates
         "eln:average_ferromagnetic_core", "eln:optimal_ferromagnetic_core",
+        // one fuse for every cable, rated in the holder (Baughn 2026-11-06): the other tiers' fuses aren't made
+        "eln:lead_fuse_for_medium_voltage_cables", "eln:lead_fuse_for_high_voltage_cables", "eln:lead_fuse_for_very_high_voltage_cables",
         "eln:copper_sword", "eln:copper_hoe", "eln:copper_shovel", "eln:copper_pickaxe",
         "eln:copper_axe", "eln:copper_helmet", "eln:copper_chestplate", "eln:copper_leggings", "eln:copper_boots",
         "eln:50_v_turbine", "eln:200_v_turbine");

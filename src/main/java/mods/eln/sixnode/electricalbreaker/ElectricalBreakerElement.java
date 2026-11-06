@@ -41,6 +41,11 @@ public class ElectricalBreakerElement extends SixNodeElement {
 
     boolean switchState = false;
     double currantMax = 0;
+    /**
+     * The current it trips at, A (Baughn 2026-11-06: a UI, for cables of any cross-section); 0: its cable's, 1.05 x
+     * that cable's nominal current, as before.
+     */
+    public float tripAmps = 0;
     boolean nbtBoot = false;
 
     public ElectricalCableDescriptor cableDescriptor = null;
@@ -48,6 +53,17 @@ public class ElectricalBreakerElement extends SixNodeElement {
     public static final byte setVoltageMaxId = 1;
     public static final byte setVoltageMinId = 2;
     public static final byte toogleSwitchId = 3;
+    public static final byte setTripAmpsId = 4;
+
+    /** Its cable's own trip current, A (1.05 x nominal), or 0 without a cable. */
+    public double cableTripAmps() {
+        return cableDescriptor == null ? 0 : 1.05 * cableDescriptor.electricalNominalPower / cableDescriptor.electricalNominalVoltage;
+    }
+
+    /** The current it trips at now, A. */
+    public double tripAmpsNow() {
+        return tripAmps > 0 ? tripAmps : cableTripAmps();
+    }
 
     public ElectricalBreakerElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
@@ -79,6 +95,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
         switchState = nbt.getBooleanOr("switchState", false);
         voltageMax = nbt.getFloatOr("voltageMax", 0f);
         voltageMin = nbt.getFloatOr("voltageMin", 0f);
+        tripAmps = nbt.getFloatOr("tripAmps", 0f);
         nbtBoot = true;
     }
 
@@ -89,6 +106,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
         nbt.putBoolean("switchState", switchState);
         nbt.putFloat("voltageMax", voltageMax);
         nbt.putFloat("voltageMin", voltageMin);
+        nbt.putFloat("tripAmps", tripAmps);
     }
 
     @Override
@@ -122,6 +140,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Contact"), switchState ? I18N.tr("Closed") : I18N.tr("Open"));
         info.put(I18N.tr("Current"), Utils.plotAmpere("", aLoad.getCurrent()));
+        info.put(I18N.tr("Trips at"), Utils.plotAmpere("", tripAmpsNow()));
         if (Eln.wailaEasyMode) {
             info.put(I18N.tr("Voltages"), Utils.plotVolt("", aLoad.getU()) + Utils.plotVolt(" ", bLoad.getU()));
         }
@@ -140,6 +159,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
             stream.writeBoolean(switchState);
             stream.writeFloat(voltageMax);
             stream.writeFloat(voltageMin);
+            stream.writeFloat((float) tripAmpsNow());
 
             Utils.serialiseItemStack(stream, inventory.getItem(ElectricalBreakerContainer.cableSlotId));
         } catch (IOException e) {
@@ -214,6 +234,11 @@ public class ElectricalBreakerElement extends SixNodeElement {
                     break;
                 case toogleSwitchId:
                     setSwitchState(!getSwitchState());
+                    needPublish();
+                    break;
+                case setTripAmpsId:
+                    float a = stream.readFloat();
+                    tripAmps = Float.isFinite(a) && a > 0 ? Math.min(a, 100000f) : 0;   // (0 or less: its cable's)
                     needPublish();
                     break;
             }

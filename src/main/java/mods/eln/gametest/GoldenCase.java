@@ -264,6 +264,7 @@ final class GoldenCase implements TestCase {
 
     /** A 1.12 display name as it is now: "50V X" -> "48V X", "200V" -> "230V", "800V" -> "400V" (real-world voltages, Baughn 2026-11-06). */
     static String renamed(String name) {
+        if (name.equals("Lead Fuse for low voltage cables")) return "Lead Fuse";   // (one fuse, rated in the holder: Baughn 2026-11-06)
         var m = TIER_NAME.matcher(name);
         if (!m.find()) return name;
         String v = switch (m.group(2)) {

@@ -19,6 +19,8 @@ public class ElectricalBreakerCutProcess implements IProcess, INBTTReady {
     public void process(double time) {
         double U = breaker.aLoad.getU();
         double I = breaker.aLoad.getCurrent();
+        // a set trip current: the cable's heat model, its current scaled so it trips there (Baughn 2026-11-06)
+        if (breaker.tripAmps > 0 && breaker.cableTripAmps() > 0) I *= breaker.cableTripAmps() / breaker.tripAmps;
         double Tmax = 0;
         ElectricalCableDescriptor cable = breaker.cableDescriptor;
         if (cable == null) {

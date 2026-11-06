@@ -34,6 +34,12 @@ public class ElectricalBreakerScreen extends ElnScreen {
             float f = EaField.parse(v);
             if (!Float.isNaN(f)) render.clientSetVoltageMin(f);
         }, tr("Minimum voltage before cutting off"));
+        text("tripl", () -> tr("trip"));
+        text("tripu", () -> "A");
+        field("trip", () -> num(render.tripAmps), v -> {
+            float f = EaField.parse(v);
+            if (!Float.isNaN(f)) render.clientSetTripAmps(f);
+        }, tr("Current it trips at (0: its cable's)"));
         button("switch", () -> render.switchState ? tr("On") : tr("Off"), render::clientToogleSwitch,
             tr("Toggle switch (it cuts off again while the voltage is outside min..max)"));
     }

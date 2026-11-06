@@ -175,6 +175,14 @@ base reads its components, so its two sources' states load (they were dropped be
 Player settings saved in volts (breaker trips,
 source targets, signal levels) are left as they were (Baughn).
 
+## Cable specs (2026-11-06, Wires stage 3)
+
+A voxel power cable (tiers 1-4: 48 V, 230 V, 400 V, 11 kV insulation) carries a `CableSpec`: `mm2` (an index into
+CableSpec.MM2) and `col` (a DyeColor id) beside `tier`. A piece saved without them is its tier's preset (2.5 mm² brown,
+1.5 mm² black, 1.5 mm² grey, 0.5 mm² red): every cable laid before specs. On the network the two bytes follow the tier
+byte of a power cable. A cable kit keeps a non-preset spec in its custom data (`mm2`, `col`); a kit without them is
+the preset. The breaker saves `tripAmps` and the fuse holder `rating` (0: the cable's or the fuse's own, as before).
+
 ## Ids that must never change
 
 - `src/main/resources/eln-ids.json`: `"<1.12 item>@<damage>"` (e.g. `eln:six_node@<id>`, `eln:transparent_node@<id>`,

@@ -21,7 +21,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 
     RcInterpolator interpol;
 
-    float uMin, uMax;
+    float uMin, uMax, tripAmps;
 
     boolean boot = true;
     float switchAlpha = 0;
@@ -63,6 +63,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
             switchState = stream.readBoolean();
             uMax = stream.readFloat();
             uMin = stream.readFloat();
+            tripAmps = stream.readFloat();
 
             ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
 
@@ -90,6 +91,19 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
             stream.writeByte(ElectricalBreakerElement.setVoltageMinId);
             stream.writeFloat(value);
 
+            sendPacketToServer(bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void clientSetTripAmps(float value) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(bos);
+            preparePacketForServer(stream);
+            stream.writeByte(ElectricalBreakerElement.setTripAmpsId);
+            stream.writeFloat(value);
             sendPacketToServer(bos);
         } catch (IOException e) {
             e.printStackTrace();

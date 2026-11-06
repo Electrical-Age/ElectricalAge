@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "eln:lead_fuse_for_low_voltage_cables"
+        "recipes": "eln:lead_fuse"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "eln:lead_fuse_for_low_voltage_cables"
+      "eln:lead_fuse"
     ]
   }
 }
