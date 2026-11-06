@@ -75,9 +75,9 @@ public class BikePhysicsTest {
     void theTerrainBikeJumpsTwoAndAHalfAndStepsAWholeBlock() {
         double peak = BikePhysics.jumpPeak(BikePhysics.jumpVelocity(1, BikeType.TERRAIN.jumpVy()));
         assertTrue(peak > 2.3 && peak < 2.7, "peak " + peak);
-        assertEquals(1.0f + BikePhysics.SUNKEN, BikeType.TERRAIN.stepHeight(), 1e-6);
+        assertEquals(1.13f, BikeType.TERRAIN.stepHeight(), 1e-6);   // (a whole block from a path or mud too)
         assertEquals(150, BikePhysics.motorWatts(BikePhysics.VMAX_POWERED, BikeType.TERRAIN.motorWatts()), 1e-9);
-        assertEquals(BikePhysics.STEP_HEIGHT + BikePhysics.SUNKEN, BikeType.ELECTRIC.stepHeight(), 1e-6);
+        assertEquals(BikePhysics.STEP_HEIGHT, BikeType.ELECTRIC.stepHeight(), 1e-6);
         assertTrue(BikeType.TERRAIN.stepHeight() < 1.5f && BikeType.ELECTRIC.stepHeight() < 1.0f);   // (a fence, a full block)
     }
 

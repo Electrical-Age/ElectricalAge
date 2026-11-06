@@ -73,16 +73,16 @@ public final class ElnConfig {
             .defineInRange("crashSpeed", 3.0, 0.0, 100.0);
         BIKE_JUMP = b.comment("Height of a full-charge jump, blocks (1.31: one block with room, never 1.5).")
             .defineInRange("jumpHeight", 1.31, 0.0, 5.0);
-        BIKE_STEP = b.comment("Height it rides up without jumping, blocks, counted from a full block (0.6: slabs and stairs; 1 or more climbs full blocks). From a dirt path, farmland or mud it rides up to 0.13 more.")
-            .defineInRange("stepHeight", 0.6, 0.0, 2.0);
+        BIKE_STEP = b.comment("Height it rides up without jumping, blocks (0.63: slabs and stairs, also from a dirt path or mud, which sit up to 1/8 low; 1 or more climbs full blocks).")
+            .defineInRange("stepHeight", 0.63, 0.0, 2.0);
         BIKE_TURN = b.comment("How fast it swings round to where the rider looks when slow, degrees per tick.")
             .defineInRange("turnRate", 12.0, 0.5, 180.0);
         BIKE_TURN_TOP = b.comment("...and at its powered top speed and above (Baughn: steering slows with speed); linear between.")
             .defineInRange("turnRateAtTopSpeed", 5.0, 0.5, 180.0);
         BIKE_LAMP = b.comment("The front lamp's draw from the trunk battery, W (both bikes; a flashlight's is 20-50).")
             .defineInRange("lampWatts", 20.0, 0.0, 1000.0);
-        TERRAIN_STEP = b.comment("The terrain bike: height it rides up without jumping, blocks, counted from a full block (1: a whole block, also from a path or mud; 1.5 stops it).")
-            .defineInRange("terrainStepHeight", 1.0, 0.0, 2.0);
+        TERRAIN_STEP = b.comment("The terrain bike: height it rides up without jumping, blocks (1.13: a whole block, also from a dirt path or mud, which sit up to 1/8 low; 1.5 stops it).")
+            .defineInRange("terrainStepHeight", 1.13, 0.0, 2.0);
         TERRAIN_JUMP = b.comment("The terrain bike: height of a full-charge jump, blocks.")
             .defineInRange("terrainJumpHeight", 2.5, 0.0, 6.0);
         TERRAIN_MOTOR = b.comment("The terrain bike: its motor's draw at full speed, W (same top speed as the electric bike).")

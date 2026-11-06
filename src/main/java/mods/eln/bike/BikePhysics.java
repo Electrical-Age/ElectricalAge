@@ -17,10 +17,11 @@ public final class BikePhysics {
     public static final double REVERSE = 0.05;
     /** A living entity's fall: gravity per tick, then drag. */
     public static final double GRAVITY = 0.08, AIR_DRAG = 0.98;
-    /** Half slabs, stairs, snow layers ride; a full block doesn't. */
-    public static volatile float STEP_HEIGHT = 0.6f;
-    /** How far a floor can sit below a full block's top and still count as level for the step: 1/8 (mud, soul sand) and a margin. */
-    public static final float SUNKEN = 0.13f;
+    /**
+     * Half slabs, stairs, snow layers ride; a full block doesn't. Counted from where the bike stands, so 0.13 over the
+     * half block lets it ride a slab from a floor that sits low: a dirt path or farmland 1/16, mud or soul sand 1/8.
+     */
+    public static volatile float STEP_HEIGHT = 0.63f;
     /** Running into something at more than 3 b/s throws you off (Baughn: a full-block step; walls too, by default). */
     public static volatile double CRASH_SPEED = 0.15;
     /** Upward speed of a full-charge jump: peaks a little over one block (BikePhysicsTest computes it). */
