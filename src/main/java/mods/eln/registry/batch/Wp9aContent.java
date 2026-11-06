@@ -56,7 +56,7 @@ public class Wp9aContent implements ElnContent {
         PowerSocketDescriptor desc;
         {
             subId = 1;
-            name = TR_NAME(Type.NONE, "50V Power Socket");
+            name = TR_NAME(Type.NONE, "48V Power Socket");
             desc = new PowerSocketDescriptor(
                 subId, name, obj.getObj("PowerSocket"),
                 10 //Range for plugged devices (without obstacles)
@@ -66,7 +66,7 @@ public class Wp9aContent implements ElnContent {
         }
         {
             subId = 2;
-            name = TR_NAME(Type.NONE, "200V Power Socket");
+            name = TR_NAME(Type.NONE, "230V Power Socket");
             desc = new PowerSocketDescriptor(
                 subId, name, obj.getObj("PowerSocket"),
                 10 //Range for plugged devices (without obstacles)
@@ -451,7 +451,7 @@ public class Wp9aContent implements ElnContent {
         {
             subId = 0;
             completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "Weak 50V Battery Charger");
+            name = TR_NAME(Type.NONE, "Weak 48V Battery Charger");
 
             descriptor = new BatteryChargerDescriptor(
                 name, obj.getObj("batterychargera"),
@@ -464,7 +464,7 @@ public class Wp9aContent implements ElnContent {
         {
             subId = 1;
             completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "50V Battery Charger");
+            name = TR_NAME(Type.NONE, "48V Battery Charger");
 
             descriptor = new BatteryChargerDescriptor(
                 name, obj.getObj("batterychargera"),
@@ -477,7 +477,7 @@ public class Wp9aContent implements ElnContent {
         {
             subId = 4;
             completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "200V Battery Charger");
+            name = TR_NAME(Type.NONE, "230V Battery Charger");
 
             descriptor = new BatteryChargerDescriptor(
                 name, obj.getObj("batterychargera"),

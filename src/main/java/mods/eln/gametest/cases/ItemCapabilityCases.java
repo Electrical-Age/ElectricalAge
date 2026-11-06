@@ -78,7 +78,7 @@ public final class ItemCapabilityCases {
         int in;
 
         public void build(TestContext ctx) {
-            macerator = ctx.placeTransparent(LabCommands.transparentId("50V Macerator"), ctx.at(1, 1, 1));
+            macerator = ctx.placeTransparent(LabCommands.transparentId("48V Macerator"), ctx.at(1, 1, 1));
             BlockPos m = macerator.node.coordonate.pos();
             in = ((mods.eln.transparentnode.electricalmachine.ElectricalMachineElement) macerator).inSlotId;
             var inv = macerator.getInventory();
@@ -130,7 +130,7 @@ public final class ItemCapabilityCases {
             }
 
             // egg incubator: eggs only
-            incubator = ctx.placeTransparent(LabCommands.transparentId("50V Egg Incubator"), ctx.at(13, 1, 1));
+            incubator = ctx.placeTransparent(LabCommands.transparentId("48V Egg Incubator"), ctx.at(13, 1, 1));
             ResourceHandler<ItemResource> eggs = cap(ctx, incubator.node.coordonate.pos(), Direction.EAST);
             ctx.check("egg incubator: takes eggs, not sticks", eggs != null && insert(eggs, new ItemStack(Items.STICK), true) == 0
                 && insert(eggs, new ItemStack(Items.EGG, 2), true) == 2, "");
@@ -215,7 +215,7 @@ public final class ItemCapabilityCases {
             BlockPos target = c.pos();
             if (ctx.level().getBlockState(target.below()).isAir()) ctx.floor(target.below());
             if (!ctx.level().getBlockState(target).isAir()) ctx.level().removeBlock(target, false);
-            TransparentNodeElement m = ctx.placeTransparent(LabCommands.transparentId("50V Macerator"), target);
+            TransparentNodeElement m = ctx.placeTransparent(LabCommands.transparentId("48V Macerator"), target);
             int in = ((mods.eln.transparentnode.electricalmachine.ElectricalMachineElement) m).inSlotId;
             AutoMinerSlowProcess p = Batch1Cases.field(miner, "slowProcess");
             boolean stick = p.drop(new ItemStack(Items.STICK));

@@ -145,10 +145,10 @@ public final class VoxelDeviceCases {
         static final String[] FLOOR_DEVICES = {"Low Voltage Relay", "Medium Voltage Relay", "High Voltage Relay", "Very High Voltage Relay",
             "Signal Relay", "Electrical Probe", "Voltage Probe", "Thermal Probe", "Temperature Probe", "Wireless Signal Receiver",
             "Wireless Signal Transmitter", "Wireless Signal Repeater", "Electrical Timer", "LED vuMeter", "Signal Switch with LED",
-            "Ground Cable", "Hub", "Energy Meter", "Advanced Energy Meter", "Weak 50V Battery Charger", "50V Battery Charger",
-            "200V Battery Charger", "Nuclear Alarm", "Standard Alarm", "10A Diode", "25A Diode", "Signal Diode", "Power Capacitor",
+            "Ground Cable", "Hub", "Energy Meter", "Advanced Energy Meter", "Weak 48V Battery Charger", "48V Battery Charger",
+            "230V Battery Charger", "Nuclear Alarm", "Standard Alarm", "10A Diode", "25A Diode", "Signal Diode", "Power Capacitor",
             "Power Inductor", "Power Resistor", "Rheostat", "Thermistor", "Electrical Fuse Holder"};
-        static final String[] WALL_DEVICES = {"50V Power Socket", "200V Power Socket", "Electrical Anemometer Sensor"};
+        static final String[] WALL_DEVICES = {"48V Power Socket", "230V Power Socket", "Electrical Anemometer Sensor"};
         String all = "", middle = "", lopsided = "", relays = "", stayed = "";
         boolean anywhereOk, middleOk, lopsidedOk, relaysOk, stayedOk;
 
@@ -629,7 +629,7 @@ public final class VoxelDeviceCases {
             c.placeSix(Wp9aCases.GROUND, c.at(8, 1, 1));
             // sockets and the anemometer: refused on the floor
             var vf = block(c, c.at(10, 1, 1));
-            floorSocket = String.valueOf(vf.placeAnywhere(desc("50V Power Socket").newItemStack(), Direction.YN, 0.3, 0, 0.5, player(c)));
+            floorSocket = String.valueOf(vf.placeAnywhere(desc("48V Power Socket").newItemStack(), Direction.YN, 0.3, 0, 0.5, player(c)));
             floorWind = String.valueOf(vf.placeAnywhere(desc("Electrical Anemometer Sensor").newItemStack(), Direction.YN, 0.3, 0, 0.5, player(c)));
             // a click on the floor in the open, as a player with voxel cables on: refused, no empty block left, item kept
             boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
@@ -653,7 +653,7 @@ public final class VoxelDeviceCases {
             }));
             BlockPos ps = c.at(1, 2, 4);
             var vs = block(c, ps);
-            socket = put(c, vs, "50V Power Socket", Direction.ZN, 2, 0, 0, Direction.YN);
+            socket = put(c, vs, "48V Power Socket", Direction.ZN, 2, 0, 0, Direction.YN);
             cableOut(c, vs, ps, socket, Direction.YN, LV, NORTH_WALL);
             // an anemometer on a north wall, its pin wherever its front puts it
             c.floor(c.at(4, 2, 3));
@@ -823,7 +823,7 @@ public final class VoxelDeviceCases {
             BlockPos s = c.at(1, 2, 7);
             var u = block(c, s);
             CableCases.voxel(c, s, List.of(new CablePart(LV, NORTH_WALL, new int[]{0, 4, 0, 16, 4, 0})));
-            socketErr = String.valueOf(u.placeAnywhere(desc("50V Power Socket").newItemStack(), Direction.ZN, 0.5, 0.45, 0, player(c)));
+            socketErr = String.valueOf(u.placeAnywhere(desc("48V Power Socket").newItemStack(), Direction.ZN, 0.5, 0.45, 0, player(c)));
             socket = placed(u);
         }
 
@@ -1082,19 +1082,19 @@ public final class VoxelDeviceCases {
             source(c, Wp9aCases.SOURCE, c.at(0, 1, 7), 200);
             BlockPos p2 = c.at(1, 1, 7);
             var v2 = block(c, p2);
-            c200 = put(c, v2, "200V Battery Charger", Direction.YN, 0, 0, 2, Direction.ZN);
+            c200 = put(c, v2, "230V Battery Charger", Direction.YN, 0, 0, 2, Direction.ZN);
             cableOut(c, v2, p2, c200, Direction.XN, mods.eln.node.voxel.CablePart.tierOf("Medium Voltage Cable"), FLOOR);
             // a 50V charger clicked onto a 50 V run
             source(c, Wp9aCases.SOURCE, c.at(4, 1, 1), 50);
             BlockPos p5 = c.at(5, 1, 1);
             var v5 = block(c, p5);
             CableCases.voxel(c, p5, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
-            placed += "charger: " + v5.placeAnywhere(desc("50V Battery Charger").newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c));
+            placed += "charger: " + v5.placeAnywhere(desc("48V Battery Charger").newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c));
             c50 = TapCase.placed(v5);
             // a weak one off centre, fed from the east
             BlockPos pw = c.at(5, 1, 4);
             var vw = block(c, pw);
-            cWeak = put(c, vw, "Weak 50V Battery Charger", Direction.YN, 0, 0, 2, Direction.ZN);
+            cWeak = put(c, vw, "Weak 48V Battery Charger", Direction.YN, 0, 0, 2, Direction.ZN);
             cableOut(c, vw, pw, cWeak, Direction.XP, LV, FLOOR);
             source(c, Wp9aCases.SOURCE, c.at(6, 1, 4), 50);
             // the alarms, their pin north on SVU
@@ -1167,7 +1167,7 @@ public final class VoxelDeviceCases {
             mods.eln.node.voxel.CableConverter.convertOnLoad = true;
             var player = player(c);
             try {
-                String[] names = {"Energy Meter", "Advanced Energy Meter", "50V Battery Charger"};
+                String[] names = {"Energy Meter", "Advanced Energy Meter", "48V Battery Charger"};
                 for (int i = 0; i < 3; i++) {
                     BlockPos p = c.at(1 + 2 * i, 1, 1);
                     var d = desc(names[i]);

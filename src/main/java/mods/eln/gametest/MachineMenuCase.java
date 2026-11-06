@@ -28,7 +28,7 @@ final class MachineMenuCase implements TestCase {
     ElnNodeMenu menu;
 
     public void build(TestContext ctx) {
-        node = ctx.placeTransparent(LabCommands.transparentId("50V Macerator"), ctx.at(1, 1, 1)).node;
+        node = ctx.placeTransparent(LabCommands.transparentId("48V Macerator"), ctx.at(1, 1, 1)).node;
         FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());
         menu = NodeMenus.menu(1, fp, node, Direction.YN);
         menu.setCarried(new ItemStack(Items.IRON_ORE, 8));

@@ -79,19 +79,19 @@
  },
  "eln:energy_converter_eln_to_other_hvublock@0": {
   "descriptor": "",
-  "display": "800V Electrical Age to other energy exporter",
+  "display": "400V Electrical Age to other energy exporter",
   "kind": "energy_converter_eln_to_other_hvublock",
   "name": "energy_converter_eln_to_other_hvublock"
  },
  "eln:energy_converter_eln_to_other_lvublock@0": {
   "descriptor": "",
-  "display": "50V Electrical Age to other energy exporter",
+  "display": "48V Electrical Age to other energy exporter",
   "kind": "energy_converter_eln_to_other_lvublock",
   "name": "energy_converter_eln_to_other_lvublock"
  },
  "eln:energy_converter_eln_to_other_mvublock@0": {
   "descriptor": "",
-  "display": "200V Electrical Age to other energy exporter",
+  "display": "230V Electrical Age to other energy exporter",
   "kind": "energy_converter_eln_to_other_mvublock",
   "name": "energy_converter_eln_to_other_mvublock"
  },
@@ -169,73 +169,73 @@
  },
  "eln:shared_item@256": {
   "descriptor": "LampDescriptor",
-  "display": "Small 50V Incandescent Light Bulb",
+  "display": "Small 48V Incandescent Light Bulb",
   "kind": "shared_item",
   "name": "small_50v_incandescent_light_bulb"
  },
  "eln:shared_item@257": {
   "descriptor": "LampDescriptor",
-  "display": "50V Incandescent Light Bulb",
+  "display": "48V Incandescent Light Bulb",
   "kind": "shared_item",
   "name": "50v_incandescent_light_bulb"
  },
  "eln:shared_item@258": {
   "descriptor": "LampDescriptor",
-  "display": "200V Incandescent Light Bulb",
+  "display": "230V Incandescent Light Bulb",
   "kind": "shared_item",
   "name": "200v_incandescent_light_bulb"
  },
  "eln:shared_item@260": {
   "descriptor": "LampDescriptor",
-  "display": "Small 50V Carbon Incandescent Light Bulb",
+  "display": "Small 48V Carbon Incandescent Light Bulb",
   "kind": "shared_item",
   "name": "small_50v_carbon_incandescent_light_bulb"
  },
  "eln:shared_item@261": {
   "descriptor": "LampDescriptor",
-  "display": "50V Carbon Incandescent Light Bulb",
+  "display": "48V Carbon Incandescent Light Bulb",
   "kind": "shared_item",
   "name": "50v_carbon_incandescent_light_bulb"
  },
  "eln:shared_item@272": {
   "descriptor": "LampDescriptor",
-  "display": "Small 50V Economic Light Bulb",
+  "display": "Small 48V Economic Light Bulb",
   "kind": "shared_item",
   "name": "small_50v_economic_light_bulb"
  },
  "eln:shared_item@273": {
   "descriptor": "LampDescriptor",
-  "display": "50V Economic Light Bulb",
+  "display": "48V Economic Light Bulb",
   "kind": "shared_item",
   "name": "50v_economic_light_bulb"
  },
  "eln:shared_item@274": {
   "descriptor": "LampDescriptor",
-  "display": "200V Economic Light Bulb",
+  "display": "230V Economic Light Bulb",
   "kind": "shared_item",
   "name": "200v_economic_light_bulb"
  },
  "eln:shared_item@288": {
   "descriptor": "LampDescriptor",
-  "display": "50V Farming Lamp",
+  "display": "48V Farming Lamp",
   "kind": "shared_item",
   "name": "50v_farming_lamp"
  },
  "eln:shared_item@292": {
   "descriptor": "LampDescriptor",
-  "display": "200V Farming Lamp",
+  "display": "230V Farming Lamp",
   "kind": "shared_item",
   "name": "200v_farming_lamp"
  },
  "eln:shared_item@293": {
   "descriptor": "LampDescriptor",
-  "display": "50V LED Bulb",
+  "display": "48V LED Bulb",
   "kind": "shared_item",
   "name": "50v_led_bulb"
  },
  "eln:shared_item@294": {
   "descriptor": "LampDescriptor",
-  "display": "200V LED Bulb",
+  "display": "230V LED Bulb",
   "kind": "shared_item",
   "name": "200v_led_bulb"
  },
@@ -415,7 +415,7 @@
  },
  "eln:shared_item@64": {
   "descriptor": "HeatingCorpElement",
-  "display": "Small 50V Copper Heating Corp",
+  "display": "Small 48V Copper Heating Corp",
   "kind": "shared_item",
   "name": "small_50v_copper_heating_corp"
  },
@@ -433,31 +433,31 @@
  },
  "eln:shared_item@65": {
   "descriptor": "HeatingCorpElement",
-  "display": "50V Copper Heating Corp",
+  "display": "48V Copper Heating Corp",
   "kind": "shared_item",
   "name": "50v_copper_heating_corp"
  },
  "eln:shared_item@66": {
   "descriptor": "HeatingCorpElement",
-  "display": "Small 200V Copper Heating Corp",
+  "display": "Small 230V Copper Heating Corp",
   "kind": "shared_item",
   "name": "small_200v_copper_heating_corp"
  },
  "eln:shared_item@67": {
   "descriptor": "HeatingCorpElement",
-  "display": "200V Copper Heating Corp",
+  "display": "230V Copper Heating Corp",
   "kind": "shared_item",
   "name": "200v_copper_heating_corp"
  },
  "eln:shared_item@68": {
   "descriptor": "HeatingCorpElement",
-  "display": "Small 50V Iron Heating Corp",
+  "display": "Small 48V Iron Heating Corp",
   "kind": "shared_item",
   "name": "small_50v_iron_heating_corp"
  },
  "eln:shared_item@69": {
   "descriptor": "HeatingCorpElement",
-  "display": "50V Iron Heating Corp",
+  "display": "48V Iron Heating Corp",
   "kind": "shared_item",
   "name": "50v_iron_heating_corp"
  },
@@ -469,7 +469,7 @@
  },
  "eln:shared_item@70": {
   "descriptor": "HeatingCorpElement",
-  "display": "Small 200V Iron Heating Corp",
+  "display": "Small 230V Iron Heating Corp",
   "kind": "shared_item",
   "name": "small_200v_iron_heating_corp"
  },
@@ -481,31 +481,31 @@
  },
  "eln:shared_item@71": {
   "descriptor": "HeatingCorpElement",
-  "display": "200V Iron Heating Corp",
+  "display": "230V Iron Heating Corp",
   "kind": "shared_item",
   "name": "200v_iron_heating_corp"
  },
  "eln:shared_item@72": {
   "descriptor": "HeatingCorpElement",
-  "display": "Small 50V Tungsten Heating Corp",
+  "display": "Small 48V Tungsten Heating Corp",
   "kind": "shared_item",
   "name": "small_50v_tungsten_heating_corp"
  },
  "eln:shared_item@73": {
   "descriptor": "HeatingCorpElement",
-  "display": "50V Tungsten Heating Corp",
+  "display": "48V Tungsten Heating Corp",
   "kind": "shared_item",
   "name": "50v_tungsten_heating_corp"
  },
  "eln:shared_item@74": {
   "descriptor": "HeatingCorpElement",
-  "display": "Small 200V Tungsten Heating Corp",
+  "display": "Small 230V Tungsten Heating Corp",
   "kind": "shared_item",
   "name": "small_200v_tungsten_heating_corp"
  },
  "eln:shared_item@75": {
   "descriptor": "HeatingCorpElement",
-  "display": "200V Tungsten Heating Corp",
+  "display": "230V Tungsten Heating Corp",
   "kind": "shared_item",
   "name": "200v_tungsten_heating_corp"
  },
@@ -1015,13 +1015,13 @@
  },
  "eln:six_node@4111": {
   "descriptor": "EmergencyLampDescriptor",
-  "display": "50V Emergency Lamp",
+  "display": "48V Emergency Lamp",
   "kind": "six_node",
   "name": "50v_emergency_lamp"
  },
  "eln:six_node@4112": {
   "descriptor": "EmergencyLampDescriptor",
-  "display": "200V Emergency Lamp",
+  "display": "230V Emergency Lamp",
   "kind": "six_node",
   "name": "200v_emergency_lamp"
  },
@@ -1033,31 +1033,31 @@
  },
  "eln:six_node@4224": {
   "descriptor": "BatteryChargerDescriptor",
-  "display": "Weak 50V Battery Charger",
+  "display": "Weak 48V Battery Charger",
   "kind": "six_node",
   "name": "weak_50v_battery_charger"
  },
  "eln:six_node@4225": {
   "descriptor": "BatteryChargerDescriptor",
-  "display": "50V Battery Charger",
+  "display": "48V Battery Charger",
   "kind": "six_node",
   "name": "50v_battery_charger"
  },
  "eln:six_node@4228": {
   "descriptor": "BatteryChargerDescriptor",
-  "display": "200V Battery Charger",
+  "display": "230V Battery Charger",
   "kind": "six_node",
   "name": "200v_battery_charger"
  },
  "eln:six_node@4289": {
   "descriptor": "PowerSocketDescriptor",
-  "display": "50V Power Socket",
+  "display": "48V Power Socket",
   "kind": "six_node",
   "name": "50v_power_socket"
  },
  "eln:six_node@4290": {
   "descriptor": "PowerSocketDescriptor",
-  "display": "200V Power Socket",
+  "display": "230V Power Socket",
   "kind": "six_node",
   "name": "200v_power_socket"
  },
@@ -1639,13 +1639,13 @@
  },
  "eln:transparent_node@1056": {
   "descriptor": "BatteryDescriptor",
-  "display": "50V Capacitor",
+  "display": "48V Capacitor",
   "kind": "transparent_node",
   "name": "50v_capacitor"
  },
  "eln:transparent_node@1060": {
   "descriptor": "BatteryDescriptor",
-  "display": "200V Capacitor",
+  "display": "230V Capacitor",
   "kind": "transparent_node",
   "name": "200v_capacitor"
  },
@@ -1675,67 +1675,67 @@
  },
  "eln:transparent_node@2112": {
   "descriptor": "MaceratorDescriptor",
-  "display": "50V Macerator",
+  "display": "48V Macerator",
   "kind": "transparent_node",
   "name": "50v_macerator"
  },
  "eln:transparent_node@2116": {
   "descriptor": "MaceratorDescriptor",
-  "display": "200V Macerator",
+  "display": "230V Macerator",
   "kind": "transparent_node",
   "name": "200v_macerator"
  },
  "eln:transparent_node@2240": {
   "descriptor": "CompressorDescriptor",
-  "display": "50V Compressor",
+  "display": "48V Compressor",
   "kind": "transparent_node",
   "name": "50v_compressor"
  },
  "eln:transparent_node@2244": {
   "descriptor": "CompressorDescriptor",
-  "display": "200V Compressor",
+  "display": "230V Compressor",
   "kind": "transparent_node",
   "name": "200v_compressor"
  },
  "eln:transparent_node@2304": {
   "descriptor": "MagnetizerDescriptor",
-  "display": "50V Magnetizer",
+  "display": "48V Magnetizer",
   "kind": "transparent_node",
   "name": "50v_magnetizer"
  },
  "eln:transparent_node@2308": {
   "descriptor": "MagnetizerDescriptor",
-  "display": "200V Magnetizer",
+  "display": "230V Magnetizer",
   "kind": "transparent_node",
   "name": "200v_magnetizer"
  },
  "eln:transparent_node@2368": {
   "descriptor": "PlateMachineDescriptor",
-  "display": "50V Plate Machine",
+  "display": "48V Plate Machine",
   "kind": "transparent_node",
   "name": "50v_plate_machine"
  },
  "eln:transparent_node@2372": {
   "descriptor": "PlateMachineDescriptor",
-  "display": "200V Plate Machine",
+  "display": "230V Plate Machine",
   "kind": "transparent_node",
   "name": "200v_plate_machine"
  },
  "eln:transparent_node@257": {
   "descriptor": "TurbineDescriptor",
-  "display": "50V Turbine",
+  "display": "48V Turbine",
   "kind": "transparent_node",
   "name": "50v_turbine"
  },
  "eln:transparent_node@2624": {
   "descriptor": "EggIncubatorDescriptor",
-  "display": "50V Egg Incubator",
+  "display": "48V Egg Incubator",
   "kind": "transparent_node",
   "name": "50v_egg_incubator"
  },
  "eln:transparent_node@264": {
   "descriptor": "TurbineDescriptor",
-  "display": "200V Turbine",
+  "display": "230V Turbine",
   "kind": "transparent_node",
   "name": "200v_turbine"
  },
@@ -1795,7 +1795,7 @@
  },
  "eln:transparent_node@273": {
   "descriptor": "ShaftMotorDescriptor",
-  "display": "200V Shaft Motor",
+  "display": "230V Shaft Motor",
   "kind": "transparent_node",
   "name": "200v_shaft_motor"
  },
@@ -1855,7 +1855,7 @@
  },
  "eln:transparent_node@4130": {
   "descriptor": "ThermalDissipatorActiveDescriptor",
-  "display": "200V Active Thermal Dissipator",
+  "display": "230V Active Thermal Dissipator",
   "kind": "transparent_node",
   "name": "200v_active_thermal_dissipator"
  },
@@ -1867,19 +1867,19 @@
  },
  "eln:transparent_node@4224": {
   "descriptor": "TurretDescriptor",
-  "display": "800V Defence Turret",
+  "display": "400V Defence Turret",
   "kind": "transparent_node",
   "name": "800v_defence_turret"
  },
  "eln:transparent_node@4289": {
   "descriptor": "FuelGeneratorDescriptor",
-  "display": "50V Fuel Generator",
+  "display": "48V Fuel Generator",
   "kind": "transparent_node",
   "name": "50v_fuel_generator"
  },
  "eln:transparent_node@4290": {
   "descriptor": "FuelGeneratorDescriptor",
-  "display": "200V Fuel Generator",
+  "display": "230V Fuel Generator",
   "kind": "transparent_node",
   "name": "200v_fuel_generator"
  },
@@ -1951,37 +1951,37 @@
  },
  "eln:transparent_node@5120": {
   "descriptor": "OilSeparatorDescriptor",
-  "display": "50V Tar Sand Separator",
+  "display": "48V Tar Sand Separator",
   "kind": "transparent_node",
   "name": "50v_tar_sand_separator"
  },
  "eln:transparent_node@5124": {
   "descriptor": "OilSeparatorDescriptor",
-  "display": "200V Tar Sand Separator",
+  "display": "230V Tar Sand Separator",
   "kind": "transparent_node",
   "name": "200v_tar_sand_separator"
  },
  "eln:transparent_node@5184": {
   "descriptor": "OilPumpDescriptor",
-  "display": "50V Oil Pump",
+  "display": "48V Oil Pump",
   "kind": "transparent_node",
   "name": "50v_oil_pump"
  },
  "eln:transparent_node@5188": {
   "descriptor": "OilPumpDescriptor",
-  "display": "200V Oil Pump",
+  "display": "230V Oil Pump",
   "kind": "transparent_node",
   "name": "200v_oil_pump"
  },
  "eln:transparent_node@5192": {
   "descriptor": "SubmersiblePumpDescriptor",
-  "display": "50V Submersible Pump",
+  "display": "48V Submersible Pump",
   "kind": "transparent_node",
   "name": "50v_submersible_pump"
  },
  "eln:transparent_node@5196": {
   "descriptor": "SubmersiblePumpDescriptor",
-  "display": "200V Submersible Pump",
+  "display": "230V Submersible Pump",
   "kind": "transparent_node",
   "name": "200v_submersible_pump"
  },
@@ -1993,13 +1993,13 @@
  },
  "eln:transparent_node@5248": {
   "descriptor": "ElectricHeaterDescriptor",
-  "display": "50V Electric Heater",
+  "display": "48V Electric Heater",
   "kind": "transparent_node",
   "name": "50v_electric_heater"
  },
  "eln:transparent_node@5252": {
   "descriptor": "ElectricHeaterDescriptor",
-  "display": "200V Electric Heater",
+  "display": "230V Electric Heater",
   "kind": "transparent_node",
   "name": "200v_electric_heater"
  },
@@ -2011,13 +2011,13 @@
  },
  "eln:transparent_node@5260": {
   "descriptor": "SteamGeneratorDescriptor",
-  "display": "50V Steam Turbine",
+  "display": "48V Steam Turbine",
   "kind": "transparent_node",
   "name": "50v_steam_turbine"
  },
  "eln:transparent_node@5264": {
   "descriptor": "SteamGeneratorDescriptor",
-  "display": "200V Steam Turbine",
+  "display": "230V Steam Turbine",
   "kind": "transparent_node",
   "name": "200v_steam_turbine"
  },
@@ -2047,7 +2047,7 @@
  },
  "eln:transparent_node@5284": {
   "descriptor": "CompactTurbineDescriptor",
-  "display": "50V Compact Steam Turbine",
+  "display": "48V Compact Steam Turbine",
   "kind": "transparent_node",
   "name": "50v_compact_steam_turbine"
  },
@@ -2065,7 +2065,7 @@
  },
  "eln:transparent_node@5296": {
   "descriptor": "InlinePumpDescriptor",
-  "display": "200V Inline Pump",
+  "display": "230V Inline Pump",
   "kind": "transparent_node",
   "name": "200v_inline_pump"
  },
@@ -2101,19 +2101,19 @@
  },
  "eln:transparent_node@5376": {
   "descriptor": "EnergyConverterElnToOtherDescriptor",
-  "display": "50V Electrical Age to other energy exporter",
+  "display": "48V Electrical Age to other energy exporter",
   "kind": "transparent_node",
   "name": "energy_converter_eln_to_other_lvublock"
  },
  "eln:transparent_node@5380": {
   "descriptor": "EnergyConverterElnToOtherDescriptor",
-  "display": "200V Electrical Age to other energy exporter",
+  "display": "230V Electrical Age to other energy exporter",
   "kind": "transparent_node",
   "name": "energy_converter_eln_to_other_mvublock"
  },
  "eln:transparent_node@5384": {
   "descriptor": "EnergyConverterElnToOtherDescriptor",
-  "display": "800V Electrical Age to other energy exporter",
+  "display": "400V Electrical Age to other energy exporter",
   "kind": "transparent_node",
   "name": "energy_converter_eln_to_other_hvublock"
  },

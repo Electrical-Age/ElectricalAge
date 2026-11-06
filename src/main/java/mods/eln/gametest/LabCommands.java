@@ -766,7 +766,7 @@ public final class LabCommands {
 
     static int machines(CommandSourceStack src, int n, BlockPos origin) {
         WorldTestContext ctx = new WorldTestContext(src.getLevel(), origin);
-        int id = transparentId("50V Macerator");
+        int id = transparentId("48V Macerator");
         for (int i = 0; i < n; i++) {
             BlockPos p = ctx.at((i % 10) * 2, 1, (i / 10) * 2);
             ctx.floor(p.below());

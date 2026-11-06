@@ -1925,7 +1925,7 @@ public final class CableCases {
             net.minecraft.world.item.ItemStack bulb = null;
             for (int i = 0; i < 64 * 128 && bulb == null; i++) {
                 var d = mods.eln.Eln.sharedItem.getDescriptor(i);
-                if (d != null && "Small 50V Economic Light Bulb".equals(d.name)) bulb = d.newItemStack();
+                if (d != null && "Small 48V Economic Light Bulb".equals(d.name)) bulb = d.newItemStack();
             }
             lamp.getInventory().setItem(0, bulb);
             lamp.getInventory().setChanged();

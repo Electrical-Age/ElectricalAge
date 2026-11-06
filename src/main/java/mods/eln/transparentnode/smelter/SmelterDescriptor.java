@@ -68,6 +68,6 @@ public class SmelterDescriptor extends TransparentNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Smelts with heat from a thermal cable\non its back, as hot as the cable brings.\nHoppers feed the top and empty the bottom.\nNeeds a little 50V for its controls.").split("\n"));
+        Collections.addAll(list, tr("Smelts with heat from a thermal cable\non its back, as hot as the cable brings.\nHoppers feed the top and empty the bottom.\nNeeds a little 48V for its controls.").split("\n"));
     }
 }

@@ -40,7 +40,7 @@ public final class BreakToolCases {
             ctx.level().setBlockAndUpdate(ctx.at(0, 1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
             ctx.placeSix(Ids.six("Low Voltage Cable"), six, Direction.YN);
             ctx.placeSix(Ids.six("NOT Chip"), six, Direction.XN);
-            heater = ctx.placeTransparent(Ids.transparent("50V Electric Heater"), ctx.at(4, 1, 1)).node.coordonate.pos();
+            heater = ctx.placeTransparent(Ids.transparent("48V Electric Heater"), ctx.at(4, 1, 1)).node.coordonate.pos();
             pipe = ctx.at(7, 1, 1);
             PipeCases.lay(ctx, pipe, 1, 0, 8, 8, 16, 8, 8);
             cable = ctx.at(10, 1, 1);

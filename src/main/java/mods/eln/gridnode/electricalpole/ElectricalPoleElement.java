@@ -149,10 +149,12 @@ public class ElectricalPoleElement extends GridElement {
     }
 
     public void setupTransformer() {
-        voltageSecondaryWatchdog.setUNominal(3200);
+        voltageSecondaryWatchdog.setUNominal(Eln.VVU);
         secondaryMaxCurrent = (float) desc.cableDescriptor.electricalMaximalCurrent;
 
-        interSystemProcess.setRatio(0.25);
+        // the grid at the transmission tier, the ground side at the high tier (1.12: 3200 V to 800 V, 1/4; now 11 kV to
+        // 400 V, 2/55)
+        interSystemProcess.setRatio(Eln.HVU / Eln.VVU);
     }
 
     @Override

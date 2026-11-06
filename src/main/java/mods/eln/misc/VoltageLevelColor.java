@@ -26,11 +26,12 @@ public enum VoltageLevelColor {
     public static VoltageLevelColor fromVoltage(double voltage) {
         if (voltage < 0) {
             return None;
-        } else if (voltage <= 2 * Eln.LVU) {
+        // (each tier up to the geometric middle between it and the next; 1.12 used 2 x each tier, which fitted x4 steps)
+        } else if (voltage <= Math.sqrt(Eln.LVU * Eln.MVU)) {
             return LowVoltage;
-        } else if (voltage <= 2 * Eln.MVU) {
+        } else if (voltage <= Math.sqrt(Eln.MVU * Eln.HVU)) {
             return MediumVoltage;
-        } else if (voltage <= 2 * Eln.HVU) {
+        } else if (voltage <= Math.sqrt(Eln.HVU * Eln.VVU)) {
             return HighVoltage;
         } else if (voltage <= 2 * Eln.VVU) {
             return VeryHighVoltage;

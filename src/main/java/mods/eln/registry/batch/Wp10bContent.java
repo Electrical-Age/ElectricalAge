@@ -136,7 +136,7 @@ public class Wp10bContent implements ElnContent {
 
         {
             subId = 1;
-            name = TR_NAME(Type.NONE, "50V Turbine");
+            name = TR_NAME(Type.NONE, "48V Turbine");
             double RsFactor = 0.1;
             double nominalU = LVU;
             double nominalP = 300 * heatTurbinePowerFactor;
@@ -149,7 +149,7 @@ public class Wp10bContent implements ElnContent {
         }
         {
             subId = 8;
-            name = TR_NAME(Type.NONE, "200V Turbine");
+            name = TR_NAME(Type.NONE, "230V Turbine");
             double RsFactor = 0.10;
             double nominalU = MVU;
             double nominalP = 500 * heatTurbinePowerFactor;
@@ -230,14 +230,14 @@ public class Wp10bContent implements ElnContent {
         {
             subId = 1;
             FuelGeneratorDescriptor descriptor =
-                new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "50V Fuel Generator"), obj.getObj("FuelGenerator50V"),
+                new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "48V Fuel Generator"), obj.getObj("FuelGenerator50V"),
                     lowVoltageCableDescriptor, fuelGeneratorPowerFactor * 300, LVU * 1.05, fuelGeneratorTankCapacity);
             transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
         }
         {
             subId = 2;
             FuelGeneratorDescriptor descriptor =
-                new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "200V Fuel Generator"), obj.getObj("FuelGenerator200V"),
+                new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "230V Fuel Generator"), obj.getObj("FuelGenerator200V"),
                     meduimVoltageCableDescriptor, fuelGeneratorPowerFactor * 1500, MVU * 1.05,
                     fuelGeneratorTankCapacity);
             transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
@@ -286,7 +286,7 @@ public class Wp10bContent implements ElnContent {
 
         {
             subId = 34;
-            name = TR_NAME(Type.NONE, "200V Active Thermal Dissipator");
+            name = TR_NAME(Type.NONE, "230V Active Thermal Dissipator");
 
             ThermalDissipatorActiveDescriptor desc = new ThermalDissipatorActiveDescriptor(
                 name,
@@ -371,7 +371,7 @@ public class Wp10bContent implements ElnContent {
     public static void registerTurret(int id) {
         {
             int subId = 0;
-            String name = TR_NAME(Type.NONE, "800V Defence Turret");
+            String name = TR_NAME(Type.NONE, "400V Defence Turret");
 
             TurretDescriptor desc = new TurretDescriptor(name, "Turret");
 

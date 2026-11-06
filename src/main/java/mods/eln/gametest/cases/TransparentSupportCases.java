@@ -39,7 +39,7 @@ public final class TransparentSupportCases {
             BlockPos floor = ctx.at(1, 1, 1);
             p = floor.above();
             level.setBlockAndUpdate(floor, Blocks.STONE.defaultBlockState());
-            var incubator = ctx.placeTransparent(LabCommands.transparentId("50V Egg Incubator"), p);
+            var incubator = ctx.placeTransparent(LabCommands.transparentId("48V Egg Incubator"), p);
             incubator.getInventory().setItem(0, new ItemStack(Items.EGG, 3));
             ItemStack item = incubator.transparentNodeDescriptor.newItemStack();
             level.setBlockAndUpdate(floor, Blocks.AIR.defaultBlockState());
@@ -87,7 +87,7 @@ public final class TransparentSupportCases {
 
         public void build(TestContext ctx) {
             var level = ctx.level();
-            var d = mods.eln.Eln.transparentNodeItem.getDescriptor(LabCommands.transparentId("50V Egg Incubator"));
+            var d = mods.eln.Eln.transparentNodeItem.getDescriptor(LabCommands.transparentId("48V Egg Incubator"));
             var slab = Blocks.STONE_SLAB.defaultBlockState();
             var top = slab.setValue(net.minecraft.world.level.block.SlabBlock.TYPE, net.minecraft.world.level.block.state.properties.SlabType.TOP);
             var stair = Blocks.STONE_STAIRS.defaultBlockState().setValue(net.minecraft.world.level.block.StairBlock.FACING, net.minecraft.core.Direction.EAST);
@@ -104,7 +104,7 @@ public final class TransparentSupportCases {
             // placed on a top slab, it stays when a neighbour changes
             BlockPos below = ctx.at(1, 1, 3);
             level.setBlockAndUpdate(below, top);
-            ctx.placeTransparent(LabCommands.transparentId("50V Egg Incubator"), below.above());
+            ctx.placeTransparent(LabCommands.transparentId("48V Egg Incubator"), below.above());
             level.setBlockAndUpdate(below.above().east(), Blocks.STONE.defaultBlockState());
             level.setBlockAndUpdate(below.above().east(), Blocks.AIR.defaultBlockState());
             stays = !level.getBlockState(below.above()).isAir();

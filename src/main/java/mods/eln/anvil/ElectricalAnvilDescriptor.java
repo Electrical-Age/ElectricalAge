@@ -82,7 +82,7 @@ public class ElectricalAnvilDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Repairs a tool with its repair material, for no XP.\nIt never raises the tool's anvil cost,\nand lowers an old one a step each repair.\nTakes 800V at %1$ while it welds: feed it\nfrom a capacitor bank.",
+        Collections.addAll(list, tr("Repairs a tool with its repair material, for no XP.\nIt never raises the tool's anvil cost,\nand lowers an old one a step each repair.\nTakes 400V at %1$ while it welds: feed it\nfrom a capacitor bank.",
             mods.eln.misc.Utils.plotPower(powerW)).split("\n"));
     }
 }

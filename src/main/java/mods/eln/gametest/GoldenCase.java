@@ -87,6 +87,8 @@ final class GoldenCase implements TestCase {
         m.put("Power Capacitor", Map.of("dischargeTao", "leaks with RC 30 min, as the capacitor bank (Baughn 2026-10-28: batteries stay the bulk store)"));
         m.put("Signal Processor", Map.of("alphaOff", "restyled with a logger screen on top, no door (Baughn 2026-10-30, board #45)"));
         // the voltage tiers (Eln.LVU, MVU, HVU, VVU, SVU; MVP 3 kW) and every number derived from them
+        for (String solar : new String[]{"Small Solar Panel", "Small Rotating Solar Panel", "2x3 Solar Panel", "2x3 Rotating Solar Panel"})
+            tier(m, solar, "electricalUmax", "electricalRs");   // (LVSolarU 59 -> 57 for the 48 V tier)
         tier(m, "Signal Cable", "electricalNominalRs", "electricalNominalVoltage", "electricalNominalPower", "electricalNominalPowerDropFactor", "electricalMaximalVoltage", "electricalRs", "thermalRp", "thermalRs", "thermalC", "electricalRsMin", "dielectricBreakOhm", "dielectricVoltage", "dielectricBreakOhmMin");
         tier(m, "Low Voltage Cable", "electricalNominalRs", "electricalNominalVoltage", "electricalMaximalVoltage", "electricalMaximalCurrent", "electricalRs", "electricalMaximalI", "electricalRsMin", "dielectricBreakOhm", "dielectricVoltage", "dielectricBreakOhmMin");
         tier(m, "Medium Voltage Cable", "electricalNominalRs", "electricalNominalVoltage", "electricalNominalPower", "electricalMaximalVoltage", "electricalMaximalCurrent", "electricalRs", "thermalRp", "thermalRs", "thermalC", "electricalMaximalI", "electricalRsMin", "dielectricBreakOhm", "dielectricVoltage", "dielectricBreakOhmMin");
@@ -208,9 +210,9 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5568",   // the computer (robotics phase 3, Baughn 2026-11-05)
         "eln:ore@7");   // Deepslate Lead Ore: lead in deepslate's middle (Baughn 2026-10-20)
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
-    static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("50V Tar Sand Separator", "200V Tar Sand Separator",
-        "50V Electric Heater", "200V Electric Heater", "Smelter", "Steam Oven", "Small Steam Condenser", "Steam Condenser",
-        "50V Steam Turbine", "200V Steam Turbine", "50V Compact Steam Turbine",
+    static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("48V Tar Sand Separator", "230V Tar Sand Separator",
+        "48V Electric Heater", "230V Electric Heater", "Smelter", "Steam Oven", "Small Steam Condenser", "Steam Condenser",
+        "48V Steam Turbine", "230V Steam Turbine", "48V Compact Steam Turbine",
         "Electrical Anvil",   // (their screen: Baughn 2026-10-26)
         "Three-Channel Data Logger", "Tilted Terminal Logger",   // (Baughn 2026-10-30, board #45)
         "Bus I/O Module",   // (the field bus)
@@ -248,11 +250,26 @@ final class GoldenCase implements TestCase {
         for (String f : was.keySet()) {
             if (IGNORED.contains(f) || changed.containsKey(f)) continue;
             JsonElement a = was.get(f), b = now.get(f);
+            if (f.equals("name") && a.isJsonPrimitive()) a = new com.google.gson.JsonPrimitive(renamed(a.getAsString()));
             if (b == null) diff.append(f).append(" missing; ");
             else if (!same(a, b)) diff.append(f).append(": ").append(a).append(" -> ").append(b).append("; ");
         }
         ctx.check("golden " + name + ": descriptor numbers as in 1.12", diff.length() == 0, diff.toString());
         return 1;
+    }
+
+    private static final java.util.regex.Pattern TIER_NAME = java.util.regex.Pattern.compile("^((?:Small |Weak )?)(50|200|800)V ");
+
+    /** A 1.12 display name as it is now: "50V X" -> "48V X", "200V" -> "230V", "800V" -> "400V" (real-world voltages, Baughn 2026-11-06). */
+    static String renamed(String name) {
+        var m = TIER_NAME.matcher(name);
+        if (!m.find()) return name;
+        String v = switch (m.group(2)) {
+            case "50" -> "48";
+            case "200" -> "230";
+            default -> "400";
+        };
+        return m.group(1) + v + "V " + name.substring(m.end());
     }
 
     static boolean same(JsonElement a, JsonElement b) {

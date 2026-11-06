@@ -212,7 +212,7 @@ public final class Wp11Cases {
 
     /**
      * Utility pole w/DC-DC converter fed LVU on its ground side (LV cable + source), grid side open: the transformer
-     * process gives grid U = ground U / ratio(0.25) = 4 LVU (no current: ground U = LVU). Both poles get their 3 ghost
+     * process gives grid U = ground U / ratio(HVU / VVU, 2/55) (no current: ground U = LVU). Both poles get their 3 ghost
      * blocks above; the TOP ghost lookup resolves a ghost to the pole's item. Plain utility pole: placement + ghosts.
      */
     static final class PoleCase implements TestCase {
@@ -248,7 +248,7 @@ public final class Wp11Cases {
             ghosts(ctx, "DC-DC pole", dcdcPos, UTILITY_POLE_DCDC);
             ghosts(ctx, "utility pole", plainPos, UTILITY_POLE);
             ctx.checkValue("wp11 DC-DC pole ground side [V] (no current: = LVU)", dcdc.secondaryLoad.getU(), U);
-            ctx.checkValue("wp11 DC-DC pole grid side [V] (ground / 0.25 = 4 LVU)", dcdc.electricalLoad.getU(), U / 0.25);
+            ctx.checkValue("wp11 DC-DC pole grid side [V] (ground x VVU / HVU)", dcdc.electricalLoad.getU(), U / (mods.eln.Eln.HVU / mods.eln.Eln.VVU));
             ctx.check("wp11 utility pole has no ground connection (no transformer)", plain.secondaryLoad == null && plain.getConnectionMask(Direction.XP, LRDU.Down) == 0, "");
         }
     }

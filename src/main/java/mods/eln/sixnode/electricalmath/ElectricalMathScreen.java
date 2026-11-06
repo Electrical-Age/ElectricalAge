@@ -71,7 +71,7 @@ public class ElectricalMathScreen extends ElnScreen {
         field(LEFT_X + 30, 177, 28, () -> num(channel().max), v -> {
             float p = mods.eln.client.gui.EaField.parse(v);
             if (!Float.isNaN(p)) lc.max(selected, p);
-        }, tr("Max"), tr("what a full signal (50 V) reads as"));
+        }, tr("Max"), tr("what a full signal (5 V) reads as"));
         field(LEFT_X + 60, 177, LEFT_W - 60, () -> channel().unit, v -> lc.unit(selected, v), tr("Unit"), tr("any text, up to 10 characters"));
     }
 

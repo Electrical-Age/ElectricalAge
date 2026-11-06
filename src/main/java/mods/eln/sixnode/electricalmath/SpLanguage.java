@@ -136,7 +136,7 @@ public final class SpLanguage implements LanguageAdapter {
                     return out;
                 }
                 case INPUT_A, INPUT_B, INPUT_C -> {
-                    List<String> out = new ArrayList<>(List.of("Input " + w, "The signal on that side, 0 to 1 for 0 to 50 V."));
+                    List<String> out = new ArrayList<>(List.of("Input " + w, "The signal on that side, 0 to 1 for 0 to 5 V."));
                     for (Statement st : statements(text))
                         if (st.definition()) {
                             String def = text.split("\n", -1)[st.line()].substring(st.start(), st.end()).trim();
@@ -151,7 +151,7 @@ public final class SpLanguage implements LanguageAdapter {
                     if (ch == mods.eln.bus.BusChannel.UNUSED)
                         return List.of("Not a bus channel", "The 16 channels are the dye colours: " + mods.eln.bus.BusChannel.choices());
                     List<String> out = new ArrayList<>(List.of("Bus channel " + mods.eln.bus.BusChannel.label(ch),
-                        "A field bus channel, 0 to 1 for 0 to 50 V. Read, it is the bus's level as the tick began; a line bus." + w.substring(Program.BUS.length()) + " = ... writes it."));
+                        "A field bus channel, 0 to 1 for 0 to 5 V. Read, it is the bus's level as the tick began; a line bus." + w.substring(Program.BUS.length()) + " = ... writes it."));
                     String[] lines = text.split("\n", -1);
                     for (Statement st : statements(text))
                         if (st.definition()) {

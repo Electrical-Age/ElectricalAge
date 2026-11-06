@@ -63,7 +63,7 @@ public final class IncandescenceCases {
             for (int row = 0; row < 2; row++) {
                 int z = 1 + 5 * row;
                 BlockPos hp = c.at(1, 1, z);
-                var h = (mods.eln.oil.ElectricHeaterElement) Wp10bCases.placeFacing(c, Ids.transparent("50V Electric Heater"), hp, mods.eln.misc.Direction.XN);
+                var h = (mods.eln.oil.ElectricHeaterElement) Wp10bCases.placeFacing(c, Ids.transparent("48V Electric Heater"), hp, mods.eln.misc.Direction.XN);
                 Lights.hold(h.thermal, 700);
                 for (int x = 2; x <= 4; x++) c.placeSix(cable, c.at(x, 1, z));
                 near[row] = c.at(2, 1, z);
@@ -144,9 +144,9 @@ public final class IncandescenceCases {
             hold(cold.getThermalLoad(), 500);
             probes.add(new Probe("Large Rheostat at 500 C", c.at(3, 1, 1), 500, 0));
             // the electric heater's coils at 720 C (it fails at 800)
-            var heater = (mods.eln.oil.ElectricHeaterElement) c.placeTransparent(Ids.transparent("50V Electric Heater"), c.at(5, 1, 1));
+            var heater = (mods.eln.oil.ElectricHeaterElement) c.placeTransparent(Ids.transparent("48V Electric Heater"), c.at(5, 1, 1));
             hold(heater.thermal, 720);
-            probes.add(new Probe("50V Electric Heater at 720 C", c.at(5, 1, 1), 720, 4));
+            probes.add(new Probe("48V Electric Heater at 720 C", c.at(5, 1, 1), 720, 4));
             // a six-node thermal cable at 950 C (fails at 1000)
             var tc = c.placeSix(Ids.six("Copper Thermal Cable"), c.at(7, 1, 1));
             hold((ThermalLoad) mods.eln.gametest.LabCommands.field(tc, "thermalLoad"), 950);

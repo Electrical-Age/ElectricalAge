@@ -90,12 +90,12 @@ public final class ElnConfig {
         b.pop();
         // the electrical anvil (Baughn 2026-10-28: an 800 V pulse, maxed out, so players build capacitor banks)
         b.push("anvil");
-        ANVIL_POWER = b.comment("The electrical anvil's draw while it welds, W, at 800 V (the high-voltage cable's rating: 5000).")
+        ANVIL_POWER = b.comment("The electrical anvil's draw while it welds, W, at 400 V (the high-voltage cable's rating: 5000).")
             .defineInRange("power", 5000.0, 10.0, 1e6);
         ANVIL_UNIT = b.comment("Energy for a unit of repair material's worth of repair (a quarter of the tool), J (40000: 8 s at 5 kW).")
             .defineInRange("joulesPerUnit", 40000.0, 0.0, 1e9);
         ANVIL_NAME = b.comment("Energy to engrave a new name, J.").defineInRange("joulesPerName", 2000.0, 0.0, 1e9);
-        ANVIL_RESUME = b.comment("It starts a pulse when the line is at this share of 800 V...").defineInRange("resumeFraction", 0.95, 0.0, 2.0);
+        ANVIL_RESUME = b.comment("It starts a pulse when the line is at this share of 400 V...").defineInRange("resumeFraction", 0.95, 0.0, 2.0);
         ANVIL_PLATEAU = b.comment("...or, when the line has stopped rising for 2 s, at this share or more (a bank on a weak plant levels off",
                 "below resumeFraction: its leak).").defineInRange("plateauFraction", 0.93, 0.0, 2.0);
         ANVIL_SAG = b.comment("...and pauses (keeping its progress) when it sags below this share.").defineInRange("sagFraction", 0.9, 0.0, 2.0);

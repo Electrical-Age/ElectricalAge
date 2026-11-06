@@ -675,7 +675,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             }
             if (i >= 0 && parts.get(i) instanceof PipeSensorPart s) {
                 s.scale = s.nextScale();
-                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("%s: full scale (50 V) %.0f %s", s.name(), s.scale, s.unit())));
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("%s: full scale (5 V) %.0f %s", s.name(), s.scale, s.unit())));
                 setNeedPublish(true);
                 return true;
             }

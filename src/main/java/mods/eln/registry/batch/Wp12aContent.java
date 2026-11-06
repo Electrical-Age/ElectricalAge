@@ -68,7 +68,7 @@ public class Wp12aContent implements ElnContent {
         {
             subId = 0;
             completId = subId + (id << 6);
-            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 50V Copper Heating Corp"),// iconId,
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 48V Copper Heating Corp"),// iconId,
                 // name,
                 LVU, 150,// electricalNominalU, electricalNominalP,
                 190,// electricalMaximalP)
@@ -79,7 +79,7 @@ public class Wp12aContent implements ElnContent {
         {
             subId = 1;
             completId = subId + (id << 6);
-            element = new HeatingCorpElement(TR_NAME(Type.NONE, "50V Copper Heating Corp"),// iconId,
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "48V Copper Heating Corp"),// iconId,
                 // name,
                 LVU, 250,// electricalNominalU, electricalNominalP,
                 320,// electricalMaximalP)
@@ -89,7 +89,7 @@ public class Wp12aContent implements ElnContent {
         {
             subId = 2;
             completId = subId + (id << 6);
-            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 200V Copper Heating Corp"),// iconId,
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 230V Copper Heating Corp"),// iconId,
                 // name,
                 MVU, 400,// electricalNominalU, electricalNominalP,
                 500,// electricalMaximalP)
@@ -99,7 +99,7 @@ public class Wp12aContent implements ElnContent {
         {
             subId = 3;
             completId = subId + (id << 6);
-            element = new HeatingCorpElement(TR_NAME(Type.NONE, "200V Copper Heating Corp"),// iconId,
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "230V Copper Heating Corp"),// iconId,
                 // name,
                 MVU, 600,// electricalNominalU, electricalNominalP,
                 750,// electricalMaximalP)
@@ -109,7 +109,7 @@ public class Wp12aContent implements ElnContent {
         {
             subId = 4;
             completId = subId + (id << 6);
-            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 50V Iron Heating Corp"),// iconId,
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 48V Iron Heating Corp"),// iconId,
                 // name,
                 LVU, 180,// electricalNominalU, electricalNominalP,
                 225,// electricalMaximalP)
@@ -120,7 +120,7 @@ public class Wp12aContent implements ElnContent {
         {
             subId = 5;
             completId = subId + (id << 6);
-            element = new HeatingCorpElement(TR_NAME(Type.NONE, "50V Iron Heating Corp"),// iconId,
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "48V Iron Heating Corp"),// iconId,
                 // name,
                 LVU, 375,// electricalNominalU, electricalNominalP,
                 480,// electricalMaximalP)
@@ -130,7 +130,7 @@ public class Wp12aContent implements ElnContent {
         {
             subId = 6;
             completId = subId + (id << 6);
-            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 200V Iron Heating Corp"),// iconId,
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 230V Iron Heating Corp"),// iconId,
                 // name,
                 MVU, 600,// electricalNominalU, electricalNominalP,
                 750,// electricalMaximalP)
@@ -140,7 +140,7 @@ public class Wp12aContent implements ElnContent {
         {
             subId = 7;
             completId = subId + (id << 6);
-            element = new HeatingCorpElement(TR_NAME(Type.NONE, "200V Iron Heating Corp"),// iconId,
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "230V Iron Heating Corp"),// iconId,
                 // name,
                 MVU, 900,// electricalNominalU, electricalNominalP,
                 1050,// electricalMaximalP)
@@ -150,7 +150,7 @@ public class Wp12aContent implements ElnContent {
         {
             subId = 8;
             completId = subId + (id << 6);
-            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 50V Tungsten Heating Corp"),// iconId,
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 48V Tungsten Heating Corp"),// iconId,
                 // name,
                 LVU, 240,// electricalNominalU, electricalNominalP,
                 300,// electricalMaximalP)
@@ -161,7 +161,7 @@ public class Wp12aContent implements ElnContent {
         {
             subId = 9;
             completId = subId + (id << 6);
-            element = new HeatingCorpElement(TR_NAME(Type.NONE, "50V Tungsten Heating Corp"),// iconId,
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "48V Tungsten Heating Corp"),// iconId,
                 // name,
                 LVU, 500,// electricalNominalU, electricalNominalP,
                 640,// electricalMaximalP)
@@ -172,7 +172,7 @@ public class Wp12aContent implements ElnContent {
             subId = 10;
             completId = subId + (id << 6);
             element = new HeatingCorpElement(
-                TR_NAME(Type.NONE, "Small 200V Tungsten Heating Corp"),// iconId, name,
+                TR_NAME(Type.NONE, "Small 230V Tungsten Heating Corp"),// iconId, name,
                 MVU, 800,// electricalNominalU, electricalNominalP,
                 1000,// electricalMaximalP)
                 meduimVoltageCableDescriptor);
@@ -181,7 +181,7 @@ public class Wp12aContent implements ElnContent {
         {
             subId = 11;
             completId = subId + (id << 6);
-            element = new HeatingCorpElement(TR_NAME(Type.NONE, "200V Tungsten Heating Corp"),// iconId,
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "230V Tungsten Heating Corp"),// iconId,
                 // name,
                 MVU, 1200,// electricalNominalU, electricalNominalP,
                 1500,// electricalMaximalP)

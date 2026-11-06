@@ -483,7 +483,7 @@ public final class ElnDeviceRegistry {
         solarIfSBase = new FunctionTable(new double[]{0.0, 0.1, 0.4, 0.6,
             0.8, 1.0}, 1);
 
-        double LVSolarU = 59;
+        double LVSolarU = 57;   // (1.12: 59 for its 50 V tier; scaled to the 48 V tier)
 
         {
             subId = 1;
@@ -750,7 +750,7 @@ public final class ElnDeviceRegistry {
         {
             subId = 0;
             completId = subId + (id << 6);
-            element = new LampDescriptor(TR_NAME(Type.NONE, "Small 50V Incandescent Light Bulb"),
+            element = new LampDescriptor(TR_NAME(Type.NONE, "Small 48V Incandescent Light Bulb"),
                 "incandescentironlamp", LampDescriptor.Type.Incandescent,
                 LampSocketType.Douille, LVU, lightPower[12], // nominalU,
                 // nominalP
@@ -762,7 +762,7 @@ public final class ElnDeviceRegistry {
         {
             subId = 1;
             completId = subId + (id << 6);
-            element = new LampDescriptor(TR_NAME(Type.NONE, "50V Incandescent Light Bulb"),
+            element = new LampDescriptor(TR_NAME(Type.NONE, "48V Incandescent Light Bulb"),
                 "incandescentironlamp", LampDescriptor.Type.Incandescent,
                 LampSocketType.Douille, LVU, lightPower[14], // nominalU,
                 // nominalP
@@ -774,7 +774,7 @@ public final class ElnDeviceRegistry {
         {
             subId = 2;
             completId = subId + (id << 6);
-            element = new LampDescriptor(TR_NAME(Type.NONE, "200V Incandescent Light Bulb"),
+            element = new LampDescriptor(TR_NAME(Type.NONE, "230V Incandescent Light Bulb"),
                 "incandescentironlamp", LampDescriptor.Type.Incandescent,
                 LampSocketType.Douille, MVU, lightPower[14], // nominalU,
                 // nominalP
@@ -788,7 +788,7 @@ public final class ElnDeviceRegistry {
             subId = 4;
             completId = subId + (id << 6);
             element = new LampDescriptor(
-                TR_NAME(Type.NONE, "Small 50V Carbon Incandescent Light Bulb"),
+                TR_NAME(Type.NONE, "Small 48V Carbon Incandescent Light Bulb"),
                 "incandescentcarbonlamp", LampDescriptor.Type.Incandescent,
                 LampSocketType.Douille, LVU, lightPower[11], // nominalU,
                 // nominalP
@@ -800,7 +800,7 @@ public final class ElnDeviceRegistry {
         {
             subId = 5;
             completId = subId + (id << 6);
-            element = new LampDescriptor(TR_NAME(Type.NONE, "50V Carbon Incandescent Light Bulb"),
+            element = new LampDescriptor(TR_NAME(Type.NONE, "48V Carbon Incandescent Light Bulb"),
                 "incandescentcarbonlamp", LampDescriptor.Type.Incandescent,
                 LampSocketType.Douille, LVU, lightPower[13], // nominalU,
                 // nominalP
@@ -813,7 +813,7 @@ public final class ElnDeviceRegistry {
         {
             subId = 16;
             completId = subId + (id << 6);
-            element = new LampDescriptor(TR_NAME(Type.NONE, "Small 50V Economic Light Bulb"),
+            element = new LampDescriptor(TR_NAME(Type.NONE, "Small 48V Economic Light Bulb"),
                 "fluorescentlamp", LampDescriptor.Type.eco,
                 LampSocketType.Douille, LVU, lightPower[12]
                 * economicPowerFactor, // nominalU, nominalP
@@ -825,7 +825,7 @@ public final class ElnDeviceRegistry {
         {
             subId = 17;
             completId = subId + (id << 6);
-            element = new LampDescriptor(TR_NAME(Type.NONE, "50V Economic Light Bulb"),
+            element = new LampDescriptor(TR_NAME(Type.NONE, "48V Economic Light Bulb"),
                 "fluorescentlamp", LampDescriptor.Type.eco,
                 LampSocketType.Douille, LVU, lightPower[14]
                 * economicPowerFactor, // nominalU, nominalP
@@ -837,7 +837,7 @@ public final class ElnDeviceRegistry {
         {
             subId = 18;
             completId = subId + (id << 6);
-            element = new LampDescriptor(TR_NAME(Type.NONE, "200V Economic Light Bulb"),
+            element = new LampDescriptor(TR_NAME(Type.NONE, "230V Economic Light Bulb"),
                 "fluorescentlamp", LampDescriptor.Type.eco,
                 LampSocketType.Douille, MVU, lightPower[14]
                 * economicPowerFactor, // nominalU, nominalP
@@ -850,7 +850,7 @@ public final class ElnDeviceRegistry {
         {
             subId = 32;
             completId = subId + (id << 6);
-            element = new LampDescriptor(TR_NAME(Type.NONE, "50V Farming Lamp"),
+            element = new LampDescriptor(TR_NAME(Type.NONE, "48V Farming Lamp"),
                 "farminglamp", LampDescriptor.Type.Incandescent,
                 LampSocketType.Douille, LVU, 120, // nominalU, nominalP
                 lightLevel[15], incandescentLampLife, 0.50 // nominalLight,
@@ -861,7 +861,7 @@ public final class ElnDeviceRegistry {
         {
             subId = 36;
             completId = subId + (id << 6);
-            element = new LampDescriptor(TR_NAME(Type.NONE, "200V Farming Lamp"),
+            element = new LampDescriptor(TR_NAME(Type.NONE, "230V Farming Lamp"),
                 "farminglamp", LampDescriptor.Type.Incandescent,
                 LampSocketType.Douille, MVU, 120, // nominalU, nominalP
                 lightLevel[15], incandescentLampLife, 0.50 // nominalLight,
@@ -872,7 +872,7 @@ public final class ElnDeviceRegistry {
         {
             subId = 37;
             completId = subId + (id << 6);
-            element = new LampDescriptor(TR_NAME(Type.NONE, "50V LED Bulb"),
+            element = new LampDescriptor(TR_NAME(Type.NONE, "48V LED Bulb"),
                 "ledlamp", LampDescriptor.Type.LED,
                 LampSocketType.Douille, LVU, lightPower[14] / 2, // nominalU, nominalP
                 lightLevel[14], ledLampLife, standardGrowRate // nominalLight,
@@ -883,7 +883,7 @@ public final class ElnDeviceRegistry {
         {
             subId = 38;
             completId = subId + (id << 6);
-            element = new LampDescriptor(TR_NAME(Type.NONE, "200V LED Bulb"),
+            element = new LampDescriptor(TR_NAME(Type.NONE, "230V LED Bulb"),
                 "ledlamp", LampDescriptor.Type.LED,
                 LampSocketType.Douille, MVU, lightPower[14] / 2, // nominalU, nominalP
                 lightLevel[14], ledLampLife, standardGrowRate // nominalLight,

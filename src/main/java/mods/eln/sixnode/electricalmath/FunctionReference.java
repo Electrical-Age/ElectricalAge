@@ -51,7 +51,7 @@ public final class FunctionReference {
         new Entry("Utility", "A = 0.5", "An input's default: what A (or B, C) reads while no cable is on it, a weak pull up or down; a cable overrides it. In signal units (1 = 50 V), once per input; the logger graphs it.", "B = 0.2", "A = 0.5"),
         new Entry("Utility", "name = expression", "Names a part, computed once and paid once; the last line is the output.", "x = A * 0.5", "x = "),
         new Entry("Utility", "# text", "A comment.", "# my notes", "# "),
-        new Entry("Field bus", "bus.colour", "Reads a channel of the field bus on its pin beside the output: 0 to 1 for 0 to 50 V, as the tick began. "
+        new Entry("Field bus", "bus.colour", "Reads a channel of the field bus on its pin beside the output: 0 to 1 for 0 to 5 V, as the tick began. "
             + "The 16 channels are the dye colours, numbered 0 to 15, each listed below.", "bus.light_blue < 0.3", "bus."),
         new Entry("Field bus", "bus.colour = expression", "Writes a channel, once a tick; with several writers the last change wins. It may be the last line: then the output wire gives 0 V.",
             "bus.red = rs(A, B)", "bus.red = ")));

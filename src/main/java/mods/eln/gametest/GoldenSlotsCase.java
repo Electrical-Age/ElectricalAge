@@ -154,7 +154,7 @@ final class GoldenSlotsCase implements TestCase {
         for (JsonElement e : golden) {
             JsonObject dev = e.getAsJsonObject();
             String name = dev.get("device").getAsString();
-            Object d = byName.get(name);
+            Object d = byName.get(GoldenCase.renamed(name));
             if (d == null && REMOVED.contains(name)) continue;
             if (GUI_REMOVED.contains(name)) {
                 ctx.line("INFO golden slots: known difference: " + name + " has no GUI (its cable slot was removed)");
@@ -279,7 +279,7 @@ final class GoldenSlotsCase implements TestCase {
         ctx.check("golden slots: slots match", slotsOk == slotsAll, slotsOk + " of " + slotsAll);
         // every descriptor with slots is a golden device: a subclass inheriting a spec 1.12 didn't give it would show here
         Set<String> goldenNames = new HashSet<>();
-        for (JsonElement e : golden) goldenNames.add(e.getAsJsonObject().get("device").getAsString());
+        for (JsonElement e : golden) goldenNames.add(GoldenCase.renamed(e.getAsJsonObject().get("device").getAsString()));
         for (var e : byName.entrySet())
             if (MenuSpecs.of(e.getValue()) != MenuSpec.SCREEN_ONLY && !goldenNames.contains(e.getKey()) && !GoldenCase.NEW_IN_26_NAMES.contains(e.getKey()))
                 ctx.check("golden slots: " + e.getKey() + " has no 1.12 container", false, "spec from " + MenuSpecs.registeredClass(e.getValue()).getSimpleName());

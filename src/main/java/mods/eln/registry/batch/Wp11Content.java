@@ -57,11 +57,11 @@ public class Wp11Content implements ElnContent {
      */
     public static void registerEnergyConverter() {
         if (ElnToOtherEnergyConverterEnable) {
-            elnToOtherLvu = energyConverter(ExporterSaveUpgrade.LVU_ID, "50V Electrical Age to other energy exporter", "EnergyConverterElnToOtherLVU",
+            elnToOtherLvu = energyConverter(ExporterSaveUpgrade.LVU_ID, "48V Electrical Age to other energy exporter", "EnergyConverterElnToOtherLVU",
                 new ElnDescriptor(LVU, LVP()), new Ic2Descriptor(32, 1));
-            elnToOtherMvu = energyConverter(ExporterSaveUpgrade.MVU_ID, "200V Electrical Age to other energy exporter", "EnergyConverterElnToOtherMVU",
+            elnToOtherMvu = energyConverter(ExporterSaveUpgrade.MVU_ID, "230V Electrical Age to other energy exporter", "EnergyConverterElnToOtherMVU",
                 new ElnDescriptor(MVU, MVP()), new Ic2Descriptor(128, 2));
-            elnToOtherHvu = energyConverter(ExporterSaveUpgrade.HVU_ID, "800V Electrical Age to other energy exporter", "EnergyConverterElnToOtherHVU",
+            elnToOtherHvu = energyConverter(ExporterSaveUpgrade.HVU_ID, "400V Electrical Age to other energy exporter", "EnergyConverterElnToOtherHVU",
                 new ElnDescriptor(HVU, HVP()), new Ic2Descriptor(512, 3));
         }
     }
@@ -121,7 +121,7 @@ public class Wp11Content implements ElnContent {
             // Baughn 2026-10-29: a small electric motor to spin shafts up and drive a condenser's pumps
             subId = 17;
             ShaftMotorDescriptor desc = new ShaftMotorDescriptor(
-                TR_NAME(Type.NONE, "200V Shaft Motor"),
+                TR_NAME(Type.NONE, "230V Shaft Motor"),
                 obj.getObj("shaftmotor"),
                 meduimVoltageCableDescriptor,
                 MVU, 2000);

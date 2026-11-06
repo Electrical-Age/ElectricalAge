@@ -66,19 +66,19 @@ public class Wp10aContent implements ElnContent {
     /** 26.x oil & steam: electric heaters and the boiler (placeholder models). */
     public static void registerSteam(int id) {
         // (a burnt heater gets a new heating corp, overvoltage or overheat)
-        var heater50 = new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "50V Electric Heater"),
+        var heater50 = new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "48V Electric Heater"),
             LVU, 1000, lowVoltageCableDescriptor, "electricheater50v");
-        heater50.repairPart = "50V Copper Heating Corp";
+        heater50.repairPart = "48V Copper Heating Corp";
         transparentNodeItem.addDescriptor(0 + (id << 6), heater50);
-        var heater200 = new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "200V Electric Heater"),
+        var heater200 = new mods.eln.oil.ElectricHeaterDescriptor(TR_NAME(Type.NONE, "230V Electric Heater"),
             MVU, 4000, meduimVoltageCableDescriptor, "electricheater200v");
-        heater200.repairPart = "200V Copper Heating Corp";
+        heater200.repairPart = "230V Copper Heating Corp";
         transparentNodeItem.addDescriptor(4 + (id << 6), heater200);
         transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.BoilerDescriptor(TR_NAME(Type.NONE, "Boiler"), "boiler"));
         // Baughn: small steam turbines with the generator built in; they replace the heat turbines (now uncraftable)
-        transparentNodeItem.addDescriptor(12 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "50V Steam Turbine"),
+        transparentNodeItem.addDescriptor(12 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "48V Steam Turbine"),
             LVU, 1000, lowVoltageCableDescriptor, "steamturbine50v"));
-        transparentNodeItem.addDescriptor(16 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "200V Steam Turbine"),
+        transparentNodeItem.addDescriptor(16 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "230V Steam Turbine"),
             MVU, 4000, meduimVoltageCableDescriptor, "steamturbine200v"));
         // the steam oven (Baughn 2026-10-23): food cooked with a pipe's steam; model mods.eln.cad.models.SteamOven
         transparentNodeItem.addDescriptor(20 + (id << 6), new mods.eln.oil.SteamOvenDescriptor(TR_NAME(Type.NONE, "Steam Oven"), "steamoven"));
@@ -88,14 +88,14 @@ public class Wp10aContent implements ElnContent {
         transparentNodeItem.addDescriptor(32 + (id << 6), new mods.eln.oil.CondenserDescriptor(TR_NAME(Type.NONE, "Steam Condenser"),
             4000, 0.02, "condenser200v"));
         // the bootstrap turbine (Baughn 2026-10-27): heat and water in, 50 V out, its control and condenser built in
-        transparentNodeItem.addDescriptor(36 + (id << 6), new mods.eln.oil.CompactTurbineDescriptor(TR_NAME(Type.NONE, "50V Compact Steam Turbine"),
+        transparentNodeItem.addDescriptor(36 + (id << 6), new mods.eln.oil.CompactTurbineDescriptor(TR_NAME(Type.NONE, "48V Compact Steam Turbine"),
             LVU, 300, lowVoltageCableDescriptor, "compactturbine50v"));
         // the shaft redo (Baughn 2026-10-29): tanks (steam drum, separator, hotwell) and an inline feed pump
         transparentNodeItem.addDescriptor(40 + (id << 6), new mods.eln.oil.TankDescriptor(TR_NAME(Type.NONE, "Iron Tank"),
             mods.eln.oil.TankDescriptor.bucketsVolume(12), 10e5, 40e5, "tankiron"));   // (12 buckets a block: Baughn 2026-10-29)
         transparentNodeItem.addDescriptor(44 + (id << 6), new mods.eln.oil.TankDescriptor(TR_NAME(Type.NONE, "Alloy Tank"),
             mods.eln.oil.TankDescriptor.bucketsVolume(12), 100e5, 300e5, "tankalloy"));
-        transparentNodeItem.addDescriptor(48 + (id << 6), new mods.eln.oil.InlinePumpDescriptor(TR_NAME(Type.NONE, "200V Inline Pump"),
+        transparentNodeItem.addDescriptor(48 + (id << 6), new mods.eln.oil.InlinePumpDescriptor(TR_NAME(Type.NONE, "230V Inline Pump"),
             MVU, meduimVoltageCableDescriptor, "inlinepump200v"));
         // ... and the plant condenser for the shaft turbines (the add-on condensers above stay as they are)
         transparentNodeItem.addDescriptor(52 + (id << 6), new mods.eln.oil.PlantCondenserDescriptor(TR_NAME(Type.NONE, "Plant Steam Condenser"),
@@ -107,31 +107,31 @@ public class Wp10aContent implements ElnContent {
 
     /** 26.x oil: the pump (on well casing; oil lakes and water). Model: mods.eln.cad.models.OilPump. */
     public static void registerOilPump(int id) {
-        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.OilPumpDescriptor(TR_NAME(Type.NONE, "50V Oil Pump"),
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.OilPumpDescriptor(TR_NAME(Type.NONE, "48V Oil Pump"),
             LVU, 1000, lowVoltageCableDescriptor, "oilpump50v"));
-        transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.OilPumpDescriptor(TR_NAME(Type.NONE, "200V Oil Pump"),
+        transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.OilPumpDescriptor(TR_NAME(Type.NONE, "230V Oil Pump"),
             MVU, 4000, meduimVoltageCableDescriptor, "oilpump200v"));
         // the steam injection wellhead (todo #138; Baughn 2026-10-30: enhanced recovery by steam, not water)
         transparentNodeItem.addDescriptor(16 + (id << 6), new mods.eln.oil.SteamInjectionDescriptor(TR_NAME(Type.NONE, "Steam Injection Wellhead"),
             "oilpump50v"));
         // Baughn 2026-10-25: small waterlogged pumps for a boiler's feed, a few turbines' worth of water each
-        transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.SubmersiblePumpDescriptor(TR_NAME(Type.NONE, "50V Submersible Pump"),
+        transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.SubmersiblePumpDescriptor(TR_NAME(Type.NONE, "48V Submersible Pump"),
             LVU, 100, 1000, 6e5, lowVoltageCableDescriptor, "submersiblepump50v"));
-        transparentNodeItem.addDescriptor(12 + (id << 6), new mods.eln.oil.SubmersiblePumpDescriptor(TR_NAME(Type.NONE, "200V Submersible Pump"),
+        transparentNodeItem.addDescriptor(12 + (id << 6), new mods.eln.oil.SubmersiblePumpDescriptor(TR_NAME(Type.NONE, "230V Submersible Pump"),
             MVU, 400, 4000, 15e5, meduimVoltageCableDescriptor, "submersiblepump200v"));
     }
 
     /** 26.x oil: the tar sand separator (notes/oil; model mods.eln.cad.models.TarSandSeparator, drawn as a macerator). */
     public static void registerOilSeparator(int id) {
         {
-            String name = TR_NAME(Type.NONE, "50V Tar Sand Separator");
+            String name = TR_NAME(Type.NONE, "48V Tar Sand Separator");
             var desc = new mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor(name, "tarsandseparator50v", LVU, 200, LVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0), lowVoltageCableDescriptor, mods.eln.Eln.separatorRecipes);
             transparentNodeItem.addDescriptor(0 + (id << 6), desc);
             desc.setRunningSound("eln:separator");   // (Baughn's recording, 2026-11-03: squishier than the macerator)
         }
         {
-            String name = TR_NAME(Type.NONE, "200V Tar Sand Separator");
+            String name = TR_NAME(Type.NONE, "230V Tar Sand Separator");
             var desc = new mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor(name, "tarsandseparator200v", MVU, 2000, MVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0), meduimVoltageCableDescriptor, mods.eln.Eln.separatorRecipes);
             transparentNodeItem.addDescriptor(4 + (id << 6), desc);
@@ -241,7 +241,7 @@ public class Wp10aContent implements ElnContent {
         String name;
         {
             subId = 0;
-            name = TR_NAME(Type.NONE, "50V Macerator");
+            name = TR_NAME(Type.NONE, "48V Macerator");
 
             MaceratorDescriptor desc = new MaceratorDescriptor(name,
                 "maceratora", LVU, 200,// double nominalU,double nominalP,
@@ -256,7 +256,7 @@ public class Wp10aContent implements ElnContent {
 
         {
             subId = 4;
-            name = TR_NAME(Type.NONE, "200V Macerator");
+            name = TR_NAME(Type.NONE, "230V Macerator");
 
             MaceratorDescriptor desc = new MaceratorDescriptor(name,
                 "maceratorb", MVU, 2000,// double nominalU,double nominalP,
@@ -277,7 +277,7 @@ public class Wp10aContent implements ElnContent {
         String name;
         {
             subId = 0;
-            name = TR_NAME(Type.NONE, "50V Plate Machine");
+            name = TR_NAME(Type.NONE, "48V Plate Machine");
 
             PlateMachineDescriptor desc = new PlateMachineDescriptor(
                 name,// String name,
@@ -295,7 +295,7 @@ public class Wp10aContent implements ElnContent {
 
         {
             subId = 4;
-            name = TR_NAME(Type.NONE, "200V Plate Machine");
+            name = TR_NAME(Type.NONE, "230V Plate Machine");
 
             PlateMachineDescriptor desc = new PlateMachineDescriptor(
                 name,// String name,
@@ -319,7 +319,7 @@ public class Wp10aContent implements ElnContent {
         String name;
         {
             subId = 0;
-            name = TR_NAME(Type.NONE, "50V Egg Incubator");
+            name = TR_NAME(Type.NONE, "48V Egg Incubator");
 
             EggIncubatorDescriptor desc = new EggIncubatorDescriptor(
                 name, obj.getObj("eggincubator"),
@@ -336,7 +336,7 @@ public class Wp10aContent implements ElnContent {
         String name;
         {
             subId = 0;
-            name = TR_NAME(Type.NONE, "50V Compressor");
+            name = TR_NAME(Type.NONE, "48V Compressor");
 
             CompressorDescriptor desc = new CompressorDescriptor(
                 name,// String name,
@@ -355,7 +355,7 @@ public class Wp10aContent implements ElnContent {
 
         {
             subId = 4;
-            name = TR_NAME(Type.NONE, "200V Compressor");
+            name = TR_NAME(Type.NONE, "230V Compressor");
 
             CompressorDescriptor desc = new CompressorDescriptor(
                 name,// String name,
@@ -379,7 +379,7 @@ public class Wp10aContent implements ElnContent {
         String name;
         {
             subId = 0;
-            name = TR_NAME(Type.NONE, "50V Magnetizer");
+            name = TR_NAME(Type.NONE, "48V Magnetizer");
 
             MagnetizerDescriptor desc = new MagnetizerDescriptor(
                 name,// String name,
@@ -397,7 +397,7 @@ public class Wp10aContent implements ElnContent {
 
         {
             subId = 4;
-            name = TR_NAME(Type.NONE, "200V Magnetizer");
+            name = TR_NAME(Type.NONE, "230V Magnetizer");
 
             MagnetizerDescriptor desc = new MagnetizerDescriptor(
                 name,// String name,

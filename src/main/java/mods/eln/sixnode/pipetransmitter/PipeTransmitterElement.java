@@ -145,7 +145,7 @@ public class PipeTransmitterElement extends SixNodeElement {
     public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
         if (player != null && player.getMainHandItem().isEmpty()) {
             scale = PipeSensorPart.nextScale(descriptor.sensing, scale);
-            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("%s: full scale %.0f %s at 50 V",
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("%s: full scale %.0f %s at 5 V",
                 PipeSensorPart.name(descriptor.sensing), scale, PipeSensorPart.unit(descriptor.sensing))));
             read();
             needPublish();
