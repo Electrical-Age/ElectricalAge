@@ -303,7 +303,7 @@
     (set heard (now))
     (try (game seed)
       ([err fib] (if (= err :gone)
-                   (do (status :red "Your partner has gone. Looking again...") (sleep 2))
+                   (do (status :red "Your partner has gone. Looking again...") (sleep 5))
                    (propagate err fib))))))
 
 (gorillas)
