@@ -14,13 +14,13 @@ import java.util.List;
  * piece of pipe would; shut, nothing. Three kinds (Baughn 2026-10-26: two more pipe modules):
  * <ul>
  * <li>{@link #ON_OFF}: a right-click turns it open or shut.</li>
- * <li>{@link #CONTROL}: opened by a signal (0-50 V): a signal cable laid into its block (on the floor under it)
+ * <li>{@link #CONTROL}: opened by a signal (0-5 V): a signal cable laid into its block (on the floor under it)
  * connects (VoxelNode.connectValves). A turbine's throttle.</li>
  * <li>{@link #THROTTLE}: a handwheel set anywhere from shut to open on a screen with a slider (right-click).</li>
  * <li>{@link #PRESSURE}: the pressure valve (Baughn 2026-10-29, the shaft redo): one way, in the direction of its
  * arrow; RELIEF holds the pressure before it at its set point (opens as that rises over it: a back-pressure or dump
  * valve, e.g. a turbine bypass), REDUCING holds the pressure after it at its set point (shuts as that rises to it).
- * Throttling is isenthalpic (the network carries enthalpy). Set point on a screen, or a 0-50 V signal from a signal
+ * Throttling is isenthalpic (the network carries enthalpy). Set point on a screen, or a 0-5 V signal from a signal
  * cable laid into its block (0 to MAX_BAR) when one is there. It works as a pressure offset on its link (boost), which
  * the network solves within the step: no overshoot, no flapping.</li>
  * </ul>
@@ -76,7 +76,7 @@ public final class ValvePart extends VoxelPart {
         return signal != null && !signal.getConnectedComponents().isEmpty();
     }
 
-    /** PRESSURE: its set point now (Pa): the screen's, or the signal's (0-50 V: 0 to MAX_BAR). */
+    /** PRESSURE: its set point now (Pa): the screen's, or the signal's (0-5 V: 0 to MAX_BAR). */
     public double setPoint() {
         return signalled() ? Math.max(MIN_BAR, signal.getNormalized() * MAX_BAR) * 1e5 : setPa;
     }

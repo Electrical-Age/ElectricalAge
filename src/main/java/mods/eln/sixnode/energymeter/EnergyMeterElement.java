@@ -52,7 +52,7 @@ public class EnergyMeterElement extends SixNodeElement {
      */
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
-    public float voltageMax = (float) Eln.SVU, voltageMin = 0;
+    public float voltageMax = (float) Eln.LVU, voltageMin = 0;   // (1.12: SVU, which was also its 50 V tier; the 48 V tier now)
 
     int energyUnit = 1, timeUnit = 0;
 

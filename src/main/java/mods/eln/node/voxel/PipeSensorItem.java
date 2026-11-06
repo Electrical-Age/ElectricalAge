@@ -141,6 +141,6 @@ public class PipeSensorItem extends Item implements PipeTool {
         return java.util.List.of(sensing == PipeSensorPart.PRESSURE ? "Reads a pipe's pressure"
                 : sensing == PipeSensorPart.TEMPERATURE ? "Reads a pipe's temperature" : "Reads how wet a pipe's steam is",
             "Goes on a floor, wall or ceiling: lay pipe from its port to the pipe to measure",
-            "0-50 V out on its signal pin", "Right-click it with an empty hand to step its full scale");
+            "0-5 V out on its signal pin", "Right-click it with an empty hand to step its full scale");
     }
 }

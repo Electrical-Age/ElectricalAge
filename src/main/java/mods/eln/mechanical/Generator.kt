@@ -92,7 +92,7 @@ class GeneratorDescriptor(
 class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
     val entity = entity
 
-    override val cableRender = Eln.stdCableRender3200V
+    override val cableRender = Eln.stdCableRender800V
     val desc = desc_ as GeneratorDescriptor
     /** Current over nominal, either way (motor or generator): the electrical hum's loudness. */
     val load = SlewLimiter(1f)
@@ -109,7 +109,7 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
     }
 
     override fun getCableRender(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
-        if (lrdu == LRDU.Down && side == front) return Eln.stdCableRender3200V
+        if (lrdu == LRDU.Down && side == front) return Eln.stdCableRender800V
         return null
     }
 

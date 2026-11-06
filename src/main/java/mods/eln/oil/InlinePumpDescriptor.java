@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * The inline pump (Baughn 2026-10-29, the shaft redo): an electric centrifugal pump in a pipe line, for feedwater and
- * condensate. Water in on its left flank, out of its right; power on its front, a speed signal on its back (0-50 V;
+ * condensate. Water in on its left flank, out of its right; power on its front, a speed signal on its back (0-5 V;
  * none: full speed). Head goes with the square of its speed (up to HEAD_PA at full), flow with its speed; the power it
  * draws with what it moves. It needs water at its inlet with some margin over boiling (NPSH_PA): fed vapour, or water
  * at its boiling point, it cavitates: it moves next to nothing and rattles (so it goes after the condenser or cooler,

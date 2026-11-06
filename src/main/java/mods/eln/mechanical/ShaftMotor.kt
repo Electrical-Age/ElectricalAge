@@ -21,7 +21,7 @@ import java.io.DataOutputStream
 /**
  * A small electric motor on the shaft (Baughn 2026-10-29): spins a shaft up controllably (a gas turbine that can't
  * start itself, generators brought up to speed before they take load), and drives what sits against its side (a
- * condenser's pumps). Power in on its front; a signal on its back sets the speed it drives to (0-50 V: 0 to 800 rad/s;
+ * condenser's pumps). Power in on its front; a signal on its back sets the speed it drives to (0-5 V: 0 to 800 rad/s;
  * no signal: 800). It only drives, never brakes; motor-generator sets work and lose what the two machines lose.
  */
 class ShaftMotorDescriptor(
@@ -176,7 +176,7 @@ class ShaftMotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor)
         info["Drives to"] = Utils.plotRads("", targetRads())
         info["Power"] = Utils.plotPower("", drawnW)
         // AdventurAgent took the speed signal's small plate on its back for the power terminal: say which face is which
-        info["Terminals"] = "200 V on its " + ShaftSteamTurbineElement.compass(front) + " face, speed signal on its " +
+        info["Terminals"] = "230 V on its " + ShaftSteamTurbineElement.compass(front) + " face, speed signal on its " +
             ShaftSteamTurbineElement.compass(front.back())
         if (Eln.wailaEasyMode) info["Voltage"] = Utils.plotVolt("", load.u)
         return info

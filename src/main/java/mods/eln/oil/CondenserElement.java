@@ -29,7 +29,7 @@ import java.util.Map;
  * Each fluid step: the shell takes the vessel's heat, the air ejector pulls air out, the condensate pump (open as far as
  * the turbine turns) pushes water from the vessel's bottom to the front flange. Makeup water by the flange on top,
  * through a float valve: open below MAKEUP_OPEN of its volume as water, shut by MAKEUP_SHUT (Baughn's makeup pump
- * filled one to the flood line). A signal on its left flank (0-50 V) holds the makeup: 0 V shut, full as the float valve
+ * filled one to the flood line). A signal on its left flank (0-5 V) holds the makeup: 0 V shut, full as the float valve
  * has it, unconnected as the float valve has it (Baughn 2026-11-03: the boiler's fill, through a comparator, can then
  * say when the plant wants water; the condenser can't know which boiler it feeds).
  */

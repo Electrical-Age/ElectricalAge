@@ -83,13 +83,13 @@ public class ElectricalMathElement extends SixNodeElement {
 
     /**
      * The logger it carries (Baughn 2026-10-30, board #45): A, B and C as the program reads them (defaults included)
-     * and the output, all as signals (0..1), shown 0 to 50 V unless set otherwise.
+     * and the output, all as signals (0..1), shown 0 to 5 V unless set otherwise.
      */
     public final mods.eln.sixnode.electricaldatalogger.Logger logger = new mods.eln.sixnode.electricaldatalogger.Logger(this, LOG_HEADER,
         channel("A"), channel("B"), channel("C"), channel("out"));
 
     public static mods.eln.sixnode.electricaldatalogger.LogChannel channel(String name) {
-        var c = new mods.eln.sixnode.electricaldatalogger.LogChannel(0, 50, "V");
+        var c = new mods.eln.sixnode.electricaldatalogger.LogChannel(0, (float) mods.eln.Eln.SVU, "V");
         c.name = name;
         return c;
     }

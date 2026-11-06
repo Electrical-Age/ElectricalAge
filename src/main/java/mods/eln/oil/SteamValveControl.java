@@ -15,7 +15,7 @@ import java.util.function.DoubleSupplier;
  * A steam turbine's controls (Baughn 2026-10-26: a screen as the heat furnace's), shared by the 50V/200V Steam Turbines
  * and the shaft Steam Turbine (Baughn 2026-10-29): a regulator slot; internal control sets the throttle (the most the
  * steam valve may open) or, with a regulator, a target inlet pressure the regulator holds by closing the valve when the
- * inlet falls below it (so the boiler keeps its pressure); external control: a signal (0-50 V: 0-100%) sets the
+ * inlet falls below it (so the boiler keeps its pressure); external control: a signal (0-5 V: 0-100%) sets the
  * throttle. The turbine's speed governor works within that limit. The screen is SteamGeneratorScreen, through
  * {@link Render}.
  */

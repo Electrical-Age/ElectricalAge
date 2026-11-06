@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * A pipe sensor (Baughn 2026-10-27): a dial on a short stem, fitted on a straight stretch of pipe like the safety valve,
- * reading the pressure (absolute) or the temperature of the run it sits on. Its reading goes out as a 0-50 V signal (0 at
+ * reading the pressure (absolute) or the temperature of the run it sits on. Its reading goes out as a 0-5 V signal (0 at
  * zero, 50 V at full scale) on any signal cable laid into its block, as a control valve takes its signal
  * (VoxelNode.connectSensors). An empty-hand right-click steps its full scale through {@link #PRESSURE_BAR},
  * {@link #TEMPERATURE_C} or {@link #WETNESS_PCT}. The steam quality sensor (Baughn 2026-10-29, the shaft redo: a turbine's

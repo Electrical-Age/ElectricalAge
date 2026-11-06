@@ -26,7 +26,7 @@ import java.util.Map;
 
 /**
  * A pipe sensor device (PipeTransmitterDescriptor): reads the run of the pipe at its port, in its descriptor's mode, and
- * puts reading / full scale out as 0-50 V on its front pin, as the pipe sensor fitted on a pipe did (PipeSensorPart:
+ * puts reading / full scale out as 0-5 V on its front pin, as the pipe sensor fitted on a pipe did (PipeSensorPart:
  * same modes, full scales and right-click stepping). The device holds no fluid: the pipe laid to it ends capped at the
  * port, so the fluid world is unchanged. Without a pipe at the port it reads nothing and outputs 0 V.
  */
