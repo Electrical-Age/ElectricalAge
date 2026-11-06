@@ -487,7 +487,7 @@ public class TransformerElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
+        Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade shows the first lines unsneaked)
         info.put(I18N.tr("Ratio"), Utils.plotValue(transformer.getRatio()));
         double limit = coreLimit();
         if (limit > 0 && complete())
