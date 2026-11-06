@@ -92,6 +92,16 @@ The electrical anvil (`anvil/ElectricalAnvil*`, transparent node `eln:transparen
 2026-10-28): see [anvil.md](anvil.md). Its companion, the capacitor bank (`transparentnode/capacitorbank`,
 `eln:transparent_node@5444`, `capacitor_bank`) and its Capacitor Cell (`eln:capacitor_cell`), is in the same file.
 
+The wire-drawing machines (`transparentnode/wiredrawing`, `eln:transparent_node@5632` `wire_drawing_machine_48v` and
+`@5636` `wire_drawing_machine_230v`; Baughn 2026-11-06, Wires stage 4) draw copper (ingots or dust) and rubber into
+cable kits of any `CableSpec` and into Windings (`eln:winding`, `node/voxel/WindingItem`: turns, tier, mm2, col in
+custom data). The 48 V machine makes up to 6 mm² and 230 V insulation, the 230 V machine everything. Costs per block of
+wire (a turn is 1/8 block): copper 1/3 ingot x mm²/2.5, rubber 2/3 x insulation layers (1, 1.5, 2, 4) x
+sqrt(mm²/2.5), energy 1 kJ x sqrt(mm²/2.5). Whole items go into buffers (saved `copper`, `rubber`) that keep the
+fractions; progress is `done` (blocks). A DC-DC converter slot takes cables (one a turn) or one Winding. A converter
+with a Winding must fit its core's window (turns x mm² over both sides: 150 cheap, 300 average, 800 optimal); one wound
+only with cables is not held to it. JEI: `compat/jei/WireDrawingCategory`.
+
 The servo layer (`robotics`, Baughn 2026-11-02: the servo layer first, 200 V only): the Linear Servo Drive (transparent
 node `eln:transparent_node@5504`, `linear_servo_drive`), `eln:servo_rail` and `eln:station_marker` (plain blocks with
 checked models, `ServoParts`), and the elevator car entity `eln:elevator_car` (not saved, not summonable). Recipes: the

@@ -56,6 +56,10 @@ public class ElnLang extends LanguageProvider {
         add("jei.eln.tree_resin_collector", "Tree Resin Collector");
         add("jei.eln.anneal", "Annealing");
         add("jei.eln.anneal.how", "Anneals between %s and %s °C (%s kJ)");
+        add("jei.eln.wire_drawing", "Wire Drawing");
+        add("jei.eln.wire_drawing.either", "48V or 230V machine, %s kJ");
+        add("jei.eln.wire_drawing.big", "230V machine only, %s kJ");
+        add("jei.eln.wire_drawing.how", "Any size, insulation, colour: set on its screen");
         add("jei.eln.machine.macerator", "Macerator");
         add("jei.eln.machine.compressor", "Compressor");
         add("jei.eln.machine.plate_machine", "Plate Machine");
