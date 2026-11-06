@@ -110,6 +110,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
         set(value) {
             if (value == field) return
             field = value
+            T = 0.0   // (a new fuse starts cold: the blown one's heat stayed, and the next blew at once; AdventurAgent)
             refreshSwitchResistor()
             needPublish()
         }
@@ -122,10 +123,11 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
      */
     var ratingAmps = 0.0
 
-    /** The rating now, A (0 with no working fuse in). */
+    /** The rating now, A: the set one, else the working fuse's own, else a Lead Fuse's (shown with no fuse in). */
     fun ratingNow(): Double {
-        val c = installedFuse?.cableDescriptor ?: return 0.0
-        return if (ratingAmps > 0) ratingAmps else c.electricalNominalPower / c.electricalNominalVoltage
+        if (ratingAmps > 0) return ratingAmps
+        val c = installedFuse?.cableDescriptor ?: ElnDeviceRegistry.lowVoltageCableDescriptor
+        return c.electricalNominalPower / c.electricalNominalVoltage
     }
 
     private val fuseProcess = IProcess { time ->
@@ -206,7 +208,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
 
     override fun getWaila(): MutableMap<String, String> {
         val infos = mutableMapOf(Pair(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(aLoad.current))))
-        if (installedFuse?.cableDescriptor != null) infos[I18N.tr("Rating")] = Utils.plotAmpere("", ratingNow())
+        infos[I18N.tr("Rating")] = Utils.plotAmpere("", ratingNow())
         return infos
     }
 

@@ -420,6 +420,9 @@ public final class Wp9aCases {
     static final class TripCase implements TestCase {
         ElectricalBreakerElement low;
         ElectricalFuseHolderElement fuse;
+        boolean blew;
+        mods.eln.sim.IProcess watch;
+        int tick;
 
         public String name() {
             return "wp9a breaker and fuse trip at their set current";
@@ -465,11 +468,26 @@ public final class Wp9aCases {
             }));
             resistor(ctx, POWER_RESISTOR, 2, 2, 36);
             ctx.placeSix(GROUND, ctx.at(3, 1, 2));
+            // once blown: out, a new fuse in, rated 20 A: it holds (a blown fuse's heat stayed and blew the next, AdventurAgent)
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                tick++;
+                if (!blew && fuse.getInstalledFuse() == ElectricalFuseDescriptor.Companion.getBlownFuse()) {
+                    blew = true;
+                    fuse.networkUnserialize(ctx.stream(out -> out.writeByte(ElectricalFuseHolderElement.TAKE_OUT)));
+                    fuse.setInstalledFuse((ElectricalFuseDescriptor) Eln.sharedItem.getDescriptor(FUSE_LV));
+                    fuse.networkUnserialize(ctx.stream(out -> {
+                        out.writeByte(ElectricalFuseHolderElement.SET_RATING);
+                        out.writeFloat(20F);
+                    }));
+                }
+            });
         }
 
         public void measure(TestContext ctx) {
             ctx.check("trip: a breaker set to 2 A opens at 4.8 A", !low.getSwitchState(), "");
-            ctx.check("trip: a fuse rated 2 A blows at 4.8 A", fuse.getInstalledFuse() == ElectricalFuseDescriptor.Companion.getBlownFuse(),
+            Eln.simulator.removeSlowProcess(watch);
+            ctx.check("trip: a fuse rated 2 A blows at 4.8 A", blew, "");
+            ctx.check("trip: a new fuse rated 20 A then holds", fuse.getInstalledFuse() != null && fuse.getInstalledFuse().getCableDescriptor() != null,
                 fuse.getInstalledFuse() == null ? "none" : fuse.getInstalledFuse().name);
             ctx.check("trip: unset, a breaker trips at its cable's 1.05 x nominal", Math.abs(low.cableTripAmps() - 1.05 * 1000 / Eln.LVU) < 0.01,
                 "" + low.cableTripAmps());
