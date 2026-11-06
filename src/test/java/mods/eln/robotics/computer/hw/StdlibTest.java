@@ -348,8 +348,14 @@ class StdlibTest {
     @Test
     void theHandbookCounterWorks() {
         type("(var n 0)");
-        tick(20, "\n0\n> ");
-        type("(defn counter [] (def t (proc/tab)) (defn show [] (ui/text t 2 2 1 :yellow (string \"count: \" n))) (ui/clear t) (ui/button t 3 2 3 5 \"+1\" (fn [] (++ n) (show))) (ui/button t 4 8 3 5 \"-1\" (fn [] (-- n) (show))) (show) (forever (sleep 60)))");
+        tick(20, "> ");
+        type("(defn show [t] (ui/text t 2 2 1 :yellow (string \"count: \" n)))");
+        tick(20, "> ");
+        type("(defn up [t] (++ n) (show t))");
+        tick(20, "> ");
+        type("(defn down [t] (-- n) (show t))");
+        tick(20, "> ");
+        type("(defn counter [] (def t (proc/tab)) (ui/clear t) (ui/button t 3 2 3 5 \"+1\" |(up t)) (ui/button t 4 8 3 5 \"-1\" |(down t)) (show t) (forever (sleep 60)))");
         tick(20, "> ");
         type("(proc/start \"counter\" counter)");
         tick(20, "\n2\n> ");
