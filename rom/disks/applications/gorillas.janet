@@ -159,8 +159,8 @@
       (set me address)
       (cond
         (not on-bus) (status :red "Gorillas: connect this computer to a bus first.")
-        (zero? me) (status :red "Gorillas: give this computer an address in its screen.")
-        (status :yellow (string "Gorillas: looking for a partner on the bus (this is " me ")")))
+        (zero? me) (status :red "Give this computer an address in its screen first.")
+        (status :yellow (string "Looking for a partner on the bus (this is " me ")")))
       (when (and on-bus (pos? me) (>= (now) next-hello))
         (bus/send 0 :reply HELLO 0)
         (set next-hello (+ (now) 2)))
@@ -274,7 +274,7 @@
                                        (cond (pos? w) (string/repeat ">" w) (neg? w) (string/repeat "<" (- w)) "none")))
         (def [angle speed]
           (if (= who mine)
-            (let [a (read-number "Angle" 0 180 last-angle)
+            (let [a (read-number (if (= mine 0) "Angle to the right" "Angle to the left") 0 180 last-angle)
                   s (read-number "Speed" 1 200 last-speed)]
               (set last-angle a)
               (set last-speed s)

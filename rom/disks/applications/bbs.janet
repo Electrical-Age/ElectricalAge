@@ -98,6 +98,7 @@
     (ui/remove t 3)
     (ui/log t 3 15 1 (- ui/width 15) (- ui/height 2))
     (ui/append t 3 :yellow (string "#" board "\n"))
+    (ui/send 'line t 4 0 (- ui/height 1) ui/width (string "#" board "> "))   # (its prompt names the board posts go to)
     (set shown (board-posts board))
     (each r shown (show-post r))
     (draw-boards)

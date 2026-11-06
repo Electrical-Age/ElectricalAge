@@ -188,6 +188,15 @@ class ApplicationsTest extends StdlibTest {
     }
 
     @Test
+    void rightClickClosesAProgramsTab() throws IOException {
+        start("gorillas");
+        run(20);
+        m.editor.give(event(new Form.Symbol("close"), 2L));
+        run(10);
+        assertNull(screen.scene.tabs.get(2), "the tab is gone; " + dump(screen));
+    }
+
+    @Test
     void calculatorAddsAndKeepsATape() throws IOException {
         start("calculator");
         run(20);
