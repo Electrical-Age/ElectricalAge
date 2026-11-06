@@ -43,6 +43,12 @@
 #define BUS_IRQ           EA_IO(3, 0x44)   /* bit 0: interrupt while packets wait */
 #define BUS_STATUS        EA_IO(3, 0x48)   /* bit 0: packets wait; bit 1: room to send; bit 2: on a bus */
 #define BUS_DROPPED       EA_IO(3, 0x4C)
+#define BUS_TX_LEN        EA_IO(3, 0x50)   /* a data packet's length in bytes, at most BUS_MAX_DATA */
+#define BUS_RX_LEN        EA_IO(3, 0x54)
+#define BUS_TX_DATA(i)    EA_IO(3, 0x100 + 4 * (i))  /* its bytes, four to a word, the lowest first */
+#define BUS_RX_DATA(i)    EA_IO(3, 0x140 + 4 * (i))
+#define BUS_MAX_DATA      64
+#define BUS_TYPE_DATA     9
 #define BUS_LEVEL(c)      EA_IO(3, 0x80 + 4 * (c))   /* float bits, as of the tick's start */
 
 /* the floppy drives (A = 0, B = 1) */

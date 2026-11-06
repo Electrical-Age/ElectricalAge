@@ -44,16 +44,10 @@ int _read(int fd, char *buf, int n) {
         errno = EBADF;
         return -1;
     }
-    if (n <= 0) return 0;
-    if (!(CON_STATUS(CONSOLE) & 1)) wait_irq(1);
-    int i = 0;
-    while (i < n && (CON_STATUS(CONSOLE) & 1)) {
-        int c = (int) CON_RX(CONSOLE);
-        if (c < 0) break;
-        buf[i++] = (char) c;
-        if (c == '\n') break;
-    }
-    return i;
+    /* stdin is at its end: nobody types on the console (the screen talks to the scheduler), and a read waiting for it
+       would stop every task */
+    (void) buf;
+    return 0;
 }
 
 void *_sbrk(ptrdiff_t incr) {

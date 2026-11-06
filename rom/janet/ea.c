@@ -20,12 +20,21 @@ static volatile int break_seen;
 
 JANET_FN(cfun_send, "(ea/send target type index value &opt source)",
          "Send a bus packet: target 0 broadcast, 1-16 the colour channels, 17-255 devices; type by number. "
+         "The value of a data packet (type 9) is a string or buffer of at most 64 bytes. "
          "With source, send as that address (the raw API); else as the computer's own. False if the send buffer is full.") {
     janet_arity(argc, 4, 5);
+    uint32_t type = (uint32_t) janet_getinteger(argv, 1) & 0xFF;
     BUS_TX_TARGET = (uint32_t) janet_getinteger(argv, 0) & 0xFF;
-    BUS_TX_TYPE = (uint32_t) janet_getinteger(argv, 1) & 0xFF;
+    BUS_TX_TYPE = type;
     BUS_TX_INDEX = (uint32_t) janet_getinteger(argv, 2) & 0xFF;
-    BUS_TX_VALUE = fbits((float) janet_getnumber(argv, 3));
+    if (type == BUS_TYPE_DATA) {
+        JanetByteView b = janet_getbytes(argv, 3);
+        if (b.len > BUS_MAX_DATA) janet_panicf("a data packet holds %d bytes at most, not %d", BUS_MAX_DATA, b.len);
+        uint32_t w[BUS_MAX_DATA / 4] = {0};
+        memcpy(w, b.bytes, (size_t) b.len);
+        for (int i = 0; i < (b.len + 3) / 4; i++) BUS_TX_DATA(i) = w[i];
+        BUS_TX_LEN = (uint32_t) b.len;
+    } else BUS_TX_VALUE = fbits((float) janet_getnumber(argv, 3));
     if (!(BUS_STATUS & 2)) return janet_wrap_false();
     if (argc == 5) {
         BUS_TX_SOURCE = (uint32_t) janet_getinteger(argv, 4) & 0xFF;
@@ -34,14 +43,22 @@ JANET_FN(cfun_send, "(ea/send target type index value &opt source)",
     return janet_wrap_true();
 }
 
-JANET_FN(cfun_recv, "(ea/recv)", "The oldest packet waiting, as [target source type index value], or nil.") {
+JANET_FN(cfun_recv, "(ea/recv)",
+         "The oldest packet waiting, as [target source type index value], or nil; a data packet's value is a string.") {
     janet_fixarity(argc, 0);
     (void) argv;
     if (BUS_RX_COUNT == 0) return janet_wrap_nil();
     BUS_RX_POP = 1;
+    uint32_t type = BUS_RX_TYPE;
+    Janet value;
+    if (type == BUS_TYPE_DATA) {
+        uint32_t n = BUS_RX_LEN, w[BUS_MAX_DATA / 4];
+        if (n > BUS_MAX_DATA) n = BUS_MAX_DATA;
+        for (uint32_t i = 0; i < (n + 3) / 4; i++) w[i] = BUS_RX_DATA(i);
+        value = janet_stringv((const uint8_t *) w, (int32_t) n);
+    } else value = janet_wrap_number(bitsf(BUS_RX_VALUE));
     Janet t[5] = {janet_wrap_integer((int32_t) BUS_RX_TARGET), janet_wrap_integer((int32_t) BUS_RX_SOURCE),
-                  janet_wrap_integer((int32_t) BUS_RX_TYPE), janet_wrap_integer((int32_t) BUS_RX_INDEX),
-                  janet_wrap_number(bitsf(BUS_RX_VALUE))};
+                  janet_wrap_integer((int32_t) type), janet_wrap_integer((int32_t) BUS_RX_INDEX), value};
     return janet_wrap_tuple(janet_tuple_n(t, 5));
 }
 

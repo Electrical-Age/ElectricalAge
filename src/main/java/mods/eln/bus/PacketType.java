@@ -21,20 +21,30 @@ public enum PacketType {
     /** A device reports a fault: its code, broadcast. */
     FAULT(7, true, false),
     /** A floor sensor saw the car arrive: its index, broadcast. */
-    ARRIVE(8, true, false);
+    ARRIVE(8, true, false),
+    /**
+     * Bytes between computers: an index (the program's own message kind) and up to Packet.MAX_DATA bytes, to one
+     * computer or broadcast. Devices ignore it (Baughn: for the BBS, msg 1568257517262471179).
+     */
+    DATA(9, true, false, true);
 
     public final int id;
-    public final boolean hasIndex, hasValue;
+    public final boolean hasIndex, hasValue, hasData;
 
     PacketType(int id, boolean hasIndex, boolean hasValue) {
+        this(id, hasIndex, hasValue, false);
+    }
+
+    PacketType(int id, boolean hasIndex, boolean hasValue, boolean hasData) {
         this.id = id;
         this.hasIndex = hasIndex;
         this.hasValue = hasValue;
+        this.hasData = hasData;
     }
 
-    /** Payload bytes: 1 for the index, 4 for the float. */
+    /** Payload bytes for no data: 1 for the index, 4 for the float, 1 for the data's length. */
     public int payloadLength() {
-        return (hasIndex ? 1 : 0) + (hasValue ? 4 : 0);
+        return (hasIndex ? 1 : 0) + (hasValue ? 4 : 0) + (hasData ? 1 : 0);
     }
 
     /** Its name as programs write it (press). */

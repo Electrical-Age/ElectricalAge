@@ -2,7 +2,7 @@
 # REPL on the terminal as one of those tasks, and the bus, device, light and drive calls. Compiled at boot into the
 # root environment; the REPL and programs run in environments made from it.
 
-(def bus/types "Packet types by number." {1 :signal 2 :press 3 :power 4 :write 5 :read 6 :reply 7 :fault 8 :arrive})
+(def bus/types "Packet types by number." {1 :signal 2 :press 3 :power 4 :write 5 :read 6 :reply 7 :fault 8 :arrive 9 :data})
 (def- type-ids (invert bus/types))
 (def bus/colours "The 16 colour channels, as the dyes (0 white .. 15 black)."
   [:white :orange :magenta :light-blue :yellow :lime :pink :gray
@@ -14,10 +14,8 @@
 (def- ready @[])       # [fiber value] to resume next
 (def- sleepers @[])    # [until fiber]
 (def- waiters @[])     # [pred fiber until]: waiting for a packet
-(def- handlers @[])    # [pred f]: a task for every packet that matches
+(def- handlers @[])    # [pred f env]: a task (in env) for every packet that matches
 (def- joiners @{})     # fiber -> the fiber waiting for it to end
-(def- typed @"")       # keystrokes not yet read
-(var- input-fiber nil) # the task waiting for keystrokes
 (var- repl-eval nil)   # the REPL's form being evaluated (Break stops it)
 (def- tasks @{})       # every task alive -> true
 (var- broke nil)       # a Break already stopped the task that was running
@@ -30,6 +28,8 @@
 (def- display-out @"") # messages for the screen not yet sent (its channel was full)
 (def- outputs @[])     # [buffer tab log colour]: print output to move into a log
 (def- ui-handlers @{}) # [tab id] -> the function for its events
+(def- line-waiters @{}) # tab -> the task waiting in getline for a line typed there
+(def- repl-tabs @{})   # tabs with a REPL (their line is element 2)
 
 (defn ticks "The computer's clock: game ticks it has run (20 a second)." [] (ea/ticks))
 (defn now "The computer's clock in seconds." [] (/ (ea/ticks) 20))
@@ -66,7 +66,7 @@
   (match req
     [:sleep until] (array/push sleepers [until f])
     [:packet pred until] (array/push waiters [pred f until])
-    [:input] (set input-fiber f)
+    [:line t] (put line-waiters t f)
     [:join g] (if (= :new (fiber/status g)) (put joiners g f)
                 (if (index-of (fiber/status g) [:dead :error :user8 :interrupted])
                   (array/push ready [f [:ok nil]])
@@ -86,7 +86,7 @@
   (defn keep [l i] (def k (filter |(not= f ($ i)) l)) (array/clear l) (array/concat l k))
   (keep sleepers 1)
   (keep waiters 1)
-  (when (= input-fiber f) (set input-fiber nil)))
+  (eachp [t w] line-waiters (when (= w f) (put line-waiters t nil))))
 
 (defn- stop-tasks [stop]
   (each f stop
@@ -117,8 +117,8 @@
   {:target (t 0) :source (t 1) :type (get bus/types (t 2) (t 2)) :index (t 3) :value (t 4)})
 
 (defn- deliver [p]
-  (each [pred f] handlers
-    (when (pred p) (spawn f p)))
+  (each [pred f env] handlers
+    (when (pred p) (fiber/setenv (spawn f p) env)))
   (def still @[])
   (each w waiters
     (if ((w 0) p) (array/push ready [(w 1) p]) (array/push still w)))
@@ -182,19 +182,24 @@
       (buffer/clear buf)
       (ui/send 'append t id colour s))))
 
-(defn- env-of? [f env]
-  (var e (fiber/getenv f))
+(defn- env-in? [e env]
+  (var e e)
   (var found false)
   (while e
     (when (= e env) (set found true) (break))
     (set e (table/getproto e)))
   found)
 
+(defn- env-of? [f env] (env-in? (fiber/getenv f) env))
+
 (defn- proc-stop "Stop every task of the process in tab t." [t]
   (def p (get procs t))
   (when p
     (def stop (filter |(env-of? $ (p :env)) (keys tasks)))
     (stop-tasks stop)
+    (def keep (filter |(not (env-in? ($ 2) (p :env))) handlers))   # its bus/on handlers go with it
+    (array/clear handlers)
+    (array/concat handlers keep)
     (length stop)))
 
 (defn- proc-close "Stop the process in tab t and remove its tab." [t]
@@ -222,7 +227,13 @@
   (when (and (tuple? m) (> (length m) 2) (number? (m 1)) (number? (m 2)))
     (def f (get ui-handlers [(m 1) (m 2)]))
     (case (m 0)
-      'submit (when (and f (string? (get m 4))) (spawn f (m 4) (get m 3 0)))
+      'submit (when (string? (get m 4))
+                (if-let [w (get line-waiters (m 1))]
+                  (do (put line-waiters (m 1) nil)   # a getline was waiting for it
+                      (ui/send 'busy (m 1) (m 2) (get m 3 0) true)
+                      (ui/send 'busy (m 1) (m 2) (get m 3 0) false)
+                      (array/push ready [w (m 4)]))
+                  (when f (spawn f (m 4) (get m 3 0)))))
       'press (when f (spawn f))
       'select (when (and f (number? (get m 3))) (spawn f (m 3)))
       'key (when (and (struct? f) (f :key) (string? (get m 3))) (spawn (f :key) (m 3) (get m 4 0)))
@@ -252,13 +263,8 @@
   (forever
     (when (ea/break?) (set break-pending true))
     (while (def t (ea/recv)) (deliver (packet t)))
-    (buffer/push typed (ea/input))
+    (ea/input)   # (the console takes no input: bytes typed there are dropped, so they can't keep waking it)
     (screen-events)
-    (when (and input-fiber (not (empty? typed)))
-      (def f input-fiber)
-      (set input-fiber nil)
-      (array/push ready [f (string typed)])
-      (buffer/clear typed))
     (wake (ea/ticks))
     (flush-outputs)
     (display-drain)
@@ -279,7 +285,7 @@
 
 (defn bus/send
   "Send a packet from this computer: target (0 everyone, 17-255 a device), type (:power, :write, ... or a number),
-  index and value as the type has them."
+  index and value as the type has them. A :data packet's value is a string of at most 64 bytes, for other computers."
   [target type &opt index value]
   (or (ea/send target (type-id type) (or index 0) (or value 0)) (error "too many packets this tick")))
 
@@ -301,11 +307,12 @@
   (yield [:packet (or pred (fn [_] true)) (if timeout (+ (ea/ticks) (math/ceil (* 20 timeout))))]))
 
 (defn bus/on
-  "Call (f packet) in a task of its own for every packet whose type is type (or that pred accepts, given a function)."
+  "Call (f packet) in a task of its own for every packet whose type is type (or that pred accepts, given a function).
+  The task belongs to the process that called bus/on; stopping that process forgets the handler."
   [type-or-pred f]
   (def pred (if (function? type-or-pred) type-or-pred
               (let [t (get bus/types (type-id type-or-pred))] (fn [p] (= t (p :type))))))
-  (array/push handlers [pred f])
+  (array/push handlers [pred f (curenv)])
   nil)
 
 (defn bus/on-press
@@ -371,6 +378,9 @@
 (defn disk/mkdir "Make a directory." [path] (ea/disk-mkdir path))
 (defn disk/exists? "Is there a file at path?" [path]
   (try (do (file/close (file/open path :rb)) true) ([_] false)))
+
+# import finds a:/lib/util as the file a:/lib/util.janet (Janet's own patterns only know relative and system paths)
+(array/push module/paths [":all:.janet" :source])
 
 # file/open, slurp and spit say why a floppy refused (no disk, not formatted, write-protected)
 (def- core-open file/open)
@@ -438,9 +448,6 @@
 (defn alarm "Say something is wrong, in red." [& msg]
   (eprint "ALARM: " ;msg))
 
-(defn read-line "Wait for a line typed on the console." []
-  (yield [:input]))
-
 (defn spawn-in
   "Run (f ;args) as a task whose environment (its definitions, where it prints) is env."
   [env f & args]
@@ -459,6 +466,7 @@
   echoes it into the log, evaluates each form as a task, and prints the value."
   [env &opt t name]
   (default t 1)
+  (put repl-tabs t true)
   (def p (parser/new))
   (ui/output env t 1)
   (ui/tab t (or name "REPL"))
@@ -512,6 +520,12 @@
       (error (string path ":" (get thunk :line "?") ": " (get thunk :error)))))
   (when (= :error (parser/status p)) (error (string path ": " (parser/error p)))))
 
+(defn load
+  "Run a Janet file's forms in the environment of the task that calls it, so its definitions stay there: at the REPL,
+  (load \"a:/lib.janet\") defines the file's names in the REPL."
+  [path]
+  (run-file path (curenv)))
+
 (defn proc/new-tab
   "A tab for a process of its own, empty (proc/start puts a log in it): returns its number. The process's environment
   is ((proc/env t))."
@@ -548,6 +562,24 @@
   (var found nil)
   (eachp [t p] procs (when (env-of? (fiber/current) (p :env)) (set found t)))
   found)
+
+(defn getline
+  "Wait for a line typed on this task's tab and return it (with its newline) in a buffer, or in buf if given. At the
+  REPL the line is the REPL's own; a process's tab gets a line at its bottom while it waits. The prompt and the line
+  are printed too."
+  [&opt prompt buf env]
+  (def t (or (proc/tab) (if (env-of? (fiber/current) repl-env) 1) (error "getline: this task has no tab")))
+  (when (get line-waiters t) (error "getline: another task is waiting for a line on this tab"))
+  (def id (if (get repl-tabs t) 2 65000))
+  (ui/send 'line t id 0 (- ui/height 1) ui/width (or prompt ""))
+  (when (= id 65000) (put ui-handlers [t id] (fn [&] nil)))
+  (def text (yield [:line t]))
+  (if (get repl-tabs t)
+    (ui/send 'line t id 0 (- ui/height 1) ui/width "> ")
+    (ui/remove t id))
+  (print (or prompt "") text)
+  (flush-outputs)
+  (buffer/push (or buf @"") text "\n"))
 
 # ---- editing files: an editor tab (the editor runs on the player's client; a save sends hunks against a revision)
 
