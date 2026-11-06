@@ -127,6 +127,7 @@ public final class LabCommands {
                     return n;
                 })))
                 .then(Commands.literal("protection").executes(c -> demo(c.getSource(), () -> protection(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("wiredrawing").executes(c -> demo(c.getSource(), () -> wiredrawing(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cores").executes(c -> demo(c.getSource(), () -> cores(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("converters").executes(c -> demo(c.getSource(), () -> converters(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("computers").executes(c -> demo(c.getSource(), () -> computers(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -462,6 +463,60 @@ public final class LabCommands {
      * cheap (~229 V), (d) 5:24 LV:MV optimal (230.4 V), (e) the Variable converter 14:28 LV:MV cheap with a Signal Trimmer on
      * its front at 50 %, (f) 14:7 cheap with its secondary shorted to ground (overheats).
      */
+    /** Places a transparent node of this display name at p, facing as a player looking along +z would place it. */
+    static mods.eln.node.transparent.TransparentNodeElement placeTransparent(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.player.Player player,
+                                                                         String name, BlockPos p) {
+        var d = mods.eln.Eln.transparentNodeItem.getDescriptor(transparentId(name));
+        float y0 = player.getYRot(), x0 = player.getXRot();
+        player.setYRot(0);
+        player.setXRot(0);
+        try {
+            var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, p, mods.eln.misc.Direction.YN);
+            if (node == null) throw new IllegalStateException("no room for " + name + " at " + p);
+            return node.element;
+        } finally {
+            player.setYRot(y0);
+            player.setXRot(x0);
+        }
+    }
+
+    /** A source of volts two blocks out on side of p, joined to p by a cable (six-node id). */
+    static void feed(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.player.Player player, BlockPos p, mods.eln.misc.Direction side,
+                     int cable, double volts) {
+        host(level, player, cable, step(p, side));
+        var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, step(step(p, side), side));
+        orient(src, l -> l, side.getInverse());
+        src.networkUnserialize(packet(o -> {
+            o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+            o.writeFloat((float) volts);
+        }));
+    }
+
+    /**
+     * Wires stage 4: the 48V wire-drawing machine on a 48 V source (back), the 230V one on a 230 V source, and a 48 V-fed
+     * DC-DC converter with a cheap core and empty winding slots (an LV cable on its secondary side).
+     */
+    static int wiredrawing(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        int lv = 4 + (32 << 6), mv = 8 + (32 << 6);
+        var m48 = placeTransparent(level, player, "48V Wire Drawing Machine", pos);
+        feed(level, player, pos, m48.front.back(), lv, mods.eln.Eln.LVU);
+        BlockPos p2 = pos.offset(5, 0, 0);
+        var m230 = placeTransparent(level, player, "230V Wire Drawing Machine", p2);
+        feed(level, player, p2, m230.front.back(), mv, mods.eln.Eln.MVU);
+        BlockPos p3 = pos.offset(10, 0, 0);
+        var t = (mods.eln.transparentnode.transformer.TransformerElement) placeTransparent(level, player, "DC-DC Converter", p3);
+        feed(level, player, p3, t.front.left(), lv, mods.eln.Eln.LVU);
+        host(level, player, mv, step(p3, t.front.right()));
+        t.getInventory().setItem(mods.eln.transparentnode.transformer.TransformerContainer.ferromagneticSlotId,
+            mods.eln.Eln.findItemStack("Cheap Ferromagnetic Core", 1));
+        t.getInventory().setChanged();
+        src.sendSuccess(() -> Component.literal("wiredrawing: 48V machine " + pos.toShortString() + ", 230V machine " + p2.toShortString()
+            + ", converter (cheap core, 48 V on its left, a 230 V cable on its right) " + p3.toShortString()), false);
+        return 1;
+    }
+
     static int converters(CommandSourceStack src, BlockPos pos) {
         var level = src.getLevel();
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
