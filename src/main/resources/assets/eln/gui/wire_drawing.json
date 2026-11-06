@@ -1,0 +1,202 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "230V Wire Drawing Machine"
+  },
+  {
+   "row": [
+    {
+     "slot": "0"
+    },
+    {
+     "slot": "1"
+    },
+    {
+     "progress": "work"
+    },
+    {
+     "slot": "2",
+     "big": true
+    },
+    {
+     "space": 0,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "makel",
+     "sample": "Make"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "button": "mode",
+     "sample": [
+      "Cable kit",
+      "Winding"
+     ],
+     "width": 80
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "mm2l",
+     "sample": "Wire"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "button": "mm2dn",
+     "sample": [
+      "<"
+     ],
+     "width": 16
+    },
+    {
+     "text": "mm2",
+     "sample": "95 mm², 205 A"
+    },
+    {
+     "button": "mm2up",
+     "sample": [
+      ">"
+     ],
+     "width": 16
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "insl",
+     "sample": "Insulation"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "button": "insdn",
+     "sample": [
+      "<"
+     ],
+     "width": 16
+    },
+    {
+     "text": "ins",
+     "sample": "11 kV"
+    },
+    {
+     "button": "insup",
+     "sample": [
+      ">"
+     ],
+     "width": 16
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "coll",
+     "sample": "Colour"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "button": "coldn",
+     "sample": [
+      "<"
+     ],
+     "width": 16
+    },
+    {
+     "text": "col",
+     "sample": "light gray"
+    },
+    {
+     "button": "colup",
+     "sample": [
+      ">"
+     ],
+     "width": 16
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "amountl",
+     "sample": "Length"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "field": "amount",
+     "chars": 5
+    },
+    {
+     "text": "amountu",
+     "sample": "blocks"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "cost",
+   "sample": "Takes 99.9 copper, 99.9 rubber, 9999 kJ"
+  },
+  {
+   "text": "buffer",
+   "sample": "Held: 0.99 copper, 0.99 rubber"
+  },
+  {
+   "row": [
+    {
+     "text": "status",
+     "sample": "Needs copper (ingots or dust)"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "button": "run",
+     "sample": [
+      "Start",
+      "Stop"
+     ],
+     "width": 44
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 3
+}

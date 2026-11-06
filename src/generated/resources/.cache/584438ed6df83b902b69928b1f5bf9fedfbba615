@@ -1,4 +1,4 @@
-// 26.3	2026-11-06T21:23:50.515697901	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-06T22:39:42.065001127	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -24,6 +24,7 @@ ecd902b2213a1761325442b159c85dc633b6c9de data/eln/advancement/recipes/misc/230v_
 6075d859bb4709f91bc1bfb9e690ffb9c8b7d87f data/eln/advancement/recipes/misc/230v_submersible_pump.json
 0f66adfcf18984e19cd7c7dc438f741fe82a87f4 data/eln/advancement/recipes/misc/230v_tar_sand_separator.json
 34eda3e357333fd791966656bc847ea8d321c0c5 data/eln/advancement/recipes/misc/230v_tungsten_heating_corp.json
+880344c112df45e8b6273e6eb64de1dcea7e3b14 data/eln/advancement/recipes/misc/230v_wire_drawing_machine.json
 ebe9a5941cbab033c4ecd0805aa17c77ada664c1 data/eln/advancement/recipes/misc/25a_diode.json
 9783651d20f260f32babb8d25e03e288180fcd8e data/eln/advancement/recipes/misc/2x3_rotating_solar_panel.json
 571a49df6fa9bccdb84573c7b438321e1d0dbcc1 data/eln/advancement/recipes/misc/2x3_solar_panel.json
@@ -61,6 +62,7 @@ eb4871e8b04a10b34f4752aabde482079cd70590 data/eln/advancement/recipes/misc/48v_m
 cd85e26e6ce215d3f6f5aec06d88bd2588db5e0b data/eln/advancement/recipes/misc/48v_submersible_pump.json
 7f44fedd86d8829d718efa2261f8843f5ebf30a9 data/eln/advancement/recipes/misc/48v_tar_sand_separator.json
 4ca808710b883138c6810514d9de5c0f96d63f15 data/eln/advancement/recipes/misc/48v_tungsten_heating_corp.json
+40fbffb9611bf7bdee850f10bce7493d1d8b57de data/eln/advancement/recipes/misc/48v_wire_drawing_machine.json
 5efa0377fe291ce95e997e762d12ae33a202dd39 data/eln/advancement/recipes/misc/8kw_generator.json
 2129118260babb35c71c3abaa9e0cf9a0c2f3c90 data/eln/advancement/recipes/misc/8kw_generator_2.json
 2007c62000752cff5aaf2af4386805307f313111 data/eln/advancement/recipes/misc/addressable_button.json
@@ -394,6 +396,7 @@ f52b8037748b5855a326b573fe52f465705d9bea data/eln/recipe/230v_oil_pump.json
 e25333ec84e2f843591d15dc724e02fd024fe100 data/eln/recipe/230v_submersible_pump.json
 8679563ab6e0e1e5d10c076891217a5ba2d08c9a data/eln/recipe/230v_tar_sand_separator.json
 9a75db92f399405442866f5db3fff39496170f65 data/eln/recipe/230v_tungsten_heating_corp.json
+551cd2ed37c712f66e39c430099d8486d1cb08d2 data/eln/recipe/230v_wire_drawing_machine.json
 9ec2d01e1165fcb7bd72aed5bae949d7d9b18a1e data/eln/recipe/25a_diode.json
 00fad3caedadd181be59056b7237a672f7813a1e data/eln/recipe/2x3_rotating_solar_panel.json
 5b487f52b0bcfcafb13fd94f448396e380d1e894 data/eln/recipe/2x3_solar_panel.json
@@ -431,6 +434,7 @@ ff65ed40747e67a23b728a34eea693acdc07d9e2 data/eln/recipe/48v_power_socket.json
 a2699653d83e94fba3176fed07eb9bc947098d52 data/eln/recipe/48v_submersible_pump.json
 597e59b2cb40ff96580947c9d42e4806e4aba461 data/eln/recipe/48v_tar_sand_separator.json
 26dd0e5b78d384e75a61dd3a288c91e7a056aed6 data/eln/recipe/48v_tungsten_heating_corp.json
+c1acb5341e8a0c417df53b3e3c259b93545986f2 data/eln/recipe/48v_wire_drawing_machine.json
 b3b8ebbb856ae9ded0fbf671a186c8a3ce40f64b data/eln/recipe/8kw_generator.json
 4477cf450de2cf8492975fc1c1f3d14b2eacd62a data/eln/recipe/8kw_generator_2.json
 891330455503b65f892eed662eff4ed1cd487ed0 data/eln/recipe/addressable_button.json

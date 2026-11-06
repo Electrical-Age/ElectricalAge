@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "M": "eln:machine_block",
+    "R": "minecraft:redstone",
+    "c": "eln:electrical_motor",
+    "d": "minecraft:diamond"
+  },
+  "pattern": [
+    "IdI",
+    "cMc",
+    "IRI"
+  ],
+  "result": {
+    "id": "eln:wire_drawing_machine_48v"
+  }
+}

@@ -2158,5 +2158,17 @@
   "display": "Computer",
   "kind": "transparent_node",
   "name": "computer"
+ },
+ "eln:transparent_node@5632": {
+  "descriptor": "WireDrawingDescriptor",
+  "display": "48V Wire Drawing Machine",
+  "kind": "transparent_node",
+  "name": "wire_drawing_machine_48v"
+ },
+ "eln:transparent_node@5636": {
+  "descriptor": "WireDrawingDescriptor",
+  "display": "230V Wire Drawing Machine",
+  "kind": "transparent_node",
+  "name": "wire_drawing_machine_230v"
  }
 }

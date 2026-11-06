@@ -155,6 +155,8 @@ voltagesource/voltagesource.obj
 vumeter/vumeter.obj
 wallclock/wallclock.obj
 windturbinemini/windturbinemini.obj
+wiredrawer230/wiredrawer230.obj
+wiredrawer48/wiredrawer48.obj
 wirelesssignalrepeater/wirelesssignalrepeater.obj
 wirelesssignalrx/wirelesssignalrx.obj
 wirelesssignaltx/wirelesssignaltx.obj

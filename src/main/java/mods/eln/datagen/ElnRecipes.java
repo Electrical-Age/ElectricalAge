@@ -2251,6 +2251,27 @@ public final class ElnRecipes extends ElnRecipesBase {
             'D', "plateAlloy",
             'I', "ingotAlloy");
 
+        // the wire-drawing machines (Baughn 2026-11-06, Wires stage 4): a diamond drawing die between two motors
+        addRecipe(findItemStack("48V Wire Drawing Machine", 1),
+            "IdI",
+            "cMc",
+            "IRI",
+            'M', findItemStack("Machine Block"),
+            'c', findItemStack("Electrical Motor"),
+            'd', stack(Items.DIAMOND),
+            'I', stack(Items.IRON_INGOT),
+            'R', stack(Items.REDSTONE));
+
+        addRecipe(findItemStack("230V Wire Drawing Machine", 1),
+            "DdD",
+            "cMc",
+            "DCD",
+            'M', findItemStack("Advanced Machine Block"),
+            'C', dictAdvancedChip,
+            'c', findItemStack("Advanced Electrical Motor"),
+            'd', stack(Items.DIAMOND),
+            'D', "plateAlloy");
+
         addRecipe(findItemStack("48V Magnetizer", 1),
             "IRI",
             "cMc",

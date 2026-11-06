@@ -151,6 +151,13 @@ public final class MenuSpecs {
             SlotSpec.filter(mods.eln.anvil.ElectricalAnvilElement.TOOL, 28, 25, 1, s -> s.isDamageableItem() || s.getMaxStackSize() == 1, BIG, tr("Tool")),
             SlotSpec.filter(mods.eln.anvil.ElectricalAnvilElement.MATERIAL, 86, 25, 64, mods.eln.anvil.ElectricalAnvilElement::materialMayGo, MEDIUM,
                 tr("Repair material"))).publishing(1).inventoryAt(150));
+        // the wire-drawing machines (Baughn 2026-11-06, Wires stage 4): copper, rubber, the kit or winding
+        put(mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor.class, d -> MenuSpec.of(
+            SlotSpec.filter(mods.eln.transparentnode.wiredrawing.WireDrawingElement.COPPER, 8, 25, 64,
+                mods.eln.transparentnode.wiredrawing.WireDrawingElement::isCopper, MEDIUM, tr("Copper: ingots or dust")),
+            SlotSpec.filter(mods.eln.transparentnode.wiredrawing.WireDrawingElement.RUBBER, 26, 25, 64,
+                mods.eln.transparentnode.wiredrawing.WireDrawingElement::isRubber, MEDIUM, tr("Rubber")),
+            SlotSpec.output(mods.eln.transparentnode.wiredrawing.WireDrawingElement.OUT, 86, 25, BIG)).publishing(1).inventoryAt(200));
         // the robotics computer (Baughn 2026-11-05): 8 chip slots of 1 MB under its terminal, then floppy drives A and B
         put(mods.eln.robotics.computer.ComputerDescriptor.class, d -> {
             java.util.List<SlotSpec> slots = new java.util.ArrayList<>();

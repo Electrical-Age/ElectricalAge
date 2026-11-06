@@ -298,7 +298,8 @@ final class GoldenSlotsCase implements TestCase {
     static final Set<Class<?>> NEW_SPECS = Set.of(mods.eln.transparentnode.smelter.SmelterDescriptor.class,
         mods.eln.anvil.ElectricalAnvilDescriptor.class,   // (the electrical anvil: Baughn 2026-10-28)
         mods.eln.mechanical.SteamTurbineDescriptor.class,   // (the shaft steam turbine's controls: Baughn 2026-10-29)
-        mods.eln.robotics.computer.ComputerDescriptor.class);   // (the computer's chips and drives: Baughn 2026-11-05)
+        mods.eln.robotics.computer.ComputerDescriptor.class,
+        mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor.class);   // (the wire-drawing machines: Wires stage 4)   // (the computer's chips and drives: Baughn 2026-11-05)
 
     /** A spec without its filters (lambdas): kind, index, position, limit per slot. */
     static List<String> shape(MenuSpec spec) {

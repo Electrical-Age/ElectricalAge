@@ -47,6 +47,20 @@ public class Wp10aContent implements ElnContent {
         registerSmelter(82);
         registerColumn(83);
         registerAnvil(85);
+        registerWireDrawing(88);
+    }
+
+    /**
+     * The wire-drawing machines (Baughn 2026-11-06, Wires stage 4): cable kits and windings to any spec; the 48 V one up
+     * to 6 mm² and 230 V insulation, the 230 V one everything. Model mods.eln.cad.models.WireDrawer.
+     */
+    public static void registerWireDrawing(int id) {
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor(
+            TR_NAME(Type.NONE, "48V Wire Drawing Machine"), "wiredrawer48", LVU, 400, lowVoltageCableDescriptor, 6, 2,
+            mods.eln.node.voxel.CableSpec.BROWN));
+        transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor(
+            TR_NAME(Type.NONE, "230V Wire Drawing Machine"), "wiredrawer230", MVU, 1600, meduimVoltageCableDescriptor,
+            mods.eln.node.voxel.CableSpec.MM2.length - 1, 4, mods.eln.node.voxel.CableSpec.BLACK));
     }
 
     /** The electrical anvil (Baughn 2026-10-28): a workshop desk on 800 V; model mods.eln.cad.models.ElectricalAnvil. */

@@ -209,6 +209,7 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5504",   // the Linear Servo Drive (the servo layer, Baughn 2026-11-02)
         "eln:transparent_node@5568",   // the computer (robotics phase 3, Baughn 2026-11-05)
         "eln:transparent_node@129",   // the Variable DC-DC Converter (real-world voltages, Baughn 2026-11-06)
+        "eln:transparent_node@5632", "eln:transparent_node@5636",   // the wire-drawing machines (Wires stage 4, Baughn 2026-11-06)
         "eln:shared_item@451", "eln:shared_item@452",   // the better cores' intermediates (Baughn 2026-11-06)
         "eln:ore@7");   // Deepslate Lead Ore: lead in deepslate's middle (Baughn 2026-10-20)
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
@@ -220,6 +221,7 @@ final class GoldenCase implements TestCase {
         "Bus I/O Module",   // (the field bus)
         "Addressable Button", "Addressable Light", "Floor Sensor", "Linear Servo Drive",   // (their address screen)
         "Computer",   // (its terminal, chips and drives)
+        "48V Wire Drawing Machine", "230V Wire Drawing Machine",   // (what to make: Wires stage 4)
         "Steam Turbine", "LP Steam Turbine");   // (the shaft ones' controls, as the 50V/200V's: Baughn 2026-10-29)
 
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {
