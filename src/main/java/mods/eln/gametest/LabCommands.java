@@ -126,6 +126,7 @@ public final class LabCommands {
                     if (n == 0) c.getSource().sendFailure(Component.literal("no tilted terminal logger there"));
                     return n;
                 })))
+                .then(Commands.literal("protection").executes(c -> demo(c.getSource(), () -> protection(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cores").executes(c -> demo(c.getSource(), () -> cores(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("converters").executes(c -> demo(c.getSource(), () -> converters(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("computers").executes(c -> demo(c.getSource(), () -> computers(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -578,6 +579,53 @@ public final class LabCommands {
             where.append((char) ('a' + i)).append(' ').append(names[i]).append(' ').append(p.toShortString()).append(" (power ").append(side).append("); ");
         }
         src.sendSuccess(() -> Component.literal("cores: " + where), false);
+        return 1;
+    }
+
+    /**
+     * Rigs for breakers and fuses with set trip currents (Baughn 2026-11-06), along +x from pos, on voxel LV cables: a 48 V
+     * source, a cable, the device, a cable, a 10 ohm Power Resistor (4.8 A), a cable, a ground. Row z: a breaker with
+     * an LV cable in its slot, closed; row z+3: a fuse holder with a Lead Fuse.
+     */
+    static int protection(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        int lv = mods.eln.node.voxel.CablePart.tierOf("Low Voltage Cable");
+        for (int row = 0; row < 2; row++) {
+            BlockPos o = pos.offset(0, 0, 3 * row);
+            var feed = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, o);
+            feed.networkUnserialize(packet(out -> {
+                out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                out.writeFloat((float) mods.eln.Eln.LVU);
+            }));
+            for (int x : new int[]{1, 3, 5})
+                for (var part : mods.eln.node.voxel.CablePart.arms(lv, 0, 4, 5)) {   // (on the floor, west to east)
+                    String err = mods.eln.node.voxel.PipeKitItem.place(level, o.offset(x, 0, 0), part, null);
+                    if (err != null) throw new IllegalStateException("cable at " + o.offset(x, 0, 0) + ": " + err);
+                }
+            if (row == 0) {
+                var b = (mods.eln.sixnode.electricalbreaker.ElectricalBreakerElement) host(level, player, sixId("Electrical Breaker"), o.offset(2, 0, 0));
+                orient(b, l -> l, mods.eln.misc.Direction.XN);
+                b.getInventory().setItem(0, mods.eln.Eln.findItemStack("Low Voltage Cable", 1));
+                b.getInventory().setChanged();
+                b.networkUnserialize(packet(out -> {
+                    out.writeByte(mods.eln.sixnode.electricalbreaker.ElectricalBreakerElement.setVoltageMaxId);
+                    out.writeFloat(100f);
+                }));
+                b.networkUnserialize(packet(out -> out.writeByte(mods.eln.sixnode.electricalbreaker.ElectricalBreakerElement.toogleSwitchId)));
+            } else {
+                var f = (mods.eln.sixnode.ElectricalFuseHolderElement) host(level, player, sixId("Electrical Fuse Holder"), o.offset(2, 0, 0));
+                orient(f, l -> l, mods.eln.misc.Direction.XN);
+                f.setInstalledFuse((mods.eln.item.ElectricalFuseDescriptor) mods.eln.item.ElectricalFuseDescriptor.getDescriptor(mods.eln.Eln.findItemStack("Lead Fuse", 1)));
+            }
+            var r = (mods.eln.sixnode.resistor.ResistorElement) host(level, player, sixId("Power Resistor"), o.offset(4, 0, 0));
+            orient(r, mods.eln.misc.LRDU::right, mods.eln.misc.Direction.XN);
+            r.getInventory().setItem(mods.eln.sixnode.resistor.ResistorElement.coreSlotId, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COAL, 36));
+            r.getInventory().setChanged();
+            host(level, player, sixId("Ground Cable"), o.offset(6, 0, 0));
+        }
+        src.sendSuccess(() -> Component.literal("protection: breaker row at " + pos.toShortString() + ", fuse row at " + pos.offset(0, 0, 3).toShortString()
+            + " (devices at x+2, 10 ohm resistors at x+4: 4.8 A)"), false);
         return 1;
     }
 
