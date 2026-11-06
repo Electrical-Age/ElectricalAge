@@ -29,6 +29,8 @@ public final class CablePlacer {
 
     public static final class Plan {
         final int tier;
+        /** The kit's spec (power cables): a route is laid of one cable. */
+        CableSpec spec;
         final CableRouter.End start;
         final long[] startJoin;
         final List<CableRouter.End> waypoints = new ArrayList<>();
@@ -70,7 +72,8 @@ public final class CablePlacer {
     static void checkLapse(ServerPlayer p, long now) {
         Plan plan = PLANS.get(p.getUUID());
         if (plan == null) return;
-        boolean holding = p.getMainHandItem().getItem() instanceof CableKitItem k && k.tier == plan.tier;
+        boolean holding = p.getMainHandItem().getItem() instanceof CableKitItem k && k.tier == plan.tier
+            && java.util.Objects.equals(CableKitItem.specOf(p.getMainHandItem()), plan.spec);
         String why = lapse(plan, now, holding, plan.dim == p.level().dimension(), p.position());
         if (why == null) return;
         PLANS.remove(p.getUUID());
@@ -452,9 +455,11 @@ public final class CablePlacer {
     public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, ItemStack kit, int tier, Vec3 hit) {
         Plan plan = PLANS.get(player.getUUID());
         long now = level.getGameTime();
-        if (plan != null && (plan.tier != tier || lapse(plan, now, true, plan.dim == level.dimension(), player.position()) != null)) {
+        CableSpec spec = CableKitItem.specOf(kit);
+        boolean other = plan != null && (plan.tier != tier || !java.util.Objects.equals(plan.spec, spec));
+        if (plan != null && (other || lapse(plan, now, true, plan.dim == level.dimension(), player.position()) != null)) {
             PLANS.remove(player.getUUID());
-            if (plan.tier != tier) player.sendOverlayMessage(Component.literal("Cable route cancelled (another kind of cable in hand)"));
+            if (other) player.sendOverlayMessage(Component.literal("Cable route cancelled (another kind of cable in hand)"));
             plan = null;
         }
         if (plan != null) plan.touched = now;
@@ -478,6 +483,7 @@ public final class CablePlacer {
         boolean device = at.dir() >= 0;
         if (plan == null) {
             Plan p = new Plan(tier, at, join[0], level.dimension());
+            p.spec = spec;
             p.touched = now;
             PLANS.put(player.getUUID(), p);
             player.sendOverlayMessage(Component.literal("Cable route started: click faces for waypoints, a device or cable (or the last waypoint again) to finish, sneak-click to undo"));
@@ -513,7 +519,7 @@ public final class CablePlacer {
             show(player, level, r.steps);
             return true;
         }
-        String err = lay(level, tier, r.steps, player);
+        String err = lay(level, tier, spec, r.steps, player);
         if (err != null) {
             player.sendOverlayMessage(Component.literal("Can't lay it: " + err));
             return true;
@@ -538,8 +544,13 @@ public final class CablePlacer {
         CableRouter.Space s = space(level);
         if (plan.startJoin != null) s = around(s, plan.startJoin);
         if (endJoin != null) s = around(s, endJoin);
-        CablePart.Tier t = CablePart.TIERS[plan.tier];
+        CablePart.Tier t = tierOf(plan.tier, plan.spec);
         return CableRouter.route(s, t.width(), t.height(), plan.start, wps, last);
+    }
+
+    /** A tier's cross-section with a spec (power cables: by cross-section and insulation). */
+    static CablePart.Tier tierOf(int tier, CableSpec spec) {
+        return new CablePart(tier, spec, 0, new int[0]).tierInfo();
     }
 
     /** Route between two ends, each maybe joining an old cable (join point or null), and lay it (GameTests). */
@@ -563,10 +574,15 @@ public final class CablePlacer {
 
     /** Lay a route: a cable part per block piece (and the knuckles); checked first, all or nothing. */
     public static String lay(Level level, int tier, List<CableRouter.Step> steps, net.minecraft.world.entity.player.Player player) {
-        List<CableRouter.Piece> pieces = CableRouter.pieces(steps, CablePart.TIERS[tier].width(), CablePart.TIERS[tier].height());
+        return lay(level, tier, null, steps, player);
+    }
+
+    public static String lay(Level level, int tier, CableSpec spec, List<CableRouter.Step> steps, net.minecraft.world.entity.player.Player player) {
+        CablePart.Tier ti = tierOf(tier, spec);
+        List<CableRouter.Piece> pieces = CableRouter.pieces(steps, ti.width(), ti.height());
         List<CablePart> parts = new ArrayList<>();
         for (CableRouter.Piece p : pieces) {
-            CablePart part = p.face() < 0 ? CablePart.knuckle(tier, p.points()[0], p.points()[1], p.points()[2]) : new CablePart(tier, p.face(), p.points());
+            CablePart part = p.face() < 0 ? CablePart.knuckle(tier, spec, p.points()[0], p.points()[1], p.points()[2]) : new CablePart(tier, spec, p.face(), p.points());
             if (!part.valid()) return "bad piece at " + p.bx() + " " + p.by() + " " + p.bz();
             parts.add(part);
             BlockPos bp = new BlockPos((int) p.bx(), (int) p.by(), (int) p.bz());

@@ -90,6 +90,8 @@ public final class CablePart extends VoxelPart {
     }
 
     public final int tier;
+    /** A power cable's spec (cross-section, colour; its tier is its insulation), null for signal, thermal and bus. */
+    public final CableSpec spec;
     /** The attachment face (net.minecraft.core.Direction 3D value: 0 down .. 5 east), -1 for a knuckle. */
     public final int face;
     /** The centre line on the face's plane, x y z per point, in voxels (the face's own coordinate is 0 or 16). */
@@ -109,10 +111,26 @@ public final class CablePart extends VoxelPart {
     /** Saved state (server): voltage and temperature, restored into its conductor. */
     public double u, t;
 
+    /** A piece of its tier's preset spec (power tiers). */
     public CablePart(int tier, int face, int[] points) {
+        this(tier, CableSpec.power(tier) ? CableSpec.preset(tier) : null, face, points);
+    }
+
+    public CablePart(int tier, CableSpec spec, int face, int[] points) {
         this.tier = tier;
+        this.spec = CableSpec.power(tier) ? (spec != null ? spec : CableSpec.preset(tier)) : null;
         this.face = face;
         this.points = points;
+    }
+
+    /** The same cable (tier and spec): pieces of one conductor, one kit. */
+    public boolean sameCable(CablePart o) {
+        return tier == o.tier && java.util.Objects.equals(spec, o.spec);
+    }
+
+    /** Its electrical constants: its spec's, or its tier's (signal); null for thermal and bus. */
+    public ElectricalCableDescriptor descriptor() {
+        return spec != null ? spec.descriptor(tier) : TIERS[tier].descriptor();
     }
 
     /**
@@ -120,6 +138,10 @@ public final class CablePart extends VoxelPart {
      * the middle of each edge toward `dirs` (3D values, along the face); two opposite arms are one straight piece.
      */
     public static List<CablePart> arms(int tier, int face, int... dirs) {
+        return arms(tier, null, face, dirs);
+    }
+
+    public static List<CablePart> arms(int tier, CableSpec spec, int face, int... dirs) {
         int n = normalAxis(face);
         int[] c = {8, 8, 8};
         c[n] = plane(face);
@@ -128,12 +150,12 @@ public final class CablePart extends VoxelPart {
         if (dirs.length >= 2) {
             int[] a = edge(c, dirs[0]), b = edge(c, dirs[1]);
             boolean straight = dirs[0] / 2 == dirs[1] / 2;
-            out.add(new CablePart(tier, face, straight ? new int[]{a[0], a[1], a[2], b[0], b[1], b[2]}
+            out.add(new CablePart(tier, spec, face, straight ? new int[]{a[0], a[1], a[2], b[0], b[1], b[2]}
                 : new int[]{a[0], a[1], a[2], c[0], c[1], c[2], b[0], b[1], b[2]}));
         }
         for (int i = dirs.length >= 2 ? 2 : 0; i < dirs.length; i++) {
             int[] e = edge(c, dirs[i]);
-            out.add(new CablePart(tier, face, new int[]{c[0], c[1], c[2], e[0], e[1], e[2]}));
+            out.add(new CablePart(tier, spec, face, new int[]{c[0], c[1], c[2], e[0], e[1], e[2]}));
         }
         return out;
     }
@@ -147,7 +169,11 @@ public final class CablePart extends VoxelPart {
     }
 
     public static CablePart knuckle(int tier, int x, int y, int z) {
-        return new CablePart(tier, -1, new int[]{x, y, z});
+        return knuckle(tier, null, x, y, z);
+    }
+
+    public static CablePart knuckle(int tier, CableSpec spec, int x, int y, int z) {
+        return new CablePart(tier, spec, -1, new int[]{x, y, z});
     }
 
     @Override
@@ -155,8 +181,12 @@ public final class CablePart extends VoxelPart {
         return KIND;
     }
 
+    private Tier info;
+
     public Tier tierInfo() {
-        return TIERS[tier];
+        if (spec == null) return TIERS[tier];
+        if (info == null) info = new Tier(TIERS[tier].name, spec.width(tier), spec.height(tier), TIERS[tier].kind);
+        return info;   // (its spec's cross-section)
     }
 
     public boolean isKnuckle() {
@@ -204,7 +234,7 @@ public final class CablePart extends VoxelPart {
         // all on one plane, the cross-section inside the block (on a block face, or on a step inside one)
         int n = normalAxis(face);
         for (int i = n; i < points.length; i += 3) if (points[i] != points[n]) return false;
-        int h = TIERS[tier].height;
+        int h = tierInfo().height;
         if (face % 2 == 0 ? points[n] + h > 16 : points[n] - h < 0) return false;
         for (int i = 3; i < points.length; i += 3) {
             int axes = 0;
@@ -347,6 +377,10 @@ public final class CablePart extends VoxelPart {
     @Override
     public void write(CompoundTag tag) {
         tag.putString("tier", TIERS[tier].name);
+        if (spec != null) {
+            tag.putInt("mm2", spec.mm2());
+            tag.putInt("col", spec.colour());
+        }
         tag.putInt("face", face);
         tag.putIntArray("pts", points);
         if (burnt != null) tag.putString("burnt", burnt.name());
@@ -359,7 +393,10 @@ public final class CablePart extends VoxelPart {
     static CablePart read(CompoundTag tag) {
         int tier = tierOf(tag.getStringOr("tier", ""));
         if (tier < 0) return null;
-        CablePart p = new CablePart(tier, tag.getIntOr("face", 0), tag.getIntArray("pts").orElse(new int[0]));
+        // (a power cable saved before specs is its tier's preset: Baughn's in-place upgrade)
+        CableSpec spec = CableSpec.power(tier) && tag.contains("mm2")
+            ? new CableSpec(tag.getIntOr("mm2", 0), tag.getIntOr("col", 0)) : null;
+        CablePart p = new CablePart(tier, spec, tag.getIntOr("face", 0), tag.getIntArray("pts").orElse(new int[0]));
         if (!p.valid()) return null;
         String b = tag.getStringOr("burnt", "");
         if (!b.isEmpty()) {
@@ -379,6 +416,10 @@ public final class CablePart extends VoxelPart {
     @Override
     public void serialize(java.io.DataOutputStream out) throws java.io.IOException {
         out.writeByte(tier | (burnt != null ? 0x80 : 0));
+        if (spec != null) {
+            out.writeByte(spec.mm2());
+            out.writeByte(spec.colour());
+        }
         out.writeByte(face);
         out.writeByte(points.length / 3);
         for (int v : points) out.writeByte(v);
@@ -386,11 +427,13 @@ public final class CablePart extends VoxelPart {
 
     static CablePart deserialize(java.io.DataInputStream in) throws java.io.IOException {
         int b = in.readByte();
+        int tier = Math.max(0, Math.min(TIERS.length - 1, b & 0x7F));
+        CableSpec spec = CableSpec.power(tier) ? new CableSpec(in.readByte(), in.readByte()) : null;
         int face = in.readByte();
         int n = in.readByte();
         int[] pts = new int[3 * n];
         for (int i = 0; i < pts.length; i++) pts[i] = in.readByte();
-        CablePart p = new CablePart(Math.max(0, Math.min(TIERS.length - 1, b & 0x7F)), face, pts);
+        CablePart p = new CablePart(tier, spec, face, pts);
         if ((b & 0x80) != 0) p.burnt = mods.eln.sim.process.destruct.FailureCause.OVERHEAT;
         return p;
     }

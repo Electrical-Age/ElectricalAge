@@ -85,6 +85,7 @@ public final class KitPreview {
         // thread made the preview slow); the latest aim wins
         RouteView view = snapshotFor(p, level, plan, at);
         int tier = kit.tier, have = p.isCreative() ? Integer.MAX_VALUE : KitItem.length(p.getMainHandItem());
+        CableSpec spec = CableKitItem.specOf(p.getMainHandItem());
         List<CableRouter.End> wps = List.copyOf(plan.waypoints);
         CableRouter.End start = plan.start;
         long[] startJoin = plan.startJoin, endJoin = join[0];
@@ -92,7 +93,7 @@ public final class KitPreview {
         var server = level.getServer();
         WORKER.execute(() -> {
             if (GEN.getOrDefault(id, 0L) != gen) return;   // (aimed elsewhere since)
-            Answer a = answer(view, tier, start, startJoin, wps, at, endJoin, have);
+            Answer a = answer(view, tier, spec, start, startJoin, wps, at, endJoin, have);
             server.execute(() -> {
                 if (GEN.getOrDefault(id, 0L) != gen) return;
                 ServerPlayer now = server.getPlayerList().getPlayer(id);
@@ -115,10 +116,15 @@ public final class KitPreview {
     /** The route to {@code at}, over a view of the world (the preview thread). */
     public static Answer answer(RouteView view, int tier, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps, CableRouter.End at,
                          long[] endJoin, int have) {
+        return answer(view, tier, null, start, startJoin, wps, at, endJoin, have);
+    }
+
+    public static Answer answer(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
+                                CableRouter.End at, long[] endJoin, int have) {
         CableRouter.Space sp = CablePlacer.space(view);
         if (startJoin != null) sp = CablePlacer.around(sp, startJoin);
         if (endJoin != null) sp = CablePlacer.around(sp, endJoin);
-        CablePart.Tier t = CablePart.TIERS[tier];
+        CablePart.Tier t = CablePlacer.tierOf(tier, spec);
         CableRouter.Result r = CableRouter.route(sp, t.width(), t.height(), start, wps, at, PREVIEW_BUDGET_MS);
         List<int[]> boxes = new ArrayList<>();
         if (r.error != null) {
@@ -126,7 +132,7 @@ public final class KitPreview {
             return new Answer(false, boxes, "Can't reach there: " + r.error + " (sneak-click to cancel the route)");
         }
         for (CableRouter.Piece pc : CableRouter.pieces(r.steps, t.width(), t.height())) {
-            CablePart part = pc.face() < 0 ? CablePart.knuckle(tier, pc.points()[0], pc.points()[1], pc.points()[2]) : new CablePart(tier, pc.face(), pc.points());
+            CablePart part = pc.face() < 0 ? CablePart.knuckle(tier, spec, pc.points()[0], pc.points()[1], pc.points()[2]) : new CablePart(tier, spec, pc.face(), pc.points());
             for (int[] b : part.boxes())
                 boxes.add(new int[]{(int) pc.bx() * 16 + b[0], (int) pc.by() * 16 + b[1], (int) pc.bz() * 16 + b[2],
                     (int) pc.bx() * 16 + b[3], (int) pc.by() * 16 + b[4], (int) pc.bz() * 16 + b[5]});

@@ -209,8 +209,8 @@ public final class DevicePlacer {
         if (near != p[k + a]) for (int x = 0; x < 3; x++) first.add(x == a ? near : p[k + x]);
         if (far != p[k + 3 + a]) for (int x = 0; x < 3; x++) second.add(x == a ? far : p[k + 3 + x]);
         for (int i = k + 3; i < p.length; i++) second.add(p[i]);
-        CablePart pa = first.size() >= 6 ? new CablePart(c.tier, c.face, first.stream().mapToInt(Integer::intValue).toArray()) : null;
-        CablePart pb = second.size() >= 6 ? new CablePart(c.tier, c.face, second.stream().mapToInt(Integer::intValue).toArray()) : null;
+        CablePart pa = first.size() >= 6 ? new CablePart(c.tier, c.spec, c.face, first.stream().mapToInt(Integer::intValue).toArray()) : null;
+        CablePart pb = second.size() >= 6 ? new CablePart(c.tier, c.spec, c.face, second.stream().mapToInt(Integer::intValue).toArray()) : null;
         if (pa != null && !pa.valid() || pb != null && !pb.valid()) return null;
         int len = c.length(), la = pa == null ? 0 : pa.length(), lb = pb == null ? 0 : pb.length();
         int returned;
@@ -306,7 +306,7 @@ public final class DevicePlacer {
     static Cut trim(End end, CablePart c, int tip) {
         int[] q = c.points.clone();
         q[end.e() + end.axis()] = tip;
-        CablePart t = new CablePart(c.tier, c.face, q);
+        CablePart t = new CablePart(c.tier, c.spec, c.face, q);
         if (!t.valid()) return null;
         t.u = c.u;
         t.t = c.t;

@@ -109,7 +109,8 @@ public class ElnJadePlugin implements IWailaPlugin {
         if (el >= 0 && v.sideElementList[el] != null) return v.sideElementList[el].sixNodeElementDescriptor.name;
         if (pi < 0) return null;
         var part = v.parts.get(pi);
-        if (part instanceof mods.eln.node.voxel.CablePart c) return mods.eln.node.voxel.CablePart.TIERS[c.tier].name();
+        if (part instanceof mods.eln.node.voxel.CablePart c)   // (a power cable: its spec, Baughn 2026-11-06)
+            return mods.eln.node.voxel.CablePart.TIERS[c.tier].name() + (c.spec != null ? " (" + c.spec.label(c.tier) + ")" : "");
         if (part instanceof mods.eln.node.voxel.PipePart pp) return (switch (pp.tier) { case 0 -> "Iron"; case 1 -> "Alloy"; default -> "Large Alloy"; }) + " Pipe";
         return null;
     }

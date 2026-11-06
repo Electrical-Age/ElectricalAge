@@ -275,7 +275,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** The item a part was made from (what it drops), or empty: a burst pipe, a burnt cable. */
     static ItemStack partItem(VoxelPart p) {
         if (p instanceof PipePart pipe) return pipe.burst ? ItemStack.EMPTY : PipeKitItem.kit(pipe.tier, pipe.length());
-        if (p instanceof CablePart c) return c.burnt != null ? ItemStack.EMPTY : CableKitItem.kit(c.tier, c.dropLength());
+        if (p instanceof CablePart c) return c.burnt != null ? ItemStack.EMPTY : CableKitItem.kit(c.tier, c.spec, c.dropLength());
         if (p instanceof ValvePart v) return valveItem(v);
         if (p instanceof AdapterPart) return new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get());
         if (p instanceof SafetyValvePart) return new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get());
@@ -300,7 +300,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** A part's item for a middle-click: a cable or pipe as a one-block kit of its tier (burnt or burst too). */
     static ItemStack pickPart(VoxelPart p) {
         if (p instanceof PipePart pipe) return PipeKitItem.kit(pipe.tier, 16);
-        if (p instanceof CablePart c) return CableKitItem.kit(c.tier, 16);
+        if (p instanceof CablePart c) return CableKitItem.kit(c.tier, c.spec, 16);
         return partItem(p);
     }
 
@@ -333,6 +333,26 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         for (int i = parts.size() - 1; i >= 0; i--)   // (the outline is 2 voxels fatter than the parts)
             for (int[] b : parts.get(i).boxes()) if (VoxelPart.contains(b, x, y, z, 2.05)) return i;
         return -1;
+    }
+
+    /**
+     * A brush on a power cable paints its insulation (Baughn 2026-11-06: colour is only its look). EA's brushes count
+     * colours as the old dye damage (0 black .. 15 white), a spec as DyeColor ids (0 white .. 15 black).
+     */
+    boolean recolour(Player player, int index, CablePart c) {
+        ItemStack held = player.getMainHandItem();
+        if (!(mods.eln.item.BrushDescriptor.getDescriptor(held) instanceof mods.eln.item.BrushDescriptor brush)) return false;
+        int colour = 15 - brush.getColor(held);
+        if (colour == c.spec.colour() || !brush.use(held, player)) return true;
+        CablePart n = new CablePart(c.tier, new CableSpec(c.spec.mm2(), colour), c.face, c.points);
+        n.burnt = c.burnt;
+        n.paid = c.paid;
+        n.byConverter = c.byConverter;
+        n.u = c.u;
+        n.t = c.t;
+        parts.set(index, n);
+        changed();
+        return true;
     }
 
     private void changed() {
@@ -666,6 +686,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         Aimed a = aimed(vx, vy, vz);
         int el = a.element(), pi = a.part();
         if (el >= 0) return onSlotActivated(player, el, vx, vy, vz);
+        if (pi >= 0 && parts.get(pi) instanceof CablePart c && c.spec != null && recolour(player, pi, c)) return true;
         if (player.getMainHandItem().isEmpty()) {
             int i = pi;
             if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv) {
@@ -993,7 +1014,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (cut != null) {
             changed();   // (the cable's conductors and links rebuilt round the device)
             // the cut-out cable back to the player: cable is neither made nor lost
-            ItemStack back = CableKitItem.kit(old.tier, cut.returned());
+            ItemStack back = CableKitItem.kit(old.tier, old.spec, cut.returned());
             if (!back.isEmpty() && player != null && !player.isCreative() && !player.getInventory().add(back)) dropItem(back);
         }
         return null;

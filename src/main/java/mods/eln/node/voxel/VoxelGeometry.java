@@ -86,9 +86,9 @@ public final class VoxelGeometry {
                 int argb = pipe.burst ? rgb(0.55f, 0.35f, 0.25f) : 0xFFFFFFFF;
                 pipe(m, pipe, PIPE[pipe.tier], argb, adapters);
             } else if (part instanceof CablePart c) {
-                // (black insulation, Baughn; burnt: scorched brown)
+                // (insulation: a power cable's spec colour (Baughn 2026-11-06), else black; burnt: scorched brown)
                 // (the field bus: violet, as real Profibus cable is)
-                int argb = c.burnt != null ? rgb(0.35f, 0.22f, 0.14f) : c.tierInfo().bus() ? rgb(0.62f, 0.38f, 0.80f) : rgb(0.22f, 0.22f, 0.24f);
+                int argb = c.burnt != null ? rgb(0.35f, 0.22f, 0.14f) : c.tierInfo().bus() ? rgb(0.62f, 0.38f, 0.80f) : insulation(c);
                 cable(m, c, argb, cableBoxes);
                 if (lugs != null && c.face == 0 && !c.isKnuckle())
                     for (CablePart.Port port : c.cablePorts())
@@ -377,7 +377,7 @@ public final class VoxelGeometry {
         double w2 = c.tierInfo().width() / 2.0, h = c.tierInfo().height();
         // (its foot 0.1 px off the floor: on it, its underside lay in the cable box's and z-fought)
         lugBox(m, along, across, 0.1, H - 0.1, mid, w2 + 0.05, edge + in * 0.25, edge + in * (0.25 + h), cableSprite(c.tier)).named("lug riser")
-            .rgb(0.22f, 0.22f, 0.24f);
+            .argb(insulation(c));
         int copper = rgb(0.77f, 0.43f, 0.27f);   // (dull copper: a lug you can touch isn't bare metal, Baughn)
         lugBox(m, along, across, H - 0.1, H + 0.6, mid, w2 + 0.15, edge + in * 0.15, edge + in * (0.35 + h), PIPE[0]).named("lug barrel").argb(copper);
         lugBox(m, along, across, H - 0.85, H + 0.85, mid, Math.max(0.75, w2 - 0.25), edge, edge + in * 0.25, PIPE[0]).named("lug palm").argb(copper);
@@ -402,6 +402,12 @@ public final class VoxelGeometry {
 
     static int[] others(int axis) {
         return axis == 0 ? new int[]{1, 2} : axis == 1 ? new int[]{0, 2} : new int[]{0, 1};
+    }
+
+    /** A cable's insulation colour: its spec's dye (black stays the 1.12 dark grey), else that dark grey. */
+    static int insulation(CablePart c) {
+        if (c.spec == null || c.spec.colour() == CableSpec.BLACK) return rgb(0.22f, 0.22f, 0.24f);
+        return 0xFF000000 | net.minecraft.world.item.DyeColor.byId(c.spec.colour()).getTextureDiffuseColor();
     }
 
     static int rgb(float r, float g, float b) {

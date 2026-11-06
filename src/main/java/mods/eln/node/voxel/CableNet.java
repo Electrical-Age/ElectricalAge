@@ -55,6 +55,8 @@ final class CableNet {
         /** The thermal cable's (d null then: no electrical load, only heat). */
         final mods.eln.sixnode.thermalcable.ThermalCableDescriptor td;
         final int tier, face;
+        /** A power cable's spec (null otherwise). */
+        final CableSpec spec;
         /** Null for a thermal cable. */
         final ElectricalLoad load;
         ThermalLoad thermal;
@@ -63,10 +65,11 @@ final class CableNet {
         int glowStep;
         final mods.eln.misc.Incandescence.Light glow = new mods.eln.misc.Incandescence.Light();
 
-        Conductor(int tier, int face) {
+        Conductor(int tier, CableSpec spec, int face) {
             this.tier = tier;
+            this.spec = spec;
             this.face = face;
-            this.d = CablePart.TIERS[tier].descriptor();
+            this.d = spec != null ? spec.descriptor(tier) : CablePart.TIERS[tier].descriptor();
             this.td = CablePart.TIERS[tier].thermalDescriptor();
             this.bus = CablePart.TIERS[tier].bus();
             this.port = bus ? new mods.eln.bus.BusPort() : null;
@@ -82,6 +85,7 @@ final class CableNet {
         }
 
         String name() {
+            if (spec != null) return d.name + " (" + spec.label(tier) + ")";
             return d != null ? d.name : td != null ? td.name : CablePart.TIERS[tier].name();
         }
 
@@ -243,14 +247,14 @@ final class CableNet {
         for (int i = 0; i < n; i++)
             for (int j = i + 1; j < n; j++) {
                 CablePart a = cables.get(i), b = cables.get(j);
-                if (a.isKnuckle() || b.isKnuckle() || a.tier != b.tier || a.face != b.face || !a.touches(b)) continue;
+                if (a.isKnuckle() || b.isKnuckle() || !a.sameCable(b) || a.face != b.face || !a.touches(b)) continue;
                 int ra = find(root, i), rb = find(root, j);
                 if (ra != rb) root[ra] = rb;
             }
         Map<Integer, Conductor> byRoot = new java.util.LinkedHashMap<>();
         for (int i = 0; i < n; i++) {
             CablePart c = cables.get(i);
-            Conductor k = byRoot.computeIfAbsent(find(root, i), r -> new Conductor(c.tier, c.face));
+            Conductor k = byRoot.computeIfAbsent(find(root, i), r -> new Conductor(c.tier, c.spec, c.face));
             k.parts.add(c);
             of.put(c, k);
         }

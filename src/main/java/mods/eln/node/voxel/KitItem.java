@@ -14,6 +14,16 @@ public interface KitItem {
     /** A kit of this item holding len voxels (empty if none). */
     ItemStack make(int len);
 
+    /** A kit like this one (a cable kit: of its spec) holding len voxels. */
+    default ItemStack make(ItemStack like, int len) {
+        return make(len);
+    }
+
+    /** One kind of kit: the same item, and a cable kit the same spec (so they merge and top each other up). */
+    static boolean same(ItemStack a, ItemStack b) {
+        return a.getItem() == b.getItem() && java.util.Objects.equals(CableKitItem.specOf(a), CableKitItem.specOf(b));
+    }
+
     String LEN_KEY = "kitLen";
 
     static int length(ItemStack s) {
@@ -54,7 +64,7 @@ public interface KitItem {
         var inv = e.getPlayer().getInventory();
         for (int i = 0; i < inv.getContainerSize() && len > 0; i++) {
             ItemStack o = inv.getItem(i);
-            if (o == s || o.getItem() != s.getItem()) continue;
+            if (o == s || !same(o, s)) continue;
             int room = MAX - length(o);
             if (room <= 0) continue;
             int take = Math.min(room, len);

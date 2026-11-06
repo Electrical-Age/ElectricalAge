@@ -80,7 +80,7 @@ public final class CableKitRecipes {
         }
 
         static int[] use(List<ItemStack> items) {
-            return KitRecipes.use(items, s -> s.getItem() instanceof CableKitItem k ? k.tier : -1, CableKitRecipes::coilTier, t -> 1);
+            return KitRecipes.use(items, s -> s.getItem() instanceof CableKitItem k && CableKitItem.isPreset(s) ? k.tier : -1, CableKitRecipes::coilTier, t -> 1);
         }
 
         @Override
@@ -139,7 +139,7 @@ public final class CableKitRecipes {
 
         @Override
         protected int kitTier(ItemStack s) {
-            return s.getItem() instanceof CableKitItem k ? k.tier : -1;
+            return s.getItem() instanceof CableKitItem k && CableKitItem.isPreset(s) ? k.tier : -1;   // (a kit of another spec isn't coils)
         }
 
         @Override

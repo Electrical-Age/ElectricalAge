@@ -209,7 +209,7 @@ public final class PipeKitRecipes {
             for (int i = 0; i < in.size(); i++) {
                 ItemStack s = in.getItem(i);
                 if (s.isEmpty()) continue;
-                if (!(s.getItem() instanceof KitItem) || s.getCount() != 1 || (kit != null && s.getItem() != kit.getItem())) return null;
+                if (!(s.getItem() instanceof KitItem) || s.getCount() != 1 || (kit != null && !KitItem.same(s, kit))) return null;
                 if (KitItem.length(s) >= KitItem.MAX) return null;
                 kit = s;
                 len += KitItem.length(s);
@@ -226,7 +226,7 @@ public final class PipeKitRecipes {
         @Override
         public ItemStack assemble(CraftingInput input) {
             Object[] t = total(input);
-            return t == null ? ItemStack.EMPTY : ((KitItem) ((ItemStack) t[0]).getItem()).make(Math.min(KitItem.MAX, (Integer) t[1]));
+            return t == null ? ItemStack.EMPTY : ((KitItem) ((ItemStack) t[0]).getItem()).make((ItemStack) t[0], Math.min(KitItem.MAX, (Integer) t[1]));
         }
 
         /** What's over a full kit stays in the grid, as one kit in the last kit's slot. */
@@ -237,7 +237,7 @@ public final class PipeKitRecipes {
             if (t == null || (Integer) t[1] <= KitItem.MAX) return out;
             for (int i = input.size() - 1; i >= 0; i--)
                 if (!input.getItem(i).isEmpty()) {
-                    out.set(i, ((KitItem) ((ItemStack) t[0]).getItem()).make((Integer) t[1] - KitItem.MAX));
+                    out.set(i, ((KitItem) ((ItemStack) t[0]).getItem()).make((ItemStack) t[0], (Integer) t[1] - KitItem.MAX));
                     break;
                 }
             return out;

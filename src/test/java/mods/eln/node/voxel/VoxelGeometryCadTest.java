@@ -50,7 +50,9 @@ public class VoxelGeometryCadTest {
     static boolean changed(VoxelCases.Case c) {
         return c.parts().stream().anyMatch(p -> p instanceof SafetyValvePart || p instanceof PipeSensorPart || p instanceof AdapterPart)
             || c.name().startsWith("cable") && c.name().matches(".* (bend|tee|cross) on .*") || c.name().startsWith("large alloy S ")
-            || c.name().contains("Field Bus");
+            || c.name().contains("Field Bus")
+            // power cables draw their spec's cross-section and insulation colour (Baughn 2026-11-06, Wires stage 3)
+            || c.parts().stream().anyMatch(p -> p instanceof CablePart cp && cp.spec != null);
     }
 
     @Test
