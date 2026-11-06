@@ -664,18 +664,19 @@
                            (row (string "source " (or (d :source) "?")) nil))
                :fiber (row (string "task " (task-line v)) [:task v "task"])
                (row (short v) nil)))
-    (ui/text t 1 0 0 :light-gray (string/slice (string (if (empty? path) "" (string (length path) ": ")) label) 0 (min (- ui/width 24) (length (string label)))))
+    (def header (string (if (empty? path) "" (string (length path) ": ")) label))
+    (ui/text t 1 0 0 :light-gray (string/slice header 0 (min (- ui/width 27) (length header))))
     (ui/list t 2 0 1 ui/width (- ui/height 1) items
              (fn [i]
                (def what (get rows i))
                (when what (array/push path what) (show)))))
-  (ui/button t 3 (- ui/width 24) 0 6 "Back" (fn [] (unless (empty? path) (array/pop path)) (show)))
-  (ui/button t 4 (- ui/width 17) 0 11 "REPL here"
+  (ui/button t 3 (- ui/width 26) 0 6 "Back" (fn [] (unless (empty? path) (array/pop path)) (show)))
+  (ui/button t 4 (- ui/width 19) 0 11 "REPL here"
              (fn []
                (def e (or (find |(= :env ($ 0)) (reverse path)) [:env (proc-env-of 1) "REPL"]))
                (def nt (proc/new-tab (string "repl " (e 2))))
                (repl-tab (e 1) nt (string "repl " (e 2)))))
-  (ui/button t 5 (- ui/width 6) 0 6 "Close" (fn [] (proc/close t)))
+  (ui/button t 5 (- ui/width 7) 0 7 "Close" (fn [] (proc/close t)))
   (show)
   (ui/focus t)
   t)

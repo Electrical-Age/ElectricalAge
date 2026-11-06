@@ -38,7 +38,7 @@ public class ComputerScreen extends ElnScreen {
 
     /** The tab shown, and the element with the keyboard. */
     int tab = -1, focusId = -1;
-    int seenFocus = -1;
+    long seenFocus = -1;
     /** The player picked the tab shown (the Console tab is only the default while there is no REPL). */
     boolean chose;
     /** What only this player has: each line's edit, each log's and list's scroll. */
@@ -118,7 +118,8 @@ public class ComputerScreen extends ElnScreen {
                 if (w == null) {
                     int ex = (int) Form.num(m, 3, 0), ey = (int) Form.num(m, 4, 0), ew = (int) Form.num(m, 5, 10), eh = (int) Form.num(m, 6, 5);
                     boolean janet = "janet".equals(Form.kwName(m, 7, ""));
-                    w = new mods.eln.client.gui.CodeEditor(cx(ex), cy(ey), ew * CELL, eh * LINE, st.text, 32768,
+                    // (its last row is left for the save status, which the widget would cover)
+                    w = new mods.eln.client.gui.CodeEditor(cx(ex), cy(ey), ew * CELL, Math.max(1, eh - 1) * LINE, st.text, 32768,
                         janet ? JANET : PLAIN, s2 -> {
                             st.text = s2;
                             st.status = "";
@@ -209,10 +210,11 @@ public class ComputerScreen extends ElnScreen {
 
     Scene.Tab currentTab() {
         Scene s = scene();
-        if (s.focus != seenFocus && s.tabs.containsKey(s.focus)) {
-            seenFocus = s.focus;
+        if (s.focusSeq != seenFocus && s.tabs.containsKey(s.focus)) {
+            seenFocus = s.focusSeq;
             tab = s.focus;
         }
+        if (!s.tabs.containsKey(tab)) chose = false;   // (gone, e.g. after a reset: back to the REPL once it is up)
         if (!s.tabs.containsKey(tab) || (tab == 0 && !chose && s.tabs.containsKey(1))) {
             tab = s.tabs.containsKey(1) ? 1 : s.tabs.isEmpty() ? -1 : s.tabs.keySet().iterator().next();
             focusId = -1;
@@ -298,15 +300,22 @@ public class ComputerScreen extends ElnScreen {
     }
 
     /** A tab's title, shortened when there are many (the bar must stop short of inventory mods' sort buttons). */
+    /** Where the tabs may go: from beside the title to short of the inventory mods' buttons. */
+    static final int TABS_X = 60, TABS_END = WIDTH - 44;
+
+    /** A tab's title, shortened so that all the tabs fit their row. */
     String tabTitle(int t, Scene.Tab tab, int count) {
         String title = tab.title.isEmpty() ? String.valueOf(t) : tab.title;
-        int max = count <= 3 ? 14 : count <= 5 ? 9 : 5;
-        return title.length() > max ? title.substring(0, max - 1) + "." : title;
+        int room = Math.max(font.width("W."), (TABS_END - TABS_X) / Math.max(1, count) - 10);
+        if (font.width(title) <= room) return title;
+        int n = title.length();
+        while (n > 1 && font.width(title.substring(0, n) + ".") > room) n--;
+        return title.substring(0, n) + ".";
     }
 
     /** The tabs, beside the title (inventory mods draw their sort buttons at the top right). */
     void drawTabs(GuiGraphicsExtractor g, Scene s) {
-        int x = leftPos + 60;
+        int x = leftPos + TABS_X;
         for (Map.Entry<Integer, Scene.Tab> en : s.tabs.entrySet()) {
             String title = tabTitle(en.getKey(), en.getValue(), s.tabs.size());
             int w = font.width(title) + 8;
@@ -429,7 +438,7 @@ public class ComputerScreen extends ElnScreen {
     public boolean mouseClicked(MouseButtonEvent ev, boolean doubleClick) {
         Scene s = scene();
         double mx = ev.x(), my = ev.y();
-        int x = leftPos + 60;
+        int x = leftPos + TABS_X;
         for (Map.Entry<Integer, Scene.Tab> en : s.tabs.entrySet()) {
             String title = tabTitle(en.getKey(), en.getValue(), s.tabs.size());
             int w = font.width(title) + 8;

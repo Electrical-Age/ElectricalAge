@@ -17,8 +17,9 @@ public final class Scene {
 
     public int w = DEFAULT_W, h = DEFAULT_H;
     public final Map<Integer, Tab> tabs = new LinkedHashMap<>();
-    /** The tab the program last asked to bring forward (-1: none). */
+    /** The tab the program last asked to bring forward (-1: none), and a count of the asks (the same tab again is news). */
     public int focus = -1;
+    public long focusSeq;
 
     public static final class Tab {
         public String title;
@@ -101,6 +102,7 @@ public final class Scene {
                 int t = tab(m);
                 if (!tabs.containsKey(t)) return false;
                 focus = t;
+                focusSeq++;
                 return true;
             }
             case "clear" -> {

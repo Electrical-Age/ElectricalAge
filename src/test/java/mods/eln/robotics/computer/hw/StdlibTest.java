@@ -306,6 +306,15 @@ class StdlibTest {
         tick(5, null);
         String slots = screen.scene.tabs.get(3).elements.get(2).msg.get(7).toString();
         assertTrue(slots.contains("= 42"), slots);
+        // the header says where it is, whole; Back goes up a level at a time
+        String header = screen.scene.tabs.get(3).elements.get(1).msg.get(6).toString();
+        assertTrue(header.startsWith("2: #1"), header);
+        m.editor.give("(press 3 3)\n".getBytes(StandardCharsets.UTF_8));
+        tick(5, null);
+        assertEquals(frames, screen.scene.tabs.get(3).elements.get(2).msg.get(7).toString());
+        m.editor.give("(press 3 3)\n".getBytes(StandardCharsets.UTF_8));
+        tick(5, null);
+        assertTrue(screen.scene.tabs.get(3).elements.get(2).msg.get(7).toString().contains("sleeper (tab 2)"));
     }
 
     @Test
