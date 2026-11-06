@@ -31,7 +31,7 @@ public class WireDrawingCategory extends AbstractRecipeCategory<WireDrawingCateg
     public static final IRecipeType<Draw> TYPE = IRecipeType.create("eln", "wire_drawing", Draw.class);
 
     public WireDrawingCategory(IGuiHelper gui, ItemStack machine) {
-        super(TYPE, Component.translatable("jei.eln.wire_drawing"), gui.createDrawableItemStack(machine), 150, 54);
+        super(TYPE, Component.translatable("jei.eln.wire_drawing"), gui.createDrawableItemStack(machine), 170, 54);
     }
 
     /** An example of blocks of wire of a spec: a kit (turns 0) or a winding of turns. */
@@ -56,15 +56,15 @@ public class WireDrawingCategory extends AbstractRecipeCategory<WireDrawingCateg
     @Override
     public void setRecipe(IRecipeLayoutBuilder b, Draw r, IFocusGroup focuses) {
         b.addInputSlot(1, 6).setStandardSlotBackground().add(r.copper());
-        b.addInputSlot(19, 6).setStandardSlotBackground().add(r.rubber());
-        b.addOutputSlot(85, 6).setOutputSlotBackground().add(r.out());
+        b.addInputSlot(27, 6).setStandardSlotBackground().add(r.rubber());
+        b.addOutputSlot(101, 6).setOutputSlotBackground().add(r.out());
     }
 
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder b, Draw r, IFocusGroup focuses) {
-        b.addRecipeArrow().setPosition(50, 6);
-        b.addText(Component.translatable(r.small() ? "jei.eln.wire_drawing.either" : "jei.eln.wire_drawing.big", String.format("%.0f", r.kJ())), 150, 10)
+        b.addRecipeArrow().setPosition(64, 6);
+        b.addText(Component.translatable(r.small() ? "jei.eln.wire_drawing.either" : "jei.eln.wire_drawing.big", String.format("%.0f", r.kJ())), 170, 10)
             .setPosition(0, 28);
-        b.addText(Component.translatable("jei.eln.wire_drawing.how"), 150, 10).setPosition(0, 40);
+        b.addText(Component.translatable("jei.eln.wire_drawing.how"), 170, 10).setPosition(0, 40);
     }
 }

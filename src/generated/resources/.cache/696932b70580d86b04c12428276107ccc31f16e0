@@ -1,4 +1,4 @@
-// 26.3	2026-11-06T22:39:42.06152978	eln-global/EA models
+// 26.3	2026-11-06T23:47:19.718264519	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -998,8 +998,8 @@ b11cee6e3e98894426df042fd7cc530a796809d7 assets/eln/models/item/utility_pole.jso
 d1f41a03c6327ea90dc560980dfb5eaf61478054 assets/eln/models/item/utility_pole_3d.json
 a0ce898b04fad77f6c8fbc4daf5a8d77323c1d2b assets/eln/models/item/utility_pole_w_dc_dc_converter.json
 895de7cc7152c77402393e8ea1efa5a962531573 assets/eln/models/item/utility_pole_w_dc_dc_converter_3d.json
-b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/variable_dc_dc_converter.json
-bda6e369ab0719a6a951d6919f38e4c49467cdda assets/eln/models/item/variable_dc_dc_converter_3d.json
+62f896df7efbe5fc00491b9a319a68ab942d1ade assets/eln/models/item/variable_dc_dc_converter.json
+948a6bc24e94f14280beeb31ddbb94ec18b7b3bc assets/eln/models/item/variable_dc_dc_converter_3d.json
 7a5234d52e6df02ac3a4dbac252a5c1b7b8b689e assets/eln/models/item/very_high_voltage_cable.json
 35fc58425356983ad33e0163ddbca11ebdb2e625 assets/eln/models/item/very_high_voltage_relay.json
 854507146f69b26e5ff6fa4774083ac69024b285 assets/eln/models/item/very_high_voltage_relay_3d.json
@@ -1024,10 +1024,10 @@ d026402349bd1c2bd42e820c09cc5bcdba6b0cd3 assets/eln/models/item/weak_50v_battery
 f2187f0ed8e4c6c2b6ed24ea0159339e75c0f971 assets/eln/models/item/wind_turbine.json
 f1b2e6da3fad6668fdbce71ca86176d9b1d9e3af assets/eln/models/item/wind_turbine_3d.json
 f8c7a091938c43f21b5bf2862ee478e7f30c0766 assets/eln/models/item/winding.json
-b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/wire_drawing_machine_230v.json
-bda6e369ab0719a6a951d6919f38e4c49467cdda assets/eln/models/item/wire_drawing_machine_230v_3d.json
-b414eedcad041b5dcf4dfc0ab2f9a951b1afc523 assets/eln/models/item/wire_drawing_machine_48v.json
-bda6e369ab0719a6a951d6919f38e4c49467cdda assets/eln/models/item/wire_drawing_machine_48v_3d.json
+70b23dec193f3cdde90a8eb146f7a2f5918cfd33 assets/eln/models/item/wire_drawing_machine_230v.json
+7627928b9656ef2f728df7a7dd5a8f715b98f9e6 assets/eln/models/item/wire_drawing_machine_230v_3d.json
+323696bdf3dbc8b494ac60753064d7359f7a2282 assets/eln/models/item/wire_drawing_machine_48v.json
+0bd642fb3f54e3430158a4fc38c63f93969d799d assets/eln/models/item/wire_drawing_machine_48v_3d.json
 be170e66e563ed299d3d5173cb44b485205d4a20 assets/eln/models/item/wireless_analyzer.json
 370f5507720395a48aed6d940ebf081a63c82f1c assets/eln/models/item/wireless_button.json
 40fbfa51cd78a3c7db802b801e81e4828855e461 assets/eln/models/item/wireless_button_3d.json
