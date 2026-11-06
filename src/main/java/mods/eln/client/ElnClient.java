@@ -106,6 +106,9 @@ public final class ElnClient {
         if (mods.eln.handbook.Handbook.guideAvailable())
             modBus.addListener(net.neoforged.neoforge.client.event.AddClientReloadListenersEvent.class, HandbookGuide::onAddReloadListeners);
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);
+        // lamp beams (flashlights, the headlamp, the bike lamp), drawn per pixel (LampBeam)
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.FrameGraphSetupEvent.class, LampBeam::frame);
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, LampBeam::tick);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent.class, mods.eln.client.render.ChiselOutline::onExtract);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent.class, mods.eln.client.render.KitOutline::onExtract);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent.class, mods.eln.client.render.VoxelOutline::onExtract);

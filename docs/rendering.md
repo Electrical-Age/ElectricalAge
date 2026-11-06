@@ -52,6 +52,13 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 - Display poses: `src/main/resources/assets/eln/models/item/device_six.json`, `device_transparent.json`, `device_obj.json` (X-ray scanner via `itemDrawParent()`), as the base of per-item `<name>_3d` models.
 - `client/render/ElnItemRenderer.java` (`SpecialModelRenderer`, registered as `eln:device`): opens a GlFrame and calls `GenericItemBlockUsingDamageDescriptor.drawItem(entity)` or `GenericItemUsingDamageDescriptor.drawItem(stack, entity)` when `hasItemDraw()`.
 - `client/render/LitProperty.java`: condition `eln:lit` (flashlight on/off icon).
+- `client/LampBeam.java`: lamp beams (lit flashlights in either hand, the worn headlamp, the bike's front lamp:
+  `LampItem.beamLight`) drawn per pixel by a post effect (`post_effect/lamp_beam.json`, `shaders/post/lamp_beam.fsh`),
+  for up to 5 players within 64 blocks, off under an Iris shaderpack. It goes first among the active post effects. The
+  beam data is a 128x1 float texture (`eln:textures/effect/beamdata.png`); the level's projection with the view bob
+  comes from `mixin/client/GameRendererMixin`. The server lights only the holder's own block (`LampItem.light`);
+  1.12's trail of light blocks along the beam is gone (Baughn 2026-11-06). Moved from Stasis Delvers, which drew it
+  first.
 - `client/render/WornCurios.java` (Curios loaded only): `ICurioRenderer`s draw the worn accessories on players (Baughn,
   todo #166). Battery belt: a band 3 px tall round the waist, 1.2 px off the body (over a chestplate), its faces cut from
   the item icon. Headlamp: its item model on the forehead at 1.15x, following the head. In the helmet slot the headlamp

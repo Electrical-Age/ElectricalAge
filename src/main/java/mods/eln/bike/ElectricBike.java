@@ -293,19 +293,18 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         if (player.getVehicle() instanceof ElectricBike b && b.getControllingPassenger() == player) b.toggleLamp();
     }
 
-    /** How far the beam reaches without a client-drawn beam (blocks), its light, and where the lamp sits on the bike (forward, up). */
-    static final double LAMP_RANGE = 12, LAMP_FORWARD = 0.55, LAMP_UP = 0.85;
+    /** Where the lamp sits on the bike (forward, up), and its light (the beam's length: client/LampBeam). */
+    static final double LAMP_FORWARD = 0.55, LAMP_UP = 0.85;
     public static final int LAMP_LIGHT = 14;
 
     /**
-     * Server, each tick the lamp is on: the rider casts the beam as a flashlight or headlamp does (LampItem.light: with
-     * a client drawing beams, Stasis Delvers, one light block at the eyes; else 1.12's trail of light blocks), and
-     * LampItem.beamLight counts the lamp for its rider. Baughn 2026-11-06: no more trail of light blocks of its own,
+     * Server, each tick the lamp is on: the rider casts the beam as a flashlight or headlamp does (LampItem.light: one
+     * light block at the eyes; LampItem.beamLight counts the lamp for its rider, and clients draw it). Baughn 2026-11-06: no more trail of light blocks of its own,
      * which lagged. Parked with it on, one light block at the lamp.
      */
     void lightTheWay() {
         if (getControllingPassenger() instanceof Player p) {
-            mods.eln.item.electricalitem.LampItem.light(level(), p, LAMP_LIGHT, (int) LAMP_RANGE);
+            mods.eln.item.electricalitem.LampItem.light(level(), p, LAMP_LIGHT);
             return;
         }
         float yr = getYRot() * Mth.DEG_TO_RAD;

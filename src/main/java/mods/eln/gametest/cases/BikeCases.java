@@ -433,27 +433,15 @@ public final class BikeCases {
                 p.setYRot(0);
                 p.setXRot(0);
                 bike.positionRider(p);
-                var beam = mods.eln.item.electricalitem.LampItem.clientBeam;
                 BlockPos at = bike.blockPosition();
-                int near, ahead;
-                try {
-                    // with a client drawing the beam (Stasis Delvers), the rider casts it: one light block, at the eyes
-                    mods.eln.item.electricalitem.LampItem.clientBeam = e -> true;
-                    for (int t = 0; t < 80; t++) bike.serverTick();   // 4 s, standing still (at 5 s it may tip over with the rider)
-                    near = lights(ctx, at.offset(-3, -1, -3), at.offset(3, 4, 12));
-                    ctx.check("the rider casts the lamp's beam, as with a flashlight", mods.eln.item.electricalitem.LampItem.beamLight(p) == ElectricBike.LAMP_LIGHT,
-                        "" + mods.eln.item.electricalitem.LampItem.beamLight(p));
-                    ctx.check("with a client-drawn beam, one light block (Baughn: no trail of them)", near == 1, near + " light blocks");
-                } finally {
-                    mods.eln.item.electricalitem.LampItem.clientBeam = beam;
-                }
+                // the rider casts the beam (clients draw it): one light block, at the eyes
+                for (int t = 0; t < 80; t++) bike.serverTick();   // 4 s, standing still (at 5 s it may tip over with the rider)
+                int near = lights(ctx, at.offset(-3, -1, -3), at.offset(3, 4, 12));
+                ctx.check("the rider casts the lamp's beam, as with a flashlight", mods.eln.item.electricalitem.LampItem.beamLight(p) == ElectricBike.LAMP_LIGHT,
+                    "" + mods.eln.item.electricalitem.LampItem.beamLight(p));
+                ctx.check("one light block, no trail of them (Baughn)", near == 1, near + " light blocks");
                 double used = e0 - bb.getEnergy(bike.trunk.getItem(0));
                 ctx.check("it draws its " + BikePhysics.LAMP_WATTS + " W standing still (4 s)", Math.abs(used - BikePhysics.LAMP_WATTS * 4) < 5, used + " J");
-                if (beam == null) {
-                    bike.serverTick();
-                    ahead = lights(ctx, at.offset(-2, -1, 1), at.offset(2, 3, 12));
-                    ctx.check("without one, the flashlight's trail lights the air ahead", ahead > 0, ahead + " light blocks ahead");
-                }
                 bb.setEnergy(bike.trunk.getItem(0), 0);
                 bike.serverTick();
                 ctx.check("flat, it goes out", !bike.lampOn(), "");

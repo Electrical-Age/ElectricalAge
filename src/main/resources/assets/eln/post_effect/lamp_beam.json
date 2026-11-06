@@ -1,0 +1,30 @@
+{
+    "targets": {
+        "swap": {}
+    },
+    "passes": [
+        {
+            "vertex_shader": "minecraft:core/screenquad",
+            "fragment_shader": "eln:post/lamp_beam",
+            "inputs": [
+                { "sampler_name": "In", "target": "minecraft:main" },
+                { "sampler_name": "Depth", "target": "minecraft:main", "use_depth_buffer": true },
+                { "sampler_name": "Data", "location": "eln:beamdata", "width": 128, "height": 1 }
+            ],
+            "output": "swap"
+        },
+        {
+            "vertex_shader": "minecraft:core/screenquad",
+            "fragment_shader": "minecraft:post/blit",
+            "inputs": [
+                { "sampler_name": "In", "target": "swap" }
+            ],
+            "uniforms": {
+                "BlitConfig": [
+                    { "name": "ColorModulate", "type": "vec4", "value": [ 1.0, 1.0, 1.0, 1.0 ] }
+                ]
+            },
+            "output": "minecraft:main"
+        }
+    ]
+}

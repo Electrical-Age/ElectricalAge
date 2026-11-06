@@ -117,10 +117,10 @@ GameTest `bike_recipe` crafts it.
   `BikeLamp`, `eln:bike_lamp`; the server takes it only from the bike's rider). On foot a right-click still mounts.
 - On only with charge; it draws `lampWatts` from the trunk battery, standing or riding, and goes out when the battery
   is flat or taken out. Synced and saved (`lamp`).
-- While on, each server tick it lights the way as EA's flashlight does (`LampItem`): short-lived light blocks (level 14,
-  5 ticks) in the air along the bike's heading from the lamp, dipped 8 degrees, up to 12 blocks, every third half-block
-  step back from where the beam stops. Everyone sees the light. The lamp's face is drawn full bright when on and
-  dimmed when off (`BikeModel.Group.LAMP`). No beam cone is drawn (EA has none; Stasis draws the flashlight's).
+- While on, its rider casts the lamp's beam as with a flashlight or headlamp (Baughn 2026-11-06): `LampItem.beamLight`
+  counts it (light 14), every client draws the beam along the rider's look (`client/LampBeam`), and each server tick
+  puts one short-lived light block at the rider's eyes (`LampItem.light`). Parked with the lamp on, one light block at
+  the lamp. The lamp's face is drawn full bright when on and dimmed when off (`BikeModel.Group.LAMP`).
 
 ## Paint (Baughn 2026-10-29: dyeable, per frame element)
 

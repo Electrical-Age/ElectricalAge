@@ -4,6 +4,7 @@
   "package": "mods.eln.mixin.client",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "GameRendererMixin",
     "HumanoidModelMixin"
   ],
   "injectors": {

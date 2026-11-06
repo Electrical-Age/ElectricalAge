@@ -69,18 +69,12 @@ public final class HeadlampCases {
             for (BlockPos q : BlockPos.betweenClosed(ctx.at(1, 0, 0), ctx.at(9, 3, 2)))
                 if (ctx.level().getBlockState(q).is(ElnRegistry.LIGHT_BLOCK.get())) lights++;
             // one light for hand-held and worn lamps (Baughn 2026-10-31): the beam a client draws counts the headlamp, and
-            // with a client drawing beams the server lights the eyes, as for a flashlight
+            // the server lights the eyes, as for a flashlight
             beam = mods.eln.item.electricalitem.LampItem.beamLight(p);
-            var was = mods.eln.item.electricalitem.LampItem.clientBeam;
-            mods.eln.item.electricalitem.LampItem.clientBeam = e -> true;
-            try {
-                BlockPos eyes = BlockPos.containing(p.getX(), p.getY() + 1.62, p.getZ());
-                ctx.level().removeBlock(eyes, false);
-                HeadlampItem.wornTick(worn, p, 0.05);
-                eyeLight = ctx.level().getBlockState(eyes).is(ElnRegistry.LIGHT_BLOCK.get());
-            } finally {
-                mods.eln.item.electricalitem.LampItem.clientBeam = was;
-            }
+            BlockPos eyes = BlockPos.containing(p.getX(), p.getY() + 1.62, p.getZ());
+            ctx.level().removeBlock(eyes, false);
+            HeadlampItem.wornTick(worn, p, 0.05);
+            eyeLight = ctx.level().getBlockState(eyes).is(ElnRegistry.LIGHT_BLOCK.get());
         }
 
         public void measure(TestContext ctx) {
@@ -91,8 +85,8 @@ public final class HeadlampCases {
             ctx.check("headlamp: the key switches a charged one on", HeadlampItem.isOn(worn), "");
             ctx.check("headlamp: 20 W for a second takes 20 J", Math.abs(e0 - e - 21) < 0.5, (e0 - e) + " J (and one tick more)");
             ctx.check("headlamp: its beam is the flashlight's (LampItem.beamLight 10)", beam == HeadlampItem.LIGHT, beam + "");
-            ctx.check("headlamp: with clients drawing beams, a light at the eyes as for a flashlight", eyeLight, "");
-            ctx.check("headlamp: light along its wearer's look", lights > 0, lights + " light blocks");
+            ctx.check("headlamp: a light at the eyes, as for a flashlight", eyeLight, "");
+            ctx.check("headlamp: no trail of light blocks along the look (Baughn 2026-11-06: clients draw the beam)", lights <= 1, lights + " light blocks");
             mods.eln.server.PlayerKeys.set(p, mods.eln.server.PlayerKeys.HEADLAMP, true);
             ctx.check("headlamp: the key switches it off", !HeadlampItem.isOn(p.getItemBySlot(EquipmentSlot.HEAD)), "");
             p.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
