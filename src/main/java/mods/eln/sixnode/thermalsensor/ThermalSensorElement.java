@@ -68,7 +68,7 @@ public class ThermalSensorElement extends SixNodeElement {
 
         if (this.descriptor.temperatureOnly) {
             inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
-                .acceptIfEmpty(0, ThermalCableDescriptor.class, ElectricalCableDescriptor.class);
+                .acceptCable(0, 1, true);
         } else {
             inventory = new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this));
         }
@@ -201,12 +201,13 @@ public class ThermalSensorElement extends SixNodeElement {
             return;
         }
         ItemStack cable = getInventory().getItem(ThermalSensorContainer.cableSlotId);
-        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(cable);
-        if (descriptor != null && descriptor.getClass() == ThermalCableDescriptor.class) {
-            ((ThermalCableDescriptor) descriptor).setThermalLoad(thermalLoad);
+        ThermalCableDescriptor thermal = mods.eln.node.voxel.CableItems.thermal(cable);   // (1.12 item or thermal kit)
+        if (thermal != null) {
+            thermal.setThermalLoad(thermalLoad);
             thermalLoad.setAsFast();
         } else {
-            ElectricalCableDescriptor cableDescriptor = descriptor instanceof ElectricalCableDescriptor e ? e
+            ElectricalCableDescriptor e = mods.eln.node.voxel.CableItems.descriptor(cable);
+            ElectricalCableDescriptor cableDescriptor = e != null ? e
                 : ElnDeviceRegistry.lowVoltageCableDescriptor; // empty slot: as an LV cable (Baughn 2026-10-17)
             cableDescriptor.applyTo(thermalLoad);
             thermalLoad.Rp = 1000000000.0;
@@ -216,8 +217,7 @@ public class ThermalSensorElement extends SixNodeElement {
 
     boolean isItemThermalCable() {
         if (!descriptor.temperatureOnly) return false; // the thermal probe's slot is gone
-        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(getInventory().getItem(ThermalSensorContainer.cableSlotId));
-        return descriptor != null && descriptor.getClass() == ThermalCableDescriptor.class;
+        return mods.eln.node.voxel.CableItems.isThermal(getInventory().getItem(ThermalSensorContainer.cableSlotId));
     }
 
     @Override

@@ -27,6 +27,16 @@ public class GridLink implements INBTTReady {
     boolean connected = false;
     // Drop this if the link is broken.
     ItemStack cable;
+
+    /** The cable this line was strung with (dropped when it breaks). */
+    public ItemStack cableStack() {
+        return cable;
+    }
+
+    /** The line's resistance. */
+    public double rs() {
+        return rs;
+    }
     private Direction as;
     private Direction bs;
     private Optional<GridElement> ae = Optional.empty();
@@ -58,7 +68,8 @@ public class GridLink implements INBTTReady {
         }
     }
 
-    static public boolean addLink(GridElement a, GridElement b, Direction as, Direction bs, ElectricalCableDescriptor cable, int cableLength) {
+    /** Links two poles with this cable: an item stack of it (a kit piece, or 1.12 items) kept to drop on a break, and its Rs. */
+    static public boolean addLink(GridElement a, GridElement b, Direction as, Direction bs, ItemStack cable, double rs) {
         // Check if these two nodes are already linked.
         for (GridLink link : a.gridLinkList) {
             if (link.links(a, b)) {
@@ -73,8 +84,7 @@ public class GridLink implements INBTTReady {
 
         // Makin' a Link. Where'd Zelda go?
         GridLink link = new GridLink(
-            a.coordonate(), b.coordonate(), as, bs, cable.newItemStack(cableLength),
-            cable.electricalRs * cableLength);
+            a.coordonate(), b.coordonate(), as, bs, cable, rs);
         link.connect();
 
         return true;

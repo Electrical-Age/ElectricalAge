@@ -29,6 +29,20 @@ public class ElnSlot extends Slot {
         return spec.filter().test(stack);
     }
 
+    /** A cable-piece slot takes a block (16 voxels) of a cable kit, leaving the rest with the player (Baughn 2026-11-07). */
+    public boolean takesPiece(ItemStack stack) {
+        return SlotSpec.CABLE_PIECE.equals(spec.kind()) && mods.eln.node.voxel.CableItems.kitTier(stack) >= 0;
+    }
+
+    @Override
+    public ItemStack safeInsert(ItemStack stack, int increment) {
+        if (!stack.isEmpty() && takesPiece(stack) && !hasItem() && mayPlace(stack)) {
+            setByPlayer(mods.eln.node.voxel.CableItems.take(stack, 16));
+            return stack;
+        }
+        return super.safeInsert(stack, increment);
+    }
+
     /** 1.12 getSlotStackLimit (the slot's own limit; 26.x also caps by the item's max stack size). */
     @Override
     public int getMaxStackSize() {

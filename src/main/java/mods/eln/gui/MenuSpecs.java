@@ -32,11 +32,10 @@ public final class MenuSpecs {
     }
 
     /** The menu of a device descriptor (the closest registered class), or SCREEN_ONLY. Called on both sides. */
-    /** A converter's winding slot: a six-node power cable (one a turn) or a machine-made winding (Wires stage 4). */
+    /** A converter's winding slot: a machine-made winding (Wires stage 4), or an electrical cable, a 1.12 item (one a
+     *  turn) or a cable kit (a block a turn; Baughn 2026-11-07). */
     static final java.util.function.Predicate<net.minecraft.world.item.ItemStack> WINDING_OR_CABLE = s ->
-        mods.eln.node.voxel.WindingItem.is(s)
-            || s.getItem() instanceof mods.eln.node.six.SixNodeItem i && i.getEaDescriptor() != null
-            && i.getEaDescriptor().getClass() == mods.eln.sixnode.electricalcable.ElectricalCableDescriptor.class;
+        mods.eln.node.voxel.WindingItem.is(s) || mods.eln.node.voxel.CableItems.isElectrical(s);
 
     public static MenuSpec of(Object descriptor) {
         for (Class<?> c = descriptor.getClass(); c != null; c = c.getSuperclass()) {
@@ -58,8 +57,9 @@ public final class MenuSpecs {
 
     static final Class<?>[] CABLE = {ElectricalCableDescriptor.class};
 
+    /** An electrical cable: a 1.12 cable item, or a cable kit (Baughn 2026-11-07: kits replace the items), whose spec counts. */
     static SlotSpec cableSlot(int id, int x, int y, int limit) {
-        return six(id, x, y, limit, CABLE, MEDIUM, tr("Electrical cable slot"));
+        return SlotSpec.cablePiece(id, x, y, mods.eln.node.voxel.CableItems::isElectrical, MEDIUM, tr("Electrical cable slot: a cable kit (takes a block of it)"));
     }
 
     static {
@@ -95,8 +95,8 @@ public final class MenuSpecs {
         put(mods.eln.sixnode.lampsocket.LampSocketDescriptor.class, d -> MenuSpec.of(
             lamp(mods.eln.sixnode.lampsocket.LampSocketContainer.lampSlotId, 70, 57, 1, d.socketType)));
         put(mods.eln.sixnode.lampsupply.LampSupplyDescriptor.class, d -> MenuSpec.of(
-            six(0, 184, 144, 64, CABLE, MEDIUM,
-                tr("Electrical cable slot (optional)\nBase range is 32 blocks.\nEach cable\nincreases range by one.").split("\n"))).panel(220, 205, 8, 125));
+            filter(0, 184, 144, 64, mods.eln.node.voxel.CableItems::isElectrical, MEDIUM,
+                tr("Cable kit slot (optional)\nBase range is 32 blocks.\nEach block of cable\nincreases range by one.").split("\n"))).panel(220, 205, 8, 125));
         put(mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor.class, d -> MenuSpec.of(
             filter(mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixContainer.redId, 132, 8, 13, item(Items.REDSTONE), MEDIUM,
                 tr("Redstone slot"), tr("(Increases capacity)")),
@@ -111,8 +111,8 @@ public final class MenuSpecs {
         put(mods.eln.sixnode.resistor.ResistorDescriptor.class, d -> resistor());
         // the thermal probe: built-in Copper Thermal Cable; the temperature probe: an optional mode slot
         put(mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor.class, d -> d.temperatureOnly ? MenuSpec.of(
-            six(0, 152, 62, 1, new Class<?>[]{ThermalCableDescriptor.class, ElectricalCableDescriptor.class}, MEDIUM,
-                tr("Cable slot (optional)"), tr("Empty: on electrical cables"), tr("Thermal cable: on thermal cables")))
+            SlotSpec.cablePiece(0, 152, 62, s -> mods.eln.node.voxel.CableItems.isElectrical(s) || mods.eln.node.voxel.CableItems.isThermal(s), MEDIUM,
+                tr("Cable slot (optional)"), tr("Empty: on electrical cables"), tr("Thermal cable kit: on thermal cables")))
             : MenuSpec.of());
         put(mods.eln.sixnode.batterycharger.BatteryChargerDescriptor.class, d -> MenuSpec.of(
             battery(0, 26 - 18 + 0, 6 + 0),

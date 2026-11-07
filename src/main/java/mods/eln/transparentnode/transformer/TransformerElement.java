@@ -194,11 +194,15 @@ public class TransformerElement extends TransparentNodeElement {
             return new Wire(mods.eln.node.voxel.WindingItem.turns(s), mods.eln.node.voxel.WindingItem.descriptor(s),
                 mods.eln.node.voxel.WindingItem.rs(s), spec.squareMillimetres(), spec.mm2(), spec.colour(), mods.eln.node.voxel.WindingItem.tier(s));
         }
-        if (!(Eln.sixNodeItem.getDescriptor(s) instanceof ElectricalCableDescriptor d)) return null;
-        int tier = mods.eln.node.voxel.CablePart.tierOf(d.name);
-        if (!mods.eln.node.voxel.CableSpec.power(tier)) return new Wire(s.getCount(), d, d.electricalRs, 0.5, 0, 7, 0);
-        var preset = mods.eln.node.voxel.CableSpec.preset(tier);
-        return new Wire(s.getCount(), d, d.electricalRs, preset.squareMillimetres(), preset.mm2(), preset.colour(), tier);
+        // a 1.12 cable item a turn, or a cable kit a block a turn (Baughn 2026-11-07: kits replace the items), each turn
+        // the whole cable's Rs as the items were; a kit's spec gives its wire
+        ElectricalCableDescriptor d = mods.eln.node.voxel.CableItems.descriptor(s);
+        if (d == null) return null;
+        int tier = mods.eln.node.voxel.CableItems.tier(s), turns = Math.min(64, mods.eln.node.voxel.CableItems.blocks(s));
+        if (!mods.eln.node.voxel.CableSpec.power(tier)) return new Wire(turns, d, d.electricalRs, 0.5, 0, 7, 0);
+        var spec = mods.eln.node.voxel.CableKitItem.specOf(s);
+        if (spec == null) spec = mods.eln.node.voxel.CableSpec.preset(tier);
+        return new Wire(turns, d, d.electricalRs, spec.squareMillimetres(), spec.mm2(), spec.colour(), tier);
     }
 
     Wire primaryWire() {
@@ -209,7 +213,7 @@ public class TransformerElement extends TransparentNodeElement {
         return wire(inventory.getItem(TransformerContainer.secondaryCableSlotId));
     }
 
-    int primaryTurns() {
+    public int primaryTurns() {
         Wire w = primaryWire();
         return w == null ? 0 : w.turns();
     }
@@ -304,7 +308,7 @@ public class TransformerElement extends TransparentNodeElement {
     }
 
     /** The turns of the secondary in use (the variable converter taps it). */
-    int secondaryTurns() {
+    public int secondaryTurns() {
         Wire w = secondaryWire();
         return w == null ? 0 : w.turns();
     }
@@ -431,14 +435,10 @@ public class TransformerElement extends TransparentNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            if (Utils.isEmpty(inventory.getItem(0)))
-                stream.writeByte(0);
-            else
-                stream.writeByte(inventory.getItem(0).getCount());
-            if (Utils.isEmpty(inventory.getItem(1)))
-                stream.writeByte(0);
-            else
-                stream.writeByte(inventory.getItem(1).getCount());
+            // (the turns, for the drawing: a stack of 1.12 cables counts its items, a kit its blocks)
+            Wire pw0 = primaryWire(), sw0 = secondaryWire();
+            stream.writeByte(pw0 == null || mods.eln.node.voxel.WindingItem.is(inventory.getItem(0)) ? (Utils.isEmpty(inventory.getItem(0)) ? 0 : inventory.getItem(0).getCount()) : pw0.turns());
+            stream.writeByte(sw0 == null || mods.eln.node.voxel.WindingItem.is(inventory.getItem(1)) ? (Utils.isEmpty(inventory.getItem(1)) ? 0 : inventory.getItem(1).getCount()) : sw0.turns());
 
             Utils.serialiseItemStack(stream, inventory.getItem(TransformerContainer.ferromagneticSlotId));
             Utils.serialiseItemStack(stream, inventory.getItem(TransformerContainer.primaryCableSlotId));
@@ -501,11 +501,12 @@ public class TransformerElement extends TransparentNodeElement {
      * the new ratio (5:24 for 48 V -> 230 V, 26:15 for 400 V -> 230 V, 2:55 for 400 V -> 11 kV). Windings of one tier wound 1:4 or 4:1 are taken
      * for 48 V <-> 230 V. Coils are only added, never taken; anything else is left as it is.
      */
-    void rewindForRealVoltages() {
+    public void rewindForRealVoltages() {
         ItemStack p = inventory.getItem(TransformerContainer.primaryCableSlotId);
         ItemStack s = inventory.getItem(TransformerContainer.secondaryCableSlotId);
         if (Utils.isEmpty(p) || Utils.isEmpty(s)) return;
         if (mods.eln.node.voxel.WindingItem.is(p) || mods.eln.node.voxel.WindingItem.is(s)) return;   // (windings are newer than the rewind)
+        if (mods.eln.node.voxel.CableItems.kitTier(p) >= 0 || mods.eln.node.voxel.CableItems.kitTier(s) >= 0) return;   // (and kits)
         int[] turns = rewound(p.getCount(), s.getCount(), cableVolts(p), cableVolts(s));
         if (turns == null) return;
         p.setCount(turns[0]);

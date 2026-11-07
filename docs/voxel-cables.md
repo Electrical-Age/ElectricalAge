@@ -188,6 +188,24 @@ others, including voxel nodes via `VoxelNode.slowProcesses()`) -> `Conductor.bur
   `SixNodeItem` treats old cable items as coils and puts new devices into voxel blocks.
 - Commands: `/elnlab voxelcables convert|dry|revert <r>` (`gametest/LabCommands.java`).
 
+## Kits in devices (`CableItems`)
+
+Baughn 2026-11-07: recipes take bare Copper Cable, hand recipes make cable kits, and the 1.12 LV/MV/HV/VHV cable
+items leave the creative tab (`ElnDeviceRegistry`: `addWithoutRegistry`). Devices that took a cable item take a kit:
+`node/voxel/CableItems` gives a stack's `ElectricalCableDescriptor` (a 1.12 item's, or the kit's spec:
+`CableSpec.descriptor(tier)`, the preset's if it has none), its thermal descriptor, tier, blocks (16 voxels) and
+`take(stack, voxels)` (a kit piece keeps the spec). Old items stay valid wherever they are, so saves need nothing.
+- Breaker and hub slots, the temperature probe's: `SlotSpec.cablePiece` (kind `CablePiece`) takes a block of a kit
+  (`ElnSlot.safeInsert` for clicks, `ElnNodeMenu.quickMoveStack` for shift-clicks); the spec sets contacts, trip
+  current and thermals.
+- Lamp supply: range + blocks (`AutoAcceptInventoryProxy.acceptCable`: a right click adds a block).
+- DC-DC converters: a kit's blocks are turns (as the items were one a turn); windings are the efficient way; the
+  one-time rewind skips kits.
+- Utility poles: a kit of the pole's tier (any cross-section), `ceil(distance)` blocks taken; the line keeps the
+  piece (dropped on a break) and its Rs from the spec. Lines saved with 1.12 items still load and drop them.
+- Clients get only the item id (`Utils.serialiseItemStack`): a spec kit in a device draws as its tier's preset.
+Tests: `gametest/cases/KitDeviceCases`.
+
 ## Routers
 
 - `CableRouter`: lattice 2 voxels, states (point, attach face, last dir), moves along a face / inner corner / outer

@@ -107,7 +107,46 @@ class AutoAcceptInventoryProxy(val inventory: Container) {
         }
     }
 
+    /**
+     * A cable slot (Baughn 2026-11-07: kits replace the 1.12 cable items): an electrical (or, if thermal, a thermal)
+     * 1.12 cable item one at a time, or a block's piece (16 voxels) of a cable kit, up to maxBlocks of the same cable.
+     */
+    private class CableAcceptor(index: Int, val maxBlocks: Int, val thermal: Boolean) : ItemAcceptor(index) {
+        fun fits(s: ItemStack) = mods.eln.node.voxel.CableItems.isElectrical(s) || thermal && mods.eln.node.voxel.CableItems.isThermal(s)
+
+        override fun take(itemStack: ItemStack?, inventory: Container): Boolean {
+            if (itemStack == null || itemStack.isEmpty || !fits(itemStack)) return false
+            val existing = inventory.getItem(index)
+            if (existing.isEmpty) {
+                inventory.setItem(index, mods.eln.node.voxel.CableItems.take(itemStack, 16))
+                return true
+            }
+            if (mods.eln.node.voxel.CableItems.blocks(existing) >= maxBlocks) return false
+            if (mods.eln.node.voxel.CableItems.kitTier(existing) >= 0) {
+                if (existing.item != itemStack.item || !sameSpec(existing, itemStack)) return false
+                val piece = mods.eln.node.voxel.CableItems.take(itemStack, 16)
+                mods.eln.node.voxel.CableItems.add(existing, mods.eln.node.voxel.CableItems.voxels(piece))
+                return true
+            }
+            if (!ItemStack.isSameItemSameComponents(existing, itemStack)) return false
+            itemStack.count -= 1
+            existing.count += 1
+            return true
+        }
+
+        fun sameSpec(a: ItemStack, b: ItemStack) =
+            mods.eln.node.voxel.CableKitItem.specOf(a) == mods.eln.node.voxel.CableKitItem.specOf(b)
+    }
+
     private val itemAcceptors: Array<ItemAcceptor?> = arrayOfNulls(inventory.containerSize)
+
+    /** A cable slot taking 1.12 cable items or kit pieces (CableAcceptor). */
+    fun acceptCable(index: Int, maxBlocks: Int, thermal: Boolean = false): AutoAcceptInventoryProxy {
+        if (index >= 0 && index < itemAcceptors.count()) {
+            itemAcceptors[index] = CableAcceptor(index, maxBlocks, thermal)
+        }
+        return this
+    }
 
     fun acceptIfEmpty(index: Int, vararg types: Class<out Any>): AutoAcceptInventoryProxy {
         if (index >= 0 && index < itemAcceptors.count()) {

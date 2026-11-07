@@ -184,7 +184,7 @@ public class HubElement extends SixNodeElement {
         ElectricalCableDescriptor cableDescriptor;
         ItemStack cable;
         cable = inventory.getItem(HubContainer.cableSlotId + lrdu.toInt());
-        cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+        cableDescriptor = mods.eln.node.voxel.CableItems.descriptor(cable);
         return cableDescriptor;
     }
 

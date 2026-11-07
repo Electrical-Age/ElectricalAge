@@ -159,6 +159,16 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         return player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= 64.0;
     }
 
+    /** Shift-click of a cable kit: a block of it into the first empty cable-piece slot that takes it. */
+    boolean cablePiece(ItemStack stack) {
+        for (int i = 0; i < deviceSlots; i++)
+            if (slots.get(i) instanceof ElnSlot s && s.takesPiece(stack) && !s.hasItem() && s.mayPlace(stack)) {
+                s.setByPlayer(mods.eln.node.voxel.CableItems.take(stack, 16));
+                return true;
+            }
+        return false;
+    }
+
     /**
      * Shift-click: device slot -> a worn slot, else the player inventory (from the end); worn slot -> the device slots,
      * else the inventory; player slot -> the device slots, then the worn slots, else between the main inventory and the
@@ -170,6 +180,12 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         Slot slot = slots.get(index);
         if (!slot.hasItem() || !slot.mayPickup(player)) return ItemStack.EMPTY;
         ItemStack stack = slot.getItem();
+        if (index >= deviceSlots && stack.getItem() instanceof mods.eln.node.voxel.CableKitItem && cablePiece(stack)) {
+            // a block of the kit went into a cable slot, the rest stays; EMPTY ends the shift-click loop (Baughn 2026-11-07)
+            if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
+            else slot.set(stack);
+            return ItemStack.EMPTY;
+        }
         ItemStack before = stack.copy();
         int total = slots.size();
         boolean moved;

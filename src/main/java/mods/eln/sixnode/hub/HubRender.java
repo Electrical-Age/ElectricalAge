@@ -42,7 +42,7 @@ public class HubRender extends SixNodeElementRender {
         try {
             for (int idx = 0; idx < 4; idx++) {
                 ItemStack cableStack = Utils.unserialiseItemStack(stream);
-                ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
+                ElectricalCableDescriptor desc = mods.eln.node.voxel.CableItems.descriptor(cableStack);
                 if (desc == null)
                     cableRender[idx] = null;
                 else

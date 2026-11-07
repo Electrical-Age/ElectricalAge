@@ -75,6 +75,13 @@ public record SlotSpec(String kind, int index, int x, int y, int limit, Predicat
         }, skin, comment);
     }
 
+    /** A cable slot: a 1.12 cable item, or a block's piece (16 voxels) of a cable kit put in (ElnSlot, ElnNodeMenu). */
+    public static SlotSpec cablePiece(int index, int x, int y, Predicate<ItemStack> filter, String skin, String... comment) {
+        return new SlotSpec(CABLE_PIECE, index, x, y, 1, filter, skin, comment);
+    }
+
+    public static final String CABLE_PIECE = "CablePiece";
+
     public static SlotSpec filter(int index, int x, int y, int limit, Predicate<ItemStack> filter, String skin, String... comment) {
         return new SlotSpec("SlotFilter", index, x, y, limit, filter, skin, comment);
     }

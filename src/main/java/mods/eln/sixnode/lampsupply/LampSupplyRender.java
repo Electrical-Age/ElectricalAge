@@ -80,7 +80,7 @@ public class LampSupplyRender extends SixNodeElementRender {
 
             ItemStack cableStack = Utils.unserialiseItemStack(stream);
             ElectricalCableDescriptor desc = Utils.isEmpty(cableStack) ? null
-                : (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
+                : mods.eln.node.voxel.CableItems.descriptor(cableStack);
             cableRender = desc != null ? desc.render : mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor.render;
         } catch (IOException e) {
             e.printStackTrace();

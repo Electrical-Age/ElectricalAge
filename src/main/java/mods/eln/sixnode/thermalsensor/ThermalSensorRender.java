@@ -65,11 +65,8 @@ public class ThermalSensorRender extends SixNodeElementRender {
             lowValue = (float) (stream.readFloat() + PhysicalConstant.Tamb);
             highValue = (float) (stream.readFloat() + PhysicalConstant.Tamb);
             ItemStack stack = Utils.unserialiseItemStack(stream);
-            GenericItemBlockUsingDamageDescriptor desc = ThermalCableDescriptor.getDescriptor(stack);
-            if (desc instanceof ThermalCableDescriptor) cable = (ThermalCableDescriptor) desc;
-            else cable = null;
-            if (desc instanceof ElectricalCableDescriptor) ecable = (ElectricalCableDescriptor) desc;
-            else ecable = null;
+            cable = mods.eln.node.voxel.CableItems.thermal(stack);   // (1.12 items or kits)
+            ecable = cable == null ? mods.eln.node.voxel.CableItems.descriptor(stack) : null;
         } catch (IOException e) {
             e.printStackTrace();
         }

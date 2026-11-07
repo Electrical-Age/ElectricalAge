@@ -38,7 +38,7 @@ public class VariableTransformerElement extends TransformerElement {
     }
 
     @Override
-    int secondaryTurns() {
+    public int secondaryTurns() {
         int all = super.secondaryTurns();
         return all == 0 ? 0 : Math.max(1, Math.min(all, tapTurns));
     }

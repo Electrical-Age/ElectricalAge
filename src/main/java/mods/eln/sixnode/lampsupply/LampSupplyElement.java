@@ -59,11 +59,11 @@ public class LampSupplyElement extends SixNodeElement {
     public IProcess lampSupplySlowProcess = new LampSupplySlowProcess();
 
     /**
-     * Cables extend the range (descriptor range + one block per cable). Baughn 2026-10-17: no longer needed to connect;
+     * Cables extend the range (descriptor range + one block per cable, or per block of a cable kit). Baughn 2026-10-17: no longer needed to connect;
      * the supply works with an empty slot, as with an LV cable, and no cable sets a watchdog.
      */
     private AutoAcceptInventoryProxy inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
-        .acceptIfIncrement(0, 64, ElectricalCableDescriptor.class);
+        .acceptCable(0, 64, false);
 
 
     static class Entry {
@@ -323,7 +323,7 @@ public class LampSupplyElement extends SixNodeElement {
     void setupFromInventory() {
         ItemStack cableStack = getInventory().getItem(LampSupplyContainer.cableSlotId);
         ElectricalCableDescriptor desc = Utils.isEmpty(cableStack) ? null
-            : (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
+            : mods.eln.node.voxel.CableItems.descriptor(cableStack);
         if (desc == null) desc = mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor;
         desc.applyTo(powerLoad);
         voltageWatchdog.setUNominal(10000); // 1.12's empty-slot value: off
@@ -399,6 +399,6 @@ public class LampSupplyElement extends SixNodeElement {
     private int getRange(LampSupplyDescriptor desc, Container inventory2) {
         ItemStack stack = getInventory().getItem(LampSupplyContainer.cableSlotId);
         if (Utils.isEmpty(stack)) return desc.range;
-        return desc.range + stack.getCount();
+        return desc.range + Math.min(64, mods.eln.node.voxel.CableItems.blocks(stack));
     }
 }

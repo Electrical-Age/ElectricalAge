@@ -46,9 +46,10 @@ abstract public class GridElement extends TransparentNodeElement {
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         // Check if user is holding an appropriate tool.
         final ItemStack stack = entityPlayer.getMainHandItem();
-        final GenericItemBlockUsingDamageDescriptor itemDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(stack);
-        if (itemDesc instanceof ElectricalCableDescriptor) {
-            return onTryGridConnect(entityPlayer, stack, (ElectricalCableDescriptor) itemDesc, side);
+        // a cable kit (Baughn 2026-11-07: kits replace the 1.12 cable items), or a 1.12 cable item still about
+        final ElectricalCableDescriptor cable = mods.eln.node.voxel.CableItems.descriptor(stack);
+        if (cable != null) {
+            return onTryGridConnect(entityPlayer, stack, cable, side);
         }
         // TODO: Scissors. Break the connection without breaking the pole.
         return false;
@@ -62,9 +63,9 @@ abstract public class GridElement extends TransparentNodeElement {
         if (p != null) {
             other = GridLink.getElementFromCoordinate(p.getLeft());
         }
-        // Check if it's the *correct* cable descriptor.
-        if (!cable.equals(desc.cableDescriptor)) {
-            Utils.sendMessage(entityPlayer, "Wrong cable, you need " + desc.cableDescriptor.name);
+        // Check if it's the *correct* cable: the pole's tier (any cross-section of a kit; its spec sets the line's Rs).
+        if (mods.eln.node.voxel.CableItems.tier(stack) != mods.eln.node.voxel.CablePart.tierOf(desc.cableDescriptor.name)) {
+            Utils.sendMessage(entityPlayer, "Wrong cable, you need " + desc.cableDescriptor.name + " (a kit)");
             return true;
         }
         if (other == null || other == this) {
@@ -74,8 +75,8 @@ abstract public class GridElement extends TransparentNodeElement {
             final double distance = other.coordonate().trueDistanceTo(this.coordonate());
             final int cableLength = (int) Math.ceil(distance);
             final int range = Math.min(connectRange, other.connectRange);
-            if (stack.getCount() < distance) {
-                Utils.sendMessage(entityPlayer, "You need " + cableLength + " units of cable");
+            if (mods.eln.node.voxel.CableItems.voxels(stack) < cableLength * 16) {
+                Utils.sendMessage(entityPlayer, "You need " + cableLength + " blocks of cable");
             } else if (distance > range) {
                 Utils.sendMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks");
             } else if (!this.canConnect(other)) {
@@ -83,9 +84,10 @@ abstract public class GridElement extends TransparentNodeElement {
             } else if (!this.validLOS(other)) {
                 Utils.sendMessage(entityPlayer, "Cannot connect, no line of sight");
             } else {
-                if (GridLink.addLink(this, other, side, p.getRight(), cable, cableLength)) {
+                ItemStack piece = mods.eln.node.voxel.CableItems.take(stack.copy(), cableLength * 16);
+                if (GridLink.addLink(this, other, side, p.getRight(), piece, cable.electricalRs * cableLength)) {
                     Utils.sendMessage(entityPlayer, "Added connection");
-                    stack.split(cableLength);
+                    mods.eln.node.voxel.CableItems.take(stack, cableLength * 16);
                 } else {
                     Utils.sendMessage(entityPlayer, "Already connected");
                 }

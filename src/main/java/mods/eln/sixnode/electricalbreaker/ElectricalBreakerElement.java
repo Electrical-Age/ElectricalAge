@@ -177,7 +177,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 
     public void refreshSwitchResistor() {
         ItemStack cable = inventory.getItem(ElectricalBreakerContainer.cableSlotId);
-        ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+        ElectricalCableDescriptor cableDescriptor = mods.eln.node.voxel.CableItems.descriptor(cable);
         if (cableDescriptor == null || !switchState) {
             switchResistor.ultraImpedance();
         } else {
@@ -207,7 +207,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
         if (!nbtBoot) setSwitchState(false);
         nbtBoot = false;
 
-        cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+        cableDescriptor = mods.eln.node.voxel.CableItems.descriptor(cable);
         if (cableDescriptor == null) {
             aLoad.highImpedance();
             bLoad.highImpedance();

@@ -100,14 +100,14 @@ public class TransformerRender extends TransparentNodeElementRender {
                 feroPart = feroDesc.feroPart;
 
             ItemStack priStack = Utils.unserialiseItemStack(stream);
-            ElectricalCableDescriptor priDesc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(priStack, ElectricalCableDescriptor.class);
+            ElectricalCableDescriptor priDesc = mods.eln.node.voxel.CableItems.descriptor(priStack);
             if (priDesc == null)
                 priRender = null;
             else
                 priRender = priDesc.render;
 
             ItemStack secStack = Utils.unserialiseItemStack(stream);
-            ElectricalCableDescriptor secDesc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(secStack, ElectricalCableDescriptor.class);
+            ElectricalCableDescriptor secDesc = mods.eln.node.voxel.CableItems.descriptor(secStack);
             if (secDesc == null)
                 secRender = null;
             else

@@ -65,7 +65,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
             uMin = stream.readFloat();
             tripAmps = stream.readFloat();
 
-            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
+            ElectricalCableDescriptor desc = mods.eln.node.voxel.CableItems.descriptor(Utils.unserialiseItemStack(stream));
 
             if (desc == null)
                 cableRender = null;
