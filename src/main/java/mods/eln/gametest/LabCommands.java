@@ -129,6 +129,7 @@ public final class LabCommands {
                 .then(Commands.literal("protection").executes(c -> demo(c.getSource(), () -> protection(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("wiredrawing").executes(c -> demo(c.getSource(), () -> wiredrawing(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cores").executes(c -> demo(c.getSource(), () -> cores(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("rubber").executes(c -> demo(c.getSource(), () -> rubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("converters").executes(c -> demo(c.getSource(), () -> converters(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("computers").executes(c -> demo(c.getSource(), () -> computers(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("loggerdemo").executes(c -> demo(c.getSource(), () -> loggerDemo(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -584,10 +585,23 @@ public final class LabCommands {
      * 500 C (too cold to anneal), (c) a 230V Magnetizer.
      */
     static int cores(CommandSourceStack src, BlockPos pos) {
+        return furnaceRigs(src, pos, "cores", new String[]{"Electrical Furnace", "Electrical Furnace", "230V Magnetizer"}, new float[]{650, 500, 0});
+    }
+
+    /**
+     * Rigs for the rubber chain (Baughn 2026-11-07), 5 apart along x, each on 230 V: (a) an Electrical Furnace held at
+     * 160 C (vulcanises Rubber Compound), (b) one at 260 C (chars it), (c) and (d) 230V Macerators (soul sand, sulfur).
+     */
+    static int rubber(CommandSourceStack src, BlockPos pos) {
+        return furnaceRigs(src, pos, "rubber", new String[]{"Electrical Furnace", "Electrical Furnace", "230V Macerator", "230V Macerator"},
+            new float[]{160, 260, 0, 0});
+    }
+
+    /** Machines on 230 V, 5 apart along x; a furnace gets a tungsten heating corp, insulation and a regulator at its target (C). */
+    static int furnaceRigs(CommandSourceStack src, BlockPos pos, String label, String[] names, float[] targets) {
         var level = src.getLevel();
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
         StringBuilder where = new StringBuilder();
-        String[] names = {"Electrical Furnace", "Electrical Furnace", "230V Magnetizer"};
         for (int i = 0; i < names.length; i++) {
             BlockPos p = pos.offset(5 * i, 0, 0);
             var d = mods.eln.Eln.transparentNodeItem.getDescriptor(transparentId(names[i]));
@@ -625,7 +639,7 @@ public final class LabCommands {
                 f.getInventory().setItem(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.thermalRegulatorSlotId,
                     mods.eln.Eln.findItemStack("Analogic Regulator", 1));
                 f.getInventory().setChanged();
-                float target = (float) ((i == 0 ? 650 : 500) - mods.eln.sim.PhysicalConstant.Tamb);   // (the screen shows the target plus the room)
+                float target = (float) (targets[i] - mods.eln.sim.PhysicalConstant.Tamb);   // (the screen shows the target plus the room)
                 f.networkUnserialize(packet(o -> {
                     o.writeByte(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.unserializeTemperatureTarget);
                     o.writeFloat(target);
@@ -633,7 +647,7 @@ public final class LabCommands {
             }
             where.append((char) ('a' + i)).append(' ').append(names[i]).append(' ').append(p.toShortString()).append(" (power ").append(side).append("); ");
         }
-        src.sendSuccess(() -> Component.literal("cores: " + where), false);
+        src.sendSuccess(() -> Component.literal(label + ": " + where), false);
         return 1;
     }
 
