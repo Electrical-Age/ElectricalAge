@@ -26,6 +26,7 @@ final class MachineKit {
         Palette.put("label_in", 52, 102, 176, 0, Compressor.text("IN", 4, 5));
         Palette.put("label_out", 176, 48, 40, 0, Compressor.text("OUT", 2, 5));
         Palette.put("latex", 242, 238, 220, 4, null);
+        Palette.put("sulfur", 222, 200, 70, 10, null);
     }
 
     /** Rivets on a z face (at z, facing +z if out > 0): count of them from x0 to x1 at height y. */
@@ -57,6 +58,33 @@ final class MachineKit {
         List<Mesh> pw = new ArrayList<>(List.of(prism('x', y + 0.4, z - 0.5, 0.28, x - 1.05, x - 0.8, "led_green", 8)));
         List<Mesh> run = new ArrayList<>(List.of(prism('x', y + 0.4, z + 0.5, 0.28, x - 1.05, x - 0.8, "led_amber", 8)));
         return List.of(pw, run);
+    }
+
+    /** Four bolt heads on a flange facing -x (the front) at x0..x1, centre (y, z). */
+    static List<Mesh> mirroredBoltsX(double x0, double x1, double y, double z) {
+        List<Mesh> ms = new ArrayList<>();
+        for (int k = 0; k < 4; k++) {
+            double a = Math.PI / 4 + Math.PI / 2 * k;
+            ms.add(prism('x', y + 1.25 * Math.cos(a), z + 1.25 * Math.sin(a), 0.17, x0, x1, "darksteel", 6, true, false));
+        }
+        return ms;
+    }
+
+    /** The label on a flange's face facing -x (the front) at x, centre (y, z), radius r: readable from the front. */
+    static Mesh flangeLabelFront(double x, double y, double z, double r, String mat) {
+        Mesh d = prism('x', y, z, r, x - 0.06, x, mat, 12, true, false);
+        d.uv(f -> {
+            float[] uv = new float[2 * f.n];
+            for (int i = 0; i < f.n; i++) {
+                double fz = f.xyz[3 * i + 2], fy = f.xyz[3 * i + 1];
+                // seen from -x, right is +z
+                uv[2 * i] = (float) Math.min(1, Math.max(0, (fz - (z - r)) / (2 * r)));
+                uv[2 * i + 1] = (float) Math.min(1, Math.max(0, (fy - (y - r)) / (2 * r)));
+            }
+            return uv;
+        });
+        d.free("a label printed on the flange's face");
+        return d;
     }
 
     /** The label on a flange's face facing up at y, centre (x, z), radius r; readable from the front (x-). */

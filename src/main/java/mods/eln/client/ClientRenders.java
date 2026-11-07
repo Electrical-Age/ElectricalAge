@@ -86,6 +86,7 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor.class, mods.eln.transparentnode.wiredrawing.WireDrawingRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.resincollector.IndustrialResinCollectorDescriptor.class, mods.eln.transparentnode.resincollector.IndustrialResinCollectorRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.carbonblack.CarbonBlackBurnerDescriptor.class, mods.eln.transparentnode.carbonblack.CarbonBlackBurnerRender::new);
+        ElnRenders.transparent(mods.eln.transparentnode.desulfuriser.DesulfuriserDescriptor.class, mods.eln.transparentnode.desulfuriser.DesulfuriserRender::new);
         ElnRenders.transparent(mods.eln.robotics.servo.LinearServoDriveDescriptor.class, mods.eln.robotics.servo.LinearServoDriveRender::new);
         ElnRenders.transparent(mods.eln.robotics.computer.ComputerDescriptor.class, mods.eln.robotics.computer.ComputerRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.class, mods.eln.transparentnode.capacitorbank.CapacitorBankRender::new);

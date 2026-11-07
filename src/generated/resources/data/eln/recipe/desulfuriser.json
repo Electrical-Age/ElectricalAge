@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "minecraft:cauldron",
+    "H": "eln:200v_copper_heating_corp",
+    "M": "eln:machine_block",
+    "P": "eln:iron_plate"
+  },
+  "pattern": [
+    "PCP",
+    "PMP",
+    " H "
+  ],
+  "result": {
+    "id": "eln:desulfuriser"
+  }
+}

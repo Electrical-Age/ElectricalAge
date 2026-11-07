@@ -2182,5 +2182,11 @@
   "display": "Carbon Black Burner",
   "kind": "transparent_node",
   "name": "carbon_black_burner"
+ },
+ "eln:transparent_node@6016": {
+  "descriptor": "DesulfuriserDescriptor",
+  "display": "Desulfuriser",
+  "kind": "transparent_node",
+  "name": "desulfuriser"
  }
 }

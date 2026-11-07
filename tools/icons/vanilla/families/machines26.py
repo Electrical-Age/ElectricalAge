@@ -163,3 +163,19 @@ def carbon_black_burner():
         cv.set(x, 11, DARK[2])                                                     # bands
     cv.set(4, 9, h('#ffb030')); cv.set(5, 9, h('#ff7a20')); cv.set(4, 10, h('#ff7a20'))   # fire
     return cv
+
+
+# ------------------------------------------------------------------------------- desulfuriser
+def desulfuriser():
+    """The vertical vessel, its blue heater band, the domed head, a red flange in front, the sulfur drawer."""
+    B = tier_ramp('mv')
+    cv = Canvas(16)
+    box(cv, 2, 13, 10, 1, 3, DARK, bevel=False)
+    sub(cv, lambda c: cylinder(c, 4, 3, 10, 7, STEEL, axis='y'))
+    sub(cv, lambda c: box(c, 4, 8, 7, 2, 1, B, bevel=False))                       # heater band
+    for x, c in ((2, RED[3]), (3, RED[4])):
+        cv.set(x, 11, c); cv.set(x, 12, RED[2])                                    # OUT flange
+    for x in range(9, 12):
+        cv.set(x, 12, h('#d8c446'))                                                # sulfur
+    leds(cv, 5, 6)
+    return cv

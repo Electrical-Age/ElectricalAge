@@ -1,4 +1,4 @@
-// 26.3	2026-11-07T19:27:15.171724374	eln-global/EA models
+// 26.3	2026-11-07T19:41:38.685582731	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -44,6 +44,7 @@ f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.jso
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/current_oriented_battery.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/dc_dc_converter.json
 18a289fab3462a60a4549341ddffcafd418d5077 assets/eln/blockstates/deepslate_lead_ore.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/desulfuriser.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/electrical_anvil.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/electrical_furnace.json
 4a42da1e82c1939cf3a66afa4c1ecd3700d3e92a assets/eln/blockstates/energy_converter_eln_to_other_hvublock.json
@@ -232,6 +233,7 @@ b6a86730122c1e3e042892a19167fc2e440ca338 assets/eln/items/d_flip_flop_chip.json
 f5a668bacb3e6fd1ed601b06b2e6d455d1aeb435 assets/eln/items/data_logger_print.json
 661dbe0aebf24eadbaa354f1055a7e93b8b5a2b5 assets/eln/items/dc_dc_converter.json
 7a7772285d1f235d611fbc30b2eac02756ada357 assets/eln/items/deepslate_lead_ore.json
+21849c5458660e9714955f76c897a05afd0715a9 assets/eln/items/desulfuriser.json
 8520d766df6e210652cb43d6b1f3afd090bd693e assets/eln/items/dielectric.json
 e191f43f15cf7c2efad666aae8df6ee117d108c1 assets/eln/items/digital_watch.json
 dabc42c459d0bb6ae8a7c0e3945baef444a86c66 assets/eln/items/e_coal_boots.json
@@ -680,6 +682,8 @@ b4ffd4e12339530f49432a9c7185dabc2716c505 assets/eln/models/item/d_flip_flop_chip
 9186aec3aa11a45a2b24103e84126c200f2ac5c2 assets/eln/models/item/data_logger_print.json
 f957de633144cc263645997e3602f75f4f1beb80 assets/eln/models/item/dc_dc_converter.json
 de5cd4f2c7ae15294e354b8783a8b915982e21f0 assets/eln/models/item/dc_dc_converter_3d.json
+d61a97c2f84fe29bf6dfeab230f1c558c7707106 assets/eln/models/item/desulfuriser.json
+7f501e3e949c7c1ca5d97a1c1e7cc831b14e9a06 assets/eln/models/item/desulfuriser_3d.json
 c1edd3d4941867819dc5cee23ca8d23cafd4abf0 assets/eln/models/item/dielectric.json
 0e1eb32d980f64c7186f37da2ade10ec7c762d65 assets/eln/models/item/digital_watch.json
 08ad17f3ed444f42bfc69a6e19d5394658321f86 assets/eln/models/item/digital_watch_3d.json

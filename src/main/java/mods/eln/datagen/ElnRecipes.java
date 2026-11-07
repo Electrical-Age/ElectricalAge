@@ -1197,6 +1197,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             stack(mods.eln.registry.ElnRegistry.CARBON_BLACK.get()));
         addShapelessRecipe(stack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("black_dye"))),
             stack(mods.eln.registry.ElnRegistry.CARBON_BLACK.get()));
+        // the Desulfuriser: a heated vessel (an iron tank's worth of iron) on a machine block, a heating element
+        addRecipe(findItemStack("Desulfuriser", 1),
+            "PCP",
+            "PMP",
+            " H ",
+            'P', findItemStack("Iron Plate"),
+            'C', stack(Items.CAULDRON),
+            'M', findItemStack("Machine Block"),
+            'H', findItemStack("230V Copper Heating Corp"));
         addRecipe(findItemStack("Carbon Black Burner", 1),
             " P ",
             "BFB",

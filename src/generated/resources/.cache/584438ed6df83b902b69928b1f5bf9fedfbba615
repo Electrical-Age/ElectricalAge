@@ -1,4 +1,4 @@
-// 26.3	2026-11-07T19:27:15.175629006	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-07T19:41:38.689152817	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -128,6 +128,7 @@ dbbb12bd98f307467cefd19fa6a0ec1f7271eaa5 data/eln/advancement/recipes/misc/cyan_
 00fa837c4a13e0176ea6eded44c13316368cbb97 data/eln/advancement/recipes/misc/d_flip_flop_chip.json
 075c3a8de538d2e8e46ea5f0ec5945d6f04e6180 data/eln/advancement/recipes/misc/data_logger.json
 0a5773dde2644fd61c0d60a9774b3417c747f731 data/eln/advancement/recipes/misc/dc_dc_converter.json
+5576430499cdd478b8203aec1fd7fe8d96356ced data/eln/advancement/recipes/misc/desulfuriser.json
 ac2011fba37a0aed61ad00c01aebe821b0cdf556 data/eln/advancement/recipes/misc/digital_watch.json
 5d65358bc607424b903608f0fd768b445e6f4411 data/eln/advancement/recipes/misc/e_coal_boots.json
 3fa697d38d42571a5858828ab1357da704173ce8 data/eln/advancement/recipes/misc/e_coal_chestplate.json
@@ -510,6 +511,7 @@ e70d02238ffa719c088ac138dab88c1d69bfd4d5 data/eln/recipe/cyan_brush.json
 c40890deab3ed13bca080d4d8684932603c57add data/eln/recipe/d_flip_flop_chip.json
 994ec4a50ae5086f8820bdd7bef2ddda90892dd4 data/eln/recipe/data_logger.json
 e0f38bc4eb3608f2f34e79e22d8e2b7999b3f5ea data/eln/recipe/dc_dc_converter.json
+09f5964686f9a022e26ca5d7851d9e01723aeca4 data/eln/recipe/desulfuriser.json
 58b2964af5b266fa8c333b8769473063e53b694e data/eln/recipe/digital_watch.json
 656cb1c7969f112c47b71824819937636f7368a7 data/eln/recipe/e_coal_boots.json
 8970f591dff2d2758fdf86d1f6916ff7ac561f8e data/eln/recipe/e_coal_chestplate.json

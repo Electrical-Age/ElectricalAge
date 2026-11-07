@@ -163,3 +163,4 @@ wirelesssignaltx/wirelesssignaltx.obj
 xrayscanner/xrayscanner.obj
 resincollector230/resincollector230.obj
 carbonblackburner/carbonblackburner.obj
+desulfuriser/desulfuriser.obj

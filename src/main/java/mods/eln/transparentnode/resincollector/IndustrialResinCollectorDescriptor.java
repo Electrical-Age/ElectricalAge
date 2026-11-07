@@ -58,7 +58,7 @@ public class IndustrialResinCollectorDescriptor extends TransparentNodeDescripto
         led(obj.getPart("ledrun"), running);
     }
 
-    static void led(Obj3D.Obj3DPart part, boolean on) {
+    public static void led(Obj3D.Obj3DPart part, boolean on) {
         if (part == null) return;
         if (on) {
             mods.eln.misc.UtilsClient.drawLight(part);

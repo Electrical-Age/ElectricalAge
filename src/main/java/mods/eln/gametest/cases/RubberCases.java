@@ -26,6 +26,7 @@ public final class RubberCases {
         cases.add(new ChainCase());
         cases.add(new TreeCase());
         cases.add(new CarbonCase());
+        cases.add(new DesulfuriserCase());
     }
 
     /** Rubber trees (Baughn 2026-11-07): the sapling grows a rubber fig (Ficus elastica); a collector gets 1.5x the old rate on its trunk and
@@ -149,6 +150,33 @@ public final class RubberCases {
             c.check("a carbon black compound vulcanises to 11 Rubber (Baughn: a filler)", h != null && h.out().get().getCount() == 11, String.valueOf(h));
             c.check("carbon black is a black dye (c:dyes/black)", new ItemStack(ElnRegistry.CARBON_BLACK.get()).is(net.minecraft.tags.TagKey.create(
                 net.minecraft.core.registries.Registries.ITEM, net.minecraft.resources.Identifier.parse("c:dyes/black"))), "");
+        }
+    }
+
+    /** The Desulfuriser (the oil route, 2026-11-07), powered at 230 V with nothing on its outlet (LabAgent: test it against
+     *  a closed outlet): it treats the cut into its out tank until that's full, and loses nothing. */
+    static final class DesulfuriserCase implements TestCase {
+        mods.eln.transparentnode.desulfuriser.DesulfuriserElement d;
+
+        public String id() {
+            return "desulfuriser_closed_outlet";
+        }
+
+        public int ticks() {
+            return 500;
+        }
+
+        public void build(TestContext c) {
+            var l = new Wp10aCases.Layout(c, width());
+            d = (mods.eln.transparentnode.desulfuriser.DesulfuriserElement) l.device(0 + (94 << 6), 3, 1);
+            l.feed(c.at(3, 1, 1), d.front.left(), 8 + (32 << 6), mods.eln.Eln.MVU);   // (a 230 V cable on its side)
+            d.fillIn(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.Cut.DIESEL.source.get(), 1000));
+        }
+
+        public void measure(TestContext c) {
+            String st = String.format("treated %.0f, in %d, out %d, sulfur %d", d.treated(), d.inMb(), d.outMb(), d.sulfur());
+            c.check("the desulfuriser treats the diesel into its out tank (~50 mB/s at 230 V)", d.treated() > 500, st);
+            c.check("... with its outlet closed, nothing is lost (in + out = 1000 mB)", d.inMb() + d.outMb() == 1000, st);
         }
     }
 

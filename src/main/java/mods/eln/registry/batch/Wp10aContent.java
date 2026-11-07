@@ -50,6 +50,14 @@ public class Wp10aContent implements ElnContent {
         registerWireDrawing(88);
         registerResinCollector(92);
         registerCarbonBlackBurner(93);
+        registerDesulfuriser(94);
+    }
+
+    /** The Desulfuriser (the rubber chain's oil route, 2026-11-07): in line on a cut's pipe, 230 V, 1 kW. Model
+     *  mods.eln.cad.models.Desulfuriser. */
+    public static void registerDesulfuriser(int id) {
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.transparentnode.desulfuriser.DesulfuriserDescriptor(
+            TR_NAME(Type.NONE, "Desulfuriser"), "desulfuriser", MVU, 1000, meduimVoltageCableDescriptor));
     }
 
     /** The Carbon Black Burner (the rubber chain's oil route, 2026-11-07). Model mods.eln.cad.models.CarbonBlackBurner. */
