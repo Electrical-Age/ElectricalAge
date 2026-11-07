@@ -105,6 +105,32 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
         return true;
     }
 
+    /** Status LEDs (Baughn 2026-11-07, the restyled machines): parts ledpower (lit with voltage on) and ledrun (lit while
+     *  it works), drawn full-bright when lit and dimmed when not; a model without them draws none. */
+    mods.eln.misc.Obj3D.Obj3DPart ledPower, ledRun;
+
+    protected void initLeds(mods.eln.misc.Obj3D obj) {
+        if (obj == null) return;
+        ledPower = obj.getPart("ledpower");
+        ledRun = obj.getPart("ledrun");
+    }
+
+    void drawLeds(float uFactor, float powerFactor) {
+        led(ledPower, uFactor > 0.5f);
+        led(ledRun, powerFactor > 0.05f);
+    }
+
+    static void led(mods.eln.misc.Obj3D.Obj3DPart part, boolean on) {
+        if (part == null) return;
+        if (on) {
+            mods.eln.misc.UtilsClient.drawLight(part);
+        } else {
+            mods.eln.gl.GL11.glColor3f(0.3f, 0.3f, 0.3f);
+            part.draw();
+            mods.eln.misc.UtilsClient.glDefaultColor();
+        }
+    }
+
     public boolean drawCable() {
         return false;
     }

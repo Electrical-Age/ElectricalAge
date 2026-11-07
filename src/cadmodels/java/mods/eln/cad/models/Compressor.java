@@ -34,7 +34,7 @@ public final class Compressor {
 
     // ---- 48V
 
-    static List<Mesh> bodyA() {
+    static List<Mesh> bodyA(List<List<Mesh>> leds) {
         List<Mesh> m = new ArrayList<>();
         m.add(box(1.5, 0, 1.5, 14.5, 1.0, 14.5, "darksteel"));                                         // plinth
         m.add(box(2.0, 1.0, 3.0, 14.0, 5.0, 13.0, "paint"));                                           // bed
@@ -48,6 +48,16 @@ public final class Compressor {
         m.add(prism('z', 8.0, 14.4, 0.9, 13.4, 15.0, "steel", 10));                                    // small motor, z+ end
         // an output tray on the bed, beside the die
         m.add(box(5.0, 5.5, 11.0, 9.0, 5.8, 13.0, "darksteel"));
+        // fiddly bits: column collars under the crown, rivets on the crown and the bed, a band round the bed, the
+        // motor's fins and terminal box, the control box with its LEDs, a conduit to the motor
+        for (double z : new double[]{4.0, 12.0}) m.add(prism('y', 8.0, z, 1.1, 12.4, 13.0, "darksteel", 10));
+        MachineKit.rivetsX(m, 3.5, 12.5, 14.0, 4.5, -1, 5);
+        MachineKit.rivetsX(m, 4.5, 11.5, 14.0, 11.5, 1, 4);
+        m.add(box(1.9, 1.6, 2.9, 14.1, 2.0, 13.1, "darksteel", "nsewu"));
+        for (double z : new double[]{13.8, 14.3}) m.add(prism('z', 8.0, 14.4, 1.05, z - 0.15, z + 0.15, "darksteel", 10));
+        m.add(box(8.6, 14.4, 13.6, 9.6, 15.6, 14.6, "darksteel"));   // (motor terminal box, from the motor's axis)
+        leds.addAll(MachineKit.controlBox(m, 2.0, 3.2, 11.5));
+        m.add(box(13.0, 5.5, 12.6, 13.6, 13.0, 13.2, "darksteel"));
         // a nameplate on the bed's front
         m.add(box(1.9, 2.0, 6.0, 2.0, 3.5, 10.0, "brass", "w").free("a nameplate, a decal on the bed"));
         // power: floor terminals on the z faces, against junction boxes on the bed
@@ -67,12 +77,6 @@ public final class Compressor {
 
     // ---- 230V
 
-    static {
-        Palette.put("paint_red", 176, 48, 40, 8, null);
-        Palette.put("label_in", 52, 102, 176, 4, text("IN", 5, 10));
-        Palette.put("label_out", 176, 48, 40, 4, text("OUT", 3, 4));
-    }
-
     /** 3x5 capitals for the flange labels. */
     static final java.util.Map<Character, String[]> FONT = java.util.Map.of(
         'I', new String[]{"###", ".#.", ".#.", ".#.", "###"},
@@ -85,8 +89,7 @@ public final class Compressor {
     static Palette.Shade text(String s, int col, int row) {
         int w = 4 * s.length() - 1;
         return (x, y) -> {
-            // (the back panel's texture runs right to left as seen from behind: mirrored)
-            int r = y - row, c = w - 1 - (x - col);
+            int r = y - row, c = x - col;
             if (r < 0 || r >= 5 || c < 0 || c >= w) return null;
             int k = c / 4, cc = c % 4;
             if (k >= s.length() || cc == 3) return null;
@@ -97,7 +100,7 @@ public final class Compressor {
     /** Column centres (x, z). */
     static final double[][] COLS = {{3.4, 4.0}, {3.4, 12.0}, {9.6, 4.0}, {9.6, 12.0}};
 
-    static List<Mesh> bodyB() {
+    static List<Mesh> bodyB(List<List<Mesh>> leds) {
         List<Mesh> m = new ArrayList<>();
         m.add(box(1.0, 0, 0.85, 15.6, 1.0, 15.15, "darksteel"));                                       // skid
         m.add(box(1.5, 1.0, 2.5, 11.5, 5.0, 13.5, "castiron"));                                        // bed
@@ -107,8 +110,20 @@ public final class Compressor {
             m.add(prism('y', c[0], c[1], 1.15, 5.0, 5.6, "darksteel", 10));                            // column nuts
         }
         m.add(box(1.5, 13.0, 2.5, 11.5, 15.0, 13.5, "castiron"));                                      // crown
-        m.add(prism('y', 6.5, 8.0, 2.4, 15.0, 16.0, "paint", 14));                                    // cylinder
+        m.add(prism('y', 6.5, 8.0, 2.4, 15.0, 15.85, "paint", 14));                                   // cylinder
         m.add(box(5.4, 5.0, 11.0, 8.6, 5.3, 13.0, "darksteel"));                                       // output tray
+        // fiddly bits: column nuts on the crown, the cylinder's bolt ring and gland, rivets along crown and bed, the
+        // tank's seam band and drain plug, the motor's fins and terminal box, a hose to the cylinder, the control box
+        for (double[] c : COLS) m.add(prism('y', c[0], c[1], 1.1, 15.0, 15.4, "darksteel", 6));
+        m.addAll(OilKit.boltRing('y', 6.5, 8.0, 2.05, 15.8, 15.98, 8, "darksteel", 0.2, 0));
+        MachineKit.rivetsX(m, 3.3, 12.7, 14.0, 1.5, -1, 6);
+        MachineKit.rivetsX(m, 3.3, 9.6, 3.0, 1.5, -1, 4);
+        MachineKit.rivetsZ(m, 2.5, 10.5, 14.0, 13.5, 1, 4);
+        m.add(box(11.4, 3.6, 1.9, 15.1, 4.0, 10.1, "darksteel", "nsewu"));
+        m.add(prism('z', 13.0, 1.8, 0.35, 1.6, 2.0, "brass", 6, true, false));
+        for (double y : new double[]{8.4, 9.2, 11.4}) m.add(prism('y', 13.2, 4.6, 1.7, y - 0.15, y + 0.15, "darksteel", 12));
+        m.add(box(11.0, 9.0, 4.0, 11.8, 10.4, 5.2, "darksteel"));
+        leds.addAll(MachineKit.controlBox(m, 1.5, 3.0, 11.6));
         // the power pack at the back: tank, motor standing on it, pump, gauge; its pipe up to the cylinder
         m.add(box(11.5, 1.0, 2.0, 15.0, 7.0, 10.0, "paint"));                                         // tank
         m.add(box(11.3, 7.0, 1.8, 15.2, 7.4, 10.2, "darksteel"));                                      // tank lid
@@ -119,12 +134,14 @@ public final class Compressor {
         m.add(prism('x', 14.0, 8.3, 0.4, 8.5, 13.4, "darksteel", 8, false, false));                    // ... across to the cylinder
         m.add(prism('y', 8.7, 8.3, 0.4, 14.0, 15.0, "darksteel", 8, false, false));
         m.addAll(dial(11.4, 5.0, 6.0, 0.9));                                                          // gauge (front of the tank)
-        // the back panel with the two flanges and their labels (Baughn: blue IN, red OUT, marked in the texture)
-        m.add(box(15.0, 1.0, 1.5, 15.5, 12.0, 14.5, "castiron"));
-        m.add(box(15.5, 1.0, 3.0, 15.6, 6.0, 14.0, "label_in", "e").free("the IN label, a decal on the panel"));
-        m.add(box(15.5, 7.0, 3.0, 15.6, 12.0, 14.0, "label_out", "e").free("the OUT label, a decal on the panel"));
-        m.addAll(flange(3.5, 13.0, "paint_blue"));
-        m.addAll(flange(9.5, 13.0, "paint_red"));
+        // the manifold block at the back with the two flanges (Baughn: blue IN, red OUT; the words in miniature on
+        // each flange's face, a backstop you zoom in to read), their pipes into the power pack
+        m.add(box(14.6, 1.0, 11.0, 15.5, 11.5, 15.0, "castiron"));
+        MachineKit.rivetsX(m, 11.6, 14.4, 11.0, 15.5, 1, 3);
+        m.addAll(flange(3.5, 13.0, "paint_blue", "label_in"));
+        m.addAll(flange(9.0, 13.0, "paint_red", "label_out"));
+        m.add(prism('z', 9.0, 13.0, 0.45, 10.0, 11.0, "darksteel", 8, false, false));                  // OUT line to the pump
+        m.add(prism('z', 3.5, 13.0, 0.45, 10.0, 11.0, "darksteel", 8, false, false));                  // IN line to the tank
         // a nameplate on the bed's front
         m.add(box(1.4, 2.0, 6.0, 1.5, 3.5, 10.0, "brass", "w").free("a nameplate, a decal on the bed"));
         // power: floor terminals on the z faces, junction boxes against the bed and the tank
@@ -135,12 +152,13 @@ public final class Compressor {
         return m;
     }
 
-    /** A pipe flange on the back panel (x 15.5): a painted collar and a steel face, its centre at (y, z). */
-    static List<Mesh> flange(double y, double z, String paint) {
+    /** A pipe flange on the manifold (x 15.5): a painted collar, a steel face with four bolts and its label, centre (y, z). */
+    static List<Mesh> flange(double y, double z, String paint, String label) {
         List<Mesh> m = new ArrayList<>();
-        m.add(prism('x', y, z, 1.0, 15.5, 15.75, paint, 12));
-        m.add(prism('x', y, z, 1.4, 15.75, 15.95, "steel", 12));
-        m.add(prism('x', y, z, 0.5, 15.95, 16.0, "darksteel", 8));
+        m.add(prism('x', y, z, 1.0, 15.5, 15.7, paint, 12));
+        m.add(prism('x', y, z, 1.45, 15.7, 15.9, "steel", 12));
+        m.addAll(OilKit.boltRing('x', y, z, 1.25, 15.9, 15.98, 4, "darksteel", 0.17, Math.PI / 4));
+        m.add(MachineKit.flangeLabel(15.9, y, z, 1.0, label));
         return m;
     }
 
@@ -161,13 +179,19 @@ public final class Compressor {
     public static List<NodeModel> models() {
         List<NodeModel> out = new ArrayList<>();
         NodeModel a = new NodeModel("compressora", OilKit.PAINT_50V);
-        a.part("main", bodyA());
+        List<List<Mesh>> la = new ArrayList<>();
+        a.part("main", bodyA(la));
         a.part("move", ramA());
+        a.part("ledpower", la.get(0));
+        a.part("ledrun", la.get(1));
         items(a, new double[]{8.0, 6.5, 8.0}, new double[]{7.0, 5.8, 12.0});
         out.add(a);
         NodeModel b = new NodeModel("compressorb", OilKit.PAINT_200V);
-        b.part("main", bodyB());
+        List<List<Mesh>> lb = new ArrayList<>();
+        b.part("main", bodyB(lb));
         b.part("move", ramB());
+        b.part("ledpower", lb.get(0));
+        b.part("ledrun", lb.get(1));
         items(b, new double[]{6.5, 7.0, 8.0}, new double[]{7.0, 5.3, 12.0});
         out.add(b);
         return out;

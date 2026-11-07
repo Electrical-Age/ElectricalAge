@@ -16,6 +16,8 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
     private Obj3DPart main;
     private Obj3DPart rot1;
     private Obj3DPart rot2;
+    /** The 230V macerator's flywheel belt (its model's beltlink part; null on the 48V). */
+    private mods.eln.anim.Belt belt;
 
     public MaceratorDescriptor(String name, String modelName, double nominalU, double nominalP, double maximalU,
                                ThermalLoadInitializer thermal, ElectricalCableDescriptor cable, RecipesList recipe) {
@@ -25,7 +27,9 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
             rot1 = obj.getPart("rot1");
             rot2 = obj.getPart("rot2");
             main = obj.getPart("main");
+            belt = mods.eln.anim.Belt.of(obj.getPart("beltlink"));
         }
+        initLeds(obj);
     }
 
     class MaceratorDescriptorHandle {
@@ -46,6 +50,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
         main.draw();
         rot1.draw(handle.counter, 0f, 0f, -1f);
         rot2.draw(handle.counter, 0f, 0f, 1f);
+        if (belt != null) belt.draw(handle.counter);
 
         //UtilsClient.enableDepthTest();
         GL11.glScalef(0.7f, 0.7f, 0.7f);

@@ -57,6 +57,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
     public void draw() {
         GL11.glPushMatrix();
         front.glRotateXnRef();
+        descriptor.drawLeds(UFactor, powerFactor);   // (first: a descriptor's draw may scale for its items)
         descriptor.draw(this, drawHandle, inEntity, outEntity, powerFactor, processState);
         GL11.glPopMatrix();
 

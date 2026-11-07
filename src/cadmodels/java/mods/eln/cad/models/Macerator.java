@@ -51,7 +51,7 @@ public final class Macerator {
 
     // ---- 48V
 
-    static List<Mesh> bodyA() {
+    static List<Mesh> bodyA(List<List<Mesh>> leds) {
         List<Mesh> m = new ArrayList<>();
         Rolls r = ROLLS_A;
         m.add(box(2.0, 0, 1.0, 14.0, 1.0, 15.0, "darksteel"));                                         // plinth
@@ -89,6 +89,21 @@ public final class Macerator {
         m.add(box(13.5, 4.5, 9.6, 14.2, 7.5, 10.4, "darksteel"));
         // a brass nameplate on the front of the z- cheek
         m.add(box(2.4, 4.0, 2.4, 2.5, 6.0, 3.6, "brass", "w").free("a nameplate, a decal on the cheek"));
+        // fiddly bits (Baughn: too clean): rivets round the cheeks' faces, a band across their feet, bolts on the gear
+        // cover, the motor's fins, fan cowl and terminal box, a conduit from the z+ junction box up to it, the control
+        // box with the status LEDs on the z+ cheek's front
+        for (double[] z : new double[][]{{2.0, -1}, {14.0, 1}}) {
+            MachineKit.rivetsZ(m, 3.3, 12.7, 5.4, z[0], (int) z[1], 6);   // (above the junction boxes)
+            MachineKit.rivetsZ(m, 3.3, 12.7, 9.2, z[0], (int) z[1], 6);
+        }
+        m.add(box(2.4, 1.0, 1.9, 13.6, 1.5, 14.1, "darksteel", "nsewu"));
+        for (double[] p : new double[][]{{4.5, 10.0}, {11.5, 10.0}, {4.5, 13.8}, {11.5, 13.8}})
+            m.add(prism('z', p[0], p[1], 0.25, 1.15, 1.3, "brass", 6, true, false));
+        for (double z : new double[]{6.2, 9.8}) m.add(prism('z', 14.6, 6.0, 1.45, z - 0.15, z + 0.15, "darksteel", 12));
+        m.add(prism('z', 14.6, 6.0, 1.15, 11.0, 11.6, "darksteel", 12));
+        m.add(box(14.0, 7.2, 6.8, 15.2, 8.2, 7.6, "darksteel"));
+        m.add(box(13.5, 4.5, 13.0, 14.1, 8.0, 13.6, "darksteel"));
+        leds.addAll(MachineKit.controlBox(m, 2.5, 7.0, 13.0));
         // power: floor terminals on the two z faces, a junction box behind each against its cheek
         m.addAll(turned(terminalPlate(), 1));
         m.addAll(turned(terminalPlate(), 3));
@@ -124,7 +139,7 @@ public final class Macerator {
         return m;
     }
 
-    static List<Mesh> bodyB() {
+    static List<Mesh> bodyB(List<List<Mesh>> leds) {
         List<Mesh> m = new ArrayList<>();
         Rolls r = ROLLS_B;
         double[] zz = v(0, 0, 1);
@@ -143,8 +158,8 @@ public final class Macerator {
             m.add(obox(v(8.0 - s * 4.6, 14.2, 7.5), ax, normalOf(ax), zz, 2.45, 0.3, 4.4, "paint"));
         }
         // (the checker: the rims' inner faces lay in the side plates'; 0.1 px back into them)
-        m.add(box(1.2, 15.6, 3.0, 14.8, 16.0, 3.5, "darksteel"));                                     // rim
-        m.add(box(1.2, 15.6, 11.5, 14.8, 16.0, 12.0, "darksteel"));
+        m.add(box(1.2, 15.5, 3.0, 14.8, 15.9, 3.5, "darksteel"));                                     // rim
+        m.add(box(1.2, 15.5, 11.5, 14.8, 15.9, 12.0, "darksteel"));
         // front cross beam under the hopper, back plate
         // (the checker: their tops lay in the housings' caps' and their feet in the motor feet's plane; tops sunk into the
         // caps, no bottom faces on the skid)
@@ -164,9 +179,28 @@ public final class Macerator {
         m.add(box(11.0, 1.5, 7.6, 14.8, 2.0, 9.4, "darksteel", "nsewu"));                              // motor feet
         m.add(prism('z', PX, PY + 0.4, 0.4, 13.9, FW_Z1, "darksteel", 8));                              // motor shaft
         m.add(prism('z', PX, PY + 0.4, PR, FW_Z0 + 0.1, FW_Z1 - 0.1, "steel", 12));                     // pulley
-        m.addAll(belt(r.x1, r.y, FW_R, PX, PY + 0.4, PR));
+        // (the belt is drawn by mods.eln.anim.Belt from part beltlink, wrapping the flywheel and the pulley, running)
         // a brass nameplate on the front of the z- housing
         m.add(box(1.4, 6.0, 1.3, 1.5, 8.0, 3.1, "brass", "w").free("a nameplate, a decal on the housing"));
+        // fiddly bits: ribs and rivet rows on the housings' outer faces, bolt rings and grease nipples on the bearing
+        // caps, lifting eyes on the caps, hopper rim bolts, the motor's terminal box and conduit, the control box
+        for (double x : new double[]{2.6, 13.4}) m.add(box(x - 0.4, 1.5, 0.55, x + 0.4, 12.0, 0.85, "castiron", "nwue"));
+        MachineKit.rivetsZ(m, 2.2, 13.8, 2.2, 0.85, -1, 7);
+        MachineKit.rivetsZ(m, 2.2, 13.8, 11.4, 0.85, -1, 7);
+        MachineKit.rivetsZ(m, 2.2, 13.8, 11.4, 13.9, 1, 7);
+        for (double x : new double[]{r.x1, r.x2}) {
+            m.addAll(OilKit.boltRing('z', x, r.y, 1.0, 0.35, 0.5, 6, "brass", 0.15, 0));
+            m.add(prism('z', x, r.y, 0.35, 0.3, 0.5, "darksteel", 6));
+        }
+        m.add(prism('y', r.x2, r.y + 1.0, 0.2, 10.8, 11.6, "brass", 6).free("a grease nipple on the bearing"));
+        for (double[] p : new double[][]{{2.2, 2.2}, {13.8, 2.2}, {2.2, 12.6}, {13.8, 12.6}})
+            m.add(Mc.tube('x', 13.0, p[1], 0.3, 0.6, p[0] - 0.25, p[0] + 0.25, "darksteel", 8));
+        for (double x : new double[]{3.0, 8.0, 13.0}) {
+            m.add(prism('y', x, 3.25, 0.18, 15.85, 15.98, "brass", 6, false, true));
+            m.add(prism('y', x, 11.75, 0.18, 15.85, 15.98, "brass", 6, false, true));
+        }
+        m.add(box(PX - 0.8, PY + 2.2, 9.0, PX + 0.8, PY + 3.2, 10.6, "darksteel"));                    // motor terminal box
+        leds.addAll(MachineKit.controlBox(m, 1.5, 9.0, 2.2));
         // power: floor terminals on the two z faces, junction boxes against the housings
         m.addAll(turned(terminalPlate(), 1));
         m.addAll(turned(terminalPlate(), 3));
@@ -193,13 +227,23 @@ public final class Macerator {
     public static List<NodeModel> models() {
         List<NodeModel> out = new ArrayList<>();
         NodeModel a = new NodeModel("maceratora", OilKit.PAINT_50V);
-        a.part("main", bodyA());
+        List<List<Mesh>> la = new ArrayList<>();
+        a.part("main", bodyA(la));
+        a.part("ledpower", la.get(0));
+        a.part("ledrun", la.get(1));
         a.part("rot1", roll(ROLLS_A, 0, 2.6, 14.0, "steel"));
         a.part("rot2", roll(ROLLS_A, 1, 2.6, 14.0, "steel"));
         a.origin("rot1", ROLLS_A.x1, ROLLS_A.y, 8.0).origin("rot2", ROLLS_A.x2, ROLLS_A.y, 8.0);
         out.add(a);
         NodeModel b = new NodeModel("maceratorb", OilKit.PAINT_200V);
-        b.part("main", bodyB());
+        List<List<Mesh>> lb = new ArrayList<>();
+        b.part("main", bodyB(lb));
+        b.part("ledpower", lb.get(0));
+        b.part("ledrun", lb.get(1));
+        // one belt link, built on the block's centre line in the flywheel's plane; mods.eln.anim.Belt repeats it
+        b.part("beltlink", List.of(box(7.6, 7.85, FW_Z0 + 0.25, 8.4, 8.15, FW_Z1 - 0.25, "rubber")));
+        b.txt.addAll(List.of("o beltlink", "f ax " + Catalog.fmt(ROLLS_B.x1), "f ay " + Catalog.fmt(ROLLS_B.y), "f ar " + Catalog.fmt(FW_R + 0.15),
+            "f bx " + Catalog.fmt(PX), "f by " + Catalog.fmt(PY + 0.4), "f br " + Catalog.fmt(PR + 0.15), "f pitch 0.8"));
         List<Mesh> r1 = roll(ROLLS_B, 0, 1.2, FW_Z1 + 0.2, "steel");
         r1.addAll(flywheel(ROLLS_B));
         b.part("rot1", r1);

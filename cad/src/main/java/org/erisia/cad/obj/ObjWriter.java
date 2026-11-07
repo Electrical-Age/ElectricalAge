@@ -113,7 +113,11 @@ public final class ObjWriter {
                 if (cell == null) throw new IllegalArgumentException(s + ": no atlas cell for " + s.material);
                 for (Face f : s.faces()) {
                     if (f.nx == 0 && f.ny == 0 && f.nz == 0) continue;
+                    // a solid's own UvMap (cell-local 0..1, V up) wins over the planar default: e.g. a label's whole
+                    // cell squeezed onto a small face, for text finer than a pixel
                     double[] uv = PlanarUv.of(f.xyz, f.n, f.nx, f.ny, f.nz);
+                    if (f.uv != null && f.uv.length == 2 * f.n)
+                        for (int i = 0; i < 2 * f.n; i++) uv[i] = f.uv[i];
                     String[] ids = new String[f.n];
                     for (int i = 0; i < f.n; i++) {
                         double u = inset + uv[2 * i] * (1 - 2 * inset), w = inset + uv[2 * i + 1] * (1 - 2 * inset);

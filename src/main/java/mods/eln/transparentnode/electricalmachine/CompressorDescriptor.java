@@ -26,6 +26,7 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
         if (obj != null) {
             main = obj.getPart("main");
             move = obj.getPart("move");
+            initLeds(obj);
             if (move != null) {
                 tyOn = move.getFloat("tyon");
                 tyOff = move.getFloat("tyoff");
