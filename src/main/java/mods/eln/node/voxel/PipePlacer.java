@@ -98,6 +98,16 @@ public final class PipePlacer {
     /** The port on this block's face, if any (a device's flange, or a pipe's end on that face), as a routing end
      *  leaving the face. */
     static PipeRouter.End portAt(Level level, BlockPos pos, Direction face) {
+        return portAt(level, pos, face, null);
+    }
+
+    /**
+     * The device port on that face of the block; of several on one face (the 230V compressor's IN and OUT flanges,
+     * 2026-11-07), the one nearest the clicked point hit (world coordinates; null: the first).
+     */
+    static PipeRouter.End portAt(Level level, BlockPos pos, Direction face, net.minecraft.world.phys.Vec3 hit) {
+        PipeRouter.End best = null;
+        double bestD = Double.MAX_VALUE;
         List<FluidDevice.FluidPort> ports = new ArrayList<>();
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         if (n instanceof VoxelNode v) ports.addAll(v.fluidPorts());
@@ -112,9 +122,15 @@ public final class PipePlacer {
                 case Z -> { x = bx + u; y = by + w; z = bz + (face == Direction.SOUTH ? 16 : 0); }
                 default -> { y = by + u; z = bz + w; x = bx + (face == Direction.EAST ? 16 : 0); }
             }
-            return new PipeRouter.End(x, y, z, dirOf(face));
+            PipeRouter.End end = new PipeRouter.End(x, y, z, dirOf(face));
+            if (hit == null) return end;
+            double d = Math.pow(x / 16.0 - hit.x, 2) + Math.pow(y / 16.0 - hit.y, 2) + Math.pow(z / 16.0 - hit.z, 2);
+            if (d < bestD) {
+                bestD = d;
+                best = end;
+            }
         }
-        return null;
+        return best;
     }
 
     /**
@@ -167,6 +183,11 @@ public final class PipePlacer {
         return portAt(level, pos, face);
     }
 
+    /** (for tests) the port nearest a point on the face (world coordinates). */
+    public static PipeRouter.End portAtForTests(Level level, BlockPos pos, Direction face, net.minecraft.world.phys.Vec3 hit) {
+        return portAt(level, pos, face, hit);
+    }
+
     /** Router direction (0..5 = -x +x -y +y -z +z) of a face. */
     static int dirOf(Direction f) {
         return switch (f) {
@@ -190,7 +211,7 @@ public final class PipePlacer {
             plan = null;
         }
         if (plan != null) plan.touched = now;
-        PipeRouter.End port = portAt(level, pos, face);
+        PipeRouter.End port = portAt(level, pos, face, hit);
         boolean device = false;
         if (port == null) device = (port = devicePort(level, pos, hit)) != null;
         if (player.isSecondaryUseActive()) {

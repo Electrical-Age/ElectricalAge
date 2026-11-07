@@ -33,6 +33,26 @@ public class ElectricalStackMachineProcess implements IProcess {
     double energyNeeded = 0;
     double energyCounter = 0;
 
+    /** A recipe fed from a tank, worked while the input slot is empty (the rubber chain, 2026-11-07: the 230V
+     *  compressor presses latex from its IN flange to Raw Rubber). */
+    public interface FluidRecipe {
+        /** Is there enough in the tank for one? */
+        boolean ready();
+
+        ItemStack[] output();
+
+        double energy();
+
+        /** Take one's worth from the tank. */
+        void consume();
+    }
+
+    /** The item recipe that finished last (for observers whose recipes also make fluid); null after a fluid recipe. */
+    public Recipe lastRecipe;
+
+    /** The machine's fluid recipe, or null (most machines). */
+    public FluidRecipe fluidRecipe;
+
     public interface ElectricalStackMachineProcessObserver {
         void done(ElectricalStackMachineProcess who);
     }
@@ -120,7 +140,7 @@ public class ElectricalStackMachineProcess implements IProcess {
             energyCounter = 0.0;
         } else {
             smeltInProcess = true;
-            energyNeeded = recipesList.getRecipe(inventory.getItem(inputSlotId)).energy;
+            energyNeeded = fromTank() ? fluidRecipe.energy() : recipesList.getRecipe(inventory.getItem(inputSlotId)).energy;
             energyCounter = 0.0;
         }
     }
@@ -132,10 +152,12 @@ public class ElectricalStackMachineProcess implements IProcess {
     public java.util.function.BooleanSupplier extraCondition = () -> true;
 
     public boolean smeltCan() {
-        if (!extraCondition.getAsBoolean()) return false;
         if (Utils.isEmpty(inventory.getItem(inputSlotId))) {
-            return false;
-        } else {
+            // (no item: the fluid recipe, if any; extraCondition is about the item recipes' outputs)
+            return fluidRecipe != null && fluidRecipe.ready() && Utils.canPutStackInInventory(fluidRecipe.output(), inventory, outSlotIdList);
+        }
+        if (!extraCondition.getAsBoolean()) return false;
+        {
             ItemStack[] output = getSmeltResult();
             if (output == null) return false;
             return Utils.canPutStackInInventory(getSmeltResult(), inventory, outSlotIdList);
@@ -144,7 +166,13 @@ public class ElectricalStackMachineProcess implements IProcess {
 
     static final java.util.Random RANDOM = new java.util.Random();
 
+    /** Working from the tank (no item in the input slot, a fluid recipe)? */
+    boolean fromTank() {
+        return Utils.isEmpty(inventory.getItem(inputSlotId)) && fluidRecipe != null;
+    }
+
     public ItemStack[] getSmeltResult() {
+        if (fromTank()) return fluidRecipe.output();
         Recipe recipe = recipesList.getRecipe(inventory.getItem(inputSlotId));
         if (recipe == null) return null;
         return recipe.maxOutput();
@@ -154,8 +182,16 @@ public class ElectricalStackMachineProcess implements IProcess {
      * Turn one item from the furnace source stack into the appropriate smelted item in the furnace result stack
      */
     public void smeltItem() {
+        if (this.smeltCan() && fromTank()) {
+            lastRecipe = null;
+            Utils.tryPutStackInInventory(fluidRecipe.output(), inventory, outSlotIdList);
+            fluidRecipe.consume();
+            if (observer != null) observer.done(this);
+            return;
+        }
         if (this.smeltCan()) {
             Recipe recipe = recipesList.getRecipe(inventory.getItem(inputSlotId));
+            lastRecipe = recipe;
             Utils.tryPutStackInInventory(recipe.getOutputCopy(RANDOM), inventory, outSlotIdList);
             inventory.removeItem(inputSlotId, recipe.input.getCount());
             if (observer != null) observer.done(this);

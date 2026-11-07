@@ -239,7 +239,7 @@ public final class KitPreview {
             send(p, true, boxes);
             return;
         }
-        PipeRouter.End port = PipePlacer.portAt(level, bh.getBlockPos(), bh.getDirection());
+        PipeRouter.End port = PipePlacer.portAt(level, bh.getBlockPos(), bh.getDirection(), bh.getLocation());
         if (port == null) port = PipePlacer.devicePort(level, bh.getBlockPos(), bh.getLocation());
         if (plan == null) {   // (where it would start: a port)
             if (port != null) boxes.add(new int[]{(int) port.x() - 2, (int) port.y() - 2, (int) port.z() - 2, (int) port.x() + 2, (int) port.y() + 2, (int) port.z() + 2});

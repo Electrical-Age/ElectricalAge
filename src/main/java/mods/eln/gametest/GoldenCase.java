@@ -74,7 +74,9 @@ final class GoldenCase implements TestCase {
         // its meaning (it took 7,200 mB/s of capability steam at a fixed 2.257 J/mB)
         "Steam Turbine", java.util.Set.of(),
         // the same for the Gas Turbine (Baughn 2026-10-29): its 4 mB of capability fuel at a fixed rate gave way to a cycle
-        "Gas Turbine", java.util.Set.of());
+        "Gas Turbine", java.util.Set.of(),
+        // the 230V compressor gained latex ports and the dandelion recipe (the rubber chain, 2026-11-07): its own class
+        "200V Compressor", java.util.Set.of("nominalP", "outStackCount", "boosterEfficiency", "boosterSpeedUp"));
 
     /** Fields changed on purpose (golden/README.md): name -> field -> why. */
     static final Map<String, Map<String, String>> CHANGED = changed();

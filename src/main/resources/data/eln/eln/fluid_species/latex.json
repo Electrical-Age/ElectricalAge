@@ -1,0 +1,11 @@
+{
+  "kind": "none",
+  "group": "latex",
+  "density": 980,
+  "cp_liquid": 3800,
+  "cp_vapour": 1900,
+  "molar_mass": 0.02,
+  "viscosity": [[293, 0.012], [353, 0.005]],
+  "colour": "#F2EEDC",
+  "fluids": {"liquid": ["eln:latex"], "vapour": []}
+}

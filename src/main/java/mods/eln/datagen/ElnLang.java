@@ -169,6 +169,10 @@ public class ElnLang extends LanguageProvider {
         add("block.eln.well_casing", "Well Casing");
         add("fluid.eln.steam", "Steam");
         add("fluid_type.eln.steam", "Steam");
+        add("fluid.eln.latex", "Latex");
+        add("fluid_type.eln.latex", "Latex");
+        add("item.eln.latex_bucket", "Latex Bucket");
+        add("jei.eln.info.latex", "Rubber trees' milky sap. An Industrial Resin Collector taps it from a trunk, and a 230V Compressor presses it from dandelions; the 230V Compressor presses 250 mB of it, fed into its blue IN flange, to a Raw Rubber.");
         for (var c : mods.eln.oil.Oil.Cut.values()) {
             add("fluid.eln." + c.id, c.display);
             add("fluid_type.eln." + c.id, c.display);

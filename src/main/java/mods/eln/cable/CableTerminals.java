@@ -28,6 +28,8 @@ public final class CableTerminals {
     public static final CableTerminals FRONT_AND_BACK = new CableTerminals(M_FRONT | M_BACK, CONDUCTOR_HEIGHT_PX);
     /** The two flanks, left and right of the front (electric heaters, tar sand separators). */
     public static final CableTerminals FLANKS = new CableTerminals(M_FLANKS, CONDUCTOR_HEIGHT_PX);
+    /** The two side faces and the back (the restyled magnetizers, 2026-11-07). */
+    public static final CableTerminals FLANKS_AND_BACK = new CableTerminals(M_FLANKS | M_BACK, CONDUCTOR_HEIGHT_PX);
     /** The front and the two flanks (the submersible pumps: signal in front, power on the flanks). */
     public static final CableTerminals FRONT_AND_FLANKS = new CableTerminals(M_FRONT | M_FLANKS, CONDUCTOR_HEIGHT_PX);
     /** Every horizontal face. */

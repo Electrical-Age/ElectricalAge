@@ -379,7 +379,8 @@ public class Wp10aContent implements ElnContent {
             subId = 4;
             name = TR_NAME(Type.NONE, "230V Compressor");
 
-            CompressorDescriptor desc = new CompressorDescriptor(
+            // (the rubber chain, 2026-11-07: latex ports on its back and the dandelion recipe)
+            CompressorDescriptor desc = new mods.eln.transparentnode.electricalmachine.CompressorPortsDescriptor(
                 name,// String name,
                 obj.getObj("compressorb"),
                 MVU, 2000,// double nominalU,double nominalP,

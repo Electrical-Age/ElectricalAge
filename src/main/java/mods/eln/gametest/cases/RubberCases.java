@@ -152,6 +152,9 @@ public final class RubberCases {
             c.check("soul sand macerates to 2 soul dust", macerate(Items.SOUL_SAND).equals("2..2 eln:soul_dust"), macerate(Items.SOUL_SAND));
             c.check("soul soil macerates to 2 soul dust", macerate(Items.SOUL_SOIL).equals("2..2 eln:soul_dust"), macerate(Items.SOUL_SOIL));
 
+            int latex = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:latex");
+            c.check("latex is a fluid species, named by the latex fluid", latex >= 0
+                && mods.eln.fluid.FluidSpecies.of(mods.eln.oil.Latex.SOURCE.get()) != null, "id " + latex);
             Item resin = BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "tree_resin"));
             c.check("resin smelts to raw rubber", smelt(c, resin).equals("1 eln:raw_rubber"), smelt(c, resin));
             c.check("raw rubber smelts to 1 rubber", smelt(c, ElnRegistry.RAW_RUBBER.get()).equals("1 eln:rubber"), smelt(c, ElnRegistry.RAW_RUBBER.get()));

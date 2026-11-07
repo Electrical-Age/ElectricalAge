@@ -22,6 +22,7 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
     public MagnetizerDescriptor(String name, Obj3D obj, double nominalU, double nominalP, double maximalU,
                                 ThermalLoadInitializer thermal, ElectricalCableDescriptor cable, RecipesList recipe) {
         super(name, nominalU, nominalP, maximalU, thermal, cable, recipe);
+        cableTerminals = mods.eln.cable.CableTerminals.FLANKS_AND_BACK;   // (the restyled models' floor terminal plates, 2026-11-07)
         if (obj != null) {
             rot = obj.getPart("rot");
             main = obj.getPart("main");

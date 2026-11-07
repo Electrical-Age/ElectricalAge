@@ -50,6 +50,8 @@ public final class ElnClient {
             }
             e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(wStill, wFlow, null,
                 net.neoforged.neoforge.client.fluid.FluidTintSources.constant(0xFFE8ECF0)), mods.eln.oil.Oil.STEAM, mods.eln.oil.Oil.STEAM_FLOWING);
+            e.register(new net.minecraft.client.renderer.block.FluidModel.Unbaked(wStill, wFlow, null,
+                net.neoforged.neoforge.client.fluid.FluidTintSources.constant(mods.eln.oil.Latex.COLOR)), mods.eln.oil.Latex.SOURCE, mods.eln.oil.Latex.FLOWING);
         });
         modBus.addListener(EntityRenderersEvent.RegisterRenderers.class, e -> {
             e.registerBlockEntityRenderer(ElnRegistry.SIX_NODE_ENTITY.get(), ctx -> new SixNodeRender<>());

@@ -379,10 +379,16 @@ public final class OilCases {
      * separator_out: the tar sand separator's crude out of its back flange (4 px up, off centre) into a tank;
      * fuel_furnace_in: a tank of gasoline into the fuel heat furnace's front flange (4 px up), into its tank;
      * fuel_furnace_crude: the same with crude oil (Baughn: it burns every EA oil that makes sense in it);
-     * fuel_furnace_buckets: a bucket's worth of each EA oil a burner fires goes into an empty one (Baughn: by bucket).
+     * fuel_furnace_buckets: a bucket's worth of each EA oil a burner fires goes into an empty one (Baughn: by bucket);
+     * compressor_latex_out: the 230V compressor's latex out of its red OUT flange (its back, 9 px up) into a tank;
+     * compressor_latex_in: a tank's latex into its blue IN flange (4 px up, the same face), into its press tank.
      */
+    /** The 230V compressor (latex ports since 2026-11-07). */
+    static final int COMPRESSOR_230 = 4 + (35 << 6);
+
     static final class OilOnPipes implements TestCase {
-        static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel", "separator_out", "fuel_furnace_in", "fuel_furnace_crude", "fuel_furnace_buckets"};
+        static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel", "separator_out", "fuel_furnace_in", "fuel_furnace_crude", "fuel_furnace_buckets",
+            "compressor_latex_out", "compressor_latex_in"};
         final String variant;
         mods.eln.node.transparent.TransparentNodeElement west, east;
         mods.eln.oil.TankElement tank;
@@ -523,6 +529,28 @@ public final class OilCases {
                         ctx.level().removeBlock(p, false);
                     }
                 }
+                case "compressor_latex_out", "compressor_latex_in" -> {
+                    boolean out = variant.endsWith("out");
+                    west = ctx.placeTransparent(COMPRESSOR_230, w);
+                    west.front = XN;   // (its back, with both flanges, east)
+                    west.reconnect();
+                    tank = tank(ctx, e, XN);
+                    int y = out ? mods.eln.transparentnode.electricalmachine.CompressorPortsDescriptor.OUT_Y
+                        : mods.eln.transparentnode.electricalmachine.CompressorPortsDescriptor.IN_Y;
+                    int at = mods.eln.fluid.PortBridge.endSpot(XN, XP, y, mods.eln.transparentnode.electricalmachine.CompressorPortsDescriptor.FLANGE_Z);
+                    // (the player's click picks the flange nearest it, PipePlacer.portAt)
+                    var hit = new net.minecraft.world.phys.Vec3(w.getX() + 1, w.getY() + (at / 17) / 16.0, w.getZ() + (at % 17) / 16.0);
+                    var a = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), w, net.minecraft.core.Direction.EAST, hit);
+                    var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
+                    if (a == null || b == null || a.y() % 16 != at / 17) err = "ports: " + a + " " + b + " (want y " + at / 17 + ")";
+                    else {
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
+                    }
+                    if (out) ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).fill(
+                        new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Latex.SOURCE.get(), 2000), true);
+                    else put(ctx, e, mods.eln.oil.Latex.SOURCE.get(), 6000);
+                }
                 default -> throw new IllegalStateException(variant);
             }
         }
@@ -557,6 +585,16 @@ public final class OilCases {
                     double got = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
                     ctx.check("oil on pipes: the separator's crude went into the tank", got > 500,
                         String.format("%.0f mB in the tank, %d left in the separator", got, ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).getFluidAmount()));
+                }
+                case "compressor_latex_out" -> {
+                    int id = reg.id("eln:latex");
+                    double got = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
+                    ctx.check("latex on pipes: the 230V compressor's latex went out of its OUT flange into the tank", got > 500,
+                        String.format("%.0f mB in the tank, compressor %s", got, west.getWaila()));
+                }
+                case "compressor_latex_in" -> {
+                    int in = ((mods.eln.transparentnode.electricalmachine.CompressorPortsElement) west).latexIn();
+                    ctx.check("latex on pipes: the tank's latex went into the 230V compressor's IN flange", in > 500, in + " mB in its press tank, " + west.getWaila());
                 }
                 case "fuel_furnace_buckets" -> ctx.check("oil: the fuel heat furnace takes a bucket of every EA oil a burner fires", allBuckets, bucketed);
                 case "fuel_furnace_in", "fuel_furnace_crude" -> {
