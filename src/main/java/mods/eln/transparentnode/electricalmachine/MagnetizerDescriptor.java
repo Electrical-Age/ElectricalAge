@@ -16,6 +16,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
     private Obj3DPart main;
     private Obj3DPart rot;
+    /** Where the item is drawn (block units from the centre; the restyled models' rot.txt says, 2026-11-07). */
+    private float inX = 0f, inY = 0.125f, inZ = 0f;
 
     public MagnetizerDescriptor(String name, Obj3D obj, double nominalU, double nominalP, double maximalU,
                                 ThermalLoadInitializer thermal, ElectricalCableDescriptor cable, RecipesList recipe) {
@@ -23,7 +25,13 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
         if (obj != null) {
             rot = obj.getPart("rot");
             main = obj.getPart("main");
+            if (rot != null && (rot.getFloat("iny") != 0 || rot.getFloat("inx") != 0)) {
+                inX = rot.getFloat("inx");
+                inY = rot.getFloat("iny");
+                inZ = rot.getFloat("inz");
+            }
         }
+        initLeds(obj);
     }
 
     class MaceratorDescriptorHandle {
@@ -45,7 +53,7 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
         rot.draw(handle.counter, 0f, 0f, 1f);
 
         GL11.glScalef(0.5f, 0.5f, 0.5f);
-        UtilsClient.drawEntityItem(inEntity, 0.0, 0.25f, 0f, handle.itemCounter, 1f);
+        UtilsClient.drawEntityItem(inEntity, inX / 0.5f, inY / 0.5f, inZ / 0.5f, handle.itemCounter, 1f);
     }
     @Override
     void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity, float powerFactor, float processState) {
