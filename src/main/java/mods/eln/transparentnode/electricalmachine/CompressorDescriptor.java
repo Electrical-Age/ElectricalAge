@@ -13,6 +13,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 public class CompressorDescriptor extends ElectricalMachineDescriptor {
     private float tyOn;
     private float tyOff;
+    /** Where the input and output items are drawn (block units from the centre; the model's move.txt may say). */
+    private float inX = -0.35f, inY = 0.04f, inZ = 0.3f, outX = 0.35f, outY = 0.04f, outZ = 0.3f;
 
     private Obj3DPart main;
     private Obj3DPart move;
@@ -27,6 +29,15 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
             if (move != null) {
                 tyOn = move.getFloat("tyon");
                 tyOff = move.getFloat("tyoff");
+                // (the restyled presses, 2026-11-07: the input on the die, the output on a tray beside it)
+                if (move.getFloat("inx") != 0 || move.getFloat("iny") != 0) {
+                    inX = move.getFloat("inx");
+                    inY = move.getFloat("iny");
+                    inZ = move.getFloat("inz");
+                    outX = move.getFloat("outx");
+                    outY = move.getFloat("outy");
+                    outZ = move.getFloat("outz");
+                }
             }
         }
     }
@@ -56,8 +67,8 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
               float powerFactor, float processState) {
         CompressorDescriptorHandle handle = (CompressorDescriptorHandle) handleO;
 
-        UtilsClient.drawEntityItem(inEntity, -0.35f, 0.04f, 0.3f, handle.itemCounter, 1f);
-        UtilsClient.drawEntityItem(outEntity, 0.35f, 0.04f, 0.3f, -handle.itemCounter + 139f, 1f);
+        UtilsClient.drawEntityItem(inEntity, inX, inY, inZ, handle.itemCounter, 1f);
+        UtilsClient.drawEntityItem(outEntity, outX, outY, outZ, -handle.itemCounter + 139f, 1f);
 
         main.draw();
         GL11.glTranslatef(0f, tyOff + (float) Math.sqrt(handle.interpolator.get()) * (tyOn - tyOff), 0f);
