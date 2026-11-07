@@ -652,21 +652,24 @@ public final class LabCommands {
             node.element.front = mods.eln.misc.Direction.fromEnumFacing(toDev).back();
             node.element.reconnect();
         }
-        int filled = 0;
-        if (latexMb > 0) {   // (after the turn: a reconnect lost what was poured in before it)
-            var cap = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, tp, net.minecraft.core.Direction.UP);
-            if (cap != null)
-                try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                    filled = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Latex.SOURCE.get()), latexMb, tx);
-                    tx.commit();
-                }
+        if (latexMb > 0) {   // (a second later: poured in the tick it was placed, or before its turn, the latex was lost)
+            var server = level.getServer();
+            server.schedule(new net.minecraft.server.TickTask(server.getTickCount() + 20, () -> {
+                var cap = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, tp, net.minecraft.core.Direction.UP);
+                if (cap != null)
+                    try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                        int got = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Latex.SOURCE.get()), latexMb, tx);
+                        tx.commit();
+                        src.sendSuccess(() -> Component.literal(got + " mB of latex poured into the tank at " + tp.toShortString()), false);
+                    }
+            }));
         }
-        final int poured = filled;
+        final String poured = "filling in a second";
         var b = toDev == null ? null : mods.eln.node.voxel.PipePlacer.portAtForTests(level, tp, toDev);
         if (a == null || b == null) return "ports " + a + " " + b;
         var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, a, java.util.List.of(), b);
         String err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
-        return (err == null ? "piped" : err) + (latexMb > 0 ? ", " + poured + " mB of latex in it" : "");
+        return (err == null ? "piped" : err) + (latexMb > 0 ? ", " + poured : "");
     }
 
     /** Machines on 230 V, 5 apart along x; a furnace gets a tungsten heating corp, insulation and a regulator at its target (C). */
