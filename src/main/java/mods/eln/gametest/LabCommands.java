@@ -654,6 +654,10 @@ public final class LabCommands {
         var a = mods.eln.node.voxel.PipePlacer.portAtForTests(level, dev, face, hit);
         net.minecraft.core.Direction toDev = null;
         for (var f : net.minecraft.core.Direction.Plane.HORIZONTAL) if (tp.relative(f).distManhattan(dev) < tp.distManhattan(dev)) toDev = f;
+        if (toDev != null && node.element != null) {   // (a tank's port is on its back: turn it to the device)
+            node.element.front = mods.eln.misc.Direction.fromEnumFacing(toDev).back();
+            node.element.reconnect();
+        }
         var b = toDev == null ? null : mods.eln.node.voxel.PipePlacer.portAtForTests(level, tp, toDev);
         if (a == null || b == null) return "ports " + a + " " + b;
         var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, a, java.util.List.of(), b);
