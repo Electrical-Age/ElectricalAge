@@ -46,7 +46,7 @@ public final class RubberCases {
         }
 
         public int height() {
-            return 12;
+            return 18;   // (a 10-log trunk and its crown: a 12-high box made the tallest trees fail now and then)
         }
 
         public void build(TestContext c) {
@@ -58,9 +58,9 @@ public final class RubberCases {
             level.setBlock(pos, sap, 3);
             boolean ok = mods.eln.rubber.RubberTrees.GROWER.growTree(level, level.getChunkSource().getGenerator(), pos, sap, level.getRandom());
             int logs = 0;
-            for (int y = 0; y < 11; y++) if (level.getBlockState(pos.above(y)).is(mods.eln.rubber.RubberTrees.LOG.get())) logs++;
+            for (int y = 0; y < 14; y++) if (level.getBlockState(pos.above(y)).is(mods.eln.rubber.RubberTrees.LOG.get())) logs++;
             int leaves = 0;
-            for (var p : net.minecraft.core.BlockPos.betweenClosed(pos.offset(-3, 0, -3), pos.offset(3, 10, 3)))
+            for (var p : net.minecraft.core.BlockPos.betweenClosed(pos.offset(-3, 0, -3), pos.offset(3, 15, 3)))
                 if (level.getBlockState(p).is(mods.eln.rubber.RubberTrees.LEAVES.get())) leaves++;
             grown = ok + " " + logs + " logs " + leaves + " leaves";
         }
@@ -95,6 +95,12 @@ public final class RubberCases {
             var r = c.level().recipeAccess().getRecipeFor(RecipeType.CRAFTING, input, c.level());
             c.check("a rubber sapling from jungle, oak, birch and acacia saplings",
                 r.isPresent() && r.get().value().assemble(input).is(mods.eln.rubber.RubberTrees.SAPLING_ITEM.get()), r.map(rh -> rh.value().assemble(input).toString()).orElse("none"));
+        }
+    }
+
+    static final class SlotSpecName {
+        static String of(mods.eln.gui.SlotSpec sl) {
+            return sl.kind() + "#" + sl.index();
         }
     }
 
@@ -139,6 +145,11 @@ public final class RubberCases {
             c.check("raw rubber smelts to 1 rubber", smelt(c, ElnRegistry.RAW_RUBBER.get()).equals("1 eln:rubber"), smelt(c, ElnRegistry.RAW_RUBBER.get()));
             c.check("rubber compound doesn't smelt in a plain furnace", smelt(c, ElnRegistry.RUBBER_COMPOUND.get()).equals("none"), smelt(c, ElnRegistry.RUBBER_COMPOUND.get()));
             var h = mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.treatmentFor(new ItemStack(ElnRegistry.RUBBER_COMPOUND.get()));
+            var furnace = mods.eln.Eln.transparentNodeItem.getDescriptor(0 + (32 << 6));
+            var inSlot = mods.eln.gui.MenuSpecs.of(furnace).slots().stream()
+                .filter(sl -> sl.index() == mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.inSlotId).findFirst();
+            c.check("the Electrical Furnace's input slot takes Rubber Compound (AdventurAgent: it refused it)",
+                inSlot.isPresent() && inSlot.get().filter().test(new ItemStack(ElnRegistry.RUBBER_COMPOUND.get())), String.valueOf(inSlot.map(SlotSpecName::of)));
             c.check("rubber compound vulcanises to 8 rubber in the Electrical Furnace", h != null && h.out().get().getCount() == 8
                 && h.out().get().is(mods.eln.Eln.findItemStack("Rubber").getItem()), String.valueOf(h));
 
