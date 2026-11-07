@@ -14,7 +14,9 @@ import static mods.eln.cad.models.Mc.tube;
  * top, a copper rod spool at the back on two uprights, the drawing die block in the middle, and at the front a capstan
  * wound with finished (rubber-sheathed) wire. The wire runs from the spool through the die to the capstan. The power
  * terminal plate sits low on the back face. Two models, alike but for the paint: wiredrawer48 (green) and
- * wiredrawer230 (blue). Drawn by WireDrawingRender through Obj3D. Front XN (x = 0).
+ * wiredrawer230 (blue). Drawn by WireDrawingRender through Obj3D. Front XN (x = 0). The spool and the capstan are
+ * parts of their own that turn while the machine draws (Baughn 2026-11-07: it had no animation); a bolt on the spool's
+ * flanges and spokes on the capstan's cap show them turning.
  */
 public final class WireDrawer {
     private WireDrawer() {
@@ -34,16 +36,12 @@ public final class WireDrawer {
         // the rod spool at the back: two uprights, an axle, a copper drum between steel flanges
         for (double z0 : new double[]{1.5, 13.5}) m.add(box(SPOOL_X - 0.6, TOP, z0, SPOOL_X + 0.6, SPOOL_Y + 0.7, z0 + 1.0, "darksteel"));
         m.add(prism('z', SPOOL_X, SPOOL_Y, 0.45, 1.3, 14.7, "steel", 8));
-        m.add(prism('z', SPOOL_X, SPOOL_Y, 3.6, 3.0, 3.5, "steel", 16));
-        m.add(prism('z', SPOOL_X, SPOOL_Y, 3.6, 12.5, 13.0, "steel", 16));
-        m.add(prism('z', SPOOL_X, SPOOL_Y, 2.9, 3.5, 12.5, "copper", 16));
+        // (the drum: part "spool")
         // the die block in the middle, with the die's brass ring on its back face
         m.add(box(6.5, TOP, 6.0, 8.5, TOP + 3.5, 10.0, "steel"));
         m.add(tube('x', WIRE_Y, 8.0, 0.4, 1.0, 8.5, 8.8, "brass", 10, Double.NaN, true));
         // the capstan at the front, wound with finished wire
-        m.add(prism('y', 3.5, 8.0, 2.2, TOP, TOP + 3.6, "steel", 16));
-        m.add(tube('y', 3.5, 8.0, 2.0, 2.7, TOP + 1.2, TOP + 3.0, "rubber", 16, Double.NaN, false));
-        m.add(prism('y', 3.5, 8.0, 2.6, TOP + 3.6, TOP + 3.9, "darksteel", 16));
+        // (the capstan: part "capstan")
         // the wire: bare copper from the spool's underside to the die, sheathed from the die to the capstan
         m.add(box(8.5, WIRE_Y - 0.25, 7.75, SPOOL_X, WIRE_Y + 0.25, 8.25, "copper"));
         m.add(box(5.4, WIRE_Y - 0.3, 7.7, 6.5, WIRE_Y + 0.3, 8.3, "rubber"));
@@ -54,11 +52,37 @@ public final class WireDrawer {
         return m;
     }
 
+    /** The rod spool's drum between its flanges, turning about its axle (z); a bolt head on each flange. */
+    static List<Mesh> spool() {
+        List<Mesh> m = new ArrayList<>();
+        m.add(prism('z', SPOOL_X, SPOOL_Y, 3.6, 3.0, 3.5, "steel", 16));
+        m.add(prism('z', SPOOL_X, SPOOL_Y, 3.6, 12.5, 13.0, "steel", 16));
+        m.add(prism('z', SPOOL_X, SPOOL_Y, 2.9, 3.5, 12.5, "copper", 16));
+        for (double z : new double[]{2.6, 13.0})
+            m.add(box(SPOOL_X - 0.5, SPOOL_Y + 2.2, z, SPOOL_X + 0.5, SPOOL_Y + 3.2, z + 0.4, "darksteel")
+                .free("a bolt head on the flange, standing proud of it"));
+        return m;
+    }
+
+    /** The capstan, wound with finished wire, turning about its upright axis (y); spokes on its cap. */
+    static List<Mesh> capstan() {
+        List<Mesh> m = new ArrayList<>();
+        m.add(prism('y', 3.5, 8.0, 2.2, TOP, TOP + 3.6, "steel", 16));
+        m.add(tube('y', 3.5, 8.0, 2.0, 2.7, TOP + 1.2, TOP + 3.0, "rubber", 16, Double.NaN, false));
+        m.add(prism('y', 3.5, 8.0, 2.6, TOP + 3.6, TOP + 3.9, "darksteel", 16));
+        m.add(box(3.5 - 2.2, TOP + 3.9, 7.7, 3.5 + 2.2, TOP + 4.2, 8.3, "steel").free("a spoke on the capstan's cap"));
+        m.add(box(3.2, TOP + 3.9, 8.0 - 2.2, 3.8, TOP + 4.2, 8.0 + 2.2, "steel").free("a spoke on the capstan's cap"));
+        return m;
+    }
+
     public static List<NodeModel> models() {
         List<NodeModel> out = new ArrayList<>();
         for (String[] v : new String[][]{{"wiredrawer48", "paint_green"}, {"wiredrawer230", "paint_blue"}}) {
             NodeModel n = new NodeModel(v[0], v[1]);
             n.part("main", machine());
+            n.part("spool", spool());
+            n.part("capstan", capstan());
+            n.origin("spool", SPOOL_X, SPOOL_Y, 8.0).origin("capstan", 3.5, TOP, 8.0);
             out.add(n);
         }
         return out;

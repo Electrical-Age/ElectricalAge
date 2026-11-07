@@ -33,8 +33,8 @@ import java.util.Map;
  * Cable (a number of them; no rubber, half again the hand recipe's yield). Started, it
  * draws the wire a little each tick at its rated power, taking copper (ingots or dust) and rubber from its slots a
  * whole item at a time into buffers that keep the fractions, and puts the kit or winding in its output slot when the
- * length is done. It waits while the output slot is full, and pauses (keeping its progress) when copper or rubber runs
- * out. Changing what to make scraps the wire drawn so far.
+ * length is done, and stops: one item a Start. It waits while the output slot is full, and pauses (keeping its
+ * progress) when copper or rubber runs out. Changing what to make scraps the wire drawn so far.
  */
 public class WireDrawingElement extends TransparentNodeElement {
     public static final int COPPER = 0, RUBBER = 1, OUT = 2;
@@ -178,7 +178,11 @@ public class WireDrawingElement extends TransparentNodeElement {
         if (done >= length() - 1e-9) {
             inventory.setItem(OUT, product());
             done = 0;
+            // one item a Start (Baughn 2026-11-07: twice he made a second one he didn't mean to)
+            running = false;
+            status = STOPPED;
             inventory.setChanged();
+            needPublish();
         }
     }
 

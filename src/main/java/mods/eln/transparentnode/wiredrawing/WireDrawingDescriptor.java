@@ -113,9 +113,18 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
     }
 
     void draw() {
+        draw(0, 0);
+    }
+
+    /** The machine, its spool and capstan turned by these angles (degrees). */
+    void draw(float spool, float capstan) {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();
+        var s = obj.getPart("spool");
+        if (s != null) s.draw(spool, 0, 0, 1);
+        var c = obj.getPart("capstan");
+        if (c != null) c.draw(capstan, 0, 1, 0);
     }
 
     @Override

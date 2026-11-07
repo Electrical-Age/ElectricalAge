@@ -22,10 +22,23 @@ public class WireDrawingRender extends TransparentNodeElementRender {
         desc = (WireDrawingDescriptor) d;
     }
 
+    /** The spool's and capstan's turn (degrees), and how fast they go now (eased, so they spin up and run down). */
+    float spoolAngle, capstanAngle, speed;
+
+    @Override
+    public void refresh(float deltaT) {
+        super.refresh(deltaT);
+        float target = status == WireDrawingElement.RUNNING ? 1f : 0f;
+        speed += (target - speed) * Math.min(1f, deltaT * 3f);
+        // the rod pays off the big spool slowly; the small capstan pulls the wire faster (the same wire speed)
+        spoolAngle = (spoolAngle + speed * deltaT * 60f) % 360f;
+        capstanAngle = (capstanAngle - speed * deltaT * 150f) % 360f;
+    }
+
     @Override
     public void draw() {
         front.glRotateXnRef();
-        desc.draw();
+        desc.draw(spoolAngle, capstanAngle);
     }
 
     /** Sends what to make (the element clamps it to its limits). */

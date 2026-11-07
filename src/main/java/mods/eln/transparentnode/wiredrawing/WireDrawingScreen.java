@@ -13,7 +13,7 @@ import static mods.eln.i18n.I18N.tr;
 /**
  * A wire-drawing machine (layout gui/wire_drawing.json): copper and rubber in, the kit or winding out; what to make
  * (kit or winding, cross-section, insulation and colour within the machine's limits, blocks or turns), what it takes,
- * the copper and rubber already in the machine, its state, and Start/Stop.
+ * the copper and rubber already in the machine, its state, and Start (one item a press).
  */
 public class WireDrawingScreen extends ElnScreen {
     final WireDrawingRender render;
@@ -90,7 +90,10 @@ public class WireDrawingScreen extends ElnScreen {
             case WireDrawingElement.RUNNING -> 0xFF206020;
             default -> LABEL;
         });
-        button("run", () -> r.running ? tr("Stop") : tr("Start"), () -> r.clientRun(!r.running),
-            tr("Changing what to make scraps the wire drawn so far"));
+        // one item a Start, no Stop (Baughn 2026-11-07: twice he made a second one he didn't mean to); greyed while drawing
+        var run = button("run", () -> r.running ? tr("Drawing...") : tr("Start"), () -> {
+            if (!r.running) r.clientRun(true);
+        }, tr("Draws one item, then stops. Changing what to make scraps the wire drawn so far"));
+        refreshers.add(() -> run.active = !r.running);
     }
 }

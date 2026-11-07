@@ -149,7 +149,7 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
     protected void update() {
     }
 
-    private final java.util.List<Runnable> refreshers = new java.util.ArrayList<>();
+    protected final java.util.List<Runnable> refreshers = new java.util.ArrayList<>();
 
     @Override
     protected void containerTick() {

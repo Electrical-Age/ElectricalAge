@@ -142,7 +142,15 @@ public final class WireDrawingCases {
                 && m.getInventory().getItem(WireDrawingElement.RUBBER).getCount() == 5,
                 m.getInventory().getItem(WireDrawingElement.COPPER) + " " + m.getInventory().getItem(WireDrawingElement.RUBBER));
             ctx.checkValue("wire drawing: copper left in the machine (ingots)", m.copper, 4 - 4 * 0.8);
-            ctx.check("wire drawing: then it waits for the kit to be taken", m.status == WireDrawingElement.OUTPUT_FULL, "" + m.status);
+            ctx.check("wire drawing: then it stops: one item a Start (Baughn 2026-11-07)", !m.running && m.status == WireDrawingElement.STOPPED,
+                m.running + " " + m.status);
+            // bare wire: 3 Copper Cable from 2 ingots, no rubber
+            m.getInventory().setItem(WireDrawingElement.OUT, ItemStack.EMPTY);
+            m.configure(WireDrawingElement.BARE, 0, 1, 0, 3);
+            ctx.checkValue("wire drawing: bare wire takes two thirds of an ingot a cable", m.copperNeeded(), 2.0);
+            ctx.checkValue("wire drawing: ... and no rubber", m.rubberNeeded(), 0);
+            ItemStack bare = m.product();
+            ctx.check("wire drawing: ... and makes Copper Cable", bare.getCount() == 3 && bare.getItem() == mods.eln.Eln.findItemStack("Copper Cable", 1).getItem(), bare.toString());
         }
     }
 }
