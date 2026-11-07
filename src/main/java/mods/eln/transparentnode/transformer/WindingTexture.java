@@ -76,19 +76,22 @@ public final class WindingTexture {
             g = g / 2;
             b = b / 2;
         }
-        int tpl = Math.max(1, Math.min(H, turnsPerLayer)), lay = Math.max(1, Math.min(W / 2, layers));
+        // (on dark wire a dark line between turns doesn't show: there the line is a highlight, the sheen on the wire's edge)
+        boolean dark = Math.max(r, Math.max(g, b)) < 70;
+        int gap = dark ? colour(Math.min(255, r + 46), Math.min(255, g + 46), Math.min(255, b + 46), 1f) : 0;
+        int tpl = Math.max(1, Math.min(H, turnsPerLayer)), lay = Math.max(1, Math.min(10, layers));   // (more rings than ten would blur into a slab: ten at most, each a few layers)
         for (int y = 0; y < H; y++) {
             int k = y * tpl / H, y0 = k * H / tpl, y1 = (k + 1) * H / tpl;
             float t = (y - y0 + 0.5f) / Math.max(1, y1 - y0);
-            float shade = y1 - y0 >= 3 && y == y1 - 1 ? 0.45f : 1.12f - 0.4f * t;
-            int c = colour(r, g, b, shade);
+            boolean line = y1 - y0 >= 3 && y == y1 - 1;
+            int c = line && dark ? gap : colour(r, g, b, line ? 0.45f : 1.12f - 0.4f * t);
             for (int x = 0; x < W / 2; x++) img.setPixel(x, y, c);
         }
         for (int x = 0; x < W / 2; x++) {
             int k = x * lay / (W / 2), x0 = k * (W / 2) / lay, x1 = (k + 1) * (W / 2) / lay;
             float t = (x - x0 + 0.5f) / Math.max(1, x1 - x0);
-            float shade = x1 - x0 >= 3 && x == x1 - 1 ? 0.5f : 1.2f - 0.4f * t;
-            int c = colour(r, g, b, shade);
+            boolean line = x1 - x0 >= 3 && x == x1 - 1;
+            int c = line && dark ? gap : colour(r, g, b, line ? 0.5f : 1.2f - 0.4f * t);
             for (int y = 0; y < H; y++) img.setPixel(W / 2 + x, y, c);
         }
     }
