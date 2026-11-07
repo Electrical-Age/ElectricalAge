@@ -31,8 +31,8 @@ public class WireDrawingRender extends TransparentNodeElementRender {
         float target = status == WireDrawingElement.RUNNING ? 1f : 0f;
         speed += (target - speed) * Math.min(1f, deltaT * 3f);
         // the rod pays off the big spool slowly; the small capstan pulls the wire faster (the same wire speed)
-        spoolAngle = (spoolAngle + speed * deltaT * 60f) % 360f;
-        capstanAngle = (capstanAngle - speed * deltaT * 150f) % 360f;
+        spoolAngle = (spoolAngle + speed * deltaT * 200f) % 360f;   // (Baughn: 60 and 150 degrees a second read as barely moving)
+        capstanAngle = (capstanAngle - speed * deltaT * 500f) % 360f;
     }
 
     @Override
