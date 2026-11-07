@@ -647,8 +647,9 @@ public final class LabCommands {
         var level = src.getLevel();
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
         var bd = mods.eln.Eln.transparentNodeItem.getDescriptor(0 + (93 << 6));
-        level.setBlockAndUpdate(pos.below(), net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState());
         var bn = ((mods.eln.node.transparent.TransparentNodeItem) bd.parentItem).placeAt(bd.newItemStack(), player, level, pos, mods.eln.misc.Direction.YN);
+        if (bn == null) src.sendFailure(Component.literal("no room for the carbon black burner at " + pos.toShortString()));
+        level.setBlockAndUpdate(pos.below(), net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState());   // (after: it stands on the floor)
         if (bn != null && bn.element != null) {
             var back = bn.element.front.back().toEnumFacing();
             String r = tankPiped(src, pos.relative(back, 2), pos, back, null, 6000, mods.eln.oil.Oil.CRUDE.get());
