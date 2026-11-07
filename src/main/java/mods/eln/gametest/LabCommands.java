@@ -644,13 +644,6 @@ public final class LabCommands {
         var d = mods.eln.Eln.transparentNodeItem.getDescriptor(40 + (82 << 6));   // (an iron tank)
         var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, tp, mods.eln.misc.Direction.YN);
         if (node == null) return "no room for the tank";
-        if (latexMb > 0) {
-            var cap = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, tp, net.minecraft.core.Direction.UP);
-            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Latex.SOURCE.get()), latexMb, tx);
-                tx.commit();
-            }
-        }
         var a = mods.eln.node.voxel.PipePlacer.portAtForTests(level, dev, face, hit);
         net.minecraft.core.Direction toDev = null;
         for (var f : net.minecraft.core.Direction.Plane.HORIZONTAL) if (tp.relative(f).distManhattan(dev) < tp.distManhattan(dev)) toDev = f;
@@ -658,11 +651,21 @@ public final class LabCommands {
             node.element.front = mods.eln.misc.Direction.fromEnumFacing(toDev).back();
             node.element.reconnect();
         }
+        int filled = 0;
+        if (latexMb > 0) {   // (after the turn: a reconnect lost what was poured in before it)
+            var cap = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, tp, net.minecraft.core.Direction.UP);
+            if (cap != null)
+                try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                    filled = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Latex.SOURCE.get()), latexMb, tx);
+                    tx.commit();
+                }
+        }
+        final int poured = filled;
         var b = toDev == null ? null : mods.eln.node.voxel.PipePlacer.portAtForTests(level, tp, toDev);
         if (a == null || b == null) return "ports " + a + " " + b;
         var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, a, java.util.List.of(), b);
         String err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
-        return err == null ? "piped" : err;
+        return (err == null ? "piped" : err) + (latexMb > 0 ? ", " + poured + " mB of latex in it" : "");
     }
 
     /** Machines on 230 V, 5 apart along x; a furnace gets a tungsten heating corp, insulation and a regulator at its target (C). */
