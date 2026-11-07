@@ -586,7 +586,7 @@
   "jei.eln.wire_drawing": "Wire Drawing",
   "jei.eln.wire_drawing.big": "230V machine only, %s kJ",
   "jei.eln.wire_drawing.either": "48V or 230V machine, %s kJ",
-  "jei.eln.wire_drawing.how": "Size, insulation, colour: on its screen",
+  "jei.eln.wire_drawing.how": "Any spec: set on its screen",
   "key.category.eln.keys": "Electrical Age",
   "key.eln.headlamp": "Lights on/off (headlamp, flashlights in hand)",
   "key.eln.wrench": "Wrench (hold: a switch's screen on click; the chisel's brush menu)",
