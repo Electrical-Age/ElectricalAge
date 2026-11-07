@@ -190,7 +190,8 @@ public final class CableKitRecipes {
         var book = new net.minecraft.world.item.crafting.CraftingRecipe.CraftingBookInfo(net.minecraft.world.item.crafting.CraftingBookCategory.MISC, "eln_cable_kit");
         for (int t = 0; t < CablePart.TIERS.length; t++) {
             ItemStack c = coil(t);
-            if (c.isEmpty()) continue;
+            // (the power tiers' cable items are retired: their own recipe still turns old ones into kits)
+            if (c.isEmpty() || CableSpec.power(t)) continue;
             var ing = net.minecraft.world.item.crafting.Ingredient.of(c.getItem());
             for (int n : new int[]{9}) {   // (the one-cable recipe JEI lists itself, from display(): AdventurAgent saw it twice)
                 List<net.minecraft.world.item.crafting.Ingredient> ings = new java.util.ArrayList<>();

@@ -1,11 +1,20 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/copper"
+      }
+    }
+  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_ingredient": {
       "conditions": {
         "items": [
           {
-            "items": "eln:low_voltage_cable"
+            "items": "#c:ingots/copper"
           }
         ]
       },
@@ -13,7 +22,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "eln:medium_voltage_cable"
+        "recipes": "eln:cable_kit_lv_2"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +35,7 @@
   ],
   "rewards": {
     "recipes": [
-      "eln:medium_voltage_cable"
+      "eln:cable_kit_lv_2"
     ]
   }
 }

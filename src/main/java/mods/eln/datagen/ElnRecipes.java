@@ -145,22 +145,26 @@ public final class ElnRecipes extends ElnRecipesBase {
             'C', findItemStack("Iron Cable"),
             'R', "itemRubber");
 
-        addRecipe(stack(lowVoltageCableDescriptor, 1),
+        // the power cables (Baughn 2026-11-07): recipes take bare Copper Cable now, so the hand recipes make cable kits
+        // of the tier's preset (16 voxels a former cable item), each layer of insulation a rubber (230 V two, 400 V
+        // three), and the 1.12 cable items are retired
+        addRecipe(kit(1, 1),
             "R",
             "C",
             'C', findItemStack("Copper Cable"),
             'R', "itemRubber");
 
-        addRecipe(stack(meduimVoltageCableDescriptor, 1),
+        addRecipe(kit(2, 1),
             "R",
             "C",
-            'C', stack(lowVoltageCableDescriptor, 1),
+            "R",
+            'C', findItemStack("Copper Cable"),
             'R', "itemRubber");
 
-        addRecipe(stack(highVoltageCableDescriptor, 1),
-            "R",
-            "C",
-            'C', stack(meduimVoltageCableDescriptor, 1),
+        addRecipe(kit(3, 1),
+            " R ",
+            "RCR",
+            'C', findItemStack("Copper Cable"),
             'R', "itemRubber");
 
         addRecipe(stack(signalCableDescriptor, 6),
@@ -170,21 +174,27 @@ public final class ElnRecipes extends ElnRecipesBase {
             'C', stack(Items.IRON_INGOT),
             'R', "itemRubber");
 
-        addRecipe(stack(lowVoltageCableDescriptor, 6),
+        addRecipe(kit(1, 6),
             "RRR",
             "CCC",
             "RRR",
             'C', "ingotCopper",
             'R', "itemRubber");
 
-
-        addRecipe(stack(veryHighVoltageCableDescriptor, 6),
+        addRecipe(kit(4, 6),
             "RRR",
             "CCC",
             "RRR",
             'C', "ingotAlloy",
             'R', "itemRubber");
 
+    }
+
+    /** A cable kit of a power tier's preset, as long as n of the 1.12 cable items (16 voxels each). */
+    static RStack kit(int tier, int n) {
+        net.minecraft.nbt.CompoundTag t = new net.minecraft.nbt.CompoundTag();
+        t.putInt(mods.eln.node.voxel.KitItem.LEN_KEY, 16 * n);
+        return new RStack(mods.eln.registry.ElnRegistry.CABLE_KITS.get(tier).get(), 1, t);
     }
 
     public static void recipeThermalCable() {
@@ -269,7 +279,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "cbc",
             " l ",
             " g ",
-            'c', findItemStack("Low Voltage Cable"),
+            'c', findItemStack("Copper Cable"),
             'b', findItemStack("Portable Battery Pack"),
             'l', findItemStack("48V LED Bulb"),
             'g', stack(Blocks.GLASS_PANE));
@@ -278,7 +288,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "cbc",
             " l ",
             " g ",
-            'c', findItemStack("Medium Voltage Cable"),
+            'c', findItemStack("Copper Cable"),
             'b', findItemStack("Portable Battery Pack"),
             'l', findItemStack("230V LED Bulb"),
             'g', stack(Blocks.GLASS_PANE));
@@ -301,14 +311,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             'R', "itemRubber",
             'U', "plateCopper",
             'A', "plateAlloy",
-            'C', findItemStack("Low Voltage Cable"));
+            'C', findItemStack("Copper Cable"));
         addRecipe(findItemStack("230V Power Socket", 16),
             "RUR",
             "ACA",
+            "R R",
             'R', "itemRubber",
             'U', "plateCopper",
             'A', "plateAlloy",
-            'C', findItemStack("Medium Voltage Cable"));
+            'C', findItemStack("Copper Cable"));
     }
 
     public static void recipePassiveComponent() {
@@ -402,7 +413,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'R', stack(Items.REDSTONE),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
-            'C', findItemStack("Low Voltage Cable"));
+            'C', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Medium Voltage Switch"),
             "  I",
@@ -411,7 +422,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'R', stack(Items.REDSTONE),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
-            'C', findItemStack("Medium Voltage Cable"));
+            'C', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("High Voltage Switch"),
             "AAI",
@@ -420,7 +431,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'R', stack(Items.REDSTONE),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
-            'C', findItemStack("High Voltage Cable"));
+            'C', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Very High Voltage Switch"),
             "AAI",
@@ -429,13 +440,13 @@ public final class ElnRecipes extends ElnRecipesBase {
             'R', stack(Items.REDSTONE),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
-            'C', findItemStack("Very High Voltage Cable"));
+            'C', "ingotAlloy");
 
     }
 
     public static void recipeElectricalRelay() {
         addRecipe(findItemStack("Low Voltage Relay"),
-            "GGG",
+            "GAG",
             "OIO",
             "CRC",
             'R', stack(Items.REDSTONE),
@@ -443,10 +454,10 @@ public final class ElnRecipes extends ElnRecipesBase {
             'G', stack(Blocks.GLASS_PANE),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
-            'C', findItemStack("Low Voltage Cable"));
+            'C', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Medium Voltage Relay"),
-            "GGG",
+            "AGA",
             "OIO",
             "CRC",
             'R', stack(Items.REDSTONE),
@@ -454,10 +465,10 @@ public final class ElnRecipes extends ElnRecipesBase {
             'G', stack(Blocks.GLASS_PANE),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
-            'C', findItemStack("Medium Voltage Cable"));
+            'C', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("High Voltage Relay"),
-            "GGG",
+            "AAA",
             "OIO",
             "CRC",
             'R', stack(Items.REDSTONE),
@@ -465,10 +476,10 @@ public final class ElnRecipes extends ElnRecipesBase {
             'G', stack(Blocks.GLASS_PANE),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
-            'C', findItemStack("High Voltage Cable"));
+            'C', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Very High Voltage Relay"),
-            "GGG",
+            "AAA",
             "OIO",
             "CRC",
             'R', stack(Items.REDSTONE),
@@ -476,7 +487,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'G', stack(Blocks.GLASS_PANE),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
-            'C', findItemStack("Very High Voltage Cable"));
+            'C', "ingotAlloy");
 
         addRecipe(findItemStack("Signal Relay"),
             "GGG",
@@ -729,7 +740,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'm', findItemStack("Advanced Electrical Motor"),
             'M', findItemStack("Advanced Machine Block"),
             'a', firstExistingOre("ingotAluminum", "ingotIron"),
-            'E', findItemStack("High Voltage Cable")
+            'E', findItemStack("Copper Cable")
         );
         addRecipe(findItemStack("Steam Turbine"),
             " a ",
@@ -748,16 +759,17 @@ public final class ElnRecipes extends ElnRecipesBase {
             'G', findItemStack("Generator"),
             'M', findItemStack("Advanced Machine Block"),
             'a', firstExistingOre("ingotAluminum", "ingotIron"),
-            'E', findItemStack("High Voltage Cable")
+            'E', findItemStack("Copper Cable")
         );
         addRecipe(findItemStack("230V Shaft Motor"),
             " m ",
             "iMi",
-            " E ",
+            "AEA",
             'm', findItemStack("Electrical Motor"),
             'i', stack(Items.IRON_INGOT),
             'M', findItemStack("Machine Block"),
-            'E', findItemStack("Medium Voltage Cable")
+            'A', "itemRubber",
+            'E', findItemStack("Copper Cable")
         );
         // the shaft redo's plumbing (Baughn 2026-10-29): tanks and the inline pump
         addRecipe(findItemStack("Iron Tank"),
@@ -776,13 +788,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             'T', findItemStack("Iron Tank")
         );
         addRecipe(findItemStack("230V Inline Pump"),
-            " m ",
+            "Bm ",
             "pMp",
-            " E ",
+            "AEA",
             'm', findItemStack("Electrical Motor"),
             'p', stack(Items.IRON_INGOT),
             'M', findItemStack("Machine Block"),
-            'E', findItemStack("Medium Voltage Cable")
+            'A', "itemRubber",
+            'B', stack(Items.BUCKET),
+            'E', findItemStack("Copper Cable")
         );
         addRecipe(findItemStack("LP Steam Turbine"),
             "aAa",
@@ -869,7 +883,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "C C",
             "PPP",
             "PPP",
-            'C', findItemStack("Low Voltage Cable"),
+            'C', findItemStack("Copper Cable"),
             'P', "ingotLead",
             'I', stack(Items.IRON_INGOT));
 
@@ -905,7 +919,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "ppp",
             "III",
             "ppp",
-            'C', findItemStack("Low Voltage Cable"),
+            'C', findItemStack("Copper Cable"),
             'p', stack(Items.COAL),
             'I', "ingotCopper");
 
@@ -913,7 +927,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "ppp",
             "III",
             "ppp",
-            'C', findItemStack("Low Voltage Cable"),
+            'C', findItemStack("Copper Cable"),
             'p', stack(Items.CHARCOAL),
             'I', "ingotCopper");
     }
@@ -951,7 +965,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             " TC",
             " PH",
             'P', findItemStack("Utility Pole"),
-            'H', findItemStack("High Voltage Cable"),
+            'H', findItemStack("Copper Cable"),
             'C', findItemStack("Optimal Ferromagnetic Core"),
             'T', findItemStack("DC-DC Converter")
         );
@@ -962,7 +976,7 @@ public final class ElnRecipes extends ElnRecipesBase {
 //					"PPP",
 //					'P', "sheetPlastic",
 //					'M', findItemStack("Machine Block"),
-//					'H', findItemStack("High Voltage Cable")
+//					'H', findItemStack("Copper Cable")
 //			);
 //		} else {
 //			addRecipe(findItemStack("Downlink"),
@@ -971,7 +985,7 @@ public final class ElnRecipes extends ElnRecipesBase {
 //					"PPP",
 //					'P', "itemRubber",
 //					'M', findItemStack("Machine Block"),
-//					'H', findItemStack("High Voltage Cable")
+//					'H', findItemStack("Copper Cable")
 //			);
 //		}
     }
@@ -982,7 +996,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "III",
             "IFI",
             "ICI",
-            'C', findItemStack("Low Voltage Cable"),
+            'C', findItemStack("Copper Cable"),
             'F', stack(Blocks.FURNACE),
             'I', stack(Items.IRON_INGOT));
     }
@@ -1067,7 +1081,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'I', "plateIron",
             'B', findItemStack("Machine Block"),
             'A', findItemStack("Analogic Regulator"),
-            'C', findItemStack("Low Voltage Cable"),
+            'C', findItemStack("Copper Cable"),
             'M', findItemStack("Electrical Motor"));
 
         addRecipe(findItemStack("230V Fuel Generator"),
@@ -1077,7 +1091,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'I', "plateIron",
             'B', findItemStack("Advanced Machine Block"),
             'A', findItemStack("Analogic Regulator"),
-            'C', findItemStack("Medium Voltage Cable"),
+            'C', findItemStack("Copper Cable"),
             'M', findItemStack("Advanced Electrical Motor"));
     }
 
@@ -1088,7 +1102,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "III",
             'S', "plateSilicon",
             'I', stack(Items.IRON_INGOT),
-            'C', findItemStack("Low Voltage Cable"));
+            'C', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Small Rotating Solar Panel"),
             "ISI",
@@ -1177,9 +1191,10 @@ public final class ElnRecipes extends ElnRecipesBase {
             'C', findItemStack("Copper Coil"));
 
         addRecipe(findItemStack("48V Copper Heating Corp"),
-            "C C",
+            "CAC",
             "CCC",
-            "C C",
+            "CAC",
+            'A', "itemRubber",
             'C', findItemStack("Copper Coil"));
 
         addRecipe(findItemStack("Small 230V Copper Heating Corp"),
@@ -1266,18 +1281,20 @@ public final class ElnRecipes extends ElnRecipesBase {
         addRecipe(findItemStack("48V Incandescent Light Bulb", 4),
             " G ",
             "GFG",
-            " S ",
+            "AS ",
             'G', stack(Blocks.GLASS_PANE),
             'F', dictTungstenIngot,
-            'S', findItemStack("Low Voltage Cable"));
+            'A', "itemRubber",
+            'S', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("230V Incandescent Light Bulb", 4),
             " G ",
             "GFG",
-            " S ",
+            "ASA",
             'G', stack(Blocks.GLASS_PANE),
             'F', dictTungstenIngot,
-            'S', findItemStack("Medium Voltage Cable"));
+            'A', "itemRubber",
+            'S', findItemStack("Copper Cable"));
 
         // CARBON
         addRecipe(findItemStack("Small 48V Carbon Incandescent Light Bulb", 4),
@@ -1300,18 +1317,20 @@ public final class ElnRecipes extends ElnRecipesBase {
             findItemStack("48V Carbon Incandescent Light Bulb", 4),
             " G ",
             "GFG",
-            " S ",
+            "AS ",
             'G', stack(Blocks.GLASS_PANE),
             'F', stack(Items.COAL),
-            'S', findItemStack("Low Voltage Cable"));
+            'A', "itemRubber",
+            'S', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("48V Carbon Incandescent Light Bulb", 4),
             " G ",
             "GFG",
-            " S ",
+            "AS ",
             'G', stack(Blocks.GLASS_PANE),
             'F', stack(Items.CHARCOAL),
-            'S', findItemStack("Low Voltage Cable"));
+            'A', "itemRubber",
+            'S', findItemStack("Copper Cable"));
 
         addRecipe(
             findItemStack("Small 48V Economic Light Bulb", 4),
@@ -1325,18 +1344,20 @@ public final class ElnRecipes extends ElnRecipesBase {
         addRecipe(findItemStack("48V Economic Light Bulb", 4),
             " G ",
             "GFG",
-            " S ",
+            "AS ",
             'G', stack(Blocks.GLASS_PANE),
             'F', stack(Items.GLOWSTONE_DUST),
-            'S', findItemStack("Low Voltage Cable"));
+            'A', "itemRubber",
+            'S', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("230V Economic Light Bulb", 4),
             " G ",
             "GFG",
-            " S ",
+            "ASA",
             'G', stack(Blocks.GLASS_PANE),
             'F', stack(Items.GLOWSTONE_DUST),
-            'S', findItemStack("Medium Voltage Cable"));
+            'A', "itemRubber",
+            'S', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("48V Farming Lamp", 2),
             "GGG",
@@ -1344,31 +1365,34 @@ public final class ElnRecipes extends ElnRecipesBase {
             "GSG",
             'G', stack(Blocks.GLASS_PANE),
             'F', dictTungstenIngot,
-            'S', findItemStack("Low Voltage Cable"));
+            'S', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("230V Farming Lamp", 2),
             "GGG",
             "FFF",
-            "GSG",
+            "ASA",
             'G', stack(Blocks.GLASS_PANE),
             'F', dictTungstenIngot,
-            'S', findItemStack("Medium Voltage Cable"));
+            'A', "itemRubber",
+            'S', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("48V LED Bulb", 2),
             "GGG",
             "SSS",
-            " C ",
+            "AC ",
             'G', stack(Blocks.GLASS_PANE),
             'S', findItemStack("Silicon Ingot"),
-            'C', findItemStack("Low Voltage Cable"));
+            'A', "itemRubber",
+            'C', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("230V LED Bulb", 2),
             "GGG",
             "SSS",
-            " C ",
+            "ACA",
             'G', stack(Blocks.GLASS_PANE),
             'S', findItemStack("Silicon Ingot"),
-            'C', findItemStack("Medium Voltage Cable"));
+            'A', "itemRubber",
+            'C', findItemStack("Copper Cable"));
 
     }
 
@@ -1444,7 +1468,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "III",
             "C C",
             'I', stack(Items.IRON_INGOT),
-            'C', findItemStack("Low Voltage Cable"));
+            'C', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Advanced Electrical Motor"),
             "RCR",
@@ -1453,7 +1477,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'M', findItemStack("Advanced Magnet"),
             'I', stack(Items.IRON_INGOT),
             'R', stack(Items.REDSTONE),
-            'C', findItemStack("Medium Voltage Cable"));
+            'C', findItemStack("Copper Cable"));
 
         // TODO
 
@@ -1738,7 +1762,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             " R ",
             "RCR",
             " R ",
-            'C', findItemStack("High Voltage Cable"),
+            'C', findItemStack("Copper Cable"),
             'R', stack(Items.REDSTONE));
 
         addRecipe(findItemStack("Thermal Probe Chip"),
@@ -1929,7 +1953,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "RMR",
             " R ",
             'M', findItemStack("Advanced Machine Block"),
-            'C', findItemStack("High Voltage Cable"),
+            'C', findItemStack("Copper Cable"),
             'R', dictAdvancedChip);
     }
 
@@ -1941,7 +1965,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             " c ",
             'M', findItemStack("Advanced Machine Block"),
             'C', dictAdvancedChip,
-            'c', stack(highVoltageCableDescriptor, 1),
+            'c', findItemStack("Copper Cable"),
             'R', stack(Blocks.REDSTONE_BLOCK));
 
     }
@@ -2056,9 +2080,10 @@ public final class ElnRecipes extends ElnRecipesBase {
         addRecipe(findItemStack("48V Steam Turbine", 1),
             " m ",
             "IMI",
-            " E ",
+            "AE ",
             'M', findItemStack("Machine Block"),
-            'E', findItemStack("Low Voltage Cable"),
+            'A', "itemRubber",
+            'E', findItemStack("Copper Cable"),
             'I', stack(Items.IRON_INGOT),
             'm', findItemStack("Electrical Motor"));
         addRecipe(findItemStack("230V Steam Turbine", 1),
@@ -2067,7 +2092,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "IEI",
             'I', "itemRubber",
             'M', findItemStack("Advanced Machine Block"),
-            'E', findItemStack("Medium Voltage Cable"),
+            'E', findItemStack("Copper Cable"),
             'm', findItemStack("Advanced Electrical Motor"));
         // the bootstrap turbine (Baughn 2026-10-27): cheaper than the 50V Steam Turbine and no boiler to buy; a bucket for
         // its tank, copper plates for its condenser
@@ -2079,14 +2104,14 @@ public final class ElnRecipes extends ElnRecipesBase {
             'B', stack(Items.BUCKET),
             'I', stack(Items.IRON_INGOT),
             'm', findItemStack("Electrical Motor"),
-            'E', findItemStack("Low Voltage Cable"));
+            'E', findItemStack("Copper Cable"));
         // the electrical anvil (Baughn 2026-10-28: late-midgame gear): an anvil fed by 800 V cable on an advanced machine
         // block, a steel-plate top and two legs
         addRecipe(findItemStack("Electrical Anvil", 1),
             "HAH",
             "pMp",
             "i i",
-            'H', findItemStack("High Voltage Cable"),
+            'H', findItemStack("Copper Cable"),
             'A', stack(Items.ANVIL),
             'p', "plateIron",
             'M', findItemStack("Advanced Machine Block"),
@@ -2106,7 +2131,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "pHp",
             'C', stack(mods.eln.registry.ElnRegistry.CAPACITOR_CELL.get()),
             'p', "plateIron",
-            'H', findItemStack("High Voltage Cable"));
+            'H', findItemStack("Copper Cable"));
         // the electric bike (Baughn 2026-10-28): a chest for its trunk and a leather saddle, an iron frame round an electrical
         // motor, two rubber wheels
         addRecipe(stack(mods.eln.registry.ElnRegistry.ELECTRIC_BIKE.get()),
@@ -2128,7 +2153,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'm', findItemStack("Electrical Motor"),
             'S', findItemStack("Signal Cable"),
             'B', findItemStack("Machine Block"),
-            'V', findItemStack("Medium Voltage Cable"));
+            'V', findItemStack("Copper Cable"));
         addRecipe(stack(mods.eln.robotics.Robotics.SERVO_RAIL_ITEM.get(), 8),
             "IpI",
             "IpI",
@@ -2334,7 +2359,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'A', dictAdvancedChip,
             'b', stack(mods.eln.registry.ElnRegistry.FIELD_BUS_CABLE.get()),
             'B', findItemStack("Advanced Machine Block"),
-            'L', findItemStack("Low Voltage Cable"));
+            'L', findItemStack("Copper Cable"));
         addShapelessRecipe(stack(mods.eln.robotics.Robotics.RAM_CHIP.get(), 1),
             dictCheapChip, dictCheapChip, dictCheapChip, findItemStack("Silicon Ingot"), stack(Items.GOLD_NUGGET));
         addShapelessRecipe(stack(mods.eln.robotics.Robotics.JANET_ROM.get(), 1),
@@ -2464,7 +2489,7 @@ public final class ElnRecipes extends ElnRecipesBase {
         addRecipe(findItemStack("Lead Fuse", 4),
             "rcr",
             'r', findItemStack("itemRubber"),
-            'c', findItemStack("Low Voltage Cable"));
+            'c', findItemStack("Copper Cable"));
 
     }
 
@@ -2642,7 +2667,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "RIR",
             "III",
             "RcR",
-            'c', findItemStack("Low Voltage Cable"),
+            'c', findItemStack("Copper Cable"),
             'I', stack(Items.IRON_INGOT),
             'R', stack(Items.REDSTONE));
         addRecipe(findItemStack("48V Battery Charger", 1),
@@ -2650,7 +2675,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "ICI",
             "RcR",
             'C', dictCheapChip,
-            'c', findItemStack("Low Voltage Cable"),
+            'c', findItemStack("Copper Cable"),
             'I', stack(Items.IRON_INGOT),
             'R', stack(Items.REDSTONE));
 
@@ -2659,7 +2684,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "ICI",
             "RcR",
             'C', dictAdvancedChip,
-            'c', findItemStack("Medium Voltage Cable"),
+            'c', findItemStack("Copper Cable"),
             'I', stack(Items.IRON_INGOT),
             'R', stack(Items.REDSTONE));
 
@@ -2684,7 +2709,7 @@ public final class ElnRecipes extends ElnRecipesBase {
                 "cCR",
                 "III",
                 'C', dictCheapChip,
-                'c', findItemStack("Low Voltage Cable"),
+                'c', findItemStack("Copper Cable"),
                 'I', stack(Items.IRON_INGOT),
                 'R', "ingotCopper");
 
@@ -2693,7 +2718,7 @@ public final class ElnRecipes extends ElnRecipesBase {
                 "cCR",
                 "III",
                 'C', dictCheapChip,
-                'c', findItemStack("Medium Voltage Cable"),
+                'c', findItemStack("Copper Cable"),
                 'I', stack(Items.IRON_INGOT),
                 'R', dictTungstenIngot);
 
@@ -2702,7 +2727,7 @@ public final class ElnRecipes extends ElnRecipesBase {
                 "cCR",
                 "III",
                 'C', dictAdvancedChip,
-                'c', findItemStack("High Voltage Cable"),
+                'c', findItemStack("Copper Cable"),
                 'I', stack(Items.IRON_INGOT),
                 'R', stack(Items.GOLD_INGOT));
 

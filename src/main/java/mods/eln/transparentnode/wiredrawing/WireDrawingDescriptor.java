@@ -87,6 +87,31 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
         return JOULES_PER_BLOCK * girth(mm2);
     }
 
+    /** Bare wire (Baughn 2026-11-07): copper ingots a Copper Cable, half again what the hand recipe gets (1 an ingot). */
+    public static final double BARE_COPPER = 2.0 / 3;
+
+    /** Blocks of wire in an item of this mode and amount (a bare Copper Cable counts as one). */
+    public static double length(int mode, int amount) {
+        return mode == WireDrawingElement.WINDING ? amount * mods.eln.node.voxel.WindingItem.BLOCKS_PER_TURN : amount;
+    }
+
+    public static double copperPerBlock(int mode, int mm2) {
+        return mode == WireDrawingElement.BARE ? BARE_COPPER : copperPerBlock(mm2);
+    }
+
+    public static double rubberPerBlock(int mode, int tier, int mm2) {
+        return mode == WireDrawingElement.BARE ? 0 : rubberPerBlock(tier, mm2);
+    }
+
+    public static double energyPerBlock(int mode, int mm2) {
+        return mode == WireDrawingElement.BARE ? JOULES_PER_BLOCK : energyPerBlock(mm2);
+    }
+
+    /** Most of each mode: kit blocks, winding turns, Copper Cables (a stack). */
+    public static int maxAmount(int mode) {
+        return mode == WireDrawingElement.WINDING ? mods.eln.node.voxel.WindingItem.MAX_TURNS : MAX_BLOCKS;
+    }
+
     void draw() {
         if (obj == null) return;
         var m = obj.getPart("main");
@@ -108,7 +133,7 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         String volts = CableSpec.volts(maxTier) >= 1000 ? (int) (CableSpec.volts(maxTier) / 1000) + " kV" : (int) CableSpec.volts(maxTier) + " V";
-        Collections.addAll(list, tr("Draws copper and rubber into cable kits\nand transformer windings to any spec:\nup to %1$ mm², %2$ insulation.\nNominal power: %3$W",
+        Collections.addAll(list, tr("Draws copper and rubber into cable kits\nand transformer windings to any spec:\nup to %1$ mm², %2$ insulation;\nand bare Copper Cable.\nNominal power: %3$W",
             fmt(CableSpec.MM2[maxMm2]), volts, mods.eln.misc.Utils.plotValue(nominalP)).split("\n"));
     }
 

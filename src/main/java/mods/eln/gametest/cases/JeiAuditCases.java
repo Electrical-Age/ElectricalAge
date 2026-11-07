@@ -140,7 +140,8 @@ public final class JeiAuditCases {
         for (var a : mods.eln.compat.JeiPages.anneals()) ways.add(new Way("anneal", List.of(one(a.in()), one(mods.eln.compat.JeiPages.furnace())), one(a.out())));
         Set<Item> drawers = new LinkedHashSet<>();
         for (ItemStack m : mods.eln.compat.JeiPages.drawers()) drawers.addAll(one(m));
-        for (var d : mods.eln.compat.JeiPages.draws()) ways.add(new Way("wire drawing", List.of(one(d.copper()), one(d.rubber()), drawers), one(d.out())));
+        for (var d : mods.eln.compat.JeiPages.draws())
+            ways.add(new Way("wire drawing", d.rubber().isEmpty() ? List.of(one(d.copper()), drawers) : List.of(one(d.copper()), one(d.rubber()), drawers), one(d.out())));
         for (var i : mods.eln.compat.JeiPages.infos()) {
             Set<Item> out = new LinkedHashSet<>();
             for (ItemStack st : i.items()) out.addAll(one(st));

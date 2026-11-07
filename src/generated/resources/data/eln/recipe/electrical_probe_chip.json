@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "C": "eln:high_voltage_cable",
+    "C": "eln:copper_cable",
     "R": "minecraft:redstone"
   },
   "pattern": [

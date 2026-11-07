@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "eln:medium_voltage_cable"
+            "items": "eln:copper_cable"
           }
         ]
       },

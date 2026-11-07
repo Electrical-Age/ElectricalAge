@@ -5,10 +5,15 @@
     "R": "#c:rubbers"
   },
   "pattern": [
-    "R",
-    "C"
+    " R ",
+    "RCR"
   ],
   "result": {
-    "id": "eln:low_voltage_cable"
+    "components": {
+      "minecraft:custom_data": {
+        "kitLen": 16
+      }
+    },
+    "id": "eln:cable_kit_hv"
   }
 }

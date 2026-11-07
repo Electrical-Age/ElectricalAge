@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:copper_cable",
+    "R": "#c:rubbers"
+  },
+  "pattern": [
+    "R",
+    "C"
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_data": {
+        "kitLen": 16
+      }
+    },
+    "id": "eln:cable_kit_lv"
+  }
+}

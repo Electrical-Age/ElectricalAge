@@ -29,7 +29,8 @@ import java.util.Map;
 
 /**
  * A wire-drawing machine (WireDrawingDescriptor). The screen sets what to make: a cable kit (a length in blocks) or a
- * winding (a number of turns), of a cross-section, insulation and colour within the machine's limits. Started, it
+ * winding (a number of turns), of a cross-section, insulation and colour within the machine's limits, or bare Copper
+ * Cable (a number of them; no rubber, half again the hand recipe's yield). Started, it
  * draws the wire a little each tick at its rated power, taking copper (ingots or dust) and rubber from its slots a
  * whole item at a time into buffers that keep the fractions, and puts the kit or winding in its output slot when the
  * length is done. It waits while the output slot is full, and pauses (keeping its progress) when copper or rubber runs
@@ -37,7 +38,8 @@ import java.util.Map;
  */
 public class WireDrawingElement extends TransparentNodeElement {
     public static final int COPPER = 0, RUBBER = 1, OUT = 2;
-    public static final int KIT = 0, WINDING = 1;
+    /** What it makes: a cable kit, a converter winding, or bare Copper Cable (Baughn 2026-11-07). */
+    public static final int KIT = 0, WINDING = 1, BARE = 2;
     public static final byte SET = 1, RUN = 2;
     public static final byte STOPPED = 0, RUNNING = 1, NO_COPPER = 2, NO_RUBBER = 3, OUTPUT_FULL = 4, NO_POWER = 5;
 
@@ -76,7 +78,7 @@ public class WireDrawingElement extends TransparentNodeElement {
 
     /** The current item's wire, blocks. */
     public double length() {
-        return mode == KIT ? amount : amount * WindingItem.BLOCKS_PER_TURN;
+        return WireDrawingDescriptor.length(mode, amount);
     }
 
     public CableSpec spec() {
@@ -85,19 +87,20 @@ public class WireDrawingElement extends TransparentNodeElement {
 
     /** Copper and rubber for the whole item. */
     public double copperNeeded() {
-        return length() * WireDrawingDescriptor.copperPerBlock(mm2);
+        return length() * WireDrawingDescriptor.copperPerBlock(mode, mm2);
     }
 
     public double rubberNeeded() {
-        return length() * WireDrawingDescriptor.rubberPerBlock(tier, mm2);
+        return length() * WireDrawingDescriptor.rubberPerBlock(mode, tier, mm2);
     }
 
     public double energyNeeded() {
-        return length() * WireDrawingDescriptor.energyPerBlock(mm2);
+        return length() * WireDrawingDescriptor.energyPerBlock(mode, mm2);
     }
 
-    /** What it makes now, for the given length (a kit of the blocks, a winding of the turns). */
+    /** What it makes now, for the given length (a kit of the blocks, a winding of the turns, Copper Cables). */
     public ItemStack product() {
+        if (mode == BARE) return mods.eln.Eln.findItemStack("Copper Cable", amount);
         return mode == KIT ? CableKitItem.kit(tier, spec(), amount * 16) : WindingItem.make(tier, spec(), amount);
     }
 
@@ -116,11 +119,11 @@ public class WireDrawingElement extends TransparentNodeElement {
     }
 
     void apply(int mode, int mm2, int tier, int colour, int amount) {
-        mode = mode == WINDING ? WINDING : KIT;
+        mode = mode == WINDING || mode == BARE ? mode : KIT;
         mm2 = Math.max(0, Math.min(descriptor.maxMm2, mm2));
         tier = Math.max(1, Math.min(descriptor.maxTier, tier));
         colour = Math.max(0, Math.min(15, colour));
-        amount = Math.max(1, Math.min(mode == KIT ? WireDrawingDescriptor.MAX_BLOCKS : WindingItem.MAX_TURNS, amount));
+        amount = Math.max(1, Math.min(WireDrawingDescriptor.maxAmount(mode), amount));
         if (mode != this.mode || mm2 != this.mm2 || tier != this.tier || colour != this.colour || amount != this.amount) done = 0;
         this.mode = mode;
         this.mm2 = mm2;
@@ -154,14 +157,14 @@ public class WireDrawingElement extends TransparentNodeElement {
             status = OUTPUT_FULL;
             return;
         }
-        double jpb = WireDrawingDescriptor.energyPerBlock(mm2), cpb = WireDrawingDescriptor.copperPerBlock(mm2),
-            rpb = WireDrawingDescriptor.rubberPerBlock(tier, mm2);
+        double jpb = WireDrawingDescriptor.energyPerBlock(mode, mm2), cpb = WireDrawingDescriptor.copperPerBlock(mode, mm2),
+            rpb = WireDrawingDescriptor.rubberPerBlock(mode, tier, mm2);
         double step = Math.min(machine.ratedJoulesPerTick() / jpb, length() - done);
         if (!fill(COPPER, true, step * cpb)) {
             status = NO_COPPER;
             return;
         }
-        if (!fill(RUBBER, false, step * rpb)) {
+        if (rpb > 0 && !fill(RUBBER, false, step * rpb)) {
             status = NO_RUBBER;
             return;
         }
@@ -297,8 +300,9 @@ public class WireDrawingElement extends TransparentNodeElement {
         return null;
     }
 
-    /** "Cable kit: 16 blocks of 2.5 mm², 48 V, brown" or "Winding: 120 turns of ...". */
+    /** "Cable kit: 16 blocks of 2.5 mm², 48 V, brown", "Winding: 120 turns of ..." or "Bare wire: 16 Copper Cable". */
     public static String jobText(int mode, int mm2, int tier, int colour, int amount) {
+        if (mode == BARE) return I18N.tr("Bare wire: %1$ Copper Cable", amount);
         String what = new CableSpec(mm2, colour).label(tier) + ", " + net.minecraft.world.item.DyeColor.byId(colour).getName().replace('_', ' ');
         return mode == KIT ? I18N.tr("Cable kit: %1$ blocks of %2$", amount, what) : I18N.tr("Winding: %1$ turns of %2$", amount, what);
     }

@@ -14,7 +14,7 @@
   ],
   "type": "minecraft:crafting_shaped",
   "key": {
-    "E": "eln:high_voltage_cable",
+    "E": "eln:copper_cable",
     "G": "eln:generator",
     "M": "eln:advanced_machine_block",
     "a": "#c:ingots/iron",

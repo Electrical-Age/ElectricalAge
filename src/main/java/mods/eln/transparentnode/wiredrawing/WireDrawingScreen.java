@@ -4,7 +4,6 @@ import mods.eln.client.gui.EaField;
 import mods.eln.client.gui.ElnScreen;
 import mods.eln.gui.ElnNodeMenu;
 import mods.eln.node.voxel.CableSpec;
-import mods.eln.node.voxel.WindingItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.DyeColor;
@@ -26,8 +25,8 @@ public class WireDrawingScreen extends ElnScreen {
 
     void set(int mode, int mm2, int tier, int colour, int amount) {
         WireDrawingDescriptor d = render.desc;
-        mode = mode == WireDrawingElement.WINDING ? WireDrawingElement.WINDING : WireDrawingElement.KIT;
-        int max = mode == WireDrawingElement.KIT ? WireDrawingDescriptor.MAX_BLOCKS : WindingItem.MAX_TURNS;
+        mode = mode == WireDrawingElement.WINDING || mode == WireDrawingElement.BARE ? mode : WireDrawingElement.KIT;
+        int max = WireDrawingDescriptor.maxAmount(mode);
         render.clientSet(mode, Math.max(0, Math.min(d.maxMm2, mm2)), Math.max(1, Math.min(d.maxTier, tier)), (colour + 16) % 16,
             Math.max(1, Math.min(max, amount)));
     }
@@ -43,9 +42,13 @@ public class WireDrawingScreen extends ElnScreen {
         WireDrawingRender r = render;
         progress("work", () -> r.progress);
         text("makel", () -> tr("Make"));
-        button("mode", () -> r.mode == WireDrawingElement.KIT ? tr("Cable kit") : tr("Winding"),
-            () -> set(1 - r.mode, r.mm2, r.tier, r.colour, r.mode == WireDrawingElement.KIT ? Math.max(r.amount, 20) : Math.min(r.amount, WireDrawingDescriptor.MAX_BLOCKS)),
-            tr("A cable kit (blocks of cable) or a winding for a DC-DC converter (turns)"));
+        button("mode", () -> switch (r.mode) {
+                case WireDrawingElement.KIT -> tr("Cable kit");
+                case WireDrawingElement.WINDING -> tr("Winding");
+                default -> tr("Bare wire");
+            },
+            () -> set((r.mode + 1) % 3, r.mm2, r.tier, r.colour, r.mode == WireDrawingElement.KIT ? Math.max(r.amount, 20) : Math.min(r.amount, WireDrawingDescriptor.MAX_BLOCKS)),
+            tr("A cable kit (blocks of cable), a winding for a DC-DC converter (turns), or bare Copper Cable for crafting"));
         text("mm2l", () -> tr("Wire"));
         button("mm2dn", () -> "<", () -> set(r.mode, r.mm2 - 1, r.tier, r.colour, r.amount));
         text("mm2", () -> WireDrawingDescriptor.fmt(CableSpec.MM2[r.mm2]) + " mm², " + String.format("%.0f A", CableSpec.AMPS[r.mm2]));
@@ -60,17 +63,25 @@ public class WireDrawingScreen extends ElnScreen {
         button("coldn", () -> "<", () -> set(r.mode, r.mm2, r.tier, r.colour - 1, r.amount));
         text("col", () -> DyeColor.byId(r.colour).getName().replace('_', ' '));
         button("colup", () -> ">", () -> set(r.mode, r.mm2, r.tier, r.colour + 1, r.amount), tr("Only the look"));
-        text("amountl", () -> r.mode == WireDrawingElement.KIT ? tr("Length") : tr("Turns"));
+        text("amountl", () -> switch (r.mode) {
+            case WireDrawingElement.KIT -> tr("Length");
+            case WireDrawingElement.WINDING -> tr("Turns");
+            default -> tr("Count");
+        });
         field("amount", () -> String.valueOf(r.amount), v -> {
             float f = EaField.parse(v);
             if (!Float.isNaN(f)) set(r.mode, r.mm2, r.tier, r.colour, Math.round(f));
-        }, tr("Kits: 1 to 64 blocks. Windings: 1 to 1000 turns"));
-        text("amountu", () -> r.mode == WireDrawingElement.KIT ? tr("blocks") : tr("turns"));
+        }, tr("Kits: 1 to 64 blocks. Windings: 1 to 1000 turns. Bare wire: 1 to 64 Copper Cable"));
+        text("amountu", () -> switch (r.mode) {
+            case WireDrawingElement.KIT -> tr("blocks");
+            case WireDrawingElement.WINDING -> tr("turns");
+            default -> tr("cables");
+        });
         text("cost", () -> {
-            double l = r.mode == WireDrawingElement.KIT ? r.amount : r.amount * WindingItem.BLOCKS_PER_TURN;
-            return tr("Takes %1$ copper, %2$ rubber, %3$ kJ", String.format("%.1f", l * WireDrawingDescriptor.copperPerBlock(r.mm2)),
-                String.format("%.1f", l * WireDrawingDescriptor.rubberPerBlock(r.tier, r.mm2)),
-                String.format("%.0f", l * WireDrawingDescriptor.energyPerBlock(r.mm2) / 1000));
+            double l = WireDrawingDescriptor.length(r.mode, r.amount);
+            return tr("Takes %1$ copper, %2$ rubber, %3$ kJ", String.format("%.1f", l * WireDrawingDescriptor.copperPerBlock(r.mode, r.mm2)),
+                String.format("%.1f", l * WireDrawingDescriptor.rubberPerBlock(r.mode, r.tier, r.mm2)),
+                String.format("%.0f", l * WireDrawingDescriptor.energyPerBlock(r.mode, r.mm2) / 1000));
         });
         text("buffer", () -> tr("Held: %1$ copper, %2$ rubber", String.format("%.2f", r.copper), String.format("%.2f", r.rubber)));
         text("status", () -> WireDrawingElement.statusText(r.status), () -> switch (r.status) {

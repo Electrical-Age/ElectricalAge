@@ -2,13 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "A": "#eln:high_quality_plates/alloy",
-    "C": "eln:medium_voltage_cable",
+    "C": "eln:copper_cable",
     "R": "#c:rubbers",
     "U": "#eln:high_quality_plates/copper"
   },
   "pattern": [
     "RUR",
-    "ACA"
+    "ACA",
+    "R R"
   ],
   "result": {
     "count": 16,

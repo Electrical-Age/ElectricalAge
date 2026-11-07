@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "A": "#c:rubbers",
-    "C": "eln:very_high_voltage_cable",
+    "C": "#c:ingots/alloy",
     "I": "eln:copper_cable"
   },
   "pattern": [

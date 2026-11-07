@@ -776,15 +776,16 @@ public final class CableCases {
                 net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "cable_kit_from_coils_mv"));
             var mv = rm.byKey(mvKey).map(h -> h.value()).orElse(null);
             var adv = c.level().getServer().getAdvancements().get(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "recipes/misc/cable_kit_from_coils"));
-            c.check("cable kit: in the recipe book, one recipe per tier each way, unlocked by cable",
-                learnable == 2 * CablePart.TIERS.length && adv != null, learnable + " learnable, advancement " + (adv != null));
+            // (the power tiers' cable items are retired, Baughn 2026-11-07: old ones still become kits, kits no longer become them)
+            c.check("cable kit: in the recipe book, one recipe per tier each way (the power tiers into kits only), unlocked by cable",
+                learnable == 2 * CablePart.TIERS.length - 4 && adv != null, learnable + " learnable, advancement " + (adv != null));
             var mvIngs = mv == null ? List.<net.minecraft.world.item.crafting.Ingredient>of() : mv.placementInfo().ingredients();
             var mvIn = net.minecraft.world.item.crafting.CraftingInput.of(1, 1, List.of(mods.eln.node.voxel.CableKitRecipes.coil(LV + 1)));
             c.check("cable kit: the MV recipe places MV cable only and takes no LV", mv instanceof mods.eln.node.voxel.CableKitRecipes.FromCoils
                 && mvIngs.size() == 1 && mvIngs.get(0).test(mods.eln.node.voxel.CableKitRecipes.coil(LV + 1)) && !mvIngs.get(0).test(coil)
                 && !((mods.eln.node.voxel.CableKitRecipes.FromCoils) mv).matches(net.minecraft.world.item.crafting.CraftingInput.of(1, 1, List.of(coil.copy())), c.level())
                 && ((mods.eln.node.voxel.CableKitRecipes.FromCoils) mv).matches(mvIn, c.level()) && mv.display().size() == 1, String.valueOf(mv));
-            c.check("cable kit: JEI examples per tier", mods.eln.node.voxel.CableKitRecipes.examples().size() >= 10,
+            c.check("cable kit: JEI examples per tier still made", mods.eln.node.voxel.CableKitRecipes.examples().size() == 2 * (CablePart.TIERS.length - 4),
                 mods.eln.node.voxel.CableKitRecipes.examples().size() + " examples");
             // whole stacks (Baughn: a grid of cable stacks gave one cable's worth per slot, and shift-click a heap of kits)
             var four = new java.util.ArrayList<net.minecraft.world.item.ItemStack>();

@@ -3,7 +3,7 @@
   "key": {
     "A": "#c:circuits/advanced",
     "B": "eln:advanced_machine_block",
-    "L": "eln:low_voltage_cable",
+    "L": "eln:copper_cable",
     "b": "eln:field_bus_cable",
     "p": "#eln:high_quality_plates/iron"
   },

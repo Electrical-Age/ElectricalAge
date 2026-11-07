@@ -96,6 +96,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.IncandescenceCases.addTo(l);
         mods.eln.gametest.cases.HandbookCases.addTo(l);
         mods.eln.gametest.cases.JeiAuditCases.addTo(l);
+        mods.eln.gametest.cases.RecipeClashCases.addTo(l);
         mods.eln.gametest.cases.OilPondCases.addTo(l);
         mods.eln.gametest.cases.ServoCases.addTo(l);
         mods.eln.gametest.cases.ComputerCases.addTo(l);

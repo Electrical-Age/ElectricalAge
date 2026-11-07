@@ -94,7 +94,7 @@ public final class JeiPages {
             len * WireDrawingDescriptor.energyPerBlock(spec.mm2()) / 1000, tier <= 2 && spec.mm2() <= 6);
     }
 
-    /** Each machine's presets, a 48 -> 230 V converter's winding, an 11 kV one. */
+    /** Each machine's presets, a 48 -> 230 V converter's winding, an 11 kV one, bare wire. */
     public static List<Draw> draws() {
         if (drawers().isEmpty()) return List.of();
         List<Draw> l = new ArrayList<>();
@@ -102,6 +102,9 @@ public final class JeiPages {
         l.add(draw(1, new CableSpec(6, CableSpec.BROWN), 16, 0));
         l.add(draw(2, CableSpec.preset(2), 0, 58));    // a 48 -> 230 V converter's secondary on a cheap core
         l.add(draw(4, CableSpec.preset(4), 0, 688));   // 400 V -> 11 kV on an optimal core
+        // bare wire: 2 ingots, 3 Copper Cable (no rubber)
+        l.add(new Draw(new ItemStack(Items.COPPER_INGOT, 2), ItemStack.EMPTY, Eln.findItemStack("Copper Cable", 3),
+            3 * WireDrawingDescriptor.JOULES_PER_BLOCK / 1000, true));
         return l;
     }
 

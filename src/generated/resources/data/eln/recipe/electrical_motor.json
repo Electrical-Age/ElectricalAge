@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "C": "eln:low_voltage_cable",
+    "C": "eln:copper_cable",
     "I": "minecraft:iron_ingot"
   },
   "pattern": [

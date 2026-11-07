@@ -3,7 +3,7 @@
   "key": {
     "A": "eln:analogic_regulator",
     "B": "eln:machine_block",
-    "C": "eln:low_voltage_cable",
+    "C": "eln:copper_cable",
     "I": "#eln:high_quality_plates/iron",
     "M": "eln:electrical_motor"
   },

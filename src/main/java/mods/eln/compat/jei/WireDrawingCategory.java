@@ -26,7 +26,8 @@ public class WireDrawingCategory extends AbstractRecipeCategory<Draw> {
     @Override
     public void setRecipe(IRecipeLayoutBuilder b, Draw r, IFocusGroup focuses) {
         b.addInputSlot(1, 6).setStandardSlotBackground().add(r.copper());
-        b.addInputSlot(27, 6).setStandardSlotBackground().add(r.rubber());
+        var rubber = b.addInputSlot(27, 6).setStandardSlotBackground();
+        if (!r.rubber().isEmpty()) rubber.add(r.rubber());
         b.addOutputSlot(101, 6).setOutputSlotBackground().add(r.out());
     }
 

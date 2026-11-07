@@ -19,7 +19,11 @@
     "RRR"
   ],
   "result": {
-    "count": 6,
-    "id": "eln:low_voltage_cable"
+    "components": {
+      "minecraft:custom_data": {
+        "kitLen": 96
+      }
+    },
+    "id": "eln:cable_kit_lv"
   }
 }

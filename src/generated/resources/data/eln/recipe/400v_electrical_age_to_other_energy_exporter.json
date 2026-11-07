@@ -4,7 +4,7 @@
     "C": "#c:circuits/advanced",
     "I": "minecraft:iron_ingot",
     "R": "minecraft:gold_ingot",
-    "c": "eln:high_voltage_cable"
+    "c": "eln:copper_cable"
   },
   "pattern": [
     "III",

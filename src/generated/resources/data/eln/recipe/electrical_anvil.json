@@ -11,7 +11,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "A": "minecraft:anvil",
-    "H": "eln:high_voltage_cable",
+    "H": "eln:copper_cable",
     "M": "eln:advanced_machine_block",
     "i": "#c:ingots/iron",
     "p": "#eln:high_quality_plates/iron"

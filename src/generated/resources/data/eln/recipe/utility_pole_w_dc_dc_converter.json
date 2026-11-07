@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "C": "eln:optimal_ferromagnetic_core",
-    "H": "eln:high_voltage_cable",
+    "H": "eln:copper_cable",
     "P": "eln:utility_pole",
     "T": "eln:dc_dc_converter"
   },

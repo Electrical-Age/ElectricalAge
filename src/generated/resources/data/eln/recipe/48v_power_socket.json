@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "A": "#eln:high_quality_plates/alloy",
-    "C": "eln:low_voltage_cable",
+    "C": "eln:copper_cable",
     "R": "#c:rubbers",
     "U": "#eln:high_quality_plates/copper"
   },

@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "C": "eln:medium_voltage_cable",
+    "C": "eln:copper_cable",
     "I": "minecraft:iron_ingot",
     "M": "eln:advanced_magnet",
     "R": "minecraft:redstone"

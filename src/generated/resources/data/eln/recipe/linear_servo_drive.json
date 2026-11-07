@@ -3,7 +3,7 @@
   "key": {
     "B": "eln:machine_block",
     "S": "eln:signal_cable",
-    "V": "eln:medium_voltage_cable",
+    "V": "eln:copper_cable",
     "m": "eln:electrical_motor",
     "p": "#eln:high_quality_plates/iron"
   },

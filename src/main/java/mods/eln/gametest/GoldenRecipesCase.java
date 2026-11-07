@@ -55,13 +55,23 @@ final class GoldenRecipesCase implements TestCase {
     public void build(TestContext ctx) {
     }
 
+    /** Insulated cables that recipes take as bare Copper Cable now (Baughn 2026-11-07); the cable items are retired. */
+    static final Set<String> BARE = Set.of("eln:low_voltage_cable", "eln:medium_voltage_cable", "eln:high_voltage_cable");
+
     /** Golden recipes whose output is deferred to a later phase (notes/port26/deferred.md). */
     static final Set<String> DEFERRED = Set.of("eln:x_ray_scanner");
     /** Machine recipes changed on purpose (list:input): sand makes four Dielectrics, not one (Baughn 2026-10-28). */
     static final Set<String> MACHINE_CHANGED = Set.of("compressor:Sand");
     /** Recipes changed on purpose (Baughn 2026-10-13): copper cable 1 per ingot, windings take the new Copper Coil;
      *  thermal insulation takes any wool (Baughn 2026-10-26). Their output must still have a 26.x recipe. */
-    static final Set<String> CHANGED = Set.of("eln:thermal_insulation", "eln:copper_cable", "eln:power_resistor", "eln:dc_dc_converter", "eln:rheostat",
+    static final Set<String> CHANGED = Set.of(
+        // tier pairs told apart by rubber, a layer a step, once their cables became Copper Cable; the very high
+        // voltage ones by alloy; the inline pump by a bucket (it had the shaft motor's recipe) (Baughn 2026-11-07)
+        "eln:50_v_incandescent_light_bulb", "eln:200_v_incandescent_light_bulb", "eln:50_v_economic_light_bulb", "eln:200_v_economic_light_bulb",
+        "eln:50_v_carbon_incandescent_light_bulb", "eln:50_v_carbon_incandescent_light_bulb_2", "eln:200_v_farming_lamp", "eln:50_v_led_bulb",
+        "eln:200_v_led_bulb", "eln:200_v_power_socket", "eln:low_voltage_relay", "eln:medium_voltage_relay", "eln:high_voltage_relay",
+        "eln:very_high_voltage_relay", "eln:very_high_voltage_switch",
+        "eln:thermal_insulation", "eln:copper_cable", "eln:power_resistor", "eln:dc_dc_converter", "eln:rheostat",
         "eln:thermistor", "eln:power_inductor", "eln:small_50_v_copper_heating_corp", "eln:50_v_copper_heating_corp");
 
     /**
@@ -69,6 +79,8 @@ final class GoldenRecipesCase implements TestCase {
      * turbines, replaced by the 50V/200V steam turbines (Baughn, 2026-10-14).
      */
     static final Set<String> REMOVED = Set.of(
+        // the insulated cable items are retired: hand recipes make cable kits instead (Baughn 2026-11-07)
+        "eln:low_voltage_cable", "eln:low_voltage_cable_2", "eln:medium_voltage_cable", "eln:high_voltage_cable", "eln:very_high_voltage_cable",
         // made by machines now (Baughn 2026-11-06): the Average core annealed in the Electrical Furnace, the Optimal one
         // field-annealed in the Magnetizer, from their own crafted intermediates
         "eln:average_ferromagnetic_core", "eln:optimal_ferromagnetic_core",
@@ -138,7 +150,7 @@ final class GoldenRecipesCase implements TestCase {
         List<Item> items = new ArrayList<>();
         for (JsonElement a : alts) {
             Item i = map(a.getAsJsonObject(), unknown);
-            if (i != null) items.add(i);
+            if (i != null) items.add(BARE.contains(BuiltInRegistries.ITEM.getKey(i).toString()) ? BuiltInRegistries.ITEM.getValue(Identifier.parse("eln:copper_cable")) : i);
         }
         return new Slot(false, items.isEmpty(), items);
     }

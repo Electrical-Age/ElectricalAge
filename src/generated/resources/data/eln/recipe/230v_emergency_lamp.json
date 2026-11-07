@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "b": "eln:portable_battery_pack",
-    "c": "eln:medium_voltage_cable",
+    "c": "eln:copper_cable",
     "g": "minecraft:glass_pane",
     "l": "eln:200v_led_bulb"
   },

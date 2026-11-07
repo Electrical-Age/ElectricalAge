@@ -3,7 +3,7 @@
   "key": {
     "F": "#eln:ingots/tungsten",
     "G": "minecraft:glass_pane",
-    "S": "eln:low_voltage_cable"
+    "S": "eln:copper_cable"
   },
   "pattern": [
     "GGG",

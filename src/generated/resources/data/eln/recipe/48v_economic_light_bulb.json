@@ -1,14 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
+    "A": "#c:rubbers",
     "F": "minecraft:glowstone_dust",
     "G": "minecraft:glass_pane",
-    "S": "eln:low_voltage_cable"
+    "S": "eln:copper_cable"
   },
   "pattern": [
     " G ",
     "GFG",
-    " S "
+    "AS "
   ],
   "result": {
     "count": 4,

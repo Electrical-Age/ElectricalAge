@@ -1,7 +1,8 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "E": "eln:low_voltage_cable",
+    "A": "#c:rubbers",
+    "E": "eln:copper_cable",
     "I": "minecraft:iron_ingot",
     "M": "eln:machine_block",
     "m": "eln:electrical_motor"
@@ -9,7 +10,7 @@
   "pattern": [
     " m ",
     "IMI",
-    " E "
+    "AE "
   ],
   "result": {
     "id": "eln:50v_steam_turbine"

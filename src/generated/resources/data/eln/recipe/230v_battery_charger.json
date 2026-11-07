@@ -4,7 +4,7 @@
     "C": "#c:circuits/advanced",
     "I": "minecraft:iron_ingot",
     "R": "minecraft:redstone",
-    "c": "eln:medium_voltage_cable"
+    "c": "eln:copper_cable"
   },
   "pattern": [
     "RIR",

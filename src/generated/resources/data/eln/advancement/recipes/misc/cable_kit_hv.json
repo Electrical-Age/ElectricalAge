@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "eln:low_voltage_cable"
+        "recipes": "eln:cable_kit_hv"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "eln:low_voltage_cable"
+      "eln:cable_kit_hv"
     ]
   }
 }

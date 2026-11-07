@@ -1,14 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "C": "eln:low_voltage_cable",
+    "A": "#c:rubbers",
+    "C": "eln:copper_cable",
     "G": "minecraft:glass_pane",
     "I": "eln:copper_cable",
     "O": "minecraft:iron_ingot",
     "R": "minecraft:redstone"
   },
   "pattern": [
-    "GGG",
+    "GAG",
     "OIO",
     "CRC"
   ],

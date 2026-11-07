@@ -4,7 +4,7 @@
     "C": "#c:circuits/basic",
     "I": "minecraft:iron_ingot",
     "R": "#eln:ingots/tungsten",
-    "c": "eln:medium_voltage_cable"
+    "c": "eln:copper_cable"
   },
   "pattern": [
     "III",

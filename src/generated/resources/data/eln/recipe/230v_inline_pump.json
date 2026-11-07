@@ -1,15 +1,17 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "E": "eln:medium_voltage_cable",
+    "A": "#c:rubbers",
+    "B": "minecraft:bucket",
+    "E": "eln:copper_cable",
     "M": "eln:machine_block",
     "m": "eln:electrical_motor",
     "p": "minecraft:iron_ingot"
   },
   "pattern": [
-    " m ",
+    "Bm ",
     "pMp",
-    " E "
+    "AEA"
   ],
   "result": {
     "id": "eln:200v_inline_pump"

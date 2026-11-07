@@ -143,7 +143,7 @@ public final class ElnDeviceRegistry {
                 // thermalConductivityTao
             );
 
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            sixNodeItem.addWithoutRegistry(subId + (id << 6), desc); // retired from the tab: recipes take Copper Cable, hands make kits (Baughn 2026-11-07)
 
             desc = new ElectricalCableDescriptor(name, stdCableRender50V,
                 "For low voltage with high current.", false);
@@ -187,7 +187,7 @@ public final class ElnDeviceRegistry {
                 // thermalConductivityTao
             );
 
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            sixNodeItem.addWithoutRegistry(subId + (id << 6), desc); // retired from the tab: recipes take Copper Cable, hands make kits (Baughn 2026-11-07)
 
         }
         {
@@ -215,7 +215,7 @@ public final class ElnDeviceRegistry {
                 // thermalConductivityTao
             );
 
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            sixNodeItem.addWithoutRegistry(subId + (id << 6), desc); // retired from the tab: recipes take Copper Cable, hands make kits (Baughn 2026-11-07)
 
         }
 
@@ -245,7 +245,7 @@ public final class ElnDeviceRegistry {
                 // thermalConductivityTao
             );
 
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            sixNodeItem.addWithoutRegistry(subId + (id << 6), desc); // retired from the tab: recipes take Copper Cable, hands make kits (Baughn 2026-11-07)
 
         }
     }

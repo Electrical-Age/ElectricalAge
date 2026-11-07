@@ -13,7 +13,7 @@
     "C": "#c:circuits/basic",
     "I": "minecraft:iron_ingot",
     "R": "#c:ingots/copper",
-    "c": "eln:low_voltage_cable"
+    "c": "eln:copper_cable"
   },
   "pattern": [
     "III",

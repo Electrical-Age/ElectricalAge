@@ -1,12 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
+    "A": "#c:rubbers",
     "C": "eln:copper_coil"
   },
   "pattern": [
-    "C C",
+    "CAC",
     "CCC",
-    "C C"
+    "CAC"
   ],
   "result": {
     "id": "eln:50v_copper_heating_corp"
