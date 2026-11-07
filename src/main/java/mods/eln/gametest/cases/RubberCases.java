@@ -84,7 +84,8 @@ public final class RubberCases {
             var lvl = c.level();
             var trunk = c.at(10, 2, 10);
             double fig = mods.eln.transparentnode.resincollector.IndustrialResinCollectorElement.handRate(lvl, trunk.west(), mods.eln.misc.Direction.XP);
-            c.check("the industrial collector sees the rubber fig behind it (rate > 0)", fig > 0, "" + fig);
+            c.check("the industrial collector sees the rubber fig behind it, counting at most 6 logs (Baughn)",
+                Math.abs(fig - 3.0 / 5 / 1440 * 6 * 1.5) < 1e-9, "" + fig);
             c.check("rubber logs are logs, its leaves leaves (the collector's checks)",
                 mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor.isWood(mods.eln.rubber.RubberTrees.LOG.get())
                     && mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor.isLeaf(mods.eln.rubber.RubberTrees.LEAVES.get()), "");

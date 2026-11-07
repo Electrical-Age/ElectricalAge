@@ -30,6 +30,8 @@ public class IndustrialResinCollectorDescriptor extends TransparentNodeDescripto
     public static final double OUT_MB_PER_S = 200, OUT_HEAD_PA = 6e5;
     /** How much faster than the hand collector it taps (Baughn: ~10x). */
     public static final double SPEED_UP = 10;
+    /** The most logs of a trunk it counts (Baughn 2026-11-07: a rubber fig's whole trunk made far too much). */
+    public static final int MAX_LOGS = 6;
     /** The OUT flange's height (px, top face centre). */
     public static final int FLANGE_Y = 16;
 

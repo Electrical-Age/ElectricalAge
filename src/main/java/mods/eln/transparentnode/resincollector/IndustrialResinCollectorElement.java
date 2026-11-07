@@ -31,7 +31,7 @@ import java.util.Map;
 /**
  * The Industrial Resin Collector (IndustrialResinCollectorDescriptor). The trunk is the column of logs behind it (its
  * back face); it needs leaves, as the hand collector does (TreeResinCollectorElement.treeLeaves). Latex a second:
- * the hand collector's resin a second for that trunk (3/5 a day a log, x the tree's factor) x SPEED_UP, at 250 mB a
+ * the hand collector's resin a second for that trunk (3/5 a day a log, at most MAX_LOGS of them, x the tree's factor) x SPEED_UP, at 250 mB a
  * resin, while it has power (less on a sagging line) and room in its tank.
  */
 public class IndustrialResinCollectorElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice {
@@ -98,7 +98,9 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
         while (TreeResinCollectorDescriptor.isWood(level.getBlockState(new BlockPos(log.getX(), y0 - 1, log.getZ())).getBlock())) y0--;
         while (TreeResinCollectorDescriptor.isWood(level.getBlockState(new BlockPos(log.getX(), y1 + 1, log.getZ())).getBlock())) y1++;
         if (TreeResinCollectorElement.treeLeaves(level, log) < 4) return 0;
-        return 3.0 / 5 / (60 * 24) * (y1 - y0 + 1) * TreeResinCollectorElement.treeFactor(block);
+        // (Baughn 2026-11-07: a fig's 10-13 logs gave one collector ~270 Raw Rubber an hour; it counts at most MAX_LOGS)
+        int logs = Math.min(y1 - y0 + 1, IndustrialResinCollectorDescriptor.MAX_LOGS);
+        return 3.0 / 5 / (60 * 24) * logs * TreeResinCollectorElement.treeFactor(block);
     }
 
     // ---- fluid
