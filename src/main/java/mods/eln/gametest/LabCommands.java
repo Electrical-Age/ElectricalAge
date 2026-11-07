@@ -605,6 +605,20 @@ public final class LabCommands {
      */
     static int latex(CommandSourceStack src, BlockPos pos) {
         furnaceRigs(src, pos, "latex", new String[]{"230V Compressor"}, new float[]{0});
+        var lvl = src.getLevel();
+        // (AdventurAgent: give the IN flange latex to press) an iron tank of latex two blocks behind it, piped to its IN flange
+        var cn = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, lvl));
+        if (cn instanceof mods.eln.node.transparent.TransparentNode ct && ct.element != null) {
+            var back = ct.element.front.back();
+            BlockPos tp = pos.relative(back.toEnumFacing(), 2);
+            int at = mods.eln.fluid.PortBridge.endSpot(ct.element.front, back, mods.eln.transparentnode.electricalmachine.CompressorPortsDescriptor.IN_Y,
+                mods.eln.transparentnode.electricalmachine.CompressorPortsDescriptor.FLANGE_Z);
+            var face = back.toEnumFacing();
+            // (a point on the IN flange, for the port pick: the face's centre column at the flange's height)
+            var hit = net.minecraft.world.phys.Vec3.atCenterOf(pos).relative(face, 0.5).add(0, (at / 17 - 8) / 16.0, 0);
+            String r = tankPiped(src, tp, pos, face, hit, 8000);
+            src.sendSuccess(() -> Component.literal("latex tank at " + tp.toShortString() + " to the IN flange: " + r), false);
+        }
         BlockPos p = pos.offset(8, 0, 0);
         furnaceRigs(src, p, "collector", new String[]{"Industrial Resin Collector"}, new float[]{0});
         var level = src.getLevel();
@@ -615,8 +629,36 @@ public final class LabCommands {
             var feature = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.FEATURE).getOrThrow(mods.eln.rubber.RubberTrees.TREE);
             boolean ok = feature.value().place(level, level.getChunkSource().getGenerator(), level.getRandom(), trunk);
             src.sendSuccess(() -> Component.literal("rubber fig at " + trunk.toShortString() + ": " + (ok ? "grown" : "refused: " + mods.eln.rubber.RubberFigFeature.lastRefusal)), false);
+            // an empty iron tank two blocks in front of it, piped from its top flange
+            BlockPos tp = p.relative(t.element.front.toEnumFacing(), 2);
+            String r = tankPiped(src, tp, p, net.minecraft.core.Direction.UP, null, 0);
+            src.sendSuccess(() -> Component.literal("tank at " + tp.toShortString() + " from the collector's flange: " + r), false);
         }
         return 1;
+    }
+
+    /** An iron tank at tp (mB of latex in it), and an EA pipe routed from the device's port on face (nearest hit) to it. */
+    static String tankPiped(CommandSourceStack src, BlockPos tp, BlockPos dev, net.minecraft.core.Direction face, net.minecraft.world.phys.Vec3 hit, int latexMb) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        var d = mods.eln.Eln.transparentNodeItem.getDescriptor(40 + (82 << 6));   // (an iron tank)
+        var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, tp, mods.eln.misc.Direction.YN);
+        if (node == null) return "no room for the tank";
+        if (latexMb > 0) {
+            var cap = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, tp, net.minecraft.core.Direction.UP);
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Latex.SOURCE.get()), latexMb, tx);
+                tx.commit();
+            }
+        }
+        var a = mods.eln.node.voxel.PipePlacer.portAtForTests(level, dev, face, hit);
+        net.minecraft.core.Direction toDev = null;
+        for (var f : net.minecraft.core.Direction.Plane.HORIZONTAL) if (tp.relative(f).distManhattan(dev) < tp.distManhattan(dev)) toDev = f;
+        var b = toDev == null ? null : mods.eln.node.voxel.PipePlacer.portAtForTests(level, tp, toDev);
+        if (a == null || b == null) return "ports " + a + " " + b;
+        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, a, java.util.List.of(), b);
+        String err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
+        return err == null ? "piped" : err;
     }
 
     /** Machines on 230 V, 5 apart along x; a furnace gets a tungsten heating corp, insulation and a regulator at its target (C). */

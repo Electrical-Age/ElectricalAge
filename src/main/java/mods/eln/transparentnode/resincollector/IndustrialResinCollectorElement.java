@@ -46,6 +46,8 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
     double handRate;
     double sinceLook = 1e9;
     boolean running;
+    /** Seconds since it last tapped: the amber LED stays lit a moment past each (AdventurAgent: it flickered off). */
+    double sinceTap = 1e9;
 
     public IndustrialResinCollectorElement(TransparentNode node, TransparentNodeDescriptor descriptor) {
         super(node, descriptor);
@@ -64,12 +66,12 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
         }
         boolean room = tank.getCapacity() - tank.getFluidAmount() >= 1;
         boolean was = running;
-        running = false;
+        sinceTap += dt;
         if (handRate > 0 && room) {
             double rated = machine.ratedJoulesPerTick();
             double got = rated > 0 ? machine.takeJoules(rated) : 0;
             double share = rated > 0 ? got / rated : 0;
-            running = share > 0.05;
+            if (share > 0.05) sinceTap = 0;
             carry += handRate * IndustrialResinCollectorDescriptor.SPEED_UP * Latex.MB_PER_RUBBER * share * dt;
             int whole = (int) Math.floor(carry);
             if (whole > 0) {
@@ -77,6 +79,7 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
                 tank.fill(new FluidStack(Latex.SOURCE.get(), whole), true);
             }
         }
+        running = sinceTap < 2;
         if (running != was) needPublish();
         if (!outPort.piped() && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)
             mods.eln.fluid.FluidExport.push(tank, level, node.coordonate.pos(), Direction.YP.toEnumFacing(),
