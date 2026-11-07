@@ -18,8 +18,10 @@ import java.util.WeakHashMap;
  * Plays the element renders' looped sounds (1.12 LoopedSoundManager; client only). OpenAL has a fixed pool of sources
  * (about 247 for sounds like these) and a full pool silences every new sound, vanilla's too: so every half second
  * the loops that are audible here (volume, fading to nothing over the 16 blocks of linear attenuation) are ranked and
- * the MAX_PLAYING loudest get a ticking sound instance. An instance follows its loop's volume and pitch, and stops when
- * its loop or block entity goes, when it has been silent SILENT_TICKS, or when it drops out of the ranking.
+ * the MAX_PLAYING loudest get a ticking sound instance. An instance eases toward its loop's volume (so a machine that
+ * stops fades out instead of cutting off: Baughn 2026-11-07, the autominer), at most 1 (louder only stretched the
+ * engine's attenuation past RANGE, where the ranking dropped it mid-sound), follows its pitch, and stops when its loop
+ * or block entity goes, when it has been silent SILENT_TICKS, or, faded out, when it drops out of the ranking.
  */
 public final class LoopedSoundPlayer {
     private LoopedSoundPlayer() {
@@ -30,6 +32,8 @@ public final class LoopedSoundPlayer {
     public static final int MAX_PLAYING = 24;
     public static final float AUDIBLE = 0.002f;
     static final int SILENT_TICKS = 40;
+    /** Easing a tick toward the loop's volume: up (fade in over ~0.3 s), down (fade out over ~1 s). */
+    static final float RISE = 0.3f, FALL = 0.1f;
     static final Map<LoopedSound, Instance> PLAYING = new WeakHashMap<>();
     static float timer;
 
@@ -50,6 +54,7 @@ public final class LoopedSoundPlayer {
             this.y = loop.getCoord().y + 0.5;
             this.z = loop.getCoord().z + 0.5;
             this.attenuation = loop.getAttenuation() == LoopedSound.Attenuation.NONE ? Attenuation.NONE : Attenuation.LINEAR;
+            this.volume = 0;
             tick();
         }
 
@@ -61,15 +66,26 @@ public final class LoopedSoundPlayer {
 
         @Override
         public void tick() {
-            if (evicted || !loop.getActive() || owner.isRemoved()) {
+            if (!loop.getActive() || owner.isRemoved()) {
                 stop();
                 return;
             }
-            volume = Math.max(0f, loop.getVolume());
+            float target = evicted ? 0f : Math.min(1f, Math.max(0f, loop.getVolume()));
+            volume = ease(volume, target);
+            if (evicted && volume < AUDIBLE) {
+                stop();
+                return;
+            }
             pitch = Math.max(0.01f, loop.getPitch());
             silent = volume < AUDIBLE ? silent + 1 : 0;
             if (silent > SILENT_TICKS) stop();
         }
+    }
+
+    /** One tick of easing from volume toward target (RISE up, FALL down), snapping to it when close. */
+    public static float ease(float volume, float target) {
+        float v = volume + (target - volume) * (target > volume ? RISE : FALL);
+        return Math.abs(target - v) < AUDIBLE / 2 ? target : v;
     }
 
     /** The loops of a block's renders; none of a burnt one (Baughn: a damaged machine shouldn't keep making sounds). */

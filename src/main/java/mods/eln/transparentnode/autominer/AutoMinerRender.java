@@ -65,7 +65,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
                 if (powerOk &&
                     (job == AutoMinerSlowProcess.jobType.ore || job == AutoMinerSlowProcess.jobType.pipeAdd ||
                         job == AutoMinerSlowProcess.jobType.pipeRemove))
-                    return 2.13f;
+                    return 0.5f;   // (Baughn 2026-11-07: too loud; it was 2.13, which the engine played at 1)
                 else
                     return 0f;
             }

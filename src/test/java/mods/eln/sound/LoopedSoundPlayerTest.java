@@ -29,4 +29,28 @@ public class LoopedSoundPlayerTest {
         for (int k = 0; k < r.size(); k++) assertEquals(k, r.get(k));   // the nearest, loudest first
         assertTrue(LoopedSoundPlayer.MAX_PLAYING < 64);
     }
+
+    /** Baughn 2026-11-07: the autominer cut out abruptly. A loop that goes silent fades over about a second, and one
+     *  that starts fades in quicker; both reach their level. */
+    @Test
+    void loopsFadeRatherThanCut() {
+        float v = 0.5f;
+        int ticks = 0;
+        while (v > 0.05f) {
+            v = LoopedSoundPlayer.ease(v, 0f);
+            ticks++;
+        }
+        assertTrue(ticks >= 15 && ticks <= 30, ticks + " ticks to fade to a tenth");
+        for (int k = 0; k < 200; k++) v = LoopedSoundPlayer.ease(v, 0f);
+        assertEquals(0f, v);
+        float u = 0f;
+        int up = 0;
+        while (u < 0.45f) {
+            u = LoopedSoundPlayer.ease(u, 0.5f);
+            up++;
+        }
+        assertTrue(up < ticks, up + " ticks to fade in");
+        for (int k = 0; k < 200; k++) u = LoopedSoundPlayer.ease(u, 0.5f);
+        assertEquals(0.5f, u);
+    }
 }
