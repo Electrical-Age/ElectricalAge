@@ -99,14 +99,20 @@ def leaves():
 
 
 def aerial_root():
-    """Thin strands hanging straight down, grey-brown, with a few knots; mostly transparent (a cross model)."""
+    """Two or three thin roots hanging down, wandering a pixel side to side, grey-brown with a lit edge; no regular
+    marks (Baughn: knots every few pixels made them read as fence posts or ladders)."""
+    r = random.Random(21)
     im = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
-    c1, c2, c3 = hexc('#6b5a48'), hexc('#857260'), hexc('#4f4236')
-    for x, top, col in ((6, 0, c1), (7, 0, c2), (9, 0, c1), (8, 3, c3), (10, 5, c2)):
-        for y in range(top, 16):
-            im.putpixel((x, y), col if y % 5 else c3)
-    for (x, y) in ((7, 6), (9, 11), (6, 13)):
-        im.putpixel((x, y), hexc('#9c8a74'))
+    lit, body, shadow = hexc('#a08c74'), hexc('#7a6852'), hexc('#57493b')
+    # each root steps out a pixel and back once in 16 rows, so it meets itself where the texture repeats
+    for x0, w, out, back, d in ((5, 2, 4, 11, -1), (9, 1, 2, 9, 1), (11, 1, 6, 13, 1)):
+        for y in range(16):
+            x = x0 + (d if out <= y < back else 0)
+            for k in range(w):
+                im.putpixel((x + k, y), body)
+            im.putpixel((x - 1, y), lit) if w > 1 and r.random() < 0.6 else None
+            if w > 1:
+                im.putpixel((x + w - 1, y), shadow)
     return im
 
 
