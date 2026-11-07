@@ -7,17 +7,14 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.network.chat.Component;
+import mods.eln.compat.JeiPages.Resin;
 import net.minecraft.world.item.ItemStack;
 
 /**
  * Tree resin comes from a Tree Resin Collector on the side of a log (Baughn: JEI should show that as a machine). Not a
  * recipe in the game: the collector fills slowly, if the log's trunk has leaves over it (TreeResinCollectorElement).
  */
-public class ResinCategory extends AbstractRecipeCategory<ResinCategory.Resin> {
-    /** Any log, the collector, the resin. */
-    public record Resin(ItemStack collector, ItemStack resin) {
-    }
-
+public class ResinCategory extends AbstractRecipeCategory<Resin> {
     public static final IRecipeType<Resin> TYPE = IRecipeType.create("eln", "tree_resin_collector", Resin.class);
 
     public ResinCategory(IGuiHelper gui, ItemStack collector) {

@@ -7,6 +7,7 @@ import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mods.eln.Eln;
+import mods.eln.compat.JeiPages;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -15,7 +16,8 @@ import net.minecraft.resources.Identifier;
 /**
  * JEI (loaded only when JEI is installed): the cable-kit recipes, which are custom recipes JEI can't list itself, as
  * examples in the crafting category (Baughn: they weren't in JEI; the grid takes whole stacks all the same); and the
- * Tree Resin Collector as a machine making tree resin (ResinCategory).
+ * Tree Resin Collector as a machine making tree resin (ResinCategory). What it shows beyond the game's recipes is in
+ * JeiPages, which the GameTest jei_every_item_reachable checks.
  */
 @JeiPlugin
 public class ElnJeiPlugin implements IModPlugin {
@@ -24,17 +26,11 @@ public class ElnJeiPlugin implements IModPlugin {
         return Identifier.fromNamespaceAndPath("eln", "jei");
     }
 
-    /** The machines' recipe lists, by key (MachineCategory). */
-    static final java.util.Map<String, java.util.function.Supplier<mods.eln.misc.RecipesList>> MACHINES = new java.util.LinkedHashMap<>();
+    /** A recipe type per machine list (JeiPages.MACHINES; MachineCategory). */
     static final java.util.Map<String, mezz.jei.api.recipe.types.IRecipeType<mods.eln.misc.Recipe>> TYPES = new java.util.LinkedHashMap<>();
 
     static {
-        MACHINES.put("macerator", () -> Eln.maceratorRecipes);
-        MACHINES.put("compressor", () -> Eln.compressorRecipes);
-        MACHINES.put("plate_machine", () -> Eln.plateMachineRecipes);
-        MACHINES.put("magnetiser", () -> Eln.magnetiserRecipes);
-        MACHINES.put("separator", () -> Eln.separatorRecipes);
-        for (String k : MACHINES.keySet()) TYPES.put(k, mezz.jei.api.recipe.types.IRecipeType.create("eln", k, mods.eln.misc.Recipe.class));
+        for (String k : JeiPages.MACHINES.keySet()) TYPES.put(k, mezz.jei.api.recipe.types.IRecipeType.create("eln", k, mods.eln.misc.Recipe.class));
     }
 
     /**
@@ -51,18 +47,16 @@ public class ElnJeiPlugin implements IModPlugin {
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
         ensureRecipes();
-        for (var e : MACHINES.entrySet()) {
+        for (var e : JeiPages.MACHINES.entrySet()) {
             var list = e.getValue().get();
             if (list.getMachines().isEmpty() || list.getRecipes().isEmpty()) continue;
             registration.addRecipeCategories(new MachineCategory(registration.getJeiHelpers().getGuiHelper(), TYPES.get(e.getKey()), e.getKey(),
                 list.getMachines().get(0)));
         }
-        ItemStack collector = Eln.findItemStack("Tree Resin Collector", 1);
-        if (!collector.isEmpty()) registration.addRecipeCategories(new ResinCategory(registration.getJeiHelpers().getGuiHelper(), collector));
-        ItemStack furnace = Eln.findItemStack("Electrical Furnace", 1);
-        if (!furnace.isEmpty()) registration.addRecipeCategories(new AnnealCategory(registration.getJeiHelpers().getGuiHelper(), furnace));
-        ItemStack drawer = Eln.findItemStack("230V Wire Drawing Machine", 1);
-        if (!drawer.isEmpty()) registration.addRecipeCategories(new WireDrawingCategory(registration.getJeiHelpers().getGuiHelper(), drawer));
+        var gui = registration.getJeiHelpers().getGuiHelper();
+        if (!JeiPages.resins().isEmpty()) registration.addRecipeCategories(new ResinCategory(gui, JeiPages.collector()));
+        if (!JeiPages.anneals().isEmpty()) registration.addRecipeCategories(new AnnealCategory(gui, JeiPages.furnace()));
+        if (!JeiPages.draws().isEmpty()) registration.addRecipeCategories(new WireDrawingCategory(gui, JeiPages.drawers().getLast()));
     }
 
     @Override
@@ -70,32 +64,22 @@ public class ElnJeiPlugin implements IModPlugin {
         ensureRecipes();
         registration.addRecipes(RecipeTypes.CRAFTING, mods.eln.node.voxel.CableKitRecipes.examples());
         registration.addRecipes(RecipeTypes.CRAFTING, mods.eln.node.voxel.PipeKitRecipes.examples());
-        for (var e : MACHINES.entrySet()) {
+        for (var e : JeiPages.MACHINES.entrySet()) {
             var list = e.getValue().get();
             if (!list.getMachines().isEmpty() && !list.getRecipes().isEmpty()) registration.addRecipes(TYPES.get(e.getKey()), list.getRecipes());
         }
-        ItemStack collector = Eln.findItemStack("Tree Resin Collector", 1), resin = Eln.findItemStack("Tree Resin", 1);
-        if (!collector.isEmpty() && !resin.isEmpty())
-            registration.addRecipes(ResinCategory.TYPE, List.of(new ResinCategory.Resin(collector, resin)));
-        ItemStack lam = Eln.findItemStack("Silicon Steel Laminations", 1), core = Eln.findItemStack("Average Ferromagnetic Core", 1);
-        if (!lam.isEmpty() && !core.isEmpty()) registration.addRecipes(AnnealCategory.TYPE, List.of(new AnnealCategory.Anneal(lam, core)));
-        if (!Eln.findItemStack("230V Wire Drawing Machine", 1).isEmpty()) registration.addRecipes(WireDrawingCategory.TYPE, WireDrawingCategory.examples());
+        registration.addRecipes(ResinCategory.TYPE, JeiPages.resins());
+        registration.addRecipes(AnnealCategory.TYPE, JeiPages.anneals());
+        registration.addRecipes(WireDrawingCategory.TYPE, JeiPages.draws());
+        // what no recipe makes (ores, oil, fuel cuts, a blown fuse, a print, creative-only items): an information page
+        for (JeiPages.Info i : JeiPages.infos()) registration.addItemStackInfo(i.items(), net.minecraft.network.chat.Component.translatable(i.key()));
     }
 
-    /** The pipe sensor devices' own items are internal (the pipe sensor items place them): kept out of the list, so each
-     *  sensor's name shows once (a lab test found two of each). */
+    /** What JeiPages.hidden() names is kept out of the list. */
     @Override
     public void onRuntimeAvailable(mezz.jei.api.runtime.IJeiRuntime runtime) {
         List<ItemStack> hidden = new java.util.ArrayList<>();
-        for (int s = 0; s < 3; s++) {
-            var d = mods.eln.node.voxel.PipeSensorItem.device(s);
-            if (d != null && d.parentItem != null) hidden.add(new ItemStack(d.parentItem));
-        }
-        // the 1.12 fuses for the other tiers: no longer made, one Lead Fuse rated in its holder (Baughn 2026-11-06)
-        for (String n : new String[]{"Lead Fuse for medium voltage cables", "Lead Fuse for high voltage cables", "Lead Fuse for very high voltage cables"}) {
-            ItemStack f = Eln.findItemStack(n, 1);
-            if (!f.isEmpty()) hidden.add(f);
-        }
+        for (net.minecraft.world.item.Item i : JeiPages.hidden()) hidden.add(new ItemStack(i));
         if (!hidden.isEmpty()) runtime.getIngredientManager().removeIngredientsAtRuntime(mezz.jei.api.constants.VanillaTypes.ITEM_STACK, hidden);
     }
 
@@ -113,18 +97,13 @@ public class ElnJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        for (var e : MACHINES.entrySet()) {
+        for (var e : JeiPages.MACHINES.entrySet()) {
             var list = e.getValue().get();
             if (list.getRecipes().isEmpty()) continue;
             for (ItemStack m : list.getMachines()) registration.addCraftingStation(TYPES.get(e.getKey()), m);
         }
-        ItemStack collector = Eln.findItemStack("Tree Resin Collector", 1);
-        if (!collector.isEmpty()) registration.addCraftingStation(ResinCategory.TYPE, collector);
-        ItemStack furnace = Eln.findItemStack("Electrical Furnace", 1);
-        if (!furnace.isEmpty()) registration.addCraftingStation(AnnealCategory.TYPE, furnace);
-        for (String n : new String[]{"48V Wire Drawing Machine", "230V Wire Drawing Machine"}) {
-            ItemStack m = Eln.findItemStack(n, 1);
-            if (!m.isEmpty()) registration.addCraftingStation(WireDrawingCategory.TYPE, m);
-        }
+        if (!JeiPages.resins().isEmpty()) registration.addCraftingStation(ResinCategory.TYPE, JeiPages.collector());
+        if (!JeiPages.anneals().isEmpty()) registration.addCraftingStation(AnnealCategory.TYPE, JeiPages.furnace());
+        for (ItemStack m : JeiPages.drawers()) registration.addCraftingStation(WireDrawingCategory.TYPE, m);
     }
 }

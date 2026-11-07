@@ -133,6 +133,14 @@ type `data/eln/damage_type/scald.json` (steam jets) is tagged `bypasses_armor`.
   macerator list's `RecipesList.fallback`; Baughn 2026-10-25). An ore that drops itself (ancient debris) has none.
 - Golden comparison against 1.12 (crafting, smelting and the machine lists): `gametest/GoldenRecipesCase`
   (`golden_recipes`). See testing.md.
+- JEI (Baughn 2026-11-06): every EA item JEI lists can be made by clicking its recipe, then its ingredients', down
+  to vanilla. `compat/JeiPages` (no JEI classes) holds what the plugin `compat/jei/ElnJeiPlugin` shows beyond the
+  game's recipes: the machine lists, resin, annealing and wire-drawing pages, information pages (ores, tar sand, oil
+  and its cuts, the blown fuse, the data logger print, creative-only items; text `jei.eln.info.*`) and the items kept
+  out of the list (dead ends: old 50 V/200 V turbines, ferrite ingot, the cinnabar chain; other-tier fuses; pipe
+  sensor devices). JEI lists what the creative tabs list, so the fuel buckets are in the tab (`ElnRegistry.TAB_EXTRAS`).
+  `gametest/cases/JeiAuditCases` (`jei_every_item_reachable`) grows the obtainable set from vanilla over all of it
+  and names any listed item left out. A new item needs a recipe, a page, or a place in `hidden()`.
 
 ## Datagen
 

@@ -8,6 +8,7 @@ import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 import mezz.jei.api.recipe.types.IRecipeType;
 import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess;
 import net.minecraft.network.chat.Component;
+import mods.eln.compat.JeiPages.Anneal;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -15,10 +16,7 @@ import net.minecraft.world.item.ItemStack;
  * Core in a window of temperature (ElectricalFurnaceProcess). Not a vanilla smelting recipe, so JEI had nothing for the
  * core (AdventurAgent): this shows it.
  */
-public class AnnealCategory extends AbstractRecipeCategory<AnnealCategory.Anneal> {
-    public record Anneal(ItemStack in, ItemStack out) {
-    }
-
+public class AnnealCategory extends AbstractRecipeCategory<Anneal> {
     public static final IRecipeType<Anneal> TYPE = IRecipeType.create("eln", "anneal", Anneal.class);
 
     public AnnealCategory(IGuiHelper gui, ItemStack furnace) {

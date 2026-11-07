@@ -140,7 +140,7 @@ transparent neighbour).
   laid a second pipe beside the first).
 - Its kind shows on the body's top: a coloured plate (pressure blue, temperature red, quality green) with a raised white
   letter P, T or Q for colourblind players. Jade's three headline lines: the reading, the output volts, the full scale.
-- Its own hidden items are out of the creative tab (`addWithoutRegistry`) and JEI (`ElnJeiPlugin.onRuntimeAvailable`).
+- Its own hidden items are out of the creative tab (`addWithoutRegistry`) and JEI (`compat/JeiPages.hidden`).
 - Its port is `PORT_HEIGHT` (4) voxels off the face over its centre (`PipeTransmitterElement.port`), clear of its
   2-voxel body. `PipePlacer.devicePort` makes it a routing end any way round (dir -1) when a pipe kit clicks the
   device, for a route's start and its finish (laid with `lay`; the piece ends capped at the port). `KitPreview` does

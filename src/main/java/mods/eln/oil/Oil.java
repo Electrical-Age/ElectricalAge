@@ -117,7 +117,10 @@ public final class Oil {
                 .density(density).viscosity(viscosity)));
             source = FLUIDS.register(id, () -> new BaseFlowingFluid.Source(props()));
             flowing = FLUIDS.register("flowing_" + id, () -> new BaseFlowingFluid.Flowing(props()));
-            if (bucket) bucketItem = ITEMS.registerItem(id + "_bucket", p -> new BucketItem(source.get(), p.craftRemainder(Items.BUCKET).stacksTo(1)));
+            if (bucket) {
+                bucketItem = ITEMS.registerItem(id + "_bucket", p -> new BucketItem(source.get(), p.craftRemainder(Items.BUCKET).stacksTo(1)));
+                mods.eln.registry.ElnRegistry.TAB_EXTRAS.add(bucketItem);
+            }
         }
     }
 
@@ -136,6 +139,7 @@ public final class Oil {
         CRUDE_FLOWING = FLUIDS.register("flowing_crude_oil", () -> new BaseFlowingFluid.Flowing(crudeProps()));
         CRUDE_BLOCK = BLOCKS.registerBlock("crude_oil", p -> new LiquidBlock(CRUDE.get(), p), p -> liquidProps(p));
         CRUDE_BUCKET = ITEMS.registerItem("crude_oil_bucket", p -> new BucketItem(CRUDE.get(), p.craftRemainder(Items.BUCKET).stacksTo(1)));
+        mods.eln.registry.ElnRegistry.TAB_EXTRAS.add(CRUDE_BUCKET);
         RESERVOIR_OIL = FLUIDS.register("reservoir_oil", ReservoirOilFluid::new);
         STEAM = FLUIDS.register("steam", () -> new BaseFlowingFluid.Source(new BaseFlowingFluid.Properties(STEAM_TYPE, STEAM, STEAM_FLOWING)));
         STEAM_FLOWING = FLUIDS.register("flowing_steam", () -> new BaseFlowingFluid.Flowing(new BaseFlowingFluid.Properties(STEAM_TYPE, STEAM, STEAM_FLOWING)));
