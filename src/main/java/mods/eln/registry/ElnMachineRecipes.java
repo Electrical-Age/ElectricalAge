@@ -197,8 +197,12 @@ public final class ElnMachineRecipes {
         add(compressorRecipes, new Recipe(new ItemStack(Blocks.SAND),
             findItemStack("Dielectric", 4), 2000.0));
 
-        add(compressorRecipes, new Recipe(new ItemStack(Blocks.OAK_LOG),
-            findItemStack("Tree Resin"), 3000.0));
+        // resin from logs (Baughn 2026-11-07): two rubber logs give three resin, two of any other log one (it was one
+        // a log). The rubber log comes first: the other recipe takes any log (minecraft:logs).
+        compressorRecipes.addRecipe(new Recipe(new ItemStack(mods.eln.rubber.RubberTrees.LOG_ITEM.get(), 2),
+            findItemStack("Tree Resin", 3), 6000.0));
+        add(compressorRecipes, new Recipe(new ItemStack(Blocks.OAK_LOG, 2),
+            findItemStack("Tree Resin"), 6000.0));
 
     }
 

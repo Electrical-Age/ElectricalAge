@@ -62,6 +62,7 @@ public class ElnLang extends LanguageProvider {
         add("jei.eln.info.sulfur_dust", "Macerate vanilla sulfur from the Sulfur Caves: a sulfur block gives 4 to 5 dust, a spike 1. Mixed into Rubber Compound, it vulcanises raw rubber.");
         add("jei.eln.info.soul_dust", "Macerate soul sand or soul soil. The activator in Rubber Compound.");
         add("jei.eln.info.rubber", "Smelt Tree Resin to Raw Rubber. Raw Rubber smelts to 1 Rubber; mixed with Sulfur Dust and Soul Dust into Rubber Compound, it vulcanises to twice as much in an Electrical Furnace held at 130-200 °C (above 230 °C it chars).");
+        add("jei.eln.info.rubber_sapling", "Rubber trees grow wild in small groves in jungles. Craft a sapling from a jungle, an oak, a birch and an acacia sapling. A Tree Resin Collector on a rubber tree collects three times what it gets from any other tree.");
         add("jei.eln.info.tar_sand", "Rims the small oil ponds dug over some oil lakes. A Tar Sand Separator gets crude oil out of it.");
         add("jei.eln.info.crude_oil", "From oil lakes underground, through an Oil Pump, or from the small ponds over some of them. An empty bucket takes it from a pond, or 1000 mB from a pump or tank that holds that much.");
         add("jei.eln.info.fraction", "Drawn off a Fractionating Column fed with hot crude oil: each segment draws off its own cut, the base the residue. An empty bucket takes 1000 mB from any EA device holding that much.");
@@ -78,10 +79,10 @@ public class ElnLang extends LanguageProvider {
         add("jei.eln.machine.magnetiser", "Magnetizer");
         add("jei.eln.machine.separator", "Separator");
         add("jei.eln.machine.extra", "(sometimes more)");
-        add("jei.eln.tree_resin_collector.how", "On the side of a log under leaves. Right-click it to empty it.");
+        add("jei.eln.tree_resin_collector.how", "On the side of a log under leaves. Right-click it to empty it. A rubber tree gives three times as much.");
         // the guide advancements' hints (Baughn's words, 2026-10-20; data/eln/advancement/guide, tools/advancements/make_guide.py)
         add("advancements.eln.guide.root.title", "Electrical Age");
-        add("advancements.eln.guide.root.description", "Every tree is a rubber tree.");
+        add("advancements.eln.guide.root.description", "Every tree gives a little resin; rubber trees give the most.");
         add("advancements.eln.guide.copper_cable.title", "Live Wire");
         add("advancements.eln.guide.copper_cable.description", "It all starts with three copper in a row.");
         add("advancements.eln.guide.heat_furnace.title", "Fire Starter");
@@ -160,6 +161,9 @@ public class ElnLang extends LanguageProvider {
         add("block.eln.reservoir_oil", "Crude Oil");
         add("item.eln.crude_oil_bucket", "Crude Oil Bucket");
         add("block.eln.tar_sand", "Tar Sand");
+        add("block.eln.rubber_log", "Rubber Log");
+        add("block.eln.rubber_leaves", "Rubber Leaves");
+        add("block.eln.rubber_sapling", "Rubber Sapling");
         add("block.eln.well_casing", "Well Casing");
         add("fluid.eln.steam", "Steam");
         add("fluid_type.eln.steam", "Steam");

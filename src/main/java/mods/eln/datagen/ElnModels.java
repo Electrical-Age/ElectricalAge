@@ -124,6 +124,8 @@ public class ElnModels implements DataProvider {
                 continue;
             } else if (id.getPath().equals("crude_oil") || id.getPath().equals("reservoir_oil") || id.getPath().equals("tar_sand") || id.getPath().equals("well_casing")) {
                 continue;   // oil: hand-written in src/main/resources (fluids)
+            } else if (id.getPath().startsWith("rubber_")) {
+                continue;   // rubber trees: hand-written in src/main/resources
             } else if (b instanceof mods.eln.robotics.servo.ServoRailBlock || b instanceof mods.eln.robotics.servo.StationMarkerBlock) {
                 // robotics: the checked library's models (src/cadmodels ServoParts), turned to FACING; the rail's points up,
                 // the marker's north

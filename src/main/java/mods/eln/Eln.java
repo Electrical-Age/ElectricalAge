@@ -323,6 +323,7 @@ public class Eln {
         mods.eln.robotics.Robotics.register(modBus);
         mods.eln.item.belt.CuriosCompat.register(modBus);
         mods.eln.oil.Oil.register(modBus);
+        mods.eln.rubber.RubberTrees.register(modBus);   // rubber trees (Baughn 2026-11-07)
         mods.eln.sound.ElnSounds.register(modBus);
         mods.eln.datagen.ElnDataGen.register(modBus);
         mods.eln.gametest.LabCommands.register(); // /elnlab: render-port scenes (op only)

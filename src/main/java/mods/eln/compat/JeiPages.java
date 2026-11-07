@@ -140,6 +140,7 @@ public final class JeiPages {
         info(l, "sulfur_dust", "sulfur_dust");
         info(l, "soul_dust", "soul_dust");
         info(l, "rubber", "rubber", "raw_rubber", "rubber_compound");
+        info(l, "rubber_sapling", "rubber_sapling", "rubber_log", "rubber_leaves");
         info(l, "crude_oil", "crude_oil_bucket");
         info(l, "fraction", "gasoline_bucket", "diesel_bucket", "heavyoil_bucket", "residue_bucket");
         info(l, "blown_fuse", "blown_lead_fuse");

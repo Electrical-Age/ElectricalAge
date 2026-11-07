@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:jungle_sapling",
+    "minecraft:oak_sapling",
+    "minecraft:birch_sapling",
+    "minecraft:acacia_sapling"
+  ],
+  "result": {
+    "id": "eln:rubber_sapling"
+  }
+}

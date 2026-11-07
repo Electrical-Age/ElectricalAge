@@ -1596,6 +1596,11 @@ public final class ElnRecipes extends ElnRecipesBase {
     }
 
     public static void recipeTreeResinAndRubber() {
+        // rubber trees (Baughn 2026-11-07): a sapling from four others, one of them jungle; the pale wood planks as birch
+        addShapelessRecipe(stack(mods.eln.rubber.RubberTrees.SAPLING_ITEM.get()),
+            stack(Items.JUNGLE_SAPLING), stack(Items.OAK_SAPLING), stack(Items.BIRCH_SAPLING), stack(Items.ACACIA_SAPLING));
+        addShapelessRecipe(stack(Items.BIRCH_PLANKS, 4), stack(mods.eln.rubber.RubberTrees.LOG_ITEM.get()));
+
         addRecipe(findItemStack("Tree Resin Collector"),
             "W W",
             "WW ", 'W', "plankWood");

@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": { "end": "eln:block/rubber_log_top", "side": "eln:block/rubber_log" }
+}

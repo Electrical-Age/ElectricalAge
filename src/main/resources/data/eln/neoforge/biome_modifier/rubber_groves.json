@@ -1,0 +1,8 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#minecraft:is_jungle",
+  "features": [
+    "eln:rubber_grove"
+  ],
+  "step": "vegetal_decoration"
+}

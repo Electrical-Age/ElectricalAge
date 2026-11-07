@@ -64,7 +64,8 @@ final class GoldenRecipesCase implements TestCase {
      *  (the rubber chain, Baughn 2026-11-07). */
     static final Set<String> SMELT_CHANGED = Set.of("Tree Resin");
     /** Machine recipes changed on purpose (list:input): sand makes four Dielectrics, not one (Baughn 2026-10-28). */
-    static final Set<String> MACHINE_CHANGED = Set.of("compressor:Sand");
+    static final Set<String> MACHINE_CHANGED = Set.of("compressor:Sand",
+        "compressor:Oak Wood");   // (two logs a resin; Baughn 2026-11-07, rubber trees give more)
     /** Recipes changed on purpose (Baughn 2026-10-13): copper cable 1 per ingot, windings take the new Copper Coil;
      *  thermal insulation takes any wool (Baughn 2026-10-26). Their output must still have a 26.x recipe. */
     static final Set<String> CHANGED = Set.of(

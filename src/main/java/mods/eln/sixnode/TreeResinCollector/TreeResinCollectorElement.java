@@ -128,8 +128,17 @@ public class TreeResinCollectorElement extends SixNodeElement {
             Utils.println("ASSERT collectiorCount == 0");
         }
         double leaf = leafCount >= TREE_LEAVES ? 1 : 0.000000001;
-        double productPerSeconde = Math.min(0.05, occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount) * leaf;
+        double kind = treeFactor(WorldCompat.getBlock(world, posWood[0], coord.y, posWood[2]));
+        double productPerSeconde = Math.min(0.05, occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount) * leaf * kind;
         return productPerSeconde;
+    }
+
+    /** Baughn (2026-11-07): other trees give half the resin they used to, a rubber tree three times that. */
+    public static final double OTHER_TREE_FACTOR = 0.5, RUBBER_TREE_FACTOR = 1.5;
+
+    /** How much resin a trunk of this log gives, against the 1.7 rate. */
+    public static double treeFactor(net.minecraft.world.level.block.Block log) {
+        return mods.eln.rubber.RubberTrees.isRubberLog(log) ? RUBBER_TREE_FACTOR : OTHER_TREE_FACTOR;
     }
 
     /** A tree has at least this many leaves within 2 blocks (straight out) of its logs. */

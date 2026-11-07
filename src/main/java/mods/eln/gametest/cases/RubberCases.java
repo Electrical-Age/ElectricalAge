@@ -24,6 +24,78 @@ public final class RubberCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new ChainCase());
+        cases.add(new TreeCase());
+    }
+
+    /** Rubber trees (Baughn 2026-11-07): the sapling grows a rubber tree; a collector gets 1.5x the old rate on its trunk and
+     *  half on other trees; the compressor takes two logs a resin (two rubber logs: three); the grove is in the worldgen
+     *  registries; a sapling is crafted from jungle, oak, birch and acacia saplings. */
+    static final class TreeCase implements TestCase {
+        String grown = "";
+
+        public String id() {
+            return "rubber_tree";
+        }
+
+        public int width() {
+            return 11;
+        }
+
+        public int depth() {
+            return 9;
+        }
+
+        public int height() {
+            return 12;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            var ground = c.at(4, 1, 4);
+            level.setBlock(ground, Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+            var pos = ground.above();
+            var sap = mods.eln.rubber.RubberTrees.SAPLING.get().defaultBlockState();
+            level.setBlock(pos, sap, 3);
+            boolean ok = mods.eln.rubber.RubberTrees.GROWER.growTree(level, level.getChunkSource().getGenerator(), pos, sap, level.getRandom());
+            int logs = 0;
+            for (int y = 0; y < 11; y++) if (level.getBlockState(pos.above(y)).is(mods.eln.rubber.RubberTrees.LOG.get())) logs++;
+            int leaves = 0;
+            for (var p : net.minecraft.core.BlockPos.betweenClosed(pos.offset(-3, 0, -3), pos.offset(3, 10, 3)))
+                if (level.getBlockState(p).is(mods.eln.rubber.RubberTrees.LEAVES.get())) leaves++;
+            grown = ok + " " + logs + " logs " + leaves + " leaves";
+        }
+
+        public void measure(TestContext c) {
+            c.check("a rubber sapling grows a rubber tree (7-10 logs, leaves)", grown.startsWith("true ") && !grown.contains(" 0 leaves")
+                && Integer.parseInt(grown.split(" ")[1]) >= 7, grown);
+            c.check("rubber logs are logs, its leaves leaves (the collector's checks)",
+                mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor.isWood(mods.eln.rubber.RubberTrees.LOG.get())
+                    && mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor.isLeaf(mods.eln.rubber.RubberTrees.LEAVES.get()), "");
+            double oak = mods.eln.sixnode.TreeResinCollector.TreeResinCollectorElement.treeFactor(Blocks.OAK_LOG),
+                rub = mods.eln.sixnode.TreeResinCollector.TreeResinCollectorElement.treeFactor(mods.eln.rubber.RubberTrees.LOG.get());
+            c.check("a collector gets half the old rate on an oak, 1.5x on a rubber tree", oak == 0.5 && rub == 1.5, oak + " " + rub);
+
+            var oneOak = mods.eln.Eln.compressorRecipes.getRecipe(new ItemStack(Items.OAK_LOG, 1));
+            var twoOak = mods.eln.Eln.compressorRecipes.getRecipe(new ItemStack(Items.SPRUCE_LOG, 2));
+            var twoRubber = mods.eln.Eln.compressorRecipes.getRecipe(new ItemStack(mods.eln.rubber.RubberTrees.LOG_ITEM.get(), 2));
+            c.check("compressor: one log isn't enough, two logs make a resin", oneOak == null && twoOak != null
+                && twoOak.getOutputCopy()[0].getCount() == 1, oneOak + " / " + (twoOak == null ? "none" : twoOak.getOutputCopy()[0].toString()));
+            c.check("compressor: two rubber logs make three resin", twoRubber != null && twoRubber.getOutputCopy()[0].getCount() == 3,
+                twoRubber == null ? "none" : twoRubber.getOutputCopy()[0].toString());
+
+            var reg = c.level().registryAccess();
+            boolean feature = reg.lookupOrThrow(net.minecraft.core.registries.Registries.FEATURE).get(mods.eln.rubber.RubberTrees.TREE).isPresent();
+            boolean grove = reg.lookupOrThrow(net.minecraft.core.registries.Registries.PLACED_FEATURE).get(net.minecraft.resources.ResourceKey.create(
+                net.minecraft.core.registries.Registries.PLACED_FEATURE, net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "rubber_grove"))).isPresent();
+            c.check("worldgen: the rubber tree and its grove are registered", feature && grove, feature + " " + grove);
+
+            List<ItemStack> grid = new ArrayList<>(List.of(new ItemStack(Items.JUNGLE_SAPLING), new ItemStack(Items.OAK_SAPLING),
+                new ItemStack(Items.BIRCH_SAPLING), new ItemStack(Items.ACACIA_SAPLING)));
+            var input = CraftingInput.of(2, 2, grid);
+            var r = c.level().recipeAccess().getRecipeFor(RecipeType.CRAFTING, input, c.level());
+            c.check("a rubber sapling from jungle, oak, birch and acacia saplings",
+                r.isPresent() && r.get().value().assemble(input).is(mods.eln.rubber.RubberTrees.SAPLING_ITEM.get()), r.map(rh -> rh.value().assemble(input).toString()).orElse("none"));
+        }
     }
 
     static final class ChainCase implements TestCase {

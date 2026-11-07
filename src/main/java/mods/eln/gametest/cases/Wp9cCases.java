@@ -1069,7 +1069,8 @@ public final class Wp9cCases {
     /**
      * Tree Resin Collector on the -X side of a 3-log trunk (logs at x2, y1..3) with four leaves on its other sides.
      * Placement rule: only on the side of wood (canBePlacedOnSide: log yes, stone no). Production =
-     * min(0.05, 3/5 / 1440 per trunk block * 3 blocks / 1 collector) = 0.00125 items/s; with fewer than 4 leaves * 1e-9.
+     * min(0.05, 3/5 / 1440 per trunk block * 3 blocks / 1 collector) = 0.00125 items/s, x 0.5 off a rubber tree; with fewer
+     * than 4 leaves * 1e-9.
      */
     static final class ResinCollectorCase extends Wp9bCases.Base {
         TreeResinCollectorElement collector;
@@ -1100,7 +1101,8 @@ public final class Wp9cCases {
             boolean onStone = d.canBePlacedOnSide(player(ctx), new Coordonate(stone.getX(), stone.getY(), stone.getZ(), ctx.world()), clicked);
             ctx.check("wp9c resin collector placement: on the side of a log yes, of stone no", onLog && !onStone,
                 "log " + onLog + ", stone " + onStone);
-            double expected = 3f / 5f / (60f * 24f) * 3;
+            // (x 0.5 on a tree that isn't a rubber tree: Baughn 2026-11-07)
+            double expected = 3f / 5f / (60f * 24f) * 3 * mods.eln.sixnode.TreeResinCollector.TreeResinCollectorElement.OTHER_TREE_FACTOR;
             ctx.checkValue("wp9c resin collector production [1/s] (3-log trunk, leaves on the other sides)", (double) call(collector, "getProductPerSecond"), expected);
             var waila = collector.getWaila();
             ctx.check("wp9c resin collector probe: pot and rate, no null (Baughn)", waila.containsKey("Resin in pot")
