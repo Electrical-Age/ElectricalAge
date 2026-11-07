@@ -49,6 +49,13 @@ public class Wp10aContent implements ElnContent {
         registerAnvil(85);
         registerWireDrawing(88);
         registerResinCollector(92);
+        registerCarbonBlackBurner(93);
+    }
+
+    /** The Carbon Black Burner (the rubber chain's oil route, 2026-11-07). Model mods.eln.cad.models.CarbonBlackBurner. */
+    public static void registerCarbonBlackBurner(int id) {
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.transparentnode.carbonblack.CarbonBlackBurnerDescriptor(
+            TR_NAME(Type.NONE, "Carbon Black Burner"), "carbonblackburner"));
     }
 
     /** The Industrial Resin Collector (Baughn 2026-11-07, the rubber chain): taps a trunk for latex on 230 V. Model

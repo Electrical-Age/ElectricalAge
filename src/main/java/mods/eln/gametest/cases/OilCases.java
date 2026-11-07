@@ -382,16 +382,19 @@ public final class OilCases {
      * fuel_furnace_buckets: a bucket's worth of each EA oil a burner fires goes into an empty one (Baughn: by bucket);
      * compressor_latex_out: the 230V compressor's latex out of its red OUT flange (its back, 9 px up) into a tank;
      * compressor_latex_in: a tank's latex into its blue IN flange (4 px up, the same face), into its press tank;
-     * resin_collector_out: the Industrial Resin Collector's latex up out of its top flange, over and down into a tank.
+     * resin_collector_out: the Industrial Resin Collector's latex up out of its top flange, over and down into a tank;
+     * carbon_burner_in: a tank's crude into the Carbon Black Burner's blue IN flange (its back, 4 px up), which burns it.
      */
     /** The 230V compressor (latex ports since 2026-11-07). */
     static final int COMPRESSOR_230 = 4 + (35 << 6);
     /** The Industrial Resin Collector (2026-11-07). */
     static final int RESIN_COLLECTOR = 0 + (92 << 6);
+    /** The Carbon Black Burner (2026-11-07). */
+    static final int CARBON_BURNER = 0 + (93 << 6);
 
     static final class OilOnPipes implements TestCase {
         static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel", "separator_out", "fuel_furnace_in", "fuel_furnace_crude", "fuel_furnace_buckets",
-            "compressor_latex_out", "compressor_latex_in", "resin_collector_out"};
+            "compressor_latex_out", "compressor_latex_in", "resin_collector_out", "carbon_burner_in"};
         final String variant;
         mods.eln.node.transparent.TransparentNodeElement west, east;
         mods.eln.oil.TankElement tank;
@@ -554,6 +557,20 @@ public final class OilCases {
                         new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Latex.SOURCE.get(), 2000), true);
                     else put(ctx, e, mods.eln.oil.Latex.SOURCE.get(), 6000);
                 }
+                case "carbon_burner_in" -> {
+                    tank = tank(ctx, w, XP);
+                    east = ctx.placeTransparent(CARBON_BURNER, e);
+                    east.front = XP;   // (its back, with the IN flange, west)
+                    east.reconnect();
+                    var a = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), w, net.minecraft.core.Direction.EAST);
+                    var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
+                    if (a == null || b == null) err = "ports: " + a + " " + b;
+                    else {
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
+                    }
+                    put(ctx, w, Oil.CRUDE.get(), 6000);   // (cold residue barely flows in a pipe, by its species: crude shows the flange works)
+                }
                 case "resin_collector_out" -> {
                     west = ctx.placeTransparent(RESIN_COLLECTOR, w);
                     tank = tank(ctx, e, XN);
@@ -607,6 +624,11 @@ public final class OilCases {
                     double got = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
                     ctx.check("latex on pipes: the 230V compressor's latex went out of its OUT flange into the tank", got > 500,
                         String.format("%.0f mB in the tank, compressor %s", got, west.getWaila()));
+                }
+                case "carbon_burner_in" -> {
+                    var cb = (mods.eln.transparentnode.carbonblack.CarbonBlackBurnerElement) east;
+                    ctx.check("oil on pipes: the tank's crude went into the carbon black burner, which burns it", cb.burnt() > 20 || cb.getWaila().toString().contains("burning"),
+                        String.format("%.0f mB burnt, %s", cb.burnt(), cb.getWaila()));
                 }
                 case "resin_collector_out" -> {
                     int id = reg.id("eln:latex");

@@ -2176,5 +2176,11 @@
   "display": "Industrial Resin Collector",
   "kind": "transparent_node",
   "name": "industrial_resin_collector"
+ },
+ "eln:transparent_node@5952": {
+  "descriptor": "CarbonBlackBurnerDescriptor",
+  "display": "Carbon Black Burner",
+  "kind": "transparent_node",
+  "name": "carbon_black_burner"
  }
 }

@@ -1,4 +1,4 @@
-// 26.3	2026-11-07T17:15:32.860984228	eln-global/EA models
+// 26.3	2026-11-07T19:27:15.171724374	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -36,6 +36,7 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/boiler.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/capacitor_bank.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/capacity_oriented_battery.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/carbon_black_burner.json
 f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/computer.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/cost_oriented_battery.json
@@ -201,6 +202,9 @@ ee011fe699481f3e2f4f72b8ef1dce937f3dff6d assets/eln/items/black_brush.json
 26f935fcd5d24d65bcd332e8a9e8eecbecc9f049 assets/eln/items/capacitor_bank.json
 1b0fda30d7df88dad46da130272273a8d88d9be8 assets/eln/items/capacitor_cell.json
 416d58aaae7250af7c091abfb63554244ca09aa6 assets/eln/items/capacity_oriented_battery.json
+01b348835ca6724be339d19b6a2ab5d2ed3a5b6a assets/eln/items/carbon_black.json
+8ca113edb1e6c749b16f1855b7e7f776c92a8855 assets/eln/items/carbon_black_burner.json
+84b7fbd7602a9d1af74d956ec2d2dcc516a0c654 assets/eln/items/carbon_black_rubber_compound.json
 a915ec2cfca7a70816ec77e554864bfaf06e22dc assets/eln/items/casing.json
 3923dc921f4278cb2812659902b5100ef7d968f5 assets/eln/items/charcoal_nugget.json
 54c73cdeae61d72e7dfca65d5655d763c6a23b82 assets/eln/items/cheap_chip.json
@@ -640,6 +644,10 @@ dc755ad6fcb99f65397dddcfa3331bfd1517ee2c assets/eln/models/item/capacitor_bank.j
 decdbe8d8a1c921126077d1ab6667f7c765adea2 assets/eln/models/item/capacitor_cell.json
 1fb49930355446d40b68162bc471465a6ac1901d assets/eln/models/item/capacity_oriented_battery.json
 c01d247e009543b7b3371b07e7b8a45e28eea766 assets/eln/models/item/capacity_oriented_battery_3d.json
+82954237c8c20a3d995d3c652f9a61db76019944 assets/eln/models/item/carbon_black.json
+2b19e190e157f1fa1bcae50605e7f6917d29ab5b assets/eln/models/item/carbon_black_burner.json
+0b0ae2bdcb11351ef8708d909f22b6fc6777e6ac assets/eln/models/item/carbon_black_burner_3d.json
+6402fe67cea47eac583cca1cfdf8b7bf9ccbd725 assets/eln/models/item/carbon_black_rubber_compound.json
 ccab4471b309e90a6f273d50e50f9ad1052fb4ff assets/eln/models/item/casing.json
 61fdc35c2155e60b578b6788c4cf9b95d9114fe7 assets/eln/models/item/charcoal_nugget.json
 bf73432e1181339472b745af9693c30e46be8c6d assets/eln/models/item/cheap_chip.json

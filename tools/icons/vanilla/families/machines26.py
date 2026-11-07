@@ -145,3 +145,21 @@ def resin_collector():
         cv.set(x, 2, c)                                                            # the OUT flange
     leds(cv, 2, 8)
     return cv
+
+
+# ------------------------------------------------------------------------------- carbon black burner
+BRICK = (h('#3a1a12'), h('#4a2016'), h('#6e3424'), h('#8e4a32'), h('#ad6648'), h('#c88466'))
+
+
+def carbon_black_burner():
+    """The firebrick box with its steel bands, the stack and its smoke-black lip, the fire in the sight port."""
+    cv = Canvas(16)
+    box(cv, 1, 13, 11, 1, 3, DARK, bevel=False)
+    sub(cv, lambda c: (box(c, 7, 1, 2, 6, 1, DARK, bevel=False)))                   # the stack
+    zb = zsolid([('box', 1, 6, 9, 7, 3, 0)])
+    zpaint(cv, zb, BRICK, bevel=True)
+    for x in range(1, 10):
+        cv.set(x, 8, DARK[2])
+        cv.set(x, 11, DARK[2])                                                     # bands
+    cv.set(4, 9, h('#ffb030')); cv.set(5, 9, h('#ff7a20')); cv.set(4, 10, h('#ff7a20'))   # fire
+    return cv

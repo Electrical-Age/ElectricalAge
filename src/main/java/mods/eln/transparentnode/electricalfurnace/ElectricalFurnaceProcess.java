@@ -118,7 +118,10 @@ public class ElectricalFurnaceProcess implements IProcess {
         new HeatTreatment(() -> mods.eln.Eln.findItemStack("Silicon Steel Laminations"), ANNEAL_MIN_C, ANNEAL_MAX_C, ANNEAL_SPOIL_C, ANNEAL_ENERGY,
             () -> mods.eln.Eln.findItemStack("Average Ferromagnetic Core"), () -> mods.eln.Eln.findItemStack("Iron Dust", 4)),
         new HeatTreatment(() -> new ItemStack(mods.eln.registry.ElnRegistry.RUBBER_COMPOUND.get()), VULCANISE_MIN_C, VULCANISE_MAX_C, VULCANISE_SPOIL_C,
-            VULCANISE_ENERGY, () -> mods.eln.Eln.findItemStack("Rubber", 8), () -> new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get(), 2)));
+            VULCANISE_ENERGY, () -> mods.eln.Eln.findItemStack("Rubber", 8), () -> new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get(), 2)),
+        // with carbon black as a filler (Baughn 2026-11-07): 11 Rubber
+        new HeatTreatment(() -> new ItemStack(mods.eln.registry.ElnRegistry.CARBON_BLACK_COMPOUND.get()), VULCANISE_MIN_C, VULCANISE_MAX_C, VULCANISE_SPOIL_C,
+            VULCANISE_ENERGY, () -> mods.eln.Eln.findItemStack("Rubber", 11), () -> new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get(), 3)));
 
     /** The heat treatment for a stack, or null. */
     public static HeatTreatment treatmentFor(ItemStack in) {

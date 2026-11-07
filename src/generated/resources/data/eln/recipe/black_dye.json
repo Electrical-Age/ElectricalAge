@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:carbon_black"
+  ],
+  "result": {
+    "id": "minecraft:black_dye"
+  }
+}

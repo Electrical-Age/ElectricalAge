@@ -188,6 +188,7 @@ final class GoldenCase implements TestCase {
     /** Items new in 26.x (no 1.12 twin): Copper Coil, the thin winding wire (Baughn 2026-10-13). */
     static final java.util.Set<String> NEW_IN_26 = java.util.Set.of("eln:shared_item@4163",
         "eln:transparent_node@5888",   // the Industrial Resin Collector (the rubber chain, 2026-11-07)
+        "eln:transparent_node@5952",   // the Carbon Black Burner (the rubber chain's oil route)
         "eln:six_node@5955", "eln:six_node@5956",   // the three-channel data logger, the tilted terminal (Baughn 2026-10-30, board #45)
         "eln:six_node@7489",   // the Bus I/O Module (the field bus)
         "eln:six_node@7490", "eln:six_node@7491", "eln:six_node@7494",   // the Addressable Button and Light, the Floor Sensor (RS485, Baughn 2026-11-05)

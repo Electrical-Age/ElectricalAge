@@ -25,6 +25,7 @@ public final class RubberCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new ChainCase());
         cases.add(new TreeCase());
+        cases.add(new CarbonCase());
     }
 
     /** Rubber trees (Baughn 2026-11-07): the sapling grows a rubber fig (Ficus elastica); a collector gets 1.5x the old rate on its trunk and
@@ -119,6 +120,35 @@ public final class RubberCases {
     static final class SlotSpecName {
         static String of(mods.eln.gui.SlotSpec sl) {
             return sl.kind() + "#" + sl.index();
+        }
+    }
+
+    /** Carbon black (the oil route, 2026-11-07): the burner makes one from 500 mB of residue (20 mB/s), a filled compound
+     *  vulcanises to 11 Rubber, carbon black is a black dye. */
+    static final class CarbonCase implements TestCase {
+        mods.eln.transparentnode.carbonblack.CarbonBlackBurnerElement burner;
+
+        public String id() {
+            return "carbon_black";
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext c) {
+            burner = (mods.eln.transparentnode.carbonblack.CarbonBlackBurnerElement) c.placeTransparent(0 + (93 << 6), c.at(2, 1, 1));
+            ((mods.eln.fluid.ElementFluidHandler) burner.getFluidHandler()).fill(
+                new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.Cut.RESIDUE.source.get(), 2000), true);
+        }
+
+        public void measure(TestContext c) {
+            c.check("the burner made a Carbon Black from 500 mB of residue (30 s at 20 mB/s)", burner.carbon() >= 1,
+                String.format("%d, %.0f mB burnt", burner.carbon(), burner.burnt()));
+            var h = mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.treatmentFor(new ItemStack(ElnRegistry.CARBON_BLACK_COMPOUND.get()));
+            c.check("a carbon black compound vulcanises to 11 Rubber (Baughn: a filler)", h != null && h.out().get().getCount() == 11, String.valueOf(h));
+            c.check("carbon black is a black dye (c:dyes/black)", new ItemStack(ElnRegistry.CARBON_BLACK.get()).is(net.minecraft.tags.TagKey.create(
+                net.minecraft.core.registries.Registries.ITEM, net.minecraft.resources.Identifier.parse("c:dyes/black"))), "");
         }
     }
 

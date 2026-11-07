@@ -1188,6 +1188,22 @@ public final class ElnRecipes extends ElnRecipesBase {
             stack(mods.eln.registry.ElnRegistry.RAW_RUBBER.get()), stack(mods.eln.registry.ElnRegistry.RAW_RUBBER.get()),
             stack(mods.eln.registry.ElnRegistry.SULFUR_DUST.get()), stack(mods.eln.registry.ElnRegistry.SOUL_DUST.get()));
         // (the compound vulcanises only in the Electrical Furnace, held at its temperature: ElectricalFurnaceProcess.TREATMENTS)
+        // carbon black as a filler (Baughn 2026-11-07, option A): the same compound with a Carbon Black vulcanises to 11;
+        // and it is a black dye
+        addShapelessRecipe(stack(mods.eln.registry.ElnRegistry.CARBON_BLACK_COMPOUND.get()),
+            stack(mods.eln.registry.ElnRegistry.RAW_RUBBER.get()), stack(mods.eln.registry.ElnRegistry.RAW_RUBBER.get()),
+            stack(mods.eln.registry.ElnRegistry.RAW_RUBBER.get()), stack(mods.eln.registry.ElnRegistry.RAW_RUBBER.get()),
+            stack(mods.eln.registry.ElnRegistry.SULFUR_DUST.get()), stack(mods.eln.registry.ElnRegistry.SOUL_DUST.get()),
+            stack(mods.eln.registry.ElnRegistry.CARBON_BLACK.get()));
+        addShapelessRecipe(stack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("black_dye"))),
+            stack(mods.eln.registry.ElnRegistry.CARBON_BLACK.get()));
+        addRecipe(findItemStack("Carbon Black Burner", 1),
+            " P ",
+            "BFB",
+            "BBB",
+            'P', findItemStack("Iron Plate"),
+            'B', stack(Items.BRICKS),
+            'F', stack(Items.FURNACE));
 
     }
 

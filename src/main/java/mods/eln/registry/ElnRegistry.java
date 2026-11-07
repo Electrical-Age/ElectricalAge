@@ -133,6 +133,11 @@ public final class ElnRegistry {
     public static final DeferredItem<Item> SOUL_DUST = ITEMS.registerSimpleItem("soul_dust");
     public static final DeferredItem<Item> RAW_RUBBER = ITEMS.registerSimpleItem("raw_rubber");
     public static final DeferredItem<Item> RUBBER_COMPOUND = ITEMS.registerSimpleItem("rubber_compound");
+    /** Carbon black (the rubber chain's oil route, 2026-11-07): soot from burning heavy oil or residue starved of air
+     *  (the Carbon Black Burner); a black dye (tag c:dyes/black), and a filler: a compound with it vulcanises to more
+     *  Rubber (Baughn: filler, option A). */
+    public static final DeferredItem<Item> CARBON_BLACK = ITEMS.registerSimpleItem("carbon_black");
+    public static final DeferredItem<Item> CARBON_BLACK_COMPOUND = ITEMS.registerSimpleItem("carbon_black_rubber_compound");
     /** A Capacitor Bank's can (Baughn 2026-10-28): six Dielectrics round a block of redstone; six make a bank. */
     public static final DeferredItem<Item> CAPACITOR_CELL = ITEMS.registerSimpleItem("capacitor_cell");
     /** What food turns into in an electrical oven above 280 °C (Baughn); four make a charcoal, and it burns a quarter as long. */
@@ -361,6 +366,8 @@ public final class ElnRegistry {
         ALL_ITEMS.add(SOUL_DUST);
         ALL_ITEMS.add(RAW_RUBBER);
         ALL_ITEMS.add(RUBBER_COMPOUND);
+        ALL_ITEMS.add(CARBON_BLACK);
+        ALL_ITEMS.add(CARBON_BLACK_COMPOUND);
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
             .icon(() -> new ItemStack(tabIcon.get()))

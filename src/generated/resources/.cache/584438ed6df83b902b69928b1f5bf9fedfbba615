@@ -1,4 +1,4 @@
-// 26.3	2026-11-07T17:15:32.864897424	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-07T19:27:15.175629006	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -90,6 +90,7 @@ f289486095d89988f698c37c5d367dc83b161c16 data/eln/advancement/recipes/misc/big_f
 8adb36e95b31e6e9b845c1129dddb9476dc0a250 data/eln/advancement/recipes/misc/birch_planks.json
 050aa2bbc1ec70cbd0c9b5cdb9beb8960ef703f7 data/eln/advancement/recipes/misc/birch_planks_2.json
 2501e5ea88438b2af90471608116cac06a6e26e8 data/eln/advancement/recipes/misc/black_brush.json
+b9d6302b02f7322426a980a05795cf6591194c00 data/eln/advancement/recipes/misc/black_dye.json
 99ae0efd8c0ccafddc9ab9361155ecf7fa6da6a7 data/eln/advancement/recipes/misc/blasting_raw_lead_2.json
 48e1ac1745c2bab169ae79b8355a217ff57a1b03 data/eln/advancement/recipes/misc/blasting_raw_tungsten_2.json
 0422be25ff77f9d9a6e621f5f9e381118a147066 data/eln/advancement/recipes/misc/blue_brush.json
@@ -105,6 +106,8 @@ a5275b5ccd3d616e94cb41d832d72089b7162d45 data/eln/advancement/recipes/misc/cable
 1ed758878c96ccb177e26898cf87b3eb6ba6799d data/eln/advancement/recipes/misc/capacitor_bank.json
 721b24687736891e1289922bce10b7a2f728030f data/eln/advancement/recipes/misc/capacitor_cell.json
 727ff8c6105794cf50890d21503562ad91ba5af3 data/eln/advancement/recipes/misc/capacity_oriented_battery.json
+055651c687ae33309bd8bc478ca56704d4127980 data/eln/advancement/recipes/misc/carbon_black_burner.json
+791997cbc7184891889b2dc24796ee8fbf3e4df0 data/eln/advancement/recipes/misc/carbon_black_rubber_compound.json
 9fcd80d4de5e8f37f7005751e6fb2b566937432a data/eln/advancement/recipes/misc/casing.json
 51678bd91fdf0fd4d45cf8945f27a844441ef9c4 data/eln/advancement/recipes/misc/charcoal.json
 c1c02f926058e1a5bf383be49d8fad52eb0c9dff data/eln/advancement/recipes/misc/charcoal_nugget.json
@@ -469,6 +472,7 @@ e1b3870485515b24146953a51d534596cf57c58d data/eln/recipe/auto_miner.json
 d04b55a424837a091ce5119b9dbb653f438f9b18 data/eln/recipe/birch_planks.json
 e2cfad2a85df248f6979f6980caa5482a5b41c42 data/eln/recipe/birch_planks_2.json
 1400d68edba46e673564ca9489831bad2b19be47 data/eln/recipe/black_brush.json
+817a20a6f4366a89f93c0686db99987927697d52 data/eln/recipe/black_dye.json
 c0fbc37fef711710f071e961fde22bae501d6883 data/eln/recipe/blasting_raw_lead_2.json
 bd83f8e28296e360fafeb22cf8cab8536161a42c data/eln/recipe/blasting_raw_tungsten_2.json
 351b690d7cf1b517859cc5b1d42e1e8a944e9634 data/eln/recipe/blue_brush.json
@@ -484,6 +488,8 @@ bd83f8e28296e360fafeb22cf8cab8536161a42c data/eln/recipe/blasting_raw_tungsten_2
 af3158d57d5adb8ba826254613d5e0c27f6055d6 data/eln/recipe/capacitor_bank.json
 50b17ae4822cc8fe7f74e6b92a4e7bbc84ab9af8 data/eln/recipe/capacitor_cell.json
 2654bb694e4ec304ddc307586afb15f0bfdbe5d4 data/eln/recipe/capacity_oriented_battery.json
+a0f7ef8f0e0befaccc272349a2c0c20cc3640b1e data/eln/recipe/carbon_black_burner.json
+7b8f99da913405361ad23ac994abfc786dacd68b data/eln/recipe/carbon_black_rubber_compound.json
 6642247514f8b88b66706cab4b85fe4cc818527e data/eln/recipe/casing.json
 56412ab86155c5379106a743c5f67611b5ed06c1 data/eln/recipe/charcoal.json
 3dda76ae8f0f3575454b313488ed551b28f72428 data/eln/recipe/charcoal_nugget.json

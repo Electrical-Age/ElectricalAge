@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:bricks",
+    "F": "minecraft:furnace",
+    "P": "eln:iron_plate"
+  },
+  "pattern": [
+    " P ",
+    "BFB",
+    "BBB"
+  ],
+  "result": {
+    "id": "eln:carbon_black_burner"
+  }
+}

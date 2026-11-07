@@ -225,9 +225,23 @@ def rubber_compound():
     return cv
 
 
+def carbon_black():
+    """Soot: the kit's low heap in the darkest carbon, a dull grain."""
+    return dust(kit.CARBON)
+
+
+def carbon_black_rubber_compound():
+    """The compound ball, near-black (carbon black filler), flecked with sulfur yellow."""
+    cv = paint_grid(RUBBER, kit.RUBBER_BLACK)
+    for (x, y) in ((6, 8), (9, 10), (10, 7)):
+        cv.set(x, y, SULFUR[3])
+    return cv
+
+
 # ------------------------------------------------------------------------------ dispatcher
 _SPECIAL = {'mercury': mercury, 'rubber': rubber, 'tree_resin': tree_resin, 'dielectric': dielectric,
-            'sulfur_dust': sulfur_dust, 'soul_dust': soul_dust, 'raw_rubber': raw_rubber, 'rubber_compound': rubber_compound}
+            'sulfur_dust': sulfur_dust, 'soul_dust': soul_dust, 'raw_rubber': raw_rubber, 'rubber_compound': rubber_compound,
+            'carbon_black': carbon_black, 'carbon_black_rubber_compound': carbon_black_rubber_compound}
 
 
 def icon(item_id):
