@@ -173,7 +173,7 @@ public class ElnLang extends LanguageProvider {
         add("fluid_type.eln.latex", "Latex");
         add("item.eln.latex_bucket", "Latex Bucket");
         add("jei.eln.info.industrial_resin_collector", "Set it against a tree trunk by its back, on 230 V at its sides. It taps latex ten times as fast as a Tree Resin Collector (a rubber tree gives three times what any other does) and pushes it out of the red flange on top.");
-        add("jei.eln.info.carbon_black", "Soot: a Carbon Black Burner makes one from 500 mB of heavy oil, residue or crude burnt starved of air. A black dye, and a filler: a Rubber Compound with one vulcanises to 11 Rubber.");
+        add("jei.eln.info.carbon_black", "Soot: a Carbon Black Burner makes one from 500 mB of heavy oil, residue or crude burnt starved of air, into a hopper under it. A black dye, and a filler: a Rubber Compound with one vulcanises to 11 Rubber.");
         add("jei.eln.info.latex", "Rubber trees' milky sap. An Industrial Resin Collector taps it from a trunk, and a 230V Compressor presses it from dandelions; the 230V Compressor presses 250 mB of it, fed into its blue IN flange, to a Raw Rubber.");
         for (var c : mods.eln.oil.Oil.Cut.values()) {
             add("fluid.eln." + c.id, c.display);

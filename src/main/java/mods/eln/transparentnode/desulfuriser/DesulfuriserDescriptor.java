@@ -20,7 +20,7 @@ import static mods.eln.i18n.I18N.tr;
  * The Desulfuriser (the rubber chain's oil route, 2026-11-07): a heated vessel in line on a refinery cut's pipe. The cut
  * comes in at the blue IN flange on its back and leaves unchanged by the red OUT flange on its front, up to 50 mB/s at
  * its rated 1 kW (it holds no more than its small tanks); every 2000 mB it treats leaves a Sulfur Dust (real refineries'
- * sulfur comes from hydrodesulfurisation), which it pushes into a container under it or a right-click takes. 230 V on its
+ * sulfur comes from hydrodesulfurisation), which it pushes into a hopper under it or a right-click takes. 230 V on its
  * side faces. Model mods.eln.cad.models.Desulfuriser.
  */
 public class DesulfuriserDescriptor extends TransparentNodeDescriptor {
@@ -68,7 +68,7 @@ public class DesulfuriserDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("In line on a refinery cut's pipe:\nin at the blue flange on its back,\nout at the red one on its front.\nA Sulfur Dust every 2000 mB treated.\nNominal power: %1$W",
+        Collections.addAll(list, tr("In line on a refinery cut's pipe:\nin at the blue flange on its back,\nout at the red one on its front.\nA Sulfur Dust every 2000 mB treated,\ninto a hopper under it.\nNominal power: %1$W",
             mods.eln.misc.Utils.plotValue(nominalP)).split("\n"));
     }
 }

@@ -647,13 +647,16 @@ public final class LabCommands {
         var level = src.getLevel();
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
         var bd = mods.eln.Eln.transparentNodeItem.getDescriptor(0 + (93 << 6));
+        level.setBlockAndUpdate(pos.below(), net.minecraft.world.level.block.Blocks.HOPPER.defaultBlockState());
         var bn = ((mods.eln.node.transparent.TransparentNodeItem) bd.parentItem).placeAt(bd.newItemStack(), player, level, pos, mods.eln.misc.Direction.YN);
         if (bn == null) src.sendFailure(Component.literal("no room for the carbon black burner at " + pos.toShortString()));
-        level.setBlockAndUpdate(pos.below(), net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState());   // (after: it stands on the floor)
+        // (a hopper under it, which a transparent node may stand on, and a chest under that)
+        level.setBlockAndUpdate(pos.below(2), net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState());
+        level.setBlockAndUpdate(pos.below(), net.minecraft.world.level.block.Blocks.HOPPER.defaultBlockState());
         if (bn != null && bn.element != null) {
             var back = bn.element.front.back().toEnumFacing();
             String r = tankPiped(src, pos.relative(back, 2), pos, back, null, 6000, mods.eln.oil.Oil.CRUDE.get());
-            src.sendSuccess(() -> Component.literal("a carbon black burner " + pos.toShortString() + " (a chest under it): " + r), false);
+            src.sendSuccess(() -> Component.literal("a carbon black burner " + pos.toShortString() + " (a hopper and a chest under it): " + r), false);
         }
         BlockPos dp = pos.offset(8, 0, 0);
         furnaceRigs(src, dp, "desulfuriser", new String[]{"Desulfuriser"}, new float[]{0});

@@ -70,7 +70,7 @@ public class CarbonBlackBurnerElement extends TransparentNodeElement implements 
         }
     }
 
-    /** Into a container under it (a hopper, a chest), as many as it takes. */
+    /** Into a hopper under it (a transparent node stands on a full block or a hopper), as many as it takes. */
     void pushBelow() {
         var level = node.coordonate.world();
         if (level == null) return;

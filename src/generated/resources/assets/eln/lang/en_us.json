@@ -596,7 +596,7 @@
   "jei.eln.anneal": "Heat treatment",
   "jei.eln.anneal.how": "Between %s and %s °C (%s kJ)",
   "jei.eln.info.blown_fuse": "What is left of a Lead Fuse after it blows. Take it out of the holder and put in a new fuse.",
-  "jei.eln.info.carbon_black": "Soot: a Carbon Black Burner makes one from 500 mB of heavy oil, residue or crude burnt starved of air. A black dye, and a filler: a Rubber Compound with one vulcanises to 11 Rubber.",
+  "jei.eln.info.carbon_black": "Soot: a Carbon Black Burner makes one from 500 mB of heavy oil, residue or crude burnt starved of air, into a hopper under it. A black dye, and a filler: a Rubber Compound with one vulcanises to 11 Rubber.",
   "jei.eln.info.creative": "Creative only: no recipe makes it.",
   "jei.eln.info.crude_oil": "From oil lakes underground, through an Oil Pump, or from the small ponds over some of them. An empty bucket takes it from a pond, or 1000 mB from a pump or tank that holds that much.",
   "jei.eln.info.data_logger_print": "A Data Logger prints its graph when you press Print on its screen, on paper in its paper slot.",

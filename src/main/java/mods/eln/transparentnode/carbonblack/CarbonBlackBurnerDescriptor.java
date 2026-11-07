@@ -14,7 +14,7 @@ import static mods.eln.i18n.I18N.tr;
 /**
  * The Carbon Black Burner (the rubber chain's oil route, 2026-11-07): heavy oil, residue or crude, fed into its blue IN
  * flange on the back, burns starved of air in a firebrick box (the furnace process); the soot collects as Carbon Black,
- * which it pushes into a container under it, or a right-click takes. It gives no useful heat (LabAgent: starved, less
+ * which it pushes into a hopper under it (it may stand on one), or a right-click takes. It gives no useful heat (LabAgent: starved, less
  * than the fuel furnace), only black smoke up its stack. No power. Model mods.eln.cad.models.CarbonBlackBurner.
  */
 public class CarbonBlackBurnerDescriptor extends TransparentNodeDescriptor {
@@ -64,6 +64,6 @@ public class CarbonBlackBurnerDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Burns heavy oil, residue or crude\nstarved of air, fed into the blue IN\nflange on its back: Carbon Black,\none a 500 mB. Pushes it into a\ncontainer below; right-click takes it.").split("\n"));
+        Collections.addAll(list, tr("Burns heavy oil, residue or crude\nstarved of air, fed into the blue IN\nflange on its back: Carbon Black,\none a 500 mB. Pushes it into a\nhopper under it; right-click takes it.").split("\n"));
     }
 }
