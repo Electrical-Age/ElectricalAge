@@ -378,7 +378,8 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         if (vessel == null) return info;
         info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s, %.0f °C", vessel.P() / 1e5, EaUnits.contents(vessel), vessel.T() - Water.T0));
         info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
-        info.put(I18N.tr("Water"), String.format("%.0f mB, %.0f%% full", vessel.mLiquid() / EaUnits.KG_PER_MB_WATER, fill() * 100));
+        // (all its liquids: "Water" counted only water while the share counted latex too, LabAssistant)
+        info.put(I18N.tr("Liquid"), String.format("%.0f mB, %.0f%% full", vessel.liquidVolume() * Water.RHO_L / EaUnits.KG_PER_MB_WATER, fill() * 100));
         info.put(I18N.tr("Vessel"), group == null ? I18N.tr("one block") : String.format("%d x %d x %d blocks, %.0f buckets", group.sx, group.sy, group.sz,
             vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER / 1000));
         // (its ports are drawn only where a pipe meets them: say where they are)

@@ -1987,7 +1987,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (p instanceof PipeSensorPart s) out.put(s.name(), String.format(s.sensing == PipeSensorPart.PRESSURE ? "%.2f %s (absolute) of %.0f: %.1f V" : "%.0f %s of %.0f: %.1f V",
                 s.reading, s.unit(), s.scale, s.share() * mods.eln.Eln.SVU));
         if (!details) return out;
-        out.put("Water", String.format("%.0f mB", n.mLiquid() / EaUnits.KG_PER_MB_WATER));
+        out.put("Liquid", String.format("%.0f mB", n.liquidVolume() * mods.eln.sim.fluid.Water.RHO_L / EaUnits.KG_PER_MB_WATER));
         out.put("Run volume", String.format("%.2f L", n.volume * 1000));
         out.put("Rating", String.format("works to %.0f bar, bursts at %.0f", pipe.workingPa(n.T()) / 1e5, pipe.burstPa(n.T()) / 1e5));
         for (VoxelPart p : parts) if (p instanceof AdapterPart a) out.put("Adapter", net.minecraft.core.Direction.from3DDataValue(a.face).getName());
