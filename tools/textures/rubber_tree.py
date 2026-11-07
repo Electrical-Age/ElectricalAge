@@ -90,8 +90,11 @@ def leaves():
             if im.getpixel((x, y))[3] == 0 and r.random() < 0.3:
                 im.putpixel((x, y), dark)
     # the red sheath of a new shoot: two pixels at one leaf's tip
-    for p in ((11, 0), (11, 1)):
+    # (AdventurAgent: two dots barely showed from the ground; three sheaths, each a bright red spike of three pixels)
+    for p in ((11, 0), (11, 1), (12, 0), (3, 7), (3, 8), (14, 9), (14, 10)):
         im.putpixel(p, sheath)
+    for p in ((11, 15), (3, 9), (14, 11)):
+        im.putpixel(p, hexc('#d4483c'))
     return im
 
 

@@ -83,6 +83,10 @@ public final class RubberTrees {
     public static final DeferredBlock<RubberLogBlock> LOG = BLOCKS.registerBlock("rubber_log", RubberLogBlock::new,
         p -> p.mapColor(s -> s.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? MapColor.SAND : MapColor.COLOR_LIGHT_GRAY)
             .instrument(NoteBlockInstrument.BASS).strength(2f).sound(SoundType.WOOD).ignitedByLava());
+    /** Bark on all six faces: buttress fins, branch elbows and the pillars aerial roots grow into (AdventurAgent: logs
+     *  laid sideways showed their end grain and read as boxes). */
+    public static final DeferredBlock<RubberLogBlock> WOOD = BLOCKS.registerBlock("rubber_wood", RubberLogBlock::new,
+        p -> p.mapColor(MapColor.COLOR_LIGHT_GRAY).instrument(NoteBlockInstrument.BASS).strength(2f).sound(SoundType.WOOD).ignitedByLava());
     public static final DeferredBlock<RubberLeavesBlock> LEAVES = BLOCKS.registerBlock("rubber_leaves", RubberLeavesBlock::new,
         p -> p.mapColor(MapColor.PLANT).strength(0.2f).randomTicks().sound(SoundType.GRASS).noOcclusion()
             .isValidSpawn((s, l, pos, e) -> false).isSuffocating((s, l, pos) -> false).isViewBlocking((s, l, pos, box) -> false)
@@ -101,12 +105,13 @@ public final class RubberTrees {
         FEATURE_TYPES.register("rubber_fig", () -> RubberFigFeature.CODEC);
 
     public static final DeferredItem<BlockItem> LOG_ITEM = ITEMS.registerItem("rubber_log", p -> new BlockItem(LOG.get(), p.useBlockDescriptionPrefix()));
+    public static final DeferredItem<BlockItem> WOOD_ITEM = ITEMS.registerItem("rubber_wood", p -> new BlockItem(WOOD.get(), p.useBlockDescriptionPrefix()));
     public static final DeferredItem<BlockItem> LEAVES_ITEM = ITEMS.registerItem("rubber_leaves", p -> new BlockItem(LEAVES.get(), p.useBlockDescriptionPrefix()));
     public static final DeferredItem<BlockItem> SAPLING_ITEM = ITEMS.registerItem("rubber_sapling", p -> new BlockItem(SAPLING.get(), p.useBlockDescriptionPrefix()));
 
     /** Is this block a rubber tree's log? */
     public static boolean isRubberLog(Block b) {
-        return b == LOG.get();
+        return b == LOG.get() || b == WOOD.get();
     }
 
     public static void register(IEventBus modBus) {
@@ -115,6 +120,7 @@ public final class RubberTrees {
         FEATURE_TYPES.register(modBus);
         mods.eln.registry.ElnRegistry.TAB_EXTRAS.add(SAPLING_ITEM);
         mods.eln.registry.ElnRegistry.TAB_EXTRAS.add(LOG_ITEM);
+        mods.eln.registry.ElnRegistry.TAB_EXTRAS.add(WOOD_ITEM);
         mods.eln.registry.ElnRegistry.TAB_EXTRAS.add(LEAVES_ITEM);
         mods.eln.registry.ElnRegistry.TAB_EXTRAS.add(AERIAL_ROOT_ITEM);
     }

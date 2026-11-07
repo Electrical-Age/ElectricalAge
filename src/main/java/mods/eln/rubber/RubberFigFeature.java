@@ -44,7 +44,7 @@ public record RubberFigFeature() implements Feature {
             if (!free(level, origin.above(y))) return refuse("trunk blocked at " + origin.above(y) + ": " + level.getBlockState(origin.above(y)));
         Map<BlockPos, BlockState> logs = new HashMap<>();
         Set<BlockPos> leaves = new LinkedHashSet<>();
-        BlockState log = RubberTrees.LOG.get().defaultBlockState();
+        BlockState log = RubberTrees.LOG.get().defaultBlockState(), wood = RubberTrees.WOOD.get().defaultBlockState();
 
         // the trunk and the central leader
         for (int y = 0; y <= height; y++) logs.put(origin.above(y), log);
@@ -55,8 +55,8 @@ public record RubberFigFeature() implements Feature {
             for (int k = 1; k <= len; k++) {
                 BlockPos p = origin.relative(d, k);
                 int tall = k == 1 ? 1 + r.nextInt(2) : 0;
-                for (int y = 0; y <= tall; y++) logs.put(p.above(y), log.setValue(RotatedPillarBlock.AXIS, d.getAxis()));
-                for (int y = -1; y >= -2 && free(level, p.above(y)); y--) logs.put(p.above(y), log);   // (down to the ground)
+                for (int y = 0; y <= tall; y++) logs.put(p.above(y), wood);
+                for (int y = -1; y >= -2 && free(level, p.above(y)); y--) logs.put(p.above(y), wood);   // (down to the ground)
             }
         }
         // the leaders: lean out from the split, each ending in a crown lobe
@@ -72,11 +72,11 @@ public record RubberFigFeature() implements Feature {
             for (int k = 1; k <= len; k++) {
                 double out = k * 0.85;
                 BlockPos p = origin.offset((int) Math.round(dx * out), y0 + k, (int) Math.round(dz * out));
-                boolean flat = p.getY() == last.getY();
-                Direction.Axis axis = flat ? (Math.abs(dx) > Math.abs(dz) ? Direction.Axis.X : Direction.Axis.Z) : Direction.Axis.Y;
-                logs.put(p, log.setValue(RotatedPillarBlock.AXIS, axis));
+                // (a limb is bark all round where it bends: wood; logs only where it runs straight up)
+                boolean straight = p.getX() == last.getX() && p.getZ() == last.getZ();
+                logs.put(p, straight ? log : wood);
                 if (p.getX() != last.getX() && p.getZ() != last.getZ())   // (keep the limb joined face to face)
-                    logs.put(new BlockPos(p.getX(), p.getY(), last.getZ()), log.setValue(RotatedPillarBlock.AXIS, axis));
+                    logs.put(new BlockPos(p.getX(), p.getY(), last.getZ()), wood);
                 limbs.add(p);
                 last = p;
             }
@@ -98,23 +98,25 @@ public record RubberFigFeature() implements Feature {
                     }
             }
         }
-        // aerial roots: from under limbs and the crown's underside, hanging down; some reach the ground and thicken
+        // aerial roots: from under the limbs and the crown's underside, hanging down; many reach the ground, and some of
+        // those have thickened into pillar trunks (AdventurAgent: 2-3 short ones per tree read as too few)
         Map<BlockPos, Boolean> roots = new HashMap<>();
-        int drops = 4 + r.nextInt(4);
         java.util.List<BlockPos> sources = new java.util.ArrayList<>(limbs);
-        for (BlockPos t : tips)
-            for (int k = 0; k < 3; k++) sources.add(t.offset(r.nextInt(5) - 2, -2, r.nextInt(5) - 2));
+        for (BlockPos l : leaves)
+            if (!leaves.contains(l.below()) && !logs.containsKey(l.below()) && r.nextInt(6) == 0) sources.add(l);
+        int drops = 9 + r.nextInt(6), pillars = 0;
         for (int n = 0; n < drops && !sources.isEmpty(); n++) {
             BlockPos s = sources.remove(r.nextInt(sources.size())).below();
-            if (Math.abs(s.getX() - origin.getX()) + Math.abs(s.getZ() - origin.getZ()) < 2) continue;
+            if (Math.abs(s.getX() - origin.getX()) + Math.abs(s.getZ() - origin.getZ()) < 2 || roots.containsKey(s)) continue;
             int ground = 0;
-            while (ground < 16 && free(level, s.below(ground)) && !logs.containsKey(s.below(ground)) && !leaves.contains(s.below(ground)))
+            while (ground < 20 && free(level, s.below(ground)) && !logs.containsKey(s.below(ground)) && !leaves.contains(s.below(ground)))
                 ground++;
-            boolean reaches = ground < 16 && soil(level, s.below(ground));
-            if (reaches && r.nextInt(3) == 0) {
-                for (int k = 0; k < ground; k++) logs.put(s.below(k), log);   // a pillar trunk
+            boolean reaches = ground < 20 && soil(level, s.below(ground));
+            if (reaches && pillars < 2 && r.nextInt(3) == 0) {
+                for (int k = 0; k < ground; k++) logs.put(s.below(k), wood);   // a pillar trunk
+                pillars++;
             } else {
-                int len = Math.min(ground - 1, 2 + r.nextInt(4));
+                int len = reaches && r.nextBoolean() ? ground : Math.min(ground - 1, 3 + r.nextInt(ground / 2 + 2));
                 for (int k = 0; k < len; k++) roots.put(s.below(k), true);
             }
         }

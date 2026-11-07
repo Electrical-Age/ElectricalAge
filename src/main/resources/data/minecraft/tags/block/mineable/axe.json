@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "eln:rubber_log"
+    "eln:rubber_log",
+    "eln:rubber_wood"
   ]
 }

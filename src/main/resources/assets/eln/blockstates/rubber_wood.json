@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "eln:block/rubber_wood"
+    },
+    "axis=y": {
+      "model": "eln:block/rubber_wood"
+    },
+    "axis=z": {
+      "model": "eln:block/rubber_wood"
+    }
+  }
+}

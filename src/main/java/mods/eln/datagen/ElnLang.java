@@ -162,6 +162,7 @@ public class ElnLang extends LanguageProvider {
         add("item.eln.crude_oil_bucket", "Crude Oil Bucket");
         add("block.eln.tar_sand", "Tar Sand");
         add("block.eln.rubber_log", "Rubber Fig Log");
+        add("block.eln.rubber_wood", "Rubber Fig Wood");
         add("block.eln.rubber_leaves", "Rubber Fig Leaves");
         add("block.eln.rubber_aerial_root", "Rubber Fig Aerial Root");
         add("block.eln.rubber_sapling", "Rubber Fig Sapling");
