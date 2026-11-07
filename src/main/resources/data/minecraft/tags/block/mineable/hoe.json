@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "eln:rubber_leaves"
+    "eln:rubber_leaves",
+    "eln:rubber_aerial_root"
   ]
 }

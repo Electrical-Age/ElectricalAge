@@ -1,6 +1,7 @@
 package mods.eln.rubber;
 
 import mods.eln.Eln;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -28,7 +29,8 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * Rubber trees (Baughn 2026-11-07, the rubber chain): a log, leaves and a sapling. They grow wild in small groves in
+ * Rubber trees (Baughn 2026-11-07, the rubber chain): rubber figs (Ficus elastica, RubberFigFeature), with a log, leaves,
+ * aerial roots and a sapling. They grow wild in small groves in
  * jungles (worldgen data eln:rubber_grove), and a sapling is crafted from four others, one of them jungle. A Tree Resin
  * Collector on a rubber trunk collects three times what it gets from any other tree (TreeResinCollectorElement).
  * Assets and data are hand-written in src/main/resources.
@@ -88,6 +90,16 @@ public final class RubberTrees {
     public static final DeferredBlock<SaplingBlock> SAPLING = BLOCKS.registerBlock("rubber_sapling", p -> new SaplingBlock(GROWER, p),
         p -> p.mapColor(MapColor.PLANT).noCollision().randomTicks().instabreak().sound(SoundType.GRASS).pushReaction(PushReaction.POPPED));
 
+    public static final DeferredBlock<AerialRootBlock> AERIAL_ROOT = BLOCKS.registerBlock("rubber_aerial_root", AerialRootBlock::new,
+        p -> p.mapColor(MapColor.COLOR_BROWN).noCollision().instabreak().sound(SoundType.HANGING_ROOTS).ignitedByLava()
+            .pushReaction(PushReaction.POPPED));
+    public static final DeferredItem<BlockItem> AERIAL_ROOT_ITEM = ITEMS.registerItem("rubber_aerial_root", p -> new BlockItem(AERIAL_ROOT.get(), p.useBlockDescriptionPrefix()));
+
+    /** The rubber fig's shape, in code (RubberFigFeature); worldgen/feature/rubber_tree.json names it. */
+    static final DeferredRegister<MapCodec<? extends Feature>> FEATURE_TYPES = DeferredRegister.create(Registries.FEATURE_TYPE, Eln.MODID);
+    public static final net.neoforged.neoforge.registries.DeferredHolder<MapCodec<? extends Feature>, MapCodec<RubberFigFeature>> FIG =
+        FEATURE_TYPES.register("rubber_fig", () -> RubberFigFeature.CODEC);
+
     public static final DeferredItem<BlockItem> LOG_ITEM = ITEMS.registerItem("rubber_log", p -> new BlockItem(LOG.get(), p.useBlockDescriptionPrefix()));
     public static final DeferredItem<BlockItem> LEAVES_ITEM = ITEMS.registerItem("rubber_leaves", p -> new BlockItem(LEAVES.get(), p.useBlockDescriptionPrefix()));
     public static final DeferredItem<BlockItem> SAPLING_ITEM = ITEMS.registerItem("rubber_sapling", p -> new BlockItem(SAPLING.get(), p.useBlockDescriptionPrefix()));
@@ -100,9 +112,11 @@ public final class RubberTrees {
     public static void register(IEventBus modBus) {
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
+        FEATURE_TYPES.register(modBus);
         mods.eln.registry.ElnRegistry.TAB_EXTRAS.add(SAPLING_ITEM);
         mods.eln.registry.ElnRegistry.TAB_EXTRAS.add(LOG_ITEM);
         mods.eln.registry.ElnRegistry.TAB_EXTRAS.add(LEAVES_ITEM);
+        mods.eln.registry.ElnRegistry.TAB_EXTRAS.add(AERIAL_ROOT_ITEM);
     }
 
     /** (for the JEI audit and tests) */

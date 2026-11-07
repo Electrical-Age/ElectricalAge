@@ -27,7 +27,7 @@ public final class RubberCases {
         cases.add(new TreeCase());
     }
 
-    /** Rubber trees (Baughn 2026-11-07): the sapling grows a rubber tree; a collector gets 1.5x the old rate on its trunk and
+    /** Rubber trees (Baughn 2026-11-07): the sapling grows a rubber fig (Ficus elastica); a collector gets 1.5x the old rate on its trunk and
      *  half on other trees; the compressor takes two logs a resin (two rubber logs: three); the grove is in the worldgen
      *  registries; a sapling is crafted from jungle, oak, birch and acacia saplings. */
     static final class TreeCase implements TestCase {
@@ -38,36 +38,48 @@ public final class RubberCases {
         }
 
         public int width() {
-            return 11;
+            return 21;
         }
 
         public int depth() {
-            return 9;
+            return 21;
         }
 
         public int height() {
-            return 18;   // (a 10-log trunk and its crown: a 12-high box made the tallest trees fail now and then)
+            return 20;   // (a rubber fig: a trunk up to 13, its crown, and 8 blocks of reach each way)
         }
 
         public void build(TestContext c) {
             var level = c.level();
-            var ground = c.at(4, 1, 4);
-            level.setBlock(ground, Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+            var ground = c.at(10, 1, 10);
+            for (var g : net.minecraft.core.BlockPos.betweenClosed(c.at(1, 1, 1), c.at(19, 1, 19)))
+                level.setBlock(g, Blocks.GRASS_BLOCK.defaultBlockState(), 3);
             var pos = ground.above();
             var sap = mods.eln.rubber.RubberTrees.SAPLING.get().defaultBlockState();
             level.setBlock(pos, sap, 3);
             boolean ok = mods.eln.rubber.RubberTrees.GROWER.growTree(level, level.getChunkSource().getGenerator(), pos, sap, level.getRandom());
             int logs = 0;
-            for (int y = 0; y < 14; y++) if (level.getBlockState(pos.above(y)).is(mods.eln.rubber.RubberTrees.LOG.get())) logs++;
-            int leaves = 0;
-            for (var p : net.minecraft.core.BlockPos.betweenClosed(pos.offset(-3, 0, -3), pos.offset(3, 15, 3)))
-                if (level.getBlockState(p).is(mods.eln.rubber.RubberTrees.LEAVES.get())) leaves++;
-            grown = ok + " " + logs + " logs " + leaves + " leaves";
+            for (int y = 0; y < 16; y++) if (level.getBlockState(pos.above(y)).is(mods.eln.rubber.RubberTrees.LOG.get())) logs++;
+            int leaves = 0, roots = 0, wide = 0, decaying = 0;
+            for (var p : net.minecraft.core.BlockPos.betweenClosed(pos.offset(-8, -1, -8), pos.offset(8, 17, 8))) {
+                var st = level.getBlockState(p);
+                if (st.is(mods.eln.rubber.RubberTrees.LEAVES.get())) {
+                    leaves++;
+                    if (Math.max(Math.abs(p.getX() - pos.getX()), Math.abs(p.getZ() - pos.getZ())) >= 5) wide++;
+                    if (st.getValue(net.minecraft.world.level.block.LeavesBlock.DISTANCE) >= 7) decaying++;
+                }
+                if (st.is(mods.eln.rubber.RubberTrees.AERIAL_ROOT.get())) roots++;
+                if (st.is(mods.eln.rubber.RubberTrees.LOG.get()) && p.getY() == pos.getY() && !p.equals(pos)) wide += 0;
+            }
+            if (!ok) c.line("rubber fig refused: " + mods.eln.rubber.RubberFigFeature.lastRefusal);
+            grown = ok + " " + logs + " logs " + leaves + " leaves " + wide + " wide " + roots + " roots " + decaying + " decaying";
         }
 
         public void measure(TestContext c) {
-            c.check("a rubber sapling grows a rubber tree (7-10 logs, leaves)", grown.startsWith("true ") && !grown.contains(" 0 leaves")
-                && Integer.parseInt(grown.split(" ")[1]) >= 7, grown);
+            String[] g = grown.split(" ");
+            c.check("a rubber sapling grows a rubber fig: a trunk of 10+ logs, a broad crown (leaves 5+ out), none decaying",
+                g[0].equals("true") && Integer.parseInt(g[1]) >= 10 && Integer.parseInt(g[3]) > 50 && Integer.parseInt(g[5]) > 5
+                    && g[9].equals("0"), grown);
             c.check("rubber logs are logs, its leaves leaves (the collector's checks)",
                 mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor.isWood(mods.eln.rubber.RubberTrees.LOG.get())
                     && mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor.isLeaf(mods.eln.rubber.RubberTrees.LEAVES.get()), "");

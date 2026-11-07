@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Rubber tree block textures (2026-11-07): log side and top, leaves, sapling.
+"""Rubber fig block textures (2026-11-07): log side and top, leaves, sapling, aerial root.
 
-Hevea bark is smooth and grey-brown with paler lichen patches; the wood is pale cream; the leaves are glossy, dark
-green, in threes. Seeded, so a rerun gives the same pixels.
+Ficus elastica: smooth grey-brown bark with paler patches, pale wood, big glossy dark leaves with red sheaths at new
+shoots, and thin aerial roots. Seeded, so a rerun gives the same pixels.
 
     python3 tools/textures/rubber_tree.py    (writes src/main/resources/assets/eln/textures/block/rubber_*.png)
 """
@@ -63,24 +63,47 @@ def log_top():
 
 
 def leaves():
+    """Ficus elastica: big leathery oval leaves, dark and glossy, a pale midrib, a bright glint; a red sheath at a tip."""
     r = random.Random(13)
-    greens = [hexc('#1f4d1c'), hexc('#2a6224'), hexc('#36752c'), hexc('#4a8c38'), hexc('#6aa84a')]
+    dark, mid, light, glint = hexc('#14361a'), hexc('#1f4d24'), hexc('#2e6a32'), hexc('#7fb07a')
+    rib, sheath = hexc('#4f7a45'), hexc('#a8322c')
     im = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
-    # leaflets: short diagonal ovals, a highlight on one edge (glossy)
-    for _ in range(26):
-        cx, cy = r.randrange(16), r.randrange(16)
-        horiz = r.random() < 0.5
-        pts = [(0, 0), (1, 0), (-1, 0), (2, 0)] if horiz else [(0, 0), (0, 1), (0, -1), (0, 2)]
-        for i, (dx, dy) in enumerate(pts):
-            g = greens[r.randrange(1, 4)]
-            if i == 0 and r.random() < 0.5:
-                g = greens[4]
-            im.putpixel(((cx + dx) % 16, (cy + dy) % 16), g)
-    # darken a few for depth; leave holes (alpha 0) so it reads as leaves
+    # five leaves, each an ellipse 6-7 x 3 px, tilted by its axis; they tile across the edges
+    leaves = [(3, 3, 0), (11, 4, 1), (6, 10, 1), (13, 12, 0), (1, 13, 1)]
+    for (cx, cy, vert) in leaves:
+        a, b = (1.6, 3.4) if vert else (3.4, 1.6)
+        for dx in range(-4, 5):
+            for dy in range(-4, 5):
+                if (dx / a) ** 2 + (dy / b) ** 2 > 1.0:
+                    continue
+                x, y = (cx + dx) % 16, (cy + dy) % 16
+                edge = (dx / a) ** 2 + (dy / b) ** 2 > 0.55
+                c = mid if edge else light
+                if (vert and dx == 0) or (not vert and dy == 0):
+                    c = rib
+                if (dx, dy) == ((-1, -1) if vert else (-2, -1)):
+                    c = glint
+                im.putpixel((x, y), c)
+    # shadows between leaves, holes kept
     for x in range(16):
         for y in range(16):
-            if im.getpixel((x, y))[3] == 0 and r.random() < 0.35:
-                im.putpixel((x, y), greens[0])
+            if im.getpixel((x, y))[3] == 0 and r.random() < 0.3:
+                im.putpixel((x, y), dark)
+    # the red sheath of a new shoot: two pixels at one leaf's tip
+    for p in ((11, 0), (11, 1)):
+        im.putpixel(p, sheath)
+    return im
+
+
+def aerial_root():
+    """Thin strands hanging straight down, grey-brown, with a few knots; mostly transparent (a cross model)."""
+    im = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    c1, c2, c3 = hexc('#6b5a48'), hexc('#857260'), hexc('#4f4236')
+    for x, top, col in ((6, 0, c1), (7, 0, c2), (9, 0, c1), (8, 3, c3), (10, 5, c2)):
+        for y in range(top, 16):
+            im.putpixel((x, y), col if y % 5 else c3)
+    for (x, y) in ((7, 6), (9, 11), (6, 13)):
+        im.putpixel((x, y), hexc('#9c8a74'))
     return im
 
 
@@ -109,6 +132,7 @@ def sapling():
 
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
-    for name, f in (('rubber_log', log_side), ('rubber_log_top', log_top), ('rubber_leaves', leaves), ('rubber_sapling', sapling)):
+    for name, f in (('rubber_log', log_side), ('rubber_log_top', log_top), ('rubber_leaves', leaves), ('rubber_sapling', sapling),
+                    ('rubber_aerial_root', aerial_root)):
         f().save(os.path.join(OUT, name + '.png'))
         print('wrote', name)
