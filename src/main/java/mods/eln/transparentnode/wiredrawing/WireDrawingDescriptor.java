@@ -34,7 +34,7 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
     final Obj3D obj;
 
     /** Energy to draw a block of 2.5 mm² wire, J (more for thicker wire, by its girth). */
-    public static final double JOULES_PER_BLOCK = 1000;
+    public static final double JOULES_PER_BLOCK = 2000;   // (Baughn 2026-11-07: twice the 1 kJ, jobs twice as long)
     /** Longest kit, blocks (a kit holds 1024 voxels), and most turns of a winding. */
     public static final int MAX_BLOCKS = 64;
 

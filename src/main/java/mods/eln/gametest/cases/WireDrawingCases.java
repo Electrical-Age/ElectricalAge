@@ -104,7 +104,7 @@ public final class WireDrawingCases {
 
     /**
      * The 48 V machine fed at 48 V on its back: 4 blocks of red 6 mm² 48 V cable (0.8 copper and 1.03 rubber a block,
-     * 1.55 kJ a block: 6.2 kJ, about 16 s at 400 W). It takes 4 ingots and 5 rubber, keeps 0.8 ingot and 0.87 rubber,
+     * 3.1 kJ a block: 12.4 kJ, about 31 s at 400 W). It takes 4 ingots and 5 rubber, keeps 0.8 ingot and 0.87 rubber,
      * and the kit comes out with the spec.
      */
     static final class Draws implements TestCase {
@@ -117,7 +117,7 @@ public final class WireDrawingCases {
         }
 
         public int ticks() {
-            return 440;
+            return 800;
         }
 
         WireDrawingElement m;
