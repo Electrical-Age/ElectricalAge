@@ -130,6 +130,7 @@ public final class LabCommands {
                 .then(Commands.literal("wiredrawing").executes(c -> demo(c.getSource(), () -> wiredrawing(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cores").executes(c -> demo(c.getSource(), () -> cores(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("rubber").executes(c -> demo(c.getSource(), () -> rubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("latex").executes(c -> demo(c.getSource(), () -> latex(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("converters").executes(c -> demo(c.getSource(), () -> converters(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("computers").executes(c -> demo(c.getSource(), () -> computers(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("loggerdemo").executes(c -> demo(c.getSource(), () -> loggerDemo(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -595,6 +596,27 @@ public final class LabCommands {
     static int rubber(CommandSourceStack src, BlockPos pos) {
         return furnaceRigs(src, pos, "rubber", new String[]{"Electrical Furnace", "Electrical Furnace", "230V Macerator", "230V Macerator"},
             new float[]{160, 260, 0, 0});
+    }
+
+    /**
+     * Rigs for latex (the rubber chain, 2026-11-07), on 230 V: (a) a 230V Compressor (feed it dandelions; latex out of its
+     * red flange, latex into its blue one presses to Raw Rubber); (b) an Industrial Resin Collector 8 blocks on, a rubber
+     * fig grown against its back.
+     */
+    static int latex(CommandSourceStack src, BlockPos pos) {
+        furnaceRigs(src, pos, "latex", new String[]{"230V Compressor"}, new float[]{0});
+        BlockPos p = pos.offset(8, 0, 0);
+        furnaceRigs(src, p, "collector", new String[]{"Industrial Resin Collector"}, new float[]{0});
+        var level = src.getLevel();
+        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level));
+        if (n instanceof mods.eln.node.transparent.TransparentNode t && t.element != null) {
+            BlockPos trunk = p.relative(t.element.front.back().toEnumFacing());
+            level.setBlockAndUpdate(trunk.below(), net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+            var feature = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.FEATURE).getOrThrow(mods.eln.rubber.RubberTrees.TREE);
+            boolean ok = feature.value().place(level, level.getChunkSource().getGenerator(), level.getRandom(), trunk);
+            src.sendSuccess(() -> Component.literal("rubber fig at " + trunk.toShortString() + ": " + (ok ? "grown" : "refused: " + mods.eln.rubber.RubberFigFeature.lastRefusal)), false);
+        }
+        return 1;
     }
 
     /** Machines on 230 V, 5 apart along x; a furnace gets a tungsten heating corp, insulation and a regulator at its target (C). */
