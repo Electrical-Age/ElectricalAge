@@ -24,7 +24,9 @@ class CoilTest {
     void fullCoresMeetAndOverfullOnesShow() {
         Coil a = Coil.of(30, 2.5, 150, 150), b = Coil.of(50, 1.5, 150, 150);
         assertEquals(Coil.WINDOW, a.build() + b.build(), 1e-9);
-        assertTrue(Coil.of(64, 2.5, 150, 320).over());
+        Coil o1 = Coil.of(64, 2.5, 150, 320), o2 = Coil.of(64, 2.5, 150, 320);
+        assertTrue(o1.over());
+        assertEquals(Coil.WINDOW, o1.build() + o2.build(), 1e-9, "overfull coils meet in the middle; they don't leave the block");
     }
 
     @Test

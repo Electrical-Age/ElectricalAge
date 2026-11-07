@@ -67,7 +67,7 @@ public final class WindingTexture {
     static void paint(NativeImage img, int turnsPerLayer, int layers, int rgb, boolean over) {
         int r = rgb >> 16 & 255, g = rgb >> 8 & 255, b = rgb & 255;
         // (dark insulation would hide the shading: lift it a little)
-        int lift = Math.max(0, 56 - Math.max(r, Math.max(g, b)));
+        int lift = Math.max(0, 34 - Math.max(r, Math.max(g, b)));
         r += lift;
         g += lift;
         b += lift;
@@ -80,7 +80,7 @@ public final class WindingTexture {
         for (int y = 0; y < H; y++) {
             int k = y * tpl / H, y0 = k * H / tpl, y1 = (k + 1) * H / tpl;
             float t = (y - y0 + 0.5f) / Math.max(1, y1 - y0);
-            float shade = y1 - y0 >= 3 && y == y1 - 1 ? 0.45f : 1.25f - 0.5f * t;
+            float shade = y1 - y0 >= 3 && y == y1 - 1 ? 0.45f : 1.12f - 0.4f * t;
             int c = colour(r, g, b, shade);
             for (int x = 0; x < W / 2; x++) img.setPixel(x, y, c);
         }
