@@ -87,7 +87,11 @@ public class GhostBlock extends Block {
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         // a kit routes to a machine's port on its ghost (the Auto Miner's power: Baughn, a click there opened its screen)
-        if (stack.getItem() instanceof mods.eln.node.voxel.PipeTool) return InteractionResult.PASS;
+        // (but a utility pole, on its ghosts too, is strung with a cable kit: Baughn 2026-11-07)
+        if (stack.getItem() instanceof mods.eln.node.voxel.PipeTool && !(stack.getItem() instanceof mods.eln.node.voxel.CableKitItem
+            && !level.isClientSide() && getElement(level, pos) instanceof GhostElement g
+            && mods.eln.gridnode.GridLink.getElementFromCoordinate(g.getObservatorCoordonate()) != null))
+            return InteractionResult.PASS;
         return activate(level, pos, player, hit);
     }
 

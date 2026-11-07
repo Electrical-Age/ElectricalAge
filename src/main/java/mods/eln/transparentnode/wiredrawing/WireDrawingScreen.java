@@ -51,17 +51,18 @@ public class WireDrawingScreen extends ElnScreen {
             tr("A cable kit (blocks of cable), a winding for a DC-DC converter (turns), or bare Copper Cable for crafting"));
         text("mm2l", () -> tr("Wire"));
         button("mm2dn", () -> "<", () -> set(r.mode, r.mm2 - 1, r.tier, r.colour, r.amount));
-        text("mm2", () -> WireDrawingDescriptor.fmt(CableSpec.MM2[r.mm2]) + " mm², " + String.format("%.0f A", CableSpec.AMPS[r.mm2]));
+        // (bare wire has no spec: its rows say so, AdventurAgent)
+        text("mm2", () -> r.mode == WireDrawingElement.BARE ? tr("Copper Cable") : WireDrawingDescriptor.fmt(CableSpec.MM2[r.mm2]) + " mm², " + String.format("%.0f A", CableSpec.AMPS[r.mm2]));
         button("mm2up", () -> ">", () -> set(r.mode, r.mm2 + 1, r.tier, r.colour, r.amount),
             tr("Up to %1$ mm² on this machine", WireDrawingDescriptor.fmt(CableSpec.MM2[r.desc.maxMm2])));
         text("insl", () -> tr("Insulation"));
         button("insdn", () -> "<", () -> set(r.mode, r.mm2, r.tier - 1, r.colour, r.amount));
-        text("ins", () -> volts(r.tier));
+        text("ins", () -> r.mode == WireDrawingElement.BARE ? tr("none") : volts(r.tier));
         button("insup", () -> ">", () -> set(r.mode, r.mm2, r.tier + 1, r.colour, r.amount),
             tr("Up to %1$ on this machine", volts(r.desc.maxTier)));
         text("coll", () -> tr("Colour"));
         button("coldn", () -> "<", () -> set(r.mode, r.mm2, r.tier, r.colour - 1, r.amount));
-        text("col", () -> DyeColor.byId(r.colour).getName().replace('_', ' '));
+        text("col", () -> r.mode == WireDrawingElement.BARE ? "-" : DyeColor.byId(r.colour).getName().replace('_', ' '));
         button("colup", () -> ">", () -> set(r.mode, r.mm2, r.tier, r.colour + 1, r.amount), tr("Only the look"));
         text("amountl", () -> switch (r.mode) {
             case WireDrawingElement.KIT -> tr("Length");

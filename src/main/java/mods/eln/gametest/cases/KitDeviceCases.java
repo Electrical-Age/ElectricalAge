@@ -246,8 +246,11 @@ public final class KitDeviceCases {
                     said += a.gridLinkList.size() + "," + b.gridLinkList.size();
                     hand = kit(HV, thick(), 10);
                     p.setItemInHand(InteractionHand.MAIN_HAND, hand);
-                    a.onBlockActivated(p, Direction.XP, 0.5F, 0.5F, 0.5F);
-                    b.onBlockActivated(p, Direction.XN, 0.5F, 0.5F, 0.5F);
+                    // as a player's click: the block's use (a kit routes cables elsewhere, AdventurAgent: here it strings the pole)
+                    for (BlockPos q : new BlockPos[]{pa, pb}) {
+                        var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(q), net.minecraft.core.Direction.EAST, q, false);
+                        ctx.world().getBlockState(q).useItemOn(hand, ctx.world(), p, InteractionHand.MAIN_HAND, hit);
+                    }
                 } finally {
                     p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                 }
