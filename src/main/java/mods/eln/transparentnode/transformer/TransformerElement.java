@@ -179,7 +179,7 @@ public class TransformerElement extends TransparentNodeElement {
     }
 
     /** A winding: its turns, its wire's constants, its resistance (Rs as a load counts it) and cross-section, mm². */
-    record Wire(int turns, ElectricalCableDescriptor d, double rs, double mm2) {
+    record Wire(int turns, ElectricalCableDescriptor d, double rs, double mm2, int mm2Index, int colour, int tier) {
     }
 
     /**
@@ -189,13 +189,16 @@ public class TransformerElement extends TransparentNodeElement {
      */
     static Wire wire(ItemStack s) {
         if (Utils.isEmpty(s)) return null;
-        if (mods.eln.node.voxel.WindingItem.is(s))
+        if (mods.eln.node.voxel.WindingItem.is(s)) {
+            var spec = mods.eln.node.voxel.WindingItem.spec(s);
             return new Wire(mods.eln.node.voxel.WindingItem.turns(s), mods.eln.node.voxel.WindingItem.descriptor(s),
-                mods.eln.node.voxel.WindingItem.rs(s), mods.eln.node.voxel.WindingItem.spec(s).squareMillimetres());
+                mods.eln.node.voxel.WindingItem.rs(s), spec.squareMillimetres(), spec.mm2(), spec.colour(), mods.eln.node.voxel.WindingItem.tier(s));
+        }
         if (!(Eln.sixNodeItem.getDescriptor(s) instanceof ElectricalCableDescriptor d)) return null;
         int tier = mods.eln.node.voxel.CablePart.tierOf(d.name);
-        double mm2 = mods.eln.node.voxel.CableSpec.power(tier) ? mods.eln.node.voxel.CableSpec.preset(tier).squareMillimetres() : 0.5;
-        return new Wire(s.getCount(), d, d.electricalRs, mm2);
+        if (!mods.eln.node.voxel.CableSpec.power(tier)) return new Wire(s.getCount(), d, d.electricalRs, 0.5, 0, 7, 0);
+        var preset = mods.eln.node.voxel.CableSpec.preset(tier);
+        return new Wire(s.getCount(), d, d.electricalRs, preset.squareMillimetres(), preset.mm2(), preset.colour(), tier);
     }
 
     Wire primaryWire() {
@@ -451,6 +454,15 @@ public class TransformerElement extends TransparentNodeElement {
             }
             stream.writeFloat(load);
             stream.writeBoolean(!Utils.isEmpty(inventory.getItem(3)));
+            // the windings as drawn (Baughn 2026-11-07: see the configuration at a glance): turns, wire, colour, tier
+            // a side, and the core's window
+            for (Wire w : new Wire[]{primaryWire(), secondaryWire()}) {
+                stream.writeShort(w == null ? 0 : w.turns());
+                stream.writeByte(w == null ? 0 : w.mm2Index());
+                stream.writeByte(w == null ? 0 : w.colour());
+                stream.writeByte(w == null ? 0 : w.tier());
+            }
+            stream.writeFloat((float) window());
 
         } catch (IOException e) {
 
