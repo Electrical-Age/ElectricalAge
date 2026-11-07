@@ -36,6 +36,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
 
     class MaceratorDescriptorHandle {
         float counter = 0, itemCounter = 0, soulsDue = 0;
+        final mods.eln.anim.Belt.Run belt = new mods.eln.anim.Belt.Run();
         final RcInterpolator interpolator = new RcInterpolator(0.5f);
     }
 
@@ -52,7 +53,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
         main.draw();
         rot1.draw(handle.counter, 0f, 0f, -1f);
         rot2.draw(handle.counter, 0f, 0f, 1f);
-        if (belt != null) belt.draw(handle.counter);
+        if (belt != null) belt.draw(handle.counter, handle.belt);
 
         //UtilsClient.enableDepthTest();
         GL11.glScalef(0.7f, 0.7f, 0.7f);

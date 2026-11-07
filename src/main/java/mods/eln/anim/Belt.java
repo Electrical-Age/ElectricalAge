@@ -38,12 +38,27 @@ public final class Belt {
         return b;
     }
 
+    /** A machine's own run of its belt: the last angle seen and the distance run since (Belt is shared by a model). */
+    public static final class Run {
+        double lastDeg = Double.NaN, dist;
+    }
+
     /**
      * Draw it with pulley A turned by angle (degrees, clockwise as the belt runs: a part drawn with draw(angle, 0, 0, -1)).
-     * Call inside the model's frame (front already turned).
+     * Call inside the model's frame (front already turned). The angle may wrap (a counter kept in 0..360): run keeps the
+     * distance going on across the wrap, so the belt never snaps back (Baughn: a whole turn of the pulley isn't a whole
+     * number of links).
      */
-    public void draw(float angleDeg) {
-        double shift = Math.toRadians(angleDeg) * path.ar, step = path.length / links;
+    public void draw(float angleDeg, Run run) {
+        double step = path.length / links;
+        if (!Double.isNaN(run.lastDeg)) {
+            double d = angleDeg - run.lastDeg;
+            d -= 360 * Math.round(d / 360);   // (the shortest way round: the counter's wrap)
+            run.dist += Math.toRadians(d) * path.ar;
+            run.dist %= step * MARK_EVERY * 1000;   // (bounded; a multiple of the mark spacing, so no jump)
+        }
+        run.lastDeg = angleDeg;
+        double shift = run.dist;
         for (int k = 0; k < links; k++) {
             double[] p = path.at(k * step + shift);
             GL11.glPushMatrix();
