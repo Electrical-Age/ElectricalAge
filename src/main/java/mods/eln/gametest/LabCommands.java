@@ -130,6 +130,7 @@ public final class LabCommands {
                 .then(Commands.literal("wiredrawing").executes(c -> demo(c.getSource(), () -> wiredrawing(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cores").executes(c -> demo(c.getSource(), () -> cores(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("rubber").executes(c -> demo(c.getSource(), () -> rubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("oilrubber").executes(c -> demo(c.getSource(), () -> oilRubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("latex").executes(c -> demo(c.getSource(), () -> latex(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("converters").executes(c -> demo(c.getSource(), () -> converters(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("computers").executes(c -> demo(c.getSource(), () -> computers(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -638,8 +639,42 @@ public final class LabCommands {
         return 1;
     }
 
+    /**
+     * Rigs for the oil route (2026-11-07): (a) a Carbon Black Burner fed by a tank of crude piped to its back flange, a
+     * chest under it; (b) a Desulfuriser on 230 V, a tank of diesel piped to its IN flange and an empty tank from its OUT.
+     */
+    static int oilRubber(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        var bd = mods.eln.Eln.transparentNodeItem.getDescriptor(0 + (93 << 6));
+        level.setBlockAndUpdate(pos.below(), net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState());
+        var bn = ((mods.eln.node.transparent.TransparentNodeItem) bd.parentItem).placeAt(bd.newItemStack(), player, level, pos, mods.eln.misc.Direction.YN);
+        if (bn != null && bn.element != null) {
+            var back = bn.element.front.back().toEnumFacing();
+            String r = tankPiped(src, pos.relative(back, 2), pos, back, null, 6000, mods.eln.oil.Oil.CRUDE.get());
+            src.sendSuccess(() -> Component.literal("a carbon black burner " + pos.toShortString() + " (a chest under it): " + r), false);
+        }
+        BlockPos dp = pos.offset(8, 0, 0);
+        furnaceRigs(src, dp, "desulfuriser", new String[]{"Desulfuriser"}, new float[]{0});
+        var dn = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(dp, level));
+        if (dn instanceof mods.eln.node.transparent.TransparentNode t && t.element != null) {
+            var back = t.element.front.back().toEnumFacing();
+            var frontF = t.element.front.toEnumFacing();
+            String a = tankPiped(src, dp.relative(back, 2), dp, back, null, 8000, mods.eln.oil.Oil.Cut.DIESEL.source.get());
+            String b = tankPiped(src, dp.relative(frontF, 2), dp, frontF, null, 0);
+            src.sendSuccess(() -> Component.literal("desulfuriser " + dp.toShortString() + ": diesel in " + a + "; out " + b), false);
+        }
+        return 1;
+    }
+
     /** An iron tank at tp (mB of latex in it), and an EA pipe routed from the device's port on face (nearest hit) to it. */
     static String tankPiped(CommandSourceStack src, BlockPos tp, BlockPos dev, net.minecraft.core.Direction face, net.minecraft.world.phys.Vec3 hit, int latexMb) {
+        return tankPiped(src, tp, dev, face, hit, latexMb, mods.eln.oil.Latex.SOURCE.get());
+    }
+
+    /** As above, the tank holding mB of fluid f. */
+    static String tankPiped(CommandSourceStack src, BlockPos tp, BlockPos dev, net.minecraft.core.Direction face, net.minecraft.world.phys.Vec3 hit, int latexMb,
+                            net.minecraft.world.level.material.Fluid fluid) {
         var level = src.getLevel();
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
         var d = mods.eln.Eln.transparentNodeItem.getDescriptor(40 + (82 << 6));   // (an iron tank)
@@ -658,9 +693,9 @@ public final class LabCommands {
                 var cap = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, tp, net.minecraft.core.Direction.UP);
                 if (cap != null)
                     try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                        int got = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Latex.SOURCE.get()), latexMb, tx);
+                        int got = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(fluid), latexMb, tx);
                         tx.commit();
-                        src.sendSuccess(() -> Component.literal(got + " mB of latex poured into the tank at " + tp.toShortString()), false);
+                        src.sendSuccess(() -> Component.literal(got + " mB poured into the tank at " + tp.toShortString()), false);
                     }
             }));
         }
