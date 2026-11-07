@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "cookingtime": 200,
+  "experience": 0.1,
+  "ingredient": "eln:raw_rubber",
+  "result": {
+    "id": "eln:rubber"
+  }
+}

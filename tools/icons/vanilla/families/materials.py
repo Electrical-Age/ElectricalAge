@@ -194,8 +194,40 @@ def dielectric():
     return cv
 
 
+#: The rubber chain (2026-11-07), family-local ramps: vanilla sulfur's yellow, soul sand's brown, and pale crepe for raw
+#: rubber (natural rubber before vulcanising is a translucent cream).
+SULFUR = (h('#4a3d06'), h('#7a6610'), h('#b09a1c'), h('#d9c43a'), h('#efe27a'), h('#fbf4c0'))
+SOUL = (h('#2e2016'), h('#352419'), h('#4d3626'), h('#664a36'), h('#806049'), h('#a08066'))
+CREPE = (h('#4a3418'), h('#7a5a2c'), h('#a9874e'), h('#cfb27a'), h('#e8d6a8'), h('#f7eed6'))
+
+
+def sulfur_dust():
+    return dust(SULFUR)
+
+
+def soul_dust():
+    """Soul sand's brown heap with two pale soul-blue specks (vanilla's soul fire colour)."""
+    cv = dust(SOUL)
+    for (x, y) in ((6, 10), (10, 11)):
+        cv.set(x, y, h('#7fd8e0'))
+    return cv
+
+
+def raw_rubber():
+    return paint_grid(RUBBER, CREPE)
+
+
+def rubber_compound():
+    """The rubber ball, dark grey, flecked with sulfur yellow: mixed, not yet vulcanised."""
+    cv = paint_grid(RUBBER, kit.CARBON)
+    for (x, y) in ((6, 8), (9, 10), (7, 12), (10, 7)):
+        cv.set(x, y, SULFUR[3])
+    return cv
+
+
 # ------------------------------------------------------------------------------ dispatcher
-_SPECIAL = {'mercury': mercury, 'rubber': rubber, 'tree_resin': tree_resin, 'dielectric': dielectric}
+_SPECIAL = {'mercury': mercury, 'rubber': rubber, 'tree_resin': tree_resin, 'dielectric': dielectric,
+            'sulfur_dust': sulfur_dust, 'soul_dust': soul_dust, 'raw_rubber': raw_rubber, 'rubber_compound': rubber_compound}
 
 
 def icon(item_id):

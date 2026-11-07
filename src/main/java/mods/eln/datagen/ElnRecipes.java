@@ -1178,8 +1178,16 @@ public final class ElnRecipes extends ElnRecipesBase {
     }
 
     public static void recipeGeneral() {
+        // the rubber chain (Baughn 2026-11-07): resin smelts to raw rubber, which smelts to 1 Rubber as resin did; mixed
+        // with sulfur and the soul dust activator into a compound, it vulcanises to twice that
         addSmelting(treeResin.parentItem,
-            treeResin.parentItemDamage, findItemStack("Rubber", 1), 0f);
+            treeResin.parentItemDamage, stack(mods.eln.registry.ElnRegistry.RAW_RUBBER.get()), 0f);
+        addSmelting(mods.eln.registry.ElnRegistry.RAW_RUBBER.get(), 0, findItemStack("Rubber", 1), 0.1f);
+        addShapelessRecipe(stack(mods.eln.registry.ElnRegistry.RUBBER_COMPOUND.get()),
+            stack(mods.eln.registry.ElnRegistry.RAW_RUBBER.get()), stack(mods.eln.registry.ElnRegistry.RAW_RUBBER.get()),
+            stack(mods.eln.registry.ElnRegistry.RAW_RUBBER.get()), stack(mods.eln.registry.ElnRegistry.RAW_RUBBER.get()),
+            stack(mods.eln.registry.ElnRegistry.SULFUR_DUST.get()), stack(mods.eln.registry.ElnRegistry.SOUL_DUST.get()));
+        // (the compound vulcanises only in the Electrical Furnace, held at its temperature: ElectricalFurnaceProcess.TREATMENTS)
 
     }
 

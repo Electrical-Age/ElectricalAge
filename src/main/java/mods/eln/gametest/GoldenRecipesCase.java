@@ -60,6 +60,9 @@ final class GoldenRecipesCase implements TestCase {
 
     /** Golden recipes whose output is deferred to a later phase (notes/port26/deferred.md). */
     static final Set<String> DEFERRED = Set.of("eln:x_ray_scanner");
+    /** Smelting inputs changed on purpose (1.12 name): resin smelts to Raw Rubber, which smelts to the 1 Rubber resin gave
+     *  (the rubber chain, Baughn 2026-11-07). */
+    static final Set<String> SMELT_CHANGED = Set.of("Tree Resin");
     /** Machine recipes changed on purpose (list:input): sand makes four Dielectrics, not one (Baughn 2026-10-28). */
     static final Set<String> MACHINE_CHANGED = Set.of("compressor:Sand");
     /** Recipes changed on purpose (Baughn 2026-10-13): copper cable 1 per ingot, windings take the new Copper Coil;
@@ -313,6 +316,7 @@ final class GoldenRecipesCase implements TestCase {
             JsonObject g = e.getAsJsonObject();
             Item in = map(g.getAsJsonObject("input"), unknown), out = map(g.getAsJsonObject("output"), unknown);
             if (in == null || !seenInputs.add(in)) continue;
+            if (g.getAsJsonObject("input").has("name") && SMELT_CHANGED.contains(g.getAsJsonObject("input").get("name").getAsString())) continue;
             int count = g.getAsJsonObject("output").has("count") ? g.getAsJsonObject("output").get("count").getAsInt() : 1;
             boolean ok = false;
             for (RecipeHolder<?> h : mine) {

@@ -23,7 +23,7 @@ public class ElnLang extends LanguageProvider {
         Map.entry("replicator_spawn_egg", "Replicator Spawn Egg"),
         Map.entry("pipe_kit_iron", "Iron Pipe Kit"), Map.entry("pipe_kit_alloy", "Alloy Pipe Kit"), Map.entry("pipe_kit_large_alloy", "Large Alloy Pipe Kit"), Map.entry("pipe_valve", "Pipe Valve"), Map.entry("pipe_control_valve", "Pipe Control Valve"), Map.entry("pipe_throttle_valve", "Pipe Throttle Valve"), Map.entry("pipe_adapter", "Pipe Adapter"), Map.entry("pipe_safety_valve", "Pipe Safety Valve"), Map.entry("pipe_pressure_sensor", "Pipe Pressure Sensor"), Map.entry("pipe_temperature_sensor", "Pipe Temperature Sensor"), Map.entry("pipe_quality_sensor", "Pipe Steam Quality Sensor"), Map.entry("pipe_pressure_valve", "Pipe Pressure Valve"), Map.entry("battery_belt", "Battery Belt"), Map.entry("headlamp", "Headlamp"), Map.entry("electric_bike", "Electric Bike"), Map.entry("terrain_bike", "Terrain Bike"),
         Map.entry("cable_kit_signal", "Signal Cable Kit"), Map.entry("cable_kit_lv", "Low Voltage Cable Kit"), Map.entry("cable_kit_mv", "Medium Voltage Cable Kit"),
-        Map.entry("cable_kit_hv", "High Voltage Cable Kit"), Map.entry("cable_kit_vhv", "Very High Voltage Cable Kit"), Map.entry("cable_kit_thermal", "Copper Thermal Cable Kit"), Map.entry("cable_kit_bus", "Field Bus Cable Kit"), Map.entry("field_bus_cable", "Field Bus Cable"), Map.entry("winding", "Winding"), Map.entry("chisel", "Chisel"), Map.entry("handbook", "Electrical Engineer's Ledger"), Map.entry("raw_lead", "Raw Lead"), Map.entry("raw_tungsten", "Raw Tungsten"), Map.entry("capacitor_cell", "Capacitor Cell"), Map.entry("charcoal_nugget", "Charcoal Nugget"),
+        Map.entry("cable_kit_hv", "High Voltage Cable Kit"), Map.entry("cable_kit_vhv", "Very High Voltage Cable Kit"), Map.entry("cable_kit_thermal", "Copper Thermal Cable Kit"), Map.entry("cable_kit_bus", "Field Bus Cable Kit"), Map.entry("field_bus_cable", "Field Bus Cable"), Map.entry("winding", "Winding"), Map.entry("chisel", "Chisel"), Map.entry("handbook", "Electrical Engineer's Ledger"), Map.entry("raw_lead", "Raw Lead"), Map.entry("raw_tungsten", "Raw Tungsten"), Map.entry("capacitor_cell", "Capacitor Cell"), Map.entry("sulfur_dust", "Sulfur Dust"), Map.entry("soul_dust", "Soul Dust"), Map.entry("raw_rubber", "Raw Rubber"), Map.entry("rubber_compound", "Rubber Compound"), Map.entry("charcoal_nugget", "Charcoal Nugget"),
         Map.entry("servo_rail", "Servo Rail"), Map.entry("ram_chip", "RAM Chip (1 MB)"), Map.entry("janet_rom_chip", "ROM Chip: Janet"), Map.entry("boot_rom_chip", "ROM Chip: Floppy Boot"), Map.entry("floppy_disk", "Floppy Disk"), Map.entry("elevator_disk", "Floppy Disk: Elevator"), Map.entry("applications_disk", "Floppy Disk: Applications"), Map.entry("station_marker", "Station Marker"),
         Map.entry("item_creative_tab", "Electrical Age"));
 
@@ -54,11 +54,14 @@ public class ElnLang extends LanguageProvider {
         add("item.eln.handbook.no_guideme", "The Ledger's pages are blank: it needs the GuideME mod.");
         // JEI (compat/jei/ResinCategory)
         add("jei.eln.tree_resin_collector", "Tree Resin Collector");
-        add("jei.eln.anneal", "Annealing");
-        add("jei.eln.anneal.how", "Anneals between %s and %s °C (%s kJ)");
+        add("jei.eln.anneal", "Heat treatment");
+        add("jei.eln.anneal.how", "Between %s and %s °C (%s kJ)");
         // information pages (compat.JeiPages.infos): what no recipe makes
         add("jei.eln.info.lead_ore", "Lead ore lies deep, mostly in deepslate: from y -64 to 0, most of it around -32. Mine it for raw lead.");
         add("jei.eln.info.tungsten_ore", "Tungsten ore lies in stone from y 0 to 31. Mine it for raw tungsten.");
+        add("jei.eln.info.sulfur_dust", "Macerate vanilla sulfur from the Sulfur Caves: a sulfur block gives 4 to 5 dust, a spike 1. Mixed into Rubber Compound, it vulcanises raw rubber.");
+        add("jei.eln.info.soul_dust", "Macerate soul sand or soul soil. The activator in Rubber Compound.");
+        add("jei.eln.info.rubber", "Smelt Tree Resin to Raw Rubber. Raw Rubber smelts to 1 Rubber; mixed with Sulfur Dust and Soul Dust into Rubber Compound, it vulcanises to twice as much in an Electrical Furnace held at 130-200 °C (above 230 °C it chars).");
         add("jei.eln.info.tar_sand", "Rims the small oil ponds dug over some oil lakes. A Tar Sand Separator gets crude oil out of it.");
         add("jei.eln.info.crude_oil", "From oil lakes underground, through an Oil Pump, or from the small ponds over some of them. An empty bucket takes it from a pond, or 1000 mB from a pump or tank that holds that much.");
         add("jei.eln.info.fraction", "Drawn off a Fractionating Column fed with hot crude oil: each segment draws off its own cut, the base the residue. An empty bucket takes 1000 mB from any EA device holding that much.");

@@ -126,6 +126,13 @@ public final class ElnRegistry {
      *  1.7); smelted or blasted to ingots, macerated to dust. */
     public static final DeferredItem<Item> RAW_LEAD = ITEMS.registerSimpleItem("raw_lead");
     public static final DeferredItem<Item> RAW_TUNGSTEN = ITEMS.registerSimpleItem("raw_tungsten");
+    /** The rubber chain (Baughn 2026-11-07): sulfur dust from vanilla's sulfur blocks, soul dust from soul sand (the
+     *  vulcanising activator), raw rubber smelted from resin, and the compound (raw rubber, sulfur, activator) that
+     *  vulcanises in a furnace. */
+    public static final DeferredItem<Item> SULFUR_DUST = ITEMS.registerSimpleItem("sulfur_dust");
+    public static final DeferredItem<Item> SOUL_DUST = ITEMS.registerSimpleItem("soul_dust");
+    public static final DeferredItem<Item> RAW_RUBBER = ITEMS.registerSimpleItem("raw_rubber");
+    public static final DeferredItem<Item> RUBBER_COMPOUND = ITEMS.registerSimpleItem("rubber_compound");
     /** A Capacitor Bank's can (Baughn 2026-10-28): six Dielectrics round a block of redstone; six make a bank. */
     public static final DeferredItem<Item> CAPACITOR_CELL = ITEMS.registerSimpleItem("capacitor_cell");
     /** What food turns into in an electrical oven above 280 °C (Baughn); four make a charcoal, and it burns a quarter as long. */
@@ -350,6 +357,10 @@ public final class ElnRegistry {
         ALL_ITEMS.add(RAW_TUNGSTEN);
         ALL_ITEMS.add(CHARCOAL_NUGGET);
         ALL_ITEMS.add(CAPACITOR_CELL);
+        ALL_ITEMS.add(SULFUR_DUST);
+        ALL_ITEMS.add(SOUL_DUST);
+        ALL_ITEMS.add(RAW_RUBBER);
+        ALL_ITEMS.add(RUBBER_COMPOUND);
         TABS.register("eln", () -> CreativeModeTab.builder()
             .title(Component.literal("Electrical Age"))
             .icon(() -> new ItemStack(tabIcon.get()))

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:raw_rubber",
+    "eln:raw_rubber",
+    "eln:raw_rubber",
+    "eln:raw_rubber",
+    "eln:sulfur_dust",
+    "eln:soul_dust"
+  ],
+  "result": {
+    "id": "eln:rubber_compound"
+  }
+}

@@ -82,6 +82,7 @@ public final class Wp10aCases {
         cases.add(new FurnaceCase());
         cases.add(new FurnaceCharCase());
         cases.add(new FurnaceAnnealCase());
+        cases.add(new FurnaceVulcaniseCase());
         cases.add(new SmelterCase());
         cases.add(new MachinesCase());
         cases.add(new MaceratorProcessCase());
@@ -396,6 +397,69 @@ public final class Wp10aCases {
             ctx.check("anneal: no progress at 500 C, anneals at 620 C, spoils at 800 C", probeOk, probe);
             ctx.check("anneal: a regulated tungsten furnace makes an Average core", out.is(Eln.findItemStack("Average Ferromagnetic Core").getItem()), out.toString());
             ctx.check("anneal: ... without overshooting into spoiling", hottest < mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.ANNEAL_SPOIL_C, "" + hottest);
+        }
+    }
+
+    /**
+     * Vulcanising (Baughn 2026-11-07: in the temperature-controlled oven, as the core): Rubber Compound in an Electrical
+     * Furnace regulated to 160 C vulcanises to 8 Rubber; below 130 C it makes no progress, above 230 C it chars.
+     */
+    static final class FurnaceVulcaniseCase implements TestCase {
+        ElectricalFurnaceElement furnace;
+        String probe = "";
+        boolean probeOk;
+        double hottest;
+        mods.eln.sim.IProcess watch;
+
+        public String name() {
+            return "electrical furnace vulcanises rubber compound";
+        }
+
+        public int ticks() {
+            return 2000;
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            furnace = (ElectricalFurnaceElement) l.device(FURNACE, 3);
+            l.feed(ctx.at(3, 1, 1), furnace.front.getInverse(), 8 + (32 << 6), Eln.MVU);   // a Medium Voltage Cable
+            ItemStack compound = new ItemStack(mods.eln.registry.ElnRegistry.RUBBER_COMPOUND.get(), 2);
+            ItemStack corp = Eln.findItemStack("230V Tungsten Heating Corp"), ins = Eln.findItemStack("Thermal Insulation"),
+                reg = Eln.findItemStack("Analogic Regulator");
+            mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess pr = field(furnace, "slowRefreshProcess");
+            ThermalLoad t = field(furnace, "thermalLoad");
+            furnace.getInventory().setItem(ElectricalFurnaceElement.inSlotId, compound);
+            double tamb = mods.eln.sim.PhysicalConstant.Tamb;
+            t.Tc = 120 - tamb;
+            boolean cold = !pr.annealProgresses();
+            t.Tc = 160 - tamb;
+            ItemStack warm = pr.getSmeltResult();
+            boolean warmGoes = pr.annealProgresses();
+            t.Tc = 250 - tamb;
+            ItemStack hot = pr.getSmeltResult();
+            t.Tc = 0;
+            probe = "120 C progresses " + !cold + ", 160 C " + warm + " progresses " + warmGoes + ", 250 C " + hot;
+            probeOk = cold && warmGoes && warm.is(Eln.findItemStack("Rubber").getItem()) && warm.getCount() == 8
+                && hot.is(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get());
+            furnace.getInventory().setItem(ElectricalFurnaceElement.heatingCorpSlotId, corp);
+            furnace.getInventory().setItem(ElectricalFurnaceElement.thermalIsolatorSlotId, ins);
+            furnace.getInventory().setItem(ElectricalFurnaceElement.thermalRegulatorSlotId, reg);
+            furnace.getInventory().setChanged();
+            furnace.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(ElectricalFurnaceElement.unserializeTemperatureTarget);
+                o.writeFloat(160f);
+            }));
+            Eln.simulator.addSlowProcess(watch = dt -> hottest = Math.max(hottest, t.Tc + tamb));
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            ItemStack out = furnace.getInventory().getItem(ElectricalFurnaceElement.outSlotId);
+            ctx.line("vulcanise: " + probe + "; hottest " + Math.round(hottest) + " C, out " + out + ", in "
+                + furnace.getInventory().getItem(ElectricalFurnaceElement.inSlotId));
+            ctx.check("vulcanise: no progress at 120 C, 8 Rubber at 160 C, chars at 250 C", probeOk, probe);
+            ctx.check("vulcanise: a regulated furnace makes Rubber from the compound", out.is(Eln.findItemStack("Rubber").getItem()) && out.getCount() >= 8, out.toString());
+            ctx.check("vulcanise: ... without overshooting into charring", hottest < mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.VULCANISE_SPOIL_C, "" + hottest);
         }
     }
 

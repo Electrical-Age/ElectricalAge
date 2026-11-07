@@ -29,7 +29,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
     }
 
     class MaceratorDescriptorHandle {
-        float counter = 0, itemCounter = 0;
+        float counter = 0, itemCounter = 0, soulsDue = 0;
         final RcInterpolator interpolator = new RcInterpolator(0.5f);
     }
 
@@ -64,7 +64,27 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
 
         handle.itemCounter += deltaT * 90;
         while (handle.itemCounter >= 360f) handle.itemCounter -= 360;
+
+        // souls rise from the hopper while it grinds soul sand or soul soil (Baughn 2026-11-07)
+        if (inEntity != null && isSoulBlock(inEntity.getItem()) && handle.interpolator.get() > 0.1f) {
+            var level = render.tileEntity.getLevel();
+            if (level != null) {
+                handle.soulsDue += deltaT * 4 * handle.interpolator.get();
+                var p = render.tileEntity.getBlockPos();
+                while (handle.soulsDue >= 1) {
+                    handle.soulsDue -= 1;
+                    double jx = (Math.random() - 0.5) * 0.5, jz = (Math.random() - 0.5) * 0.5;
+                    level.addParticle(net.minecraft.core.particles.ParticleTypes.SOUL,
+                        p.getX() + 0.5 + jx, p.getY() + 1.05, p.getZ() + 0.5 + jz, 0, 0.03, 0);
+                }
+            }
+        }
     }
+    /** Soul sand and soul soil: what makes the macerator give off souls. */
+    public static boolean isSoulBlock(net.minecraft.world.item.ItemStack stack) {
+        return stack.is(net.minecraft.world.item.Items.SOUL_SAND) || stack.is(net.minecraft.world.item.Items.SOUL_SOIL);
+    }
+
     @Override
     public boolean powerLrdu(Direction side, Direction front) {
         return side != front && side != front.getInverse();

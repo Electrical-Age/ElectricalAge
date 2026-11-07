@@ -45,7 +45,7 @@ public final class JeiPages {
     }
 
     /** Annealing in the Electrical Furnace. */
-    public record Anneal(ItemStack in, ItemStack out) {
+    public record Anneal(ItemStack in, ItemStack out, double minC, double maxC, double kJ) {
     }
 
     /** A wire-drawing example: what it takes (whole items), what comes out, and which machine makes it. */
@@ -79,9 +79,15 @@ public final class JeiPages {
         return c.isEmpty() || r.isEmpty() ? List.of() : List.of(new Resin(c, r));
     }
 
+    /** The Electrical Furnace's heat treatments (annealing, vulcanising). */
     public static List<Anneal> anneals() {
-        ItemStack lam = Eln.findItemStack("Silicon Steel Laminations", 1), core = Eln.findItemStack("Average Ferromagnetic Core", 1);
-        return furnace().isEmpty() || lam.isEmpty() || core.isEmpty() ? List.of() : List.of(new Anneal(lam, core));
+        if (furnace().isEmpty()) return List.of();
+        List<Anneal> l = new ArrayList<>();
+        for (var h : mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.TREATMENTS) {
+            ItemStack in = h.in().get(), out = h.out().get();
+            if (!in.isEmpty() && !out.isEmpty()) l.add(new Anneal(in, out, h.minC(), h.maxC(), h.energy() / 1000));
+        }
+        return l;
     }
 
     /** An example of blocks of wire of a spec: a kit (turns 0) or a winding of turns. */
@@ -131,6 +137,9 @@ public final class JeiPages {
         info(l, "lead_ore", "lead_ore", "deepslate_lead_ore");
         info(l, "tungsten_ore", "tungsten_ore");
         info(l, "tar_sand", "tar_sand");
+        info(l, "sulfur_dust", "sulfur_dust");
+        info(l, "soul_dust", "soul_dust");
+        info(l, "rubber", "rubber", "raw_rubber", "rubber_compound");
         info(l, "crude_oil", "crude_oil_bucket");
         info(l, "fraction", "gasoline_bucket", "diesel_bucket", "heavyoil_bucket", "residue_bucket");
         info(l, "blown_fuse", "blown_lead_fuse");

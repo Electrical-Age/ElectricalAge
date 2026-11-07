@@ -44,7 +44,7 @@ public class ElectricalFurnaceProcess implements IProcess {
         }
 
         if (smeltInProcess && annealing() && !ItemStack.isSameItem(resultAtInit, getSmeltResult()))
-            smeltInit();   // (laminations: annealing turned to spoiling, or back)
+            smeltInit();   // (a heat treatment turned to spoiling, or back)
         if (smeltInProcess && (!annealing() || annealProgresses())) {
             energyCounter += getPower() * time;
             if (energyCounter > energyNeeded) {
@@ -88,25 +88,55 @@ public class ElectricalFurnaceProcess implements IProcess {
         } else {
             smeltInProcess = true;
             resultAtInit = getSmeltResult().copy();
-            energyNeeded = annealing() && resultAtInit.is(mods.eln.Eln.findItemStack("Average Ferromagnetic Core").getItem())
-                ? ANNEAL_ENERGY : energyNeededPerSmelt;
+            HeatTreatment h = treatment();
+            energyNeeded = h != null && ItemStack.isSameItem(resultAtInit, h.out().get()) ? h.energy() : energyNeededPerSmelt;
             energyCounter = 0.0;
         }
     }
 
     ItemStack resultAtInit = ItemStack.EMPTY;
 
-    // ---- annealing Silicon Steel Laminations into an Average Ferromagnetic Core (Baughn 2026-11-06, after Argon): it
-    // progresses between ANNEAL_MIN_C and ANNEAL_MAX_C, waits up to ANNEAL_SPOIL_C, and spoils to Iron Dust above it
+    // ---- heat treatments: an input that progresses only between minC and maxC, waits up to spoilC, and spoils above it.
+    // Annealing Silicon Steel Laminations into an Average Ferromagnetic Core (Baughn 2026-11-06, after Argon);
+    // vulcanising Rubber Compound into Rubber (Baughn 2026-11-07: in the temperature-controlled oven, as the core).
 
     public static final double ANNEAL_MIN_C = 550, ANNEAL_MAX_C = 700, ANNEAL_SPOIL_C = 750;
     /** Energy an anneal takes (J): about 40 s at the furnace's smelting power there. */
     public static final double ANNEAL_ENERGY = 40000;
+    /** Vulcanising: rubber cures at about 140-180 C in real life (a little wider here, for a regulator's swing); past
+     *  230 C it scorches and chars. */
+    public static final double VULCANISE_MIN_C = 130, VULCANISE_MAX_C = 200, VULCANISE_SPOIL_C = 230;
+    /** Energy a vulcanising takes (J): about 40 s at the furnace's 40 W at 160 C. */
+    public static final double VULCANISE_ENERGY = 1600;
 
-    /** Is the input Silicon Steel Laminations? */
+    /** A heat treatment: in becomes out between minC and maxC, waits up to spoilC, and becomes spoiled above it. */
+    public record HeatTreatment(java.util.function.Supplier<ItemStack> in, double minC, double maxC, double spoilC, double energy,
+                                java.util.function.Supplier<ItemStack> out, java.util.function.Supplier<ItemStack> spoiled) {
+    }
+
+    public static final java.util.List<HeatTreatment> TREATMENTS = java.util.List.of(
+        new HeatTreatment(() -> mods.eln.Eln.findItemStack("Silicon Steel Laminations"), ANNEAL_MIN_C, ANNEAL_MAX_C, ANNEAL_SPOIL_C, ANNEAL_ENERGY,
+            () -> mods.eln.Eln.findItemStack("Average Ferromagnetic Core"), () -> mods.eln.Eln.findItemStack("Iron Dust", 4)),
+        new HeatTreatment(() -> new ItemStack(mods.eln.registry.ElnRegistry.RUBBER_COMPOUND.get()), VULCANISE_MIN_C, VULCANISE_MAX_C, VULCANISE_SPOIL_C,
+            VULCANISE_ENERGY, () -> mods.eln.Eln.findItemStack("Rubber", 8), () -> new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get(), 2)));
+
+    /** The heat treatment for a stack, or null. */
+    public static HeatTreatment treatmentFor(ItemStack in) {
+        if (Utils.isEmpty(in)) return null;
+        for (HeatTreatment h : TREATMENTS) {
+            ItemStack i = h.in().get();
+            if (!Utils.isEmpty(i) && ItemStack.isSameItem(in, i)) return h;
+        }
+        return null;
+    }
+
+    HeatTreatment treatment() {
+        return treatmentFor(inventory.getItem(ElectricalFurnaceElement.inSlotId));
+    }
+
+    /** Is the input heat-treated (laminations, rubber compound)? */
     boolean annealing() {
-        ItemStack in = inventory.getItem(ElectricalFurnaceElement.inSlotId);
-        return !Utils.isEmpty(in) && in.is(mods.eln.Eln.findItemStack("Silicon Steel Laminations").getItem());
+        return treatment() != null;
     }
 
     double celsius() {
@@ -114,8 +144,10 @@ public class ElectricalFurnaceProcess implements IProcess {
     }
 
     public boolean annealProgresses() {
+        HeatTreatment h = treatment();
+        if (h == null) return true;
         double t = celsius();
-        return t >= ANNEAL_MIN_C && t <= ANNEAL_MAX_C || t > ANNEAL_SPOIL_C;   // (spoiling is quick: it takes a smelt's energy)
+        return t >= h.minC() && t <= h.maxC() || t > h.spoilC();   // (spoiling is quick: it takes a smelt's energy)
     }
 
     /**
@@ -142,8 +174,8 @@ public class ElectricalFurnaceProcess implements IProcess {
     public ItemStack getSmeltResult() {
         ItemStack in = inventory.getItem(ElectricalFurnaceElement.inSlotId);
         if (chars(furnace.thermalLoad.Tc) && charrable(in)) return new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get());
-        if (annealing())
-            return celsius() > ANNEAL_SPOIL_C ? mods.eln.Eln.findItemStack("Iron Dust", 4) : mods.eln.Eln.findItemStack("Average Ferromagnetic Core");
+        HeatTreatment h = treatmentFor(in);
+        if (h != null) return celsius() > h.spoilC() ? h.spoiled().get() : h.out().get();
         return Utils.smeltResult(furnace.node.coordonate.world(), in);
     }
 
