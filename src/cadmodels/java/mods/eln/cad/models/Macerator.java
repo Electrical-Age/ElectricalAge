@@ -204,7 +204,9 @@ public final class Macerator {
         // power: floor terminals on the two z faces, junction boxes against the housings
         m.addAll(turned(terminalPlate(), 1));
         m.addAll(turned(terminalPlate(), 3));
-        m.add(box(4.5, 1.5, 13.9, 11.0, 4.5, 15.15, "castiron"));
+        // (Baughn: the belt ran through this junction box; it is low now, under the belt's lower run with 0.6 px to spare;
+        // the skid carries the terminal plate with it)
+        m.add(box(4.5, 1.5, 13.9, 11.5, 2.6, 15.15, "castiron"));
         return m;
     }
 
