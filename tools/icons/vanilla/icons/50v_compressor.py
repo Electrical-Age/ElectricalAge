@@ -1,5 +1,5 @@
-"""50v_compressor - the press (compressora.obj), body = LV tier ramp (green texture); see families/machines.py."""
-from families.machines import compressor
+"""50v_compressor - restyled 2026-11 (families/machines26.py)."""
+from families.machines26 import compressor
 
 
 def draw():

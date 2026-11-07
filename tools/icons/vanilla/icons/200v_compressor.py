@@ -1,5 +1,5 @@
-"""200v_compressor - the press (compressorb.obj), body = MV tier ramp (blue texture); see families/machines.py."""
-from families.machines import compressor
+"""200v_compressor - restyled 2026-11 (families/machines26.py)."""
+from families.machines26 import compressor
 
 
 def draw():

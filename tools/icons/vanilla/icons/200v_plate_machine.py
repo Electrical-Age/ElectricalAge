@@ -1,5 +1,5 @@
-"""200v_plate_machine - rolling mill (platemachineb.obj), frame = MV tier ramp; see families/machines.py."""
-from families.machines import plate_machine
+"""200v_plate_machine - restyled 2026-11 (families/machines26.py)."""
+from families.machines26 import plate_machine
 
 
 def draw():

@@ -1,5 +1,5 @@
-"""200v_magnetizer - coil drum on a pedestal (magnetizerb.obj), pedestal = MV tier ramp; see families/machines.py."""
-from families.machines import magnetizer
+"""200v_magnetizer - restyled 2026-11 (families/machines26.py)."""
+from families.machines26 import magnetizer
 
 
 def draw():
