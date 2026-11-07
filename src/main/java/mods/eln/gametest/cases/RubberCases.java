@@ -80,6 +80,11 @@ public final class RubberCases {
             c.check("a rubber sapling grows a rubber fig: a trunk of 10+ logs, a broad crown (leaves 5+ out), none decaying",
                 g[0].equals("true") && Integer.parseInt(g[1]) >= 10 && Integer.parseInt(g[3]) > 50 && Integer.parseInt(g[5]) > 5
                     && g[9].equals("0"), grown);
+            // the Industrial Resin Collector reads the trunk behind it: a rubber fig's three times an oak's of the same height
+            var lvl = c.level();
+            var trunk = c.at(10, 2, 10);
+            double fig = mods.eln.transparentnode.resincollector.IndustrialResinCollectorElement.handRate(lvl, trunk.west(), mods.eln.misc.Direction.XP);
+            c.check("the industrial collector sees the rubber fig behind it (rate > 0)", fig > 0, "" + fig);
             c.check("rubber logs are logs, its leaves leaves (the collector's checks)",
                 mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor.isWood(mods.eln.rubber.RubberTrees.LOG.get())
                     && mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor.isLeaf(mods.eln.rubber.RubberTrees.LEAVES.get()), "");

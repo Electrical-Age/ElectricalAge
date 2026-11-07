@@ -147,7 +147,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
     static final int MAX_LOGS = 256;
 
     /** Leaves within 2 blocks, along the axes, of the logs joined (also diagonally: branches) to {@code start}. */
-    static int treeLeaves(Level world, net.minecraft.core.BlockPos start) {
+    public static int treeLeaves(Level world, net.minecraft.core.BlockPos start) {
         java.util.Set<net.minecraft.core.BlockPos> logs = new java.util.HashSet<>(), leaves = new java.util.HashSet<>();
         java.util.ArrayDeque<net.minecraft.core.BlockPos> todo = new java.util.ArrayDeque<>();
         if (!world.getBlockState(start).is(net.minecraft.tags.BlockTags.LOGS)) return 0;

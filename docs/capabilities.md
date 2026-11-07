@@ -44,7 +44,9 @@ mods must address a multiblock's master block), simple nodes (gone; the exporter
 - Transparent devices override `TransparentNodeElement.getFluidHandler()` (returns `Object`): one tank via
   `fluid/ElementFluidHandler.java` (whitelist via `setFilter`, applies while empty) or a multi-tank
   `ResourceHandler<FluidResource>` (e.g. the boiler: water in, steam out). Overrides: `mechanical/Turbines.kt`,
-  `transparentnode/FuelHeatFurnace.kt`, `transparentnode/electricalmachine/OilSeparatorElement.java`, and in `oil/`:
+  `transparentnode/FuelHeatFurnace.kt`, `transparentnode/electricalmachine/OilSeparatorElement.java`,
+  `transparentnode/electricalmachine/CompressorPortsElement.java` (its OUT tank),
+  `transparentnode/resincollector/IndustrialResinCollectorElement.java`, and in `oil/`:
   `BoilerElement`, `SteamGeneratorElement`, `OilPumpElement`, `FlareStackElement`, `ColumnBaseElement`,
   `ColumnSegmentElement`.
 - Buckets: `TransparentNode.onBlockActivated` -> `fluid/FluidBuckets.use` on the same handler.

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "E": "eln:electrical_motor",
+    "M": "eln:machine_block",
+    "P": "eln:iron_plate",
+    "T": "eln:tree_resin_collector"
+  },
+  "pattern": [
+    " T ",
+    "PMP",
+    " E "
+  ],
+  "result": {
+    "id": "eln:industrial_resin_collector"
+  }
+}

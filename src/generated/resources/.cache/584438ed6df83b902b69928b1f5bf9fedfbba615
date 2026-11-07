@@ -1,4 +1,4 @@
-// 26.3	2026-11-07T15:00:16.280363652	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-07T17:15:32.864897424	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -177,6 +177,7 @@ adff65b0e3b516752580628470a82e029fef2c0c data/eln/advancement/recipes/misc/high_
 389625a0b3068699697a055e47fdab9352df0ec2 data/eln/advancement/recipes/misc/hub.json
 66103a82763e2f5be503d9a4251d7ff65b7a29d8 data/eln/advancement/recipes/misc/improved_flashlight.json
 26baca3846cf3c09885134d3b1f92feb7bf65a5a data/eln/advancement/recipes/misc/industrial_data_logger.json
+9b8601e87485588a1d3f04b45278c4988b733e06 data/eln/advancement/recipes/misc/industrial_resin_collector.json
 23e7e1a3c03fa30b6de61225a6f5a79bb8c48b5e data/eln/advancement/recipes/misc/iron_cable.json
 caa773201e3270ec7194fa6ad69acb7e3b4f7c13 data/eln/advancement/recipes/misc/iron_tank.json
 594b66a9bcba4caa1404e3f5a46caea38718bd95 data/eln/advancement/recipes/misc/janet_rom_chip.json
@@ -555,6 +556,7 @@ ac0567a3cf2f8b131a6719973f7964e08126dcf6 data/eln/recipe/fuel_heat_furnace.json
 7100a4afa0e935888c7e32607d2c279f16d69cdf data/eln/recipe/hub.json
 820d044aff444868e33966e505a7ee17af71055b data/eln/recipe/improved_flashlight.json
 4a6c0ad115aeb7f8a62cb0fab925aac8786d0226 data/eln/recipe/industrial_data_logger.json
+7477e2b0fcc3a058e82c51f76fcf597019a42361 data/eln/recipe/industrial_resin_collector.json
 441236a83e9903671ee085ecd8705c19a822f2ac data/eln/recipe/iron_cable.json
 4b9f9ef5fa11f713b714c8dd328c65558f315235 data/eln/recipe/iron_tank.json
 ea42d036d4911bc6d7b3539c2c241dae7182251f data/eln/recipe/janet_rom_chip.json

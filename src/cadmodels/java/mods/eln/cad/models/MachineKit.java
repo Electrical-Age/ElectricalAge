@@ -25,6 +25,7 @@ final class MachineKit {
         Palette.put("paint_red", 176, 48, 40, 8, null);
         Palette.put("label_in", 52, 102, 176, 0, Compressor.text("IN", 4, 5));
         Palette.put("label_out", 176, 48, 40, 0, Compressor.text("OUT", 2, 5));
+        Palette.put("latex", 242, 238, 220, 4, null);
     }
 
     /** Rivets on a z face (at z, facing +z if out > 0): count of them from x0 to x1 at height y. */
@@ -56,6 +57,23 @@ final class MachineKit {
         List<Mesh> pw = new ArrayList<>(List.of(prism('x', y + 0.4, z - 0.5, 0.28, x - 1.05, x - 0.8, "led_green", 8)));
         List<Mesh> run = new ArrayList<>(List.of(prism('x', y + 0.4, z + 0.5, 0.28, x - 1.05, x - 0.8, "led_amber", 8)));
         return List.of(pw, run);
+    }
+
+    /** The label on a flange's face facing up at y, centre (x, z), radius r; readable from the front (x-). */
+    static Mesh flangeLabelUp(double y, double x, double z, double r, String mat) {
+        Mesh d = prism('y', x, z, r, y, y + 0.06, mat, 12, false, true);
+        d.uv(f -> {
+            float[] uv = new float[2 * f.n];
+            for (int i = 0; i < f.n; i++) {
+                double fx = f.xyz[3 * i], fz = f.xyz[3 * i + 2];
+                // seen from above with the front (x-) at the bottom: right is +z, up is +x
+                uv[2 * i] = (float) Math.min(1, Math.max(0, (fz - (z - r)) / (2 * r)));
+                uv[2 * i + 1] = (float) Math.min(1, Math.max(0, (fx - (x - r)) / (2 * r)));
+            }
+            return uv;
+        });
+        d.free("a label printed on the flange's face");
+        return d;
     }
 
     /**

@@ -48,6 +48,14 @@ public class Wp10aContent implements ElnContent {
         registerColumn(83);
         registerAnvil(85);
         registerWireDrawing(88);
+        registerResinCollector(92);
+    }
+
+    /** The Industrial Resin Collector (Baughn 2026-11-07, the rubber chain): taps a trunk for latex on 230 V. Model
+     *  mods.eln.cad.models.ResinCollector. */
+    public static void registerResinCollector(int id) {
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.transparentnode.resincollector.IndustrialResinCollectorDescriptor(
+            TR_NAME(Type.NONE, "Industrial Resin Collector"), "resincollector230", MVU, 200, meduimVoltageCableDescriptor));
     }
 
     /**

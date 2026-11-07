@@ -1600,6 +1600,15 @@ public final class ElnRecipes extends ElnRecipesBase {
         addShapelessRecipe(stack(mods.eln.rubber.RubberTrees.SAPLING_ITEM.get()),
             stack(Items.JUNGLE_SAPLING), stack(Items.OAK_SAPLING), stack(Items.BIRCH_SAPLING), stack(Items.ACACIA_SAPLING));
         addShapelessRecipe(stack(Items.BIRCH_PLANKS, 4), stack(mods.eln.rubber.RubberTrees.LOG_ITEM.get()));
+        // the Industrial Resin Collector (2026-11-07): a hand collector on a machine block, a motor to tap, iron plates
+        addRecipe(findItemStack("Industrial Resin Collector", 1),
+            " T ",
+            "PMP",
+            " E ",
+            'T', findItemStack("Tree Resin Collector"),
+            'P', findItemStack("Iron Plate"),
+            'M', findItemStack("Machine Block"),
+            'E', findItemStack("Electrical Motor"));
         addShapelessRecipe(stack(Items.BIRCH_PLANKS, 4), stack(mods.eln.rubber.RubberTrees.WOOD_ITEM.get()));
         addRecipe(stack(mods.eln.rubber.RubberTrees.WOOD_ITEM.get(), 3), "LL", "LL", 'L', stack(mods.eln.rubber.RubberTrees.LOG_ITEM.get()));
 

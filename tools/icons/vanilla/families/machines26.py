@@ -126,3 +126,22 @@ def plate_machine(tier):
             cv.set(x + 1, 2, RED[3]); cv.set(x, 3, RED[2]); cv.set(x + 2, 3, RED[2])   # handwheels
     leds(cv, 2, 10 if not big else 9)
     return cv
+
+
+# ------------------------------------------------------------------------------- industrial resin collector
+def resin_collector():
+    """The Industrial Resin Collector: the blue cabinet, the struts and rubber pads reaching back (up-right) to the
+    trunk, the riser and red OUT flange on top, LEDs."""
+    B = tier_ramp('mv')
+    cv = Canvas(16)
+    box(cv, 1, 13, 10, 1, 3, DARK, bevel=False)
+    sub(cv, lambda c: (box(c, 10, 7, 3, 1, 1, STEEL, bevel=False), box(c, 13, 4, 1, 5, 1, DARK, bevel=False)))   # strut, pad
+    zb = zsolid([('cab', 1, 7, 9, 6, 3, 0)])
+    zpaint(cv, zb, B, bevel=True)
+    for y in range(8, 12):
+        cv.set(4, y, h('#f2eedc'))                                                 # sight glass with latex
+    sub(cv, lambda c: box(c, 6, 2, 1, 3, 1, DARK, bevel=False))                    # riser
+    for x, c in ((5, RED[3]), (6, RED[4]), (7, RED[3]), (8, RED[2])):
+        cv.set(x, 2, c)                                                            # the OUT flange
+    leds(cv, 2, 8)
+    return cv

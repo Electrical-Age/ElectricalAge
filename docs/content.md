@@ -66,7 +66,7 @@ draw-off (front; natural gas as a gas); into the column base's crude nozzle (rig
 gas turbine's fuel flange (top). Out-ports push up to 200 mB/s against up to 6 bar (constants in each descriptor).
 With no EA pipe on the flange, a device with a drawn outlet pushes its tank into whatever block there takes fluid
 (`fluid/FluidExport`: another mod's pipe, a column base, a flare stack, an EA tank), and every device offers its
-tanks on every face. The fuel heat furnace takes fuel on a flange low on its front into a two-bucket tank (gasoline,
+tanks on every face. Latex (the rubber chain, 2026-11-07): the 230V compressor (CompressorPortsElement) takes it in at its blue IN flange (back, 4 px up, 13 across) and presses it to Raw Rubber, and pushes the latex it presses from dandelions out of its red OUT flange (back, 9 px up); the Industrial Resin Collector (transparentnode/resincollector) pushes the latex it taps out of a flange on top (face centre). PipePlacer.portAt picks the port nearest the click where a face has several. The fuel heat furnace takes fuel on a flange low on its front into a two-bucket tank (gasoline,
 diesel, heavy oil, residue, crude). Crude cokes its burner (residue at half that rate), and a coked burner fires that
 much less: half after an hour at full power on crude, at most 90 % coked. A right click with wool cleans it. Burning
 crude or residue puts out black smoke (Baughn 2026-11-03). Tests: `OilCases` oil_pump_into_pipe*, oil_on_pipes_*,
@@ -77,7 +77,7 @@ fuel_furnace_coke.
   the loader's javadoc: kind curve/none/gas, group, density, heat capacities, molar mass, boiling point, latent heat,
   critical temperature, liquid viscosity at two temperatures, colour, the NeoForge fluids it is). Water and air are
   built in. EA ships crude_oil, gasoline, diesel, heavy_oil (hydrocarbons, one group), residue (never boils, denser
-  than water) and natural_gas. A modpack can add species or retune these; a file that fails its checks (the vapour's
+  than water), natural_gas and latex (the rubber chain: its own group, never boils; mods.eln.oil.Latex, not a column cut). A modpack can add species or retune these; a file that fails its checks (the vapour's
   energy must stay above the liquid's below the critical point) is skipped with a log line. Optional `flammable`
   {flash_point, autoignition} (K): a leak's jet (`node/voxel/SteamJet.burn`) of a species that burns catches by itself
   at its autoignition temperature, over its flash point from a flame within 2 blocks (fire, lava, a torch, a lit

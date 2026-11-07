@@ -2170,5 +2170,11 @@
   "display": "230V Wire Drawing Machine",
   "kind": "transparent_node",
   "name": "wire_drawing_machine_230v"
+ },
+ "eln:transparent_node@5888": {
+  "descriptor": "IndustrialResinCollectorDescriptor",
+  "display": "Industrial Resin Collector",
+  "kind": "transparent_node",
+  "name": "industrial_resin_collector"
  }
 }

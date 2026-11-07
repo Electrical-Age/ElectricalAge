@@ -1,4 +1,4 @@
-// 26.3	2026-11-07T13:22:51.877375514	eln-global/EA models
+// 26.3	2026-11-07T17:15:32.860984228	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -59,6 +59,7 @@ f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.jso
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/ghost_block.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/high_power_receiver_antenna.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/high_power_transmitter_antenna.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/industrial_resin_collector.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/iron_tank.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/joint.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/joint_hub.json
@@ -285,6 +286,7 @@ dbadde2aaf16a92fc3972d7e6b3f4254c6eddab9 assets/eln/items/high_voltage_relay.jso
 f32af3c050c7673d1f5e3d48b17f8a898a0f68db assets/eln/items/hub.json
 abc3744929bb16ef9d942ab9d03c8e70fb6134bb assets/eln/items/improved_flashlight.json
 fd0aa72d3eb5d1bf7b04f632242dd9119a2253ff assets/eln/items/industrial_data_logger.json
+d491dc4e5a279feb5baedfd1b5fa810f990db605 assets/eln/items/industrial_resin_collector.json
 3524eb28ec02f59cfb5d5a686a6ded00e7572c6f assets/eln/items/iron_cable.json
 8a896c86af04321b4a515bb68f6d530e12b03df5 assets/eln/items/iron_dust.json
 b7ccc528e7b56155ebfa04c3b65da5f3c2f55163 assets/eln/items/iron_plate.json
@@ -753,6 +755,8 @@ c77440ac82c6ecea9f0c1bcf51a96abee9bd2396 assets/eln/models/item/improved_flashli
 52300738a7ab3e65d1ef9644f3df17e3d9c0f729 assets/eln/models/item/improved_flashlight_on.json
 38c19581358525bc28f22f74919c936f3c1c250a assets/eln/models/item/industrial_data_logger.json
 87783c94209c88105a6daa28fc95c66daddfb34c assets/eln/models/item/industrial_data_logger_3d.json
+a90a41cfb3c84aebaec96c6deb742722896a839f assets/eln/models/item/industrial_resin_collector.json
+01e3b27177eb3697d22d8cbe8739711dd709c1db assets/eln/models/item/industrial_resin_collector_3d.json
 4a6030e469c1ee94608d5a180e4d50067fca17b6 assets/eln/models/item/iron_cable.json
 b5949fe001bb7915d5c219a56ec8a8aa59abd64a assets/eln/models/item/iron_dust.json
 6ee852843c5ce8c9b8ee81b3593e09311b85c931 assets/eln/models/item/iron_plate.json
