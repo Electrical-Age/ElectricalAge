@@ -1,4 +1,4 @@
-// 26.3	2026-10-27T14:38:20.757373795	eln-global/Tags for minecraft:item mod id eln
+// 26.3	2026-11-07T20:59:51.241811096	eln-global/Tags for minecraft:item mod id eln
 84e660d99ec050723c2cbcd48806f26355cdd0fa data/c/tags/item/casings.json
 b1c2dbaac22ebe066a8de4d98af4e881ddef621f data/c/tags/item/casings/machine.json
 864234b02478871ab4edcaaf9bbb5976971370f5 data/c/tags/item/casings/machine_advanced.json
@@ -46,3 +46,9 @@ c878309f02ed8719e9c1b955f3d2e5791fda50fc data/eln/tags/item/high_quality_plates/
 1e45613c086e995b0dd09f0caa446f850b1fb151 data/eln/tags/item/ingots/tungsten.json
 05abdd0d8560b0671f8c122f795fcb1bc2155276 data/eln/tags/item/ore_drops/coal.json
 c4d5e840a138209dffa934f3802ed4e360f264eb data/eln/tags/item/ores/tungsten.json
+1bb8cef862d367a4fda88222ce9d9794c91528c4 data/minecraft/tags/item/enchantable/chest_armor.json
+8cb088f35404b5be151b6a9d079fab5ec77d6f7d data/minecraft/tags/item/enchantable/durability.json
+8cb088f35404b5be151b6a9d079fab5ec77d6f7d data/minecraft/tags/item/enchantable/equippable.json
+ef343bf2f2c9f0d3c4eb10debcc6da2bea3ab587 data/minecraft/tags/item/enchantable/foot_armor.json
+04adfb6d6de913358d2573b47d45561193a351a6 data/minecraft/tags/item/enchantable/head_armor.json
+d7a8d7d762fa599eb1eb0d869a6aa686d0debe07 data/minecraft/tags/item/enchantable/leg_armor.json

@@ -61,6 +61,19 @@ public class ElnItemTags extends ItemTagsProvider {
         tag(itemTag("c", "ores")).addTag(itemTag("c", "ores/tungsten"));
         // the X-ray scanner's filters (XRayFilter): coal is what coal ore drops, but has no convention tag of its own
         tag(itemTag("eln", "ore_drops/coal")).add(key(net.minecraft.world.item.Items.COAL));
+        // E-Coal armour takes armour enchantments (Baughn 2026-11-07): the per-slot enchantable tags, durability and
+        // equippable ones (Unbreaking, Mending, curses), not the armour tags themselves (they'd make it trimmable too)
+        armourEnchantable(net.minecraft.tags.ItemTags.HEAD_ARMOR_ENCHANTABLE, "e_coal_helmet");
+        armourEnchantable(net.minecraft.tags.ItemTags.CHEST_ARMOR_ENCHANTABLE, "e_coal_chestplate");
+        armourEnchantable(net.minecraft.tags.ItemTags.LEG_ARMOR_ENCHANTABLE, "e_coal_leggings");
+        armourEnchantable(net.minecraft.tags.ItemTags.FOOT_ARMOR_ENCHANTABLE, "e_coal_boots");
+    }
+
+    void armourEnchantable(TagKey<Item> slot, String path) {
+        var k = ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("eln", path));
+        tag(slot).add(k);
+        tag(net.minecraft.tags.ItemTags.DURABILITY_ENCHANTABLE).add(k);
+        tag(net.minecraft.tags.ItemTags.EQUIPPABLE_ENCHANTABLE).add(k);
     }
 
     static TagKey<Item> itemTag(String ns, String path) {

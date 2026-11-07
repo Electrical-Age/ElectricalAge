@@ -65,8 +65,10 @@ public class Wp12dContent implements ElnContent {
             (armor + armorMarge) * energyPerDamage, 250.0, // energyStorage, chargePower
             armor / 20.0, armor * energyPerDamage, // ratioMax, ratioMaxEnergy
             energyPerDamage), p -> p.durability(type.getDurability(ECOAL.durability()))
-            // humanoidArmor without enchantable (1.12 enchantability 0) and without a repair ingredient (not repairable)
-            .attributes(ECOAL.createAttributes(type))
+            // humanoidArmor without a repair ingredient (not repairable); enchantable as diamond, the top tier (Baughn, Nero
+            // 2026-11-07; 1.12: 0),
+            // with the vanilla armour enchantable tags (ElnItemTags)
+            .attributes(ECOAL.createAttributes(type)).enchantable(10)
             .component(net.minecraft.core.component.DataComponents.EQUIPPABLE, net.minecraft.world.item.equipment.Equippable
                 .builder(type.getSlot()).setEquipSound(ECOAL.equipSound()).setAsset(ECOAL.assetId()).build()));
         ElnRegistry.ALL_ITEMS.add(i);
