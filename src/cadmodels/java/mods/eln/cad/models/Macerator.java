@@ -240,10 +240,13 @@ public final class Macerator {
         b.part("main", bodyB(lb));
         b.part("ledpower", lb.get(0));
         b.part("ledrun", lb.get(1));
-        // one belt link, built on the block's centre line in the flywheel's plane; mods.eln.anim.Belt repeats it
-        b.part("beltlink", List.of(box(7.6, 7.85, FW_Z0 + 0.25, 8.4, 8.15, FW_Z1 - 0.25, "rubber")));
+        // one belt link in the flywheel's plane; mods.eln.anim.Belt repeats it
+        // (built above the block, clear of the model, where it is never drawn: Belt moves it from (lx, ly))
+        b.part("beltlink", List.of(box(7.6, 16.85, FW_Z0 + 0.25, 8.4, 17.15, FW_Z1 - 0.25, "rubber")));
+        b.part("beltmark", List.of(box(7.5, 16.75, FW_Z0 + 0.15, 8.5, 17.25, FW_Z1 - 0.15, "steel")));   // (a lacing clip: shows it run)
         b.txt.addAll(List.of("o beltlink", "f ax " + Catalog.fmt(ROLLS_B.x1), "f ay " + Catalog.fmt(ROLLS_B.y), "f ar " + Catalog.fmt(FW_R + 0.15),
-            "f bx " + Catalog.fmt(PX), "f by " + Catalog.fmt(PY + 0.4), "f br " + Catalog.fmt(PR + 0.15), "f pitch 0.8"));
+            "f bx " + Catalog.fmt(PX), "f by " + Catalog.fmt(PY + 0.4), "f br " + Catalog.fmt(PR + 0.15), "f pitch 0.8",
+            "f lx 8.0", "f ly 17.0"));
         List<Mesh> r1 = roll(ROLLS_B, 0, 1.2, FW_Z1 + 0.2, "steel");
         r1.addAll(flywheel(ROLLS_B));
         b.part("rot1", r1);

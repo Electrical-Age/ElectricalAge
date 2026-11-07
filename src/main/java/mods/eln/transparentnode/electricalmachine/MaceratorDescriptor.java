@@ -28,6 +28,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
             rot2 = obj.getPart("rot2");
             main = obj.getPart("main");
             belt = mods.eln.anim.Belt.of(obj.getPart("beltlink"));
+            if (belt != null) belt.mark = obj.getPart("beltmark");
         }
         initLeds(obj);
     }

@@ -158,7 +158,7 @@ public final class Compressor {
         m.add(prism('x', y, z, 1.0, 15.5, 15.7, paint, 12));
         m.add(prism('x', y, z, 1.45, 15.7, 15.9, "steel", 12));
         m.addAll(OilKit.boltRing('x', y, z, 1.25, 15.9, 15.98, 4, "darksteel", 0.17, Math.PI / 4));
-        m.add(MachineKit.flangeLabel(15.9, y, z, 1.0, label));
+        m.add(MachineKit.flangeLabel(15.9, y, z, 0.7, label));   // (AdventurAgent: readable at 4.5 blocks; smaller, a zoom-in backstop)
         return m;
     }
 
