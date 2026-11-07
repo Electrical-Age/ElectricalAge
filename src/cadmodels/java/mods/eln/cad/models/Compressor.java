@@ -134,14 +134,21 @@ public final class Compressor {
         m.add(prism('x', 14.0, 8.3, 0.4, 8.5, 13.4, "darksteel", 8, false, false));                    // ... across to the cylinder
         m.add(prism('y', 8.7, 8.3, 0.4, 14.0, 15.0, "darksteel", 8, false, false));
         m.addAll(dial(11.4, 5.0, 6.0, 0.9));                                                          // gauge (front of the tank)
-        // the manifold block at the back with the two flanges (Baughn: blue IN, red OUT; the words in miniature on
-        // each flange's face, a backstop you zoom in to read), their pipes into the power pack
-        m.add(box(14.6, 1.0, 11.0, 15.5, 11.5, 15.0, "castiron"));
-        MachineKit.rivetsX(m, 11.6, 14.4, 11.0, 15.5, 1, 3);
+        // the two flanges on a bracket at the back (Baughn: blue IN, red OUT; the words in miniature on each flange's face)
+        // and their pipes, run in plain sight into the machine (Baughn: they had no visible connection): IN back along the
+        // tank's side and into it, OUT into the pump
+        m.add(box(15.0, 1.0, 11.8, 15.5, 11.0, 14.2, "castiron"));
+        MachineKit.rivetsX(m, 12.2, 13.8, 6.2, 15.5, 1, 2);
         m.addAll(flange(3.5, 13.0, "paint_blue", "label_in"));
         m.addAll(flange(9.0, 13.0, "paint_red", "label_out"));
-        m.add(prism('z', 9.0, 13.0, 0.45, 10.0, 11.0, "darksteel", 8, false, false));                  // OUT line to the pump
-        m.add(prism('z', 3.5, 13.0, 0.45, 10.0, 11.0, "darksteel", 8, false, false));                  // IN line to the tank
+        m.add(prism('x', 3.5, 13.0, 0.45, 12.6, 15.0, "darksteel", 8, false, false));                  // IN: inward
+        m.add(box(12.3, 3.2, 12.7, 13.3, 4.2, 13.7, "darksteel"));                                       // elbow
+        m.add(prism('z', 12.8, 3.7, 0.45, 10.0, 12.7, "darksteel", 8, false, false));                  // ... into the tank
+        m.add(prism('x', 9.0, 13.0, 0.45, 13.0, 15.0, "darksteel", 8, false, false));                  // OUT: inward
+        m.add(box(12.7, 8.5, 12.7, 13.7, 9.5, 13.7, "darksteel"));                                       // elbow
+        m.add(prism('z', 13.2, 8.6, 0.45, 9.6, 12.7, "darksteel", 8, false, false));                   // ... into the pump
+        for (double[] p : new double[][]{{12.8, 3.7, 11.3}, {13.2, 8.6, 11.0}})                         // pipe clamps
+            m.add(Mc.tube('z', p[0], p[1], 0.45, 0.65, p[2] - 0.2, p[2] + 0.2, "steel", 8));
         // a nameplate on the bed's front
         m.add(box(1.4, 2.0, 6.0, 1.5, 3.5, 10.0, "brass", "w").free("a nameplate, a decal on the bed"));
         // power: floor terminals on the z faces, junction boxes against the bed and the tank
