@@ -57,8 +57,8 @@ public class ElnLang extends LanguageProvider {
         add("jei.eln.anneal", "Annealing");
         add("jei.eln.anneal.how", "Anneals between %s and %s °C (%s kJ)");
         // information pages (compat.JeiPages.infos): what no recipe makes
-        add("jei.eln.info.lead_ore", "Lead ore lies deep, mostly in deepslate: from y -64 to 0, most of it around -32. Mine it for raw lead; silk touch keeps the ore.");
-        add("jei.eln.info.tungsten_ore", "Tungsten ore lies in stone from y 0 to 31. Mine it for raw tungsten; silk touch keeps the ore.");
+        add("jei.eln.info.lead_ore", "Lead ore lies deep, mostly in deepslate: from y -64 to 0, most of it around -32. Mine it for raw lead.");
+        add("jei.eln.info.tungsten_ore", "Tungsten ore lies in stone from y 0 to 31. Mine it for raw tungsten.");
         add("jei.eln.info.tar_sand", "Rims the small oil ponds dug over some oil lakes. A Tar Sand Separator gets crude oil out of it.");
         add("jei.eln.info.crude_oil", "From oil lakes underground, through an Oil Pump, or from the small ponds over some of them. An empty bucket takes it from a pond, or 1000 mB from a pump or tank that holds that much.");
         add("jei.eln.info.fraction", "Drawn off a Fractionating Column fed with hot crude oil: each segment draws off its own cut, the base the residue. An empty bucket takes 1000 mB from any EA device holding that much.");
