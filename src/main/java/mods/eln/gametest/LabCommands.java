@@ -615,7 +615,8 @@ public final class LabCommands {
                 mods.eln.transparentnode.electricalmachine.CompressorPortsDescriptor.FLANGE_Z);
             var face = back.toEnumFacing();
             // (a point on the IN flange, for the port pick: the face's centre column at the flange's height)
-            var hit = net.minecraft.world.phys.Vec3.atCenterOf(pos).relative(face, 0.5).add(0, (at / 17 - 8) / 16.0, 0);
+            int yPx = face.get3DDataValue() <= 3 ? at % 17 : at / 17;   // (PortBridge.endSpot: north/south x then y, west/east y then z)
+            var hit = net.minecraft.world.phys.Vec3.atCenterOf(pos).relative(face, 0.5).add(0, (yPx - 8) / 16.0, 0);
             String r = tankPiped(src, tp, pos, face, hit, 8000);
             src.sendSuccess(() -> Component.literal("latex tank at " + tp.toShortString() + " to the IN flange: " + r), false);
         }
