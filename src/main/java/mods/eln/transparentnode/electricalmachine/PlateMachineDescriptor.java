@@ -72,16 +72,26 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
         handle.backup3.draw(rot3, 0f, 0f, 1f);
         handle.backup4.draw(rot4, 0f, 0f, -1f);
 
-        // the piece being rolled (Baughn 2026-11-07: more than a turning item): it lies on the entry table, runs through
-        // the rolls toward the exit table as the job goes on, and is flattened and drawn out where it has passed the gap;
-        // the plates made lie flat on the exit table. (Flat, the item-frame view: standing plates turned on edge and
-        // through each other, AdventurAgent.)
+        // the piece being rolled (Baughn 2026-11-07: more than a turning item). It slides from the entry table to the roll
+        // gap; then the ingot goes in on one side while the plate comes out on the other, at once (Baughn 2026-11-08: it
+        // stayed an ingot until it was all through): the ingot shortens toward the gap as the plate grows from it, longer
+        // and thinner, toward the exit table, where the plates made lie. Flat (the item-frame view): standing plates
+        // turned on edge and through each other (AdventurAgent).
         float p = render == null ? 0 : render.progress.shown();
-        float t = mods.eln.anim.ItemMotion.ease(p, 0.05f, 0.95f);
-        float x = mods.eln.anim.ItemMotion.lerp(inX, outX, t), z = mods.eln.anim.ItemMotion.lerp(inZ, outZ, t);
-        float rolled = rollX == null ? p : mods.eln.anim.ItemMotion.ease(x, rollX - 0.06f, rollX + 0.06f);
-        if (p < 0.95f || outEntity == null || outEntity.getItem().isEmpty())
-            mods.eln.anim.ItemMotion.drawFlat(inEntity, x, inY, z, 0, ITEM_SIZE, 1 + 0.4f * rolled, 1, 2f - 1.4f * rolled);
+        float gap = rollX == null ? (inX + outX) / 2 : rollX, dir = Math.signum(outX - inX);
+        float slide = mods.eln.anim.ItemMotion.ease(p, 0, 0.15f), t = mods.eln.anim.ItemMotion.ease(p, 0.15f, 0.95f);
+        float z = mods.eln.anim.ItemMotion.lerp(inZ, outZ, 0.5f * slide);
+        if (t < 0.999f) {   // the ingot: at the entry table, then shortening into the gap
+            float len = ITEM_SIZE * (1 - t);
+            float x = mods.eln.anim.ItemMotion.lerp(inX, gap - dir * ITEM_SIZE / 2, slide);
+            if (t > 0) x = gap - dir * len / 2;
+            mods.eln.anim.ItemMotion.drawFlat(inEntity, x, inY, z, 0, ITEM_SIZE, 1 - t, 1, 2f);
+        }
+        if (t > 0) {   // the plate it becomes, growing out of the gap (the output's item if there is one yet)
+            float len = ITEM_SIZE * 1.4f * t;
+            ItemEntity plate = outEntity != null && !outEntity.getItem().isEmpty() ? outEntity : inEntity;
+            mods.eln.anim.ItemMotion.drawFlat(plate, gap + dir * len / 2, inY, z, 0, ITEM_SIZE, 1.4f * t, 1, 0.6f);
+        }
         mods.eln.anim.ItemMotion.drawFlat(outEntity, outX, outY, outZ, 0, ITEM_SIZE, 1.4f, 1, 0.6f);
     }
     @Override
