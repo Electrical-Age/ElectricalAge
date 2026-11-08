@@ -2,7 +2,6 @@ package mods.eln.transparentnode.waterturbine;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
-import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
@@ -24,10 +23,10 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
     }
 
     Coordonate waterCoord, waterCoordRight;
-    RcInterpolator powerFactorFilter = new RcInterpolator(1);
-    RcInterpolator dirFilter = new RcInterpolator(0.5f);
+    /** The flow's direction (-1..1, eased), then the wheel's speed: direction x the root of power, eased again. */
+    final mods.eln.anim.Smooth dirFilter = new mods.eln.anim.Smooth(0.5);
+    mods.eln.anim.Spin wheel;
     WaterTurbineDescriptor descriptor;
-    float alpha = (float) (Math.random() * 360);
     boolean soundPlaying = false;
 
     @Override
@@ -35,34 +34,29 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
         // front.glRotateXnRef();
 
         front.glRotateXnRef();
-        descriptor.draw(alpha);
+        descriptor.draw(wheel().deg());
 
     }
 
+
+    mods.eln.anim.Spin wheel() {
+        if (wheel == null) wheel = new mods.eln.anim.Spin(descriptor.speed, 1).randomPhase();
+        return wheel;
+    }
 
     public void refresh(float deltaT) {
         float flowDir = waterCoord.getMeta() > waterCoordRight.getMeta() ? 1 : -1;
         if (Utils.isWater(waterCoord) == false)
             flowDir = 0;
 
-        dirFilter.setTarget(flowDir);
-        dirFilter.step(deltaT);
-        powerFactorFilter.setTarget((float) (dirFilter.get() * Math.sqrt(powerFactor)));
-        powerFactorFilter.step(deltaT);
+        dirFilter.target(flowDir).step(deltaT);
+        float before = wheel().deg();
+        wheel.speed(dirFilter.get() * Math.sqrt(powerFactor)).step(deltaT);
+        float speed = wheel.speedNow();
 
-        // Utils.println(powerFactorFilter.get());
-        float alphaN_1 = alpha;
-        alpha += deltaT * descriptor.speed * powerFactorFilter.get();
-        if (alpha > 360)
-            alpha -= 360;
-        if (alpha < 0)
-            alpha += 360;
-
-        if ((int) (alpha / 45) != (int) (alphaN_1 / 45) && soundPlaying == false) {
-            Coordonate coord = coordonate();
+        if ((int) (wheel.deg() / 45) != (int) (before / 45) && soundPlaying == false) {   // (each paddle passing)
             play(new SoundCommand(descriptor.soundName)
-                .mulVolume(descriptor.nominalVolume * (0.007f + 0.2f * (float) powerFactorFilter.get() * (float) powerFactorFilter.get()),
-                    1.1f));
+                .mulVolume(descriptor.nominalVolume * (0.007f + 0.2f * speed * speed), 1.1f));
             //SoundClient.playFromBlock(tileEntity.getLevel(),coord.x, coord.y, coord.z, descriptor.soundName,1,1,5,15);
             soundPlaying = true;
         } else

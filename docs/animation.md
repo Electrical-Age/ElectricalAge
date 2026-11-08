@@ -45,8 +45,12 @@ code on purpose.
 | Electrical furnace | item turntable | `Spin` (was the wall clock) | lib |
 | Smelter, heat furnace, fuel heat furnace | fire glow | `Glow` (each its own ramp), `Fill.drawAbout` | lib |
 | 230V macerator | flywheel belt | `Belt` | lib |
-| Macerator, magnetizer, plate machine, compressor | handles/rollers, ram, items | hand-written R1, items spin | own |
-| Compact turbine, steam generator, inline pump, wind/water turbines, active dissipator, alarm, anemometer, auto miner pipe, wire drawer | rotors | hand-written smoothed rotor | own |
+| Macerator, magnetizer, plate machine | rollers, drum, rolls (the 230V's backup rolls on spins of their own: a multiple of a wrapped angle jumped), items | `Spin`, `Emitter` (souls), `ItemMotion` + `Progress` (items in process) | lib |
+| Compressor | ram, items | `RcInterpolator` ram; `ItemMotion` squash | own (ram) |
+| Compact turbine, steam generator | rotor, steam puffs from the vent | `Spin`, `Smooth`, `Emitter` + `Emitter.vent` | lib |
+| Inline pump, active dissipator, alarm beacon, anemometer, auto miner pipe, wire drawer | rotors | `Spin` | lib |
+| Wind turbine | rotor (root of the eased power), blade-pass sound, halo | `Smooth`, `Spin`, `Blink` | lib |
+| Water turbine | wheel either way, paddle sound | `Smooth` (direction), `Spin` | lib |
 | Egg incubator | item turntable | constant spin | own |
 | Switches, breaker, relay, signal sources, bus button, VU meter, timeout | levers, contacts, needles | `RcInterpolator`/`PhysicalInterpolator` | own |
 | Transformer, lamp supply, teleporter | doors (player near), gyro | `PhysicalInterpolator` | own |

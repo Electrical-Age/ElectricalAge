@@ -3,7 +3,6 @@ package mods.eln.transparentnode.windturbine;
 import mods.eln.cable.CableRenderType;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDUMask;
-import mods.eln.misc.RcInterpolator;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
@@ -15,19 +14,17 @@ import java.io.IOException;
 import java.util.Random;
 
 public class WindTurbineRender extends TransparentNodeElementRender {
-    private float haloBlink_OnTime = 0.5f;
-    private float haloBlink_OffTime = 2.5f;
-
     private boolean soundPlaying = false;
-    private float haloBlinkCounter = 0.f;
-    private boolean haloState = false;
 
     private CableRenderType renderPreProcess;
     private final LRDUMask eConn = new LRDUMask();
 
-    private final RcInterpolator powerFactorFilter = new RcInterpolator(2);
+    /** The power share, eased over two seconds; the rotor turns at the descriptor's speed times its square root. */
+    private final mods.eln.anim.Smooth powerFactorFilter = new mods.eln.anim.Smooth(2);
+    private final mods.eln.anim.Spin rotor;
+    /** The halo on the nacelle: half a second on, two and a half off, each turbine a little off the others. */
+    private final mods.eln.anim.Blink halo;
     private final WindTurbineDescriptor descriptor;
-    private float alpha = (float) (Math.random() * 360);
 
     private float wind;
     private float powerFactor;
@@ -35,49 +32,36 @@ public class WindTurbineRender extends TransparentNodeElementRender {
     public WindTurbineRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
         this.descriptor = (WindTurbineDescriptor) descriptor;
+        rotor = new mods.eln.anim.Spin(this.descriptor.speed, 0).randomPhase();
         Random rand = new Random();
-        this.haloBlinkCounter = rand.nextFloat() * this.haloBlink_OffTime;
-        this.haloBlink_OffTime += rand.nextFloat() * this.haloBlink_OffTime / 15.f;
-        this.haloBlink_OnTime += rand.nextFloat() * this.haloBlink_OnTime / 15.f;
+        float off = 2.5f + rand.nextFloat() * 2.5f / 15f, on = 0.5f + rand.nextFloat() * 0.5f / 15f;
+        halo = mods.eln.anim.Blink.random(on, on, off, off);
     }
 
     @Override
     public void draw() {
         renderPreProcess = drawCable(Direction.YN, descriptor.cable.render, eConn, renderPreProcess);
         front.glRotateXnRef();
-        descriptor.draw(alpha, haloState);
+        descriptor.draw(rotor.deg(), halo.on());
     }
 
     public void refresh(float deltaT) {
-        powerFactorFilter.setTarget(powerFactor);
-        powerFactorFilter.step(deltaT);
-        float alphaN_1 = alpha;
-        alpha += deltaT * descriptor.speed * Math.sqrt(powerFactorFilter.get());
-        if (alpha > 360) alpha -= 360;
-        if (alpha % 120 > 45 && alphaN_1 % 120 <= 45 && !soundPlaying) {
+        powerFactorFilter.target(powerFactor).step(deltaT);
+        float root = (float) Math.sqrt(Math.max(0, powerFactorFilter.get()));
+        float before = rotor.deg();
+        rotor.speed(root).step(deltaT);
+        // a blade passing (every 120 degrees) swishes
+        if (rotor.deg() % 120 > 45 && before % 120 <= 45 && !soundPlaying) {
             this.play(new SoundCommand(descriptor.soundName)
                 .mediumRange()
                 .mulBlockAttenuation(2)
                 .applyNominalVolume(descriptor.nominalVolume)
-                .mulVolume((0.007f + 1f * (float) Math.sqrt(powerFactorFilter.get())),
-                    1f + (float) Math.sqrt(powerFactorFilter.get()) / 1.3f));
-
+                .mulVolume(0.007f + root, 1f + root / 1.3f));
             soundPlaying = true;
         } else {
             soundPlaying = false;
         }
-        haloBlinkCounter += deltaT;
-        if (!haloState) {
-            if (haloBlinkCounter > haloBlink_OffTime) {
-                haloBlinkCounter -= haloBlink_OffTime;
-                haloState = true;
-            }
-        } else {
-            if (haloBlinkCounter > haloBlink_OnTime) {
-                haloBlinkCounter -= haloBlink_OnTime;
-                haloState = false;
-            }
-        }
+        halo.step(deltaT);
     }
 
     @Override

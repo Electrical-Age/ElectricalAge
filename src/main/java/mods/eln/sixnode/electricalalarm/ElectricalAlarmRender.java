@@ -6,7 +6,6 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
@@ -22,9 +21,8 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 
     LRDU front;
 
-    RcInterpolator interpol = new RcInterpolator(0.4f);
-
-    float rotAlpha = 0;
+    /** The beacon turning while it sounds (rotSpeed degrees a second), spinning up and down over 0.4 s. */
+    mods.eln.anim.Spin beacon;
     boolean warm = false;
     boolean mute = false;
 
@@ -44,15 +42,17 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
         } else {
             drawSignalPin(front, descriptor.pinDistance);
         }
-        descriptor.draw(warm, rotAlpha);
+        descriptor.draw(warm, beacon().deg());
+    }
+
+    mods.eln.anim.Spin beacon() {
+        if (beacon == null) beacon = new mods.eln.anim.Spin(descriptor.rotSpeed, 0.4);
+        return beacon;
     }
 
     @Override
     public void refresh(float deltaT) {
-        interpol.setTarget(warm ? descriptor.rotSpeed : 0f);
-        interpol.step(deltaT);
-
-        rotAlpha += interpol.get() * deltaT;
+        beacon().speed(warm ? 1 : 0).step(deltaT);
     }
 
     @Override

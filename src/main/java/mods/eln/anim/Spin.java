@@ -34,6 +34,11 @@ public final class Spin {
         deg = wrap(deg + degPerSecond * speed.get() * dt);
     }
 
+    /** The eased speed now (for a sound that follows the turning). */
+    public float speedNow() {
+        return (float) speed.get();
+    }
+
     public float deg() {
         return (float) deg;
     }

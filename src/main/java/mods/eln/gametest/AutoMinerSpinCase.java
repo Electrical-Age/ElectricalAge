@@ -12,7 +12,7 @@ import java.io.DataOutputStream;
 
 /**
  * Autominer drill animation (P3): a client render told "job ore, power ok" spins the pipe and drill head (1.12: rotSpeed
- * eases to 360 deg/s, pipeAlpha integrates it in refresh), and stops again on another job. Mining itself needs an
+ * eases to 360 deg/s, the pipe's Spin integrates it in refresh), and stops again on another job. Mining itself needs an
  * 800 V supply, a drill, pipes and a chest: the render is fed the publish packet the element would send instead.
  */
 final class AutoMinerSpinCase implements TestCase {
@@ -51,9 +51,9 @@ final class AutoMinerSpinCase implements TestCase {
     }
 
     static float alpha(AutoMinerRender r) throws Exception {
-        var f = AutoMinerRender.class.getDeclaredField("pipeAlpha");
+        var f = AutoMinerRender.class.getDeclaredField("pipe");   // (its mods.eln.anim.Spin)
         f.setAccessible(true);
-        return f.getFloat(r);
+        return ((mods.eln.anim.Spin) f.get(r)).deg();
     }
 
     /** Degrees turned over `seconds` of 0.05 s client frames (unwrapped). */

@@ -47,9 +47,11 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
     private Float rollX;
 
     class PlateMachineDescriptorHandle {
-        float counter = 0;
-        final RcInterpolator interpolator = new RcInterpolator(0.5f);
-        float itemCounter = 0;
+        /** The work rolls: a turn a second at full power, easing over half a second; the 230V's backup rolls at their
+         *  ratio (their own spins: a multiple of a wrapped angle jumped at each wrap); the items a quarter turn a second. */
+        final mods.eln.anim.Spin rolls = new mods.eln.anim.Spin(360, 0.5), items = new mods.eln.anim.Spin(90, 0).speed(1);
+        final mods.eln.anim.Spin backup3 = new mods.eln.anim.Spin(360 * (rot3 == null ? 1 : rot3.getFloat("ratio")), 0.5),
+            backup4 = new mods.eln.anim.Spin(360 * (rot4 == null ? 1 : rot4.getFloat("ratio")), 0.5);
     }
 
     @Override
@@ -62,33 +64,30 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
         PlateMachineDescriptorHandle handle = (PlateMachineDescriptorHandle) handleO;
 
         main.draw();
-        rot1.draw(handle.counter, 0f, 0f, -1f);
-        rot2.draw(handle.counter, 0f, 0f, 1f);
-        if (rot3 != null) rot3.draw(handle.counter * rot3.getFloat("ratio"), 0f, 0f, 1f);
-        if (rot4 != null) rot4.draw(handle.counter * rot4.getFloat("ratio"), 0f, 0f, -1f);
+        handle.rolls.draw(rot1, 0f, 0f, -1f);
+        handle.rolls.draw(rot2, 0f, 0f, 1f);
+        handle.backup3.draw(rot3, 0f, 0f, 1f);
+        handle.backup4.draw(rot4, 0f, 0f, -1f);
 
         // the piece being rolled (Baughn 2026-11-07: more than a turning item): it runs from the entry table through the
         // rolls toward the exit table as the job goes on, flattened and drawn out where it has passed the roll gap
         float p = render == null ? 0 : render.progress.shown();
-        if (p <= 0) UtilsClient.drawEntityItem(inEntity, inX, inY, inZ, handle.itemCounter, 1f);
+        if (p <= 0) UtilsClient.drawEntityItem(inEntity, inX, inY, inZ, handle.items.deg(), 1f);
         else {
             float x = mods.eln.anim.ItemMotion.lerp(inX, outX, mods.eln.anim.ItemMotion.ease(p, 0.05f, 0.95f));
             float rolled = rollX == null ? p : mods.eln.anim.ItemMotion.ease(x, rollX - 0.06f, rollX + 0.06f);
             float z = mods.eln.anim.ItemMotion.lerp(inZ, outZ, mods.eln.anim.ItemMotion.ease(p, 0.05f, 0.95f));
             mods.eln.anim.ItemMotion.draw(inEntity, x, inY, z, 0, 1 + 0.5f * rolled, 1 - 0.7f * rolled, 1);
         }
-        UtilsClient.drawEntityItem(outEntity, outX, outY, outZ, -handle.itemCounter + 139f, 1f);
+        UtilsClient.drawEntityItem(outEntity, outX, outY, outZ, -handle.items.deg() + 139f, 1f);
     }
     @Override
     void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity, float powerFactor, float processState) {
         PlateMachineDescriptorHandle handle = (PlateMachineDescriptorHandle) handleO;
-        handle.interpolator.setTarget(powerFactor);
-        handle.interpolator.step(deltaT);
-        handle.counter += deltaT * handle.interpolator.get() * 360;
-        while (handle.counter >= 360f) handle.counter -= 360;
-
-        handle.itemCounter += deltaT * 90;
-        while (handle.itemCounter >= 360f) handle.itemCounter -= 360;
+        handle.rolls.speed(powerFactor).step(deltaT);
+        handle.backup3.speed(powerFactor).step(deltaT);
+        handle.backup4.speed(powerFactor).step(deltaT);
+        handle.items.step(deltaT);
     }
     @Override
     public boolean powerLrdu(Direction side, Direction front) {

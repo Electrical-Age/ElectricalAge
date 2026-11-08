@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.thermaldissipatoractive;
 
-import mods.eln.misc.RcInterpolator;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
@@ -17,25 +16,22 @@ public class ThermalDissipatorActiveRender extends TransparentNodeElementRender 
         this.descriptor = (ThermalDissipatorActiveDescriptor) descriptor;
     }
 
-    RcInterpolator rc = new RcInterpolator(2f);
+    /** The fan: a turn a second at full power, spinning up and down over two seconds. */
+    final mods.eln.anim.Spin fan = new mods.eln.anim.Spin(360, 2);
 
     @Override
     public void draw() {
         front.glRotateXnRef();
 
 
-        descriptor.draw(alpha);
+        descriptor.draw(fan.deg());
     }
 
     @Override
     public void refresh(float deltaT) {
-        rc.setTarget(powerFactor);
-        rc.step(deltaT);
-        alpha += rc.get() * 360f * deltaT;
-        while (alpha > 360f) alpha -= 360f;
+        fan.speed(powerFactor).step(deltaT);
     }
 
-    float alpha = 0;
     float powerFactor;
 
     @Override

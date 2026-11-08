@@ -23,8 +23,8 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
 
     private final PhysicalInterpolatorNoRebound pipeLengthInterpol = new PhysicalInterpolatorNoRebound(0.4f, 2f, 0.8f);
-    private final RcInterpolator rotSpeed = new RcInterpolator(1);
-    private float pipeAlpha = 0;
+    /** The drill pipe turning (its published speed in degrees a second, eased over a second). */
+    private final mods.eln.anim.Spin pipe = new mods.eln.anim.Spin(1, 1);
 
     private final LinkedList<String> logs = new LinkedList<String>();
 
@@ -81,7 +81,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
     @Override
     public void draw() {
         GL11.glPushMatrix();
-        GL11.glRotatef(pipeAlpha, 0, -1, 0);
+        GL11.glRotatef(pipe.deg(), 0, -1, 0);
         GL11.glPushMatrix();
         GL11.glScalef(0.99f, 0.99f, 0.99f);
         descriptor.pipe.draw();
@@ -138,8 +138,6 @@ public class AutoMinerRender extends TransparentNodeElementRender {
     }
     public void refresh(float deltaT) {
         super.refresh(deltaT);
-        pipeAlpha += rotSpeed.get() * deltaT;
-        if (pipeAlpha > 360) pipeAlpha -= 360;
         for (int idx = 0; idx < this.descriptor.ledsACount; idx++) {
             if (powerOk) {
                 if (Math.random() < 0.2 * deltaT)
@@ -184,7 +182,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
         pipeLengthInterpol.step(deltaT);
         if (pipeLengthInterpol.get() < 0) pipeLengthInterpol.setPos(0);
-        rotSpeed.step(deltaT);
+        pipe.step(deltaT);
     }
 
     @Override
@@ -197,10 +195,10 @@ public class AutoMinerRender extends TransparentNodeElementRender {
             if (job != (job = AutoMinerSlowProcess.jobType.values()[stream.readByte()])) {
                 switch (job) {
                     case ore:
-                        rotSpeed.setTarget(360);
+                        pipe.speed(360);
                         break;
                     default:
-                        rotSpeed.setTarget(0);
+                        pipe.speed(0);
                         break;
                 }
             }

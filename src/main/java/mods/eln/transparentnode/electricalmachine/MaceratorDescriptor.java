@@ -41,9 +41,10 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
     float sinkY = 0.05f;
 
     class MaceratorDescriptorHandle {
-        float counter = 0, itemCounter = 0, soulsDue = 0;
+        /** The rollers: half a turn a second at full power, easing over half a second; the items a quarter turn a second. */
+        final mods.eln.anim.Spin rollers = new mods.eln.anim.Spin(180, 0.5), items = new mods.eln.anim.Spin(90, 0).speed(1);
+        final mods.eln.anim.Emitter souls = new mods.eln.anim.Emitter();
         final mods.eln.anim.Belt.Run belt = new mods.eln.anim.Belt.Run();
-        final RcInterpolator interpolator = new RcInterpolator(0.5f);
     }
 
     @Override
@@ -57,9 +58,9 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
         MaceratorDescriptorHandle handle = (MaceratorDescriptorHandle) handleO;
 
         main.draw();
-        rot1.draw(handle.counter, 0f, 0f, -1f);
-        rot2.draw(handle.counter, 0f, 0f, 1f);
-        if (belt != null) belt.draw(handle.counter, handle.belt);
+        handle.rollers.draw(rot1, 0f, 0f, -1f);
+        handle.rollers.draw(rot2, 0f, 0f, 1f);
+        if (belt != null) belt.draw(handle.rollers.deg(), handle.belt);
 
         GL11.glScalef(0.7f, 0.7f, 0.7f);
         // the piece being ground (Baughn 2026-11-07: more than a turning item): it sinks from the hopper toward the
@@ -67,36 +68,29 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
         float p = render == null ? 0 : render.progress.shown();
         float y = mods.eln.anim.ItemMotion.lerp(IN_Y, sinkY, mods.eln.anim.ItemMotion.ease(p, 0, 0.8f));
         float size = mods.eln.anim.ItemMotion.lerp(1, 0.3f, mods.eln.anim.ItemMotion.ease(p, 0.25f, 1));
-        float amp = 0.035f * Math.min(1, handle.interpolator.get() * 2) * (p > 0 ? 1 : 0);
-        mods.eln.anim.ItemMotion.draw(inEntity, mods.eln.anim.ItemMotion.shake(handle.counter, amp, 0), y,
-            mods.eln.anim.ItemMotion.shake(handle.counter, amp, 1), handle.itemCounter, size, size, size);
-        UtilsClient.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.itemCounter, 1f);
+        float amp = 0.035f * Math.min(1, handle.rollers.speedNow() * 2) * (p > 0 ? 1 : 0);
+        mods.eln.anim.ItemMotion.draw(inEntity, mods.eln.anim.ItemMotion.shake(handle.rollers.deg(), amp, 0), y,
+            mods.eln.anim.ItemMotion.shake(handle.rollers.deg(), amp, 1), handle.items.deg(), size, size, size);
+        UtilsClient.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.items.deg(), 1f);
     }
     @Override
     void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity,
                  ItemEntity outEntity, float powerFactor, float processState) {
         MaceratorDescriptorHandle handle = (MaceratorDescriptorHandle) handleO;
 
-        handle.interpolator.setTarget(powerFactor);
-        handle.interpolator.step(deltaT);
-        handle.counter += deltaT * handle.interpolator.get() * 180;
-        while (handle.counter >= 360f) handle.counter -= 360;
-
-        handle.itemCounter += deltaT * 90;
-        while (handle.itemCounter >= 360f) handle.itemCounter -= 360;
+        handle.rollers.speed(powerFactor).step(deltaT);
+        handle.items.step(deltaT);
 
         // souls rise from the hopper while it grinds soul sand or soul soil (Baughn 2026-11-07)
-        if (inEntity != null && isSoulBlock(inEntity.getItem()) && handle.interpolator.get() > 0.1f) {
-            var level = render.tileEntity.getLevel();
-            if (level != null) {
-                handle.soulsDue += deltaT * 4 * handle.interpolator.get();
-                var p = render.tileEntity.getBlockPos();
-                while (handle.soulsDue >= 1) {
-                    handle.soulsDue -= 1;
-                    double jx = (Math.random() - 0.5) * 0.5, jz = (Math.random() - 0.5) * 0.5;
-                    level.addParticle(net.minecraft.core.particles.ParticleTypes.SOUL,
-                        p.getX() + 0.5 + jx, p.getY() + 1.05, p.getZ() + 0.5 + jz, 0, 0.03, 0);
-                }
+        boolean grinding = inEntity != null && isSoulBlock(inEntity.getItem()) && handle.rollers.speedNow() > 0.1f;
+        int n = handle.souls.step(deltaT, grinding ? 4 * handle.rollers.speedNow() : 0);
+        var level = render.tileEntity.getLevel();
+        if (n > 0 && level != null) {
+            var p = render.tileEntity.getBlockPos();
+            for (int i = 0; i < n; i++) {
+                double jx = (Math.random() - 0.5) * 0.5, jz = (Math.random() - 0.5) * 0.5;
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.SOUL,
+                    p.getX() + 0.5 + jx, p.getY() + 1.05, p.getZ() + 0.5 + jz, 0, 0.03, 0);
             }
         }
     }
