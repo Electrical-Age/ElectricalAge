@@ -1,4 +1,4 @@
-// 26.3	2026-11-08T15:59:33.925511068	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-08T22:01:53.948331118	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -101,6 +101,7 @@ b85823dd74834547255b7d60faa1cc1280c8c423 data/eln/advancement/recipes/misc/boile
 9385f32bfd3aaf89dd4d13b8dd4375fcb0b1dd2c data/eln/advancement/recipes/misc/cable_kit_hv.json
 f563b5713b684dad4d03a5ac1209d7541bda83f9 data/eln/advancement/recipes/misc/cable_kit_lv.json
 de31a6e035c77509cf4b3518e791722dd591a9b1 data/eln/advancement/recipes/misc/cable_kit_lv_2.json
+8b8e8969f7f3d46a5c9b62af54ff6c26736c5cd9 data/eln/advancement/recipes/misc/cable_kit_lv_3.json
 a5275b5ccd3d616e94cb41d832d72089b7162d45 data/eln/advancement/recipes/misc/cable_kit_mv.json
 42f2e5bde58f7c7d6f0e38ce225837dc97c547c1 data/eln/advancement/recipes/misc/cable_kit_vhv.json
 1ed758878c96ccb177e26898cf87b3eb6ba6799d data/eln/advancement/recipes/misc/capacitor_bank.json
@@ -486,6 +487,7 @@ bd83f8e28296e360fafeb22cf8cab8536161a42c data/eln/recipe/blasting_raw_tungsten_2
 947ba3e4720da17455914a08814cdad083fad6ae data/eln/recipe/cable_kit_hv.json
 07f2a607d4089921bf6adf5c07d5736d743b4295 data/eln/recipe/cable_kit_lv.json
 2caf62be97bd698679047e873aa4f4dde417b2f8 data/eln/recipe/cable_kit_lv_2.json
+4f2ef19b5103dc322d38a0eedd6bf5643f6b9dce data/eln/recipe/cable_kit_lv_3.json
 3c166935c8255e2ffd6ff35814af5337ef1319d8 data/eln/recipe/cable_kit_mv.json
 042c6fe82ea9fa21cea9bdd38626fafae2834a6c data/eln/recipe/cable_kit_vhv.json
 af3158d57d5adb8ba826254613d5e0c27f6055d6 data/eln/recipe/capacitor_bank.json

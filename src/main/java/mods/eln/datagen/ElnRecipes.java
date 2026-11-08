@@ -180,6 +180,12 @@ public final class ElnRecipes extends ElnRecipesBase {
             "RRR",
             'C', "ingotCopper",
             'R', "itemRubber");
+        // a low voltage kit insulated with leather instead, one for one (Baughn 2026-11-08: before there's rubber)
+        addRecipe(kit(1, 1),
+            "L",
+            "C",
+            'C', findItemStack("Copper Cable"),
+            'L', stack(Items.LEATHER));
 
         addRecipe(kit(4, 6),
             "RRR",
