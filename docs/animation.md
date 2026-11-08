@@ -53,6 +53,7 @@ code on purpose.
 | Water turbine | wheel either way, paddle sound | `Smooth` (direction), `Spin` | lib |
 | Egg incubator | egg turning on its nest | `Spin` | lib |
 | Fire detector | standby LED flash | `Blink` | lib |
+| Utility pole spans (stasis anchor) | blue halo: six fading shells, shimmering aperiodically | three `Spin` phases at incommensurate rates, summed | lib |
 | Switches, breaker, relay, signal sources (wired and wireless), bus button | levers, contacts, knobs, button travel | `Travel.smooth` | lib |
 | VU meter | needle | `Travel.spring` | lib |
 | Transformer, lamp supply | casing doors / window opening when a player is near | `Travel.spring` | lib |

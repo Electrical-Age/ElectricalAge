@@ -27,8 +27,12 @@ public abstract class GridRender extends TransparentNodeElementRender {
      * conductor, each wider and fainter, so the glow fades out to nothing at its edge (Baughn: not a sheath).
      */
     private ArrayList<Catenary> haloCatenaries = new ArrayList<Catenary>();
-    /** The halo's slow pulse: a phase turning once in 4 s (frame time, mods.eln.anim). */
-    private final mods.eln.anim.Spin haloPhase = new mods.eln.anim.Spin(90, 0.01).speed(1);
+    /**
+     * The halo's slow, aperiodic shimmer (Baughn: not periodic): three phases on frame time (mods.eln.anim) turning at
+     * incommensurate rates (4 s, x golden ratio, x silver ratio), each from a random start, summed.
+     */
+    private final mods.eln.anim.Spin[] haloPhase = {new mods.eln.anim.Spin(90, 0.01).speed(1).randomPhase(),
+        new mods.eln.anim.Spin(90 / 1.6180339887, 0.01).speed(1).randomPhase(), new mods.eln.anim.Spin(90 / 2.4142135624, 0.01).speed(1).randomPhase()};
     private float idealRenderingAngle;
 
     public GridRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
@@ -61,18 +65,19 @@ public abstract class GridRender extends TransparentNodeElementRender {
     @Override
     public void refresh(float deltaT) {
         super.refresh(deltaT);
-        if (!haloCatenaries.isEmpty()) haloPhase.step(deltaT);
+        if (!haloCatenaries.isEmpty()) for (var p : haloPhase) p.step(deltaT);
     }
 
     /**
-     * The stasis halo: a faint blue glow round the conductors of spans with an anchored pole at either end, slowly
-     * brightening and fading (Baughn 2026-11-08: subtle). Drawn after the cables, blended, writing no depth.
+     * The stasis halo: a faint blue glow round the conductors of spans with an anchored pole at either end, shimmering
+     * slowly (Baughn 2026-11-08: subtle, aperiodic). Drawn after the cables, blended, writing no depth.
      */
     protected void drawHalo() {
         if (haloCatenaries.isEmpty()) return;
         // the shells overlap, so what one sees through the middle is the sum of all of them, at the edge only the
         // outermost: each shell is as faint as the falloff's step there
-        float a = (float) (0.16 + 0.10 * Math.sin(Math.toRadians(haloPhase.deg())));
+        float a = (float) (0.16 + 0.045 * Math.sin(Math.toRadians(haloPhase[0].deg())) + 0.035 * Math.sin(Math.toRadians(haloPhase[1].deg()))
+            + 0.025 * Math.sin(Math.toRadians(haloPhase[2].deg())));
         UtilsClient.disableLight();
         UtilsClient.enableBlend();
         glDisable(GL_TEXTURE_2D);
@@ -80,7 +85,8 @@ public abstract class GridRender extends TransparentNodeElementRender {
         glDisable(GL_CULL_FACE);
         for (int i = 0; i < haloCatenaries.size(); i++) {
             int k = i % HALO_LAYERS;
-            float layer = a * 0.45f * (1f - (float) k / HALO_LAYERS);
+            // (dimmed, Baughn: the shells summed to ~1.6x v1's sheath at the core; now ~0.9x)
+            float layer = a * 0.25f * (1f - (float) k / HALO_LAYERS);
             glColor4f(0.47f, 0.71f, 1f, layer);
             haloCatenaries.get(i).draw();
         }
