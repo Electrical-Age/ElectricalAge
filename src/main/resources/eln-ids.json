@@ -2188,5 +2188,11 @@
   "display": "Desulfuriser",
   "kind": "transparent_node",
   "name": "desulfuriser"
+ },
+ "eln:transparent_node@6080": {
+  "descriptor": "SteamCrackerDescriptor",
+  "display": "Steam Cracker",
+  "kind": "transparent_node",
+  "name": "steam_cracker"
  }
 }

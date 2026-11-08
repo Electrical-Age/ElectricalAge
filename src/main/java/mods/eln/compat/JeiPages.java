@@ -143,6 +143,7 @@ public final class JeiPages {
         info(l, "latex", "latex_bucket");
         info(l, "carbon_black", "carbon_black");
         info(l, "industrial_resin_collector", "industrial_resin_collector");
+        info(l, "steam_cracker", "steam_cracker");
         info(l, "rubber_sapling", "rubber_sapling", "rubber_log", "rubber_wood", "rubber_leaves", "rubber_aerial_root");
         info(l, "crude_oil", "crude_oil_bucket");
         info(l, "fraction", "gasoline_bucket", "diesel_bucket", "heavyoil_bucket", "residue_bucket");

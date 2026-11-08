@@ -1206,6 +1206,17 @@ public final class ElnRecipes extends ElnRecipesBase {
             'C', stack(Items.CAULDRON),
             'M', findItemStack("Machine Block"),
             'H', findItemStack("230V Copper Heating Corp"));
+        // the Steam Cracker: a firebox (an advanced machine block, alloy) with tungsten heaters (it runs hot), the drum an
+        // iron tank
+        addRecipe(findItemStack("Steam Cracker", 1),
+            "PTP",
+            "AMA",
+            "HPH",
+            'P', findItemStack("Iron Plate"),
+            'T', findItemStack("Iron Tank"),
+            'A', findItemStack("Alloy Ingot"),
+            'M', findItemStack("Advanced Machine Block"),
+            'H', findItemStack("230V Tungsten Heating Corp"));
         addRecipe(findItemStack("Carbon Black Burner", 1),
             " P ",
             "BFB",

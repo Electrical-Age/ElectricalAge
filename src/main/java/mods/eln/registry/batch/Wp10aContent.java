@@ -51,6 +51,14 @@ public class Wp10aContent implements ElnContent {
         registerResinCollector(92);
         registerCarbonBlackBurner(93);
         registerDesulfuriser(94);
+        registerSteamCracker(95);
+    }
+
+    /** The Steam Cracker (the rubber chain's oil route, 2026-11-07): gasoline and steam to butadiene and natural gas, 400 V,
+     *  4 kW. Model mods.eln.cad.models.SteamCracker. */
+    public static void registerSteamCracker(int id) {
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.transparentnode.steamcracker.SteamCrackerDescriptor(
+            TR_NAME(Type.NONE, "Steam Cracker"), "steamcracker", HVU, 4000, highVoltageCableDescriptor));
     }
 
     /** The Desulfuriser (the rubber chain's oil route, 2026-11-07): in line on a cut's pipe, 230 V, 1 kW. Model

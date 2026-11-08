@@ -179,3 +179,24 @@ def desulfuriser():
         cv.set(x, 12, h('#d8c446'))                                                # sulfur
     leds(cv, 5, 6)
     return cv
+
+
+# ------------------------------------------------------------------------------- steam cracker
+def steam_cracker():
+    """The cast-iron firebox with its orange (400 V) roof, the drum on top, the glowing peepholes, a red OUT flange."""
+    B = tier_ramp('hv')
+    cv = Canvas(16)
+    box(cv, 1, 13, 13, 1, 3, DARK, bevel=False)                                    # skid
+    zb = zsolid([('fb', 2, 6, 11, 7, 3, 0)])
+    zpaint(cv, zb, DARK, bevel=True)                                                # firebox
+    for x in range(2, 14):
+        cv.set(x, 5, B[3] if x < 12 else B[1])                                     # its orange roof
+    sub(cv, lambda c: cylinder(c, 6, 0, 5, 4, STEEL, axis='y'))                    # the exchanger drum
+    for x in (4, 9):
+        cv.set(x, 8, h('#ffb030')); cv.set(x + 1, 8, h('#ff7a20'))                 # peepholes
+    for x in range(2, 13):
+        cv.set(x, 11, DARK[3])                                                     # buckstay
+    for x, c in ((1, RED[3]), (2, RED[4])):
+        cv.set(x, 11, c); cv.set(x, 12, RED[2])                                    # OUT flange
+    leds(cv, 7, 7)
+    return cv

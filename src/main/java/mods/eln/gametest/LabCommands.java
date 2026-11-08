@@ -130,6 +130,7 @@ public final class LabCommands {
                 .then(Commands.literal("wiredrawing").executes(c -> demo(c.getSource(), () -> wiredrawing(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cores").executes(c -> demo(c.getSource(), () -> cores(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("rubber").executes(c -> demo(c.getSource(), () -> rubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("cracker").executes(c -> demo(c.getSource(), () -> cracker(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("oilrubber").executes(c -> demo(c.getSource(), () -> oilRubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("latex").executes(c -> demo(c.getSource(), () -> latex(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("converters").executes(c -> demo(c.getSource(), () -> converters(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -671,6 +672,59 @@ public final class LabCommands {
         return 1;
     }
 
+    /** Where a click on a device's port lands (world coordinates), from its spot (FluidPort.at) on its face. */
+    static net.minecraft.world.phys.Vec3 portHit(BlockPos dev, mods.eln.sim.fluid.FluidDevice.FluidPort p) {
+        var f = net.minecraft.core.Direction.from3DDataValue(p.face());
+        double a = p.at() / 17 / 16.0, b = p.at() % 17 / 16.0;
+        double x = dev.getX(), y = dev.getY(), z = dev.getZ();
+        return switch (f) {
+            case NORTH -> new net.minecraft.world.phys.Vec3(x + a, y + b, z);
+            case SOUTH -> new net.minecraft.world.phys.Vec3(x + a, y + b, z + 1);
+            case WEST -> new net.minecraft.world.phys.Vec3(x, y + a, z + b);
+            case EAST -> new net.minecraft.world.phys.Vec3(x + 1, y + a, z + b);
+            default -> new net.minecraft.world.phys.Vec3(x + 0.5, y + 0.5, z + 0.5);
+        };
+    }
+
+    /**
+     * The Steam Cracker (the oil route, P5c) on 400 V: a tank of gasoline piped to its C8 flange, a tank of hot steam
+     * (3 bar, 150 C; it cools) to its H2O flange, its steam tank filled too (4000 mB: 32 s of cracking), and empty tanks
+     * from its C4H6 and CH4 flanges.
+     */
+    static int cracker(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        furnaceRigs(src, pos, "steam cracker", new String[]{"Steam Cracker"}, new float[]{0});
+        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
+        if (!(n instanceof mods.eln.node.transparent.TransparentNode t) || !(t.element instanceof mods.eln.transparentnode.steamcracker.SteamCrackerElement c)) {
+            src.sendFailure(Component.literal("no steam cracker at " + pos.toShortString()));
+            return 0;
+        }
+        var ports = c.fluidPorts();
+        var back = c.front.back().toEnumFacing();
+        var frontF = c.front.toEnumFacing();
+        var right = c.front.right().toEnumFacing();
+        // (the flanges at model z 12 are on the side of front.right(), those at z 4 on the other)
+        String g = tankPiped(src, pos.relative(back, 2).relative(right.getOpposite(), 1), pos, back, portHit(pos, ports.get(0)), 8000, mods.eln.oil.Oil.Cut.GASOLINE.source.get());
+        BlockPos stp = pos.relative(back, 2).relative(right, 1);
+        String st = tankPiped(src, stp, pos, back, portHit(pos, ports.get(1)), 0);
+        String b = tankPiped(src, pos.relative(frontF, 2).relative(right.getOpposite(), 1), pos, frontF, portHit(pos, ports.get(2)), 0);
+        String ng = tankPiped(src, pos.relative(frontF, 2).relative(right, 1), pos, frontF, portHit(pos, ports.get(3)), 0);
+        var server = level.getServer();
+        server.schedule(new net.minecraft.server.TickTask(server.getTickCount() + 20, () -> {
+            var sn = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(stp, level));
+            if (sn instanceof mods.eln.node.transparent.TransparentNode tn && tn.element instanceof mods.eln.oil.TankElement tank) {
+                var v = tank.vessel;
+                v.fill(0, 1, 423.15);
+                mods.eln.sim.fluid.EaUnits.addWater(v, 3e5 * v.volume / (461.5 * 423.15), 423.15, true);
+                v.update();
+                mods.eln.fluid.FluidWorld.changed(tank);
+            }
+            c.fillIn(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.STEAM.get(), 4000));
+        }));
+        src.sendSuccess(() -> Component.literal("steam cracker " + pos.toShortString() + ": gasoline " + g + "; steam " + st + "; butadiene " + b + "; gas " + ng), false);
+        return 1;
+    }
+
     /** An iron tank at tp (mB of latex in it), and an EA pipe routed from the device's port on face (nearest hit) to it. */
     static String tankPiped(CommandSourceStack src, BlockPos tp, BlockPos dev, net.minecraft.core.Direction face, net.minecraft.world.phys.Vec3 hit, int latexMb) {
         return tankPiped(src, tp, dev, face, hit, latexMb, mods.eln.oil.Latex.SOURCE.get());
@@ -738,12 +792,13 @@ public final class LabCommands {
                     break;
                 }
             if (side == null) throw new IllegalStateException("no power side on " + names[i]);
-            host(level, player, 8 + (32 << 6), step(p, side));   // a Medium Voltage Cable
+            boolean hv = e instanceof mods.eln.transparentnode.steamcracker.SteamCrackerElement;
+            host(level, player, hv ? 12 + (32 << 6) : 8 + (32 << 6), step(p, side));   // a Medium (High) Voltage Cable
             var feed = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, step(step(p, side), side));
             orient(feed, l -> l, side.getInverse());
             feed.networkUnserialize(packet(o -> {
                 o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                o.writeFloat((float) mods.eln.Eln.MVU);
+                o.writeFloat((float) (hv ? mods.eln.Eln.HVU : mods.eln.Eln.MVU));
             }));
             if (e instanceof mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement f) {
                 f.getInventory().setItem(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.heatingCorpSlotId,

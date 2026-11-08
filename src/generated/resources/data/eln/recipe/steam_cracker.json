@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "eln:alloy_ingot",
+    "H": "eln:200v_tungsten_heating_corp",
+    "M": "eln:advanced_machine_block",
+    "P": "eln:iron_plate",
+    "T": "eln:iron_tank"
+  },
+  "pattern": [
+    "PTP",
+    "AMA",
+    "HPH"
+  ],
+  "result": {
+    "id": "eln:steam_cracker"
+  }
+}

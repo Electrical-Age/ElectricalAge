@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.BlockPos;
 
 /** The rubber chain (Baughn 2026-11-07): vanilla sulfur macerates to Sulfur Dust (twice an ore's dust), soul sand to
  *  Soul Dust; resin smelts to Raw Rubber, which smelts to 1 Rubber; four Raw Rubber, a Sulfur Dust and a Soul Dust make
@@ -27,6 +28,8 @@ public final class RubberCases {
         cases.add(new TreeCase());
         cases.add(new CarbonCase());
         cases.add(new DesulfuriserCase());
+        cases.add(new SteamCrackerCase());
+        cases.add(new ButadienePipeCase());
     }
 
     /** Rubber trees (Baughn 2026-11-07): the sapling grows a rubber fig (Ficus elastica); a collector gets 1.5x the old rate on its trunk and
@@ -177,6 +180,80 @@ public final class RubberCases {
             String st = String.format("treated %.0f, in %d, out %d, sulfur %d", d.treated(), d.inMb(), d.outMb(), d.sulfur());
             c.check("the desulfuriser treats the diesel into its out tank (~50 mB/s at 230 V)", d.treated() > 500, st);
             c.check("... with its outlet closed, nothing is lost (in + out = 1000 mB)", d.inMb() + d.outMb() == 1000, st);
+        }
+    }
+
+    /**
+     * The Steam Cracker (the oil route), on 400 V with 1000 mB of gasoline and 4000 mB of steam in its tanks: it cracks 10 mB/s
+     * of gasoline until the steam (12.5 mB a mB) runs out at 320 mB, into 40 % butadiene and 30 % natural gas, held in its
+     * OUT tanks (no pipes), and then says it has no steam.
+     */
+    static final class SteamCrackerCase implements TestCase {
+        mods.eln.transparentnode.steamcracker.SteamCrackerElement d;
+
+        public String id() {
+            return "steam_cracker";
+        }
+
+        public int ticks() {
+            return 900;
+        }
+
+        public void build(TestContext c) {
+            var l = new Wp10aCases.Layout(c, width());
+            d = (mods.eln.transparentnode.steamcracker.SteamCrackerElement) l.device(0 + (95 << 6), 3, 1);
+            l.feed(c.at(3, 1, 1), d.front.left(), 12 + (32 << 6), mods.eln.Eln.HVU);   // (a 400 V cable on its side)
+            d.fillIn(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.Cut.GASOLINE.source.get(), 1000));
+            d.fillIn(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.STEAM.get(), 4000));
+        }
+
+        public void measure(TestContext c) {
+            String st = String.format("cracked %.0f; gasoline %d, steam %d, butadiene %d, gas %d; %s", d.cracked(), d.gasolineMb(), d.steamMb(),
+                d.butadieneMb(), d.gasMb(), d.status());
+            c.check("the steam cracker cracks gasoline until its steam runs out (320 mB at 12.5 mB of steam each)", Math.abs(d.cracked() - 320) <= 1, st);
+            c.check("... the gasoline it cracked left its tank", d.gasolineMb() == 1000 - (int) Math.round(d.cracked()), st);
+            c.check("... into 40 % butadiene and 30 % natural gas, held in its OUT tanks", Math.abs(d.butadieneMb() - 128) <= 1 && Math.abs(d.gasMb() - 96) <= 1, st);
+            c.check("... and then it waits for steam", d.status().equals("no steam") && !d.running(), st);
+        }
+    }
+
+    /**
+     * Butadiene in a closed pipe at room temperature (LabAgent: a real condensable, boiling at -4.4 C): it boils until about
+     * 2.3 bar is over it and stays liquid under that, without NaNs.
+     */
+    static final class ButadienePipeCase implements TestCase {
+        BlockPos a;
+
+        public String id() {
+            return "butadiene_in_a_closed_pipe";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext c) {
+            a = c.at(1, 1, 1);
+            for (BlockPos p : new BlockPos[]{a, c.at(2, 1, 1)}) PipeCases.lay(c, p, 0, 0, 8, 8, 16, 8, 8);
+            var f = PipeCases.node(c, a).parts.get(0) instanceof mods.eln.node.voxel.PipePart pp ? pp.fluid : null;
+            int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:butadiene");
+            f.fill(0, 1, 293.15);
+            mods.eln.sim.fluid.EaUnits.add(f, id, 0.3 * f.volume * 615, 293.15, false);   // (a third full of liquid, no air)
+            f.update();
+            mods.eln.fluid.FluidWorld.changed(PipeCases.node(c, a));
+        }
+
+        public void measure(TestContext c) {
+            var f = ((mods.eln.node.voxel.PipePart) PipeCases.node(c, a).parts.get(0)).fluid;
+            int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:butadiene");
+            double p = f.P(), liq = f.liquid(id), vap = f.vapour(id);
+            String st = String.format("P %.3g Pa, T %.1f K, liquid %.3g kg, vapour %.3g kg", p, f.T(), liq, vap);
+            c.check("butadiene in a closed pipe at room temperature boils to ~2.3 bar over its liquid", p > 1.6e5 && p < 3.2e5 && Double.isFinite(p), st);
+            c.check("... and most of it stays liquid", liq > vap && liq > 0, st);
         }
     }
 

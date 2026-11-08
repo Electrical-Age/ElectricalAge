@@ -145,6 +145,7 @@ public final class Oil {
         STEAM_FLOWING = FLUIDS.register("flowing_steam", () -> new BaseFlowingFluid.Flowing(new BaseFlowingFluid.Properties(STEAM_TYPE, STEAM, STEAM_FLOWING)));
         for (Cut c : Cut.values()) c.register();
         Latex.register();   // (the rubber chain, 2026-11-07: not a cut)
+        Butadiene.register();
         RESERVOIR_BLOCK = BLOCKS.registerBlock("reservoir_oil", ReservoirOilBlock::new, p -> liquidProps(p));
         OilWorldgen.register(modBus);
         TYPES.register(modBus);

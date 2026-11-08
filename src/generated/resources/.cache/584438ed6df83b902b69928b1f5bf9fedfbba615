@@ -1,4 +1,4 @@
-// 26.3	2026-11-07T19:41:38.689152817	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-08T00:21:55.960296937	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -314,6 +314,7 @@ fe7580a5cab94e3b2a53fc81c07fc52050eb51e3 data/eln/advancement/recipes/misc/smelt
 d745c0a06786c255ec7cf4ebac2a0bd8da10121b data/eln/advancement/recipes/misc/solar_tracker.json
 91ecd892a2a111989dbc8ae5cd7292830389e96f data/eln/advancement/recipes/misc/standard_alarm.json
 35aadf92ce0cd908191a2b23fa5db29821d21129 data/eln/advancement/recipes/misc/steam_condenser.json
+d802b3c38c25ca1e6ec2abe10377f3666a47b3a1 data/eln/advancement/recipes/misc/steam_cracker.json
 febda46518aac7a1a3b44f912d4bf97add471642 data/eln/advancement/recipes/misc/steam_injection_wellhead.json
 3b3894bb499e10bccea06d0524264277edaa9371 data/eln/advancement/recipes/misc/steam_oven.json
 ca2f8a0f26291613f84a226e9e99d0312ac72383 data/eln/advancement/recipes/misc/steam_turbine.json
@@ -697,6 +698,7 @@ f8d98570968cecc459a14f0cd820a44af3560cf9 data/eln/recipe/smelting_tungsten_dust.
 5bfee752b7a7f8c89009a59ae6e95f13ce11aacc data/eln/recipe/solar_tracker.json
 4ab93d287ce3eeee14c2bf3bb7c860f4ebacbd27 data/eln/recipe/standard_alarm.json
 c4a92d71ecc73f59ecdd4e92dba9ace4eaf4260b data/eln/recipe/steam_condenser.json
+9d4f9aad2634e27f24bbf845e98c830f88ff5871 data/eln/recipe/steam_cracker.json
 de6b0d86f1b6a83a630f6f99c80a28f8adcf17e5 data/eln/recipe/steam_injection_wellhead.json
 ad38d8978faeb5e64094fb9e2d5f61f950b2a9c1 data/eln/recipe/steam_oven.json
 d73dbee890e5b032106e12119ea9857489e8714d data/eln/recipe/steam_turbine.json

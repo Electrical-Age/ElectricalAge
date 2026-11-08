@@ -190,6 +190,7 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5888",   // the Industrial Resin Collector (the rubber chain, 2026-11-07)
         "eln:transparent_node@5952",   // the Carbon Black Burner (the rubber chain's oil route)
         "eln:transparent_node@6016",   // the Desulfuriser (the rubber chain's oil route)
+        "eln:transparent_node@6080",   // the Steam Cracker (the rubber chain's oil route)
         "eln:six_node@5955", "eln:six_node@5956",   // the three-channel data logger, the tilted terminal (Baughn 2026-10-30, board #45)
         "eln:six_node@7489",   // the Bus I/O Module (the field bus)
         "eln:six_node@7490", "eln:six_node@7491", "eln:six_node@7494",   // the Addressable Button and Light, the Floor Sensor (RS485, Baughn 2026-11-05)

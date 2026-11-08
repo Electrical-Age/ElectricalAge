@@ -1,0 +1,16 @@
+{
+  "kind": "curve",
+  "group": "hydrocarbon",
+  "density": 615,
+  "cp_liquid": 2270,
+  "cp_vapour": 1470,
+  "molar_mass": 0.054,
+  "boiling_point": 268.7,
+  "latent_heat": 416000,
+  "critical_temperature": 425,
+  "viscosity": [[273, 0.0002], [323, 0.00012]],
+  "vapour_viscosity": 7.5e-6,
+  "colour": "#D8D0E8",
+  "fluids": {"liquid": ["eln:butadiene"], "vapour": ["eln:butadiene_gas"]},
+  "flammable": {"flash_point": 197, "autoignition": 687}
+}

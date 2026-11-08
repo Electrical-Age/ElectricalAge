@@ -80,12 +80,18 @@ public final class Compressor {
     // ---- 230V
 
     /** 3x5 capitals for the flange labels. */
-    static final java.util.Map<Character, String[]> FONT = java.util.Map.of(
-        'I', new String[]{"###", ".#.", ".#.", ".#.", "###"},
-        'N', new String[]{"#.#", "###", "###", "###", "#.#"},
-        'O', new String[]{"###", "#.#", "#.#", "#.#", "###"},
-        'U', new String[]{"#.#", "#.#", "#.#", "#.#", "###"},
-        'T', new String[]{"###", ".#.", ".#.", ".#.", ".#."});
+    static final java.util.Map<Character, String[]> FONT = java.util.Map.ofEntries(
+        java.util.Map.entry('I', new String[]{"###", ".#.", ".#.", ".#.", "###"}),
+        java.util.Map.entry('N', new String[]{"#.#", "###", "###", "###", "#.#"}),
+        java.util.Map.entry('O', new String[]{"###", "#.#", "#.#", "#.#", "###"}),
+        java.util.Map.entry('U', new String[]{"#.#", "#.#", "#.#", "#.#", "###"}),
+        java.util.Map.entry('T', new String[]{"###", ".#.", ".#.", ".#.", ".#."}),
+        java.util.Map.entry('C', new String[]{"###", "#..", "#..", "#..", "###"}),
+        java.util.Map.entry('H', new String[]{"#.#", "#.#", "###", "#.#", "#.#"}),
+        java.util.Map.entry('2', new String[]{"##.", "..#", ".#.", "#..", "###"}),
+        java.util.Map.entry('4', new String[]{"#.#", "#.#", "###", "..#", "..#"}),
+        java.util.Map.entry('6', new String[]{".##", "#..", "###", "#.#", "###"}),
+        java.util.Map.entry('8', new String[]{"###", "#.#", "###", "#.#", "###"}));
 
     /** A shade that writes s in white from texel (col, row) of the cell (row 0 at the top). */
     static Palette.Shade text(String s, int col, int row) {
@@ -96,6 +102,15 @@ public final class Compressor {
             int k = c / 4, cc = c % 4;
             if (k >= s.length() || cc == 3) return null;
             return FONT.get(s.charAt(k))[r].charAt(cc) == '#' ? new int[]{180, 180, 180} : null;
+        };
+    }
+
+    /** Two lines of text, each centred in the cell: top from row 3, bottom from row 8 (a flange's IN/OUT and its fluid). */
+    static Palette.Shade text2(String top, String bottom) {
+        Palette.Shade a = text(top, (16 - (4 * top.length() - 1)) / 2, 3), b = text(bottom, (16 - (4 * bottom.length() - 1)) / 2, 8);
+        return (x, y) -> {
+            int[] c = a.at(x, y);
+            return c != null ? c : b.at(x, y);
         };
     }
 
