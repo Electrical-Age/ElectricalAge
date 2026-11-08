@@ -127,8 +127,10 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
                 return;
             }
             // an oil lake in its seepage tail gives its pumps only a trickle between them: a pump runs slowly, drawing a share
-            OilRecovery rec = OilRecovery.oil(res) ? OilRecovery.get(level) : null;
-            boolean seeping = rec != null && rec.regime(res) == OilRecovery.Regime.SEEPAGE;
+            OilRecovery rec = OilRecovery.recovers(level, res) ? OilRecovery.get(level) : null;
+            if (rec != null) rec.seep(level, res);   // (the seepage goes into the lake first; Baughn 2026-11-08)
+            // (seeping, an empty lake: run slow, as only the seepage comes in)
+            boolean seeping = rec != null && rec.regime(res) == OilRecovery.Regime.SEEPAGE && res.amount() < 1000;
             double seepW = OilRecovery.seepRate() * OilPumpDescriptor.energyPerMb(false, depth);
             resistor.setR(seeping && seepW < desc.nominalP ? desc.resistorR * desc.nominalP / Math.max(1, seepW) : desc.resistorR);
             double e = resistor.getP() * time;
@@ -148,7 +150,7 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
             }
             rate = 0.9 * rate + 0.1 * (got / Math.max(time, 1e-6));
             if (got > 0) status = source < 0 ? "pumping water" : water ? "pumping water from lake #" + source : "pumping crude";
-            lake = rec != null ? OilRecovery.describe(level, res) : null;
+            lake = OilRecovery.oil(res) ? OilRecovery.describe(level, res) : null;
         }
     }
 

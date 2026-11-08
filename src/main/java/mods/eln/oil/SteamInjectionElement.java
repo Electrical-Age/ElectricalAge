@@ -66,8 +66,8 @@ public class SteamInjectionElement extends TransparentNodeElement implements Flu
         }
         Reservoir r = source > 0 ? ReservoirData.get(level).byId(source) : null;
         kgPerS = 0;
-        if (!OilRecovery.oil(r)) {
-            lake = "no well casing down to an oil lake";
+        if (!OilRecovery.recovers(level, r)) {
+            lake = OilRecovery.oil(r) ? "a surface pond: it doesn't take steam" : "no well casing down to an oil lake";
             why = "";
             return;
         }
@@ -79,7 +79,7 @@ public class SteamInjectionElement extends TransparentNodeElement implements Flu
         else if (over <= 0) why = String.format("needs %.1f bar to push down %d blocks", neededPa(depth) / 1e5, depth);
         else {
             double kg = Math.min(Math.min(MAX_KG_S, INJECT_KG_PER_S_PA * over) * dt, EaUnits.steamAvailable(inlet));
-            kg = rec.inject(r, kg);
+            kg = rec.inject(level, r, kg);
             if (kg > 0) EaUnits.drainVapour(inlet, kg);
             kgPerS = kg / dt;
             totalKg += kg;

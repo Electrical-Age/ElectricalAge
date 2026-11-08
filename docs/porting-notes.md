@@ -494,9 +494,11 @@ on 1.7.10) onto 26.x.
 
 - Oil lakes (todo #138, Baughn 2026-10-30, after Argon's review): new lakes are `oilLakes.sizeMultiplier` (2) times as
   big, all by depth (same footprint; the scale is saved in the lake's structure piece, 1 for older lakes). Below
-  `oilLakes.tailShare` (20 %) of its capacity an oil lake seeps instead of running dry: one budget per lake, `seepShare`
-  (18 %) of a 200V oil pump's nominal rate (~5.6 mB/s), shared by all its pumps (Baughn 2026-10-30); the lake stays at
-  its tail level. Steam pushed down a
+  `oilLakes.tailShare` (20 %) of its capacity an oil lake refills by seepage, `seepShare` (18 %) of a 230V oil pump's
+  nominal rate (~5.6 mB/s), into the lake and back up to the tail level (Baughn 2026-11-08: the seepage refills the
+  reservoir, so more pumps don't mean more oil; until then it went to the pumps directly and the lake stayed at its tail
+  level). It is caught up lazily by game time (`seep_time` per lake in `eln:oil_recovery`). Surface ponds (`oil-pond:`)
+  don't refill (Baughn 2026-11-08). GameTest `oil_lake_refills_to_its_tail`. Steam pushed down a
   second well casing through the Steam Injection Wellhead (`eln:transparent_node@5200`, new; above the casing's head of
   crude, ~0.08 bar a block) pays for crude at `steamKgPerBucket` (0.2 kg), and the lake's pumps run at full rate on it
   (credit per lake in SavedData `eln:oil_recovery`, at most a pump tank's worth). Water lakes still run dry. Residue is a

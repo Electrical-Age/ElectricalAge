@@ -74,6 +74,12 @@ public final class ReservoirData extends SavedData {
         return java.util.Collections.unmodifiableSet(byKey.keySet());
     }
 
+    /** The maker's key of a reservoir, or null (a scan: callers cache it). */
+    public String keyOf(int id) {
+        for (var e : byKey.entrySet()) if (e.getValue() == id) return e.getKey();
+        return null;
+    }
+
     public Reservoir byKey(String key) {
         Integer id = byKey.get(key);
         return id == null ? null : byId.get(id);

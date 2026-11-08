@@ -21,6 +21,7 @@ public final class OilLakeCases {
         cases.add(new Recovery(Recovery.Mode.STEAM));
         cases.add(new Recovery(Recovery.Mode.WEAK_STEAM));
         cases.add(new Recovery(Recovery.Mode.TWO_PUMPS));
+        cases.add(new Refill());
     }
 
     /**
@@ -61,12 +62,11 @@ public final class OilLakeCases {
     }
 
     /**
-     * A depleted lake (15 % of its capacity, under the 20 % tail) under the test floor, a 50V oil pump on well casing
-     * down to it:
+     * A pumped-out lake (empty, under the 20 % tail) under the test floor, a 50V oil pump on well casing down to it:
      * <ul>
-     * <li>SEEPAGE: it never runs dry: it seeps 18 % of a 200V pump's nominal rate (OilRecovery.seepRate), the lake stays
- * where it is, Jade says so;</li>
- * <li>TWO_PUMPS: two pumps on it share that one budget (Baughn 2026-10-30);</li>
+     * <li>SEEPAGE: it never runs dry: it seeps 18 % of a 230V pump's nominal rate (OilRecovery.seepRate) into the lake,
+     * which its pump drains, so the lake stays near empty; Jade says so;</li>
+     * <li>TWO_PUMPS: two pumps on it share that one seepage (Baughn 2026-11-08: more pumps mustn't mean more oil);</li>
      * <li>STEAM: steam at 3 bar down a second casing through a wellhead (more than the well's head) pays for crude: the
      * pump runs at its full rate again, Jade says boosted, the steam taken matches the crude at steamKgPerBucket;</li>
      * <li>WEAK_STEAM: steam under the well's head doesn't go down: nothing injected, seepage as before.</li>
@@ -113,7 +113,7 @@ public final class OilLakeCases {
                     mask[x * 3 + z] = 0b1111;
                 }
             r = mods.eln.oil.OilReservoirs.create(level, null, under.getX(), under.getZ(), 6, 3, floor, mask, Long.MAX_VALUE);
-            mods.eln.reservoir.Reservoirs.setAmount(level, r, (long) (0.15 * r.capacity()));
+            mods.eln.reservoir.Reservoirs.setAmount(level, r, 0);
             mods.eln.reservoir.Reservoirs.sweep(level, r, under.getX() >> 4, under.getZ() >> 4);
             amount0 = r.amount();
             for (int x : new int[]{1, 4}) level.setBlock(ctx.at(x, 0, 1), mods.eln.oil.OilWorldgen.WELL_CASING.get().defaultBlockState(), 3);
@@ -158,7 +158,8 @@ public final class OilLakeCases {
             var info = pump.getWaila();
             ctx.line(String.format("%s: pump %.2f mB/s (nominal %.2f, %.0f%%); lake %d -> %d mB of %d; steam %.4f kg; pump %s%s", mode, rate, nominal,
                 100 * rate / nominal, amount0, r.amount(), r.capacity(), steam, info, well == null ? "" : "; wellhead " + well.getWaila()));
-            ctx.check(mode + ": the lake stays at its tail level", r.amount() == amount0, r.amount() + " vs " + amount0);
+            ctx.check(mode + ": the lake stays near empty (its pumps drain what seeps in)", r.amount() < 2 * mods.eln.oil.OilRecovery.seepRate() + 50,
+                r.amount() + " mB");
             String lake = String.valueOf(info.get("Lake"));
             if (mode == Mode.STEAM) {
                 ctx.check("steam: the pump runs at its full rate again (over 80 % of nominal)", rate > 0.8 * nominal, String.format("%.2f of %.2f mB/s", rate, nominal));
@@ -174,6 +175,47 @@ public final class OilLakeCases {
                 if (mode == Mode.WEAK_STEAM) ctx.check("weak steam: under the well's head nothing goes down", steam == 0, String.format("%.4f kg", steam));
             }
             mods.eln.reservoir.ReservoirData.get(ctx.level()).remove(r);
+        }
+    }
+
+    /**
+     * Seepage refills the lake (Baughn 2026-11-08): an empty lake left alone for 100 s gains seepRate x 100 s, caught up
+     * when next looked at; it refills only up to its tail level; a surface pond (key "oil-pond:") doesn't refill at all.
+     */
+    static final class Refill implements TestCase {
+        public String id() {
+            return "oil_lake_refills_to_its_tail";
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            var level = ctx.level();
+            var at = ctx.at(0, 0, 0).below(20);
+            int[] floor = {at.getY(), at.getY(), at.getY(), at.getY()}, mask = {0b11, 0b11, 0b11, 0b11};
+            var lake = mods.eln.oil.OilReservoirs.create(level, null, at.getX(), at.getZ(), 2, 2, floor, mask, 0);
+            var pond = mods.eln.reservoir.ReservoirData.get(level).create(level, "oil-pond:test" + at.asLong(), mods.eln.oil.OilReservoirs.KIND,
+                mods.eln.reservoir.ArrayBasin.TYPE, mods.eln.reservoir.ArrayBasin.spec(at.getX() + 4, at.getZ(), 2, 2, floor, new int[]{2, 2, 2, 2}),
+                mods.eln.reservoir.ArrayBasin.area(floor, new int[]{2, 2, 2, 2})[0][0], mods.eln.reservoir.ArrayBasin.area(floor, new int[]{2, 2, 2, 2})[1], 0);
+            var rec = mods.eln.oil.OilRecovery.get(level);
+            try {
+                long now = level.getGameTime();
+                rec.seepTimeForTests(lake, now - 100 * 20);
+                rec.seepTimeForTests(pond, now - 100 * 20);
+                long got = rec.seep(level, lake);
+                double want = Math.min(mods.eln.oil.OilRecovery.seepRate() * 100, mods.eln.oil.OilRecovery.tail(lake));
+                ctx.check("oil: an empty lake left 100 s gains its seepage", Math.abs(lake.amount() - want) <= 1, lake.amount() + " vs " + want);
+                rec.seepTimeForTests(lake, now - 1000000L);
+                rec.seep(level, lake);
+                ctx.check("oil: ... but only up to its tail level", lake.amount() == mods.eln.oil.OilRecovery.tail(lake),
+                    lake.amount() + " vs " + mods.eln.oil.OilRecovery.tail(lake));
+                ctx.check("oil: a surface pond doesn't refill", rec.seep(level, pond) == 0 && pond.amount() == 0
+                    && !mods.eln.oil.OilRecovery.recovers(level, pond) && mods.eln.oil.OilRecovery.recovers(level, lake), pond.amount() + " mB");
+            } finally {
+                mods.eln.reservoir.ReservoirData.get(level).remove(lake);
+                mods.eln.reservoir.ReservoirData.get(level).remove(pond);
+            }
         }
     }
 }
