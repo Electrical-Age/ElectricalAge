@@ -39,15 +39,7 @@ public class CarbonBlackBurnerDescriptor extends TransparentNodeDescriptor {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();
-        var fire = obj.getPart("fire");
-        if (fire != null) {
-            if (burning) mods.eln.misc.UtilsClient.drawLight(fire);
-            else {
-                mods.eln.gl.GL11.glColor3f(0.25f, 0.2f, 0.2f);
-                fire.draw();
-                mods.eln.misc.UtilsClient.glDefaultColor();
-            }
-        }
+        mods.eln.anim.Led.draw(obj.getPart("fire"), burning, 1, 1, 1, 0.25f, 0.2f, 0.2f);   // (the sight port's fire)
     }
 
     @Override

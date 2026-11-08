@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.smelter;
 
-import mods.eln.client.FrameTime;
 import mods.eln.gl.GL11;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
@@ -24,27 +23,21 @@ public class SmelterRender extends TransparentNodeElementRender {
         desc = (SmelterDescriptor) d;
     }
 
+    static final mods.eln.anim.Glow.Ramp WINDOW = k -> new float[]{0.25f + 0.75f * Math.min(1, k * 2), 0.12f + 0.75f * k, 0.08f + 0.6f * k * k};
+
     @Override
     public void draw() {
         front.glRotateXnRef();
         if (desc.obj == null) return;
         var m = desc.obj.getPart("main");
         if (m != null) m.draw();
-        var g = desc.obj.getPart("glow");
-        if (g != null) {
-            // dull red from ~400 °C to yellow-white at ~1000 °C (Tc is above the room's temperature)
-            float k = Math.max(0, Math.min(1, (temperature - 300) / 700f));
-            if (k > 0.02f) UtilsClient.disableLight();
-            GL11.glColor4f(0.25f + 0.75f * Math.min(1, k * 2), 0.12f + 0.75f * k, 0.08f + 0.6f * k * k, 1);
-            g.draw();
-            GL11.glColor4f(1, 1, 1, 1);
-            if (k > 0.02f) UtilsClient.enableLight();
-        }
+        // the window: dull red from ~400 °C to yellow-white at ~1000 °C (Tc is above the room's temperature)
+        mods.eln.anim.Glow.draw(desc.obj.getPart("glow"), Math.max(0, Math.min(1, (temperature - 300) / 700f)), WINDOW);
     }
 
     @Override
     public void refresh(float deltaT) {
-        progress = Math.min(1, progress + perSecond * FrameTime.getNotCaped2());
+        progress = Math.min(1, progress + perSecond * deltaT);
     }
 
     @Override

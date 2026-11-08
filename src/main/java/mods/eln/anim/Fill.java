@@ -19,4 +19,15 @@ public final class Fill {
         part.draw();
         GL11.glPopMatrix();
     }
+
+    /** The part scaled share in y about the height y (block units, model frame): a fire bed's foot, not its origin. */
+    public static void drawAbout(Obj3D.Obj3DPart part, float y, float share) {
+        if (part == null || share <= 0) return;
+        GL11.glPushMatrix();
+        GL11.glTranslatef(0, y, 0);
+        GL11.glScalef(1, share, 1);
+        GL11.glTranslatef(0, -y, 0);
+        part.draw();
+        GL11.glPopMatrix();
+    }
 }

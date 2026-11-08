@@ -71,11 +71,7 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
 
     fun draw(on: Boolean = false) {
         main?.draw()
-        if (on) {
-            UtilsClient.drawLight(switch)
-        } else {
-            switch?.draw()
-        }
+        mods.eln.anim.Led.draw(switch, on, 1f, 1f, 1f, 1f, 1f, 1f)
     }
 
 

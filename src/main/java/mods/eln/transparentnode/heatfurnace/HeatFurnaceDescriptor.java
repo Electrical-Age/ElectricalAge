@@ -71,6 +71,9 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
 
     /** The foot of the firebox window (px; mods.eln.cad.models.HeatFurnace WIN_Y0): the glow is scaled about it. */
     static final float WINDOW_Y0 = 5.25f;
+    /** The fire bed's colour by power (0..1): dull dark red to bright orange-yellow; always self-lit. */
+    static final mods.eln.anim.Glow.Ramp FIRE = mods.eln.anim.Glow.ramp(
+        k -> new float[]{0.45f + 0.55f * Math.min(1, k * 1.6f), 0.08f + 0.77f * k, 0.03f + 0.32f * k * k}, -1);
 
     /** Its highest power: the furnace's own and every combustion chamber's (the glow's full brightness). */
     public double maxPower() {
@@ -84,20 +87,9 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
      */
     void draw(float fire, float power) {
         if (main != null) main.draw();
-        if (glow != null && fire > 0.01f) {
-            float k = Math.max(0, Math.min(1, power));
-            UtilsClient.disableLight();
-            GL11.glColor4f(0.45f + 0.55f * Math.min(1, k * 1.6f), 0.08f + 0.77f * k, 0.03f + 0.32f * k * k, 1);
-            float at = WINDOW_Y0 / 16f - 0.5f;
-            GL11.glPushMatrix();
-            GL11.glTranslatef(0, at, 0);
-            GL11.glScalef(1, Math.min(1, fire), 1);
-            GL11.glTranslatef(0, -at, 0);
-            glow.draw();
-            GL11.glPopMatrix();
-            GL11.glColor4f(1, 1, 1, 1);
-            UtilsClient.enableLight();
-        }
+        if (glow != null && fire > 0.01f)
+            mods.eln.anim.Glow.draw(() -> mods.eln.anim.Fill.drawAbout(glow, WINDOW_Y0 / 16f - 0.5f, Math.min(1, fire)),
+                Math.max(0, Math.min(1, power)), FIRE);
         if (glass != null) {
             UtilsClient.enableBlend();
             GL11.glColor4f(1, 1, 1, 0.3f);

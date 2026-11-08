@@ -57,14 +57,7 @@ public class BusModuleDescriptor extends SixNodeDescriptor {
     }
 
     private static void lamp(Obj3DPart p, boolean on, float r, float g, float b) {
-        if (p == null) return;
-        if (on) {
-            GL11.glColor3f(r, g, b);
-            UtilsClient.drawLight(p);
-        } else {
-            GL11.glColor3f(r * 0.4f + 0.1f, g * 0.4f + 0.1f, b * 0.4f + 0.1f);
-            p.draw();
-        }
+        mods.eln.anim.Led.draw(p, on, r, g, b, r * 0.4f + 0.1f, g * 0.4f + 0.1f, b * 0.4f + 0.1f);
     }
 
     @Override

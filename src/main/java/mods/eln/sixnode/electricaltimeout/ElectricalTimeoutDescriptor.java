@@ -59,8 +59,7 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
             rot.draw(rotEnd + (rotStart - rotEnd) * left, 1f, 0f, 0f);
         }
         if (led != null) {
-            UtilsClient.ledOnOffColor(left != 0f);
-            UtilsClient.drawLight(led);
+            mods.eln.anim.Led.redGreen(led, left != 0f);
             GL11.glColor3f(1f, 1f, 1f);
         }
     }

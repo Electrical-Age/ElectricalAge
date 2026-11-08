@@ -40,15 +40,19 @@ code on purpose.
 |---|---|---|---|
 | Polymeriser | agitator drive | `Spin` | lib |
 | Steam Cracker | peepholes, LEDs | `Glow`, `Led` | lib |
-| Desulfuriser, Industrial Resin Collector, the four electrical machines | status LEDs | `Led` | lib |
+| Desulfuriser, Industrial Resin Collector, the four electrical machines, fuel heat furnace, fuel generator, carbon black burner, math chip, bus module, Modbus RTU, timeout, battery charger, wireless Rx/repeater | status LEDs, sight ports | `Led` (`draw`, tinted, `redGreen`) | lib |
+| Battery charger | charging LED blink | `Blink` (was the wall clock) | lib |
+| Electrical furnace | item turntable | `Spin` (was the wall clock) | lib |
+| Smelter, heat furnace, fuel heat furnace | fire glow | `Glow` (each its own ramp), `Fill.drawAbout` | lib |
 | 230V macerator | flywheel belt | `Belt` | lib |
 | Macerator, magnetizer, plate machine, compressor | handles/rollers, ram, items | hand-written R1, items spin | own |
 | Compact turbine, steam generator, inline pump, wind/water turbines, active dissipator, alarm, anemometer, auto miner pipe, wire drawer | rotors | hand-written smoothed rotor | own |
-| Egg incubator, electrical furnace | item turntable | constant spin (the furnace on the wall clock) | own |
+| Egg incubator | item turntable | constant spin | own |
 | Switches, breaker, relay, signal sources, bus button, VU meter, timeout | levers, contacts, needles | `RcInterpolator`/`PhysicalInterpolator` | own |
 | Transformer, lamp supply, teleporter | doors (player near), gyro | `PhysicalInterpolator` | own |
 | Compact turbine, steam generator, steam oven, anvil, macerator, flare stack, heat furnaces, carbon black burner | particles | due-accumulators, four copies of the vent rotation | own |
-| Smelter, heat furnace, fuel heat furnace | fire glow, flicker | hand-written ramps | own |
+| Heat furnace, fuel heat furnace | flicker | hand-written | own |
+| Switch, VU meter, gate sources, fire detector, source, lamp supply, entity sensor, emergency lamp, redstone in/out, bus button/light/floor sensor, turret, data logger | LEDs with halos or mixed states | inline | own |
 | Boiler, tanks, oil separator | levels | hand-written scale | own |
 | Wind turbine halo, teleporter, fire detector, math chip, auto miner, battery charger | blinking | four different clocks | own |
 | Shafts (all shaft parts, turbines, generator, motor) | rotors | `log(rads+1)/log(1.2)` deg-rate, unsmoothed | special: Baughn's 2015 curve (slow shafts turn visibly, fast ones don't strobe) |

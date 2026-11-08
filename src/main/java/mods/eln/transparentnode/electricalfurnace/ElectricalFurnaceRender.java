@@ -1,7 +1,6 @@
 package mods.eln.transparentnode.electricalfurnace;
 
 import mods.eln.Eln;
-import mods.eln.client.FrameTime;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -24,11 +23,10 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender {
     //float temperatureTarget;
     ItemEntity entityItemIn = null;
 
-    long time;
 
     float processState, processStatePerSecond;
 
-    float counter = 0;
+
 
     short heatingCorpResistorP = 0;
 
@@ -41,8 +39,10 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender {
 
     public ElectricalFurnaceRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
-        time = System.currentTimeMillis();
     }
+
+    /** The item turns a quarter turn a second (on frame time: it ran on the wall clock, on while paused). */
+    final mods.eln.anim.Spin turntable = new mods.eln.anim.Spin(90, 0).speed(1);
 
     @Override
     public void draw() {
@@ -51,18 +51,15 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender {
         Eln.obj.draw("ElectricFurnace", "furnace");
         //ClientProxy.obj.draw("ELFURNACE");
 
-        drawEntityItem(entityItemIn, -0.1, -0.20, 0, counter, 0.8f);
+        drawEntityItem(entityItemIn, -0.1, -0.20, 0, turntable.deg(), 0.8f);
     }
 
 
     @Override
     public void refresh(float deltaT) {
-        processState += processStatePerSecond * FrameTime.getNotCaped2();
+        processState += processStatePerSecond * deltaT;
         if (processState > 1f) processState = 1f;
-        counter += (System.currentTimeMillis() - time) * 0.001 * 360 / 4;
-        if (counter > 360) counter -= 360;
-
-        time = System.currentTimeMillis();
+        turntable.step(deltaT);
     }
 
     @Override

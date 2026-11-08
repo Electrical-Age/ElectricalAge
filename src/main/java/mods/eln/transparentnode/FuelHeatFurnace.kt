@@ -65,36 +65,13 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
             burners.getOrNull(installedBurner)?.draw()
         }
 
-        if (on) {
-            GL11.glColor3f(0f, 1f, 0f)
-            UtilsClient.drawLight(powerLED)
-        } else {
-            GL11.glColor3f(0.05f, 0.18f, 0.05f)   // (off: dark glass; it looked lit at half green, AdventurAgent)
-            powerLED?.draw()
-        }
-
-        if (heating) {
-            GL11.glColor3f(1f, 0f, 0f)
-            UtilsClient.drawLight(heatLED)
-        } else {
-            GL11.glColor3f(0.2f, 0.04f, 0.04f)
-            heatLED?.draw()
-        }
-        GL11.glColor3f(1f, 1f, 1f)
+        // (off: dark glass; it looked lit at half green, AdventurAgent)
+        mods.eln.anim.Led.draw(powerLED, on, 0f, 1f, 0f, 0.05f, 0.18f, 0.05f)
+        mods.eln.anim.Led.draw(heatLED, heating, 1f, 0f, 0f, 0.2f, 0.04f, 0.04f)
 
         if (glow != null && heating && fire > 0.01f) {   // (only a burning flame: not while it kindles, nor when burnt out)
-            val k = power.coerceIn(0f, 1f)
-            UtilsClient.disableLight()
-            GL11.glColor4f(0.85f + 0.15f * k, 0.38f + 0.54f * k, 0.08f + 0.67f * k * k, 1f)
-            val at = WINDOW_Y0 / 16f - 0.5f
-            GL11.glPushMatrix()
-            GL11.glTranslatef(0f, at, 0f)
-            GL11.glScalef(1f, Math.min(1f, fire), 1f)
-            GL11.glTranslatef(0f, -at, 0f)
-            glow.draw()
-            GL11.glPopMatrix()
-            GL11.glColor4f(1f, 1f, 1f, 1f)
-            UtilsClient.enableLight()
+            mods.eln.anim.Glow.draw({ mods.eln.anim.Fill.drawAbout(glow, WINDOW_Y0 / 16f - 0.5f, Math.min(1f, fire)) },
+                power.coerceIn(0f, 1f), FLAME)
         }
         if (glass != null) {
             UtilsClient.enableBlend()
@@ -114,6 +91,8 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
     companion object {
         /** The foot of the sight port (px; mods.eln.cad.models.FuelHeater WIN_Y0): the flame is scaled about it. */
         const val WINDOW_Y0 = 6.5f
+        /** The flame's colour by power (0..1), always self-lit. */
+        val FLAME: mods.eln.anim.Glow.Ramp = mods.eln.anim.Glow.ramp({ k -> floatArrayOf(0.85f + 0.15f * k, 0.38f + 0.54f * k, 0.08f + 0.67f * k * k) }, -1f)
     }
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {

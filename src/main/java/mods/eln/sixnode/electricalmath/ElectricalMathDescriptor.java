@@ -76,16 +76,8 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
         for (int idx = 0; idx < Math.min(modules, MODULES); idx++) if (module[idx] != null) module[idx].draw();
         for (int idx = 0; idx < 8; idx++) {
             if (led[idx] == null) continue;
-            if (ledOn[idx]) {
-                if ((idx & 3) == 0)
-                    GL11.glColor3f(0.8f, 0f, 0f);
-                else
-                    GL11.glColor3f(0f, 0.8f, 0f);
-                UtilsClient.drawLight(led[idx]);
-            } else {
-                GL11.glColor3f(0.3f, 0.3f, 0.3f);
-                led[idx].draw();
-            }
+            boolean red = (idx & 3) == 0;
+            mods.eln.anim.Led.draw(led[idx], ledOn[idx], red ? 0.8f : 0f, red ? 0f : 0.8f, 0f, 0.3f, 0.3f, 0.3f);
         }
         GL11.glColor3f(1f, 1f, 1f);
         if (graph != null && screenY1 > screenY0) drawGraph(graph);

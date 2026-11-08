@@ -65,40 +65,11 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
         if (main != null) main.draw();
         if (door != null) door.draw((1f - open) * alphaOff, 0f, 0f, 1f);
 
-        if (led_power != null) {
-            GL11.glColor3f(0f, 0.8f, 0f);
-            UtilsClient.drawLight(led_power);
-        }
+        mods.eln.anim.Led.draw(led_power, true, 0f, 0.8f, 0f, 0f, 0f, 0f);
+        mods.eln.anim.Led.draw(led_activity, activityLed, 0.8f, 0.8f, 0f, 0.4f, 0.4f, 0.1f);
+        mods.eln.anim.Led.draw(led_error, errorLed, 0.8f, 0f, 0f, 0.4f, 0.2f, 0.2f);
 
-        if (led_activity != null) {
-            if (activityLed) {
-                GL11.glColor3f(0.8f, 0.8f, 0f);
-                UtilsClient.drawLight(led_activity);
-            } else {
-                GL11.glColor3f(0.4f, 0.4f, 0.1f);
-                led_activity.draw();
-            }
-        }
-
-        if (led_error != null) {
-            if (errorLed) {
-                GL11.glColor3f(0.8f, 0f, 0f);
-                UtilsClient.drawLight(led_error);
-            } else {
-                GL11.glColor3f(0.4f, 0.2f, 0.2f);
-                led_error.draw();
-            }
-        }
-
-        if (display != null) {
-            if (open > 0.9) {
-                GL11.glColor3f(1f, 1f, 1f);
-                UtilsClient.drawLight(display);
-            } else {
-                GL11.glColor3f(0.5f, 0.5f, 0.5f);
-                display.draw();
-            }
-        }
+        mods.eln.anim.Led.draw(display, open > 0.9, 1f, 1f, 1f, 0.5f, 0.5f, 0.5f);   // (the display lights with the door open)
     }
 
     /** Its door is drawn open in the model: not part of the box (Baughn 2026-10-29). */

@@ -79,8 +79,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
         int idx = 0;
         for (Obj3DPart led : leds) {
             if (presence != null && presence[idx] && powered && (charged[idx] || blinkOn)) {
-                UtilsClient.ledOnOffColor(charged[idx]);
-                UtilsClient.drawLight(led);
+                mods.eln.anim.Led.redGreen(led, charged[idx]);
             } else {
                 GL11.glColor3f(0.2f, 0.2f, 0.2f);
                 led.draw();

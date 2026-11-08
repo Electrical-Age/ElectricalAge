@@ -59,8 +59,7 @@ public class WirelessSignalRxDescriptor extends SixNodeDescriptor {
         if (main != null) main.draw();
 
         if (led != null) {
-            UtilsClient.ledOnOffColor(connection);
-            UtilsClient.drawLight(led);
+            mods.eln.anim.Led.redGreen(led, connection);
         }
     }
 

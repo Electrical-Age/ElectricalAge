@@ -66,7 +66,16 @@ public class BatteryChargerRender extends SixNodeElementRender {
             if (b[i] != null)
                 UtilsClient.drawFlatItem(b[i].getItem(), ITEM_X, i < 2 ? 0.15625 : -0.15625, i % 2 == 0 ? 0.15625 : -0.15625, ITEM_SIZE, ITEM_THICK);
 
-        descriptor.draw(batteryPresence, charged, powered(), (System.currentTimeMillis() / 500) % 2 == 0);
+        descriptor.draw(batteryPresence, charged, powered(), blink.on());
+    }
+
+    /** A charging battery's LED blinks a second's cycle, on frame time (it ran on the wall clock: on while paused). */
+    final mods.eln.anim.Blink blink = mods.eln.anim.Blink.every(1.0, 0.5);
+
+    @Override
+    public void refresh(float deltaT) {
+        super.refresh(deltaT);
+        blink.step(deltaT);
     }
 
     @Override
