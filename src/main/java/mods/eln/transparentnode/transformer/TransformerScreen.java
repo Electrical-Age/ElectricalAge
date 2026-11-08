@@ -39,7 +39,7 @@ public class TransformerScreen extends ElnScreen {
         // switched on or off (Baughn 2026-11-08): it comes up off; what it would do shows before it's switched on
         button("on", () -> r.switchedOn ? tr("Switched on") : tr("Switched off"), () -> r.clientSendId(TransformerElement.toggleSwitchedOn),
             tr("Joins the windings to their terminals. A converter comes up off when placed, when a winding or the core changes, and after it burns out or is repaired."));
-        text("onl", () -> r.switchedOn ? "" : tr("Check below, then switch on"));
+        text("onl", () -> r.switchedOn ? "" : tr("Check, then switch on"));
         text("ratio", () -> r.primaryTurns <= 0 || r.secondaryTurns <= 0 ? tr("Needs both windings and a core")
             : tr("Turns %1$ : %2$ (x %3$)", r.primaryTurns, r.secondaryTurns, String.format("%.2f", (double) r.secondaryTurns / r.primaryTurns))
                 + (r.coreVoltsPerTurn > 0 ? tr(", core %1$ V a turn", fmt(r.coreVoltsPerTurn)) : tr(", no core")));

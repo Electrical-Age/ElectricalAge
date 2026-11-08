@@ -224,10 +224,11 @@ public class TransformerElement extends TransparentNodeElement {
         return w == null ? 0 : w.turns();
     }
 
-    /** Turns x mm² of both windings, against the core's window (Wires stage 4); 0 if a slot is empty. */
+    /** Turns x mm² of the windings in, against the core's window (Wires stage 4). */
     double windowUsed() {
         Wire p = primaryWire(), s = secondaryWire();
-        return p == null || s == null ? 0 : p.turns() * p.mm2() + s.turns() * s.mm2();
+        // (both windings that are in: the screen shows the fill as they go in; AdventurAgent)
+        return (p == null ? 0 : p.turns() * p.mm2()) + (s == null ? 0 : s.turns() * s.mm2());
     }
 
     double window() {
