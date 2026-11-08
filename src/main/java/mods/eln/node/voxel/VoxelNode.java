@@ -321,6 +321,24 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         });
     }
 
+    /**
+     * A carved block stays a voxel block when its last part or device goes: turning back into what it imitated would
+     * fill the carving in (Baughn 2026-11-08: removing a cable took the chisel's cut-out with it).
+     */
+    public boolean keepsCarving() {
+        return host != null && carved != null && !carved.isEmpty();
+    }
+
+    /**
+     * The last part or device went from an imitating block: it becomes the stair (or whatever it imitated) again, unless
+     * it's carved, when it stays as it is. True if it imitates something (the caller mustn't remove the block then).
+     */
+    public boolean lastPartGone() {
+        if (host == null) return false;
+        if (!keepsCarving()) removeEmptyBlock();
+        return true;
+    }
+
     /** Nothing left: no parts, no elements (the block goes). */
     public boolean isEmptyNode() {
         return parts.isEmpty() && !getIfSideRemain();
@@ -1087,7 +1105,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         markUsed();
         setNeedPublish(true);
         // an element that went on its own (self-destruction) with nothing else left: the block goes too
-        if (!breakingByPlayer && isEmptyNode() && !isDestructing() && coordonate.world() != null) removeEmptyBlock();
+        if (!breakingByPlayer && isEmptyNode() && !keepsCarving() && !isDestructing() && coordonate.world() != null) removeEmptyBlock();
     }
 
     /**
@@ -1588,10 +1606,14 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         v.setNeedPublish(true);
     }
 
-    /** Across a face to another voxel block: every end meeting one of its ends at the same point. */
+    /**
+     * Across a face to another voxel block: every end meeting one of its ends at the same point; then cables whose bodies
+     * touch across the face though their ends don't meet (connectTouching).
+     */
     private void connectVoxel(Direction dir, VoxelNode v) {
         int f = dir.toEnumFacing().get3DDataValue();
         List<End> theirs = v.ends();
+        java.util.Set<java.util.List<Object>> joined = new java.util.HashSet<>();
         for (End a : ends()) {
             if (a.out != f) continue;
             CablePart.Port m = new CablePart.Port(a.out, a.x, a.y, a.z).mirrored();
@@ -1606,6 +1628,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 }
                 mods.eln.sim.ElectricalConnection e = null;
                 mods.eln.sim.ThermalConnection t = null;
+                if (a.load != null && b.load != null) joined.add(java.util.List.of(a.load, b.load));
+                if (a.thermal != null && b.thermal != null) joined.add(java.util.List.of(a.thermal, b.thermal));
+                if (a.bus != null && b.bus != null) joined.add(java.util.List.of(a.bus, b.bus));
                 if (a.load != null && b.load != null) {
                     e = new mods.eln.sim.ElectricalConnection(a.load, b.load);
                     Eln.simulator.addElectricalComponent(e);
@@ -1620,6 +1645,65 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 v.setNeedPublish(true);
             }
         }
+        connectTouching(dir, f, v, joined);
+    }
+
+    /**
+     * Cables in two voxel blocks whose bodies touch across the face between them, with an area of contact, though no
+     * end meets an end there: an inner corner falling on the blocks' boundary (Baughn 2026-11-08: a cable along a
+     * ceiling, up a shaft chiselled through the block above, drawn connected but carrying nothing; the ceiling piece
+     * ends at its centre line, the shaft's piece lies on its wall's plane, a voxel apart). As one block's touching
+     * conductors are joined (CableNet), these are.
+     */
+    private void connectTouching(Direction dir, int f, VoxelNode v, java.util.Set<java.util.List<Object>> joined) {
+        int[] d = CableRouter.DV[f];
+        int axis = d[0] != 0 ? 0 : d[1] != 0 ? 1 : 2, plane = d[axis] > 0 ? 16 : 0;
+        for (CableNet.Conductor ka : cables.live())
+            for (CableNet.Conductor kb : v.cables.live()) {
+                if (ka.isBurntNow() || kb.isBurntNow() || !compareConnectionMask(ka.mask(), kb.mask())) continue;
+                if (ka.load != null && kb.load != null && joined.contains(java.util.List.of(ka.load, kb.load))) continue;
+                if (ka.thermal != null && kb.thermal != null && joined.contains(java.util.List.of(ka.thermal, kb.thermal))) continue;
+                if (ka.port != null && kb.port != null && joined.contains(java.util.List.of(ka.port, kb.port))) continue;
+                if (!touchAcross(ka, kb, axis, plane)) continue;
+                if (ka.port != null && kb.port != null) {
+                    mods.eln.bus.BusNet.link(ka.port, kb.port);
+                    v.setNeedPublish(true);
+                    continue;
+                }
+                mods.eln.sim.ElectricalConnection e = null;
+                mods.eln.sim.ThermalConnection t = null;
+                if (ka.load != null && kb.load != null) {
+                    e = new mods.eln.sim.ElectricalConnection(ka.load, kb.load);
+                    Eln.simulator.addElectricalComponent(e);
+                }
+                if (ka.thermal != null && kb.thermal != null) {
+                    t = new mods.eln.sim.ThermalConnection(ka.thermal, kb.thermal);
+                    Eln.simulator.addThermalConnection(t);
+                }
+                if (e == null && t == null) continue;
+                var c = new mods.eln.node.NodeConnection(this, dir, LRDU.Up, v, dir.getInverse(), LRDU.Up, e, t);
+                nodeConnectionList.add(c);
+                v.nodeConnectionList.add(c);
+                v.setNeedPublish(true);
+            }
+    }
+
+    /** Do a box of ka's touching the boundary plane (axis, plane) and one of kb's (on the other side) overlap there? */
+    static boolean touchAcross(CableNet.Conductor ka, CableNet.Conductor kb, int axis, int plane) {
+        int other = 16 - plane;
+        for (CablePart p : ka.parts)
+            for (int[] a : p.boxes()) {
+                if ((plane == 16 ? a[axis + 3] : a[axis]) != plane) continue;
+                for (CablePart q : kb.parts)
+                    for (int[] b : q.boxes()) {
+                        if ((other == 16 ? b[axis + 3] : b[axis]) != other) continue;
+                        boolean over = true;
+                        for (int k = 0; k < 3 && over; k++)
+                            if (k != axis) over = Math.min(a[k + 3], b[k + 3]) > Math.max(a[k], b[k]);
+                        if (over) return true;
+                    }
+            }
+        return false;
     }
 
     /** (Element stubs are set by the connections themselves; a neighbour dropping its links reconnects at once.) */

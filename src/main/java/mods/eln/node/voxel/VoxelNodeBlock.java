@@ -240,10 +240,7 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
             node.breakingByPlayer = false;
         }
         if (!node.isEmptyNode()) return false;   // (others remain)
-        if (node.host != null) {   // (the last part went: the block is the stair again)
-            node.removeEmptyBlock();
-            return false;
-        }
+        if (node.lastPartGone()) return false;
         return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
     }
 }

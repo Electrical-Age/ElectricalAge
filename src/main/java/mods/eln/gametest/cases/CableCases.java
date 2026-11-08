@@ -169,6 +169,7 @@ public final class CableCases {
             c.line(String.format("voxel cable straight: cable at x 3 warmed by %.3f C (six-node), %.3f C (voxel)", ts, tv));
             c.check("voxel cable straight: warms like a six-node cable (1%)", ts > 0.1 && Math.abs(ts - tv) <= 0.01 * ts, String.format("six-node %.3f, voxel %.3f", ts, tv));
         }));
+        cases.add(new ShaftJoin());
         cases.add(new Case("voxel cable inner corners", (c, six, z) -> {
             // floor, up onto a wall to the south, along it, back down to the floor
             for (int x = 2; x <= 5; x++) c.floor(c.at(x, 1, z + 1));
@@ -2031,6 +2032,86 @@ public final class CableCases {
                     String.format("six-node %.5f A, voxel %.5f A", a, b));
             }
             if (extra != null) extra.check(c, 1, 6);
+        }
+    }
+
+    /**
+     * Baughn 2026-11-08 (Incognito 397 73..75 582): a cable along a ceiling turns up a shaft chiselled through the block
+     * above and out over its top. At each mouth the pieces either side of the blocks' boundary end a voxel apart (one's
+     * centre line, the other's wall plane), so no ends meet; their bodies touch across the boundary, and that joins them
+     * now. Then, the shaft's cable broken, the carved block stays carved (it turned back into a whole block).
+     */
+    static final class ShaftJoin implements TestCase {
+        String links = "", after = "";
+        boolean carvedKept;
+
+        public String name() {
+            return "voxel cable up a chiselled shaft joins at its mouths";
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        static mods.eln.node.voxel.VoxelNode node(TestContext c, BlockPos p) {
+            return mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, c.level())) instanceof mods.eln.node.voxel.VoxelNode v ? v : null;
+        }
+
+        static boolean linked(mods.eln.node.voxel.VoxelNode a, mods.eln.node.voxel.VoxelNode b) {
+            if (a == null || b == null) return false;
+            for (var nc : a.nodeConnectionList) {
+                try {
+                    var f1 = nc.getClass().getDeclaredField("N1");
+                    var f2 = nc.getClass().getDeclaredField("N2");
+                    var fe = nc.getClass().getDeclaredField("EC");
+                    f1.setAccessible(true);
+                    f2.setAccessible(true);
+                    fe.setAccessible(true);
+                    if ((f1.get(nc) == b || f2.get(nc) == b) && fe.get(nc) != null) return true;
+                } catch (ReflectiveOperationException e) {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        public void build(TestContext c) {
+            var level = c.level();
+            BlockPos low = c.at(2, 1, 1), up = low.above(), top = up.above();
+            c.floor(low.west());
+            c.floor(up);
+            c.floor(up.east());
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.CHISEL.get()));
+            // the shaft: x 0..4, z 8..12 through the whole block, four 4-cubes
+            for (int yy = 0; yy < 16; yy += 4) {
+                var hit = new net.minecraft.world.phys.Vec3(up.getX() + 0.01, up.getY() + (yy + 2) / 16.0, up.getZ() + 10 / 16.0);
+                mods.eln.node.voxel.ChiselItem.carve(player, level, up, hit, net.minecraft.core.Direction.WEST, 4, true);
+            }
+            int mv = 2;
+            voxel(c, low, List.of(new CablePart(mv, 1, new int[]{8, 16, 10, 3, 16, 10})));
+            voxel(c, up, List.of(new CablePart(mv, 5, new int[]{4, 0, 10, 4, 16, 10})));
+            voxel(c, top, List.of(new CablePart(mv, 0, new int[]{3, 0, 10, 12, 0, 10})));
+        }
+
+        public void measure(TestContext c) {
+            BlockPos low = c.at(2, 1, 1), up = low.above(), top = up.above();
+            var nu = node(c, up);
+            links = linked(nu, node(c, low)) + "," + linked(nu, node(c, top)) + "," + (nu == null ? "no node" : nu.carved == null ? 0 : nu.carved.cardinality());
+            c.check("shaft: the ceiling piece and the shaft's piece are joined across the blocks' boundary, and the shaft's and the top's",
+                links.startsWith("true,true,"), links);
+            if (nu == null) return;
+            nu.removePart(0, false);
+            nu.lastPartGone();
+            boolean still = c.level().getBlockState(up).getBlock() instanceof mods.eln.node.voxel.VoxelNodeBlock;
+            var again = node(c, up);
+            after = still + "," + (again == null ? "no node" : again.carved == null ? "0" : String.valueOf(again.carved.cardinality()));
+            c.check("shaft: its cable gone, the carved block stays carved (Baughn: the cut-out went with the cable)", still && again != null
+                && again.carved != null && again.carved.cardinality() == 256, after);
         }
     }
 }
