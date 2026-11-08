@@ -1133,6 +1133,10 @@ public final class LabCommands {
                 } catch (RuntimeException e) {
                     out.add("- (waila: " + e + ")");
                 }
+                if (v.host != null) {
+                    out.add("  host " + v.host + (v.carved == null ? "" : ", carved " + v.carved.cardinality() + " voxels"));
+                    for (int[] b : v.hostBoxes()) out.add("  solid box " + java.util.Arrays.toString(b));
+                }
                 for (var p : v.parts) {
                     var t = new net.minecraft.nbt.CompoundTag();
                     p.write(t);
