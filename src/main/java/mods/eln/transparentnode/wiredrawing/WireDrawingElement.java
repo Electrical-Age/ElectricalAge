@@ -194,7 +194,8 @@ public class WireDrawingElement extends TransparentNodeElement {
         try {
             if (type == SET) {
                 String[] f = stream.readUTF().split(",");
-                if (f.length == 5)
+                // (not while drawing: the screen greys its settings then; a stale packet mustn't scrap the item)
+                if (f.length == 5 && !running)
                     configure(Integer.parseInt(f[0]), Integer.parseInt(f[1]), Integer.parseInt(f[2]), Integer.parseInt(f[3]), Integer.parseInt(f[4]));
             } else if (type == RUN) {
                 running = stream.readBoolean();

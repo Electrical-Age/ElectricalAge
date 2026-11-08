@@ -97,6 +97,20 @@ public final class WireDrawingCases {
             mv.readFromNBT(nbt);
             ctx.check("wire drawing: a save keeps what it makes, its progress and its buffers", mv.mode == WireDrawingElement.KIT && mv.amount == 64
                 && mv.done == 12.5 && mv.copper == 0.25 && mv.running, mv.mode + " " + mv.amount + " " + mv.done + " " + mv.copper);
+            // (Baughn 2026-11-08: a click on the screen's settings while drawing scrapped the item; greyed now, and the
+            // element ignores a settings packet while it draws)
+            mv.networkUnserialize(ctx.stream(out -> {
+                out.writeByte(WireDrawingElement.SET);
+                out.writeUTF(WireDrawingElement.WINDING + ",0,2,0,3");
+            }));
+            ctx.check("wire drawing: while drawing, a settings packet changes nothing", mv.mode == WireDrawingElement.KIT && mv.done == 12.5,
+                mv.mode + " " + mv.done);
+            mv.running = false;
+            mv.networkUnserialize(ctx.stream(out -> {
+                out.writeByte(WireDrawingElement.SET);
+                out.writeUTF(WireDrawingElement.WINDING + ",0,2,0,3");
+            }));
+            ctx.check("wire drawing: ... and stopped, the same packet sets it", mv.mode == WireDrawingElement.WINDING && mv.amount == 3, mv.mode + " " + mv.amount);
             mv.configure(WireDrawingElement.KIT, 4, 1, CableSpec.RED, 64);
             ctx.check("wire drawing: changing what to make scraps the progress", mv.done == 0, "" + mv.done);
         }

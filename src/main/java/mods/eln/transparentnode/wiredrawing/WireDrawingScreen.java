@@ -23,7 +23,16 @@ public class WireDrawingScreen extends ElnScreen {
         this.render = (WireDrawingRender) render;
     }
 
+    /** The settings' widgets, greyed while it draws: a change would scrap the item in progress (Baughn 2026-11-08). */
+    final java.util.List<net.minecraft.client.gui.components.AbstractWidget> lockedWhileDrawing = new java.util.ArrayList<>();
+
+    <W extends net.minecraft.client.gui.components.AbstractWidget> W locked(W w) {
+        lockedWhileDrawing.add(w);
+        return w;
+    }
+
     void set(int mode, int mm2, int tier, int colour, int amount) {
+        if (render.running) return;   // (greyed; and a key into the field mustn't scrap the item either)
         WireDrawingDescriptor d = render.desc;
         mode = mode == WireDrawingElement.WINDING || mode == WireDrawingElement.BARE ? mode : WireDrawingElement.KIT;
         int max = WireDrawingDescriptor.maxAmount(mode);
@@ -42,37 +51,37 @@ public class WireDrawingScreen extends ElnScreen {
         WireDrawingRender r = render;
         progress("work", () -> r.progress);
         text("makel", () -> tr("Make"));
-        button("mode", () -> switch (r.mode) {
+        locked(button("mode", () -> switch (r.mode) {
                 case WireDrawingElement.KIT -> tr("Cable kit");
                 case WireDrawingElement.WINDING -> tr("Winding");
                 default -> tr("Bare wire");
             },
             () -> set((r.mode + 1) % 3, r.mm2, r.tier, r.colour, r.mode == WireDrawingElement.KIT ? Math.max(r.amount, 20) : Math.min(r.amount, WireDrawingDescriptor.MAX_BLOCKS)),
-            tr("A cable kit (blocks of cable), a winding for a DC-DC converter (turns), or bare Copper Cable for crafting"));
+            tr("A cable kit (blocks of cable), a winding for a DC-DC converter (turns), or bare Copper Cable for crafting")));
         text("mm2l", () -> tr("Wire"));
-        button("mm2dn", () -> "<", () -> set(r.mode, r.mm2 - 1, r.tier, r.colour, r.amount));
+        locked(button("mm2dn", () -> "<", () -> set(r.mode, r.mm2 - 1, r.tier, r.colour, r.amount)));
         // (bare wire has no spec: its rows say so, AdventurAgent)
         text("mm2", () -> r.mode == WireDrawingElement.BARE ? tr("Copper Cable") : WireDrawingDescriptor.fmt(CableSpec.MM2[r.mm2]) + " mm², " + String.format("%.0f A", CableSpec.AMPS[r.mm2]));
-        button("mm2up", () -> ">", () -> set(r.mode, r.mm2 + 1, r.tier, r.colour, r.amount),
-            tr("Up to %1$ mm² on this machine", WireDrawingDescriptor.fmt(CableSpec.MM2[r.desc.maxMm2])));
+        locked(button("mm2up", () -> ">", () -> set(r.mode, r.mm2 + 1, r.tier, r.colour, r.amount),
+            tr("Up to %1$ mm² on this machine", WireDrawingDescriptor.fmt(CableSpec.MM2[r.desc.maxMm2]))));
         text("insl", () -> tr("Insulation"));
-        button("insdn", () -> "<", () -> set(r.mode, r.mm2, r.tier - 1, r.colour, r.amount));
+        locked(button("insdn", () -> "<", () -> set(r.mode, r.mm2, r.tier - 1, r.colour, r.amount)));
         text("ins", () -> r.mode == WireDrawingElement.BARE ? tr("none") : volts(r.tier));
-        button("insup", () -> ">", () -> set(r.mode, r.mm2, r.tier + 1, r.colour, r.amount),
-            tr("Up to %1$ on this machine", volts(r.desc.maxTier)));
+        locked(button("insup", () -> ">", () -> set(r.mode, r.mm2, r.tier + 1, r.colour, r.amount),
+            tr("Up to %1$ on this machine", volts(r.desc.maxTier))));
         text("coll", () -> tr("Colour"));
-        button("coldn", () -> "<", () -> set(r.mode, r.mm2, r.tier, r.colour - 1, r.amount));
+        locked(button("coldn", () -> "<", () -> set(r.mode, r.mm2, r.tier, r.colour - 1, r.amount)));
         text("col", () -> r.mode == WireDrawingElement.BARE ? "-" : DyeColor.byId(r.colour).getName().replace('_', ' '));
-        button("colup", () -> ">", () -> set(r.mode, r.mm2, r.tier, r.colour + 1, r.amount), tr("Only the look"));
+        locked(button("colup", () -> ">", () -> set(r.mode, r.mm2, r.tier, r.colour + 1, r.amount), tr("Only the look")));
         text("amountl", () -> switch (r.mode) {
             case WireDrawingElement.KIT -> tr("Length");
             case WireDrawingElement.WINDING -> tr("Turns");
             default -> tr("Count");
         });
-        field("amount", () -> String.valueOf(r.amount), v -> {
+        locked(field("amount", () -> String.valueOf(r.amount), v -> {
             float f = EaField.parse(v);
             if (!Float.isNaN(f)) set(r.mode, r.mm2, r.tier, r.colour, Math.round(f));
-        }, tr("Kits: 1 to 64 blocks. Windings: 1 to 1000 turns. Bare wire: 1 to 64 Copper Cable"));
+        }, tr("Kits: 1 to 64 blocks. Windings: 1 to 1000 turns. Bare wire: 1 to 64 Copper Cable")));
         text("amountu", () -> switch (r.mode) {
             case WireDrawingElement.KIT -> tr("blocks");
             case WireDrawingElement.WINDING -> tr("turns");
@@ -94,6 +103,9 @@ public class WireDrawingScreen extends ElnScreen {
         var run = button("run", () -> r.running ? tr("Drawing...") : tr("Start"), () -> {
             if (!r.running) r.clientRun(true);
         }, tr("Draws one item, then stops. Changing what to make scraps the wire drawn so far"));
-        refreshers.add(() -> run.active = !r.running);
+        refreshers.add(() -> {
+            run.active = !r.running;
+            for (var w : lockedWhileDrawing) w.active = !r.running;
+        });
     }
 }
