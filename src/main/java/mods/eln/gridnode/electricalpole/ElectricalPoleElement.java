@@ -77,6 +77,17 @@ public class ElectricalPoleElement extends GridElement {
     final TransparentNodeElementInventory inventory = new PoleInventory(this);
     /** Streetlights lit now (they share one dark sensor). */
     boolean lit;
+    /** Seconds until the lights follow the sensor (NaN: they agree). */
+    double switchIn = Double.NaN;
+    /** Most a pole waits after its sensor changes, s. */
+    static final double MAX_SWITCH_DELAY = 30;
+
+    /** This pole's own switching delay: steady for the pole, spread over 0..MAX_SWITCH_DELAY by its position. */
+    double switchDelay() {
+        long h = coordonate().pos().asLong() * 0x9E3779B97F4A7C15L;
+        return MAX_SWITCH_DELAY * ((h >>> 11) & 0xFFFF) / 65535.0;
+    }
+
     /** GameTests: force the dark sensor (null: the sky decides). */
     public Boolean darkOverride;
     /** The line's tier when last applied (0: none yet). */
@@ -306,10 +317,17 @@ public class ElectricalPoleElement extends GridElement {
             int mask = lampMask();
             Level level = coordonate().world();
             boolean powered = electricalLoad.getU() > lineVolts() * 0.5;
-            boolean nowLit = mask != 0 && level != null && powered && dark(level);
-            if (nowLit != lit) {
-                lit = nowLit;
-                needPublish();
+            boolean want = mask != 0 && level != null && powered && dark(level);
+            // each pole switches a little after the others (Baughn: not all at once at dusk): a delay of its own, 0..30 s
+            if (want != lit) {
+                switchIn = Double.isNaN(switchIn) ? switchDelay() : switchIn - time;
+                if (switchIn <= 0 || !powered || darkOverride != null) {
+                    lit = want;
+                    switchIn = Double.NaN;
+                    needPublish();
+                }
+            } else {
+                switchIn = Double.NaN;
             }
             if (lit) {
                 // constant power: the built-in converter draws LAMP_WATTS each, whatever the line's voltage
