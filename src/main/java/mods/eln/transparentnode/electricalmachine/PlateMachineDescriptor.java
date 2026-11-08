@@ -40,7 +40,7 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
             }
         }
         initLeds(obj);
-        if (rot1 != null && rot1.getFloat("originX") != 0) rollX = rot1.getFloat("originX");
+        if (rot1 != null) rollX = rot1.getFloat("originX");   // (0 is a place: the 230V's rolls stand at the centre)
     }
 
     /** The work rolls' x (rot1's .txt origin), where a piece passing through is flattened; null: flattened with progress. */

@@ -154,8 +154,9 @@ public final class Magnetizer {
         a.part("ledpower", la.get(0));
         a.part("ledrun", la.get(1));
         a.origin("rot", 8.0, AY, 8.0).spin("rot", 'z');
-        // (the item hovers over the drum, small: in its bore, behind the spider and axle, it couldn't be seen, AdventurAgent)
-        items(a, new double[]{8.0, AY + 3.55, 8.0}, 0.6);
+        // (the item hovers in front of the coil, in its field: in the bore, behind the spider and axle, it couldn't be seen;
+        // over the drum it was too small, or poked out of the block, AdventurAgent)
+        items(a, new double[]{2.8, AY - 1.0, 8.0}, 1);
         out.add(a);
         NodeModel b = new NodeModel("magnetizerb", OilKit.PAINT_200V);
         List<List<Mesh>> lb = new ArrayList<>();
