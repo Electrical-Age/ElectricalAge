@@ -39,6 +39,7 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
         float counter = 0;
         float itemCounter = 0;
         final RcInterpolator interpolator = new RcInterpolator(0.5f);
+        final mods.eln.anim.Emitter sparks = new mods.eln.anim.Emitter();
     }
 
     @Override
@@ -53,8 +54,11 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
         main.draw();
         rot.draw(handle.counter, 0f, 0f, 1f);
 
+        // the piece being magnetised (Baughn 2026-11-07: more than a turning item) lifts off its seat in the field and
+        // spins up as it charges (refresh), sparks crackling round it
+        float lift = 0.04f * mods.eln.anim.ItemMotion.ease(render == null ? 0 : render.progress.shown(), 0, 0.3f);
         GL11.glScalef(0.5f, 0.5f, 0.5f);
-        UtilsClient.drawEntityItem(inEntity, inX / 0.5f, inY / 0.5f, inZ / 0.5f, handle.itemCounter, 1f);
+        UtilsClient.drawEntityItem(inEntity, inX / 0.5f, (inY + lift) / 0.5f, inZ / 0.5f, handle.itemCounter, 1f);
     }
     @Override
     void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity, float powerFactor, float processState) {
@@ -64,8 +68,17 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
         handle.counter += deltaT * handle.interpolator.get() * 360;
         while (handle.counter >= 360f) handle.counter -= 360;
 
-        handle.itemCounter += deltaT * 90;
+        float p = render == null ? 0 : render.progress.shown();
+        handle.itemCounter += deltaT * (90 + 630 * p * p);   // (a quarter turn a second at rest, two at the end)
         while (handle.itemCounter >= 360f) handle.itemCounter -= 360;
+        int n = handle.sparks.step(deltaT, p > 0 ? 3 + 9 * p : 0);
+        var level = render.tileEntity.getLevel();
+        if (n > 0 && level != null && inEntity != null && !inEntity.getItem().isEmpty()) {
+            var at = mods.eln.anim.Emitter.vent(render.tileEntity.getBlockPos(), render.front, inX, inY + 0.12, inZ);
+            for (int i = 0; i < n; i++)
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+                    at.x + (Math.random() - 0.5) * 0.3, at.y + (Math.random() - 0.5) * 0.2, at.z + (Math.random() - 0.5) * 0.3, 0, 0, 0);
+        }
     }
     @Override
     public boolean drawCable() {

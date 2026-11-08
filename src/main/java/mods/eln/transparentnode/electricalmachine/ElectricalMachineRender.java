@@ -30,6 +30,8 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
     private float processStatePerSecond;
 
     float UFactor;
+    /** The job's progress, run on between publishes and eased for drawing items in process (mods.eln.anim). */
+    public final mods.eln.anim.Progress progress = new mods.eln.anim.Progress();
     /** A basin's fill (0..1; the oil separator's crude tank), if its descriptor publishes one. */
     public float basin;
 
@@ -70,6 +72,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
         super.refresh(deltaT);
         processState += processStatePerSecond * deltaT;
         if (processState > 1f) processState = 1f;
+        progress.step(deltaT);
         descriptor.refresh(deltaT, this, drawHandle, inEntity, outEntity, powerFactor, processState);
     }
 
@@ -88,6 +91,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
             outEntity = unserializeItemStackToEntityItem(stream, outEntity);
             processState = stream.readFloat();
             processStatePerSecond = stream.readFloat();
+            progress.set(processState, processStatePerSecond);
             eConn.deserialize(stream);
             UFactor = stream.readFloat();
             if (descriptor.publishesBasin()) basin = stream.readFloat();

@@ -131,6 +131,7 @@ public final class LabCommands {
                 .then(Commands.literal("wiredrawing").executes(c -> demo(c.getSource(), () -> wiredrawing(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cores").executes(c -> demo(c.getSource(), () -> cores(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("rubber").executes(c -> demo(c.getSource(), () -> rubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("itemanim").executes(c -> demo(c.getSource(), () -> itemAnim(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cracker").executes(c -> demo(c.getSource(), () -> cracker(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("oilrubber").executes(c -> demo(c.getSource(), () -> oilRubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("latex").executes(c -> demo(c.getSource(), () -> latex(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -707,6 +708,32 @@ public final class LabCommands {
         return 1;
     }
 
+    /**
+     * The four electrical machines at work, 230V in a row along +x and 48V in a row 5 blocks along +z, each powered and
+     * with a stack in its input (iron ore, coal dust, iron ingots, copper ingots): their items in process (todo #278).
+     */
+    static int itemAnim(CommandSourceStack src, BlockPos pos) {
+        String[] kinds = {"Macerator", "Compressor", "Magnetizer", "Plate Machine"};
+        net.minecraft.world.item.ItemStack[] inputs = {new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_ORE, 64),
+            mods.eln.Eln.findItemStack("Coal Dust", 64), new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 64),
+            new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COPPER_INGOT, 64)};
+        for (int row = 0; row < 2; row++) {
+            String tier = row == 0 ? "230V " : "48V ";
+            String[] names = new String[kinds.length];
+            for (int i = 0; i < kinds.length; i++) names[i] = tier + kinds[i];
+            BlockPos rp = pos.offset(0, 0, 5 * row);
+            furnaceRigs(src, rp, "item animations " + tier.trim(), names, new float[kinds.length]);
+            for (int i = 0; i < kinds.length; i++) {
+                var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(rp.offset(5 * i, 0, 0), src.getLevel()));
+                if (n instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof mods.eln.transparentnode.electricalmachine.ElectricalMachineElement m) {
+                    m.getInventory().setItem(m.inSlotId, inputs[i].copy());
+                    m.getInventory().setChanged();
+                }
+            }
+        }
+        return 1;
+    }
+
     /** Where a click on a device's port lands (world coordinates), from its spot (FluidPort.at) on its face. */
     static net.minecraft.world.phys.Vec3 portHit(BlockPos dev, mods.eln.sim.fluid.FluidDevice.FluidPort p) {
         var f = net.minecraft.core.Direction.from3DDataValue(p.face());
@@ -842,13 +869,13 @@ public final class LabCommands {
                     break;
                 }
             if (side == null) throw new IllegalStateException("no power side on " + names[i]);
-            boolean hv = e instanceof mods.eln.transparentnode.steamcracker.SteamCrackerElement;
-            host(level, player, hv ? 12 + (32 << 6) : 8 + (32 << 6), step(p, side));   // a Medium (High) Voltage Cable
+            boolean hv = e instanceof mods.eln.transparentnode.steamcracker.SteamCrackerElement, lv = names[i].startsWith("48V");
+            host(level, player, hv ? 12 + (32 << 6) : lv ? 4 + (32 << 6) : 8 + (32 << 6), step(p, side));   // a Low/Medium/High Voltage Cable
             var feed = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, step(step(p, side), side));
             orient(feed, l -> l, side.getInverse());
             feed.networkUnserialize(packet(o -> {
                 o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                o.writeFloat((float) (hv ? mods.eln.Eln.HVU : mods.eln.Eln.MVU));
+                o.writeFloat((float) (hv ? mods.eln.Eln.HVU : lv ? mods.eln.Eln.LVU : mods.eln.Eln.MVU));
             }));
             if (e instanceof mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement f) {
                 f.getInventory().setItem(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.heatingCorpSlotId,

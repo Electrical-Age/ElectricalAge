@@ -47,6 +47,8 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
     class CompressorDescriptorHandle {
         final RcInterpolator interpolator = new RcInterpolator(0.25f);
         float itemCounter = 0f;
+        /** The piece's turn when the ram met it: it stops turning while pressed. */
+        float pressedAt = 0f;
     }
 
     @Override
@@ -69,11 +71,17 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
               float powerFactor, float processState) {
         CompressorDescriptorHandle handle = (CompressorDescriptorHandle) handleO;
 
-        UtilsClient.drawEntityItem(inEntity, inX, inY, inZ, handle.itemCounter, 1f);
+        // the piece on the die squashes under the ram as it comes down (Baughn 2026-11-07: more than a turning item):
+        // flatter and wider with the ram's travel, still while pressed; it springs back as the ram lifts for the next
+        float ram = (float) Math.sqrt(Math.max(0, handle.interpolator.get()));
+        float squash = mods.eln.anim.ItemMotion.ease(ram, 0.15f, 1);
+        float sy = 1 - 0.7f * squash, sxz = 1 + 0.35f * squash;
+        float turn = squash > 0.01f ? handle.pressedAt : handle.itemCounter;
+        mods.eln.anim.ItemMotion.draw(inEntity, inX, inY, inZ, turn, sxz, sy, sxz);
         UtilsClient.drawEntityItem(outEntity, outX, outY, outZ, -handle.itemCounter + 139f, 1f);
 
         main.draw();
-        GL11.glTranslatef(0f, tyOff + (float) Math.sqrt(handle.interpolator.get()) * (tyOn - tyOff), 0f);
+        GL11.glTranslatef(0f, tyOff + ram * (tyOn - tyOff), 0f);
         move.draw();
     }
     @Override
@@ -82,8 +90,11 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
         handle.interpolator.setTarget(processState);
         handle.interpolator.step(deltaT);
 
-        handle.itemCounter += deltaT * 90;
-        while (handle.itemCounter >= 360f) handle.itemCounter -= 360;
+        if (Math.sqrt(Math.max(0, handle.interpolator.get())) < 0.15) {   // (free: it turns; under the ram: held)
+            handle.itemCounter += deltaT * 90;
+            while (handle.itemCounter >= 360f) handle.itemCounter -= 360;
+            handle.pressedAt = handle.itemCounter;
+        }
     }
     @Override
     public boolean powerLrdu(Direction side, Direction front) {

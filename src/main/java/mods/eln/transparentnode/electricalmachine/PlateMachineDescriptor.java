@@ -40,7 +40,11 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
             }
         }
         initLeds(obj);
+        if (rot1 != null && rot1.getFloat("originX") != 0) rollX = rot1.getFloat("originX");
     }
+
+    /** The work rolls' x (rot1's .txt origin), where a piece passing through is flattened; null: flattened with progress. */
+    private Float rollX;
 
     class PlateMachineDescriptorHandle {
         float counter = 0;
@@ -63,7 +67,16 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
         if (rot3 != null) rot3.draw(handle.counter * rot3.getFloat("ratio"), 0f, 0f, 1f);
         if (rot4 != null) rot4.draw(handle.counter * rot4.getFloat("ratio"), 0f, 0f, -1f);
 
-        UtilsClient.drawEntityItem(inEntity, inX, inY, inZ, handle.itemCounter, 1f);
+        // the piece being rolled (Baughn 2026-11-07: more than a turning item): it runs from the entry table through the
+        // rolls toward the exit table as the job goes on, flattened and drawn out where it has passed the roll gap
+        float p = render == null ? 0 : render.progress.shown();
+        if (p <= 0) UtilsClient.drawEntityItem(inEntity, inX, inY, inZ, handle.itemCounter, 1f);
+        else {
+            float x = mods.eln.anim.ItemMotion.lerp(inX, outX, mods.eln.anim.ItemMotion.ease(p, 0.05f, 0.95f));
+            float rolled = rollX == null ? p : mods.eln.anim.ItemMotion.ease(x, rollX - 0.06f, rollX + 0.06f);
+            float z = mods.eln.anim.ItemMotion.lerp(inZ, outZ, mods.eln.anim.ItemMotion.ease(p, 0.05f, 0.95f));
+            mods.eln.anim.ItemMotion.draw(inEntity, x, inY, z, 0, 1 + 0.5f * rolled, 1 - 0.7f * rolled, 1);
+        }
         UtilsClient.drawEntityItem(outEntity, outX, outY, outZ, -handle.itemCounter + 139f, 1f);
     }
     @Override

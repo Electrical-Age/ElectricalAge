@@ -32,7 +32,13 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
             if (belt != null) belt.mark = obj.getPart("beltmark");
         }
         initLeds(obj);
+        if (rot1 != null) sinkY = Math.min(IN_Y, (rot1.getFloat("originY") + 0.06f) / 0.7f);
     }
+
+    /** Where the piece being ground is drawn (in the 0.7-scaled item frame): its start in the hopper, and how far it
+     *  sinks, to just over the rollers' axis (rot1's .txt origin). */
+    static final float IN_Y = 0.4f;
+    float sinkY = 0.05f;
 
     class MaceratorDescriptorHandle {
         float counter = 0, itemCounter = 0, soulsDue = 0;
@@ -55,9 +61,15 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
         rot2.draw(handle.counter, 0f, 0f, 1f);
         if (belt != null) belt.draw(handle.counter, handle.belt);
 
-        //UtilsClient.enableDepthTest();
         GL11.glScalef(0.7f, 0.7f, 0.7f);
-        UtilsClient.drawEntityItem(inEntity, 0.0, 0.4f, 0f, handle.itemCounter, 1f);
+        // the piece being ground (Baughn 2026-11-07: more than a turning item): it sinks from the hopper toward the
+        // rollers as the job goes on, shrinking as it's broken up, and rattles while they turn
+        float p = render == null ? 0 : render.progress.shown();
+        float y = mods.eln.anim.ItemMotion.lerp(IN_Y, sinkY, mods.eln.anim.ItemMotion.ease(p, 0, 0.8f));
+        float size = mods.eln.anim.ItemMotion.lerp(1, 0.3f, mods.eln.anim.ItemMotion.ease(p, 0.25f, 1));
+        float amp = 0.035f * Math.min(1, handle.interpolator.get() * 2) * (p > 0 ? 1 : 0);
+        mods.eln.anim.ItemMotion.draw(inEntity, mods.eln.anim.ItemMotion.shake(handle.counter, amp, 0), y,
+            mods.eln.anim.ItemMotion.shake(handle.counter, amp, 1), handle.itemCounter, size, size, size);
         UtilsClient.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.itemCounter, 1f);
     }
     @Override
