@@ -20,7 +20,6 @@ import java.io.IOException;
 public class ElectricalSensorRender extends SixNodeElementRender {
 
     ElectricalSensorDescriptor descriptor;
-    long time;
 
     int typeOfSensor = 0;
     float lowValue = 0, highValue = 50;
@@ -29,7 +28,6 @@ public class ElectricalSensorRender extends SixNodeElementRender {
     public ElectricalSensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalSensorDescriptor) descriptor;
-        time = System.currentTimeMillis();
     }
 
     @Override

@@ -49,6 +49,13 @@ public final class Travel {
         return (float) (smooth != null ? smooth.get() : spring.get());
     }
 
+    /** Jump to v (the target unchanged; a meter's published position). */
+    public Travel set(double v) {
+        if (smooth != null) smooth.set(v);
+        else spring.setPos((float) v);
+        return this;
+    }
+
     /** Jump to the target (a device seen for the first time shows its state, not a swing to it). */
     public Travel snap() {
         if (smooth != null) smooth.snap();

@@ -24,7 +24,6 @@ import java.io.IOException;
 public class ThermalSensorRender extends SixNodeElementRender {
 
     ThermalSensorDescriptor descriptor;
-    long time;
 
     LRDU front;
 
@@ -37,7 +36,6 @@ public class ThermalSensorRender extends SixNodeElementRender {
     public ThermalSensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (ThermalSensorDescriptor) descriptor;
-        time = System.currentTimeMillis();
     }
 
     @Override

@@ -17,7 +17,6 @@ import java.io.IOException;
 public class ElectricalTimeoutRender extends SixNodeElementRender {
 
     ElectricalTimeoutDescriptor descriptor;
-    long time;
 
     float timeoutValue = 0, timeoutCounter = 0;
     boolean inputState;
@@ -25,7 +24,6 @@ public class ElectricalTimeoutRender extends SixNodeElementRender {
     public ElectricalTimeoutRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalTimeoutDescriptor) descriptor;
-        time = System.currentTimeMillis();
     }
 
     //PhysicalInterpolator interpolator = new PhysicalInterpolator(0.2f, 2.0f, 1.5f, 0.2f);

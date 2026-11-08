@@ -8,7 +8,6 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.RcInterpolator;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
@@ -23,7 +22,8 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
 
     LRDU front;
 
-    RcInterpolator interpolator;
+    /** The lever or knob following the output (0..1 of the signal range), easing at the render's speed. */
+    mods.eln.anim.Travel interpolator;
 
     float voltageSyncValue = 0;
     boolean voltageSyncNew = false;
@@ -32,7 +32,7 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
     public ElectricalGateSourceRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalGateSourceDescriptor) descriptor;
-        interpolator = new RcInterpolator(this.descriptor.render.speed);
+        interpolator = mods.eln.anim.Travel.smooth(this.descriptor.render.speed);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
 
     @Override
     public void refresh(float deltaT) {
-        interpolator.setTarget((float) (voltageSyncValue / Eln.SVU));
+        interpolator.target(voltageSyncValue / Eln.SVU);
         interpolator.step(deltaT);
     }
 
@@ -70,7 +70,7 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
 
             if (boot) {
                 boot = false;
-                interpolator.setValue((float) (voltageSyncValue / Eln.SVU));
+                interpolator.set(voltageSyncValue / Eln.SVU);
             }
         } catch (IOException e) {
             e.printStackTrace();

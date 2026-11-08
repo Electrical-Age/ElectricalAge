@@ -19,7 +19,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
     ElectricalBreakerDescriptor descriptor;
     long time;
 
-    RcInterpolator interpol;
+    mods.eln.anim.Travel interpol;
 
     float uMin, uMax, tripAmps;
 
@@ -33,7 +33,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalBreakerDescriptor) descriptor;
         time = System.currentTimeMillis();
-        interpol = new RcInterpolator(this.descriptor.speed);
+        interpol = mods.eln.anim.Travel.smooth(this.descriptor.speed);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 
     @Override
     public void refresh(float deltaT) {
-        interpol.setTarget(switchState ? 1f : 0f);
+        interpol.to(switchState);
         interpol.step(deltaT);
     }
 
@@ -76,7 +76,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
         }
 
         if (boot) {
-            interpol.setValue(switchState ? 1f : 0f);
+            interpol.to(switchState).snap();
         }
         boot = false;
     }

@@ -8,7 +8,6 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
@@ -20,7 +19,8 @@ public class ElectricalVuMeterRender extends SixNodeElementRender {
 
     ElectricalVuMeterDescriptor descriptor;
 
-    PhysicalInterpolator interpolator;
+    /** The needle on a damped spring: it overshoots a little and settles. */
+    mods.eln.anim.Travel interpolator;
     float factor;
     LRDU front;
 
@@ -29,7 +29,7 @@ public class ElectricalVuMeterRender extends SixNodeElementRender {
     public ElectricalVuMeterRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalVuMeterDescriptor) descriptor;
-        interpolator = new PhysicalInterpolator(0.4f, 2.0f, 1.5f, 0.2f);
+        interpolator = mods.eln.anim.Travel.spring(0.4f, 2.0f, 1.5f, 0.2f);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class ElectricalVuMeterRender extends SixNodeElementRender {
             front.right().glRotateOnX();
         }
 
-        descriptor.draw(descriptor.onOffOnly ? interpolator.getTarget() : interpolator.get(), UtilsClient.distanceFromClientPlayer(tileEntity), tileEntity);
+        descriptor.draw(descriptor.onOffOnly ? (float) interpolator.target() : interpolator.get(), UtilsClient.distanceFromClientPlayer(tileEntity), tileEntity);
     }
 
     @Override
@@ -62,9 +62,9 @@ public class ElectricalVuMeterRender extends SixNodeElementRender {
             b = stream.readByte();
             front = LRDU.fromInt((b >> 4) & 3);
             if (boot) {
-                interpolator.setPos(stream.readFloat());
+                interpolator.set(stream.readFloat());
             } else {
-                interpolator.setTarget(stream.readFloat());
+                interpolator.target(stream.readFloat());
             }
         } catch (IOException e) {
             e.printStackTrace();

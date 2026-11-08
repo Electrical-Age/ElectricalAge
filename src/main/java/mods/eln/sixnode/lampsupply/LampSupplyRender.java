@@ -20,7 +20,8 @@ public class LampSupplyRender extends SixNodeElementRender {
     LampSupplyDescriptor descriptor;
 
     Coordonate coord;
-    PhysicalInterpolator interpolator;
+    /** The window, opening on a spring when a player is near. */
+    mods.eln.anim.Travel interpolator;
 
     public ArrayList<LampSupplyElement.Entry> entries = new ArrayList<LampSupplyElement.Entry>();
 
@@ -31,7 +32,7 @@ public class LampSupplyRender extends SixNodeElementRender {
     public LampSupplyRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (LampSupplyDescriptor) descriptor;
-        interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
+        interpolator = mods.eln.anim.Travel.spring(0.4f, 8.0f, 0.9f, 0.2f);
         coord = new Coordonate(tileEntity);
         for (int i = 0; i < ((LampSupplyDescriptor) descriptor).channelCount; i++) {
             entries.add(new LampSupplyElement.Entry("", "", 2));
@@ -55,10 +56,7 @@ public class LampSupplyRender extends SixNodeElementRender {
     }
     @Override
     public void refresh(float deltaT) {
-        if (!Utils.isPlayerAround(tileEntity.getLevel(), coord.getAxisAlignedBB(0)))
-            interpolator.setTarget(0f);
-        else
-            interpolator.setTarget(1f);
+        interpolator.to(Utils.isPlayerAround(tileEntity.getLevel(), coord.getAxisAlignedBB(0)));
 
         interpolator.step(deltaT);
     }

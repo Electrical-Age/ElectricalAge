@@ -37,7 +37,7 @@ public class TransformerRender extends TransparentNodeElementRender {
         });
 
         coordinate = new Coordonate(tileEntity);
-        doorOpen = new PhysicalInterpolator(0.4f, 4.0f, 0.9f, 0.05f);
+        doorOpen = mods.eln.anim.Travel.spring(0.4f, 4.0f, 0.9f, 0.05f);
     }
 
     @Override
@@ -84,7 +84,8 @@ public class TransformerRender extends TransparentNodeElementRender {
     private boolean hasCasing = false;
 
     private final Coordonate coordinate;
-    private final PhysicalInterpolator doorOpen;
+    /** The casing's doors, swinging open on a spring when a player is near. */
+    private final mods.eln.anim.Travel doorOpen;
 
     @Override
     public void networkUnserialize(DataInputStream stream) {
@@ -176,9 +177,9 @@ public class TransformerRender extends TransparentNodeElementRender {
 
         if (hasCasing) {
             if (!Utils.isPlayerAround(tileEntity.getLevel(), coordinate.moved(front).getAxisAlignedBB(0)))
-                doorOpen.setTarget(0f);
+                doorOpen.to(false);
             else
-                doorOpen.setTarget(1f);
+                doorOpen.to(true);
             doorOpen.step(deltaT);
         }
     }

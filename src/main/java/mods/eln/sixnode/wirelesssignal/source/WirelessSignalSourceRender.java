@@ -8,7 +8,6 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.RcInterpolator;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
@@ -21,7 +20,7 @@ public class WirelessSignalSourceRender extends SixNodeElementRender {
 
     WirelessSignalSourceDescriptor descriptor;
 
-    RcInterpolator interpolator;
+    mods.eln.anim.Travel interpolator;
 
     String channel;
     boolean state = false;
@@ -30,7 +29,7 @@ public class WirelessSignalSourceRender extends SixNodeElementRender {
         super(tileEntity, side, descriptor);
         this.descriptor = (WirelessSignalSourceDescriptor) descriptor;
 
-        interpolator = new RcInterpolator(this.descriptor.render.speed);
+        interpolator = mods.eln.anim.Travel.smooth(this.descriptor.render.speed);
     }
 
     @Override
@@ -41,7 +40,7 @@ public class WirelessSignalSourceRender extends SixNodeElementRender {
 
     @Override
     public void refresh(float deltaT) {
-        interpolator.setTarget((float) ((state ? 1 : 0)));
+        interpolator.to(state);
         interpolator.step(deltaT);
     }
 

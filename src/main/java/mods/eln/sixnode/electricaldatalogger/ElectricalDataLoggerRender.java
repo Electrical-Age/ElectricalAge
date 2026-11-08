@@ -19,7 +19,6 @@ import java.io.IOException;
 public class ElectricalDataLoggerRender extends SixNodeElementRender {
 
     ElectricalDataLoggerDescriptor descriptor;
-    long time;
 
     public boolean pause;
 
@@ -29,7 +28,6 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
     public ElectricalDataLoggerRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalDataLoggerDescriptor) descriptor;
-        time = System.currentTimeMillis();
     }
 
     @Override

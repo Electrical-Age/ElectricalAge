@@ -5,7 +5,6 @@ import mods.eln.misc.UtilsClient;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.RcInterpolator;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
@@ -20,7 +19,8 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
 
     double voltageAnode = 0, voltageCatode = 0, current = 0, temperature = 0;
 
-    RcInterpolator interpol;
+    /** The lever between its poses, easing at the descriptor's speed. */
+    mods.eln.anim.Travel interpol;
 
     boolean boot = true;
     float switchAlpha = 0;
@@ -29,7 +29,7 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
     public ElectricalSwitchRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalSwitchDescriptor) descriptor;
-        interpol = new RcInterpolator(this.descriptor.speed);
+        interpol = mods.eln.anim.Travel.smooth(this.descriptor.speed);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
 
     @Override
     public void refresh(float deltaT) {
-        interpol.setTarget(switchState ? 1f : 0f);
+        interpol.to(switchState);
         interpol.step(deltaT);
     }
 
@@ -81,7 +81,7 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
         }
 
         if (boot) {
-            interpol.setValue(switchState ? 1f : 0f);
+            interpol.to(switchState).snap();
         }
         boot = false;
     }

@@ -52,8 +52,11 @@ code on purpose.
 | Wind turbine | rotor (root of the eased power), blade-pass sound, halo | `Smooth`, `Spin`, `Blink` | lib |
 | Water turbine | wheel either way, paddle sound | `Smooth` (direction), `Spin` | lib |
 | Egg incubator | item turntable | constant spin | own |
-| Switches, breaker, relay, signal sources, bus button, VU meter, timeout | levers, contacts, needles | `RcInterpolator`/`PhysicalInterpolator` | own |
-| Transformer, lamp supply, teleporter | doors (player near), gyro | `PhysicalInterpolator` | own |
+| Switches, breaker, relay, signal sources (wired and wireless), bus button | levers, contacts, knobs, button travel | `Travel.smooth` | lib |
+| VU meter | needle | `Travel.spring` | lib |
+| Transformer, lamp supply | casing doors / window opening when a player is near | `Travel.spring` | lib |
+| Timeout | dial running down | client countdown | own |
+| Teleporter | doors (max speed), gyro, blue fades, blinking LEDs | `PhysicalInterpolator`, `RcInterpolator` | own |
 | Compact turbine, steam generator, steam oven, anvil, macerator, flare stack, heat furnaces, carbon black burner | particles | due-accumulators, four copies of the vent rotation | own |
 | Heat furnace, fuel heat furnace | flicker | hand-written | own |
 | Switch, VU meter, gate sources, fire detector, source, lamp supply, entity sensor, emergency lamp, redstone in/out, bus button/light/floor sensor, turret, data logger | LEDs with halos or mixed states | inline | own |

@@ -8,7 +8,6 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.RcInterpolator;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
@@ -21,9 +20,8 @@ import java.io.IOException;
 public class ElectricalRelayRender extends SixNodeElementRender {
 
     ElectricalRelayDescriptor descriptor;
-    long time;
-
-    RcInterpolator interpolator;
+    /** The contacts between their poses, easing at the descriptor's speed. */
+    mods.eln.anim.Travel interpolator;
 
     boolean boot = true;
     float switchAlpha = 0;
@@ -32,8 +30,7 @@ public class ElectricalRelayRender extends SixNodeElementRender {
     public ElectricalRelayRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalRelayDescriptor) descriptor;
-        time = System.currentTimeMillis();
-        interpolator = new RcInterpolator(this.descriptor.speed);
+        interpolator = mods.eln.anim.Travel.smooth(this.descriptor.speed);
     }
 
     @Override
@@ -58,13 +55,13 @@ public class ElectricalRelayRender extends SixNodeElementRender {
             switchState = stream.readBoolean();
             defaultOutput = stream.readBoolean();
 
-            interpolator.setTarget(switchState ? 1f : 0f);
+            interpolator.to(switchState);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         if (boot) {
-            interpolator.setValueFromTarget();
+            interpolator.snap();
         }
         boot = false;
     }
