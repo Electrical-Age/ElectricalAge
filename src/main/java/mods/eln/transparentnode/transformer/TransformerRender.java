@@ -79,6 +79,9 @@ public class TransformerRender extends TransparentNodeElementRender {
     private CableRenderDescriptor priRender;
     private CableRenderDescriptor secRender;
     public boolean isIsolator;
+    /** For its screen: switched on, both sides' voltages, the core's volts a turn, the window used, saturated. */
+    public boolean switchedOn = true, saturated;
+    public float primaryU, secondaryU, coreVoltsPerTurn, windowUsed;
 
     private Obj3DPart feroPart;
     private boolean hasCasing = false;
@@ -130,6 +133,12 @@ public class TransformerRender extends TransparentNodeElementRender {
             secondaryColour = stream.readByte() & 15;
             secondaryTier = stream.readByte();
             window = stream.readFloat();
+            switchedOn = stream.readBoolean();
+            primaryU = stream.readFloat();
+            secondaryU = stream.readFloat();
+            coreVoltsPerTurn = stream.readFloat();
+            windowUsed = stream.readFloat();
+            saturated = stream.readBoolean();
             // (a winding isn't a cable item: its cables join with its tier's look)
             if (priRender == null && primaryTurns > 0) priRender = tierRender(primaryTier);
             if (secRender == null && secondaryTurns > 0) secRender = tierRender(secondaryTier);

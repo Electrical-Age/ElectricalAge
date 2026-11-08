@@ -344,7 +344,7 @@ public class TransformerElement extends TransparentNodeElement {
         double limit = coreLimit(), vpt = voltsPerTurn();
         // (the core's rating is its working flux: it saturates 10 % over it, so a converter wound for 48 V doesn't saturate
         // on a line a volt high, as a real one has headroom)
-        boolean want = !legacy && limit > 0 && burnHeat > 0 && (saturated ? vpt > 1.07 * limit : vpt > SATURATES_AT * limit);
+        boolean want = switchedOn && !legacy && limit > 0 && burnHeat > 0 && (saturated ? vpt > 1.07 * limit : vpt > SATURATES_AT * limit);
         if (dwell > 0) dwell--;
         else if (want != saturated) {
             setSaturated(want);
@@ -370,6 +370,7 @@ public class TransformerElement extends TransparentNodeElement {
         primaryLoad.remove(transformer);
         secondaryLoad.remove(transformer);
 
+        if (!switchedOn) return;   // (off: both windings on their terminals, coupled to nothing)
         if (isIsolator) {
             primaryVoltageSource.connectTo(primaryLoad, null);
             secondaryVoltageSource.connectTo(secondaryLoad, null);
@@ -383,10 +384,66 @@ public class TransformerElement extends TransparentNodeElement {
 
     public void inventoryChange(Container inventory) {
         disconnect();
+        // a winding or the core changed: it comes up switched off, to be checked on its screen first (Baughn 2026-11-08)
+        String k = windingsKey();
+        if (!k.equals(lastWindings)) switchedOn = false;
+        lastWindings = k;
+        applyIsolation();
         computeInventory();
         connect();
         needPublish();
     }
+
+    /**
+     * Switched on: its windings are joined to their terminals (Baughn 2026-11-08: a converter comes up off when placed,
+     * when a winding or the core changes, and after it burns out or is repaired, so a wrong winding doesn't burn it again
+     * at once; its screen shows what it would do first). Saved converters from before this stay on.
+     */
+    public boolean switchedOn = true;
+    String lastWindings = "";
+
+    /** The windings and core as they are (items, counts and their data). */
+    String windingsKey() {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            ItemStack st = inventory.getItem(i);
+            b.append(Utils.isEmpty(st) ? "-" : st.getItem() + "x" + st.getCount() + st.getComponentsPatch()).append(';');
+        }
+        return b.toString();
+    }
+
+    @Override
+    public void readItemStackNBT(net.minecraft.nbt.CompoundTag nbt) {
+        super.readItemStackNBT(nbt);
+        switchedOn = false;   // (placed: off)
+    }
+
+    @Override
+    public void burn(mods.eln.sim.process.destruct.FailureCause cause, mods.eln.sim.process.destruct.Failure.Kind kind) {
+        super.burn(cause, kind);
+        // (burnt, its electrical side is out of the simulation: the components may change now)
+        switchedOn = false;
+        applyIsolation();
+    }
+
+    @Override
+    public void repair() {
+        switchedOn = false;
+        if (isBurnt()) applyIsolation();   // (still out of the simulation until super.repair connects it)
+        super.repair();
+    }
+
+    /** Switch it on (its screen's switch; lab rigs and GameTests). */
+    public void switchOn() {
+        disconnect();
+        switchedOn = true;
+        applyIsolation();
+        computeInventory();
+        connect();
+        needPublish();
+    }
+
+    public static final byte toggleSwitchedOn = 0x2;
 
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
@@ -419,6 +476,14 @@ public class TransformerElement extends TransparentNodeElement {
     @Override
     public byte networkUnserialize(DataInputStream stream) {
         switch (super.networkUnserialize(stream)) {
+            case toggleSwitchedOn:
+                disconnect();
+                switchedOn = !switchedOn;
+                applyIsolation();
+                computeInventory();
+                connect();
+                needPublish();
+                break;
             case toogleIsIsolator:
                 if (!canToggleIsolation()) break;
                 disconnect();
@@ -463,6 +528,13 @@ public class TransformerElement extends TransparentNodeElement {
                 stream.writeByte(w == null ? 0 : w.tier());
             }
             stream.writeFloat((float) window());
+            // its screen: on or off, both sides' voltages, the core's volts a turn and the window used
+            stream.writeBoolean(switchedOn);
+            stream.writeFloat((float) primaryLoad.getU());
+            stream.writeFloat((float) secondaryLoad.getU());
+            stream.writeFloat((float) coreLimit());
+            stream.writeFloat((float) windowUsed());
+            stream.writeBoolean(saturated);
 
         } catch (IOException e) {
 
@@ -474,6 +546,7 @@ public class TransformerElement extends TransparentNodeElement {
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putBoolean("isIsolated", isIsolator);
+        nbt.putBoolean("on", switchedOn);
         nbt.putInt("tierGen", 1);
         if (legacy) nbt.putString("legacyCore", legacyKey);
     }
@@ -482,8 +555,11 @@ public class TransformerElement extends TransparentNodeElement {
     public void readFromNBT(CompoundTag nbt) {
         // (isolation first: its two sources must be in the component list when the base reads their saved states)
         isIsolator = nbt.getBooleanOr("isIsolated", false) || !canToggleIsolation();
+        switchedOn = nbt.getBooleanOr("on", true);
         applyIsolation();
         super.readFromNBT(nbt);
+        switchedOn = nbt.getBooleanOr("on", true);
+        lastWindings = windingsKey();
         if (nbt.getIntOr("tierGen", 0) < 1) {
             rewindForRealVoltages();
             legacy = true;

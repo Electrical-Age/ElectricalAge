@@ -97,6 +97,7 @@ public final class Wp10aCases {
         cases.add(new TransformerSaturatesCase());
         cases.add(new TransformerLegacyCase());
         cases.add(new TransformerWindingCase());
+        cases.add(new ConverterSwitchCase());
         cases.add(new VariableTransformerCase());
         cases.add(new CapacitorCase());
         cases.add(new InductorCase());
@@ -922,7 +923,7 @@ public final class Wp10aCases {
             ItemStack c = shared(CORE_CHEAP, FerromagneticCoreDescriptor.class, 1);
             core = !c.isEmpty();
             if (core) tr.getInventory().setItem(TransformerContainer.ferromagneticSlotId, c);
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
         }
 
         public void measure(TestContext ctx) {
@@ -958,7 +959,7 @@ public final class Wp10aCases {
             super.build(ctx);
             tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(2));
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(1));
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
             Eln.simulator.addSlowProcess(watch = dt -> sawSaturated |= tr.saturated);
         }
 
@@ -1004,14 +1005,14 @@ public final class Wp10aCases {
             nbt.remove("tierGen");   // as saved by an older EA
             tr.readFromNBT(nbt);
             legacyAfterLoad = tr.legacy;
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
             Eln.simulator.addSlowProcess(watch = dt -> {
                 tick++;
                 if (tick < 150) saturatedAsLegacy |= tr.saturated;
                 if (tick == 150) {   // a player rewinds it: as any converter now (14:7 is within the cheap core)
                     tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(14));
                     tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(7));
-                    tr.getInventory().setChanged();
+                    tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
                 }
                 if (tick == 160) legacyAfterEdit = tr.legacy;
             });
@@ -1048,7 +1049,7 @@ public final class Wp10aCases {
             super.build(ctx);
             tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, mods.eln.node.voxel.WindingItem.make(1, LV_WIRE, 20));
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, mods.eln.node.voxel.WindingItem.make(1, LV_WIRE, 10));
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
         }
 
         @Override
@@ -1063,20 +1064,80 @@ public final class Wp10aCases {
             ctx.check("converter: a winding's resistance is its wire's", Math.abs(rs - want) < 1e-9 + 1e-6 * want, rs + " vs " + want);
             ctx.check("converter: 20:10 of 2.5 mm² fits a cheap core", !tr.windowFull(), "");
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, mods.eln.node.voxel.WindingItem.make(1, LV_WIRE, 100));
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
             ctx.check("converter: 20:100 of 2.5 mm² overfills a cheap core", tr.windowFull(), "");
             ctx.check("converter: ... and it disconnects", tr.getElectricalLoad(tr.front.right(), mods.eln.misc.LRDU.Down) == null, "");
             // cables are held to the window too (Baughn: they disconnect until corrected)
             tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(64));
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(64));
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
             ctx.check("converter: 64:64 LV cables (320 mm² turns) overfill a cheap core and disconnect", tr.windowFull()
                 && tr.getElectricalLoad(tr.front.right(), mods.eln.misc.LRDU.Down) == null, "");
             tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(14));
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(7));
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
             ctx.check("converter: ... and reconnect when corrected (14:7)", !tr.windowFull()
                 && tr.getElectricalLoad(tr.front.right(), mods.eln.misc.LRDU.Down) != null, "");
+        }
+    }
+
+    /**
+     * Baughn 2026-11-08: a converter comes up switched off when a winding changes: its primary terminal is live (48 V), its
+     * secondary dead, the windings coupled to nothing. Switched on, they're coupled. Burnt and repaired, it's off again.
+     * Its windings are hand-wound ones (HandWindingRecipe: Copper Cable and leather or rubber, 8 turns a cable, 1.5 mm²,
+     * 230 V, up to 64 turns; windings of one wire combine).
+     */
+    static class ConverterSwitchCase extends TransformerCase {
+        String recipes = "";
+
+        @Override
+        public String name() {
+            return "wp10a converter comes up off; hand windings";
+        }
+
+        static net.minecraft.world.item.crafting.CraftingInput grid(ItemStack... items) {
+            return net.minecraft.world.item.crafting.CraftingInput.of(3, 3, java.util.Arrays.asList(java.util.Arrays.copyOf(
+                java.util.Arrays.stream(items).toArray(ItemStack[]::new), 9)).stream().map(x -> x == null ? ItemStack.EMPTY : x).toList());
+        }
+
+        @Override
+        public void build(TestContext ctx) {
+            super.build(ctx);
+            var spec = mods.eln.node.voxel.HandWindingRecipe.spec();
+            tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, mods.eln.node.voxel.WindingItem.make(2, spec, 16));
+            tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, mods.eln.node.voxel.WindingItem.make(2, spec, 32));
+            tr.getInventory().setChanged();   // (left off)
+            ItemStack cu = Eln.findItemStack("Copper Cable", 1), leather = new ItemStack(net.minecraft.world.item.Items.LEATHER),
+                rubber = new ItemStack(Eln.itemsByName.get("Rubber"));
+            ItemStack one = mods.eln.node.voxel.HandWindingRecipe.result(grid(cu, leather));
+            ItemStack three = mods.eln.node.voxel.HandWindingRecipe.result(grid(cu, cu, cu, rubber, rubber, leather));
+            ItemStack nine = mods.eln.node.voxel.HandWindingRecipe.result(grid(cu, cu, cu, cu, cu, cu, cu, cu, cu));
+            ItemStack both = mods.eln.node.voxel.HandWindingRecipe.result(grid(one, three));
+            ItemStack odd = mods.eln.node.voxel.HandWindingRecipe.result(grid(one, mods.eln.node.voxel.WindingItem.make(1, LV_WIRE_HAND, 8)));
+            recipes = turns(one) + "," + turns(three) + "," + turns(nine) + "," + turns(both) + "," + turns(odd)
+                + "," + (mods.eln.node.voxel.WindingItem.is(one) ? mods.eln.node.voxel.WindingItem.tier(one) + "/" + mods.eln.node.voxel.WindingItem.spec(one).mm2() : "-");
+        }
+
+        static final mods.eln.node.voxel.CableSpec LV_WIRE_HAND = new mods.eln.node.voxel.CableSpec(4, mods.eln.node.voxel.CableSpec.BROWN);
+
+        static int turns(ItemStack s) {
+            return mods.eln.node.voxel.WindingItem.is(s) ? mods.eln.node.voxel.WindingItem.turns(s) : 0;
+        }
+
+        @Override
+        public void measure(TestContext ctx) {
+            ctx.check("hand windings: a cable and leather wind 8 turns; 3 cables and 3 insulators 24; 9 cables alone nothing;"
+                + " 8 + 24 combine to 32; different wires don't combine; 1.5 mm² at 230 V", recipes.equals("8,24,0,32,0,2/3"), recipes);
+            if (!core) return;
+            ctx.check("converter: a winding changed, it's off", !tr.switchedOn, "");
+            ctx.checkValue("converter: off, its primary terminal is live [V]", loadU(primary), U);
+            ctx.check("converter: off, its secondary is dead", Math.abs(loadU(secondary)) < 1, loadU(secondary) + " V");
+            tr.switchOn();
+            ctx.check("converter: switched on, its windings are coupled", tr.switchedOn && tr.electricalComponentList.contains(field(tr, "transformer")), "");
+            tr.burn(mods.eln.sim.process.destruct.FailureCause.values()[0], mods.eln.sim.process.destruct.Failure.Kind.values()[0]);
+            boolean offBurnt = !tr.switchedOn;
+            tr.repair();
+            ctx.check("converter: burnt, it's off, and still off once repaired", offBurnt && !tr.switchedOn && !tr.isBurnt(), offBurnt + "," + tr.switchedOn);
         }
     }
 
@@ -1142,7 +1203,7 @@ public final class Wp10aCases {
             ItemStack c = shared(CORE_CHEAP, FerromagneticCoreDescriptor.class, 1);
             core = !c.isEmpty();
             if (core) tr.getInventory().setItem(TransformerContainer.ferromagneticSlotId, c);
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
             Eln.simulator.addSlowProcess(watch = dt -> {
                 tick++;
                 if (tick == 100) signal.setU(Eln.SVU);
@@ -1198,12 +1259,12 @@ public final class Wp10aCases {
             // (back to 14:7: 230 V on its LV windings would burn it)
             tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(14));
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(7));
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
             // 64 a side fits
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(64));
             bigS = tr.getInventory().getItem(TransformerContainer.secondaryCableSlotId).getCount();
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(7));
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
         }
 
         @Override
@@ -1245,7 +1306,7 @@ public final class Wp10aCases {
             secondary = l.six(LV_CABLE, off(p, tr.front.right()));
             tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, lvCables(2));
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, lvCables(1));
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
         }
 
         public void measure(TestContext ctx) {
@@ -1258,7 +1319,7 @@ public final class Wp10aCases {
             ItemStack c = shared(CORE_CHEAP, FerromagneticCoreDescriptor.class, 1);
             if (c.isEmpty()) return;
             tr.getInventory().setItem(TransformerContainer.ferromagneticSlotId, c);
-            tr.getInventory().setChanged();
+            tr.getInventory().setChanged();   tr.switchOn();   // (it comes up off: Baughn 2026-11-08)
             ctx.check("wp10a transformer with the core in connects", tr.getConnectionMask(tr.front.left(), mods.eln.misc.LRDU.Down) != 0
                 && tr.getElectricalLoad(tr.front.right(), mods.eln.misc.LRDU.Down) != null, "");
         }

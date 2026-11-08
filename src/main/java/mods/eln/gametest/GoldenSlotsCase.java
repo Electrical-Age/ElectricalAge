@@ -264,6 +264,11 @@ final class GoldenSlotsCase implements TestCase {
                     known.add(name + " slot " + i + " takes 64 turns (1.12: 4; Baughn 2026-11-06)");
                     wantLimit = 64;
                 }
+                // (Baughn 2026-11-08: windings only, from the wire-drawing machine or wound by hand; cables no longer go in)
+                if ("DC-DC Converter".equals(name) && i < 2 && got.isEmpty() && !want.isEmpty()) {
+                    known.add(name + " slot " + i + " takes windings only, no cables (Baughn 2026-11-08)");
+                    want = got;
+                }
                 boolean ok = index == g.get("index").getAsInt() && limit == wantLimit && got.equals(want);
                 slotsAll++;
                 if (ok) slotsOk++;

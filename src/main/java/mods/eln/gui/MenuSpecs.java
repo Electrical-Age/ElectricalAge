@@ -32,10 +32,12 @@ public final class MenuSpecs {
     }
 
     /** The menu of a device descriptor (the closest registered class), or SCREEN_ONLY. Called on both sides. */
-    /** A converter's winding slot: a machine-made winding (Wires stage 4), or an electrical cable, a 1.12 item (one a
-     *  turn) or a cable kit (a block a turn; Baughn 2026-11-07). */
-    static final java.util.function.Predicate<net.minecraft.world.item.ItemStack> WINDING_OR_CABLE = s ->
-        mods.eln.node.voxel.WindingItem.is(s) || mods.eln.node.voxel.CableItems.isElectrical(s);
+    /**
+     * A converter's winding slot takes a winding only: made by a wire-drawing machine, or wound by hand (Baughn
+     * 2026-11-08: cables and kits no longer go in, but those already in a slot stay and still count, a turn a cable item
+     * or a block of kit).
+     */
+    static final java.util.function.Predicate<net.minecraft.world.item.ItemStack> WINDING_OR_CABLE = mods.eln.node.voxel.WindingItem::is;
 
     public static MenuSpec of(Object descriptor) {
         for (Class<?> c = descriptor.getClass(); c != null; c = c.getSuperclass()) {
@@ -238,9 +240,9 @@ public final class MenuSpecs {
         put(mods.eln.transparentnode.transformer.TransformerDescriptor.class, d -> MenuSpec.of(
             // up to 64 turns a side (Baughn 2026-11-06; 1.12: 4), one cable a turn; or one machine-made winding
             SlotSpec.filter(mods.eln.transparentnode.transformer.TransformerContainer.primaryCableSlotId, 58, 30, 64, WINDING_OR_CABLE, MEDIUM,
-                tr("Winding slot: cables (one a turn) or a winding")),
+                tr("Winding slot: a winding (from a wire-drawing machine,"), tr("or wound by hand from Copper Cable and rubber or leather)")),
             SlotSpec.filter(mods.eln.transparentnode.transformer.TransformerContainer.secondaryCableSlotId, 100, 30, 64, WINDING_OR_CABLE, MEDIUM,
-                tr("Winding slot: cables (one a turn) or a winding")),
+                tr("Winding slot: a winding (from a wire-drawing machine,"), tr("or wound by hand from Copper Cable and rubber or leather)")),
             descriptor(mods.eln.transparentnode.transformer.TransformerContainer.ferromagneticSlotId, 58 + (100 - 58) / 2, 30, 1,
                 FerromagneticCoreDescriptor.class, MEDIUM, tr("Ferromagnetic core slot")),
             descriptor(mods.eln.transparentnode.transformer.TransformerContainer.CasingSlotId, 130, 74, 1, CaseItemDescriptor.class,

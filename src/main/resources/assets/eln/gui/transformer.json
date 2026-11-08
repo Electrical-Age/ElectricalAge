@@ -62,6 +62,43 @@
    "fill": true
   },
   {
+   "row": [
+    {
+     "button": "on",
+     "sample": [
+      "Switched off",
+      "Switched on"
+     ],
+     "width": 90
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "text": "onl",
+     "sample": "Check before switching on"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "ratio",
+   "sample": "Turns 1000 : 1000 (x 99.99), core 16 V a turn"
+  },
+  {
+   "text": "expect",
+   "sample": "Off: 9999 V on the primary, the secondary would be 99999 V"
+  },
+  {
+   "text": "vpt",
+   "sample": "Volts a turn 99.9 of 16 (saturates over 17.6)"
+  },
+  {
+   "text": "window",
+   "sample": "Window 999 of 800 mm² turns: too full"
+  },
+  {
    "button": "isolator",
    "sample": [
     "Isolated",
