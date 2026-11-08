@@ -1217,6 +1217,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             'A', findItemStack("Alloy Ingot"),
             'M', findItemStack("Advanced Machine Block"),
             'H', findItemStack("230V Tungsten Heating Corp"));
+        // the Polymeriser: a stirred vessel (a cauldron) on a machine block, an electrical motor driving its agitator
+        addRecipe(findItemStack("Polymeriser", 1),
+            "PCP",
+            "PMP",
+            " E ",
+            'P', findItemStack("Iron Plate"),
+            'C', stack(Items.CAULDRON),
+            'M', findItemStack("Machine Block"),
+            'E', findItemStack("Electrical Motor"));
         addRecipe(findItemStack("Carbon Black Burner", 1),
             " P ",
             "BFB",

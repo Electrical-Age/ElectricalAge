@@ -30,6 +30,8 @@ public final class RubberCases {
         cases.add(new DesulfuriserCase());
         cases.add(new SteamCrackerCase());
         cases.add(new ButadienePipeCase());
+        cases.add(new PolymeriserCase(false));
+        cases.add(new PolymeriserCase(true));
     }
 
     /** Rubber trees (Baughn 2026-11-07): the sapling grows a rubber fig (Ficus elastica); a collector gets 1.5x the old rate on its trunk and
@@ -214,6 +216,50 @@ public final class RubberCases {
             c.check("... the gasoline it cracked left its tank", d.gasolineMb() == 1000 - (int) Math.round(d.cracked()), st);
             c.check("... into 40 % butadiene and 30 % natural gas, held in its OUT tanks", Math.abs(d.butadieneMb() - 128) <= 1 && Math.abs(d.gasMb() - 96) <= 1, st);
             c.check("... and then it waits for steam", d.status().equals("no steam") && !d.running(), st);
+        }
+    }
+
+    /**
+     * The Polymeriser (the oil route), on 230 V with 100 mB of butadiene (as liquid, or the same mass as vapour) and a Soul
+     * Dust: it makes 5 Raw Rubber (20 mB each), the dust initiating 3 more, and then waits for butadiene.
+     */
+    static final class PolymeriserCase implements TestCase {
+        final boolean vapour;
+        mods.eln.transparentnode.polymeriser.PolymeriserElement d;
+
+        PolymeriserCase(boolean vapour) {
+            this.vapour = vapour;
+        }
+
+        public String id() {
+            return vapour ? "polymeriser_vapour" : "polymeriser";
+        }
+
+        public int ticks() {
+            return 700;
+        }
+
+        public void build(TestContext c) {
+            var l = new Wp10aCases.Layout(c, width());
+            d = (mods.eln.transparentnode.polymeriser.PolymeriserElement) l.device(0 + (96 << 6), 3, 1);
+            l.feed(c.at(3, 1, 1), d.front.left(), 8 + (32 << 6), mods.eln.Eln.MVU);
+            int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:butadiene");
+            int gasMb = 1 + (int) Math.ceil(100 * mods.eln.fluid.FluidSpecies.kgPerMb(id, false) / mods.eln.fluid.FluidSpecies.kgPerMb(id, true));
+            d.fillIn(vapour ? new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Butadiene.GAS.get(), gasMb)
+                : new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Butadiene.SOURCE.get(), 100));
+            d.getInventory().setItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.SOUL_SLOT, new ItemStack(ElnRegistry.SOUL_DUST.get()));
+        }
+
+        public void measure(TestContext c) {
+            var inv = d.getInventory();
+            String st = String.format("made %d, butadiene %.1f mB, soul %d, raw rubber %d; %s; %s", d.made(), d.butadieneMb(),
+                inv.getItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.SOUL_SLOT).getCount(),
+                inv.getItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.RUBBER_SLOT).getCount(), d.status(), d.getWaila());
+            c.check("the polymeriser makes 100 mB of butadiene" + (vapour ? " (as vapour)" : "") + " into 5 Raw Rubber", d.made() == 5
+                && inv.getItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.RUBBER_SLOT).is(ElnRegistry.RAW_RUBBER.get()), st);
+            c.check("... using one Soul Dust (good for 8)", inv.getItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.SOUL_SLOT).isEmpty()
+                && st.contains("+3 rubber left"), st);
+            c.check("... and then waits for butadiene", d.status().equals("no butadiene") && d.butadieneMb() < 20, st);
         }
     }
 

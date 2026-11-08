@@ -388,7 +388,8 @@ public final class OilCases {
      * cracker_gasoline_in / cracker_steam_in: a tank's gasoline (or hot steam at 3 bar) into the Steam Cracker's blue C8
      * (H2O) flange on its back, picked by the click as a player would, into that tank only;
      * cracker_butadiene_out / cracker_gas_out: its butadiene (natural gas) out of its red C4H6 (CH4) flange on its front
-     * into a tank, and nothing of the other.
+     * into a tank, and nothing of the other;
+     * polymeriser_in: a tank's butadiene into the Polymeriser's blue IN flange (its back, 4 px up), into its feed.
      */
     /** The 230V compressor (latex ports since 2026-11-07). */
     static final int COMPRESSOR_230 = 4 + (35 << 6);
@@ -402,7 +403,7 @@ public final class OilCases {
     static final class OilOnPipes implements TestCase {
         static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel", "separator_out", "fuel_furnace_in", "fuel_furnace_crude", "fuel_furnace_buckets",
             "compressor_latex_out", "compressor_latex_in", "resin_collector_out", "carbon_burner_in", "desulfuriser_in",
-            "cracker_gasoline_in", "cracker_steam_in", "cracker_butadiene_out", "cracker_gas_out"};
+            "cracker_gasoline_in", "cracker_steam_in", "cracker_butadiene_out", "cracker_gas_out", "polymeriser_in"};
         final String variant;
         mods.eln.node.transparent.TransparentNodeElement west, east;
         mods.eln.oil.TankElement tank;
@@ -595,6 +596,20 @@ public final class OilCases {
                         default -> cracker.fillOut(new net.neoforged.neoforge.fluids.FluidStack(Oil.Cut.NATURALGAS.source.get(), 1000));
                     }
                 }
+                case "polymeriser_in" -> {
+                    tank = tank(ctx, w, XP);
+                    east = ctx.placeTransparent(0 + (96 << 6), e);
+                    east.front = XP;   // (its back, with the IN flange, west)
+                    east.reconnect();
+                    var a = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), w, net.minecraft.core.Direction.EAST);
+                    var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
+                    if (a == null || b == null) err = "ports: " + a + " " + b;
+                    else {
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
+                    }
+                    put(ctx, w, mods.eln.oil.Butadiene.SOURCE.get(), 6000);
+                }
                 case "desulfuriser_in" -> {
                     tank = tank(ctx, w, XP);
                     east = ctx.placeTransparent(0 + (94 << 6), e);
@@ -690,6 +705,10 @@ public final class OilCases {
                     double got = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, gas), wrong = tank.vessel.mass(not);
                     ctx.check("oil on pipes: the steam cracker's " + (gas ? "natural gas went out of its CH4" : "butadiene went out of its C4H6") + " flange into the tank",
                         got > 300 && wrong == 0, String.format("%.0f mB in the tank (other: %.2g kg), cracker %s", got, wrong, west.getWaila()));
+                }
+                case "polymeriser_in" -> {
+                    double in = ((mods.eln.transparentnode.polymeriser.PolymeriserElement) east).butadieneMb();
+                    ctx.check("oil on pipes: the tank's butadiene went into the polymeriser's IN flange", in > 200, String.format("%.0f mB in its feed, %s; tank %s", in, east.getWaila(), tank.getWaila()));
                 }
                 case "desulfuriser_in" -> {
                     int in = ((mods.eln.transparentnode.desulfuriser.DesulfuriserElement) east).inMb();

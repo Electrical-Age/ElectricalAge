@@ -2194,5 +2194,11 @@
   "display": "Steam Cracker",
   "kind": "transparent_node",
   "name": "steam_cracker"
+ },
+ "eln:transparent_node@6144": {
+  "descriptor": "PolymeriserDescriptor",
+  "display": "Polymeriser",
+  "kind": "transparent_node",
+  "name": "polymeriser"
  }
 }

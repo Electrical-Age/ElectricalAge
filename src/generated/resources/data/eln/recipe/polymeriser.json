@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "minecraft:cauldron",
+    "E": "eln:electrical_motor",
+    "M": "eln:machine_block",
+    "P": "eln:iron_plate"
+  },
+  "pattern": [
+    "PCP",
+    "PMP",
+    " E "
+  ],
+  "result": {
+    "id": "eln:polymeriser"
+  }
+}

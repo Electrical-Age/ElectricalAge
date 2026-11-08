@@ -200,3 +200,18 @@ def steam_cracker():
         cv.set(x, 11, c); cv.set(x, 12, RED[2])                                    # OUT flange
     leds(cv, 7, 7)
     return cv
+
+
+# ------------------------------------------------------------------------------- polymeriser
+def polymeriser():
+    """The jacketed reactor, its blue jacket, the motor on top, the tray of rubber crumb at its foot, LEDs."""
+    B = tier_ramp('mv')
+    cv = Canvas(16)
+    box(cv, 1, 13, 13, 1, 3, DARK, bevel=False)                                    # skid
+    sub(cv, lambda c: cylinder(c, 4, 3, 10, 8, STEEL, axis='y'))                   # the vessel
+    sub(cv, lambda c: box(c, 4, 7, 8, 3, 1, B, bevel=False))                       # jacket
+    sub(cv, lambda c: cylinder(c, 6, 0, 3, 4, B, axis='y'))                        # motor
+    for x in range(1, 5):
+        cv.set(x, 12, h('#d6c496'))                                                # rubber crumb
+    leds(cv, 6, 5)
+    return cv

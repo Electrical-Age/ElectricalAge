@@ -52,6 +52,14 @@ public class Wp10aContent implements ElnContent {
         registerCarbonBlackBurner(93);
         registerDesulfuriser(94);
         registerSteamCracker(95);
+        registerPolymeriser(96);
+    }
+
+    /** The Polymeriser (the rubber chain's oil route, 2026-11-07): butadiene and Soul Dust to Raw Rubber, 230 V, 1 kW. Model
+     *  mods.eln.cad.models.Polymeriser. */
+    public static void registerPolymeriser(int id) {
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.transparentnode.polymeriser.PolymeriserDescriptor(
+            TR_NAME(Type.NONE, "Polymeriser"), "polymeriser", MVU, 1000, meduimVoltageCableDescriptor));
     }
 
     /** The Steam Cracker (the rubber chain's oil route, 2026-11-07): gasoline and steam to butadiene and natural gas, 400 V,

@@ -688,8 +688,8 @@ public final class LabCommands {
 
     /**
      * The Steam Cracker (the oil route, P5c) on 400 V: a tank of gasoline piped to its C8 flange, a tank of hot steam
-     * (3 bar, 150 C; it cools) to its H2O flange, its steam tank filled too (4000 mB: 32 s of cracking), and empty tanks
-     * from its C4H6 and CH4 flanges.
+     * (3 bar, 150 C; it cools) to its H2O flange, its steam tank filled too (4000 mB: 32 s of cracking), a Polymeriser fed
+     * from its C4H6 flange (P5d), and an empty tank from its CH4 flange.
      */
     static int cracker(CommandSourceStack src, BlockPos pos) {
         var level = src.getLevel();
@@ -707,7 +707,22 @@ public final class LabCommands {
         String g = tankPiped(src, pos.relative(back, 2).relative(right.getOpposite(), 1), pos, back, portHit(pos, ports.get(0)), 8000, mods.eln.oil.Oil.Cut.GASOLINE.source.get());
         BlockPos stp = pos.relative(back, 2).relative(right, 1);
         String st = tankPiped(src, stp, pos, back, portHit(pos, ports.get(1)), 0);
-        String b = tankPiped(src, pos.relative(frontF, 2).relative(right.getOpposite(), 1), pos, frontF, portHit(pos, ports.get(2)), 0);
+        // the butadiene into a Polymeriser (on 230 V, 16 Soul Dust in it), three blocks out in front, facing the same way
+        BlockPos pp = pos.relative(frontF, 3).relative(right.getOpposite(), 2);
+        furnaceRigs(src, pp, "polymeriser", new String[]{"Polymeriser"}, new float[]{0});
+        String b;
+        var pn = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pp, level));
+        if (pn instanceof mods.eln.node.transparent.TransparentNode ptn && ptn.element instanceof mods.eln.transparentnode.polymeriser.PolymeriserElement pe) {
+            pe.getInventory().setItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.SOUL_SLOT, new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.SOUL_DUST.get(), 16));
+            var pa = mods.eln.node.voxel.PipePlacer.portAtForTests(level, pos, frontF, portHit(pos, ports.get(2)));
+            var pb = mods.eln.node.voxel.PipePlacer.portAtForTests(level, pp, pe.front.back().toEnumFacing());
+            if (pa == null || pb == null) b = "ports " + pa + " " + pb + " (polymeriser front " + pe.front + ")";
+            else {
+                var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, pa, java.util.List.of(), pb);
+                String err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
+                b = err == null ? "piped to the polymeriser at " + pp.toShortString() : err;
+            }
+        } else b = "no polymeriser";
         String ng = tankPiped(src, pos.relative(frontF, 2).relative(right, 1), pos, frontF, portHit(pos, ports.get(3)), 0);
         var server = level.getServer();
         server.schedule(new net.minecraft.server.TickTask(server.getTickCount() + 20, () -> {

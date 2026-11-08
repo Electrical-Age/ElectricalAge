@@ -165,3 +165,4 @@ resincollector230/resincollector230.obj
 carbonblackburner/carbonblackburner.obj
 desulfuriser/desulfuriser.obj
 steamcracker/steamcracker.obj
+polymeriser/polymeriser.obj

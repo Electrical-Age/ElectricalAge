@@ -1,4 +1,4 @@
-// 26.3	2026-11-08T00:21:55.960296937	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-08T03:05:34.944236295	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -242,6 +242,7 @@ b4965ce3977f71a9aa0d7f115ad9fc6106661373 data/eln/advancement/recipes/misc/pid_r
 c15d5c0cc610b6749034d53b6fe5c87c72a784c3 data/eln/advancement/recipes/misc/pink_brush.json
 c22c87bd08ed65c2308e22e1978b06ec035c7d0b data/eln/advancement/recipes/misc/plant_steam_condenser.json
 4a4cb32b42945ddd436f0ebf7fa6ecfff05bbea1 data/eln/advancement/recipes/misc/player_filter.json
+d1f0e9f45023a237aa17e53beb7259176edf4cf9 data/eln/advancement/recipes/misc/polymeriser.json
 af15506bbf1df0708de0892e348079db76cd76b6 data/eln/advancement/recipes/misc/portable_battery.json
 7c8367399d01fd66c86922ca2985f609d7ce06e0 data/eln/advancement/recipes/misc/portable_condensator.json
 d7fea25d78653aba807011d32fe5e574370c8378 data/eln/advancement/recipes/misc/portable_condensator_pack.json
@@ -626,6 +627,7 @@ c5b8082a0f4371b3a9d0d19015a5cb184cc23fcd data/eln/recipe/pid_regulator.json
 c31f1c59279d00c829341217db7ecf75091cf6fa data/eln/recipe/pink_brush.json
 6ea63de7579029a939062d12a7c7930d2b78a4fc data/eln/recipe/plant_steam_condenser.json
 31bea419e6ecfe9febfd542ffead3424dfd77c2b data/eln/recipe/player_filter.json
+7c239492123b6ff4e3c8f7fd285f7b5ecf6a7c03 data/eln/recipe/polymeriser.json
 e98466c835a24561de034c981fcb9142a1a9d70f data/eln/recipe/portable_battery.json
 6e1ebfac271ea15d5682ebba74d6e3f58b01d1ab data/eln/recipe/portable_condensator.json
 621d200d059d3149c77591253af609794fefc0d1 data/eln/recipe/portable_condensator_pack.json
