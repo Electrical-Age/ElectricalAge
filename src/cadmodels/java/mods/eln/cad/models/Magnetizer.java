@@ -29,9 +29,9 @@ public final class Magnetizer {
     private Magnetizer() {
     }
 
-    static void items(NodeModel n, double[] in) {
+    static void items(NodeModel n, double[] in, double size) {
         n.txt.addAll(List.of("o rot", "f inx " + Catalog.fmt(in[0] / 16 - 0.5), "f iny " + Catalog.fmt(in[1] / 16 - 0.5),
-            "f inz " + Catalog.fmt(in[2] / 16 - 0.5)));
+            "f inz " + Catalog.fmt(in[2] / 16 - 0.5), "f insize " + Catalog.fmt(size)));
     }
 
     static void power(List<Mesh> m, double y0) {
@@ -154,7 +154,8 @@ public final class Magnetizer {
         a.part("ledpower", la.get(0));
         a.part("ledrun", la.get(1));
         a.origin("rot", 8.0, AY, 8.0).spin("rot", 'z');
-        items(a, new double[]{8.0, AY, 8.0});
+        // (the item hovers over the drum, small: in its bore, behind the spider and axle, it couldn't be seen, AdventurAgent)
+        items(a, new double[]{8.0, AY + 3.55, 8.0}, 0.6);
         out.add(a);
         NodeModel b = new NodeModel("magnetizerb", OilKit.PAINT_200V);
         List<List<Mesh>> lb = new ArrayList<>();
@@ -163,7 +164,7 @@ public final class Magnetizer {
         b.part("ledpower", lb.get(0));
         b.part("ledrun", lb.get(1));
         b.origin("rot", FX, FY, FZ).spin("rot", 'z');
-        items(b, new double[]{PX, (GAP0 + GAP1) / 2 - 1.0, PZ});
+        items(b, new double[]{PX, (GAP0 + GAP1) / 2 - 1.0, PZ}, 1);
         out.add(b);
         return out;
     }

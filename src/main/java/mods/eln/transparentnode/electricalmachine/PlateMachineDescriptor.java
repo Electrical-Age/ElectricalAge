@@ -46,10 +46,13 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
     /** The work rolls' x (rot1's .txt origin), where a piece passing through is flattened; null: flattened with progress. */
     private Float rollX;
 
+    /** The items' size (blocks across). */
+    static final float ITEM_SIZE = 0.25f;
+
     class PlateMachineDescriptorHandle {
         /** The work rolls: a turn a second at full power, easing over half a second; the 230V's backup rolls at their
-         *  ratio (their own spins: a multiple of a wrapped angle jumped at each wrap); the items a quarter turn a second. */
-        final mods.eln.anim.Spin rolls = new mods.eln.anim.Spin(360, 0.5), items = new mods.eln.anim.Spin(90, 0).speed(1);
+         *  ratio (their own spins: a multiple of a wrapped angle jumped at each wrap); */
+        final mods.eln.anim.Spin rolls = new mods.eln.anim.Spin(360, 0.5);
         final mods.eln.anim.Spin backup3 = new mods.eln.anim.Spin(360 * (rot3 == null ? 1 : rot3.getFloat("ratio")), 0.5),
             backup4 = new mods.eln.anim.Spin(360 * (rot4 == null ? 1 : rot4.getFloat("ratio")), 0.5);
     }
@@ -69,17 +72,17 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
         handle.backup3.draw(rot3, 0f, 0f, 1f);
         handle.backup4.draw(rot4, 0f, 0f, -1f);
 
-        // the piece being rolled (Baughn 2026-11-07: more than a turning item): it runs from the entry table through the
-        // rolls toward the exit table as the job goes on, flattened and drawn out where it has passed the roll gap
+        // the piece being rolled (Baughn 2026-11-07: more than a turning item): it lies on the entry table, runs through
+        // the rolls toward the exit table as the job goes on, and is flattened and drawn out where it has passed the gap;
+        // the plates made lie flat on the exit table. (Flat, the item-frame view: standing plates turned on edge and
+        // through each other, AdventurAgent.)
         float p = render == null ? 0 : render.progress.shown();
-        if (p <= 0) UtilsClient.drawEntityItem(inEntity, inX, inY, inZ, handle.items.deg(), 1f);
-        else {
-            float x = mods.eln.anim.ItemMotion.lerp(inX, outX, mods.eln.anim.ItemMotion.ease(p, 0.05f, 0.95f));
-            float rolled = rollX == null ? p : mods.eln.anim.ItemMotion.ease(x, rollX - 0.06f, rollX + 0.06f);
-            float z = mods.eln.anim.ItemMotion.lerp(inZ, outZ, mods.eln.anim.ItemMotion.ease(p, 0.05f, 0.95f));
-            mods.eln.anim.ItemMotion.draw(inEntity, x, inY, z, 0, 1 + 0.5f * rolled, 1 - 0.7f * rolled, 1);
-        }
-        UtilsClient.drawEntityItem(outEntity, outX, outY, outZ, -handle.items.deg() + 139f, 1f);
+        float t = mods.eln.anim.ItemMotion.ease(p, 0.05f, 0.95f);
+        float x = mods.eln.anim.ItemMotion.lerp(inX, outX, t), z = mods.eln.anim.ItemMotion.lerp(inZ, outZ, t);
+        float rolled = rollX == null ? p : mods.eln.anim.ItemMotion.ease(x, rollX - 0.06f, rollX + 0.06f);
+        if (p < 0.95f || outEntity == null || outEntity.getItem().isEmpty())
+            mods.eln.anim.ItemMotion.drawFlat(inEntity, x, inY, z, 0, ITEM_SIZE, 1 + 0.4f * rolled, 1, 2f - 1.4f * rolled);
+        mods.eln.anim.ItemMotion.drawFlat(outEntity, outX, outY, outZ, 0, ITEM_SIZE, 1.4f, 1, 0.6f);
     }
     @Override
     void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity, float powerFactor, float processState) {
@@ -87,7 +90,6 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
         handle.rolls.speed(powerFactor).step(deltaT);
         handle.backup3.speed(powerFactor).step(deltaT);
         handle.backup4.speed(powerFactor).step(deltaT);
-        handle.items.step(deltaT);
     }
     @Override
     public boolean powerLrdu(Direction side, Direction front) {

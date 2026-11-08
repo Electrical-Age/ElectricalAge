@@ -16,7 +16,7 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
     private Obj3DPart main;
     private Obj3DPart rot;
     /** Where the item is drawn (block units from the centre; the restyled models' rot.txt says, 2026-11-07). */
-    private float inX = 0f, inY = 0.125f, inZ = 0f;
+    private float inX = 0f, inY = 0.125f, inZ = 0f, inSize = 1f;
 
     public MagnetizerDescriptor(String name, Obj3D obj, double nominalU, double nominalP, double maximalU,
                                 ThermalLoadInitializer thermal, ElectricalCableDescriptor cable, RecipesList recipe) {
@@ -29,6 +29,7 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
                 inX = rot.getFloat("inx");
                 inY = rot.getFloat("iny");
                 inZ = rot.getFloat("inz");
+                if (rot.getFloat("insize") > 0) inSize = rot.getFloat("insize");
             }
         }
         initLeds(obj);
@@ -56,7 +57,7 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
         // spins up as it charges (refresh), sparks crackling round it
         float lift = 0.04f * mods.eln.anim.ItemMotion.ease(render == null ? 0 : render.progress.shown(), 0, 0.3f);
         GL11.glScalef(0.5f, 0.5f, 0.5f);
-        UtilsClient.drawEntityItem(inEntity, inX / 0.5f, (inY + lift) / 0.5f, inZ / 0.5f, handle.item.deg(), 1f);
+        UtilsClient.drawEntityItem(inEntity, inX / 0.5f, (inY + lift) / 0.5f, inZ / 0.5f, handle.item.deg(), inSize);
     }
     @Override
     void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity, float powerFactor, float processState) {
@@ -65,13 +66,13 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
 
         float p = render == null ? 0 : render.progress.shown();
         handle.item.speed(90 + 630 * p * p).step(deltaT);   // (a quarter turn a second at rest, two at the end)
-        int n = handle.sparks.step(deltaT, p > 0 ? 3 + 9 * p : 0);
+        int n = handle.sparks.step(deltaT, p > 0 ? 1.5 + 3.5 * p : 0);   // (AdventurAgent: many big sparks hid the item)
         var level = render.tileEntity.getLevel();
         if (n > 0 && level != null && inEntity != null && !inEntity.getItem().isEmpty()) {
             var at = mods.eln.anim.Emitter.vent(render.tileEntity.getBlockPos(), render.front, inX, inY + 0.12, inZ);
             for (int i = 0; i < n; i++)
                 level.addParticle(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
-                    at.x + (Math.random() - 0.5) * 0.3, at.y + (Math.random() - 0.5) * 0.2, at.z + (Math.random() - 0.5) * 0.3, 0, 0, 0);
+                    at.x + (Math.random() - 0.5) * 0.4, at.y + (Math.random() - 0.5) * 0.25, at.z + (Math.random() - 0.5) * 0.4, 0, 0, 0);
         }
     }
     @Override

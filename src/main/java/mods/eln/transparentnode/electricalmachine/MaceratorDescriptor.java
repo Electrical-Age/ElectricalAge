@@ -39,11 +39,15 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
      *  sinks, to just over the rollers' axis (rot1's .txt origin). */
     static final float IN_Y = 0.4f;
     float sinkY = 0.05f;
+    /** How long a new piece takes to drop in (s). */
+    static final float ENTRY_S = 0.35f;
 
     class MaceratorDescriptorHandle {
         /** The rollers: half a turn a second at full power, easing over half a second; the items a quarter turn a second. */
         final mods.eln.anim.Spin rollers = new mods.eln.anim.Spin(180, 0.5), items = new mods.eln.anim.Spin(90, 0).speed(1);
         final mods.eln.anim.Emitter souls = new mods.eln.anim.Emitter();
+        /** Seconds since the current piece went in (a new job), and the progress last frame. */
+        float entered = ENTRY_S, lastP;
         final mods.eln.anim.Belt.Run belt = new mods.eln.anim.Belt.Run();
     }
 
@@ -66,7 +70,9 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
         // the piece being ground (Baughn 2026-11-07: more than a turning item): it sinks from the hopper toward the
         // rollers as the job goes on, shrinking as it's broken up, and rattles while they turn
         float p = render == null ? 0 : render.progress.shown();
-        float y = mods.eln.anim.ItemMotion.lerp(IN_Y, sinkY, mods.eln.anim.ItemMotion.ease(p, 0, 0.8f));
+        // (a new piece drops in from the hopper's mouth: AdventurAgent saw it pop in at full size)
+        float drop = 0.3f * (1 - mods.eln.anim.ItemMotion.ease(handle.entered, 0, ENTRY_S));
+        float y = mods.eln.anim.ItemMotion.lerp(IN_Y, sinkY, mods.eln.anim.ItemMotion.ease(p, 0, 0.8f)) + drop;
         float size = mods.eln.anim.ItemMotion.lerp(1, 0.3f, mods.eln.anim.ItemMotion.ease(p, 0.25f, 1));
         float amp = 0.035f * Math.min(1, handle.rollers.speedNow() * 2) * (p > 0 ? 1 : 0);
         mods.eln.anim.ItemMotion.draw(inEntity, mods.eln.anim.ItemMotion.shake(handle.rollers.deg(), amp, 0), y,
@@ -80,6 +86,10 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
 
         handle.rollers.speed(powerFactor).step(deltaT);
         handle.items.step(deltaT);
+        float shown = render.progress.shown();
+        if (shown < handle.lastP - 0.3f) handle.entered = 0;   // (the progress started over: the next piece)
+        handle.entered = Math.min(ENTRY_S, handle.entered + deltaT);
+        handle.lastP = shown;
 
         // souls rise from the hopper while it grinds soul sand or soul soil (Baughn 2026-11-07)
         boolean grinding = inEntity != null && isSoulBlock(inEntity.getItem()) && handle.rollers.speedNow() > 0.1f;

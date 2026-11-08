@@ -188,9 +188,10 @@ public final class Compressor {
 
     static List<Mesh> ramB() {
         List<Mesh> m = new ArrayList<>();
-        m.add(box(2.2, 9.0, 3.0, 10.8, 10.4, 13.0, "paint"));                                         // platen (down: 7)
-        m.add(box(2.4, 8.6, 5.5, 10.6, 9.0, 10.5, "darksteel"));                                       // its face
-        m.add(prism('y', 6.5, 8.0, 1.0, 10.4, 14.5, "steel", 12));                                    // piston rod
+        // (its face comes down exactly onto the die's top, 7: it went 0.4 px into the die, and the item on it was hidden)
+        m.add(box(2.2, 9.4, 3.0, 10.8, 10.8, 13.0, "paint"));                                         // platen
+        m.add(box(2.4, 9.0, 5.5, 10.6, 9.4, 10.5, "darksteel"));                                       // its face (down: 7)
+        m.add(prism('y', 6.5, 8.0, 1.0, 10.8, 14.5, "steel", 12));                                    // piston rod
         return m;
     }
 

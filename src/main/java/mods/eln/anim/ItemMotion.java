@@ -23,6 +23,28 @@ public final class ItemMotion {
         GL11.glPopMatrix();
     }
 
+    /**
+     * The stack lying flat, face up, centred at (x, y, z), its bottom on y: size blocks across (sx, sz stretch it along
+     * the model's x and z), turned rotY about y, thick times its usual one-pixel depth (thinner as it's pressed). The
+     * item-frame view (GlFrame.FlatItem), whose geometry is exact, unlike a standing (ground) item's.
+     */
+    public static void drawFlat(net.minecraft.world.item.ItemStack stack, double x, double y, double z, float rotY, float size,
+                                float sx, float sz, float thick) {
+        if (stack == null || stack.isEmpty()) return;
+        GL11.glPushMatrix();
+        GL11.glTranslatef((float) x, (float) (y + size * thick / 32f), (float) z);
+        GL11.glRotatef(rotY, 0, 1, 0);
+        GL11.glScalef(sx, 1, sz);
+        GL11.glRotatef(-90, 1, 0, 0);   // (the item frame's view faces +z: face up)
+        GL11.glScalef(size, size, size * thick);
+        mods.eln.gl.GlFrame.current().extra(new mods.eln.gl.GlFrame.FlatItem(stack));
+        GL11.glPopMatrix();
+    }
+
+    public static void drawFlat(ItemEntity item, double x, double y, double z, float rotY, float size, float sx, float sz, float thick) {
+        if (item != null) drawFlat(item.getItem(), x, y, z, rotY, size, sx, sz, thick);
+    }
+
     /** 0 below a, 1 above b, eased (smoothstep) between. */
     public static float ease(float t, float a, float b) {
         if (b <= a) return t >= b ? 1 : 0;
