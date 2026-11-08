@@ -512,6 +512,13 @@ public abstract class NodeBase {
         return isAdded;
     }
 
+    private boolean connecting;
+
+    /** True while connect() runs its connectInit and connectJob (before the node counts as added). */
+    public boolean isConnecting() {
+        return connecting;
+    }
+
     public void connect() {
 
         if (isAdded) {
@@ -524,8 +531,13 @@ public abstract class NodeBase {
             return;
         }
 
-        connectInit();
-        connectJob();
+        connecting = true;
+        try {
+            connectInit();
+            connectJob();
+        } finally {
+            connecting = false;
+        }
 
         isAdded = true;
 

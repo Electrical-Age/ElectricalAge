@@ -62,6 +62,7 @@ public final class Wp11Cases {
         cases.add(new TurbineIdleCase());
         cases.add(new PoleCase());
         cases.add(new PoleGearCase());
+        cases.add(new FrozenPoleCase());
         cases.add(new EnergyConverterCase());
         cases.add(new LegacyExporterCase());
         cases.add(new ExporterFeCase());
@@ -320,6 +321,52 @@ public final class Wp11Cases {
             near(ctx, "poles: B's foot [V] (its 230 V transformer)", b.secondaryLoad.getU(), mods.eln.Eln.MVU * U / mods.eln.Eln.LVU, 0.03);
             double u = b.electricalLoad.getU();
             near(ctx, "poles: B's lit streetlight draws its watts from the line", u * u / b.lampLoad.getR(), ElectricalPoleElement.LAMP_WATTS, 0.05);
+        }
+    }
+
+    /**
+     * A pole out of the simulation (as Stasis holds one in stopped time; Baughn 2026-11-08: an anchored pole runs beside
+     * one that doesn't): its span stays up, listed on both poles, but carries nothing, and the running pole's line isn't
+     * joined to the frozen load. Back in the simulation, the span carries again.
+     */
+    static final class FrozenPoleCase implements TestCase {
+        ElectricalPoleElement a, b;
+        mods.eln.gridnode.GridLink link;
+        String frozen = "";
+
+        public String name() {
+            return "wp11 frozen utility pole";
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 10;
+        }
+
+        public void build(TestContext ctx) {
+            a = (ElectricalPoleElement) ctx.placeTransparent(UTILITY_POLE, ctx.at(1, 1, 1));
+            b = (ElectricalPoleElement) ctx.placeTransparent(UTILITY_POLE, ctx.at(6, 1, 1));
+            var spec = new mods.eln.node.voxel.CableSpec(6, mods.eln.node.voxel.CableSpec.preset(4).colour());
+            mods.eln.gridnode.GridLink.addLink(a, b, Direction.XP, Direction.XN, mods.eln.node.voxel.CableKitItem.kit(4, spec, 16 * 16), 5 * spec.descriptor(4).electricalRs);
+            link = a.gridLinkList.iterator().next();
+            var before = NodeBase.simulationVeto;
+            NodeBase.simulationVeto = n -> n == a.node;
+            try {
+                a.node.reconnect();
+                b.node.reconnect();
+                frozen = link.isConnected() + "," + a.node.isAdded() + "," + a.gridLinkList.contains(link) + "," + b.gridLinkList.contains(link);
+            } finally {
+                NodeBase.simulationVeto = before;
+            }
+            a.node.connect();
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("poles: with A frozen, the span is kept on both but carries nothing", frozen.equals("false,false,true,true"), frozen);
+            ctx.check("poles: A back in the simulation, the span carries again", link.isConnected() && a.node.isAdded(), link.isConnected() + "," + a.node.isAdded());
         }
     }
 

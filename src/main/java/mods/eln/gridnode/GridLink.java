@@ -33,6 +33,11 @@ public class GridLink implements INBTTReady {
         return cable;
     }
 
+    /** Whether the line carries current now (both poles simulated, neither burnt). */
+    public boolean isConnected() {
+        return connected;
+    }
+
     /** The line's resistance. */
     public double rs() {
         return rs;
@@ -108,11 +113,21 @@ public class GridLink implements INBTTReady {
         GridElement a = getElementFromCoordinate(this.a);
         GridElement b = getElementFromCoordinate(this.b);
 
-        if (a == null || b == null || connected) {
+        if (a == null || b == null) {
             return false;
         }
-        // A burnt pole is out of the simulation; the line stays up but carries nothing.
-        if (a.isBurnt() || b.isBurnt()) {
+        // Both poles keep the line (it's drawn, saved and dropped as theirs) even while it carries nothing.
+        a.gridLinkList.add(this);
+        b.gridLinkList.add(this);
+        if (connected) {
+            return false;
+        }
+        // A burnt pole is out of the simulation; the line stays up but carries nothing. So does a pole Stasis holds out
+        // of it (stopped time, Baughn 2026-11-08: an anchored pole runs beside one that doesn't): a link into a load that
+        // isn't simulated would join two networks through nothing.
+        if (a.isBurnt() || b.isBurnt() || !live(a) || !live(b)) {
+            updateElement(a);
+            updateElement(b);
             return false;
         }
 
@@ -126,15 +141,16 @@ public class GridLink implements INBTTReady {
         Eln.simulator.addElectricalComponent(ab);
         ab.setR(rs);
 
-
-        // Add link to link lists.
-        a.gridLinkList.add(this);
-        b.gridLinkList.add(this);
         updateElement(a);
         updateElement(b);
 
         connected = true;
         return true;
+    }
+
+    /** Is this pole in the simulation, or joining it now (its connectJob runs before the node counts as added)? */
+    static boolean live(GridElement e) {
+        return e.node.isAdded() || e.node.isConnecting();
     }
 
     private void updateElement(GridElement e) {
