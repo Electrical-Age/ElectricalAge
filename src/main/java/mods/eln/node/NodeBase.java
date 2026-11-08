@@ -493,6 +493,14 @@ public abstract class NodeBase {
      */
     public static volatile java.util.function.ToDoubleFunction<NodeBase> timeScale;
 
+    /**
+     * For Stasis Delvers: true when this node asks to keep running in stopped land (a utility pole with a stasis anchor,
+     * Baughn 2026-11-08). EA only reports it; Stasis decides.
+     */
+    public boolean timeExempt() {
+        return false;
+    }
+
     /** How fast time runs at this node (timeScale; at least 1). */
     public double timeScale() {
         var f = timeScale;

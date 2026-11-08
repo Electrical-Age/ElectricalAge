@@ -8,7 +8,7 @@ final class Models {
     private Models() {
     }
 
-    static final List<Supplier<List<NodeModel>>> NODES = List.of(Boiler::models, CompactTurbine::models, Condenser::models, ElectricHeater::models,
+    static final List<Supplier<List<NodeModel>>> NODES = List.of(Boiler::models, PoleGear::models, CompactTurbine::models, Condenser::models, ElectricHeater::models,
         InlinePump::models, OilPump::models, SubmersiblePump::models, Tank::models, TarSandSeparator::models, ShaftGas::models, ShaftMotor::models,
         ShaftParts::models, ShaftTurbines::models, PlantCondenser::models, HeatExchanger::models, SteamOven::models, SteamTurbine::models,
         Smelter::models, HeatFurnace::models, FuelHeater::models, ElectricalAnvil::models, CapacitorBank::models, Column::models, HandDrill::models, SignalProcessor::models, FieldLogger::models, TiltedTerminal::models,

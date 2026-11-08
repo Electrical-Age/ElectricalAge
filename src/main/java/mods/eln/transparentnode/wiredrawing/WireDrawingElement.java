@@ -37,11 +37,15 @@ import java.util.Map;
  * progress) when copper or rubber runs out. Changing what to make scraps the wire drawn so far.
  */
 public class WireDrawingElement extends TransparentNodeElement {
-    public static final int COPPER = 0, RUBBER = 1, OUT = 2;
-    /** What it makes: a cable kit, a converter winding, or bare Copper Cable (Baughn 2026-11-07). */
-    public static final int KIT = 0, WINDING = 1, BARE = 2;
+    public static final int COPPER = 0, RUBBER = 1, OUT = 2, CORE = 3;
+    /**
+     * What it makes: a cable kit, a converter winding, bare Copper Cable (Baughn 2026-11-07), or a pole transformer
+     * (Baughn 2026-11-08: its two windings on a ferromagnetic core from the core slot; the 230 V machine only, for the
+     * line winding's 11 kV insulation).
+     */
+    public static final int KIT = 0, WINDING = 1, BARE = 2, POLE = 3;
     public static final byte SET = 1, RUN = 2;
-    public static final byte STOPPED = 0, RUNNING = 1, NO_COPPER = 2, NO_RUBBER = 3, OUTPUT_FULL = 4, NO_POWER = 5;
+    public static final byte STOPPED = 0, RUNNING = 1, NO_COPPER = 2, NO_RUBBER = 3, OUTPUT_FULL = 4, NO_POWER = 5, NO_CORE = 6;
 
     final WireDrawingDescriptor descriptor;
     final WireDrawingInventory inventory = new WireDrawingInventory(this);
@@ -70,6 +74,26 @@ public class WireDrawingElement extends TransparentNodeElement {
 
     public static boolean isCopper(ItemStack s) {
         return !s.isEmpty() && (s.is(OreDictTags.tag("ingotCopper")) || s.is(OreDictTags.tag("dustCopper")));
+    }
+
+    /** A ferromagnetic core's quality (0 cheap, 1 average, 2 optimal), or -1 for anything else. */
+    public static int coreQuality(ItemStack s) {
+        if (s.isEmpty()) return -1;
+        String[] names = {"Cheap Ferromagnetic Core", "Average Ferromagnetic Core", "Optimal Ferromagnetic Core"};
+        for (int q = 0; q < names.length; q++) {
+            ItemStack c = mods.eln.Eln.findItemStack(names[q], 1);
+            if (!c.isEmpty() && ItemStack.isSameItemSameComponents(c, s)) return q;
+        }
+        return -1;
+    }
+
+    public static boolean isCore(ItemStack s) {
+        return coreQuality(s) >= 0;
+    }
+
+    /** Whether this machine can wind pole transformers (its insulation reaches 11 kV). */
+    public boolean makesPoleTransformers() {
+        return descriptor.maxTier >= 4;
     }
 
     public static boolean isRubber(ItemStack s) {
@@ -101,6 +125,7 @@ public class WireDrawingElement extends TransparentNodeElement {
     /** What it makes now, for the given length (a kit of the blocks, a winding of the turns, Copper Cables). */
     public ItemStack product() {
         if (mode == BARE) return mods.eln.Eln.findItemStack("Copper Cable", amount);
+        if (mode == POLE) return mods.eln.gridnode.electricalpole.PoleTransformerItem.make(tier, mm2, Math.max(0, coreQuality(inventory.getItem(CORE))));
         return mode == KIT ? CableKitItem.kit(tier, spec(), amount * 16) : WindingItem.make(tier, spec(), amount);
     }
 
@@ -119,9 +144,10 @@ public class WireDrawingElement extends TransparentNodeElement {
     }
 
     void apply(int mode, int mm2, int tier, int colour, int amount) {
-        mode = mode == WINDING || mode == BARE ? mode : KIT;
+        mode = mode == WINDING || mode == BARE || mode == POLE && makesPoleTransformers() ? mode : KIT;
         mm2 = Math.max(0, Math.min(descriptor.maxMm2, mm2));
-        tier = Math.max(1, Math.min(descriptor.maxTier, tier));
+        // (a pole transformer's tier is its low side's: 48, 230 or 400 V)
+        tier = Math.max(1, Math.min(mode == POLE ? 3 : descriptor.maxTier, tier));
         colour = Math.max(0, Math.min(15, colour));
         amount = Math.max(1, Math.min(WireDrawingDescriptor.maxAmount(mode), amount));
         if (mode != this.mode || mm2 != this.mm2 || tier != this.tier || colour != this.colour || amount != this.amount) done = 0;
@@ -168,6 +194,10 @@ public class WireDrawingElement extends TransparentNodeElement {
             status = NO_RUBBER;
             return;
         }
+        if (mode == POLE && !isCore(inventory.getItem(CORE))) {
+            status = NO_CORE;
+            return;
+        }
         double got = machine.takeJoules(step * jpb);
         watts = got / Math.max(1e-6, dt);
         double d = got / jpb;
@@ -177,6 +207,7 @@ public class WireDrawingElement extends TransparentNodeElement {
         status = got > 0 ? RUNNING : NO_POWER;
         if (done >= length() - 1e-9) {
             inventory.setItem(OUT, product());
+            if (mode == POLE) inventory.removeItem(CORE, 1);
             done = 0;
             // one item a Start (Baughn 2026-11-07: twice he made a second one he didn't mean to)
             running = false;
@@ -308,6 +339,7 @@ public class WireDrawingElement extends TransparentNodeElement {
     /** "Cable kit: 16 blocks of 2.5 mm², 48 V, brown", "Winding: 120 turns of ..." or "Bare wire: 16 Copper Cable". */
     public static String jobText(int mode, int mm2, int tier, int colour, int amount) {
         if (mode == BARE) return I18N.tr("Bare wire: %1$ Copper Cable", amount);
+        if (mode == POLE) return I18N.tr("Pole transformer: line to %1$, %2$ mm²", (int) CableSpec.volts(tier) + " V", WireDrawingDescriptor.fmt(CableSpec.MM2[mm2]));
         String what = new CableSpec(mm2, colour).label(tier) + ", " + net.minecraft.world.item.DyeColor.byId(colour).getName().replace('_', ' ');
         return mode == KIT ? I18N.tr("Cable kit: %1$ blocks of %2$", amount, what) : I18N.tr("Winding: %1$ turns of %2$", amount, what);
     }
@@ -319,6 +351,7 @@ public class WireDrawingElement extends TransparentNodeElement {
             case NO_RUBBER -> I18N.tr("Needs rubber");
             case OUTPUT_FULL -> I18N.tr("Take the finished item out");
             case NO_POWER -> I18N.tr("No power");
+            case NO_CORE -> I18N.tr("Needs a ferromagnetic core");
             default -> I18N.tr("Stopped");
         };
     }

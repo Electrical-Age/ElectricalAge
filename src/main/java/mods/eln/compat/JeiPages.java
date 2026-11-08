@@ -49,7 +49,11 @@ public final class JeiPages {
     }
 
     /** A wire-drawing example: what it takes (whole items), what comes out, and which machine makes it. */
-    public record Draw(ItemStack copper, ItemStack rubber, ItemStack out, double kJ, boolean small) {
+    /** A wire-drawing example; extra is what else it takes (a pole transformer's core), or EMPTY. */
+    public record Draw(ItemStack copper, ItemStack rubber, ItemStack out, double kJ, boolean small, ItemStack extra) {
+        public Draw(ItemStack copper, ItemStack rubber, ItemStack out, double kJ, boolean small) {
+            this(copper, rubber, out, kJ, small, ItemStack.EMPTY);
+        }
     }
 
     /** An information page: the items it is on, and its text's lang key. */
@@ -108,6 +112,15 @@ public final class JeiPages {
         l.add(draw(1, new CableSpec(6, CableSpec.BROWN), 16, 0));
         l.add(draw(2, CableSpec.preset(2), 0, 58));    // a 48 -> 230 V converter's secondary on a cheap core
         l.add(draw(4, CableSpec.preset(4), 0, 688));   // 400 V -> 11 kV on an optimal core
+        // a pole transformer, line to 400 V, 16 mm², on a cheap core (the 230 V machine; Baughn 2026-11-08)
+        {
+            int m = 8, mode = mods.eln.transparentnode.wiredrawing.WireDrawingElement.POLE;
+            double len = WireDrawingDescriptor.length(mode, 1);
+            ItemStack core = Eln.findItemStack("Cheap Ferromagnetic Core", 1);
+            l.add(new Draw(new ItemStack(Items.COPPER_INGOT, (int) Math.ceil(len * WireDrawingDescriptor.copperPerBlock(mode, m))),
+                new ItemStack(Eln.itemsByName.get("Rubber"), (int) Math.ceil(len * WireDrawingDescriptor.rubberPerBlock(mode, 3, m))),
+                mods.eln.gridnode.electricalpole.PoleTransformerItem.make(3, m, 0), len * WireDrawingDescriptor.energyPerBlock(mode, m) / 1000, false, core));
+        }
         // bare wire: 2 ingots, 3 Copper Cable (no rubber)
         l.add(new Draw(new ItemStack(Items.COPPER_INGOT, 2), ItemStack.EMPTY, Eln.findItemStack("Copper Cable", 3),
             3 * WireDrawingDescriptor.JOULES_PER_BLOCK / 1000, true));
@@ -171,6 +184,8 @@ public final class JeiPages {
             ItemStack f = eln(p);
             if (!f.isEmpty()) h.add(f.getItem());
         }
+        // the pole stasis anchor's recipe comes from Stasis Delvers (it owns the rift crystal); without it, nothing makes one
+        if (!net.neoforged.fml.ModList.get().isLoaded("stasisdelvers")) h.add(mods.eln.registry.ElnRegistry.POLE_ANCHOR.get());
         return h;
     }
 }

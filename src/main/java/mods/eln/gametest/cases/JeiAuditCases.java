@@ -51,7 +51,8 @@ public final class JeiAuditCases {
             public void measure(TestContext ctx) {
                 List<Way> ways = ways(ctx);
                 Set<Item> hidden = mods.eln.compat.JeiPages.hidden();
-                ctx.check("the hidden items are all found", hidden.size() == 12, hidden.size() + " items");
+                int expectHidden = 12 + (net.neoforged.fml.ModList.get().isLoaded("stasisdelvers") ? 0 : 1);   // (+ the pole anchor without Stasis)
+                ctx.check("the hidden items are all found", hidden.size() == expectHidden, hidden.size() + " items");
                 Set<Item> have = new LinkedHashSet<>();
                 for (Item i : BuiltInRegistries.ITEM) if (!isEln(i)) have.add(i);
                 net.minecraft.world.item.CreativeModeTabs.tryRebuildTabContents(ctx.level().enabledFeatures(), true, ctx.level().registryAccess());
@@ -141,7 +142,13 @@ public final class JeiAuditCases {
         Set<Item> drawers = new LinkedHashSet<>();
         for (ItemStack m : mods.eln.compat.JeiPages.drawers()) drawers.addAll(one(m));
         for (var d : mods.eln.compat.JeiPages.draws())
-            ways.add(new Way("wire drawing", d.rubber().isEmpty() ? List.of(one(d.copper()), drawers) : List.of(one(d.copper()), one(d.rubber()), drawers), one(d.out())));
+        {
+            List<Set<Item>> slots = new ArrayList<>(List.of(one(d.copper())));
+            if (!d.rubber().isEmpty()) slots.add(one(d.rubber()));
+            if (!d.extra().isEmpty()) slots.add(one(d.extra()));
+            slots.add(drawers);
+            ways.add(new Way("wire drawing", slots, one(d.out())));
+        }
         for (var i : mods.eln.compat.JeiPages.infos()) {
             Set<Item> out = new LinkedHashSet<>();
             for (ItemStack st : i.items()) out.addAll(one(st));

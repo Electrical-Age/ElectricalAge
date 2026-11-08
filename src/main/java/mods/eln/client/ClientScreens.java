@@ -17,6 +17,7 @@ final class ClientScreens {
         layout("oil.SteamOvenDescriptor", "steam_oven");
         layout("anvil.ElectricalAnvilDescriptor", "electrical_anvil");
         layout("transparentnode.wiredrawing.WireDrawingDescriptor", "wire_drawing");
+        layout("gridnode.electricalpole.ElectricalPoleDescriptor", "utility_pole");
         layout("sixnode.electricalsource.ElectricalSourceDescriptor", "electrical_source");
         layout("sixnode.wirelesssignal.tx.WirelessSignalTxDescriptor", "wireless_tx");
         layout("sixnode.wirelesssignal.source.WirelessSignalSourceDescriptor", "wireless_source");
@@ -74,6 +75,7 @@ final class ClientScreens {
         ElnScreens.register(mods.eln.oil.SteamOvenDescriptor.class, mods.eln.oil.SteamOvenScreen::new);
         ElnScreens.register(mods.eln.anvil.ElectricalAnvilDescriptor.class, mods.eln.anvil.ElectricalAnvilScreen::new);
         ElnScreens.register(mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor.class, mods.eln.transparentnode.wiredrawing.WireDrawingScreen::new);
+        ElnScreens.register(mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor.class, mods.eln.gridnode.electricalpole.PoleScreen::new);
         ElnScreens.register(mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor.class,
             mods.eln.sixnode.electricalsource.ElectricalSourceScreen::new);
         reg(mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxDescriptor.class, mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxScreen::new);

@@ -26,6 +26,7 @@ public final class WireDrawingCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new Rules());
         cases.add(new Draws());
+        cases.add(new PoleTransformers());
     }
 
     static ItemStack rubber(int n) {
@@ -165,6 +166,48 @@ public final class WireDrawingCases {
             ctx.checkValue("wire drawing: ... and no rubber", m.rubberNeeded(), 0);
             ItemStack bare = m.product();
             ctx.check("wire drawing: ... and makes Copper Cable", bare.getCount() == 3 && bare.getItem() == mods.eln.Eln.findItemStack("Copper Cable", 1).getItem(), bare.toString());
+        }
+    }
+
+    /**
+     * Pole transformers (Baughn 2026-11-08): only the 230 V machine winds them (the line's winding is insulated for 11 kV);
+     * the low side is 48, 230 or 400 V; it waits for a ferromagnetic core, and the transformer carries the core's quality.
+     */
+    static final class PoleTransformers implements TestCase {
+        public String id() {
+            return "wire_drawing_pole_transformers";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        WireDrawingElement lv, mv;
+
+        public void build(TestContext ctx) {
+            lv = (WireDrawingElement) ctx.placeTransparent(MACHINE_48, ctx.at(1, 1, 1));
+            mv = (WireDrawingElement) ctx.placeTransparent(MACHINE_230, ctx.at(5, 1, 1));
+        }
+
+        public void measure(TestContext ctx) {
+            lv.configure(WireDrawingElement.POLE, 4, 2, 0, 1);
+            ctx.check("pole transformers: the 48 V machine can't wind one", lv.mode == WireDrawingElement.KIT, "mode " + lv.mode);
+            mv.configure(WireDrawingElement.POLE, 8, 4, 0, 7);
+            ctx.check("pole transformers: the low side is at most 400 V, and it makes one", mv.mode == WireDrawingElement.POLE && mv.tier == 3 && mv.amount == 1,
+                mv.mode + " " + mv.tier + " " + mv.amount);
+            mv.getInventory().setItem(WireDrawingElement.COPPER, new ItemStack(Items.COPPER_INGOT, 64));
+            mv.getInventory().setItem(WireDrawingElement.RUBBER, rubber(64));
+            mv.running = true;
+            mv.tick(0.05);
+            ctx.check("pole transformers: it waits for a core", mv.status == WireDrawingElement.NO_CORE, "status " + mv.status);
+            mv.getInventory().setItem(WireDrawingElement.CORE, mods.eln.Eln.findItemStack("Average Ferromagnetic Core", 1));
+            ItemStack t = mv.product();
+            ctx.check("pole transformers: it makes a 400 V, 16 mm² transformer on the core it has", mods.eln.gridnode.electricalpole.PoleTransformerItem.is(t)
+                && mods.eln.gridnode.electricalpole.PoleTransformerItem.tier(t) == 3 && mods.eln.gridnode.electricalpole.PoleTransformerItem.mm2(t) == 8
+                && mods.eln.gridnode.electricalpole.PoleTransformerItem.core(t) == 1, t + " " + t.getComponents());
+            ctx.checkValue("pole transformers: copper, two windings' worth (12.5 blocks of 16 mm²)", mv.copperNeeded(),
+                12.5 * mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor.copperPerBlock(8));
+            mv.running = false;
         }
     }
 }

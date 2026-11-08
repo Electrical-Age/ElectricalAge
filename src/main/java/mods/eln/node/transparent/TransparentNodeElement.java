@@ -146,6 +146,11 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return false;
     }
 
+    /** Stasis Delvers: keep this device running in stopped land (NodeBase.timeExempt). */
+    public boolean timeExempt() {
+        return false;
+    }
+
     public Container getInventory() {
         return null;
     }

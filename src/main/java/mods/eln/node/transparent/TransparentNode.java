@@ -198,6 +198,11 @@ public class TransparentNode extends Node implements mods.eln.bus.BusPeer, mods.
     }
 
     @Override
+    public boolean timeExempt() {
+        return element != null && element.timeExempt();
+    }
+
+    @Override
     public boolean hasGui(Direction side) {
         if (element == null || element.isBurnt()) return false;
         return element.hasGui();

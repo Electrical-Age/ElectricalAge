@@ -28,6 +28,8 @@ public class WireDrawingCategory extends AbstractRecipeCategory<Draw> {
         b.addInputSlot(1, 6).setStandardSlotBackground().add(r.copper());
         var rubber = b.addInputSlot(27, 6).setStandardSlotBackground();
         if (!r.rubber().isEmpty()) rubber.add(r.rubber());
+        var extra = b.addInputSlot(45, 6).setStandardSlotBackground();
+        if (!r.extra().isEmpty()) extra.add(r.extra());
         b.addOutputSlot(101, 6).setOutputSlotBackground().add(r.out());
     }
 

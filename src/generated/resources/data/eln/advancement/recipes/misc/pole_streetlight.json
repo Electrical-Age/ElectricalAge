@@ -1,11 +1,20 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/iron"
+      }
+    }
+  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_ingredient": {
       "conditions": {
         "items": [
           {
-            "items": "eln:utility_pole"
+            "items": "minecraft:iron_bars"
           }
         ]
       },
@@ -13,7 +22,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "eln:utility_pole_w_dc_dc_converter"
+        "recipes": "eln:pole_streetlight"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +35,7 @@
   ],
   "rewards": {
     "recipes": [
-      "eln:utility_pole_w_dc_dc_converter"
+      "eln:pole_streetlight"
     ]
   }
 }

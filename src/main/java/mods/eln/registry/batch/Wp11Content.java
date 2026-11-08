@@ -201,7 +201,7 @@ public class Wp11Content implements ElnContent {
         {
             subId = 4;
             ElectricalPoleDescriptor descriptor =
-                new ElectricalPoleDescriptor("Utility Pole", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, false);
+                new ElectricalPoleDescriptor("Utility Pole", obj.getObj("UtilityPole"), obj.getObj("polegear"), "textures/wire.png", highVoltageCableDescriptor, false);
             GhostGroup g = new GhostGroup();
             g.addElement(0, 1, 0);
             g.addElement(0, 2, 0);
@@ -213,14 +213,15 @@ public class Wp11Content implements ElnContent {
         {
             subId = 5;
             ElectricalPoleDescriptor descriptor =
-                new ElectricalPoleDescriptor("Utility Pole w/DC-DC Converter", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, true);
+                new ElectricalPoleDescriptor("Utility Pole w/DC-DC Converter", obj.getObj("UtilityPole"), obj.getObj("polegear"), "textures/wire.png", highVoltageCableDescriptor, true);
             GhostGroup g = new GhostGroup();
             g.addElement(0, 1, 0);
             g.addElement(0, 2, 0);
             g.addElement(0, 3, 0);
             //g.addRectangle(-1, 1, 3, 4, -1, 1);
             descriptor.setGhostGroup(g);
-            transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+            // retired from the tab: a Utility Pole takes a fitted Pole Transformer (Baughn 2026-11-08)
+            transparentNodeItem.addWithoutRegistry(subId + (id << 6), descriptor);
         }
     }
 }

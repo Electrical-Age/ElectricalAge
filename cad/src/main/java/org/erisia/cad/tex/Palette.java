@@ -93,6 +93,7 @@ public final class Palette {
         put("hvtier", 245, 204, 143, 8, null);   // the 800 V (HV) tier colour (as ElectricalAnvil's)
         // (CapacitorBank)
         put("blue", 40, 84, 200, 6, null);       // the - polarity
+        put("crystal", 120, 180, 255, 10, null);   // rift crystal (the pole stasis anchor)
         // (CapacitorBank)
         put("label", 232, 228, 214, 4, (x, y) -> all((y == 6 || y == 9) && x >= 3 && x <= 12 ? -150 : 0));   // two printed lines
         // (Column)

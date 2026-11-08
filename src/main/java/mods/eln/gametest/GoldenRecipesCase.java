@@ -92,7 +92,9 @@ final class GoldenRecipesCase implements TestCase {
         "eln:lead_fuse_for_medium_voltage_cables", "eln:lead_fuse_for_high_voltage_cables", "eln:lead_fuse_for_very_high_voltage_cables",
         "eln:copper_sword", "eln:copper_hoe", "eln:copper_shovel", "eln:copper_pickaxe",
         "eln:copper_axe", "eln:copper_helmet", "eln:copper_chestplate", "eln:copper_leggings", "eln:copper_boots",
-        "eln:50_v_turbine", "eln:200_v_turbine");
+        "eln:50_v_turbine", "eln:200_v_turbine",
+        // a Pole Transformer from the wire machine fits any Utility Pole (Baughn 2026-11-08)
+        "eln:utility_pole_w_dc_dc_converter");
 
     /** Macerator inputs 26.x changes on purpose: vanilla ores give raw chunks (Baughn, 2026-10-10; golden/README.md). */
     static final Set<String> ORES_TO_CHUNKS = Set.of("Iron Ore", "Gold Ore", "Copper Ore", "Lead Ore", "Tungsten Ore",   // (lead, tungsten: Baughn 2026-10-19)

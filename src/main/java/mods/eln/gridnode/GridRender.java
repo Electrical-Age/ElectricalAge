@@ -34,7 +34,16 @@ public abstract class GridRender extends TransparentNodeElementRender {
     @Override
     public void draw() {
         descriptor.draw(idealRenderingAngle);
+        drawCatenaries();
+    }
 
+    /** The angle the server turned this node to (degrees about y). */
+    protected float idealRenderingAngle() {
+        return idealRenderingAngle;
+    }
+
+    /** The spans this node draws. */
+    protected void drawCatenaries() {
         UtilsClient.bindTexture(cableTexture);
         // TODO: Try not to need this. (How? Math.)
         glDisable(GL_CULL_FACE);

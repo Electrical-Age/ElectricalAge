@@ -90,8 +90,15 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
     /** Bare wire (Baughn 2026-11-07): copper ingots a Copper Cable, half again what the hand recipe gets (1 an ingot). */
     public static final double BARE_COPPER = 2.0 / 3;
 
+    /**
+     * Wire in a pole transformer, blocks: its two windings hold the same copper (a low side of 50 turns, and the line's
+     * side of as many more turns as its ratio, thinner by as much).
+     */
+    public static final double POLE_BLOCKS = 2 * 50 * mods.eln.node.voxel.WindingItem.BLOCKS_PER_TURN;
+
     /** Blocks of wire in an item of this mode and amount (a bare Copper Cable counts as one). */
     public static double length(int mode, int amount) {
+        if (mode == WireDrawingElement.POLE) return POLE_BLOCKS;
         return mode == WireDrawingElement.WINDING ? amount * mods.eln.node.voxel.WindingItem.BLOCKS_PER_TURN : amount;
     }
 
@@ -100,6 +107,7 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
     }
 
     public static double rubberPerBlock(int mode, int tier, int mm2) {
+        if (mode == WireDrawingElement.POLE) return rubberPerBlock(4, mm2);   // (insulated for the line, 11 kV)
         return mode == WireDrawingElement.BARE ? 0 : rubberPerBlock(tier, mm2);
     }
 
@@ -109,6 +117,7 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
 
     /** Most of each mode: kit blocks, winding turns, Copper Cables (a stack). */
     public static int maxAmount(int mode) {
+        if (mode == WireDrawingElement.POLE) return 1;
         return mode == WireDrawingElement.WINDING ? mods.eln.node.voxel.WindingItem.MAX_TURNS : MAX_BLOCKS;
     }
 

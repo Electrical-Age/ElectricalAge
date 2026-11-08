@@ -63,9 +63,18 @@ abstract public class GridElement extends TransparentNodeElement {
         if (p != null) {
             other = GridLink.getElementFromCoordinate(p.getLeft());
         }
-        // Check if it's the *correct* cable: the pole's tier (any cross-section of a kit; its spec sets the line's Rs).
-        if (mods.eln.node.voxel.CableItems.tier(stack) != mods.eln.node.voxel.CablePart.tierOf(desc.cableDescriptor.name)) {
-            Utils.sendMessage(entityPlayer, "Wrong cable, you need " + desc.cableDescriptor.name + " (a kit)");
+        // Check if it's the *correct* cable: the line's tier (any cross-section of a kit; its spec sets the line's Rs).
+        int kitTier = mods.eln.node.voxel.CableItems.tier(stack);
+        for (GridElement e : new GridElement[]{this, other}) {
+            if (e == null) continue;
+            int need = e.lineTierRequired();
+            if (need >= 0 && kitTier != need) {
+                Utils.sendMessage(entityPlayer, "Wrong cable: this line is " + (int) mods.eln.node.voxel.CableSpec.volts(need) + " V, it needs a kit of that tier");
+                return true;
+            }
+        }
+        if (!mods.eln.node.voxel.CableSpec.power(kitTier)) {
+            Utils.sendMessage(entityPlayer, "Lines need a power cable kit");
             return true;
         }
         if (other == null || other == this) {
@@ -87,6 +96,8 @@ abstract public class GridElement extends TransparentNodeElement {
                 ItemStack piece = mods.eln.node.voxel.CableItems.take(stack.copy(), cableLength * 16);
                 if (GridLink.addLink(this, other, side, p.getRight(), piece, cable.electricalRs * cableLength)) {
                     Utils.sendMessage(entityPlayer, "Added connection");
+                    onLinksChanged();
+                    other.onLinksChanged();
                     mods.eln.node.voxel.CableItems.take(stack, cableLength * 16);
                 } else {
                     Utils.sendMessage(entityPlayer, "Already connected");
@@ -168,6 +179,18 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     abstract protected ElectricalLoad getGridElectricalLoad(Direction side);
+
+    /**
+     * The kit tier a new span to this element must be, or -1 for any power tier. Fixed devices: their descriptor's
+     * cable. Utility poles: the tier of the line they already carry (Baughn 2026-11-08), any on a bare pole.
+     */
+    protected int lineTierRequired() {
+        return mods.eln.node.voxel.CablePart.tierOf(desc.cableDescriptor.name);
+    }
+
+    /** A span was added or removed. */
+    protected void onLinksChanged() {
+    }
 
     // TODO: This should check if the wire isn't passing through blocks.
     private boolean validLOS(GridElement other) {

@@ -61,6 +61,7 @@ public final class Wp11Cases {
         cases.add(new GeneratorCase());
         cases.add(new TurbineIdleCase());
         cases.add(new PoleCase());
+        cases.add(new PoleGearCase());
         cases.add(new EnergyConverterCase());
         cases.add(new LegacyExporterCase());
         cases.add(new ExporterFeCase());
@@ -249,7 +250,76 @@ public final class Wp11Cases {
             ghosts(ctx, "utility pole", plainPos, UTILITY_POLE);
             ctx.checkValue("wp11 DC-DC pole ground side [V] (no current: = LVU)", dcdc.secondaryLoad.getU(), U);
             ctx.checkValue("wp11 DC-DC pole grid side [V] (ground x VVU / HVU)", dcdc.electricalLoad.getU(), U / (mods.eln.Eln.HVU / mods.eln.Eln.VVU));
-            ctx.check("wp11 utility pole has no ground connection (no transformer)", plain.secondaryLoad == null && plain.getConnectionMask(Direction.XP, LRDU.Down) == 0, "");
+            ctx.check("wp11 utility pole has no ground connection (no transformer)", !plain.hasTransformer() && plain.getConnectionMask(Direction.XP, LRDU.Down) == 0, "");
+            ctx.check("wp11 the old DC-DC pole places with a 400 V Pole Transformer fitted (Baughn 2026-11-08)", dcdc.hasTransformer()
+                && mods.eln.gridnode.electricalpole.PoleTransformerItem.tier(dcdc.transformer()) == 3, dcdc.transformer().toString());
+        }
+    }
+
+    /**
+     * The modular utility pole (Baughn 2026-11-08). Pole A's foot is fed LVU through a 48 V Pole Transformer, so its line
+     * runs at 11 kV; an 11 kV kit's span joins it to pole B, whose 230 V transformer then gives 230 V at its foot (no load).
+     * Equipment goes on by right-click: a second transformer is refused, a streetlight goes on the side the player stands
+     * (east of B: the east slot), an anchor makes the pole time-exempt for Stasis. Lit (the dark sensor forced), B's light
+     * draws LAMP_WATTS from the line.
+     */
+    static final class PoleGearCase implements TestCase {
+        ElectricalPoleElement a, b;
+        String said = "";
+
+        public String name() {
+            return "wp11 modular utility pole";
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        static boolean fit(TestContext ctx, ElectricalPoleElement pole, ItemStack held, double px, double pz) {
+            var p = Wp9aCases.player(ctx);
+            p.setPos(px, pole.coordonate().y, pz);
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, held);
+            try {
+                pole.onBlockActivated(p, Direction.XP, 0.5F, 0.5F, 0.5F);
+                return held.isEmpty();
+            } finally {
+                p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            }
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos pa = ctx.at(1, 1, 1), pb = ctx.at(6, 1, 1);
+            a = (ElectricalPoleElement) ctx.placeTransparent(UTILITY_POLE, pa);
+            feed(ctx, ctx.at(2, 1, 1), ctx.at(3, 1, 1));
+            b = (ElectricalPoleElement) ctx.placeTransparent(UTILITY_POLE, pb);
+            boolean t1 = fit(ctx, a, mods.eln.gridnode.electricalpole.PoleTransformerItem.make(1, 8, 2), pa.getX() + 3, pa.getZ() + 0.5);
+            boolean t2 = fit(ctx, b, mods.eln.gridnode.electricalpole.PoleTransformerItem.make(2, 8, 2), pb.getX() + 3, pb.getZ() + 0.5);
+            boolean t3 = fit(ctx, b, mods.eln.gridnode.electricalpole.PoleTransformerItem.make(3, 8, 2), pb.getX() + 3, pb.getZ() + 0.5);
+            boolean lamp = fit(ctx, b, new ItemStack(mods.eln.registry.ElnRegistry.STREETLIGHT.get()), pb.getX() + 3, pb.getZ() + 0.5);
+            boolean anchor = fit(ctx, b, new ItemStack(mods.eln.registry.ElnRegistry.POLE_ANCHOR.get()), pb.getX() + 3, pb.getZ() + 0.5);
+            said = t1 + "," + t2 + "," + t3 + "," + lamp + "," + anchor;
+            var kit = mods.eln.node.voxel.CableKitItem.kit(4, new mods.eln.node.voxel.CableSpec(6, mods.eln.node.voxel.CableSpec.preset(4).colour()), 16 * 16);
+            mods.eln.gridnode.GridLink.addLink(a, b, Direction.XP, Direction.XN, kit, 5 * new mods.eln.node.voxel.CableSpec(6, 0).descriptor(4).electricalRs);
+            b.darkOverride = true;
+        }
+
+        static void near(TestContext ctx, String what, double got, double want, double tol) {
+            ctx.check(what, Math.abs(got - want) <= Math.abs(want) * tol, String.format("%.4g, expected %.4g", got, want));
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("poles: transformers fit by right-click, a second is refused, a light and an anchor fit", said.equals("true,true,false,true,true"), said);
+            ctx.check("poles: the light went on the side the player stood (east)", b.lampMask() == 2, "mask " + b.lampMask());
+            ctx.check("poles: an anchored pole is time-exempt, a bare one isn't", b.timeExempt() && !a.timeExempt(), "");
+            ctx.check("poles: a bare pole's line is 11 kV; the span keeps it so", a.lineTier() == 4 && b.lineTier() == 4, a.lineTier() + "," + b.lineTier());
+            near(ctx, "poles: A's line [V] (48 V foot through a 48 V transformer: 11 kV)", a.electricalLoad.getU(), mods.eln.Eln.VVU * U / mods.eln.Eln.LVU, 0.02);
+            near(ctx, "poles: B's foot [V] (its 230 V transformer)", b.secondaryLoad.getU(), mods.eln.Eln.MVU * U / mods.eln.Eln.LVU, 0.03);
+            double u = b.electricalLoad.getU();
+            near(ctx, "poles: B's lit streetlight draws its watts from the line", u * u / b.lampLoad.getR(), ElectricalPoleElement.LAMP_WATTS, 0.05);
         }
     }
 

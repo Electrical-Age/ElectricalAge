@@ -960,15 +960,17 @@ public final class ElnRecipes extends ElnRecipesBase {
             'W', "logWood",
             'I', "ingotIron"
         );
-        addRecipe(findItemStack("Utility Pole w/DC-DC Converter"),
-            "HHH",
-            " TC",
-            " PH",
-            'P', findItemStack("Utility Pole"),
-            'H', findItemStack("Copper Cable"),
-            'C', findItemStack("Optimal Ferromagnetic Core"),
-            'T', findItemStack("DC-DC Converter")
-        );
+        // (the Utility Pole w/DC-DC Converter is retired: a Pole Transformer from the wire machine fits any pole, Baughn 2026-11-08)
+        // a pole streetlight: an LED bulb, a light sensor (its dark sensor), an iron bar arm and a glass pane lens (Baughn 2026-11-08)
+        addRecipe(stack(mods.eln.registry.ElnRegistry.STREETLIGHT.get()),
+            "BBI",
+            " LS",
+            "  G",
+            'B', stack(Items.IRON_BARS),
+            'I', "ingotIron",
+            'L', findItemStack("230V LED Bulb"),
+            'S', findItemStack("Electrical Light Sensor"),
+            'G', stack(Items.GLASS_PANE));
 //		if (oreNames.contains("sheetPlastic")) {
 //			addRecipe(findItemStack("Downlink"),
 //					"H H",

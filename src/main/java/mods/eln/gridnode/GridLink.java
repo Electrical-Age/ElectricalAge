@@ -210,6 +210,8 @@ public class GridLink implements INBTTReady {
         a.gridLinkList.remove(this);
         b.gridLinkList.remove(this);
         disconnect();
+        if (a != null) a.onLinksChanged();
+        if (b != null) b.onLinksChanged();
         return cable;
     }
 

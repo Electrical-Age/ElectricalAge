@@ -13,6 +13,9 @@
      "slot": "1"
     },
     {
+     "slot": "3"
+    },
+    {
      "progress": "work"
     },
     {
@@ -39,10 +42,10 @@
     {
      "button": "mode",
      "sample": [
-      "Cable kit",
-      "Winding"
+      "Pole transformer ▾",
+      "Cable kit"
      ],
-     "width": 80
+     "width": 110
     }
    ],
    "fill": true
@@ -51,7 +54,7 @@
    "row": [
     {
      "text": "mm2l",
-     "sample": "Wire"
+     "sample": "Low-side wire"
     },
     {
      "space": 0,

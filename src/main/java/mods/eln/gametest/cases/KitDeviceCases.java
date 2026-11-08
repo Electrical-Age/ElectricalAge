@@ -31,7 +31,7 @@ public final class KitDeviceCases {
     private KitDeviceCases() {
     }
 
-    static final int HV = 3, LV = 1;
+    static final int HV = 3, LV = 1, VHV = 4;
 
     static ItemStack kit(int tier, CableSpec spec, int blocks) {
         return CableKitItem.kit(tier, spec, blocks * 16);
@@ -217,7 +217,7 @@ public final class KitDeviceCases {
         });
 
         cases.add(new TestCase() {
-            ElectricalPoleElement a, b;
+            ElectricalPoleElement a, b, c;
             ItemStack hand;
             String said = "";
 
@@ -238,32 +238,34 @@ public final class KitDeviceCases {
                 a = (ElectricalPoleElement) ctx.placeTransparent(Wp11Cases.UTILITY_POLE, pa);
                 b = (ElectricalPoleElement) ctx.placeTransparent(Wp11Cases.UTILITY_POLE, pb);
                 Player p = Wp9aCases.player(ctx);
-                hand = kit(LV, null, 10);
+                hand = kit(VHV, thick(), 10);
                 p.setItemInHand(InteractionHand.MAIN_HAND, hand);
                 try {
-                    a.onBlockActivated(p, Direction.XP, 0.5F, 0.5F, 0.5F);
-                    b.onBlockActivated(p, Direction.XN, 0.5F, 0.5F, 0.5F);
-                    said += a.gridLinkList.size() + "," + b.gridLinkList.size();
-                    hand = kit(HV, thick(), 10);
-                    p.setItemInHand(InteractionHand.MAIN_HAND, hand);
                     // as a player's click: the block's use (a kit routes cables elsewhere, AdventurAgent: here it strings the pole)
                     for (BlockPos q : new BlockPos[]{pa, pb}) {
                         var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(q), net.minecraft.core.Direction.EAST, q, false);
                         ctx.world().getBlockState(q).useItemOn(hand, ctx.world(), p, InteractionHand.MAIN_HAND, hit);
                     }
+                    // a third, bare pole: a 48 V kit from it to a (an 11 kV line now) is refused
+                    c = (ElectricalPoleElement) ctx.placeTransparent(Wp11Cases.UTILITY_POLE, ctx.at(3, 1, 1));
+                    p.setItemInHand(InteractionHand.MAIN_HAND, kit(LV, null, 10));
+                    c.onBlockActivated(p, Direction.XP, 0.5F, 0.5F, 0.5F);
+                    a.onBlockActivated(p, Direction.XN, 0.5F, 0.5F, 0.5F);
+                    said = a.gridLinkList.size() + "," + c.gridLinkList.size();
                 } finally {
                     p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                 }
             }
 
             public void measure(TestContext ctx) {
-                ctx.check("kits: a 48 V kit doesn't string a 400 V pole", said.equals("0,0"), said);
+                ctx.check("kits: a 48 V kit doesn't join an 11 kV line (the line's tier, Baughn 2026-11-08)", said.equals("1,0"), said);
+                ctx.check("kits: the line's tier is its kits' (11 kV)", a.lineTier() == VHV && c.lineTier() == VHV, a.lineTier() + "," + c.lineTier());
                 GridLink l = a.gridLinkList.size() == 1 ? a.gridLinkList.iterator().next() : null;
-                ctx.check("kits: a 400 V kit strings two poles 5 blocks apart and loses 5 blocks", l != null && CableItems.blocks(hand) == 5,
+                ctx.check("kits: an 11 kV kit strings two poles 5 blocks apart and loses 5 blocks", l != null && CableItems.blocks(hand) == 5,
                     a.gridLinkList.size() + " links, hand " + CableItems.blocks(hand));
                 if (l == null) return;
                 ctx.check("kits: the line keeps a 5-block piece of the kit, its Rs the 6 mm² cable's", CableItems.blocks(l.cableStack()) == 5
-                    && thick().equals(CableKitItem.specOf(l.cableStack())) && Math.abs(l.rs() - 5 * thick().descriptor(HV).electricalRs) < 1e-9,
+                    && thick().equals(CableKitItem.specOf(l.cableStack())) && Math.abs(l.rs() - 5 * thick().descriptor(VHV).electricalRs) < 1e-9,
                     l.cableStack() + ", rs " + l.rs());
             }
         });

@@ -1,4 +1,4 @@
-// 26.3	2026-11-08T03:05:34.944236295	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-08T15:59:33.925511068	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -242,6 +242,7 @@ b4965ce3977f71a9aa0d7f115ad9fc6106661373 data/eln/advancement/recipes/misc/pid_r
 c15d5c0cc610b6749034d53b6fe5c87c72a784c3 data/eln/advancement/recipes/misc/pink_brush.json
 c22c87bd08ed65c2308e22e1978b06ec035c7d0b data/eln/advancement/recipes/misc/plant_steam_condenser.json
 4a4cb32b42945ddd436f0ebf7fa6ecfff05bbea1 data/eln/advancement/recipes/misc/player_filter.json
+1deb057f1b19edbc5364cd47b3ddfa82ebb3ce1c data/eln/advancement/recipes/misc/pole_streetlight.json
 d1f0e9f45023a237aa17e53beb7259176edf4cf9 data/eln/advancement/recipes/misc/polymeriser.json
 af15506bbf1df0708de0892e348079db76cd76b6 data/eln/advancement/recipes/misc/portable_battery.json
 7c8367399d01fd66c86922ca2985f609d7ce06e0 data/eln/advancement/recipes/misc/portable_condensator.json
@@ -342,7 +343,6 @@ f10a9eefb44cbdb04d4d1f0ca0507bbb07418460 data/eln/advancement/recipes/misc/tree_
 61ab3d5995c6865bb5ee2c140f3156fd26e60b8d data/eln/advancement/recipes/misc/utility_pole.json
 45da0cd5f829bf7dcb0e5bfecc984c9067178cc3 data/eln/advancement/recipes/misc/utility_pole_2.json
 036bce211a26d4b14a24a799461b4d1e26a834f4 data/eln/advancement/recipes/misc/utility_pole_3.json
-aa8fd0f6d50cf3c54d56d97003bfc2ce7a1673bf data/eln/advancement/recipes/misc/utility_pole_w_dc_dc_converter.json
 a30a7b28e36e7bae9045d93e34b4b2d03445a1b9 data/eln/advancement/recipes/misc/variable_dc_dc_converter.json
 6893fed10d74884eb15363bba761e76e78435764 data/eln/advancement/recipes/misc/very_high_voltage_relay.json
 cbd5e648fff3d8500ff78d476e14c6cf6b01a0c1 data/eln/advancement/recipes/misc/very_high_voltage_switch.json
@@ -627,6 +627,7 @@ c5b8082a0f4371b3a9d0d19015a5cb184cc23fcd data/eln/recipe/pid_regulator.json
 c31f1c59279d00c829341217db7ecf75091cf6fa data/eln/recipe/pink_brush.json
 6ea63de7579029a939062d12a7c7930d2b78a4fc data/eln/recipe/plant_steam_condenser.json
 31bea419e6ecfe9febfd542ffead3424dfd77c2b data/eln/recipe/player_filter.json
+3c80941bae44b472e0d93d5fe5ef7a80ec3ed3a5 data/eln/recipe/pole_streetlight.json
 7c239492123b6ff4e3c8f7fd285f7b5ecf6a7c03 data/eln/recipe/polymeriser.json
 e98466c835a24561de034c981fcb9142a1a9d70f data/eln/recipe/portable_battery.json
 6e1ebfac271ea15d5682ebba74d6e3f58b01d1ab data/eln/recipe/portable_condensator.json
@@ -727,7 +728,6 @@ a0578d3014c4046035c4bb4b86acfcd0233f31ac data/eln/recipe/turbine_blade_set.json
 651d22f75e6b8295b7992f229776b4292dffcc6b data/eln/recipe/utility_pole.json
 b204e479cbae894349308593acaaac469f4941ab data/eln/recipe/utility_pole_2.json
 fdb6dd720302e6dca9aafb6aa3bf07a3b7b35a8f data/eln/recipe/utility_pole_3.json
-ca0c29767efaabafadf97eeacd5a22784862a23b data/eln/recipe/utility_pole_w_dc_dc_converter.json
 fa650cba5313ee803be74e3d378890478a3fe3bf data/eln/recipe/variable_dc_dc_converter.json
 9382345c00ecfd2650e8d385d371167c3a2c8b2d data/eln/recipe/very_high_voltage_relay.json
 0483cd4817dee32d1162b7a775cc8156bd14f2f3 data/eln/recipe/very_high_voltage_switch.json

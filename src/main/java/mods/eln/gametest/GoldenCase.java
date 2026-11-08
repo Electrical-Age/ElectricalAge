@@ -229,6 +229,7 @@ final class GoldenCase implements TestCase {
         "Addressable Button", "Addressable Light", "Floor Sensor", "Linear Servo Drive",   // (their address screen)
         "Computer",   // (its terminal, chips and drives)
         "48V Wire Drawing Machine", "230V Wire Drawing Machine",   // (what to make: Wires stage 4)
+        "Utility Pole", "Utility Pole w/DC-DC Converter",   // (its equipment: Baughn 2026-11-08)
         "Steam Turbine", "LP Steam Turbine");   // (the shaft ones' controls, as the 50V/200V's: Baughn 2026-10-29)
 
     static int compare(TestContext ctx, Map<String, JsonObject> golden, String key, Object descriptor) {

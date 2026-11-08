@@ -1,0 +1,79 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Utility Pole w/DC-DC Converter"
+  },
+  {
+   "row": [
+    {
+     "slot": "0"
+    },
+    {
+     "slot": "1"
+    },
+    {
+     "space": 6
+    },
+    {
+     "slot": "2"
+    },
+    {
+     "slot": "3"
+    },
+    {
+     "slot": "4"
+    },
+    {
+     "slot": "5"
+    },
+    {
+     "space": 0,
+     "fill": true
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "text": "gearl",
+     "sample": "Transformer, anchor"
+    },
+    {
+     "space": 0,
+     "fill": true
+    },
+    {
+     "text": "lampsl",
+     "sample": "Lights: N E S W"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "text": "line",
+   "sample": "Line: 11 kV kits, 10.95 kV, 999.9 kW"
+  },
+  {
+   "text": "xfmr",
+   "sample": "Transformer: to 400 V, 205 A, 99% load"
+  },
+  {
+   "text": "lights",
+   "sample": "Streetlights: 4, lit (400 W)"
+  },
+  {
+   "text": "anchor",
+   "sample": "Stasis anchor: keeps running in stopped time"
+  },
+  {
+   "text": "inventory",
+   "sample": "Inventory"
+  },
+  {
+   "inventory": true
+  }
+ ],
+ "gap": 3
+}

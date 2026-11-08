@@ -122,6 +122,13 @@ public final class ElnRegistry {
         ITEMS.registerItem("cable_kit_bus", p -> new mods.eln.node.voxel.CableKitItem(6, p)));
     /** A transformer winding (Wires stage 4, Baughn 2026-11-06): N turns of a wire, made by a wire-drawing machine. */
     public static final DeferredItem<mods.eln.node.voxel.WindingItem> WINDING = ITEMS.registerItem("winding", mods.eln.node.voxel.WindingItem::new);
+    /** Utility pole equipment (Baughn 2026-11-08): a transformer from the wire machine, a streetlight, a stasis anchor. */
+    public static final DeferredItem<mods.eln.gridnode.electricalpole.PoleTransformerItem> POLE_TRANSFORMER =
+        ITEMS.registerItem("pole_transformer", mods.eln.gridnode.electricalpole.PoleTransformerItem::new);
+    public static final DeferredItem<mods.eln.gridnode.electricalpole.PoleGearItem> STREETLIGHT = ITEMS.registerItem("pole_streetlight",
+        p -> new mods.eln.gridnode.electricalpole.PoleGearItem(mods.eln.gridnode.electricalpole.PoleGearItem.Kind.STREETLIGHT, p));
+    public static final DeferredItem<mods.eln.gridnode.electricalpole.PoleGearItem> POLE_ANCHOR = ITEMS.registerItem("pole_stasis_anchor",
+        p -> new mods.eln.gridnode.electricalpole.PoleGearItem(mods.eln.gridnode.electricalpole.PoleGearItem.Kind.ANCHOR, p));
     /** Raw lead and tungsten: what their ores drop, like raw iron (Baughn 2026-10-19: they dropped the ore block, as in
      *  1.7); smelted or blasted to ingots, macerated to dust. */
     public static final DeferredItem<Item> RAW_LEAD = ITEMS.registerSimpleItem("raw_lead");
@@ -358,6 +365,9 @@ public final class ElnRegistry {
         ALL_ITEMS.add(HANDBOOK);
         ALL_ITEMS.add(FIELD_BUS_CABLE);
         ALL_ITEMS.add(WINDING);
+        ALL_ITEMS.add(POLE_TRANSFORMER);
+        ALL_ITEMS.add(STREETLIGHT);
+        ALL_ITEMS.add(POLE_ANCHOR);
         ALL_ITEMS.add(RAW_LEAD);
         ALL_ITEMS.add(RAW_TUNGSTEN);
         ALL_ITEMS.add(CHARCOAL_NUGGET);

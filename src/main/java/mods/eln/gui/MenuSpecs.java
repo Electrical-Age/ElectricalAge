@@ -151,13 +151,29 @@ public final class MenuSpecs {
             SlotSpec.filter(mods.eln.anvil.ElectricalAnvilElement.TOOL, 28, 25, 1, s -> s.isDamageableItem() || s.getMaxStackSize() == 1, BIG, tr("Tool")),
             SlotSpec.filter(mods.eln.anvil.ElectricalAnvilElement.MATERIAL, 86, 25, 64, mods.eln.anvil.ElectricalAnvilElement::materialMayGo, MEDIUM,
                 tr("Repair material"))).publishing(1).inventoryAt(150));
+        // the utility pole (Baughn 2026-11-08): its transformer, stasis anchor and streetlights (north, east, south, west)
+        put(mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor.class, d -> {
+            java.util.List<SlotSpec> slots = new java.util.ArrayList<>();
+            slots.add(SlotSpec.filter(mods.eln.gridnode.electricalpole.ElectricalPoleElement.TRANSFORMER, 8, 25, 1,
+                s -> mods.eln.gridnode.electricalpole.PoleInventory.fits(mods.eln.gridnode.electricalpole.ElectricalPoleElement.TRANSFORMER, s), MEDIUM, tr("Pole transformer")));
+            slots.add(SlotSpec.filter(mods.eln.gridnode.electricalpole.ElectricalPoleElement.ANCHOR, 26, 25, 1,
+                s -> mods.eln.gridnode.electricalpole.PoleInventory.fits(mods.eln.gridnode.electricalpole.ElectricalPoleElement.ANCHOR, s), MEDIUM, tr("Stasis anchor")));
+            String[] sides = {tr("Streetlight facing north"), tr("Streetlight facing east"), tr("Streetlight facing south"), tr("Streetlight facing west")};
+            for (int k = 0; k < 4; k++) {
+                int slot = mods.eln.gridnode.electricalpole.ElectricalPoleElement.LAMP0 + k;
+                slots.add(SlotSpec.filter(slot, 50 + 18 * k, 25, 1, s -> mods.eln.gridnode.electricalpole.PoleInventory.fits(slot, s), MEDIUM, sides[k]));
+            }
+            return MenuSpec.of(slots.toArray(new SlotSpec[0])).publishing(1).inventoryAt(120);
+        });
         // the wire-drawing machines (Baughn 2026-11-06, Wires stage 4): copper, rubber, the kit or winding
         put(mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor.class, d -> MenuSpec.of(
             SlotSpec.filter(mods.eln.transparentnode.wiredrawing.WireDrawingElement.COPPER, 8, 25, 64,
                 mods.eln.transparentnode.wiredrawing.WireDrawingElement::isCopper, MEDIUM, tr("Copper: ingots or dust")),
             SlotSpec.filter(mods.eln.transparentnode.wiredrawing.WireDrawingElement.RUBBER, 26, 25, 64,
                 mods.eln.transparentnode.wiredrawing.WireDrawingElement::isRubber, MEDIUM, tr("Rubber")),
-            SlotSpec.output(mods.eln.transparentnode.wiredrawing.WireDrawingElement.OUT, 86, 25, BIG)).publishing(1).inventoryAt(200));
+            SlotSpec.output(mods.eln.transparentnode.wiredrawing.WireDrawingElement.OUT, 86, 25, BIG),
+            SlotSpec.filter(mods.eln.transparentnode.wiredrawing.WireDrawingElement.CORE, 44, 25, 64,
+                mods.eln.transparentnode.wiredrawing.WireDrawingElement::isCore, MEDIUM, tr("Ferromagnetic core: for pole transformers"))).publishing(1).inventoryAt(200));
         // the robotics computer (Baughn 2026-11-05): 8 chip slots of 1 MB under its terminal, then floppy drives A and B
         put(mods.eln.robotics.computer.ComputerDescriptor.class, d -> {
             java.util.List<SlotSpec> slots = new java.util.ArrayList<>();

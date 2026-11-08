@@ -1,4 +1,4 @@
-// 26.3	2026-11-08T03:05:34.939998485	eln-global/EA models
+// 26.3	2026-11-08T15:59:33.92069558	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -379,6 +379,9 @@ e1c7df200fbe53eff0440d11993e5a25d66567d5 assets/eln/items/pipe_temperature_senso
 73d8a7e3731c0a46b7e6e80712e8ab03d1ab94e2 assets/eln/items/pipe_valve.json
 62aae6d44e8a75521b676252b916b5f601d6e0c1 assets/eln/items/plant_steam_condenser.json
 a222de97919a80552ca8b6461dd1152c42f9343b assets/eln/items/player_filter.json
+26bfab432f9e1bcb1111d6feb0fd1789562f0467 assets/eln/items/pole_stasis_anchor.json
+61751441f3f10271b6cdc0f8f5be8bbb4bec651d assets/eln/items/pole_streetlight.json
+14dc1baab8f7a52d118e590765199bccf7fffda4 assets/eln/items/pole_transformer.json
 abe701e0a88d48177181b5844e9755c8aa5a7372 assets/eln/items/polymeriser.json
 fe78eef8cbad6b2ea4f1ee7ca815c53bd607e714 assets/eln/items/portable_battery.json
 03e549623a3e9b8e499ad90f96537ef46fcf636c assets/eln/items/portable_battery_pack.json
@@ -888,6 +891,9 @@ dfc7e3162421f7f4f1e6a850b22e03a280449386 assets/eln/models/item/pipe_throttle_va
 e094407dc02261dd7493e9998d5a611ecb791c42 assets/eln/models/item/pipe_valve.json
 aea553be1a7403d99f63a810998b9714ed6b7cbf assets/eln/models/item/plant_steam_condenser.json
 4a9d386e1ae640f932b01052c84a1974236d246c assets/eln/models/item/player_filter.json
+30e9051181869446006aa75eee254d4bb3c1422c assets/eln/models/item/pole_stasis_anchor.json
+d052c5145200a41e6dfc7dcad56e4c0b16d503c7 assets/eln/models/item/pole_streetlight.json
+0ccf86a0143c03d6ac7851ac296ad75976afb1ea assets/eln/models/item/pole_transformer.json
 fd15152efd1bcb86ad0588bfdf0828cb401baeec assets/eln/models/item/polymeriser.json
 2719b6d70a7509b09969b17ca426d80df8f6100c assets/eln/models/item/polymeriser_3d.json
 fae3633068c6a0dddbd79198b06f9db6c89fe250 assets/eln/models/item/portable_battery.json
