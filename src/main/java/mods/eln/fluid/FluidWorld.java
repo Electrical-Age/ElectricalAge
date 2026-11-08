@@ -105,6 +105,14 @@ public final class FluidWorld implements IProcess {
     }
 
     /** The edges at a node this step (its ports' couplings and vents). */
+    /** How many pieces n's run is made of (1 for a node in no run with others). */
+    public static int runSize(FluidNode n) {
+        INSTANCE.rebuildIfDirty();
+        FluidNode lump = INSTANCE.lumpOf.get(n);
+        List<FluidNode> ms = lump == null ? null : INSTANCE.lumps.get(lump);
+        return ms == null ? 1 : ms.size();
+    }
+
     public static List<FluidEdge> edgesOf(FluidNode n) {
         List<FluidEdge> out = new ArrayList<>();
         FluidNetwork net = networkOf(n);

@@ -66,9 +66,13 @@ public final class PortBridge {
         return f <= 3 ? w * 17 + y : y * 17 + w;   // (north/south: x then y; west/east: y then z)
     }
 
-    /** Whether a pipe meets it. */
+    /**
+     * Whether a pipe meets it: its run reaches another node, or holds more than its stub. (A pipe from one device's
+     * flange straight to another's is one run of both stubs and the pipe, with no edge out of it: the Steam Cracker's
+     * butadiene into a Polymeriser never left, LabAssistant.)
+     */
     public boolean piped() {
-        return stub != null && !FluidWorld.edgesOf(stub).isEmpty();
+        return stub != null && (FluidWorld.runSize(stub) > 1 || !FluidWorld.edgesOf(stub).isEmpty());
     }
 
     /** Before a fluid step: move between the tank and the pipe (mB moved). T: what goes into the pipe is at T (K). */
