@@ -24,7 +24,7 @@ public class PolymeriserRender extends TransparentNodeElementRender {
         long now = System.nanoTime();
         float dt = Math.min(0.1f, (now - last) / 1e9f);
         last = now;
-        if (running) stir = (stir + 180 * dt) % 360;   // (half a turn a second)
+        if (running) stir = (stir + 270 * dt) % 360;   // (three quarters of a turn a second)
         front.glRotateXnRef();
         desc.draw(powered, running, stir);
     }

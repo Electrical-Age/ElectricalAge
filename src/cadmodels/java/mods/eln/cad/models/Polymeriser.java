@@ -14,7 +14,7 @@ import static mods.eln.cad.models.OilKit.turned;
 /**
  * The Polymeriser (the rubber chain's oil route, 2026-11-07; 230 V blue): a jacketed stirred reactor on a skid, its
  * agitator driven from a motor and gearbox on a lantern frame over the domed head (part stirrer, the coupling and shaft,
- * turns about the vessel's axis while it runs); a Soul Dust hopper on the head's shoulder; a tray of Raw Rubber crumb at
+ * turns about the vessel's axis while it runs: a red disc with a brass bar, so it is seen to turn); a Soul Dust hopper on the head's shoulder; a tray of Raw Rubber crumb at
  * its front foot; the butadiene's blue IN flange on the back (4 px up, centred, labelled); status LEDs over the jacket;
  * power on the two side faces. Drawn by PolymeriserRender. Front XN (x = 0).
  */
@@ -39,11 +39,11 @@ public final class Polymeriser {
         m.add(Mc.tube('y', CX, CZ, R, R + 0.15, 1.0, 1.4, "darksteel", 20));                           // the foot ring
         // the drive: four lantern posts on the head, the gearbox, the motor standing on it, its terminal box
         for (double[] p : new double[][]{{-1.1, -1.1}, {1.1, -1.1}, {-1.1, 1.1}, {1.1, 1.1}})
-            m.add(box(CX + p[0] - 0.2, HEAD, CZ + p[1] - 0.2, CX + p[0] + 0.2, 12.6, CZ + p[1] + 0.2, "darksteel"));
-        m.add(box(CX - 1.6, 12.6, CZ - 1.6, CX + 1.6, 13.8, CZ + 1.6, "castiron"));                    // gearbox
-        m.add(prism('y', CX, CZ, 1.3, 13.8, 15.6, "paint", 14));                                       // motor
-        for (double y : new double[]{14.3, 14.8, 15.3}) m.add(Mc.tube('y', CX, CZ, 1.3, 1.45, y - 0.1, y + 0.1, "darksteel", 14));
-        m.add(box(CX + 1.3, 14.0, CZ - 0.5, CX + 1.9, 14.8, CZ + 0.5, "darksteel"));
+            m.add(box(CX + p[0] - 0.2, HEAD, CZ + p[1] - 0.2, CX + p[0] + 0.2, 13.2, CZ + p[1] + 0.2, "darksteel"));
+        m.add(box(CX - 1.6, 13.2, CZ - 1.6, CX + 1.6, 14.2, CZ + 1.6, "castiron"));                    // gearbox
+        m.add(prism('y', CX, CZ, 1.3, 14.2, 15.9, "paint", 14));                                       // motor
+        for (double y : new double[]{14.7, 15.15, 15.6}) m.add(Mc.tube('y', CX, CZ, 1.3, 1.45, y - 0.1, y + 0.1, "darksteel", 14));
+        m.add(box(CX + 1.3, 14.4, CZ - 0.5, CX + 1.9, 15.2, CZ + 0.5, "darksteel"));
         // the Soul Dust hopper on the head's shoulder, its dust showing
         m.add(box(5.2, 10.6, 9.4, 7.2, 12.4, 11.4, "darksteel"));
         m.add(box(5.4, 12.4, 9.6, 7.0, 12.5, 11.2, "soul_dust").free("Soul Dust heaped in the hopper"));
@@ -68,13 +68,12 @@ public final class Polymeriser {
         return m;
     }
 
-    /** The agitator's coupling (two bolt heads, so it is seen to turn) and shaft between the gearbox and the head. */
+    /** The agitator's shaft between the head and the gearbox, its coupling a red disc with a brass bar across it. */
     static List<Mesh> stirrer() {
         List<Mesh> s = new ArrayList<>();
-        s.add(prism('y', CX, CZ, 0.3, HEAD, 12.6, "steel", 10));
-        s.add(prism('y', CX, CZ, 0.7, 12.0, 12.3, "darksteel", 12).free("the coupling, on the agitator shaft"));
-        s.add(prism('y', CX + 0.45, CZ, 0.12, 12.3, 12.42, "brass", 6).free("a coupling bolt head"));
-        s.add(prism('y', CX - 0.45, CZ, 0.12, 12.3, 12.42, "brass", 6).free("a coupling bolt head"));
+        s.add(prism('y', CX, CZ, 0.3, HEAD, 13.2, "steel", 10));
+        s.add(prism('y', CX, CZ, 0.85, 12.2, 12.5, "red", 14).free("the coupling's disc, on the agitator shaft"));
+        s.add(box(CX - 0.8, 12.5, CZ - 0.15, CX + 0.8, 12.75, CZ + 0.15, "brass").free("the coupling's driving bar, on its disc"));
         return s;
     }
 
@@ -85,7 +84,7 @@ public final class Polymeriser {
         n.part("ledpower", l.get(0));
         n.part("ledrun", l.get(1));
         n.part("stirrer", stirrer());
-        n.origin("stirrer", CX, 12.0, CZ);
+        n.origin("stirrer", CX, 12.5, CZ);
         return List.of(n);
     }
 }
