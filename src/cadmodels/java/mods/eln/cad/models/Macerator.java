@@ -235,7 +235,7 @@ public final class Macerator {
         a.part("ledrun", la.get(1));
         a.part("rot1", roll(ROLLS_A, 0, 2.6, 14.0, "steel"));
         a.part("rot2", roll(ROLLS_A, 1, 2.6, 14.0, "steel"));
-        a.origin("rot1", ROLLS_A.x1, ROLLS_A.y, 8.0).origin("rot2", ROLLS_A.x2, ROLLS_A.y, 8.0);
+        a.origin("rot1", ROLLS_A.x1, ROLLS_A.y, 8.0).origin("rot2", ROLLS_A.x2, ROLLS_A.y, 8.0).spin("rot1", 'z').spin("rot2", 'z');
         out.add(a);
         NodeModel b = new NodeModel("maceratorb", OilKit.PAINT_200V);
         List<List<Mesh>> lb = new ArrayList<>();
@@ -253,7 +253,7 @@ public final class Macerator {
         r1.addAll(flywheel(ROLLS_B));
         b.part("rot1", r1);
         b.part("rot2", roll(ROLLS_B, 1, 1.2, 13.4, "steel"));
-        b.origin("rot1", ROLLS_B.x1, ROLLS_B.y, 8.0).origin("rot2", ROLLS_B.x2, ROLLS_B.y, 8.0);
+        b.origin("rot1", ROLLS_B.x1, ROLLS_B.y, 8.0).origin("rot2", ROLLS_B.x2, ROLLS_B.y, 8.0).spin("rot1", 'z').spin("rot2", 'z');
         out.add(b);
         return out;
     }

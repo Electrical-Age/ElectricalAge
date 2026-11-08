@@ -2,6 +2,7 @@ package mods.eln.cad.models;
 
 import org.erisia.cad.Checker;
 import org.erisia.cad.Face;
+import org.erisia.cad.Mesh;
 import org.erisia.cad.Model;
 import org.erisia.cad.Solid;
 import org.erisia.cad.obj.ObjWriter;
@@ -114,11 +115,74 @@ public final class Catalog {
         }
     }
 
+    /** The gap (px) a belt's straight runs keep from everything else, and how far into a run its pulleys may reach. */
+    static final double BELT_GAP = 0.3;
+
+    /**
+     * What moves: each declared spinning part swept a full turn against main (Motion.sweep), and a belt (part beltlink's
+     * .txt: ax ay ar bx by br, in px, the link part's z extent its width) whose straight runs, with BELT_GAP round them,
+     * must clear every other solid (Motion.clearance). The runs stop short of the pulleys by the length over which a rim
+     * comes within the gap of the belt (sqrt(2 r gap)).
+     */
+    static List<Checker.Issue> motion(NodeModel n) {
+        List<Checker.Issue> out = new ArrayList<>();
+        Model main = n.parts.get("main");
+        for (var e : n.spins.entrySet()) {
+            Model p = n.parts.get(e.getKey());
+            double[] o = n.origins.get(e.getKey());
+            if (p == null || o == null || main == null) {
+                out.add(new Checker.Issue("swept", "part " + e.getKey() + " is declared turning but has no part or origin"));
+                continue;
+            }
+            out.addAll(org.erisia.cad.Motion.sweep(e.getKey(), p.solids, o, e.getValue(), main.solids));
+        }
+        Map<String, Double> belt = new java.util.HashMap<>();
+        boolean in = false;
+        for (String line : n.txt) {
+            String[] w = line.split(" ");
+            if (w[0].equals("o")) in = w.length > 1 && w[1].equals("beltlink");
+            else if (in && w[0].equals("f") && w.length > 2) belt.put(w[1], Double.parseDouble(w[2]));
+        }
+        Model link = n.parts.get("beltlink");
+        if (link != null && belt.containsKey("ar")) {
+            double z0 = Double.MAX_VALUE, z1 = -Double.MAX_VALUE;
+            for (Solid s : link.solids)
+                for (var f : s.faces())
+                    for (int i = 0; i < f.n; i++) {
+                        z0 = Math.min(z0, f.xyz[3 * i + 2]);
+                        z1 = Math.max(z1, f.xyz[3 * i + 2]);
+                    }
+            double ax = belt.get("ax"), ay = belt.get("ay"), ra = belt.get("ar"), bx = belt.get("bx"), by = belt.get("by"), rb = belt.get("br");
+            double dx = bx - ax, dy = by - ay, d = Math.hypot(dx, dy), base = Math.atan2(dy, dx), off = Math.acos((ra - rb) / d);
+            double half = 0.15, ta = Math.sqrt(2 * ra * BELT_GAP) + 0.2, tb = Math.sqrt(2 * rb * BELT_GAP) + 0.2;
+            List<Mesh> env = new ArrayList<>();
+            for (int sgn : new int[]{-1, 1}) {
+                double ang = base + sgn * off;
+                double[] nn = Mc.v(Math.cos(ang), Math.sin(ang), 0);
+                double[] p0 = Mc.v(ax + ra * nn[0], ay + ra * nn[1], 0), p1 = Mc.v(bx + rb * nn[0], by + rb * nn[1], 0);
+                double len = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]);
+                double[] t = Mc.v((p1[0] - p0[0]) / len, (p1[1] - p0[1]) / len, 0);
+                double l = (len - ta - tb) / 2;
+                if (l <= 0) continue;
+                double mid = (ta - tb) / 2;
+                env.add(OilKit.obox(Mc.v((p0[0] + p1[0]) / 2 + t[0] * mid, (p0[1] + p1[1]) / 2 + t[1] * mid, (z0 + z1) / 2), t, nn, Mc.v(0, 0, 1),
+                    l, half + BELT_GAP, (z1 - z0) / 2 + 0.1, "rubber"));
+            }
+            List<Solid> others = new ArrayList<>();
+            for (var e : n.parts.entrySet())
+                if (!e.getKey().equals("beltlink") && !e.getKey().equals("beltmark")) others.addAll(e.getValue().solids);
+            out.addAll(org.erisia.cad.Motion.clearance("the belt (" + BELT_GAP + " px gap)", env, others));
+        }
+        return out;
+    }
+
     /** The checker's issues for every catalog model, as lines (empty: all pass). */
     public static List<String> check() {
         List<String> out = new ArrayList<>();
-        for (NodeModel n : nodes())
+        for (NodeModel n : nodes()) {
             for (Checker.Issue is : Checker.check(whole(n))) out.add(n.name + ": " + is);
+            for (Checker.Issue is : motion(n)) out.add(n.name + ": " + is);
+        }
         for (BlockModel b : blocks())
             for (Checker.Issue is : Checker.check(b.model())) out.add(b.name() + ": " + is);
         return out;

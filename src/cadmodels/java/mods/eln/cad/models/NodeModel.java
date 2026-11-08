@@ -23,6 +23,9 @@ public final class NodeModel {
     /** Material -> palette entry, where not the same name ("paint" -> the device's paint). */
     public final Map<String, String> palette = new LinkedHashMap<>();
     public boolean writeHitbox;
+    /** Parts that turn full circles, and about which axis (0 x, 1 y, 2 z) through their origin: the checker sweeps them
+     *  (org.erisia.cad.Motion.sweep) against main. */
+    public final Map<String, Integer> spins = new LinkedHashMap<>();
 
     public NodeModel(String name, String paint) {
         this.name = name;
@@ -38,6 +41,12 @@ public final class NodeModel {
 
     public NodeModel origin(String part, double x, double y, double z) {
         origins.put(part, new double[]{x, y, z});
+        return this;
+    }
+
+    /** The part turns full circles about axis ('x', 'y' or 'z') through its origin (for the checker's sweep). */
+    public NodeModel spin(String part, char axis) {
+        spins.put(part, axis - 'x');
         return this;
     }
 

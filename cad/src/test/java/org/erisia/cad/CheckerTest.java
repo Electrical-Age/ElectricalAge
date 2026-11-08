@@ -195,4 +195,26 @@ public class CheckerTest {
         assertEquals(1, got.size(), got.toString());
         assertTrue(got.get(0).contains("loose"), got.toString());
     }
+
+    @Test
+    void sweepFindsWhatATurningPartHits() {
+        List<Solid> arm = List.of(new Box(0, -0.5, -0.5, 10, 0.5, 0.5));                  // an arm along x, turning about z
+        Solid inWay = new Box(0.5, 5, -0.4, 1.5, 6, 0.4).named("inway");                    // clear at rest, inside its circle
+        Solid beyond = new Box(11, 0, -0.4, 12, 1, 0.4).named("beyond");                     // outside its reach
+        Solid behind = new Box(0.5, 5, 2, 1.5, 6, 3).named("behind");                        // beside its plane
+        Solid bearing = new Box(-1, -1, -1, 1, 1, -0.4).named("bearing");                    // round its root at rest
+        List<String> got = Motion.sweep("the arm", arm, new double[]{0, 0, 0}, 2, List.of(inWay, beyond, behind, bearing)).stream()
+            .map(Checker.Issue::toString).toList();
+        assertEquals(1, got.size(), got.toString());
+        assertTrue(got.get(0).contains("inway"), got.toString());
+    }
+
+    @Test
+    void clearanceFindsWhatABeltRunsThrough() {
+        List<Solid> run = List.of(new Box(0, 0, 0, 10, 0.6, 1));
+        Solid box = new Box(4, 0.5, 0, 6, 2, 1).named("box"), clear = new Box(4, 1, 0, 6, 2, 1).named("clear");
+        List<String> got = Motion.clearance("the belt", run, List.of(box, clear)).stream().map(Checker.Issue::toString).toList();
+        assertEquals(1, got.size(), got.toString());
+        assertTrue(got.get(0).contains("box"), got.toString());
+    }
 }

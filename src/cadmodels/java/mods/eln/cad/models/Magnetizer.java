@@ -153,7 +153,7 @@ public final class Magnetizer {
         a.part("rot", drumA());
         a.part("ledpower", la.get(0));
         a.part("ledrun", la.get(1));
-        a.origin("rot", 8.0, AY, 8.0);
+        a.origin("rot", 8.0, AY, 8.0).spin("rot", 'z');
         items(a, new double[]{8.0, AY, 8.0});
         out.add(a);
         NodeModel b = new NodeModel("magnetizerb", OilKit.PAINT_200V);
@@ -162,7 +162,7 @@ public final class Magnetizer {
         b.part("rot", fanB());
         b.part("ledpower", lb.get(0));
         b.part("ledrun", lb.get(1));
-        b.origin("rot", FX, FY, FZ);
+        b.origin("rot", FX, FY, FZ).spin("rot", 'z');
         items(b, new double[]{PX, (GAP0 + GAP1) / 2 - 1.0, PZ});
         out.add(b);
         return out;

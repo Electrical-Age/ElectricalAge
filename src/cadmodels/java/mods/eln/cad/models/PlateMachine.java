@@ -140,7 +140,7 @@ public final class PlateMachine {
         a.part("rot2", roll(AX, AY2, AR, 4.3, 11.7, 2.4, 13.6));
         a.part("ledpower", la.get(0));
         a.part("ledrun", la.get(1));
-        a.origin("rot1", AX, AY1, 8.0).origin("rot2", AX, AY2, 8.0);
+        a.origin("rot1", AX, AY1, 8.0).origin("rot2", AX, AY2, 8.0).spin("rot1", 'z').spin("rot2", 'z');
         items(a, new double[]{2.6, AY1 + AR, 8.0}, new double[]{13.4, AY1 + AR, 8.0});
         out.add(a);
         NodeModel b = new NodeModel("platemachineb", OilKit.PAINT_200V);
@@ -152,7 +152,8 @@ public final class PlateMachine {
         b.part("rot4", roll(BX, BY4, BBR, 4.9, 11.1, 3.2, 12.8));
         b.part("ledpower", lb.get(0));
         b.part("ledrun", lb.get(1));
-        b.origin("rot1", BX, BY1, 8.0).origin("rot2", BX, BY2, 8.0).origin("rot3", BX, BY3, 8.0).origin("rot4", BX, BY4, 8.0);
+        b.origin("rot1", BX, BY1, 8.0).origin("rot2", BX, BY2, 8.0).origin("rot3", BX, BY3, 8.0).origin("rot4", BX, BY4, 8.0)
+            .spin("rot1", 'z').spin("rot2", 'z').spin("rot3", 'z').spin("rot4", 'z');
         items(b, new double[]{2.4, BY1 + BR, 8.0}, new double[]{13.6, BY1 + BR, 8.0});
         b.txt.addAll(List.of("o rot3", "f ratio " + Catalog.fmt(BR / BBR), "o rot4", "f ratio " + Catalog.fmt(BR / BBR)));
         out.add(b);

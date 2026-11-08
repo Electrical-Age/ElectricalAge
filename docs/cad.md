@@ -26,6 +26,12 @@ towergen) for geometry that is checked by tests.
     another: its whole section). A solid meant to float says so with `free(reason)`. Coaxial solids of revolution (`Mesh.coax`, set by `Mc.tube` and straight `Mc.prism`) also join when one sits on the other's skin (by their common length) or they butt end to end (by the ring they share), which the hull contact can't see: a band on a former, a flange on a tube's end; VoxelGeometry makes each part a
     body of its own;
   - a decal that is meant to lie over a surface says so with `layer(n)` (n x 0.1 px out).
+  - swept (`Motion.sweep`): a part declared turning (`NodeModel.spin(part, axis)`, about its origin) swept a full
+    turn against main: a solid clear of it at rest but inside the ring a piece of it sweeps (cut to that piece's extent
+    along the axis) is in its way. Solids touching it at rest (bearings) are left out;
+  - clearance (`Motion.clearance`): a belt (part `beltlink`'s .txt, as `mods.eln.anim.Belt` reads it) keeps
+    `Catalog.BELT_GAP` (0.3 px) between its straight runs and every other solid; the runs stop short of the pulleys
+    by the length over which a rim comes that close;
   `Checker.faces` also reads other engines' output (polygon soups), which is how the old geometry was surveyed.
 - **OBJ targets** (`obj.ObjWriter`): `block` writes a neoforge:obj block model (0..1, usemtl per material, planar UVs
   at vanilla density); `eln` writes an EA Obj3D node model (centred, parts, one atlas of 16 px cells, UVs inset 0.3
