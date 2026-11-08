@@ -127,6 +127,7 @@ public final class LabCommands {
                     return n;
                 })))
                 .then(Commands.literal("protection").executes(c -> demo(c.getSource(), () -> protection(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("poles").executes(c -> demo(c.getSource(), () -> poles(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("wiredrawing").executes(c -> demo(c.getSource(), () -> wiredrawing(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cores").executes(c -> demo(c.getSource(), () -> cores(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("rubber").executes(c -> demo(c.getSource(), () -> rubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -518,6 +519,40 @@ public final class LabCommands {
         t.getInventory().setChanged();
         src.sendSuccess(() -> Component.literal("wiredrawing: 48V machine " + pos.toShortString() + ", 230V machine " + p2.toShortString()
             + ", converter (cheap core, 48 V on its left, a 230 V cable on its right) " + p3.toShortString()), false);
+        return 1;
+    }
+
+    /**
+     * The modular utility pole (Baughn 2026-11-08), three poles 8 apart along +x strung with 11 kV kits: A fed 48 V at its
+     * foot through a 48 V transformer (so the line is at 11 kV), B with a 230 V transformer, four streetlights and a stasis
+     * anchor, C with one streetlight facing south and nothing else.
+     */
+    static int poles(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        int lv = 4 + (32 << 6);
+        var pe = new mods.eln.gridnode.electricalpole.ElectricalPoleElement[3];
+        for (int k = 0; k < 3; k++)
+            pe[k] = (mods.eln.gridnode.electricalpole.ElectricalPoleElement) placeTransparent(level, player, "Utility Pole", pos.offset(8 * k, 0, 0));
+        feed(level, player, pos, mods.eln.misc.Direction.ZN, lv, mods.eln.Eln.LVU);
+        var inv = pe[0].getInventory();
+        inv.setItem(mods.eln.gridnode.electricalpole.ElectricalPoleElement.TRANSFORMER, mods.eln.gridnode.electricalpole.PoleTransformerItem.make(1, 8, 2));
+        inv.setChanged();
+        inv = pe[1].getInventory();
+        inv.setItem(mods.eln.gridnode.electricalpole.ElectricalPoleElement.TRANSFORMER, mods.eln.gridnode.electricalpole.PoleTransformerItem.make(2, 8, 1));
+        inv.setItem(mods.eln.gridnode.electricalpole.ElectricalPoleElement.ANCHOR, new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.POLE_ANCHOR.get()));
+        for (int k = 0; k < 4; k++)
+            inv.setItem(mods.eln.gridnode.electricalpole.ElectricalPoleElement.LAMP0 + k, new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.STREETLIGHT.get()));
+        inv.setChanged();
+        inv = pe[2].getInventory();
+        inv.setItem(mods.eln.gridnode.electricalpole.ElectricalPoleElement.LAMP0 + 2, new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.STREETLIGHT.get()));
+        inv.setChanged();
+        var spec = new mods.eln.node.voxel.CableSpec(6, mods.eln.node.voxel.CableSpec.preset(4).colour());
+        for (int k = 0; k < 2; k++)
+            mods.eln.gridnode.GridLink.addLink(pe[k], pe[k + 1], mods.eln.misc.Direction.XP, mods.eln.misc.Direction.XN,
+                mods.eln.node.voxel.CableKitItem.kit(4, spec, 8 * 16), 8 * spec.descriptor(4).electricalRs);
+        src.sendSuccess(() -> Component.literal("poles: A (48 V fed, 48 V transformer) " + pos.toShortString() + ", B (230 V transformer, 4 lights, anchor) "
+            + pos.offset(8, 0, 0).toShortString() + ", C (a light facing south) " + pos.offset(16, 0, 0).toShortString()), false);
         return 1;
     }
 
