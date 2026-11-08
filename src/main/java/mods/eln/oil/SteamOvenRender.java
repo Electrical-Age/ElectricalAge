@@ -1,6 +1,5 @@
 package mods.eln.oil;
 
-import mods.eln.client.FrameTime;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -18,7 +17,7 @@ public class SteamOvenRender extends TransparentNodeElementRender {
     public boolean powered;
     final RcInterpolator steam = new RcInterpolator(1.5f);
     ItemEntity entityItemIn;
-    float due;
+    final mods.eln.anim.Emitter plume = new mods.eln.anim.Emitter();
     static final java.util.Random RND = new java.util.Random();
 
     public SteamOvenRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
@@ -34,23 +33,17 @@ public class SteamOvenRender extends TransparentNodeElementRender {
 
     @Override
     public void refresh(float deltaT) {
-        progress = Math.min(1, progress + perSecond * FrameTime.getNotCaped2());
+        progress = Math.min(1, progress + perSecond * deltaT);
         steam.step(deltaT);
         var level = tileEntity.getLevel();
         float[] v = desc.vent();
-        if (level == null || v == null || steam.get() < 0.02f) return;
-        due += deltaT * 8 * Math.min(1.5f, steam.get());   // (the steam it doesn't use: a lively plume)
-        double th = Math.toRadians(switch (front) {
-            case XP -> 180;
-            case ZP -> 90;
-            case ZN -> 270;
-            default -> 0;
-        });
-        double c = Math.cos(th), s = Math.sin(th);
-        var p = tileEntity.getBlockPos();
-        double x = p.getX() + 0.5 + v[0] * c + v[2] * s, y = p.getY() + 0.5 + v[1], z = p.getZ() + 0.5 - v[0] * s + v[2] * c;
-        while (due >= 1) {
-            due -= 1;
+        // (the steam it doesn't use: a lively plume)
+        int n = plume.step(deltaT, v != null && steam.get() >= 0.02f ? 8 * Math.min(1.5f, steam.get()) : 0);
+        if (level == null || n == 0) return;
+        double th = mods.eln.anim.Emitter.turn(front), c = Math.cos(th), s = Math.sin(th);
+        var at = mods.eln.anim.Emitter.vent(tileEntity.getBlockPos(), front, v[0], v[1], v[2]);
+        double x = at.x, y = at.y, z = at.z;
+        for (int i = 0; i < n; i++) {
             double jx = (RND.nextDouble() - 0.5) * 0.06, jz = (RND.nextDouble() - 0.5) * 0.06;
             // out of the back face (model +x), then rising: a boiler set on top doesn't hide it (AdventurAgent)
             double out = 0.04 + RND.nextDouble() * 0.02;

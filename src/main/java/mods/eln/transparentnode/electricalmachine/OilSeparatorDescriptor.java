@@ -38,13 +38,7 @@ public class OilSeparatorDescriptor extends MaceratorDescriptor {
               net.minecraft.world.entity.item.ItemEntity outEntity, float powerFactor, float processState) {
         if (oil != null && render != null && render.basin > 0.005f) {   // (no render: the item)
             // (a sliver over the floor at the least, not in its plane)
-            float share = 0.05f + 0.95f * Math.min(1, render.basin), oy = oil.getFloat("originY");
-            mods.eln.gl.GL11.glPushMatrix();
-            mods.eln.gl.GL11.glTranslatef(0, oy, 0);
-            mods.eln.gl.GL11.glScalef(1, share, 1);
-            mods.eln.gl.GL11.glTranslatef(0, -oy, 0);
-            oil.draw();
-            mods.eln.gl.GL11.glPopMatrix();
+            mods.eln.anim.Fill.drawAbout(oil, oil.getFloat("originY"), 0.05f + 0.95f * Math.min(1, render.basin));
         }
         super.draw(render, handle, inEntity, outEntity, powerFactor, processState);
     }

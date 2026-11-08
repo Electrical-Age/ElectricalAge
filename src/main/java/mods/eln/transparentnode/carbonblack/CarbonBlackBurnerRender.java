@@ -11,7 +11,7 @@ import java.io.IOException;
 public class CarbonBlackBurnerRender extends TransparentNodeElementRender {
     final CarbonBlackBurnerDescriptor desc;
     boolean burning;
-    float smokeDue;
+    final mods.eln.anim.Emitter smoke = new mods.eln.anim.Emitter();
 
     public CarbonBlackBurnerRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
@@ -27,15 +27,14 @@ public class CarbonBlackBurnerRender extends TransparentNodeElementRender {
     @Override
     public void refresh(float deltaT) {
         var level = tileEntity.getLevel();
-        if (!burning || level == null) return;
-        smokeDue += deltaT * 6;
+        int n = smoke.step(deltaT, burning ? 6 : 0);
+        if (level == null || n == 0) return;
         var p = tileEntity.getBlockPos();
         // (the stack's top, in the block's frame: the model's x runs from the front to the back; its z is on the centre line)
         var back = front.back().toEnumFacing();
         double off = (CarbonBlackBurnerDescriptor.STACK_X - 8) / 16.0;
         double[] xz = {0.5 + back.getStepX() * off, 0.5 + back.getStepZ() * off};
-        while (smokeDue >= 1) {
-            smokeDue -= 1;
+        for (int i = 0; i < n; i++) {
             double jx = (Math.random() - 0.5) * 0.1, jz = (Math.random() - 0.5) * 0.1;
             level.addParticle(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE, p.getX() + xz[0] + jx, p.getY() + 1.02, p.getZ() + xz[1] + jz, 0, 0.07, 0);
         }

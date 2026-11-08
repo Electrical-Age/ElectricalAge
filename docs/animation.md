@@ -57,10 +57,11 @@ code on purpose.
 | Transformer, lamp supply | casing doors / window opening when a player is near | `Travel.spring` | lib |
 | Timeout | dial running down | client countdown | own |
 | Teleporter | doors (max speed), gyro, blue fades, blinking LEDs | `PhysicalInterpolator`, `RcInterpolator` | own |
-| Compact turbine, steam generator, steam oven, anvil, macerator, flare stack, heat furnaces, carbon black burner | particles | due-accumulators, four copies of the vent rotation | own |
+| Steam oven (plume out of its back), anvil (weld sparks), flare stack, heat furnace and fuel heat furnace (stack smoke), carbon black burner | particles | `Emitter`, `Emitter.vent`/`turn` | lib |
 | Heat furnace, fuel heat furnace | flicker | hand-written | own |
 | Switch, VU meter, gate sources, fire detector, source, lamp supply, entity sensor, emergency lamp, redstone in/out, bus button/light/floor sensor, turret, data logger | LEDs with halos or mixed states | inline | own |
-| Boiler, tanks, oil separator | levels | hand-written scale | own |
+| Boiler (gauge glass), oil separator (basin) | levels | `Fill` | lib |
+| Tanks | layered liquid columns | `TankDescriptor.drawScaled` (layers) | own |
 | Wind turbine halo, teleporter, fire detector, math chip, auto miner, battery charger | blinking | four different clocks | own |
 | Shafts (all shaft parts, turbines, generator, motor) | rotors | `log(rads+1)/log(1.2)` deg-rate, unsmoothed | special: Baughn's 2015 curve (slow shafts turn visibly, fast ones don't strobe) |
 | Energy meter | disk, odometer | client integration of power | special |

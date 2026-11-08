@@ -24,14 +24,20 @@ public final class Emitter {
         return n;
     }
 
-    /** The model point (x, y, z: block units from the centre, model frame) in the world, for the block at pos facing front. */
-    public static Vec3 vent(BlockPos pos, Direction front, double x, double y, double z) {
-        double th = Math.toRadians(switch (front) {
+    /** How far the model is turned about y for a device facing front (radians; as glRotateXnRef turns it): XN 0, ZP 90,
+     *  XP 180, ZN 270 degrees. A model direction (dx, dz) is (dx cos + dz sin, -dx sin + dz cos) in the world. */
+    public static double turn(Direction front) {
+        return Math.toRadians(switch (front) {
             case XP -> 180;
             case ZP -> 90;
             case ZN -> 270;
             default -> 0;
         });
+    }
+
+    /** The model point (x, y, z: block units from the centre, model frame) in the world, for the block at pos facing front. */
+    public static Vec3 vent(BlockPos pos, Direction front, double x, double y, double z) {
+        double th = turn(front);
         double c = Math.cos(th), s = Math.sin(th);
         return new Vec3(pos.getX() + 0.5 + x * c + z * s, pos.getY() + 0.5 + y, pos.getZ() + 0.5 - x * s + z * c);
     }

@@ -15,7 +15,7 @@ import java.util.Set;
 public class FlareStackRender extends TransparentNodeElementRender {
     final FlareStackDescriptor desc;
     String burning = "";
-    double due;
+    final mods.eln.anim.Emitter puffs = new mods.eln.anim.Emitter();
     static final Random RND = new Random();
     static final Set<String> HEAVY = Set.of("heavyoil", "residue", "crude_oil", "reservoir_oil", "creosote", "oil", "lava", "tar");
     static final Set<String> VAPOUR = Set.of("steam", "ic2steam", "water");
@@ -56,12 +56,11 @@ public class FlareStackRender extends TransparentNodeElementRender {
         super.refresh(deltaT);
         Look l = look(burning);
         var level = tileEntity.getLevel();
-        if (l == Look.NONE || level == null) return;
-        due += deltaT * 20;   // ~20 puffs a second
+        int n = puffs.step(deltaT, l == Look.NONE ? 0 : 20);   // ~20 puffs a second
+        if (level == null || n == 0) return;
         var p = tileEntity.getBlockPos();
         double x = p.getX() + 0.5, y = p.getY() + 1.05, z = p.getZ() + 0.5;
-        while (due >= 1) {
-            due -= 1;
+        for (int i = 0; i < n; i++) {
             double jx = (RND.nextDouble() - 0.5) * 0.18, jz = (RND.nextDouble() - 0.5) * 0.18;   // inside the tip (r 1.75 px)
             switch (l) {
                 case VAPOUR -> level.addParticle(ParticleTypes.CLOUD, x + jx, y, z + jz, jx * 0.1, 0.12, jz * 0.1);

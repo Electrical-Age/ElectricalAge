@@ -48,16 +48,7 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
             if (p != null) p.draw();
         }
         var level = obj.getPart("level");
-        if (level != null && fill > 0.01f) {
-            // (the column is modelled half the glass high, about its foot)
-            float ox = level.getFloat("originX"), oy = level.getFloat("originY"), oz = level.getFloat("originZ");
-            GL11.glPushMatrix();
-            GL11.glTranslatef(ox, oy, oz);
-            GL11.glScalef(1, 2 * Math.min(1, fill), 1);
-            GL11.glTranslatef(-ox, -oy, -oz);
-            level.draw();
-            GL11.glPopMatrix();
-        }
+        if (level != null && fill > 0.01f) mods.eln.anim.Fill.draw(level, 2 * Math.min(1, fill));   // (the column is modelled half the glass high, about its foot)
         var needle = obj.getPart("needle");
         if (needle != null) needle.draw(-135 + 270 * Math.max(0, Math.min(1, celsius / DIAL_MAX_C)), 1, 0, 0);
     }

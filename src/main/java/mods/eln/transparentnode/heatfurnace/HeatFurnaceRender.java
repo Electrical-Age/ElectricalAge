@@ -20,7 +20,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
     public boolean lighting;
     /** Smoke up its stack (burning, nothing piped on its flue's flange). */
     boolean smoking;
-    private float smokeDue;
+    private final mods.eln.anim.Emitter smoke = new mods.eln.anim.Emitter();
 
 
     double temperature;
@@ -67,12 +67,11 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
     public void refresh(float deltaT) {
         flicker = (flicker + deltaT * 7) % (float) (20 * Math.PI);
         var level = tileEntity.getLevel();
-        if (!smoking || level == null) return;
         // (smoke out of the stack's open flange, more of it the harder it burns)
-        smokeDue += deltaT * (2 + 10 * fire);
+        int n = smoke.step(deltaT, smoking ? 2 + 10 * fire : 0);
+        if (level == null || n == 0) return;
         var p = tileEntity.getBlockPos();
-        while (smokeDue >= 1) {
-            smokeDue -= 1;
+        for (int i = 0; i < n; i++) {
             double jx = (Math.random() - 0.5) * 0.12, jz = (Math.random() - 0.5) * 0.12;
             level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, p.getX() + 0.5 + jx, p.getY() + 1.02, p.getZ() + 0.5 + jz, 0, 0.06, 0);
         }

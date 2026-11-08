@@ -24,7 +24,7 @@ public class ElectricalAnvilRender extends TransparentNodeElementRender {
     public String pendingName;
     public final Map<String, Float> credit = new LinkedHashMap<>();
     public ItemStack tool = ItemStack.EMPTY;
-    float due;
+    final mods.eln.anim.Emitter sparks = new mods.eln.anim.Emitter();
     static final java.util.Random RND = new java.util.Random();
 
     public ElectricalAnvilRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
@@ -66,19 +66,11 @@ public class ElectricalAnvilRender extends TransparentNodeElementRender {
     public void refresh(float deltaT) {
         var level = tileEntity.getLevel();
         float[] v = desc.point("spark");
-        if (!welding || level == null || v == null) return;
-        due += deltaT * 30;
-        double th = Math.toRadians(switch (front) {
-            case XP -> 180;
-            case ZP -> 90;
-            case ZN -> 270;
-            default -> 0;
-        });
-        double c = Math.cos(th), s = Math.sin(th);
-        var p = tileEntity.getBlockPos();
-        double x = p.getX() + 0.5 + v[0] * c + v[2] * s, y = p.getY() + 0.5 + v[1], z = p.getZ() + 0.5 - v[0] * s + v[2] * c;
-        while (due >= 1) {
-            due -= 1;
+        int n = sparks.step(deltaT, welding && v != null ? 30 : 0);
+        if (level == null || n == 0) return;
+        var at = mods.eln.anim.Emitter.vent(tileEntity.getBlockPos(), front, v[0], v[1], v[2]);
+        double x = at.x, y = at.y, z = at.z;
+        for (int i = 0; i < n; i++) {
             double vx = (RND.nextDouble() - 0.5) * 0.25, vz = (RND.nextDouble() - 0.5) * 0.25;
             level.addParticle(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, x, y, z, vx, 0.05 + RND.nextDouble() * 0.15, vz);
         }

@@ -415,7 +415,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     var smoking = false
     /** Burning crude or residue: thick black smoke. */
     var sooty = false
-    private var smokeDue = 0f
+    private val smoke = mods.eln.anim.Emitter()
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
         override fun getPitch() = FuelBurnerDescriptor.pitchForType(type)
@@ -439,13 +439,11 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
 
     override fun refresh(deltaT: Float) {
         flicker = (flicker + deltaT * 11) % (20 * Math.PI).toFloat()
-        val level = tileEntity.level ?: return
-        if (!smoking) return
         // (smoke out of the stack's open flange, more of it the harder it burns)
-        smokeDue += deltaT * (2 + 10 * fire)
+        val n = smoke.step(deltaT.toDouble(), if (smoking) (2 + 10 * fire).toDouble() else 0.0)
+        val level = tileEntity.level ?: return
         val p = tileEntity.blockPos
-        while (smokeDue >= 1) {
-            smokeDue -= 1
+        repeat(n) {
             val jx = (Math.random() - 0.5) * 0.12
             val jz = (Math.random() - 0.5) * 0.12
             level.addParticle(if (sooty) net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE else net.minecraft.core.particles.ParticleTypes.SMOKE,
