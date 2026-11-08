@@ -24,7 +24,8 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
 
     EggIncubatorDescriptor descriptor;
 
-    float alpha = 0;
+    /** The egg turns on its nest, a sixth of a turn a second. */
+    final mods.eln.anim.Spin turn = new mods.eln.anim.Spin(60, 0).speed(1);
 
     byte eggStackSize;
 
@@ -44,7 +45,7 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
         GL11.glPushMatrix();
         front.glRotateXnRef();
         if (egg != null) {
-            UtilsClient.drawEntityItem(egg, 0.0f, -0.25f, 0.13f, alpha, 0.7f);   // 1.12: -0.3, 0.6 (half sunk in the nest here)
+            UtilsClient.drawEntityItem(egg, 0.0f, -0.25f, 0.13f, turn.deg(), 0.7f);   // 1.12: -0.3, 0.6 (half sunk in the nest here)
         }
         descriptor.draw(eggStackSize, (float) (voltage / descriptor.nominalVoltage));
         GL11.glPopMatrix();
@@ -53,8 +54,7 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
 
     @Override
     public void refresh(float deltaT) {
-        alpha += deltaT * 60;
-        if (alpha >= 360) alpha -= 360;
+        turn.step(deltaT);
     }
 
     @Override

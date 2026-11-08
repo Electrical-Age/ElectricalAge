@@ -51,16 +51,17 @@ class ElectricalFireDetectorRender(tileEntity: SixNodeEntity, side: Direction, d
         }
     }
 
-    var time = 0f
+    /** On standby the LED flashes a fifth of a second every five seconds. */
+    private val standby = mods.eln.anim.Blink.every(5.0, 0.04)
     override fun refresh(deltaT: Float) {
         super.refresh(deltaT)
-        time += deltaT
+        standby.step(deltaT.toDouble())
 
         if (powered) {
             if (firePresent) {
                 ledOn = firePresent
             } else {
-                ledOn = (time * 5).toInt() % 25 == 0
+                ledOn = standby.on()
             }
         } else {
             ledOn = false

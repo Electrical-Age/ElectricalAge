@@ -51,7 +51,8 @@ code on purpose.
 | Inline pump, active dissipator, alarm beacon, anemometer, auto miner pipe, wire drawer | rotors | `Spin` | lib |
 | Wind turbine | rotor (root of the eased power), blade-pass sound, halo | `Smooth`, `Spin`, `Blink` | lib |
 | Water turbine | wheel either way, paddle sound | `Smooth` (direction), `Spin` | lib |
-| Egg incubator | item turntable | constant spin | own |
+| Egg incubator | egg turning on its nest | `Spin` | lib |
+| Fire detector | standby LED flash | `Blink` | lib |
 | Switches, breaker, relay, signal sources (wired and wireless), bus button | levers, contacts, knobs, button travel | `Travel.smooth` | lib |
 | VU meter | needle | `Travel.spring` | lib |
 | Transformer, lamp supply | casing doors / window opening when a player is near | `Travel.spring` | lib |
@@ -62,7 +63,7 @@ code on purpose.
 | Switch, VU meter, gate sources, fire detector, source, lamp supply, entity sensor, emergency lamp, redstone in/out, bus button/light/floor sensor, turret, data logger | LEDs with halos or mixed states | inline | own |
 | Boiler (gauge glass), oil separator (basin) | levels | `Fill` | lib |
 | Tanks | layered liquid columns | `TankDescriptor.drawScaled` (layers) | own |
-| Wind turbine halo, teleporter, fire detector, math chip, auto miner, battery charger | blinking | four different clocks | own |
+| Teleporter, math chip, auto miner | blinking / random busy LEDs | hand-written | own |
 | Shafts (all shaft parts, turbines, generator, motor) | rotors | `log(rads+1)/log(1.2)` deg-rate, unsmoothed | special: Baughn's 2015 curve (slow shafts turn visibly, fast ones don't strobe) |
 | Energy meter | disk, odometer | client integration of power | special |
 | Watch | hands | world time | special |
