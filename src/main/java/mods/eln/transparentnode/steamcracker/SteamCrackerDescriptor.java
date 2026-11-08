@@ -49,21 +49,16 @@ public class SteamCrackerDescriptor extends TransparentNodeDescriptor {
             .burnsOnOvervoltage(Machines.BURNS_OUT).power(RelativeFace.LEFT, RelativeFace.RIGHT).build();
     }
 
+    static final mods.eln.anim.Glow.Ramp PEEPHOLE = k -> k > 0.5f ? new float[]{1f, 0.55f, 0.15f} : new float[]{0.15f, 0.12f, 0.1f};
+
     void draw(boolean powered, boolean running) {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();
-        mods.eln.transparentnode.resincollector.IndustrialResinCollectorDescriptor.led(obj.getPart("ledpower"), powered);
-        mods.eln.transparentnode.resincollector.IndustrialResinCollectorDescriptor.led(obj.getPart("ledrun"), running);
-        var g = obj.getPart("glow");   // the peepholes: the coil's orange heat while it cracks, dark glass when not
-        if (g != null) {
-            if (running) mods.eln.misc.UtilsClient.disableLight();
-            if (running) mods.eln.gl.GL11.glColor4f(1f, 0.55f, 0.15f, 1);
-            else mods.eln.gl.GL11.glColor4f(0.15f, 0.12f, 0.1f, 1);
-            g.draw();
-            if (running) mods.eln.misc.UtilsClient.enableLight();
-            mods.eln.misc.UtilsClient.glDefaultColor();
-        }
+        mods.eln.anim.Led.draw(obj.getPart("ledpower"), powered);
+        mods.eln.anim.Led.draw(obj.getPart("ledrun"), running);
+        // the peepholes: the coil's orange heat while it cracks, dark glass when not
+        mods.eln.anim.Glow.draw(obj.getPart("glow"), running ? 1 : 0, PEEPHOLE);
     }
 
     @Override

@@ -50,8 +50,8 @@ public class DesulfuriserDescriptor extends TransparentNodeDescriptor {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();
-        mods.eln.transparentnode.resincollector.IndustrialResinCollectorDescriptor.led(obj.getPart("ledpower"), powered);
-        mods.eln.transparentnode.resincollector.IndustrialResinCollectorDescriptor.led(obj.getPart("ledrun"), running);
+        mods.eln.anim.Led.draw(obj.getPart("ledpower"), powered);
+        mods.eln.anim.Led.draw(obj.getPart("ledrun"), running);
     }
 
     @Override

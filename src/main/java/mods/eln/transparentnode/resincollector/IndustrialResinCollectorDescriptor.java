@@ -54,19 +54,8 @@ public class IndustrialResinCollectorDescriptor extends TransparentNodeDescripto
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();
-        led(obj.getPart("ledpower"), powered);
-        led(obj.getPart("ledrun"), running);
-    }
-
-    public static void led(Obj3D.Obj3DPart part, boolean on) {
-        if (part == null) return;
-        if (on) {
-            mods.eln.misc.UtilsClient.drawLight(part);
-        } else {
-            mods.eln.gl.GL11.glColor3f(0.3f, 0.3f, 0.3f);
-            part.draw();
-            mods.eln.misc.UtilsClient.glDefaultColor();
-        }
+        mods.eln.anim.Led.draw(obj.getPart("ledpower"), powered);
+        mods.eln.anim.Led.draw(obj.getPart("ledrun"), running);
     }
 
     @Override

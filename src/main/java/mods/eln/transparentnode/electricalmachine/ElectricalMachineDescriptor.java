@@ -116,19 +116,8 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
     }
 
     void drawLeds(float uFactor, float powerFactor) {
-        led(ledPower, uFactor > 0.5f);
-        led(ledRun, powerFactor > 0.05f);
-    }
-
-    static void led(mods.eln.misc.Obj3D.Obj3DPart part, boolean on) {
-        if (part == null) return;
-        if (on) {
-            mods.eln.misc.UtilsClient.drawLight(part);
-        } else {
-            mods.eln.gl.GL11.glColor3f(0.3f, 0.3f, 0.3f);
-            part.draw();
-            mods.eln.misc.UtilsClient.glDefaultColor();
-        }
+        mods.eln.anim.Led.draw(ledPower, uFactor > 0.5f);
+        mods.eln.anim.Led.draw(ledRun, powerFactor > 0.05f);
     }
 
     public boolean drawCable() {

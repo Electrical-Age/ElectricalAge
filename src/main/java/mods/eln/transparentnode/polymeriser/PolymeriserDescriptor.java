@@ -54,8 +54,8 @@ public class PolymeriserDescriptor extends TransparentNodeDescriptor {
         if (m != null) m.draw();
         var s = obj.getPart("stirrer");   // (the agitator's drive turns while it runs, about its origin)
         if (s != null) s.draw(stirDeg, 0, 1, 0);
-        mods.eln.transparentnode.resincollector.IndustrialResinCollectorDescriptor.led(obj.getPart("ledpower"), powered);
-        mods.eln.transparentnode.resincollector.IndustrialResinCollectorDescriptor.led(obj.getPart("ledrun"), running);
+        mods.eln.anim.Led.draw(obj.getPart("ledpower"), powered);
+        mods.eln.anim.Led.draw(obj.getPart("ledrun"), running);
     }
 
     @Override

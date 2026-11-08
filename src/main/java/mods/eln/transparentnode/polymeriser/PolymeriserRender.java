@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.polymeriser;
 
+import mods.eln.anim.Spin;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
@@ -11,8 +12,8 @@ import java.io.IOException;
 public class PolymeriserRender extends TransparentNodeElementRender {
     final PolymeriserDescriptor desc;
     boolean powered, running;
-    float stir;
-    long last = System.nanoTime();
+    /** The agitator: three quarters of a turn a second, easing up and down over a fraction of a second. */
+    final Spin stir = new Spin(270, 0.3);
 
     public PolymeriserRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
@@ -20,13 +21,15 @@ public class PolymeriserRender extends TransparentNodeElementRender {
     }
 
     @Override
+    public void refresh(float deltaT) {
+        super.refresh(deltaT);
+        stir.speed(running ? 1 : 0).step(deltaT);
+    }
+
+    @Override
     public void draw() {
-        long now = System.nanoTime();
-        float dt = Math.min(0.1f, (now - last) / 1e9f);
-        last = now;
-        if (running) stir = (stir + 270 * dt) % 360;   // (three quarters of a turn a second)
         front.glRotateXnRef();
-        desc.draw(powered, running, stir);
+        desc.draw(powered, running, stir.deg());
     }
 
     @Override

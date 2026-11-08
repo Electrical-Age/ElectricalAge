@@ -162,3 +162,5 @@ the insulated thermal cables, but ... for charm"). The rheostat's drum is its ow
   `hot_things_light_their_block` and `electric_heater_heats_a_thermal_cable` (the heater's back face feeds a floor
   thermal cable, six-node and voxel). In a lab, `/elnlab heat <pos> <celsius>` holds a node's thermal loads at a
   temperature (above a device's limit it burns, as it would).
+
+Animations (turning parts, levers, blinking, particles, glow, levels, items in machines): see [animation.md](animation.md).
