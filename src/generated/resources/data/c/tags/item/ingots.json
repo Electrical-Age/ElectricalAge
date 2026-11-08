@@ -1,6 +1,7 @@
 {
   "values": [
     "#c:ingots/lead",
+    "#c:ingots/tungsten",
     "#c:ingots/ferrite",
     "#c:ingots/alloy",
     "#c:ingots/silicon"

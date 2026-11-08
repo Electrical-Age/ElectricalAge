@@ -371,6 +371,9 @@ public class Wp12aContent implements ElnContent {
             tungstenIngot = element;
             // wiki (P4): Data.addResource(element.newItemStack());
             mods.eln.misc.OreDictTags.addToOre(dictTungstenIngot, element);
+            // also in the common tag (c:ingots/tungsten), so other mods' recipes find it (Occultism's crushers made no tungsten
+            // dust: Nero 2026-11-08); EA's own recipes keep the private eln: tag
+            mods.eln.misc.OreDictTags.addToOre("ingotTungsten", element);
         }
 
         {
@@ -477,6 +480,9 @@ public class Wp12aContent implements ElnContent {
             sharedItem.addElement(id, element);
             // wiki (P4): Data.addResource(element.newItemStack());
             mods.eln.misc.OreDictTags.addToOre(dictTungstenDust, element);
+            // also in the common tag (c:dusts/tungsten), so other mods' recipes find it (Occultism's crushers made no tungsten
+            // dust: Nero 2026-11-08); EA's own recipes keep the private eln: tag
+            mods.eln.misc.OreDictTags.addToOre("dustTungsten", element);
         }
 
         {

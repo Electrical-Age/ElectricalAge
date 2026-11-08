@@ -1,11 +1,11 @@
-// 26.3	2026-11-07T20:59:51.241811096	eln-global/Tags for minecraft:item mod id eln
+// 26.3	2026-11-08T22:53:43.390705831	eln-global/Tags for minecraft:item mod id eln
 84e660d99ec050723c2cbcd48806f26355cdd0fa data/c/tags/item/casings.json
 b1c2dbaac22ebe066a8de4d98af4e881ddef621f data/c/tags/item/casings/machine.json
 864234b02478871ab4edcaaf9bbb5976971370f5 data/c/tags/item/casings/machine_advanced.json
 5da67a77979c512b793ac34b33aa5857c183f8fc data/c/tags/item/circuits.json
 81d4a44dab12cfc684d9fff1d873edbc21aea006 data/c/tags/item/circuits/advanced.json
 c857d5d471235ece5d7ee4adcfb1314ab0237d9d data/c/tags/item/circuits/basic.json
-47b5de20101406777bf5f8625372eeb9fc0714ae data/c/tags/item/dusts.json
+ac270c66031ac11bd3456e2f46056fb0846dc950 data/c/tags/item/dusts.json
 b54871e0d72812d7dc6f53d440f4f3bd093a9be9 data/c/tags/item/dusts/alloy.json
 00ec4c2e9a59c9298ea3638b99829ddbd3651862 data/c/tags/item/dusts/cinnabar.json
 e6e8e09d8ee604aa26beb51c6fb4e0977d684768 data/c/tags/item/dusts/coal.json
@@ -14,11 +14,13 @@ e6e8e09d8ee604aa26beb51c6fb4e0977d684768 data/c/tags/item/dusts/coal.json
 2cf22437e81f11894ae4a083b4f9aaa7131648fd data/c/tags/item/dusts/iron.json
 ab702d221148a3f3f5538cca2c65b8c1430ccbd3 data/c/tags/item/dusts/lead.json
 099e4e0599ca07b880296f2bd1db25254dc3ac7c data/c/tags/item/dusts/silicon.json
-f1137c7846d66d54399d214e71f8cca5796ac79e data/c/tags/item/ingots.json
+f48af7320030e33b00ea9fac50efbed71c48854a data/c/tags/item/dusts/tungsten.json
+bbe536e59978aca1a2040a2908b76db66446305e data/c/tags/item/ingots.json
 a0b4bfe15d9df0c07b7a4e7a591f6ab78660ef36 data/c/tags/item/ingots/alloy.json
 faddda2a328ef2bf5622c70d46376f7bca1358e0 data/c/tags/item/ingots/ferrite.json
 d941123117e2543cf4733b89375860087cf9bf5c data/c/tags/item/ingots/lead.json
 de9263e8109a0fb9c323772ee182757202b21f85 data/c/tags/item/ingots/silicon.json
+1e45613c086e995b0dd09f0caa446f850b1fb151 data/c/tags/item/ingots/tungsten.json
 1d0d4dad1135cfca57e3c3e70a1747f909ae12cf data/c/tags/item/ores.json
 2b6951f8fd96baa6c173700469c8988bb9beb54b data/c/tags/item/ores/cinnabar.json
 a60b9ff352cb9ed896432253517c1c54aeb9897e data/c/tags/item/ores/lead.json
