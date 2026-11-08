@@ -114,6 +114,7 @@ public final class Mc {
         if (cap0 && r > 0) m.poly(right ? reversed(lo) : lo);
         if (cap1 && re > 0) m.poly(right ? hi : reversed(hi));
         m.closed = m.convex = cap0 && cap1 && r > 0 && re > 0;
+        if (re == r) m.coax = new double[]{axis - 'x', c1, c2, 0, r, a0, a1};
         return m;
     }
 
@@ -156,6 +157,7 @@ public final class Mc {
             }
         }
         m.closed = inner;
+        m.coax = new double[]{axis - 'x', c1, c2, rIn, rOut, a0, a1};
         return m;
     }
 

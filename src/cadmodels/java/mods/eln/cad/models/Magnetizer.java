@@ -78,12 +78,11 @@ public final class Magnetizer {
         // bores are sunk into its wall)
         // (the checker: bands and flanges sunk into the former's wall didn't count as joined; the bands sit on its skin,
         // the flanges butt against its ends, and a spider of two bars carries each stub axle)
-        // (the checker can't see a joint between coaxial tubes, a band on a former or a flange butted to its end: exempted
-        // by name; a gap in the checker to close, board #58)
+        // (coaxial joints, a band on the former's skin and a flange butted to its end, are the checker's Mesh.coax rule)
         for (double z = 4.6; z < 11.6; z += 1.4)
-            m.add(tube('z', 8.0, AY, 2.8, 3.1, z, z + 0.9, "copper", 16).free("a winding band on the former's skin (coaxial)"));
-        m.add(tube('z', 8.0, AY, 2.0, 3.5, 3.4, 4.0, "steel", 16).free("a flange butted to the former's end (coaxial)"));
-        m.add(tube('z', 8.0, AY, 2.0, 3.5, 12.0, 12.6, "steel", 16).free("a flange butted to the former's end (coaxial)"));
+            m.add(tube('z', 8.0, AY, 2.8, 3.1, z, z + 0.9, "copper", 16));
+        m.add(tube('z', 8.0, AY, 2.0, 3.5, 3.4, 4.0, "steel", 16));
+        m.add(tube('z', 8.0, AY, 2.0, 3.5, 12.0, 12.6, "steel", 16));
         for (double[] z : new double[][]{{3.4, 4.0}, {12.0, 12.6}}) {
             m.add(box(6.0, AY - 0.25, z[0] + 0.1, 10.0, AY + 0.25, z[1] - 0.1, "darksteel").free("a spider bar across the flange's bore"));
             m.add(box(8.0 - 0.25, AY - 2.0, z[0] + 0.1, 8.0 + 0.25, AY + 2.0, z[1] - 0.1, "darksteel").free("a spider bar across the flange's bore"));

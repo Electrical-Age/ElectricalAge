@@ -23,7 +23,7 @@ towergen) for geometry that is checked by tests.
   - connected: every drawn solid hangs together with its body (`Solid.body`; else its nearest `Part.moving()` part, a
     wheel or a crank; else the model), linked to the body's main piece (the component with the most bulk) through
     joints that each hold at least 50 % of the narrower piece's outline, seen along the joint (a tube's end inside
-    another: its whole section). A solid meant to float says so with `free(reason)`. VoxelGeometry makes each part a
+    another: its whole section). A solid meant to float says so with `free(reason)`. Coaxial solids of revolution (`Mesh.coax`, set by `Mc.tube` and straight `Mc.prism`) also join when one sits on the other's skin (by their common length) or they butt end to end (by the ring they share), which the hull contact can't see: a band on a former, a flange on a tube's end; VoxelGeometry makes each part a
     body of its own;
   - a decal that is meant to lie over a surface says so with `layer(n)` (n x 0.1 px out).
   `Checker.faces` also reads other engines' output (polygon soups), which is how the old geometry was surveyed.

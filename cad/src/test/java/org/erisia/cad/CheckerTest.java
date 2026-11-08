@@ -168,4 +168,31 @@ public class CheckerTest {
         assertTrue(got.get(0).contains("corner") && got.get(0).contains("%"), got.toString());
         assertTrue(got.get(1).contains("away") && got.get(1).contains("touches nothing"), got.toString());
     }
+
+    /** A closed box as a Mesh (for pieces that carry Mesh.coax). */
+    static Mesh boxMesh(double x0, double y0, double z0, double x1, double y1, double z1) {
+        Mesh m = new Mesh("steel");
+        double[][] c = {{x0, y0, z0}, {x1, y0, z0}, {x1, y1, z0}, {x0, y1, z0}, {x0, y0, z1}, {x1, y0, z1}, {x1, y1, z1}, {x0, y1, z1}};
+        int[][] f = {{0, 3, 2, 1}, {4, 5, 6, 7}, {0, 1, 5, 4}, {2, 3, 7, 6}, {1, 2, 6, 5}, {0, 4, 7, 3}};
+        for (int[] q : f) m.poly(c[q[0]], c[q[1]], c[q[2]], c[q[3]]);
+        m.closed = m.convex = true;
+        return m;
+    }
+
+    @Test
+    void coaxialPiecesJoinOnTheSkinAndEndToEnd() {
+        // (the hull test can't see these: here the meshes stand apart; only their coax descriptions meet)
+        Model m = new Model();
+        Mesh former = m.add(boxMesh(0, 0, 0, 4, 4, 8)).named("former");
+        former.coax = new double[]{2, 2, 2, 2.0, 2.8, 0, 8};
+        Mesh band = m.add(boxMesh(20, 0, 0, 21, 1, 1)).named("band");
+        band.coax = new double[]{2, 2, 2, 2.8, 3.1, 3, 3.9};                 // on the former's skin
+        Mesh flange = m.add(boxMesh(30, 0, 0, 31, 1, 1)).named("flange");
+        flange.coax = new double[]{2, 2, 2, 2.0, 3.5, 8, 8.6};              // butted to its end
+        Mesh loose = m.add(boxMesh(40, 0, 0, 41, 1, 1)).named("loose");
+        loose.coax = new double[]{2, 2, 2, 3.0, 3.3, 5, 5.9};               // a band 0.2 px off the skin
+        List<String> got = Checker.connectivity(m).stream().map(Checker.Issue::toString).toList();
+        assertEquals(1, got.size(), got.toString());
+        assertTrue(got.get(0).contains("loose"), got.toString());
+    }
 }

@@ -13,6 +13,13 @@ public final class Mesh extends Solid {
     public boolean closed;
     /** Closed and convex (a box, a capped prism): it may hide what lies inside it from the checker. */
     public boolean convex;
+    /**
+     * A solid of revolution about an axis (a tube or a straight prism, as its builder made it): {axis (0 x, 1 y, 2 z), c1,
+     * c2 (the centre on the other two axes), inner radius (0 for a prism), outer radius, a0, a1 (its extent along the
+     * axis)}, or null. The checker joins coaxial pieces that sit on each other's skin or butt end to end, which the
+     * convex-hull contact test can't see. A mapped copy has none.
+     */
+    public double[] coax;
 
     public Mesh(String material) {
         this.material = material;

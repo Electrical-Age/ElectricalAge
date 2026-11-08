@@ -73,6 +73,12 @@ public final class Checker {
             for (int i = 0; i < n; i++)
                 for (int j = i + 1; j < n; j++) {
                     Solid a = body.get(i), b = body.get(j);
+                    double co = coaxJoint(a, b);   // (coaxial pieces the hull test can't see; else the hull test as ever)
+                    if (co >= CONNECT_SHARE - 1e-9) {
+                        share[i][j] = share[j][i] = co;
+                        union(comp, i, j);
+                        continue;
+                    }
                     Geom.Hull ha = hulls.computeIfAbsent(a, k -> new Geom.Hull(faces.computeIfAbsent(k, Solid::faces)));
                     Geom.Hull hb = hulls.computeIfAbsent(b, k -> new Geom.Hull(faces.computeIfAbsent(k, Solid::faces)));
                     double[] sa = Geom.separationAxis(ha, hb);
@@ -105,6 +111,35 @@ public final class Checker {
             }
         }
         return out;
+    }
+
+    /** How far apart (px) two coaxial skins or ends may be and still meet (a polygon's flats sit inside its radius). */
+    public static final double COAX_TOL = 0.1;
+
+    /**
+     * The joint between two coaxial solids of revolution (Mesh.coax), as a share like Geom.joint's, or 0 if they aren't
+     * coaxial or don't meet: one on the other's skin (a band on a former) by their common length over the shorter one's;
+     * their walls overlapping (a piece sunk into the other) 1; butted end to end (a flange on a tube's end) by the ring
+     * they share over the narrower one's.
+     */
+    static double coaxJoint(Solid a, Solid b) {
+        if (!(a instanceof Mesh ma) || !(b instanceof Mesh mb) || ma.coax == null || mb.coax == null) return 0;
+        double[] p = ma.coax, q = mb.coax;
+        if (p[0] != q[0] || Math.abs(p[1] - q[1]) > EPS || Math.abs(p[2] - q[2]) > EPS) return 0;
+        double axial = Math.min(p[6], q[6]) - Math.max(p[5], q[5]);
+        if (axial > EPS) {
+            double shorter = Math.min(p[6] - p[5], q[6] - q[5]);
+            if (Math.abs(p[3] - q[4]) <= COAX_TOL || Math.abs(q[3] - p[4]) <= COAX_TOL) return Math.min(1, axial / shorter);
+            if (Math.min(p[4], q[4]) - Math.max(p[3], q[3]) > EPS) return 1;
+            return 0;
+        }
+        if (Math.abs(p[6] - q[5]) <= EPS || Math.abs(q[6] - p[5]) <= EPS) {
+            double lo = Math.max(p[3], q[3]), hi = Math.min(p[4], q[4]);
+            if (hi <= lo) return 0;
+            double ringA = p[4] * p[4] - p[3] * p[3], ringB = q[4] * q[4] - q[3] * q[3];
+            return Math.min(1, (hi * hi - lo * lo) / Math.min(ringA, ringB));
+        }
+        return 0;
     }
 
     static int find(int[] c, int i) {
