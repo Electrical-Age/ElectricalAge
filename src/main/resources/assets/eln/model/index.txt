@@ -11,6 +11,7 @@ batterychargera/batterychargera.obj
 batterychargerb/batterychargerb.obj
 boiler/boiler.obj
 capacitorbank/capacitorbank.obj
+carbonblackburner/carbonblackburner.obj
 classiclampsocket/classiclampsocket.obj
 columnbase/columnbase.obj
 columnsegment/columnsegment.obj
@@ -22,6 +23,7 @@ condenser200v/condenser200v.obj
 condenser50v/condenser50v.obj
 dataloggercrtfloor/dataloggercrtfloor.obj
 daylightsensor/daylightsensor.obj
+desulfuriser/desulfuriser.obj
 digitalwallclock/digitalwallclock.obj
 distributionboard/distributionboard.obj
 eggincubator/eggincubator.obj
@@ -81,6 +83,8 @@ passivethermaldissipatora/passivethermaldissipatora.obj
 plantcondenser/plantcondenser.obj
 platemachinea/platemachinea.obj
 platemachineb/platemachineb.obj
+polegear/polegear.obj
+polymeriser/polymeriser.obj
 powerelectricprimitives/powerelectricprimitives.obj
 powerpole/downlink.obj
 powerpole/transformer.obj
@@ -91,6 +95,7 @@ redtoele/redtoele.obj
 relay800/relay800.obj
 relaybig/relaybig.obj
 relaysmall/relaysmall.obj
+resincollector230/resincollector230.obj
 robustlamp/robustlamp.obj
 robustlampsuspended/robustlampsuspended.obj
 rtu/rtu.obj
@@ -118,6 +123,7 @@ smelter/smelter.obj
 solarpanel2x2/solarpanel2x2.obj
 solarpanel2x3/bigsolarpanel.obj
 solarpanel2x3/bigsolarpanelrot.obj
+steamcracker/steamcracker.obj
 steamoven/steamoven.obj
 steamturbine200v/steamturbine200v.obj
 steamturbine50v/steamturbine50v.obj
@@ -161,8 +167,3 @@ wirelesssignalrepeater/wirelesssignalrepeater.obj
 wirelesssignalrx/wirelesssignalrx.obj
 wirelesssignaltx/wirelesssignaltx.obj
 xrayscanner/xrayscanner.obj
-resincollector230/resincollector230.obj
-carbonblackburner/carbonblackburner.obj
-desulfuriser/desulfuriser.obj
-steamcracker/steamcracker.obj
-polymeriser/polymeriser.obj

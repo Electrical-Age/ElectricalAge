@@ -124,11 +124,16 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
     protected net.minecraft.client.gui.components.Button dropdown(String id, String[] options, java.util.function.IntSupplier current,
                                                                   java.util.function.IntConsumer choose, String... tooltip) {
         var r = rect("button", id);
-        Dropdown d = new Dropdown(leftPos + r.x(), topPos + r.y() + 20, r.w(), options, choose);
+        int w = r.w();
+        for (String o : options) w = Math.max(w, font.width(o) + 8);   // (the list is as wide as its longest option)
+        Dropdown d = new Dropdown(leftPos + r.x(), topPos + r.y() + 20, w, options, choose);
         var b = button(r.x(), r.y(), r.w(), () -> {
             int c = current.getAsInt();
             return (c >= 0 && c < options.length ? options[c] : "?") + " \u25BE";
         }, () -> openDropdown = openDropdown == d ? null : d, tooltip);
+        // the tooltip would cover the open list (AdventurAgent): only while it's shut
+        var tip = tooltip.length > 0 ? net.minecraft.client.gui.components.Tooltip.create(Component.literal(String.join("\n", tooltip))) : null;
+        refreshers.add(() -> b.setTooltip(openDropdown == d ? null : tip));
         return b;
     }
 
