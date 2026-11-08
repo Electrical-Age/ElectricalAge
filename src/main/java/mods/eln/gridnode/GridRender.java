@@ -22,7 +22,10 @@ public abstract class GridRender extends TransparentNodeElementRender {
     private final GridDescriptor descriptor;
     private final Identifier cableTexture;
     private ArrayList<Catenary> catenaries = new ArrayList<Catenary>();
-    /** Wider copies of the spans that carry a stasis halo (either pole anchored: Baughn 2026-11-08). */
+    /**
+     * Shells round the spans that carry a stasis halo (either pole anchored: Baughn 2026-11-08), HALO_LAYERS of them a
+     * conductor, each wider and fainter, so the glow fades out to nothing at its edge (Baughn: not a sheath).
+     */
     private ArrayList<Catenary> haloCatenaries = new ArrayList<Catenary>();
     /** The halo's slow pulse: a phase turning once in 4 s (frame time, mods.eln.anim). */
     private final mods.eln.anim.Spin haloPhase = new mods.eln.anim.Spin(90, 0.01).speed(1);
@@ -46,7 +49,14 @@ public abstract class GridRender extends TransparentNodeElementRender {
         return idealRenderingAngle;
     }
 
-    static final double CABLE_WIDTH = 0.05, HALO_WIDTH = 0.11;
+    static final double CABLE_WIDTH = 0.05;
+    /** The halo's shells: from just over the cable out to its edge. */
+    static final int HALO_LAYERS = 6;
+    static final double HALO_INNER = 0.06, HALO_OUTER = 0.2;
+
+    static double haloWidth(int k) {
+        return HALO_INNER + (HALO_OUTER - HALO_INNER) * k / (HALO_LAYERS - 1);
+    }
 
     @Override
     public void refresh(float deltaT) {
@@ -60,14 +70,22 @@ public abstract class GridRender extends TransparentNodeElementRender {
      */
     protected void drawHalo() {
         if (haloCatenaries.isEmpty()) return;
+        // the shells overlap, so what one sees through the middle is the sum of all of them, at the edge only the
+        // outermost: each shell is as faint as the falloff's step there
         float a = (float) (0.16 + 0.10 * Math.sin(Math.toRadians(haloPhase.deg())));
         UtilsClient.disableLight();
         UtilsClient.enableBlend();
+        glDisable(GL_TEXTURE_2D);
         glDepthMask(false);
         glDisable(GL_CULL_FACE);
-        glColor4f(0.47f, 0.71f, 1f, a);
-        for (Catenary catenary : haloCatenaries) catenary.draw();
+        for (int i = 0; i < haloCatenaries.size(); i++) {
+            int k = i % HALO_LAYERS;
+            float layer = a * 0.45f * (1f - (float) k / HALO_LAYERS);
+            glColor4f(0.47f, 0.71f, 1f, layer);
+            haloCatenaries.get(i).draw();
+        }
         glColor4f(1f, 1f, 1f, 1f);
+        glEnable(GL_TEXTURE_2D);
         glEnable(GL_CULL_FACE);
         glDepthMask(true);
         UtilsClient.disableBlend();
@@ -120,7 +138,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
                 Vec3[][] pairs = crossV < straightV ? new Vec3[][]{{splus, tplus}, {sgnd, tgnd}} : new Vec3[][]{{splus, tgnd}, {sgnd, tplus}};
                 for (Vec3[] pr : pairs) {
                     catenaries.add(new Catenary(pr[0], pr[1], CABLE_WIDTH));
-                    if (halo) haloCatenaries.add(new Catenary(pr[0], pr[1], HALO_WIDTH));
+                    if (halo) for (int k = 0; k < HALO_LAYERS; k++) haloCatenaries.add(new Catenary(pr[0], pr[1], haloWidth(k)));
                 }
             }
         } catch (IOException e) {
