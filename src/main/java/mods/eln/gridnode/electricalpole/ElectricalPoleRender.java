@@ -55,7 +55,7 @@ public class ElectricalPoleRender extends GridRender {
             if ((lampMask & (1 << k)) == 0 || descriptor.lamp == null) continue;
             GL11.glPushMatrix();
             GL11.glRotatef(LAMP_YAW[k], 0, 1, 0);
-            GL11.glTranslatef(0, 3.0f, 0);
+            GL11.glTranslatef(0, 4.0f, 0);   // (above the cross-arm and its insulators, clear of the spans: Baughn)
             descriptor.lamp.draw();
             if (descriptor.lens != null) {
                 if (lit) mods.eln.misc.UtilsClient.disableLight();
