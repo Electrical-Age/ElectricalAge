@@ -109,14 +109,20 @@ public class TransformerElement extends TransparentNodeElement {
     @Override
     public void disconnectJob() {
         super.disconnectJob();
-        if (isIsolator)
-            Eln.simulator.mna.removeProcess(interSystemProcess);
+        if (processIn) Eln.simulator.mna.removeProcess(interSystemProcess);
+        processIn = false;
     }
+
+    /** The isolating sources' process is in the simulator (only while isolated and switched on: off, the sources aren't
+     *  in the circuit, and their process would solve a subsystem they aren't in). */
+    private boolean processIn;
 
     @Override
     public void connectJob() {
-        if (isIsolator)
+        if (isIsolator && switchedOn) {
             Eln.simulator.mna.addProcess(interSystemProcess);
+            processIn = true;
+        }
         super.connectJob();
     }
 

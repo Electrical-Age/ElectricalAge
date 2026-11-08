@@ -1107,6 +1107,14 @@ public final class Wp10aCases {
             tr.getInventory().setItem(TransformerContainer.primaryCableSlotId, mods.eln.node.voxel.WindingItem.make(2, spec, 16));
             tr.getInventory().setItem(TransformerContainer.secondaryCableSlotId, mods.eln.node.voxel.WindingItem.make(2, spec, 32));
             tr.getInventory().setChanged();   // (left off)
+            // an isolated (variable) converter left off ticks without its sources' process (it crashed the server: a lab test)
+            if (core) {
+                var vt = (mods.eln.transparentnode.transformer.VariableTransformerElement) ctx.placeTransparent(TRANSFORMER + 1, ctx.at(1, 1, 2));
+                vt.getInventory().setItem(TransformerContainer.primaryCableSlotId, mods.eln.node.voxel.WindingItem.make(2, spec, 16));
+                vt.getInventory().setItem(TransformerContainer.secondaryCableSlotId, mods.eln.node.voxel.WindingItem.make(2, spec, 32));
+                vt.getInventory().setItem(TransformerContainer.ferromagneticSlotId, Eln.findItemStack("Cheap Ferromagnetic Core", 1));
+                vt.getInventory().setChanged();
+            }
             ItemStack cu = Eln.findItemStack("Copper Cable", 1), leather = new ItemStack(net.minecraft.world.item.Items.LEATHER),
                 rubber = new ItemStack(Eln.itemsByName.get("Rubber"));
             ItemStack one = mods.eln.node.voxel.HandWindingRecipe.result(grid(cu, leather));
