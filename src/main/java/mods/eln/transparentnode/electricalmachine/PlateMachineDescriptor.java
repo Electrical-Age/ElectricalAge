@@ -87,13 +87,24 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
             if (t > 0) x = gap - dir * len / 2;
             mods.eln.anim.ItemMotion.drawFlat(inEntity, x, inY, z, 0, ITEM_SIZE, 1 - t, 1, 2f);
         }
-        if (t > 0) {   // the plate it becomes, growing out of the gap (the output's item if there is one yet)
+        if (t > 0) {   // the plate it becomes, growing out of the gap
             float len = ITEM_SIZE * 1.4f * t;
-            ItemEntity plate = outEntity != null && !outEntity.getItem().isEmpty() ? outEntity : inEntity;
-            mods.eln.anim.ItemMotion.drawFlat(plate, gap + dir * len / 2, inY, z, 0, ITEM_SIZE, 1.4f * t, 1, 0.6f);
+            mods.eln.anim.ItemMotion.drawFlat(made(inEntity, outEntity), gap + dir * len / 2, inY, z, 0, ITEM_SIZE, 1.4f * t, 1, 0.6f);
         }
         mods.eln.anim.ItemMotion.drawFlat(outEntity, outX, outY, outZ, 0, ITEM_SIZE, 1.4f, 1, 0.6f);
     }
+    /**
+     * What the piece being rolled becomes: the recipe's output for the input (the output slot may still be empty, or
+     * hold something else: the plate grew as an ingot, AdventurAgent), else what's in the output slot.
+     */
+    net.minecraft.world.item.ItemStack made(ItemEntity in, ItemEntity out) {
+        if (in != null && !in.getItem().isEmpty()) {
+            var r = recipe.getRecipe(in.getItem().copyWithCount(64));
+            if (r != null && r.getOutputCopy().length > 0) return r.getOutputCopy()[0];
+        }
+        return out == null ? net.minecraft.world.item.ItemStack.EMPTY : out.getItem();
+    }
+
     @Override
     void refresh(float deltaT, ElectricalMachineRender render, Object handleO, ItemEntity inEntity, ItemEntity outEntity, float powerFactor, float processState) {
         PlateMachineDescriptorHandle handle = (PlateMachineDescriptorHandle) handleO;
