@@ -22,6 +22,10 @@ public abstract class GridRender extends TransparentNodeElementRender {
     private final GridDescriptor descriptor;
     private final Identifier cableTexture;
     private ArrayList<Catenary> catenaries = new ArrayList<Catenary>();
+    /** Wider copies of the spans that carry a stasis halo (either pole anchored: Baughn 2026-11-08). */
+    private ArrayList<Catenary> haloCatenaries = new ArrayList<Catenary>();
+    /** The halo's slow pulse: a phase turning once in 4 s (frame time, mods.eln.anim). */
+    private final mods.eln.anim.Spin haloPhase = new mods.eln.anim.Spin(90, 0.01).speed(1);
     private float idealRenderingAngle;
 
     public GridRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
@@ -42,6 +46,34 @@ public abstract class GridRender extends TransparentNodeElementRender {
         return idealRenderingAngle;
     }
 
+    static final double CABLE_WIDTH = 0.05, HALO_WIDTH = 0.11;
+
+    @Override
+    public void refresh(float deltaT) {
+        super.refresh(deltaT);
+        if (!haloCatenaries.isEmpty()) haloPhase.step(deltaT);
+    }
+
+    /**
+     * The stasis halo: a faint blue glow round the conductors of spans with an anchored pole at either end, slowly
+     * brightening and fading (Baughn 2026-11-08: subtle). Drawn after the cables, blended, writing no depth.
+     */
+    protected void drawHalo() {
+        if (haloCatenaries.isEmpty()) return;
+        float a = (float) (0.16 + 0.10 * Math.sin(Math.toRadians(haloPhase.deg())));
+        UtilsClient.disableLight();
+        UtilsClient.enableBlend();
+        glDepthMask(false);
+        glDisable(GL_CULL_FACE);
+        glColor4f(0.47f, 0.71f, 1f, a);
+        for (Catenary catenary : haloCatenaries) catenary.draw();
+        glColor4f(1f, 1f, 1f, 1f);
+        glEnable(GL_CULL_FACE);
+        glDepthMask(true);
+        UtilsClient.disableBlend();
+        UtilsClient.enableLight();
+    }
+
     /** The spans this node draws. */
     protected void drawCatenaries() {
         UtilsClient.bindTexture(cableTexture);
@@ -51,6 +83,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
             catenary.draw();
         }
         glEnable(GL_CULL_FACE);
+        drawHalo();
     }
 
     private Vec3 readVec(DataInputStream stream) throws IOException {
@@ -65,6 +98,10 @@ public abstract class GridRender extends TransparentNodeElementRender {
                 catenary.destroy();
             }
             catenaries.clear();
+            for (Catenary catenary : haloCatenaries) {
+                catenary.destroy();
+            }
+            haloCatenaries.clear();
             idealRenderingAngle = stream.readFloat();
             int linkCount = stream.readInt();
             for (int i = 0; i < linkCount; i++) {
@@ -73,18 +110,17 @@ public abstract class GridRender extends TransparentNodeElementRender {
                 Vec3 tplus = readVec(stream);
                 Vec3 sgnd = readVec(stream);
                 Vec3 tgnd = readVec(stream);
+                boolean halo = stream.readBoolean();
                 Vec3 dplus = splus.vectorTo(tplus).normalize();
                 Vec3 dgnd = sgnd.vectorTo(tgnd).normalize();
                 double straightV = dplus.dot(dgnd);
                 dplus = splus.vectorTo(tgnd).normalize();
                 dgnd = sgnd.vectorTo(tplus).normalize();
                 double crossV = dplus.dot(dgnd);
-                if (crossV < straightV) {
-                    catenaries.add(new Catenary(splus, tplus));
-                    catenaries.add(new Catenary(sgnd, tgnd));
-                } else {
-                    catenaries.add(new Catenary(splus, tgnd));
-                    catenaries.add(new Catenary(sgnd, tplus));
+                Vec3[][] pairs = crossV < straightV ? new Vec3[][]{{splus, tplus}, {sgnd, tgnd}} : new Vec3[][]{{splus, tgnd}, {sgnd, tplus}};
+                for (Vec3[] pr : pairs) {
+                    catenaries.add(new Catenary(pr[0], pr[1], CABLE_WIDTH));
+                    if (halo) haloCatenaries.add(new Catenary(pr[0], pr[1], HALO_WIDTH));
                 }
             }
         } catch (IOException e) {
@@ -118,13 +154,14 @@ public abstract class GridRender extends TransparentNodeElementRender {
             1, 1, // 7
             1, 0, // 8
         };
-        private final double cableWidth = 0.05;
+        private final double cableWidth;
 
         // TODO: Lighting and such should not be the same across the entire cable.
         // Probably need make physical "cable" blocks, to make minecraft cooperate.
         // The individual blocks should do the rendering.
         // ...later. Much later.
-        Catenary(Vec3 start, Vec3 end) {
+        Catenary(Vec3 start, Vec3 end, double width) {
+            this.cableWidth = width;
             // These are the central vertices of the catenary.
             Vec3[] catenary = getConnectionCatenary(start, end);
 

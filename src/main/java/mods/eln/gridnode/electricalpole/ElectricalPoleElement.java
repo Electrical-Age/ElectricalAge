@@ -218,6 +218,11 @@ public class ElectricalPoleElement extends GridElement {
         applyEquipment();
         connect();
         needPublish();
+        // the span's halo is drawn by whichever pole draws the span: tell the neighbours too
+        for (GridLink link : gridLinkList) {
+            var other = link.getOtherElement(this);
+            if (other != null) other.needPublish();
+        }
     }
 
     /** Puts the transformer into the circuit, or takes it out, as one is fitted (between disconnect and connect). */

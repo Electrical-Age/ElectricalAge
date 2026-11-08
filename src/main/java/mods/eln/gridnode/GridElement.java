@@ -296,6 +296,8 @@ abstract public class GridElement extends TransparentNodeElement {
                     writeVec(stream, start);
                     writeVec(stream, end);
                 }
+                // the stasis halo: either pole anchored (Baughn 2026-11-08)
+                stream.writeBoolean(timeExempt() || target.timeExempt());
             }
         } catch (IOException e) {
             e.printStackTrace();
