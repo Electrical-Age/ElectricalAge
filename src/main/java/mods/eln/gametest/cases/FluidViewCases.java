@@ -62,6 +62,8 @@ public final class FluidViewCases {
         }
         cases.add(new Layers());
         cases.add(new Adapter());
+        cases.add(new TankCushion());
+        cases.add(new TankBoxOnce());
     }
 
     /** Water at 8 bar behind a check valve into each of a device's ports (a feed pump on every flange). */
@@ -250,6 +252,137 @@ public final class FluidViewCases {
             int room = (int) Math.floor(Math.max(0, 0.9 * run.volume - run.liquidVolume()) * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
             took = takesAtOnce(ctx, at);
             ctx.check("adapter: other mods fill the run to 90 % at most, every slot at once", took <= room + 1, took + " mB taken, room " + room);
+        }
+    }
+
+    /** Water in mB through the block's capability (UP face), committed; what it took. */
+    static int pour(TestContext ctx, BlockPos p, int mb) {
+        var cap = ctx.level().getCapability(Capabilities.Fluid.BLOCK, p, net.minecraft.core.Direction.UP);
+        if (cap == null) return 0;
+        try (var tx = Transaction.openRoot()) {
+            int took = cap.insert(FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), mb, tx);
+            tx.commit();
+            return took;
+        }
+    }
+
+    /**
+     * A lone iron and a lone alloy tank, empty (air at 1 atm), filled through their capability 250 mB at a time (another
+     * mod's pipe) until they refuse: they stop with the air over the water at their working pressure, then step 5 s
+     * without bursting (review 2026-11-09: the view offered the whole vessel; filled on, the air cushion went past 400 bar
+     * and the tank exploded). And they still take most of their 12 buckets.
+     */
+    static final class TankCushion implements TestCase {
+        mods.eln.oil.TankElement iron, alloy;
+        int ironMb, alloyMb;
+
+        public String id() {
+            return "fluid_view_tank_stops_short_of_burst";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 100;
+        }
+
+        static int fillUp(TestContext ctx, mods.eln.oil.TankElement t) {
+            int total = 0;
+            for (int i = 0; i < 400; i++) {
+                int took = pour(ctx, t.node.coordonate.pos(), 250);
+                t.syncWater();
+                if (took == 0) break;
+                total += took;
+            }
+            return total;
+        }
+
+        public void build(TestContext ctx) {
+            iron = PlumbingCases.tank(ctx, PlumbingCases.IRON_TANK, ctx.at(1, 1, 1), Direction.XN);
+            alloy = PlumbingCases.tank(ctx, PlumbingCases.ALLOY_TANK, ctx.at(3, 1, 1), Direction.XN);
+            if (iron.vessel == null || alloy.vessel == null) return;
+            ironMb = fillUp(ctx, iron);
+            alloyMb = fillUp(ctx, alloy);
+        }
+
+        static boolean standing(TestContext ctx, mods.eln.oil.TankElement t) {
+            var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(t.node.coordonate);
+            return n instanceof mods.eln.node.transparent.TransparentNode tn && tn.element == t && !t.node.isDestructing();
+        }
+
+        public void measure(TestContext ctx) {
+            if (iron.vessel == null || alloy.vessel == null) {
+                ctx.check("tank cushion: placed", false, "");
+                return;
+            }
+            // (the tiers' working pressures, Wp10aContent: iron 10 bar, alloy 100 bar)
+            double ironP = iron.vessel.P(), alloyP = alloy.vessel.P();
+            ctx.line(String.format("tank cushion: iron took %d mB, %.1f bar; alloy took %d mB, %.1f bar", ironMb, ironP / 1e5, alloyMb, alloyP / 1e5));
+            ctx.check("tank cushion: the iron tank is still there after filling to refusal", standing(ctx, iron), "");
+            ctx.check("tank cushion: the alloy tank is still there after filling to refusal", standing(ctx, alloy), "");
+            ctx.check("tank cushion: the iron tank stops at its working pressure", ironP <= 10.5e5, String.format("%.1f bar", ironP / 1e5));
+            ctx.check("tank cushion: the alloy tank stops at its working pressure", alloyP <= 101e5, String.format("%.1f bar", alloyP / 1e5));
+            ctx.check("tank cushion: the iron tank takes over 10 buckets", ironMb >= 10_000, ironMb + " mB");
+            ctx.check("tank cushion: the alloy tank takes over 11 buckets, under 98 %", alloyMb >= 11_000 && alloyMb <= 11_760, alloyMb + " mB");
+        }
+    }
+
+    /**
+     * A box of two iron tanks, half water: drawing through both blocks' capabilities in one transaction gets no more than
+     * the box holds, filling through both no more than its room, and what was drawn leaves the vessel exactly once (each
+     * block had its own view of the one vessel: the second draw found the liquid gone and dropped the difference, a dupe).
+     * Each block's capability stays its own object (a pipe's cached handler survives the box re-forming).
+     */
+    static final class TankBoxOnce implements TestCase {
+        mods.eln.oil.TankElement a, b;
+
+        public String id() {
+            return "fluid_view_tank_box_offers_once";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public void build(TestContext ctx) {
+            a = PlumbingCases.tank(ctx, PlumbingCases.IRON_TANK, ctx.at(1, 1, 1), Direction.XN);
+            b = PlumbingCases.tank(ctx, PlumbingCases.IRON_TANK, ctx.at(1, 2, 1), Direction.XN);
+        }
+
+        public void measure(TestContext ctx) {
+            if (a.group == null || a.group != b.group) {
+                ctx.check("tank box once: the two tanks are one box", false, "group " + a.group + " / " + b.group);
+                return;
+            }
+            FluidNode n = a.group.node;
+            PlumbingCases.fill(n, 0.5 * n.volume * Water.RHO_L, Water.P_ATM, Water.T_AMBIENT);
+            a.showWater();
+            b.showWater();
+            BlockPos pa = a.node.coordonate.pos(), pb = b.node.coordonate.pos();
+            var ca = ctx.level().getCapability(Capabilities.Fluid.BLOCK, pa, net.minecraft.core.Direction.UP);
+            var cb = ctx.level().getCapability(Capabilities.Fluid.BLOCK, pb, net.minecraft.core.Direction.UP);
+            ctx.check("tank box once: each block's capability is its own view object", ca == a.water && cb == b.water, ca + " / " + cb);
+            var water = FluidResource.of(net.minecraft.world.level.material.Fluids.WATER);
+            int held = realLiquidMb(n);
+            int in;
+            try (var tx = Transaction.openRoot()) {
+                in = ca.insert(water, 1_000_000, tx) + cb.insert(water, 1_000_000, tx);
+            }
+            int room = freeMb(n);
+            ctx.check("tank box once: filling through both blocks takes no more than its room", in <= room + 1, in + " mB taken, " + room + " mB free");
+            double before = n.mWater;
+            int out;
+            try (var tx = Transaction.openRoot()) {
+                out = ca.extract(water, 1_000_000, tx) + cb.extract(water, 1_000_000, tx);
+                tx.commit();
+            }
+            ctx.check("tank box once: drawing through both blocks gets no more than it holds", out <= held + 1, out + " mB drawn, " + held + " mB held");
+            a.syncWater();
+            b.syncWater();
+            double left = n.mWater, gone = (before - left) / EaUnits.KG_PER_MB_WATER;
+            ctx.check("tank box once: what was drawn left the vessel, once", Math.abs(gone - out) <= 2, String.format("%d mB drawn, %.0f mB left the vessel", out, gone));
         }
     }
 }

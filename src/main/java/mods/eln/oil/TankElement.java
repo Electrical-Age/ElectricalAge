@@ -81,6 +81,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     public TankElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
         desc = (TankDescriptor) d;
+        water = new TankLiquid(desc.workingPa, () -> group == null ? null : group.master().water);
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         slowProcessList.add(time -> {
             if (vessel == null) return;
@@ -118,7 +119,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     }
 
     /** Its liquid as a fluid capability (buckets; another mod's pipes): a view of its vessel (TankLiquid). */
-    public final TankLiquid water = new TankLiquid();
+    public final TankLiquid water;
 
     @Override
     public Object getFluidHandler() {

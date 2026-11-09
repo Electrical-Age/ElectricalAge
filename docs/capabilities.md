@@ -58,7 +58,11 @@ mods must address a multiblock's master block), simple nodes (gone; the exporter
   volume). What other mods put in or take out goes into the node at the next fluid step (`sync`), then `show`.
   - Pipe adapter: `AdapterPart.Tanks`, the run behind the face; liquid to 90 % of the run, gas to about 9 bar
     (`VoxelNode.syncAdapters`, `showAdapters`).
-  - Tank: `oil/TankLiquid`, liquid and intake, to the vessel's full volume (`TankElement.syncWater`). Buckets use it.
+  - Tank: `oil/TankLiquid`, liquid and intake, to 98 % of the vessel (`TankGroup.FULL`) and no further than keeps the
+    air over the liquid at the tank's working pressure (`Spec.cushion`: a tank has no vent, and filled to 100 % its air
+    went past the burst pressure; an empty iron tank takes about 10.8 buckets this way, an alloy tank 11.7)
+    (`TankElement.syncWater`). In a box every block's capability hands its calls to the box master's view, so the vessel
+    is offered once, not once per block. Buckets use it.
   - Boiler: `oil/BoilerTanks`, water in to its rated fill (`BoilerElement.RATED_KG`, the mark its feed float closes
     at), steam out once it boils.
   - Steam oven: steam in to 5 bar.
