@@ -120,6 +120,51 @@ class NetworkTest {
         assertTrue(failures == 0 && negatives.isEmpty(), log.toString());
     }
 
+    /** Two closed volumes joined only by heat conduction: their temperatures meet, energy is conserved, no mass moves. */
+    @Test
+    void conductionEvensOutTemperatures() {
+        Network net = new Network();
+        var a = net.add(new Network.Node(1e-3, 0, 0.1, false).fill(0.5, 1e-3, 360));
+        var b = net.add(new Network.Node(1e-3, 0, 0.1, false).fill(0.3, 1e-3, 300));
+        var e = net.connect(a, 0, b, 0, 0);
+        e.conductance = 200;   // (time constant about 4 s)
+        double u0 = a.U + b.U;
+        for (int s = 0; s < 1200; s++) net.step(DT);
+        assertEquals(u0, a.U + b.U, 1e-9 * Math.abs(u0), "energy");
+        assertEquals(0.5, a.mw, 1e-15, "no water moves");
+        assertEquals(a.T(), b.T(), 0.01, "temperatures meet");
+        assertEquals(0, net.stats.failures, "failures");
+    }
+
+    /** The random networks with every edge also conducting heat: the slow thermal settling (the restless ones) goes. */
+    @Test
+    void randomLevelNetworksWithConductionSettle() throws Exception {
+        int cases = Integer.parseInt(java.util.Objects.requireNonNullElse(System.getenv("FLUIDCORE_CASES"), "40"));
+        int steps = Integer.parseInt(java.util.Objects.requireNonNullElse(System.getenv("FLUIDCORE_STEPS"), "600"));
+        List<Long> restless = new ArrayList<>();
+        long failures = 0, total = 0, iters = 0;
+        List<String> failed = new ArrayList<>();
+        for (long seed = 1; seed <= cases; seed++) {
+            Network net = level(seed);
+            for (var e : net.edges) e.conductance = 5;
+            double[] t0 = totals(net);
+            for (int s = 0; s < steps; s++) net.step(DT);
+            double[] t1 = totals(net);
+            assertEquals(t0[2], t1[2], 1e-9 * Math.max(1e3, Math.abs(t0[2])), "energy " + seed);
+            assertEquals(t0[0], t1[0], 1e-11 * Math.max(1, t0[0]), "water " + seed);
+            double moving = 0;
+            for (var e : net.edges) moving += Math.abs(e.flow);
+            if (moving * 1000 >= t1[0] + t1[1] + 1e-9) restless.add(seed);
+            if (net.stats.failures > 0) failed.add(seed + "x" + net.stats.failures);
+            failures += net.stats.failures;
+            iters += net.stats.iterations;
+            total += net.stats.steps;
+        }
+        String log = String.format("conduction 5 W/K: cases %d steps %d: restless %s, failures %d %s, iterations/step %.2f%n", cases, steps, restless, failures, failed, iters / (double) total);
+        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-conduction.txt"), log);
+        assertEquals(0, failures, log);
+    }
+
     @Test
     void stepsAreDeterministic() {
         Network a = level(7), b = level(7);
@@ -137,6 +182,11 @@ class NetworkTest {
             Network net = level(seed);
             out.append("seed ").append(seed).append(": ").append(net.checkJacobian(DT)).append("\n");
         }
+        for (long seed = 1; seed <= 5; seed++) {
+            Network net = level(seed);
+            for (var e : net.edges) e.conductance = 5;
+            out.append("seed ").append(seed).append(" conducting: ").append(net.checkJacobian(DT)).append("\n");
+        }
         java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-jac.txt"), out.toString());
     }
 
@@ -146,11 +196,15 @@ class NetworkTest {
         long seed = Long.parseLong(java.util.Objects.requireNonNullElse(System.getenv("FLUIDCORE_SEED"), "12"));
         int until = Integer.parseInt(java.util.Objects.requireNonNullElse(System.getenv("FLUIDCORE_STEPS"), "1870"));
         Network net = level(seed);
+        String cond = System.getenv("FLUIDCORE_COND");
+        if (cond != null) for (var e : net.edges) e.conductance = Double.parseDouble(cond);
         for (int st = 0; st < until; st++) {
             long f0 = net.stats.substeps;
             net.step(DT);
             if (net.stats.substeps == f0 && st < until - 15) continue;
             out.append("step ").append(st).append(" substeps ").append(net.stats.substeps - f0).append(" lastFail ").append(net.stats.lastFail.stream().map(v -> String.format("%.2e", v)).toList()).append("\n");
+            if (net.stats.lastRows != null) out.append("  rows ").append(java.util.Arrays.stream(net.stats.lastRows).mapToObj(v -> String.format("%.1e", v)).toList()).append("\n");
+            net.stats.lastRows = null;
             net.stats.lastFail.clear();
         }
         for (var n : net.nodes) out.append(String.format("node V %.4g z %.2f H %.2f mw %.6g ma %.6g T %.2f P %.1f level %.4f%n", n.V, n.z, n.H, n.mw, n.ma, n.T(), n.P(), n.level()));

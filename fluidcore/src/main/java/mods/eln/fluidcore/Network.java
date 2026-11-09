@@ -32,6 +32,7 @@ public final class Network {
         WaterAir.Split split;
         double[] out;
         double[][] slopes;
+        double[] tSlope;
         double tHint = 300;
 
         public Node(double V, double z, double H, boolean fixed) {
@@ -56,6 +57,13 @@ public final class Network {
             tHint = split.T();
             out = WaterAir.outputs(split, V);
             slopes = null;   // (taken when the Jacobian needs them: slopes())
+            tSlope = null;
+        }
+
+        /** dT against (mw, ma, U), for heat conduction's slopes. */
+        double[] tSlope() {
+            if (tSlope == null) tSlope = fixed ? new double[3] : WaterAir.derivatives(split, mw, ma, U, V)[0];
+            return tSlope;
         }
 
         double[][] slopes() {
@@ -94,6 +102,12 @@ public final class Network {
          * stack of tanks drain liquid down while gas comes up through one coupling (one stream an edge can't).
          */
         public double exchange;
+        /**
+         * Heat conductance between the two nodes (W/K, 0 for none): a pipe wall, a heat exchanger's plates. It acts in full
+         * between nodes holding at least about M_CONTACT kg/m^3, fading to nothing for an empty one (wetted(): with
+         * nothing to hold it, a near-empty node's temperature answers a joule by thousands of kelvin, and Newton failed).
+         */
+        public double conductance;
         /** The last step's flow (kg/s, a to b positive). */
         public double flow;
 
@@ -124,6 +138,26 @@ public final class Network {
     }
 
     // ---- smooth pieces
+
+    /** The contents (kg/m^3) at which conduction is half on: about air at 1 bar. */
+    public static double M_CONTACT = 1;
+
+    /** How much of an edge's conductance a node's contents carry: m / (m + M_CONTACT V). */
+    static double wetted(Node n) {
+        double m = Math.max(0, n.mw) + Math.max(0, n.ma), m0 = M_CONTACT * n.V;
+        return m / (m + m0);
+    }
+
+    /** d wetted / d mass. */
+    static double wettedSlope(Node n) {
+        double m = Math.max(0, n.mw) + Math.max(0, n.ma), m0 = M_CONTACT * n.V;
+        return m0 / ((m + m0) * (m + m0));
+    }
+
+    /** Heat from a to b (W). */
+    static double conduction(Edge e) {
+        return e.conductance * wetted(e.a) * wetted(e.b) * (e.a.T() - e.b.T());
+    }
 
     /** A C1 step from 0 (x <= -1) to 1 (x >= 1). */
     static double smoothStep(double x) {
@@ -301,6 +335,12 @@ public final class Network {
             r[3 * i + 2] = n.U - y0[3 * i + 2] - dt * n.heat;
         }
         for (Edge e : edges) {
+            if (e.conductance > 0) {
+                double h = conduction(e);
+                Integer ia = idx.get(e.a), ib = idx.get(e.b);
+                if (ia != null) r[3 * ia + 2] += dt * h;
+                if (ib != null) r[3 * ib + 2] -= dt * h;
+            }
             if (e.exchange > 0) {
                 double[] x = exchangeFlux(e);
                 Integer ia = idx.get(e.a), ib = idx.get(e.b);
@@ -360,6 +400,25 @@ public final class Network {
                     }
             }
         }
+        // heat conduction: H = C wa wb (Ta - Tb), through each node's temperature slope and its contents
+        for (Edge e : edges) {
+            if (e.conductance <= 0) continue;
+            Integer ia = idx.get(e.a), ib = idx.get(e.b);
+            double wa = wetted(e.a), wb = wetted(e.b), dTab = e.a.T() - e.b.T();
+            for (int side = 0; side < 2; side++) {
+                Integer col = side == 0 ? ia : ib;
+                if (col == null) continue;
+                Node n = side == 0 ? e.a : e.b;
+                double[] dT = n.tSlope();
+                double sign = side == 0 ? 1 : -1, wOther = side == 0 ? wb : wa, dw = wettedSlope(n);
+                for (int j = 0; j < 3; j++) {
+                    double dm = j == 0 ? (n.mw > 0 ? dw : 0) : j == 1 ? (n.ma > 0 ? dw : 0) : 0;
+                    double dH = e.conductance * (wa * wb * sign * dT[j] + wOther * dm * dTab);
+                    if (ia != null) J.add(3 * ia + 2, 3 * col + j, dt * dH);
+                    if (ib != null) J.add(3 * ib + 2, 3 * col + j, -dt * dH);
+                }
+            }
+        }
         // the exchange edges: their slopes by central differences over their two nodes' contents (local and cheap)
         for (Edge e : edges) {
             if (e.exchange <= 0) continue;
@@ -390,6 +449,7 @@ public final class Network {
         var split = n.split;
         var out = n.out;
         var slopes = n.slopes;
+        var tSlope = n.tSlope;
         if (j == 0) n.mw += d;
         else if (j == 1) n.ma += d;
         else n.U += d;
@@ -401,6 +461,7 @@ public final class Network {
         n.split = split;
         n.out = out;
         n.slopes = slopes;
+        n.tSlope = tSlope;
         n.tHint = split.T();
         return f;
     }
@@ -448,6 +509,10 @@ public final class Network {
         for (Edge e : edges) {
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
             int a = ia == null ? -1 : ia, b = ib == null ? -1 : ib;
+            if (e.conductance > 0) {
+                double h = dt * conduction(e);
+                if (h != 0) moves.add(h > 0 ? new double[]{a, b, 2, h} : new double[]{b, a, 2, -h});
+            }
             if (e.exchange > 0) {
                 double[] x = exchangeFlux(e);
                 for (int k = 0; k < 3; k++) if (x[k] != 0) moves.add(x[k] > 0 ? new double[]{a, b, k, dt * x[k]} : new double[]{b, a, k, -dt * x[k]});
