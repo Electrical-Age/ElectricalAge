@@ -262,11 +262,12 @@ public final class Network {
      * smoothly through q = 0 (strictly upwind, a pipe at rest between a liquid port and a gas port flips between carrying
      * water and air, and Newton stalled there). At rest the streams are g SPLIT_DP ln 2 each way: equal masses, so
      * nothing moves where both ports draw the same; where one draws liquid and the other gas, they swap slowly (liquid
-     * runs into a dry branch below the surface, its gas bubbles out), as they would. 1 Pa against strict upwind, 100
-     * random networks x 3000 steps: with conduction 0 failed steps (was 44), without 80 sub-steps (was 312);
-     * 0.1 Pa and 0.01 Pa helped less (09-k-check.md).
+     * runs into a dry branch below the surface, its gas bubbles out), as they would. 100 random networks x 3000 steps,
+     * failed steps without / with conduction on every edge: strict upwind 2 / 44, 1 Pa 2 / 32 (once the slopes were
+     * exact), 10 Pa 0 / 4, 100 Pa 0 / 1. Narrower bands fail because a dry node's pressure moves ~170 Pa per microgram
+     * of vapour, so Newton's steps jump across a 1 Pa band (09-k-check.md).
      */
-    public static double SPLIT_DP = 1;
+    public static double SPLIT_DP = 10;
 
     /** The two streams {q+ from a, q- from b} and their slopes in dp. */
     static double[] streams(Edge e) {
