@@ -153,6 +153,8 @@ public final class LabCommands {
                 .then(Commands.literal("fluidtrace").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .then(Commands.argument("n", IntegerArgumentType.integer(1, 200))
                         .executes(c -> fluidtrace(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "n"))))))
+                .then(Commands.literal("nodes").then(Commands.argument("pos", BlockPosArgument.blockPos()).then(Commands.argument("r", IntegerArgumentType.integer(1, 32))
+                    .executes(c -> nodesNear(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "r"))))))
                 .then(Commands.literal("inspect").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> inspect(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("machines").then(Commands.argument("n", IntegerArgumentType.integer(1, 500))
@@ -1109,6 +1111,24 @@ public final class LabCommands {
         mods.eln.fluid.FluidWorld.traceSteps = n;
         src.sendSuccess(() -> Component.literal("tracing " + n + " steps (server log, 'fluidtrace')"), false);
         return n;
+    }
+
+    /** /elnlab nodes POS R: every EA node within R blocks (a cube), by position and kind (its element's class). */
+    static int nodesNear(CommandSourceStack src, BlockPos pos, int r) {
+        List<String> out = new ArrayList<>();
+        for (var n : mods.eln.node.NodeManager.instance.getNodes()) {
+            if (n.coordonate.world() != src.getLevel()) continue;
+            var p = n.coordonate.pos();
+            if (Math.abs(p.getX() - pos.getX()) > r || Math.abs(p.getY() - pos.getY()) > r || Math.abs(p.getZ() - pos.getZ()) > r) continue;
+            String kind = n instanceof mods.eln.node.transparent.TransparentNode tn && tn.element != null ? tn.element.getClass().getSimpleName()
+                : n.getClass().getSimpleName();
+            if (kind.equals("VoxelNode") || kind.equals("SixNode")) continue;   // (cables)
+            out.add(p.getX() + " " + p.getY() + " " + p.getZ() + " " + kind);
+        }
+        java.util.Collections.sort(out);
+        String text = out.isEmpty() ? "no EA devices within " + r : String.join("; ", out);
+        src.sendSuccess(() -> Component.literal(text), false);
+        return out.size();
     }
 
     public static int inspect(CommandSourceStack src, BlockPos pos) {
