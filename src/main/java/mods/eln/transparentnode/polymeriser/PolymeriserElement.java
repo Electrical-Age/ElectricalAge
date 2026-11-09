@@ -54,7 +54,17 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
         return out.isEmpty() || out.is(ElnRegistry.RAW_RUBBER.get()) && out.getCount() < out.getMaxStackSize();
     }
 
+    /** Its on/off lever (Nero 2026-11-08): off, it does nothing and draws nothing. */
+    public final mods.eln.node.transparent.MachineSwitch onOff = new mods.eln.node.transparent.MachineSwitch();
+
     void tick(double dt) {
+        if (!onOff.on) {
+            if (running) {
+                running = false;
+                needPublish();
+            }
+            return;
+        }
         boolean was = running;
         sinceRun += dt;
         boolean soul = initiator > 0 || inventory.getItem(SOUL_SLOT).is(ElnRegistry.SOUL_DUST.get());
@@ -131,6 +141,7 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
     /** Soul Dust in hand goes in; an empty hand takes the Raw Rubber. */
     @Override
     public boolean onBlockActivated(net.minecraft.world.entity.player.Player player, Direction side, float vx, float vy, float vz) {
+        if (onOff.activated(this, player, descriptor.toggle(), vx, vy, vz)) return true;
         if (node.coordonate.world().isClientSide()) return true;
         ItemStack hand = player.getMainHandItem();
         if (hand.is(ElnRegistry.SOUL_DUST.get())) {
@@ -226,6 +237,7 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
         try {
             stream.writeBoolean(machine.volts() > descriptor.nominalU * 0.5);
             stream.writeBoolean(running);
+            stream.writeBoolean(onOff.on);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -234,6 +246,7 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
+        onOff.write(nbt);
         feed.write(nbt, "butadiene");
         inPort.write(nbt);
         nbt.putDouble("progress", progress);
@@ -244,6 +257,7 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
+        onOff.read(nbt);
         feed.read(nbt, "butadiene");
         inPort.read(nbt);
         progress = nbt.getDoubleOr("progress", 0);
@@ -254,6 +268,7 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>(machine.wailaLines());
+        if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
         info.put(I18N.tr("Status"), I18N.tr(status));
         info.put(I18N.tr("Butadiene (blue)"), String.format("%.0f / %d mB", feed.asLiquid(), TANK_MB));
         info.put(I18N.tr("Soul Dust"), inventory.getItem(SOUL_SLOT).getCount() + (initiator > 0 ? " (+" + initiator + " rubber left)" : ""));

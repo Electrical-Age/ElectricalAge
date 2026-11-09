@@ -50,12 +50,13 @@ public class IndustrialResinCollectorDescriptor extends TransparentNodeDescripto
             .burnsOnOvervoltage(Machines.BURNS_OUT).power(RelativeFace.LEFT, RelativeFace.RIGHT).build();
     }
 
-    void draw(boolean powered, boolean running) {
+    void draw(boolean powered, boolean running, float lever) {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();
         mods.eln.anim.Led.draw(obj.getPart("ledpower"), powered);
         mods.eln.anim.Led.draw(obj.getPart("ledrun"), running);
+        mods.eln.node.transparent.MachineSwitch.drawToggle(obj.getPart("toggle"), lever);
     }
 
     @Override
@@ -63,9 +64,14 @@ public class IndustrialResinCollectorDescriptor extends TransparentNodeDescripto
         return true;
     }
 
+    /** The on/off lever (MachineSwitch), or null. */
+    public mods.eln.misc.Obj3D.Obj3DPart toggle() {
+        return obj == null ? null : obj.getPart("toggle");
+    }
+
     @Override
     public void drawItem(boolean entity) {
-        draw(false, false);
+        draw(false, false, 1);
     }
 
     @Override

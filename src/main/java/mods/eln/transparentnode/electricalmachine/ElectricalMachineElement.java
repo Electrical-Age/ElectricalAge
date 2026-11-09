@@ -50,6 +50,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
     private final ElectricalMachineSlowProcess slowProcess = new ElectricalMachineSlowProcess(this);
     private boolean powerOn = false;
+    /** Its on/off lever (Nero 2026-11-08). */
+    public final mods.eln.node.transparent.MachineSwitch onOff = new mods.eln.node.transparent.MachineSwitch();
     final ElectricalMachineDescriptor descriptor;
     public int inSlotId = 0;
     public final int outSlotId = 0;
@@ -68,6 +70,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
         slowRefreshProcess = new ElectricalStackMachineProcess(
             inventory, inSlotId, outSlotId, this.descriptor.outStackCount, machine, this.descriptor.recipe);
 
+        slowRefreshProcess.switchedOn = () -> onOff.on;
         slowProcessList.add(slowRefreshProcess);
         slowProcessList.add(slowProcess);
         slowProcessList.add(fieldSpeedProcess);
@@ -171,6 +174,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (onOff.activated(this, entityPlayer, descriptor.toggle, vx, vy, vz)) return true;
         return booterAccepter.take(entityPlayer.getMainHandItem(), this, false, true);
     }
 
@@ -187,6 +191,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
             stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
             node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
             stream.writeFloat((float) (machine.volts() / descriptor.nominalU));
+            stream.writeBoolean(onOff.on);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -196,6 +201,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putBoolean("powerOn", powerOn);
+        onOff.write(nbt);
         double progress = slowRefreshProcess.progressJoules();
         if (progress > 0) nbt.putDouble("progressJ", progress);
     }
@@ -204,6 +210,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         powerOn = nbt.getBooleanOr("powerOn", false);
+        onOff.read(nbt);
         slowRefreshProcess.resume(nbt.getDoubleOr("progressJ", 0)); // (saves before 26.x's machine API kept no progress)
     }
 
@@ -218,6 +225,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.putAll(machine.wailaLines());   // volts, the power drawn, and the machine's state when it isn't running
+        if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
         if (Eln.wailaEasyMode) {
             info.put(I18N.tr("Power provided"), Utils.plotPower("", machine.watts()));
         }

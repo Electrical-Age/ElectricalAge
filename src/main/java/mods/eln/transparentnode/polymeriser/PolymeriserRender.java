@@ -20,8 +20,12 @@ public class PolymeriserRender extends TransparentNodeElementRender {
         desc = (PolymeriserDescriptor) d;
     }
 
+    /** The on/off lever's swing (mods.eln.anim). */
+    final mods.eln.anim.Travel lever = mods.eln.anim.Travel.smooth(0.08).set(1);
+
     @Override
     public void refresh(float deltaT) {
+        lever.step(deltaT);
         super.refresh(deltaT);
         stir.speed(running ? 1 : 0).step(deltaT);
     }
@@ -29,7 +33,7 @@ public class PolymeriserRender extends TransparentNodeElementRender {
     @Override
     public void draw() {
         front.glRotateXnRef();
-        desc.draw(powered, running, stir.deg());
+        desc.draw(powered, running, lever.get(), stir.deg());
     }
 
     @Override
@@ -38,6 +42,7 @@ public class PolymeriserRender extends TransparentNodeElementRender {
         try {
             powered = stream.readBoolean();
             running = stream.readBoolean();
+            lever.to(stream.readBoolean());
         } catch (IOException e) {
             e.printStackTrace();
         }

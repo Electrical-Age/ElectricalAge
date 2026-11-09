@@ -49,15 +49,18 @@ final class MachineKit {
 
     /**
      * A control box on a face facing -x (the front) at x, its middle at (y, z): a steel box, two LED lenses (the parts),
-     * a toggle switch. Adds the box to main and returns {ledpower meshes, ledrun meshes}.
+     * the on/off lever's boss. Adds the box to main and returns {ledpower meshes, ledrun meshes, toggle (lever) meshes}.
      */
     static List<List<Mesh>> controlBox(List<Mesh> main, double x, double y, double z) {
         main.add(box(x - 0.8, y - 1.0, z - 1.2, x + 0.05, y + 1.0, z + 1.2, "darksteel"));
         main.add(box(x - 0.9, y - 0.9, z - 1.1, x - 0.8, y + 0.9, z + 1.1, "steel", "w").free("the control box's face plate, a decal"));
-        main.add(box(x - 1.3, y - 0.75, z + 0.55, x - 0.8, y - 0.35, z + 0.85, "steel"));                 // toggle
+        main.add(box(x - 1.05, y - 0.8, z + 0.5, x - 0.8, y - 0.3, z + 0.9, "steel"));                    // the lever's boss
         List<Mesh> pw = new ArrayList<>(List.of(prism('x', y + 0.4, z - 0.5, 0.28, x - 1.05, x - 0.8, "led_green", 8)));
         List<Mesh> run = new ArrayList<>(List.of(prism('x', y + 0.4, z + 0.5, 0.28, x - 1.05, x - 0.8, "led_amber", 8)));
-        return List.of(pw, run);
+        // the on/off lever (Nero 2026-11-08: it works now): its own part, turned about its root by MachineSwitch.drawToggle
+        List<Mesh> lever = new ArrayList<>(List.of(box(x - 1.8, y - 0.62, z + 0.63, x - 1.05, y - 0.48, z + 0.77, "steel"),
+            box(x - 2.0, y - 0.75, z + 0.5, x - 1.75, y - 0.35, z + 0.9, "red")));
+        return List.of(pw, run, lever);
     }
 
     /** Four bolt heads on a flange facing -x (the front) at x0..x1, centre (y, z). */

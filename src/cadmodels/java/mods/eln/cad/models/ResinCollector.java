@@ -74,6 +74,7 @@ public final class ResinCollector {
         n.part("main", body(l));
         n.part("ledpower", l.get(0));
         n.part("ledrun", l.get(1));
+        n.part("toggle", l.get(2));
         return List.of(n);
     }
 }

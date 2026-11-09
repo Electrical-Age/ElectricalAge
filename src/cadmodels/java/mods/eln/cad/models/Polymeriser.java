@@ -83,6 +83,7 @@ public final class Polymeriser {
         n.part("main", body(l));
         n.part("ledpower", l.get(0));
         n.part("ledrun", l.get(1));
+        n.part("toggle", l.get(2));
         n.part("stirrer", stirrer());
         n.origin("stirrer", CX, 12.5, CZ).spin("stirrer", 'y');
         return List.of(n);

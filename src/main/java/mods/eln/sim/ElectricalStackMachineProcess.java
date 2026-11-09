@@ -151,7 +151,11 @@ public class ElectricalStackMachineProcess implements IProcess {
     /** 26.x: an extra condition to run at all (e.g. the oil separator's tank has room). */
     public java.util.function.BooleanSupplier extraCondition = () -> true;
 
+    /** The machine's on/off switch (MachineSwitch; Nero 2026-11-08): off, nothing runs. */
+    public java.util.function.BooleanSupplier switchedOn = () -> true;
+
     public boolean smeltCan() {
+        if (!switchedOn.getAsBoolean()) return false;
         if (Utils.isEmpty(inventory.getItem(inputSlotId))) {
             // (no item: the fluid recipe, if any; extraCondition is about the item recipes' outputs)
             return fluidRecipe != null && fluidRecipe.ready() && Utils.canPutStackInInventory(fluidRecipe.output(), inventory, outSlotIdList);

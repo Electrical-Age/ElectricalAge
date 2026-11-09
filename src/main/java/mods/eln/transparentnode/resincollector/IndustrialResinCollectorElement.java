@@ -58,7 +58,17 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
     }
 
+    /** Its on/off lever (Nero 2026-11-08): off, it does nothing and draws nothing. */
+    public final mods.eln.node.transparent.MachineSwitch onOff = new mods.eln.node.transparent.MachineSwitch();
+
     void tick(double dt) {
+        if (!onOff.on) {
+            if (running) {
+                running = false;
+                needPublish();
+            }
+            return;
+        }
         sinceLook += dt;
         if (sinceLook > 5) {
             sinceLook = 0;
@@ -151,6 +161,7 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
 
     @Override
     public boolean onBlockActivated(net.minecraft.world.entity.player.Player player, Direction side, float vx, float vy, float vz) {
+        if (onOff.activated(this, player, descriptor.toggle(), vx, vy, vz)) return true;
         return false;
     }
 
@@ -188,6 +199,7 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
         try {
             stream.writeBoolean(machine.volts() > descriptor.nominalU * 0.5);
             stream.writeBoolean(running);
+            stream.writeBoolean(onOff.on);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -196,6 +208,7 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
+        onOff.write(nbt);
         tank.writeToNBT(nbt, "tank");
         outPort.write(nbt);
         nbt.putDouble("carry", carry);
@@ -204,6 +217,7 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
+        onOff.read(nbt);
         tank.readFromNBT(nbt, "tank");
         outPort.read(nbt);
         carry = nbt.getDoubleOr("carry", 0);
@@ -212,6 +226,7 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>(machine.wailaLines());
+        if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
         info.put(I18N.tr("Latex"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB");
         info.put(I18N.tr("Tapping"), handRate <= 0 ? I18N.tr("no tree behind it (a trunk with leaves)")
             : String.format("%.0f mB/h", handRate * IndustrialResinCollectorDescriptor.SPEED_UP * Latex.MB_PER_RUBBER * 3600) + (running ? "" : " " + I18N.tr("(stopped)")));

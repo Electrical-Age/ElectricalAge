@@ -153,6 +153,7 @@ public final class Magnetizer {
         a.part("rot", drumA());
         a.part("ledpower", la.get(0));
         a.part("ledrun", la.get(1));
+        a.part("toggle", la.get(2));
         a.origin("rot", 8.0, AY, 8.0).spin("rot", 'z');
         // (the item hovers in front of the coil, in its field: in the bore, behind the spider and axle, it couldn't be seen;
         // over the drum it was too small, or poked out of the block, AdventurAgent)
@@ -164,6 +165,7 @@ public final class Magnetizer {
         b.part("rot", fanB());
         b.part("ledpower", lb.get(0));
         b.part("ledrun", lb.get(1));
+        b.part("toggle", lb.get(2));
         b.origin("rot", FX, FY, FZ).spin("rot", 'z');
         items(b, new double[]{PX, (GAP0 + GAP1) / 2 - 1.0, PZ}, 1);
         out.add(b);

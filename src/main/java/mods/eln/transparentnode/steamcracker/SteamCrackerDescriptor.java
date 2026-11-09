@@ -51,12 +51,13 @@ public class SteamCrackerDescriptor extends TransparentNodeDescriptor {
 
     static final mods.eln.anim.Glow.Ramp PEEPHOLE = k -> k > 0.5f ? new float[]{1f, 0.55f, 0.15f} : new float[]{0.15f, 0.12f, 0.1f};
 
-    void draw(boolean powered, boolean running) {
+    void draw(boolean powered, boolean running, float lever) {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();
         mods.eln.anim.Led.draw(obj.getPart("ledpower"), powered);
         mods.eln.anim.Led.draw(obj.getPart("ledrun"), running);
+        mods.eln.node.transparent.MachineSwitch.drawToggle(obj.getPart("toggle"), lever);
         // the peepholes: the coil's orange heat while it cracks, dark glass when not
         mods.eln.anim.Glow.draw(obj.getPart("glow"), running ? 1 : 0, PEEPHOLE);
     }
@@ -66,9 +67,14 @@ public class SteamCrackerDescriptor extends TransparentNodeDescriptor {
         return true;
     }
 
+    /** The on/off lever (MachineSwitch), or null. */
+    public mods.eln.misc.Obj3D.Obj3DPart toggle() {
+        return obj == null ? null : obj.getPart("toggle");
+    }
+
     @Override
     public void drawItem(boolean entity) {
-        draw(false, false);
+        draw(false, false, 1);
     }
 
     @Override

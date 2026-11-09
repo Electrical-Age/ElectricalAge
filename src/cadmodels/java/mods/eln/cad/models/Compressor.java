@@ -209,6 +209,7 @@ public final class Compressor {
         a.part("move", ramA());
         a.part("ledpower", la.get(0));
         a.part("ledrun", la.get(1));
+        a.part("toggle", la.get(2));
         items(a, new double[]{8.0, 6.5, 8.0}, new double[]{7.0, 5.8, 12.0});
         out.add(a);
         NodeModel b = new NodeModel("compressorb", OilKit.PAINT_200V);
@@ -217,6 +218,7 @@ public final class Compressor {
         b.part("move", ramB());
         b.part("ledpower", lb.get(0));
         b.part("ledrun", lb.get(1));
+        b.part("toggle", lb.get(2));
         items(b, new double[]{6.5, 7.0, 8.0}, new double[]{7.0, 5.3, 12.0});
         out.add(b);
         return out;

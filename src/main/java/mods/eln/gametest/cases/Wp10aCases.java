@@ -86,6 +86,7 @@ public final class Wp10aCases {
         cases.add(new SmelterCase());
         cases.add(new MachinesCase());
         cases.add(new MaceratorProcessCase());
+        cases.add(new MaceratorSwitchCase());
         cases.add(new MaceratorReverseCase());
         cases.add(new MaceratorFieldSpeedCase());
         cases.add(new SingleUseChargeCase());
@@ -629,6 +630,59 @@ public final class Wp10aCases {
             ItemStack dust = Eln.findItemStack("Copper Dust");
             ctx.check("macerator: vanilla copper ingot (c:ingots/copper) -> 1 EA Copper Dust", in.isEmpty()
                 && out.getItem() == dust.getItem() && out.getCount() == 1, "in " + in + ", out " + out);
+        }
+    }
+
+    /**
+     * The macerator's on/off lever (Nero 2026-11-08): switched off by a sneaking right-click, it grinds nothing in the
+     * time that grinds a copper ingot, and draws next to nothing; a second sneaking click switches it on again.
+     */
+    static final class MaceratorSwitchCase implements TestCase {
+        ElectricalMachineElement macerator;
+        String clicks = "";
+
+        public String name() {
+            return "wp10a macerator switched off does nothing";
+        }
+
+        public int width() {
+            return 6;
+        }
+
+        public int ticks() {
+            return 260;
+        }
+
+        public void build(TestContext ctx) {
+            Layout l = new Layout(ctx, width());
+            macerator = (ElectricalMachineElement) l.device(MACHINES[0], 2, 1);
+            l.feed(ctx.at(2, 1, 1), macerator.front.left());
+            macerator.getInventory().setItem(macerator.inSlotId, new ItemStack(Items.COPPER_INGOT));
+            macerator.getInventory().setChanged();
+            var p = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            p.setShiftKeyDown(true);
+            try {
+                boolean a = macerator.onBlockActivated(p, Direction.YP, 0.5f, 0.5f, 0.5f);
+                clicks = a + "," + macerator.onOff.on;
+            } finally {
+                p.setShiftKeyDown(false);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ItemStack in = macerator.getInventory().getItem(macerator.inSlotId);
+            ItemStack out = macerator.getInventory().getItem(macerator.outSlotId);
+            ctx.check("switch: a sneaking right-click switches it off", clicks.equals("true,false"), clicks);
+            ctx.check("switch: off, it ground nothing", in.getCount() == 1 && out.isEmpty(), "in " + in + ", out " + out);
+            ctx.check("switch: off, it draws next to nothing", macerator.machine.watts() < 1, macerator.machine.watts() + " W");
+            var p = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            p.setShiftKeyDown(true);
+            try {
+                macerator.onBlockActivated(p, Direction.YP, 0.5f, 0.5f, 0.5f);
+            } finally {
+                p.setShiftKeyDown(false);
+            }
+            ctx.check("switch: clicked again, it's on", macerator.onOff.on, "");
         }
     }
 

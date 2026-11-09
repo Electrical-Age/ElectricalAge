@@ -30,6 +30,8 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
     private float processStatePerSecond;
 
     float UFactor;
+    /** The on/off lever's swing (mods.eln.anim). */
+    final mods.eln.anim.Travel lever = mods.eln.anim.Travel.smooth(0.08).set(1);
     /** The job's progress, run on between publishes and eased for drawing items in process (mods.eln.anim). */
     public final mods.eln.anim.Progress progress = new mods.eln.anim.Progress();
     /** A basin's fill (0..1; the oil separator's crude tank), if its descriptor publishes one. */
@@ -59,7 +61,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
     public void draw() {
         GL11.glPushMatrix();
         front.glRotateXnRef();
-        descriptor.drawLeds(UFactor, powerFactor);   // (first: a descriptor's draw may scale for its items)
+        descriptor.drawLeds(UFactor, powerFactor, lever.get());   // (first: a descriptor's draw may scale for its items)
         descriptor.draw(this, drawHandle, inEntity, outEntity, powerFactor, processState);
         GL11.glPopMatrix();
 
@@ -73,6 +75,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
         processState += processStatePerSecond * deltaT;
         if (processState > 1f) processState = 1f;
         progress.step(deltaT);
+        lever.step(deltaT);
         descriptor.refresh(deltaT, this, drawHandle, inEntity, outEntity, powerFactor, processState);
     }
 
@@ -94,6 +97,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
             progress.set(processState, processStatePerSecond);
             eConn.deserialize(stream);
             UFactor = stream.readFloat();
+            lever.to(stream.readBoolean());
             if (descriptor.publishesBasin()) basin = stream.readFloat();
             connectionType = null;
         } catch (IOException e) {

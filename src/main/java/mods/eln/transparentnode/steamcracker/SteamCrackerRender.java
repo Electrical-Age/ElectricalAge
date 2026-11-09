@@ -17,10 +17,19 @@ public class SteamCrackerRender extends TransparentNodeElementRender {
         desc = (SteamCrackerDescriptor) d;
     }
 
+    /** The on/off lever's swing (mods.eln.anim). */
+    final mods.eln.anim.Travel lever = mods.eln.anim.Travel.smooth(0.08).set(1);
+
+    @Override
+    public void refresh(float deltaT) {
+        super.refresh(deltaT);
+        lever.step(deltaT);
+    }
+
     @Override
     public void draw() {
         front.glRotateXnRef();
-        desc.draw(powered, running);
+        desc.draw(powered, running, lever.get());
     }
 
     @Override
@@ -29,6 +38,7 @@ public class SteamCrackerRender extends TransparentNodeElementRender {
         try {
             powered = stream.readBoolean();
             running = stream.readBoolean();
+            lever.to(stream.readBoolean());
         } catch (IOException e) {
             e.printStackTrace();
         }

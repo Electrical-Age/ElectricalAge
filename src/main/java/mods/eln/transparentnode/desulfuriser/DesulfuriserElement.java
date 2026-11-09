@@ -54,7 +54,17 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
     }
 
+    /** Its on/off lever (Nero 2026-11-08): off, it does nothing and draws nothing. */
+    public final mods.eln.node.transparent.MachineSwitch onOff = new mods.eln.node.transparent.MachineSwitch();
+
     void tick(double dt) {
+        if (!onOff.on) {
+            if (running) {
+                running = false;
+                needPublish();
+            }
+            return;
+        }
         boolean was = running;
         sinceRun += dt;
         FluidStack in = inTank.getFluid();
@@ -122,6 +132,7 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
 
     @Override
     public boolean onBlockActivated(net.minecraft.world.entity.player.Player player, Direction side, float vx, float vy, float vz) {
+        if (onOff.activated(this, player, descriptor.toggle(), vx, vy, vz)) return true;
         if (sulfur <= 0 || node.coordonate.world().isClientSide()) return sulfur > 0;
         ItemStack s = new ItemStack(mods.eln.registry.ElnRegistry.SULFUR_DUST.get(), sulfur);
         sulfur = 0;
@@ -216,6 +227,7 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
         try {
             stream.writeBoolean(machine.volts() > descriptor.nominalU * 0.5);
             stream.writeBoolean(running);
+            stream.writeBoolean(onOff.on);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -224,6 +236,7 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
+        onOff.write(nbt);
         inTank.writeToNBT(nbt, "cutInTank");
         outTank.writeToNBT(nbt, "cutOutTank");
         inPort.write(nbt);
@@ -236,6 +249,7 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
+        onOff.read(nbt);
         inTank.readFromNBT(nbt, "cutInTank");
         outTank.readFromNBT(nbt, "cutOutTank");
         inPort.read(nbt);
@@ -248,6 +262,7 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>(machine.wailaLines());
+        if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
         info.put(I18N.tr("In (blue)"), inTank.getFluidAmount() + " / " + inTank.getCapacity() + " mB");
         info.put(I18N.tr("Out (red)"), outTank.getFluidAmount() + " / " + outTank.getCapacity() + " mB");
         info.put(I18N.tr("Sulfur Dust"), String.valueOf(sulfur));

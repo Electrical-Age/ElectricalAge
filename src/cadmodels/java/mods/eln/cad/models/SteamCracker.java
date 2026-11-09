@@ -109,6 +109,7 @@ public final class SteamCracker {
         n.part("main", body(l));
         n.part("ledpower", l.get(0));
         n.part("ledrun", l.get(1));
+        n.part("toggle", l.get(2));
         n.part("glow", glow());
         return List.of(n);
     }

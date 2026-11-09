@@ -233,6 +233,7 @@ public final class Macerator {
         a.part("main", bodyA(la));
         a.part("ledpower", la.get(0));
         a.part("ledrun", la.get(1));
+        a.part("toggle", la.get(2));
         a.part("rot1", roll(ROLLS_A, 0, 2.6, 14.0, "steel"));
         a.part("rot2", roll(ROLLS_A, 1, 2.6, 14.0, "steel"));
         a.origin("rot1", ROLLS_A.x1, ROLLS_A.y, 8.0).origin("rot2", ROLLS_A.x2, ROLLS_A.y, 8.0).spin("rot1", 'z').spin("rot2", 'z');
@@ -242,6 +243,7 @@ public final class Macerator {
         b.part("main", bodyB(lb));
         b.part("ledpower", lb.get(0));
         b.part("ledrun", lb.get(1));
+        b.part("toggle", lb.get(2));
         // one belt link in the flywheel's plane; mods.eln.anim.Belt repeats it
         // (built above the block, clear of the model, where it is never drawn: Belt moves it from (lx, ly))
         b.part("beltlink", List.of(box(7.6, 16.85, FW_Z0 + 0.25, 8.4, 17.15, FW_Z1 - 0.25, "rubber")));
