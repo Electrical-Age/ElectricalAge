@@ -10,6 +10,11 @@ import java.util.Random;
 /** Step time against network size (M3; FLUIDCORE_BENCH=1): a synthetic plant of pipe-run nodes and tanks, ports level. */
 @EnabledIfEnvironmentVariable(named = "FLUIDCORE_BENCH", matches = "1")
 class BenchTest {
+    static {
+        String v = System.getenv("FLUIDCORE_SPLIT");
+        if (v != null) Network.SPLIT_DP = Double.parseDouble(v);
+    }
+
     static Network plant(int n, long seed) {
         Random r = new Random(seed);
         Network net = new Network();
