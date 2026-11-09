@@ -140,11 +140,13 @@ class NetworkTest {
     @Test
     void traceFailures() throws Exception {
         StringBuilder out = new StringBuilder();
-        Network net = level(1);
-        for (int st = 0; st < 170; st++) {
+        long seed = Long.parseLong(java.util.Objects.requireNonNullElse(System.getenv("FLUIDCORE_SEED"), "12"));
+        int until = Integer.parseInt(java.util.Objects.requireNonNullElse(System.getenv("FLUIDCORE_STEPS"), "1870"));
+        Network net = level(seed);
+        for (int st = 0; st < until; st++) {
             long f0 = net.stats.substeps;
             net.step(DT);
-            if (net.stats.substeps == f0 && st < 150) continue;
+            if (net.stats.substeps == f0 && st < until - 15) continue;
             out.append("step ").append(st).append(" substeps ").append(net.stats.substeps - f0).append(" lastFail ").append(net.stats.lastFail.stream().map(v -> String.format("%.2e", v)).toList()).append("\n");
             net.stats.lastFail.clear();
         }

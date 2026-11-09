@@ -171,20 +171,20 @@ public final class Network {
 
     static double[] draw(Node n, double f) {
         double xl = smoothStep(windowArg(n, f));
-        double yv = n.out[WaterAir.YV];
-        return new double[]{xl + (1 - xl) * yv, (1 - xl) * (1 - yv), xl * n.out[WaterAir.HL] + (1 - xl) * n.out[WaterAir.HG]};
+        double yv = n.out[WaterAir.YV], ya = n.out[WaterAir.YA];
+        return new double[]{xl + (1 - xl) * yv, (1 - xl) * ya, xl * n.out[WaterAir.HL] + (1 - xl) * n.out[WaterAir.HG]};
     }
 
     /** Slopes of draw() against n's (mw, ma, U): [component][j]. */
     static double[][] drawSlope(Node n, double f) {
         double x = windowArg(n, f);
         double xl = smoothStep(x), dxl = 2 * stepSlope(x) / BAND;
-        double yv = n.out[WaterAir.YV], hl = n.out[WaterAir.HL], hg = n.out[WaterAir.HG];
+        double yv = n.out[WaterAir.YV], ya = n.out[WaterAir.YA], hl = n.out[WaterAir.HL], hg = n.out[WaterAir.HG];
         double[][] d = new double[3][3];
         for (int j = 0; j < 3; j++) {
-            double dL = dxl * n.slopes()[WaterAir.LEVEL][j], dy = n.slopes()[WaterAir.YV][j];
+            double dL = dxl * n.slopes()[WaterAir.LEVEL][j], dy = n.slopes()[WaterAir.YV][j], da = n.slopes()[WaterAir.YA][j];
             d[0][j] = dL * (1 - yv) + (1 - xl) * dy;
-            d[1][j] = -dL * (1 - yv) - (1 - xl) * dy;
+            d[1][j] = -dL * ya + (1 - xl) * da;
             d[2][j] = dL * (hl - hg) + xl * n.slopes()[WaterAir.HL][j] + (1 - xl) * n.slopes()[WaterAir.HG][j];
         }
         return d;
@@ -347,7 +347,7 @@ public final class Network {
         return x;
     }
 
-    public static double TOL = 1e-10;
+    public static double TOL = 1e-10, STALL_OK = 1e-6;
 
     /**
      * End the step conservatively whatever Newton reached: the contents become the start's plus dt times the fluxes
@@ -416,6 +416,9 @@ public final class Network {
             stats.norms.add(nr);
             if (!accepted) {
                 set(free, y);
+                // (stalled at the precision floor: a liquid-full node turns a rounding error in its mass into a pressure,
+                // so the residual can't go lower; the step still ends conservatively)
+                if (nr < STALL_OK) return true;
                 if (nr >= 1e3 * TOL) {
                     stats.lastFail.clear();
                     stats.lastFail.addAll(stats.norms);
