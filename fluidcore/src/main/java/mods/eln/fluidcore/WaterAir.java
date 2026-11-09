@@ -170,6 +170,33 @@ public final class WaterAir {
         return Math.exp(x);
     }
 
+    /**
+     * Solve from a nearby split (the node's last): Newton on (T, ln Vg) with the residuals' own Jacobian (as in
+     * derivatives()), a few iterations; falls back to the bracketed solve if it doesn't converge or leaves the range.
+     */
+    public static Split solve(double mw, double ma, double U, double V, Split near) {
+        if (near == null) return solve(mw, ma, U, V, 300);
+        double T = near.T(), x = Math.log(near.vg());
+        for (int it = 0; it < 12; it++) {
+            double vg = Math.exp(x);
+            double[] r = residuals(mw, ma, U, V, T, vg);
+            double scaleU = Math.max(1, Math.abs(U)) * 1e-13;
+            if (Math.abs(r[0]) < scaleU + 1e-9 && Math.abs(r[1]) < 1e-13) return split(mw, ma, V, T, vg);
+            double hT = 1e-6 * T, hx = 1e-7;
+            double[] rT = residuals(mw, ma, U, V, T + hT, vg), rX = residuals(mw, ma, U, V, T, Math.exp(x + hx));
+            double j11 = (rT[0] - r[0]) / hT, j21 = (rT[1] - r[1]) / hT, j12 = (rX[0] - r[0]) / hx, j22 = (rX[1] - r[1]) / hx;
+            double det = j11 * j22 - j12 * j21;
+            if (!(Math.abs(det) > 0) || !Double.isFinite(det)) break;
+            double dT = -(j22 * r[0] - j12 * r[1]) / det, dx = -(-j21 * r[0] + j11 * r[1]) / det;
+            // (damped: at most 30 K and a factor e in Vg per iteration)
+            double k = Math.min(1, Math.min(30 / Math.max(1e-30, Math.abs(dT)), 1 / Math.max(1e-30, Math.abs(dx))));
+            T += k * dT;
+            x += k * dx;
+            if (!(T > T_MIN && T < T_MAX) || x > Math.log(V) + 1e-9 || !Double.isFinite(x)) break;
+        }
+        return solve(mw, ma, U, V, near.T());
+    }
+
     /** Solve (water mw, air ma, internal energy U, volume V) for the split; tHint speeds the bracket. */
     public static Split solve(double mw, double ma, double U, double V, double tHint) {
         double lo = T_MIN, hi = T_MAX;
