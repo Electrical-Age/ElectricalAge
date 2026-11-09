@@ -54,12 +54,12 @@ final class MachineKit {
     static List<List<Mesh>> controlBox(List<Mesh> main, double x, double y, double z) {
         main.add(box(x - 0.8, y - 1.0, z - 1.2, x + 0.05, y + 1.0, z + 1.2, "darksteel"));
         main.add(box(x - 0.9, y - 0.9, z - 1.1, x - 0.8, y + 0.9, z + 1.1, "steel", "w").free("the control box's face plate, a decal"));
-        main.add(box(x - 1.05, y - 0.8, z + 0.5, x - 0.8, y - 0.3, z + 0.9, "steel"));                    // the lever's boss
+        main.add(box(x - 1.05, y - 0.6, z + 0.5, x - 0.8, y - 0.1, z + 0.9, "steel"));                    // the lever's boss
         List<Mesh> pw = new ArrayList<>(List.of(prism('x', y + 0.4, z - 0.5, 0.28, x - 1.05, x - 0.8, "led_green", 8)));
         List<Mesh> run = new ArrayList<>(List.of(prism('x', y + 0.4, z + 0.5, 0.28, x - 1.05, x - 0.8, "led_amber", 8)));
-        // the on/off lever (Nero 2026-11-08: it works now): its own part, turned about its root by MachineSwitch.drawToggle
-        List<Mesh> lever = new ArrayList<>(List.of(box(x - 1.8, y - 0.62, z + 0.63, x - 1.05, y - 0.48, z + 0.77, "steel"),
-            box(x - 2.0, y - 0.75, z + 0.5, x - 1.75, y - 0.35, z + 0.9, "red")));
+        // the on/off lever (Nero 2026-11-08: it works now; high enough on the box that, down, its knob stays on it): its own part, turned about its root by MachineSwitch.drawToggle
+        List<Mesh> lever = new ArrayList<>(List.of(box(x - 1.8, y - 0.42, z + 0.63, x - 1.05, y - 0.28, z + 0.77, "steel"),
+            box(x - 2.0, y - 0.55, z + 0.5, x - 1.75, y - 0.15, z + 0.9, "red")));
         return List.of(pw, run, lever);
     }
 

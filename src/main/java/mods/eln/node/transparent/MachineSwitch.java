@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Player;
 public final class MachineSwitch {
     public static final String NBT = "machineOn";
     /** The lever's swing either side of level, degrees. */
-    static final float SWING = 30;
+    static final float SWING = 20;
 
     public boolean on = true;
 
