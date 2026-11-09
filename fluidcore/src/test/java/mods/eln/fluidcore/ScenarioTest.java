@@ -7,6 +7,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Gameplay scenarios for the fluid core (M3), from the mod's GameTests' physics. */
 class ScenarioTest {
+    /** A trace of Newton on the pump's first step (FLUIDCORE_DEBUG=1; notes/fluid-review/pump-newton.txt). */
+    @Test
+    @org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable(named = "FLUIDCORE_DEBUG", matches = "1")
+    void debugPumpFirstStep() throws Exception {
+        Network net = new Network();
+        var res = net.add(new Network.Node(1, 0, 1, false).fill(600, RHO_AIR * 0.4, 293));
+        var riser = net.add(new Network.Node(0.005, 0, 5, false).fill(0, RHO_AIR * 0.005, 293));
+        var tank = net.add(new Network.Node(1, 5, 1, false).fill(0, RHO_AIR, 293));
+        var pump = net.connect(res, 0, riser, 0, 1e-5);
+        pump.boost = 1.2e5;
+        pump.kind = Network.Kind.CHECK;
+        net.connect(riser, 1, tank, 0, 1e-5);
+        Network.DEBUG = new StringBuilder();
+        Network.MAX_DEPTH = 0;
+        try {
+            net.step(DT);
+            java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/pump-newton.txt"), Network.DEBUG.toString());
+        } finally {
+            Network.DEBUG = null;
+            Network.MAX_DEPTH = 5;
+        }
+    }
+
     static final double DT = 0.05, RHO_AIR = 1.2;
 
     static double water(Network net) {
@@ -36,9 +59,7 @@ class ScenarioTest {
                     net.stats.lastFail.stream().map(v -> String.format("%.2e", v)).toList(), riser.mw, riser.level(), riser.P(), tank.mw) + java.util.Arrays.toString(net.stats.lastRows);
             }
             assertEquals(w0, water(net), 1e-9 * w0, "water kept");
-            // (known, open: the first step of a pump starting into an empty riser stalls in Newton (the riser's water row,
-            // 2 g in 0.067 kg) and ends on its best iterate, conservatively; the run recovers. Allowed once until fixed.)
-            assertTrue(fail.isEmpty() || fail.startsWith("step 0 ") && fail.indexOf("step ", 1) < 0, "failures: " + fail);
+            assertEquals("", fail, "failures");
             if (boost > 1e5) assertTrue(tank.mw > 10, "1.2 bar lifts water into the tank: " + tank.mw + " kg");
             else assertTrue(tank.mw < 0.1, "0.3 bar can't lift 5 m: " + tank.mw + " kg");
         }

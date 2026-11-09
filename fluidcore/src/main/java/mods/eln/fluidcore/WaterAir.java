@@ -307,8 +307,13 @@ public final class WaterAir {
         double[] h = {Math.max(1e-12, 1e-6 * mw), Math.max(1e-12, 1e-6 * ma), Math.max(1e-6, 1e-9 * Math.abs(U))};
         double[][] out = new double[2][3];
         for (int k = 0; k < 3; k++) {
-            double[] p = residualsAt(k, +h[k], mw, ma, U, V, T, vg), m = residualsAt(k, -h[k], mw, ma, U, V, T, vg);
-            double d1 = (p[0] - m[0]) / (2 * h[k]), d2 = (p[1] - m[1]) / (2 * h[k]);
+            // (a mass at or near zero: a forward difference, as a central one would ask about negative contents; at
+            // exactly no water the Jacobian came out pointing the wrong way, and a pump's first step into an empty riser
+            // held the riser's water at zero against its own inflow)
+            boolean forward = (k == 0 && mw < h[k]) || (k == 1 && ma < h[k]);
+            double[] p = residualsAt(k, +h[k], mw, ma, U, V, T, vg), m = forward ? residualsAt(k, 0, mw, ma, U, V, T, vg) : residualsAt(k, -h[k], mw, ma, U, V, T, vg);
+            double den = forward ? h[k] : 2 * h[k];
+            double d1 = (p[0] - m[0]) / den, d2 = (p[1] - m[1]) / den;
             // [dT, dVg] = -J^-1 [d1, d2]
             out[0][k] = -(j22 * d1 - j12 * d2) / det;
             out[1][k] = -(-j21 * d1 + j11 * d2) / det;
@@ -351,12 +356,13 @@ public final class WaterAir {
         double[] oTp = outputs(split(mw, ma, V, T + hT, vg), V), oTm = outputs(split(mw, ma, V, T - hT, vg), V);
         double[] oVp = outputs(split(mw, ma, V, T, vg + hV), V), oVm = outputs(split(mw, ma, V, T, vg - hV), V);
         double hw = Math.max(1e-12, 1e-6 * mw), ha = Math.max(1e-12, 1e-6 * ma);
-        double[] owp = outputs(split(mw + hw, ma, V, T, vg), V), owm = outputs(split(mw - hw, ma, V, T, vg), V);
-        double[] oap = outputs(split(mw, ma + ha, V, T, vg), V), oam = outputs(split(mw, ma - ha, V, T, vg), V);
+        boolean fw = mw < hw, fa = ma < ha;   // (forward differences at or near zero, as in derivatives())
+        double[] owp = outputs(split(mw + hw, ma, V, T, vg), V), owm = outputs(split(fw ? mw : mw - hw, ma, V, T, vg), V);
+        double[] oap = outputs(split(mw, ma + ha, V, T, vg), V), oam = outputs(split(mw, fa ? ma : ma - ha, V, T, vg), V);
         double[][] out = new double[OUTPUTS][3];
         for (int o = 0; o < OUTPUTS; o++) {
             double dT = (oTp[o] - oTm[o]) / (2 * hT), dV = (oVp[o] - oVm[o]) / (2 * hV);
-            double pw = (owp[o] - owm[o]) / (2 * hw), pa = (oap[o] - oam[o]) / (2 * ha);
+            double pw = (owp[o] - owm[o]) / (fw ? hw : 2 * hw), pa = (oap[o] - oam[o]) / (fa ? ha : 2 * ha);
             out[o][0] = pw + dT * d[0][0] + dV * d[1][0];
             out[o][1] = pa + dT * d[0][1] + dV * d[1][1];
             out[o][2] = dT * d[0][2] + dV * d[1][2];   // (U enters only through T and Vg)
