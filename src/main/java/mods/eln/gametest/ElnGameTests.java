@@ -190,6 +190,7 @@ public final class ElnGameTests {
     }
 
     static void registerTests(RegisterGameTestsEvent event) {
+        mods.eln.robotics.computer.hw.Runner.SYNC = true;   // (computers keep pace with a test server ticking flat out)
         mods.eln.fluid.FluidWorld.watchAll = true;
         Holder<TestEnvironmentDefinition<?>> env = event.registerEnvironment(
             Identifier.fromNamespaceAndPath(Eln.MODID, "default"), new TestEnvironmentDefinition.AllOf(List.of()));

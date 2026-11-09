@@ -121,6 +121,7 @@ public final class Runner implements Runnable {
         if (powered && machine.runnable()) {
             sliceBudget = budget;
             ComputerPool.get().execute(this);
+            if (SYNC) awaitIdle();
         } else {
             ran = 0;
             state.set(IDLE);
@@ -297,6 +298,13 @@ public final class Runner implements Runnable {
     public long late() {
         return late;
     }
+
+    /**
+     * GameTests: each tick waits for its slice, so a computer gets its budget every tick however fast the test server
+     * ticks (it runs ticks back to back; with the fluid solver 3x faster the elevator disk fell behind and missed its
+     * floor). In play the server ticks at 20 Hz and the slice is done long before the next tick.
+     */
+    public static volatile boolean SYNC = false;
 
     /** Wait until it is between slices (a slice is a few ms, plus its wait in the pool's queue); tests. */
     public void awaitIdle() {
