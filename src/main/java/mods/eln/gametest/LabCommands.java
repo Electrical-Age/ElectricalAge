@@ -150,6 +150,21 @@ public final class LabCommands {
                         c.getSource().sendSuccess(() -> Component.literal("scanning every fluid network (server log, 'fluidscan')"), false);
                         return 1;
                     })))
+                .then(Commands.literal("fluidstats").executes(c -> {
+                    var nets = mods.eln.fluid.FluidWorld.networksByCost();
+                    double total = 0;
+                    for (var n : nets) total += n.avgNanos;
+                    StringBuilder sb = new StringBuilder(String.format("%d fluid networks, last tick %.3f ms, average sum %.3f ms; worst:",
+                        nets.size(), mods.eln.fluid.FluidWorld.lastTickNanos() / 1e6, total / 1e6));
+                    for (int i = 0; i < Math.min(8, nets.size()); i++) {
+                        var n = nets.get(i);
+                        sb.append(String.format("%n  %.3f ms avg (%.3f last), %d nodes, %d edges, at %s", n.avgNanos / 1e6, n.lastNanos / 1e6,
+                            n.freeNodes(), n.edges.size(), n.where));
+                    }
+                    String msg = sb.toString();
+                    c.getSource().sendSuccess(() -> Component.literal(msg), false);
+                    return nets.size();
+                }))
                 .then(Commands.literal("fluidtrace").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .then(Commands.argument("n", IntegerArgumentType.integer(1, 200))
                         .executes(c -> fluidtrace(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "n"))))))

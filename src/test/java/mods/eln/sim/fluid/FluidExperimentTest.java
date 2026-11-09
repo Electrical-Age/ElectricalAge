@@ -133,6 +133,59 @@ class FluidExperimentTest {
         return new FluidPropertyTest.Case(net, free, List.of(), List.of(), new double[n]);
     }
 
+    /**
+     * A synthetic plant of n lumped nodes, ports joined at one height: a chain of pipe-run nodes with branches (a tree)
+     * and a few loops, every tenth a tank part full of water, some pumps (boost) and check valves. Seeded.
+     */
+    static FluidNetwork plant(int n, long seed) {
+        java.util.Random r = new java.util.Random(seed);
+        FluidNetwork net = new FluidNetwork();
+        List<FluidNode> ns = new ArrayList<>();
+        double[] z = new double[n], h = new double[n];
+        for (int i = 0; i < n; i++) {
+            boolean tank = i % 10 == 0;
+            h[i] = tank ? 2 + r.nextDouble() : 0.5 + r.nextDouble();
+            double V = tank ? 1 + 4 * r.nextDouble() : 0.002 + 0.02 * r.nextDouble();
+            int parent = i == 0 ? -1 : Math.max(0, i - 1 - (r.nextDouble() < 0.3 ? r.nextInt(Math.min(i, 20)) : 0));
+            z[i] = parent < 0 ? 0 : z[parent] + (r.nextBoolean() ? 0 : h[parent]) - (r.nextBoolean() ? 0 : h[i]);
+            double liquid = tank ? (0.2 + 0.6 * r.nextDouble()) * V * Water.RHO_L : (r.nextDouble() < 0.5 ? 0.9 * V * Water.RHO_L : 0);
+            FluidNode node = net.add(new FluidNode(V, z[i], h[i], false).fill(liquid, 1e5 + 2e5 * r.nextDouble(), 293 + 60 * r.nextDouble()));
+            ns.add(node);
+            if (parent >= 0) {
+                double meet = Math.max(z[parent], z[i]);
+                FluidEdge e = net.connect(ns.get(parent), (meet - z[parent]) / h[parent], node, (meet - z[i]) / h[i], 1e-9 + 1e-8 * r.nextDouble());
+                if (r.nextDouble() < 0.05) e.kind(FluidEdge.Kind.CHECK);
+                if (r.nextDouble() < 0.05) e.boost = 1e5 * r.nextDouble();
+            }
+        }
+        for (int extra = 0; extra < n / 20; extra++) {
+            int a = r.nextInt(n), b = r.nextInt(n);
+            if (a == b) continue;
+            double lo = Math.max(z[a], z[b]), hi = Math.min(z[a] + h[a], z[b] + h[b]);
+            if (hi < lo) continue;
+            net.connect(ns.get(a), (lo - z[a]) / h[a], ns.get(b), (lo - z[b]) / h[b], 1e-9);
+        }
+        return net;
+    }
+
+    /** Step time against network size (scale plan step 1). */
+    @Test
+    void bench() throws Exception {
+        StringBuilder out = new StringBuilder("nodes | edges | steps timed | ms per step (avg) | newton iters\n");
+        for (int n : new int[]{25, 100, 300, 1000, 2000}) {
+            FluidNetwork net = plant(n, 42);
+            int warm = n >= 1000 ? 1 : 20, steps = n >= 2000 ? 2 : n >= 1000 ? 5 : 100;
+            for (int s = 0; s < warm; s++) net.step(FluidPropertyTest.DT);
+            FluidNetwork.Stats.reset();
+            long t0 = System.nanoTime();
+            for (int s = 0; s < steps; s++) net.step(FluidPropertyTest.DT);
+            double ms = (System.nanoTime() - t0) / 1e6 / steps;
+            out.append(String.format("%d | %d | %d | %.3f | %d | solves/step %.1f | phases ms/step %s%n", n, net.edges.size(), steps, ms, FluidNetwork.Stats.newtonIters, FluidNetwork.Stats.solves / (double) steps,
+                java.util.Arrays.stream(FluidNetwork.Stats.phaseNanos).mapToObj(v -> String.format("%.2f", v / 1e6 / steps)).toList()));
+            java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/bench.txt"), out.toString());
+        }
+    }
+
     @Test
     void experiments() throws Exception {
         StringBuilder out = new StringBuilder("config | restless lax | restless strict | steps | newton iters | newton failed | ms\n");

@@ -39,12 +39,15 @@ public final class FluidNetwork {
 
     /** Counters for measurements (tests, /elnlab). */
     public static final class Stats {
-        public static long steps, newtonIters, newtonFailed;
+        public static long steps, newtonIters, newtonFailed, solves;
+        /** Time per phase (ns): 0 responses, 1 solve passes, 2 limiters, 3 phase caps, 4 passThrough, 5 transfer, 6 update. */
+        public static final long[] phaseNanos = new long[7];
         /** The last step's residual norms (Pa, rms over nodes), one per iteration. */
         public static final java.util.List<Double> lastNorms = new java.util.ArrayList<>();
 
         public static void reset() {
-            steps = newtonIters = newtonFailed = 0;
+            steps = newtonIters = newtonFailed = solves = 0;
+            java.util.Arrays.fill(phaseNanos, 0);
         }
     }
 
@@ -94,6 +97,33 @@ public final class FluidNetwork {
         return n;
     }
 
+    /** Where it is (a port's block, for logs and /elnlab fluidstats; null if unknown). */
+    public String where;
+    /** Its step time (ns): the last one, and an average over about 100 steps. */
+    public long lastNanos;
+    public double avgNanos;
+
+    public void timed(long nanos) {
+        lastNanos = nanos;
+        avgNanos = avgNanos == 0 ? nanos : avgNanos + 0.01 * (nanos - avgNanos);
+    }
+
+    public int freeNodes() {
+        int n = 0;
+        for (FluidNode x : nodes) if (!x.fixed) n++;
+        return n;
+    }
+
+    /** The pressure system's symbolic factorisation, kept while the network's pattern holds (Sparse.solve). */
+    private final java.util.Map<Long, SparseLU> luCache = new java.util.HashMap<>();
+
+    /** Each node's edges, for the step (built at its start: the per-node loops were over every edge, O(N E)). */
+    private java.util.Map<FluidNode, List<FluidEdge>> adj = new java.util.IdentityHashMap<>();
+
+    private List<FluidEdge> edgesOf(FluidNode n) {
+        return adj.getOrDefault(n, List.of());
+    }
+
     public FluidEdge connect(FluidNode a, double portA, FluidNode b, double portB, double k) {
         FluidEdge e = new FluidEdge(a, portA, b, portB, k);
         edges.add(e);
@@ -101,6 +131,11 @@ public final class FluidNetwork {
     }
 
     public void step(double dt) {
+        adj = new java.util.IdentityHashMap<>();
+        for (FluidEdge e : edges) {
+            adj.computeIfAbsent(e.a, k -> new ArrayList<>()).add(e);
+            if (e.b != e.a) adj.computeIfAbsent(e.b, k -> new ArrayList<>()).add(e);
+        }
         // 1. heat
         for (FluidNode n : nodes) {
             if (n.fixed) { n.heat = 0; continue; }
@@ -124,6 +159,7 @@ public final class FluidNetwork {
             e.pkA = null;
             e.pkB = null;
         }
+        long tPh = System.nanoTime();
         Flash probe = new Flash();
         // each free node's pressure response per kg of liquid and per kg of its own gas (one per phase, whichever edge
         // brings or takes it: per-edge responses made in != out at a small node in a steady through-flow)
@@ -150,6 +186,7 @@ public final class FluidNetwork {
         // coupled low and high (their gas tied by the high ports) sloshed their liquid back and forth through the low
         // ones every step, by the cap on a level's move (Baughn 2026-11-09: a box tank split by a broken corner, its oil
         // oscillating)
+        Stats.phaseNanos[0] += System.nanoTime() - tPh;
         int[] lam = new int[N];
         java.util.Arrays.fill(lam, -1);
         int M = N;
@@ -192,11 +229,12 @@ public final class FluidNetwork {
             // (the one-way edges the solve shut this step: one at a time, the worst back-flow first, and opened again if the
             // drive across one turns forward; shutting them all at once, a feed valve back-flowing from its boiler also shut
             // the pump pushing into the same pipe, and the pipe sat under the pump's shut-off with nothing flowing)
+            long tSolve = System.nanoTime();
             java.util.Set<FluidEdge> shut = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
             for (int pass = 0; pass < (it > 0 && NEWTON_KEEP_EDGES ? 1 : MAX_PASSES); pass++) {
-                double[][] A = new double[M][M];
+                Sparse A = new Sparse(M);
                 double[] rhs = new double[M];
-                for (int i = 0; i < M; i++) A[i][i] = 1;
+                for (int i = 0; i < M; i++) A.add(i, i, 1);
                 for (int i = 0; i < N; i++) rhs[i] = free.get(i).P() + corr[i];
                 for (int i = N; i < M; i++) rhs[i] = corr[i];
                 for (FluidEdge e : edges) {
@@ -214,16 +252,17 @@ public final class FluidNetwork {
                         double per = row == 0 ? -e.sA : row == 1 ? e.sB : row == 2 ? -e.xl : e.xl;
                         double k = dt * per * e.g;   // (a loses the flow, b gains it)
                         // row i: X_i' - k (Pa' + hA La - Pb' - hB Lb) = X_i + k c
-                        if (ia != null) A[i][ia] -= k;
+                        if (ia != null) A.add(i, ia, -k);
                         else rhs[i] += k * e.a.P();
-                        if (ib != null) A[i][ib] += k;
+                        if (ib != null) A.add(i, ib, k);
                         else rhs[i] -= k * e.b.P();
-                        if (la >= 0) A[i][la] -= k * e.hA;
-                        if (lb >= 0) A[i][lb] += k * e.hB;
+                        if (la >= 0) A.add(i, la, -k * e.hA);
+                        if (lb >= 0) A.add(i, lb, k * e.hB);
                         rhs[i] += k * c;
                     }
                 }
-                X = solve(A, rhs);
+                X = A.solve(rhs, luCache);
+                Stats.solves++;
                 P = java.util.Arrays.copyOf(X, N);
                 boolean again = false;
                 FluidEdge worst = null;
@@ -269,6 +308,7 @@ public final class FluidNetwork {
                 e.g = 0;
                 e.flow = 0;
             }
+            Stats.phaseNanos[1] += System.nanoTime() - tSolve;
             if (NEWTON_FD) {
                 newtonFD(X, dt, free, idx, lam, N, M, snap == null ? new Snapshot(free) : snap);
                 break;
@@ -280,6 +320,7 @@ public final class FluidNetwork {
             for (int i = 0; i < N; i++) solved.put(free.get(i), P[i]);
             gainedL.clear();
             for (int i = 0; i < N; i++) if (lam[i] >= 0) gainedL.put(free.get(i), X[lam[i]]);
+            long tLim = System.nanoTime();
             if (!NEWTON) {
                 for (int pass = 0; pass < 3; pass++) {
                     limitNoReversal(dt);
@@ -301,11 +342,19 @@ public final class FluidNetwork {
                 xl[k] = pk.rho > 0 ? pk.xl : 0;
                 if (pk.rho <= 0) e.flow = 0;
             }
+            Stats.phaseNanos[2] += System.nanoTime() - tLim;
+            long t3 = System.nanoTime();
             Own[] own = new Own[N];
             for (int i = 0; i < N; i++) own[i] = new Own(free.get(i));
             double[][] theta = capPhases(dt, free, idx, xl, pks);
+            long t4 = System.nanoTime();
             Pass[] pass = passThrough(free, idx, xl, pks, theta, own);
+            long t5 = System.nanoTime();
             for (int k = 0; k < E; k++) transfer(edges.get(k), dt, xl[k], pks[k], idx, theta, pass, own);
+            long t6 = System.nanoTime();
+            Stats.phaseNanos[3] += t4 - t3;
+            Stats.phaseNanos[4] += t5 - t4;
+            Stats.phaseNanos[5] += t6 - t5;
 
             for (FluidNode n : free) n.update();
             if (!NEWTON) break;
@@ -800,7 +849,7 @@ public final class FluidNetwork {
         for (FluidNode n : nodes) {
             if (n.fixed) continue;
             double P = n.P(), lo = P, hi = P, rise = 0, inRise = 0, outFall = 0;
-            for (FluidEdge e : edges) {
+            for (FluidEdge e : edgesOf(n)) {
                 if (e.a != n && e.b != n) continue;
                 if (e.oneWay() && e.g == 0) continue;   // (a shut check valve pushes nothing either way)
                 double offA = e.a.pressureOver(e.portA, e.spanA) - e.a.P() + e.hA * gainedL.getOrDefault(e.a, 0.0);
@@ -820,10 +869,10 @@ public final class FluidNetwork {
             }
             if (P + rise > hi + 1e-9 && inRise > 0) {
                 double f = Math.max(0, Math.min(1, (hi - P + outFall) / inRise));
-                for (FluidEdge e : edges) if ((e.b == n && e.flow > 0) || (e.a == n && e.flow < 0)) e.flow *= f;
+                for (FluidEdge e : edgesOf(n)) if ((e.b == n && e.flow > 0) || (e.a == n && e.flow < 0)) e.flow *= f;
             } else if (P + rise < lo - 1e-9 && outFall > 0) {
                 double f = Math.max(0, Math.min(1, (P - lo + inRise) / outFall));
-                for (FluidEdge e : edges) if ((e.a == n && e.flow > 0) || (e.b == n && e.flow < 0)) e.flow *= f;
+                for (FluidEdge e : edgesOf(n)) if ((e.a == n && e.flow > 0) || (e.b == n && e.flow < 0)) e.flow *= f;
             }
         }
     }
@@ -852,7 +901,7 @@ public final class FluidNetwork {
         for (FluidNode n : nodes) {
             if (n.fixed) continue;
             double inL = 0, outL = 0;
-            for (FluidEdge e : edges) {
+            for (FluidEdge e : edgesOf(n)) {
                 double f = out(e, n);
                 if (f > 0) outL += f * liquidRoom(packet(e, n));
                 else if (f < 0) inL -= f * liquidRoom(packet(e, other(e, n)));
@@ -862,14 +911,14 @@ public final class FluidNetwork {
             double limIn = Math.min(room * Water.RHO_L / dt, band);
             if (inL - outL > limIn * (1 + 1e-9) + 1e-12) {
                 double sc = (limIn + outL) / inL;
-                for (FluidEdge e : edges) {
+                for (FluidEdge e : edgesOf(n)) {
                     if (out(e, n) >= 0) continue;
                     if (packet(e, other(e, n)).xl > 0) e.flow *= sc;
                 }
                 cut = true;
             } else if (outL - inL > band * (1 + 1e-9) + 1e-12) {
                 double sc = (band + inL) / outL;
-                for (FluidEdge e : edges)
+                for (FluidEdge e : edgesOf(n))
                     if (out(e, n) > 0 && packet(e, n).xl > 0) e.flow *= sc;
                 cut = true;
             }
@@ -886,7 +935,7 @@ public final class FluidNetwork {
     private boolean capLayers(FluidNode n, double band) {
         int[] reps = SpeciesRegistry.get().groupReps();
         java.util.Map<Integer, double[]> by = null;   // group -> {in, out}
-        for (FluidEdge e : edges) {
+        for (FluidEdge e : edgesOf(n)) {
             double f = out(e, n);
             if (f == 0) continue;
             Packet pk = packet(e, f > 0 ? n : other(e, n));
@@ -909,11 +958,11 @@ public final class FluidNetwork {
             double in = en.getValue()[0], out = en.getValue()[1];
             if (in - out > band * (1 + 1e-9) + 1e-12) {
                 double sc = (band + out) / in;
-                for (FluidEdge e : edges) if (out(e, n) < 0 && carries(packet(e, other(e, n)), g)) e.flow *= sc;
+                for (FluidEdge e : edgesOf(n)) if (out(e, n) < 0 && carries(packet(e, other(e, n)), g)) e.flow *= sc;
                 cut = true;
             } else if (out - in > band * (1 + 1e-9) + 1e-12) {
                 double sc = (band + in) / out;
-                for (FluidEdge e : edges) if (out(e, n) > 0 && carries(packet(e, n), g)) e.flow *= sc;
+                for (FluidEdge e : edgesOf(n)) if (out(e, n) > 0 && carries(packet(e, n), g)) e.flow *= sc;
                 cut = true;
             }
         }
@@ -1106,7 +1155,7 @@ public final class FluidNetwork {
         for (int i = 0; i < N; i++) pass[i] = new Pass();
         // columns: 0 the enthalpy, 1 + s the share of species s; (sum in) X_i - sum_in q (1 - theta_u) X_u = sum_in q theta_u own_u
         for (int phase = 0; phase < 2; phase++) {
-            double[][] A = new double[N][N];
+            Sparse A = new Sparse(N);
             double[][] b = new double[1 + nb][N];
             boolean[] used = new boolean[1 + nb];
             used[0] = true;
@@ -1123,7 +1172,7 @@ public final class FluidNetwork {
                 Own ou = iu == null ? new Own(u) : own[iu];
                 if (phase == 1) {
                     double th = iu == null ? 1 : theta[iu][theta[iu].length - 1];
-                    if (iu != null && th < 1) A[id][iu] -= q * (1 - th);
+                    if (iu != null && th < 1) A.add(id, iu, -q * (1 - th));
                     b[0][id] += q * th * ou.gasH;
                     for (int s = 0; s < ou.gasComp.length; s++) if (ou.gasComp[s] != 0) {
                         b[1 + s][id] += q * th * ou.gasComp[s];
@@ -1135,7 +1184,7 @@ public final class FluidNetwork {
                     if (L <= 1) {
                         // (one layer, or a fixed node's: as one liquid)
                         double th = iu == null ? 1 : theta[iu][0];
-                        if (iu != null && th < 1) A[id][iu] -= q * (1 - th);
+                        if (iu != null && th < 1) A.add(id, iu, -q * (1 - th));
                         b[0][id] += q * th * ou.liquidH;
                         for (int s = 0; s < ou.liquidComp.length; s++) if (ou.liquidComp[s] != 0) {
                             b[1 + s][id] += q * th * ou.liquidComp[s];
@@ -1145,7 +1194,7 @@ public final class FluidNetwork {
                         if (ls[l] == 0) continue;
                         double ql = q * ls[l];
                         double th = iu == null ? 1 : theta[iu][l];
-                        if (iu != null && th < 1) A[id][iu] -= ql * (1 - th);
+                        if (iu != null && th < 1) A.add(id, iu, -ql * (1 - th));
                         b[0][id] += ql * th * ou.layerH[l];
                         for (int s = 0; s < ou.layerComp[l].length; s++) if (ou.layerComp[l][s] != 0) {
                             b[1 + s][id] += ql * th * ou.layerComp[l][s];
@@ -1159,10 +1208,9 @@ public final class FluidNetwork {
                 for (int s = 0; s < oc.length; s++) if (oc[s] != 0) used[1 + s] = true;
             }
             for (int i = 0; i < N; i++) {
-                if (inSum[i] > 0) A[i][i] += inSum[i];
+                if (inSum[i] > 0) A.add(i, i, inSum[i]);
                 else {   // (nothing flows in: it passes its own)
-                    java.util.Arrays.fill(A[i], 0);
-                    A[i][i] = 1;
+                    A.unitRow(i);
                     double[] oc = phase == 0 ? own[i].liquidComp : own[i].gasComp;
                     b[0][i] = phase == 0 ? own[i].liquidH : own[i].gasH;
                     for (int s = 0; s < nb; s++) b[1 + s][i] = s < oc.length ? oc[s] : 0;
@@ -1175,9 +1223,7 @@ public final class FluidNetwork {
             }
             for (int c = 0; c < b.length; c++) {
                 if (!used[c]) continue;
-                double[][] Ac = new double[N][];
-                for (int i = 0; i < N; i++) Ac[i] = A[i].clone();
-                double[] x = solve(Ac, b[c]);
+                double[] x = A.solve(b[c]);
                 for (int i = 0; i < N; i++) {
                     if (c == 0) {
                         if (phase == 0) pass[i].liquidH = x[i];

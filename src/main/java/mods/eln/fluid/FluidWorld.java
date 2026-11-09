@@ -33,6 +33,19 @@ public final class FluidWorld implements IProcess {
     private final Map<FluidNode, List<FluidNode>> lumps = new IdentityHashMap<>();
     private final Map<FluidNode, FluidNode> lumpOf = new IdentityHashMap<>();
     private boolean dirty;
+    /** The last tick's time stepping every network (ns): /elnlab fluidstats. */
+    long lastTickNanos;
+
+    /** For /elnlab fluidstats: the networks (worst average step time first), and the last tick's total (ns). */
+    public static List<FluidNetwork> networksByCost() {
+        List<FluidNetwork> l = new ArrayList<>(INSTANCE.networks);
+        l.sort((x, y) -> Double.compare(y.avgNanos, x.avgNanos));
+        return l;
+    }
+
+    public static long lastTickNanos() {
+        return INSTANCE.lastTickNanos;
+    }
 
     private FluidWorld() {
     }
@@ -133,7 +146,13 @@ public final class FluidWorld implements IProcess {
             l.edge.open = l.open;
             l.edge.boost = l.boost;
         }
-        for (FluidNetwork n : networks) n.step(time);
+        long t0 = System.nanoTime();
+        for (FluidNetwork n : networks) {
+            long s0 = System.nanoTime();
+            n.step(time);
+            n.timed(System.nanoTime() - s0);
+        }
+        lastTickNanos = System.nanoTime() - t0;
         if (traceSteps > 0 && traceNode != null) trace();
         if (scanSteps > 0) scan();
         if (watchAll) watch();
@@ -384,6 +403,8 @@ public final class FluidWorld implements IProcess {
             var p = (FluidDevice.FluidPort) c[0];
             var q = (FluidDevice.FluidPort) c[1];
             FluidNode a = repr.apply(p.node()), b = repr.apply(q.node());
+            FluidNetwork netAt = byRoot.get(find(a, parent));
+            if (netAt != null && netAt.where == null) netAt.where = net.minecraft.core.BlockPos.of(p.pos()).toShortString();
             if (a == b) continue;   // (inside one run)
             // a run's end: its draw on the lump, and half the run's resistance instead of the piece's own
             double rA = a != p.node() ? runR.get(a) / 2 : 1 / p.k(), rB = b != q.node() ? runR.get(b) / 2 : 1 / q.k();
