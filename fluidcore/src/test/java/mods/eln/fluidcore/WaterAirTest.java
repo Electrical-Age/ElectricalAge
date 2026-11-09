@@ -126,4 +126,37 @@ class WaterAirTest {
             assertEquals(WaterAir.pSat(s.T(), s.p()), pv, 1e-4 * pv, "case " + k);
         }
     }
+
+    @Test
+    void outputSlopesMatchFiniteDifferences() {
+        Random r = new Random(4);
+        String[] names = {"P", "ml", "mv", "ma", "hL", "hG", "level", "yv"};
+        int checked = 0;
+        for (int k = 0; k < 300; k++) {
+            double[] s = state(r);
+            double mw = s[0], ma = s[1], V = s[2];
+            if (mw == 0 || ma == 0) continue;
+            double U = WaterAir.energyAt(mw, ma, V, s[3]);
+            var sp = WaterAir.solve(mw, ma, U, V, s[3]);
+            double[][] d = WaterAir.outputSlopes(sp, mw, ma, U, V);
+            double[] base = {mw, ma, U};
+            for (int j = 0; j < 3; j++) {
+                double h = j == 2 ? 1e-5 * Math.max(1, Math.abs(U)) : 1e-5 * base[j];   // (1e-5: larger steps keep the solve's noise down)
+                double[] p = base.clone(), m = base.clone();
+                p[j] += h;
+                m[j] -= h;
+                double[] op = WaterAir.outputs(WaterAir.solve(p[0], p[1], p[2], V, sp.T()), V);
+                double[] om = WaterAir.outputs(WaterAir.solve(m[0], m[1], m[2], V, sp.T()), V);
+                double[] o0 = WaterAir.outputs(sp, V);
+                for (int o = 0; o < WaterAir.OUTPUTS; o++) {
+                    double fd = (op[o] - om[o]) / (2 * h);
+                    // (scale: the output's own size over the input's, so tiny outputs aren't held to noise)
+                    double scale = Math.max(Math.abs(fd), Math.abs(d[o][j])) + 2e-5 * Math.abs(o0[o]) / Math.max(1e-30, Math.abs(base[j]));   // (the solve resolves T to 1e-11 K: a finite difference of a tiny output carries that noise)
+                    assertEquals(fd, d[o][j], 3e-3 * scale + 1e-14, "d" + names[o] + "/d" + j + ", case " + k + " " + java.util.Arrays.toString(s));
+                    checked++;
+                }
+            }
+        }
+        assertTrue(checked > 2000, "checked " + checked);
+    }
 }

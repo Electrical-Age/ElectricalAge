@@ -248,4 +248,41 @@ public final class WaterAir {
     private static double[] residualsAt(int k, double d, double mw, double ma, double U, double V, double T, double vg) {
         return residuals(mw + (k == 0 ? d : 0), ma + (k == 1 ? d : 0), U + (k == 2 ? d : 0), V, T, vg);
     }
+
+    // ---- what a flux needs, and its slopes
+
+    /** Indices into outputs(): pressure, liquid mass, vapour mass, air (with the cushion), the liquid's and the gas's specific enthalpy, liquid level (share of the volume), the vapour's share of the gas. */
+    public static final int P = 0, ML = 1, MV = 2, MA = 3, HL = 4, HG = 5, LEVEL = 6, YV = 7, OUTPUTS = 8;
+
+    /** The outputs of a split (explicit in T, Vg and the contents). */
+    public static double[] outputs(Split s, double V) {
+        double gas = s.mv() + s.ma();
+        double hl = uLiquidThermal(s.T()) + eElastic(s.v()) + s.p() * s.v();
+        double hg = gas > 0 ? (s.mv() * hVapour(s.T()) + s.ma() * hAir(s.T())) / gas : hAir(s.T());
+        return new double[]{s.p(), s.ml(), s.mv(), s.ma(), hl, hg, s.vl() / V, gas > 0 ? s.mv() / gas : 0};
+    }
+
+    /**
+     * The slopes of outputs() against (mw, ma, U) at a solved split: the explicit partials (central differences of the
+     * split at fixed T and Vg) plus the chain through T and Vg (derivatives()). Returns [output][mw, ma, U].
+     */
+    public static double[][] outputSlopes(Split s, double mw, double ma, double U, double V) {
+        double[][] d = derivatives(s, mw, ma, U, V);
+        double T = s.T(), vg = s.vg();
+        double hT = 1e-5 * T, hV = 1e-6 * vg;
+        double[] oTp = outputs(split(mw, ma, V, T + hT, vg), V), oTm = outputs(split(mw, ma, V, T - hT, vg), V);
+        double[] oVp = outputs(split(mw, ma, V, T, vg + hV), V), oVm = outputs(split(mw, ma, V, T, vg - hV), V);
+        double hw = Math.max(1e-12, 1e-6 * mw), ha = Math.max(1e-12, 1e-6 * ma);
+        double[] owp = outputs(split(mw + hw, ma, V, T, vg), V), owm = outputs(split(mw - hw, ma, V, T, vg), V);
+        double[] oap = outputs(split(mw, ma + ha, V, T, vg), V), oam = outputs(split(mw, ma - ha, V, T, vg), V);
+        double[][] out = new double[OUTPUTS][3];
+        for (int o = 0; o < OUTPUTS; o++) {
+            double dT = (oTp[o] - oTm[o]) / (2 * hT), dV = (oVp[o] - oVm[o]) / (2 * hV);
+            double pw = (owp[o] - owm[o]) / (2 * hw), pa = (oap[o] - oam[o]) / (2 * ha);
+            out[o][0] = pw + dT * d[0][0] + dV * d[1][0];
+            out[o][1] = pa + dT * d[0][1] + dV * d[1][1];
+            out[o][2] = dT * d[0][2] + dV * d[1][2];   // (U enters only through T and Vg)
+        }
+        return out;
+    }
 }
