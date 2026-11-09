@@ -40,12 +40,17 @@ public final class FluidNetwork {
      * state; check valves are max(0, g x drive); the Jacobian is the step's matrix with each node's responses taken
      * again at the iterate (one probe a phase); a backtracking line search on the row-scaled residual.
      */
-    public static boolean NEWTON2 = false, NEWTON_DEBUG = false, BROYDEN = false;
+    public static boolean NEWTON2 = false, NEWTON_DEBUG = false, BROYDEN = false, COLOURED_ONLY = false;
+    /**
+     * Each node sends out at most DRAIN_CAP of what it holds a step, inflow not counted (Baughn's suggestion): nothing
+     * passes through a node within a step, so a node's end state depends only on its own edges, and the Jacobian is local.
+     */
+    public static boolean GROSS_CAP = false;
     public static double NEWTON_TOL_PA = 50, NEWTON_TOL_REL = 1e-4;
 
     /** Counters for measurements (tests, /elnlab). */
     public static final class Stats {
-        public static long steps, newtonIters, newtonFailed, solves;
+        public static long steps, newtonIters, newtonFailed, solves, fallbacks, residuals;
         public static String debug = "";
         /** Time per phase (ns): 0 responses, 1 solve passes, 2 limiters, 3 phase caps, 4 passThrough, 5 transfer, 6 update. */
         public static final long[] phaseNanos = new long[7];
@@ -53,7 +58,7 @@ public final class FluidNetwork {
         public static final java.util.List<Double> lastNorms = new java.util.ArrayList<>();
 
         public static void reset() {
-            steps = newtonIters = newtonFailed = solves = 0;
+            steps = newtonIters = newtonFailed = solves = fallbacks = residuals = 0;
             java.util.Arrays.fill(phaseNanos, 0);
         }
     }
@@ -617,7 +622,11 @@ public final class FluidNetwork {
         double norm = snorm(r, scale);
         Stats.lastNorms.add(norm);
         List<double[]> P = new ArrayList<>(), Q = new ArrayList<>();   // (H = A^-1 + sum p q^T)
-        boolean done = false;
+        boolean done = false, coloured = COLOURED_ONLY;
+        if (coloured) {
+            A = jacobianColoured(X, r, dt, free, idx, lam, N, M, snap);
+            residualFD(X, dt, free, idx, lam, N, M, snap);
+        }
         for (int it = 0; it < NEWTON_MAX && !done; it++) {
             Stats.newtonIters++;
             double[] d = applyH(A, P, Q, r);
@@ -635,7 +644,30 @@ public final class FluidNetwork {
                     if (nt < (1 - 1e-4 * alpha) * norm) break;
                 }
             }
-            if (best == null) break;
+            if (best == null) {
+                if (coloured) break;
+                // (the built Jacobian stalled: the coloured one from here on)
+                Stats.fallbacks++;
+                coloured = true;
+                A = jacobianColoured(X, r, dt, free, idx, lam, N, M, snap);
+                P.clear();
+                Q.clear();
+                residualFD(X, dt, free, idx, lam, N, M, snap);
+                it--;
+                continue;
+            }
+            if (coloured) {
+                X = best;
+                r = bestR;
+                norm = bestN;
+                Stats.lastNorms.add(norm);
+                done = converged(r, X, N);
+                if (!done && it + 1 < NEWTON_MAX) {
+                    A = jacobianColoured(X, r, dt, free, idx, lam, N, M, snap);
+                    residualFD(X, dt, free, idx, lam, N, M, snap);
+                }
+                continue;
+            }
             // Broyden: the step taken (st) and the residual's change (u = r - r_new, since r_new ~ r - B st)
             double[] st = new double[M], u = new double[M];
             double uu = 0;
@@ -659,6 +691,86 @@ public final class FluidNetwork {
         }
         if (!done) Stats.newtonFailed++;
         residualFD(X, dt, free, idx, lam, N, M, snap);   // (leave the nodes in that end state)
+    }
+
+
+    /**
+     * The Jacobian by coloured finite differences (Curtis, Powell and Reid): a row depends only on unknowns within two
+     * hops of its node (its edges' far ends, and through a donor cap, theirs), so nodes four or more hops apart can be
+     * perturbed together. Each colour costs a residual evaluation for its pressures and one for its liquid gains,
+     * whatever the network's size. Returns A = -dR/dX (the sign the linear solve uses).
+     */
+    private Sparse jacobianColoured(double[] X, double[] r, double dt, List<FluidNode> free, java.util.Map<FluidNode, Integer> idx, int[] lam,
+                                    int N, int M, Snapshot snap) {
+        // node graph over the free nodes
+        List<List<Integer>> nb = new ArrayList<>(N);
+        for (int i = 0; i < N; i++) nb.add(new ArrayList<>());
+        for (FluidEdge e : edges) {
+            Integer ia = idx.get(e.a), ib = idx.get(e.b);
+            if (ia != null && ib != null && !ia.equals(ib)) {
+                nb.get(ia).add(ib);
+                nb.get(ib).add(ia);
+            }
+        }
+        // within2[i]: the nodes at most 2 hops from i (the columns row i can depend on)
+        List<int[]> within2 = new ArrayList<>(N);
+        for (int i = 0; i < N; i++) within2.add(bfs(nb, i, 2));
+        // greedy colouring: nodes conflict when within 4 hops
+        int[] colour = new int[N];
+        java.util.Arrays.fill(colour, -1);
+        int colours = 0;
+        for (int i = 0; i < N; i++) {
+            java.util.Set<Integer> used = new java.util.HashSet<>();
+            for (int j : bfs(nb, i, 4)) if (colour[j] >= 0) used.add(colour[j]);
+            int c = 0;
+            while (used.contains(c)) c++;
+            colour[i] = c;
+            colours = Math.max(colours, c + 1);
+        }
+        Sparse A = new Sparse(M);
+        for (int c = 0; c < colours; c++)
+            for (int kind = 0; kind < 2; kind++) {   // (0: the colour's pressures, 1: its liquid gains)
+                double[] Xh = X.clone();
+                double[] h = new double[M];
+                boolean any = false;
+                for (int j = 0; j < N; j++) {
+                    if (colour[j] != c) continue;
+                    int col = kind == 0 ? j : lam[j];
+                    if (col < 0) continue;
+                    h[col] = kind == 0 ? Math.max(1.0, 1e-6 * Math.abs(X[col])) : Math.max(1e-9, 1e-6 * Math.abs(X[col]));
+                    Xh[col] += h[col];
+                    any = true;
+                }
+                if (!any) continue;
+                Stats.residuals++;
+                double[] rh = residualFD(Xh, dt, free, idx, lam, N, M, snap);
+                for (int i = 0; i < N; i++)
+                    for (int j : within2.get(i)) {
+                        if (colour[j] != c) continue;
+                        int col = kind == 0 ? j : lam[j];
+                        if (col < 0) continue;
+                        A.add(i, col, -(rh[i] - r[i]) / h[col]);
+                        if (lam[i] >= 0) A.add(lam[i], col, -(rh[lam[i]] - r[lam[i]]) / h[col]);
+                    }
+            }
+        return A;
+    }
+
+    /** The nodes within d hops of s (s included). */
+    private static int[] bfs(List<List<Integer>> nb, int s, int d) {
+        java.util.Map<Integer, Integer> dist = new java.util.HashMap<>();
+        java.util.ArrayDeque<Integer> q = new java.util.ArrayDeque<>();
+        dist.put(s, 0);
+        q.add(s);
+        while (!q.isEmpty()) {
+            int x = q.poll(), dx = dist.get(x);
+            if (dx == d) continue;
+            for (int y : nb.get(x)) if (!dist.containsKey(y)) {
+                dist.put(y, dx + 1);
+                q.add(y);
+            }
+        }
+        return dist.keySet().stream().mapToInt(Integer::intValue).toArray();
     }
 
     /** H v with H = A^-1 + sum p_j q_j^T. */
@@ -1303,12 +1415,12 @@ public final class FluidNetwork {
             }
             boolean cut = false;
             for (int i = 0; i < N; i++) {
-                double capG = DRAIN_CAP * haveG[i] / dt + inG[i];
+                double capG = DRAIN_CAP * haveG[i] / dt + (GROSS_CAP ? 0 : inG[i]);
                 double fG = outG[i] > capG * (1 + 1e-9) ? capG / outG[i] : 1;
                 int L = haveL[i].length;
                 boolean all = fG >= 1;
                 if (L == 1) {
-                    double capL = DRAIN_CAP * haveL[i][0] / dt + inL[i];
+                    double capL = DRAIN_CAP * haveL[i][0] / dt + (GROSS_CAP ? 0 : inL[i]);
                     fL[i][0] = outL[i][0] > capL * (1 + 1e-9) ? capL / outL[i][0] : 1;
                     all &= fL[i][0] >= 1;
                 } else {
@@ -1316,7 +1428,7 @@ public final class FluidNetwork {
                     for (int l = 0; l < L; l++) excess += Math.max(0, outL[i][l] - DRAIN_CAP * haveL[i][l] / dt);
                     for (int l = 0; l < L; l++) {
                         double own = DRAIN_CAP * haveL[i][l] / dt, ex = Math.max(0, outL[i][l] - own);
-                        double allowed = own + (excess > 0 ? Math.min(1, inL[i] / excess) * ex : 0);
+                        double allowed = own + (!GROSS_CAP && excess > 0 ? Math.min(1, inL[i] / excess) * ex : 0);
                         fL[i][l] = outL[i][l] > allowed * (1 + 1e-9) ? allowed / outL[i][l] : 1;
                         all &= fL[i][l] >= 1;
                     }

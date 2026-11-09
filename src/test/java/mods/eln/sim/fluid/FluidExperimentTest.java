@@ -192,13 +192,15 @@ class FluidExperimentTest {
 
     @Test
     void experiments() throws Exception {
-        StringBuilder out = new StringBuilder("config | restless lax | restless strict | steps | newton iters | newton failed | ms\n");
+        StringBuilder out = new StringBuilder("config | restless lax | restless strict | steps | newton iters | newton failed | fallbacks | residual evals | ms\n");
         String[] configs = java.util.Objects.requireNonNullElse(System.getenv("FLUID_CONFIGS"), "base,N").split(",");
         for (String cfg : configs) {
             FluidNetwork.NEWTON = cfg.contains("N");
             FluidNetwork.NEWTON_FD = cfg.contains("J");
             FluidNetwork.MEAN_HEAD = cfg.contains("M");
-            FluidNetwork.NEWTON2 = cfg.contains("W");
+            FluidNetwork.NEWTON2 = cfg.contains("W") || cfg.contains("C");
+            FluidNetwork.COLOURED_ONLY = cfg.contains("C");
+            FluidNetwork.GROSS_CAP = cfg.contains("G");
             Flash.BRACKETED = !cfg.contains("F");   // (F: the old bisection)
             FluidNetwork.Stats.reset();
             List<Long> lax = new ArrayList<>(), strict = new ArrayList<>();
@@ -213,7 +215,7 @@ class FluidExperimentTest {
                 if (moving * 1000 >= total + 1e-6) strict.add(seed);
             }
             long ms = (System.nanoTime() - t0) / 1_000_000;
-            out.append(String.format("%s | %d | %d | %d | %d | %d | %d%n", cfg, lax.size(), strict.size(), FluidNetwork.Stats.steps, FluidNetwork.Stats.newtonIters, FluidNetwork.Stats.newtonFailed, ms));
+            out.append(String.format("%s | %d | %d | %d | %d | %d | %d | %d | %d%n", cfg, lax.size(), strict.size(), FluidNetwork.Stats.steps, FluidNetwork.Stats.newtonIters, FluidNetwork.Stats.newtonFailed, FluidNetwork.Stats.fallbacks, FluidNetwork.Stats.residuals, ms));
             out.append("  lax seeds ").append(lax).append("\n");
         }
         java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/experiments-unit" + (LEVEL ? "-level" : "") + ".txt"), out.toString());
