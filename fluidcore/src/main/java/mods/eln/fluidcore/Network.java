@@ -256,6 +256,32 @@ public final class Network {
         return e.kind == Kind.CHECK ? e.g * Math.max(0, dp) : e.g * dp;
     }
 
+    /**
+     * A pipe's flow as two streams (0: strictly upwind instead), q+ = g SPLIT_DP softplus(dp / SPLIT_DP) from a
+     * carrying a's draw and q- = q+ - q from b carrying b's, so the net flow is exactly q but what it carries changes
+     * smoothly through q = 0 (strictly upwind, a pipe at rest between a liquid port and a gas port flips between carrying
+     * water and air, and Newton stalled there). At rest the streams are g SPLIT_DP ln 2 each way: equal masses, so
+     * nothing moves where both ports draw the same; where one draws liquid and the other gas, they swap slowly (liquid
+     * runs into a dry branch below the surface, its gas bubbles out), as they would. 1 Pa against strict upwind, 100
+     * random networks x 3000 steps: with conduction 0 failed steps (was 44), without 80 sub-steps (was 312);
+     * 0.1 Pa and 0.01 Pa helped less (09-k-check.md).
+     */
+    public static double SPLIT_DP = 1;
+
+    /** The two streams {q+ from a, q- from b} and their slopes in dp. */
+    static double[] streams(Edge e) {
+        double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
+        if (e.kind == Kind.CHECK) return dp > 0 ? new double[]{e.g * dp, 0, e.g, 0} : new double[4];
+        if (SPLIT_DP > 0) {
+            double x = dp / SPLIT_DP;
+            double sp = x > 30 ? x : x < -30 ? Math.exp(x) : Math.log1p(Math.exp(x));
+            double sig = x > 30 ? 1 : x < -30 ? Math.exp(x) : 1 / (1 + Math.exp(-x));
+            double qp = e.g * SPLIT_DP * sp;
+            return new double[]{qp, qp - e.g * dp, e.g * sig, e.g * sig - e.g};
+        }
+        return dp >= 0 ? new double[]{e.g * dp, 0, e.g, 0} : new double[]{0, -e.g * dp, 0, -e.g};
+    }
+
     // ---- the step
 
     /** Counters for tests and measurements. */
@@ -349,13 +375,12 @@ public final class Network {
                     if (ib != null) r[3 * ib + k] -= dt * x[k];
                 }
             }
-            double q = flow(e);
-            if (q == 0) continue;
-            Node up = q > 0 ? e.a : e.b;
-            double[] c = draw(up, q > 0 ? e.fa : e.fb);
+            double[] qs = streams(e);
+            if (qs[0] == 0 && qs[1] == 0) continue;
+            double[] ca = qs[0] != 0 ? draw(e.a, e.fa) : null, cb = qs[1] != 0 ? draw(e.b, e.fb) : null;
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
             for (int k = 0; k < 3; k++) {
-                double f = q * c[k];
+                double f = (ca != null ? qs[0] * ca[k] : 0) - (cb != null ? qs[1] * cb[k] : 0);
                 if (ia != null) r[3 * ia + k] += dt * f;   // (a loses q c)
                 if (ib != null) r[3 * ib + k] -= dt * f;
             }
@@ -369,35 +394,28 @@ public final class Network {
         Sparse J = new Sparse(M);
         for (int i = 0; i < M; i++) J.add(i, i, 1);
         for (Edge e : edges) {
-            double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
-            boolean open = e.kind != Kind.CHECK || dp > 0;
-            double q = open ? e.g * dp : 0;
-            boolean fromA = q > 0 || (q == 0 && dp >= 0);
-            Node up = fromA ? e.a : e.b;
-            double fUp = fromA ? e.fa : e.fb;
-            double[] c = draw(up, fUp);
-            double[][] dc = drawSlope(up, fUp);
+            // F_k = q+ ca_k - q- cb_k; dF_k = (dq+ ca_k - dq- cb_k) (dPa - dPb) + q+ dca_k (a) - q- dcb_k (b)
+            double[] qs = streams(e);
+            double[] ca = draw(e.a, e.fa), cb = draw(e.b, e.fb);
+            double[][] dca = qs[0] != 0 ? drawSlope(e.a, e.fa) : null, dcb = qs[1] != 0 ? drawSlope(e.b, e.fb) : null;
             double[] dpa = portPSlope(e.a, e.fa), dpb = portPSlope(e.b, e.fb);
-            Integer ia = idx.get(e.a), ib = idx.get(e.b), iu = idx.get(up);
+            Integer ia = idx.get(e.a), ib = idx.get(e.b);
             for (int k = 0; k < 3; k++) {
-                // F_k = q c_k; dF_k = g c_k (dPa - dPb) + q dc_k (upstream)
+                double dFdp = qs[2] * ca[k] - qs[3] * cb[k];
                 for (int side = 0; side < 2; side++) {
                     Integer col = side == 0 ? ia : ib;
-                    if (col == null || !open) continue;
+                    if (col == null) continue;
                     double[] dpx = side == 0 ? dpa : dpb;
                     double sign = side == 0 ? 1 : -1;
-                    for (int j = 0; j < 3; j++) {
-                        double dF = e.g * c[k] * sign * dpx[j];
-                        if (ia != null) J.add(3 * ia + k, 3 * col + j, dt * dF);
-                        if (ib != null) J.add(3 * ib + k, 3 * col + j, -dt * dF);
+                    double[][] dc = side == 0 ? dca : dcb;
+                    double qn = side == 0 ? qs[0] : -qs[1];
+                    for (int j2 = 0; j2 < 3; j2++) {
+                        double dF = dFdp * sign * dpx[j2] + (dc != null ? qn * dc[k][j2] : 0);
+                        if (dF == 0) continue;
+                        if (ia != null) J.add(3 * ia + k, 3 * col + j2, dt * dF);
+                        if (ib != null) J.add(3 * ib + k, 3 * col + j2, -dt * dF);
                     }
                 }
-                if (iu != null && q != 0)
-                    for (int j = 0; j < 3; j++) {
-                        double dF = q * dc[k][j];
-                        if (ia != null) J.add(3 * ia + k, 3 * iu + j, dt * dF);
-                        if (ib != null) J.add(3 * ib + k, 3 * iu + j, -dt * dF);
-                    }
             }
         }
         // heat conduction: H = C wa wb (Ta - Tb), through each node's temperature slope and its contents
@@ -517,12 +535,15 @@ public final class Network {
                 double[] x = exchangeFlux(e);
                 for (int k = 0; k < 3; k++) if (x[k] != 0) moves.add(x[k] > 0 ? new double[]{a, b, k, dt * x[k]} : new double[]{b, a, k, -dt * x[k]});
             }
-            double q = flow(e);
-            if (q == 0) continue;
-            double[] c = draw(q > 0 ? e.a : e.b, q > 0 ? e.fa : e.fb);
-            for (int k = 0; k < 3; k++) {
-                double f = dt * q * c[k];
-                if (f != 0) moves.add(f > 0 ? new double[]{a, b, k, f} : new double[]{b, a, k, -f});
+            double[] qs = streams(e);
+            for (int side = 0; side < 2; side++) {
+                if (qs[side] == 0) continue;
+                double[] c = side == 0 ? draw(e.a, e.fa) : draw(e.b, e.fb);
+                for (int k = 0; k < 3; k++) {
+                    double f = dt * qs[side] * c[k];   // (from a to b for side 0, from b to a for side 1)
+                    if (side == 1) f = -f;
+                    if (f != 0) moves.add(f > 0 ? new double[]{a, b, k, f} : new double[]{b, a, k, -f});
+                }
             }
         }
         // the limiter: a node can't send more of a mass than it started with plus what it receives (Newton's tolerance
@@ -674,6 +695,7 @@ public final class Network {
             stats.norms.add(nr);
             if (!accepted) {
                 set(free, y);
+                if (DEBUG != null) DEBUG.append("  stalled; scaled Jacobian errors: ").append(scaledJacobianErrors(free, idx, y0, dt, s)).append("\n");
                 // (stalled at the precision floor: a liquid-full node turns a rounding error in its mass into a pressure,
                 // so the residual can't go lower; the step still ends conservatively)
                 if (nr < STALL_OK) {
@@ -729,5 +751,36 @@ public final class Network {
             }
         }
         return String.format("%.3g at %s", worst, at);
+    }
+
+    /** Debugging: the five largest |J - FD| entries at the current states, scaled by the row and column scales. */
+    private String scaledJacobianErrors(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt, double[] sc) {
+        double[] y = pack(free);
+        double[][] J = jacobian(free, idx, dt).dense();
+        int M = y.length;
+        List<double[]> errs = new ArrayList<>();
+        for (int j = 0; j < M; j++) {
+            double h = j % 3 == 2 ? 1e-6 * Math.max(1, Math.abs(y[j])) : Math.max(1e-12, 1e-6 * y[j]);
+            if (j % 3 != 2 && y[j] - h < 0) continue;
+            double[] yp = y.clone(), ym = y.clone();
+            yp[j] += h;
+            ym[j] -= h;
+            set(free, yp);
+            double[] rp = residual(free, idx, y0, dt);
+            set(free, ym);
+            double[] rm = residual(free, idx, y0, dt);
+            set(free, y);
+            for (int i = 0; i < M; i++) {
+                double fd = (rp[i] - rm[i]) / (2 * h);
+                errs.add(new double[]{Math.abs(fd - J[i][j]) * sc[i] / sc[j], i, j, J[i][j], fd});
+            }
+        }
+        errs.sort((a, b) -> Double.compare(b[0], a[0]));
+        StringBuilder o = new StringBuilder();
+        for (int k = 0; k < 5 && k < errs.size(); k++) {
+            double[] e = errs.get(k);
+            o.append(String.format("[%.2e r%d c%d J %.4g FD %.4g] ", e[0], (int) e[1], (int) e[2], e[3], e[4]));
+        }
+        return o.toString();
     }
 }
