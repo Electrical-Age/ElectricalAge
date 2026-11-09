@@ -443,9 +443,60 @@ public final class Network {
      * zero; converged, this moves Y' by no more than the residual.
      */
     private void finish(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt) {
-        double[] r = residual(free, idx, y0, dt);   // (R = Y' - Y0 - dt F, so Y0 + dt F = Y' - R)
-        double[] y = pack(free);
-        for (int i = 0; i < y.length; i++) y[i] -= r[i];
+        // each transfer: {from, to (indices into free, -1 for a fixed node), component, amount moved over dt}
+        List<double[]> moves = new ArrayList<>();
+        for (Edge e : edges) {
+            Integer ia = idx.get(e.a), ib = idx.get(e.b);
+            int a = ia == null ? -1 : ia, b = ib == null ? -1 : ib;
+            if (e.exchange > 0) {
+                double[] x = exchangeFlux(e);
+                for (int k = 0; k < 3; k++) if (x[k] != 0) moves.add(x[k] > 0 ? new double[]{a, b, k, dt * x[k]} : new double[]{b, a, k, -dt * x[k]});
+            }
+            double q = flow(e);
+            if (q == 0) continue;
+            double[] c = draw(q > 0 ? e.a : e.b, q > 0 ? e.fa : e.fb);
+            for (int k = 0; k < 3; k++) {
+                double f = dt * q * c[k];
+                if (f != 0) moves.add(f > 0 ? new double[]{a, b, k, f} : new double[]{b, a, k, -f});
+            }
+        }
+        // the limiter: a node can't send more of a mass than it started with plus what it receives (Newton's tolerance
+        // is relative to the node's whole contents, so a dry node's water could end 1e-10 of its air below zero);
+        // its sends of that mass are scaled down, which keeps every transfer in flux form and so conserves exactly
+        int M = y0.length;
+        double[] scale = new double[M];
+        java.util.Arrays.fill(scale, 1);
+        double[] y = new double[M];
+        for (int pass = 0; pass < 4; pass++) {
+            double[] in = new double[M], out = new double[M];
+            for (double[] mv : moves) {
+                int from = (int) mv[0], to = (int) mv[1], k = (int) mv[2];
+                double s = from >= 0 && k < 2 ? scale[3 * from + k] : 1;
+                if (from >= 0) out[3 * from + k] += mv[3] * s;
+                if (to >= 0) in[3 * to + k] += mv[3] * s;
+            }
+            boolean changed = false;
+            for (int i = 0; i < M; i++) {
+                if (i % 3 == 2 || out[i] == 0) continue;
+                double have = Math.max(0, y0[i]) + in[i];
+                if (out[i] > have * (1 + 1e-15)) {
+                    scale[i] *= have / out[i];
+                    changed = true;
+                }
+            }
+            if (!changed && pass > 0) break;
+        }
+        for (int i = 0; i < free.size(); i++) {
+            y[3 * i] = y0[3 * i];
+            y[3 * i + 1] = y0[3 * i + 1];
+            y[3 * i + 2] = y0[3 * i + 2] + dt * free.get(i).heat;
+        }
+        for (double[] mv : moves) {
+            int from = (int) mv[0], to = (int) mv[1], k = (int) mv[2];
+            double amt = mv[3] * (from >= 0 && k < 2 ? scale[3 * from + k] : 1);
+            if (from >= 0) y[3 * from + k] -= amt;
+            if (to >= 0) y[3 * to + k] += amt;
+        }
         set(free, y);
     }
 
