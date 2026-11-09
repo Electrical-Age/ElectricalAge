@@ -87,6 +87,13 @@ public final class Network {
         public final double fa, fb;
         public double g, boost;
         public Kind kind = Kind.PIPE;
+        /**
+         * Counter-current exchange (m^3 s / kg, 0 for none): where a's port is at its floor and b's at its ceiling (a over
+         * b), liquid at a's port and gas at b's swap places, equal volumes Q = exchange x (rho_liquid - rho_gas) g x
+         * (liquid at a's port) x (gas at b's port) a second. Volume-neutral, so the pressure flow doesn't see it; it lets a
+         * stack of tanks drain liquid down while gas comes up through one coupling (one stream an edge can't).
+         */
+        public double exchange;
         /** The last step's flow (kg/s, a to b positive). */
         public double flow;
 
@@ -190,6 +197,25 @@ public final class Network {
         return d;
     }
 
+
+    /** The exchange's fluxes {water, air, energy} from a to b (negative: b to a) at the current states (Edge.exchange). */
+    static double[] exchangeFlux(Edge e) {
+        double[] f = new double[3];
+        if (e.exchange <= 0) return f;
+        Node a = e.a, b = e.b;
+        double wl = smoothStep(windowArg(a, e.fa)), wg = 1 - smoothStep(windowArg(b, e.fb));
+        double vgB = b.split.vg();
+        double rhoG = (b.out[WaterAir.MV] + b.out[WaterAir.MA]) / vgB, rhoL = 1 / a.split.v();
+        double Q = e.exchange * Math.max(0, rhoL - rhoG) * G * wl * wg;
+        if (Q <= 0) return f;
+        // liquid down: Q rhoL of a's liquid; gas up: Q of b's gas (its real contents' share: the cushion stays)
+        double gasM = Q * rhoG;
+        f[0] = Q * rhoL - gasM * b.out[WaterAir.YV];
+        f[1] = -gasM * b.out[WaterAir.YA];
+        f[2] = Q * rhoL * a.out[WaterAir.HL] - gasM * b.out[WaterAir.HG];
+        return f;
+    }
+
     /** The edge's mass flow at the current states. */
     static double flow(Edge e) {
         double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
@@ -203,6 +229,8 @@ public final class Network {
         public long steps, iterations, substeps, failures, solves;
         /** The last failed solve's residual norms by iteration (tests). */
         public final List<Double> lastFail = new ArrayList<>();
+        /** The last failed solve's scaled residual by row (tests). */
+        public double[] lastRows = new double[0];
         final List<Double> norms = new ArrayList<>();
     }
 
@@ -273,6 +301,14 @@ public final class Network {
             r[3 * i + 2] = n.U - y0[3 * i + 2] - dt * n.heat;
         }
         for (Edge e : edges) {
+            if (e.exchange > 0) {
+                double[] x = exchangeFlux(e);
+                Integer ia = idx.get(e.a), ib = idx.get(e.b);
+                for (int k = 0; k < 3; k++) {
+                    if (ia != null) r[3 * ia + k] += dt * x[k];
+                    if (ib != null) r[3 * ib + k] -= dt * x[k];
+                }
+            }
             double q = flow(e);
             if (q == 0) continue;
             Node up = q > 0 ? e.a : e.b;
@@ -324,7 +360,49 @@ public final class Network {
                     }
             }
         }
+        // the exchange edges: their slopes by central differences over their two nodes' contents (local and cheap)
+        for (Edge e : edges) {
+            if (e.exchange <= 0) continue;
+            Integer ia = idx.get(e.a), ib = idx.get(e.b);
+            for (int side = 0; side < 2; side++) {
+                Node n = side == 0 ? e.a : e.b;
+                Integer col = side == 0 ? ia : ib;
+                if (col == null) continue;
+                double[] y = {n.mw, n.ma, n.U};
+                for (int j = 0; j < 3; j++) {
+                    double h = j == 2 ? 1e-6 * Math.max(1, Math.abs(y[2])) : Math.max(1e-12, 1e-6 * y[j]);
+                    if (j < 2 && y[j] - h < 0) h = Math.max(y[j], 1e-15);
+                    double[] fp = perturbed(n, j, h, e), fm = perturbed(n, j, -h, e);
+                    for (int k = 0; k < 3; k++) {
+                        double dF = (fp[k] - fm[k]) / (2 * h);
+                        if (ia != null) J.add(3 * ia + k, 3 * col + j, dt * dF);
+                        if (ib != null) J.add(3 * ib + k, 3 * col + j, -dt * dF);
+                    }
+                }
+            }
+        }
         return J;
+    }
+
+    /** exchangeFlux(e) with node n's component j moved by d (n restored after). */
+    private static double[] perturbed(Node n, int j, double d, Edge e) {
+        double mw = n.mw, ma = n.ma, U = n.U;
+        var split = n.split;
+        var out = n.out;
+        var slopes = n.slopes;
+        if (j == 0) n.mw += d;
+        else if (j == 1) n.ma += d;
+        else n.U += d;
+        n.update();
+        double[] f = exchangeFlux(e);
+        n.mw = mw;
+        n.ma = ma;
+        n.U = U;
+        n.split = split;
+        n.out = out;
+        n.slopes = slopes;
+        n.tHint = split.T();
+        return f;
     }
 
     private final java.util.Map<Long, SparseLU> luCache = new java.util.HashMap<>();
@@ -390,13 +468,29 @@ public final class Network {
             // fraction to the boundary: no mass goes below zero in a trial
             // (a component already at or near zero that the step would take lower is held where it is: projecting it,
             // rather than shrinking the whole step to nothing for it, as a node with no air at all did)
+            // (held components are taken out of the system and the rest solved again without them: zeroing them in the
+            // step alone left a direction the residual didn't fall along, and an empty riser's first step stalled)
+            // (repeated until no further component at zero would go lower: holding some can turn others)
+            for (int round = 0; round < 6; round++) {
+                boolean held = false;
+                for (int i = 0; i < free.size(); i++)
+                    for (int k = 0; k < 2; k++) {
+                        double tiny = 1e-12 * Math.max(1e-3, y[3 * i] + y[3 * i + 1]);
+                        if (d[3 * i + k] < 0 && y[3 * i + k] <= tiny) {
+                            J.unitRow(3 * i + k);
+                            minus[3 * i + k] = 0;
+                            held = true;
+                        }
+                    }
+                if (!held) break;
+                stats.solves++;
+                d = J.solve(minus);
+            }
             double alpha = 1;
             for (int i = 0; i < free.size(); i++)
                 for (int k = 0; k < 2; k++) {
                     double m = y[3 * i + k], dm = d[3 * i + k];
-                    double tiny = 1e-12 * Math.max(1e-3, y[3 * i] + y[3 * i + 1]);
-                    if (dm < 0 && m <= tiny) d[3 * i + k] = 0;
-                    else if (dm < 0 && m + dm < 0) alpha = Math.min(alpha, 0.99 * m / -dm);
+                    if (dm < 0 && m + dm < 0 && m > 0) alpha = Math.min(alpha, 0.99 * m / -dm);
                 }
             boolean accepted = false;
             for (int ls = 0; ls < 12; ls++, alpha *= 0.5) {
@@ -420,6 +514,8 @@ public final class Network {
                 // so the residual can't go lower; the step still ends conservatively)
                 if (nr < STALL_OK) return true;
                 if (nr >= 1e3 * TOL) {
+                    stats.lastRows = new double[r.length];
+                    for (int i = 0; i < r.length; i++) stats.lastRows[i] = r[i] * s[i];
                     stats.lastFail.clear();
                     stats.lastFail.addAll(stats.norms);
                     stats.lastFail.add(-alpha);
