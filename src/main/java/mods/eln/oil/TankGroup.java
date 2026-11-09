@@ -42,6 +42,7 @@ public final class TankGroup {
         }
         node = new FluidNode(volume, y0, sy, false);
         for (TankElement m : members) node.addShareOf(m.own, 1);   // (every species: the blocks' contents summed)
+        written = stamp();
         node.lossWPerK = loss;
         node.update();
     }
@@ -55,12 +56,55 @@ public final class TankGroup {
         return members.get(0);
     }
 
-    /** Write the vessel's contents back into its blocks' shares, by volume. */
+    /**
+     * Write the vessel's contents back into its blocks' shares: the liquid by layer, from the bottom up to the vessel's
+     * level, the gas over it (Baughn 2026-11-09: a box split by a broken corner shared its oil by volume, the upper blocks
+     * as full as the lower, and one-block tanks can't pass liquid down and gas up through one coupling, so it stayed up
+     * there). Each block at the vessel's temperature, scaled to its energy exactly, so a save and reload (which sums the
+     * shares) changes nothing.
+     */
+    static final double FULL = 0.98;
+
+    /** The vessel's contents when its blocks' shares last matched it (stamp()), so an unchanged vessel isn't written again:
+     *  the shares come from float-rounded saves, and a fresh layered split of their sum differs in the last bits. */
+    private double[] written;
+
+    private double[] stamp() {
+        double[] st = new double[3 + (node.extra == null ? 0 : node.extra.length)];
+        st[0] = node.mWater;
+        st[1] = node.mAir;
+        st[2] = node.energy;
+        for (int i = 3; i < st.length; i++) st[i] = node.extra[i - 3];
+        return st;
+    }
+
     void writeBack() {
+        if (java.util.Arrays.equals(written, stamp())) return;
+        node.update();
+        // (each layer at most FULL liquid, so no block is left without gas: a one-block tank of only liquid is stiff, and
+        // burst when it next stepped; past that, the same fill everywhere)
+        double vL = node.liquidVolume(), vG = Math.max(1e-12, node.volume - vL), level = vL / (FULL * node.volume) * sy;
+        double T = node.T(), sum = 0;
+        int n = node.speciesBound();
         for (TankElement m : members) {
-            m.own.setShareOf(node, m.own.volume / node.volume);
+            int j = m.node.coordonate.y - y0;
+            double lf = level > sy ? vL / node.volume : FULL * Math.max(0, Math.min(1, level - j));   // (the share of this block the liquid fills)
+            double sL = vL > 0 ? lf * m.own.volume / vL : 0, sG = (1 - lf) * m.own.volume / vG;
+            var own = m.own;
+            own.mWater = node.mLiquid() * sL + node.mVapour() * sG;
+            own.mAir = node.mAir * sG;
+            double[] ex = n > 2 ? new double[n - 2] : null;
+            for (int i = 2; i < n; i++) ex[i - 2] = node.liquid(i) * sL + node.vapour(i) * sG;
+            own.extra = ex;
+            own.energy = own.energyAt(T);
+            sum += own.energy;
+        }
+        double k = Math.abs(sum) > 1e-12 ? node.energy / sum : 1;
+        for (TankElement m : members) {
+            m.own.energy *= k;
             m.own.update();
         }
+        written = stamp();
     }
 
     static final Direction[] DIRS = {Direction.XN, Direction.XP, Direction.YN, Direction.YP, Direction.ZN, Direction.ZP};

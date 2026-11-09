@@ -512,7 +512,7 @@ public final class PlumbingCases {
         }
     }
 
-    /** Breaking a block of a 2 x 2 x 3 box: what's left isn't a box, so 11 one-block tanks, each with its share. */
+    /** Breaking a block of a 2 x 2 x 3 box: what's left isn't a box, so 11 one-block tanks, each with its share by layer. */
     static final class TankBoxSplits extends Big {
         java.util.List<TankElement> ts;
         double before;
@@ -539,7 +539,8 @@ public final class PlumbingCases {
             for (TankElement t : ts) alone &= t.group == null && t.vessel == t.own;
             double after = water(ts);
             ctx.check("tank box split: 11 one-block tanks (not a box)", alone && ts.size() == 11, "");
-            ctx.check("tank box split: they keep 11/12 of the water (by volume)", Math.abs(after - before * 11 / 12) < 0.02 * before,
+            // (the liquid lies in the lower layers, so the top corner held only gas and vapour)
+            ctx.check("tank box split: they keep the water (the broken top corner held none)", Math.abs(after - before) < 0.01 * before,
                 String.format("%.3f of %.3f kg", after, before));
         }
     }
