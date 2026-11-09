@@ -24,10 +24,10 @@ class NetworkTest {
         var a = net.add(new Network.Node(0.1, 0, 1, false).fill(40, 0.5, 300));
         var b = net.add(new Network.Node(0.1, 0, 1, false).fill(10, 0.1, 300));
         net.connect(a, 0, b, 0, 1e-5);
-        double w0 = a.mw + b.mw, a0 = a.ma + b.ma, u0 = a.U + b.U;
+        double w0 = a.mw() + b.mw(), a0 = a.ma() + b.ma(), u0 = a.U + b.U;
         for (int s = 0; s < 2000; s++) net.step(DT);
-        assertEquals(w0, a.mw + b.mw, 1e-12 * w0, "water");
-        assertEquals(a0, a.ma + b.ma, 1e-12 * a0, "air");
+        assertEquals(w0, a.mw() + b.mw(), 1e-12 * w0, "water");
+        assertEquals(a0, a.ma() + b.ma(), 1e-12 * a0, "air");
         assertEquals(u0, a.U + b.U, 1e-9 * Math.abs(u0), "energy");
         assertEquals(portPressure(a, 0), portPressure(b, 0), 50, "the bottom ports' pressures meet");
         assertEquals(0, net.stats.failures, "failures");
@@ -83,8 +83,8 @@ class NetworkTest {
     static double[] totals(Network net) {
         double w = 0, a = 0, u = 0;
         for (var n : net.nodes) {
-            w += n.mw;
-            a += n.ma;
+            w += n.mw();
+            a += n.ma();
             u += n.U;
         }
         return new double[]{w, a, u};
@@ -104,7 +104,7 @@ class NetworkTest {
             double[] t0 = totals(net);
             for (int s = 0; s < steps; s++) {
                 net.step(DT);
-                for (var n : net.nodes) if (!(n.mw >= -1e-12 * Math.max(1e-3, n.mw + n.ma) && n.ma >= -1e-12 * Math.max(1e-3, n.mw + n.ma))) negatives.add(seed + "@" + s);
+                for (var n : net.nodes) if (!(n.mw() >= -1e-12 * Math.max(1e-3, n.mw() + n.ma()) && n.ma() >= -1e-12 * Math.max(1e-3, n.mw() + n.ma()))) negatives.add(seed + "@" + s);
             }
             double[] t1 = totals(net);
             if (Math.abs(t0[0] - t1[0]) > 1e-11 * Math.max(1, t0[0]) || Math.abs(t0[1] - t1[1]) > 1e-11 * Math.max(1e-3, t0[1])
@@ -136,7 +136,7 @@ class NetworkTest {
         double u0 = a.U + b.U;
         for (int s = 0; s < 1200; s++) net.step(DT);
         assertEquals(u0, a.U + b.U, 1e-9 * Math.abs(u0), "energy");
-        assertEquals(0.5, a.mw, 1e-15, "no water moves");
+        assertEquals(0.5, a.mw(), 1e-15, "no water moves");
         assertEquals(a.T(), b.T(), 0.01, "temperatures meet");
         assertEquals(0, net.stats.failures, "failures");
     }
@@ -212,7 +212,7 @@ class NetworkTest {
             net.stats.lastRows = null;
             net.stats.lastFail.clear();
         }
-        for (var n : net.nodes) out.append(String.format("node V %.4g z %.2f H %.2f mw %.6g ma %.6g T %.2f P %.1f level %.4f%n", n.V, n.z, n.H, n.mw, n.ma, n.T(), n.P(), n.level()));
+        for (var n : net.nodes) out.append(String.format("node V %.4g z %.2f H %.2f mw %.6g ma %.6g T %.2f P %.1f level %.4f%n", n.V, n.z, n.H, n.mw(), n.ma(), n.T(), n.P(), n.level()));
         for (var e : net.edges) out.append(String.format("edge %d(%.2f) -> %d(%.2f) g %.3g %s flow %.4g%n", net.nodes.indexOf(e.a), e.fa, net.nodes.indexOf(e.b), e.fb, e.g, e.kind, e.flow));
         java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-trace.txt"), out.toString());
     }
@@ -242,7 +242,7 @@ class NetworkTest {
             }
             if (st < from) continue;
             out.append(String.format("step %d substeps %d iters %d fail %d%n", st, net.stats.substeps - sub0, net.stats.iterations - it0, net.stats.failures - f0));
-            for (var n : net.nodes) out.append(String.format("  mw %.9g ma %.9g T %.3f P %.1f level %.5g yv %.4g ml %.4g mv %.4g%n", n.mw, n.ma, n.T(), n.P(), n.level(), n.out[WaterAir.YV], n.out[WaterAir.ML], n.out[WaterAir.MV]));
+            for (var n : net.nodes) out.append(String.format("  mw %.9g ma %.9g T %.3f P %.1f level %.5g yv %.4g ml %.4g mv %.4g%n", n.mw(), n.ma(), n.T(), n.P(), n.level(), n.waterAir().out[WaterAir.YV], n.waterAir().out[WaterAir.ML], n.waterAir().out[WaterAir.MV]));
             if (st >= 0) for (var e : net.edges) out.append(String.format("  flow %.4g%n", e.flow));
         }
         java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-states.txt"), out.toString());
@@ -274,7 +274,7 @@ class NetworkTest {
                 }
             }
             double lo = 1e9, hi = 0;
-            for (var n : net.nodes) if (n.mw + n.ma > 1e-9) {
+            for (var n : net.nodes) if (n.mw() + n.ma() > 1e-9) {
                 lo = Math.min(lo, n.T());
                 hi = Math.max(hi, n.T());
             }
