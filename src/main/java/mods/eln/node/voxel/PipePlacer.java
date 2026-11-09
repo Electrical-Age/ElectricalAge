@@ -112,17 +112,32 @@ public final class PipePlacer {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         if (n instanceof VoxelNode v) ports.addAll(v.fluidPorts());
         else if (n instanceof TransparentNode t && t.element instanceof FluidDevice d) ports.addAll(d.fluidPorts());
+        // (none on the face clicked, the click on the model inside the block rather than on its face: the side port
+        // nearest the click, of any side. Baughn 2026-11-09: a tank box's blocks are its round shell, so a corner
+        // block's side faces are empty air, and a click on the shell there hit a face of a step of it)
+        boolean inside = hit != null && switch (face) {
+            case EAST -> hit.x < pos.getX() + 1 - 1e-4;
+            case WEST -> hit.x > pos.getX() + 1e-4;
+            case SOUTH -> hit.z < pos.getZ() + 1 - 1e-4;
+            case NORTH -> hit.z > pos.getZ() + 1e-4;
+            case UP -> hit.y < pos.getY() + 1 - 1e-4;
+            case DOWN -> hit.y > pos.getY() + 1e-4;
+        };
+        boolean onFace = false;
+        for (FluidDevice.FluidPort p : ports) onFace |= p.face() == face.get3DDataValue();
+        boolean anySide = !onFace && inside;
         for (FluidDevice.FluidPort p : ports) {
-            if (p.face() != face.get3DDataValue()) continue;
+            if (anySide ? p.face() < 2 || p.face() > 5 : p.face() != face.get3DDataValue()) continue;
+            Direction pf = Direction.from3DDataValue(p.face());
             int u = p.at() / 17, w = p.at() % 17;
             long bx = pos.getX() * 16L, by = pos.getY() * 16L, bz = pos.getZ() * 16L;
             long x, y, z;
-            switch (face.getAxis()) {
-                case Y -> { x = bx + u; z = bz + w; y = by + (face == Direction.UP ? 16 : 0); }
-                case Z -> { x = bx + u; y = by + w; z = bz + (face == Direction.SOUTH ? 16 : 0); }
-                default -> { y = by + u; z = bz + w; x = bx + (face == Direction.EAST ? 16 : 0); }
+            switch (pf.getAxis()) {
+                case Y -> { x = bx + u; z = bz + w; y = by + (pf == Direction.UP ? 16 : 0); }
+                case Z -> { x = bx + u; y = by + w; z = bz + (pf == Direction.SOUTH ? 16 : 0); }
+                default -> { y = by + u; z = bz + w; x = bx + (pf == Direction.EAST ? 16 : 0); }
             }
-            PipeRouter.End end = new PipeRouter.End(x, y, z, dirOf(face));
+            PipeRouter.End end = new PipeRouter.End(x, y, z, dirOf(pf));
             if (hit == null) return end;
             double d = Math.pow(x / 16.0 - hit.x, 2) + Math.pow(y / 16.0 - hit.y, 2) + Math.pow(z / 16.0 - hit.z, 2);
             if (d < bestD) {

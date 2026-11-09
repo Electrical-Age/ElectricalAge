@@ -36,6 +36,7 @@ public final class PlumbingCases {
         cases.add(new TankBoxSplits());
         cases.add(new TankBoxSettlesAfterBreak());
         cases.add(new TankBoxHitbox());
+        cases.add(new TankBoxCornerPipeClick());
         cases.add(new TankFlanges());
         cases.add(new TankSightGlass());
         cases.add(new HotWaterIntoShortPipe());
@@ -610,6 +611,44 @@ public final class PlumbingCases {
             }
             ctx.line("tank box hitbox: " + line);
             ctx.check("a tank box's hitbox is its shell, cut to each block", bad.isEmpty(), bad);
+        }
+    }
+
+    /**
+     * A click on a box's shell at a corner block (Baughn 2026-11-09; AdventurAgent's pipes didn't seat): the shell's steps
+     * face any way, so a click on one whose face has no port (the box's inside) takes the nearest side port; a click on
+     * the block's own face with no port takes none, as before.
+     */
+    static final class TankBoxCornerPipeClick extends Big {
+        java.util.List<BlockPos> at = new java.util.ArrayList<>();
+
+        public String id() {
+            return "tank_box_corner_click_finds_its_port";
+        }
+
+        public int ticks() {
+            return 4;
+        }
+
+        public void build(TestContext ctx) {
+            for (int y = 1; y <= 2; y++)
+                for (int x = 2; x <= 3; x++)
+                    for (int z = 2; z <= 3; z++) ctx.placeTransparent(IRON_TANK, ctx.at(x, y, z));
+        }
+
+        public void measure(TestContext ctx) {
+            var pos = ctx.at(2, 1, 2);   // (the box's low corner: its outer faces are west and north)
+            var level = ctx.level();
+            var hit = new net.minecraft.world.phys.Vec3(pos.getX() + 0.7, pos.getY() + 0.3, pos.getZ() + 0.75);
+            var e = mods.eln.node.voxel.PipePlacer.portAtForTests(level, pos, net.minecraft.core.Direction.EAST, hit);
+            ctx.check("a click inside a corner block on an inner-facing step takes its nearest side port (west, low)",
+                e != null && e.dir() == 0 && e.x() == pos.getX() * 16L && e.y() == pos.getY() * 16L + 4, String.valueOf(e));
+            var hit2 = new net.minecraft.world.phys.Vec3(pos.getX() + 0.3, pos.getY() + 0.8, pos.getZ() + 0.6);
+            var e2 = mods.eln.node.voxel.PipePlacer.portAtForTests(level, pos, net.minecraft.core.Direction.SOUTH, hit2);
+            ctx.check("... and high up, its west high port", e2 != null && e2.dir() == 0 && e2.y() == pos.getY() * 16L + 12, String.valueOf(e2));
+            var onFace = new net.minecraft.world.phys.Vec3(pos.getX() + 1, pos.getY() + 0.3, pos.getZ() + 0.5);
+            ctx.check("a click on a block's own face with no port takes none",
+                mods.eln.node.voxel.PipePlacer.portAtForTests(level, pos, net.minecraft.core.Direction.EAST, onFace) == null, "");
         }
     }
 
