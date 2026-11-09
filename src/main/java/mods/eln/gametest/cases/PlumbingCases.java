@@ -37,6 +37,7 @@ public final class PlumbingCases {
         cases.add(new TankBoxSettlesAfterBreak());
         cases.add(new TankBoxHitbox());
         cases.add(new TankBoxCornerPipeClick());
+        cases.add(new TankGlugExperiment());
         cases.add(new TankFlanges());
         cases.add(new TankSightGlass());
         cases.add(new HotWaterIntoShortPipe());
@@ -649,6 +650,41 @@ public final class PlumbingCases {
             var onFace = new net.minecraft.world.phys.Vec3(pos.getX() + 1, pos.getY() + 0.3, pos.getZ() + 0.5);
             ctx.check("a click on a block's own face with no port takes none",
                 mods.eln.node.voxel.PipePlacer.portAtForTests(level, pos, net.minecraft.core.Direction.EAST, onFace) == null, "");
+        }
+    }
+
+    /** Research (free time 2026-11-09): an L of three lone tanks, crude in the upper one: how much drains down in 30 s? */
+    static final class TankGlugExperiment extends Big {
+        TankElement up, down, side;
+        IProcess watch;
+        int tick;
+        String trace = "";
+
+        public String id() {
+            return "research_tank_glug";
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext ctx) {
+            down = (TankElement) ctx.placeTransparent(IRON_TANK, ctx.at(3, 1, 3));
+            side = (TankElement) ctx.placeTransparent(IRON_TANK, ctx.at(4, 1, 3));
+            up = (TankElement) ctx.placeTransparent(IRON_TANK, ctx.at(3, 2, 3));
+            int crude = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
+            mods.eln.sim.fluid.EaUnits.add(up.vessel, crude, 0.8 * up.vessel.volume * 850, 293.15, false);
+            watch = dt -> {
+                if (tick++ % 100 == 0) trace += String.format(" t%d up %.0f%% down %.0f%% side %.0f%% P %.3f/%.3f bar;", tick, 100 * up.vessel.liquidVolume() / up.vessel.volume,
+                    100 * down.vessel.liquidVolume() / down.vessel.volume, 100 * side.vessel.liquidVolume() / side.vessel.volume, up.vessel.P() / 1e5, down.vessel.P() / 1e5);
+            };
+            mods.eln.Eln.simulator.addSlowProcess(watch);
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(watch);
+            ctx.line("glug (GLUG " + mods.eln.sim.fluid.FluidNetwork.GLUG + ", edges seen " + mods.eln.sim.fluid.FluidNetwork.glugEdges + ", swaps " + mods.eln.sim.fluid.FluidNetwork.glugSwaps + "): groups " + up.group + " " + down.group + ";" + trace);
+            ctx.check("research: glug measured", true, "");
         }
     }
 

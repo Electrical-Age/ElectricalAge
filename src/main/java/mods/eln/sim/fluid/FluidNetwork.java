@@ -218,6 +218,55 @@ public final class FluidNetwork {
         for (int k = 0; k < E; k++) transfer(edges.get(k), dt, xl[k], pks[k], idx, theta, pass, own);
         // 8. new equilibria
         for (FluidNode n : free) n.update();
+        if (GLUG > 0) glug(dt);
+    }
+
+    /** Research prototype: share of the smaller vessel a floor-to-ceiling coupling swaps a second (0: off). */
+    public static double GLUG = 0.5;
+    public static int glugEdges, glugSwaps;
+
+    /**
+     * Research prototype (free time 2026-11-09): counter-flow through a coupling from one vessel's floor to the ceiling of
+     * the one below it. The pressure solve moves one phase each way per edge, so liquid in the upper vessel can only
+     * come down as far as the lower one's trapped gas compresses; here equal volumes of the upper one's liquid and the
+     * lower one's gas swap places, as they would glugging through a real opening.
+     */
+    private void glug(double dt) {
+        for (FluidEdge e : edges) {
+            FluidNode up, dn;
+            double pUp, pDn;
+            if (e.a.z >= e.b.z) {
+                up = e.a; dn = e.b; pUp = e.portA; pDn = e.portB;
+            } else {
+                up = e.b; dn = e.a; pUp = e.portB; pDn = e.portA;
+            }
+            if (up.fixed || dn.fixed || pUp > BAND || pDn < 1 - BAND) continue;
+            if (e.kind != FluidEdge.Kind.PIPE || e.oneWay() || e.open < 1 || e.k <= 0) continue;   // (a valve, shut or throttled, holds)
+            glugEdges++;
+            double vL = up.liquidVolume(), vG = dn.volume - dn.liquidVolume();
+            if (vL <= 1e-12 || dn.level() > 1 - BAND) continue;
+            double dV = Math.min(GLUG * Math.min(up.volume, dn.volume) * dt, Math.min(vL, 0.5 * vG));
+            if (dV <= 1e-12) continue;
+            Packet liq = packet(up, 0.0), gas = packet(dn, 1.0);
+            double fL = dV / vL, fG = dV / Math.max(1e-12, vG);
+            int n = Math.max(up.speciesBound(), dn.speciesBound());
+            double mL = 0, mG = 0;
+            for (int i = 0; i < n; i++) {
+                double l = i < up.speciesBound() ? up.liquid(i) * fL : 0, g = i < dn.speciesBound() ? dn.vapour(i) * fG : 0;
+                up.addMass(i, -l);
+                dn.addMass(i, l);
+                dn.addMass(i, -g);
+                up.addMass(i, g);
+                mL += l;
+                mG += g;
+            }
+            double eL = mL * liq.h, eG = mG * gas.h;
+            up.energy += eG - eL;
+            dn.energy += eL - eG;
+            up.update();
+            dn.update();
+            glugSwaps++;
+        }
     }
 
     /** Port band (fraction of a node's height) over which a port goes from drawing gas to drawing liquid. */
