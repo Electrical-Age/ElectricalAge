@@ -26,6 +26,57 @@ public final class FluidNetwork {
     static final double DRAIN_CAP = 0.5;
     /** Pressure solves a step may take (check valves shut one at a time, valves' orifice laws, upstream flips). */
     static final int MAX_PASSES = 16;
+    /** The Newton step (review #61, plan 05): the end states' real flash corrects the linear solve. */
+    public static boolean NEWTON = false;
+    public static int NEWTON_MAX = 8;
+    public static double NEWTON_TOL_PA = 50, NEWTON_TOL_REL = 1e-4;
+
+    /** Counters for measurements (tests, /elnlab). */
+    public static final class Stats {
+        public static long steps, newtonIters, newtonFailed;
+        /** The last step's residual norms (Pa, rms over nodes), one per iteration. */
+        public static final java.util.List<Double> lastNorms = new java.util.ArrayList<>();
+
+        public static void reset() {
+            steps = newtonIters = newtonFailed = 0;
+        }
+    }
+
+    /** Free nodes' contents at the start of the transport, to try a step again. */
+    static final class Snapshot {
+        final List<FluidNode> nodes;
+        final double[] mW, mA, U, mLiquid;
+        final double[][] extra;
+
+        Snapshot(List<FluidNode> nodes) {
+            this.nodes = nodes;
+            int n = nodes.size();
+            mW = new double[n];
+            mA = new double[n];
+            U = new double[n];
+            mLiquid = new double[n];
+            extra = new double[n][];
+            for (int i = 0; i < n; i++) {
+                FluidNode f = nodes.get(i);
+                mW[i] = f.mWater;
+                mA[i] = f.mAir;
+                U[i] = f.energy;
+                mLiquid[i] = f.mLiquid();
+                extra[i] = f.extra == null ? null : f.extra.clone();
+            }
+        }
+
+        void restore() {
+            for (int i = 0; i < mW.length; i++) {
+                FluidNode f = nodes.get(i);
+                f.mWater = mW[i];
+                f.mAir = mA[i];
+                f.energy = U[i];
+                f.extra = extra[i] == null ? null : extra[i].clone();
+                f.update();
+            }
+        }
+    }
 
     public final List<FluidNode> nodes = new ArrayList<>();
     public final List<FluidEdge> edges = new ArrayList<>();
@@ -105,119 +156,176 @@ public final class FluidNetwork {
         //    again if a check valve would run backwards, or a flow runs against the side it was taken from (the edge
         //    then takes its packet from the other side: a short pipe drained by its valve draws from its boiler even
         //    when it started the step at a higher pressure)
-        double[] P = new double[N], X = new double[M];
-        // (the one-way edges the solve shut this step: one at a time, the worst back-flow first, and opened again if the
-        // drive across one turns forward; shutting them all at once, a feed valve back-flowing from its boiler also shut
-        // the pump pushing into the same pipe, and the pipe sat under the pump's shut-off with nothing flowing)
-        java.util.Set<FluidEdge> shut = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
-        for (int pass = 0; pass < MAX_PASSES; pass++) {
-            double[][] A = new double[M][M];
-            double[] rhs = new double[M];
-            for (int i = 0; i < M; i++) A[i][i] = 1;
-            for (int i = 0; i < N; i++) rhs[i] = free.get(i).P();
-            for (FluidEdge e : edges) {
-                if (e.g == 0) continue;
-                // flow a->b = g (Pa' + hA La - Pb' - hB Lb + c), c = the port offsets and the head, L the liquid gained
-                double c = e.a.pressureOver(e.portA, e.spanA) - e.a.P() - (pressureB(e) - e.b.P()) + e.head;
-                Integer ia = idx.get(e.a), ib = idx.get(e.b);
-                int la = ia == null || e.hA == 0 ? -1 : lam[ia], lb = ib == null || e.hB == 0 ? -1 : lam[ib];
-                for (int row = 0; row < 4; row++) {
-                    // rows: a's pressure, b's pressure, a's liquid gain, b's liquid gain
-                    Integer n = row % 2 == 0 ? ia : ib;
-                    if (n == null) continue;
-                    int i = row < 2 ? n : lam[n];
-                    if (i < 0) continue;
-                    double per = row == 0 ? -e.sA : row == 1 ? e.sB : row == 2 ? -e.xl : e.xl;
-                    double k = dt * per * e.g;   // (a loses the flow, b gains it)
-                    // row i: X_i' - k (Pa' + hA La - Pb' - hB Lb) = X_i + k c
-                    if (ia != null) A[i][ia] -= k;
-                    else rhs[i] += k * e.a.P();
-                    if (ib != null) A[i][ib] += k;
-                    else rhs[i] -= k * e.b.P();
-                    if (la >= 0) A[i][la] -= k * e.hA;
-                    if (lb >= 0) A[i][lb] += k * e.hB;
-                    rhs[i] += k * c;
-                }
+        // Newton (NEWTON, review #61): the linear solve above is the Jacobian; each iteration moves the contents, flashes
+        // the end states, and feeds what the real flash says back as a correction to the next solve (a chord Newton on
+        // P' - Flash(end state) and on the liquid each node gains), until the solved pressures are the pressures that
+        // result. Without it the step is one linear guess, cut back by the limiters (the old way).
+        double[] corr = new double[M];
+        Stats.lastNorms.clear();
+        Snapshot snap = NEWTON ? new Snapshot(free) : null;
+        double lastNorm = Double.MAX_VALUE;
+        double[] lastR = null;
+        double[][] edge0 = NEWTON ? new double[edges.size()][] : null;
+        if (NEWTON) for (int k = 0; k < edges.size(); k++) {
+            FluidEdge e = edges.get(k);
+            edge0[k] = new double[]{e.g, e.sA, e.sB, e.rho, e.xl, e.head, e.fromA ? 1 : 0};
+        }
+        for (int it = 0; ; it++) {
+            if (it > 0) for (int k = 0; k < edges.size(); k++) {   // (each solve starts from the step's edges: valves open)
+                FluidEdge e = edges.get(k);
+                double[] v = edge0[k];
+                e.g = v[0];
+                e.sA = v[1];
+                e.sB = v[2];
+                e.rho = v[3];
+                e.xl = v[4];
+                e.head = v[5];
+                e.fromA = v[6] != 0;
             }
-            X = solve(A, rhs);
-            P = java.util.Arrays.copyOf(X, N);
-            boolean again = false;
-            FluidEdge worst = null;
-            for (FluidEdge e : edges) {
-                double pa = e.a.fixed ? e.a.P() : P[idx.get(e.a)], pb = e.b.fixed ? e.b.P() : P[idx.get(e.b)];
-                double offA = e.a.pressureOver(e.portA, e.spanA) - e.a.P() + e.hA * gained(e.a, idx, lam, X);
-                double offB = pressureB(e) - e.b.P() + e.hB * gained(e.b, idx, lam, X);
-                double drive = pa + offA - pb - offB + e.head;
-                e.flow = e.g * drive;
-                if (e.oneWay() && e.flow < 0 && e.g != 0) {
-                    if (worst == null || e.flow < worst.flow) worst = e;
-                } else if (e.g == 0 && drive > 0 && shut.remove(e) && pass < MAX_PASSES - 1) {
-                    props(e, true);
-                    Integer ja = idx.get(e.a), jb = idx.get(e.b);
-                    e.sA = ja == null ? 0 : response(e, sL[ja], rhoL[ja], sG[ja]);
-                    e.sB = jb == null ? 0 : response(e, sL[jb], rhoL[jb], sG[jb]);
-                    again = true;
-                } else if (e.area > 0 && e.g != 0 && pass < 7) {
-                    // a valve's orifice law, at the drop just solved (between its guess and this, for a quiet fixed point)
-                    double gt = orificeG(e, pa + offA - pb - offB + e.head);
-                    if (Math.abs(gt - e.g) > 0.05 * e.g) {
-                        e.g = Math.sqrt(e.g * gt);
+            double[] P = new double[N], X = new double[M];
+            // (the one-way edges the solve shut this step: one at a time, the worst back-flow first, and opened again if the
+            // drive across one turns forward; shutting them all at once, a feed valve back-flowing from its boiler also shut
+            // the pump pushing into the same pipe, and the pipe sat under the pump's shut-off with nothing flowing)
+            java.util.Set<FluidEdge> shut = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+            for (int pass = 0; pass < MAX_PASSES; pass++) {
+                double[][] A = new double[M][M];
+                double[] rhs = new double[M];
+                for (int i = 0; i < M; i++) A[i][i] = 1;
+                for (int i = 0; i < N; i++) rhs[i] = free.get(i).P() + corr[i];
+                for (int i = N; i < M; i++) rhs[i] = corr[i];
+                for (FluidEdge e : edges) {
+                    if (e.g == 0) continue;
+                    // flow a->b = g (Pa' + hA La - Pb' - hB Lb + c), c = the port offsets and the head, L the liquid gained
+                    double c = e.a.pressureOver(e.portA, e.spanA) - e.a.P() - (pressureB(e) - e.b.P()) + e.head;
+                    Integer ia = idx.get(e.a), ib = idx.get(e.b);
+                    int la = ia == null || e.hA == 0 ? -1 : lam[ia], lb = ib == null || e.hB == 0 ? -1 : lam[ib];
+                    for (int row = 0; row < 4; row++) {
+                        // rows: a's pressure, b's pressure, a's liquid gain, b's liquid gain
+                        Integer n = row % 2 == 0 ? ia : ib;
+                        if (n == null) continue;
+                        int i = row < 2 ? n : lam[n];
+                        if (i < 0) continue;
+                        double per = row == 0 ? -e.sA : row == 1 ? e.sB : row == 2 ? -e.xl : e.xl;
+                        double k = dt * per * e.g;   // (a loses the flow, b gains it)
+                        // row i: X_i' - k (Pa' + hA La - Pb' - hB Lb) = X_i + k c
+                        if (ia != null) A[i][ia] -= k;
+                        else rhs[i] += k * e.a.P();
+                        if (ib != null) A[i][ib] += k;
+                        else rhs[i] -= k * e.b.P();
+                        if (la >= 0) A[i][la] -= k * e.hA;
+                        if (lb >= 0) A[i][lb] += k * e.hB;
+                        rhs[i] += k * c;
+                    }
+                }
+                X = solve(A, rhs);
+                P = java.util.Arrays.copyOf(X, N);
+                boolean again = false;
+                FluidEdge worst = null;
+                for (FluidEdge e : edges) {
+                    double pa = e.a.fixed ? e.a.P() : P[idx.get(e.a)], pb = e.b.fixed ? e.b.P() : P[idx.get(e.b)];
+                    double offA = e.a.pressureOver(e.portA, e.spanA) - e.a.P() + e.hA * gained(e.a, idx, lam, X);
+                    double offB = pressureB(e) - e.b.P() + e.hB * gained(e.b, idx, lam, X);
+                    double drive = pa + offA - pb - offB + e.head;
+                    e.flow = e.g * drive;
+                    if (e.oneWay() && e.flow < 0 && e.g != 0) {
+                        if (worst == null || e.flow < worst.flow) worst = e;
+                    } else if (e.g == 0 && drive > 0 && shut.remove(e) && pass < MAX_PASSES - 1) {
+                        props(e, true);
+                        Integer ja = idx.get(e.a), jb = idx.get(e.b);
+                        e.sA = ja == null ? 0 : response(e, sL[ja], rhoL[ja], sG[ja]);
+                        e.sB = jb == null ? 0 : response(e, sL[jb], rhoL[jb], sG[jb]);
+                        again = true;
+                    } else if (e.area > 0 && e.g != 0 && pass < 7) {
+                        // a valve's orifice law, at the drop just solved (between its guess and this, for a quiet fixed point)
+                        double gt = orificeG(e, pa + offA - pb - offB + e.head);
+                        if (Math.abs(gt - e.g) > 0.05 * e.g) {
+                            e.g = Math.sqrt(e.g * gt);
+                            again = true;
+                        }
+                    }
+                    if (!e.oneWay() && e.flow != 0 && (e.flow > 0) != e.fromA && pass < 3) {
+                        props(e, !e.fromA);
+                        Integer ja = idx.get(e.a), jb = idx.get(e.b);
+                        e.sA = ja == null ? 0 : response(e, sL[ja], rhoL[ja], sG[ja]);
+                        e.sB = jb == null ? 0 : response(e, sL[jb], rhoL[jb], sG[jb]);
                         again = true;
                     }
                 }
-                if (!e.oneWay() && e.flow != 0 && (e.flow > 0) != e.fromA && pass < 3) {
-                    props(e, !e.fromA);
-                    Integer ja = idx.get(e.a), jb = idx.get(e.b);
-                    e.sA = ja == null ? 0 : response(e, sL[ja], rhoL[ja], sG[ja]);
-                    e.sB = jb == null ? 0 : response(e, sL[jb], rhoL[jb], sG[jb]);
+                if (worst != null) {
+                    worst.g = 0;
+                    shut.add(worst);
                     again = true;
                 }
+                if (!again) break;
             }
-            if (worst != null) {
-                worst.g = 0;
-                shut.add(worst);
-                again = true;
+            // (out of passes: no one-way edge runs back)
+            for (FluidEdge e : edges) if (e.oneWay() && e.flow < 0) {
+                e.g = 0;
+                e.flow = 0;
             }
-            if (!again) break;
+            // 6. no node's pressure may be driven past the pressures its neighbours push it towards (the linearized solve
+            //    can overshoot when a node changes phase or an edge's upstream side flips; a maximum principle); then cap
+            //    what leaves each node
+            solved.clear();
+            for (int i = 0; i < N; i++) solved.put(free.get(i), P[i]);
+            gainedL.clear();
+            for (int i = 0; i < N; i++) if (lam[i] >= 0) gainedL.put(free.get(i), X[lam[i]]);
+            if (!NEWTON) {
+                for (int pass = 0; pass < 3; pass++) {
+                    limitNoReversal(dt);
+                    limitToNeighbourRange(dt);
+                }
+                capOutflows(dt);
+            }
+            // 7. move contents: each edge's liquid and gas shares from its upstream port (the step's starting contents);
+            //    the phase caps; what passes through each node (an implicit upwind solve); then the transfer
+            int E = edges.size();
+            double[] xl = new double[E];
+            Packet[] pks = new Packet[E];
+            for (int k = 0; k < E; k++) {
+                FluidEdge e = edges.get(k);
+                if (e.flow == 0) continue;
+                FluidNode u = e.flow > 0 ? e.a : e.b;
+                Packet pk = packet(e, u);
+                pks[k] = pk;
+                xl[k] = pk.rho > 0 ? pk.xl : 0;
+                if (pk.rho <= 0) e.flow = 0;
+            }
+            Own[] own = new Own[N];
+            for (int i = 0; i < N; i++) own[i] = new Own(free.get(i));
+            double[][] theta = capPhases(dt, free, idx, xl, pks);
+            Pass[] pass = passThrough(free, idx, xl, pks, theta, own);
+            for (int k = 0; k < E; k++) transfer(edges.get(k), dt, xl[k], pks[k], idx, theta, pass, own);
+
+            for (FluidNode n : free) n.update();
+            if (!NEWTON) break;
+            // residuals: the flashed pressure against the solved one; the liquid gained against the solved gain
+            double[] r = new double[M];
+            double norm = 0;
+            boolean done = true;
+            for (int i = 0; i < N; i++) {
+                FluidNode n = free.get(i);
+                r[i] = n.P() - X[i];
+                double tol = Math.max(NEWTON_TOL_PA, NEWTON_TOL_REL * Math.max(n.P(), X[i]));
+                if (Math.abs(r[i]) > tol) done = false;
+                norm += r[i] * r[i];
+                if (lam[i] >= 0) r[lam[i]] = n.mLiquid() - snap.mLiquid[i] - X[lam[i]];
+            }
+            Stats.newtonIters++;
+            Stats.lastNorms.add(Math.sqrt(norm / Math.max(1, N)));
+            if (done) break;
+            if (it + 1 >= NEWTON_MAX) {
+                Stats.newtonFailed++;
+                break;
+            }
+            // (a correction that made things worse is halved, as a line search on the residual)
+            double damp = norm > lastNorm && lastR != null ? 0.5 : 1.0;
+            for (int i = 0; i < M; i++) corr[i] += damp * r[i];
+            lastNorm = Math.min(lastNorm, norm);
+            lastR = r;
+            snap.restore();
         }
-        // (out of passes: no one-way edge runs back)
-        for (FluidEdge e : edges) if (e.oneWay() && e.flow < 0) {
-            e.g = 0;
-            e.flow = 0;
-        }
-        // 6. no node's pressure may be driven past the pressures its neighbours push it towards (the linearized solve
-        //    can overshoot when a node changes phase or an edge's upstream side flips; a maximum principle); then cap
-        //    what leaves each node
-        solved.clear();
-        for (int i = 0; i < N; i++) solved.put(free.get(i), P[i]);
-        gainedL.clear();
-        for (int i = 0; i < N; i++) if (lam[i] >= 0) gainedL.put(free.get(i), X[lam[i]]);
-        for (int pass = 0; pass < 3; pass++) {
-            limitNoReversal(dt);
-            limitToNeighbourRange(dt);
-        }
-        capOutflows(dt);
-        // 7. move contents: each edge's liquid and gas shares from its upstream port (the step's starting contents);
-        //    the phase caps; what passes through each node (an implicit upwind solve); then the transfer
-        int E = edges.size();
-        double[] xl = new double[E];
-        Packet[] pks = new Packet[E];
-        for (int k = 0; k < E; k++) {
-            FluidEdge e = edges.get(k);
-            if (e.flow == 0) continue;
-            FluidNode u = e.flow > 0 ? e.a : e.b;
-            Packet pk = packet(e, u);
-            pks[k] = pk;
-            xl[k] = pk.rho > 0 ? pk.xl : 0;
-            if (pk.rho <= 0) e.flow = 0;
-        }
-        Own[] own = new Own[N];
-        for (int i = 0; i < N; i++) own[i] = new Own(free.get(i));
-        double[][] theta = capPhases(dt, free, idx, xl, pks);
-        Pass[] pass = passThrough(free, idx, xl, pks, theta, own);
-        for (int k = 0; k < E; k++) transfer(edges.get(k), dt, xl[k], pks[k], idx, theta, pass, own);
-        // 8. new equilibria
-        for (FluidNode n : free) n.update();
+        Stats.steps++;
     }
 
     /** Port band (fraction of a node's height) over which a port goes from drawing gas to drawing liquid. */
