@@ -34,7 +34,7 @@ class ScenarioTest {
 
     static double water(Network net) {
         double w = 0;
-        for (var n : net.nodes) if (!n.fixed) w += n.mw;
+        for (var n : net.nodes) if (!n.fixed) w += n.mw();
         return w;
     }
 
@@ -56,12 +56,12 @@ class ScenarioTest {
                 long f0 = net.stats.failures;
                 net.step(DT);
                 if (net.stats.failures > f0) fail += String.format("step %d (boost %.0f): norms %s, riser %.4g kg level %.4f P %.0f; tank %.3g kg; ", s, boost,
-                    net.stats.lastFail.stream().map(v -> String.format("%.2e", v)).toList(), riser.mw, riser.level(), riser.P(), tank.mw) + java.util.Arrays.toString(net.stats.lastRows);
+                    net.stats.lastFail.stream().map(v -> String.format("%.2e", v)).toList(), riser.mw(), riser.level(), riser.P(), tank.mw()) + java.util.Arrays.toString(net.stats.lastRows);
             }
             assertEquals(w0, water(net), 1e-9 * w0, "water kept");
             assertEquals("", fail, "failures");
-            if (boost > 1e5) assertTrue(tank.mw > 10, "1.2 bar lifts water into the tank: " + tank.mw + " kg");
-            else assertTrue(tank.mw < 0.1, "0.3 bar can't lift 5 m: " + tank.mw + " kg");
+            if (boost > 1e5) assertTrue(tank.mw() > 10, "1.2 bar lifts water into the tank: " + tank.mw() + " kg");
+            else assertTrue(tank.mw() < 0.1, "0.3 bar can't lift 5 m: " + tank.mw() + " kg");
         }
     }
 
@@ -75,14 +75,14 @@ class ScenarioTest {
         var valve = net.connect(boiler, 1, air, 0, 1e-6);
         valve.kind = Network.Kind.CHECK;
         valve.boost = -10e5;   // (opens once the boiler is 10 bar over the air)
-        double peak = 0, w0 = boiler.mw;
+        double peak = 0, w0 = boiler.mw();
         for (int s = 0; s < 4000; s++) {
             net.step(DT);
             peak = Math.max(peak, boiler.P());
         }
         assertTrue(peak < 11.5e5 + air.P(), "peak " + peak + " Pa");
         assertTrue(boiler.P() > 9e5, "it stays up near the setpoint: " + boiler.P());
-        assertTrue(boiler.mw < w0, "it vented steam: " + boiler.mw + " of " + w0);
+        assertTrue(boiler.mw() < w0, "it vented steam: " + boiler.mw() + " of " + w0);
         assertEquals(0, net.stats.failures, "failures");
     }
 
@@ -95,7 +95,7 @@ class ScenarioTest {
         var cold = net.add(new Network.Node(1, 0, 1, false).fill(400, RHO_AIR * 0.6, 300));
         net.connect(hot, 0, pipe, 0, 1e-5);
         net.connect(pipe, 0, cold, 0, 1e-5);
-        double w0 = water(net), c0 = cold.mw, worst = 0;
+        double w0 = water(net), c0 = cold.mw(), worst = 0;
         for (int s = 0; s < 1000; s++) {
             net.step(DT);
             double lo = Math.min(hot.P(), cold.P()), hi = Math.max(hot.P(), cold.P());
@@ -103,7 +103,7 @@ class ScenarioTest {
         }
         assertEquals(w0, water(net), 1e-9 * w0, "water kept");
         assertTrue(worst < 2e5, "the pipe stays within 2 bar of its ends' range: " + worst + " Pa past it");
-        assertTrue(cold.mw > c0 + 1, "water got through: " + (cold.mw - c0) + " kg");
+        assertTrue(cold.mw() > c0 + 1, "water got through: " + (cold.mw() - c0) + " kg");
         assertEquals(0, net.stats.failures, "failures");
     }
 
@@ -119,8 +119,8 @@ class ScenarioTest {
             double w0 = water(net);
             for (int s = 0; s < 2000; s++) net.step(DT);
             assertEquals(w0, water(net), 1e-9 * w0, "water kept");
-            if (ex > 0) assertTrue(upper.mw < 10, "with the exchange the upper drains: " + upper.mw + " kg left");
-            else assertTrue(upper.mw > 150, "without it, most stays up (gas lock): " + upper.mw + " kg");
+            if (ex > 0) assertTrue(upper.mw() < 10, "with the exchange the upper drains: " + upper.mw() + " kg left");
+            else assertTrue(upper.mw() > 150, "without it, most stays up (gas lock): " + upper.mw() + " kg");
             assertEquals(0, net.stats.failures, "failures");
         }
     }
