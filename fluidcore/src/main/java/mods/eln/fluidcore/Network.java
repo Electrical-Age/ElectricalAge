@@ -419,6 +419,12 @@ public final class Network {
         return s;
     }
 
+    private static double[] scaled(double[] r, double[] s) {
+        double[] o = new double[r.length];
+        for (int i = 0; i < r.length; i++) o[i] = Math.round(r[i] * s[i] * 1e6) / 1e6;
+        return o;
+    }
+
     private static double norm(double[] r, double[] s) {
         double x = 0;
         for (int i = 0; i < r.length; i++) x = Math.max(x, Math.abs(r[i] * s[i]));
@@ -426,6 +432,10 @@ public final class Network {
     }
 
     public static double TOL = 1e-10, STALL_OK = 1e-6;
+    /** Fraction-to-the-boundary floor (share of the node's contents): components under it are damped on their own. */
+    public static double FLOOR = 1e-4;
+    /** Tests: a trace of each Newton iteration (null: off). */
+    public static StringBuilder DEBUG = null;
 
     /**
      * End the step conservatively whatever Newton reached: the contents become the start's plus dt times the fluxes
@@ -439,10 +449,31 @@ public final class Network {
         set(free, y);
     }
 
+    /**
+     * Newton's starting point: an explicit predictor, Y* = Y0 + dt F(Y0), each node's change scaled down as far as keeps
+     * its masses non-negative (to 90 % of the way). Started from Y0, an empty riser a pump fed was linearised as a node of
+     * air (its pressure answering heat as air's does), so Newton refused the water while admitting its energy and
+     * deadlocked whatever the step; from the predicted state the riser holds water and Newton converges.
+     */
+    private void predict(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt) {
+        double[] r = residual(free, idx, y0, dt);   // (at Y = Y0: R = -dt F(Y0))
+        double[] y = y0.clone();
+        for (int i = 0; i < free.size(); i++) {
+            double f = 1;
+            for (int k = 0; k < 2; k++) {
+                double m = y0[3 * i + k], dm = -r[3 * i + k];
+                if (dm < 0 && m + dm < 0) f = Math.min(f, m > 0 ? 0.9 * m / -dm : 0);
+            }
+            for (int k = 0; k < 3; k++) y[3 * i + k] = y0[3 * i + k] - f * r[3 * i + k];
+        }
+        set(free, y);
+    }
+
     /** Newton from the nodes' current states (y0 = the step's start); true if it converged (the nodes then hold Y'). */
     private boolean solve(List<Node> free, double[] y0, double dt) {
         java.util.Map<Node, Integer> idx0 = new java.util.IdentityHashMap<>();
         for (int i = 0; i < free.size(); i++) idx0.put(free.get(i), i);
+        predict(free, idx0, y0, dt);
         boolean ok = newton(free, y0, dt);
         finish(free, idx0, y0, dt);
         return ok;
@@ -477,6 +508,11 @@ public final class Network {
                     for (int k = 0; k < 2; k++) {
                         double tiny = 1e-12 * Math.max(1e-3, y[3 * i] + y[3 * i + 1]);
                         if (d[3 * i + k] < 0 && y[3 * i + k] <= tiny) {
+                            if (r[3 * i + k] < 0) {
+                                // (its own balance wants it up: not held but stepped along its diagonal, -r)
+                                d[3 * i + k] = -r[3 * i + k];
+                                continue;
+                            }
                             J.unitRow(3 * i + k);
                             minus[3 * i + k] = 0;
                             held = true;
@@ -486,12 +522,23 @@ public final class Network {
                 stats.solves++;
                 d = J.solve(minus);
             }
+            // fraction to the boundary with a floor: a component holding more than 1e-4 of its node's contents
+            // limits the whole step to 99 % of the way to zero (keeping Newton's direction); one with less is damped on
+            // its own (shrinking the whole step for 3 mg of water in a tank stalled a pump's first step into an empty
+            // riser; damping every component on its own broke the direction elsewhere and the scenarios crawled)
             double alpha = 1;
             for (int i = 0; i < free.size(); i++)
                 for (int k = 0; k < 2; k++) {
                     double m = y[3 * i + k], dm = d[3 * i + k];
-                    if (dm < 0 && m + dm < 0 && m > 0) alpha = Math.min(alpha, 0.99 * m / -dm);
+                    if (!(dm < 0 && m + dm < 0)) continue;
+                    double floor = FLOOR * Math.max(1e-9, y[3 * i] + y[3 * i + 1]);
+                    if (m > floor) alpha = Math.min(alpha, 0.99 * m / -dm);
+                    else d[3 * i + k] = -0.99 * Math.max(0, m);
                 }
+            if (DEBUG != null) {
+                DEBUG.append(String.format("it %d nr %.3e alpha0 %.3e%n  y %s%n  r*s %s%n  d %s%n", it, nr, alpha, java.util.Arrays.toString(y),
+                    java.util.Arrays.toString(scaled(r, s)), java.util.Arrays.toString(d)));
+            }
             boolean accepted = false;
             for (int ls = 0; ls < 12; ls++, alpha *= 0.5) {
                 double[] yt = y.clone();
@@ -499,6 +546,7 @@ public final class Network {
                 set(free, yt);
                 double[] rt = residual(free, idx, y0, dt);
                 double nt = norm(rt, s);
+                if (DEBUG != null && ls < 3) DEBUG.append(String.format("    ls %d alpha %.3e nt %.3e r*s %s%n", ls, alpha, nt, java.util.Arrays.toString(scaled(rt, s))));
                 if (nt < (1 - 1e-4 * alpha) * nr || nt < TOL) {
                     y = yt;
                     r = rt;
