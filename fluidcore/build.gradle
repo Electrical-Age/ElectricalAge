@@ -1,0 +1,27 @@
+// The fluid core (board #61, notes/fluid-review/08-core-plan.md): a standalone, fully implicit solver for networks of
+// fluid volumes (species masses and energy per node, flows between them), with its thermodynamics and its tests. Pure
+// Java, no Minecraft: this project compiling alone proves it stays so; the mod adopts it once every test passes (M5).
+plugins {
+    id 'java-library'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform()
+    maxHeapSize = '2g'
+}
