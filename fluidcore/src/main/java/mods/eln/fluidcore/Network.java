@@ -395,6 +395,8 @@ public final class Network {
         Sparse J = new Sparse(M);
         for (int i = 0; i < M; i++) J.add(i, i, 1);
         for (Edge e : edges) {
+            // (every entry an edge can touch is added, zeros too: skipping zeros let entries come and go, and each new
+            // one rebuilt the sparse LU's symbolic factorisation, most steps at 2,000 nodes)
             // F_k = q+ ca_k - q- cb_k; dF_k = (dq+ ca_k - dq- cb_k) (dPa - dPb) + q+ dca_k (a) - q- dcb_k (b)
             double[] qs = streams(e);
             double[] ca = draw(e.a, e.fa), cb = draw(e.b, e.fb);
@@ -412,7 +414,6 @@ public final class Network {
                     double qn = side == 0 ? qs[0] : -qs[1];
                     for (int j2 = 0; j2 < 3; j2++) {
                         double dF = dFdp * sign * dpx[j2] + (dc != null ? qn * dc[k][j2] : 0);
-                        if (dF == 0) continue;
                         if (ia != null) J.add(3 * ia + k, 3 * col + j2, dt * dF);
                         if (ib != null) J.add(3 * ib + k, 3 * col + j2, -dt * dF);
                     }
@@ -658,7 +659,7 @@ public final class Network {
                     }
                 if (!held) break;
                 stats.solves++;
-                d = J.solve(minus);
+                d = J.solve(minus, luCache);
             }
             // fraction to the boundary with a floor: a component holding more than 1e-4 of its node's contents
             // limits the whole step to 99 % of the way to zero (keeping Newton's direction); one with less is damped on
