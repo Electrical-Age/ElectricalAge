@@ -59,7 +59,7 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
         slowProcessList.add(time -> {
             // (an EA pipe on its flange takes it, PortBridge; else whatever takes fluid on that face)
             if (!dischargePort.piped() && node.coordonate.world() instanceof ServerLevel level)
-                mods.eln.fluid.FluidExport.push(tank, level, node.coordonate.pos(), discharge().toEnumFacing(), (int) Math.ceil(DISCHARGE_MB_PER_S * time));
+                exportedForTests += mods.eln.fluid.FluidExport.push(tank, level, node.coordonate.pos(), discharge().toEnumFacing(), (int) Math.ceil(DISCHARGE_MB_PER_S * time));
         });
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         slowProcessList.add(watchdog.set(load).setUNominal(desc.nominalU).set(new Failure(this).machine()));
@@ -71,6 +71,31 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
     /** Its discharge on an EA pipe: up to DISCHARGE_MB_PER_S, against up to OilPumpDescriptor.DISCHARGE_HEAD_PA. */
     final mods.eln.fluid.PortBridge dischargePort = new mods.eln.fluid.PortBridge("discharge", mods.eln.fluid.PortBridge.Mode.OUT,
         DISCHARGE_MB_PER_S, OilPumpDescriptor.DISCHARGE_HEAD_PA);
+
+    long exportedForTests, bridgedForTests;
+
+    static double crudeMb(mods.eln.sim.fluid.FluidNode n) {
+        int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
+        return n.liquid(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
+    }
+
+    static String edgesForTests(mods.eln.sim.fluid.FluidNode run) {
+        StringBuilder b = new StringBuilder();
+        for (var e : mods.eln.fluid.FluidWorld.edgesOf(run)) {
+            var o = e.a == run ? e.b : e.a;
+            b.append(String.format("; edge to node V %.6f z %.2f h %.2f crude %.1f mB P %.0f", o.volume, o.z, o.height, crudeMb(o), o.P()));
+        }
+        return b.toString();
+    }
+
+    /** GameTests: the discharge run's state (volume m3, liquid mB, pressure Pa, level, run size), or "unpiped". */
+    public String dischargeRunForTests() {
+        if (dischargePort.stub == null || !dischargePort.piped()) return "unpiped; exported " + exportedForTests + ", bridged " + bridgedForTests;
+        var run = mods.eln.fluid.FluidWorld.nodeFor(dischargePort.stub);
+        return String.format("run %.6f m3 z %.2f h %.2f, crude %.1f mB, P %.0f Pa, level %.3f, %d pieces; exported %d, bridged %d", run.volume, run.z, run.height,
+            crudeMb(run), run.P(), run.level(), mods.eln.fluid.FluidWorld.runSize(dischargePort.stub), exportedForTests, bridgedForTests)
+            + edgesForTests(run);
+    }
 
     @Override
     public Object fluidLevel() {
@@ -87,7 +112,7 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
 
     @Override
     public void beforeFluidStep(double dt) {
-        dischargePort.step(tank, dt, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        bridgedForTests += dischargePort.step(tank, dt, mods.eln.sim.Ambient.kelvin(node.coordonate));
     }
 
     @Override

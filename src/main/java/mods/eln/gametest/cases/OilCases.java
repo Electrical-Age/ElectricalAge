@@ -34,6 +34,7 @@ public final class OilCases {
         cases.add(new Outlet(false));
         cases.add(new PumpIntoPipe(1000));
         cases.add(new PumpIntoPipe(120));
+        cases.add(new PumpIntoPipe(1000, 3));
         for (String v : OilOnPipes.VARIANTS) cases.add(new OilOnPipes(v));
         cases.add(new Basin());
         cases.add(new Coke());
@@ -310,16 +311,27 @@ public final class OilCases {
         /** What the pump has to give (mB): 1000, or 120, less than half the pipe (Baughn 2026-11-03: a part-full run
          *  held its puddle until it was half full, its open end drawing from mid-bore; now some reaches the tank). */
         final int mB;
+        /** How far above the pump the tank stands (blocks): Baughn 2026-11-09, a pipe up 3 blocks into a tank got nothing. */
+        final int rise;
         mods.eln.oil.OilPumpElement pump;
         mods.eln.oil.TankElement tank;
         String err;
 
         PumpIntoPipe(int mB) {
+            this(mB, 0);
+        }
+
+        PumpIntoPipe(int mB, int rise) {
             this.mB = mB;
+            this.rise = rise;
+        }
+
+        public int height() {
+            return rise > 0 ? 7 : 4;   // (floor_5x7x3)
         }
 
         public String id() {
-            return mB == 1000 ? "oil_pump_into_pipe" : "oil_pump_into_pipe_little";
+            return rise > 0 ? "oil_pump_into_pipe_uphill" : mB == 1000 ? "oil_pump_into_pipe" : "oil_pump_into_pipe_little";
         }
 
         public int width() {
@@ -327,7 +339,7 @@ public final class OilCases {
         }
 
         public int ticks() {
-            return 140;
+            return rise > 0 ? 400 : 140;
         }
 
         public void build(TestContext ctx) {
@@ -336,19 +348,21 @@ public final class OilCases {
             for (var f : new mods.eln.misc.Direction[]{mods.eln.misc.Direction.XN, mods.eln.misc.Direction.ZN, mods.eln.misc.Direction.XP, mods.eln.misc.Direction.ZP})
                 if (f.right() == mods.eln.misc.Direction.XP) pump.front = f;
             pump.reconnect();
-            tank = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, ctx.at(3, 1, 1));
+            if (rise > 0) for (int y = 1; y <= rise; y++) ctx.floor(ctx.at(3, y, 1));   // (the tank on a pillar)
+            tank = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, ctx.at(3, 1 + rise, 1));
             tank.front = mods.eln.misc.Direction.XP;   // (its back, with a low side port, to the west)
             tank.reconnect();
             // (routed as a player's pipe kit routes it: the flange is 6 px up, off the router's lattice)
             var level = ctx.level();
             var a = mods.eln.node.voxel.PipePlacer.portAtForTests(level, p, net.minecraft.core.Direction.EAST);
-            var b = mods.eln.node.voxel.PipePlacer.portAtForTests(level, ctx.at(3, 1, 1), net.minecraft.core.Direction.WEST);
+            var b = mods.eln.node.voxel.PipePlacer.portAtForTests(level, ctx.at(3, 1 + rise, 1), net.minecraft.core.Direction.WEST);
             if (a == null || b == null) err = "ports not found: " + a + " " + b;
             else {
                 var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, a, java.util.List.of(), b);
                 err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
             }
-            ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), mB), true);
+            // (uphill: a full pump tank, more than the riser holds, as a pump on a lake keeps it supplied)
+            ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), rise > 0 ? 8000 : mB), true);
         }
 
         public void measure(TestContext ctx) {
@@ -363,8 +377,11 @@ public final class OilCases {
             int left = ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).getFluidAmount();
             double inTank = tank.vessel == null ? 0 : tank.vessel.mass(crude) / mods.eln.fluid.FluidSpecies.kgPerMb(crude, false);
             ctx.line("oil pump into pipe: " + left + " mB left in the pump, tank " + tank.getWaila());
-            ctx.check("oil pump: its crude went into the pipe", left < 500, left + " mB left");
-            ctx.check("oil pump: and along it into the tank, as crude", inTank > 200, String.format("%.0f mB of crude in the tank", inTank));
+            ctx.line("oil pump into pipe: discharge " + pump.dischargeRunForTests());
+            ctx.check("oil pump: its crude went into the pipe", left < (rise > 0 ? 7500 : 500), left + " mB left");
+            // (uphill: the riser fills first, ~2000 mB in 10 s, then the crude spills into the tank, faster than a pump lifts it)
+            ctx.check("oil pump: and along it into the tank, as crude" + (rise > 0 ? ", up a 3-block riser" : ""), inTank > (rise > 0 ? 100 : 200),
+                String.format("%.0f mB of crude in the tank", inTank));
         }
     }
 

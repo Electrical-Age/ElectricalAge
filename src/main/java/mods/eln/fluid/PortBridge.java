@@ -88,8 +88,12 @@ public final class PortBridge {
 
     private int push(ResourceHandler<FluidResource> tank, FluidNode run, int budget, double T) {
         if (run.P() > headPa) return 0;
-        // (liquids up to 90 % of the run, in mB of any liquid: they go by volume)
-        int liquidRoom = (int) Math.floor(Math.max(0, 0.9 * run.volume - run.liquidVolume()) * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
+        // Liquids until the run is full, and then a little more, as far as the liquid's give takes the run to the head
+        // pressure (Water.K_LIQUID): a pump fills its pipe right up and pushes, so a pipe that climbs to a port high up
+        // reaches it (Baughn 2026-11-09: 3 blocks up into a tank, nothing arrived; liquids stopped at 90 % of the run,
+        // short of its top). In mB of any liquid: they go by volume.
+        double roomM3 = Math.max(0, 0.98 * run.volume - run.liquidVolume()) + Math.max(0, headPa - run.P()) * run.volume / Water.K_LIQUID;
+        int liquidRoom = (int) Math.floor(roomM3 * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
         int moved = 0;
         for (int i = 0; i < tank.size() && moved < budget; i++) {
             FluidResource r = tank.getResource(i);
