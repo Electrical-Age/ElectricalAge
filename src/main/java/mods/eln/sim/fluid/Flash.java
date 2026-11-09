@@ -361,15 +361,70 @@ public final class Flash {
             finish(V);
             return this;
         }
-        for (int i = 0; i < 60 && hi - lo > 1e-7; i++) {
-            double mid = 0.5 * (lo + hi);
-            splitMasses(V, mid);
-            if (energy() < U) lo = mid;
-            else hi = mid;
+        if (!BRACKETED) {
+            for (int i = 0; i < 60 && hi - lo > 1e-7; i++) {
+                double mid = 0.5 * (lo + hi);
+                splitMasses(V, mid);
+                if (energy() < U) lo = mid;
+                else hi = mid;
+            }
+            split(V, 0.5 * (lo + hi));
+            return this;
         }
-        split(V, 0.5 * (lo + hi));
+        // a bracket round the hint, widened until it holds U, then false position (Illinois); bisecting the whole
+        // 80-6000 K range took 60 flashes a solve (Argon's review, board #61), this takes a handful from a nearby hint
+        double fLo = Double.NaN, fHi = Double.NaN;
+        double t0 = Math.max(lo, Math.min(hi, tHint > 0 ? tHint : 300));
+        double w = 0.5;
+        double a = Math.max(lo, t0 - w), b = Math.min(hi, t0 + w);
+        splitMasses(V, a);
+        double fa = energy() - U;
+        splitMasses(V, b);
+        double fb = energy() - U;
+        while (fa > 0 && a > lo) {
+            b = a;
+            fb = fa;
+            w *= 4;
+            a = Math.max(lo, t0 - w);
+            splitMasses(V, a);
+            fa = energy() - U;
+        }
+        while (fb < 0 && b < hi) {
+            a = b;
+            fa = fb;
+            w *= 4;
+            b = Math.min(hi, t0 + w);
+            splitMasses(V, b);
+            fb = energy() - U;
+        }
+        double tol = 1e-12 * Math.max(1, Math.abs(U));
+        int side = 0;
+        double t = 0.5 * (a + b);
+        for (int i = 0; i < 100 && b - a > 1e-7; i++) {
+            t = fb != fa ? b - fb * (b - a) / (fb - fa) : 0.5 * (a + b);
+            if (!(t > a && t < b)) t = 0.5 * (a + b);
+            splitMasses(V, t);
+            double ft = energy() - U;
+            if (Math.abs(ft) <= tol) break;
+            if (ft < 0) {
+                a = t;
+                fa = ft;
+                if (side == -1) fb *= 0.5;   // (Illinois: the end that stays twice running is halved)
+                side = -1;
+            } else {
+                b = t;
+                fb = ft;
+                if (side == 1) fa *= 0.5;
+                side = 1;
+            }
+            if (i > 40) t = 0.5 * (a + b);
+        }
+        split(V, t);
         return this;
     }
+
+    /** Solve T by false position from the hint (true) or by bisecting the whole range (false, the old way: A/B tests). */
+    public static boolean BRACKETED = true;
 
     /** Solve for water mw (kg) and air ma (kg) only, U (J) in V (m^3). */
     public Flash solve(double mw, double ma, double U, double V, double tHint) {
