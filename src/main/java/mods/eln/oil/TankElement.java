@@ -205,7 +205,9 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             for (Direction d : new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP}) {
                 if (TankGroup.neighbour(this, d, null) != null && group.members.contains(TankGroup.neighbour(this, d, null))) continue;
                 int f = d.toEnumFacing().get3DDataValue();
-                out.add(new FluidPort(vessel, at, f, (j * 16 + LOW) / (16.0 * h), PORT_K, sideSpot(f, LOW)));
+                // (the bottom row's low ports draw from the floor, as a lone tank's do: a dip to its bottom; Baughn 2026-11-09:
+                // a box tank 9 % full gave nothing at its low flange, 4 px up, and nothing can be piped under a tank)
+                out.add(new FluidPort(vessel, at, f, j == 0 ? 0.0 : (j * 16 + LOW) / (16.0 * h), PORT_K, sideSpot(f, LOW)));
                 out.add(new FluidPort(vessel, at, f, (j * 16 + HIGH) / (16.0 * h), PORT_K, sideSpot(f, HIGH)));
             }
         }

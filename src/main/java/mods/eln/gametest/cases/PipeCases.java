@@ -1071,7 +1071,10 @@ public final class PipeCases {
             ctx.line(String.format("sealed run: P %.1f level %.3f water %.5f | tank P %.1f water %.5f |%s", run.P(), run.level(), run.mWater, tank.vessel.P(), inTank, es));
             ctx.check("pipe: a sealed third-full run drains into the tank under its opening", inTank > 0.5 * before,
                 String.format("%.4f of %.4f kg went over", inTank, before));
-            ctx.check("pipe: the tank's air came back over it (the pressures even out)", Math.abs(run.P() - tank.vessel.P()) < 60,
+            // (since 2026-11-09 a box tank's bottom low ports draw from its floor, as a lone tank's always did (Baughn: a box
+            // 9 % full gave nothing at them): the water now covers the port and holds the tank's air back, a little
+            // compressed by what came in; before, at 4 px up, the air came back over it to within 60 Pa)
+            ctx.check("pipe: the tank's air is barely compressed by the water that came in (under 3 kPa)", Math.abs(run.P() - tank.vessel.P()) < 3000,
                 String.format("run %.0f Pa, tank %.0f Pa", run.P(), tank.vessel.P()));
         }
     }
