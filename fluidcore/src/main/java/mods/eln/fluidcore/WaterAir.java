@@ -107,13 +107,38 @@ public final class WaterAir {
 
     // h0 and s0 from g0(T) = g_l(T, p_W) - R T ln(p_W / P0) - B p_W (so the vapour at p_W has the liquid's Gibbs energy)
     private static double hVapourCurve(double T) {
-        double pw = pWagner(T), b = bVirial(T), db = dBVirial(T), dl = dLnPw(T);
-        return CP_L * (T - T0) + P0 * V0 + gePw(T) - T * dGePw(T) + R_V * T * T * dl - b * pw + T * db * pw + T * b * pw * dl;
+        return curve(T)[0];
     }
 
     private static double sVapourCurve(double T) {
-        double pw = pWagner(T), dl = dLnPw(T);
-        return CP_L * Math.log(T / T0) - dGePw(T) + R_V * (Math.log(PC / P0) + lnPw(T)) + R_V * T * dl + dBVirial(T) * pw + bVirial(T) * pw * dl;
+        return curve(T)[1];
+    }
+
+    private static final double LN_PC_P0 = Math.log(PC / P0);
+
+    /**
+     * {h0, s0} below T_JOIN, with every power of t = 1 - T / TC from one square root and B's terms from one logarithm
+     * (the separate functions above cost about thirty pow and exp calls a temperature; the step spent most of its time
+     * here). Same values as lnPw, dLnPw, pWagner, gePw, dGePw, bFit and dBFit.
+     */
+    private static double[] curve(double T) {
+        double t = 1 - T / TC, rt = Math.sqrt(t), t2 = t * t, t3 = t2 * t, t4 = t3 * t, t6 = t3 * t3;
+        double sum = A[0] * t + A[1] * t * rt + A[2] * t3 + A[3] * t3 * rt + A[4] * t4 + A[5] * t6 * t * rt;
+        double ds = A[0] + 1.5 * A[1] * rt + 3 * A[2] * t2 + 3.5 * A[3] * t2 * rt + 4 * A[4] * t3 + 7.5 * A[5] * t6 * rt;
+        double lnpw = TC / T * sum, dl = -TC * sum / (T * T) - ds / T;
+        double pw = PC * Math.exp(lnpw);
+        double ex = Math.exp(-(pw - P0) / K);
+        double ge = V0 * K * (1 - ex), dge = V0 * ex * pw * dl;
+        double lt = Math.log(T / 100), bsum = 0, dbsum = 0;
+        for (int i = 0; i < 4; i++) {
+            double term = BA[i] * Math.exp(BE[i] * lt);
+            bsum += term;
+            dbsum += BE[i] * term;
+        }
+        double b = bsum * B_UNIT, db = dbsum * B_UNIT / T;
+        double h0 = CP_L * (T - T0) + P0 * V0 + ge - T * dge + R_V * T * T * dl - b * pw + T * db * pw + T * b * pw * dl;
+        double s0 = CP_L * Math.log(T / T0) - dge + R_V * (LN_PC_P0 + lnpw) + R_V * T * dl + db * pw + b * pw * dl;
+        return new double[]{h0, s0, b, db};
     }
 
     static {
@@ -149,23 +174,54 @@ public final class WaterAir {
         return V0 * K * (1 - Math.exp(-(p - P0) / K));
     }
 
+    /** What the vapour needs at one temperature: h0, s0, g0 = h0 - T s0, B and B'. */
+    record Vap(double T, double h0, double s0, double g0, double b, double db) {
+    }
+
+    // (the curve costs a dozen pow and exp calls, and a split asks for it at one T many times over: a few entries per
+    // thread, round robin, as the slopes alternate between T and T +- h)
+    private static final class VapCache {
+        final Vap[] e = new Vap[4];
+        int next;
+    }
+
+    private static final ThreadLocal<VapCache> VAP_CACHE = ThreadLocal.withInitial(VapCache::new);
+
+    static Vap vap(double T) {
+        VapCache c = VAP_CACHE.get();
+        for (Vap v : c.e) if (v != null && v.T() == T) return v;
+        Vap v;
+        if (T <= T_JOIN) {
+            double[] c4 = curve(T);
+            v = new Vap(T, c4[0], c4[1], c4[0] - T * c4[1], c4[2], c4[3]);
+        } else {
+            double h0 = H_JOIN + CP_JOIN * (T - T_JOIN), s0 = S_JOIN + CP_JOIN * Math.log(T / T_JOIN);
+            v = new Vap(T, h0, s0, h0 - T * s0, bVirial(T), dBVirial(T));
+        }
+        c.e[c.next] = v;
+        c.next = (c.next + 1) % c.e.length;
+        return v;
+    }
+
     /** h0: the vapour's enthalpy less its virial part. */
     static double hVapour0(double T) {
-        return T <= T_JOIN ? hVapourCurve(T) : H_JOIN + CP_JOIN * (T - T_JOIN);
+        return vap(T).h0();
     }
 
     /** The vapour's specific enthalpy at T and its partial pressure p. */
     public static double hVapour(double T, double p) {
-        return hVapour0(T) + (bVirial(T) - T * dBVirial(T)) * p;
+        Vap v = vap(T);
+        return v.h0() + (v.b() - T * v.db()) * p;
     }
 
     /** The vapour's specific internal energy at T and its partial pressure p. */
     public static double uVapour(double T, double p) {
-        return hVapour0(T) - R_V * T - T * dBVirial(T) * p;
+        Vap v = vap(T);
+        return v.h0() - R_V * T - T * v.db() * p;
     }
 
     static double sVapourStd(double T) {
-        return T <= T_JOIN ? sVapourCurve(T) : S_JOIN + CP_JOIN * Math.log(T / T_JOIN);
+        return vap(T).s0();
     }
 
     public static double uAir(double T) {
@@ -179,7 +235,8 @@ public final class WaterAir {
     /** The vapour pressure over liquid at T under pressure p: Gibbs equality, with the Poynting term. */
     public static double pSat(double T, double p) {
         double gl = uLiquidThermal(T) + P0 * V0 - T * sLiquid(T) + gElastic(p);
-        double c = gl - (hVapour0(T) - T * sVapourStd(T)), rt = R_V * T, bp = bVirial(T) * P0;
+        Vap vp = vap(T);
+        double c = gl - vp.g0(), rt = R_V * T, bp = vp.b() * P0;
         // R T x + B P0 e^x = c in x = ln(ps / P0), B < 0: concave, rising to its top at e^x = R T / (-B P0), where the
         // vapour's volume R T / p + B reaches zero. With no root there (hot: the vapour can't match the liquid's Gibbs
         // energy at any density) every drop evaporates: the top is returned, where split() finds room for any vapour.
@@ -221,7 +278,7 @@ public final class WaterAir {
      */
     public static Split split(double mw, double ma, double V, double T, double vg) {
         double mac = ma + AIR_CUSHION * V;
-        double pa = mac * R_A * T / vg, b = bVirial(T);
+        double pa = mac * R_A * T / vg, b = vap(T).b();
         double p = pa, pv = 0;
         double ml = 0, mv = mw;
         for (int i = 0; i < 3; i++) {
