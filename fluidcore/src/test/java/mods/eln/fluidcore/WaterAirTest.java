@@ -135,6 +135,57 @@ class WaterAirTest {
         }
     }
 
+    /** The vapour's dh0/dT and B'' (analytic, for the slopes) against differences of h0 and B'. */
+    @Test
+    void vapourHeatCapacityMatchesTheCurve() {
+        for (double T = 250; T < 900; T += 7.3) {
+            double h = 1e-3;
+            double fd = (WaterAir.vap(T + h).h0() - WaterAir.vap(T - h).h0()) / (2 * h);
+            assertEquals(fd, WaterAir.vap(T).cp0(), 1e-5 * Math.abs(fd), "cp0 at " + T);
+            double fb = (WaterAir.vap(T + h).db() - WaterAir.vap(T - h).db()) / (2 * h);
+            assertEquals(fb, WaterAir.vap(T).d2b(), 1e-5 * Math.abs(fb) + 1e-15, "B'' at " + T);
+        }
+    }
+
+    /** The analytic slopes against the finite-difference ones they replaced (same states as the solve checks). */
+    @Test
+    void analyticSlopesMatchTheFiniteDifferenceOnes() {
+        Random r = new Random(5);
+        String[] names = {"P", "ml", "mv", "ma", "hL", "hG", "level", "yv", "ya"};
+        double worst = 0;
+        String at = "";
+        for (int k = 0; k < 500; k++) {
+            double[] st = state(r);
+            double mw = st[0], ma = st[1], V = st[2];
+            double U = WaterAir.energyAt(mw, ma, V, st[3]);
+            var sp = WaterAir.solve(mw, ma, U, V, st[3]);
+            double[][] a = WaterAir.outputSlopes(sp, mw, ma, U, V), f = WaterAir.outputSlopesFD(sp, mw, ma, U, V);
+            double[] o0 = WaterAir.outputs(sp, V), base = {mw, ma, U};
+            for (int o = 0; o < WaterAir.OUTPUTS; o++)
+                for (int j = 0; j < 3; j++) {
+                    double scale = Math.max(Math.abs(a[o][j]), Math.abs(f[o][j])) + 1e-6 * Math.abs(o0[o]) / Math.max(1e-9, Math.abs(base[j]));
+                    double err = Math.abs(a[o][j] - f[o][j]) / Math.max(1e-300, scale);
+                    if (err > 1e-2) {
+                        // (the old slopes were wrong in places, e.g. dP/dmw in a liquid-full node by 10 %: then judge the
+                        // analytic one against a difference of the solve itself)
+                        if (base[j] == 0) continue;
+                        double h = 1e-6 * (j == 2 ? Math.max(1, Math.abs(U)) : base[j]);
+                        double[] pp = base.clone(), mm = base.clone();
+                        pp[j] += h;
+                        mm[j] -= h;
+                        double fd = (WaterAir.outputs(WaterAir.solve(pp[0], pp[1], pp[2], V, sp), V)[o] - WaterAir.outputs(WaterAir.solve(mm[0], mm[1], mm[2], V, sp), V)[o]) / (2 * h);
+                        err = Math.abs(a[o][j] - fd) / Math.max(1e-300, Math.max(Math.abs(fd), Math.abs(a[o][j])) + 1e-6 * Math.abs(o0[o]) / Math.max(1e-9, Math.abs(base[j])));
+                    }
+                    if (err > worst) {
+                        worst = err;
+                        at = "d" + names[o] + "/d" + j + " case " + k + " " + java.util.Arrays.toString(st) + ": " + a[o][j] + " vs FD " + f[o][j];
+                    }
+                }
+        }
+        System.out.println("analytic vs FD slopes: worst " + worst + " at " + at);
+        assertTrue(worst < 1e-2, "worst " + worst + " at " + at);
+    }
+
     @Test
     void outputSlopesMatchFiniteDifferences() {
         Random r = new Random(4);

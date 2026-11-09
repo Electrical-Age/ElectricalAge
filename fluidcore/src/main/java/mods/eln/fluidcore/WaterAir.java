@@ -125,20 +125,27 @@ public final class WaterAir {
         double t = 1 - T / TC, rt = Math.sqrt(t), t2 = t * t, t3 = t2 * t, t4 = t3 * t, t6 = t3 * t3;
         double sum = A[0] * t + A[1] * t * rt + A[2] * t3 + A[3] * t3 * rt + A[4] * t4 + A[5] * t6 * t * rt;
         double ds = A[0] + 1.5 * A[1] * rt + 3 * A[2] * t2 + 3.5 * A[3] * t2 * rt + 4 * A[4] * t3 + 7.5 * A[5] * t6 * rt;
+        double dds = 0.75 * A[1] / rt + 6 * A[2] * t + 8.75 * A[3] * t * rt + 12 * A[4] * t2 + 48.75 * A[5] * t4 * t * rt;
         double lnpw = TC / T * sum, dl = -TC * sum / (T * T) - ds / T;
+        double d2l = 2 * TC * sum / (T * T * T) + 2 * ds / (T * T) + dds / (TC * T);
         double pw = PC * Math.exp(lnpw);
         double ex = Math.exp(-(pw - P0) / K);
         double ge = V0 * K * (1 - ex), dge = V0 * ex * pw * dl;
-        double lt = Math.log(T / 100), bsum = 0, dbsum = 0;
+        double lt = Math.log(T / 100), bsum = 0, dbsum = 0, d2bsum = 0;
         for (int i = 0; i < 4; i++) {
             double term = BA[i] * Math.exp(BE[i] * lt);
             bsum += term;
             dbsum += BE[i] * term;
+            d2bsum += BE[i] * (BE[i] - 1) * term;
         }
-        double b = bsum * B_UNIT, db = dbsum * B_UNIT / T;
+        double b = bsum * B_UNIT, db = dbsum * B_UNIT / T, d2b = d2bsum * B_UNIT / (T * T);
         double h0 = CP_L * (T - T0) + P0 * V0 + ge - T * dge + R_V * T * T * dl - b * pw + T * db * pw + T * b * pw * dl;
         double s0 = CP_L * Math.log(T / T0) - dge + R_V * (LN_PC_P0 + lnpw) + R_V * T * dl + db * pw + b * pw * dl;
-        return new double[]{h0, s0, b, db};
+        // dh0/dT (= T ds0/dT): the same terms differentiated once more
+        double pwp = pw * dl, exp_ = -ex * pwp / K;
+        double dgeP = V0 * (exp_ * pw * dl + ex * pwp * dl + ex * pw * d2l);
+        double cp0 = CP_L - T * dgeP + R_V * (2 * T * dl + T * T * d2l) + T * pw * (d2b + 2 * db * dl + b * dl * dl + b * d2l);
+        return new double[]{h0, s0, b, db, cp0, d2b};
     }
 
     static {
@@ -175,7 +182,7 @@ public final class WaterAir {
     }
 
     /** What the vapour needs at one temperature: h0, s0, g0 = h0 - T s0, B and B'. */
-    record Vap(double T, double h0, double s0, double g0, double b, double db) {
+    record Vap(double T, double h0, double s0, double g0, double b, double db, double cp0, double d2b) {
     }
 
     // (the curve costs a dozen pow and exp calls, and a split asks for it at one T many times over: a few entries per
@@ -193,10 +200,11 @@ public final class WaterAir {
         Vap v;
         if (T <= T_JOIN) {
             double[] c4 = curve(T);
-            v = new Vap(T, c4[0], c4[1], c4[0] - T * c4[1], c4[2], c4[3]);
+            v = new Vap(T, c4[0], c4[1], c4[0] - T * c4[1], c4[2], c4[3], c4[4], c4[5]);
         } else {
             double h0 = H_JOIN + CP_JOIN * (T - T_JOIN), s0 = S_JOIN + CP_JOIN * Math.log(T / T_JOIN);
-            v = new Vap(T, h0, s0, h0 - T * s0, bVirial(T), dBVirial(T));
+            double bb = bVirial(T);
+            v = new Vap(T, h0, s0, h0 - T * s0, bb, dBVirial(T), CP_JOIN, N_J * (N_J + 1) * bb / (T * T));
         }
         c.e[c.next] = v;
         c.next = (c.next + 1) % c.e.length;
@@ -416,7 +424,7 @@ public final class WaterAir {
      * explicit and smooth, so their partial derivatives are taken by central differences of those functions (no solve
      * inside). Returns {{dT/dmw, dT/dma, dT/dU}, {dVg/dmw, dVg/dma, dVg/dU}}.
      */
-    public static double[][] derivatives(Split s, double mw, double ma, double U, double V) {
+    static double[][] derivativesFD(Split s, double mw, double ma, double U, double V) {
         double T = s.T(), vg = s.vg();
         double hT = 1e-5 * T, hV = 1e-6 * vg;
         double[] rTp = residuals(mw, ma, U, V, T + hT, vg), rTm = residuals(mw, ma, U, V, T - hT, vg);
@@ -469,8 +477,8 @@ public final class WaterAir {
      * The slopes of outputs() against (mw, ma, U) at a solved split: the explicit partials (central differences of the
      * split at fixed T and Vg) plus the chain through T and Vg (derivatives()). Returns [output][mw, ma, U].
      */
-    public static double[][] outputSlopes(Split s, double mw, double ma, double U, double V) {
-        double[][] d = derivatives(s, mw, ma, U, V);
+    static double[][] outputSlopesFD(Split s, double mw, double ma, double U, double V) {
+        double[][] d = derivativesFD(s, mw, ma, U, V);
         double T = s.T(), vg = s.vg();
         double hT = 1e-5 * T, hV = 1e-6 * vg;
         double[] oTp = outputs(split(mw, ma, V, T + hT, vg), V), oTm = outputs(split(mw, ma, V, T - hT, vg), V);
@@ -486,6 +494,176 @@ public final class WaterAir {
             out[o][0] = pw + dT * d[0][0] + dV * d[1][0];
             out[o][1] = pa + dT * d[0][1] + dV * d[1][1];
             out[o][2] = dT * d[0][2] + dV * d[1][2];   // (U enters only through T and Vg)
+        }
+        return out;
+    }
+
+    // ---- analytic slopes (forward mode through split(): the same three fixed-point passes, differentiated)
+
+    /** Gradient slots: temperature, gas volume, water, air. */
+    private static final int GT = 0, GV = 1, GW = 2, GA = 3;
+
+    /** A split with the gradients of what it's made of against (T, Vg, mw, ma). */
+    static final class SplitD {
+        Split s;
+        Vap vap;
+        double[] dml = new double[4], dmv = new double[4], dp = new double[4], dpv = new double[4], dv = new double[4];
+    }
+
+    /** ln ps and its slopes {value, d/dT, d/dp} (pSat's root, differentiated by the implicit function theorem). */
+    static double[] lnPSatD(double T, double p) {
+        Vap vp = vap(T);
+        double ps = pSat(T, p), rt = R_V * T, bps = vp.b() * ps;
+        double x = Math.log(ps / P0);
+        if (rt + bps <= 1e-9 * rt) return new double[]{Math.log(ps), 1 / T - vp.db() / vp.b(), 0};   // (no root: the top)
+        double den = rt + bps;
+        double dcdT = vp.s0() - sLiquid(T);
+        return new double[]{Math.log(ps), (dcdT - R_V * x - vp.db() * ps) / den, vLiquid(p) / den};
+    }
+
+    static SplitD splitD(double mw, double ma, double V, double T, double vg) {
+        SplitD o = new SplitD();
+        Vap vp = vap(T);
+        o.vap = vp;
+        double b = vp.b(), db = vp.db();
+        double mac = ma + AIR_CUSHION * V;
+        double pa = mac * R_A * T / vg;
+        double[] dpa = {pa / T, -pa / vg, 0, R_A * T / vg};
+        double p = pa, pv = 0, ml = 0, mv = mw;
+        double[] dp = dpa.clone(), dpv = new double[4], dml = new double[4], dmv = {0, 0, 1, 0};
+        double w = EPS_L * Math.max(mw, 1e-12);
+        double dwdmw = mw > 1e-12 ? EPS_L : 0;
+        for (int i = 0; i < 3; i++) {
+            double[] lp = lnPSatD(T, p);
+            double ps = Math.exp(lp[0]);
+            double[] dln = new double[4];
+            for (int k = 0; k < 4; k++) dln[k] = lp[2] * dp[k];
+            dln[GT] += lp[1];
+            double den = R_V * T / ps + b;
+            if (den > 0) {
+                double mvs = vg / den;
+                double[] dz = new double[4];
+                for (int k = 0; k < 4; k++) {
+                    double dden = -(R_V * T / ps) * dln[k] + (k == GT ? R_V / ps + db : 0);
+                    double dmvs = (k == GV ? 1 / den : 0) - mvs / den * dden;
+                    dz[k] = (k == GW ? 1 : 0) - dmvs;
+                }
+                double z = mw - mvs, x = z / w;
+                double sp, sig;
+                if (x > 30) {
+                    sp = x;
+                    sig = 1;
+                } else if (x < -30) {
+                    sp = Math.exp(x);
+                    sig = sp;
+                } else {
+                    sp = Math.log1p(Math.exp(x));
+                    sig = 1 / (1 + Math.exp(-x));
+                }
+                ml = w * sp;
+                double dmlw = sp - x * sig;   // (d ml / d w)
+                for (int k = 0; k < 4; k++) dml[k] = sig * dz[k] + (k == GW ? dmlw * dwdmw : 0);
+            } else {
+                ml = 0;
+                java.util.Arrays.fill(dml, 0);
+            }
+            mv = mw - ml;
+            for (int k = 0; k < 4; k++) dmv[k] = (k == GW ? 1 : 0) - dml[k];
+            double q = vg - mv * b, num = mv * R_V * T;
+            pv = num / q;
+            for (int k = 0; k < 4; k++) {
+                double dnum = R_V * (T * dmv[k] + (k == GT ? mv : 0));
+                double dq = (k == GV ? 1 : 0) - b * dmv[k] - (k == GT ? mv * db : 0);
+                dpv[k] = dnum / q - pv * dq / q;
+                dp[k] = dpv[k] + dpa[k];
+            }
+            p = pv + pa;
+        }
+        double v = vLiquid(p);
+        for (int k = 0; k < 4; k++) o.dv[k] = -v / K * dp[k];
+        o.s = new Split(T, vg, ml, mv, mac, p, v, pv);
+        o.dml = dml;
+        o.dmv = dmv;
+        o.dp = dp;
+        o.dpv = dpv;
+        return o;
+    }
+
+    /** The residuals' gradients against (T, Vg, mw, ma): {d energy, d volume residual}. */
+    private static double[][] residualGrads(SplitD d, double V) {
+        Split s = d.s;
+        Vap vp = d.vap;
+        double T = s.T(), x = s.v() / V0;
+        double uL = uLiquidThermal(T) + eElastic(s.v()), uV = uVapour(T, s.pv());
+        double duVdT = vp.cp0() - R_V - (vp.db() + T * vp.d2b()) * s.pv(), duVdpv = -T * vp.db();
+        double[] dE = new double[4], dR = new double[4];
+        for (int k = 0; k < 4; k++) {
+            double dT = k == GT ? 1 : 0;
+            dE[k] = d.dml[k] * uL + s.ml() * (CP_L * dT + K * V0 * Math.log(x) / V0 * d.dv[k])
+                + d.dmv[k] * uV + s.mv() * (duVdT * dT + duVdpv * d.dpv[k])
+                + (k == GA ? uAir(T) : 0) + s.ma() * CV_A * dT;
+            dR[k] = ((k == GV ? 1 : 0) + d.dml[k] * s.v() + s.ml() * d.dv[k]) / V;
+        }
+        return new double[][]{dE, dR};
+    }
+
+    /**
+     * The slopes of (T, Vg) against (mw, ma, U) at a solved split, by the implicit function theorem on the residuals'
+     * analytic gradients. Returns {{dT/dmw, dT/dma, dT/dU}, {dVg/dmw, dVg/dma, dVg/dU}}.
+     */
+    public static double[][] derivatives(Split s, double mw, double ma, double U, double V) {
+        return derivatives(splitD(mw, ma, V, s.T(), s.vg()), V);
+    }
+
+    private static double[][] derivatives(SplitD sd, double V) {
+        double[][] g = residualGrads(sd, V);
+        double j11 = g[0][GT], j12 = g[0][GV], j21 = g[1][GT], j22 = g[1][GV];
+        double det = j11 * j22 - j12 * j21;
+        double[][] out = new double[2][3];
+        for (int k = 0; k < 3; k++) {
+            double d1 = k == 0 ? g[0][GW] : k == 1 ? g[0][GA] : -1;
+            double d2 = k == 0 ? g[1][GW] : k == 1 ? g[1][GA] : 0;
+            out[0][k] = -(j22 * d1 - j12 * d2) / det;
+            out[1][k] = -(-j21 * d1 + j11 * d2) / det;
+        }
+        return out;
+    }
+
+    /**
+     * The slopes of outputs() against (mw, ma, U) at a solved split: the outputs' analytic gradients in (T, Vg, mw, ma),
+     * chained through T and Vg (derivatives()). Returns [output][mw, ma, U].
+     */
+    public static double[][] outputSlopes(Split s0, double mw, double ma, double U, double V) {
+        SplitD sd = splitD(mw, ma, V, s0.T(), s0.vg());
+        double[][] th = derivatives(sd, V);
+        Split s = sd.s;
+        Vap vp = sd.vap;
+        double T = s.T();
+        double gas = s.mv() + s.ma(), air = Math.max(0, s.ma() - AIR_CUSHION * V);
+        double yv = gas > 0 ? s.mv() / gas : 0, ya = gas > 0 ? air / gas : 0;
+        double hV = hVapour(T, s.pv()), hA = hAir(T);
+        double dhVdT = vp.cp0() - T * vp.d2b() * s.pv(), dhVdpv = vp.b() - T * vp.db();
+        double lx = Math.log(s.v() / V0);
+        double[][] g = new double[OUTPUTS][4];
+        for (int k = 0; k < 4; k++) {
+            double dT = k == GT ? 1 : 0;
+            double dgas = sd.dmv[k] + (k == GA ? 1 : 0), dair = k == GA && s.ma() - AIR_CUSHION * V >= 0 ? 1 : 0;   // (at no air: the right-hand slope, as a forward difference gave)
+            double dyv = gas > 0 ? (sd.dmv[k] - yv * dgas) / gas : 0, dya = gas > 0 ? (dair - ya * dgas) / gas : 0;
+            g[P][k] = sd.dp[k];
+            g[ML][k] = sd.dml[k];
+            g[MV][k] = sd.dmv[k];
+            g[MA][k] = k == GA ? 1 : 0;
+            g[HL][k] = CP_L * dT + K * lx * sd.dv[k] + s.v() * sd.dp[k] + s.p() * sd.dv[k];
+            g[HG][k] = dyv * hV + yv * (dhVdT * dT + dhVdpv * sd.dpv[k]) + dya * hA + ya * (CV_A + R_A) * dT;
+            g[LEVEL][k] = (sd.dml[k] * s.v() + s.ml() * sd.dv[k]) / V;
+            g[YV][k] = dyv;
+            g[YA][k] = dya;
+        }
+        double[][] out = new double[OUTPUTS][3];
+        for (int o = 0; o < OUTPUTS; o++) {
+            out[o][0] = g[o][GW] + g[o][GT] * th[0][0] + g[o][GV] * th[1][0];
+            out[o][1] = g[o][GA] + g[o][GT] * th[0][1] + g[o][GV] * th[1][1];
+            out[o][2] = g[o][GT] * th[0][2] + g[o][GV] * th[1][2];
         }
         return out;
     }
