@@ -180,6 +180,14 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
      * computed from its model's geometry (Baughn 2026-10-30: "hitboxes should be computed from geometry"), with a
      * model's hand-written NAME.hitbox added where it has one (the CAD library's shaft parts, furnaces, condensers), once.
      */
+    /**
+     * The outline (collision false) or collision of this device at its block entity, if it depends on more than its
+     * front (a tank box's shell, cut to each block); null takes modelHitbox()'s.
+     */
+    public net.minecraft.world.phys.shapes.VoxelShape shapeAt(TransparentNodeEntity e, boolean collision) {
+        return null;
+    }
+
     public ModelHitbox modelHitbox() {
         if (!hitboxTried) {
             hitboxTried = true;

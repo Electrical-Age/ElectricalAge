@@ -75,7 +75,11 @@ public class TransparentNodeBlock extends NodeBlock implements net.minecraft.wor
         ModelHitbox h = descriptor.modelHitbox();
         // (a device without a front, or before the client knows it, takes its model's own: front XN. The small solar
         // panel fell back to its old half-block box: AdventurAgent)
-        if (h != null && level.getBlockEntity(pos) instanceof TransparentNodeEntity e) return h.shape(frontOr(e));
+        if (level.getBlockEntity(pos) instanceof TransparentNodeEntity e) {
+            var at = descriptor.shapeAt(e, false);
+            if (at != null) return at;
+            if (h != null) return h.shape(frontOr(e));
+        }
         return shape();
     }
 
@@ -90,7 +94,11 @@ public class TransparentNodeBlock extends NodeBlock implements net.minecraft.wor
     protected net.minecraft.world.phys.shapes.VoxelShape getCollisionShape(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos,
                                                                             net.minecraft.world.phys.shapes.CollisionContext context) {
         ModelHitbox h = descriptor.modelHitbox();
-        if (h != null && level.getBlockEntity(pos) instanceof TransparentNodeEntity e) return h.collision(frontOr(e));
+        if (level.getBlockEntity(pos) instanceof TransparentNodeEntity e) {
+            var at = descriptor.shapeAt(e, true);
+            if (at != null) return at;
+            if (h != null) return h.collision(frontOr(e));
+        }
         return shape();
     }
 

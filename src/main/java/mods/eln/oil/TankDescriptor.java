@@ -76,6 +76,86 @@ public class TankDescriptor extends TransparentNodeDescriptor {
         if (steam && fill < 0.995f) drawScaled("vapour", GLASS_Y1, 1 - fill);
     }
 
+    /**
+     * A block of a box's outline or collision: the box's shell and sight glass as TankRender draws them, cut to this
+     * block (Baughn 2026-11-09: a box kept its lone tanks' hitboxes, small cylinders with gaps between). The box comes
+     * from the element's group on the server and from the render's published size on the client; a lone tank takes
+     * its model's hitbox.
+     */
+    @Override
+    public net.minecraft.world.phys.shapes.VoxelShape shapeAt(mods.eln.node.transparent.TransparentNodeEntity e, boolean collision) {
+        int[] b = boxOf(e);
+        if (b == null) return null;
+        String key = java.util.Arrays.toString(b);
+        mods.eln.node.transparent.ModelHitbox h;
+        synchronized (boxHitboxes) {
+            h = boxHitboxes.get(key);
+            if (h == null && !boxHitboxes.containsKey(key)) {
+                h = boxHitbox(b);
+                if (boxHitboxes.size() > 512) boxHitboxes.clear();
+                boxHitboxes.put(key, h);
+            }
+        }
+        if (h == null) return net.minecraft.world.phys.shapes.Shapes.empty();
+        return collision ? h.collision(mods.eln.misc.Direction.XN) : h.shape(mods.eln.misc.Direction.XN);
+    }
+
+    private final java.util.Map<String, mods.eln.node.transparent.ModelHitbox> boxHitboxes = new java.util.HashMap<>();
+
+    /** {front ordinal, sx, sy, sz, ox, oy, oz} of the box e's block is in, or null (a lone tank, or not known yet). */
+    static int[] boxOf(mods.eln.node.transparent.TransparentNodeEntity e) {
+        var level = e.getLevel();
+        if (level == null) return null;
+        if (!level.isClientSide()) {
+            if (!(e.getNode() instanceof mods.eln.node.transparent.TransparentNode n) || !(n.element instanceof TankElement t)) return null;
+            TankGroup g = t.group;
+            if (g == null || t.front == null) return null;
+            var c = t.node.coordonate;
+            return new int[]{t.front.ordinal(), g.sx, g.sy, g.sz, c.x - g.x0, c.y - g.y0, c.z - g.z0};
+        }
+        if (!(e.elementRender instanceof TankRender r) || r.front == null) return null;
+        if (r.sx * r.sy * r.sz <= 1) return null;
+        return new int[]{r.front.ordinal(), r.sx, r.sy, r.sz, r.ox, r.oy, r.oz};
+    }
+
+    /** The hitbox (front XN, i.e. already in world axes) of block b of a box: see shapeAt. */
+    mods.eln.node.transparent.ModelHitbox boxHitbox(int[] b) {
+        if (obj == null) return null;
+        var front = mods.eln.misc.Direction.values()[b[0]];
+        int sx = b[1], sy = b[2], sz = b[3];
+        boolean alongX = front == mods.eln.misc.Direction.XN || front == mods.eln.misc.Direction.XP;
+        double across = alongX ? sx : sz;
+        // (from the box's centre to this block's, world axes)
+        double dx = b[4] - (sx - 1) / 2.0, dy = b[5] - (sy - 1) / 2.0, dz = b[6] - (sz - 1) / 2.0;
+        List<List<double[]>> parts = new java.util.ArrayList<>();
+        for (String name : new String[]{"shell", "glass"}) {
+            var part = obj.getPart(name);
+            if (part == null) continue;
+            List<double[]> tris = new java.util.ArrayList<>();
+            part.triangles(tris);
+            boolean glass = name.equals("glass");
+            for (double[] t : tris)
+                for (int i = 0; i < 9; i += 3) {
+                    double x = t[i], y = t[i + 1], z = t[i + 2];   // (about the block's centre, front XN)
+                    if (glass) {   // (on the scaled shell's front, the box's height: TankRender.draw)
+                        x -= (across - 1) * TankRender.SHELL_R / 16.0;
+                        y *= sy;
+                    }
+                    double[] w = mods.eln.node.transparent.ModelHitbox.turnedPoint(x, y, z, front);
+                    if (!glass) {
+                        w[0] *= sx;
+                        w[1] *= sy;
+                        w[2] *= sz;
+                    }
+                    t[i] = w[0] - dx + 0.5;
+                    t[i + 1] = w[1] - dy + 0.5;
+                    t[i + 2] = w[2] - dz + 0.5;
+                }
+            if (!tris.isEmpty()) parts.add(tris);
+        }
+        return parts.isEmpty() ? null : mods.eln.node.transparent.ModelHitbox.computedParts(parts);
+    }
+
     void drawPart(String name) {
         var p = obj == null ? null : obj.getPart(name);
         if (p != null) p.draw();

@@ -114,7 +114,7 @@ public final class ModelHitbox {
     }
 
     /** A point about the block's centre turned as glRotateXnRef turns the model (see turned). */
-    static double[] turnedPoint(double x, double y, double z, Direction f) {
+    public static double[] turnedPoint(double x, double y, double z, Direction f) {
         return switch (f) {
             case XP -> new double[]{-x, y, -z};
             case ZP -> new double[]{z, y, -x};

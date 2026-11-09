@@ -35,6 +35,7 @@ public final class PlumbingCases {
         cases.add(new TankBox());
         cases.add(new TankBoxSplits());
         cases.add(new TankBoxSettlesAfterBreak());
+        cases.add(new TankBoxHitbox());
         cases.add(new TankFlanges());
         cases.add(new TankSightGlass());
         cases.add(new HotWaterIntoShortPipe());
@@ -550,6 +551,53 @@ public final class PlumbingCases {
      * crude loses a bottom corner; after it has had 5 s to settle, a bottom tank's water stays put (within 1 % over the
      * last 5 s).
      */
+    /**
+     * A box's outline and collision are its shell's, cut to each block (Baughn 2026-11-09: a 2 x 2 x 3 box kept its lone
+     * tanks' small cylinders): a block reaches the faces it shares with the rest of the box, the middle layer runs floor
+     * to ceiling, the top stops at the shell's top, and the box's inside corner is solid to walk on.
+     */
+    static final class TankBoxHitbox extends Big {
+        String bad = "", line = "";
+
+        public String id() {
+            return "tank_box_hitbox_from_its_shell";
+        }
+
+        public int ticks() {
+            return 4;
+        }
+
+        public void build(TestContext ctx) {
+            box(ctx);
+        }
+
+        public void measure(TestContext ctx) {
+            var level = ctx.level();
+            for (int y = 1; y <= 3; y++) {
+                var pos = ctx.at(2, y, 2);
+                var st = level.getBlockState(pos);
+                var outline = st.getShape(level, pos);
+                var coll = st.getCollisionShape(level, pos);
+                if (outline.isEmpty() || coll.isEmpty()) {
+                    bad += "layer " + y + " empty; ";
+                    continue;
+                }
+                var b = outline.bounds();
+                line += String.format("layer %d: x %.2f..%.2f y %.2f..%.2f z %.2f..%.2f (%d boxes); ", y, b.minX, b.maxX, b.minY, b.maxY, b.minZ, b.maxZ, outline.toAabbs().size());
+                if (b.maxX < 0.999 || b.maxZ < 0.999) bad += "layer " + y + " short of the box's inside faces; ";
+                if (b.minX < 0.01 || b.minZ < 0.01) bad += "layer " + y + " out to the box's outer faces; ";
+                if (y < 3 && b.maxY < 0.999) bad += "layer " + y + " short of the next layer; ";
+                if (y > 1 && b.minY > 0.001) bad += "layer " + y + " short of the layer below; ";
+                if (y == 3 && (b.maxY > 0.99 || b.maxY < 0.75)) bad += "top layer's top at " + b.maxY + "; ";
+                boolean corner = false;
+                for (var a : coll.toAabbs()) corner |= a.contains(0.95, y == 3 ? 0.5 : 0.95, 0.95);
+                if (!corner) bad += "layer " + y + " collision misses the inside corner; ";
+            }
+            ctx.line("tank box hitbox: " + line);
+            ctx.check("a tank box's hitbox is its shell, cut to each block", bad.isEmpty(), bad);
+        }
+    }
+
     static final class TankBoxSettlesAfterBreak extends Big {
         java.util.List<TankElement> ts;
         IProcess watch;
