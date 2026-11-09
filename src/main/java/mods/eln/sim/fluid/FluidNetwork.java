@@ -29,6 +29,12 @@ public final class FluidNetwork {
     /** The Newton step (review #61, plan 05): the end states' real flash corrects the linear solve. */
     public static boolean NEWTON = false;
     public static int NEWTON_MAX = 8;
+    /** Later iterations keep the first one's upstream sides and valve states (no flips between iterations). */
+    public static boolean NEWTON_KEEP_EDGES = true;
+    /** Experiment: a true Newton with a finite-difference Jacobian of the whole step (small networks; tests only). */
+    public static boolean NEWTON_FD = false;
+    /** The head across a two-way edge weighs the mean of both ports' densities, not the upstream one's (plan 05). */
+    public static boolean MEAN_HEAD = false;
     public static double NEWTON_TOL_PA = 50, NEWTON_TOL_REL = 1e-4;
 
     /** Counters for measurements (tests, /elnlab). */
@@ -162,7 +168,7 @@ public final class FluidNetwork {
         // result. Without it the step is one linear guess, cut back by the limiters (the old way).
         double[] corr = new double[M];
         Stats.lastNorms.clear();
-        Snapshot snap = NEWTON ? new Snapshot(free) : null;
+        Snapshot snap = NEWTON || NEWTON_FD ? new Snapshot(free) : null;
         double lastNorm = Double.MAX_VALUE;
         double[] lastR = null;
         double[][] edge0 = NEWTON ? new double[edges.size()][] : null;
@@ -171,7 +177,7 @@ public final class FluidNetwork {
             edge0[k] = new double[]{e.g, e.sA, e.sB, e.rho, e.xl, e.head, e.fromA ? 1 : 0};
         }
         for (int it = 0; ; it++) {
-            if (it > 0) for (int k = 0; k < edges.size(); k++) {   // (each solve starts from the step's edges: valves open)
+            if (it > 0 && !NEWTON_KEEP_EDGES) for (int k = 0; k < edges.size(); k++) {   // (each solve starts from the step's edges: valves open)
                 FluidEdge e = edges.get(k);
                 double[] v = edge0[k];
                 e.g = v[0];
@@ -187,7 +193,7 @@ public final class FluidNetwork {
             // drive across one turns forward; shutting them all at once, a feed valve back-flowing from its boiler also shut
             // the pump pushing into the same pipe, and the pipe sat under the pump's shut-off with nothing flowing)
             java.util.Set<FluidEdge> shut = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
-            for (int pass = 0; pass < MAX_PASSES; pass++) {
+            for (int pass = 0; pass < (it > 0 && NEWTON_KEEP_EDGES ? 1 : MAX_PASSES); pass++) {
                 double[][] A = new double[M][M];
                 double[] rhs = new double[M];
                 for (int i = 0; i < M; i++) A[i][i] = 1;
@@ -263,6 +269,10 @@ public final class FluidNetwork {
                 e.g = 0;
                 e.flow = 0;
             }
+            if (NEWTON_FD) {
+                newtonFD(X, dt, free, idx, lam, N, M, snap == null ? new Snapshot(free) : snap);
+                break;
+            }
             // 6. no node's pressure may be driven past the pressures its neighbours push it towards (the linearized solve
             //    can overshoot when a node changes phase or an edge's upstream side flips; a maximum principle); then cap
             //    what leaves each node
@@ -326,6 +336,106 @@ public final class FluidNetwork {
             snap.restore();
         }
         Stats.steps++;
+    }
+
+
+    /** The end state for unknowns X (P' of the free nodes, then the liquid gains): flows by the drive, then transport. */
+    private double[] residualFD(double[] X, double dt, List<FluidNode> free, java.util.Map<FluidNode, Integer> idx, int[] lam, int N, int M,
+                                Snapshot snap) {
+        snap.restore();
+        for (FluidEdge e : edges) {
+            if (e.g == 0) {
+                e.flow = 0;
+                continue;
+            }
+            double pa = e.a.fixed ? e.a.P() : X[idx.get(e.a)], pb = e.b.fixed ? e.b.P() : X[idx.get(e.b)];
+            double offA = e.a.pressureOver(e.portA, e.spanA) - e.a.P() + e.hA * gained(e.a, idx, lam, X);
+            double offB = pressureB(e) - e.b.P() + e.hB * gained(e.b, idx, lam, X);
+            e.flow = e.g * (pa + offA - pb - offB + e.head);
+            if (e.oneWay() && e.flow < 0) e.flow = 0;
+        }
+        int E = edges.size();
+        double[] xl = new double[E];
+        Packet[] pks = new Packet[E];
+        for (int k = 0; k < E; k++) {
+            FluidEdge e = edges.get(k);
+            if (e.flow == 0) continue;
+            Packet pk = packet(e, e.flow > 0 ? e.a : e.b);
+            pks[k] = pk;
+            xl[k] = pk.rho > 0 ? pk.xl : 0;
+            if (pk.rho <= 0) e.flow = 0;
+        }
+        Own[] own = new Own[N];
+        for (int i = 0; i < N; i++) own[i] = new Own(free.get(i));
+        double[][] theta = capPhases(dt, free, idx, xl, pks);
+        Pass[] pass = passThrough(free, idx, xl, pks, theta, own);
+        for (int k = 0; k < E; k++) transfer(edges.get(k), dt, xl[k], pks[k], idx, theta, pass, own);
+        for (FluidNode n : free) n.update();
+        double[] r = new double[M];
+        for (int i = 0; i < N; i++) {
+            r[i] = free.get(i).P() - X[i];
+            if (lam[i] >= 0) r[lam[i]] = free.get(i).mLiquid() - snap.mLiquid[i] - X[lam[i]];
+        }
+        return r;
+    }
+
+    /** A damped Newton on residualFD, from the linear solve's X; leaves the nodes in the best end state found. */
+    private void newtonFD(double[] X0, double dt, List<FluidNode> free, java.util.Map<FluidNode, Integer> idx, int[] lam, int N, int M,
+                          Snapshot snap) {
+        double[] X = X0.clone();
+        double[] r = residualFD(X, dt, free, idx, lam, N, M, snap);
+        double norm = pnorm(r, N);
+        Stats.lastNorms.clear();
+        Stats.lastNorms.add(norm);
+        boolean done = false;
+        for (int it = 0; it < NEWTON_MAX && !(done = converged(r, X, N)); it++) {
+            Stats.newtonIters++;
+            double[][] J = new double[M][M];
+            for (int j = 0; j < M; j++) {
+                double h = j < N ? Math.max(1.0, 1e-6 * Math.abs(X[j])) : Math.max(1e-9, 1e-6 * Math.abs(X[j]));
+                double[] Xh = X.clone();
+                Xh[j] += h;
+                double[] rh = residualFD(Xh, dt, free, idx, lam, N, M, snap);
+                for (int i = 0; i < M; i++) J[i][j] = (rh[i] - r[i]) / h;
+            }
+            double[] minus = new double[M];
+            for (int i = 0; i < M; i++) minus[i] = -r[i];
+            double[] d = solve(J, minus);
+            double alpha = 1;
+            double[] best = null, bestR = null;
+            double bestN = norm;
+            for (int ls = 0; ls < 6; ls++, alpha *= 0.5) {
+                double[] Xt = X.clone();
+                for (int i = 0; i < M; i++) Xt[i] += alpha * d[i];
+                double[] rt = residualFD(Xt, dt, free, idx, lam, N, M, snap);
+                double nt = pnorm(rt, N);
+                if (nt < bestN) {
+                    best = Xt;
+                    bestR = rt;
+                    bestN = nt;
+                    if (nt < (1 - 1e-4 * alpha) * norm) break;
+                }
+            }
+            if (best == null) break;   // (no descent: stop at the best so far)
+            X = best;
+            r = bestR;
+            norm = bestN;
+            Stats.lastNorms.add(norm);
+        }
+        if (!done && !converged(r, X, N)) Stats.newtonFailed++;
+        residualFD(X, dt, free, idx, lam, N, M, snap);   // (leave the nodes in that end state)
+        Stats.steps++;
+    }
+
+    private static double pnorm(double[] r, int N) {
+        double s = 0;
+        for (int i = 0; i < N; i++) s += r[i] * r[i];
+        return Math.sqrt(s / Math.max(1, N));
+    }
+
+    private static boolean converged(double[] r, double[] X, int N) {
+        for (int i = 0; i < N; i++) if (Math.abs(r[i]) > Math.max(NEWTON_TOL_PA, NEWTON_TOL_REL * Math.abs(X[i]))) return false;
+        return true;
     }
 
     /** Port band (fraction of a node's height) over which a port goes from drawing gas to drawing liquid. */
@@ -630,7 +740,9 @@ public final class FluidNetwork {
         e.fromA = fromA;
         e.rho = pk.rho;
         e.xl = pk.xl;
-        e.head = pk.rhoHead * G * (e.zA() - e.zB()) + e.boost;
+        double rhoHead = pk.rhoHead;
+        if (MEAN_HEAD && !e.oneWay()) rhoHead = 0.5 * (packet(e, e.a).rhoHead + packet(e, e.b).rhoHead);   // (both ports: no head pump round a loop)
+        e.head = rhoHead * G * (e.zA() - e.zB()) + e.boost;
         e.g = e.area > 0 ? orificeG(e, e.a.pressureOver(e.portA, e.spanA) - pressureB(e) + e.head) : pk.rho * e.k * e.open / pk.mu;
     }
 

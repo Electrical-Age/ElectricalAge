@@ -14,6 +14,7 @@ class FluidExperimentTest {
     @Test
     void restlessKind() throws Exception {
         FluidNetwork.NEWTON = "1".equals(System.getenv("FLUID_NEWTON"));
+        FluidNetwork.NEWTON_FD = "1".equals(System.getenv("FLUID_NEWTON_FD"));
         StringBuilder out = new StringBuilder("seed | moving/total at 3000, 4500, 6000, 9000 steps | flow sign flips in the last 200 steps (edges) | nodes, edges\n");
         int shown = 0;
         for (long seed = 1001; seed < 1001 + 300 && shown < 25; seed++) {
@@ -51,6 +52,8 @@ class FluidExperimentTest {
     void traceSeed() throws Exception {
         long seed = Long.parseLong(java.util.Objects.requireNonNullElse(System.getenv("FLUID_SEED"), "1129"));
         FluidNetwork.NEWTON = "1".equals(System.getenv("FLUID_NEWTON"));
+        FluidNetwork.NEWTON_FD = "1".equals(System.getenv("FLUID_NEWTON_FD"));
+        FluidNetwork.MEAN_HEAD = "1".equals(System.getenv("FLUID_MEAN_HEAD"));
         FluidPropertyTest.Case c = FluidPropertyTest.random(seed, true);
         StringBuilder out = new StringBuilder("seed " + seed + "\n");
         var net = c.net();
@@ -69,7 +72,7 @@ class FluidExperimentTest {
             }
         }
         out.append("totals: steps " + FluidNetwork.Stats.steps + " newton iters " + FluidNetwork.Stats.newtonIters + " failed " + FluidNetwork.Stats.newtonFailed + "\n");
-        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/trace-" + seed + (FluidNetwork.NEWTON ? "-newton" : "") + ".txt"), out.toString());
+        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/trace-" + seed + (FluidNetwork.NEWTON_FD ? "-fd" : FluidNetwork.NEWTON ? "-newton" : "") + (FluidNetwork.MEAN_HEAD ? "-mean" : "") + ".txt"), out.toString());
     }
 
     @Test
@@ -78,6 +81,8 @@ class FluidExperimentTest {
         String[] configs = java.util.Objects.requireNonNullElse(System.getenv("FLUID_CONFIGS"), "base,N").split(",");
         for (String cfg : configs) {
             FluidNetwork.NEWTON = cfg.contains("N");
+            FluidNetwork.NEWTON_FD = cfg.contains("J");
+            FluidNetwork.MEAN_HEAD = cfg.contains("M");
             Flash.BRACKETED = !cfg.contains("F");   // (F: the old bisection)
             FluidNetwork.Stats.reset();
             List<Long> lax = new ArrayList<>(), strict = new ArrayList<>();
