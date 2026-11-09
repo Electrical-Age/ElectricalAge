@@ -26,19 +26,63 @@ public final class WaterAir {
     public static final double CP_L = 4186, CP_V = 1900, CV_V = CP_V - R_V, CV_A = 718;
     public static final double V0 = 1 / 958.0, K = 2e9;
     public static final double L_TB = 2.257e6;
-    /** Vapour's internal energy at T0 and entropy at (T0, P0): boiling at TB under P0 with latent heat L_TB. */
-    static final double U_V0, S_V0;
     /** Softplus width of the liquid, as a share of the water held; the air cushion (kg/m^3). */
     public static double EPS_L = 1e-2, AIR_CUSHION = 1e-6;
     public static final double T_MIN = 120, T_MAX = 4000;
 
+    // ---- the vapour, from the saturation curve (Baughn 2026-11-09: exact and consistent)
+    // Wagner and Pruss's saturation pressure (IAPWS-95's auxiliary equation) fixes the vapour's standard Gibbs energy,
+    // g_v(T) = g_l(T, P0) - R_V T ln(p_W(T) / P0), so the Gibbs equality gives back p_W exactly at P0; its entropy and
+    // enthalpy follow (s = -dg/dT, h = g + T s), so the latent heat is Clausius-Clapeyron's, h_v - h_l = R_V T^2 dln p_W/dT.
+    // Above T_JOIN (near the critical point, where the curve ends) the vapour goes on as an ideal gas with the heat
+    // capacity it has there (C1 at the join).
+    static final double TC = 647.096, PC = 22.064e6, T_JOIN = 600;
+    private static final double[] A = {-7.85951783, 1.84408259, -11.7866497, 22.6807411, -15.9618719, 1.80122502};
+    static final double H_JOIN, S_JOIN, CP_JOIN;
+
+    /** ln(p_W / PC) and its derivative in T (T below TC). */
+    static double lnPw(double T) {
+        double t = 1 - T / TC;
+        double sum = A[0] * t + A[1] * Math.pow(t, 1.5) + A[2] * t * t * t + A[3] * Math.pow(t, 3.5) + A[4] * t * t * t * t + A[5] * Math.pow(t, 7.5);
+        return TC / T * sum;
+    }
+
+    static double dLnPw(double T) {
+        double t = 1 - T / TC;
+        double sum = A[0] * t + A[1] * Math.pow(t, 1.5) + A[2] * t * t * t + A[3] * Math.pow(t, 3.5) + A[4] * t * t * t * t + A[5] * Math.pow(t, 7.5);
+        double ds = A[0] + 1.5 * A[1] * Math.sqrt(t) + 3 * A[2] * t * t + 3.5 * A[3] * Math.pow(t, 2.5) + 4 * A[4] * t * t * t + 7.5 * A[5] * Math.pow(t, 6.5);
+        return -TC * sum / (T * T) - ds / T;
+    }
+
+    /** Wagner and Pruss's saturation pressure (Pa), below TC. */
+    public static double pWagner(double T) {
+        return PC * Math.exp(lnPw(T));
+    }
+
+    // (the liquid's Gibbs energy at the saturation pressure itself, Poynting term and all, so the equality holds at p_W;
+    // taken at P0 the curve came out 0.2 % high at 150 C)
+    private static double gePw(double T) {
+        return gElastic(pWagner(T));
+    }
+
+    private static double dGePw(double T) {
+        double p = pWagner(T);
+        return vLiquid(p) * p * dLnPw(T);
+    }
+
+    private static double hVapourCurve(double T) {
+        return CP_L * (T - T0) + P0 * V0 + gePw(T) - T * dGePw(T) + R_V * T * T * dLnPw(T);
+    }
+
+    private static double sVapourCurve(double T) {
+        return CP_L * Math.log(T / T0) - dGePw(T) + R_V * (Math.log(PC / P0) + lnPw(T)) + R_V * T * dLnPw(T);
+    }
+
     static {
-        // h_v(TB) - h_l(TB, P0) = L_TB, with h_l = u_l + P0 V0 (incompressible at P0) and h_v = u_v + R_V T
-        double hl = CP_L * (TB - T0) + P0 * V0;
-        U_V0 = hl + L_TB - R_V * TB - CV_V * (TB - T0);
-        // g_v(TB, P0) = g_l(TB, P0): g = h - T s, s_l = CP_L ln(T/T0)
-        double sl = CP_L * Math.log(TB / T0);
-        S_V0 = sl + L_TB / TB - CP_V * Math.log(TB / T0);
+        H_JOIN = hVapourCurve(T_JOIN);
+        S_JOIN = sVapourCurve(T_JOIN);
+        double h = 1e-3;
+        CP_JOIN = (hVapourCurve(T_JOIN) - hVapourCurve(T_JOIN - h)) / h;
     }
 
     // ---- per-phase functions (SI; energies relative to liquid at T0 and P0)
@@ -67,16 +111,16 @@ public final class WaterAir {
         return V0 * K * (1 - Math.exp(-(p - P0) / K));
     }
 
-    public static double uVapour(double T) {
-        return U_V0 + CV_V * (T - T0);
+    public static double hVapour(double T) {
+        return T <= T_JOIN ? hVapourCurve(T) : H_JOIN + CP_JOIN * (T - T_JOIN);
     }
 
-    public static double hVapour(double T) {
-        return uVapour(T) + R_V * T;
+    public static double uVapour(double T) {
+        return hVapour(T) - R_V * T;
     }
 
     static double sVapourStd(double T) {
-        return S_V0 + CP_V * Math.log(T / T0);
+        return T <= T_JOIN ? sVapourCurve(T) : S_JOIN + CP_JOIN * Math.log(T / T_JOIN);
     }
 
     public static double uAir(double T) {
