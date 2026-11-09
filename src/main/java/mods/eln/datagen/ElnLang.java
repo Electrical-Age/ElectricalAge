@@ -55,6 +55,12 @@ public class ElnLang extends LanguageProvider {
         // JEI (compat/jei/ResinCategory)
         add("jei.eln.tree_resin_collector", "Tree Resin Collector");
         add("jei.eln.anneal", "Heat treatment");
+        add("jei.eln.oil_rubber", "Oil to rubber");
+        add("jei.eln.oil.energy", "%s kJ.");
+        add("jei.eln.oil.desulfuriser", "Any cut piped through it comes out unchanged, leaving a Sulfur Dust every 2000 mB. 230 V, 1 kW.");
+        add("jei.eln.oil.steam_cracker", "Gasoline and steam piped in at the back; butadiene and natural gas out at the front, each on its own pipe. 400 V, 4 kW.");
+        add("jei.eln.oil.polymeriser", "Butadiene piped in at the back (liquid or vapour); Soul Dust by hopper or hand. Raw Rubber into a hopper below. 230 V, 1 kW.");
+        add("jei.eln.oil.carbon_black_burner", "Fuel piped in at the back, burnt starved of air; Carbon Black into a hopper below. No power needed.");
         add("jei.eln.anneal.how", "Between %s and %s °C (%s kJ)");
         // information pages (compat.JeiPages.infos): what no recipe makes
         add("jei.eln.info.lead_ore", "Lead ore lies deep, mostly in deepslate: from y -64 to 0, most of it around -32. Mine it for raw lead.");

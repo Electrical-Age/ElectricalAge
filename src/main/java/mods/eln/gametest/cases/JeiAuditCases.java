@@ -53,6 +53,11 @@ public final class JeiAuditCases {
                 Set<Item> hidden = mods.eln.compat.JeiPages.hidden();
                 int expectHidden = 12 + (net.neoforged.fml.ModList.get().isLoaded("stasisdelvers") ? 0 : 1);   // (+ the pole anchor without Stasis)
                 ctx.check("the hidden items are all found", hidden.size() == expectHidden, hidden.size() + " items");
+                // the oil route's pages (Baughn 2026-11-09: JEI had none): four machines, making raw rubber, sulfur and carbon black
+                Set<String> made = new java.util.TreeSet<>();
+                for (var st : mods.eln.compat.JeiPages.oilSteps()) for (var o : st.out()) for (ItemStack x : o.items()) made.add(itemName(x.getItem()));
+                ctx.check("the oil route has its JEI pages", mods.eln.compat.JeiPages.oilSteps().size() == 4
+                    && made.containsAll(List.of("raw_rubber", "sulfur_dust", "carbon_black")), mods.eln.compat.JeiPages.oilSteps().size() + " steps, " + made);
                 Set<Item> have = new LinkedHashSet<>();
                 for (Item i : BuiltInRegistries.ITEM) if (!isEln(i)) have.add(i);
                 net.minecraft.world.item.CreativeModeTabs.tryRebuildTabContents(ctx.level().enabledFeatures(), true, ctx.level().registryAccess());
@@ -148,6 +153,18 @@ public final class JeiAuditCases {
             if (!d.extra().isEmpty()) slots.add(one(d.extra()));
             slots.add(drawers);
             ways.add(new Way("wire drawing", slots, one(d.out())));
+        }
+        // the oil route to rubber (Baughn 2026-11-09): its item outputs from its item inputs and machine (fluids come by pipe)
+        for (var st : mods.eln.compat.JeiPages.oilSteps()) {
+            List<Set<Item>> slots = new ArrayList<>(List.of(one(st.machine())));
+            for (var in : st.in()) if (!in.items().isEmpty()) {
+                Set<Item> alt = new LinkedHashSet<>();
+                for (ItemStack x : in.items()) alt.addAll(one(x));
+                slots.add(alt);
+            }
+            Set<Item> out = new LinkedHashSet<>();
+            for (var o : st.out()) for (ItemStack x : o.items()) out.addAll(one(x));
+            ways.add(new Way("oil route", slots, out));
         }
         for (var i : mods.eln.compat.JeiPages.infos()) {
             Set<Item> out = new LinkedHashSet<>();

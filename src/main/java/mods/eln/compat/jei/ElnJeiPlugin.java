@@ -57,6 +57,7 @@ public class ElnJeiPlugin implements IModPlugin {
         if (!JeiPages.resins().isEmpty()) registration.addRecipeCategories(new ResinCategory(gui, JeiPages.collector()));
         if (!JeiPages.anneals().isEmpty()) registration.addRecipeCategories(new AnnealCategory(gui, JeiPages.furnace()));
         if (!JeiPages.draws().isEmpty()) registration.addRecipeCategories(new WireDrawingCategory(gui, JeiPages.drawers().getLast()));
+        if (!JeiPages.oilSteps().isEmpty()) registration.addRecipeCategories(new OilRubberCategory(gui, JeiPages.oilSteps().get(0).machine()));
     }
 
     @Override
@@ -71,6 +72,7 @@ public class ElnJeiPlugin implements IModPlugin {
         registration.addRecipes(ResinCategory.TYPE, JeiPages.resins());
         registration.addRecipes(AnnealCategory.TYPE, JeiPages.anneals());
         registration.addRecipes(WireDrawingCategory.TYPE, JeiPages.draws());
+        registration.addRecipes(OilRubberCategory.TYPE, JeiPages.oilSteps());
         // what no recipe makes (ores, oil, fuel cuts, a blown fuse, a print, creative-only items): an information page
         for (JeiPages.Info i : JeiPages.infos()) registration.addItemStackInfo(i.items(), net.minecraft.network.chat.Component.translatable(i.key()));
     }
@@ -105,5 +107,6 @@ public class ElnJeiPlugin implements IModPlugin {
         if (!JeiPages.resins().isEmpty()) registration.addCraftingStation(ResinCategory.TYPE, JeiPages.collector());
         if (!JeiPages.anneals().isEmpty()) registration.addCraftingStation(AnnealCategory.TYPE, JeiPages.furnace());
         for (ItemStack m : JeiPages.drawers()) registration.addCraftingStation(WireDrawingCategory.TYPE, m);
+        for (var st : JeiPages.oilSteps()) registration.addCraftingStation(OilRubberCategory.TYPE, st.machine());
     }
 }

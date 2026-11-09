@@ -56,6 +56,68 @@ public final class JeiPages {
         }
     }
 
+    /** A fluid and an amount (mB), for the oil route's pages. */
+    public record Fl(net.minecraft.world.level.material.Fluid fluid, long mb) {
+    }
+
+    /** One slot of a step: items or fluids (alternatives: any one of them). */
+    public record Ing(List<ItemStack> items, List<Fl> fluids) {
+        static Ing of(ItemStack... s) {
+            return new Ing(List.of(s), List.of());
+        }
+
+        static Ing of(Fl... f) {
+            return new Ing(List.of(), List.of(f));
+        }
+    }
+
+    /**
+     * A step of the oil route to rubber (Baughn 2026-11-09: JEI had nothing for it): a machine, what goes in and comes
+     * out (pipes for the fluids), the energy it takes, and its note's lang key.
+     */
+    public record OilStep(ItemStack machine, List<Ing> in, List<Ing> out, double kJ, String key) {
+    }
+
+    /**
+     * The route: a Desulfuriser leaves sulfur from any cut it treats, a Steam Cracker makes gasoline and steam into
+     * butadiene (and natural gas), a Polymeriser makes butadiene and Soul Dust into Raw Rubber, and a Carbon Black Burner
+     * makes soot from heavy oil, residue or crude.
+     */
+    public static List<OilStep> oilSteps() {
+        List<OilStep> l = new ArrayList<>();
+        var cuts = mods.eln.oil.Oil.Cut.values();
+        if (cuts[0].source == null || mods.eln.oil.Butadiene.SOURCE == null) return l;
+        net.minecraft.world.level.material.Fluid gasoline = mods.eln.oil.Oil.Cut.GASOLINE.source.get(), diesel = mods.eln.oil.Oil.Cut.DIESEL.source.get(),
+            heavy = mods.eln.oil.Oil.Cut.HEAVYOIL.source.get(), residue = mods.eln.oil.Oil.Cut.RESIDUE.source.get(), crude = mods.eln.oil.Oil.CRUDE.get(),
+            steam = mods.eln.oil.Oil.STEAM.get(), butadiene = mods.eln.oil.Butadiene.SOURCE.get(), gas = mods.eln.oil.Oil.Cut.NATURALGAS.source.get();
+        ItemStack ds = eln("desulfuriser"), sc = eln("steam_cracker"), po = eln("polymeriser"), cb = eln("carbon_black_burner");
+        int s = mods.eln.transparentnode.desulfuriser.DesulfuriserDescriptor.MB_PER_SULFUR;
+        if (!ds.isEmpty()) {
+            Fl[] any = {new Fl(gasoline, s), new Fl(diesel, s), new Fl(heavy, s), new Fl(crude, s)};
+            l.add(new OilStep(ds, List.of(Ing.of(any)), List.of(Ing.of(any), Ing.of(eln("sulfur_dust"))),
+                s / mods.eln.transparentnode.desulfuriser.DesulfuriserDescriptor.TREAT_MB_PER_S, "jei.eln.oil.desulfuriser"));
+        }
+        if (!sc.isEmpty()) {
+            double k = mods.eln.transparentnode.steamcracker.SteamCrackerDescriptor.STEAM_PER_100;
+            l.add(new OilStep(sc, List.of(Ing.of(new Fl(gasoline, 100)), Ing.of(new Fl(steam, (long) k))),
+                List.of(Ing.of(new Fl(butadiene, (long) mods.eln.transparentnode.steamcracker.SteamCrackerDescriptor.BUTADIENE_PER_100)),
+                    Ing.of(new Fl(gas, (long) mods.eln.transparentnode.steamcracker.SteamCrackerDescriptor.GAS_PER_100))),
+                40, "jei.eln.oil.steam_cracker"));
+        }
+        if (!po.isEmpty()) {
+            int n = mods.eln.transparentnode.polymeriser.PolymeriserDescriptor.RUBBER_PER_SOUL_DUST;
+            l.add(new OilStep(po, List.of(Ing.of(new Fl(butadiene, (long) (n * mods.eln.transparentnode.polymeriser.PolymeriserDescriptor.MB_PER_RUBBER))),
+                Ing.of(eln("soul_dust"))), List.of(Ing.of(eln("raw_rubber").copyWithCount(n))),
+                n * mods.eln.transparentnode.polymeriser.PolymeriserDescriptor.JOULES_PER_RUBBER / 1000, "jei.eln.oil.polymeriser"));
+        }
+        if (!cb.isEmpty()) {
+            int m = mods.eln.transparentnode.carbonblack.CarbonBlackBurnerDescriptor.MB_PER_CARBON;
+            l.add(new OilStep(cb, List.of(Ing.of(new Fl(heavy, m), new Fl(residue, m), new Fl(crude, m))), List.of(Ing.of(eln("carbon_black"))),
+                0, "jei.eln.oil.carbon_black_burner"));
+        }
+        return l;
+    }
+
     /** An information page: the items it is on, and its text's lang key. */
     public record Info(List<ItemStack> items, String key) {
     }
