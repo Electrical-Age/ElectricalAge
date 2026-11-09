@@ -6,7 +6,9 @@ package mods.eln.fluidcore;
  * <ul>
  *   <li>Liquid: heat capacity CP_L, specific volume v0 exp(-(p - p0)/K) (bulk modulus K, so a full volume compresses its
  *       liquid instead of failing), with the elastic energy that goes with it.</li>
- *   <li>Vapour and air: ideal gases with constant heat capacities.</li>
+ *   <li>Air: an ideal gas with a constant heat capacity. Vapour: a gas with a second virial term, v = R T / p + B(T)
+ *       (Baughn 2026-11-09: people set thermostats by vapour curves; the ideal gas overstated the latent heat by 11 % at
+ *       200 C). The two share the gas space, each at its partial pressure.</li>
  *   <li>The vapour pressure is not a fitted curve but the equality of the liquid's and the vapour's Gibbs energy (Poynting
  *       term included), so the model has an exact entropy (the availability argument in the plan needs one). The
  *       constants put the boiling point at 100 C at 1 atm with a latent heat of 2257 kJ/kg there.</li>
@@ -70,12 +72,48 @@ public final class WaterAir {
         return vLiquid(p) * p * dLnPw(T);
     }
 
+    // The vapour's second virial coefficient: Harvey and Lemmon's fit for water, B = sum a_i (T / 100 K)^b_i in
+    // dm^3/mol, here in m^3/kg (-0.0251 at 100 C). The vapour is v = R T / p + B, so g_v(T, p) = g0(T) + R T ln(p / P0)
+    // + B p, s_v = s0 - R ln(p / P0) - B' p, h_v = h0 + (B - T B') p and u_v = h0 - R T - T B' p; g0 is fixed by the
+    // Gibbs equality at p_W (below), and h0, s0 are its enthalpy and entropy.
+    private static final double[] BA = {0.34404, -0.75826, -24.219, -3978.2}, BE = {-0.5, -0.8, -3.35, -8.3};
+    private static final double B_UNIT = 1e-3 / 0.018015268;
+
+    // (above T_JOIN, B goes on as B_J (T_JOIN / T)^n, C1 at the join, so it stays negative: the fit turns positive
+    // near 1,500 K, and a positive B bounds the vapour a volume can hold, which the smoothed split can overrun)
+    private static double bFit(double T) {
+        double t = T / 100, b = 0;
+        for (int i = 0; i < 4; i++) b += BA[i] * Math.pow(t, BE[i]);
+        return b * B_UNIT;
+    }
+
+    private static double dBFit(double T) {
+        double t = T / 100, b = 0;
+        for (int i = 0; i < 4; i++) b += BA[i] * BE[i] * Math.pow(t, BE[i] - 1);
+        return b * B_UNIT / 100;
+    }
+
+    private static final double B_J = bFit(600), N_J = -600 * dBFit(600) / bFit(600);
+
+    /** The vapour's second virial coefficient (m^3/kg). */
+    static double bVirial(double T) {
+        return T <= T_JOIN ? bFit(T) : B_J * Math.pow(T_JOIN / T, N_J);
+    }
+
+    /** dB/dT (m^3/kg/K). */
+    static double dBVirial(double T) {
+        return T <= T_JOIN ? dBFit(T) : -N_J * bVirial(T) / T;
+    }
+
+    // h0 and s0 from g0(T) = g_l(T, p_W) - R T ln(p_W / P0) - B p_W (so the vapour at p_W has the liquid's Gibbs energy)
     private static double hVapourCurve(double T) {
-        return CP_L * (T - T0) + P0 * V0 + gePw(T) - T * dGePw(T) + R_V * T * T * dLnPw(T);
+        double pw = pWagner(T), b = bVirial(T), db = dBVirial(T), dl = dLnPw(T);
+        return CP_L * (T - T0) + P0 * V0 + gePw(T) - T * dGePw(T) + R_V * T * T * dl - b * pw + T * db * pw + T * b * pw * dl;
     }
 
     private static double sVapourCurve(double T) {
-        return CP_L * Math.log(T / T0) - dGePw(T) + R_V * (Math.log(PC / P0) + lnPw(T)) + R_V * T * dLnPw(T);
+        double pw = pWagner(T), dl = dLnPw(T);
+        return CP_L * Math.log(T / T0) - dGePw(T) + R_V * (Math.log(PC / P0) + lnPw(T)) + R_V * T * dl + dBVirial(T) * pw + bVirial(T) * pw * dl;
     }
 
     static {
@@ -111,12 +149,19 @@ public final class WaterAir {
         return V0 * K * (1 - Math.exp(-(p - P0) / K));
     }
 
-    public static double hVapour(double T) {
+    /** h0: the vapour's enthalpy less its virial part. */
+    static double hVapour0(double T) {
         return T <= T_JOIN ? hVapourCurve(T) : H_JOIN + CP_JOIN * (T - T_JOIN);
     }
 
-    public static double uVapour(double T) {
-        return hVapour(T) - R_V * T;
+    /** The vapour's specific enthalpy at T and its partial pressure p. */
+    public static double hVapour(double T, double p) {
+        return hVapour0(T) + (bVirial(T) - T * dBVirial(T)) * p;
+    }
+
+    /** The vapour's specific internal energy at T and its partial pressure p. */
+    public static double uVapour(double T, double p) {
+        return hVapour0(T) - R_V * T - T * dBVirial(T) * p;
     }
 
     static double sVapourStd(double T) {
@@ -134,8 +179,23 @@ public final class WaterAir {
     /** The vapour pressure over liquid at T under pressure p: Gibbs equality, with the Poynting term. */
     public static double pSat(double T, double p) {
         double gl = uLiquidThermal(T) + P0 * V0 - T * sLiquid(T) + gElastic(p);
-        double gv0 = hVapour(T) - T * sVapourStd(T);
-        return P0 * Math.exp((gl - gv0) / (R_V * T));
+        double c = gl - (hVapour0(T) - T * sVapourStd(T)), rt = R_V * T, bp = bVirial(T) * P0;
+        // R T x + B P0 e^x = c in x = ln(ps / P0), B < 0: concave, rising to its top at e^x = R T / (-B P0), where the
+        // vapour's volume R T / p + B reaches zero. With no root there (hot: the vapour can't match the liquid's Gibbs
+        // energy at any density) every drop evaporates: the top is returned, where split() finds room for any vapour.
+        // Otherwise Newton from left of the root (where f < 0) climbs to it without overshooting.
+        double xTop = Math.log(rt / -bp);
+        if (rt * xTop - rt - c <= 0) return P0 * Math.exp(xTop);
+        double x = Math.min(c / rt, xTop - 1);
+        while (rt * x + bp * Math.exp(x) - c >= 0) x -= 1;
+        for (int i = 0; i < 60; i++) {
+            double e = Math.exp(x), f = rt * x + bp * e - c, d = rt + bp * e;
+            if (!(d > 0)) break;
+            double dx = -f / d;
+            x += dx;
+            if (Math.abs(dx) < 1e-15 * Math.max(1, Math.abs(x))) break;
+        }
+        return P0 * Math.exp(x);
     }
 
     /** softplus of z over width w (w > 0): smooth max(0, z), within w ln 2 of it. */
@@ -147,7 +207,7 @@ public final class WaterAir {
     // ---- the state at given T and gas volume (explicit: what the residuals and the outputs are made of)
 
     /** The split at T and gas volume Vg for water mw and air ma: liquid mass, vapour mass, pressure, liquid volume. */
-    public record Split(double T, double vg, double ml, double mv, double ma, double p, double v) {
+    public record Split(double T, double vg, double ml, double mv, double ma, double p, double v, double pv) {
         public double vl() {
             return ml * v;
         }
@@ -161,21 +221,24 @@ public final class WaterAir {
      */
     public static Split split(double mw, double ma, double V, double T, double vg) {
         double mac = ma + AIR_CUSHION * V;
-        double p = mac * R_A * T / vg;
+        double pa = mac * R_A * T / vg, b = bVirial(T);
+        double p = pa, pv = 0;
         double ml = 0, mv = mw;
         for (int i = 0; i < 3; i++) {
             double ps = pSat(T, p);
-            double mvs = ps * vg / (R_V * T);
+            double den = R_V * T / ps + b;
+            double mvs = den > 0 ? vg / den : Double.POSITIVE_INFINITY;
             ml = softplus(mw - mvs, EPS_L * Math.max(mw, 1e-12));
             mv = mw - ml;
-            p = (mv * R_V + mac * R_A) * T / vg;
+            pv = mv * R_V * T / (vg - mv * b);
+            p = pv + pa;
         }
-        return new Split(T, vg, ml, mv, mac, p, vLiquid(p));
+        return new Split(T, vg, ml, mv, mac, p, vLiquid(p), pv);
     }
 
     /** Internal energy of a split. */
     public static double energy(Split s) {
-        return s.ml() * (uLiquidThermal(s.T()) + eElastic(s.v())) + s.mv() * uVapour(s.T()) + s.ma() * uAir(s.T());
+        return s.ml() * (uLiquidThermal(s.T()) + eElastic(s.v())) + s.mv() * uVapour(s.T(), s.pv()) + s.ma() * uAir(s.T());
     }
 
     /** The two residuals at (T, Vg): energy against U, and volume (gas + liquid) against V. */
@@ -341,7 +404,7 @@ public final class WaterAir {
         double air = Math.max(0, s.ma() - AIR_CUSHION * V);
         double hl = uLiquidThermal(s.T()) + eElastic(s.v()) + s.p() * s.v();
         double yv = gas > 0 ? s.mv() / gas : 0, ya = gas > 0 ? air / gas : 0;
-        double hg = yv * hVapour(s.T()) + ya * hAir(s.T());
+        double hg = yv * hVapour(s.T(), s.pv()) + ya * hAir(s.T());
         return new double[]{s.p(), s.ml(), s.mv(), s.ma(), hl, hg, s.vl() / V, yv, ya};
     }
 

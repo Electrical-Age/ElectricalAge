@@ -17,12 +17,14 @@ class WaterAirTest {
         for (double[] r : table) {
             double p = WaterAir.pSat(r[0], r[1] * 1e3);
             assertTrue(Math.abs(p / (r[1] * 1e3) - 1) < 1e-3 + r[1] * 1e3 / WaterAir.K, r[0] + " K: " + p + " Pa vs " + r[1] + " kPa");
-            double latent = WaterAir.hVapour(r[0]) - (WaterAir.uLiquidThermal(r[0]) + WaterAir.P0 * WaterAir.V0);
-            // (an ideal-gas vapour: consistency then makes the latent heat Clausius-Clapeyron's with v = R T / p, which
-            // overstates it: +1.6 % at 100 C, +4.8 % at 150, +11 % at 200, +24 % at 250, where real steam is far from ideal.
-            // A virial term in the vapour would fix it; open.)
-            double bound = r[0] <= 423.15 ? 0.05 : r[0] <= 473.15 ? 0.12 : 0.6;
-            assertTrue(Math.abs(latent / (r[2] * 1e3) - 1) < bound, r[0] + " K: latent " + latent + " vs " + r[2] + " kJ/kg");
+            double latent = WaterAir.hVapour(r[0], p) - (WaterAir.uLiquidThermal(r[0]) + WaterAir.P0 * WaterAir.V0);
+            // (the ideal-gas vapour overstated it by +1.6 % at 100 C, +11 % at 200 and +24 % at 250; with the virial
+            // term: +0.07 % at 100 C, +0.4 % at 150, +1.7 % at 200, +5.3 % at 250; nearer the critical point the second
+            // virial alone falls short of real steam)
+            double err = latent / (r[2] * 1e3) - 1;
+            System.out.printf("latent %.2f K: %+.2f %%%n", r[0], 100 * err);
+            double bound = r[0] <= 423.15 ? 0.01 : r[0] <= 473.15 ? 0.025 : r[0] <= 523.15 ? 0.07 : 0.25;
+            assertTrue(Math.abs(err) < bound, r[0] + " K: latent " + latent + " vs " + r[2] + " kJ/kg");
         }
     }
 
@@ -128,7 +130,7 @@ class WaterAirTest {
         for (int k = 0; k < 500; k++) {
             double V = 1e-3, T = 300 + 200 * r.nextDouble(), mw = (0.05 + 0.8 * r.nextDouble()) * V / WaterAir.V0, ma = r.nextDouble() * 1e-3;
             var s = WaterAir.solve(mw, ma, WaterAir.energyAt(mw, ma, V, T), V, T);
-            double pv = s.mv() * WaterAir.R_V * s.T() / s.vg();
+            double pv = s.pv();
             assertEquals(WaterAir.pSat(s.T(), s.p()), pv, 1e-4 * pv, "case " + k);
         }
     }
