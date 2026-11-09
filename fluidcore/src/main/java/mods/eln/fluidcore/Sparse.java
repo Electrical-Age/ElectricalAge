@@ -102,8 +102,10 @@ public final class Sparse {
             }
             lu = new SparseLU(pattern);
             cache.put(0L, lu);
+            REBUILDS++;
         }
         double[] x = lu.solve(this, b);
+        if (x == null) FALLBACKS++;
         return x != null ? x : solve(b);
     }
 
@@ -126,6 +128,9 @@ public final class Sparse {
         }
         return true;
     }
+
+    /** Counters (benchmarks): symbolic factorisations rebuilt, numeric solves that fell back to the general solve. */
+    public static long REBUILDS, FALLBACKS;
 
     /** Below this size the dense solve is as quick and needs no ordering. */
     static int DENSE_BELOW = 24;
