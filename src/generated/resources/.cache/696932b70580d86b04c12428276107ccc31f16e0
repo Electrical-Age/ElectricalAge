@@ -1,4 +1,4 @@
-// 26.3	2026-11-08T15:59:33.92069558	eln-global/EA models
+// 26.3	2026-11-09T02:46:25.579677443	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -357,6 +357,7 @@ a2d3efff61392dc4ac49b056e2346398f882fd6e assets/eln/items/on_off_regulator_1.jso
 d25eaf195029d4df16516d52362921fa466b2aa2 assets/eln/items/orange_brush.json
 ff6e2b28162f15aa2036f97affcfd80a1465b7d9 assets/eln/items/ore_scanner.json
 0abd0880cab8c1c0d06a8467f69b8e7869493304 assets/eln/items/oscillator_chip.json
+840fff65d2be229035a0323dc778fae5c4cf478a assets/eln/items/overhead_cable.json
 04338be264fc7b5eba16459d6f6c81bf9cb3b8dd assets/eln/items/overheating_protection.json
 86ba1733a87a139e0d3cc0aa08e3246568b27871 assets/eln/items/overvoltage_protection.json
 7cfae86b3a9e4fa357ad809ae260c10b26d25135 assets/eln/items/pal_chip.json
@@ -867,6 +868,7 @@ abac5c1fa4aedfa77e71f9bc29ce77e4630d9780 assets/eln/models/item/opamp.json
 46f94ce091c873a96d6c5ae732551412ce1b42a2 assets/eln/models/item/ore_scanner.json
 f8814ca76c3ee546f3f1a6c7cd450ba56ea724cc assets/eln/models/item/oscillator_chip.json
 093ba150329fe8920bc80d923e5e66fb215c5847 assets/eln/models/item/oscillator_chip_3d.json
+9bac3e5603deed90e7380083b3f2cb51241cd88e assets/eln/models/item/overhead_cable.json
 38d29b330dc4f5ebe08958cb9de5ec48e1a730a5 assets/eln/models/item/overheating_protection.json
 360f8f7eebc88bf2e1cf58b7695fcc64adca36a4 assets/eln/models/item/overvoltage_protection.json
 7ce45e2a6432df25284680b690fcfbe49294f0ae assets/eln/models/item/pal_chip.json

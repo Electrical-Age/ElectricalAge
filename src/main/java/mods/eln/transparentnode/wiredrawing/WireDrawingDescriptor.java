@@ -108,16 +108,18 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
 
     public static double rubberPerBlock(int mode, int tier, int mm2) {
         if (mode == WireDrawingElement.POLE) return rubberPerBlock(4, mm2);   // (insulated for the line, 11 kV)
-        return mode == WireDrawingElement.BARE ? 0 : rubberPerBlock(tier, mm2);
+        // (bare wire and overhead cable: none; air insulates a line in the open, Baughn 2026-11-09)
+        return mode == WireDrawingElement.BARE || mode == WireDrawingElement.OVERHEAD ? 0 : rubberPerBlock(tier, mm2);
     }
 
     public static double energyPerBlock(int mode, int mm2) {
         return mode == WireDrawingElement.BARE ? JOULES_PER_BLOCK : energyPerBlock(mm2);
     }
 
-    /** Most of each mode: kit blocks, winding turns, Copper Cables (a stack). */
+    /** Most of each mode: kit blocks, winding turns, Copper Cables (a stack), overhead cable blocks. */
     public static int maxAmount(int mode) {
         if (mode == WireDrawingElement.POLE) return 1;
+        if (mode == WireDrawingElement.OVERHEAD) return mods.eln.gridnode.OverheadCableItem.MAX_BLOCKS;
         return mode == WireDrawingElement.WINDING ? mods.eln.node.voxel.WindingItem.MAX_TURNS : MAX_BLOCKS;
     }
 
@@ -155,7 +157,7 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
             fmt(CableSpec.MM2[maxMm2]), volts, mods.eln.misc.Utils.plotValue(nominalP)).split("\n"));
     }
 
-    static String fmt(double m) {
+    public static String fmt(double m) {
         return m == Math.floor(m) ? String.valueOf((int) m) : String.valueOf(m);
     }
 }

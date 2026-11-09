@@ -208,6 +208,22 @@ public final class WireDrawingCases {
             ctx.checkValue("pole transformers: copper, two windings' worth (12.5 blocks of 16 mm²)", mv.copperNeeded(),
                 12.5 * mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor.copperPerBlock(8));
             mv.running = false;
+            // overhead cable (Baughn 2026-11-09): either machine, a cross-section, no rubber, up to 500 blocks
+            lv.configure(WireDrawingElement.OVERHEAD, 0, 4, 0, 900);
+            ctx.check("overhead cable: the 48 V machine makes it too, up to 500 blocks", lv.mode == WireDrawingElement.OVERHEAD && lv.amount == 500,
+                lv.mode + " " + lv.amount);
+            lv.configure(WireDrawingElement.OVERHEAD, 0, 4, 0, 100);
+            ctx.checkValue("overhead cable: no rubber", lv.rubberNeeded(), 0);
+            ctx.checkValue("overhead cable: copper as a kit's of 0.5 mm²", lv.copperNeeded(),
+                100 * mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor.copperPerBlock(0));
+            ItemStack oc = lv.product();
+            ctx.check("overhead cable: it makes 100 blocks of 0.5 mm² overhead cable", mods.eln.gridnode.OverheadCableItem.blocks(oc) == 100
+                && mods.eln.gridnode.OverheadCableItem.mm2(oc) == 0, oc + " " + oc.getComponents());
+            lv.getInventory().setItem(WireDrawingElement.COPPER, new ItemStack(Items.COPPER_INGOT, 64));
+            lv.running = true;
+            lv.tick(0.05);
+            ctx.check("overhead cable: it draws with an empty rubber slot", lv.status != WireDrawingElement.NO_RUBBER, "status " + lv.status);
+            lv.running = false;
         }
     }
 }

@@ -44,38 +44,24 @@ abstract public class GridElement extends TransparentNodeElement {
     /* Connect one GridNode to another. */
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
-        // Check if user is holding an appropriate tool.
         final ItemStack stack = entityPlayer.getMainHandItem();
-        // a cable kit (Baughn 2026-11-07: kits replace the 1.12 cable items), or a 1.12 cable item still about
-        final ElectricalCableDescriptor cable = mods.eln.node.voxel.CableItems.descriptor(stack);
-        if (cable != null) {
-            return onTryGridConnect(entityPlayer, stack, cable, side);
+        // overhead cable only (Baughn 2026-11-09: air insulates a line, so spans take bare copper, no rubber)
+        if (OverheadCableItem.is(stack)) return onTryGridConnect(entityPlayer, stack, side);
+        if (mods.eln.node.voxel.CableItems.descriptor(stack) != null) {
+            Utils.sendMessage(entityPlayer, "Lines between poles take Overhead Cable, made on a wire drawing machine, not cable kits");
+            return true;
         }
         // TODO: Scissors. Break the connection without breaking the pole.
         return false;
     }
 
-    private boolean onTryGridConnect(Player entityPlayer, ItemStack stack, ElectricalCableDescriptor cable, Direction side) {
+    private boolean onTryGridConnect(Player entityPlayer, ItemStack stack, Direction side) {
         // First node, or second node?
         UUID uuid = entityPlayer.getUUID();
         Pair<Coordonate, Direction> p = pending.get(uuid);
         GridElement other = null;
         if (p != null) {
             other = GridLink.getElementFromCoordinate(p.getLeft());
-        }
-        // Check if it's the *correct* cable: the line's tier (any cross-section of a kit; its spec sets the line's Rs).
-        int kitTier = mods.eln.node.voxel.CableItems.tier(stack);
-        for (GridElement e : new GridElement[]{this, other}) {
-            if (e == null) continue;
-            int need = e.lineTierRequired();
-            if (need >= 0 && kitTier != need) {
-                Utils.sendMessage(entityPlayer, "Wrong cable: this line is " + (int) mods.eln.node.voxel.CableSpec.volts(need) + " V, it needs a kit of that tier");
-                return true;
-            }
-        }
-        if (!mods.eln.node.voxel.CableSpec.power(kitTier)) {
-            Utils.sendMessage(entityPlayer, "Lines need a power cable kit");
-            return true;
         }
         if (other == null || other == this) {
             Utils.sendMessage(entityPlayer, "Setting starting point");
@@ -84,7 +70,7 @@ abstract public class GridElement extends TransparentNodeElement {
             final double distance = other.coordonate().trueDistanceTo(this.coordonate());
             final int cableLength = (int) Math.ceil(distance);
             final int range = Math.min(connectRange, other.connectRange);
-            if (mods.eln.node.voxel.CableItems.voxels(stack) < cableLength * 16) {
+            if (OverheadCableItem.blocks(stack) < cableLength) {
                 Utils.sendMessage(entityPlayer, "You need " + cableLength + " blocks of cable");
             } else if (distance > range) {
                 Utils.sendMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks");
@@ -93,12 +79,12 @@ abstract public class GridElement extends TransparentNodeElement {
             } else if (!this.validLOS(other)) {
                 Utils.sendMessage(entityPlayer, "Cannot connect, no line of sight");
             } else {
-                ItemStack piece = mods.eln.node.voxel.CableItems.take(stack.copy(), cableLength * 16);
-                if (GridLink.addLink(this, other, side, p.getRight(), piece, cable.electricalRs * cableLength)) {
+                ItemStack piece = OverheadCableItem.make(OverheadCableItem.mm2(stack), cableLength);
+                if (GridLink.addLink(this, other, side, p.getRight(), piece, OverheadCableItem.rsPerBlock(stack) * cableLength)) {
                     Utils.sendMessage(entityPlayer, "Added connection");
                     onLinksChanged();
                     other.onLinksChanged();
-                    mods.eln.node.voxel.CableItems.take(stack, cableLength * 16);
+                    OverheadCableItem.take(stack, cableLength);
                 } else {
                     Utils.sendMessage(entityPlayer, "Already connected");
                 }
@@ -179,14 +165,6 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     abstract protected ElectricalLoad getGridElectricalLoad(Direction side);
-
-    /**
-     * The kit tier a new span to this element must be, or -1 for any power tier. Fixed devices: their descriptor's
-     * cable. Utility poles: the tier of the line they already carry (Baughn 2026-11-08), any on a bare pole.
-     */
-    protected int lineTierRequired() {
-        return mods.eln.node.voxel.CablePart.tierOf(desc.cableDescriptor.name);
-    }
 
     /** A span was added or removed. */
     protected void onLinksChanged() {

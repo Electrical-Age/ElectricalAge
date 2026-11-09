@@ -101,6 +101,11 @@ sqrt(mm²/2.5), energy 1 kJ x sqrt(mm²/2.5). Whole items go into buffers (saved
 fractions; progress is `done` (blocks). A DC-DC converter slot takes cables (one a turn) or one Winding. Every converter
 must fit its core's window (turns x mm² over both sides, a cable counting its tier's preset cross-section: 150 cheap,
 300 average, 800 optimal), or it disconnects until corrected (Baughn: old converters too). JEI: `compat/jei/WireDrawingCategory`.
+Both machines also draw Overhead Cable (`eln:overhead_cable`, `gridnode/OverheadCableItem`: blocks and mm2 in custom
+data, up to 500 blocks; Baughn 2026-11-09): bare copper at a kit's copper cost, no rubber, the only thing utility poles,
+downlinks and grid transformers are strung with (they refuse cable kits). A span's Rs is its cross-section's cable
+resistance x its length; the poles' line is 11 kV, set by their insulators. Spans strung with kits before then load and
+keep their kits' tier. Pieces of one cross-section combine by clicking one onto the other.
 
 The servo layer (`robotics`, Baughn 2026-11-02: the servo layer first, 200 V only): the Linear Servo Drive (transparent
 node `eln:transparent_node@5504`, `linear_servo_drive`), `eln:servo_rail` and `eln:station_marker` (plain blocks with

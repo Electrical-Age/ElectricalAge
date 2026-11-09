@@ -551,10 +551,11 @@ public final class LabCommands {
         inv = pe[2].getInventory();
         inv.setItem(mods.eln.gridnode.electricalpole.ElectricalPoleElement.LAMP0 + 2, new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.STREETLIGHT.get()));
         inv.setChanged();
-        var spec = new mods.eln.node.voxel.CableSpec(6, mods.eln.node.voxel.CableSpec.preset(4).colour());
+        // (overhead cable, 6 mm²: Baughn 2026-11-09, poles are strung with it)
+        var cable = mods.eln.gridnode.OverheadCableItem.make(6, 8);
         for (int k = 0; k < 2; k++)
             mods.eln.gridnode.GridLink.addLink(pe[k], pe[k + 1], mods.eln.misc.Direction.XP, mods.eln.misc.Direction.XN,
-                mods.eln.node.voxel.CableKitItem.kit(4, spec, 8 * 16), 8 * spec.descriptor(4).electricalRs);
+                cable.copy(), 8 * mods.eln.gridnode.OverheadCableItem.rsPerBlock(cable));
         src.sendSuccess(() -> Component.literal("poles: A (48 V fed, 48 V transformer) " + pos.toShortString() + ", B (230 V transformer, 4 lights, anchor) "
             + pos.offset(8, 0, 0).toShortString() + ", C (a light facing south) " + pos.offset(16, 0, 0).toShortString()), false);
         return 1;

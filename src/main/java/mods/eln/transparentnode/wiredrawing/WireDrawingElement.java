@@ -41,9 +41,10 @@ public class WireDrawingElement extends TransparentNodeElement {
     /**
      * What it makes: a cable kit, a converter winding, bare Copper Cable (Baughn 2026-11-07), or a pole transformer
      * (Baughn 2026-11-08: its two windings on a ferromagnetic core from the core slot; the 230 V machine only, for the
-     * line winding's 11 kV insulation).
+     * line winding's 11 kV insulation), or overhead cable for utility pole spans (Baughn 2026-11-09: bare copper of a
+     * cross-section, no rubber, up to 500 blocks).
      */
-    public static final int KIT = 0, WINDING = 1, BARE = 2, POLE = 3;
+    public static final int KIT = 0, WINDING = 1, BARE = 2, POLE = 3, OVERHEAD = 4;
     public static final byte SET = 1, RUN = 2;
     public static final byte STOPPED = 0, RUNNING = 1, NO_COPPER = 2, NO_RUBBER = 3, OUTPUT_FULL = 4, NO_POWER = 5, NO_CORE = 6;
 
@@ -125,6 +126,7 @@ public class WireDrawingElement extends TransparentNodeElement {
     /** What it makes now, for the given length (a kit of the blocks, a winding of the turns, Copper Cables). */
     public ItemStack product() {
         if (mode == BARE) return mods.eln.Eln.findItemStack("Copper Cable", amount);
+        if (mode == OVERHEAD) return mods.eln.gridnode.OverheadCableItem.make(mm2, amount);
         if (mode == POLE) return mods.eln.gridnode.electricalpole.PoleTransformerItem.make(tier, mm2, Math.max(0, coreQuality(inventory.getItem(CORE))));
         return mode == KIT ? CableKitItem.kit(tier, spec(), amount * 16) : WindingItem.make(tier, spec(), amount);
     }
@@ -144,7 +146,7 @@ public class WireDrawingElement extends TransparentNodeElement {
     }
 
     void apply(int mode, int mm2, int tier, int colour, int amount) {
-        mode = mode == WINDING || mode == BARE || mode == POLE && makesPoleTransformers() ? mode : KIT;
+        mode = mode == WINDING || mode == BARE || mode == OVERHEAD || mode == POLE && makesPoleTransformers() ? mode : KIT;
         mm2 = Math.max(0, Math.min(descriptor.maxMm2, mm2));
         // (a pole transformer's tier is its low side's: 48, 230 or 400 V)
         tier = Math.max(1, Math.min(mode == POLE ? 3 : descriptor.maxTier, tier));
@@ -339,6 +341,7 @@ public class WireDrawingElement extends TransparentNodeElement {
     /** "Cable kit: 16 blocks of 2.5 mm², 48 V, brown", "Winding: 120 turns of ..." or "Bare wire: 16 Copper Cable". */
     public static String jobText(int mode, int mm2, int tier, int colour, int amount) {
         if (mode == BARE) return I18N.tr("Bare wire: %1$ Copper Cable", amount);
+        if (mode == OVERHEAD) return I18N.tr("Overhead cable: %1$ blocks of %2$ mm²", amount, WireDrawingDescriptor.fmt(CableSpec.MM2[mm2]));
         if (mode == POLE) return I18N.tr("Pole transformer: line to %1$, %2$ mm²", (int) CableSpec.volts(tier) + " V", WireDrawingDescriptor.fmt(CableSpec.MM2[mm2]));
         String what = new CableSpec(mm2, colour).label(tier) + ", " + net.minecraft.world.item.DyeColor.byId(colour).getName().replace('_', ' ');
         return mode == KIT ? I18N.tr("Cable kit: %1$ blocks of %2$", amount, what) : I18N.tr("Winding: %1$ turns of %2$", amount, what);

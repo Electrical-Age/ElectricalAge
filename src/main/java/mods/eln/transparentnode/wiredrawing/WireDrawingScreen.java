@@ -35,7 +35,7 @@ public class WireDrawingScreen extends ElnScreen {
         if (render.running) return;   // (greyed; and a key into the field mustn't scrap the item either)
         WireDrawingDescriptor d = render.desc;
         boolean pole = mode == WireDrawingElement.POLE && d.maxTier >= 4;
-        mode = mode == WireDrawingElement.WINDING || mode == WireDrawingElement.BARE || pole ? mode : WireDrawingElement.KIT;
+        mode = mode == WireDrawingElement.WINDING || mode == WireDrawingElement.BARE || mode == WireDrawingElement.OVERHEAD || pole ? mode : WireDrawingElement.KIT;
         int max = WireDrawingDescriptor.maxAmount(mode);
         render.clientSet(mode, Math.max(0, Math.min(d.maxMm2, mm2)), Math.max(1, Math.min(pole ? 3 : d.maxTier, tier)), (colour + 16) % 16,
             Math.max(1, Math.min(max, amount)));
@@ -44,6 +44,11 @@ public class WireDrawingScreen extends ElnScreen {
     /** What each mode uses (Baughn 2026-11-08: rows a mode doesn't use aren't shown). */
     boolean usesWire() {
         return render.mode != WireDrawingElement.BARE;
+    }
+
+    /** Insulation: not for bare wire or overhead cable (air insulates it). */
+    boolean usesInsulation() {
+        return render.mode != WireDrawingElement.BARE && render.mode != WireDrawingElement.OVERHEAD;
     }
 
     boolean usesColour() {
@@ -79,39 +84,48 @@ public class WireDrawingScreen extends ElnScreen {
         progress("work", () -> r.progress);
         text("makel", () -> tr("Make"));
         boolean pole = r.desc.maxTier >= 4;
-        String[] modes = pole ? new String[]{tr("Cable kit"), tr("Winding"), tr("Bare wire"), tr("Pole transformer")}
-            : new String[]{tr("Cable kit"), tr("Winding"), tr("Bare wire")};
-        locked(dropdown("mode", modes, () -> r.mode, m -> set(m, r.mm2, r.tier, r.colour,
-                m == WireDrawingElement.KIT ? Math.max(r.amount, 20) : Math.min(r.amount, WireDrawingDescriptor.MAX_BLOCKS)),
-            pole ? tr("A cable kit (blocks of cable), a winding for a DC-DC converter (turns), bare Copper Cable for crafting,\nor a transformer for a utility pole (it takes a ferromagnetic core)")
-                : tr("A cable kit (blocks of cable), a winding for a DC-DC converter (turns), or bare Copper Cable for crafting")));
-        java.util.function.BooleanSupplier wire = this::usesWire, colour = this::usesColour, amount = this::usesAmount;
+        // the drop-down's entries and the mode each stands for (the pole transformer only on the 230 V machine)
+        String[] modes = pole ? new String[]{tr("Cable kit"), tr("Winding"), tr("Bare wire"), tr("Pole transformer"), tr("Overhead cable")}
+            : new String[]{tr("Cable kit"), tr("Winding"), tr("Bare wire"), tr("Overhead cable")};
+        int[] modeOf = pole ? new int[]{WireDrawingElement.KIT, WireDrawingElement.WINDING, WireDrawingElement.BARE, WireDrawingElement.POLE, WireDrawingElement.OVERHEAD}
+            : new int[]{WireDrawingElement.KIT, WireDrawingElement.WINDING, WireDrawingElement.BARE, WireDrawingElement.OVERHEAD};
+        locked(dropdown("mode", modes, () -> {
+                for (int i = 0; i < modeOf.length; i++) if (modeOf[i] == r.mode) return i;
+                return 0;
+            }, i -> {
+                int m = modeOf[Math.max(0, Math.min(modeOf.length - 1, i))];
+                set(m, r.mm2, r.tier, r.colour, m == WireDrawingElement.KIT ? Math.max(r.amount, 20)
+                    : m == WireDrawingElement.OVERHEAD ? Math.max(r.amount, 100) : Math.min(r.amount, WireDrawingDescriptor.MAX_BLOCKS));
+            },
+            pole ? tr("A cable kit (blocks of cable), a winding for a DC-DC converter (turns), bare Copper Cable for crafting,\na transformer for a utility pole (it takes a ferromagnetic core), or overhead cable for the spans between poles (no rubber)")
+                : tr("A cable kit (blocks of cable), a winding for a DC-DC converter (turns), bare Copper Cable for crafting,\nor overhead cable for the spans between utility poles (no rubber)")));
+        java.util.function.BooleanSupplier wire = this::usesWire, ins = this::usesInsulation, colour = this::usesColour, amount = this::usesAmount;
         java.util.function.BooleanSupplier poleMode = () -> r.mode == WireDrawingElement.POLE;
         text("mm2l", shown(wire, () -> poleMode.getAsBoolean() ? tr("Low-side wire") : tr("Wire")));
         when(wire, locked(button("mm2dn", () -> "<", () -> set(r.mode, r.mm2 - 1, r.tier, r.colour, r.amount))));
         text("mm2", shown(wire, () -> WireDrawingDescriptor.fmt(CableSpec.MM2[r.mm2]) + " mm², " + String.format("%.0f A", CableSpec.AMPS[r.mm2])));
         when(wire, locked(button("mm2up", () -> ">", () -> set(r.mode, r.mm2 + 1, r.tier, r.colour, r.amount),
             tr("Up to %1$ mm² on this machine", WireDrawingDescriptor.fmt(CableSpec.MM2[r.desc.maxMm2])))));
-        text("insl", shown(wire, () -> poleMode.getAsBoolean() ? tr("Low side") : tr("Insulation")));
-        when(wire, locked(button("insdn", () -> "<", () -> set(r.mode, r.mm2, r.tier - 1, r.colour, r.amount))));
-        text("ins", shown(wire, () -> volts(r.tier)));
-        when(wire, locked(button("insup", () -> ">", () -> set(r.mode, r.mm2, r.tier + 1, r.colour, r.amount),
+        text("insl", shown(ins, () -> poleMode.getAsBoolean() ? tr("Low side") : tr("Insulation")));
+        when(ins, locked(button("insdn", () -> "<", () -> set(r.mode, r.mm2, r.tier - 1, r.colour, r.amount))));
+        text("ins", shown(ins, () -> volts(r.tier)));
+        when(ins, locked(button("insup", () -> ">", () -> set(r.mode, r.mm2, r.tier + 1, r.colour, r.amount),
             tr("Up to %1$ on this machine (pole transformers: 48, 230 or 400 V on the low side)", volts(r.desc.maxTier)))));
         text("coll", shown(colour, () -> tr("Colour")));
         when(colour, locked(button("coldn", () -> "<", () -> set(r.mode, r.mm2, r.tier, r.colour - 1, r.amount))));
         text("col", shown(colour, () -> DyeColor.byId(r.colour).getName().replace('_', ' ')));
         when(colour, locked(button("colup", () -> ">", () -> set(r.mode, r.mm2, r.tier, r.colour + 1, r.amount), tr("Only the look"))));
         text("amountl", shown(amount, () -> switch (r.mode) {
-            case WireDrawingElement.KIT -> tr("Length");
+            case WireDrawingElement.KIT, WireDrawingElement.OVERHEAD -> tr("Length");
             case WireDrawingElement.WINDING -> tr("Turns");
             default -> tr("Count");
         }));
         when(amount, locked(field("amount", () -> String.valueOf(r.amount), v -> {
             float f = EaField.parse(v);
             if (!Float.isNaN(f)) set(r.mode, r.mm2, r.tier, r.colour, Math.round(f));
-        }, tr("Kits: 1 to 64 blocks. Windings: 1 to 1000 turns. Bare wire: 1 to 64 Copper Cable"))));
+        }, tr("Kits: 1 to 64 blocks. Windings: 1 to 1000 turns. Bare wire: 1 to 64 Copper Cable. Overhead cable: 1 to 500 blocks"))));
         text("amountu", shown(amount, () -> switch (r.mode) {
-            case WireDrawingElement.KIT -> tr("blocks");
+            case WireDrawingElement.KIT, WireDrawingElement.OVERHEAD -> tr("blocks");
             case WireDrawingElement.WINDING -> tr("turns");
             default -> tr("cables");
         }));

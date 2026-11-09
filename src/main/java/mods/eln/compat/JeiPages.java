@@ -121,6 +121,12 @@ public final class JeiPages {
                 new ItemStack(Eln.itemsByName.get("Rubber"), (int) Math.ceil(len * WireDrawingDescriptor.rubberPerBlock(mode, 3, m))),
                 mods.eln.gridnode.electricalpole.PoleTransformerItem.make(3, m, 0), len * WireDrawingDescriptor.energyPerBlock(mode, m) / 1000, false, core));
         }
+        // overhead cable for pole spans: 100 blocks of 0.5 mm², no rubber, either machine (Baughn 2026-11-09)
+        {
+            int m = 0, mode = mods.eln.transparentnode.wiredrawing.WireDrawingElement.OVERHEAD;
+            l.add(new Draw(new ItemStack(Items.COPPER_INGOT, (int) Math.ceil(100 * WireDrawingDescriptor.copperPerBlock(mode, m) - 1e-9)), ItemStack.EMPTY,
+                mods.eln.gridnode.OverheadCableItem.make(m, 100), 100 * WireDrawingDescriptor.energyPerBlock(mode, m) / 1000, true));
+        }
         // bare wire: 2 ingots, 3 Copper Cable (no rubber)
         l.add(new Draw(new ItemStack(Items.COPPER_INGOT, 2), ItemStack.EMPTY, Eln.findItemStack("Copper Cable", 3),
             3 * WireDrawingDescriptor.JOULES_PER_BLOCK / 1000, true));

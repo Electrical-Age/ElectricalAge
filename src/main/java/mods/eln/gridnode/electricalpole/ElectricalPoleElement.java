@@ -37,9 +37,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 /**
- * A utility pole (Baughn 2026-11-08: one modular pole). It carries a line strung pole to pole with cable kits; the
- * line's voltage is the tier of the kits it was strung with (11 kV, red kits, is what poles are for; a pole refuses a
- * kit of another tier than the line it already carries). Right-clicking it with equipment fits it:
+ * A utility pole (Baughn 2026-11-08: one modular pole). It carries a line strung pole to pole with overhead cable
+ * (Baughn 2026-11-09: bare copper, air insulates it), at 11 kV, set by its insulators; a line strung with cable kits
+ * before then keeps their tier. Right-clicking it with equipment fits it:
  * <ul>
  * <li>a pole transformer (PoleTransformerItem): the cable socket at the foot then gives the transformer's low side,
  * at the line voltage x its ratio (low side / the line's nominal voltage);</li>
@@ -239,8 +239,8 @@ public class ElectricalPoleElement extends GridElement {
     // ---- the line
 
     /**
-     * The line's tier: that of the kits its spans were strung with (the first span sets it; GridElement refuses
-     * others), 11 kV for a pole with no span yet.
+     * The line's tier: 11 kV, set by the pole's insulators for spans of overhead cable (Baughn 2026-11-09); a line
+     * strung with cable kits before then keeps their tier.
      */
     public int lineTier() {
         for (GridLink link : gridLinkList) {
@@ -266,12 +266,6 @@ public class ElectricalPoleElement extends GridElement {
     public double lineMaxVolts() {
         int t = lineTier();
         return t >= 4 ? CableSpec.volts(t) * 1.3 : Eln.HVU * 16;
-    }
-
-    @Override
-    protected int lineTierRequired() {
-        boolean any = !gridLinkList.isEmpty() || !gridLinksBooting.isEmpty();
-        return any ? lineTier() : -1;
     }
 
     @Override

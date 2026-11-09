@@ -125,6 +125,8 @@ public final class ElnRegistry {
         ITEMS.registerItem("cable_kit_bus", p -> new mods.eln.node.voxel.CableKitItem(6, p)));
     /** A transformer winding (Wires stage 4, Baughn 2026-11-06): N turns of a wire, made by a wire-drawing machine. */
     public static final DeferredItem<mods.eln.node.voxel.WindingItem> WINDING = ITEMS.registerItem("winding", mods.eln.node.voxel.WindingItem::new);
+    /** Overhead cable (Baughn 2026-11-09): bare copper for utility pole spans, no rubber, from a wire-drawing machine. */
+    public static final DeferredItem<mods.eln.gridnode.OverheadCableItem> OVERHEAD_CABLE = ITEMS.registerItem("overhead_cable", mods.eln.gridnode.OverheadCableItem::new);
     /** Utility pole equipment (Baughn 2026-11-08): a transformer from the wire machine, a streetlight, a stasis anchor. */
     public static final DeferredItem<mods.eln.gridnode.electricalpole.PoleTransformerItem> POLE_TRANSFORMER =
         ITEMS.registerItem("pole_transformer", mods.eln.gridnode.electricalpole.PoleTransformerItem::new);
@@ -368,6 +370,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(HANDBOOK);
         ALL_ITEMS.add(FIELD_BUS_CABLE);
         ALL_ITEMS.add(WINDING);
+        ALL_ITEMS.add(OVERHEAD_CABLE);
         ALL_ITEMS.add(POLE_TRANSFORMER);
         ALL_ITEMS.add(STREETLIGHT);
         ALL_ITEMS.add(POLE_ANCHOR);
