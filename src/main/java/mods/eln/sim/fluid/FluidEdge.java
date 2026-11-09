@@ -45,6 +45,8 @@ public final class FluidEdge {
     public double[] fSpecies;
     // the solve's coefficient and upstream properties (per step)
     double g, rho, head, sA, sB, xl;
+    /** How each end's port pressure answers a kg more liquid in its node (Pa/kg: the weight over the port; FluidNetwork.headResponse). */
+    double hA, hB;
     boolean fromA;
     /** The solve's per-step coefficients, for /elnlab fluidtrace. */
     public String debug() {

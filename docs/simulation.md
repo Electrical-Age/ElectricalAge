@@ -178,8 +178,11 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   species in and out; `FluidNode.energyAt(T)` is a node's whole contents' energy (heat exchange). Tanks' sight glasses
   draw each liquid layer in its species' colour.
   Per step (20 Hz): heat in; one compressibility per phase per node (the stiffer of a small and a 2% flash step); an
-  implicit pressure solve, repeated if a check valve runs backwards or a flow runs against the side its packet was
-  taken from (a check valve enters every solve open, carrying its upstream side's packet; the solve shuts the worst
+  implicit pressure solve, which also solves for the liquid each node with a port under its liquid gains, so the
+  weight of that liquid on its low ports is taken at the step's end (`FluidNetwork.headResponse`; at the step's start,
+  two tanks coupled low and high sloshed their oil through the low ports every step: Baughn 2026-11-09,
+  `MultiFluidTest.tanksCoupledLowAndHighEvenTheirLevelsWithoutSloshing`, `tank_box_settles_after_break`), repeated
+  if a check valve runs backwards or a flow runs against the side its packet was taken from (a check valve enters every solve open, carrying its upstream side's packet; the solve shuts the worst
   back-flowing one per pass and opens a shut one again if its drive turns forward, so a feed valve on the edge of
   opening neither stays shut for a whole step on its starting drive nor shuts the pump feeding the same pipe:
   `BoilerFeedTest`, Baughn 2026-11-04); limiters bound nodes by their neighbours' solved pressures and cap liquid level moves; each node gives at

@@ -110,4 +110,34 @@ public class MultiFluidTest {
         FluidNode cut = lump.splitOff(0.5, 0, 1);
         assertEquals(0.4, cut.mass(oil), 1e-12);
     }
+
+    /**
+     * Baughn 2026-11-09: a box tank split by a broken corner, its oil oscillating. Two one-block tanks coupled at their
+     * floors and their tops, one 40 % full and one 10 %: their gas is tied through the tops, so only the liquid's weight
+     * evens the levels, and the solve must count it at the step's end. Counted at its start, the oil ran back and forth
+     * through the floors every step, by the cap on a level's move. Crude and water: the levels close in without
+     * overshooting, and the floor flow never runs back.
+     */
+    @Test
+    void tanksCoupledLowAndHighEvenTheirLevelsWithoutSloshing() {
+        int crude = TestSpecies.id("crude_oil");
+        double V = mods.eln.oil.TankDescriptor.bucketsVolume(12), k = mods.eln.node.voxel.PipePart.LARGE_END_K / 2, T = 293.15;
+        for (int id : new int[]{crude, W}) {
+            double rho = SpeciesRegistry.get().byId(id).rhoL;
+            FluidNetwork net = new FluidNetwork();
+            FluidNode a = net.add(TestSpecies.node(V, 0, 1, T, Water.P_ATM, id, 0.4 * V * rho));
+            FluidNode b = net.add(TestSpecies.node(V, 0, 1, T, Water.P_ATM, id, 0.1 * V * rho));
+            FluidEdge low = net.connect(a, 0, b, 0, k);
+            net.connect(a, 1, b, 1, k);
+            double gap = a.level() - b.level();
+            for (int s = 0; s < 200; s++) {
+                net.step(0.05);
+                double now = a.level() - b.level();
+                assertTrue(low.flow >= 0, "species " + id + " step " + s + ": the floor flow ran back, " + low.flow + " kg/s");
+                assertTrue(now > -1e-4 && now <= gap + 1e-9, "species " + id + " step " + s + ": level gap " + gap + " -> " + now);
+                gap = now;
+            }
+            assertTrue(Math.abs(gap) < 1e-3, "species " + id + ": levels still " + gap + " apart");
+        }
+    }
 }

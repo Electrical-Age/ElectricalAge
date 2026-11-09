@@ -34,6 +34,7 @@ public final class PlumbingCases {
         cases.add(new QualitySensor());
         cases.add(new TankBox());
         cases.add(new TankBoxSplits());
+        cases.add(new TankBoxSettlesAfterBreak());
         cases.add(new TankFlanges());
         cases.add(new TankSightGlass());
         cases.add(new HotWaterIntoShortPipe());
@@ -540,6 +541,63 @@ public final class PlumbingCases {
             ctx.check("tank box split: 11 one-block tanks (not a box)", alone && ts.size() == 11, "");
             ctx.check("tank box split: they keep 11/12 of the water (by volume)", Math.abs(after - before * 11 / 12) < 0.02 * before,
                 String.format("%.3f of %.3f kg", after, before));
+        }
+    }
+
+    /**
+     * Baughn 2026-11-09: breaking a corner of a box tank set the oil in the rest oscillating. A 3 x 2 x 3 box 15 % full of
+     * crude loses a bottom corner; after it has had 5 s to settle, a bottom tank's water stays put (within 1 % over the
+     * last 5 s).
+     */
+    static final class TankBoxSettlesAfterBreak extends Big {
+        java.util.List<TankElement> ts;
+        IProcess watch;
+        int tick;
+        double lo = Double.MAX_VALUE, hi = -Double.MAX_VALUE;
+        final java.util.List<Double> samples = new java.util.ArrayList<>();
+        String trace = "";
+
+        public String id() {
+            return "tank_box_settles_after_break";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            // (Baughn's: 3 x 2 x 3 iron tanks, x 2..4, y 1..2, z 2..4)
+            ts = new java.util.ArrayList<>();
+            for (int y = 1; y <= 2; y++)
+                for (int x = 2; x <= 4; x++)
+                    for (int z = 2; z <= 4; z++) ts.add((TankElement) ctx.placeTransparent(IRON_TANK, ctx.at(x, y, z)));
+            var g = ts.get(0).group;
+            // (crude, as Baughn's: 15 % of the box)
+            int crude = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
+            if (g != null) {
+                fill(g.node, 0, Water.P_ATM, 293.15);
+                mods.eln.sim.fluid.EaUnits.add(g.node, crude, 0.15 * g.node.volume * 850, 293.15, false);
+            }
+            TankElement gone = ts.remove(0);   // (a bottom corner)
+            ctx.level().removeBlock(gone.node.coordonate.pos(), false);
+            TankElement watched = ts.get(1);
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                tick++;
+                double m = watched.vessel.liquidVolume();
+                if (tick % 40 == 0) trace += String.format(" %.7f", m);
+                samples.add(m);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            for (int i = samples.size() / 2; i < samples.size(); i++) {   // (the last half: 5 s)
+                lo = Math.min(lo, samples.get(i));
+                hi = Math.max(hi, samples.get(i));
+            }
+            ctx.line("tank box after a break: a bottom tank's crude (m3), 10 samples:" + trace);
+            ctx.check("tank box after a break: the crude settles (within 1 % over the last 5 s)", hi - lo <= 0.01 * Math.max(hi, 1e-9),
+                String.format("%.7f .. %.7f m3", lo, hi));
         }
     }
 
