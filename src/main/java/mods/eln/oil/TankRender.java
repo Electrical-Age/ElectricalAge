@@ -45,9 +45,11 @@ public class TankRender extends TransparentNodeElementRender {
                     desc.drawPart(hi == 0 ? "disc_low" : "disc_high");
                     // a nozzle from behind the flange in past the shell, which a box scales away from its faces
                     // (AdventurAgent 2026-10-29: on a 2 x 2 x 2 iron tank a pipe ended a third of a block short of it)
-                    float len = nozzle(face) - DISC;
+                    float[] nz = sideNozzle(face);
+                    float len = nz[0] - DISC;
                     if (len > 0.05f) {
                         mods.eln.gl.GL11.glTranslatef(-0.5f + DISC / 16f, 0, 0);
+                        if (nz[1] != 0) mods.eln.gl.GL11.glRotatef(nz[1], 0, 1, 0);
                         mods.eln.gl.GL11.glScalef(len, 1, 1);
                         mods.eln.gl.GL11.glTranslatef(0.5f, 0, 0);
                         desc.drawPart(hi == 0 ? "nozzle_low" : "nozzle_high");
@@ -105,6 +107,42 @@ public class TankRender extends TransparentNodeElementRender {
         boolean high = face == 3 || face == 5;   // (south/east: the face at the block's far side)
         double faceAt = high ? (o + 1) * 16 : o * 16, shellAt = high ? n * 8.0 + reach : n * 8.0 - reach;
         return (float) (Math.max(0, Math.abs(shellAt - faceAt)) + SINK);
+    }
+
+    /**
+     * A side nozzle: {its length from this block's FACE (px), its turn about y (degrees, the model's frame turned to the
+     * face; positive turns its +x toward -z)}. Straight in (nozzle) where its bore meets the shell; a port beside the
+     * shell (near a box's corner, where the round shell leaves the block mostly empty) aims at the nearest point of the
+     * shell instead (Baughn 2026-11-09: a pipe on a corner flange didn't meet the tank), long enough that its bore's
+     * edge reaches in past the shell's curve.
+     */
+    public float[] sideNozzle(int face) {
+        boolean alongX = face == 4 || face == 5;
+        int o = alongX ? ox : oz, n = alongX ? sx : sz, oAcross = alongX ? oz : ox, nAcross = alongX ? sz : sx;
+        double au = SHELL_R * FLATS * n, av = SHELL_R * FLATS * nAcross;
+        double v = oAcross * 16 + 8;
+        if (Math.abs(v - nAcross * 8.0) + NOZZLE_R <= 0.95 * av) return new float[]{nozzle(face), 0};
+        boolean high = face == 3 || face == 5;
+        double faceAt = high ? (o + 1) * 16 : o * 16, u = high ? faceAt - DISC : faceAt + DISC;
+        // (the nearest point of the shell's flats' ellipse to the flange's centre)
+        double best = Double.MAX_VALUE, bu = 0, bv = 0;
+        for (int k = 0; k < 1440; k++) {
+            double t = 2 * Math.PI * k / 1440, pu = n * 8.0 + au * Math.cos(t), pv = nAcross * 8.0 + av * Math.sin(t);
+            double d = Math.hypot(pu - u, pv - v);
+            if (d < best) {
+                best = d;
+                bu = pu;
+                bv = pv;
+            }
+        }
+        double in = Math.abs(bu - u), side = bv - v;
+        double r = Math.min(au, av), sag = r > NOZZLE_R ? r - Math.sqrt(r * r - NOZZLE_R * NOZZLE_R) : NOZZLE_R;
+        // (the across axis in the face's model frame: model z is world x on the south face, -x north, z west, -z east)
+        double sideModel = switch (face) {
+            case 2, 5 -> -side;
+            default -> side;
+        };
+        return new float[]{(float) (DISC + best + sag + SINK), (float) Math.toDegrees(Math.atan2(-sideModel, in))};
     }
 
     /**

@@ -441,7 +441,7 @@ public final class PlumbingCases {
             // every side nozzle of a box up to 3 x 3 x 3, on every outer face of its blocks: its bore's end inside the shell
             var r = rb;
             String bad = "";
-            int checked = 0;
+            int checked = 0, turned = 0;
             for (int sx = 1; sx <= 3; sx++)
                 for (int sz = 1; sz <= 3; sz++)
                     for (int ox = 0; ox < sx; ox++)
@@ -456,7 +456,22 @@ public final class PlumbingCases {
                                 r.oz = oz;
                                 int nAcross = alongX ? sz : sx, oAcross = alongX ? oz : ox;
                                 double across = oAcross * 16 + 8, half = mods.eln.oil.TankRender.SHELL_R * Math.cos(Math.PI / 14) * nAcross;
-                                if (Math.abs(across - nAcross * 8.0) + mods.eln.oil.TankRender.NOZZLE_R > 0.95 * half) continue;   // (beside the shell)
+                                if (Math.abs(across - nAcross * 8.0) + mods.eln.oil.TankRender.NOZZLE_R > 0.95 * half) {
+                                    // beside the shell (Baughn 2026-11-09, a corner flange): it turns toward the shell, and its bore's end is in it
+                                    float[] nz = r.sideNozzle(face);
+                                    double th = Math.toRadians(nz[1]), sign = face == 2 || face == 5 ? -1 : 1;
+                                    double du = high ? -Math.cos(th) : Math.cos(th), dv = sign * -Math.sin(th);
+                                    double l = nz[0] - mods.eln.oil.TankRender.DISC, pu = (high ? (o + 1) * 16 - mods.eln.oil.TankRender.DISC : o * 16 + mods.eln.oil.TankRender.DISC);
+                                    double eu = pu + du * l, ev = across + dv * l;
+                                    boolean ok = nz[1] != 0 && l < 24;
+                                    for (int k = -1; k <= 1; k += 2) {
+                                        double wu = eu - k * dv * mods.eln.oil.TankRender.NOZZLE_R, wv = ev + k * du * mods.eln.oil.TankRender.NOZZLE_R;
+                                        ok &= alongX ? inShell(wu, wv, sx, sz) : inShell(wv, wu, sx, sz);
+                                    }
+                                    if (!ok) bad += String.format(" %dx%d (%d,%d) face %d turned %.0f len %.1f;", sx, sz, ox, oz, face, nz[1], nz[0]);
+                                    turned++;
+                                    continue;
+                                }
                                 double faceAt = high ? (o + 1) * 16 : o * 16, end = high ? faceAt - r.nozzle(face) : faceAt + r.nozzle(face);
                                 for (int k = 0; k < 24; k++) {
                                     double w = across + mods.eln.oil.TankRender.NOZZLE_R * Math.cos(2 * Math.PI * k / 24);
@@ -468,7 +483,7 @@ public final class PlumbingCases {
                                 }
                                 checked++;
                             }
-            ctx.check("tank flanges: every side nozzle reaches inside the shell all round its bore", bad.isEmpty() && checked > 20, checked + " nozzles;" + bad);
+            ctx.check("tank flanges: every side nozzle reaches inside the shell all round its bore", bad.isEmpty() && checked > 20 && turned > 10, checked + " straight, " + turned + " turned;" + bad);
             r.sx = r.sz = 1;
             r.ox = r.oz = 0;
             ctx.check("tank flanges: a lone tank's top nozzle reaches below its flat top (15 px)", 16 - r.topNozzle() < 15, String.format("%.2f px", 16 - r.topNozzle()));
