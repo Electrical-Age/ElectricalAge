@@ -127,6 +127,9 @@ public final class LabCommands {
                     return n;
                 })))
                 .then(Commands.literal("protection").executes(c -> demo(c.getSource(), () -> protection(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("switches").executes(c -> demo(c.getSource(), () -> furnaceRigs(c.getSource(), BlockPos.containing(c.getSource().getPosition()),
+                    "switches", new String[]{"230V Macerator", "230V Compressor", "230V Magnetizer", "230V Plate Machine", "Desulfuriser", "Polymeriser",
+                        "Industrial Resin Collector", "Steam Cracker"}, new float[8]))))
                 .then(Commands.literal("poles").executes(c -> demo(c.getSource(), () -> poles(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("wiredrawing").executes(c -> demo(c.getSource(), () -> wiredrawing(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cores").executes(c -> demo(c.getSource(), () -> cores(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
