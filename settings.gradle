@@ -10,3 +10,5 @@ plugins {
 rootProject.name = 'eln'
 // the checked model library (cad/, pure Java; its sources are compiled into the mod)
 include 'cad'
+// the fluid core (fluidcore/, pure Java; the standalone solver of board #61, not yet in the mod)
+include 'fluidcore'
