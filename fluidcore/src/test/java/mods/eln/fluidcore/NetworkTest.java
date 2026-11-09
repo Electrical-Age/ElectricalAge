@@ -155,6 +155,32 @@ class NetworkTest {
         java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-trace.txt"), out.toString());
     }
 
+    /** Every node's state for the first FLUIDCORE_STEPS steps of seed FLUIDCORE_SEED (where a negative appears). */
+    @Test
+    void traceStates() throws Exception {
+        String seedS = System.getenv("FLUIDCORE_TRACE");
+        if (seedS == null) return;
+        long seed = Long.parseLong(seedS);
+        int until = Integer.parseInt(java.util.Objects.requireNonNullElse(System.getenv("FLUIDCORE_STEPS"), "10"));
+        StringBuilder out = new StringBuilder();
+        Network net = level(seed);
+        for (var n : net.nodes) out.append(String.format("node V %.4g z %.3f H %.3f%n", n.V, n.z, n.H));
+        for (var e : net.edges) out.append(String.format("edge %d(%.2f) -> %d(%.2f) g %.3g %s%n", net.nodes.indexOf(e.a), e.fa, net.nodes.indexOf(e.b), e.fb, e.g, e.kind));
+        for (int st = -1; st < until; st++) {
+            long sub0 = net.stats.substeps, it0 = net.stats.iterations, f0 = net.stats.failures;
+            if (st == 1) Network.DEBUG = new StringBuilder();
+            if (st >= 0) net.step(DT);
+            if (Network.DEBUG != null) {
+                out.append(Network.DEBUG);
+                Network.DEBUG = null;
+            }
+            out.append(String.format("step %d substeps %d iters %d fail %d%n", st, net.stats.substeps - sub0, net.stats.iterations - it0, net.stats.failures - f0));
+            for (var n : net.nodes) out.append(String.format("  mw %.9g ma %.9g T %.3f P %.1f level %.5g yv %.4g ml %.4g mv %.4g%n", n.mw, n.ma, n.T(), n.P(), n.level(), n.out[WaterAir.YV], n.out[WaterAir.ML], n.out[WaterAir.MV]));
+            if (st >= 0) for (var e : net.edges) out.append(String.format("  flow %.4g%n", e.flow));
+        }
+        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-states.txt"), out.toString());
+    }
+
     /** For the given seeds (FLUIDCORE_SEEDS): slow settling, chatter or circulation? */
     @Test
     void restlessKind() throws Exception {
