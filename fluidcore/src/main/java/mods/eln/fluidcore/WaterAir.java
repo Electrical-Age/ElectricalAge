@@ -278,15 +278,22 @@ public final class WaterAir {
 
     // ---- what a flux needs, and its slopes
 
-    /** Indices into outputs(): pressure, liquid mass, vapour mass, air (with the cushion), the liquid's and the gas's specific enthalpy, liquid level (share of the volume), the vapour's share of the gas. */
-    public static final int P = 0, ML = 1, MV = 2, MA = 3, HL = 4, HG = 5, LEVEL = 6, YV = 7, OUTPUTS = 8;
+    /**
+     * Indices into outputs(): pressure, liquid mass, vapour mass, air (with the cushion), the liquid's specific enthalpy,
+     * the energy a kg drawn from the gas carries, liquid level (share of the volume), the vapour's and the real air's
+     * shares of a kg drawn from the gas. The cushion's share of the gas is drawn as nothing: it is not part of the
+     * contents (a full node's top port drained "cushion air" it hadn't got and drove its air negative).
+     */
+    public static final int P = 0, ML = 1, MV = 2, MA = 3, HL = 4, HG = 5, LEVEL = 6, YV = 7, YA = 8, OUTPUTS = 9;
 
     /** The outputs of a split (explicit in T, Vg and the contents). */
     public static double[] outputs(Split s, double V) {
         double gas = s.mv() + s.ma();
+        double air = Math.max(0, s.ma() - AIR_CUSHION * V);
         double hl = uLiquidThermal(s.T()) + eElastic(s.v()) + s.p() * s.v();
-        double hg = gas > 0 ? (s.mv() * hVapour(s.T()) + s.ma() * hAir(s.T())) / gas : hAir(s.T());
-        return new double[]{s.p(), s.ml(), s.mv(), s.ma(), hl, hg, s.vl() / V, gas > 0 ? s.mv() / gas : 0};
+        double yv = gas > 0 ? s.mv() / gas : 0, ya = gas > 0 ? air / gas : 0;
+        double hg = yv * hVapour(s.T()) + ya * hAir(s.T());
+        return new double[]{s.p(), s.ml(), s.mv(), s.ma(), hl, hg, s.vl() / V, yv, ya};
     }
 
     /**

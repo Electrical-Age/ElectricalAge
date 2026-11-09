@@ -130,7 +130,7 @@ class WaterAirTest {
     @Test
     void outputSlopesMatchFiniteDifferences() {
         Random r = new Random(4);
-        String[] names = {"P", "ml", "mv", "ma", "hL", "hG", "level", "yv"};
+        String[] names = {"P", "ml", "mv", "ma", "hL", "hG", "level", "yv", "ya"};
         int checked = 0;
         for (int k = 0; k < 300; k++) {
             double[] s = state(r);
