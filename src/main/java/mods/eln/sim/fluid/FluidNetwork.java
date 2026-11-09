@@ -35,11 +35,18 @@ public final class FluidNetwork {
     public static boolean NEWTON_FD = false;
     /** The head across a two-way edge weighs the mean of both ports' densities, not the upstream one's (plan 05). */
     public static boolean MEAN_HEAD = false;
+    /**
+     * The Newton step (plan 05, review #61): unknowns (P', Λ); the residual is the real transport and flash of the end
+     * state; check valves are max(0, g x drive); the Jacobian is the step's matrix with each node's responses taken
+     * again at the iterate (one probe a phase); a backtracking line search on the row-scaled residual.
+     */
+    public static boolean NEWTON2 = false, NEWTON_DEBUG = false;
     public static double NEWTON_TOL_PA = 50, NEWTON_TOL_REL = 1e-4;
 
     /** Counters for measurements (tests, /elnlab). */
     public static final class Stats {
         public static long steps, newtonIters, newtonFailed, solves;
+        public static String debug = "";
         /** Time per phase (ns): 0 responses, 1 solve passes, 2 limiters, 3 phase caps, 4 passThrough, 5 transfer, 6 update. */
         public static final long[] phaseNanos = new long[7];
         /** The last step's residual norms (Pa, rms over nodes), one per iteration. */
@@ -205,7 +212,7 @@ public final class FluidNetwork {
         // result. Without it the step is one linear guess, cut back by the limiters (the old way).
         double[] corr = new double[M];
         Stats.lastNorms.clear();
-        Snapshot snap = NEWTON || NEWTON_FD ? new Snapshot(free) : null;
+        Snapshot snap = NEWTON || NEWTON_FD || NEWTON2 ? new Snapshot(free) : null;
         double lastNorm = Double.MAX_VALUE;
         double[] lastR = null;
         double[][] edge0 = NEWTON ? new double[edges.size()][] : null;
@@ -231,7 +238,7 @@ public final class FluidNetwork {
             // the pump pushing into the same pipe, and the pipe sat under the pump's shut-off with nothing flowing)
             long tSolve = System.nanoTime();
             java.util.Set<FluidEdge> shut = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
-            for (int pass = 0; pass < (it > 0 && NEWTON_KEEP_EDGES ? 1 : MAX_PASSES); pass++) {
+            for (int pass = 0; pass < (NEWTON2 || it > 0 && NEWTON_KEEP_EDGES ? 1 : MAX_PASSES); pass++) {
                 Sparse A = new Sparse(M);
                 double[] rhs = new double[M];
                 for (int i = 0; i < M; i++) A.add(i, i, 1);
@@ -311,6 +318,10 @@ public final class FluidNetwork {
             Stats.phaseNanos[1] += System.nanoTime() - tSolve;
             if (NEWTON_FD) {
                 newtonFD(X, dt, free, idx, lam, N, M, snap == null ? new Snapshot(free) : snap);
+                break;
+            }
+            if (NEWTON2) {
+                newton2(X, dt, free, idx, lam, N, M, snap == null ? new Snapshot(free) : snap);
                 break;
             }
             // 6. no node's pressure may be driven past the pressures its neighbours push it towards (the linearized solve
@@ -416,7 +427,12 @@ public final class FluidNetwork {
         }
         Own[] own = new Own[N];
         for (int i = 0; i < N; i++) own[i] = new Own(free.get(i));
+        double[] before = new double[E];
+        for (int k = 0; k < E; k++) before[k] = edges.get(k).flow;
         double[][] theta = capPhases(dt, free, idx, xl, pks);
+        // (which flows the donor caps cut: their slope is ~0, the Jacobian drops them as it does shut valves)
+        if (lastCapped == null || lastCapped.length != E) lastCapped = new boolean[E];
+        for (int k = 0; k < E; k++) lastCapped[k] = Math.abs(edges.get(k).flow) < Math.abs(before[k]) * (1 - 1e-9);
         Pass[] pass = passThrough(free, idx, xl, pks, theta, own);
         for (int k = 0; k < E; k++) transfer(edges.get(k), dt, xl[k], pks[k], idx, theta, pass, own);
         for (FluidNode n : free) n.update();
@@ -474,6 +490,133 @@ public final class FluidNetwork {
         if (!done && !converged(r, X, N)) Stats.newtonFailed++;
         residualFD(X, dt, free, idx, lam, N, M, snap);   // (leave the nodes in that end state)
         Stats.steps++;
+    }
+
+
+    /** A node's pressure response per kg of a mix arriving (one forward probe; the iterate's slope, for the Jacobian). */
+    static double dPdm1(FluidNode n, double[] liq, double[] gas, double h, Flash probe) {
+        int nb = Math.max(n.speciesBound(), Math.max(liq == null ? 0 : liq.length, gas == null ? 0 : gas.length));
+        double[] per = new double[nb];
+        for (int i = 0; i < nb; i++) per[i] = (liq != null && i < liq.length ? liq[i] : 0) + (gas != null && i < gas.length ? gas[i] : 0);
+        double d = Math.max(1e-7, 1e-4 * n.mass());
+        double[] extra = nb > 2 ? new double[nb - 2] : null;
+        if (extra != null) for (int i = 2; i < nb; i++) extra[i - 2] = n.mass(i) + per[i] * d;
+        probe.solve(n.mWater + per[0] * d, n.mAir + per[1] * d, extra, n.energy + h * d, n.volume, n.T());
+        // (a saturated two-phase node answers a kg at its own enthalpy with almost no change: its slope is about 0, and
+        // that is the Jacobian's truth; only an empty node takes air's)
+        if (n.mass() <= 1e-12) return Water.R_AIR * Math.max(n.T(), Flash.T_MIN) / n.volume;
+        return Math.max(0, (probe.P - n.P()) / d);
+    }
+
+    /** The step's matrix A (as in the linear solve) with the responses sA/sB given per edge, valves held shut dropped. */
+    private Sparse jacobian(double dt, java.util.Map<FluidNode, Integer> idx, int[] lam, int M, double[] sA, double[] sB, boolean[] off) {
+        Sparse A = new Sparse(M);
+        for (int i = 0; i < M; i++) A.add(i, i, 1);
+        for (int k = 0; k < edges.size(); k++) {
+            FluidEdge e = edges.get(k);
+            if (e.g == 0 || off[k]) continue;
+            Integer ia = idx.get(e.a), ib = idx.get(e.b);
+            int la = ia == null || e.hA == 0 ? -1 : lam[ia], lb = ib == null || e.hB == 0 ? -1 : lam[ib];
+            for (int row = 0; row < 4; row++) {
+                Integer n = row % 2 == 0 ? ia : ib;
+                if (n == null) continue;
+                int i = row < 2 ? n : lam[n];
+                if (i < 0) continue;
+                double per = row == 0 ? -sA[k] : row == 1 ? sB[k] : row == 2 ? -e.xl : e.xl;
+                double kk = dt * per * e.g;
+                if (ia != null) A.add(i, ia, -kk);
+                if (ib != null) A.add(i, ib, kk);
+                if (la >= 0) A.add(i, la, -kk * e.hA);
+                if (lb >= 0) A.add(i, lb, kk * e.hB);
+            }
+        }
+        return A;
+    }
+
+    /** The Newton step proper (NEWTON2); leaves the nodes in the best end state found. */
+    private void newton2(double[] X0, double dt, List<FluidNode> free, java.util.Map<FluidNode, Integer> idx, int[] lam, int N, int M, Snapshot snap) {
+        double[] X = X0.clone();
+        double[] r = residualFD(X, dt, free, idx, lam, N, M, snap);
+        int E = edges.size();
+        double[] sA = new double[E], sB = new double[E];
+        boolean[] off = new boolean[E];
+        Flash probe = new Flash();
+        double[] scale = new double[M];
+        Stats.lastNorms.clear();
+        double norm = Double.NaN;
+        boolean done = converged(r, X, N);
+        for (int it = 0; it < NEWTON_MAX && !done; it++) {
+            Stats.newtonIters++;
+            // responses at the iterate (the nodes hold its end state now), per edge as the step's: the arriving packet
+            double[] sL = new double[N], sG = new double[N], rhoL = new double[N];
+            for (int i = 0; i < N; i++) {
+                FluidNode n = free.get(i);
+                Mix lm = liquidMix(n), gm = gasMix(n);
+                sL[i] = dPdm1(n, lm.share, null, lm.h, probe);
+                rhoL[i] = lm.rho;
+                sG[i] = dPdm1(n, null, gm.share, gm.h, probe);
+            }
+            for (int k = 0; k < E; k++) {
+                FluidEdge e = edges.get(k);
+                Integer ia = idx.get(e.a), ib = idx.get(e.b);
+                sA[k] = ia == null ? 0 : response(e, sL[ia], rhoL[ia], sG[ia]);
+                sB[k] = ib == null ? 0 : response(e, sL[ib], rhoL[ib], sG[ib]);
+                off[k] = e.oneWay() && e.flow <= 0 || lastCapped != null && lastCapped[k];   // (a valve held shut, a capped flow: no slope)
+            }
+            Sparse A = jacobian(dt, idx, lam, M, sA, sB, off);
+            if (NEWTON_DEBUG && it == 0) {
+                // (debug: the finite-difference Jacobian of the residual against -A)
+                StringBuilder db = new StringBuilder("M=" + M + " A:" + java.util.Arrays.deepToString(A.dense()) + " FD(-dR/dX):");
+                double[][] J = new double[M][M];
+                for (int j = 0; j < M; j++) {
+                    double h = j < N ? Math.max(1.0, 1e-6 * Math.abs(X[j])) : Math.max(1e-9, 1e-6 * Math.abs(X[j]));
+                    double[] Xh = X.clone();
+                    Xh[j] += h;
+                    double[] rh = residualFD(Xh, dt, free, idx, lam, N, M, snap);
+                    for (int i = 0; i < M; i++) J[i][j] = -(rh[i] - r[i]) / h;
+                }
+                residualFD(X, dt, free, idx, lam, N, M, snap);
+                db.append(java.util.Arrays.deepToString(J));
+                Stats.debug = db.toString();
+            }
+            for (int i = 0; i < M; i++) scale[i] = 1 / Math.max(1, Math.abs(A.get(i, i)));
+            if (Double.isNaN(norm)) norm = snorm(r, scale);
+            Stats.lastNorms.add(norm);
+            // A d = r: the model X = P + dt S q(X) gives R = -A dX to first order
+            double[] d = A.solve(r, newtonCache);
+            double alpha = 1, bestN = norm;
+            double[] best = null, bestR = null;
+            for (int ls = 0; ls < 6; ls++, alpha *= 0.5) {
+                double[] Xt = X.clone();
+                for (int i = 0; i < M; i++) Xt[i] += alpha * d[i];
+                double[] rt = residualFD(Xt, dt, free, idx, lam, N, M, snap);
+                double nt = snorm(rt, scale);
+                if (nt < bestN) {
+                    best = Xt;
+                    bestR = rt;
+                    bestN = nt;
+                    if (nt < (1 - 1e-4 * alpha) * norm) break;
+                }
+            }
+            if (best == null) break;
+            X = best;
+            r = bestR;
+            norm = bestN;
+            done = converged(r, X, N);
+        }
+        Stats.lastNorms.add(norm);
+        if (!done) Stats.newtonFailed++;
+        residualFD(X, dt, free, idx, lam, N, M, snap);   // (leave the nodes in that end state)
+    }
+
+    private final java.util.Map<Long, SparseLU> newtonCache = new java.util.HashMap<>();
+    /** The edges the last residual's donor caps cut. */
+    private boolean[] lastCapped;
+
+    private static double snorm(double[] r, double[] scale) {
+        double s = 0;
+        for (int i = 0; i < r.length; i++) s += r[i] * scale[i] * r[i] * scale[i];
+        return Math.sqrt(s / Math.max(1, r.length));
     }
 
     private static double pnorm(double[] r, int N) {

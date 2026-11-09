@@ -18,6 +18,7 @@ class FluidExperimentTest {
         FluidNetwork.NEWTON = "1".equals(System.getenv("FLUID_NEWTON"));
         FluidNetwork.NEWTON_FD = "1".equals(System.getenv("FLUID_NEWTON_FD"));
         FluidNetwork.MEAN_HEAD = "1".equals(System.getenv("FLUID_MEAN_HEAD"));
+        FluidNetwork.NEWTON2 = "1".equals(System.getenv("FLUID_NEWTON2"));
         StringBuilder out = new StringBuilder("seed | moving/total at 3000, 4500, 6000, 9000 steps | flow sign flips in the last 200 steps (edges) | nodes, edges\n");
         int shown = 0;
         for (long seed = 1001; seed < 1001 + Integer.parseInt(java.util.Objects.requireNonNullElse(System.getenv("FLUID_CASES"), "300")) && shown < 25; seed++) {
@@ -63,6 +64,8 @@ class FluidExperimentTest {
         FluidNetwork.NEWTON = "1".equals(System.getenv("FLUID_NEWTON"));
         FluidNetwork.NEWTON_FD = "1".equals(System.getenv("FLUID_NEWTON_FD"));
         FluidNetwork.MEAN_HEAD = "1".equals(System.getenv("FLUID_MEAN_HEAD"));
+        FluidNetwork.NEWTON2 = "1".equals(System.getenv("FLUID_NEWTON2"));
+        FluidNetwork.NEWTON_DEBUG = "1".equals(System.getenv("FLUID_DEBUG"));
         FluidPropertyTest.Case c = FluidPropertyTest.random(seed, true);
         StringBuilder out = new StringBuilder("seed " + seed + "\n");
         var net = c.net();
@@ -73,7 +76,7 @@ class FluidExperimentTest {
             long it0 = FluidNetwork.Stats.newtonIters, f0 = FluidNetwork.Stats.newtonFailed;
             net.step(FluidPropertyTest.DT);
             if (s >= 2990) {
-                out.append("step ").append(s).append(" (newton ").append(FluidNetwork.Stats.newtonIters - it0).append(FluidNetwork.Stats.newtonFailed > f0 ? " FAILED" : "").append(" ").append(FluidNetwork.Stats.lastNorms.stream().map(v -> String.format("%.3g", v)).toList()).append("):");
+                out.append("step ").append(s).append(" (newton ").append(FluidNetwork.Stats.newtonIters - it0).append(FluidNetwork.Stats.newtonFailed > f0 ? " FAILED" : "").append(" ").append(FluidNetwork.Stats.lastNorms.stream().map(v -> String.format("%.3g", v)).toList()).append(") ").append(FluidNetwork.Stats.debug).append(":");
                 for (FluidNode n : c.free()) out.append(String.format(" [P=%.5g T=%.2f lvl=%.4f mW=%.6g mA=%.4g]", n.P(), n.T(), n.level(), n.mWater, n.mAir));
                 out.append("\n   ");
                 for (FluidEdge e : net.edges) out.append(String.format(" flow=%.4g %s;", e.flow, e.debug()));
@@ -81,7 +84,7 @@ class FluidExperimentTest {
             }
         }
         out.append("totals: steps " + FluidNetwork.Stats.steps + " newton iters " + FluidNetwork.Stats.newtonIters + " failed " + FluidNetwork.Stats.newtonFailed + "\n");
-        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/trace-" + seed + (FluidNetwork.NEWTON_FD ? "-fd" : FluidNetwork.NEWTON ? "-newton" : "") + (FluidNetwork.MEAN_HEAD ? "-mean" : "") + ".txt"), out.toString());
+        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/trace-" + seed + (FluidNetwork.NEWTON2 ? "-n2" : FluidNetwork.NEWTON_FD ? "-fd" : FluidNetwork.NEWTON ? "-newton" : "") + (FluidNetwork.MEAN_HEAD ? "-mean" : "") + ".txt"), out.toString());
     }
 
     /**
@@ -172,6 +175,7 @@ class FluidExperimentTest {
     @Test
     void bench() throws Exception {
         StringBuilder out = new StringBuilder("nodes | edges | steps timed | ms per step (avg) | newton iters\n");
+        FluidNetwork.NEWTON2 = "1".equals(System.getenv("FLUID_NEWTON2"));
         for (int n : new int[]{25, 100, 300, 1000, 2000}) {
             FluidNetwork net = plant(n, 42);
             int warm = n >= 1000 ? 1 : 20, steps = n >= 2000 ? 2 : n >= 1000 ? 5 : 100;
@@ -194,6 +198,7 @@ class FluidExperimentTest {
             FluidNetwork.NEWTON = cfg.contains("N");
             FluidNetwork.NEWTON_FD = cfg.contains("J");
             FluidNetwork.MEAN_HEAD = cfg.contains("M");
+            FluidNetwork.NEWTON2 = cfg.contains("W");
             Flash.BRACKETED = !cfg.contains("F");   // (F: the old bisection)
             FluidNetwork.Stats.reset();
             List<Long> lax = new ArrayList<>(), strict = new ArrayList<>();
