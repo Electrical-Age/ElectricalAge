@@ -154,4 +154,40 @@ class NetworkTest {
         for (var e : net.edges) out.append(String.format("edge %d(%.2f) -> %d(%.2f) g %.3g %s flow %.4g%n", net.nodes.indexOf(e.a), e.fa, net.nodes.indexOf(e.b), e.fb, e.g, e.kind, e.flow));
         java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-trace.txt"), out.toString());
     }
+
+    /** For the given seeds (FLUIDCORE_SEEDS): slow settling, chatter or circulation? */
+    @Test
+    void restlessKind() throws Exception {
+        String seeds = java.util.Objects.requireNonNullElse(System.getenv("FLUIDCORE_SEEDS"), "7,12,29,49,63,96,98");
+        StringBuilder out = new StringBuilder("seed | moving/mass at 3000, 4500, 6000, 9000 | flips in the last 200 | T spread K | nodes, edges | failures\n");
+        for (String t : seeds.split(",")) {
+            long seed = Long.parseLong(t.trim());
+            Network net = level(seed);
+            double mass = totals(net)[0] + totals(net)[1];
+            List<Double> at = new ArrayList<>();
+            double[] last = new double[net.edges.size()];
+            int flips = 0;
+            for (int s = 1; s <= 9000; s++) {
+                net.step(DT);
+                if (s == 3000 || s == 4500 || s == 6000 || s == 9000) {
+                    double m = 0;
+                    for (var e : net.edges) m += Math.abs(e.flow);
+                    at.add(m / mass);
+                }
+                for (int i = 0; i < last.length; i++) {
+                    double f = net.edges.get(i).flow;
+                    if (s > 8800 && f * last[i] < 0) flips++;
+                    last[i] = f;
+                }
+            }
+            double lo = 1e9, hi = 0;
+            for (var n : net.nodes) if (n.mw + n.ma > 1e-9) {
+                lo = Math.min(lo, n.T());
+                hi = Math.max(hi, n.T());
+            }
+            out.append(seed).append(" | ").append(at.stream().map(v -> String.format("%.2e", v)).toList()).append(" | ").append(flips)
+                .append(String.format(" | %.2f | %d, %d | %d%n", hi - lo, net.nodes.size(), net.edges.size(), net.stats.failures));
+        }
+        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-restless.txt"), out.toString());
+    }
 }
