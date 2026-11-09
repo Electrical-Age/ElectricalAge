@@ -226,7 +226,7 @@ public final class Network {
 
     /** Counters for tests and measurements. */
     public static final class Stats {
-        public long steps, iterations, substeps, failures, solves;
+        public long steps, iterations, substeps, failures, solves, stalls;
         /** The last failed solve's residual norms by iteration (tests). */
         public final List<Double> lastFail = new ArrayList<>();
         /** The last failed solve's scaled residual by row (tests). */
@@ -611,7 +611,10 @@ public final class Network {
                 set(free, y);
                 // (stalled at the precision floor: a liquid-full node turns a rounding error in its mass into a pressure,
                 // so the residual can't go lower; the step still ends conservatively)
-                if (nr < STALL_OK) return true;
+                if (nr < STALL_OK) {
+                    stats.stalls++;
+                    return true;
+                }
                 if (nr >= 1e3 * TOL) {
                     stats.lastRows = new double[r.length];
                     for (int i = 0; i < r.length; i++) stats.lastRows[i] = r[i] * s[i];
