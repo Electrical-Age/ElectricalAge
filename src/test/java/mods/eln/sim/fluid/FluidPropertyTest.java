@@ -79,7 +79,9 @@ public class FluidPropertyTest {
         for (FluidNode n : c.free) {
             String at = "seed " + seed + " step " + step + " node V " + n.volume;
             if (!(Double.isFinite(n.P()) && Double.isFinite(n.T()) && Double.isFinite(n.energy))) fail("not finite: " + at);
-            assertTrue(n.mWater >= -1e-12 && n.mAir >= -1e-12, "negative mass " + n.mWater + " " + n.mAir + ": " + at);
+            // (round-off scaled to the node's contents: a 4 kg node's air can end at -1e-12 kg after its transfers)
+            double eps = 1e-12 * Math.max(1, n.mass());
+            assertTrue(n.mWater >= -eps && n.mAir >= -eps, "negative mass " + n.mWater + " " + n.mAir + ": " + at);
             assertTrue(n.P() >= 0, "negative pressure " + n.P() + ": " + at);
             if (n.mLiquid() > 1e-9 && n.mAir < 1e-12)
                 assertTrue(n.P() >= Water.psat(n.T()) * 0.98 - 50, "liquid below its boiling pressure: " + n.P() + " < psat " + Water.psat(n.T()) + ": " + at);
