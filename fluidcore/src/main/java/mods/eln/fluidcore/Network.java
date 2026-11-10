@@ -270,7 +270,12 @@ public final class Network {
     }
 
     public final Stats stats = new Stats();
-    public static int MAX_ITERS = 25, MAX_DEPTH = 5;
+    /**
+     * Newton iterations a solve, and how many times a step may halve (8: down to dt / 256). At 5, one random network's
+     * violent first steps (hot liquid running into a cold, nearly empty node) still failed at dt / 32; at 8 none fails
+     * in 100 random networks x 3000 steps, with or without conduction, and the deeper halvings cost nothing elsewhere.
+     */
+    public static int MAX_ITERS = 25, MAX_DEPTH = 8;
 
     /** One step of dt seconds. */
     public void step(double dt) {
