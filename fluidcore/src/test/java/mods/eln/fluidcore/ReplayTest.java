@@ -24,7 +24,7 @@ class ReplayTest {
         int depth = Network.MAX_DEPTH;
         try {
             Network.MAX_DEPTH = 5;
-            for (String name : new String[]{"air-pipe-first-steam", "steam-into-air-stub", "steam-into-air-stub-2"}) {
+            for (String name : new String[]{"air-pipe-first-steam", "steam-into-air-stub", "steam-into-air-stub-2", "fill-near-full-from-50-bar"}) {
                 String text;
                 try (var in = ReplayTest.class.getResourceAsStream("/replay/" + name + ".txt")) {
                     text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);

@@ -112,6 +112,31 @@ public final class Network {
         public double liquid() {
             return waterAir().liquid();
         }
+
+        // ---- reads for the game (its devices and readouts), from the solved state
+
+        /** Species j's liquid and vapour (or gas) mass (kg), and its partial pressure in the gas (Pa). */
+        public double liquidMass(int j) {
+            return fluid.liquidMass(j);
+        }
+
+        public double vapourMass(int j) {
+            return fluid.vapourMass(j);
+        }
+
+        public double partialP(int j) {
+            return fluid.partialP(j);
+        }
+
+        /** The pressure at a port at share f of its height, the liquid's head over it included. */
+        public double portP(double f) {
+            return fluid.portP(f);
+        }
+
+        /** The internal energy (J) its masses would have at T, in equilibrium. */
+        public double energyAt(double T) {
+            return fluid.energyAt(m, T);
+        }
     }
 
     public enum Kind { PIPE, CHECK }
@@ -723,6 +748,8 @@ public final class Network {
     }
 
     public static double TOL = 1e-10, STALL_OK = 1e-6;
+    /** The pressure chop: an iteration moves no node's pressure by more than CHOP times itself or a bar (0: off). */
+    public static double CHOP = 1;
     /** Fraction-to-the-boundary floor (share of the node's contents): components under it are damped on their own. */
     public static double FLOOR = 1e-4;
     /** Tests: a trace of each Newton iteration (null: off). */
@@ -880,6 +907,19 @@ public final class Network {
                     double floor = FLOOR * Math.max(1e-9, massOf(y, C * i, S));
                     if (m > floor) alpha = Math.min(alpha, 0.99 * m / -dm);
                     else d[C * i + k] = -0.99 * Math.max(0, m);
+                }
+            // pressure chop (Appleyard's, from reservoir simulation): no node's pressure may move by more than itself (or a
+            // bar) in one iteration by the linear model. Filling a nearly full tank from a 50 bar vessel, the first step
+            // poured in a thousand times the tank, Newton swung between empty and over-full, and its best iterate emptied
+            // the tank; chopped, the pressure climbs the knee a doubling at a time
+            if (CHOP > 0)
+                for (int i = 0; i < free.size(); i++) {
+                    Node n = free.get(i);
+                    double[] dP = n.fluid.portPSlope(1);
+                    double change = 0;
+                    for (int j = 0; j < C; j++) change += dP[j] * d[C * i + j];
+                    double room = CHOP * Math.max(n.P(), 1e5);
+                    if (Math.abs(change) * alpha > room) alpha = room / Math.abs(change);
                 }
             if (DEBUG != null) {
                 DEBUG.append(String.format("it %d nr %.3e alpha0 %.3e%n  y %s%n  r*s %s%n  d %s%n", it, nr, alpha, java.util.Arrays.toString(y),

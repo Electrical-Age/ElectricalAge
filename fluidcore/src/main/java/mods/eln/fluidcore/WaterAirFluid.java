@@ -142,6 +142,22 @@ final class WaterAirFluid implements NodeFluid {
         return new double[]{out[WaterAir.YV], out[WaterAir.YA], out[WaterAir.HG]};
     }
 
+    public double liquidMass(int i) {
+        return i == 0 ? out[WaterAir.ML] : 0;
+    }
+
+    public double vapourMass(int i) {
+        return i == 0 ? out[WaterAir.MV] : out[WaterAir.MA];
+    }
+
+    public double partialP(int i) {
+        return i == 0 ? split.pv() : Math.max(0, out[WaterAir.P] - split.pv());
+    }
+
+    public double energyAt(double[] m, double T) {
+        return WaterAir.energyAt(m[0], m[1], V, T);
+    }
+
     public Object saveState() {
         return new Object[]{split, out, slopes, tSlope};
     }

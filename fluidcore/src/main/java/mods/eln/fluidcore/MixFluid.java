@@ -500,7 +500,7 @@ final class MixFluid implements NodeFluid {
         return Math.exp(x);
     }
 
-    double energyAt(double[] mv, double T) {
+    public double energyAt(double[] mv, double T) {
         return eval(T, gasVolume(mv, T), mv).E.v;
     }
 
@@ -752,6 +752,18 @@ final class MixFluid implements NodeFluid {
         for (int i = 0; i < S; i++) o[i] = st.yG[i].v;
         o[S] = st.hG.v;
         return o;
+    }
+
+    public double liquidMass(int i) {
+        return st.ml[i] == null ? 0 : st.ml[i].v;
+    }
+
+    public double vapourMass(int i) {
+        return st.mv[i] == null ? 0 : st.mv[i].v;
+    }
+
+    public double partialP(int i) {
+        return st.pv[i] == null ? 0 : st.pv[i].v;
     }
 
     public Object saveState() {

@@ -47,6 +47,16 @@ interface NodeFluid {
 
     double[] gasDraw();
 
+    /** Species i's liquid and vapour (or gas) mass (kg) in the solved state, and its partial pressure in the gas (Pa). */
+    double liquidMass(int i);
+
+    double vapourMass(int i);
+
+    double partialP(int i);
+
+    /** The internal energy (J) masses m would have at T, in equilibrium in this node (no change to its state). */
+    double energyAt(double[] m, double T);
+
     /** An opaque copy of the solved state, and putting it back (Network.perturbed: a trial without a new solve after). */
     Object saveState();
 
