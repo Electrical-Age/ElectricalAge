@@ -94,6 +94,8 @@ neoForge {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             systemProperty 'eln.golden', file('golden/1.12').absolutePath
+            // the fluid core instead of the legacy fluid solve: -PelnFluid=core
+            if (project.findProperty('elnFluid') == 'core') systemProperty 'eln.fluidCore', 'true'
             // the cable benchmark instead of the tests: -PelnBench=result.json [-PelnBenchLabel=name]
             if (project.hasProperty('elnBench')) {
                 systemProperty 'eln.bench', file(project.property('elnBench')).absolutePath

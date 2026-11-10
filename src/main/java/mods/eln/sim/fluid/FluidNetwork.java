@@ -43,7 +43,14 @@ public final class FluidNetwork {
         return e;
     }
 
+    /** The fluid core's mirror of this network, while CoreStep.ON. */
+    CoreStep core;
+
     public void step(double dt) {
+        if (CoreStep.ON) {
+            CoreStep.of(this).step(this, dt);
+            return;
+        }
         // 1. heat
         for (FluidNode n : nodes) {
             if (n.fixed) { n.heat = 0; continue; }
