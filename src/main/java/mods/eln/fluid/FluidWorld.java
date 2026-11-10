@@ -113,6 +113,21 @@ public final class FluidWorld implements IProcess {
         return out;
     }
 
+    /** A network's progress after a step (CoreStep), onto its nodes and their runs' pieces (FluidNode.stallNow). */
+    public static void recordProgress(List<FluidNode> nodes, double stall, double dropped) {
+        for (FluidNode n : nodes) {
+            List<FluidNode> pieces = INSTANCE.lumps.get(n);
+            if (pieces != null) for (FluidNode p : pieces) progress(p, stall, dropped);
+            progress(n, stall, dropped);
+        }
+    }
+
+    private static void progress(FluidNode n, double stall, double dropped) {
+        n.stallNow = stall;
+        n.longestStall = Math.max(n.longestStall, stall);
+        n.droppedTime += dropped;
+    }
+
     /** How many pieces n's run is made of (1 for a node in no run with others). */
     public static int runSize(FluidNode n) {
         INSTANCE.rebuildIfDirty();

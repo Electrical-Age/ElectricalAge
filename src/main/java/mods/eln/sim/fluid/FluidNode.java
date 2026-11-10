@@ -28,6 +28,12 @@ public final class FluidNode {
      * in), for the device to take from (or give to) its thermal load after the step.
      */
     public double wallUA, wallT, wallJ;
+    /**
+     * Progress of its network (Baughn 2026-11-10: over a quarter of a second without progress is not workable): the
+     * stretch (s) of ticks in a row now, and the longest since loaded, whose step covered under half the tick, and the
+     * time (s) the cap on owed time dropped. Kept on the node, so a network rebuilt mid-stall keeps the record; not saved.
+     */
+    public double stallNow, longestStall, droppedTime;
     final Flash state = new Flash();
 
     public FluidNode(double volume, double z, double height, boolean fixed) {

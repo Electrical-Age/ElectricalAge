@@ -533,6 +533,8 @@ public final class Network {
         public long steps, iterations, substeps, failures, solves, stalls, slept;
         /** Steps ended early (CUT_SHORT): their remaining time dropped; and of those, steps that moved nothing at all. */
         public long cut, stuck;
+        /** Solves accepted out of iterations while crawling at the precision floor (under STALL_OK; Network.solve). */
+        public long crawls;
         /** The last failed solve's residual norms by iteration (tests). */
         public final List<Double> lastFail = new ArrayList<>();
         /** The last failed solve's scaled residual by row (tests). */
@@ -1003,6 +1005,11 @@ public final class Network {
     }
 
     public static double TOL = 1e-10, STALL_OK = 1e-6;
+    /**
+     * Out of iterations, a residual under this is accepted as the precision floor (Network.solve). In the GameTests such
+     * solves end at 1e-10 to 1e-7 (a few thousand in 28 steam tests); the few over 1e-7 sub-step as other failures do.
+     */
+    public static double CRAWL_OK = 1e-7;
     /** The pressure chop: an iteration moves no node's pressure by more than CHOP times itself or a bar (0: off). */
     public static double CHOP = 1;
     /** Fraction-to-the-boundary floor (share of the node's contents): components under it are damped on their own. */
@@ -1250,11 +1257,11 @@ public final class Network {
             }
         }
         // (out of iterations crawling at the precision floor: each iteration took a sliver off the residual, so the line
-        // search never stalled, but rounding keeps it there; as a stall under STALL_OK, accepted: the step ends
-        // conservatively. A steam jet into an emptied condenser failed every sub-step this way at 3e-10 to 3e-8, and
-        // its network made no progress for seconds)
-        if (nr >= TOL && nr < STALL_OK) {
-            stats.stalls++;
+        // search never stalled, but rounding keeps it there; under CRAWL_OK, accepted: the step ends conservatively. A
+        // steam jet into an emptied condenser failed every sub-step this way at 3e-10 to 3e-8, and its network made no
+        // progress for seconds)
+        if (nr >= TOL && nr < CRAWL_OK) {
+            stats.crawls++;
             return true;
         }
         if (nr >= TOL) {

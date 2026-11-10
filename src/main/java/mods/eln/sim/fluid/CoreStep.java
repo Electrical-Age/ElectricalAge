@@ -248,8 +248,7 @@ final class CoreStep {
     /** Time (s) a cut-short step left undone, carried into the next steps (one tick's worth more per tick, OWED_MAX at most). */
     private double owed;
     static final double OWED_MAX = 0.5;
-    /** The stretch (s) of ticks in a row now, and the longest since built, whose step covered under half the tick. */
-    double stall, maxStall;
+    static final java.util.concurrent.atomic.AtomicLong CRAWLS = new java.util.concurrent.atomic.AtomicLong();
     private boolean stallDumped;
 
     void step(FluidNetwork fn, double dt) {
@@ -327,13 +326,18 @@ final class CoreStep {
             u0[i] = cn[i].U;
             h0[i] = cn[i].heat;
         }
-        long sub0 = net.stats.substeps, cut0 = net.stats.cut;
+        long sub0 = net.stats.substeps, cut0 = net.stats.cut, crawls0 = net.stats.crawls;
         net.step(dt);
+        // (solves accepted at the precision floor, counted to watch: a few thousand in the 28 steam GameTests)
+        long crawled = CRAWLS.addAndGet(net.stats.crawls - crawls0);
+        if (net.stats.crawls > crawls0 && Long.bitCount(crawled) == 1 && crawled >= 16) System.out.println("[fluidcore] solves accepted at the precision floor so far: " + crawled);
         // (a step cut short covered less than dt: the rest is owed, so heat put in over it isn't lost and the network
         // catches up; flows below are what moved this tick, per tick, so what devices book from them balances)
         owed += Math.max(0, dt - net.done);
-        stall = net.done < 0.5 * tick ? stall + tick : 0;
-        maxStall = Math.max(maxStall, stall);
+        // (the stall record lives on the nodes, so a network rebuilt mid-stall, as a burst rebuilds it, keeps it)
+        double before = 0;
+        for (FluidNode n : nodes) before = Math.max(before, n.stallNow);
+        double stall = net.done < 0.5 * tick ? before + tick : 0, dropped = Math.max(0, owed - OWED_MAX);
         // (a network stalled for half a second is written out once more: its first failure is often a harmless one)
         if (net.done == 0 && owed > OWED_MAX && !stallDumped) {
             stallDumped = true;
@@ -343,6 +347,7 @@ final class CoreStep {
         // and oversped one. Time dropped moves nothing: heat links pass heat by the time stepped, so the books still
         // balance)
         owed = Math.min(owed, OWED_MAX);
+        mods.eln.fluid.FluidWorld.recordProgress(nodes, stall, dropped);
         // (written out with the step length asked for: a replay at the tick's length isn't the step that failed)
         if (net.stats.failures > failures) failed(dt, m0, u0, h0);
         else if (net.stats.cut > cut0 || net.stats.substeps - sub0 > 64) slow(dt, m0, u0, h0, net.stats.substeps - sub0);

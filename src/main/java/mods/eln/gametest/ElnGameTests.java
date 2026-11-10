@@ -174,19 +174,25 @@ public final class ElnGameTests {
         });
     }
 
-    /** No fluid network of a device in the test's bounds went a quarter second without progress (Baughn 2026-11-10). */
+    /**
+     * No fluid network of a device in the test's bounds went a quarter second without progress, nor lost a quarter second
+     * of time to the cap on owed time (Baughn 2026-11-10).
+     */
     static void stalls(GameTestHelper helper, GameTestContext ctx) {
         net.minecraft.world.phys.AABB bounds = helper.getBounds();
-        java.util.Set<mods.eln.sim.fluid.FluidNetwork> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        double worst = 0, lost = 0;
+        String where = "";
         for (var d : mods.eln.fluid.FluidWorld.devices())
             for (var p : d.fluidPorts()) {
                 var b = net.minecraft.core.BlockPos.of(p.pos());
                 if (!bounds.contains(b.getX() + .5, b.getY() + .5, b.getZ() + .5)) continue;
-                var fn = mods.eln.fluid.FluidWorld.networkOf(p.node());
-                if (fn != null && seen.add(fn) && fn.longestStall() > 0.25)
-                    ctx.check("fluid: no network goes a quarter second without progress", false,
-                        d.getClass().getSimpleName() + " at " + b.toShortString() + String.format(": %.2f s", fn.longestStall()));
+                var n = p.node();
+                if (n.longestStall > worst || n.droppedTime > lost) where = d.getClass().getSimpleName() + " at " + b.toShortString();
+                worst = Math.max(worst, n.longestStall);
+                lost = Math.max(lost, n.droppedTime);
             }
+        if (worst > 0.25 || lost > 0.25) ctx.check("fluid: no network goes a quarter second without progress", false,
+            where + String.format(": %.2f s in a row, %.2f s dropped", worst, lost));
     }
 
     /**

@@ -50,6 +50,7 @@ public final class OilCases {
         cases.add(new TurbineHoldsPressure());
         cases.add(new CondenserFloods());
         cases.add(new CondenserMakeupFloat());
+        cases.add(new CondenserDryMakeupStub());
         cases.add(new CondenserLegacyLoad());
         cases.add(new CondenserMakeupSignal());
         cases.add(new CondensateReturn(10e5, false));
@@ -1371,6 +1372,54 @@ public final class OilCases {
 
     /** The makeup flange's float valve (Baughn: a 200V pump on it filled a condenser to the flood line): with makeup
      *  water at 10 bar behind it, a condenser 30 % full takes none, one 5 % full takes it in. */
+    /**
+     * A condenser pulling a vacuum with a dry dead-end pipe stub on its makeup flange and its float valve open: the stub's
+     * air drains into the vessel, cooling as it expands (a node drained like this once fell under the EOS's 120 K floor
+     * and its network stopped converging). The harness checks the network keeps making progress. The stub still ends
+     * at the 120 K floor: nothing warms a pipe's gas (todo #370).
+     */
+    static final class CondenserDryMakeupStub implements TestCase {
+        mods.eln.oil.CondenserElement c;
+        mods.eln.sim.IProcess prime;
+        BlockPos stub;
+
+        public String id() {
+            return "oil_condenser_dry_makeup_stub";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            l.device(28 + (82 << 6), 1, 1);
+            stub = ctx.at(1, 2, 1);
+            PipeCases.lay(ctx, stub, 0, 8, 0, 8, 8, 8, 8);
+            mods.eln.Eln.simulator.addSlowProcess(prime = x -> {
+                if (c == null) c = condenserOf(ctx, ctx.at(1, 1, 1));
+                if (c == null || c.vessel == null) return;
+                mods.eln.Eln.simulator.removeSlowProcess(prime);
+                // (5 % water: under the float valve's open level)
+                mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.05 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 300, false);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(prime);
+            var run = PipeCases.node(ctx, stub);
+            var n = run == null ? null : mods.eln.fluid.FluidWorld.nodeFor(((mods.eln.node.voxel.PipePart) run.parts.get(0)).fluid);
+            ctx.line("dry makeup stub: condenser " + (c == null ? "none" : c.getWaila()) + "; stub "
+                + (n == null ? "none" : String.format("%.4f bar, %.0f K, %.3g kg", n.P() / 1e5, n.T(), n.mass())));
+            ctx.check("condenser: it pulls a vacuum with the stub on (under 0.2 bar)", c != null && c.vessel.P() < 0.2e5,
+                c == null ? "none" : String.format("%.3f bar", c.vessel.P() / 1e5));
+        }
+    }
+
     static final class CondenserMakeupFloat implements TestCase {
         mods.eln.oil.CondenserElement full, low;
         mods.eln.sim.IProcess feed;
