@@ -8,6 +8,7 @@ import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.LRDUMask
 import mods.eln.misc.Obj3D
+import mods.eln.network.ClientValues
 import mods.eln.node.NodeBase
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
@@ -86,8 +87,9 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
         val type = super.networkUnserialize(stream)
         when (type.toInt()) {
             SetRangeEventId -> {
-                minRads = stream?.readFloat() ?: DefaultMinRads
-                maxRads = stream?.readFloat() ?: DefaultMaxRads
+                // (typed in text boxes: any finite number)
+                minRads = ClientValues.finite(stream?.readFloat() ?: DefaultMinRads, minRads)
+                maxRads = ClientValues.finite(stream?.readFloat() ?: DefaultMaxRads, maxRads)
                 needPublish()
                 return unserializeNulldId
             }

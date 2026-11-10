@@ -3,6 +3,7 @@ package mods.eln.transparentnode.electricalfurnace;
 import net.minecraft.world.entity.item.ItemEntity;
 
 
+import mods.eln.network.ClientValues;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
@@ -253,7 +254,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
                     needPublish();
                     break;
                 case unserializeTemperatureTarget:
-                    thermalRegulator.setTarget(stream.readFloat());
+                    thermalRegulator.setTarget(ClientValues.clamp(stream.readFloat(), 0, 800, thermalRegulator.getTarget()));   // (the screen's slider)
                     needPublish();
                     break;
                 default:

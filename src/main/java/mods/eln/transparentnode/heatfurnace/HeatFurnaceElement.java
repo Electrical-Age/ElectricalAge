@@ -5,6 +5,7 @@ import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.transparent.TransparentNode;
@@ -210,14 +211,14 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
             switch (packetType) {
                 case unserializeGain:
                     if (Utils.isEmpty(inventory.getItem(HeatFurnaceContainer.regulatorId))) {
-                        furnaceProcess.setGain(stream.readFloat());
+                        furnaceProcess.setGain(ClientValues.clamp(stream.readFloat(), 0.1f, 1f, (float) furnaceProcess.getGain()));   // (the screen's slider)
                     }
                     needPublish();
                     break;
                 case unserializeTemperatureTarget:
                     //if(Utils.isEmpty(inventory.getItem(HeatFurnaceContainer.regulatorId)))
                 {
-                    regulator.setTarget(stream.readFloat());
+                    regulator.setTarget(ClientValues.clamp(stream.readFloat(), 0, 980, regulator.getTarget()));   // (the screen's slider)
                 }
                 needPublish();
                 break;

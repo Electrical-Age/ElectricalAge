@@ -29,7 +29,7 @@ public class FurnaceProcess implements IProcess {
     }
 
     public void setGain(double gain) {
-        if (gain < gainMin) gain = gainMin;
+        if (!(gain >= gainMin)) gain = gainMin;   // (also a NaN)
         if (gain > 1.0) gain = 1.0;
         this.gain = gain;
     }

@@ -1,5 +1,6 @@
 package mods.eln.transparentnode
 
+import mods.eln.network.ClientValues
 import mods.eln.sound.LoopedSound
 
 import mods.eln.gl.GL11
@@ -311,10 +312,10 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             }
             MainSwitchToggleEvent -> mainSwitch = !mainSwitch
             SetManualControlValueEvent -> {
-                manualControl = stream.readFloat().toDouble()
+                manualControl = ClientValues.clamp(stream.readFloat().toDouble(), 0.0, 1.0, manualControl)   // (the screen's slider)
             }
             SetTemperatureEvent -> {
-                setTemperature = stream.readFloat().toDouble()
+                setTemperature = ClientValues.clamp(stream.readFloat().toDouble(), 0.0, 900.0, setTemperature)
                 controlProcess.target = setTemperature
             }
         }
@@ -343,8 +344,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         externalControlled = nbt.getBooleanOr("externalControlled", false)
         mainSwitch = nbt.getBooleanOr("mainSwitch", false)
         heaterControlValue = nbt.getDoubleOr("heaterControlValue", 0.0)
-        manualControl = nbt.getDoubleOr("manualControl", 0.0)
-        setTemperature = nbt.getDoubleOr("setTemperature", 0.0)
+        manualControl = ClientValues.finite(nbt.getDoubleOr("manualControl", 0.0), 0.0)
+        setTemperature = ClientValues.finite(nbt.getDoubleOr("setTemperature", 0.0), 0.0)
         actualHeatPower = nbt.getDoubleOr("actualHeatPower", 0.0)
         if (nbt.contains("fire")) fire.read(nbt, "") else fire.level = heaterControlValue
         fuelIn.read(nbt)

@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.turret;
 
 
+import mods.eln.network.ClientValues;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -185,7 +186,8 @@ public class TurretElement extends TransparentNodeElement {
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        chargePower = nbt.getDoubleOr("chargePower", 0.0);
+        // (an older handler stored what the client sent: a negative charge power is a negative resistance)
+        chargePower = ClientValues.load(nbt.getDoubleOr("chargePower", chargePower), 100, 5000, chargePower);
         filterIsSpare = nbt.getBooleanOr("filterIsSpare", false);
         energyBuffer = nbt.getDoubleOr("energyBuffer", 0.0);
     }
@@ -217,7 +219,7 @@ public class TurretElement extends TransparentNodeElement {
                     break;
 
                 case UnserializeChargePower:
-                    chargePower = stream.readFloat();
+                    chargePower = ClientValues.clamp(stream.readFloat(), 100, 5000, chargePower);   // (the screen's slider)
                     needPublish();
                     break;
             }
