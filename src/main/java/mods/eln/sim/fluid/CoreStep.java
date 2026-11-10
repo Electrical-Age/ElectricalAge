@@ -19,14 +19,16 @@ final class CoreStep {
     /** The switch: -Deln.fluidCore=true or ELN_FLUID=core (M5.1; a config option comes with the full adapter). */
     static boolean ON = Boolean.getBoolean("eln.fluidCore") || "core".equals(System.getenv("ELN_FLUID"));
 
-    /** Audit: edges whose two ports are not at one height (the core has no head on edges), the worst, and where. */
-    static long notLevel, notJoined;
+    /** Audit: edges whose two ports are not at one height (each stream pays its own head over them), and the worst. */
+    static long notLevel;
     static double worstDz;
     static String worstEdge = "";
     private static final java.util.Set<String> SEEN = java.util.concurrent.ConcurrentHashMap.newKeySet();
     /** Steps that failed (the core's best iterate was kept), and how many were written out (fluidcore-fail/, at most 30). */
-    static long failedSteps;
+    static long failedSteps, discardedSteps;
     static int dumps;
+    /** This network has been written out already (one dump each, so the 30 cover 30 networks). */
+    private boolean dumped;
 
     static {
         // (in a game tick, 32 sub-steps at most: past that a failing network would stall the server; its step ends at the
@@ -81,14 +83,6 @@ final class CoreStep {
                     worstDz = Math.abs(za - zb);
                     worstEdge = what;
                 }
-                // (meet at the one port's height on the other node, if it has one there)
-                double fb2 = e.b.height > 0 ? (za - e.b.z) / e.b.height : -1, fa2 = e.a.height > 0 ? (zb - e.a.z) / e.a.height : -1;
-                if (fb2 >= 0 && fb2 <= 1) fb = fb2;
-                else if (fa2 >= 0 && fa2 <= 1) fa = fa2;
-                else {
-                    notJoined++;
-                    continue;
-                }
             }
             ce[k] = net.connect(a, fa, b, fb, 0);
             FluidEdge next = k + 1 < ce.length ? edges.get(k + 1) : null;
@@ -96,6 +90,13 @@ final class CoreStep {
                 pipeOfPair[k] = true;
             else if (e.oneWay()) ce[k].kind = Network.Kind.CHECK;
         }
+    }
+
+    /** A stream's conductance (kg/s/Pa) carrying packet pk at drive dp: rho k open / mu, or a valve's orifice law. */
+    private static double conductance(FluidEdge e, FluidNetwork.Packet pk, double dp, double open) {
+        return e.area > 0
+            ? FluidEdge.CD * e.area * open * Math.sqrt(2 * Math.max(pk.rho, 1e-6) / Math.max(Math.abs(dp), FluidEdge.DP_LINEAR))
+            : pk.rho * e.k * open / pk.mu;
     }
 
     /** The network's core, built or rebuilt as needed. */
@@ -147,16 +148,36 @@ final class CoreStep {
      */
     private void failed(double dt, double[][] m0, double[] u0, double[] h0) {
         failedSteps++;
+        // (the best iterate is kept unless it is not a physical state: kept, a stub's first flooding goes on to converge
+        // the next tick; put back, the next tick starts from the same contents and fails the same way for ever)
+        boolean sane = true;
+        for (Network.Node c : cn) {
+            if (c.fixed) continue;
+            double T = c.T();
+            if (!Double.isFinite(c.U) || !Double.isFinite(c.P()) || !(T > 150 && T < 3000)) sane = false;
+            for (double x : c.m) if (!Double.isFinite(x)) sane = false;
+        }
+        if (!sane) discardedSteps++;
         if (failedSteps == 1 || Long.bitCount(failedSteps) == 1)
-            System.out.println("[fluidcore] failed steps so far: " + failedSteps + " (this one: " + cn.length + " nodes, the first at z " + nodes.get(0).z + ")");
-        if (dumps >= 30) {
-            restore(m0, u0);
+            System.out.println("[fluidcore] failed steps so far: " + failedSteps + ", of them put back " + discardedSteps + " (this one: "
+                + cn.length + " nodes, the first at z " + nodes.get(0).z + ")");
+        if (dumped || dumps >= 30) {
+            if (!sane) discard(m0, u0);
             return;
         }
+        dumped = true;
         int n = ++dumps;
+        double[][] m1 = new double[cn.length][];
+        double[] u1 = new double[cn.length];
+        for (int i = 0; i < cn.length; i++) {
+            m1[i] = cn[i].m.clone();
+            u1[i] = cn[i].U;
+        }
         restore(m0, u0);
         for (int i = 0; i < cn.length; i++) cn[i].heat = h0[i];
         String text = mods.eln.fluidcore.NetworkDump.write(net, dt);
+        if (sane) restore(m1, u1);
+        else discard(m0, u0);
         try {
             java.nio.file.Path dir = java.nio.file.Path.of("fluidcore-fail");
             java.nio.file.Files.createDirectories(dir);
@@ -174,6 +195,11 @@ final class CoreStep {
             cn[i].U = u0[i];
             cn[i].update();
         }
+    }
+
+    /** Back to the step's start, with nothing moved. */
+    private void discard(double[][] m0, double[] u0) {
+        restore(m0, u0);
         for (Network.Edge c : ce) if (c != null && c.moved != null) java.util.Arrays.fill(c.moved, 0);
     }
 
@@ -190,7 +216,8 @@ final class CoreStep {
             n.heat = 0;
             c.update();
         }
-        // conductances from the upstream port at the step's start
+        // each stream's conductance from its own port at the step's start (rho k open / mu, or a valve's orifice law at the
+        // starting drop, its own head included), held for the step
         double[] xl = new double[ce.length];
         for (int k = 0; k < ce.length; k++) {
             Network.Edge c = ce[k];
@@ -198,13 +225,13 @@ final class CoreStep {
             FluidEdge e = edges.get(k);
             c.boost = e.boost;
             double dp = e.a.pressureOver(e.portA, e.spanA) - e.b.pressureOver(e.portB, e.spanB) + e.boost;
-            boolean fromA = dp >= 0 || (e.oneWay() && !pipeOfPair[k]);
-            FluidNetwork.Packet pk = fromA ? FluidNetwork.packet(e.a, e.portA, e.spanA) : FluidNetwork.packet(e.b, e.portB, e.spanB);
-            xl[k] = pk.xl;
+            double dz = (e.a.z + e.portA * e.a.height) - (e.b.z + e.portB * e.b.height);
+            FluidNetwork.Packet pa = FluidNetwork.packet(e.a, e.portA, e.spanA), pb = FluidNetwork.packet(e.b, e.portB, e.spanB);
+            boolean fromA = dp + pa.rhoHead * Network.G * dz >= 0 || (e.oneWay() && !pipeOfPair[k]);
+            xl[k] = fromA ? pa.xl : pb.xl;
             double open = Math.max(0, e.open);
-            c.g = e.area > 0
-                ? FluidEdge.CD * e.area * open * Math.sqrt(2 * Math.max(pk.rho, 1e-6) / Math.max(Math.abs(dp), FluidEdge.DP_LINEAR))
-                : pk.rho * e.k * open / pk.mu;
+            c.g = conductance(e, pa, dp + pa.rhoHead * Network.G * dz, open);
+            c.gBack = e.oneWay() && !pipeOfPair[k] ? Double.NaN : conductance(e, pb, dp + pb.rhoHead * Network.G * dz, open);
         }
         long slept = net.stats.slept, failures = net.stats.failures;
         double[][] m0 = new double[cn.length][];

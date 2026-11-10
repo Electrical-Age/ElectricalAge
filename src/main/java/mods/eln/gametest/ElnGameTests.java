@@ -197,7 +197,11 @@ public final class ElnGameTests {
         mods.eln.fluid.FluidWorld.watchAll = true;
         Holder<TestEnvironmentDefinition<?>> env = event.registerEnvironment(
             Identifier.fromNamespaceAndPath(Eln.MODID, "default"), new TestEnvironmentDefinition.AllOf(List.of()));
+        // (-Deln.gametests=a,b,...: only the cases whose ids are listed; for re-running a handful while working)
+        String only = System.getProperty("eln.gametests");
+        java.util.Set<String> wanted = only == null || only.isBlank() ? null : java.util.Set.of(only.split(","));
         for (TestCase c : cases()) {
+            if (wanted != null && !wanted.contains(c.id())) continue;
             Identifier id = Identifier.fromNamespaceAndPath(Eln.MODID, c.id());
             Identifier structure = Identifier.fromNamespaceAndPath(Eln.MODID,
                 "floor_" + c.width() + "x" + c.height() + "x" + c.depth());
