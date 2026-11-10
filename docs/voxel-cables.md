@@ -118,8 +118,11 @@ transparent neighbour).
   coloured by their cable: copper for thermal, pale for signal, dark grey for power.
 - Pins that change after placement (a Hub's with its slots, a Temperature Probe's back pin) are published when they
   change (`VoxelNode.pinsChanged`), and one that now lands on something is logged; links follow the kind as always.
-- `placeErrorAt` builds a stand-in element to read its pins and unloads it after (a Wireless Signal Repeater joins the
-  wireless spots as it is made; left there, its empty spot crashed the receivers' process).
+- `placeErrorAt` and `DevicePlacer.masks` build a stand-in element to read its pins and unload it after. Devices join
+  their static registries (wireless channels and spots, power socket channels) in `initialize`, which a stand-in never
+  gets: a Wireless Signal Repeater made here used to join the spots (its empty spot crashed the receivers' process),
+  and a Wireless Button left a phantom transmitter on "Default channel" for every probe the preview built.
+  `VoxelDeviceCases.ProbesLeaveNoTraceCase` checks every device that goes anywhere.
 - Holding such a device shows it see-through where a click would put it (`DevicePreview`, client
   `DevicePreviewRender`, `GlFrame.ghost`), reddish where it may not go. A click on a device in a voxel block places on
   that device's face (`placeFace`).

@@ -835,7 +835,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         try {
             return placeError(probe);
         } finally {
-            probe.unload();   // (undo what its constructor joined: a Wireless Signal Repeater joins the wireless spots)
+            probe.unload();   // (devices join their registries in initialize, which a probe never gets; unload is the backstop)
         }
     }
 
@@ -892,8 +892,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         }
     }
 
-    /** An element of this stack's kind at that place and front, not added (to read its pins); the caller unloads it,
-     *  which undoes what its constructor joined. Null if it can't be made. */
+    /** An element of this stack's kind at that place and front, not added (to read its pins); never initialised, so it
+     *  joins no registry (VoxelDeviceCases.ProbesLeaveNoTraceCase); the caller still unloads it. Null if it can't be made. */
     mods.eln.node.six.SixNodeElement standIn(ItemStack stack, int slot, Direction face, int ox, int oy, int oz, LRDU front) {
         var d = Eln.sixNodeItem.getDescriptor(stack);
         mods.eln.node.six.SixNodeElement probe;

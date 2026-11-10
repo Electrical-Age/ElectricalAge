@@ -85,8 +85,6 @@ public class PowerSocketElement extends SixNodeElement {
         voltageWatchdog
             .set(powerLoad)
             .set(new Failure(this).electronics());
-
-        channelRegister(this);
     }
 
     class PowerSocketSlowProcess implements IProcess {
@@ -170,9 +168,12 @@ public class PowerSocketElement extends SixNodeElement {
         return null;
     }
 
+    /** Joins the channel here, not in the constructor: a placement probe is built and never initialised. */
     @Override
     public void initialize() {
         setupFromInventory();
+        channelRemove(this);
+        channelRegister(this);
     }
 
     @Override

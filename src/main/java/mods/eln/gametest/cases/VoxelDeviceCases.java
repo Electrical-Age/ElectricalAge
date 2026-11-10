@@ -43,6 +43,7 @@ public final class VoxelDeviceCases {
         cases.add(new PassivesInLineCase());
         cases.add(new DiodeRigCase());
         cases.add(new RheostatThermistorCase());
+        cases.add(new ProbesLeaveNoTraceCase());
     }
 
     static int id(String name) {
@@ -1589,6 +1590,91 @@ public final class VoxelDeviceCases {
                 fmt("%.2f ohm", rt));
             Wp9cCases.within(c, "thermistor: 50 V over it and 100 ohm [A]", Math.abs(Wp9aCases.current(rTherm)), 50 / (100 + rt), 0.02 * 50 / (100 + rt));
             if (body != null) mods.eln.Eln.simulator.removeThermalLoad(body);
+        }
+    }
+    /**
+     * The placement checks build throwaway elements of the held device (DevicePlacer.plan, VoxelNode.placeErrorAt: the
+     * preview does it every tick while a player aims a device at a voxel block) and leave the static registries as they
+     * were, for every device that goes anywhere: a Wireless Button's probes stayed in the wireless channels until the
+     * server stopped. A bare probe, built and not yet unloaded, has joined nothing either.
+     */
+    static final class ProbesLeaveNoTraceCase implements TestCase {
+        String planned = "", bare = "";
+        int devices;
+
+        public String name() {
+            return "placement probes leave the static registries as they were";
+        }
+
+        public int width() {
+            return 4;
+        }
+
+        static int entries(java.util.Map<String, ? extends java.util.List<?>> m) {
+            int n = 0;
+            for (var l : m.values()) n += l.size();
+            return n;
+        }
+
+        /** Entries in every static registry a device joins: wireless transmitters, repeaters, lamp supplies, sockets. */
+        static String registries() {
+            return "tx " + entries(mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement.channelMap)
+                + ", source " + entries(mods.eln.sixnode.wirelesssignal.source.WirelessSignalSourceElement.channelMap)
+                + ", spots " + mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot.spots.size()
+                + ", supplies " + entries(mods.eln.sixnode.lampsupply.LampSupplyElement.channelMap)
+                + ", sockets " + entries(mods.eln.sixnode.powersocket.PowerSocketElement.channelMap)
+                + ", light observers " + mods.eln.sixnode.lampsocket.LightBlockEntity.observers.size();
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 4; x++) c.floor(c.at(x, 0, 1));
+            c.level().setBlockAndUpdate(c.at(2, 1, 0), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            BlockPos p = c.at(1, 1, 1), q = c.at(2, 1, 1);
+            var v = block(c, p);
+            CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
+            var w = block(c, q);
+            CableCases.voxel(c, q, List.of(new CablePart(LV, NORTH_WALL, new int[]{0, 4, 0, 16, 4, 0})));
+            var player = player(c);
+            StringBuilder pl = new StringBuilder(), ba = new StringBuilder();
+            for (var d : new java.util.TreeMap<>(mods.eln.Eln.sixNodeItem.all()).values()) {
+                if (!d.placeAnywhere()) continue;
+                devices++;
+                var stack = d.newItemStack();
+                String before = registries();
+                // on the cable (masks, in line, at an end), beside it, far from it (placeErrorAt); and on a wall
+                mods.eln.node.voxel.DevicePlacer.plan(v, stack, v.freeSlot(), Direction.YN, new double[]{0.55, 0, 0.5}, player);
+                mods.eln.node.voxel.DevicePlacer.plan(v, stack, v.freeSlot(), Direction.YN, new double[]{0.5, 0, 0.3}, player);
+                mods.eln.node.voxel.DevicePlacer.plan(v, stack, v.freeSlot(), Direction.YN, new double[]{0.5, 0, 0.05}, player);
+                mods.eln.node.voxel.DevicePlacer.plan(w, stack, w.freeSlot(), Direction.ZN, new double[]{0.55, 0.25, 0}, player);
+                String after = registries();
+                if (!after.equals(before)) pl.append(d.name).append(": ").append(before).append(" -> ").append(after).append("; ");
+                // a bare probe as VoxelNode.standIn builds one
+                SixNodeElement probe;
+                try {
+                    probe = (SixNodeElement) d.ElementClass.getConstructor(mods.eln.node.six.SixNode.class, Direction.class,
+                        mods.eln.node.six.SixNodeDescriptor.class).newInstance(v, Direction.YN, d);
+                } catch (ReflectiveOperationException | RuntimeException ex) {
+                    c.line("probes: " + d.name + " not built (" + ex + "), as standIn gives null");
+                    continue;
+                }
+                String built = registries();
+                probe.unload();
+                String unloaded = registries();
+                if (!built.equals(before) || !unloaded.equals(before))
+                    ba.append(d.name).append(": ").append(before).append(" -> built ").append(built).append(" -> unloaded ").append(unloaded).append("; ");
+            }
+            planned = pl.toString();
+            bare = ba.toString();
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void measure(TestContext c) {
+            c.check("probes: there are devices that go anywhere", devices > 20, devices + " devices");
+            c.check("probes: the placement checks leave every registry as it was", planned.isEmpty(), planned);
+            c.check("probes: a bare probe joins no registry, and its unload leaves none", bare.isEmpty(), bare);
         }
     }
 }

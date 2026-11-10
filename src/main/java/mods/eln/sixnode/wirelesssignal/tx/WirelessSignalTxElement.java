@@ -46,7 +46,6 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
         electricalLoadList.add(inputGate);
         slowProcessList.add(lightningGlitchProcess = new LightningGlitchProcess(getCoordonate()));
         this.descriptor = (WirelessSignalTxDescriptor) descriptor;
-        channelRegister(this);
     }
 
     static public class LightningGlitchProcess implements IProcess {
@@ -136,8 +135,11 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
         return null;
     }
 
+    /** Joins the channel here, not in the constructor: a placement probe is built and never initialised. */
     @Override
     public void initialize() {
+        channelRemove(this);
+        channelRegister(this);
     }
 
     @Override

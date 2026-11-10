@@ -31,8 +31,6 @@ public class WirelessSignalRepeaterElement extends SixNodeElement {
         this.descriptor = (WirelessSignalRepeaterDescriptor) descriptor;
 
         slowProcessList.add(slowProcess);
-
-        IWirelessSignalSpot.spots.add(slowProcess);
     }
 
     @Override
@@ -88,8 +86,11 @@ public class WirelessSignalRepeaterElement extends SixNodeElement {
         IWirelessSignalSpot.spots.remove(slowProcess);
     }
 
+    /** Joins the wireless spots here, not in the constructor: a placement probe is built and never initialised. */
     @Override
     public void initialize() {
+        IWirelessSignalSpot.spots.remove(slowProcess);
+        IWirelessSignalSpot.spots.add(slowProcess);
         if (!fromNbt) {
             slowProcess.process(0.05);
         }

@@ -314,6 +314,7 @@ public class SixNode extends Node {
                 sideElementList[idx] = null;
                 sideElementIdList[idx] = 0;
             } else {
+                SixNodeElement built = null;
                 try {
                     SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(sideElementId);
                     if (descriptor == null) throw new IllegalStateException("no six-node device " + sideElementId + " in this version");
@@ -324,10 +325,19 @@ public class SixNode extends Node {
                     e.oy = at[2];
                     e.oz = at[3];
                     sideElementList[idx] = e;
+                    built = e;
                     e.readFromNBT(nbt.getCompoundOrEmpty("ED" + idx));
                     sideElementList[idx].initialize();
                 } catch (Exception e) {
-                    // (a half-built element must not stay: it would run, save and drop as if it had loaded)
+                    // (a half-built element must not stay: it would run, save and drop as if it had loaded; nor stay in a
+                    // wireless channel or a supply's list that its readFromNBT or initialize joined)
+                    if (built != null) {
+                        try {
+                            built.unload();
+                        } catch (RuntimeException u) {
+                            e.addSuppressed(u);
+                        }
+                    }
                     sideElementList[idx] = null;
                     sideElementIdList[idx] = 0;
                     CompoundTag kept = new CompoundTag();
