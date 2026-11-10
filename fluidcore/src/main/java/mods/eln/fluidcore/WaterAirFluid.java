@@ -121,7 +121,7 @@ final class WaterAirFluid implements NodeFluid {
         return smoothStep(windowArg(f));
     }
 
-    public double rhoLiquid() {
+    public double rhoLiquid(double f) {
         return 1 / split.v();
     }
 
@@ -129,7 +129,7 @@ final class WaterAirFluid implements NodeFluid {
         return (out[WaterAir.MV] + out[WaterAir.MA]) / split.vg();
     }
 
-    public double[] liquidDraw() {
+    public double[] liquidDraw(double f) {
         return new double[]{1, 0, out[WaterAir.HL]};
     }
 

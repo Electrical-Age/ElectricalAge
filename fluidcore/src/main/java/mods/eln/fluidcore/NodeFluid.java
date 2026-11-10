@@ -33,14 +33,17 @@ interface NodeFluid {
 
     double[][] drawSlope(double f);
 
-    /** For the counter-current exchange: how much the port at f draws liquid (0..1), the densities, and what a kg of liquid / of gas carries. */
+    /**
+     * For the counter-current exchange: how much the port at f draws liquid (0..1), the density of the liquid it draws
+     * and of the gas, and what a kg of that liquid / of the gas carries.
+     */
     double liquidWindow(double f);
 
-    double rhoLiquid();
+    double rhoLiquid(double f);
 
     double rhoGas();
 
-    double[] liquidDraw();
+    double[] liquidDraw(double f);
 
     double[] gasDraw();
 

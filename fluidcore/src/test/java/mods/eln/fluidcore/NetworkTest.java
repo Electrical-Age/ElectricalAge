@@ -13,6 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class NetworkTest {
     static final double DT = 0.05;
 
+    /** FLUIDCORE_MIX=1: the random networks through MixFluid with {water, air} instead of WaterAirFluid. */
+    static final Species[] MIX = "1".equals(System.getenv("FLUIDCORE_MIX")) ? new Species[]{Species.WATER, Species.AIR} : null;
+
     static {
         String v = System.getenv("FLUIDCORE_SPLIT");
         if (v != null) Network.SPLIT_DP = Double.parseDouble(v);
@@ -58,7 +61,7 @@ class NetworkTest {
             double T = 280 + 200 * r.nextDouble();
             double mw = r.nextDouble() < 0.6 ? r.nextDouble() * 0.9 * V / WaterAir.V0 : 0;
             double ma = r.nextDouble() < 0.3 ? 0 : (0.5 + 15 * r.nextDouble()) * V;
-            ns.add(net.add(new Network.Node(V, z[i], h[i], false).fill(mw, ma, T)));
+            ns.add(net.add(new Network.Node(V, z[i], h[i], false, MIX).fill(mw, ma, T)));
         }
         // tree edges as built above (the child's port meets the parent's)
         Random r2 = new Random(seed);
