@@ -42,6 +42,16 @@ public final class ArmourEnchantCases {
                 ItemStack boots = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("eln", "e_coal_boots")));
                 ItemStack helmet = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("eln", "e_coal_helmet")));
                 ctx.check("Feather Falling on the boots only", feather.value().canEnchant(boots) && !feather.value().canEnchant(helmet), "");
+                // nero 2026-11-10: the tooltip shows the charge (in a charger too) and the protection it gives
+                var plate = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("eln", "e_coal_chestplate")));
+                var armour = (mods.eln.item.electricalitem.ElectricalArmor) plate.getItem();
+                armour.setEnergy(plate, armour.getEnergyMax(plate) / 2);
+                var lines = new java.util.ArrayList<String>();
+                armour.appendHoverText(plate, net.minecraft.world.item.Item.TooltipContext.EMPTY,
+                    net.minecraft.world.item.component.TooltipDisplay.DEFAULT, c -> lines.add(c.getString()),
+                    net.minecraft.world.item.TooltipFlag.NORMAL);
+                String all = String.join(" | ", lines);
+                ctx.check("E-Coal tooltip: charge 50 % and protection 30 % max", all.contains("(50%)") && all.contains("up to 30%"), all);
             }
         });
     }

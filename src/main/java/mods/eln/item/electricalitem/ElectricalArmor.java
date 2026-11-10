@@ -123,6 +123,21 @@ public class ElectricalArmor extends Item implements IItemEnergyBattery {
     public void electricalItemUpdate(ItemStack stack, double time) {
     }
 
+    /** Stored energy and its share (nero 2026-11-10: the armour showed no charge when hovered in a charger). */
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext ctx, net.minecraft.world.item.component.TooltipDisplay display,
+                                java.util.function.Consumer<net.minecraft.network.chat.Component> out, net.minecraft.world.item.TooltipFlag flag) {
+        super.appendHoverText(stack, ctx, display, out, flag);
+        double e = getEnergy(stack);
+        out.accept(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Stored energy: %1$J (%2$%)",
+            mods.eln.misc.Utils.plotValue(e), (int) (e / energyStorage * 100))).withStyle(net.minecraft.ChatFormatting.GRAY));
+        // (nero: show its armour stats; it has no armour points, the stored energy absorbs a share of the damage)
+        out.accept(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Absorbs %1$% of damage now (up to %2$% charged)",
+            Math.round(absorbRatio(stack) * 100), Math.round(ratioMax * 100))).withStyle(net.minecraft.ChatFormatting.BLUE));
+        out.accept(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Each damage point absorbed costs %1$J",
+            mods.eln.misc.Utils.plotValue(energyPerDamage))).withStyle(net.minecraft.ChatFormatting.GRAY));
+    }
+
     // R5: energy as the vanilla item bar (see ElnItem)
     @Override
     public boolean isBarVisible(net.minecraft.world.item.ItemStack stack) {
