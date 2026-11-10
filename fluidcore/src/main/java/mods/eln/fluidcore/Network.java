@@ -663,6 +663,11 @@ public final class Network {
             for (int k = 0; k < C; k++) y[C * i + k] = y0[C * i + k] - f * r[C * i + k];
         }
         set(free, y);
+        // (kept only if it is nearer the step's end than the start is: through an edge stiff for the step, a steam pipe at
+        // 10 bar opening into a pipe of air at 1 bar, the explicit flow is 100 times what the small node can hold, and the
+        // predicted state was thousands of bar, where Newton's linear solve was singular)
+        double[] s = scales(free, y0);
+        if (norm(residual(free, idx, y0, dt), s) > norm(r, s)) set(free, y0);
     }
 
     /** Newton from the nodes' current states (y0 = the step's start); true if it converged (the nodes then hold Y'). */
@@ -719,13 +724,19 @@ public final class Network {
                         double tiny = 1e-12 * Math.max(1e-3, massOf(y, C * i, S));
                         if (d[C * i + k] < 0 && y[C * i + k] <= tiny) {
                             if (r[C * i + k] < 0) {
-                                // (its own balance wants it up: not held but stepped along its diagonal, -r)
-                                d[C * i + k] = -r[C * i + k];
+                                // (its own balance wants it up: not held but stepped along its diagonal, -r, and the rest
+                                // solved again with that step fixed; setting it alone left the others' step computed for
+                                // the far larger fall Newton wanted, and a pipe of air taking its first steam stalled)
+                                if (d[C * i + k] == -r[C * i + k]) continue;
+                                J.unitRow(C * i + k);
+                                held = true;
+                                if (DEBUG != null) DEBUG.append("  row ").append(C * i + k).append(" stepped along -r\n");
                                 continue;
                             }
                             J.unitRow(C * i + k);
                             minus[C * i + k] = 0;
                             held = true;
+                            if (DEBUG != null) DEBUG.append("  held row ").append(C * i + k).append('\n');
                         }
                     }
                 if (!held) break;

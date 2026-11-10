@@ -10,11 +10,36 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Replays networks the game wrote out when one of their steps failed (NetworkDump; the game's fluidcore-fail/). The
- * directory comes from FLUIDCORE_REPLAY; without it there is nothing to do. Each dump is stepped once as the game
- * did, then once more with the library's own sub-step depth, and the counts printed.
+ * Replays networks the game wrote out when one of their steps failed (NetworkDump; the game's fluidcore-fail/): the
+ * cases kept under test resources, and with FLUIDCORE_REPLAY a directory of dumps, each stepped once as the game did
+ * and once with the library's own sub-step depth, the counts printed.
  */
 class ReplayTest {
+    /**
+     * Networks whose step failed in the game (GameTests on the core's first adapter), kept as cases: each must now step
+     * without a failure within the game's sub-step depth (5).
+     */
+    @Test
+    void gameNetworksThatOnceFailedStep() throws Exception {
+        int depth = Network.MAX_DEPTH;
+        try {
+            Network.MAX_DEPTH = 5;
+            for (String name : new String[]{"air-pipe-first-steam", "steam-into-air-stub", "steam-into-air-stub-2"}) {
+                String text;
+                try (var in = ReplayTest.class.getResourceAsStream("/replay/" + name + ".txt")) {
+                    text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                }
+                double[] dt = new double[1];
+                Network net = NetworkDump.read(text, dt);
+                net.step(dt[0]);
+                System.out.printf("%s: substeps %d, iterations %d%n", name, net.stats.substeps, net.stats.iterations);
+                assertEquals(0, net.stats.failures, name + ": failed sub-steps");
+            }
+        } finally {
+            Network.MAX_DEPTH = depth;
+        }
+    }
+
     @Test
     void replayDumps() throws Exception {
         String dir = System.getenv("FLUIDCORE_REPLAY");
