@@ -41,6 +41,17 @@ dependencies {
     implementation sourceSets.api.output
     implementation sourceSets.apiTestkit.output
 }
+// The fluid core (fluidcore/, a pure-Java subproject with its own tests and spec) is part of the mod too: its sources
+// compile here as one more source set, with nothing of Minecraft on its classpath, and go into the mod's jar.
+sourceSets {
+    fluidcore {
+        java { srcDirs = ['fluidcore/src/main/java'] }
+        resources { srcDirs = [] }
+    }
+}
+dependencies {
+    implementation sourceSets.fluidcore.output
+}
 // The device models made with it (src/cadmodels: mods.eln.cad.models.Catalog) are generated at build time into
 // build/generated/cad (OBJ, MTL, atlases, origins, hitboxes, the converters' block models and sprites), not committed.
 // The task fails the build if a model breaks the checker; it is cached on the library's and the models' code.
@@ -108,6 +119,7 @@ neoForge {
             sourceSet(sourceSets.main)
             sourceSet(sourceSets.api)
             sourceSet(sourceSets.apiTestkit)
+            sourceSet(sourceSets.fluidcore)
         }
     }
 
@@ -219,6 +231,7 @@ apiVersionMatch = null
 tasks.named('jar') {
     from sourceSets.api.output
     from sourceSets.apiTestkit.output
+    from sourceSets.fluidcore.output
 }
 
 def apiJars = [api: 'eln-api', apiTestkit: 'eln-api-testkit'].collectEntries { setName, artifact ->
