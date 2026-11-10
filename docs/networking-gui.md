@@ -94,7 +94,8 @@ within 16 blocks (`MAX_DISTANCE_SQ`, 26.x hardening) -> `NodeBase.networkUnseria
 | `*Container` classes (23, e.g. `src/main/java/mods/eln/sixnode/hub/HubContainer.java`) | both | Only slot-id constants now; the elements index their inventories with them. |
 
 Rules:
-- `stillValid`: the node is not destructing, is still the node at `pos`, and the player is within 8 blocks.
+- `stillValid`: the node is not destructing, is still the node at `pos`, still has the element the menu was opened on
+  (a six-node face broken while the block stays closes it), and the player is within 8 blocks.
 - Shift-click (`ElnNodeMenu.quickMoveStack`): device slot -> a worn slot, else player inventory (from the end); worn
   slot -> device slots, else player inventory; player slot -> device slots (first accepting), then worn slots, else
   main inventory <-> hotbar. Returns `EMPTY` unless something moved, because 26.x repeats the move while the result

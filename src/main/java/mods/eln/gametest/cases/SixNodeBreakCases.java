@@ -24,6 +24,7 @@ public final class SixNodeBreakCases {
         cases.add(new BreakKeptOnlyVoxel());
         cases.add(new OrphanBlock());
         cases.add(new LostSupport());
+        cases.add(new MenuOfBrokenFace());
     }
 
     static final class BreakOneFace implements TestCase {
@@ -109,6 +110,67 @@ public final class SixNodeBreakCases {
         public void measure(TestContext ctx) {
             ctx.check("wall gone: its cable drops, the floor one stays", afterWall == 1 && stayedAfterWall, afterWall + " items, block stayed " + stayedAfterWall);
             ctx.check("floor gone too: that cable drops and the block goes", afterFloor == 2 && goneAfterFloor, afterFloor + " items, gone " + goneAfterFloor);
+        }
+    }
+
+    /**
+     * A device's screen closes when that device goes and the block stays (another device on it): its contents drop
+     * once, and the menu still open on the device neither keeps them (they were on the ground and in the menu: a dupe)
+     * nor takes new ones (lost when it closed). A new device on the same face doesn't bring the old menu back.
+     */
+    static final class MenuOfBrokenFace implements TestCase {
+        BlockPos p;
+        boolean validBefore, nodeStayed, validAfter, validOverNew;
+        String inMenu = "", inDevice = "";
+        int dropped;
+
+        public String name() {
+            return "six node device menu closes when its face is broken";
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void build(TestContext ctx) {
+            var level = ctx.level();
+            p = ctx.at(1, 1, 1);
+            level.setBlockAndUpdate(ctx.at(0, 1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            var charger = ctx.placeSix(ChargerWearCases.CHARGER_WEAK, p, Direction.YN);
+            ctx.placeSix(Ids.six("Low Voltage Cable"), p, Direction.XN);
+            var six = charger.sixNode;
+            var battery = new ItemStack(mods.eln.Eln.itemsByName.get("Portable Battery"));
+            charger.getInventory().setItem(0, battery.copy());
+            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+            player.setPos(p.getX() + 0.5, p.getY(), p.getZ() + 2.5);
+            var menu = mods.eln.node.NodeMenus.menu(1, player, six, Direction.YN);
+            validBefore = menu != null && menu.stillValid(player) && !menu.deviceInventory.isEmpty();
+            if (menu == null) return;
+            six.deleteSlot(null, Direction.YN.getInt());
+            nodeStayed = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level)) == six
+                && six.getElement(Direction.YN) == null && six.getElement(Direction.XN) != null;
+            validAfter = menu.stillValid(player);
+            inMenu = contents(menu.deviceInventory);
+            inDevice = contents(charger.getInventory());
+            dropped = level.getEntitiesOfClass(ItemEntity.class, new AABB(p).inflate(2)).stream()
+                .filter(e -> e.getItem().is(battery.getItem())).mapToInt(e -> e.getItem().getCount()).sum();
+            ctx.placeSix(ChargerWearCases.CHARGER_WEAK, p, Direction.YN);
+            validOverNew = menu.stillValid(player);
+        }
+
+        static String contents(net.minecraft.world.Container inv) {
+            StringBuilder b = new StringBuilder();
+            for (int i = 0; i < inv.getContainerSize(); i++) if (!inv.getItem(i).isEmpty()) b.append(i).append(": ").append(inv.getItem(i)).append("; ");
+            return b.toString();
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("broken face: the menu was open and valid on the charger with a battery", validBefore, "");
+            ctx.check("broken face: the block stays for the cable", nodeStayed, "");
+            ctx.check("broken face: the menu is no longer valid", !validAfter, "still valid");
+            ctx.check("broken face: the battery drops once, and neither the menu nor the device keeps it",
+                dropped == 1 && inMenu.isEmpty() && inDevice.isEmpty(), dropped + " dropped; menu " + inMenu + "device " + inDevice);
+            ctx.check("broken face: a new device there doesn't revive the old menu", !validOverNew, "valid again");
         }
     }
 

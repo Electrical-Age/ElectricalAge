@@ -458,6 +458,11 @@ In the port:
   `BatteryPackRecipe` sums their charge into the pack; `golden_recipes` accepts a custom recipe in a shapeless one's
   place when the 1.12 grid makes the same item. Test: `battery_pack_keeps_charge`.
 
+- A six-node device's screen stayed open after that face was broken while the block stayed (another device or a cable
+  on it, a voxel block), and its contents were both on the ground and in the screen: a dupe, or a loss for anything put
+  in after. The screen now closes with its device, and dropped contents leave the inventory
+  (`six_node_device_menu_closes_when_its_face_is_broken`).
+
 - Two devices on adjacent faces of one block shared heat only on some corners: `SixNode.tryConnectTwoInternalElement`
   paired the wrong thermal loads (1.12). Test: `six_node_inner_corner_a_temperature_probe_reads_a_wall_cable_s_heat`.
 

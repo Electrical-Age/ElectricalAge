@@ -38,6 +38,8 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
     public final Container deviceInventory;
     /** Server only (null on the client). */
     private final @Nullable NodeBase node;
+    /** Server only: the device the menu was opened on (NodeMenus.element); the menu is valid while it is still there. */
+    private final @Nullable Object element;
     public final int deviceSlots;
 
     /** Server: the worn slots shown are the player's own (keys from {@link #wearables}). */
@@ -57,6 +59,7 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         this.spec = spec;
         this.deviceInventory = deviceInventory;
         this.node = node;
+        this.element = node == null ? null : NodeMenus.element(node, slot);
         for (SlotSpec s : spec.slots()) addSlot(new ElnSlot(deviceInventory, s, playerInventory.player.level()));
         deviceSlots = spec.slots().size();
         if (spec.playerInventory()) {
@@ -153,6 +156,8 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
     public boolean stillValid(Player player) {
         if (node != null) {
             if (node.isDestructing() || mods.eln.node.NodeMenus.burnt(node, slot)) return false;
+            // (the device on that face went and the block stayed: its inventory is no one's, its items have dropped)
+            if (NodeMenus.element(node, slot) != element) return false;
             NodeBase now = NodeManager.instance.getNodeFromCoordonate(new Coordonate(pos, player.level()));
             if (now != node) return false;
         }

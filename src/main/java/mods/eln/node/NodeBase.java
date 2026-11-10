@@ -703,10 +703,17 @@ public abstract class NodeBase {
         }
     }
 
+    /**
+     * Drops every stack of the inventory and empties its slots: the item entity gets the stack itself, so a slot that
+     * kept it would share it with the entity (a menu still open on the inventory could take it out again).
+     */
     public void dropInventory(Container inventory) {
         if (inventory == null) return;
         for (int idx = 0; idx < inventory.getContainerSize(); idx++) {
-            dropItem(inventory.getItem(idx));
+            ItemStack stack = inventory.getItem(idx);
+            if (Utils.isEmpty(stack)) continue;
+            inventory.removeItemNoUpdate(idx);
+            dropItem(stack);
         }
     }
 

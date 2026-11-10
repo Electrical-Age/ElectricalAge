@@ -77,6 +77,12 @@ public final class NodeMenus {
         return new ElnNodeMenu(containerId, player.getInventory(), inventory, spec, node, node.coordonate.pos(), slot, kind, id);
     }
 
+    /** The element behind a node's menu at slot (a six-node's element there, a transparent node's element), or null. */
+    public static @Nullable Object element(NodeBase node, int slot) {
+        if (node instanceof SixNode six) return six.getElement(slot);
+        return node instanceof TransparentNode t ? t.element : null;
+    }
+
     /** Is the element behind a node's menu at slot burnt out? Its open screen closes (ElnNodeMenu.stillValid). */
     public static boolean burnt(NodeBase node, int slot) {
         if (node instanceof SixNode six) {
