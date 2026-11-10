@@ -40,6 +40,8 @@ final class CoreStep {
     final Network.Node[] cn;
     /** Per FluidEdge its core edge (null: not joined, its ports could not be brought to one height). */
     final Network.Edge[] ce;
+    /** Per FluidEdge: the first of an opening's two one-way edges, joined in the core as one pipe (the second has none). */
+    final boolean[] pipeOfPair;
     /** Core species index to registry id (null: water and air, the core's fast path). */
     final int[] ids;
     final int water, air;
@@ -63,8 +65,11 @@ final class CoreStep {
             of.put(n, cn[i]);
         }
         ce = new Network.Edge[edges.size()];
+        pipeOfPair = new boolean[ce.length];
         for (int k = 0; k < ce.length; k++) {
             FluidEdge e = edges.get(k);
+            // (an opening's second edge, the way back in: the core's pipe carries both ways in one edge, its two streams)
+            if (k > 0 && pipeOfPair[k - 1] && e.entrySpan > 0) continue;
             Network.Node a = of.get(e.a), b = of.get(e.b);
             double fa = e.portA, fb = e.portB, za = e.a.z + fa * e.a.height, zb = e.b.z + fb * e.b.height;
             if (Math.abs(za - zb) > 1e-6) {
@@ -86,7 +91,10 @@ final class CoreStep {
                 }
             }
             ce[k] = net.connect(a, fa, b, fb, 0);
-            if (e.oneWay()) ce[k].kind = Network.Kind.CHECK;
+            FluidEdge next = k + 1 < ce.length ? edges.get(k + 1) : null;
+            if (e.kind == FluidEdge.Kind.CHECK && e.spanA > 0 && next != null && next.entrySpan > 0 && next.a == e.b && next.b == e.a)
+                pipeOfPair[k] = true;
+            else if (e.oneWay()) ce[k].kind = Network.Kind.CHECK;
         }
     }
 
@@ -184,7 +192,7 @@ final class CoreStep {
             FluidEdge e = edges.get(k);
             c.boost = e.boost;
             double dp = e.a.pressureOver(e.portA, e.spanA) - e.b.pressureOver(e.portB, e.spanB) + e.boost;
-            boolean fromA = dp >= 0 || e.oneWay();
+            boolean fromA = dp >= 0 || (e.oneWay() && !pipeOfPair[k]);
             FluidNetwork.Packet pk = fromA ? FluidNetwork.packet(e.a, e.portA, e.spanA) : FluidNetwork.packet(e.b, e.portB, e.spanB);
             xl[k] = pk.xl;
             double open = Math.max(0, e.open);
