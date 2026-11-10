@@ -170,8 +170,9 @@ public final class Network {
          * PUMP: a centrifugal pump from a to b. qMax (kg/s at full speed against no head), h0 its shut-off head (Pa), speed
          * (0..1: scales the flow, the shut-off head stays, as the game's pumps), eta its efficiency. Its flow against the
          * back-pressure dp (b's port over a's, its own head included) is speed qMax sqrt(1 - dp / h0), smoothed over
-         * PUMP_W of h0 at the shut-off so its slope stays finite (Network.pumpStreams); the work it does on the fluid,
-         * q dp / (rho eta), goes into b as power. work: that power over the last step (W).
+         * PUMP_W of h0 at the shut-off so its slope stays finite (Network.pumpStreams); qMax and h0 are for a liquid,
+         * and scale with the density drawn under PUMP_PRIME_RHO (a gas: it loses its prime); the work it does on the
+         * fluid, q dp / (rho eta), goes into b as power. work: that power over the last step (W).
          */
         public double qMax, h0, speed = 1, eta = 0.7, work;
         /**
@@ -403,16 +404,29 @@ public final class Network {
      */
     static double[] pumpStreams(Edge e, double dp) {
         if (e.qMax <= 0 || e.h0 <= 0 || e.speed <= 0) return new double[4];
-        double arg = pumpDrive(e, dp), w = PUMP_W, u = (1 + arg / e.h0) / w;
+        // (a centrifugal pump moves a volume and makes a head in metres: drawing gas, its flow and shut-off pressure fall
+        // with the density, so it loses its prime instead of pumping a vessel's vapour out to a hard vacuum)
+        double f = prime(e), h0 = e.h0 * f, qMax = e.qMax * f;
+        if (!(h0 > 0)) return new double[4];
+        double arg = pumpDrive(e, dp), w = PUMP_W, u = (1 + arg / h0) / w;
         double sp = w * spc(u);
         // (far past its shut-off the softplus underflows to nothing, and so does the flow; its slope 0 / 0 was NaN)
         if (!(sp > 0)) return new double[4];
         double phi = Math.sqrt(sp), dphi = sgc(u) / (2 * phi);
         // (and shut past the shut-off head as a check valve shuts, over SPLIT_DP: the curve's own tail, h0 PUMP_W wide,
         // crept a stalled pump's full pipe up for ever)
-        double x = (e.h0 + arg) / SPLIT_DP, gate = sgc(x), dgate = gate * sgc(-x) / SPLIT_DP;
-        double q = e.speed * e.qMax * phi * gate, dq = e.speed * e.qMax * (dphi / e.h0 * gate + phi * dgate);
+        double x = (h0 + arg) / SPLIT_DP, gate = sgc(x), dgate = gate * sgc(-x) / SPLIT_DP;
+        double q = e.speed * qMax * phi * gate, dq = e.speed * qMax * (dphi / h0 * gate + phi * dgate);
         return new double[]{q, 0, dq, 0};
+    }
+
+    /** A pump's rated flow and head are for a liquid at least this dense (kg/m^3); below it both scale with density. */
+    public static double PUMP_PRIME_RHO = 500;
+
+    /** The share of a pump's rated flow and shut-off head it has on what it draws (held for the step as heads are). */
+    static double prime(Edge e) {
+        double rho = Double.isNaN(e.rhoA) ? rhoDraw(e.a, e.fa) : e.rhoA;
+        return Math.max(0, Math.min(1, rho / PUMP_PRIME_RHO));
     }
 
     /**
@@ -1234,6 +1248,14 @@ public final class Network {
                 }
                 return nr < 1e3 * TOL;
             }
+        }
+        // (out of iterations crawling at the precision floor: each iteration took a sliver off the residual, so the line
+        // search never stalled, but rounding keeps it there; as a stall under STALL_OK, accepted: the step ends
+        // conservatively. A steam jet into an emptied condenser failed every sub-step this way at 3e-10 to 3e-8, and
+        // its network made no progress for seconds)
+        if (nr >= TOL && nr < STALL_OK) {
+            stats.stalls++;
+            return true;
         }
         if (nr >= TOL) {
             stats.lastFail.clear();

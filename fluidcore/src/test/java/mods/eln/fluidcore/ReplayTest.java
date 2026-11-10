@@ -17,7 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ReplayTest {
     /**
      * Networks whose step failed in the game (GameTests on the core's first adapter), kept as cases: each must now step
-     * without a failed sub-step with the game's settings (sub-steps to 1/256 of a tick, cut short at the floor).
+     * without a failed sub-step with the game's settings (sub-steps to 1/256 of a tick, cut short at the floor), and
+     * cover the whole step (Baughn 2026-11-10: a network making no progress for long is not workable, whatever its
+     * devices do). The last two stalled a closed plant's turbine network for seconds: its condensate pump had pumped the
+     * condenser's vapour out to a hard vacuum, and steam then expanded into the empty vessel.
      */
     @Test
     void gameNetworksThatOnceFailedStep() throws Exception {
@@ -26,7 +29,8 @@ class ReplayTest {
         try {
             Network.MAX_DEPTH = 8;
             Network.CUT_SHORT = true;
-            for (String name : new String[]{"air-pipe-first-steam", "steam-into-air-stub", "steam-into-air-stub-2", "fill-near-full-from-50-bar", "flood-pipe-from-6-bar", "boiler-flash-into-stub"}) {
+            for (String name : new String[]{"air-pipe-first-steam", "steam-into-air-stub", "steam-into-air-stub-2", "fill-near-full-from-50-bar", "flood-pipe-from-6-bar", "boiler-flash-into-stub",
+                "condenser-pumped-to-vacuum", "steam-into-evacuated-condenser"}) {
                 String text;
                 try (var in = ReplayTest.class.getResourceAsStream("/replay/" + name + ".txt")) {
                     text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
@@ -36,6 +40,7 @@ class ReplayTest {
                 net.step(dt[0]);
                 System.out.printf("%s: substeps %d, iterations %d%n", name, net.stats.substeps, net.stats.iterations);
                 assertEquals(0, net.stats.failures, name + ": failed sub-steps");
+                assertEquals(dt[0], net.done, 1e-12, name + ": the whole step covered");
             }
         } finally {
             Network.MAX_DEPTH = depth;
