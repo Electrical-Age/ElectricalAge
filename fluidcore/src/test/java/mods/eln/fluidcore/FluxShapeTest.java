@@ -125,4 +125,26 @@ class FluxShapeTest {
             }
         }
     }
+
+    /**
+     * The exchange swaps equal volumes: the liquid it sends down, at the density it is given, fills the volume of the
+     * gas it brings up, also where the port sees two layers at once.
+     */
+    @Test
+    void exchangedLiquidHasTheDensityItIsSentAt() {
+        Species[] sp = {Species.WATER, MixFluidTest.GASOLINE, Species.AIR};
+        Network.Node n = MixFluidTest.node(sp, 1e-3, new double[]{0.3, 0.2, 0.001}, 300);
+        MixFluid f = MixFluidTest.mf(n);
+        double interface_ = f.st.top[0].v;
+        boolean mixed = false;
+        for (double df = -1.5 * Network.BAND; df <= 0.5 * Network.BAND; df += Network.BAND / 16) {
+            double at = interface_ + df;
+            double[] l = f.liquidDraw(at);
+            double volume = 0;
+            for (int i = 0; i < 2; i++) volume += l[i] * f.st.v[i].v;
+            assertEquals(1, f.rhoLiquid(at) * volume, 1e-12, "density x volume per kg at " + df);
+            mixed |= l[0] > 0.2 && l[1] > 0.2;
+        }
+        assertTrue(mixed, "some port saw both layers");
+    }
 }
