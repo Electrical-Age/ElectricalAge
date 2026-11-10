@@ -1376,7 +1376,7 @@ public final class OilCases {
      * A condenser pulling a vacuum with a dry dead-end pipe stub on its makeup flange and its float valve open: the stub's
      * air drains into the vessel, cooling as it expands (a node drained like this once fell under the EOS's 120 K floor
      * and its network stopped converging). The harness checks the network keeps making progress, and the pipe's wall
-     * (its heat link to the air) keeps the gas near the air's temperature.
+     * keeps the gas near the air's temperature. The ejector, a gas pump, takes a little of the vessel's steam too.
      */
     static final class CondenserDryMakeupStub implements TestCase {
         mods.eln.oil.CondenserElement c;
@@ -1406,8 +1406,11 @@ public final class OilCases {
                 mods.eln.Eln.simulator.removeSlowProcess(prime);
                 // (5 % water: under the float valve's open level)
                 mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.05 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 300, false);
+                water0 = c.vessel.mWater;
             });
         }
+
+        double water0;
 
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(prime);
@@ -1419,6 +1422,10 @@ public final class OilCases {
                 c == null ? "none" : String.format("%.3f bar", c.vessel.P() / 1e5));
             ctx.check("condenser: the stub's wall keeps its air near the air's temperature (over 250 K)", n != null && n.T() > 250,
                 n == null ? "none" : String.format("%.0f K", n.T()));
+            // (the ejector is a gas pump to the air: it takes the vessel's steam with its air, Baughn 2026-11-10: make it real)
+            double lost = c == null ? 0 : water0 - c.vessel.mWater;
+            ctx.check("condenser: its ejector takes a little steam out with the air (0.01-2 % of its water)",
+                c != null && lost > 1e-4 * water0 && lost < 0.02 * water0, String.format("%.3g of %.3g kg", lost, water0));
         }
     }
 

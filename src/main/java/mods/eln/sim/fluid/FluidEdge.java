@@ -39,6 +39,8 @@ public final class FluidEdge {
      * power it put into the fluid last step (W).
      */
     public double qMax, h0, speed = 1, eta = 0.7, work;
+    /** PUMP: a gas pump (qMax a volume, m^3/s; Network.Edge.gas). */
+    public boolean gas;
     /**
      * TURBINE (in the fluid core's solve, Network.Kind.TURBINE): its nozzle coefficient and the isentropic drop (J/kg)
      * from its inlet to its exhaust's pressure, set each step; it takes eta x drop a kg of water out as shaft work (work,

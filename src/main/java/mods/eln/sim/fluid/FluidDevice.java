@@ -66,6 +66,16 @@ public interface FluidDevice {
         /** PUMP: its curve (FluidEdge.qMax, h0, eta); the device sets speed before each step. */
         public double qMax, h0, speed = 1, eta = 0.7;
 
+        /** PUMP as a gas pump (Network.Edge.gas): qMax a volume (m^3/s), h0 the pressure it makes whatever it draws. */
+        public boolean gas;
+
+        /** This link as a gas pump (an ejector): free flow qMax (m^3/s at full speed), shut-off pressure rise h0 (Pa). */
+        public Link gasPump(double qMax, double h0) {
+            pump(qMax, h0);
+            gas = true;
+            return this;
+        }
+
         /** This link as a centrifugal pump: free flow qMax (kg/s at full speed), shut-off head h0 (Pa). */
         public Link pump(double qMax, double h0) {
             this.kind = FluidEdge.Kind.PUMP;

@@ -160,6 +160,7 @@ public final class FluidWorld implements IProcess {
             l.edge.speed = l.speed;
             l.edge.qMax = l.qMax;
             l.edge.h0 = l.h0;
+            l.edge.gas = l.gas;
             l.edge.drop = l.drop;
             l.edge.conductance = l.conductance;
         }
@@ -449,6 +450,7 @@ public final class FluidWorld implements IProcess {
             l.edge.boost = l.boost;
             l.edge.qMax = l.qMax;
             l.edge.h0 = l.h0;
+            l.edge.gas = l.gas;
             l.edge.speed = l.speed;
             l.edge.eta = l.eta;
             l.edge.nozzle = l.nozzle;

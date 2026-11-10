@@ -94,7 +94,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
 
     @Override
     public List<FluidDevice.Link> fluidLinks() {
-        return v.pump == null ? List.of() : List.of(v.pump, v.makeup);
+        return v.pump == null ? List.of() : List.of(v.pump, v.makeup, v.ejector);
     }
 
     /** The condensate pump turns with the turbine's shaft; the ejector always works (its steam jet). */

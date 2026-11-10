@@ -311,6 +311,7 @@ final class CoreStep {
                 // (a pump is its curve in the core's solve: the device sets its speed; open scales it too)
                 c.qMax = e.qMax;
                 c.h0 = e.h0;
+                c.gas = e.gas;
                 c.eta = e.eta;
                 c.speed = e.speed * open;
                 continue;

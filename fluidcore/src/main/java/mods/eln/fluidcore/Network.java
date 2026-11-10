@@ -176,6 +176,12 @@ public final class Network {
          */
         public double qMax, h0, speed = 1, eta = 0.7, work;
         /**
+         * A gas pump (an ejector, a compressor): qMax is a volume (m^3/s at full speed against no head), the flow its
+         * port's gas density times that (none as far as the port is under the liquid), and h0 the pressure it can make
+         * whatever the density (no loss of prime).
+         */
+        public boolean gas;
+        /**
          * TURBINE: a steam turbine from a (its inlet, drawn at its port) to b (its exhaust). Its nozzle passes q = nozzle
          * open sqrt(rho / p_a (p_a + p_b) S softplus((p_a - p_b) / S)) (the ellipse law, rho the inlet gas's density held for
          * the step), and takes eta x drop (J/kg, the isentropic drop to b's pressure, set by the game each step) for each kg
@@ -406,7 +412,7 @@ public final class Network {
         if (e.qMax <= 0 || e.h0 <= 0 || e.speed <= 0) return new double[4];
         // (a centrifugal pump moves a volume and makes a head in metres: drawing gas, its flow and shut-off pressure fall
         // with the density, so it loses its prime instead of pumping a vessel's vapour out to a hard vacuum)
-        double f = prime(e), h0 = e.h0 * f, qMax = e.qMax * f;
+        double f = prime(e), h0 = e.gas ? e.h0 : e.h0 * f, qMax = e.gas ? e.qMax * drawRho(e) : e.qMax * f;
         if (!(h0 > 0)) return new double[4];
         double arg = pumpDrive(e, dp), w = PUMP_W, u = (1 + arg / h0) / w;
         double sp = w * spc(u);
@@ -425,8 +431,17 @@ public final class Network {
 
     /** The share of a pump's rated flow and shut-off head it has on what it draws (held for the step as heads are). */
     static double prime(Edge e) {
-        double rho = Double.isNaN(e.rhoA) ? rhoDraw(e.a, e.fa) : e.rhoA;
-        return Math.max(0, Math.min(1, rho / PUMP_PRIME_RHO));
+        return Math.max(0, Math.min(1, drawRho(e) / PUMP_PRIME_RHO));
+    }
+
+    /** The density a pump draws (held for the step as heads are). */
+    static double drawRho(Edge e) {
+        return Math.max(0, Double.isNaN(e.rhoA) ? e.gas ? gasDraw(e) : rhoDraw(e.a, e.fa) : e.rhoA);
+    }
+
+    /** What a gas pump draws: the gas, as far as its port is above the liquid (under water, an ejector moves nothing). */
+    static double gasDraw(Edge e) {
+        return e.a.fluid.rhoGas() * (1 - e.a.fluid.liquidWindow(e.fa));
     }
 
     /**
@@ -573,7 +588,7 @@ public final class Network {
         for (Node n : free) n.wallJ = n.pendingWall = 0;
         for (Edge e : edges) {
             boolean f = FREEZE_HEAD && (e.dz != 0 || e.kind == Kind.PUMP) || e.kind == Kind.TURBINE;
-            e.rhoA = !f ? Double.NaN : e.kind == Kind.TURBINE ? e.a.fluid.rhoGas() : rhoDraw(e.a, e.fa);
+            e.rhoA = !f ? Double.NaN : e.kind == Kind.TURBINE ? e.a.fluid.rhoGas() : e.gas ? gasDraw(e) : rhoDraw(e.a, e.fa);
             e.rhoB = f ? rhoDraw(e.b, e.fb) : Double.NaN;
         }
         progressed = false;

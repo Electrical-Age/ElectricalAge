@@ -105,7 +105,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     @Override
     public List<FluidDevice.Link> fluidLinks() {
         if (v.pump == null) return List.of();
-        return tubesLink == null ? List.of(v.pump, v.makeup) : List.of(v.pump, v.makeup, tubesLink);
+        return tubesLink == null ? List.of(v.pump, v.makeup, v.ejector) : List.of(v.pump, v.makeup, v.ejector, tubesLink);
     }
 
     @Override
