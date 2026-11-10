@@ -29,8 +29,9 @@ public final class CuriosCompat {
         return LOADED;
     }
 
-    /** The Curios slot types the battery charger shows, in order: the battery belt's and the headlamp's. */
-    static final String[] WORN_TYPES = {"belt", "head"};
+    /** The Curios slot types the battery charger shows, in order: the battery belt's, the headlamp's, and the necklace
+     *  (Stasis' rift pendants charge in it: nero 2026-11-10). */
+    static final String[] WORN_TYPES = {"belt", "head", "necklace"};
 
     /** The player's Curios belt and head slots, for device menus (ElnNodeMenu; none without Curios). */
     public static final mods.eln.gui.ElnNodeMenu.Wearables WEARABLES = new mods.eln.gui.ElnNodeMenu.Wearables() {

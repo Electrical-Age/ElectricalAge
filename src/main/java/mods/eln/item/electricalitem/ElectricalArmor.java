@@ -50,17 +50,34 @@ public class ElectricalArmor extends Item implements IItemEnergyBattery {
 
     private static final EquipmentSlot[] ARMOR = {EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD};
 
+    /**
+     * Registers the absorption as a modifier of the armour step, so it runs inside actuallyHurt: after the hit cooldown.
+     * Done in LivingIncomingDamageEvent itself it ran before the cooldown check, so the armour paid for every hit that
+     * i-frames then threw away: on a magma block (a hit every tick) a 240 kJ Stasis E-Coal set emptied in ~8 s (nero,
+     * Baughn 2026-11-10: "Move it to after i-frames. That's just a bug."). The order against Protection is unchanged.
+     */
     public static void onIncomingDamage(LivingIncomingDamageEvent event) {
         LivingEntity entity = event.getEntity();
         if (entity.level().isClientSide() || event.getSource().is(DamageTypeTags.BYPASSES_ARMOR)) return;
+        for (EquipmentSlot slot : ARMOR)
+            if (entity.getItemBySlot(slot).getItem() instanceof ElectricalArmor) {
+                event.getContainer().addModifier(net.neoforged.neoforge.common.damagesource.DamageContainer.Reduction.ARMOR,
+                    (container, reduction) -> reduction + absorb(entity, container.getNewDamage() - reduction));
+                return;
+            }
+    }
+
+    /** Absorbs a share of {@code amount} with the worn pieces' energy and pays for it; returns the damage absorbed. */
+    static float absorb(LivingEntity entity, float amount) {
+        if (amount <= 0) return 0;
         double total = 0;
         double[] ratios = new double[ARMOR.length];
         for (int i = 0; i < ARMOR.length; i++) {
             ItemStack s = entity.getItemBySlot(ARMOR[i]);
             if (s.getItem() instanceof ElectricalArmor a) total += ratios[i] = a.absorbRatio(s);
         }
-        if (total <= 0) return;
-        double damage = event.getAmount() * 25.0;
+        if (total <= 0) return 0;
+        double damage = amount * 25.0;
         double scale = total > 1 ? 1 / total : 1;
         double left = damage;
         for (int i = 0; i < ARMOR.length; i++) {
@@ -73,7 +90,7 @@ public class ElectricalArmor extends Item implements IItemEnergyBattery {
                 left -= absorb;
             }
         }
-        event.setAmount((float) Math.max(0, left / 25.0));
+        return (float) Math.min(amount, (damage - Math.max(0, left)) / 25.0);
     }
 
     private CompoundTag nbt(ItemStack stack) {

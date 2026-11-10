@@ -30,6 +30,7 @@ public final class ChargerWearCases {
     }
 
     static final int CHARGER_WEAK = 0 + (66 << 6);   // Weak 50V Battery Charger
+    static final List<String> ARMOR = List.of("armor#head", "armor#chest", "armor#legs", "armor#feet");
 
     static final class Worn implements TestCase {
         public String id() {
@@ -54,10 +55,27 @@ public final class ChargerWearCases {
             FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());
             fp.getInventory().clearContent();
 
-            // without Curios: the menu as before, no worn slots
+            // without Curios: the player's four armour slots only (nero 2026-11-10: charge worn armour from the charger)
             ElnNodeMenu plain = NodeMenus.menu(1, fp, charger.sixNode, Direction.YN);
-            ctx.check("charger without Curios: no worn slots", plain.wearKeys.isEmpty() && plain.inventoryEnd == plain.slots.size()
-                && plain.slots.size() == plain.deviceSlots + 36, plain.slots.size() + " slots, " + plain.deviceSlots + " device");
+            ctx.check("charger without Curios: the four armour slots", plain.wearKeys.equals(ARMOR)
+                && plain.slots.size() == plain.deviceSlots + 36 + 4, plain.slots.size() + " slots, keys " + plain.wearKeys);
+            // a worn E-Coal chestplate: shift-click into the charger, and back on
+            ItemStack plate = new ItemStack(mods.eln.registry.batch.Wp12dContent.plateECoal.get());
+            fp.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, plate.copy());
+            int chest = plain.inventoryEnd + 1;
+            ctx.check("the chest slot holds the worn chestplate and takes only chest armour", plain.getSlot(chest).getItem().is(plate.getItem())
+                && !plain.getSlot(chest).mayPlace(mods.eln.Eln.findItemStack("Portable Battery")), "" + plain.getSlot(chest).getItem());
+            plain.quickMoveStack(fp, chest);
+            int pat = -1;
+            for (int i = 0; i < plain.deviceSlots; i++) if (plain.getSlot(i).getItem().is(plate.getItem())) pat = i;
+            ctx.check("shift-click: the worn chestplate goes into a charger slot", pat >= 0
+                && fp.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST).isEmpty(), "charger slot " + pat);
+            if (pat >= 0) {
+                plain.quickMoveStack(fp, pat);
+                ctx.check("shift-click: from the charger it goes back on", fp.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST)
+                    .is(plate.getItem()), "" + fp.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST));
+            }
+            fp.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, ItemStack.EMPTY);
 
             SimpleContainer worn = new SimpleContainer(1);
             ElnNodeMenu.Wearables saved = ElnNodeMenu.wearables;
@@ -80,9 +98,11 @@ public final class ChargerWearCases {
             };
             try {
                 ElnNodeMenu menu = NodeMenus.menu(1, fp, charger.sixNode, Direction.YN);
-                int belt = menu.inventoryEnd, head = belt + 1;
-                ctx.check("charger with worn slots: the two follow the player inventory",
-                    menu.slots.size() == menu.deviceSlots + 36 + 2 && menu.wearKeys.equals(List.of("belt#0", "head#0")),
+                int belt = menu.inventoryEnd + 4, head = belt + 1;
+                List<String> keys = new java.util.ArrayList<>(ARMOR);
+                keys.addAll(List.of("belt#0", "head#0"));
+                ctx.check("charger with worn slots: the armour, then the two Curios slots",
+                    menu.slots.size() == menu.deviceSlots + 36 + 6 && menu.wearKeys.equals(keys),
                     menu.slots.size() + " slots, keys " + menu.wearKeys);
                 var buf = new RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), ctx.level().registryAccess());
                 menu.writeOpenData(buf);
