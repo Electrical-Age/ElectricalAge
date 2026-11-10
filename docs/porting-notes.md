@@ -473,6 +473,9 @@ In the port:
   could be linked for a few blocks of cable. The distance between dimensions is infinite now, a starting pole in
   another dimension is forgotten, and so is a player's starting pole on logout. Test
   `dimensions_keep_wireless_and_poles_apart`.
+- Auto Miner below y = 0 (1.12 never went there): each pipe segment's ghost id was its height, so the segment at
+  y = -1 had the machine's own id and breaking it broke the miner. Pipe segments share one id now. The stacks waiting
+  for room in the chest are saved and dropped when the miner is broken (1.12 lost them). Test `autominer_below_zero`.
 
 ## Deferred
 

@@ -129,6 +129,10 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   `bus.<dye name> = ...` line's stateful functions are saved under `equation.bus.<dye name>.`, as other components'.
 - Data logger: per channel n `busc<n>`, a byte, the bus channel 0-15 it records (absent, or any other value: its
   wire), claimed again on load. The unreleased named `bus<n>` is ignored.
+- Auto Miner: `AMSPitemsToDrop` (2026-11-10), a list of item stacks mined and waiting for room in its chest; absent
+  when the queue is empty (and in older saves). Its pipe segments are ghosts with id 1 (`PIPE_GHOST_UUID`; 1.12 gave
+  each its height); a segment an older version made at y = -1 (id -1, the machine's own) is renumbered at the first
+  tick after load.
 
 - Machine API (`api/impl/ElementHost`, any element with `Machines.forElement`): `api.machine.bufferJ` (energy
   delivered and not yet used, J), `api.machine.celsius` (with a heat model), `api.machine.trip` and
