@@ -43,6 +43,7 @@ public final class PlumbingCases {
         cases.add(new ValveMeters());
         cases.add(new LiquidStaysIncompressible());
         cases.add(new TankTakesOil());
+        cases.add(new TankStandsWithoutFloor());
     }
 
     static final int IRON_TANK = 40 + (82 << 6), ALLOY_TANK = 44 + (82 << 6), PUMP = 48 + (82 << 6);
@@ -131,6 +132,46 @@ public final class PlumbingCases {
 
         public int floorDepth() {
             return 10;
+        }
+    }
+
+    /**
+     * A tank needs no floor (Baughn 2026-11-10): tank A stands on a stone block, the block is taken away (it used to
+     * break the tank), and a pipe in its place runs from A's underside port down into tank B's top port. A stays, and
+     * its water runs down into B (slowly: both are sealed, so B's air has to climb the same pipe, ~2 g/s).
+     */
+    static final class TankStandsWithoutFloor extends Big {
+        TankElement a, b;
+        BlockPos pa;
+        double aWater0;
+
+        public String id() {
+            return "tank_stands_without_a_floor";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            pa = ctx.at(2, 3, 1);
+            BlockPos under = ctx.at(2, 2, 1);
+            ctx.level().setBlock(under, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
+            a = tank(ctx, IRON_TANK, pa, Direction.XN);
+            ctx.level().removeBlock(under, false);
+            PipeCases.lay(ctx, under, 0, 8, 16, 8, 8, 0, 8);
+            b = tank(ctx, IRON_TANK, ctx.at(2, 1, 1), Direction.XN);
+            fill(a.vessel, 0.5 * a.vessel.volume * Water.RHO_L, Water.P_ATM, 300);
+            aWater0 = a.vessel.mLiquid();
+        }
+
+        public void measure(TestContext ctx) {
+            boolean stands = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pa, ctx.level()))
+                instanceof mods.eln.node.transparent.TransparentNode n && n.element == a;
+            ctx.line("tank without a floor: A " + a.getWaila() + "; B " + b.getWaila());
+            ctx.check("tank: it stays when the block under it goes", stands, "");
+            ctx.check("tank: its water runs out of its underside port into B below", b.vessel.mLiquid() > 0.05 * aWater0,
+                String.format("%.3f of %.3f kg", b.vessel.mLiquid(), aWater0));
         }
     }
 

@@ -103,6 +103,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   how many are piped. Each flange's nozzle runs in past the shell all round its bore and is closed at its end (it was
   cut at the shell's centre line, so the curving shell left gaps at its sides one could look into).
   `tank_flanges_where_piped`.
+- Tanks need no floor (Baughn 2026-11-10): a tank, lone or a box, stays when the block under it goes, so a pipe can
+  run to its underside port (it used to break). `tank_stands_without_a_floor`.
 - Tank sight glass (Baughn 2026-11-03: "a viewglass"): a 3 px window in brass on the tank's front (was a 1.5 px slit
   in a texture half pale), the water in blue to its level and, when the vessel's gas is mostly steam, steam above it
   (else the dark of an empty glass: air). A box draws one glass on its front, the box's height but its own width.

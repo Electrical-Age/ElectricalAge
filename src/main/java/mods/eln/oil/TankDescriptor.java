@@ -26,6 +26,15 @@ public class TankDescriptor extends TransparentNodeDescriptor {
         this.obj = Eln.obj.getObj(model);
     }
 
+    /**
+     * No floor needed (Baughn 2026-11-10): a tank stands on its frame, so a pipe can run to its underside port; it used
+     * to break when the block under it went.
+     */
+    @Override
+    public boolean mustHaveFloor() {
+        return false;
+    }
+
     /** Volume (m^3) of so many buckets of water (EA units). */
     public static double bucketsVolume(double buckets) {
         return buckets * 1000 * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / mods.eln.sim.fluid.Water.RHO_L;
