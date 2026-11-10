@@ -141,25 +141,22 @@ final class CoreStep {
         };
     }
 
-    /** A step that failed: counted, and the network as it was before the step written out for a replay. */
+    /**
+     * A step that failed: counted, the network put back as it was before the step (the core's best iterate can be far
+     * from any physical state: nodes at 4000 K and 120 K followed such steps), and written out for a replay.
+     */
     private void failed(double dt, double[][] m0, double[] u0, double[] h0) {
         failedSteps++;
-        if (dumps >= 30) return;
+        if (failedSteps == 1 || Long.bitCount(failedSteps) == 1)
+            System.out.println("[fluidcore] failed steps so far: " + failedSteps + " (this one: " + cn.length + " nodes, the first at z " + nodes.get(0).z + ")");
+        if (dumps >= 30) {
+            restore(m0, u0);
+            return;
+        }
         int n = ++dumps;
-        double[][] m1 = new double[cn.length][];
-        double[] u1 = new double[cn.length];
-        for (int i = 0; i < cn.length; i++) {
-            m1[i] = cn[i].m.clone();
-            u1[i] = cn[i].U;
-            System.arraycopy(m0[i], 0, cn[i].m, 0, m0[i].length);
-            cn[i].U = u0[i];
-            cn[i].heat = h0[i];
-        }
+        restore(m0, u0);
+        for (int i = 0; i < cn.length; i++) cn[i].heat = h0[i];
         String text = mods.eln.fluidcore.NetworkDump.write(net, dt);
-        for (int i = 0; i < cn.length; i++) {
-            System.arraycopy(m1[i], 0, cn[i].m, 0, m1[i].length);
-            cn[i].U = u1[i];
-        }
         try {
             java.nio.file.Path dir = java.nio.file.Path.of("fluidcore-fail");
             java.nio.file.Files.createDirectories(dir);
@@ -169,6 +166,15 @@ final class CoreStep {
         } catch (java.io.IOException e) {
             System.out.println("[fluidcore] a step failed; could not write it out: " + e);
         }
+    }
+
+    private void restore(double[][] m0, double[] u0) {
+        for (int i = 0; i < cn.length; i++) {
+            System.arraycopy(m0[i], 0, cn[i].m, 0, m0[i].length);
+            cn[i].U = u0[i];
+            cn[i].update();
+        }
+        for (Network.Edge c : ce) if (c != null && c.moved != null) java.util.Arrays.fill(c.moved, 0);
     }
 
     void step(FluidNetwork fn, double dt) {
