@@ -184,17 +184,29 @@ theorem streams_mirror_band {g S : ℝ} (hS : 0 < S) {dp : ℝ} (hlo : -30 ≤ d
   rw [e1, e2]
   exact smooth_mirror hS.ne' g dp
 
-/-- `Network.streams` for a check valve: one way only, and nothing at all against it. -/
-noncomputable def checkStreams (g dp : ℝ) : ℝ × ℝ := if 0 < dp then (g * dp, 0) else (0, 0)
+/-- `Network.streams` for a check valve: a pipe's forward stream alone, and nothing back. Against the valve it passes
+the stream's tail, about g S e^(dp / S), at rest g S ln 2. (A hard max(0, dp) put a kink where a valve sits balanced,
+and Newton stalled on it in the game's networks.) -/
+noncomputable def checkStreams (g S dp : ℝ) : ℝ × ℝ := ((streams g S dp).1, 0)
 
-theorem checkStreams_spec {g : ℝ} (hg : 0 ≤ g) (dp : ℝ) :
-    (checkStreams g dp).1 = g * max 0 dp ∧ 0 ≤ (checkStreams g dp).1 ∧ (checkStreams g dp).2 = 0 := by
+theorem checkStreams_spec {g S : ℝ} (hg : 0 ≤ g) (hS : 0 < S) (dp : ℝ) :
+    g * max 0 dp ≤ (checkStreams g S dp).1 ∧ 0 ≤ (checkStreams g S dp).1 ∧ (checkStreams g S dp).2 = 0 := by
+  have hnn : 0 ≤ (streams g S dp).1 := (streams_nonneg hg hS dp).1
+  have hge : g * dp ≤ (streams g S dp).1 := by
+    unfold streams
+    by_cases h : 30 < dp / S
+    · simp only [h, ↓reduceIte, le_refl]
+    · simp only [h, ↓reduceIte]
+      have h1 : dp / S < spCode (dp / S) := spCode_gt _
+      have h2 : dp < S * spCode (dp / S) := by
+        have := mul_lt_mul_of_pos_left h1 hS
+        rwa [mul_div_cancel₀ dp hS.ne'] at this
+      nlinarith
+  refine ⟨?_, hnn, rfl⟩
   unfold checkStreams
-  by_cases h : 0 < dp
-  · simp only [h, ↓reduceIte, max_eq_right h.le]
-    exact ⟨trivial, mul_nonneg hg h.le, trivial⟩
-  · simp only [h, ↓reduceIte, max_eq_left (not_lt.1 h), mul_zero]
-    exact ⟨trivial, le_refl 0, trivial⟩
+  rcases le_total 0 dp with h | h
+  · rw [max_eq_right h]; exact hge
+  · rw [max_eq_left h, mul_zero]; exact hnn
 
 /-! ### What the streams carry -/
 

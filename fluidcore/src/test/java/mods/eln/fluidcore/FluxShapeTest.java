@@ -42,9 +42,11 @@ class FluxShapeTest {
             assertTrue(q[0] >= 0 && q[1] >= 0, "streams " + q[0] + ", " + q[1] + " at dp " + e.boost + ", g " + e.g);
             assertEquals(flow, q[0] - q[1], 4 * Math.ulp(Math.max(q[0], q[1])), "net flow at dp " + e.boost);
             assertEquals(flow, Network.flow(e), 0, "the reported flow");
+            double forward = q[0];
             e.kind = Network.Kind.CHECK;
             q = Network.streams(e);
-            assertTrue(q[1] == 0 && q[0] == Math.max(0, flow), "a check valve at dp " + e.boost + ": " + q[0] + ", " + q[1]);
+            // (a check valve: the pipe's forward stream alone, never under the hard max(0, dp))
+            assertTrue(q[1] == 0 && q[0] == forward && q[0] >= Math.max(0, flow), "a check valve at dp " + e.boost + ": " + q[0] + ", " + q[1]);
             e.kind = Network.Kind.PIPE;
         }
     }

@@ -23,8 +23,8 @@ prebuilt files are fetched, which it does the first time). It:
 3. runs the Lean limiter on the recorded calls and compares bits;
 4. runs it again with one division computed as a multiplication by the inverse, which must be noticed.
 
-Last run: 1260 calls (153 unlimited, 757 scaled, 28 scaled until the last allowed pass, 322 with nodes silenced and
-scales raised again), no difference; the changed arithmetic differed on 235. One branch is in no recorded call: the
+Last run: 1256 calls (153 unlimited, 757 scaled, 28 scaled until the last allowed pass, 318 with nodes silenced and
+scales raised again), no difference; the changed arithmetic differed on 246. One branch is in no recorded call: the
 limiter's last resort, all scales to zero when silencing has run as many passes as there are cells. Java's comment
 says it is never reached; the proofs cover it all the same.
 
@@ -53,7 +53,7 @@ the band `SPLIT_DP`):
 
 | | Statement | Lean (`Flux.`) | Java |
 |---|---|---|---|
-| F1 | **A pipe's two streams** (q+ from a carrying a's draw, q- from b carrying b's) are never negative and differ by exactly g dp. At rest each is g S ln 2. Java's cuts 30 bands either side of rest change each stream by at most g S e^-30 (1e-13 of g S) and the net flow by nothing. An edge turned round has the mirrored streams: exactly within the cuts, to 2 g S e^-30 beyond. A check valve sends nothing backward. | `streams_nonneg`, `streams_net`, `streams_rest`, `streams_close`, `streams_mirror_band`, `streams_mirror`, `checkStreams_spec` | `Network.streams` |
+| F1 | **A pipe's two streams** (q+ from a carrying a's draw, q- from b carrying b's) are never negative and differ by exactly g dp. At rest each is g S ln 2. Java's cuts 30 bands either side of rest change each stream by at most g S e^-30 (1e-13 of g S) and the net flow by nothing. An edge turned round has the mirrored streams: exactly within the cuts, to 2 g S e^-30 beyond. A check valve passes the forward stream alone: never less than g max(0, dp), and nothing backward. | `streams_nonneg`, `streams_net`, `streams_rest`, `streams_close`, `streams_mirror_band`, `streams_mirror`, `checkStreams_spec` | `Network.streams` |
 | F2 | **What they carry.** Where both ends draw the same mix, the edge carries the net flow of it: nothing at rest, no mixing by the return stream. An end sends no species its draw has none of. The mass moved is q+ x (a's shares' sum) - q- x (b's): the net flow less what the shares leave out (below). | `carried_same`, `carried_has`, `carried_total`, `carried_total_gap` | `Network.flux` |
 | F3 | **Conduction** never lowers entropy (heat goes from hot to cold), and a node's part in it is a share from 0 to under 1. | `conduction_entropy`, `wetted_bounds` | `Network.conduction`, `wetted` |
 | F4 | **The exchange** (liquid down through an opening, gas up) runs only when the liquid is the denser, and never lifts mass. The liquid sent down fills exactly the volume Q exchanged, also where the opening sees several layers at once; the gas brought up is the share Q / Vg of the lower node's real gas. | `exchangeQ_nonneg`, `exchangeQ_pos`, `exchanged_down`, `exchanged_liquid_volume`, `exchanged_gas` | `Network.exchangeFlux`, `MixFluid.rhoLiquid` |

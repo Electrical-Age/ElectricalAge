@@ -237,7 +237,7 @@ public final class Network {
     /** The edge's mass flow at the current states. */
     static double flow(Edge e) {
         double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
-        return e.kind == Kind.CHECK ? e.g * Math.max(0, dp) : e.g * dp;
+        return e.kind == Kind.CHECK ? streams(e)[0] : e.g * dp;
     }
 
     /**
@@ -256,7 +256,9 @@ public final class Network {
     /** The two streams {q+ from a, q- from b} and their slopes in dp. */
     static double[] streams(Edge e) {
         double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
-        if (e.kind == Kind.CHECK) return dp > 0 ? new double[]{e.g * dp, 0, e.g, 0} : new double[4];
+        // (a check valve: the forward stream alone; a hard max(0, dp) put a kink where a valve sits balanced, and Newton
+        // stalled on it in the game's networks: openings and pumps at rest)
+        if (e.kind == Kind.CHECK && SPLIT_DP <= 0) return dp > 0 ? new double[]{e.g * dp, 0, e.g, 0} : new double[4];
         if (SPLIT_DP > 0) {
             double x = dp / SPLIT_DP;
             // (far above the band the return stream is under 1e-13 of the flow: none, exactly; taken as q+ - q there,
@@ -265,6 +267,7 @@ public final class Network {
             double sp = x > 30 ? x : x < -30 ? Math.exp(x) : Math.log1p(Math.exp(x));
             double sig = x > 30 ? 1 : x < -30 ? Math.exp(x) : 1 / (1 + Math.exp(-x));
             double qp = e.g * SPLIT_DP * sp;
+            if (e.kind == Kind.CHECK) return new double[]{qp, 0, e.g * sig, 0};
             return new double[]{qp, qp - e.g * dp, e.g * sig, e.g * sig - e.g};
         }
         return dp >= 0 ? new double[]{e.g * dp, 0, e.g, 0} : new double[]{0, -e.g * dp, 0, -e.g};
