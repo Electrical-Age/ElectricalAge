@@ -380,7 +380,7 @@ public final class Network {
         return nodes.isEmpty() ? 3 : nodes.get(0).m.length + 1;
     }
 
-    private double[] pack(List<Node> free) {
+    double[] pack(List<Node> free) {
         int C = C(), S = C - 1;
         double[] y = new double[C * free.size()];
         for (int i = 0; i < free.size(); i++) {
@@ -395,7 +395,7 @@ public final class Network {
         set(free, y);
     }
 
-    private void set(List<Node> free, double[] y) {
+    void set(List<Node> free, double[] y) {
         int C = C(), S = C - 1;
         for (int i = 0; i < free.size(); i++) {
             Node n = free.get(i);
@@ -430,7 +430,7 @@ public final class Network {
     }
 
     /** The residual R = Y' - Y0 - dt (fluxes in + heat) at the nodes' current states (each node's C rows). */
-    private double[] residual(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt) {
+    double[] residual(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt) {
         int C = C(), S = C - 1;
         double[] r = new double[C * free.size()];
         for (int i = 0; i < free.size(); i++) {
@@ -588,10 +588,12 @@ public final class Network {
      * at the final iterate (Y' = Y0 + dt F(Y'_iter)), so mass and energy balance exactly even when the residual isn't
      * zero; converged, this moves Y' by no more than the residual.
      */
-    private void finish(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt) {
+    void finish(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt) {
         int C = C(), S = C - 1;
-        // each transfer: {from, to (indices into free, -1 for a fixed node), component, amount moved over dt}
+        // each transfer: {from, to (indices into free, -1 for a fixed node or outside), component, amount moved over
+        // dt}; the heat supplied to each node first
         List<double[]> moves = new ArrayList<>();
+        for (int i = 0; i < free.size(); i++) move(moves, -1, i, S, dt * free.get(i).heat);
         // (an edge's net flux of each component: its two streams' swap of one species cancels here rather than in the
         // limiter, where two nearly empty nodes swapping a trace each way kept cutting each other's sends without end)
         for (Edge e : edges) {
@@ -600,48 +602,18 @@ public final class Network {
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
             int a = ia == null ? -1 : ia, b = ib == null ? -1 : ib;
             f[S] += f[C];
-            for (int k = 0; k < C; k++) {
-                double x = dt * f[k];
-                if (x != 0) moves.add(x > 0 ? new double[]{a, b, k, x} : new double[]{b, a, k, -x});
-            }
+            for (int k = 0; k < C; k++) move(moves, a, b, k, dt * f[k]);
         }
         // the limiter: a node can't send more of a mass than it started with plus what it receives (Newton's tolerance
         // is relative to the node's whole contents, so a dry node's water could end 1e-10 of its air below zero);
         // its sends of that mass are scaled down, which keeps every transfer in flux form and so conserves exactly
-        int M = y0.length;
-        double[] scale = new double[M];
-        java.util.Arrays.fill(scale, 1);
-        double[] y = new double[M];
-        for (int pass = 0; pass < 4; pass++) {
-            double[] in = new double[M], out = new double[M];
-            for (double[] mv : moves) {
-                int from = (int) mv[0], to = (int) mv[1], k = (int) mv[2];
-                double s = from >= 0 && k < S ? scale[C * from + k] : 1;
-                if (from >= 0) out[C * from + k] += mv[3] * s;
-                if (to >= 0) in[C * to + k] += mv[3] * s;
-            }
-            boolean changed = false;
-            for (int i = 0; i < M; i++) {
-                if (i % C == S || out[i] == 0) continue;
-                double have = Math.max(0, y0[i]) + in[i];
-                if (out[i] > have * (1 + 1e-15)) {
-                    scale[i] *= have / out[i];
-                    changed = true;
-                }
-            }
-            if (!changed && pass > 0) break;
-        }
-        for (int i = 0; i < free.size(); i++) {
-            for (int k = 0; k < S; k++) y[C * i + k] = y0[C * i + k];
-            y[C * i + S] = y0[C * i + S] + dt * free.get(i).heat;
-        }
-        for (double[] mv : moves) {
-            int from = (int) mv[0], to = (int) mv[1], k = (int) mv[2];
-            double amt = mv[3] * (from >= 0 && k < S ? scale[C * from + k] : 1);
-            if (from >= 0) y[C * from + k] -= amt;
-            if (to >= 0) y[C * to + k] += amt;
-        }
-        set(free, y);
+        set(free, Limiter.apply(C, y0, moves));
+    }
+
+    /** Adds the transfer of x of component k from a to b (the other way for x < 0, nothing for 0). */
+    private static void move(List<double[]> moves, int a, int b, int k, double x) {
+        if (x > 0) moves.add(new double[]{a, b, k, x});
+        else if (x < 0) moves.add(new double[]{b, a, k, -x});
     }
 
     /**

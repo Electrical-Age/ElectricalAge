@@ -50,7 +50,8 @@ class MixNetworkTest {
                 if (Double.isNaN(meet)) continue;
                 var e = net.connect(ns.get(p), (meet - zp0) / h[p], ns.get(i), (meet - zi0) / h[i], Math.pow(10, -9 + 3 * r.nextDouble()));
                 if (r.nextDouble() < 0.15) e.kind = Network.Kind.CHECK;
-                break;
+                if (!NetworkTest.LOOPS) break;
+                if (r.nextInt(4) == 0) net.connect(ns.get(p), (meet - zp0) / h[p], ns.get(i), (meet - zi0) / h[i], Math.pow(10, -9 + 3 * r.nextDouble()));
             }
         }
         return net;
@@ -71,17 +72,26 @@ class MixNetworkTest {
         int steps = Integer.parseInt(java.util.Objects.requireNonNullElse(System.getenv("FLUIDCORE_STEPS"), "300"));
         List<String> bad = new ArrayList<>(), failed = new ArrayList<>();
         long failures = 0, substeps = 0, iters = 0, total = 0;
+        NetworkTest.limiterPasses();
+        Limiter.histogram();
+        double lowest = 0, lowestShare = 0;
+        LimiterTap tap = LimiterTap.open("mixed" + (NetworkTest.LOOPS ? "-loops" : ""));
         for (long seed = 1; seed <= cases; seed++) {
             Network net = level(seed);
             double[] t0 = totals(net);
             for (int s = 0; s < steps; s++) {
                 net.step(DT);
-                for (var n : net.nodes)
+                for (var n : net.nodes) {
+                    for (int k = 0; k < SP.length; k++) {
+                        lowest = Math.min(lowest, n.m[k]);
+                        lowestShare = Math.min(lowestShare, n.m[k] / Math.max(1e-300, n.mass()));
+                    }
                     for (int k = 0; k < SP.length; k++)
                         if (!(n.m[k] >= -1e-12 * Math.max(1e-3, n.mass()))) {
                             bad.add(seed + "@" + s + ":" + SP[k]);
                             break;
                         }
+                }
             }
             double[] t1 = totals(net);
             for (int k = 0; k < SP.length; k++)
@@ -93,8 +103,10 @@ class MixNetworkTest {
             iters += net.stats.iterations;
             total += net.stats.steps;
         }
+        tap.close();
         String log = String.format("mixed: cases %d steps %d: failures %d %s, substeps %d, iterations/step %.2f, bad %d %s%n",
-            cases, steps, failures, failed, substeps, iters / (double) total, bad.size(), bad.stream().limit(10).toList());
+            cases, steps, failures, failed, substeps, iters / (double) total, bad.size(), bad.stream().limit(10).toList())
+            + String.format("limiter (scaled at most %d times): %s; lowest mass %.3g kg, lowest share of its node %.3g%n", Limiter.DOWN_PASSES, Limiter.histogram(), lowest, lowestShare);
         java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-mix.txt"), log);
         assertTrue(failures == 0 && bad.isEmpty(), log);
     }
