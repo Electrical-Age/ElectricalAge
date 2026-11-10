@@ -166,7 +166,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
             double mv = inlet.mVapour(), mg = mv + inlet.mAir;
             want = Math.min(want, p > pEx ? mv * (1 - pEx / p) : 0);
             double tIn = inlet.T(), air0 = inlet.mAir;
-            double jpk = jPerKg(), hIn = Water.hVapour(tIn);
+            double jpk = jPerKg(), hIn = inlet.hVapour(tIn);
             double got = want > 0 && mv > 0 ? EaUnits.drainGas(inlet, want * mg / mv) : 0;
             double air = Math.max(0, air0 - inlet.mAir);
             // the work onto the shaft, under its torque limit; what the shaft can't take stays in the steam

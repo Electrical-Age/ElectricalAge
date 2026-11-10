@@ -239,7 +239,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             condenser = findCondenser();
             if ((condenser == null) != (was == null)) needPublish();   // (the models join)
             double mv = inlet.mVapour(), mg = mv + inlet.mAir, air0 = inlet.mAir, tIn = inlet.T();
-            double jpk = jPerKg(), hIn = Water.hVapour(tIn);
+            double jpk = jPerKg(), hIn = inlet.hVapour(tIn);
             double got = want > 0 && mv > 0 ? EaUnits.drainGas(inlet, want * mg / mv) : 0;
             if (condenser != null) condenser.exhaust(got, Math.max(0, air0 - inlet.mAir), hIn - jpk, tIn);   // (into it, after the work)
             drain(time);

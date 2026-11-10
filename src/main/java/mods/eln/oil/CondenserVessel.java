@@ -95,7 +95,8 @@ public final class CondenserVessel {
                 double T = new mods.eln.sim.fluid.Flash().solve(saved[0], saved[1], saved[2], savedVolume, 300).T;
                 n.mWater = Math.min(saved[0], MAKEUP_SHUT * volume * Water.RHO_L);
                 n.mAir = Math.min(saved[1], Water.P_ATM * (volume - n.mWater / Water.RHO_L) / (Water.R_AIR * T));
-                n.energy = mods.eln.sim.fluid.Flash.energyAt(n.mWater, n.mAir, volume, T);
+                n.extra = null;
+                n.energy = n.energyAt(T);
             } else {
                 mods.eln.fluid.FluidSaves.restore(n, saved);
             }

@@ -877,10 +877,10 @@ public final class PlumbingCases {
             FluidNode wet = new FluidNode(0.001, 0, 1, false), dry = new FluidNode(0.001, 0, 1, false);
             double T = Water.tsat(5e5), mv = 5e5 * 0.001 / (Water.R_V * T);   // (saturated vapour filling 1 L)
             dry.mWater = mv;
-            dry.energy = mods.eln.sim.fluid.Flash.energyAt(mv, 0, 0.001, T);
+            dry.energy = dry.energyAt(T);
             dry.update();
             wet.mWater = 1.5 * mv;   // (plus half as much again as liquid: a third of the water)
-            wet.energy = mods.eln.sim.fluid.Flash.energyAt(mv, 0, 0.001, T) + 0.5 * mv * Water.uLiquid(T);
+            wet.energy = dry.energyAt(T) + 0.5 * mv * Water.uLiquid(T);
             wet.update();
             s.read(wet);
             double w = s.reading;

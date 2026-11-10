@@ -51,7 +51,7 @@ public final class FluidNode {
         FluidNode n = new FluidNode(1e6, z, 1, true);
         n.mWater = 0.999 * n.volume * Water.RHO_L;   // (a sliver of gas space: its surface)
         n.mAir = 0;
-        n.energy = Flash.energyAt(n.mWater, 0, n.volume, T);
+        n.energy = n.energyAt(T);
         n.update();
         return n;
     }
@@ -76,13 +76,56 @@ public final class FluidNode {
         double pv = mLiquid > 0 ? Math.min(Water.psat(T), p) : 0;
         mWater += mLiquid > 0 ? pv * vGas / (Water.R_V * T) : 0;
         mAir = Math.max(0, p - pv) * vGas / (Water.R_AIR * T);
-        energy = Flash.energyAt(mWater, mAir, volume, T);
+        energy = energyAt(T);
         update();
         return this;
     }
 
     public void update() {
+        if (CoreStep.ON) {
+            coreUpdate();
+            return;
+        }
         state.solve(mWater, mAir, extra, energy, volume, state.T);
+    }
+
+    /** The fluid core's node for this one (CoreStep.ON): its thermodynamics behind every read; and its species' ids (null: water and air). */
+    private mods.eln.fluidcore.Network.Node core;
+    private int[] coreIds;
+
+    /** The core node, (re)built for the species this one holds, its masses and energy set from this one's (no solve). */
+    private mods.eln.fluidcore.Network.Node loadCore() {
+        int[] ids = null;
+        if (extra != null) {
+            int count = 0;
+            for (double e : extra) if (e > 0) count++;
+            if (count > 0) {
+                ids = new int[2 + count];
+                ids[0] = SpeciesRegistry.WATER;
+                ids[1] = SpeciesRegistry.AIR;
+                int j = 2;
+                for (int i = 0; i < extra.length; i++) if (extra[i] > 0) ids[j++] = i + 2;
+            }
+        }
+        if (core == null || !java.util.Arrays.equals(ids, coreIds)) {
+            mods.eln.fluidcore.Species[] sp = null;
+            if (ids != null) {
+                sp = new mods.eln.fluidcore.Species[ids.length];
+                for (int j = 0; j < ids.length; j++) sp[j] = CoreStep.toCore(SpeciesRegistry.get().byId(ids[j]));
+            }
+            core = new mods.eln.fluidcore.Network.Node(volume, z, height, fixed, sp);
+            coreIds = ids;
+        }
+        core.m[0] = mWater;
+        core.m[1] = mAir;
+        for (int j = 2; j < core.m.length; j++) core.m[j] = extra[coreIds[j] - 2];
+        core.U = energy;
+        return core;
+    }
+
+    private void coreUpdate() {
+        loadCore().update();
+        state.fromCore(core, coreIds, volume);
     }
 
     /** Mass of species id (kg), both phases. */
@@ -140,8 +183,18 @@ public final class FluidNode {
         return state.vLiquid;
     }
 
+    /**
+     * Specific enthalpy of water vapour at T (J/kg) as this node's thermodynamics has it: with the fluid core on, at the
+     * node's vapour pressure (its vapour is not ideal); else Water's. What a device books for steam it takes or puts.
+     */
+    public double hVapour(double T) {
+        if (CoreStep.ON) return mods.eln.fluidcore.WaterAir.hVapour(T, Math.max(state.pVapour, 1));
+        return Water.hVapour(T);
+    }
+
     /** The internal energy (J) its contents would have at T, in equilibrium. */
     public double energyAt(double T) {
+        if (CoreStep.ON) return loadCore().energyAt(T);
         return Flash.energyAt(mWater, mAir, extra, volume, T);
     }
 
@@ -192,6 +245,7 @@ public final class FluidNode {
 
     /** The top of all its liquid, as a fraction of its height. */
     public double level() {
+        if (CoreStep.ON && core != null) return core.level();
         return state.level(volume);
     }
 
@@ -203,6 +257,7 @@ public final class FluidNode {
 
     /** Pressure at a port at height fraction f: the gas pressure plus the liquid layers' columns above the port. */
     public double pressureAt(double f) {
+        if (CoreStep.ON && core != null) return core.portP(f);
         if (state.layers <= 1) {
             double depth = Math.max(0, level() - f) * height;
             return state.P + (state.layers == 1 ? state.layerRho[0] : Water.RHO_L) * FluidNetwork.G * depth;
@@ -224,7 +279,7 @@ public final class FluidNode {
         if (span <= 0) return pressureAt(f);
         double lo = Math.max(0, f - span / 2), hi = Math.min(1, f + span / 2);
         if (hi <= lo) return pressureAt(f);
-        if (state.layers <= 1) {
+        if (state.layers <= 1 && !(CoreStep.ON && core != null)) {
             double rho = state.layers == 1 ? state.layerRho[0] : Water.RHO_L, L = level();
             double mean;   // (the mean depth under the level over lo..hi, in shares of the height)
             if (L <= lo) mean = 0;

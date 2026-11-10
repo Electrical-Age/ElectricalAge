@@ -97,7 +97,7 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
         cooking = powered && canCook();
         double got = 0;
         if (cooking) {
-            double jpk = Water.hVapour(inlet.T()) - Water.hLiquid(Water.TB);
+            double jpk = inlet.hVapour(inlet.T()) - Water.hLiquid(Water.TB);
             double want = Math.min(SteamOvenDescriptor.MAX_COOK_W / SteamOvenDescriptor.EFFICIENCY * time / Math.max(1, jpk), EaUnits.steamAvailable(inlet));
             double mv = inlet.mVapour(), mg = mv + inlet.mAir;
             got = want > 0 && mv > 0 ? EaUnits.drainGas(inlet, want * mg / mv) : 0;

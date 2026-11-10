@@ -114,7 +114,7 @@ public final class EaUnits {
         double v = m * mv / mg, a = m * ma / mg, T = n.T();
         n.mWater -= v;
         n.mAir -= a;
-        n.energy -= v * Water.hVapour(T) + a * Water.hAir(T);
+        n.energy -= v * n.hVapour(T) + a * Water.hAir(T);
         n.update();
         return v;
     }
@@ -124,7 +124,7 @@ public final class EaUnits {
         m = Math.min(m, n.mVapour());
         if (m <= 0) return;
         n.mWater -= m;
-        n.energy -= m * Water.hVapour(n.T());
+        n.energy -= m * n.hVapour(n.T());
         n.update();
     }
 
@@ -142,7 +142,7 @@ public final class EaUnits {
     public static void addWater(FluidNode n, double m, double T, boolean vapour) {
         if (m <= 0) return;
         n.mWater += m;
-        n.energy += m * (vapour ? Water.hVapour(T) : Water.hLiquid(T));
+        n.energy += m * (vapour ? n.hVapour(T) : Water.hLiquid(T));
         n.update();
     }
 

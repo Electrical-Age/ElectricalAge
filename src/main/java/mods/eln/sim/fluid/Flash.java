@@ -322,6 +322,34 @@ public final class Flash {
         }
     }
 
+    /**
+     * This state from the fluid core's solved node c (its species' registry ids, null for water and air), in V: the
+     * game's reads (T, P, each species' liquid and vapour, the layers) then show the state the core steps.
+     */
+    void fromCore(mods.eln.fluidcore.Network.Node c, int[] ids, double V) {
+        int count = ids == null ? 2 : ids[ids.length - 1] + 1;
+        size(count);
+        java.util.Arrays.fill(m, 0, count, 0);
+        java.util.Arrays.fill(liq, 0, count, 0);
+        java.util.Arrays.fill(vap, 0, count, 0);
+        for (int j = 0; j < c.m.length; j++) {
+            int id = ids == null ? j : ids[j];
+            m[id] = c.m[j];
+            liq[id] = c.liquidMass(j);
+            vap[id] = c.vapourMass(j);
+        }
+        T = c.T();
+        P = c.P();
+        pVapour = c.partialP(0);
+        pAir = c.partialP(1);
+        vLiquid = c.level() * V;
+        vGas = Math.max(V - vLiquid, GAS_MIN * V);
+        mLiquid = liq[0];
+        mVapour = vap[0];
+        pFull = 0;
+        buildLayers(SpeciesRegistry.get(), V);
+    }
+
     /** Is species id in layer l (its group's). */
     boolean inLayer(int id, int l) {
         return groupOf(SpeciesRegistry.get(), id) == layerGroup[l];

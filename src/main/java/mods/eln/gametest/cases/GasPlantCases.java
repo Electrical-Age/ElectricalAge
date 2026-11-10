@@ -79,7 +79,7 @@ public final class GasPlantCases {
         double T = Water.tsat(pa), m = pa * 1.0 / (Water.R_V * T);
         FluidNode n = new FluidNode(1.0, y, 1.0, true);
         n.mWater = m;
-        n.energy = mods.eln.sim.fluid.Flash.energyAt(m, 0, 1.0, T);
+        n.energy = n.energyAt(T);
         n.update();
         return n;
     }
