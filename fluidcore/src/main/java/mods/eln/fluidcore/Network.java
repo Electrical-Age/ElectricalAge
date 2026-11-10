@@ -248,8 +248,12 @@ public final class Network {
 
     // ---- smooth pieces
 
-    /** The contents (kg/m^3) at which conduction is half on: about air at 1 bar. */
-    public static double M_CONTACT = 1;
+    /**
+     * The contents (kg/m^3) at which conduction is half on: a near vacuum. At 1 kg/m^3 (about air at 1 bar) it cut a heat
+     * exchanger's hot exhaust, ~0.5 kg/m^3, to a third of its conductance, and its steam raiser fell under the
+     * well-mixed bound (53 % at NTU 2.5, against 71 %; 72 % at 0.01).
+     */
+    public static double M_CONTACT = 0.01;
 
     /** How much of an edge's conductance a node's contents carry: m / (m + M_CONTACT V). */
     static double wetted(Node n) {
