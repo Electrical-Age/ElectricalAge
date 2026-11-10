@@ -154,6 +154,27 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         return new double[]{m, m > 0 ? (x[0] * x[1] + y[0] * y[1]) / m : side[0].T()};
     }
 
+    /**
+     * Set a side's temperatures along its length, its masses kept: tHot at the end facing hotEnd, tCold at the other,
+     * linear between (a running exchanger's profile, for tests that start it running: one temperature through 64 L of
+     * water takes hours of flow to wash out).
+     */
+    public void profile(boolean sideA, Direction hotEnd, double tHot, double tCold) {
+        HeatExchangerElement h = head();
+        h.slice();
+        h.gather();
+        FluidNode[] side = sideA ? h.sliceA : h.sliceB;
+        boolean hotAtFront = hotEnd == front;
+        for (int i = 0; i < SLICES; i++) {
+            double x = (double) i / (SLICES - 1), t = hotAtFront ? tCold + (tHot - tCold) * x : tHot + (tCold - tHot) * x;
+            side[i].energy = side[i].energyAt(t);
+            side[i].update();
+        }
+        if (sideA) h.gatherA = null;
+        else h.gatherB = null;
+        h.gather();
+    }
+
     /** Whether a pipe or device is coupled to one of its ports (an edge from an end slice to a node outside it). */
     public boolean portCoupled() {
         HeatExchangerElement h = head();

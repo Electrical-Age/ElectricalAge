@@ -478,6 +478,9 @@ public final class GasPlantCases {
             PlumbingCases.fill(rb, 0.5 * rb.volume * Water.RHO_L, 15e5, Water.tsat(15e5));
             var eb = head(econ).b;
             PlumbingCases.fill(eb, 0.97 * eb.volume * Water.RHO_L, 16e5, 453.15);
+            // (as it runs: the feed coming in at its east end at 20 C, leaving at the west end at ~180 C; one temperature
+            // through it, the exchanger's slices hold 180 C water against the gas for hours, and it gives 2 kW of 4.4)
+            head(econ).profile(false, Direction.XN, 453.15, 293.15);
             int y = ctx.at(8, 1, 5).getY();
             drain = new AirMeter(air(y));
             fx = fixtures(head(raiser).fluidLevel(), new Object[]{ctx.at(8, 1, 5), 4, drain.node},
