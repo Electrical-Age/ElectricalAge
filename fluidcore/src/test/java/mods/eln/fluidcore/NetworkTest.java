@@ -40,9 +40,18 @@ class NetworkTest {
         return Network.portP(n, f);
     }
 
+    /** FLUIDCORE_LIMITER_PASSES: the limiter's pass cap for this run (measurements). */
+    static void limiterPasses() {
+        String v = System.getenv("FLUIDCORE_LIMITER_PASSES");
+        if (v != null) Limiter.DOWN_PASSES = Integer.parseInt(v);
+    }
+
+    /** FLUIDCORE_LOOPS=1: the random networks get every edge that fits and some doubled, so rings and parallel pipes. */
+    static final boolean LOOPS = "1".equals(System.getenv("FLUIDCORE_LOOPS"));
+
     /**
-     * Random closed networks whose edges join ports at one height (as the game's do): a tree of 2-8 nodes plus a few
-     * extra edges, some check valves.
+     * Random closed networks whose edges join ports at one height (as the game's do): a tree of 2-8 nodes, some
+     * edges check valves.
      */
     static Network level(long seed) {
         Random r = new Random(seed);
@@ -77,7 +86,8 @@ class NetworkTest {
                 if (Double.isNaN(meet)) continue;
                 var e = net.connect(ns.get(p), (meet - zp0) / h[p], ns.get(i), (meet - zi0) / h[i], Math.pow(10, -9 + 3 * r.nextDouble()));
                 if (r.nextDouble() < 0.15) e.kind = Network.Kind.CHECK;
-                break;
+                if (!LOOPS) break;
+                if (r.nextInt(4) == 0) net.connect(ns.get(p), (meet - zp0) / h[p], ns.get(i), (meet - zi0) / h[i], Math.pow(10, -9 + 3 * r.nextDouble()));
             }
         }
         return net;
@@ -102,12 +112,21 @@ class NetworkTest {
         List<String> failedSeeds = new ArrayList<>();
         long failures = 0, substeps = 0, iters = 0, total = 0, stalls = 0, slept = 0, asleep = 0;
         StringBuilder log = new StringBuilder();
+        limiterPasses();
+        Limiter.histogram();
+        double lowest = 0, lowestShare = 0;
+        LimiterTap tap = LimiterTap.open("levels" + (NetworkTest.LOOPS ? "-loops" : ""));
         for (long seed = 1; seed <= cases; seed++) {
             Network net = level(seed);
             double[] t0 = totals(net);
             for (int s = 0; s < steps; s++) {
                 net.step(DT);
-                for (var n : net.nodes) if (!(n.mw() >= -1e-12 * Math.max(1e-3, n.mw() + n.ma()) && n.ma() >= -1e-12 * Math.max(1e-3, n.mw() + n.ma()))) negatives.add(seed + "@" + s);
+                for (var n : net.nodes) {
+                    if (!(n.mw() >= -1e-12 * Math.max(1e-3, n.mw() + n.ma()) && n.ma() >= -1e-12 * Math.max(1e-3, n.mw() + n.ma()))) negatives.add(seed + "@" + s);
+                    double low = Math.min(n.mw(), n.ma());
+                    lowest = Math.min(lowest, low);
+                    lowestShare = Math.min(lowestShare, low / Math.max(1e-300, n.mw() + n.ma()));
+                }
             }
             double[] t1 = totals(net);
             if (Math.abs(t0[0] - t1[0]) > 1e-11 * Math.max(1, t0[0]) || Math.abs(t0[1] - t1[1]) > 1e-11 * Math.max(1e-3, t0[1])
@@ -124,8 +143,10 @@ class NetworkTest {
             iters += net.stats.iterations;
             total += net.stats.steps;
         }
+        tap.close();
         log.append(String.format("K %.3g cases %d steps %d: restless (>=0.1 %%/s) %s, failures %d %s, substeps %d, stalls %d, iterations/step %.2f, asleep at the end %d, steps slept %d, negatives %d %s%n",
             WaterAir.K, cases, steps, restless, failures, failedSeeds, substeps, stalls, iters / (double) total, asleep, slept, negatives.size(), negatives.stream().limit(10).toList()));
+        log.append(String.format("limiter (scaled at most %d times): %s; lowest mass %.3g kg, lowest share of its node %.3g%n", Limiter.DOWN_PASSES, Limiter.histogram(), lowest, lowestShare));
         java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-m2.txt"), log.toString());
         assertTrue(failures == 0 && negatives.isEmpty(), log.toString());
     }
