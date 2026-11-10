@@ -211,7 +211,9 @@ final class GoldenSlotsCase implements TestCase {
 
             List<Slot> device = new ArrayList<>();
             int playerSlots = 0;
-            for (Slot s : menu.slots) {
+            for (int i = 0; i < menu.slots.size(); i++) {
+                Slot s = menu.slots.get(i);
+                if (i >= menu.inventoryEnd) continue;   // (the worn slots: armour and Curios, the charger's)
                 if (s.container instanceof Inventory) playerSlots++;
                 else device.add(s);
             }

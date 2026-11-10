@@ -78,7 +78,7 @@ public final class ElnLayouts {
         for (SlotSpec s : spec.wear()) wear.add(place(r, "wear" + s.index(), s));
         Layout.Rect inv = r.get("inventory", "");
         return new MenuSpec(slots, spec.playerInventory(), spec.refreshRateDivider(),
-            inv != null ? inv.x() + 1 : spec.inventoryX(), inv != null ? inv.y() + 1 : spec.inventoryY(), r.width(), r.height(), wear);
+            inv != null ? inv.x() + 1 : spec.inventoryX(), inv != null ? inv.y() + 1 : spec.inventoryY(), r.width(), r.height(), wear, spec.armor());
     }
 
     /** The slot at the layout's slot of that id, or as it was if the layout has none. */

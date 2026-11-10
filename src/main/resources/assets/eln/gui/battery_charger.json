@@ -1,88 +1,110 @@
 {
- "column": [
+ "row": [
   {
-   "text": "title",
-   "sample": "50V Battery Charger"
+   "column": [
+    {
+     "slot": "wear0"
+    },
+    {
+     "slot": "wear1"
+    },
+    {
+     "slot": "wear2"
+    },
+    {
+     "slot": "wear3"
+    }
+   ],
+   "gap": 0
   },
   {
-   "row": [
+   "column": [
     {
-     "column": [
+     "text": "title",
+     "sample": "50V Battery Charger"
+    },
+    {
+     "row": [
       {
-       "row": [
+       "column": [
         {
-         "slot": "0"
+         "row": [
+          {
+           "slot": "0"
+          },
+          {
+           "slot": "1"
+          }
+         ],
+         "gap": 0
         },
         {
-         "slot": "1"
+         "row": [
+          {
+           "slot": "2"
+          },
+          {
+           "slot": "3"
+          }
+         ],
+         "gap": 0
         }
        ],
        "gap": 0
       },
       {
-       "row": [
-        {
-         "slot": "2"
-        },
-        {
-         "slot": "3"
-        }
-       ],
-       "gap": 0
-      }
-     ],
-     "gap": 0
-    },
-    {
-     "slot": "4"
-    },
-    {
-     "column": [
+       "slot": "4"
+      },
       {
-       "row": [
+       "column": [
         {
-         "slot": "wear0"
+         "row": [
+          {
+           "slot": "wear4"
+          },
+          {
+           "slot": "wear5"
+          }
+         ],
+         "gap": 0
         },
         {
-         "slot": "wear1"
+         "row": [
+          {
+           "slot": "wear6"
+          },
+          {
+           "slot": "wear7"
+          }
+         ],
+         "gap": 0
         }
        ],
        "gap": 0
       },
       {
-       "row": [
-        {
-         "slot": "wear2"
-        },
-        {
-         "slot": "wear3"
-        }
-       ],
-       "gap": 0
+       "space": 0,
+       "fill": true
+      },
+      {
+       "button": "charge",
+       "sample": [
+        "Charging",
+        "Off"
+       ]
       }
      ],
-     "gap": 0
-    },
-    {
-     "space": 0,
      "fill": true
     },
     {
-     "button": "charge",
-     "sample": [
-      "Charging",
-      "Off"
-     ]
+     "text": "inventory",
+     "sample": "Inventory"
+    },
+    {
+     "inventory": true
     }
    ],
-   "fill": true
-  },
-  {
-   "text": "inventory",
-   "sample": "Inventory"
-  },
-  {
-   "inventory": true
+   "gap": 4
   }
  ],
  "gap": 4

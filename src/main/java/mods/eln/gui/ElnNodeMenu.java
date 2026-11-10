@@ -46,7 +46,7 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
     public ElnNodeMenu(int containerId, Inventory playerInventory, Container deviceInventory, MenuSpec spec, @Nullable NodeBase node,
                        BlockPos pos, int slot, byte kind, int descriptorId) {
         this(containerId, playerInventory, deviceInventory, spec, node, pos, slot, kind, descriptorId,
-            spec.wear().isEmpty() ? List.of() : wearables.keys(playerInventory.player, spec.wear().size()));
+            wearKeys(playerInventory.player, spec));
     }
 
     public ElnNodeMenu(int containerId, Inventory playerInventory, Container deviceInventory, MenuSpec spec, @Nullable NodeBase node,
@@ -72,8 +72,33 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         this.wearKeys = List.copyOf(wearKeys.subList(0, Math.min(wearKeys.size(), spec.wear().size())));
         for (int i = 0; i < this.wearKeys.size(); i++) {
             SlotSpec at = spec.wear().get(i);
-            addSlot(wearables.slot(playerInventory.player, this.wearKeys.get(i), at.x(), at.y()));
+            String key = this.wearKeys.get(i);
+            addSlot(key.startsWith(ARMOR) ? armorSlot(playerInventory, key, at.x(), at.y()) : wearables.slot(playerInventory.player, key, at.x(), at.y()));
         }
+    }
+
+    /** Worn-slot keys of the player's armour ("armor#head"...): MenuSpec.withArmor. */
+    static final String ARMOR = "armor#";
+    static final net.minecraft.world.entity.EquipmentSlot[] ARMOR_SLOTS = {net.minecraft.world.entity.EquipmentSlot.HEAD,
+        net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET};
+    static final String[] ARMOR_ICONS = {"container/slot/helmet", "container/slot/chestplate", "container/slot/leggings", "container/slot/boots"};
+
+    /** Server: the worn slots to show: the armour first if the spec asks for it, then the Curios slots (wearables). */
+    static List<String> wearKeys(Player player, MenuSpec spec) {
+        if (spec.wear().isEmpty()) return List.of();
+        List<String> keys = new java.util.ArrayList<>();
+        if (spec.armor()) for (var e : ARMOR_SLOTS) if (keys.size() < spec.wear().size()) keys.add(ARMOR + e.getName());
+        keys.addAll(wearables.keys(player, spec.wear().size() - keys.size()));
+        return keys;
+    }
+
+    /** A worn armour slot, as the player's inventory screen has it (vanilla ArmorSlot: what may go in, the equip sound). */
+    static Slot armorSlot(Inventory inv, String key, int x, int y) {
+        for (int i = 0; i < ARMOR_SLOTS.length; i++)
+            if (key.equals(ARMOR + ARMOR_SLOTS[i].getName()))
+                return new net.minecraft.world.inventory.ArmorSlot(inv, inv.player, ARMOR_SLOTS[i], 39 - i, x, y,
+                    net.minecraft.resources.Identifier.withDefaultNamespace(ARMOR_ICONS[i]));
+        return new NoSlot(x, y);
     }
 
     /** The end of the player inventory's slots: the worn slots follow, up to slots.size(). */
