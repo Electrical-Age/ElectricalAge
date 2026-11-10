@@ -53,6 +53,7 @@ public class WirelessUtils {
             Object best = null;
             while (!spots.isEmpty() || !txs.isEmpty()) {
                 bestScore = Double.MAX_VALUE;
+                best = null;   // (an entry at infinite distance is never best: stop instead of taking the last one again)
                 for (IWirelessSignalSpot spot : spots) {
                     double temp = spot.getCoordonate().trueDistanceTo(from.getCoordonate());
                     if (temp < bestScore) {
@@ -158,6 +159,7 @@ public class WirelessUtils {
 
     static private double getVirtualDistance(Coordonate txC, Coordonate rxC, double distance) {
         double virtualDistance = distance;
+        if (!Double.isFinite(distance)) return distance;   // (another dimension: the ray march below would never end)
         if (distance > 2) {
             double vx, vy, vz;
             double dx, dy, dz;

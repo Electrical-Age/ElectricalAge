@@ -60,7 +60,9 @@ abstract public class GridElement extends TransparentNodeElement {
         UUID uuid = entityPlayer.getUUID();
         Pair<Coordonate, Direction> p = pending.get(uuid);
         GridElement other = null;
-        if (p != null) {
+        // a starting pole in another dimension is forgotten: a span can't cross dimensions (1.12 measured x, y and z
+        // only and linked them for a few blocks of cable)
+        if (p != null && p.getLeft().dimention == this.coordonate().dimention) {
             other = GridLink.getElementFromCoordinate(p.getLeft());
         }
         if (other == null || other == this) {
@@ -162,6 +164,11 @@ abstract public class GridElement extends TransparentNodeElement {
                 break;
             gridLinksBooting.add(new GridLink(linkTag, ""));
         }
+    }
+
+    /** Forgets a player's starting pole (logout). */
+    public static void forget(UUID player) {
+        pending.remove(player);
     }
 
     abstract protected ElectricalLoad getGridElectricalLoad(Direction side);

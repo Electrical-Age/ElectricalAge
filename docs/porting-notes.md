@@ -468,6 +468,11 @@ In the port:
   non-finite saved value as 0. Tests `StatefulNanTest`, `ValueWatchdogNanTest`, `NanGuardTest`.
 - A turret ended its search at the first entity in its window that its filter spared, so a cow in front of a zombie
   kept it from firing (1.12). It skips that entity now. Test `turret_looks_past_a_spared_entity`.
+- Range checks ignored the dimension (1.12 `trueDistanceTo` compared x, y and z): a wireless transmitter or lamp supply
+  in the Nether reached devices at the same coordinates in the Overworld, and two utility poles in different dimensions
+  could be linked for a few blocks of cable. The distance between dimensions is infinite now, a starting pole in
+  another dimension is forgotten, and so is a player's starting pole on logout. Test
+  `dimensions_keep_wireless_and_poles_apart`.
 
 ## Deferred
 

@@ -232,7 +232,13 @@ public class Coordonate implements INBTTReady {
         return dimention != Dimensions.INVALID;
     }
 
+    /**
+     * The straight-line distance in blocks; infinite between two dimensions, so every range check (wireless channels,
+     * lamp supplies, poles) fails there (1.12 compared x, y and z only: a transmitter in the Nether drove receivers at
+     * the same coordinates in the Overworld).
+     */
     public double trueDistanceTo(Coordonate c) {
+        if (dimention != c.dimention) return Double.POSITIVE_INFINITY;
         long dx = x - c.x;
         long dy = y - c.y;
         long dz = z - c.z;
