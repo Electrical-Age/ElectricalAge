@@ -1568,7 +1568,7 @@ public final class OilCases {
         mods.eln.sim.IProcess fire;
         BlockPos feedAt;
         int tick, flips, steps;
-        double heat = 8000, p1 = Double.NaN, p2 = Double.NaN, lo = 1e9, hi, steam0, pumped0, fillLo = 1e9, fillHi, floodHi, power;
+        double heat = 4000, p1 = Double.NaN, p2 = Double.NaN, lo = 1e9, hi, steam0, pumped0, fillLo = 1e9, fillHi, floodHi, power;
         static final int STEP = 1400, WATCH = 2200;
 
         public String id() {
@@ -1615,7 +1615,7 @@ public final class OilCases {
                     run.fill(0.995 * run.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 300);
                     run.update();
                 }
-                if (++tick == STEP) heat = 10000;
+                if (++tick == STEP) heat = 7000;
                 boiler.thermal.moveEnergyTo(heat * t);
                 if (tick == WATCH) {
                     steam0 = c.v.totalSteamKg;
