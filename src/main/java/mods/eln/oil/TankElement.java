@@ -33,6 +33,8 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     static final double LOSS_W_PER_K = 1.0;
     /** The low (liquid) and high (vapour) side ports' heights (voxels, on the pipe lattice). */
     public static final int LOW = 4, HIGH = 12;
+    /** Half a side flange's bore (px): a small pipe's. */
+    static final int FLANGE_HALF = 1;
     public FluidNode vessel, own;
     /** The box it is part of, or null alone. */
     public TankGroup group;
@@ -192,10 +194,13 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         if (group == null) {
             out.add(new FluidPort(vessel, at, 1, 1.0, PORT_K));   // top: vapour
             out.add(new FluidPort(vessel, at, 0, 0.0, PORT_K));   // bottom: liquid
+            // (side ports draw at their true height, Baughn 2026-11-10: the low flange's bottom edge, the high flange's top
+            // edge, as liquid leaves a flange over its bottom and gas rises to its top; below the low flange is dead space,
+            // as in a real tank: drain it from the underside port, now that a tank needs no floor)
             for (Direction d : new Direction[]{front.left(), front.right(), front.back()}) {
                 int f = d.toEnumFacing().get3DDataValue();
-                out.add(new FluidPort(vessel, at, f, 0.0, PORT_K, sideSpot(f, LOW)));    // low: liquid
-                out.add(new FluidPort(vessel, at, f, 1.0, PORT_K, sideSpot(f, HIGH)));   // high: vapour
+                out.add(new FluidPort(vessel, at, f, (LOW - FLANGE_HALF) / 16.0, PORT_K, sideSpot(f, LOW)));    // low: liquid
+                out.add(new FluidPort(vessel, at, f, (HIGH + FLANGE_HALF) / 16.0, PORT_K, sideSpot(f, HIGH)));  // high: vapour
             }
         } else {
             // in a box: the ports on its outer faces, each drawing at its height in the whole vessel
@@ -206,10 +211,10 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             for (Direction d : new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP}) {
                 if (TankGroup.neighbour(this, d, null) != null && group.members.contains(TankGroup.neighbour(this, d, null))) continue;
                 int f = d.toEnumFacing().get3DDataValue();
-                // (the bottom row's low ports draw from the floor, as a lone tank's do: a dip to its bottom; Baughn 2026-11-09:
-                // a box tank 9 % full gave nothing at its low flange, 4 px up, and nothing can be piped under a tank)
-                out.add(new FluidPort(vessel, at, f, j == 0 ? 0.0 : (j * 16 + LOW) / (16.0 * h), PORT_K, sideSpot(f, LOW)));
-                out.add(new FluidPort(vessel, at, f, (j * 16 + HIGH) / (16.0 * h), PORT_K, sideSpot(f, HIGH)));
+                // (at their true height, Baughn 2026-11-10; the bottom row's low ports used to dip to the floor, since a
+                // box tank 9 % full gave nothing at its low flange and nothing could be piped under a tank: now one can)
+                out.add(new FluidPort(vessel, at, f, (j * 16 + LOW - FLANGE_HALF) / (16.0 * h), PORT_K, sideSpot(f, LOW)));
+                out.add(new FluidPort(vessel, at, f, (j * 16 + HIGH + FLANGE_HALF) / (16.0 * h), PORT_K, sideSpot(f, HIGH)));
             }
         }
         ports = out;
