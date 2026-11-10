@@ -14,7 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /** The end of a step (Limiter): what spec/ proves over exact numbers, checked here in doubles, and the vectors for it. */
 class LimiterTest {
     static double[] mv(int from, int to, int k, double amt) {
-        return new double[]{from, to, k, amt};
+        return new double[]{from, to, k, amt, -1};
+    }
+
+    static double[] mv(int from, int to, int k, double amt, int edge) {
+        return new double[]{from, to, k, amt, edge};
     }
 
     /** One mass and the energy per node; the masses after the given moves from the given starts. */
@@ -103,6 +107,25 @@ class LimiterTest {
         assertEquals(5, m[n - 1], 0, "all of it at the end");
     }
 
+    /** The energy an edge's flow carries is cut with its masses; conducted heat is not. */
+    @Test
+    void energyFollowsTheMass() throws Exception {
+        // two masses and the energy; node 0 holds a quarter of the first mass it is to send and all of the second
+        double[] y0 = {0.25, 4, 1000, 0, 0, 0};
+        List<double[]> moves = List.of(mv(0, 1, 0, 1, 0), mv(0, 1, 1, 3, 0), mv(0, 1, 2, 800, 0), mv(0, 1, 2, 7));
+        double[] y = Limiter.apply(3, y0, moves);
+        assertEquals(0.25, y[3], 1e-15, "the mass it had");
+        assertEquals(3, y[4], 0, "the other mass in full");
+        assertEquals(800 * (0.25 + 3) / 4 + 7, y[5], 1e-12, "the energy of what went, and the conducted heat");
+        assertEquals(1000, y[2] + y[5], 1e-12, "energy conserved");
+        // nothing to send at all: no energy with it
+        y = Limiter.apply(3, new double[]{0, 0, 1000, 0, 0, 0}, moves);
+        assertEquals(7, y[5], 0, "only the conducted heat");
+        // nothing limited: exactly the energy asked
+        y = Limiter.apply(3, new double[]{1.5, 4, 1000, 0, 0, 0}, List.of(mv(0, 1, 0, 1.1, 0), mv(0, 1, 1, 3.3, 0), mv(0, 1, 2, 800.7, 0)));
+        assertEquals(800.7, y[5], 0, "all the energy, to the bit");
+    }
+
     /** Random transfer lists, rings and empty senders included. {C, y0, moves}. */
     static Object[] randomCase(Random r) {
         int n = 1 + r.nextInt(8), C = 2 + r.nextInt(3), S = C - 1;
@@ -112,14 +135,14 @@ class LimiterTest {
             y0[i] = i % C == S ? (r.nextDouble() - 0.3) * 1e5 * mag : r.nextInt(3) == 0 ? (r.nextInt(4) == 0 ? -0.0 : 0) : r.nextInt(12) == 0 ? -1e-18 * mag : mag;
         }
         List<double[]> moves = new ArrayList<>();
-        int count = r.nextInt(4 * n + 2);
+        int count = r.nextInt(4 * n + 2), edges = 1 + r.nextInt(2 * n);
         double base = Math.pow(10, -12 + 14 * r.nextDouble());
         for (int j = 0; j < count; j++) {
             int from = r.nextInt(n + 1) - 1, to = r.nextInt(n + 1) - 1;
             if (from == to) continue;
             // (often of one size, so that rings nearly balance and the scales settle slowly)
             double amt = r.nextInt(3) == 0 ? base * (1 + 0.1 * r.nextDouble()) : Math.pow(10, -12 + 14 * r.nextDouble());
-            moves.add(mv(from, to, r.nextInt(C), amt));
+            moves.add(mv(from, to, r.nextInt(C), amt, r.nextInt(edges + 1) - 1));
         }
         return new Object[]{C, y0, moves};
     }
@@ -141,10 +164,19 @@ class LimiterTest {
                     tap.call(cc, a, b, passes, scale, y);
                 };
                 double[] y = Limiter.apply(C, y0, moves), scale = seen[0];
+                // each edge's masses as sent and as asked, for the energy that goes with them
+                Map<Integer, double[]> edge = new java.util.HashMap<>();
+                for (double[] m : moves)
+                    if (m[2] < S && m[4] >= 0) {
+                        double[] e = edge.computeIfAbsent((int) m[4], g -> new double[2]);
+                        e[0] += m[3] * (m[0] >= 0 ? scale[C * (int) m[0] + (int) m[2]] : 1);
+                        e[1] += m[3];
+                    }
                 double[] in = new double[y0.length], boundary = new double[C], size = new double[C];
                 for (double[] m : moves) {
                     int k = (int) m[2];
-                    double amt = m[3] * (m[0] >= 0 && k < S ? scale[C * (int) m[0] + k] : 1);
+                    double[] e = edge.get((int) m[4]);
+                    double amt = m[3] * (k < S ? (m[0] >= 0 ? scale[C * (int) m[0] + k] : 1) : e != null && e[1] != 0 ? e[0] / e[1] : 1);
                     assertTrue(amt >= 0 && amt <= m[3], "case " + c + " moved " + amt + " of " + m[3]);
                     if (m[1] >= 0) in[C * (int) m[1] + k] += amt;
                     if (m[0] < 0) boundary[k] += amt;
