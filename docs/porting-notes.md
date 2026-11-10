@@ -461,6 +461,12 @@ In the port:
 - Two devices on adjacent faces of one block shared heat only on some corners: `SixNode.tryConnectTwoInternalElement`
   paired the wrong thermal loads (1.12). Test: `six_node_inner_corner_a_temperature_probe_reads_a_wall_cable_s_heat`.
 
+- One NaN input (0/0 from two pins at 0 V) stuck in a signal processor's `rc`, `integrate`, `pid` or `derivate` for
+  good, and was saved: the program output 0 V until it was retyped. A step whose new state would not be finite is
+  skipped (the state holds, as `ramp` already did), and a NaN in a save loads as 0. A watchdog that saw one NaN sample
+  never fired again; it now skips the sample and reports it through NanGuard. Inductors and voltage sources load a
+  non-finite saved value as 0. Tests `StatefulNanTest`, `ValueWatchdogNanTest`, `NanGuardTest`.
+
 ## Deferred
 
 - Sound redesign: synthesize machine sound client-side from device state; one-shot sounds are still server packets.

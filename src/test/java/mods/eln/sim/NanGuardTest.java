@@ -48,4 +48,19 @@ public class NanGuardTest {
         assertEquals(0, t.EnergyTemp, 0);
         assertEquals(1e9, MnaConst.highImpedance, 0);
     }
+
+    @Test
+    public void aNanInASaveStaysOut() {
+        net.minecraft.nbt.CompoundTag nbt = new net.minecraft.nbt.CompoundTag();
+        nbt.putDouble("vU", Double.NaN);
+        nbt.putDouble("vIstate", Double.NaN);
+        nbt.putDouble("lIstate", Double.POSITIVE_INFINITY);
+        VoltageSource v = new VoltageSource("v");
+        v.readFromNBT(nbt, "");
+        mods.eln.sim.mna.component.Inductor l = new mods.eln.sim.mna.component.Inductor("l");
+        l.readFromNBT(nbt, "");
+        assertEquals(0, v.getU(), 0);
+        assertEquals(0, v.getCurrentState().state, 0);
+        assertEquals(0, l.getCurrentState().state, 0);
+    }
 }

@@ -544,6 +544,16 @@ public class Equation implements IValue, INBTTReady {
         return root != null;
     }
 
+    /**
+     * The stateful functions (ramp, integrate, derivate, pid, rc) skip a step whose new state would not be finite: they
+     * hold their last state, as ramp did, and go on once the input is finite again. 1.12 took the NaN of one 0/0 input
+     * into the state, saved it, and the program output NaN (shown as 0 V) until it was retyped. A NaN already in a save
+     * loads as 0 (this).
+     */
+    static double finiteOr0(double v) {
+        return Double.isFinite(v) ? v : 0;
+    }
+
     public static class Eguals extends OperatorAB {
         @Override
         public double getValue() {
@@ -903,7 +913,7 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void readFromNBT(CompoundTag nbt, String str) {
-            counter = nbt.getDoubleOr(str + "counter", 0.0);
+            counter = finiteOr0(nbt.getDoubleOr(str + "counter", 0.0));
         }
 
         @Override
@@ -944,7 +954,7 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void readFromNBT(CompoundTag nbt, String str) {
-            counter = nbt.getDoubleOr(str + "counter", 0.0);
+            counter = finiteOr0(nbt.getDoubleOr(str + "counter", 0.0));
         }
 
         @Override
@@ -954,7 +964,8 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void process(double time) {
-            counter += time * probe.getValue();
+            double next = counter + time * probe.getValue();
+            if (Double.isFinite(next)) counter = next;   // (a non-finite input holds the sum)
             if (reset.getValue() > 0.5) counter = 0;
         }
 
@@ -982,7 +993,7 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void readFromNBT(CompoundTag nbt, String str) {
-            counter = nbt.getDoubleOr(str + "counter", 0.0);
+            counter = finiteOr0(nbt.getDoubleOr(str + "counter", 0.0));
         }
 
         @Override
@@ -992,9 +1003,10 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void process(double time) {
-            counter += time * probe.getValue();
-            if (counter < min.getValue()) counter = min.getValue();
-            if (counter > max.getValue()) counter = max.getValue();
+            double next = counter + time * probe.getValue();
+            if (next < min.getValue()) next = min.getValue();
+            if (next > max.getValue()) next = max.getValue();
+            if (Double.isFinite(next)) counter = next;   // (a non-finite input or bound holds the sum)
         }
 
         @Override
@@ -1026,8 +1038,8 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void readFromNBT(CompoundTag nbt, String str) {
-            old = nbt.getDoubleOr(str + "old", 0.0);
-            value = nbt.getDoubleOr(str + "value", 0.0);
+            old = finiteOr0(nbt.getDoubleOr(str + "old", 0.0));
+            value = finiteOr0(nbt.getDoubleOr(str + "value", 0.0));
             primed = nbt.contains(str + "old");
         }
 
@@ -1040,7 +1052,9 @@ public class Equation implements IValue, INBTTReady {
         @Override
         public void process(double time) {
             double next = probe.getValue();
-            value = primed ? (next - old) / time : 0;
+            double v = primed ? (next - old) / time : 0;
+            if (!Double.isFinite(next) || !Double.isFinite(v)) return;   // (held: see Equation.finiteOr0)
+            value = v;
             old = next;
             primed = true;
         }
@@ -1069,9 +1083,9 @@ public class Equation implements IValue, INBTTReady {
 
         @Override
         public void readFromNBT(CompoundTag nbt, String str) {
-            iStack = nbt.getDoubleOr(str + "iStack", 0.0);
-            oldError = nbt.getDoubleOr(str + "oldError", 0.0);
-            dValue = nbt.getDoubleOr(str + "dValue", 0.0);
+            iStack = finiteOr0(nbt.getDoubleOr(str + "iStack", 0.0));
+            oldError = finiteOr0(nbt.getDoubleOr(str + "oldError", 0.0));
+            dValue = finiteOr0(nbt.getDoubleOr(str + "dValue", 0.0));
         }
 
         @Override
@@ -1084,11 +1098,15 @@ public class Equation implements IValue, INBTTReady {
         @Override
         public void process(double time) {
             double error = target.getValue() - hit.getValue();
-            iStack += error * time * i.getValue();
-            dValue = (error - oldError) / time;
+            double nextI = iStack + error * time * i.getValue();
+            double nextD = (error - oldError) / time;
 
-            if (iStack > hi()) iStack = hi();
-            if (iStack < lo()) iStack = lo();
+            if (nextI > hi()) nextI = hi();
+            if (nextI < lo()) nextI = lo();
+            // a non-finite input, gain or bound holds the controller's state (see Equation.finiteOr0)
+            if (!Double.isFinite(error) || !Double.isFinite(nextI) || !Double.isFinite(nextD)) return;
+            iStack = nextI;
+            dValue = nextD;
             oldError = error;
         }
 
@@ -1245,12 +1263,13 @@ public class Equation implements IValue, INBTTReady {
         @Override
         public void process(double time) {
             double tao = Math.max(time, this.tao.getValue());
-            state += (input.getValue() - state) / tao * time;
+            double next = state + (input.getValue() - state) / tao * time;
+            if (Double.isFinite(next)) state = next;   // (a non-finite input or tau holds it: see Equation.finiteOr0)
         }
 
         @Override
         public void readFromNBT(CompoundTag nbt, String str) {
-            state = nbt.getDoubleOr(str + "state", 0.0);
+            state = finiteOr0(nbt.getDoubleOr(str + "state", 0.0));
         }
 
         @Override
