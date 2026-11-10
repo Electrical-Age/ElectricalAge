@@ -176,12 +176,9 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
     void unregister() {
         removeFromServer();
 
-        // Remove all TX signals.
-        for (Integer key : wirelessTxStatusList.keySet()) {
-            ServerWirelessTxStatus status = wirelessTxStatusList.get(key);
-            status.delete();
-            wirelessTxStatusList.remove(key);
-        }
+        // Remove all TX signals (removing from the map while iterating its keys threw with two or more).
+        for (ServerWirelessTxStatus status : wirelessTxStatusList.values()) status.delete();
+        wirelessTxStatusList.clear();
     }
 
     @Override
