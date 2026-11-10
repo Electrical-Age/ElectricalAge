@@ -31,6 +31,13 @@ public final class Network {
         public double U;
         /** Heat into it (W), applied each step (free nodes). */
         public double heat;
+        /**
+         * A heat link through its wall (W/K) to a wall held at wallT (K) for the step: heat wallUA (wallT - T) in, inside
+         * the implicit step, so a near-empty node can't overshoot past its wall's temperature (a boiler's shell, a
+         * condenser's cooling, a tank's loss to the air). wallJ: the heat it passed over the last step (J, + in).
+         */
+        public double wallUA, wallT, wallJ;
+        double pendingWall;
         /** Its thermodynamics: the last solved state, what its ports draw, and their slopes. */
         final NodeFluid fluid;
 
@@ -535,6 +542,7 @@ public final class Network {
         }
         double[] y0 = pack(free);
         done = 0;
+        for (Node n : free) n.wallJ = n.pendingWall = 0;
         for (Edge e : edges) {
             boolean f = FREEZE_HEAD && (e.dz != 0 || e.kind == Kind.PUMP) || e.kind == Kind.TURBINE;
             e.rhoA = !f ? Double.NaN : e.kind == Kind.TURBINE ? e.a.fluid.rhoGas() : rhoDraw(e.a, e.fa);
@@ -598,7 +606,7 @@ public final class Network {
         long h = 0x9E3779B97F4A7C15L ^ nodes.size() * 31L ^ edges.size();
         for (Node n : nodes) {
             for (double x : n.m) h = mixIn(h, x);
-            h = mixIn(mixIn(h, n.U), n.heat);
+            h = mixIn(mixIn(mixIn(mixIn(h, n.U), n.heat), n.wallUA), n.wallT);
         }
         for (Edge e : edges) {
             h = mixIn(mixIn(mixIn(mixIn(h, e.g), e.gBack), e.boost), e.conductance);
@@ -685,6 +693,10 @@ public final class Network {
 
     private void restore(List<Node> free, double[] y) {
         set(free, y);
+        for (Node n : free) {
+            n.wallJ -= n.pendingWall;
+            n.pendingWall = 0;
+        }
         for (Edge e : edges) {
             e.workJ -= e.pendingWork;
             e.pendingWork = 0;
@@ -743,7 +755,7 @@ public final class Network {
         for (int i = 0; i < free.size(); i++) {
             Node n = free.get(i);
             for (int k = 0; k < S; k++) r[C * i + k] = n.m[k] - y0[C * i + k];
-            r[C * i + S] = n.U - y0[C * i + S] - dt * n.heat;
+            r[C * i + S] = n.U - y0[C * i + S] - dt * n.heat - (n.wallUA > 0 ? dt * n.wallUA * (n.wallT - n.T()) : 0);
         }
         for (Edge e : edges) {
             double[] f = flux(e, C);
@@ -808,6 +820,13 @@ public final class Network {
         int M = C * free.size();
         Sparse J = new Sparse(M);
         for (int i = 0; i < M; i++) J.add(i, i, 1);
+        // a wall's heat: R_U -= dt UA (Tw - T), so dR_U = dt UA dT
+        for (int i = 0; i < free.size(); i++) {
+            Node n = free.get(i);
+            if (n.wallUA <= 0) continue;
+            double[] dT = n.fluid.tSlope();
+            for (int j = 0; j < C; j++) J.add(C * i + S, C * i + j, dt * n.wallUA * dT[j]);
+        }
         java.util.Map<PortKey, double[]> rhoSlopes = new java.util.HashMap<>();
         for (Edge e : edges) {
             // (every entry an edge can touch is added, zeros too: skipping zeros let entries come and go, and each new
@@ -975,7 +994,13 @@ public final class Network {
         // each transfer: {from, to (indices into free, -1 for a fixed node or outside), component, amount moved over
         // dt, edge (-1: not an edge's flow)}; the heat supplied to each node first
         List<double[]> moves = new ArrayList<>();
-        for (int i = 0; i < free.size(); i++) move(moves, -1, i, S, dt * free.get(i).heat, -1);
+        for (int i = 0; i < free.size(); i++) {
+            Node n = free.get(i);
+            move(moves, -1, i, S, dt * n.heat, -1);
+            n.pendingWall = n.wallUA > 0 ? dt * n.wallUA * (n.wallT - n.T()) : 0;
+            n.wallJ += n.pendingWall;
+            move(moves, -1, i, S, n.pendingWall, -1);
+        }
         // (a pump's work comes from outside, into its outlet; a turbine's goes out of its exhaust, to its shaft)
         for (Edge e : edges) {
             e.pendingWork = 0;

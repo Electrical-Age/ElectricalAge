@@ -22,6 +22,12 @@ public final class FluidNode {
     public long burstTick = Long.MIN_VALUE / 2;
     /** Heat loss to the surroundings (W/K) towards Water.T_AMBIENT; 0 = insulated. */
     public double lossWPerK;
+    /**
+     * A heat link through its wall, inside the fluid core's implicit step (Network.Node.wallUA): conductance (W/K) to a
+     * wall at wallT (K), both set before each step by the device; wallJ the heat that passed in over the last step (J, +
+     * in), for the device to take from (or give to) its thermal load after the step.
+     */
+    public double wallUA, wallT, wallJ;
     final Flash state = new Flash();
 
     public FluidNode(double volume, double z, double height, boolean fixed) {

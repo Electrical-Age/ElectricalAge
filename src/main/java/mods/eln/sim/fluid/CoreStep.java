@@ -264,6 +264,8 @@ final class CoreStep {
             c.U = n.energy;
             c.heat = n.fixed ? 0 : n.heat - n.lossWPerK * (n.T() - Water.T_AMBIENT);
             n.heat = 0;
+            c.wallUA = n.fixed ? 0 : n.wallUA;
+            c.wallT = n.wallT;
             c.update();
         }
         // each stream's conductance from its own port at the step's start (rho k open / mu, or a valve's orifice law at the
@@ -342,6 +344,7 @@ final class CoreStep {
                 for (int j = 2; j < ids.length; j++) n.extra[ids[j] - 2] = c.m[j];
             }
             n.energy = c.U;
+            n.wallJ = c.wallJ;
             n.update();
         }
         // what each edge carried

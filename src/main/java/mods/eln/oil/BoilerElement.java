@@ -148,21 +148,19 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     public void beforeFluidStep(double dt) {
         syncTanks();
         if (feedCheck != null) feedCheck.open = Math.max(0, Math.min(1, (1 - fill()) / FEED_FLOAT_BAND));
-        // the shell heats the water (EA thermal temperatures are relative to the ambient, Tref)
-        double shellK = thermal.Tc + mods.eln.sim.PhysicalConstant.Tref;
-        double q = (shellK - vessel.T()) / SHELL_TO_WATER_K_PER_W * heatingShare();
-        // (at most half the way to the shell's temperature in a step, as the condenser: a boiler boiled dry holds only
-        // a little air and vapour, next to no heat capacity, and the explicit step overshot it to 1300 C and on into its
-        // pipes, with the pressure swinging 0.5-3.6 bar: AdventurAgent)
-        double toShell = (vessel.energyAt(shellK) - vessel.energy) / dt;
-        q = toShell >= 0 ? Math.max(0, Math.min(q, 0.5 * toShell)) : Math.min(0, Math.max(q, 0.5 * toShell));
-        vessel.heat += q;
-        thermal.moveEnergyTo(-q * dt);
-        if (q > 0 && vessel.mLiquid() > 1e-6 && vessel.T() > Water.tsat(vessel.P()) - 2) meterBoil += q * dt;
+        // the shell heats the water through a heat link inside the fluid core's step (EA thermal temperatures are relative
+        // to the ambient, Tref): implicit, so a boiler boiled dry, next to no heat capacity, settles at its shell's
+        // temperature instead of overshooting it (the explicit heat needed a limiter: AdventurAgent saw 1300 C)
+        vessel.wallT = thermal.Tc + mods.eln.sim.PhysicalConstant.Tref;
+        vessel.wallUA = heatingShare() / SHELL_TO_WATER_K_PER_W;
     }
 
     @Override
     public void afterFluidStep(double dt) {
+        // the heat that went through the shell this step comes out of (or back into) its thermal load
+        double q = vessel.wallJ;
+        thermal.moveEnergyTo(-q);
+        if (q > 0 && vessel.mLiquid() > 1e-6 && vessel.T() > Water.tsat(vessel.P()) - 2) meterBoil += q;
         // steam out through the ports and the valve, for the meter
         double gone = 0;
         for (FluidEdge e : FluidWorld.edgesOf(vessel)) gone += (e.a == vessel ? e.fVapour : -e.fVapour) * dt;
