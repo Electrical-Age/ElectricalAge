@@ -101,6 +101,7 @@ class SplitShapeTest {
                         worstT = Math.max(worstT, dT);
                     }
                     String what = "T " + T + " " + sp[1].key + " " + res;
+                    assertTrue(f.splitSteps <= 20 && clean.splitSteps <= 20, what + ": Newton steps to the root " + f.splitSteps + ", " + clean.splitSteps);
                     assertTrue(dl <= 400 * res + 1e-15, what + ": gasoline liquid " + f.st.ml[0].v + " against " + l0);
                     assertTrue(dT <= 2e7 * res + 1e-9, what + ": at the same energy T = " + f.T());
                 }

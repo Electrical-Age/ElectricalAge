@@ -333,7 +333,8 @@ final class MixFluid implements NodeFluid {
             double Hv = -1, HY = 0;
             for (int a = 0; a < k; a++) {
                 if (inf[a] || nn[a].v <= 0) continue;
-                double t = (y + (c[a].v - c[b].v)) / w, sa = w * soft(t);
+                // (above the cut the argument itself, not w (x / w): one species alone then stays at y = n to the bit)
+                double xa = y + (c[a].v - c[b].v), t = xa / w, sa = t > 30 ? xa : w * soft(t);
                 Hv += nn[a].v / sa;
                 HY -= nn[a].v * sig(t) / (sa * sa);
             }
