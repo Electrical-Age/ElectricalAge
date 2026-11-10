@@ -217,10 +217,17 @@ public final class Network {
             this.dz = Math.abs(d) > 1e-9 ? d : 0;
         }
 
-        /** Level, and the same conductance both ways: the streams are the plain pipe's (the path every test before heads took). */
+        /** Level, the same conductance both ways and the network's band: the plain pipe's streams (every test before heads). */
         boolean plain() {
-            return dz == 0 && (Double.isNaN(gBack) || gBack == g);
+            return dz == 0 && (Double.isNaN(gBack) || gBack == g) && Double.isNaN(band);
         }
+
+        /**
+         * Its own band (Pa; NaN: SPLIT_DP) over which its two streams swap through dp = 0. At rest each carries g band ln 2,
+         * mixing its two ends: a heat exchanger's slices, joined by wide pipes with a slow liquid stream through them, mixed
+         * back to one node at 10 Pa, so its joints take a narrower band.
+         */
+        public double band = Double.NaN;
 
         double gB() {
             return Double.isNaN(gBack) ? g : gBack;
@@ -367,16 +374,17 @@ public final class Network {
         double ha = e.dz == 0 ? 0 : G * e.dz * (Double.isNaN(e.rhoA) ? rhoDraw(e.a, e.fa) : e.rhoA);
         double hb = e.dz == 0 ? 0 : G * e.dz * (Double.isNaN(e.rhoB) ? rhoDraw(e.b, e.fb) : e.rhoB);
         double ga = e.g, gb = e.gB();
-        if (SPLIT_DP <= 0) {
+        double S = Double.isNaN(e.band) ? SPLIT_DP : e.band;
+        if (S <= 0) {
             double up = dp + ha, down = -(dp + hb);
             double qp = up > 0 ? ga * up : 0, qm = e.kind == Kind.CHECK || down <= 0 ? 0 : gb * down;
             return new double[]{qp, qm, up > 0 ? ga : 0, e.kind == Kind.CHECK || down <= 0 ? 0 : -gb};
         }
-        double xp = (dp + ha) / SPLIT_DP;
-        double qp = ga * SPLIT_DP * spc(xp), dqp = ga * sgc(xp);
+        double xp = (dp + ha) / S;
+        double qp = ga * S * spc(xp), dqp = ga * sgc(xp);
         if (e.kind == Kind.CHECK) return new double[]{qp, 0, dqp, 0};
-        double xm = -(dp + hb) / SPLIT_DP;
-        return new double[]{qp, gb * SPLIT_DP * spc(xm), dqp, -gb * sgc(xm)};
+        double xm = -(dp + hb) / S;
+        return new double[]{qp, gb * S * spc(xm), dqp, -gb * sgc(xm)};
     }
 
     /** The pump's smoothing at the shut-off (share of h0). */

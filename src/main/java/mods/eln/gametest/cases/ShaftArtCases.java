@@ -200,7 +200,7 @@ public final class ShaftArtCases {
             var hx = (mods.eln.oil.HeatExchangerElement) placeLooking(ctx, GasPlantCases.HX, ctx.at(4, 1, 9), NORTH);
             PipeCases.lay(ctx, ctx.at(5, 1, 9), 2, 0, 8, 8, 16, 8, 8);
             int ht = turnUntilMet(hx);
-            expect("a heat exchanger turned to a large pipe at its end: coupled", () -> ht >= 0 && piped(hx.a));
+            expect("a heat exchanger turned to a large pipe at its end: coupled", () -> ht >= 0 && hx.portCoupled());   // (its sides are slices: a port's coupling, not its node's edges)
             // two generators in a line (looking north: shaft east-west), spinning; one turned leaves the line, turned back
             // rejoins it
             var g1 = placeLooking(ctx, GEN4, ctx.at(1, 1, 5), NORTH);

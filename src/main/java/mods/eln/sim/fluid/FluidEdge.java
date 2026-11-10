@@ -47,6 +47,8 @@ public final class FluidEdge {
     public double nozzle, drop, workJ;
     /** Heat conductance between its two nodes (W/K), in the fluid core's step (Network.Edge.conductance): an exchanger. */
     public double conductance;
+    /** Its own stream band (Pa; NaN: the core's): Network.Edge.band. */
+    public double band = Double.NaN;
     /** TURBINE: electric power made this step (W), at EFFICIENCY of the steam's heat above liquid at 100 C. */
     public double power;
     public static final double TURBINE_EFFICIENCY = 0.40;

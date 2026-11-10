@@ -399,7 +399,7 @@ public final class GasPlantCases {
                 if (++tick == 300) j0 = head(s).totalJ;
                 if (tick > 300) {
                     window += dt;
-                    flow += HeatExchangerElement.inflow(head(s).b)[0];
+                    flow += head(s).sideInflow(false)[0];
                     n++;
                 }
             });

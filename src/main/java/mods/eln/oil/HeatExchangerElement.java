@@ -21,13 +21,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * HeatExchangerDescriptor: a node per side. Each fluid step, from what flowed into each side last step (its mass flow and
- * the temperature it came from) the counterflow effectiveness gives the heat; with one side still, the plain UA x dT
- * between the two. At most (90 % of) the way to even in a step. Each side's heat capacity rate is its flow times its
- * specific heat: liquid water 4186, vapour 1900, air 1005 J/kg K, and a side holding water and steam together (boiling
- * or condensing) a very large one: its temperature stays at saturation. Blocks stack into one exchanger
- * (HeatExchangerGroup): `ownA`/`ownB` are this block's shares, `a`/`b` the sides in use (its own, or the stack's); the
- * stack's lowest corner steps it.
+ * HeatExchangerDescriptor: two sides, each a chain of SLICES slices along the exchanger's length, the slices at each
+ * position coupled by a heat conductance (UA / SLICES) inside the fluid core's step (notes 23-hx.md; Baughn 2026-11-10:
+ * devices are components of the implicit step). Counterflow, parallel flow or a pool boiling off follow from how the
+ * streams really run; 8 slices come within 4 % of ideal counterflow at NTU 2.5 (HeatChainTest). Blocks stack into one
+ * exchanger (HeatExchangerGroup): `ownA`/`ownB` are this block's shares (what it saves), `a`/`b` the sides in use (its
+ * own, or the stack's) as whole volumes, kept summed from the slices; the stack's lowest corner owns the slices.
  */
 public class HeatExchangerElement extends TransparentNodeElement implements FluidDevice, mods.eln.fluid.FluidPlacement.Turnable {
     final HeatExchangerDescriptor desc;
@@ -70,77 +69,148 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         return new double[]{m, m > 0 ? mT / m : n.T()};
     }
 
-    static final double BOILING = 1e7;
+    /** Slices a side. */
+    public static final int SLICES = 8;
+    /** The slices (the head's: a lone block or a stack's corner), the sides they were cut from, and their links. */
+    FluidNode[] sliceA, sliceB;
+    private FluidNode slicedA, slicedB;
+    private List<FluidDevice.Link> links = List.of();
 
-    /** A side's specific heat (J/kg K) for its heat capacity rate: very large while it holds water and steam together. */
-    static double cp(FluidNode n) {
-        double mw = n.mWater, ml = n.mLiquid(), mv = n.mVapour(), ma = n.mAir;
-        // (boiling or condensing: water and steam, the steam nearly all the pressure, so at saturation; water held at 16
-        // bar with a trace of vapour at its own vapour pressure is not: taken so, cold feed soaked up any heat at 20 C,
-        // and feed at 178 C, 9.5 bar of its 16, held an economizer to 1.6 kW of 5)
-        if (ml > 1e-6 && mv > 1e-6 && n.pVapour() > 0.9 * n.P() && Math.abs(n.T() - Water.tsat(Math.max(1000, n.pVapour()))) < 2) return BOILING;
-        double m = mw + ma;
-        double other = 0, otherCp = 0;   // (other species: liquids at their cp, gases and vapours at their cp_vapour)
-        if (mods.eln.sim.fluid.EaUnits.holdsOthers(n)) {
-            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
-            for (int id = 2; id < n.speciesBound(); id++) {
-                var s = reg.byId(id);
-                other += n.mass(id);
-                otherCp += n.liquid(id) * s.cpL + n.vapour(id) * (s.gas() ? s.cpV + s.r : s.cpV);
+    /** Cut this exchanger's sides a and b into slices (again if the sides changed: a stack formed or split). */
+    void slice() {
+        if (sliceA != null && slicedA == a && slicedB == b) return;
+        sliceA = split(a);
+        sliceB = split(b);
+        slicedA = a;
+        slicedB = b;
+        // (a joint's conductance: a large pipe's end, so a gas stream drops ~100 Pa a joint; wider, the drop fell under the
+        // pipe streams' 10 Pa band and their return stream mixed the slices back towards one: 81 % against 88 %)
+        double k = mods.eln.node.voxel.PipePart.LARGE_END_K;
+        List<FluidDevice.Link> out = new java.util.ArrayList<>();
+        for (int i = 0; i + 1 < SLICES; i++)
+            for (FluidNode[] side : new FluidNode[][]{sliceA, sliceB}) {
+                // (floor to floor and ceiling to ceiling: liquid runs along under the gas, none trapped at mid-height)
+                for (double at : new double[]{0, 1}) {
+                    FluidDevice.Link j = new FluidDevice.Link(side[i], at, side[i + 1], at, k / 2);
+                    // (a narrow band: at rest a joint's two streams mix its slices by g band ln 2, and a slow water stream
+                    // through an economizer mixed back to one node at the core's 10 Pa, 1.9 kW of its 4.4)
+                    j.band = 0.5;
+                    out.add(j);
+                }
             }
+        for (int i = 0; i < SLICES; i++) {
+            FluidDevice.Link c = new FluidDevice.Link(sliceA[i], 0.5, sliceB[i], 0.5, 0);
+            c.conductance = ua() / SLICES;
+            out.add(c);
         }
-        if (m + other <= 0) return 1005;
-        if (other == 0) return (ml * Water.CP_L + mv * Water.CP_V + ma * 1005) / m;
-        return (ml * Water.CP_L + mv * Water.CP_V + ma * 1005 + otherCp) / (m + other);
+        links = out;
+    }
+
+    private static FluidNode[] split(FluidNode whole) {
+        FluidNode[] out = new FluidNode[SLICES];
+        for (int i = 0; i < SLICES; i++) {
+            FluidNode n = new FluidNode(whole.volume / SLICES, whole.z, whole.height, false);
+            n.setShareOf(whole, 1.0 / SLICES);
+            n.update();
+            out[i] = n;
+        }
+        return out;
+    }
+
+    /**
+     * Sum the slices back into the whole sides a and b (for readings, saving and regrouping). A side written to since
+     * the last sum (a test filling it, a save restored into it) is spread back into its slices instead: the whole
+     * side is then what holds.
+     */
+    void gather() {
+        if (sliceA == null || slicedA != a || slicedB != b) return;
+        gatherA = sum(a, sliceA, gatherA);
+        gatherB = sum(b, sliceB, gatherB);
+    }
+
+    private double[] gatherA, gatherB;
+
+    private static double[] sum(FluidNode whole, FluidNode[] slices, double[] last) {
+        if (last != null && (whole.mWater != last[0] || whole.mAir != last[1] || whole.energy != last[2])) {
+            for (FluidNode n : slices) {
+                n.setShareOf(whole, n.volume / whole.volume);
+                n.update();
+            }
+        } else {
+            whole.setShareOf(slices[0], 1);
+            for (int i = 1; i < slices.length; i++) whole.addShareOf(slices[i], 1);
+            whole.update();
+        }
+        return new double[]{whole.mWater, whole.mAir, whole.energy};
+    }
+
+    /** What flows into a side of this exchanger from outside (kg/s), and the flow-weighted temperature it comes from (K). */
+    public double[] sideInflow(boolean sideA) {
+        HeatExchangerElement h = head();
+        FluidNode[] side = sideA ? h.sliceA : h.sliceB;
+        if (side == null) return inflow(sideA ? a : b);
+        double[] x = inflowFromOutside(side[0], side), y = inflowFromOutside(side[side.length - 1], side);
+        double m = x[0] + y[0];
+        return new double[]{m, m > 0 ? (x[0] * x[1] + y[0] * y[1]) / m : side[0].T()};
+    }
+
+    /** Whether a pipe or device is coupled to one of its ports (an edge from an end slice to a node outside it). */
+    public boolean portCoupled() {
+        HeatExchangerElement h = head();
+        if (h.sliceA == null) return false;
+        java.util.Set<FluidNode> own = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        own.addAll(java.util.Arrays.asList(h.sliceA));
+        own.addAll(java.util.Arrays.asList(h.sliceB));
+        for (FluidNode n : new FluidNode[]{h.sliceA[0], h.sliceA[SLICES - 1], h.sliceB[0], h.sliceB[SLICES - 1]})
+            for (var e : FluidWorld.edgesOf(n)) if (!own.contains(e.a) || !own.contains(e.b)) return true;
+        return false;
+    }
+
+    /** What flows into slice n from outside its side (kg/s) and the flow-weighted temperature it comes from (K). */
+    static double[] inflowFromOutside(FluidNode n, FluidNode[] side) {
+        double m = 0, mT = 0;
+        for (var e : FluidWorld.edgesOf(n)) {
+            if (e.conductance > 0) continue;
+            FluidNode from = e.b == n ? e.a : e.a == n ? e.b : null;
+            if (from == null || java.util.Arrays.asList(side).contains(from)) continue;
+            double in = e.b == n ? e.flow : -e.flow;
+            if (in <= 0) continue;
+            m += in;
+            mT += in * from.T();
+        }
+        return new double[]{m, m > 0 ? mT / m : n.T()};
+    }
+
+    @Override
+    public List<FluidDevice.Link> fluidLinks() {
+        if (a == null || group != null && group.master() != this) return List.of();
+        slice();
+        return links;
+    }
+
+    /** What enters a side (kg/s) and at what temperature, at whichever end slice the flow comes in; its other end slice's temperature. */
+    static double[] ends(FluidNode[] side) {
+        double[] first = inflowFromOutside(side[0], side), last = inflowFromOutside(side[side.length - 1], side);
+        return first[0] >= last[0] ? new double[]{first[1], side[side.length - 1].T()} : new double[]{last[1], side[0].T()};
     }
 
     @Override
     public void beforeFluidStep(double dt) {
-        if (a == null || group != null && group.master() != this) return;   // (a stack is stepped once, by its corner)
-        var ia = inflow(a);
-        var ib = inflow(b);
-        double cpA = cp(a), cpB = cp(b);
-        // (a side boiling or condensing meets the other at its saturation temperature, whatever its feed came in at: water
-        // fed at 20 C into a drum boiling at 170 mixes up to 170 there)
-        tAin = ia[1];
-        tBin = ib[1];
-        double inA = cpA >= BOILING ? a.T() : tAin, inB = cpB >= BOILING ? b.T() : tBin;
-        double ua = ua(), heat;
-        boolean flowing;
-        // (a side boiling or condensing takes any heat at its saturation temperature, fed or not: a pool boiling off)
-        double cA = cpA >= BOILING ? BOILING : ia[0] * cpA, cB = cpB >= BOILING ? BOILING : ib[0] * cpB;
-        if (flowing = cA > 1e-6 && cB > 1e-6) {
-            // counterflow effectiveness-NTU, from the two inlets
-            double cMin = Math.min(cA, cB), cMax = Math.max(cA, cB), cr = cMin / cMax, ntu = ua / cMin, eps;
-            if (cr > 0.999) eps = ntu / (1 + ntu);
-            else {
-                double x = Math.exp(-ntu * (1 - cr));
-                eps = (1 - x) / (1 - cr * x);
-            }
-            heat = eps * cMin * (inA - inB);
-        } else heat = ua * (a.T() - b.T());   // (a side still: the two volumes)
-        // at most (90 % of) the way to even in a step: the heat that brings both sides to one temperature, from each side's
-        // heat to reach the other's (1 / (1/fromA + 1/intoB): half the smaller for two like sides, nearly all of a thin
-        // gas's heat against boiling water; capped at half the smaller, 4 L of exhaust gave 8 kW of the 13 it could. It
-        // is taken before this step's inflow arrives, so its holding, not its through-flow, is the most it can give.)
-        // Both flowing, each side goes at most to the other's inlet (counterflow: the gas leaving meets the feed coming
-        // in, colder than the warm water the economizer holds, which held it to 1.6 kW of 5)
-        double ta = flowing ? inA : a.T(), tb = flowing ? inB : b.T();
-        if (heat > 0) {
-            double fromA = (a.energy - a.energyAt(tb)) / dt;
-            double intoB = (b.energyAt(ta) - b.energy) / dt;
-            heat = fromA <= 0 || intoB <= 0 ? 0 : Math.min(heat, 0.9 / (1 / fromA + 1 / intoB));
-        } else {
-            double fromB = (b.energy - b.energyAt(ta)) / dt;
-            double intoA = (a.energyAt(tb) - a.energy) / dt;
-            heat = fromB <= 0 || intoA <= 0 ? 0 : Math.max(heat, -0.9 / (1 / fromB + 1 / intoA));
-        }
-        // (what leaves each side: a gas, its inlet less the heat over its flow, since a few litres of gas swing within a
-        // step; water, what it holds: 64 L warms over hours, and that is what leaves)
-        tAout = cA > 1e-6 && cpA < BOILING && a.mLiquid() < 1e-3 ? tAin - heat / cA : a.T();
-        tBout = cB > 1e-6 && cpB < BOILING && b.mLiquid() < 1e-3 ? tBin + heat / cB : b.T();
-        a.heat -= heat;
-        b.heat += heat;
+        if (a == null || group != null && group.master() != this || sliceA == null) return;
+        gather();   // (a side written to since the last step: into its slices)
+    }
+
+    @Override
+    public void afterFluidStep(double dt) {
+        if (a == null || group != null && group.master() != this || sliceA == null) return;
+        double heat = 0;
+        for (FluidDevice.Link l : links) if (l.conductance > 0 && l.edge != null) heat += l.edge.fEnthalpy;
+        double[] ea = ends(sliceA), eb = ends(sliceB);
+        tAin = ea[0];
+        tAout = ea[1];
+        tBin = eb[0];
+        tBout = eb[1];
+        gather();
         q = heat;
         totalJ += heat * dt;
         meterQ += heat * dt;
@@ -204,15 +274,17 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         long at = node.coordonate.pos().asLong();
         double k = mods.eln.node.voxel.PipePart.LARGE_END_K;
         List<FluidPort> out = new java.util.ArrayList<>();
-        int j = group == null ? 0 : node.coordonate.y - group.y0, h = group == null ? 1 : group.sy;
+        HeatExchangerElement h = head();
+        h.slice();
+        int j = group == null ? 0 : node.coordonate.y - group.y0, hh = group == null ? 1 : group.sy;
         for (Direction d : new Direction[]{front.back(), front}) {
             if (group != null) {
                 HeatExchangerElement o = HeatExchangerGroup.neighbour(this, d, null);
                 if (o != null && group.members.contains(o)) continue;   // (not an end)
             }
-            int f = d.toEnumFacing().get3DDataValue();
-            out.add(new FluidPort(a, at, f, (j * 16 + 8) / (16.0 * h), k));
-            out.add(new FluidPort(b, at, f, (j * 16 + TankElement.HIGH) / (16.0 * h), k, TankElement.sideSpot(f, TankElement.HIGH)));
+            int f = d.toEnumFacing().get3DDataValue(), end = d == front ? SLICES - 1 : 0;   // (the slices run back to front)
+            out.add(new FluidPort(h.sliceA[end], at, f, (j * 16 + 8) / (16.0 * hh), k));
+            out.add(new FluidPort(h.sliceB[end], at, f, (j * 16 + TankElement.HIGH) / (16.0 * hh), k, TankElement.sideSpot(f, TankElement.HIGH)));
         }
         ports = out;
     }
@@ -321,6 +393,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         if (group != null) group.writeBack();   // (its share of the stack)
+        else gather();   // (its slices summed into its own sides)
         if (ownA != null) {
             // (to float precision, as tanks: a stack re-formed on load from the shares differs in the last bits)
             for (Object[] s : new Object[][]{{"sideA", ownA}, {"sideB", ownB}}) {

@@ -277,6 +277,7 @@ final class CoreStep {
             FluidEdge e = edges.get(k);
             c.boost = e.boost;
             c.conductance = e.conductance;
+            c.band = e.band;
             double dp = e.a.pressureOver(e.portA, e.spanA) - e.b.pressureOver(e.portB, e.spanB) + e.boost;
             double dz = (e.a.z + e.portA * e.a.height) - (e.b.z + e.portB * e.b.height);
             FluidNetwork.Packet pa = FluidNetwork.packet(e.a, e.portA, e.spanA), pb = FluidNetwork.packet(e.b, e.portB, e.spanB);

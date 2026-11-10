@@ -427,6 +427,7 @@ public final class FluidWorld implements IProcess {
             l.edge.nozzle = l.nozzle;
             l.edge.drop = l.drop;
             l.edge.conductance = l.conductance;
+            l.edge.band = l.band;
             links.add(l);
         }
         Map<FluidNetwork, FluidNode> air = new IdentityHashMap<>();

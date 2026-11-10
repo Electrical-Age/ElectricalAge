@@ -39,7 +39,7 @@ public final class NetworkDump {
             s.append("edge ").append(idx.get(e.a)).append(' ').append(idx.get(e.b)).append(' ').append(h(e.fa)).append(' ').append(h(e.fb))
                 .append(' ').append(h(e.g)).append(' ').append(e.kind).append(' ').append(h(e.boost)).append(' ').append(h(e.exchange))
                 .append(' ').append(h(e.conductance)).append(' ').append(h(e.gBack)).append(' ').append(h(e.qMax)).append(' ').append(h(e.h0))
-                .append(' ').append(h(e.speed)).append(' ').append(h(e.eta)).append('\n');
+                .append(' ').append(h(e.speed)).append(' ').append(h(e.eta)).append(' ').append(h(e.band)).append('\n');
         return s.toString();
     }
 
@@ -88,6 +88,7 @@ public final class NetworkDump {
                         e.speed = d(w[13]);
                         e.eta = d(w[14]);
                     }
+                    if (w.length > 15) e.band = d(w[15]);
                 }
                 default -> {
                 }

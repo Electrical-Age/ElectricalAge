@@ -65,6 +65,7 @@ public final class HeatExchangerGroup {
 
     /** Write both sides back into the blocks' shares, by volume. */
     void writeBack() {
+        master().gather();   // (the slices summed into the stack's sides first)
         for (HeatExchangerElement m : members) {
             share(a, m.ownA);
             share(b, m.ownB);
@@ -136,6 +137,8 @@ public final class HeatExchangerGroup {
             Set<HeatExchangerGroup> old = new HashSet<>();
             for (HeatExchangerElement m : comp) if (m.group != null) old.add(m.group);
             for (HeatExchangerGroup g : old) g.writeBack();
+            // (lone blocks' slices summed into their own sides, which the new stack merges)
+            for (HeatExchangerElement m : comp) if (m.group == null) m.gather();
             int x0 = Integer.MAX_VALUE, y0 = Integer.MAX_VALUE, z0 = Integer.MAX_VALUE, x1 = Integer.MIN_VALUE, y1 = Integer.MIN_VALUE, z1 = Integer.MIN_VALUE;
             boolean sameAxis = true, ax = alongX(seed);
             for (HeatExchangerElement m : comp) {
@@ -156,6 +159,9 @@ public final class HeatExchangerGroup {
                 m.group = g;
                 m.a = g == null ? m.ownA : g.a;
                 m.b = g == null ? m.ownB : g.b;
+            }
+            // (every member's sides set before any makes its ports: the head cuts its slices from them)
+            for (HeatExchangerElement m : comp) {
                 m.makePorts();
                 FluidWorld.changed(m);
                 m.needPublish();

@@ -49,6 +49,8 @@ public interface FluidDevice {
 
         /** Heat conductance between the two nodes (W/K; a heat exchanger's plates), set by the device each step. */
         public double conductance;
+        /** Its own stream band (Pa; NaN: the core's): narrower mixes its two ends less at rest (Network.Edge.band). */
+        public double band = Double.NaN;
 
         /** TURBINE: its nozzle coefficient (FluidEdge.nozzle); the device sets open and drop before each step. */
         public double nozzle, drop;
