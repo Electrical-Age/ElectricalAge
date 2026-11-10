@@ -449,6 +449,16 @@ public final class Network {
         return Math.max(0, Double.isNaN(e.rhoA) ? e.gas ? gasDraw(e) : rhoDraw(e.a, e.fa) : e.rhoA);
     }
 
+    /** An edge that carries only its a side's gas (a gas pump): never liquid, even with its port inside the window. */
+    static boolean gasOnly(Edge e) {
+        return e.kind == Kind.PUMP && e.gas;
+    }
+
+    /** What a kg from a's side of the edge carries: a gas pump its gas alone (gasDraw), else the port's draw. */
+    static double[] drawOf(Edge e) {
+        return gasOnly(e) ? e.a.fluid.gasDraw() : e.a.fluid.draw(e.fa);
+    }
+
     /** What a gas pump draws: the gas, as far as its port is above the liquid (under water, an ejector moves nothing). */
     static double gasDraw(Edge e) {
         return e.a.fluid.rhoGas() * (1 - e.a.fluid.liquidWindow(e.fa));
@@ -858,7 +868,7 @@ public final class Network {
         }
         double[] qs = streams(e);
         if (qs[0] == 0 && qs[1] == 0) return f;
-        double[] ca = qs[0] != 0 ? e.a.fluid.draw(e.fa) : null, cb = qs[1] != 0 ? e.b.fluid.draw(e.fb) : null;
+        double[] ca = qs[0] != 0 ? drawOf(e) : null, cb = qs[1] != 0 ? e.b.fluid.draw(e.fb) : null;
         if (f == null) f = new double[C + 1];
         for (int k = 0; k < C; k++) f[k] += (ca != null ? qs[0] * ca[k] : 0) - (cb != null ? qs[1] * cb[k] : 0);
         return f;
@@ -955,8 +965,9 @@ public final class Network {
             // F_k = q+ ca_k - q- cb_k; dF_k = dq+ d(arg+) ca_k - dq- d(arg-) cb_k + q+ dca_k (a) - q- dcb_k (b), arg+ = dp + ha,
             // arg- = dp + hb (level: both dp)
             double[] qs = streams(e);
-            double[] ca = e.a.fluid.draw(e.fa), cb = e.b.fluid.draw(e.fb);
-            double[][] dca = qs[0] != 0 ? e.a.fluid.drawSlope(e.fa) : null, dcb = qs[1] != 0 ? e.b.fluid.drawSlope(e.fb) : null;
+            double[] ca = drawOf(e), cb = e.b.fluid.draw(e.fb);
+            // (a gas pump's gas-only draw: its composition's slopes left out, as small as the gas share's changes)
+            double[][] dca = qs[0] != 0 && !gasOnly(e) ? e.a.fluid.drawSlope(e.fa) : null, dcb = qs[1] != 0 ? e.b.fluid.drawSlope(e.fb) : null;
             double[] dpa = e.a.fluid.portPSlope(e.fa), dpb = e.b.fluid.portPSlope(e.fb);
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
             double[] dha = e.dz != 0 && ia != null && Double.isNaN(e.rhoA) ? rhoSlopes.computeIfAbsent(new PortKey(e.a, e.fa), p -> rhoDrawSlope(e.a, e.fa)) : null;
