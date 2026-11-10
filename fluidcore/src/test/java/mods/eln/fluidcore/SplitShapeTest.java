@@ -49,4 +49,21 @@ class SplitShapeTest {
             check(random(r, m), m, "case " + n + " " + java.util.Arrays.toString(m));
         }
     }
+
+    /**
+     * Masses that rounding left a little below zero (the limiter allows 1e-15 of a cell) count as none: no negative
+     * share, no share of 1e16, whatever else the group holds.
+     */
+    @Test
+    void negativeTracesCountAsNone() {
+        Random r = new Random(12);
+        for (int n = 0; n < 4000; n++) {
+            double[] m = new double[SP.length];
+            MixFluid f = random(r, m);
+            double U = f.energyAt(m, f.T());
+            for (int i = 0; i < m.length - 1; i++) if (r.nextDouble() < 0.4) m[i] = -Math.pow(10, -32 + 14 * r.nextDouble());
+            f.update(m, U);
+            check(f, m, "case " + n + " " + java.util.Arrays.toString(m));
+        }
+    }
 }
