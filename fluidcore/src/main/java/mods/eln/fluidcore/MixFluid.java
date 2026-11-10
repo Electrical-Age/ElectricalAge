@@ -262,8 +262,10 @@ final class MixFluid implements NodeFluid {
         boolean anyFinite = false;
         for (int a = 0; a < k; a++) {
             Species s = sp[mem[a]];
-            nn[a] = mm[mem[a]].mul(1 / s.molarMass);
-            ntot += Math.max(0, nn[a].v);
+            // (a mass that rounding left below zero counts as none, slopes kept: as an amount it gave negative
+            // shares, and a negative width where it outweighed the rest)
+            D ma = mm[mem[a]];
+            nn[a] = (ma.v < 0 ? ma.add(-ma.v) : ma).mul(1 / s.molarMass);
             if (s.kind == Species.Kind.NONE) {
                 c[a] = D.c(0, n);
                 anyFinite = true;
@@ -283,6 +285,7 @@ final class MixFluid implements NodeFluid {
             c[a] = cm.mul(1 / s.molarMass);
             anyFinite = true;
         }
+        for (int a = 0; a < k; a++) if (!inf[a]) ntot += nn[a].v;
         e.x[g] = new D[k];
         // an empty group (or one whose present species are all past their no-root point): a first trace of a volatile
         // is vapour, of a non-volatile liquid (right-hand slopes)
@@ -328,7 +331,7 @@ final class MixFluid implements NodeFluid {
         for (int j = 0; j < n; j++) gU[j] = -Fx.g[j] / FU;
         D Nstar = new D(u, gU).sub(c[k0]);
         D ntotD = D.c(0, n);
-        for (int a = 0; a < k; a++) ntotD = ntotD.add(nn[a]);
+        for (int a = 0; a < k; a++) if (!inf[a]) ntotD = ntotD.add(nn[a]);   // (those past their no-root point are all vapour)
         D N = D.softplus(Nstar, ntotD.mul(WaterAir.EPS_L));
         // lam: sum n_i / (N + lam c_i) = 1 (only the finite, volatile terms depend on lam)
         D lam;
@@ -389,8 +392,7 @@ final class MixFluid implements NodeFluid {
             D den = N.add(c[a].mul(lam));
             D x = den.v > 1e-12 * ntotD.v || (nn[a].v > 0 && den.v > 0) ? nn[a].div(den) : D.c(0, n);
             e.x[g][a] = x;
-            D nl = s.kind == Species.Kind.NONE ? nn[a] : x.mul(N);
-            e.ml[i] = nl.mul(s.molarMass);
+            e.ml[i] = s.kind == Species.Kind.NONE ? mm[i] : x.mul(N).mul(s.molarMass);
             e.mv[i] = mm[i].sub(e.ml[i]);
         }
         finishVapour(e, g, T, Vg);
