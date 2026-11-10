@@ -12,5 +12,5 @@
   "vapour_viscosity": 7e-6,
   "colour": "#6B3A1C",
   "fluids": {"liquid": ["eln:heavyoil"], "vapour": []},
-  "flammable": {"flash_point": 370, "autoignition": 680}
+  "flammable": {"flash_point": 370, "autoignition": 530}
 }

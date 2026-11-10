@@ -1255,9 +1255,9 @@ public final class PipeCases {
     }
 
     /**
-     * Fire from a hot flammable leak (Baughn 2026-11-03): an iron run of heavy oil at 430 C (over its autoignition, 680 K)
-     * under air past its burst rating bursts, and its jet catches; the same run of diesel at 20 C (under its flash point)
-     * only sprays; gasoline at 20 C (over its flash point, under its autoignition) catches from torches beside it.
+     * Fire from a hot flammable leak (Baughn 2026-11-03): an iron run of heavy oil at 430 C (over its autoignition,
+     * 530 K as real heavy fuel oil's: Baughn 2026-11-10) under air past its burst rating bursts, and its jet catches;
+     * the same run of diesel at 20 C (under its flash point) only sprays; gasoline at 20 C (over its flash point, under its autoignition) catches from torches beside it.
      */
     static final class LeakFire implements TestCase {
         /** 0 hot heavy oil, 1 cold diesel, 2 gasoline beside torches. */
