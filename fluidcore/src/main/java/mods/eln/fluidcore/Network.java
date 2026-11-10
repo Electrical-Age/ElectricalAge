@@ -72,7 +72,8 @@ public final class Network {
             return fillMasses(new double[]{mw, ma}, T);
         }
 
-        void update() {
+        /** Solve its state from m and U again: whoever changes those from outside (the game's adapter) calls it. */
+        public void update() {
             fluid.update(m, U);
         }
 
@@ -135,6 +136,13 @@ public final class Network {
         public double conductance;
         /** The last step's flow (kg/s, a to b positive). */
         public double flow;
+        /**
+         * What the last step moved through it, a to b: each species (kg), then energy (J, conduction included), before
+         * the limiter's cuts (which are rare and tiny). Null until it has carried something.
+         */
+        public double[] moved;
+        /** The last solve's share of moved (taken back out if that solve is thrown away). */
+        double[] pending;
 
         Edge(Node a, double fa, Node b, double fb, double g) {
             this.a = a;
@@ -294,6 +302,10 @@ public final class Network {
         }
         List<Node> free = new ArrayList<>();
         for (Node n : nodes) if (!n.fixed) free.add(n);
+        for (Edge e : edges) {
+            if (e.moved != null) java.util.Arrays.fill(e.moved, 0);
+            if (e.pending != null) java.util.Arrays.fill(e.pending, 0);
+        }
         double[] y0 = pack(free);
         if (!solve(free, y0, dt)) {
             // (no convergence: two half steps, each from where the last ended)
@@ -396,6 +408,11 @@ public final class Network {
 
     private void restore(List<Node> free, double[] y) {
         set(free, y);
+        for (Edge e : edges) {
+            if (e.pending == null) continue;
+            for (int k = 0; k < e.pending.length; k++) e.moved[k] -= e.pending[k];
+            java.util.Arrays.fill(e.pending, 0);
+        }
     }
 
     void set(List<Node> free, double[] y) {
@@ -602,7 +619,14 @@ public final class Network {
         for (int g = 0; g < edges.size(); g++) {
             Edge e = edges.get(g);
             double[] f = flux(e, C);
+            if (e.pending != null) java.util.Arrays.fill(e.pending, 0);
             if (f == null) continue;
+            if (e.moved == null || e.moved.length != C) {
+                e.moved = new double[C];
+                e.pending = new double[C];
+            }
+            for (int k = 0; k < C; k++) e.pending[k] = dt * (k == S ? f[k] + f[C] : f[k]);
+            for (int k = 0; k < C; k++) e.moved[k] += e.pending[k];
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
             int a = ia == null ? -1 : ia, b = ib == null ? -1 : ib;
             for (int k = 0; k < C; k++) move(moves, a, b, k, dt * f[k], g);
@@ -669,6 +693,19 @@ public final class Network {
             for (int i = 0; i < r.length; i++) minus[i] = -r[i];
             stats.solves++;
             double[] d = J.solve(minus, luCache);
+            if (DEBUG != null) {
+                double[][] Jd = jacobian(free, idx, dt).dense();
+                double worst = 0;
+                for (int i = 0; i < r.length; i++) {
+                    double row = r[i], mag = Math.abs(r[i]);
+                    for (int j = 0; j < r.length; j++) {
+                        row += Jd[i][j] * d[j];
+                        mag += Math.abs(Jd[i][j] * d[j]);
+                    }
+                    worst = Math.max(worst, Math.abs(row) / Math.max(mag, 1e-300));
+                }
+                DEBUG.append(String.format("  linear solve: worst |J d + r| / scale %.3e%n", worst));
+            }
             // fraction to the boundary: no mass goes below zero in a trial
             // (a component already at or near zero that the step would take lower is held where it is: projecting it,
             // rather than shrinking the whole step to nothing for it, as a node with no air at all did)

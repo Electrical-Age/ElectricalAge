@@ -36,6 +36,26 @@ class NetworkTest {
         assertEquals(0, net.stats.failures, "failures");
     }
 
+    /** What an edge reports it moved is what its two ends lost and gained, step by step, sub-steps included. */
+    @Test
+    void anEdgeReportsWhatItMoved() {
+        Network net = new Network();
+        var a = net.add(new Network.Node(1e-3, 0, 0.1, false).fill(0.9, 1e-4, 420));
+        var b = net.add(new Network.Node(1e-3, 0, 0.1, false).fill(0.01, 1e-3, 300));
+        var c = net.add(new Network.Node(1e-3, 0, 0.1, false).fill(0.2, 1e-3, 350));
+        Network.Edge ab = net.connect(a, 0, b, 0, 1e-4), bc = net.connect(b, 0.5, c, 0.5, 1e-5);
+        ab.conductance = 5;
+        for (int s = 0; s < 200; s++) {
+            double w = a.mw(), air = a.ma(), u = a.U, wc = c.mw(), uc = c.U;
+            net.step(s == 0 ? 2.0 : DT);
+            assertEquals(w - a.mw(), ab.moved[0], 1e-9 * w + 1e-15, "water out of a, step " + s);
+            assertEquals(air - a.ma(), ab.moved[1], 1e-9 * air + 1e-18, "air out of a, step " + s);
+            assertEquals(u - a.U, ab.moved[2], 1e-9 * Math.abs(u) + 1e-9, "energy out of a, step " + s);
+            assertEquals(c.mw() - wc, bc.moved[0], 1e-9 * wc + 1e-15, "water into c, step " + s);
+            assertEquals(c.U - uc, bc.moved[2], 1e-9 * Math.abs(uc) + 1e-9, "energy into c, step " + s);
+        }
+    }
+
     static double portPressure(Network.Node n, double f) {
         return Network.portP(n, f);
     }
