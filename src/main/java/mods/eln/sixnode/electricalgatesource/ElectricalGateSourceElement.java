@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalgatesource;
 
 
+import mods.eln.network.ClientValues;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
@@ -171,7 +172,8 @@ public class ElectricalGateSourceElement extends SixNodeElement {
         try {
             switch (stream.readByte()) {
                 case setVoltagerId:
-                    outputGateProcess.setU(Math.max(0, Math.min(mods.eln.Eln.SVU, stream.readFloat())));   // (a signal: 0 to SVU)
+                    // (a signal: 0 to SVU; a NaN passed max/min)
+                    outputGateProcess.setU(ClientValues.clamp(stream.readFloat(), 0, mods.eln.Eln.SVU, outputGateProcess.getU()));
                     needPublish();
                     break;
             }

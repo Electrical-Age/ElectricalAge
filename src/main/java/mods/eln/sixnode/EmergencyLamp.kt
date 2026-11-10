@@ -5,6 +5,7 @@ import mods.eln.gl.GL11
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
+import mods.eln.network.ClientValues
 import mods.eln.node.Node
 import mods.eln.node.NodePeriodicPublishProcess
 import mods.eln.node.published
@@ -203,7 +204,7 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         super.networkUnserialize(stream)
         when (stream.readByte()) {
             Event.TOGGLE_POWERED_BY_CABLE.value -> poweredByCable = !poweredByCable
-            Event.SET_CHANNEL.value -> channel = stream.readUTF()
+            Event.SET_CHANNEL.value -> channel = ClientValues.readString(stream)
         }
     }
 

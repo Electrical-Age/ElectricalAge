@@ -49,9 +49,7 @@ public class ElectricalSensorProcess implements IProcess {
     }
 
     void setOutput(double physical) {
-        double U = (physical - sensor.lowValue) / (sensor.highValue - sensor.lowValue) * Eln.SVU;
-        if (U > Eln.SVU) U = Eln.SVU;
-        if (U < 0) U = 0;
-        sensor.outputGateProcess.setU(U);
+        // (0 to SVU; a 0/0 when the bounds meet gives 0, not a NaN on the signal)
+        sensor.outputGateProcess.setUSafe((physical - sensor.lowValue) / (sensor.highValue - sensor.lowValue) * Eln.SVU);
     }
 }

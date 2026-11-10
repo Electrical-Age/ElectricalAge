@@ -1,5 +1,6 @@
 package mods.eln.sixnode
 
+import mods.eln.network.ClientValues
 import mods.eln.sixnode.logicgate.CHIP_SCALE
 import mods.eln.gl.GL11
 
@@ -314,9 +315,10 @@ class PIDRegulatorElement(node: SixNode, side: Direction, sixNodeDescriptor: Six
         super.networkUnserialize(stream)
         try {
             when (stream?.readByte()?.toInt()) {
-                KpParameterChangedEvent -> (function as PIDRegulator).Kp = stream.readFloat().toDouble()
-                KiParameterChangedEvent -> (function as PIDRegulator).Ki = stream.readFloat().toDouble()
-                KdParameterChangerEvent -> (function as PIDRegulator).Kd = stream.readFloat().toDouble()
+                // (the screen's sliders: Kp 0..50, Ki and Kd 0..5)
+                KpParameterChangedEvent -> (function as PIDRegulator).apply { Kp = ClientValues.clamp(stream.readFloat().toDouble(), 0.0, 50.0, Kp) }
+                KiParameterChangedEvent -> (function as PIDRegulator).apply { Ki = ClientValues.clamp(stream.readFloat().toDouble(), 0.0, 5.0, Ki) }
+                KdParameterChangerEvent -> (function as PIDRegulator).apply { Kd = ClientValues.clamp(stream.readFloat().toDouble(), 0.0, 5.0, Kd) }
             }
             needPublish()
         } catch (e: IOException) {
@@ -427,7 +429,8 @@ class AmplifierElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNod
 
         try {
             when (stream?.readByte()?.toInt()) {
-                GainChangedEvent -> (function as Amplifier).gain = stream.readFloat().toDouble()
+                // (typed: any finite gain)
+                GainChangedEvent -> (function as Amplifier).apply { gain = ClientValues.finite(stream.readFloat().toDouble(), gain) }
             }
             needPublish()
         } catch (e: IOException) {
@@ -527,9 +530,10 @@ class SummingUnitElement(node: SixNode, side: Direction, sixNodeDescriptor: SixN
 
         try {
             when (stream?.readByte()?.toInt()) {
-                GainChangedEvents[0] -> (function as SummingUnit).gains[0] = stream.readFloat().toDouble()
-                GainChangedEvents[1] -> (function as SummingUnit).gains[1] = stream.readFloat().toDouble()
-                GainChangedEvents[2] -> (function as SummingUnit).gains[2] = stream.readFloat().toDouble()
+                // (typed: any finite gains)
+                GainChangedEvents[0] -> (function as SummingUnit).gains.let { it[0] = ClientValues.finite(stream.readFloat().toDouble(), it[0]) }
+                GainChangedEvents[1] -> (function as SummingUnit).gains.let { it[1] = ClientValues.finite(stream.readFloat().toDouble(), it[1]) }
+                GainChangedEvents[2] -> (function as SummingUnit).gains.let { it[2] = ClientValues.finite(stream.readFloat().toDouble(), it[2]) }
             }
             needPublish()
         } catch (e: IOException) {
@@ -642,7 +646,8 @@ class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDe
 
         try {
             when (stream.readByte()) {
-                Event.CUTOFF_FREQUENCY_CHANGED.value -> cutOffFrequency = stream.readFloat().toDouble()
+                // (the screen's steps: 1 mHz to 5 Hz)
+                Event.CUTOFF_FREQUENCY_CHANGED.value -> cutOffFrequency = ClientValues.clamp(stream.readFloat().toDouble(), 0.001, 5.0, cutOffFrequency)
             }
             needPublish()
         } catch (e: IOException) {

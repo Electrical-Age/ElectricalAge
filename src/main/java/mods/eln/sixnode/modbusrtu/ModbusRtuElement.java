@@ -5,6 +5,7 @@ import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -49,6 +50,9 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
 
     HashMap<String, HashSet<IWirelessSignalTx>> txSet = new HashMap<String, HashSet<IWirelessSignalTx>>();
     HashMap<IWirelessSignalTx, Double> txStrength = new HashMap<IWirelessSignalTx, Double>();
+
+    /** The most Tx and the most Rx entries a packet may add (each adds one; nothing capped the count). */
+    public static final int MAX_ENTRIES = 32;
 
     static final byte setStation = 1;
     static final byte setName = 2;
@@ -302,11 +306,12 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
                     setStation(stream.readInt());
                     break;
                 case setName:
-                    setName(stream.readUTF());
+                    setName(ClientValues.readString(stream));
                     break;
                 case serverTxAdd: {
                     int idx = 0;
-                    String name = stream.readUTF();
+                    String name = ClientValues.readString(stream);
+                    if (wirelessTxStatusList.size() >= MAX_ENTRIES) break;
 
                     int uuid = 0;
                     /*
@@ -324,7 +329,8 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
                 break;
                 case serverRxAdd: {
                     int idx = 0;
-                    String name = stream.readUTF();
+                    String name = ClientValues.readString(stream);
+                    if (wirelessRxStatusList.size() >= MAX_ENTRIES) break;
 
                     int uuid = 0;
                     /*
@@ -343,7 +349,7 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
                 break;
                 case serverTxConfig: {
                     int uuid = stream.readInt();
-                    String name = stream.readUTF();
+                    String name = ClientValues.readString(stream);
                     int id = stream.readInt();
 
                     WirelessTxStatus tx = wirelessTxStatusList.get(uuid);
@@ -356,7 +362,7 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
                 break;
                 case serverRxConfig: {
                     int uuid = stream.readInt();
-                    String name = stream.readUTF();
+                    String name = ClientValues.readString(stream);
                     int id = stream.readInt();
 
                     WirelessRxStatus rx = wirelessRxStatusList.get(uuid);

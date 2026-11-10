@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalsensor;
 
 
+import mods.eln.network.ClientValues;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
@@ -102,8 +103,8 @@ public class ElectricalSensorElement extends SixNodeElement {
         byte value = nbt.getByteOr("front", (byte) 0);
         front = LRDU.fromInt((value >> 0) & 0x3);
         typeOfSensor = nbt.getByteOr("typeOfSensor", (byte) 0);
-        lowValue = nbt.getFloatOr("lowValue", 0f);
-        highValue = nbt.getFloatOr("highValue", 0f);
+        lowValue = ClientValues.finite(nbt.getFloatOr("lowValue", 0f), 0f);
+        highValue = ClientValues.finite(nbt.getFloatOr("highValue", 0f), (float) mods.eln.Eln.LVU);
         dirType = nbt.getByteOr("dirType", (byte) 0);
     }
 
@@ -222,17 +223,24 @@ public class ElectricalSensorElement extends SixNodeElement {
         try {
             switch (stream.readByte()) {
                 case setTypeOfSensorId:
-                    typeOfSensor = stream.readByte();
+                    int t = stream.readByte();
+                    if (t < 0 || t > voltageType) break;
+                    typeOfSensor = t;
                     needPublish();
                     break;
                 case setValueId:
-                    lowValue = stream.readFloat();
-                    highValue = stream.readFloat();
+                    // (typed: any finite numbers; a bound of Infinity made every output NaN, and was saved)
+                    float low = stream.readFloat(), high = stream.readFloat();
+                    if (!Float.isFinite(low) || !Float.isFinite(high)) break;
+                    lowValue = low;
+                    highValue = high;
                     if (lowValue == highValue) highValue += 0.0001;
                     needPublish();
                     break;
                 case setDirType:
-                    dirType = stream.readByte();
+                    byte d = stream.readByte();
+                    if (d < dirNone || d > dirBA) break;
+                    dirType = d;
                     needPublish();
                     break;
             }

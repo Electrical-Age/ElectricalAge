@@ -5,6 +5,7 @@ import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.AutoAcceptInventoryProxy;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
@@ -290,6 +291,11 @@ public class LampSupplyElement extends SixNodeElement {
         }
     }
 
+    /** A saved aggregator index; out of range (an older handler stored the client's byte): 2, the default. */
+    static int loadAggregator(int a) {
+        return ClientValues.index(a, 3) ? a : 2;
+    }
+
     @Override
     public void readFromNBT(CompoundTag nbt) {
         int idx = 0;
@@ -304,7 +310,7 @@ public class LampSupplyElement extends SixNodeElement {
         } else {
             idx = 0;
             while (nbt.contains("entry_p" + idx)) {
-                entries.set(idx, new Entry(nbt.getStringOr("entry_p" + idx, ""), nbt.getStringOr("entry_w" + idx, ""), nbt.getIntOr("selectedAggregator" + idx, 0)));
+                entries.set(idx, new Entry(nbt.getStringOr("entry_p" + idx, ""), nbt.getStringOr("entry_w" + idx, ""), loadAggregator(nbt.getIntOr("selectedAggregator" + idx, 0))));
                 channelStates[idx] = nbt.getBooleanOr("channelStates" + idx, false);
 
                 ((ToogleAggregator) aggregators[idx][2]).readFromNBT(nbt, "toogleAggregator" + idx);
@@ -337,7 +343,8 @@ public class LampSupplyElement extends SixNodeElement {
             switch (stream.readByte()) {
                 case setPowerName: {
                     int id = stream.readByte();
-                    String newName = stream.readUTF();
+                    String newName = ClientValues.readString(stream);
+                    if (!ClientValues.index(id, entries.size())) break;
                     channelRemove(this, id, entries.get(id).powerChannel);
                     entries.get(id).powerChannel = newName;
                     needPublish();
@@ -346,17 +353,22 @@ public class LampSupplyElement extends SixNodeElement {
                 }
                 case setWirelessName: {
                     int id = stream.readByte();
-                    String newName = stream.readUTF();
+                    String newName = ClientValues.readString(stream);
+                    if (!ClientValues.index(id, entries.size())) break;
                     channelRemove(this, id, entries.get(id).wirelessChannel);
                     entries.get(id).wirelessChannel = newName;
                     needPublish();
                     channelRegister(this, id, newName);
                     break;
                 }
-                case setSelectedAggregator:
-                    entries.get(stream.readByte()).aggregator = stream.readByte();
+                case setSelectedAggregator: {
+                    int id = stream.readByte(), a = stream.readByte();
+                    // (an aggregator past the three threw in the slow process, every tick, and was saved)
+                    if (!ClientValues.index(id, entries.size()) || !ClientValues.index(a, aggregators[id].length)) break;
+                    entries.get(id).aggregator = a;
                     needPublish();
                     break;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

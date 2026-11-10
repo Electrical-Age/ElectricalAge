@@ -1,6 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
 
+import mods.eln.network.ClientValues;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -393,7 +394,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
     public void readFromNBT(CompoundTag nbt, String str) {
         stableProb = nbt.getDoubleOr(str + "LSP" + "stableProb", 0.0);
         lbCoord.readFromNBT(nbt, str + "lbCoordInst");
-        alphaZ = nbt.getFloatOr(str + "alphaZ", 0f);
+        alphaZ = ClientValues.finite(nbt.getFloatOr(str + "alphaZ", 0f), 0f);
         light = nbt.getIntOr(str + "light", 0);
     }
 

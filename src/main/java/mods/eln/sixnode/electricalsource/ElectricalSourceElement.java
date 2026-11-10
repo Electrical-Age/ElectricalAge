@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalsource;
 
 
+import mods.eln.network.ClientValues;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -51,7 +52,7 @@ public class ElectricalSourceElement extends SixNodeElement {
         color = b & 0xF;
         colorCare = (b >> 4) & 1;
 
-        voltageSource.setU(nbt.getDoubleOr("voltage", 0.0));
+        voltageSource.setU(ClientValues.finite(nbt.getDoubleOr("voltage", 0.0), 0.0));
     }
 
     public static boolean canBePlacedOnSide(Direction side, int type) {
@@ -150,7 +151,7 @@ public class ElectricalSourceElement extends SixNodeElement {
         try {
             switch (stream.readByte()) {
                 case setVoltageId:
-                    voltageSource.setU(stream.readFloat());
+                    voltageSource.setU(ClientValues.finite(stream.readFloat(), voltageSource.getU()));   // (typed: any finite volts)
                     needPublish();
                     break;
             }
