@@ -52,6 +52,7 @@ public final class OilCases {
         cases.add(new CondenserMakeupFloat());
         cases.add(new CondenserDryMakeupStub());
         cases.add(new CondenserOnABench());
+        cases.add(new LegacyEnergyLoads());
         cases.add(new CondenserLegacyLoad());
         cases.add(new CondenserMakeupSignal());
         cases.add(new CondensateReturn(10e5, false));
@@ -2627,6 +2628,49 @@ public final class OilCases {
             double extra = w - (4000 * k + 1000e-6);   // (the fill also saturates the air space with vapour: < 0.2 g)
             ctx.check("fluid: an old boiler's water and steam are in its vessel", extra >= -1e-9 && extra < 2e-4, w + " kg, " + extra + " over");
             ctx.check("fluid: most of it liquid", l > 0.9 * 4000 * k, l + " kg");
+        }
+    }
+
+    /**
+     * A node saved by the legacy solver (no format marker) loads at the temperature that solver gave it: 2 kg of water in
+     * 8 L at 180 C, its energy by the legacy EOS (whose vapour energies are lower than the core's), comes back at 180 C;
+     * the same contents saved by the core round-trip unchanged (FluidSaves.FORMAT).
+     */
+    static final class LegacyEnergyLoads implements TestCase {
+        double tLegacy, tCore, uDiff;
+
+        public String id() {
+            return "fluid_legacy_energy_loads_at_its_temperature";
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void build(TestContext ctx) {
+            double T = 453.15, V = 0.008, mw = 2.0, ma = 0.002;
+            var tag = new net.minecraft.nbt.CompoundTag();
+            tag.putDouble("kW", mw);
+            tag.putDouble("kA", ma);
+            tag.putDouble("kU", mods.eln.sim.fluid.Flash.energyAt(mw, ma, V, T));
+            var n = new mods.eln.sim.fluid.FluidNode(V, 0, 1, false);
+            mods.eln.fluid.FluidSaves.restore(n, mods.eln.fluid.FluidSaves.array(tag, "k"));
+            n.update();
+            tLegacy = n.T();
+            var out = new net.minecraft.nbt.CompoundTag();
+            mods.eln.fluid.FluidSaves.put(out, "k", n);
+            var m = new mods.eln.sim.fluid.FluidNode(V, 0, 1, false);
+            mods.eln.fluid.FluidSaves.restore(m, mods.eln.fluid.FluidSaves.array(out, "k"));
+            m.update();
+            tCore = m.T();
+            uDiff = m.energy - n.energy;
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("fluid: a legacy save loads at the temperature it had (180 C, within 0.3 K)", Math.abs(tLegacy - 453.15) < 0.3,
+                String.format("%.2f K", tLegacy));
+            ctx.check("fluid: saved again by the core, it round-trips unchanged", uDiff == 0 && Math.abs(tCore - tLegacy) < 1e-9,
+                String.format("%.4f K, energy %+.3g J", tCore, uDiff));
         }
     }
 

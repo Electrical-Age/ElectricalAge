@@ -370,6 +370,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             nbt.putDouble("vesselA", (float) own.mAir);
             nbt.putDouble("vesselU", (float) own.energy);
             mods.eln.fluid.FluidSaves.putExtra(nbt, "vesselS", own);
+            nbt.putInt("vesselFv", mods.eln.fluid.FluidSaves.FORMAT);
         }
     }
 

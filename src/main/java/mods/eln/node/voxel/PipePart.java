@@ -247,6 +247,7 @@ public final class PipePart extends VoxelPart {
             t.putDouble("a", fluid.mAir);
             t.putDouble("u", fluid.energy);
             t.putDouble("v", fluid.volume);
+            t.putInt("fv", mods.eln.fluid.FluidSaves.FORMAT);
             mods.eln.fluid.FluidSaves.putExtra(t, "s", fluid);
         }
     }
@@ -259,6 +260,7 @@ public final class PipePart extends VoxelPart {
         p.makeNode(blockY, saved);
         if (saved != null) {
             p.fluid.extra = mods.eln.fluid.FluidSaves.extra(t, "s");
+            if (t.getIntOr("fv", 0) < mods.eln.fluid.FluidSaves.FORMAT) mods.eln.fluid.FluidSaves.fromLegacy(p.fluid);
             p.fluid.update();
         }
         // contents saved for another volume (before 2026-10-25 iron pipe held 0.15 L per block, now 0.03): kept at the

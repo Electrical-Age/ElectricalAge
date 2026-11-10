@@ -423,6 +423,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
                 nbt.putDouble(s[0] + "A", (float) n.mAir);
                 nbt.putDouble(s[0] + "U", (float) n.energy);
                 mods.eln.fluid.FluidSaves.putExtra(nbt, s[0] + "S", n);
+                nbt.putInt(s[0] + "Fv", mods.eln.fluid.FluidSaves.FORMAT);
             }
         }
     }

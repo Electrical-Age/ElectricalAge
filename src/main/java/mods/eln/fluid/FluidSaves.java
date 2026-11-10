@@ -9,6 +9,11 @@ import net.minecraft.nbt.CompoundTag;
  * "U"), and the other species by their keys in a compound (key + "S": {"eln:crude_oil": kg, ...}), only when it holds
  * any. Saves from before species load as water and air; a species a save holds that isn't defined now is kept under
  * its key (SpeciesRegistry.forSave), never dropped.
+ *
+ * Format marker (key + "Fv", FORMAT): saves without it hold the legacy solver's energy. Its liquid and air energies match
+ * the fluid core's, but its vapour's are up to ~40 kJ/kg lower, so on load the energy is taken at the temperature the
+ * legacy solver found for it (Flash), and recomputed by the core at that temperature: nothing jumps on the upgrade.
+ * The upgrade is one-way: a build without the core reads these saves' energies as its own.
  */
 public final class FluidSaves {
     private FluidSaves() {
@@ -30,7 +35,14 @@ public final class FluidSaves {
         }
     }
 
+    /** The fluid core's save format (the legacy solver's saves have no marker). */
+    public static final int FORMAT = 2;
+
+    /** Arrays from array() that hold a legacy energy (restore converts them). */
+    private static final java.util.Set<double[]> LEGACY = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+
     public static void put(CompoundTag nbt, String key, FluidNode n) {
+        nbt.putInt(key + "Fv", FORMAT);
         nbt.putDouble(key + "W", n.mWater);
         nbt.putDouble(key + "A", n.mAir);
         nbt.putDouble(key + "U", n.energy);
@@ -63,10 +75,12 @@ public final class FluidSaves {
     public static double[] array(CompoundTag nbt, String key) {
         Saved s = get(nbt, key);
         if (s == null) return null;
-        double[] wau = s.wau();
-        if (s.extra() == null) return wau;
-        double[] out = java.util.Arrays.copyOf(wau, 3 + s.extra().length);
-        System.arraycopy(s.extra(), 0, out, 3, s.extra().length);
+        double[] out = s.wau();
+        if (s.extra() != null) {
+            out = java.util.Arrays.copyOf(out, 3 + s.extra().length);
+            System.arraycopy(s.extra(), 0, out, 3, s.extra().length);
+        }
+        if (nbt.getIntOr(key + "Fv", 0) < FORMAT) LEGACY.add(out);
         return out;
     }
 
@@ -76,6 +90,18 @@ public final class FluidSaves {
         n.mAir = saved[1];
         n.energy = saved[2];
         n.extra = saved.length > 3 ? java.util.Arrays.copyOfRange(saved, 3, saved.length) : null;
+        if (LEGACY.contains(saved)) fromLegacy(n);
+    }
+
+    /**
+     * A node just loaded with a legacy energy: that energy taken at the legacy solver's temperature for these contents,
+     * the energy the fluid core gives them there instead (no update: the caller does it).
+     */
+    public static void fromLegacy(FluidNode n) {
+        if (n.mass() <= 0) return;
+        double T = new mods.eln.sim.fluid.Flash().solve(n.mWater, n.mAir, n.extra, n.energy, n.volume, 300).T;
+        if (!(T > 0) || !Double.isFinite(T)) return;
+        n.energy = n.energyAt(T);
     }
 
     /** The other species saved under tag (extra[i] is species i + 2), or null. */
