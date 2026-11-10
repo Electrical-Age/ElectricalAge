@@ -37,7 +37,7 @@ public final class CondenserVessel {
     /** Heat the shell took from the vessel (W, averaged) and condensate pumped (mB/s), for WAILA. */
     public double heatW, pumped;
     /** Totals since loaded (GameTests): condensate pumped (kg), air the ejector took (kg), steam exhausted into it (kg). */
-    public double totalPumpedKg, totalAirKg, totalSteamKg;
+    public double totalPumpedKg, totalAirKg, totalSteamKg, totalEjectedSteamKg;
     double meterHeat, meterPump, meterTime;
     /** The pump's back-pressure (Pa over the vessel's bottom) and its outlet's pressure (Pa), at the last step. */
     public double backPa, outletPa;
@@ -166,7 +166,10 @@ public final class CondenserVessel {
     /** After a fluid step: the meters; returns the condensate pumped this step (kg). */
     public double after(double dt) {
         // the heat that went out through the shell this step goes into its thermal load
-        if (ejector != null && ejector.edge != null) totalAirKg += Math.max(0, ejector.edge.fAir) * dt;
+        if (ejector != null && ejector.edge != null) {
+            totalAirKg += Math.max(0, ejector.edge.fAir) * dt;
+            totalEjectedSteamKg += Math.max(0, ejector.edge.fVapour) * dt;
+        }
         double q = vessel == null ? 0 : -vessel.wallJ;
         shell.moveEnergyTo(q);
         meterHeat += q;

@@ -97,11 +97,16 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         return v.pump == null ? List.of() : List.of(v.pump, v.makeup, v.ejector);
     }
 
-    /** The condensate pump turns with the turbine's shaft; the ejector always works (its steam jet). */
+    /**
+     * The condensate pump turns with the turbine's shaft; the ejector is a steam jet on the turbine's inlet steam, full
+     * from EJECTOR_MOTIVE_PA (Baughn 2026-11-10: no vacuum on a bench with nothing connected).
+     */
     @Override
     public void beforeFluidStep(double dt) {
         v.makeupGate = signalled() ? makeupSignal.getNormalized() : 1;
-        v.before(dt, 1, 1, turbine == null ? 0 : turbine.omega);
+        double motive = turbine == null || turbine.inlet == null ? 0
+            : Math.max(0, Math.min(1, (turbine.inlet.P() - Water.P_ATM) / (CondenserDescriptor.EJECTOR_MOTIVE_PA - Water.P_ATM)));
+        v.before(dt, 1, motive, turbine == null ? 0 : turbine.omega);
     }
 
     @Override

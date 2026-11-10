@@ -35,6 +35,8 @@ public class CondenserDescriptor extends TransparentNodeDescriptor {
     public static final double EJECTOR_TAU = 3;
     /** ... down to this much air (Pa): a good condenser's leak-in. */
     public static final double EJECTOR_FLOOR_PA = 1000;
+    /** The turbine inlet pressure (Pa) its steam ejector runs full on (none at 1 atm or with no turbine). */
+    public static final double EJECTOR_MOTIVE_PA = 3e5;
     /** Over this share of its volume as water, the turbine's exhaust floods: water damage. */
     public static final double FLOOD = 0.5;
     final Obj3D obj;

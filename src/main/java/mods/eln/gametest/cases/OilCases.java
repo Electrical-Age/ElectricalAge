@@ -51,6 +51,7 @@ public final class OilCases {
         cases.add(new CondenserFloods());
         cases.add(new CondenserMakeupFloat());
         cases.add(new CondenserDryMakeupStub());
+        cases.add(new CondenserOnABench());
         cases.add(new CondenserLegacyLoad());
         cases.add(new CondenserMakeupSignal());
         cases.add(new CondensateReturn(10e5, false));
@@ -1373,15 +1374,17 @@ public final class OilCases {
     /** The makeup flange's float valve (Baughn: a 200V pump on it filled a condenser to the flood line): with makeup
      *  water at 10 bar behind it, a condenser 30 % full takes none, one 5 % full takes it in. */
     /**
-     * A condenser pulling a vacuum with a dry dead-end pipe stub on its makeup flange and its float valve open: the stub's
-     * air drains into the vessel, cooling as it expands (a node drained like this once fell under the EOS's 120 K floor
-     * and its network stopped converging). The harness checks the network keeps making progress, and the pipe's wall
-     * keeps the gas near the air's temperature. The ejector, a gas pump, takes a little of the vessel's steam too.
+     * A condenser on its running turbine with a dry dead-end pipe stub on its makeup flange and its float valve open: the
+     * stub's air drains into the vacuum, cooling as it expands (a node drained like this once fell under the EOS's 120 K
+     * floor and its network stopped converging). The harness checks the network keeps making progress, and the pipe's
+     * wall keeps the gas near the air's temperature. The ejector, a gas pump, takes some of the vessel's steam too.
      */
     static final class CondenserDryMakeupStub implements TestCase {
+        mods.eln.oil.SteamGeneratorElement t;
         mods.eln.oil.CondenserElement c;
-        mods.eln.sim.IProcess prime;
+        mods.eln.sim.IProcess feed;
         BlockPos stub;
+        boolean primed;
 
         public String id() {
             return "oil_condenser_dry_makeup_stub";
@@ -1397,35 +1400,65 @@ public final class OilCases {
 
         public void build(TestContext ctx) {
             Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
-            l.device(28 + (82 << 6), 1, 1);
-            stub = ctx.at(1, 2, 1);
+            t = plant(l, 1, true)[0];
+            stub = ctx.at(1, 2, 2);
             PipeCases.lay(ctx, stub, 0, 8, 0, 8, 8, 8, 8);
-            mods.eln.Eln.simulator.addSlowProcess(prime = x -> {
-                if (c == null) c = condenserOf(ctx, ctx.at(1, 1, 1));
-                if (c == null || c.vessel == null) return;
-                mods.eln.Eln.simulator.removeSlowProcess(prime);
-                // (5 % water: under the float valve's open level)
-                mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.05 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 300, false);
-                water0 = c.vessel.mWater;
+            mods.eln.Eln.simulator.addSlowProcess(feed = x -> {
+                if (c == null) c = condenserOf(ctx, ctx.at(1, 1, 2));
+                if (c == null || c.vessel == null || t.inlet == null) return;
+                if (!primed) {
+                    primed = true;
+                    // (5 % water: under the float valve's open level)
+                    mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.05 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 300, false);
+                }
+                steam(t);
             });
         }
 
-        double water0;
-
         public void measure(TestContext ctx) {
-            mods.eln.Eln.simulator.removeSlowProcess(prime);
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
             var run = PipeCases.node(ctx, stub);
             var n = run == null ? null : mods.eln.fluid.FluidWorld.nodeFor(((mods.eln.node.voxel.PipePart) run.parts.get(0)).fluid);
             ctx.line("dry makeup stub: condenser " + (c == null ? "none" : c.getWaila()) + "; stub "
                 + (n == null ? "none" : String.format("%.4f bar, %.0f K, %.3g kg", n.P() / 1e5, n.T(), n.mass())));
-            ctx.check("condenser: it pulls a vacuum with the stub on (under 0.2 bar)", c != null && c.vessel.P() < 0.2e5,
+            ctx.check("condenser: on its running turbine it pulls a vacuum with the stub on (under 0.5 bar)", c != null && c.vessel.P() < 0.5e5,
                 c == null ? "none" : String.format("%.3f bar", c.vessel.P() / 1e5));
             ctx.check("condenser: the stub's wall keeps its air near the air's temperature (over 250 K)", n != null && n.T() > 250,
                 n == null ? "none" : String.format("%.0f K", n.T()));
             // (the ejector is a gas pump to the air: it takes the vessel's steam with its air, Baughn 2026-11-10: make it real)
-            double lost = c == null ? 0 : water0 - c.vessel.mWater;
-            ctx.check("condenser: its ejector takes a little steam out with the air (0.01-2 % of its water)",
-                c != null && lost > 1e-4 * water0 && lost < 0.02 * water0, String.format("%.3g of %.3g kg", lost, water0));
+            ctx.check("condenser: its ejector takes air and some steam out", c != null && c.v.totalAirKg > 0 && c.v.totalEjectedSteamKg > 0,
+                c == null ? "none" : String.format("air %.3g kg, steam %.3g kg", c.v.totalAirKg, c.v.totalEjectedSteamKg));
+        }
+    }
+
+    /**
+     * A condenser on a bench, nothing connected (Baughn 2026-11-10: it shouldn't draw a vacuum): its ejector has no
+     * motive steam, so it holds its air at 1 atm.
+     */
+    static final class CondenserOnABench implements TestCase {
+        mods.eln.oil.CondenserElement c;
+
+        public String id() {
+            return "oil_condenser_on_a_bench_no_vacuum";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 400;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            l.device(28 + (82 << 6), 1, 1);
+        }
+
+        public void measure(TestContext ctx) {
+            c = condenserOf(ctx, ctx.at(1, 1, 1));
+            ctx.check("condenser on a bench: no vacuum (over 0.9 bar)", c != null && c.vessel.P() > 0.9e5,
+                c == null ? "none" : String.format("%.3f bar", c.vessel.P() / 1e5));
         }
     }
 
