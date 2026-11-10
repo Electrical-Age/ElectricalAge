@@ -169,7 +169,7 @@ public final class Network {
         public double qMax, h0, speed = 1, eta = 0.7, work;
         /**
          * TURBINE: a steam turbine from a (its inlet, drawn at its port) to b (its exhaust). Its nozzle passes q = nozzle
-         * open sqrt(rho (p_a + p_b) S softplus((p_a - p_b) / S)) (the ellipse law, rho the inlet gas's density held for
+         * open sqrt(rho / p_a (p_a + p_b) S softplus((p_a - p_b) / S)) (the ellipse law, rho the inlet gas's density held for
          * the step), and takes eta x drop (J/kg, the isentropic drop to b's pressure, set by the game each step) for each kg
          * of water it passes out of the fluid, as shaft work.
          */
@@ -411,7 +411,7 @@ public final class Network {
     }
 
     /**
-     * A turbine's nozzle flow {q, dq/dp_a, dq/dp_b}: nozzle open sqrt(rho T), T = (p_a + p_b) S softplus((p_a - p_b) / S),
+     * A turbine's nozzle flow {q, dq/dp_a, dq/dp_b}: nozzle open sqrt(rho T), T = (p_a + p_b) S softplus((p_a - p_b) / S) / p_a,
      * the ellipse law p_a^2 - p_b^2 with its root's infinite slope at p_b = p_a smoothed over S (SPLIT_DP) as a check valve
      * is, and nothing back.
      */
@@ -419,10 +419,11 @@ public final class Network {
         if (e.nozzle <= 0 || e.open <= 0) return new double[3];
         double pa = portP(e.a, e.fa), pb = portP(e.b, e.fb), S = SPLIT_DP, x = (pa - pb) / S;
         double rho = Double.isNaN(e.rhoA) ? e.a.fluid.rhoGas() : e.rhoA;
-        double sp = S * spc(x), T = (pa + pb) * sp;
-        if (!(T > 0) || !(rho > 0)) return new double[3];
+        // (the ellipse law q = c sqrt(rho / p_a (p_a^2 - p_b^2)): choked, c p_a / sqrt(R T), as a nozzle passes)
+        double sp = S * spc(x), T = (pa + pb) * sp / pa;
+        if (!(T > 0) || !(rho > 0) || !(pa > 0)) return new double[3];
         double c = e.nozzle * e.open, q = c * Math.sqrt(rho * T), dqdT = q / (2 * T), sg = (pa + pb) * sgc(x);
-        return new double[]{q, dqdT * (sp + sg), dqdT * (sp - sg)};
+        return new double[]{q, dqdT * ((sp + sg) / pa - T / pa), dqdT * (sp - sg) / pa};
     }
 
     /** A turbine's shaft power (W) and its slopes: eta drop x the water it passes ({W, dW/dp_a, dW/dp_b, water share}). */

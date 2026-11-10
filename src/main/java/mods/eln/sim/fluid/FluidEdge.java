@@ -39,6 +39,12 @@ public final class FluidEdge {
      * power it put into the fluid last step (W).
      */
     public double qMax, h0, speed = 1, eta = 0.7, work;
+    /**
+     * TURBINE (in the fluid core's solve, Network.Kind.TURBINE): its nozzle coefficient and the isentropic drop (J/kg)
+     * from its inlet to its exhaust's pressure, set each step; it takes eta x drop a kg of water out as shaft work (work,
+     * W over the last step; workJ, J).
+     */
+    public double nozzle, drop, workJ;
     /** TURBINE: electric power made this step (W), at EFFICIENCY of the steam's heat above liquid at 100 C. */
     public double power;
     public static final double TURBINE_EFFICIENCY = 0.40;

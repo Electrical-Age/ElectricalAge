@@ -47,6 +47,17 @@ public interface FluidDevice {
             return this;
         }
 
+        /** TURBINE: its nozzle coefficient (FluidEdge.nozzle); the device sets open and drop before each step. */
+        public double nozzle, drop;
+
+        /** This link as a steam turbine (Network.Kind.TURBINE): nozzle coefficient, efficiency. */
+        public Link turbine(double nozzle, double eta) {
+            this.kind = FluidEdge.Kind.TURBINE;
+            this.nozzle = nozzle;
+            this.eta = eta;
+            return this;
+        }
+
         /** PUMP: its curve (FluidEdge.qMax, h0, eta); the device sets speed before each step. */
         public double qMax, h0, speed = 1, eta = 0.7;
 

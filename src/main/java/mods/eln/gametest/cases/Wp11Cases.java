@@ -207,7 +207,8 @@ public final class Wp11Cases {
         public void measure(TestContext ctx) {
             double rads = shaft(turbine).getRads();
             ctx.check("wp11 steam turbine without steam: shaft stays at 0 rad/s, no steam through",
-                rads == 0.0 && turbine.totalKg == 0, String.format("%.4f rad/s, %.6f kg", rads, turbine.totalKg));
+                // (under a milligram: the fluid core's nozzle law passes its smoothed tail at equal pressures, a trace)
+                rads == 0.0 && turbine.totalKg < 1e-6, String.format("%.4f rad/s, %.6f kg", rads, turbine.totalKg));
             ctx.check("wp11 steam turbine: no fluid capability (steam by EA pipe only)", turbine.getFluidHandler() == null, "");
         }
     }

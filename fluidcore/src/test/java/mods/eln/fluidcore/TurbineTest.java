@@ -30,12 +30,12 @@ class TurbineTest {
             Network net = new Network();
             var in = steam(net, 1, 0, true, 453);
             var out = steam(net, 1, 0, true, tb);
-            var e = turbine(net, in, out, 1e-5, 0);
+            var e = turbine(net, in, out, 1e-2, 0);
             net.step(DT);
             double pa = Network.portP(in, 1), pb = Network.portP(out, 1);
             // (the law smoothed over SPLIT_DP: (p_a + p_b) S softplus((p_a - p_b) / S) for p_a^2 - p_b^2)
             double S = Network.SPLIT_DP, x = (pa - pb) / S;
-            double want = 1e-5 * Math.sqrt(in.fluid.rhoGas() * (pa + pb) * S * Network.spc(x));
+            double want = 1e-2 * Math.sqrt(in.fluid.rhoGas() / pa * (pa + pb) * S * Network.spc(x));
             System.out.printf("turbine law: %.2f -> %.2f bar: %.6f kg/s, ellipse %.6f%n", pa / 1e5, pb / 1e5, e.flow, want);
             assertEquals(want, e.flow, 1e-3 * want + 1e-9, "flow at " + pb / pa);
         }
@@ -47,7 +47,7 @@ class TurbineTest {
         Network net = new Network();
         var a = steam(net, 0.02, 0, false, 453);
         var b = net.add(new Network.Node(0.02, 0, 1, false).fill(0.5, 1e-4, 320));
-        var e = turbine(net, a, b, 2e-6, 4e5);
+        var e = turbine(net, a, b, 2e-3, 4e5);
         double u0 = a.U + b.U, m0 = a.mass() + b.mass(), work = 0;
         for (int s = 0; s < 200; s++) {
             net.step(s == 0 ? 2.0 : DT);
@@ -67,7 +67,7 @@ class TurbineTest {
         Network net = new Network();
         var a = net.add(new Network.Node(0.02, 0, 1, false).fill(0, 0.2, 300));
         var b = net.add(new Network.Node(0.02, 0, 1, false).fill(0, 0.02, 300));
-        var e = turbine(net, a, b, 2e-6, 4e5);
+        var e = turbine(net, a, b, 2e-3, 4e5);
         double passed = 0, work = 0;
         for (int s = 0; s < 20; s++) {
             net.step(DT);
@@ -83,7 +83,7 @@ class TurbineTest {
         Network net = new Network();
         var a = steam(net, 0.02, 0, false, 453);
         var b = net.add(new Network.Node(0.02, 0, 1, false).fill(0.5, 1e-4, 320));
-        turbine(net, a, b, 2e-6, 4e5);
+        turbine(net, a, b, 2e-3, 4e5);
         net.step(DT);   // (the inlet gas's density is taken at a step's start and held: the slopes are of that step's law)
         for (int s = 0; s < 40; s++) {
             String r = net.checkJacobian(DT);

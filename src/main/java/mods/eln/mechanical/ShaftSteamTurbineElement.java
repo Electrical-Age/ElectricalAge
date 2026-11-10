@@ -138,53 +138,96 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
     /** Braking now (W), seconds over WATER_MAX, and the braking energy since loaded (J; GameTests). */
     public double brakeW, wetSeconds, totalBrake;
 
+    /**
+     * The turbine in the fluid core's solve (Network.Kind.TURBINE, Baughn 2026-11-10: devices are components of the
+     * implicit step): its nozzle passes steam by the inlet and exhaust pressures, the governor's valve opening it, and
+     * takes spec.eta x the isentropic drop a kg as work. Set before each step; the work it took drives the shaft after.
+     */
+    FluidDevice.Link turbine;
+    /** Its exhaust vented to the air while nothing is piped to it. */
+    FluidDevice.Vent exhaustVent;
+    /** Work the shaft couldn't take last step (J), given back to the exhaust's steam as heat this step. */
+    double unspent;
+
+    @Override
+    public List<FluidDevice.Link> fluidLinks() {
+        return turbine == null ? List.of() : List.of(turbine);
+    }
+
+    @Override
+    public List<FluidDevice.Vent> fluidVents() {
+        return exhaustVent == null ? List.of() : List.of(exhaustVent);
+    }
+
+    /** The nozzle coefficient that passes FLOW_MAX x rated steam fully open on its rated inlet, venting far below. */
+    double nozzle() {
+        // (rho: saturated steam at its rated pressure, as an ideal gas; spec.inletRho sizes its volume, not its nozzle)
+        double rho = spec.nominalPa / (Water.R_V * Water.tsat(spec.nominalPa));
+        return FLOW_MAX * spec.nominalKgPerS / Math.sqrt(rho * spec.nominalPa);
+    }
+
+    @Override
+    public void beforeFluidStep(double time) {
+        if (inlet == null || turbine == null) return;
+        double rads = getShaft().getRads();
+        // governor: 5 % droop, a short valve lag; a trip shuts it over TRIP until back under rated speed
+        // (manual control, Baughn 2026-10-29: the valve is the player's; no governor, no trip: their safeties)
+        boolean manual = controls.isManual();
+        if (manual || rads < RATED_RADS) tripped = false;
+        else if (rads > TRIP * RATED_RADS) tripped = true;
+        double target = manual ? 1 : tripped ? 0 : Math.max(0, Math.min(1, (RATED_RADS * (1 + DROOP) - rads) / (DROOP * RATED_RADS)));
+        // the governor asks for a share of rated flow, so its valve opens less on an inlet over its rated pressure
+        // (else its gain grew with the pressure: an LP on ten times its rating overshot past 850 rad/s)
+        double p = inlet.P();
+        if (!manual) target /= Math.max(1, p / spec.nominalPa);
+        // a trip shuts its trip valve at once and seals: no leak (AdventurAgent 2026-10-29)
+        gate = tripped ? 0 : gate + (target - gate) * Math.min(1, time / GOV_TAU);
+        double open = Math.min(gate, controls.limit());
+        // the governor-closed valve's leak is a share of rated flow that doesn't grow past rated inlet pressure (an LP fed
+        // ten times its rating leaked 2 g/s through a shut governor and crept to its trip; AdventurAgent 2026-10-29)
+        turbine.open = tripped ? 0 : LEAK * Math.min(1, spec.nominalPa / Math.max(1, p)) + (1 - LEAK) * open;
+        turbine.drop = Water.isentropicDrop(inlet.T(), inlet.pVapour(), exhaustPa());
+        // nothing piped to the exhaust: it goes into the air
+        exhaustPiped = false;
+        for (var e : FluidWorld.edgesOf(exhaust)) exhaustPiped |= e != turbine.edge && (exhaustVent == null || e != exhaustVent.edge);
+        if (exhaustVent != null) exhaustVent.open = exhaustPiped ? 0 : 1;
+        if (unspent > 0) exhaust.heat += unspent / time;
+        unspent = 0;
+    }
+
+    @Override
+    public void afterFluidStep(double time) {
+        if (inlet == null || turbine == null || turbine.edge == null) return;
+        double rads = getShaft().getRads();
+        // the work onto the shaft, under its torque limit; what the shaft can't take goes back into the steam
+        double offered = Math.max(0, turbine.edge.workJ);
+        double work = getShaft().drive(offered / time, time, 2 * spec.nominalP / RATED_RADS);
+        unspent = offered - work;
+        double r = rads / RATED_RADS;
+        double windage = Math.min(getShaft().getEnergy(), WINDAGE * spec.nominalP * r * r * r * time);
+        getShaft().setEnergy(getShaft().getEnergy() - windage);
+        totalWindage += windage;
+        double got = Math.max(0, turbine.edge.fVapour + turbine.edge.fLiquid) * time;   // (its steam: the air in it makes no work)
+        totalKg += got;
+        totalWork += work;
+        totalInJ += Math.max(0, turbine.edge.fEnthalpy) * time;
+        // meters
+        meterKg += got;
+        meterJ += work;
+        meterTime += time;
+        if (meterTime >= 1) {
+            steamKgPerS = meterKg / meterTime;
+            shaftW = meterJ / meterTime;
+            meterKg = meterJ = meterTime = 0;
+            needPublish();
+        }
+    }
+
     class Run implements IProcess {
         @Override
         public void process(double time) {
             if (inlet == null) return;
             double rads = getShaft().getRads();
-            // governor: 5 % droop, a short valve lag; a trip shuts it over TRIP until back under rated speed
-            // (manual control, Baughn 2026-10-29: the valve is the player's; no governor, no trip: their safeties)
-            boolean manual = controls.isManual();
-            if (manual || rads < RATED_RADS) tripped = false;
-            else if (rads > TRIP * RATED_RADS) tripped = true;
-            double target = manual ? 1 : tripped ? 0 : Math.max(0, Math.min(1, (RATED_RADS * (1 + DROOP) - rads) / (DROOP * RATED_RADS)));
-            // the governor asks for a share of rated flow, so its valve opens less on an inlet over its rated pressure
-            // (else its gain grew with the pressure: an LP on ten times its rating overshot past 850 rad/s)
-            if (!manual) target /= Math.max(1, inlet.P() / spec.nominalPa);
-            // a trip shuts its trip valve at once and seals: no leak (AdventurAgent 2026-10-29: a tripped LP behind an HP on
-            // manual still took 1.5 g/s through the governor valve's leak and drove the line on at 916 rad/s)
-            gate = tripped ? 0 : gate + (target - gate) * Math.min(1, time / GOV_TAU);
-            double open = Math.min(gate, controls.limit());
-            // steam through the nozzle (choked: by the inlet pressure), only what the inlet has above the exhaust
-            double pEx = exhaustPa(), p = inlet.P();
-            // the governor-closed valve's leak is a share of rated flow that doesn't grow past rated inlet pressure, so at 0 %
-            // it stays well under the windage (AdventurAgent 2026-10-29: an LP fed 15 bar by a manual HP, ten times its
-            // rating, leaked 2 g/s through a shut governor, 0.6-0.8 kW, and crept from 830 rad/s to its trip)
-            double flow = FLOW_MAX * spec.nominalKgPerS * p / spec.nominalPa;
-            double want = tripped ? 0 : (LEAK * FLOW_MAX * spec.nominalKgPerS * Math.min(1, p / spec.nominalPa) + (1 - LEAK) * open * flow) * time;
-            double mv = inlet.mVapour(), mg = mv + inlet.mAir;
-            want = Math.min(want, p > pEx ? mv * (1 - pEx / p) : 0);
-            double tIn = inlet.T(), air0 = inlet.mAir;
-            double jpk = jPerKg(), hIn = inlet.hVapour(tIn);
-            double got = want > 0 && mv > 0 ? EaUnits.drainGas(inlet, want * mg / mv) : 0;
-            double air = Math.max(0, air0 - inlet.mAir);
-            // the work onto the shaft, under its torque limit; what the shaft can't take stays in the steam
-            double work = getShaft().drive(got * jpk / time, time, 2 * spec.nominalP / RATED_RADS);
-            double r = rads / RATED_RADS;
-            double windage = Math.min(getShaft().getEnergy(), WINDAGE * spec.nominalP * r * r * r * time);
-            getShaft().setEnergy(getShaft().getEnergy() - windage);
-            totalWindage += windage;
-            exhaust.mWater += got;
-            exhaust.mAir += air;
-            exhaust.energy += got * hIn - work + air * Water.hAir(tIn);
-            exhaust.update();
-            totalKg += got;
-            totalWork += work;
-            totalInJ += got * hIn;
-            // nothing piped to the exhaust: it goes into the air
-            exhaustPiped = !FluidWorld.edgesOf(exhaust).isEmpty();
-            if (!exhaustPiped) exhaust.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
             drain(time);
             // failures
             if (inlet.P() > spec.burstPa)
@@ -193,16 +236,6 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
             else if (!spec.wetBraking && rads > WATER_SPEED * RATED_RADS && wetShare() > WATER_MAX)
                 new Failure(ShaftSteamTurbineElement.this).fail(FailureCause.WATER, wetShare());
             else if (spec.wetBraking) wet(rads, time);
-            // meters
-            meterKg += got;
-            meterJ += work;
-            meterTime += time;
-            if (meterTime >= 1) {
-                steamKgPerS = meterKg / meterTime;
-                shaftW = meterJ / meterTime;
-                meterKg = meterJ = meterTime = 0;
-                needPublish();
-            }
         }
     }
 
@@ -374,6 +407,8 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         double T = mods.eln.sim.Ambient.kelvin(c);
         load(inlet, loadedIn, T);
         load(exhaust, loadedEx, T);
+        turbine = new FluidDevice.Link(inlet, 1.0, exhaust, 0.5, spec.portK).turbine(nozzle(), spec.eta);
+        exhaustVent = new FluidDevice.Vent(exhaust, 0.5, mods.eln.node.voxel.PipePart.LARGE_END_K);
         makePorts();
         super.initialize();
     }

@@ -99,6 +99,7 @@ final class CoreStep {
             } else {
                 ce[k] = net.connect(a, fa, b, fb, 0);
                 if (e.kind == FluidEdge.Kind.PUMP) ce[k].kind = Network.Kind.PUMP;
+                else if (e.kind == FluidEdge.Kind.TURBINE) ce[k].kind = Network.Kind.TURBINE;
                 else if (e.oneWay()) ce[k].kind = Network.Kind.CHECK;
             }
         }
@@ -291,6 +292,14 @@ final class CoreStep {
                 }
                 continue;
             }
+            if (e.kind == FluidEdge.Kind.TURBINE) {
+                // (a turbine is its nozzle and its work in the core's solve: the device sets open and the drop)
+                c.nozzle = e.nozzle;
+                c.open = open;
+                c.drop = e.drop;
+                c.eta = e.eta;
+                continue;
+            }
             if (e.kind == FluidEdge.Kind.PUMP) {
                 // (a pump is its curve in the core's solve: the device sets its speed; open scales it too)
                 c.qMax = e.qMax;
@@ -349,7 +358,8 @@ final class CoreStep {
                 mv = both;
             }
             e.flow = e.fLiquid = e.fVapour = e.fAir = e.fEnthalpy = 0;
-            e.work = c == null ? 0 : c.work;
+            e.work = c == null ? 0 : c.workJ / dt;
+            e.workJ = c == null ? 0 : c.workJ;
             if (e.fSpecies != null) java.util.Arrays.fill(e.fSpecies, 0);
             if (mv == null) continue;
             int S = mv.length - 1;

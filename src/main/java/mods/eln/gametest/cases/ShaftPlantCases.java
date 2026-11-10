@@ -163,7 +163,9 @@ public final class ShaftPlantCases {
             ctx.line("plant: HP " + hpB.getWaila() + "; LP " + lpB.getWaila() + "; condenser " + c.getWaila());
             ctx.check("plant: the LP turbine runs on the HP's exhaust", wL > 0, String.format("%.0f J", wL));
             ctx.check("plant: the condenser holds a vacuum (under 0.3 bar)", c.v.vessel.P() < 0.3e5, String.format("%.2f bar", c.v.vessel.P() / 1e5));
-            ctx.check("plant: HP + LP + condenser gets over +50 % more work per kg than the HP venting to air", perB > 1.5 * perA,
+            // (+45 %: on the fluid core the HP's nozzle passes ~3 % more steam at the same valve, so the same shaft power
+            // is spread over more kg; the old solver's 51 % sat on its own nozzle law)
+            ctx.check("plant: HP + LP + condenser gets over +45 % more work per kg than the HP venting to air", perB > 1.45 * perA,
                 String.format("%.0f vs %.0f kJ/kg", perB / 1000, perA / 1000));
         }
     }
@@ -250,9 +252,12 @@ public final class ShaftPlantCases {
                 + "%.1f kW into %.2f kg/s of cooling water (+%.1f K), shell %.1f kW",
                 steam * 1000, work / window / 1000, work / Math.max(1e-9, kg) / 1000, p / 1e5, q / 1000, water, q / Math.max(1e-9, water) / 4186, c.v.heatW / 1000));
             ctx.line("full HP: condenser " + c.getWaila() + "; HP " + hp.getWaila());
-            ctx.check("full HP: it runs at about full steam (over 33 g/s, 16 kW on the shaft)", steam > 0.033 && work / window > 16e3,
+            // (over 25 g/s: on the fluid core the HP's exhaust reaches the condenser's vacuum, 0.05 bar where the old solver's
+            // pipe left 0.31, so its 19 kW takes 27.5 g/s at 696 kJ/kg rather than 34 at 551)
+            ctx.check("full HP: it runs at about full power (over 25 g/s of steam, 16 kW on the shaft)", steam > 0.025 && work / window > 16e3,
                 String.format("%.1f g/s, %.1f kW", steam * 1000, work / window / 1000));
-            ctx.check("full HP: the cooling water takes most of the heat (over 50 kW; the shell the rest)", q > 50e3, String.format("%.1f kW", q / 1000));
+            // (over 35 kW: less steam for the same work, as above, leaves less heat to reject: 44 kW where it was 58)
+            ctx.check("full HP: the cooling water takes most of the heat (over 35 kW; the shell the rest)", q > 35e3, String.format("%.1f kW", q / 1000));
             ctx.check("full HP: the vacuum holds (under 0.3 bar)", p < 0.3e5, String.format("%.2f bar", p / 1e5));
         }
     }
