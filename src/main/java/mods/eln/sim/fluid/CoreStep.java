@@ -25,7 +25,7 @@ final class CoreStep {
     static String worstEdge = "";
     private static final java.util.Set<String> SEEN = java.util.concurrent.ConcurrentHashMap.newKeySet();
     /** Steps that failed (the core's best iterate was kept), and how many were written out (fluidcore-fail/, at most 30). */
-    static long failedSteps, discardedSteps;
+    static long failedSteps, discardedSteps, slowSteps;
     static int dumps;
     /** This network has been written out already (one dump each, so the 30 cover 30 networks). */
     private boolean dumped;
@@ -46,6 +46,8 @@ final class CoreStep {
     final Network.Edge[] ce;
     /** Per FluidEdge: the first of an opening's two one-way edges, joined in the core as one pipe (the second has none). */
     final boolean[] pipeOfPair;
+    /** For an opening: its second core pipe, from the opening's top edge (ce has the bottom one). */
+    final Network.Edge[] ceTop;
     /** Core species index to registry id (null: water and air, the core's fast path). */
     final int[] ids;
     final int water, air;
@@ -70,6 +72,7 @@ final class CoreStep {
         }
         ce = new Network.Edge[edges.size()];
         pipeOfPair = new boolean[ce.length];
+        ceTop = new Network.Edge[ce.length];
         for (int k = 0; k < ce.length; k++) {
             FluidEdge e = edges.get(k);
             // (an opening's second edge, the way back in: the core's pipe carries both ways in one edge, its two streams)
@@ -86,11 +89,17 @@ final class CoreStep {
                     worstEdge = what;
                 }
             }
-            ce[k] = net.connect(a, fa, b, fb, 0);
             FluidEdge next = k + 1 < ce.length ? edges.get(k + 1) : null;
-            if (e.kind == FluidEdge.Kind.CHECK && e.spanA > 0 && next != null && next.entrySpan > 0 && next.a == e.b && next.b == e.a)
+            if (e.kind == FluidEdge.Kind.CHECK && e.spanA > 0 && next != null && next.entrySpan > 0 && next.a == e.b && next.b == e.a) {
+                // (an opening: two pipes from its bottom and its top edge, so liquid can leave under the gas coming back,
+                // each stream paying its own head over the opening's height)
                 pipeOfPair[k] = true;
-            else if (e.oneWay()) ce[k].kind = Network.Kind.CHECK;
+                ce[k] = net.connect(a, Math.max(0, fa - e.spanA / 2), b, fb, 0);
+                ceTop[k] = net.connect(a, Math.min(1, fa + e.spanA / 2), b, fb, 0);
+            } else {
+                ce[k] = net.connect(a, fa, b, fb, 0);
+                if (e.oneWay()) ce[k].kind = Network.Kind.CHECK;
+            }
         }
     }
 
@@ -203,6 +212,34 @@ final class CoreStep {
     private void discard(double[][] m0, double[] u0) {
         restore(m0, u0);
         for (Network.Edge c : ce) if (c != null && c.moved != null) java.util.Arrays.fill(c.moved, 0);
+        for (Network.Edge c : ceTop) if (c != null && c.moved != null) java.util.Arrays.fill(c.moved, 0);
+    }
+
+    /** A step that took many sub-steps (or hit the cap): written out once per network, as failures are. */
+    private void slow(double dt, double[][] m0, double[] u0, double[] h0, long substeps) {
+        slowSteps++;
+        if (dumped || dumps >= 30) return;
+        dumped = true;
+        int n = ++dumps;
+        double[][] m1 = new double[cn.length][];
+        double[] u1 = new double[cn.length];
+        for (int i = 0; i < cn.length; i++) {
+            m1[i] = cn[i].m.clone();
+            u1[i] = cn[i].U;
+        }
+        restore(m0, u0);
+        for (int i = 0; i < cn.length; i++) cn[i].heat = h0[i];
+        String text = mods.eln.fluidcore.NetworkDump.write(net, dt);
+        restore(m1, u1);
+        try {
+            java.nio.file.Path dir = java.nio.file.Path.of("fluidcore-fail");
+            java.nio.file.Files.createDirectories(dir);
+            java.nio.file.Path f = dir.resolve(n + "-slow.txt");
+            java.nio.file.Files.writeString(f, text);
+            System.out.println("[fluidcore] a step took " + substeps + " sub-steps (" + cn.length + " nodes); written to " + f.toAbsolutePath());
+        } catch (java.io.IOException e) {
+            System.out.println("[fluidcore] a slow step; could not write it out: " + e);
+        }
     }
 
     void step(FluidNetwork fn, double dt) {
@@ -232,8 +269,20 @@ final class CoreStep {
             boolean fromA = dp + pa.rhoHead * Network.G * dz >= 0 || (e.oneWay() && !pipeOfPair[k]);
             xl[k] = fromA ? pa.xl : pb.xl;
             double open = Math.max(0, e.open);
+            if (pipeOfPair[k]) {
+                // (each of the opening's two pipes takes half its conductance, carrying what its own edge draws)
+                for (int top = 0; top < 2; top++) {
+                    Network.Edge h = top == 0 ? c : ceTop[k];
+                    h.boost = e.boost;
+                    FluidNetwork.Packet po = FluidNetwork.packet(e.a, h.fa, 0);
+                    double dpo = e.a.pressureAt(h.fa) - e.b.pressureOver(e.portB, e.spanB) + e.boost;
+                    h.g = 0.5 * conductance(e, po, dpo + po.rhoHead * Network.G * h.dz, open);
+                    h.gBack = 0.5 * conductance(e, pb, dpo + pb.rhoHead * Network.G * h.dz, open);
+                }
+                continue;
+            }
             c.g = conductance(e, pa, dp + pa.rhoHead * Network.G * dz, open);
-            c.gBack = e.oneWay() && !pipeOfPair[k] ? Double.NaN : conductance(e, pb, dp + pb.rhoHead * Network.G * dz, open);
+            c.gBack = e.oneWay() ? Double.NaN : conductance(e, pb, dp + pb.rhoHead * Network.G * dz, open);
         }
         long slept = net.stats.slept, failures = net.stats.failures;
         double[][] m0 = new double[cn.length][];
@@ -243,8 +292,10 @@ final class CoreStep {
             u0[i] = cn[i].U;
             h0[i] = cn[i].heat;
         }
+        long sub0 = net.stats.substeps, cut0 = net.stats.cut;
         net.step(dt);
         if (net.stats.failures > failures) failed(dt, m0, u0, h0);
+        else if (net.stats.cut > cut0 || net.stats.substeps - sub0 > 64) slow(dt, m0, u0, h0, net.stats.substeps - sub0);
         boolean asleep = net.stats.slept > slept;
         // contents out
         for (int i = 0; i < cn.length; i++) {
@@ -268,6 +319,11 @@ final class CoreStep {
             FluidEdge e = edges.get(k);
             Network.Edge c = ce[k];
             double[] mv = c == null || asleep ? null : c.moved;
+            if (mv != null && ceTop[k] != null && ceTop[k].moved != null) {
+                double[] both = mv.clone();
+                for (int j = 0; j < both.length; j++) both[j] += ceTop[k].moved[j];
+                mv = both;
+            }
             e.flow = e.fLiquid = e.fVapour = e.fAir = e.fEnthalpy = 0;
             if (e.fSpecies != null) java.util.Arrays.fill(e.fSpecies, 0);
             if (mv == null) continue;

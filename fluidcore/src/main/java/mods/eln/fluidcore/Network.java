@@ -436,6 +436,7 @@ public final class Network {
         }
         double[] y0 = pack(free);
         progressed = false;
+        stepSubsteps = 0;
         if (!solve(free, y0, dt)) {
             // (no convergence: two half steps, each from where the last ended)
             restore(free, y0);
@@ -506,6 +507,12 @@ public final class Network {
 
     private boolean substep(List<Node> free, double dt, int depth) {
         stats.substeps++;
+        if (CUT_SHORT && ++stepSubsteps > MAX_SUBSTEPS) {
+            // (a step that has taken MAX_SUBSTEPS sub-steps ends where it is: a network needing thousands of sub-steps
+            // every tick stalled the server)
+            stats.cut++;
+            return false;
+        }
         for (int half = 0; half < 2; half++) {
             double[] y = pack(free);
             if (solve(free, y, dt / 2)) progressed = true;
@@ -538,6 +545,9 @@ public final class Network {
     public static boolean CUT_SHORT = false;
     /** This step has converged at least one sub-step. */
     private boolean progressed;
+    /** With CUT_SHORT: at most this many sub-steps a step (then it ends where it is); and this step's count. */
+    public static int MAX_SUBSTEPS = 256;
+    private int stepSubsteps;
 
     /** Components per node: the species masses, then the energy (one count for the whole network). */
     private int C() {
