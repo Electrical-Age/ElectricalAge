@@ -165,7 +165,8 @@ final class CoreStep {
         for (Network.Node c : cn) {
             if (c.fixed) continue;
             double T = c.T();
-            if (!Double.isFinite(c.U) || !Double.isFinite(c.P()) || !(T > 150 && T < 3000)) sane = false;
+            // (a burst pipe's air venting from 50 bar cools towards 100 K as it expands: a physical state)
+            if (!Double.isFinite(c.U) || !Double.isFinite(c.P()) || !(T > 50 && T < 6000)) sane = false;
             for (double x : c.m) if (!Double.isFinite(x)) sane = false;
         }
         if (!sane) discardedSteps++;
