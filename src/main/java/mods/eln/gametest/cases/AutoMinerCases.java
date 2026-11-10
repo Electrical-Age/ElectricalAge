@@ -38,12 +38,16 @@ public final class AutoMinerCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new BelowZeroCase());
+        cases.add(new RefusalCase());
     }
 
+    /** The fastest electrical drill. */
     static ItemStack drill() {
+        ElectricalDrillDescriptor best = null;
         for (int i = 0; i < 64 * 128; i++)
-            if (Eln.sharedItem.getDescriptor(i) instanceof ElectricalDrillDescriptor d) return d.newItemStack();
-        throw new IllegalStateException("no electrical drill");
+            if (Eln.sharedItem.getDescriptor(i) instanceof ElectricalDrillDescriptor d && (best == null || d.nominalPower > best.nominalPower)) best = d;
+        if (best == null) throw new IllegalStateException("no electrical drill");
+        return best.newItemStack();
     }
 
     /** A miner ready to work: drill, 64 pipes, a chest at its drop position (1 forward, 1 down), powered. */
@@ -88,6 +92,22 @@ public final class AutoMinerCases {
             ctx.level().setBlockAndUpdate(p, s);
         }
 
+        static final int WATCH = 60;
+        int setupsBefore = -1;
+        Object jobBefore;
+
+        int setups() {
+            return Batch1Cases.<Integer>field(Batch1Cases.field(miner, "slowProcess"), "setups");
+        }
+
+        /** Counts the job setups over the case's last WATCH ticks. */
+        void watchSetups(TestContext ctx) {
+            ctx.after(ticks() - WATCH, () -> {
+                setupsBefore = setups();
+                jobBefore = job();
+            });
+        }
+
         Object job() {
             return Batch1Cases.field(Batch1Cases.field(miner, "slowProcess"), "job");
         }
@@ -122,7 +142,9 @@ public final class AutoMinerCases {
      * bedrock the case puts at y = -3 (the shaft under the box is cleared, 3 x 3 where its scan would mine). Every pipe
      * segment has the pipe ghost id; 1.12 gave each segment its height, and the one at y = -1 had the machine's own id
      * (-1), so breaking it broke the miner. Breaking that segment now retracts the pipe and leaves the miner. Also: the
-     * mined stacks waiting for room in the chest are saved (1.12 lost them on a restart).
+     * mined stacks waiting for room in the chest are saved (1.12 lost them on a restart), a segment an older version
+     * left at y = -1 with the machine's id is renumbered after a load, and the finished miner looks
+     * for work once a second, not every tick.
      */
     static final class BelowZeroCase extends Rig {
         String premise = "";
@@ -152,6 +174,7 @@ public final class AutoMinerCases {
                             set(ctx, p, Blocks.AIR.defaultBlockState());
                         }
                 set(ctx, new BlockPos(node.getX(), -3, node.getZ()), Blocks.BEDROCK.defaultBlockState());
+                watchSetups(ctx);
             } catch (RuntimeException e) {
                 cleanUp(ctx);
                 throw e;
@@ -177,7 +200,16 @@ public final class AutoMinerCases {
                     if (g.getUUID() == miner.getDescriptor().getGhostGroupUuid()) wrong++;
                 }
                 ctx.check("autominer below zero: no pipe segment has the machine's ghost id", wrong == 0, wrong + " of " + segments);
+                // finished, it looks for work once a second (1.12: every tick, rescanning its whole layer each time)
+                int looks = setups() - setupsBefore;
+                ctx.check("autominer: a finished miner looks for work about once a second",
+                    "done".equals(String.valueOf(jobBefore)) && "done".equals(String.valueOf(job())) && looks <= WATCH / 20 + 1,
+                    looks + " job setups in " + WATCH + " ticks, job " + jobBefore + " then " + job());
 
+                // a world an older version saved: the segment at y = -1 has the machine's id; it gets the pipe id on
+                // the first step after load (checked by breaking it below)
+                Coordonate minus1 = new Coordonate(x, -1, z, ctx.level());
+                Eln.ghostManager.renumberGhost(minus1, miner.node.coordonate, atMinus1.getUUID(), miner.getDescriptor().getGhostGroupUuid());
                 // a queued stack survives a save and load
                 unpower();
                 Batch1Cases.<List<ItemStack>>field(Batch1Cases.field(miner, "slowProcess"), "itemsToDrop").add(new ItemStack(Items.DIAMOND, 3));
@@ -186,6 +218,7 @@ public final class AutoMinerCases {
                 List<ItemStack> queued = Batch1Cases.field(Batch1Cases.field(miner, "slowProcess"), "itemsToDrop");
                 ctx.check("autominer: the stacks waiting for room in the chest are saved", queued.size() == 1 && queued.get(0).is(Items.DIAMOND)
                     && queued.get(0).getCount() == 3, String.valueOf(queued));
+                Batch1Cases.<mods.eln.sim.IProcess>field(miner, "slowProcess").process(0.05);   // (its first step after the load)
 
                 // breaking the segment at y = -1: the pipe comes up, the miner stays
                 ctx.level().removeBlock(new BlockPos(x, -1, z), false);
@@ -198,6 +231,53 @@ public final class AutoMinerCases {
                     "node " + n + ", " + left + " pipe ghost(s) left");
             } catch (ReflectiveOperationException e) {
                 ctx.check("autominer below zero: reload", false, e.toString());
+            } finally {
+                cleanUp(ctx);
+            }
+        }
+    }
+
+    /**
+     * Blocks the miner leaves alone (AutoMinerSlowProcess.isProtected): with silk touch on and a spawner right under it,
+     * the miner stops (done) and the spawner stays; 1.12 mined it and put a spawner item in the chest.
+     */
+    static final class RefusalCase extends Rig {
+        public String id() {
+            return "autominer_refuses_unbreakable_blocks";
+        }
+
+        public int ticks() {
+            return 200;   // (1.12 took the spawner in 6 s: the fast drill's 6 kJ x 6 for silk touch at 3 x 2 kW)
+        }
+
+        public void build(TestContext ctx) {
+            try {
+                rig(ctx);
+                Wp9cCases.setField(Batch1Cases.field(miner, "slowProcess"), "silkTouch", true);
+                set(ctx, node.below(), Blocks.SPAWNER.defaultBlockState());
+            } catch (RuntimeException e) {
+                cleanUp(ctx);
+                throw e;
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            try {
+                int spawnerItems = 0;
+                if (ctx.level().getBlockEntity(chest) instanceof net.minecraft.world.Container c)
+                    for (int i = 0; i < c.getContainerSize(); i++) if (c.getItem(i).is(Items.SPAWNER)) spawnerItems += c.getItem(i).getCount();
+                ctx.check("autominer: leaves a spawner under it alone, with silk touch (done)",
+                    ctx.level().getBlockState(node.below()).is(Blocks.SPAWNER) && spawnerItems == 0 && "done".equals(String.valueOf(job())),
+                    "under it " + ctx.level().getBlockState(node.below()) + ", spawners in the chest " + spawnerItems + ", job " + job());
+                var level = ctx.level();
+                BlockPos p = ctx.at(0, 1, 0);
+                String wrong = "";
+                for (var b : new net.minecraft.world.level.block.Block[]{Blocks.BUDDING_AMETHYST, Blocks.END_PORTAL_FRAME, Blocks.REINFORCED_DEEPSLATE,
+                    Blocks.BARRIER, Blocks.TRIAL_SPAWNER, Blocks.VAULT, Blocks.COMMAND_BLOCK, Blocks.BEDROCK, Blocks.OBSIDIAN})
+                    if (!mods.eln.transparentnode.autominer.AutoMinerSlowProcess.isProtected(b.defaultBlockState(), level, p)) wrong += " " + b + " mined;";
+                for (var b : new net.minecraft.world.level.block.Block[]{Blocks.STONE, Blocks.DEEPSLATE, Blocks.IRON_ORE, Blocks.DEEPSLATE_DIAMOND_ORE, Blocks.SANDSTONE})
+                    if (mods.eln.transparentnode.autominer.AutoMinerSlowProcess.isProtected(b.defaultBlockState(), level, p)) wrong += " " + b + " refused;";
+                ctx.check("autominer: refuses unbreakable and special blocks, mines stone and ores", wrong.isEmpty(), wrong.trim());
             } finally {
                 cleanUp(ctx);
             }

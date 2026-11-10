@@ -60,6 +60,12 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
      */
     static final int PIPE_GHOST_UUID = 1;
 
+    /** Seconds until an idle miner (none, done, full, chestFull) looks for a job again. */
+    private double idleWait = 0;
+
+    /** How many times the job was set up (tests: an idle miner looks once a second). */
+    int setups = 0;
+
     /** The pipe ghosts of an older save were renumbered (once, on the first step: ghosts load after the nodes). */
     private boolean pipeIdsChecked = false;
 
@@ -116,6 +122,12 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                 oneJobDone = true;
                 switch (job) {
                     case ore:
+                        // read again: the block may have changed in the seconds the drill took
+                        if (isProtected(jobCoord)) {
+                            energyCounter -= energyTarget;
+                            setupJob();
+                            break;
+                        }
                         drillCount++;
 
                         Block block = WorldCompat.getBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
@@ -172,7 +184,10 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         break;
                 }
             }
-        } else {
+        } else if ((idleWait -= time) <= 0) {
+            // idle: look again once a second (1.12 did every tick, and a finished miner rescanned its whole layer, up
+            // to 129 x 129 blocks, 20 times a second for as long as it stood there)
+            idleWait = 1;
             setupJob();
         }
 
@@ -267,7 +282,27 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
             && (block) != Blocks.OBSIDIAN && (block) != Blocks.BEDROCK;
     }
 
+    /**
+     * Blocks the miner leaves alone, as it always left bedrock and obsidian: unbreakable ones (destroy speed below 0:
+     * end portal frames, barriers), those the wither can't break (reinforced deepslate, command blocks), those world
+     * generation must not replace (spawners, trial spawners, vaults, chests), and budding amethyst. 1.12 mined them
+     * too, and with silk touch handed them out as items. In the shaft they end it (done), as bedrock does; around it
+     * they are skipped.
+     */
+    public static boolean isProtected(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.Level level, BlockPos pos) {
+        return state.getDestroySpeed(level, pos) < 0
+            || state.is(net.minecraft.tags.BlockTags.WITHER_IMMUNE)
+            || state.is(net.minecraft.tags.BlockTags.FEATURES_CANNOT_REPLACE)
+            || state.is(Blocks.BUDDING_AMETHYST) || state.is(Blocks.OBSIDIAN) || state.is(Blocks.BEDROCK);
+    }
+
+    private boolean isProtected(Coordonate c) {
+        BlockPos pos = c.pos();
+        return isProtected(c.world().getBlockState(pos), c.world(), pos);
+    }
+
     private void setupJob() {
+        setups++;
         ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getItem(AutoMinerContainer.electricalDrillSlotId));
         // OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getItem(AutoMinerContainer.OreScannerSlotId));
         MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getItem(AutoMinerContainer.MiningPipeSlotId));
@@ -324,7 +359,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         double dz = jobCoord.z - miner.node.coordonate.z;
                         double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
                         Block block = WorldCompat.getBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
-                        if (checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) {
+                        if ((checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) && !isProtected(jobCoord)) {
                             jobFind = true;
                             setJob(jobType.ore);
                             break;
@@ -347,7 +382,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     if (!Utils.isAirBlock(block)
                         && block != Blocks.WATER
                         && block != Blocks.LAVA) {
-                        if (block != Blocks.OBSIDIAN && block != Blocks.BEDROCK) {
+                        if (!isProtected(jobCoord)) {
                             jobFind = true;
                             setJob(jobType.ore);
                         } else {

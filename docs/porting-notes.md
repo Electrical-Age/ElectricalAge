@@ -476,6 +476,12 @@ In the port:
 - Auto Miner below y = 0 (1.12 never went there): each pipe segment's ghost id was its height, so the segment at
   y = -1 had the machine's own id and breaking it broke the miner. Pipe segments share one id now. The stacks waiting
   for room in the chest are saved and dropped when the miner is broken (1.12 lost them). Test `autominer_below_zero`.
+- The Auto Miner mined anything but air, liquids, obsidian and bedrock, and with silk touch handed out spawners, budding
+  amethyst and end portal frames as items. It leaves alone blocks with a destroy speed below 0, the
+  `#minecraft:wither_immune` and `#minecraft:features_cannot_replace` blocks (spawners, trial spawners, vaults, chests,
+  reinforced deepslate, command blocks) and budding amethyst: in the shaft they end it as bedrock does, around it they
+  are skipped. A finished or waiting miner looks for work once a second (1.12: every tick, rescanning its whole layer).
+  Test `autominer_refuses_unbreakable_blocks`.
 
 ## Deferred
 
