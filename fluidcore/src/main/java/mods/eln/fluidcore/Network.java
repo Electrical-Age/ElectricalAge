@@ -251,6 +251,9 @@ public final class Network {
         if (e.kind == Kind.CHECK) return dp > 0 ? new double[]{e.g * dp, 0, e.g, 0} : new double[4];
         if (SPLIT_DP > 0) {
             double x = dp / SPLIT_DP;
+            // (far above the band the return stream is under 1e-13 of the flow: none, exactly; taken as q+ - q there,
+            // rounding left it a few 1e-16 kg/s either side of zero, and a negative stream sends b's species from a)
+            if (x > 30) return new double[]{e.g * dp, 0, e.g, 0};
             double sp = x > 30 ? x : x < -30 ? Math.exp(x) : Math.log1p(Math.exp(x));
             double sig = x > 30 ? 1 : x < -30 ? Math.exp(x) : 1 / (1 + Math.exp(-x));
             double qp = e.g * SPLIT_DP * sp;
