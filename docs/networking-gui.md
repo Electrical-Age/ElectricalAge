@@ -166,7 +166,7 @@ needs the stack in that slot to still be a scanner. Screen: `client/gui/XRayScan
 |---|---|
 | `src/test/java/mods/eln/gui/LayoutTest.java` | layout maths; `everyShippedLayoutIsSound`: every `assets/eln/gui/*.json` lays out without problems |
 | `gametest/GuiPacketCase` (`gui_packets`) | GUI bytes through `ServerPacketHandler.handle` reach six-node and transparent elements; a too-far player is ignored (bypasses the real channel) |
-| `gametest/cases/GuiPacketFuzzCases` (`gui_packets_reject_bad_values_*`) | every six-node and transparent element with a GUI handler (by enumeration): ids -128..127 with NaN, infinities, huge and negative numbers, out-of-range indices and a 3000-character string; no throw, no NaN/infinity or over-long string in the saved tag, the review's named values in range; an exporter saved with a bad power factor loads clean |
+| `gametest/cases/GuiPacketFuzzCases` (`gui_packets_reject_bad_values_*`) | every six-node and transparent element with a GUI handler (by enumeration): ids -128..127 with NaN, infinities, huge and negative numbers, out-of-range indices and a 3000-character string; no throw, no NaN/infinity or over-long string in the saved tag, the review's named values in range; values the screens send are stored as sent; devices saved with bad values (exporter, transporter, turret, aggregators) load clean |
 | `gametest/MenusOpenCase` (`menus_open`) | every device with a screen opens an `eln:node` menu; the open data rebuilds the same slots |
 | `gametest/GoldenSlotsCase` (`golden_slots`) | menu slots vs `golden/1.12/slots.json` |
 | `gametest/MachineMenuCase` (`machine_menu`) | a click puts iron ore into the macerator input (single click, not shift-click) |

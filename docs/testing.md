@@ -117,10 +117,11 @@ load; one circuit per block entity, none on a machine's).
 `GuiPacketFuzzCases` (`gui_packets_reject_bad_values_<element>`: one case per six-node and transparent element class
 that has its own `networkUnserialize`, found by enumerating the registries, so a new handler is covered unlisted;
 packet ids -128..127 with NaN, infinite, huge and negative numbers, out-of-range index bytes and a 3000-character
-string; after each packet that read a value, the element's processes step without throwing, its saved tag gains no
-NaN, infinity or string over 64 characters, and the values in `RANGES` are in their screens' ranges; a device whose
-check failed is removed before the simulator ticks it; `..._saved_exporter`: an exporter saved with a NaN, negative,
-infinite or too large power factor loads one in 0..1 and steps).
+string; first, each value in `VALID` (one its screen sends) must land in the saved tag as sent; after each packet that
+read a value, the element's processes step without throwing, its saved tag gains no NaN, infinity or string over 64
+characters, and the values in `RANGES` are in their screens' ranges; a device whose check failed is removed before the
+simulator ticks it; `..._saved_<element>` (`SAVED`: exporter, transporter, turret, wireless receiver, lamp supply): a
+device saved with a bad value an older handler could store loads it in range and steps).
 
 A case can run code part way (`ctx.after(ticks, r)`, as its measure runs: outside the simulator's tick) and reload a
 node from an edited tag (`Reload.node(level, pos, tag -> ...)`: a save as an older version wrote it).

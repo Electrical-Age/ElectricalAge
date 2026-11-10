@@ -50,8 +50,9 @@ import java.util.function.Function;
  *     the values the review named are in their screens' ranges ({@link #RANGES});</li>
  * <li>the simulator then runs on with it, and networkSerialize works.</li>
  * </ul>
- * A device that can't be placed here fails its case. A last case loads an exporter saved with a NaN, negative, infinite
- * or too large power factor (a save the old handler could write) and steps it.
+ * Before the bad values, each value in {@link #VALID} (what the screen sends) must be stored as sent. A device that
+ * can't be placed here fails its case. The {@link #SAVED} cases load a device saved with a bad value an older handler
+ * could store (the exporter's power factor, the transporter's and turret's power, the aggregator indices) and step it.
  */
 public final class GuiPacketFuzzCases {
     private GuiPacketFuzzCases() {
@@ -70,13 +71,14 @@ public final class GuiPacketFuzzCases {
             Class<?> c = e.getValue().ElementClass;
             if (c == null || !handles(c, SixNodeElement.class) || !seen.add(c)) continue;
             cases.add(new Device(e.getKey(), true, unique(ids, c.getSimpleName())));
+            if (SAVED.containsKey(c.getSimpleName())) cases.add(new Saved(e.getKey(), true, c.getSimpleName().replace("Element", "").toLowerCase(), SAVED.get(c.getSimpleName())));
         }
         for (Map.Entry<Integer, TransparentNodeDescriptor> e : new TreeMap<>(Eln.transparentNodeItem.all()).entrySet()) {
             Class<?> c = e.getValue().ElementClass;
             if (c == null || !handles(c, TransparentNodeElement.class) || !seen.add(c)) continue;
             cases.add(new Device(e.getKey(), false, unique(ids, c.getSimpleName())));
+            if (SAVED.containsKey(c.getSimpleName())) cases.add(new Saved(e.getKey(), false, c.getSimpleName().replace("Element", "").toLowerCase(), SAVED.get(c.getSimpleName())));
         }
-        cases.add(new SavedExporter());
     }
 
     static String unique(Set<String> ids, String name) {
@@ -207,6 +209,121 @@ public final class GuiPacketFuzzCases {
         return out;
     }
 
+    /** The first number in t under a key ending in key (an element's NBT sits under "element" or "ED<slot>"). */
+    static Double number(Tag t, String key) {
+        if (!(t instanceof CompoundTag c)) return null;
+        for (String k : c.keySet()) {
+            Tag v = c.get(k);
+            if (k.endsWith(key) && v instanceof net.minecraft.nbt.NumericTag n) return n.doubleValue();
+        }
+        for (String k : c.keySet()) {
+            Double d = number(c.get(k), key);
+            if (d != null) return d;
+        }
+        return null;
+    }
+
+    /** A value a screen does send, by packet id and payload, and the saved key it lands in. */
+    record Valid(int id, Payload payload, String key, Function<Object, Double> expected) {
+        Valid(int id, Payload payload, String key, double expected) {
+            this(id, payload, key, e -> expected);
+        }
+    }
+
+    static Payload floats(float... f) {
+        return o -> {
+            for (float x : f) o.writeFloat(x);
+        };
+    }
+
+    static double mid(Object o, String min, String max) {
+        return (((Number) get(o, min)).doubleValue() + ((Number) get(o, max)).doubleValue()) / 2;
+    }
+
+    /**
+     * Per element class, values its screen sends, which must be stored as sent: a handler that refused everything would
+     * pass the fuzz. Checked on the saved tag, right after the packet.
+     */
+    static final Map<String, List<Valid>> VALID = Map.ofEntries(
+        Map.entry("EnergyConverterElnToOtherElement", List.of(new Valid(1, floats(0.3f), "inPowerFactor", 0.3f))),
+        Map.entry("TeleporterElement", List.of(new Valid(4, floats(5000), "powerCharge", 5000))),
+        Map.entry("TurretElement", List.of(new Valid(2, floats(800), "chargePower", 800))),
+        Map.entry("WirelessSignalRxElement", List.of(new Valid(2, o -> o.writeByte(1), "selectedAggregator", 1))),
+        Map.entry("LampSupplyElement", List.of(new Valid(3, o -> {
+            o.writeByte(0);
+            o.writeByte(1);
+        }, "selectedAggregator0", 1))),
+        Map.entry("SolarPanelElement", List.of(new Valid(0, null, "panelAlpha", e -> (double) (float) mid(get(e, "descriptor"), "alphaMin", "alphaMax")))),
+        Map.entry("LampSocketElement", List.of(new Valid(2, null, "alphaZ", e -> (double) (float) mid(get(e, "socketDescriptor"), "alphaZMin", "alphaZMax")))),
+        Map.entry("PIDRegulatorElement", List.of(new Valid(1, floats(10), "Kp", 10), new Valid(2, floats(2), "Ki", 2), new Valid(3, floats(1), "Kd", 1))),
+        Map.entry("AmplifierElement", List.of(new Valid(1, floats(-2.5f), "gain", -2.5))),
+        Map.entry("SummingUnitElement", List.of(new Valid(1, floats(2.5f), "gain0", 2.5))),
+        Map.entry("FilterElement", List.of(new Valid(1, floats(0.5f), "feedback", 2 * Math.PI * 0.5))),
+        Map.entry("TachometerElement", List.of(new Valid(1, floats(10, 100), "minRads", 10), new Valid(1, floats(10, 100), "maxRads", 100))),
+        Map.entry("HeatFurnaceElement", List.of(new Valid(2, floats(500), "regulatortarget", 500))),
+        Map.entry("ElectricalFurnaceElement", List.of(new Valid(2, floats(400), "thermalRegulatortarget", 400))),
+        Map.entry("FuelHeatFurnaceElement", List.of(new Valid(3, floats(600), "setTemperature", 600), new Valid(2, floats(0.4f), "manualControl", 0.4f))),
+        Map.entry("ElectricHeaterElement", List.of(new Valid(1, floats(300), "regulatortarget", 300))),
+        Map.entry("SteamGeneratorElement", List.of(new Valid(2, floats(0.4f), "throttle", 0.4f))),
+        Map.entry("ShaftSteamTurbineElement", List.of(new Valid(2, floats(0.4f), "throttle", 0.4f))),
+        Map.entry("ElectricalSensorElement", List.of(new Valid(2, floats(-10, 30), "lowValue", -10), new Valid(2, floats(-10, 30), "highValue", 30))),
+        Map.entry("ThermalSensorElement", List.of(new Valid(2, floats(-10, 30), "lowValue", -10), new Valid(2, floats(-10, 30), "highValue", 30))),
+        Map.entry("ElectricalSourceElement", List.of(new Valid(1, floats(-120), "voltage", -120))),
+        Map.entry("ElectricalGateSourceElement", List.of(new Valid(1, null, "outputGateProcessU", e -> (double) (float) (0.4 * Eln.SVU)))),
+        Map.entry("ElectricalBreakerElement", List.of(new Valid(1, floats(200), "voltageMax", 200))),
+        Map.entry("ElectricalTimeoutElement", List.of(new Valid(2, floats(5), "timeOutValue", 5))),
+        Map.entry("EnergyMeterElement", List.of(new Valid(1, o -> o.writeDouble(1234), "energyStack", 1234))));
+
+    /** Place a device of that descriptor: transparent with its front -X, else where it fits; six-node on the floor, else a wall. */
+    static Object place(TestContext ctx, int damage, boolean six) {
+        BlockPos p = ctx.at(5, 1, 1);
+        if (six) {
+            try {
+                return ctx.placeSix(damage, p, Direction.YN);
+            } catch (RuntimeException floorRefused) {
+                // (walls only: the power sockets)
+                ctx.floor(p.north());
+                return ctx.placeSix(damage, p, Direction.ZN);
+            }
+        }
+        try {
+            // (front -X: a multiblock such as the transporter grows toward +X)
+            return Wp10bCases.placeFacing(ctx, damage, ctx.at(2, 1, 1), Direction.XN);
+        } catch (IllegalStateException noSuchFront) {
+            return ctx.placeTransparent(damage, p);
+        }
+    }
+
+    static NodeBase nodeOf(Object element) {
+        return element instanceof SixNodeElement s ? s.sixNode : ((TransparentNodeElement) element).node;
+    }
+
+    /** Runs the element's processes (its simulator lists) times steps of dt; what threw goes into thrown (at most 8). */
+    static void step(Object element, double dt, int times, String after, List<String> thrown) {
+        List<List<IProcess>> lists = new ArrayList<>();
+        if (element instanceof SixNodeElement e) {
+            lists.add(e.slowProcessList);
+            lists.add(e.electricalProcessList);
+            lists.add(e.thermalProcessList);
+            lists.add(e.thermalSlowProcessList);
+        } else {
+            TransparentNodeElement e = (TransparentNodeElement) element;
+            lists.add(e.slowPreProcessList);
+            lists.add(e.slowProcessList);
+            lists.add(e.electricalProcessList);
+            lists.add(e.thermalFastProcessList);
+        }
+        for (int i = 0; i < times; i++)
+            for (List<IProcess> l : lists)
+                for (IProcess p : new ArrayList<>(l)) {
+                    try {
+                        p.process(dt);
+                    } catch (Throwable t) {
+                        if (thrown.size() < 8) thrown.add("process " + p.getClass().getSimpleName() + " after " + after + ": " + t);
+                    }
+                }
+    }
+
     static final class Device implements TestCase {
         final int damage;
         final boolean six;
@@ -216,9 +333,10 @@ public final class GuiPacketFuzzCases {
         String placeError;
         final List<String> thrown = new ArrayList<>();
         final List<String> outOfRange = new ArrayList<>();
+        final List<String> refused = new ArrayList<>();
         final Set<String> bad = new java.util.LinkedHashSet<>();
         Set<String> badBefore = Set.of();
-        int calls;
+        int calls, accepted;
         boolean removed;
 
         Device(int damage, boolean six, String kind) {
@@ -245,8 +363,8 @@ public final class GuiPacketFuzzCases {
 
         public void build(TestContext ctx) {
             try {
-                element = six ? placeSix(ctx) : placeTransparent(ctx);
-                node = six ? ((SixNodeElement) element).sixNode : ((TransparentNodeElement) element).node;
+                element = place(ctx, damage, six);
+                node = nodeOf(element);
             } catch (RuntimeException ex) {
                 placeError = ex.toString();
                 return;
@@ -254,33 +372,30 @@ public final class GuiPacketFuzzCases {
             ctx.after(5, () -> fuzz(ctx));
         }
 
-        SixNodeElement placeSix(TestContext ctx) {
-            BlockPos p = ctx.at(5, 1, 1);
-            try {
-                return ctx.placeSix(damage, p, Direction.YN);
-            } catch (RuntimeException floorRefused) {
-                // (walls only: the power sockets)
-                ctx.floor(p.north());
-                return ctx.placeSix(damage, p, Direction.ZN);
-            }
-        }
-
-        TransparentNodeElement placeTransparent(TestContext ctx) {
-            try {
-                // (front -X: a multiblock such as the transporter grows toward +X)
-                return Wp10bCases.placeFacing(ctx, damage, ctx.at(2, 1, 1), Direction.XN);
-            } catch (IllegalStateException noSuchFront) {
-                return ctx.placeTransparent(damage, ctx.at(5, 1, 1));
-            }
-        }
-
         void fuzz(TestContext ctx) {
             FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());
             BlockPos at = node.coordonate.pos();
             fp.setPos(at.getX() + 0.5, at.getY() + 1, at.getZ() + 2.5);
+            String name = element.getClass().getSimpleName();
+            for (Valid v : VALID.getOrDefault(name, List.of())) {
+                double want;
+                try {
+                    want = v.expected().apply(element);
+                } catch (RuntimeException ex) {
+                    refused.add(v.key() + ": " + ex);
+                    continue;
+                }
+                Payload pl = v.payload() != null ? v.payload() : floats((float) want);
+                send(fp, (byte) v.id(), "valid " + v.key(), pl);
+                CompoundTag t = new CompoundTag();
+                node.writeToNBT(t);
+                Double got = number(t, v.key());
+                if (got == null || Math.abs(got - want) > 1e-6 * Math.max(1, Math.abs(want))) refused.add(v.key() + " = " + got + ", sent " + want);
+                else accepted++;
+            }
             badBefore = scan(node);
-            var range = RANGES.get(element.getClass().getSimpleName());
-            String ownLimit = OWN_LIMIT.get(element.getClass().getSimpleName());
+            var range = RANGES.get(name);
+            String ownLimit = OWN_LIMIT.get(name);
             for (int id = -128; id < 128 && thrown.size() < 8; id++) {
                 for (Map.Entry<String, Payload> p : PAYLOADS.entrySet()) {
                     String what = "packet " + id + " (" + p.getKey() + ")";
@@ -288,7 +403,7 @@ public final class GuiPacketFuzzCases {
                     // (a packet id that reads nothing more is a toggle or nothing: once is enough)
                     if (read <= 1) break;
                     // (each value as it is stored: the next packet would overwrite it)
-                    step(0.05, 1, what);
+                    step(element, 0.05, 1, what, thrown);
                     try {
                         String r = range == null ? null : range.apply(element);
                         if (r != null && outOfRange.size() < 8) outOfRange.add(what + ": " + r);
@@ -300,7 +415,7 @@ public final class GuiPacketFuzzCases {
                             bad.add(what + ": " + b);
                 }
             }
-            step(0.05, 5, "the last packet");
+            step(element, 0.05, 5, "the last packet", thrown);
             if (!thrown.isEmpty() || !bad.isEmpty() || !outOfRange.isEmpty()) {
                 // (so the simulator doesn't meet what failed here: a throw in its tick would stop the test server)
                 ctx.world().removeBlock(at, false);
@@ -332,36 +447,11 @@ public final class GuiPacketFuzzCases {
             return bytes.length - in.available();
         }
 
-        void step(double dt, int times, String after) {
-            List<List<IProcess>> lists = new ArrayList<>();
-            if (six) {
-                SixNodeElement e = (SixNodeElement) element;
-                lists.add(e.slowProcessList);
-                lists.add(e.electricalProcessList);
-                lists.add(e.thermalProcessList);
-                lists.add(e.thermalSlowProcessList);
-            } else {
-                TransparentNodeElement e = (TransparentNodeElement) element;
-                lists.add(e.slowPreProcessList);
-                lists.add(e.slowProcessList);
-                lists.add(e.electricalProcessList);
-                lists.add(e.thermalFastProcessList);
-            }
-            for (int i = 0; i < times; i++)
-                for (List<IProcess> l : lists)
-                    for (IProcess p : new ArrayList<>(l)) {
-                        try {
-                            p.process(dt);
-                        } catch (Throwable t) {
-                            if (thrown.size() < 8) thrown.add("process " + p.getClass().getSimpleName() + " after " + after + ": " + t);
-                        }
-                    }
-        }
-
         public void measure(TestContext ctx) {
             ctx.check(kind + ": placed", element != null, "" + placeError);
             if (element == null) return;
-            ctx.line(kind + ": " + calls + " packets");
+            ctx.line(kind + ": " + calls + " packets, " + accepted + " valid values stored as sent");
+            ctx.check(kind + ": the values its screen sends are stored as sent", refused.isEmpty(), String.join("; ", refused));
             ctx.check(kind + ": no handler or process threw on bad values", thrown.isEmpty(), String.join("; ", thrown));
             ctx.check(kind + ": its saved tag holds no NaN, infinity or over-long packet string", bad.isEmpty(), String.join("; ", bad));
             ctx.check(kind + ": the values the review named stay in their screens' ranges", outOfRange.isEmpty(), String.join("; ", outOfRange));
@@ -378,43 +468,84 @@ public final class GuiPacketFuzzCases {
         }
     }
 
+    /** Saved keys an older handler let a bad value into, by element class: the key, the bad values, as an int tag. */
+    record SavedBad(String key, double[] values, boolean asInt) {
+    }
+
+    static final Map<String, SavedBad> SAVED = Map.of(
+        "EnergyConverterElnToOtherElement", new SavedBad("inPowerFactor", new double[]{Double.NaN, -1, Double.POSITIVE_INFINITY, 7}, false),
+        "TeleporterElement", new SavedBad("powerCharge", new double[]{Double.NaN, -5000, 1e9}, false),
+        "TurretElement", new SavedBad("chargePower", new double[]{Double.NaN, -100, 1e9}, false),
+        "WirelessSignalRxElement", new SavedBad("selectedAggregator", new double[]{127, -1}, true),
+        "LampSupplyElement", new SavedBad("selectedAggregator0", new double[]{127, -1}, true));
+
+    /** In every compound of t that has key, set it to v. */
+    static void putWherever(Tag t, String key, double v, boolean asInt) {
+        if (!(t instanceof CompoundTag c)) return;
+        for (String k : new ArrayList<>(c.keySet())) {
+            if (k.equals(key)) {
+                if (asInt) c.putInt(k, (int) v);
+                else c.putDouble(k, v);
+            } else putWherever(c.get(k), key, v, asInt);
+        }
+    }
+
     /**
-     * An FE exporter saved with a NaN, then a negative power factor (what the unchecked handler could store): it
-     * loads with a factor in 0..1 and its process steps without throwing.
+     * A device saved with a value an older handler could store (the exporter's NaN power factor crashed the server
+     * again on start; the receiver's and lamp supply's aggregator threw in the tick): it loads with the value in its
+     * screen's range ({@link #RANGES}) and its processes step without throwing.
      */
-    static final class SavedExporter implements TestCase {
+    static final class Saved implements TestCase {
+        final int damage;
+        final boolean six;
+        final String kind;
+        final SavedBad bad;
         final List<String> results = new ArrayList<>();
 
+        Saved(int damage, boolean six, String kind, SavedBad bad) {
+            this.damage = damage;
+            this.six = six;
+            this.kind = kind;
+            this.bad = bad;
+        }
+
         public String id() {
-            return "gui_packets_reject_bad_values_saved_exporter";
+            return "gui_packets_reject_bad_values_saved_" + kind;
         }
 
         public int width() {
+            return 10;
+        }
+
+        public int height() {
             return 5;
         }
 
         public void build(TestContext ctx) {
-            BlockPos p = ctx.at(2, 1, 1);
-            ctx.placeTransparent(mods.eln.transparentnode.energyconverter.ExporterSaveUpgrade.LVU_ID, p);
+            Object placed = place(ctx, damage, six);
+            BlockPos p = nodeOf(placed).coordonate.pos();
+            Class<?> c = placed.getClass();
             ctx.after(2, () -> {
-                for (double bad : new double[]{Double.NaN, -1, Double.POSITIVE_INFINITY, 7}) {
+                for (double v : bad.values()) {
                     try {
                         Reload r = Reload.node(ctx.level(), p, t -> {
-                            t.getCompoundOrEmpty("element").putDouble("inPowerFactor", bad);
+                            putWherever(t, bad.key(), v, bad.asInt());
                             return t;
                         });
-                        var e = (mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
-                        String err = range(e, "inPowerFactor", 0, 1);
-                        try {
-                            for (IProcess q : e.slowProcessList) q.process(0.05);
-                        } catch (RuntimeException ex) {
-                            err = (err == null ? "" : err + "; ") + ex;
+                        Object e = r.fresh instanceof mods.eln.node.six.SixNode s
+                            ? java.util.Arrays.stream(s.sideElementList).filter(c::isInstance).findFirst().orElseThrow()
+                            : ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                        String err = RANGES.get(c.getSimpleName()).apply(e);
+                        List<String> thrown = new ArrayList<>();
+                        step(e, 0.05, 5, "the load", thrown);
+                        if (!thrown.isEmpty()) {
+                            err = (err == null ? "" : err + "; ") + thrown.get(0);
                             ctx.world().removeBlock(p, false);
                         }
-                        results.add(bad + ": " + (err == null ? "ok" : err));
+                        results.add(v + ": " + (err == null ? "ok" : err));
                         if (err != null) return;
-                    } catch (ReflectiveOperationException ex) {
-                        results.add(bad + ": " + ex);
+                    } catch (ReflectiveOperationException | RuntimeException ex) {
+                        results.add(v + ": " + ex);
                         return;
                     }
                 }
@@ -422,8 +553,8 @@ public final class GuiPacketFuzzCases {
         }
 
         public void measure(TestContext ctx) {
-            ctx.check("saved exporter: loads a NaN, negative, infinite or too large power factor as one in 0..1, and steps",
-                results.size() == 4 && results.stream().allMatch(s -> s.endsWith(": ok")), String.join("; ", results));
+            ctx.check(kind + " saved with " + bad.key() + " out of range or not a number: loads it in range, and steps",
+                results.size() == bad.values().length && results.stream().allMatch(s -> s.endsWith(": ok")), String.join("; ", results));
         }
     }
 }
