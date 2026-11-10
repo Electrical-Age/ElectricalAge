@@ -561,16 +561,19 @@ final class MixFluid implements NodeFluid {
         return groups.length == 0 ? 0 : st.top[groups.length - 1].v;
     }
 
-    /** The head over a port at f: g H sum over layers (rho_k - rho_k+1) softplus(top_k - f), smooth at each surface. */
+    /**
+     * The head over a port at f: g H sum over layers rho_k (softplus(top_k - f) - softplus(top_k-1 - f)), the floor
+     * being layer 0's bottom; smooth at each surface, and an empty layer adds nothing whatever its composition (its
+     * composition jumps when a first trace arrives).
+     */
     private D portPD(double f) {
         D p = st.p;
-        double w = 0.25 * BAND;
-        int L = groups.length;
-        for (int k = 0; k < L; k++) {
-            D rho = st.rhoRef[st.order[k]];
-            D drho = k + 1 < L ? rho.sub(st.rhoRef[st.order[k + 1]]) : rho;
-            D x = st.top[k].add(-f);
-            p = p.add(drho.mul(D.softplus(x, D.c(w, NG))).mul(G * H));
+        D w = D.c(0.25 * BAND, NG);
+        D below = D.softplus(D.c(-f, NG), w);
+        for (int k = 0; k < groups.length; k++) {
+            D here = D.softplus(st.top[k].add(-f), w);
+            p = p.add(st.rhoRef[st.order[k]].mul(here.sub(below)).mul(G * H));
+            below = here;
         }
         return p;
     }
