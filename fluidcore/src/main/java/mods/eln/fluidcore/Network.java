@@ -120,6 +120,17 @@ public final class Network {
         public final Node a, b;
         public final double fa, fb;
         public double g, boost;
+        /**
+         * The return stream's conductance (from b; NaN: g, the same both ways). The game gives each stream the mobility of
+         * what its own port draws (rho / mu), so liquid and gas move by their own measure.
+         */
+        public double gBack = Double.NaN;
+        /**
+         * The height of a's port over b's (m): the two draw heights. Each stream pays the head of its own fluid over it
+         * (Network.streams). The game's ports draw at one height and attach at another (a boiler's dome flange underneath
+         * draws at its top), and lumped runs and reservoirs meet ports at other heights.
+         */
+        public final double dz;
         public Kind kind = Kind.PIPE;
         /**
          * Counter-current exchange (m^3 s / kg, 0 for none): where a's port is at its floor and b's at its ceiling (a over
@@ -150,6 +161,17 @@ public final class Network {
             this.b = b;
             this.fb = fb;
             this.g = g;
+            double d = (a.z + fa * a.H) - (b.z + fb * b.H);
+            this.dz = Math.abs(d) > 1e-9 ? d : 0;
+        }
+
+        /** Level, and the same conductance both ways: the streams are the plain pipe's (the path every test before heads took). */
+        boolean plain() {
+            return dz == 0 && (Double.isNaN(gBack) || gBack == g);
+        }
+
+        double gB() {
+            return Double.isNaN(gBack) ? g : gBack;
         }
     }
 
@@ -164,10 +186,8 @@ public final class Network {
         return n;
     }
 
-    /** Join node a's port at share fa of its height to b's at fb. The two must be at one height (no head on an edge). */
+    /** Join node a's port at share fa of its height to b's at fb (at any two heights: Edge.dz). */
     public Edge connect(Node a, double fa, Node b, double fb, double g) {
-        double za = a.z + fa * a.H, zb = b.z + fb * b.H;
-        if (Math.abs(za - zb) > 1e-6) throw new IllegalArgumentException("ports at " + za + " and " + zb + ": they must meet at one height");
         Edge e = new Edge(a, fa, b, fb, g);
         edges.add(e);
         wake();
@@ -236,8 +256,11 @@ public final class Network {
 
     /** The edge's mass flow at the current states. */
     static double flow(Edge e) {
-        double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
-        return e.kind == Kind.CHECK ? streams(e)[0] : e.g * dp;
+        if (e.kind == Kind.CHECK || !e.plain()) {
+            double[] q = streams(e);
+            return q[0] - q[1];
+        }
+        return e.g * (portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost);
     }
 
     /**
@@ -256,6 +279,7 @@ public final class Network {
     /** The two streams {q+ from a, q- from b} and their slopes in dp. */
     static double[] streams(Edge e) {
         double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
+        if (!e.plain()) return headStreams(e, dp);
         // (a check valve: the forward stream alone; a hard max(0, dp) put a kink where a valve sits balanced, and Newton
         // stalled on it in the game's networks: openings and pumps at rest)
         if (e.kind == Kind.CHECK && SPLIT_DP <= 0) return dp > 0 ? new double[]{e.g * dp, 0, e.g, 0} : new double[4];
@@ -271,6 +295,80 @@ public final class Network {
             return new double[]{qp, qp - e.g * dp, e.g * sig, e.g * sig - e.g};
         }
         return dp >= 0 ? new double[]{e.g * dp, 0, e.g, 0} : new double[]{0, -e.g * dp, 0, -e.g};
+    }
+
+    /**
+     * The streams of a non-level edge, or one whose two streams have their own conductances: q+ = g S softplus((dp +
+     * rho_a G dz) / S) from a and q- = gBack S softplus(-(dp + rho_b G dz) / S) from b, each paying the head of its own
+     * fluid (rhoDraw) over the two ports' height difference, so a stream runs only where a column of what it carries
+     * would. Equal fluids and conductances: the net is g (dp + rho G dz), and level, the plain pipe's streams. A check
+     * valve has q+ alone. Returns {q+, q-, dq+ / d(dp + ha), dq- / d(dp + hb)}.
+     */
+    static double[] headStreams(Edge e, double dp) {
+        double ha = e.dz == 0 ? 0 : G * e.dz * rhoDraw(e.a, e.fa), hb = e.dz == 0 ? 0 : G * e.dz * rhoDraw(e.b, e.fb);
+        double ga = e.g, gb = e.gB();
+        if (SPLIT_DP <= 0) {
+            double up = dp + ha, down = -(dp + hb);
+            double qp = up > 0 ? ga * up : 0, qm = e.kind == Kind.CHECK || down <= 0 ? 0 : gb * down;
+            return new double[]{qp, qm, up > 0 ? ga : 0, e.kind == Kind.CHECK || down <= 0 ? 0 : -gb};
+        }
+        double xp = (dp + ha) / SPLIT_DP;
+        double qp = ga * SPLIT_DP * spc(xp), dqp = ga * sgc(xp);
+        if (e.kind == Kind.CHECK) return new double[]{qp, 0, dqp, 0};
+        double xm = -(dp + hb) / SPLIT_DP;
+        return new double[]{qp, gb * SPLIT_DP * spc(xm), dqp, -gb * sgc(xm)};
+    }
+
+    /** softplus and its slope, cut 30 either side as the streams are. */
+    static double spc(double x) {
+        return x > 30 ? x : x < -30 ? Math.exp(x) : Math.log1p(Math.exp(x));
+    }
+
+    static double sgc(double x) {
+        return x > 30 ? 1 : x < -30 ? Math.exp(x) : 1 / (1 + Math.exp(-x));
+    }
+
+    /**
+     * The density a head is weighed by: what the port at f draws, its liquid share by the port's window and the rest
+     * gas, blended by that share (as the game's legacy solve weighed its heads; the consistent 1 / (w / rhoL + (1 - w) /
+     * rhoG) jumps from gas to liquid over the last percent of the window).
+     */
+    static double rhoDraw(Node n, double f) {
+        double w = n.fluid.liquidWindow(f);
+        if (HARMONIC_HEAD) {
+            double rl = n.fluid.rhoLiquid(f), rg = n.fluid.rhoGas();
+            if (w >= 1) return rl;
+            if (w <= 0 || rl <= 0) return rg;
+            return 1 / (w / rl + (1 - w) / Math.max(rg, 1e-12));
+        }
+        return w * n.fluid.rhoLiquid(f) + (1 - w) * n.fluid.rhoGas();
+    }
+
+    /** Experiment: weigh a head by the drawn mix's own density, 1 / (w / rhoL + (1 - w) / rhoG). */
+    public static boolean HARMONIC_HEAD = "1".equals(System.getenv("FLUIDCORE_HARMONIC"));
+
+    /** d rhoDraw / d(masses, U) of a free node, by central differences of its state (as the exchange's slopes are). */
+    static double[] rhoDrawSlope(Node n, double f) {
+        int S = n.m.length, C = S + 1;
+        double[] d = new double[C];
+        Object state = n.fluid.saveState();
+        for (int j = 0; j < C; j++) {
+            double keep = j < S ? n.m[j] : n.U;
+            double h = j == S ? 1e-6 * Math.max(1, Math.abs(keep)) : Math.max(1e-12, 1e-6 * keep);
+            double lo = j < S ? Math.max(0, keep - h) : keep - h, hi = keep + h;
+            double[] r = new double[2];
+            for (int side = 0; side < 2; side++) {
+                if (j < S) n.m[j] = side == 0 ? hi : lo;
+                else n.U = side == 0 ? hi : lo;
+                n.update();
+                r[side] = rhoDraw(n, f);
+            }
+            if (j < S) n.m[j] = keep;
+            else n.U = keep;
+            n.fluid.restoreState(state);
+            d[j] = (r[0] - r[1]) / (hi - lo);
+        }
+        return d;
     }
 
     // ---- the step
@@ -365,7 +463,7 @@ public final class Network {
             h = mixIn(mixIn(h, n.U), n.heat);
         }
         for (Edge e : edges) {
-            h = mixIn(mixIn(mixIn(h, e.g), e.boost), e.conductance);
+            h = mixIn(mixIn(mixIn(mixIn(h, e.g), e.gBack), e.boost), e.conductance);
             h = mixIn(mixIn(h, e.exchange), e.kind.ordinal());
         }
         return h;
@@ -475,20 +573,37 @@ public final class Network {
     }
 
     /** dR/dY' at the current states. */
+    /** A node's port (rhoDrawSlope's cache within one Jacobian). */
+    private record PortKey(Node n, double f) {
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof PortKey k && k.n == n && k.f == f;
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(n) * 31 + Double.hashCode(f);
+        }
+    }
+
     private Sparse jacobian(List<Node> free, java.util.Map<Node, Integer> idx, double dt) {
         int C = C(), S = C - 1;
         int M = C * free.size();
         Sparse J = new Sparse(M);
         for (int i = 0; i < M; i++) J.add(i, i, 1);
+        java.util.Map<PortKey, double[]> rhoSlopes = new java.util.HashMap<>();
         for (Edge e : edges) {
             // (every entry an edge can touch is added, zeros too: skipping zeros let entries come and go, and each new
             // one rebuilt the sparse LU's symbolic factorisation, most steps at 2,000 nodes)
-            // F_k = q+ ca_k - q- cb_k; dF_k = (dq+ ca_k - dq- cb_k) (dPa - dPb) + q+ dca_k (a) - q- dcb_k (b)
+            // F_k = q+ ca_k - q- cb_k; dF_k = dq+ d(arg+) ca_k - dq- d(arg-) cb_k + q+ dca_k (a) - q- dcb_k (b), arg+ = dp + ha,
+            // arg- = dp + hb (level: both dp)
             double[] qs = streams(e);
             double[] ca = e.a.fluid.draw(e.fa), cb = e.b.fluid.draw(e.fb);
             double[][] dca = qs[0] != 0 ? e.a.fluid.drawSlope(e.fa) : null, dcb = qs[1] != 0 ? e.b.fluid.drawSlope(e.fb) : null;
             double[] dpa = e.a.fluid.portPSlope(e.fa), dpb = e.b.fluid.portPSlope(e.fb);
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
+            double[] dha = e.dz != 0 && ia != null ? rhoSlopes.computeIfAbsent(new PortKey(e.a, e.fa), p -> rhoDrawSlope(e.a, e.fa)) : null;
+            double[] dhb = e.dz != 0 && ib != null ? rhoSlopes.computeIfAbsent(new PortKey(e.b, e.fb), p -> rhoDrawSlope(e.b, e.fb)) : null;
             for (int k = 0; k < C; k++) {
                 double dFdp = qs[2] * ca[k] - qs[3] * cb[k];
                 for (int side = 0; side < 2; side++) {
@@ -498,8 +613,15 @@ public final class Network {
                     double sign = side == 0 ? 1 : -1;
                     double[][] dc = side == 0 ? dca : dcb;
                     double qn = side == 0 ? qs[0] : -qs[1];
+                    double[] dh = side == 0 ? dha : dhb;
                     for (int j2 = 0; j2 < C; j2++) {
-                        double dF = dFdp * sign * dpx[j2] + (dc != null ? qn * dc[k][j2] : 0);
+                        double dF;
+                        if (dha == null && dhb == null) dF = dFdp * sign * dpx[j2] + (dc != null ? qn * dc[k][j2] : 0);
+                        else {
+                            double dArg = sign * dpx[j2], dHead = dh != null ? G * e.dz * dh[j2] : 0;
+                            double dArgP = side == 0 ? dArg + dHead : dArg, dArgM = side == 1 ? dArg + dHead : dArg;
+                            dF = qs[2] * dArgP * ca[k] - qs[3] * dArgM * cb[k] + (dc != null ? qn * dc[k][j2] : 0);
+                        }
                         if (ia != null) J.add(C * ia + k, C * col + j2, dt * dF);
                         if (ib != null) J.add(C * ib + k, C * col + j2, -dt * dF);
                     }
