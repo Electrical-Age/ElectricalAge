@@ -286,7 +286,7 @@ final class MixFluid implements NodeFluid {
         e.x[g] = new D[k];
         // an empty group (or one whose present species are all past their no-root point): a first trace of a volatile
         // is vapour, of a non-volatile liquid (right-hand slopes)
-        if (ntot <= 1e-200 || !anyFinite || pick(c, nn, inf) < 0) {   // (1e-200: below it the smoothing width underflows)
+        if (ntot <= 1e-30 || !anyFinite || pick(c, nn, inf) < 0) {   // (1e-30 mol: below it the solve's squares underflow)
             for (int a = 0; a < k; a++) {
                 int i = mem[a];
                 boolean liquid = sp[i].kind == Species.Kind.NONE;
@@ -359,6 +359,7 @@ final class MixFluid implements NodeFluid {
             for (int a = 0; a < k; a++) {
                 if (inf[a]) continue;
                 D q = N.add(c[a].mul(l));
+                if (nn[a].v <= 0 && !(q.v > 1e-12 * ntotD.v)) continue;   // (an absent non-volatile in a dry group: no slope through it)
                 Gx = Gx.add(nn[a].div(q));
                 GL -= nn[a].v * c[a].v / (q.v * q.v);
             }
@@ -376,7 +377,7 @@ final class MixFluid implements NodeFluid {
                 continue;
             }
             D den = N.add(c[a].mul(lam));
-            D x = den.v > 0 ? nn[a].div(den) : D.c(0, n);
+            D x = den.v > 1e-12 * ntotD.v || (nn[a].v > 0 && den.v > 0) ? nn[a].div(den) : D.c(0, n);
             e.x[g][a] = x;
             D nl = s.kind == Species.Kind.NONE ? nn[a] : x.mul(N);
             e.ml[i] = nl.mul(s.molarMass);
@@ -516,7 +517,9 @@ final class MixFluid implements NodeFluid {
     }
 
     public void update(double[] mNew, double Unew) {
-        System.arraycopy(mNew, 0, m, 0, S);
+        // (masses under 1e-100 kg count as none: denormal traces, which Newton's iterates leave behind, overflow the
+        // split's reciprocals; the node's own masses, and so conservation, are untouched)
+        for (int i = 0; i < S; i++) m[i] = Math.abs(mNew[i]) < 1e-100 ? 0 : mNew[i];
         U = Unew;
         solve();
         if (DEBUG_NAN && !(Double.isFinite(st.p.v) && Double.isFinite(T))) throw new IllegalStateException("NaN state: m " + java.util.Arrays.toString(m) + " U " + U + " T " + T + " vg " + vg);
