@@ -13,7 +13,7 @@ import java.util.List;
  * comparison of its Lean limiter with this one.
  *
  * A line: V source C cells DOWN_PASSES UP_PASSES SLACK passes moves, then the cells' y0, each move's from, to,
- * component and amount, the cells' scales and the cells' results (doubles as 16 hex digits).
+ * component, amount and edge, the cells' scales and the cells' results (doubles as 16 hex digits).
  */
 final class LimiterTap implements Limiter.Tap, AutoCloseable {
     private final String source;
@@ -38,7 +38,7 @@ final class LimiterTap implements Limiter.Tap, AutoCloseable {
         for (double v : y0) if (!Double.isFinite(v)) broken = "y0 " + v;
         for (double[] mv : moves) {
             boolean ends = mv[0] >= -1 && mv[0] < n && mv[1] >= -1 && mv[1] < n && (mv[0] != mv[1] || mv[0] == -1);
-            if (!(ends && mv[2] >= 0 && mv[2] < C && mv[3] > 0 && Double.isFinite(mv[3]))) broken = "move " + java.util.Arrays.toString(mv);
+            if (!(ends && mv[2] >= 0 && mv[2] < C && mv[3] > 0 && Double.isFinite(mv[3]) && mv[4] >= -1)) broken = "move " + java.util.Arrays.toString(mv);
         }
         if (out == null) return;
         // a sample: the first of each kind, then now and then
@@ -49,7 +49,7 @@ final class LimiterTap implements Limiter.Tap, AutoCloseable {
             .append(Limiter.DOWN_PASSES).append(' ').append(Limiter.UP_PASSES).append(' ').append(hex(Limiter.SLACK)).append(' ')
             .append(passes).append(' ').append(moves.size());
         for (double v : y0) o.append(' ').append(hex(v));
-        for (double[] mv : moves) o.append(' ').append((int) mv[0]).append(' ').append((int) mv[1]).append(' ').append((int) mv[2]).append(' ').append(hex(mv[3]));
+        for (double[] mv : moves) o.append(' ').append((int) mv[0]).append(' ').append((int) mv[1]).append(' ').append((int) mv[2]).append(' ').append(hex(mv[3])).append(' ').append((int) mv[4]);
         for (double v : scale) o.append(' ').append(hex(v));
         for (double v : y) o.append(' ').append(hex(v));
         try {

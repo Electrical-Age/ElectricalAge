@@ -18,6 +18,8 @@ import java.util.concurrent.atomic.AtomicLongArray;
  *  - so after DOWN_PASSES of that, a node still over-sending sends nothing instead, again while any over-sends (each pass
  *    silences at least one more node, so this ends); then every scale is raised to what its node has at the scales so far,
  *    which keeps them feasible however often it is done.
+ * The energy an edge's flow carries is scaled with the masses on that edge (their mean scale, by mass), so a node that
+ * can't send the mass doesn't send its heat either. Heat conducted or supplied is never scaled.
  */
 final class Limiter {
     private Limiter() {
@@ -54,16 +56,26 @@ final class Limiter {
     /**
      * The contents after the transfers. Cells are node * C + component for the free nodes, the last component of each
      * the energy (never limited). y0: the contents at the step's start; moves: each {from node, to node (-1: a fixed
-     * node or outside), component, amount > 0}.
+     * node or outside), component, amount > 0, edge (-1: none)}. An energy move with an edge is the energy that edge's
+     * mass moves carry.
      */
     static double[] apply(int C, double[] y0, List<double[]> moves) {
         int[] passes = new int[1];
         double[] scale = scales(C, y0, moves, passes);
-        int S = C - 1;
+        int S = C - 1, G = 0;
+        for (double[] mv : moves) G = Math.max(G, (int) mv[4] + 1);
+        // each edge's masses as limited and in full
+        double[] sent = new double[G], asked = new double[G];
+        for (double[] mv : moves) {
+            int from = (int) mv[0], k = (int) mv[2], g = (int) mv[4];
+            if (g < 0 || k >= S) continue;
+            sent[g] += mv[3] * (from >= 0 ? scale[C * from + k] : 1);
+            asked[g] += mv[3];
+        }
         double[] y = y0.clone();
         for (double[] mv : moves) {
-            int from = (int) mv[0], to = (int) mv[1], k = (int) mv[2];
-            double amt = mv[3] * (from >= 0 && k < S ? scale[C * from + k] : 1);
+            int from = (int) mv[0], to = (int) mv[1], k = (int) mv[2], g = (int) mv[4];
+            double amt = k < S ? mv[3] * (from >= 0 ? scale[C * from + k] : 1) : mv[3] * (g >= 0 && asked[g] != 0 ? sent[g] / asked[g] : 1);
             if (from >= 0) y[C * from + k] -= amt;
             if (to >= 0) y[C * to + k] += amt;
         }

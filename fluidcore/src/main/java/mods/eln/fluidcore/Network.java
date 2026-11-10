@@ -591,18 +591,19 @@ public final class Network {
     void finish(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt) {
         int C = C(), S = C - 1;
         // each transfer: {from, to (indices into free, -1 for a fixed node or outside), component, amount moved over
-        // dt}; the heat supplied to each node first
+        // dt, edge (-1: not an edge's flow)}; the heat supplied to each node first
         List<double[]> moves = new ArrayList<>();
-        for (int i = 0; i < free.size(); i++) move(moves, -1, i, S, dt * free.get(i).heat);
+        for (int i = 0; i < free.size(); i++) move(moves, -1, i, S, dt * free.get(i).heat, -1);
         // (an edge's net flux of each component: its two streams' swap of one species cancels here rather than in the
         // limiter, where two nearly empty nodes swapping a trace each way kept cutting each other's sends without end)
-        for (Edge e : edges) {
+        for (int g = 0; g < edges.size(); g++) {
+            Edge e = edges.get(g);
             double[] f = flux(e, C);
             if (f == null) continue;
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
             int a = ia == null ? -1 : ia, b = ib == null ? -1 : ib;
-            f[S] += f[C];
-            for (int k = 0; k < C; k++) move(moves, a, b, k, dt * f[k]);
+            for (int k = 0; k < C; k++) move(moves, a, b, k, dt * f[k], g);
+            move(moves, a, b, S, dt * f[C], -1);
         }
         // the limiter: a node can't send more of a mass than it started with plus what it receives (Newton's tolerance
         // is relative to the node's whole contents, so a dry node's water could end 1e-10 of its air below zero);
@@ -611,9 +612,9 @@ public final class Network {
     }
 
     /** Adds the transfer of x of component k from a to b (the other way for x < 0, nothing for 0). */
-    private static void move(List<double[]> moves, int a, int b, int k, double x) {
-        if (x > 0) moves.add(new double[]{a, b, k, x});
-        else if (x < 0) moves.add(new double[]{b, a, k, -x});
+    private static void move(List<double[]> moves, int a, int b, int k, double x, int edge) {
+        if (x > 0) moves.add(new double[]{a, b, k, x, edge});
+        else if (x < 0) moves.add(new double[]{b, a, k, -x, edge});
     }
 
     /**
