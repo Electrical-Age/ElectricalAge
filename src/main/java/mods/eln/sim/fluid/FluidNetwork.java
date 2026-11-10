@@ -32,6 +32,14 @@ public final class FluidNetwork {
         CoreStep.of(this).step(this, dt);
     }
 
+    /**
+     * The longest stretch (s) this network went without progress since it was built: ticks in a row whose step covered
+     * under half the tick (Baughn 2026-11-10: over a quarter of a second is not workable, whatever the devices do).
+     */
+    public double longestStall() {
+        return core == null ? 0 : core.maxStall;
+    }
+
     /** Port band (fraction of a node's height) over which a port goes from drawing gas to drawing liquid. */
     static final double BAND = 0.1;
 

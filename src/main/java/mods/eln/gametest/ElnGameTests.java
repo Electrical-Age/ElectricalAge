@@ -167,10 +167,26 @@ public final class ElnGameTests {
                 ctx.check(c.id() + " measure", false, e.toString());
             }
             mods.eln.introspect.DescribeCheck.run(helper.getLevel(), helper.getBounds(), ctx::check);
+            stalls(helper, ctx);
             if (c.checkLimitCycles()) limitCycles(helper, ctx);   // (before the round trip: reloaded nodes start a fresh record)
             persistence(helper, ctx);
             ctx.finish();
         });
+    }
+
+    /** No fluid network of a device in the test's bounds went a quarter second without progress (Baughn 2026-11-10). */
+    static void stalls(GameTestHelper helper, GameTestContext ctx) {
+        net.minecraft.world.phys.AABB bounds = helper.getBounds();
+        java.util.Set<mods.eln.sim.fluid.FluidNetwork> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        for (var d : mods.eln.fluid.FluidWorld.devices())
+            for (var p : d.fluidPorts()) {
+                var b = net.minecraft.core.BlockPos.of(p.pos());
+                if (!bounds.contains(b.getX() + .5, b.getY() + .5, b.getZ() + .5)) continue;
+                var fn = mods.eln.fluid.FluidWorld.networkOf(p.node());
+                if (fn != null && seen.add(fn) && fn.longestStall() > 0.25)
+                    ctx.check("fluid: no network goes a quarter second without progress", false,
+                        d.getClass().getSimpleName() + " at " + b.toShortString() + String.format(": %.2f s", fn.longestStall()));
+            }
     }
 
     /**

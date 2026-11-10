@@ -245,8 +245,12 @@ final class CoreStep {
         }
     }
 
-    /** Time (s) a cut-short step left undone, carried into the next steps (at most a second's worth at once). */
+    /** Time (s) a cut-short step left undone, carried into the next steps (one tick's worth more per tick, OWED_MAX at most). */
     private double owed;
+    static final double OWED_MAX = 0.5;
+    /** The stretch (s) of ticks in a row now, and the longest since built, whose step covered under half the tick. */
+    double stall, maxStall;
+    private boolean stallDumped;
 
     void step(FluidNetwork fn, double dt) {
         // (at most one tick's worth caught up per tick: devices step their own processes by the tick, and a second of
@@ -328,9 +332,21 @@ final class CoreStep {
         // (a step cut short covered less than dt: the rest is owed, so heat put in over it isn't lost and the network
         // catches up; flows below are what moved this tick, per tick, so what devices book from them balances)
         owed += Math.max(0, dt - net.done);
-        dt = tick;
+        stall = net.done < 0.5 * tick ? stall + tick : 0;
+        maxStall = Math.max(maxStall, stall);
+        // (a network stalled for half a second is written out once more: its first failure is often a harmless one)
+        if (net.done == 0 && owed > OWED_MAX && !stallDumped) {
+            stallDumped = true;
+            dumped = false;
+        }
+        // (and what it owes is capped: a stall of seconds repaid at twice the rate gave turbines double power for as long,
+        // and oversped one. Time dropped moves nothing: heat links pass heat by the time stepped, so the books still
+        // balance)
+        owed = Math.min(owed, OWED_MAX);
+        // (written out with the step length asked for: a replay at the tick's length isn't the step that failed)
         if (net.stats.failures > failures) failed(dt, m0, u0, h0);
         else if (net.stats.cut > cut0 || net.stats.substeps - sub0 > 64) slow(dt, m0, u0, h0, net.stats.substeps - sub0);
+        dt = tick;
         boolean asleep = net.stats.slept > slept;
         // contents out
         for (int i = 0; i < cn.length; i++) {
