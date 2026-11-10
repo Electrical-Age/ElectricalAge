@@ -401,6 +401,8 @@ public final class Network {
     /** Counters for tests and measurements. */
     public static final class Stats {
         public long steps, iterations, substeps, failures, solves, stalls, slept;
+        /** Steps ended early (CUT_SHORT): their remaining time dropped. */
+        public long cut;
         /** The last failed solve's residual norms by iteration (tests). */
         public final List<Double> lastFail = new ArrayList<>();
         /** The last failed solve's scaled residual by row (tests). */
@@ -501,20 +503,34 @@ public final class Network {
         return z ^ (z >>> 31);
     }
 
-    private void substep(List<Node> free, double dt, int depth) {
+    private boolean substep(List<Node> free, double dt, int depth) {
         stats.substeps++;
         for (int half = 0; half < 2; half++) {
             double[] y = pack(free);
             if (!solve(free, y, dt / 2)) {
                 restore(free, y);
-                if (depth < MAX_DEPTH) substep(free, dt / 2, depth + 1);
-                else {
+                if (depth < MAX_DEPTH) {
+                    if (!substep(free, dt / 2, depth + 1)) return false;
+                } else if (CUT_SHORT) {
+                    // (the step ends at the last sub-step that converged: the rest of its time is dropped, so the network
+                    // runs slow for a moment rather than taking a best iterate that may be no physical state at all)
+                    stats.failures++;
+                    stats.cut++;
+                    return false;
+                } else {
                     stats.failures++;
                     solve(free, y, dt / 2);   // (its best iterate: still conservative)
                 }
             }
         }
+        return true;
     }
+
+    /**
+     * When a sub-step fails at the floor: end the step at the last sub-step that converged (true; the game) or take the
+     * failed one's best iterate and go on (false; conservative, but possibly far from a physical state).
+     */
+    public static boolean CUT_SHORT = false;
 
     /** Components per node: the species masses, then the energy (one count for the whole network). */
     private int C() {

@@ -31,9 +31,11 @@ final class CoreStep {
     private boolean dumped;
 
     static {
-        // (in a game tick, 32 sub-steps at most: past that a failing network would stall the server; its step ends at the
-        // best iterate, conservatively, and is counted and written out)
-        Network.MAX_DEPTH = 5;
+        // (a sub-step failing at 1/256 of the tick ends the network's step at its last converged sub-step, the rest of the
+        // tick's time dropped: a stiff moment, hot water flashing into a pipe stub, is crossed in small steps over a few
+        // ticks; a best iterate taken instead could be no physical state, and put back, the next tick failed the same way)
+        Network.MAX_DEPTH = 8;
+        Network.CUT_SHORT = true;
     }
 
     final Network net = new Network();
