@@ -143,7 +143,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
      * implicit step): its nozzle passes steam by the inlet and exhaust pressures, the governor's valve opening it, and
      * takes spec.eta x the isentropic drop a kg as work. Set before each step; the work it took drives the shaft after.
      */
-    FluidDevice.Link turbine;
+    public FluidDevice.Link turbine;
     /** Its exhaust vented to the air while nothing is piped to it. */
     FluidDevice.Vent exhaustVent;
     /** Work the shaft couldn't take last step (J), given back to the exhaust's steam as heat this step. */
@@ -185,7 +185,9 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         double open = Math.min(gate, controls.limit());
         // the governor-closed valve's leak is a share of rated flow that doesn't grow past rated inlet pressure (an LP fed
         // ten times its rating leaked 2 g/s through a shut governor and crept to its trip; AdventurAgent 2026-10-29)
-        turbine.open = tripped ? 0 : LEAK * Math.min(1, spec.nominalPa / Math.max(1, p)) + (1 - LEAK) * open;
+        // A throttle at 0 % is its stop valve, shut tight: no leak (Baughn 2026-11-10).
+        double limit = controls.limit();
+        turbine.open = tripped || limit <= 0 ? 0 : LEAK * Math.min(1, spec.nominalPa / Math.max(1, p)) + (1 - LEAK) * open;
         turbine.drop = Water.isentropicDrop(inlet.T(), inlet.pVapour(), exhaustPa());
         // nothing piped to the exhaust: it goes into the air
         exhaustPiped = false;

@@ -343,7 +343,8 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         if ((condenser == null) != (was == null)) needPublish();   // (the models join)
         aimNozzle();
         double open = Math.min(gate, controls.limit());   // (the governor within its controls' limit)
-        nozzle.open = LEAK * Math.min(1, P_REF / Math.max(1, inlet.P())) + (1 - LEAK) * open;
+        // (a throttle at 0 % is its stop valve, shut tight: no leak; Baughn 2026-11-10)
+        nozzle.open = controls.limit() <= 0 ? 0 : LEAK * Math.min(1, P_REF / Math.max(1, inlet.P())) + (1 - LEAK) * open;
         nozzle.drop = Water.isentropicDrop(inlet.T(), inlet.pVapour(), exhaustPa());
         if (exhaustVent != null) exhaustVent.open = condenser == null ? 1 : 0;
     }
