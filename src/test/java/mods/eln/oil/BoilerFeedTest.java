@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * stiff pipe 2 bar; open, it drained it a few Pa under again. Numbers from a trace of the live network (fluidtrace).
  */
 public class BoilerFeedTest {
-    @org.junit.jupiter.api.Disabled("the pump law (open and boost from last tick's back pressure) runs outside the solve and swings the stiff pipe; returns with the fluid core's PUMP component (end-state P1)")
     @Test
     void theFeedPipeHoldsOnePressure() {
         FluidNetwork net = new FluidNetwork();
@@ -32,16 +31,18 @@ public class BoilerFeedTest {
         FluidNode sink = net.add(new FluidNode(1, 144, 1, true).fill(0, 1e5, 400));
         CondensatePump curve = CondensatePump.forTurbine(10e5, 3.7e-3);
         double speed = 0.76;
-        FluidEdge pump = net.connect(vessel, 0, pipe, 0.727, curve.freeKgPerS / curve.shutoffPa * Water.MU_L / Water.RHO_L).kind(FluidEdge.Kind.CHECK);
+        // (the pump is its curve inside the fluid core's solve: Network.Kind.PUMP; its law set from the last tick's
+        // back-pressure, outside the solve, swung the stiff pipe 12..15 bar)
+        FluidEdge pump = net.connect(vessel, 0, pipe, 0.727, 0).kind(FluidEdge.Kind.PUMP);
+        pump.qMax = curve.freeKgPerS;
+        pump.h0 = curve.shutoffPa;
+        pump.speed = speed;
         FluidEdge feed = net.connect(pipe, 0.873, boiler, 0.3, 9.908e-12).kind(FluidEdge.Kind.CHECK);
         // (the turbine's draw: steam off the boiler's top into a fixed exhaust, ~4 g/s at 11 bar)
         net.connect(boiler, 1, sink, 0, 1.07e-14);
         double lo = Double.MAX_VALUE, hi = -Double.MAX_VALUE, fed = 0, pumped = 0;
         int steps = 4000, last = 400;
         for (int t = 0; t < steps; t++) {
-            double back = pipe.pressureAt(0.727) - vessel.pressureAt(0);
-            pump.open = speed * curve.lineShare(back);
-            pump.boost = curve.boost(back);
             boiler.heat = 10.6e3;
             net.step(0.05);
             if (t >= steps - last) {

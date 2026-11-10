@@ -6,7 +6,7 @@ package mods.eln.sim.fluid;
  * the port is below that node's liquid level, else its gas (vapour and air in proportion).
  */
 public final class FluidEdge {
-    public enum Kind { PIPE, CHECK, TURBINE }
+    public enum Kind { PIPE, CHECK, TURBINE, PUMP }
 
     public final FluidNode a, b;
     /** Port heights on a and b (fractions of each node's height). */
@@ -33,6 +33,12 @@ public final class FluidEdge {
     /** A pump's head (Pa), pushing a -> b: added to the drive (a pump: its shutoff pressure above its sump). */
     public double boost;
     public Kind kind = Kind.PIPE;
+    /**
+     * PUMP: a centrifugal pump a -> b in the fluid core's solve (its flow speed qMax sqrt(1 - dp / h0) against the
+     * back-pressure dp; Network.Kind.PUMP): free flow qMax (kg/s), shut-off head h0 (Pa), speed (0..), efficiency; and the
+     * power it put into the fluid last step (W).
+     */
+    public double qMax, h0, speed = 1, eta = 0.7, work;
     /** TURBINE: electric power made this step (W), at EFFICIENCY of the steam's heat above liquid at 100 C. */
     public double power;
     public static final double TURBINE_EFFICIENCY = 0.40;

@@ -139,7 +139,7 @@ public final class Network {
         }
     }
 
-    public enum Kind { PIPE, CHECK }
+    public enum Kind { PIPE, CHECK, PUMP }
 
     public static final class Edge {
         public final Node a, b;
@@ -159,6 +159,14 @@ public final class Network {
         /** With FREEZE_HEAD: the densities each stream's head is weighed by, taken at the step's start (NaN: live). */
         double rhoA = Double.NaN, rhoB = Double.NaN;
         public Kind kind = Kind.PIPE;
+        /**
+         * PUMP: a centrifugal pump from a to b. qMax (kg/s at full speed against no head), h0 its shut-off head (Pa), speed
+         * (0..1: scales the flow, the shut-off head stays, as the game's pumps), eta its efficiency. Its flow against the
+         * back-pressure dp (b's port over a's, its own head included) is speed qMax sqrt(1 - dp / h0), smoothed over
+         * PUMP_W of h0 at the shut-off so its slope stays finite (Network.pumpStreams); the work it does on the fluid,
+         * q dp / (rho eta), goes into b as power. work: that power over the last step (W).
+         */
+        public double qMax, h0, speed = 1, eta = 0.7, work;
         /**
          * Counter-current exchange (m^3 s / kg, 0 for none): where a's port is at its floor and b's at its ceiling (a over
          * b), liquid at a's port and gas at b's swap places, equal volumes Q = exchange x (rho_liquid - rho_gas) g x
@@ -283,7 +291,7 @@ public final class Network {
 
     /** The edge's mass flow at the current states. */
     static double flow(Edge e) {
-        if (e.kind == Kind.CHECK || !e.plain()) {
+        if (e.kind != Kind.PIPE || !e.plain()) {
             double[] q = streams(e);
             return q[0] - q[1];
         }
@@ -306,6 +314,7 @@ public final class Network {
     /** The two streams {q+ from a, q- from b} and their slopes in dp. */
     static double[] streams(Edge e) {
         double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
+        if (e.kind == Kind.PUMP) return pumpStreams(e, dp);
         if (!e.plain()) return headStreams(e, dp);
         // (a check valve: the forward stream alone; a hard max(0, dp) put a kink where a valve sits balanced, and Newton
         // stalled on it in the game's networks: openings and pumps at rest)
@@ -345,6 +354,48 @@ public final class Network {
         if (e.kind == Kind.CHECK) return new double[]{qp, 0, dqp, 0};
         double xm = -(dp + hb) / SPLIT_DP;
         return new double[]{qp, gb * SPLIT_DP * spc(xm), dqp, -gb * sgc(xm)};
+    }
+
+    /** The pump's smoothing at the shut-off (share of h0). */
+    public static double PUMP_W = 0.002;
+
+    /** A pump's forward drive: dp plus the head of what it draws over the height it lifts (negative: it pumps uphill). */
+    static double pumpDrive(Edge e, double dp) {
+        return dp + (e.dz == 0 ? 0 : G * e.dz * (Double.isNaN(e.rhoA) ? rhoDraw(e.a, e.fa) : e.rhoA));
+    }
+
+    /**
+     * A pump's stream {q, 0, dq / d(drive), 0}: speed qMax sqrt(sp(1 + drive / h0)), sp a softplus w = PUMP_W wide (a
+     * finite slope at the shut-off), gated off past the shut-off head over SPLIT_DP as a check valve is: the curve's
+     * own tail, h0 w wide, kept a trickle going that pumped a closed liquid-full vessel to 1.2 times the shut-off head
+     * and crept a stalled pump's full pipe up for ever.
+     */
+    static double[] pumpStreams(Edge e, double dp) {
+        if (e.qMax <= 0 || e.h0 <= 0 || e.speed <= 0) return new double[4];
+        double arg = pumpDrive(e, dp), w = PUMP_W, u = (1 + arg / e.h0) / w;
+        double sp = w * spc(u);
+        // (far past its shut-off the softplus underflows to nothing, and so does the flow; its slope 0 / 0 was NaN)
+        if (!(sp > 0)) return new double[4];
+        double phi = Math.sqrt(sp), dphi = sgc(u) / (2 * phi);
+        // (and shut past the shut-off head as a check valve shuts, over SPLIT_DP: the curve's own tail, h0 PUMP_W wide,
+        // crept a stalled pump's full pipe up for ever)
+        double x = (e.h0 + arg) / SPLIT_DP, gate = sgc(x), dgate = gate * sgc(-x) / SPLIT_DP;
+        double q = e.speed * e.qMax * phi * gate, dq = e.speed * e.qMax * (dphi / e.h0 * gate + phi * dgate);
+        return new double[]{q, 0, dq, 0};
+    }
+
+    /**
+     * The power a pump puts into the fluid (W) at its current states, and its slope in the drive: q P / (rho eta), P the
+     * pressure it lifts by (a softplus of -drive, SPLIT_DP wide: nothing where the flow runs downhill on its own).
+     */
+    static double[] pumpWork(Edge e) {
+        if (e.kind != Kind.PUMP) return null;
+        double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost, arg = pumpDrive(e, dp);
+        double[] qs = pumpStreams(e, dp);
+        double rho = Double.isNaN(e.rhoA) ? rhoDraw(e.a, e.fa) : e.rhoA;
+        if (qs[0] == 0 || rho <= 0) return new double[2];
+        double S = SPLIT_DP, x = -arg / S, P = S * spc(x), dP = -sgc(x), k = 1 / (rho * e.eta);
+        return new double[]{qs[0] * P * k, (qs[2] * P + qs[0] * dP) * k};
     }
 
     /** softplus and its slope, cut 30 either side as the streams are. */
@@ -448,7 +499,7 @@ public final class Network {
         double[] y0 = pack(free);
         done = 0;
         for (Edge e : edges) {
-            boolean f = FREEZE_HEAD && e.dz != 0;
+            boolean f = FREEZE_HEAD && (e.dz != 0 || e.kind == Kind.PUMP);
             e.rhoA = f ? rhoDraw(e.a, e.fa) : Double.NaN;
             e.rhoB = f ? rhoDraw(e.b, e.fb) : Double.NaN;
         }
@@ -460,7 +511,11 @@ public final class Network {
             restore(free, y0);
             substep(free, dt, 1);
         }
-        for (Edge e : edges) e.flow = flow(e);
+        for (Edge e : edges) {
+            e.flow = flow(e);
+            double[] w = pumpWork(e);
+            e.work = w == null ? 0 : w[0];
+        }
         quiet = isQuiet(free, y0, pack(free)) ? quiet + 1 : 0;
         if (SLEEP_STEPS > 0 && quiet >= SLEEP_STEPS) {
             asleep = true;
@@ -654,6 +709,11 @@ public final class Network {
                 if (ib != null) r[C * ib + k] -= dt * f[k];
             }
         }
+        for (Edge e : edges) {
+            double[] w = pumpWork(e);
+            Integer ib = w == null ? null : idx.get(e.b);
+            if (ib != null) r[C * ib + S] -= dt * w[0];
+        }
         return r;
     }
 
@@ -711,6 +771,20 @@ public final class Network {
                         if (ib != null) J.add(C * ib + k, C * col + j2, -dt * dF);
                     }
                 }
+            }
+        }
+        // a pump's work into its outlet: dW = dW/d(drive) (dPa - dPb)
+        for (Edge e : edges) {
+            double[] w = pumpWork(e);
+            Integer ib = w == null ? null : idx.get(e.b);
+            if (ib == null) continue;
+            Integer ia = idx.get(e.a);
+            for (int side = 0; side < 2; side++) {
+                Integer col = side == 0 ? ia : ib;
+                if (col == null) continue;
+                double[] dpx = side == 0 ? e.a.fluid.portPSlope(e.fa) : e.b.fluid.portPSlope(e.fb);
+                double sign = side == 0 ? 1 : -1;
+                for (int j = 0; j < C; j++) J.add(C * ib + S, C * col + j, -dt * w[1] * sign * dpx[j]);
             }
         }
         // heat conduction: H = C wa wb (Ta - Tb), through each node's temperature slope and its contents
@@ -826,6 +900,12 @@ public final class Network {
         // dt, edge (-1: not an edge's flow)}; the heat supplied to each node first
         List<double[]> moves = new ArrayList<>();
         for (int i = 0; i < free.size(); i++) move(moves, -1, i, S, dt * free.get(i).heat, -1);
+        // (a pump's work comes from outside, into its outlet)
+        for (Edge e : edges) {
+            double[] w = pumpWork(e);
+            Integer ib = w == null ? null : idx.get(e.b);
+            if (ib != null) move(moves, -1, ib, S, dt * w[0], -1);
+        }
         // (an edge's net flux of each component: its two streams' swap of one species cancels here rather than in the
         // limiter, where two nearly empty nodes swapping a trace each way kept cutting each other's sends without end)
         for (int g = 0; g < edges.size(); g++) {

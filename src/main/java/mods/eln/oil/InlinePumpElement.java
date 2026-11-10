@@ -88,8 +88,9 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
         gasBound = gas;
         steamBound = gas && in.pVapour() > 0.5 * in.P();   // (the gas is its own vapour: Jade calls it cavitation)
         cavitating = share > 0.05 && (gas || cavitates(in));
-        pump.open = cavitating ? 0.05 * share : share;
-        pump.boost = cavitating ? 0.02 * InlinePumpDescriptor.HEAD_PA * share * share : InlinePumpDescriptor.HEAD_PA * share * share;
+        // (the affinity laws: flow with the speed, head with its square; cavitating, a vapour lock passes next to nothing)
+        pump.speed = cavitating ? 0.05 * share : share;
+        pump.h0 = Math.max(1, (cavitating ? 0.02 : 1) * InlinePumpDescriptor.HEAD_PA * share * share);
         // (gas-bound: its casing vent passes the gas at the top on, so the water behind it comes in: it primes itself)
         purge.open = gas ? share : 0;
         purge.boost = 0.02 * InlinePumpDescriptor.HEAD_PA * share * share;
@@ -109,8 +110,9 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
             needPublish();
         }
         // the power for what it moved (hydraulic / efficiency), plus its idling, at its speed
-        double hydraulic = kg / Water.RHO_L * pump.boost;
-        wantW = share <= 0.01 ? 0 : Math.min(1.2 * InlinePumpDescriptor.NOMINAL_P, hydraulic / InlinePumpDescriptor.EFFICIENCY + InlinePumpDescriptor.IDLE_W * share);
+        // (the core's pump put that power into the fluid: the hydraulic power over its efficiency)
+        double shaft = pump.edge == null ? 0 : Math.max(0, pump.edge.work);
+        wantW = share <= 0.01 ? 0 : Math.min(1.2 * InlinePumpDescriptor.NOMINAL_P, shaft + InlinePumpDescriptor.IDLE_W * share);
         double u = load.getU();
         resistor.setR(wantW > 1 && u > 1 ? u * u / wantW : 1e9);
         if (cavitating && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 8 == 0)
@@ -162,11 +164,12 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
         var c = node.coordonate;
         inlet = node(loadedIn);
         outlet = node(loadedOut);
-        // g = rho k / mu: its rated flow with no head against it, none at the shutoff
-        pump = new Link(inlet, 0, outlet, 0, InlinePumpDescriptor.RATED_KG_PER_S / InlinePumpDescriptor.HEAD_PA * Water.MU_L / Water.RHO_L)
+        // (a centrifugal pump in the fluid core's solve: its rated flow with no head against it, none at the shut-off)
+        pump = new Link(inlet, 0, outlet, 0, PORT_K).pump(InlinePumpDescriptor.RATED_KG_PER_S, InlinePumpDescriptor.HEAD_PA);
+        pump.eta = InlinePumpDescriptor.EFFICIENCY;
+        pump.speed = 0;
+        purge = new Link(inlet, 1.0, outlet, 0.5, InlinePumpDescriptor.RATED_KG_PER_S / InlinePumpDescriptor.HEAD_PA * Water.MU_L / Water.RHO_L)
             .kind(FluidEdge.Kind.CHECK);
-        pump.open = 0;
-        purge = new Link(inlet, 1.0, outlet, 0.5, pump.k).kind(FluidEdge.Kind.CHECK);
         purge.open = 0;
         makePorts();
         connect();

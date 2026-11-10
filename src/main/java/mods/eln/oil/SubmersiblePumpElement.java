@@ -93,8 +93,7 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
     @Override
     public void beforeFluidStep(double dt) {
         if (pumpEdge == null) return;
-        pumpEdge.open = submerged ? Math.min(1.2, motor.getP() / desc.nominalP) : 0;
-        pumpEdge.boost = desc.shutoffPa - Water.P_ATM;
+        pumpEdge.speed = submerged ? Math.min(1.2, motor.getP() / desc.nominalP) : 0;
     }
 
     @Override
@@ -164,12 +163,11 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
         outlet.lumpable = true;   // (it merges into the pipe on its flange)
         outlet.resistance = 1 / PORT_K;
         sump = FluidNode.sump(c.y, mods.eln.sim.Ambient.kelvin(c));
-        // g = rho k / mu = nominal flow / shutoff head (kg/s/Pa): the nominal flow against 1 atm, none at the shutoff
+        // (a centrifugal pump in the fluid core's solve: its nominal flow against 1 atm, none at the shut-off pressure)
         double dp = desc.shutoffPa - Water.P_ATM;
         double kgPerS = desc.nominalMbPerS * EaUnits.KG_PER_MB_WATER;
-        pumpEdge = new FluidDevice.Link(sump, 0, outlet, 0, kgPerS / dp * Water.MU_L / Water.RHO_L).kind(mods.eln.sim.fluid.FluidEdge.Kind.CHECK);
-        pumpEdge.boost = dp;
-        pumpEdge.open = 0;
+        pumpEdge = new FluidDevice.Link(sump, 0, outlet, 0, PORT_K).pump(kgPerS, dp);
+        pumpEdge.speed = 0;
         ports = List.of(new FluidPort(outlet, c.pos().asLong(), 1, 0.0, PORT_K));   // the flange on top
         connect();
     }

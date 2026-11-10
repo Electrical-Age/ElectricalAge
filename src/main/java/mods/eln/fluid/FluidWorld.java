@@ -132,6 +132,9 @@ public final class FluidWorld implements IProcess {
         for (FluidDevice.Link l : links) {
             l.edge.open = l.open;
             l.edge.boost = l.boost;
+            l.edge.speed = l.speed;
+            l.edge.qMax = l.qMax;
+            l.edge.h0 = l.h0;
         }
         for (FluidNetwork n : networks) n.step(time);
         if (traceSteps > 0 && traceNode != null) trace();
@@ -415,6 +418,10 @@ public final class FluidWorld implements IProcess {
             l.edge.area = l.area;
             l.edge.open = l.open;
             l.edge.boost = l.boost;
+            l.edge.qMax = l.qMax;
+            l.edge.h0 = l.h0;
+            l.edge.speed = l.speed;
+            l.edge.eta = l.eta;
             links.add(l);
         }
         Map<FluidNetwork, FluidNode> air = new IdentityHashMap<>();

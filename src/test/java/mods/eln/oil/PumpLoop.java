@@ -27,7 +27,11 @@ final class PumpLoop {
         for (int i = 0; i < pipes; i++)
             p[i] = net.add(new FluidNode(pipeVolume, 0, 0.25, false).fill(pipeVolume * 0.95 * Water.RHO_L, Math.min(boilerPa, curve.shutoffPa), 320));
         FluidNode boiler = net.add(new FluidNode(1, 0, 1, true).fill(500, boilerPa, 400));
-        FluidEdge pump = net.connect(vessel, 0, p[0], 0, curve.freeKgPerS / curve.shutoffPa * Water.MU_L / Water.RHO_L).kind(FluidEdge.Kind.CHECK);
+        // (the pump is its curve inside the fluid core's solve: Network.Kind.PUMP)
+        FluidEdge pump = net.connect(vessel, 0, p[0], 0, 0).kind(FluidEdge.Kind.PUMP);
+        pump.qMax = curve.freeKgPerS;
+        pump.h0 = curve.shutoffPa;
+        pump.speed = speed;
         for (int i = 0; i + 1 < pipes; i++) net.connect(p[i], 0.5, p[i + 1], 0.5, pipeK);
         FluidEdge feed = net.connect(p[pipes - 1], 0.5, boiler, 0, pipeK).kind(FluidEdge.Kind.CHECK);
         double lo = 0, hi = 0, qp = 0, qf = 0, back = 0;
@@ -41,8 +45,6 @@ final class PumpLoop {
             for (int c = 0; c < CHUNK; c++, t++) {
                 // the back-pressure as CondenserVessel.backPressure reads it: outlet over the vessel's bottom port, no fall
                 back = p[0].pressureAt(0) - vessel.pressureAt(0);
-                pump.open = speed * curve.lineShare(back);
-                pump.boost = curve.boost(back);
                 net.step(0.05);
                 lo = Math.min(lo, p[0].P());
                 hi = Math.max(hi, p[0].P());
@@ -53,7 +55,11 @@ final class PumpLoop {
             double moved = 0;
             for (int i = 0; i < pipes; i++) moved = Math.max(moved, Math.abs(mean[i] - last[i]));
             last = mean;
-            if (moved < 1) break;
+            // (to 1 Pa or 1e-5 of the pressure: the pump's work warms the water it holds in a full pipe for hours, a few Pa
+            // a chunk, as a real one does)
+            double top = 0;
+            for (double m : mean) top = Math.max(top, m);
+            if (moved < Math.max(1, 1e-5 * top)) break;
         }
         return new Result(lo, hi, qp, qf, back, t);
     }

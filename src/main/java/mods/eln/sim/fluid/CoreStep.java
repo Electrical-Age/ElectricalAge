@@ -98,7 +98,8 @@ final class CoreStep {
                 ceTop[k] = net.connect(a, Math.min(1, fa + e.spanA / 2), b, fb, 0);
             } else {
                 ce[k] = net.connect(a, fa, b, fb, 0);
-                if (e.oneWay()) ce[k].kind = Network.Kind.CHECK;
+                if (e.kind == FluidEdge.Kind.PUMP) ce[k].kind = Network.Kind.PUMP;
+                else if (e.oneWay()) ce[k].kind = Network.Kind.CHECK;
             }
         }
     }
@@ -288,6 +289,14 @@ final class CoreStep {
                 }
                 continue;
             }
+            if (e.kind == FluidEdge.Kind.PUMP) {
+                // (a pump is its curve in the core's solve: the device sets its speed; open scales it too)
+                c.qMax = e.qMax;
+                c.h0 = e.h0;
+                c.eta = e.eta;
+                c.speed = e.speed * open;
+                continue;
+            }
             c.g = conductance(e, pa, dp + pa.rhoHead * Network.G * dz, open);
             c.gBack = e.oneWay() ? Double.NaN : conductance(e, pb, dp + pb.rhoHead * Network.G * dz, open);
         }
@@ -338,6 +347,7 @@ final class CoreStep {
                 mv = both;
             }
             e.flow = e.fLiquid = e.fVapour = e.fAir = e.fEnthalpy = 0;
+            e.work = c == null ? 0 : c.work;
             if (e.fSpecies != null) java.util.Arrays.fill(e.fSpecies, 0);
             if (mv == null) continue;
             int S = mv.length - 1;

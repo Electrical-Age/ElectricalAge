@@ -249,7 +249,9 @@ public final class PlumbingCases {
                 // balance them; with gas able to come back through a pipe's opening, ~0.04 kg reaches B, the rest fills
                 // the lines. One stream per edge let 0.2 kg over against 1.1 bar, more than the pump can make.)
                 ctx.check("pump: cold water goes from A to B", moved > 0.025, String.format("%.3f kg", moved));
-                ctx.check("pump: it draws power doing it", maxW > 50, String.format("%.0f W", maxW));
+                // (more than its idling: the pump puts its real hydraulic power into the water, over its efficiency, a few W
+                // against these low heads; the old law charged the full shut-off head on whatever moved)
+                ctx.check("pump: it draws power doing it", maxW > mods.eln.oil.InlinePumpDescriptor.IDLE_W + 1, String.format("%.0f W", maxW));
                 ctx.check("pump: it primed itself (passed the line's air on) and then pumped water", p.totalKg > 0.05, String.format("%.3f kg", p.totalKg));
                 ctx.check("pump: Jade calls air at its inlet priming", airJade.contains("priming"), airJade);
             } else {

@@ -12,7 +12,7 @@ import java.util.Locale;
  * species wa                                   (water and air, the fast path) or, per species:
  * species KEY GROUP KIND rho cpL cpV M tb lb
  * node V z H fixed U heat m0 m1 ...
- * edge a b fa fb g kind boost exchange conductance [gBack]
+ * edge a b fa fb g kind boost exchange conductance [gBack [qMax h0 speed eta]]
  * </pre>
  */
 public final class NetworkDump {
@@ -38,7 +38,8 @@ public final class NetworkDump {
         for (Network.Edge e : net.edges)
             s.append("edge ").append(idx.get(e.a)).append(' ').append(idx.get(e.b)).append(' ').append(h(e.fa)).append(' ').append(h(e.fb))
                 .append(' ').append(h(e.g)).append(' ').append(e.kind).append(' ').append(h(e.boost)).append(' ').append(h(e.exchange))
-                .append(' ').append(h(e.conductance)).append(' ').append(h(e.gBack)).append('\n');
+                .append(' ').append(h(e.conductance)).append(' ').append(h(e.gBack)).append(' ').append(h(e.qMax)).append(' ').append(h(e.h0))
+                .append(' ').append(h(e.speed)).append(' ').append(h(e.eta)).append('\n');
         return s.toString();
     }
 
@@ -81,6 +82,12 @@ public final class NetworkDump {
                     e.exchange = d(w[8]);
                     e.conductance = d(w[9]);
                     if (w.length > 10) e.gBack = d(w[10]);
+                    if (w.length > 14) {
+                        e.qMax = d(w[11]);
+                        e.h0 = d(w[12]);
+                        e.speed = d(w[13]);
+                        e.eta = d(w[14]);
+                    }
                 }
                 default -> {
                 }

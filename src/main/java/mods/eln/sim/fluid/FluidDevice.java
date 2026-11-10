@@ -47,6 +47,17 @@ public interface FluidDevice {
             return this;
         }
 
+        /** PUMP: its curve (FluidEdge.qMax, h0, eta); the device sets speed before each step. */
+        public double qMax, h0, speed = 1, eta = 0.7;
+
+        /** This link as a centrifugal pump: free flow qMax (kg/s at full speed), shut-off head h0 (Pa). */
+        public Link pump(double qMax, double h0) {
+            this.kind = FluidEdge.Kind.PUMP;
+            this.qMax = qMax;
+            this.h0 = h0;
+            return this;
+        }
+
         /** A valve's flow area fully open (m^2): it then meters by the orifice law (FluidEdge.area). */
         public double area;
 
