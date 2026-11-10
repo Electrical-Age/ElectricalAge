@@ -1193,6 +1193,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     @Override
     public void beforeFluidStep(double dt) {
         syncAdapters();
+        // pipe walls
+        double ambient = mods.eln.sim.Ambient.kelvin(coordonate);
+        for (VoxelPart p : parts) if (p instanceof PipePart pipe) pipe.wallBefore(ambient);
         // valves: as far open as they are (a control valve by its signal, a throttle valve by its setting)
         if (valveLinks != null)
             for (var e : valveLinks.entrySet()) {
@@ -1238,6 +1241,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public void afterFluidStep(double dt) {
         boolean changed = false;
         var level = coordonate.world();
+        double ambient = mods.eln.sim.Ambient.kelvin(coordonate);
+        for (VoxelPart p : parts) if (p instanceof PipePart pipe) pipe.wallAfter(ambient, dt);
         for (VoxelPart p : parts) {
             if (!(p instanceof PipePart pipe) || pipe.burst || pipe.fluid == null) continue;
             double P = pipe.fluid.P(), T = pipe.fluid.T();

@@ -1375,8 +1375,8 @@ public final class OilCases {
     /**
      * A condenser pulling a vacuum with a dry dead-end pipe stub on its makeup flange and its float valve open: the stub's
      * air drains into the vessel, cooling as it expands (a node drained like this once fell under the EOS's 120 K floor
-     * and its network stopped converging). The harness checks the network keeps making progress. The stub still ends
-     * at the 120 K floor: nothing warms a pipe's gas (todo #370).
+     * and its network stopped converging). The harness checks the network keeps making progress, and the pipe's wall
+     * (its heat link to the air) keeps the gas near the air's temperature.
      */
     static final class CondenserDryMakeupStub implements TestCase {
         mods.eln.oil.CondenserElement c;
@@ -1417,6 +1417,8 @@ public final class OilCases {
                 + (n == null ? "none" : String.format("%.4f bar, %.0f K, %.3g kg", n.P() / 1e5, n.T(), n.mass())));
             ctx.check("condenser: it pulls a vacuum with the stub on (under 0.2 bar)", c != null && c.vessel.P() < 0.2e5,
                 c == null ? "none" : String.format("%.3f bar", c.vessel.P() / 1e5));
+            ctx.check("condenser: the stub's wall keeps its air near the air's temperature (over 250 K)", n != null && n.T() > 250,
+                n == null ? "none" : String.format("%.0f K", n.T()));
         }
     }
 

@@ -41,6 +41,18 @@ public final class PipePart extends VoxelPart {
     /** What saves before 2026-10-25 had (no "v" key): read scales their contents to the new volume. */
     static final double[] OLD_VOLUME_PER_BLOCK = {0.00015, 0.00015 * 2.25, 0.00015 * 2.25 * LARGE_D * LARGE_D};
     public static final double[] K_PER_BLOCK = {3e-11, 3e-11 * 2.25, 3e-11 * 2.25 * Math.pow(LARGE_D, 2.5)};
+    /**
+     * Its wall (Baughn 2026-11-10: pipes have walls): iron with its heat capacity (J/K a block: a small pipe's 0.4 kg a
+     * metre, by its bore for the others), a heat link to the gas
+     * or liquid inside (W/K a block, inside the fluid core's step) and one to the air (W/K a block, bare iron in still air,
+     * about 10 W/m^2K over its outside). Gas expanding into a vacuum warms back from the iron instead of falling to the
+     * EOS's floor; a hot line loses a little heat to the air, slowly, as its iron cools.
+     */
+    public static final double[] WALL_C_PER_BLOCK = {180, 180 * 1.5, 180 * 1.5 * LARGE_D},
+        WALL_IN_UA_PER_BLOCK = {2, 2 * 1.5, 2 * 1.5 * LARGE_D},
+        WALL_UA_PER_BLOCK = {0.25, 0.25 * 1.5, 0.25 * 1.5 * LARGE_D};
+    /** Its wall's temperature (K; NaN: not set yet, the air's). Not saved: a reloaded wall starts at its contents'. */
+    public double wallTemp = Double.NaN;
     public static final String[] TIER_NAME = {"iron", "alloy", "large alloy"};
     /** A device port made to take a large alloy pipe (m^3): its end's conductance (LP turbine, condenser, tanks). */
     public static final double LARGE_END_K = 2 * K_PER_BLOCK[2] * 16;
@@ -152,6 +164,21 @@ public final class PipePart extends VoxelPart {
         if (src == null) return;
         fluid.setShareOf(src, share);
         fluid.update();
+    }
+
+    /** Its wall's link to its contents for the next fluid step (VoxelNode.beforeFluidStep). */
+    void wallBefore(double ambientK) {
+        if (fluid == null) return;
+        if (Double.isNaN(wallTemp)) wallTemp = fluid.mass() > 0 ? fluid.T() : ambientK;
+        fluid.wallUA = WALL_IN_UA_PER_BLOCK[tier] * length() / 16.0;
+        fluid.wallT = wallTemp;
+    }
+
+    /** After a fluid step of dt: the iron gives what passed to its contents (fluid.wallJ) and trades with the air. */
+    void wallAfter(double ambientK, double dt) {
+        if (fluid == null || Double.isNaN(wallTemp)) return;
+        double blocks = length() / 16.0, c = WALL_C_PER_BLOCK[tier] * blocks;
+        wallTemp += (-fluid.wallJ - WALL_UA_PER_BLOCK[tier] * blocks * (wallTemp - ambientK) * dt) / c;
     }
 
     void makeNode(int blockY, double T, double[] saved) {

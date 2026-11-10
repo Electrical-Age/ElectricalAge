@@ -269,6 +269,8 @@ public final class PlumbingCases {
             double T = boiling ? Water.TB : Water.T_AMBIENT;
             fill(a.vessel, 0.8 * a.vessel.volume * Water.RHO_L, Water.P_ATM, T);
             bWater0 = b.vessel.mLiquid();
+            // (a line in service: its iron at the water's temperature; cold, it subcooled the boiling water)
+            for (BlockPos q : new BlockPos[]{pa.south(), pp.south()}) PipeCases.warm(ctx, q, T);
             Eln.simulator.addSlowProcess(watch = dt -> {
                 sawCavitate |= boiling ? p.cavitating : p.cavitating && !p.gasBound;
                 maxW = Math.max(maxW, p.wantW);
@@ -340,6 +342,8 @@ public final class PlumbingCases {
             v.flow = 1;   // (toward +x: A to B)
             double T = Water.tsat(10e5);
             fill(a.vessel, 0.3 * a.vessel.volume * Water.RHO_L, 10e5, T);
+            // (a line in service: its iron at the steam's temperature; cold, it condensed A's steam and cooled A)
+            PipeCases.warm(ctx, pv, T);
         }
 
         public void measure(TestContext ctx) {

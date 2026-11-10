@@ -143,6 +143,16 @@ public final class FluidWorld implements IProcess {
         // crashed on a ConcurrentModificationException when a steam turbine's casing burst; the ones gone are skipped)
         List<FluidDevice> stepping = new ArrayList<>(devices);
         for (FluidDevice d : stepping) if (devices.contains(d)) d.beforeFluidStep(time);
+        // a run's wall: its pieces' heat links summed, at their mean wall temperature
+        for (var e : lumps.entrySet()) {
+            double ua = 0, uat = 0;
+            for (FluidNode m : e.getValue()) {
+                ua += m.wallUA;
+                uat += m.wallUA * m.wallT;
+            }
+            e.getKey().wallUA = ua;
+            e.getKey().wallT = ua > 0 ? uat / ua : 0;
+        }
         for (FluidDevice.Vent v : vents) v.edge.open = v.open;
         for (FluidDevice.Link l : links) {
             l.edge.open = l.open;
@@ -301,6 +311,8 @@ public final class FluidWorld implements IProcess {
             for (FluidNode m : e.getValue()) {
                 m.setShareOf(lump, m.volume / lump.volume);
                 m.update();
+                // (the heat through the run's walls, back to each piece's wall by its share of the link)
+                m.wallJ = lump.wallUA > 0 ? lump.wallJ * m.wallUA / lump.wallUA : 0;
             }
         }
     }

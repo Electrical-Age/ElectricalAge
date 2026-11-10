@@ -367,7 +367,8 @@ final class CoreStep {
                 for (int j = 2; j < ids.length; j++) n.extra[ids[j] - 2] = c.m[j];
             }
             n.energy = c.U;
-            n.wallJ = c.wallJ;
+            // (asleep, the core kept the last step's heat, but nothing passed: the state stood still)
+            n.wallJ = asleep ? 0 : c.wallJ;
             n.update();
         }
         // what each edge carried

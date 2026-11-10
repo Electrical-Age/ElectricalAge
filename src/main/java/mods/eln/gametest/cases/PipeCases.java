@@ -57,6 +57,12 @@ public final class PipeCases {
         return ctx.level().getBlockEntity(p) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n ? n : null;
     }
 
+    /** The walls of every pipe at p at T (K): a line that has been in service. */
+    static void warm(TestContext ctx, BlockPos p, double T) {
+        VoxelNode n = node(ctx, p);
+        if (n != null) for (var part : n.parts) if (part instanceof PipePart pipe) pipe.wallTemp = T;
+    }
+
     static void lay(TestContext ctx, BlockPos p, int tier, int... pts) {
         String err = PipeKitItem.place(ctx.level(), p, new PipePart(tier, pts), null);
         if (err != null) throw new IllegalStateException("pipe at " + p + ": " + err);
