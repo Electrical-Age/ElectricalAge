@@ -461,6 +461,17 @@ In the port:
 - Two devices on adjacent faces of one block shared heat only on some corners: `SixNode.tryConnectTwoInternalElement`
   paired the wrong thermal loads (1.12). Test: `six_node_inner_corner_a_temperature_probe_reads_a_wall_cable_s_heat`.
 
+- GUI packets were trusted (review of 2026-11-09): a modified client could store a NaN FE exporter power factor
+  (its process then threw in every simulator tick, and the factor was saved: the server crashed again on start), a
+  negative teleporter or turret power (a negative resistance), an index past the signal hub's links, the wireless
+  receiver's or a lamp supply's aggregators (a throw in the tick, saved), sensor bounds of Infinity (a NaN signal;
+  the stock text box sends Infinity for "1e39"), NaN through the `max(lo, min(hi, x))` clamps of the heater, gate
+  source and steam valve, and names of any length. Every handler now goes through `ClientValues` (slider values
+  clamped, typed numbers finite, indices in range, strings cut to 64 characters); bad saved values are clamped on
+  load; the Modbus RTU caps its Tx and Rx entries at 32 each. Two bugs the same test found: a Modbus RTU with two
+  or more transmitters threw on unload, and a fuel heat furnace's switch turned on with no burner was off after a
+  reload (it now turns on only with a burner, as loading kept it). Test: `gui_packets_reject_bad_values_*`.
+
 ## Deferred
 
 - Sound redesign: synthesize machine sound client-side from device state; one-shot sounds are still server packets.

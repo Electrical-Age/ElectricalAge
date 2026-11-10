@@ -114,6 +114,13 @@ device on the API passes `verifySpec` with the spec from its registered descript
 circuit at a vanilla barrel: a power face on a real line, turning, breaking; a `PortRef` link to a cable two blocks
 away, its WRONG_KIND and NO_NODE neighbours, the cable broken and placed back; a watchdog whose listener opens the
 load; one circuit per block entity, none on a machine's).
+`GuiPacketFuzzCases` (`gui_packets_reject_bad_values_<element>`: one case per six-node and transparent element class
+that has its own `networkUnserialize`, found by enumerating the registries, so a new handler is covered unlisted;
+packet ids -128..127 with NaN, infinite, huge and negative numbers, out-of-range index bytes and a 3000-character
+string; after each packet that read a value, the element's processes step without throwing, its saved tag gains no
+NaN, infinity or string over 64 characters, and the values in `RANGES` are in their screens' ranges; a device whose
+check failed is removed before the simulator ticks it; `..._saved_exporter`: an exporter saved with a NaN, negative,
+infinite or too large power factor loads one in 0..1 and steps).
 
 A case can run code part way (`ctx.after(ticks, r)`, as its measure runs: outside the simulator's tick) and reload a
 node from an edited tag (`Reload.node(level, pos, tag -> ...)`: a save as an older version wrote it).

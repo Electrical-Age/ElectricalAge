@@ -83,6 +83,13 @@ within 16 blocks (`MAX_DISTANCE_SQ`, 26.x hardening) -> `NodeBase.networkUnseria
 - `TransparentNode.networkUnserialize`: element id must match -> `TransparentNodeElement.networkUnserialize`, which
   handles `unserializeGroundedId` itself and returns any other id byte for the subclass to switch on.
 
+What the element does with the payload is its own check: a modified client sends what no screen would. Handlers read
+through `src/main/java/mods/eln/network/ClientValues.java`: a value that is not finite changes nothing, a slider's
+value is clamped to the slider's ends (the screen's numbers), a typed number is taken if finite, an index outside its
+list is ignored, a string is cut to 64 characters (EaField's limit). Values an older handler may have saved are
+clamped again on load (`ClientValues.load`). A handler that throws anyway is caught in `ServerPacketHandler.handle`
+(one warning naming the player). `GuiPacketFuzzCases` sends every handler bad values.
+
 ## Menus (`eln:node`)
 
 | Class | Side | Role |
@@ -159,6 +166,7 @@ needs the stack in that slot to still be a scanner. Screen: `client/gui/XRayScan
 |---|---|
 | `src/test/java/mods/eln/gui/LayoutTest.java` | layout maths; `everyShippedLayoutIsSound`: every `assets/eln/gui/*.json` lays out without problems |
 | `gametest/GuiPacketCase` (`gui_packets`) | GUI bytes through `ServerPacketHandler.handle` reach six-node and transparent elements; a too-far player is ignored (bypasses the real channel) |
+| `gametest/cases/GuiPacketFuzzCases` (`gui_packets_reject_bad_values_*`) | every six-node and transparent element with a GUI handler (by enumeration): ids -128..127 with NaN, infinities, huge and negative numbers, out-of-range indices and a 3000-character string; no throw, no NaN/infinity or over-long string in the saved tag, the review's named values in range; an exporter saved with a bad power factor loads clean |
 | `gametest/MenusOpenCase` (`menus_open`) | every device with a screen opens an `eln:node` menu; the open data rebuilds the same slots |
 | `gametest/GoldenSlotsCase` (`golden_slots`) | menu slots vs `golden/1.12/slots.json` |
 | `gametest/MachineMenuCase` (`machine_menu`) | a click puts iron ore into the macerator input (single click, not shift-click) |
