@@ -23,8 +23,8 @@ prebuilt files are fetched, which it does the first time). It:
 3. runs the Lean limiter on the recorded calls and compares bits;
 4. runs it again with one division computed as a multiplication by the inverse, which must be noticed.
 
-Last run: 1258 calls (153 unlimited, 759 scaled, 25 scaled until the last allowed pass, 321 with nodes silenced and
-scales raised again), no difference; the changed arithmetic differed on 237. One branch is in no recorded call: the
+Last run: 1260 calls (153 unlimited, 757 scaled, 28 scaled until the last allowed pass, 322 with nodes silenced and
+scales raised again), no difference; the changed arithmetic differed on 236. One branch is in no recorded call: the
 limiter's last resort, all scales to zero when silencing has run as many passes as there are cells. Java's comment
 says it is never reached; the proofs cover it all the same.
 
@@ -48,8 +48,43 @@ of a mass by a factor from 0 to 1 and applies the moves.
 | S3 | **The predicted state** has no mass lower than at the step's start, or than 0. | `Step.predict_mass` | `Network.predict` |
 | S4 | **Every state Newton tries** has no mass lower than the state it stepped from, or than 0 (at any length the line search can pick). With S3: within one solve, the fluid's equations of state are never asked about a mass below min(its value when the solve started, 0). A solve starts from the step's start or from an earlier call's result, so with S2 that is never below min(the step's start, -(SLACK - 1) x what the cell had available in a call). | `Step.trial_mass` | the "fraction to the boundary with a floor" loop in `Network.newton` |
 
+What an edge carries (over the real numbers; `g` an edge's conductance, `dp` the pressure difference across it, `S`
+the band `SPLIT_DP`):
+
+| | Statement | Lean (`Flux.`) | Java |
+|---|---|---|---|
+| F1 | **A pipe's two streams** (q+ from a carrying a's draw, q- from b carrying b's) are never negative and differ by exactly g dp. At rest each is g S ln 2. Java's cuts 30 bands either side of rest change each stream by at most g S e^-30 (1e-13 of g S) and the net flow by nothing. An edge turned round has the mirrored streams: exactly within the cuts, to 2 g S e^-30 beyond. A check valve sends nothing backward. | `streams_nonneg`, `streams_net`, `streams_rest`, `streams_close`, `streams_mirror_band`, `streams_mirror`, `checkStreams_spec` | `Network.streams` |
+| F2 | **What they carry.** Where both ends draw the same mix, the edge carries the net flow of it: nothing at rest, no mixing by the return stream. An end sends no species its draw has none of. The mass moved is q+ x (a's shares' sum) - q- x (b's): the net flow less what the shares leave out (below). | `carried_same`, `carried_has`, `carried_total`, `carried_total_gap` | `Network.flux` |
+| F3 | **Conduction** never lowers entropy (heat goes from hot to cold), and a node's part in it is a share from 0 to under 1. | `conduction_entropy`, `wetted_bounds` | `Network.conduction`, `wetted` |
+| F4 | **The exchange** (liquid down through an opening, gas up) runs only when the liquid is the denser, and never lifts mass. The liquid sent down fills exactly the volume Q exchanged, also where the opening sees several layers at once; the gas brought up is the share Q / Vg of the lower node's real gas. | `exchangeQ_nonneg`, `exchangeQ_pos`, `exchanged_down`, `exchanged_liquid_volume`, `exchanged_gas` | `Network.exchangeFlux`, `MixFluid.rhoLiquid` |
+| F5 | **Windows.** A port's window is a share from 0 to 1 and never falls as the surface rises. The layers' shares of a draw are not negative and, with the gas's, make one whole; so a draw's shares sum to 1 less the gas part's cushion share. | `smoothStep_bounds`, `smoothStep_mono`, `window_mono`, `layerShare_nonneg`, `layerShare_total`, `draw_total` | `Network.smoothStep`, `MixFluid.drawD` |
+| F6 | **Rest.** A state where every net flux is zero solves the step from itself, whatever the step's length. | `rest_iff` | `Network.residual` |
+
+These are about the formulas as transcribed, and assume of the fluids what `FluxShapeTest` checks in doubles on
+random networks as they run: shares not negative and summing to at most 1, the liquid's shares to 1, windows in
+[0, 1], densities positive.
+
+Two things they make plain:
+
+- **The air cushion is never drawn.** Every node's gas holds a fixed cushion of air (1e-6 kg/m^3) that is not part
+  of its contents, and the gas's shares leave it out. So an edge drawing gas moves a little less mass than the
+  flow `Edge.flow` reports (g dp): by 2e-8 of it from air at 1 bar, by all of it from a node with no gas of its
+  own (F2). Conservation is not touched; the reported flow is the pressure flow, not the mass moved.
+- **In a step that converged, the limiter withholds nothing that matters**: under 1e-13 kg from any cell over
+  200 random networks x 1000 steps (most of it 1e-34 to 1e-22 kg, where a cell is asked for its last trace). T3
+  says the limiter does nothing when nothing over-sends; this is the measure of how nearly that holds.
+
 `FluidSpec/Limiter/Examples.lean` works small cases in exact fractions (checked at build time): an over-sending
 transit node, an empty ring, a ring one node feeds, and the energy following its mass.
+
+## What writing this down found in the Java
+
+- **A pipe's return stream could be negative** (fixed). More than 30 bands above rest q- was taken as q+ - q, two
+  rounded products, and came out a few 1e-16 kg/s either side of zero. Negative, it sends b's species out of a.
+  F1's "never negative" failed in doubles; `streams` now returns exactly zero there.
+- **The exchange sent liquid down at the wrong density** where an opening sees two layers (fixed). The density
+  was the layers' weighted mean, but the weights are shares of the mass, so F4's volume balance needs
+  1 / sum(w / rho): the mean is 2 % higher for water and gasoline in equal parts.
 
 ## What the theorems assume
 
@@ -90,4 +125,5 @@ The proofs are about exact arithmetic. In doubles:
 | `FluidSpec/Limiter/Proofs.lean` | T1 to T5. |
 | `FluidSpec/Limiter/Examples.lean` | Worked cases in fractions. |
 | `FluidSpec/Step.lean` | S1 to S4. |
+| `FluidSpec/Flux.lean` | F1 to F6. |
 | `FluidSpec/Audit.lean` | The axioms each theorem rests on, for `check.sh`. |
