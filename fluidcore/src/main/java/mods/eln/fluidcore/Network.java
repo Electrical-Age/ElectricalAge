@@ -405,6 +405,30 @@ public final class Network {
         }
     }
 
+    /**
+     * The edge's net fluxes from a to b at the current states, or null for none: kg/s of each mass, then the energy its
+     * flows carry (W; the two streams and the exchange), then the heat it conducts (C + 1 entries). The one definition of
+     * the fluxes: the residual and the end of the step both use it, so the step ends on exactly the fluxes Newton solved.
+     */
+    private static double[] flux(Edge e, int C) {
+        double[] f = null;
+        if (e.conductance > 0) {
+            f = new double[C + 1];
+            f[C] = conduction(e);
+        }
+        if (e.exchange > 0) {
+            double[] x = exchangeFlux(e);
+            if (f == null) f = new double[C + 1];
+            for (int k = 0; k < C; k++) f[k] += x[k];
+        }
+        double[] qs = streams(e);
+        if (qs[0] == 0 && qs[1] == 0) return f;
+        double[] ca = qs[0] != 0 ? e.a.fluid.draw(e.fa) : null, cb = qs[1] != 0 ? e.b.fluid.draw(e.fb) : null;
+        if (f == null) f = new double[C + 1];
+        for (int k = 0; k < C; k++) f[k] += (ca != null ? qs[0] * ca[k] : 0) - (cb != null ? qs[1] * cb[k] : 0);
+        return f;
+    }
+
     /** The residual R = Y' - Y0 - dt (fluxes in + heat) at the nodes' current states (each node's C rows). */
     private double[] residual(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt) {
         int C = C(), S = C - 1;
@@ -415,28 +439,13 @@ public final class Network {
             r[C * i + S] = n.U - y0[C * i + S] - dt * n.heat;
         }
         for (Edge e : edges) {
-            if (e.conductance > 0) {
-                double h = conduction(e);
-                Integer ia = idx.get(e.a), ib = idx.get(e.b);
-                if (ia != null) r[C * ia + S] += dt * h;
-                if (ib != null) r[C * ib + S] -= dt * h;
-            }
-            if (e.exchange > 0) {
-                double[] x = exchangeFlux(e);
-                Integer ia = idx.get(e.a), ib = idx.get(e.b);
-                for (int k = 0; k < C; k++) {
-                    if (ia != null) r[C * ia + k] += dt * x[k];
-                    if (ib != null) r[C * ib + k] -= dt * x[k];
-                }
-            }
-            double[] qs = streams(e);
-            if (qs[0] == 0 && qs[1] == 0) continue;
-            double[] ca = qs[0] != 0 ? e.a.fluid.draw(e.fa) : null, cb = qs[1] != 0 ? e.b.fluid.draw(e.fb) : null;
+            double[] f = flux(e, C);
+            if (f == null) continue;
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
+            f[S] += f[C];
             for (int k = 0; k < C; k++) {
-                double f = (ca != null ? qs[0] * ca[k] : 0) - (cb != null ? qs[1] * cb[k] : 0);
-                if (ia != null) r[C * ia + k] += dt * f;   // (a loses q c)
-                if (ib != null) r[C * ib + k] -= dt * f;
+                if (ia != null) r[C * ia + k] += dt * f[k];   // (a loses what flows to b)
+                if (ib != null) r[C * ib + k] -= dt * f[k];
             }
         }
         return r;
@@ -583,26 +592,17 @@ public final class Network {
         int C = C(), S = C - 1;
         // each transfer: {from, to (indices into free, -1 for a fixed node), component, amount moved over dt}
         List<double[]> moves = new ArrayList<>();
+        // (an edge's net flux of each component: its two streams' swap of one species cancels here rather than in the
+        // limiter, where two nearly empty nodes swapping a trace each way kept cutting each other's sends without end)
         for (Edge e : edges) {
+            double[] f = flux(e, C);
+            if (f == null) continue;
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
             int a = ia == null ? -1 : ia, b = ib == null ? -1 : ib;
-            if (e.conductance > 0) {
-                double h = dt * conduction(e);
-                if (h != 0) moves.add(h > 0 ? new double[]{a, b, S, h} : new double[]{b, a, S, -h});
-            }
-            if (e.exchange > 0) {
-                double[] x = exchangeFlux(e);
-                for (int k = 0; k < C; k++) if (x[k] != 0) moves.add(x[k] > 0 ? new double[]{a, b, k, dt * x[k]} : new double[]{b, a, k, -dt * x[k]});
-            }
-            double[] qs = streams(e);
-            for (int side = 0; side < 2; side++) {
-                if (qs[side] == 0) continue;
-                double[] c = side == 0 ? e.a.fluid.draw(e.fa) : e.b.fluid.draw(e.fb);
-                for (int k = 0; k < C; k++) {
-                    double f = dt * qs[side] * c[k];   // (from a to b for side 0, from b to a for side 1)
-                    if (side == 1) f = -f;
-                    if (f != 0) moves.add(f > 0 ? new double[]{a, b, k, f} : new double[]{b, a, k, -f});
-                }
+            f[S] += f[C];
+            for (int k = 0; k < C; k++) {
+                double x = dt * f[k];
+                if (x != 0) moves.add(x > 0 ? new double[]{a, b, k, x} : new double[]{b, a, k, -x});
             }
         }
         // the limiter: a node can't send more of a mass than it started with plus what it receives (Newton's tolerance
