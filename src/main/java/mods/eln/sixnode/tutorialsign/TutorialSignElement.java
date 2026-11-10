@@ -3,6 +3,7 @@ package mods.eln.sixnode.tutorialsign;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
@@ -176,7 +177,7 @@ public class TutorialSignElement extends SixNodeElement {
         try {
             switch (stream.readByte()) {
                 case setTextFileId:
-                    setBalise(stream.readUTF());
+                    setBalise(ClientValues.readString(stream));
                     break;
             }
         } catch (IOException e) {

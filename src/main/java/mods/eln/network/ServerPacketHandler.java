@@ -16,6 +16,8 @@ import java.io.IOException;
  * (packetPublishForNode: x, y, z, dimension, node uuid, then the node's own bytes), the wrench key (packetPlayerKey) and
  * the held chisel's brush (packetChiselBrush). Runs on the server thread.
  * 26.x hardening: the player must be in the node's dimension and within 16 blocks (1.12 trusted any coordinates).
+ * What a device does with the values is its own check (ClientValues); a handler that throws anyway costs one log line
+ * naming the player, not a stack trace per packet.
  */
 public final class ServerPacketHandler {
     private ServerPacketHandler() {
@@ -52,6 +54,8 @@ public final class ServerPacketHandler {
             node.networkUnserialize(stream, player);
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (RuntimeException e) {
+            Eln.LOG.warn("Electrical Age: a GUI packet from {} was refused: {}", player.getName().getString(), e.toString());
         }
     }
 }

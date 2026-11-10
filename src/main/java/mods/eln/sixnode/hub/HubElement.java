@@ -1,6 +1,7 @@
 package mods.eln.sixnode.hub;
 
 
+import mods.eln.network.ClientValues;
 import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
@@ -224,6 +225,7 @@ public class HubElement extends SixNodeElement {
             switch (stream.readByte()) {
                 case clientConnectionGridToggle:
                     int id = stream.readByte();
+                    if (!ClientValues.index(id, connectionGrid.length)) break;
                     connectionGrid[id] = !connectionGrid[id];
                     sixNode.disconnect();
                     setup();

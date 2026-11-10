@@ -5,6 +5,7 @@ import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -93,8 +94,8 @@ public class ElectricalBreakerElement extends SixNodeElement {
         byte value = nbt.getByteOr("front", (byte) 0);
         front = LRDU.fromInt((value >> 0) & 0x3);
         switchState = nbt.getBooleanOr("switchState", false);
-        voltageMax = nbt.getFloatOr("voltageMax", 0f);
-        voltageMin = nbt.getFloatOr("voltageMin", 0f);
+        voltageMax = ClientValues.finite(nbt.getFloatOr("voltageMax", 0f), (float) Eln.LVU);
+        voltageMin = ClientValues.finite(nbt.getFloatOr("voltageMin", 0f), 0f);
         tripAmps = nbt.getFloatOr("tripAmps", 0f);
         nbtBoot = true;
     }
@@ -225,11 +226,11 @@ public class ElectricalBreakerElement extends SixNodeElement {
         try {
             switch (stream.readByte()) {
                 case setVoltageMaxId:
-                    voltageMax = stream.readFloat();
+                    voltageMax = ClientValues.finite(stream.readFloat(), voltageMax);   // (typed: any finite volts)
                     needPublish();
                     break;
                 case setVoltageMinId:
-                    voltageMin = stream.readFloat();
+                    voltageMin = ClientValues.finite(stream.readFloat(), voltageMin);
                     needPublish();
                     break;
                 case toogleSwitchId:

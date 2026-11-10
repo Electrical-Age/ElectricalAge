@@ -4,6 +4,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
@@ -171,8 +172,9 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
         try {
             switch (stream.readByte()) {
                 case setChannelId:
+                    String c = ClientValues.readString(stream);
                     WirelessSignalTxElement.channelRemove(this);
-                    channel = stream.readUTF();
+                    channel = c;
                     needPublish();
                     WirelessSignalTxElement.channelRegister(this);
                     break;

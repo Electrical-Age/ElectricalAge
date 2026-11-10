@@ -111,7 +111,8 @@ public abstract class RegulatorProcess implements IProcess, INBTTReady {
     public void readFromNBT(CompoundTag nbt, String str) {
         errorIntegrated = nbt.getDoubleOr(str + name + "errorIntegrated", 0.0);
         if (Double.isNaN(errorIntegrated)) errorIntegrated = 0;
-        setTarget(nbt.getDoubleOr(str + name + "target", 0.0));
+        double t = nbt.getDoubleOr(str + name + "target", 0.0);
+        setTarget(Double.isFinite(t) ? t : 0.0);
     }
 
     @Override

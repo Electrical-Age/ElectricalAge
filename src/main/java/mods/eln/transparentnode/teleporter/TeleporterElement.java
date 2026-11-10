@@ -7,6 +7,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -185,7 +186,8 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 
         name = nbt.getStringOr("name", "");
         targetName = nbt.getStringOr("targetName", "");
-        powerCharge = nbt.getDoubleOr("powerCharge", 0.0);
+        // (an older handler stored what the client sent: a negative charge power is a negative resistance)
+        powerCharge = ClientValues.load(nbt.getDoubleOr("powerCharge", 2000), 2000, 20000, 2000);
 
         if (nbt.getBooleanOr("reset", false))
             state = StateReset;
@@ -552,7 +554,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
             case setNameId:
                 if (state != StateIdle) break;
                 try {
-                    name = stream.readUTF();
+                    name = ClientValues.readString(stream);
                 } catch (IOException e) {
 
                     e.printStackTrace();
@@ -562,7 +564,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
             case setTargetNameId:
                 if (state != StateIdle) break;
                 try {
-                    targetName = stream.readUTF();
+                    targetName = ClientValues.readString(stream);
                 } catch (IOException e) {
 
                     e.printStackTrace();
@@ -575,7 +577,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
             case setChargePowerId:
                 if (state != StateIdle) break;
                 try {
-                    powerCharge = stream.readFloat();
+                    powerCharge = ClientValues.clamp(stream.readFloat(), 2000, 20000, powerCharge);   // (the screen's slider)
                 } catch (IOException e) {
 
                     e.printStackTrace();

@@ -5,6 +5,7 @@ import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -59,7 +60,7 @@ public class ElectricalTimeoutElement extends SixNodeElement {
         super.readFromNBT(nbt);
         byte value = nbt.getByteOr("front", (byte) 0);
         front = LRDU.fromInt((value >> 0) & 0x3);
-        timeOutValue = nbt.getFloatOr("timeOutValue", 0f);
+        timeOutValue = ClientValues.finite(nbt.getFloatOr("timeOutValue", 0f), 2f);
         timeOutCounter = nbt.getFloatOr("timeOutCounter", 0f);
     }
 
@@ -149,7 +150,7 @@ public class ElectricalTimeoutElement extends SixNodeElement {
                     set();
                     break;
                 case setTimeOutValueId:
-                    timeOutValue = stream.readFloat();
+                    timeOutValue = ClientValues.finite(stream.readFloat(), timeOutValue);   // (typed: any finite seconds)
                     needPublish();
                     break;
             }

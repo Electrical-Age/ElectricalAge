@@ -8,6 +8,7 @@ import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.AutoAcceptInventoryProxy;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
@@ -124,7 +125,7 @@ public class LampSocketElement extends SixNodeElement {
                     reconnect();
                     break;
                 case setAlphaZId:
-                    lampProcess.alphaZ = stream.readFloat();
+                    lampProcess.alphaZ = ClientValues.clamp(stream.readFloat(), socketDescriptor.alphaZMin, socketDescriptor.alphaZMax, (float) lampProcess.alphaZ);   // (the screen's slider)
                     needPublish();
                     break;
                 case tooglePowerSupplyType:
@@ -133,7 +134,7 @@ public class LampSocketElement extends SixNodeElement {
                     reconnect();
                     break;
                 case setChannel:
-                    channel = stream.readUTF();
+                    channel = ClientValues.readString(stream);
                     lastSocketName = channel;
                     needPublish();
                     break;

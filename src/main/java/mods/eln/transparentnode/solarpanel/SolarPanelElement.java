@@ -7,6 +7,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.GhostPowerNode;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.AutoAcceptInventoryProxy;
 import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNode;
@@ -173,7 +174,7 @@ public class SolarPanelElement extends TransparentNodeElement {
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         powerSource.readFromNBT(nbt, "powerSource");
-        panelAlpha = nbt.getDoubleOr("panelAlpha", 0.0);
+        panelAlpha = ClientValues.load(nbt.getDoubleOr("panelAlpha", 0.0), descriptor.alphaMin, descriptor.alphaMax, descriptor.alphaTrunk(Math.PI / 2));
     }
 
 
@@ -197,7 +198,7 @@ public class SolarPanelElement extends TransparentNodeElement {
         try {
             switch (packetType) {
                 case unserializePannelAlpha:
-                    panelAlpha = stream.readFloat();
+                    panelAlpha = ClientValues.clamp(stream.readFloat(), descriptor.alphaMin, descriptor.alphaMax, panelAlpha);
                     needPublish();
                     break;
 

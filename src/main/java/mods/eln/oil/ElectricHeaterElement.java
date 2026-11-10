@@ -4,6 +4,7 @@ import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.transparent.TransparentNode;
@@ -147,7 +148,7 @@ public class ElectricHeaterElement extends TransparentNodeElement {
         byte packetType = super.networkUnserialize(stream);
         try {
             if (packetType == SET_TARGET_EVENT) {
-                regulator.setTarget(Math.max(0, Math.min(780, stream.readFloat())));
+                regulator.setTarget(ClientValues.clamp(stream.readFloat(), 0, 780, regulator.getTarget()));   // (the screen's slider; a NaN passed max/min)
                 needPublish();
                 return unserializeNulldId;
             }

@@ -3,6 +3,7 @@ package mods.eln.sixnode.powersocket;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -221,8 +222,9 @@ public class PowerSocketElement extends SixNodeElement {
         try {
             switch (stream.readByte()) {
                 case setChannelId:
+                    String c = ClientValues.readString(stream);
                     channelRemove(this);
-                    channel = stream.readUTF();
+                    channel = c;
                     needPublish();
                     channelRegister(this);
                     break;

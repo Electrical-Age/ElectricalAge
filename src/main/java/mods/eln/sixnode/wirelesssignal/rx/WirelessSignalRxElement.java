@@ -5,6 +5,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -125,6 +126,7 @@ public class WirelessSignalRxElement extends SixNodeElement {
         channel = nbt.getStringOr("channel", "");
         connection = nbt.getBooleanOr("connection", false);
         selectedAggregator = nbt.getIntOr("selectedAggregator", 0);
+        if (!ClientValues.index(selectedAggregator, aggregators.length)) selectedAggregator = 0;
         toogleAggregator.readFromNBT(nbt, "toogleAggregator");
     }
 
@@ -140,13 +142,16 @@ public class WirelessSignalRxElement extends SixNodeElement {
         try {
             switch (stream.readByte()) {
                 case setChannelId:
-                    channel = stream.readUTF();
+                    channel = ClientValues.readString(stream);
                     slowProcess.sleepTimer = 0;
                     needPublish();
                     break;
 
                 case setSelectedAggregator:
-                    selectedAggregator = stream.readByte();
+                    // (out of range: no aggregator, a NullPointerException in the electrical step, and saved)
+                    int a = stream.readByte();
+                    if (!ClientValues.index(a, aggregators.length)) break;
+                    selectedAggregator = a;
                     needPublish();
                     break;
             }
