@@ -271,6 +271,7 @@ public final class Wp12Cases {
         net.minecraft.world.entity.animal.pig.Pig pig;
         ItemStack plate;
         float healthAfter;
+        double energyAfterFirst, energyAfterCooldownHit;
 
         @Override
         public String name() {
@@ -294,6 +295,10 @@ public final class Wp12Cases {
             pig.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, plate);
             pig.hurtServer(w, w.damageSources().cactus(), 10f); // generic damage bypasses armour on 26.x
             healthAfter = pig.getHealth();
+            // nero/Baughn 2026-11-10: a hit that the cooldown throws away (magma hurts every tick) costs nothing
+            energyAfterFirst = ((mods.eln.item.electricalitem.ElectricalArmor) plate.getItem()).getEnergy(pig.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST));
+            pig.hurtServer(w, w.damageSources().cactus(), 1f);
+            energyAfterCooldownHit = ((mods.eln.item.electricalitem.ElectricalArmor) plate.getItem()).getEnergy(pig.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST));
         }
 
         @Override
@@ -304,6 +309,7 @@ public final class Wp12Cases {
                 ctx.checkValue("e-coal armour: pig health after 10 damage (10 - 7)", healthAfter, 3.0);
                 ctx.checkValue("e-coal armour: energy left [J] (4000 - 3 * 500)", e, 2500.0);
                 ctx.check("e-coal armour: no armour points", pig.getArmorValue() == 0, "armor " + pig.getArmorValue());
+                ctx.checkValue("e-coal armour: a hit inside the hit cooldown costs no energy [J]", energyAfterCooldownHit, energyAfterFirst);
                 // AdventurAgent: worn E-Coal drew nothing; its equipment asset and layer textures were missing
                 ctx.check("e-coal armour: its equipment asset and layer textures ship", Wp12Cases.class.getResource("/assets/eln/equipment/ecoal.json") != null
                     && Wp12Cases.class.getResource("/assets/eln/textures/entity/equipment/humanoid/ecoal.png") != null
