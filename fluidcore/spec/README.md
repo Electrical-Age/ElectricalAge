@@ -81,7 +81,7 @@ of its saturated vapour the gas space holds, 0 for one that never boils; sm a so
 |---|---|---|---|
 | P1 | **The unsmoothed root.** sum n i / (X + c i) = 1 has exactly one root X\* above every -c i, between n k - c k for the species k of least c and the group's moles less c k. With every species volatile it is above zero, liquid, exactly when sum n i / c i > 1. One species alone: X\* = n - c. | `root_unique`, `root_exists`, `saturated_iff`, `single_root` | (what `MixFluid.split` smooths) |
 | P2 | **The smoothed liquid.** N = sm(X), where X is the one root of sum n i / sm(X + c i) = 1. No term is above 1 there (Java's Newton starts where the largest is 1). N holds all of what never boils, is no more than the group's moles, and is at or above the liquid of exact equilibrium. Where sm changes no term the equation is P1's; one species alone gives X = n - c, WaterAir's split. | `soft_unique`, `soft_exists`, `soft_terms`, `soft_holds`, `soft_le_total`, `soft_covers`, `softSum_exact`, `single_soft` | `MixFluid.split` |
-| P3 | **A trace changes a trace.** With nd more of a species of capacity cd the root moves up from X to X', and the others' sum falls by the newcomer's term, at most nd / sm(X + cd): as nd goes to 0, X' goes to X. | `soft_gap` | `MixFluid.split` |
+| P3 | **A trace changes a trace.** With nd more of a species of capacity cd the root moves up from X to X', and the others' sum falls by the newcomer's term, at most nd / sm(X + cd): as nd goes to 0, X' goes to X. This is the limit, not a rate: how much liquid a trace moves per unit of itself is measured, not proven (below). | `soft_gap` | `MixFluid.split` |
 | P4 | **The shares.** With N from P2 and less than the group's moles there is exactly one factor lam in (0, 1] at which the shares x i = n i / (N + lam c i) sum to 1. Then the liquid's parts sum to N, no species is more liquid than there is of it or less than none, and its vapour is lam x i times its saturation (Raoult's law, scaled). The whole split exists whatever the group holds. | `lam_unique`, `lam_exists`, `lam_pos`, `liquid_total`, `liquid_bounds`, `split_exists` | `MixFluid.split` |
 
 What P2 to P4 ask of sm is that it is positive, never below its argument and rises no faster than it (`Smooth`):
@@ -89,8 +89,9 @@ the model's softplus is that (`soft_smooth`), and so is Java's, which is cut 30 
 (`softCode_smooth`). Existence and uniqueness of X also ask that sm is continuous and rises, which the model's does
 (`soft_continuous`, `soft_strictMono`, `soft_low`) and Java's does but for steps of 1e-13 of the width at its two
 cuts. That Java's Newton iterations reach these roots is not proven: `SplitShapeTest` checks the shares' bounds
-and sums in doubles on random contents, that a trace of residue or of diesel moves nothing, and that the root
-takes at most 20 steps (10 seen).
+and sums in doubles on random contents, that a trace of residue or of diesel moves the gasoline's liquid by at
+most 400 times its own mass (35 seen; that bound is the test's, not a theorem's), and that the root takes at most
+20 steps (10 seen).
 
 The smoothing is not the exact equilibrium, and P3 is about continuity, not accuracy: a species with c i under the
 width is held liquid in proportion to its amount even where exact equilibrium has it all vapour (1e-3 of the group
