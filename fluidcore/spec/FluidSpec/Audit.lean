@@ -1,6 +1,7 @@
 import FluidSpec.Limiter.Proofs
 import FluidSpec.Step
 import FluidSpec.Flux
+import FluidSpec.Split
 /-
 The axioms each headline theorem rests on (check.sh fails on anything but Lean's three standard ones, which is how an
 unfinished proof would show).
@@ -47,3 +48,29 @@ open FluidSpec.Limiter
 #print axioms FluidSpec.Flux.layerShare_nonneg
 #print axioms FluidSpec.Flux.draw_total
 #print axioms FluidSpec.Flux.rest_iff
+#print axioms FluidSpec.Split.fracSum_strictAnti
+#print axioms FluidSpec.Split.root_unique
+#print axioms FluidSpec.Split.root_exists
+#print axioms FluidSpec.Split.saturated_iff
+#print axioms FluidSpec.Split.single_root
+#print axioms FluidSpec.Split.softSum_exact
+#print axioms FluidSpec.Split.single_soft
+#print axioms FluidSpec.Split.soft_unique
+#print axioms FluidSpec.Split.soft_exists
+#print axioms FluidSpec.Split.soft_terms
+#print axioms FluidSpec.Split.soft_holds
+#print axioms FluidSpec.Split.soft_covers
+#print axioms FluidSpec.Split.soft_le_total
+#print axioms FluidSpec.Split.soft_gap
+#print axioms FluidSpec.Split.soft_smooth
+#print axioms FluidSpec.Split.soft_strictMono
+#print axioms FluidSpec.Split.soft_continuous
+#print axioms FluidSpec.Split.soft_low
+#print axioms FluidSpec.Split.softCode_exact
+#print axioms FluidSpec.Split.softCode_smooth
+#print axioms FluidSpec.Split.lam_unique
+#print axioms FluidSpec.Split.lam_exists
+#print axioms FluidSpec.Split.lam_pos
+#print axioms FluidSpec.Split.liquid_total
+#print axioms FluidSpec.Split.liquid_bounds
+#print axioms FluidSpec.Split.split_exists

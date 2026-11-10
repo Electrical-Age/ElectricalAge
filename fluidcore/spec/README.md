@@ -24,7 +24,7 @@ prebuilt files are fetched, which it does the first time). It:
 4. runs it again with one division computed as a multiplication by the inverse, which must be noticed.
 
 Last run: 1260 calls (153 unlimited, 757 scaled, 28 scaled until the last allowed pass, 322 with nodes silenced and
-scales raised again), no difference; the changed arithmetic differed on 236. One branch is in no recorded call: the
+scales raised again), no difference; the changed arithmetic differed on 235. One branch is in no recorded call: the
 limiter's last resort, all scales to zero when silencing has run as many passes as there are cells. Java's comment
 says it is never reached; the proofs cover it all the same.
 
@@ -74,6 +74,29 @@ Two things they make plain:
   200 random networks x 1000 steps (most of it 1e-34 to 1e-22 kg, where a cell is asked for its last trace). T3
   says the limiter does nothing when nothing over-sends; this is the measure of how nearly that holds.
 
+The phase split of a group of liquids that mix (over the real numbers; n i the moles of species i, c i the moles
+of its saturated vapour the gas space holds, 0 for one that never boils; sm a softplus 1 % of the group wide):
+
+| | Statement | Lean (`Split.`) | Java |
+|---|---|---|---|
+| P1 | **The unsmoothed root.** sum n i / (X + c i) = 1 has exactly one root X\* above every -c i, between n k - c k for the species k of least c and the group's moles less c k. With every species volatile it is above zero, liquid, exactly when sum n i / c i > 1. One species alone: X\* = n - c. | `root_unique`, `root_exists`, `saturated_iff`, `single_root` | (what `MixFluid.split` smooths) |
+| P2 | **The smoothed liquid.** N = sm(X), where X is the one root of sum n i / sm(X + c i) = 1. No term is above 1 there (Java's Newton starts where the largest is 1). N holds all of what never boils, is no more than the group's moles, and is at or above the liquid of exact equilibrium. Where sm changes no term the equation is P1's; one species alone gives X = n - c, WaterAir's split. | `soft_unique`, `soft_exists`, `soft_terms`, `soft_holds`, `soft_le_total`, `soft_covers`, `softSum_exact`, `single_soft` | `MixFluid.split` |
+| P3 | **A trace changes a trace.** With nd more of a species of capacity cd the root moves up from X to X', and the others' sum falls by the newcomer's term, at most nd / sm(X + cd): as nd goes to 0, X' goes to X. | `soft_gap` | `MixFluid.split` |
+| P4 | **The shares.** With N from P2 and less than the group's moles there is exactly one factor lam in (0, 1] at which the shares x i = n i / (N + lam c i) sum to 1. Then the liquid's parts sum to N, no species is more liquid than there is of it or less than none, and its vapour is lam x i times its saturation (Raoult's law, scaled). The whole split exists whatever the group holds. | `lam_unique`, `lam_exists`, `lam_pos`, `liquid_total`, `liquid_bounds`, `split_exists` | `MixFluid.split` |
+
+What P2 to P4 ask of sm is that it is positive, never below its argument and rises no faster than it (`Smooth`):
+the model's softplus is that (`soft_smooth`), and so is Java's, which is cut 30 widths either side of zero
+(`softCode_smooth`). Existence and uniqueness of X also ask that sm is continuous and rises, which the model's does
+(`soft_continuous`, `soft_strictMono`, `soft_low`) and Java's does but for steps of 1e-13 of the width at its two
+cuts. That Java's Newton iterations reach these roots is not proven: `SplitShapeTest` checks the shares' bounds
+and sums in doubles on random contents, that a trace of residue or of diesel moves nothing, and that the root
+takes at most 20 steps (10 seen).
+
+The smoothing is not the exact equilibrium, and P3 is about continuity, not accuracy: a species with c i under the
+width is held liquid in proportion to its amount even where exact equilibrium has it all vapour (1e-3 of the group
+at c i a tenth of the width: 9e-4 of the group liquid against 3e-5). In the cases tried the error is at most about
+the species' own amount, or the width's ln 2 at a dew point.
+
 `FluidSpec/Limiter/Examples.lean` works small cases in exact fractions (checked at build time): an over-sending
 transit node, an empty ring, a ring one node feeds, and the energy following its mass.
 
@@ -85,6 +108,19 @@ transit node, an empty ring, a ring one node feeds, and the energy following its
 - **The exchange sent liquid down at the wrong density** where an opening sees two layers (fixed). The density
   was the layers' weighted mean, but the weights are shares of the mass, so F4's volume balance needs
   1 / sum(w / rho): the mean is 2 % higher for water and gasoline in equal parts.
+
+- **A first trace of a heavier species made 0.5 to 0.7 % of a superheated vapour liquid** (fixed). The liquid was
+  the softplus of the unsmoothed root X\*. In a superheated vapour of gasoline alone that root is far below zero
+  and its softplus nothing. But X\* cannot pass below -c i of any species that is present at all: with a species
+  whose c i is under the smoothing's width, X\* sits near zero and its softplus is 0.69 % of the group. 1e-28 kg of
+  residue (c = 0) in gasoline vapour at 400 to 600 K condensed 0.69 % of the gasoline and warmed the node 1 K;
+  1e-28 kg of diesel did the same to 0.5 % at 360 K. P3 is the statement that failed, and could not be stated for
+  that form at all. Smoothing every term (P2) is the fix; a first fix that smoothed only the non-volatiles' term
+  passed its test and left the diesel case, which trying to state P3 for volatiles showed.
+- **The factor lam was solved to 1e-15 of itself or of 1**, whichever was larger (fixed). Under a trace of liquid
+  the shares depend on lam far below that: P4's sum came out 1 + 2e-6.
+- **A mass rounding left below zero was a negative amount of moles** (fixed): negative shares, and where it
+  outweighed its group a negative smoothing width and a share of -1e16. It counts as none now.
 
 ## What the theorems assume
 
@@ -126,4 +162,5 @@ The proofs are about exact arithmetic. In doubles:
 | `FluidSpec/Limiter/Examples.lean` | Worked cases in fractions. |
 | `FluidSpec/Step.lean` | S1 to S4. |
 | `FluidSpec/Flux.lean` | F1 to F6. |
+| `FluidSpec/Split.lean` | P1 to P4. |
 | `FluidSpec/Audit.lean` | The axioms each theorem rests on, for `check.sh`. |
