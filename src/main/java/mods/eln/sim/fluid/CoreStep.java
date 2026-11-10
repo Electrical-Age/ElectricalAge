@@ -248,7 +248,9 @@ final class CoreStep {
     private double owed;
 
     void step(FluidNetwork fn, double dt) {
-        double tick = dt, ask = dt + Math.min(owed, 1.0);
+        // (at most one tick's worth caught up per tick: devices step their own processes by the tick, and a second of
+        // fluid landing in one tick would be a spike they all see)
+        double tick = dt, ask = dt + Math.min(owed, dt);
         owed -= ask - dt;
         dt = ask;
         // contents in (the authority is the FluidNode; the core wakes by its own signature when they change)
@@ -274,7 +276,7 @@ final class CoreStep {
             double dp = e.a.pressureOver(e.portA, e.spanA) - e.b.pressureOver(e.portB, e.spanB) + e.boost;
             double dz = (e.a.z + e.portA * e.a.height) - (e.b.z + e.portB * e.b.height);
             FluidNetwork.Packet pa = FluidNetwork.packet(e.a, e.portA, e.spanA), pb = FluidNetwork.packet(e.b, e.portB, e.spanB);
-            boolean fromA = dp + pa.rhoHead * Network.G * dz >= 0 || (e.oneWay() && !pipeOfPair[k]);
+            boolean fromA = dp + pa.rhoHead * Network.G * dz >= 0 || (e.oneWay() && !pipeOfPair[k]) || e.kind == FluidEdge.Kind.PUMP;
             xl[k] = fromA ? pa.xl : pb.xl;
             double open = Math.max(0, e.open);
             if (pipeOfPair[k]) {
