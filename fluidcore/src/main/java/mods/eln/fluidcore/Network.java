@@ -139,7 +139,7 @@ public final class Network {
         }
     }
 
-    public enum Kind { PIPE, CHECK, PUMP }
+    public enum Kind { PIPE, CHECK, PUMP, TURBINE }
 
     public static final class Edge {
         public final Node a, b;
@@ -167,6 +167,16 @@ public final class Network {
          * q dp / (rho eta), goes into b as power. work: that power over the last step (W).
          */
         public double qMax, h0, speed = 1, eta = 0.7, work;
+        /**
+         * TURBINE: a steam turbine from a (its inlet, drawn at its port) to b (its exhaust). Its nozzle passes q = nozzle
+         * open sqrt(rho (p_a + p_b) S softplus((p_a - p_b) / S)) (the ellipse law, rho the inlet gas's density held for
+         * the step), and takes eta x drop (J/kg, the isentropic drop to b's pressure, set by the game each step) for each kg
+         * of water it passes out of the fluid, as shaft work.
+         */
+        public double nozzle, open = 1, drop;
+        /** The work (J) the last step put in (a pump) or took out (a turbine); and the last solve's share of it. */
+        public double workJ;
+        double pendingWork;
         /**
          * Counter-current exchange (m^3 s / kg, 0 for none): where a's port is at its floor and b's at its ceiling (a over
          * b), liquid at a's port and gas at b's swap places, equal volumes Q = exchange x (rho_liquid - rho_gas) g x
@@ -291,6 +301,7 @@ public final class Network {
 
     /** The edge's mass flow at the current states. */
     static double flow(Edge e) {
+        if (e.kind == Kind.TURBINE) return turbineFlow(e)[0];
         if (e.kind != Kind.PIPE || !e.plain()) {
             double[] q = streams(e);
             return q[0] - q[1];
@@ -315,6 +326,7 @@ public final class Network {
     static double[] streams(Edge e) {
         double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
         if (e.kind == Kind.PUMP) return pumpStreams(e, dp);
+        if (e.kind == Kind.TURBINE) return new double[4];
         if (!e.plain()) return headStreams(e, dp);
         // (a check valve: the forward stream alone; a hard max(0, dp) put a kink where a valve sits balanced, and Newton
         // stalled on it in the game's networks: openings and pumps at rest)
@@ -396,6 +408,29 @@ public final class Network {
         if (qs[0] == 0 || rho <= 0) return new double[2];
         double S = SPLIT_DP, x = -arg / S, P = S * spc(x), dP = -sgc(x), k = 1 / (rho * e.eta);
         return new double[]{qs[0] * P * k, (qs[2] * P + qs[0] * dP) * k};
+    }
+
+    /**
+     * A turbine's nozzle flow {q, dq/dp_a, dq/dp_b}: nozzle open sqrt(rho T), T = (p_a + p_b) S softplus((p_a - p_b) / S),
+     * the ellipse law p_a^2 - p_b^2 with its root's infinite slope at p_b = p_a smoothed over S (SPLIT_DP) as a check valve
+     * is, and nothing back.
+     */
+    static double[] turbineFlow(Edge e) {
+        if (e.nozzle <= 0 || e.open <= 0) return new double[3];
+        double pa = portP(e.a, e.fa), pb = portP(e.b, e.fb), S = SPLIT_DP, x = (pa - pb) / S;
+        double rho = Double.isNaN(e.rhoA) ? e.a.fluid.rhoGas() : e.rhoA;
+        double sp = S * spc(x), T = (pa + pb) * sp;
+        if (!(T > 0) || !(rho > 0)) return new double[3];
+        double c = e.nozzle * e.open, q = c * Math.sqrt(rho * T), dqdT = q / (2 * T), sg = (pa + pb) * sgc(x);
+        return new double[]{q, dqdT * (sp + sg), dqdT * (sp - sg)};
+    }
+
+    /** A turbine's shaft power (W) and its slopes: eta drop x the water it passes ({W, dW/dp_a, dW/dp_b, water share}). */
+    static double[] turbineWork(Edge e) {
+        double[] q = turbineFlow(e);
+        if (q[0] == 0 || e.drop <= 0) return new double[4];
+        double xw = e.a.fluid.draw(e.fa)[0], k = e.eta * e.drop;
+        return new double[]{k * q[0] * xw, k * q[1] * xw, k * q[2] * xw, xw};
     }
 
     /** softplus and its slope, cut 30 either side as the streams are. */
@@ -495,12 +530,13 @@ public final class Network {
         for (Edge e : edges) {
             if (e.moved != null) java.util.Arrays.fill(e.moved, 0);
             if (e.pending != null) java.util.Arrays.fill(e.pending, 0);
+            e.workJ = e.pendingWork = 0;
         }
         double[] y0 = pack(free);
         done = 0;
         for (Edge e : edges) {
-            boolean f = FREEZE_HEAD && (e.dz != 0 || e.kind == Kind.PUMP);
-            e.rhoA = f ? rhoDraw(e.a, e.fa) : Double.NaN;
+            boolean f = FREEZE_HEAD && (e.dz != 0 || e.kind == Kind.PUMP) || e.kind == Kind.TURBINE;
+            e.rhoA = !f ? Double.NaN : e.kind == Kind.TURBINE ? e.a.fluid.rhoGas() : rhoDraw(e.a, e.fa);
             e.rhoB = f ? rhoDraw(e.b, e.fb) : Double.NaN;
         }
         progressed = false;
@@ -513,8 +549,7 @@ public final class Network {
         }
         for (Edge e : edges) {
             e.flow = flow(e);
-            double[] w = pumpWork(e);
-            e.work = w == null ? 0 : w[0];
+            e.work = e.workJ / dt;
         }
         quiet = isQuiet(free, y0, pack(free)) ? quiet + 1 : 0;
         if (SLEEP_STEPS > 0 && quiet >= SLEEP_STEPS) {
@@ -650,6 +685,8 @@ public final class Network {
     private void restore(List<Node> free, double[] y) {
         set(free, y);
         for (Edge e : edges) {
+            e.workJ -= e.pendingWork;
+            e.pendingWork = 0;
             if (e.pending == null) continue;
             for (int k = 0; k < e.pending.length; k++) e.moved[k] -= e.pending[k];
             java.util.Arrays.fill(e.pending, 0);
@@ -682,6 +719,14 @@ public final class Network {
             if (f == null) f = new double[C + 1];
             for (int k = 0; k < C; k++) f[k] += x[k];
         }
+        if (e.kind == Kind.TURBINE) {
+            double q = turbineFlow(e)[0];
+            if (q == 0) return f;
+            double[] ca = e.a.fluid.draw(e.fa);
+            if (f == null) f = new double[C + 1];
+            for (int k = 0; k < C; k++) f[k] += q * ca[k];
+            return f;
+        }
         double[] qs = streams(e);
         if (qs[0] == 0 && qs[1] == 0) return f;
         double[] ca = qs[0] != 0 ? e.a.fluid.draw(e.fa) : null, cb = qs[1] != 0 ? e.b.fluid.draw(e.fb) : null;
@@ -713,6 +758,7 @@ public final class Network {
             double[] w = pumpWork(e);
             Integer ib = w == null ? null : idx.get(e.b);
             if (ib != null) r[C * ib + S] -= dt * w[0];
+            if (e.kind == Kind.TURBINE && (ib = idx.get(e.b)) != null) r[C * ib + S] += dt * turbineWork(e)[0];
         }
         return r;
     }
@@ -731,6 +777,31 @@ public final class Network {
         }
     }
 
+    /** A turbine's entries: F_k = q ca_k out of a into b, and its work W = eta drop q ca_0 out of b's energy. */
+    private static void turbineJacobian(Sparse J, Edge e, java.util.Map<Node, Integer> idx, int C, double dt) {
+        int S = C - 1;
+        double[] q = turbineFlow(e);
+        double[] ca = e.a.fluid.draw(e.fa);
+        double[][] dca = e.a.fluid.drawSlope(e.fa);
+        double[] dpa = e.a.fluid.portPSlope(e.fa), dpb = e.b.fluid.portPSlope(e.fb);
+        double k = e.drop > 0 ? e.eta * e.drop : 0;
+        Integer ia = idx.get(e.a), ib = idx.get(e.b);
+        for (int side = 0; side < 2; side++) {
+            Integer col = side == 0 ? ia : ib;
+            if (col == null) continue;
+            for (int j = 0; j < C; j++) {
+                double dq = side == 0 ? q[1] * dpa[j] : q[2] * dpb[j];
+                for (int r = 0; r < C; r++) {
+                    double dF = dq * ca[r] + (side == 0 ? q[0] * dca[r][j] : 0);
+                    if (ia != null) J.add(C * ia + r, C * col + j, dt * dF);
+                    if (ib != null) J.add(C * ib + r, C * col + j, -dt * dF);
+                }
+                double dW = k * (dq * ca[0] + (side == 0 ? q[0] * dca[0][j] : 0));
+                if (ib != null) J.add(C * ib + S, C * col + j, dt * dW);
+            }
+        }
+    }
+
     private Sparse jacobian(List<Node> free, java.util.Map<Node, Integer> idx, double dt) {
         int C = C(), S = C - 1;
         int M = C * free.size();
@@ -740,6 +811,10 @@ public final class Network {
         for (Edge e : edges) {
             // (every entry an edge can touch is added, zeros too: skipping zeros let entries come and go, and each new
             // one rebuilt the sparse LU's symbolic factorisation, most steps at 2,000 nodes)
+            if (e.kind == Kind.TURBINE) {
+                turbineJacobian(J, e, idx, C, dt);
+                continue;
+            }
             // F_k = q+ ca_k - q- cb_k; dF_k = dq+ d(arg+) ca_k - dq- d(arg-) cb_k + q+ dca_k (a) - q- dcb_k (b), arg+ = dp + ha,
             // arg- = dp + hb (level: both dp)
             double[] qs = streams(e);
@@ -900,11 +975,20 @@ public final class Network {
         // dt, edge (-1: not an edge's flow)}; the heat supplied to each node first
         List<double[]> moves = new ArrayList<>();
         for (int i = 0; i < free.size(); i++) move(moves, -1, i, S, dt * free.get(i).heat, -1);
-        // (a pump's work comes from outside, into its outlet)
+        // (a pump's work comes from outside, into its outlet; a turbine's goes out of its exhaust, to its shaft)
         for (Edge e : edges) {
+            e.pendingWork = 0;
             double[] w = pumpWork(e);
-            Integer ib = w == null ? null : idx.get(e.b);
-            if (ib != null) move(moves, -1, ib, S, dt * w[0], -1);
+            Integer ib = idx.get(e.b);
+            if (w != null) {
+                e.pendingWork = dt * w[0];
+                if (ib != null) move(moves, -1, ib, S, dt * w[0], -1);
+            } else if (e.kind == Kind.TURBINE) {
+                double tw = turbineWork(e)[0];
+                e.pendingWork = dt * tw;
+                if (ib != null) move(moves, ib, -1, S, dt * tw, -1);
+            }
+            e.workJ += e.pendingWork;
         }
         // (an edge's net flux of each component: its two streams' swap of one species cancels here rather than in the
         // limiter, where two nearly empty nodes swapping a trace each way kept cutting each other's sends without end)
