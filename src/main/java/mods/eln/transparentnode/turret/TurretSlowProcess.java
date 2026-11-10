@@ -190,10 +190,12 @@ public class TurretSlowProcess extends StateMachine {
                 if (Math.abs(entityAngle - element.getTurretAngle()) < 15 &&
                     Math.abs(entityAngle) < element.getDescriptor().getProperties().actionAngle) {
 
+                    // a spared entity is skipped, not the end of the search (1.12 returned: a cow in front of a
+                    // zombie kept the turret from seeing the zombie)
                     if (element.filterIsSpare) {
-                        if (filterClass != null && filterClass.isAssignableFrom(entity.getClass())) return null;
+                        if (filterClass != null && filterClass.isAssignableFrom(entity.getClass())) continue;
                     } else {
-                        if (filterClass == null || !filterClass.isAssignableFrom(entity.getClass())) return null;
+                        if (filterClass == null || !filterClass.isAssignableFrom(entity.getClass())) continue;
                     }
 
                     List<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5,

@@ -466,6 +466,8 @@ In the port:
   skipped (the state holds, as `ramp` already did), and a NaN in a save loads as 0. A watchdog that saw one NaN sample
   never fired again; it now skips the sample and reports it through NanGuard. Inductors and voltage sources load a
   non-finite saved value as 0. Tests `StatefulNanTest`, `ValueWatchdogNanTest`, `NanGuardTest`.
+- A turret ended its search at the first entity in its window that its filter spared, so a cow in front of a zombie
+  kept it from firing (1.12). It skips that entity now. Test `turret_looks_past_a_spared_entity`.
 
 ## Deferred
 
