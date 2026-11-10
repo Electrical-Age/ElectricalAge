@@ -103,7 +103,8 @@ wireless), `Wp10aCases`, `Wp10bCases` (machines, generators, thermal), `Wp11Case
 `Wp12Cases`, `SolarCases` (first multiblock), `LogicTruthCases`, `ChipMoreCases`, `WirelessMoreCases`,
 `WorldSensorCases`, `ShaftMoreCases`, `LampSupplyCases`, `LampLightCases`, `CableSlotCases` (devices work with an empty
 inventory), `SixNodeBreakCases` (one face per break, kept-only voxel block, orphan block), `BurnChainCases` (one failure per network), `CableCases` (voxel vs six-node cables,
-currents agree to 0.1%), `PipeCases`, `OilCases`, `TurretCases`, `OreDropCases`, `ItemCapabilityCases` (hoppers/pipes),
+currents agree to 0.1%), `PipeCases`, `OilCases`, `TurretCases`, `DimensionCases` (wireless and poles across
+dimensions, built in the Nether too), `AutoMinerCases` (mining below y = 0, refused blocks), `OreDropCases`, `ItemCapabilityCases` (hoppers/pipes),
 `TooltipCases`, `PortHelperCases` (fuel, smelting, `eln:light`, waterlogged six-node block), `MachineApiCases` (the
 electrical machines on the Machine API against their old resistor at 1x and 0.7x their volts, reload mid-item, an
 old-format save, burn and repair), `HostedMachineCases` (machines at other mods' block entities, with the hidden

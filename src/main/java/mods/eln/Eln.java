@@ -305,6 +305,9 @@ public class Eln {
             e -> mods.eln.node.voxel.PipePlacer.forget(e.getEntity().getUUID()));
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.living.LivingDeathEvent.class,
             e -> mods.eln.node.voxel.PipePlacer.forget(e.getEntity().getUUID()));
+        // ... and the starting pole of an overhead line
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class,
+            e -> mods.eln.gridnode.GridElement.forget(e.getEntity().getUUID()));
         // ... and cable routes (Baughn: they never timed out)
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class,
             e -> mods.eln.node.voxel.CablePlacer.forget(e.getEntity().getUUID()));

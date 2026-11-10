@@ -51,7 +51,23 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
     private int drillCount = 1;
 
-    private ArrayList<ItemStack> itemsToDrop = new ArrayList<ItemStack>(4);
+    ArrayList<ItemStack> itemsToDrop = new ArrayList<ItemStack>(4);
+
+    /**
+     * The ghost id of every pipe segment. 1.12 gave each segment its height as id, and the machine's own ghosts have -1
+     * (TransparentNodeDescriptor.getGhostGroupUuid): below y = 0 the segment at y = -1 counted as the machine, so
+     * breaking it broke the miner. Any id but -1 does.
+     */
+    static final int PIPE_GHOST_UUID = 1;
+
+    /** Seconds until an idle miner (none, done, full, chestFull) looks for a job again. */
+    private double idleWait = 0;
+
+    /** How many times the job was set up (tests: an idle miner looks once a second). */
+    int setups = 0;
+
+    /** The pipe ghosts of an older save were renumbered (once, on the first step: ghosts load after the nodes). */
+    private boolean pipeIdsChecked = false;
 
     public AutoMinerSlowProcess(AutoMinerElement autoMiner) {
         this.miner = autoMiner;
@@ -79,6 +95,10 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
     @Override
     public void process(double time) {
+        if (!pipeIdsChecked) {
+            pipeIdsChecked = true;
+            renumberOldPipe();
+        }
         ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getItem(AutoMinerContainer.electricalDrillSlotId));
 
         if (++blinkCounter >= 9) {
@@ -102,6 +122,12 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                 oneJobDone = true;
                 switch (job) {
                     case ore:
+                        // read again: the block may have changed in the seconds the drill took
+                        if (isProtected(jobCoord)) {
+                            energyCounter -= energyTarget;
+                            setupJob();
+                            break;
+                        }
                         drillCount++;
 
                         Block block = WorldCompat.getBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
@@ -129,7 +155,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         break;
                     case pipeAdd:
                         // miner.pushLog("Pipe " + (pipeLength + 1) + " added");
-                        Eln.ghostManager.createGhost(jobCoord, miner.node.coordonate, jobCoord.y);
+                        Eln.ghostManager.createGhost(jobCoord, miner.node.coordonate, PIPE_GHOST_UUID);
                         miner.getInventory().removeItem(AutoMinerContainer.MiningPipeSlotId, 1);
 
                         pipeLength++;
@@ -158,7 +184,10 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         break;
                 }
             }
-        } else {
+        } else if ((idleWait -= time) <= 0) {
+            // idle: look again once a second (1.12 did every tick, and a finished miner rescanned its whole layer, up
+            // to 129 x 129 blocks, 20 times a second for as long as it stood there)
+            idleWait = 1;
             setupJob();
         }
 
@@ -253,7 +282,27 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
             && (block) != Blocks.OBSIDIAN && (block) != Blocks.BEDROCK;
     }
 
+    /**
+     * Blocks the miner leaves alone, as it always left bedrock and obsidian: unbreakable ones (destroy speed below 0:
+     * end portal frames, barriers), those the wither can't break (reinforced deepslate, command blocks), those world
+     * generation must not replace (spawners, trial spawners, vaults, chests), and budding amethyst. 1.12 mined them
+     * too, and with silk touch handed them out as items. In the shaft they end it (done), as bedrock does; around it
+     * they are skipped.
+     */
+    public static boolean isProtected(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.Level level, BlockPos pos) {
+        return state.getDestroySpeed(level, pos) < 0
+            || state.is(net.minecraft.tags.BlockTags.WITHER_IMMUNE)
+            || state.is(net.minecraft.tags.BlockTags.FEATURES_CANNOT_REPLACE)
+            || state.is(Blocks.BUDDING_AMETHYST) || state.is(Blocks.OBSIDIAN) || state.is(Blocks.BEDROCK);
+    }
+
+    private boolean isProtected(Coordonate c) {
+        BlockPos pos = c.pos();
+        return isProtected(c.world().getBlockState(pos), c.world(), pos);
+    }
+
     private void setupJob() {
+        setups++;
         ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getItem(AutoMinerContainer.electricalDrillSlotId));
         // OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getItem(AutoMinerContainer.OreScannerSlotId));
         MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getItem(AutoMinerContainer.MiningPipeSlotId));
@@ -310,7 +359,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         double dz = jobCoord.z - miner.node.coordonate.z;
                         double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
                         Block block = WorldCompat.getBlock(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z);
-                        if (checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) {
+                        if ((checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) && !isProtected(jobCoord)) {
                             jobFind = true;
                             setJob(jobType.ore);
                             break;
@@ -333,7 +382,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     if (!Utils.isAirBlock(block)
                         && block != Blocks.WATER
                         && block != Blocks.LAVA) {
-                        if (block != Blocks.OBSIDIAN && block != Blocks.BEDROCK) {
+                        if (!isProtected(jobCoord)) {
                             jobFind = true;
                             setJob(jobType.ore);
                         } else {
@@ -386,6 +435,16 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
     public void onBreakElement() {
         destroyPipe();
+        // what was mined but had no room in the chest yet
+        for (ItemStack s : itemsToDrop) Utils.dropItem(s, miner.node.coordonate);
+        itemsToDrop.clear();
+    }
+
+    /** A segment an older version made at y = -1 has the machine's ghost id (-1): it gets the pipe id. */
+    private void renumberOldPipe() {
+        Coordonate c = new Coordonate(miner.node.coordonate);
+        for (c.y = miner.node.coordonate.y - 1; c.y >= miner.node.coordonate.y - pipeLength; c.y--)
+            Eln.ghostManager.renumberGhost(c, miner.node.coordonate, miner.descriptor.getGhostGroupUuid(), PIPE_GHOST_UUID);
     }
 
     private void destroyPipe() {
@@ -411,11 +470,26 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         pipeLength = nbt.getIntOr(str + "AMSP" + "pipeLength", 0);
         drillCount = nbt.getIntOr(str + "AMSP" + "drillCount", 0);
         if (drillCount == 0) drillCount++;
+        itemsToDrop.clear();
+        net.minecraft.nbt.ListTag queued = nbt.getListOrEmpty(str + "AMSP" + "itemsToDrop");
+        for (int i = 0; i < queued.size(); i++) {
+            ItemStack s = Utils.loadItem(queued.get(i));
+            if (!s.isEmpty()) itemsToDrop.add(s);
+        }
     }
 
     @Override
     public void writeToNBT(CompoundTag nbt, String str) {
         nbt.putInt(str + "AMSP" + "pipeLength", pipeLength);
         nbt.putInt(str + "AMSP" + "drillCount", drillCount);
+        // the mined stacks waiting for room in the chest (new key 2026-11-10; older saves have none: an empty queue)
+        if (!itemsToDrop.isEmpty()) {
+            net.minecraft.nbt.ListTag queued = new net.minecraft.nbt.ListTag();
+            for (ItemStack s : itemsToDrop) {
+                net.minecraft.nbt.Tag t = Utils.saveItem(s);
+                if (t != null) queued.add(t);
+            }
+            nbt.put(str + "AMSP" + "itemsToDrop", queued);
+        }
     }
 }

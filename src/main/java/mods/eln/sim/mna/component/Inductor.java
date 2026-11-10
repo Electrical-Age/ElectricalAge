@@ -81,7 +81,8 @@ public class Inductor extends Bipole implements ISubSystemProcessI, INBTTReady {
     @Override
     public void readFromNBT(CompoundTag nbt, String str) {
         str += name;
-        currentState.state = (nbt.getDoubleOr(str + "Istate", 0.0));
+        double i = nbt.getDoubleOr(str + "Istate", 0.0);
+        currentState.state = Double.isFinite(i) ? i : 0;   // (a NaN in a save stays out of the network)
     }
 
     @Override

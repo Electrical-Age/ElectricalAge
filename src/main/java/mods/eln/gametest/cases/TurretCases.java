@@ -33,6 +33,7 @@ public final class TurretCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new SentryCase());
+        cases.add(new LooksPastCase());
     }
 
     static EntitySensorFilterDescriptor filter(Class<?> c) {
@@ -57,7 +58,7 @@ public final class TurretCases {
         }
     }
 
-    static final class SentryCase implements TestCase {
+    static class SentryCase implements TestCase {
         final List<Post> posts = new ArrayList<>();
 
         public String id() {
@@ -152,11 +153,78 @@ public final class TurretCases {
                     ctx.check("turret (" + p.what + ") spares the " + m.getType().getDescriptionId(), m.getHealth() == m.getMaxHealth() && !m.isRemoved(),
                         String.format("health %.1f of %.1f, turret U %.0f V, enabled %s", m.getHealth(), m.getMaxHealth(), u(p.turret), p.turret.isEnabled()));
             }
-            Post powered = posts.get(0), off = posts.get(5);
-            ctx.check("a powered turret arms (800 V)", powered.turret.isEnabled(), String.format("U %.0f V", u(powered.turret)));
-            ctx.check("an unpowered one doesn't", !off.turret.isEnabled(), String.format("U %.0f V", u(off.turret)));
+            if (posts.size() == 6) {
+                Post powered = posts.get(0), off = posts.get(5);
+                ctx.check("a powered turret arms (800 V)", powered.turret.isEnabled(), String.format("U %.0f V", u(powered.turret)));
+                ctx.check("an unpowered one doesn't", !off.turret.isEnabled(), String.format("U %.0f V", u(off.turret)));
+            }
             for (Post p : posts) for (Mob m : p.shoot) m.discard();
             for (Post p : posts) for (Mob m : p.spare) m.discard();
+        }
+    }
+
+    /**
+     * A spared entity in the turret's window is skipped, and the search goes on: a monster-filter turret with two cows on
+     * the husk's bearing, one nearer and one farther, both spawned before the husk (so at least one comes before it in
+     * the entity list) shoots the husk. 1.12 ended the search at the first cow, and the turret just watched.
+     */
+    static final class LooksPastCase extends SentryCase {
+        Post p;
+
+        @Override
+        public String id() {
+            return "turret_looks_past_a_spared_entity";
+        }
+
+        @Override
+        public int width() {
+            return 24;
+        }
+
+        @Override
+        public int height() {
+            return 8;
+        }
+
+        @Override
+        public int depth() {
+            return 24;
+        }
+
+        @Override
+        public int floorDepth() {
+            return 24;
+        }
+
+        @Override
+        public int ticks() {
+            return 300;
+        }
+
+        @Override
+        public void build(TestContext ctx) {
+            p = post(ctx, "a cow before the husk", 12, 12, true, net.minecraft.world.entity.monster.Enemy.class, false);
+            BlockPos at = p.turret.node.coordonate.pos();
+            p.spare.add(mob(ctx, p, at, p.turret.front, 3, 0, false));
+            p.spare.add(mob(ctx, p, at, p.turret.front, 7, 0, false));
+            p.shoot.add(mob(ctx, p, at, p.turret.front, 5, 0, true));
+            // the case only tests something if a cow comes before the husk in the list the turret walks (taken now:
+            // the husk may be dead at measure time)
+            List<net.minecraft.world.entity.LivingEntity> list = ctx.level().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+                p.turret.coordonate().getAxisAlignedBB(12));   // (its detection range)
+            int husk = list.indexOf(p.shoot.get(0)), firstCow = Integer.MAX_VALUE;
+            for (Mob m : p.spare) if (list.indexOf(m) >= 0) firstCow = Math.min(firstCow, list.indexOf(m));
+            premise = husk >= 0 && firstCow < husk;
+            order = "cow at " + firstCow + ", husk at " + husk + " of " + list.size();
+        }
+
+        boolean premise;
+        String order = "";
+
+        @Override
+        public void measure(TestContext ctx) {
+            ctx.check("turret: a spared cow comes before the husk in the entity list (the case's premise)", premise, order);
+            super.measure(ctx);
         }
     }
 }

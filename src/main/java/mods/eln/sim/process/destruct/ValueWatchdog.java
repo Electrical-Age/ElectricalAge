@@ -25,6 +25,11 @@ public abstract class ValueWatchdog implements IProcess {
             timeout = timeoutReset;
         }
         double value = getValue();
+        // a non-finite sample is no sample: in the sums below it made timeout NaN, and the watchdog never fired again
+        if (!Double.isFinite(value)) {
+            mods.eln.sim.NanGuard.report(getClass().getSimpleName(), value);
+            return;
+        }
         double overflow = Math.max(value - max, min - value);
         if (overflow > 0) {
             if (joker) {

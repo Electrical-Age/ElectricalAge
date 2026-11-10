@@ -44,6 +44,12 @@ public class GhostManager {
         return ghostTable.get(coordonate);
     }
 
+    /** Gives the ghost at c the id `to` if observer watches it with the id `from` (an observer renumbering its ghosts). */
+    public void renumberGhost(Coordonate c, Coordonate observer, int from, int to) {
+        GhostElement g = ghostTable.get(c);
+        if (g != null && g.UUID == from && g.observatorCoordonate.equals(observer)) g.UUID = to;
+    }
+
     public void removeGhost(Coordonate coordonate) {
         removeGhostNode(coordonate);
         ghostTable.remove(coordonate);

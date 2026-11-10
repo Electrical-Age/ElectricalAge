@@ -476,6 +476,27 @@ In the port:
   load; the Modbus RTU caps its Tx and Rx entries at 32 each. Two bugs the same test found: a Modbus RTU with two
   or more transmitters threw on unload, and a fuel heat furnace's switch turned on with no burner was off after a
   reload (it now turns on only with a burner, as loading kept it). Test: `gui_packets_reject_bad_values_*`.
+- One NaN input (0/0 from two pins at 0 V) stuck in a signal processor's `rc`, `integrate`, `pid` or `derivate` for
+  good, and was saved: the program output 0 V until it was retyped. A step whose new state would not be finite is
+  skipped (the state holds, as `ramp` already did), and a NaN in a save loads as 0. A watchdog that saw one NaN sample
+  never fired again; it now skips the sample and reports it through NanGuard. Inductors and voltage sources load a
+  non-finite saved value as 0. Tests `StatefulNanTest`, `ValueWatchdogNanTest`, `NanGuardTest`.
+- A turret ended its search at the first entity in its window that its filter spared, so a cow in front of a zombie
+  kept it from firing (1.12). It skips that entity now. Test `turret_looks_past_a_spared_entity`.
+- Range checks ignored the dimension (1.12 `trueDistanceTo` compared x, y and z): a wireless transmitter or lamp supply
+  in the Nether reached devices at the same coordinates in the Overworld, and two utility poles in different dimensions
+  could be linked for a few blocks of cable. The distance between dimensions is infinite now, a starting pole in
+  another dimension is forgotten, and so is a player's starting pole on logout. Test
+  `dimensions_keep_wireless_and_poles_apart`.
+- Auto Miner below y = 0 (1.12 never went there): each pipe segment's ghost id was its height, so the segment at
+  y = -1 had the machine's own id and breaking it broke the miner. Pipe segments share one id now. The stacks waiting
+  for room in the chest are saved and dropped when the miner is broken (1.12 lost them). Test `autominer_below_zero`.
+- The Auto Miner mined anything but air, liquids, obsidian and bedrock, and with silk touch handed out spawners, budding
+  amethyst and end portal frames as items. It leaves alone blocks with a destroy speed below 0, the
+  `#minecraft:wither_immune` and `#minecraft:features_cannot_replace` blocks (spawners, trial spawners, vaults, chests,
+  reinforced deepslate, command blocks) and budding amethyst: in the shaft they end it as bedrock does, around it they
+  are skipped. A finished or waiting miner looks for work once a second (1.12: every tick, rescanning its whole layer).
+  Test `autominer_refuses_unbreakable_blocks`.
 
 ## Deferred
 
