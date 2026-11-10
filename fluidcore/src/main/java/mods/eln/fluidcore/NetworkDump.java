@@ -11,8 +11,8 @@ import java.util.Locale;
  * dt BITS
  * species wa                                   (water and air, the fast path) or, per species:
  * species KEY GROUP KIND rho cpL cpV M tb lb
- * node V z H fixed U heat m0 m1 ...
- * edge a b fa fb g kind boost exchange conductance [gBack [qMax h0 speed eta]]
+ * node V z H fixed U heat m0 m1 ... [w wallUA wallT]
+ * edge a b fa fb g kind boost exchange conductance [gBack [qMax h0 speed eta [band [nozzle open drop]]]]
  * </pre>
  */
 public final class NetworkDump {
@@ -33,13 +33,15 @@ public final class NetworkDump {
             s.append("node ").append(h(n.V)).append(' ').append(h(n.z)).append(' ').append(h(n.H)).append(' ').append(n.fixed)
                 .append(' ').append(h(n.U)).append(' ').append(h(n.heat));
             for (double m : n.m) s.append(' ').append(h(m));
+            if (n.wallUA != 0) s.append(" w ").append(h(n.wallUA)).append(' ').append(h(n.wallT));
             s.append('\n');
         }
         for (Network.Edge e : net.edges)
             s.append("edge ").append(idx.get(e.a)).append(' ').append(idx.get(e.b)).append(' ').append(h(e.fa)).append(' ').append(h(e.fb))
                 .append(' ').append(h(e.g)).append(' ').append(e.kind).append(' ').append(h(e.boost)).append(' ').append(h(e.exchange))
                 .append(' ').append(h(e.conductance)).append(' ').append(h(e.gBack)).append(' ').append(h(e.qMax)).append(' ').append(h(e.h0))
-                .append(' ').append(h(e.speed)).append(' ').append(h(e.eta)).append(' ').append(h(e.band)).append('\n');
+                .append(' ').append(h(e.speed)).append(' ').append(h(e.eta)).append(' ').append(h(e.band))
+                .append(' ').append(h(e.nozzle)).append(' ').append(h(e.open)).append(' ').append(h(e.drop)).append('\n');
         return s.toString();
     }
 
@@ -72,6 +74,10 @@ public final class NetworkDump {
                     n.U = d(w[5]);
                     n.heat = d(w[6]);
                     for (int j = 0; j < n.m.length; j++) n.m[j] = d(w[7 + j]);
+                    if (w.length > 7 + n.m.length + 2 && w[7 + n.m.length].equals("w")) {
+                        n.wallUA = d(w[8 + n.m.length]);
+                        n.wallT = d(w[9 + n.m.length]);
+                    }
                     n.update();
                     nodes.add(net.add(n));
                 }
@@ -89,6 +95,11 @@ public final class NetworkDump {
                         e.eta = d(w[14]);
                     }
                     if (w.length > 15) e.band = d(w[15]);
+                    if (w.length > 18) {
+                        e.nozzle = d(w[16]);
+                        e.open = d(w[17]);
+                        e.drop = d(w[18]);
+                    }
                 }
                 default -> {
                 }
