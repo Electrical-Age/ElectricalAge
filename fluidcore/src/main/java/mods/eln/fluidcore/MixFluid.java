@@ -27,6 +27,8 @@ final class MixFluid implements NodeFluid {
     double[] m;
     double U;
     double T = 300, vg = -1;
+    /** The most Newton steps any one split's root has taken on this node (tests bound it). */
+    int splitSteps;
     Eval st;
     /** d(T, Vg) / d(masses, U): [2][S + 1]. */
     double[][] dTheta;
@@ -248,10 +250,17 @@ final class MixFluid implements NodeFluid {
 
     /**
      * One group's split at (T, Vg, p): Rachford-Rice in negative-flash form. c_i = moles of saturated vapour i the gas
-     * space holds (0 for a non-volatile, infinite for water past its no-root point); N* solves sum n_i / (N + c_i) = 1;
-     * the liquid's moles N = softplus over EPS_L of the group's moles; a common factor lam on the c_i makes the shares
-     * sum to N, so x_i = n_i / (N + lam c_i) are the liquid's mole fractions and n_l,i = x_i N (one species alone:
-     * exactly WaterAir's softplus split).
+     * space holds (0 for a non-volatile, infinite for water past its no-root point). The liquid's moles N =
+     * softplus(X) over EPS_L of the group's moles, where X solves sum n_i / softplus(X + c_i) = 1. Where every
+     * X + c_i that matters is some widths above zero this is the unsmoothed equation sum n_i / (X + c_i) = 1, whose
+     * root is the liquid's moles, or below zero by what the vapour lacks to saturation (one species alone:
+     * X = n - c, exactly WaterAir's softplus split). The softplus under each term is what lets a trace come and go:
+     * the unsmoothed root can never pass below -c_i of a species that is present at all, so the first 1e-28 kg of
+     * one with c_i under the width (a residue, or diesel in hot gasoline vapour) held it near zero and made some
+     * 0.7 % of a superheated vapour liquid. As written a trace's term fades with the trace. Then a common factor
+     * lam <= 1 on the c_i makes the shares sum to 1 at that N (softplus rises no faster than its argument, so
+     * sum n_i / (N + c_i) <= 1 and lam exists): x_i = n_i / (N + lam c_i) are the liquid's mole fractions and
+     * n_l,i = x_i N.
      */
     private void split(Eval e, int g, D T, D Vg, D p, D[] mm) {
         int[] mem = groups[g];
@@ -300,39 +309,54 @@ final class MixFluid implements NodeFluid {
             finishVapour(e, g, T, Vg);
             return;
         }
-        // N*: Newton from the root of the smallest present c (F >= 0 there; F convex and falling: no overshoot)
-        // (solved for u = N* + c_k0, the smallest present c: N* = n_k0 - c_k0 would lose n_k0 entirely when it is far
-        // below c_k0, as a trace of vapour is, and q = N* + c_k0 came out 0)
-        int k0 = pick(c, nn, inf);
-        double u = nn[k0].v;
-        for (int it = 0; it < 100; it++) {
-            double F = -1, dF = 0;
-            for (int a = 0; a < k; a++) {
-                if (inf[a] || nn[a].v <= 0) continue;
-                double q = u + (c[a].v - c[k0].v);
-                F += nn[a].v / q;
-                dF -= nn[a].v / (q * q);
-            }
-            double step = -F / dF;
-            u += step;
-            if (!(Math.abs(step) > 1e-15 * u)) break;
-        }
-        // its gradient by the implicit function theorem: du = -F_x / F_u
-        D Fx = D.c(-1, n);
-        double FU = 0;
-        for (int a = 0; a < k; a++) {
-            if (inf[a]) continue;
-            D q = c[a].sub(c[k0]).add(u);
-            if (q.v <= 0) continue;   // (an absent species that would sit below the root: no slope through it)
-            Fx = Fx.add(nn[a].div(q));
-            FU -= nn[a].v / (q.v * q.v);
-        }
-        double[] gU = new double[n];
-        for (int j = 0; j < n; j++) gU[j] = -Fx.g[j] / FU;
-        D Nstar = new D(u, gU).sub(c[k0]);
         D ntotD = D.c(0, n);
         for (int a = 0; a < k; a++) if (!inf[a]) ntotD = ntotD.add(nn[a]);   // (those past their no-root point are all vapour)
-        D N = D.softplus(Nstar, ntotD.mul(WaterAir.EPS_L));
+        D wD = ntotD.mul(WaterAir.EPS_L);
+        double w = wD.v;
+        // X: H(X) = sum n_i / softplus(X + c_i) - 1 = 0, convex and falling, by Newton from the largest
+        // softplus^-1(n_i) - c_i: that species' term is 1 there and H >= 0, so no step overshoots, and no other
+        // term is above 1, so the root is near
+        // (solved for y = X + c_b, b that species: its term is the one that decides, and X itself would round away
+        // what a trace of vapour leaves of n_b - c_b)
+        int b = -1;
+        double x0 = 0;
+        for (int a = 0; a < k; a++) {
+            if (inf[a] || nn[a].v <= 0) continue;
+            double xa = softInv(nn[a].v, w) - c[a].v;
+            if (b < 0 || xa > x0) {
+                b = a;
+                x0 = xa;
+            }
+        }
+        double y = softInv(nn[b].v, w);
+        for (int it = 0; it < 100; it++) {
+            double Hv = -1, HY = 0;
+            for (int a = 0; a < k; a++) {
+                if (inf[a] || nn[a].v <= 0) continue;
+                double t = (y + (c[a].v - c[b].v)) / w, sa = w * soft(t);
+                Hv += nn[a].v / sa;
+                HY -= nn[a].v * sig(t) / (sa * sa);
+            }
+            double step = -Hv / HY;
+            y += step;
+            splitSteps = Math.max(splitSteps, it + 1);
+            if (!(step > 1e-15 * Math.max(Math.abs(y), w))) break;   // (from below the steps only shrink: one at rounding's size, or back, is the last)
+        }
+        // N = softplus(X), its gradient with dX = -H_x / H_X (the implicit function theorem)
+        // (written out by species, each slope as softplus'(X) / softplus(X + c_i): an absent species' 1 / softplus(X + c_i)
+        // alone overflows in a vapour far from saturation, where the softplus'(X) it meets in N underflows)
+        double t0 = (y - c[b].v) / w, sig0 = sig(t0), om0 = soft(t0) - t0 * sig0, hx = 0;
+        double[] gN = new double[n];
+        for (int a = 0; a < k; a++) {
+            if (inf[a]) continue;
+            double t = (y + (c[a].v - c[b].v)) / w, st = soft(t), sg = sig(t);
+            double r = st > 1e-250 ? sig0 / (w * st) : Math.exp(lnSig(t0) - lnSoft(t)) / w;
+            double f = nn[a].v > 0 ? nn[a].v / (w * st) : 0, om = st - t * sg;
+            if (f > 0) hx += f * sg / (w * st);
+            for (int q = 0; q < n; q++) gN[q] += r * (nn[a].g[q] - f * (sg * c[a].g[q] + om * wD.g[q]));
+        }
+        for (int q = 0; q < n; q++) gN[q] = gN[q] / hx + om0 * wD.g[q];
+        D N = new D(w * soft(t0), gN);
         // lam: sum n_i / (N + lam c_i) = 1 (only the finite, volatile terms depend on lam)
         D lam;
         boolean lamMatters = false;
@@ -396,6 +420,32 @@ final class MixFluid implements NodeFluid {
             e.mv[i] = mm[i].sub(e.ml[i]);
         }
         finishVapour(e, g, T, Vg);
+    }
+
+    /** softplus(t) = ln(1 + e^t), cut as D.softplus cuts it. */
+    private static double soft(double t) {
+        return t > 30 ? t : t < -30 ? Math.exp(t) : Math.log1p(Math.exp(t));
+    }
+
+    /** softplus'(t). */
+    private static double sig(double t) {
+        return t > 30 ? 1 : t < -30 ? Math.exp(t) : 1 / (1 + Math.exp(-t));
+    }
+
+    /** ln softplus(t), finite where softplus underflows. */
+    private static double lnSoft(double t) {
+        return t > 30 ? Math.log(t) : t < -30 ? t : Math.log(Math.log1p(Math.exp(t)));
+    }
+
+    /** ln softplus'(t). */
+    private static double lnSig(double t) {
+        return t > 30 ? 0 : t < -30 ? t : -Math.log1p(Math.exp(-t));
+    }
+
+    /** Where w softplus(x / w) is n > 0. */
+    private static double softInv(double n, double w) {
+        double t = n / w;
+        return t > 30 ? n : w * Math.log(Math.expm1(t));
     }
 
     private static int pick(D[] c, D[] nn, boolean[] inf) {
