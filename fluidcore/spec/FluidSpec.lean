@@ -3,3 +3,4 @@ import FluidSpec.Limiter.Proofs
 import FluidSpec.Limiter.Examples
 import FluidSpec.Step
 import FluidSpec.Flux
+import FluidSpec.Split
