@@ -34,24 +34,42 @@ public final class Network {
         /** Its thermodynamics: the last solved state, what its ports draw, and their slopes. */
         final NodeFluid fluid;
 
+        /** Its species (null: water and air, the WaterAir fast path). */
+        final Species[] species;
+
         /** A node of water and air. */
         public Node(double V, double z, double H, boolean fixed) {
+            this(V, z, H, fixed, null);
+        }
+
+        /** A node of the given species (MixFluid; null: water and air through WaterAirFluid). */
+        public Node(double V, double z, double H, boolean fixed, Species[] species) {
             this.V = V;
             this.z = z;
             this.H = H;
             this.fixed = fixed;
-            this.fluid = new WaterAirFluid(V, H, fixed);
+            this.species = species;
+            this.fluid = species == null ? new WaterAirFluid(V, H, fixed) : new MixFluid(species, V, H, fixed);
             this.m = new double[fluid.species()];
+        }
+
+        /** Fill a node of any species: masses (kg, its species' order), all at temperature T. */
+        public Node fillMasses(double[] masses, double T) {
+            System.arraycopy(masses, 0, m, 0, m.length);
+            if (fluid instanceof MixFluid mf) {
+                mf.T = T;
+                U = mf.energyOf(m, T);
+            } else {
+                U = WaterAir.energyAt(m[0], m[1], V, T);
+                waterAir().tHint = T;
+            }
+            update();
+            return this;
         }
 
         /** Fill to water mass mw (all of it at temperature T) and air ma (a water/air node). */
         public Node fill(double mw, double ma, double T) {
-            m[0] = mw;
-            m[1] = ma;
-            this.U = WaterAir.energyAt(mw, ma, V, T);
-            waterAir().tHint = T;
-            update();
-            return this;
+            return fillMasses(new double[]{mw, ma}, T);
         }
 
         void update() {
@@ -131,6 +149,8 @@ public final class Network {
     public final List<Edge> edges = new ArrayList<>();
 
     public Node add(Node n) {
+        if (!nodes.isEmpty() && !java.util.Arrays.equals(nodes.get(0).species, n.species))
+            throw new IllegalArgumentException("one network, one species list (and one implementation)");
         nodes.add(n);
         return n;
     }
@@ -194,12 +214,12 @@ public final class Network {
         if (e.exchange <= 0) return f;
         NodeFluid a = e.a.fluid, b = e.b.fluid;
         double wl = a.liquidWindow(e.fa), wg = 1 - b.liquidWindow(e.fb);
-        double rhoG = b.rhoGas(), rhoL = a.rhoLiquid();
+        double rhoG = b.rhoGas(), rhoL = a.rhoLiquid(e.fa);
         double Q = e.exchange * Math.max(0, rhoL - rhoG) * G * wl * wg;
         if (Q <= 0) return f;
         // liquid down: Q rhoL of a's liquid; gas up: Q of b's gas
         double gasM = Q * rhoG;
-        double[] liq = a.liquidDraw(), gas = b.gasDraw();
+        double[] liq = a.liquidDraw(e.fa), gas = b.gasDraw();
         for (int k = 0; k < C; k++) f[k] = Q * rhoL * liq[k] - gasM * gas[k];
         return f;
     }
