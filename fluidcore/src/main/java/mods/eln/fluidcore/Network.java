@@ -149,6 +149,7 @@ public final class Network {
     public final List<Edge> edges = new ArrayList<>();
 
     public Node add(Node n) {
+        wake();
         if (!nodes.isEmpty() && !java.util.Arrays.equals(nodes.get(0).species, n.species))
             throw new IllegalArgumentException("one network, one species list (and one implementation)");
         nodes.add(n);
@@ -161,6 +162,7 @@ public final class Network {
         if (Math.abs(za - zb) > 1e-6) throw new IllegalArgumentException("ports at " + za + " and " + zb + ": they must meet at one height");
         Edge e = new Edge(a, fa, b, fb, g);
         edges.add(e);
+        wake();
         return e;
     }
 
@@ -261,7 +263,7 @@ public final class Network {
 
     /** Counters for tests and measurements. */
     public static final class Stats {
-        public long steps, iterations, substeps, failures, solves, stalls;
+        public long steps, iterations, substeps, failures, solves, stalls, slept;
         /** The last failed solve's residual norms by iteration (tests). */
         public final List<Double> lastFail = new ArrayList<>();
         /** The last failed solve's scaled residual by row (tests). */
@@ -280,6 +282,13 @@ public final class Network {
     /** One step of dt seconds. */
     public void step(double dt) {
         stats.steps++;
+        if (asleep) {
+            if (signature() == sleepSignature) {
+                stats.slept++;
+                return;
+            }
+            wake();
+        }
         List<Node> free = new ArrayList<>();
         for (Node n : nodes) if (!n.fixed) free.add(n);
         double[] y0 = pack(free);
@@ -289,6 +298,66 @@ public final class Network {
             substep(free, dt, 1);
         }
         for (Edge e : edges) e.flow = flow(e);
+        quiet = isQuiet(free, y0, pack(free)) ? quiet + 1 : 0;
+        if (SLEEP_STEPS > 0 && quiet >= SLEEP_STEPS) {
+            asleep = true;
+            sleepSignature = signature();
+        }
+    }
+
+    // ---- sleeping
+
+    /**
+     * A network whose every node changed by less than SLEEP_REL of its contents (masses, and energy against a typical
+     * 1e5 J/kg) in each of SLEEP_STEPS steps in a row goes to sleep: its steps then cost one pass over its inputs, until
+     * any of them changes (a node's contents or heat, an edge's conductance, boost, kind, conductance or exchange; nodes
+     * or edges added) or wake() is called. 0 steps: never sleep.
+     */
+    public static int SLEEP_STEPS = 100;
+    public static double SLEEP_REL = 1e-9;
+    private boolean asleep;
+    private int quiet;
+    private long sleepSignature;
+
+    public boolean asleep() {
+        return asleep;
+    }
+
+    /** Wake it (the adapter calls this whenever it changes anything; the signature catches the rest). */
+    public void wake() {
+        asleep = false;
+        quiet = 0;
+    }
+
+    private boolean isQuiet(List<Node> free, double[] y0, double[] y1) {
+        int C = C(), S = C - 1;
+        for (int i = 0; i < free.size(); i++) {
+            double m = Math.max(1e-9, massOf(y0, C * i, S));
+            for (int k = 0; k < S; k++) if (Math.abs(y1[C * i + k] - y0[C * i + k]) > SLEEP_REL * m) return false;
+            if (Math.abs(y1[C * i + S] - y0[C * i + S]) > SLEEP_REL * m * 1e5) return false;
+        }
+        return true;
+    }
+
+    /** A hash of everything outside the solve that a step depends on. */
+    private long signature() {
+        long h = 0x9E3779B97F4A7C15L ^ nodes.size() * 31L ^ edges.size();
+        for (Node n : nodes) {
+            for (double x : n.m) h = mixIn(h, x);
+            h = mixIn(mixIn(h, n.U), n.heat);
+        }
+        for (Edge e : edges) {
+            h = mixIn(mixIn(mixIn(h, e.g), e.boost), e.conductance);
+            h = mixIn(mixIn(h, e.exchange), e.kind.ordinal());
+        }
+        return h;
+    }
+
+    private static long mixIn(long h, double x) {
+        long z = h ^ Double.doubleToLongBits(x);
+        z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
+        z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
+        return z ^ (z >>> 31);
     }
 
     private void substep(List<Node> free, double dt, int depth) {

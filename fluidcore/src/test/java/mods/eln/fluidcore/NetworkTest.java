@@ -100,7 +100,7 @@ class NetworkTest {
         List<Long> restless = new ArrayList<>();
         List<String> negatives = new ArrayList<>();
         List<String> failedSeeds = new ArrayList<>();
-        long failures = 0, substeps = 0, iters = 0, total = 0, stalls = 0;
+        long failures = 0, substeps = 0, iters = 0, total = 0, stalls = 0, slept = 0, asleep = 0;
         StringBuilder log = new StringBuilder();
         for (long seed = 1; seed <= cases; seed++) {
             Network net = level(seed);
@@ -118,12 +118,14 @@ class NetworkTest {
             if (net.stats.failures > 0) failedSeeds.add(seed + "x" + net.stats.failures);
             failures += net.stats.failures;
             stalls += net.stats.stalls;
+            slept += net.stats.slept;
+            if (net.asleep()) asleep++;
             substeps += net.stats.substeps;
             iters += net.stats.iterations;
             total += net.stats.steps;
         }
-        log.append(String.format("K %.3g cases %d steps %d: restless (>=0.1 %%/s) %s, failures %d %s, substeps %d, stalls %d, iterations/step %.2f, negatives %d %s%n",
-            WaterAir.K, cases, steps, restless, failures, failedSeeds, substeps, stalls, iters / (double) total, negatives.size(), negatives.stream().limit(10).toList()));
+        log.append(String.format("K %.3g cases %d steps %d: restless (>=0.1 %%/s) %s, failures %d %s, substeps %d, stalls %d, iterations/step %.2f, asleep at the end %d, steps slept %d, negatives %d %s%n",
+            WaterAir.K, cases, steps, restless, failures, failedSeeds, substeps, stalls, iters / (double) total, asleep, slept, negatives.size(), negatives.stream().limit(10).toList()));
         java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-m2.txt"), log.toString());
         assertTrue(failures == 0 && negatives.isEmpty(), log.toString());
     }
