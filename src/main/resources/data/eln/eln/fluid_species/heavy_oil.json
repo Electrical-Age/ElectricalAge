@@ -5,7 +5,7 @@
   "cp_liquid": 1900,
   "cp_vapour": 1700,
   "molar_mass": 0.35,
-  "boiling_point": 650,
+  "boiling_point": 700,
   "latent_heat": 220000,
   "critical_temperature": 850,
   "viscosity": [[293, 0.2], [373, 0.015]],

@@ -1306,6 +1306,8 @@ public final class PipeCases {
         public void measure(TestContext ctx) {
             PipePart pa = (PipePart) node(ctx, a).parts.get(0), pb = (PipePart) node(ctx, b).parts.get(0);
             ctx.check("leak fire: the run burst", pa.burst || pb.burst, pa.burst + " " + pb.burst);
+            var run = mods.eln.fluid.FluidWorld.nodeFor(pa.fluid);
+            ctx.line(String.format("leak fire: the run at %.1f K, %.2f bar, %.3f kg", run.T(), run.P() / 1e5, run.mass()));
             int fires = 0;
             for (BlockPos p : BlockPos.betweenClosed(ctx.at(0, 0, 0), ctx.at(3, 3, 2)))
                 if (ctx.level().getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.BaseFireBlock) fires++;
