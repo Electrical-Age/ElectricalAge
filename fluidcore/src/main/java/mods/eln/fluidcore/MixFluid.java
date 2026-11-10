@@ -657,11 +657,16 @@ final class MixFluid implements NodeFluid {
         return w;
     }
 
+    /**
+     * The density of liquidDraw's mix. Its weights are shares of the mass, so the volumes add: 1 / sum(w / rho). (The
+     * weighted mean of the densities is higher wherever a port sees two layers, by 2 % for water and gasoline in equal
+     * parts, and the exchange then sent down more liquid volume than the gas volume it brought up.)
+     */
     public double rhoLiquid(double f) {
         double[] w = layerWeights(f);
-        double r = 0;
-        for (int k = 0; k < w.length; k++) r += w[k] * st.rhoAct[st.order[k]].v;
-        return r;
+        double v = 0;
+        for (int k = 0; k < w.length; k++) v += w[k] / st.rhoAct[st.order[k]].v;
+        return v > 0 ? 1 / v : 0;
     }
 
     public double rhoGas() {
