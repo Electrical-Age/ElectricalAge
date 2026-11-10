@@ -44,10 +44,15 @@ class SplitShapeTest {
     @Test
     void sharesKeepTheirBounds() {
         Random r = new Random(11);
+        int steps = 0;
         for (int n = 0; n < 4000; n++) {
             double[] m = new double[SP.length];
-            check(random(r, m), m, "case " + n + " " + java.util.Arrays.toString(m));
+            MixFluid f = random(r, m);
+            check(f, m, "case " + n + " " + java.util.Arrays.toString(m));
+            steps = Math.max(steps, f.splitSteps);
         }
+        System.out.println("SplitShape: at most " + steps + " Newton steps to a split's root");
+        assertTrue(steps <= 20, "Newton steps to a split's root: " + steps);
     }
 
     /**
@@ -64,6 +69,87 @@ class SplitShapeTest {
             for (int i = 0; i < m.length - 1; i++) if (r.nextDouble() < 0.4) m[i] = -Math.pow(10, -32 + 14 * r.nextDouble());
             f.update(m, U);
             check(f, m, "case " + n + " " + java.util.Arrays.toString(m));
+        }
+    }
+
+    static final Species[] GRA = {MixFluidTest.GASOLINE, MixFluidTest.RESIDUE, Species.AIR};
+    static final Species[] GDA = {MixFluidTest.GASOLINE, MixFluidTest.DIESEL, Species.AIR};
+
+    /**
+     * P5. A first trace of a heavier species changes nothing: the gasoline's liquid and the node's temperature at a
+     * given energy are those without it, superheated, at the dew point and wet. Residue never boils; diesel's vapour
+     * capacity runs from far below the smoothing's width to far above it over these temperatures. (Either made 0.5 to
+     * 0.7 % of a superheated gasoline vapour liquid, and the node up to 1 K warmer.)
+     */
+    @Test
+    void aTraceOfAHeavierSpeciesChangesNothing() {
+        for (Species[] sp : new Species[][]{GRA, GDA}) {
+            double worstL = 0, worstT = 0, perKg = 0;
+            for (double T = 300; T <= 620; T += T > 340 && T < 400 ? 0.25 : 5) {
+                double[] m0 = {0.002, 0, 0.001};
+                MixFluid clean = MixFluidTest.mf(MixFluidTest.node(sp, 1e-3, m0, T));
+                double U = clean.energyAt(m0, T), l0 = clean.st.ml[0].v;
+                for (double res : new double[]{1e-28, 1e-20, 1e-12, 1e-9, 1e-7}) {
+                    double[] m = {0.002, res, 0.001};
+                    MixFluid f = MixFluidTest.mf(MixFluidTest.node(sp, 1e-3, m, T));
+                    double dl = Math.abs(f.st.ml[0].v - l0);
+                    f.update(m, U);
+                    double dT = Math.abs(f.T() - T);
+                    if (res >= 1e-9) perKg = Math.max(perKg, dl / res);   // (below it the difference is rounding's)
+                    if (res <= 1e-12) {
+                        worstL = Math.max(worstL, dl);
+                        worstT = Math.max(worstT, dT);
+                    }
+                    String what = "T " + T + " " + sp[1].key + " " + res;
+                    assertTrue(dl <= 400 * res + 1e-15, what + ": gasoline liquid " + f.st.ml[0].v + " against " + l0);
+                    assertTrue(dT <= 2e7 * res + 1e-9, what + ": at the same energy T = " + f.T());
+                }
+            }
+            System.out.println("SplitShape: a trace of " + sp[1].key + " moves the gasoline's liquid by " + worstL + " kg, T by " + worstT
+                + " K; at most " + perKg + " kg per kg of it");
+        }
+    }
+
+    /** The slopes hold where the heavier species is a trace and the gasoline at its dew point: against differences of the solve. */
+    @Test
+    void slopesHoldAtTheDewPointWithATraceOfAHeavierSpecies() {
+        for (Species[] sp : new Species[][]{GRA, GDA}) {
+            double worst = 0;
+            String at = "";
+            for (double T = 350; T <= 390; T += 1)
+                for (double res : new double[]{1e-10, 1e-8, 1e-6, 1e-4}) {
+                    double[] m = {0.002, res, 0.001};
+                    Network.Node n = MixFluidTest.node(sp, 1e-3, m, T);
+                    MixFluid f = MixFluidTest.mf(n);
+                    double[] ps = f.portPSlope(0.5);
+                    for (int j = 0; j <= 3; j++) {
+                        // (the trace's own step relative to it: the liquid's answer to a trace bends where the trace
+                        // is as large as the smoothing's liquid, which may be far below any fixed step)
+                        double base = j < 3 ? m[j] : n.U, h = j == 1 ? 1e-3 * base : 1e-6 * Math.abs(base);
+                        double[] mp = m.clone(), mm = m.clone();
+                        double Up = n.U, Um = n.U;
+                        if (j < 3) {
+                            mp[j] += h;
+                            mm[j] -= h;
+                        } else {
+                            Up += h;
+                            Um -= h;
+                        }
+                        MixFluid a = new MixFluid(sp, 1e-3, 1, false), b = new MixFluid(sp, 1e-3, 1, false);
+                        a.T = b.T = f.T;
+                        a.vg = b.vg = f.vg;
+                        a.update(mp, Up);
+                        b.update(mm, Um);
+                        double fd = (a.portP(0.5) - b.portP(0.5)) / (2 * h);
+                        double e = Math.abs(fd - ps[j]) / (Math.max(Math.abs(fd), Math.abs(ps[j])) + 1e-3 * f.portP(0.5) / Math.max(1e-6, Math.abs(base)));
+                        if (e > worst) {
+                            worst = e;
+                            at = "dP/d" + j + " at T " + T + " " + sp[1].key + " " + res + ": " + ps[j] + " vs " + fd;
+                        }
+                    }
+                }
+            System.out.println("SplitShape slopes: worst " + worst + " at " + at);
+            assertTrue(worst < 2e-2, "worst " + worst + " at " + at);
         }
     }
 }
