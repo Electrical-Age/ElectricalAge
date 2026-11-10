@@ -156,6 +156,8 @@ public final class Network {
          * draws at its top), and lumped runs and reservoirs meet ports at other heights.
          */
         public final double dz;
+        /** With FREEZE_HEAD: the densities each stream's head is weighed by, taken at the step's start (NaN: live). */
+        double rhoA = Double.NaN, rhoB = Double.NaN;
         public Kind kind = Kind.PIPE;
         /**
          * Counter-current exchange (m^3 s / kg, 0 for none): where a's port is at its floor and b's at its ceiling (a over
@@ -330,7 +332,8 @@ public final class Network {
      * valve has q+ alone. Returns {q+, q-, dq+ / d(dp + ha), dq- / d(dp + hb)}.
      */
     static double[] headStreams(Edge e, double dp) {
-        double ha = e.dz == 0 ? 0 : G * e.dz * rhoDraw(e.a, e.fa), hb = e.dz == 0 ? 0 : G * e.dz * rhoDraw(e.b, e.fb);
+        double ha = e.dz == 0 ? 0 : G * e.dz * (Double.isNaN(e.rhoA) ? rhoDraw(e.a, e.fa) : e.rhoA);
+        double hb = e.dz == 0 ? 0 : G * e.dz * (Double.isNaN(e.rhoB) ? rhoDraw(e.b, e.fb) : e.rhoB);
         double ga = e.g, gb = e.gB();
         if (SPLIT_DP <= 0) {
             double up = dp + ha, down = -(dp + hb);
@@ -368,6 +371,13 @@ public final class Network {
         }
         return w * n.fluid.rhoLiquid(f) + (1 - w) * n.fluid.rhoGas();
     }
+
+    /**
+     * Weigh each stream's head by its port's draw density at the step's start, held through the step (as the game holds
+     * each stream's conductance): no slopes of the density in the Jacobian. Live, their finite differences cost 2(S + 1)
+     * node solves a port an iteration, which in MixFluid made the multi-species property tests crawl.
+     */
+    public static boolean FREEZE_HEAD = true;
 
     /** Experiment: weigh a head by the drawn mix's own density, 1 / (w / rhoL + (1 - w) / rhoG). */
     public static boolean HARMONIC_HEAD = "1".equals(System.getenv("FLUIDCORE_HARMONIC"));
@@ -424,6 +434,7 @@ public final class Network {
         if (asleep) {
             if (signature() == sleepSignature) {
                 stats.slept++;
+                done = dt;
                 return;
             }
             wake();
@@ -435,9 +446,16 @@ public final class Network {
             if (e.pending != null) java.util.Arrays.fill(e.pending, 0);
         }
         double[] y0 = pack(free);
+        done = 0;
+        for (Edge e : edges) {
+            boolean f = FREEZE_HEAD && e.dz != 0;
+            e.rhoA = f ? rhoDraw(e.a, e.fa) : Double.NaN;
+            e.rhoB = f ? rhoDraw(e.b, e.fb) : Double.NaN;
+        }
         progressed = false;
         stepSubsteps = 0;
-        if (!solve(free, y0, dt)) {
+        if (solve(free, y0, dt)) done = dt;
+        else {
             // (no convergence: two half steps, each from where the last ended)
             restore(free, y0);
             substep(free, dt, 1);
@@ -515,7 +533,10 @@ public final class Network {
         }
         for (int half = 0; half < 2; half++) {
             double[] y = pack(free);
-            if (solve(free, y, dt / 2)) progressed = true;
+            if (solve(free, y, dt / 2)) {
+                progressed = true;
+                done += dt / 2;
+            }
             else {
                 restore(free, y);
                 // (a step that has converged nothing yet goes 6 levels deeper before it is cut: cut at once, a network
@@ -532,6 +553,7 @@ public final class Network {
                 } else {
                     stats.failures++;
                     solve(free, y, dt / 2);   // (its best iterate: still conservative)
+                    done += dt / 2;
                 }
             }
         }
@@ -545,6 +567,11 @@ public final class Network {
     public static boolean CUT_SHORT = false;
     /** This step has converged at least one sub-step. */
     private boolean progressed;
+    /**
+     * The time (s) the last step actually covered: its dt, or with CUT_SHORT what its converged sub-steps covered (the game
+     * carries the rest into the next step, so heat put in over the dropped time isn't lost).
+     */
+    public double done;
     /** With CUT_SHORT: at most this many sub-steps a step (then it ends where it is); and this step's count. */
     public static int MAX_SUBSTEPS = 256;
     private int stepSubsteps;
@@ -660,8 +687,8 @@ public final class Network {
             double[][] dca = qs[0] != 0 ? e.a.fluid.drawSlope(e.fa) : null, dcb = qs[1] != 0 ? e.b.fluid.drawSlope(e.fb) : null;
             double[] dpa = e.a.fluid.portPSlope(e.fa), dpb = e.b.fluid.portPSlope(e.fb);
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
-            double[] dha = e.dz != 0 && ia != null ? rhoSlopes.computeIfAbsent(new PortKey(e.a, e.fa), p -> rhoDrawSlope(e.a, e.fa)) : null;
-            double[] dhb = e.dz != 0 && ib != null ? rhoSlopes.computeIfAbsent(new PortKey(e.b, e.fb), p -> rhoDrawSlope(e.b, e.fb)) : null;
+            double[] dha = e.dz != 0 && ia != null && Double.isNaN(e.rhoA) ? rhoSlopes.computeIfAbsent(new PortKey(e.a, e.fa), p -> rhoDrawSlope(e.a, e.fa)) : null;
+            double[] dhb = e.dz != 0 && ib != null && Double.isNaN(e.rhoB) ? rhoSlopes.computeIfAbsent(new PortKey(e.b, e.fb), p -> rhoDrawSlope(e.b, e.fb)) : null;
             for (int k = 0; k < C; k++) {
                 double dFdp = qs[2] * ca[k] - qs[3] * cb[k];
                 for (int side = 0; side < 2; side++) {

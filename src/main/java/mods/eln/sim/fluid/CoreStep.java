@@ -16,8 +16,8 @@ import java.util.List;
  * windows, the core's own thermodynamics for the nodes' reads and the legacy save values are not yet joined up.
  */
 final class CoreStep {
-    /** The switch: -Deln.fluidCore=true or ELN_FLUID=core (M5.1; a config option comes with the full adapter). */
-    static boolean ON = Boolean.getBoolean("eln.fluidCore") || "core".equals(System.getenv("ELN_FLUID"));
+    /** The core steps every network (the legacy solve is gone; Baughn 2026-11-10: straight to the end state). */
+    static final boolean ON = true;
 
     /** Audit: edges whose two ports are not at one height (each stream pays its own head over them), and the worst. */
     static long notLevel;
@@ -243,7 +243,13 @@ final class CoreStep {
         }
     }
 
+    /** Time (s) a cut-short step left undone, carried into the next steps (at most a second's worth at once). */
+    private double owed;
+
     void step(FluidNetwork fn, double dt) {
+        double tick = dt, ask = dt + Math.min(owed, 1.0);
+        owed -= ask - dt;
+        dt = ask;
         // contents in (the authority is the FluidNode; the core wakes by its own signature when they change)
         for (int i = 0; i < cn.length; i++) {
             FluidNode n = nodes.get(i);
@@ -295,6 +301,10 @@ final class CoreStep {
         }
         long sub0 = net.stats.substeps, cut0 = net.stats.cut;
         net.step(dt);
+        // (a step cut short covered less than dt: the rest is owed, so heat put in over it isn't lost and the network
+        // catches up; flows below are what moved this tick, per tick, so what devices book from them balances)
+        owed += Math.max(0, dt - net.done);
+        dt = tick;
         if (net.stats.failures > failures) failed(dt, m0, u0, h0);
         else if (net.stats.cut > cut0 || net.stats.substeps - sub0 > 64) slow(dt, m0, u0, h0, net.stats.substeps - sub0);
         boolean asleep = net.stats.slept > slept;
@@ -319,7 +329,9 @@ final class CoreStep {
         for (int k = 0; k < ce.length; k++) {
             FluidEdge e = edges.get(k);
             Network.Edge c = ce[k];
-            double[] mv = c == null || asleep ? null : c.moved;
+            // (asleep, the core keeps the last step's moves: the state stands still, but a pump circulating round a loop
+            // still circulates; reported as nothing, its loop flow read 0)
+            double[] mv = c == null ? null : c.moved;
             if (mv != null && ceTop[k] != null && ceTop[k].moved != null) {
                 double[] both = mv.clone();
                 for (int j = 0; j < both.length; j++) both[j] += ceTop[k].moved[j];
