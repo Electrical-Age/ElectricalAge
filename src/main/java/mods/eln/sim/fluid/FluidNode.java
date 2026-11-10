@@ -89,6 +89,11 @@ public final class FluidNode {
         state.solve(mWater, mAir, extra, energy, volume, state.T);
     }
 
+    /** Is the fluid core stepping the networks (the switch, CoreStep.ON)? */
+    public static boolean coreOn() {
+        return CoreStep.ON;
+    }
+
     /** The fluid core's node for this one (CoreStep.ON): its thermodynamics behind every read; and its species' ids (null: water and air). */
     private mods.eln.fluidcore.Network.Node core;
     private int[] coreIds;

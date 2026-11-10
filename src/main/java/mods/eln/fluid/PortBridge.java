@@ -93,6 +93,10 @@ public final class PortBridge {
         // reaches it (Baughn 2026-11-09: 3 blocks up into a tank, nothing arrived; liquids stopped at 90 % of the run,
         // short of its top). In mB of any liquid: they go by volume.
         double roomM3 = Math.max(0, 0.98 * run.volume - run.liquidVolume()) + Math.max(0, headPa - run.P()) * run.volume / Water.K_LIQUID;
+        // (the fluid core's liquid fills a run by squeezing its gas, not to a fixed 98 %: there the room is the gas the head
+        // pressure would squeeze, else a run 98 % full stood at 1.2 bar, its top port above the liquid, and nothing climbed)
+        if (FluidNode.coreOn())
+            roomM3 = NodeFluidView.cushionRoom(run.volume - run.liquidVolume(), run.P(), run.pVapour(), headPa) + Math.max(0, headPa - run.P()) * run.volume / Water.K_LIQUID;
         int liquidRoom = (int) Math.floor(roomM3 * Water.RHO_L / EaUnits.KG_PER_MB_WATER);
         int moved = 0;
         for (int i = 0; i < tank.size() && moved < budget; i++) {

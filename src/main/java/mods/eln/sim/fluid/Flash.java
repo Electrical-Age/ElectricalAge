@@ -342,7 +342,10 @@ public final class Flash {
         P = c.P();
         pVapour = c.partialP(0);
         pAir = c.partialP(1);
-        vLiquid = c.level() * V;
+        // (the liquid's volume at its nominal density, as the game counts mB and room; compressed at 100 bar it is 0.5 %
+        // less, and a tank's view offered past its 98 % cap)
+        vLiquid = 0;
+        for (int i = 0; i < count; i++) if (liq[i] > 0) vLiquid += liq[i] / SpeciesRegistry.get().byId(i).rhoL;
         vGas = Math.max(V - vLiquid, GAS_MIN * V);
         mLiquid = liq[0];
         mVapour = vap[0];
