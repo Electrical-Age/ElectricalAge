@@ -6,7 +6,7 @@ package mods.eln.sim.fluid;
  * the port is below that node's liquid level, else its gas (vapour and air in proportion).
  */
 public final class FluidEdge {
-    public enum Kind { PIPE, CHECK, TURBINE, PUMP }
+    public enum Kind { PIPE, CHECK, TURBINE, PUMP, REGULATOR }
 
     public final FluidNode a, b;
     /** Port heights on a and b (fractions of each node's height). */
@@ -41,6 +41,9 @@ public final class FluidEdge {
     public double qMax, h0, speed = 1, eta = 0.7, work;
     /** PUMP: a gas pump (qMax a volume, m^3/s; Network.Edge.gas). */
     public boolean gas;
+    /** REGULATOR: its set point (Pa) and mode (relief: holds a; else reducing: holds b; Network.Edge.setPa). */
+    public double setPa;
+    public boolean relief;
     /**
      * TURBINE (in the fluid core's solve, Network.Kind.TURBINE): its nozzle coefficient and the isentropic drop (J/kg)
      * from its inlet to its exhaust's pressure, set each step; it takes eta x drop a kg of water out as shaft work (work,
@@ -89,7 +92,7 @@ public final class FluidEdge {
 
     /** Check valves and turbines pass flow only from a to b. */
     public boolean oneWay() {
-        return kind == Kind.CHECK || kind == Kind.TURBINE;
+        return kind == Kind.CHECK || kind == Kind.TURBINE || kind == Kind.REGULATOR;
     }
 
     double zA() {

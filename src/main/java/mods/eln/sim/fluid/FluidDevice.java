@@ -86,6 +86,9 @@ public interface FluidDevice {
 
         /** A valve's flow area fully open (m^2): it then meters by the orifice law (FluidEdge.area). */
         public double area;
+        /** REGULATOR: its set point (Pa) and mode (relief: holds a at it; else reducing: holds b), set before each step. */
+        public double setPa;
+        public boolean relief;
 
         public Link area(double area) {
             this.area = area;

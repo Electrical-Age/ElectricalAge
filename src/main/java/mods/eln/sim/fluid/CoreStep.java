@@ -100,6 +100,7 @@ final class CoreStep {
                 ce[k] = net.connect(a, fa, b, fb, 0);
                 if (e.kind == FluidEdge.Kind.PUMP) ce[k].kind = Network.Kind.PUMP;
                 else if (e.kind == FluidEdge.Kind.TURBINE) ce[k].kind = Network.Kind.TURBINE;
+                else if (e.kind == FluidEdge.Kind.REGULATOR) ce[k].kind = Network.Kind.REGULATOR;
                 else if (e.oneWay()) ce[k].kind = Network.Kind.CHECK;
             }
         }
@@ -318,6 +319,9 @@ final class CoreStep {
             }
             c.g = conductance(e, pa, dp + pa.rhoHead * Network.G * dz, open);
             c.gBack = e.oneWay() ? Double.NaN : conductance(e, pb, dp + pb.rhoHead * Network.G * dz, open);
+            // (a regulator: its set point and mode, the rest of its law in the core's solve)
+            c.setPa = e.setPa;
+            c.relief = e.relief;
         }
         long slept = net.stats.slept, failures = net.stats.failures;
         double[][] m0 = new double[cn.length][];

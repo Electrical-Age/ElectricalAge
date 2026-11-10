@@ -12,7 +12,7 @@ import java.util.Locale;
  * species wa                                   (water and air, the fast path) or, per species:
  * species KEY GROUP KIND rho cpL cpV M tb lb
  * node V z H fixed U heat m0 m1 ... [w wallUA wallT]
- * edge a b fa fb g kind boost exchange conductance [gBack [qMax h0 speed eta [band [nozzle open drop [gas]]]]]
+ * edge a b fa fb g kind boost exchange conductance [gBack [qMax h0 speed eta [band [nozzle open drop [gas [setPa relief]]]]]]
  * </pre>
  */
 public final class NetworkDump {
@@ -41,7 +41,7 @@ public final class NetworkDump {
                 .append(' ').append(h(e.g)).append(' ').append(e.kind).append(' ').append(h(e.boost)).append(' ').append(h(e.exchange))
                 .append(' ').append(h(e.conductance)).append(' ').append(h(e.gBack)).append(' ').append(h(e.qMax)).append(' ').append(h(e.h0))
                 .append(' ').append(h(e.speed)).append(' ').append(h(e.eta)).append(' ').append(h(e.band))
-                .append(' ').append(h(e.nozzle)).append(' ').append(h(e.open)).append(' ').append(h(e.drop)).append(' ').append(e.gas).append('\n');
+                .append(' ').append(h(e.nozzle)).append(' ').append(h(e.open)).append(' ').append(h(e.drop)).append(' ').append(e.gas).append(' ').append(h(e.setPa)).append(' ').append(e.relief).append('\n');
         return s.toString();
     }
 
@@ -101,6 +101,10 @@ public final class NetworkDump {
                         e.drop = d(w[18]);
                     }
                     if (w.length > 19) e.gas = Boolean.parseBoolean(w[19]);
+                    if (w.length > 21) {
+                        e.setPa = d(w[20]);
+                        e.relief = Boolean.parseBoolean(w[21]);
+                    }
                 }
                 default -> {
                 }

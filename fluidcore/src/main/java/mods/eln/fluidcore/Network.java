@@ -146,7 +146,7 @@ public final class Network {
         }
     }
 
-    public enum Kind { PIPE, CHECK, PUMP, TURBINE }
+    public enum Kind { PIPE, CHECK, PUMP, TURBINE, REGULATOR }
 
     public static final class Edge {
         public final Node a, b;
@@ -188,6 +188,15 @@ public final class Network {
          * of water it passes out of the fluid, as shaft work.
          */
         public double nozzle, open = 1, drop;
+        /**
+         * REGULATOR: a self-acting pressure valve from a to b, forward only, conductance g. Reducing (relief false): it holds
+         * b at setPa, its drive min(p_a, set) - p_b; relief: it holds a at setPa, its drive p_a - max(p_b, set). The min
+         * and max are softplus-smoothed over REG_W of the set point, the drive over SPLIT_DP as a check valve's. Inside
+         * Newton, so a regulator answers within the step (as an explicit offset set from last step's pressures it
+         * overshot small vessels).
+         */
+        public double setPa;
+        public boolean relief;
         /** The work (J) the last step put in (a pump) or took out (a turbine); and the last solve's share of it. */
         public double workJ;
         double pendingWork;
@@ -327,6 +336,7 @@ public final class Network {
     /** The edge's mass flow at the current states. */
     static double flow(Edge e) {
         if (e.kind == Kind.TURBINE) return turbineFlow(e)[0];
+        if (e.kind == Kind.REGULATOR) return regulatorFlow(e)[0];
         if (e.kind != Kind.PIPE || !e.plain()) {
             double[] q = streams(e);
             return q[0] - q[1];
@@ -351,7 +361,7 @@ public final class Network {
     static double[] streams(Edge e) {
         double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
         if (e.kind == Kind.PUMP) return pumpStreams(e, dp);
-        if (e.kind == Kind.TURBINE) return new double[4];
+        if (e.kind == Kind.TURBINE || e.kind == Kind.REGULATOR) return new double[4];
         if (!e.plain()) return headStreams(e, dp);
         // (a check valve: the forward stream alone; a hard max(0, dp) put a kink where a valve sits balanced, and Newton
         // stalled on it in the game's networks: openings and pumps at rest)
@@ -472,6 +482,29 @@ public final class Network {
         if (!(T > 0) || !(rho > 0) || !(pa > 0)) return new double[3];
         double c = e.nozzle * e.open, q = c * Math.sqrt(rho * T), dqdT = q / (2 * T), sg = (pa + pb) * sgc(x);
         return new double[]{q, dqdT * ((sp + sg) / pa - T / pa), dqdT * (sp - sg) / pa};
+    }
+
+    /** A regulator's smoothing of its min / max, as a share of its set point. */
+    public static double REG_W = 0.005;
+
+    /** A regulator's flow {q, dq/dp_a, dq/dp_b} (Edge.setPa). */
+    static double[] regulatorFlow(Edge e) {
+        if (e.g <= 0 || e.setPa <= 0) return new double[3];
+        double pa = portP(e.a, e.fa), pb = portP(e.b, e.fb), set = e.setPa, W = Math.max(SPLIT_DP, REG_W * set);
+        double drive, da, db;
+        if (e.relief) {
+            double y = (pb - set) / W;
+            drive = pa - (set + W * spc(y));
+            da = 1;
+            db = -sgc(y);
+        } else {
+            double y = (set - pa) / W;
+            drive = set - W * spc(y) - pb;
+            da = sgc(y);
+            db = -1;
+        }
+        double S = SPLIT_DP, x = drive / S, q = e.g * S * spc(x), dq = e.g * sgc(x);
+        return new double[]{q, dq * da, dq * db};
     }
 
     /** A turbine's shaft power (W) and its slopes: eta drop x the water it passes ({W, dW/dp_a, dW/dp_b, water share}). */
@@ -654,7 +687,7 @@ public final class Network {
         }
         for (Edge e : edges) {
             h = mixIn(mixIn(mixIn(mixIn(h, e.g), e.gBack), e.boost), e.conductance);
-            h = mixIn(mixIn(h, e.exchange), e.kind.ordinal());
+            h = mixIn(mixIn(mixIn(h, e.exchange), e.kind.ordinal()), e.setPa);
         }
         return h;
     }
@@ -815,8 +848,8 @@ public final class Network {
             if (f == null) f = new double[C + 1];
             for (int k = 0; k < C; k++) f[k] += x[k];
         }
-        if (e.kind == Kind.TURBINE) {
-            double q = turbineFlow(e)[0];
+        if (e.kind == Kind.TURBINE || e.kind == Kind.REGULATOR) {
+            double q = e.kind == Kind.TURBINE ? turbineFlow(e)[0] : regulatorFlow(e)[0];
             if (q == 0) return f;
             double[] ca = e.a.fluid.draw(e.fa);
             if (f == null) f = new double[C + 1];
@@ -876,11 +909,11 @@ public final class Network {
     /** A turbine's entries: F_k = q ca_k out of a into b, and its work W = eta drop q ca_0 out of b's energy. */
     private static void turbineJacobian(Sparse J, Edge e, java.util.Map<Node, Integer> idx, int C, double dt) {
         int S = C - 1;
-        double[] q = turbineFlow(e);
+        double[] q = e.kind == Kind.REGULATOR ? regulatorFlow(e) : turbineFlow(e);
         double[] ca = e.a.fluid.draw(e.fa);
         double[][] dca = e.a.fluid.drawSlope(e.fa);
         double[] dpa = e.a.fluid.portPSlope(e.fa), dpb = e.b.fluid.portPSlope(e.fb);
-        double k = e.drop > 0 ? e.eta * e.drop : 0;
+        double k = e.kind == Kind.TURBINE && e.drop > 0 ? e.eta * e.drop : 0;
         Integer ia = idx.get(e.a), ib = idx.get(e.b);
         for (int side = 0; side < 2; side++) {
             Integer col = side == 0 ? ia : ib;
@@ -914,7 +947,8 @@ public final class Network {
         for (Edge e : edges) {
             // (every entry an edge can touch is added, zeros too: skipping zeros let entries come and go, and each new
             // one rebuilt the sparse LU's symbolic factorisation, most steps at 2,000 nodes)
-            if (e.kind == Kind.TURBINE) {
+            if (e.kind == Kind.TURBINE || e.kind == Kind.REGULATOR) {
+                // (a regulator: the same entries without the work, its flow a function of p_a and p_b apart)
                 turbineJacobian(J, e, idx, C, dt);
                 continue;
             }

@@ -163,6 +163,8 @@ public final class FluidWorld implements IProcess {
             l.edge.gas = l.gas;
             l.edge.drop = l.drop;
             l.edge.conductance = l.conductance;
+            l.edge.setPa = l.setPa;
+            l.edge.relief = l.relief;
         }
         for (FluidNetwork n : networks) n.step(time);
         if (traceSteps > 0 && traceNode != null) trace();
@@ -451,6 +453,8 @@ public final class FluidWorld implements IProcess {
             l.edge.qMax = l.qMax;
             l.edge.h0 = l.h0;
             l.edge.gas = l.gas;
+            l.edge.setPa = l.setPa;
+            l.edge.relief = l.relief;
             l.edge.speed = l.speed;
             l.edge.eta = l.eta;
             l.edge.nozzle = l.nozzle;

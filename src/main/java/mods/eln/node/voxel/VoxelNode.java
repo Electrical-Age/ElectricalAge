@@ -446,7 +446,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             // pressure valve's seat is narrower, a block's worth, so it can hold its set point without overshooting)
             // (a valve meters by the orifice law, its seat the smaller pipe's bore area: VOLUME_PER_BLOCK is m^3 a metre)
             Link l = new Link(a.fluid, 0.5, b.fluid, 0.5, k).area(PipePart.VOLUME_PER_BLOCK[Math.min(a.tier, b.tier)]);
-            if (v.mode == ValvePart.PRESSURE) l.kind(mods.eln.sim.fluid.FluidEdge.Kind.CHECK);
+            if (v.mode == ValvePart.PRESSURE) l.kind(mods.eln.sim.fluid.FluidEdge.Kind.REGULATOR);
             l.open = v.opening();
             valveLinks.put(l, v);
         }
@@ -1203,14 +1203,14 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 double o = v.opening();
                 e.getKey().open = o;
                 if (v.mode == ValvePart.PRESSURE) {
+                    // (a regulator in the fluid core's solve, Network.Kind.REGULATOR: it answers within the step; an
+                    // offset set from the step's starting pressures let a pipe just filled from a tank through by bars)
                     e.getKey().open = 1;
-                    // (before it: the most the pipe there can rise to this step, its neighbours' pressure: a reducing valve
-                    // on the pressure there at the step's start let a pipe just filled from a tank through by bars)
-                    var up = mods.eln.fluid.FluidWorld.nodeFor(e.getKey().a);
-                    double before = up.P();
-                    for (var edge : mods.eln.fluid.FluidWorld.edgesOf(up))
-                        if (edge != e.getKey().edge) before = Math.max(before, (edge.a == up ? edge.b : edge.a).P());
-                    e.getKey().boost = v.boost(before, mods.eln.fluid.FluidWorld.nodeFor(e.getKey().b).P());
+                    e.getKey().boost = 0;
+                    e.getKey().setPa = v.setPoint();
+                    e.getKey().relief = v.pmode == ValvePart.RELIEF;
+                    // (its lift, for Jade and the drawing, from the pressures now)
+                    v.boost(mods.eln.fluid.FluidWorld.nodeFor(e.getKey().a).P(), mods.eln.fluid.FluidWorld.nodeFor(e.getKey().b).P());
                     o = v.opening();
                 }
                 if (v.mode != ValvePart.ON_OFF && Math.abs(o - v.shown) > 0.02) {
