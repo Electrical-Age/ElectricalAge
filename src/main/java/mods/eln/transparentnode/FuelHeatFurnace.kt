@@ -310,7 +310,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
                 externalControlled = !externalControlled
                 inventoryChange(inventory_)
             }
-            MainSwitchToggleEvent -> mainSwitch = !mainSwitch
+            // (on only with a burner in its slot, as inventoryChange keeps it: a switch on without one was off after a reload)
+            MainSwitchToggleEvent -> mainSwitch = !mainSwitch && !inventory_.getItem(FuelHeatFurnaceContainer.FuelBurnerSlot).isEmpty
             SetManualControlValueEvent -> {
                 manualControl = ClientValues.clamp(stream.readFloat().toDouble(), 0.0, 1.0, manualControl)   // (the screen's slider)
             }

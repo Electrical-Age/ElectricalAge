@@ -76,6 +76,10 @@ public final class BurntCases {
             spare.setTakeFuel(true);   // (it was taking fuel when it burnt: the repair leaves it declining, todo #218)
             spare.burn(FailureCause.OVERHEAT, Failure.Kind.MACHINE);
             fuel = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(3, 1, 1));
+            // (its switch turns on only with a burner in it)
+            fuel.getInventory().setItem(mods.eln.transparentnode.FuelHeatFurnaceContainer.Companion.getFuelBurnerSlot(),
+                Eln.sharedItemStackOne.getDescriptor(2 + (124 << 6)).newItemStack());
+            fuel.inventoryChange(fuel.getInventory());
             fuel.networkUnserialize(ctx.stream(o -> o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getMainSwitchToggleEvent())));
             fuel.burn(FailureCause.OVERHEAT, Failure.Kind.MACHINE);
             part = spare.getRepairPart();
