@@ -11,7 +11,8 @@ import net.minecraft.nbt.CompoundTag;
 /**
  * A condenser's vessel and what works on it, shared by the 50V/200V turbines' condensers (CondenserElement) and the
  * Plant Steam Condenser (PlantCondenserElement; Baughn's standing rule: share code rather than copy it). The vessel sits
- * at the saturation pressure of its water; its shell (an EA thermal load) takes its heat; an air ejector pulls the air
+ * at the saturation pressure of its water; its shell (an EA thermal load) takes its heat through a heat link in the
+ * fluid core's step, so with nothing cooling the shell there is no vacuum; an air ejector pulls the air
  * out; a condensate pump (CondensatePump's curve) pushes water from its bottom to an outlet node; makeup water comes in through a float valve,
  * open below MAKEUP_OPEN of its volume as water, shut by MAKEUP_SHUT. How hard the pump and the ejector run is the
  * owner's (a turbine's shaft, or a shaft motor).
@@ -52,16 +53,6 @@ public final class CondenserVessel {
     /** Liquid as a share of the vessel. */
     public double floodShare() {
         return vessel == null ? 0 : vessel.mLiquid() / Water.RHO_L / vessel.volume;
-    }
-
-    /** A turbine's exhaust straight into it: m kg of steam (and air kg of air) with its enthalpy per kg (J/kg). */
-    public void exhaust(double m, double air, double hSteam, double tAir) {
-        if (vessel == null || m <= 0 && air <= 0) return;
-        vessel.mWater += m;
-        vessel.mAir += air;
-        totalSteamKg += Math.max(0, m);
-        vessel.energy += m * hSteam + air * Water.hAir(tAir);
-        vessel.update();
     }
 
     /** Make the nodes and links at height y (restoring what was saved), ambient T for new ones. */
@@ -109,16 +100,11 @@ public final class CondenserVessel {
      */
     public void before(double dt, double cooling, double ejector, double pumpOpen) {
         if (vessel == null) return;
-        // the shell takes the vessel's heat (EA thermal temperatures are on the 20 C scale)
-        double shellK = shell.Tc + mods.eln.sim.PhysicalConstant.Tref;
-        double q = cooling * (vessel.T() - shellK) / (CondenserDescriptor.DT_VESSEL / nominalHeat);
-        // (at most half the way to the shell's temperature in a step: a vessel of thin air has next to no heat capacity,
-        // and the explicit step overshot to -193 C: AdventurAgent)
-        double toShell = (vessel.energy - vessel.energyAt(shellK)) / dt;
-        q = toShell >= 0 ? Math.max(0, Math.min(q, 0.5 * toShell)) : Math.min(0, Math.max(q, 0.5 * toShell));
-        vessel.heat -= q;
-        shell.moveEnergyTo(q * dt);
-        meterHeat += q * dt;
+        // the shell takes the vessel's heat through a heat link inside the fluid core's step (EA thermal temperatures
+        // are on the 20 C scale): implicit, so a vessel of thin air settles at the shell's temperature instead of
+        // overshooting it (the explicit heat needed a limiter: AdventurAgent saw -193 C)
+        vessel.wallT = shell.Tc + mods.eln.sim.PhysicalConstant.Tref;
+        vessel.wallUA = Math.max(0, cooling) * nominalHeat / CondenserDescriptor.DT_VESSEL;
         // the air ejector, down to EJECTOR_FLOOR_PA of air (an empty vessel with nothing in it has no temperature:
         // AdventurAgent saw -193 C)
         double tNow = vessel.T(), floor = CondenserDescriptor.EJECTOR_FLOOR_PA * vessel.volume / (Water.R_AIR * Math.max(250, tNow));
@@ -132,12 +118,19 @@ public final class CondenserVessel {
         }
         // the makeup's float valve
         floatOpen = Math.max(0, Math.min(1, (MAKEUP_SHUT - floodShare()) / (MAKEUP_SHUT - MAKEUP_OPEN)));
-        if (makeup != null) makeup.open = floatOpen * Math.max(0, Math.min(1, makeupGate));
+        // (an unpiped makeup flange is blind: open, its few mL of air leaked into the vacuum until the node held next to
+        // nothing, colder than the core's EOS goes, and the step stopped converging)
+        if (makeup != null) makeup.open = piped(inlet) ? floatOpen * Math.max(0, Math.min(1, makeupGate)) : 0;
         if (pump != null) {
             backPa = backPressure();
             speed = Math.max(0, Math.min(1.2, pumpOpen));
             pump.speed = speed;
         }
+    }
+
+    /** Whether a port's node is coupled to anything: part of a pipe run, or with an edge besides its own link. */
+    static boolean piped(FluidNode n) {
+        return mods.eln.fluid.FluidWorld.runSize(n) > 1 || mods.eln.fluid.FluidWorld.edgesOf(n).size() > 1;
     }
 
     /**
@@ -169,6 +162,10 @@ public final class CondenserVessel {
 
     /** After a fluid step: the meters; returns the condensate pumped this step (kg). */
     public double after(double dt) {
+        // the heat that went out through the shell this step goes into its thermal load
+        double q = vessel == null ? 0 : -vessel.wallJ;
+        shell.moveEnergyTo(q);
+        meterHeat += q;
         double kg = pump != null && pump.edge != null ? Math.max(0, pump.edge.fLiquid) * dt : 0;
         totalPumpedKg += kg;
         meterPump += kg / EaUnits.KG_PER_MB_WATER;

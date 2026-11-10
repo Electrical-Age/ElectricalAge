@@ -37,12 +37,13 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     public double pumpW, totalLeakKg;
     /**
      * The cooling-water tube bundle (Baughn 2026-10-29): water piped in low on its left and out low on its right
-     * passes through tubes in the vessel; heat goes from the vessel to it at TUBES_UA (W/K), as far as the two
-     * temperatures allow (half the way to even in a step at most). A full 16 kW HP turbine's steam (~39 g/s, ~90 kW)
+     * passes through tubes in the vessel; heat goes from the vessel to it at TUBES_UA (W/K), a conductance between the
+     * two nodes inside the fluid core's step. A full 16 kW HP turbine's steam (~39 g/s, ~90 kW)
      * condenses with about a kilogram a second of cold water through it.
      */
     public static final double TUBES_UA = 4000, TUBES_VOLUME = 0.002;
     public mods.eln.sim.fluid.FluidNode tubes;
+    private FluidDevice.Link tubesLink;
     private double[] loadedTubes;
     /** Heat into the cooling water (W, last step) and since loaded (J), the water through it since loaded (kg). */
     public double tubesW, totalTubesJ, totalCoolingKg;
@@ -103,7 +104,8 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
 
     @Override
     public List<FluidDevice.Link> fluidLinks() {
-        return v.pump == null ? List.of() : List.of(v.pump, v.makeup);
+        if (v.pump == null) return List.of();
+        return tubesLink == null ? List.of(v.pump, v.makeup) : List.of(v.pump, v.makeup, tubesLink);
     }
 
     @Override
@@ -122,22 +124,18 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
             totalLeakKg += air;
         }
         v.before(dt, cooling, motorShare, motorShare);
-        // the tube bundle: the vessel's heat into the cooling water (drowned tubes still work: they are in the water)
-        if (tubes != null) {
-            double tv = n.T(), tt = tubes.T(), q = TUBES_UA * (tv - tt);
-            double fromVessel = (n.energy - n.energyAt(tt)) / dt;
-            double intoTubes = (tubes.energyAt(tv) - tubes.energy) / dt;
-            q = q >= 0 ? Math.max(0, Math.min(q, Math.min(0.5 * fromVessel, 0.5 * intoTubes))) : 0;
-            n.heat -= q;
-            tubes.heat += q;
-            tubesW = q;
-            totalTubesJ += q * dt;
-        }
+        // the tube bundle: the vessel's heat into the cooling water, a conductance inside the fluid core's step (drowned
+        // tubes still work: they are in the water)
+        if (tubes != null) tubesLink.conductance = TUBES_UA;
     }
 
     @Override
     public void afterFluidStep(double dt) {
         double kg = v.after(dt);
+        if (tubesLink != null && tubesLink.edge != null) {
+            tubesW = tubesLink.edge.fEnthalpy;
+            totalTubesJ += tubesW * dt;
+        }
         // the cooling water through it: what flows into the tubes this step
         if (tubes != null) {
             var t = FluidWorld.nodeFor(tubes);
@@ -213,6 +211,8 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
             mods.eln.fluid.FluidSaves.restore(tubes, loadedTubes);
             tubes.update();
         } else tubes.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(c));
+        tubesLink = new FluidDevice.Link(v.vessel, 0.5, tubes, 0.5, 0);
+        tubesLink.conductance = TUBES_UA;
         makePorts();
         connect();
     }

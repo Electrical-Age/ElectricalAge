@@ -82,11 +82,6 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         return v.floodShare();
     }
 
-    /** The turbine's exhaust: m kg of steam (and air kg of air) with its enthalpy per kg after the work (J/kg). */
-    public void exhaust(double m, double air, double hSteam, double tAir) {
-        v.exhaust(m, air, hSteam, tAir);
-    }
-
     @Override
     public Object fluidLevel() {
         return node.coordonate.dimention;

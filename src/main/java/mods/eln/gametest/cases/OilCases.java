@@ -1393,6 +1393,9 @@ public final class OilCases {
             Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
             l.device(28 + (82 << 6), 1, 1);
             l.device(28 + (82 << 6), 3, 1);
+            // (a pipe stub on each makeup flange: unpiped, the flange is blind)
+            PipeCases.lay(ctx, ctx.at(1, 2, 1), 0, 8, 0, 8, 8, 8, 8);
+            PipeCases.lay(ctx, ctx.at(3, 2, 1), 0, 8, 0, 8, 8, 8, 8);
             mods.eln.Eln.simulator.addSlowProcess(feed = x -> {
                 if (full == null) full = condenserOf(ctx, ctx.at(1, 1, 1));
                 if (low == null) low = condenserOf(ctx, ctx.at(3, 1, 1));
@@ -1734,6 +1737,9 @@ public final class OilCases {
         public void build(TestContext ctx) {
             off = place(ctx, ctx.at(3, 1, 5), 0);
             on = place(ctx, ctx.at(6, 1, 5), mods.eln.Eln.SVU);
+            // (a pipe stub on each makeup flange: unpiped, the flange is blind)
+            PipeCases.lay(ctx, ctx.at(3, 2, 5), 0, 8, 0, 8, 8, 8, 8);
+            PipeCases.lay(ctx, ctx.at(6, 2, 5), 0, 8, 0, 8, 8, 8, 8);
             mods.eln.Eln.simulator.addSlowProcess(feed = x -> {
                 if (off.inlet == null || on.inlet == null) return;
                 if (!primed) {
