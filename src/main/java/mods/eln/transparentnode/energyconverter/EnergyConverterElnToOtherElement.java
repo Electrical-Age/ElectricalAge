@@ -6,6 +6,7 @@ import mods.eln.api.element.Machines;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.network.ClientValues;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
@@ -157,7 +158,8 @@ public class EnergyConverterElnToOtherElement extends TransparentNodeElement {
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         energyBuffer = nbt.getDoubleOr("energyBuffer", 0.0);
-        inPowerFactor = nbt.getDoubleOr("inPowerFactor", 0.5);
+        // (an older handler stored what the client sent: a NaN or negative factor threw in every tick)
+        inPowerFactor = ClientValues.load(nbt.getDoubleOr("inPowerFactor", 0.5), 0, 1, 0.5);
     }
 
     @Override
@@ -176,7 +178,7 @@ public class EnergyConverterElnToOtherElement extends TransparentNodeElement {
         byte id = super.networkUnserialize(stream);
         try {
             if (id == setInPowerFactor) {
-                inPowerFactor = stream.readFloat();
+                inPowerFactor = ClientValues.clamp(stream.readFloat(), 0, 1, inPowerFactor);   // (the screen's slider: 0..1)
                 needPublish();
                 return unserializeNulldId;
             }
