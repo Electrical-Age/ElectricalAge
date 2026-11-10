@@ -64,10 +64,14 @@ final class WaterAirFluid implements NodeFluid {
         return out[WaterAir.ML];
     }
 
-    /** The liquid's head over a port at share f, for a level L (shares of H): rho g H softplus(L - f), smooth at the surface. */
+    /**
+     * The liquid's head over a port at share f, for a level L (shares of H): rho g H (softplus(L - f) - softplus(-f)),
+     * smooth at the surface and nothing in an empty node (without the floor's term, an empty node's floor port saw
+     * w ln 2 of phantom liquid: 21 Pa in a 1 m node; and a layer's composition would matter while it is empty).
+     */
     double head(double L, double f) {
         double w = 0.25 * BAND;
-        return G * H / WaterAir.V0 * WaterAir.softplus(L - f, w);
+        return G * H / WaterAir.V0 * (WaterAir.softplus(L - f, w) - WaterAir.softplus(-f, w));
     }
 
     double headSlope(double L, double f) {
