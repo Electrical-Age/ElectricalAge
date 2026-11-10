@@ -401,8 +401,8 @@ public final class Network {
     /** Counters for tests and measurements. */
     public static final class Stats {
         public long steps, iterations, substeps, failures, solves, stalls, slept;
-        /** Steps ended early (CUT_SHORT): their remaining time dropped. */
-        public long cut;
+        /** Steps ended early (CUT_SHORT): their remaining time dropped; and of those, steps that moved nothing at all. */
+        public long cut, stuck;
         /** The last failed solve's residual norms by iteration (tests). */
         public final List<Double> lastFail = new ArrayList<>();
         /** The last failed solve's scaled residual by row (tests). */
@@ -435,6 +435,7 @@ public final class Network {
             if (e.pending != null) java.util.Arrays.fill(e.pending, 0);
         }
         double[] y0 = pack(free);
+        progressed = false;
         if (!solve(free, y0, dt)) {
             // (no convergence: two half steps, each from where the last ended)
             restore(free, y0);
@@ -507,15 +508,19 @@ public final class Network {
         stats.substeps++;
         for (int half = 0; half < 2; half++) {
             double[] y = pack(free);
-            if (!solve(free, y, dt / 2)) {
+            if (solve(free, y, dt / 2)) progressed = true;
+            else {
                 restore(free, y);
-                if (depth < MAX_DEPTH) {
+                // (a step that has converged nothing yet goes 6 levels deeper before it is cut: cut at once, a network
+                // whose first 1/256 of a tick fails would never move)
+                if (depth < MAX_DEPTH || CUT_SHORT && !progressed && depth < MAX_DEPTH + 6) {
                     if (!substep(free, dt / 2, depth + 1)) return false;
                 } else if (CUT_SHORT) {
                     // (the step ends at the last sub-step that converged: the rest of its time is dropped, so the network
                     // runs slow for a moment rather than taking a best iterate that may be no physical state at all)
                     stats.failures++;
                     stats.cut++;
+                    if (!progressed) stats.stuck++;
                     return false;
                 } else {
                     stats.failures++;
@@ -531,6 +536,8 @@ public final class Network {
      * failed one's best iterate and go on (false; conservative, but possibly far from a physical state).
      */
     public static boolean CUT_SHORT = false;
+    /** This step has converged at least one sub-step. */
+    private boolean progressed;
 
     /** Components per node: the species masses, then the energy (one count for the whole network). */
     private int C() {
@@ -892,13 +899,25 @@ public final class Network {
                         double tiny = 1e-12 * Math.max(1e-3, massOf(y, C * i, S));
                         if (d[C * i + k] < 0 && y[C * i + k] <= tiny) {
                             if (r[C * i + k] < 0) {
-                                // (its own balance wants it up: not held but stepped along its diagonal, -r, and the rest
-                                // solved again with that step fixed; setting it alone left the others' step computed for
-                                // the far larger fall Newton wanted, and a pipe of air taking its first steam stalled)
-                                if (d[C * i + k] == -r[C * i + k]) continue;
-                                J.unitRow(C * i + k);
+                                // (its own balance wants it up: not held but stepped by its own row's Newton step, -r / J_kk,
+                                // and the rest solved again with that step fixed; setting it alone left the others' step
+                                // computed for the far larger fall Newton wanted, and a pipe of air taking its first steam
+                                // stalled; -r alone is the explicit inflow, blind to the node's own pressure pushing back, and
+                                // poured 90 g into a pipe of 34 g)
+                                int row = C * i + k;
+                                double jkk = J.get(row, row), target = -r[row] / Math.max(1, jkk);
+                                if (d[row] == target) continue;
+                                J.unitRow(row);
+                                minus[row] = target;
                                 held = true;
-                                if (DEBUG != null) DEBUG.append("  row ").append(C * i + k).append(" stepped along -r\n");
+                                if (DEBUG != null) {
+                                    DEBUG.append(String.format("  row %d stepped: Newton's d %.4g, r %.4g, J_kk %.4g, target %.4g; row:", row, d[row], r[row], jkk, target));
+                                    double[][] Jd = jacobian(free, idx, dt).dense();
+                                    for (int c2 = 0; c2 < Jd.length; c2++) DEBUG.append(String.format(" %.3g", Jd[row][c2]));
+                                    DEBUG.append("\n  energy row:");
+                                    for (int c2 = 0; c2 < Jd.length; c2++) DEBUG.append(String.format(" %.3g", Jd[C * i + C - 1][c2]));
+                                    DEBUG.append("\n");
+                                }
                                 continue;
                             }
                             J.unitRow(C * i + k);

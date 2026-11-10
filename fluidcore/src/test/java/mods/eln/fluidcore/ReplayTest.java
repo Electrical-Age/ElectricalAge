@@ -17,14 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ReplayTest {
     /**
      * Networks whose step failed in the game (GameTests on the core's first adapter), kept as cases: each must now step
-     * without a failure within the game's sub-step depth (5).
+     * without a failed sub-step with the game's settings (sub-steps to 1/256 of a tick, cut short at the floor).
      */
     @Test
     void gameNetworksThatOnceFailedStep() throws Exception {
         int depth = Network.MAX_DEPTH;
+        boolean cut = Network.CUT_SHORT;
         try {
-            Network.MAX_DEPTH = 5;
-            for (String name : new String[]{"air-pipe-first-steam", "steam-into-air-stub", "steam-into-air-stub-2", "fill-near-full-from-50-bar"}) {
+            Network.MAX_DEPTH = 8;
+            Network.CUT_SHORT = true;
+            for (String name : new String[]{"air-pipe-first-steam", "steam-into-air-stub", "steam-into-air-stub-2", "fill-near-full-from-50-bar", "flood-pipe-from-6-bar", "boiler-flash-into-stub"}) {
                 String text;
                 try (var in = ReplayTest.class.getResourceAsStream("/replay/" + name + ".txt")) {
                     text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
@@ -37,6 +39,7 @@ class ReplayTest {
             }
         } finally {
             Network.MAX_DEPTH = depth;
+            Network.CUT_SHORT = cut;
         }
     }
 
