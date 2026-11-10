@@ -338,8 +338,11 @@ final class MixFluid implements NodeFluid {
         else {
             // (started from what one species alone would need, (n - N) / c summed over the volatiles: exact for one,
             // and never at lam = 0, where n / N overflows for a trace of liquid; kept positive)
-            double sumNC = 0;
-            for (int a = 0; a < k; a++) if (!inf[a] && c[a].v > 0 && nn[a].v > 0) sumNC += nn[a].v / c[a].v;
+            double sumNC = 0, cMax = 0;
+            for (int a = 0; a < k; a++) if (!inf[a] && c[a].v > 0 && nn[a].v > 0) {
+                sumNC += nn[a].v / c[a].v;
+                cMax = Math.max(cMax, c[a].v);
+            }
             double l = Math.max(1e-300, sumNC * (1 - N.v / ntotD.v));
             for (int it = 0; it < 100; it++) {
                 double Gv = -1, dG = 0;
@@ -351,8 +354,15 @@ final class MixFluid implements NodeFluid {
                 }
                 if (dG == 0) break;
                 double step = -Gv / dG;
+                // (N >= N* puts the root at 1 or below; rounding of N can leave none, and the steps then never end)
+                if (l + step >= 1) {
+                    l = 1;
+                    break;
+                }
                 l = l + step > 0 ? l + step : 0.5 * l;
-                if (!(Math.abs(step) > 1e-15 * Math.max(1, l))) break;
+                // (to where a step changes no share: against lam alone, a trace of liquid under much vapour stopped
+                // early and its shares did not sum to 1)
+                if (!(Math.abs(step) > 1e-15 * (l + N.v / cMax))) break;
             }
             D Gx = D.c(-1, n);
             double GL = 0;
