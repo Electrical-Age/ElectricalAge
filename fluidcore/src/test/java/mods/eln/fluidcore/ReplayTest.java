@@ -21,7 +21,8 @@ class ReplayTest {
      * cover the whole step (Baughn 2026-11-10: a network making no progress for long is not workable, whatever its
      * devices do). The last two stalled a closed plant's turbine network for seconds: its condensate pump had pumped the
      * condenser's vapour out to a hard vacuum, and steam then expanded into the empty vessel. The last: the condenser's
-     * unpiped makeup node drained into that vacuum to under the EOS's 120 K floor.
+     * unpiped makeup node drained into that vacuum to under the EOS's 120 K floor. And boiling water flooding a warm, dry
+     * pump line: a 0.1 ms transient at ~1 us steps (Network.adaptive).
      */
     @Test
     void gameNetworksThatOnceFailedStep() throws Exception {
@@ -31,7 +32,8 @@ class ReplayTest {
             Network.MAX_DEPTH = 8;
             Network.CUT_SHORT = true;
             for (String name : new String[]{"air-pipe-first-steam", "steam-into-air-stub", "steam-into-air-stub-2", "fill-near-full-from-50-bar", "flood-pipe-from-6-bar", "boiler-flash-into-stub",
-                "condenser-pumped-to-vacuum", "steam-into-evacuated-condenser", "makeup-drained-below-the-eos-floor"}) {
+                "condenser-pumped-to-vacuum", "steam-into-evacuated-condenser", "makeup-drained-below-the-eos-floor",
+                "boiling-water-floods-a-warm-dry-line"}) {
                 String text;
                 try (var in = ReplayTest.class.getResourceAsStream("/replay/" + name + ".txt")) {
                     text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);

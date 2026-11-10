@@ -582,7 +582,8 @@ public final class Network {
         else {
             // (no convergence: two half steps, each from where the last ended)
             restore(free, y0);
-            substep(free, dt, 1);
+            if (CUT_SHORT && ADAPTIVE) adaptive(free, dt);
+            else substep(free, dt, 1);
         }
         for (Edge e : edges) {
             e.flow = flow(e);
@@ -649,6 +650,45 @@ public final class Network {
         z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
         return z ^ (z >>> 31);
     }
+
+    /**
+     * With CUT_SHORT (the game): sub-steps sized as they go, halved on a failure and doubled on a success, down to dt /
+     * 2^(MAX_DEPTH + ADAPTIVE_EXTRA), at most MAX_SUBSTEPS. A fixed halving tree never grew back, so a transient needing
+     * steps of 1e-7 s for 1e-4 s (boiling water flooding a warm, dry pump line: its air saturates and cools, and the
+     * pressure drop pulls the water in) cut every tick after its first converged sub-step, and the network stalled.
+     * Backward Euler has a root past the transient for steps up to ~1e-2 s, so once through, the steps grow back.
+     */
+    private void adaptive(List<Node> free, double dt) {
+        double t = 0, h = dt / 2, hMin = dt / Math.pow(2, MAX_DEPTH + ADAPTIVE_EXTRA);
+        while (t < dt * (1 - 1e-12)) {
+            stats.substeps++;
+            if (++stepSubsteps > MAX_SUBSTEPS) {
+                stats.cut++;
+                return;
+            }
+            h = Math.min(h, dt - t);
+            double[] y = pack(free);
+            if (solve(free, y, h)) {
+                progressed = true;
+                done += h;
+                t += h;
+                h *= 2;
+            } else {
+                restore(free, y);
+                h /= 2;
+                if (h < hMin) {
+                    stats.failures++;
+                    stats.cut++;
+                    if (!progressed) stats.stuck++;
+                    return;
+                }
+            }
+        }
+    }
+
+    /** Adaptive sub-steps in the game (CUT_SHORT), and how many halvings below MAX_DEPTH they may go. */
+    public static boolean ADAPTIVE = true;
+    public static int ADAPTIVE_EXTRA = 12;
 
     private boolean substep(List<Node> free, double dt, int depth) {
         stats.substeps++;
