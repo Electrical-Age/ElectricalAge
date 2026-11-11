@@ -6,7 +6,6 @@ import mods.eln.sound.LoopedSound
 import mods.eln.gl.GL11
 
 import mods.eln.Eln
-import mods.eln.fluid.FuelRegistry
 import mods.eln.fluid.PreciseElementFluidHandler
 import mods.eln.i18n.I18N
 import mods.eln.item.FuelBurnerDescriptor
@@ -114,16 +113,61 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val SetTemperatureEvent: Byte = 3
         /** The most a burner cokes: it still fires a tenth. */
         const val COKE_MAX = 0.9
+        /**
+         * Coking per residue share of what burns (Baughn 2026-11-10: fouling comes from unburnt residue): dead crude's
+         * 15.8 % residue cokes at rate 1, as crude did before (option a, until Baughn picks); refined cuts never coke.
+         */
+        const val COKE_PER_RESIDUE = 1 / 0.158
+        /** Its fuel tank (mB, two buckets: Baughn 2026-11-03, it fills by bucket) and its volume (m^3). */
+        const val TANK_MB = 2000.0
+        val TANK_M3 = TANK_MB * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / mods.eln.sim.fluid.Water.RHO_L
+        /** The tank's height in the block (m) and its fuel flange, 4 px up (mods.eln.cad.models.FuelHeater). */
+        const val TANK_H = 0.5
+        const val FLANGE_Y = 4 / 16.0
+        /** Its flange's conductance (as the oil devices' ports) and its breather's on top (small: a vent, not an opening). */
+        const val PORT_K = 6e-11
+        const val BREATHER_K = 1e-11
+        /** Heat to boil off a kg of water that reached the burner (J/kg: warming and evaporating). */
+        const val WATER_BOIL_J_PER_KG = 2.6e6
     }
 
     private val thermalLoad = NbtThermalLoad("thermalLoad")
     private val controlLoad = NbtElectricalGateInput("commandLoad")
 
-    /** Its fuel tank: two buckets (Baughn 2026-11-03: it fills by bucket; the 1.12 tank held 25 mB, under a bucket). */
-    private val tank = PreciseElementFluidHandler(2000)
+    /**
+     * Its fuel tank, a fluid node (two buckets: Baughn 2026-11-03, it fills by bucket): its flange low on its front
+     * (EA pipes, 4 px up) and buckets put any liquid in; a breather on top lets air in as it burns and live crude's gas
+     * out. What it holds burns species by species (heating_value): a mix burns as the mix it is (Baughn 2026-11-10:
+     * "mixed on the machines").
+     */
+    var vessel: mods.eln.sim.fluid.FluidNode? = null
+        private set
+    private var breather: mods.eln.sim.fluid.FluidDevice.Vent? = null
+    private var loaded: DoubleArray? = null
+    /** An old save's tank (a 2-bucket fluid tank) and its flange's stub, put into the vessel when it is made. */
+    private var legacyTank: net.neoforged.neoforge.fluids.FluidStack? = null
+    private var legacyStub: DoubleArray? = null
 
-    /** On EA pipes (Baughn 2026-11-03): fuel in on the flange low on its front (mods.eln.cad.models.FuelHeater). */
-    private val fuelIn = mods.eln.fluid.PortBridge("fuelIn", mods.eln.fluid.PortBridge.Mode.IN, 50.0, 0.0)
+    /** Its fluid capability: a view of the vessel (buckets; other mods' pipes). */
+    private val view = mods.eln.fluid.NodeFluidView(mods.eln.fluid.NodeFluidView.Spec().intake().liquidShare(0.95))
+
+    /**
+     * Heat drawn from the fuel and not yet given (J, after heatFurnaceFuelFactor): the burner takes fuel out of the vessel
+     * between fluid steps (beforeFluidStep), the control process spends it.
+     */
+    private var bank = 0.0
+    /** The heat the control process wanted over the last fluid step (J): what the next draw refills. */
+    private var wanted = 0.0
+    /** The residue share of what the burner last drew (0..1): its coking. */
+    private var residueShare = 0.0
+    /** What is at the burner, as of the last fluid step: a fuel's species, water (it boils off), or -1 for nothing. */
+    var atBurner = -1
+        private set
+    /** Meters (not saved): fuel the burner drew (kg) and heat it gave (J), since it was loaded. */
+    var fuelBurntKg = 0.0
+        private set
+    var heatGivenJ = 0.0
+        private set
     /** Its flue: smoke out of the flange on top of its stack, or up the stack (as the coal oven's). */
     private val flue = mods.eln.fluid.Flue("flue")
     private var smoking = false
@@ -131,26 +175,123 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     override fun fluidLevel(): Any = node!!.coordonate.dimention
 
     override fun fluidPorts(): List<mods.eln.sim.fluid.FluidDevice.FluidPort> {
-        if (fuelIn.stub == null || flue.node == null) return listOf()
+        val v = vessel ?: return listOf()
+        if (flue.node == null) return listOf()
         val pos = node!!.coordonate.pos().asLong()
         val f = front.toEnumFacing().get3DDataValue()
-        return listOf(fuelIn.port(pos, f, mods.eln.fluid.PortBridge.endSpot(front, front, 4, 8)), flue.port(pos))
+        return listOf(mods.eln.sim.fluid.FluidDevice.FluidPort(v, pos, f, FLANGE_Y / TANK_H, PORT_K,
+            mods.eln.fluid.PortBridge.endSpot(front, front, 4, 8)), flue.port(pos))
     }
+
+    override fun fluidVents(): List<mods.eln.sim.fluid.FluidDevice.Vent> = breather?.let { listOf(it) } ?: listOf()
 
     override fun beforeFluidStep(dt: Double) {
         val amb = mods.eln.sim.Ambient.kelvin(node!!.coordonate)
-        fuelIn.step(tank, dt, amb)
+        val v = vessel
+        if (v != null) {
+            view.sync(v, amb)
+            burn(v)
+        }
         if (flue.step(if (isBurnt()) 0.0 else actualHeatPower, dt, amb)) needPublish()   // (burnt: its fire is out)
         smoking = flue.smoking
     }
 
     override fun afterFluidStep(dt: Double) {
         flue.afterStep(mods.eln.sim.Ambient.kelvin(node!!.coordonate))
+        val v = vessel ?: return
+        view.show(v)
+        atBurner = burnerLayer(v)
+    }
+
+    /**
+     * What the burner draws: the bottom liquid layer's main species (water, a fuel, or -1 for nothing there). A layer of
+     * less than a milligram (the last of the water boiled off) doesn't count.
+     */
+    private fun burnerLayer(v: mods.eln.sim.fluid.FluidNode): Int {
+        for (l in 0 until v.layers()) {
+            var best = -1
+            var most = 0.0
+            var total = 0.0
+            for (id in 0 until v.speciesBound()) if (v.layerOf(id) == l) {
+                total += v.liquid(id)
+                if (v.liquid(id) > most) { best = id; most = v.liquid(id) }
+            }
+            if (total > 1e-6) return best
+        }
+        return -1
+    }
+
+    /**
+     * The burner takes what the control process wanted over the last step out of the vessel's bottom layer, as heat into
+     * the bank: kg = heat / (heatFurnaceFuelFactor x the layer's heating value), by drainLayer (every species in it by its
+     * share). Water there boils off at the flame's cost and gives nothing.
+     */
+    private fun burn(v: mods.eln.sim.fluid.FluidNode) {
+        val need = wanted - bank
+        wanted = 0.0
+        if (need <= 0) return
+        val id = burnerLayer(v)
+        if (id < 0) return
+        if (id == mods.eln.sim.fluid.SpeciesRegistry.WATER) {
+            mods.eln.sim.fluid.EaUnits.drainLiquid(v, need / WATER_BOIL_J_PER_KG)
+            return
+        }
+        val hv = layerHeatingValue(v, id)
+        if (hv <= 0) return
+        val f = mods.eln.ElnConfig.heatFurnaceFuelFactor
+        val residue = layerShare(v, id, mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:residue"))
+        val got = mods.eln.sim.fluid.EaUnits.drainLayer(v, id, need / f / hv)
+        if (got <= 0) return
+        bank += got * hv * f
+        fuelBurntKg += got
+        residueShare = residue
+    }
+
+    /** The heating value (J/kg) of the layer species id is in: its species' by their shares. */
+    private fun layerHeatingValue(v: mods.eln.sim.fluid.FluidNode, id: Int): Double {
+        val total = mods.eln.sim.fluid.EaUnits.layerLiquid(v, id)
+        if (total <= 0) return 0.0
+        val layer = v.layerOf(id)
+        val reg = mods.eln.sim.fluid.SpeciesRegistry.get()
+        var hv = 0.0
+        for (j in 2 until v.speciesBound()) if (v.layerOf(j) == layer) hv += v.liquid(j) / total * reg.byId(j).heatingValue
+        return hv
+    }
+
+    /** The share of species j in the layer species id is in (0 if j is absent or elsewhere). */
+    private fun layerShare(v: mods.eln.sim.fluid.FluidNode, id: Int, j: Int): Double {
+        if (j < 0 || v.layerOf(j) != v.layerOf(id)) return 0.0
+        val total = mods.eln.sim.fluid.EaUnits.layerLiquid(v, id)
+        return if (total > 0) v.liquid(j) / total else 0.0
+    }
+
+    /** Heat a kg of what is at its burner now gives (J/kg, after heatFurnaceFuelFactor; 0: water or nothing). */
+    fun heatPerKgAtBurner(): Double {
+        val v = vessel ?: return 0.0
+        val id = burnerLayer(v)
+        if (id < 0 || id == mods.eln.sim.fluid.SpeciesRegistry.WATER) return 0.0
+        return layerHeatingValue(v, id) * mods.eln.ElnConfig.heatFurnaceFuelFactor
+    }
+
+    /** Put mB of fluid into its tank at the ambient, as a bucket would (a mixture alias dead: crude as its cuts). */
+    fun putFuel(fluid: net.minecraft.world.level.material.Fluid, mB: Int) {
+        val v = vessel ?: return
+        val ph = mods.eln.fluid.FluidSpecies.of(fluid) ?: return
+        mods.eln.sim.fluid.EaUnits.add(v, ph.id(), mB * mods.eln.fluid.FluidSpecies.kgPerMb(ph.id(), ph.vapour()),
+            mods.eln.sim.Ambient.kelvin(node!!.coordonate), ph.vapour())
+        view.show(v)
+        atBurner = burnerLayer(v)
+    }
+
+    /** Its tank's liquid (mB of water's volume: every liquid's mB is the same volume). */
+    fun fuelMb(): Double {
+        val v = vessel ?: return 0.0
+        return v.liquidVolume() * mods.eln.sim.fluid.Water.RHO_L / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER
     }
 
     override fun connectJob() {
         super.connectJob()
-        if (flue.node != null) mods.eln.fluid.FluidWorld.add(this)
+        if (flue.node != null && vessel != null) mods.eln.fluid.FluidWorld.add(this)
     }
 
     override fun disconnectJob() {
@@ -198,14 +339,17 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             }
             super.process(time)
 
-            fire.step(heaterControlValue, nominalPower > 0 && tank.fluidAmount > 0, time)
-            // (each mB gives heatFurnaceFuelFactor times its heat value: Baughn 2026-10-26, with turbines by the expansion)
-            val f = mods.eln.ElnConfig.heatFurnaceFuelFactor
-            val fuel = tank.getFluid()
-            val availableEnergy = tank.drainEnergy(fire.level * nominalPower * (1 - coke) * time / f) * f
-            actualHeatPower = availableEnergy / time
-            // (the coking: per second at its full power on crude, 1 / (2 h); residue at half that)
-            val rate = cokeRate(fuel)
+            fire.step(heaterControlValue, nominalPower > 0 && (atBurner >= 0 || bank > 0), time)
+            // (each kg gives heatFurnaceFuelFactor times its heating value: Baughn 2026-10-26, with turbines by the
+            // expansion; the burner draws it into the bank between fluid steps)
+            val want = fire.level * nominalPower * (1 - coke) * time
+            wanted += want
+            val given = Math.min(want, bank)
+            bank -= given
+            heatGivenJ += given
+            actualHeatPower = given / time
+            // (the coking: per second at its full power on dead crude, 1 / (2 h); by the residue share of what burns)
+            val rate = cokeRate()
             if (rate > 0 && nominalPower > 0) coke = Math.min(COKE_MAX, coke + rate * actualHeatPower / nominalPower * time / (2 * 3600))
             thermalLoad.PcTemp += mods.eln.fluid.Flue.HEAT_SHARE * actualHeatPower   // (the rest leaves in the smoke: Flue)
         }
@@ -224,8 +368,6 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         electricalLoadList.add(controlLoad)
         slowProcessList.add(NodePeriodicPublishProcess(transparentNode, 2.0, 1.0))
         slowProcessList.add(thermalWatchdog)
-
-        tank.setFilter(FuelRegistry.fluidListToFluids(FuelRegistry.gasolineList + FuelRegistry.dieselList + FuelRegistry.heavyList))
 
         thermalWatchdog.set(thermalLoad).setLimit((descriptor as FuelHeatFurnaceDescriptor).thermal)
             .set(Failure(this).machine())
@@ -251,7 +393,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         else -> 0
     }
 
-    override fun getFluidHandler() = tank
+    override fun getFluidHandler() = view
 
     override fun multiMeterString(side: Direction?) = Utils.plotPower("P:", thermalLoad.power)
 
@@ -261,7 +403,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         (descriptor as FuelHeatFurnaceDescriptor).thermal.applyTo(thermalLoad)
         inventoryChange(inventory_)
         val amb = mods.eln.sim.Ambient.kelvin(node!!.coordonate)
-        fuelIn.make(node!!.coordonate.y + 4 / 16.0, amb)
+        makeVessel(amb)
         flue.make(node!!.coordonate.y + 0.75, amb)
         connect()
     }
@@ -276,18 +418,46 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         return true
     }
 
-    /** Coking per second at full power, as a share of COKE per (2 h): crude 1, residue 0.5, refined fuels 0. */
-    private fun cokeRate(fuel: net.neoforged.neoforge.fluids.FluidStack): Double {
-        if (fuel.isEmpty) return 0.0
-        return when {
-            fuel.fluid.isSame(mods.eln.oil.Oil.CRUDE.get()) -> 1.0
-            fuel.fluid.isSame(mods.eln.oil.Oil.Cut.RESIDUE.source.get()) -> 0.5
-            else -> 0.0
+    /** The vessel, from its save, or an old save's tank and stub, or empty at the ambient. */
+    private fun makeVessel(amb: Double) {
+        val v = mods.eln.sim.fluid.FluidNode(TANK_M3, node!!.coordonate.y.toDouble(), TANK_H, false)
+        val saved = loaded
+        if (saved != null) {
+            mods.eln.fluid.FluidSaves.restore(v, saved)
+            v.update()
+        } else {
+            v.fill(0.0, mods.eln.sim.fluid.Water.P_ATM, amb)
+            legacyTank?.let { st ->
+                val ph = mods.eln.fluid.FluidSpecies.of(st.fluid)
+                if (ph != null && st.amount > 0)
+                    mods.eln.sim.fluid.EaUnits.add(v, ph.id(), st.amount * mods.eln.fluid.FluidSpecies.kgPerMb(ph.id(), false), amb, false)
+            }
+            legacyStub?.let { a ->
+                val stub = mods.eln.sim.fluid.FluidNode(mods.eln.fluid.PortBridge.STUB_VOLUME, 0.0, 0.1, false)
+                mods.eln.fluid.FluidSaves.restore(stub, a)
+                stub.update()
+                if (stub.mWater > 0) mods.eln.sim.fluid.EaUnits.add(v, mods.eln.sim.fluid.SpeciesRegistry.WATER, stub.mWater, amb, false)
+                val reg = mods.eln.sim.fluid.SpeciesRegistry.get()
+                for (j in 2 until stub.speciesBound()) {
+                    val m = stub.liquid(j) + stub.vapour(j)
+                    if (m > 0) mods.eln.sim.fluid.EaUnits.add(v, j, m, amb, reg.byId(j).gas())
+                }
+            }
         }
+        legacyTank = null
+        legacyStub = null
+        loaded = null
+        vessel = v
+        breather = mods.eln.sim.fluid.FluidDevice.Vent(v, 1.0, BREATHER_K).also { it.open = 1.0 }
+        view.show(v)
+        atBurner = burnerLayer(v)
     }
 
-    /** Thick black smoke while it burns crude or residue. */
-    private fun sooty() = cokeRate(tank.getFluid()) > 0
+    /** Coking per second at full power, as a share of COKE per (2 h): by the residue share of what it burns. */
+    private fun cokeRate() = if (atBurner >= 0 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER) COKE_PER_RESIDUE * residueShare else 0.0
+
+    /** Thick black smoke while what it burns has residue in it. */
+    private fun sooty() = actualHeatPower > 0 && residueShare > 0
 
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
@@ -326,7 +496,12 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 
     override fun writeToNBT(nbt: CompoundTag) {
         super.writeToNBT(nbt)
-        tank.writeToNBT(nbt, "tank")
+        vessel?.let {
+            mods.eln.fluid.FluidWorld.writeBackOf(it)
+            mods.eln.fluid.FluidSaves.put(nbt, "vessel", it)
+        }
+        nbt.putDouble("bank", bank)
+        nbt.putDouble("residueShare", residueShare)
         nbt.putBoolean("externalControlled", externalControlled)
         nbt.putBoolean("mainSwitch", mainSwitch)
         nbt.putDouble("heaterControlValue", heaterControlValue)
@@ -334,14 +509,22 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         nbt.putDouble("setTemperature", setTemperature)
         nbt.putDouble("actualHeatPower", actualHeatPower)
         fire.write(nbt, "")
-        fuelIn.write(nbt)
         flue.write(nbt)
         nbt.putDouble("coke", coke)
     }
 
     override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
-        tank.readFromNBT(nbt, "tank")
+        loaded = mods.eln.fluid.FluidSaves.array(nbt, "vessel")
+        if (loaded == null) {
+            // (an old save: its 2-bucket fluid tank and its flange's PortBridge stub go into the vessel when it is made)
+            val old = PreciseElementFluidHandler(TANK_MB.toInt())
+            old.readFromNBT(nbt, "tank")
+            legacyTank = old.getFluid().copy()
+            legacyStub = mods.eln.fluid.FluidSaves.array(nbt, "fuelIn")
+        }
+        bank = nbt.getDoubleOr("bank", 0.0)
+        residueShare = nbt.getDoubleOr("residueShare", 0.0)
         externalControlled = nbt.getBooleanOr("externalControlled", false)
         mainSwitch = nbt.getBooleanOr("mainSwitch", false)
         heaterControlValue = nbt.getDoubleOr("heaterControlValue", 0.0)
@@ -349,7 +532,6 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         setTemperature = ClientValues.finite(nbt.getDoubleOr("setTemperature", 0.0), 0.0)
         actualHeatPower = nbt.getDoubleOr("actualHeatPower", 0.0)
         if (nbt.contains("fire")) fire.read(nbt, "") else fire.level = heaterControlValue
-        fuelIn.read(nbt)
         flue.read(nbt)
         coke = nbt.getDoubleOr("coke", 0.0)
     }
@@ -374,11 +556,15 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))
         info.put(I18N.tr("Power"), Utils.plotPower("", if (isBurnt()) 0.0 else actualHeatPower))
         // (what's in its tank: Baughn 2026-11-03, Jade said nothing of it)
-        val f = tank.getFluid()
-        info.put(I18N.tr("Fuel tank"), if (f.isEmpty) I18N.tr("empty") else "${tank.fluidAmount} / ${tank.capacity} mB ${f.hoverName.string}")
-        if (coke > 0.01) info.put(I18N.tr("Burner"), String.format(I18N.tr("%.0f%% coked: fires %.0f%% (right-click with wool to clean)"), coke * 100, (1 - coke) * 100))
+        val v = vessel
+        if (v != null) {
+            val mb = fuelMb()
+            info.put(I18N.tr("Fuel tank"), if (mb < 0.5) I18N.tr("empty") else String.format("%.0f / %.0f mB: %s", mb, TANK_MB, mods.eln.sim.fluid.EaUnits.composition(v)))
+            if (atBurner == mods.eln.sim.fluid.SpeciesRegistry.WATER) info.put(I18N.tr("Burner"), I18N.tr("water at the burner: it boils off, no heat until it's gone"))
+        }
+        if (coke > 0.01 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER) info.put(I18N.tr("Burner"), String.format(I18N.tr("%.0f%% coked: fires %.0f%% (right-click with wool to clean)"), coke * 100, (1 - coke) * 100))
         if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade())
-        if (fuelIn.piped()) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its front flange"))
+        if (v != null && mods.eln.fluid.FluidWorld.edgesOf(v).any { it !== breather?.edge }) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its front flange"))
         return info
     }
 

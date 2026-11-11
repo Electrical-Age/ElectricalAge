@@ -13,5 +13,6 @@
   "colour": "#1A1410",
   "fluids": {"liquid": ["eln:crude_oil"], "vapour": []},
   "flammable": {"flash_point": 280, "autoignition": 520},
-  "mixture": {"eln:heavy_oil": 0.35, "eln:diesel": 0.25, "eln:gasoline": 0.20, "eln:residue": 0.15, "eln:natural_gas": 0.05}
+  "mixture": {"eln:heavy_oil": 0.35, "eln:diesel": 0.25, "eln:gasoline": 0.20, "eln:residue": 0.15, "eln:natural_gas": 0.05},
+  "heating_value": 42000000
 }

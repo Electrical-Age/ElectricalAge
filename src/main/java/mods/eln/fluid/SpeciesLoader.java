@@ -38,6 +38,7 @@ import java.util.TreeMap;
  * fluids               {"liquid": [fluid ids], "vapour": [fluid ids]}: the NeoForge fluids that are this species
  * flammable            optional {"flash_point": K, "autoignition": K}: a leak catches from a flame over its flash
  *                      point, by itself over its autoignition temperature
+ * heating_value        optional J/kg (lower heating value): what a burner gets from a kg of it (0: not a fuel)
  * </pre>
  * A file that fails to parse or check is skipped with a log line; the species keeps its previous data, if any.
  */
@@ -139,6 +140,10 @@ public final class SpeciesLoader extends SimplePreparableReloadListener<Map<Stri
             s.autoignition = req(f, "autoignition").getAsDouble();
             s.flashPoint = f.has("flash_point") ? f.get("flash_point").getAsDouble() : 0;
             if (!(s.autoignition > s.flashPoint)) throw new IllegalArgumentException("autoignition must be over the flash point");
+        }
+        if (j.has("heating_value")) {
+            s.heatingValue = j.get("heating_value").getAsDouble();
+            if (!(s.heatingValue >= 0)) throw new IllegalArgumentException("heating_value must be >= 0");
         }
         return s;
     }

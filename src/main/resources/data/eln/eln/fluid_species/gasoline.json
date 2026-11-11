@@ -12,5 +12,6 @@
   "vapour_viscosity": 7e-6,
   "colour": "#F4E27A",
   "fluids": {"liquid": ["eln:gasoline"], "vapour": []},
-  "flammable": {"flash_point": 230, "autoignition": 520}
+  "flammable": {"flash_point": 230, "autoignition": 520},
+  "heating_value": 44000000
 }

@@ -38,6 +38,7 @@ public final class OilCases {
         for (String v : OilOnPipes.VARIANTS) cases.add(new OilOnPipes(v));
         cases.add(new Basin());
         cases.add(new Coke());
+        for (String v : FuelBySpecies.VARIANTS) cases.add(new FuelBySpecies(v));
         cases.add(new SeparatorSound());
         cases.add(new Pump(false));
         cases.add(new Pump(true));
@@ -790,9 +791,9 @@ public final class OilCases {
                 }
                 case "fuel_furnace_buckets" -> ctx.check("oil: the fuel heat furnace takes a bucket of every EA oil a burner fires", allBuckets, bucketed);
                 case "fuel_furnace_in", "fuel_furnace_crude" -> {
-                    var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, ctx.at(3, 1, 1), net.minecraft.core.Direction.UP);
-                    long got = cap == null ? 0 : cap.getAmountAsLong(0);
-                    ctx.check("oil on pipes: the fuel heat furnace's tank filled from the pipe on its front flange", got > 10, got + " mB, " + east.getWaila());
+                    // (its tank's liquid, whatever mix: crude is its cuts, which a bucket wouldn't take as one fluid)
+                    double got = ((mods.eln.transparentnode.FuelHeatFurnaceElement) east).fuelMb();
+                    ctx.check("oil on pipes: the fuel heat furnace's tank filled from the pipe on its front flange", got > 10, String.format("%.0f mB, %s", got, east.getWaila()));
                 }
                 case "turbine_fuel" -> {
                     int f = ((mods.eln.mechanical.GasTurbineElement) east).tank.getFluidAmount();
@@ -858,7 +859,7 @@ public final class OilCases {
                 o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getSetManualControlValueEvent());
                 o.writeFloat(1f);
             }));
-            ((mods.eln.fluid.ElementFluidHandler) f.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(fuel, 2000), true);
+            f.putFuel(fuel, 1800);
             f.setCoke(coke);
             return f;
         }
@@ -894,6 +895,162 @@ public final class OilCases {
                 used + ", " + wooled.getCoke() + ", " + player.getMainHandItem());
             boolean again = wooled.onBlockActivated(player, mods.eln.misc.Direction.YP, 0.5f, 0.5f, 0.5f);
             ctx.check("oil: wool on a clean burner does nothing", !again && player.getMainHandItem().getCount() == 2, again + "");
+        }
+    }
+
+    /**
+     * The fuel heat furnace's tank is a fluid node, and its burner burns what it holds species by species, by their
+     * heating values (Baughn 2026-11-10: "mixed on the machines"; real numbers):
+     * <ul>
+     * <li>mixed_fuel: gasoline and diesel half and half burn as the mix: the heat it gave is what it drew times the mix's
+     * heating value, between gasoline's and diesel's;</li>
+     * <li>coke_by_residue: coking follows the residue share of what burns (Baughn: fouling from unburnt residue): residue
+     * cokes faster than crude, diesel not at all;</li>
+     * <li>water_boils_off: water under the fuel reaches the burner first; it boils off giving no heat, then the fuel burns;</li>
+     * <li>legacy_tank: an old save's 2-bucket tank of crude loads into the vessel, as crude's cuts.</li>
+     * </ul>
+     */
+    static final class FuelBySpecies implements TestCase {
+        static final String[] VARIANTS = {"mixed_fuel", "coke_by_residue", "water_boils_off", "legacy_tank"};
+        final String variant;
+        mods.eln.transparentnode.FuelHeatFurnaceElement a, b, c;
+        double kg0, perKg0, perKgGasoline, perKgDiesel, heatEarly = -1;
+        int atBurnerEarly = -9;
+        String legacy = "";
+
+        FuelBySpecies(String variant) {
+            this.variant = variant;
+        }
+
+        public String id() {
+            return "fuel_furnace_" + variant;
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return variant.equals("water_boils_off") ? 400 : 200;
+        }
+
+        mods.eln.transparentnode.FuelHeatFurnaceElement lit(TestContext ctx, int x) {
+            var f = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(x, 1, 1));
+            f.getInventory().setItem(mods.eln.transparentnode.FuelHeatFurnaceContainer.Companion.getFuelBurnerSlot(),
+                mods.eln.Eln.sharedItemStackOne.getDescriptor(2 + (124 << 6)).newItemStack());
+            f.inventoryChange(f.getInventory());
+            f.networkUnserialize(ctx.stream(o -> o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getMainSwitchToggleEvent())));
+            f.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getSetManualControlValueEvent());
+                o.writeFloat(1f);
+            }));
+            return f;
+        }
+
+        static double hv(String key) {
+            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+            return reg.byId(reg.id(key)).heatingValue * mods.eln.ElnConfig.heatFurnaceFuelFactor;
+        }
+
+        public void build(TestContext ctx) {
+            switch (variant) {
+                case "mixed_fuel" -> {
+                    a = lit(ctx, 1);
+                    a.putFuel(Oil.Cut.GASOLINE.source.get(), 900);
+                    a.putFuel(Oil.Cut.DIESEL.source.get(), 900);
+                    perKg0 = a.heatPerKgAtBurner();
+                    perKgGasoline = hv("eln:gasoline");
+                    perKgDiesel = hv("eln:diesel");
+                }
+                case "coke_by_residue" -> {
+                    a = lit(ctx, 0);
+                    a.putFuel(Oil.Cut.RESIDUE.source.get(), 1500);
+                    b = lit(ctx, 2);
+                    b.putFuel(Oil.CRUDE.get(), 1500);
+                    c = lit(ctx, 4);
+                    c.putFuel(Oil.Cut.DIESEL.source.get(), 1500);
+                }
+                case "water_boils_off" -> {
+                    a = lit(ctx, 1);
+                    a.putFuel(net.minecraft.world.level.material.Fluids.WATER, 300);
+                    a.putFuel(Oil.Cut.GASOLINE.source.get(), 1000);
+                    ctx.after(30, () -> {
+                        atBurnerEarly = a.getAtBurner();
+                        heatEarly = a.getHeatGivenJ();
+                    });
+                }
+                case "legacy_tank" -> {
+                    a = lit(ctx, 1);
+                    var p = ctx.at(1, 1, 1);
+                    ctx.after(2, () -> {
+                        try {
+                            var r = mods.eln.gametest.Reload.node(ctx.level(), p, t -> {
+                                var el = holding(t, "vesselW");
+                                for (String k : new String[]{"vesselW", "vesselA", "vesselU", "vesselS", "vesselFv"}) el.remove(k);
+                                var old = new mods.eln.fluid.PreciseElementFluidHandler(2000);
+                                old.fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 1500), true);
+                                old.writeToNBT(el, "tank");
+                                return t;
+                            });
+                            var fresh = (mods.eln.transparentnode.FuelHeatFurnaceElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                            var v = fresh.getVessel();
+                            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+                            double total = 0;
+                            StringBuilder sb = new StringBuilder();
+                            for (String k : new String[]{"eln:heavy_oil", "eln:diesel", "eln:gasoline", "eln:residue"}) {
+                                double m = v.liquid(reg.id(k)) + v.vapour(reg.id(k));
+                                total += m;
+                                sb.append(k).append(' ').append(String.format("%.4f", m)).append("; ");
+                            }
+                            double want = 1500 * mods.eln.fluid.FluidSpecies.kgPerMb(reg.id("eln:crude_oil"), false);
+                            double heavy = v.liquid(reg.id("eln:heavy_oil")) / total;
+                            legacy = Math.abs(total - want) < 0.01 * want && Math.abs(heavy - 0.35 / 0.95) < 0.01 ? "" : sb + String.format("total %.4f kg, want %.4f", total, want);
+                        } catch (ReflectiveOperationException e) {
+                            legacy = e.toString();
+                        }
+                    });
+                }
+            }
+        }
+
+        /** The compound (at any depth) that holds key. */
+        static net.minecraft.nbt.CompoundTag holding(net.minecraft.nbt.CompoundTag t, String key) {
+            if (t.contains(key)) return t;
+            for (String k : t.keySet())
+                if (t.get(k) instanceof net.minecraft.nbt.CompoundTag c) {
+                    var h = holding(c, key);
+                    if (h != null) return h;
+                }
+            return null;
+        }
+
+        public void measure(TestContext ctx) {
+            switch (variant) {
+                case "mixed_fuel" -> {
+                    double drawn = a.getFuelBurntKg(), given = a.getHeatGivenJ();
+                    ctx.check("fuel furnace: a gasoline and diesel mix burns", given > 0 && drawn > 0, given + " J from " + drawn + " kg");
+                    ctx.check("fuel furnace: the mix's heating value lies between gasoline's and diesel's",
+                        perKg0 < perKgGasoline && perKg0 > perKgDiesel, String.format("%.4g J/kg (gasoline %.4g, diesel %.4g)", perKg0, perKgGasoline, perKgDiesel));
+                    // (what it drew is either given or still in its bank, at most a step's heat)
+                    double banked = drawn * perKg0 - given;
+                    ctx.check("fuel furnace: the heat it gave is what it drew times the mix's heating value",
+                        banked >= -0.02 * given && banked < 0.05 * drawn * perKg0 + 0.1 * a.heatPower(),
+                        String.format("drew %.5f kg x %.4g J/kg = %.0f J, gave %.0f J", drawn, perKg0, drawn * perKg0, given));
+                }
+                case "coke_by_residue" -> {
+                    ctx.check("fuel furnace: residue cokes its burner faster than crude", a.getCoke() > 3 * b.getCoke() && b.getCoke() > 0,
+                        String.format("residue %.5f, crude %.5f", a.getCoke(), b.getCoke()));
+                    ctx.check("fuel furnace: diesel doesn't coke it", c.getCoke() == 0 && c.heatPower() > 0, c.getCoke() + ", " + c.heatPower() + " W");
+                }
+                case "water_boils_off" -> {
+                    ctx.check("fuel furnace: water under the fuel reaches the burner first and gives no heat",
+                        atBurnerEarly == mods.eln.sim.fluid.SpeciesRegistry.WATER && heatEarly == 0, atBurnerEarly + ", " + heatEarly + " J");
+                    var v = a.getVessel();
+                    ctx.check("fuel furnace: the water boils off, then the fuel burns", v.liquid(mods.eln.sim.fluid.SpeciesRegistry.WATER) < 1e-6 && a.heatPower() > 0,
+                        String.format("%.6f kg water left, %.0f W, %s", v.liquid(mods.eln.sim.fluid.SpeciesRegistry.WATER), a.heatPower(), a.getWaila()));
+                }
+                case "legacy_tank" -> ctx.check("fuel furnace: an old save's tank of crude loads into its vessel as crude's cuts", legacy.isEmpty(), legacy);
+            }
         }
     }
 

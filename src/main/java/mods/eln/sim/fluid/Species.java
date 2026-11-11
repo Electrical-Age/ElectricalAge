@@ -41,6 +41,8 @@ public final class Species {
      * autoignition temperature by itself (Baughn 2026-11-03: fire from hot flammable leaks). Set by the loader.
      */
     public double flashPoint, autoignition;
+    /** Heat of combustion (J/kg, lower heating value; 0: it isn't a fuel): what a burner gets from a kg. Set by the loader. */
+    public double heatingValue;
 
     private final double andradeA, andradeB, tSteep;
 
@@ -86,6 +88,7 @@ public final class Species {
         Species s = new Species(newId, key, kind, group, rhoL, cpL, cpV, molarMass, r, tb, latentTb, tc, mu1, t1, mu2, t2, muV, colour);
         s.flashPoint = flashPoint;
         s.autoignition = autoignition;
+        s.heatingValue = heatingValue;
         return s;
     }
 

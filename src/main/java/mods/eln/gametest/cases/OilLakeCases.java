@@ -40,16 +40,25 @@ public final class OilLakeCases {
         }
 
         public void build(TestContext ctx) {
-            var furnace = ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(1, 1, 1));
             var gt = (mods.eln.mechanical.GasTurbineElement) ctx.placeTransparent(GasPlantCases.GAS_TURBINE, ctx.at(3, 1, 1));
+            int x = 0;
             for (Oil.Cut c : new Oil.Cut[]{Oil.Cut.HEAVYOIL, Oil.Cut.RESIDUE}) {
-                var tank = (mods.eln.fluid.PreciseElementFluidHandler) furnace.getFluidHandler();
-                tank.drain(tank.getFluidAmount(), true);
-                int in = tank.fill(new FluidStack(c.source.get(), 10), true);
-                double heat = in > 0 ? tank.drainEnergy(1e9) : 0;
-                double perMb = mods.eln.fluid.FuelRegistry.INSTANCE.heatEnergyPerMilliBucket(c.source.get());
+                // (each into its own furnace, through its fluid capability as a bucket; it burns by the species' heating value)
+                var p = ctx.at(x, 1, 0);
+                x += 2;
+                var furnace = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, p);
+                var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, p, net.minecraft.core.Direction.UP);
+                int in;
+                try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                    in = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(c.source.get()), 10, tx);
+                    tx.commit();
+                }
+                furnace.putFuel(c.source.get(), 10);
+                var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+                int id = mods.eln.fluid.FluidSpecies.of(c.source.get()).id();
+                double perKg = furnace.heatPerKgAtBurner(), want = reg.byId(id).heatingValue * mods.eln.ElnConfig.heatFurnaceFuelFactor;
                 if (in != 10) bad += "the furnace refuses " + c + "; ";
-                else if (Math.abs(heat - 10 * perMb) > 1e-6 * heat || perMb <= 0) bad += String.format("%s gives %.0f J for 10 mB (%.0f J/mB); ", c, heat, perMb);
+                else if (Math.abs(perKg - want) > 1e-6 * want || want <= 0) bad += String.format("%s gives %.0f J/kg at its burner (want %.0f); ", c, perKg, want);
                 int toGt = gt.tank.fill(new FluidStack(c.source.get(), 10), false);
                 if (c == Oil.Cut.HEAVYOIL && toGt != 10) bad += "the gas turbine refuses heavy oil; ";
                 if (c == Oil.Cut.RESIDUE && toGt != 0) bad += "the gas turbine takes residue; ";

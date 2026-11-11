@@ -110,6 +110,16 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   dead. A pumped crude line needs a purge valve (or a pipe taking its gas). Out of a node, a mixed liquid is named by its
   main species and taken whole (EaUnits.drainLayer), so a bucket can't distil a mix. The old column takes the cuts' mix as
   crude until it is a still. `fluid_crude_is_a_mixture`.
+- Fuel heat furnace on a fluid node (Baughn 2026-11-10: "mixed on the machines"; real numbers): its 2-bucket tank is a
+  fluid node (flange 4 px up on its front, a breather on top that lets air in and live crude's gas out; buckets put any
+  species' liquid in). The burner draws the bottom liquid layer whole and gets each species' `heating_value` (J/kg, new
+  in the species JSON: gasoline 44, diesel 43, heavy oil 41, residue 40, natural gas 50 MJ/kg) times
+  `heatFurnaceFuelFactor`, so a mix burns as the mix. Gasoline gives ~32 % more than the 1.12 table (a unit slip there);
+  the others within 5 %. Coking follows the residue share of what burns (fouling from unburnt residue), scaled so dead
+  crude cokes as before (`COKE_PER_RESIDUE` = 1/0.158; residue alone cokes ~6x faster, refined cuts never). Water at
+  the burner boils off at the flame's cost and gives no heat. Other mods' fuels with no species no longer go in (none
+  on Incognito). `fuel_furnace_mixed_fuel`, `fuel_furnace_coke_by_residue`, `fuel_furnace_water_boils_off`,
+  `fuel_furnace_legacy_tank`.
 - Pipe Purge Valve (Baughn 2026-11-10: "a valve that lets out only gas, never liquid ... it goes by phase, not species;
   it'll let out steam"): a safety valve with a float (shapeless: safety valve + bowl; blue cap). It vents the gas of the
   run under it to the air above its set pressure (1.1 bar to start, the safety valve's slider), shuts as the liquid
