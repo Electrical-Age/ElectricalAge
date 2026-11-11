@@ -53,7 +53,7 @@ class BenchTest {
             double ms = (System.nanoTime() - t0) / 1e6 / steps;
             out.append(String.format("%d | %d | %.3f | %.2f | %d | %d%n", n, steps, ms, (net.stats.iterations - it0) / (double) steps,
                 net.stats.substeps - sub0, net.stats.failures - f0));
-            java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-bench.txt"), out.toString());
+            java.nio.file.Files.writeString(TestOut.path("fluidcore-bench.txt"), out.toString());
         }
     }
 }

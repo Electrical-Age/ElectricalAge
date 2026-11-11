@@ -167,7 +167,7 @@ class NetworkTest {
         log.append(String.format("K %.3g cases %d steps %d: restless (>=0.1 %%/s) %s, failures %d %s, substeps %d, stalls %d, iterations/step %.2f, asleep at the end %d, steps slept %d, negatives %d %s%n",
             WaterAir.K, cases, steps, restless, failures, failedSeeds, substeps, stalls, iters / (double) total, asleep, slept, negatives.size(), negatives.stream().limit(10).toList()));
         log.append(String.format("limiter (scaled at most %d times): %s; lowest mass %.3g kg, lowest share of its node %.3g%n", Limiter.DOWN_PASSES, Limiter.histogram(), lowest, lowestShare));
-        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-m2.txt"), log.toString());
+        java.nio.file.Files.writeString(TestOut.path("fluidcore-m2.txt"), log.toString());
         assertTrue(failures == 0 && negatives.isEmpty(), log.toString());
     }
 
@@ -212,7 +212,7 @@ class NetworkTest {
             total += net.stats.steps;
         }
         String log = String.format("conduction 5 W/K: cases %d steps %d: restless %s, failures %d %s, iterations/step %.2f%n", cases, steps, restless, failures, failed, iters / (double) total);
-        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-conduction.txt"), log);
+        java.nio.file.Files.writeString(TestOut.path("fluidcore-conduction.txt"), log);
         assertEquals(0, failures, log);
     }
 
@@ -238,7 +238,7 @@ class NetworkTest {
             for (var e : net.edges) e.conductance = 5;
             out.append("seed ").append(seed).append(" conducting: ").append(net.checkJacobian(DT)).append("\n");
         }
-        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-jac.txt"), out.toString());
+        java.nio.file.Files.writeString(TestOut.path("fluidcore-jac.txt"), out.toString());
     }
 
     @Test
@@ -260,7 +260,7 @@ class NetworkTest {
         }
         for (var n : net.nodes) out.append(String.format("node V %.4g z %.2f H %.2f mw %.6g ma %.6g T %.2f P %.1f level %.4f%n", n.V, n.z, n.H, n.mw(), n.ma(), n.T(), n.P(), n.level()));
         for (var e : net.edges) out.append(String.format("edge %d(%.2f) -> %d(%.2f) g %.3g %s flow %.4g%n", net.nodes.indexOf(e.a), e.fa, net.nodes.indexOf(e.b), e.fb, e.g, e.kind, e.flow));
-        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-trace.txt"), out.toString());
+        java.nio.file.Files.writeString(TestOut.path("fluidcore-trace.txt"), out.toString());
     }
 
     /** Every node's state for the first FLUIDCORE_STEPS steps of seed FLUIDCORE_SEED (where a negative appears). */
@@ -291,7 +291,7 @@ class NetworkTest {
             for (var n : net.nodes) out.append(String.format("  mw %.9g ma %.9g T %.3f P %.1f level %.5g yv %.4g ml %.4g mv %.4g%n", n.mw(), n.ma(), n.T(), n.P(), n.level(), n.waterAir().out[WaterAir.YV], n.waterAir().out[WaterAir.ML], n.waterAir().out[WaterAir.MV]));
             if (st >= 0) for (var e : net.edges) out.append(String.format("  flow %.4g%n", e.flow));
         }
-        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-states.txt"), out.toString());
+        java.nio.file.Files.writeString(TestOut.path("fluidcore-states.txt"), out.toString());
     }
 
     /** For the given seeds (FLUIDCORE_SEEDS): slow settling, chatter or circulation? */
@@ -327,6 +327,6 @@ class NetworkTest {
             out.append(seed).append(" | ").append(at.stream().map(v -> String.format("%.2e", v)).toList()).append(" | ").append(flips)
                 .append(String.format(" | %.2f | %d, %d | %d%n", hi - lo, net.nodes.size(), net.edges.size(), net.stats.failures));
         }
-        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-restless.txt"), out.toString());
+        java.nio.file.Files.writeString(TestOut.path("fluidcore-restless.txt"), out.toString());
     }
 }
