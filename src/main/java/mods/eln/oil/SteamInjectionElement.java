@@ -74,7 +74,8 @@ public class SteamInjectionElement extends TransparentNodeElement implements Flu
         OilRecovery rec = OilRecovery.get(level);
         lake = OilRecovery.describe(level, r);
         double over = inlet.P() - neededPa(depth);
-        if (rec.regime(r) == OilRecovery.Regime.PRIMARY) why = "the lake still flows: no steam needed";
+        // (steam raises the seepage, which is lerped by the lake's fill: of no use only in a full lake; Baughn 2026-11-11)
+        if (r.amount() >= r.capacity()) why = "the lake is full: no steam needed";
         else if (rec.boost(r) >= OilRecovery.BOOST_CAP_MB - 1) why = "the lake has all the steam it can take";
         else if (over <= 0) why = String.format("needs %.1f bar to push down %d blocks", neededPa(depth) / 1e5, depth);
         else {

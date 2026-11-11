@@ -71,13 +71,13 @@ public final class OilLakeCases {
     }
 
     /**
-     * A pumped-out lake (empty, under the 20 % tail) under the test floor, a 50V oil pump on well casing down to it:
+     * A pumped-out lake (empty: at most seepage, under 25 % full) under the test floor, a 50V oil pump on well casing down to it:
      * <ul>
-     * <li>SEEPAGE: it never runs dry: it seeps 18 % of a 230V pump's nominal rate (OilRecovery.seepRate) into the lake,
+     * <li>SEEPAGE: it never runs dry: it seeps 25 % of a 230V pump's nominal rate (OilRecovery.seepRate) into the lake,
      * which its pump drains, so the lake stays near empty; Jade says so;</li>
      * <li>TWO_PUMPS: two pumps on it share that one seepage (Baughn 2026-11-08: more pumps mustn't mean more oil);</li>
-     * <li>STEAM: steam at 3 bar down a second casing through a wellhead (more than the well's head) pays for crude: the
-     * pump runs at its full rate again, Jade says boosted, the steam taken matches the crude at steamKgPerBucket;</li>
+     * <li>STEAM: steam at 3 bar down a second casing through a wellhead (more than the well's head) raises the seepage to
+     * a pump's full rate (Baughn 2026-11-11): the pump runs at its full rate again, Jade says boosted;</li>
      * <li>WEAK_STEAM: steam under the well's head doesn't go down: nothing injected, seepage as before.</li>
      * </ul>
      */
@@ -167,7 +167,9 @@ public final class OilLakeCases {
             var info = pump.getWaila();
             ctx.line(String.format("%s: pump %.2f mB/s (nominal %.2f, %.0f%%); lake %d -> %d mB of %d; steam %.4f kg; pump %s%s", mode, rate, nominal,
                 100 * rate / nominal, amount0, r.amount(), r.capacity(), steam, info, well == null ? "" : "; wellhead " + well.getWaila()));
-            ctx.check(mode + ": the lake stays near empty (its pumps drain what seeps in)", r.amount() < 2 * mods.eln.oil.OilRecovery.seepRate() + 50,
+            if (mode == Mode.STEAM)   // (steam raises the seepage to a 230V pump's rate, 4x what this 50V pump takes)
+                ctx.check("steam: the lake fills with what its pump doesn't take", r.amount() > 200, r.amount() + " mB");
+            else ctx.check(mode + ": the lake stays near empty (its pumps drain what seeps in)", r.amount() < 2 * mods.eln.oil.OilRecovery.seepRate() + 50,
                 r.amount() + " mB");
             String lake = String.valueOf(info.get("Lake"));
             if (mode == Mode.STEAM) {
@@ -188,12 +190,13 @@ public final class OilLakeCases {
     }
 
     /**
-     * Seepage refills the lake (Baughn 2026-11-08): an empty lake left alone for 100 s gains seepRate x 100 s, caught up
-     * when next looked at; it refills only up to its tail level; a surface pond (key "oil-pond:") doesn't refill at all.
+     * Seepage refills the lake (Baughn 2026-11-08), lerped by fill (2026-11-11): an empty lake left alone for 100 s gains
+     * its seepage, caught up when next looked at (seepRate x 100 s while under 25 % full); left for weeks it is nearly
+     * full; at 62.5 % full it seeps half its most; a surface pond (key "oil-pond:") doesn't refill at all.
      */
     static final class Refill implements TestCase {
         public String id() {
-            return "oil_lake_refills_to_its_tail";
+            return "oil_lake_refills_by_fill";
         }
 
         public void build(TestContext ctx) {
@@ -213,12 +216,15 @@ public final class OilLakeCases {
                 rec.seepTimeForTests(lake, now - 100 * 20);
                 rec.seepTimeForTests(pond, now - 100 * 20);
                 long got = rec.seep(level, lake);
-                double want = Math.min(mods.eln.oil.OilRecovery.seepRate() * 100, mods.eln.oil.OilRecovery.tail(lake));
-                ctx.check("oil: an empty lake left 100 s gains its seepage", Math.abs(lake.amount() - want) <= 1, lake.amount() + " vs " + want);
-                rec.seepTimeForTests(lake, now - 1000000L);
+                double want = mods.eln.oil.OilRecovery.gain(0, lake.capacity(), mods.eln.oil.OilRecovery.seepRate(), 100);
+                ctx.check("oil: an empty lake left 100 s gains its seepage", Math.abs(lake.amount() - want) <= 1 && want > 0, lake.amount() + " vs " + want);
+                rec.seepTimeForTests(lake, now - 100000000L);
                 rec.seep(level, lake);
-                ctx.check("oil: ... but only up to its tail level", lake.amount() == mods.eln.oil.OilRecovery.tail(lake),
-                    lake.amount() + " vs " + mods.eln.oil.OilRecovery.tail(lake));
+                ctx.check("oil: left for weeks, it is nearly full", lake.amount() >= 0.99 * lake.capacity() && lake.amount() <= lake.capacity(),
+                    lake.amount() + " of " + lake.capacity());
+                mods.eln.reservoir.Reservoirs.setAmount(level, lake, (long) (0.625 * lake.capacity()));
+                double half = mods.eln.oil.OilRecovery.seepRate(lake) / mods.eln.oil.OilRecovery.seepRate();
+                ctx.check("oil: at 62.5 % full it seeps half its most", Math.abs(half - 0.5) < 0.02, String.format("%.3f", half));
                 ctx.check("oil: a surface pond doesn't refill", rec.seep(level, pond) == 0 && pond.amount() == 0
                     && !mods.eln.oil.OilRecovery.recovers(level, pond) && mods.eln.oil.OilRecovery.recovers(level, lake), pond.amount() + " mB");
             } finally {

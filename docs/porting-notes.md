@@ -582,14 +582,16 @@ on 1.7.10) onto 26.x.
   capacitors keep their charge and take the new leak on load. GameTest `power_capacitor_leaks_like_the_bank`.
 
 - Oil lakes (todo #138, Baughn 2026-10-30, after Argon's review): new lakes are `oilLakes.sizeMultiplier` (2) times as
-  big, all by depth (same footprint; the scale is saved in the lake's structure piece, 1 for older lakes). Below
-  `oilLakes.tailShare` (20 %) of its capacity an oil lake refills by seepage, `seepShare` (18 %) of a 230V oil pump's
-  nominal rate (~5.6 mB/s), into the lake and back up to the tail level (Baughn 2026-11-08: the seepage refills the
-  reservoir, so more pumps don't mean more oil; until then it went to the pumps directly and the lake stayed at its tail
-  level). It is caught up lazily by game time (`seep_time` per lake in `eln:oil_recovery`). Surface ponds (`oil-pond:`)
-  don't refill (Baughn 2026-11-08). GameTest `oil_lake_refills_to_its_tail`. Steam pushed down a
-  second well casing through the Steam Injection Wellhead (`eln:transparent_node@5200`, new; above the casing's head of
-  crude, ~0.08 bar a block) pays for crude at `steamKgPerBucket` (0.2 kg), and the lake's pumps run at full rate on it
+  big, all by depth (same footprint; the scale is saved in the lake's structure piece, 1 for older lakes). An oil lake
+  refills by seepage lerped by its fill (Baughn 2026-11-11, "so it's easier to tell what's going on"): none when full,
+  rising linearly to `oilLakes.seepMaxShare` (25 %) of a 230V oil pump's nominal rate (~7.8 mB/s) at `seepFullAt` (25 %)
+  full and below. (Until 2026-11-11: 18 % below a 20 % tail, refilling only up to the tail; the new config keys keep the
+  old defaults out of existing configs.) The seepage goes into the lake (Baughn 2026-11-08: more pumps don't mean more
+  oil), caught up lazily by game time in closed form (`seep_time` per lake in `eln:oil_recovery`), so a lake left alone
+  refills, ever more slowly, towards full. Surface ponds (`oil-pond:`) don't refill (Baughn 2026-11-08). GameTest
+  `oil_lake_refills_by_fill`. Steam pushed down a second well casing through the Steam Injection Wellhead
+  (`eln:transparent_node@5200`, new; above the casing's head of crude, ~0.08 bar a block) pays for crude at
+  `steamKgPerBucket` (0.2 kg), which raises the seepage by the same lerp to `seepSteamShare` (100 %) of a pump's rate
   (credit per lake in SavedData `eln:oil_recovery`, at most a pump tank's worth). Water lakes still run dry. Residue is a
   fuel for the fuel heat furnace (~41.7 MJ/l); heavy oil already was. GameTests `oil_lake_seepage`, `oil_lake_steam`,
   `oil_lake_weak_steam`, `oil_heavy_cuts_burn`, `oil_lake_sizes`.

@@ -20,7 +20,7 @@ public final class ElnConfig {
     static final ModConfigSpec.DoubleValue ANVIL_POWER, ANVIL_UNIT, ANVIL_NAME, ANVIL_RESUME, ANVIL_SAG, ANVIL_GAP, ANVIL_PLATEAU;
     static final ModConfigSpec.IntValue ANVIL_BURSTS;
     static final ModConfigSpec.DoubleValue BANK_FARADS, BANK_VOLTS, BANK_LEAK, POWER_CAP_LEAK;
-    static final ModConfigSpec.DoubleValue LAKE_SIZE, TAIL_SHARE, SEEP_SHARE, STEAM_PER_BUCKET;
+    static final ModConfigSpec.DoubleValue LAKE_SIZE, FULL_AT, SEEP_SHARE, STEAM_SHARE, STEAM_PER_BUCKET;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -119,8 +119,10 @@ public final class ElnConfig {
         b.push("oilLakes");
         LAKE_SIZE = b.comment("Generated oil lakes hold this many times the old volume, by going deeper (their footprint is the same).",
                 "New lakes only: a lake keeps the multiplier it was generated with.").defineInRange("sizeMultiplier", 2.0, 0.25, 5.0);
-        TAIL_SHARE = b.comment("Below this share of its capacity an oil lake seeps instead of running dry.").defineInRange("tailShare", 0.2, 0.0, 1.0);
-        SEEP_SHARE = b.comment("A seeping lake yields this share of one 230 V pump's nominal rate, for ever, shared by all the pumps on it.").defineInRange("seepShare", 0.18, 0.0, 1.0);
+        // (new keys 2026-11-11: seepage lerped by fill, Baughn; the old tailShare/seepShare defaults would stay in configs)
+        FULL_AT = b.comment("An oil lake seeps most at and below this share of its capacity; above it the seepage falls linearly to none when full.").defineInRange("seepFullAt", 0.25, 0.0, 1.0);
+        SEEP_SHARE = b.comment("A lake's most seepage, as a share of one 230 V pump's nominal rate, for ever, shared by all the pumps on it.").defineInRange("seepMaxShare", 0.25, 0.0, 1.0);
+        STEAM_SHARE = b.comment("With steam injected, a lake's most seepage rises to this share of one 230 V pump's nominal rate.").defineInRange("seepSteamShare", 1.0, 0.0, 10.0);
         STEAM_PER_BUCKET = b.comment("Steam (kg) injected down a well that brings up a bucket of crude from a seeping lake at the pumps' full rate.")
             .defineInRange("steamKgPerBucket", 0.2, 0.001, 100.0);
         b.pop();
@@ -186,7 +188,8 @@ public final class ElnConfig {
         mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.leakTauS = BANK_LEAK.get();
         powerCapacitorLeakTauS = POWER_CAP_LEAK.get();
         mods.eln.oil.OilLakeStructure.sizeMultiplier = LAKE_SIZE.get();
-        mods.eln.oil.OilRecovery.tailShare = TAIL_SHARE.get();
+        mods.eln.oil.OilRecovery.fullAt = FULL_AT.get();
+        mods.eln.oil.OilRecovery.steamShare = STEAM_SHARE.get();
         mods.eln.oil.OilRecovery.seepShare = SEEP_SHARE.get();
         mods.eln.oil.OilRecovery.steamKgPerBucket = STEAM_PER_BUCKET.get();
         if (mods.eln.Eln.sixNodeItem != null)   // (config can load before the devices register; they take it from the field)
