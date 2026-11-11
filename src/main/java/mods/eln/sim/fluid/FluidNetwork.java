@@ -42,8 +42,15 @@ public final class FluidNetwork {
     public String stats() {
         CoreStep c = core;
         var n = c == null ? null : c.net;
-        return String.format("%d nodes, %.3f ms/step, %s, restless %.2g at row %d", nodes.size(), steps == 0 ? 0 : nanos / 1e6 / steps,
-            n == null ? "?" : n.asleep() ? "asleep" : "awake", n == null ? 0 : n.restless, n == null ? -1 : n.restlessAt);
+        double st = n == null || n.stats.steps == 0 ? 1 : n.stats.steps;
+        return String.format("%d nodes, %.3f ms/step, %s, restless %.2g at row %d, %.1f iterations %.1f sub-steps %.1f solves a step",
+            nodes.size(), steps == 0 ? 0 : nanos / 1e6 / steps, n == null ? "?" : n.asleep() ? "asleep" : "awake", n == null ? 0 : n.restless,
+            n == null ? -1 : n.restlessAt, n == null ? 0 : n.stats.iterations / st, n == null ? 0 : n.stats.substeps / st, n == null ? 0 : n.stats.solves / st);
+    }
+
+    /** The core network as a replayable dump (NetworkDump) at step length dt, or null before its first step. */
+    public String dump(double dt) {
+        return core == null ? null : mods.eln.fluidcore.NetworkDump.write(core.net, dt);
     }
 
     /** Port band (fraction of a node's height) over which a port goes from drawing gas to drawing liquid. */

@@ -144,6 +144,31 @@ public final class LabCommands {
                 .then(Commands.literal("spmodules").executes(c -> demo(c.getSource(), () -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("tilted").executes(c -> demo(c.getSource(), () -> tilted(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("threelogger").executes(c -> demo(c.getSource(), () -> threeLogger(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("fluiddump").then(Commands.argument("pos", BlockPosArgument.blockPos()).executes(c -> {
+                    var pos = BlockPosArgument.getLoadedBlockPos(c, "pos");
+                    var node = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, c.getSource().getLevel()));
+                    Object dev = node instanceof mods.eln.node.transparent.TransparentNode tn ? tn.element : node;
+                    if (!(dev instanceof mods.eln.sim.fluid.FluidDevice d) || d.fluidPorts().isEmpty()) {
+                        c.getSource().sendFailure(Component.literal("no fluid device at " + pos));
+                        return 0;
+                    }
+                    var net = mods.eln.fluid.FluidWorld.networkOf(d.fluidPorts().get(0).node());
+                    String text = net == null ? null : net.dump(0.05);
+                    if (text == null) {
+                        c.getSource().sendFailure(Component.literal("no network stepped there yet"));
+                        return 0;
+                    }
+                    try {
+                        var dir = java.nio.file.Path.of("fluidcore-fail");
+                        java.nio.file.Files.createDirectories(dir);
+                        var f = dir.resolve("dump-" + pos.getX() + "_" + pos.getY() + "_" + pos.getZ() + ".txt");
+                        java.nio.file.Files.writeString(f, text);
+                        c.getSource().sendSuccess(() -> Component.literal("written to " + f.toAbsolutePath()), false);
+                    } catch (java.io.IOException ex) {
+                        c.getSource().sendFailure(Component.literal("could not write: " + ex));
+                    }
+                    return 1;
+                })))
                 .then(Commands.literal("fluidstats").executes(c -> {
                     var lines = mods.eln.fluid.FluidWorld.stats();
                     for (String l : lines) mods.eln.Eln.LOG.info("fluidstats: " + l);
