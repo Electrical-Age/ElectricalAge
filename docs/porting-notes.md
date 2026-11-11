@@ -110,6 +110,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   dead. A pumped crude line needs a purge valve (or a pipe taking its gas). Out of a node, a mixed liquid is named by its
   main species and taken whole (EaUnits.drainLayer), so a bucket can't distil a mix. The old column takes the cuts' mix as
   crude until it is a still. `fluid_crude_is_a_mixture`.
+- Flare stack on a fluid node: its 4-bucket tank is a fluid node behind its front flange (half way up; buckets put
+  any species in). Its tip passes every gas over the air's pressure between steps, each species by its share: natural
+  gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took
+  250 mB/s of anything and backed up). Liquids still burn at up to 250 mB/s, the bottom layer whole; water boils away.
+  A float vent on its tip relieves a step's surge (gas only) and a vacuum breaker lets air in as liquid burns down.
+  `oil_flare_live_gas`, `oil_flare_legacy_tank`.
 - Fuel heat furnace on a fluid node (Baughn 2026-11-10: "mixed on the machines"; real numbers): its 2-bucket tank is a
   fluid node (flange 4 px up on its front; buckets put any species' liquid in). Its breather on top is two vents: gas
   out (gas only, its float shut once the liquid nears the top) and air in (a vacuum breaker), each opening only past

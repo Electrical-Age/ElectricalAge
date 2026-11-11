@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class FlareStackDescriptor extends TransparentNodeDescriptor {
     public static final int TANK_MB = 4000;
-    /** mB/s it burns at most. */
+    /** mB/s of liquid it burns at most (gas: all that reaches it). */
     public static final double BURN_RATE = 250;
     final Obj3D obj;
 
@@ -31,6 +31,6 @@ public class FlareStackDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add(String.format("Burns any fluid piped in, up to %.0f mB/s, for nothing", BURN_RATE));
+        list.add(String.format("Burns any gas piped in, and liquids up to %.0f mB/s, for nothing", BURN_RATE));
     }
 }

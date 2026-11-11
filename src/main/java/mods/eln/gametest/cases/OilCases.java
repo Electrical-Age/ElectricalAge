@@ -83,6 +83,7 @@ public final class OilCases {
         cases.add(new Column());
         cases.add(new ColumnFold());
         cases.add(new Flare());
+        for (String v : FlareNode.VARIANTS) cases.add(new FlareNode(v));
     }
 
     /** Build the lake (full) and sweep it in. */
@@ -3118,12 +3119,112 @@ public final class OilCases {
         public void build(TestContext ctx) {
             Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
             flare = (mods.eln.oil.FlareStackElement) l.device(8 + (83 << 6), 2, 1);
-            flare.tank.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.Cut.RESIDUE.source.get(), 1000), true);
+            flare.putFluid(mods.eln.oil.Oil.Cut.RESIDUE.source.get(), 1000);
         }
 
         public void measure(TestContext ctx) {
-            int burnt = 1000 - flare.tank.getFluidAmount();
-            ctx.check("oil: the flare stack burns ~250 mB/s (2 s)", burnt >= 400 && burnt <= 550, burnt + " mB");
+            double burnt = 1000 - flare.liquidMb();
+            ctx.check("oil: the flare stack burns ~250 mB/s (2 s)", burnt >= 400 && burnt <= 550, String.format("%.0f mB", burnt));
+        }
+    }
+
+    /**
+     * The flare stack's tank is a fluid node behind its flange:
+     * <ul>
+     * <li>live_gas: natural gas under pressure in a tank, piped to its flange: it burns it (by mass: what left the tank and
+     * pipe is what it burnt), and its vessel doesn't fill up;</li>
+     * <li>legacy_tank: an old save's 4-bucket tank of residue loads into the vessel.</li>
+     * </ul>
+     */
+    static final class FlareNode implements TestCase {
+        static final String[] VARIANTS = {"live_gas", "legacy_tank"};
+        final String variant;
+        mods.eln.oil.FlareStackElement flare;
+        mods.eln.oil.TankElement tank;
+        double ng0;
+        String legacy = "";
+
+        FlareNode(String variant) {
+            this.variant = variant;
+        }
+
+        public String id() {
+            return "oil_flare_" + variant;
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        static int ng() {
+            return mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:natural_gas");
+        }
+
+        public void build(TestContext ctx) {
+            switch (variant) {
+                case "live_gas" -> {
+                    // (as oil_on_pipes_flare_in, with natural gas at ~3 bar in the tank instead of crude)
+                    tank = OilOnPipes.tank(ctx, ctx.at(1, 1, 1), mods.eln.misc.Direction.XP);
+                    flare = (mods.eln.oil.FlareStackElement) ctx.placeTransparent(8 + (83 << 6), ctx.at(3, 1, 1));
+                    flare.front = mods.eln.misc.Direction.XN;
+                    flare.reconnect();
+                    PipeCases.lay(ctx, ctx.at(2, 1, 1), 0, 0, 4, 8, 8, 4, 8, 8, 8, 8, 16, 8, 8);
+                    mods.eln.sim.fluid.EaUnits.add(tank.vessel, ng(), 1.4 * tank.vessel.volume, tank.vessel.T(), true);
+                    tank.vessel.update();
+                    ctx.after(1, () -> ng0 = ngIn(ctx));
+                }
+                case "legacy_tank" -> {
+                    flare = (mods.eln.oil.FlareStackElement) ctx.placeTransparent(8 + (83 << 6), ctx.at(1, 1, 1));
+                    var p = ctx.at(1, 1, 1);
+                    ctx.after(2, () -> {
+                        try {
+                            var r = mods.eln.gametest.Reload.node(ctx.level(), p, t -> {
+                                var el = FuelBySpecies.holding(t, "vesselW");
+                                for (String k : new String[]{"vesselW", "vesselA", "vesselU", "vesselS", "vesselFv"}) el.remove(k);
+                                var old = new mods.eln.fluid.ElementFluidHandler(mods.eln.oil.FlareStackDescriptor.TANK_MB);
+                                old.fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.Cut.RESIDUE.source.get(), 1000), true);
+                                old.writeToNBT(el, "tank");
+                                return t;
+                            });
+                            var fresh = (mods.eln.oil.FlareStackElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                            int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:residue");
+                            double kg = fresh.vessel.liquid(id), want = 1000 * mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
+                            legacy = Math.abs(kg - want) < 0.01 * want ? "" : String.format("%.5f kg of residue, want %.5f", kg, want);
+                        } catch (ReflectiveOperationException e) {
+                            legacy = e.toString();
+                        }
+                    });
+                }
+            }
+        }
+
+        /** The rig's natural gas (kg): the tank, the pipe between and the flare's vessel. */
+        double ngIn(TestContext ctx) {
+            int id = ng();
+            double kg = tank.vessel.vapour(id) + flare.vessel.vapour(id);
+            for (var part : PipeCases.node(ctx, ctx.at(2, 1, 1)).parts)
+                if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null) {
+                    mods.eln.fluid.FluidWorld.writeBackOf(pp.fluid);
+                    kg += pp.fluid.vapour(id);
+                }
+            return kg;
+        }
+
+        public void measure(TestContext ctx) {
+            switch (variant) {
+                case "live_gas" -> {
+                    double gone = ng0 - ngIn(ctx), dp = flare.vessel.P() - mods.eln.sim.fluid.Water.P_ATM;
+                    String what = String.format("%.6f kg gone from the rig (of %.6f), %.6f kg burnt, flare at %+.0f Pa, %s", gone, ng0, flare.gasBurntKg, dp, flare.getWaila());
+                    // (by mass: only its tip's float vent lets gas out unburnt, and only over 300 Pa)
+                    ctx.check("flare stack: the natural gas piped in burns", gone > 0.3 * ng0 && flare.gasBurntKg > 0.95 * gone && flare.gasBurntKg < 1.01 * gone, what);
+                    ctx.check("flare stack: its vessel doesn't fill up with gas", dp < 2000, what);
+                }
+                case "legacy_tank" -> ctx.check("flare stack: an old save's tank of residue loads into its vessel", legacy.isEmpty(), legacy);
+            }
         }
     }
 
