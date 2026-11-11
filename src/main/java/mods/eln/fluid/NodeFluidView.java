@@ -202,6 +202,8 @@ public class NodeFluidView extends FluidStacksResourceHandler {
             int top = FluidSpecies.topLiquid(n);
             int id = top < 0 ? SpeciesRegistry.WATER : top;
             double kg = id == SpeciesRegistry.WATER ? waterShown(n) : EaUnits.layerLiquid(n, id);
+            // (a mixed layer counts as its main species only at PURE_SHARE of it; under that a bucket gets nothing)
+            if (id != SpeciesRegistry.WATER && kg > 0 && n.liquid(id) < EaUnits.PURE_SHARE * kg) kg = 0;
             put(LIQUID, FluidSpecies.fluid(id, false), (int) Math.round(kg / FluidSpecies.kgPerMb(id, false)));
             int gas = FluidSpecies.mainVapour(n);
             int gid = gas < 0 ? SpeciesRegistry.WATER : gas;

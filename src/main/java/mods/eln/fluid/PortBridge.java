@@ -148,7 +148,10 @@ public final class PortBridge {
         for (int id = 0; id < run.speciesBound() && moved < budget; id++) {
             for (boolean vapour : new boolean[]{false, true}) {
                 if (moved >= budget) break;
-                double kg = vapour ? EaUnits.vapourAvailable(run, id) : run.liquid(id);
+                // (a liquid layer goes whole, as its main species, Baughn 2026-11-10: a machine takes a mix and makes what
+                // it will of it; it doesn't pick one species out of it)
+                if (!vapour && id != mods.eln.sim.fluid.SpeciesRegistry.WATER && EaUnits.mainOfLayer(run, id) != id) continue;
+                double kg = vapour ? EaUnits.vapourAvailable(run, id) : id == mods.eln.sim.fluid.SpeciesRegistry.WATER ? run.liquid(id) : EaUnits.layerLiquid(run, id);
                 var f = FluidSpecies.fluid(id, vapour);
                 if (f == null || kg <= 0) continue;
                 double per = FluidSpecies.kgPerMb(id, vapour);
@@ -162,7 +165,7 @@ public final class PortBridge {
                 }
                 if (put <= 0) continue;
                 if (vapour) EaUnits.drainVapour(run, id, put * per);
-                else EaUnits.drainLiquid(run, id, put * per);
+                else EaUnits.drainLayer(run, id, put * per);
                 moved += put;
             }
         }

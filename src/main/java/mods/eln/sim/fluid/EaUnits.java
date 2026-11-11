@@ -193,6 +193,20 @@ public final class EaUnits {
         return m;
     }
 
+    /**
+     * The share a mixed liquid's main species must have to count as that species at a bucket or another mod's pipe
+     * (Baughn 2026-11-10: 90 %). Under it the view refuses the layer: refine it first.
+     */
+    public static final double PURE_SHARE = 0.9;
+
+    /** The species with the most liquid in id's layer (id itself for water). */
+    public static int mainOfLayer(FluidNode n, int id) {
+        if (id == SpeciesRegistry.WATER) return id;
+        int layer = n.layerOf(id), best = id;
+        for (int j = 2; j < n.speciesBound(); j++) if (n.layerOf(j) == layer && n.liquid(j) > n.liquid(best)) best = j;
+        return best;
+    }
+
     /** The liquid (kg) of the layer species id is in: every species mixed in it. */
     public static double layerLiquid(FluidNode n, int id) {
         if (id == SpeciesRegistry.WATER) return n.liquid(id);

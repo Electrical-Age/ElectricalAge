@@ -1019,11 +1019,12 @@ public final class PipeCases {
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
             int took;
             try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                // (crude only goes in; what comes out is the mix, named by its main species: heavy oil, Baughn 2026-11-10)
+                // (crude only goes in; its mix, 37 % heavy oil at most, is too mixed to count as any one cut: a liquid is its
+                // main species only at 90 % of it, Baughn 2026-11-10)
                 took = cap.extract(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Oil.Cut.HEAVYOIL.source.get()), 50, tx);
                 tx.commit();
             }
-            ctx.check("pipe: the crude's mix comes back out through it, as heavy oil (its main cut)", took == 50, took + " mB");
+            ctx.check("pipe: the crude's mix is too mixed to take back out as one cut", took == 0, took + " mB");
         }
     }
 
