@@ -72,8 +72,12 @@ public final class FluidViewCases {
         final List<Link> links = new ArrayList<>();
 
         Flooder(FluidDevice target, double y) {
+            this(target, y, 8e5);
+        }
+
+        Flooder(FluidDevice target, double y, double pa) {
             level = target.fluidLevel();
-            FluidNode src = new FluidNode(1, y - 1, 1, true).fill(900, 8e5, Water.T_AMBIENT);
+            FluidNode src = new FluidNode(1, y - 1, 1, true).fill(900, pa, Water.T_AMBIENT);
             for (FluidPort p : target.fluidPorts()) links.add(new Link(src, 0, p.node(), p.draw(), p.k()).kind(FluidEdge.Kind.CHECK));
         }
 
@@ -156,7 +160,8 @@ public final class FluidViewCases {
                 return;
             }
             if (e.getFluidHandler() instanceof NodeFluidView && e instanceof FluidDevice d) {
-                flood = new Flooder(d, e.node.coordonate.y);
+                // (the fuel heat furnace isn't built for pressure: 8 bar bursts it, Baughn 2026-11-11)
+                flood = new Flooder(d, e.node.coordonate.y, kind.equals("FuelHeatFurnaceElement") ? 2.5e5 : 8e5);
                 FluidWorld.add(flood);
             }
         }

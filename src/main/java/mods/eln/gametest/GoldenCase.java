@@ -87,6 +87,8 @@ final class GoldenCase implements TestCase {
         m.put("Stone Heat Furnace", stoneHeatFurnace());
         m.put("Generator", Map.of("sound", "no single shaft loop: GeneratorRender plays MachineSounds' hum, rotor and air (Baughn 2026-10-28)"));
         m.put("Power Capacitor", Map.of("dischargeTao", "leaks with RC 30 min, as the capacitor bank (Baughn 2026-10-28: batteries stay the bulk store)"));
+        for (String burner : new String[]{"Small Fuel Burner", "Medium Fuel Burner", "Big Fuel Burner"})
+            m.put(burner, Map.of("producedHeatPower", "2/5/10 kW at natural draft, so forced air means something (Baughn 2026-11-11)"));
         m.put("Signal Processor", Map.of("alphaOff", "restyled with a logger screen on top, no door (Baughn 2026-10-30, board #45)"));
         // the voltage tiers (Eln.LVU, MVU, HVU, VVU, SVU; MVP 3 kW) and every number derived from them
         for (String solar : new String[]{"Small Solar Panel", "Small Rotating Solar Panel", "2x3 Solar Panel", "2x3 Rotating Solar Panel"})
