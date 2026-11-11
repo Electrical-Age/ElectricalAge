@@ -76,7 +76,8 @@ public class ElnJadePlugin implements IWailaPlugin {
             var h = acc.getHitResult().getLocation();
             var p = acc.getPosition();
             var a = v.aimed(h.x - p.getX(), h.y - p.getY(), h.z - p.getZ());
-            return a.element() >= 0 ? v.sideElementList[a.element()] : null;
+            if (a.element() >= 0) return v.sideElementList[a.element()];
+            return a.part() >= 0 && v.parts.get(a.part()) instanceof mods.eln.node.voxel.CablePart c ? v.burnableOf(c) : null;
         }
         if (node instanceof mods.eln.node.transparent.TransparentNode t) return t.element;
         if (node instanceof mods.eln.node.six.SixNode s && be instanceof mods.eln.node.six.SixNodeEntity se) {
@@ -133,7 +134,8 @@ public class ElnJadePlugin implements IWailaPlugin {
             if (b != null && b.isBurnt()) {   // (first, in the headline: what happened and what repairs it)
                 var lines = new java.util.LinkedHashMap<String, String>();
                 lines.put(mods.eln.i18n.I18N.tr("Burnt out"), b.getBurnt().text);
-                lines.put(mods.eln.i18n.I18N.tr("Repair with"), "1 " + mods.eln.sim.process.destruct.Repair.partName(b));
+                lines.put(mods.eln.i18n.I18N.tr("Repair with"), b.getBurntKind() == mods.eln.sim.process.destruct.Failure.Kind.CABLE
+                    ? mods.eln.i18n.I18N.tr("a matching cable kit (right-click the cable)") : "1 " + mods.eln.sim.process.destruct.Repair.partName(b));
                 if (m != null) lines.putAll(m);
                 m = lines;
             }

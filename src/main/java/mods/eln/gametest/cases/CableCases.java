@@ -40,6 +40,7 @@ public final class CableCases {
         cases.add(new JoinedRouteCase());
         cases.add(new DeviceEndCase());
         cases.add(new WaypointEndCase());
+        cases.add(new BurntRepairCase());
         cases.add(new PreviewSnapshotCase());
         cases.add(new HostedCase());
         cases.add(new FootprintCase());
@@ -624,6 +625,94 @@ public final class CableCases {
             c.check("waypoint end: laid", err == null, String.valueOf(err));
             c.line("waypoint end: parts " + where);
             c.check("waypoint end: a piece in the last block", last, where.toString());
+        }
+    }
+
+    /**
+     * A burnt cable is mended by right-clicking it with a matching kit (Baughn 2026-11-11, like a machine's repair part):
+     * the whole burnt run joined to the clicked piece, for the kit length it holds; a kit of another kind refuses.
+     */
+    static final class BurntRepairCase implements TestCase {
+        String err;
+        int burntBefore, burntAfterWrong, burntAfter, kitBefore, kitAfter, laidLen;
+        boolean handledWrong, handled;
+
+        public String name() {
+            return "a burnt cable is mended with a matching kit";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 4;
+        }
+
+        public int depth() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 10;
+        }
+
+        java.util.List<mods.eln.node.voxel.VoxelNode> nodes(TestContext c) {
+            var out = new java.util.ArrayList<mods.eln.node.voxel.VoxelNode>();
+            for (int x = 0; x < 8; x++)
+                if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, 1, 1), c.level())) instanceof mods.eln.node.voxel.VoxelNode v)
+                    out.add(v);
+            return out;
+        }
+
+        int burnt(TestContext c) {
+            int n = 0;
+            for (var v : nodes(c)) for (var p : v.parts) if (p instanceof CablePart cp && cp.burnt != null) n++;
+            return n;
+        }
+
+        public void build(TestContext c) {
+            var hitA = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(1, 0, 1)).add(0.5, 1.0, 0.5);
+            var hitB = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(6, 0, 1)).add(0.5, 1.0, 0.5);
+            long[][] j = new long[1][];
+            var a = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(1, 0, 1), net.minecraft.core.Direction.UP, hitA, true, j);
+            var b = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(6, 0, 1), net.minecraft.core.Direction.UP, hitB, false, j);
+            err = mods.eln.node.voxel.CablePlacer.routeAndLayForTests(c.level(), LV, a, b);
+            // burn it in blocks 2..4 (each block's conductor burns on its own, as overheating does)
+            for (var v : nodes(c)) {
+                int x = v.coordonate.x - c.at(0, 0, 0).getX();
+                if (x < 2 || x > 4) continue;
+                for (var p : v.parts)
+                    if (p instanceof CablePart cp) {
+                        var bu = v.burnableOf(cp);
+                        if (bu != null) bu.burn(mods.eln.sim.process.destruct.FailureCause.OVERHEAT, mods.eln.sim.process.destruct.Failure.Kind.CABLE);
+                        laidLen += cp.length();
+                    }
+            }
+            burntBefore = burnt(c);
+            var player = Wp10bCases.player(c);
+            player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            net.minecraft.core.BlockPos at = c.at(3, 1, 1);
+            var v = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(at, c.level()));
+            int[] bx = null;
+            for (var p : v.parts) if (p instanceof CablePart cp) bx = cp.boxes().get(0);
+            var hit = net.minecraft.world.phys.Vec3.atLowerCornerOf(at).add((bx[0] + bx[3]) / 32.0, bx[4] / 16.0, (bx[2] + bx[5]) / 32.0);
+            var wrong = mods.eln.node.voxel.CableKitItem.kit(CablePart.tierOf("Signal Cable"), 16 * 20);
+            handledWrong = mods.eln.node.voxel.CablePlacer.use(player, c.level(), at, net.minecraft.core.Direction.UP, wrong, CablePart.tierOf("Signal Cable"), hit);
+            burntAfterWrong = burnt(c);
+            var kit = mods.eln.node.voxel.CableKitItem.kit(LV, 16 * 20);
+            kitBefore = mods.eln.node.voxel.KitItem.lengthForTests(kit);
+            handled = mods.eln.node.voxel.CablePlacer.use(player, c.level(), at, net.minecraft.core.Direction.UP, kit, LV, hit);
+            kitAfter = mods.eln.node.voxel.KitItem.lengthForTests(kit);
+            burntAfter = burnt(c);
+        }
+
+        public void measure(TestContext c) {
+            c.check("burnt repair: laid", err == null, String.valueOf(err));
+            c.check("burnt repair: three blocks burnt", burntBefore >= 3, burntBefore + " burnt pieces");
+            c.check("burnt repair: a kit of another kind refuses", handledWrong && burntAfterWrong == burntBefore, handledWrong + ", " + burntAfterWrong);
+            c.check("burnt repair: the matching kit mends the whole burnt run", handled && burntAfter == 0, burntAfter + " still burnt");
+            c.check("burnt repair: it costs the burnt length", kitBefore - kitAfter == laidLen, (kitBefore - kitAfter) + " voxels taken, " + laidLen + " burnt");
         }
     }
 

@@ -25,6 +25,29 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         registerDefaultState(stateDefinition.any().setValue(WATERLOGGED, false));
     }
 
+    /** How long a cable smoulders after it was seen to burn, ticks (then only a rare wisp). */
+    static final int SMOULDER_TICKS = 2400;
+
+    /** Burnt cables smoke (Baughn 2026-11-11: obviously failed): thickly with embers for a while after they burn, then a
+     *  wisp now and then. Client only; drawn from the published parts. */
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, net.minecraft.util.RandomSource random) {
+        if (!(level.getBlockEntity(pos) instanceof VoxelNodeEntity e)) return;
+        boolean fresh = level.getGameTime() - e.clientBurnt < SMOULDER_TICKS;
+        for (VoxelPart p : e.clientParts) {
+            if (!(p instanceof CablePart c) || c.burnt == null) continue;
+            if (!fresh && random.nextInt(12) != 0) continue;
+            for (int[] b : c.boxes()) {
+                double x = pos.getX() + (b[0] + random.nextDouble() * (b[3] - b[0])) / 16, y = pos.getY() + b[4] / 16.0,
+                    z = pos.getZ() + (b[2] + random.nextDouble() * (b[5] - b[2])) / 16;
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, x, y, z, 0, 0.01, 0);
+                if (fresh && random.nextInt(6) == 0)
+                    level.addParticle(net.minecraft.core.particles.ParticleTypes.SMALL_FLAME, x, y, z, 0, 0.005, 0);
+                if (!fresh) break;
+            }
+        }
+    }
+
     // waterloggable, like the six-node block (cables and devices under water; a converted underwater block stays wet)
     @Override
     protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {

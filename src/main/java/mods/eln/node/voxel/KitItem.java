@@ -26,6 +26,10 @@ public interface KitItem {
 
     String LEN_KEY = "kitLen";
 
+    public static int lengthForTests(ItemStack s) {
+        return length(s);
+    }
+
     static int length(ItemStack s) {
         if (!(s.getItem() instanceof KitItem)) return 0;
         var data = s.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);

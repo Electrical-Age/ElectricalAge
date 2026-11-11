@@ -206,6 +206,12 @@ final class CableNet {
             for (CablePart p : parts) p.burnt = cause;
             node.connect();
             node.setNeedPublish(true);
+            // (a puff of smoke where it burnt; the client keeps it smouldering: VoxelNodeBlock.animateTick)
+            if (node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)
+                for (CablePart p : parts)
+                    for (int[] b : p.boxes())
+                        level.sendParticles(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE, node.coordonate.x + (b[0] + b[3]) / 32.0,
+                            node.coordonate.y + (b[1] + b[4]) / 32.0, node.coordonate.z + (b[2] + b[5]) / 32.0, 4, 0.1, 0.05, 0.1, 0.01);
         }
 
         @Override

@@ -177,6 +177,9 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
     /** Client: the glowing surface strips of hot thermal cables (Incandescence.cableSurface). */
     public volatile List<float[]> clientGlow = List.of();
 
+    /** Client: when a cable here was last seen to burn (game time), or MIN_VALUE. */
+    public volatile long clientBurnt = Long.MIN_VALUE;
+
     /** Client: the parts as last published. */
     public volatile List<VoxelPart> clientParts = List.of();
 
@@ -238,6 +241,11 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
                 for (int[] b : read[i].boxes()) glow.add(new float[]{c, b[0], b[1], b[2], b[3], b[4], b[5]});
             }
             clientGlow = glow.isEmpty() ? List.of() : List.copyOf(mods.eln.misc.Incandescence.cableSurface(glow));
+            // (a cable that burnt while we watched smoulders for a while: VoxelNodeBlock.animateTick)
+            int burntNow = 0, burntBefore = 0;
+            for (VoxelPart p : ps) if (p instanceof CablePart c && c.burnt != null) burntNow++;
+            for (VoxelPart p : clientParts) if (p instanceof CablePart c && c.burnt != null) burntBefore++;
+            if (burntNow > burntBefore && !clientParts.isEmpty() && level != null) clientBurnt = level.getGameTime();
             if (hash != partsHash || clientParts.size() != ps.size()) {
                 partsHash = hash;
                 partsChanged = true;

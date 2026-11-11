@@ -49,6 +49,7 @@ public final class VoxelModel implements DynamicBlockStateModel {
             // every sprite the geometry uses, resolved now (the mesher runs on worker threads)
             Map<Identifier, Material.Baked> sprites = new HashMap<>();
             for (Identifier id : VoxelGeometry.PIPE) sprites.put(id, baker.materials().get(new Material(id), () -> "eln:voxel_node"));
+            sprites.put(VoxelGeometry.BURNT, baker.materials().get(new Material(VoxelGeometry.BURNT), () -> "eln:voxel_node"));
             for (int t = 0; t < mods.eln.node.voxel.CablePart.TIERS.length; t++) {
                 Identifier id = VoxelGeometry.cableSprite(t);
                 sprites.computeIfAbsent(id, k -> baker.materials().get(new Material(k), () -> "eln:voxel_node"));

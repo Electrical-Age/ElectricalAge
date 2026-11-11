@@ -39,6 +39,10 @@ public final class VoxelGeometry {
         Identifier.fromNamespaceAndPath("eln", "block/pipe_alloy"), Identifier.fromNamespaceAndPath("eln", "block/pipe_alloy")};
     static final int SIDES = 12;
 
+    /** A burnt cable's texture: charred insulation with ember cracks, untinted (Baughn 2026-11-11: a failed cable must
+     *  look obviously failed; the old scorched-brown tint matched the 48 V cable's brown). */
+    public static final Identifier BURNT = Identifier.fromNamespaceAndPath("eln", "block/cable/burnt");
+
     /** The cable texture of a tier (the six-node cable's, copied onto the block atlas: textures/block/cable/). */
     public static Identifier cableSprite(int tier) {
         if (CablePart.TIERS[tier].thermal()) return Identifier.fromNamespaceAndPath("eln", "block/cable/thermal");
@@ -86,9 +90,9 @@ public final class VoxelGeometry {
                 int argb = pipe.burst ? rgb(0.55f, 0.35f, 0.25f) : 0xFFFFFFFF;
                 pipe(m, pipe, PIPE[pipe.tier], argb, adapters);
             } else if (part instanceof CablePart c) {
-                // (insulation: a power cable's spec colour (Baughn 2026-11-06), else black; burnt: scorched brown)
+                // (insulation: a power cable's spec colour (Baughn 2026-11-06), else black; burnt: the char sprite)
                 // (the field bus: violet, as real Profibus cable is)
-                int argb = c.burnt != null ? rgb(0.35f, 0.22f, 0.14f) : c.tierInfo().bus() ? rgb(0.62f, 0.38f, 0.80f) : insulation(c);
+                int argb = c.burnt != null ? 0xFFFFFFFF : c.tierInfo().bus() ? rgb(0.62f, 0.38f, 0.80f) : insulation(c);
                 cable(m, c, argb, cableBoxes);
                 if (lugs != null && c.face == 0 && !c.isKnuckle())
                     for (CablePart.Port port : c.cablePorts())
@@ -344,7 +348,7 @@ public final class VoxelGeometry {
                 }
                 return out;
             };
-            box(m, bx, cableSprite(c.tier)).named("cable box " + i).argb(argb).uv(uv);
+            box(m, bx, c.burnt != null ? BURNT : cableSprite(c.tier)).named("cable box " + i).argb(argb).uv(uv);
         }
     }
 

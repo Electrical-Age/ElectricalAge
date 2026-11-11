@@ -339,6 +339,23 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return true;
     }
 
+    /** Is part in a burnt conductor here? */
+    boolean burntCable(CablePart part) {
+        for (CableNet.Conductor k : cables.conductors) if (k.parts.contains(part)) return k.getBurnt() != null;
+        return false;
+    }
+
+    /** The conductor holding part, as a burnable (Jade's burnt-out lines), or null. */
+    public mods.eln.sim.process.destruct.IBurnable burnableOf(CablePart part) {
+        for (CableNet.Conductor k : cables.conductors) if (k.parts.contains(part)) return k;
+        return null;
+    }
+
+    /** Mend the burnt conductor holding part (a burnt cable repaired with a kit: Baughn 2026-11-11). */
+    void repairCable(CablePart part) {
+        for (CableNet.Conductor k : cables.conductors) if (k.parts.contains(part)) k.repair();
+    }
+
     /** Nothing left: no parts, no elements (the block goes). */
     public boolean isEmptyNode() {
         return parts.isEmpty() && !getIfSideRemain();

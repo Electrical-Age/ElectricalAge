@@ -463,6 +463,7 @@ public final class CablePlacer {
             plan = null;
         }
         if (plan != null) plan.touched = now;
+        if (plan == null && !player.isSecondaryUseActive() && hit != null && repair(player, level, pos, hit, kit, tier, spec)) return true;
         if (player.isSecondaryUseActive()) {
             if (plan == null) return false;
             if (plan.waypoints.isEmpty()) {
@@ -548,6 +549,81 @@ public final class CablePlacer {
         return CableRouter.route(s, t.width(), t.height(), plan.start, wps, last);
     }
 
+    /** How many blocks of burnt cable one repair click mends at most (the burnt run, followed from the clicked piece). */
+    static final int REPAIR_MAX_BLOCKS = 512;
+
+    /**
+     * A kit clicked on a burnt cable of its kind mends the burnt run there, like a repair part on a machine (Baughn
+     * 2026-11-11): every burnt piece joined to the clicked one through the blocks' faces, for the kit length they
+     * hold. False if the click isn't on a burnt cable (the kit then routes as usual).
+     */
+    static boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, ItemStack kit, int tier, CableSpec spec) {
+        if (!(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return false;
+        int idx = n.partAt(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ());
+        if (idx < 0 || !(n.parts.get(idx) instanceof CablePart c) || c.burnt == null) return false;
+        if (c.tier != tier || spec != null && c.spec != null && spec.mm2() != c.spec.mm2()) {
+            player.sendOverlayMessage(Component.literal("This kit doesn't match the burnt cable"));
+            return true;
+        }
+        List<Object[]> run = burntRun(level, pos, n, c);
+        int len = 0;
+        for (Object[] r : run) len += ((CablePart) r[1]).isKnuckle() ? 0 : ((CablePart) r[1]).length();
+        boolean creative = player.isCreative();
+        if (!creative && KitItem.length(kit) < len) {
+            player.sendOverlayMessage(Component.literal(String.format("Mending it takes %.1f blocks of cable; the kit holds %.1f", len / 16.0, KitItem.length(kit) / 16.0)));
+            return true;
+        }
+        for (Object[] r : run) ((VoxelNode) r[0]).repairCable((CablePart) r[1]);
+        if (!creative) {
+            int left = KitItem.length(kit) - len;
+            if (left <= 0) kit.shrink(1);
+            else KitItem.setLength(kit, left);
+        }
+        player.sendOverlayMessage(Component.literal(String.format("Mended %.1f blocks of burnt cable", len / 16.0)));
+        return true;
+    }
+
+    /** The burnt pieces joined to c (same cable, through mirrored ports), as {node, piece} pairs, c's first. */
+    static List<Object[]> burntRun(Level level, BlockPos pos, VoxelNode n, CablePart c) {
+        List<Object[]> out = new ArrayList<>();
+        java.util.Set<CablePart> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        java.util.ArrayDeque<Object[]> todo = new java.util.ArrayDeque<>();
+        todo.add(new Object[]{n, c, pos});
+        seen.add(c);
+        java.util.Set<BlockPos> blocks = new java.util.HashSet<>();
+        while (!todo.isEmpty()) {
+            Object[] cur = todo.poll();
+            VoxelNode cn = (VoxelNode) cur[0];
+            CablePart cp = (CablePart) cur[1];
+            BlockPos cpos = (BlockPos) cur[2];
+            out.add(new Object[]{cn, cp});
+            blocks.add(cpos);
+            if (blocks.size() >= REPAIR_MAX_BLOCKS) break;
+            // the same burnt conductor in this block
+            for (VoxelPart q : cn.parts)
+                if (q instanceof CablePart o && o.burnt != null && o.sameCable(cp) && !seen.contains(o) && touchesIn(o, cp)) {
+                    seen.add(o);
+                    todo.add(new Object[]{cn, o, cpos});
+                }
+            for (CablePart.Port p : cp.cablePorts()) {
+                BlockPos np = cpos.relative(net.minecraft.core.Direction.from3DDataValue(p.face()));
+                if (!(level.getBlockEntity(np) instanceof VoxelNodeEntity ne) || !(ne.getNode() instanceof VoxelNode nn)) continue;
+                CablePart.Port m = p.mirrored();
+                for (VoxelPart q : nn.parts)
+                    if (q instanceof CablePart o && o.burnt != null && o.sameCable(cp) && !seen.contains(o) && o.cablePorts().contains(m)) {
+                        seen.add(o);
+                        todo.add(new Object[]{nn, o, np});
+                    }
+            }
+        }
+        return out;
+    }
+
+    /** Do two pieces in one block meet (an end of one on the other's line, or sharing a point)? */
+    static boolean touchesIn(CablePart a, CablePart b) {
+        return a.touches(b) || b.touches(a);
+    }
+
     /** A tier's cross-section with a spec (power cables: by cross-section and insulation). */
     static CablePart.Tier tierOf(int tier, CableSpec spec) {
         return new CablePart(tier, spec, 0, new int[0]).tierInfo();
@@ -555,7 +631,7 @@ public final class CablePlacer {
 
     /** Route between two ends, each maybe joining an old cable (join point or null), and lay it (GameTests). */
     public static String routeAndLayJoinedForTests(Level level, int tier, CableRouter.End start, long[] startJoin, CableRouter.End end, long[] endJoin) {
-        CablePart.Tier t = CablePart.TIERS[tier];
+        CablePart.Tier t = tierOf(tier, null);   // (the preset's cross-section, as lay() lays it)
         CableRouter.Space s = space(level);
         if (startJoin != null) s = around(s, startJoin);
         if (endJoin != null) s = around(s, endJoin);
@@ -566,7 +642,7 @@ public final class CablePlacer {
 
     /** Route between two ends and lay it (GameTests). Null if done, else why not. */
     public static String routeAndLayForTests(Level level, int tier, CableRouter.End start, CableRouter.End end) {
-        CablePart.Tier t = CablePart.TIERS[tier];
+        CablePart.Tier t = tierOf(tier, null);   // (the preset's cross-section, as lay() lays it)
         var r = CableRouter.route(space(level), t.width(), t.height(), start, List.of(), end);
         if (r.error != null) return r.error;
         return lay(level, tier, r.steps, null);

@@ -71,6 +71,8 @@ public final class CablePart extends VoxelPart {
         }
     }
 
+    /** The kinds of cable. A power cable's cross-section comes from its spec (CableSpec.width/height: tierInfo), not
+     *  from these sizes, which are used only by signal, thermal and bus cables and as names. */
     public static final Tier[] TIERS = {
         new Tier("Signal Cable", 1, 1),
         new Tier("Low Voltage Cable", 2, 1),
