@@ -127,6 +127,10 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         /** Its flange's conductance (as the oil devices' ports) and its breather's on top (small: a vent, not an opening). */
         const val PORT_K = 6e-11
         const val BREATHER_K = 1e-11
+        /** The pressure difference (Pa) over which each breather vent starts to open, fully open at twice it. */
+        const val BREATHER_DEADBAND_PA = 300.0
+        /** The liquid share of the tank at which the gas vent's float has shut (it closes over the 2 % under it). */
+        const val FLOAT_SHUT = 0.97
         /** Heat to boil off a kg of water that reached the burner (J/kg: warming and evaporating). */
         const val WATER_BOIL_J_PER_KG = 2.6e6
     }
@@ -142,7 +146,12 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
      */
     var vessel: mods.eln.sim.fluid.FluidNode? = null
         private set
+    /**
+     * Its breather: a float vent letting gas out (never liquid: a full tank shuts it) and a vacuum breaker letting air
+     * in, each opening only past a small pressure difference, so a standing tank doesn't breathe its fuel away.
+     */
     private var breather: mods.eln.sim.fluid.FluidDevice.Vent? = null
+    private var airIn: mods.eln.sim.fluid.FluidDevice.Vent? = null
     private var loaded: DoubleArray? = null
     /** An old save's tank (a 2-bucket fluid tank) and its flange's stub, put into the vessel when it is made. */
     private var legacyTank: net.neoforged.neoforge.fluids.FluidStack? = null
@@ -183,7 +192,22 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             mods.eln.fluid.PortBridge.endSpot(front, front, 4, 8)), flue.port(pos))
     }
 
-    override fun fluidVents(): List<mods.eln.sim.fluid.FluidDevice.Vent> = breather?.let { listOf(it) } ?: listOf()
+    override fun fluidVents(): List<mods.eln.sim.fluid.FluidDevice.Vent> {
+        val out = breather ?: return listOf()
+        val inn = airIn ?: return listOf()
+        return listOf(out, inn)
+    }
+
+    /**
+     * Set the breather's two vents by the tank's pressure against the air's: each opens over BREATHER_DEADBAND_PA. The
+     * gas vent's float shuts it once the liquid nears the top (FLOAT_SHUT of the volume), so a full tank keeps its fuel.
+     */
+    private fun setBreather(v: mods.eln.sim.fluid.FluidNode) {
+        val dp = v.P() - mods.eln.sim.fluid.Water.P_ATM
+        val float = Math.max(0.0, Math.min(1.0, (FLOAT_SHUT - v.liquidVolume() / v.volume) / 0.02))
+        breather?.open = float * Math.max(0.0, Math.min(1.0, (dp - BREATHER_DEADBAND_PA) / BREATHER_DEADBAND_PA))
+        airIn?.open = Math.max(0.0, Math.min(1.0, (-dp - BREATHER_DEADBAND_PA) / BREATHER_DEADBAND_PA))
+    }
 
     override fun beforeFluidStep(dt: Double) {
         val amb = mods.eln.sim.Ambient.kelvin(node!!.coordonate)
@@ -191,6 +215,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         if (v != null) {
             view.sync(v, amb)
             burn(v)
+            setBreather(v)
         }
         if (flue.step(if (isBurnt()) 0.0 else actualHeatPower, dt, amb)) needPublish()   // (burnt: its fire is out)
         smoking = flue.smoking
@@ -319,8 +344,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
      */
     var coke = 0.0
 
-    /** Its burner's heat power now (W), before the flue takes its share. */
-    fun heatPower() = actualHeatPower
+    /** Its burner's heat power now (W), before the flue takes its share; 0 when burnt out (as Jade shows). */
+    fun heatPower() = if (isBurnt()) 0.0 else actualHeatPower
 
     private val controlProcess = object : RegulatorProcess("controller") {
         override fun process(time: Double) {
@@ -448,7 +473,9 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         legacyStub = null
         loaded = null
         vessel = v
-        breather = mods.eln.sim.fluid.FluidDevice.Vent(v, 1.0, BREATHER_K).also { it.open = 1.0 }
+        breather = mods.eln.sim.fluid.FluidDevice.Vent(v, 1.0, BREATHER_K).also { it.gasOnly = true }
+        airIn = mods.eln.sim.fluid.FluidDevice.Vent(v, 1.0, BREATHER_K).also { it.inward = true }
+        setBreather(v)
         view.show(v)
         atBurner = burnerLayer(v)
     }
@@ -564,7 +591,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         }
         if (coke > 0.01 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER) info.put(I18N.tr("Burner"), String.format(I18N.tr("%.0f%% coked: fires %.0f%% (right-click with wool to clean)"), coke * 100, (1 - coke) * 100))
         if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade())
-        if (v != null && mods.eln.fluid.FluidWorld.edgesOf(v).any { it !== breather?.edge }) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its front flange"))
+        if (v != null && mods.eln.fluid.FluidWorld.edgesOf(v).any { it !== breather?.edge && it !== airIn?.edge }) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its front flange"))
         return info
     }
 

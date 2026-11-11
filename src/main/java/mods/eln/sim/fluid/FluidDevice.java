@@ -138,6 +138,8 @@ public interface FluidDevice {
         public double open;
         /** Gas only, never liquid, and nothing back in (a purge valve: Network.Edge.gasOnly). */
         public boolean gasOnly;
+        /** The other way: only air in from outside, nothing out (a vacuum breaker: a check valve from the air). */
+        public boolean inward;
         /** This step's edge (set by the world when it builds the network). */
         public FluidEdge edge;
 

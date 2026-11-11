@@ -495,9 +495,10 @@ public final class FluidWorld implements IProcess {
                 FluidNode vn = repr.apply(v.node);   // (a burst pipe vents its whole run)
                 FluidNetwork net = byRoot.get(find(vn, parent));
                 FluidNode atm = air.computeIfAbsent(net, k -> k.add(FluidNode.atmosphere(vn.z + vn.height)));
-                v.edge = net.connect(vn, drawOn(vn, v.node, v.draw), atm, 0, v.k);
+                v.edge = v.inward ? net.connect(atm, 0, vn, drawOn(vn, v.node, v.draw), v.k).kind(FluidEdge.Kind.CHECK)
+                    : net.connect(vn, drawOn(vn, v.node, v.draw), atm, 0, v.k);
                 v.edge.open = v.open;
-                if (v.gasOnly) {
+                if (v.gasOnly && !v.inward) {
                     v.edge.gasOnly = true;
                     v.edge.kind(FluidEdge.Kind.CHECK);
                 }

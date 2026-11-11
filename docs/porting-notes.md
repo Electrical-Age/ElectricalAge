@@ -111,8 +111,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   main species and taken whole (EaUnits.drainLayer), so a bucket can't distil a mix. The old column takes the cuts' mix as
   crude until it is a still. `fluid_crude_is_a_mixture`.
 - Fuel heat furnace on a fluid node (Baughn 2026-11-10: "mixed on the machines"; real numbers): its 2-bucket tank is a
-  fluid node (flange 4 px up on its front, a breather on top that lets air in and live crude's gas out; buckets put any
-  species' liquid in). The burner draws the bottom liquid layer whole and gets each species' `heating_value` (J/kg, new
+  fluid node (flange 4 px up on its front; buckets put any species' liquid in). Its breather on top is two vents: gas
+  out (gas only, its float shut once the liquid nears the top) and air in (a vacuum breaker), each opening only past
+  300 Pa, so live crude's gas leaves and air comes in as it burns, but a standing tank doesn't breathe its fuel away
+  and a full one spills nothing (an open vent lost ~44 mB of gasoline an hour idle and spilled ~4 buckets when filled
+  from a pressurised tank). `fuel_furnace_idle_breather`, `fuel_furnace_overfill`. The burner draws the bottom liquid layer whole and gets each species' `heating_value` (J/kg, new
   in the species JSON: gasoline 44, diesel 43, heavy oil 41, residue 40, natural gas 50 MJ/kg) times
   `heatFurnaceFuelFactor`, so a mix burns as the mix. Gasoline gives ~32 % more than the 1.12 table (a unit slip there);
   the others within 5 %. Coking follows the residue share of what burns (fouling from unburnt residue), scaled so dead

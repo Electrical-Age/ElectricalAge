@@ -911,7 +911,7 @@ public final class OilCases {
      * </ul>
      */
     static final class FuelBySpecies implements TestCase {
-        static final String[] VARIANTS = {"mixed_fuel", "coke_by_residue", "water_boils_off", "legacy_tank"};
+        static final String[] VARIANTS = {"mixed_fuel", "coke_by_residue", "water_boils_off", "legacy_tank", "idle_breather", "overfill"};
         final String variant;
         mods.eln.transparentnode.FuelHeatFurnaceElement a, b, c;
         double kg0, perKg0, perKgGasoline, perKgDiesel, heatEarly = -1;
@@ -931,7 +931,12 @@ public final class OilCases {
         }
 
         public int ticks() {
-            return variant.equals("water_boils_off") ? 400 : 200;
+            return switch (variant) {
+                case "water_boils_off" -> 400;
+                case "idle_breather" -> 2400;
+                case "overfill" -> 600;
+                default -> 200;
+            };
         }
 
         mods.eln.transparentnode.FuelHeatFurnaceElement lit(TestContext ctx, int x) {
@@ -979,6 +984,26 @@ public final class OilCases {
                         heatEarly = a.getHeatGivenJ();
                     });
                 }
+                case "idle_breather" -> {
+                    // (no burner: it only stands there, a tank of gasoline at the ambient with its breather open)
+                    a = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(1, 1, 1));
+                    a.putFuel(Oil.Cut.GASOLINE.source.get(), 1000);
+                    perKgGasoline = mods.eln.fluid.FluidSpecies.kgPerMb(mods.eln.fluid.FluidSpecies.of(Oil.Cut.GASOLINE.source.get()).id(), false);
+                    // (the first minute: its head space fills with gasoline vapour, which pushes some gas out once)
+                    perKg0 = gasoline(a.getVessel());
+                    ctx.after(1200, () -> kg0 = gasoline(a.getVessel()));
+                }
+                case "overfill" -> {
+                    // (as oil_on_pipes_fuel_furnace_in, but on until it is full: a pressurised tank pushes on)
+                    OilOnPipes.tank(ctx, ctx.at(1, 1, 1), mods.eln.misc.Direction.XP);
+                    a = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(3, 1, 1));
+                    a.front = mods.eln.misc.Direction.XN;
+                    a.reconnect();
+                    PipeCases.lay(ctx, ctx.at(2, 1, 1), 0, 0, 4, 8, 16, 4, 8);
+                    OilOnPipes.put(ctx, ctx.at(1, 1, 1), Oil.Cut.GASOLINE.source.get(), 9000);
+                    perKgGasoline = mods.eln.fluid.FluidSpecies.kgPerMb(mods.eln.fluid.FluidSpecies.of(Oil.Cut.GASOLINE.source.get()).id(), false);
+                    ctx.after(2, () -> kg0 = gasolineIn(ctx));   // (the tank takes what was put in at its first step)
+                }
                 case "legacy_tank" -> {
                     a = lit(ctx, 1);
                     var p = ctx.at(1, 1, 1);
@@ -1013,6 +1038,28 @@ public final class OilCases {
             }
         }
 
+        /** A node's gasoline (kg, both phases). */
+        static double gasoline(mods.eln.sim.fluid.FluidNode n) {
+            int id = mods.eln.fluid.FluidSpecies.of(Oil.Cut.GASOLINE.source.get()).id();
+            return n.liquid(id) + n.vapour(id);
+        }
+
+        /** The overfill rig's gasoline (kg, both phases): its tank, the pipe between and the furnace's vessel. */
+        double gasolineIn(TestContext ctx) {
+            int id = mods.eln.fluid.FluidSpecies.of(Oil.Cut.GASOLINE.source.get()).id();
+            var t = (mods.eln.oil.TankElement) ((mods.eln.node.transparent.TransparentNode) mods.eln.node.NodeManager.instance
+                .getNodeFromCoordonate(new mods.eln.misc.Coordonate(ctx.at(1, 1, 1), ctx.level()))).element;
+            double kg = 0;
+            for (var n : new mods.eln.sim.fluid.FluidNode[]{t.vessel, a.getVessel()})
+                if (n != null) kg += n.liquid(id) + n.vapour(id);
+            for (var part : PipeCases.node(ctx, ctx.at(2, 1, 1)).parts)
+                if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null) {
+                    mods.eln.fluid.FluidWorld.writeBackOf(pp.fluid);
+                    kg += pp.fluid.liquid(id) + pp.fluid.vapour(id);
+                }
+            return kg;
+        }
+
         /** The compound (at any depth) that holds key. */
         static net.minecraft.nbt.CompoundTag holding(net.minecraft.nbt.CompoundTag t, String key) {
             if (t.contains(key)) return t;
@@ -1028,6 +1075,8 @@ public final class OilCases {
             switch (variant) {
                 case "mixed_fuel" -> {
                     double drawn = a.getFuelBurntKg(), given = a.getHeatGivenJ();
+                    String jade = a.getWaila().get(mods.eln.i18n.I18N.tr("Power")), want = mods.eln.misc.Utils.plotPower("", a.heatPower());
+                    ctx.check("fuel furnace: Jade shows the power it fires at", want.equals(jade), jade + " against " + want);
                     ctx.check("fuel furnace: a gasoline and diesel mix burns", given > 0 && drawn > 0, given + " J from " + drawn + " kg");
                     ctx.check("fuel furnace: the mix's heating value lies between gasoline's and diesel's",
                         perKg0 < perKgGasoline && perKg0 > perKgDiesel, String.format("%.4g J/kg (gasoline %.4g, diesel %.4g)", perKg0, perKgGasoline, perKgDiesel));
@@ -1046,10 +1095,25 @@ public final class OilCases {
                     ctx.check("fuel furnace: water under the fuel reaches the burner first and gives no heat",
                         atBurnerEarly == mods.eln.sim.fluid.SpeciesRegistry.WATER && heatEarly == 0, atBurnerEarly + ", " + heatEarly + " J");
                     var v = a.getVessel();
-                    ctx.check("fuel furnace: the water boils off, then the fuel burns", v.liquid(mods.eln.sim.fluid.SpeciesRegistry.WATER) < 1e-6 && a.heatPower() > 0,
-                        String.format("%.6f kg water left, %.0f W, %s", v.liquid(mods.eln.sim.fluid.SpeciesRegistry.WATER), a.heatPower(), a.getWaila()));
+                    // (by the heat it has given: on its bench nothing takes the heat, so it may overheat and burn out after)
+                    ctx.check("fuel furnace: the water boils off, then the fuel burns", v.liquid(mods.eln.sim.fluid.SpeciesRegistry.WATER) < 1e-6 && a.getHeatGivenJ() > 0,
+                        String.format("%.6f kg water left, %.0f J given, burnt %b, %s", v.liquid(mods.eln.sim.fluid.SpeciesRegistry.WATER), a.getHeatGivenJ(), a.isBurnt(), a.getWaila()));
                 }
                 case "legacy_tank" -> ctx.check("fuel furnace: an old save's tank of crude loads into its vessel as crude's cuts", legacy.isEmpty(), legacy);
+                case "idle_breather" -> {
+                    // (by its vessel's gasoline: nothing else goes in or out)
+                    double first = (perKg0 - kg0) / perKgGasoline, mb = (perKg0 - gasoline(a.getVessel())) / perKgGasoline, perHour = (mb - first) * 3600 / (1200 * 0.05);
+                    ctx.check("fuel furnace: a tank of gasoline standing idle breathes out under 1 mB as its head space saturates", first < 1,
+                        String.format("%.3f mB in its first 60 s", first));
+                    ctx.check("fuel furnace: then it loses under 2 mB an hour through its breather", perHour < 2,
+                        String.format("%.3f mB in the next 60 s (%.2f mB/h), %.0f mB left", mb - first, perHour, a.fuelMb()));
+                }
+                case "overfill" -> {
+                    // (by the rig's gasoline: the tank, the pipe and the furnace; only the breather lets any out)
+                    double gone = (kg0 - gasolineIn(ctx)) / perKgGasoline;
+                    ctx.check("fuel furnace: filled from a pressurised tank, no liquid leaves by its breather", gone < 1 && a.fuelMb() > 1900,
+                        String.format("%.2f mB gone from the rig, %.0f mB in it, %s", gone, a.fuelMb(), a.getWaila()));
+                }
             }
         }
     }
