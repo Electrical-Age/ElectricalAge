@@ -107,7 +107,7 @@ class MixNetworkTest {
         String log = String.format("mixed: cases %d steps %d: failures %d %s, substeps %d, iterations/step %.2f, bad %d %s%n",
             cases, steps, failures, failed, substeps, iters / (double) total, bad.size(), bad.stream().limit(10).toList())
             + String.format("limiter (scaled at most %d times): %s; lowest mass %.3g kg, lowest share of its node %.3g%n", Limiter.DOWN_PASSES, Limiter.histogram(), lowest, lowestShare);
-        java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/fluidcore-mix.txt"), log);
+        java.nio.file.Files.writeString(TestOut.path("fluidcore-mix.txt"), log);
         assertTrue(failures == 0 && bad.isEmpty(), log);
     }
 }

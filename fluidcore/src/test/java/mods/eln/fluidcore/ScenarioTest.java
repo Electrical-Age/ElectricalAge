@@ -23,7 +23,7 @@ class ScenarioTest {
         Network.MAX_DEPTH = 0;
         try {
             net.step(DT);
-            java.nio.file.Files.writeString(java.nio.file.Path.of("/var/lib/mclab/agent/notes/fluid-review/pump-newton.txt"), Network.DEBUG.toString());
+            java.nio.file.Files.writeString(TestOut.path("pump-newton.txt"), Network.DEBUG.toString());
         } finally {
             Network.DEBUG = null;
             Network.MAX_DEPTH = 5;
