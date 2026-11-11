@@ -499,6 +499,28 @@ def inline_pump():
     return cv
 
 
+#: the 50 V tier's green paint (OilKit.PAINT_50V)
+GREEN = R('#132a17', '#1f4426', '#2e6638', '#3f844a', '#68ab70', '#9ccda1')
+
+
+def pipe_mixer():
+    """pipemixer: the pipe across with flanges at both ends, the green cast body over the junction, two valve bonnets
+    with red handwheels on top, the outlet stub receding behind, the signal terminal in front."""
+    cv = Canvas(16)
+    skid(cv, 2, 13)
+    sub(cv, lambda c: box(c, 9, 7, 2, 2, 4, STEEL, bevel=False))   # (the outlet, going back)
+    sub(cv, lambda c: cylinder(c, 1, 9, 14, 3, STEEL, round_ends=False))
+    for (x, y) in ((0, 9), (14, 9)):
+        reg = {(xx, yy) for xx in (x, x + 1) for yy in range(y - 1, y + 4)}
+        sub(cv, lambda c, reg=reg: region_paint(c, reg, lambda p: STEEL[3] if p[0] % 2 == 0 else STEEL[2], STEEL))
+    sub(cv, lambda c: box(c, 4, 6, 7, 6, 2, GREEN))
+    for x in (4, 8):
+        sub(cv, lambda c, x=x: box(c, x, 3, 2, 3, 1, STEEL, bevel=False))
+        cv.hline(x - 1, x + 1, 2, MARK_RED)   # (each bonnet's handwheel)
+    cv.set(7, 12, ORANGE[3])
+    return cv
+
+
 DRAW = {
     "steam_turbine": steam_turbine,
     "lp_steam_turbine": lp_steam_turbine,
@@ -515,6 +537,7 @@ DRAW = {
     "iron_tank": iron_tank,
     "alloy_tank": alloy_tank,
     "200v_inline_pump": inline_pump,
+    "pipe_mixer": pipe_mixer,
 }
 
 

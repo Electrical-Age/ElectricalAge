@@ -150,6 +150,8 @@ public class Wp10aContent implements ElnContent {
             mods.eln.oil.TankDescriptor.bucketsVolume(12), 100e5, 300e5, "tankalloy"));
         transparentNodeItem.addDescriptor(48 + (id << 6), new mods.eln.oil.InlinePumpDescriptor(TR_NAME(Type.NONE, "230V Inline Pump"),
             MVU, meduimVoltageCableDescriptor, "inlinepump200v"));
+        // the pipe mixer: a T of two check valves steered by a signal (Baughn 2026-11-11)
+        transparentNodeItem.addDescriptor(60 + (id << 6), new mods.eln.oil.PipeMixerDescriptor(TR_NAME(Type.NONE, "Pipe Mixer"), "pipemixer"));
         // ... and the plant condenser for the shaft turbines (the add-on condensers above stay as they are)
         transparentNodeItem.addDescriptor(52 + (id << 6), new mods.eln.oil.PlantCondenserDescriptor(TR_NAME(Type.NONE, "Plant Steam Condenser"),
             0.06, 40000, mods.eln.mechanical.SteamTurbineSpec.HP, "plantcondenser"));

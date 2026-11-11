@@ -793,6 +793,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             'P', stack(Items.GLASS_PANE),
             'T', findItemStack("Iron Tank")
         );
+        // the pipe mixer: two check valves in a cast T, a signal to steer them
+        addRecipe(findItemStack("Pipe Mixer"),
+            " c ",
+            "PIP",
+            " P ",
+            'c', findItemStack("Signal Cable"),
+            'P', stack(Items.IRON_INGOT),
+            'I', findItemStack("Machine Block"));
+
         addRecipe(findItemStack("230V Inline Pump"),
             "Bm ",
             "pMp",

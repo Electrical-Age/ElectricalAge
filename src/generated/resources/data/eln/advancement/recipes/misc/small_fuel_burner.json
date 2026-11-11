@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "eln:combustion_chamber"
+            "items": "eln:alloy_plate"
           }
         ]
       },

@@ -157,6 +157,13 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   rooms and spills aren't tracked). Jade shows the overfiring and the venting. A pump-fed furnace now overfires by its
   line's pressure unless the line is regulated. GameTests `fuel_furnace_forced_air`, `_relief`, `_burst`, `_gas_first`,
   `_gas_fire`.
+- Pipe Mixer (`eln:transparent_node@5308`, new; Baughn 2026-11-11): a signal-controlled pipe T that works as two
+  steerable check valves, not molar valves. Inlet A on its left flank, B on its right, the outlet out of its back, all
+  4 px up; a signal on its front opens A by s and B by 1 - s (no signal: half each). Each inlet is a check valve with a
+  port's conductance; the mix follows the pressures on its inlets and outlet, so a set mix takes pressure math or
+  feedback from the outlet's contents (Jade shows both inlets' flows and the outlet's composition). Model
+  `mods.eln.cad.models.PipeMixer`, icon drawn in tools/icons/shaft. GameTests `pipe_mixer_a_only`, `_b_only`, `_half`,
+  `_b_stronger`, `_no_backflow`.
 - Fuel heat furnace inertia from thermal mass (Baughn 2026-11-11, 30 s): its flame follows the setting at once (it
   still takes `oilLightSeconds` to light; the `oilLagSeconds` config is gone) and heats its burner, a lumped mass of
   0.3 J/K per W of rating plus the fuel in its tank (2000 J/(kg K)), which passes the heat on through G = rating /

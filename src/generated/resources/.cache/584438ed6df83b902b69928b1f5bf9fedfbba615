@@ -1,4 +1,4 @@
-// 26.3	2026-11-08T22:01:53.948331118	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-11T17:50:45.931209067	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -86,7 +86,7 @@ deef8d780422f077177f1d8075d975640f319ae2 data/eln/advancement/recipes/misc/analo
 7419d9a95e1ba352b8558df04a97a5b86d0e1a70 data/eln/advancement/recipes/misc/applications_disk.json
 e397443c98e6b42bdb11364d1b6ce472b87c0a04 data/eln/advancement/recipes/misc/auto_miner.json
 9923be029e64dd1fabfd662d1f17778ee17721f6 data/eln/advancement/recipes/misc/average_electrical_drill.json
-f289486095d89988f698c37c5d367dc83b161c16 data/eln/advancement/recipes/misc/big_fuel_burner.json
+9371e8f08e2427ba1d9ad81d706862d0bca4b9a7 data/eln/advancement/recipes/misc/big_fuel_burner.json
 8adb36e95b31e6e9b845c1129dddb9476dc0a250 data/eln/advancement/recipes/misc/birch_planks.json
 050aa2bbc1ec70cbd0c9b5cdb9beb8960ef703f7 data/eln/advancement/recipes/misc/birch_planks_2.json
 2501e5ea88438b2af90471608116cac06a6e26e8 data/eln/advancement/recipes/misc/black_brush.json
@@ -215,7 +215,7 @@ ab4a82c69f420dae28984c5d5a63affa0b65de68 data/eln/advancement/recipes/misc/lp_st
 78963af925d293a3a9e1333e02a59d52b11f763d data/eln/advancement/recipes/misc/machine_block.json
 06f47239a3574d3c0cd2dc069583599180624ea4 data/eln/advancement/recipes/misc/machine_booster.json
 8906d98097cb2c61c6f6b604bd2d2ec70c0f04f1 data/eln/advancement/recipes/misc/magenta_brush.json
-1e82e13d694c4fa428bf5f0ce06a2ac3162bbdfd data/eln/advancement/recipes/misc/medium_fuel_burner.json
+06b89689dc35c3439a95285861f712067797d5ca data/eln/advancement/recipes/misc/medium_fuel_burner.json
 66138fd5612381d71a0b5f1f9c2758dc922ad210 data/eln/advancement/recipes/misc/medium_power_receiver_antenna.json
 9cf49818e1d6c611c9fe7966b7a6d725bfa6e762 data/eln/advancement/recipes/misc/medium_power_transmitter_antenna.json
 6721ab576c3e255d8d4d1949cdaada1c3bb9d286 data/eln/advancement/recipes/misc/medium_voltage_relay.json
@@ -241,6 +241,7 @@ f040a0f74d9a8ed301c5e1180778e4413fd87668 data/eln/advancement/recipes/misc/overv
 33fede72ebcfffbf0ab2ef073240b9cb4538478c data/eln/advancement/recipes/misc/pal_chip.json
 b4965ce3977f71a9aa0d7f115ad9fc6106661373 data/eln/advancement/recipes/misc/pid_regulator.json
 c15d5c0cc610b6749034d53b6fe5c87c72a784c3 data/eln/advancement/recipes/misc/pink_brush.json
+1917d5c0a1b70228345febf8fec1dd1729bafb5c data/eln/advancement/recipes/misc/pipe_mixer.json
 c22c87bd08ed65c2308e22e1978b06ec035c7d0b data/eln/advancement/recipes/misc/plant_steam_condenser.json
 4a4cb32b42945ddd436f0ebf7fa6ecfff05bbea1 data/eln/advancement/recipes/misc/player_filter.json
 1deb057f1b19edbc5364cd47b3ddfa82ebb3ce1c data/eln/advancement/recipes/misc/pole_streetlight.json
@@ -293,7 +294,7 @@ c6846797ca2db19a947f82dfec68c252efb973ad data/eln/advancement/recipes/misc/small
 21928041e616bb45574ac6a6dc3a44aa102a3309 data/eln/advancement/recipes/misc/small_48v_tungsten_heating_corp.json
 5ef410e94255ecece82cf27bbed938e0699fc66f data/eln/advancement/recipes/misc/small_active_thermal_dissipator.json
 3da77d3aa9d11cfa23535bd7264d76e9111c9bd1 data/eln/advancement/recipes/misc/small_flashlight.json
-56a78f177bdb0205b418def40936b067a9ed51aa data/eln/advancement/recipes/misc/small_fuel_burner.json
+3e98d1eb1638b7c0390055984b6d61abfb65a167 data/eln/advancement/recipes/misc/small_fuel_burner.json
 a1f2052271b5b4cde232bda63d2947bd9aa0b28d data/eln/advancement/recipes/misc/small_passive_thermal_dissipator.json
 d5c59bcfcc64138299c7921fca8ae46ebaf2ad4b data/eln/advancement/recipes/misc/small_rotating_solar_panel.json
 26c31e667b275ebc305ce8b853e8f11e3eabfc88 data/eln/advancement/recipes/misc/small_solar_panel.json
@@ -472,7 +473,7 @@ f08a17f8c96555319fad60d61b2788c122fbf087 data/eln/recipe/and_chip.json
 758f782c4e7515c313ee5e6810ae2ee5a739ca17 data/eln/recipe/applications_disk.json
 e1b3870485515b24146953a51d534596cf57c58d data/eln/recipe/auto_miner.json
 035486821d9fa0d6a29ddf339b77c7a9c7034581 data/eln/recipe/average_electrical_drill.json
-9602844551f3d1dc111c860b342998dcc2d5e4e2 data/eln/recipe/big_fuel_burner.json
+a6dd680610cdc842bccfce297fee30bca4ccfe67 data/eln/recipe/big_fuel_burner.json
 d04b55a424837a091ce5119b9dbb653f438f9b18 data/eln/recipe/birch_planks.json
 e2cfad2a85df248f6979f6980caa5482a5b41c42 data/eln/recipe/birch_planks_2.json
 1400d68edba46e673564ca9489831bad2b19be47 data/eln/recipe/black_brush.json
@@ -601,7 +602,7 @@ e44eec5ce607faee65bb7c914419718b2dd4636a data/eln/recipe/lp_steam_turbine_4.json
 789b4cedd5840c52844b2ddc92a42e0ff82d40e1 data/eln/recipe/machine_block.json
 d5f805910e688c02cc8ec7887d09bdb0385185cb data/eln/recipe/machine_booster.json
 e5563e26e89b0f375d849f941cbd8e2827d35aaa data/eln/recipe/magenta_brush.json
-b6418d27c73561055188f90cc889cccf24063fa8 data/eln/recipe/medium_fuel_burner.json
+280b3ec28975365105f5587f9cd7e41c8aaba996 data/eln/recipe/medium_fuel_burner.json
 5c1b4d6392b77b416634a23d5285b8b82c33bd66 data/eln/recipe/medium_power_receiver_antenna.json
 e1573474fb9c89def650e1530e4eda654752e046 data/eln/recipe/medium_power_transmitter_antenna.json
 c456ea7ead2d8f1dfb7c1c616446cfc06954d50f data/eln/recipe/medium_voltage_relay.json
@@ -627,6 +628,7 @@ bf528ceabda211c42878a565139d3114c1da1119 data/eln/recipe/oscillator_chip.json
 93b891c67b99090f4e687a2ab2eb61a71c09e438 data/eln/recipe/pal_chip.json
 c5b8082a0f4371b3a9d0d19015a5cb184cc23fcd data/eln/recipe/pid_regulator.json
 c31f1c59279d00c829341217db7ecf75091cf6fa data/eln/recipe/pink_brush.json
+c2b22523c777815fbe197d62d158005a661e04c7 data/eln/recipe/pipe_mixer.json
 6ea63de7579029a939062d12a7c7930d2b78a4fc data/eln/recipe/plant_steam_condenser.json
 31bea419e6ecfe9febfd542ffead3424dfd77c2b data/eln/recipe/player_filter.json
 3c80941bae44b472e0d93d5fe5ef7a80ec3ed3a5 data/eln/recipe/pole_streetlight.json
@@ -679,7 +681,7 @@ d6cf5f6337426b85d291a8164064b16bcec566ce data/eln/recipe/small_48v_copper_heatin
 40e4ec9b3435dce6da3640dc44149cdda646af61 data/eln/recipe/small_48v_tungsten_heating_corp.json
 b55411774da0e06e85879b4b3445840eb24c93ea data/eln/recipe/small_active_thermal_dissipator.json
 ff350989b46245a341761f6b7ec21606ed08fae3 data/eln/recipe/small_flashlight.json
-e1c6f55b036e2a967f23435250ad0a6b6928b22d data/eln/recipe/small_fuel_burner.json
+0b5e29483921f7cf47269f90a984c44a38af1413 data/eln/recipe/small_fuel_burner.json
 817114c9d7122415faafd35fe091ec574164bba4 data/eln/recipe/small_passive_thermal_dissipator.json
 275a076fa3ff6ac9d7088ad773a105652203922e data/eln/recipe/small_rotating_solar_panel.json
 58562a062ddddc17d0015632a20d87d77552a325 data/eln/recipe/small_solar_panel.json
