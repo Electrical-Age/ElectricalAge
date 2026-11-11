@@ -178,7 +178,7 @@ public final class KitPreview {
                 hi[k] = Math.max(hi[k], Math.floorDiv(v[k], 16));
             }
         }
-        int m = CableRouter.MARGIN / 16 + 2;
+        int m = Math.max(CableRouter.MARGIN, PipeRouter.MARGIN) / 16 + 2;   // (pipes search further round their legs)
         long now = level.getGameTime();
         Snap old = SNAPS.get(p.getUUID());
         if (old != null && now - old.taken < 20 && old.x0 <= lo[0] - m && old.y0 <= lo[1] - m && old.z0 <= lo[2] - m
@@ -288,7 +288,7 @@ public final class KitPreview {
     public static Answer pipeAnswer(RouteView view, long[] join, int tier, PipeRouter.End start, List<PipeRouter.End> wps, PipeRouter.End end,
                                     int have, boolean toPort) {
         PipeRouter.Space sp = PipePlacer.space(view);
-        if (join != null) sp = PipePlacer.spaceAround(sp, join, 6);
+        if (join != null) sp = PipePlacer.spaceAround(sp, join, PipePart.JOIN_CLEAR);
         PipeRouter.Result r = PipeRouter.route(sp, PipePart.GRID[tier], start, wps, end, PREVIEW_BUDGET_MS);
         List<int[]> bs = new ArrayList<>();
         boolean ok = r.error == null;
@@ -314,7 +314,7 @@ public final class KitPreview {
 
     /** pipeAnswer from start to end with no waypoints, on a snapshot round them (GameTests). */
     public static Answer pipeAnswerForTests(ServerLevel level, int tier, PipeRouter.End start, PipeRouter.End end) {
-        int m = CableRouter.MARGIN / 16 + 2;
+        int m = PipeRouter.MARGIN / 16 + 2;
         int x0 = (int) Math.floorDiv(Math.min(start.x(), end.x()), 16) - m, y0 = (int) Math.floorDiv(Math.min(start.y(), end.y()), 16) - m;
         int z0 = (int) Math.floorDiv(Math.min(start.z(), end.z()), 16) - m, x1 = (int) Math.floorDiv(Math.max(start.x(), end.x()), 16) + m;
         int y1 = (int) Math.floorDiv(Math.max(start.y(), end.y()), 16) + m, z1 = (int) Math.floorDiv(Math.max(start.z(), end.z()), 16) + m;

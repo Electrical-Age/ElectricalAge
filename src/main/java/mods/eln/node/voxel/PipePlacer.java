@@ -125,7 +125,9 @@ public final class PipePlacer {
         };
         boolean onFace = false;
         for (FluidDevice.FluidPort p : ports) onFace |= p.face() == face.get3DDataValue();
-        boolean anySide = !onFace && inside;
+        // (only for devices: inside a voxel block a click on a pipe's body is a join or a waypoint, never its end on
+        // another face, which already couples to the next block)
+        boolean anySide = !onFace && inside && !(n instanceof VoxelNode);
         for (FluidDevice.FluidPort p : ports) {
             if (anySide ? p.face() < 2 || p.face() > 5 : p.face() != face.get3DDataValue()) continue;
             Direction pf = Direction.from3DDataValue(p.face());
@@ -188,10 +190,14 @@ public final class PipePlacer {
 
     /** Route from a port to join a pipe at join (world voxels) and lay it (GameTests). Null if done, else why not. */
     public static String routeAndJoinForTests(Level level, int tier, PipeRouter.End start, long[] join) {
-        var r = PipeRouter.route(spaceAround(space(level), join, 6), PipePart.GRID[tier], start, List.of(),
+        var r = PipeRouter.route(spaceAround(space(level), join, PipePart.JOIN_CLEAR), PipePart.GRID[tier], start, List.of(),
             new PipeRouter.End(join[0], join[1], join[2], -1));
         if (r.error != null) return r.error;
         return layJoined(level, tier, r.points, join, null);
+    }
+
+    public static long[] joinPointForTests(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
+        return joinPoint(level, pos, hit);
     }
 
     public static PipeRouter.End portAtForTests(Level level, BlockPos pos, Direction face) {
@@ -269,7 +275,7 @@ public final class PipePlacer {
         }
         // finish: at a port, or joining a pipe mid-run
         PipeRouter.End end = port != null ? port : new PipeRouter.End(join[0], join[1], join[2], -1);
-        PipeRouter.Result r = join == null ? route(level, plan, end) : PipeRouter.route(spaceAround(space(level), join, 6),
+        PipeRouter.Result r = join == null ? route(level, plan, end) : PipeRouter.route(spaceAround(space(level), join, PipePart.JOIN_CLEAR),
             PipePart.GRID[plan.tier], plan.start, plan.waypoints, end);
         if (r.error != null) {
             player.sendOverlayMessage(Component.literal("No route: " + r.error));
@@ -309,7 +315,7 @@ public final class PipePlacer {
         for (int x = 4; x <= 12; x += 4)
             for (int y = 4; y <= 12; y += 4)
                 for (int z = 4; z <= 12; z += 4) {
-                    if (!pipe.passes(x, y, z)) continue;
+                    if (!pipe.passes(x, y, z) || n.fittingAt(x, y, z)) continue;
                     double d = (x - hx) * (x - hx) + (y - hy) * (y - hy) + (z - hz) * (z - hz);
                     if (d < bd) {
                         bd = d;
@@ -346,9 +352,13 @@ public final class PipePlacer {
         BlockPos jb = new BlockPos((int) Math.floorDiv(join[0], 16), (int) Math.floorDiv(join[1], 16), (int) Math.floorDiv(join[2], 16));
         List<int[]> last = pieces.remove(List.of((long) jb.getX(), (long) jb.getY(), (long) jb.getZ()));
         if (last == null || last.size() != 1) return "the route doesn't end in the pipe's block";
+        if (!(level.getBlockEntity(jb) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return "the pipe is gone";
+        // (check the junction before laying anything, so a refused join leaves no pipe behind)
+        String jerr = n.joinError(new PipePart(tier, last.get(0)), (int) (join[0] - jb.getX() * 16L), (int) (join[1] - jb.getY() * 16L),
+            (int) (join[2] - jb.getZ() * 16L));
+        if (jerr != null) return jerr;
         String err = lay(level, tier, pieces, player);
         if (err != null) return err;
-        if (!(level.getBlockEntity(jb) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return "the pipe is gone";
         return n.addJoined(new PipePart(tier, last.get(0)), (int) (join[0] - jb.getX() * 16L), (int) (join[1] - jb.getY() * 16L),
             (int) (join[2] - jb.getZ() * 16L));
     }

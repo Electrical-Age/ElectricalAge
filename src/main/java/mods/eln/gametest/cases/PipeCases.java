@@ -35,6 +35,8 @@ public final class PipeCases {
         cases.add(new TwoPipesOneBlock());
         cases.add(new RoutedOverAWall());
         cases.add(new JoinMidRun());
+        cases.add(new JoinClickOnBody());
+        cases.add(new JoinRefusedLaysNothing());
         cases.add(new KitCrafting());
         cases.add(new ThrottleAndControlValves());
         cases.add(new Burst());
@@ -812,6 +814,91 @@ public final class PipeCases {
             ctx.check("pipe: the route joins the run", err == null, "" + err);
             ctx.check("pipe: the run is cut in two at the junction, plus the new pipe: 3 pieces", partsAtJoin == 3, partsAtJoin + " pieces");
             ctx.check("pipe: boiler, run and turbine are one network", net != null && net == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet), "");
+        }
+    }
+
+    /** A click on the top of a horizontal through-run's body is a join point, not the run's end port on a side face (that
+     *  end already couples to the next block; the device fallback for tank shells took it). */
+    static final class JoinClickOnBody implements TestCase {
+        boolean portNull, joinFound;
+
+        public String id() {
+            return "pipe_join_click_on_body";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        public void build(TestContext ctx) {
+            lay(ctx, ctx.at(1, 1, 1), 0, 0, 8, 8, 16, 8, 8);
+            lay(ctx, ctx.at(2, 1, 1), 0, 0, 8, 8, 16, 8, 8);
+            lay(ctx, ctx.at(3, 1, 1), 0, 0, 8, 8, 16, 8, 8);
+            BlockPos b = ctx.at(2, 1, 1);
+            var hit = new net.minecraft.world.phys.Vec3(b.getX() + 0.5, b.getY() + 9.0 / 16, b.getZ() + 0.5);   // (top of the pipe)
+            portNull = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), b, net.minecraft.core.Direction.UP, hit) == null;
+            joinFound = mods.eln.node.voxel.PipePlacer.joinPointForTests(ctx.level(), b, hit) != null;
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("pipe: a click on a through-run's body isn't taken as its end port", portNull, "");
+            ctx.check("pipe: it is a join point", joinFound, "");
+        }
+    }
+
+    /** A join the junction refuses (a valve sits at the point) lays none of the route: before, the other blocks were laid
+     *  and the kit not charged (free pipe); and a third pipe at a valve uncoupled all three. */
+    static final class JoinRefusedLaysNothing implements TestCase {
+        String err, valveErr;
+        int before, after;
+
+        public String id() {
+            return "pipe_join_refused_lays_nothing";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        static int pieces(TestContext ctx, int w) {
+            int n = 0;
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < 4; y++)
+                    for (int z = 0; z < w; z++) {
+                        VoxelNode v = node(ctx, ctx.at(x, y, z));
+                        if (v != null) n += v.parts.size();
+                    }
+            return n;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            l.device(8 + (82 << 6), 1, 1);   // (a boiler to start from)
+            lay(ctx, ctx.at(5, 2, 1), 0, 0, 8, 8, 16, 8, 8);
+            lay(ctx, ctx.at(4, 2, 1), 0, 0, 8, 8, 16, 8, 8);
+            lay(ctx, ctx.at(3, 2, 1), 0, 4, 8, 8, 16, 8, 8);
+            BlockPos jb = ctx.at(4, 2, 1);
+            VoxelNode n = node(ctx, jb);
+            valveErr = n == null ? "no node" : n.addValve(8, 8, 8);
+            before = pieces(ctx, width());
+            var a = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), ctx.at(1, 1, 1), net.minecraft.core.Direction.UP);
+            long[] join = {jb.getX() * 16L + 8, jb.getY() * 16L + 8, jb.getZ() * 16L + 8};
+            err = mods.eln.node.voxel.PipePlacer.routeAndJoinForTests(ctx.level(), 0, a, join);
+            after = pieces(ctx, width());
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("pipe: the valve went on", valveErr == null, "" + valveErr);
+            ctx.check("pipe: a join at the valve's point is refused", err != null, "joined");
+            ctx.check("pipe: nothing of the route was laid", before == after, before + " parts before, " + after + " after");
         }
     }
 

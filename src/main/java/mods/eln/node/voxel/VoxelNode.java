@@ -1119,18 +1119,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      * the existing pipe is cut there into two, and the new one may overlap them only around the junction.
      */
     public String addJoined(PipePart part, int x, int y, int z) {
-        if (!part.valid()) return "not a straight-pieced pipe inside the block";
+        String err = joinError(part, x, y, z);
+        if (err != null) return err;
         int target = -1;
         for (int i = 0; i < parts.size(); i++) if (parts.get(i) instanceof PipePart p && p.passes(x, y, z)) target = i;
-        if (target < 0) return "no pipe there to join";
         PipePart old = (PipePart) parts.get(target);
-        int h = Math.max(old.bore(), part.bore()) / 2 + 1;
-        BitSet want = new BitSet(4096);
-        for (int[] b : part.boxes()) fill(want, b);
-        BitSet around = new BitSet(4096);
-        fill(around, new int[]{Math.max(0, x - h), Math.max(0, y - h), Math.max(0, z - h), Math.min(16, x + h), Math.min(16, y + h), Math.min(16, z + h)});
-        want.andNot(around);
-        if (want.intersects(used)) return "something is in the way";
         PipePart[] halves = old.splitAt(x, y, z);
         mods.eln.sim.fluid.FluidNode saved = old.fluid;
         if (halves != null) {
@@ -1146,6 +1139,33 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         markUsed();
         changed();
         return null;
+    }
+
+    /** Why part can't join the pipe at (x, y, z), or null: addJoined's checks, also run before any of a joining route
+     *  is laid (so a refused join lays nothing). */
+    public String joinError(PipePart part, int x, int y, int z) {
+        if (!part.valid()) return "not a straight-pieced pipe inside the block";
+        boolean any = false;
+        for (VoxelPart p : parts) any |= p instanceof PipePart pp && pp.passes(x, y, z);
+        if (!any) return "no pipe there to join";
+        if (fittingAt(x, y, z)) return "a valve or sensor sits there";
+        int h = PipePart.JOIN_CLEAR;
+        BitSet want = new BitSet(4096);
+        for (int[] b : part.boxes()) fill(want, b);
+        BitSet around = new BitSet(4096);
+        fill(around, new int[]{Math.max(0, x - h), Math.max(0, y - h), Math.max(0, z - h), Math.min(16, x + h), Math.min(16, y + h), Math.min(16, z + h)});
+        want.andNot(around);
+        if (want.intersects(used)) return "something is in the way";
+        return null;
+    }
+
+    /** Is a valve, safety valve or pipe sensor at that point of a pipe? (A third pipe there would end at the valve and
+     *  uncouple all three: its link needs exactly two pipe ends.) */
+    boolean fittingAt(int x, int y, int z) {
+        for (VoxelPart p : parts)
+            if (p instanceof ValvePart v && v.x == x && v.y == y && v.z == z || p instanceof SafetyValvePart s && s.x == x && s.y == y && s.z == z
+                || p instanceof PipeSensorPart s2 && s2.x == x && s2.y == y && s2.z == z) return true;
+        return false;
     }
 
     /** A burst pipe vents its run. */

@@ -24,6 +24,9 @@ public final class PipePart extends VoxelPart {
      * the large alloy pipe 6 voxels, the old alloy look). Volume per block of length (m^3), conductance per block (m^3).
      */
     public static final int[] GRID = {2, 2, 6};
+    /** Half-size of the cube round a junction point where a joining pipe may overlap the old one: the router frees it
+     *  and addJoined allows it (one number for both, so a route the router finds is never refused when laid). */
+    public static final int JOIN_CLEAR = java.util.Arrays.stream(GRID).max().getAsInt() / 2 + 1;
     public static final double[] DRAWN = {1.0, 1.5, 6.0};
     /** Before 2026-10-29: the grid widths saved in fittings' "at" arrays (no "g" key): iron 4, alloy 6. */
     static int oldBore(int saved) {
