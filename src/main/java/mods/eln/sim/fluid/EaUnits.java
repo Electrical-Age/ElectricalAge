@@ -239,6 +239,25 @@ public final class EaUnits {
         return m;
     }
 
+    /**
+     * How much of the layer species ids[0] is in matches the shares given for ids (1 - total variation distance, 0..1):
+     * 1 for a layer in exactly those proportions, the matching share for a layer of one of them, less for anything else
+     * in it.
+     */
+    public static double layerOverlap(FluidNode n, double[] ids, double[] shares) {
+        int first = (int) ids[0];
+        double total = layerLiquid(n, first);
+        if (total <= 0) return 0;
+        int layer = n.layerOf(first);
+        double overlap = 0;
+        for (int i = 0; i < ids.length; i++) {
+            int id = (int) ids[i];
+            double own = n.layerOf(id) == layer ? n.liquid(id) / total : 0;
+            overlap += Math.min(own, shares[i]);
+        }
+        return overlap;
+    }
+
     /** Take up to m kg of species id's vapour out of n, with its enthalpy. */
     public static void drainVapour(FluidNode n, int id, double m) {
         if (id == SpeciesRegistry.WATER) {

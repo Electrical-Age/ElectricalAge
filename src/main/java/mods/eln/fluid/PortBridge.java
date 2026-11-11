@@ -122,6 +122,9 @@ public final class PortBridge {
         return moved;
     }
 
+    /** How close (EaUnits.layerOverlap) a run's layer must be to a mixture alias's proportions to be taken as it. */
+    static final double ALIAS_OVERLAP = 0.8;
+
     private int pull(ResourceHandler<FluidResource> tank, FluidNode run, int budget) {
         int moved = 0;
         // (a device that takes a mixture alias, the column's crude: the run's layer of its parts, whole, as that alias, until
@@ -132,6 +135,9 @@ public final class PortBridge {
             var f = mix == null ? null : FluidSpecies.fluid(id, false);
             if (f == null) continue;
             int part = (int) mix[0][0];
+            // only a layer still close to the alias's own proportions counts as it, so residue or a refined cut piped
+            // into the column isn't distilled into crude's cuts
+            if (EaUnits.layerOverlap(run, mix[0], mix[1]) < ALIAS_OVERLAP) continue;
             double kg = EaUnits.layerLiquid(run, part);
             double per = FluidSpecies.kgPerMb(id, false);
             int want = Math.min(budget - moved, (int) Math.floor(kg / per));

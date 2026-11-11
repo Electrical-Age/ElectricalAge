@@ -432,7 +432,7 @@ public final class OilCases {
     static final int CARBON_BURNER = 0 + (93 << 6);
 
     static final class OilOnPipes implements TestCase {
-        static final String[] VARIANTS = {"column_in", "residue_out", "segment_out", "flare_in", "turbine_fuel", "separator_out", "fuel_furnace_in", "fuel_furnace_crude", "fuel_furnace_buckets",
+        static final String[] VARIANTS = {"column_in", "column_refuses_heavy_oil", "residue_out", "segment_out", "flare_in", "turbine_fuel", "separator_out", "fuel_furnace_in", "fuel_furnace_crude", "fuel_furnace_buckets",
             "compressor_latex_out", "compressor_latex_in", "resin_collector_out", "carbon_burner_in", "desulfuriser_in",
             "cracker_gasoline_in", "cracker_steam_in", "cracker_butadiene_out", "cracker_gas_out", "polymeriser_in", "cracker_to_polymeriser"};
         final String variant;
@@ -494,12 +494,12 @@ public final class OilCases {
             var XP = mods.eln.misc.Direction.XP;
             var XN = mods.eln.misc.Direction.XN;
             switch (variant) {
-                case "column_in" -> {
+                case "column_in", "column_refuses_heavy_oil" -> {
                     tank = tank(ctx, w, XP);   // (its back east: low side port 4 px up)
                     east = ctx.placeTransparent(0 + (83 << 6), e);
                     face(east, mods.eln.misc.Direction::right, XN);
                     lay(ctx, mid, 0, 4, 8, 8, 4, 8, 8, 8, 8, 16, 8, 8);
-                    put(ctx, w, Oil.CRUDE.get(), 9000);
+                    put(ctx, w, variant.equals("column_in") ? Oil.CRUDE.get() : Oil.Cut.HEAVYOIL.source.get(), 9000);
                 }
                 case "residue_out" -> {
                     west = ctx.placeTransparent(0 + (83 << 6), w);
@@ -710,6 +710,10 @@ public final class OilCases {
             ctx.check("oil on pipes " + variant + ": the pipe goes in", err == null, "" + err);
             var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
             switch (variant) {
+                case "column_refuses_heavy_oil" -> {
+                    int c = ((mods.eln.oil.ColumnBaseElement) east).tanks.crude();
+                    ctx.check("oil on pipes: heavy oil piped into the column base isn't taken as crude", c == 0, c + " mB of crude in the base, tank " + tank.getWaila());
+                }
                 case "column_in" -> {
                     int c = ((mods.eln.oil.ColumnBaseElement) east).tanks.crude();
                     ctx.check("oil on pipes: the tank's crude went into the column base", c > 500, c + " mB of crude in the base, tank " + tank.getWaila());
