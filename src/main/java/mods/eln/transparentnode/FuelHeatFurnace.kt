@@ -136,6 +136,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         const val FLOAT_SHUT = 0.97
         /** Heat to boil off a kg of water that reached the burner (J/kg: warming and evaporating). */
         const val WATER_BOIL_J_PER_KG = 2.6e6
+        /** Drowned, the hot burner flashes this many seconds of its fire's heat of the water to steam out of its stack. */
+        const val DROWN_FLASH_S = 5.0
     }
 
     private val thermalLoad = NbtThermalLoad("thermalLoad")
@@ -261,7 +263,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val id = burnerLayer(v)
         if (id < 0) return
         if (id == mods.eln.sim.fluid.SpeciesRegistry.WATER) {
-            mods.eln.sim.fluid.EaUnits.drainLiquid(v, need / WATER_BOIL_J_PER_KG)
+            drown(v)
             return
         }
         val hv = layerHeatingValue(v, id)
@@ -274,6 +276,33 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         fuelBurntKg += got
         cokingIndex = index
     }
+
+    /**
+     * Water reached a burning burner (Baughn 2026-11-11: "a lot of steam out the exhaust, and likely a collapsed fire with
+     * no way to restart it"): the fire goes out and its switch drops; the hot burner flashes a little of the water to steam
+     * up its stack. It lights again only once the water is out of the tank (buckets take the top layer, or its flange) and
+     * the player switches it on.
+     */
+    private fun drown(v: mods.eln.sim.fluid.FluidNode) {
+        if (fire.level <= 0 && bank <= 0) return
+        val nominal = FuelBurnerDescriptor.getDescriptor(inventory_.getItem(FuelHeatFurnaceContainer.FuelBurnerSlot))?.producedHeatPower ?: 0.0
+        val kg = mods.eln.sim.fluid.EaUnits.drainLiquid(v, (bank + fire.level * nominal * DROWN_FLASH_S) / WATER_BOIL_J_PER_KG)
+        val fn = flue.node
+        if (fn != null && kg > 0) mods.eln.sim.fluid.EaUnits.addWater(fn, kg, 373.15, true)
+        steamedKg += kg
+        fire.level = 0.0
+        bank = 0.0
+        mainSwitch = false
+        steamPuff = 2
+        needPublish()
+    }
+
+    /** Is its main switch on? */
+    fun switchedOn() = mainSwitch
+
+    /** Water flashed to steam by drowning its fire (kg, since loaded); client ticks of steam puff left. */
+    var steamedKg = 0.0
+    private var steamPuff = 0
 
     /** The heating value (J/kg) of the layer species id is in: its species' by their shares. */
     private fun layerHeatingValue(v: mods.eln.sim.fluid.FluidNode, id: Int): Double {
@@ -379,7 +408,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             }
             super.process(time)
 
-            fire.step(heaterControlValue, nominalPower > 0 && (atBurner >= 0 || bank > 0), time)
+            // (water at the burner: no fuel, it won't light, Baughn 2026-11-11)
+            fire.step(heaterControlValue, nominalPower > 0 && (atBurner >= 0 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER || bank > 0), time)
             // (each kg gives heatFurnaceFuelFactor times its heating value: Baughn 2026-10-26, with turbines by the
             // expansion; the burner draws it into the bank between fluid steps)
             val want = fire.level * nominalPower * (1 - coke) * time
@@ -515,6 +545,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         stream.writeBoolean(fire.lighting())
         stream.writeBoolean(smoking && !isBurnt())
         stream.writeBoolean(sooty())
+        stream.writeBoolean(steamPuff > 0)
+        if (steamPuff > 0) steamPuff--
     }
 
     override fun networkUnserialize(stream: DataInputStream): Byte {
@@ -603,7 +635,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         if (v != null) {
             val mb = fuelMb()
             info.put(I18N.tr("Fuel tank"), if (mb < 0.5) I18N.tr("empty") else String.format("%.0f / %.0f mB: %s", mb, TANK_MB, mods.eln.sim.fluid.EaUnits.composition(v)))
-            if (atBurner == mods.eln.sim.fluid.SpeciesRegistry.WATER) info.put(I18N.tr("Burner"), I18N.tr("water at the burner: it boils off, no heat until it's gone"))
+            if (atBurner == mods.eln.sim.fluid.SpeciesRegistry.WATER) info.put(I18N.tr("Burner"), I18N.tr("water at the burner: the fire is out; drain it to relight"))
         }
         if (coke > 0.01 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER) info.put(I18N.tr("Burner"), String.format(I18N.tr("%.0f%% coked: fires %.0f%% (right-click with wool to clean)"), coke * 100, (1 - coke) * 100))
         if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade())
@@ -646,6 +678,8 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     var smoking = false
     /** Burning crude or residue: thick black smoke. */
     var sooty = false
+    /** Its fire just drowned: a burst of steam up its stack. */
+    var steaming = false
     private val smoke = mods.eln.anim.Emitter()
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
@@ -680,6 +714,8 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
             level.addParticle(if (sooty) net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE else net.minecraft.core.particles.ParticleTypes.SMOKE,
                 p.x + 0.5 + jx, p.y + 1.02, p.z + 0.5 + jz, 0.0, 0.06, 0.0)
         }
+        if (steaming && Math.random() < 0.6) level.addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD,
+            p.x + 0.5 + (Math.random() - 0.5) * 0.3, p.y + 1.02, p.z + 0.5 + (Math.random() - 0.5) * 0.3, 0.0, 0.12, 0.0)
     }
 
     override fun networkUnserialize(stream: DataInputStream) {
@@ -700,6 +736,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
         lighting = stream.readBoolean()
         smoking = stream.readBoolean()
         sooty = stream.readBoolean()
+        steaming = stream.readBoolean()
     }
 
 }

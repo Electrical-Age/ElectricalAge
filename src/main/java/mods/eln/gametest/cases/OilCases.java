@@ -1023,16 +1023,19 @@ public final class OilCases {
      * <li>coke_balance: coking follows the coking index of what burns against a plausible refinery's fuel (Baughn
      * 2026-11-11): residue cokes faster than crude, heavy oil slower than crude but still cokes, and diesel clears a
      * coked burner as it burns ("the ash gets pulled out with the smoke eventually");</li>
-     * <li>water_boils_off: water under the fuel reaches the burner first; it boils off giving no heat, then the fuel burns;</li>
+     * <li>water_drowns_fire: water poured into a burning furnace sinks to its burner and puts the fire out (Baughn
+     * 2026-11-11): a flash of steam, its switch drops, no more heat; switched on again with the water there it stays out;
+     * the water drained, switched on, it burns again;</li>
      * <li>legacy_tank: an old save's 2-bucket tank of crude loads into the vessel, as crude's cuts.</li>
      * </ul>
      */
     static final class FuelBySpecies implements TestCase {
-        static final String[] VARIANTS = {"mixed_fuel", "coke_balance", "water_boils_off", "legacy_tank", "idle_breather", "overfill"};
+        static final String[] VARIANTS = {"mixed_fuel", "coke_balance", "water_drowns_fire", "legacy_tank", "idle_breather", "overfill"};
         final String variant;
         mods.eln.transparentnode.FuelHeatFurnaceElement a, b, c, d;
-        double kg0, perKg0, perKgGasoline, perKgDiesel, heatEarly = -1;
+        double kg0, perKg0, perKgGasoline, perKgDiesel, heatEarly = -1, heatDrowned = -1, heatWet = -1;
         int atBurnerEarly = -9;
+        boolean litBefore, switchAfter = true, litWet = true;
         String legacy = "";
 
         FuelBySpecies(String variant) {
@@ -1049,7 +1052,7 @@ public final class OilCases {
 
         public int ticks() {
             return switch (variant) {
-                case "water_boils_off" -> 400;
+                case "water_drowns_fire" -> 400;
                 case "idle_breather" -> 2400;
                 case "overfill" -> 600;
                 default -> 200;
@@ -1095,13 +1098,27 @@ public final class OilCases {
                     d = lit(ctx, 6);
                     d.putFuel(Oil.Cut.HEAVYOIL.source.get(), 1500);
                 }
-                case "water_boils_off" -> {
+                case "water_drowns_fire" -> {
                     a = lit(ctx, 1);
-                    a.putFuel(net.minecraft.world.level.material.Fluids.WATER, 300);
                     a.putFuel(Oil.Cut.GASOLINE.source.get(), 1000);
-                    ctx.after(30, () -> {
+                    ctx.after(100, () -> {
+                        litBefore = a.getFire().level > 0 && a.getHeatGivenJ() > 0;
+                        a.putFuel(net.minecraft.world.level.material.Fluids.WATER, 300);
+                    });
+                    ctx.after(140, () -> {
                         atBurnerEarly = a.getAtBurner();
                         heatEarly = a.getHeatGivenJ();
+                        switchAfter = a.switchedOn();
+                        a.networkUnserialize(ctx.stream(o -> o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getMainSwitchToggleEvent())));
+                    });
+                    ctx.after(240, () -> {
+                        heatWet = a.getHeatGivenJ() - heatEarly;
+                        litWet = a.getFire().level > 0;
+                        var v = a.getVessel();
+                        mods.eln.sim.fluid.EaUnits.drainLiquid(v, mods.eln.sim.fluid.SpeciesRegistry.WATER, v.liquid(mods.eln.sim.fluid.SpeciesRegistry.WATER));
+                        v.update();
+                        if (!a.switchedOn()) a.networkUnserialize(ctx.stream(o -> o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getMainSwitchToggleEvent())));
+                        heatDrowned = a.getHeatGivenJ();
                     });
                 }
                 case "idle_breather" -> {
@@ -1213,13 +1230,13 @@ public final class OilCases {
                         String.format("heavy oil %.5f, crude %.5f", d.getCoke(), b.getCoke()));
                     ctx.check("fuel furnace: diesel clears a coked burner as it burns", c.getCoke() < 0.2 && c.heatPower() > 0, c.getCoke() + ", " + c.heatPower() + " W");
                 }
-                case "water_boils_off" -> {
-                    ctx.check("fuel furnace: water under the fuel reaches the burner first and gives no heat",
-                        atBurnerEarly == mods.eln.sim.fluid.SpeciesRegistry.WATER && heatEarly == 0, atBurnerEarly + ", " + heatEarly + " J");
-                    var v = a.getVessel();
-                    // (by the heat it has given: on its bench nothing takes the heat, so it may overheat and burn out after)
-                    ctx.check("fuel furnace: the water boils off, then the fuel burns", v.liquid(mods.eln.sim.fluid.SpeciesRegistry.WATER) < 1e-6 && a.getHeatGivenJ() > 0,
-                        String.format("%.6f kg water left, %.0f J given, burnt %b, %s", v.liquid(mods.eln.sim.fluid.SpeciesRegistry.WATER), a.getHeatGivenJ(), a.isBurnt(), a.getWaila()));
+                case "water_drowns_fire" -> {
+                    String what = String.format("lit before %b; at burner %d, switch after %b, steamed %.4f kg; switched on wet: +%.0f J, lit %b; drained: +%.0f J; %s",
+                        litBefore, atBurnerEarly, switchAfter, a.getSteamedKg(), heatWet, litWet, a.getHeatGivenJ() - heatDrowned, a.getWaila());
+                    ctx.check("fuel furnace: water poured into it burning sinks to its burner and drowns the fire (steam, switch off)",
+                        litBefore && atBurnerEarly == mods.eln.sim.fluid.SpeciesRegistry.WATER && !switchAfter && a.getSteamedKg() > 0, what);
+                    ctx.check("fuel furnace: switched on with the water still there, it stays out", !litWet && heatWet == 0, what);
+                    ctx.check("fuel furnace: the water drained and switched on, it burns again", a.getHeatGivenJ() > heatDrowned && a.getFire().level > 0, what);
                 }
                 case "legacy_tank" -> ctx.check("fuel furnace: an old save's tank of crude loads into its vessel as crude's cuts", legacy.isEmpty(), legacy);
                 case "idle_breather" -> {

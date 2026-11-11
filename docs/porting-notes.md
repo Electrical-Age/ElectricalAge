@@ -142,8 +142,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   residue 1, heavy oil 0.15, diesel 0.01, light cuts 0) against `COKE_BALANCE` 0.05, a plausible refinery's fuel
   (Baughn 2026-11-11): over it the burner cokes, scaled so dead crude cokes as before (residue ~6x faster, heavy oil
   ~0.6x); under it the burner clears as it burns ("the ash gets pulled out with the smoke eventually"). Water at
-  the burner boils off at the flame's cost and gives no heat. Other mods' fuels with no species no longer go in (none
-  on Incognito). `fuel_furnace_mixed_fuel`, `fuel_furnace_coke_balance`, `fuel_furnace_water_boils_off`,
+  a burning burner drowns it (Baughn 2026-11-11): a flash of steam up its stack (into its flue pipe if any), the fire
+  out and its switch dropped; it won't light while water is at the burner, only once drained (buckets take the top
+  layer, or its flange) and switched on. Other mods' fuels with no species no longer go in (none
+  on Incognito). `fuel_furnace_mixed_fuel`, `fuel_furnace_coke_balance`, `fuel_furnace_water_drowns_fire`,
   `fuel_furnace_legacy_tank`.
 - Natural gas (and syngas) at real heating values (Baughn 2026-11-11: "we'll make the gas numbers real"): 1.12
   multiplied gases by 1000 ("Minecraft gases are heavily pressurized"). Now a mB of natural gas is what a fluid node
