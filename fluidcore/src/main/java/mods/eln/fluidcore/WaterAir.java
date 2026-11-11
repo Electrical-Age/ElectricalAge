@@ -364,7 +364,15 @@ public final class WaterAir {
             double k = Math.min(1, Math.min(30 / Math.max(1e-30, Math.abs(dT)), 1 / Math.max(1e-30, Math.abs(dx))));
             T += k * dT;
             x += k * dx;
-            if (!(T > T_MIN && T < T_MAX) || x > Math.log(V) + 1e-9 || !Double.isFinite(x)) break;
+            if (!(T > T_MIN && T < T_MAX)) {
+                // (pushed past the EOS's range: where the energy lies past the bound's, the bracket would end at the bound
+                // anyway; answered here, as a node held at the 120 K floor fell back to the bracket on every update and
+                // cost a player's 9-node network a fifth of its time)
+                double edge = T <= T_MIN ? T_MIN : T_MAX, ue = energyAt(mw, ma, V, edge);
+                if (edge == T_MIN ? U <= ue : U >= ue) return split(mw, ma, V, edge, gasVolume(mw, ma, V, edge, 0));
+                break;
+            }
+            if (x > Math.log(V) + 1e-9 || !Double.isFinite(x)) break;
         }
         return solve(mw, ma, U, V, near.T());
     }
