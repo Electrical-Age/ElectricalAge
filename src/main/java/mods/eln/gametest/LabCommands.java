@@ -144,6 +144,12 @@ public final class LabCommands {
                 .then(Commands.literal("spmodules").executes(c -> demo(c.getSource(), () -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("tilted").executes(c -> demo(c.getSource(), () -> tilted(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("threelogger").executes(c -> demo(c.getSource(), () -> threeLogger(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("fluidstats").executes(c -> {
+                    var lines = mods.eln.fluid.FluidWorld.stats();
+                    for (String l : lines) mods.eln.Eln.LOG.info("fluidstats: " + l);
+                    c.getSource().sendSuccess(() -> Component.literal(lines.size() + " lines (server log, 'fluidstats')"), false);
+                    return lines.size();
+                }))
                 .then(Commands.literal("fluidscan").then(Commands.argument("n", IntegerArgumentType.integer(5, 2000))
                     .executes(c -> {
                         mods.eln.fluid.FluidWorld.startScan(IntegerArgumentType.getInteger(c, "n"));

@@ -113,6 +113,32 @@ public final class FluidWorld implements IProcess {
         return out;
     }
 
+    /** /elnlab fluidstats: every network by its stepping cost, with where one of its devices is. */
+    public static List<String> stats() {
+        INSTANCE.rebuildIfDirty();
+        List<FluidNetwork> ns = new ArrayList<>(INSTANCE.networks);
+        ns.sort((x, y) -> Long.compare(y.nanos, x.nanos));
+        long total = 0, steps = 0;
+        for (FluidNetwork n : ns) {
+            total += n.nanos;
+            steps = Math.max(steps, n.steps);
+        }
+        List<String> out = new ArrayList<>();
+        out.add(String.format("%d networks, %.3f ms/tick in all", ns.size(), steps == 0 ? 0 : total / 1e6 / steps));
+        for (FluidNetwork n : ns) {
+            String where = "?";
+            outer:
+            for (FluidDevice d : INSTANCE.devices)
+                for (FluidDevice.FluidPort p : d.fluidPorts())
+                    if (n.nodes.contains(nodeFor(p.node()))) {
+                        where = d.getClass().getSimpleName() + " " + net.minecraft.core.BlockPos.of(p.pos()).toShortString();
+                        break outer;
+                    }
+            out.add(n.stats() + "; " + where);
+        }
+        return out;
+    }
+
     /** A network's progress after a step (CoreStep), onto its nodes and their runs' pieces (FluidNode.stallNow). */
     public static void recordProgress(List<FluidNode> nodes, double stall, double dropped) {
         for (FluidNode n : nodes) {

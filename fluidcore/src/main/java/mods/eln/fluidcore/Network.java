@@ -680,13 +680,25 @@ public final class Network {
 
     private boolean isQuiet(List<Node> free, double[] y0, double[] y1) {
         int C = C(), S = C - 1;
+        double worst = 0;
+        int at = -1;
         for (int i = 0; i < free.size(); i++) {
             double m = Math.max(1e-9, massOf(y0, C * i, S));
-            for (int k = 0; k < S; k++) if (Math.abs(y1[C * i + k] - y0[C * i + k]) > SLEEP_REL * m) return false;
-            if (Math.abs(y1[C * i + S] - y0[C * i + S]) > SLEEP_REL * m * 1e5) return false;
+            for (int k = 0; k < S; k++) {
+                double r = Math.abs(y1[C * i + k] - y0[C * i + k]) / m;
+                if (r > worst) { worst = r; at = C * i + k; }
+            }
+            double r = Math.abs(y1[C * i + S] - y0[C * i + S]) / (m * 1e5);
+            if (r > worst) { worst = r; at = C * i + S; }
         }
-        return true;
+        restless = worst;
+        restlessAt = at;
+        return worst <= SLEEP_REL;
     }
+
+    /** The last step's largest change (relative, as isQuiet measures it) and its row: why a network stays awake. */
+    public double restless;
+    public int restlessAt = -1;
 
     /** A hash of everything outside the solve that a step depends on. */
     private long signature() {
@@ -1320,7 +1332,7 @@ public final class Network {
                 DEBUG.append(String.format("it %d nr %.3e alpha0 %.3e%n  y %s%n  r*s %s%n  d %s%n", it, nr, alpha, java.util.Arrays.toString(y),
                     java.util.Arrays.toString(scaled(r, s)), java.util.Arrays.toString(d)));
             }
-            boolean accepted = false;
+            boolean accepted = false, crawling = false;
             for (int ls = 0; ls < 12; ls++, alpha *= 0.5) {
                 double[] yt = y.clone();
                 for (int i = 0; i < y.length; i++) yt[i] += alpha * d[i];
@@ -1329,6 +1341,7 @@ public final class Network {
                 double nt = norm(rt, s);
                 if (DEBUG != null && ls < 3) DEBUG.append(String.format("    ls %d alpha %.3e nt %.3e r*s %s%n", ls, alpha, nt, java.util.Arrays.toString(scaled(rt, s))));
                 if (nt < (1 - 1e-4 * alpha) * nr || nt < TOL) {
+                    crawling = nt >= TOL && nt < CRAWL_OK && nt > 0.5 * nr;
                     y = yt;
                     r = rt;
                     nr = nt;
@@ -1337,6 +1350,13 @@ public final class Network {
                 }
             }
             stats.norms.add(nr);
+            // (crawling at the precision floor: under CRAWL_OK and an iteration took less than half off; more iterations
+            // only shave slivers. Accepted at once: on the clone, networks crawled to MAX_ITERS every tick, each
+            // iteration a line search re-flashing every node, and three 4-9 node networks cost 2-4 ms a step)
+            if (accepted && crawling) {
+                stats.crawls++;
+                return true;
+            }
             if (!accepted) {
                 set(free, y);
                 if (DEBUG != null) DEBUG.append("  stalled; scaled Jacobian errors: ").append(scaledJacobianErrors(free, idx, y0, dt, s)).append("\n");

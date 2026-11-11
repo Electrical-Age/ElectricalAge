@@ -29,7 +29,21 @@ public final class FluidNetwork {
     CoreStep core;
 
     public void step(double dt) {
+        long t0 = System.nanoTime();
         CoreStep.of(this).step(this, dt);
+        nanos += System.nanoTime() - t0;
+        steps++;
+    }
+
+    /** Time spent stepping (ns) and steps since built (/elnlab fluidstats). */
+    public long nanos, steps;
+
+    /** One line for /elnlab fluidstats: size, cost, asleep, and what keeps it awake. */
+    public String stats() {
+        CoreStep c = core;
+        var n = c == null ? null : c.net;
+        return String.format("%d nodes, %.3f ms/step, %s, restless %.2g at row %d", nodes.size(), steps == 0 ? 0 : nanos / 1e6 / steps,
+            n == null ? "?" : n.asleep() ? "asleep" : "awake", n == null ? 0 : n.restless, n == null ? -1 : n.restlessAt);
     }
 
     /** Port band (fraction of a node's height) over which a port goes from drawing gas to drawing liquid. */
