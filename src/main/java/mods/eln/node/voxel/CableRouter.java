@@ -8,13 +8,13 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 /**
- * Cable routing (notes/cables/PLAN.md step 3; Baughn: cables share the pipes' pathfinder, but run against a face, never
- * in mid-air). A* over states (world voxel point on a block face plane, the face it lies against, the last move): a
- * cable lies on the plane between a solid block (its support) and the block it is in. Moves: one lattice step along
- * the face (the support must go on: solid all the way), an inner corner (up a wall met at a block's edge), an outer
- * corner (over the support's edge onto its next face, with a knuckle in the block round the corner). Cost = length + a
- * penalty per bend + a little per block entered. Directions are net.minecraft.core.Direction 3D values (0 down, 1 up,
- * 2 north, 3 south, 4 west, 5 east). Pure Java: the world is behind Space.
+ * Cable routing's entry point and output stage (notes/cables/PLAN.md step 3; Baughn: cables share the pipes'
+ * pathfinder, but run against a face, never in mid-air). The search is Router's, for a SURFACE kind: states are a world
+ * voxel point on a block face plane, the face it lies against and the last move; moves go along the face (on solid
+ * support), round inner corners (up a wall) and outer corners (over the support's edge, a knuckle in the block round the
+ * corner). Cost = length + a penalty per bend + a little per block entered. Directions are
+ * net.minecraft.core.Direction 3D values (0 down, 1 up, 2 north, 3 south, 4 west, 5 east). pieces() cuts a route into
+ * per-block cable parts. Pure Java: the world is behind Space.
  */
 public final class CableRouter {
     public static final int LATTICE = 2;
@@ -74,31 +74,7 @@ public final class CableRouter {
     }
 
     public static Result route(Space space, int width, int height, End start, List<End> waypoints, End end, long budgetMs) {
-        long deadline = System.nanoTime() + budgetMs * 1_000_000;
-        List<End> stops = new ArrayList<>();
-        stops.add(start);
-        stops.addAll(waypoints);
-        stops.add(end);
-        List<Step> out = new ArrayList<>();
-        int lastDir = start.dir();
-        try {
-            for (int leg = 0; leg + 1 < stops.size(); leg++) {
-                End a = stops.get(leg), b = stops.get(leg + 1);
-                int attach = out.isEmpty() ? a.attach() : out.get(out.size() - 1).attach();
-                int arrive = leg + 2 == stops.size() ? b.dir() : -1;
-                List<Step> p = leg(space, width, height, a, attach, lastDir, b, arrive, deadline);
-                if (p == null) return new Result(null, stops.size() == 2 ? "no way along faces" : "no way along faces on leg " + (leg + 1));
-                if (!out.isEmpty()) p.remove(0);
-                out.addAll(p);
-                if (out.size() >= 2) {
-                    Step x = out.get(out.size() - 2), y = out.get(out.size() - 1);
-                    lastDir = dirOf(x, y);
-                }
-            }
-        } catch (PipeRouter.GaveUp e) {
-            return new Result(null, "gave up: too far or too tangled to find a way (try waypoints)");
-        }
-        return new Result(simplify(out), null);
+        return Router.surface(space, RouteKind.cable("cable", width, height), start, waypoints, end, budgetMs);
     }
 
     static int dirOf(Step a, Step b) {
@@ -123,16 +99,6 @@ public final class CableRouter {
         return out;
     }
 
-    private record Key(long x, long y, long z, int attach, int dir) {
-    }
-
-    private record Open(Key k, long g, long f) implements Comparable<Open> {
-        @Override
-        public int compareTo(Open o) {
-            return Long.compare(f, o.f);
-        }
-    }
-
     /** The block a cable at p on attach's plane lies in, on its in-plane axes using `toward` to pick the side of a
      *  boundary the point sits on (-1: floor). */
     static long[] cell(long[] p, int attach, int toward) {
@@ -145,154 +111,6 @@ public final class CableRouter {
             else c[a] = Math.floorDiv(p[a], 16);
         }
         return c;
-    }
-
-    /** The cable's cross-section swept from p one step along d (world voxels), with its clearance. */
-    static boolean stepBlocked(Space space, int width, int height, long[] p, int attach, int d) {
-        long[] q = {p[0] + DV[d][0] * LATTICE, p[1] + DV[d][1] * LATTICE, p[2] + DV[d][2] * LATTICE};
-        int n = axis(attach), along = axis(d), w = 3 - n - along;
-        long[] lo = new long[3], hi = new long[3];
-        lo[along] = Math.min(p[along], q[along]);
-        hi[along] = Math.max(p[along], q[along]);
-        lo[w] = p[w] - width / 2 - CLEARANCE;
-        hi[w] = p[w] + (width - width / 2) + CLEARANCE;
-        if (attach % 2 == 0) {
-            lo[n] = p[n];
-            hi[n] = p[n] + height + CLEARANCE;
-        } else {
-            lo[n] = p[n] - height - CLEARANCE;
-            hi[n] = p[n];
-        }
-        return space.blocked(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
-    }
-
-    /** Is what's under a step from p along d solid (one voxel deep on attach's side, the cable's width)? */
-    static boolean supported(Space space, int width, long[] p, int attach, int d) {
-        int n = axis(attach), along = axis(d), w = 3 - n - along;
-        long[] lo = new long[3], hi = new long[3];
-        lo[along] = Math.min(p[along], p[along] + DV[d][along] * LATTICE);
-        hi[along] = Math.max(p[along], p[along] + DV[d][along] * LATTICE);
-        lo[w] = p[w] - width / 2;
-        hi[w] = p[w] + (width - width / 2);
-        lo[n] = attach % 2 == 0 ? p[n] - 1 : p[n];
-        hi[n] = lo[n] + 1;
-        return space.solid(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
-    }
-
-    /** One voxel beyond p along e, the cable's width across: on the cable's side (a wall there?) or the support's side
-     *  (does the support go on?). */
-    static boolean solidBeyond(Space space, int width, int height, long[] p, int attach, int e, boolean supportSide) {
-        int n = axis(attach), ea = axis(e), w = 3 - n - ea;
-        long[] lo = new long[3], hi = new long[3];
-        lo[ea] = e % 2 == 1 ? p[ea] : p[ea] - 1;
-        hi[ea] = lo[ea] + 1;
-        lo[w] = p[w] - width / 2;
-        hi[w] = p[w] + (width - width / 2);
-        if (supportSide) {
-            lo[n] = attach % 2 == 0 ? p[n] - 1 : p[n];
-            hi[n] = lo[n] + 1;
-        } else if (attach % 2 == 0) {
-            lo[n] = p[n];
-            hi[n] = p[n] + height;
-        } else {
-            lo[n] = p[n] - height;
-            hi[n] = p[n];
-        }
-        return space.solid(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
-    }
-
-    static List<Step> leg(Space space, int width, int height, End a, int attach0, int lastDir, End b, int arriveDir, long deadline) {
-        long[] s = {a.x(), a.y(), a.z()}, t = {b.x(), b.y(), b.z()};
-        for (int i = 0; i < 3; i++) if (Math.floorMod(s[i], LATTICE) != 0 || Math.floorMod(t[i], LATTICE) != 0) return null;
-        long[] lo = new long[3], hi = new long[3];
-        for (int i = 0; i < 3; i++) {
-            lo[i] = Math.min(s[i], t[i]) - MARGIN;
-            hi[i] = Math.max(s[i], t[i]) + MARGIN;
-        }
-        PriorityQueue<Open> open = new PriorityQueue<>();
-        Map<Key, Long> best = new HashMap<>();
-        Map<Key, Key> from = new HashMap<>();
-        Map<Key, Boolean> outer = new HashMap<>();
-        Key k0 = new Key(s[0], s[1], s[2], attach0, lastDir);
-        boolean leavePort = a.dir() >= 0 && lastDir == a.dir();
-        best.put(k0, 0L);
-        open.add(new Open(k0, 0, h(s, t)));
-        int expansions = 0;
-        while (!open.isEmpty()) {
-            if (++expansions > MAX_EXPANSIONS || System.nanoTime() > deadline) throw new PipeRouter.GaveUp();
-            Open o = open.poll();
-            Key k = o.k;
-            if (o.g > best.getOrDefault(k, Long.MAX_VALUE)) continue;
-            long[] p = {k.x(), k.y(), k.z()};
-            if (p[0] == t[0] && p[1] == t[1] && p[2] == t[2] && (b.attach() < 0 || k.attach() == b.attach()) && (arriveDir < 0 || k.dir() == arriveDir)) {
-                List<Step> path = new ArrayList<>();
-                for (Key c = k; c != null; c = from.get(c)) path.add(0, new Step(c.x(), c.y(), c.z(), c.attach(), outer.getOrDefault(c, false)));
-                return path;
-            }
-            int n = axis(k.attach());
-            // along the face
-            for (int d = 0; d < 6; d++) {
-                if (axis(d) == n) continue;
-                if (k.equals(k0) && leavePort && d != a.dir()) continue;   // (leave a device straight out)
-                if (k.dir() >= 0 && d == reverse(k.dir())) continue;
-                long[] q = {p[0] + DV[d][0] * LATTICE, p[1] + DV[d][1] * LATTICE, p[2] + DV[d][2] * LATTICE};
-                if (out(q, lo, hi)) continue;
-                // a cable stays inside its block: it crosses a block's edge, never runs along one (it would straddle two)
-                if (Math.floorMod(p[3 - n - axis(d)], 16) == 0) continue;
-                if (stepBlocked(space, width, height, p, k.attach(), d) || !supported(space, width, p, k.attach(), d)) continue;
-                long[] cp = cell(p, k.attach(), d), cq = cell(q, k.attach(), reverse(d));
-                long g = o.g + LATTICE + (k.dir() >= 0 && k.dir() != d ? BEND : 0)
-                    + (cp[0] != cq[0] || cp[1] != cq[1] || cp[2] != cq[2] ? BLOCK_ENTERED : 0);
-                push(open, best, from, outer, k, new Key(q[0], q[1], q[2], k.attach(), d), g, t, false);
-            }
-            // corners, toward e (across the face): a wall met here (inner), or the support ending here (outer); at a block's
-            // edge or at a step inside a block (a stair's riser, a slab's edge). Not two in a row at one point: that is
-            // a run of no length, and two inner corners turned a cable round to the far side of a plane, through the
-            // edge where two blocks meet diagonally (the cable's width reached the far block and read as a wall)
-            if (k.dir() < 0 && !k.equals(k0)) continue;
-            for (int e = 0; e < 6; e++) {
-                if (axis(e) == n) continue;
-                if (solidBeyond(space, width, height, p, k.attach(), e, false)) {
-                    // inner corner: up the wall met here
-                    push(open, best, from, outer, k, new Key(p[0], p[1], p[2], e, -1), o.g + BEND, t, false);
-                } else {
-                    // outer corner: round the support's edge onto its face toward e
-                    if (solidBeyond(space, width, height, p, k.attach(), e, true)) continue;
-                    if (!solidBeyond(space, width, height, p, k.attach(), reverse(e), true)) continue;
-                    if (knuckleBlocked(space, width, height, p, k.attach(), e)) continue;
-                    push(open, best, from, outer, k, new Key(p[0], p[1], p[2], reverse(e), -1), o.g + BEND, t, true);
-                }
-            }
-        }
-        return null;
-    }
-
-    /** The knuckle round an outer corner at p (a box at the edge, in the block round the corner) with clearance. */
-    static boolean knuckleBlocked(Space space, int width, int height, long[] p, int attach, int e) {
-        int n = axis(attach), ea = axis(e), w = 3 - n - ea;
-        long[] lo = new long[3], hi = new long[3];
-        lo[w] = p[w] - width / 2 - CLEARANCE;
-        hi[w] = p[w] + (width - width / 2) + CLEARANCE;
-        if (attach % 2 == 0) { lo[n] = p[n]; hi[n] = p[n] + height + CLEARANCE; }
-        else { lo[n] = p[n] - height - CLEARANCE; hi[n] = p[n]; }
-        if (e % 2 == 1) { lo[ea] = p[ea]; hi[ea] = p[ea] + height + CLEARANCE; }
-        else { lo[ea] = p[ea] - height - CLEARANCE; hi[ea] = p[ea]; }
-        return space.blocked(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
-    }
-
-    private static boolean out(long[] q, long[] lo, long[] hi) {
-        for (int i = 0; i < 3; i++) if (q[i] < lo[i] || q[i] > hi[i]) return true;
-        return false;
-    }
-
-    private static void push(PriorityQueue<Open> open, Map<Key, Long> best, Map<Key, Key> from, Map<Key, Boolean> outer, Key k, Key nk,
-                             long g, long[] t, boolean isOuter) {
-        if (g >= best.getOrDefault(nk, Long.MAX_VALUE)) return;
-        best.put(nk, g);
-        from.put(nk, k);
-        if (isOuter) outer.put(nk, true);
-        else outer.remove(nk);
-        open.add(new Open(nk, g, g + h(new long[]{nk.x(), nk.y(), nk.z()}, t)));
     }
 
     static long h(long[] p, long[] t) {

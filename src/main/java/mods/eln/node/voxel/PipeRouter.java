@@ -7,10 +7,11 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 /**
- * Pipe routing (notes/pipes/DESIGN.md section 4): A* on a lattice of world voxels (every LATTICE voxels; the face
- * centres of blocks are on it), axis-aligned moves, cost = length + a penalty per bend + a little per block entered.
- * A move is allowed if the pipe's bore swept along it hits nothing (Space). Waypoints split the search into legs; the
- * result is one polyline of world voxel points (corners only). Pure Java: the world is behind Space.
+ * Pipe routing's entry point and output stage (notes/pipes/DESIGN.md section 4). The search is Router's, for a FREE
+ * kind: a lattice of world voxels (every LATTICE voxels; the face centres of blocks are on it), axis-aligned moves,
+ * cost = length + a penalty per bend + a little per block entered (+ a little where it rests against nothing). A move
+ * is allowed if the pipe's bore swept along it hits nothing (Space). Waypoints split the search into legs; the result
+ * is one polyline of world voxel points (corners only), which perBlock() cuts into per-block pieces. Pure Java.
  */
 public final class PipeRouter {
     public static final int LATTICE = 4;
@@ -66,110 +67,7 @@ public final class PipeRouter {
     }
 
     public static Result route(Space space, int bore, End start, List<End> waypoints, End end, long budgetMs) {
-        long deadline = System.nanoTime() + budgetMs * 1_000_000;
-        try {
-            return routeUntil(space, bore, start, waypoints, end, deadline);
-        } catch (GaveUp e) {
-            return new Result(null, "gave up: too far or too tangled to find a way (try waypoints)");
-        }
-    }
-
-    static Result routeUntil(Space space, int bore, End start, List<End> waypoints, End end, long deadline) {
-        // (a port off the lattice, a device's drawn flange between its points: straight out, then across onto it)
-        List<long[]> head = jog(space, bore, start), tail = jog(space, bore, end);
-        if (head != null) {
-            long[] r = head.get(head.size() - 1);
-            start = new End(r[0], r[1], r[2], -1);
-        }
-        if (tail != null) {
-            long[] r = tail.get(tail.size() - 1);
-            end = new End(r[0], r[1], r[2], -1);
-        }
-        Result inner = routeLegs(space, bore, start, waypoints, end, deadline);
-        if (inner.error != null || head == null && tail == null) return inner;
-        List<long[]> pts = new ArrayList<>();
-        if (head != null) pts.addAll(head.subList(0, head.size() - 1));
-        pts.addAll(inner.points);
-        if (tail != null) for (int i = tail.size() - 2; i >= 0; i--) pts.add(tail.get(i));
-        return new Result(simplify(pts), null);
-    }
-
-    /**
-     * For a port off the lattice (only across its direction): the points from it one lattice step straight out, then
-     * across to the nearest lattice point a pipe of this bore can reach, ending there; null if it is on the lattice
-     * (or no such point is free: the route then fails as before).
-     */
-    static List<long[]> jog(Space space, int bore, End e) {
-        if (e.dir() < 0) return null;
-        long[] p = {e.x(), e.y(), e.z()};
-        int along = e.dir() / 2;
-        boolean off = false;
-        for (int a = 0; a < 3; a++) if (Math.floorMod(p[a], LATTICE) != 0) off = true;
-        if (!off || Math.floorMod(p[along], LATTICE) != 0) return null;
-        long[] q = {p[0] + D[e.dir()][0] * LATTICE, p[1] + D[e.dir()][1] * LATTICE, p[2] + D[e.dir()][2] * LATTICE};
-        if (segmentBlocked(space, bore, p, q)) return null;
-        // the cross axes' lattice points either side, nearest first
-        int[] cross = new int[2];
-        int n = 0;
-        for (int a = 0; a < 3; a++) if (a != along) cross[n++] = a;
-        List<long[]> options = new ArrayList<>();
-        for (int i = 0; i < 2; i++)
-            for (int j = 0; j < 2; j++) {
-                long[] r = q.clone();
-                for (int c = 0; c < 2; c++) {
-                    int a = cross[c];
-                    long m = Math.floorMod(r[a], LATTICE);
-                    if (m == 0) continue;
-                    r[a] = (c == 0 ? i : j) == 0 ? r[a] - m : r[a] - m + LATTICE;
-                }
-                options.add(r);
-            }
-        options.sort(java.util.Comparator.comparingLong(r -> Math.abs(r[cross[0]] - q[cross[0]]) + Math.abs(r[cross[1]] - q[cross[1]])));
-        for (long[] r : options) {
-            long[] mid = q.clone();
-            mid[cross[0]] = r[cross[0]];
-            if (segmentBlocked(space, bore, q, mid) || segmentBlocked(space, bore, mid, r)) continue;
-            List<long[]> out = new ArrayList<>(List.of(p, q));
-            if (!java.util.Arrays.equals(mid, q) && !java.util.Arrays.equals(mid, r)) out.add(mid);
-            if (!java.util.Arrays.equals(r, q)) out.add(r);
-            return out;
-        }
-        return null;
-    }
-
-    /** Does a pipe of this bore along the straight segment a..b hit anything (across the bore; along it, the segment)? */
-    static boolean segmentBlocked(Space space, int bore, long[] a, long[] b) {
-        if (java.util.Arrays.equals(a, b)) return false;
-        long h = bore / 2;
-        int axis = a[0] != b[0] ? 0 : a[1] != b[1] ? 1 : 2;
-        long[] lo = new long[3], hi = new long[3];
-        for (int i = 0; i < 3; i++) {
-            long e = i == axis ? 0 : h;
-            lo[i] = Math.min(a[i], b[i]) - e;
-            hi[i] = Math.max(a[i], b[i]) + e;
-        }
-        return space.blocked(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
-    }
-
-    static Result routeLegs(Space space, int bore, End start, List<End> waypoints, End end, long deadline) {
-        List<End> stops = new ArrayList<>();
-        stops.add(start);
-        stops.addAll(waypoints);
-        stops.add(end);
-        List<long[]> pts = new ArrayList<>();
-        int arriveDir = -1;
-        for (int leg = 0; leg + 1 < stops.size(); leg++) {
-            End a = stops.get(leg), b = stops.get(leg + 1);
-            // leave a port along its direction; a waypoint continues the way the last leg arrived (no forced bend)
-            int leaveDir = leg == 0 ? a.dir() : -1;
-            int arrive = leg + 2 == stops.size() && b.dir() >= 0 ? b.dir() ^ 1 : -1;   // (arrive into a port: opposite its out-direction)
-            List<long[]> p = leg(space, bore, a, b, leaveDir, arriveDir, arrive, deadline);
-            if (p == null) return new Result(null, leg == 0 && stops.size() == 2 ? "no free path" : "no free path on leg " + (leg + 1));
-            if (!pts.isEmpty()) p.remove(0);
-            pts.addAll(p);
-            arriveDir = p.size() >= 2 ? dirOf(pts.get(pts.size() - 2), pts.get(pts.size() - 1)) : arriveDir;
-        }
-        return new Result(simplify(pts), null);
+        return Router.free(space, RouteKind.pipe("pipe", bore), start, waypoints, end, budgetMs);
     }
 
     static int dirOf(long[] a, long[] b) {
@@ -188,112 +86,6 @@ public final class PipeRouter {
             out.add(pts.get(i));
         }
         return out;
-    }
-
-    /** Does a pipe of this bore, moved one lattice step from p along dir, hit anything? */
-    static boolean stepBlocked(Space space, int bore, long[] p, int dir) {
-        long h = bore / 2;
-        long[] q = {p[0] + D[dir][0] * LATTICE, p[1] + D[dir][1] * LATTICE, p[2] + D[dir][2] * LATTICE};
-        long[] lo = new long[3], hi = new long[3];
-        for (int a = 0; a < 3; a++) {
-            // across the bore; along the move only the step itself (a pipe leaving a device's face doesn't reach into it)
-            long e = a == dir / 2 ? 0 : h;
-            lo[a] = Math.min(p[a], q[a]) - e;
-            hi[a] = Math.max(p[a], q[a]) + e;
-        }
-        return space.blocked(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
-    }
-
-    private record Key(long x, long y, long z, int dir) {
-    }
-
-    private static final class Open implements Comparable<Open> {
-        final Key k;
-        final long g, f;
-
-        Open(Key k, long g, long f) {
-            this.k = k;
-            this.g = g;
-            this.f = f;
-        }
-
-        @Override
-        public int compareTo(Open o) {
-            return Long.compare(f, o.f);
-        }
-    }
-
-    /** One leg: A* over (point, last direction). Returns the lattice points, start and end included, or null. */
-    static List<long[]> leg(Space space, int bore, End a, End b, int leaveDir, int lastDir, int arriveDir, long deadline) {
-        long[] s = {a.x(), a.y(), a.z()}, t = {b.x(), b.y(), b.z()};
-        for (int i = 0; i < 3; i++) if (Math.floorMod(s[i], LATTICE) != 0 || Math.floorMod(t[i], LATTICE) != 0) return null;
-        long lo0 = Math.min(s[0], t[0]) - MARGIN, hi0 = Math.max(s[0], t[0]) + MARGIN;
-        long lo1 = Math.min(s[1], t[1]) - MARGIN, hi1 = Math.max(s[1], t[1]) + MARGIN;
-        long lo2 = Math.min(s[2], t[2]) - MARGIN, hi2 = Math.max(s[2], t[2]) + MARGIN;
-        PriorityQueue<Open> open = new PriorityQueue<>();
-        Map<Key, Long> best = new HashMap<>();
-        Map<Key, Key> from = new HashMap<>();
-        Key k0 = new Key(s[0], s[1], s[2], lastDir);
-        best.put(k0, 0L);
-        open.add(new Open(k0, 0, h(s, t)));
-        int expansions = 0;
-        while (!open.isEmpty()) {
-            if (++expansions > MAX_EXPANSIONS || System.nanoTime() > deadline) throw new GaveUp();
-            Open o = open.poll();
-            Key k = o.k;
-            if (o.g > best.getOrDefault(k, Long.MAX_VALUE)) continue;
-            long[] p = {k.x(), k.y(), k.z()};
-            if (p[0] == t[0] && p[1] == t[1] && p[2] == t[2] && (arriveDir < 0 || k.dir() == arriveDir)) {
-                List<long[]> path = new ArrayList<>();
-                for (Key c = k; c != null; c = from.get(c)) path.add(0, new long[]{c.x(), c.y(), c.z()});
-                return path;
-            }
-            for (int d = 0; d < 6; d++) {
-                if (k.equals(k0) && leaveDir >= 0 && d != leaveDir) continue;   // (leave a port straight out)
-                if (k.dir() >= 0 && d == (k.dir() ^ 1)) continue;               // (no doubling back)
-                long[] q = {p[0] + D[d][0] * LATTICE, p[1] + D[d][1] * LATTICE, p[2] + D[d][2] * LATTICE};
-                if (q[0] < lo0 || q[0] > hi0 || q[1] < lo1 || q[1] > hi1 || q[2] < lo2 || q[2] > hi2) continue;
-                // a pipe stays inside blocks: it crosses a face plane, never runs in one (or it would straddle two)
-                boolean inPlane = false;
-                for (int x = 0; x < 3; x++) if (x != d / 2 && Math.floorMod(q[x], 16) == 0) inPlane = true;
-                if (inPlane) continue;
-                if (stepBlocked(space, bore, p, d)) continue;
-                long g = o.g + LATTICE + (k.dir() >= 0 && k.dir() != d ? BEND : 0) + (supported(space, bore, q, d) ? 0 : UNSUPPORTED)
-                    + (Math.floorDiv(q[0], 16) != Math.floorDiv(p[0], 16) || Math.floorDiv(q[1], 16) != Math.floorDiv(p[1], 16)
-                    || Math.floorDiv(q[2], 16) != Math.floorDiv(p[2], 16) ? BLOCK_ENTERED : 0);
-                Key nk = new Key(q[0], q[1], q[2], d);
-                if (g >= best.getOrDefault(nk, Long.MAX_VALUE)) continue;
-                best.put(nk, g);
-                from.put(nk, k);
-                open.add(new Open(nk, g, g + h(q, t)));
-            }
-        }
-        return null;
-    }
-
-    /** Does a pipe at q (moving along d) rest against something on any side across its run? */
-    static boolean supported(Space space, int bore, long[] q, int d) {
-        long h = bore / 2;
-        int along = d / 2;
-        for (int side = 0; side < 3; side++) {
-            if (side == along) continue;
-            for (int sgn = -1; sgn <= 1; sgn += 2) {
-                long[] lo = new long[3], hi = new long[3];
-                for (int a = 0; a < 3; a++) {
-                    lo[a] = q[a] - h;
-                    hi[a] = q[a] + h;
-                }
-                if (sgn < 0) {
-                    lo[side] = q[side] - h - REST;
-                    hi[side] = q[side] - h;
-                } else {
-                    lo[side] = q[side] + h;
-                    hi[side] = q[side] + h + REST;
-                }
-                if (space.blocked(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2])) return true;
-            }
-        }
-        return false;
     }
 
     static long h(long[] p, long[] t) {
