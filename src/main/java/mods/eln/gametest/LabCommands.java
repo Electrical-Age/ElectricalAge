@@ -1284,6 +1284,12 @@ public final class LabCommands {
         int n = 0;
         for (mods.eln.node.NodeBase node : new java.util.ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
             if (node.coordonate.world() != src.getLevel() || !node.coordonate.pos().closerThan(at, r + 0.5)) continue;
+            if (node instanceof mods.eln.node.voxel.VoxelNode v)   // (its cables too: the burnt look and repair, lab checks)
+                for (var p : v.parts)
+                    if (p instanceof mods.eln.node.voxel.CablePart cp && cp.burnt == null && v.burnableOf(cp) != null) {
+                        v.burnableOf(cp).burn(mods.eln.sim.process.destruct.FailureCause.OVERHEAT, mods.eln.sim.process.destruct.Failure.Kind.CABLE);
+                        n++;
+                    }
             if (node instanceof mods.eln.node.six.SixNode six) {
                 for (Direction d : Direction.values()) {
                     var e = six.getElement(d);
