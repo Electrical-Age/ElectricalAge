@@ -28,6 +28,16 @@ public class NodeFluidView extends FluidStacksResourceHandler {
         boolean liquidIn = true, liquidOut = true, gasIn, gasOut, intake, gasWhenBoiling;
         java.util.function.IntPredicate liquids = id -> true;
         double liquidShare = 1, gasCeilingPa = 9e5, cushionPa;
+        boolean aliases;
+
+        /**
+         * A layer still close to a mixture alias's proportions (PortBridge.ALIAS_OVERLAP) shows as that alias: the oil
+         * pump's live crude is crude to a bucket or another mod's pipe, though no one species of it is 90 %.
+         */
+        public Spec aliases() {
+            aliases = true;
+            return this;
+        }
 
         /** Liquid can be put in and taken out (default both). */
         public Spec liquid(boolean in, boolean out) {
@@ -179,7 +189,11 @@ public class NodeFluidView extends FluidStacksResourceHandler {
             } else if (ph.id() == SpeciesRegistry.WATER) {
                 double got = EaUnits.drainLiquid(n, kg);
                 if (got < kg && n.T() < Water.TB) EaUnits.drainVapour(n, kg - got);   // (cold: the rest is vapour that would condense)
-            } else EaUnits.drainLayer(n, ph.id(), kg);   // (its whole layer by share: a mixed liquid goes as it is)
+            } else {
+                // (a mixture alias taken out: the layer of its parts, whole)
+                double[][] mix = SpeciesRegistry.get().mixture(ph.id(), true);
+                EaUnits.drainLayer(n, mix != null ? (int) mix[0][0] : ph.id(), kg);   // (its whole layer by share: a mixed liquid goes as it is)
+            }
         }
         set(INTAKE, FluidResource.EMPTY, 0);
     }
@@ -202,8 +216,10 @@ public class NodeFluidView extends FluidStacksResourceHandler {
             int top = FluidSpecies.topLiquid(n);
             int id = top < 0 ? SpeciesRegistry.WATER : top;
             double kg = id == SpeciesRegistry.WATER ? waterShown(n) : EaUnits.layerLiquid(n, id);
+            int alias = spec.aliases && id != SpeciesRegistry.WATER && kg > 0 ? aliasOf(n, id) : -1;
+            if (alias >= 0) id = alias;
             // (a mixed layer counts as its main species only at PURE_SHARE of it; under that a bucket gets nothing)
-            if (id != SpeciesRegistry.WATER && kg > 0 && n.liquid(id) < EaUnits.PURE_SHARE * kg) kg = 0;
+            else if (id != SpeciesRegistry.WATER && kg > 0 && n.liquid(id) < EaUnits.PURE_SHARE * kg) kg = 0;
             put(LIQUID, FluidSpecies.fluid(id, false), (int) Math.round(kg / FluidSpecies.kgPerMb(id, false)));
             int gas = FluidSpecies.mainVapour(n);
             int gid = gas < 0 ? SpeciesRegistry.WATER : gas;
@@ -221,6 +237,18 @@ public class NodeFluidView extends FluidStacksResourceHandler {
             shownFluid[i] = fluid(i) != null ? fluid(i) : shownFluid[i];
         }
         shown[INTAKE] = 0;
+    }
+
+    /** The mixture alias (a fluid) that the layer species id is in still looks like, or -1. */
+    static int aliasOf(FluidNode n, int id) {
+        var reg = SpeciesRegistry.get();
+        int layer = n.layerOf(id);
+        for (int a = 2; a < reg.size(); a++) {
+            double[][] mix = reg.mixture(a, true);
+            if (mix == null || FluidSpecies.fluid(a, false) == null || n.layerOf((int) mix[0][0]) != layer) continue;
+            if (EaUnits.layerOverlap(n, mix[0], mix[1]) >= PortBridge.ALIAS_OVERLAP) return a;
+        }
+        return -1;
     }
 
     /**

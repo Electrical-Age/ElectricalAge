@@ -110,6 +110,20 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   dead. A pumped crude line needs a purge valve (or a pipe taking its gas). Out of a node, a mixed liquid is named by its
   main species and taken whole (EaUnits.drainLayer), so a bucket can't distil a mix. The old column takes the cuts' mix as
   crude until it is a still. `fluid_crude_is_a_mixture`.
+- Oil pump and tar sand separator on fluid nodes (Baughn 2026-11-10: PortBridge push becomes the device's pump): each
+  one's tank is a vessel node, and a centrifugal pump in the core's solve sends it from the vessel's floor to a small
+  outlet node behind the flange (free flow 200 mB/s of crude, shut-off at 6 bar, the old push's rate and head).
+  - The pump's vessel is a sealed wellhead: the well's natural gas goes down the line through a check valve from its
+    top (the casing gas), as live crude's gas went before. The separator's basin is open (tar sand's crude is dead):
+    a float vent and a vacuum breaker, as the furnace's tank.
+  - Each stops making when its vessel is full or its vessel or line is at the 6 bar head, so a dead-ended line stops
+    at it instead of the well's gas pushing it on (`oil_pump_dead_end`).
+  - Unpiped, the pump stands and the vessel's liquid goes into the block on the flange's face through its view
+    (FluidExport), as the old push did; the pump's gas then leaves by a float vent to the air.
+  - Their views name a liquid layer still in crude's proportions (80 % overlap, as the column's inlet) crude, so a
+    bucket or another mod's pipe takes the pump's crude as crude (Baughn: buckets from the pump), though no one species
+    of it is 90 %. Other devices' views keep the 90 % rule.
+  `oil_pump_dead_end`, `oil_pump_legacy_tank`, `oil_separator_legacy_tank`.
 - Flare stack on a fluid node: its 4-bucket tank is a fluid node behind its front flange (half way up; buckets put
   any species in). Its tip passes every gas over the air's pressure between steps, each species by its share: natural
   gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took

@@ -139,8 +139,8 @@ public final class OilLakeCases {
             }
             mods.eln.Eln.simulator.addSlowProcess(watch = dt -> {
                 if (++tick == 200) {
-                    tank0 = ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).getFluidAmount();
-                    tank20 = pump2 == null ? 0 : ((mods.eln.fluid.ElementFluidHandler) pump2.getFluidHandler()).getFluidAmount();
+                    tank0 = (int) pump.producedMb;
+                    tank20 = pump2 == null ? 0 : (int) pump2.producedMb;
                     steam0 = well == null ? 0 : field(well, "totalKg");
                 }
                 if (tick > 200) window += dt;
@@ -160,8 +160,8 @@ public final class OilLakeCases {
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(watch);
             if (fx != null) mods.eln.fluid.FluidWorld.remove(fx);
-            int got = ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).getFluidAmount() - tank0;
-            int got2 = pump2 == null ? 0 : ((mods.eln.fluid.ElementFluidHandler) pump2.getFluidHandler()).getFluidAmount() - tank20;
+            int got = (int) pump.producedMb - tank0;
+            int got2 = pump2 == null ? 0 : (int) pump2.producedMb - tank20;
             double rate = got / window, nominal = 1000 / mods.eln.oil.OilPumpDescriptor.energyPerMb(false, 1);
             double steam = well == null ? 0 : field(well, "totalKg") - steam0;
             var info = pump.getWaila();

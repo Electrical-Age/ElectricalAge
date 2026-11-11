@@ -127,6 +127,11 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   is the legacy solver's: on load it is taken at the temperature the legacy Flash finds for it and recomputed by the
   core there (its vapour energies differ by up to ~40 kJ/kg), so nothing jumps. One-way: an older build reads the core's
   energies as its own.
+- Oil pump and tar sand separator (2026-11-11): each one's tank is a fluid node saved as `vessel*` (with `vesselFv`),
+  and its outlet node behind the flange keeps the old PortBridge stub's key (`discharge*`, `outlet*`), so a stub's
+  contents load as the outlet's. An older save's `tank*` (an 8- or 4-bucket fluid tank) is read only when `vesselW` is
+  absent and goes into the vessel at the ambient (crude dead, as its cuts). Written back as `vessel*` only.
+  `oil_pump_legacy_tank`, `oil_separator_legacy_tank`.
 - Flare stack (2026-11-11): its tank is a fluid node saved as `vessel*` (with `vesselFv`), plus `carry`. An older save's
   `tank*` (a 4-bucket fluid tank) and its flange stub `inlet*` (PortBridge) are read only when `vesselW` is absent and
   go into the vessel at the ambient (crude dead, as its cuts); a fluid no species names is dropped. Written back as

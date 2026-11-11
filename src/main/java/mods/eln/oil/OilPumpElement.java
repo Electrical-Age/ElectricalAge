@@ -1,6 +1,5 @@
 package mods.eln.oil;
 
-import mods.eln.fluid.ElementFluidHandler;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -30,14 +29,14 @@ import java.util.Map;
 
 /**
  * The pump (OilPumpDescriptor): electrical load + resistor; a slow process finds its source and moves fluid into its
- * tank, and its discharge line on its right pushes the tank into whatever takes it there (Baughn 2026-11-03: the oil
- * devices' drawn outlets did nothing).
+ * vessel (a fluid node: DeviceOutlet), and its discharge pump sends the vessel down the pipe on the flange on its right,
+ * the well's natural gas with it through the casing gas line (Baughn 2026-11-10: PortBridge push becomes the device's
+ * pump). Unpiped, it pushes into whatever takes fluid on that face (Baughn 2026-11-03: the drawn outlets did nothing).
  */
 public class OilPumpElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice {
     final OilPumpDescriptor desc;
     final NbtElectricalLoad load = new NbtElectricalLoad("load");
     final Resistor resistor = new Resistor(load, null);
-    public final ElementFluidHandler tank = new ElementFluidHandler(OilPumpDescriptor.TANK_MB);
     final VoltageStateWatchDog watchdog = new VoltageStateWatchDog();
 
     /** Source found at the last look: a lake id (> 0), water (-1) or nothing (0); depth in blocks. */
@@ -49,6 +48,8 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
     String lake;
     String status = "idle";
     int look;
+    /** What it pumped last: water, or crude. */
+    public boolean lastWater;
 
     public OilPumpElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
@@ -57,9 +58,9 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
         electricalComponentList.add(resistor);
         slowProcessList.add(new Pumping());
         slowProcessList.add(time -> {
-            // (an EA pipe on its flange takes it, PortBridge; else whatever takes fluid on that face)
-            if (!dischargePort.piped() && node.coordonate.world() instanceof ServerLevel level)
-                exportedForTests += mods.eln.fluid.FluidExport.push(tank, level, node.coordonate.pos(), discharge().toEnumFacing(), (int) Math.ceil(DISCHARGE_MB_PER_S * time));
+            // (an EA pipe on its flange takes it, its pump; else whatever takes fluid on that face)
+            if (node.coordonate.world() instanceof ServerLevel level)
+                discharge.export(level, node.coordonate.pos(), discharge().toEnumFacing(), (int) Math.ceil(DISCHARGE_MB_PER_S * time));
         });
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         slowProcessList.add(watchdog.set(load).setUNominal(desc.nominalU).set(new Failure(this).machine()));
@@ -68,16 +69,16 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
     /** How fast its discharge pushes out what it pumped (mB/s): far more than it pumps. */
     static final double DISCHARGE_MB_PER_S = 200;
 
-    /** Its discharge on an EA pipe: up to DISCHARGE_MB_PER_S, against up to OilPumpDescriptor.DISCHARGE_HEAD_PA. */
-    final mods.eln.fluid.PortBridge dischargePort = new mods.eln.fluid.PortBridge("discharge", mods.eln.fluid.PortBridge.Mode.OUT,
-        DISCHARGE_MB_PER_S, OilPumpDescriptor.DISCHARGE_HEAD_PA);
+    /**
+     * Its vessel and discharge (a sealed wellhead: its gas goes down the line): a pump of DISCHARGE_MB_PER_S free flow
+     * and OilPumpDescriptor.DISCHARGE_HEAD_PA shut-off. The well's crude is live, its natural gas with it (Baughn
+     * 2026-11-10: a purge valve on the line lets it off). Its save key for the outlet is the old PortBridge's.
+     */
+    public final mods.eln.fluid.DeviceOutlet discharge = new mods.eln.fluid.DeviceOutlet("discharge", OilPumpDescriptor.TANK_MB,
+        DISCHARGE_MB_PER_S, OilPumpDescriptor.DISCHARGE_HEAD_PA, false, true);
 
-    {
-        // (the well's crude is live, its natural gas with it, Baughn 2026-11-10: a purge valve on the line lets it off)
-        dischargePort.live = true;
-    }
-
-    long exportedForTests, bridgedForTests;
+    /** What it has pumped (mB) since it was made: the tests weigh it against the lake. */
+    public long producedMb;
 
     static double crudeMb(mods.eln.sim.fluid.FluidNode n) {
         int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
@@ -95,11 +96,11 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
 
     /** GameTests: the discharge run's state (volume m3, liquid mB, pressure Pa, level, run size), or "unpiped". */
     public String dischargeRunForTests() {
-        if (dischargePort.stub == null || !dischargePort.piped()) return "unpiped; exported " + exportedForTests + ", bridged " + bridgedForTests;
-        var run = mods.eln.fluid.FluidWorld.nodeFor(dischargePort.stub);
-        return String.format("run %.6f m3 z %.2f h %.2f, crude %.1f mB, P %.0f Pa, level %.3f, %d pieces; exported %d, bridged %d", run.volume, run.z, run.height,
-            crudeMb(run), run.P(), run.level(), mods.eln.fluid.FluidWorld.runSize(dischargePort.stub), exportedForTests, bridgedForTests)
-            + edgesForTests(run);
+        if (discharge.outlet == null || !discharge.piped()) return "unpiped; exported " + discharge.exported;
+        var run = mods.eln.fluid.FluidWorld.nodeFor(discharge.outlet);
+        return String.format("run %.6f m3 z %.2f h %.2f, crude %.1f mB, P %.0f Pa, level %.3f, %d pieces; vessel %.0f mB %.2f bar",
+            run.volume, run.z, run.height, crudeMb(run), run.P(), run.level(), mods.eln.fluid.FluidWorld.runSize(discharge.outlet),
+            discharge.liquidMb(), discharge.vessel.P() / 1e5) + edgesForTests(run);
     }
 
     @Override
@@ -110,20 +111,30 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
     /** The flange at the end of its discharge line: the right face, 6 px up (mods.eln.cad.models.OilPump). */
     @Override
     public java.util.List<FluidPort> fluidPorts() {
-        if (dischargePort.stub == null) return java.util.List.of();
+        if (discharge.outlet == null) return java.util.List.of();
         int face = discharge().toEnumFacing().get3DDataValue();
-        return java.util.List.of(dischargePort.port(node.coordonate.pos().asLong(), face, TankElement.sideSpot(face, OilPumpDescriptor.DISCHARGE_Y)));
+        return java.util.List.of(discharge.port(node.coordonate.pos().asLong(), face, TankElement.sideSpot(face, OilPumpDescriptor.DISCHARGE_Y)));
+    }
+
+    @Override
+    public java.util.List<Link> fluidLinks() {
+        return discharge.links();
     }
 
     @Override
     public void beforeFluidStep(double dt) {
-        bridgedForTests += dischargePort.step(tank, dt, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        discharge.before(mods.eln.sim.Ambient.kelvin(node.coordonate));
+    }
+
+    @Override
+    public void afterFluidStep(double dt) {
+        discharge.after();
     }
 
     @Override
     public void connectJob() {
         super.connectJob();
-        if (dischargePort.stub != null) mods.eln.fluid.FluidWorld.add(this);
+        if (discharge.outlet != null) mods.eln.fluid.FluidWorld.add(this);
     }
 
     @Override
@@ -148,12 +159,12 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
             // (a water reservoir, a Watershed lake, is pumped like oil: from its record, Baughn: no infinite water)
             mods.eln.reservoir.Reservoir res = source > 0 ? mods.eln.reservoir.ReservoirData.get(level).byId(source) : null;
             boolean water = source < 0 || res != null && res.kind().equals(mods.eln.reservoir.ReservoirWater.KIND);
-            boolean room = tank.getCapacity() - tank.getFluidAmount() >= 1
-                && (tank.getFluidAmount() == 0 || tank.getFluid().getFluid().isSame(water ? Fluids.WATER : Oil.CRUDE.get()));
+            // (full, or at its head's pressure in the vessel or at the flange: a dead-ended line stops it)
+            boolean room = discharge.room(1);
             if (source == 0 || !room) {
                 resistor.setR(MnaConst.highImpedance);
                 rate = 0;
-                status = source == 0 ? "no well casing down to oil or water" : "tank full";
+                status = source == 0 ? "no well casing down to oil or water" : "tank full, or its line at the head";
                 return;
             }
             // an oil lake in its seepage tail gives its pumps only a trickle between them: a pump runs slowly, drawing a share
@@ -165,7 +176,7 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
             resistor.setR(seeping && seepW < desc.nominalP ? desc.resistorR * desc.nominalP / Math.max(1, seepW) : desc.resistorR);
             double e = resistor.getP() * time;
             double mb = e / OilPumpDescriptor.energyPerMb(water, depth) + carry;
-            int whole = (int) Math.min(Math.floor(mb), tank.getCapacity() - tank.getFluidAmount());
+            int whole = (int) Math.min(Math.floor(mb), Math.max(0, discharge.capacityMb() - discharge.liquidMb()));
             carry = mb - Math.floor(mb);
             long got = 0;
             if (whole > 0) {
@@ -176,7 +187,11 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
                     if (res != null) got = mods.eln.reservoir.Reservoirs.take(level, res, whole, false);
                     if (got == 0) status = "the lake is empty";
                 }
-                if (got > 0) tank.fill(new FluidStack(water ? Fluids.WATER : Oil.CRUDE.get(), (int) got), true);
+                if (got > 0) {
+                    discharge.made(water ? Fluids.WATER : Oil.CRUDE.get(), got);
+                    producedMb += got;
+                    lastWater = water;
+                }
             }
             rate = 0.9 * rate + 0.1 * (got / Math.max(time, 1e-6));
             if (got > 0) status = source < 0 ? "pumping water" : water ? "pumping water from lake #" + source : "pumping crude";
@@ -244,7 +259,7 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
     public void initialize() {
         desc.cable.applyTo(load);
         resistor.setR(desc.resistorR);
-        dischargePort.make(node.coordonate.y + OilPumpDescriptor.DISCHARGE_Y / 16.0, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        discharge.make(node.coordonate.y, node.coordonate.y + OilPumpDescriptor.DISCHARGE_Y / 16.0, mods.eln.sim.Ambient.kelvin(node.coordonate));
         connect();
     }
 
@@ -255,23 +270,32 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
 
     @Override
     public Object getFluidHandler() {
-        return tank;
+        return discharge.view;
+    }
+
+    /** Put mB of fluid straight into its vessel (tests: crude live, as it comes up the well). */
+    public void putFluid(net.minecraft.world.level.material.Fluid fluid, int mB) {
+        discharge.put(fluid, mB, mods.eln.sim.Ambient.kelvin(node.coordonate));
+    }
+
+    /** The same, crude live or dead. */
+    public void putFluid(net.minecraft.world.level.material.Fluid fluid, int mB, boolean live) {
+        discharge.put(fluid, mB, mods.eln.sim.Ambient.kelvin(node.coordonate), live);
     }
 
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        tank.writeToNBT(nbt, "tank");
+        discharge.write(nbt);
         nbt.putDouble("carry", carry);
-        dischargePort.write(nbt);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        tank.readFromNBT(nbt, "tank");
+        // (an old save's tank goes into the vessel, its PortBridge stub's contents into the outlet)
+        discharge.read(nbt, OilPumpDescriptor.TANK_MB);
         carry = nbt.getDoubleOr("carry", 0);
-        dischargePort.read(nbt);
     }
 
     @Override
@@ -280,8 +304,11 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
         info.put(I18N.tr("Status"), status);
         if (lake != null) info.put(I18N.tr("Lake"), lake);
         info.put(I18N.tr("Flow"), String.format("%.1f mB/s", rate));
-        info.put(I18N.tr("Tank"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB");
-        info.put(I18N.tr("Discharge"), dischargePort.piped() ? I18N.tr("the flange on its right, into the pipe") : I18N.tr("the flange on its right"));
+        if (discharge.vessel != null) {
+            info.put(I18N.tr("Tank"), String.format("%.0f / %.0f mB, %.2f bar", discharge.liquidMb(), discharge.capacityMb(), discharge.vessel.P() / 1e5));
+            info.put(I18N.tr("Contents"), mods.eln.sim.fluid.EaUnits.composition(discharge.vessel));
+        }
+        info.put(I18N.tr("Discharge"), discharge.piped() ? I18N.tr("the flange on its right, into the pipe") : I18N.tr("the flange on its right"));
         info.put(I18N.tr("Power consumption"), Utils.plotPower("", resistor.getP()));
         return info;
     }

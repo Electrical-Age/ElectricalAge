@@ -13,27 +13,26 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import java.util.Map;
 
 /**
- * The tar sand separator (OilSeparatorDescriptor): a macerator whose finished items also give crude to its tank, which
- * its outlet on the back pushes into whatever takes it there (Baughn 2026-11-03: it lacked a pipe output).
+ * The tar sand separator (OilSeparatorDescriptor): a macerator whose finished items also give crude to its basin (a
+ * fluid node that breathes: DeviceOutlet), which its outlet pump on the back sends down the pipe there (Baughn
+ * 2026-11-10: PortBridge push becomes the device's pump), or unpiped pushes into whatever takes it there (Baughn
+ * 2026-11-03: it lacked a pipe output). Tar sand's crude is dead: no natural gas.
  */
 public class OilSeparatorElement extends ElectricalMachineElement implements mods.eln.sim.fluid.FluidDevice {
-    final ElementFluidHandler tank = new ElementFluidHandler(OilSeparatorDescriptor.TANK_MB);
+    /** Its basin and outlet: a pump of OUTLET_MB_PER_S free flow and OUTLET_HEAD_PA shut-off; the old PortBridge's key. */
+    public final mods.eln.fluid.DeviceOutlet outlet = new mods.eln.fluid.DeviceOutlet("outlet", OilSeparatorDescriptor.TANK_MB,
+        OilSeparatorDescriptor.OUTLET_MB_PER_S, OilSeparatorDescriptor.OUTLET_HEAD_PA, true, false);
 
     public OilSeparatorElement(TransparentNode node, TransparentNodeDescriptor descriptor) {
         super(node, descriptor);
-        tank.setFilter(new Fluid[]{mods.eln.oil.Oil.CRUDE.get()});
-        slowRefreshProcess.extraCondition = () -> tank.getCapacity() - tank.getFluidAmount() >= OilSeparatorDescriptor.CRUDE_PER_ITEM;
+        slowRefreshProcess.extraCondition = () -> outlet.room(OilSeparatorDescriptor.CRUDE_PER_ITEM);
         slowProcessList.add(time -> {
-            // (an EA pipe on its outlet's flange takes it, PortBridge; else whatever takes fluid on that face)
-            if (!outletPort.piped() && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)
-                mods.eln.fluid.FluidExport.push(tank, level, node.coordonate.pos(), outlet().toEnumFacing(), (int) Math.ceil(OilSeparatorDescriptor.OUTLET_MB_PER_S * time));
+            // (an EA pipe on its outlet's flange takes it, its pump; else whatever takes fluid on that face)
+            if (node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)
+                outlet.export(level, node.coordonate.pos(), outlet().toEnumFacing(), (int) Math.ceil(OilSeparatorDescriptor.OUTLET_MB_PER_S * time));
             if (Math.abs(basin() - shownBasin) > 0.02) needPublish();
         });
     }
-
-    /** Its outlet on an EA pipe: up to OUTLET_MB_PER_S against up to OUTLET_HEAD_PA. */
-    final mods.eln.fluid.PortBridge outletPort = new mods.eln.fluid.PortBridge("outlet", mods.eln.fluid.PortBridge.Mode.OUT,
-        OilSeparatorDescriptor.OUTLET_MB_PER_S, OilSeparatorDescriptor.OUTLET_HEAD_PA);
 
     @Override
     public Object fluidLevel() {
@@ -42,26 +41,41 @@ public class OilSeparatorElement extends ElectricalMachineElement implements mod
 
     @Override
     public java.util.List<FluidPort> fluidPorts() {
-        if (outletPort.stub == null) return java.util.List.of();
-        return java.util.List.of(outletPort.port(node.coordonate.pos().asLong(), outlet().toEnumFacing().get3DDataValue(),
+        if (outlet.outlet == null) return java.util.List.of();
+        return java.util.List.of(outlet.port(node.coordonate.pos().asLong(), outlet().toEnumFacing().get3DDataValue(),
             mods.eln.fluid.PortBridge.endSpot(front, outlet(), OilSeparatorDescriptor.OUTLET_Y, OilSeparatorDescriptor.OUTLET_Z)));
     }
 
     @Override
+    public java.util.List<Link> fluidLinks() {
+        return outlet.links();
+    }
+
+    @Override
+    public java.util.List<Vent> fluidVents() {
+        return outlet.vents();
+    }
+
+    @Override
     public void beforeFluidStep(double dt) {
-        outletPort.step(tank, dt, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        outlet.before(mods.eln.sim.Ambient.kelvin(node.coordonate));
+    }
+
+    @Override
+    public void afterFluidStep(double dt) {
+        outlet.after();
     }
 
     @Override
     public void initialize() {
-        outletPort.make(node.coordonate.y + OilSeparatorDescriptor.OUTLET_Y / 16.0, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        outlet.make(node.coordonate.y, node.coordonate.y + OilSeparatorDescriptor.OUTLET_Y / 16.0, mods.eln.sim.Ambient.kelvin(node.coordonate));
         super.initialize();
     }
 
     @Override
     public void connectJob() {
         super.connectJob();
-        if (outletPort.stub != null) mods.eln.fluid.FluidWorld.add(this);
+        if (outlet.outlet != null) mods.eln.fluid.FluidWorld.add(this);
     }
 
     @Override
@@ -77,13 +91,18 @@ public class OilSeparatorElement extends ElectricalMachineElement implements mod
 
     @Override
     public void done(ElectricalStackMachineProcess who) {
-        tank.fill(new FluidStack(mods.eln.oil.Oil.CRUDE.get(), OilSeparatorDescriptor.CRUDE_PER_ITEM), true);
+        outlet.made(mods.eln.oil.Oil.CRUDE.get(), OilSeparatorDescriptor.CRUDE_PER_ITEM);
         super.done(who);
     }
 
-    /** Its crude tank's fill (0..1): the oil in its basin, drawn; last published. */
+    /** Its basin's fill (0..1 of its old tank's size): the crude in it as its view shows it, drawn; last published. */
     public float basin() {
-        return (float) tank.getFluidAmount() / tank.getCapacity();
+        return (float) Math.min(1, (double) outlet.view.amount(mods.eln.fluid.NodeFluidView.LIQUID) / OilSeparatorDescriptor.TANK_MB);
+    }
+
+    /** Put mB of fluid straight into its basin (tests). */
+    public void putFluid(Fluid fluid, int mB) {
+        outlet.put(fluid, mB, mods.eln.sim.Ambient.kelvin(node.coordonate));
     }
 
     float shownBasin = -1;
@@ -101,27 +120,26 @@ public class OilSeparatorElement extends ElectricalMachineElement implements mod
 
     @Override
     public Object getFluidHandler() {
-        return tank;
+        return outlet.view;
     }
 
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        tank.writeToNBT(nbt, "tank");
-        outletPort.write(nbt);
+        outlet.write(nbt);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        tank.readFromNBT(nbt, "tank");
-        outletPort.read(nbt);
+        // (an old save's tank goes into the basin, its PortBridge stub's contents into the outlet)
+        outlet.read(nbt, OilSeparatorDescriptor.TANK_MB);
     }
 
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = super.getWaila();
-        info.put(I18N.tr("Crude oil"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB");
+        info.put(I18N.tr("Crude oil"), String.format("%.0f / %.0f mB", outlet.liquidMb(), outlet.capacityMb()));
         info.put(I18N.tr("Outlet"), I18N.tr("the pipe on its back"));
         return info;
     }

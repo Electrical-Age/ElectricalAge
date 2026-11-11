@@ -49,7 +49,7 @@ public final class FluidViewCases {
      */
     static final Set<String> INT_TANK_DEVICES = Set.of("DesulfuriserElement", "CarbonBlackBurnerElement", "IndustrialResinCollectorElement", "CompressorPortsElement", 
         "FuelHeatFurnaceElement", "GasTurbineElement", "ColumnBaseElement", "ColumnSegmentElement",
-        "OilSeparatorElement", "OilPumpElement", "FuelGeneratorElement",
+        "FuelGeneratorElement",
         // (its water is a number, capped at its tank; the well node feeds it through a float valve a bucket short of full)
         "CompactTurbineElement");
 
@@ -173,6 +173,8 @@ public final class FluidViewCases {
             FluidNode n = v.node();
             boolean own = false;
             for (var port : d.fluidPorts()) own |= n != null && (FluidWorld.nodeFor(port.node()) == FluidWorld.nodeFor(n) || port.node() == n);
+            // (or a node behind its own link: a producer's vessel behind its discharge pump)
+            for (var link : d.fluidLinks()) own |= n != null && (link.a == n || link.b == n);
             ctx.check(kind + ": its view watches one of its own nodes", own, "" + n);
             if (n == null) return;
             int shown = v.amount(NodeFluidView.LIQUID), real = realLiquidMb(n);

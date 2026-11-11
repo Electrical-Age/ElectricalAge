@@ -35,6 +35,7 @@ public final class OilCases {
         cases.add(new PumpIntoPipe(1000));
         cases.add(new PumpIntoPipe(120));
         cases.add(new PumpIntoPipe(1000, 3));
+        for (String v : ProducerNode.VARIANTS) cases.add(new ProducerNode(v));
         for (String v : OilOnPipes.VARIANTS) cases.add(new OilOnPipes(v));
         cases.add(new Basin());
         cases.add(new Coke());
@@ -255,14 +256,14 @@ public final class OilCases {
 
         public void measure(TestContext ctx) {
             ItemStack in = sep.getInventory().getItem(sep.inSlotId), out = sep.getInventory().getItem(sep.outSlotId);
-            var tank = (mods.eln.fluid.ElementFluidHandler) sep.getFluidHandler();
+            int crudeMb = sep.outlet.view.amount(mods.eln.fluid.NodeFluidView.LIQUID);
             mods.eln.sim.ElectricalStackMachineProcess proc = Wp10aCases.field(sep, "slowRefreshProcess");
             ctx.check("oil: separator used the tar sand and made sand", in.isEmpty() && out.is(net.minecraft.world.item.Items.SAND) && out.getCount() == 1,
                 "in " + in + ", out " + out + ", recipes " + mods.eln.Eln.separatorRecipes.getRecipes().size() + ", can " + proc.smeltCan()
                     + ", extra " + proc.extraCondition.getAsBoolean() + ", P " + proc.getPower() + ", state " + proc.processState());
-            ctx.check("oil: 100 mB crude in its tank", tank.getFluidAmount() == 100, tank.getFluidAmount() + " mB");
+            ctx.check("oil: 100 mB crude in its basin", Math.abs(crudeMb - 100) <= 1, crudeMb + " mB, " + sep.getWaila());
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, sep.node.coordonate.pos(), null);
-            ctx.check("oil: the tank is the block's fluid capability (pipes can drain it)", cap == tank, "" + cap);
+            ctx.check("oil: its basin's view is the block's fluid capability (pipes can drain it)", cap == sep.getFluidHandler(), "" + cap);
         }
     }
 
@@ -274,7 +275,8 @@ public final class OilCases {
      */
     static final class Outlet implements TestCase {
         final boolean separator;
-        mods.eln.fluid.ElementFluidHandler from, into, beside;
+        mods.eln.transparentnode.electricalmachine.OilSeparatorElement into, beside;
+        mods.eln.fluid.DeviceOutlet from;
 
         Outlet(boolean separator) {
             this.separator = separator;
@@ -294,17 +296,128 @@ public final class OilCases {
             var e = ctx.placeTransparent(separator ? 0 + (80 << 6) : 0 + (81 << 6), p);
             mods.eln.misc.Direction out = separator ? ((mods.eln.transparentnode.electricalmachine.OilSeparatorElement) e).outlet()
                 : ((mods.eln.oil.OilPumpElement) e).discharge();
-            from = (mods.eln.fluid.ElementFluidHandler) e.getFluidHandler();
-            from.fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 1000), true);
-            into = (mods.eln.fluid.ElementFluidHandler) ctx.placeTransparent(0 + (80 << 6), p.relative(out.toEnumFacing())).getFluidHandler();
-            beside = (mods.eln.fluid.ElementFluidHandler) ctx.placeTransparent(0 + (80 << 6), p.relative(out.left().toEnumFacing())).getFluidHandler();
+            if (separator) {
+                var s = (mods.eln.transparentnode.electricalmachine.OilSeparatorElement) e;
+                from = s.outlet;
+                s.putFluid(Oil.CRUDE.get(), 1000);
+            } else {
+                var pump = (mods.eln.oil.OilPumpElement) e;
+                from = pump.discharge;
+                pump.putFluid(Oil.CRUDE.get(), 1000);
+            }
+            into = (mods.eln.transparentnode.electricalmachine.OilSeparatorElement) ctx.placeTransparent(0 + (80 << 6), p.relative(out.toEnumFacing()));
+            beside = (mods.eln.transparentnode.electricalmachine.OilSeparatorElement) ctx.placeTransparent(0 + (80 << 6), p.relative(out.left().toEnumFacing()));
         }
 
         public void measure(TestContext ctx) {
             String what = separator ? "separator outlet" : "pump discharge";
-            ctx.check("oil: the " + what + " pushed its crude into the block there", from.getFluidAmount() == 0 && into.getFluidAmount() == 1000,
-                from.getFluidAmount() + " mB left, " + into.getFluidAmount() + " mB there");
-            ctx.check("oil: nothing out of its other faces", beside.getFluidAmount() == 0, beside.getFluidAmount() + " mB");
+            int left = from.view.amount(mods.eln.fluid.NodeFluidView.LIQUID), there = into.outlet.view.amount(mods.eln.fluid.NodeFluidView.LIQUID);
+            // (the pump's crude is live: its gas stays behind in its vessel, the liquid goes, as crude)
+            ctx.check("oil: the " + what + " pushed its crude into the block there", left <= 1 && Math.abs(there - (separator ? 1000 : 950)) <= 60,
+                left + " mB left, " + there + " mB there (" + from.exported + " mB exported), there " + into.getWaila());
+            ctx.check("oil: nothing out of its other faces", beside.outlet.liquidMb() < 1, beside.outlet.liquidMb() + " mB");
+        }
+    }
+
+    /**
+     * The producers on fluid nodes (Baughn 2026-11-10: PortBridge push becomes the device's pump):
+     * <ul>
+     * <li>pump_legacy_tank, separator_legacy_tank: an old save's fluid tank of crude loads into the vessel, as crude's
+     *     cuts (dead), every kg of it;</li>
+     * <li>pump_dead_end: the pump makes live crude (8 mB/s, as on a lake) into a pipe capped a block on: the line stops at
+     *     its 6 bar head (the pump stops making when its line or vessel is at it, so the well's gas can't push it on).</li>
+     * </ul>
+     */
+    static final class ProducerNode implements TestCase {
+        static final String[] VARIANTS = {"pump_legacy_tank", "separator_legacy_tank", "pump_dead_end"};
+        final String variant;
+        String legacy = "", err;
+        mods.eln.oil.OilPumpElement pump;
+        mods.eln.sim.IProcess making;
+        double made;
+
+        ProducerNode(String variant) {
+            this.variant = variant;
+        }
+
+        public String id() {
+            return "oil_" + variant;
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return variant.equals("pump_dead_end") ? 600 : 60;
+        }
+
+        public void build(TestContext ctx) {
+            var p = ctx.at(1, 1, 1);
+            if (variant.equals("pump_dead_end")) {
+                pump = (mods.eln.oil.OilPumpElement) ctx.placeTransparent(0 + (81 << 6), p);
+                for (var f : new mods.eln.misc.Direction[]{mods.eln.misc.Direction.XN, mods.eln.misc.Direction.ZN, mods.eln.misc.Direction.XP, mods.eln.misc.Direction.ZP})
+                    if (f.right() == mods.eln.misc.Direction.XP) pump.front = f;
+                pump.reconnect();
+                // (a pipe from its flange, 6 px up on its east face, capped half way into the next block)
+                try {
+                    PipeCases.lay(ctx, ctx.at(2, 1, 1), 0, 0, 6, 8, 8, 6, 8);
+                } catch (IllegalStateException e) {
+                    err = e.getMessage();
+                }
+                mods.eln.Eln.simulator.addSlowProcess(making = t -> {
+                    if (pump.discharge.vessel == null || !pump.discharge.room(1)) return;
+                    pump.discharge.made(Oil.CRUDE.get(), 8 * t);
+                    made += 8 * t;
+                });
+                return;
+            }
+            boolean sep = variant.startsWith("separator");
+            ctx.placeTransparent(sep ? 0 + (80 << 6) : 0 + (81 << 6), p);
+            int tankMb = sep ? mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor.TANK_MB : mods.eln.oil.OilPumpDescriptor.TANK_MB;
+            ctx.after(2, () -> {
+                try {
+                    var r = mods.eln.gametest.Reload.node(ctx.level(), p, t -> {
+                        var el = FuelBySpecies.holding(t, "vesselW");
+                        for (String k : new String[]{"vesselW", "vesselA", "vesselU", "vesselS", "vesselFv"}) el.remove(k);
+                        var old = new mods.eln.fluid.ElementFluidHandler(tankMb);
+                        old.fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 1500), true);
+                        old.writeToNBT(el, "tank");
+                        return t;
+                    });
+                    var el = ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                    var v = sep ? ((mods.eln.transparentnode.electricalmachine.OilSeparatorElement) el).outlet.vessel
+                        : ((mods.eln.oil.OilPumpElement) el).discharge.vessel;
+                    var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+                    double total = 0;
+                    StringBuilder sb = new StringBuilder();
+                    for (String k : new String[]{"eln:heavy_oil", "eln:diesel", "eln:gasoline", "eln:residue", "eln:natural_gas"}) {
+                        double m = v.liquid(reg.id(k)) + v.vapour(reg.id(k));
+                        total += m;
+                        sb.append(k).append(' ').append(String.format("%.5f", m)).append("; ");
+                    }
+                    double want = 1500 * mods.eln.fluid.FluidSpecies.kgPerMb(reg.id("eln:crude_oil"), false);
+                    double heavy = v.liquid(reg.id("eln:heavy_oil")) / total, gas = v.vapour(reg.id("eln:natural_gas")) + v.liquid(reg.id("eln:natural_gas"));
+                    legacy = Math.abs(total - want) < 0.01 * want && Math.abs(heavy - 0.35 / 0.95) < 0.01 && gas == 0 ? ""
+                        : sb + String.format("total %.5f kg, want %.5f", total, want);
+                } catch (ReflectiveOperationException e) {
+                    legacy = e.toString();
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            if (!variant.equals("pump_dead_end")) {
+                ctx.check(variant + ": an old save's tank of crude is in the vessel, as its cuts (dead)", legacy.isEmpty(), legacy);
+                return;
+            }
+            mods.eln.Eln.simulator.removeSlowProcess(making);
+            ctx.check("pump dead end: the capped pipe is laid on its flange", err == null && pump.discharge.piped(), err + ", " + pump.dischargeRunForTests());
+            double line = mods.eln.fluid.FluidWorld.nodeFor(pump.discharge.outlet).P(), vessel = pump.discharge.vessel.P();
+            String state = String.format("line %.2f bar, vessel %.2f bar, made %.0f mB; %s", line / 1e5, vessel / 1e5, made, pump.dischargeRunForTests());
+            ctx.line("pump dead end: " + state);
+            ctx.check("pump dead end: it made crude and pushed the line up", made > 20 && line > 3e5, state);
+            ctx.check("pump dead end: the line and the vessel stop at its 6 bar head", line < 6.3e5 && vessel < 6.3e5, state);
         }
     }
 
@@ -374,7 +487,9 @@ public final class OilCases {
                 err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
             }
             // (uphill: a full pump tank, more than the riser holds, as a pump on a lake keeps it supplied)
-            ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), rise > 0 ? 8000 : mB), true);
+            // (into its vessel, live as the well gives it; uphill 6000 of its 8000 mB of dead crude, as a pump on a lake keeps
+            // it supplied: that much live crude at once would hold ~200 bar of gas in its vessel)
+            pump.putFluid(Oil.CRUDE.get(), rise > 0 ? 6000 : mB, rise == 0);
         }
 
         public void measure(TestContext ctx) {
@@ -389,11 +504,11 @@ public final class OilCases {
                 return;
             }
             int crude = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
-            int left = ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).getFluidAmount();
+            int left = (int) Math.round(pump.discharge.liquidMb());
             double inTank = crudeMb(tank.vessel);
             ctx.line("oil pump into pipe: " + left + " mB left in the pump, tank " + tank.getWaila());
             ctx.line("oil pump into pipe: discharge " + pump.dischargeRunForTests());
-            ctx.check("oil pump: its crude went into the pipe", left < (rise > 0 ? 7500 : 500), left + " mB left");
+            ctx.check("oil pump: its crude went into the pipe", left < (rise > 0 ? 5500 : 500), left + " mB left");
             // (uphill: the riser fills first, ~2000 mB in 10 s, then the crude spills into the tank, faster than a pump lifts it)
             ctx.check("oil pump: and along it into the tank, as crude" + (rise > 0 ? ", up a 3-block riser" : ""), inTank > (rise > 0 ? 100 : 200),
                 String.format("%.0f mB of crude in the tank", inTank));
@@ -550,7 +665,7 @@ public final class OilCases {
                         var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
                         err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
                     }
-                    ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(), 2000), true);
+                    ((mods.eln.transparentnode.electricalmachine.OilSeparatorElement) west).putFluid(Oil.CRUDE.get(), 2000);
                 }
                 case "fuel_furnace_in", "fuel_furnace_crude" -> {
                     tank = tank(ctx, w, XP);
@@ -739,7 +854,7 @@ public final class OilCases {
                 case "separator_out" -> {
                     double got = crudeMb(tank.vessel);
                     ctx.check("oil on pipes: the separator's crude went into the tank", got > 500,
-                        String.format("%.0f mB in the tank, %d left in the separator", got, ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).getFluidAmount()));
+                        String.format("%.0f mB in the tank, %.0f left in the separator", got, ((mods.eln.transparentnode.electricalmachine.OilSeparatorElement) west).outlet.liquidMb()));
                 }
                 case "compressor_latex_out" -> {
                     int id = reg.id("eln:latex");
@@ -1132,8 +1247,7 @@ public final class OilCases {
 
         public void build(TestContext ctx) {
             sep = (mods.eln.transparentnode.electricalmachine.OilSeparatorElement) ctx.placeTransparent(0 + (80 << 6), ctx.at(3, 1, 1));
-            ((mods.eln.fluid.ElementFluidHandler) sep.getFluidHandler()).fill(new net.neoforged.neoforge.fluids.FluidStack(Oil.CRUDE.get(),
-                mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor.TANK_MB / 2), true);
+            sep.putFluid(Oil.CRUDE.get(), mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor.TANK_MB / 2);
         }
 
         public void measure(TestContext ctx) {
@@ -1194,9 +1308,8 @@ public final class OilCases {
         }
 
         public void measure(TestContext ctx) {
-            var tank = (mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler();
-            int got = tank.getFluidAmount();
-            var fluid = tank.getFluid().getFluid();
+            int got = (int) pump.producedMb;
+            var fluid = pump.lastWater ? net.minecraft.world.level.material.Fluids.WATER : Oil.CRUDE.get();
             BlockPos under = ctx.at(2, 0, 1).below();
             ctx.line("oil: pump " + (water ? "water" : "lake") + ": " + got + " mB in 5 s, " + pump.getWaila() + ", at(under) "
                 + ReservoirData.get(ctx.level()).at(ctx.level(), under) + ", block under " + ctx.level().getBlockState(under) + ", casing " + ctx.level().getBlockState(ctx.at(2, 0, 1)));
@@ -3014,9 +3127,9 @@ public final class OilCases {
             afterWater = use(ctx, boiler, new ItemStack(net.minecraft.world.item.Items.WATER_BUCKET));
             waterAfter = boiler.tanks.water();
             afterSteamTry = use(ctx, boiler, new ItemStack(net.minecraft.world.item.Items.BUCKET));   // water stays in, steam has no bucket
-            pump.tank.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.CRUDE.get(), 1500), true);
+            pump.putFluid(mods.eln.oil.Oil.CRUDE.get(), 1500);
             afterEmpty = use(ctx, pump, new ItemStack(net.minecraft.world.item.Items.BUCKET));
-            crudeAfter = pump.tank.getFluidAmount();
+            crudeAfter = pump.discharge.view.amount(mods.eln.fluid.NodeFluidView.LIQUID);
         }
 
         public void measure(TestContext ctx) {
@@ -3025,7 +3138,8 @@ public final class OilCases {
             // (a little of it evaporates into the vessel's air space: since the pipes' phase 2 the tanks show the vessel)
             ctx.check("oil: an empty bucket can't take the boiler's water", boiler.tanks.water() >= 990 && afterSteamTry.is(net.minecraft.world.item.Items.BUCKET),
                 boiler.tanks.water() + " mB, hand " + afterSteamTry);
-            ctx.check("oil: an empty bucket takes 1000 mB of crude from the pump", crudeAfter == 500 && afterEmpty.is(mods.eln.oil.Oil.CRUDE_BUCKET.get()),
+            // (its live crude's gas is out of the liquid: ~1425 mB of it shows as crude)
+            ctx.check("oil: an empty bucket takes 1000 mB of crude from the pump", Math.abs(crudeAfter - 425) <= 30 && afterEmpty.is(mods.eln.oil.Oil.CRUDE_BUCKET.get()),
                 crudeAfter + " mB, hand " + afterEmpty);
         }
     }
