@@ -143,6 +143,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   the burner boils off at the flame's cost and gives no heat. Other mods' fuels with no species no longer go in (none
   on Incognito). `fuel_furnace_mixed_fuel`, `fuel_furnace_coke_by_residue`, `fuel_furnace_water_boils_off`,
   `fuel_furnace_legacy_tank`.
+- Natural gas (and syngas) at real heating values (Baughn 2026-11-11: "we'll make the gas numbers real"): 1.12
+  multiplied gases by 1000 ("Minecraft gases are heavily pressurized"). Now a mB of natural gas is what a fluid node
+  holds as gas, 1e-6 kg x M/M_water, times methane's 50 MJ/kg: ~44 J/mB, 1/55 of before. The gas turbine burns
+  ~0.5 g/s (~560 mB/s) at 7 kW; its fuel flange takes up to 2000 mB/s (was 200) to keep up. Burning associated gas is
+  a small efficiency gain, not a power source. `gas_turbine_real_gas`.
 - Pipe Purge Valve (Baughn 2026-11-10: "a valve that lets out only gas, never liquid ... it goes by phase, not species;
   it'll let out steam"): a safety valve with a float (shapeless: safety valve + bowl; blue cap). It vents the gas of the
   run under it to the air above its set pressure (1.1 bar to start, the safety valve's slider), shuts as the liquid

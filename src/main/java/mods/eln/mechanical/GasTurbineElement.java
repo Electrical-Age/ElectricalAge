@@ -49,10 +49,13 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     private double[] loadedEx;
     private List<FluidPort> ports = List.of();
     /** On EA pipes: fuel in on its small top flange (mods.eln.cad.models.ShaftGas), into its fuel tank. */
-    final mods.eln.fluid.PortBridge fuelIn = new mods.eln.fluid.PortBridge("fuelIn", mods.eln.fluid.PortBridge.Mode.IN, FUEL_PIPE_MB_PER_S, 0);
+    public final mods.eln.fluid.PortBridge fuelIn = new mods.eln.fluid.PortBridge("fuelIn", mods.eln.fluid.PortBridge.Mode.IN, FUEL_PIPE_MB_PER_S, 0);
 
-    /** What its fuel flange takes from a pipe each second at most (mB): far more than it burns. */
-    static final double FUEL_PIPE_MB_PER_S = 200;
+    /**
+     * What its fuel flange takes from a pipe each second at most (mB): far more than it burns, liquid or gas. Natural gas
+     * at its real heating value (~44 J/mB, Baughn 2026-11-11) takes ~810 mB/s at full power.
+     */
+    static final double FUEL_PIPE_MB_PER_S = 2000;
 
     @Override
     public void beforeFluidStep(double dt) {

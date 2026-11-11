@@ -53,14 +53,17 @@ object FuelRegistry {
     /**
      * Burnable gases. Gas turbine is still happy, fuel generator is not.
      *
-     * The values represent the heating value (energy) for 1L of the fuel IRL.
+     * Real numbers per EA mB of gas (Baughn 2026-11-11, 1570091283270336655: "we'll make the gas numbers real"; the old
+     * x1000 for "heavily pressurized" Minecraft gases is gone). A fluid node holds gas as kg, 1e-6 kg x M/M_water per mB
+     * (FluidSpecies.kgPerMb), so natural gas (methane, 50 MJ/kg) is ~44 J/mB: 1/55 of the 1.12 value. The table stores
+     * J per litre before Eln.fuelHeatValueFactor, as the others. Syngas keeps its old ratio to natural gas (20/36).
      */
+    private val naturalGasJPerMb = 50e6 * 1e-6 * 16.04 / 18.015
     private val gasFuels = mapOf(
-        "naturalgas" to 36000.0, // Magneticraft, heating value = 36 MJ/m3
-        "syngas" to 20000.0         // Advanced Generators, heating value = 20 MJ/m3
+        "naturalgas" to 1.0,
+        "syngas" to 20.0 / 36.0
     ).mapValues {
-        // Multiplied by 1000 because Minecraft gases are -- heavily pressurized.
-        it.value * 1000
+        it.value * naturalGasJPerMb / Eln.fuelHeatValueFactor
     }
     val gasList = gasFuels.keys.toTypedArray()
 

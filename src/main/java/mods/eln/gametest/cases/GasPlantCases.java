@@ -36,6 +36,7 @@ public final class GasPlantCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new MotorStart());
         cases.add(new NoSelfStart());
+        cases.add(new RealGas());
         cases.add(new SteamRaiser());
         cases.add(new StackMergesAndSplits());
         cases.add(new Reheat());
@@ -102,6 +103,10 @@ public final class GasPlantCases {
         }
 
         GasLine(TestContext ctx, boolean withMotor, double loadW) {
+            this(ctx, withMotor, loadW, true);
+        }
+
+        GasLine(TestContext ctx, boolean withMotor, double loadW, boolean bucketFuel) {
             gt = (GasTurbineElement) orient(ctx.placeTransparent(GAS_TURBINE, ctx.at(2, 1, 5)));
             var g = (GeneratorElement) orient(ctx.placeTransparent(GENERATOR_8KW, ctx.at(2, 1, 4)));
             load = load(g, loadW);
@@ -117,7 +122,7 @@ public final class GasPlantCases {
                 }));
             }
             var fuels = FuelRegistry.INSTANCE.fluidListToFluids(FuelRegistry.INSTANCE.getGasolineList());
-            if (fuels.length > 0) gt.tank.fill(new FluidStack(fuels[0], GasTurbineElement.TANK_MB), true);
+            if (fuels.length > 0 && bucketFuel) gt.tank.fill(new FluidStack(fuels[0], GasTurbineElement.TANK_MB), true);
         }
     }
 
@@ -167,6 +172,66 @@ public final class GasPlantCases {
             ctx.check("gas turbine: at its load within 10 s of lighting", full > 0 && full - lit < 200, String.format("%.1f s", (full - lit) / 20.0));
             ctx.check("gas turbine: holds its speed (780-845 rad/s)", minR > 780 && maxR < 845, String.format("%.0f-%.0f", minR, maxR));
             ctx.check("gas turbine: work / fuel heat ~28 % (25-30)", eta > 0.25 && eta < 0.30, String.format("%.1f %%", eta * 100));
+        }
+    }
+
+    /**
+     * Natural gas at its real heating value (Baughn 2026-11-11, 1570091283270336655): a gas main at 3 bar on its fuel
+     * flange lights it and carries its 7 kW load at speed; the
+     * fuel heat it reports is the gas it burnt x 50 MJ/kg (within 5 %), ~0.5 g/s, ~560 mB/s.
+     */
+    static final class RealGas extends PlumbingCases.Big {
+        GasLine l;
+        IProcess watch;
+        FluidDevice fx;
+        FluidNode main;
+        int tick, lit = -1, full = -1;
+        double kg0, f0, tank0;
+
+        public String id() {
+            return "gas_turbine_real_gas";
+        }
+
+        public int ticks() {
+            return 900;
+        }
+
+        static int ng() {
+            return mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:natural_gas");
+        }
+
+        public void build(TestContext ctx) {
+            l = new GasLine(ctx, true, 7000, false);
+            // (a gas main: 1 m^3 of natural gas at ~3 bar, ~2 kg, on its top fuel flange)
+            main = new FluidNode(1.0, ctx.at(2, 2, 5).getY(), 1.0, false).fill(0, 100, 293.15);
+            mods.eln.sim.fluid.EaUnits.add(main, ng(), 3e5 * 0.01604 / (8.314 * 293.15), 293.15, true);
+            main.update();
+            fx = fixtures(l.gt.fluidLevel(), new Object[]{ctx.at(2, 2, 5), 0, main});
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                tick++;
+                l.tick();
+                if (lit < 0 && l.gt.burning) lit = tick;
+                if (lit >= 0 && full < 0 && l.load.getP() > 0.9 * 7000 * Math.pow(l.gt.getShaft().getRads() / 800, 2) && l.gt.getShaft().getRads() > 760) full = tick;
+                if (tick == 500) {
+                    kg0 = main.vapour(ng());
+                    f0 = l.gt.totalFuelJ;
+                    tank0 = l.gt.tank.getFluidAmount();
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            Eln.simulator.removeElectricalComponent(l.load);
+            mods.eln.fluid.FluidWorld.remove(fx);
+            double perMb = mods.eln.fluid.FluidSpecies.kgPerMb(ng(), true);
+            double burnt = (kg0 - main.vapour(ng())) - (l.gt.tank.getFluidAmount() - tank0) * perMb, fuel = l.gt.totalFuelJ - f0, secs = (tick - 500) / 20.0;
+            String what = String.format("lit at %.1f s, load at %.1f s; %.3f g/s of gas, %.1f kW fuel heat (%.1f MJ/kg), tank %d mB, main %.2f bar; %s",
+                lit / 20.0, full / 20.0, burnt / secs * 1000, fuel / secs / 1000, fuel / Math.max(1e-12, burnt) / 1e6, l.gt.tank.getFluidAmount(), main.P() / 1e5, l.gt.getWaila());
+            ctx.line("gas turbine on real gas: " + what);
+            ctx.check("gas turbine on natural gas: lights and carries its 7 kW load", lit > 0 && full > 0, what);
+            ctx.check("gas turbine on natural gas: 50 MJ/kg (within 5 %)", Math.abs(fuel / Math.max(1e-12, burnt) - 50e6) < 2.5e6, what);
+            ctx.check("gas turbine on natural gas: ~0.5 g/s (0.4-0.65)", burnt / secs > 0.4e-3 && burnt / secs < 0.65e-3, what);
         }
     }
 
