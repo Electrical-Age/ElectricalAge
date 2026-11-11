@@ -18,7 +18,8 @@ public class PipeVolumeUpgradeTest {
         t.putIntArray("pts", old.points);
         t.putDouble("w", n.mWater);
         t.putDouble("a", n.mAir);
-        t.putDouble("u", n.energy);   // (no "v": an old save)
+        // (no "v" and no "fv": an old save, so its energy is the legacy solver's at the same state: FluidSaves.FORMAT)
+        t.putDouble("u", mods.eln.sim.fluid.Flash.energyAt(n.mWater, n.mAir, vOld, n.T()));
         PipePart p = PipePart.read(t, 0);
         assertEquals(PipePart.VOLUME_PER_BLOCK[0], p.fluid.volume, 1e-12);
         assertEquals(n.P(), p.fluid.P(), 1e-3 * n.P(), "pressure");
