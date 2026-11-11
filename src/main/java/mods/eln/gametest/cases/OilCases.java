@@ -1020,16 +1020,17 @@ public final class OilCases {
      * <ul>
      * <li>mixed_fuel: gasoline and diesel half and half burn as the mix: the heat it gave is what it drew times the mix's
      * heating value, between gasoline's and diesel's;</li>
-     * <li>coke_by_residue: coking follows the residue share of what burns (Baughn: fouling from unburnt residue): residue
-     * cokes faster than crude, diesel not at all;</li>
+     * <li>coke_balance: coking follows the coking index of what burns against a plausible refinery's fuel (Baughn
+     * 2026-11-11): residue cokes faster than crude, heavy oil slower than crude but still cokes, and diesel clears a
+     * coked burner as it burns ("the ash gets pulled out with the smoke eventually");</li>
      * <li>water_boils_off: water under the fuel reaches the burner first; it boils off giving no heat, then the fuel burns;</li>
      * <li>legacy_tank: an old save's 2-bucket tank of crude loads into the vessel, as crude's cuts.</li>
      * </ul>
      */
     static final class FuelBySpecies implements TestCase {
-        static final String[] VARIANTS = {"mixed_fuel", "coke_by_residue", "water_boils_off", "legacy_tank", "idle_breather", "overfill"};
+        static final String[] VARIANTS = {"mixed_fuel", "coke_balance", "water_boils_off", "legacy_tank", "idle_breather", "overfill"};
         final String variant;
-        mods.eln.transparentnode.FuelHeatFurnaceElement a, b, c;
+        mods.eln.transparentnode.FuelHeatFurnaceElement a, b, c, d;
         double kg0, perKg0, perKgGasoline, perKgDiesel, heatEarly = -1;
         int atBurnerEarly = -9;
         String legacy = "";
@@ -1083,13 +1084,16 @@ public final class OilCases {
                     perKgGasoline = hv("eln:gasoline");
                     perKgDiesel = hv("eln:diesel");
                 }
-                case "coke_by_residue" -> {
+                case "coke_balance" -> {
                     a = lit(ctx, 0);
                     a.putFuel(Oil.Cut.RESIDUE.source.get(), 1500);
                     b = lit(ctx, 2);
                     b.putFuel(Oil.CRUDE.get(), 1500);
                     c = lit(ctx, 4);
                     c.putFuel(Oil.Cut.DIESEL.source.get(), 1500);
+                    c.setCoke(0.2);
+                    d = lit(ctx, 6);
+                    d.putFuel(Oil.Cut.HEAVYOIL.source.get(), 1500);
                 }
                 case "water_boils_off" -> {
                     a = lit(ctx, 1);
@@ -1202,10 +1206,12 @@ public final class OilCases {
                         banked >= -0.02 * given && banked < 0.05 * drawn * perKg0 + 0.1 * a.heatPower(),
                         String.format("drew %.5f kg x %.4g J/kg = %.0f J, gave %.0f J", drawn, perKg0, drawn * perKg0, given));
                 }
-                case "coke_by_residue" -> {
+                case "coke_balance" -> {
                     ctx.check("fuel furnace: residue cokes its burner faster than crude", a.getCoke() > 3 * b.getCoke() && b.getCoke() > 0,
                         String.format("residue %.5f, crude %.5f", a.getCoke(), b.getCoke()));
-                    ctx.check("fuel furnace: diesel doesn't coke it", c.getCoke() == 0 && c.heatPower() > 0, c.getCoke() + ", " + c.heatPower() + " W");
+                    ctx.check("fuel furnace: heavy oil cokes it, slower than crude", d.getCoke() > 0 && d.getCoke() < b.getCoke(),
+                        String.format("heavy oil %.5f, crude %.5f", d.getCoke(), b.getCoke()));
+                    ctx.check("fuel furnace: diesel clears a coked burner as it burns", c.getCoke() < 0.2 && c.heatPower() > 0, c.getCoke() + ", " + c.heatPower() + " W");
                 }
                 case "water_boils_off" -> {
                     ctx.check("fuel furnace: water under the fuel reaches the burner first and gives no heat",

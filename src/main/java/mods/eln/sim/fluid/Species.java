@@ -43,6 +43,8 @@ public final class Species {
     public double flashPoint, autoignition;
     /** Heat of combustion (J/kg, lower heating value; 0: it isn't a fuel): what a burner gets from a kg. Set by the loader. */
     public double heatingValue;
+    /** How much a burner fouls on it (coke per kg against residue's 1; 0: it burns clean). Set by the loader. */
+    public double coking;
 
     private final double andradeA, andradeB, tSteep;
 
@@ -89,6 +91,7 @@ public final class Species {
         s.flashPoint = flashPoint;
         s.autoignition = autoignition;
         s.heatingValue = heatingValue;
+        s.coking = coking;
         return s;
     }
 

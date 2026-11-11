@@ -99,7 +99,7 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(I18N.tr("Generates heat when supplied with fuel."))
         list.add(I18N.tr("Burns gasoline, diesel, heavy oil, residue and crude oil."))
-        list.add(I18N.tr("Crude oil and residue coke its burner: clean it with wool."))
+        list.add(I18N.tr("Crude, residue and heavy oil coke its burner; clean fuel clears it. Wool cleans it."))
         list.add(Utils.plotCelsius(I18N.tr("  Max. temperature: "), thermal.warmLimit))
     }
 }
@@ -114,10 +114,13 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         /** The most a burner cokes: it still fires a tenth. */
         const val COKE_MAX = 0.9
         /**
-         * Coking per residue share of what burns (Baughn 2026-11-10: fouling comes from unburnt residue): dead crude's
-         * 15.8 % residue cokes at rate 1, as crude did before (option a, until Baughn picks); refined cuts never coke.
+         * The coking index (each species' `coking` by its share of what burns: residue 1, heavy oil 0.15, diesel 0.01,
+         * light cuts 0) at which a burner neither cokes nor clears: a plausible refinery's fuel (Baughn 2026-11-11: on
+         * better fuel "the ash gets pulled out with the smoke eventually"). Over it the burner cokes, under it it clears.
          */
-        const val COKE_PER_RESIDUE = 1 / 0.158
+        const val COKE_BALANCE = 0.05
+        /** Coking per unit of index over the balance: dead crude (index 0.216) cokes at rate 1, as before. */
+        const val COKE_PER_INDEX = 1 / (0.2159 - COKE_BALANCE)
         /** Its fuel tank (mB, two buckets: Baughn 2026-11-03, it fills by bucket) and its volume (m^3). */
         const val TANK_MB = 2000.0
         val TANK_M3 = TANK_MB * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / mods.eln.sim.fluid.Water.RHO_L
@@ -167,8 +170,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private var bank = 0.0
     /** The heat the control process wanted over the last fluid step (J): what the next draw refills. */
     private var wanted = 0.0
-    /** The residue share of what the burner last drew (0..1): its coking. */
-    private var residueShare = 0.0
+    /** The coking index of what it burnt last (residue 1 ... light cuts 0). */
+    private var cokingIndex = 0.0
     /** What is at the burner, as of the last fluid step: a fuel's species, water (it boils off), or -1 for nothing. */
     var atBurner = -1
         private set
@@ -264,12 +267,12 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val hv = layerHeatingValue(v, id)
         if (hv <= 0) return
         val f = mods.eln.ElnConfig.heatFurnaceFuelFactor
-        val residue = layerShare(v, id, mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:residue"))
+        val index = layerCoking(v, id)
         val got = mods.eln.sim.fluid.EaUnits.drainLayer(v, id, need / f / hv)
         if (got <= 0) return
         bank += got * hv * f
         fuelBurntKg += got
-        residueShare = residue
+        cokingIndex = index
     }
 
     /** The heating value (J/kg) of the layer species id is in: its species' by their shares. */
@@ -281,6 +284,17 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         var hv = 0.0
         for (j in 2 until v.speciesBound()) if (v.layerOf(j) == layer) hv += v.liquid(j) / total * reg.byId(j).heatingValue
         return hv
+    }
+
+    /** The coking index of the layer species id is in: its species' `coking` by their shares. */
+    private fun layerCoking(v: mods.eln.sim.fluid.FluidNode, id: Int): Double {
+        val total = mods.eln.sim.fluid.EaUnits.layerLiquid(v, id)
+        if (total <= 0) return 0.0
+        val layer = v.layerOf(id)
+        val reg = mods.eln.sim.fluid.SpeciesRegistry.get()
+        var c = 0.0
+        for (j in 2 until v.speciesBound()) if (v.layerOf(j) == layer) c += v.liquid(j) / total * reg.byId(j).coking
+        return c
     }
 
     /** The share of species j in the layer species id is in (0 if j is absent or elsewhere). */
@@ -338,8 +352,9 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private var actualHeatPower by published(0.0)
 
     /**
-     * How coked its burner is (0..COKE_MAX; Baughn 2026-11-03: crude burns, but at a cost): burning crude (residue at
-     * half the rate) cokes it, and a coked burner fires that much less (half after an hour at its full power on crude).
+     * How coked its burner is (0..COKE_MAX; Baughn 2026-11-03: crude burns, but at a cost): fuel over the coking
+     * balance cokes it (crude: half after an hour at its full power; residue ~6x faster, heavy oil ~0.6x), fuel under it
+     * clears it again, and a coked burner fires that much less.
      * A right click with wool cleans it.
      */
     var coke = 0.0
@@ -373,9 +388,10 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             bank -= given
             heatGivenJ += given
             actualHeatPower = given / time
-            // (the coking: per second at its full power on dead crude, 1 / (2 h); by the residue share of what burns)
+            // (the coking: per second at its full power on dead crude, 1 / (2 h); by the coking index of what burns, over
+            // or under the balance: fuel better than a plausible refinery's clears the burner as it burns)
             val rate = cokeRate()
-            if (rate > 0 && nominalPower > 0) coke = Math.min(COKE_MAX, coke + rate * actualHeatPower / nominalPower * time / (2 * 3600))
+            if (rate != 0.0 && nominalPower > 0) coke = Math.max(0.0, Math.min(COKE_MAX, coke + rate * actualHeatPower / nominalPower * time / (2 * 3600)))
             thermalLoad.PcTemp += mods.eln.fluid.Flue.HEAT_SHARE * actualHeatPower   // (the rest leaves in the smoke: Flue)
         }
 
@@ -480,11 +496,11 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         atBurner = burnerLayer(v)
     }
 
-    /** Coking per second at full power, as a share of COKE per (2 h): by the residue share of what it burns. */
-    private fun cokeRate() = if (atBurner >= 0 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER) COKE_PER_RESIDUE * residueShare else 0.0
+    /** Coking per second at full power, as a share of COKE per (2 h): by the coking index over the balance (< 0 clears). */
+    private fun cokeRate() = if (atBurner >= 0 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER) COKE_PER_INDEX * (cokingIndex - COKE_BALANCE) else 0.0
 
-    /** Thick black smoke while what it burns has residue in it. */
-    private fun sooty() = actualHeatPower > 0 && residueShare > 0
+    /** Thick black smoke while what it burns cokes the burner. */
+    private fun sooty() = actualHeatPower > 0 && cokingIndex > COKE_BALANCE
 
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
@@ -528,7 +544,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             mods.eln.fluid.FluidSaves.put(nbt, "vessel", it)
         }
         nbt.putDouble("bank", bank)
-        nbt.putDouble("residueShare", residueShare)
+        nbt.putDouble("cokingIndex", cokingIndex)
         nbt.putBoolean("externalControlled", externalControlled)
         nbt.putBoolean("mainSwitch", mainSwitch)
         nbt.putDouble("heaterControlValue", heaterControlValue)
@@ -551,7 +567,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             legacyStub = mods.eln.fluid.FluidSaves.array(nbt, "fuelIn")
         }
         bank = nbt.getDoubleOr("bank", 0.0)
-        residueShare = nbt.getDoubleOr("residueShare", 0.0)
+        cokingIndex = nbt.getDoubleOr("cokingIndex", nbt.getDoubleOr("residueShare", 0.0))
         externalControlled = nbt.getBooleanOr("externalControlled", false)
         mainSwitch = nbt.getBooleanOr("mainSwitch", false)
         heaterControlValue = nbt.getDoubleOr("heaterControlValue", 0.0)

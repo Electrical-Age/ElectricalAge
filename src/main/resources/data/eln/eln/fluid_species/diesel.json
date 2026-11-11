@@ -13,5 +13,6 @@
   "colour": "#C8862A",
   "fluids": {"liquid": ["eln:diesel"], "vapour": []},
   "flammable": {"flash_point": 330, "autoignition": 530},
-  "heating_value": 43000000
+  "heating_value": 43000000,
+  "coking": 0.01
 }

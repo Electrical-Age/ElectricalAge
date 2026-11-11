@@ -138,10 +138,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   from a pressurised tank). `fuel_furnace_idle_breather`, `fuel_furnace_overfill`. The burner draws the bottom liquid layer whole and gets each species' `heating_value` (J/kg, new
   in the species JSON: gasoline 44, diesel 43, heavy oil 41, residue 40, natural gas 50 MJ/kg) times
   `heatFurnaceFuelFactor`, so a mix burns as the mix. Gasoline gives ~32 % more than the 1.12 table (a unit slip there);
-  the others within 5 %. Coking follows the residue share of what burns (fouling from unburnt residue), scaled so dead
-  crude cokes as before (`COKE_PER_RESIDUE` = 1/0.158; residue alone cokes ~6x faster, refined cuts never). Water at
+  the others within 5 %. Coking follows the coking index of what burns (each species' `coking`, new in the species JSON:
+  residue 1, heavy oil 0.15, diesel 0.01, light cuts 0) against `COKE_BALANCE` 0.05, a plausible refinery's fuel
+  (Baughn 2026-11-11): over it the burner cokes, scaled so dead crude cokes as before (residue ~6x faster, heavy oil
+  ~0.6x); under it the burner clears as it burns ("the ash gets pulled out with the smoke eventually"). Water at
   the burner boils off at the flame's cost and gives no heat. Other mods' fuels with no species no longer go in (none
-  on Incognito). `fuel_furnace_mixed_fuel`, `fuel_furnace_coke_by_residue`, `fuel_furnace_water_boils_off`,
+  on Incognito). `fuel_furnace_mixed_fuel`, `fuel_furnace_coke_balance`, `fuel_furnace_water_boils_off`,
   `fuel_furnace_legacy_tank`.
 - Natural gas (and syngas) at real heating values (Baughn 2026-11-11: "we'll make the gas numbers real"): 1.12
   multiplied gases by 1000 ("Minecraft gases are heavily pressurized"). Now a mB of natural gas is what a fluid node

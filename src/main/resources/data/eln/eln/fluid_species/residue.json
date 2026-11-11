@@ -9,5 +9,6 @@
   "colour": "#2A2826",
   "fluids": {"liquid": ["eln:residue"], "vapour": []},
   "flammable": {"flash_point": 500, "autoignition": 680},
-  "heating_value": 40000000
+  "heating_value": 40000000,
+  "coking": 1.0
 }

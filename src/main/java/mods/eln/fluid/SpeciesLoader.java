@@ -39,6 +39,7 @@ import java.util.TreeMap;
  * flammable            optional {"flash_point": K, "autoignition": K}: a leak catches from a flame over its flash
  *                      point, by itself over its autoignition temperature
  * heating_value        optional J/kg (lower heating value): what a burner gets from a kg of it (0: not a fuel)
+ * coking               optional, 0..1: how much a burner fouls on a kg of it, against residue's 1 (0: burns clean)
  * </pre>
  * A file that fails to parse or check is skipped with a log line; the species keeps its previous data, if any.
  */
@@ -144,6 +145,10 @@ public final class SpeciesLoader extends SimplePreparableReloadListener<Map<Stri
         if (j.has("heating_value")) {
             s.heatingValue = j.get("heating_value").getAsDouble();
             if (!(s.heatingValue >= 0)) throw new IllegalArgumentException("heating_value must be >= 0");
+        }
+        if (j.has("coking")) {
+            s.coking = j.get("coking").getAsDouble();
+            if (!(s.coking >= 0 && s.coking <= 1)) throw new IllegalArgumentException("coking must be in 0..1");
         }
         return s;
     }
