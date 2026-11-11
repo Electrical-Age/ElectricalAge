@@ -44,6 +44,8 @@ public final class FluidEdge {
     /** REGULATOR: its set point (Pa) and mode (relief: holds a; else reducing: holds b; Network.Edge.setPa). */
     public double setPa;
     public boolean relief;
+    /** Gas only (a purge valve; Network.Edge.gasOnly). */
+    public boolean gasOnly;
     /**
      * TURBINE (in the fluid core's solve, Network.Kind.TURBINE): its nozzle coefficient and the isentropic drop (J/kg)
      * from its inlet to its exhaust's pressure, set each step; it takes eta x drop a kg of water out as shaft work (work,

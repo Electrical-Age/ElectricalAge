@@ -7,8 +7,16 @@ import net.minecraft.world.item.context.UseOnContext;
 
 /** A safety valve: right-click a straight stretch of pipe; its outlet points out of the pipe's most open side. */
 public class SafetyValveItem extends Item implements PipeTool {
+    /** A purge valve (gas only) rather than a safety valve. */
+    final boolean purge;
+
     public SafetyValveItem(Properties p) {
+        this(p, false);
+    }
+
+    public SafetyValveItem(Properties p, boolean purge) {
         super(p);
+        this.purge = purge;
     }
 
     @Override
@@ -20,10 +28,10 @@ public class SafetyValveItem extends Item implements PipeTool {
         var hit = ctx.getClickLocation();
         String err;
         if (level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n)
-            err = n.addSafetyValveNear(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ());
+            err = n.addSafetyValveNear(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ(), purge);
         else err = "fit it on a pipe";
         if (err != null) {
-            if (player != null) player.sendOverlayMessage(Component.literal("Can't fit a safety valve: " + err));
+            if (player != null) player.sendOverlayMessage(Component.literal("Can't fit a " + (purge ? "purge" : "safety") + " valve: " + err));
             return InteractionResult.FAIL;
         }
         if (player == null || !player.isCreative()) ctx.getItemInHand().shrink(1);

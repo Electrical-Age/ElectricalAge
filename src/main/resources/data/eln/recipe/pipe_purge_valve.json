@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": ["eln:pipe_safety_valve", "minecraft:bowl"],
+  "result": {
+    "id": "eln:pipe_purge_valve"
+  }
+}

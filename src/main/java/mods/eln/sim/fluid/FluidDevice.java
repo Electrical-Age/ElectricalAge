@@ -136,6 +136,8 @@ public interface FluidDevice {
         public final FluidNode node;
         public final double draw, k;
         public double open;
+        /** Gas only, never liquid, and nothing back in (a purge valve: Network.Edge.gasOnly). */
+        public boolean gasOnly;
         /** This step's edge (set by the world when it builds the network). */
         public FluidEdge edge;
 

@@ -278,7 +278,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (p instanceof CablePart c) return c.burnt != null ? ItemStack.EMPTY : CableKitItem.kit(c.tier, c.spec, c.dropLength());
         if (p instanceof ValvePart v) return valveItem(v);
         if (p instanceof AdapterPart) return new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get());
-        if (p instanceof SafetyValvePart) return new ItemStack(mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get());
+        if (p instanceof SafetyValvePart sv) return new ItemStack(sv.purge ? mods.eln.registry.ElnRegistry.PIPE_PURGE_VALVE.get() : mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get());
         if (p instanceof PipeSensorPart s) return sensorItem(s);
         return ItemStack.EMPTY;
     }
@@ -485,6 +485,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** Fit a safety valve on the pipe under the click, at the lattice point nearest the click, its outlet out of the
      *  pipe's most open side; set to the pipe's working pressure. */
     public String addSafetyValveNear(double hx, double hy, double hz) {
+        return addSafetyValveNear(hx, hy, hz, false);
+    }
+
+    /** ... or a purge valve (gas only), set just over the air's pressure. */
+    public String addSafetyValveNear(double hx, double hy, double hz, boolean purge) {
         int idx = partAt(hx, hy, hz);
         if (idx >= 0 && (parts.get(idx) instanceof SafetyValvePart || parts.get(idx) instanceof ValvePart)) return "there's a valve there already";
         for (VoxelPart q : parts) if (q instanceof SafetyValvePart) return "one safety valve per block (this one has one)";
@@ -522,7 +527,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             }
         }
         if (outlet < 0) return "no room around the pipe there";
-        var v = new SafetyValvePart(best[0], best[1], best[2], outlet, pipe.bore(), pipe.workingPa(mods.eln.sim.fluid.Water.T_AMBIENT));
+        var v = new SafetyValvePart(best[0], best[1], best[2], outlet, pipe.bore(),
+            purge ? SafetyValvePart.PURGE_PA : pipe.workingPa(mods.eln.sim.fluid.Water.T_AMBIENT), purge);
         parts.add(v);
         markUsed();
         changed();
@@ -1155,7 +1161,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 } else if (p instanceof SafetyValvePart sv && pipeUnder(sv) != null) {
                     PipePart under = pipeUnder(sv);
                     double draw = sv.outlet == 1 ? 1 : sv.outlet == 0 ? 0 : 0.5;   // (a valve on top lets out what's at the top)
-                    vents.put(new Vent(under.fluid, draw, SafetyValvePart.VENT_K), p);
+                    Vent vent = new Vent(under.fluid, draw, SafetyValvePart.VENT_K);
+                    vent.gasOnly = sv.purge;
+                    vents.put(vent, p);
                 }
         }
         return new ArrayList<>(vents.keySet());
@@ -2070,8 +2078,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     v.setPoint() / 1e5, v.signalled() ? " by signal" : "", v.opening() * 100)
                 : String.format("%.0f%% open", v.opening() * 100));
         for (VoxelPart p : parts)
-            if (p instanceof SafetyValvePart sv) out.put(out.containsKey("Safety valve") ? "Safety valve " + (out.size()) : "Safety valve",
-                String.format("%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) > 0 ? ", blowing" : ""));
+            if (p instanceof SafetyValvePart sv) {
+                String name = sv.purge ? "Purge valve" : "Safety valve";
+                out.put(out.containsKey(name) ? name + " " + (out.size()) : name,
+                    String.format(sv.purge ? "%.1f bar%s" : "%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) <= 0 ? ""
+                        : sv.purge && n.level() >= 0.999 ? ", shut: liquid at it" : sv.purge ? ", venting gas" : ", blowing"));
+            }
         for (VoxelPart p : parts)
             if (p instanceof PipeSensorPart s) out.put(s.name(), String.format(s.sensing == PipeSensorPart.PRESSURE ? "%.2f %s (absolute) of %.0f: %.1f V" : "%.0f %s of %.0f: %.1f V",
                 s.reading, s.unit(), s.scale, s.share() * mods.eln.Eln.SVU));

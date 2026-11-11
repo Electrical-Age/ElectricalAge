@@ -218,7 +218,9 @@ public final class VoxelGeometry {
         int[] o = others(ax);
         double base = c[ax], top = base + dir * (rp + 3 * s), end = top + dir * s;
         Solid body = tube(m, ax, c[o[0]], c[o[1]], 1.4 * s, Math.min(base, top), Math.max(base, top), PIPE[0]).named("safety valve body").rgb(0.8f, 0.6f, 0.3f);
-        Solid cap = tube(m, ax, c[o[0]], c[o[1]], 2 * s, Math.min(top, end), Math.max(top, end), PIPE[0]).named("safety valve cap").rgb(0.75f, 0.15f, 0.12f);
+        // (a purge valve's cap is blue: Baughn 2026-11-10)
+        Solid cap = tube(m, ax, c[o[0]], c[o[1]], 2 * s, Math.min(top, end), Math.max(top, end), PIPE[0]).named("safety valve cap")
+            .rgb(sv.purge ? 0.2f : 0.75f, sv.purge ? 0.4f : 0.15f, sv.purge ? 0.8f : 0.12f);
         Solid pipe = pipeUnder(m, pipeAxis(parts, sv.x, sv.y, sv.z, ax), c, rp);
         Solid hit = box(m, sv.boxes().get(0), null).named("safety valve hitbox").ghost();
         m.attach(body, pipe, rp).abut(body, cap).within(cap, hit).disjoint(cap, pipe)

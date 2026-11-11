@@ -180,6 +180,9 @@ public final class ElnRegistry {
         ITEMS.registerItem("pipe_throttle_valve", p -> new mods.eln.node.voxel.ValveItem(p, mods.eln.node.voxel.ValvePart.THROTTLE));
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.SafetyValveItem> PIPE_SAFETY_VALVE =
         ITEMS.registerItem("pipe_safety_valve", mods.eln.node.voxel.SafetyValveItem::new);
+    /** Baughn 2026-11-10: a purge valve, gas only (beside a crude tank: its natural gas). */
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.SafetyValveItem> PIPE_PURGE_VALVE =
+        ITEMS.registerItem("pipe_purge_valve", p -> new mods.eln.node.voxel.SafetyValveItem(p, true));
     /** Baughn 2026-10-27: pipe sensors, a 0-5 V signal of a run's pressure or temperature. */
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.PipeSensorItem> PIPE_PRESSURE_SENSOR =
         ITEMS.registerItem("pipe_pressure_sensor", p -> new mods.eln.node.voxel.PipeSensorItem(p, mods.eln.node.voxel.PipeSensorPart.PRESSURE));
@@ -359,6 +362,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(PIPE_THROTTLE_VALVE);
         ALL_ITEMS.add(PIPE_ADAPTER);
         ALL_ITEMS.add(PIPE_SAFETY_VALVE);
+        ALL_ITEMS.add(PIPE_PURGE_VALVE);
         ALL_ITEMS.add(PIPE_PRESSURE_SENSOR);
         ALL_ITEMS.add(PIPE_TEMPERATURE_SENSOR);
         ALL_ITEMS.add(PIPE_QUALITY_SENSOR);

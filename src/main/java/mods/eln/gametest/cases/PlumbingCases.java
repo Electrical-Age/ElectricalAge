@@ -44,6 +44,8 @@ public final class PlumbingCases {
         cases.add(new LiquidStaysIncompressible());
         cases.add(new TankTakesOil());
         cases.add(new TankStandsWithoutFloor());
+        cases.add(new PurgeValve(false));
+        cases.add(new PurgeValve(true));
     }
 
     static final int IRON_TANK = 40 + (82 << 6), ALLOY_TANK = 44 + (82 << 6), PUMP = 48 + (82 << 6);
@@ -172,6 +174,53 @@ public final class PlumbingCases {
             ctx.check("tank: it stays when the block under it goes", stands, "");
             ctx.check("tank: its water runs out of its underside port into B below", b.vessel.mLiquid() > 0.05 * aWater0,
                 String.format("%.3f of %.3f kg", b.vessel.mLiquid(), aWater0));
+        }
+    }
+
+    /**
+     * A purge valve (Baughn 2026-11-10: gas only, never liquid) on a pipe standing on a sealed tank's top port. Half full of
+     * water under 3 bar of air, it bleeds the air down to its set pressure and keeps the water (the vapour in the air goes
+     * with it). Brim full of water, it vents the pipe's air, then shuts as the water reaches it.
+     */
+    static final class PurgeValve extends Big {
+        final boolean full;
+        TankElement t;
+        BlockPos pipeAt;
+        String err;
+        double water0;
+
+        PurgeValve(boolean full) {
+            this.full = full;
+        }
+
+        public String id() {
+            return full ? "pipe_purge_valve_keeps_the_liquid" : "pipe_purge_valve_bleeds_the_gas";
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        public void build(TestContext ctx) {
+            t = tank(ctx, IRON_TANK, ctx.at(2, 1, 1), Direction.XN);
+            pipeAt = ctx.at(2, 2, 1);
+            PipeCases.lay(ctx, pipeAt, 0, 8, 0, 8, 8, 12, 8);
+            var n = PipeCases.node(ctx, pipeAt);
+            err = n.addSafetyValveNear(0.5, 8 / 16.0, 0.5, true);
+            fill(t.vessel, (full ? 0.995 : 0.5) * t.vessel.volume * Water.RHO_L, 3e5, 300);
+            water0 = t.vessel.mWater;
+        }
+
+        public void measure(TestContext ctx) {
+            var run = mods.eln.fluid.FluidWorld.nodeFor(((mods.eln.node.voxel.PipePart) PipeCases.node(ctx, pipeAt).parts.get(0)).fluid);
+            double water = t.vessel.mWater + run.mWater;
+            ctx.line(String.format("purge valve (%s): tank %.3f bar, %.4f -> %.4f kg of water; %s", full ? "full" : "half", t.vessel.P() / 1e5, water0, water,
+                PipeCases.node(ctx, pipeAt).getWaila(false)));
+            ctx.check("purge valve: it fits on the pipe", err == null, "" + err);
+            // (the vapour in the gas it lets out goes too, a few hundredths of a gram: "it'll let out steam")
+            ctx.check("purge valve: no liquid goes, only the vapour in the gas (under 0.1 g)", water > water0 - 1e-4, String.format("%.6f kg lost", water0 - water));
+            if (!full) ctx.check("purge valve: it bleeds the air down to its set pressure (under 1.3 bar)", t.vessel.P() < 1.3e5,
+                String.format("%.3f bar", t.vessel.P() / 1e5));
         }
     }
 

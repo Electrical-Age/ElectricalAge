@@ -317,7 +317,10 @@ final class CoreStep {
                 c.speed = e.speed * open;
                 continue;
             }
-            c.g = conductance(e, pa, dp + pa.rhoHead * Network.G * dz, open);
+            // (a gas-only edge's conductance is its gas's: the port's packet blends in the liquid near the surface)
+            FluidNetwork.Packet pq = e.gasOnly ? FluidNetwork.packet(e.a, 1.0, 0) : pa;
+            c.gasOnly = e.gasOnly;
+            c.g = conductance(e, pq, dp + pa.rhoHead * Network.G * dz, open);
             c.gBack = e.oneWay() ? Double.NaN : conductance(e, pb, dp + pb.rhoHead * Network.G * dz, open);
             // (a regulator: its set point and mode, the rest of its law in the core's solve)
             c.setPa = e.setPa;

@@ -103,6 +103,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   how many are piped. Each flange's nozzle runs in past the shell all round its bore and is closed at its end (it was
   cut at the shell's centre line, so the curving shell left gaps at its sides one could look into).
   `tank_flanges_where_piped`.
+- Pipe Purge Valve (Baughn 2026-11-10: "a valve that lets out only gas, never liquid ... it goes by phase, not species;
+  it'll let out steam"): a safety valve with a float (shapeless: safety valve + bowl; blue cap). It vents the gas of the
+  run under it to the air above its set pressure (1.1 bar to start, the safety valve's slider), shuts as the liquid
+  reaches its outlet, and lets nothing back in (a gas-only, one-way vent: `Network.Edge.gasOnly`).
+  `pipe_purge_valve_bleeds_the_gas`, `pipe_purge_valve_keeps_the_liquid`.
 - Tanks need no floor (Baughn 2026-11-10): a tank, lone or a box, stays when the block under it goes, so a pipe can
   run to its underside port (it used to break). `tank_stands_without_a_floor`.
 - Tank sight glass (Baughn 2026-11-03: "a viewglass"): a 3 px window in brass on the tank's front (was a 1.5 px slit

@@ -197,6 +197,13 @@ public final class Network {
          */
         public double setPa;
         public boolean relief;
+        /**
+         * Gas only (a purge valve, Baughn 2026-11-10: "lets out only gas, never liquid ... it goes by phase"): the
+         * stream from a carries a's gas alone (gasDraw), and only as far as its port is above the liquid (a float valve):
+         * gasShare = 1 - a's liquid window at the port, taken at the step's start.
+         */
+        public boolean gasOnly;
+        double gasShare = 1;
         /** The work (J) the last step put in (a pump) or took out (a turbine); and the last solve's share of it. */
         public double workJ;
         double pendingWork;
@@ -235,7 +242,7 @@ public final class Network {
 
         /** Level, the same conductance both ways and the network's band: the plain pipe's streams (every test before heads). */
         boolean plain() {
-            return dz == 0 && (Double.isNaN(gBack) || gBack == g) && Double.isNaN(band);
+            return dz == 0 && (Double.isNaN(gBack) || gBack == g) && Double.isNaN(band) && !gasOnly;
         }
 
         /**
@@ -359,6 +366,15 @@ public final class Network {
 
     /** The two streams {q+ from a, q- from b} and their slopes in dp. */
     static double[] streams(Edge e) {
+        double[] q = streams0(e);
+        if (e.gasOnly && e.kind != Kind.PUMP) {
+            q[0] *= e.gasShare;
+            q[2] *= e.gasShare;
+        }
+        return q;
+    }
+
+    static double[] streams0(Edge e) {
         double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
         if (e.kind == Kind.PUMP) return pumpStreams(e, dp);
         if (e.kind == Kind.TURBINE || e.kind == Kind.REGULATOR) return new double[4];
@@ -451,7 +467,7 @@ public final class Network {
 
     /** An edge that carries only its a side's gas (a gas pump): never liquid, even with its port inside the window. */
     static boolean gasOnly(Edge e) {
-        return e.kind == Kind.PUMP && e.gas;
+        return e.kind == Kind.PUMP && e.gas || e.gasOnly;
     }
 
     /** What a kg from a's side of the edge carries: a gas pump its gas alone (gasDraw), else the port's draw. */
@@ -633,6 +649,7 @@ public final class Network {
             boolean f = FREEZE_HEAD && (e.dz != 0 || e.kind == Kind.PUMP) || e.kind == Kind.TURBINE;
             e.rhoA = !f ? Double.NaN : e.kind == Kind.TURBINE ? e.a.fluid.rhoGas() : e.gas ? gasDraw(e) : rhoDraw(e.a, e.fa);
             e.rhoB = f ? rhoDraw(e.b, e.fb) : Double.NaN;
+            if (e.gasOnly) e.gasShare = Math.max(0, 1 - e.a.fluid.liquidWindow(e.fa));
         }
         progressed = false;
         stepSubsteps = 0;

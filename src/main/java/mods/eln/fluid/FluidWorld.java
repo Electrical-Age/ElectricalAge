@@ -497,6 +497,10 @@ public final class FluidWorld implements IProcess {
                 FluidNode atm = air.computeIfAbsent(net, k -> k.add(FluidNode.atmosphere(vn.z + vn.height)));
                 v.edge = net.connect(vn, drawOn(vn, v.node, v.draw), atm, 0, v.k);
                 v.edge.open = v.open;
+                if (v.gasOnly) {
+                    v.edge.gasOnly = true;
+                    v.edge.kind(FluidEdge.Kind.CHECK);
+                }
                 vents.add(v);
             }
     }
