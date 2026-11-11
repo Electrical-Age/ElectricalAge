@@ -103,6 +103,13 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   how many are piped. Each flange's nozzle runs in past the shell all round its bore and is closed at its end (it was
   cut at the shell's centre line, so the curving shell left gaps at its sides one could look into).
   `tank_flanges_where_piped`.
+- Crude is a mixture (Baughn 2026-11-10): `eln:crude_oil` stays a fluid (buckets, the pump's tank, other mods), but in a
+  node it is heavy oil 35 / diesel 25 / gasoline 20 / residue 15 / natural gas 5 % by mass (the species JSON's "mixture";
+  sulphur counts in the residue). Live, with its gas, only from the oil pump's sealed line; from a bucket or any
+  capability it goes in dead ("the buckets don't have lids"), the four liquids renormalised; crude a save holds loads
+  dead. A pumped crude line needs a purge valve (or a pipe taking its gas). Out of a node, a mixed liquid is named by its
+  main species and taken whole (EaUnits.drainLayer), so a bucket can't distil a mix. The old column takes the cuts' mix as
+  crude until it is a still. `fluid_crude_is_a_mixture`.
 - Pipe Purge Valve (Baughn 2026-11-10: "a valve that lets out only gas, never liquid ... it goes by phase, not species;
   it'll let out steam"): a safety valve with a float (shapeless: safety valve + bowl; blue cap). It vents the gas of the
   run under it to the air above its set pressure (1.1 bar to start, the safety valve's slider), shuts as the liquid

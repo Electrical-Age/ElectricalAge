@@ -72,6 +72,11 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
     final mods.eln.fluid.PortBridge dischargePort = new mods.eln.fluid.PortBridge("discharge", mods.eln.fluid.PortBridge.Mode.OUT,
         DISCHARGE_MB_PER_S, OilPumpDescriptor.DISCHARGE_HEAD_PA);
 
+    {
+        // (the well's crude is live, its natural gas with it, Baughn 2026-11-10: a purge valve on the line lets it off)
+        dischargePort.live = true;
+    }
+
     long exportedForTests, bridgedForTests;
 
     static double crudeMb(mods.eln.sim.fluid.FluidNode n) {

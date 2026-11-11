@@ -84,6 +84,7 @@ public final class SpeciesLoader extends SimplePreparableReloadListener<Map<Stri
             try {
                 Species s = parse(e.getKey(), e.getValue());
                 SpeciesRegistry.get().define(s);
+                SpeciesRegistry.get().setMixture(s.key, mixture(e.getValue()));
                 JsonObject f = e.getValue().has("fluids") ? e.getValue().getAsJsonObject("fluids") : new JsonObject();
                 liq.put(s.key, strings(f.get("liquid")));
                 vap.put(s.key, strings(f.get("vapour")));
@@ -140,6 +141,25 @@ public final class SpeciesLoader extends SimplePreparableReloadListener<Map<Stri
             if (!(s.autoignition > s.flashPoint)) throw new IllegalArgumentException("autoignition must be over the flash point");
         }
         return s;
+    }
+
+    /**
+     * A species that is a mixture of others wherever it goes into a node (Baughn 2026-11-10: crude as heavy oil, diesel,
+     * gasoline, residue and natural gas): "mixture": {"eln:heavy_oil": 0.35, ...}, mass shares (normalised), or null.
+     */
+    static Map<String, Double> mixture(JsonObject j) {
+        if (!j.has("mixture")) return null;
+        Map<String, Double> m = new java.util.LinkedHashMap<>();
+        double sum = 0;
+        for (var e : j.getAsJsonObject("mixture").entrySet()) {
+            double f = e.getValue().getAsDouble();
+            if (!(f > 0)) throw new IllegalArgumentException("mixture: " + e.getKey() + " must be over 0");
+            m.put(e.getKey(), f);
+            sum += f;
+        }
+        if (m.isEmpty()) return null;
+        for (var e : m.entrySet()) e.setValue(e.getValue() / sum);
+        return m;
     }
 
     private static JsonElement req(JsonObject j, String field) {

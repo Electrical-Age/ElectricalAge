@@ -53,6 +53,7 @@ public final class OilCases {
         cases.add(new CondenserDryMakeupStub());
         cases.add(new CondenserOnABench());
         cases.add(new LegacyEnergyLoads());
+        cases.add(new CrudeIsAMixture());
         cases.add(new CondenserLegacyLoad());
         cases.add(new CondenserMakeupSignal());
         cases.add(new CondensateReturn(10e5, false));
@@ -315,6 +316,7 @@ public final class OilCases {
          *  held its puddle until it was half full, its open end drawing from mid-bore; now some reaches the tank). */
         final int mB;
         /** How far above the pump the tank stands (blocks): Baughn 2026-11-09, a pipe up 3 blocks into a tank got nothing. */
+        String purgeErr;
         final int rise;
         mods.eln.oil.OilPumpElement pump;
         mods.eln.oil.TankElement tank;
@@ -342,7 +344,8 @@ public final class OilCases {
         }
 
         public int ticks() {
-            return rise > 0 ? 400 : 140;
+            // (the little one 240: crude's mix is thicker than the old crude species, its residue at 50 Pa s cold)
+            return rise > 0 ? 400 : mB == 1000 ? 140 : 240;
         }
 
         public void build(TestContext ctx) {
@@ -355,6 +358,10 @@ public final class OilCases {
             tank = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, ctx.at(3, 1 + rise, 1));
             tank.front = mods.eln.misc.Direction.XP;   // (its back, with a low side port, to the west)
             tank.reconnect();
+            // (a purge valve on the tank's top: the well's crude is live, its natural gas comes out in the tank; Baughn
+            // 2026-11-10)
+            PipeCases.lay(ctx, ctx.at(3, 2 + rise, 1), 0, 8, 0, 8, 8, 12, 8);
+            purgeErr = PipeCases.node(ctx, ctx.at(3, 2 + rise, 1)).addSafetyValveNear(0.5, 8 / 16.0, 0.5, true);
             // (routed as a player's pipe kit routes it: the flange is 6 px up, off the router's lattice)
             var level = ctx.level();
             var a = mods.eln.node.voxel.PipePlacer.portAtForTests(level, p, net.minecraft.core.Direction.EAST);
@@ -370,15 +377,18 @@ public final class OilCases {
 
         public void measure(TestContext ctx) {
             ctx.check("oil pump: a pipe goes from its discharge flange to the tank", err == null, "" + err);
+            ctx.check("oil pump: a purge valve fits on the tank's top pipe", purgeErr == null, "" + purgeErr);
             if (mB != 1000) {
                 int crude = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
-                double inTank = tank.vessel == null ? 0 : tank.vessel.mass(crude) / mods.eln.fluid.FluidSpecies.kgPerMb(crude, false);
-                ctx.check("oil pump: a little crude, less than half the pipe holds, still reaches the tank", inTank > 20, String.format("%.1f of %d mB in the tank", inTank, mB));
+                double inTank = crudeMb(tank.vessel);
+                // (over 10 mB: crude's thicker mix, residue and heavy oil, leaves more standing in the pipe than the old
+                // single species did; 16-19 mB arrive)
+                ctx.check("oil pump: a little crude, less than half the pipe holds, still reaches the tank", inTank > 10, String.format("%.1f of %d mB in the tank", inTank, mB));
                 return;
             }
             int crude = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
             int left = ((mods.eln.fluid.ElementFluidHandler) pump.getFluidHandler()).getFluidAmount();
-            double inTank = tank.vessel == null ? 0 : tank.vessel.mass(crude) / mods.eln.fluid.FluidSpecies.kgPerMb(crude, false);
+            double inTank = crudeMb(tank.vessel);
             ctx.line("oil pump into pipe: " + left + " mB left in the pump, tank " + tank.getWaila());
             ctx.line("oil pump into pipe: discharge " + pump.dischargeRunForTests());
             ctx.check("oil pump: its crude went into the pipe", left < (rise > 0 ? 7500 : 500), left + " mB left");
@@ -717,13 +727,11 @@ public final class OilCases {
                         String.format("%.0f mB in the tank, %d left in the segment", got, ((mods.eln.oil.ColumnSegmentElement) west).tank.getFluidAmount()));
                 }
                 case "flare_in" -> {
-                    int id = reg.id("eln:crude_oil");
-                    double left = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
+                    double left = crudeMb(tank.vessel);
                     ctx.check("oil on pipes: the flare stack took the tank's crude", left < 8500, String.format("%.0f mB left in the tank, flare %s", left, east.getWaila()));
                 }
                 case "separator_out" -> {
-                    int id = reg.id("eln:crude_oil");
-                    double got = tank.vessel.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
+                    double got = crudeMb(tank.vessel);
                     ctx.check("oil on pipes: the separator's crude went into the tank", got > 500,
                         String.format("%.0f mB in the tank, %d left in the separator", got, ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).getFluidAmount()));
                 }
@@ -1284,6 +1292,20 @@ public final class OilCases {
             ctx.check("oil: external control with no signal keeps the valve shut", ext.steamRate < 0.02 * mods.eln.oil.SteamGeneratorDescriptor.nominalSteam(1000)
                 && ext.omega < 0.5, String.format("%.0f mB/s, speed %.0f%%", ext.steamRate, ext.omega * 100));
         }
+    }
+
+    /**
+     * Crude in a node (mB): crude is a mixture alias now (Baughn 2026-11-10), so its five cuts and natural gas, by mass,
+     * counted as crude's mB (the species itself, from an old save, too).
+     */
+    static double crudeMb(mods.eln.sim.fluid.FluidNode n) {
+        if (n == null) return 0;
+        var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+        int crude = reg.id("eln:crude_oil");
+        double kg = n.mass(crude);
+        double[][] mix = reg.mixture(crude, false);
+        if (mix != null) for (double c : mix[0]) kg += n.mass((int) c);
+        return kg / mods.eln.fluid.FluidSpecies.kgPerMb(crude, false);
     }
 
     /** A turbine with a condenser against its exhaust side (right of its front: +z for a front of XN), and its load. */
@@ -2671,6 +2693,64 @@ public final class OilCases {
                 String.format("%.2f K", tLegacy));
             ctx.check("fluid: saved again by the core, it round-trips unchanged", uDiff == 0 && Math.abs(tCore - tLegacy) < 1e-9,
                 String.format("%.4f K, energy %+.3g J", tCore, uDiff));
+        }
+    }
+
+    /**
+     * Crude is a mixture alias (Baughn 2026-11-10): heavy oil 35 / diesel 25 / gasoline 20 / residue 15 / natural gas 5 %.
+     * Put into a node as from a bucket it is dead (no lids: its gas long gone), the four liquids by their shares; live, as
+     * the oil pump's line delivers it, it has its gas too; and crude a save holds loads dead.
+     */
+    static final class CrudeIsAMixture implements TestCase {
+        String deadMix, liveMix, savedMix;
+        double deadGas, liveGas, deadSum, savedSum;
+
+        public String id() {
+            return "fluid_crude_is_a_mixture";
+        }
+
+        public int ticks() {
+            return 1;
+        }
+
+        public void build(TestContext ctx) {
+            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+            int crude = reg.id("eln:crude_oil"), gas = reg.id("eln:natural_gas");
+            int[] cuts = {reg.id("eln:heavy_oil"), reg.id("eln:diesel"), reg.id("eln:gasoline"), reg.id("eln:residue")};
+            var dead = new mods.eln.sim.fluid.FluidNode(0.01, 0, 1, false);
+            dead.fill(0, mods.eln.sim.fluid.Water.P_ATM, 300);
+            mods.eln.sim.fluid.EaUnits.add(dead, crude, 1.0, 300, false);
+            var live = new mods.eln.sim.fluid.FluidNode(0.01, 0, 1, false);
+            live.fill(0, mods.eln.sim.fluid.Water.P_ATM, 300);
+            mods.eln.sim.fluid.EaUnits.add(live, crude, 1.0, 300, false, true);
+            var tag = new net.minecraft.nbt.CompoundTag();
+            var sp = new net.minecraft.nbt.CompoundTag();
+            sp.putDouble("eln:crude_oil", 1.0);
+            tag.put("kS", sp);
+            double[] extra = mods.eln.fluid.FluidSaves.extra(tag, "kS");
+            StringBuilder d = new StringBuilder(), l = new StringBuilder(), sv = new StringBuilder();
+            for (int c : cuts) {
+                d.append(String.format(" %.3f", dead.mass(c)));
+                l.append(String.format(" %.3f", live.mass(c)));
+                double kg = extra != null && c - 2 < extra.length ? extra[c - 2] : 0;
+                sv.append(String.format(" %.3f", kg));
+                deadSum += dead.mass(c);
+                savedSum += kg;
+            }
+            deadMix = d.toString();
+            liveMix = l.toString();
+            savedMix = sv.toString();
+            deadGas = dead.mass(gas);
+            liveGas = live.mass(gas);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line("crude: dead" + deadMix + " gas " + deadGas + "; live" + liveMix + " gas " + liveGas + "; saved" + savedMix);
+            ctx.check("crude: from a bucket it goes in dead, the four liquids by their shares (35/25/20/15 of 95)",
+                deadGas == 0 && Math.abs(deadSum - 1) < 1e-12 && deadMix.startsWith(" 0.368"), deadMix + ", gas " + deadGas);
+            ctx.check("crude: from the well it goes in live, with its 5 % natural gas", Math.abs(liveGas - 0.05) < 1e-12 && liveMix.startsWith(" 0.350"),
+                liveMix + ", gas " + liveGas);
+            ctx.check("crude: crude a save holds loads dead", Math.abs(savedSum - 1) < 1e-12 && savedMix.equals(deadMix), savedMix);
         }
     }
 

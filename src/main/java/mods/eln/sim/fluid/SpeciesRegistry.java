@@ -76,6 +76,42 @@ public final class SpeciesRegistry {
         return all[id];
     }
 
+    /** Mixture aliases by key: component key -> mass share (SpeciesLoader.mixture). */
+    private final Map<String, Map<String, Double>> mixtures = new HashMap<>();
+
+    /** Set (or clear, with null) the mixture a species stands for in nodes. */
+    public synchronized void setMixture(String key, Map<String, Double> shares) {
+        if (shares == null) mixtures.remove(key);
+        else mixtures.put(key, Map.copyOf(shares));
+    }
+
+    /**
+     * What a species is made of in a node: {ids, mass shares}, or null if it is no mixture or a component isn't known.
+     * dead: without its gases, the rest renormalised (a save's crude: Baughn 2026-11-10, saves load as dead crude, so
+     * a sealed crude pipe doesn't burst on load).
+     */
+    public synchronized double[][] mixture(int id, boolean dead) {
+        if (id < 0 || id >= byId.size()) return null;
+        Map<String, Double> m = mixtures.get(byId.get(id).key);
+        if (m == null) return null;
+        List<double[]> parts = new ArrayList<>();
+        double sum = 0;
+        for (var e : m.entrySet()) {
+            Integer c = idOf.get(e.getKey());
+            if (c == null || c == id || mixtures.containsKey(e.getKey())) return null;
+            if (dead && byId.get(c).gas()) continue;
+            parts.add(new double[]{c, e.getValue()});
+            sum += e.getValue();
+        }
+        if (parts.isEmpty() || !(sum > 0)) return null;
+        double[][] out = new double[2][parts.size()];
+        for (int i = 0; i < parts.size(); i++) {
+            out[0][i] = parts.get(i)[0];
+            out[1][i] = parts.get(i)[1] / sum;
+        }
+        return out;
+    }
+
     /** The id for a key, or -1. */
     public synchronized int id(String key) {
         Integer i = idOf.get(key);

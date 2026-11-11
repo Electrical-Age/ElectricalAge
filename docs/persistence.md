@@ -121,6 +121,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   always, plus `<prefix>S`, a compound of the other species by key (`{"eln:crude_oil": kg}`), only when the node holds
   any. Saves without it load as water and air. A key that names no defined species loads as a placeholder liquid under
   that key (`SpeciesRegistry.forSave`, logged once) and is written back unchanged, so a removed datapack loses nothing.
+  A species key that is a mixture alias (`eln:crude_oil`) loads as its parts, dead (without its gases, the rest
+  renormalised), so nothing saved bursts on load.
   `<prefix>Fv` (int, `FluidSaves.FORMAT` = 2; a pipe part's `fv`) marks a save by the fluid core. Without it the energy
   is the legacy solver's: on load it is taken at the temperature the legacy Flash finds for it and recomputed by the
   core there (its vapour energies differ by up to ~40 kJ/kg), so nothing jumps. One-way: an older build reads the core's

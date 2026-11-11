@@ -113,8 +113,16 @@ public final class FluidSaves {
             for (String k : s.get().keySet()) {
                 int id = reg.forSave(k);
                 if (id < 2) continue;   // (the built-ins have their own keys)
-                if (extra == null || id - 2 >= extra.length) extra = extra == null ? new double[id - 1] : java.util.Arrays.copyOf(extra, id - 1);
-                extra[id - 2] += s.get().getDoubleOr(k, 0);
+                double kg = s.get().getDoubleOr(k, 0);
+                // (a mixture alias a save holds, crude saved before it was one: its parts, dead, without its gas)
+                double[][] mix = reg.mixture(id, true);
+                int[] ids = mix == null ? new int[]{id} : java.util.Arrays.stream(mix[0]).mapToInt(x -> (int) x).toArray();
+                for (int i = 0; i < ids.length; i++) {
+                    int c = ids[i];
+                    if (c < 2) continue;
+                    if (extra == null || c - 2 >= extra.length) extra = extra == null ? new double[c - 1] : java.util.Arrays.copyOf(extra, Math.max(extra.length, c - 1));
+                    extra[c - 2] += mix == null ? kg : kg * mix[1][i];
+                }
             }
         }
         return extra;

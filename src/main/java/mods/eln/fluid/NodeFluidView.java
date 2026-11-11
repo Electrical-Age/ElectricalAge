@@ -179,7 +179,7 @@ public class NodeFluidView extends FluidStacksResourceHandler {
             } else if (ph.id() == SpeciesRegistry.WATER) {
                 double got = EaUnits.drainLiquid(n, kg);
                 if (got < kg && n.T() < Water.TB) EaUnits.drainVapour(n, kg - got);   // (cold: the rest is vapour that would condense)
-            } else EaUnits.drainLiquid(n, ph.id(), kg);
+            } else EaUnits.drainLayer(n, ph.id(), kg);   // (its whole layer by share: a mixed liquid goes as it is)
         }
         set(INTAKE, FluidResource.EMPTY, 0);
     }
@@ -201,7 +201,7 @@ public class NodeFluidView extends FluidStacksResourceHandler {
         } else {
             int top = FluidSpecies.topLiquid(n);
             int id = top < 0 ? SpeciesRegistry.WATER : top;
-            double kg = id == SpeciesRegistry.WATER ? waterShown(n) : n.liquid(id);
+            double kg = id == SpeciesRegistry.WATER ? waterShown(n) : EaUnits.layerLiquid(n, id);
             put(LIQUID, FluidSpecies.fluid(id, false), (int) Math.round(kg / FluidSpecies.kgPerMb(id, false)));
             int gas = FluidSpecies.mainVapour(n);
             int gid = gas < 0 ? SpeciesRegistry.WATER : gas;

@@ -31,6 +31,9 @@ public final class PortBridge {
     private double[] loaded;
     private double carry;
 
+    /** OUT: what it pushes is live (crude with its natural gas: the oil pump's sealed line from the well). */
+    public boolean live;
+
     public PortBridge(String key, Mode mode, double ratePerS, double headPa) {
         this.key = key;
         this.mode = mode;
@@ -112,7 +115,7 @@ public final class PortBridge {
                 tx.commit();
             }
             if (got <= 0) continue;
-            EaUnits.add(run, ph.id(), got * FluidSpecies.kgPerMb(ph.id(), ph.vapour()), T, ph.vapour());
+            EaUnits.add(run, ph.id(), got * FluidSpecies.kgPerMb(ph.id(), ph.vapour()), T, ph.vapour(), live);
             moved += got;
             if (!ph.vapour()) liquidRoom -= got;
         }
@@ -121,6 +124,27 @@ public final class PortBridge {
 
     private int pull(ResourceHandler<FluidResource> tank, FluidNode run, int budget) {
         int moved = 0;
+        // (a device that takes a mixture alias, the column's crude: the run's layer of its parts, whole, as that alias, until
+        // the column is a still; crude in a pipe is its five cuts now, Baughn 2026-11-10)
+        var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+        for (int id = 2; id < reg.size() && moved < budget; id++) {
+            double[][] mix = reg.mixture(id, true);
+            var f = mix == null ? null : FluidSpecies.fluid(id, false);
+            if (f == null) continue;
+            int part = (int) mix[0][0];
+            double kg = EaUnits.layerLiquid(run, part);
+            double per = FluidSpecies.kgPerMb(id, false);
+            int want = Math.min(budget - moved, (int) Math.floor(kg / per));
+            if (want <= 0) continue;
+            int put;
+            try (var tx = Transaction.openRoot()) {
+                put = tank.insert(FluidResource.of(f), want, tx);
+                tx.commit();
+            }
+            if (put <= 0) continue;
+            EaUnits.drainLayer(run, part, put * per);
+            moved += put;
+        }
         for (int id = 0; id < run.speciesBound() && moved < budget; id++) {
             for (boolean vapour : new boolean[]{false, true}) {
                 if (moved >= budget) break;

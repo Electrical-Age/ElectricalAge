@@ -1011,17 +1011,19 @@ public final class PipeCases {
             for (VoxelPart p : n.parts) if (p instanceof PipePart pp) stub = pp;
             int crude = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:crude_oil");
             var run = stub == null ? null : mods.eln.fluid.FluidWorld.nodeFor(stub.fluid);
-            double inRun = run == null || crude < 0 ? 0 : run.mass(crude) / mods.eln.fluid.FluidSpecies.kgPerMb(crude, false);
+            // (crude is a mixture alias, Baughn 2026-11-10: its cuts and its gas, as crude's mB)
+            double inRun = run == null || crude < 0 ? 0 : OilCases.crudeMb(run);
             ctx.check("pipe: 120 mB of crude oil went in through the adapter", put == 120, put + " mB");
             ctx.check("pipe: it is crude oil in the run", inRun > 119 && inRun < 121, inRun + " mB, water " + (run == null ? 0 : run.mWater));
             ctx.check("pipe: lava (no species) is refused", lava == 0, lava + " mB");
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, at, net.minecraft.core.Direction.WEST);
             int took;
             try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                took = cap.extract(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Oil.CRUDE.get()), 50, tx);
+                // (crude only goes in; what comes out is the mix, named by its main species: heavy oil, Baughn 2026-11-10)
+                took = cap.extract(net.neoforged.neoforge.transfer.fluid.FluidResource.of(mods.eln.oil.Oil.Cut.HEAVYOIL.source.get()), 50, tx);
                 tx.commit();
             }
-            ctx.check("pipe: crude oil comes back out through it", took == 50, took + " mB");
+            ctx.check("pipe: the crude's mix comes back out through it, as heavy oil (its main cut)", took == 50, took + " mB");
         }
     }
 

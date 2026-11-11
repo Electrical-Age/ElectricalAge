@@ -155,6 +155,22 @@ public final class EaUnits {
 
     /** Put m kg of species id in at temperature T, as liquid or vapour (water: addWater). */
     public static void add(FluidNode n, int id, double m, double T, boolean vapour) {
+        add(n, id, m, T, vapour, false);
+    }
+
+    /**
+     * ... a mixture alias as what it is made of: crude as its cuts. Live (the oil pump's sealed line from the well) with its
+     * natural gas; otherwise dead, its gas long gone (Baughn 2026-11-10: "the buckets don't have lids").
+     */
+    public static void add(FluidNode n, int id, double m, double T, boolean vapour, boolean live) {
+        double[][] mix = SpeciesRegistry.get().mixture(id, !live);
+        if (mix != null) {
+            for (int i = 0; i < mix[0].length; i++) {
+                int c = (int) mix[0][i];
+                add(n, c, m * mix[1][i], T, SpeciesRegistry.get().byId(c).gas());
+            }
+            return;
+        }
         if (id == SpeciesRegistry.WATER) {
             addWater(n, m, T, vapour);
             return;
@@ -173,6 +189,38 @@ public final class EaUnits {
         if (m <= 0) return 0;
         n.addMass(id, -m);
         n.energy -= m * SpeciesRegistry.get().byId(id).hLiquid(n.T());
+        n.update();
+        return m;
+    }
+
+    /** The liquid (kg) of the layer species id is in: every species mixed in it. */
+    public static double layerLiquid(FluidNode n, int id) {
+        if (id == SpeciesRegistry.WATER) return n.liquid(id);
+        int layer = n.layerOf(id);
+        double kg = 0;
+        for (int j = 2; j < n.speciesBound(); j++) if (n.liquid(j) > 0 && n.layerOf(j) == layer) kg += n.liquid(j);
+        return kg;
+    }
+
+    /**
+     * Take up to m kg of the layer species id is in out of n, every species in it by its share, each with its enthalpy
+     * (Baughn 2026-11-10: a mixed liquid is named by its main species; taken whole, so a bucket can't pull one species out
+     * of a mix and distil it for free). Returns what it took.
+     */
+    public static double drainLayer(FluidNode n, int id, double m) {
+        if (id == SpeciesRegistry.WATER) return drainLiquid(n, m);
+        double total = layerLiquid(n, id);
+        m = Math.min(m, total);
+        if (m <= 0) return 0;
+        int layer = n.layerOf(id);
+        double T = n.T(), f = m / total;
+        double[] take = new double[n.speciesBound()];
+        for (int j = 2; j < take.length; j++) if (n.liquid(j) > 0 && n.layerOf(j) == layer) take[j] = n.liquid(j) * f;
+        for (int j = 2; j < take.length; j++) {
+            if (take[j] <= 0) continue;
+            n.addMass(j, -take[j]);
+            n.energy -= take[j] * SpeciesRegistry.get().byId(j).hLiquid(T);
+        }
         n.update();
         return m;
     }
