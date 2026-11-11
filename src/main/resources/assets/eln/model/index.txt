@@ -80,6 +80,7 @@ mediumvoltageswitch/mediumvoltageswitch.obj
 oilpump200v/oilpump200v.obj
 oilpump50v/oilpump50v.obj
 passivethermaldissipatora/passivethermaldissipatora.obj
+pipemixer/pipemixer.obj
 plantcondenser/plantcondenser.obj
 platemachinea/platemachinea.obj
 platemachineb/platemachineb.obj

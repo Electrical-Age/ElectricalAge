@@ -76,7 +76,9 @@ final class GoldenRecipesCase implements TestCase {
         "eln:200_v_led_bulb", "eln:200_v_power_socket", "eln:low_voltage_relay", "eln:medium_voltage_relay", "eln:high_voltage_relay",
         "eln:very_high_voltage_relay", "eln:very_high_voltage_switch",
         "eln:thermal_insulation", "eln:copper_cable", "eln:power_resistor", "eln:dc_dc_converter", "eln:rheostat",
-        "eln:thermistor", "eln:power_inductor", "eln:small_50_v_copper_heating_corp", "eln:50_v_copper_heating_corp");
+        "eln:thermistor", "eln:power_inductor", "eln:small_50_v_copper_heating_corp", "eln:50_v_copper_heating_corp",
+        // the fuel burners from alloy plates, not stone combustion chambers (Baughn 2026-11-11)
+        "eln:small_fuel_burner", "eln:medium_fuel_burner", "eln:big_fuel_burner");
 
     /**
      * 1.12 outputs dropped on purpose: copper tools and armour, vanilla since 1.21.9 (Baughn, 2026-10-11); the heat
