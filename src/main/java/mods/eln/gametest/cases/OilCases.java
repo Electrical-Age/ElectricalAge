@@ -1026,11 +1026,13 @@ public final class OilCases {
      * <li>gas_fire: natural gas fed in faster than the flame takes it escapes by its vents with the fire lit and sets the
      * blocks around it alight;</li>
      * <li>inertia: a small burner lit at full: its flame is at full at once, the heat it gives follows through its burner's
-     * mass, 63 % in ~30 s (Baughn 2026-11-11), and it keeps giving heat for a while after the flame goes out.</li>
+     * mass, 63 % in ~30 s (Baughn 2026-11-11), and it keeps giving heat for a while after the flame goes out;</li>
+     * <li>buckets: two buckets of diesel go in, whole, through its capability (AdventurAgent 2026-11-11: the second
+     * didn't fit); one of diesel and one of water too.</li>
      * </ul>
      */
     static final class FurnacePressure implements TestCase {
-        static final String[] VARIANTS = {"forced_air", "relief", "burst", "gas_first", "gas_fire", "inertia"};
+        static final String[] VARIANTS = {"forced_air", "relief", "burst", "gas_first", "gas_fire", "inertia", "buckets"};
         final String variant;
         mods.eln.transparentnode.FuelHeatFurnaceElement a, b;
         mods.eln.sim.fluid.FluidDevice fx, watch;
@@ -1151,6 +1153,18 @@ public final class OilCases {
                         if (tick == 1200) afterOff = a.heatPower();
                     });
                 }
+                case "buckets" -> {
+                    a = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(1, 1, 1));
+                    b = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(4, 1, 1));
+                    ctx.after(2, () -> {
+                        OilOnPipes.put(ctx, ctx.at(1, 1, 1), Oil.Cut.DIESEL.source.get(), 1000);
+                        OilOnPipes.put(ctx, ctx.at(4, 1, 1), Oil.Cut.DIESEL.source.get(), 1000);
+                    });
+                    ctx.after(6, () -> {
+                        OilOnPipes.put(ctx, ctx.at(1, 1, 1), Oil.Cut.DIESEL.source.get(), 1000);
+                        OilOnPipes.put(ctx, ctx.at(4, 1, 1), net.minecraft.world.level.material.Fluids.WATER, 1000);
+                    });
+                }
                 case "gas_first" -> {
                     a = FuelBySpecies.lit(ctx, 3);
                     a.putFuel(Oil.Cut.DIESEL.source.get(), 800);
@@ -1196,6 +1210,12 @@ public final class OilCases {
                     String.format("started at %.2f bar, now %.3f bar, %.6f kg out by the relief", maxGauge / 1e5, gauge(a) / 1e5, a.getReliefKg()));
                 case "burst" -> ctx.check("fuel furnace: a 20 bar air line outruns its relief: past 6 bar it bursts",
                     ctx.level().getBlockEntity(ctx.at(3, 1, 1)) == null || a.isBurnt(), "" + ctx.level().getBlockState(ctx.at(3, 1, 1)));
+                case "buckets" -> {
+                    double water = b.getVessel().liquid(mods.eln.sim.fluid.SpeciesRegistry.WATER) / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
+                    String what = String.format("%.0f mB in the first; %.0f mB in the second, %.0f of it water", a.fuelMb(), b.fuelMb(), water);
+                    ctx.check("fuel furnace: two buckets of diesel go in", Math.abs(a.fuelMb() - 2000) < 20, what);
+                    ctx.check("fuel furnace: a bucket of water goes in over one of diesel", Math.abs(b.fuelMb() - 2000) < 20 && water > 950, what);
+                }
                 case "inertia" -> {
                     mods.eln.Eln.simulator.removeSlowProcess(clock);
                     String what = String.format("lit at %.1f s, 63 %% of its flame's heat %.1f s later; 5 s after the flame went out it gives %.0f W", litAt / 20.0, (at63 - litAt) / 20.0, afterOff);

@@ -121,9 +121,13 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         const val COKE_BALANCE = 0.05
         /** Coking per unit of index over the balance: dead crude (index 0.216) cokes at rate 1, as before. */
         const val COKE_PER_INDEX = 1 / (0.2159 - COKE_BALANCE)
-        /** Its fuel tank (mB, two buckets: Baughn 2026-11-03, it fills by bucket) and its volume (m^3). */
+        /**
+         * Its fuel tank (mB, two buckets: Baughn 2026-11-03, it fills by bucket) and its volume (m^3): two buckets under
+         * the view's 95 % fill, with head space over them (AdventurAgent 2026-11-11: a second bucket didn't fit).
+         */
         const val TANK_MB = 2000.0
-        val TANK_M3 = TANK_MB * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / mods.eln.sim.fluid.Water.RHO_L
+        const val TANK_FILL = 0.95
+        val TANK_M3 = TANK_MB / TANK_FILL * 1.01 * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / mods.eln.sim.fluid.Water.RHO_L
         /** The tank's height in the block (m) and its fuel flange, 4 px up (mods.eln.cad.models.FuelHeater). */
         const val TANK_H = 0.5
         const val FLANGE_Y = 4 / 16.0
@@ -189,7 +193,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private var legacyStub: DoubleArray? = null
 
     /** Its fluid capability: a view of the vessel (buckets; other mods' pipes). */
-    private val view = mods.eln.fluid.NodeFluidView(mods.eln.fluid.NodeFluidView.Spec().intake().liquidShare(0.95))
+    private val view = mods.eln.fluid.NodeFluidView(mods.eln.fluid.NodeFluidView.Spec().intake().liquidShare(TANK_FILL))
 
     /**
      * Heat drawn from the fuel and not yet given (J, after heatFurnaceFuelFactor): the burner takes fuel out of the vessel
