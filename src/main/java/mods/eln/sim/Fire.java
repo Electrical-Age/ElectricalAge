@@ -22,6 +22,8 @@ public final class Fire {
     public static volatile double minFire = 0.15;
 
     final Kind kind;
+    /** No lag once lit: the flame follows the setting at once (the fuel heat furnace's inertia is its burner's mass). */
+    public boolean instant;
     /** The real burn level (0 = out .. 1). */
     public double level;
     double lighting;
@@ -48,7 +50,7 @@ public final class Fire {
             } else lighting = 0;
             return;
         }
-        level += (setting - level) * (kind.lag <= 0 ? 1 : Math.min(1, time / kind.lag));
+        level += (setting - level) * (instant || kind.lag <= 0 ? 1 : Math.min(1, time / kind.lag));
         if (setting < min && level <= min) level = 0;   // (asked lower than it can burn: it goes out)
     }
 

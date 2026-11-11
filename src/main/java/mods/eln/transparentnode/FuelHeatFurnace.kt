@@ -154,6 +154,11 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         const val GAS_FIRE_S = 2.0
         /** Heat to boil off a kg of water that reached the burner (J/kg: warming and evaporating). */
         const val WATER_BOIL_J_PER_KG = 2.6e6
+        /** The burner's thermal mass per W of its rating (J/K/W) and how far it runs over the furnace at its rating (K). */
+        const val BURNER_C_PER_W = 0.3
+        const val BURNER_DT = 100.0
+        /** The fuel's heat capacity (J/(kg K)), for its share of the burner's inertia. */
+        const val FUEL_CP = 2000.0
         /** Drowned, the hot burner flashes this many seconds of its fire's heat of the water to steam out of its stack. */
         const val DROWN_FLASH_S = 5.0
     }
@@ -205,6 +210,9 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     var gasBurntKg = 0.0
         private set
     var heatGivenJ = 0.0
+        private set
+    /** Heat its flame made (J, since loaded): what it drew x heating value; the burner gives it on with a lag. */
+    var flameJ = 0.0
         private set
     /** Its flue: smoke out of the flange on top of its stack, or up the stack (as the coal oven's). */
     private val flue = mods.eln.fluid.Flue("flue")
@@ -338,6 +346,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         steamedKg += kg
         fire.level = 0.0
         bank = 0.0
+        delivered = 0.0   // (the water quenches the burner)
         mainSwitch = false
         steamPuff = 2
         needPublish()
@@ -423,7 +432,25 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 
     private var heaterControlValue = 0.0
     /** The burner's real level, lagging the control value (Fire.OIL). */
-    val fire = mods.eln.sim.Fire(mods.eln.sim.Fire.OIL)
+    val fire = mods.eln.sim.Fire(mods.eln.sim.Fire.OIL).also { it.instant = true }
+
+    /**
+     * Its burner's thermal inertia (Baughn 2026-11-11: from the burner's mass and the fuel's, 30 s): the flame heats the
+     * burner, a lumped mass of BURNER_C_PER_W J/K per W of rating (about 6 kg of alloy for the big one) plus the fuel in
+     * the tank (FUEL_CP), which passes heat on through G = rating / BURNER_DT. The heat it gives lags the flame by
+     * tau = C / G: 30 s empty, a little more with a full tank.
+     */
+    private var delivered = 0.0
+    /** The flame's own power now (W): what it burns, before the burner's lag. */
+    var flamePower = 0.0
+        private set
+
+    /** Its burner's time constant now (s). */
+    fun burnerTau(nominal: Double): Double {
+        if (nominal <= 0) return 0.0
+        val fuelKg = (vessel?.liquidVolume() ?: 0.0) * 850   // (a fuel's density, near enough)
+        return BURNER_DT * (BURNER_C_PER_W * nominal + FUEL_CP * fuelKg) / nominal
+    }
     private var actualHeatPower by published(0.0)
 
     /**
@@ -460,14 +487,20 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             // expansion; the burner draws it into the bank between fluid steps)
             val want = fire.level * nominalPower * (1 - coke) * overfire() * time
             wanted += want
-            val given = Math.min(want, bank)
-            bank -= given
-            heatGivenJ += given
-            actualHeatPower = given / time
+            val burnt = Math.min(want, bank)
+            bank -= burnt
+            flamePower = burnt / time
+            flameJ += burnt
+            // (the burner's mass between the flame and the furnace: the heat it gives follows the flame with tau)
+            val tau = burnerTau(nominalPower)
+            delivered += (flamePower - delivered) * (if (tau <= 0) 1.0 else Math.min(1.0, time / tau))
+            if (delivered < 1e-3) delivered = 0.0
+            heatGivenJ += delivered * time
+            actualHeatPower = delivered
             // (the coking: per second at its full power on dead crude, 1 / (2 h); by the coking index of what burns, over
             // or under the balance: fuel better than a plausible refinery's clears the burner as it burns)
             val rate = cokeRate()
-            if (rate != 0.0 && nominalPower > 0) coke = Math.max(0.0, Math.min(COKE_MAX, coke + rate * actualHeatPower / nominalPower * time / (2 * 3600)))
+            if (rate != 0.0 && nominalPower > 0) coke = Math.max(0.0, Math.min(COKE_MAX, coke + rate * flamePower / nominalPower * time / (2 * 3600)))
             thermalLoad.PcTemp += mods.eln.fluid.Flue.HEAT_SHARE * actualHeatPower   // (the rest leaves in the smoke: Flue)
         }
 
@@ -616,7 +649,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private fun cokeRate() = if (atBurner >= 0 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER) COKE_PER_INDEX * (cokingIndex - COKE_BALANCE) else 0.0
 
     /** Thick black smoke while what it burns cokes the burner. */
-    private fun sooty() = actualHeatPower > 0 && cokingIndex > COKE_BALANCE
+    private fun sooty() = flamePower > 0 && cokingIndex > COKE_BALANCE
 
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
@@ -669,6 +702,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         nbt.putDouble("manualControl", manualControl)
         nbt.putDouble("setTemperature", setTemperature)
         nbt.putDouble("actualHeatPower", actualHeatPower)
+        nbt.putDouble("burnerW", delivered)
         fire.write(nbt, "")
         flue.write(nbt)
         nbt.putDouble("coke", coke)
@@ -692,6 +726,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         manualControl = ClientValues.finite(nbt.getDoubleOr("manualControl", 0.0), 0.0)
         setTemperature = ClientValues.finite(nbt.getDoubleOr("setTemperature", 0.0), 0.0)
         actualHeatPower = nbt.getDoubleOr("actualHeatPower", 0.0)
+        delivered = nbt.getDoubleOr("burnerW", actualHeatPower)
         if (nbt.contains("fire")) fire.read(nbt, "") else fire.level = heaterControlValue
         flue.read(nbt)
         coke = nbt.getDoubleOr("coke", 0.0)

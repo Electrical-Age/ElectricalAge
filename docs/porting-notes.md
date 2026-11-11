@@ -157,6 +157,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   rooms and spills aren't tracked). Jade shows the overfiring and the venting. A pump-fed furnace now overfires by its
   line's pressure unless the line is regulated. GameTests `fuel_furnace_forced_air`, `_relief`, `_burst`, `_gas_first`,
   `_gas_fire`.
+- Fuel heat furnace inertia from thermal mass (Baughn 2026-11-11, 30 s): its flame follows the setting at once (it
+  still takes `oilLightSeconds` to light; the `oilLagSeconds` config is gone) and heats its burner, a lumped mass of
+  0.3 J/K per W of rating plus the fuel in its tank (2000 J/(kg K)), which passes the heat on through G = rating /
+  100 K: tau = 30 s with an empty tank, ~35 s for a small burner on a full one. Fuel is drawn and coking counted by
+  the flame; heat given, smoke and Jade's power by the burner. Water at the burner quenches it. GameTest
+  `fuel_furnace_inertia`.
 - Fuel burners are 2, 5 and 10 kW (were 5, 10 and 25: sized for natural draft, Baughn 2026-11-11, so forced air means
   something) and made of alloy plates instead of stone combustion chambers.
 - Natural gas (and syngas) at real heating values (Baughn 2026-11-11: "we'll make the gas numbers real"): 1.12

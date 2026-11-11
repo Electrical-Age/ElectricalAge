@@ -1024,17 +1024,20 @@ public final class OilCases {
      * <li>burst: a 20 bar line outruns the relief: past 6 bar gauge the tank bursts;</li>
      * <li>gas_first: a little natural gas in its head space burns in the flame, none escapes, nothing catches fire;</li>
      * <li>gas_fire: natural gas fed in faster than the flame takes it escapes by its vents with the fire lit and sets the
-     * blocks around it alight.</li>
+     * blocks around it alight;</li>
+     * <li>inertia: a small burner lit at full: its flame is at full at once, the heat it gives follows through its burner's
+     * mass, 63 % in ~30 s (Baughn 2026-11-11), and it keeps giving heat for a while after the flame goes out.</li>
      * </ul>
      */
     static final class FurnacePressure implements TestCase {
-        static final String[] VARIANTS = {"forced_air", "relief", "burst", "gas_first", "gas_fire"};
+        static final String[] VARIANTS = {"forced_air", "relief", "burst", "gas_first", "gas_fire", "inertia"};
         final String variant;
         mods.eln.transparentnode.FuelHeatFurnaceElement a, b;
         mods.eln.sim.fluid.FluidDevice fx, watch;
         mods.eln.sim.fluid.FluidNode main;
-        double heatA0, heatB0, heatA1, heatB1, over, gaugeAt, maxGauge, gas0, main0;
-        int tick;
+        double heatA0, heatB0, heatA1, heatB1, over, gaugeAt, maxGauge, gas0, main0, afterOff = -1;
+        int tick, litAt = -1, at63 = -1;
+        mods.eln.sim.IProcess clock;
 
         FurnacePressure(String variant) {
             this.variant = variant;
@@ -1049,7 +1052,7 @@ public final class OilCases {
         }
 
         public int ticks() {
-            return 300;
+            return variant.equals("inertia") ? 1300 : 300;
         }
 
         static int ng() {
@@ -1131,6 +1134,23 @@ public final class OilCases {
                     a.putFuel(Oil.Cut.DIESEL.source.get(), 800);
                     fx = onFlange(a, main = main(y, 20e5, false));
                 }
+                case "inertia" -> {
+                    a = FuelBySpecies.lit(ctx, 3);
+                    a.getInventory().setItem(mods.eln.transparentnode.FuelHeatFurnaceContainer.Companion.getFuelBurnerSlot(),
+                        mods.eln.Eln.sharedItemStackOne.getDescriptor(0 + (124 << 6)).newItemStack());   // (the small one: it doesn't overheat on its bench)
+                    a.inventoryChange(a.getInventory());
+                    a.putFuel(Oil.Cut.DIESEL.source.get(), 800);
+                    mods.eln.Eln.simulator.addSlowProcess(clock = dt -> {
+                        tick++;
+                        if (litAt < 0 && a.getFlamePower() > 0) litAt = tick;
+                        if (litAt >= 0 && at63 < 0 && a.heatPower() >= 0.632 * a.getFlamePower() && a.getFlamePower() > 0) at63 = tick;
+                        if (tick == 1100) a.networkUnserialize(ctx.stream(o -> {
+                            o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getSetManualControlValueEvent());
+                            o.writeFloat(0f);
+                        }));
+                        if (tick == 1200) afterOff = a.heatPower();
+                    });
+                }
                 case "gas_first" -> {
                     a = FuelBySpecies.lit(ctx, 3);
                     a.putFuel(Oil.Cut.DIESEL.source.get(), 800);
@@ -1176,6 +1196,13 @@ public final class OilCases {
                     String.format("started at %.2f bar, now %.3f bar, %.6f kg out by the relief", maxGauge / 1e5, gauge(a) / 1e5, a.getReliefKg()));
                 case "burst" -> ctx.check("fuel furnace: a 20 bar air line outruns its relief: past 6 bar it bursts",
                     ctx.level().getBlockEntity(ctx.at(3, 1, 1)) == null || a.isBurnt(), "" + ctx.level().getBlockState(ctx.at(3, 1, 1)));
+                case "inertia" -> {
+                    mods.eln.Eln.simulator.removeSlowProcess(clock);
+                    String what = String.format("lit at %.1f s, 63 %% of its flame's heat %.1f s later; 5 s after the flame went out it gives %.0f W", litAt / 20.0, (at63 - litAt) / 20.0, afterOff);
+                    ctx.line("inertia: " + what);
+                    ctx.check("fuel furnace: its heat follows the flame through its burner's mass, 63 % in 25-45 s", litAt > 0 && at63 > 0 && at63 - litAt > 25 * 20 && at63 - litAt < 45 * 20, what);
+                    ctx.check("fuel furnace: ... and it still gives heat 5 s after the flame goes out", afterOff > 0, what);
+                }
                 case "gas_first" -> {
                     double burnt = a.getGasBurntKg() - gas0, left = a.getVessel().vapour(ng());
                     String what = String.format("%.6f kg burnt, %.6f kg left, %d fire blocks", burnt, left, fires(ctx, ctx.at(3, 1, 1)));
@@ -1388,7 +1415,8 @@ public final class OilCases {
         public void measure(TestContext ctx) {
             switch (variant) {
                 case "mixed_fuel" -> {
-                    double drawn = a.getFuelBurntKg(), given = a.getHeatGivenJ();
+                    // (by its flame's heat: what the burner's mass gives on lags it, Baughn 2026-11-11)
+                    double drawn = a.getFuelBurntKg(), given = a.getFlameJ();
                     String jade = a.getWaila().get(mods.eln.i18n.I18N.tr("Power")), want = mods.eln.misc.Utils.plotPower("", a.heatPower());
                     ctx.check("fuel furnace: Jade shows the power it fires at", want.equals(jade), jade + " against " + want);
                     ctx.check("fuel furnace: a gasoline and diesel mix burns", given > 0 && drawn > 0, given + " J from " + drawn + " kg");

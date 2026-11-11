@@ -13,7 +13,7 @@ public final class ElnConfig {
     static final ModConfigSpec.BooleanValue PROBE_DETAILS;
     static final ModConfigSpec.BooleanValue CONVERT_CABLES;
     static final ModConfigSpec.BooleanValue INTROSPECT_REMOTE;
-    static final ModConfigSpec.DoubleValue COAL_LAG, OIL_LAG, MIN_FIRE, COAL_KINDLE, OIL_LIGHT;
+    static final ModConfigSpec.DoubleValue COAL_LAG, MIN_FIRE, COAL_KINDLE, OIL_LIGHT;
     static final ModConfigSpec.DoubleValue DEPTH_C, DEPTH_PER_BLOCK, NETHER_C, HEAT_FURNACE_FUEL;
     static final ModConfigSpec.DoubleValue BIKE_POWERED, BIKE_PEDALLING, BIKE_WINDOW, BIKE_MOTOR, BIKE_TIP_DELAY, BIKE_TIP_CHANCE,
         BIKE_CRASH, BIKE_JUMP, BIKE_STEP, BIKE_TURN, BIKE_TURN_TOP, BIKE_LAMP, TERRAIN_STEP, TERRAIN_JUMP, TERRAIN_MOTOR;
@@ -37,7 +37,7 @@ public final class ElnConfig {
         b.push("fire");
         COAL_LAG = b.comment("Seconds a coal fire (the stone heat furnace) takes to follow its setting: a first-order lag (Baughn: coal",
                 "plants change burn rate slowly).").defineInRange("coalLagSeconds", 180.0, 0.0, 3600.0);
-        OIL_LAG = b.comment("The same for an oil burner (the fuel heat furnace).").defineInRange("oilLagSeconds", 20.0, 0.0, 3600.0);
+        // (no oil lag: the fuel heat furnace's inertia is its burner's mass, Baughn 2026-11-11)
         MIN_FIRE = b.comment("Below this share of full power a fire asked to burn lower goes out.").defineInRange("minFire", 0.15, 0.0, 1.0);
         COAL_KINDLE = b.comment("Seconds to relight a coal fire that went out.").defineInRange("coalKindleSeconds", 30.0, 0.0, 3600.0);
         OIL_LIGHT = b.comment("Seconds to light an oil burner.").defineInRange("oilLightSeconds", 3.0, 0.0, 3600.0);
@@ -153,7 +153,6 @@ public final class ElnConfig {
         mods.eln.node.voxel.CableConverter.convertOnLoad = CONVERT_CABLES.get();
         mods.eln.sim.Fire.COAL.lag = COAL_LAG.get();
         mods.eln.sim.Fire.COAL.kindle = COAL_KINDLE.get();
-        mods.eln.sim.Fire.OIL.lag = OIL_LAG.get();
         mods.eln.sim.Fire.OIL.kindle = OIL_LIGHT.get();
         mods.eln.sim.Fire.minFire = MIN_FIRE.get();
         mods.eln.sim.Ambient.depthC = DEPTH_C.get();
