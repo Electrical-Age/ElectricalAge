@@ -300,16 +300,17 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
+        // (in order: Jade's headline is the first lines; the pumping rate first, as its tank is usually empty: Baughn 2026-11-11)
+        Map<String, String> info = new java.util.LinkedHashMap<>();
+        info.put(I18N.tr("Pumping"), String.format("%.1f mB/s", rate));
         info.put(I18N.tr("Status"), status);
         if (lake != null) info.put(I18N.tr("Lake"), lake);
-        info.put(I18N.tr("Flow"), String.format("%.1f mB/s", rate));
+        info.put(I18N.tr("Power consumption"), Utils.plotPower("", resistor.getP()));
+        info.put(I18N.tr("Discharge"), discharge.piped() ? I18N.tr("the flange on its right, into the pipe") : I18N.tr("the flange on its right"));
         if (discharge.vessel != null) {
             info.put(I18N.tr("Tank"), String.format("%.0f / %.0f mB, %.2f bar", discharge.liquidMb(), discharge.capacityMb(), discharge.vessel.P() / 1e5));
             info.put(I18N.tr("Contents"), mods.eln.sim.fluid.EaUnits.composition(discharge.vessel));
         }
-        info.put(I18N.tr("Discharge"), discharge.piped() ? I18N.tr("the flange on its right, into the pipe") : I18N.tr("the flange on its right"));
-        info.put(I18N.tr("Power consumption"), Utils.plotPower("", resistor.getP()));
         return info;
     }
 }

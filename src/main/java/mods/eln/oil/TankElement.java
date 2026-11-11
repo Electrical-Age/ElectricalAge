@@ -76,7 +76,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     /**
      * Which of its ports have something coupled to them (Baughn: a flange only where a pipe meets it; 2026-10-29 for a
      * merged box, 2026-11-03 for a lone tank too): bit 2 * face + (0 low, 1 high) for the side faces (Direction 3D
-     * values 2..5), bit 12 the top. Published when it changes.
+     * values 2..5), bit 12 the top, bit 13 the underside. Published when it changes.
      */
     public int coupled;
 
@@ -233,7 +233,8 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             if (d == null) continue;
             for (FluidPort q : d.fluidPorts())
                 if (q.pos() == there.asLong() && q.face() == f.getOpposite().get3DDataValue() && q.at() == p.at()) {
-                    if (p.face() == 1) mask |= 1 << 12;
+                    if (p.face() == 0) mask |= 1 << 13;   // (its underside port: counted, not drawn)
+                    else if (p.face() == 1) mask |= 1 << 12;
                     else if (p.face() >= 2) mask |= 1 << (2 * p.face() + (p.at() == sideSpot(p.face(), HIGH) ? 1 : 0));
                 }
         }
@@ -394,7 +395,10 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         // (its ports are drawn only where a pipe meets them: say where they are)
         info.put(I18N.tr("Ports"), group == null ? I18N.tr("steam: top, and 12 px up on the sides; water: bottom, and 4 px up on the sides (not the glass's)")
             : I18N.tr("on its outer faces: steam: top, and 12 px up a side; water: bottom, and 4 px up a side"));
-        info.put(I18N.tr("Piped"), String.format("%d of %d ports here", Integer.bitCount(coupled), ports.stream().filter(p -> p.face() != 0).count()));
+        // (the whole box's: "0 of 2 ports here" on one block of a box piped elsewhere read as a fault, Baughn 2026-11-11)
+        int piped = 0;
+        for (TankElement t : group == null ? List.of(this) : group.members) piped += Integer.bitCount(t.coupled);
+        info.put(I18N.tr("Pipes"), piped == 0 ? I18N.tr("none connected") : String.format(I18N.tr("%d connected"), piped));
         if (vessel.P() > desc.workingPa) info.put(I18N.tr("Warning"), String.format("over its %.0f bar working pressure", desc.workingPa / 1e5));
         return info;
     }

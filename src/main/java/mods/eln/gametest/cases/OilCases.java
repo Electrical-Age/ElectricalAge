@@ -3345,7 +3345,7 @@ public final class OilCases {
     static final class Buckets2 implements TestCase {
         mods.eln.oil.BoilerElement boiler;
         mods.eln.oil.OilPumpElement pump;
-        ItemStack afterWater, afterEmpty, afterSteamTry;
+        ItemStack afterWater, afterEmpty, afterSteamTry, afterTank;
         int waterAfter, crudeAfter;
 
         public String id() {
@@ -3378,6 +3378,12 @@ public final class OilCases {
             pump.putFluid(mods.eln.oil.Oil.CRUDE.get(), 1500);
             afterEmpty = use(ctx, pump, new ItemStack(net.minecraft.world.item.Items.BUCKET));
             crudeAfter = pump.discharge.view.amount(mods.eln.fluid.NodeFluidView.LIQUID);
+            // a tank of crude buckets out as crude too (Baughn 2026-11-11: a reservoir gave a bucket, a tank didn't)
+            var tank = OilOnPipes.tank(ctx, ctx.at(1, 1, 4), mods.eln.misc.Direction.XP);
+            ctx.after(2, () -> {
+                OilOnPipes.put(ctx, ctx.at(1, 1, 4), mods.eln.oil.Oil.CRUDE.get(), 3000);
+                ctx.after(4, () -> afterTank = use(ctx, tank, new ItemStack(net.minecraft.world.item.Items.BUCKET)));
+            });
         }
 
         public void measure(TestContext ctx) {
@@ -3387,6 +3393,7 @@ public final class OilCases {
             ctx.check("oil: an empty bucket can't take the boiler's water", boiler.tanks.water() >= 990 && afterSteamTry.is(net.minecraft.world.item.Items.BUCKET),
                 boiler.tanks.water() + " mB, hand " + afterSteamTry);
             // (its live crude's gas is out of the liquid: ~1425 mB of it shows as crude)
+            ctx.check("oil: an empty bucket takes crude from a tank of crude", afterTank != null && afterTank.is(mods.eln.oil.Oil.CRUDE_BUCKET.get()), "hand " + afterTank);
             ctx.check("oil: an empty bucket takes 1000 mB of crude from the pump", Math.abs(crudeAfter - 425) <= 30 && afterEmpty.is(mods.eln.oil.Oil.CRUDE_BUCKET.get()),
                 crudeAfter + " mB, hand " + afterEmpty);
         }

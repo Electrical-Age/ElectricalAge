@@ -52,8 +52,8 @@ public final class EaUnits {
 
     /**
      * Everything that makes up more than 1% of a node's volume, by name and compact, liquids in mB and gases in
-     * grams: "2.1 g of steam, 2000 mB of water" (Baughn 2026-11-04, mB his call: Jade named only the gas that made the pressure; one
-     * line for every fluid container). A gas's share is its partial pressure's share of the space above the liquid; "empty" if none counts.
+     * grams: "2.1 g steam, 2.0 B water" (Baughn 2026-11-04, mB his call: Jade named only the gas that made the pressure; one
+     * line for every fluid container; buckets from 1000 mB and no "of", Baughn 2026-11-11). A gas's share is its partial pressure's share of the space above the liquid; "empty" if none counts.
      */
     public static String composition(FluidNode n) {
         SpeciesRegistry reg = SpeciesRegistry.get();
@@ -64,10 +64,10 @@ public final class EaUnits {
         for (int id = 0; id < n.speciesBound(); id++) {
             Species sp = reg.byId(id);
             double liq = s.liquid(id), vap = s.vapour(id);
-            if (liq > 0 && liq / sp.rhoL > 0.01 * n.volume) parts.put(sp.displayName(), millibuckets(liq / sp.rhoL * Water.RHO_L / KG_PER_MB_WATER) + " of " + sp.displayName());
+            if (liq > 0 && liq / sp.rhoL > 0.01 * n.volume) parts.put(sp.displayName(), volume(liq / sp.rhoL * Water.RHO_L / KG_PER_MB_WATER) + " " + sp.displayName());
             if (vap > 0 && pSum > 0 && vap * sp.r / pSum * vGas > 0.01 * n.volume) {
                 String name = id == SpeciesRegistry.WATER ? "steam" : sp.gas() || liq <= 0 ? sp.displayName() : sp.displayName() + " vapour";
-                parts.put(name, grams(vap * 1000) + " of " + name);
+                parts.put(name, grams(vap * 1000) + " " + name);
             }
         }
         return parts.isEmpty() ? "empty" : String.join(", ", parts.values());
@@ -78,9 +78,13 @@ public final class EaUnits {
         return String.format(v >= 10 ? "%.0f" : v >= 1 ? "%.1f" : v >= 0.1 ? "%.2f" : "%.3f", v);
     }
 
-    private static String millibuckets(double mB) {
-        return compact(mB) + " mB";
+    /** A liquid volume compactly (Baughn 2026-11-11: "18 g air, 14.6 B gasoline, 700 mB diesel"): buckets from 1000 mB. */
+    private static String volume(double mB) {
+        if (mB < 1000) return compact(mB) + " mB";
+        double b = mB / 1000;
+        return String.format(b >= 100 ? "%.0f B" : "%.1f B", b);
     }
+
 
     private static String grams(double g) {
         return g >= 1000 ? compact(g / 1000) + " kg" : compact(g) + " g";
