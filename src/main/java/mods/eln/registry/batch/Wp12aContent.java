@@ -1065,12 +1065,13 @@ public class Wp12aContent implements ElnContent {
         }
     }
 
+    /** Fuel burners: 2, 5 and 10 kW at natural draft (Baughn 2026-11-11; were 5, 10 and 25), so forced air means something. */
     public static void registerFuelBurnerItem(int id) {
         sharedItemStackOne.addElement(0 + (id << 6),
-            new FuelBurnerDescriptor(TR_NAME(Type.NONE, "Small Fuel Burner"), 5000 * fuelHeatFurnacePowerFactor, 2, 1.6f));
+            new FuelBurnerDescriptor(TR_NAME(Type.NONE, "Small Fuel Burner"), 2000 * fuelHeatFurnacePowerFactor, 2, 1.6f));
         sharedItemStackOne.addElement(1 + (id << 6),
-            new FuelBurnerDescriptor(TR_NAME(Type.NONE, "Medium Fuel Burner"), 10000 * fuelHeatFurnacePowerFactor, 1, 1.4f));
+            new FuelBurnerDescriptor(TR_NAME(Type.NONE, "Medium Fuel Burner"), 5000 * fuelHeatFurnacePowerFactor, 1, 1.4f));
         sharedItemStackOne.addElement(2 + (id << 6),
-            new FuelBurnerDescriptor(TR_NAME(Type.NONE, "Big Fuel Burner"), 25000 * fuelHeatFurnacePowerFactor, 0, 1f));
+            new FuelBurnerDescriptor(TR_NAME(Type.NONE, "Big Fuel Burner"), 10000 * fuelHeatFurnacePowerFactor, 0, 1f));
     }
 }

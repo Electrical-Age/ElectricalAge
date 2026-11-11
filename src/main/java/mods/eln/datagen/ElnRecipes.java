@@ -1911,26 +1911,27 @@ public final class ElnRecipes extends ElnRecipesBase {
 
 
 
+    /** Fuel burners from alloy plates, not stone combustion chambers (Baughn 2026-11-11). */
     public static void recipeFuelBurnerItem() {
         addRecipe(findItemStack("Small Fuel Burner"),
             "   ",
-            " Cc",
+            " Pc",
             "   ",
-            'C', findItemStack("Combustion Chamber"),
+            'P', findItemStack("Alloy Plate"),
             'c', findItemStack("Copper Thermal Cable"));
 
         addRecipe(findItemStack("Medium Fuel Burner"),
             "   ",
-            " Cc",
-            " C ",
-            'C', findItemStack("Combustion Chamber"),
+            " Pc",
+            " P ",
+            'P', findItemStack("Alloy Plate"),
             'c', findItemStack("Copper Thermal Cable"));
 
         addRecipe(findItemStack("Big Fuel Burner"),
             "   ",
-            "CCc",
-            "CC ",
-            'C', findItemStack("Combustion Chamber"),
+            "PPc",
+            "PP ",
+            'P', findItemStack("Alloy Plate"),
             'c', findItemStack("Copper Thermal Cable"));
     }
 

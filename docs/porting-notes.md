@@ -147,6 +147,18 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   layer, or its flange) and switched on. Other mods' fuels with no species no longer go in (none
   on Incognito). `fuel_furnace_mixed_fuel`, `fuel_furnace_coke_balance`, `fuel_furnace_water_drowns_fire`,
   `fuel_furnace_legacy_tank`.
+- Fuel heat furnace under pressure (Baughn 2026-11-11, todo #399/#400): its burner is pressure-fed: over the breather's
+  300 Pa its tank's gauge pressure feeds it 1 + gauge / 1 bar times its setting (an air or gas line on its one flange
+  pressurises the tank against its small breather; 1 bar doubles it; past its rating it overheats as before). Its
+  breather gained a relief valve (opens at 3 bar, as large as its flange), and past 6 bar gauge the tank bursts
+  (Failure.pressureVessel): a 20 bar line outruns the relief. No fire rule: the pressure bursts it. Fuel gas in its
+  head space (natural gas, not a liquid fuel's vapour) burns first, as far as the flame takes it; fuel gas escaping by
+  its vents over 0.05 g/s (averaged over 2 s) with the fire lit sets the blocks around it alight (an ad-hoc rule while
+  rooms and spills aren't tracked). Jade shows the overfiring and the venting. A pump-fed furnace now overfires by its
+  line's pressure unless the line is regulated. GameTests `fuel_furnace_forced_air`, `_relief`, `_burst`, `_gas_first`,
+  `_gas_fire`.
+- Fuel burners are 2, 5 and 10 kW (were 5, 10 and 25: sized for natural draft, Baughn 2026-11-11, so forced air means
+  something) and made of alloy plates instead of stone combustion chambers.
 - Natural gas (and syngas) at real heating values (Baughn 2026-11-11: "we'll make the gas numbers real"): 1.12
   multiplied gases by 1000 ("Minecraft gases are heavily pressurized"). Now a mB of natural gas is what a fluid node
   holds as gas, 1e-6 kg x M/M_water, times methane's 50 MJ/kg: ~44 J/mB, 1/55 of before. The gas turbine burns

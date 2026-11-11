@@ -40,6 +40,7 @@ public final class OilCases {
         cases.add(new Basin());
         cases.add(new Coke());
         for (String v : FuelBySpecies.VARIANTS) cases.add(new FuelBySpecies(v));
+        for (String v : FurnacePressure.VARIANTS) cases.add(new FurnacePressure(v));
         cases.add(new SeparatorSound());
         cases.add(new Pump(false));
         cases.add(new Pump(true));
@@ -1015,6 +1016,182 @@ public final class OilCases {
     }
 
     /**
+     * The fuel heat furnace's tank under pressure (Baughn 2026-11-11):
+     * <ul>
+     * <li>forced_air: an air line at ~1.2 bar on its flange holds its tank at ~1 bar against its breather and feeds its
+     * pressure-fed burner: it fires ~2x its setting, against one beside it at the air's pressure;</li>
+     * <li>relief: its tank at 4.5 bar (a line's doing) lets air out by its relief valve too, and holds;</li>
+     * <li>burst: a 20 bar line outruns the relief: past 6 bar gauge the tank bursts;</li>
+     * <li>gas_first: a little natural gas in its head space burns in the flame, none escapes, nothing catches fire;</li>
+     * <li>gas_fire: natural gas fed in faster than the flame takes it escapes by its vents with the fire lit and sets the
+     * blocks around it alight.</li>
+     * </ul>
+     */
+    static final class FurnacePressure implements TestCase {
+        static final String[] VARIANTS = {"forced_air", "relief", "burst", "gas_first", "gas_fire"};
+        final String variant;
+        mods.eln.transparentnode.FuelHeatFurnaceElement a, b;
+        mods.eln.sim.fluid.FluidDevice fx, watch;
+        mods.eln.sim.fluid.FluidNode main;
+        double heatA0, heatB0, heatA1, heatB1, over, gaugeAt, maxGauge, gas0, main0;
+        int tick;
+
+        FurnacePressure(String variant) {
+            this.variant = variant;
+        }
+
+        public String id() {
+            return "fuel_furnace_" + variant;
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        static int ng() {
+            return mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:natural_gas");
+        }
+
+        static double gauge(mods.eln.transparentnode.FuelHeatFurnaceElement f) {
+            return f.getVessel().P() - mods.eln.sim.fluid.Water.P_ATM;
+        }
+
+        /** A big gas main (1 m^3) at gauge Pa: air, or natural gas if gas. */
+        static mods.eln.sim.fluid.FluidNode main(double y, double pa, boolean gas) {
+            if (!gas) return new mods.eln.sim.fluid.FluidNode(1.0, y, 1.0, false).fill(0, mods.eln.sim.fluid.Water.P_ATM + pa, 293.15);
+            var n = new mods.eln.sim.fluid.FluidNode(1.0, y, 1.0, false).fill(0, 100, 293.15);
+            mods.eln.sim.fluid.EaUnits.add(n, ng(), (mods.eln.sim.fluid.Water.P_ATM + pa) * 0.01604 / (8.314 * 293.15), 293.15, true);
+            n.update();
+            return n;
+        }
+
+        /** The main coupled to its fuel flange (a pipe's end on it). */
+        static mods.eln.sim.fluid.FluidDevice onFlange(mods.eln.transparentnode.FuelHeatFurnaceElement f, mods.eln.sim.fluid.FluidNode main) {
+            var front = f.front;
+            var pos = f.node.coordonate.pos();
+            return GasPlantCases.fixtures(f.fluidLevel(), new Object[]{pos.relative(front.toEnumFacing()),
+                front.toEnumFacing().getOpposite().get3DDataValue(), main, mods.eln.fluid.PortBridge.endSpot(front, front, 4, 8)});
+        }
+
+        /** A fluid device with no ports that runs step after each fluid step (to read the tank's pressure as it stands). */
+        static mods.eln.sim.fluid.FluidDevice after(mods.eln.transparentnode.FuelHeatFurnaceElement f, Runnable step) {
+            var d = new mods.eln.sim.fluid.FluidDevice() {
+                public Object fluidLevel() {
+                    return f.fluidLevel();
+                }
+
+                public java.util.List<FluidPort> fluidPorts() {
+                    return java.util.List.of();
+                }
+
+                public void afterFluidStep(double dt) {
+                    step.run();
+                }
+            };
+            mods.eln.fluid.FluidWorld.add(d);
+            return d;
+        }
+
+        public void build(TestContext ctx) {
+            double y = ctx.at(0, 1, 0).getY();
+            switch (variant) {
+                case "forced_air" -> {
+                    a = FuelBySpecies.lit(ctx, 1);
+                    a.putFuel(Oil.Cut.DIESEL.source.get(), 800);
+                    b = FuelBySpecies.lit(ctx, 4);
+                    b.putFuel(Oil.Cut.DIESEL.source.get(), 800);
+                    fx = onFlange(a, main = main(y, 1.2e5, false));
+                    // (over 100 ticks once both burn steadily: on its bench nothing takes the heat, so it overheats later)
+                    ctx.after(60, () -> {
+                        heatA0 = a.getHeatGivenJ();
+                        heatB0 = b.getHeatGivenJ();
+                    });
+                    ctx.after(140, () -> {
+                        heatA1 = a.getHeatGivenJ();
+                        heatB1 = b.getHeatGivenJ();
+                        over = a.overfire();
+                        gaugeAt = gauge(a);
+                    });
+                }
+                case "relief" -> {
+                    // (its tank pumped up to ~4.5 bar gauge, as a line would leave it, then left alone)
+                    a = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(3, 1, 1));
+                    a.putFuel(Oil.Cut.DIESEL.source.get(), 800);
+                    var v = a.getVessel();
+                    mods.eln.sim.fluid.EaUnits.add(v, mods.eln.sim.fluid.SpeciesRegistry.AIR, 4.5e5 * (v.volume - v.liquidVolume()) * 0.029 / (8.314 * v.T()), v.T(), true);
+                    v.update();
+                    maxGauge = gauge(a);
+                }
+                case "burst" -> {
+                    a = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(3, 1, 1));
+                    a.putFuel(Oil.Cut.DIESEL.source.get(), 800);
+                    fx = onFlange(a, main = main(y, 20e5, false));
+                }
+                case "gas_first" -> {
+                    a = FuelBySpecies.lit(ctx, 3);
+                    a.putFuel(Oil.Cut.DIESEL.source.get(), 800);
+                    ctx.after(100, () -> {
+                        var v = a.getVessel();
+                        mods.eln.sim.fluid.EaUnits.add(v, ng(), 5e-6, v.T(), true);
+                        v.update();
+                        gas0 = a.getGasBurntKg();
+                    });
+                }
+                case "gas_fire" -> {
+                    a = FuelBySpecies.lit(ctx, 3);
+                    a.putFuel(Oil.Cut.DIESEL.source.get(), 800);
+                    ctx.after(60, () -> {
+                        fx = onFlange(a, main = main(y, 1e5, true));
+                        main0 = main.vapour(ng());
+                    });
+                }
+            }
+        }
+
+        static int fires(TestContext ctx, net.minecraft.core.BlockPos p) {
+            int n = 0;
+            for (var q : net.minecraft.core.BlockPos.betweenClosed(p.offset(-2, -1, -2), p.offset(2, 2, 2)))
+                if (ctx.level().getBlockState(q).is(net.minecraft.world.level.block.Blocks.FIRE)) n++;
+            return n;
+        }
+
+        public void measure(TestContext ctx) {
+            if (fx != null) mods.eln.fluid.FluidWorld.remove(fx);
+            if (watch != null) mods.eln.fluid.FluidWorld.remove(watch);
+            switch (variant) {
+                case "forced_air" -> {
+                    double pa = heatA1 - heatA0, pb = heatB1 - heatB0;
+                    String what = String.format("tank at %.2f bar gauge, fires %.2fx; %.0f J vs %.0f J beside it", gaugeAt / 1e5, over, pa, pb);
+                    ctx.line("forced air: " + what);
+                    ctx.check("fuel furnace: an air line on its flange pressurises its tank (0.5-1.2 bar)", gaugeAt > 0.5e5 && gaugeAt < 1.2e5, what);
+                    ctx.check("fuel furnace: ... and it fires that much over its setting, against one beside it (within 15 %)",
+                        pb > 0 && Math.abs(pa / pb - over) < 0.15 * over && over > 1.4, what);
+                }
+                case "relief" -> ctx.check("fuel furnace: its tank at 4.5 bar lets air out by its relief valve, and holds",
+                    a.getReliefKg() > 0 && gauge(a) < 0.1e5 && ctx.level().getBlockEntity(ctx.at(3, 1, 1)) != null && !a.isBurnt(),
+                    String.format("started at %.2f bar, now %.3f bar, %.6f kg out by the relief", maxGauge / 1e5, gauge(a) / 1e5, a.getReliefKg()));
+                case "burst" -> ctx.check("fuel furnace: a 20 bar air line outruns its relief: past 6 bar it bursts",
+                    ctx.level().getBlockEntity(ctx.at(3, 1, 1)) == null || a.isBurnt(), "" + ctx.level().getBlockState(ctx.at(3, 1, 1)));
+                case "gas_first" -> {
+                    double burnt = a.getGasBurntKg() - gas0, left = a.getVessel().vapour(ng());
+                    String what = String.format("%.6f kg burnt, %.6f kg left, %d fire blocks", burnt, left, fires(ctx, ctx.at(3, 1, 1)));
+                    ctx.check("fuel furnace: a little gas in its head space mostly burns in the flame", burnt > 3e-6 && left < 1e-7, what);
+                    ctx.check("fuel furnace: ... and nothing catches fire", fires(ctx, ctx.at(3, 1, 1)) == 0, what);
+                }
+                case "gas_fire" -> {
+                    String what = String.format("%.4f kg from the main, %.4f kg burnt, escaping %.6f kg/s, %d fire blocks",
+                        main0 - main.vapour(ng()), a.getGasBurntKg(), a.getGasEscapingKgS(), fires(ctx, ctx.at(3, 1, 1)));
+                    ctx.check("fuel furnace: a gas main on its flange outruns the flame: the gas escapes and sets fire around it", fires(ctx, ctx.at(3, 1, 1)) > 0, what);
+                }
+            }
+        }
+    }
+
+    /**
      * The fuel heat furnace's tank is a fluid node, and its burner burns what it holds species by species, by their
      * heating values (Baughn 2026-11-10: "mixed on the machines"; real numbers):
      * <ul>
@@ -1059,7 +1236,7 @@ public final class OilCases {
             };
         }
 
-        mods.eln.transparentnode.FuelHeatFurnaceElement lit(TestContext ctx, int x) {
+        static mods.eln.transparentnode.FuelHeatFurnaceElement lit(TestContext ctx, int x) {
             var f = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(x, 1, 1));
             f.getInventory().setItem(mods.eln.transparentnode.FuelHeatFurnaceContainer.Companion.getFuelBurnerSlot(),
                 mods.eln.Eln.sharedItemStackOne.getDescriptor(2 + (124 << 6)).newItemStack());
