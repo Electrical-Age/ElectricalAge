@@ -144,9 +144,6 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
     /** One coil around the leg at z = -5 px (x -1..1, z -6..-4), above the board's parts (y -0.75) to the yoke (y 4.9). */
     static void drawCoil(Coil c, int rgb) {
         net.minecraft.resources.Identifier tex = WindingTexture.of(c.turnsPerLayer(), c.layers(), rgb, c.over());
-        float hx = 1.15f, hz0 = -6.15f, hz1 = -3.85f, y0 = -0.75f, y1 = 4.9f;
-        float x1 = hx + (float) Math.min(c.build(), 2.8), x0 = -x1;
-        float zIn = hz1 + (float) c.build(), zOut = hz0 - (float) Math.min(c.build(), 1.8);
         if (tex != null) {
             GL11.bindTexture(tex);
             GL11.glColor4f(1, 1, 1, 1);
@@ -157,6 +154,34 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
         mods.eln.misc.UtilsClient.disableCulling();
         GL11.glPushMatrix();
         GL11.glScalef(1 / 16f, 1 / 16f, 1 / 16f);
+        GL11.glCallList(coilList(c.build()));
+        GL11.glPopMatrix();
+        mods.eln.misc.UtilsClient.enableCulling();
+        if (tex == null) GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glColor4f(1, 1, 1, 1);
+    }
+
+    /**
+     * The coil's shape for a build, compiled once into a display list (its texture and colour are set around the call):
+     * drawn vertex by vertex every frame, its ~4000 vertices were 9 % of a player's render thread (2026-11-12).
+     */
+    private static final java.util.Map<Float, Integer> COIL_LISTS = new java.util.HashMap<>();
+
+    public static int coilList(double build) {
+        return COIL_LISTS.computeIfAbsent((float) build, b -> {
+            int list = GL11.glGenLists(1);
+            GL11.glNewList(list, GL11.GL_COMPILE);
+            coilShape(b);
+            GL11.glEndList();
+            return list;
+        });
+    }
+
+    /** The coil's quads in pixels (see drawCoil). */
+    public static void coilShape(float build) {
+        float hx = 1.15f, hz0 = -6.15f, hz1 = -3.85f, y0 = -0.75f, y1 = 4.9f;
+        float x1 = hx + Math.min(build, 2.8f), x0 = -x1;
+        float zIn = hz1 + build, zOut = hz0 - Math.min(build, 1.8f);
         GL11.glBegin(GL11.GL_QUADS);
         // the sides: stripes run round the coil (u across, v down)
         side(0, 0, 1, x0, zIn, x1, zIn, y0, y1);
@@ -178,10 +203,6 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
             corner(y, -hx, hz0, -1, -1, bxs, bout);
         }
         GL11.glEnd();
-        GL11.glPopMatrix();
-        mods.eln.misc.UtilsClient.enableCulling();
-        if (tex == null) GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glColor4f(1, 1, 1, 1);
     }
 
     static void side(float nx, float ny, float nz, float ax, float az, float bx, float bz, float y0, float y1) {
