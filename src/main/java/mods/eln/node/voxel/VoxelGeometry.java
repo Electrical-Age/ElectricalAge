@@ -76,7 +76,75 @@ public final class VoxelGeometry {
             // each part is a body of its own: its solids hang together (Checker.connectivity)
             for (int i = first; i < m.solids.size(); i++) if (m.solids.get(i).body == null) m.solids.get(i).body = part;
         }
+        fittings(m, parts);
         return m;
+    }
+
+    /**
+     * The fittings that show where runs are joined (Baughn: visible = connected): a sleeve where a cable's end meets
+     * another cable of its kind mid-way (a branch; CableNet joins them there), and a junction body where three or more
+     * pipe ends meet with no junction part (old saves' branches, joined until the converter turns them into junctions).
+     */
+    static void fittings(Model m, List<VoxelPart> parts) {
+        java.util.Set<String> sleeved = new java.util.HashSet<>();
+        for (VoxelPart pa : parts) {
+            if (!(pa instanceof CablePart a) || a.isKnuckle()) continue;
+            for (VoxelPart pb : parts) {
+                if (pb == pa || !(pb instanceof CablePart b) || b.isKnuckle() || !a.sameCable(b) || a.face != b.face) continue;
+                for (int[] e : a.ends()) {
+                    if (!b.passes(e[0], e[1], e[2])) continue;
+                    boolean bEnd = false;
+                    for (int[] f : b.ends()) bEnd |= f[0] == e[0] && f[1] == e[1] && f[2] == e[2];
+                    if (!bEnd && sleeved.add(System.identityHashCode(b) + ":" + e[0] + "," + e[1] + "," + e[2])) sleeve(m, b, e);
+                }
+            }
+        }
+        java.util.Map<Integer, Integer> ends = new java.util.HashMap<>();
+        java.util.Map<Integer, Integer> tierAt = new java.util.HashMap<>();
+        java.util.Set<Integer> junctions = new java.util.HashSet<>();
+        for (VoxelPart p : parts) if (p instanceof JunctionPart j) junctions.add(j.x << 10 | j.y << 5 | j.z);
+        for (VoxelPart p : parts)
+            if (p instanceof PipePart pipe)
+                for (int[] e : pipe.innerEnds()) {
+                    int k = e[0] << 10 | e[1] << 5 | e[2];
+                    ends.merge(k, 1, Integer::sum);
+                    tierAt.merge(k, pipe.tier, Math::min);
+                }
+        for (var en : ends.entrySet()) {
+            if (en.getValue() < 3 || junctions.contains(en.getKey())) continue;
+            int k = en.getKey();
+            JunctionPart shown = new JunctionPart(k >> 10, k >> 5 & 31, k & 31, tierAt.get(k));
+            box(m, shown.boxes().get(0), PIPE[shown.tier]).named("pipe junction (old)").rgb(0.82f, 0.82f, 0.86f);
+        }
+    }
+
+    /** A sleeve round cable b at point e of its centre line: a voxel wider and higher than it, 5 voxels long, brass. */
+    static void sleeve(Model m, CablePart b, int[] e) {
+        int n = CablePart.normalAxis(b.face);
+        int along = -1;
+        int[] p = b.points;
+        for (int i = 3; i < p.length && along < 0; i += 3) {
+            boolean in = true;
+            for (int a = 0; a < 3; a++) if (e[a] < Math.min(p[i - 3 + a], p[i + a]) || e[a] > Math.max(p[i - 3 + a], p[i + a])) in = false;
+            if (in) for (int a = 0; a < 3; a++) if (p[i - 3 + a] != p[i + a]) along = a;
+        }
+        if (along < 0) return;
+        int w = 3 - n - along;
+        double half = b.tierInfo().width() / 2.0 + 1, h = b.tierInfo().height() + 1;
+        double[] lo = new double[3], hi = new double[3];
+        lo[along] = Math.max(0, e[along] - 2.5);   // (half voxels: its ends never lie in a branch's sides)
+        hi[along] = Math.min(16, e[along] + 2.5);
+        lo[w] = Math.max(0, e[w] - half);
+        hi[w] = Math.min(16, e[w] + half);
+        // (its face on the support a hair off the plane: it lay in the cable's own bottom face and z-fought with it)
+        if (b.face % 2 == 0) {
+            lo[n] = e[n] + 0.05;
+            hi[n] = Math.min(16, e[n] + h);
+        } else {
+            lo[n] = Math.max(0, e[n] - h);
+            hi[n] = e[n] - 0.05;
+        }
+        boxD(m, lo, hi, cableSprite(b.tier)).named("cable splice").rgb(0.72f, 0.55f, 0.25f);
     }
 
     static void draw(Model m, VoxelPart part, List<VoxelPart> parts, float[] lugs, boolean[] adapters, List<int[]> cableBoxes) {

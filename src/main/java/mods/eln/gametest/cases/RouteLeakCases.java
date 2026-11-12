@@ -44,9 +44,10 @@ public final class RouteLeakCases {
 
     static final class LayBreakRelay implements TestCase {
         static final int ROUNDS = 14, W = 9;
+        static final int[] ISLANDS = {2, 3, 5, 6};
         final Set<Object> gone = Collections.newSetFromMap(new IdentityHashMap<>());
         final Set<NodeBase> goneNodes = Collections.newSetFromMap(new IdentityHashMap<>());
-        int laid, broken, refused, liveSeen, liveSampled;
+        int laid, broken, refused, liveSeen, liveSampled, junctions, airLaid;
         final java.util.TreeMap<String, int[]> coverage = new java.util.TreeMap<>();
 
         public String id() {
@@ -68,7 +69,7 @@ public final class RouteLeakCases {
         List<BlockPos> padBlocks(TestContext c) {
             List<BlockPos> out = new ArrayList<>();
             for (int x = 0; x < W; x++)
-                for (int y = 1; y < 3; y++)
+                for (int y = 1; y < 4; y++)
                     for (int z = 0; z < 3; z++) out.add(c.at(x, y, z));
             return out;
         }
@@ -93,6 +94,8 @@ public final class RouteLeakCases {
         public void build(TestContext c) {
             Random r = new Random(1112);
             BlockPos o = c.at(0, 0, 0);
+            // (routing phase 2: two islands floating a block over the floor, a block apart, for cables across the air)
+            for (int x : ISLANDS) c.floor(c.at(x, 2, 1));
             for (int round = 0; round < ROUNDS; round++) {
                 // lay one or two routes
                 for (int k = 0; k < 1 + r.nextInt(2); k++) {
@@ -111,6 +114,34 @@ public final class RouteLeakCases {
                     }
                     if (err == null) laid++;
                     else refused++;
+                }
+                // a cable across the gap between the islands (its piece over the gap hangs in the air)
+                if (r.nextBoolean()) {
+                    int tier = CablePart.tierOf("Low Voltage Cable");
+                    int ax = ISLANDS[r.nextInt(2)], bx = ISLANDS[2 + r.nextInt(2)];
+                    var a = new CableRouter.End((o.getX() + ax) * 16L + 2 + 2 * r.nextInt(7), (o.getY() + 3) * 16L, (o.getZ() + 1) * 16L + 4 + 2 * r.nextInt(5), 0, -1);
+                    var b = new CableRouter.End((o.getX() + bx) * 16L + 2 + 2 * r.nextInt(7), (o.getY() + 3) * 16L, (o.getZ() + 1) * 16L + 4 + 2 * r.nextInt(5), 0, -1);
+                    String err = CablePlacer.routeAndLayForTests(c.level(), tier, a, b);
+                    if (err == null) {
+                        laid++;
+                        VoxelNode gap = node(c, c.at(4, 3, 1));
+                        if (gap != null) for (var part : gap.parts) if (part instanceof CablePart cp && !CablePlacer.supported(c.level(), c.at(4, 3, 1), cp)) airLaid++;
+                    } else refused++;
+                }
+                // a branch onto a pipe standing on the pad: up from a point of its centre line to the block's top (a junction)
+                for (BlockPos p : padBlocks(c)) {
+                    VoxelNode v = node(c, p);
+                    if (v == null || r.nextInt(4) != 0) continue;
+                    for (var part : new ArrayList<>(v.parts)) {
+                        if (!(part instanceof mods.eln.node.voxel.PipePart pipe) || pipe.points.length < 6) continue;
+                        int[] q = pipe.points;
+                        int mx = (q[0] + q[3]) / 2, my = (q[1] + q[4]) / 2, mz = (q[2] + q[5]) / 2;
+                        if (mx % 4 != 0 || my % 4 != 0 || mz % 4 != 0 || my >= 12) continue;
+                        var up = new mods.eln.node.voxel.PipePart(pipe.tier, new int[]{mx, my, mz, mx, 16, mz});
+                        if (v.joinError(up, mx, my, mz) != null) continue;
+                        if (v.addJoined(up, mx, my, mz) == null) junctions++;
+                        break;
+                    }
                 }
                 // break: some random pieces, or (every few rounds) everything
                 boolean all = round % 4 == 3;   // (the last rounds leave blocks standing, for the census check)
@@ -180,7 +211,7 @@ public final class RouteLeakCases {
                 for (Object x : v.simObjectsForTests()) {
                     if (x instanceof NodeConnection) continue;
                     liveSampled++;
-                    int[] cv = coverage.computeIfAbsent(x.getClass().getSimpleName().replaceAll("\\$\\$Lambda.*", "$$Lambda"), k -> new int[2]);
+                    int[] cv = coverage.computeIfAbsent(x.getClass().getSimpleName().replaceAll("\\$\\$Lambda.*", "\\$\\$Lambda"), k -> new int[2]);
                     cv[1]++;
                     if (live.contains(x)) {
                         liveSeen++;
@@ -210,6 +241,8 @@ public final class RouteLeakCases {
             c.line("lay/break/relay: " + laid + " routes laid, " + refused + " refused, " + broken + " pieces broken, " + goneNodes.size() + " blocks gone, "
                 + gone.size() + " objects to be gone");
             c.check("lay/break/relay: routes were laid and blocks went", laid >= ROUNDS && goneNodes.size() >= 20, laid + " laid, " + goneNodes.size() + " gone");
+            c.line("lay/break/relay: " + junctions + " pipe junctions made, " + airLaid + " cable pieces laid over the islands' gap");
+            c.check("lay/break/relay: junctions and air runs came and went too (routing phase 2)", junctions > 0 && airLaid > 0, junctions + " junctions, " + airLaid + " air pieces");
             StringBuilder cov = new StringBuilder();
             for (var e : coverage.entrySet()) cov.append(e.getKey()).append(' ').append(e.getValue()[0]).append('/').append(e.getValue()[1]).append(", ");
             c.line("lay/break/relay: census coverage of standing blocks (seen/held): " + cov);
