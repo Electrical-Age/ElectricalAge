@@ -25,6 +25,7 @@ public final class CableAirCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new BridgeCase());
         cases.add(new DeviceInAirCase());
+        cases.add(new AfterLayingCase());
     }
 
     static VoxelNode voxel(TestContext c, BlockPos p) {
@@ -170,6 +171,42 @@ public final class CableAirCases {
             c.check(name() + ": across the air in front of the bank", inAir > 0, inAir + " unsupported pieces there");
             double u = bank.voltage();
             c.check(name() + ": the bank charges through it", u > 1, String.format("%.2f V", u));
+        }
+    }
+
+    /**
+     * Right after a route is laid, aiming at its end (on the cable, or just beside it in the block's outline) is a place
+     * to start the next route, not "Not a place for a cable" (AdventurAgent saw that message after a finishing click).
+     */
+    static final class AfterLayingCase implements TestCase {
+        String err, onCable = "none", beside = "none", besideMsg = "";
+
+        public String name() {
+            return "cable end is a start right after laying";
+        }
+
+        public int ticks() {
+            return 10;
+        }
+
+        public void build(TestContext c) {
+            BlockPos a = c.at(1, 1, 1), b = c.at(5, 1, 1);
+            var ea = new mods.eln.node.voxel.CableRouter.End(a.getX() * 16L + 8, a.getY() * 16L, a.getZ() * 16L + 8, 0, -1);
+            var eb = new mods.eln.node.voxel.CableRouter.End(b.getX() * 16L + 8, b.getY() * 16L, b.getZ() * 16L + 8, 0, -1);
+            err = mods.eln.node.voxel.CablePlacer.routeAndLayForTests(c.level(), LV, ea, eb);
+            var e1 = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), b, net.minecraft.core.Direction.UP,
+                Vec3.atLowerCornerOf(b).add(0.5, 1.0 / 16, 0.5), true, new long[1][]);
+            onCable = String.valueOf(e1);
+            var e2 = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), b, net.minecraft.core.Direction.UP,
+                Vec3.atLowerCornerOf(b).add(0.5, 1.0 / 16, 0.62), true, new long[1][]);
+            beside = String.valueOf(e2);
+            if (e2 == null) besideMsg = mods.eln.node.voxel.CablePlacer.noEndForTests(c.level(), b);
+        }
+
+        public void measure(TestContext c) {
+            c.check(name() + ": laid", err == null, String.valueOf(err));
+            c.check(name() + ": aiming at its end starts a route there", !"null".equals(onCable), onCable);
+            c.check(name() + ": aiming just beside it in the block too", !"null".equals(beside), beside + " " + besideMsg);
         }
     }
 }

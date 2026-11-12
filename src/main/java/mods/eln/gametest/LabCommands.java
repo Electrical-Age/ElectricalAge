@@ -76,6 +76,14 @@ public final class LabCommands {
                         .executes(c -> netdump(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), 8))
                         .then(Commands.argument("r", IntegerArgumentType.integer(0, 512))
                             .executes(c -> netdump(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "r"))))))
+                // (routing phase 2: an LV route between two blocks' tops, timed with and without the air allowance)
+                .then(Commands.literal("routetime").then(Commands.argument("from", BlockPosArgument.blockPos()).then(Commands.argument("to", BlockPosArgument.blockPos())
+                    .executes(c -> {
+                        String res = mods.eln.node.voxel.CablePlacer.routeTimeForTests(c.getSource().getLevel(), BlockPosArgument.getLoadedBlockPos(c, "from"),
+                            BlockPosArgument.getLoadedBlockPos(c, "to"));
+                        c.getSource().sendSuccess(() -> Component.literal(res), false);
+                        return 1;
+                    }))))
                 .then(Commands.literal("remove").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(c -> remove(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos")))))
                 .then(Commands.literal("reconnect").then(Commands.argument("pos", BlockPosArgument.blockPos())

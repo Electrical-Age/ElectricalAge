@@ -492,7 +492,8 @@ public final class CablePart extends VoxelPart {
         int[] pts = new int[3 * n];
         for (int i = 0; i < pts.length; i++) pts[i] = in.readByte();
         CablePart p = new CablePart(tier, spec, face, pts);
-        int nh = in.readShort();
+        // (a phase 1 server sends no hang: nothing more in the stream)
+        int nh = in.available() >= 2 ? in.readShort() : 0;
         if (nh > 0) {
             p.hang = new int[nh];
             for (int i = 0; i < nh; i++) p.hang[i] = in.readShort();

@@ -96,6 +96,19 @@ public final class Router {
     static CableRouter.Result surface(CableRouter.Space space, RouteKind kind, CableRouter.End start, List<CableRouter.End> waypoints,
                                       CableRouter.End end, long budgetMs) {
         long deadline = System.nanoTime() + budgetMs * 1_000_000;
+        if (kind.airLimit() == 0) return surfaceUntil(space, kind, start, waypoints, end, deadline);
+        // with an air allowance: first on supports only (as before air runs: fast), then with the air in what time is left.
+        // The air search finds the cheaper route when it finishes; when it can't in the time left, the supported route
+        // stands (on real terrain the air states made long ordinary routes give up at the click's budget: elnlab routetime)
+        CableRouter.Result onSupport = surfaceUntil(space, kind.withAir(RouteKind.NO_AIR), start, waypoints, end, deadline);
+        CableRouter.Result withAir = surfaceUntil(space, kind, start, waypoints, end, deadline);
+        if (withAir.error == null || onSupport.error != null) return withAir;
+        return onSupport;
+    }
+
+    /** One search over all legs, until deadline (nanoTime). */
+    private static CableRouter.Result surfaceUntil(CableRouter.Space space, RouteKind kind, CableRouter.End start, List<CableRouter.End> waypoints,
+                                                   CableRouter.End end, long deadline) {
         List<CableRouter.End> stops = new ArrayList<>();
         stops.add(start);
         stops.addAll(waypoints);

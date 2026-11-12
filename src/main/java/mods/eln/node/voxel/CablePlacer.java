@@ -193,6 +193,10 @@ public final class CablePlacer {
     }
 
     /** Why a click is no end: on a machine, no connector on that edge (AdventurAgent: say so); else no place for one. */
+    public static String noEndForTests(Level level, BlockPos pos) {
+        return noEnd(level, pos);
+    }
+
     static String noEnd(Level level, BlockPos pos) {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         return n != null && !(n instanceof VoxelNode) ? "No connector there: try another face or edge of the machine" : "Not a place for a cable";
@@ -665,6 +669,30 @@ public final class CablePlacer {
     }
 
     /** Route between two ends and lay it (GameTests). Null if done, else why not. */
+    /**
+     * Lab timing (elnlab routetime): an LV route between the tops of two blocks' columns on the live world, with and
+     * without the air allowance, at the click's budget: result, length, milliseconds and expansions of each.
+     */
+    public static String routeTimeForTests(Level level, BlockPos a0, BlockPos b0) {
+        // (on the tops of their columns: the surface at those x, z)
+        var hm = net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES;
+        BlockPos a = new BlockPos(a0.getX(), level.getHeight(hm, a0.getX(), a0.getZ()) - 1, a0.getZ());
+        BlockPos b = new BlockPos(b0.getX(), level.getHeight(hm, b0.getX(), b0.getZ()) - 1, b0.getZ());
+        CableRouter.End ea = new CableRouter.End(a.getX() * 16L + 8, (a.getY() + 1) * 16L, a.getZ() * 16L + 8, 0, -1);
+        CableRouter.End eb = new CableRouter.End(b.getX() * 16L + 8, (b.getY() + 1) * 16L, b.getZ() * 16L + 8, 0, -1);
+        StringBuilder sb = new StringBuilder(a.toShortString() + " -> " + b.toShortString() + ": ");
+        for (boolean air : new boolean[]{false, true}) {
+            RouteKind k = RouteKind.cable("cable", 2, 1);
+            if (!air) k = k.withAir(RouteKind.NO_AIR);
+            long t0 = System.nanoTime();
+            var r = CableRouter.route(space(level), k, ea, List.of(), eb, PipeRouter.TIME_BUDGET_MS);
+            long ms = (System.nanoTime() - t0) / 1_000_000;
+            sb.append(air ? " | air: " : "no air: ").append(r.error != null ? r.error : String.format("%.1f blocks", r.length() / 16.0))
+                .append(", ").append(ms).append(" ms, ").append(Router.LAST_EXPANSIONS.get()).append(" expansions");
+        }
+        return sb.toString();
+    }
+
     public static String routeAndLayForTests(Level level, int tier, CableRouter.End start, CableRouter.End end) {
         CablePart.Tier t = tierOf(tier, null);   // (the preset's cross-section, as lay() lays it)
         var r = CableRouter.route(space(level), t.width(), t.height(), start, List.of(), end);

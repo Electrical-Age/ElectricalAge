@@ -457,6 +457,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         CablePart n = new CablePart(c.tier, new CableSpec(c.spec.mm2(), colour), c.face, c.points);
         n.burnt = c.burnt;
         n.paid = c.paid;
+        n.hang = c.hang;   // (its hang across the air: only the colour changes)
         n.byConverter = c.byConverter;
         n.u = c.u;
         n.t = c.t;
