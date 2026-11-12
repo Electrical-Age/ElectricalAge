@@ -21,7 +21,8 @@ public class TankLiquid extends NodeFluidView {
     private final java.util.function.Supplier<NodeFluidView> primary;
 
     public TankLiquid(double workingPa, java.util.function.Supplier<NodeFluidView> primary) {
-        super(new Spec().intake().liquidShare(TankGroup.FULL).cushion(workingPa));
+        // (aliases: a layer still in crude's proportions buckets out as crude, Baughn 2026-11-11: a tank of oil gave no bucket)
+        super(new Spec().intake().liquidShare(TankGroup.FULL).cushion(workingPa).aliases());
         this.primary = primary;
     }
 
