@@ -154,6 +154,11 @@ public interface FluidDevice {
         public boolean gasOnly;
         /** The other way: only air in from outside, nothing out (a vacuum breaker: a check valve from the air). */
         public boolean inward;
+        /**
+         * A relief vent (a safety valve, Baughn 2026-11-12: it sirened): above 0, a self-acting relief regulator to the air
+         * that holds its node at this pressure (Pa) inside the core's solve, its conductance k wide open. Set before each step.
+         */
+        public double setPa;
         /** This step's edge (set by the world when it builds the network). */
         public FluidEdge edge;
 

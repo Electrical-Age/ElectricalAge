@@ -40,7 +40,7 @@ public final class VoxelOutline {
             Vec3 cam = lrs.cameraRenderState.pos;
             pose.pushPose();
             pose.translate(at.getX() - cam.x, at.getY() - cam.y, at.getZ() - cam.z);
-            collector.submitShapeOutline(pose, shape, RenderTypes.linesTranslucent(), 0x66000000, 2f, false);
+            collector.submitShapeOutline(pose, shape, lines(), 0x66000000, 2f, false);
             pose.popPose();
             return true;
         });
@@ -64,5 +64,16 @@ public final class VoxelOutline {
         for (int[] b : p.boxes())
             out.add(new int[]{Math.max(0, b[0] - 2), Math.max(0, b[1] - 2), Math.max(0, b[2] - 2), Math.min(16, b[3] + 2), Math.min(16, b[4] + 2), Math.min(16, b[5] + 2)});
         return out;
+    }
+
+    /**
+     * The line type for EA's outlines, as vanilla picks its own block outline's: under Fabulous ("improved
+     * transparency") the translucent lines go through the order-independent transparency pass, and only the no-depth-
+     * write variant has pipelines there (Baughn's client crashed on login: "Render type lines_translucent does not have
+     * OIT pipelines set up", 2026-11-12).
+     */
+    public static net.minecraft.client.renderer.rendertype.RenderType lines() {
+        return net.minecraft.client.Minecraft.getInstance().gameRenderer.useImprovedTransparency()
+            ? RenderTypes.linesTranslucentNoDepthWrite() : RenderTypes.linesTranslucent();
     }
 }

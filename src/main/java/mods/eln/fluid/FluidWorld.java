@@ -179,7 +179,10 @@ public final class FluidWorld implements IProcess {
             e.getKey().wallUA = ua;
             e.getKey().wallT = ua > 0 ? uat / ua : 0;
         }
-        for (FluidDevice.Vent v : vents) v.edge.open = v.open;
+        for (FluidDevice.Vent v : vents) {
+            v.edge.open = v.open;
+            if (v.edge.kind == FluidEdge.Kind.REGULATOR) v.edge.setPa = v.setPa;   // (a safety valve's slider)
+        }
         for (FluidDevice.Link l : links) {
             l.edge.open = l.open;
             l.edge.boost = l.boost;
@@ -519,6 +522,11 @@ public final class FluidWorld implements IProcess {
                 v.edge = v.inward ? net.connect(atm, 0, vn, drawOn(vn, v.node, v.draw), v.k).kind(FluidEdge.Kind.CHECK)
                     : net.connect(vn, drawOn(vn, v.node, v.draw), atm, 0, v.k);
                 v.edge.open = v.open;
+                if (v.setPa > 0 && !v.inward && !v.gasOnly) {
+                    v.edge.kind(FluidEdge.Kind.REGULATOR);
+                    v.edge.relief = true;
+                    v.edge.setPa = v.setPa;
+                }
                 if (v.gasOnly && !v.inward) {
                     v.edge.gasOnly = true;
                     v.edge.kind(FluidEdge.Kind.CHECK);
