@@ -34,7 +34,7 @@ public final class ChiselOutline {
             Vec3 cam = lrs.cameraRenderState.pos;
             pose.pushPose();
             pose.translate(at.getX() - cam.x, at.getY() - cam.y, at.getZ() - cam.z);
-            collector.submitShapeOutline(pose, shape, RenderTypes.linesTranslucent(), 0xC0FF9020, 2.5f, false);
+            collector.submitShapeOutline(pose, shape, VoxelOutline.lines(), 0xC0FF9020, 2.5f, false);
             pose.popPose();
             return true;
         });

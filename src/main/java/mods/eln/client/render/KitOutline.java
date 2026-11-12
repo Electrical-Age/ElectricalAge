@@ -41,7 +41,7 @@ public final class KitOutline {
                 pose.pushPose();
                 pose.translate(b[0] / 16.0 - cam.x, b[1] / 16.0 - cam.y, b[2] / 16.0 - cam.z);
                 collector.submitShapeOutline(pose, Shapes.box(0, 0, 0, (b[3] - b[0]) / 16.0, (b[4] - b[1]) / 16.0, (b[5] - b[2]) / 16.0),
-                    RenderTypes.linesTranslucent(), color, 2.5f, false);
+                    VoxelOutline.lines(), color, 2.5f, false);
                 pose.popPose();
             }
             return false;   // (and the block's own outline)
