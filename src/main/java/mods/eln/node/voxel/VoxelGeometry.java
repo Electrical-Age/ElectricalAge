@@ -501,7 +501,7 @@ public final class VoxelGeometry {
         double[] s = new double[n];
         for (int i = 0; i < n; i++) {
             double[] a = p[Math.max(0, i - 1)], b = p[Math.min(n - 1, i + 1)];
-            t[i] = unit(new double[]{b[0] - a[0], b[1] - a[1], b[2] - a[2]});
+            t[i] = d.tan() != null ? unit(d.tan()[i]) : unit(new double[]{b[0] - a[0], b[1] - a[1], b[2] - a[2]});
             double[] nr = d.nrm()[i];
             double dot = nr[0] * t[i][0] + nr[1] * t[i][1] + nr[2] * t[i][2];
             nn[i] = unit(new double[]{nr[0] - dot * t[i][0], nr[1] - dot * t[i][1], nr[2] - dot * t[i][2]});

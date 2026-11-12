@@ -31,7 +31,7 @@ public class HangStorageTest {
     @Test
     void theNewHangRoundTrips() throws Exception {
         CablePart c = new CablePart(1, 0, new int[]{0, 0, 8, 16, 0, 8});
-        c.hang2 = new int[]{0, 128, 2, 0, 0, 64, 0, 64, 0, 128, -8, 64, 0, 64, 0};
+        c.hang2 = new int[]{0, 128, 2, 0, 0, 64, 0, 64, 0, 64, 0, 0, 128, -8, 64, 0, 64, 0, 64, 0, 0};
         var tag = new net.minecraft.nbt.CompoundTag();
         c.write(tag);
         CablePart r = CablePart.read(tag);

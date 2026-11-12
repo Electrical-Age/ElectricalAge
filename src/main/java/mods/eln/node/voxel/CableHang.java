@@ -19,6 +19,7 @@ public final class CableHang {
 
     /** How much longer than the route the chain is. */
     static final double SLACK = 0.03;
+
     /** Energy weights: per node per voxel of height, per unit of bend (|p[i-1] - 2 p[i] + p[i+1]|^2), per unit of stretch
      *  ((|link| - rest)^2), per voxel peeled off a surface; the descent's step and its limit. */
     static final double E_GRAVITY = 0.2, E_BEND = 3.0, E_STRETCH = 10, E_PEEL = 0.2, ETA = 0.015;
@@ -272,7 +273,7 @@ public final class CableHang {
     /**
      * The hangs' share for one piece (block-local; CablePart.hang2), or null: per hang crossing it, {s0, s1 (the arc
      * range of the piece's own polyline it draws over, in eighths of a voxel), count, then count points x y z and
-     * normals nx ny nz (eighths, and 64ths)}. The piece's place on the route comes from projecting its two ends on it.
+     * normals nx ny nz, then tangents tx ty tz (eighths, and 64ths; the normal square to the tangent)}. The piece's place on the route comes from projecting its two ends on it.
      */
     static int[] encode(CableRouter.Piece pc, Route r, List<Hang> hangs) {
         if (hangs.isEmpty() || pc.face() < 0) return null;
@@ -293,29 +294,46 @@ public final class CableHang {
             double s0 = reversed ? hi - b : a - lo, s1 = reversed ? hi - a : b - lo;
             s0 = Math.max(0, Math.min(plen, s0));
             s1 = Math.max(0, Math.min(plen, s1));
-            List<double[]> cp = new ArrayList<>(), cn = new ArrayList<>();
+            List<double[]> cp = new ArrayList<>(), cn = new ArrayList<>(), ct = new ArrayList<>();
             int n = h.pts().size() - 1;
-            cp.add(chainAt(h.pts(), (a - h.from()) / (h.to() - h.from()) * n));
-            cn.add(chainAt(h.nrm(), (a - h.from()) / (h.to() - h.from()) * n));
+            // (the direction along the curve from the whole chain: the pieces either side of a block's face then
+            // carry the same cross-section there, with no crack between them; AdventurAgent saw hairlines)
+            List<double[]> tan = new ArrayList<>();
+            for (int i = 0; i <= n; i++) {
+                double[] pa = h.pts().get(Math.max(0, i - 1)), pb = h.pts().get(Math.min(n, i + 1));
+                tan.add(unit(new double[]{pb[0] - pa[0], pb[1] - pa[1], pb[2] - pa[2]}));
+            }
+            double fa = (a - h.from()) / (h.to() - h.from()) * n, fb = (b - h.from()) / (h.to() - h.from()) * n;
+            cp.add(chainAt(h.pts(), fa));
+            cn.add(chainAt(h.nrm(), fa));
+            ct.add(unit(chainAt(tan, fa)));
             for (int i = 0; i <= n; i++) {
                 double t = h.from() + (h.to() - h.from()) * i / n;
                 if (t > a + 1e-9 && t < b - 1e-9) {
                     cp.add(h.pts().get(i));
                     cn.add(h.nrm().get(i));
+                    ct.add(tan.get(i));
                 }
             }
-            cp.add(chainAt(h.pts(), (b - h.from()) / (h.to() - h.from()) * n));
-            cn.add(chainAt(h.nrm(), (b - h.from()) / (h.to() - h.from()) * n));
+            cp.add(chainAt(h.pts(), fb));
+            cn.add(chainAt(h.nrm(), fb));
+            ct.add(unit(chainAt(tan, fb)));
             if (reversed) {
                 java.util.Collections.reverse(cp);
                 java.util.Collections.reverse(cn);
+                java.util.Collections.reverse(ct);
+                for (double[] t : ct) for (int c = 0; c < 3; c++) t[c] = -t[c];
             }
             out.add((int) Math.round(s0 * 8));
             out.add((int) Math.round(s1 * 8));
             out.add(cp.size());
             for (int i = 0; i < cp.size(); i++) {
+                double[] t = ct.get(i), nr = cn.get(i);
+                double dot = nr[0] * t[0] + nr[1] * t[1] + nr[2] * t[2];
+                double[] sq = unit(new double[]{nr[0] - dot * t[0], nr[1] - dot * t[1], nr[2] - dot * t[2]});
                 for (int c = 0; c < 3; c++) out.add((int) Math.round((cp.get(i)[c] - base[c]) * 8));
-                for (int c = 0; c < 3; c++) out.add((int) Math.round(cn.get(i)[c] * 64));
+                for (int c = 0; c < 3; c++) out.add((int) Math.round(sq[c] * 64));
+                for (int c = 0; c < 3; c++) out.add((int) Math.round(t[c] * 64));
             }
         }
         if (out.isEmpty()) return null;
@@ -343,6 +361,11 @@ public final class CableHang {
             }
         }
         return best;
+    }
+
+    static double[] unit(double[] v) {
+        double l = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+        return l < 1e-12 ? new double[]{1, 0, 0} : new double[]{v[0] / l, v[1] / l, v[2] / l};
     }
 
     /** The chain's point at fractional node index f (linear between nodes). */

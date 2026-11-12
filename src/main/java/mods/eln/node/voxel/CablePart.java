@@ -119,12 +119,13 @@ public final class CablePart extends VoxelPart {
     /**
      * How this piece hangs (Baughn 2026-11-12: energy minimisation at laying, CableHang), replacing `hang`: per hung span
      * through it, {s0, s1: the arc range of this piece's own polyline it is drawn over (eighths of a voxel, from its first
-     * point), count, then count points x y z (eighths, block-local) and normals nx ny nz (64ths)}. Only drawn. Null: none.
+     * point), count, then count points x y z (eighths, block-local), normals and tangents (64ths)}. Only drawn. Null: none.
      */
     public int[] hang2;
 
-    /** One drawn span: the piece's arc range it replaces, and the cable's centre line and normals over it. */
-    public record Drawn(double s0, double s1, double[][] pts, double[][] nrm) {
+    /** One drawn span: the piece's arc range it replaces, and the cable's centre line, normals and tangents over it
+     *  (tangents null: work them out from the points). */
+    public record Drawn(double s0, double s1, double[][] pts, double[][] nrm, double[][] tan) {
     }
 
     /** The drawn spans (hang2, or the older hang converted), or an empty list. */
@@ -133,15 +134,16 @@ public final class CablePart extends VoxelPart {
         if (hang2 != null) {
             for (int i = 0; i + 2 < hang2.length; ) {
                 int n = hang2[i + 2];
-                if (i + 3 + 6 * n > hang2.length) break;
-                double[][] p = new double[n][3], nr = new double[n][3];
+                if (i + 3 + 9 * n > hang2.length) break;
+                double[][] p = new double[n][3], nr = new double[n][3], tn = new double[n][3];
                 for (int k = 0; k < n; k++)
                     for (int c = 0; c < 3; c++) {
-                        p[k][c] = hang2[i + 3 + 6 * k + c] / 8.0;
-                        nr[k][c] = hang2[i + 6 + 6 * k + c] / 64.0;
+                        p[k][c] = hang2[i + 3 + 9 * k + c] / 8.0;
+                        nr[k][c] = hang2[i + 6 + 9 * k + c] / 64.0;
+                        tn[k][c] = hang2[i + 9 + 9 * k + c] / 64.0;
                     }
-                out.add(new Drawn(hang2[i] / 8.0, hang2[i + 1] / 8.0, p, nr));
-                i += 3 + 6 * n;
+                out.add(new Drawn(hang2[i] / 8.0, hang2[i + 1] / 8.0, p, nr, tn));
+                i += 3 + 9 * n;
             }
             return out;
         }
@@ -170,7 +172,7 @@ public final class CablePart extends VoxelPart {
                     p[b] = t1;
                 }
             }
-            if (!Double.isNaN(s0) && !Double.isNaN(s1)) out.add(new Drawn(s0, s1, p, nr));
+            if (!Double.isNaN(s0) && !Double.isNaN(s1)) out.add(new Drawn(s0, s1, p, nr, null));
             i += 3 + 3 * n;
         }
         return out;
