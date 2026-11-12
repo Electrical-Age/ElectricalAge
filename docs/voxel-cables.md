@@ -227,6 +227,11 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   dearer. A state reached as cheaply with no more air behind it prunes this one. An air piece is an ordinary flat
   piece whose plane is off any surface; whether it is supported is read live (`CablePlacer.supported`): no device goes
   on its face (`VoxelNode.placeFace`) and no branch starts on it (`endAt`), so air allowances can't chain.
+- How air cables hang (Baughn 2026-11-12: chain physics once at placement; route and preview stay straight):
+  `CablePlacer.lay` finds the horizontal air stretches (`airStretches`), relaxes a chain of ~1-voxel links for each
+  (`CableHang`: 4 % slack, the two end links held on the line so it leaves and lands flat, gravity, nodes kept out of
+  blocked voxels, 200 steps), and stores each block's share on its piece (`CablePart.hang`, NBT key `hang`, absent =
+  straight). `VoxelGeometry.hanging` sweeps the cross-section along it. Hitboxes, connections and the line stay as routed.
 - FREE kinds (pipes): lattice 4, `BEND` 6, unsupported steps cost more (`UNSUPPORTED`), off-lattice ports jog onto the
   lattice, waypoints as legs; gives up on the wall-clock budget (Baughn: it runs on the server thread).
 

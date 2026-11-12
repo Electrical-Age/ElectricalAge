@@ -340,7 +340,7 @@ public final class VoxelGeometry {
                 float[] out = new float[8];
                 for (int j = 0; j < 4; j++) {
                     double[] v = {f.xyz[3 * j], f.xyz[3 * j + 1], f.xyz[3 * j + 2]};
-                    v[1] += c.sagAt(alongF, v[alongF]);   // (textured as the straight cable it hangs from)
+                    v[1] += c.dropAt(alongF, v[alongF]);   // (textured as the straight cable it hangs from)
                     double u, vv = v[along] / 16;
                     double depth = Math.abs(top - v[n]);
                     if (knuckle) u = 0.25 + (v[w] - cw) / 32;   // (a knuckle: just the strip)
@@ -353,65 +353,80 @@ public final class VoxelGeometry {
                 return out;
             };
             Identifier sprite = c.burnt != null ? BURNT : cableSprite(c.tier);
-            if (!knuckle && along != 1 && sags(c, along, bx)) sagged(m, c, bx, along, sprite).named("cable box " + i).argb(argb).uv(uv);
+            double[][] chain = knuckle || along == 1 ? null : c.hangPoints(along);
+            if (chain != null && hangs(chain, along, bx)) hanging(m, bx, along, chain, c.hangLineY(along), sprite, argb, uv, "cable box " + i);
             else box(m, bx, sprite).named("cable box " + i).argb(argb).uv(uv);
         }
     }
 
-    /** Does the cable dip anywhere along this box (along axis)? */
-    static boolean sags(CablePart c, int along, int[] bx) {
-        if (c.sag == null) return false;
-        for (int u = bx[along]; u <= bx[along + 3]; u++) if (c.sagAt(along, u) > 1e-3) return true;
-        return false;
+    /** Does the chain lie along this box (overlapping its length)? */
+    static boolean hangs(double[][] chain, int along, int[] bx) {
+        double a = chain[0][along], b = chain[chain.length - 1][along];
+        return Math.max(a, b) > bx[along] + 1e-6 && Math.min(a, b) < bx[along + 3] - 1e-6;
     }
 
     /**
-     * A cable box hanging along its air stretch (Baughn 2026-11-12: a catenary, flat where it meets a surface): the box
-     * cut into 1-voxel slices along its length, each slice's ends lowered by the dip there, so the cable bends smoothly
-     * down and back up. A closed mesh: the four long sides per slice and the two end caps.
+     * A cable box with an air stretch hanging along it (Baughn 2026-11-12: chain physics at placement, CableHang): the
+     * box where the cable lies on its support, and over the stretch the cable's cross-section swept along the chain, link
+     * by link (a closed mesh: four long sides per link and the two end caps), so it leaves its support flat, hangs and
+     * comes back up.
      */
-    static Mesh sagged(Model m, CablePart c, int[] bx, int along, Identifier sprite) {
-        Mesh mesh = new Mesh(null);
+    static void hanging(Model m, int[] bx, int along, double[][] chain, double lineY, Identifier sprite, int argb, UvMap uv, String name) {
         int[] o = others(along);
         int q0 = o[0], q1 = o[1];
-        List<Double> us = new ArrayList<>();
-        us.add((double) bx[along]);
-        for (int u = bx[along] + 1; u < bx[along + 3]; u++) us.add((double) u);
-        us.add((double) bx[along + 3]);
-        // a corner at u (along) with the across coordinates (a on q0, b on q1), lowered by the dip at u
-        java.util.function.Function<double[], double[]> at = k -> {
-            double[] v = new double[3];
-            v[along] = k[0];
-            v[q0] = k[1];
-            v[q1] = k[2];
-            v[1] -= c.sagAt(along, k[0]);
-            return v;
-        };
-        double[] lo = {bx[q0], bx[q1]}, hi = {bx[q0 + 3], bx[q1 + 3]};
-        double[] centre = {(bx[0] + bx[3]) / 2.0, (bx[1] + bx[4]) / 2.0, (bx[2] + bx[5]) / 2.0};
-        for (int k = 0; k + 1 < us.size(); k++) {
-            double u0 = us.get(k), u1 = us.get(k + 1);
-            // (this slice's own centre, lowered with it: the faces are wound away from it)
-            double[] cs = centre.clone();
-            cs[along] = (u0 + u1) / 2;
-            cs[1] -= (c.sagAt(along, u0) + c.sagAt(along, u1)) / 2;
-            double[] centreS = cs;
-            // the four long sides: q0 low/high, q1 low/high
-            quadOut(mesh, centreS, along, at.apply(new double[]{u0, lo[0], lo[1]}), at.apply(new double[]{u1, lo[0], lo[1]}),
-                at.apply(new double[]{u1, lo[0], hi[1]}), at.apply(new double[]{u0, lo[0], hi[1]}));
-            quadOut(mesh, centreS, along, at.apply(new double[]{u0, hi[0], lo[1]}), at.apply(new double[]{u1, hi[0], lo[1]}),
-                at.apply(new double[]{u1, hi[0], hi[1]}), at.apply(new double[]{u0, hi[0], hi[1]}));
-            quadOut(mesh, centreS, along, at.apply(new double[]{u0, lo[0], lo[1]}), at.apply(new double[]{u1, lo[0], lo[1]}),
-                at.apply(new double[]{u1, hi[0], lo[1]}), at.apply(new double[]{u0, hi[0], lo[1]}));
-            quadOut(mesh, centreS, along, at.apply(new double[]{u0, lo[0], hi[1]}), at.apply(new double[]{u1, lo[0], hi[1]}),
-                at.apply(new double[]{u1, hi[0], hi[1]}), at.apply(new double[]{u0, hi[0], hi[1]}));
+        // the chain runs forward along the axis
+        double[][] pts = chain[0][along] <= chain[chain.length - 1][along] ? chain : reversed(chain);
+        double c0 = pts[0][along], c1 = pts[pts.length - 1][along];
+        // the parts of the box off the stretch: boxes
+        if (c0 > bx[along] + 0.01) {
+            double[] lo = {bx[0], bx[1], bx[2]}, hi = {bx[3], bx[4], bx[5]};
+            hi[along] = c0;
+            boxD(m, lo, hi, sprite).named(name + " (on its support)").argb(argb).uv(uv);
         }
-        for (double u : new double[]{us.get(0), us.get(us.size() - 1)})
-            quadOut(mesh, centre, along, at.apply(new double[]{u, lo[0], lo[1]}), at.apply(new double[]{u, hi[0], lo[1]}),
-                at.apply(new double[]{u, hi[0], hi[1]}), at.apply(new double[]{u, lo[0], hi[1]}));
+        if (c1 < bx[along + 3] - 0.01) {
+            double[] lo = {bx[0], bx[1], bx[2]}, hi = {bx[3], bx[4], bx[5]};
+            lo[along] = c1;
+            boxD(m, lo, hi, sprite).named(name + " (on its support)").argb(argb).uv(uv);
+        }
+        // the cross-section round the routed line, carried by each chain point (the chain is the line's point: the box's
+        // corners are offsets from it on the two other axes)
+        double line0 = q0 == 1 ? lineY : pts[0][q0], line1 = q1 == 1 ? lineY : pts[0][q1];
+        double[] lo = {bx[q0] - line0, bx[q1] - line1}, hi = {bx[q0 + 3] - line0, bx[q1 + 3] - line1};
+        Mesh mesh = new Mesh(null);
+        for (int k = 0; k + 1 < pts.length; k++) {
+            double[] a = pts[k], b = pts[k + 1];
+            double[] cs = {(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2};
+            cs[q0] += (lo[0] + hi[0]) / 2;
+            cs[q1] += (lo[1] + hi[1]) / 2;
+            quadOut(mesh, cs, along, corner(a, along, q0, q1, lo[0], lo[1]), corner(b, along, q0, q1, lo[0], lo[1]),
+                corner(b, along, q0, q1, lo[0], hi[1]), corner(a, along, q0, q1, lo[0], hi[1]));
+            quadOut(mesh, cs, along, corner(a, along, q0, q1, hi[0], lo[1]), corner(b, along, q0, q1, hi[0], lo[1]),
+                corner(b, along, q0, q1, hi[0], hi[1]), corner(a, along, q0, q1, hi[0], hi[1]));
+            quadOut(mesh, cs, along, corner(a, along, q0, q1, lo[0], lo[1]), corner(b, along, q0, q1, lo[0], lo[1]),
+                corner(b, along, q0, q1, hi[0], lo[1]), corner(a, along, q0, q1, hi[0], lo[1]));
+            quadOut(mesh, cs, along, corner(a, along, q0, q1, lo[0], hi[1]), corner(b, along, q0, q1, lo[0], hi[1]),
+                corner(b, along, q0, q1, hi[0], hi[1]), corner(a, along, q0, q1, hi[0], hi[1]));
+        }
+        double[] mid = {(pts[0][0] + pts[pts.length - 1][0]) / 2, (pts[0][1] + pts[pts.length - 1][1]) / 2, (pts[0][2] + pts[pts.length - 1][2]) / 2};
+        for (double[] e : new double[][]{pts[0], pts[pts.length - 1]})
+            quadOut(mesh, mid, along, corner(e, along, q0, q1, lo[0], lo[1]), corner(e, along, q0, q1, hi[0], lo[1]),
+                corner(e, along, q0, q1, hi[0], hi[1]), corner(e, along, q0, q1, lo[0], hi[1]));
         mesh.closed(true);
         m.add(mesh).material(sprite);
-        return mesh;
+        mesh.named(name + " (hanging)").argb(argb).uv(uv);
+    }
+
+    static double[] corner(double[] p, int along, int q0, int q1, double d0, double d1) {
+        double[] v = p.clone();
+        v[q0] += d0;
+        v[q1] += d1;
+        return v;
+    }
+
+    static double[][] reversed(double[][] a) {
+        double[][] r = new double[a.length][];
+        for (int i = 0; i < a.length; i++) r[i] = a[a.length - 1 - i];
+        return r;
     }
 
     /** Add quad a b c d to mesh wound to face away from the box's centre line (along axis through centre). */

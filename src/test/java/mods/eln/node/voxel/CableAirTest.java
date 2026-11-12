@@ -108,9 +108,10 @@ public class CableAirTest {
     }
 
     @Test
-    void aBridgeHangsInACurve() {
-        // the stretch over the gap (x 48..64 at the islands' top) dips 15 % of its span (2.4 voxels) at its middle, flat
-        // at both ends; only the piece over the gap carries it, and its drawn mesh reaches down that far
+    void aBridgeHangsOnAChain() {
+        // the stretch over the gap (x 48..64 at the islands' top): the chain leaves and lands flat (its end links on the
+        // line), hangs ~12 % of the span (2 voxels) at its middle, stays out of the blocks; only the piece over the gap
+        // carries it, and its drawn mesh reaches down that far
         var solid = strip(0, 1, 2, 4, 5, 6);
         var sp = CableRouterTest.world(solid);
         var r = route(solid, LV, 1, 5);
@@ -120,25 +121,33 @@ public class CableAirTest {
         assertEquals(0, st.get(0)[0]);
         assertEquals(48, st.get(0)[3]);
         assertEquals(64, st.get(0)[4]);
-        int sagging = 0;
+        long t0 = System.nanoTime();
+        var chain = CableHang.hang(sp, st.get(0));
+        long us = (System.nanoTime() - t0) / 1000;
+        double low = Double.MAX_VALUE;
+        for (double[] q : chain) low = Math.min(low, q[1]);
+        System.out.println("CableHang: the middle hangs " + (-low) + " voxels, " + us + " us");
+        assertTrue(low < -1.2 && low > -3.5, "the middle hangs " + (-low) + " voxels (" + us + " us)");
+        assertEquals(0, chain.get(1)[1], 1e-9, "flat where it leaves");
+        assertEquals(0, chain.get(chain.size() - 2)[1], 1e-9, "flat where it lands");
+        for (double[] q : chain) assertFalse(CableHang.blocked(sp, q), "a node inside a block: " + java.util.Arrays.toString(q));
+        int hanging = 0;
         for (CableRouter.Piece p : CableRouter.pieces(r.steps, 2, 1)) {
             if (p.face() < 0) continue;
-            int[] sag = CablePlacer.sagOf(p, st);
-            if (sag == null) continue;
-            sagging++;
+            int[] hang = CablePlacer.hangOf(p, st, List.of(chain));
+            if (hang == null) continue;
+            hanging++;
             assertEquals(3, p.bx(), "the piece over the gap");
-            assertArrayEquals(new int[]{0, 0, 16, 24}, sag);
             CablePart part = new CablePart(CableRouterTest.LV, p.face(), p.points());
-            part.sag = sag;
-            assertEquals(2.4, part.sagAt(0, 8), 1e-9);
-            assertEquals(0, part.sagAt(0, 0), 1e-9);
-            double[] low = {Double.MAX_VALUE};
+            part.hang = hang;
+            assertEquals(0, part.dropAt(0, 0.01), 0.2);
+            assertEquals(-low, part.dropAt(0, 8), 0.3);
+            double[] lowest = {Double.MAX_VALUE};
             VoxelGeometry.model(List.of(part), null).emit(f -> {
-                for (int i = 1; i < f.xyz.length; i += 3) low[0] = Math.min(low[0], f.xyz[i]);
+                for (int i = 1; i < f.xyz.length; i += 3) lowest[0] = Math.min(lowest[0], f.xyz[i]);
             });
-            assertEquals(-2.4, low[0], 0.05, "the drawn cable's lowest point (its routed bottom is y 0)");
+            assertEquals(low, lowest[0], 0.3, "the drawn cable's lowest point");
         }
-        assertEquals(1, sagging);
+        assertEquals(1, hanging);
     }
 }
-

@@ -680,10 +680,13 @@ public final class CablePlacer {
         List<CableRouter.Piece> pieces = CableRouter.pieces(steps, ti.width(), ti.height());
         List<BlockPos> at = new ArrayList<>();
         List<VoxelPart> parts = new ArrayList<>();
-        List<long[]> stretches = airStretches(space(level), RouteKind.cable(tier, spec), steps);
+        CableRouter.Space sp = space(level);
+        List<long[]> stretches = airStretches(sp, RouteKind.cable(tier, spec), steps);
+        List<List<double[]>> chains = new ArrayList<>();
+        for (long[] st : stretches) chains.add(CableHang.hang(sp, st));
         for (CableRouter.Piece p : pieces) {
             CablePart part = p.face() < 0 ? CablePart.knuckle(tier, spec, p.points()[0], p.points()[1], p.points()[2]) : new CablePart(tier, spec, p.face(), p.points());
-            if (!part.isKnuckle()) part.sag = sagOf(p, stretches);
+            if (!part.isKnuckle()) part.hang = hangOf(p, stretches, chains);
             parts.add(part);
             at.add(new BlockPos((int) p.bx(), (int) p.by(), (int) p.bz()));
         }
@@ -726,15 +729,17 @@ public final class CablePlacer {
     }
 
     /**
-     * A piece's share of the air stretches (CablePart.sag), or null: each stretch whose line one of the piece's segments
-     * lies on. The dip is about 15 % of the span, at most 3 voxels (Baughn 2026-11-12: a catenary or the like).
+     * A piece's share of the hanging chains (CablePart.hang), or null: for each stretch whose line one of the piece's
+     * segments lies on, the chain's points inside the piece's block, cut at the block's faces (interpolated on the
+     * chain, so neighbouring blocks meet at the same point).
      */
-    static int[] sagOf(CableRouter.Piece pc, List<long[]> stretches) {
+    static int[] hangOf(CableRouter.Piece pc, List<long[]> stretches, List<List<double[]>> chains) {
         if (stretches.isEmpty()) return null;
         long[] base = {pc.bx() * 16, pc.by() * 16, pc.bz() * 16};
         int[] pts = pc.points();
         List<Integer> out = new ArrayList<>();
-        for (long[] st : stretches) {
+        for (int s = 0; s < stretches.size(); s++) {
+            long[] st = stretches.get(s);
             int ax = (int) st[0];
             int[] o = VoxelGeometry.others(ax);
             boolean on = false;
@@ -743,16 +748,37 @@ public final class CablePlacer {
                     && base[o[0]] + pts[k + o[0]] == st[1] && base[o[1]] + pts[k + o[1]] == st[2]
                     && Math.max(pts[k + ax], pts[k - 3 + ax]) + base[ax] > st[3] && Math.min(pts[k + ax], pts[k - 3 + ax]) + base[ax] < st[4];
             if (!on) continue;
-            long span = st[4] - st[3];
+            List<double[]> chain = chains.get(s);
+            int n = chain.size() - 1;
+            double from = st[3], span = st[4] - st[3];
+            double lo = Math.max(from, base[ax]), hi = Math.min(st[4], base[ax] + 16);
+            if (hi <= lo) continue;
+            List<double[]> in = new ArrayList<>();
+            in.add(along(chain, (lo - from) / span * n));
+            for (int i = 0; i <= n; i++) {
+                double u = from + i * span / n;
+                if (u > lo + 1e-9 && u < hi - 1e-9) in.add(chain.get(i));
+            }
+            in.add(along(chain, (hi - from) / span * n));
+            // (the routed line's y: the stretch's horizontal, so its y is one of the two others)
+            double lineY = o[0] == 1 ? st[1] : st[2];
             out.add(ax);
-            out.add((int) (st[3] - base[ax]));
-            out.add((int) (st[4] - base[ax]));
-            out.add((int) Math.round(Math.min(0.15 * span, 3.0) * 10));
+            out.add((int) Math.round((lineY - base[1]) * 8));
+            out.add(in.size());
+            for (double[] q : in) for (int c = 0; c < 3; c++) out.add((int) Math.round((q[c] - base[c]) * 8));
         }
         if (out.isEmpty()) return null;
         int[] r = new int[out.size()];
         for (int i = 0; i < r.length; i++) r[i] = out.get(i);
         return r;
+    }
+
+    /** The chain's point at fractional node index f (linear between nodes). */
+    static double[] along(List<double[]> chain, double f) {
+        int i = (int) Math.max(0, Math.min(chain.size() - 2, Math.floor(f)));
+        double t = Math.max(0, Math.min(1, f - i));
+        double[] a = chain.get(i), b = chain.get(i + 1);
+        return new double[]{a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t};
     }
 
     static void show(ServerPlayer player, ServerLevel level, List<CableRouter.Step> steps) {
