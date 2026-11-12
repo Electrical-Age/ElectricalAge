@@ -82,7 +82,11 @@ public final class ChunkBake implements Bake.Host {
 
     /** Let the chunk draw what it can of this block entity's frame (call right after opening the frame). */
     public static void attach(GlFrame frame, BlockEntity be, int light) {
-        if (Bake.mode == 0 || be == null || be.isRemoved() || be.getLevel() != INSTANCE.level) return;
+        if (Bake.mode == 0) return;
+        if (be == null || be.isRemoved() || be.getLevel() != INSTANCE.level) {
+            frame.noBake(Bake.NO_BLOCK_ENTITY);
+            return;
+        }
         frame.bake(be, be.getBlockPos().asLong(), light);
     }
 
@@ -230,7 +234,7 @@ public final class ChunkBake implements Bake.Host {
             if (c.device.owner instanceof BlockEntity be && be.isRemoved()) continue;
             live.add(c);
         }
-        Bake.Call[] calls = live.toArray(new Bake.Call[0]);
+        Bake.Call[] calls = Bake.inDrawOrder(live);
         Snap snap = new Snap(Util.getNanos(), calls);
         s.snaps.add(snap);
         if (s.snaps.size() > 16) s.snaps.remove(0);

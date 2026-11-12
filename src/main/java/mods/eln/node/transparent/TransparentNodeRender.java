@@ -40,7 +40,8 @@ public class TransparentNodeRender implements BlockEntityRenderer<TransparentNod
         if (state.render == null) return;
         GlFrame frame = GlSubmit.openBlock(poseStack);
         // (a burnt device draws twice, the second time as a soot overlay that needs the first one's depth)
-        if (!state.render.burnt) mods.eln.client.render.bake.ChunkBake.attach(frame, state.entity, state.lightCoords);
+        if (state.render.burnt) frame.noBake(mods.eln.gl.Bake.BURNT);
+        else mods.eln.client.render.bake.ChunkBake.attach(frame, state.entity, state.lightCoords);
         if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.device(state.blockPos.asLong(), state.render.getClass().getSimpleName());
         try {
             GL11.glTranslatef(.5f, .5f, .5f);

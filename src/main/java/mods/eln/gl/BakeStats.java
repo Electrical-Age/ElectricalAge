@@ -10,7 +10,8 @@ import java.util.Map;
  * Measurement only (static-bake study): per rendered frame, how many of the vertices the block entity renderers send
  * could live in a chunk mesh. A display-list primitive counts as constant when its matrix (relative to the renderer's
  * pose), colour and state equal the previous frame's for the same device and position in the draw order. Enabled by
- * -Deln.bakeStats=true or ELN_BAKE_STATS=1; logs a summary every {@link #PERIOD} frames.
+ * -Deln.bakeStats=true or ELN_BAKE_STATS=1; logs a summary every {@link #PERIOD} frames. With {@link Bake} on, the
+ * constant vertices the renderer still draws are split by the reason the chunk mesh does not draw them.
  */
 public final class BakeStats {
     private BakeStats() {
@@ -33,6 +34,11 @@ public final class BakeStats {
     private static final Map<String, long[]> BY_LABEL = new HashMap<>();
     private static final IdentityHashMap<float[], Boolean> UV_OK = new IdentityHashMap<>();
     private static final long[] TOTAL = new long[N];
+    private static final String[] WHY = {"unknown", "not attached", "burnt", "pose", "no block entity", "changed", "waiting",
+        "waiting longer", "no sprite", "no whole quad", "mesh not shown yet", "other section hidden"};
+    private static final Map<String, long[]> WHY_BY_LABEL = new HashMap<>();
+    private static final long[] WHY_TOTAL = new long[Bake.REASONS];
+    private static final java.util.LinkedHashSet<String> NO_SPRITE = new java.util.LinkedHashSet<>(), TWICE = new java.util.LinkedHashSet<>();
     private static int frames, frameNo;
     private static Device device;
     private static int seq;
@@ -57,13 +63,38 @@ public final class BakeStats {
             long[] c = rows.get(i).getValue();
             sb.append("\n[eln bake stats]   ").append(rows.get(i).getKey()).append(": total=").append(sum(c) / frames);
             for (int k = 0; k < N; k++) if (c[k] != 0) sb.append(' ').append(NAMES[k]).append('=').append(c[k] / frames);
+            long[] w = WHY_BY_LABEL.get(rows.get(i).getKey());
+            if (w != null) reasons(sb.append("; const is"), w);
+        }
+        if (Bake.mode != 0) {
+            reasons(sb.append("\n[eln bake stats]   const left to the renderer:"), WHY_TOTAL);
+            if (!NO_SPRITE.isEmpty()) sb.append("\n[eln bake stats]   textures without a sprite: ").append(NO_SPRITE);
+            if (!TWICE.isEmpty()) sb.append("\n[eln bake stats]   a part drawn twice in the same place: ").append(TWICE);
         }
         sb.append("\n[eln bake stats]   ").append(Bake.statsLine(frames));
         org.slf4j.LoggerFactory.getLogger("eln").info(sb.toString());
         frames = 0;
         java.util.Arrays.fill(TOTAL, 0);
+        java.util.Arrays.fill(WHY_TOTAL, 0);
         BY_LABEL.clear();
+        WHY_BY_LABEL.clear();
+        NO_SPRITE.clear();
+        TWICE.clear();
         DEVICES.values().removeIf(d -> frameNo - d.lastFrame > PERIOD);
+    }
+
+    private static void reasons(StringBuilder sb, long[] w) {
+        for (int k = 0; k < w.length; k++) if (w[k] != 0) sb.append(' ').append(WHY[k]).append('=').append(w[k] / frames);
+    }
+
+    /** A texture that is not in the block atlas kept a primitive out of the chunk mesh. */
+    static void noSprite(net.minecraft.resources.Identifier texture) {
+        if (NO_SPRITE.size() < 16) NO_SPRITE.add(String.valueOf(texture));
+    }
+
+    /** The device drew a primitive at a matrix it had already drawn it at in this draw. */
+    static void twiceInPlace() {
+        if (TWICE.size() < 16) TWICE.add(label);
     }
 
     private static long sum(long[] c) {
@@ -101,8 +132,11 @@ public final class BakeStats {
         BY_LABEL.computeIfAbsent(label, k -> new long[N])[category] += vertices;
     }
 
-    /** One replayed display-list primitive; the hash covers its matrix (relative to the pose), colour and state. */
-    static void list(float[] quads, int floats, int vertices, long hash, boolean blended, boolean overlay) {
+    /**
+     * One replayed display-list primitive that the renderer draws; the hash covers its matrix (relative to the pose),
+     * colour and state, why is the {@link Bake} reason the chunk mesh does not draw it.
+     */
+    static void list(float[] quads, int floats, int vertices, long hash, boolean blended, boolean overlay, int why) {
         if (!tracked) return;
         if (overlay) {
             add(OVERLAY, vertices);
@@ -133,7 +167,12 @@ public final class BakeStats {
         if (i >= d.hashes.length) d.hashes = java.util.Arrays.copyOf(d.hashes, d.hashes.length * 2);
         hash = hash * 31 + System.identityHashCode(quads);
         boolean seen = i < d.count && d.lastFrame == frameNo - 1;
-        add(!seen ? FIRST : d.hashes[i] == hash ? CONST : MOVING, vertices);
+        int category = !seen ? FIRST : d.hashes[i] == hash ? CONST : MOVING;
+        add(category, vertices);
         d.hashes[i] = hash;
+        if (category == CONST && Bake.mode != 0) {
+            WHY_TOTAL[why] += vertices;
+            WHY_BY_LABEL.computeIfAbsent(label, k -> new long[Bake.REASONS])[why] += vertices;
+        }
     }
 }

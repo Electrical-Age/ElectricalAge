@@ -136,7 +136,14 @@ public final class GlFrame {
      * block entity. Does nothing unless the frame was opened by {@link #openBlock} with a translating pose.
      */
     public void bake(Object owner, long pos, int light) {
-        if (split && Bake.mode != 0) bake = Bake.begin(owner, pos, light);
+        if (Bake.mode == 0) return;
+        if (split) bake = Bake.begin(owner, pos, light);
+        else noBake = Bake.POSE;
+    }
+
+    /** Why this frame leaves nothing to the chunk mesh (a {@link Bake} reason; statistics only). */
+    public void noBake(int why) {
+        noBake = why;
     }
 
     /** Close the frame; its batches stay readable until the pool is reset by the next render frame. */
@@ -177,6 +184,7 @@ public final class GlFrame {
     private float ox, oy, oz;
     private boolean split;
     private Bake.Device bake;
+    private int noBake = Bake.NOT_ATTACHED;
     /** While set, nothing drawn is left to the chunk mesh (a burnt element: its soot overlay needs the same depth). */
     public boolean bakePause;
     private final Matrix4f[] stack = new Matrix4f[64];
@@ -232,6 +240,7 @@ public final class GlFrame {
         ox = oy = oz = 0;
         split = false;
         bake = null;
+        noBake = Bake.NOT_ATTACHED;
         bakePause = false;
         mode = -1;
         lastKey = null;
@@ -680,10 +689,13 @@ public final class GlFrame {
 
     private void replay(Prim p) {
         if (discard) return;
-        if (bake != null && !blend && !soot && ghost == 0 && !bakePause
-            && bake.skip(p, stack[depth], p.colored ? 0 : argb(r, g, b, a), texture2d ? texture : null, cull, fullBright, lighting)) {
-            if (BakeStats.ON) BakeStats.add(BakeStats.SKIPPED, p.floats / STRIDE);
-            return;
+        int why = bakePause ? Bake.BURNT : noBake;
+        if (bake != null && !blend && !soot && ghost == 0 && !bakePause) {
+            if (bake.skip(p, stack[depth], p.colored ? 0 : argb(r, g, b, a), texture2d ? texture : null, cull, fullBright, lighting)) {
+                if (BakeStats.ON) BakeStats.add(BakeStats.SKIPPED, p.floats / STRIDE);
+                return;
+            }
+            why = Bake.why;
         }
         if (BakeStats.ON) {
             Matrix4f m = stack[depth], b0 = stack[0];
@@ -703,7 +715,7 @@ public final class GlFrame {
             if (!p.colored) h = h * 31 + argb(r, g, b, a);
             h = h * 31 + (texture2d && texture != null ? texture.hashCode() : 0);
             h = h * 31 + (cull ? 1 : 0) + (fullBright ? 2 : 0) + (lighting ? 4 : 0);
-            BakeStats.list(p.quads, p.floats, p.floats / STRIDE, h, blend, soot || ghost != 0);
+            BakeStats.list(p.quads, p.floats, p.floats / STRIDE, h, blend, soot || ghost != 0, why);
         }
         emit(p.quads, p.floats, p.colored);
     }

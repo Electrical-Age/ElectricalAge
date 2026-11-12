@@ -300,6 +300,58 @@ class BakeTest {
         }
     }
 
+    /**
+     * A part drawn twice in the same place, shaded and then at full light: the chunk writes the two in the order of
+     * the draw, so the second covers the first, also when the second settled first.
+     */
+    @Test
+    void aPartDrawnTwiceInPlaceKeepsItsOrder() {
+        int list = quadList(0.5f, 1);
+        Runnable bright = () -> {
+            mods.eln.misc.UtilsClient.disableLight();
+            GL11.glCallList(list);
+            mods.eln.misc.UtilsClient.enableLight();
+        };
+        Runnable both = () -> {
+            GL11.glCallList(list);
+            bright.run();
+        };
+        frame(0, bright);
+        frame(500, bright);
+        assertEquals(1, settled.size());
+        frame(100, both);
+        frame(500, both);
+        assertEquals(2, settled.size());
+        assertTrue(settled.get(0).fullBright, "the full-light draw settled first");
+        assertFalse(settled.get(1).fullBright);
+        Bake.Call[] calls = Bake.inDrawOrder(settled);
+        assertFalse(calls[0].fullBright);
+        assertTrue(calls[1].fullBright);
+        var sprites = java.util.Map.of(mods.eln.misc.UtilsClient.WHITE, new mods.eln.client.render.bake.ModelSprites.Spr(0, 0, 1, 1, false));
+        List<Integer> lights = new ArrayList<>();
+        mods.eln.client.render.bake.ChunkBake.write((cutout, x, y, z, color, u, v, l) -> lights.add(l),
+            calls, sprites, calls[0].sections[0], 96, 0, -48, false);
+        assertEquals(8, lights.size());
+        assertEquals(light, lights.get(0));
+        assertEquals(net.minecraft.util.LightCoordsUtil.FULL_BRIGHT, lights.get(7));
+    }
+
+    /** Calls of several devices stay together, each device's in the order of its draw. */
+    @Test
+    void theChunkWritesEachDevicesCallsInDrawOrder() {
+        int a = quadList(0.25f, 1), b = quadList(0.5f, 1), c = quadList(0.75f, 1);
+        Runnable draw = () -> {
+            GL11.glCallList(a);
+            GL11.glCallList(b);
+            GL11.glCallList(c);
+        };
+        frame(0, draw);
+        frame(500, draw);
+        assertEquals(3, settled.size());
+        List<Bake.Call> shuffled = List.of(settled.get(2), settled.get(0), settled.get(1));
+        assertArrayEquals(settled.toArray(), Bake.inDrawOrder(shuffled));
+    }
+
     /** With a pose that is more than a translation the matrices hold the camera: nothing of such a frame is baked. */
     @Test
     void aFrameWithARotatedPoseIsNotBaked() {

@@ -23,8 +23,8 @@ import java.util.function.Predicate;
  * and is drawn by the renderer again, so nothing is ever assumed to be static: the comparison every frame is the proof.
  * A primitive that keeps changing after it settled (a blinking part) waits longer each time before it settles again.
  * <p>
- * Render thread only, except that a settled call's fields are read by the meshing workers (they are not written after
- * it settled).
+ * Render thread only, except that the meshing workers read a settled call's geometry and state (everything but
+ * {@link Call#order}; those fields are not written after it settled).
  */
 public final class Bake {
     private Bake() {
@@ -65,6 +65,16 @@ public final class Bake {
 
     public static Host host;
 
+    /**
+     * Why {@link Device#skip} last answered false, and why a frame has no device at all (statistics). CHANGED = not
+     * what it was last frame; WAITING = the same, but not for long enough yet; WAITING_LONG = the same, but the part
+     * changed soon after it last settled and waits longer; NOT_SHOWN = settled, the mesh on screen does not contain
+     * it yet; HIDDEN = some of it lies in another section, which is not drawn.
+     */
+    public static final int NONE = 0, NOT_ATTACHED = 1, BURNT = 2, POSE = 3, NO_BLOCK_ENTITY = 4, CHANGED = 5, WAITING = 6,
+        WAITING_LONG = 7, NO_SPRITE = 8, NO_QUADS = 9, NOT_SHOWN = 10, HIDDEN = 11, REASONS = 12;
+    static int why;
+
     /** One replay of a display-list primitive. */
     public static final class Call {
         final GlFrame.Prim prim;
@@ -84,6 +94,8 @@ public final class Bake {
         long since, settledAt;
         boolean settled;
         int stamp;
+        /** Its place in the device's last draw (render thread only; rewritten every frame). */
+        int order;
         /** The sections holding this call's quads (SectionPos.asLong); set when it settles. */
         public long[] sections;
         /** In how many of them the mesh on screen contains this call (kept by the host). */
@@ -126,10 +138,13 @@ public final class Bake {
             this.light = light;
         }
 
-        boolean same(Matrix4f m, int color, Identifier texture, boolean cull, boolean fullBright, boolean lit, int light) {
+        boolean at(Matrix4f m) {
             return m30 == m.m30() && m31 == m.m31() && m32 == m.m32() && m00 == m.m00() && m11 == m.m11() && m22 == m.m22()
-                && m01 == m.m01() && m02 == m.m02() && m10 == m.m10() && m12 == m.m12() && m20 == m.m20() && m21 == m.m21()
-                && this.color == color && this.light == light && this.cull == cull && this.fullBright == fullBright && this.lit == lit
+                && m01 == m.m01() && m02 == m.m02() && m10 == m.m10() && m12 == m.m12() && m20 == m.m20() && m21 == m.m21();
+        }
+
+        boolean same(Matrix4f m, int color, Identifier texture, boolean cull, boolean fullBright, boolean lit, int light) {
+            return at(m) && this.color == color && this.light == light && this.cull == cull && this.fullBright == fullBright && this.lit == lit
                 && (this.texture == texture || (texture != null && texture.equals(this.texture)));
         }
     }
@@ -178,6 +193,17 @@ public final class Bake {
         return out;
     }
 
+    /**
+     * The calls in the order the chunk writes them: each device's in the order of its draw. Where a device draws two
+     * things in the same place the later one covers the earlier, in the chunk as in 1.12, whichever settled first.
+     * Render thread only.
+     */
+    public static Call[] inDrawOrder(java.util.Collection<Call> calls) {
+        Call[] out = calls.toArray(new Call[0]);
+        java.util.Arrays.sort(out, (a, b) -> a.device != b.device ? Integer.compare(a.device.id, b.device.id) : Integer.compare(a.order, b.order));
+        return out;
+    }
+
     /** How long a call must stay the same before it settles, and the most a primitive that keeps changing waits. */
     static final long SETTLE_NS = 400_000_000L, SETTLE_MAX_NS = 60_000_000_000L;
 
@@ -186,6 +212,7 @@ public final class Bake {
     private static long settles, drops;
     private static int settledCalls;
     private static long settledVertices;
+    private static int devices;
 
     private static final Map<Object, Device> DEVICES = new IdentityHashMap<>();
 
@@ -239,6 +266,7 @@ public final class Bake {
     public static final class Device {
         public final Object owner;
         final long pos, home;
+        final int id = devices++;
         private int light;
         private Call[] prev = new Call[8], cur = new Call[8];
         private int prevN, curN, cursor, pass;
@@ -275,6 +303,7 @@ public final class Bake {
          * draws exactly this, so the renderer must not.
          */
         boolean skip(GlFrame.Prim p, Matrix4f m, int color, Identifier texture, boolean cull, boolean fullBright, boolean lit) {
+            why = NONE;
             if (!p.uvInUnitSquare()) return false;
             Call c = null, spare = null;
             int n = prevN;
@@ -290,20 +319,41 @@ public final class Bake {
                 }
                 if (!o.settled && spare == null) spare = o;
             }
-            if (c == null) {
-                if (!host.hasSprite(texture)) return false;
+            boolean changed = c == null;
+            if (changed) {
+                if (!host.hasSprite(texture)) {
+                    why = NO_SPRITE;
+                    if (BakeStats.ON) BakeStats.noSprite(texture);
+                    return false;
+                }
                 // a part in motion reuses its object from last frame
                 c = spare != null ? spare : new Call(this, p);
                 c.set(m, color, texture, cull, fullBright, lit, light);
                 c.since = now;
             }
+            if (BakeStats.ON) {
+                for (int i = 0; i < curN; i++) {
+                    if (cur[i].prim == p && cur[i].at(m)) {
+                        BakeStats.twiceInPlace();
+                        break;
+                    }
+                }
+            }
             c.stamp = pass;
+            c.order = curN;
             if (curN == cur.length) cur = java.util.Arrays.copyOf(cur, curN * 2);
             cur[curN++] = c;
             if (!c.settled) {
-                if (now - c.since < settleTime(p)) return false;
+                long wait = settleTime(p);
+                if (now - c.since < wait) {
+                    why = changed ? CHANGED : wait == SETTLE_NS ? WAITING : WAITING_LONG;
+                    return false;
+                }
                 c.sections = sectionsOf(c);
-                if (c.sections.length == 0) return false;
+                if (c.sections.length == 0) {
+                    why = NO_QUADS;
+                    return false;
+                }
                 c.foreign = c.sections.length > 1 || c.sections[0] != home;
                 c.settled = true;
                 c.settledAt = now;
@@ -313,9 +363,17 @@ public final class Bake {
                 host.settled(c);
             }
             if (mode == 2) return true;
-            if (c.activeIn != c.sections.length) return false;
+            if (c.activeIn != c.sections.length) {
+                why = NOT_SHOWN;
+                return false;
+            }
             if (c.foreign) {
-                for (long s : c.sections) if (s != home && !host.visible(s)) return false;
+                for (long s : c.sections) {
+                    if (s != home && !host.visible(s)) {
+                        why = HIDDEN;
+                        return false;
+                    }
+                }
             }
             return true;
         }
