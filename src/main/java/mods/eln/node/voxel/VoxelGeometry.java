@@ -400,6 +400,8 @@ public final class VoxelGeometry {
     static void cable(Model m, CablePart c, int argb, List<int[]> drawn) {
         List<int[]> boxes = c.boxes();
         int[] p = c.points;
+        List<CablePart.Drawn> hung = c.isKnuckle() ? List.of() : c.drawn();
+        double arc = 0;   // (the polyline's arc length at segment i's start: the hung spans are given in it)
         for (int i = 0; i < boxes.size(); i++) {
             int along, n;
             if (c.isKnuckle()) {
@@ -424,7 +426,6 @@ public final class VoxelGeometry {
                 float[] out = new float[8];
                 for (int j = 0; j < 4; j++) {
                     double[] v = {f.xyz[3 * j], f.xyz[3 * j + 1], f.xyz[3 * j + 2]};
-                    v[1] += c.dropAt(alongF, v[alongF]);   // (textured as the straight cable it hangs from)
                     double u, vv = v[along] / 16;
                     double depth = Math.abs(top - v[n]);
                     if (knuckle) u = 0.25 + (v[w] - cw) / 32;   // (a knuckle: just the strip)
@@ -437,80 +438,145 @@ public final class VoxelGeometry {
                 return out;
             };
             Identifier sprite = c.burnt != null ? BURNT : cableSprite(c.tier);
-            double[][] chain = knuckle || along == 1 ? null : c.hangPoints(along);
-            if (chain != null && hangs(chain, along, bx)) hanging(m, bx, along, chain, c.hangLineY(along), sprite, argb, uv, "cable box " + i);
-            else box(m, bx, sprite).named("cable box " + i).argb(argb).uv(uv);
+            int segLen = knuckle ? 0 : Math.abs(p[3 * (i + 1)] - p[3 * i]) + Math.abs(p[3 * (i + 1) + 1] - p[3 * i + 1]) + Math.abs(p[3 * (i + 1) + 2] - p[3 * i + 2]);
+            if (hung.isEmpty() || knuckle) box(m, bx, sprite).named("cable box " + i).argb(argb).uv(uv);
+            else {
+                // the box where the cable lies as routed; over a hung span the sweep below draws it instead
+                double from = p[3 * i + along], dirSign = Math.signum(p[3 * (i + 1) + along] - from);
+                List<double[]> keep = new ArrayList<>();
+                keep.add(new double[]{arc, arc + segLen});
+                for (CablePart.Drawn d : hung) keep = cut(keep, d.s0(), d.s1());
+                for (double[] k : keep) {
+                    double u0 = from + dirSign * (k[0] - arc), u1 = from + dirSign * (k[1] - arc);
+                    double lo = Math.max(bx[along], Math.min(u0, u1)), hi = Math.min(bx[along + 3], Math.max(u0, u1));
+                    // (the box's own reach past the line's ends, at the polyline's two ends, stays)
+                    if (k[0] <= arc + 1e-6) {
+                        if (dirSign > 0) lo = bx[along];
+                        else hi = bx[along + 3];
+                    }
+                    if (k[1] >= arc + segLen - 1e-6) {
+                        if (dirSign > 0) hi = bx[along + 3];
+                        else lo = bx[along];
+                    }
+                    if (hi - lo < 1e-3) continue;
+                    double[] blo = {bx[0], bx[1], bx[2]}, bhi = {bx[3], bx[4], bx[5]};
+                    blo[along] = lo;
+                    bhi[along] = hi;
+                    boxD(m, blo, bhi, sprite).named("cable box " + i).argb(argb).uv(uv);
+                }
+            }
+            arc += segLen;
+        }
+        if (!hung.isEmpty()) {
+            Identifier sprite = c.burnt != null ? BURNT : cableSprite(c.tier);
+            for (CablePart.Drawn d : hung) sweep(m, d, c.tierInfo().width(), c.tierInfo().height(), sprite, argb);
         }
     }
 
-    /** Does the chain lie along this box (overlapping its length)? */
-    static boolean hangs(double[][] chain, int along, int[] bx) {
-        double a = chain[0][along], b = chain[chain.length - 1][along];
-        return Math.max(a, b) > bx[along] + 1e-6 && Math.min(a, b) < bx[along + 3] - 1e-6;
+    /** The intervals minus [a, b]. */
+    static List<double[]> cut(List<double[]> in, double a, double b) {
+        List<double[]> out = new ArrayList<>();
+        for (double[] k : in) {
+            if (b <= k[0] || a >= k[1]) {
+                out.add(k);
+                continue;
+            }
+            if (a > k[0]) out.add(new double[]{k[0], a});
+            if (b < k[1]) out.add(new double[]{b, k[1]});
+        }
+        return out;
     }
 
     /**
-     * A cable box with an air stretch hanging along it (Baughn 2026-11-12: chain physics at placement, CableHang): the
-     * box where the cable lies on its support, and over the stretch the cable's cross-section swept along the chain, link
-     * by link (a closed mesh: four long sides per link and the two end caps), so it leaves its support flat, hangs and
-     * comes back up.
+     * A hung span drawn (Baughn 2026-11-12): the cable's cross-section (width across, height off the line toward its
+     * body) carried along the stored centre line with a frame that turns with it (tangent, the stored normal made square
+     * to it, and their cross), link by link; a closed mesh, textured as the straight cable is (the strip across the
+     * top and down the sides, v along the length).
      */
-    static void hanging(Model m, int[] bx, int along, double[][] chain, double lineY, Identifier sprite, int argb, UvMap uv, String name) {
-        int[] o = others(along);
-        int q0 = o[0], q1 = o[1];
-        // the chain runs forward along the axis
-        double[][] pts = chain[0][along] <= chain[chain.length - 1][along] ? chain : reversed(chain);
-        double c0 = pts[0][along], c1 = pts[pts.length - 1][along];
-        // the parts of the box off the stretch: boxes
-        if (c0 > bx[along] + 0.01) {
-            double[] lo = {bx[0], bx[1], bx[2]}, hi = {bx[3], bx[4], bx[5]};
-            hi[along] = c0;
-            boxD(m, lo, hi, sprite).named(name + " (on its support)").argb(argb).uv(uv);
+    static void sweep(Model m, CablePart.Drawn d, double width, double height, Identifier sprite, int argb) {
+        double[][] p = d.pts();
+        int n = p.length;
+        if (n < 2) return;
+        double[][] t = new double[n][], nn = new double[n][], bb = new double[n][];
+        double[] s = new double[n];
+        for (int i = 0; i < n; i++) {
+            double[] a = p[Math.max(0, i - 1)], b = p[Math.min(n - 1, i + 1)];
+            t[i] = unit(new double[]{b[0] - a[0], b[1] - a[1], b[2] - a[2]});
+            double[] nr = d.nrm()[i];
+            double dot = nr[0] * t[i][0] + nr[1] * t[i][1] + nr[2] * t[i][2];
+            nn[i] = unit(new double[]{nr[0] - dot * t[i][0], nr[1] - dot * t[i][1], nr[2] - dot * t[i][2]});
+            bb[i] = cross(t[i], nn[i]);
+            if (i > 0) s[i] = s[i - 1] + Math.sqrt(sq3(p[i], p[i - 1]));
         }
-        if (c1 < bx[along + 3] - 0.01) {
-            double[] lo = {bx[0], bx[1], bx[2]}, hi = {bx[3], bx[4], bx[5]};
-            lo[along] = c1;
-            boxD(m, lo, hi, sprite).named(name + " (on its support)").argb(argb).uv(uv);
-        }
-        // the cross-section round the routed line, carried by each chain point (the chain is the line's point: the box's
-        // corners are offsets from it on the two other axes)
-        double line0 = q0 == 1 ? lineY : pts[0][q0], line1 = q1 == 1 ? lineY : pts[0][q1];
-        double[] lo = {bx[q0] - line0, bx[q1] - line1}, hi = {bx[q0 + 3] - line0, bx[q1 + 3] - line1};
+        double half = width / 2;
         Mesh mesh = new Mesh(null);
-        for (int k = 0; k + 1 < pts.length; k++) {
-            double[] a = pts[k], b = pts[k + 1];
-            double[] cs = {(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2};
-            cs[q0] += (lo[0] + hi[0]) / 2;
-            cs[q1] += (lo[1] + hi[1]) / 2;
-            quadOut(mesh, cs, along, corner(a, along, q0, q1, lo[0], lo[1]), corner(b, along, q0, q1, lo[0], lo[1]),
-                corner(b, along, q0, q1, lo[0], hi[1]), corner(a, along, q0, q1, lo[0], hi[1]));
-            quadOut(mesh, cs, along, corner(a, along, q0, q1, hi[0], lo[1]), corner(b, along, q0, q1, hi[0], lo[1]),
-                corner(b, along, q0, q1, hi[0], hi[1]), corner(a, along, q0, q1, hi[0], hi[1]));
-            quadOut(mesh, cs, along, corner(a, along, q0, q1, lo[0], lo[1]), corner(b, along, q0, q1, lo[0], lo[1]),
-                corner(b, along, q0, q1, hi[0], lo[1]), corner(a, along, q0, q1, hi[0], lo[1]));
-            quadOut(mesh, cs, along, corner(a, along, q0, q1, lo[0], hi[1]), corner(b, along, q0, q1, lo[0], hi[1]),
-                corner(b, along, q0, q1, hi[0], hi[1]), corner(a, along, q0, q1, hi[0], hi[1]));
+        List<float[]> uvs = new ArrayList<>();
+        // corners: (across c, height h) at node i
+        java.util.function.BiFunction<Integer, double[], double[]> at = (i, ch) -> new double[]{
+            p[i][0] + bb[i][0] * ch[0] + nn[i][0] * ch[1], p[i][1] + bb[i][1] * ch[0] + nn[i][1] * ch[1], p[i][2] + bb[i][2] * ch[0] + nn[i][2] * ch[1]};
+        double[][] ring = {{-half, 0}, {half, 0}, {half, height}, {-half, height}};
+        for (int i = 0; i + 1 < n; i++) {
+            double[] mid = {(p[i][0] + p[i + 1][0]) / 2 + (nn[i][0] + nn[i + 1][0]) * height / 4, (p[i][1] + p[i + 1][1]) / 2 + (nn[i][1] + nn[i + 1][1]) * height / 4,
+                (p[i][2] + p[i + 1][2]) / 2 + (nn[i][2] + nn[i + 1][2]) * height / 4};
+            for (int e = 0; e < 4; e++) {
+                double[] c0 = ring[e], c1 = ring[(e + 1) % 4];
+                double[][] q = {at.apply(i, c0), at.apply(i + 1, c0), at.apply(i + 1, c1), at.apply(i, c1)};
+                double[] u = new double[4];
+                double[] cc = {c0[0], c0[0], c1[0], c1[0]}, hh = {c0[1], c0[1], c1[1], c1[1]}, ss = {s[i], s[i + 1], s[i + 1], s[i]};
+                for (int k = 0; k < 4; k++) {
+                    boolean side = e == 1 || e == 3;   // (the two sides: the strip runs down them)
+                    u[k] = side ? 0.25 + Math.signum(cc[k]) * (half / 32 + (height - hh[k]) / 16) : 0.25 + cc[k] / 32;
+                }
+                float[] uv = new float[8];
+                for (int k = 0; k < 4; k++) {
+                    uv[2 * k] = (float) clamp01(u[k]);
+                    uv[2 * k + 1] = (float) clamp01(ss[k] / 16 % 1);
+                }
+                addQuad(mesh, uvs, q, uv, mid);
+            }
         }
-        double[] mid = {(pts[0][0] + pts[pts.length - 1][0]) / 2, (pts[0][1] + pts[pts.length - 1][1]) / 2, (pts[0][2] + pts[pts.length - 1][2]) / 2};
-        for (double[] e : new double[][]{pts[0], pts[pts.length - 1]})
-            quadOut(mesh, mid, along, corner(e, along, q0, q1, lo[0], lo[1]), corner(e, along, q0, q1, hi[0], lo[1]),
-                corner(e, along, q0, q1, hi[0], hi[1]), corner(e, along, q0, q1, lo[0], hi[1]));
+        for (int end = 0; end < 2; end++) {
+            int i = end == 0 ? 0 : n - 1;
+            double[][] q = {at.apply(i, ring[0]), at.apply(i, ring[1]), at.apply(i, ring[2]), at.apply(i, ring[3])};
+            float[] uv = new float[8];
+            for (int k = 0; k < 4; k++) {
+                uv[2 * k] = (float) clamp01(0.25 + ring[k][0] / 32);
+                uv[2 * k + 1] = (float) clamp01(0.5 - (height - ring[k][1]) / 16);
+            }
+            double[] inside = end == 0 ? p[Math.min(n - 1, 1)] : p[Math.max(0, n - 2)];
+            double[] c = {inside[0] + nn[i][0] * height / 2, inside[1] + nn[i][1] * height / 2, inside[2] + nn[i][2] * height / 2};
+            addQuad(mesh, uvs, q, uv, c);
+        }
         mesh.closed(true);
         m.add(mesh).material(sprite);
-        mesh.named(name + " (hanging)").argb(argb).uv(uv);
+        mesh.named("cable (hanging)").argb(argb).uv(f -> uvs.get(Math.min(f.index, uvs.size() - 1)));
     }
 
-    static double[] corner(double[] p, int along, int q0, int q1, double d0, double d1) {
-        double[] v = p.clone();
-        v[q0] += d0;
-        v[q1] += d1;
-        return v;
+    /** Add quad q to mesh, wound to face away from point inside, with its corners' uv (reordered with it). */
+    static void addQuad(Mesh mesh, List<float[]> uvs, double[][] q, float[] uv, double[] inside) {
+        double[] e1 = {q[1][0] - q[0][0], q[1][1] - q[0][1], q[1][2] - q[0][2]}, e2 = {q[2][0] - q[0][0], q[2][1] - q[0][1], q[2][2] - q[0][2]};
+        double[] nr = cross(e1, e2);
+        double[] mid = {(q[0][0] + q[2][0]) / 2 - inside[0], (q[0][1] + q[2][1]) / 2 - inside[1], (q[0][2] + q[2][2]) / 2 - inside[2]};
+        if (nr[0] * mid[0] + nr[1] * mid[1] + nr[2] * mid[2] >= 0) {
+            mesh.poly(q[0], q[1], q[2], q[3]);
+            uvs.add(uv);
+        } else {
+            mesh.poly(q[3], q[2], q[1], q[0]);
+            uvs.add(new float[]{uv[6], uv[7], uv[4], uv[5], uv[2], uv[3], uv[0], uv[1]});
+        }
     }
 
-    static double[][] reversed(double[][] a) {
-        double[][] r = new double[a.length][];
-        for (int i = 0; i < a.length; i++) r[i] = a[a.length - 1 - i];
-        return r;
+    static double[] cross(double[] a, double[] b) {
+        return new double[]{a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
+    }
+
+    static double[] unit(double[] v) {
+        double l = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+        return l < 1e-12 ? new double[]{0, 1, 0} : new double[]{v[0] / l, v[1] / l, v[2] / l};
+    }
+
+    static double sq3(double[] a, double[] b) {
+        return (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]) + (a[2] - b[2]) * (a[2] - b[2]);
     }
 
     /** Add quad a b c d to mesh wound to face away from the box's centre line (along axis through centre). */

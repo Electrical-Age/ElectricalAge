@@ -107,48 +107,89 @@ public class CableAirTest {
         assertTrue(exp < 30_000, exp + " expansions");
     }
 
+    /** Lowest y of the hangs' chains, and the y where a chain passes x (on a line along x at the islands' top). */
+    static double lowest(List<CableHang.Hang> hs) {
+        double low = Double.MAX_VALUE;
+        for (var h : hs) for (double[] q : h.pts()) low = Math.min(low, q[1]);
+        return low;
+    }
+
+    static double yAtX(CableHang.Hang h, double x) {
+        var p = h.pts();
+        for (int i = 1; i < p.size(); i++) {
+            double a = p.get(i - 1)[0], b = p.get(i)[0];
+            if ((x - a) * (x - b) <= 0 && a != b) return p.get(i - 1)[1] + (p.get(i)[1] - p.get(i - 1)[1]) * (x - a) / (b - a);
+        }
+        return Double.NaN;
+    }
+
     @Test
-    void aBridgeHangsOnAChain() {
-        // the stretch over the gap (x 48..64 at the islands' top): the chain leaves and lands flat (its end links on the
-        // line), hangs ~12 % of the span (2 voxels) at its middle, stays out of the blocks; only the piece over the gap
-        // carries it, and its drawn mesh reaches down that far
+    void aBridgeHangsFromItsEdges() {
+        // the gap is x 48..64 at the islands' top (y 0): the cable leaves the edge along the floor and bends down from
+        // there (it began a voxel into the gap with its two end links held straight: Baughn 1570524112013623437), hangs a
+        // couple of voxels at the middle, stays out of the blocks; only the piece over the gap draws it
         var solid = strip(0, 1, 2, 4, 5, 6);
         var sp = CableRouterTest.world(solid);
         var r = route(solid, LV, 1, 5);
         assertNull(r.error);
-        var st = CablePlacer.airStretches(sp, LV, r.steps);
-        assertEquals(1, st.size(), "one stretch");
-        assertEquals(0, st.get(0)[0]);
-        assertEquals(48, st.get(0)[3]);
-        assertEquals(64, st.get(0)[4]);
         long t0 = System.nanoTime();
-        var chain = CableHang.hang(sp, st.get(0));
+        var hung = CableHang.laid(sp, LV, r.steps);
         long us = (System.nanoTime() - t0) / 1000;
-        double low = Double.MAX_VALUE;
-        for (double[] q : chain) low = Math.min(low, q[1]);
-        System.out.println("CableHang: the middle hangs " + (-low) + " voxels, " + us + " us");
-        assertTrue(low < -1.2 && low > -3.5, "the middle hangs " + (-low) + " voxels (" + us + " us)");
-        assertEquals(0, chain.get(1)[1], 1e-9, "flat where it leaves");
-        assertEquals(0, chain.get(chain.size() - 2)[1], 1e-9, "flat where it lands");
-        for (double[] q : chain) assertFalse(CableHang.blocked(sp, q), "a node inside a block: " + java.util.Arrays.toString(q));
-        int hanging = 0;
+        assertEquals(1, hung.hangs().size(), "one span");
+        var h = hung.hangs().get(0);
+        double low = lowest(hung.hangs());
+        System.out.println("CableHang bridge: hangs " + (-low) + " voxels, " + us + " us, y at the edge+1 " + yAtX(h, 49) + ", +2 " + yAtX(h, 50));
+        assertTrue(low < -1.0 && low > -4, "the middle hangs " + (-low) + " voxels");
+        assertTrue(yAtX(h, 49) < -0.02, "already below the line a voxel past the edge: " + yAtX(h, 49));
+        assertTrue(yAtX(h, 49) > -1.0, "but only a little (it leaves the edge along the floor): " + yAtX(h, 49));
+        for (int i = 0; i < h.pts().size(); i++)
+            assertFalse(CableHang.blocked(sp, h.pts().get(i), h.nrm().get(i)), "a node inside a block: " + java.util.Arrays.toString(h.pts().get(i)));
+        int drawn = 0;
         for (CableRouter.Piece p : CableRouter.pieces(r.steps, 2, 1)) {
             if (p.face() < 0) continue;
-            int[] hang = CablePlacer.hangOf(p, st, List.of(chain));
+            int[] hang = CableHang.encode(p, hung.route(), hung.hangs());
             if (hang == null) continue;
-            hanging++;
-            assertEquals(3, p.bx(), "the piece over the gap");
             CablePart part = new CablePart(CableRouterTest.LV, p.face(), p.points());
-            part.hang = hang;
-            assertEquals(0, part.dropAt(0, 0.01), 0.2);
-            assertEquals(-low, part.dropAt(0, 8), 0.3);
+            part.hang2 = hang;
+            assertFalse(part.drawn().isEmpty());
+            if (p.bx() != 3) continue;
+            drawn++;
             double[] lowest = {Double.MAX_VALUE};
             VoxelGeometry.model(List.of(part), null).emit(f -> {
                 for (int i = 1; i < f.xyz.length; i += 3) lowest[0] = Math.min(lowest[0], f.xyz[i]);
             });
             assertEquals(low, lowest[0], 0.3, "the drawn cable's lowest point");
         }
-        assertEquals(1, hanging);
+        assertEquals(1, drawn, "the piece over the gap");
+    }
+
+    @Test
+    void aDropPastAnAirBlockEasesOntoTheFloor() {
+        // a pillar (x 0..16, y 16..64) ending a block over the floor (y 0): down its east face, off its foot, straight
+        // down the air block and onto the floor eastward: the drawn cable rounds the corner at the bottom instead of a
+        // hard turn (Baughn: it should bow or take a short run, by energy, not a perfect vertical and a right angle)
+        java.util.Set<List<Long>> solid = new java.util.HashSet<>();
+        for (long y = 1; y <= 3; y++) solid.add(List.of(0L, y, 0L));
+        for (long x = -2; x <= 6; x++) solid.add(List.of(x, -1L, 0L));
+        var sp = CableRouterTest.world(solid);
+        var r = CableRouter.route(sp, LV, new CableRouter.End(16, 56, 8, 4, -1), List.of(), new CableRouter.End(4 * 16 + 8, 0, 8, 0, -1), 10_000);
+        assertNull(r.error, "the route");
+        var hung = CableHang.laid(sp, LV, r.steps);
+        assertFalse(hung.hangs().isEmpty(), "a hung span: " + r.steps);
+        var h = hung.hangs().get(0);
+        // off the routed L (the line x 16 down to y 0, then along y 0): how far the chain cuts or bows the corner
+        double most = 0;
+        for (int i = 0; i < h.pts().size(); i++) {
+            double[] q = h.pts().get(i);
+            assertFalse(CableHang.blocked(sp, q, h.nrm().get(i)), "a node inside a block: " + java.util.Arrays.toString(q));
+            double off = Math.min(Math.abs(q[0] - 16) + Math.max(0, -q[1]), Math.abs(q[1]) + Math.max(0, 16 - q[0]));
+            most = Math.max(most, off);
+        }
+        System.out.println("CableHang drop: off the routed corner by up to " + most + " voxels; steps " + r.steps);
+        assertTrue(most > 1.0, "the corner is eased, not a right angle: " + most);
+        // (deterministic: the same again)
+        var again = CableHang.laid(sp, LV, r.steps).hangs().get(0);
+        for (int i = 0; i < h.pts().size(); i++) assertArrayEquals(h.pts().get(i), again.pts().get(i), 1e-12);
     }
 
     @Test

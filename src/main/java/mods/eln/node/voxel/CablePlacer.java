@@ -710,106 +710,17 @@ public final class CablePlacer {
         List<CableRouter.Piece> pieces = CableRouter.pieces(steps, ti.width(), ti.height());
         List<BlockPos> at = new ArrayList<>();
         List<VoxelPart> parts = new ArrayList<>();
-        CableRouter.Space sp = space(level);
-        List<long[]> stretches = airStretches(sp, RouteKind.cable(tier, spec), steps);
-        List<List<double[]>> chains = new ArrayList<>();
-        for (long[] st : stretches) chains.add(CableHang.hang(sp, st));
+        // (how its spans across the air hang: worked out once, now, and stored on the pieces; CableHang)
+        CableHang.Laid hung = CableHang.laid(space(level), RouteKind.cable(tier, spec), steps);
         for (CableRouter.Piece p : pieces) {
             CablePart part = p.face() < 0 ? CablePart.knuckle(tier, spec, p.points()[0], p.points()[1], p.points()[2]) : new CablePart(tier, spec, p.face(), p.points());
-            if (!part.isKnuckle()) part.hang = hangOf(p, stretches, chains);
+            if (!part.isKnuckle()) part.hang2 = CableHang.encode(p, hung.route(), hung.hangs());
             parts.add(part);
             at.add(new BlockPos((int) p.bx(), (int) p.by(), (int) p.bz()));
         }
         return Laying.lay(level, at, parts, player);   // (all or nothing)
     }
 
-    /**
-     * The route's horizontal air stretches (world voxels): {axis, the line's coordinate on the two other axes (in
-     * others(axis) order), from, to}. A stretch runs from where the cable leaves its support to where it lands, along
-     * one straight segment (the router keeps them straight). Vertical ones hang straight and aren't listed.
-     */
-    static List<long[]> airStretches(CableRouter.Space space, RouteKind kind, List<CableRouter.Step> steps) {
-        List<long[]> out = new ArrayList<>();
-        int lattice = kind.lattice();
-        for (int i = 0; i + 1 < steps.size(); i++) {
-            CableRouter.Step a = steps.get(i), b = steps.get(i + 1);
-            int d = CableRouter.dirOf(a, b);
-            if (d < 0) continue;
-            int ax = CableRouter.axis(d);
-            long[] p = {a.x(), a.y(), a.z()};
-            long len = Math.abs(b.x() - a.x()) + Math.abs(b.y() - a.y()) + Math.abs(b.z() - a.z());
-            long from = Long.MIN_VALUE, to = 0;
-            for (long t = 0; t <= len; t += lattice) {
-                boolean air = t < len && !Router.surfaceSupported(space, kind, p, b.attach(), d);
-                long here = p[ax], next = here + CableRouter.DV[d][ax] * lattice;
-                if (air) {
-                    if (from == Long.MIN_VALUE) from = here;
-                    to = next;
-                } else if (from != Long.MIN_VALUE) {
-                    if (ax != 1) {
-                        int[] o = VoxelGeometry.others(ax);
-                        out.add(new long[]{ax, p[o[0]], p[o[1]], Math.min(from, to), Math.max(from, to)});
-                    }
-                    from = Long.MIN_VALUE;
-                }
-                for (int j = 0; j < 3; j++) p[j] += CableRouter.DV[d][j] * lattice;
-            }
-        }
-        return out;
-    }
-
-    /**
-     * A piece's share of the hanging chains (CablePart.hang), or null: for each stretch whose line one of the piece's
-     * segments lies on, the chain's points inside the piece's block, cut at the block's faces (interpolated on the
-     * chain, so neighbouring blocks meet at the same point).
-     */
-    static int[] hangOf(CableRouter.Piece pc, List<long[]> stretches, List<List<double[]>> chains) {
-        if (stretches.isEmpty()) return null;
-        long[] base = {pc.bx() * 16, pc.by() * 16, pc.bz() * 16};
-        int[] pts = pc.points();
-        List<Integer> out = new ArrayList<>();
-        for (int s = 0; s < stretches.size(); s++) {
-            long[] st = stretches.get(s);
-            int ax = (int) st[0];
-            int[] o = VoxelGeometry.others(ax);
-            boolean on = false;
-            for (int k = 3; k < pts.length && !on; k += 3)
-                on = pts[k + ax] != pts[k - 3 + ax] && pts[k + o[0]] == pts[k - 3 + o[0]] && pts[k + o[1]] == pts[k - 3 + o[1]]
-                    && base[o[0]] + pts[k + o[0]] == st[1] && base[o[1]] + pts[k + o[1]] == st[2]
-                    && Math.max(pts[k + ax], pts[k - 3 + ax]) + base[ax] > st[3] && Math.min(pts[k + ax], pts[k - 3 + ax]) + base[ax] < st[4];
-            if (!on) continue;
-            List<double[]> chain = chains.get(s);
-            int n = chain.size() - 1;
-            double from = st[3], span = st[4] - st[3];
-            double lo = Math.max(from, base[ax]), hi = Math.min(st[4], base[ax] + 16);
-            if (hi <= lo) continue;
-            List<double[]> in = new ArrayList<>();
-            in.add(along(chain, (lo - from) / span * n));
-            for (int i = 0; i <= n; i++) {
-                double u = from + i * span / n;
-                if (u > lo + 1e-9 && u < hi - 1e-9) in.add(chain.get(i));
-            }
-            in.add(along(chain, (hi - from) / span * n));
-            // (the routed line's y: the stretch's horizontal, so its y is one of the two others)
-            double lineY = o[0] == 1 ? st[1] : st[2];
-            out.add(ax);
-            out.add((int) Math.round((lineY - base[1]) * 8));
-            out.add(in.size());
-            for (double[] q : in) for (int c = 0; c < 3; c++) out.add((int) Math.round((q[c] - base[c]) * 8));
-        }
-        if (out.isEmpty()) return null;
-        int[] r = new int[out.size()];
-        for (int i = 0; i < r.length; i++) r[i] = out.get(i);
-        return r;
-    }
-
-    /** The chain's point at fractional node index f (linear between nodes). */
-    static double[] along(List<double[]> chain, double f) {
-        int i = (int) Math.max(0, Math.min(chain.size() - 2, Math.floor(f)));
-        double t = Math.max(0, Math.min(1, f - i));
-        double[] a = chain.get(i), b = chain.get(i + 1);
-        return new double[]{a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t};
-    }
 
     static void show(ServerPlayer player, ServerLevel level, List<CableRouter.Step> steps) {
         var dust = new net.minecraft.core.particles.DustParticleOptions(0xFFB040, 0.7f);

@@ -458,6 +458,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         n.burnt = c.burnt;
         n.paid = c.paid;
         n.hang = c.hang;   // (its hang across the air: only the colour changes)
+        n.hang2 = c.hang2;
         n.byConverter = c.byConverter;
         n.u = c.u;
         n.t = c.t;

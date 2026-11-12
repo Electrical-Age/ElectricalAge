@@ -116,47 +116,76 @@ public final class CablePart extends VoxelPart {
      */
     public int[] hang;
 
-    /** The hanging chain's points (voxels, block-local) along axis, or null. */
-    public double[][] hangPoints(int axis) {
-        if (hang == null) return null;
-        for (int i = 0; i + 2 < hang.length; ) {
-            int n = hang[i + 2];
-            if (hang[i] == axis) {
-                double[][] out = new double[n][3];
-                for (int k = 0; k < n; k++) for (int c = 0; c < 3; c++) out[k][c] = hang[i + 3 + 3 * k + c] / 8.0;
-                return out;
+    /**
+     * How this piece hangs (Baughn 2026-11-12: energy minimisation at laying, CableHang), replacing `hang`: per hung span
+     * through it, {s0, s1: the arc range of this piece's own polyline it is drawn over (eighths of a voxel, from its first
+     * point), count, then count points x y z (eighths, block-local) and normals nx ny nz (64ths)}. Only drawn. Null: none.
+     */
+    public int[] hang2;
+
+    /** One drawn span: the piece's arc range it replaces, and the cable's centre line and normals over it. */
+    public record Drawn(double s0, double s1, double[][] pts, double[][] nrm) {
+    }
+
+    /** The drawn spans (hang2, or the older hang converted), or an empty list. */
+    public List<Drawn> drawn() {
+        List<Drawn> out = new ArrayList<>();
+        if (hang2 != null) {
+            for (int i = 0; i + 2 < hang2.length; ) {
+                int n = hang2[i + 2];
+                if (i + 3 + 6 * n > hang2.length) break;
+                double[][] p = new double[n][3], nr = new double[n][3];
+                for (int k = 0; k < n; k++)
+                    for (int c = 0; c < 3; c++) {
+                        p[k][c] = hang2[i + 3 + 6 * k + c] / 8.0;
+                        nr[k][c] = hang2[i + 6 + 6 * k + c] / 64.0;
+                    }
+                out.add(new Drawn(hang2[i] / 8.0, hang2[i + 1] / 8.0, p, nr));
+                i += 3 + 6 * n;
             }
-            i += 3 + 3 * n;
+            return out;
         }
-        return null;
-    }
-
-    /** The routed line's y (voxels, block-local) of the hanging chain along axis, or NaN. */
-    public double hangLineY(int axis) {
-        if (hang == null) return Double.NaN;
-        for (int i = 0; i + 2 < hang.length; i += 3 + 3 * hang[i + 2]) if (hang[i] == axis) return hang[i + 1] / 8.0;
-        return Double.NaN;
-    }
-
-    /** How far (voxels) the drawn cable hangs below its routed line at u along axis (block-local), 0 off its chain. */
-    public double dropAt(int axis, double u) {
-        if (hang == null) return 0;
+        if (hang == null || isKnuckle()) return out;
+        // (a hang laid by the 11-12 jar: its chain along one axis of a straight segment; its arc range from where that
+        // segment lies on the polyline)
+        int nAxis = normalAxis(face);
+        double[] up = new double[3];
+        up[nAxis] = face % 2 == 0 ? 1 : -1;
         for (int i = 0; i + 2 < hang.length; ) {
-            int n = hang[i + 2];
-            if (hang[i] == axis) {
-                double line = hang[i + 1] / 8.0;
-                for (int k = 0; k + 1 < n; k++) {
-                    double u0 = hang[i + 3 + 3 * k + axis] / 8.0, u1 = hang[i + 3 + 3 * (k + 1) + axis] / 8.0;
-                    if (u < Math.min(u0, u1) || u > Math.max(u0, u1) || u0 == u1) continue;
-                    double t = (u - u0) / (u1 - u0);
-                    double y = (hang[i + 3 + 3 * k + 1] * (1 - t) + hang[i + 3 + 3 * (k + 1) + 1] * t) / 8.0;
-                    return line - y;
+            int n = hang[i + 2], axis = hang[i];
+            if (i + 3 + 3 * n > hang.length) break;
+            double[][] p = new double[n][3], nr = new double[n][3];
+            for (int k = 0; k < n; k++) {
+                for (int c = 0; c < 3; c++) p[k][c] = hang[i + 3 + 3 * k + c] / 8.0;
+                nr[k] = up.clone();
+            }
+            double s0 = arcOf(axis, p[0][axis]), s1 = arcOf(axis, p[n - 1][axis]);
+            if (s1 < s0) {
+                double t = s0;
+                s0 = s1;
+                s1 = t;
+                for (int a = 0, b = n - 1; a < b; a++, b--) {
+                    double[] t1 = p[a];
+                    p[a] = p[b];
+                    p[b] = t1;
                 }
-                return 0;
             }
+            if (!Double.isNaN(s0) && !Double.isNaN(s1)) out.add(new Drawn(s0, s1, p, nr));
             i += 3 + 3 * n;
         }
-        return 0;
+        return out;
+    }
+
+    /** The arc length (from the first point) where the polyline's segment along axis reaches u, or NaN. */
+    double arcOf(int axis, double u) {
+        double s = 0;
+        for (int i = 3; i < points.length; i += 3) {
+            double a = points[i - 3 + axis], b = points[i + axis];
+            int len = Math.abs(points[i] - points[i - 3]) + Math.abs(points[i + 1] - points[i - 2]) + Math.abs(points[i + 2] - points[i - 1]);
+            if (a != b && u >= Math.min(a, b) - 1e-6 && u <= Math.max(a, b) + 1e-6) return s + Math.abs(u - a);
+            s += len;
+        }
+        return Double.NaN;
     }
 
     /** Laid by the converter (a knuckle round an outer corner): a revert takes it out. */
@@ -440,6 +469,7 @@ public final class CablePart extends VoxelPart {
         if (byConverter) tag.putBoolean("conv", true);
         if (paid >= 0) tag.putInt("paid", paid);
         if (hang != null) tag.putIntArray("hang", hang);
+        if (hang2 != null) tag.putIntArray("hang2", hang2);
         tag.putDouble("u", u);
         tag.putDouble("t", t);
     }
@@ -464,6 +494,8 @@ public final class CablePart extends VoxelPart {
         p.paid = tag.getIntOr("paid", -1);
         int[] hg = tag.getIntArray("hang").orElse(null);
         if (hg != null && hg.length >= 3) p.hang = hg;
+        int[] hg2 = tag.getIntArray("hang2").orElse(null);
+        if (hg2 != null && hg2.length >= 3) p.hang2 = hg2;
         p.u = tag.getDoubleOr("u", 0);
         p.t = tag.getDoubleOr("t", 0);
         return p;
@@ -481,6 +513,9 @@ public final class CablePart extends VoxelPart {
         for (int v : points) out.writeByte(v);
         out.writeShort(hang == null ? 0 : hang.length);
         if (hang != null) for (int v : hang) out.writeShort(v);
+        // (a slot of its own after the old one: a client on the older jar reads the old slot and stops)
+        out.writeShort(hang2 == null ? 0 : hang2.length);
+        if (hang2 != null) for (int v : hang2) out.writeShort(v);
     }
 
     static CablePart deserialize(java.io.DataInputStream in) throws java.io.IOException {
@@ -497,6 +532,11 @@ public final class CablePart extends VoxelPart {
         if (nh > 0) {
             p.hang = new int[nh];
             for (int i = 0; i < nh; i++) p.hang[i] = in.readShort();
+        }
+        int nh2 = in.available() >= 2 ? in.readShort() : 0;
+        if (nh2 > 0 && in.available() >= 2 * nh2) {
+            p.hang2 = new int[nh2];
+            for (int i = 0; i < nh2; i++) p.hang2[i] = in.readShort();
         }
         if ((b & 0x80) != 0) p.burnt = mods.eln.sim.process.destruct.FailureCause.OVERHEAT;
         return p;
