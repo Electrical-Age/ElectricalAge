@@ -17,15 +17,37 @@ package mods.eln.node.voxel;
  * @param margin       how far outside a leg's box the search may wander
  * @param unsupported  extra cost of a FREE step resting against nothing
  * @param rest         how near (voxels) something must be for a FREE step to rest against it
+ * @param airTiers     a SURFACE kind's air allowance: {max contiguous voxels off any support, extra cost per lattice step}
+ *                     pairs, ascending; a step beyond the last tier is refused. Empty: always on a support (Baughn
+ *                     2026-11-11: cables only, pipes keep their soft support)
  */
 public record RouteKind(String id, Placement placement, int width, int height, int lattice, int bend, int blockEntered, int clearance,
-                        int margin, int unsupported, int rest) {
+                        int margin, int unsupported, int rest, int[][] airTiers) {
     public enum Placement { SURFACE, FREE }
+
+    /** No air allowance. */
+    static final int[][] NO_AIR = {};
+
+    /** The most contiguous air voxels allowed (0: none). */
+    public int airLimit() {
+        return airTiers.length == 0 ? 0 : airTiers[airTiers.length - 1][0];
+    }
+
+    /** The extra cost of a step that leaves `air` voxels off a support, or -1 if it is over the limit. */
+    public int airCost(int air) {
+        for (int[] t : airTiers) if (air <= t[0]) return t[1];
+        return -1;
+    }
+
+    /** This kind with another air allowance. */
+    public RouteKind withAir(int[][] tiers) {
+        return new RouteKind(id, placement, width, height, lattice, bend, blockEntered, clearance, margin, unsupported, rest, tiers);
+    }
 
     /** A cable of this cross-section, with today's cable routing constants. */
     public static RouteKind cable(String id, int width, int height) {
         return new RouteKind(id, Placement.SURFACE, width, height, CableRouter.LATTICE, CableRouter.BEND, CableRouter.BLOCK_ENTERED,
-            CableRouter.CLEARANCE, CableRouter.MARGIN, 0, 0);
+            CableRouter.CLEARANCE, CableRouter.MARGIN, 0, 0, NO_AIR);
     }
 
     /** A cable tier with a spec (null: the preset), as the kit lays it. */
@@ -37,7 +59,7 @@ public record RouteKind(String id, Placement placement, int width, int height, i
     /** A pipe of this bore, with today's pipe routing constants. */
     public static RouteKind pipe(String id, int bore) {
         return new RouteKind(id, Placement.FREE, bore, bore, PipeRouter.LATTICE, PipeRouter.BEND, PipeRouter.BLOCK_ENTERED, 0,
-            PipeRouter.MARGIN, PipeRouter.UNSUPPORTED, PipeRouter.REST);
+            PipeRouter.MARGIN, PipeRouter.UNSUPPORTED, PipeRouter.REST, NO_AIR);
     }
 
     /** A pipe tier (PipePart.GRID, TIER_NAME). */

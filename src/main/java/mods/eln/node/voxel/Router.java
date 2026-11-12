@@ -95,12 +95,13 @@ public final class Router {
         stops.add(end);
         List<CableRouter.Step> out = new ArrayList<>();
         int lastDir = start.dir();
+        int[] air = {0};   // (voxels off a support at the end of the last leg: a waypoint in mid-air doesn't reset it)
         try {
             for (int leg = 0; leg + 1 < stops.size(); leg++) {
                 CableRouter.End a = stops.get(leg), b = stops.get(leg + 1);
                 int attach = out.isEmpty() ? a.attach() : out.get(out.size() - 1).attach();
                 int arrive = leg + 2 == stops.size() ? b.dir() : -1;
-                List<CableRouter.Step> p = surfaceLeg(space, kind, a, attach, lastDir, b, arrive, deadline);
+                List<CableRouter.Step> p = surfaceLeg(space, kind, a, attach, lastDir, air, b, arrive, deadline);
                 if (p == null) return new CableRouter.Result(null, stops.size() == 2 ? "no way along faces" : "no way along faces on leg " + (leg + 1));
                 if (!out.isEmpty()) p.remove(0);
                 out.addAll(p);
@@ -115,12 +116,14 @@ public final class Router {
         return new CableRouter.Result(CableRouter.simplify(out), null);
     }
 
-    /** A surface search state: the point, the face it lies against, the last move (-1 just after a corner). */
-    private record SKey(long x, long y, long z, int attach, int dir) {
+    /** A surface search state: the point, the face it lies against, the last move (-1 just after a corner), and the
+     *  voxels since the last support (0 on a support; only kinds with an air allowance leave it). */
+    private record SKey(long x, long y, long z, int attach, int dir, int air) {
     }
 
+    /** One leg from a to b; air[0] is the air run at a on entry and at b on return. */
     static List<CableRouter.Step> surfaceLeg(CableRouter.Space space, RouteKind kind, CableRouter.End a, int attach0, int lastDir,
-                                             CableRouter.End b, int arriveDir, long deadline) {
+                                             int[] air, CableRouter.End b, int arriveDir, long deadline) {
         int lattice = kind.lattice();
         long[] s = {a.x(), a.y(), a.z()}, t = {b.x(), b.y(), b.z()};
         for (int i = 0; i < 3; i++) if (Math.floorMod(s[i], lattice) != 0 || Math.floorMod(t[i], lattice) != 0) return null;
@@ -131,7 +134,7 @@ public final class Router {
         }
         Map<SKey, SKey> from = new HashMap<>();
         Map<SKey, Boolean> outer = new HashMap<>();
-        SKey k0 = new SKey(s[0], s[1], s[2], attach0, lastDir);
+        SKey k0 = new SKey(s[0], s[1], s[2], attach0, lastDir, air[0]);
         boolean leavePort = a.dir() >= 0 && lastDir == a.dir();
         SKey goal = search(k0, k -> h(new long[]{k.x(), k.y(), k.z()}, t),
             k -> k.x() == t[0] && k.y() == t[1] && k.z() == t[2] && (b.attach() < 0 || k.attach() == b.attach()) && (arriveDir < 0 || k.dir() == arriveDir),
@@ -151,7 +154,7 @@ public final class Router {
                     long[] cp = CableRouter.cell(p, k.attach(), d), cq = CableRouter.cell(q, k.attach(), CableRouter.reverse(d));
                     long g = g0 + lattice + (k.dir() >= 0 && k.dir() != d ? kind.bend() : 0)
                         + (cp[0] != cq[0] || cp[1] != cq[1] || cp[2] != cq[2] ? kind.blockEntered() : 0);
-                    SKey nk = new SKey(q[0], q[1], q[2], k.attach(), d);
+                    SKey nk = new SKey(q[0], q[1], q[2], k.attach(), d, 0);
                     if (push.push(k, nk, g)) outer.remove(nk);
                 }
                 // corners, toward e (across the face): a wall met here (inner), or the support ending here (outer); at a
@@ -163,19 +166,20 @@ public final class Router {
                     if (CableRouter.axis(e) == n) continue;
                     if (solidBeyond(space, kind, p, k.attach(), e, false)) {
                         // inner corner: up the wall met here
-                        SKey nk = new SKey(p[0], p[1], p[2], e, -1);
+                        SKey nk = new SKey(p[0], p[1], p[2], e, -1, k.air());
                         if (push.push(k, nk, g0 + kind.bend())) outer.remove(nk);
                     } else {
                         // outer corner: round the support's edge onto its face toward e
                         if (solidBeyond(space, kind, p, k.attach(), e, true)) continue;
                         if (!solidBeyond(space, kind, p, k.attach(), CableRouter.reverse(e), true)) continue;
                         if (knuckleBlocked(space, kind, p, k.attach(), e)) continue;
-                        SKey nk = new SKey(p[0], p[1], p[2], CableRouter.reverse(e), -1);
+                        SKey nk = new SKey(p[0], p[1], p[2], CableRouter.reverse(e), -1, k.air());
                         if (push.push(k, nk, g0 + kind.bend())) outer.put(nk, true);
                     }
                 }
             }, from, CableRouter.MAX_EXPANSIONS, deadline);
         if (goal == null) return null;
+        air[0] = goal.air();
         List<CableRouter.Step> path = new ArrayList<>();
         for (SKey c = goal; c != null; c = from.get(c)) path.add(0, new CableRouter.Step(c.x(), c.y(), c.z(), c.attach(), outer.getOrDefault(c, false)));
         return path;
