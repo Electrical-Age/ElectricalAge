@@ -113,6 +113,11 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 - Every GL11 call outside an open frame is silently discarded; draw code must run inside a BER/item `submit`.
 - `GlFrame` is single-threaded and shared; drawing an EA item inside a device draw reopens it (hence GlSubmit's extras copy).
 - A render's `networkUnserialize` must read exactly what the element wrote; a short read garbles the following six-node faces (guarded by `PublishRenderCase`).
+- Opaque draws in different states (`Key`s) have no order among themselves: each key is a render type, and the game
+  draws a phase's render types in the order of a hash map over them, which differs from launch to launch. Draw code
+  that puts two opaque things in the same place and counts on the second covering the first (1.12's lit suspended
+  lamp: its head shaded, then again at full light) shows either one. Draw the one that should be seen
+  (`SuspendedLampDrawTest`). Blended draws come after the opaque ones, so glow and halo overlays are safe.
 - Stale comments: `GL11` javadoc says lines are dropped (they are recorded as LINES batches now); element render javadocs still say looped sounds are "not here yet".
 
 ## Battery charger (Baughn 2026-10-28)

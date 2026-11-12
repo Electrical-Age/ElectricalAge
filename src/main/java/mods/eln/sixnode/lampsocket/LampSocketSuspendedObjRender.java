@@ -67,27 +67,18 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
         GL11.glEnable(GL11.GL_CULL_FACE);
         if (!onOffModel) {
             socket.draw();
-        } else {
-            if (light > 8) {
-                float l = (light) / 14f;
-                GL11.glColor3f(l, l, l);
-
-                UtilsClient.bindTexture(tOn);
-            } else
-                UtilsClient.bindTexture(tOff);
+        } else if (light > 8) {
+            // 1.12 drew the lit head shaded and then again at full light on top; only the second draw showed
+            float l = (light) / 14f;
+            GL11.glColor3f(l, l, l);
+            UtilsClient.bindTexture(tOn);
+            UtilsClient.disableLight();
             socket.drawNoBind();
-
-            if (light > 8) {
-                UtilsClient.disableLight();
-
-            }
-
-            if (socket != null) socket.drawNoBind();
-
-            if (light > 8) {
-                UtilsClient.enableLight();
-                GL11.glColor3f(1f, 1f, 1f);
-            }
+            UtilsClient.enableLight();
+            GL11.glColor3f(1f, 1f, 1f);
+        } else {
+            UtilsClient.bindTexture(tOff);
+            socket.drawNoBind();
         }
 
         GL11.glDisable(GL11.GL_CULL_FACE);
