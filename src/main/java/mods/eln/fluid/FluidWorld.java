@@ -371,6 +371,12 @@ public final class FluidWorld implements IProcess {
                 addNode(l.b, parent, all, levelOf, d.fluidLevel());
             }
         }
+        // (Baughn 2026-11-12, after the junction volume near-miss: a node too small to compute reliably is an error)
+        for (FluidDevice d : devices)
+            for (FluidNode n : nodesOf(d))
+                if (!n.fixed && n.volume < MIN_RELIABLE_VOLUME && TOO_SMALL.add(n))
+                    mods.eln.Eln.LOG.error("FluidWorld: a fluid node of {} m^3 in {} is too small to compute reliably (under {} m^3)",
+                        String.format("%.2g", n.volume), d, MIN_RELIABLE_VOLUME);
         List<FluidDevice.Link> allLinks = new ArrayList<>();
         for (FluidDevice d : devices) allLinks.addAll(d.fluidLinks());
         List<Object[]> couplings = new ArrayList<>();   // {portA, portB}
@@ -472,7 +478,22 @@ public final class FluidWorld implements IProcess {
             FluidNode a = repr.apply(l.a), b = repr.apply(l.b);
             if (a == b) continue;   // (both sides in one run: the valve can't hold anything back)
             double r = 1 / l.k + (a != l.a ? runR.get(a) / 2 : 0) + (b != l.b ? runR.get(b) / 2 : 0);
+            double lsA = spanOn(a, l.a, l.spanA), lsB = spanOn(b, l.b, l.spanB);
+            if ((lsA > 0) != (lsB > 0)) {
+                // an opening on a point (a pipe arm's end into a junction): the couplings' counter-flow pair, above
+                FluidNode o = lsA > 0 ? a : b, d = lsA > 0 ? b : a;
+                double dO = drawOn(o, lsA > 0 ? l.a : l.b, lsA > 0 ? l.drawA : l.drawB), dD = drawOn(d, lsA > 0 ? l.b : l.a, lsA > 0 ? l.drawB : l.drawA);
+                double span = Math.max(lsA, lsB);
+                var net = byRoot.get(find(a, parent));
+                l.edge = net.connect(o, dO, d, dD, 1 / r).kind(FluidEdge.Kind.CHECK);
+                l.edge.spanA = span;
+                net.connect(d, dD, o, dO, 1 / r).kind(FluidEdge.Kind.CHECK).entrySpan = span;
+                links.add(l);
+                continue;
+            }
             l.edge = byRoot.get(find(a, parent)).connect(a, drawOn(a, l.a, l.drawA), b, drawOn(b, l.b, l.drawB), 1 / r).kind(l.kind);
+            l.edge.spanA = lsA;   // (two openings, as two pipes' side ends: the mix over their spans; valves 0)
+            l.edge.spanB = lsB;
             l.edge.area = l.area;
             l.edge.open = l.open;
             l.edge.boost = l.boost;
@@ -504,6 +525,24 @@ public final class FluidWorld implements IProcess {
                 }
                 vents.add(v);
             }
+    }
+
+    /** The smallest node volume (m^3) the core is trusted with: a voxel of iron pipe is ~2e-6 (LabAgent: the trouble in
+     *  #374 and #370 came from nodes near PipePart's 1e-7 floor). */
+    public static final double MIN_RELIABLE_VOLUME = 1e-6;
+    /** Nodes already reported (once each). */
+    private static final java.util.Set<FluidNode> TOO_SMALL = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+
+    /** A device's nodes: its ports', vents' and links' (as the rebuild gathers them). */
+    private static List<FluidNode> nodesOf(FluidDevice d) {
+        List<FluidNode> out = new ArrayList<>();
+        for (FluidDevice.FluidPort p : d.fluidPorts()) out.add(p.node());
+        for (FluidDevice.Vent v : d.fluidVents()) out.add(v.node);
+        for (FluidDevice.Link l : d.fluidLinks()) {
+            out.add(l.a);
+            out.add(l.b);
+        }
+        return out;
     }
 
     /** A port's draw on its node, as a draw on the node standing for it (the same height in the world). */

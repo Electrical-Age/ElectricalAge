@@ -266,6 +266,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public boolean removePart(int index, boolean drop) {
         if (index < 0 || index >= parts.size()) return parts.isEmpty();
         VoxelPart p = parts.remove(index);
+        if (p instanceof PipePart) pruneJunctions();
         markUsed();
         if (drop && !partItem(p).isEmpty()) dropItem(partItem(p));
         changed();
@@ -351,6 +352,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             out.addAll(k.watchdogs);
         }
         for (VoxelPart p : parts) if (p instanceof PipePart pp && pp.fluid != null) out.add(pp.fluid);
+        for (VoxelPart p : parts) if (p instanceof JunctionPart j && j.fluid != null) out.add(j.fluid);
         out.addAll(nodeConnectionList);
         return out;
     }
@@ -379,11 +381,68 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** The part whose boxes hold the block-local point (0..1), or -1. */
     public int partAt(double x, double y, double z) {
+        // (a junction is never aimed at on its own: the arm under it is; it goes when its arms do)
         for (int i = parts.size() - 1; i >= 0; i--)
-            for (int[] b : parts.get(i).boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return i;
+            if (!(parts.get(i) instanceof JunctionPart)) for (int[] b : parts.get(i).boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return i;
         for (int i = parts.size() - 1; i >= 0; i--)   // (the outline is 2 voxels fatter than the parts)
-            for (int[] b : parts.get(i).boxes()) if (VoxelPart.contains(b, x, y, z, 2.05)) return i;
+            if (!(parts.get(i) instanceof JunctionPart)) for (int[] b : parts.get(i).boxes()) if (VoxelPart.contains(b, x, y, z, 2.05)) return i;
+        for (int i = parts.size() - 1; i >= 0; i--)
+            if (parts.get(i) instanceof JunctionPart j) for (int[] b : j.boxes()) if (VoxelPart.contains(b, x, y, z, 2.05)) return armNear(j, x, y, z);
         return -1;
+    }
+
+    /** The index of the pipe ending at junction j nearest the point (block-local voxels), or -1. */
+    int armNear(JunctionPart j, double x, double y, double z) {
+        int best = -1;
+        double bd = Double.MAX_VALUE;
+        for (int i = 0; i < parts.size(); i++)
+            if (parts.get(i) instanceof PipePart pipe && endsAt(pipe, j.x, j.y, j.z)) {
+                int[] pts = pipe.points;
+                int k = pts[0] == j.x && pts[1] == j.y && pts[2] == j.z ? 3 : pts.length - 6;   // (the point next to its end)
+                double d = sq(pts[k] - x) + sq(pts[k + 1] - y) + sq(pts[k + 2] - z);
+                if (d < bd) {
+                    bd = d;
+                    best = i;
+                }
+            }
+        return best;
+    }
+
+    private static double sq(double v) {
+        return v * v;
+    }
+
+    /** Does a pipe have an inner end at (x, y, z)? */
+    static boolean endsAt(PipePart pipe, int x, int y, int z) {
+        for (int[] e : pipe.innerEnds()) if (e[0] == x && e[1] == y && e[2] == z) return true;
+        return false;
+    }
+
+    /** The junction at (x, y, z), or null. */
+    JunctionPart junctionAt(int x, int y, int z) {
+        for (VoxelPart p : parts) if (p instanceof JunctionPart j && j.x == x && j.y == y && j.z == z) return j;
+        return null;
+    }
+
+    /** The pipes with an inner end at (x, y, z). */
+    List<PipePart> armsAt(int x, int y, int z) {
+        List<PipePart> out = new ArrayList<>();
+        for (VoxelPart p : parts) if (p instanceof PipePart pipe && endsAt(pipe, x, y, z)) out.add(pipe);
+        return out;
+    }
+
+    /** Junctions left with fewer than two arms go; their contents go into the arm that is left (if any). */
+    private void pruneJunctions() {
+        for (int i = parts.size() - 1; i >= 0; i--)
+            if (parts.get(i) instanceof JunctionPart j) {
+                List<PipePart> arms = armsAt(j.x, j.y, j.z);
+                if (arms.size() >= 2) continue;
+                if (!arms.isEmpty() && arms.get(0).fluid != null && j.fluid != null) {
+                    arms.get(0).fluid.addShareOf(j.fluid, 1);
+                    arms.get(0).fluid.update();
+                }
+                parts.remove(i);
+            }
     }
 
     /**
@@ -409,6 +468,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     private void changed() {
         vents = null;
         valveLinks = null;
+        junctionLinks = null;
         if (isAdded()) {
             if (hasFluid()) FluidWorld.add(this);
             FluidWorld.changed(this);
@@ -445,6 +505,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         java.util.Map<Integer, List<mods.eln.sim.fluid.FluidNode>> at = new java.util.HashMap<>();
         java.util.Set<Integer> valves = new java.util.HashSet<>();
         for (VoxelPart p : parts) if (p instanceof ValvePart v) valves.add(voxel(v.x, v.y, v.z));
+        // (nor at a junction: its arms link to its own node, fluidLinks; one rule, whatever else meets there)
+        for (VoxelPart p : parts) if (p instanceof JunctionPart j) valves.add(voxel(j.x, j.y, j.z));
         for (VoxelPart p : parts)
             if (p instanceof PipePart pipe && pipe.fluid != null)
                 for (int[] e : pipe.innerEnds())
@@ -459,6 +521,39 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      *  control and throttle valves set their link's opening every step, beforeFluidStep). */
     @Override
     public List<Link> fluidLinks() {
+        List<Link> out = valveLinks();
+        if (junctionLinks == null) {
+            junctionLinks = new ArrayList<>();
+            for (VoxelPart p : parts)
+                if (p instanceof JunctionPart j && j.fluid != null)
+                    for (PipePart arm : armsAt(j.x, j.y, j.z)) if (arm.fluid != null) junctionLinks.add(armLink(arm, j));
+        }
+        out.addAll(junctionLinks);
+        return out;
+    }
+
+    private List<Link> junctionLinks;
+
+    /**
+     * An arm's link to its junction: from the arm's end, at that end's height on its piece, with the end's own
+     * conductance (as at a port: half the piece's length to it); a horizontal end is an opening as tall as the bore
+     * (as a pipe's end on a side face), a vertical end a point at its end; the junction's side is an opening as tall as
+     * its body. So, as between two pipes' ends, a vertical arm gets the counter-flow pair (liquid down out of a sealed
+     * riser while the junction's gas goes up into it: LabAgent's review) and a level arm one edge across the two
+     * openings.
+     */
+    static Link armLink(PipePart arm, JunctionPart j) {
+        int[] pts = arm.points;
+        boolean first = pts[0] == j.x && pts[1] == j.y && pts[2] == j.z;
+        int k = first ? 3 : pts.length - 6;
+        boolean vertical = pts[k] == j.x && pts[k + 2] == j.z;
+        double draw = arm.heightVoxels() == arm.bore() ? 0.5 : (j.y - arm.minY()) / (double) arm.heightVoxels();
+        double span = vertical ? 0 : Math.min(1, arm.bore() / (double) arm.heightVoxels());
+        double k0 = 2 * PipePart.K_PER_BLOCK[arm.tier] * 16.0 / Math.max(1, arm.length());
+        return new Link(arm.fluid, draw, j.fluid, 0.5, k0).spans(span, 1);
+    }
+
+    private List<Link> valveLinks() {
         if (valveLinks != null) return new ArrayList<>(valveLinks.keySet());
         valveLinks = new java.util.LinkedHashMap<>();
         for (VoxelPart p : parts) {
@@ -1160,16 +1255,35 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         PipePart old = (PipePart) parts.get(target);
         PipePart[] halves = old.splitAt(x, y, z);
         mods.eln.sim.fluid.FluidNode saved = old.fluid;
+        double T0 = mods.eln.sim.Ambient.kelvin(coordonate);
+        // a junction at the point (Baughn 2026-11-11: a tee fitting with its own node), filled with its share of the pipe
+        // it is cut into (by volume; the pieces only hold their run's contents after writeBackOf)
+        JunctionPart j = junctionAt(x, y, z);
+        boolean fresh = j == null;
+        if (fresh) {
+            j = new JunctionPart(x, y, z, Math.min(old.tier, part.tier));
+            j.makeNode(coordonate.y, T0, null);
+        }
+        if (saved != null) mods.eln.fluid.FluidWorld.writeBackOf(saved);
+        double sj = fresh && saved != null ? j.fluid.volume / (j.fluid.volume + saved.volume) : 0;
+        if (fresh && saved != null) {
+            j.fluid.setShareOf(saved, sj);
+            j.fluid.update();
+        }
         if (halves != null) {
             parts.remove(target);
             for (PipePart hp : halves) {
-                double share = hp.length() / (double) Math.max(1, old.length());
-                hp.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), saved, share);
+                double share = (1 - sj) * hp.length() / (double) Math.max(1, old.length());
+                hp.makeNode(coordonate.y, T0, saved, share);
                 parts.add(hp);
             }
+        } else if (sj > 0) {
+            saved.setShareOf(saved, 1 - sj);   // (joined at an existing end: that pipe gives the junction its share)
+            saved.update();
         }
-        if (part.fluid == null) part.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), null);
+        if (part.fluid == null) part.makeNode(coordonate.y, T0, null);
         parts.add(part);
+        if (fresh) parts.add(j);
         markUsed();
         changed();
         return null;
@@ -1183,6 +1297,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         for (VoxelPart p : parts) any |= p instanceof PipePart pp && pp.passes(x, y, z);
         if (!any) return "no pipe there to join";
         if (fittingAt(x, y, z)) return "a valve or sensor sits there";
+        // (a tee takes a third arm, a cross a fourth; no more)
+        if (junctionAt(x, y, z) != null && armsAt(x, y, z).size() >= 4) return "a cross takes no more pipes";
         int h = PipePart.JOIN_CLEAR;
         BitSet want = new BitSet(4096);
         for (int[] b : part.boxes()) fill(want, b);
@@ -1258,6 +1374,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         // pipe walls
         double ambient = mods.eln.sim.Ambient.kelvin(coordonate);
         for (VoxelPart p : parts) if (p instanceof PipePart pipe) pipe.wallBefore(ambient);
+        for (VoxelPart p : parts) if (p instanceof JunctionPart j) j.wallBefore(ambient);
         // valves: as far open as they are (a control valve by its signal, a throttle valve by its setting)
         if (valveLinks != null)
             for (var e : valveLinks.entrySet()) {
@@ -1305,9 +1422,18 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         var level = coordonate.world();
         double ambient = mods.eln.sim.Ambient.kelvin(coordonate);
         for (VoxelPart p : parts) if (p instanceof PipePart pipe) pipe.wallAfter(ambient, dt);
+        for (VoxelPart p : parts) if (p instanceof JunctionPart j) j.wallAfter(ambient, dt);
         for (VoxelPart p : parts) {
             if (!(p instanceof PipePart pipe) || pipe.burst || pipe.fluid == null) continue;
             double P = pipe.fluid.P(), T = pipe.fluid.T();
+            // (a junction is no stronger than its arms: over their rating, an arm at it bursts; LabAgent's review)
+            for (int[] e : pipe.innerEnds()) {
+                JunctionPart j = junctionAt(e[0], e[1], e[2]);
+                if (j != null && j.fluid != null && j.fluid.P() > P) {
+                    P = j.fluid.P();
+                    T = j.fluid.T();
+                }
+            }
             if (P > pipe.burstPa(T) && mods.eln.fluid.FluidWorld.claimBurst(pipe.fluid, level.getGameTime())) {
                 pipe.burst = true;
                 changed = true;

@@ -52,8 +52,9 @@ public final class PipeTransmitterCases {
     static void steam(TestContext c, BlockPos... blocks) {
         for (BlockPos p : blocks)
             for (VoxelPart q : node(c, p).parts)
-                if (q instanceof PipePart pipe) {
-                    var f = pipe.fluid;
+                if (q instanceof PipePart || q instanceof mods.eln.node.voxel.JunctionPart) {
+                    // (a junction too: a cold fitting on a line of hot steam condenses it all, as cold iron would)
+                    var f = q instanceof PipePart pipe ? pipe.fluid : ((mods.eln.node.voxel.JunctionPart) q).fluid;
                     f.fill(0, 1, 423.15);
                     mods.eln.sim.fluid.EaUnits.addWater(f, 6e5 * f.volume / (461.5 * 423.15), 423.15, true);
                     mods.eln.fluid.FluidWorld.changed(node(c, p));

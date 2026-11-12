@@ -235,6 +235,17 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
 - FREE kinds (pipes): lattice 4, `BEND` 6, unsupported steps cost more (`UNSUPPORTED`), off-lattice ports jog onto the
   lattice, waypoints as legs; gives up on the wall-clock budget (Baughn: it runs on the server thread).
 
+- Pipe junctions (Baughn 2026-11-11, LabAgent's review): where a route joins a pipe's body or another pipe's end,
+  `VoxelNode.addJoined` cuts the pipe and adds a `JunctionPart` at the point: its own fluid node, never lumped, 3/4
+  block of its bore in volume (smaller nodes troubled the core: #374, #370), a wall as a pipe's, and filled with its
+  share of the pipe it was cut into (after `FluidWorld.writeBackOf`). `fluidJoins` never joins at a junction;
+  `fluidLinks` links each arm's end to it (the end's own conductance and height; a level end an opening as tall as the
+  bore, the junction an opening as tall as its body, so a vertical arm gets the counter-flow pair: a sealed riser drains,
+  `FluidDevice.Link.spanA/spanB`). So each branch is its own run. It takes up to four arms, isn't aimed at on its own
+  (`partAt` gives the nearest arm), and goes when fewer than two arms are left, its contents into the last. Over its
+  arms' rating an arm at it bursts. Old saves' coinciding ends (no part) stay lumped until the phase 3 converter.
+  `FluidWorld` reports any node under `MIN_RELIABLE_VOLUME` (1e-6 m^3) once (Baughn). Tests: `JunctionCases`.
+
 ## Laying and the kit UX
 
 - `Laying`: all or nothing for both kits. Every new part is checked against the world and the route's other parts in

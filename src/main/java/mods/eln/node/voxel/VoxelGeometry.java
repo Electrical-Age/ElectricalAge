@@ -84,6 +84,9 @@ public final class VoxelGeometry {
             if (part instanceof ValvePart v) valve(m, v);
             else if (part instanceof SafetyValvePart sv) safetyValve(m, sv, parts);
             else if (part instanceof PipeSensorPart ps) sensor(m, ps, parts);
+            else if (part instanceof JunctionPart j)
+                // (a tee or cross: a body a voxel wider than the bore, where the arms meet; Baughn: visible = connected)
+                box(m, j.boxes().get(0), PIPE[j.tier]).named("pipe junction").rgb(0.82f, 0.82f, 0.86f);
             else if (part instanceof AdapterPart a)
                 box(m, a.boxes().get(0), PIPE[0]).named("adapter flange").rgb(0.75f, 0.55f, 0.3f);   // (brass)
             else if (part instanceof PipePart pipe) {

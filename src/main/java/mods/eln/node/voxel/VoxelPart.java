@@ -38,6 +38,7 @@ public abstract class VoxelPart {
     static VoxelPart read(CompoundTag t, int blockY) {
         return switch (t.getStringOr("kind", "")) {
             case PipePart.KIND -> PipePart.read(t, blockY);
+            case JunctionPart.KIND -> JunctionPart.read(t, blockY);
             case ValvePart.KIND -> ValvePart.read(t);
             case AdapterPart.KIND -> AdapterPart.read(t);
             case SafetyValvePart.KIND -> SafetyValvePart.read(t);
@@ -51,6 +52,7 @@ public abstract class VoxelPart {
     static VoxelPart deserialize(String kind, DataInputStream in) throws IOException {
         return switch (kind) {
             case PipePart.KIND -> PipePart.deserialize(in);
+            case JunctionPart.KIND -> JunctionPart.deserialize(in);
             case ValvePart.KIND -> ValvePart.deserialize(in);
             case AdapterPart.KIND -> AdapterPart.deserialize(in);
             case SafetyValvePart.KIND -> SafetyValvePart.deserialize(in);

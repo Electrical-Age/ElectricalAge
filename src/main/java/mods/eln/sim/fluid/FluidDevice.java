@@ -42,6 +42,20 @@ public interface FluidDevice {
             this.k = k;
         }
 
+        /**
+         * Openings (as FluidPort.span: a share of the node's height, 0 a point) at each end: when exactly one end is an
+         * opening, the world gives the link the couplings' counter-flow pair of one-way edges, so liquid can run out
+         * under it while gas comes back over it (a sealed part-full pipe arm into a junction drains: LabAgent's review,
+         * 2026-11-12). Valves leave both 0 (one edge: their opening and regulating act on it).
+         */
+        public double spanA, spanB;
+
+        public Link spans(double a, double b) {
+            spanA = a;
+            spanB = b;
+            return this;
+        }
+
         public Link kind(FluidEdge.Kind kind) {
             this.kind = kind;
             return this;

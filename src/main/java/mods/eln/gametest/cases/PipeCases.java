@@ -809,13 +809,24 @@ public final class PipeCases {
             long[] join = {joinBlock.getX() * 16L + 8, joinBlock.getY() * 16L + 8, joinBlock.getZ() * 16L + 8};
             err = mods.eln.node.voxel.PipePlacer.routeAndJoinForTests(level, 0, a, join);
             VoxelNode n = node(ctx, joinBlock);
-            partsAtJoin = n == null ? 0 : n.parts.size();
+            partsAtJoin = n == null ? 0 : (int) n.parts.stream().filter(q -> q instanceof mods.eln.node.voxel.PipePart).count();
+            junction = n != null && n.parts.stream().anyMatch(q -> q instanceof mods.eln.node.voxel.JunctionPart);
+            if (n != null)
+                for (var q : n.parts) if (q instanceof mods.eln.node.voxel.PipePart pp) runs.add(pp);
         }
+
+        boolean junction;
+        final java.util.List<mods.eln.node.voxel.PipePart> runs = new java.util.ArrayList<>();
 
         public void measure(TestContext ctx) {
             var net = mods.eln.fluid.FluidWorld.networkOf(boiler.vessel);
             ctx.check("pipe: the route joins the run", err == null, "" + err);
             ctx.check("pipe: the run is cut in two at the junction, plus the new pipe: 3 pieces", partsAtJoin == 3, partsAtJoin + " pieces");
+            ctx.check("pipe: a junction fitting sits where they meet", junction, "");
+            // (Baughn 2026-11-11, LabAgent: each branch its own run through the junction's node, not one lump for the tree)
+            java.util.Set<Object> lumps = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+            for (var pp : runs) lumps.add(mods.eln.fluid.FluidWorld.nodeFor(pp.fluid));
+            ctx.check("pipe: the three arms are three runs (not lumped through the junction)", lumps.size() == 3, lumps.size() + " runs");
             ctx.check("pipe: boiler, run and turbine are one network", net != null && net == mods.eln.fluid.FluidWorld.networkOf(turbine.inlet), "");
         }
     }
@@ -1025,7 +1036,7 @@ public final class PipeCases {
      *  network: the cable kit's start-on-a-cable, for pipes. */
     static final class KitBranchesPipeToPipe implements TestCase {
         boolean started, finished;
-        int partsA, partsB;
+        int partsA, partsB, junctions;
         Object netA, netB;
 
         public String id() {
@@ -1055,8 +1066,10 @@ public final class PipeCases {
             started = kitClick(ctx, p, kit, 0, a, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(a).add(0.5, 9.0 / 16, 0.5));
             finished = kitClick(ctx, p, kit, 0, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 9.0 / 16, 0.5));
             VoxelNode na = node(ctx, a), nb = node(ctx, b);
-            partsA = na == null ? 0 : na.parts.size();
-            partsB = nb == null ? 0 : nb.parts.size();
+            partsA = na == null ? 0 : (int) na.parts.stream().filter(q -> q instanceof mods.eln.node.voxel.PipePart).count();
+            partsB = nb == null ? 0 : (int) nb.parts.stream().filter(q -> q instanceof mods.eln.node.voxel.PipePart).count();
+            junctions = (na != null && na.parts.stream().anyMatch(q -> q instanceof mods.eln.node.voxel.JunctionPart) ? 1 : 0)
+                + (nb != null && nb.parts.stream().anyMatch(q -> q instanceof mods.eln.node.voxel.JunctionPart) ? 1 : 0);
             p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
         }
 
@@ -1067,6 +1080,7 @@ public final class PipeCases {
             var netB = fb == null ? null : mods.eln.fluid.FluidWorld.networkOf((mods.eln.sim.fluid.FluidNode) fb);
             ctx.check("pipe kit: a route starts on a pipe's body and finishes on another's", started && finished, started + " " + finished);
             ctx.check("pipe kit: each run is cut at its junction, plus the new pipe: 3 pieces each", partsA == 3 && partsB == 3, partsA + " / " + partsB);
+            ctx.check("pipe kit: a junction fitting at each", junctions == 2, junctions + "");
             ctx.check("pipe kit: both runs and the branch are one network", netA != null && netA == netB, netA + " / " + netB);
         }
     }
