@@ -656,32 +656,13 @@ public final class CablePlacer {
     public static String lay(Level level, int tier, CableSpec spec, List<CableRouter.Step> steps, net.minecraft.world.entity.player.Player player) {
         CablePart.Tier ti = tierOf(tier, spec);
         List<CableRouter.Piece> pieces = CableRouter.pieces(steps, ti.width(), ti.height());
-        List<CablePart> parts = new ArrayList<>();
+        List<BlockPos> at = new ArrayList<>();
+        List<VoxelPart> parts = new ArrayList<>();
         for (CableRouter.Piece p : pieces) {
-            CablePart part = p.face() < 0 ? CablePart.knuckle(tier, spec, p.points()[0], p.points()[1], p.points()[2]) : new CablePart(tier, spec, p.face(), p.points());
-            if (!part.valid()) return "bad piece at " + p.bx() + " " + p.by() + " " + p.bz();
-            parts.add(part);
-            BlockPos bp = new BlockPos((int) p.bx(), (int) p.by(), (int) p.bz());
-            BlockState s = level.getBlockState(bp);
-            VoxelNode existing = s.getBlock() instanceof VoxelNodeBlock && level.getBlockEntity(bp) instanceof VoxelNodeEntity ve
-                && ve.getNode() instanceof VoxelNode n ? n : null;
-            if (existing == null && Mimic.allowed(s)) {   // (through a stair, under a fence: clear of its own voxels)
-                for (int[] hb : Mimic.boxes(s, level, bp))
-                    for (int[] pb : part.boxes())
-                        if (hb[0] < pb[3] && pb[0] < hb[3] && hb[1] < pb[4] && pb[1] < hb[4] && hb[2] < pb[5] && pb[2] < hb[5])
-                            return "the " + s.getBlock().getName().getString() + " is in the way at " + bp.toShortString();
-            } else if (existing == null && !(s.isAir() || s.canBeReplaced())) return "a block is in the way at " + bp.toShortString();
-            if (existing != null) {
-                String why = existing.canAdd(part);
-                if (why != null) return why + " at " + bp.toShortString();
-            }
+            parts.add(p.face() < 0 ? CablePart.knuckle(tier, spec, p.points()[0], p.points()[1], p.points()[2]) : new CablePart(tier, spec, p.face(), p.points()));
+            at.add(new BlockPos((int) p.bx(), (int) p.by(), (int) p.bz()));
         }
-        for (int i = 0; i < pieces.size(); i++) {
-            CableRouter.Piece p = pieces.get(i);
-            String err = PipeKitItem.place(level, new BlockPos((int) p.bx(), (int) p.by(), (int) p.bz()), parts.get(i), player);
-            if (err != null) return err + " at " + p.bx() + " " + p.by() + " " + p.bz();
-        }
-        return null;
+        return Laying.lay(level, at, parts, player);   // (all or nothing)
     }
 
     static void show(ServerPlayer player, ServerLevel level, List<CableRouter.Step> steps) {

@@ -196,6 +196,23 @@ public final class PipePlacer {
         return layJoined(level, tier, r.points, join, null);
     }
 
+    /** Lay a route's pieces with placing forced to fail at piece failAt (GameTests: nothing may stay laid). */
+    public static String layFailingForTests(Level level, int tier, List<long[]> points, int failAt) {
+        List<BlockPos> at = new ArrayList<>();
+        List<VoxelPart> parts = new ArrayList<>();
+        for (var e : PipeRouter.perBlock(points).entrySet())
+            for (int[] pts : e.getValue()) {
+                at.add(new BlockPos(e.getKey().get(0).intValue(), e.getKey().get(1).intValue(), e.getKey().get(2).intValue()));
+                parts.add(new PipePart(tier, pts));
+            }
+        return Laying.layFailingAtForTests(level, at, parts, failAt < 0 ? parts.size() + failAt : failAt);
+    }
+
+    /** Check two pipe pieces in one block as one route (GameTests: a route may not cross itself). */
+    public static String checkTwoForTests(Level level, BlockPos pos, int tier, int[] a, int[] b) {
+        return Laying.check(level, List.of(pos, pos), List.of(new PipePart(tier, a), new PipePart(tier, b)));
+    }
+
     public static long[] joinPointForTests(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
         return joinPoint(level, pos, hit);
     }
@@ -379,27 +396,14 @@ public final class PipePlacer {
     }
 
     static String lay(Level level, int tier, java.util.Map<List<Long>, List<int[]>> pieces, net.minecraft.world.entity.player.Player player) {
-        // check first
-        for (var e : pieces.entrySet()) {
-            BlockPos p = new BlockPos(e.getKey().get(0).intValue(), e.getKey().get(1).intValue(), e.getKey().get(2).intValue());
-            BlockState s = level.getBlockState(p);
-            VoxelNode existing = s.getBlock() instanceof VoxelNodeBlock && level.getBlockEntity(p) instanceof VoxelNodeEntity ve
-                && ve.getNode() instanceof VoxelNode n ? n : null;
-            if (existing == null && !(s.isAir() || s.canBeReplaced())) return "a block is in the way at " + p.toShortString();
+        List<BlockPos> at = new ArrayList<>();
+        List<VoxelPart> parts = new ArrayList<>();
+        for (var e : pieces.entrySet())
             for (int[] pts : e.getValue()) {
-                PipePart part = new PipePart(tier, pts);
-                if (!part.valid()) return "bad piece at " + p.toShortString();
-                if (existing != null && !existing.fits(part)) return "something is in the way at " + p.toShortString();
+                at.add(new BlockPos(e.getKey().get(0).intValue(), e.getKey().get(1).intValue(), e.getKey().get(2).intValue()));
+                parts.add(new PipePart(tier, pts));
             }
-        }
-        for (var e : pieces.entrySet()) {
-            BlockPos p = new BlockPos(e.getKey().get(0).intValue(), e.getKey().get(1).intValue(), e.getKey().get(2).intValue());
-            for (int[] pts : e.getValue()) {
-                String err = PipeKitItem.place(level, p, new PipePart(tier, pts), player);
-                if (err != null) return err + " at " + p.toShortString();
-            }
-        }
-        return null;
+        return Laying.lay(level, at, parts, player);   // (all or nothing)
     }
 
     static void preview(ServerPlayer player, ServerLevel level, Plan plan, PipeRouter.End end) {

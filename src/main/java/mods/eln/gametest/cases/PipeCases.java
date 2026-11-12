@@ -37,6 +37,7 @@ public final class PipeCases {
         cases.add(new JoinMidRun());
         cases.add(new JoinClickOnBody());
         cases.add(new JoinRefusedLaysNothing());
+        cases.add(new LayingAllOrNothing());
         cases.add(new KitCrafting());
         cases.add(new ThrottleAndControlValves());
         cases.add(new Burst());
@@ -899,6 +900,53 @@ public final class PipeCases {
             ctx.check("pipe: the valve went on", valveErr == null, "" + valveErr);
             ctx.check("pipe: a join at the valve's point is refused", err != null, "joined");
             ctx.check("pipe: nothing of the route was laid", before == after, before + " parts before, " + after + " after");
+        }
+    }
+
+    /** Laying is all or nothing (routing phase 1): a route whose last piece fails to place leaves none of it laid (new
+     *  blocks gone, a top slab it went under a slab again, an old pipe block as it was), and a route crossing itself
+     *  in a block is refused before anything is laid. */
+    static final class LayingAllOrNothing implements TestCase {
+        String err, crossErr;
+        int partsBefore, partsAfter;
+        boolean airAgain, stairAgain;
+
+        public String id() {
+            return "pipe_laying_all_or_nothing";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        public void build(TestContext ctx) {
+            // an old pipe across block 1; the new route runs through blocks 1..5 under it, a top slab in block 3
+            lay(ctx, ctx.at(1, 1, 1), 0, 8, 12, 0, 8, 12, 16);
+            ctx.level().setBlock(ctx.at(3, 1, 1), net.minecraft.world.level.block.Blocks.OAK_SLAB.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.SlabBlock.TYPE, net.minecraft.world.level.block.state.properties.SlabType.TOP), 3);
+            VoxelNode old = node(ctx, ctx.at(1, 1, 1));
+            partsBefore = old == null ? -1 : old.parts.size();
+            BlockPos o = ctx.at(0, 0, 0);
+            long y = o.getY() * 16L + 16 + 4, z = o.getZ() * 16L + 16 + 12;
+            java.util.List<long[]> pts = java.util.List.of(new long[]{o.getX() * 16L + 16 + 4, y, z}, new long[]{o.getX() * 16L + 5 * 16 + 12, y, z});
+            err = mods.eln.node.voxel.PipePlacer.layFailingForTests(ctx.level(), 0, pts, -1);
+            VoxelNode after = node(ctx, ctx.at(1, 1, 1));
+            partsAfter = after == null ? -1 : after.parts.size();
+            airAgain = ctx.level().getBlockState(ctx.at(2, 1, 1)).isAir() && ctx.level().getBlockState(ctx.at(4, 1, 1)).isAir();
+            stairAgain = ctx.level().getBlockState(ctx.at(3, 1, 1)).getBlock() == net.minecraft.world.level.block.Blocks.OAK_SLAB;
+            crossErr = mods.eln.node.voxel.PipePlacer.checkTwoForTests(ctx.level(), ctx.at(5, 2, 1), 0, new int[]{0, 8, 8, 16, 8, 8}, new int[]{8, 0, 8, 8, 16, 8});
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("laying: everything but the last piece was placed, then the forced failure", "forced".equals(err), "" + err);
+            ctx.check("laying: the old pipe block keeps just its own pipe", partsAfter == partsBefore, partsBefore + " parts before, " + partsAfter + " after");
+            ctx.check("laying: new blocks are air again", airAgain, "");
+            ctx.check("laying: the top slab is a slab again", stairAgain, "" + ctx.level().getBlockState(ctx.at(3, 1, 1)));
+            ctx.check("laying: a route crossing itself in a block is refused", crossErr != null && crossErr.contains("crosses itself"), "" + crossErr);
         }
     }
 
