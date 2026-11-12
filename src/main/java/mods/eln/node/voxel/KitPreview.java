@@ -63,6 +63,8 @@ public final class KitPreview {
         if (last != null && last.key.equals(key)) return;
         LAST.put(p.getUUID(), new Last(key, false));
         long gen = GEN.merge(p.getUUID(), 1L, Long::sum);
+        long tAim = System.nanoTime();
+        boolean debug = RouteDebug.on(p);
         List<int[]> boxes = new ArrayList<>();
         if (!(h instanceof BlockHitResult bh) || h.getType() != HitResult.Type.BLOCK || p.isSecondaryUseActive()) {
             send(p, true, boxes);
@@ -84,7 +86,11 @@ public final class KitPreview {
         }
         // the route: on the preview thread, over a snapshot of the blocks round its ends (Baughn: the router on the server
         // thread made the preview slow); the latest aim wins
+        long tSnap = System.nanoTime();
         RouteView view = snapshotFor(p, level, plan, at);
+        long snapMs = (System.nanoTime() - tSnap) / 1_000_000;
+        slow("preview snapshot (server thread)", tSnap, plan.startJoin != null ? "from a cable" : "");
+        long tQueued = System.nanoTime();
         int tier = kit.tier, have = p.isCreative() ? Integer.MAX_VALUE : KitItem.length(p.getMainHandItem());
         CableSpec spec = CableKitItem.specOf(p.getMainHandItem());
         List<CableRouter.End> wps = List.copyOf(plan.waypoints);
@@ -94,7 +100,11 @@ public final class KitPreview {
         var server = level.getServer();
         WORKER.execute(() -> {
             if (GEN.getOrDefault(id, 0L) != gen) return;   // (aimed elsewhere since)
+            long tRoute = System.nanoTime();
             Answer a = answer(view, tier, spec, start, startJoin, wps, at, endJoin, have);
+            int exp = Router.LAST_EXPANSIONS.get();
+            long waitMs = (tRoute - tQueued) / 1_000_000, routeMs = (System.nanoTime() - tRoute) / 1_000_000;
+            slow("preview route (worker)", tRoute, (startJoin != null ? "from a cable, " : "") + exp + " expansions");
             server.execute(() -> {
                 if (GEN.getOrDefault(id, 0L) != gen) return;
                 ServerPlayer now = server.getPlayerList().getPlayer(id);
@@ -104,12 +114,23 @@ public final class KitPreview {
                     bs = new ArrayList<>(bs);
                     bs.add(port(at));
                 }
-                send(now, a.ok, bs, device && a.ok);
+                send(now, a.ok, bs, device && a.ok, debug);
+                if (debug)
+                    RouteDebug.report(now, (System.nanoTime() - tAim) / 1_000_000, snapMs, waitMs, routeMs, exp, startJoin != null,
+                        RouteDebug.token(tier, start, startJoin, wps, at, endJoin));
                 // (always a line: a "can't reach" left over from a moment ago read as if the route drawn now were wrong)
                 now.sendOverlayMessage(net.minecraft.network.chat.Component.literal(a.message));
             });
         });
     }
+
+    /** Log a step that took long (Baughn 2026-11-12: routes from a cable were slow to start; where does the time go?). */
+    static void slow(String what, long t0, String detail) {
+        long ms = (System.nanoTime() - t0) / 1_000_000;
+        if (ms >= SLOW_MS) mods.eln.Eln.LOG.info("[eln route timing] {}: {} ms {}", what, ms, detail);
+    }
+
+    static final long SLOW_MS = 30;
 
     /** What the preview shows for a route: ok or not, its boxes (or a marker at the end), and the action-bar line. */
     public record Answer(boolean ok, List<int[]> boxes, String message) {}
@@ -172,6 +193,11 @@ public final class KitPreview {
 
     /** A snapshot of the blocks round these route ends (world voxels), reused while the aim stays inside it. */
     static RouteView snapshotAround(ServerPlayer p, ServerLevel level, List<long[]> ends) {
+        return snapshotAround(p, level, ends, false);
+    }
+
+    /** ... fresh: always a new snapshot (RouteDebug's replay times one). */
+    static RouteView snapshotAround(ServerPlayer p, ServerLevel level, List<long[]> ends, boolean fresh) {
         long[] lo = {Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE}, hi = {Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE};
         for (long[] v : ends) {
             for (int k = 0; k < 3; k++) {
@@ -182,7 +208,7 @@ public final class KitPreview {
         int m = Math.max(CableRouter.MARGIN, PipeRouter.MARGIN) / 16 + 2;   // (pipes search further round their legs)
         long now = level.getGameTime();
         Snap old = SNAPS.get(p.getUUID());
-        if (old != null && now - old.taken < 20 && old.x0 <= lo[0] - m && old.y0 <= lo[1] - m && old.z0 <= lo[2] - m
+        if (!fresh && old != null && now - old.taken < 20 && old.x0 <= lo[0] - m && old.y0 <= lo[1] - m && old.z0 <= lo[2] - m
             && old.x1 >= hi[0] + m && old.y1 >= hi[1] + m && old.z1 >= hi[2] + m) return old.view;
         int pad = m + 8;   // (room for the aim to wander without a new snapshot)
         int x0 = (int) lo[0] - pad, y0 = (int) lo[1] - m, z0 = (int) lo[2] - pad, x1 = (int) hi[0] + pad, y1 = (int) hi[1] + m, z1 = (int) hi[2] + pad;
@@ -207,6 +233,11 @@ public final class KitPreview {
 
     /** state: 0 won't work, 1 works, 2 works and connects to a machine (KitOutline's colours). */
     static void send(ServerPlayer p, boolean ok, List<int[]> boxes, boolean device) {
+        send(p, ok, boxes, device, false);
+    }
+
+    /** ... debug: the client says when it first drew this outline (RouteDebug; a trailing byte, read if there). */
+    static void send(ServerPlayer p, boolean ok, List<int[]> boxes, boolean device, boolean debug) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (DataOutputStream out = new DataOutputStream(bos)) {
             out.writeByte(Eln.packetKitPreview);
@@ -214,6 +245,7 @@ public final class KitPreview {
             int n = Math.min(boxes.size(), 2000);
             out.writeShort(n);
             for (int i = 0; i < n; i++) for (int v : boxes.get(i)) out.writeInt(v);
+            out.writeByte(debug ? 1 : 0);
         } catch (IOException ignored) {
         }
         ElnNet.sendToPlayer(p, bos);

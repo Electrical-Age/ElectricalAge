@@ -76,6 +76,24 @@ public final class LabCommands {
                         .executes(c -> netdump(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), 8))
                         .then(Commands.argument("r", IntegerArgumentType.integer(0, 512))
                             .executes(c -> netdump(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "r"))))))
+                // (Baughn 2026-11-12: the route debug kit and its replay; RouteDebug)
+                .then(Commands.literal("debugkit").executes(c -> {
+                    String res = mods.eln.node.voxel.RouteDebug.give(c.getSource().getPlayerOrException());
+                    c.getSource().sendSuccess(() -> Component.literal(res), false);
+                    return 1;
+                }))
+                .then(Commands.literal("routereplay").then(Commands.argument("token", com.mojang.brigadier.arguments.StringArgumentType.word()).executes(c -> {
+                    String res;
+                    try {
+                        res = mods.eln.node.voxel.RouteDebug.replay(c.getSource().getLevel(), c.getSource().getPlayer(),
+                            com.mojang.brigadier.arguments.StringArgumentType.getString(c, "token"));
+                    } catch (RuntimeException ex) {
+                        res = "bad token: " + ex;
+                    }
+                    String out = res;
+                    c.getSource().sendSuccess(() -> Component.literal(out), false);
+                    return 1;
+                })))
                 // (routing phase 2: an LV route between two blocks' tops, timed with and without the air allowance)
                 .then(Commands.literal("routetime").then(Commands.argument("from", BlockPosArgument.blockPos()).then(Commands.argument("to", BlockPosArgument.blockPos())
                     .executes(c -> {

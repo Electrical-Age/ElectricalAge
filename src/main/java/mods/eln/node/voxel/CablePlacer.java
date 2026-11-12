@@ -162,6 +162,15 @@ public final class CablePlacer {
     static CableRouter.Space around(CableRouter.Space s, long[] p) {
         final int h = 4;
         PipeRouter.Space free = PipePlacer.spaceAround(s, p, h);
+        // (the cube's solid voxels worked out once: asked per query, each voxel of a voxel block recomputed that block's
+        // shapes, and a route from a cable spent 100 ms over 43 steps on the server thread: Baughn's slow start)
+        boolean[] solidIn = new boolean[8 * h * h * h];
+        for (int x = 0; x < 2 * h; x++)
+            for (int y = 0; y < 2 * h; y++)
+                for (int z = 0; z < 2 * h; z++) {
+                    long wx = p[0] - h + x, wy = p[1] - h + y, wz = p[2] - h + z;
+                    solidIn[(x * 2 * h + y) * 2 * h + z] = s.solid(wx, wy, wz, wx + 1, wy + 1, wz + 1);
+                }
         return new CableRouter.Space() {
             @Override
             public boolean blocked(long x0, long y0, long z0, long x1, long y1, long z1) {
@@ -170,7 +179,8 @@ public final class CablePlacer {
                     cz0 = Math.max(z0, p[2] - h), cz1 = Math.min(z1, p[2] + h);
                 for (long x = cx0; x < cx1; x++)
                     for (long y = cy0; y < cy1; y++)
-                        for (long z = cz0; z < cz1; z++) if (s.solid(x, y, z, x + 1, y + 1, z + 1)) return true;
+                        for (long z = cz0; z < cz1; z++)
+                            if (solidIn[(int) (((x - p[0] + h) * 2 * h + (y - p[1] + h)) * 2 * h + (z - p[2] + h))]) return true;
                 return false;
             }
 
@@ -193,6 +203,11 @@ public final class CablePlacer {
     }
 
     /** Why a click is no end: on a machine, no connector on that edge (AdventurAgent: say so); else no place for one. */
+    /** May a kit of tier b branch off a cable of tier a? The same tier, or both power cables (any voltage). */
+    static boolean joins(int a, int b) {
+        return a == b || CableSpec.power(a) && CableSpec.power(b);
+    }
+
     public static String noEndForTests(Level level, BlockPos pos) {
         return noEnd(level, pos);
     }
@@ -231,8 +246,10 @@ public final class CablePlacer {
                 // a branch of a cable of the kit's own tier: the clicked one, or the nearest such in the block
                 // (AdventurAgent: a bus kit started on a signal cable crossing the cell began a separate bus, "Laid")
                 List<CablePart> cands = new ArrayList<>();
-                if (tier < 0 || clicked.tier == tier) cands.add(clicked);
-                else for (VoxelPart vp : v.parts) if (vp instanceof CablePart o && !o.isKnuckle() && o.tier == tier) cands.add(o);
+                // (power cables of any voltage join each other: players know what they mean, Baughn 2026-11-12: a 230 V
+                // kit couldn't branch off a 48 V cable; signal, bus and thermal stay apart)
+                if (tier < 0 || joins(clicked.tier, tier)) cands.add(clicked);
+                else for (VoxelPart vp : v.parts) if (vp instanceof CablePart o && !o.isKnuckle() && joins(o.tier, tier)) cands.add(o);
                 // not a cable crossing the air: a branch from it would start its own air allowance afresh and could chain
                 // past the 1.2-block limit (Baughn 2026-11-11)
                 cands.removeIf(c -> !supported(level, pos, c));
@@ -522,7 +539,9 @@ public final class CablePlacer {
         boolean again = last != null && last.x() == at.x() && last.y() == at.y() && last.z() == at.z() && last.attach() == at.attach();
         if (!device && join[0] == null && !again) {
             plan.waypoints.add(at);
+            long tRoute = System.nanoTime();
             CableRouter.Result r = route(level, plan, null, null);
+            KitPreview.slow("waypoint route (server thread)", tRoute, (plan.startJoin != null ? "from a cable, " : "") + Router.LAST_EXPANSIONS.get() + " expansions");
             if (r.error != null) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
                 player.sendOverlayMessage(Component.literal("Can't reach that waypoint: " + r.error + " (sneak-click to cancel the route)"));
@@ -534,7 +553,9 @@ public final class CablePlacer {
         }
         // finish: at a device, a cable, or the last waypoint
         CableRouter.End end = again ? plan.waypoints.remove(plan.waypoints.size() - 1) : at;
+        long tRoute = System.nanoTime();
         CableRouter.Result r = route(level, plan, end, join[0]);
+        KitPreview.slow("click route (server thread)", tRoute, (plan.startJoin != null ? "from a cable, " : "") + Router.LAST_EXPANSIONS.get() + " expansions");
         if (r.error != null) {
             if (again) plan.waypoints.add(end);
             player.sendOverlayMessage(Component.literal("No route: " + r.error + " (sneak-click to cancel the route)"));

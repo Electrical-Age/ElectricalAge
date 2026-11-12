@@ -27,7 +27,11 @@ public final class KitOutline {
         for (int i = 0; i < n; i++) l.add(new int[]{in.readInt(), in.readInt(), in.readInt(), in.readInt(), in.readInt(), in.readInt()});
         state = k;
         boxes = l;
+        // (the route debug kit: say when this outline is first drawn; RouteDebug)
+        if (in.available() > 0 && in.readByte() == 1) debugArrived = System.nanoTime();
     }
+
+    private static volatile long debugArrived;
 
     public static void onExtract(ExtractBlockOutlineRenderStateEvent e) {
         var player = Minecraft.getInstance().player;
@@ -35,6 +39,12 @@ public final class KitOutline {
         if (player == null || bs.isEmpty() || !(player.getMainHandItem().getItem() instanceof KitItem)) return;   // (cable and pipe kits)
         int st = state;
         int color = st == 2 ? 0xE040D8FF : st == 1 ? 0xC040FF60 : 0xC0FF4040;   // (cyan: into a machine's port)
+        long arrived = debugArrived;
+        if (arrived != 0) {
+            debugArrived = 0;
+            long ms = (System.nanoTime() - arrived) / 1_000_000;
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("[route debug] outline drawn " + ms + " ms after its packet came"));
+        }
         e.addCustomRenderer((state, collector, pose, lrs) -> {
             Vec3 cam = lrs.cameraRenderState.pos;
             for (int[] b : bs) {

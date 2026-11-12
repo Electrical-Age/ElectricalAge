@@ -90,12 +90,12 @@ public final class VoxelGeometry {
         for (VoxelPart pa : parts) {
             if (!(pa instanceof CablePart a) || a.isKnuckle()) continue;
             for (VoxelPart pb : parts) {
-                if (pb == pa || !(pb instanceof CablePart b) || b.isKnuckle() || !a.sameCable(b) || a.face != b.face) continue;
+                if (pb == pa || !(pb instanceof CablePart b) || b.isKnuckle() || !CablePlacer.joins(a.tier, b.tier) || a.face != b.face) continue;
                 for (int[] e : a.ends()) {
                     if (!b.passes(e[0], e[1], e[2])) continue;
                     boolean bEnd = false;
                     for (int[] f : b.ends()) bEnd |= f[0] == e[0] && f[1] == e[1] && f[2] == e[2];
-                    if (!bEnd && sleeved.add(System.identityHashCode(b) + ":" + e[0] + "," + e[1] + "," + e[2])) sleeve(m, b, e);
+                    if (!bEnd && sleeved.add(b.face + ":" + e[0] + "," + e[1] + "," + e[2])) sleeve(m, b, e);
                 }
             }
         }
@@ -106,10 +106,10 @@ public final class VoxelGeometry {
                 for (int[] e : a.ends()) cableEnds.computeIfAbsent(a.face + ":" + e[0] + "," + e[1] + "," + e[2], k -> new ArrayList<>()).add(a);
         for (var en : cableEnds.entrySet()) {
             List<CablePart> at = en.getValue();
-            if (at.size() < 3 || !at.stream().allMatch(x -> x.sameCable(at.get(0)))) continue;
+            if (at.size() < 3 || !at.stream().allMatch(x -> CablePlacer.joins(x.tier, at.get(0).tier))) continue;
             String[] xyz = en.getKey().substring(en.getKey().indexOf(':') + 1).split(",");
             int[] e = {Integer.parseInt(xyz[0]), Integer.parseInt(xyz[1]), Integer.parseInt(xyz[2])};
-            if (sleeved.add(System.identityHashCode(at.get(0)) + ":" + e[0] + "," + e[1] + "," + e[2])) sleeve(m, at.get(0), e);
+            if (sleeved.add(at.get(0).face + ":" + e[0] + "," + e[1] + "," + e[2])) sleeve(m, at.get(0), e);
         }
         java.util.Map<Integer, Integer> ends = new java.util.HashMap<>();
         java.util.Map<Integer, Integer> tierAt = new java.util.HashMap<>();
@@ -130,34 +130,44 @@ public final class VoxelGeometry {
         }
     }
 
-    /** A sleeve round cable b at point e of its centre line: a voxel wider and higher than it, 5 voxels long, brass. */
+    /**
+     * A splice round cable b at point e of its centre line: a slim band half a voxel proud of the cable, 3 voxels long,
+     * in the cable's own colour (Baughn 2026-11-12: the brass sleeves, a voxel over the cable and overlapping where
+     * branches met, looked ugly). One per point.
+     */
     static void sleeve(Model m, CablePart b, int[] e) {
         int n = CablePart.normalAxis(b.face);
-        int along = -1;
+        int along = -1, seg = -1;
         int[] p = b.points;
         for (int i = 3; i < p.length && along < 0; i += 3) {
             boolean in = true;
             for (int a = 0; a < 3; a++) if (e[a] < Math.min(p[i - 3 + a], p[i + a]) || e[a] > Math.max(p[i - 3 + a], p[i + a])) in = false;
-            if (in) for (int a = 0; a < 3; a++) if (p[i - 3 + a] != p[i + a]) along = a;
+            if (in) for (int a = 0; a < 3; a++) if (p[i - 3 + a] != p[i + a]) {
+                along = a;
+                seg = i / 3 - 1;
+            }
         }
-        if (along < 0) return;
+        if (along < 0 || seg >= b.boxes().size()) return;
         int w = 3 - n - along;
-        double half = b.tierInfo().width() / 2.0 + 1, h = b.tierInfo().height() + 1;
+        // (the cable's own box there, grown by a little under half a voxel across and on top: no face of it lies in one
+        // of the cable's, whatever its width)
+        int[] bx = b.boxes().get(seg);
+        double g = 0.45;
         double[] lo = new double[3], hi = new double[3];
-        lo[along] = Math.max(0, e[along] - 2.5);   // (half voxels: its ends never lie in a branch's sides)
-        hi[along] = Math.min(16, e[along] + 2.5);
-        lo[w] = Math.max(0, e[w] - half);
-        hi[w] = Math.min(16, e[w] + half);
+        lo[along] = Math.max(0, e[along] - 1.5);   // (half voxels: its ends never lie in a branch's sides)
+        hi[along] = Math.min(16, e[along] + 1.5);
+        lo[w] = Math.max(0, bx[w] - g);
+        hi[w] = Math.min(16, bx[w + 3] + g);
         // (its face on the support a hair off the plane: it lay in the cable's own bottom face and z-fought with it)
         if (b.face % 2 == 0) {
-            lo[n] = e[n] + 0.05;
-            hi[n] = Math.min(16, e[n] + h);
+            lo[n] = bx[n] + 0.05;
+            hi[n] = Math.min(16, bx[n + 3] + g);
         } else {
-            lo[n] = Math.max(0, e[n] - h);
-            hi[n] = e[n] - 0.05;
+            lo[n] = Math.max(0, bx[n] - g);
+            hi[n] = bx[n + 3] - 0.05;
         }
-        // (on the pipes' metal, tinted brass: on the cable's own texture the tint made it as dark as the cable, unseen)
-        boxD(m, lo, hi, PIPE[0]).named("cable splice").rgb(0.95f, 0.75f, 0.35f);
+        int argb = b.burnt != null ? 0xFFFFFFFF : b.tierInfo().bus() ? rgb(0.62f, 0.38f, 0.80f) : insulation(b);
+        boxD(m, lo, hi, b.burnt != null ? BURNT : cableSprite(b.tier)).named("cable splice").argb(argb);
     }
 
     static void draw(Model m, VoxelPart part, List<VoxelPart> parts, float[] lugs, boolean[] adapters, List<int[]> cableBoxes) {
