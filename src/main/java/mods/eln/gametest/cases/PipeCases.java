@@ -38,6 +38,8 @@ public final class PipeCases {
         cases.add(new JoinClickOnBody());
         cases.add(new JoinRefusedLaysNothing());
         cases.add(new LayingAllOrNothing());
+        cases.add(new KitStartsAnywhereAndCaps());
+        cases.add(new KitBranchesPipeToPipe());
         cases.add(new KitCrafting());
         cases.add(new ThrottleAndControlValves());
         cases.add(new Burst());
@@ -947,6 +949,125 @@ public final class PipeCases {
             ctx.check("laying: new blocks are air again", airAgain, "");
             ctx.check("laying: the top slab is a slab again", stairAgain, "" + ctx.level().getBlockState(ctx.at(3, 1, 1)));
             ctx.check("laying: a route crossing itself in a block is refused", crossErr != null && crossErr.contains("crosses itself"), "" + crossErr);
+        }
+    }
+
+    /** A click with a pipe kit, as a player (the cable kit's UX for pipes, routing phase 1). */
+    static boolean kitClick(TestContext ctx, net.minecraft.server.level.ServerPlayer p, ItemStack kit, int tier, BlockPos pos,
+                            net.minecraft.core.Direction face, net.minecraft.world.phys.Vec3 hit) {
+        return mods.eln.node.voxel.PipePlacer.use(p, ctx.level(), pos, face, kit, tier, hit);
+    }
+
+    /** The pipe kit as the cable kit (Baughn 2026-11-11): a route starts on a plain floor, a waypoint further along, the
+     *  same spot clicked again ends it capped there; it lies low along the floor, and the kit pays its length. */
+    static final class KitStartsAnywhereAndCaps implements TestCase {
+        boolean started, waypoint, finished;
+        int blocks, lowest = 99, kitBefore, kitAfter;
+        boolean validStarts = true;
+        String bad = "";
+
+        public String id() {
+            return "pipe_kit_starts_anywhere_and_caps";
+        }
+
+        public int width() {
+            return 8;
+        }
+
+        public int ticks() {
+            return 2;
+        }
+
+        public void build(TestContext ctx) {
+            var p = Wp10bCases.player(ctx);
+            p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            mods.eln.node.voxel.PipePlacer.forget(p.getUUID());
+            ItemStack kit = PipeKitItem.kit(0, 16 * 16);
+            kitBefore = PipeKitItem.length(kit);
+            BlockPos a = ctx.at(1, 0, 1), b = ctx.at(5, 0, 1);
+            var up = net.minecraft.core.Direction.UP;
+            started = kitClick(ctx, p, kit, 0, a, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(a).add(0.5, 1, 0.5));
+            waypoint = kitClick(ctx, p, kit, 0, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 1, 0.5));
+            finished = kitClick(ctx, p, kit, 0, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 1, 0.5));
+            kitAfter = PipeKitItem.length(kit);
+            for (int x = 0; x < width(); x++) {
+                VoxelNode n = node(ctx, ctx.at(x, 1, 1));
+                if (n == null) continue;
+                blocks++;
+                for (VoxelPart part : n.parts)
+                    if (part instanceof PipePart pp) for (int i = 1; i < pp.points.length; i += 3) lowest = Math.min(lowest, pp.points[i]);
+            }
+            // every face of a floor block gives a start the router accepts: on the lattice, not in a face plane
+            for (var f : net.minecraft.core.Direction.values()) {
+                BlockPos at = ctx.at(3, 0, 2);
+                var hit = net.minecraft.world.phys.Vec3.atCenterOf(at).add(f.getStepX() * 0.5, f.getStepY() * 0.5, f.getStepZ() * 0.5);
+                var e = mods.eln.node.voxel.PipePlacer.surfacePointForTests(ctx.level(), at, f, hit, PipePart.GRID[0]);
+                if (e == null) continue;   // (below the floor: stone)
+                long[] q = {e.x(), e.y(), e.z()};
+                for (long v : q)
+                    if (Math.floorMod(v, mods.eln.node.voxel.PipeRouter.LATTICE) != 0 || Math.floorMod(v, 16) == 0) {
+                        validStarts = false;
+                        bad += f + " ";
+                    }
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("pipe kit: a route starts on a plain floor", started && waypoint && finished, started + " " + waypoint + " " + finished);
+            ctx.check("pipe kit: clicking the last waypoint again lays it, ended there", blocks >= 5, blocks + " blocks");
+            ctx.check("pipe kit: it lies low along the floor", lowest == 4, "lowest point y " + lowest);
+            ctx.check("pipe kit: the kit pays its length", kitBefore - kitAfter >= 4 * 16, (kitBefore - kitAfter) + " voxels");
+            ctx.check("pipe kit: surface starts are on the lattice, never in a face plane", validStarts, bad);
+        }
+    }
+
+    /** A route started on one pipe's body and finished on another's (a branch at each end) joins all three into one
+     *  network: the cable kit's start-on-a-cable, for pipes. */
+    static final class KitBranchesPipeToPipe implements TestCase {
+        boolean started, finished;
+        int partsA, partsB;
+        Object netA, netB;
+
+        public String id() {
+            return "pipe_kit_branches_pipe_to_pipe";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+            // two runs along x, at z 0 and z 2, both one block up
+            for (int x = 1; x < 6; x++) {
+                lay(ctx, ctx.at(x, 1, 0), 0, 0, 8, 8, 16, 8, 8);
+                lay(ctx, ctx.at(x, 1, 2), 0, 0, 8, 8, 16, 8, 8);
+            }
+            var p = Wp10bCases.player(ctx);
+            p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            mods.eln.node.voxel.PipePlacer.forget(p.getUUID());
+            ItemStack kit = PipeKitItem.kit(0, 16 * 16);
+            BlockPos a = ctx.at(3, 1, 0), b = ctx.at(3, 1, 2);
+            var up = net.minecraft.core.Direction.UP;
+            started = kitClick(ctx, p, kit, 0, a, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(a).add(0.5, 9.0 / 16, 0.5));
+            finished = kitClick(ctx, p, kit, 0, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 9.0 / 16, 0.5));
+            VoxelNode na = node(ctx, a), nb = node(ctx, b);
+            partsA = na == null ? 0 : na.parts.size();
+            partsB = nb == null ? 0 : nb.parts.size();
+            p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        }
+
+        public void measure(TestContext ctx) {
+            VoxelNode na = node(ctx, ctx.at(1, 1, 0)), nb = node(ctx, ctx.at(5, 1, 2));
+            Object fa = na == null ? null : ((PipePart) na.parts.get(0)).fluid, fb = nb == null ? null : ((PipePart) nb.parts.get(0)).fluid;
+            var netA = fa == null ? null : mods.eln.fluid.FluidWorld.networkOf((mods.eln.sim.fluid.FluidNode) fa);
+            var netB = fb == null ? null : mods.eln.fluid.FluidWorld.networkOf((mods.eln.sim.fluid.FluidNode) fb);
+            ctx.check("pipe kit: a route starts on a pipe's body and finishes on another's", started && finished, started + " " + finished);
+            ctx.check("pipe kit: each run is cut at its junction, plus the new pipe: 3 pieces each", partsA == 3 && partsB == 3, partsA + " / " + partsB);
+            ctx.check("pipe kit: both runs and the branch are one network", netA != null && netA == netB, netA + " / " + netB);
         }
     }
 

@@ -94,32 +94,11 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         ItemStack stack = ctx.getItemInHand();
         Player player = ctx.getPlayer();
-        boolean creative = player != null && player.isCreative();
         var face = ctx.getClickedFace();
-        // a route: started at a port, waypoints, finished at a port (PipePlacer); else one straight block
+        // a route, laid as a cable kit lays one (PipePlacer; Baughn 2026-11-11: the one-straight-block click is gone)
         if (player instanceof net.minecraft.server.level.ServerPlayer sp && level instanceof net.minecraft.server.level.ServerLevel sl
             && PipePlacer.use(sp, sl, ctx.getClickedPos(), face, stack, tier, ctx.getClickLocation())) return InteractionResult.SUCCESS;
-        BlockPos pos = ctx.getClickedPos().relative(face);
-        if (!creative && length(stack) < 16) {
-            if (player != null) player.sendOverlayMessage(Component.literal("Not enough pipe in this kit for a block"));
-            return InteractionResult.FAIL;
-        }
-        int[] pts = switch (face.getAxis()) {
-            case X -> new int[]{0, 8, 8, 16, 8, 8};
-            case Y -> new int[]{8, 0, 8, 8, 16, 8};
-            case Z -> new int[]{8, 8, 0, 8, 8, 16};
-        };
-        String err = place(level, pos, new PipePart(tier, pts), player);
-        if (err != null) {
-            if (player != null) player.sendOverlayMessage(Component.literal("Can't lay pipe here: " + err));
-            return InteractionResult.FAIL;
-        }
-        if (!creative) {
-            int left = length(stack) - 16;
-            if (left <= 0) stack.shrink(1);
-            else KitItem.setLength(stack, left);
-        }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.PASS;
     }
 
     /** Put a part into the block at pos: a new voxel node in air (or anything replaceable), or into one already there. */

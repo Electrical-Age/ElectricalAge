@@ -41,6 +41,7 @@ public final class KitPreview {
     public static void tick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post e) {
         if (!(e.getEntity() instanceof ServerPlayer p) || !(p.level() instanceof ServerLevel level)) return;
         CablePlacer.checkLapse(p, level.getGameTime());   // (every tick: Baughn found the outline slow at 4 ticks)
+        PipePlacer.checkLapse(p, level.getGameTime());
         Last last = LAST.get(p.getUUID());
         if (p.getMainHandItem().getItem() instanceof PipeKitItem pipeKit) {
             pipeTick(p, level, pipeKit, last);
@@ -241,18 +242,27 @@ public final class KitPreview {
         }
         PipeRouter.End port = PipePlacer.portAt(level, bh.getBlockPos(), bh.getDirection(), bh.getLocation());
         if (port == null) port = PipePlacer.devicePort(level, bh.getBlockPos(), bh.getLocation());
-        if (plan == null) {   // (where it would start: a port)
-            if (port != null) boxes.add(new int[]{(int) port.x() - 2, (int) port.y() - 2, (int) port.z() - 2, (int) port.x() + 2, (int) port.y() + 2, (int) port.z() + 2});
-            send(p, port != null, boxes, port != null);
+        long[] join = port == null ? PipePlacer.joinPoint(level, bh.getBlockPos(), bh.getLocation()) : null;
+        PipeRouter.End surface = port == null && join == null
+            ? PipePlacer.surfacePoint(PipePlacer.space(level), bh.getBlockPos(), bh.getDirection(), bh.getLocation(), PipePart.GRID[kit.tier]) : null;
+        if (plan == null) {   // (where it would start: a port, a point on a pipe, or a point on the surface)
+            PipeRouter.End s = port != null ? port : join != null ? new PipeRouter.End(join[0], join[1], join[2], -1) : surface;
+            if (s != null) boxes.add(new int[]{(int) s.x() - 2, (int) s.y() - 2, (int) s.z() - 2, (int) s.x() + 2, (int) s.y() + 2, (int) s.z() + 2});
+            send(p, s != null, boxes, port != null);
             return;
         }
-        long[] join = port == null ? PipePlacer.joinPoint(level, bh.getBlockPos(), bh.getLocation()) : null;
         PipeRouter.End end;
+        List<PipeRouter.End> wpsNow = new ArrayList<>(plan.waypoints);
+        PipeRouter.End lastWp = wpsNow.isEmpty() ? null : wpsNow.get(wpsNow.size() - 1);
+        boolean again = surface != null && lastWp != null && surface.x() == lastWp.x() && surface.y() == lastWp.y() && surface.z() == lastWp.z();
         if (port != null) end = port;
         else if (join != null) end = new PipeRouter.End(join[0], join[1], join[2], -1);
+        else if (again) end = wpsNow.remove(wpsNow.size() - 1);   // (clicked again: it would end capped there)
+        else if (surface != null) end = surface;
         else {
-            BlockPos at = bh.getBlockPos().relative(bh.getDirection());
-            end = new PipeRouter.End(at.getX() * 16L + 8, at.getY() * 16L + 8, at.getZ() * 16L + 8, -1);
+            send(p, false, boxes);
+            p.sendOverlayMessage(net.minecraft.network.chat.Component.literal("No room for a pipe there"));
+            return;
         }
         List<long[]> ends = new ArrayList<>();
         for (PipeRouter.End e : plan.waypoints) ends.add(new long[]{e.x(), e.y(), e.z()});
@@ -260,8 +270,9 @@ public final class KitPreview {
         ends.add(new long[]{end.x(), end.y(), end.z()});
         RouteView view = snapshotAround(p, level, ends);
         int tier = plan.tier, have = p.isCreative() ? Integer.MAX_VALUE : PipeKitItem.length(p.getMainHandItem());
-        List<PipeRouter.End> wps = List.copyOf(plan.waypoints);
+        List<PipeRouter.End> wps = List.copyOf(wpsNow);
         PipeRouter.End start = plan.start;
+        long[] startJoin = plan.startJoin;
         boolean toPort = port != null;
         UUID id = p.getUUID();
         var server = level.getServer();
@@ -269,7 +280,7 @@ public final class KitPreview {
             if (GEN.getOrDefault(id, 0L) != gen) return;
             Answer ans;
             try {
-                ans = pipeAnswer(view, join, tier, start, wps, end, have, toPort);
+                ans = pipeAnswer(view, join, startJoin, tier, start, wps, end, have, toPort);
             } catch (RuntimeException ex) {
                 Eln.LOG.warn("Pipe route preview failed", ex);
                 return;
@@ -287,8 +298,15 @@ public final class KitPreview {
     /** A pipe route's preview: the pipe as it would be laid from start over the waypoints to end (world voxels). */
     public static Answer pipeAnswer(RouteView view, long[] join, int tier, PipeRouter.End start, List<PipeRouter.End> wps, PipeRouter.End end,
                                     int have, boolean toPort) {
+        return pipeAnswer(view, join, null, tier, start, wps, end, have, toPort);
+    }
+
+    /** ... free round a start on a pipe too (startJoin, or null). */
+    public static Answer pipeAnswer(RouteView view, long[] join, long[] startJoin, int tier, PipeRouter.End start, List<PipeRouter.End> wps,
+                                    PipeRouter.End end, int have, boolean toPort) {
         PipeRouter.Space sp = PipePlacer.space(view);
         if (join != null) sp = PipePlacer.spaceAround(sp, join, PipePart.JOIN_CLEAR);
+        if (startJoin != null) sp = PipePlacer.spaceAround(sp, startJoin, PipePart.JOIN_CLEAR);
         PipeRouter.Result r = PipeRouter.route(sp, PipePart.GRID[tier], start, wps, end, PREVIEW_BUDGET_MS);
         List<int[]> bs = new ArrayList<>();
         boolean ok = r.error == null;

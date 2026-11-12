@@ -211,10 +211,30 @@ Tests: `gametest/cases/KitDeviceCases`.
 
 ## Routers
 
-- `CableRouter`: lattice 2 voxels, states (point, attach face, last dir), moves along a face / inner corner / outer
-  corner (knuckle); `BEND` 4, `BLOCK_ENTERED` 1, `MAX_EXPANSIONS` 400000, budget `PipeRouter.TIME_BUDGET_MS` (200 ms).
-- `PipeRouter`: lattice 4, `BEND` 6, unsupported steps cost more (`UNSUPPORTED`), waypoints as legs; gives up on the
-  wall-clock budget (Baughn: it runs on the server thread).
+One router for cables and pipes (Baughn 2026-11-11): `Router` holds the A* core (queue, best costs, expansion limit,
+wall-clock deadline) and the moves by the `RouteKind`'s placement; `RouteKind` carries what the search needs
+(placement, cross-section, lattice, bend and block costs, clearance, margin, support). `CableRouter` and `PipeRouter`
+are the kinds' entry points (same signatures) and output stages (`pieces`, `perBlock`). `RouterDifferentialTest`
+holds them to frozen copies of the routers before the merge (`LegacyCableRouter`, `LegacyPipeRouter`).
+- SURFACE kinds (cables): lattice 2 voxels, states (point, attach face, last dir), moves along a face / inner corner /
+  outer corner (knuckle); `BEND` 4, `BLOCK_ENTERED` 1, `MAX_EXPANSIONS` 400000, budget `PipeRouter.TIME_BUDGET_MS`
+  (200 ms).
+- FREE kinds (pipes): lattice 4, `BEND` 6, unsupported steps cost more (`UNSUPPORTED`), off-lattice ports jog onto the
+  lattice, waypoints as legs; gives up on the wall-clock budget (Baughn: it runs on the server thread).
+
+## Laying and the kit UX
+
+- `Laying`: all or nothing for both kits. Every new part is checked against the world and the route's other parts in
+  its block (pieces of one cable may overlap where they touch), then all are placed; a late failure takes back what
+  was placed. Pipe junctions (`VoxelNode.joinError`) are checked before anything is laid.
+- Both kits work alike (Baughn 2026-11-11): start at a port, on an old run (a branch) or any surface; waypoints are
+  points on clicked surfaces (pipes: in the block in front, as near the face as the lattice allows,
+  `PipePlacer.surfacePoint`); finish at a port, on a run, or by clicking the last waypoint again (the run ends there,
+  a pipe capped); sneak-click takes back a waypoint or cancels; a route lapses each tick (another dimension or item, a
+  minute idle, too far). The pipe kit's old one-straight-block click is gone (Baughn). A pipe route may start and end
+  on pipes (`PipePlacer.layJoined` with both joins).
+- Tests: `RouteLeakCases` (lay/break/re-lay rounds leave nothing in the simulator or fluid world),
+  `PipeCases` (`pipe_laying_all_or_nothing`, `pipe_kit_starts_anywhere_and_caps`, `pipe_kit_branches_pipe_to_pipe`).
 
 ## Chisel
 
