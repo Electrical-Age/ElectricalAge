@@ -7,6 +7,7 @@ import org.erisia.cad.Frustum;
 import org.erisia.cad.Model;
 import org.erisia.cad.Ring;
 import org.erisia.cad.Solid;
+import org.erisia.cad.Mesh;
 import org.erisia.cad.Sweep;
 import org.erisia.cad.UvMap;
 
@@ -332,11 +333,14 @@ public final class VoxelGeometry {
             double cw = (bx[w] + bx[w + 3]) / 2.0, half = (bx[w + 3] - bx[w]) / 2.0;
             boolean knuckle = c.isKnuckle();
             double top = c.isKnuckle() || CablePart.plane(c.face) == 0 ? bx[n + 3] : bx[n];
+            final int alongF = along;
             UvMap uv = f -> {
-                int fa = f.index / 2;
+                // (the face's axis from its normal: a sagging cable's faces are a mesh's, a little tilted)
+                int fa = Math.abs(f.nx) >= Math.abs(f.ny) && Math.abs(f.nx) >= Math.abs(f.nz) ? 0 : Math.abs(f.ny) >= Math.abs(f.nz) ? 1 : 2;
                 float[] out = new float[8];
                 for (int j = 0; j < 4; j++) {
                     double[] v = {f.xyz[3 * j], f.xyz[3 * j + 1], f.xyz[3 * j + 2]};
+                    v[1] += c.sagAt(alongF, v[alongF]);   // (textured as the straight cable it hangs from)
                     double u, vv = v[along] / 16;
                     double depth = Math.abs(top - v[n]);
                     if (knuckle) u = 0.25 + (v[w] - cw) / 32;   // (a knuckle: just the strip)
@@ -348,8 +352,81 @@ public final class VoxelGeometry {
                 }
                 return out;
             };
-            box(m, bx, c.burnt != null ? BURNT : cableSprite(c.tier)).named("cable box " + i).argb(argb).uv(uv);
+            Identifier sprite = c.burnt != null ? BURNT : cableSprite(c.tier);
+            if (!knuckle && along != 1 && sags(c, along, bx)) sagged(m, c, bx, along, sprite).named("cable box " + i).argb(argb).uv(uv);
+            else box(m, bx, sprite).named("cable box " + i).argb(argb).uv(uv);
         }
+    }
+
+    /** Does the cable dip anywhere along this box (along axis)? */
+    static boolean sags(CablePart c, int along, int[] bx) {
+        if (c.sag == null) return false;
+        for (int u = bx[along]; u <= bx[along + 3]; u++) if (c.sagAt(along, u) > 1e-3) return true;
+        return false;
+    }
+
+    /**
+     * A cable box hanging along its air stretch (Baughn 2026-11-12: a catenary, flat where it meets a surface): the box
+     * cut into 1-voxel slices along its length, each slice's ends lowered by the dip there, so the cable bends smoothly
+     * down and back up. A closed mesh: the four long sides per slice and the two end caps.
+     */
+    static Mesh sagged(Model m, CablePart c, int[] bx, int along, Identifier sprite) {
+        Mesh mesh = new Mesh(null);
+        int[] o = others(along);
+        int q0 = o[0], q1 = o[1];
+        List<Double> us = new ArrayList<>();
+        us.add((double) bx[along]);
+        for (int u = bx[along] + 1; u < bx[along + 3]; u++) us.add((double) u);
+        us.add((double) bx[along + 3]);
+        // a corner at u (along) with the across coordinates (a on q0, b on q1), lowered by the dip at u
+        java.util.function.Function<double[], double[]> at = k -> {
+            double[] v = new double[3];
+            v[along] = k[0];
+            v[q0] = k[1];
+            v[q1] = k[2];
+            v[1] -= c.sagAt(along, k[0]);
+            return v;
+        };
+        double[] lo = {bx[q0], bx[q1]}, hi = {bx[q0 + 3], bx[q1 + 3]};
+        double[] centre = {(bx[0] + bx[3]) / 2.0, (bx[1] + bx[4]) / 2.0, (bx[2] + bx[5]) / 2.0};
+        for (int k = 0; k + 1 < us.size(); k++) {
+            double u0 = us.get(k), u1 = us.get(k + 1);
+            // (this slice's own centre, lowered with it: the faces are wound away from it)
+            double[] cs = centre.clone();
+            cs[along] = (u0 + u1) / 2;
+            cs[1] -= (c.sagAt(along, u0) + c.sagAt(along, u1)) / 2;
+            double[] centreS = cs;
+            // the four long sides: q0 low/high, q1 low/high
+            quadOut(mesh, centreS, along, at.apply(new double[]{u0, lo[0], lo[1]}), at.apply(new double[]{u1, lo[0], lo[1]}),
+                at.apply(new double[]{u1, lo[0], hi[1]}), at.apply(new double[]{u0, lo[0], hi[1]}));
+            quadOut(mesh, centreS, along, at.apply(new double[]{u0, hi[0], lo[1]}), at.apply(new double[]{u1, hi[0], lo[1]}),
+                at.apply(new double[]{u1, hi[0], hi[1]}), at.apply(new double[]{u0, hi[0], hi[1]}));
+            quadOut(mesh, centreS, along, at.apply(new double[]{u0, lo[0], lo[1]}), at.apply(new double[]{u1, lo[0], lo[1]}),
+                at.apply(new double[]{u1, hi[0], lo[1]}), at.apply(new double[]{u0, hi[0], lo[1]}));
+            quadOut(mesh, centreS, along, at.apply(new double[]{u0, lo[0], hi[1]}), at.apply(new double[]{u1, lo[0], hi[1]}),
+                at.apply(new double[]{u1, hi[0], hi[1]}), at.apply(new double[]{u0, hi[0], hi[1]}));
+        }
+        for (double u : new double[]{us.get(0), us.get(us.size() - 1)})
+            quadOut(mesh, centre, along, at.apply(new double[]{u, lo[0], lo[1]}), at.apply(new double[]{u, hi[0], lo[1]}),
+                at.apply(new double[]{u, hi[0], hi[1]}), at.apply(new double[]{u, lo[0], hi[1]}));
+        mesh.closed(true);
+        m.add(mesh).material(sprite);
+        return mesh;
+    }
+
+    /** Add quad a b c d to mesh wound to face away from the box's centre line (along axis through centre). */
+    static void quadOut(Mesh mesh, double[] centre, int along, double[] a, double[] b, double[] c, double[] d) {
+        double[] e1 = {b[0] - a[0], b[1] - a[1], b[2] - a[2]}, e2 = {c[0] - a[0], c[1] - a[1], c[2] - a[2]};
+        double[] nrm = {e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]};
+        double[] mid = {(a[0] + c[0]) / 2, (a[1] + c[1]) / 2, (a[2] + c[2]) / 2};
+        double[] out = {mid[0] - centre[0], mid[1] - centre[1], mid[2] - centre[2]};
+        // (sides: away from the centre line, so not along it; the end caps: along it, away from the middle)
+        boolean cap = a[along] == b[along] && b[along] == c[along];
+        if (!cap) out[along] = 0;
+        else for (int i = 0; i < 3; i++) if (i != along) out[i] = 0;
+        double dot = nrm[0] * out[0] + nrm[1] * out[1] + nrm[2] * out[2];
+        if (dot >= 0) mesh.poly(a, b, c, d);
+        else mesh.poly(d, c, b, a);
     }
 
     /**

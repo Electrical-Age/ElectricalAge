@@ -680,11 +680,79 @@ public final class CablePlacer {
         List<CableRouter.Piece> pieces = CableRouter.pieces(steps, ti.width(), ti.height());
         List<BlockPos> at = new ArrayList<>();
         List<VoxelPart> parts = new ArrayList<>();
+        List<long[]> stretches = airStretches(space(level), RouteKind.cable(tier, spec), steps);
         for (CableRouter.Piece p : pieces) {
-            parts.add(p.face() < 0 ? CablePart.knuckle(tier, spec, p.points()[0], p.points()[1], p.points()[2]) : new CablePart(tier, spec, p.face(), p.points()));
+            CablePart part = p.face() < 0 ? CablePart.knuckle(tier, spec, p.points()[0], p.points()[1], p.points()[2]) : new CablePart(tier, spec, p.face(), p.points());
+            if (!part.isKnuckle()) part.sag = sagOf(p, stretches);
+            parts.add(part);
             at.add(new BlockPos((int) p.bx(), (int) p.by(), (int) p.bz()));
         }
         return Laying.lay(level, at, parts, player);   // (all or nothing)
+    }
+
+    /**
+     * The route's horizontal air stretches (world voxels): {axis, the line's coordinate on the two other axes (in
+     * others(axis) order), from, to}. A stretch runs from where the cable leaves its support to where it lands, along
+     * one straight segment (the router keeps them straight). Vertical ones hang straight and aren't listed.
+     */
+    static List<long[]> airStretches(CableRouter.Space space, RouteKind kind, List<CableRouter.Step> steps) {
+        List<long[]> out = new ArrayList<>();
+        int lattice = kind.lattice();
+        for (int i = 0; i + 1 < steps.size(); i++) {
+            CableRouter.Step a = steps.get(i), b = steps.get(i + 1);
+            int d = CableRouter.dirOf(a, b);
+            if (d < 0) continue;
+            int ax = CableRouter.axis(d);
+            long[] p = {a.x(), a.y(), a.z()};
+            long len = Math.abs(b.x() - a.x()) + Math.abs(b.y() - a.y()) + Math.abs(b.z() - a.z());
+            long from = Long.MIN_VALUE, to = 0;
+            for (long t = 0; t <= len; t += lattice) {
+                boolean air = t < len && !Router.surfaceSupported(space, kind, p, b.attach(), d);
+                long here = p[ax], next = here + CableRouter.DV[d][ax] * lattice;
+                if (air) {
+                    if (from == Long.MIN_VALUE) from = here;
+                    to = next;
+                } else if (from != Long.MIN_VALUE) {
+                    if (ax != 1) {
+                        int[] o = VoxelGeometry.others(ax);
+                        out.add(new long[]{ax, p[o[0]], p[o[1]], Math.min(from, to), Math.max(from, to)});
+                    }
+                    from = Long.MIN_VALUE;
+                }
+                for (int j = 0; j < 3; j++) p[j] += CableRouter.DV[d][j] * lattice;
+            }
+        }
+        return out;
+    }
+
+    /**
+     * A piece's share of the air stretches (CablePart.sag), or null: each stretch whose line one of the piece's segments
+     * lies on. The dip is about 15 % of the span, at most 3 voxels (Baughn 2026-11-12: a catenary or the like).
+     */
+    static int[] sagOf(CableRouter.Piece pc, List<long[]> stretches) {
+        if (stretches.isEmpty()) return null;
+        long[] base = {pc.bx() * 16, pc.by() * 16, pc.bz() * 16};
+        int[] pts = pc.points();
+        List<Integer> out = new ArrayList<>();
+        for (long[] st : stretches) {
+            int ax = (int) st[0];
+            int[] o = VoxelGeometry.others(ax);
+            boolean on = false;
+            for (int k = 3; k < pts.length && !on; k += 3)
+                on = pts[k + ax] != pts[k - 3 + ax] && pts[k + o[0]] == pts[k - 3 + o[0]] && pts[k + o[1]] == pts[k - 3 + o[1]]
+                    && base[o[0]] + pts[k + o[0]] == st[1] && base[o[1]] + pts[k + o[1]] == st[2]
+                    && Math.max(pts[k + ax], pts[k - 3 + ax]) + base[ax] > st[3] && Math.min(pts[k + ax], pts[k - 3 + ax]) + base[ax] < st[4];
+            if (!on) continue;
+            long span = st[4] - st[3];
+            out.add(ax);
+            out.add((int) (st[3] - base[ax]));
+            out.add((int) (st[4] - base[ax]));
+            out.add((int) Math.round(Math.min(0.15 * span, 3.0) * 10));
+        }
+        if (out.isEmpty()) return null;
+        int[] r = new int[out.size()];
+        for (int i = 0; i < r.length; i++) r[i] = out.get(i);
+        return r;
     }
 
     static void show(ServerPlayer player, ServerLevel level, List<CableRouter.Step> steps) {

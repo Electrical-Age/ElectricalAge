@@ -108,6 +108,27 @@ public final class CablePart extends VoxelPart {
         return paid >= 0 ? paid : isKnuckle() ? 0 : length();
     }
 
+    /**
+     * Where this piece hangs across the air (Baughn 2026-11-12: air cables sag like a catenary, lying flat where they
+     * reach a surface): per air stretch through it, {axis, a, b, sag}: the stretch runs along axis from a to b
+     * (block-local voxels, may lie outside the block) and dips `sag` tenths of a voxel at its middle. Worked out once
+     * when the route is laid; only drawn (boxes, connections and saves of the line stay as routed). Null: straight.
+     */
+    public int[] sag;
+
+    /** How far (voxels) the drawn cable dips below its routed line at u along axis (block-local), 0 off its stretches. */
+    public double sagAt(int axis, double u) {
+        if (sag == null) return 0;
+        double d = 0;
+        for (int i = 0; i + 3 < sag.length; i += 4) {
+            if (sag[i] != axis || u <= sag[i + 1] || u >= sag[i + 2]) continue;
+            double t = (u - sag[i + 1]) / (sag[i + 2] - sag[i + 1]);
+            // flat at both ends (tangent to the surface it leaves and reaches), deepest in the middle
+            d = Math.max(d, sag[i + 3] / 10.0 * 16 * t * t * (1 - t) * (1 - t));
+        }
+        return d;
+    }
+
     /** Laid by the converter (a knuckle round an outer corner): a revert takes it out. */
     public boolean byConverter;
     /** Saved state (server): voltage and temperature, restored into its conductor. */
@@ -388,6 +409,7 @@ public final class CablePart extends VoxelPart {
         if (burnt != null) tag.putString("burnt", burnt.name());
         if (byConverter) tag.putBoolean("conv", true);
         if (paid >= 0) tag.putInt("paid", paid);
+        if (sag != null) tag.putIntArray("sag", sag);
         tag.putDouble("u", u);
         tag.putDouble("t", t);
     }
@@ -410,6 +432,8 @@ public final class CablePart extends VoxelPart {
         }
         p.byConverter = tag.getBooleanOr("conv", false);
         p.paid = tag.getIntOr("paid", -1);
+        int[] sg = tag.getIntArray("sag").orElse(null);
+        if (sg != null && sg.length >= 4 && sg.length % 4 == 0) p.sag = sg;
         p.u = tag.getDoubleOr("u", 0);
         p.t = tag.getDoubleOr("t", 0);
         return p;
@@ -425,6 +449,8 @@ public final class CablePart extends VoxelPart {
         out.writeByte(face);
         out.writeByte(points.length / 3);
         for (int v : points) out.writeByte(v);
+        out.writeByte(sag == null ? 0 : sag.length / 4);
+        if (sag != null) for (int v : sag) out.writeByte(v);
     }
 
     static CablePart deserialize(java.io.DataInputStream in) throws java.io.IOException {
@@ -436,6 +462,11 @@ public final class CablePart extends VoxelPart {
         int[] pts = new int[3 * n];
         for (int i = 0; i < pts.length; i++) pts[i] = in.readByte();
         CablePart p = new CablePart(tier, spec, face, pts);
+        int ns = in.readByte();
+        if (ns > 0) {
+            p.sag = new int[4 * ns];
+            for (int i = 0; i < p.sag.length; i++) p.sag[i] = in.readByte();
+        }
         if ((b & 0x80) != 0) p.burnt = mods.eln.sim.process.destruct.FailureCause.OVERHEAT;
         return p;
     }

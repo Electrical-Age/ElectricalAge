@@ -106,4 +106,39 @@ public class CableAirTest {
         int exp = Router.LAST_EXPANSIONS.get();
         assertTrue(exp < 30_000, exp + " expansions");
     }
+
+    @Test
+    void aBridgeHangsInACurve() {
+        // the stretch over the gap (x 48..64 at the islands' top) dips 15 % of its span (2.4 voxels) at its middle, flat
+        // at both ends; only the piece over the gap carries it, and its drawn mesh reaches down that far
+        var solid = strip(0, 1, 2, 4, 5, 6);
+        var sp = CableRouterTest.world(solid);
+        var r = route(solid, LV, 1, 5);
+        assertNull(r.error);
+        var st = CablePlacer.airStretches(sp, LV, r.steps);
+        assertEquals(1, st.size(), "one stretch");
+        assertEquals(0, st.get(0)[0]);
+        assertEquals(48, st.get(0)[3]);
+        assertEquals(64, st.get(0)[4]);
+        int sagging = 0;
+        for (CableRouter.Piece p : CableRouter.pieces(r.steps, 2, 1)) {
+            if (p.face() < 0) continue;
+            int[] sag = CablePlacer.sagOf(p, st);
+            if (sag == null) continue;
+            sagging++;
+            assertEquals(3, p.bx(), "the piece over the gap");
+            assertArrayEquals(new int[]{0, 0, 16, 24}, sag);
+            CablePart part = new CablePart(CableRouterTest.LV, p.face(), p.points());
+            part.sag = sag;
+            assertEquals(2.4, part.sagAt(0, 8), 1e-9);
+            assertEquals(0, part.sagAt(0, 0), 1e-9);
+            double[] low = {Double.MAX_VALUE};
+            VoxelGeometry.model(List.of(part), null).emit(f -> {
+                for (int i = 1; i < f.xyz.length; i += 3) low[0] = Math.min(low[0], f.xyz[i]);
+            });
+            assertEquals(-2.4, low[0], 0.05, "the drawn cable's lowest point (its routed bottom is y 0)");
+        }
+        assertEquals(1, sagging);
+    }
 }
+
