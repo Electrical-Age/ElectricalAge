@@ -91,4 +91,19 @@ public class CableAirTest {
         assertNull(r.error);
         assertEquals(0, longestAir(CableRouterTest.world(solid), LV, r.steps), "a wall to climb: no air needed");
     }
+
+    @Test
+    void aBridgeOverOpenGroundStaysCheap() {
+        // the GameTest's islands over a test floor over open ground: the air opens all that ground to the search; air
+        // stretches being straight keeps it to ~15k expansions (bends in the air: 74k, past the click budget)
+        Set<List<Long>> solid = new HashSet<>();
+        for (long x = -6; x < 16; x++) for (long z = -6; z < 9; z++) solid.add(List.of(x, -1L, z));
+        for (long x = 0; x < 10; x++) for (long z = 0; z < 3; z++) solid.add(List.of(x, 0L, z));
+        for (long x = 0; x < 10; x++) if (x != 4) solid.add(List.of(x, 2L, 1L));
+        var r = CableRouter.route(CableRouterTest.world(solid), LV, new CableRouter.End(1 * 16 + 8, 48, 24, 0, -1), List.of(),
+            new CableRouter.End(6 * 16 + 8, 48, 24, 0, -1), 60_000);
+        assertNull(r.error);
+        int exp = Router.LAST_EXPANSIONS.get();
+        assertTrue(exp < 30_000, exp + " expansions");
+    }
 }

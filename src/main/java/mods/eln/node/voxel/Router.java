@@ -63,6 +63,7 @@ public final class Router {
             return true;
         };
         int expansions = 0;
+        try {
         while (!open.isEmpty()) {
             if (++expansions > maxExpansions || System.nanoTime() > deadline) throw new PipeRouter.GaveUp();
             Open<K> o = open.poll();
@@ -72,7 +73,13 @@ public final class Router {
             expander.expand(k, o.g, push);
         }
         return null;
+        } finally {
+            LAST_EXPANSIONS.set(expansions);
+        }
     }
+
+    /** The expansions of this thread's last search (tests and benchmarks). */
+    static final ThreadLocal<Integer> LAST_EXPANSIONS = ThreadLocal.withInitial(() -> 0);
 
     static long h(long[] p, long[] t) {
         return Math.abs(p[0] - t[0]) + Math.abs(p[1] - t[1]) + Math.abs(p[2] - t[2]);
@@ -136,9 +143,26 @@ public final class Router {
         Map<SKey, Boolean> outer = new HashMap<>();
         SKey k0 = new SKey(s[0], s[1], s[2], attach0, lastDir, air[0]);
         boolean leavePort = a.dir() >= 0 && lastDir == a.dir();
+        // with an air allowance: a state reached as cheaply with no more air behind it makes this one pointless (it can do
+        // everything this one can); without that pruning the air states multiplied the search past its budget wherever
+        // the air opened new ground (a gap over a floor: 250 ms for a 5-block bridge)
+        int airSlots = kind.airLimit() / lattice + 1;
+        Map<SKey, long[]> byAir = new HashMap<>();
         SKey goal = search(k0, k -> h(new long[]{k.x(), k.y(), k.z()}, t),
             k -> k.x() == t[0] && k.y() == t[1] && k.z() == t[2] && (b.attach() < 0 || k.attach() == b.attach()) && (arriveDir < 0 || k.dir() == arriveDir),
-            (k, g0, push) -> {
+            (k, g0, push0) -> {
+                Push<SKey> push = airSlots == 1 ? push0 : (kk, nk, g) -> {
+                    long[] best = byAir.computeIfAbsent(new SKey(nk.x(), nk.y(), nk.z(), nk.attach(), nk.dir(), 0), q -> {
+                        long[] fresh = new long[airSlots];
+                        java.util.Arrays.fill(fresh, Long.MAX_VALUE);
+                        return fresh;
+                    });
+                    int i = nk.air() / lattice;
+                    for (int j = 0; j <= i; j++) if (best[j] <= g) return false;
+                    if (!push0.push(kk, nk, g)) return false;
+                    best[i] = g;
+                    return true;
+                };
                 long[] p = {k.x(), k.y(), k.z()};
                 int n = CableRouter.axis(k.attach());
                 // along the face
@@ -146,6 +170,10 @@ public final class Router {
                     if (CableRouter.axis(d) == n) continue;
                     if (k.equals(k0) && leavePort && d != a.dir()) continue;   // (leave a device straight out)
                     if (k.dir() >= 0 && d == CableRouter.reverse(k.dir())) continue;
+                    // in the air a run goes straight on: an air stretch is one straight line from where it leaves a support
+                    // (off an edge, or lifted off a face) to where it lands or ends. Bends and turns in the air made the
+                    // search 10x dearer (a cloud of air states round every edge) for nothing a straight stretch can't do
+                    if (k.air() > 0 && k.dir() >= 0 && d != k.dir()) continue;
                     long[] q = {p[0] + CableRouter.DV[d][0] * lattice, p[1] + CableRouter.DV[d][1] * lattice, p[2] + CableRouter.DV[d][2] * lattice};
                     if (out(q, lo, hi)) continue;
                     // a cable stays inside its block: it crosses a block's edge, never runs along one (it would straddle two)
@@ -179,19 +207,17 @@ public final class Router {
                         if (push.push(k, nk, g0 + kind.bend())) outer.remove(nk);
                         continue;
                     }
-                    // a kind that may leave its support turns up as if a wall stood straight ahead (lifting off a face,
-                    // anywhere on it, or bending in the air); the steps after it are air steps unless a real face is
-                    // there. Only ahead: toward another side the turn would wrap round the support's own edge, which is
-                    // an outer corner (a knuckle), not this
-                    if (airy && e == k.dir()) {
-                        SKey nk = new SKey(p[0], p[1], p[2], e, -1, k.air());
+                    // lifting off: a kind that may leave its support turns up off the face it lies on, anywhere on it, as
+                    // if a wall stood straight ahead; the steps after it are air steps until it lands. Only from a support,
+                    // and only ahead: toward another side the turn would wrap round the support's own edge, which is an
+                    // outer corner (a knuckle), not this
+                    if (airy && e == k.dir() && k.air() == 0) {
+                        SKey nk = new SKey(p[0], p[1], p[2], e, -1, 0);
                         if (push.push(k, nk, g0 + kind.bend())) outer.remove(nk);
                     }
-                    // outer corner: round the support's edge onto its face toward e; in the air (nothing behind) round an
-                    // edge that isn't there, which bends an air run back toward the plane it left
+                    // outer corner: round the support's edge onto its face toward e
                     if (solidBeyond(space, kind, p, k.attach(), e, true)) continue;
-                    boolean behind = solidBeyond(space, kind, p, k.attach(), CableRouter.reverse(e), true);
-                    if (!behind && !(airy && k.air() > 0 && e == k.dir())) continue;
+                    if (!solidBeyond(space, kind, p, k.attach(), CableRouter.reverse(e), true)) continue;
                     if (knuckleBlocked(space, kind, p, k.attach(), e)) continue;
                     SKey nk = new SKey(p[0], p[1], p[2], CableRouter.reverse(e), -1, k.air());
                     if (push.push(k, nk, g0 + kind.bend())) outer.put(nk, true);

@@ -219,6 +219,14 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
 - SURFACE kinds (cables): lattice 2 voxels, states (point, attach face, last dir), moves along a face / inner corner /
   outer corner (knuckle); `BEND` 4, `BLOCK_ENTERED` 1, `MAX_EXPANSIONS` 400000, budget `PipeRouter.TIME_BUDGET_MS`
   (200 ms).
+- Air runs (Baughn 2026-11-11, D5): a SURFACE kind's `airTiers` let it leave its support: cables `RouteKind.CABLE_AIR`,
+  up to 10 voxels off any support at +4 per step and up to 20 at +16, never further (the same for every tier, Baughn
+  2026-11-12). The state gains `air` (voxels since the last support, carried across waypoint legs). An air stretch is
+  one straight line: off an edge, or lifted off a face (a turn as if a wall stood straight ahead, only from a support),
+  to where it lands (a supported step, or an inner corner onto a wall). No bends in the air: they made the search ~10x
+  dearer. A state reached as cheaply with no more air behind it prunes this one. An air piece is an ordinary flat
+  piece whose plane is off any surface; whether it is supported is read live (`CablePlacer.supported`): no device goes
+  on its face (`VoxelNode.placeFace`) and no branch starts on it (`endAt`), so air allowances can't chain.
 - FREE kinds (pipes): lattice 4, `BEND` 6, unsupported steps cost more (`UNSUPPORTED`), off-lattice ports jog onto the
   lattice, waypoints as legs; gives up on the wall-clock budget (Baughn: it runs on the server thread).
 

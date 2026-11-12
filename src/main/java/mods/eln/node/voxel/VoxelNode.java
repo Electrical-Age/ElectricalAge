@@ -1110,9 +1110,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         int el = elementAt(hx, hy, hz, 0);
         if (el >= 0) return sideElementList[el].side;
         // on a cable: the face it lies on (AdventurAgent: a click on the end of a floor cable aimed at the open side
-        // and did nothing)
+        // and did nothing); not a cable crossing the air, whose face is no surface (a device there would hang on nothing)
         int part = partAt(hx, hy, hz);
-        if (part >= 0 && parts.get(part) instanceof CablePart c && !c.isKnuckle())
+        if (part >= 0 && parts.get(part) instanceof CablePart c && !c.isKnuckle()
+            && (coordonate.world() == null || CablePlacer.supported(coordonate.world(), coordonate.pos(), c)))
             return Direction.fromIntMinecraftSide(c.face);
         return Direction.fromIntMinecraftSide(clicked.get3DDataValue()).getInverse();
     }

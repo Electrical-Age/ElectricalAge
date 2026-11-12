@@ -106,6 +106,25 @@ public final class CablePlacer {
     }
 
     /**
+     * Does cable part c in the block at pos lie on a support all along (the voxel layer beyond its face plane under each of
+     * its boxes solid)? Read live, not stored: a cable crossing air (routing phase 2) may be landed on later, or its
+     * support mined out. A knuckle wraps an edge: supported.
+     */
+    public static boolean supported(Level level, BlockPos pos, CablePart c) {
+        if (c.isKnuckle()) return true;
+        RouteView view = RouteView.live(level);
+        int n = CablePart.normalAxis(c.face);
+        long[] o = {pos.getX() * 16L, pos.getY() * 16L, pos.getZ() * 16L};
+        for (int[] b : c.boxes()) {
+            long[] lo = {o[0] + b[0], o[1] + b[1], o[2] + b[2]}, hi = {o[0] + b[3], o[1] + b[4], o[2] + b[5]};
+            if (c.face % 2 == 0) hi[n] = lo[n]--;
+            else lo[n] = hi[n]++;
+            if (!solid(view, lo[0], lo[1], lo[2], hi[0], hi[1], hi[2])) return false;
+        }
+        return true;
+    }
+
+    /**
      * Is every voxel of the box (world voxels) solid enough to lay a cable on: a full solid block, or inside the shape of
      * a decorative block (a stair's step, a slab), real or imitated by a voxel block (Mimic)?
      */
@@ -210,6 +229,9 @@ public final class CablePlacer {
                 List<CablePart> cands = new ArrayList<>();
                 if (tier < 0 || clicked.tier == tier) cands.add(clicked);
                 else for (VoxelPart vp : v.parts) if (vp instanceof CablePart o && !o.isKnuckle() && o.tier == tier) cands.add(o);
+                // not a cable crossing the air: a branch from it would start its own air allowance afresh and could chain
+                // past the 1.2-block limit (Baughn 2026-11-11)
+                cands.removeIf(c -> !supported(level, pos, c));
                 long[] best = null;
                 int bestFace = -1;
                 double bd = Double.MAX_VALUE;
