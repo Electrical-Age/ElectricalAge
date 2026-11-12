@@ -339,6 +339,22 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return true;
     }
 
+    /** What this node put into the simulation and the fluid world (GameTests: none of it may stay after the node goes):
+     *  its conductors' loads and processes, its pipes' fluid nodes, its node connections. */
+    public List<Object> simObjectsForTests() {
+        List<Object> out = new ArrayList<>();
+        for (CableNet.Conductor k : cables.conductors) {
+            if (k.load != null) out.add(k.load);
+            if (k.thermal != null) out.add(k.thermal);
+            out.addAll(k.slow);
+            out.addAll(k.thermalSlow);
+            out.addAll(k.watchdogs);
+        }
+        for (VoxelPart p : parts) if (p instanceof PipePart pp && pp.fluid != null) out.add(pp.fluid);
+        out.addAll(nodeConnectionList);
+        return out;
+    }
+
     /** Is part in a burnt conductor here? */
     boolean burntCable(CablePart part) {
         for (CableNet.Conductor k : cables.conductors) if (k.parts.contains(part)) return k.getBurnt() != null;
