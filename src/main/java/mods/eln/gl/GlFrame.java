@@ -79,7 +79,9 @@ public final class GlFrame {
     /** Record an extra at the current matrix (dropped when compiling a display list or in the discarding frame). */
     public void extra(Object payload) {
         if (discard || rec != null) return;
-        extras.add(new Extra(new Matrix4f(stack[depth]), payload));
+        Matrix4f m = new Matrix4f(stack[depth]);
+        if (split) m.setTranslation(m.m30() + ox, m.m31() + oy, m.m32() + oz);
+        extras.add(new Extra(m, payload));
     }
 
     /** In-world text at the current matrix (1.12 FontRenderer.drawString in a TESR). */
@@ -111,8 +113,38 @@ public final class GlFrame {
         return FRAME;
     }
 
+    /**
+     * Open the frame for a block entity's draw. A pose that only translates (block position minus camera, the usual
+     * case) is kept out of the matrix stack and added to every vertex instead, so the matrices of the draw are the
+     * same from frame to frame while the camera moves: that is what lets {@link Bake} compare them.
+     */
+    public static GlFrame openBlock(Matrix4f pose, Matrix3f normal) {
+        boolean pure = pose.m00() == 1 && pose.m11() == 1 && pose.m22() == 1 && pose.m01() == 0 && pose.m02() == 0
+            && pose.m10() == 0 && pose.m12() == 0 && pose.m20() == 0 && pose.m21() == 0 && pose.m33() == 1;
+        if (!pure) return open(pose, normal);
+        FRAME.reset(null, normal);
+        FRAME.ox = pose.m30();
+        FRAME.oy = pose.m31();
+        FRAME.oz = pose.m32();
+        FRAME.split = true;
+        current = FRAME;
+        return FRAME;
+    }
+
+    /**
+     * Let the chunk mesh stand in for this frame's unchanging display-list geometry (see {@link Bake}); owner is the
+     * block entity. Does nothing unless the frame was opened by {@link #openBlock} with a translating pose.
+     */
+    public void bake(Object owner, long pos, int light) {
+        if (split && Bake.mode != 0) bake = Bake.begin(owner, pos, light);
+    }
+
     /** Close the frame; its batches stay readable until the pool is reset by the next render frame. */
     public static void close() {
+        if (FRAME.bake != null) {
+            FRAME.bake.end();
+            FRAME.bake = null;
+        }
         current = DISCARD;
     }
 
@@ -124,6 +156,7 @@ public final class GlFrame {
     public static void beginRenderFrame() {
         poolUsed = 0;
         BakeStats.frame();
+        Bake.frame(System.nanoTime());
     }
 
     private static Batch acquire() {
@@ -140,6 +173,12 @@ public final class GlFrame {
     }
 
     // ---- state
+    /** The base translation of a frame opened by {@link #openBlock} (0 otherwise): added to every vertex. */
+    private float ox, oy, oz;
+    private boolean split;
+    private Bake.Device bake;
+    /** While set, nothing drawn is left to the chunk mesh (a burnt element: its soot overlay needs the same depth). */
+    public boolean bakePause;
     private final Matrix4f[] stack = new Matrix4f[64];
     private final Matrix3f baseNormal = new Matrix3f();
     private int depth;
@@ -190,6 +229,10 @@ public final class GlFrame {
         ghost = 0;
         droppedVertices = 0;
         rec = null;
+        ox = oy = oz = 0;
+        split = false;
+        bake = null;
+        bakePause = false;
         mode = -1;
         lastKey = null;
         lastBatch = null;
@@ -200,7 +243,33 @@ public final class GlFrame {
     }
 
     // ---- display lists: state calls as ops, primitives as quads in list space
-    private record Prim(float[] quads, int floats, boolean colored, boolean lines) {
+    static final class Prim {
+        final float[] quads;
+        final int floats;
+        final boolean colored, lines;
+        /** Texture coordinates all within [0,1] (so the texture can be a sprite of an atlas): 0 unknown, 1 yes, 2 no. */
+        private byte uv;
+
+        Prim(float[] quads, int floats, boolean colored, boolean lines) {
+            this.quads = quads;
+            this.floats = floats;
+            this.colored = colored;
+            this.lines = lines;
+        }
+
+        boolean uvInUnitSquare() {
+            if (uv == 0) {
+                uv = 1;
+                for (int i = 0; i < floats; i += STRIDE) {
+                    float u = quads[i + 3], v = quads[i + 4];
+                    if (!(u >= -1e-4f && u <= 1.0001f && v >= -1e-4f && v <= 1.0001f)) {
+                        uv = 2;
+                        break;
+                    }
+                }
+            }
+            return uv == 1;
+        }
     }
 
     private static final Map<Integer, List<Object>> LISTS = new HashMap<>();
@@ -582,10 +651,10 @@ public final class GlFrame {
         float col = Float.intBitsToFloat(argb(r, g, b, a));
         for (int i = 0; i + 2 * STRIDE <= floats; i += 2 * STRIDE) {
             float x0 = q[i], y0 = q[i + 1], z0 = q[i + 2], x1 = q[i + STRIDE], y1 = q[i + STRIDE + 1], z1 = q[i + STRIDE + 2];
-            float ax = m.m00() * x0 + m.m10() * y0 + m.m20() * z0 + m.m30(), ay = m.m01() * x0 + m.m11() * y0 + m.m21() * z0 + m.m31(),
-                az = m.m02() * x0 + m.m12() * y0 + m.m22() * z0 + m.m32();
-            float bx = m.m00() * x1 + m.m10() * y1 + m.m20() * z1 + m.m30(), by = m.m01() * x1 + m.m11() * y1 + m.m21() * z1 + m.m31(),
-                bz = m.m02() * x1 + m.m12() * y1 + m.m22() * z1 + m.m32();
+            float ax = m.m00() * x0 + m.m10() * y0 + m.m20() * z0 + m.m30() + ox, ay = m.m01() * x0 + m.m11() * y0 + m.m21() * z0 + m.m31() + oy,
+                az = m.m02() * x0 + m.m12() * y0 + m.m22() * z0 + m.m32() + oz;
+            float bx = m.m00() * x1 + m.m10() * y1 + m.m20() * z1 + m.m30() + ox, by = m.m01() * x1 + m.m11() * y1 + m.m21() * z1 + m.m31() + oy,
+                bz = m.m02() * x1 + m.m12() * y1 + m.m22() * z1 + m.m32() + oz;
             float dx = bx - ax, dy = by - ay, dz = bz - az, len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
             if (len > 0) {
                 dx /= len;
@@ -611,6 +680,11 @@ public final class GlFrame {
 
     private void replay(Prim p) {
         if (discard) return;
+        if (bake != null && !blend && !soot && ghost == 0 && !bakePause
+            && bake.skip(p, stack[depth], p.colored ? 0 : argb(r, g, b, a), texture2d ? texture : null, cull, fullBright, lighting)) {
+            if (BakeStats.ON) BakeStats.add(BakeStats.SKIPPED, p.floats / STRIDE);
+            return;
+        }
         if (BakeStats.ON) {
             Matrix4f m = stack[depth], b0 = stack[0];
             long h = 17;
@@ -646,7 +720,7 @@ public final class GlFrame {
         int o = out.floats;
         Matrix4f m = stack[depth];
         float m00 = m.m00(), m01 = m.m01(), m02 = m.m02(), m10 = m.m10(), m11 = m.m11(), m12 = m.m12(),
-            m20 = m.m20(), m21 = m.m21(), m22 = m.m22(), m30 = m.m30(), m31 = m.m31(), m32 = m.m32();
+            m20 = m.m20(), m21 = m.m21(), m22 = m.m22(), m30 = m.m30() + ox, m31 = m.m31() + oy, m32 = m.m32() + oz;
         boolean flat = !lighting;
         float fx = 0, fy = 1, fz = 0;
         if (flat) {

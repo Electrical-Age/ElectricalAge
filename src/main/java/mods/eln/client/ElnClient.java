@@ -111,6 +111,15 @@ public final class ElnClient {
         if (mods.eln.handbook.Handbook.guideAvailable())
             modBus.addListener(net.neoforged.neoforge.client.event.AddClientReloadListenersEvent.class, HandbookGuide::onAddReloadListeners);
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);
+        mods.eln.gl.Bake.host = mods.eln.client.render.bake.ChunkBake.INSTANCE;
+        modBus.addListener(net.neoforged.neoforge.client.event.RegisterSpriteSourcesEvent.class,
+            e -> e.register(mods.eln.client.render.bake.ModelSprites.ID, mods.eln.client.render.bake.ModelSprites.CODEC));
+        modBus.addListener(net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent.class,
+            e -> mods.eln.client.render.bake.ModelSprites.stitched(e.getAtlas()));
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.AddSectionGeometryEvent.class,
+            mods.eln.client.render.bake.ChunkBake.INSTANCE::onGeometry);
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class,
+            e -> mods.eln.client.render.bake.ChunkBake.INSTANCE.tick());
         // lamp beams (flashlights, the headlamp, the bike lamp), drawn per pixel (LampBeam)
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.FrameGraphSetupEvent.class, LampBeam::frame);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, LampBeam::tick);

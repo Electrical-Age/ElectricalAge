@@ -1,5 +1,6 @@
 {
   "sources": [
-    {"type": "minecraft:directory", "prefix": "blocks/", "source": "blocks"}
+    {"type": "minecraft:directory", "prefix": "blocks/", "source": "blocks"},
+    {"type": "eln:model_textures"}
   ]
 }

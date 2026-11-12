@@ -30,6 +30,12 @@ public final class GlSubmit {
         return GlFrame.open(p.pose(), p.normal());
     }
 
+    /** Open a frame for a block entity's draw (see {@link GlFrame#openBlock}). */
+    public static GlFrame openBlock(PoseStack poseStack) {
+        PoseStack.Pose p = poseStack.last();
+        return GlFrame.openBlock(p.pose(), p.normal());
+    }
+
     /** Submit every batch of the frame (call after GlFrame.close()); light = the block's packed light coords. */
     public static void submit(GlFrame frame, PoseStack poseStack, SubmitNodeCollector collector, int light) {
         // extras last, from a copy: an item drawn by EA's own item renderer (an x-ray scanner in a battery charger)

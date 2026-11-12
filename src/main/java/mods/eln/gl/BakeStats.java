@@ -20,8 +20,8 @@ public final class BakeStats {
     private static final int PERIOD = 600;
 
     /** Vertex categories. */
-    public static final int CONST = 0, MOVING = 1, FIRST = 2, BLEND = 3, UV = 4, IMMEDIATE = 5, OVERLAY = 6, LINES = 7, N = 8;
-    private static final String[] NAMES = {"const", "moving", "first-seen", "blended", "uv-wrap", "immediate", "soot/ghost", "lines"};
+    public static final int CONST = 0, MOVING = 1, FIRST = 2, BLEND = 3, UV = 4, IMMEDIATE = 5, OVERLAY = 6, LINES = 7, SKIPPED = 8, N = 9;
+    private static final String[] NAMES = {"const", "moving", "first-seen", "blended", "uv-wrap", "immediate", "soot/ghost", "lines", "in-chunk"};
 
     private static final class Device {
         long[] hashes = new long[16];
@@ -58,6 +58,7 @@ public final class BakeStats {
             sb.append("\n[eln bake stats]   ").append(rows.get(i).getKey()).append(": total=").append(sum(c) / frames);
             for (int k = 0; k < N; k++) if (c[k] != 0) sb.append(' ').append(NAMES[k]).append('=').append(c[k] / frames);
         }
+        sb.append("\n[eln bake stats]   ").append(Bake.statsLine(frames));
         org.slf4j.LoggerFactory.getLogger("eln").info(sb.toString());
         frames = 0;
         java.util.Arrays.fill(TOTAL, 0);

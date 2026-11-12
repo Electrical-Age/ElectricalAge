@@ -26,6 +26,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
         /** A voxel block's glowing thermal cable boxes (Incandescence). */
         java.util.List<float[]> glow = java.util.List.of();
         int daylight;
+        SixNodeEntity entity;
     }
 
     @Override
@@ -58,13 +59,15 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
                                    ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(be, state, partialTicks, cameraPosition, breakProgress);
         System.arraycopy(be.elementRenderList, 0, state.renders, 0, SixNode.SLOTS);
+        state.entity = be;
         state.glow = be instanceof mods.eln.node.voxel.VoxelNodeEntity v ? v.clientGlow : java.util.List.of();
         state.daylight = state.glow.isEmpty() ? 0 : mods.eln.misc.UtilsClient.hooks.skyLight(be.getLevel(), be.getBlockPos());
     }
 
     @Override
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
-        GlFrame frame = GlSubmit.open(poseStack);
+        GlFrame frame = GlSubmit.openBlock(poseStack);
+        mods.eln.client.render.bake.ChunkBake.attach(frame, state.entity, state.lightCoords);
         if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.device(state.blockPos.asLong(), "six");
         try {
             GL11.glTranslatef(.5f, .5f, .5f);
@@ -73,6 +76,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
                 if (render == null) continue;
                 if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.label(render.getClass().getSimpleName());
                 UtilsClient.glDefaultColor();
+                frame.bakePause = render.burnt;   // (its soot overlay needs the depth of its own draw)
                 GL11.glPushMatrix();
                 GL11.glTranslatef(render.ox / 16f, render.oy / 16f, render.oz / 16f);   // (off centre: a slot past the faces)
                 render.side.glRotateXnRef();
@@ -96,6 +100,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
                     frame.soot = false;
                 }
             }
+            frame.bakePause = false;
             if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.label("cable-glow");
             mods.eln.misc.Incandescence.drawCableGlow(state.glow, state.daylight);
         } catch (RuntimeException e) {
