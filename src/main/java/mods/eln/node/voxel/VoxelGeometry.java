@@ -99,6 +99,18 @@ public final class VoxelGeometry {
                 }
             }
         }
+        // three or more ends of one cable at a point (a branch at a corner of the run): a sleeve too
+        java.util.Map<String, List<CablePart>> cableEnds = new java.util.HashMap<>();
+        for (VoxelPart pa : parts)
+            if (pa instanceof CablePart a && !a.isKnuckle())
+                for (int[] e : a.ends()) cableEnds.computeIfAbsent(a.face + ":" + e[0] + "," + e[1] + "," + e[2], k -> new ArrayList<>()).add(a);
+        for (var en : cableEnds.entrySet()) {
+            List<CablePart> at = en.getValue();
+            if (at.size() < 3 || !at.stream().allMatch(x -> x.sameCable(at.get(0)))) continue;
+            String[] xyz = en.getKey().substring(en.getKey().indexOf(':') + 1).split(",");
+            int[] e = {Integer.parseInt(xyz[0]), Integer.parseInt(xyz[1]), Integer.parseInt(xyz[2])};
+            if (sleeved.add(System.identityHashCode(at.get(0)) + ":" + e[0] + "," + e[1] + "," + e[2])) sleeve(m, at.get(0), e);
+        }
         java.util.Map<Integer, Integer> ends = new java.util.HashMap<>();
         java.util.Map<Integer, Integer> tierAt = new java.util.HashMap<>();
         java.util.Set<Integer> junctions = new java.util.HashSet<>();
@@ -144,7 +156,8 @@ public final class VoxelGeometry {
             lo[n] = Math.max(0, e[n] - h);
             hi[n] = e[n] - 0.05;
         }
-        boxD(m, lo, hi, cableSprite(b.tier)).named("cable splice").rgb(0.72f, 0.55f, 0.25f);
+        // (on the pipes' metal, tinted brass: on the cable's own texture the tint made it as dark as the cable, unseen)
+        boxD(m, lo, hi, PIPE[0]).named("cable splice").rgb(0.95f, 0.75f, 0.35f);
     }
 
     static void draw(Model m, VoxelPart part, List<VoxelPart> parts, float[] lugs, boolean[] adapters, List<int[]> cableBoxes) {

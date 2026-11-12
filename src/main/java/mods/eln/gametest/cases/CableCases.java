@@ -722,6 +722,8 @@ public final class CableCases {
      * conducts.
      */
     static final class JoinedRouteCase implements TestCase {
+        long sleeves;
+        String partsAt = "";
         ResistorElement r;
         String err1, err2, joinAt;
 
@@ -763,12 +765,21 @@ public final class CableCases {
             long[][] j3 = new long[1][];
             var b = mods.eln.node.voxel.CablePlacer.endAtForTests(level, c.at(7, 1, 1), net.minecraft.core.Direction.WEST, hitR, false, j3);
             err2 = s2 == null ? "no start on the cable" : mods.eln.node.voxel.CablePlacer.routeAndLayJoinedForTests(level, LV, s2, j2[0], b, j3[0]);
+            // (routing phase 2: a sleeve is drawn where the branch meets the first cable; Baughn: visible = connected)
+            if (j2[0] != null) {
+                BlockPos jb = new BlockPos((int) Math.floorDiv(j2[0][0], 16), (int) Math.floorDiv(j2[0][1], 16), (int) Math.floorDiv(j2[0][2], 16));
+                if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(jb, level)) instanceof mods.eln.node.voxel.VoxelNode v) {
+                    sleeves = mods.eln.node.voxel.VoxelGeometry.model(v.parts, null).solids.stream().filter(sd -> "cable splice".equals(sd.name)).count();
+                    for (var part : v.parts) if (part instanceof CablePart cp) partsAt += java.util.Arrays.toString(cp.points) + " f" + cp.face + " ";
+                }
+            }
         }
 
         public void measure(TestContext c) {
             c.check("joined route: the first cable laid", err1 == null, String.valueOf(err1));
             c.check("joined route: the second starts on it (a join)", !"no join".equals(joinAt), joinAt);
             c.check("joined route: the second laid", err2 == null, String.valueOf(err2));
+            c.check("joined route: a sleeve shows where it joins", sleeves == 1, sleeves + " sleeves; pieces there: " + partsAt);
             double i = current(r);
             c.check("joined route: the circuit conducts through the join", Math.abs(i) > 1, String.format("%.4f A", i));
         }

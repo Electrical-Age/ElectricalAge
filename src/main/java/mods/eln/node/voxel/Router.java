@@ -111,7 +111,7 @@ public final class Router {
                 List<CableRouter.Step> p = surfaceLeg(space, kind, a, attach, lastDir, air, b, arrive, deadline);
                 if (p == null) {
                     // (with an air allowance, say how far it reaches: AdventurAgent read "no way" at a 3-block gap as a fault)
-                    String why = kind.airLimit() > 0 ? String.format("no way along faces or across gaps of up to %.1f blocks", kind.airLimit() / 16.0)
+                    String why = kind.airLimit() > 0 ? "no way along faces or across gaps of up to " + blocks(kind.airLimit()) + " blocks"
                         : "no way along faces";
                     return new CableRouter.Result(null, stops.size() == 2 ? why : why + " on leg " + (leg + 1));
                 }
@@ -124,10 +124,15 @@ public final class Router {
             }
         } catch (PipeRouter.GaveUp e) {
             return new CableRouter.Result(null, kind.airLimit() > 0
-                ? String.format("gave up: too far, too tangled, or across a gap wider than %.1f blocks (try waypoints)", kind.airLimit() / 16.0)
+                ? "gave up: too far, too tangled, or across a gap wider than " + blocks(kind.airLimit()) + " blocks (try waypoints)"
                 : "gave up: too far or too tangled to find a way (try waypoints)");
         }
         return new CableRouter.Result(CableRouter.simplify(out), null);
+    }
+
+    /** Voxels as blocks for a message, without rounding 20 voxels up to "1.3" (AdventurAgent): 1.25. */
+    static String blocks(int voxels) {
+        return java.math.BigDecimal.valueOf(voxels / 16.0).stripTrailingZeros().toPlainString();
     }
 
     /** A surface search state: the point, the face it lies against, the last move (-1 just after a corner), and the

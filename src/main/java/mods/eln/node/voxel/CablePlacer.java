@@ -235,9 +235,11 @@ public final class CablePlacer {
                 long[] best = null;
                 int bestFace = -1;
                 double bd = Double.MAX_VALUE;
+                // (inside the block, never on its faces: a branch from a point on a face looked, from either block, like
+                // a plain corner, and got no sleeve; AdventurAgent)
                 for (CablePart c : cands)
-                for (int a = 0; a <= 16; a += 2)
-                    for (int b = 0; b <= 16; b += 2) {
+                for (int a = 2; a <= 14; a += 2)
+                    for (int b = 2; b <= 14; b += 2) {
                         int[] q = new int[3];
                         int nx = CablePart.normalAxis(c.face);
                         int[] o = VoxelGeometry.others(nx);
