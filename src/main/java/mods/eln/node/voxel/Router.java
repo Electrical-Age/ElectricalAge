@@ -109,7 +109,12 @@ public final class Router {
                 int attach = out.isEmpty() ? a.attach() : out.get(out.size() - 1).attach();
                 int arrive = leg + 2 == stops.size() ? b.dir() : -1;
                 List<CableRouter.Step> p = surfaceLeg(space, kind, a, attach, lastDir, air, b, arrive, deadline);
-                if (p == null) return new CableRouter.Result(null, stops.size() == 2 ? "no way along faces" : "no way along faces on leg " + (leg + 1));
+                if (p == null) {
+                    // (with an air allowance, say how far it reaches: AdventurAgent read "no way" at a 3-block gap as a fault)
+                    String why = kind.airLimit() > 0 ? String.format("no way along faces or across gaps of up to %.1f blocks", kind.airLimit() / 16.0)
+                        : "no way along faces";
+                    return new CableRouter.Result(null, stops.size() == 2 ? why : why + " on leg " + (leg + 1));
+                }
                 if (!out.isEmpty()) p.remove(0);
                 out.addAll(p);
                 if (out.size() >= 2) {
@@ -118,7 +123,9 @@ public final class Router {
                 }
             }
         } catch (PipeRouter.GaveUp e) {
-            return new CableRouter.Result(null, "gave up: too far or too tangled to find a way (try waypoints)");
+            return new CableRouter.Result(null, kind.airLimit() > 0
+                ? String.format("gave up: too far, too tangled, or across a gap wider than %.1f blocks (try waypoints)", kind.airLimit() / 16.0)
+                : "gave up: too far or too tangled to find a way (try waypoints)");
         }
         return new CableRouter.Result(CableRouter.simplify(out), null);
     }

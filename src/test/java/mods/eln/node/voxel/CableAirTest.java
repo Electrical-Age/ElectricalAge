@@ -150,4 +150,21 @@ public class CableAirTest {
         }
         assertEquals(1, hanging);
     }
+
+    @Test
+    void reachesADeviceFaceInTheAir() {
+        // a wall (x 0..16), and a device block a block away (x 32..48) hanging in the air at y 16..32; its connector on the
+        // west face's bottom edge: the cable comes down the wall, lifts off and crosses straight to it, arriving on the
+        // edge's face (attach down) moving east, as a cable on a floor there would (EA's edge rule, VoxelNode.legacy)
+        Set<List<Long>> solid = new HashSet<>();
+        for (long y = 0; y < 3; y++) solid.add(List.of(0L, y, 0L));
+        solid.add(List.of(2L, 1L, 0L));
+        var r = CableRouter.route(CableRouterTest.world(solid), LV, new CableRouter.End(16, 40, 8, 4, -1), List.of(),
+            new CableRouter.End(32, 16, 8, 0, 5), 10_000);
+        assertNull(r.error);
+        CableRouter.Step last = r.steps.get(r.steps.size() - 1);
+        assertEquals(0, last.attach(), "arrives on the edge's face: " + r.steps);
+        assertTrue(longestAir(CableRouterTest.world(solid), LV, r.steps) > 0, "through the air: " + r.steps);
+    }
 }
+

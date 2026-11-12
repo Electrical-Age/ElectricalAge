@@ -24,6 +24,7 @@ public final class CableAirCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new BridgeCase());
+        cases.add(new DeviceInAirCase());
     }
 
     static VoxelNode voxel(TestContext c, BlockPos p) {
@@ -99,4 +100,77 @@ public final class CableAirCases {
             c.check(name() + ": a device clicked onto it doesn't go on the cable's (air) face", !"YN".equals(place), place);
         }
     }
+
+    /**
+     * A machine on a pillar a block from a wall (a capacitor bank), its side face over the air: the kit routes from a source on the wall's
+     * top down the wall and straight across the air to the edge of the bank's side face, arriving as a cable on a floor
+     * there would (EA's edge rule), and the bank charges through it.
+     */
+    static final class DeviceInAirCase implements TestCase {
+        mods.eln.transparentnode.capacitorbank.CapacitorBankElement bank;
+        String err, ends = "";
+
+        public String name() {
+            return "cable reaches a machine in the air";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        public int floorDepth() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 100;
+        }
+
+        public void build(TestContext c) {
+            BlockPos at = c.at(4, 3, 3);
+            c.floor(at.below());   // (it needs a block to stand on; the cable's block beside it has none)
+            bank = (mods.eln.transparentnode.capacitorbank.CapacitorBankElement) c.placeTransparent(CapacitorBankCases.BANK, at);
+            Direction l = bank.front.left(), r = bank.front.right();
+            c.floor(Wp10aCases.off(at, r).below());
+            c.placeSix(GROUND, Wp10aCases.off(at, r));
+            BlockPos wall = Wp10aCases.off(Wp10aCases.off(at, l), l);
+            for (int y = 1; y <= 3; y++) c.floor(wall.atY(c.at(0, y, 0).getY()));
+            BlockPos top = wall.atY(c.at(0, 4, 0).getY());
+            var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) c.placeSix(SOURCE, top);
+            src.networkUnserialize(c.stream(o -> {
+                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                o.writeFloat(20);
+            }));
+            net.minecraft.core.Direction toBank = r.toEnumFacing(), bankFace = l.toEnumFacing();
+            Vec3 hitS = Vec3.atCenterOf(top).add(toBank.getStepX() * 0.5, -0.45, toBank.getStepZ() * 0.5);
+            Vec3 hitB = Vec3.atCenterOf(at).add(bankFace.getStepX() * 0.5, -0.45, bankFace.getStepZ() * 0.5);
+            long[][] j = new long[1][];
+            int hv = CablePart.tierOf("High Voltage Cable");
+            var a = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), top, toBank, hitS, true, j, hv);
+            var b = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), at, bankFace, hitB, false, j, hv);
+            ends = a + " -> " + b;
+            err = a == null || b == null ? "no end" : mods.eln.node.voxel.CablePlacer.routeAndLayForTests(c.level(), hv, a, b);
+            if (voxel(c, Wp10aCases.off(at, l)) instanceof VoxelNode v)
+                for (var part : v.parts)
+                    if (part instanceof CablePart cp && !mods.eln.node.voxel.CablePlacer.supported(c.level(), v.coordonate.pos(), cp)) inAir++;
+        }
+
+        int inAir;
+
+        public void measure(TestContext c) {
+            c.check(name() + ": laid", err == null, err + " (" + ends + ")");
+            c.check(name() + ": across the air in front of the bank", inAir > 0, inAir + " unsupported pieces there");
+            double u = bank.voltage();
+            c.check(name() + ": the bank charges through it", u > 1, String.format("%.2f V", u));
+        }
+    }
 }
+
