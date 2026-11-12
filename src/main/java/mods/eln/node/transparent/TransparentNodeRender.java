@@ -37,6 +37,7 @@ public class TransparentNodeRender implements BlockEntityRenderer<TransparentNod
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
         if (state.render == null) return;
         GlFrame frame = GlSubmit.open(poseStack);
+        if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.device(state.blockPos.asLong(), state.render.getClass().getSimpleName());
         try {
             GL11.glTranslatef(.5f, .5f, .5f);
             UtilsClient.glDefaultColor();
@@ -52,6 +53,7 @@ public class TransparentNodeRender implements BlockEntityRenderer<TransparentNod
         } catch (RuntimeException e) {
             ElnRenderErrors.report("transparent-node", e);
         } finally {
+            mods.eln.gl.BakeStats.endDevice();
             GlFrame.close();
         }
         GlSubmit.submit(frame, poseStack, collector, state.lightCoords);

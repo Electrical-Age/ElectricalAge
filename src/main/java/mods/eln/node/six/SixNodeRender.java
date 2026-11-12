@@ -65,11 +65,13 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
     @Override
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
         GlFrame frame = GlSubmit.open(poseStack);
+        if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.device(state.blockPos.asLong(), "six");
         try {
             GL11.glTranslatef(.5f, .5f, .5f);
             for (int idx = 0; idx < SixNode.SLOTS; idx++) {
                 SixNodeElementRender render = state.renders[idx];
                 if (render == null) continue;
+                if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.label(render.getClass().getSimpleName());
                 UtilsClient.glDefaultColor();
                 GL11.glPushMatrix();
                 GL11.glTranslatef(render.ox / 16f, render.oy / 16f, render.oz / 16f);   // (off centre: a slot past the faces)
@@ -94,10 +96,12 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
                     frame.soot = false;
                 }
             }
+            if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.label("cable-glow");
             mods.eln.misc.Incandescence.drawCableGlow(state.glow, state.daylight);
         } catch (RuntimeException e) {
             ElnRenderErrors.report("six-node", e);
         } finally {
+            mods.eln.gl.BakeStats.endDevice();
             GlFrame.close();
         }
         GlSubmit.submit(frame, poseStack, collector, state.lightCoords);

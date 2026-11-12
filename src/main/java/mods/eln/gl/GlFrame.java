@@ -123,6 +123,7 @@ public final class GlFrame {
     /** A new render frame: every batch handed out before has been drawn. */
     public static void beginRenderFrame() {
         poolUsed = 0;
+        BakeStats.frame();
     }
 
     private static Batch acquire() {
@@ -250,8 +251,10 @@ public final class GlFrame {
         if (ops == null) return;
         for (Object op : ops) {
             if (op instanceof Prim p) {
-                if (p.lines) emitLines(p.quads, p.floats, p.colored);
-                else replay(p);
+                if (p.lines) {
+                    if (BakeStats.ON) BakeStats.add(BakeStats.LINES, p.floats / STRIDE);
+                    emitLines(p.quads, p.floats, p.colored);
+                } else replay(p);
             }
             else ((Consumer<GlFrame>) op).accept(this);
         }
@@ -483,7 +486,10 @@ public final class GlFrame {
             toLines(m, n);
             if (quadFloats == 0) return;
             if (rec != null) rec.add(new Prim(Arrays.copyOf(quadBuf, quadFloats), quadFloats, ccolored, true));
-            else if (!discard) emitLines(quadBuf, quadFloats, true);
+            else if (!discard) {
+                if (BakeStats.ON) BakeStats.add(BakeStats.LINES, quadFloats / STRIDE);
+                emitLines(quadBuf, quadFloats, true);
+            }
             return;
         }
         float[] quads = toQuads(m, n);
@@ -497,6 +503,7 @@ public final class GlFrame {
             return;
         }
         if (discard) return;
+        if (BakeStats.ON) BakeStats.add(BakeStats.IMMEDIATE, qf / STRIDE);
         emit(quads, qf, true);
     }
 
@@ -604,6 +611,26 @@ public final class GlFrame {
 
     private void replay(Prim p) {
         if (discard) return;
+        if (BakeStats.ON) {
+            Matrix4f m = stack[depth], b0 = stack[0];
+            long h = 17;
+            h = h * 31 + Math.round((m.m30() - b0.m30()) * 1024f);
+            h = h * 31 + Math.round((m.m31() - b0.m31()) * 1024f);
+            h = h * 31 + Math.round((m.m32() - b0.m32()) * 1024f);
+            h = h * 31 + Math.round(m.m00() * 4096f);
+            h = h * 31 + Math.round(m.m01() * 4096f);
+            h = h * 31 + Math.round(m.m02() * 4096f);
+            h = h * 31 + Math.round(m.m10() * 4096f);
+            h = h * 31 + Math.round(m.m11() * 4096f);
+            h = h * 31 + Math.round(m.m12() * 4096f);
+            h = h * 31 + Math.round(m.m20() * 4096f);
+            h = h * 31 + Math.round(m.m21() * 4096f);
+            h = h * 31 + Math.round(m.m22() * 4096f);
+            if (!p.colored) h = h * 31 + argb(r, g, b, a);
+            h = h * 31 + (texture2d && texture != null ? texture.hashCode() : 0);
+            h = h * 31 + (cull ? 1 : 0) + (fullBright ? 2 : 0) + (lighting ? 4 : 0);
+            BakeStats.list(p.quads, p.floats, p.floats / STRIDE, h, blend, soot || ghost != 0);
+        }
         emit(p.quads, p.floats, p.colored);
     }
 
