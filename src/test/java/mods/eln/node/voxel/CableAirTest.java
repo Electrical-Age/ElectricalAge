@@ -132,16 +132,22 @@ public class CableAirTest {
         var sp = CableRouterTest.world(solid);
         var r = route(solid, LV, 1, 5);
         assertNull(r.error);
+        CableHang.laid(sp, LV, r.steps);   // (warm)
         long t0 = System.nanoTime();
         var hung = CableHang.laid(sp, LV, r.steps);
         long us = (System.nanoTime() - t0) / 1000;
         assertEquals(1, hung.hangs().size(), "one span");
         var h = hung.hangs().get(0);
         double low = lowest(hung.hangs());
-        System.out.println("CableHang bridge: hangs " + (-low) + " voxels, " + us + " us, y at the edge+1 " + yAtX(h, 49) + ", +2 " + yAtX(h, 50));
-        assertTrue(low < -1.0 && low > -4, "the middle hangs " + (-low) + " voxels");
+        StringBuilder ys = new StringBuilder();
+        for (int x = 40; x <= 72; x += 2) ys.append(String.format(" %d:%.2f", x, yAtX(h, x)));
+        System.out.println("CableHang bridge: hangs " + (-low) + " voxels, " + us + " us;" + ys);
+        assertTrue(low < -0.7 && low > -4, "the middle hangs " + (-low) + " voxels");
         assertTrue(yAtX(h, 49) < -0.02, "already below the line a voxel past the edge: " + yAtX(h, 49));
-        assertTrue(yAtX(h, 49) > -1.0, "but only a little (it leaves the edge along the floor): " + yAtX(h, 49));
+        // deeper and deeper from each edge to the middle (no lift, no kink near the edges)
+        for (double x = 48; x < 56; x += 1) assertTrue(yAtX(h, x + 1) <= yAtX(h, x) + 0.02, "steadily deeper from the west edge at " + x + ":" + ys);
+        for (double x = 64; x > 56; x -= 1) assertTrue(yAtX(h, x - 1) <= yAtX(h, x) + 0.02, "steadily deeper from the east edge at " + x + ":" + ys);
+        assertTrue(us < 20_000, "warm, " + us + " us");
         for (int i = 0; i < h.pts().size(); i++)
             assertFalse(CableHang.blocked(sp, h.pts().get(i), h.nrm().get(i)), "a node inside a block: " + java.util.Arrays.toString(h.pts().get(i)));
         int drawn = 0;
@@ -185,8 +191,16 @@ public class CableAirTest {
             double off = Math.min(Math.abs(q[0] - 16) + Math.max(0, -q[1]), Math.abs(q[1]) + Math.max(0, 16 - q[0]));
             most = Math.max(most, off);
         }
-        System.out.println("CableHang drop: off the routed corner by up to " + most + " voxels; steps " + r.steps);
-        assertTrue(most > 1.0, "the corner is eased, not a right angle: " + most);
+        // where it is at half the drop's height (y 8): a slant out toward the run (x > 16) or a bow back under the pillar
+        double xMid = Double.NaN;
+        for (int i = 1; i < h.pts().size(); i++) {
+            double[] p0 = h.pts().get(i - 1), p1 = h.pts().get(i);
+            if ((p0[1] - 8) * (p1[1] - 8) <= 0 && p0[1] != p1[1]) xMid = p0[0] + (p1[0] - p0[0]) * (8 - p0[1]) / (p1[1] - p0[1]);
+        }
+        System.out.println("CableHang drop: off the routed corner by up to " + most + " voxels; at y 8 x " + xMid + "; from " + h.from() + " to " + h.to()
+            + "; steps " + r.steps);
+        assertTrue(most > 2.0, "the corner is eased, not a right angle: " + most);
+        assertTrue(xMid > 17, "it slants out toward the floor run, not straight down: x " + xMid + " at y 8");
         // (deterministic: the same again)
         var again = CableHang.laid(sp, LV, r.steps).hangs().get(0);
         for (int i = 0; i < h.pts().size(); i++) assertArrayEquals(h.pts().get(i), again.pts().get(i), 1e-12);

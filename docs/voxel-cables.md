@@ -229,13 +229,16 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   on its face (`VoxelNode.placeFace`) and no branch starts on it (`endAt`), so air allowances can't chain.
 - How air cables hang (Baughn 2026-11-12: energy minimisation once at placement; route, preview and hitbox stay as
   routed): `CableHang` finds the free spans (from where the cable leaves a support to where it lands, round corners: a
-  drop past an air block onto a floor is one span), and for each tries peeling 0, 2 or 4 voxels off each surface;
-  each try is a chain of ~1-voxel links (3 % longer than the route), two glued nodes at each end on the route, relaxed
-  by projected gradient descent on gravity + bending + stretch (a node never enters a blocked voxel); the lowest
-  energy plus a cost per voxel peeled wins. Each piece stores its share (`CablePart.hang2`: the arc range of its own
-  polyline the curve replaces, the curve's points and normals; NBT `hang2`, its own stream slot after the old `hang`
-  slot). `VoxelGeometry.cable` draws the boxes outside those ranges and `sweep` carries the cross-section along the
-  curve with a turning frame. Cables laid by the 11-12 jar keep their `hang` (drawn through the same path).
+  drop past an air block onto a floor is one span) and searches, for each, where it leaves the surface before (peeling
+  back up to 8 voxels), where it lands after, and a curve between: a Hermite curve along the surfaces' directions there,
+  lowered by a smooth bump. Score over the same stretch of route for every candidate: gravity per voxel of length,
+  bending (turn squared per voxel), tension per voxel of length (so a short slant wins over a vertical drop and a
+  right angle; length may exceed the route's by 5 %, so a straight bridge can sag), and a cost per voxel peeled;
+  candidates whose cable would touch a blocked voxel are out (none fits: drawn as routed). Coarse grid, then a local
+  search; ~5-10 ms a span. Each piece stores its share (`CablePart.hang2`: the arc range of its own polyline the curve
+  replaces, the curve's points, normals and tangents; NBT `hang2`, its own stream slot after the old `hang` slot).
+  `VoxelGeometry.cable` draws the boxes outside those ranges and `sweep` carries the cross-section along the curve with
+  a turning frame. Cables laid by the 11-12 jar keep their `hang` (drawn through the same path).
 - FREE kinds (pipes): lattice 4, `BEND` 6, unsupported steps cost more (`UNSUPPORTED`), off-lattice ports jog onto the
   lattice, waypoints as legs; gives up on the wall-clock budget (Baughn: it runs on the server thread).
 

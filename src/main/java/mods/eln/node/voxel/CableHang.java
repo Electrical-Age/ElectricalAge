@@ -17,15 +17,15 @@ public final class CableHang {
     private CableHang() {
     }
 
-    /** How much longer than the route the chain is. */
-    static final double SLACK = 0.03;
-
-    /** Energy weights: per node per voxel of height, per unit of bend (|p[i-1] - 2 p[i] + p[i+1]|^2), per unit of stretch
-     *  ((|link| - rest)^2), per voxel peeled off a surface; the descent's step and its limit. */
-    static final double E_GRAVITY = 0.2, E_BEND = 3.0, E_STRETCH = 10, E_PEEL = 0.2, ETA = 0.015;
-    static final int MAX_STEPS = 4000;
-    /** Peel lengths tried at each end (voxels, on the cable lattice). */
-    static final int[] PEELS = {0, 2, 4};
+    /** Energy weights: per voxel of length per voxel of height, per turn squared per voxel, per voxel of length, per
+     *  voxel peeled off a surface. */
+    static double E_GRAVITY = 0.2, E_BEND = 3.0, E_TENSION = 1.0, E_PEEL = 0.3;
+    /** How far it may peel off each surface (voxels, in steps of 2); the handle lengths (shares of the chord) and sags
+     *  (voxels) of the coarse grid. */
+    static double MAX_PEEL = 8;
+    /** How much longer than the route it replaces a curve may be (the kit's give: a straight bridge can sag). */
+    static final double SLACK = 0.05;
+    static double[] HANDLES = {0.25, 0.5, 0.8, 1.2}, SAGS = {0, 1, 2, 3, 4};
 
     /** The route as a dense polyline: points on the lattice (corners repeated), the normal away from the support at
      *  each point, arc length, and per segment whether it lies on a support. */
@@ -131,115 +131,145 @@ public final class CableHang {
         return out;
     }
 
-    /** Every span of the route, hung (the lowest-energy of the peel lengths tried at its two ends). */
+    /** Every span of the route, hung: the lowest-energy curve found for it (none where nothing fits: drawn as routed). */
     public static List<Hang> hangs(CableRouter.Space space, RouteKind kind, List<CableRouter.Step> steps) {
         Route r = route(space, kind, steps);
         List<double[]> sp = spans(r);
         List<Hang> out = new ArrayList<>();
+        java.util.Map<Long, Boolean> seen = new java.util.HashMap<>();
         for (int k = 0; k < sp.size(); k++) {
             double lo = k == 0 ? 0 : sp.get(k - 1)[1], hi = k + 1 < sp.size() ? sp.get(k + 1)[0] : r.length();
-            Hang best = null;
-            double bestE = Double.MAX_VALUE;
-            for (int pa : PEELS)
-                for (int pb : PEELS) {
-                    double from = sp.get(k)[0] - pa, to = sp.get(k)[1] + pb;
-                    if (from - 1 < lo - 1e-9 && pa > 0 || to + 1 > hi + 1e-9 && pb > 0) continue;   // (not into the next span)
-                    double[] e = new double[1];
-                    Hang h = solve(space, r, from, to, e);
-                    double energy = e[0] + E_PEEL * (pa + pb);
-                    if (energy < bestE) {
-                        bestE = energy;
-                        best = h;
-                    }
-                }
-            if (best != null) out.add(best);
+            Hang h = solve(space, seen, r, sp.get(k)[0], sp.get(k)[1], lo, hi, kind.height());
+            if (h != null) out.add(h);
         }
         return out;
     }
 
-    /** The chain over route arc [from, to], relaxed; energy[0] = its energy over the route's (gravity, bending,
-     *  stretch). One glued node before and after (on the route) give it the surface's direction where it leaves and
-     *  lands. Projected gradient descent on that energy: a node that would enter a blocked voxel stays put. */
-    static Hang solve(CableRouter.Space space, Route r, double from, double to, double[] energy) {
-        double a = Math.max(0, from - 1), b = Math.min(r.length(), to + 1);
-        double span = b - a;
-        int n = (int) Math.max(4, Math.round(span));
-        double[][] x = new double[n + 1][], nr = new double[n + 1][];
-        for (int i = 0; i <= n; i++) {
-            double t = a + span * i / n;
-            x[i] = r.at(t);
-            nr[i] = r.normal(t);
-        }
-        double[] rest = new double[n];
-        for (int i = 0; i < n; i++) rest[i] = span / n * (1 + SLACK);
-        boolean[] free = new boolean[n + 1];
-        for (int i = 2; i <= n - 2; i++) free[i] = true;
-        java.util.Map<Long, Boolean> seen = new java.util.HashMap<>();
-        double e0 = energy(x, rest, free);
-        double[][] g = new double[n + 1][3];
-        for (int step = 0; step < MAX_STEPS; step++) {
-            gradient(x, rest, free, g);
-            double moved = 0;
-            for (int i = 0; i <= n; i++) {
-                if (!free[i]) continue;
-                double[] np = {x[i][0] - ETA * g[i][0], x[i][1] - ETA * g[i][1], x[i][2] - ETA * g[i][2]};
-                if (blockedAt(space, seen, np, nr[i])) continue;
-                moved = Math.max(moved, dist(np, x[i]));
-                x[i] = np;
+    /**
+     * The span [a, b] of the route hung (lo, hi: how far it may peel back). The unknowns are where it leaves the surface
+     * before it (a - pa), where it lands after (b + pb), and the curve between: a Hermite curve along the surfaces'
+     * directions there (handle lengths ha, hb) lowered by a smooth bump (depth sag) that keeps the ends and their
+     * directions. Every candidate is scored over the same stretch of route, [a - maxPeel, b + maxPeel], the peeled part
+     * by the curve and the rest as routed: gravity (height per voxel of length), bending (turn squared per voxel),
+     * tension (per voxel of length: so a shorter slant can win; the routed length plus SLACK is only an upper limit) and a cost
+     * per voxel peeled (Baughn: strain on the attachment). A candidate whose cable would touch a blocked voxel is out.
+     * A coarse grid, then a local search round the best. Null when nothing fits.
+     */
+    static Hang solve(CableRouter.Space space, java.util.Map<Long, Boolean> seen, Route r, double a, double b, double lo, double hi, double height) {
+        double maxA = Math.min(MAX_PEEL, a - lo), maxB = Math.min(MAX_PEEL, hi - b);
+        double from0 = a - Math.max(0, maxA), to0 = b + Math.max(0, maxB);
+        double best = Double.MAX_VALUE;
+        double[] bestP = null;
+        for (double pa = 0; pa <= maxA + 1e-9; pa += 2)
+            for (double pb = 0; pb <= maxB + 1e-9; pb += 2) {
+                double chord = dist(r.at(a - pa), r.at(b + pb));
+                for (double ha : HANDLES)
+                    for (double hb : HANDLES)
+                        for (double sag : SAGS) {
+                            double e = score(space, seen, r, a - pa, b + pb, ha * chord, hb * chord, sag, from0, to0, height);
+                            if (e + E_PEEL * (pa + pb) < best) {
+                                best = e + E_PEEL * (pa + pb);
+                                bestP = new double[]{pa, pb, ha * chord, hb * chord, sag};
+                            }
+                        }
             }
-            if (moved < 1e-5) break;
+        if (bestP == null) return null;
+        // refine the curve's three shape numbers round the best (the peels stay)
+        double[] step = {0, 0, Math.max(0.5, bestP[2] / 4), Math.max(0.5, bestP[3] / 4), 0.5};
+        for (int round = 0; round < 24; round++) {
+            boolean better = false;
+            for (int q = 2; q < 5; q++)
+                for (int sign = -1; sign <= 1; sign += 2) {
+                    double[] t = bestP.clone();
+                    t[q] = Math.max(q == 4 ? 0 : 0.1, t[q] + sign * step[q]);
+                    double e = score(space, seen, r, a - t[0], b + t[1], t[2], t[3], t[4], from0, to0, height) + E_PEEL * (t[0] + t[1]);
+                    if (e < best - 1e-9) {
+                        best = e;
+                        bestP = t;
+                        better = true;
+                    }
+                }
+            if (!better) for (int q = 2; q < 5; q++) step[q] /= 2;
         }
-        energy[0] = energy(x, rest, free) - e0;
-        List<double[]> pts = new ArrayList<>(), nrm = new ArrayList<>();
-        for (int i = 0; i <= n; i++) {
-            pts.add(x[i]);
-            nrm.add(nr[i]);
-        }
-        return new Hang(a, b, pts, smooth(nrm));
+        double from = a - bestP[0], to = b + bestP[1];
+        List<double[]> pts = curve(r, from, to, bestP[2], bestP[3], bestP[4]);
+        List<double[]> nrm = new ArrayList<>();
+        int n = pts.size() - 1;
+        for (int i = 0; i <= n; i++) nrm.add(r.normal(from + (to - from) * i / n));
+        return new Hang(from, to, pts, smooth(nrm));
     }
 
-    /** Gravity (per free node, its height), bending (|p[i-1] - 2 p[i] + p[i+1]|^2) and stretch ((|d| - rest)^2). */
-    static double energy(double[][] x, double[] rest, boolean[] free) {
-        double e = 0;
-        int n = x.length - 1;
-        for (int i = 0; i <= n; i++) if (free[i]) e += E_GRAVITY * x[i][1];
-        for (int i = 1; i < n; i++) {
-            double bx = x[i - 1][0] - 2 * x[i][0] + x[i + 1][0], by = x[i - 1][1] - 2 * x[i][1] + x[i + 1][1], bz = x[i - 1][2] - 2 * x[i][2] + x[i + 1][2];
-            e += E_BEND * (bx * bx + by * by + bz * bz);
+    /** Points along the curve from route arc from to to (~1 voxel apart): Hermite along the route's directions there
+     *  (handles ha, hb), lowered by sag at its middle (16 u^2 (1-u)^2: ends and their directions kept). */
+    static List<double[]> curve(Route r, double from, double to, double ha, double hb, double sag) {
+        double[] p0 = r.at(from), p1 = r.at(to);
+        double[] t0 = unit(sub(r.at(Math.min(r.length(), from + 0.5)), r.at(Math.max(0, from - 0.5))));
+        double[] t1 = unit(sub(r.at(Math.min(r.length(), to + 0.5)), r.at(Math.max(0, to - 0.5))));
+        int n = (int) Math.max(4, Math.ceil(dist(p0, p1) + (ha + hb) / 3));
+        List<double[]> out = new ArrayList<>();
+        for (int i = 0; i <= n; i++) {
+            double u = (double) i / n, u2 = u * u, u3 = u2 * u;
+            double h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+            double[] q = new double[3];
+            for (int c = 0; c < 3; c++) q[c] = h00 * p0[c] + h10 * ha * t0[c] + h01 * p1[c] + h11 * hb * t1[c];
+            q[1] -= sag * 16 * u2 * (1 - u) * (1 - u);
+            out.add(q);
         }
+        return out;
+    }
+
+    /** The energy of a candidate over route arc [from0, to0] (see solve), or MAX_VALUE if it touches a blocked voxel or
+     *  is longer than the route it replaces. */
+    static double score(CableRouter.Space space, java.util.Map<Long, Boolean> seen, Route r, double from, double to, double ha, double hb, double sag,
+                        double from0, double to0, double height) {
+        List<double[]> c = curve(r, from, to, ha, hb, sag);
+        int n = c.size() - 1;
+        double len = 0;
+        for (int i = 1; i <= n; i++) len += dist(c.get(i - 1), c.get(i));
+        if (len > (to - from) * (1 + SLACK) + 1e-6) return Double.MAX_VALUE;   // (a little more than the route laid)
+        double e = 0;
+        for (int i = 1; i <= n; i++) {
+            double[] p = c.get(i - 1), q = c.get(i);
+            double ds = dist(p, q);
+            e += (E_GRAVITY * (p[1] + q[1]) / 2 + E_TENSION) * ds;
+        }
+        for (int i = 1; i < n; i++) {
+            double[] d0 = unit(sub(c.get(i), c.get(i - 1))), d1 = unit(sub(c.get(i + 1), c.get(i)));
+            double cos = Math.max(-1, Math.min(1, d0[0] * d1[0] + d0[1] * d1[1] + d0[2] * d1[2]));
+            double turn = Math.acos(cos), ds = (dist(c.get(i), c.get(i - 1)) + dist(c.get(i + 1), c.get(i))) / 2;
+            e += E_BEND * turn * turn / Math.max(ds, 0.1);
+        }
+        // its cable stays clear of blocks: the body above the line, at its middle and near its top
+        for (int i = 1; i < n; i++) {
+            double[] nr = r.normal(from + (to - from) * i / n), p = c.get(i);
+            for (double f : new double[]{0.25, Math.max(0.5, height - 0.25)})
+                if (blockedAt(space, seen, new double[]{p[0] + nr[0] * f, p[1] + nr[1] * f, p[2] + nr[2] * f})) return Double.MAX_VALUE;
+        }
+        // the rest of [from0, to0] as routed: on its surfaces, at their height
+        e += routed(r, from0, from) + routed(r, to, to0);
+        return e;
+    }
+
+    /** Gravity and tension of the route between arcs a and b (it lies flat on its surfaces: no bending). */
+    static double routed(Route r, double a, double b) {
+        if (b - a < 1e-9) return 0;
+        double e = 0;
+        int n = (int) Math.max(1, Math.ceil(b - a));
         for (int i = 0; i < n; i++) {
-            double d = dist(x[i], x[i + 1]) - rest[i];
-            e += E_STRETCH * d * d;
+            double[] p = r.at(a + (b - a) * i / n), q = r.at(a + (b - a) * (i + 1) / n);
+            double ds = dist(p, q);
+            e += (E_GRAVITY * (p[1] + q[1]) / 2 + E_TENSION) * ds;
         }
         return e;
     }
 
-    static void gradient(double[][] x, double[] rest, boolean[] free, double[][] g) {
-        int n = x.length - 1;
-        for (double[] v : g) java.util.Arrays.fill(v, 0);
-        for (int i = 0; i <= n; i++) if (free[i]) g[i][1] += E_GRAVITY;
-        for (int i = 1; i < n; i++)
-            for (int c = 0; c < 3; c++) {
-                double bc = 2 * E_BEND * (x[i - 1][c] - 2 * x[i][c] + x[i + 1][c]);
-                g[i - 1][c] += bc;
-                g[i][c] -= 2 * bc;
-                g[i + 1][c] += bc;
-            }
-        for (int i = 0; i < n; i++) {
-            double d = dist(x[i], x[i + 1]);
-            if (d < 1e-9) continue;
-            double f = 2 * E_STRETCH * (d - rest[i]) / d;
-            for (int c = 0; c < 3; c++) {
-                double v = f * (x[i + 1][c] - x[i][c]);
-                g[i][c] -= v;
-                g[i + 1][c] += v;
-            }
-        }
+    static double[] sub(double[] a, double[] b) {
+        return new double[]{a[0] - b[0], a[1] - b[1], a[2] - b[2]};
     }
 
-    /** blocked(), remembered per voxel for one solve (the solver asks about the same few voxels many times). */
-    static boolean blockedAt(CableRouter.Space space, java.util.Map<Long, Boolean> seen, double[] p, double[] n) {
-        long vx = (long) Math.floor(p[0] + 0.5 * n[0]), vy = (long) Math.floor(p[1] + 0.5 * n[1]), vz = (long) Math.floor(p[2] + 0.5 * n[2]);
+    /** Is the voxel holding point p blocked? Remembered per voxel (the search asks about the same few many times). */
+    static boolean blockedAt(CableRouter.Space space, java.util.Map<Long, Boolean> seen, double[] p) {
+        long vx = (long) Math.floor(p[0]), vy = (long) Math.floor(p[1]), vz = (long) Math.floor(p[2]);
         long key = (vx & 0x1FFFFF) << 42 | (vy & 0x1FFFFF) << 21 | (vz & 0x1FFFFF);
         return seen.computeIfAbsent(key, k -> space.blocked(vx, vy, vz, vx + 1, vy + 1, vz + 1));
     }
@@ -263,7 +293,7 @@ public final class CableHang {
     /** Is the voxel half a voxel off the line, on the cable's body side (normal n), blocked? (The line lies on its
      *  support's surface: the support itself is right under it.) */
     static boolean blocked(CableRouter.Space space, double[] p, double[] n) {
-        double x = p[0] + 0.5 * n[0], y = p[1] + 0.5 * n[1], z = p[2] + 0.5 * n[2];
+        double x = p[0] + 0.25 * n[0], y = p[1] + 0.25 * n[1], z = p[2] + 0.25 * n[2];
         long vx = (long) Math.floor(x), vy = (long) Math.floor(y), vz = (long) Math.floor(z);
         return space.blocked(vx, vy, vz, vx + 1, vy + 1, vz + 1);
     }
