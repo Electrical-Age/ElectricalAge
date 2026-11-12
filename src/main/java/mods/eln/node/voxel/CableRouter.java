@@ -74,7 +74,11 @@ public final class CableRouter {
     }
 
     public static Result route(Space space, int width, int height, End start, List<End> waypoints, End end, long budgetMs) {
-        return Router.surface(space, RouteKind.cable("cable", width, height), start, waypoints, end, budgetMs);
+        return route(space, RouteKind.cable("cable", width, height), start, waypoints, end, budgetMs);
+    }
+
+    public static Result route(Space space, RouteKind kind, End start, List<End> waypoints, End end, long budgetMs) {
+        return Router.surface(space, kind, start, waypoints, end, budgetMs);
     }
 
     static int dirOf(Step a, Step b) {

@@ -102,7 +102,9 @@ public class RouterDifferentialTest {
                 nw.add(new CableRouter.End(p[0], p[1], p[2], 0, -1));
                 ow.add(new LegacyCableRouter.End(p[0], p[1], p[2], 0, -1));
             }
-            CableRouter.Result n = CableRouter.route(sp, t.width(), t.height(), new CableRouter.End(a[0], a[1], a[2], 0, dirA), nw,
+            // (with no air allowance: air runs are new, so only the on-support routes must match)
+            CableRouter.Result n = CableRouter.route(sp, RouteKind.cable("cable", t.width(), t.height()).withAir(RouteKind.NO_AIR),
+                new CableRouter.End(a[0], a[1], a[2], 0, dirA), nw,
                 new CableRouter.End(b[0], b[1], b[2], 0, dirB), NO_BUDGET);
             LegacyCableRouter.Result o = LegacyCableRouter.route(sp, t.width(), t.height(), new LegacyCableRouter.End(a[0], a[1], a[2], 0, dirA), ow,
                 new LegacyCableRouter.End(b[0], b[1], b[2], 0, dirB), NO_BUDGET);

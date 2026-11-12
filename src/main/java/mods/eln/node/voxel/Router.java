@@ -150,11 +150,19 @@ public final class Router {
                     if (out(q, lo, hi)) continue;
                     // a cable stays inside its block: it crosses a block's edge, never runs along one (it would straddle two)
                     if (Math.floorMod(p[3 - n - CableRouter.axis(d)], 16) == 0) continue;
-                    if (surfaceStepBlocked(space, kind, p, k.attach(), d) || !surfaceSupported(space, kind, p, k.attach(), d)) continue;
+                    // off a support (a gap, a ledge, lifted off a face): only within the kind's air allowance, at its
+                    // tier's extra cost, and with clearance on the support side too (parts aren't support: an air run
+                    // must not lie on a pipe or another cable). A supported step lands: the air run starts over
+                    int nAir = 0, airCost = 0;
+                    if (!surfaceSupported(space, kind, p, k.attach(), d)) {
+                        nAir = k.air() + lattice;
+                        airCost = kind.airCost(nAir);
+                        if (airCost < 0 || surfaceStepBlocked(space, kind, p, k.attach(), d, true)) continue;
+                    } else if (surfaceStepBlocked(space, kind, p, k.attach(), d, false)) continue;
                     long[] cp = CableRouter.cell(p, k.attach(), d), cq = CableRouter.cell(q, k.attach(), CableRouter.reverse(d));
-                    long g = g0 + lattice + (k.dir() >= 0 && k.dir() != d ? kind.bend() : 0)
+                    long g = g0 + lattice + airCost + (k.dir() >= 0 && k.dir() != d ? kind.bend() : 0)
                         + (cp[0] != cq[0] || cp[1] != cq[1] || cp[2] != cq[2] ? kind.blockEntered() : 0);
-                    SKey nk = new SKey(q[0], q[1], q[2], k.attach(), d, 0);
+                    SKey nk = new SKey(q[0], q[1], q[2], k.attach(), d, nAir);
                     if (push.push(k, nk, g)) outer.remove(nk);
                 }
                 // corners, toward e (across the face): a wall met here (inner), or the support ending here (outer); at a
@@ -162,20 +170,31 @@ public final class Router {
                 // that is a run of no length, and two inner corners turned a cable round to the far side of a plane, through
                 // the edge where two blocks meet diagonally (the cable's width reached the far block and read as a wall)
                 if (k.dir() < 0 && !k.equals(k0)) return;
+                boolean airy = kind.airLimit() > 0;
                 for (int e = 0; e < 6; e++) {
                     if (CableRouter.axis(e) == n) continue;
                     if (solidBeyond(space, kind, p, k.attach(), e, false)) {
                         // inner corner: up the wall met here
                         SKey nk = new SKey(p[0], p[1], p[2], e, -1, k.air());
                         if (push.push(k, nk, g0 + kind.bend())) outer.remove(nk);
-                    } else {
-                        // outer corner: round the support's edge onto its face toward e
-                        if (solidBeyond(space, kind, p, k.attach(), e, true)) continue;
-                        if (!solidBeyond(space, kind, p, k.attach(), CableRouter.reverse(e), true)) continue;
-                        if (knuckleBlocked(space, kind, p, k.attach(), e)) continue;
-                        SKey nk = new SKey(p[0], p[1], p[2], CableRouter.reverse(e), -1, k.air());
-                        if (push.push(k, nk, g0 + kind.bend())) outer.put(nk, true);
+                        continue;
                     }
+                    // a kind that may leave its support turns up as if a wall stood straight ahead (lifting off a face,
+                    // anywhere on it, or bending in the air); the steps after it are air steps unless a real face is
+                    // there. Only ahead: toward another side the turn would wrap round the support's own edge, which is
+                    // an outer corner (a knuckle), not this
+                    if (airy && e == k.dir()) {
+                        SKey nk = new SKey(p[0], p[1], p[2], e, -1, k.air());
+                        if (push.push(k, nk, g0 + kind.bend())) outer.remove(nk);
+                    }
+                    // outer corner: round the support's edge onto its face toward e; in the air (nothing behind) round an
+                    // edge that isn't there, which bends an air run back toward the plane it left
+                    if (solidBeyond(space, kind, p, k.attach(), e, true)) continue;
+                    boolean behind = solidBeyond(space, kind, p, k.attach(), CableRouter.reverse(e), true);
+                    if (!behind && !(airy && k.air() > 0 && e == k.dir())) continue;
+                    if (knuckleBlocked(space, kind, p, k.attach(), e)) continue;
+                    SKey nk = new SKey(p[0], p[1], p[2], CableRouter.reverse(e), -1, k.air());
+                    if (push.push(k, nk, g0 + kind.bend())) outer.put(nk, true);
                 }
             }, from, CableRouter.MAX_EXPANSIONS, deadline);
         if (goal == null) return null;
@@ -185,8 +204,9 @@ public final class Router {
         return path;
     }
 
-    /** The cable's cross-section swept from p one step along d (world voxels), with its clearance. */
-    static boolean surfaceStepBlocked(CableRouter.Space space, RouteKind kind, long[] p, int attach, int d) {
+    /** The cable's cross-section swept from p one step along d (world voxels), with its clearance (on the support side
+     *  too for a step in the air). */
+    static boolean surfaceStepBlocked(CableRouter.Space space, RouteKind kind, long[] p, int attach, int d, boolean inAir) {
         int lattice = kind.lattice(), width = kind.width(), height = kind.height(), clearance = kind.clearance();
         long[] q = {p[0] + CableRouter.DV[d][0] * lattice, p[1] + CableRouter.DV[d][1] * lattice, p[2] + CableRouter.DV[d][2] * lattice};
         int n = CableRouter.axis(attach), along = CableRouter.axis(d), w = 3 - n - along;
@@ -195,12 +215,13 @@ public final class Router {
         hi[along] = Math.max(p[along], q[along]);
         lo[w] = p[w] - width / 2 - clearance;
         hi[w] = p[w] + (width - width / 2) + clearance;
+        int under = inAir ? clearance : 0;
         if (attach % 2 == 0) {
-            lo[n] = p[n];
+            lo[n] = p[n] - under;
             hi[n] = p[n] + height + clearance;
         } else {
             lo[n] = p[n] - height - clearance;
-            hi[n] = p[n];
+            hi[n] = p[n] + under;
         }
         return space.blocked(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
     }

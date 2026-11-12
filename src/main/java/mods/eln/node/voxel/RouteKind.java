@@ -44,10 +44,17 @@ public record RouteKind(String id, Placement placement, int width, int height, i
         return new RouteKind(id, placement, width, height, lattice, bend, blockEntered, clearance, margin, unsupported, rest, tiers);
     }
 
-    /** A cable of this cross-section, with today's cable routing constants. */
+    /**
+     * A cable's air allowance (Baughn 2026-11-11, D5): up to 0.6 block off any support at a medium cost, up to 1.2 blocks
+     * at a high one, never further (10 and 20 voxels on the 2-voxel lattice; +4 and +16 per step against a base step of
+     * 2, so a short hop costs ~3x floor routing and a long one ~9x, and floors, walls and ceilings win where they reach).
+     */
+    static final int[][] CABLE_AIR = {{10, 4}, {20, 16}};
+
+    /** A cable of this cross-section, with today's cable routing constants and the cable air allowance. */
     public static RouteKind cable(String id, int width, int height) {
         return new RouteKind(id, Placement.SURFACE, width, height, CableRouter.LATTICE, CableRouter.BEND, CableRouter.BLOCK_ENTERED,
-            CableRouter.CLEARANCE, CableRouter.MARGIN, 0, 0, NO_AIR);
+            CableRouter.CLEARANCE, CableRouter.MARGIN, 0, 0, CABLE_AIR);
     }
 
     /** A cable tier with a spec (null: the preset), as the kit lays it. */
