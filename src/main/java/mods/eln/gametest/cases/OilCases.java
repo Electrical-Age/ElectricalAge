@@ -79,6 +79,12 @@ public final class OilCases {
         cases.add(new DryBoiler());
         cases.add(new SafetyValvePlant(4000, 1200, "fluid_safety_valve_holds_the_plant"));
         cases.add(new SafetyValvePlant(8000, 1400, "fluid_safety_valve_relieves_steadily"));
+        cases.add(new SafetyValvePlant(8000, 1400, "fluid_safety_valve_down_a_run_relieves_steadily", 6));
+        // (Baughn 2026-11-12: his workshop's safety valve sirened, on the pipe from a boiler to a steam turbine whose
+        // analog regulator holds 12 bar; the valve at 13. Swept over plausible heats, the boiler kept fed)
+        for (int kw : new int[]{3, 5, 6, 8, 10, 12, 16, 20}) cases.add(new SafetyValveTurbine(kw * 1000, true));
+        // (unfed, the steam rises slowly past the valve's setting as the governor throttles back: where it sirened)
+        for (int kw : new int[]{6, 7}) cases.add(new SafetyValveTurbine(kw * 1000, false));
         cases.add(new SteamJetScalds());
         cases.add(new OldBoilerSave());
         cases.add(new Buckets2());
@@ -3064,19 +3070,26 @@ public final class OilCases {
     static final class SafetyValvePlant implements TestCase {
         mods.eln.oil.BoilerElement boiler;
         mods.eln.sim.IProcess fire;
-        double peak, time, lo = 1e9, hi, lastLift, liftSum;
+        double peak, time, lo = 1e9, hi, lastLift, liftSum, liftLo = 1e9, liftHi, qLo = 1e9, qHi, qSum;
+        mods.eln.node.voxel.VoxelNode valveNode;
         int flips;
         net.minecraft.core.BlockPos pipeAt;
         String err;
         mods.eln.node.voxel.SafetyValvePart valve;
         final double heat;
-        final int ticks;
+        final int ticks, run;
         final String id;
 
         SafetyValvePlant(double heat, int ticks, String id) {
+            this(heat, ticks, id, 0);
+        }
+
+        /** With the valve at the end of a level run this many blocks from the boiler (Baughn's siren, 2026-11-12). */
+        SafetyValvePlant(double heat, int ticks, String id, int run) {
             this.heat = heat;
             this.ticks = ticks;
             this.id = id;
+            this.run = run;
         }
 
         public String id() {
@@ -3084,7 +3097,7 @@ public final class OilCases {
         }
 
         public int width() {
-            return 3;
+            return 3 + run;
         }
 
         public int ticks() {
@@ -3097,11 +3110,20 @@ public final class OilCases {
             boiler.thermal.Tc = 175 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
             boiler.fromTanks(8000, 0);
             boiler.showTanks();
-            pipeAt = ctx.at(1, 2, 1);
-            mods.eln.node.voxel.PipeKitItem.place(ctx.level(), pipeAt, new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 12, 8}), null);
+            if (run > 0) {
+                // (up from the boiler's top port, then east along the run; the valve on its last block)
+                PipeCases.lay(ctx, ctx.at(1, 2, 1), 0, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+                for (int x = 2; x < 1 + run; x++) PipeCases.lay(ctx, ctx.at(x, 2, 1), 0, 0, 8, 8, 16, 8, 8);
+                pipeAt = ctx.at(1 + run, 2, 1);
+                PipeCases.lay(ctx, pipeAt, 0, 0, 8, 8, 12, 8, 8);
+            } else {
+                pipeAt = ctx.at(1, 2, 1);
+                mods.eln.node.voxel.PipeKitItem.place(ctx.level(), pipeAt, new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 12, 8}), null);
+            }
             var n = (mods.eln.node.voxel.VoxelNode) ((mods.eln.node.voxel.VoxelNodeEntity) ctx.level().getBlockEntity(pipeAt)).getNode();
             err = n.addSafetyValveNear(0.5, 8 / 16.0, 0.5);
             for (var p : n.parts) if (p instanceof mods.eln.node.voxel.SafetyValvePart sv) valve = sv;
+            valveNode = n;
             mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
                 boiler.thermal.moveEnergyTo(heat * t);
                 peak = Math.max(peak, boiler.vessel.P());
@@ -3113,6 +3135,14 @@ public final class OilCases {
                     if (lastLift < 0.02 && valve.lift >= 0.02) flips++;
                     lastLift = valve.lift;
                     liftSum += valve.lift * t;
+                    liftLo = Math.min(liftLo, valve.lift);
+                    // (what it lets out, kg/s: the whistle follows it)
+                    double q = 0;
+                    for (var v : valveNode.fluidVents()) if (v.edge != null) q += v.edge.flow;
+                    qLo = Math.min(qLo, q);
+                    qHi = Math.max(qHi, q);
+                    qSum += q * t;
+                    liftHi = Math.max(liftHi, valve.lift);
                 }
             });
         }
@@ -3122,8 +3152,8 @@ public final class OilCases {
             var n = (mods.eln.node.voxel.VoxelNode) ((mods.eln.node.voxel.VoxelNodeEntity) ctx.level().getBlockEntity(pipeAt)).getNode();
             boolean burst = false;
             for (var p : n.parts) if (p instanceof mods.eln.node.voxel.PipePart pp && pp.burst) burst = true;
-            ctx.line("fluid: plant with a safety valve " + boiler.getWaila() + String.format(", peak %.1f bar; last 20 s %.2f-%.2f bar, %d openings, mean lift %.3f, lift %.2f",
-                peak / 1e5, lo / 1e5, hi / 1e5, flips, liftSum / 20, valve == null ? -1 : valve.lift));
+            ctx.line("fluid: plant with a safety valve " + boiler.getWaila() + String.format(", peak %.1f bar; last 20 s %.2f-%.2f bar, %d openings, mean lift %.3f, lift %.2f (%.3f-%.3f); flow %.3f-%.3f g/s, mean %.3f",
+                peak / 1e5, lo / 1e5, hi / 1e5, flips, liftSum / 20, valve == null ? -1 : valve.lift, liftLo, liftHi, qLo * 1e3, qHi * 1e3, qSum / 20 * 1e3));
             ctx.check("fluid: a safety valve fits on the pipe", err == null, "" + err);
             ctx.check("fluid: it holds the plant near its 10 bar setting", peak > 9e5 && peak < 12e5, String.format("peak %.1f bar", peak / 1e5));
             ctx.check("fluid: the pipe doesn't burst", !burst, "");
@@ -3150,6 +3180,110 @@ public final class OilCases {
             // (Baughn 2026-10-27: it pulsed; it acts on the averaged pressure now) relieving 8 kW, it holds steady
             if (heat > 5000) ctx.check("fluid: relieving, it holds the boiler steady (no pulsing)", flips <= 1 && hi - lo < 0.5e5,
                 String.format("%d openings, %.2f-%.2f bar in the last 20 s", flips, lo / 1e5, hi / 1e5));
+            // (Baughn 2026-11-12: it sirened, the lift swinging with the averaged pressure) relieving, it converges: a steady
+            // pressure and a steady lift, so a constant whistle
+            if (heat > 5000) ctx.check("fluid: relieving, pressure and lift converge (no siren)", hi - lo < 0.05e5 && qSum > 0 && qHi - qLo < 0.2 * qSum / 20,
+                String.format("%.3f-%.3f bar, flow %.3f-%.3f g/s in the last 20 s", lo / 1e5, hi / 1e5, qLo * 1e3, qHi * 1e3));
+        }
+    }
+
+    /**
+     * Baughn's workshop (2026-11-12): boiler -> pipe with a safety valve at 13 bar -> 50V steam turbine with an analog
+     * regulator holding 12 bar at its inlet, a condenser on its exhaust, a 1 kW heater as its load. Whatever the heat,
+     * the boiler settles: the turbine takes what it can at 12 bar, the valve lets out the rest at a steady flow (a
+     * steady whistle, no siren), and neither cycles.
+     */
+    static final class SafetyValveTurbine implements TestCase {
+        final double heat;
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.SteamGeneratorElement t;
+        mods.eln.node.voxel.VoxelNode valveNode;
+        String err;
+        mods.eln.sim.IProcess fire;
+        double time, lo = 1e9, hi, qLo = 1e9, qHi, qSum, gLo = 1e9, gHi, peak, qMax;
+
+        final boolean fed;
+
+        SafetyValveTurbine(double heat, boolean fed) {
+            this.heat = heat;
+            this.fed = fed;
+        }
+
+        double water() {
+            return boiler.vessel == null ? 0 : boiler.vessel.mLiquid() / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
+        }
+
+        public String id() {
+            return "fluid_safety_valve_turbine_" + (int) (heat / 1000) + "kw" + (fed ? "" : "_unfed");
+        }
+
+        public int width() {
+            return 6;
+        }
+
+        public int ticks() {
+            return fed ? 3600 : 2400;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            boiler.thermal.Tc = 175 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.fromTanks(8000, 0);
+            boiler.showTanks();
+            t = plant(l, 3, true)[0];
+            t.inventory.setItem(mods.eln.oil.SteamGeneratorElement.REGULATOR_SLOT, mods.eln.Eln.findItemStack("Analogic Regulator"));
+            t.inventoryChange(t.inventory);
+            t.controls.targetBar = 12;
+            t.inventoryChange(t.inventory);
+            PipeCases.lay(ctx, ctx.at(1, 2, 1), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);   // up out of the boiler, then east
+            PipeCases.lay(ctx, ctx.at(2, 2, 1), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(3, 2, 1), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);   // down into the turbine
+            valveNode = PipeCases.node(ctx, ctx.at(2, 2, 1));
+            err = valveNode.addSafetyValveNear(0.5, 8 / 16.0, 0.5);
+            for (var p : valveNode.parts) if (p instanceof mods.eln.node.voxel.SafetyValvePart sv) sv.setPa = 13e5;
+            mods.eln.Eln.simulator.addSlowProcess(fire = dt -> {
+                boiler.thermal.moveEnergyTo(heat * dt);
+                // (fed smoothly with water at 27 C, as a feed pump on a level controller would; 1 mB is ~1/16 g here)
+                if (fed && boiler.vessel != null) {
+                    double mB = Math.max(0, Math.min(400 * dt, (6000 - water()) * 0.5 * dt));
+                    mods.eln.sim.fluid.EaUnits.addWater(boiler.vessel, mB * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER, 300, false);
+                }
+                time += dt;
+                peak = Math.max(peak, boiler.vessel.P());
+                for (var v : valveNode.fluidVents()) if (v.edge != null) qMax = Math.max(qMax, v.edge.flow);
+                if (time > ticks() / 20.0 - 30) {
+                    double P = boiler.vessel.P(), q = 0;
+                    for (var v : valveNode.fluidVents()) if (v.edge != null) q += v.edge.flow;
+                    lo = Math.min(lo, P);
+                    hi = Math.max(hi, P);
+                    qLo = Math.min(qLo, q);
+                    qHi = Math.max(qHi, q);
+                    qSum += q * dt;
+                    gLo = Math.min(gLo, t.limit);
+                    gHi = Math.max(gHi, t.limit);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            double qMean = qSum / 30;
+            ctx.line(String.format("safety valve + turbine at %.0f kW: boiler %.2f-%.2f bar (peak %.2f), valve %.3f-%.3f g/s (mean %.3f), turbine valve %.2f-%.2f; turbine %s",
+                heat / 1000, lo / 1e5, hi / 1e5, peak / 1e5, qLo * 1e3, qHi * 1e3, qMean * 1e3, gLo, gHi, t.getWaila()));
+            ctx.check("safety valve + turbine: the valve fits", err == null, "" + err);
+            if (fed) {
+                ctx.check("safety valve + turbine: the boiler settles (under 0.3 bar of swing in the last 30 s)", hi - lo < 0.3e5,
+                    String.format("%.2f-%.2f bar", lo / 1e5, hi / 1e5));
+                ctx.check("safety valve + turbine: the valve's flow is steady, or it stays shut (no siren)",
+                    qHi < 1e-5 || qHi - qLo < 0.2 * Math.max(qMean, 1e-9), String.format("%.3f-%.3f g/s", qLo * 1e3, qHi * 1e3));
+            } else {
+                // (with the averaged lift the valve opened late as the steam crept past 13 bar, blew a puff of ~14 g/s,
+                // shut, and rang for seconds, 13.10/12.95/13.04/12.96 bar, every time the steam came up again)
+                ctx.check("safety valve + turbine: rising slowly past its setting it neither overshoots nor puffs (under 13.05 bar, 1.5 g/s)",
+                    peak < 13.05e5 && qMax < 1.5e-3, String.format("peak %.3f bar, %.3f g/s at most", peak / 1e5, qMax * 1e3));
+            }
+            ctx.check("safety valve + turbine: under 14 bar", peak < 14e5, String.format("%.2f bar", peak / 1e5));
         }
     }
 

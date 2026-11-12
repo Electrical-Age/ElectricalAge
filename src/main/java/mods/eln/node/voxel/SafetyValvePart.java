@@ -33,7 +33,8 @@ public final class SafetyValvePart extends VoxelPart {
      * Baughn 2026-10-27: it pulsed, popping open and shut every second or so. A boiler's pressure jitters by several
      * percent from tick to tick, more than the old 5% band, so the valve flapped between shut and wide open. It now acts
      * on the pressure averaged over AVG_TAU seconds (pAvg), and opens over a wider band, BAND above its set pressure.
-     * Server only, not saved: pAvg starts from the first reading.
+     * Server only, not saved: pAvg starts from the first reading. Only purge valves still work this way; a safety valve
+     * is a relief regulator in the solve now (relieve, below).
      */
     public double lift, pAvg = Double.NaN;
     public static final double AVG_TAU = 2.0, BAND = 0.10;
@@ -63,6 +64,22 @@ public final class SafetyValvePart extends VoxelPart {
         lift = opening(pAvg);
         return lift;
     }
+
+    /**
+     * A safety valve (not a purge valve) is the fluid core's relief regulator (Baughn 2026-11-12: with the new solver the
+     * averaged pressure only lagged, and the valve cycled like a siren). Inside the solve it passes RELIEF_K times the
+     * pressure over its set point, so a boiler settles a little over the setting with a steady flow and a steady
+     * whistle. The lift is only shown and heard: it follows the pressure under it, without averaging. Returns the set
+     * pressure for the vent.
+     */
+    public double relieve(double P) {
+        pAvg = P;
+        lift = opening(P);
+        return setPa;
+    }
+
+    /** A safety valve's conductance over its set point: the wide-open vent's flow BAND over it (m^3). */
+    static final double RELIEF_K = VENT_K / BAND;
 
     /** Opening (0..1) at pressure P. */
     public double opening(double P) {

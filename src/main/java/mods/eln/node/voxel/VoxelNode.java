@@ -1332,8 +1332,13 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 } else if (p instanceof SafetyValvePart sv && pipeUnder(sv) != null) {
                     PipePart under = pipeUnder(sv);
                     double draw = sv.outlet == 1 ? 1 : sv.outlet == 0 ? 0 : 0.5;   // (a valve on top lets out what's at the top)
-                    Vent vent = new Vent(under.fluid, draw, SafetyValvePart.VENT_K);
+                    Vent vent = new Vent(under.fluid, draw, sv.purge ? SafetyValvePart.VENT_K : SafetyValvePart.RELIEF_K);
                     vent.gasOnly = sv.purge;
+                    if (!sv.purge) {
+                        // (a safety valve is the core's relief regulator: it holds the run at its set pressure inside the solve)
+                        vent.setPa = sv.setPa;
+                        vent.open = 1;
+                    }
                     vents.put(vent, p);
                 }
         }
@@ -1412,7 +1417,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         // safety valves open by the pressure under them
         if (vents != null)
             for (var e : vents.entrySet())
-                if (e.getValue() instanceof SafetyValvePart sv) e.getKey().open = sv.follow(mods.eln.fluid.FluidWorld.nodeFor(e.getKey().node).P(), dt);
+                if (e.getValue() instanceof SafetyValvePart sv) {
+                    double P = mods.eln.fluid.FluidWorld.nodeFor(e.getKey().node).P();
+                    if (sv.purge) e.getKey().open = sv.follow(P, dt);
+                    else e.getKey().setPa = sv.relieve(P);
+                }
     }
 
     /** Over its rating a pipe bursts (the weakest of a run goes first: each piece checks its own rating against the
@@ -1465,7 +1474,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     var origin = new net.minecraft.world.phys.Vec3(coordonate.x + c[0] / 16.0, coordonate.y + c[1] / 16.0, coordonate.z + c[2] / 16.0)
                         .add(dir.getStepX() * pipe.drawn() / 32.0, dir.getStepY() * pipe.drawn() / 32.0, dir.getStepZ() * pipe.drawn() / 32.0);
                     SteamJet.tick(sl, origin, dir, e.getKey().edge, SteamJet.MAX_LENGTH);
-                } else if (e.getValue() instanceof SafetyValvePart sv && e.getKey().edge != null && e.getKey().open > 0) {
+                } else if (e.getValue() instanceof SafetyValvePart sv && e.getKey().edge != null && sv.lift > 0) {
                     var dir = net.minecraft.core.Direction.from3DDataValue(sv.outlet);
                     int[] b = sv.boxes().get(0);
                     var origin = new net.minecraft.world.phys.Vec3(coordonate.x + (b[0] + b[3]) / 32.0, coordonate.y + (b[1] + b[4]) / 32.0,
