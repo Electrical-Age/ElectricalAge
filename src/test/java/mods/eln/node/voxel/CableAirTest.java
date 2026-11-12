@@ -132,10 +132,13 @@ public class CableAirTest {
         var sp = CableRouterTest.world(solid);
         var r = route(solid, LV, 1, 5);
         assertNull(r.error);
-        CableHang.laid(sp, LV, r.steps);   // (warm)
-        long t0 = System.nanoTime();
-        var hung = CableHang.laid(sp, LV, r.steps);
-        long us = (System.nanoTime() - t0) / 1000;
+        CableHang.Laid hung = null;
+        long us = Long.MAX_VALUE;
+        for (int rep = 0; rep < 4; rep++) {   // (warm; the best of a few, as other builds share the machine)
+            long t0 = System.nanoTime();
+            hung = CableHang.laid(sp, LV, r.steps);
+            us = Math.min(us, (System.nanoTime() - t0) / 1000);
+        }
         assertEquals(1, hung.hangs().size(), "one span");
         var h = hung.hangs().get(0);
         double low = lowest(hung.hangs());
@@ -220,6 +223,20 @@ public class CableAirTest {
         CableRouter.Step last = r.steps.get(r.steps.size() - 1);
         assertEquals(0, last.attach(), "arrives on the edge's face: " + r.steps);
         assertTrue(longestAir(CableRouterTest.world(solid), LV, r.steps) > 0, "through the air: " + r.steps);
+    }
+
+    @Test
+    void aBridgeHighUpSagsAsMuchAsOneLowDown() {
+        // the same bridge 150 blocks up (AdventurAgent: it hung straight there, as gravity counted absolute height)
+        java.util.Set<List<Long>> solid = new java.util.HashSet<>();
+        for (int x : new int[]{0, 1, 2, 4, 5, 6}) solid.add(List.of((long) x, 149L, 0L));
+        var sp = CableRouterTest.world(solid);
+        var r = CableRouter.route(sp, LV, new CableRouter.End(24, 150 * 16, 8, 0, -1), List.of(), new CableRouter.End(88, 150 * 16, 8, 0, -1), 10_000);
+        assertNull(r.error);
+        var hs = CableHang.laid(sp, LV, r.steps).hangs();
+        assertEquals(1, hs.size());
+        double sag = 150 * 16 - lowest(hs);
+        assertTrue(sag > 0.7 && sag < 4, "sags " + sag + " voxels at y 150 too");
     }
 }
 

@@ -62,7 +62,7 @@ public final class CableHang {
     }
 
     /** A hung span: the chain covering route arc [from, to], its points and the normals carried along. */
-    public record Hang(double from, double to, List<double[]> pts, List<double[]> nrm) {
+    public record Hang(double from, double to, List<double[]> pts, List<double[]> nrm, List<double[]> tan) {
     }
 
     /** The route of steps as a dense polyline (CableRouter.Step points, attach faces). */
@@ -158,6 +158,9 @@ public final class CableHang {
     static Hang solve(CableRouter.Space space, java.util.Map<Long, Boolean> seen, Route r, double a, double b, double lo, double hi, double height) {
         double maxA = Math.min(MAX_PEEL, a - lo), maxB = Math.min(MAX_PEEL, hi - b);
         double from0 = a - Math.max(0, maxA), to0 = b + Math.max(0, maxB);
+        // (heights from the stretch's lowest end: in absolute world height every extra voxel of length cost y times the
+        // gravity weight, and a bridge at y 150 would never sag: AdventurAgent)
+        double y0 = Math.min(r.at(from0)[1], r.at(to0)[1]);
         double best = Double.MAX_VALUE;
         double[] bestP = null;
         for (double pa = 0; pa <= maxA + 1e-9; pa += 2)
@@ -166,7 +169,7 @@ public final class CableHang {
                 for (double ha : HANDLES)
                     for (double hb : HANDLES)
                         for (double sag : SAGS) {
-                            double e = score(space, seen, r, a - pa, b + pb, ha * chord, hb * chord, sag, from0, to0, height);
+                            double e = score(space, seen, r, a - pa, b + pb, ha * chord, hb * chord, sag, from0, to0, height, y0);
                             if (e + E_PEEL * (pa + pb) < best) {
                                 best = e + E_PEEL * (pa + pb);
                                 bestP = new double[]{pa, pb, ha * chord, hb * chord, sag};
@@ -182,7 +185,7 @@ public final class CableHang {
                 for (int sign = -1; sign <= 1; sign += 2) {
                     double[] t = bestP.clone();
                     t[q] = Math.max(q == 4 ? 0 : 0.1, t[q] + sign * step[q]);
-                    double e = score(space, seen, r, a - t[0], b + t[1], t[2], t[3], t[4], from0, to0, height) + E_PEEL * (t[0] + t[1]);
+                    double e = score(space, seen, r, a - t[0], b + t[1], t[2], t[3], t[4], from0, to0, height, y0) + E_PEEL * (t[0] + t[1]);
                     if (e < best - 1e-9) {
                         best = e;
                         bestP = t;
@@ -192,16 +195,24 @@ public final class CableHang {
             if (!better) for (int q = 2; q < 5; q++) step[q] /= 2;
         }
         double from = a - bestP[0], to = b + bestP[1];
-        List<double[]> pts = curve(r, from, to, bestP[2], bestP[3], bestP[4]);
+        List<double[]> tan = new ArrayList<>();
+        List<double[]> pts = curve(r, from, to, bestP[2], bestP[3], bestP[4], tan);
         List<double[]> nrm = new ArrayList<>();
         int n = pts.size() - 1;
         for (int i = 0; i <= n; i++) nrm.add(r.normal(from + (to - from) * i / n));
-        return new Hang(from, to, pts, smooth(nrm));
+        return new Hang(from, to, pts, smooth(nrm), tan);
     }
 
     /** Points along the curve from route arc from to to (~1 voxel apart): Hermite along the route's directions there
      *  (handles ha, hb), lowered by sag at its middle (16 u^2 (1-u)^2: ends and their directions kept). */
     static List<double[]> curve(Route r, double from, double to, double ha, double hb, double sag) {
+        return curve(r, from, to, ha, hb, sag, null);
+    }
+
+    /** ... and, into tan if given, the curve's exact direction at each point (level where it leaves a floor: the drawn
+     *  cross-section there meets the flat cable's square end; a direction from the chord to the next point tilted it,
+     *  and a wedge showed: Baughn, AdventurAgent). */
+    static List<double[]> curve(Route r, double from, double to, double ha, double hb, double sag, List<double[]> tan) {
         double[] p0 = r.at(from), p1 = r.at(to);
         double[] t0 = unit(sub(r.at(Math.min(r.length(), from + 0.5)), r.at(Math.max(0, from - 0.5))));
         double[] t1 = unit(sub(r.at(Math.min(r.length(), to + 0.5)), r.at(Math.max(0, to - 0.5))));
@@ -214,6 +225,13 @@ public final class CableHang {
             for (int c = 0; c < 3; c++) q[c] = h00 * p0[c] + h10 * ha * t0[c] + h01 * p1[c] + h11 * hb * t1[c];
             q[1] -= sag * 16 * u2 * (1 - u) * (1 - u);
             out.add(q);
+            if (tan != null) {
+                double d00 = 6 * u2 - 6 * u, d10 = 3 * u2 - 4 * u + 1, d01 = -6 * u2 + 6 * u, d11 = 3 * u2 - 2 * u;
+                double[] d = new double[3];
+                for (int c = 0; c < 3; c++) d[c] = d00 * p0[c] + d10 * ha * t0[c] + d01 * p1[c] + d11 * hb * t1[c];
+                d[1] -= sag * 16 * (2 * u * (1 - u) * (1 - u) - 2 * u2 * (1 - u));
+                tan.add(unit(d));
+            }
         }
         return out;
     }
@@ -221,7 +239,7 @@ public final class CableHang {
     /** The energy of a candidate over route arc [from0, to0] (see solve), or MAX_VALUE if it touches a blocked voxel or
      *  is longer than the route it replaces. */
     static double score(CableRouter.Space space, java.util.Map<Long, Boolean> seen, Route r, double from, double to, double ha, double hb, double sag,
-                        double from0, double to0, double height) {
+                        double from0, double to0, double height, double y0) {
         List<double[]> c = curve(r, from, to, ha, hb, sag);
         int n = c.size() - 1;
         double len = 0;
@@ -231,7 +249,7 @@ public final class CableHang {
         for (int i = 1; i <= n; i++) {
             double[] p = c.get(i - 1), q = c.get(i);
             double ds = dist(p, q);
-            e += (E_GRAVITY * (p[1] + q[1]) / 2 + E_TENSION) * ds;
+            e += (E_GRAVITY * ((p[1] + q[1]) / 2 - y0) + E_TENSION) * ds;
         }
         for (int i = 1; i < n; i++) {
             double[] d0 = unit(sub(c.get(i), c.get(i - 1))), d1 = unit(sub(c.get(i + 1), c.get(i)));
@@ -246,19 +264,19 @@ public final class CableHang {
                 if (blockedAt(space, seen, new double[]{p[0] + nr[0] * f, p[1] + nr[1] * f, p[2] + nr[2] * f})) return Double.MAX_VALUE;
         }
         // the rest of [from0, to0] as routed: on its surfaces, at their height
-        e += routed(r, from0, from) + routed(r, to, to0);
+        e += routed(r, from0, from, y0) + routed(r, to, to0, y0);
         return e;
     }
 
     /** Gravity and tension of the route between arcs a and b (it lies flat on its surfaces: no bending). */
-    static double routed(Route r, double a, double b) {
+    static double routed(Route r, double a, double b, double y0) {
         if (b - a < 1e-9) return 0;
         double e = 0;
         int n = (int) Math.max(1, Math.ceil(b - a));
         for (int i = 0; i < n; i++) {
             double[] p = r.at(a + (b - a) * i / n), q = r.at(a + (b - a) * (i + 1) / n);
             double ds = dist(p, q);
-            e += (E_GRAVITY * (p[1] + q[1]) / 2 + E_TENSION) * ds;
+            e += (E_GRAVITY * ((p[1] + q[1]) / 2 - y0) + E_TENSION) * ds;
         }
         return e;
     }
@@ -328,11 +346,7 @@ public final class CableHang {
             int n = h.pts().size() - 1;
             // (the direction along the curve from the whole chain: the pieces either side of a block's face then
             // carry the same cross-section there, with no crack between them; AdventurAgent saw hairlines)
-            List<double[]> tan = new ArrayList<>();
-            for (int i = 0; i <= n; i++) {
-                double[] pa = h.pts().get(Math.max(0, i - 1)), pb = h.pts().get(Math.min(n, i + 1));
-                tan.add(unit(new double[]{pb[0] - pa[0], pb[1] - pa[1], pb[2] - pa[2]}));
-            }
+            List<double[]> tan = h.tan();
             double fa = (a - h.from()) / (h.to() - h.from()) * n, fb = (b - h.from()) / (h.to() - h.from()) * n;
             cp.add(chainAt(h.pts(), fa));
             cn.add(chainAt(h.nrm(), fa));
