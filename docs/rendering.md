@@ -130,7 +130,8 @@ change, and the block entity renderer draws the rest. The draw code is untouched
   The game draws a block entity only while its own section is drawn, so chunk and renderer show the device under the
   same condition; and a section of nothing but air is never compiled, so a part could not be put where it lies.
 - Far away: a block entity is drawn within 64 blocks. Past that the settled parts stay in the chunk (Baughn: keep
-  them visible), and what moves or glows is not drawn, as before. To keep the chunk's copy current without the
+  them visible), and what moves or glows is not drawn, as before (Baughn 2026-11-13: left out rather than drawn
+  standing still; most of it shows only up close). To keep the chunk's copy current without the
   player having been near, the two node renderers' `shouldRender` also answers true beyond 64 blocks when
   `ChunkBake.farDue` says the device is due a **far frame**: the same draw code into a frame flagged far, whose
   display-list replays go through `Device.skip` and which is never submitted. Near or far is decided by the
