@@ -10,7 +10,9 @@ only where measurements demand it. No raw GL anywhere, so OpenGL and Vulkan back
 
 ```
 BER.extractRenderState  copy element render refs (SixNodeRender: renders[6]; TransparentNodeRender: render)
-BER.submit -> GlSubmit.open(poseStack)            GlFrame.open(pose, normal): frame becomes "current"
+BER.submit -> GlSubmit.openBlock(poseStack)       GlFrame.openBlock(pose, normal): frame becomes "current"; the pose's
+                                                    translation is added to every vertex, not put in the matrix stack
+   ChunkBake.attach(frame, blockEntity)             the chunk may draw this device's unchanging parts (below)
    1.12 draw code: render.draw() -> descriptor.draw() -> Obj3DPart.draw() / CableRender / GL11.glXxx
    mods.eln.gl.GL11 (static facade) -> GlFrame state machine: matrix stack, colour, texture, flags
    vertices transformed into pose space, grouped into Batch by Key(texture, blend, cull, fullBright, lit)
