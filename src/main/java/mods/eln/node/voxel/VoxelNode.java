@@ -266,6 +266,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public boolean removePart(int index, boolean drop) {
         if (index < 0 || index >= parts.size()) return parts.isEmpty();
         VoxelPart p = parts.remove(index);
+        if (p instanceof CablePart) CableLinks.forgetPiece(this, p.id);
         if (p instanceof PipePart) pruneJunctions();
         markUsed();
         if (drop && !partItem(p).isEmpty()) dropItem(partItem(p));
@@ -1185,6 +1186,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         }
         if (cut != null && cut.inline()) d.placedInLine(getElement(slot));   // (an energy meter starts closed)
         if (cut != null) {
+            ensureIds();   // (the cut's pieces: their ids, before the joints that point at them)
+            CableLinks.cut(this, old, cut.a(), cut.b());
             changed();   // (the cable's conductors and links rebuilt round the device)
             // the cut-out cable back to the player: cable is neither made nor lost
             ItemStack back = CableKitItem.kit(old.tier, old.spec, cut.returned());

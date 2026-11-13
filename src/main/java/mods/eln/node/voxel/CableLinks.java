@@ -73,7 +73,11 @@ public final class CableLinks {
 
     /** Add j to c's joints unless the same joint (implied or not) is there already. */
     static void add(CablePart c, int[] j) {
-        for (int[] o : c.joints) if (same(o, j)) return;
+        for (int[] o : c.joints)
+            if (same(o, j)) {
+                if (!implied(j)) o[0] &= ~IMPLIED;   // (an editor's joint over one the rules recorded: it is meant now)
+                return;
+            }
         c.joints.add(j);
     }
 
@@ -84,8 +88,13 @@ public final class CableLinks {
     }
 
     static int[] implied(int kind, int... rest) {
+        return joint(kind | IMPLIED, rest);
+    }
+
+    /** A joint with kind (and flags) and fields. */
+    static int[] joint(int kind, int... rest) {
         int[] j = new int[rest.length + 1];
-        j[0] = kind | IMPLIED;
+        j[0] = kind;
         System.arraycopy(rest, 0, j, 1, rest.length);
         return j;
     }
@@ -93,16 +102,21 @@ public final class CableLinks {
     /** Record what joins two touching pieces of one block (CableNet): an end of one on the other's line, as a CONT if
      *  it is an end of both, else a SPLICE onto the piece whose line it lies on. Knuckles take body ends (-1). */
     static void recordTouching(CablePart a, CablePart b) {
+        recordTouching(a, b, IMPLIED);
+    }
+
+    /** As recordTouching(a, b), the joints flagged flag (IMPLIED, or 0 for an editor's). */
+    static void recordTouching(CablePart a, CablePart b, int flag) {
         boolean any = false;
-        any |= recordEnds(a, b);
-        any |= recordEnds(b, a);
+        any |= recordEnds(a, b, flag);
+        any |= recordEnds(b, a, flag);
         if (!any) {   // (a knuckle's point on a line: a splice of the knuckle's body)
             CablePart k = a.isKnuckle() ? a : b, o = k == a ? b : a;
-            add(k, implied(SPLICE, -1, 0, 0, 0, o.id, k.points[0], k.points[1], k.points[2]));
+            add(k, joint(SPLICE | flag, -1, 0, 0, 0, o.id, k.points[0], k.points[1], k.points[2]));
         }
     }
 
-    private static boolean recordEnds(CablePart a, CablePart b) {
+    private static boolean recordEnds(CablePart a, CablePart b, int flag) {
         if (a.isKnuckle()) return false;
         boolean any = false;
         int[][] e = a.ends();
@@ -112,17 +126,126 @@ public final class CableLinks {
             any = true;
             int be = endAt(b, p[0], p[1], p[2]);
             if (be >= 0) {
-                add(a, implied(CONT, i, 0, 0, 0, b.id, be));
-                add(b, implied(CONT, be, 0, 0, 0, a.id, i));
-            } else add(a, implied(SPLICE, i, 0, 0, 0, b.id, p[0], p[1], p[2]));
+                add(a, joint(CONT | flag, i, 0, 0, 0, b.id, be));
+                add(b, joint(CONT | flag, be, 0, 0, 0, a.id, i));
+            } else add(a, joint(SPLICE | flag, i, 0, 0, 0, b.id, p[0], p[1], p[2]));
         }
         return any;
     }
 
     /** Record a CONT across a face: a's end ea to b's end eb, b in the block (dx, dy, dz) from a's. */
     static void recordAcross(CablePart a, int ea, CablePart b, int eb, int dx, int dy, int dz) {
-        add(a, implied(CONT, ea, dx, dy, dz, b.id, eb));
-        add(b, implied(CONT, eb, -dx, -dy, -dz, a.id, ea));
+        recordAcross(a, ea, b, eb, dx, dy, dz, IMPLIED);
+    }
+
+    static void recordAcross(CablePart a, int ea, CablePart b, int eb, int dx, int dy, int dz, int flag) {
+        add(a, joint(CONT | flag, ea, dx, dy, dz, b.id, eb));
+        add(b, joint(CONT | flag, eb, -dx, -dy, -dz, a.id, ea));
+    }
+
+    // ---------------------------------------------------------------- editors' joints
+
+    /**
+     * A route was laid (Laying.lay: parts at their blocks, in route order): consecutive pieces of the run are joined by
+     * the layer's own joints (CONT, or a SPLICE through a knuckle), written now, before the new blocks connect. The
+     * route's two free ends keep what the rules give them (implied: a splice onto the cable it starts from, a device).
+     */
+    static void laid(java.util.List<net.minecraft.core.BlockPos> at, java.util.List<? extends VoxelPart> parts) {
+        for (int i = 0; i + 1 < parts.size(); i++) {
+            if (!(parts.get(i) instanceof CablePart a) || !(parts.get(i + 1) instanceof CablePart b)) continue;
+            var pa = at.get(i);
+            var pb = at.get(i + 1);
+            int dx = pb.getX() - pa.getX(), dy = pb.getY() - pa.getY(), dz = pb.getZ() - pa.getZ();
+            if (dx == 0 && dy == 0 && dz == 0) {
+                if (a.touches(b)) recordTouching(a, b, 0);
+                continue;
+            }
+            if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) != 1) continue;
+            int f = net.minecraft.core.Direction.getNearest(dx, dy, dz, null).get3DDataValue();
+            for (CablePart.Port p : a.cablePorts()) {
+                if (p.face() != f) continue;
+                CablePart.Port m = p.mirrored();
+                for (CablePart.Port q : b.cablePorts())
+                    if (q.equals(m)) recordAcross(a, endOf(a, p), b, endOf(b, q), dx, dy, dz, 0);
+            }
+        }
+    }
+
+    /** A piece of node (by id) goes: every joint pointing at it, in its block and the face neighbours, goes too. */
+    static void forgetPiece(VoxelNode node, int id) {
+        if (id < 0) return;
+        for (int f = 0; f < 6; f++) {
+            int[] d = CableRouter.DV[f];
+            VoxelNode v = node.at(d[0], d[1], d[2]);
+            if (v != null) dropTargeting(v, -d[0], -d[1], -d[2], id);
+        }
+        dropTargeting(node, 0, 0, 0, id);
+    }
+
+    private static void dropTargeting(VoxelNode v, int dx, int dy, int dz, int id) {
+        for (VoxelPart p : v.parts)
+            if (p instanceof CablePart c)
+                c.joints.removeIf(j -> {
+                    int[] o = offset(j);
+                    return target(j) == id && o != null && o[0] == dx && o[1] == dy && o[2] == dz;
+                });
+    }
+
+    /**
+     * A device was put on a cable (DevicePlacer): the piece old was replaced by a and b (either null; a trim leaves one).
+     * Each of old's ends that a new piece still has keeps its joints there, and the joints others had on that end follow
+     * it; a splice onto old moves to the piece whose line holds its point. The editors' joints only: the rules record
+     * the implied ones afresh as the block reconnects. Joints at ends the device now takes are dropped.
+     */
+    static void cut(VoxelNode node, CablePart old, CablePart a, CablePart b) {
+        int[][] oe = old.ends();
+        CablePart[] to = new CablePart[2];
+        int[] toEnd = {-1, -1};
+        for (int i = 0; i < 2; i++)
+            for (CablePart n : new CablePart[]{a, b}) {
+                if (n == null || to[i] != null) continue;
+                int k = endAt(n, oe[i][0], oe[i][1], oe[i][2]);
+                if (k >= 0) {
+                    to[i] = n;
+                    toEnd[i] = k;
+                }
+            }
+        for (int[] j : old.joints) {
+            if (implied(j) || j[1] < 0 || to[j[1]] == null) continue;
+            int[] c = j.clone();
+            c[1] = toEnd[j[1]];
+            add(to[j[1]], c);
+        }
+        for (int f = 0; f <= 6; f++) {
+            int[] d = f < 6 ? CableRouter.DV[f] : new int[3];
+            VoxelNode v = node.at(d[0], d[1], d[2]);
+            if (v == null) continue;
+            int dx = -d[0], dy = -d[1], dz = -d[2];
+            for (VoxelPart p : v.parts) {
+                if (!(p instanceof CablePart c) || c == a || c == b) continue;
+                List<int[]> moved = new java.util.ArrayList<>();
+                c.joints.removeIf(j -> {
+                    int[] o = offset(j);
+                    if (target(j) != old.id || o == null || o[0] != dx || o[1] != dy || o[2] != dz) return false;
+                    if (implied(j)) return true;
+                    if (kind(j) == CONT && j[6] >= 0 && j[6] < 2 && to[j[6]] != null) {
+                        int[] m = j.clone();
+                        m[5] = to[j[6]].id;
+                        m[6] = toEnd[j[6]];
+                        moved.add(m);
+                    } else if (kind(j) == SPLICE)
+                        for (CablePart n : new CablePart[]{a, b})
+                            if (n != null && n.passes(j[6], j[7], j[8])) {
+                                int[] m = j.clone();
+                                m[5] = n.id;
+                                moved.add(m);
+                                break;
+                            }
+                    return true;
+                });
+                for (int[] m : moved) add(c, m);
+            }
+        }
     }
 
     /** Record bodies touching across a face (TOUCH), b in the block (dx, dy, dz) from a's. */
@@ -174,8 +297,8 @@ public final class CableLinks {
         return at.partById(id) instanceof CablePart c && c.burnt != null;
     }
 
-    /** The block of `node` goes (broken, or reverted to a six-node block): drop its voxel neighbours' implied joints into
-     *  it (whatever takes its place records its own links when it connects). */
+    /** The block of `node` goes (broken, or reverted to a six-node block): drop its voxel neighbours' joints into it
+     *  (whatever takes its place records its own links when it connects). */
     static void forget(VoxelNode node) {
         for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
             if (!(node.getNeighbor(mods.eln.misc.Direction.fromEnumFacing(d)) instanceof VoxelNode v)) continue;
@@ -184,7 +307,7 @@ public final class CableLinks {
                 if (p instanceof CablePart c)
                     c.joints.removeIf(j -> {
                         int[] o = offset(j);
-                        return implied(j) && o != null && o[0] == dx && o[1] == dy && o[2] == dz;
+                        return o != null && o[0] == dx && o[1] == dy && o[2] == dz;
                     });
         }
     }
