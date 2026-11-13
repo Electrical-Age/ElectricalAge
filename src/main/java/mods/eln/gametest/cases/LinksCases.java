@@ -26,6 +26,7 @@ public final class LinksCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new LaidCutBroken());
         cases.add(new TrimBurnRepair());
+        cases.add(new FrozenBoundary());
     }
 
     static VoxelNode node(TestContext c, BlockPos p) {
@@ -39,7 +40,9 @@ public final class LinksCases {
         for (var p : v.parts)
             if (p instanceof CablePart c) {
                 b.append('#').append(c.id).append('{');
-                for (int[] j : c.joints) b.append(CableLinks.describe(j)).append("; ");
+                List<int[]> sorted = new ArrayList<>(c.joints);
+                sorted.sort(java.util.Arrays::compare);
+                for (int[] j : sorted) b.append(CableLinks.describe(j)).append("; ");
                 b.append("} ");
             }
         return b.toString();
@@ -72,6 +75,83 @@ public final class LinksCases {
                     }
         }
         return b.toString();
+    }
+
+    /** Every joint of the cable pieces in these blocks, as text (to compare states). */
+    static String allJoints(TestContext c, List<BlockPos> at) {
+        StringBuilder b = new StringBuilder();
+        for (BlockPos p : at) b.append(p.toShortString()).append(':').append(joints(node(c, p))).append(' ');
+        return b.toString();
+    }
+
+    /**
+     * A block of a laid run frozen out of the simulation (Stasis: NodeBase.simulationVeto), its neighbours reconnected,
+     * then thawed: the neighbours keep their joints toward it while it is out, the check counts it as out of the
+     * simulation rather than a problem, and after the thaw everything is as before.
+     */
+    static final class FrozenBoundary implements TestCase {
+        String layErr, before = "", frozenState = "", thawed = "", frozenReport = "", thawedReport = "";
+        boolean frozenOk, thawedOk, outCounted;
+
+        public String id() {
+            return "links_frozen_boundary";
+        }
+
+        public int width() {
+            return 6;
+        }
+
+        public void build(TestContext c) {
+            BlockPos o = c.at(0, 0, 0);
+            int tier = CablePart.tierOf("Low Voltage Cable");
+            var a = new CableRouter.End(o.getX() * 16L + 4, (o.getY() + 1) * 16L, (o.getZ() + 1) * 16L + 8, 0, -1);
+            var b = new CableRouter.End((o.getX() + 4) * 16L + 12, (o.getY() + 1) * 16L, (o.getZ() + 1) * 16L + 8, 0, -1);
+            layErr = CablePlacer.routeAndLayForTests(c.level(), tier, a, b);
+            List<BlockPos> run = new ArrayList<>();
+            for (int x = 0; x < 5; x++) run.add(c.at(x, 1, 1));
+            VoxelNode mid = node(c, c.at(2, 1, 1)), left = node(c, c.at(1, 1, 1)), right = node(c, c.at(3, 1, 1));
+            if (mid == null || left == null || right == null) return;
+            // let every block connect first (new blocks connect when their block entity loads)
+            for (BlockPos p : run) {
+                VoxelNode v = node(c, p);
+                if (v != null && !v.isAdded()) v.connect();
+            }
+            before = allJoints(c, run);
+            var was = mods.eln.node.NodeBase.simulationVeto;
+            try {
+                mods.eln.node.NodeBase.simulationVeto = n -> n == mid;
+                mid.reconnect();
+                left.reconnect();
+                right.reconnect();
+                frozenState = allJoints(c, run);
+                List<VoxelNode> scope = new ArrayList<>();
+                for (BlockPos p : run) if (node(c, p) != null) scope.add(node(c, p));
+                var rep = mods.eln.node.voxel.CableVerify.verify(scope);
+                frozenOk = rep.ok() && !mid.isAdded();
+                outCounted = rep.excludedBlocks() == 1 && rep.unjoinedToAbsent() == 0;
+                frozenReport = rep.summary() + " " + String.join("; ", rep.problems());
+            } finally {
+                mods.eln.node.NodeBase.simulationVeto = was;
+            }
+            mid.connect();
+            left.reconnect();
+            right.reconnect();
+            thawed = allJoints(c, run);
+            List<VoxelNode> scope = new ArrayList<>();
+            for (BlockPos p : run) if (node(c, p) != null) scope.add(node(c, p));
+            var rep = mods.eln.node.voxel.CableVerify.verify(scope);
+            thawedOk = rep.ok() && mid.isAdded();
+            thawedReport = rep.summary() + " " + String.join("; ", rep.problems());
+        }
+
+        public void measure(TestContext c) {
+            c.check("frozen: the run was laid", layErr == null, String.valueOf(layErr));
+            c.check("frozen: with the middle block out, the joints match and nothing is a problem", frozenOk, frozenReport);
+            c.check("frozen: the frozen block is counted as out, no end meets it unjoined", outCounted, frozenReport);
+            c.check("frozen: the neighbours keep their joints toward it", frozenState.equals(before), "before " + before + " | frozen " + frozenState);
+            c.check("frozen: thawed, the joints match again", thawedOk, thawedReport);
+            c.check("frozen: thawed, every joint is as before", thawed.equals(before), "before " + before + " | thawed " + thawed);
+        }
     }
 
     /**
