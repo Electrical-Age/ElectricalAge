@@ -343,6 +343,16 @@ class BakeTest {
         assertArrayEquals(settled.toArray(), Bake.inDrawOrder(shuffled));
     }
 
+    @Test
+    void theOverrideReadsOffOnAndForce() {
+        assertEquals(-1, Bake.override(null));
+        assertEquals(0, Bake.override("off"));
+        assertEquals(1, Bake.override("on"));
+        assertEquals(1, Bake.override("1"));
+        assertEquals(2, Bake.override("force"));
+        assertEquals(-1, Bake.override("maybe"));
+    }
+
     /** With a pose that is more than a translation the matrices hold the camera: nothing of such a frame is baked. */
     @Test
     void aFrameWithARotatedPoseIsNotBaked() {

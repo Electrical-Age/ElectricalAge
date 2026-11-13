@@ -2,7 +2,6 @@ package mods.eln.client.render.bake;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.serialization.MapCodec;
-import mods.eln.gl.Bake;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -22,8 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Puts the textures the block entity renderers bind whole (assets/eln/model, and assets/eln/sprites but for its gui
  * folder) into the block atlas, so chunk geometry can use them: a chunk layer samples nothing else. A sprite is named as the texture is bound. It is padded
  * to multiples of 16 pixels by repeating its edge (an odd size would cap the atlas' mipmap levels), and its alpha
- * becomes 0 or 255 at the renderers' cutoff of 0.1: the chunk's cutout layer discards below 0.5.
- * Adds nothing while baking is off.
+ * becomes 0 or 255 at the renderers' cutoff of 0.1: the chunk's cutout layer discards below 0.5. They are there
+ * whether or not the chunk draws device parts just now, so that turning it on needs no reload of the resources.
  */
 public final class ModelSprites implements SpriteSource {
     public static final Identifier ID = Identifier.fromNamespaceAndPath("eln", "model_textures");
@@ -40,7 +39,6 @@ public final class ModelSprites implements SpriteSource {
 
     @Override
     public void run(ResourceManager resourceManager, Output output) {
-        if (Bake.mode == 0) return;
         Map<Identifier, Resource> found = new HashMap<>(resourceManager.listResources("model",
             id -> id.getNamespace().equals("eln") && id.getPath().endsWith(".png")));
         found.putAll(resourceManager.listResources("sprites",

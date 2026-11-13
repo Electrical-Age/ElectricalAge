@@ -38,15 +38,21 @@ public final class Bake {
 
     /**
      * 0 = off. 1 = on. 2 = debug: the renderer leaves out every settled call without asking whether the chunk mesh
-     * shows it (what is on screen is then what the chunk draws).
+     * shows it (what is on screen is then what the chunk draws). Set by the host from the client's config.
      */
-    public static int mode = initialMode();
+    public static int mode;
 
-    private static int initialMode() {
-        String e = System.getenv("ELN_BAKE");
-        if ("force".equals(e)) return 2;
-        if ("1".equals(e) || Boolean.getBoolean("eln.bake")) return 1;
-        return 0;
+    /** The mode that -Deln.bake or ELN_BAKE (off, on, force) asks for in place of the config's; -1 = neither is set. */
+    public static final int OVERRIDE = override(System.getProperty("eln.bake", System.getenv("ELN_BAKE")));
+
+    static int override(String v) {
+        if (v == null) return -1;
+        return switch (v) {
+            case "off", "0", "false" -> 0;
+            case "on", "1", "true" -> 1;
+            case "force" -> 2;
+            default -> -1;
+        };
     }
 
     /** The client side: sprites, chunk sections and their meshes. */

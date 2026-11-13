@@ -21,7 +21,14 @@ import net.neoforged.neoforge.common.NeoForge;
 /** EA's client entry point (1.12 ClientProxy): renderers, the client side of the EA protocol, frame refresh (P3). */
 @Mod(value = Eln.MODID, dist = Dist.CLIENT)
 public final class ElnClient {
-    public ElnClient(IEventBus modBus) {
+    public ElnClient(IEventBus modBus, net.neoforged.fml.ModContainer container) {
+        container.registerConfig(net.neoforged.fml.config.ModConfig.Type.CLIENT, ElnClientConfig.SPEC);
+        modBus.addListener(net.neoforged.fml.event.config.ModConfigEvent.Loading.class, e -> {
+            if (e.getConfig().getSpec() == ElnClientConfig.SPEC) ElnClientConfig.refresh();
+        });
+        modBus.addListener(net.neoforged.fml.event.config.ModConfigEvent.Reloading.class, e -> {
+            if (e.getConfig().getSpec() == ElnClientConfig.SPEC) ElnClientConfig.refresh();
+        });
         ElnNet.clientHandler = ClientPacketHandler::packetRx;
         mods.eln.sound.SoundCommand.clientPlayer = mods.eln.sound.SoundClient::play;
         UtilsClient.hooks = new ClientHooks();

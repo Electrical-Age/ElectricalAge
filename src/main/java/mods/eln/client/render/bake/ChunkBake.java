@@ -83,6 +83,29 @@ public final class ChunkBake implements Bake.Host {
         Minecraft.getInstance().execute(this::clear);
     }
 
+    /**
+     * The client's config says whether the chunk draws the devices' unchanging parts ({@link Bake#OVERRIDE} wins).
+     * Applies at once, from any thread; also the way back on after a failure switched it off.
+     */
+    public void configure(boolean on) {
+        int mode = Bake.OVERRIDE >= 0 ? Bake.OVERRIDE : on ? 1 : 0;
+        Minecraft.getInstance().execute(() -> {
+            failed = false;
+            setMode(mode);
+        });
+    }
+
+    /** Off: the sections that hold parts are meshed again without them, and the renderers draw everything from now. */
+    private void setMode(int mode) {
+        if (mode == Bake.mode) return;
+        boolean was = Bake.mode != 0;
+        Bake.mode = mode;
+        if (was == (mode != 0)) return;
+        for (Sec s : secs.values()) dirty(s.node);
+        clear();
+        org.slf4j.LoggerFactory.getLogger("eln").info("[eln bake] static device parts are drawn {}", mode != 0 ? "by the chunk" : "by the block entity renderers");
+    }
+
     /** Let the chunk draw what it can of this block entity's frame (call right after opening the frame). */
     public static void attach(GlFrame frame, BlockEntity be) {
         if (Bake.mode == 0) return;
@@ -156,6 +179,10 @@ public final class ChunkBake implements Bake.Host {
     @Override
     public void frame() {
         Minecraft mc = Minecraft.getInstance();
+        if (failed) {
+            setMode(0);
+            return;
+        }
         if (mc.level != level) {
             level = mc.level;
             clear();
@@ -246,7 +273,8 @@ public final class ChunkBake implements Bake.Host {
                 compiles.increment();
                 snap.complete = true;
             } catch (Throwable t) {
-                if (!failed) org.slf4j.LoggerFactory.getLogger("eln").error("[eln bake] writing chunk geometry failed", t);
+                // the snapshot stays incomplete, so nothing of it counts as shown; the next frame switches baking off
+                if (!failed) org.slf4j.LoggerFactory.getLogger("eln").error("[eln bake] writing chunk geometry failed; static device parts go back to the block entity renderers", t);
                 failed = true;
             }
         });
