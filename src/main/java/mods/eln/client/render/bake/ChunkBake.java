@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * The chunk side of {@link Bake}: keeps the settled calls of each chunk section, writes them into the section's mesh
- * when it is compiled, and knows which calls the mesh on screen contains.
+ * The chunk side of {@link Bake}: keeps the settled calls of each chunk section (those of the devices whose block is
+ * in it), writes them into the section's mesh when it is compiled, and knows which calls the mesh on screen contains.
  * <p>
  * Every compile of a section that has calls gets a snapshot of them, taken when the section's extra renderers are
  * gathered (on the render thread, just before the compile task is created). A compiled mesh carries its task's start
@@ -59,7 +59,6 @@ public final class ChunkBake implements Bake.Host {
         final ArrayList<Snap> snaps = new ArrayList<>();
         SectionMesh lastMesh;
         Snap active;
-        long seen;
 
         Sec(long node) {
             this.node = node;
@@ -68,8 +67,6 @@ public final class ChunkBake implements Bake.Host {
 
     private final Long2ObjectOpenHashMap<Sec> secs = new Long2ObjectOpenHashMap<>();
     private Level level;
-    private long frame;
-    private int foreign;
     private long dirties;
     private final java.util.concurrent.atomic.LongAdder compiles = new java.util.concurrent.atomic.LongAdder(),
         compiledVertices = new java.util.concurrent.atomic.LongAdder();
@@ -93,7 +90,6 @@ public final class ChunkBake implements Bake.Host {
     private void clear() {
         Bake.clear();
         secs.clear();
-        foreign = 0;
     }
 
     // ---- Bake.Host
@@ -105,25 +101,20 @@ public final class ChunkBake implements Bake.Host {
 
     @Override
     public void settled(Bake.Call c) {
-        for (long s : c.sections) {
-            Sec sec = secs.get(s);
-            if (sec == null) {
-                sec = new Sec(s);
-                secs.put(s, sec);
-            }
-            sec.calls.add(c);
-            dirty(s);
+        long s = c.device.home;
+        Sec sec = secs.get(s);
+        if (sec == null) {
+            sec = new Sec(s);
+            secs.put(s, sec);
         }
-        if (c.foreign) foreign++;
+        sec.calls.add(c);
+        dirty(s);
     }
 
     @Override
     public void unsettled(Bake.Call c) {
-        for (long s : c.sections) {
-            Sec sec = secs.get(s);
-            if (sec != null && sec.calls.remove(c)) dirty(s);
-        }
-        if (c.foreign) foreign--;
+        Sec sec = secs.get(c.device.home);
+        if (sec != null && sec.calls.remove(c)) dirty(sec.node);
     }
 
     private void dirty(long section) {
@@ -132,16 +123,10 @@ public final class ChunkBake implements Bake.Host {
     }
 
     @Override
-    public boolean visible(long section) {
-        Sec s = secs.get(section);
-        return s != null && s.seen == frame;
-    }
-
-    @Override
     public String stats() {
         int active = 0;
         for (Sec s : secs.values()) if (s.active != null) active++;
-        // audit: every call's count of meshes on screen that contain it, against the sections' own records
+        // audit: whether the mesh on screen contains a call, against the call's own flag
         java.util.IdentityHashMap<Bake.Call, int[]> shown = new java.util.IdentityHashMap<>();
         for (Sec s : secs.values()) {
             for (Bake.Call c : s.calls) shown.computeIfAbsent(c, k -> new int[1]);
@@ -150,9 +135,9 @@ public final class ChunkBake implements Bake.Host {
         int wrong = 0, stale = 0, skippable = 0;
         for (var e : shown.entrySet()) {
             Bake.Call c = e.getKey();
-            if (c.activeIn != e.getValue()[0]) wrong++;
+            if ((c.shown ? 1 : 0) != e.getValue()[0]) wrong++;
             if (!c.isSettled()) stale++;
-            else if (c.activeIn == c.sections.length) skippable++;
+            else if (c.shown) skippable++;
         }
         String out = secs.size() + " sections with calls (" + active + " shown), " + skippable + " calls shown by the chunk, " + stale
             + " stale in meshes, " + wrong + " MISCOUNTED, " + dirties + " made dirty, " + compiles.sumThenReset()
@@ -169,14 +154,7 @@ public final class ChunkBake implements Bake.Host {
             level = mc.level;
             clear();
         }
-        frame++;
         if (secs.isEmpty() || mc.levelRenderer == null) return;
-        if (foreign > 0) {
-            for (SectionRenderDispatcher.RenderSection rs : mc.levelRenderer.visibleSections()) {
-                Sec s = secs.get(rs.getSectionNode());
-                if (s != null) s.seen = frame;
-            }
-        }
         ViewArea area = mc.levelRenderer.viewArea();
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         var it = secs.values().iterator();
@@ -214,9 +192,9 @@ public final class ChunkBake implements Bake.Host {
 
     private static void activate(Sec s, Snap snap) {
         if (s.active == snap) return;
-        if (s.active != null) for (Bake.Call c : s.active.calls) c.activeIn--;
+        if (s.active != null) for (Bake.Call c : s.active.calls) c.shown = false;
         s.active = snap;
-        if (snap != null) for (Bake.Call c : snap.calls) c.activeIn++;
+        if (snap != null) for (Bake.Call c : snap.calls) c.shown = true;
     }
 
     /** A section is about to be compiled: hand it the calls it holds now. */
@@ -252,7 +230,7 @@ public final class ChunkBake implements Bake.Host {
                     int b = cutout ? 1 : 0;
                     if (buffers[b] == null) buffers[b] = context.getOrCreateChunkBuffer(cutout ? ChunkSectionLayer.CUTOUT : ChunkSectionLayer.SOLID);
                     buffers[b].addVertex(x, y, z, color, u, v, OverlayTexture.NO_OVERLAY, light, 0, 1, 0);
-                }, calls, sprites, node, ox, oy, oz, nether));
+                }, calls, sprites, ox, oy, oz, nether));
                 compiles.increment();
                 snap.complete = true;
             } catch (Throwable t) {
@@ -286,11 +264,11 @@ public final class ChunkBake implements Bake.Host {
     }
 
     /**
-     * Write the calls' quads that lie in this section into its buffers (meshing worker; reads only the arguments).
-     * Vertices are relative to the section's origin. The colour carries the entity shader's directional shading for
+     * Write the calls' quads into their section's buffers (meshing worker; reads only the arguments). Vertices are
+     * relative to the section's origin (ox, oy, oz) and may lie outside the section. The colour carries the entity shader's directional shading for
      * the vertex normal (two lights, 0.6 each, over 0.4 ambient), so the result equals the block entity renderer's.
      */
-    public static int write(Sink out, Bake.Call[] calls, Map<Identifier, ModelSprites.Spr> sprites, long node, int ox, int oy, int oz, boolean nether) {
+    public static int write(Sink out, Bake.Call[] calls, Map<Identifier, ModelSprites.Spr> sprites, int ox, int oy, int oz, boolean nether) {
         int written = 0;
         final int S = GlFrame.STRIDE;
         float l1y = nether ? -L1Y : L1Y;
@@ -308,12 +286,10 @@ public final class ChunkBake implements Bake.Host {
             float n20 = m01 * m12 - m02 * m11, n21 = m02 * m10 - m00 * m12, n22 = m00 * m11 - m01 * m10;
             float det = m00 * n00 + m01 * n01 + m02 * n02;
             float sign = det < 0 ? -1 : 1;
-            boolean all = c.sections.length == 1;
             int light = c.fullBright ? LightCoordsUtil.FULL_BRIGHT : c.light;
             float[] q = c.quads;
             int base = c.color;
             for (int i = 0; i + 4 * S <= c.floats; i += 4 * S) {
-                if (!all && Bake.sectionOf(c, i) != node) continue;
                 for (int k = 0; k < 4; k++) {
                     int j = i + k * S;
                     float x = q[j], y = q[j + 1], z = q[j + 2];

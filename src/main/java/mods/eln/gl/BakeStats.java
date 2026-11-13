@@ -35,7 +35,7 @@ public final class BakeStats {
     private static final IdentityHashMap<float[], Boolean> UV_OK = new IdentityHashMap<>();
     private static final long[] TOTAL = new long[N];
     private static final String[] WHY = {"unknown", "not attached", "burnt", "pose", "no block entity", "changed", "waiting",
-        "waiting longer", "no sprite", "no whole quad", "mesh not shown yet", "other section hidden"};
+        "waiting longer", "no sprite", "no whole quad", "mesh not shown yet"};
     private static final Map<String, long[]> WHY_BY_LABEL = new HashMap<>();
     private static final long[] WHY_TOTAL = new long[Bake.REASONS];
     /** Per label: calls that differed from the last draw, by {@link Bake} change kind; then the settled ones among them. */

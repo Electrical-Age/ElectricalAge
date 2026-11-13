@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class BakeTest {
     static final long MS = 1_000_000L;
     final List<Bake.Call> settled = new ArrayList<>();
-    final List<Long> hidden = new ArrayList<>();
     boolean sprites = true;
     long t = 1_000_000_000L;
     final Object owner = new Object();
@@ -42,10 +41,6 @@ class BakeTest {
 
             public void unsettled(Bake.Call c) {
                 assertTrue(settled.remove(c));
-            }
-
-            public boolean visible(long section) {
-                return !hidden.contains(section);
             }
 
             public void frame() {
@@ -111,9 +106,8 @@ class BakeTest {
         assertEquals(4, frame(150, draw), "settled, but the mesh does not show it yet");
         assertEquals(1, settled.size());
         Bake.Call c = settled.get(0);
-        assertArrayEquals(new long[]{SectionPos.asLong(100 >> 4, 15 >> 4, -40 >> 4)}, c.sections);
-        assertFalse(c.foreign);
-        c.activeIn = 1;
+        assertEquals(SectionPos.asLong(100 >> 4, 15 >> 4, -40 >> 4), c.device.home);
+        c.shown = true;
         assertEquals(0, frame(16, draw));
         assertEquals(0, frame(16, draw));
         assertEquals(1, settled.size());
@@ -131,14 +125,14 @@ class BakeTest {
         };
         frame(0, draw);
         frame(500, draw);
-        settled.get(0).activeIn = 1;
+        settled.get(0).shown = true;
         assertEquals(0, frame(16, draw));
         angle[0] = 10;
         assertEquals(4, frame(16, draw));
         assertTrue(settled.isEmpty(), "the old pose left the chunk");
         // the light is part of what a call is (the wait is 0.8 s now: the part moved soon after settling)
         frame(900, draw);
-        settled.get(0).activeIn = 1;
+        settled.get(0).shown = true;
         assertEquals(0, frame(16, draw));
         light = 0xE000F0;
         assertEquals(4, frame(16, draw));
@@ -190,7 +184,7 @@ class BakeTest {
         frame(0, draw);
         frame(500, draw);
         assertEquals(2, settled.size());
-        for (Bake.Call c : settled) c.activeIn = 1;
+        for (Bake.Call c : settled) c.shown = true;
         assertEquals(0, frame(16, draw));
         both[0] = false;
         assertEquals(0, frame(16, draw));
@@ -226,8 +220,9 @@ class BakeTest {
         assertTrue(settled.isEmpty(), "texture not in the atlas");
     }
 
+    /** A section of nothing but air is never compiled, and the game draws a block entity by its block's section. */
     @Test
-    void quadsGoToTheSectionOfTheirCentreAndNeedItVisible() {
+    void quadsOutsideTheBlocksSectionStillGoToIt() {
         // the block is at y 15: a quad raised by 1.5 lies in the section above
         int low = quadList(0.5f, 1), high = quadList(1.5f, 1);
         Runnable draw = () -> {
@@ -237,14 +232,18 @@ class BakeTest {
         frame(0, draw);
         frame(500, draw);
         assertEquals(2, settled.size());
-        long home = SectionPos.asLong(100 >> 4, 0, -40 >> 4), above = SectionPos.asLong(100 >> 4, 1, -40 >> 4);
-        assertArrayEquals(new long[]{home}, settled.get(0).sections);
-        assertArrayEquals(new long[]{above}, settled.get(1).sections);
-        assertTrue(settled.get(1).foreign);
-        for (Bake.Call c : settled) c.activeIn = 1;
+        long home = SectionPos.asLong(100 >> 4, 0, -40 >> 4);
+        for (Bake.Call c : settled) {
+            assertEquals(home, c.device.home);
+            c.shown = true;
+        }
         assertEquals(0, frame(16, draw));
-        hidden.add(above);
-        assertEquals(4, frame(16, draw), "the section above is not drawn: the renderer draws that quad");
+        var sprites = java.util.Map.of(mods.eln.misc.UtilsClient.WHITE, new mods.eln.client.render.bake.ModelSprites.Spr(0, 0, 1, 1, false));
+        List<Float> ys = new ArrayList<>();
+        assertEquals(8, mods.eln.client.render.bake.ChunkBake.write((cutout, x, y, z, color, u, v, l) -> ys.add(y),
+            Bake.inDrawOrder(settled), sprites, 96, 0, -48, false));
+        assertEquals(15.5f, ys.get(0), 1e-5f);
+        assertEquals(16.5f, ys.get(4), 1e-5f, "above the section's 16 blocks");
     }
 
     /** The chunk mesh gets a settled call's quads where the renderer drew them, shaded as the entity shader shades. */
@@ -279,7 +278,7 @@ class BakeTest {
             assertFalse(cutout);
             assertEquals(light, l);
             out.add(new float[]{x, y, z, u, v, color});
-        }, settled.toArray(new Bake.Call[0]), sprites, settled.get(0).sections[0], 96, 0, -48, false);
+        }, settled.toArray(new Bake.Call[0]), sprites, 96, 0, -48, false);
         assertEquals(4, n);
         // -x: only the second light reaches it, 0.2/sqrt(1.53) of it
         float shade = (float) (0.2 / Math.sqrt(1.53) * 0.6 + 0.4);
@@ -330,7 +329,7 @@ class BakeTest {
         var sprites = java.util.Map.of(mods.eln.misc.UtilsClient.WHITE, new mods.eln.client.render.bake.ModelSprites.Spr(0, 0, 1, 1, false));
         List<Integer> lights = new ArrayList<>();
         mods.eln.client.render.bake.ChunkBake.write((cutout, x, y, z, color, u, v, l) -> lights.add(l),
-            calls, sprites, calls[0].sections[0], 96, 0, -48, false);
+            calls, sprites, 96, 0, -48, false);
         assertEquals(8, lights.size());
         assertEquals(light, lights.get(0));
         assertEquals(net.minecraft.util.LightCoordsUtil.FULL_BRIGHT, lights.get(7));

@@ -3,7 +3,6 @@ package mods.eln.gl;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -18,10 +17,14 @@ import java.util.function.Predicate;
  * The renderer runs the device's draw code every frame as before. Each display-list primitive it replays (opaque,
  * texture coordinates within the texture) is described by a {@link Call}: the primitive, its matrix, colour, texture,
  * state and light. A call that has been the same for a while is <i>settled</i>: the {@link Host} puts it into the
- * chunk sections its quads lie in and has them re-meshed. Once the mesh on screen contains it, {@link Device#skip}
- * answers true and the renderer leaves it out. A call that changes or stops being drawn leaves the sections at once
+ * chunk section of the device's block and has it re-meshed. Once the mesh on screen contains it, {@link Device#skip}
+ * answers true and the renderer leaves it out. A call that changes or stops being drawn leaves the section at once
  * and is drawn by the renderer again, so nothing is ever assumed to be static: the comparison every frame is the proof.
  * A primitive that keeps changing after it settled (a blinking part) waits longer each time before it settles again.
+ * <p>
+ * All of a device's geometry goes into the section of its block, however far the model reaches: the game draws a
+ * block entity only while that section is drawn, so the chunk shows the device exactly when the renderer would. (A
+ * section holding nothing but air is never compiled, so a part could not be put where it lies.)
  * <p>
  * Render thread only, except that the meshing workers read a settled call's geometry and state (everything but
  * {@link Call#order}; those fields are not written after it settled).
@@ -48,14 +51,11 @@ public final class Bake {
         /** Whether the texture (null = untextured) is in the block atlas. */
         boolean hasSprite(Identifier texture);
 
-        /** The call joins the sections of {@link Call#sections}. */
+        /** The call joins the section of its device ({@link Device#home}). */
         void settled(Call c);
 
-        /** The call leaves its sections. */
+        /** The call leaves its section. */
         void unsettled(Call c);
-
-        /** Whether the section was drawn last frame (a call in a section other than its device's is skipped only then). */
-        boolean visible(long section);
 
         /** Once per rendered frame, before any device is drawn. */
         void frame();
@@ -69,10 +69,10 @@ public final class Bake {
      * Why {@link Device#skip} last answered false, and why a frame has no device at all (statistics). CHANGED = not
      * what it was last frame; WAITING = the same, but not for long enough yet; WAITING_LONG = the same, but the part
      * changed soon after it last settled and waits longer; NOT_SHOWN = settled, the mesh on screen does not contain
-     * it yet; HIDDEN = some of it lies in another section, which is not drawn.
+     * it yet.
      */
     public static final int NONE = 0, NOT_ATTACHED = 1, BURNT = 2, POSE = 3, NO_BLOCK_ENTITY = 4, CHANGED = 5, WAITING = 6,
-        WAITING_LONG = 7, NO_SPRITE = 8, NO_QUADS = 9, NOT_SHOWN = 10, HIDDEN = 11, REASONS = 12;
+        WAITING_LONG = 7, NO_SPRITE = 8, NO_QUADS = 9, NOT_SHOWN = 10, REASONS = 11;
     static int why;
     /** What made a call differ from the device's last draw of the same primitive (statistics). */
     public static final int NEW = 0, BY_MATRIX = 1, BY_LIGHT = 2, BY_STATE = 3, CHANGES = 4;
@@ -98,14 +98,10 @@ public final class Bake {
         int stamp;
         /** Its place in the device's last draw (render thread only; rewritten every frame). */
         int order;
-        /** The sections holding this call's quads (SectionPos.asLong); set when it settles. */
-        public long[] sections;
-        /** In how many of them the mesh on screen contains this call (kept by the host). */
-        public int activeIn;
-        /** Some of its quads lie in a section other than its device's. */
-        public boolean foreign;
+        /** Whether the mesh on screen contains this call (kept by the host). */
+        public boolean shown;
 
-        /** Whether it is in its sections now (false again once it changed or was no longer drawn). */
+        /** Whether it is in its section now (false again once it changed or was no longer drawn). */
         public boolean isSettled() {
             return settled;
         }
@@ -149,50 +145,6 @@ public final class Bake {
             return at(m) && this.color == color && this.light == light && this.cull == cull && this.fullBright == fullBright && this.lit == lit
                 && (this.texture == texture || (texture != null && texture.equals(this.texture)));
         }
-    }
-
-    /** The section holding the quad that starts at float index i of the call's quads: the one its centre is in. */
-    public static long sectionOf(Call c, int i) {
-        float[] q = c.quads;
-        int s = GlFrame.STRIDE;
-        float x = (q[i] + q[i + s] + q[i + 2 * s] + q[i + 3 * s]) * 0.25f;
-        float y = (q[i + 1] + q[i + s + 1] + q[i + 2 * s + 1] + q[i + 3 * s + 1]) * 0.25f;
-        float z = (q[i + 2] + q[i + s + 2] + q[i + 2 * s + 2] + q[i + 3 * s + 2]) * 0.25f;
-        int bx = BlockPos.getX(c.pos) + Mth.floor(c.m00 * x + c.m10 * y + c.m20 * z + c.m30);
-        int by = BlockPos.getY(c.pos) + Mth.floor(c.m01 * x + c.m11 * y + c.m21 * z + c.m31);
-        int bz = BlockPos.getZ(c.pos) + Mth.floor(c.m02 * x + c.m12 * y + c.m22 * z + c.m32);
-        return SectionPos.asLong(bx >> 4, by >> 4, bz >> 4);
-    }
-
-    private static long[] sectionsOf(Call c) {
-        long first = 0;
-        long[] more = null;
-        int n = 0;
-        for (int i = 0; i + 4 * GlFrame.STRIDE <= c.floats; i += 4 * GlFrame.STRIDE) {
-            long s = sectionOf(c, i);
-            if (n == 0) {
-                first = s;
-                n = 1;
-                continue;
-            }
-            if (s == first) continue;
-            boolean known = false;
-            for (int k = 0; k < n - 1; k++) {
-                if (more[k] == s) {
-                    known = true;
-                    break;
-                }
-            }
-            if (known) continue;
-            if (more == null) more = new long[4];
-            else if (n - 1 == more.length) more = java.util.Arrays.copyOf(more, more.length * 2);
-            more[n - 1] = s;
-            n++;
-        }
-        long[] out = new long[n];
-        if (n > 0) out[0] = first;
-        if (n > 1) System.arraycopy(more, 0, out, 1, n - 1);
-        return out;
     }
 
     /**
@@ -267,7 +219,9 @@ public final class Bake {
     /** A block entity's calls: last frame's, matched against this frame's as they come. */
     public static final class Device {
         public final Object owner;
-        final long pos, home;
+        final long pos;
+        /** The chunk section of the device's block (SectionPos.asLong): where its settled calls go. */
+        public final long home;
         final int id = devices++;
         private int light;
         private Call[] prev = new Call[8], cur = new Call[8];
@@ -354,12 +308,10 @@ public final class Bake {
                     why = changed ? CHANGED : wait == SETTLE_NS ? WAITING : WAITING_LONG;
                     return false;
                 }
-                c.sections = sectionsOf(c);
-                if (c.sections.length == 0) {
+                if (c.floats < 4 * GlFrame.STRIDE) {
                     why = NO_QUADS;
                     return false;
                 }
-                c.foreign = c.sections.length > 1 || c.sections[0] != home;
                 c.settled = true;
                 c.settledAt = now;
                 settles++;
@@ -368,17 +320,9 @@ public final class Bake {
                 host.settled(c);
             }
             if (mode == 2) return true;
-            if (c.activeIn != c.sections.length) {
+            if (!c.shown) {
                 why = NOT_SHOWN;
                 return false;
-            }
-            if (c.foreign) {
-                for (long s : c.sections) {
-                    if (s != home && !host.visible(s)) {
-                        why = HIDDEN;
-                        return false;
-                    }
-                }
             }
             return true;
         }
