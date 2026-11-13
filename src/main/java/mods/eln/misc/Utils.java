@@ -245,7 +245,7 @@ public class Utils {
         value += mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius;
         if (!header.equals(""))
             header += " ";
-        return header + plotValue(value, "\u00B0C ");
+        return header + mods.eln.api.Meters.celsius(value) + " ";
     }
 
     public static String plotPercent(String header, double value) {

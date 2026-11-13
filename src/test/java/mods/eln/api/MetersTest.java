@@ -22,6 +22,11 @@ public class MetersTest {
             assertEquals("10.0Ω", Meters.ohms(10));
             assertEquals("30.0K", Meters.kelvin(30));
             assertEquals("85.0°C", Meters.celsius(85));
+            // (under a degree: decimals, no milli-degrees; a client check read "122 m°C" on a cold furnace)
+            assertEquals("0.12°C", Meters.celsius(0.122));
+            assertEquals("-0.50°C", Meters.celsius(-0.5));
+            assertEquals("0°C", Meters.celsius(0.004));
+            assertEquals("1.50k°C", Meters.celsius(1500));
             // number() is the one copy of EA's meter format (Utils.plotValue calls it): pinned at every band
             double[] in = {0, 5e-7, 2e-6, 4.5e-5, 4.5e-4, 0.0045, 0.045, 0.45, 4.5, 45, 450, 4500, 45000, 450000, 4.5e6, 4.5e7, 4.5e8, -0.0032};
             String[] out = {"0", "0", "2.00µ", "45.0µ", "450µ", "4.50m", "45.0m", "450m", "4.50", "45.0", "450", "4.50k",

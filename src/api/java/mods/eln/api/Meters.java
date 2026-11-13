@@ -39,9 +39,14 @@ public final class Meters {
         return number(kelvin) + "K";
     }
 
-    /** A temperature in degrees Celsius (as MachineView.celsius()): "85.0°C". */
+    /**
+     * A temperature in degrees Celsius (as MachineView.celsius()): "85.0°C". Under a degree it has two decimals and no
+     * prefix ("0.12°C", not "122m°C": nobody reads milli-degrees Celsius), and "0°C" under 0.005.
+     */
     public static String celsius(double celsius) {
-        return number(celsius) + "°C";
+        double abs = Math.abs(celsius);
+        if (abs < 0.005) return "0°C";
+        return (abs < 0.999 ? String.format("%1.2f", celsius) : number(celsius)) + "°C";
     }
 
     /**
