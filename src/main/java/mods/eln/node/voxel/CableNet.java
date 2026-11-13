@@ -254,6 +254,7 @@ final class CableNet {
             for (int j = i + 1; j < n; j++) {
                 CablePart a = cables.get(i), b = cables.get(j);
                 if (a.isKnuckle() || b.isKnuckle() || !a.sameCable(b) || a.face != b.face || !a.touches(b)) continue;
+                CableLinks.recordTouching(a, b);
                 int ra = find(root, i), rb = find(root, j);
                 if (ra != rb) root[ra] = rb;
             }
@@ -270,17 +271,21 @@ final class CableNet {
         for (int i = 0; i < conductors.size(); i++)
             for (int j = i + 1; j < conductors.size(); j++) {
                 Conductor a = conductors.get(i), b = conductors.get(j);
-                if (!a.valid() || !b.valid() || a.isBurntNow() || b.isBurntNow()) continue;
-                if (!NodeBase.compareConnectionMask(a.mask(), b.mask()) || !touch(a, b)) continue;
+                if (!a.valid() || !b.valid() || !NodeBase.compareConnectionMask(a.mask(), b.mask())) continue;
+                CablePart[] pq = touching(a, b);
+                if (pq == null) continue;
+                CableLinks.recordTouching(pq[0], pq[1]);   // (a burnt piece keeps its joints: it is repaired in place)
+                if (a.isBurntNow() || b.isBurntNow()) continue;
                 if (a.load != null && b.load != null) internalE.add(new ElectricalConnection(a.load, b.load));
                 if (a.thermal != null && b.thermal != null) internalT.add(new ThermalConnection(a.thermal, b.thermal));
                 if (a.port != null && b.port != null) internalB.add(new mods.eln.bus.BusPort[]{a.port, b.port});
             }
     }
 
-    private static boolean touch(Conductor a, Conductor b) {
-        for (CablePart p : a.parts) for (CablePart q : b.parts) if (p.touches(q)) return true;
-        return false;
+    /** The first pair of pieces, one of each conductor, that touch; null if none. */
+    private static CablePart[] touching(Conductor a, Conductor b) {
+        for (CablePart p : a.parts) for (CablePart q : b.parts) if (p.touches(q)) return new CablePart[]{p, q};
+        return null;
     }
 
     private static int find(int[] root, int i) {
