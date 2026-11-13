@@ -134,6 +134,7 @@ public final class CableRouter {
     public static List<Piece> pieces(List<Step> steps, int width, int height) {
         List<Piece> out = new ArrayList<>();
         Gap gap = null;   // (an outer corner inside a block still to fill)
+        int[] inner = null;   // (the faces of an inner corner the next run leaves from)
         // densify: a point at every block boundary crossed along a run
         List<Step> dense = new ArrayList<>();
         for (int i = 0; i < steps.size(); i++) {
@@ -188,9 +189,13 @@ public final class CableRouter {
                 continue;
             }
             if (a.attach != b.attach) {   // inner corner: same point, new face
+                // (a run along the corner's edge, which only a stretch through the air allows, reaches on as round an
+                // outer corner: a one-voxel cable dropping off a ceiling met its run along the floor at an edge only)
+                alongEdge(poly, curKey, a.attach, b.attach, width);
                 flush(out, curKey, poly);
                 curKey = null;
                 poly = null;
+                inner = new int[]{a.attach, b.attach};
                 continue;
             }
             if (a.x == b.x && a.y == b.y && a.z == b.z) continue;
@@ -205,6 +210,8 @@ public final class CableRouter {
                 poly.add(new long[]{a.x, a.y, a.z});
             }
             poly.add(new long[]{b.x, b.y, b.z});
+            if (inner != null && poly.size() == 2) alongEdgeStart(poly, curKey, inner[0], inner[1], width);
+            inner = null;
             if (gap != null && poly.size() == 2) {
                 if (!gap.fillAfter(poly, curKey)) {
                     gap.stub(out);

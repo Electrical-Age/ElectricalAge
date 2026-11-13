@@ -1,5 +1,6 @@
 package mods.eln.node.voxel;
 
+import net.jqwik.api.Example;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.constraints.IntRange;
@@ -73,6 +74,15 @@ public class CableAirPropertyTest {
                 + ps.get(k) + " " + java.util.Arrays.toString(ps.get(k).points()) + " " + CableRoutePropertyTest.boxesText(tier, ps.get(k))
                 + "; steps " + r.steps);
         }
+    }
+
+    /**
+     * A sample the property found: a one-voxel cable drops from a ceiling through the air onto a slab and leaves along
+     * the floor, across the drop. The floor run must reach back under the drop, not meet it at an edge.
+     */
+    @Example
+    void aRunAcrossADropTouchesIt() {
+        airRunsAreWholeAndWithinTheLimit(13, 0, 0, 0, 0, 1);
     }
 
     @AfterContainer
