@@ -56,6 +56,12 @@ final class AutoMinerSpinCase implements TestCase {
         return ((mods.eln.anim.Spin) f.get(r)).deg();
     }
 
+    static boolean[] leds(AutoMinerRender r, String field) throws Exception {
+        var f = AutoMinerRender.class.getDeclaredField(field);
+        f.setAccessible(true);
+        return (boolean[]) f.get(r);
+    }
+
     /** Degrees turned over `seconds` of 0.05 s client frames (unwrapped). */
     static float turn(AutoMinerRender r, float seconds) throws Exception {
         float total = 0, last = alpha(r);
@@ -90,9 +96,16 @@ final class AutoMinerSpinCase implements TestCase {
             ctx.check("autominer: spinning drill draws", PublishRenderCase.draw(ctx, "Auto Miner (mining)", r::draw), "");
             // the drill stands for the reference and while the parts settle (13 draws), then turns: the chunk has it
             // by then, and the renderer must draw it again from the first frame it moves
+            // (its LEDs flip at random in refresh: held as they are, so that the drill is the only part that changes.
+            // One that went out after its part was in the chunk failed the check now and then)
+            boolean[][] leds = {leds(r, "ledsAState"), leds(r, "ledsPState")};
+            boolean[][] held = {leds[0].clone(), leds[1].clone()};
             int[] draws = {0};
             BakeOnceCheck.check(ctx, "Auto Miner (the drill starts to turn)", be, at, () -> {
-                if (draws[0]++ >= 13) r.refresh(0.05f);
+                if (draws[0]++ >= 13) {
+                    r.refresh(0.05f);
+                    for (int i = 0; i < 2; i++) System.arraycopy(held[i], 0, leds[i], 0, held[i].length);
+                }
                 r.draw();
             });
             publish(r, none, true);
