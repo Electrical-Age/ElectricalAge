@@ -37,4 +37,14 @@ public class SafetyValveItem extends Item implements PipeTool {
         if (player == null || !player.isCreative()) ctx.getItemInHand().shrink(1);
         return InteractionResult.SUCCESS;
     }
+
+    /** Its tooltip lines (client ItemTooltips). */
+    public java.util.List<String> tooltip() {
+        return purge
+            ? java.util.List.of("Lets gas out of a pipe above its set pressure, never liquid.",
+                "Bleeds a crude tank's gas or the air of a filling run (set to 1.1 bar at first).",
+                "Fits on a straight stretch of pipe; right-click it with an empty hand to set it.")
+            : java.util.List.of("Lets out whatever is in a pipe above its set pressure.",
+                "Fits on a straight stretch of pipe; right-click it with an empty hand to set it.");
+    }
 }

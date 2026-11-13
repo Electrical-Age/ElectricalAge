@@ -34,6 +34,10 @@ public final class ItemTooltips {
             for (String l : v.tooltip()) e.getToolTip().add(Component.literal(l));
             return;
         }
+        if (stack.getItem() instanceof mods.eln.node.voxel.SafetyValveItem sv) {
+            for (String l : sv.tooltip()) e.getToolTip().add(Component.literal(l));
+            return;
+        }
         if (!(stack.getItem() instanceof IDescriptorItem di)) return;
         Object d = di.getEaDescriptor();
         if (d == null || broken.contains(d)) return;
