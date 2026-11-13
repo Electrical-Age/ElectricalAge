@@ -33,7 +33,7 @@ public class PipeMixerDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add("Two inlets (left A, right B), one outlet (back): two check valves steered by one signal.");
+        list.add("Two inlets (left A, red wheel; right B, blue wheel), one outlet (back): two check valves steered by one signal.");
         list.add("A signal on its front opens A by it and B by the rest (no signal: half each).");
         list.add("The mix follows the pressures: set it by calculation, or by watching what comes out.");
     }

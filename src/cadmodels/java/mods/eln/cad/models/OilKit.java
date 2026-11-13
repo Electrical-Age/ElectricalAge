@@ -114,16 +114,21 @@ public final class OilKit {
 
     /** Red valve handwheel (rim and two spokes) at (x, y, z), turning about 'y' or 'z'. */
     public static List<Mesh> handwheel(double x, double y, double z, double r, char axis) {
+        return handwheel(x, y, z, r, axis, "red");
+    }
+
+    /** A valve handwheel of material mat (two valves on one device told apart by their wheels' colours). */
+    public static List<Mesh> handwheel(double x, double y, double z, double r, char axis, String mat) {
         List<Mesh> ms = new ArrayList<>();
         if (axis == 'y') {
-            ms.add(tube('y', x, z, r - 0.3, r, y - 0.15, y + 0.15, "red", 6));
-            ms.add(box(x - r + 0.2, y - 0.1, z - 0.12, x + r - 0.2, y + 0.1, z + 0.12, "red"));
-            ms.add(box(x - 0.12, y - 0.1, z - r + 0.2, x + 0.12, y + 0.1, z + r - 0.2, "red"));
+            ms.add(tube('y', x, z, r - 0.3, r, y - 0.15, y + 0.15, mat, 6));
+            ms.add(box(x - r + 0.2, y - 0.1, z - 0.12, x + r - 0.2, y + 0.1, z + 0.12, mat));
+            ms.add(box(x - 0.12, y - 0.1, z - r + 0.2, x + 0.12, y + 0.1, z + r - 0.2, mat));
             ms.add(prism('y', x, z, 0.3, y - 0.2, y + 0.3, "darksteel", 6));
         } else {
-            ms.add(tube('z', x, y, r - 0.3, r, z - 0.15, z + 0.15, "red", 6));
-            ms.add(box(x - r + 0.2, y - 0.12, z - 0.1, x + r - 0.2, y + 0.12, z + 0.1, "red"));
-            ms.add(box(x - 0.12, y - r + 0.2, z - 0.1, x + 0.12, y + r - 0.2, z + 0.1, "red"));
+            ms.add(tube('z', x, y, r - 0.3, r, z - 0.15, z + 0.15, mat, 6));
+            ms.add(box(x - r + 0.2, y - 0.12, z - 0.1, x + r - 0.2, y + 0.12, z + 0.1, mat));
+            ms.add(box(x - 0.12, y - r + 0.2, z - 0.1, x + 0.12, y + r - 0.2, z + 0.1, mat));
             ms.add(prism('z', x, y, 0.3, z - 0.2, z + 0.3, "darksteel", 6));
         }
         return ms;

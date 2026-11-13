@@ -14,7 +14,7 @@ import static mods.eln.cad.models.OilKit.signalPlate;
  * The Pipe Mixer (Baughn 2026-11-11): a pipe T of two steerable check valves. Inlet A on its left flank (z = 0:
  * front.left()), inlet B on its right (z = 16), the outlet out of its back (x = 16), all at the line's height
  * (PipeMixerElement.LINE_Y), iron pipe flanges at the face centre; a cast body over the junction with a valve bonnet
- * and handwheel over each inlet; the signal on the front floor terminal. Part main. Front XN (x = 0).
+ * and handwheel over each inlet (A's red, B's blue); the signal on the front floor terminal. Part main. Front XN (x = 0).
  */
 public final class PipeMixer {
     private PipeMixer() {
@@ -35,10 +35,10 @@ public final class PipeMixer {
         m.add(prism('z', C, LY, 1.5, 15.0, 16.0, "steel", 10, false, true));
         m.add(prism('x', LY, C, 0.75, 10.5, 15.1, "steel", 8, false, false));
         m.add(prism('x', LY, C, 1.5, 15.0, 16.0, "steel", 10, false, true));
-        // a bonnet and a handwheel over each inlet's valve
+        // a bonnet and a handwheel over each inlet's valve: A's wheel red, B's blue (a client check: the inlets looked alike)
         for (double z : new double[]{5.75, 10.25}) {
             m.add(prism('y', C, z, 0.9, 6.4, 8.5, "steel", 8, false, true));
-            m.addAll(handwheel(C, 8.7, z, 1.1, 'y'));   // (its hub on the bonnet's top)
+            m.addAll(handwheel(C, 8.7, z, 1.1, 'y', z < C ? "red" : "blue"));   // (its hub on the bonnet's top)
         }
         // the signal terminal on the front, its backing joining it to the skid
         m.addAll(signalPlate());

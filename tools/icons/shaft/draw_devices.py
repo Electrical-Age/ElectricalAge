@@ -505,7 +505,8 @@ GREEN = R('#132a17', '#1f4426', '#2e6638', '#3f844a', '#68ab70', '#9ccda1')
 
 def pipe_mixer():
     """pipemixer: the pipe across with flanges at both ends, the green cast body over the junction, two valve bonnets
-    with red handwheels on top, the outlet stub receding behind, the signal terminal in front."""
+    with handwheels on top (A's red on the left, B's blue), the outlet stub receding behind, the signal terminal in
+    front."""
     cv = Canvas(16)
     skid(cv, 2, 13)
     sub(cv, lambda c: box(c, 9, 7, 2, 2, 4, STEEL, bevel=False))   # (the outlet, going back)
@@ -516,7 +517,7 @@ def pipe_mixer():
     sub(cv, lambda c: box(c, 4, 6, 7, 6, 2, GREEN))
     for x in (4, 8):
         sub(cv, lambda c, x=x: box(c, x, 3, 2, 3, 1, STEEL, bevel=False))
-        cv.hline(x - 1, x + 1, 2, MARK_RED)   # (each bonnet's handwheel)
+        cv.hline(x - 1, x + 1, 2, MARK_RED if x == 4 else h('#2854c8'))   # (each bonnet's handwheel: A red, B blue)
     cv.set(7, 12, ORANGE[3])
     return cv
 
