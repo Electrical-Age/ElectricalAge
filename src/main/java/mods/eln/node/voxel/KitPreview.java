@@ -105,10 +105,12 @@ public final class KitPreview {
             int exp = Router.LAST_EXPANSIONS.get();
             long waitMs = (tRoute - tQueued) / 1_000_000, routeMs = (System.nanoTime() - tRoute) / 1_000_000;
             slow("preview route (worker)", tRoute, (startJoin != null ? "from a cable, " : "") + exp + " expansions");
-            server.execute(() -> {
+            // sent from here, not handed back to the server thread: that waited for the next tick, 40-90 ms of every
+            // update (the route debug kit found it; Baughn's slow start). The connection's send is thread-safe
+            {
                 if (GEN.getOrDefault(id, 0L) != gen) return;
-                ServerPlayer now = server.getPlayerList().getPlayer(id);
-                if (now == null) return;
+                ServerPlayer now = p;
+                if (now.hasDisconnected()) return;
                 List<int[]> bs = a.boxes;
                 if (device && a.ok) {
                     bs = new ArrayList<>(bs);
@@ -120,7 +122,7 @@ public final class KitPreview {
                         RouteDebug.token(tier, start, startJoin, wps, at, endJoin));
                 // (always a line: a "can't reach" left over from a moment ago read as if the route drawn now were wrong)
                 now.sendOverlayMessage(net.minecraft.network.chat.Component.literal(a.message));
-            });
+            }
         });
     }
 
@@ -317,13 +319,13 @@ public final class KitPreview {
                 Eln.LOG.warn("Pipe route preview failed", ex);
                 return;
             }
-            server.execute(() -> {
+            {   // (sent from here, as the cable preview: no wait for the next tick)
                 if (GEN.getOrDefault(id, 0L) != gen) return;
-                ServerPlayer now = server.getPlayerList().getPlayer(id);
-                if (now == null) return;
+                ServerPlayer now = p;
+                if (now.hasDisconnected()) return;
                 send(now, ans.ok(), ans.boxes(), ans.ok() && toPort);
                 now.sendOverlayMessage(net.minecraft.network.chat.Component.literal(ans.message()));
-            });
+            }
         });
     }
 
