@@ -40,7 +40,10 @@ public final class ElnWorldSaves {
             if (e.getLevel() instanceof ServerLevel l) save(l);
         });
         NeoForge.EVENT_BUS.addListener(LevelEvent.Unload.class, e -> {
-            if (e.getLevel() instanceof ServerLevel l) unload(l);
+            if (e.getLevel() instanceof ServerLevel l) {
+                unload(l);
+                mods.eln.sim.Ambient.forget(l);
+            }
         });
     }
 

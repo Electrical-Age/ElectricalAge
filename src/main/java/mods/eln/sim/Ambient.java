@@ -29,10 +29,39 @@ public final class Ambient {
     /** The GameTests' fixed ambient (their world's biomes vary from test to test); null in a game. */
     public static volatile Double fixedC;
 
+    /**
+     * Ambient in unloaded chunks by level and position: there it comes from the world generator (surface height, biome),
+     * which never changes but costs about a millisecond a call, and the fluid world asks for every device every step
+     * (Baughn 2026-11-13: 5 TPS with every overworld base unloaded while players were in the End). Bounded: cleared when
+     * it grows past CACHE_MAX positions.
+     */
+    private static final java.util.concurrent.ConcurrentHashMap<Level, java.util.concurrent.ConcurrentHashMap<Long, Double>> UNLOADED =
+        new java.util.concurrent.ConcurrentHashMap<>();
+    static final int CACHE_MAX = 1 << 16;
+
     /** Ambient at pos, in C. */
     public static double celsius(Level level, BlockPos pos) {
         Double fixed = fixedC;
         if (fixed != null) return fixed;
+        if (level instanceof net.minecraft.server.level.ServerLevel && !level.hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) {
+            var m = UNLOADED.computeIfAbsent(level, l -> new java.util.concurrent.ConcurrentHashMap<>());
+            long k = pos.asLong();
+            Double c = m.get(k);
+            if (c != null) return c;
+            double v = compute(level, pos);
+            if (m.size() >= CACHE_MAX) m.clear();
+            m.put(k, v);
+            return v;
+        }
+        return compute(level, pos);
+    }
+
+    /** Forget a level's cached ambients (it unloaded). */
+    public static void forget(Level level) {
+        UNLOADED.remove(level);
+    }
+
+    private static double compute(Level level, BlockPos pos) {
         if (level.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.WATER_EVAPORATES, pos)) return netherC;
         var climate = level.getBiome(pos).value().getModifiedClimateSettings();
         double t = climate.temperatureModifier().modifyTemperature(pos, climate.temperature());
