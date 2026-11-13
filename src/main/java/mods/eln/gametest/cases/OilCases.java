@@ -90,7 +90,8 @@ public final class OilCases {
         cases.add(new Buckets2());
         cases.add(new Column());
         cases.add(new ColumnFold());
-        cases.add(new Flare());
+        cases.add(new Flare(false));
+        cases.add(new Flare(true));
         for (String v : FlareNode.VARIANTS) cases.add(new FlareNode(v));
     }
 
@@ -3607,12 +3608,20 @@ public final class OilCases {
         }
     }
 
-    /** The flare stack burns what it's given at 250 mB/s. */
+    /**
+     * The flare stack burns what it's given at 250 mB/s. Water (variant water) boils off at that rate without a flame
+     * (Baughn 2026-11-11: the flare shouldn't "burn" water): the client is told a plume, and Jade says "Boiling off".
+     */
     static final class Flare implements TestCase {
+        final boolean water;
         mods.eln.oil.FlareStackElement flare;
 
+        Flare(boolean water) {
+            this.water = water;
+        }
+
         public String id() {
-            return "oil_flare";
+            return water ? "oil_flare_water" : "oil_flare";
         }
 
         public int ticks() {
@@ -3622,12 +3631,21 @@ public final class OilCases {
         public void build(TestContext ctx) {
             Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
             flare = (mods.eln.oil.FlareStackElement) l.device(8 + (83 << 6), 2, 1);
-            flare.putFluid(mods.eln.oil.Oil.Cut.RESIDUE.source.get(), 1000);
+            flare.putFluid(water ? net.minecraft.world.level.material.Fluids.WATER : mods.eln.oil.Oil.Cut.RESIDUE.source.get(), 1000);
         }
 
         public void measure(TestContext ctx) {
             double burnt = 1000 - flare.liquidMb();
-            ctx.check("oil: the flare stack burns ~250 mB/s (2 s)", burnt >= 400 && burnt <= 550, String.format("%.0f mB", burnt));
+            var jade = flare.getWaila();
+            if (water) {
+                ctx.check("oil: the flare stack boils water off at ~250 mB/s (2 s)", burnt >= 400 && burnt <= 550, String.format("%.0f mB", burnt));
+                ctx.check("oil: water at the flare goes up as a plume, not a flame", flare.plume() && flare.burning().equals("water"), flare.burning());
+                ctx.check("oil: Jade doesn't say the flare burns water", jade.containsKey("Boiling off") && !jade.containsKey("Burning"), "" + jade);
+            } else {
+                ctx.check("oil: the flare stack burns ~250 mB/s (2 s)", burnt >= 400 && burnt <= 550, String.format("%.0f mB", burnt));
+                ctx.check("oil: residue at the flare burns with a flame", !flare.plume() && flare.burning().equals("residue"), flare.burning());
+                ctx.check("oil: Jade says the flare is burning", jade.containsKey("Burning") && !jade.containsKey("Boiling off"), "" + jade);
+            }
         }
     }
 

@@ -18,7 +18,6 @@ public class FlareStackRender extends TransparentNodeElementRender {
     final mods.eln.anim.Emitter puffs = new mods.eln.anim.Emitter();
     static final Random RND = new Random();
     static final Set<String> HEAVY = Set.of("heavyoil", "residue", "crude_oil", "reservoir_oil", "creosote", "oil", "lava", "tar");
-    static final Set<String> VAPOUR = Set.of("steam", "ic2steam", "water");
 
     enum Look {NONE, VAPOUR, GAS, LIGHT, HEAVY}
 
@@ -29,7 +28,7 @@ public class FlareStackRender extends TransparentNodeElementRender {
 
     static Look look(String fluid) {
         if (fluid.isEmpty()) return Look.NONE;
-        if (VAPOUR.contains(fluid)) return Look.VAPOUR;
+        if (FlareStackElement.PLUME.contains(fluid)) return Look.VAPOUR;
         if (HEAVY.contains(fluid)) return Look.HEAVY;
         if (java.util.Arrays.asList(mods.eln.fluid.FuelRegistry.INSTANCE.getGasList()).contains(fluid)) return Look.GAS;
         return Look.LIGHT;

@@ -60,6 +60,17 @@ public class FlareStackElement extends TransparentNodeElement implements FluidDe
     /** What it burnt (kg) since it was made: gas, and liquid (tests weigh it against what went in). */
     public double gasBurntKg, liquidBurntKg;
     String burning = "";
+    /** What goes up the stack without a flame (Baughn 2026-11-11: the flare shouldn't "burn" water): a plume, and no "Burning" line. */
+    static final java.util.Set<String> PLUME = java.util.Set.of("steam", "ic2steam", "water");
+
+    /** What it burns or boils off most of, as the client is told ("" for nothing), and whether that goes up as a plume. */
+    public String burning() {
+        return burning;
+    }
+
+    public boolean plume() {
+        return PLUME.contains(burning);
+    }
 
     public FlareStackElement(TransparentNode node, TransparentNodeDescriptor d) {
         super(node, d);
@@ -340,7 +351,8 @@ public class FlareStackElement extends TransparentNodeElement implements FluidDe
             info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
             info.put(I18N.tr("Tank"), String.format("%.0f / %.0f mB of liquid", liquidMb(), VESSEL_MB));
         }
-        info.put(I18N.tr("Burning"), String.format("%.0f mB/s", burnRate));
+        if (plume()) info.put(I18N.tr("Boiling off"), String.format(I18N.tr("%.0f mB/s of water, no flame"), burnRate));
+        else info.put(I18N.tr("Burning"), String.format("%.0f mB/s", burnRate));
         return info;
     }
 }
