@@ -257,6 +257,16 @@ public final class ElnGameTests {
         var on = LinksDiff.connectedWith(scope, true);
         ctx.check("links: the joints build the same network as the rules", off.equals(on),
             off.size() + " vs " + on.size() + " lines; " + LinksDiff.difference(off, on, 6));
+        // one block at a time (second opinion, 11-13: a block reconnecting alone builds its links against neighbours
+        // whose joints were confirmed in their own passes): after each single reconnect, still the rules' network
+        String single = "";
+        for (var v : scope) {
+            var now = LinksDiff.connectedWith(java.util.List.of(v), true);
+            var all = LinksDiff.canonical(scope);
+            if (!all.equals(off) && single.isEmpty())
+                single = v.coordonate + ": " + LinksDiff.difference(off, all, 6);
+        }
+        ctx.check("links: each block reconnected alone keeps the rules' network", single.isEmpty(), single);
     }
 
     /** The cable pieces' stored joints say what the live network has (CableVerify), over the voxel blocks in the test's bounds. */
