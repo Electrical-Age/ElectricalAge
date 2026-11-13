@@ -141,6 +141,10 @@ change, and the block entity renderer draws the rest. The draw code is untouched
   again is held in its section until the run ends, so a part that changes far away is swapped in one re-mesh,
   not removed and added. A part that keeps moving is left out. At most 64 far frames a rendered frame; burnt
   devices get none. The rules and their reasons are in `Bake.Device`'s javadoc; `BakeTest` tests them.
+- Draw code at a distance (audited for far frames, 2026-11): no `draw()` sends packets beyond its own range (the
+  data logger and the signal processor `watch()` only within 32 and 6 blocks), plays sounds or spawns particles;
+  those happen in `refresh`, which runs for every loaded device whatever the distance. What draw code writes (random
+  LEDs, the breaker's clock, coil textures made on first draw) is harmless when drawn far.
 - Light: not part of a call. The snapshot reads each device's packed light as `BlockEntityRenderState` does, and the
   game meshes a section again when light in it changes. The colour carries the entity shader's shading (two lights
   of 0.6 over 0.4 ambient, the normal a signed byte per axis), since the chunk shader has none.
