@@ -26,7 +26,8 @@ import java.util.Map;
  * Server publish -> client render, for every device with a render (P3 R3): each device is placed, its node's real
  * publish packet is read by a fresh client-side block entity (as the client does on chunk load), and then drawn into
  * a GlFrame (its recording time is logged). The render must consume the packet exactly (a short read on one face of a six-node block garbles the
- * faces after it), not throw, and emit vertices.
+ * faces after it), not throw, and emit vertices. Each device is then drawn with its unchanging parts in the chunk's
+ * geometry ({@link BakeOnceCheck}): the picture must be the same.
  */
 final class PublishRenderCase implements TestCase {
     public String id() {
@@ -66,6 +67,7 @@ final class PublishRenderCase implements TestCase {
         BlockPos p = ctx.at(4, 1, 1);
         Map<Object, Boolean> seen = new IdentityHashMap<>();
         int ok = 0, all = 0;
+        BakeOnceCheck.reset();
         // every device has a render registered (ClientRenders): without one its node draws nothing in the world, while
         // its item (drawn from the descriptor) looks fine (the electrical anvil, 2026-10-28)
         java.util.Set<String> noRender = new java.util.TreeSet<>();
@@ -102,7 +104,10 @@ final class PublishRenderCase implements TestCase {
                 else if (INVISIBLE_IN_112.contains(d.name)) {
                     r.draw();
                     ok++;
-                } else if (draw(ctx, d.name, r::draw)) ok++;
+                } else if (draw(ctx, d.name, r::draw)) {
+                    ok++;
+                    BakeOnceCheck.check(ctx, d.name, be, p, r::draw);
+                }
             }
             GoldenSlotsCase.clear(ctx);
         }
@@ -130,11 +135,15 @@ final class PublishRenderCase implements TestCase {
                 else if (INVISIBLE_IN_112.contains(d.name) || level.getBlockState(at).getRenderShape() == net.minecraft.world.level.block.RenderShape.MODEL) {
                     be.elementRender.draw();
                     ok++;
-                } else if (draw(ctx, d.name, be.elementRender::draw)) ok++;
+                } else if (draw(ctx, d.name, be.elementRender::draw)) {
+                    ok++;
+                    BakeOnceCheck.check(ctx, d.name, be, at, be.elementRender::draw);
+                }
             }
             GoldenSlotsCase.clear(ctx);
         }
         ctx.check("publish_render: devices", ok == all, ok + " of " + all);
+        BakeOnceCheck.summary(ctx, 0.9);   // (98.9% when this was written)
     }
 
     /** Feed the node's publish packet to a client-side entity; it must read every byte. */

@@ -88,6 +88,13 @@ final class AutoMinerSpinCase implements TestCase {
             float spinning = turn(r, 1);
             ctx.check("autominer: mining drill turns ~360 deg/s", spinning > 330 && spinning < 370, spinning + " deg in 1 s");
             ctx.check("autominer: spinning drill draws", PublishRenderCase.draw(ctx, "Auto Miner (mining)", r::draw), "");
+            // the drill stands for the reference and while the parts settle (13 draws), then turns: the chunk has it
+            // by then, and the renderer must draw it again from the first frame it moves
+            int[] draws = {0};
+            BakeOnceCheck.check(ctx, "Auto Miner (the drill starts to turn)", be, at, () -> {
+                if (draws[0]++ >= 13) r.refresh(0.05f);
+                r.draw();
+            });
             publish(r, none, true);
             turn(r, 6);
             float after = turn(r, 1);

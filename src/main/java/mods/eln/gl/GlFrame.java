@@ -161,9 +161,14 @@ public final class GlFrame {
 
     /** A new render frame: every batch handed out before has been drawn. */
     public static void beginRenderFrame() {
+        beginRenderFrame(System.nanoTime());
+    }
+
+    /** A new render frame at the given time in nanoseconds (tests set their own clock for {@link Bake}). */
+    public static void beginRenderFrame(long nanos) {
         poolUsed = 0;
         BakeStats.frame();
-        Bake.frame(System.nanoTime());
+        Bake.frame(nanos);
     }
 
     private static Batch acquire() {
