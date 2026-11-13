@@ -145,10 +145,13 @@ public final class CableLinks {
             var other = node.getNeighbor(mods.eln.misc.Direction.fromEnumFacing(d));
             if (!(other instanceof VoxelNode v) || !other.isAdded()) continue;
             int dx = -d.getStepX(), dy = -d.getStepY(), dz = -d.getStepZ();
+            int back = mods.eln.misc.Direction.fromEnumFacing(d.getOpposite()).getInt();
             for (VoxelPart p : v.parts) {
                 if (!(p instanceof CablePart c) || c.burnt != null) continue;
                 c.joints.removeIf(j -> {
-                    if (!implied(j) || toBurnt(v, j)) return false;
+                    if (!implied(j)) return false;
+                    if (kind(j) == TERM_NEIGHBOUR) return j[2] == back;   // (toward a block that was a legacy one: now voxel)
+                    if (toBurnt(v, j)) return false;
                     int[] o = offset(j);
                     return o != null && o[0] == dx && o[1] == dy && o[2] == dz;
                 });
@@ -169,6 +172,21 @@ public final class CableLinks {
             at = v;
         }
         return at.partById(id) instanceof CablePart c && c.burnt != null;
+    }
+
+    /** The block of `node` goes (broken, or reverted to a six-node block): drop its voxel neighbours' implied joints into
+     *  it (whatever takes its place records its own links when it connects). */
+    static void forget(VoxelNode node) {
+        for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
+            if (!(node.getNeighbor(mods.eln.misc.Direction.fromEnumFacing(d)) instanceof VoxelNode v)) continue;
+            int dx = -d.getStepX(), dy = -d.getStepY(), dz = -d.getStepZ();
+            for (VoxelPart p : v.parts)
+                if (p instanceof CablePart c)
+                    c.joints.removeIf(j -> {
+                        int[] o = offset(j);
+                        return implied(j) && o != null && o[0] == dx && o[1] == dy && o[2] == dz;
+                    });
+        }
     }
 
     private static boolean towardAbsent(VoxelNode node, int[] j) {

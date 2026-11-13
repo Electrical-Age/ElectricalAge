@@ -495,7 +495,10 @@ public final class CablePart extends VoxelPart {
         if (hang2 != null) tag.putIntArray("hang2", hang2);
         if (!joints.isEmpty()) {
             net.minecraft.nbt.ListTag l = new net.minecraft.nbt.ListTag();
-            for (int[] j : joints) l.add(new net.minecraft.nbt.IntArrayTag(j));
+            // (in a fixed order: implied joints are recorded afresh at each connect, in whatever order the rules run)
+            List<int[]> sorted = new ArrayList<>(joints);
+            sorted.sort(java.util.Arrays::compare);
+            for (int[] j : sorted) l.add(new net.minecraft.nbt.IntArrayTag(j));
             tag.put("j", l);
         }
         tag.putDouble("u", u);

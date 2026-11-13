@@ -203,6 +203,7 @@ public final class CableConverter {
                 nbt.putShort("EID" + f, v.legacy.getShortOr("EID" + f, (short) 0));
                 nbt.put("ED" + f, v.legacy.getCompoundOrEmpty("ED" + f));
             }
+        CableLinks.forget(v);
         v.disconnect();
         v.unload();
         NodeManager.instance.removeNode(v);

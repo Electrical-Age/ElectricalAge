@@ -2081,6 +2081,93 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         }
     }
 
+    /** Every live link this block made or holds (CableVerify): {layer 'E', 'T' or 'B', one end, the other}. */
+    void liveLinks(java.util.function.Consumer<Object[]> out) {
+        for (var e : cables.internalE) out.accept(new Object[]{'E', e.a(), e.b()});
+        for (var t : cables.internalT) out.accept(new Object[]{'T', t.L1, t.L2});
+        for (var b : cables.internalB) out.accept(new Object[]{'B', b[0], b[1]});
+        for (var e : elementLinksE) out.accept(new Object[]{'E', e.a(), e.b()});
+        for (var t : elementLinksT) out.accept(new Object[]{'T', t.L1, t.L2});
+        for (var c : nodeConnectionList) {
+            if (c.electrical() != null) out.accept(new Object[]{'E', c.electrical().a(), c.electrical().b()});
+            if (c.thermal() != null) out.accept(new Object[]{'T', c.thermal().L1, c.thermal().L2});
+        }
+        for (CableNet.Conductor k : cables.live())
+            if (k.port != null) for (var q : k.port.linked()) out.accept(new Object[]{'B', k.port, q});
+    }
+
+    /** The conductor holding a piece of this block, or null (CableVerify). */
+    CableNet.Conductor conductorOf(CablePart c) {
+        return cables.of.get(c);
+    }
+
+    List<CableNet.Conductor> conductors() {
+        return cables.conductors;
+    }
+
+    /** The voxel block at a joint's offset from this one (itself for 0, 0, 0), or null. */
+    VoxelNode at(int dx, int dy, int dz) {
+        if (dx == 0 && dy == 0 && dz == 0) return this;
+        var d = net.minecraft.core.Direction.getNearest(dx, dy, dz, null);
+        if (d == null || Math.abs(dx) + Math.abs(dy) + Math.abs(dz) != 1) return null;
+        return getNeighbor(Direction.fromEnumFacing(d)) instanceof VoxelNode v ? v : null;
+    }
+
+    /**
+     * What a terminal joint (TERM_ELEMENT, TERM_NEIGHBOUR, TERM_FITTING) of a piece here leads to: {electrical load,
+     * thermal load, bus port}, any null (a burnt device: both loads null); null if the device is gone (CableVerify).
+     */
+    Object[] terminal(int[] j) {
+        switch (CableLinks.kind(j)) {
+            case CableLinks.TERM_ELEMENT -> {
+                VoxelNode n = at(j[2], j[3], j[4]);
+                if (n == null || j[5] < 0 || j[5] >= SLOTS || n.sideElementList[j[5]] == null) return null;
+                var e = n.sideElementList[j[5]];
+                LRDU l = LRDU.fromInt(j[6]);
+                boolean burnt = e.isBurnt();
+                if (j[5] >= 6) {
+                    for (Pin p : pins(e)) if (p.lrdu == l) return new Object[]{p.load, p.thermal, p.bus};
+                    return null;
+                }
+                for (var p : e.edgePins())
+                    if (p.lrdu() == l && p.offset() == j[7])
+                        return new Object[]{burnt ? null : p.load(), null, p.mask() == maskRs485 ? e.busPort(l) : null};
+                if (j[7] != 0) return null;
+                return new Object[]{burnt ? null : e.getElectricalLoad(l), burnt ? null : e.getThermalLoad(l), e.busPort(l)};
+            }
+            case CableLinks.TERM_NEIGHBOUR -> {
+                Direction d = Direction.fromInt(j[2]);
+                mods.eln.node.NodeBase other = getNeighbor(d);
+                if (other == null || other instanceof VoxelNode) return null;
+                LRDU l = LRDU.fromInt(j[3]);
+                switch (j[4]) {
+                    case CableLinks.TERM_EDGE -> {
+                        return new Object[]{other.getElectricalLoad(d.getInverse(), l.inverseIfLR()), other.getThermalLoad(d.getInverse(), l.inverseIfLR()), null};
+                    }
+                    case CableLinks.TERM_BUS -> {
+                        return other instanceof mods.eln.bus.BusPeer peer ? new Object[]{null, null, peer.busPortOn(d.getInverse())} : null;
+                    }
+                    default -> {
+                        if (!(other instanceof mods.eln.node.FacePins fp) || j.length < 6) return null;
+                        for (var pin : fp.facePins(d.getInverse()))
+                            if (pin.lrdu() == l && pin.leftward() == j[5]) return new Object[]{pin.bus() != null ? null : pin.load(), null, pin.bus()};
+                        return null;
+                    }
+                }
+            }
+            case CableLinks.TERM_FITTING -> {
+                for (VoxelPart p : parts) {
+                    if (p instanceof ValvePart v && v.x == j[2] && v.y == j[3] && v.z == j[4] && v.signal != null) return new Object[]{v.signal, null, null};
+                    if (p instanceof PipeSensorPart s && s.x == j[2] && s.y == j[3] && s.z == j[4] && s.out != null) return new Object[]{s.out, null, null};
+                }
+                return null;
+            }
+            default -> {
+                return null;
+            }
+        }
+    }
+
     /** The bus port of the cable taking EA's (side, edge) connection toward a non-voxel neighbour (see legacy), or null. */
     public mods.eln.bus.BusPort busPortAt(Direction side, LRDU lrdu) {
         CableNet.Conductor k = legacy(side, lrdu);
@@ -2153,6 +2240,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     @Override
     public void onBreakBlock() {
+        CableLinks.forget(this);
         for (VoxelPart p : parts) if (!partItem(p).isEmpty()) dropItem(partItem(p));
         parts.clear();
         super.onBreakBlock();

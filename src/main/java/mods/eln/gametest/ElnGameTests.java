@@ -173,6 +173,7 @@ public final class ElnGameTests {
             mods.eln.introspect.DescribeCheck.run(helper.getLevel(), helper.getBounds(), ctx::check);
             stalls(helper, ctx);
             if (c.checkLimitCycles()) limitCycles(helper, ctx);   // (before the round trip: reloaded nodes start a fresh record)
+            links(helper, ctx);
             persistence(helper, ctx);
             ctx.finish();
         });
@@ -235,6 +236,20 @@ public final class ElnGameTests {
             event.registerTest(id, new FunctionGameTestInstance(fn, new TestData<>(env, net.minecraft.world.level.Level.OVERWORLD,
                 structure, c.ticks() + 40, 0, true, net.minecraft.world.level.block.Rotation.NONE, false, 1, 1, false, PADDING)));
         }
+    }
+
+    /** The cable pieces' stored joints say what the live network has (CableVerify), over the voxel blocks in the test's bounds. */
+    static void links(GameTestHelper helper, GameTestContext ctx) {
+        net.minecraft.world.phys.AABB bounds = helper.getBounds();
+        java.util.List<mods.eln.node.voxel.VoxelNode> scope = new java.util.ArrayList<>();
+        for (mods.eln.node.NodeBase n : new java.util.ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
+            if (!(n instanceof mods.eln.node.voxel.VoxelNode v) || n.isDestructing() || n.coordonate.dimention != mods.eln.misc.Dimensions.id(helper.getLevel())) continue;
+            if (bounds.contains(n.coordonate.x + .5, n.coordonate.y + .5, n.coordonate.z + .5)) scope.add(v);
+        }
+        if (scope.isEmpty()) return;
+        var rep = mods.eln.node.voxel.CableVerify.verify(scope);
+        ctx.check("links: the cables' joints match the network", rep.ok(),
+            rep.summary() + (rep.ok() ? "" : "; " + String.join("; ", rep.problems().subList(0, Math.min(6, rep.problems().size())))));
     }
 
     /**

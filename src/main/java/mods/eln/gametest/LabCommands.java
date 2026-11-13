@@ -55,6 +55,9 @@ public final class LabCommands {
                         .executes(c -> cables(c.getSource(), IntegerArgumentType.getInteger(c, "n"), BlockPosArgument.getLoadedBlockPos(c, "pos"))))))
                 .then(Commands.literal("devicevolts").then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.word())
                     .executes(c -> deviceVolts(c.getSource(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "name")))))
+                .then(Commands.literal("links").then(Commands.literal("verify")
+                    .executes(c -> links(c.getSource(), 0))
+                    .then(Commands.argument("r", IntegerArgumentType.integer(0, 100000)).executes(c -> links(c.getSource(), IntegerArgumentType.getInteger(c, "r"))))))
                 .then(Commands.literal("voxelcables")
                     .then(Commands.literal("convert").then(Commands.argument("r", IntegerArgumentType.integer(0, 100000))
                         .executes(c -> voxelCables(c.getSource(), "convert", IntegerArgumentType.getInteger(c, "r")))))
@@ -223,6 +226,30 @@ public final class LabCommands {
      * /elnlab voxelcables convert|dry|revert r: six-node cables within r blocks (horizontally) to voxel cables, a report
      * of what would convert and why not, or back. The report goes to the chat and, in full, to eln-voxelcables.txt.
      */
+    /** /elnlab links verify [r]: do the cable pieces' joints match the live network (CableVerify)? r 0: every loaded block. */
+    static int links(CommandSourceStack src, int r) {
+        BlockPos at = BlockPos.containing(src.getPosition());
+        var level = src.getLevel();
+        List<mods.eln.node.voxel.VoxelNode> scope = new ArrayList<>();
+        for (mods.eln.node.NodeBase n : new ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
+            if (!(n instanceof mods.eln.node.voxel.VoxelNode v) || n.coordonate.world() != level) continue;
+            if (r > 0 && (Math.abs(n.coordonate.x - at.getX()) > r || Math.abs(n.coordonate.z - at.getZ()) > r)) continue;
+            scope.add(v);
+        }
+        var rep = mods.eln.node.voxel.CableVerify.verify(scope);
+        src.sendSuccess(() -> Component.literal((rep.ok() ? "links OK: " : "links DIFFER: ") + rep.summary()), true);
+        for (int i = 0; i < Math.min(5, rep.problems().size()); i++) {
+            String line = rep.problems().get(i);
+            src.sendSuccess(() -> Component.literal("  " + line), false);
+        }
+        try (Writer w = new FileWriter("eln-links.txt")) {
+            w.write(rep.summary() + "\n\nproblems:\n" + String.join("\n", rep.problems()) + "\n\nparallel:\n" + String.join("\n", rep.parallel()) + "\n");
+        } catch (IOException e) {
+            src.sendFailure(Component.literal("report not written: " + e));
+        }
+        return rep.problems().size();
+    }
+
     static int voxelCables(CommandSourceStack src, String mode, int r) {
         BlockPos at = BlockPos.containing(src.getPosition());
         var level = src.getLevel();
