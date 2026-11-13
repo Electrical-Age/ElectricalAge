@@ -136,9 +136,19 @@ public final class GlFrame {
      * block entity. Does nothing unless the frame was opened by {@link #openBlock} with a translating pose.
      */
     public void bake(Object owner, long pos) {
+        bake(owner, pos, false);
+    }
+
+    /**
+     * As {@link #bake(Object, long)}; far = this is a far frame ({@link Bake#farDue}): its display-list geometry is
+     * compared and not drawn.
+     */
+    public void bake(Object owner, long pos, boolean far) {
         if (Bake.mode == 0) return;
-        if (split) bake = Bake.begin(owner, pos);
-        else noBake = Bake.POSE;
+        if (split) {
+            bake = Bake.begin(owner, pos, far);
+            this.far = far && bake != null;
+        } else noBake = Bake.POSE;
     }
 
     /** Why this frame leaves nothing to the chunk mesh (a {@link Bake} reason; statistics only). */
@@ -189,6 +199,7 @@ public final class GlFrame {
     private float ox, oy, oz;
     private boolean split;
     private Bake.Device bake;
+    private boolean far;
     private int noBake = Bake.NOT_ATTACHED;
     /** While set, nothing drawn is left to the chunk mesh (a burnt element: its soot overlay needs the same depth). */
     public boolean bakePause;
@@ -245,6 +256,7 @@ public final class GlFrame {
         ox = oy = oz = 0;
         split = false;
         bake = null;
+        far = false;
         noBake = Bake.NOT_ATTACHED;
         bakePause = false;
         mode = -1;
@@ -702,6 +714,7 @@ public final class GlFrame {
             }
             why = Bake.why;
         }
+        if (far) return;
         if (BakeStats.ON) {
             Matrix4f m = stack[depth], b0 = stack[0];
             long h = 17;

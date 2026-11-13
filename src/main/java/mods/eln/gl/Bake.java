@@ -22,6 +22,10 @@ import java.util.function.Predicate;
  * and is drawn by the renderer again, so nothing is ever assumed to be static: the comparison every frame is the proof.
  * A primitive that keeps changing after it settled (a blinking part) waits longer each time before it settles again.
  * <p>
+ * The game draws a block entity only within its renderer's range, and the chunk much farther. Beyond that range a
+ * device is drawn now and then into a frame that puts nothing on screen ({@link #farDue}), so that the chunk shows
+ * it without the player having been near, and follows what it does; see {@link Device}.
+ * <p>
  * All of a device's geometry goes into the section of its block, however far the model reaches: the game draws a
  * block entity only while that section is drawn, so the chunk shows the device exactly when the renderer would. (A
  * section holding nothing but air is never compiled, so a part could not be put where it lies.)
@@ -168,6 +172,15 @@ public final class Bake {
 
     /** How long a call must stay the same before it settles, and the most a primitive that keeps changing waits. */
     static final long SETTLE_NS = 400_000_000L, SETTLE_MAX_NS = 60_000_000_000L;
+    /**
+     * Far frames. A run lasts RUN_NS at most. A device is looked at again RETRY_NS after a run that changed what the
+     * chunk holds, and twice as long after each run that did not, up to RETRY_MAX_NS (and up to a quarter longer, so
+     * that the devices of a base do not all come due in one frame). A packet brings the next run forward, to at
+     * least RETRY_NS after a run that changed nothing.
+     */
+    static final long RUN_NS = 3_000_000_000L, RETRY_NS = 10_000_000_000L, RETRY_MAX_NS = 160_000_000_000L;
+    /** The most far frames in one rendered frame; a device over it stays due. */
+    static final int FAR_PER_FRAME = 64;
 
     private static long now;
     private static long frame;
@@ -175,6 +188,8 @@ public final class Bake {
     private static int settledCalls;
     private static long settledVertices;
     private static int devices;
+    private static int farGranted, heldCalls;
+    private static long farFrames, runsSettled, runsGivenUp;
 
     private static final Map<Object, Device> DEVICES = new IdentityHashMap<>();
 
@@ -182,18 +197,40 @@ public final class Bake {
     static void frame(long nanos) {
         now = nanos;
         frame++;
+        farGranted = 0;
         if (mode != 0 && host != null) host.frame();
     }
 
-    /** The device of a block entity (owner), about to be drawn; null when baking is off. */
-    static Device begin(Object owner, long pos) {
+    /**
+     * Whether a block entity the game would not draw (it is beyond the renderer's range) is to be drawn into a far
+     * frame now: a frame that puts nothing on screen and only keeps the chunk's copy of the device current. To be
+     * asked in every rendered frame in which the device is in view; true = the caller draws it far in this frame.
+     */
+    public static boolean farDue(Object owner) {
+        if (mode == 0 || host == null) return false;
+        Device d = DEVICES.get(owner);
+        if (d != null && !d.due()) return false;
+        if (farGranted >= FAR_PER_FRAME) return false;
+        farGranted++;
+        if (d != null) d.granted = frame;
+        return true;
+    }
+
+    /** The server sent the block entity new state: if it is drawn far, it is looked at again soon. */
+    public static void published(Object owner) {
+        Device d = DEVICES.get(owner);
+        if (d != null) d.published = true;
+    }
+
+    /** The device of a block entity (owner), about to be drawn (far = into a far frame); null when baking is off. */
+    static Device begin(Object owner, long pos, boolean far) {
         if (host == null) return null;
         Device d = DEVICES.get(owner);
         if (d == null) {
             d = new Device(owner, pos);
             DEVICES.put(owner, d);
         }
-        d.begin();
+        d.begin(far);
         return d;
     }
 
@@ -204,8 +241,9 @@ public final class Bake {
             if (!gone.test(d.owner)) continue;
             for (int i = 0; i < d.prevN; i++) {
                 Call c = d.prev[i];
-                if (c.settled) d.unsettle(c, false);
+                if (c.settled) d.unsettle(c);
             }
+            d.release();
             it.remove();
         }
     }
@@ -215,16 +253,42 @@ public final class Bake {
         DEVICES.clear();
         settledCalls = 0;
         settledVertices = 0;
+        heldCalls = 0;
     }
 
     static String statsLine(int frames) {
         String s = "bake mode " + mode + ": " + DEVICES.size() + " devices, " + settledCalls + " settled calls (" + settledVertices
-            + " vertices), " + settles + " settled and " + drops + " dropped in " + frames + " frames";
-        settles = drops = 0;
+            + " vertices), " + settles + " settled and " + drops + " dropped in " + frames + " frames; far: " + farFrames + " frames, "
+            + runsSettled + " runs settled, " + runsGivenUp + " given up, " + heldCalls + " calls held";
+        settles = drops = farFrames = runsSettled = runsGivenUp = 0;
         return host == null ? s : s + "; " + host.stats();
     }
 
-    /** A block entity's calls: last frame's, matched against this frame's as they come. */
+    /**
+     * A block entity's calls: last frame's, matched against this frame's as they come.
+     * <p>
+     * Within the renderer's range the device is drawn every frame (a <i>near</i> frame) and the above holds as said.
+     * Beyond it the device is only looked at now and then, in <i>far</i> frames that draw nothing ({@link #farDue}):
+     * <ul>
+     * <li>It is looked at in a <i>run</i> of samples {@link #SETTLE_NS} apart. A run begins with the device's first
+     * far frame, after a near frame, after a packet ({@link #published}) and when its time to be looked at again has
+     * come. A call has to be the same in every sample of the run over its wait: a weaker proof than every frame, good
+     * for as long as nothing draws the device. The first near frame compares again.</li>
+     * <li>A settled call that a sample does not find again is <i>held</i>: it stays in its section, so the part does
+     * not vanish while what replaced it waits. While calls are held nothing joins the section. A held call that is
+     * drawn again is taken back as it is.</li>
+     * <li>The run ends <i>settled</i> with a sample, not its first, that finds the device as the sample before did
+     * and nothing waiting: the held calls leave and the calls that waited long enough join, in one frame, so one
+     * re-mesh swaps old for new.</li>
+     * <li>It is <i>given up</i> with the second sample in a row that finds a change while nothing is held and nothing
+     * waits (a part that moves: left out far away), and in any case {@link #RUN_NS} after it began, with the same
+     * swap.</li>
+     * <li>Every run is followed by another some time later, sooner after a packet: for the part that stopped
+     * moving, and for what changes without a packet. Devices that send packets all the time, or keep moving, cost two
+     * samples every {@link #RETRY_NS} at most.</li>
+     * <li>A near frame ends the run; held calls leave before it compares anything.</li>
+     * </ul>
+     */
     public static final class Device {
         public final Object owner;
         final long pos;
@@ -233,9 +297,24 @@ public final class Bake {
         final int id = devices++;
         private Call[] prev = new Call[8], cur = new Call[8];
         private int prevN, curN, cursor, pass;
-        private long lastFrame;
+        /** The last rendered frame that drew the device, and the last that granted it a far frame. */
+        private long seen, granted;
         /** Settle times of the primitives that changed soon after settling. */
         private IdentityHashMap<GlFrame.Prim, Long> slow;
+
+        /** Whether the last draw (or the one going on) was a far frame. */
+        private boolean far;
+        /** In a run; first = its first sample is still to come; moved = it changed what the section holds. */
+        private boolean run, first, moved;
+        /** This sample differs from the one before (changedBefore: so did that one); a call that is as it was still waits. */
+        private boolean changed, changedBefore, waiting;
+        /** A packet came since the last run began. */
+        private boolean published;
+        /** When the run began, its next sample, the next run without a packet, and the earliest run a packet starts. */
+        private long runStart, nextSample, retryAt, packetAt;
+        private long retryDelay = RETRY_NS;
+        /** Settled calls the last samples did not draw; still in the section until the run's swap. */
+        private ArrayList<Call> held;
 
         Device(Object owner, long pos) {
             this.owner = owner;
@@ -243,15 +322,39 @@ public final class Bake {
             home = SectionPos.asLong(BlockPos.getX(pos) >> 4, BlockPos.getY(pos) >> 4, BlockPos.getZ(pos) >> 4);
         }
 
-        void begin() {
+        /** Whether a far frame is wanted now ({@link Bake#farDue}). */
+        private boolean due() {
+            if (granted == frame) return false;
+            if (!far) return true;
+            if (run) return now >= nextSample;
+            return now >= retryAt || (published && now >= packetAt);
+        }
+
+        void begin(boolean far) {
             cursor = 0;
             curN = 0;
             pass++;
-            if (frame - lastFrame > 1) {
-                // not drawn for a while: what it did meanwhile is unknown, so the wait starts again
-                for (int i = 0; i < prevN; i++) if (!prev[i].settled) prev[i].since = now;
+            // not drawn in the last frame: what it did meanwhile is unknown, so the waits start again
+            boolean again = frame - seen > 1;
+            seen = frame;
+            if (!far) {
+                // frames prove more than samples do: the waits start again after far frames too
+                if (this.far) again = true;
+                release();
+                run = false;
+            } else {
+                farFrames++;
+                if (run) again = false;   // the samples of a run carry the waits on
+                else {
+                    if (this.far) again = true;
+                    run = first = true;
+                    moved = published = changedBefore = false;
+                    runStart = now;
+                }
             }
-            lastFrame = frame;
+            if (again) for (int i = 0; i < prevN; i++) if (!prev[i].settled) prev[i].since = now;
+            this.far = far;
+            changed = waiting = false;
         }
 
         private long settleTime(GlFrame.Prim p) {
@@ -262,7 +365,7 @@ public final class Bake {
 
         /**
          * Account for one replay of a primitive with the given matrix and state. True = the chunk mesh on screen
-         * draws exactly this, so the renderer must not.
+         * draws exactly this, so the renderer must not. (A far frame draws nothing, whatever the answer.)
          */
         boolean skip(GlFrame.Prim p, Matrix4f m, int color, Identifier texture, boolean cull, boolean fullBright, boolean lit) {
             why = NONE;
@@ -282,8 +385,9 @@ public final class Bake {
                 if (!o.settled && spare == null) spare = o;
                 if (near == null) near = o;
             }
-            boolean changed = c == null;
-            if (changed) {
+            boolean differs = c == null;
+            if (differs && held != null) c = takeBack(p, m, color, texture, cull, fullBright, lit);
+            if (c == null) {
                 if (!host.hasSprite(texture)) {
                     why = NO_SPRITE;
                     if (BakeStats.ON) BakeStats.noSprite(texture);
@@ -295,6 +399,7 @@ public final class Bake {
                 c.set(m, color, texture, cull, fullBright, lit);
                 c.since = now;
             }
+            if (differs) changed = true;
             if (BakeStats.ON) {
                 for (int i = 0; i < curN; i++) {
                     if (cur[i].prim == p && cur[i].at(m)) {
@@ -308,21 +413,18 @@ public final class Bake {
             if (curN == cur.length) cur = java.util.Arrays.copyOf(cur, curN * 2);
             cur[curN++] = c;
             if (!c.settled) {
-                long wait = settleTime(p);
-                if (now - c.since < wait) {
-                    why = changed ? CHANGED : wait == SETTLE_NS ? WAITING : WAITING_LONG;
+                int w = ready(c);
+                if (w != NONE) {
+                    why = w == NO_QUADS ? w : differs ? CHANGED : w;
+                    if (w != NO_QUADS && !differs) waiting = true;
                     return false;
                 }
-                if (c.floats < 4 * GlFrame.STRIDE) {
-                    why = NO_QUADS;
+                if (far) {
+                    // joins when the sample is over, unless calls are held
+                    why = NOT_SHOWN;
                     return false;
                 }
-                c.settled = true;
-                c.settledAt = now;
-                settles++;
-                settledCalls++;
-                settledVertices += c.floats / GlFrame.STRIDE;
-                host.settled(c);
+                settle(c);
             }
             if (mode == 2) return true;
             if (!c.shown) {
@@ -332,13 +434,33 @@ public final class Bake {
             return true;
         }
 
-        private void unsettle(Call c, boolean penalty) {
+        /** NONE when an unsettled call has been the same for long enough to settle, else why not. */
+        private int ready(Call c) {
+            long wait = settleTime(c.prim);
+            if (now - c.since < wait) return wait == SETTLE_NS ? WAITING : WAITING_LONG;
+            return c.floats < 4 * GlFrame.STRIDE ? NO_QUADS : NONE;
+        }
+
+        private void settle(Call c) {
+            c.settled = true;
+            c.settledAt = now;
+            settles++;
+            settledCalls++;
+            settledVertices += c.floats / GlFrame.STRIDE;
+            host.settled(c);
+        }
+
+        /** The call leaves its section. */
+        private void unsettle(Call c) {
             c.settled = false;
             drops++;
             settledCalls--;
             settledVertices -= c.floats / GlFrame.STRIDE;
             host.unsettled(c);
-            if (!penalty) return;
+        }
+
+        /** A settled call was not drawn again: if that is soon after it settled, its primitive waits longer from now on. */
+        private void changedAfterSettling(Call c) {
             long t = settleTime(c.prim);
             if (now - c.settledAt < 16 * t) {
                 if (slow == null) slow = new IdentityHashMap<>();
@@ -346,11 +468,42 @@ public final class Bake {
             } else if (slow != null) slow.remove(c.prim);
         }
 
-        /** The draw is over: what was not drawn again leaves the chunk. */
+        /** The held call that is exactly this replay, taken out of the held ones; null if there is none. */
+        private Call takeBack(GlFrame.Prim p, Matrix4f m, int color, Identifier texture, boolean cull, boolean fullBright, boolean lit) {
+            for (int i = 0; i < held.size(); i++) {
+                Call h = held.get(i);
+                if (h.prim != p || !h.same(m, color, texture, cull, fullBright, lit)) continue;
+                held.remove(i);
+                heldCalls--;
+                return h;
+            }
+            return null;
+        }
+
+        /** The held calls leave the section. */
+        private void release() {
+            if (held == null) return;
+            for (Call h : held) unsettle(h);
+            heldCalls -= held.size();
+            held = null;
+            moved = true;
+        }
+
+        /** The draw is over: what was not drawn again leaves the chunk (near), or is held (far). */
         void end() {
             for (int i = 0; i < prevN; i++) {
                 Call c = prev[i];
-                if (c.stamp != pass && c.settled) unsettle(c, true);
+                if (c.stamp != pass) {
+                    changed = true;
+                    if (c.settled) {
+                        changedAfterSettling(c);
+                        if (far) {
+                            if (held == null) held = new ArrayList<>();
+                            held.add(c);
+                            heldCalls++;
+                        } else unsettle(c);
+                    }
+                }
                 prev[i] = null;
             }
             Call[] t = prev;
@@ -358,6 +511,38 @@ public final class Bake {
             cur = t;
             prevN = curN;
             curN = 0;
+            if (far) sampled();
+        }
+
+        /** A far frame is over: swap held calls for those that waited long enough, and see whether the run goes on. */
+        private void sampled() {
+            boolean quiet = !changed && !waiting && !first;
+            boolean late = now - runStart >= RUN_NS;
+            // two samples in a row differ from the one before, and nothing else is worth another: a part in motion
+            boolean moving = changed && changedBefore && !waiting && held == null;
+            first = false;
+            changedBefore = changed;
+            if (quiet || late) release();
+            if (held == null) {
+                for (int i = 0; i < prevN; i++) {
+                    Call c = prev[i];
+                    if (c.settled || ready(c) != NONE) continue;
+                    settle(c);
+                    moved = true;
+                }
+            }
+            if (!quiet && !late && !moving) {
+                nextSample = now + SETTLE_NS;
+                return;
+            }
+            run = false;
+            if (quiet) runsSettled++;
+            else runsGivenUp++;
+            if (moved) retryDelay = RETRY_NS;
+            // up to a quarter more, by where the device stands
+            retryAt = now + retryDelay + retryDelay / 128 * ((pos * 0x9E3779B97F4A7C15L) >>> 59);
+            retryDelay = Math.min(retryDelay * 2, RETRY_MAX_NS);
+            packetAt = moved ? now : now + RETRY_NS;
         }
 
         /** The calls of the last draw (tests). */
@@ -365,6 +550,15 @@ public final class Bake {
             ArrayList<Call> out = new ArrayList<>();
             for (int i = 0; i < prevN; i++) out.add(prev[i]);
             return out;
+        }
+
+        /** Whether the device is in a run of far frames, and how many of its calls are held (tests). */
+        public boolean inRun() {
+            return run;
+        }
+
+        public int held() {
+            return held == null ? 0 : held.size();
         }
     }
 }
