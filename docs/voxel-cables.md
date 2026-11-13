@@ -77,8 +77,22 @@ the rules above; the joints are kept alongside:
   reverted drops all joints into it (`forget`); a device put on a cable hands the old piece's joints to the cut's pieces
   (`CableLinks.cut`); a recolour keeps id and joints (`copyStateFrom`).
 - **Check:** `CableVerify` compares the joints' groups with the live conductors, and their links (electrical, thermal,
-  bus; conductor to anything) with the blocks' own link lists. `/elnlab links verify [r]` (report `eln-links.txt`), and
-  the GameTest harness after every test (`ElnGameTests.links`).
+  bus; conductor to anything) with the blocks' own link lists; it also counts blocks out of the simulation, blocks never
+  connected under stored links (`VoxelNode.linksRecorded`, NBT `lk`) and ends meeting a block out of the simulation with
+  no joint. `/elnlab links verify [r]` (report `eln-links.txt`), and the GameTest harness after every test
+  (`ElnGameTests.links`).
+- **Networks from joints (routing phase 3b, config `[cables] linksBuild`, default true):** `connectFromJoints` runs the
+  rules in record-only mode (`recordOnly`: joints, no simulator objects or flags); each joint they give is confirmed for
+  this connect (`CableLinks.pass`). Then the links are made from confirmed joints only: `CableNet.buildFromJoints`
+  (conductors = same-cable same-face pieces joined by same-block CONT/SPLICE; other same-block joints pair conductors,
+  one link per pair), `elementsFromJoints` (face elements' ends, off-centre pins), `fittingsFromJoints`,
+  `acrossFromJoints` (CONT one NodeConnection each, TERM_ELEMENT either side, pins across, TOUCH one per conductor pair).
+  Links that aren't a cable's (pin to pin, element to element across a face; `nonCableOnly`) and links to non-voxel
+  neighbours (`connectLegacy`: EA's edge rule, bus peers, face pins) stay rule-made. Editors' joints no rule gives now are
+  logged (`[eln links]`), not linked. `linksBuild = false` is `connectByRules` (3a). Implied joints are still recorded
+  afresh at every connect, so the network is the rules' (neutral); the "freeze" (joints persist, rules stop) is a later
+  step. `ElnGameTests.linksNeutral` reconnects every test's voxel blocks with the switch off and on and compares links and
+  connection flags (`gametest/LinksDiff`); `/elnlab links diff [r]` does the same on a world (`eln-links-diff.txt`).
 
 ## Devices off centre (chips)
 

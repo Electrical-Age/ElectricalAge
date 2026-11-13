@@ -84,6 +84,10 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
   1. leaked-node check: any node already in the test bounds (same dimension) fails the case;
   2. lays the stone floor (`width x floorDepth`);
   3. `build` -> wait `ticks()` -> `measure` (exceptions become failed checks);
+  3a. `links`: the voxel blocks' stored cable joints match their live network (`CableVerify`; docs/voxel-cables.md,
+      Stored links); `linksNeutral`: those blocks reconnected with `[cables] linksBuild` off and on have the same links
+      and connection flags (`LinksDiff`). Cases: `LinksCases` (laid run, device cut, break, trim, burn/repair, a frozen
+      block), and the lay/break/relay test verifies after every round;
   4. `persistence`: `Reload.node` on every non-destructing, saved (`mustBeSaved`) node in the bounds (save -> unload -> fresh node from the
      tag -> save again; also compares `networkSerialize` bytes). Differences in keys ending `Uc` or `State`
      (`Reload.isTransient`) are allowed; anything else fails.

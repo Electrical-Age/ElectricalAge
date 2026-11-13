@@ -2,6 +2,7 @@ package mods.eln.node.voxel;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The joints a cable piece keeps (CablePart.joints): what each of its ends, or its body, connects to. Each joint is an
@@ -76,9 +77,31 @@ public final class CableLinks {
         for (int[] o : c.joints)
             if (same(o, j)) {
                 if (!implied(j)) o[0] &= ~IMPLIED;   // (an editor's joint over one the rules recorded: it is meant now)
+                if (pass != null) pass.add(o);
                 return;
             }
         c.joints.add(j);
+        if (pass != null) pass.add(j);
+    }
+
+    /**
+     * The joints the rules gave in the connect under way (VoxelNode.connectJob, routing phase 3b): links are built only
+     * from these, so a joint no rule gives now (an editor's mistake) never becomes a link. Null outside a connect.
+     */
+    static Set<int[]> pass;
+
+    static Set<int[]> beginPass() {
+        Set<int[]> was = pass;
+        pass = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        return was;
+    }
+
+    static void endPass(Set<int[]> was) {
+        pass = was;
+    }
+
+    static boolean confirmed(int[] j) {
+        return pass != null && pass.contains(j);
     }
 
     static boolean same(int[] a, int[] b) {

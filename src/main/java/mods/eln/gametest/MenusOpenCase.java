@@ -108,6 +108,10 @@ final class MenusOpenCase implements TestCase {
                          net.minecraft.core.Direction face, Vec3 local) {
         try {
             opened = null;
+            // (empty-handed: the fake player is shared, and another test may have left an item in its hand, which a
+            // device takes instead of opening its screen: a Lamp Supply took one, menus_open failed now and then)
+            fp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+            fp.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, net.minecraft.world.item.ItemStack.EMPTY);
             Vec3 hitAt = new Vec3(at.getX() + local.x, at.getY() + local.y, at.getZ() + local.z);
             fp.setPos(hitAt.x - 1.5, at.getY(), hitAt.z);
             var state = ctx.level().getBlockState(at);

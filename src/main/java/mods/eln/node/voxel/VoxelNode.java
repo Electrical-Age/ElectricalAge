@@ -1525,6 +1525,28 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         connectElements();   // (six-node elements hosted here: their loads and links inside the block)
         ensureIds();
         CableLinks.clearImplied(this);   // (the connections below record them afresh)
+        var outer = CableLinks.beginPass();
+        try {
+            if (linksBuild) connectFromJoints();
+            else connectByRules();
+        } finally {
+            CableLinks.endPass(outer);
+        }
+        // only blocks with pipes in the fluid world (it steps every device every tick)
+        if (hasFluid()) FluidWorld.add(this);
+        else FluidWorld.remove(this);
+        linksRecorded = true;
+    }
+
+    /** Build voxel cables' connections from their joints (routing phase 3b; config [cables] linksBuild). */
+    public static volatile boolean linksBuild = true;
+    /** The connection rules only record joints (no simulator objects, no flags): the first half of connectFromJoints. */
+    private boolean recordOnly;
+    /** The connection rules make only what isn't a cable's (pin to pin, element to element): connectFromJoints' rest. */
+    private boolean nonCableOnly;
+
+    /** As before routing phase 3b: the rules make the links (and record the joints). */
+    private void connectByRules() {
         cables.build();
         cables.addToSimulation();
         connectElementsToCables();
@@ -1539,24 +1561,260 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (other instanceof VoxelNode v) {
                 connectVoxel(dir, v);
                 connectPinsAcross(dir, v);
+            } else connectLegacy(dir, other);
+        }
+    }
+
+    /**
+     * Routing phase 3b: the rules record what they would join (each joint they give is confirmed in this pass), then
+     * every cable link is made from the confirmed joints: conductors and their pairings (CableNet.buildFromJoints),
+     * devices, pins, fittings, and links across faces. A joint no rule gives now is left unlinked and reported. Links
+     * that aren't a cable's (pin to pin, element to element across a face) and links to non-voxel neighbours (EA's edge
+     * rule, bus peers, face pins: machines not yet voxel parts) are made by the rules as before.
+     */
+    private void connectFromJoints() {
+        recordOnly = true;
+        try {
+            cables.build();
+            connectElementsToCables();
+            connectPins();
+            connectValves();
+            connectSensors();
+            for (Direction dir : Direction.values()) {
+                mods.eln.node.NodeBase other = getNeighbor(dir);
+                if (other instanceof VoxelNode v && other.isAdded()) {
+                    connectVoxel(dir, v);
+                    connectPinsAcross(dir, v);
+                }
             }
-            else {
-                // (legacy() gives no cable on an edge with several pins: connectPeerPins links those)
-                for (LRDU lrdu : LRDU.values()) tryConnectTwoNode(this, dir, lrdu, other, dir.getInverse(), lrdu.inverseIfLR());
-                // a bus port on the face toward a bus cable here (a machine at another mod's block): a bus link
-                if (other instanceof mods.eln.bus.BusPeer peer && peer.busPortOn(dir.getInverse()) instanceof mods.eln.bus.BusPort bp)
-                    for (LRDU lrdu : LRDU.values()) {
-                        mods.eln.bus.BusPort mine = busPortAt(dir, lrdu);
-                        mods.eln.bus.BusNet.link(bp, mine);
-                        if (mine != null) recordNeighbour(dir, lrdu, CableLinks.TERM_BUS);
-                    }
-                connectPeerPins(dir, other);
+        } finally {
+            recordOnly = false;
+        }
+        reportUnconfirmed();
+        cables.buildFromJoints(CableLinks::confirmed);
+        cables.addToSimulation();
+        elementsFromJoints();
+        nonCableOnly = true;
+        try {
+            connectPins();   // (pin to pin)
+        } finally {
+            nonCableOnly = false;
+        }
+        pinsChanged();
+        fittingsFromJoints();
+        cablesBuilt = !cables.conductors.isEmpty();
+        for (Direction dir : Direction.values()) {
+            mods.eln.node.NodeBase other = getNeighbor(dir);
+            if (other == null || !other.isAdded()) continue;
+            if (other instanceof VoxelNode v) {
+                acrossFromJoints(dir, v);
+                nonCableOnly = true;
+                try {
+                    connectVoxel(dir, v);   // (element to element)
+                    connectPinsAcross(dir, v);   // (pin to pin)
+                } finally {
+                    nonCableOnly = false;
+                }
+            } else connectLegacy(dir, other);
+        }
+    }
+
+    /** The confirmed joints of this block's working pieces (routing phase 3b), with each piece's conductor. */
+    private void forConfirmed(java.util.function.BiConsumer<CableNet.Conductor, int[]> out) {
+        for (CableNet.Conductor k : cables.live())
+            for (CablePart c : k.parts)
+                for (int[] j : c.joints) if (CableLinks.confirmed(j)) out.accept(k, j);
+    }
+
+    /**
+     * Devices hosted in this block and its cables, from TERM_ELEMENT joints (routing phase 3b): a face element's end
+     * (as connectElementsToCables: the element's flag, a bus link, an electrical link and with it a thermal one, where
+     * both have loads), an off-centre device's pin on a cable (as connectPins: one link per pin and conductor).
+     */
+    private void elementsFromJoints() {
+        elementLinksE.clear();
+        elementLinksT.clear();
+        java.util.Set<List<Object>> pinDone = new java.util.HashSet<>();
+        forConfirmed((k, j) -> {
+            if (CableLinks.kind(j) != CableLinks.TERM_ELEMENT || j[2] != 0 || j[3] != 0 || j[4] != 0) return;
+            int slot = j[5];
+            LRDU l = LRDU.fromInt(j[6]);
+            if (slot < 0 || slot >= SLOTS || sideElementList[slot] == null) return;
+            Object[] t = terminal(j);
+            if (t == null) return;
+            if (slot >= 6) {
+                if (!pinDone.add(List.of(slot, l, k))) return;
+                sideElementList[slot].slotMask.set(l, true);
+                link((ElectricalLoad) t[0], k.load, (ThermalLoad) t[1], k.thermal);
+                mods.eln.bus.BusNet.link((mods.eln.bus.BusPort) t[2], k.port);
+                return;
+            }
+            lrduElementMask.set(Direction.fromInt(slot), l, true);
+            mods.eln.bus.BusNet.link((mods.eln.bus.BusPort) t[2], k.port);
+            if (t[0] == null || k.load == null) return;
+            var e = new mods.eln.sim.ElectricalConnection((ElectricalLoad) t[0], k.load);
+            Eln.simulator.addElectricalComponent(e);
+            elementLinksE.add(e);
+            if (t[1] != null && k.thermal != null) {
+                var th = new mods.eln.sim.ThermalConnection((ThermalLoad) t[1], k.thermal);
+                Eln.simulator.addThermalConnection(th);
+                elementLinksT.add(th);
+            }
+        });
+    }
+
+    /** Valves' and pipe sensors' signals in the simulation, linked to the signal cables their TERM_FITTING joints name. */
+    private void fittingsFromJoints() {
+        for (VoxelPart p : parts) {
+            if (p instanceof ValvePart v && v.signal != null) Eln.simulator.addElectricalLoad(v.signal);
+            if (p instanceof PipeSensorPart sp && sp.out != null) {
+                Eln.simulator.addElectricalLoad(sp.out);
+                Eln.simulator.addElectricalComponent(sp.outProcess);
             }
         }
-        // only blocks with pipes in the fluid world (it steps every device every tick)
-        if (hasFluid()) FluidWorld.add(this);
-        else FluidWorld.remove(this);
-        linksRecorded = true;
+        java.util.Set<List<Object>> done = new java.util.HashSet<>();
+        forConfirmed((k, j) -> {
+            if (CableLinks.kind(j) != CableLinks.TERM_FITTING || k.load == null || k.d == null || !k.d.signalWire) return;
+            Object[] t = terminal(j);
+            if (t == null || t[0] == null || !done.add(List.of(t[0], k))) return;
+            link((ElectricalLoad) t[0], k.load, null, null);
+        });
+    }
+
+    /**
+     * Links across the face toward the voxel block v, from the joints this connect confirmed (routing phase 3b): ends
+     * meeting ends (CONT: one link per joint; bus conductors a bus link), a cable end on a device's edge in either block
+     * (TERM_ELEMENT, whichever side holds it), a pin on a cable across the face, and bodies touching (TOUCH: one per
+     * conductor pair). As connectVoxel, connectTouching and pinToCables made them.
+     */
+    private void acrossFromJoints(Direction dir, VoxelNode v) {
+        var st = dir.toEnumFacing();
+        int dx = st.getStepX(), dy = st.getStepY(), dz = st.getStepZ();
+        java.util.Set<List<Object>> touchDone = new java.util.HashSet<>(), pinDone = new java.util.HashSet<>();
+        // my pieces' joints toward v
+        forConfirmed((k, j) -> {
+            int kind = CableLinks.kind(j);
+            if (kind != CableLinks.CONT && kind != CableLinks.TERM_ELEMENT && kind != CableLinks.TOUCH) return;
+            if (j[2] != dx || j[3] != dy || j[4] != dz) return;
+            if (kind == CableLinks.TERM_ELEMENT) {
+                elementAcross(dir, v, this, k, j, pinDone);
+                return;
+            }
+            if (!(v.partById(j[5]) instanceof CablePart tc) || tc.burnt != null) return;
+            CableNet.Conductor kt = v.conductorOf(tc);
+            if (kt == null || !kt.valid() || kt.isBurntNow() || !compareConnectionMask(k.mask(), kt.mask())) return;
+            if (kind == CableLinks.TOUCH && !touchDone.add(List.of(k, kt))) return;
+            cableAcross(dir, v, k, kt, kind == CableLinks.CONT);
+        });
+        // v's pieces' joints toward a device here
+        v.forConfirmed((k, j) -> {
+            if (CableLinks.kind(j) != CableLinks.TERM_ELEMENT || j[2] != -dx || j[3] != -dy || j[4] != -dz) return;
+            elementAcross(dir.getInverse(), this, v, k, j, pinDone);
+        });
+    }
+
+    /** A cable link across the face (conductor k here, kt in v): a bus link, or a NodeConnection with what both have. */
+    private void cableAcross(Direction dir, VoxelNode v, CableNet.Conductor k, CableNet.Conductor kt, boolean always) {
+        if (k.port != null && kt.port != null) {
+            mods.eln.bus.BusNet.link(k.port, kt.port);
+            v.setNeedPublish(true);
+            return;
+        }
+        mods.eln.sim.ElectricalConnection e = null;
+        mods.eln.sim.ThermalConnection t = null;
+        if (k.load != null && kt.load != null) {
+            e = new mods.eln.sim.ElectricalConnection(k.load, kt.load);
+            Eln.simulator.addElectricalComponent(e);
+        }
+        if (k.thermal != null && kt.thermal != null) {
+            t = new mods.eln.sim.ThermalConnection(k.thermal, kt.thermal);
+            Eln.simulator.addThermalConnection(t);
+        }
+        if (e == null && t == null && !always) return;   // (touching bodies with nothing in common: as connectTouching)
+        var c = new mods.eln.node.NodeConnection(this, dir, LRDU.Up, v, dir.getInverse(), LRDU.Up, e, t);
+        nodeConnectionList.add(c);
+        v.nodeConnectionList.add(c);
+        v.setNeedPublish(true);
+    }
+
+    /**
+     * A TERM_ELEMENT joint across a face: cable conductor k in block `cable` (which holds joint j), the device in block
+     * `dev` (toward dir from `cable`). The link is kept by both nodes, made from this node's connect.
+     */
+    private void elementAcross(Direction dir, VoxelNode dev, VoxelNode cable, CableNet.Conductor k, int[] j, java.util.Set<List<Object>> pinDone) {
+        int slot = j[5];
+        LRDU l = LRDU.fromInt(j[6]);
+        if (slot < 0 || slot >= SLOTS || dev.sideElementList[slot] == null) return;
+        Object[] t = cable.terminal(j);
+        if (t == null) return;
+        VoxelNode other = cable == this ? dev : cable;
+        Direction toOther = cable == this ? dir : dir.getInverse();
+        if (slot >= 6) {   // (a pin on a cable across the face: as pinToCables)
+            if (!pinDone.add(List.of(dev, slot, l, k))) return;
+            dev.sideElementList[slot].slotMask.set(l, true);
+            if (t[2] != null && k.port != null) mods.eln.bus.BusNet.link((mods.eln.bus.BusPort) t[2], k.port);
+            else across(toOther, other, (ElectricalLoad) t[0], k.load, (ThermalLoad) t[1], k.thermal);
+            return;
+        }
+        dev.lrduElementMask.set(Direction.fromInt(slot), l, true);
+        if (t[2] != null && k.port != null) {   // (bus links stay out of NodeConnections: fault networks)
+            mods.eln.bus.BusNet.link((mods.eln.bus.BusPort) t[2], k.port);
+            other.setNeedPublish(true);
+            return;
+        }
+        mods.eln.sim.ElectricalConnection e = null;
+        mods.eln.sim.ThermalConnection th = null;
+        if (t[0] != null && k.load != null) {
+            e = new mods.eln.sim.ElectricalConnection((ElectricalLoad) t[0], k.load);
+            Eln.simulator.addElectricalComponent(e);
+        }
+        if (t[1] != null && k.thermal != null) {
+            th = new mods.eln.sim.ThermalConnection((ThermalLoad) t[1], k.thermal);
+            Eln.simulator.addThermalConnection(th);
+        }
+        var c = new mods.eln.node.NodeConnection(this, toOther, LRDU.Up, other, toOther.getInverse(), LRDU.Up, e, th);
+        nodeConnectionList.add(c);
+        other.nodeConnectionList.add(c);
+        other.setNeedPublish(true);
+    }
+
+    /** Joints written by an editor that no rule gives now: not linked (an editor's mistake must not add a link); logged. */
+    private void reportUnconfirmed() {
+        int n = 0;
+        String first = null;
+        for (VoxelPart p : parts)
+            if (p instanceof CablePart c && c.burnt == null)
+                for (int[] j : c.joints)
+                    if (!CableLinks.implied(j) && !CableLinks.confirmed(j) && !towardAbsentBlock(j)) {
+                        n++;
+                        if (first == null) first = "piece " + c.id + " " + CableLinks.describe(j);
+                    }
+        if (n > 0 && unconfirmedLogged++ < 20)
+            Eln.LOG.warn("[eln links] {} joint(s) at {} no rule gives now, not linked (first: {})", n, coordonate, first);
+    }
+
+    private static int unconfirmedLogged;
+
+    /** Is the joint toward a block that isn't in the simulation now (its links wait for that block)? */
+    private boolean towardAbsentBlock(int[] j) {
+        int[] o = CableLinks.offset(j);
+        if (o == null || (o[0] == 0 && o[1] == 0 && o[2] == 0)) return false;
+        VoxelNode v = at(o[0], o[1], o[2]);
+        return v == null || !v.isAdded();
+    }
+
+    /** Links to a non-voxel neighbour toward dir: EA's edge rule, a bus peer's port, face pins. */
+    private void connectLegacy(Direction dir, mods.eln.node.NodeBase other) {
+        // (legacy() gives no cable on an edge with several pins: connectPeerPins links those)
+        for (LRDU lrdu : LRDU.values()) tryConnectTwoNode(this, dir, lrdu, other, dir.getInverse(), lrdu.inverseIfLR());
+        // a bus port on the face toward a bus cable here (a machine at another mod's block): a bus link
+        if (other instanceof mods.eln.bus.BusPeer peer && peer.busPortOn(dir.getInverse()) instanceof mods.eln.bus.BusPort bp)
+            for (LRDU lrdu : LRDU.values()) {
+                mods.eln.bus.BusPort mine = busPortAt(dir, lrdu);
+                mods.eln.bus.BusNet.link(bp, mine);
+                if (mine != null) recordNeighbour(dir, lrdu, CableLinks.TERM_BUS);
+            }
+        connectPeerPins(dir, other);
     }
 
     private boolean hasFluid() {
@@ -1679,18 +1937,18 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         List<Pin> all = new ArrayList<>();
         for (int i = 6; i < SLOTS; i++) if (sideElementList[i] != null) all.addAll(pins(sideElementList[i]));
         for (Pin p : all) {
-            for (CableNet.Conductor k : cables.live()) {
+            for (CableNet.Conductor k : nonCableOnly ? List.<CableNet.Conductor>of() : cables.live()) {
                 if (!compareConnectionMask(p.mask, k.mask())) continue;
-                boolean touch = false;
                 CablePart at = null;
                 for (CablePart c : k.parts) for (int[] b : c.boxes()) if (at == null && overlaps(b, p.contact)) at = c;
                 if (at == null) continue;
                 CableLinks.add(at, CableLinks.implied(CableLinks.TERM_ELEMENT, -1, 0, 0, 0, p.slot, p.lrdu.toInt(), 0));
+                if (recordOnly) continue;
                 sideElementList[p.slot].slotMask.set(p.lrdu, true);
                 link(p.load, k.load, p.thermal, k.thermal);
                 mods.eln.bus.BusNet.link(p.bus, k.port);
             }
-            for (Pin q : all) {
+            for (Pin q : recordOnly ? List.<Pin>of() : all) {
                 if (q.slot <= p.slot || !meet(p, q) || !compareConnectionMask(p.mask, q.mask)) continue;
                 sideElementList[p.slot].slotMask.set(p.lrdu, true);
                 sideElementList[q.slot].slotMask.set(q.lrdu, true);
@@ -1738,11 +1996,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     private void connectValves() {
         for (VoxelPart p : parts) {
             if (!(p instanceof ValvePart v) || v.signal == null) continue;
-            Eln.simulator.addElectricalLoad(v.signal);
+            if (!recordOnly) Eln.simulator.addElectricalLoad(v.signal);
             for (CableNet.Conductor k : cables.live())
                 if (k.load != null && k.d != null && k.d.signalWire) {
                     CableLinks.add(k.parts.get(0), CableLinks.implied(CableLinks.TERM_FITTING, -1, v.x, v.y, v.z));
-                    link(v.signal, k.load, null, null);
+                    if (!recordOnly) link(v.signal, k.load, null, null);
                 }
         }
     }
@@ -1751,26 +2009,31 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     private void connectSensors() {
         for (VoxelPart p : parts) {
             if (!(p instanceof PipeSensorPart s) || s.out == null) continue;
-            Eln.simulator.addElectricalLoad(s.out);
-            Eln.simulator.addElectricalComponent(s.outProcess);
+            if (!recordOnly) {
+                Eln.simulator.addElectricalLoad(s.out);
+                Eln.simulator.addElectricalComponent(s.outProcess);
+            }
             for (CableNet.Conductor k : cables.live())
                 if (k.load != null && k.d != null && k.d.signalWire) {
                     CableLinks.add(k.parts.get(0), CableLinks.implied(CableLinks.TERM_FITTING, -1, s.x, s.y, s.z));
-                    link(s.out, k.load, null, null);
+                    if (!recordOnly) link(s.out, k.load, null, null);
                 }
         }
     }
 
     /** Hosted elements and cable ends meeting at a point in this block (on the element's face, or an inner corner). */
     private void connectElementsToCables() {
-        elementLinksE.clear();
-        elementLinksT.clear();
+        if (!recordOnly) {
+            elementLinksE.clear();
+            elementLinksT.clear();
+        }
         List<End> all = ends();
         for (End a : all) {
             if (a.elSide < 0) continue;
             for (End b : all) {
                 if (b.elSide >= 0 || !a.at(new int[]{b.x, b.y, b.z}) || !compareConnectionMask(a.mask, b.mask)) continue;
                 CableLinks.add(b.part, CableLinks.implied(CableLinks.TERM_ELEMENT, b.pend, 0, 0, 0, a.elSide, a.lrdu.toInt(), a.pin));
+                if (recordOnly) continue;
                 lrduElementMask.set(Direction.fromInt(a.elSide), a.lrdu, true);
                 mods.eln.bus.BusNet.link(a.bus, b.bus);
                 if (a.load == null || b.load == null) continue;
@@ -1807,8 +2070,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         for (int i = 6; i < SLOTS; i++) if (v.sideElementList[i] != null) theirs.addAll(pins(v.sideElementList[i]));
         if (mine.isEmpty() && theirs.isEmpty()) return;
         // my pins against their cables, theirs against mine (contact boxes in the other block's coordinates)
-        for (Pin p : mine) pinToCables(dir, this, p, v, shifted(p.contact, dir, 1));
-        for (Pin q : theirs) pinToCables(dir.getInverse(), v, q, this, shifted(q.contact, dir, -1));
+        if (!nonCableOnly) {
+            for (Pin p : mine) pinToCables(dir, this, p, v, shifted(p.contact, dir, 1));
+            for (Pin q : theirs) pinToCables(dir.getInverse(), v, q, this, shifted(q.contact, dir, -1));
+        }
+        if (recordOnly) return;
         for (Pin p : mine) {
             int[] tip = shifted(p.tip, dir, 1);
             for (Pin q : theirs) {
@@ -1829,6 +2095,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (at == null) continue;
             var step = dir.getInverse().toEnumFacing();   // (from b's block to a's)
             CableLinks.add(at, CableLinks.implied(CableLinks.TERM_ELEMENT, -1, step.getStepX(), step.getStepY(), step.getStepZ(), p.slot, p.lrdu.toInt(), 0));
+            if (recordOnly) continue;
             a.sideElementList[p.slot].slotMask.set(p.lrdu, true);
             // a bus pin on a bus cable: a bus link, not a NodeConnection (that would merge fault networks)
             if (p.bus != null && k.port != null) mods.eln.bus.BusNet.link(p.bus, k.port);
@@ -1868,7 +2135,15 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             CablePart.Port m = new CablePart.Port(a.out, a.x, a.y, a.z).mirrored();
             for (End b : theirs) {
                 if (b.out != m.face() || b.x != m.x() || b.y != m.y() || b.z != m.z() || !compareConnectionMask(a.mask, b.mask)) continue;
+                boolean cable = a.part != null || b.part != null;
+                if (cable ? nonCableOnly : recordOnly) continue;
                 recordAcross(dir, a, b);
+                if (recordOnly) {   // (what the links would join, so touching bodies skip the pairs ends already join)
+                    if (a.bus != null && b.bus != null) continue;
+                    if (a.load != null && b.load != null) joined.add(java.util.List.of(a.load, b.load));
+                    if (a.thermal != null && b.thermal != null) joined.add(java.util.List.of(a.thermal, b.thermal));
+                    continue;
+                }
                 if (a.elSide >= 0) lrduElementMask.set(Direction.fromInt(a.elSide), a.lrdu, true);
                 if (b.elSide >= 0) v.lrduElementMask.set(Direction.fromInt(b.elSide), b.lrdu, true);
                 if (a.bus != null && b.bus != null) {   // (bus links stay out of NodeConnections: fault networks)
@@ -1895,7 +2170,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 v.setNeedPublish(true);
             }
         }
-        connectTouching(dir, f, v, joined);
+        if (!nonCableOnly) connectTouching(dir, f, v, joined);
     }
 
     /**
@@ -1917,6 +2192,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 CablePart[] pq = touchingAcross(ka, kb, axis, plane);
                 if (pq == null) continue;
                 CableLinks.recordTouch(pq[0], pq[1], d[0], d[1], d[2]);
+                if (recordOnly) continue;
                 if (ka.port != null && kb.port != null) {
                     mods.eln.bus.BusNet.link(ka.port, kb.port);
                     v.setNeedPublish(true);
@@ -2101,6 +2377,38 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         }
         for (CableNet.Conductor k : cables.live())
             if (k.port != null) for (var q : k.port.linked()) out.accept(new Object[]{'B', k.port, q});
+    }
+
+    /** Its conductors' loads, thermal loads and bus ports, named by block and piece ids (LinksDiff: stable across connects). */
+    public java.util.Map<Object, String> conductorNames() {
+        java.util.Map<Object, String> m = new java.util.IdentityHashMap<>();
+        String at = coordonate.x + "," + coordonate.y + "," + coordonate.z;
+        for (CableNet.Conductor k : cables.conductors) {
+            List<Integer> ids = new ArrayList<>();
+            for (CablePart c : k.parts) ids.add(c.id);
+            java.util.Collections.sort(ids);
+            String n = at + ids;
+            if (k.load != null) m.put(k.load, n + ".E");
+            if (k.thermal != null) m.put(k.thermal, n + ".T");
+            if (k.port != null) m.put(k.port, n + ".B");
+        }
+        return m;
+    }
+
+    /** As liveLinks, each with the list it came from: {layer, one end, the other, source} (LinksDiff). */
+    public void liveLinksForDiff(java.util.function.Consumer<Object[]> out) {
+        for (var e : cables.internalE) out.accept(new Object[]{'E', e.a(), e.b(), "internal"});
+        for (var t : cables.internalT) out.accept(new Object[]{'T', t.L1, t.L2, "internal"});
+        for (var b : cables.internalB) out.accept(new Object[]{'B', b[0], b[1], "internal"});
+        for (var e : elementLinksE) out.accept(new Object[]{'E', e.a(), e.b(), "element"});
+        for (var t : elementLinksT) out.accept(new Object[]{'T', t.L1, t.L2, "element"});
+        for (var c : nodeConnectionList) {
+            if (c.electrical() != null) out.accept(new Object[]{'E', c.electrical().a(), c.electrical().b(), "node"});
+            if (c.thermal() != null) out.accept(new Object[]{'T', c.thermal().L1, c.thermal().L2, "node"});
+            if (c.electrical() == null && c.thermal() == null) out.accept(new Object[]{'N', "empty link to " + c.other(this).coordonate.x + "," + c.other(this).coordonate.y + "," + c.other(this).coordonate.z, "-", "node"});
+        }
+        for (CableNet.Conductor k : cables.live())
+            if (k.port != null) for (var q : k.port.linked()) out.accept(new Object[]{'B', k.port, q, "bus"});
     }
 
     /** The conductor holding a piece of this block, or null (CableVerify). */

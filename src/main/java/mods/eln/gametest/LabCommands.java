@@ -57,7 +57,10 @@ public final class LabCommands {
                     .executes(c -> deviceVolts(c.getSource(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "name")))))
                 .then(Commands.literal("links").then(Commands.literal("verify")
                     .executes(c -> links(c.getSource(), 0))
-                    .then(Commands.argument("r", IntegerArgumentType.integer(0, 100000)).executes(c -> links(c.getSource(), IntegerArgumentType.getInteger(c, "r"))))))
+                    .then(Commands.argument("r", IntegerArgumentType.integer(0, 100000)).executes(c -> links(c.getSource(), IntegerArgumentType.getInteger(c, "r")))))
+                    .then(Commands.literal("diff")
+                        .executes(c -> linksDiff(c.getSource(), 0))
+                        .then(Commands.argument("r", IntegerArgumentType.integer(0, 100000)).executes(c -> linksDiff(c.getSource(), IntegerArgumentType.getInteger(c, "r"))))))
                 .then(Commands.literal("voxelcables")
                     .then(Commands.literal("convert").then(Commands.argument("r", IntegerArgumentType.integer(0, 100000))
                         .executes(c -> voxelCables(c.getSource(), "convert", IntegerArgumentType.getInteger(c, "r")))))
@@ -226,6 +229,39 @@ public final class LabCommands {
      * /elnlab voxelcables convert|dry|revert r: six-node cables within r blocks (horizontally) to voxel cables, a report
      * of what would convert and why not, or back. The report goes to the chat and, in full, to eln-voxelcables.txt.
      */
+    /**
+     * /elnlab links diff [r]: reconnect the voxel blocks within r (0: all loaded) with [cables] linksBuild off (the rules
+     * make the links) and then on (the joints do), and compare their links and connection flags (LinksDiff). Leaves
+     * them connected with the configured setting. Report: eln-links-diff.txt.
+     */
+    static int linksDiff(CommandSourceStack src, int r) {
+        BlockPos at = BlockPos.containing(src.getPosition());
+        var level = src.getLevel();
+        List<mods.eln.node.NodeBase> in = new ArrayList<>();
+        for (mods.eln.node.NodeBase n : new ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
+            if (n.coordonate.world() != level) continue;
+            if (r > 0 && (Math.abs(n.coordonate.x - at.getX()) > r || Math.abs(n.coordonate.z - at.getZ()) > r)) continue;
+            in.add(n);
+        }
+        var scope = LinksDiff.added(in);
+        boolean configured = mods.eln.node.voxel.VoxelNode.linksBuild;
+        long t0 = System.nanoTime();
+        var off = LinksDiff.connectedWith(scope, false);
+        var on = LinksDiff.connectedWith(scope, true);
+        if (!configured) LinksDiff.connectedWith(scope, false);
+        long ms = (System.nanoTime() - t0) / 1_000_000;
+        boolean same = off.equals(on);
+        String diff = LinksDiff.difference(off, on, 200);
+        src.sendSuccess(() -> Component.literal((same ? "links diff: SAME" : "links diff: DIFFERENT") + " over " + scope.size() + " voxel blocks, "
+            + off.size() + " vs " + on.size() + " lines, " + ms + " ms"), true);
+        try (Writer w = new FileWriter("eln-links-diff.txt")) {
+            w.write((same ? "same" : "different") + ", " + scope.size() + " blocks\n" + diff.replace("; ", "\n") + "\n");
+        } catch (IOException e) {
+            src.sendFailure(Component.literal("report not written: " + e));
+        }
+        return same ? 0 : 1;
+    }
+
     /** /elnlab links verify [r]: do the cable pieces' joints match the live network (CableVerify)? r 0: every loaded block. */
     static int links(CommandSourceStack src, int r) {
         BlockPos at = BlockPos.containing(src.getPosition());
