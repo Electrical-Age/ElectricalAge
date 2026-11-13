@@ -75,7 +75,7 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 
 ## Cables
 
-- Six-node cables: `cable/CableRender.java` (`connectionType`, `drawCable`, `drawKnuckles`), `cable/CableRenderDescriptor.java` (sprite, width, height), drawn per frame through the shim by e.g. `sixnode/electricalcable/ElectricalCableRender.java`. Neighbour BE spawn -> `tileEntityNeighborSpawn()` refreshes the connection look.
+- Six-node cables: `cable/CableRender.java` (`connectionType`, `drawCable`, `drawKnuckles`), `cable/CableRenderDescriptor.java` (sprite, width, height), drawn per frame through the shim by e.g. `sixnode/electricalcable/ElectricalCableRender.java`. `tileEntityNeighborSpawn()` -> `notifyNeighborSpawn()` would refresh the connection look when a neighbour block entity appears, but nothing calls it in the port.
 - `cable/CableTerminals.java` (26.x): devices opt in to floor terminal plates; a floor cable connecting there draws a lug.
 - Grid lines: `gridnode/GridRender.java` builds `Catenary` lists from the published links.
 - Voxel cables: baked, see voxel-cables.md.
@@ -100,11 +100,64 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 
 - Per device per frame: LV cable ~1.2 us, macerator ~29 us; cost is per-vertex submission (~11 ns/vertex), recording a macerator ~8 us. Heaviest: Gas Turbine ~18.9k vertices, Steam Turbine ~15k.
 - Typical base: ~1-3 ms/frame. Bad case: hundreds of machines or many big turbines in view.
-- Deferred: bake static device geometry into chunk meshes (block model fed from the recorded draw, rebuilt on state change; animated parts stay per-frame). Caching recordings alone would save only the recording part. Done so far: voxel cables/pipes baked (`VoxelModel`), FE exporter baked.
+- Voxel cables/pipes (`VoxelModel`) and the FE exporter are block models. The devices' unchanging parts are drawn by the chunk (next section); what moves, blends or glows stays per frame.
+
+## Static parts in the chunk (Baughn 2026-11-12)
+
+A base of machines cost the client most of its frame in device geometry sent again every frame (about 133,000
+vertices a frame at the Stasis Delvers workshop). Now the chunk's own mesh draws whatever part of a device does not
+change, and the block entity renderer draws the rest. The draw code is untouched: nothing declares a part static.
+
+- How: the renderer still runs the device's draw every frame. `GlSubmit.openBlock` keeps the camera-relative
+  translation out of the matrix stack (`GlFrame.openBlock`), so a part's matrix is the same from frame to frame.
+  Each display-list replay is a `Bake.Call` (primitive, matrix, colour, texture, cull/fullBright/lit). A call that
+  stayed the same for 0.4 s settles: `ChunkBake` adds it to its section and has the section meshed again
+  (`AddSectionGeometryEvent`, `BakeMesh.write`). Once the mesh on screen holds it (`Call.shown`), `Device.skip`
+  answers true and the renderer leaves that replay out. A call that changes or is not drawn again leaves the section
+  in the same frame and the renderer draws it. A part that changes soon after it settled (within 16 times its wait)
+  waits twice as long next time, up to 60 s: blinking parts end up with the renderer.
+- Never in the chunk: blended draws, soot and ghost (preview) draws, a burnt device, immediate-mode geometry (not a
+  display list), lines, texture coordinates outside 0..1 (a sprite cannot repeat), textures made at run time
+  (`eln:dynamic/...`, the coil windings), a frame whose pose is more than a translation, and text and item extras.
+- Exactly once: a quad is on screen from the renderer or from the chunk, never both or neither. The mesh a section
+  shows is found by its compile task's start time: each compile of a section with calls takes a snapshot on the
+  render thread, and the mesh on screen holds the last snapshot taken before its task started. A mesh that maps to no
+  snapshot counts as holding nothing. `ELN_BAKE_STATS` counts quads a mesh holds and the renderer also drew
+  ("stale in meshes": the frames between a part's change and the section's next mesh) and any miscount.
+- Section: all of a device's calls go into the section of its block (`Device.home`), however far the model reaches.
+  The game draws a block entity only while its own section is drawn, so chunk and renderer show the device under the
+  same condition; and a section of nothing but air is never compiled, so a part could not be put where it lies.
+- Far away: a block entity is drawn within 64 blocks. Past that the settled parts stay in the chunk (Baughn: keep
+  them visible), and what moves or glows is not drawn, as before. Calls only ever come from the renderer's own
+  frames, so until the device is drawn again its parts in the chunk are as it last drew them, and a device that was
+  never within 64 blocks has none (not done yet: frames for far devices whose state was published).
+- Light: not part of a call. The snapshot reads each device's packed light as `BlockEntityRenderState` does, and the
+  game meshes a section again when light in it changes. The colour carries the entity shader's shading (two lights
+  of 0.6 over 0.4 ambient, the normal a signed byte per axis), since the chunk shader has none.
+- Textures: `ModelSprites` (a `SpriteSource` named in `atlases/blocks.json`) stitches `assets/eln/model` and
+  `assets/eln/sprites` (not `sprites/gui`) into the block atlas, padded to multiples of 16 pixels, alpha made 0 or
+  255 at the renderers' cutoff. Always, whether or not the chunk draws parts: 211 textures made no difference to
+  the atlas' size on the Stasis Delvers pack (4096x2048).
+- Switches: client config `rendering.staticPartsInChunks` (`config/eln-client.toml`, default true; `ElnClientConfig`),
+  applied at once. `-Deln.bake` or `ELN_BAKE` = `off`, `on` or `force` (leave settled parts out without asking
+  whether the mesh shows them) wins over it. If writing a section's parts throws, it is logged once and the baking
+  switches itself off; reloading the config turns it on again.
+- Measuring: `-Deln.bakeStats=true` or `ELN_BAKE_STATS=1` logs every 600 frames where the vertices went (in-chunk,
+  const, moving, blended...), per render class, and why constant ones are still with the renderer (changed, waiting,
+  waiting longer, no sprite, mesh not shown yet). At the workshop: 80-86% in the chunk.
+
+| Class | Role |
+|---|---|
+| `gl/Bake.java` | calls, devices, settling; no client classes |
+| `gl/BakeMesh.java` | a call's quads as chunk vertices, shaded |
+| `gl/BakeStats.java` | the measurement |
+| `client/render/bake/ChunkBake.java` | sections, snapshots, which mesh is on screen, the switch |
+| `client/render/bake/ModelSprites.java` | the textures in the block atlas |
 
 ## Tests
 
 - GameTest `gametest/PublishRenderCase.java`: every device with a render: server publish packet read by a fresh client BE, consumed exactly, draw does not throw and emits vertices.
+- `gametest/BakeOnceCheck.java` (run by `publish_render` for every device, and by `autominer_spin` with a part that starts to move): the device drawn with its parts in the chunk shows every quad exactly once, in the same place and colour; see testing.md. `src/test/java/mods/eln/gl/BakeTest.java`: settling, waits, the section, the override.
 - `gametest/ItemDrawCase.java`: every 3D item draw records vertices without exceptions. `gametest/XRayCase.java`: X-ray filter, state machine, menu, item draw. `src/test/java/mods/eln/item/xray/XRayRayMarchTest.java`.
 - `/elnlab gallery|burn|cables` (`gametest/LabCommands.java`): visual comparison scenes and stress scenes for frame times.
 

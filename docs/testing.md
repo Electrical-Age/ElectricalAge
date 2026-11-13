@@ -93,10 +93,23 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
 ### Case files
 
 Top level: `SimTickCase`, `KotlinRuntimeCase.kt` (jarJar'd stdlib loads), `PublishRenderCase` (publish packet ->
-fresh client render consumes it exactly, draws), `GuiPacketCase` (client->server GUI packets via
+fresh client render consumes it exactly, draws; then `BakeOnceCheck`, below), `GuiPacketCase` (client->server GUI packets via
 `ServerPacketHandler.handle`, far player ignored), `MachineMenuCase`, `MenusOpenCase`, `AutoMinerSpinCase`,
 `ItemDrawCase`, `XRayCase`, golden cases (below). `TestEnergySinks`: a lodestone at a test-registered position is an
 FE receiver.
+
+`BakeOnceCheck.check(ctx, name, blockEntity, pos, draw)`: the device with its unchanging parts in the chunk
+(rendering.md) must show every quad exactly once. It draws the device without baking for reference, then with it
+on a clock of its own (50 ms a frame) until the parts settle, and compares three frames against the reference:
+before the chunk shows the parts (the renderer draws all), while it shows them (the renderer's frame plus what
+`BakeMesh.write` gives for the settled calls: place within 1e-4, texture coordinates, state, light, and the colour
+the entity shader would give, within 3 of 255), and after it stopped (the renderer draws all again). Then the device
+is swept and nothing may be left settled. Only quads that the reference draws before and after agree on are
+compared one by one (a part moving on its own differs between any two draws), and the frames' vertex counts must
+add up. `publish_render` runs it for every device and fails if the chunk's share of all vertices falls below 90%
+(98.9% when written; the INFO lines give it per device). `autominer_spin` runs it with a drill that stands until the
+chunk shows it and then turns. A new device with a render is covered by `publish_render` without more work; a test
+of a part that changes state can call the check with a draw that changes it.
 
 `cases/`: `Batch1Cases`, `Wp9aCases` (six-node power), `Wp9bCases` (sensors, probes), `Wp9cCases` (logic, meters,
 wireless), `Wp10aCases`, `Wp10bCases` (machines, generators, thermal), `Wp11Cases` (shafts, poles, converters),

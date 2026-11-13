@@ -90,7 +90,12 @@ public final class ChunkBake implements Bake.Host {
      */
     public void configure(boolean on) {
         int mode = Bake.OVERRIDE >= 0 ? Bake.OVERRIDE : on ? 1 : 0;
-        Minecraft.getInstance().execute(() -> {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc == null) {   // (data generation: no game to draw)
+            Bake.mode = mode;
+            return;
+        }
+        mc.execute(() -> {
             failed = false;
             setMode(mode);
         });

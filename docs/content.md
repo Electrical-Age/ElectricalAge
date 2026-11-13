@@ -189,6 +189,10 @@ Not "none": `src/main/java/mods/eln/ElnConfig.java` is a SYNCED `ModConfigSpec` 
 1.12 config value is a plain static with its 1.12 default in `Eln.java` (power factors, lamp lives, ranges,
 `xRayScannerRange` 7.5...).
 
+`src/main/java/mods/eln/client/ElnClientConfig.java` is the CLIENT spec (`config/eln-client.toml`), registered in the
+`ElnClient` constructor: `rendering.staticPartsInChunks` (true), whether the chunk draws the devices' unchanging
+parts ([rendering.md](rendering.md)); it applies as soon as the file changes.
+
 ## Decisions and removed content
 
 - Copper Coil (0e58d068): new shared item `eln:copper_coil`, 4 copper ingots around a stick give 4; windings

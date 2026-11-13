@@ -393,6 +393,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   core saturates, draws a magnetising current and heats, and the converter burns; a winding over 1.3 x its cable's
   current heats it too. The Variable DC-DC Converter taps its secondary by a signal on its front. Old converters are
   rewound once and kept as built (no saturation) until changed (docs/persistence.md).
+- **Static device parts are drawn by the chunk** (2026-11-12, board #67): the client's frame at a base of machines
+  went mostly to device geometry sent again every frame. Of three options (coarser coil ends, geometry kept on the
+  GPU, static parts as chunk geometry) Baughn chose the last as the end state. Past the 64 blocks a block entity is
+  drawn within, a device used to vanish whole; its parts in the chunk now stay, without what moves or glows ("keep
+  them visible; it's an improvement even without the details"). Client config `rendering.staticPartsInChunks` turns
+  it off (docs/rendering.md).
 
 ## Behaviour changes vs 1.12
 
@@ -585,7 +591,6 @@ In the port:
 - Modbus RTU: element ported, render and GUI not; registered without a creative entry while `Eln.modbusEnable` is false.
 - Other languages: only the generated `en_us`; 1.12's 40+ `.lang` files to convert.
 - Config: the rest of the 1.12 balancing values.
-- Chunk baking of static device geometry (voxel nodes are already baked into the chunk mesh); only if playtests need it.
 - In-game wiki guide (`wiki/Data.java` only collects descriptor groups), ore regeneration.
 - Servo layer: horizontal rails (the car and its payload carry an axis; the drive only scans up), larger platforms, bus
   I/O on the drive, the drive's own screen. Other players and mobs riding a car are drawn by vanilla's interpolation,
