@@ -127,7 +127,7 @@ Rules:
   lines computed from the slots).
 - `src/main/java/mods/eln/client/gui/ElnScreen.java`: base screen. Builders by layout id (`button`, `field`, `slider`,
   ...) throw if the layout lacks the id. `containerTick` -> refreshers -> `update()` (read live values from the render).
-  `EaField` commits on Enter or focus loss; `EaSlider` sends on release or a key press, and follows the device while idle.
+  `EaField` commits on Enter, on focus loss, or before a click elsewhere on the screen acts (so a button sees the typed value); `EaSlider` sends on release or a key press, and follows the device while idle.
 - Code editor (board #45): `client/gui/CodeEditor.java`, a widget over `gui/code/CodeBuffer` (pure Java: lines,
   cursor, selection, undo/redo; tested by `CodeBufferTest`) with a `gui/code/LanguageAdapter` (tokens to colour,
   diagnostics to mark, rules to draw). Text is drawn in fixed 6 px cells, each glyph of the game font centred in its

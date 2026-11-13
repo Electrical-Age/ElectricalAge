@@ -151,6 +151,9 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
 
     @Override
     public boolean mouseClicked(MouseButtonEvent e, boolean doubleClick) {
+        // a text box being edited commits before a click elsewhere acts: the clicked button ran first and the box lost
+        // focus after it, so the wire drawing machine started on its old turns and then refused the new ones
+        if (getFocused() instanceof EaField f && !f.isMouseOver(e.x(), e.y())) f.fire();
         if (openDropdown != null) {
             Dropdown d = openDropdown;
             openDropdown = null;
