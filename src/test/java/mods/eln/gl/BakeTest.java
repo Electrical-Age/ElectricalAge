@@ -230,9 +230,9 @@ class BakeTest {
             c.shown = true;
         }
         assertEquals(0, frame(16, draw));
-        var sprites = java.util.Map.of(mods.eln.misc.UtilsClient.WHITE, new mods.eln.client.render.bake.ModelSprites.Spr(0, 0, 1, 1, false));
+        var sprites = java.util.Map.of(mods.eln.misc.UtilsClient.WHITE, new BakeMesh.Spr(0, 0, 1, 1, false));
         List<Float> ys = new ArrayList<>();
-        assertEquals(8, mods.eln.client.render.bake.ChunkBake.write((cutout, x, y, z, color, u, v, l) -> ys.add(y),
+        assertEquals(8, BakeMesh.write((cutout, x, y, z, color, u, v, l) -> ys.add(y),
             Bake.inDrawOrder(settled), new int[2], sprites, 96, 0, -48, false));
         assertEquals(15.5f, ys.get(0), 1e-5f);
         assertEquals(16.5f, ys.get(4), 1e-5f, "above the section's 16 blocks");
@@ -264,9 +264,9 @@ class BakeTest {
         frame(500, draw);
         assertEquals(1, settled.size());
         Identifier white = mods.eln.misc.UtilsClient.WHITE;
-        var sprites = java.util.Map.of(white, new mods.eln.client.render.bake.ModelSprites.Spr(0.25f, 0.5f, 0.125f, 0.0625f, false));
+        var sprites = java.util.Map.of(white, new BakeMesh.Spr(0.25f, 0.5f, 0.125f, 0.0625f, false));
         List<float[]> out = new ArrayList<>();
-        int n = mods.eln.client.render.bake.ChunkBake.write((cutout, x, y, z, color, u, v, l) -> {
+        int n = BakeMesh.write((cutout, x, y, z, color, u, v, l) -> {
             assertFalse(cutout);
             assertEquals(0xE000B0, l);
             out.add(new float[]{x, y, z, u, v, color});
@@ -318,9 +318,9 @@ class BakeTest {
         Bake.Call[] calls = Bake.inDrawOrder(settled);
         assertFalse(calls[0].fullBright);
         assertTrue(calls[1].fullBright);
-        var sprites = java.util.Map.of(mods.eln.misc.UtilsClient.WHITE, new mods.eln.client.render.bake.ModelSprites.Spr(0, 0, 1, 1, false));
+        var sprites = java.util.Map.of(mods.eln.misc.UtilsClient.WHITE, new BakeMesh.Spr(0, 0, 1, 1, false));
         List<Integer> lights = new ArrayList<>();
-        mods.eln.client.render.bake.ChunkBake.write((cutout, x, y, z, color, u, v, l) -> lights.add(l),
+        BakeMesh.write((cutout, x, y, z, color, u, v, l) -> lights.add(l),
             calls, new int[]{0xE000B0, 0xE000B0}, sprites, 96, 0, -48, false);
         assertEquals(8, lights.size());
         assertEquals(0xE000B0, lights.get(0));
