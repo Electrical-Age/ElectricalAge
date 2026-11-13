@@ -26,7 +26,9 @@ import java.util.Map;
  * settled. While the chunk does not show them the renderer must still draw everything. Once it does, what the
  * renderer leaves out must be exactly what {@link BakeMesh} writes for the settled calls: same place, texture
  * coordinates, state and light, and the colour the entity shader would have given the vertex. When the chunk stops
- * showing them the renderer draws everything again, and a device that is gone leaves nothing behind.
+ * showing them the renderer draws everything again, and a device that is gone leaves nothing behind. Then the same
+ * device is drawn only into far frames, as from beyond the renderer's range: one run of them must settle what the
+ * near frames did, and the next near frame shows every quad exactly once.
  * <p>
  * Only quads that two reference draws agree on are compared (a part moving on the real clock differs between any
  * two draws), plus the vertex count of the whole frame.
@@ -96,6 +98,8 @@ final class BakeOnceCheck {
     private static final long STEP = 50_000_000L;
     /** Frames drawn while the parts settle (well over the 0.4 s a part must stay the same). */
     private static final int SETTLE_FRAMES = 12;
+    /** Far frames are asked for over this many frames: one run at most (3 s), and not the next (10 s on). */
+    private static final int FAR_FRAMES = 90;
     /** The light the calls are written with, to tell it from full light. */
     private static final int LIGHT = 0x00A000B0;
     private static final int S = GlFrame.STRIDE;
@@ -158,7 +162,7 @@ final class BakeOnceCheck {
         Bake.host = host;
         Bake.mode = 1;
         List<String> errors = new ArrayList<>();
-        int total = 0, fixed = 0, inChunk = 0;
+        int total = 0, fixed = 0, inChunk = 0, farInChunk = 0;
         try {
             Map<Q, Integer> before = frame(null, pos, draw);
             Map<Q, Integer> waiting = null;
@@ -181,73 +185,10 @@ final class BakeOnceCheck {
             fixed = vertices(same);
             boolean steady = vertices(before) == total;
 
-            // the chunk's geometry for the settled calls, each quad matched to one of the reference
             Map<GlFrame.Key, List<Q>> byKey = new HashMap<>();
             for (Q q : same.keySet()) byKey.computeIfAbsent(q.key, k -> new ArrayList<>()).add(q);
             Map<Q, Integer> chunk = new HashMap<>();
-            Map<Identifier, BakeMesh.Spr> sprites = new HashMap<>();
-            float[][] buf = {new float[7 * 64]};
-            int[] n = {0};
-            BakeMesh.Sink sink = (cutout, x, y, z, color, u, v, light) -> {
-                if (n[0] + 7 > buf[0].length) buf[0] = Arrays.copyOf(buf[0], buf[0].length * 2);
-                float[] d = buf[0];
-                int o = n[0];
-                d[o] = x;
-                d[o + 1] = y;
-                d[o + 2] = z;
-                d[o + 3] = u;
-                d[o + 4] = v;
-                d[o + 5] = Float.intBitsToFloat(color);
-                d[o + 6] = Float.intBitsToFloat(light);
-                n[0] = o + 7;
-            };
-            for (Bake.Call c : calls) {
-                sprites.put(c.texture == null ? UtilsClient.WHITE : c.texture, new BakeMesh.Spr(0, 0, 1, 1, false));
-                n[0] = 0;
-                BakeMesh.write(sink, new Bake.Call[]{c}, new int[]{LIGHT}, sprites, pos.getX(), pos.getY(), pos.getZ(), false);
-                List<Q> candidates = byKey.get(new GlFrame.Key(c.texture, GlFrame.Blend.NONE, c.cull, c.fullBright, c.lit));
-                int per = c.cull ? 28 : 56;
-                if (n[0] % per != 0) errors.add("the chunk's part of " + c.texture + " is not whole quads");
-                int at = 0;
-                for (int i = 0; i + per <= n[0]; i += per) {
-                    float[] d = buf[0];
-                    if (!c.cull) {
-                        // seen from both sides: the same quad again, wound the other way
-                        for (int k = 0; k < 4; k++)
-                            for (int j = 0; j < 7; j++)
-                                if (Float.floatToRawIntBits(d[i + k * 7 + j]) != Float.floatToRawIntBits(d[i + 28 + (3 - k) * 7 + j])) {
-                                    errors.add("the back of a two-sided quad of " + c.texture + " is not its front reversed");
-                                    k = 4;
-                                    break;
-                                }
-                    }
-                    Q hit = null;
-                    String wrong = null;
-                    int size = candidates == null ? 0 : candidates.size();
-                    for (int t = 0; t < size; t++) {
-                        // (the chunk writes in the order of the draw, so the next one is usually right after the last)
-                        Q q = candidates.get((at + t) % size);
-                        if (!matches(q.v, d, i)) continue;
-                        // (a device may draw two quads in one place, in different colours)
-                        String w = colours(q, d, i, c.fullBright);
-                        if (hit == null || w == null) {
-                            hit = q;
-                            wrong = w;
-                        }
-                        if (w == null) {
-                            at = (at + t + 1) % size;
-                            break;
-                        }
-                    }
-                    if (hit == null) {
-                        errors.add(String.format("the chunk draws a quad of %s at %.3f %.3f %.3f that the device does not", c.texture, d[i], d[i + 1], d[i + 2]));
-                        continue;
-                    }
-                    chunk.merge(hit, 1, Integer::sum);
-                    inChunk += 4;
-                    if (wrong != null) errors.add(wrong);
-                }
-            }
+            inChunk = chunk(calls, byKey, pos, chunk, errors);
 
             for (Map.Entry<Q, Integer> e : same.entrySet()) {
                 Q q = e.getKey();
@@ -264,6 +205,35 @@ final class BakeOnceCheck {
             }
             Bake.sweep(o -> o == owner);
             if (!host.settled.isEmpty()) errors.add(host.settled.size() + " parts are left in the chunk when the device is gone");
+
+            // the same device seen only from beyond the renderer's range: far frames settle what the near ones did
+            int looks = 0;
+            for (int i = 0; i < FAR_FRAMES; i++) {
+                clock += STEP;
+                GlFrame.beginRenderFrame(clock);
+                if (!Bake.farDue(owner, pos.asLong())) continue;
+                looks++;
+                GlFrame f = GlFrame.openBlock(new Matrix4f(), new Matrix3f());
+                try {
+                    f.bake(owner, pos.asLong(), true);
+                    draw.run();
+                } finally {
+                    GlFrame.close();
+                }
+            }
+            if (looks < 2 || looks > 9) errors.add(looks + " far frames in " + FAR_FRAMES * STEP / 1_000_000 + " ms, not 2 to 9 (one run)");
+            Map<Q, Integer> farChunk = new HashMap<>();
+            farInChunk = chunk(Bake.inDrawOrder(host.settled), byKey, pos, farChunk, errors);
+            if (steady && farInChunk != inChunk) errors.add("far frames settled " + farInChunk + " vertices, the near frames " + inChunk);
+            for (Bake.Call c : host.settled) c.shown = true;
+            Map<Q, Integer> farShown = frame(owner, pos, draw);
+            for (Map.Entry<Q, Integer> e : same.entrySet()) {
+                Q q = e.getKey();
+                int r = farShown.getOrDefault(q, 0), c = farChunk.getOrDefault(q, 0);
+                if (r + c != e.getValue()) errors.add(where(q) + " is drawn " + r + " times by the renderer and " + c + " by the chunk after far frames, not " + e.getValue());
+            }
+            Bake.sweep(o -> o == owner);
+            if (!host.settled.isEmpty()) errors.add(host.settled.size() + " parts are left in the chunk when the device is gone (far)");
         } catch (RuntimeException ex) {
             errors.add(ex.toString());
         } finally {
@@ -275,9 +245,81 @@ final class BakeOnceCheck {
         allVertices += total;
         chunkVertices += inChunk;
         if (inChunk == 0) nothingBaked.add(name);
-        ctx.check("bake " + name + ": every quad drawn exactly once", errors.isEmpty(),
+        ctx.check("bake " + name + ": every quad drawn exactly once, near and far", errors.isEmpty(),
             errors.size() + " differences, the first: " + errors.subList(0, Math.min(3, errors.size())));
-        ctx.line(String.format("INFO bake %s: %d of %d vertices from the chunk (%d the same in every draw)", name, inChunk, total, fixed));
+        ctx.line(String.format("INFO bake %s: %d of %d vertices from the chunk (%d the same in every draw; far frames: %d)", name, inChunk, total, fixed, farInChunk));
+    }
+
+    /**
+     * The chunk's geometry for the settled calls, each quad matched to one of the reference quads (byKey) and counted
+     * in chunk; returns its vertices. What does not match goes to errors.
+     */
+    private static int chunk(Bake.Call[] calls, Map<GlFrame.Key, List<Q>> byKey, BlockPos pos, Map<Q, Integer> chunk, List<String> errors) {
+        int inChunk = 0;
+        Map<Identifier, BakeMesh.Spr> sprites = new HashMap<>();
+        float[][] buf = {new float[7 * 64]};
+        int[] n = {0};
+        BakeMesh.Sink sink = (cutout, x, y, z, color, u, v, light) -> {
+            if (n[0] + 7 > buf[0].length) buf[0] = Arrays.copyOf(buf[0], buf[0].length * 2);
+            float[] d = buf[0];
+            int o = n[0];
+            d[o] = x;
+            d[o + 1] = y;
+            d[o + 2] = z;
+            d[o + 3] = u;
+            d[o + 4] = v;
+            d[o + 5] = Float.intBitsToFloat(color);
+            d[o + 6] = Float.intBitsToFloat(light);
+            n[0] = o + 7;
+        };
+        for (Bake.Call c : calls) {
+            sprites.put(c.texture == null ? UtilsClient.WHITE : c.texture, new BakeMesh.Spr(0, 0, 1, 1, false));
+            n[0] = 0;
+            BakeMesh.write(sink, new Bake.Call[]{c}, new int[]{LIGHT}, sprites, pos.getX(), pos.getY(), pos.getZ(), false);
+            List<Q> candidates = byKey.get(new GlFrame.Key(c.texture, GlFrame.Blend.NONE, c.cull, c.fullBright, c.lit));
+            int per = c.cull ? 28 : 56;
+            if (n[0] % per != 0) errors.add("the chunk's part of " + c.texture + " is not whole quads");
+            int at = 0;
+            for (int i = 0; i + per <= n[0]; i += per) {
+                float[] d = buf[0];
+                if (!c.cull) {
+                    // seen from both sides: the same quad again, wound the other way
+                    for (int k = 0; k < 4; k++)
+                        for (int j = 0; j < 7; j++)
+                            if (Float.floatToRawIntBits(d[i + k * 7 + j]) != Float.floatToRawIntBits(d[i + 28 + (3 - k) * 7 + j])) {
+                                errors.add("the back of a two-sided quad of " + c.texture + " is not its front reversed");
+                                k = 4;
+                                break;
+                            }
+                }
+                Q hit = null;
+                String wrong = null;
+                int size = candidates == null ? 0 : candidates.size();
+                for (int t = 0; t < size; t++) {
+                    // (the chunk writes in the order of the draw, so the next one is usually right after the last)
+                    Q q = candidates.get((at + t) % size);
+                    if (!matches(q.v, d, i)) continue;
+                    // (a device may draw two quads in one place, in different colours)
+                    String w = colours(q, d, i, c.fullBright);
+                    if (hit == null || w == null) {
+                        hit = q;
+                        wrong = w;
+                    }
+                    if (w == null) {
+                        at = (at + t + 1) % size;
+                        break;
+                    }
+                }
+                if (hit == null) {
+                    errors.add(String.format("the chunk draws a quad of %s at %.3f %.3f %.3f that the device does not", c.texture, d[i], d[i + 1], d[i + 2]));
+                    continue;
+                }
+                chunk.merge(hit, 1, Integer::sum);
+                inChunk += 4;
+                if (wrong != null) errors.add(wrong);
+            }
+        }
+        return inChunk;
     }
 
     /** Whether the chunk's quad at d[i] (7 floats a vertex) is where the reference quad is, with its texture coordinates. */

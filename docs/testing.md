@@ -104,7 +104,9 @@ on a clock of its own (50 ms a frame) until the parts settle, and compares three
 before the chunk shows the parts (the renderer draws all), while it shows them (the renderer's frame plus what
 `BakeMesh.write` gives for the settled calls: place within 1e-4, texture coordinates, state, light, and the colour
 the entity shader would give, within 3 of 255), and after it stopped (the renderer draws all again). Then the device
-is swept and nothing may be left settled. Only quads that the reference draws before and after agree on are
+is swept and nothing may be left settled. Then it is drawn only into far frames (`Bake.farDue`, 90 frames): one run
+of 2 to 9 far frames must settle what the near frames did (the same vertex count for a steady device, every quad
+matching the reference), and the next near frame with the parts shown must again show every quad exactly once. Only quads that the reference draws before and after agree on are
 compared one by one (a part moving on its own differs between any two draws), and the frames' vertex counts must
 add up. `publish_render` runs it for every device and fails if the chunk's share of all vertices falls below 90%
 (98.9% when written; the INFO lines give it per device). `autominer_spin` runs it with a drill that stands until the

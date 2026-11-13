@@ -167,7 +167,7 @@ change, and the block entity renderer draws the rest. The draw code is untouched
 ## Tests
 
 - GameTest `gametest/PublishRenderCase.java`: every device with a render: server publish packet read by a fresh client BE, consumed exactly, draw does not throw and emits vertices.
-- `gametest/BakeOnceCheck.java` (run by `publish_render` for every device, and by `autominer_spin` with a part that starts to move): the device drawn with its parts in the chunk shows every quad exactly once, in the same place and colour; see testing.md. `src/test/java/mods/eln/gl/BakeTest.java`: settling, waits, the section, the override, far frames.
+- `gametest/BakeOnceCheck.java` (run by `publish_render` for every device, and by `autominer_spin` with a part that starts to move): the device drawn with its parts in the chunk shows every quad exactly once, in the same place and colour, also after only far frames; see testing.md. `src/test/java/mods/eln/gl/BakeTest.java`: settling, waits, the section, the override, far frames.
 - `gametest/ItemDrawCase.java`: every 3D item draw records vertices without exceptions. `gametest/XRayCase.java`: X-ray filter, state machine, menu, item draw. `src/test/java/mods/eln/item/xray/XRayRayMarchTest.java`.
 - `/elnlab gallery|burn|cables` (`gametest/LabCommands.java`): visual comparison scenes and stress scenes for frame times.
 
