@@ -25,6 +25,7 @@ public final class LinksCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new LaidCutBroken());
+        cases.add(new TrimBurnRepair());
     }
 
     static VoxelNode node(TestContext c, BlockPos p) {
@@ -53,6 +54,86 @@ public final class LinksCases {
                 for (int[] j : c.joints)
                     if (!CableLinks.implied(j) && CableLinks.kind(j) == CableLinks.CONT && j[2] == dx && j[3] == dy && j[4] == dz) n++;
         return n;
+    }
+
+    /** No joint in these blocks points at a piece that isn't there (CONT, SPLICE, TOUCH targets). */
+    static String dangling(TestContext c, List<BlockPos> at) {
+        StringBuilder b = new StringBuilder();
+        for (BlockPos p : at) {
+            VoxelNode v = node(c, p);
+            if (v == null) continue;
+            for (var part : v.parts)
+                if (part instanceof CablePart cp)
+                    for (int[] j : cp.joints) {
+                        int k = CableLinks.kind(j);
+                        if (k != CableLinks.CONT && k != CableLinks.SPLICE && k != CableLinks.TOUCH) continue;
+                        VoxelNode t = node(c, p.offset(j[2], j[3], j[4]));
+                        if (t == null || t.partById(j[5]) == null) b.append(p.toShortString()).append(" #").append(cp.id).append(' ').append(CableLinks.describe(j)).append("; ");
+                    }
+        }
+        return b.toString();
+    }
+
+    /**
+     * A device put at a laid run's free end trims the last piece (DevicePlacer.trim): the joint from the block before it
+     * follows the trimmed piece. A piece of the run burnt and repaired keeps the layer's joints, both ways.
+     */
+    static final class TrimBurnRepair implements TestCase {
+        String layErr, trimErr, danglingAfterTrim = "", trimmedJoints = "", burnt = "", repaired = "";
+        int contsToTrimmed = -1, laidBeforeBurn = -1, laidWhileBurnt = -1, laidAfterRepair = -1;
+
+        public String id() {
+            return "links_trim_burn_repair";
+        }
+
+        public int width() {
+            return 6;
+        }
+
+        public void build(TestContext c) {
+            BlockPos o = c.at(0, 0, 0);
+            int tier = CablePart.tierOf("Low Voltage Cable");
+            // a run on the floor from block x 0 to the middle of block x 3 (its end in the block, free)
+            var a = new CableRouter.End(o.getX() * 16L + 4, (o.getY() + 1) * 16L, (o.getZ() + 1) * 16L + 8, 0, -1);
+            var b = new CableRouter.End((o.getX() + 3) * 16L + 8, (o.getY() + 1) * 16L, (o.getZ() + 1) * 16L + 8, 0, -1);
+            layErr = CablePlacer.routeAndLayForTests(c.level(), tier, a, b);
+            VoxelNode end = node(c, c.at(3, 1, 1));
+            if (end != null) {
+                var stack = VoxelDeviceCases.desc("Voltage Probe").newItemStack();
+                trimErr = end.placeAnywhere(stack, Direction.YN, 9.5 / 16, 0.5 / 16, 8.0 / 16, VoxelDeviceCases.player(c));
+            }
+            List<BlockPos> run = new ArrayList<>();
+            for (int x = 0; x < 4; x++) run.add(c.at(x, 1, 1));
+            danglingAfterTrim = dangling(c, run);
+            VoxelNode before = node(c, c.at(2, 1, 1));
+            contsToTrimmed = laidConts(before, 1, 0, 0);
+            trimmedJoints = joints(end);
+            // burn the middle block's piece, then repair it
+            VoxelNode mid = node(c, c.at(1, 1, 1));
+            laidBeforeBurn = laidConts(mid, 1, 0, 0) + laidConts(mid, -1, 0, 0);
+            CablePart piece = null;
+            if (mid != null) for (var part : mid.parts) if (part instanceof CablePart cp) piece = cp;
+            if (piece != null && mid.burnableOf(piece) != null) {
+                mid.burnableOf(piece).burn(mods.eln.sim.process.destruct.FailureCause.OVERHEAT, mods.eln.sim.process.destruct.Failure.Kind.CABLE);
+                laidWhileBurnt = laidConts(mid, 1, 0, 0) + laidConts(mid, -1, 0, 0)
+                    + laidConts(node(c, c.at(0, 1, 1)), 1, 0, 0) + laidConts(node(c, c.at(2, 1, 1)), -1, 0, 0);
+                burnt = joints(mid);
+                if (mid.burnableOf(piece) != null) mid.burnableOf(piece).repair();
+                laidAfterRepair = laidConts(mid, 1, 0, 0) + laidConts(mid, -1, 0, 0)
+                    + laidConts(node(c, c.at(0, 1, 1)), 1, 0, 0) + laidConts(node(c, c.at(2, 1, 1)), -1, 0, 0);
+                repaired = joints(mid);
+            }
+        }
+
+        public void measure(TestContext c) {
+            c.check("trim: the run was laid", layErr == null, String.valueOf(layErr));
+            c.check("trim: a Voltage Probe went on its free end", trimErr == null, String.valueOf(trimErr));
+            c.check("trim: no joint points at the replaced piece", danglingAfterTrim.isEmpty(), danglingAfterTrim);
+            c.check("trim: the block before keeps the layer's joint to the trimmed piece", contsToTrimmed == 1, contsToTrimmed + "; end block: " + trimmedJoints);
+            c.check("burn: the middle piece held the layer's joints both ways", laidBeforeBurn == 2, String.valueOf(laidBeforeBurn));
+            c.check("burn: burnt, it and its neighbours keep them", laidWhileBurnt == 4, laidWhileBurnt + ": " + burnt);
+            c.check("burn: repaired, still", laidAfterRepair == 4, laidAfterRepair + ": " + repaired);
+        }
     }
 
     static final class LaidCutBroken implements TestCase {

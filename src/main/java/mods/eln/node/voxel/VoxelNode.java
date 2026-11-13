@@ -464,6 +464,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** The next part id to give (VoxelPart.id): ids are never reused, so a stored link never finds a newer part. */
     int nextPartId = 1;
+    /** Has this block connected under stored links (its implied joints recorded at least once)? Saved ("lk"): a block
+     *  that never has (frozen since before, or never loaded) has no joints from the rules yet. */
+    boolean linksRecorded;
 
     /**
      * Give every part without an id (or with one another part already has) a new one. Called on load and whenever the
@@ -1553,6 +1556,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         // only blocks with pipes in the fluid world (it steps every device every tick)
         if (hasFluid()) FluidWorld.add(this);
         else FluidWorld.remove(this);
+        linksRecorded = true;
     }
 
     private boolean hasFluid() {
@@ -2297,6 +2301,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (carved != null && !carved.isEmpty()) nbt.putLongArray("carved", carved.toLongArray());
         nbt.putInt("parts", parts.size());
         nbt.putInt("nextPartId", nextPartId);
+        if (linksRecorded) nbt.putBoolean("lk", true);
         for (int i = 0; i < parts.size(); i++) {
             CompoundTag t = new CompoundTag();
             t.putString("kind", parts.get(i).kind());
@@ -2317,6 +2322,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         carved = nbt.getLongArray("carved").map(BitSet::valueOf).orElse(null);
         int n = nbt.getIntOr("parts", 0);
         nextPartId = nbt.getIntOr("nextPartId", 1);
+        linksRecorded = nbt.getBooleanOr("lk", false);
         for (int i = 0; i < n; i++) {
             CompoundTag pt = nbt.getCompoundOrEmpty("p" + i);
             VoxelPart p = VoxelPart.read(pt, coordonate.y);

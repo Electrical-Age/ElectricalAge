@@ -29,14 +29,18 @@ public final class CableVerify {
 
     /** The outcome: counts, and one line per problem (capped in text by the caller). */
     public record Report(int blocks, int pieces, int burnt, int outside, int liveEdges, int jointEdges, int[] counts,
-                         List<String> problems, List<String> parallel) {
+                         List<String> problems, List<String> parallel, int excludedBlocks, int excludedPieces, int unrecorded,
+                         int unjoinedToAbsent) {
         public boolean ok() {
             return problems.isEmpty();
         }
 
         public String summary() {
             StringBuilder b = new StringBuilder();
-            b.append(blocks).append(" block(s), ").append(pieces).append(" piece(s) checked (").append(burnt).append(" burnt, ")
+            b.append(blocks).append(" block(s), ").append(pieces).append(" piece(s) checked (").append(excludedBlocks)
+                .append(" block(s) with ").append(excludedPieces).append(" piece(s) out of the simulation not checked; ")
+                .append(unrecorded).append(" block(s) never connected under stored links; ").append(unjoinedToAbsent)
+                .append(" end(s) meeting a block out of the simulation with no joint; ").append(burnt).append(" burnt, ")
                 .append(outside).append(" joint(s) to blocks out of the simulation skipped); ").append(liveEdges).append(" live link(s), ")
                 .append(jointEdges).append(" from joints; ").append(problems.size()).append(" problem(s), ").append(parallel.size())
                 .append(" parallel pair(s). Joints:");
@@ -50,7 +54,17 @@ public final class CableVerify {
 
     public static Report verify(Collection<VoxelNode> scope) {
         List<VoxelNode> nodes = new ArrayList<>();
-        for (VoxelNode n : scope) if (n.isAdded() && !n.isDestructing()) nodes.add(n);
+        int excludedBlocks = 0, excludedPieces = 0, unrecorded = 0, unjoined = 0;
+        for (VoxelNode n : scope) {
+            if (n.isDestructing()) continue;
+            if (!n.linksRecorded) unrecorded++;
+            if (n.isAdded()) {
+                nodes.add(n);
+                continue;
+            }
+            excludedBlocks++;
+            for (VoxelPart p : n.parts) if (p instanceof CablePart) excludedPieces++;
+        }
         Set<VoxelNode> in = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
         in.addAll(nodes);
         // the blocks looked at: the scope and its voxel neighbours (joints and links across the scope's edge)
@@ -153,7 +167,32 @@ public final class CableVerify {
             if (e.getValue().size() > 1 && e.getKey().startsWith("E")) parallel.add(fromJoints.get(e.getKey()) + " x" + e.getValue().size());
         // groups
         for (VoxelNode n : nodes) groups(n, problems);
-        return new Report(nodes.size(), pieces, burnt, outside, live.size(), fromJoints.size(), CableLinks.counts(all), problems, parallel);
+        // ends meeting an end in a block out of the simulation (frozen, unloaded) that no joint records: links that were
+        // never seen with both blocks connected
+        for (VoxelNode n : nodes)
+            for (int f = 0; f < 6; f++) {
+                int[] d = CableRouter.DV[f];
+                VoxelNode v = n.at(d[0], d[1], d[2]);
+                if (v == null || v.isAdded()) continue;
+                for (VoxelPart p : n.parts) {
+                    if (!(p instanceof CablePart c)) continue;
+                    for (CablePart.Port port : c.cablePorts()) {
+                        if (port.face() != f) continue;
+                        CablePart.Port m = port.mirrored();
+                        boolean meets = false, joined = false;
+                        for (VoxelPart q : v.parts)
+                            if (q instanceof CablePart o && o.cablePorts().contains(m)) {
+                                meets = true;
+                                int e = CableLinks.endOf(c, port);
+                                for (int[] j : c.joints)
+                                    joined |= CableLinks.kind(j) == CableLinks.CONT && j[1] == e && j[2] == d[0] && j[3] == d[1] && j[4] == d[2] && j[5] == o.id;
+                            }
+                        if (meets && !joined) unjoined++;
+                    }
+                }
+            }
+        return new Report(nodes.size(), pieces, burnt, outside, live.size(), fromJoints.size(), CableLinks.counts(all), problems, parallel,
+            excludedBlocks, excludedPieces, unrecorded, unjoined);
     }
 
     /** The same-block joints of n's pieces must group them exactly as its live conductors. */

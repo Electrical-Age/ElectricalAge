@@ -237,7 +237,10 @@ public final class LabCommands {
             scope.add(v);
         }
         var rep = mods.eln.node.voxel.CableVerify.verify(scope);
-        src.sendSuccess(() -> Component.literal((rep.ok() ? "links OK: " : "links DIFFER: ") + rep.summary()), true);
+        int total = 0;
+        for (mods.eln.node.NodeBase n : mods.eln.node.NodeManager.instance.getNodes()) if (n instanceof mods.eln.node.voxel.VoxelNode) total++;
+        int all = total;
+        src.sendSuccess(() -> Component.literal((rep.ok() ? "links OK: " : "links DIFFER: ") + rep.summary() + " (" + all + " voxel blocks in the node manager)"), true);
         for (int i = 0; i < Math.min(5, rep.problems().size()); i++) {
             String line = rep.problems().get(i);
             src.sendSuccess(() -> Component.literal("  " + line), false);
