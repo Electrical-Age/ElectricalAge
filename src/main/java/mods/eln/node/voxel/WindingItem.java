@@ -78,6 +78,9 @@ public class WindingItem extends Item {
         CableSpec spec = spec(stack);
         out.accept(Component.literal(turns(stack) + " turns of " + spec.label(tier(stack)) + String.format(", %.0f A", spec.amps()))
             .withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.literal("For a DC-DC converter's winding slot").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        out.accept(Component.literal("For a Transformer (DC-DC)'s winding slot").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        // (Baughn 2026-11-13: say that they merge; HandWindingRecipe's rule)
+        out.accept(Component.literal("Windings of the same wire merge in a crafting grid, up to " + HandWindingRecipe.MAX_TURNS + " turns")
+            .withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
     }
 }

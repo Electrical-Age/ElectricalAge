@@ -97,8 +97,8 @@ public class WireDrawingScreen extends ElnScreen {
                 set(m, r.mm2, r.tier, r.colour, m == WireDrawingElement.KIT ? Math.max(r.amount, 20)
                     : m == WireDrawingElement.OVERHEAD ? Math.max(r.amount, 100) : Math.min(r.amount, WireDrawingDescriptor.MAX_BLOCKS));
             },
-            pole ? tr("A cable kit (blocks of cable), a winding for a DC-DC converter (turns), bare Copper Cable for crafting,\na transformer for a utility pole (it takes a ferromagnetic core), or overhead cable for the spans between poles (no rubber)")
-                : tr("A cable kit (blocks of cable), a winding for a DC-DC converter (turns), bare Copper Cable for crafting,\nor overhead cable for the spans between utility poles (no rubber)")));
+            pole ? tr("A cable kit (blocks of cable), a winding for a Transformer (DC-DC) (turns), bare Copper Cable for crafting,\na transformer for a utility pole (it takes a ferromagnetic core), or overhead cable for the spans between poles (no rubber)")
+                : tr("A cable kit (blocks of cable), a winding for a Transformer (DC-DC) (turns), bare Copper Cable for crafting,\nor overhead cable for the spans between utility poles (no rubber)")));
         java.util.function.BooleanSupplier wire = this::usesWire, ins = this::usesInsulation, colour = this::usesColour, amount = this::usesAmount;
         java.util.function.BooleanSupplier poleMode = () -> r.mode == WireDrawingElement.POLE;
         text("mm2l", shown(wire, () -> poleMode.getAsBoolean() ? tr("Low-side wire") : tr("Wire")));
