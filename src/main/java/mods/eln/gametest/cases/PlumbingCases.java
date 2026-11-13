@@ -217,6 +217,15 @@ public final class PlumbingCases {
             ctx.line(String.format("purge valve (%s): tank %.3f bar, %.4f -> %.4f kg of water; %s", full ? "full" : "half", t.vessel.P() / 1e5, water0, water,
                 PipeCases.node(ctx, pipeAt).getWaila(false)));
             ctx.check("purge valve: it fits on the pipe", err == null, "" + err);
+            // (a client check: Jade's header read "Pipes and Cables" with the crosshair on the valve)
+            var vn = PipeCases.node(ctx, pipeAt);
+            String onValve = null, onPipe = vn.nameAt(0.5, 1 / 16.0, 0.5);
+            for (var part : vn.parts)
+                if (part instanceof mods.eln.node.voxel.SafetyValvePart sv) {
+                    int[] b = sv.boxes().get(0);   // (its body, beside the pipe)
+                    onValve = vn.nameAt((b[0] + b[3]) / 32.0, (b[1] + b[4]) / 32.0, (b[2] + b[5]) / 32.0);
+                }
+            ctx.check("purge valve: Jade names it, and the pipe under it", "Pipe Purge Valve".equals(onValve) && "Iron Pipe".equals(onPipe), onValve + " / " + onPipe);
             // (the vapour in the gas it lets out goes too, a few hundredths of a gram: "it'll let out steam")
             ctx.check("purge valve: no liquid goes, only the vapour in the gas (under 0.1 g)", water > water0 - 1e-4, String.format("%.6f kg lost", water0 - water));
             if (!full) ctx.check("purge valve: it bleeds the air down to its set pressure (under 1.3 bar)", t.vessel.P() < 1.3e5,

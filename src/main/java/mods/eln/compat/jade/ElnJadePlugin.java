@@ -105,15 +105,7 @@ public class ElnJadePlugin implements IWailaPlugin {
         var h = acc.getHitResult().getLocation();
         var p = acc.getPosition();
         double x = h.x - p.getX(), y = h.y - p.getY(), z = h.z - p.getZ();
-        var a = v.aimed(x, y, z);
-        int el = a.element(), pi = a.part();
-        if (el >= 0 && v.sideElementList[el] != null) return v.sideElementList[el].sixNodeElementDescriptor.name;
-        if (pi < 0) return null;
-        var part = v.parts.get(pi);
-        if (part instanceof mods.eln.node.voxel.CablePart c)   // (a power cable: its spec, Baughn 2026-11-06)
-            return mods.eln.node.voxel.CablePart.TIERS[c.tier].name() + (c.spec != null ? " (" + c.spec.label(c.tier) + ")" : "");
-        if (part instanceof mods.eln.node.voxel.PipePart pp) return (switch (pp.tier) { case 0 -> "Iron"; case 1 -> "Alloy"; default -> "Large Alloy"; }) + " Pipe";
-        return null;
+        return v.nameAt(x, y, z);
     }
 
     enum Server implements IServerDataProvider<BlockAccessor> {
