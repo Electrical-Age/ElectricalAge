@@ -59,6 +59,27 @@ transparent neighbour).
   each is an `End` of its own, offset voxels from the edge's middle toward `side.applyLRDU(lrdu.left())`, and that edge
   then has no middle point. In a plain six-node block such an element falls back to one connection an edge.
 
+### Stored links (routing phase 3a)
+
+Every part has an id unique in its block, never reused (`VoxelPart.id`, `VoxelNode.nextPartId`, assigned in
+`changed()` and after load). Every cable piece keeps joints (`CablePart.joints`, `CableLinks`): what each end (0, 1; a
+knuckle's port index) or its body (-1) connects to: CONT (the next piece, here or across a face; on both pieces), SPLICE
+(an end on another piece's line; on the branch), TERM_ELEMENT (a device in this or the neighbouring voxel block: slot,
+edge, terminal offset), TERM_NEIGHBOUR (a machine in a non-voxel neighbour: EA's edge rule, a bus peer, a face pin),
+TERM_FITTING (a valve's or pipe sensor's signal), TOUCH (bodies touching across a face). Networks are still built by
+the rules above; the joints are kept alongside:
+- **Implied** joints (flag `IMPLIED`): every rule that links a piece records one (`CableNet.build`, `connectElementsToCables`,
+  `connectPins`, valves and sensors, `connectVoxel`, `connectTouching`, `pinToCables`, `newConnectionAt`, bus peers,
+  `connectPeerPins`). `CableLinks.clearImplied` drops them at each `connectJob` (and the neighbours' into the block),
+  so they say what the network had; joints toward a block out of the simulation and burnt pieces' are kept.
+- **Editors' joints:** `Laying.lay` writes CONT/SPLICE between consecutive pieces of a route (`CableLinks.laid`; the
+  route's free ends stay implied); `removePart` drops joints pointing at the piece (`forgetPiece`), a block broken or
+  reverted drops all joints into it (`forget`); a device put on a cable hands the old piece's joints to the cut's pieces
+  (`CableLinks.cut`); a recolour keeps id and joints (`copyStateFrom`).
+- **Check:** `CableVerify` compares the joints' groups with the live conductors, and their links (electrical, thermal,
+  bus; conductor to anything) with the blocks' own link lists. `/elnlab links verify [r]` (report `eln-links.txt`), and
+  the GameTest harness after every test (`ElnGameTests.links`).
+
 ## Devices off centre (chips)
 
 - A voxel block has `SixNode.SLOTS` element slots: 0..5 are the faces (a device centred on face f, as six-node blocks
@@ -167,7 +188,8 @@ others, including voxel nodes via `VoxelNode.slowProcesses()`) -> `Conductor.bur
   `"parts"` (count), `"p<i>"` (one compound per part, `"kind"` + the part's keys).
 - `CablePart`: `"tier"` (descriptor name), `"face"`, `"pts"`, `"burnt"` (FailureCause name), `"conv"` (laid by the
   converter), `"paid"` (voxels returned on break), `"u"`, `"t"` (voltage, temperature: `CableNet.save()` copies them in
-  before a write or rebuild).
+  before a write or rebuild), `"hang"`/`"hang2"` (drawn hang), `"j"` (joints: a list of int arrays, sorted; see Stored links).
+- Each part `"id"` (in its `p<i>` compound), the node `"nextPartId"`.
 - `PipePart`: `"tier"`, `"pts"`, `"burst"`, `"burstDir"`, `"w"`, `"a"`, `"u"`. `ValvePart`: `"at"`, `"open"`.
   `SafetyValvePart`: `"at"`, `"set"`. `PipeSensorPart`: `"at"` (x, y, z, outlet, bore, kind), `"scale"`, its output. `AdapterPart`: `"face"`. Unknown kinds load as nothing (dropped).
 - Client publish: part count, then kind + length-prefixed bytes per part, then SixNode's elements
