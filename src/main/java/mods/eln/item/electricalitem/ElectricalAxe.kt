@@ -148,6 +148,16 @@ object TreeCapitation : IProcess {
         if (world.isClientSide())
             return
 
+        // A machine's fake player (Integrated Tunnels' Player Simulator, a deployer) holds the axe only for this click:
+        // it puts the stack back into its inventory or chest right after. Fell the whole tree now, while the stack is
+        // still in its hand, instead of drawing energy from a stack someone else owns over the next ticks (Baughn
+        // 2026-11-13: a Player Simulator's axe vanished from the chest it was kept in).
+        if (player is net.neoforged.neoforge.common.util.FakePlayer) {
+            while (swapper.tick()) {
+            }
+            return
+        }
+
         val dim = mods.eln.misc.Dimensions.id(world)
         blockSwappers[dim] = blockSwappers[dim]?.plus(swapper) ?: listOf(swapper)
     }
@@ -240,6 +250,10 @@ object TreeCapitation : IProcess {
         fun tick(): Boolean {
             // If empty, this swapper is done.
             if (candidateQueue.isEmpty())
+                return false
+            // A player who put the axe away (or swapped it) stops the felling: the stack is no longer theirs to drain
+            // (a fake player's swapper runs to the end within its click, addBlockSwapper)
+            if (player !is net.neoforged.neoforge.common.util.FakePlayer && player.mainHandItem !== stack)
                 return false
 
             var remainingSwaps = BLOCK_SWAP_RATE

@@ -36,11 +36,15 @@ public final class Wp12Cases {
     }
 
     /**
-     * Portable electrical axe with 40 kJ, tree capitation on a 4-log oak trunk from its bottom log (the block swapper
-     * runs from the server tick). Expected: all 4 logs cut, 200 J per log.
+     * Portable electrical axe with 40 kJ, tree capitation on a 4-log oak trunk from its bottom log. Expected: all 4 logs
+     * cut, 200 J per log. With a fake player (a machine's: Integrated Tunnels' Player Simulator) the whole tree goes
+     * within the click, and the stack isn't drawn on afterwards, once the machine has put it back (Baughn 2026-11-13:
+     * a Player Simulator's axe vanished from its chest).
      */
     static final class TreeCapitationCase implements TestCase {
         private ItemStack axe;
+        private int logsAfterClick = -1;
+        private double energyAfterClick;
         private static final double ENERGY = 40000;
 
         @Override
@@ -69,6 +73,9 @@ public final class Wp12Cases {
             ElectricalTool tool = (ElectricalTool) Utils.getItemObject(axe);
             tool.setEnergy(axe, ENERGY);
             TreeCapitation.INSTANCE.addBlockSwapper(w, FakePlayerFactory.getMinecraft(w), tool, ctx.at(1, 1, 1), true, axe);
+            logsAfterClick = 0;
+            for (int y = 1; y <= 4; y++) if (w.getBlockState(ctx.at(1, y, 1)).getBlock() == Blocks.OAK_LOG) logsAfterClick++;
+            energyAfterClick = tool.getEnergy(axe);
         }
 
         @Override
@@ -79,6 +86,9 @@ public final class Wp12Cases {
             ctx.check("wp12 tree capitation cut the logs", logs == 0, logs + " of 4 logs left (expected 0)");
             ElectricalTool tool = (ElectricalTool) Utils.getItemObject(axe);
             ctx.checkValue("wp12 tree capitation axe energy used (J)", ENERGY - tool.getEnergy(axe), 4 * 200);
+            ctx.check("wp12 tree capitation: a fake player's tree is felled within the click", logsAfterClick == 0, logsAfterClick + " logs left after the click");
+            ctx.check("wp12 tree capitation: the stack isn't drawn on after the click", tool.getEnergy(axe) == energyAfterClick,
+                energyAfterClick + " J after the click, " + tool.getEnergy(axe) + " J now");
             for (int y = 1; y <= 4; y++) if (w.getBlockState(ctx.at(1, y, 1)).getBlock() == Blocks.OAK_LOG) w.removeBlock(ctx.at(1, y, 1), false);
         }
     }
