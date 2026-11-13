@@ -455,19 +455,38 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         int colour = 15 - brush.getColor(held);
         if (colour == c.spec.colour() || !brush.use(held, player)) return true;
         CablePart n = new CablePart(c.tier, new CableSpec(c.spec.mm2(), colour), c.face, c.points);
-        n.burnt = c.burnt;
-        n.paid = c.paid;
-        n.hang = c.hang;   // (its hang across the air: only the colour changes)
-        n.hang2 = c.hang2;
-        n.byConverter = c.byConverter;
-        n.u = c.u;
-        n.t = c.t;
+        n.copyStateFrom(c);   // (only the colour changes: its id, links, hang, state stay)
         parts.set(index, n);
         changed();
         return true;
     }
 
+    /** The next part id to give (VoxelPart.id): ids are never reused, so a stored link never finds a newer part. */
+    int nextPartId = 1;
+
+    /**
+     * Give every part without an id (or with one another part already has) a new one. Called on load and whenever the
+     * parts change: parts reach the list by addPart, addJoined, valve fitting and device cuts alike (routing phase 3).
+     */
+    void ensureIds() {
+        java.util.Set<Integer> seen = new java.util.HashSet<>();
+        for (VoxelPart p : parts) if (p.id >= nextPartId) nextPartId = p.id + 1;
+        for (VoxelPart p : parts) {
+            if (p.id < 0 || !seen.add(p.id)) {
+                p.id = nextPartId++;
+                seen.add(p.id);
+            }
+        }
+    }
+
+    /** The part with this id, or null. */
+    public VoxelPart partById(int id) {
+        for (VoxelPart p : parts) if (p.id == id) return p;
+        return null;
+    }
+
     private void changed() {
+        ensureIds();
         vents = null;
         valveLinks = null;
         junctionLinks = null;
@@ -2124,10 +2143,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (host != null) nbt.put("host", net.minecraft.nbt.NbtUtils.writeBlockState(host));
         if (carved != null && !carved.isEmpty()) nbt.putLongArray("carved", carved.toLongArray());
         nbt.putInt("parts", parts.size());
+        nbt.putInt("nextPartId", nextPartId);
         for (int i = 0; i < parts.size(); i++) {
             CompoundTag t = new CompoundTag();
             t.putString("kind", parts.get(i).kind());
             parts.get(i).write(t);
+            if (parts.get(i).id >= 0) t.putInt("id", parts.get(i).id);
             nbt.put("p" + i, t);
         }
     }
@@ -2142,10 +2163,15 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         host = nbt.getCompound("host").map(t -> net.minecraft.nbt.NbtUtils.readBlockState(net.minecraft.core.registries.BuiltInRegistries.BLOCK, t)).orElse(null);
         carved = nbt.getLongArray("carved").map(BitSet::valueOf).orElse(null);
         int n = nbt.getIntOr("parts", 0);
+        nextPartId = nbt.getIntOr("nextPartId", 1);
         for (int i = 0; i < n; i++) {
-            VoxelPart p = VoxelPart.read(nbt.getCompoundOrEmpty("p" + i), coordonate.y);
-            if (p != null) parts.add(p);
+            CompoundTag pt = nbt.getCompoundOrEmpty("p" + i);
+            VoxelPart p = VoxelPart.read(pt, coordonate.y);
+            if (p == null) continue;
+            p.id = pt.getIntOr("id", -1);
+            parts.add(p);
         }
+        ensureIds();   // (parts saved before ids get theirs now, in list order, once)
         if (six) super.readFromNBT(nbt);
         else {
             CompoundTag wrap = new CompoundTag();
