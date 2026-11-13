@@ -138,6 +138,7 @@ public class ElnLang extends LanguageProvider {
             name = PLAIN.get(path);
             if (name == null && item instanceof IDescriptorItem d && d.getEaDescriptor() != null) name = descriptorName(d.getEaDescriptor());
             if (name == null) throw new IllegalStateException("ElnLang: no English name for eln:" + path);
+            name = shown(name);
             add(item, name);
             // (a plain BlockItem's name is its block's: one key for both)
             if (item instanceof BlockItem b && BuiltInRegistries.BLOCK.getKey(b.getBlock()).getNamespace().equals(Eln.MODID)
@@ -158,7 +159,7 @@ public class ElnLang extends LanguageProvider {
         add(mods.eln.apitest.ApiTestMachines.BLOCK.get(), "API Test Machine");   // (the GameTests' hidden fixture)
         for (var b : ElnRegistry.TRANSPARENT_BLOCKS) {
             var d = b.get().descriptor;
-            add(b.get(), d.name);
+            add(b.get(), shown(d.name));
         }
         add("itemGroup.eln", "Electrical Age");
         add("death.attack.eln.scald", "%1$s was scalded by steam");
@@ -192,6 +193,12 @@ public class ElnLang extends LanguageProvider {
             add("fluid_type.eln." + c.id, c.display);
             if (c.bucket) add("item.eln." + c.id + "_bucket", c.display + " Bucket");
         }
+    }
+
+    /** The name a player sees, where it differs from the descriptor's (which stays: it keys saves and recipes).
+     *  Baughn 2026-11-13: the DC-DC converters are called "Transformer (DC-DC)". */
+    static String shown(String name) {
+        return name.replace("DC-DC Converter", "Transformer (DC-DC)");
     }
 
     static String descriptorName(Object d) {
