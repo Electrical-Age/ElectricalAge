@@ -20,6 +20,8 @@ public class TransparentNodeRender implements BlockEntityRenderer<TransparentNod
     public static class State extends BlockEntityRenderState {
         TransparentNodeElementRender render;
         TransparentNodeEntity entity;
+        /** Beyond the renderer's range: a far frame, which only keeps the chunk's copy current. */
+        boolean far;
     }
 
     @Override
@@ -33,16 +35,25 @@ public class TransparentNodeRender implements BlockEntityRenderer<TransparentNod
         BlockEntityRenderer.super.extractRenderState(be, state, partialTicks, cameraPosition, breakProgress);
         state.render = be.elementRender;
         state.entity = be;
+        // (the same answer shouldRender got: the same camera position in the same frame)
+        state.far = !BlockEntityRenderer.super.shouldRender(be, cameraPosition);
+    }
+
+    /** Beyond the renderer's range, a device that bakes is drawn when it is due a far frame. */
+    @Override
+    public boolean shouldRender(TransparentNodeEntity be, Vec3 cameraPosition) {
+        if (BlockEntityRenderer.super.shouldRender(be, cameraPosition)) return true;
+        return be.elementRender != null && !be.elementRender.burnt && mods.eln.client.render.bake.ChunkBake.farDue(be);
     }
 
     @Override
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
-        if (state.render == null) return;
+        if (state.render == null || state.far && state.render.burnt) return;
         GlFrame frame = GlSubmit.openBlock(poseStack);
         // (a burnt device draws twice, the second time as a soot overlay that needs the first one's depth)
         if (state.render.burnt) frame.noBake(mods.eln.gl.Bake.BURNT);
-        else mods.eln.client.render.bake.ChunkBake.attach(frame, state.entity);
-        if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.device(state.blockPos.asLong(), state.render.getClass().getSimpleName());
+        else mods.eln.client.render.bake.ChunkBake.attach(frame, state.entity, state.far);
+        if (mods.eln.gl.BakeStats.ON && !state.far) mods.eln.gl.BakeStats.device(state.blockPos.asLong(), state.render.getClass().getSimpleName());
         try {
             GL11.glTranslatef(.5f, .5f, .5f);
             UtilsClient.glDefaultColor();
@@ -61,7 +72,7 @@ public class TransparentNodeRender implements BlockEntityRenderer<TransparentNod
             mods.eln.gl.BakeStats.endDevice();
             GlFrame.close();
         }
-        GlSubmit.submit(frame, poseStack, collector, state.lightCoords);
+        if (!state.far) GlSubmit.submit(frame, poseStack, collector, state.lightCoords);
     }
 
     /** Multiblock devices (turbines, solar panels, poles) reach past their block: don't cull them by it. */

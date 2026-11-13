@@ -130,9 +130,17 @@ change, and the block entity renderer draws the rest. The draw code is untouched
   The game draws a block entity only while its own section is drawn, so chunk and renderer show the device under the
   same condition; and a section of nothing but air is never compiled, so a part could not be put where it lies.
 - Far away: a block entity is drawn within 64 blocks. Past that the settled parts stay in the chunk (Baughn: keep
-  them visible), and what moves or glows is not drawn, as before. Calls only ever come from the renderer's own
-  frames, so until the device is drawn again its parts in the chunk are as it last drew them, and a device that was
-  never within 64 blocks has none (not done yet: frames for far devices whose state was published).
+  them visible), and what moves or glows is not drawn, as before. To keep the chunk's copy current without the
+  player having been near, the two node renderers' `shouldRender` also answers true beyond 64 blocks when
+  `ChunkBake.farDue` says the device is due a **far frame**: the same draw code into a frame flagged far, whose
+  display-list replays go through `Device.skip` and which is never submitted. Near or far is decided by the
+  default range test with the camera position the game passes to both `shouldRender` and `extractRenderState`, so
+  both agree; it is carried in the render state. Far frames come in runs of samples 0.4 s apart: a run starts on
+  the device's first far frame, after a near frame, after a packet (`ClientPacketHandler.forNode` tells
+  `ChunkBake.published`) and on a retry 10 to 160 s after the last run. A settled call a sample does not find
+  again is held in its section until the run ends, so a part that changes far away is swapped in one re-mesh,
+  not removed and added. A part that keeps moving is left out. At most 64 far frames a rendered frame; burnt
+  devices get none. The rules and their reasons are in `Bake.Device`'s javadoc; `BakeTest` tests them.
 - Light: not part of a call. The snapshot reads each device's packed light as `BlockEntityRenderState` does, and the
   game meshes a section again when light in it changes. The colour carries the entity shader's shading (two lights
   of 0.6 over 0.4 ambient, the normal a signed byte per axis), since the chunk shader has none.
@@ -159,7 +167,7 @@ change, and the block entity renderer draws the rest. The draw code is untouched
 ## Tests
 
 - GameTest `gametest/PublishRenderCase.java`: every device with a render: server publish packet read by a fresh client BE, consumed exactly, draw does not throw and emits vertices.
-- `gametest/BakeOnceCheck.java` (run by `publish_render` for every device, and by `autominer_spin` with a part that starts to move): the device drawn with its parts in the chunk shows every quad exactly once, in the same place and colour; see testing.md. `src/test/java/mods/eln/gl/BakeTest.java`: settling, waits, the section, the override.
+- `gametest/BakeOnceCheck.java` (run by `publish_render` for every device, and by `autominer_spin` with a part that starts to move): the device drawn with its parts in the chunk shows every quad exactly once, in the same place and colour; see testing.md. `src/test/java/mods/eln/gl/BakeTest.java`: settling, waits, the section, the override, far frames.
 - `gametest/ItemDrawCase.java`: every 3D item draw records vertices without exceptions. `gametest/XRayCase.java`: X-ray filter, state machine, menu, item draw. `src/test/java/mods/eln/item/xray/XRayRayMarchTest.java`.
 - `/elnlab gallery|burn|cables` (`gametest/LabCommands.java`): visual comparison scenes and stress scenes for frame times.
 

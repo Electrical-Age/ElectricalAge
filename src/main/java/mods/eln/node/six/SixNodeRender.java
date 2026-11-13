@@ -27,6 +27,8 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
         java.util.List<float[]> glow = java.util.List.of();
         int daylight;
         SixNodeEntity entity;
+        /** Beyond the renderer's range: a far frame, which only keeps the chunk's copy current. */
+        boolean far;
     }
 
     @Override
@@ -34,13 +36,18 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
         return new State();
     }
 
-    /** Only blocks with elements or glowing cables (voxel blocks of plain cables and pipes are drawn by their block model). */
+    /**
+     * Only blocks with elements or glowing cables (voxel blocks of plain cables and pipes are drawn by their block
+     * model). Beyond the renderer's range, a block with elements is drawn when it is due a far frame.
+     */
     @Override
     public boolean shouldRender(E be, Vec3 cameraPosition) {
-        if (be instanceof mods.eln.node.voxel.VoxelNodeEntity v && !v.clientGlow.isEmpty())
-            return BlockEntityRenderer.super.shouldRender(be, cameraPosition);
-        for (SixNodeElementRender r : be.elementRenderList) if (r != null) return BlockEntityRenderer.super.shouldRender(be, cameraPosition);
-        return false;
+        boolean elements = false;
+        for (SixNodeElementRender r : be.elementRenderList) if (r != null) elements = true;
+        boolean glow = be instanceof mods.eln.node.voxel.VoxelNodeEntity v && !v.clientGlow.isEmpty();
+        if (!elements && !glow) return false;
+        if (BlockEntityRenderer.super.shouldRender(be, cameraPosition)) return true;
+        return elements && mods.eln.client.render.bake.ChunkBake.farDue(be);
     }
 
     /**
@@ -60,6 +67,8 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
         BlockEntityRenderer.super.extractRenderState(be, state, partialTicks, cameraPosition, breakProgress);
         System.arraycopy(be.elementRenderList, 0, state.renders, 0, SixNode.SLOTS);
         state.entity = be;
+        // (the same answer shouldRender got: the same camera position in the same frame)
+        state.far = !BlockEntityRenderer.super.shouldRender(be, cameraPosition);
         state.glow = be instanceof mods.eln.node.voxel.VoxelNodeEntity v ? v.clientGlow : java.util.List.of();
         state.daylight = state.glow.isEmpty() ? 0 : mods.eln.misc.UtilsClient.hooks.skyLight(be.getLevel(), be.getBlockPos());
     }
@@ -67,13 +76,13 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
     @Override
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
         GlFrame frame = GlSubmit.openBlock(poseStack);
-        mods.eln.client.render.bake.ChunkBake.attach(frame, state.entity);
-        if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.device(state.blockPos.asLong(), "six");
+        mods.eln.client.render.bake.ChunkBake.attach(frame, state.entity, state.far);
+        if (mods.eln.gl.BakeStats.ON && !state.far) mods.eln.gl.BakeStats.device(state.blockPos.asLong(), "six");
         try {
             GL11.glTranslatef(.5f, .5f, .5f);
             for (int idx = 0; idx < SixNode.SLOTS; idx++) {
                 SixNodeElementRender render = state.renders[idx];
-                if (render == null) continue;
+                if (render == null || state.far && render.burnt) continue;
                 if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.label(render.getClass().getSimpleName());
                 UtilsClient.glDefaultColor();
                 frame.bakePause = render.burnt;   // (its soot overlay needs the depth of its own draw)
@@ -101,14 +110,16 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
                 }
             }
             frame.bakePause = false;
-            if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.label("cable-glow");
-            mods.eln.misc.Incandescence.drawCableGlow(state.glow, state.daylight);
+            if (!state.far) {
+                if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.label("cable-glow");
+                mods.eln.misc.Incandescence.drawCableGlow(state.glow, state.daylight);
+            }
         } catch (RuntimeException e) {
             ElnRenderErrors.report("six-node", e);
         } finally {
             mods.eln.gl.BakeStats.endDevice();
             GlFrame.close();
         }
-        GlSubmit.submit(frame, poseStack, collector, state.lightCoords);
+        if (!state.far) GlSubmit.submit(frame, poseStack, collector, state.lightCoords);
     }
 }

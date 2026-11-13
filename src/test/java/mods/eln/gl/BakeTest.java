@@ -113,7 +113,7 @@ class BakeTest {
     }
 
     boolean farFrame(Object owner, long pos, Runnable draw) {
-        if (!Bake.farDue(owner)) return false;
+        if (!Bake.farDue(owner, pos)) return false;
         GlFrame f = GlFrame.openBlock(new Matrix4f().translation(3, -2, 7), null);
         f.bake(owner, pos, true);
         try {
@@ -496,11 +496,86 @@ class BakeTest {
         frame(0, draw);
         frame(500, draw);
         unseen(16);
-        assertTrue(Bake.farDue(owner));
-        assertFalse(Bake.farDue(owner), "asked twice before it was drawn");
+        assertTrue(Bake.farDue(owner, pos));
+        assertFalse(Bake.farDue(owner, pos), "asked twice before it was drawn");
         assertTrue(far(16, draw), "not drawn in that frame: still due");
         assertTrue(far(400, draw));
         assertFalse(settled.get(0).device.inRun());
+    }
+
+    /** A device never drawn is asked about twice in a frame (another pass): one far frame, one slot of the cap. */
+    @Test
+    void aNewDeviceAskedTwiceInAFrameIsGrantedOnce() {
+        t += 16 * MS;
+        frames++;
+        Bake.frame(t);
+        assertTrue(Bake.farDue(owner, pos));
+        assertFalse(Bake.farDue(owner, pos));
+    }
+
+    /** A crane thrown far away swings for 4 s: longer than a run. The run gives it up, and it is looked at again soon. */
+    @Test
+    void aPartAPacketSetsMovingForLongerThanARunIsLookedAtAgainSoon() {
+        int list = quadList(0.5f, 1);
+        long[] start = {Long.MAX_VALUE / 2};
+        Runnable draw = () -> {
+            float a = t < start[0] + 10_000 * MS ? 0 : Math.min(60, (t - start[0] - 10_000 * MS) / MS * 0.015f);
+            turned(list, new float[] {a}).run();
+        };
+        far(0, draw);
+        far(400, draw);
+        Bake.Call old = settled.get(0);
+        Bake.Device d = old.device;
+        for (int delay = 10_000; delay <= 40_000; delay *= 2) {
+            dueAfter(delay, draw);
+            assertTrue(far(400, draw));
+        }
+        assertFalse(d.inRun());
+        // thrown now; the packet's run comes when the rate limit after a run that changed nothing allows
+        start[0] = t;
+        Bake.published(owner);
+        assertFalse(far(9_000, draw));
+        assertTrue(far(1_000, draw));
+        int samples = 1;
+        while (d.inRun()) {
+            assertEquals(List.of(old), settled, "the old pose stays while the part moves");
+            assertTrue(far(400, draw));
+            samples++;
+        }
+        assertEquals(9, samples, "given up with the first sample at 3 s or later");
+        assertTrue(settled.isEmpty());
+        assertFalse(far(1900, draw));
+        assertTrue(far(600, draw), "looked at again 2 to 2.5 s later, not after the quiet device's 80 s");
+        assertTrue(far(400, draw));
+        assertEquals(1, settled.size());
+        assertFalse(settled.get(0) == old);
+        // and that run changed the chunk: the next look is 10 s on
+        dueAfter(10_000, draw);
+    }
+
+    /** A gauge needle eases for a second after a packet: its old pose is held while it moves, and the run waits it out. */
+    @Test
+    void aPartAPacketSetsMovingForASecondSettlesInTheSameRun() {
+        int list = quadList(0.5f, 1);
+        long[] start = {Long.MAX_VALUE / 2};
+        Runnable draw = () -> {
+            float a = t < start[0] + 10_000 * MS ? 0 : Math.min(30, (t - start[0] - 10_000 * MS) / MS * 0.03f);
+            turned(list, new float[] {a}).run();
+        };
+        far(0, draw);
+        far(400, draw);
+        Bake.Call old = settled.get(0);
+        Bake.Device d = old.device;
+        dueAfter(10_000, draw);
+        assertTrue(far(400, draw));
+        // thrown now; the packet's run comes when the rate limit after a run that changed nothing allows
+        start[0] = t;
+        Bake.published(owner);
+        assertFalse(far(9_000, draw));
+        assertTrue(far(1_000, draw));
+        while (d.inRun()) assertTrue(far(400, draw));
+        assertEquals(1, settled.size());
+        assertFalse(settled.get(0) == old, "settled at rest within the run");
     }
 
     @Test

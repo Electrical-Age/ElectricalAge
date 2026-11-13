@@ -114,12 +114,34 @@ public final class ChunkBake implements Bake.Host {
 
     /** Let the chunk draw what it can of this block entity's frame (call right after opening the frame). */
     public static void attach(GlFrame frame, BlockEntity be) {
+        attach(frame, be, false);
+    }
+
+    /** As {@link #attach(GlFrame, BlockEntity)}; far = a far frame ({@link #farDue}), which draws nothing. */
+    public static void attach(GlFrame frame, BlockEntity be, boolean far) {
         if (Bake.mode == 0) return;
-        if (be == null || be.isRemoved() || be.getLevel() != INSTANCE.level) {
+        if (!bakes(be)) {
             frame.noBake(Bake.NO_BLOCK_ENTITY);
             return;
         }
-        frame.bake(be, be.getBlockPos().asLong());
+        frame.bake(be, be.getBlockPos().asLong(), far);
+    }
+
+    private static boolean bakes(BlockEntity be) {
+        return be != null && !be.isRemoved() && be.getLevel() == INSTANCE.level;
+    }
+
+    /**
+     * Whether a block entity beyond its renderer's range is to be drawn into a far frame now ({@link Bake#farDue}).
+     * For the renderer's shouldRender, which the game asks only for devices in view.
+     */
+    public static boolean farDue(BlockEntity be) {
+        return Bake.mode != 0 && bakes(be) && Bake.farDue(be, be.getBlockPos().asLong());
+    }
+
+    /** The server sent this block entity new state (main thread). */
+    public static void published(BlockEntity be) {
+        if (Bake.mode != 0) Bake.published(be);
     }
 
     private void clear() {

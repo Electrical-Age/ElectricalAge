@@ -179,6 +179,11 @@ public final class Bake {
      * least RETRY_NS after a run that changed nothing.
      */
     static final long RUN_NS = 3_000_000_000L, RETRY_NS = 10_000_000_000L, RETRY_MAX_NS = 160_000_000_000L;
+    /**
+     * A run that a packet started on a quiet device and that was given up (a lever still swinging, a needle still
+     * easing) is followed by another this soon, once.
+     */
+    static final long AGAIN_NS = 2_000_000_000L;
     /** The most far frames in one rendered frame; a device over it stays due. */
     static final int FAR_PER_FRAME = 64;
 
@@ -205,14 +210,19 @@ public final class Bake {
      * Whether a block entity the game would not draw (it is beyond the renderer's range) is to be drawn into a far
      * frame now: a frame that puts nothing on screen and only keeps the chunk's copy of the device current. To be
      * asked in every rendered frame in which the device is in view; true = the caller draws it far in this frame.
+     * Owners whose frames do not bake (burnt devices, frames that are not a block's) must not be asked about.
      */
-    public static boolean farDue(Object owner) {
+    public static boolean farDue(Object owner, long pos) {
         if (mode == 0 || host == null) return false;
         Device d = DEVICES.get(owner);
         if (d != null && !d.due()) return false;
         if (farGranted >= FAR_PER_FRAME) return false;
         farGranted++;
-        if (d != null) d.granted = frame;
+        if (d == null) {
+            d = new Device(owner, pos);
+            DEVICES.put(owner, d);
+        }
+        d.granted = frame;
         return true;
     }
 
@@ -283,6 +293,8 @@ public final class Bake {
      * <li>It is <i>given up</i> with the second sample in a row that finds a change while nothing is held and nothing
      * waits (a part that moves: left out far away), and in any case {@link #RUN_NS} after it began, with the same
      * swap.</li>
+     * <li>A run that a packet started on a quiet device and that was given up is followed by another
+     * {@link #AGAIN_NS} later: a lever or a needle the packet set going has come to rest by then.</li>
      * <li>Every run is followed by another some time later, sooner after a packet: for the part that stopped
      * moving, and for what changes without a packet. Devices that send packets all the time, or keep moving, cost two
      * samples every {@link #RETRY_NS} at most.</li>
@@ -308,8 +320,8 @@ public final class Bake {
         private boolean run, first, moved;
         /** This sample differs from the one before (changedBefore: so did that one); a call that is as it was still waits. */
         private boolean changed, changedBefore, waiting;
-        /** A packet came since the last run began. */
-        private boolean published;
+        /** A packet came since the last run began; this run began on one; the last run ended settled. */
+        private boolean published, packetRun, lastSettled;
         /** When the run began, its next sample, the next run without a packet, and the earliest run a packet starts. */
         private long runStart, nextSample, retryAt, packetAt;
         private long retryDelay = RETRY_NS;
@@ -348,6 +360,7 @@ public final class Bake {
                 else {
                     if (this.far) again = true;
                     run = first = true;
+                    packetRun = published;
                     moved = published = changedBefore = false;
                     runStart = now;
                 }
@@ -543,6 +556,9 @@ public final class Bake {
             retryAt = now + retryDelay + retryDelay / 128 * ((pos * 0x9E3779B97F4A7C15L) >>> 59);
             retryDelay = Math.min(retryDelay * 2, RETRY_MAX_NS);
             packetAt = moved ? now : now + RETRY_NS;
+            // what the packet changed was still moving: look once more soon, not after the quiet device's long wait
+            if (!quiet && packetRun && lastSettled) retryAt = now + AGAIN_NS + AGAIN_NS / 128 * ((pos * 0x9E3779B97F4A7C15L) >>> 59);
+            lastSettled = quiet;
         }
 
         /** The calls of the last draw (tests). */

@@ -62,5 +62,6 @@ public final class ClientPacketHandler {
         }
         if (publish) node.serverPublishUnserialize(stream);
         else node.serverPacketUnserialize(stream);
+        mods.eln.client.render.bake.ChunkBake.published(be);
     }
 }
