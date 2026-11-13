@@ -98,7 +98,7 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(I18N.tr("Generates heat when supplied with fuel."))
-        list.add(I18N.tr("Burns gasoline, diesel, heavy oil, residue and crude oil."))
+        list.add(I18N.tr("Burns gasoline, diesel, heavy oil, residue, crude oil and piped fuel gas."))
         list.add(I18N.tr("Crude, residue and heavy oil coke its burner; clean fuel clears it. Wool cleans it."))
         list.add(Utils.plotCelsius(I18N.tr("  Max. temperature: "), thermal.warmLimit))
     }
