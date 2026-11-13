@@ -135,9 +135,9 @@ public final class GlFrame {
      * Let the chunk mesh stand in for this frame's unchanging display-list geometry (see {@link Bake}); owner is the
      * block entity. Does nothing unless the frame was opened by {@link #openBlock} with a translating pose.
      */
-    public void bake(Object owner, long pos, int light) {
+    public void bake(Object owner, long pos) {
         if (Bake.mode == 0) return;
-        if (split) bake = Bake.begin(owner, pos, light);
+        if (split) bake = Bake.begin(owner, pos);
         else noBake = Bake.POSE;
     }
 

@@ -67,7 +67,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
     @Override
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
         GlFrame frame = GlSubmit.openBlock(poseStack);
-        mods.eln.client.render.bake.ChunkBake.attach(frame, state.entity, state.lightCoords);
+        mods.eln.client.render.bake.ChunkBake.attach(frame, state.entity);
         if (mods.eln.gl.BakeStats.ON) mods.eln.gl.BakeStats.device(state.blockPos.asLong(), "six");
         try {
             GL11.glTranslatef(.5f, .5f, .5f);

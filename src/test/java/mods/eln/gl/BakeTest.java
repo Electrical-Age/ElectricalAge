@@ -24,7 +24,6 @@ class BakeTest {
     long t = 1_000_000_000L;
     final Object owner = new Object();
     final long pos = BlockPos.asLong(100, 15, -40);
-    int light = 0xF000F0;
 
     @BeforeEach
     void host() {
@@ -85,7 +84,7 @@ class BakeTest {
         t += dtMs * MS;
         Bake.frame(t);
         GlFrame f = GlFrame.openBlock(new Matrix4f().translation(3, -2, 7), null);
-        f.bake(owner, pos, light);
+        f.bake(owner, pos);
         try {
             draw.run();
         } finally {
@@ -130,13 +129,6 @@ class BakeTest {
         angle[0] = 10;
         assertEquals(4, frame(16, draw));
         assertTrue(settled.isEmpty(), "the old pose left the chunk");
-        // the light is part of what a call is (the wait is 0.8 s now: the part moved soon after settling)
-        frame(900, draw);
-        settled.get(0).shown = true;
-        assertEquals(0, frame(16, draw));
-        light = 0xE000F0;
-        assertEquals(4, frame(16, draw));
-        assertTrue(settled.isEmpty());
     }
 
     @Test
@@ -241,7 +233,7 @@ class BakeTest {
         var sprites = java.util.Map.of(mods.eln.misc.UtilsClient.WHITE, new mods.eln.client.render.bake.ModelSprites.Spr(0, 0, 1, 1, false));
         List<Float> ys = new ArrayList<>();
         assertEquals(8, mods.eln.client.render.bake.ChunkBake.write((cutout, x, y, z, color, u, v, l) -> ys.add(y),
-            Bake.inDrawOrder(settled), sprites, 96, 0, -48, false));
+            Bake.inDrawOrder(settled), new int[2], sprites, 96, 0, -48, false));
         assertEquals(15.5f, ys.get(0), 1e-5f);
         assertEquals(16.5f, ys.get(4), 1e-5f, "above the section's 16 blocks");
     }
@@ -276,9 +268,9 @@ class BakeTest {
         List<float[]> out = new ArrayList<>();
         int n = mods.eln.client.render.bake.ChunkBake.write((cutout, x, y, z, color, u, v, l) -> {
             assertFalse(cutout);
-            assertEquals(light, l);
+            assertEquals(0xE000B0, l);
             out.add(new float[]{x, y, z, u, v, color});
-        }, settled.toArray(new Bake.Call[0]), sprites, 96, 0, -48, false);
+        }, settled.toArray(new Bake.Call[0]), new int[]{0xE000B0}, sprites, 96, 0, -48, false);
         assertEquals(4, n);
         // -x: only the second light reaches it, 0.2/sqrt(1.53) of it
         float shade = (float) (0.2 / Math.sqrt(1.53) * 0.6 + 0.4);
@@ -329,9 +321,9 @@ class BakeTest {
         var sprites = java.util.Map.of(mods.eln.misc.UtilsClient.WHITE, new mods.eln.client.render.bake.ModelSprites.Spr(0, 0, 1, 1, false));
         List<Integer> lights = new ArrayList<>();
         mods.eln.client.render.bake.ChunkBake.write((cutout, x, y, z, color, u, v, l) -> lights.add(l),
-            calls, sprites, 96, 0, -48, false);
+            calls, new int[]{0xE000B0, 0xE000B0}, sprites, 96, 0, -48, false);
         assertEquals(8, lights.size());
-        assertEquals(light, lights.get(0));
+        assertEquals(0xE000B0, lights.get(0));
         assertEquals(net.minecraft.util.LightCoordsUtil.FULL_BRIGHT, lights.get(7));
     }
 
@@ -359,7 +351,7 @@ class BakeTest {
             t += 500 * MS;
             Bake.frame(t);
             GlFrame f = GlFrame.openBlock(new Matrix4f().translation(3, -2, 7).rotateY(0.3f), null);
-            f.bake(owner, pos, light);
+            f.bake(owner, pos);
             GL11.glCallList(list);
             GlFrame.close();
             assertEquals(4, f.batches().values().iterator().next().vertices());

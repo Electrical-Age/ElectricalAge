@@ -40,7 +40,7 @@ public final class BakeStats {
     private static final long[] WHY_TOTAL = new long[Bake.REASONS];
     /** Per label: calls that differed from the last draw, by {@link Bake} change kind; then the settled ones among them. */
     private static final Map<String, int[]> CHANGED_BY_LABEL = new HashMap<>();
-    private static final String[] CHANGE = {"new", "matrix", "light", "state"};
+    private static final String[] CHANGE = {"new", "matrix", "state"};
     private static final java.util.LinkedHashSet<String> NO_SPRITE = new java.util.LinkedHashSet<>(), TWICE = new java.util.LinkedHashSet<>();
     private static int frames, frameNo;
     private static Device device;

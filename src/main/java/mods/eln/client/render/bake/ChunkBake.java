@@ -35,6 +35,9 @@ import java.util.Map;
  * time, so the mesh on screen contains exactly the last snapshot taken before that time, provided the snapshot's
  * renderer ran to its end. A mesh that maps to no snapshot contains nothing as far as the block entity renderers are
  * told, and they draw everything themselves.
+ * <p>
+ * A snapshot also holds the light each device stands in, read as the block entity renderer reads it. The game compiles
+ * a section again whenever light in it changes, so the mesh follows the light as the blocks around the device do.
  */
 public final class ChunkBake implements Bake.Host {
     public static final ChunkBake INSTANCE = new ChunkBake();
@@ -45,11 +48,14 @@ public final class ChunkBake implements Bake.Host {
     private static final class Snap {
         final long time;
         final Bake.Call[] calls;
+        /** The packed light of each call's device when the snapshot was taken. */
+        final int[] light;
         volatile boolean complete;
 
-        Snap(long time, Bake.Call[] calls) {
+        Snap(long time, Bake.Call[] calls, int[] light) {
             this.time = time;
             this.calls = calls;
+            this.light = light;
         }
     }
 
@@ -78,13 +84,13 @@ public final class ChunkBake implements Bake.Host {
     }
 
     /** Let the chunk draw what it can of this block entity's frame (call right after opening the frame). */
-    public static void attach(GlFrame frame, BlockEntity be, int light) {
+    public static void attach(GlFrame frame, BlockEntity be) {
         if (Bake.mode == 0) return;
         if (be == null || be.isRemoved() || be.getLevel() != INSTANCE.level) {
             frame.noBake(Bake.NO_BLOCK_ENTITY);
             return;
         }
-        frame.bake(be, be.getBlockPos().asLong(), light);
+        frame.bake(be, be.getBlockPos().asLong());
     }
 
     private void clear() {
@@ -213,7 +219,13 @@ public final class ChunkBake implements Bake.Host {
             live.add(c);
         }
         Bake.Call[] calls = Bake.inDrawOrder(live);
-        Snap snap = new Snap(Util.getNanos(), calls);
+        int[] lights = new int[calls.length];
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int i = 0; i < calls.length; i++) {
+            // as BlockEntityRenderState.extractBase reads it
+            lights[i] = i > 0 && calls[i].device == calls[i - 1].device ? lights[i - 1] : LightCoordsUtil.getLightCoords(mc.level, p.set(calls[i].pos));
+        }
+        Snap snap = new Snap(Util.getNanos(), calls, lights);
         s.snaps.add(snap);
         if (s.snaps.size() > 16) s.snaps.remove(0);
         if (calls.length == 0) {
@@ -230,7 +242,7 @@ public final class ChunkBake implements Bake.Host {
                     int b = cutout ? 1 : 0;
                     if (buffers[b] == null) buffers[b] = context.getOrCreateChunkBuffer(cutout ? ChunkSectionLayer.CUTOUT : ChunkSectionLayer.SOLID);
                     buffers[b].addVertex(x, y, z, color, u, v, OverlayTexture.NO_OVERLAY, light, 0, 1, 0);
-                }, calls, sprites, ox, oy, oz, nether));
+                }, calls, lights, sprites, ox, oy, oz, nether));
                 compiles.increment();
                 snap.complete = true;
             } catch (Throwable t) {
@@ -265,16 +277,18 @@ public final class ChunkBake implements Bake.Host {
 
     /**
      * Write the calls' quads into their section's buffers (meshing worker; reads only the arguments). Vertices are
-     * relative to the section's origin (ox, oy, oz) and may lie outside the section. The colour carries the entity shader's directional shading for
+     * relative to the section's origin (ox, oy, oz) and may lie outside the section. light[i] is the packed light of
+     * calls[i], but for what is drawn at full light. The colour carries the entity shader's directional shading for
      * the vertex normal (two lights, 0.6 each, over 0.4 ambient), so the result equals the block entity renderer's.
      */
-    public static int write(Sink out, Bake.Call[] calls, Map<Identifier, ModelSprites.Spr> sprites, int ox, int oy, int oz, boolean nether) {
+    public static int write(Sink out, Bake.Call[] calls, int[] lights, Map<Identifier, ModelSprites.Spr> sprites, int ox, int oy, int oz, boolean nether) {
         int written = 0;
         final int S = GlFrame.STRIDE;
         float l1y = nether ? -L1Y : L1Y;
         float[] vx = new float[4], vy = new float[4], vz = new float[4], vu = new float[4], vv = new float[4];
         int[] vc = new int[4];
-        for (Bake.Call c : calls) {
+        for (int ci = 0; ci < calls.length; ci++) {
+            Bake.Call c = calls[ci];
             ModelSprites.Spr sp = sprites.get(c.texture == null ? UtilsClient.WHITE : c.texture);
             if (sp == null) throw new IllegalStateException("no sprite for " + c.texture);
             boolean cutout = sp.holes();
@@ -286,7 +300,7 @@ public final class ChunkBake implements Bake.Host {
             float n20 = m01 * m12 - m02 * m11, n21 = m02 * m10 - m00 * m12, n22 = m00 * m11 - m01 * m10;
             float det = m00 * n00 + m01 * n01 + m02 * n02;
             float sign = det < 0 ? -1 : 1;
-            int light = c.fullBright ? LightCoordsUtil.FULL_BRIGHT : c.light;
+            int light = c.fullBright ? LightCoordsUtil.FULL_BRIGHT : lights[ci];
             float[] q = c.quads;
             int base = c.color;
             for (int i = 0; i + 4 * S <= c.floats; i += 4 * S) {

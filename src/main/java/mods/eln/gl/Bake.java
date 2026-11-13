@@ -15,8 +15,8 @@ import java.util.function.Predicate;
  * Which of a block entity's display-list geometry the chunk mesh draws in place of the block entity renderer.
  * <p>
  * The renderer runs the device's draw code every frame as before. Each display-list primitive it replays (opaque,
- * texture coordinates within the texture) is described by a {@link Call}: the primitive, its matrix, colour, texture,
- * state and light. A call that has been the same for a while is <i>settled</i>: the {@link Host} puts it into the
+ * texture coordinates within the texture) is described by a {@link Call}: the primitive, its matrix, colour, texture
+ * and state. A call that has been the same for a while is <i>settled</i>: the {@link Host} puts it into the
  * chunk section of the device's block and has it re-meshed. Once the mesh on screen contains it, {@link Device#skip}
  * answers true and the renderer leaves it out. A call that changes or stops being drawn leaves the section at once
  * and is drawn by the renderer again, so nothing is ever assumed to be static: the comparison every frame is the proof.
@@ -25,6 +25,9 @@ import java.util.function.Predicate;
  * All of a device's geometry goes into the section of its block, however far the model reaches: the game draws a
  * block entity only while that section is drawn, so the chunk shows the device exactly when the renderer would. (A
  * section holding nothing but air is never compiled, so a part could not be put where it lies.)
+ * <p>
+ * The light a device is drawn with is not part of a call. The host reads it where the device stands whenever the
+ * section is meshed, and the game meshes a section again when light in it changes, as for the blocks around.
  * <p>
  * Render thread only, except that the meshing workers read a settled call's geometry and state (everything but
  * {@link Call#order}; those fields are not written after it settled).
@@ -75,7 +78,7 @@ public final class Bake {
         WAITING_LONG = 7, NO_SPRITE = 8, NO_QUADS = 9, NOT_SHOWN = 10, REASONS = 11;
     static int why;
     /** What made a call differ from the device's last draw of the same primitive (statistics). */
-    public static final int NEW = 0, BY_MATRIX = 1, BY_LIGHT = 2, BY_STATE = 3, CHANGES = 4;
+    public static final int NEW = 0, BY_MATRIX = 1, BY_STATE = 2, CHANGES = 3;
 
     /** One replay of a display-list primitive. */
     public static final class Call {
@@ -87,7 +90,7 @@ public final class Bake {
         public final boolean colored;
         /** List space to block space (the device's block corner is the origin). */
         public float m00, m01, m02, m10, m11, m12, m20, m21, m22, m30, m31, m32;
-        public int color, light;
+        public int color;
         public Identifier texture;
         public boolean cull, fullBright, lit;
         /** The device's block (BlockPos.asLong). */
@@ -115,7 +118,7 @@ public final class Bake {
             colored = p.colored;
         }
 
-        void set(Matrix4f m, int color, Identifier texture, boolean cull, boolean fullBright, boolean lit, int light) {
+        void set(Matrix4f m, int color, Identifier texture, boolean cull, boolean fullBright, boolean lit) {
             m00 = m.m00();
             m01 = m.m01();
             m02 = m.m02();
@@ -133,7 +136,6 @@ public final class Bake {
             this.cull = cull;
             this.fullBright = fullBright;
             this.lit = lit;
-            this.light = light;
         }
 
         boolean at(Matrix4f m) {
@@ -141,8 +143,8 @@ public final class Bake {
                 && m01 == m.m01() && m02 == m.m02() && m10 == m.m10() && m12 == m.m12() && m20 == m.m20() && m21 == m.m21();
         }
 
-        boolean same(Matrix4f m, int color, Identifier texture, boolean cull, boolean fullBright, boolean lit, int light) {
-            return at(m) && this.color == color && this.light == light && this.cull == cull && this.fullBright == fullBright && this.lit == lit
+        boolean same(Matrix4f m, int color, Identifier texture, boolean cull, boolean fullBright, boolean lit) {
+            return at(m) && this.color == color && this.cull == cull && this.fullBright == fullBright && this.lit == lit
                 && (this.texture == texture || (texture != null && texture.equals(this.texture)));
         }
     }
@@ -178,14 +180,14 @@ public final class Bake {
     }
 
     /** The device of a block entity (owner), about to be drawn; null when baking is off. */
-    static Device begin(Object owner, long pos, int light) {
+    static Device begin(Object owner, long pos) {
         if (host == null) return null;
         Device d = DEVICES.get(owner);
         if (d == null) {
             d = new Device(owner, pos);
             DEVICES.put(owner, d);
         }
-        d.begin(light);
+        d.begin();
         return d;
     }
 
@@ -223,7 +225,6 @@ public final class Bake {
         /** The chunk section of the device's block (SectionPos.asLong): where its settled calls go. */
         public final long home;
         final int id = devices++;
-        private int light;
         private Call[] prev = new Call[8], cur = new Call[8];
         private int prevN, curN, cursor, pass;
         private long lastFrame;
@@ -236,8 +237,7 @@ public final class Bake {
             home = SectionPos.asLong(BlockPos.getX(pos) >> 4, BlockPos.getY(pos) >> 4, BlockPos.getZ(pos) >> 4);
         }
 
-        void begin(int light) {
-            this.light = light;
+        void begin() {
             cursor = 0;
             curN = 0;
             pass++;
@@ -268,7 +268,7 @@ public final class Bake {
                 if (i >= n) i -= n;
                 Call o = prev[i];
                 if (o.stamp == pass || o.prim != p) continue;
-                if (o.same(m, color, texture, cull, fullBright, lit, light)) {
+                if (o.same(m, color, texture, cull, fullBright, lit)) {
                     c = o;
                     cursor = i + 1 == n ? 0 : i + 1;
                     break;
@@ -283,11 +283,10 @@ public final class Bake {
                     if (BakeStats.ON) BakeStats.noSprite(texture);
                     return false;
                 }
-                if (BakeStats.ON) BakeStats.changed(near == null ? NEW : !near.at(m) ? BY_MATRIX
-                    : near.same(m, color, texture, cull, fullBright, lit, near.light) ? BY_LIGHT : BY_STATE, near != null && near.settled);
+                if (BakeStats.ON) BakeStats.changed(near == null ? NEW : !near.at(m) ? BY_MATRIX : BY_STATE, near != null && near.settled);
                 // a part in motion reuses its object from last frame
                 c = spare != null ? spare : new Call(this, p);
-                c.set(m, color, texture, cull, fullBright, lit, light);
+                c.set(m, color, texture, cull, fullBright, lit);
                 c.since = now;
             }
             if (BakeStats.ON) {
