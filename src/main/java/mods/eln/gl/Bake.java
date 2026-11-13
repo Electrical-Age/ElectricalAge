@@ -74,6 +74,8 @@ public final class Bake {
     public static final int NONE = 0, NOT_ATTACHED = 1, BURNT = 2, POSE = 3, NO_BLOCK_ENTITY = 4, CHANGED = 5, WAITING = 6,
         WAITING_LONG = 7, NO_SPRITE = 8, NO_QUADS = 9, NOT_SHOWN = 10, HIDDEN = 11, REASONS = 12;
     static int why;
+    /** What made a call differ from the device's last draw of the same primitive (statistics). */
+    public static final int NEW = 0, BY_MATRIX = 1, BY_LIGHT = 2, BY_STATE = 3, CHANGES = 4;
 
     /** One replay of a display-list primitive. */
     public static final class Call {
@@ -305,7 +307,7 @@ public final class Bake {
         boolean skip(GlFrame.Prim p, Matrix4f m, int color, Identifier texture, boolean cull, boolean fullBright, boolean lit) {
             why = NONE;
             if (!p.uvInUnitSquare()) return false;
-            Call c = null, spare = null;
+            Call c = null, spare = null, near = null;
             int n = prevN;
             for (int k = 0; k < n; k++) {
                 int i = cursor + k;
@@ -318,6 +320,7 @@ public final class Bake {
                     break;
                 }
                 if (!o.settled && spare == null) spare = o;
+                if (near == null) near = o;
             }
             boolean changed = c == null;
             if (changed) {
@@ -326,6 +329,8 @@ public final class Bake {
                     if (BakeStats.ON) BakeStats.noSprite(texture);
                     return false;
                 }
+                if (BakeStats.ON) BakeStats.changed(near == null ? NEW : !near.at(m) ? BY_MATRIX
+                    : near.same(m, color, texture, cull, fullBright, lit, near.light) ? BY_LIGHT : BY_STATE, near != null && near.settled);
                 // a part in motion reuses its object from last frame
                 c = spare != null ? spare : new Call(this, p);
                 c.set(m, color, texture, cull, fullBright, lit, light);

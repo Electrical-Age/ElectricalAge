@@ -38,6 +38,9 @@ public final class BakeStats {
         "waiting longer", "no sprite", "no whole quad", "mesh not shown yet", "other section hidden"};
     private static final Map<String, long[]> WHY_BY_LABEL = new HashMap<>();
     private static final long[] WHY_TOTAL = new long[Bake.REASONS];
+    /** Per label: calls that differed from the last draw, by {@link Bake} change kind; then the settled ones among them. */
+    private static final Map<String, int[]> CHANGED_BY_LABEL = new HashMap<>();
+    private static final String[] CHANGE = {"new", "matrix", "light", "state"};
     private static final java.util.LinkedHashSet<String> NO_SPRITE = new java.util.LinkedHashSet<>(), TWICE = new java.util.LinkedHashSet<>();
     private static int frames, frameNo;
     private static Device device;
@@ -65,6 +68,12 @@ public final class BakeStats {
             for (int k = 0; k < N; k++) if (c[k] != 0) sb.append(' ').append(NAMES[k]).append('=').append(c[k] / frames);
             long[] w = WHY_BY_LABEL.get(rows.get(i).getKey());
             if (w != null) reasons(sb.append("; const is"), w);
+            int[] ch = CHANGED_BY_LABEL.get(rows.get(i).getKey());
+            if (ch != null) {
+                sb.append("; calls changed by");
+                for (int k = 0; k < Bake.CHANGES; k++)
+                    if (ch[k] != 0) sb.append(' ').append(CHANGE[k]).append('=').append(ch[k]).append(" (").append(ch[Bake.CHANGES + k]).append(" settled)");
+            }
         }
         if (Bake.mode != 0) {
             reasons(sb.append("\n[eln bake stats]   const left to the renderer:"), WHY_TOTAL);
@@ -78,6 +87,7 @@ public final class BakeStats {
         java.util.Arrays.fill(WHY_TOTAL, 0);
         BY_LABEL.clear();
         WHY_BY_LABEL.clear();
+        CHANGED_BY_LABEL.clear();
         NO_SPRITE.clear();
         TWICE.clear();
         DEVICES.values().removeIf(d -> frameNo - d.lastFrame > PERIOD);
@@ -90,6 +100,13 @@ public final class BakeStats {
     /** A texture that is not in the block atlas kept a primitive out of the chunk mesh. */
     static void noSprite(net.minecraft.resources.Identifier texture) {
         if (NO_SPRITE.size() < 16) NO_SPRITE.add(String.valueOf(texture));
+    }
+
+    /** A call differed from the device's last draw of its primitive (settled = that one was in the chunk mesh). */
+    static void changed(int kind, boolean settled) {
+        int[] c = CHANGED_BY_LABEL.computeIfAbsent(label, k -> new int[2 * Bake.CHANGES]);
+        c[kind]++;
+        if (settled) c[Bake.CHANGES + kind]++;
     }
 
     /** The device drew a primitive at a matrix it had already drawn it at in this draw. */

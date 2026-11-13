@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Puts the model textures (assets/eln/model, bound whole by the block entity renderers) into the block atlas, so chunk
- * geometry can use them: a chunk layer samples nothing else. A sprite is named as the texture is bound. It is padded
+ * Puts the textures the block entity renderers bind whole (assets/eln/model, and assets/eln/sprites but for its gui
+ * folder) into the block atlas, so chunk geometry can use them: a chunk layer samples nothing else. A sprite is named as the texture is bound. It is padded
  * to multiples of 16 pixels by repeating its edge (an odd size would cap the atlas' mipmap levels), and its alpha
  * becomes 0 or 255 at the renderers' cutoff of 0.1: the chunk's cutout layer discards below 0.5.
  * Adds nothing while baking is off.
@@ -43,6 +43,8 @@ public final class ModelSprites implements SpriteSource {
         if (Bake.mode == 0) return;
         Map<Identifier, Resource> found = new HashMap<>(resourceManager.listResources("model",
             id -> id.getNamespace().equals("eln") && id.getPath().endsWith(".png")));
+        found.putAll(resourceManager.listResources("sprites",
+            id -> id.getNamespace().equals("eln") && id.getPath().endsWith(".png") && !id.getPath().startsWith("sprites/gui/")));
         resourceManager.getResource(UtilsClient.WHITE).ifPresent(r -> found.put(UtilsClient.WHITE, r));
         for (Map.Entry<Identifier, Resource> e : found.entrySet()) {
             Identifier id = e.getKey();
