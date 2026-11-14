@@ -648,7 +648,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         // outlet: up if the pipe isn't vertical and there's room, else the most open side
         int outlet = -1;
         for (int d : axis == 1 ? new int[]{2, 3, 4, 5} : new int[]{1, 2, 3, 4, 5, 0}) {
-            var v = new SafetyValvePart(best[0], best[1], best[2], d, pipe.bore(), pipe.workingPa(mods.eln.sim.fluid.Water.T_AMBIENT));
+            var v = new SafetyValvePart(best[0], best[1], best[2], d, pipe.bore(), pipe.reliefPa());
             if (v.boxes().get(0)[3] - v.boxes().get(0)[0] < 4 || v.boxes().get(0)[4] - v.boxes().get(0)[1] < 4
                 || v.boxes().get(0)[5] - v.boxes().get(0)[2] < 4) continue;   // (cut off by the block's edge)
             if (fits(v)) {
@@ -658,7 +658,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         }
         if (outlet < 0) return "no room around the pipe there";
         var v = new SafetyValvePart(best[0], best[1], best[2], outlet, pipe.bore(),
-            purge ? SafetyValvePart.PURGE_PA : pipe.workingPa(mods.eln.sim.fluid.Water.T_AMBIENT), purge);
+            purge ? SafetyValvePart.PURGE_PA : pipe.reliefPa(), purge);
         parts.add(v);
         markUsed();
         changed();

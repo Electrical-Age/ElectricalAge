@@ -57,6 +57,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `CondensatePumpTest`, `oil_condensate_return_*`, `plant_condenser_pump_into_*`.
   Jade on both condensers, "Pump outlet": the pressure it works against and its flow there as a share of its rated
   (free) flow at its speed, or "shut off, needs a pipe pump" (Baughn 2026-11-03).
+- Iron pipe works to 20 bar and bursts at 25 (Baughn 2026-11-14; it was 10 and 40). A sound 10 bar plant's
+  condensate line stood over the old working pressure and smoked its warning all the time (a player's plant on
+  Incognito); now the warning comes just under the burst and means it. A pipe on a live server between 25 and 40 bar
+  bursts on update. A safety valve newly fitted to an iron pipe is still set to 10 bar (`PipePart.RELIEF_PA`), the
+  small turbine's rating; alloy pipes' valves start at their working pressure as before. `fluid_safety_valve_*`,
+  `CondensatePumpTest`.
 - Small Steam Condenser / Steam Condenser vessels hold 12 buckets, as a tank block (Baughn 2026-11-03: "133 m^3 is a
   bit much for a 1m^3 block"); they were 5 / 20 L (74 000 / 296 000 mB). Saves without the "tank3" tag load trimmed:
   water over the float valve's shut level (25 %) and air over 1 atm's worth go, at the temperature they had (kept, a

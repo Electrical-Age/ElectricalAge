@@ -61,10 +61,16 @@ public final class PipePart extends VoxelPart {
     public static final double LARGE_END_K = 2 * K_PER_BLOCK[2] * 16;
     /**
      * Ratings (DESIGN.md 6a): working and burst pressure (Pa), and the temperature (K) from which the rating falls,
-     * linearly to half at SOFT_SPAN above it. Iron: 1850s-60s wrought iron; alloy: a Cr-Mo steam-line steel.
+     * linearly to half at SOFT_SPAN above it. Iron: 1850s-60s wrought iron; alloy: a Cr-Mo steam-line steel. Iron works
+     * to 20 bar and bursts at 25 (Baughn 2026-11-14; it was 10 and 40): a 10 bar plant's condensate line stands at up to
+     * twice its turbine's rating when the boilers are full, so the warning at 10 bar came on in a sound plant, and with
+     * the burst close above it the warning now means something.
      */
-    public static final double[] WORKING_PA = {10e5, 100e5, 40e5}, BURST_PA = {40e5, 300e5, 120e5}, SOFT_K = {573.15, 873.15, 873.15};
+    public static final double[] WORKING_PA = {20e5, 100e5, 40e5}, BURST_PA = {25e5, 300e5, 120e5}, SOFT_K = {573.15, 873.15, 873.15};
     static final double SOFT_SPAN = 100;
+    /** What a safety valve fitted to the pipe is set to at first (Pa): its working pressure, but an iron pipe's stays 10
+     *  bar, the small turbine's rating, which the plants built on iron pipe run at. */
+    public static final double[] RELIEF_PA = {10e5, 100e5, 40e5};
     /** A burst pipe vents through this (m^3): a crack, about a third of an open bore (a jet that lasts: Gemini). */
     static final double BURST_VENT_K = 1e-11;
 
@@ -149,6 +155,11 @@ public final class PipePart extends VoxelPart {
 
     public double burstPa(double T) {
         return BURST_PA[tier] * derate(T);
+    }
+
+    /** The set pressure of a safety valve newly fitted to it (Pa). */
+    public double reliefPa() {
+        return RELIEF_PA[tier];
     }
 
     public double workingPa(double T) {

@@ -1493,7 +1493,7 @@ public final class PipeCases {
         }
     }
 
-    /** An iron run pressed past its burst rating (40 bar) bursts: the weak piece goes, scorched, and the run vents to
+    /** An iron run pressed past its burst rating (25 bar) bursts: the weak piece goes, scorched, and the run vents to
      *  the air (Baughn: a burst vents; a player's break seals). Breaking the burst piece drops nothing. */
     static final class Burst implements TestCase {
         BlockPos a, b;
