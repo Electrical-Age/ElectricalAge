@@ -1512,6 +1512,8 @@ public final class Network {
     }
 
     /** Tests: the Jacobian at the nodes' current states against central differences of the residual; the worst row-relative error and where. */
+    static double CHECK_STEP = 1e-8;
+
     String checkJacobian(double dt) {
         List<Node> free = new ArrayList<>();
         for (Node n : nodes) if (!n.fixed) free.add(n);
@@ -1524,11 +1526,16 @@ public final class Network {
         double worst = 0;
         String at = "";
         for (int j = 0; j < M; j++) {
-            double h = j % C == C - 1 ? 1e-6 * Math.max(1, Math.abs(y[j])) : Math.max(1e-12, 1e-6 * y[j]);
-            if (j % C != C - 1 && y[j] - h < 0) continue;
+            // (a species' step is sized by its node's whole mass: against a trace's own mass the pressure moves by
+            // 1e-7 of itself, under the state solve's precision, and the difference is 1 % noise. One-sided where the
+            // step would take the trace under zero.)
+            boolean energy = j % C == C - 1;
+            double h = energy ? 1e-6 * Math.max(1, Math.abs(y[j])) : Math.max(1e-6 * y[j], CHECK_STEP * massOf(y, j - j % C, C - 1));
+            if (!energy && h == 0) continue;
             double[] yp = y.clone(), ym = y.clone();
             yp[j] += h;
-            ym[j] -= h;
+            if (energy || y[j] - h >= 0) ym[j] -= h;
+            h = (yp[j] - ym[j]) / 2;
             set(free, yp);
             double[] rp = residual(free, idx, y0, dt);
             set(free, ym);
@@ -1554,11 +1561,16 @@ public final class Network {
         int M = y.length;
         List<double[]> errs = new ArrayList<>();
         for (int j = 0; j < M; j++) {
-            double h = j % C == C - 1 ? 1e-6 * Math.max(1, Math.abs(y[j])) : Math.max(1e-12, 1e-6 * y[j]);
-            if (j % C != C - 1 && y[j] - h < 0) continue;
+            // (a species' step is sized by its node's whole mass: against a trace's own mass the pressure moves by
+            // 1e-7 of itself, under the state solve's precision, and the difference is 1 % noise. One-sided where the
+            // step would take the trace under zero.)
+            boolean energy = j % C == C - 1;
+            double h = energy ? 1e-6 * Math.max(1, Math.abs(y[j])) : Math.max(1e-6 * y[j], CHECK_STEP * massOf(y, j - j % C, C - 1));
+            if (!energy && h == 0) continue;
             double[] yp = y.clone(), ym = y.clone();
             yp[j] += h;
-            ym[j] -= h;
+            if (energy || y[j] - h >= 0) ym[j] -= h;
+            h = (yp[j] - ym[j]) / 2;
             set(free, yp);
             double[] rp = residual(free, idx, y0, dt);
             set(free, ym);

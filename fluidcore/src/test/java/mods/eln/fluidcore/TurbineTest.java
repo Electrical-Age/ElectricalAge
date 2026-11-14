@@ -92,11 +92,11 @@ class TurbineTest {
         for (int s = 0; s < 40; s++) {
             String r = net.checkJacobian(DT);
             double worst = Double.parseDouble(r.substring(0, r.indexOf(' ')));
-            // (to 10 %: the energy flux's slope against the inlet's air is two terms of 1e8 that cancel to 1e7, and
-            // WaterAir's pressure slope against a trace of air at saturation is ~1 % off its differences; todo #364)
+            // (to 1 %: half a band above balance the differences' stencil already feels the shut-off's curvature, 0.4 %;
+            // well above it they agree to 1e-4 or better)
             // (while it drives: once the two sides balance, the differences' stencil spans the shut-off, tens of bands
             // either way, and measures a secant, not the slope; the shut-off's own slopes are checked in FluxShapeTest)
-            if (Network.portP(a, 1) - Network.portP(b, 1) > 0.1 * Network.SPLIT_DP) assertTrue(worst < 0.1, "step " + s + ": " + r);
+            if (Network.portP(a, 1) - Network.portP(b, 1) > 0.1 * Network.SPLIT_DP) assertTrue(worst < 0.01, "step " + s + ": " + r);
             else balanced++;
             net.step(DT);
         }
