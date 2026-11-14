@@ -178,6 +178,24 @@ public final class DeviceInlet {
         return EaUnits.drainLayer(vessel, f[1], mB * per) / per;
     }
 
+    /** What takeMix took: mB of the fluid the feed counts as, the kg of every species in it (by id), and its temperature. */
+    public record Taken(double mB, double[] kg, double kelvin) {
+    }
+
+    /** As take, for a device that passes its feed on: it hands on the same mix, not the main species alone. */
+    public Taken takeMix(double mB) {
+        int[] f = feed();
+        if (f == null || mB <= 0) return null;
+        FluidNode v = vessel;
+        double per = FluidSpecies.kgPerMb(f[0], false), T = v.T();
+        double[] kg = new double[v.speciesBound()];
+        for (int id = 2; id < kg.length; id++) kg[id] = v.mass(id);
+        double got = EaUnits.drainLayer(v, f[1], mB * per);
+        if (got <= 0) return null;
+        for (int id = 2; id < kg.length; id++) kg[id] = Math.max(0, kg[id] - v.mass(id));
+        return new Taken(got / per, kg, T);
+    }
+
     /** With no feed in the vessel: the liquid that is in it instead and keeps the feed out (its name), or null. */
     public String blockedBy() {
         FluidNode v = vessel;

@@ -2,7 +2,8 @@ package mods.eln.transparentnode.desulfuriser;
 
 import mods.eln.api.element.ElementMachine;
 import mods.eln.api.element.Machines;
-import mods.eln.fluid.ElementFluidHandler;
+import mods.eln.fluid.DeviceInlet;
+import mods.eln.fluid.DeviceOutlet;
 import mods.eln.fluid.PortBridge;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
@@ -33,11 +34,10 @@ import java.util.Map;
 public class DesulfuriserElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice {
     final DesulfuriserDescriptor descriptor;
     public final ElementMachine machine;
-    final ElementFluidHandler inTank = new ElementFluidHandler(DesulfuriserDescriptor.TANK_MB);
-    final ElementFluidHandler outTank = new ElementFluidHandler(DesulfuriserDescriptor.TANK_MB);
-    final PortBridge inPort = new PortBridge("cutIn", PortBridge.Mode.IN, DesulfuriserDescriptor.PORT_MB_PER_S, 0);
-    final PortBridge outPort = new PortBridge("cutOut", PortBridge.Mode.OUT, DesulfuriserDescriptor.PORT_MB_PER_S, DesulfuriserDescriptor.OUT_HEAD_PA);
-    /** Treated toward the next Sulfur Dust (mB), dust waiting, treated in all (mB), and the part of a mB treated. */
+    /** Its IN vessel, filled by the line on the blue flange, and its OUT basin with the outlet pump. */
+    public final DeviceInlet inlet;
+    public final DeviceOutlet outlet;
+    /** Treated toward the next Sulfur Dust (mB), dust waiting, treated in all (mB), and mB paid for and not yet moved. */
     double treatedToward, treatedAll, carry;
     int sulfur;
     double sinceRun = 1e9, sincePush;
@@ -47,8 +47,9 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
         super(node, descriptor);
         this.descriptor = (DesulfuriserDescriptor) descriptor;
         Fluid[] cuts = {Oil.Cut.GASOLINE.source.get(), Oil.Cut.DIESEL.source.get(), Oil.Cut.HEAVYOIL.source.get(), Oil.CRUDE.get()};
-        inTank.setFilter(cuts);
-        outTank.setFilter(cuts);
+        inlet = new DeviceInlet("cutIn", DesulfuriserDescriptor.TANK_MB, cuts);
+        outlet = new DeviceOutlet("cutOut", DesulfuriserDescriptor.TANK_MB / 0.95, DesulfuriserDescriptor.PORT_MB_PER_S, DesulfuriserDescriptor.OUT_HEAD_PA, true, false)
+            .takes(cuts).keys("cutOutVessel", "cutOutTank");
         machine = Machines.forElement(this, this.descriptor.spec());
         slowProcessList.add(this::tick);
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
@@ -67,33 +68,18 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
         }
         boolean was = running;
         sinceRun += dt;
-        FluidStack in = inTank.getFluid();
-        int room = outTank.getCapacity() - outTank.getFluidAmount();
-        boolean sameFluid = outTank.getFluidAmount() == 0 || in.isEmpty() || outTank.getFluid().getFluid() == in.getFluid();
-        if (!in.isEmpty() && room > 0 && sameFluid && sulfur < DesulfuriserDescriptor.MAX_SULFUR) {
+        // (the power is drawn here, a tick at a time; the cut moves before the next fluid step, in treat())
+        if (inlet.feedMb() > 0 && outlet.room(1) && sulfur < DesulfuriserDescriptor.MAX_SULFUR) {
             double rated = machine.ratedJoulesPerTick();
             double got = rated > 0 ? machine.takeJoules(rated) : 0;
             double share = rated > 0 ? got / rated : 0;
             carry += DesulfuriserDescriptor.TREAT_MB_PER_S * share * dt;
-            int move = (int) Math.min(Math.floor(carry), Math.min(in.getAmount(), room));
-            if (move > 0) {
-                carry -= move;
-                Fluid f = in.getFluid();
-                inTank.drain(move, true);
-                outTank.fill(new FluidStack(f, move), true);
-                treatedToward += move;
-                treatedAll += move;
-                while (treatedToward >= DesulfuriserDescriptor.MB_PER_SULFUR) {
-                    treatedToward -= DesulfuriserDescriptor.MB_PER_SULFUR;
-                    sulfur++;
-                }
-            }
             if (share > 0.05) sinceRun = 0;
         } else carry = Math.min(carry, 1);
         running = sinceRun < 2;
         if (running != was) needPublish();
-        if (!outPort.piped() && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)
-            mods.eln.fluid.FluidExport.push(outTank, level, node.coordonate.pos(), front.toEnumFacing(), (int) Math.ceil(DesulfuriserDescriptor.PORT_MB_PER_S * dt));
+        if (node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)
+            outlet.export(level, node.coordonate.pos(), front.toEnumFacing(), (int) Math.ceil(DesulfuriserDescriptor.PORT_MB_PER_S * dt));
         sincePush += dt;
         if (sincePush >= 1 && sulfur > 0) {
             sincePush = 0;
@@ -108,9 +94,27 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
         }
     }
 
-    /** (tests) pour a cut into its IN tank. */
+    /** Move what the power has paid for from the IN vessel to the OUT basin: the whole mix of the feed layer, at its
+     *  temperature (a diesel with some gasoline in it comes out as that). */
+    void treat() {
+        double move = Math.min(carry, inlet.feedMb());
+        if (move <= 0 || sulfur >= DesulfuriserDescriptor.MAX_SULFUR || !outlet.room(move)) return;
+        var got = inlet.takeMix(move);
+        if (got == null) return;
+        carry -= got.mB();
+        outlet.madeKg(got.kg(), got.kelvin());
+        treatedToward += got.mB();
+        treatedAll += got.mB();
+        while (treatedToward >= DesulfuriserDescriptor.MB_PER_SULFUR) {
+            treatedToward -= DesulfuriserDescriptor.MB_PER_SULFUR;
+            sulfur++;
+        }
+    }
+
+    /** (tests) pour a cut into its IN vessel. */
     public int fillIn(FluidStack f) {
-        return inTank.fill(f, true);
+        inlet.put(f.getFluid(), f.getAmount(), mods.eln.sim.Ambient.kelvin(node.coordonate));
+        return f.getAmount();
     }
 
     /** (tests) */
@@ -119,11 +123,11 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
     }
 
     public int inMb() {
-        return inTank.getFluidAmount();
+        return (int) Math.round(inlet.feedMb());
     }
 
     public int outMb() {
-        return outTank.getFluidAmount();
+        return (int) Math.round(outlet.liquidMb());
     }
 
     public int sulfur() {
@@ -152,33 +156,56 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
 
     @Override
     public java.util.List<FluidPort> fluidPorts() {
-        if (inPort.stub == null || outPort.stub == null) return java.util.List.of();
+        if (inlet.stub == null || outlet.outlet == null) return java.util.List.of();
         long pos = node.coordonate.pos().asLong();
         Direction back = front.back();
         return java.util.List.of(
-            inPort.port(pos, back.toEnumFacing().get3DDataValue(), PortBridge.endSpot(front, back, DesulfuriserDescriptor.FLANGE_Y, DesulfuriserDescriptor.FLANGE_Z)),
-            outPort.port(pos, front.toEnumFacing().get3DDataValue(), PortBridge.endSpot(front, front, DesulfuriserDescriptor.FLANGE_Y, DesulfuriserDescriptor.FLANGE_Z)));
+            inlet.port(pos, back.toEnumFacing().get3DDataValue(), PortBridge.endSpot(front, back, DesulfuriserDescriptor.FLANGE_Y, DesulfuriserDescriptor.FLANGE_Z)),
+            outlet.port(pos, front.toEnumFacing().get3DDataValue(), PortBridge.endSpot(front, front, DesulfuriserDescriptor.FLANGE_Y, DesulfuriserDescriptor.FLANGE_Z)));
     }
 
     @Override
+    public java.util.List<Link> fluidLinks() {
+        var all = new java.util.ArrayList<>(inlet.links());
+        all.addAll(outlet.links());
+        return all;
+    }
+
+    @Override
+    public java.util.List<Vent> fluidVents() {
+        var all = new java.util.ArrayList<>(inlet.vents());
+        all.addAll(outlet.vents());
+        return all;
+    }
+
+    /** The cut moves here, between the views' sync and show: a change in the tick would leave the views stale. */
+    @Override
     public void beforeFluidStep(double dt) {
         double t = mods.eln.sim.Ambient.kelvin(node.coordonate);
-        inPort.step(inTank, dt, t);
-        outPort.step(outTank, dt, t);
+        inlet.sync(dt, t);
+        if (onOff.on) treat();
+        inlet.settle(dt);
+        outlet.before(t);
+    }
+
+    @Override
+    public void afterFluidStep(double dt) {
+        inlet.after();
+        outlet.after();
     }
 
     @Override
     public void initialize() {
         double t = mods.eln.sim.Ambient.kelvin(node.coordonate);
-        inPort.make(node.coordonate.y + DesulfuriserDescriptor.FLANGE_Y / 16.0, t);
-        outPort.make(node.coordonate.y + DesulfuriserDescriptor.FLANGE_Y / 16.0, t);
+        inlet.make(node.coordonate.y, node.coordonate.y + DesulfuriserDescriptor.FLANGE_Y / 16.0, t);
+        outlet.make(node.coordonate.y, node.coordonate.y + DesulfuriserDescriptor.FLANGE_Y / 16.0, t);
         connect();
     }
 
     @Override
     public void connectJob() {
         super.connectJob();
-        if (inPort.stub != null) mods.eln.fluid.FluidWorld.add(this);
+        if (inlet.stub != null) mods.eln.fluid.FluidWorld.add(this);
     }
 
     @Override
@@ -190,7 +217,7 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
     /** Buckets and other mods' pipes see the treated cut. */
     @Override
     public Object getFluidHandler() {
-        return outTank;
+        return outlet.view;
     }
 
     // ---- electrical
@@ -237,10 +264,8 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         onOff.write(nbt);
-        inTank.writeToNBT(nbt, "cutInTank");
-        outTank.writeToNBT(nbt, "cutOutTank");
-        inPort.write(nbt);
-        outPort.write(nbt);
+        inlet.write(nbt);
+        outlet.write(nbt);
         nbt.putDouble("treatedToward", treatedToward);
         nbt.putDouble("treatedAll", treatedAll);
         nbt.putInt("sulfur", sulfur);
@@ -250,10 +275,8 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         onOff.read(nbt);
-        inTank.readFromNBT(nbt, "cutInTank");
-        outTank.readFromNBT(nbt, "cutOutTank");
-        inPort.read(nbt);
-        outPort.read(nbt);
+        inlet.read(nbt, "cutInTank", DesulfuriserDescriptor.TANK_MB);
+        outlet.read(nbt, DesulfuriserDescriptor.TANK_MB);
         treatedToward = nbt.getDoubleOr("treatedToward", 0);
         treatedAll = nbt.getDoubleOr("treatedAll", 0);
         sulfur = nbt.getIntOr("sulfur", 0);
@@ -263,8 +286,10 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>(machine.wailaLines());
         if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
-        info.put(I18N.tr("In (blue)"), inTank.getFluidAmount() + " / " + inTank.getCapacity() + " mB");
-        info.put(I18N.tr("Out (red)"), outTank.getFluidAmount() + " / " + outTank.getCapacity() + " mB");
+        String wrong = inlet.blockedBy();
+        if (onOff.on && wrong != null) info.put(I18N.tr("State"), I18N.tr("blocked: it holds %1$, which it can't treat", wrong));
+        info.put(I18N.tr("In (blue)"), inMb() + " / " + DesulfuriserDescriptor.TANK_MB + " mB");
+        info.put(I18N.tr("Out (red)"), outMb() + " / " + DesulfuriserDescriptor.TANK_MB + " mB");
         info.put(I18N.tr("Sulfur Dust"), String.valueOf(sulfur));
         return info;
     }

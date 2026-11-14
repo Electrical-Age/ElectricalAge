@@ -47,6 +47,10 @@ public final class DeviceOutlet {
     /** What the device made since the last step, by species id (mB), and whether crude is live (with its gas). */
     private final java.util.Map<Integer, Double> made = new java.util.LinkedHashMap<>();
     private final boolean live;
+    /** A mix the device made since the last step: kg by species id, each lot with its temperature; and its liquid mB. */
+    private final java.util.List<double[]> madeKg = new java.util.ArrayList<>();
+    private final java.util.List<Double> madeAt = new java.util.ArrayList<>();
+    private double madeKgMb;
 
     private double[] loaded, loadedOut;
     private net.neoforged.neoforge.fluids.FluidStack legacyTank;
@@ -88,6 +92,18 @@ public final class DeviceOutlet {
     public DeviceOutlet keys(String vesselKey, String oldTankKey) {
         this.vesselKey = vesselKey;
         this.oldTankKey = oldTankKey;
+        return this;
+    }
+
+    /** The liquids its view takes from buckets and other mods' pipes (the old tank's filter), where it makes several. */
+    public DeviceOutlet takes(Fluid... fluids) {
+        spec.liquids(id -> {
+            for (Fluid f : fluids) {
+                var ph = FluidSpecies.of(f);
+                if (ph != null && ph.id() == id) return true;
+            }
+            return false;
+        });
         return this;
     }
 
@@ -164,6 +180,14 @@ public final class DeviceOutlet {
         made.merge(ph.id(), mB, Double::sum);
     }
 
+    /** The device made a mix: kg of liquid by species id, at kelvin (what a DeviceInlet.takeMix took, passed on). */
+    public void madeKg(double[] kg, double kelvin) {
+        var reg = SpeciesRegistry.get();
+        for (int id = 2; id < kg.length; id++) if (kg[id] > 0) madeKgMb += kg[id] / reg.byId(id).rhoL / NodeFluidView.M3_PER_MB;
+        madeKg.add(kg);
+        madeAt.add(kelvin);
+    }
+
     /** Before a fluid step: what was put in or taken out through the view, what was made, then the pump and vents. */
     public void before(double ambientK) {
         if (vessel == null) return;
@@ -173,6 +197,13 @@ public final class DeviceOutlet {
             EaUnits.add(vessel, id, e.getValue() * FluidSpecies.kgPerMb(id, false), ambientK, false, live);
         }
         made.clear();
+        for (int i = 0; i < madeKg.size(); i++) {
+            double[] kg = madeKg.get(i);
+            for (int id = 2; id < kg.length; id++) if (kg[id] > 0) EaUnits.add(vessel, id, kg[id], madeAt.get(i), false);
+        }
+        madeKg.clear();
+        madeAt.clear();
+        madeKgMb = 0;
         boolean piped = piped();
         // (unpiped, the flange is shut: the pump stands and the view gives the liquid to the block there instead)
         pump.speed = piped ? 1 : 0;
@@ -210,7 +241,7 @@ public final class DeviceOutlet {
     /** Room for mB more (with what's waiting to go in), under the head's pressure in the vessel and at the flange. */
     public boolean room(double mB) {
         if (vessel == null) return false;
-        double waiting = 0;
+        double waiting = madeKgMb;
         for (double d : made.values()) waiting += d;
         if (liquidMb() + waiting + mB > capacityMb()) return false;
         return vessel.P() < headPa && (outlet == null || FluidWorld.nodeFor(outlet).P() < headPa);

@@ -31,6 +31,7 @@ public final class RubberCases {
         for (String v : CompressorVesselCase.VARIANTS) cases.add(new CompressorVesselCase(v));
         cases.add(new CarbonCase());
         cases.add(new DesulfuriserCase());
+        for (String v : DesulfuriserVesselCase.VARIANTS) cases.add(new DesulfuriserVesselCase(v));
         cases.add(new SteamCrackerCase());
         cases.add(new ButadienePipeCase());
         cases.add(new PolymeriserCase(false));
@@ -478,7 +479,105 @@ public final class RubberCases {
         public void measure(TestContext c) {
             String st = String.format("treated %.0f, in %d, out %d, sulfur %d", d.treated(), d.inMb(), d.outMb(), d.sulfur());
             c.check("the desulfuriser treats the diesel into its out tank (~50 mB/s at 230 V)", d.treated() > 500, st);
-            c.check("... with its outlet closed, nothing is lost (in + out = 1000 mB)", d.inMb() + d.outMb() == 1000, st);
+            c.check("... with its outlet closed, nothing is lost (in + out = 1000 mB)", Math.abs(d.inlet.feedMb() + d.outlet.liquidMb() - 1000) < 1, st);
+        }
+    }
+
+    /** The Desulfuriser's vessels: an old save's two tanks load into them; a diesel with a fifth of gasoline in it comes out
+     *  as that mix; water under the cut drains while it treats. */
+    static final class DesulfuriserVesselCase implements TestCase {
+        static final String[] VARIANTS = {"legacy_tanks", "passes_mix", "water_drains"};
+        final String variant;
+        mods.eln.transparentnode.desulfuriser.DesulfuriserElement d;
+        String legacy = "not loaded";
+
+        DesulfuriserVesselCase(String variant) {
+            this.variant = variant;
+        }
+
+        public String id() {
+            return "desulfuriser_" + variant;
+        }
+
+        public int ticks() {
+            return variant.equals("legacy_tanks") ? 60 : 500;
+        }
+
+        public void build(TestContext c) {
+            var l = new Wp10aCases.Layout(c, width());
+            var p = c.at(3, 1, 1);
+            d = (mods.eln.transparentnode.desulfuriser.DesulfuriserElement) l.device(0 + (94 << 6), 3, 1);
+            var diesel = mods.eln.oil.Oil.Cut.DIESEL.source.get();
+            var gasoline = mods.eln.oil.Oil.Cut.GASOLINE.source.get();
+            if (!variant.equals("legacy_tanks")) l.feed(p, d.front.left(), 8 + (32 << 6), mods.eln.Eln.MVU);
+            switch (variant) {
+                case "passes_mix" -> {
+                    d.fillIn(new net.neoforged.neoforge.fluids.FluidStack(diesel, 800));
+                    d.fillIn(new net.neoforged.neoforge.fluids.FluidStack(gasoline, 200));
+                }
+                case "water_drains" -> {
+                    d.fillIn(new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER, 400));
+                    d.fillIn(new net.neoforged.neoforge.fluids.FluidStack(diesel, 600));
+                }
+                default -> c.after(2, () -> {
+                    try {
+                        var r = mods.eln.gametest.Reload.node(c.level(), p, t -> {
+                            var el = OilCases.FuelBySpecies.holding(t, "cutInVesselW");
+                            for (String k : new String[]{"W", "A", "U", "S", "Fv"}) {
+                                el.remove("cutInVessel" + k);
+                                el.remove("cutOutVessel" + k);
+                            }
+                            int cap = mods.eln.transparentnode.desulfuriser.DesulfuriserDescriptor.TANK_MB;
+                            var in = new mods.eln.fluid.ElementFluidHandler(cap);
+                            in.fill(new net.neoforged.neoforge.fluids.FluidStack(diesel, 600), true);
+                            in.writeToNBT(el, "cutInTank");
+                            var out = new mods.eln.fluid.ElementFluidHandler(cap);
+                            out.fill(new net.neoforged.neoforge.fluids.FluidStack(gasoline, 300), true);
+                            out.writeToNBT(el, "cutOutTank");
+                            el.putDouble("treatedAll", 4300);
+                            return t;
+                        });
+                        d = (mods.eln.transparentnode.desulfuriser.DesulfuriserElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                        legacy = "";
+                    } catch (ReflectiveOperationException e) {
+                        legacy = e.toString();
+                    }
+                });
+            }
+        }
+
+        static double mb(mods.eln.sim.fluid.FluidNode n, net.minecraft.world.level.material.Fluid f) {
+            int id = mods.eln.fluid.FluidSpecies.of(f).id();
+            return n.mass(id) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
+        }
+
+        public void measure(TestContext c) {
+            var in = d.inlet.vessel;
+            var out = d.outlet.vessel;
+            var diesel = mods.eln.oil.Oil.Cut.DIESEL.source.get();
+            var gasoline = mods.eln.oil.Oil.Cut.GASOLINE.source.get();
+            String st = String.format("in %.1f mB (%.1f water), out %.1f mB: %.1f diesel + %.1f gasoline, treated %.1f, in %.3f bar, out %.3f bar, %s", d.inlet.feedMb(),
+                in.mLiquid() / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER, d.outlet.liquidMb(), mb(out, diesel), mb(out, gasoline), d.treated(), in.P() / 1e5, out.P() / 1e5, d.getWaila());
+            c.line("desulfuriser " + variant + ": " + st);
+            switch (variant) {
+                case "passes_mix" -> {
+                    double all = mb(out, diesel) + mb(out, gasoline) + mb(in, diesel) + mb(in, gasoline);
+                    c.check("desulfuriser: a diesel with a fifth of gasoline in it comes out as that mix", d.treated() > 500 && mb(out, diesel) > 400
+                        && Math.abs(mb(out, gasoline) / (mb(out, diesel) + mb(out, gasoline)) - 0.2) < 0.01, st);
+                    c.check("desulfuriser: ... and every mB of both is in one vessel or the other", Math.abs(all - 1000) < 1, st);
+                }
+                case "water_drains" -> {
+                    c.check("desulfuriser: the water under its cut ran out of the drain", in.mLiquid() < 1e-6 && Math.abs(d.inlet.drainedKg / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER - 400) < 1,
+                        String.format("%.1f mB drained; %s", d.inlet.drainedKg / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER, st));
+                    c.check("desulfuriser: ... while it treated the diesel over it, with no water in what came out", d.treated() > 500 && out.mLiquid() < 1e-6
+                        && Math.abs(mb(in, diesel) + mb(out, diesel) - 600) < 1, st);
+                }
+                default -> {
+                    c.check("desulfuriser: an old save loads", legacy.isEmpty(), legacy);
+                    c.check("desulfuriser: an old save's two tanks are in its vessels, every kg", Math.abs(mb(in, diesel) - 600) < 1 && Math.abs(mb(out, gasoline) - 300) < 1 && d.treated() == 4300, st);
+                    c.check("desulfuriser: ... with air over them, at the air's pressure", Math.abs(in.P() - mods.eln.sim.fluid.Water.P_ATM) < 2000 && Math.abs(out.P() - mods.eln.sim.fluid.Water.P_ATM) < 2000, st);
+                }
+            }
         }
     }
 

@@ -147,6 +147,14 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   basin with the outlet pump (200 mB/s free, shut-off at 6 bar), as the resin collector's. It presses dandelions only
   while the basin has room for 250 mB and its line is under 6 bar. A pressing's latex leaves the IN vessel at the next
   fluid step. `compressor_presses_latex`, `compressor_presses_dandelions`, `compressor_legacy_tanks`.
+- Desulfuriser's tanks on fluid nodes (2026-11-14): the IN tank is a vessel the line fills (as the carbon black
+  burner's: passive, breathing, water drains, a liquid it can't treat blocks it with a Jade line), the OUT tank a
+  basin with the outlet pump. The treated cut is the feed layer's whole mix at its temperature: a diesel with a fifth
+  of gasoline in it comes out as that (the old tanks held one fluid, and the port counted the layer as its main
+  cut). So the old rule "the OUT tank must hold the same fluid or be empty" is gone: the basin takes any treated
+  cut, and they mix there as in any vessel. Rate, power and Sulfur Dust are unchanged; the power is drawn per
+  tick, the cut moves at the fluid step. `desulfuriser_closed_outlet`, `desulfuriser_legacy_tanks`,
+  `desulfuriser_passes_mix`, `desulfuriser_water_drains`.
 - Flare stack on a fluid node: its 4-bucket tank is a fluid node behind its front flange (half way up; buckets put
   any species in). Its tip passes every gas over the air's pressure between steps, each species by its share: natural
   gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took
