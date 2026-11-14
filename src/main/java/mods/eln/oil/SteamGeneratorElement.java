@@ -250,8 +250,11 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
             else if (omega > TRIP)
                 new mods.eln.sim.process.destruct.Failure(SteamGeneratorElement.this).rotating(() -> H * pNom * omega * omega)
                     .fail(mods.eln.sim.process.destruct.FailureCause.OVERSPEED, omega);
-            else if (omega > WATER_SPEED && (waterShare() > WATER_MAX || condenser != null && condenser.floodShare() > CondenserDescriptor.FLOOD))
+            else if (omega > WATER_SPEED && waterShare() > WATER_MAX)
                 new mods.eln.sim.process.destruct.Failure(SteamGeneratorElement.this).fail(mods.eln.sim.process.destruct.FailureCause.WATER, waterShare());
+            else if (omega > WATER_SPEED && condenser != null && condenser.floodShare() > CondenserDescriptor.FLOOD)
+                new mods.eln.sim.process.destruct.Failure(SteamGeneratorElement.this)
+                    .fail(mods.eln.sim.process.destruct.FailureCause.FLOODED, condenser.floodShare());
             else if (omega > 1.1 && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 10 == 0)
                 sl.playSound(null, node.coordonate.pos(), net.minecraft.sounds.SoundEvents.MINECART_RIDING, net.minecraft.sounds.SoundSource.BLOCKS,
                     0.8f, (float) Math.min(2, omega * 1.4));   // (the whine of a shaft over speed)

@@ -228,10 +228,12 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
         info.put(I18N.tr("Turbine"), turbine == null ? I18N.tr("none: place it against a turbine's exhaust side") : I18N.tr("connected"));
         if (vessel != null) {
+            // (Baughn 2026-11-14: the level in the headline, 100 % where it floods the turbine; the contents are details)
+            info.put(I18N.tr("Water level"), String.format(I18N.tr("%.0f%% of what floods the turbine (%.0f mB)"), floodShare() / CondenserDescriptor.FLOOD * 100,
+                vessel.mLiquid() / EaUnits.KG_PER_MB_WATER));
             info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", vessel.P() / 1e5, EaUnits.contents(vessel)));
-            info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
             info.put(I18N.tr("Temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
-            info.put(I18N.tr("Fill"), String.format("%.0f%% (%.0f mB)", floodShare() * 100, vessel.mLiquid() / EaUnits.KG_PER_MB_WATER));
+            info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
         }
         info.put(I18N.tr("Heat rejected"), Utils.plotPower("", Math.max(0, heatW)));   // (no -28 mW while idle: AdventurAgent)
         var makeup = v.makeup;

@@ -2028,7 +2028,8 @@ public final class OilCases {
             String running = c.getWaila().get(mods.eln.i18n.I18N.tr("Condensate pump")), idle = alone.getWaila().get(mods.eln.i18n.I18N.tr("Condensate pump"));
             ctx.check("oil: Jade: the running condenser's pump shows its share and flow", running != null && running.endsWith("mB/s"), "" + running);
             ctx.check("oil: Jade: a condenser without a turning turbine says its pump is stopped", idle != null && idle.startsWith("stopped"), "" + idle);
-            ctx.check("oil: Jade: its fill", c.getWaila().containsKey(mods.eln.i18n.I18N.tr("Fill")), "" + c.getWaila());
+            ctx.check("oil: Jade: its water level, in the headline", new java.util.ArrayList<>(c.getWaila().keySet()).indexOf(mods.eln.i18n.I18N.tr("Water level")) == 1,
+                "" + c.getWaila());
         }
     }
 
@@ -2557,7 +2558,8 @@ public final class OilCases {
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(feed);
             ctx.check("oil: condenser placed, and the turbine ran before the flood", c != null && ranBefore, "" + t.getWaila());
-            ctx.check("oil: flooded, the turbine takes water damage", t.getBurnt() == mods.eln.sim.process.destruct.FailureCause.WATER, "" + t.getBurnt());
+            ctx.check("oil: flooded, the turbine takes water damage, and says its condenser flooded", t.getBurnt() == mods.eln.sim.process.destruct.FailureCause.FLOODED,
+                "" + t.getBurnt());
         }
     }
 

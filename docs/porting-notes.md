@@ -69,6 +69,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   flood level (50 %) while its pump turns. A running condenser's level now sits between 25 and 40 % (it sat under
   25 %). Makeup alone still fills cold boilers and replaces losses, into boilers up to 1.6 x the rating. Jade's
   "Pump outlet" says "holding back, its hotwell is low" when that is why nothing flows. `ParallelCondensateTest`.
+  Jade on both condensers (Baughn 2026-11-14): "Water level" is in the headline, as a share of the level that floods
+  the turbine or drowns the tubes (100 % = half the vessel), in place of "Fill" (a share of the vessel, in the
+  details); "Contents" moved to the details. A turbine burnt by its flooded condenser says "water damage: its
+  condenser flooded, its water isn't leaving" (`FailureCause.FLOODED`, appended), one that took water through its
+  steam line "water damage: water came in with its steam".
   Jade on both condensers, "Pump outlet": the pressure it works against and its flow there as a share of its rated
   (free) flow at its speed, or "shut off, needs a pipe pump" (Baughn 2026-11-03).
 - Iron pipe works to 20 bar and bursts at 25 (Baughn 2026-11-14; it was 10 and 40). A sound 10 bar plant's
