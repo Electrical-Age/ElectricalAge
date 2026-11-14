@@ -395,7 +395,8 @@ public final class ShaftPlantCases {
                 if (c.v.vessel == null) return;
                 if (!primed) {
                     primed = true;
-                    mods.eln.sim.fluid.EaUnits.addWater(c.v.vessel, 0.2 * c.v.vessel.volume * Water.RHO_L, 320, false);
+                    // (its hotwell over the pump's level band: the whole curve)
+                    mods.eln.sim.fluid.EaUnits.addWater(c.v.vessel, (mods.eln.oil.CondenserVessel.LEVEL_FULL + 0.03) * c.v.vessel.volume * Water.RHO_L, 320, false);
                 }
                 if (++tick == 100) kg0 = c.v.totalPumpedKg;
                 if (tick > 100) {

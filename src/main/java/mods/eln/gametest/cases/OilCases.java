@@ -2363,8 +2363,8 @@ public final class OilCases {
             for (int x = 1; x <= 3; x++) l.used.add(ctx.at(x, 1, 2));
             mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
                 if (c.vessel == null || boiler.vessel == null) return;
-                if (tick == 0) {   // (20 % water: the pump's port draws liquid; under the makeup float's shut level)
-                    mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.2 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 320, false);
+                if (tick == 0) {   // (28 % water: in the pump's level band, about where it settles at this pressure)
+                    mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.28 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 320, false);
                     // the feed run full of water, as a plant that has run a while: a liquid-full pipe is stiff, the case
                     // where a check valve decided at the step's start flipped it (Baughn's base)
                     var run = mods.eln.fluid.FluidWorld.nodeFor(boiler.feed);
