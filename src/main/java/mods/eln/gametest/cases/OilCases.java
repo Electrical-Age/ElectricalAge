@@ -747,7 +747,7 @@ public final class OilCases {
                             mods.eln.sim.fluid.EaUnits.addWater(v, 3e5 * v.volume / (461.5 * 423.15), 423.15, true);   // (~3 bar of steam at 150 C)
                             v.update();
                         }
-                        case "cracker_butadiene_out" -> cracker.fillOut(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Butadiene.SOURCE.get(), 1000));
+                        case "cracker_butadiene_out" -> cracker.fillOut(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Butadiene.SOURCE.get(), 600));   // (sealed: more would crush its air past the pump's head)
                         default -> cracker.fillOut(new net.neoforged.neoforge.fluids.FluidStack(Oil.Cut.NATURALGAS.source.get(), 1000));
                     }
                 }
@@ -769,7 +769,9 @@ public final class OilCases {
                         var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
                         err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
                     }
-                    cracker.fillOut(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Butadiene.SOURCE.get(), 1000));
+                    // (sealed: 1000 mB at once would crush its air past the pump's head; and the pipe between holds a few hundred)
+                    for (int at2 = 0; at2 <= 120; at2 += 40)
+                        ctx.after(at2 + 1, () -> cracker.fillOut(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Butadiene.SOURCE.get(), 500)));
                 }
                 case "polymeriser_in" -> {
                     tank = tank(ctx, w, XP);
@@ -886,7 +888,8 @@ public final class OilCases {
                     double in = ((mods.eln.transparentnode.polymeriser.PolymeriserElement) east).butadieneMb();
                     var cr = (mods.eln.transparentnode.steamcracker.SteamCrackerElement) west;
                     ctx.check("oil on pipes: the steam cracker's butadiene went straight into a polymeriser", in > 200,
-                        String.format("%.0f mB in its feed; cracker still holds %d", in, cr.butadieneMb()));
+                        String.format("%.0f mB in its feed, %s; cracker still holds %d at %.2f bar, %.0f K, %s", in, east.getWaila(), cr.butadieneMb(),
+                            cr.butadieneOut.vessel.P() / 1e5, cr.butadieneOut.vessel.T(), cr.getWaila()));
                 }
                 case "polymeriser_in" -> {
                     double in = ((mods.eln.transparentnode.polymeriser.PolymeriserElement) east).butadieneMb();

@@ -34,6 +34,9 @@ public class SteamCrackerDescriptor extends TransparentNodeDescriptor {
     public static final double LIQUID_PORT_MB_PER_S = 200, STEAM_PORT_MB_PER_S = 1000, OUT_HEAD_PA = 6e5;
     /** Its flanges (px, model frame): the two INs on the back, the two OUTs on the front, 4 px up, at z 4 and 12. */
     public static final int FLANGE_Y = 4, FLANGE_Z_A = 4, FLANGE_Z_B = 12;
+    /** Its sealed gas vessels (m^3): the steam inlet holds the old tank's 4000 mB of steam at 6 bar, the natural gas
+     *  outlet the old tank's 1000 mB at its head. The steam it draws ahead of the cracking (mB): a second's worth. */
+    public static final double STEAM_VESSEL_M3 = 1.26e-3, GAS_VESSEL_M3 = 2.7e-4, STEAM_CHARGE_MB = 125;
 
     public SteamCrackerDescriptor(String name, String model, double nominalU, double nominalP, ElectricalCableDescriptor cable) {
         super(name, SteamCrackerElement.class, SteamCrackerRender.class);

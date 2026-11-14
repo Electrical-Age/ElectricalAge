@@ -163,6 +163,16 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   (about 8 mB as liquid) stays in it, and Jade counts what it can use. Water in it drains; another liquid stays
   and Jade names it. Rate, power and Soul Dust are unchanged. `polymeriser`, `polymeriser_vapour` (100 mB make 4
   Raw Rubber, was 5), `polymeriser_legacy_feed`, `oil_on_pipes_polymeriser_in`.
+- Steam cracker's tanks on fluid nodes (2026-11-14): gasoline stands in a breathing vessel like the other liquid
+  feeds (water in it drains). Steam is in a sealed vessel sized to hold the old tank's 4000 mB at 6 bar; the
+  condensate drains, and switched on the cracker draws a second's steam (125 mB) ahead, with whatever else is in
+  the vessel's gas, down to 1 atm and no further: the last 1 atm of steam (about 600 mB) stays in it, and "no
+  steam" now means under 1 atm of it. Butadiene is made into a sealed vessel under its own pressure and leaves by
+  a pump that keeps a sump (about 120 mB stay; on a film the pump drew gas, emptied the vessel and froze it).
+  Natural gas is made into a sealed gas vessel and leaves by its own pressure through a check valve, to 6 bar.
+  Neither product vents or leaves without a pipe: an outlet that is full stops the cracker as before. Rates,
+  ratios and power are unchanged. `steam_cracker` (4000 mB of steam crack ~266 mB, was 320),
+  `steam_cracker_legacy_tanks`, `oil_on_pipes_cracker_*`.
 - Flare stack on a fluid node: its 4-bucket tank is a fluid node behind its front flange (half way up; buckets put
   any species in). Its tip passes every gas over the air's pressure between steps, each species by its share: natural
   gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took

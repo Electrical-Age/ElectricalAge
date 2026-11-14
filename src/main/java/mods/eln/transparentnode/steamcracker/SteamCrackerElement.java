@@ -2,7 +2,8 @@ package mods.eln.transparentnode.steamcracker;
 
 import mods.eln.api.element.ElementMachine;
 import mods.eln.api.element.Machines;
-import mods.eln.fluid.ElementFluidHandler;
+import mods.eln.fluid.DeviceInlet;
+import mods.eln.fluid.DeviceOutlet;
 import mods.eln.fluid.PortBridge;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
@@ -30,16 +31,16 @@ import static mods.eln.transparentnode.steamcracker.SteamCrackerDescriptor.*;
 public class SteamCrackerElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice {
     final SteamCrackerDescriptor descriptor;
     public final ElementMachine machine;
-    final ElementFluidHandler gasolineTank = new ElementFluidHandler(GASOLINE_TANK_MB);
-    final ElementFluidHandler steamTank = new ElementFluidHandler(STEAM_TANK_MB);
-    final ElementFluidHandler butadieneTank = new ElementFluidHandler(BUTADIENE_TANK_MB);
-    final ElementFluidHandler gasTank = new ElementFluidHandler(GAS_TANK_MB);
-    final PortBridge gasolineIn = new PortBridge("gasolineIn", PortBridge.Mode.IN, LIQUID_PORT_MB_PER_S, 0);
-    final PortBridge steamIn = new PortBridge("steamIn", PortBridge.Mode.IN, STEAM_PORT_MB_PER_S, 0);
-    final PortBridge butadieneOut = new PortBridge("butadieneOut", PortBridge.Mode.OUT, LIQUID_PORT_MB_PER_S, OUT_HEAD_PA);
-    final PortBridge gasOut = new PortBridge("gasOut", PortBridge.Mode.OUT, LIQUID_PORT_MB_PER_S, OUT_HEAD_PA);
-    /** The parts of a mB toward the next whole one: gasoline cracked, steam used, butadiene and gas made. */
-    double carry, steamCarry, butadieneCarry, gasCarry;
+    /** Its feed vessels: gasoline (it breathes; water drains) and steam (sealed; the condensate drains). */
+    public final DeviceInlet gasolineIn = new DeviceInlet("gasolineIn", GASOLINE_TANK_MB, Oil.Cut.GASOLINE.source.get());
+    public final DeviceInlet steamIn = new DeviceInlet("steamIn", STEAM_TANK_MB, Oil.STEAM.get()).sealed(STEAM_VESSEL_M3);
+    /** Its product vessels, both sealed: butadiene leaves by a pump that keeps a sump, natural gas under its own pressure. */
+    public final DeviceOutlet butadieneOut = new DeviceOutlet("butadieneOut", BUTADIENE_TANK_MB / 0.95, LIQUID_PORT_MB_PER_S, OUT_HEAD_PA, false, false)
+        .only(Butadiene.SOURCE.get()).sump().keys("butadieneOutVessel", "butadieneTank");
+    public final DeviceOutlet gasOut = new DeviceOutlet("gasOut", GAS_TANK_MB, LIQUID_PORT_MB_PER_S, OUT_HEAD_PA, false, false)
+        .only(Oil.Cut.NATURALGAS.source.get()).gasOnly(GAS_VESSEL_M3).keys("gasOutVessel", "gasTank");
+    /** Gasoline the power has paid for and not yet cracked (mB), and steam drawn out of its vessel for it (mB). */
+    double carry, steamCharge;
     /** Gasoline cracked in all (mB). */
     double crackedAll;
     double sinceRun = 1e9;
@@ -49,23 +50,15 @@ public class SteamCrackerElement extends TransparentNodeElement implements mods.
     public SteamCrackerElement(TransparentNode node, TransparentNodeDescriptor descriptor) {
         super(node, descriptor);
         this.descriptor = (SteamCrackerDescriptor) descriptor;
-        gasolineTank.setFilter(new net.minecraft.world.level.material.Fluid[]{Oil.Cut.GASOLINE.source.get()});
-        steamTank.setFilter(new net.minecraft.world.level.material.Fluid[]{Oil.STEAM.get()});
-        butadieneTank.setFilter(new net.minecraft.world.level.material.Fluid[]{Butadiene.SOURCE.get()});
-        gasTank.setFilter(new net.minecraft.world.level.material.Fluid[]{Oil.Cut.NATURALGAS.source.get()});
         machine = Machines.forElement(this, this.descriptor.spec());
         slowProcessList.add(this::tick);
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
     }
 
-    /** Whole mB of gasoline it could crack now, by its feeds and the room for its products (ignoring power). */
-    int canCrack() {
-        double steamPer = STEAM_PER_100 / 100, butPer = BUTADIENE_PER_100 / 100, gasPer = GAS_PER_100 / 100;
-        double n = gasolineTank.getFluidAmount();
-        n = Math.min(n, (steamTank.getFluidAmount() + steamCarry) / steamPer);
-        n = Math.min(n, (butadieneTank.getCapacity() - butadieneTank.getFluidAmount() - butadieneCarry) / butPer);
-        n = Math.min(n, (gasTank.getCapacity() - gasTank.getFluidAmount() - gasCarry) / gasPer);
-        return (int) Math.floor(Math.max(0, n));
+    static final double STEAM_PER = STEAM_PER_100 / 100, BUTADIENE_PER = BUTADIENE_PER_100 / 100, GAS_PER = GAS_PER_100 / 100;
+
+    boolean outletsHaveRoom(double mB) {
+        return butadieneOut.room(mB * BUTADIENE_PER) && gasOut.room(mB * GAS_PER);
     }
 
     /** Its on/off lever (Nero 2026-11-08): off, it does nothing and draws nothing. */
@@ -81,55 +74,49 @@ public class SteamCrackerElement extends TransparentNodeElement implements mods.
         }
         boolean was = running;
         sinceRun += dt;
-        int can = canCrack();
-        if (gasolineTank.getFluidAmount() <= 0) status = "no gasoline";
-        else if (steamTank.getFluidAmount() < STEAM_PER_100 / 100) status = "no steam";
-        else if (can <= 0) status = "an outlet is full";
-        else status = "cracking";
-        if (can > 0) {
+        // (the power is drawn here, a tick at a time; the gasoline is cracked before the next fluid step, in crack())
+        if (gasolineIn.feedMb() <= 0) status = "no gasoline";
+        else if (steamCharge < STEAM_PER) status = "no steam";
+        else if (!outletsHaveRoom(1)) status = "an outlet is full";
+        else {
+            status = "cracking";
             double rated = machine.ratedJoulesPerTick();
             double got = rated > 0 ? machine.takeJoules(rated) : 0;
             double share = rated > 0 ? got / rated : 0;
             carry += GASOLINE_MB_PER_S * share * dt;
-            int move = (int) Math.min(Math.floor(carry), can);
-            if (move > 0) {
-                carry -= move;
-                gasolineTank.drain(move, true);
-                steamCarry -= move * STEAM_PER_100 / 100;
-                int steam = (int) Math.ceil(-steamCarry);
-                steamTank.drain(steam, true);
-                steamCarry += steam;
-                butadieneCarry += move * BUTADIENE_PER_100 / 100;
-                int b = (int) Math.floor(butadieneCarry + 1e-9);
-                if (b > 0) {
-                    butadieneTank.fill(new FluidStack(Butadiene.SOURCE.get(), b), true);
-                    butadieneCarry -= b;
-                }
-                gasCarry += move * GAS_PER_100 / 100;
-                int g = (int) Math.floor(gasCarry + 1e-9);
-                if (g > 0) {
-                    gasTank.fill(new FluidStack(Oil.Cut.NATURALGAS.source.get(), g), true);
-                    gasCarry -= g;
-                }
-                crackedAll += move;
-            }
             if (share > 0.05) sinceRun = 0;
             else status = "no power";
-        } else carry = Math.min(carry, 1);
+        }
+        if (!status.equals("cracking")) carry = Math.min(carry, 1);
         running = sinceRun < 2;
         if (running != was) needPublish();
     }
 
-    // ---- tests
-
-    /** (tests) pour gasoline or steam into its IN tanks. */
-    public int fillIn(FluidStack f) {
-        return f.getFluid() == Oil.STEAM.get() ? steamTank.fill(f, true) : gasolineTank.fill(f, true);
+    /** Crack what the power has paid for, by the gasoline and the steam it has and the room for its products. */
+    void crack() {
+        double move = Math.min(carry, Math.min(gasolineIn.feedMb(), steamCharge / STEAM_PER));
+        if (move <= 0 || !outletsHaveRoom(move)) return;
+        double got = gasolineIn.take(move);
+        carry -= got;
+        steamCharge = Math.max(0, steamCharge - got * STEAM_PER);
+        butadieneOut.made(Butadiene.SOURCE.get(), got * BUTADIENE_PER);
+        gasOut.made(Oil.Cut.NATURALGAS.source.get(), got * GAS_PER);
+        crackedAll += got;
     }
 
-    /** (tests) put butadiene or natural gas in its OUT tanks. */
+    // ---- tests
+
+    /** (tests) pour gasoline or steam (at 450 K) into its IN vessels. */
+    public int fillIn(FluidStack f) {
+        boolean steam = f.getFluid() == Oil.STEAM.get();
+        (steam ? steamIn : gasolineIn).put(f.getFluid(), f.getAmount(), steam ? 450 : mods.eln.sim.Ambient.kelvin(node.coordonate));
+        return f.getAmount();
+    }
+
+    /** (tests) put butadiene or natural gas in its OUT vessels. */
     public int fillOut(FluidStack f) {
-        return f.getFluid() == Butadiene.SOURCE.get() ? butadieneTank.fill(f, true) : gasTank.fill(f, true);
+        (f.getFluid() == Butadiene.SOURCE.get() ? butadieneOut : gasOut).put(f.getFluid(), f.getAmount(), mods.eln.sim.Ambient.kelvin(node.coordonate));
+        return f.getAmount();
     }
 
     public boolean running() {
@@ -145,19 +132,20 @@ public class SteamCrackerElement extends TransparentNodeElement implements mods.
     }
 
     public int gasolineMb() {
-        return gasolineTank.getFluidAmount();
+        return (int) Math.round(gasolineIn.feedMb());
     }
 
+    /** Its steam: what it has drawn for the cracking, and the steam in its vessel (mB). */
     public int steamMb() {
-        return steamTank.getFluidAmount();
+        return (int) Math.round(steamCharge + steamIn.gasFeedKg() / mods.eln.sim.fluid.EaUnits.KG_PER_MB_STEAM);
     }
 
     public int butadieneMb() {
-        return butadieneTank.getFluidAmount();
+        return (int) Math.round(butadieneOut.holdsMb(Butadiene.SOURCE.get()));
     }
 
     public int gasMb() {
-        return gasTank.getFluidAmount();
+        return (int) Math.round(gasOut.holdsMb(Oil.Cut.NATURALGAS.source.get()));
     }
 
     @Override
@@ -187,22 +175,53 @@ public class SteamCrackerElement extends TransparentNodeElement implements mods.
     }
 
     @Override
+    public java.util.List<Link> fluidLinks() {
+        var all = new java.util.ArrayList<Link>();
+        all.addAll(gasolineIn.links());
+        all.addAll(steamIn.links());
+        all.addAll(butadieneOut.links());
+        all.addAll(gasOut.links());
+        return all;
+    }
+
+    @Override
+    public java.util.List<Vent> fluidVents() {
+        return gasolineIn.vents();
+    }
+
+    /** Switched on, it draws its steam a second ahead (with the steam everything else in the vessel's gas, which is
+     *  how the air of a new line leaves), and cracks here, between the views' sync and show. */
+    @Override
     public void beforeFluidStep(double dt) {
-        double t = mods.eln.sim.Ambient.kelvin(node.coordonate);
-        gasolineIn.step(gasolineTank, dt, t);
-        steamIn.step(steamTank, dt, t);
-        butadieneOut.step(butadieneTank, dt, t);
-        gasOut.step(gasTank, dt, t);
+        double t = mods.eln.sim.Ambient.kelvin(node.coordonate), perMb = mods.eln.sim.fluid.EaUnits.KG_PER_MB_STEAM;
+        gasolineIn.sync(dt, t);
+        steamIn.sync(dt, t);
+        if (onOff.on) {
+            if (steamCharge < STEAM_CHARGE_MB) steamCharge += steamIn.drawKg((STEAM_CHARGE_MB - steamCharge) * perMb) / perMb;
+            crack();
+        }
+        gasolineIn.settle(dt);
+        steamIn.settle(dt);
+        butadieneOut.before(t);
+        gasOut.before(t);
+    }
+
+    @Override
+    public void afterFluidStep(double dt) {
+        gasolineIn.after();
+        steamIn.after();
+        butadieneOut.after();
+        gasOut.after();
     }
 
     @Override
     public void initialize() {
         double t = mods.eln.sim.Ambient.kelvin(node.coordonate);
-        double z = node.coordonate.y + FLANGE_Y / 16.0;
-        gasolineIn.make(z, t);
-        steamIn.make(z, t);
-        butadieneOut.make(z, t);
-        gasOut.make(z, t);
+        double y = node.coordonate.y, z = y + FLANGE_Y / 16.0;
+        gasolineIn.make(y, z, t);
+        steamIn.make(y, z, t);
+        butadieneOut.make(y, z, t);
+        gasOut.make(y, z, t);
         connect();
     }
 
@@ -268,17 +287,11 @@ public class SteamCrackerElement extends TransparentNodeElement implements mods.
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         onOff.write(nbt);
-        gasolineTank.writeToNBT(nbt, "gasolineTank");
-        steamTank.writeToNBT(nbt, "steamTank");
-        butadieneTank.writeToNBT(nbt, "butadieneTank");
-        gasTank.writeToNBT(nbt, "gasTank");
         gasolineIn.write(nbt);
         steamIn.write(nbt);
         butadieneOut.write(nbt);
         gasOut.write(nbt);
-        nbt.putDouble("steamCarry", steamCarry);
-        nbt.putDouble("butadieneCarry", butadieneCarry);
-        nbt.putDouble("gasCarry", gasCarry);
+        nbt.putDouble("steamCharge", steamCharge);
         nbt.putDouble("crackedAll", crackedAll);
     }
 
@@ -286,17 +299,11 @@ public class SteamCrackerElement extends TransparentNodeElement implements mods.
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         onOff.read(nbt);
-        gasolineTank.readFromNBT(nbt, "gasolineTank");
-        steamTank.readFromNBT(nbt, "steamTank");
-        butadieneTank.readFromNBT(nbt, "butadieneTank");
-        gasTank.readFromNBT(nbt, "gasTank");
-        gasolineIn.read(nbt);
-        steamIn.read(nbt);
-        butadieneOut.read(nbt);
-        gasOut.read(nbt);
-        steamCarry = nbt.getDoubleOr("steamCarry", 0);
-        butadieneCarry = nbt.getDoubleOr("butadieneCarry", 0);
-        gasCarry = nbt.getDoubleOr("gasCarry", 0);
+        gasolineIn.read(nbt, "gasolineTank", GASOLINE_TANK_MB);
+        steamIn.read(nbt, "steamTank", STEAM_TANK_MB);
+        butadieneOut.read(nbt, BUTADIENE_TANK_MB);
+        gasOut.read(nbt, GAS_TANK_MB);
+        steamCharge = nbt.getDoubleOr("steamCharge", 0);
         crackedAll = nbt.getDoubleOr("crackedAll", 0);
     }
 
@@ -305,11 +312,12 @@ public class SteamCrackerElement extends TransparentNodeElement implements mods.
         Map<String, String> info = new HashMap<>(machine.wailaLines());
         if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
         info.put(I18N.tr("Status"), I18N.tr(status));
-        info.put(I18N.tr("Gasoline (blue C8)"), gasolineTank.getFluidAmount() + " / " + gasolineTank.getCapacity() + " mB");
-        info.put(I18N.tr("Steam (blue H2O)"), mods.eln.sim.fluid.EaUnits.steamGrams(steamTank.getFluidAmount()) + " / "
-            + mods.eln.sim.fluid.EaUnits.steamGrams(steamTank.getCapacity()));
-        info.put(I18N.tr("Butadiene (red C4H6)"), butadieneTank.getFluidAmount() + " / " + butadieneTank.getCapacity() + " mB");
-        info.put(I18N.tr("Natural gas (red CH4)"), gasTank.getFluidAmount() + " / " + gasTank.getCapacity() + " mB");
+        String wrong = gasolineIn.blockedBy();
+        if (wrong != null) info.put(I18N.tr("Blocked"), I18N.tr("it holds %1$, which it can't crack", wrong));
+        info.put(I18N.tr("Gasoline (blue C8)"), gasolineMb() + " / " + GASOLINE_TANK_MB + " mB");
+        info.put(I18N.tr("Steam (blue H2O)"), mods.eln.sim.fluid.EaUnits.steamGrams(steamMb()) + String.format(", %.1f bar", steamIn.vessel == null ? 0 : steamIn.vessel.P() / 1e5));
+        info.put(I18N.tr("Butadiene (red C4H6)"), butadieneMb() + " / " + BUTADIENE_TANK_MB + " mB");
+        info.put(I18N.tr("Natural gas (red CH4)"), gasMb() + " mB" + String.format(", %.1f bar", gasOut.vessel == null ? 0 : gasOut.vessel.P() / 1e5));
         return info;
     }
 }

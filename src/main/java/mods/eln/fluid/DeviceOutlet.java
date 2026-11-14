@@ -24,6 +24,11 @@ import java.util.List;
  * line), so a live well's natural gas reaches the pipe as before; an open one (the separator's basin) breathes through a
  * float vent and a vacuum breaker, as the furnace's tank. Unpiped, the pump stands and the vessel's liquid goes into the
  * block on the flange's face through its view (FluidExport), as the old push did.
+ * <p>
+ * Two more sealed kinds, for a machine's products: a liquefied gas (sump(): butadiene) leaves by the pump alone, which
+ * keeps a sump (Vessels.sumpSpeed; on a film it would draw the gas with the liquid, empty the vessel and freeze it), and
+ * a gas (gasOnly()) by the check valve from the vessel's top alone, under its own pressure. Neither vents nor exports
+ * when unpiped: the vessel holds what is made up to the head, and the machine waits.
  */
 public final class DeviceOutlet {
     public static final double PORT_K = PortBridge.PORT_K, OUTLET_VOLUME = PortBridge.STUB_VOLUME, VENT_K = 1e-11;
@@ -32,7 +37,9 @@ public final class DeviceOutlet {
 
     final String outletKey;
     private String vesselKey = "vessel", oldTankKey = "tank";
-    final double vesselM3, headPa, mbPerS;
+    double vesselM3;
+    final double headPa, mbPerS;
+    private boolean sump, gasOnly;
     double freeKgPerS;
     final boolean open;
     /** The one fluid it makes (only()), or null: any, the pump rated on crude. */
@@ -95,6 +102,19 @@ public final class DeviceOutlet {
         return this;
     }
 
+    /** Sealed, for a liquefied gas: the pump keeps a sump, and there is no gas line and no vent. */
+    public DeviceOutlet sump() {
+        sump = true;
+        return this;
+    }
+
+    /** Sealed, for a gas, in a vessel of m3: no pump; it leaves by the check valve from the top, and nothing vents. */
+    public DeviceOutlet gasOnly(double m3) {
+        gasOnly = true;
+        vesselM3 = m3;
+        return this;
+    }
+
     /** The liquids its view takes from buckets and other mods' pipes (the old tank's filter), where it makes several. */
     public DeviceOutlet takes(Fluid... fluids) {
         spec.liquids(id -> {
@@ -119,7 +139,17 @@ public final class DeviceOutlet {
             v.fill(0, Water.P_ATM, ambientK);
             if (legacyTank != null && !legacyTank.isEmpty()) {
                 var ph = FluidSpecies.of(legacyTank.getFluid());
-                if (ph != null) EaUnits.add(v, ph.id(), legacyTank.getAmount() * FluidSpecies.kgPerMb(ph.id(), ph.vapour()), ambientK, ph.vapour());
+                if (ph != null) {
+                    double kg = legacyTank.getAmount() * FluidSpecies.kgPerMb(ph.id(), ph.vapour());
+                    EaUnits.add(v, ph.id(), kg, ambientK, ph.vapour());
+                    if (sump || gasOnly) {
+                        // (nothing lets the air out from over the liquid, and gas put in as a flow would be hot by its
+                        // compression: the air that fits over the liquid at 1 atm, and all of it at the ambient)
+                        if (!ph.vapour()) v.mAir *= Math.max(0, 1 - kg / SpeciesRegistry.get().byId(ph.id()).rhoL / vesselM3);
+                        v.energy = v.energyAt(ambientK);
+                        v.update();
+                    }
+                }
             }
         }
         FluidNode o = new FluidNode(OUTLET_VOLUME, flangeY, 0.1, false);
@@ -134,8 +164,12 @@ public final class DeviceOutlet {
         vessel = v;
         outlet = o;
         // (a centrifugal pump in the core's solve: the old push's rate free, none at its head over the vessel's 1 atm)
-        pump = new FluidDevice.Link(v, 0, o, 0.5, PORT_K).pump(freeKgPerS, Math.max(0, headPa - Water.P_ATM));
-        if (open) {
+        if (!gasOnly) pump = new FluidDevice.Link(v, 0, o, 0.5, PORT_K).pump(freeKgPerS, Math.max(0, headPa - Water.P_ATM));
+        if (sump) {
+            // (the pump alone)
+        } else if (gasOnly) {
+            gasLine = new FluidDevice.Link(v, 1.0, o, 0.5, PORT_K).kind(mods.eln.sim.fluid.FluidEdge.Kind.CHECK);
+        } else if (open) {
             tip = new FluidDevice.Vent(v, 1.0, VENT_K);
             tip.gasOnly = true;
             airIn = new FluidDevice.Vent(v, 1.0, VENT_K);
@@ -155,7 +189,7 @@ public final class DeviceOutlet {
     }
 
     public List<FluidDevice.Link> links() {
-        if (pump == null) return List.of();
+        if (pump == null) return gasLine == null ? List.of() : List.of(gasLine);
         return gasLine == null ? List.of(pump) : List.of(pump, gasLine);
     }
 
@@ -194,7 +228,9 @@ public final class DeviceOutlet {
         view.sync(vessel, ambientK);
         for (var e : made.entrySet()) {
             int id = e.getKey();
-            EaUnits.add(vessel, id, e.getValue() * FluidSpecies.kgPerMb(id, false), ambientK, false, live);
+            // (a gas goes in as gas: as a liquid it would come in cold by its heat of evaporation)
+            boolean gas = id != SpeciesRegistry.WATER && SpeciesRegistry.get().mixture(id, true) == null && SpeciesRegistry.get().byId(id).gas();
+            EaUnits.add(vessel, id, e.getValue() * FluidSpecies.kgPerMb(id, gas), ambientK, gas, live);
         }
         made.clear();
         for (int i = 0; i < madeKg.size(); i++) {
@@ -206,7 +242,7 @@ public final class DeviceOutlet {
         madeKgMb = 0;
         boolean piped = piped();
         // (unpiped, the flange is shut: the pump stands and the view gives the liquid to the block there instead)
-        pump.speed = piped ? 1 : 0;
+        if (pump != null) pump.speed = !piped ? 0 : sump ? mods.eln.sim.fluid.Vessels.sumpSpeed(vessel) : 1;
         if (gasLine != null) gasLine.open = piped ? 1 : 0;
         if (tip != null) {
             double dp = vessel.P() - Water.P_ATM;
@@ -223,7 +259,7 @@ public final class DeviceOutlet {
 
     /** Unpiped: push up to max mB of the vessel's liquid into the block on face (FluidExport). */
     public int export(ServerLevel level, BlockPos pos, Direction face, int max) {
-        if (vessel == null || piped()) return 0;
+        if (vessel == null || sump || gasOnly || piped()) return 0;
         int n = FluidExport.push(view, level, pos, face, max);
         exported += n;
         return n;
@@ -243,8 +279,14 @@ public final class DeviceOutlet {
         if (vessel == null) return false;
         double waiting = madeKgMb;
         for (double d : made.values()) waiting += d;
-        if (liquidMb() + waiting + mB > capacityMb()) return false;
+        if (!gasOnly && liquidMb() + waiting + mB > capacityMb()) return false;
         return vessel.P() < headPa && (outlet == null || FluidWorld.nodeFor(outlet).P() < headPa);
+    }
+
+    /** What the vessel holds of fluid's species, liquid and gas (mB of fluid, by mass). */
+    public double holdsMb(Fluid fluid) {
+        var ph = FluidSpecies.of(fluid);
+        return vessel == null || ph == null ? 0 : vessel.mass(ph.id()) / FluidSpecies.kgPerMb(ph.id(), ph.vapour());
     }
 
     /** Put mB of fluid straight into the vessel at ambientK (tests; crude live if this outlet's is). */

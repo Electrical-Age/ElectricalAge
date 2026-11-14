@@ -33,6 +33,7 @@ public final class RubberCases {
         cases.add(new DesulfuriserCase());
         for (String v : DesulfuriserVesselCase.VARIANTS) cases.add(new DesulfuriserVesselCase(v));
         cases.add(new SteamCrackerCase());
+        cases.add(new SteamCrackerLegacyCase());
         cases.add(new ButadienePipeCase());
         cases.add(new PolymeriserCase(false));
         cases.add(new PolymeriserCase(true));
@@ -583,9 +584,9 @@ public final class RubberCases {
     }
 
     /**
-     * The Steam Cracker (the oil route), on 400 V with 1000 mB of gasoline and 4000 mB of steam in its tanks: it cracks 10 mB/s
-     * of gasoline until the steam (12.5 mB a mB) runs out at 320 mB, into 40 % butadiene and 30 % natural gas, held in its
-     * OUT tanks (no pipes), and then says it has no steam.
+     * The Steam Cracker (the oil route), on 400 V with 1000 mB of gasoline and 4000 mB of steam in its vessels: it cracks
+     * 10 mB/s of gasoline, 12.5 mB of steam a mB, until its sealed steam vessel is down to 1 atm (it has no vacuum pump),
+     * into 40 % butadiene and 30 % natural gas, held in its sealed OUT vessels (no pipes), and then says it has no steam.
      */
     static final class SteamCrackerCase implements TestCase {
         mods.eln.transparentnode.steamcracker.SteamCrackerElement d;
@@ -607,12 +608,76 @@ public final class RubberCases {
         }
 
         public void measure(TestContext c) {
-            String st = String.format("cracked %.0f; gasoline %d, steam %d, butadiene %d, gas %d; %s", d.cracked(), d.gasolineMb(), d.steamMb(),
-                d.butadieneMb(), d.gasMb(), d.status());
-            c.check("the steam cracker cracks gasoline until its steam runs out (320 mB at 12.5 mB of steam each)", Math.abs(d.cracked() - 320) <= 1, st);
-            c.check("... the gasoline it cracked left its tank", d.gasolineMb() == 1000 - (int) Math.round(d.cracked()), st);
-            c.check("... into 40 % butadiene and 30 % natural gas, held in its OUT tanks", Math.abs(d.butadieneMb() - 128) <= 1 && Math.abs(d.gasMb() - 96) <= 1, st);
+            double cracked = d.cracked(), steamBar = d.steamIn.vessel.P() / 1e5;
+            String st = String.format("cracked %.0f; gasoline %d, steam %d at %.2f bar, butadiene %d, gas %d at %.2f bar; %s", cracked, d.gasolineMb(), d.steamMb(),
+                steamBar, d.butadieneMb(), d.gasMb(), d.gasOut.vessel.P() / 1e5, d.status());
+            c.check("the steam cracker cracks gasoline until its steam is down to 1 atm", cracked > 240 && cracked < 320 && steamBar < 1.1, st);
+            double condensed = 4000 - d.steamMb() - 12.5 * cracked;   // (expanding, a little of the steam condenses and drains)
+            c.check("... 12.5 mB of steam a mB of gasoline", condensed > -15 && condensed < 100, st + String.format("; %.0f mB of steam condensed", condensed));
+            c.check("... the gasoline it cracked left its vessel", Math.abs(d.gasolineMb() - (1000 - cracked)) <= 1, st);
+            c.check("... into 40 % butadiene and 30 % natural gas, held in its OUT vessels", Math.abs(d.butadieneMb() - 0.4 * cracked) <= 1 && Math.abs(d.gasMb() - 0.3 * cracked) <= 1, st);
             c.check("... and then it waits for steam", d.status().equals("no steam") && !d.running(), st);
+        }
+    }
+
+    /** An old save's Steam Cracker, its four tanks holding gasoline, steam, butadiene and natural gas: each is in its
+     *  vessel, every mB, the sealed ones under what pressure that makes, and it cracks on from there. */
+    static final class SteamCrackerLegacyCase implements TestCase {
+        mods.eln.transparentnode.steamcracker.SteamCrackerElement d;
+        String legacy = "not loaded", loaded = "";
+
+        public String id() {
+            return "steam_cracker_legacy_tanks";
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        public void build(TestContext c) {
+            var l = new Wp10aCases.Layout(c, width());
+            var p = c.at(3, 1, 1);
+            d = (mods.eln.transparentnode.steamcracker.SteamCrackerElement) l.device(0 + (95 << 6), 3, 1);
+            c.after(2, () -> {
+                try {
+                    var r = mods.eln.gametest.Reload.node(c.level(), p, t -> {
+                        var el = OilCases.FuelBySpecies.holding(t, "gasolineInVesselW");
+                        for (String v : new String[]{"gasolineInVessel", "steamInVessel", "butadieneOutVessel", "gasOutVessel"})
+                            for (String k : new String[]{"W", "A", "U", "S", "Fv"}) el.remove(v + k);
+                        el.remove("steamCharge");
+                        Object[][] old = {{"gasolineTank", mods.eln.oil.Oil.Cut.GASOLINE.source.get(), 500}, {"steamTank", mods.eln.oil.Oil.STEAM.get(), 3000},
+                            {"butadieneTank", mods.eln.oil.Butadiene.SOURCE.get(), 400}, {"gasTank", mods.eln.oil.Oil.Cut.NATURALGAS.source.get(), 600}};
+                        for (Object[] o : old) {
+                            var tank = new mods.eln.fluid.ElementFluidHandler(4000);
+                            tank.fill(new net.neoforged.neoforge.fluids.FluidStack((net.minecraft.world.level.material.Fluid) o[1], (Integer) o[2]), true);
+                            tank.writeToNBT(el, (String) o[0]);
+                        }
+                        el.putDouble("steamCarry", 3);
+                        return t;
+                    });
+                    d = (mods.eln.transparentnode.steamcracker.SteamCrackerElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                    legacy = "";
+                } catch (ReflectiveOperationException e) {
+                    legacy = e.toString();
+                }
+            });
+            c.after(6, () -> {
+                if (!legacy.isEmpty()) return;
+                loaded = String.format("gasoline %d, steam %d at %.2f bar %.0f K, butadiene %d at %.2f bar, gas %d at %.2f bar", d.gasolineMb(), d.steamMb(),
+                    d.steamIn.vessel.P() / 1e5, d.steamIn.vessel.T(), d.butadieneMb(), d.butadieneOut.vessel.P() / 1e5, d.gasMb(), d.gasOut.vessel.P() / 1e5);
+                c.check("an old save's steam cracker has its four tanks in its vessels, every mB",
+                    Math.abs(d.gasolineMb() - 500) <= 1 && Math.abs(d.steamMb() - 3000) <= 5 && Math.abs(d.butadieneMb() - 400) <= 1 && Math.abs(d.gasMb() - 600) <= 1, loaded);
+                c.check("... the sealed ones under no more than the cracker's own head", d.steamIn.vessel.P() < 6.5e5 && d.butadieneOut.vessel.P() < 6e5 && d.gasOut.vessel.P() < 6e5, loaded);
+                l.feed(p, d.front.left(), 12 + (32 << 6), mods.eln.Eln.HVU);
+            });
+        }
+
+        public void measure(TestContext c) {
+            c.check("the old save loaded", legacy.isEmpty(), legacy);
+            if (!legacy.isEmpty()) return;
+            String st = String.format("cracked %.0f; gasoline %d, steam %d, butadiene %d, gas %d; %s; loaded: %s", d.cracked(), d.gasolineMb(), d.steamMb(),
+                d.butadieneMb(), d.gasMb(), d.status(), loaded);
+            c.check("... and it cracks on from there", d.cracked() > 50 && Math.abs(d.butadieneMb() - 400 - 0.4 * d.cracked()) <= 1, st);
         }
     }
 
