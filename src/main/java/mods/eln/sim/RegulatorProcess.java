@@ -18,6 +18,11 @@ public abstract class RegulatorProcess implements IProcess, INBTTReady {
         type = RegulatorType.Manual;
     }
 
+    /** Is no regulator in charge (the command is the owner's)? */
+    public boolean isManual() {
+        return type == RegulatorType.Manual;
+    }
+
     public void setNone() {
         type = RegulatorType.None;
     }

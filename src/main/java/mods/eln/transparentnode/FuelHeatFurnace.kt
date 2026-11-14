@@ -161,6 +161,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         /** The burner's thermal mass per W of its rating (J/K/W) and how far it runs over the furnace at its rating (K). */
         const val BURNER_C_PER_W = 0.3
         const val BURNER_DT = 100.0
+        /** A burner still giving this share of its rating is hot: its fire catches at once (Fire.hot). */
+        const val HOT_SHARE = 0.01
         /** The fuel's heat capacity (J/(kg K)), for its share of the burner's inertia. */
         const val FUEL_CP = 2000.0
         /** Drowned, the hot burner flashes this many seconds of its fire's heat of the water to steam out of its stack. */
@@ -468,6 +470,9 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     /** Its burner's heat power now (W), before the flue takes its share; 0 when burnt out (as Jade shows). */
     fun heatPower() = if (isBurnt()) 0.0 else actualHeatPower
 
+    /** The burner's lag at the last step (s), 0 with no burner: what the thermostat looks ahead by. */
+    private var lead = 0.0
+
     private val controlProcess = object : RegulatorProcess("controller") {
         override fun process(time: Double) {
             val nominalPower = if (mainSwitch)
@@ -479,12 +484,17 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
                 externalControlled -> {
                     setCmd(controlLoad.u / Eln.SVU)
                 }
-                else -> {
+                // (by hand; a thermostat's command is its own: an on/off one keeps its last between its two thresholds,
+                // where the hand setting used to take over)
+                isManual -> {
                     setCmd(manualControl)
                 }
             }
             super.process(time)
 
+            // (a burner still giving heat is hot enough to catch at once: a thermostat's flame cycles without the
+            // lighting time, which held it under its set point)
+            fire.hot = delivered > HOT_SHARE * nominalPower
             // (water at the burner: no fuel, it won't light, Baughn 2026-11-11)
             fire.step(heaterControlValue, nominalPower > 0 && (atBurner >= 0 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER || bank > 0), time)
             // (each kg gives heatFurnaceFuelFactor times its heating value: Baughn 2026-10-26, with turbines by the
@@ -497,6 +507,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             flameJ += burnt
             // (the burner's mass between the flame and the furnace: the heat it gives follows the flame with tau)
             val tau = burnerTau(nominalPower)
+            lead = if (tau.isFinite() && tau > 0) tau else 0.0
             delivered += (flamePower - delivered) * (if (tau <= 0) 1.0 else Math.min(1.0, time / tau))
             if (delivered < 1e-3) delivered = 0.0
             heatGivenJ += delivered * time
@@ -508,7 +519,13 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             thermalLoad.PcTemp += mods.eln.fluid.Flue.HEAT_SHARE * actualHeatPower   // (the rest leaves in the smoke: Flue)
         }
 
-        override fun getHit() = thermalLoad.Tc
+        /**
+         * What the thermostat goes by: the furnace's temperature plus what the heat still in the burner will add (its
+         * rate of change times the burner's lag, which is the temperature it would have were the flame's heat given at
+         * once). It cuts the flame that early, so the furnace settles on its set point instead of overshooting it by the
+         * burner's stored heat (set to 700 it peaked over 900 and burnt out); the furnace reacts as before. Baughn 2026-11-14.
+         */
+        override fun getHit() = thermalLoad.Tc + lead * thermalLoad.Pc / thermalLoad.C
         override fun setCmd(cmd: Double) {
             heaterControlValue = Math.max(0.0, cmd)
         }
@@ -779,7 +796,9 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val regulatorStack = inventory_.getItem(FuelHeatFurnaceContainer.RegulatorSlot)
         if (!regulatorStack.isEmpty && !externalControlled) {
             val regulator = Utils.getItemObject(regulatorStack) as IRegulatorDescriptor
+            val held = heaterControlValue   // (an on/off regulator starts off: a loaded furnace keeps what it was at)
             regulator.applyTo(controlProcess, 500.0, 20.0, 0.2, 0.1)
+            heaterControlValue = held
         } else {
             controlProcess.setManual()
         }

@@ -35,6 +35,22 @@ public class FireTest {
     }
 
     @Test
+    void aHotBurnerCatchesAtOnce() {
+        Fire f = new Fire(Fire.OIL);
+        f.instant = true;
+        f.level = 0.5;
+        f.step(0.0, true, DT);
+        assertEquals(0.0, f.level, 0.0, "out");
+        f.hot = true;
+        run(f, 1.0, true, Fire.HOT_KINDLE + DT);
+        assertTrue(f.level > 0, "a hot burner is lit after a quarter second");
+        f.step(0.0, true, DT);
+        f.hot = false;
+        run(f, 1.0, true, Fire.OIL.kindle - 1);
+        assertTrue(f.lighting() && f.level == 0, "a cold one is still being lit");
+    }
+
+    @Test
     void noFuelNoFireAndOilIsQuick() {
         Fire f = new Fire(Fire.COAL);
         f.level = 0.8;

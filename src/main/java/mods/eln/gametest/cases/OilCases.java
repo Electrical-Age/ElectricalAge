@@ -1035,11 +1035,14 @@ public final class OilCases {
      * <li>inertia: a small burner lit at full: its flame is at full at once, the heat it gives follows through its burner's
      * mass, 63 % in ~30 s (Baughn 2026-11-11), and it keeps giving heat for a while after the flame goes out;</li>
      * <li>buckets: two buckets of diesel go in, whole, through its capability (AdventurAgent 2026-11-11: the second
-     * didn't fit); one of diesel and one of water too.</li>
+     * didn't fit); one of diesel and one of water too;</li>
+     * <li>thermostat: four big-burner furnaces with nothing taking their heat, an on/off and an analogue regulator set to
+     * 600 and to 700 degrees: none goes over its setting, each holds it (Baughn 2026-11-14: the thermostat allows for
+     * the heat still in the burner; they peaked at 830-930 and the two at 700 burnt out).</li>
      * </ul>
      */
     static final class FurnacePressure implements TestCase {
-        static final String[] VARIANTS = {"forced_air", "relief", "burst", "gas_first", "gas_fire", "inertia", "buckets"};
+        static final String[] VARIANTS = {"forced_air", "relief", "burst", "gas_first", "gas_fire", "inertia", "buckets", "thermostat"};
         final String variant;
         mods.eln.transparentnode.FuelHeatFurnaceElement a, b;
         mods.eln.sim.fluid.FluidDevice fx, watch;
@@ -1047,6 +1050,24 @@ public final class OilCases {
         double heatA0, heatB0, heatA1, heatB1, over, gaugeAt, maxGauge, gas0, main0, afterOff = -1;
         int tick, litAt = -1, at63 = -1;
         mods.eln.sim.IProcess clock;
+        /** The thermostat variant's furnaces: regulator (sub-id) and set point each, the hottest each got and its sum over the third minute. */
+        static final int[][] THERMOSTATS = {{0, 600}, {8, 600}, {0, 700}, {8, 700}};
+        final mods.eln.transparentnode.FuelHeatFurnaceElement[] th = new mods.eln.transparentnode.FuelHeatFurnaceElement[THERMOSTATS.length];
+        final double[] thMax = new double[THERMOSTATS.length], thSum = new double[THERMOSTATS.length];
+
+        /** A lit big-burner furnace with a regulator item (sub-id), set to so many degrees over the ambient, nothing taking its heat. */
+        static mods.eln.transparentnode.FuelHeatFurnaceElement thermostat(TestContext ctx, int x, int regulator, float set) {
+            var f = FuelBySpecies.lit(ctx, x);
+            f.getInventory().setItem(mods.eln.transparentnode.FuelHeatFurnaceContainer.Companion.getRegulatorSlot(),
+                mods.eln.Eln.sharedItem.getDescriptor(regulator + (3 << 6)).newItemStack());
+            f.inventoryChange(f.getInventory());
+            f.networkUnserialize(ctx.stream(o -> {
+                o.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getSetTemperatureEvent());
+                o.writeFloat(set);
+            }));
+            f.putFuel(Oil.Cut.DIESEL.source.get(), 1800);
+            return f;
+        }
 
         FurnacePressure(String variant) {
             this.variant = variant;
@@ -1057,11 +1078,11 @@ public final class OilCases {
         }
 
         public int width() {
-            return 7;
+            return variant.equals("thermostat") ? 9 : 7;
         }
 
         public int ticks() {
-            return variant.equals("inertia") ? 1300 : 300;
+            return variant.equals("inertia") ? 1300 : variant.equals("thermostat") ? 3600 : 300;
         }
 
         static int ng() {
@@ -1160,6 +1181,17 @@ public final class OilCases {
                         if (tick == 1200) afterOff = a.heatPower();
                     });
                 }
+                case "thermostat" -> {
+                    for (int i = 0; i < th.length; i++) th[i] = thermostat(ctx, 1 + 2 * i, THERMOSTATS[i][0], THERMOSTATS[i][1]);
+                    mods.eln.Eln.simulator.addSlowProcess(clock = dt -> {
+                        tick++;
+                        for (int i = 0; i < th.length; i++) {
+                            double t = th[i].thermalLoadList.get(0).Tc;
+                            thMax[i] = Math.max(thMax[i], t);
+                            if (tick > 2400) thSum[i] += t;
+                        }
+                    });
+                }
                 case "buckets" -> {
                     a = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(1, 1, 1));
                     b = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(4, 1, 1));
@@ -1222,6 +1254,17 @@ public final class OilCases {
                     String what = String.format("%.0f mB in the first; %.0f mB in the second, %.0f of it water", a.fuelMb(), b.fuelMb(), water);
                     ctx.check("fuel furnace: two buckets of diesel go in", Math.abs(a.fuelMb() - 2000) < 20, what);
                     ctx.check("fuel furnace: a bucket of water goes in over one of diesel", Math.abs(b.fuelMb() - 2000) < 20 && water > 950, what);
+                }
+                case "thermostat" -> {
+                    mods.eln.Eln.simulator.removeSlowProcess(clock);
+                    int n = Math.max(1, tick - 2400);
+                    for (int i = 0; i < th.length; i++) {
+                        int set = THERMOSTATS[i][1];
+                        String name = (THERMOSTATS[i][0] == 0 ? "an on/off" : "an analogue") + " thermostat set to " + set;
+                        String what = String.format("peak %.0f, mean %.0f over the third minute, burnt %s, %d ticks", thMax[i], thSum[i] / n, th[i].isBurnt(), tick);
+                        ctx.check("fuel furnace: " + name + " never takes it over its setting (the burner's stored heat took it 230 over)", !th[i].isBurnt() && thMax[i] < set + 10, what);
+                        ctx.check("fuel furnace: " + name + " holds it there", thSum[i] / n > set - 30 && thSum[i] / n < set + 5, what);
+                    }
                 }
                 case "inertia" -> {
                     mods.eln.Eln.simulator.removeSlowProcess(clock);

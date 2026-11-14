@@ -24,6 +24,10 @@ public final class Fire {
     final Kind kind;
     /** No lag once lit: the flame follows the setting at once (the fuel heat furnace's inertia is its burner's mass). */
     public boolean instant;
+    /** Lighting time of a fire still hot from its last flame (seconds). */
+    public static final double HOT_KINDLE = 0.25;
+    /** Still hot from its last flame (its owner says so before a step): lit again, it catches in HOT_KINDLE seconds. */
+    public boolean hot;
     /** The real burn level (0 = out .. 1). */
     public double level;
     double lighting;
@@ -43,7 +47,7 @@ public final class Fire {
         if (level <= 0) {
             if (setting >= min && setting > 0) {
                 lighting += time;
-                if (lighting >= kind.kindle) {
+                if (lighting >= (hot ? Math.min(HOT_KINDLE, kind.kindle) : kind.kindle)) {
                     level = Math.max(min, 1e-3);
                     lighting = 0;
                 }

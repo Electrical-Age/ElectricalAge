@@ -172,6 +172,15 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   100 K: tau = 30 s with an empty tank, ~35 s for a small burner on a full one. Fuel is drawn and coking counted by
   the flame; heat given, smoke and Jade's power by the burner. Water at the burner quenches it. GameTest
   `fuel_furnace_inertia`.
+- Fuel heat furnace thermostat allows for the heat still in its burner (Baughn 2026-11-14): a regulator in its slot
+  cut the flame when the furnace reached its setting, and the burner's stored heat then took an unloaded one 230
+  degrees further (set to 700 it burnt out). The regulator now goes by the furnace's temperature plus its rate of
+  change times the burner's lag, which is the temperature it would have were the flame's heat given at once: the
+  furnace comes up to its setting with the burner's lag (95 % in ~1.5 min) and stays under it, and reacts to a load
+  as before. With it: a burner still giving 1 % of its rating relights in 0.25 s instead of `oilLightSeconds`
+  (`Fire.hot`; the lighting time held a cycling thermostat 40-110 degrees low), and an on/off regulator keeps its
+  last command between its thresholds (1.12 handed the furnace to the manual setting there) and through a save.
+  GameTest `fuel_furnace_thermostat`, `FireTest.aHotBurnerCatchesAtOnce`.
 - Fuel burners are 2, 5 and 10 kW (were 5, 10 and 25: sized for natural draft, Baughn 2026-11-11, so forced air means
   something) and made of alloy plates instead of stone combustion chambers.
 - Natural gas (and syngas) at real heating values (Baughn 2026-11-11: "we'll make the gas numbers real"): 1.12
