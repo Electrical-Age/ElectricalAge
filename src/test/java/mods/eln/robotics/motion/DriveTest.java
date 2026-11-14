@@ -68,7 +68,8 @@ class DriveTest {
         assertTrue(lift.joules(paid, force) <= got * (1 + 1e-9) + 1e-12, "paid for: " + lift.joules(paid, force) + " > " + got);
         if (force * dx <= 0) assertEquals(dx, paid, "lowering (or holding) costs nothing");
         Segment n = lift.afterPaying(s, at, force, got, need * sustainShare);
-        if (share >= 1 || need == 0) {
+        if (share >= 1) assertEquals(dx, paid, "paid in full");
+        if (paid == dx) {   // (also a cost under the buffer's rounding: a settling step of 1e-17 m)
             assertSame(s, n, "paid in full: no new segment");
             return;
         }
