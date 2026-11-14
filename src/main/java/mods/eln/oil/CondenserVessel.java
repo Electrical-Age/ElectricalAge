@@ -46,6 +46,19 @@ public final class CondenserVessel {
     public double makeupGate = 1, floatOpen;
     /** The pump's speed (0..1.2 of its rating). */
     public double speed;
+    /**
+     * The condensate pump's level control (Baughn 2026-11-14, from a player's plant: two condensers on one condensate
+     * line, one pump fed the boilers on makeup water while the other delivered nothing and its hotwell flooded its
+     * turbine). At or under the makeup's shut level the pump has LOW_HEAD of its shut-off head and LOW_FLOW of its
+     * flow; both rise with the water to the whole curve at LEVEL_FULL of the vessel. So against boilers whose feed
+     * floats throttle, a low hotwell's pump shuts off first and the fuller one delivers; a low hotwell still fills
+     * cold boilers and makes up losses into a boiler up to LOW_HEAD of the shut-off. While the line is under that
+     * head a hotwell at LEVEL_FULL passes more than its turbine's condensate at full power, so it can't fill further.
+     */
+    public static final double LEVEL_FULL = 0.40, LOW_HEAD = 1.6 / CondensatePump.SHUTOFF_OVER_NOMINAL, LOW_FLOW = 0.3;
+    /** The level control's share of the curve now (0 at the makeup's shut level and under, 1 from LEVEL_FULL), and
+     *  the shut-off head it leaves the pump (Pa). */
+    public double levelShare, headPa;
 
     public CondenserVessel(NbtThermalLoad shell, double volume, double nominalHeat, CondensatePump curve) {
         this.shell = shell;
@@ -127,7 +140,10 @@ public final class CondenserVessel {
         if (pump != null) {
             backPa = backPressure();
             speed = Math.max(0, Math.min(1.2, pumpOpen));
-            pump.speed = speed;
+            levelShare = levelShare(floodShare());
+            headPa = curve.shutoffPa * headLevel(levelShare);
+            pump.h0 = headPa;
+            pump.speed = speed * flowLevel(levelShare);
         }
     }
 
@@ -147,9 +163,24 @@ public final class CondenserVessel {
         return pb - pa - Water.RHO_L * mods.eln.sim.fluid.FluidNetwork.G * (a.z + pump.drawA * a.height - b.z - pump.drawB * b.height);
     }
 
-    /** The pump's flow now against its back-pressure, at its speed, as a share of its rated (free) flow; 0: shut off. */
+    /** The level control's share of the curve for a vessel this full of water (0..1). */
+    public static double levelShare(double flood) {
+        return Math.max(0, Math.min(1, (flood - MAKEUP_SHUT) / (LEVEL_FULL - MAKEUP_SHUT)));
+    }
+
+    /** The share of the pump's shut-off head, and of its flow, the level control leaves it. */
+    public static double headLevel(double levelShare) {
+        return LOW_HEAD + (1 - LOW_HEAD) * levelShare;
+    }
+
+    public static double flowLevel(double levelShare) {
+        return LOW_FLOW + (1 - LOW_FLOW) * levelShare;
+    }
+
+    /** The pump's flow now against its back-pressure, at its speed and its hotwell's level, as a share of its rated
+     *  (free) flow; 0: shut off. */
     public double flowShare() {
-        return speed * curve.share(backPa);
+        return headPa <= 0 ? 0 : speed * flowLevel(levelShare) * Math.sqrt(1 - Math.max(0, Math.min(1, backPa / headPa)));
     }
 
     /**
@@ -160,6 +191,7 @@ public final class CondenserVessel {
         String against = String.format(mods.eln.i18n.I18N.tr("against %.1f bar"), outletPa / 1e5);
         if (curve.share(backPa) < 0.05) return against + mods.eln.i18n.I18N.tr(": shut off, needs a pipe pump");
         if (speed < 0.01) return against + mods.eln.i18n.I18N.tr(": not turning");
+        if (flowShare() < 0.05 * speed) return against + mods.eln.i18n.I18N.tr(": holding back, its hotwell is low");
         return against + String.format(mods.eln.i18n.I18N.tr(": %.0f%% of its rated flow"), flowShare() * 100);
     }
 

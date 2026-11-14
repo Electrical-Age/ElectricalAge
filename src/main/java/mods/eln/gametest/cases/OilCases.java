@@ -2186,7 +2186,7 @@ public final class OilCases {
      * The condensate pump's curve (Baughn 2026-11-03: a turbine at its rated pressure works on its own, an overclocked
      * one needs a pipe pump): a loaded 50V turbine on steam at boilerPa into a Small Steam Condenser whose front feeds a
      * boiler held at boilerPa (a fixed node, half water). At the rating (10 bar) the pump returns what the turbine
-     * exhausts and the level holds, and so at 14 bar (a governed 10 bar turbine's boiler, AdventurAgent on live: the
+     * exhausts and the level holds (in the band of its level control), and so at 14 bar (a governed 10 bar turbine's boiler, AdventurAgent on live: the
      * first cut's 13 bar shut-off flooded it); at 21 bar (past its 18 bar shut-off) it returns nothing and the vessel
      * fills; with a 200V Inline Pump between them at 21 bar it keeps up again.
      */
@@ -2264,8 +2264,8 @@ public final class OilCases {
                 if (t.inlet == null || c.vessel == null || inlinePump && pump.inlet == null) return;
                 if (!primed) {
                     primed = true;
-                    // (20 % water: the pump's port draws liquid; under the float valve's shut level)
-                    mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.2 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 320, false);
+                    // (32 % water: in the band the pump's level control works in, about where it settles at full power)
+                    mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.32 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 320, false);
                     if (inlinePump) for (var n : new mods.eln.sim.fluid.FluidNode[]{pump.inlet, pump.outlet}) {
                         var m = mods.eln.fluid.FluidWorld.nodeFor(n);
                         m.fill(0.95 * m.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 300);
@@ -2297,7 +2297,7 @@ public final class OilCases {
             if (boilerPa <= mods.eln.oil.CondensatePump.RATED_OVER_NOMINAL * mods.eln.oil.SteamGeneratorDescriptor.NOMINAL_PA || inlinePump) {
                 ctx.check(id + ": its condensate goes back to the boiler (over 90 %)", pumped > 0.9 * steam,
                     String.format("%.1f of %.1f g", pumped * 1000, steam * 1000));
-                ctx.check(id + ": the level holds (no rise, under the float valve's shut level)", fill <= fill0 + 0.01 && fill < mods.eln.oil.CondenserVessel.MAKEUP_SHUT,
+                ctx.check(id + ": the level holds (no rise, within the pump's level band)", fill <= fill0 + 0.01 && fill < mods.eln.oil.CondenserVessel.LEVEL_FULL,
                     String.format("%.1f%% -> %.1f%%", fill0 * 100, fill * 100));
                 ctx.check(id + ": Jade: the pump's back-pressure and its share of rated flow", jade.startsWith("against") && jade.endsWith("of its rated flow"), jade);
             } else {
@@ -2408,7 +2408,7 @@ public final class OilCases {
                 flips + " of " + steps + String.format(", %.2f..%.2f bar", lo / 1e5, hi / 1e5));
             ctx.check("closed plant: the condensate goes back to the boiler (90 %+)", steam > 0.02 && pumped > 0.9 * steam,
                 String.format("%.1f of %.1f g", pumped * 1000, steam * 1000));
-            ctx.check("closed plant: the condenser doesn't flood", floodHi < mods.eln.oil.CondenserVessel.MAKEUP_SHUT, String.format("%.0f%%", floodHi * 100));
+            ctx.check("closed plant: the condenser doesn't flood", floodHi < mods.eln.oil.CondenserVessel.LEVEL_FULL, String.format("%.0f%%", floodHi * 100));
             ctx.check("closed plant: the boiler neither boils dry nor overfills", fillLo > 0.3 && fillHi < 1.02, String.format("%.0f..%.0f%%", fillLo * 100, fillHi * 100));
         }
     }

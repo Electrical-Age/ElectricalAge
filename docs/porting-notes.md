@@ -59,6 +59,16 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   condensate line then stands at the shut-off head, and 20 bar was over what its iron pipe works to. Small/Steam
   Condenser: shut-off 18 bar, ~4.9 / 19.4 g/s at 10 bar, 3.0 / 11.9 at 15 (7.3 / 29 free), short of full-power
   condensate above ~16.7 bar. Plant Steam Condenser: shut-off 36 bar, 97 g/s at 20 bar, 59 at 30 (145 free).
+  Level control since 2026-11-14 (Baughn, from a player's plant on Incognito: two turbines' condensers on one
+  condensate line to boilers at their full mark; one pump fed the boilers on makeup water passing through its
+  hotwell while the other delivered nothing, and that one's hotwell filled with its turbine's condensate until it
+  flooded the turbine). The pump now follows its hotwell's level: at or under the makeup's shut level (25 %) it has
+  1.6 x the rating as shut-off head (16 bar on a 10 bar turbine) and 30 % of its flow, and both rise with the water
+  to the whole curve at 40 %. A low hotwell's pump shuts off first against throttling feed floats and the fuller
+  one delivers; under 16 bar a hotwell at 40 % passes more than its turbine's condensate, so it can't fill to the
+  flood level (50 %) while its pump turns. A running condenser's level now sits between 25 and 40 % (it sat under
+  25 %). Makeup alone still fills cold boilers and replaces losses, into boilers up to 1.6 x the rating. Jade's
+  "Pump outlet" says "holding back, its hotwell is low" when that is why nothing flows. `ParallelCondensateTest`.
   Jade on both condensers, "Pump outlet": the pressure it works against and its flow there as a share of its rated
   (free) flow at its speed, or "shut off, needs a pipe pump" (Baughn 2026-11-03).
 - Iron pipe works to 20 bar and bursts at 25 (Baughn 2026-11-14; it was 10 and 40). A sound 10 bar plant's
