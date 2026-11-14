@@ -129,7 +129,9 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took
   250 mB/s of anything and backed up). Liquids still burn at up to 250 mB/s, the bottom layer whole; water boils away.
   A float vent on its tip relieves a step's surge (gas only) and a vacuum breaker lets air in as liquid burns down.
-  `oil_flare_live_gas`, `oil_flare_legacy_tank`.
+  What goes up it without burning shows as what it is (`anim.Plume`): water as steam, a furnace's flue gas as smoke
+  (Baughn 2026-11-13; it showed nothing, having no fluid to name it by).
+  `oil_flare_live_gas`, `oil_flare_flue`, `oil_flare_legacy_tank`.
 - Fuel heat furnace on a fluid node (Baughn 2026-11-10: "mixed on the machines"; real numbers): its 2-bucket tank is a
   fluid node (flange 4 px up on its front; buckets put any species' liquid in). Its breather on top is two vents: gas
   out (gas only, its float shut once the liquid nears the top) and air in (a vacuum breaker), each opening only past

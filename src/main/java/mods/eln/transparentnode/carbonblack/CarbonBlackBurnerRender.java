@@ -34,10 +34,7 @@ public class CarbonBlackBurnerRender extends TransparentNodeElementRender {
         var back = front.back().toEnumFacing();
         double off = (CarbonBlackBurnerDescriptor.STACK_X - 8) / 16.0;
         double[] xz = {0.5 + back.getStepX() * off, 0.5 + back.getStepZ() * off};
-        for (int i = 0; i < n; i++) {
-            double jx = (Math.random() - 0.5) * 0.1, jz = (Math.random() - 0.5) * 0.1;
-            level.addParticle(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE, p.getX() + xz[0] + jx, p.getY() + 1.02, p.getZ() + xz[1] + jz, 0, 0.07, 0);
-        }
+        for (int i = 0; i < n; i++) mods.eln.anim.Plume.SOOT.puff(level, p.getX() + xz[0], p.getY() + 1.02, p.getZ() + xz[1], 0.05);
     }
 
     @Override

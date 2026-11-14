@@ -12,7 +12,6 @@ import java.io.IOException;
 /** The compact turbine: its rotor turns while it makes power; steam puffs from its stack while the safety valve lets go. */
 public class CompactTurbineRender extends TransparentNodeElementRender {
     static final float DEG_PER_S = 360, PUFFS_PER_S = 8;
-    static final java.util.Random RND = new java.util.Random();
     final CompactTurbineDescriptor desc;
     final mods.eln.anim.Spin rotor = new mods.eln.anim.Spin(DEG_PER_S, 1.5).randomPhase();
     /** The safety valve's letting go (0..1), eased. */
@@ -54,10 +53,7 @@ public class CompactTurbineRender extends TransparentNodeElementRender {
         int n = puffs.step(deltaT, vent.get() < 0.01 ? 0 : PUFFS_PER_S * Math.min(1, vent.get()));
         if (level == null || v == null || n == 0) return;
         var at = mods.eln.anim.Emitter.vent(tileEntity.getBlockPos(), front, v[0], v[1], v[2]);   // (the stack's outlet in the world)
-        for (int i = 0; i < n; i++) {
-            double jx = (RND.nextDouble() - 0.5) * 0.06, jz = (RND.nextDouble() - 0.5) * 0.06;
-            level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, at.x + jx, at.y, at.z + jz, jx * 0.2, 0.05 + RND.nextDouble() * 0.03, jz * 0.2);
-        }
+        for (int i = 0; i < n; i++) mods.eln.anim.Plume.STEAM.puff(level, at.x, at.y, at.z, 0.03);
     }
 
     @Override

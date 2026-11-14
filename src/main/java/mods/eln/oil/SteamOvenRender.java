@@ -42,12 +42,10 @@ public class SteamOvenRender extends TransparentNodeElementRender {
         if (level == null || n == 0) return;
         double th = mods.eln.anim.Emitter.turn(front), c = Math.cos(th), s = Math.sin(th);
         var at = mods.eln.anim.Emitter.vent(tileEntity.getBlockPos(), front, v[0], v[1], v[2]);
-        double x = at.x, y = at.y, z = at.z;
         for (int i = 0; i < n; i++) {
-            double jx = (RND.nextDouble() - 0.5) * 0.06, jz = (RND.nextDouble() - 0.5) * 0.06;
             // out of the back face (model +x), then rising: a boiler set on top doesn't hide it (AdventurAgent)
             double out = 0.04 + RND.nextDouble() * 0.02;
-            level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, x + jz * s, y + jx, z + jz * c, c * out, 0.02 + RND.nextDouble() * 0.02, -s * out);
+            mods.eln.anim.Plume.STEAM.puff(level, at.x, at.y, at.z, 0.03, c * out, -s * out);
         }
     }
 

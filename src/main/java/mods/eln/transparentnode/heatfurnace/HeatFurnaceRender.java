@@ -71,10 +71,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
         int n = smoke.step(deltaT, smoking ? 2 + 10 * fire : 0);
         if (level == null || n == 0) return;
         var p = tileEntity.getBlockPos();
-        for (int i = 0; i < n; i++) {
-            double jx = (Math.random() - 0.5) * 0.12, jz = (Math.random() - 0.5) * 0.12;
-            level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, p.getX() + 0.5 + jx, p.getY() + 1.02, p.getZ() + 0.5 + jz, 0, 0.06, 0);
-        }
+        for (int i = 0; i < n; i++) mods.eln.anim.Plume.SMOKE.puff(level, p.getX() + 0.5, p.getY() + 1.02, p.getZ() + 0.5, 0.06);
     }
 
     @Override

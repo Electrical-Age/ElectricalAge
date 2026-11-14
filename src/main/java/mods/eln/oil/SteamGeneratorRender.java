@@ -18,7 +18,6 @@ public class SteamGeneratorRender extends TransparentNodeElementRender implement
     /** The steam it takes (per unit of nominal), eased. */
     final mods.eln.anim.Smooth steam = new mods.eln.anim.Smooth(1.5);
     final mods.eln.anim.Emitter puffs = new mods.eln.anim.Emitter();
-    static final java.util.Random RND = new java.util.Random();
     /** Puffs a second out of the vent at nominal steam: a calm stream (Baughn). */
     static final float PUFFS_PER_S = 6;
     /** The steam's loudness at nominal flow (the loops are ~-18 dBFS; EA's older loops play quieter still). */
@@ -76,10 +75,7 @@ public class SteamGeneratorRender extends TransparentNodeElementRender implement
         int n = puffs.step(deltaT, venting ? PUFFS_PER_S * (0.25 + 0.75 * Math.min(1.5, steam.get())) : 0);
         if (level == null || n == 0) return;
         var at = mods.eln.anim.Emitter.vent(tileEntity.getBlockPos(), front, v[0], v[1], v[2]);   // (the vent stack's outlet)
-        for (int i = 0; i < n; i++) {
-            double jx = (RND.nextDouble() - 0.5) * 0.06, jz = (RND.nextDouble() - 0.5) * 0.06;
-            level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, at.x + jx, at.y, at.z + jz, jx * 0.2, 0.03 + RND.nextDouble() * 0.02, jz * 0.2);
-        }
+        for (int i = 0; i < n; i++) mods.eln.anim.Plume.STEAM.puff(level, at.x, at.y, at.z, 0.03);
     }
 
     @Override

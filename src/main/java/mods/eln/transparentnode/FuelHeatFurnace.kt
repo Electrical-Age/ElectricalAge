@@ -809,6 +809,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     /** Its fire just drowned: a burst of steam up its stack. */
     var steaming = false
     private val smoke = mods.eln.anim.Emitter()
+    private val steam = mods.eln.anim.Emitter()
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
         override fun getPitch() = FuelBurnerDescriptor.pitchForType(type)
@@ -834,16 +835,13 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
         flicker = (flicker + deltaT * 11) % (20 * Math.PI).toFloat()
         // (smoke out of the stack's open flange, more of it the harder it burns)
         val n = smoke.step(deltaT.toDouble(), if (smoking) (2 + 10 * fire).toDouble() else 0.0)
+        // (its drowned fire's steam: so many a second, where it was a chance a frame)
+        val wisps = steam.step(deltaT.toDouble(), if (steaming) 25.0 else 0.0)
         val level = tileEntity.level ?: return
         val p = tileEntity.blockPos
-        repeat(n) {
-            val jx = (Math.random() - 0.5) * 0.12
-            val jz = (Math.random() - 0.5) * 0.12
-            level.addParticle(if (sooty) net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE else net.minecraft.core.particles.ParticleTypes.SMOKE,
-                p.x + 0.5 + jx, p.y + 1.02, p.z + 0.5 + jz, 0.0, 0.06, 0.0)
-        }
-        if (steaming && Math.random() < 0.6) level.addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD,
-            p.x + 0.5 + (Math.random() - 0.5) * 0.3, p.y + 1.02, p.z + 0.5 + (Math.random() - 0.5) * 0.3, 0.0, 0.12, 0.0)
+        val plume = if (sooty) mods.eln.anim.Plume.SOOT else mods.eln.anim.Plume.SMOKE
+        repeat(n) { plume.puff(level, p.x + 0.5, p.y + 1.02, p.z + 0.5, 0.06) }
+        repeat(wisps) { mods.eln.anim.Plume.STEAM.puff(level, p.x + 0.5, p.y + 1.02, p.z + 0.5, 0.06) }
     }
 
     override fun networkUnserialize(stream: DataInputStream) {

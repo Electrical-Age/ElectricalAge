@@ -24,6 +24,7 @@ referenced from CLAUDE.md).
 | `Travel` | 0..1 between two poses, eased (`smooth(tau)`) or on a damped spring (`spring(...)`, misc.PhysicalInterpolator); `rotate`/`slide` a part | levers, contacts, buttons, needles, doors |
 | `Blink` | On/off on frame time: fixed period and duty, or random spells | beacons, busy LEDs |
 | `Emitter` | Particles per second (whole ones a frame, the rest carried), and `vent(pos, front, x, y, z)`: a model point turned to world coordinates by the facing | smoke, steam puffs, sparks, souls |
+| `Plume` | What a device lets out into the air, one look per kind (Baughn 2026-11-13: the same output looks the same on every device): `STEAM` (white wisps), `SMOKE` (a clean fire's flue gas), `SOOT` (a fouled fire, carbon black), `FLAME_GAS`, `FLAME_LIGHT`, `FLAME_HEAVY`. `Plume.vented(fluid)` / `burnt(fluid)` pick the kind by the fluid's name; `puff(level, x, y, z, halfWidth[, pushX, pushZ])` draws one (the device gives the place and, with an `Emitter`, the rate); `jet()` is the particle of a jet under pressure, sent by the server (`SteamJet`) | every stack, vent and flare; a new outlet picks a kind, a new kind of output gets a kind here |
 | `Led` | A status LED part: full-bright on, dimmed off | ledpower / ledrun parts |
 | `Glow` | A part self-lit in a colour from a per-device `Ramp` of a 0..1 level | fire windows, peepholes (temperature-true colour: `misc.Incandescence`) |
 | `Fill` | A part scaled in y about its origin | gauge glasses, tank levels |
@@ -47,7 +48,7 @@ code on purpose.
 | 230V macerator | flywheel belt | `Belt` | lib |
 | Macerator, magnetizer, plate machine | rollers, drum, rolls (the 230V's backup rolls on spins of their own: a multiple of a wrapped angle jumped), items | `Spin`, `Emitter` (souls), `ItemMotion` + `Progress` (items in process) | lib |
 | Compressor | ram, items | `RcInterpolator` ram; `ItemMotion` squash | own (ram) |
-| Compact turbine, steam generator | rotor, steam puffs from the vent | `Spin`, `Smooth`, `Emitter` + `Emitter.vent` | lib |
+| Compact turbine, steam generator | rotor, steam puffs from the vent | `Spin`, `Smooth`, `Emitter` + `Emitter.vent`, `Plume.STEAM` | lib |
 | Inline pump, active dissipator, alarm beacon, anemometer, auto miner pipe, wire drawer | rotors | `Spin` | lib |
 | Wind turbine | rotor (root of the eased power), blade-pass sound, halo | `Smooth`, `Spin`, `Blink` | lib |
 | Water turbine | wheel either way, paddle sound | `Smooth` (direction), `Spin` | lib |
@@ -60,7 +61,9 @@ code on purpose.
 | Transformer, lamp supply | casing doors / window opening when a player is near | `Travel.spring` | lib |
 | Timeout | dial running down | client countdown | own |
 | Teleporter | doors (max speed), gyro, blue fades, blinking LEDs | `PhysicalInterpolator`, `RcInterpolator` | own |
-| Steam oven (plume out of its back), anvil (weld sparks), flare stack, heat furnace and fuel heat furnace (stack smoke), carbon black burner | particles | `Emitter`, `Emitter.vent`/`turn` | lib |
+| Steam oven (steam out of its back), flare stack (by what goes up it: flames, steam, a flue's smoke), heat furnace and fuel heat furnace (stack smoke, soot when fouling, steam when drowned), carbon black burner (soot) | what they let out | `Emitter`, `Emitter.vent`/`turn`, `Plume` | lib |
+| Pipe leaks, bursts' jets, relief valve outlets | a jet's particles (server): steam's cloud, a flue's smoke, a liquid's splash or colour | `SteamJet`, `Plume.jet()` for gas | lib (gas) |
+| Anvil (weld sparks) | particles | `Emitter` | lib |
 | Heat furnace, fuel heat furnace | flicker | hand-written | own |
 | Switch, VU meter, gate sources, fire detector, source, lamp supply, entity sensor, emergency lamp, redstone in/out, bus button/light/floor sensor, turret, data logger | LEDs with halos or mixed states | inline | own |
 | Boiler (gauge glass), oil separator (basin) | levels | `Fill` | lib |

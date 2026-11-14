@@ -60,16 +60,17 @@ public class FlareStackElement extends TransparentNodeElement implements FluidDe
     /** What it burnt (kg) since it was made: gas, and liquid (tests weigh it against what went in). */
     public double gasBurntKg, liquidBurntKg;
     String burning = "";
-    /** What goes up the stack without a flame (Baughn 2026-11-11: the flare shouldn't "burn" water): a plume, and no "Burning" line. */
-    static final java.util.Set<String> PLUME = java.util.Set.of("steam", "ic2steam", "water");
-
-    /** What it burns or boils off most of, as the client is told ("" for nothing), and whether that goes up as a plume. */
+    /**
+     * What it burns or lets off most of, as the client is told ("" for nothing), and whether that goes up without a
+     * flame (Baughn 2026-11-11: the flare shouldn't "burn" water; 2026-11-13: a flue's smoke goes up as smoke): a
+     * plume, and no "Burning" line.
+     */
     public String burning() {
         return burning;
     }
 
     public boolean plume() {
-        return PLUME.contains(burning);
+        return !burning.isEmpty() && !mods.eln.anim.Plume.burnt(burning).flame();
     }
 
     public FlareStackElement(TransparentNode node, TransparentNodeDescriptor d) {
@@ -182,11 +183,16 @@ public class FlareStackElement extends TransparentNodeElement implements FluidDe
         }
     }
 
-    /** The fluid name of species id in that phase (or its other phase's: gasoline vapour burns as gasoline). */
+    /**
+     * The fluid name of species id in that phase (or its other phase's: gasoline vapour burns as gasoline); a species
+     * without a fluid (flue gas) goes by its key's path.
+     */
     static String name(int id, boolean vapour) {
         var f = FluidSpecies.fluid(id, vapour);
         if (f == null) f = FluidSpecies.fluid(id, !vapour);
-        return FuelRegistry.INSTANCE.fluidName(f);
+        if (f != null) return FuelRegistry.INSTANCE.fluidName(f);
+        String key = SpeciesRegistry.get().byId(id).key;
+        return key.substring(key.indexOf(':') + 1);
     }
 
     /** The bottom liquid layer's main species (-1: none; a layer under a milligram doesn't count). */
@@ -351,8 +357,10 @@ public class FlareStackElement extends TransparentNodeElement implements FluidDe
             info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
             info.put(I18N.tr("Tank"), String.format("%.0f / %.0f mB of liquid", liquidMb(), VESSEL_MB));
         }
-        if (plume()) info.put(I18N.tr("Boiling off"), String.format(I18N.tr("%.0f mB/s of water, no flame"), burnRate));
-        else info.put(I18N.tr("Burning"), String.format("%.0f mB/s", burnRate));
+        if (!plume()) info.put(I18N.tr("Burning"), String.format("%.0f mB/s", burnRate));
+        else if (mods.eln.anim.Plume.burnt(burning) == mods.eln.anim.Plume.STEAM)
+            info.put(I18N.tr("Boiling off"), String.format(I18N.tr("%.0f mB/s of water, no flame"), burnRate));
+        else info.put(I18N.tr("Letting off"), String.format(I18N.tr("%.0f mB/s of smoke, no flame"), burnRate));
         return info;
     }
 }

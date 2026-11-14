@@ -3654,16 +3654,20 @@ public final class OilCases {
      * <ul>
      * <li>live_gas: natural gas under pressure in a tank, piped to its flange: it burns it (by mass: what left the tank and
      * pipe is what it burnt), and its vessel doesn't fill up;</li>
+     * <li>flue: a furnace's flue gas piped to it instead goes up as smoke (Baughn 2026-11-13): the client is told flue_gas,
+     * a plume without a flame, and Jade says "Letting off";</li>
      * <li>legacy_tank: an old save's 4-bucket tank of residue loads into the vessel.</li>
      * </ul>
      */
     static final class FlareNode implements TestCase {
-        static final String[] VARIANTS = {"live_gas", "legacy_tank"};
+        static final String[] VARIANTS = {"live_gas", "flue", "legacy_tank"};
         final String variant;
         mods.eln.oil.FlareStackElement flare;
         mods.eln.oil.TankElement tank;
         double ng0;
-        String legacy = "";
+        String legacy = "", told = "";
+        boolean plume;
+        java.util.Map<String, String> jade = java.util.Map.of();
 
         FlareNode(String variant) {
             this.variant = variant;
@@ -3681,13 +3685,14 @@ public final class OilCases {
             return 300;
         }
 
-        static int ng() {
-            return mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:natural_gas");
+        /** The gas in the tank: natural gas, or a flue's. */
+        int ng() {
+            return mods.eln.sim.fluid.SpeciesRegistry.get().id(variant.equals("flue") ? "eln:flue_gas" : "eln:natural_gas");
         }
 
         public void build(TestContext ctx) {
             switch (variant) {
-                case "live_gas" -> {
+                case "live_gas", "flue" -> {
                     // (as oil_on_pipes_flare_in, with natural gas at ~3 bar in the tank instead of crude)
                     tank = OilOnPipes.tank(ctx, ctx.at(1, 1, 1), mods.eln.misc.Direction.XP);
                     flare = (mods.eln.oil.FlareStackElement) ctx.placeTransparent(8 + (83 << 6), ctx.at(3, 1, 1));
@@ -3697,6 +3702,11 @@ public final class OilCases {
                     mods.eln.sim.fluid.EaUnits.add(tank.vessel, ng(), 1.4 * tank.vessel.volume, tank.vessel.T(), true);
                     tank.vessel.update();
                     ctx.after(1, () -> ng0 = ngIn(ctx));
+                    ctx.after(60, () -> {   // (while it flows)
+                        told = flare.burning();
+                        plume = flare.plume();
+                        jade = flare.getWaila();
+                    });
                 }
                 case "legacy_tank" -> {
                     flare = (mods.eln.oil.FlareStackElement) ctx.placeTransparent(8 + (83 << 6), ctx.at(1, 1, 1));
@@ -3743,6 +3753,12 @@ public final class OilCases {
                     // (by mass: only its tip's float vent lets gas out unburnt, and only over 300 Pa)
                     ctx.check("flare stack: the natural gas piped in burns", gone > 0.3 * ng0 && flare.gasBurntKg > 0.95 * gone && flare.gasBurntKg < 1.01 * gone, what);
                     ctx.check("flare stack: its vessel doesn't fill up with gas", dp < 2000, what);
+                }
+                case "flue" -> {
+                    double gone = ng0 - ngIn(ctx);
+                    ctx.check("flare stack: the flue gas piped in goes up it", gone > 0.3 * ng0, String.format("%.6f kg gone from the rig (of %.6f)", gone, ng0));
+                    ctx.check("flare stack: flue gas goes up as smoke, not a flame", plume && told.equals("flue_gas"), told);
+                    ctx.check("flare stack: Jade says it lets the smoke off", jade.containsKey("Letting off") && !jade.containsKey("Burning"), "" + jade);
                 }
                 case "legacy_tank" -> ctx.check("flare stack: an old save's tank of residue loads into its vessel", legacy.isEmpty(), legacy);
             }

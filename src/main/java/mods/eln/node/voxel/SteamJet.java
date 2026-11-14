@@ -63,6 +63,25 @@ public final class SteamJet {
         return m <= 0 ? 0 : g / m;
     }
 
+    /** How a gas jet looks (anim.Plume): smoke when most of it is a flue's, else steam's white cloud. */
+    static mods.eln.anim.Plume gasLook(FluidEdge e) {
+        if (e.fSpecies == null) return mods.eln.anim.Plume.STEAM;
+        var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+        int best = -1;
+        double most = Math.abs(e.fVapour) + Math.abs(e.fAir);
+        for (int i = 2; i < e.fSpecies.length; i++) {
+            double f = Math.abs(e.fSpecies[i]);
+            if (f > most && reg.byId(i).gas()) {
+                most = f;
+                best = i;
+            }
+        }
+        if (best < 0) return mods.eln.anim.Plume.STEAM;
+        String key = reg.byId(best).key;
+        var look = mods.eln.anim.Plume.vented(key.substring(key.indexOf(':') + 1));
+        return look == mods.eln.anim.Plume.NONE ? mods.eln.anim.Plume.STEAM : look;
+    }
+
     /** The colour (0xRRGGBB) of the main other species a liquid jet carries, or -1 if it is mostly water. */
     static int liquidColour(FluidEdge e) {
         if (e.fSpecies == null) return -1;
@@ -111,7 +130,7 @@ public final class SteamJet {
                 Vec3 p = origin.add(step.scale(len * (i + 0.5) / n));
                 if (colour >= 0)
                     level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(colour, 1.2f), p.x, p.y, p.z, 2, 0.08, 0.08, 0.08, 0.3);
-                else level.sendParticles(gas ? ParticleTypes.CLOUD : ParticleTypes.SPLASH, p.x, p.y, p.z, 1, 0.08, 0.08, 0.08,
+                else level.sendParticles(gas ? gasLook(edge).jet() : ParticleTypes.SPLASH, p.x, p.y, p.z, 1, 0.08, 0.08, 0.08,
                     gas ? 0.08 : 0.3);
             }
         }

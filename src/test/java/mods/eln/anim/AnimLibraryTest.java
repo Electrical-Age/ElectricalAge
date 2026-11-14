@@ -93,4 +93,21 @@ class AnimLibraryTest {
         p.set(0, 0.5);
         assertEquals(0, p.shown(), 1e-9, "a new piece starts from the top");
     }
+
+    /** The same output looks the same wherever it comes out: the kind is the fluid's alone. */
+    @Test
+    void plumeByWhatComesOut() {
+        assertEquals(Plume.STEAM, Plume.vented("steam"));
+        assertEquals(Plume.SMOKE, Plume.vented("flue_gas"));
+        assertEquals(Plume.NONE, Plume.vented("diesel"), "nothing to see of an unlit fuel");
+        // (at a flame: what doesn't burn goes up as it would anywhere)
+        assertEquals(Plume.STEAM, Plume.burnt("water"));
+        assertEquals(Plume.SMOKE, Plume.burnt("flue_gas"));
+        assertEquals(Plume.FLAME_GAS, Plume.burnt("naturalgas"));
+        assertEquals(Plume.FLAME_LIGHT, Plume.burnt("gasoline"));
+        assertEquals(Plume.FLAME_HEAVY, Plume.burnt("residue"));
+        assertEquals(Plume.NONE, Plume.burnt(""));
+        for (Plume p : Plume.values())
+            assertEquals(p.name().startsWith("FLAME"), p.flame(), p.name());
+    }
 }
