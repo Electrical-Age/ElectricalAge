@@ -718,8 +718,7 @@ public final class OilCases {
                         var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
                         err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
                     }
-                    if (out) ((mods.eln.fluid.ElementFluidHandler) west.getFluidHandler()).fill(
-                        new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Latex.SOURCE.get(), 2000), true);
+                    if (out) ((mods.eln.transparentnode.electricalmachine.CompressorPortsElement) west).putLatex(false, 2000);
                     else put(ctx, e, mods.eln.oil.Latex.SOURCE.get(), 6000);
                 }
                 case "cracker_gasoline_in", "cracker_steam_in", "cracker_butadiene_out", "cracker_gas_out" -> {

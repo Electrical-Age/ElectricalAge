@@ -31,6 +31,7 @@ public final class DeviceOutlet {
     static final double VENT_DEADBAND_PA = 300.0, FLOAT_SHUT = 0.97;
 
     final String outletKey;
+    private String vesselKey = "vessel", oldTankKey = "tank";
     final double vesselM3, headPa, mbPerS;
     double freeKgPerS;
     final boolean open;
@@ -80,6 +81,13 @@ public final class DeviceOutlet {
             var ph = FluidSpecies.of(only);
             return ph != null && ph.id() == id;
         });
+        return this;
+    }
+
+    /** Its save keys, for a device with more than one vessel: the vessel's, and the old fluid tank's (read()). */
+    public DeviceOutlet keys(String vesselKey, String oldTankKey) {
+        this.vesselKey = vesselKey;
+        this.oldTankKey = oldTankKey;
         return this;
     }
 
@@ -222,20 +230,20 @@ public final class DeviceOutlet {
     }
 
     public void write(CompoundTag nbt) {
-        if (vessel != null) FluidSaves.put(nbt, "vessel", vessel);
+        if (vessel != null) FluidSaves.put(nbt, vesselKey, vessel);
         if (outlet != null) {
             FluidWorld.writeBackOf(outlet);
             FluidSaves.put(nbt, outletKey, outlet);
         }
     }
 
-    /** Read a save; an old one (no vessel) has its fluid tank under "tank", which goes into the vessel. */
+    /** Read a save; an old one (no vessel) has its fluid tank under "tank" (keys()), which goes into the vessel. */
     public void read(CompoundTag nbt, int oldTankMb) {
-        loaded = FluidSaves.array(nbt, "vessel");
+        loaded = FluidSaves.array(nbt, vesselKey);
         loadedOut = FluidSaves.array(nbt, outletKey);
         if (loaded == null) {
             var old = new ElementFluidHandler(oldTankMb);
-            old.readFromNBT(nbt, "tank");
+            old.readFromNBT(nbt, oldTankKey);
             legacyTank = old.getFluid().copy();
         }
     }

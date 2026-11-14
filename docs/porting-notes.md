@@ -142,6 +142,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     stays, and with no fuel over it Jade says what blocks the burner; the right fuel on top dilutes it until the
     layer burns, and breaking the burner empties it. Gas that comes down the line leaves by its float vent.
   `carbon_burner_water_drains`, `carbon_burner_wrong_oil`, `oil_on_pipes_carbon_burner_in`.
+- 230V compressor's latex tanks on fluid nodes (2026-11-14): the IN tank is a vessel the line fills (as the carbon
+  black burner's: passive, takes what the line carries, water drains, another liquid blocks it), the OUT tank an open
+  basin with the outlet pump (200 mB/s free, shut-off at 6 bar), as the resin collector's. It presses dandelions only
+  while the basin has room for 250 mB and its line is under 6 bar. A pressing's latex leaves the IN vessel at the next
+  fluid step. `compressor_presses_latex`, `compressor_presses_dandelions`, `compressor_legacy_tanks`.
 - Flare stack on a fluid node: its 4-bucket tank is a fluid node behind its front flange (half way up; buckets put
   any species in). Its tip passes every gas over the air's pressure between steps, each species by its share: natural
   gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took

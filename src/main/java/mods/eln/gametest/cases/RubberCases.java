@@ -28,6 +28,7 @@ public final class RubberCases {
         cases.add(new TreeCase());
         for (String v : CollectorBasinCase.VARIANTS) cases.add(new CollectorBasinCase(v));
         for (String v : BurnerVesselCase.VARIANTS) cases.add(new BurnerVesselCase(v));
+        for (String v : CompressorVesselCase.VARIANTS) cases.add(new CompressorVesselCase(v));
         cases.add(new CarbonCase());
         cases.add(new DesulfuriserCase());
         cases.add(new SteamCrackerCase());
@@ -350,6 +351,105 @@ public final class RubberCases {
                     c.check("carbon burner: an old save loads", legacy.isEmpty(), legacy);
                     c.check("carbon burner: an old save's tank is in the vessel, every kg, and it burns it", d.burnt() > 60 && Math.abs(d.inlet.feedMb() + d.burnt() - 3000) < 1, st);
                     c.check("carbon burner: ... with air over it, at the air's pressure", v.liquidVolume() / v.volume < 0.9 && Math.abs(v.P() - mods.eln.sim.fluid.Water.P_ATM) < 2000, st);
+                }
+            }
+        }
+    }
+
+    /**
+     * The 230V compressor's two latex vessels on the fluid core (its tanks were numbers outside it), on 230 V:
+     * <ul>
+     * <li>presses_latex: 1000 mB of latex in its IN vessel become Raw Rubber, 250 mB each, and none is lost;</li>
+     * <li>presses_dandelions: 16 dandelions become 250 mB of latex a pressing in its OUT vessel, which keeps them with
+     *     nothing on its flange;</li>
+     * <li>legacy_tanks: an old save's IN tank (1500 mB) and full OUT tank (4000 mB) load into the vessels, every kg, with
+     *     air over them; the OUT vessel is full, so it presses no dandelions, and it presses the IN vessel's latex.</li>
+     * </ul>
+     */
+    static final class CompressorVesselCase implements TestCase {
+        static final String[] VARIANTS = {"presses_latex", "presses_dandelions", "legacy_tanks"};
+        final String variant;
+        mods.eln.transparentnode.electricalmachine.CompressorPortsElement d;
+        String legacy = "not loaded";
+
+        CompressorVesselCase(String variant) {
+            this.variant = variant;
+        }
+
+        public String id() {
+            return "compressor_" + variant;
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 600;
+        }
+
+        public void build(TestContext c) {
+            var l = new Wp10aCases.Layout(c, width());
+            var p = c.at(2, 1, 1);
+            d = (mods.eln.transparentnode.electricalmachine.CompressorPortsElement) l.device(4 + (35 << 6), 2, 1);
+            l.feed(p, d.front.left(), 8 + (32 << 6), mods.eln.Eln.MVU);   // (a 230 V cable on its side)
+            switch (variant) {
+                case "presses_latex" -> d.putLatex(true, 1000);
+                case "presses_dandelions" -> {
+                    d.getInventory().setItem(d.inSlotId, new ItemStack(Items.DANDELION, 16));
+                    d.getInventory().setChanged();
+                }
+                default -> c.after(2, () -> {
+                    try {
+                        var r = mods.eln.gametest.Reload.node(c.level(), p, t -> {
+                            var el = OilCases.FuelBySpecies.holding(t, "latexInVesselW");
+                            for (String k : new String[]{"W", "A", "U", "S", "Fv"}) {
+                                el.remove("latexInVessel" + k);
+                                el.remove("latexOutVessel" + k);
+                            }
+                            int cap = mods.eln.transparentnode.electricalmachine.CompressorPortsDescriptor.TANK_MB;
+                            var in = new mods.eln.fluid.ElementFluidHandler(cap);
+                            in.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Latex.SOURCE.get(), 1500), true);
+                            in.writeToNBT(el, "latexInTank");
+                            var out = new mods.eln.fluid.ElementFluidHandler(cap);
+                            out.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Latex.SOURCE.get(), 4000), true);
+                            out.writeToNBT(el, "latexOutTank");
+                            return t;
+                        });
+                        d = (mods.eln.transparentnode.electricalmachine.CompressorPortsElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                        d.getInventory().setItem(d.inSlotId, ItemStack.EMPTY);
+                        legacy = "";
+                    } catch (ReflectiveOperationException e) {
+                        legacy = e.toString();
+                    }
+                });
+            }
+        }
+
+        public void measure(TestContext c) {
+            ItemStack in = d.getInventory().getItem(d.inSlotId), out = d.getInventory().getItem(d.outSlotId);
+            var vi = d.inlet.vessel;
+            var vo = d.outlet.vessel;
+            int rubber = out.is(ElnRegistry.RAW_RUBBER.get()) ? out.getCount() : 0;
+            String st = String.format("in slot %s, out slot %s, IN %.1f mB (%.3f bar, %.0f %% liquid), OUT %.1f mB (%.3f bar, %.0f %% liquid), %s", in, out,
+                CollectorBasinCase.latexMb(vi), vi.P() / 1e5, 100 * vi.liquidVolume() / vi.volume,
+                CollectorBasinCase.latexMb(vo), vo.P() / 1e5, 100 * vo.liquidVolume() / vo.volume, d.getWaila());
+            c.line("compressor " + variant + ": " + st);
+            switch (variant) {
+                case "presses_latex" -> c.check("compressor: it presses its IN vessel's latex to Raw Rubber, 250 mB each, and loses none",
+                    rubber >= 2 && Math.abs(CollectorBasinCase.latexMb(vi) + 250 * rubber - 1000) < 0.5 && d.latexIn() == 1000 - 250 * rubber, st);
+                case "presses_dandelions" -> {
+                    int pressed = (16 - in.getCount()) / 8;
+                    c.check("compressor: it presses dandelions to 250 mB of latex in its OUT vessel, which keeps it unpiped",
+                        pressed >= 1 && Math.abs(CollectorBasinCase.latexMb(vo) - 250 * pressed) < 0.5 && d.latexOut() == 250 * pressed, st);
+                }
+                default -> {
+                    c.check("compressor: an old save loads", legacy.isEmpty(), legacy);
+                    c.check("compressor: an old save's tanks are in its vessels, every kg (the IN vessel's less what it pressed)",
+                        rubber >= 2 && Math.abs(CollectorBasinCase.latexMb(vi) + 250 * rubber - 1500) < 0.5 && Math.abs(CollectorBasinCase.latexMb(vo) - 4000) < 0.5, st);
+                    c.check("compressor: ... with air over them, at the air's pressure", vo.liquidVolume() / vo.volume < 0.96 && Math.abs(vo.P() - mods.eln.sim.fluid.Water.P_ATM) < 2000
+                        && Math.abs(vi.P() - mods.eln.sim.fluid.Water.P_ATM) < 2000, st);
+                    c.check("compressor: ... its OUT vessel is full", !d.outlet.room(mods.eln.oil.Latex.MB_PER_RUBBER) && String.valueOf(d.getWaila()).contains("4000 / 4000 mB"), st);
                 }
             }
         }
