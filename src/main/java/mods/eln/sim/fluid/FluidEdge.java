@@ -71,6 +71,25 @@ public final class FluidEdge {
     /** How each end's port pressure answers a kg more liquid in its node (Pa/kg: the weight over the port; FluidNetwork.headResponse). */
     double hA, hB;
     boolean fromA;
+    /**
+     * A filling valve's opening (0..1) that passes at most roomM3 of what a's port draws in a step of dt s, at the two
+     * ends' present pressures (taken as at least FILL_DRIVE apart); 1 if it would pass less fully open. An edge's
+     * conductance is fixed at the start of a step, so a valve opened by the room that is left cannot fill a small
+     * vessel past it within the step, whatever the line's pressure and the fluid's viscosity.
+     */
+    public double openingFor(double roomM3, double dt) {
+        if (roomM3 <= 0) return 0;
+        FluidNetwork.Packet pa = FluidNetwork.packet(a, portA, spanA);
+        double dz = (a.z + portA * a.height) - (b.z + portB * b.height);
+        double drive = a.pressureOver(portA, spanA) - b.pressureOver(portB, spanB) + boost + pa.rhoHead * mods.eln.fluidcore.Network.G * dz;
+        drive = Math.max(drive, FILL_DRIVE);
+        double full = CoreStep.conductance(this, pa, drive, 1) * drive;
+        return full <= 0 ? 1 : Math.min(1, roomM3 * pa.rho / (dt * full));
+    }
+
+    /** The least drive (Pa) openingFor reckons with: a line may gain this much within a step. */
+    public static final double FILL_DRIVE = 1000;
+
     /** The solve's per-step coefficients, for /elnlab fluidtrace. */
     public String debug() {
         return String.format("g=%.4g head=%.4g sA=%.4g sB=%.4g xl=%.3f fromA=%s", g, head, sA, sB, xl, fromA);

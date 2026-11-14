@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 
 /** EA's built-in species data (the datapack JSON), defined in the registry for unit tests. */
 final class TestSpecies {
-    static final String[] NAMES = {"crude_oil", "diesel", "gasoline", "heavy_oil", "natural_gas", "residue"};
+    static final String[] NAMES = {"crude_oil", "diesel", "gasoline", "heavy_oil", "natural_gas", "residue", "butadiene", "latex"};
 
     private TestSpecies() {
     }

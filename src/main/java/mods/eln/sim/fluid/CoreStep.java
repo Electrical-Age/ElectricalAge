@@ -107,7 +107,7 @@ final class CoreStep {
     }
 
     /** A stream's conductance (kg/s/Pa) carrying packet pk at drive dp: rho k open / mu, or a valve's orifice law. */
-    private static double conductance(FluidEdge e, FluidNetwork.Packet pk, double dp, double open) {
+    static double conductance(FluidEdge e, FluidNetwork.Packet pk, double dp, double open) {
         return e.area > 0
             ? FluidEdge.CD * e.area * open * Math.sqrt(2 * Math.max(pk.rho, 1e-6) / Math.max(Math.abs(dp), FluidEdge.DP_LINEAR))
             : pk.rho * e.k * open / pk.mu;
