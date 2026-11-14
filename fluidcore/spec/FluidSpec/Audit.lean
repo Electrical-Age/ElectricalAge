@@ -26,6 +26,9 @@ open FluidSpec.Limiter
 #print axioms FluidSpec.Step.run_mass_bound
 #print axioms FluidSpec.Step.predict_mass
 #print axioms FluidSpec.Step.trial_mass
+#print axioms FluidSpec.Step.adaptive_bounds
+#print axioms FluidSpec.Step.adaptive_all
+#print axioms FluidSpec.Step.owed_books
 #print axioms FluidSpec.Flux.streams_net
 #print axioms FluidSpec.Flux.streams_nonneg
 #print axioms FluidSpec.Flux.streams_rest
@@ -35,6 +38,13 @@ open FluidSpec.Limiter
 #print axioms FluidSpec.Flux.softplus_tangent
 #print axioms FluidSpec.Flux.checkSp_spec
 #print axioms FluidSpec.Flux.checkStreams_spec
+#print axioms FluidSpec.Flux.checkGate_spec
+#print axioms FluidSpec.Flux.checkRoot_spec
+#print axioms FluidSpec.Flux.pumpFlow_spec
+#print axioms FluidSpec.Flux.reducing_spec
+#print axioms FluidSpec.Flux.relief_spec
+#print axioms FluidSpec.Flux.turbineFlow_spec
+#print axioms FluidSpec.Flux.gasOnly_spec
 #print axioms FluidSpec.Flux.carried_same
 #print axioms FluidSpec.Flux.carried_has
 #print axioms FluidSpec.Flux.carried_total_gap

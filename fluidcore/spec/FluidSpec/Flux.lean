@@ -377,6 +377,196 @@ theorem checkStreams_spec {g S : ℝ} (hg : 0 ≤ g) (hS : 0 < S) (dp : ℝ) :
           ring
       _ ≤ g * S * checkSp (dp / S) := mul_le_mul_of_nonneg_left hlag hgS
 
+/-! ### Pumps, regulators, turbines: one stream, shut exactly -/
+
+theorem sigm_mono {x y : ℝ} (h : x ≤ y) : sigm x ≤ sigm y := by
+  unfold sigm
+  have hy := Real.exp_pos (-y)
+  exact one_div_le_one_div_of_le (by positivity) (by linarith [Real.exp_le_exp.2 (neg_le_neg h)])
+
+theorem spc_ge (x : ℝ) : x ≤ spc x := by
+  unfold spc
+  by_cases h : 30 < x
+  · simp only [h, ↓reduceIte, le_refl]
+  · simp only [h, ↓reduceIte]
+    exact (spCode_gt x).le
+
+theorem spc_pos (x : ℝ) : 0 < spc x := by
+  unfold spc
+  by_cases h : 30 < x
+  · simp only [h, ↓reduceIte]
+    linarith
+  · simp only [h, ↓reduceIte]
+    exact spCode_pos x
+
+/-- Java's slope of softplus with its upper cut (`Network.sgc`; its lower cut is never reached here). -/
+noncomputable def sgc (x : ℝ) : ℝ := if 30 < x then 1 else sigm x
+
+/-- `Network.checkSg`: checkSp's slope. -/
+noncomputable def checkSg (x : ℝ) : ℝ :=
+  if x ≤ 0 then 0 else (sgc (x - crack) - sigm (-crack)) / (1 - sigm (-crack))
+
+theorem checkSg_bounds (x : ℝ) : 0 ≤ checkSg x ∧ checkSg x ≤ 1 := by
+  have hD : 0 < 1 - sigm (-1) := by linarith [sigm_lt_one (-1)]
+  unfold checkSg crack
+  by_cases hx : x ≤ 0
+  · simp only [hx, ↓reduceIte]
+    exact ⟨le_refl 0, zero_le_one⟩
+  · simp only [hx, ↓reduceIte]
+    have lo : sigm (-1) ≤ sgc (x - 1) := by
+      unfold sgc
+      by_cases h : 30 < x - 1
+      · simp only [h, ↓reduceIte]
+        exact (sigm_lt_one _).le
+      · simp only [h, ↓reduceIte]
+        exact sigm_mono (by linarith [not_le.1 hx])
+    have hi : sgc (x - 1) ≤ 1 := by
+      unfold sgc
+      by_cases h : 30 < x - 1
+      · simp only [h, ↓reduceIte, le_refl]
+      · simp only [h, ↓reduceIte]
+        exact (sigm_lt_one _).le
+    refine ⟨div_nonneg (by linarith) hD.le, ?_⟩
+    rw [div_le_one hD]
+    linarith
+
+/-- `Network.checkGate`: checkSg squared, a gate from shut to open whose slope starts at 0 too. -/
+noncomputable def checkGate (x : ℝ) : ℝ := checkSg x ^ 2
+
+/-- **The gate** is shut at or under 0, exactly, and a share from 0 to 1 above. -/
+theorem checkGate_spec (x : ℝ) : (x ≤ 0 → checkGate x = 0) ∧ 0 ≤ checkGate x ∧ checkGate x ≤ 1 := by
+  obtain ⟨h0, h1⟩ := checkSg_bounds x
+  unfold checkGate
+  refine ⟨fun h => ?_, sq_nonneg _, pow_le_one₀ h0 h1⟩
+  unfold checkSg
+  simp only [h, ↓reduceIte, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow]
+
+/-- `Network.checkRoot`: f^2 / (f + 1) of checkSp's f, the drive under a root law. -/
+noncomputable def checkRoot (x : ℝ) : ℝ := checkSp x ^ 2 / (checkSp x + 1)
+
+/-- **A root law's drive** is nothing at or under 0, exactly, never negative and never more than the difference. -/
+theorem checkRoot_spec (x : ℝ) : (x ≤ 0 → checkRoot x = 0) ∧ 0 ≤ checkRoot x ∧ checkRoot x ≤ max 0 x := by
+  obtain ⟨h0, hnn, hle, _⟩ := checkSp_spec x
+  have hp : 0 < checkSp x + 1 := by linarith
+  unfold checkRoot
+  refine ⟨fun h => ?_, div_nonneg (sq_nonneg _) hp.le, ?_⟩
+  · rw [h0 h]
+    norm_num
+  · refine le_trans ?_ hle
+    rw [div_le_iff₀ hp]
+    nlinarith
+
+/-- `Network.pumpStreams`: a pump's one stream at the drive (the pressure difference along it plus the head of what
+it lifts; negative: it pumps uphill), speed x qMax x the curve's root, softened over w of the shut-off head h0, x
+the gate that shuts it past the shut-off head over the band S. -/
+noncomputable def pumpFlow (speed qMax h0 w S drive : ℝ) : ℝ :=
+  speed * qMax * Real.sqrt (w * spc ((1 + drive / h0) / w)) * checkGate ((h0 + drive) / S)
+
+/-- **A pump passes nothing against its shut-off head or more**, exactly (so it lifts no closed vessel past it);
+its flow is never negative, and never more than its curve's. -/
+theorem pumpFlow_spec {speed qMax S : ℝ} (hs : 0 ≤ speed) (hq : 0 ≤ qMax) (hS : 0 < S) (h0 w drive : ℝ) :
+    (drive ≤ -h0 → pumpFlow speed qMax h0 w S drive = 0) ∧ 0 ≤ pumpFlow speed qMax h0 w S drive ∧
+    pumpFlow speed qMax h0 w S drive ≤ speed * qMax * Real.sqrt (w * spc ((1 + drive / h0) / w)) := by
+  obtain ⟨g0, gnn, g1⟩ := checkGate_spec ((h0 + drive) / S)
+  have hc : 0 ≤ speed * qMax * Real.sqrt (w * spc ((1 + drive / h0) / w)) :=
+    mul_nonneg (mul_nonneg hs hq) (Real.sqrt_nonneg _)
+  unfold pumpFlow
+  refine ⟨fun h => ?_, mul_nonneg hc gnn, mul_le_of_le_one_right hc g1⟩
+  rw [g0 (div_nonpos_of_nonpos_of_nonneg (by linarith) hS.le), mul_zero]
+
+/-- `Network.regulatorFlow`'s drive. A reducing regulator: the lower of its set point and its inlet, less its
+outlet. A relief regulator: its inlet less the higher of its set point and its outlet. The min and max are softened
+over W. -/
+noncomputable def regDrive (relief : Bool) (set W pa pb : ℝ) : ℝ :=
+  if relief then pa - (set + W * spc ((pb - set) / W)) else set - W * spc ((set - pa) / W) - pb
+
+theorem regDrive_le {W : ℝ} (hW : 0 < W) (relief : Bool) (set pa pb : ℝ) :
+    regDrive relief set W pa pb ≤ if relief then pa - max set pb else min set pa - pb := by
+  unfold regDrive
+  cases relief
+  · simp only [Bool.false_eq_true, ↓reduceIte]
+    have h1 := mul_le_mul_of_nonneg_left (spc_ge ((set - pa) / W)) hW.le
+    have h2 := mul_pos hW (spc_pos ((set - pa) / W))
+    have e : W * ((set - pa) / W) = set - pa := by field_simp
+    rw [e] at h1
+    rcases le_total set pa with h | h
+    · rw [min_eq_left h]
+      linarith
+    · rw [min_eq_right h]
+      linarith
+  · simp only [↓reduceIte]
+    have h1 := mul_le_mul_of_nonneg_left (spc_ge ((pb - set) / W)) hW.le
+    have h2 := mul_pos hW (spc_pos ((pb - set) / W))
+    have e : W * ((pb - set) / W) = pb - set := by field_simp
+    rw [e] at h1
+    rcases le_total set pb with h | h
+    · rw [max_eq_right h]
+      linarith
+    · rw [max_eq_left h]
+      linarith
+
+/-- A regulator's flow: a check valve's stream of its drive. -/
+noncomputable def regulatorFlow (g S : ℝ) (relief : Bool) (set W pa pb : ℝ) : ℝ :=
+  g * S * checkSp (regDrive relief set W pa pb / S)
+
+/-- **A reducing regulator passes nothing once its outlet is at its set point**, or at its inlet's pressure,
+exactly: it never lifts its outlet past either. Its flow is never negative. -/
+theorem reducing_spec {g S W : ℝ} (hg : 0 ≤ g) (hS : 0 < S) (hW : 0 < W) (set pa pb : ℝ) :
+    (min set pa ≤ pb → regulatorFlow g S false set W pa pb = 0) ∧ 0 ≤ regulatorFlow g S false set W pa pb ∧
+    regulatorFlow g S false set W pa pb ≤ g * max 0 (min set pa - pb) := by
+  have d := regDrive_le hW false set pa pb
+  simp only [Bool.false_eq_true, ↓reduceIte] at d
+  obtain ⟨c0, cnn, cle, _, _⟩ := checkStreams_spec hg hS (regDrive false set W pa pb)
+  have e : regulatorFlow g S false set W pa pb = (checkStreams g S (regDrive false set W pa pb)).1 := rfl
+  rw [e]
+  refine ⟨fun h => c0 (by linarith), cnn, cle.trans ?_⟩
+  exact mul_le_mul_of_nonneg_left (max_le_max (le_refl 0) d) hg
+
+/-- **A relief regulator passes nothing until its inlet is over its set point**, and over its outlet, exactly. Its
+flow is never negative. -/
+theorem relief_spec {g S W : ℝ} (hg : 0 ≤ g) (hS : 0 < S) (hW : 0 < W) (set pa pb : ℝ) :
+    (pa ≤ max set pb → regulatorFlow g S true set W pa pb = 0) ∧ 0 ≤ regulatorFlow g S true set W pa pb ∧
+    regulatorFlow g S true set W pa pb ≤ g * max 0 (pa - max set pb) := by
+  have d := regDrive_le hW true set pa pb
+  simp only [↓reduceIte] at d
+  obtain ⟨c0, cnn, cle, _, _⟩ := checkStreams_spec hg hS (regDrive true set W pa pb)
+  have e : regulatorFlow g S true set W pa pb = (checkStreams g S (regDrive true set W pa pb)).1 := rfl
+  rw [e]
+  refine ⟨fun h => c0 (by linarith), cnn, cle.trans ?_⟩
+  exact mul_le_mul_of_nonneg_left (max_le_max (le_refl 0) d) hg
+
+/-- `Network.turbineFlow`: a nozzle c (its size x how far it is open) passing gas of density rho from p_a to p_b by
+the ellipse law, its difference softened over the band S as a root law's drive. -/
+noncomputable def turbineFlow (c rho S pa pb : ℝ) : ℝ :=
+  c * Real.sqrt (rho * ((pa + pb) * (S * checkRoot ((pa - pb) / S)) / pa))
+
+/-- **A turbine passes nothing unless its inlet is over its outlet**, exactly; its flow is never negative and never
+more than the ellipse law's c sqrt(rho (p_a^2 - p_b^2) / p_a). -/
+theorem turbineFlow_spec {c rho S pa pb : ℝ} (hc : 0 ≤ c) (hrho : 0 ≤ rho) (hS : 0 < S) (hpa : 0 < pa) (hpb : 0 ≤ pb) :
+    (pa ≤ pb → turbineFlow c rho S pa pb = 0) ∧ 0 ≤ turbineFlow c rho S pa pb ∧
+    turbineFlow c rho S pa pb ≤ c * Real.sqrt (rho * ((pa + pb) * max 0 (pa - pb) / pa)) := by
+  obtain ⟨r0, rnn, rle⟩ := checkRoot_spec ((pa - pb) / S)
+  unfold turbineFlow
+  refine ⟨fun h => ?_, mul_nonneg hc (Real.sqrt_nonneg _), ?_⟩
+  · rw [r0 (div_nonpos_of_nonpos_of_nonneg (by linarith) hS.le)]
+    simp
+  · refine mul_le_mul_of_nonneg_left (Real.sqrt_le_sqrt ?_) hc
+    refine mul_le_mul_of_nonneg_left ?_ hrho
+    refine div_le_div_of_nonneg_right ?_ hpa.le
+    refine mul_le_mul_of_nonneg_left ?_ (by linarith)
+    have h1 : S * max 0 ((pa - pb) / S) = max 0 (pa - pb) := by
+      rw [mul_max_of_nonneg _ _ hS.le, mul_zero]
+      congr 1
+      field_simp
+    rw [← h1]
+    exact mul_le_mul_of_nonneg_left rle hS.le
+
+/-- **A gas-only edge** (a vent, a burner's intake) passes its stream times the share of its port above the liquid:
+never negative, never more than the stream, and nothing with its port under the liquid. -/
+theorem gasOnly_spec {q share : ℝ} (hq : 0 ≤ q) (h0 : 0 ≤ share) (h1 : share ≤ 1) :
+    0 ≤ share * q ∧ share * q ≤ q ∧ (share = 0 → share * q = 0) :=
+  ⟨mul_nonneg h0 hq, mul_le_of_le_one_left hq h1, fun h => by rw [h, zero_mul]⟩
+
 /-! ### What the streams carry -/
 
 variable {ι : Type} [Fintype ι]

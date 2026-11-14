@@ -238,4 +238,94 @@ theorem trial_mass {c : α} (hc0 : 0 ≤ c) (hc1 : c ≤ 1) (masses : List (α �
     apply (min_le_left _ _).trans
     nlinarith [not_lt.mp hdm]
 
+/-! ### Sub-steps sized as they go, and the time a step covers -/
+
+/-- `Network.adaptive`'s loop, as the time it covers: from t with the next length h, `ok t h` saying whether the
+solve of length h from t converged. A success moves on and doubles the length; a failure halves it, and ends the
+step where it is once the length is under hMin. At most n solves (MAX_SUBSTEPS). (Java stops at dt (1 - 1e-12),
+for rounding.) -/
+def adaptive (ok : α → α → Bool) (dt hMin : α) : Nat → α → α → α
+  | 0, t, _ => t
+  | n + 1, t, h =>
+    if dt ≤ t then t
+    else if ok t (min h (dt - t)) then adaptive ok dt hMin n (t + min h (dt - t)) (2 * min h (dt - t))
+    else if min h (dt - t) / 2 < hMin then t
+    else adaptive ok dt hMin n t (min h (dt - t) / 2)
+
+/-- **A step never covers more than its time, and never goes back**: whatever converged, from t it ends between t
+and dt. -/
+theorem adaptive_bounds (ok : α → α → Bool) (dt hMin : α) (n : Nat) {t h : α} (ht : t ≤ dt) (hh : 0 ≤ h) :
+    t ≤ adaptive ok dt hMin n t h ∧ adaptive ok dt hMin n t h ≤ dt := by
+  induction n generalizing t h with
+  | zero => exact ⟨le_refl t, ht⟩
+  | succ n ih =>
+    have hm : 0 ≤ min h (dt - t) := le_min hh (sub_nonneg.2 ht)
+    have hm' : min h (dt - t) ≤ dt - t := min_le_right _ _
+    unfold adaptive
+    by_cases h1 : dt ≤ t
+    · rw [ifPos h1]
+      exact ⟨le_refl t, ht⟩
+    · rw [ifNeg h1]
+      by_cases h2 : ok t (min h (dt - t)) = true
+      · rw [ifPos h2]
+        have r := ih (t := t + min h (dt - t)) (h := 2 * min h (dt - t)) (by linarith) (by linarith)
+        exact ⟨by linarith [r.1], r.2⟩
+      · rw [ifNeg h2]
+        by_cases h3 : min h (dt - t) / 2 < hMin
+        · rw [ifPos h3]
+          exact ⟨le_refl t, ht⟩
+        · rw [ifNeg h3]
+          exact ih ht (div_nonneg hm (by norm_num))
+
+/-- **Where every solve converges, two halves cover the step.** -/
+theorem adaptive_all (dt hMin : α) (n : Nat) (hdt : 0 < dt) :
+    adaptive (fun _ _ => true) dt hMin (n + 3) 0 (dt / 2) = dt := by
+  have e1 : min (dt / 2) (dt - 0) = dt / 2 := min_eq_left (by linarith [half_pos hdt])
+  have e2 : min (2 * (dt / 2)) (dt - (0 + dt / 2)) = dt / 2 := by
+    have e : dt - (0 + dt / 2) = dt / 2 := by ring
+    rw [e]
+    exact min_eq_right (by linarith [half_pos hdt])
+  have e3 : (0 : α) + dt / 2 + dt / 2 = dt := by ring
+  have hlt : ¬ dt ≤ 0 := not_le.2 hdt
+  have hlt2 : ¬ dt ≤ 0 + dt / 2 := by
+    rw [not_le]
+    linarith [half_pos hdt]
+  unfold adaptive
+  rw [ifNeg hlt, ifPos rfl, e1]
+  unfold adaptive
+  rw [ifNeg hlt2, ifPos rfl, e2, e3]
+  unfold adaptive
+  rw [ifPos (le_refl dt)]
+
+/-- The game's books of time (`CoreStep.step`): a tick of dt asks the core for dt and up to as much again of what
+earlier steps left undone; what the step did not cover is owed, up to a cap; the rest is dropped. Returns (asked,
+owed after, dropped). -/
+def owedAfter (dt owed cap done : α) : α × α × α :=
+  let ask := dt + min owed dt
+  let o := owed - (ask - dt) + max 0 (ask - done)
+  (ask, min o cap, max 0 (o - cap))
+
+/-- **No time is lost unseen**: the tick's time plus what was owed is what the step covered, plus what is owed
+after, plus what was dropped; and what is owed stays between 0 and the cap. -/
+theorem owed_books {dt owed cap done : α} (hc : 0 ≤ cap)
+    (hd : done ≤ (owedAfter dt owed cap done).1) :
+    dt + owed = done + (owedAfter dt owed cap done).2.1 + (owedAfter dt owed cap done).2.2 ∧
+    0 ≤ (owedAfter dt owed cap done).2.1 ∧ (owedAfter dt owed cap done).2.1 ≤ cap ∧
+    (owedAfter dt owed cap done).1 ≤ 2 * dt := by
+  simp only [owedAfter] at hd ⊢
+  have hm : min owed dt ≤ owed := min_le_left _ _
+  have hm2 : min owed dt ≤ dt := min_le_right _ _
+  have hmax : max 0 (dt + min owed dt - done) = dt + min owed dt - done := max_eq_right (by linarith)
+  rw [hmax]
+  have hsum : ∀ o : α, min o cap + max 0 (o - cap) = o := by
+    intro o
+    rcases le_total o cap with h | h
+    · rw [min_eq_left h, max_eq_left (by linarith)]
+      ring
+    · rw [min_eq_right h, max_eq_right (by linarith)]
+      ring
+  refine ⟨?_, le_min (by linarith) hc, min_le_right _ _, by linarith⟩
+  have := hsum (owed - (dt + min owed dt - dt) + (dt + min owed dt - done))
+  linarith
+
 end FluidSpec.Step
