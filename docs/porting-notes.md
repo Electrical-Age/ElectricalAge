@@ -185,6 +185,18 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   so), water in the vessel drains, and another liquid (crude, residue) stays and blocks it, named by Jade. Other
   mods' fuels that are not fluid species no longer go in. `gas_turbine_low_head_fuel`, `gas_turbine_legacy_tank`,
   `gas_turbine_real_gas`, `oil_on_pipes_turbine_fuel`.
+- Idle machines' fluid networks sleep (2026-11-14, `fluidcore` `Network`): a machine with a filling valve standing
+  idle kept its little network awake for good, at about 0.03 ms a step each. Two causes. A check valve's stream was a
+  bare softplus, which passes a little forward at balance and an exponential tail below it, so the dead-end stub
+  behind a shut filling valve drained through it, slower and slower, for over an hour: a check valve now passes
+  nothing at or under balance, exactly, and opens smoothly above it (`Network.checkSp`; far above, it is the pipe's
+  conductance about 18 Pa late, 1.8 mm of water: a cracking pressure). And a sleeping network woke when any input
+  differed in a single bit, so a device that sets its valve from its vessel's state woke it every 5 s by a rounding:
+  inputs now count as changed past 1e-9 of themselves (`Network.sameInputs`). The comparison now also covers every
+  field a step reads: the old hash left out a pump's speed and a turbine's throttle, so in the core a network asleep
+  round a stopped pump slept on when the pump started (`PoolSleepTest.pumpStartingWakesIt`). `idle_inlets_sleep`,
+  `PoolSleepTest`, `FluxShapeTest`. Known, left: pumps past their shut-off head, regulators and turbines still have
+  the exponential tail.
 - Flare stack on a fluid node: its 4-bucket tank is a fluid node behind its front flange (half way up; buckets put
   any species in). Its tip passes every gas over the air's pressure between steps, each species by its share: natural
   gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took

@@ -25,6 +25,7 @@ public final class RubberCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new ChainCase());
+        cases.add(new IdleInletsSleepCase());
         cases.add(new TreeCase());
         for (String v : CollectorBasinCase.VARIANTS) cases.add(new CollectorBasinCase(v));
         for (String v : BurnerVesselCase.VARIANTS) cases.add(new BurnerVesselCase(v));
@@ -882,6 +883,54 @@ public final class RubberCases {
             c.check("the macerator gives off souls for soul sand, not for sulfur",
                 mods.eln.transparentnode.electricalmachine.MaceratorDescriptor.isSoulBlock(new ItemStack(Blocks.SOUL_SAND))
                     && !mods.eln.transparentnode.electricalmachine.MaceratorDescriptor.isSoulBlock(new ItemStack(Blocks.SULFUR)), "");
+        }
+    }
+
+    /**
+     * The machines with a feed vessel, placed and left alone with no pipe: each one's fluid network goes to sleep (a
+     * breathing vessel at rest costs nothing; they stayed awake on changes of 1e-8 of their contents a step).
+     */
+    static final class IdleInletsSleepCase implements TestCase {
+        static final int[] IDS = {0 + (92 << 6), 0 + (93 << 6), 0 + (94 << 6), 0 + (95 << 6), 0 + (96 << 6)};
+        final List<mods.eln.node.transparent.TransparentNodeElement> placed = new java.util.ArrayList<>();
+
+        public String id() {
+            return "idle_inlets_sleep";
+        }
+
+        public int width() {
+            return 2 * IDS.length + 3;
+        }
+
+        public int ticks() {
+            return 1200;
+        }
+
+        public void build(TestContext c) {
+            for (int i = 0; i < IDS.length; i++) placed.add(c.placeTransparent(IDS[i], c.at(1 + 2 * i, 1, 1)));
+            placed.add(c.placeTransparent(GasPlantCases.GAS_TURBINE, c.at(1 + 2 * IDS.length, 1, 1)));
+        }
+
+        public void measure(TestContext c) {
+            for (var e : placed) {
+                String kind = e.getClass().getSimpleName();
+                var nets = new java.util.LinkedHashSet<mods.eln.sim.fluid.FluidNetwork>();
+                var d = (mods.eln.sim.fluid.FluidDevice) e;
+                for (var port : d.fluidPorts()) nets.add(mods.eln.fluid.FluidWorld.networkOf(port.node()));
+                for (var l : d.fluidLinks()) {
+                    nets.add(mods.eln.fluid.FluidWorld.networkOf(l.a));
+                    nets.add(mods.eln.fluid.FluidWorld.networkOf(l.b));
+                }
+                nets.remove(null);
+                StringBuilder sb = new StringBuilder();
+                boolean asleep = !nets.isEmpty();
+                for (var n : nets) {
+                    String st = n.stats();
+                    asleep &= st.contains(", asleep,");
+                    sb.append(st).append(" | ");
+                }
+                c.check(kind + " standing idle with no pipe: its fluid network sleeps", asleep, sb.toString());
+            }
         }
     }
 }

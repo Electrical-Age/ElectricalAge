@@ -386,11 +386,11 @@ public final class Network {
             double x = dp / SPLIT_DP;
             // (far above the band the return stream is under 1e-13 of the flow: none, exactly; taken as q+ - q there,
             // rounding left it a few 1e-16 kg/s either side of zero, and a negative stream sends b's species from a)
+            if (e.kind == Kind.CHECK) return new double[]{e.g * SPLIT_DP * checkSp(x), 0, e.g * checkSg(x), 0};
             if (x > 30) return new double[]{e.g * dp, 0, e.g, 0};
             double sp = x > 30 ? x : x < -30 ? Math.exp(x) : Math.log1p(Math.exp(x));
             double sig = x > 30 ? 1 : x < -30 ? Math.exp(x) : 1 / (1 + Math.exp(-x));
             double qp = e.g * SPLIT_DP * sp;
-            if (e.kind == Kind.CHECK) return new double[]{qp, 0, e.g * sig, 0};
             return new double[]{qp, qp - e.g * dp, e.g * sig, e.g * sig - e.g};
         }
         return dp >= 0 ? new double[]{e.g * dp, 0, e.g, 0} : new double[]{0, -e.g * dp, 0, -e.g};
@@ -414,8 +414,8 @@ public final class Network {
             return new double[]{qp, qm, up > 0 ? ga : 0, e.kind == Kind.CHECK || down <= 0 ? 0 : -gb};
         }
         double xp = (dp + ha) / S;
+        if (e.kind == Kind.CHECK) return new double[]{ga * S * checkSp(xp), 0, ga * checkSg(xp), 0};
         double qp = ga * S * spc(xp), dqp = ga * sgc(xp);
-        if (e.kind == Kind.CHECK) return new double[]{qp, 0, dqp, 0};
         double xm = -(dp + hb) / S;
         return new double[]{qp, gb * S * spc(xm), dqp, -gb * sgc(xm)};
     }
@@ -542,6 +542,28 @@ public final class Network {
     }
 
     /** softplus and its slope, cut 30 either side as the streams are. */
+    /** A check valve's cracking pressure, in bands: its stream starts there. */
+    static final double CRACK = 1;
+
+    /**
+     * A check valve's stream over the band: none at or under balance, exactly, and the pipe's slope far above it,
+     * CRACK bands late. It is softplus(x - CRACK) less its tangent at 0, rescaled: smooth in value and slope. (The
+     * bare softplus let exp(x) through a shut valve, so a dead end behind one drained through it for an hour, its
+     * network awake all the while.)
+     */
+    static double checkSp(double x) {
+        if (x <= 0) return 0;
+        double s0 = sgc(-CRACK);
+        return (spc(x - CRACK) - spc(-CRACK) - s0 * x) / (1 - s0);
+    }
+
+    /** checkSp's slope. */
+    static double checkSg(double x) {
+        if (x <= 0) return 0;
+        double s0 = sgc(-CRACK);
+        return (sgc(x - CRACK) - s0) / (1 - s0);
+    }
+
     static double spc(double x) {
         return x > 30 ? x : x < -30 ? Math.exp(x) : Math.log1p(Math.exp(x));
     }
@@ -628,7 +650,7 @@ public final class Network {
     public void step(double dt) {
         stats.steps++;
         if (asleep) {
-            if (signature() == sleepSignature) {
+            if (sameInputs(sleepInputs, inputs())) {
                 stats.slept++;
                 done = dt;
                 return;
@@ -667,7 +689,7 @@ public final class Network {
         quiet = isQuiet(free, y0, pack(free)) ? quiet + 1 : 0;
         if (SLEEP_STEPS > 0 && quiet >= SLEEP_STEPS) {
             asleep = true;
-            sleepSignature = signature();
+            sleepInputs = inputs();
         }
     }
 
@@ -676,14 +698,14 @@ public final class Network {
     /**
      * A network whose every node changed by less than SLEEP_REL of its contents (masses, and energy against a typical
      * 1e5 J/kg) in each of SLEEP_STEPS steps in a row goes to sleep: its steps then cost one pass over its inputs, until
-     * any of them changes (a node's contents or heat, an edge's conductance, boost, kind, conductance or exchange; nodes
-     * or edges added) or wake() is called. 0 steps: never sleep.
+     * any of them changes by more than SLEEP_REL of itself (a node's contents, heat or wall; anything set on an edge;
+     * nodes or edges added) or wake() is called. 0 steps: never sleep.
      */
     public static int SLEEP_STEPS = 100;
     public static double SLEEP_REL = 1e-9;
     private boolean asleep;
     private int quiet;
-    private long sleepSignature;
+    private double[] sleepInputs;
 
     public boolean asleep() {
         return asleep;
@@ -717,25 +739,57 @@ public final class Network {
     public double restless;
     public int restlessAt = -1;
 
-    /** A hash of everything outside the solve that a step depends on. */
-    private long signature() {
-        long h = 0x9E3779B97F4A7C15L ^ nodes.size() * 31L ^ edges.size();
+    /** Everything outside the solve that a step depends on. */
+    private double[] inputs() {
+        int C = nodes.isEmpty() ? 0 : nodes.get(0).m.length;
+        double[] x = new double[2 + nodes.size() * (C + 4) + edges.size() * 18];
+        int k = 0;
+        x[k++] = nodes.size();
+        x[k++] = edges.size();
         for (Node n : nodes) {
-            for (double x : n.m) h = mixIn(h, x);
-            h = mixIn(mixIn(mixIn(mixIn(h, n.U), n.heat), n.wallUA), n.wallT);
+            for (double m : n.m) x[k++] = m;
+            x[k++] = n.U;
+            x[k++] = n.heat;
+            x[k++] = n.wallUA;
+            x[k++] = n.wallT;
         }
         for (Edge e : edges) {
-            h = mixIn(mixIn(mixIn(mixIn(h, e.g), e.gBack), e.boost), e.conductance);
-            h = mixIn(mixIn(mixIn(h, e.exchange), e.kind.ordinal()), e.setPa);
+            x[k++] = e.g;
+            x[k++] = e.gBack;
+            x[k++] = e.boost;
+            x[k++] = e.conductance;
+            x[k++] = e.exchange;
+            x[k++] = e.kind.ordinal();
+            x[k++] = e.setPa;
+            x[k++] = e.relief ? 1 : 0;
+            x[k++] = e.band;
+            x[k++] = e.qMax;
+            x[k++] = e.h0;
+            x[k++] = e.speed;
+            x[k++] = e.eta;
+            x[k++] = e.gas ? 1 : 0;
+            x[k++] = e.nozzle;
+            x[k++] = e.open;
+            x[k++] = e.drop;
+            x[k++] = e.gasOnly ? 1 : 0;
         }
-        return h;
+        return x;
     }
 
-    private static long mixIn(long h, double x) {
-        long z = h ^ Double.doubleToLongBits(x);
-        z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
-        z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
-        return z ^ (z >>> 31);
+    /**
+     * Are they the inputs it went to sleep on, to SLEEP_REL of each. (Not to the bit: a device that sets a valve by its
+     * vessel's state set it a rounding apart after the last quiet step, and that woke the network for another
+     * SLEEP_STEPS, every time. Asleep the state stands still, so what follows from it cannot creep.) Every field a
+     * step reads is in it: a pump's speed and a turbine's throttle too, which the hash this replaces left out, so a
+     * network asleep round a stopped pump slept on when the pump started.
+     */
+    private static boolean sameInputs(double[] a, double[] b) {
+        if (a == null || a.length != b.length) return false;
+        for (int i = 0; i < a.length; i++) {
+            if (Double.doubleToLongBits(a[i]) == Double.doubleToLongBits(b[i])) continue;
+            if (!(Math.abs(a[i] - b[i]) <= SLEEP_REL * Math.max(Math.abs(a[i]), Math.abs(b[i])))) return false;
+        }
+        return true;
     }
 
     /**

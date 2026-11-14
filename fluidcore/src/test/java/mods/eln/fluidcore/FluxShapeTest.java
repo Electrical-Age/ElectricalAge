@@ -45,8 +45,10 @@ class FluxShapeTest {
             double forward = q[0];
             e.kind = Network.Kind.CHECK;
             q = Network.streams(e);
-            // (a check valve: the pipe's forward stream alone, never under the hard max(0, dp))
-            assertTrue(q[1] == 0 && q[0] == forward && q[0] >= Math.max(0, flow), "a check valve at dp " + e.boost + ": " + q[0] + ", " + q[1]);
+            // (a check valve: a forward stream alone, none at all at or under balance, and never over the pipe's)
+            assertTrue(q[1] == 0 && q[0] >= 0 && q[0] <= forward && (x > 0 || q[0] == 0), "a check valve at dp " + e.boost + ": " + q[0] + ", " + q[1]);
+            // (far above its cracking pressure, the pipe's slope)
+            if (x > 40) assertEquals(e.g, q[2], 1e-9 * e.g, "a check valve's slope at dp " + e.boost);
             e.kind = Network.Kind.PIPE;
         }
     }
