@@ -134,7 +134,7 @@ public class CableAirTest {
         assertNull(r.error);
         CableHang.Laid hung = null;
         long us = Long.MAX_VALUE;
-        for (int rep = 0; rep < 4; rep++) {   // (warm; the best of a few, as other builds share the machine)
+        for (int rep = 0; rep < 12; rep++) {   // (warm; the best of a dozen, as other builds share the machine)
             long t0 = System.nanoTime();
             hung = CableHang.laid(sp, LV, r.steps);
             us = Math.min(us, (System.nanoTime() - t0) / 1000);
