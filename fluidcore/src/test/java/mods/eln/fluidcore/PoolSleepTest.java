@@ -97,6 +97,8 @@ class PoolSleepTest {
         pump.speed = 1;
         net.step(0.05);
         assertFalse(net.asleep(), "the pump's speed wakes it");
+        assertEquals("edge 0 speed", net.wokenByName(), "and it says so");
+        assertEquals(1, net.stats.wakes);
         assertTrue(b.m[0] > m, "and it pumps");
     }
 
@@ -114,6 +116,7 @@ class PoolSleepTest {
         e.g *= 1 + 1e-6;
         net.step(0.05);
         assertFalse(net.asleep(), "a change wakes it");
+        assertEquals("edge 0 g", net.wokenByName());
     }
 
     /** An open turbine, a regulator and a running pump at its shut-off head between vessels at rest pass nothing, and their networks sleep. */

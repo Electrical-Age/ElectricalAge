@@ -192,15 +192,18 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   nothing at or under balance, exactly, and opens smoothly above it (`Network.checkSp`; far above, it is the pipe's
   conductance about 18 Pa late, 1.8 mm of water: a cracking pressure). And a sleeping network woke when any input
   differed in a single bit, so a device that sets its valve from its vessel's state woke it every 5 s by a rounding:
-  inputs now count as changed past 1e-9 of themselves (`Network.sameInputs`). The comparison now also covers every
+  inputs now count as changed past 1e-9 of themselves (`Network.changedInput`). The comparison now also covers every
   field a step reads: the old hash left out a pump's speed and a turbine's throttle, so in the core a network asleep
   round a stopped pump slept on when the pump started (`PoolSleepTest.pumpStartingWakesIt`). `idle_inlets_sleep`,
   `PoolSleepTest`, `FluxShapeTest`. The same for the other one-way laws: a pump past its shut-off head, a regulator
   past its set point and a turbine's nozzle with no drop across it pass nothing, exactly (`Network.checkGate`,
   `checkRoot`; an open turbine at standstill passed steam with no pressure drop, and pumped its inlet under its
   exhaust). Far above the band each is its old law about 20-30 Pa late. `PoolSleepTest.shutDevicesSleep`,
-  `FluxShapeTest.shutOffShapes`.
-- **Open pipes mix at rest** (`fluidcore` `Network`): a plain pipe carries two smooth streams whose difference is
+  `FluxShapeTest.shutOffShapes`. `/elnlab fluidstats` says for each
+  network how much of the time it slept, how often an input woke it and which one ("node 1 m[2]", "edge 0 speed"),
+  and how often its core was rebuilt. A machine that makes or uses fluid every tick (a resin collector dripping)
+  stays awake with no solves: its contents are an input.
+- Open pipes mix at rest (2026-11-14, `fluidcore` `Network`): a plain pipe carries two smooth streams whose difference is
   exactly g·Δp, so at balance each still carries g·S·ln 2 (S the 10 Pa band): the contents of two joined vessels mix
   slowly, as they would through an open pipe (about 6 mg/s of gas through a machine port). Anything meant to be shut
   at rest is a one-way edge, which passes nothing at or under balance: machine vents are a gas-out and an air-in pair.

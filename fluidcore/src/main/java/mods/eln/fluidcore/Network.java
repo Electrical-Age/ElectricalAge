@@ -651,6 +651,8 @@ public final class Network {
     /** Counters for tests and measurements. */
     public static final class Stats {
         public long steps, iterations, substeps, failures, solves, stalls, slept;
+        /** Times a changed input woke it from sleep. */
+        public long wakes;
         /** Steps ended early (CUT_SHORT): their remaining time dropped; and of those, steps that moved nothing at all. */
         public long cut, stuck;
         /** Solves accepted out of iterations while crawling at the precision floor (under STALL_OK; Network.solve). */
@@ -674,11 +676,14 @@ public final class Network {
     public void step(double dt) {
         stats.steps++;
         if (asleep) {
-            if (sameInputs(sleepInputs, inputs())) {
+            int changed = changedInput(sleepInputs, inputs());
+            if (changed < 0) {
                 stats.slept++;
                 done = dt;
                 return;
             }
+            stats.wakes++;
+            wokenBy = changed;
             wake();
         }
         List<Node> free = new ArrayList<>();
@@ -766,7 +771,7 @@ public final class Network {
     /** Everything outside the solve that a step depends on. */
     private double[] inputs() {
         int C = nodes.isEmpty() ? 0 : nodes.get(0).m.length;
-        double[] x = new double[2 + nodes.size() * (C + 4) + edges.size() * 18];
+        double[] x = new double[2 + nodes.size() * (C + 4) + edges.size() * EDGE_INPUTS.length];
         int k = 0;
         x[k++] = nodes.size();
         x[k++] = edges.size();
@@ -801,19 +806,39 @@ public final class Network {
     }
 
     /**
-     * Are they the inputs it went to sleep on, to SLEEP_REL of each. (Not to the bit: a device that sets a valve by its
+     * The first input that is not the one it went to sleep on, to SLEEP_REL of each, or -1. (Not to the bit: a device that sets a valve by its
      * vessel's state set it a rounding apart after the last quiet step, and that woke the network for another
      * SLEEP_STEPS, every time. Asleep the state stands still, so what follows from it cannot creep.) Every field a
      * step reads is in it: a pump's speed and a turbine's throttle too, which the hash this replaces left out, so a
      * network asleep round a stopped pump slept on when the pump started.
      */
-    private static boolean sameInputs(double[] a, double[] b) {
-        if (a == null || a.length != b.length) return false;
+    private static int changedInput(double[] a, double[] b) {
+        if (a == null || a.length != b.length) return 0;
         for (int i = 0; i < a.length; i++) {
             if (Double.doubleToLongBits(a[i]) == Double.doubleToLongBits(b[i])) continue;
-            if (!(Math.abs(a[i] - b[i]) <= SLEEP_REL * Math.max(Math.abs(a[i]), Math.abs(b[i])))) return false;
+            if (!(Math.abs(a[i] - b[i]) <= SLEEP_REL * Math.max(Math.abs(a[i]), Math.abs(b[i])))) return i;
         }
-        return true;
+        return -1;
+    }
+
+    /** The input that last woke it (its index in inputs(); 0 for a changed size), or -1: never woken by one. */
+    public int wokenBy = -1;
+
+    private static final String[] NODE_INPUTS = {"U", "heat", "wallUA", "wallT"};
+    private static final String[] EDGE_INPUTS = {"g", "gBack", "boost", "conductance", "exchange", "kind", "setPa", "relief", "band", "qMax",
+        "h0", "speed", "eta", "gas", "nozzle", "open", "drop", "gasOnly"};
+
+    /** wokenBy in words: "node 2 heat", "edge 0 speed", "node 1 m[3]", "size", or "nothing". */
+    public String wokenByName() {
+        int C = nodes.isEmpty() ? 0 : nodes.get(0).m.length, k = wokenBy - 2;
+        if (wokenBy < 0) return "nothing";
+        if (k < 0) return "size";
+        if (k < nodes.size() * (C + 4)) {
+            int f = k % (C + 4);
+            return "node " + k / (C + 4) + " " + (f < C ? "m[" + f + "]" : NODE_INPUTS[f - C]);
+        }
+        k -= nodes.size() * (C + 4);
+        return k / EDGE_INPUTS.length < edges.size() ? "edge " + k / EDGE_INPUTS.length + " " + EDGE_INPUTS[k % EDGE_INPUTS.length] : "size";
     }
 
     /**

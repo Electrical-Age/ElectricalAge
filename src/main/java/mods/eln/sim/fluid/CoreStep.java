@@ -121,6 +121,7 @@ final class CoreStep {
             || !same(c.nodes, fn.nodes) || !same(c.edges, fn.edges)) {
             c = new CoreStep(fn, ids);
             fn.core = c;
+            fn.builds++;
         }
         return c;
     }

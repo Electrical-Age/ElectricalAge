@@ -37,15 +37,19 @@ public final class FluidNetwork {
 
     /** Time spent stepping (ns) and steps since built (/elnlab fluidstats). */
     public long nanos, steps;
+    /** Times its core network was built: once, unless its nodes, edges or species keep changing. */
+    public long builds;
 
-    /** One line for /elnlab fluidstats: size, cost, asleep, and what keeps it awake. */
+    /** One line for /elnlab fluidstats: size, cost, asleep, and what keeps it awake or wakes it. */
     public String stats() {
         CoreStep c = core;
         var n = c == null ? null : c.net;
         double st = n == null || n.stats.steps == 0 ? 1 : n.stats.steps;
-        return String.format("%d nodes, %.3f ms/step, %s, restless %.2g at row %d, %.1f iterations %.1f sub-steps %.1f solves a step",
+        return String.format("%d nodes, %.3f ms/step, %s, restless %.2g at row %d, %.1f iterations %.1f sub-steps %.1f solves a step, slept %.0f%%, "
+                + "woken %d times (last by %s), core built %d times",
             nodes.size(), steps == 0 ? 0 : nanos / 1e6 / steps, n == null ? "?" : n.asleep() ? "asleep" : "awake", n == null ? 0 : n.restless,
-            n == null ? -1 : n.restlessAt, n == null ? 0 : n.stats.iterations / st, n == null ? 0 : n.stats.substeps / st, n == null ? 0 : n.stats.solves / st);
+            n == null ? -1 : n.restlessAt, n == null ? 0 : n.stats.iterations / st, n == null ? 0 : n.stats.substeps / st, n == null ? 0 : n.stats.solves / st,
+            n == null ? 0 : 100 * n.stats.slept / st, n == null ? 0 : n.stats.wakes, n == null ? "?" : n.wokenByName(), builds);
     }
 
     /** The core network as a replayable dump (NetworkDump) at step length dt, or null before its first step. */
