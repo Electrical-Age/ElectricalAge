@@ -200,6 +200,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `checkRoot`; an open turbine at standstill passed steam with no pressure drop, and pumped its inlet under its
   exhaust). Far above the band each is its old law about 20-30 Pa late. `PoolSleepTest.shutDevicesSleep`,
   `FluxShapeTest.shutOffShapes`.
+- **Open pipes mix at rest** (`fluidcore` `Network`): a plain pipe carries two smooth streams whose difference is
+  exactly g·Δp, so at balance each still carries g·S·ln 2 (S the 10 Pa band): the contents of two joined vessels mix
+  slowly, as they would through an open pipe (about 6 mg/s of gas through a machine port). Anything meant to be shut
+  at rest is a one-way edge, which passes nothing at or under balance: machine vents are a gas-out and an air-in pair.
+  A plain edge to the atmosphere airs a vessel out (`FluidCoreTest.communicatingVesselsLevelOut` uses the pair).
 - Flare stack on a fluid node: its 4-bucket tank is a fluid node behind its front flange (half way up; buckets put
   any species in). Its tip passes every gas over the air's pressure between steps, each species by its share: natural
   gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took

@@ -182,7 +182,6 @@ public class FluidCoreTest {
         assertTrue(v.T() >= 470, "heated to " + v.T());
     }
 
-    @org.junit.jupiter.api.Disabled("the core's two streams swap g S ln 2 each way at rest, so an open vent exchanges air with the atmosphere and the water evaporates about 500x too fast: a core debt (end-state plan 3a)")
     @Test
     void communicatingVesselsLevelOut() {
         // two open-topped vessels joined at the bottom: water flows from the fuller one until both levels match
@@ -191,8 +190,13 @@ public class FluidCoreTest {
         FluidNode a = net.add(new FluidNode(0.02, 0, 1.0, false).fill(15, Water.P_ATM, 293.15));
         FluidNode b = net.add(new FluidNode(0.02, 0, 1.0, false).fill(3, Water.P_ATM, 293.15));
         net.connect(a, 0, b, 0, 2e-10);
-        net.connect(a, 1, atm, 0, 1e-8);
-        net.connect(b, 1, atm, 0, 1e-8);
+        // open tops as the machines have them: gas out one way, air in the other, so nothing passes at rest (a plain
+        // edge swaps g S ln 2 each way at balance, which is mixing: right between vessels, but it would air the
+        // vessels out and dry them)
+        for (FluidNode n : new FluidNode[]{a, b}) {
+            net.connect(n, 1, atm, 0, 1e-8).kind(FluidEdge.Kind.CHECK).gasOnly = true;
+            net.connect(atm, 0, n, 1, 1e-8).kind(FluidEdge.Kind.CHECK);
+        }
         double w0 = a.mWater + b.mWater;
         for (int i = 0; i < 20000; i++) net.step(DT);
         assertEquals(a.level(), b.level(), 0.01, a.level() + " vs " + b.level());
