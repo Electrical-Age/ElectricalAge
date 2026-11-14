@@ -33,11 +33,16 @@ public class MultiFluidTest {
         assertEquals(840, n.state.layerRho[1], 1e-9, "diesel above it");
         assertEquals(0.4, n.state.layerTop[0], 1e-4);   // (less what evaporated)
         assertEquals(0.7, n.level(), 1e-4);
-        // the column at the bottom weighs both layers
-        double expect = n.P() + FluidNetwork.G * (Water.RHO_L * 0.4 + 840 * 0.3) * n.height;
-        // (to 15 % of the column: the fluid core's column comes out about 10 % under the nominal densities' here, against
-        // its own library's numbers within 0.5 %; todo on board #61 to find out why)
-        assertEquals(expect, n.pressureAt(0), 0.15 * FluidNetwork.G * (Water.RHO_L * 0.4 + 840 * 0.3) * n.height);
+        // the column at the bottom weighs both layers, before and after the fluid core has stepped it
+        double column = FluidNetwork.G * (Water.RHO_L * 0.4 + 840 * 0.3) * n.height;
+        assertEquals(n.P() + column, n.pressureAt(0), 0.01 * column);
+        FluidNetwork net = new FluidNetwork();
+        net.add(n);
+        net.step(0.05);
+        // (at the floor itself the core's head is 0.5 % short here: its surfaces are softened over half a percent of the
+        // height, the floor's too, which is 3.5 mm of water in this 1 m node; a tenth of the way up it is exact)
+        assertEquals(n.P() + column, n.pressureAt(0), 0.01 * column, "on the core, at the floor");
+        assertEquals(n.P() + column - FluidNetwork.G * Water.RHO_L * 0.1 * n.height, n.pressureAt(0.1), 1e-3 * column, "on the core, 0.1 up");
         // a port at the bottom draws water, one in the oil draws oil, one above both draws gas
         FluidNetwork.Packet bottom = FluidNetwork.packet(n, 0), mid = FluidNetwork.packet(n, 0.55), top = FluidNetwork.packet(n, 0.95);
         assertEquals(1, bottom.xl, 1e-12);
