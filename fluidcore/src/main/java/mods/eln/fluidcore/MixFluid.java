@@ -504,8 +504,12 @@ final class MixFluid implements NodeFluid {
         return eval(T, gasVolume(mv, T), mv).E.v;
     }
 
+    /** The energy is outside what the masses hold between T_MIN and T_MAX: T is the bound and doesn't follow U or the masses. */
+    private boolean pinned;
+
     /** Solve for (T, Vg): Newton from the last state with the exact Jacobian, else a bracket on T. */
     private void solve() {
+        pinned = false;
         if (vg > 0 && newton()) return;
         double lo = WaterAir.T_MIN, hi = WaterAir.T_MAX;
         double t0 = Math.max(lo, Math.min(hi, T)), w = 1;
@@ -527,6 +531,16 @@ final class MixFluid implements NodeFluid {
         }
         double t = 0.5 * (a + b), tol = 1e-13 * Math.max(1, Math.abs(U));
         int side = 0;
+        // (more energy than it holds at T_MAX, or less than at T_MIN: the bound is its temperature. Bisecting towards it
+        // took some 40 evaluations and a failed polish every update, and the slopes of a free T misled the network's
+        // Newton steps: a node boiled dry under a steady heat sat there, and its network took a second a tick)
+        if (fb < 0 || fa > 0) {
+            pinned = true;
+            T = fb < 0 ? b : a;
+            vg = gasVolume(m, T);
+            st = eval(T, vg, m);
+            return;
+        }
         for (int i = 0; i < 200 && b - a > 1e-11; i++) {
             t = fb != fa ? b - fb * (b - a) / (fb - fa) : 0.5 * (a + b);
             if (!(t > a && t < b) || i % 8 == 7) t = 0.5 * (a + b);
@@ -592,8 +606,8 @@ final class MixFluid implements NodeFluid {
         dTheta = new double[2][S + 1];
         for (int k = 0; k <= S; k++) {
             double d1 = k < S ? st.E.g[2 + k] : -1, d2 = k < S ? st.rv.g[2 + k] : 0;
-            dTheta[0][k] = -(j22 * d1 - j12 * d2) / det;
-            dTheta[1][k] = -(-j21 * d1 + j11 * d2) / det;
+            dTheta[0][k] = pinned ? 0 : -(j22 * d1 - j12 * d2) / det;
+            dTheta[1][k] = pinned ? -d2 / j22 : -(-j21 * d1 + j11 * d2) / det;
         }
     }
 

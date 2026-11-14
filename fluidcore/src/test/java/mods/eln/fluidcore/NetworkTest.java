@@ -329,4 +329,35 @@ class NetworkTest {
         }
         java.nio.file.Files.writeString(TestOut.path("fluidcore-restless.txt"), out.toString());
     }
+
+    /**
+     * A vessel boiled dry under a steady heat sits at T_MAX, its energy past what its trace of gas holds there. T then
+     * follows neither the energy nor the masses, and the slopes say so: with a free T's slopes every Newton step of
+     * its network was misled, and most of its ticks ran out of sub-steps (16 in 200 random heated networks).
+     */
+    @Test
+    void aNodeBoiledDryDoesNotStallItsNetwork() {
+        boolean cut = Network.CUT_SHORT;
+        try {
+            Network.CUT_SHORT = true;
+            Network net = new Network();
+            Network.Node pot = net.add(new Network.Node(2.5e-4, 0, 0.1, false).fill(0.05, 0, 400));
+            Network.Node tank = net.add(new Network.Node(0.015, 0, 0.3, false).fill(4.7, 0, 410));
+            Network.Node air = net.add(new Network.Node(1, 0, 1, true).fill(0, 1.2, 300));
+            net.connect(pot, 1, tank, 1, 1e-6);
+            net.connect(tank, 1, air, 0.5, 1e-7);
+            for (int s = 0; s < 1200; s++) {
+                pot.heat = 3500;
+                net.step(0.05);
+            }
+            assertEquals(WaterAir.T_MAX, pot.T(), 1e-6);
+            assertEquals(0, net.stats.cut, "steps cut short");
+            assertTrue(net.stats.substeps < 400, "sub-steps: " + net.stats.substeps);
+            double[][] d = WaterAir.derivatives(WaterAir.solve(1e-4, 0, 1e9, 2.5e-4, 300), 1e-4, 0, 1e9, 2.5e-4);
+            assertEquals(0, d[0][0]);
+            assertEquals(0, d[0][2]);
+        } finally {
+            Network.CUT_SHORT = cut;
+        }
+    }
 }

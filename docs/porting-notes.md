@@ -185,6 +185,13 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   so), water in the vessel drains, and another liquid (crude, residue) stays and blocks it, named by Jade. Other
   mods' fuels that are not fluid species no longer go in. `gas_turbine_low_head_fuel`, `gas_turbine_legacy_tank`,
   `gas_turbine_real_gas`, `oil_on_pipes_turbine_fuel`.
+- A vessel boiled dry no longer stalls its network (2026-11-14, `fluidcore` `WaterAir.pinned`, `MixFluid`): a
+  vessel emptied under a steady heat ends at the 4000 K cap with more energy than its trace of gas holds there. The
+  solver still told the network that its temperature followed its energy, so every Newton step was misled: most
+  ticks ran out of sub-steps (16 of 200 random heated networks; one multi-fluid network took a second a tick). At
+  the cap, or the 120 K floor, the temperature's slopes are now zero, and the multi-fluid solve answers at the bound
+  without bisecting towards it. The random open-network tests (`openNetworksKeepTheBooks`) run again: they book heat
+  over the time each step covered, and require that no step is cut short.
 - Idle machines' fluid networks sleep (2026-11-14, `fluidcore` `Network`): a machine with a filling valve standing
   idle kept its little network awake for good, at about 0.03 ms a step each. Two causes. A check valve's stream was a
   bare softplus, which passes a little forward at balance and an exponential tail below it, so the dead-end stub

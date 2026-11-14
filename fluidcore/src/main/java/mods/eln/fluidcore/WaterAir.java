@@ -620,10 +620,19 @@ public final class WaterAir {
      * analytic gradients. Returns {{dT/dmw, dT/dma, dT/dU}, {dVg/dmw, dVg/dma, dVg/dU}}.
      */
     public static double[][] derivatives(Split s, double mw, double ma, double U, double V) {
-        return derivatives(splitD(mw, ma, V, s.T(), s.vg()), V);
+        return derivatives(splitD(mw, ma, V, s.T(), s.vg()), V, pinned(s.T()));
     }
 
-    private static double[][] derivatives(SplitD sd, double V) {
+    /**
+     * T is at a bound of the range: the energy lies past what the masses hold there, and T follows neither it nor
+     * the masses. (With the slopes of a free T, a node boiled dry under a steady heat and held at T_MAX misled every
+     * Newton step of its network: most of its ticks ran out of sub-steps.)
+     */
+    static boolean pinned(double T) {
+        return T <= T_MIN + 1e-9 || T >= T_MAX - 1e-9;
+    }
+
+    private static double[][] derivatives(SplitD sd, double V, boolean pinned) {
         double[][] g = residualGrads(sd, V);
         double j11 = g[0][GT], j12 = g[0][GV], j21 = g[1][GT], j22 = g[1][GV];
         double det = j11 * j22 - j12 * j21;
@@ -631,8 +640,8 @@ public final class WaterAir {
         for (int k = 0; k < 3; k++) {
             double d1 = k == 0 ? g[0][GW] : k == 1 ? g[0][GA] : -1;
             double d2 = k == 0 ? g[1][GW] : k == 1 ? g[1][GA] : 0;
-            out[0][k] = -(j22 * d1 - j12 * d2) / det;
-            out[1][k] = -(-j21 * d1 + j11 * d2) / det;
+            out[0][k] = pinned ? 0 : -(j22 * d1 - j12 * d2) / det;
+            out[1][k] = pinned ? -d2 / j22 : -(-j21 * d1 + j11 * d2) / det;
         }
         return out;
     }
@@ -643,7 +652,7 @@ public final class WaterAir {
      */
     public static double[][] outputSlopes(Split s0, double mw, double ma, double U, double V) {
         SplitD sd = splitD(mw, ma, V, s0.T(), s0.vg());
-        double[][] th = derivatives(sd, V);
+        double[][] th = derivatives(sd, V, pinned(s0.T()));
         Split s = sd.s;
         Vap vp = sd.vap;
         double T = s.T();
