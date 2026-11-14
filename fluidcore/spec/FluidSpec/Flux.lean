@@ -184,29 +184,198 @@ theorem streams_mirror_band {g S : ℝ} (hS : 0 < S) {dp : ℝ} (hlo : -30 ≤ d
   rw [e1, e2]
   exact smooth_mirror hS.ne' g dp
 
-/-- `Network.streams` for a check valve: a pipe's forward stream alone, and nothing back. Against the valve it passes
-the stream's tail, about g S e^(dp / S), at rest g S ln 2. (A hard max(0, dp) put a kink where a valve sits balanced,
-and Newton stalled on it in the game's networks.) -/
-noncomputable def checkStreams (g S dp : ℝ) : ℝ × ℝ := ((streams g S dp).1, 0)
+/-! ### A check valve's stream -/
 
+/-- The slope of softplus: 1 / (1 + e^-x). -/
+noncomputable def sigm (x : ℝ) : ℝ := 1 / (1 + Real.exp (-x))
+
+theorem sigm_pos (x : ℝ) : 0 < sigm x := by
+  unfold sigm
+  have := Real.exp_pos (-x)
+  positivity
+
+theorem sigm_lt_one (x : ℝ) : sigm x < 1 := by
+  unfold sigm
+  have := Real.exp_pos (-x)
+  rw [div_lt_one (by positivity)]
+  linarith
+
+theorem softplus_mono {x y : ℝ} (h : x ≤ y) : softplus x ≤ softplus y := by
+  unfold softplus
+  exact Real.log_le_log (by linarith [Real.exp_pos x]) (by linarith [Real.exp_le_exp.2 h])
+
+/-- e^(s d) lies under the chord from 1 to e^d. -/
+theorem exp_chord {s : ℝ} (d : ℝ) (h0 : 0 ≤ s) (h1 : s ≤ 1) :
+    Real.exp (s * d) ≤ (1 - s) + s * Real.exp d := by
+  have a : Real.exp (s * d) * (1 + (d - s * d)) ≤ Real.exp d := by
+    have h := Real.add_one_le_exp (d - s * d)
+    have e : Real.exp d = Real.exp (s * d) * Real.exp (d - s * d) := by
+      rw [← Real.exp_add]
+      ring_nf
+    rw [e]
+    exact mul_le_mul_of_nonneg_left (by linarith) (Real.exp_pos _).le
+  have b : Real.exp (s * d) * (1 + (0 - s * d)) ≤ 1 := by
+    have h := Real.add_one_le_exp (-(s * d))
+    have e : Real.exp (s * d) * Real.exp (-(s * d)) = 1 := by
+      rw [← Real.exp_add]
+      simp
+    rw [← e]
+    exact mul_le_mul_of_nonneg_left (by linarith) (Real.exp_pos _).le
+  have key : Real.exp (s * d) =
+      s * (Real.exp (s * d) * (1 + (d - s * d))) + (1 - s) * (Real.exp (s * d) * (1 + (0 - s * d))) := by ring
+  have a' := mul_le_mul_of_nonneg_left a h0
+  have b' := mul_le_mul_of_nonneg_left b (sub_nonneg.2 h1)
+  linarith
+
+/-- **softplus lies above its tangents** (it is convex). -/
+theorem softplus_tangent (y0 y : ℝ) : softplus y0 + sigm y0 * (y - y0) ≤ softplus y := by
+  have hs0 : 0 ≤ sigm y0 := (sigm_pos y0).le
+  have hs1 : sigm y0 ≤ 1 := (sigm_lt_one y0).le
+  have hA : 0 < 1 + Real.exp y0 := by linarith [Real.exp_pos y0]
+  have hse : sigm y0 * (1 + Real.exp y0) = Real.exp y0 := by
+    unfold sigm
+    rw [Real.exp_neg]
+    have := (Real.exp_pos y0).ne'
+    field_simp
+    ring
+  have c := mul_le_mul_of_nonneg_left (exp_chord (y - y0) hs0 hs1) hA.le
+  have e : Real.exp y = Real.exp y0 * Real.exp (y - y0) := by
+    rw [← Real.exp_add]
+    ring_nf
+  have h : (1 + Real.exp y0) * Real.exp (sigm y0 * (y - y0)) ≤ 1 + Real.exp y := by
+    have i : (1 + Real.exp y0) * ((1 - sigm y0) + sigm y0 * Real.exp (y - y0)) =
+        1 + Real.exp y0 * Real.exp (y - y0) := by
+      linear_combination (Real.exp (y - y0) - 1) * hse
+    rw [e, ← i]
+    exact c
+  have l := Real.log_le_log (mul_pos hA (Real.exp_pos _)) h
+  rw [Real.log_mul hA.ne' (Real.exp_pos _).ne', Real.log_exp] at l
+  unfold softplus
+  exact l
+
+/-- Java's softplus with both cuts (`Network.spc`): x itself above 30. -/
+noncomputable def spc (x : ℝ) : ℝ := if 30 < x then x else spCode x
+
+/-- CRACK: a check valve's stream starts one band above balance. -/
+def crack : ℝ := 1
+
+/-- `Network.checkSp`: softplus(x - CRACK) less its tangent at 0, rescaled to the pipe's slope far above. -/
+noncomputable def checkSp (x : ℝ) : ℝ :=
+  if x ≤ 0 then 0 else (spc (x - crack) - spc (-crack) - sigm (-crack) * x) / (1 - sigm (-crack))
+
+/-- How far a check valve's stream lags a pipe's far above balance, in bands (about 1.8). -/
+noncomputable def checkLag : ℝ := (1 + softplus (-1)) / (1 - sigm (-1))
+
+/-- **The check valve's shape**: nothing at or under balance, exactly; never negative, never more than a pipe's
+flow, and never more than checkLag behind it. -/
+theorem checkSp_spec (x : ℝ) :
+    (x ≤ 0 → checkSp x = 0) ∧ 0 ≤ checkSp x ∧ checkSp x ≤ max 0 x ∧ x - checkLag ≤ checkSp x := by
+  have hD : 0 < 1 - sigm (-1) := by linarith [sigm_lt_one (-1)]
+  have hL : 0 < softplus (-1) := softplus_pos _
+  have hlag : 0 < checkLag := by
+    unfold checkLag
+    positivity
+  have hm : spc (-1) = softplus (-1) := by
+    unfold spc spCode
+    norm_num
+  rcases le_or_gt x 0 with hx | hx
+  · have h0 : checkSp x = 0 := by
+      unfold checkSp
+      simp only [hx, ↓reduceIte]
+    refine ⟨fun _ => h0, ?_, ?_, ?_⟩
+    · rw [h0]
+    · rw [h0]
+      exact le_max_left 0 x
+    · rw [h0]
+      linarith
+  · have hv : checkSp x = (spc (x - 1) - softplus (-1) - sigm (-1) * x) / (1 - sigm (-1)) := by
+      unfold checkSp crack
+      simp only [not_le.2 hx, ↓reduceIte, hm]
+    have hlagx : x - checkLag = ((1 - sigm (-1)) * x - (1 + softplus (-1))) / (1 - sigm (-1)) := by
+      unfold checkLag
+      field_simp
+    refine ⟨fun h => absurd h (not_le.2 hx), ?_, ?_, ?_⟩
+    · rw [hv]
+      refine div_nonneg ?_ hD.le
+      by_cases h : 30 < x - 1
+      · have e : spc (x - 1) = x - 1 := by
+          unfold spc
+          simp only [h, ↓reduceIte]
+        have hL1 : softplus (-1) ≤ 1 := (softplus_le_exp _).trans (Real.exp_le_one_iff.2 (by norm_num))
+        have hs : sigm (-1) ≤ 1 / 2 := by
+          unfold sigm
+          rw [neg_neg, div_le_div_iff₀ (by positivity) (by norm_num)]
+          linarith [Real.add_one_le_exp (1 : ℝ)]
+        rw [e]
+        nlinarith
+      · have e : spc (x - 1) = softplus (x - 1) := by
+          unfold spc spCode
+          have : ¬ x - 1 < -30 := by linarith
+          simp only [h, this, ↓reduceIte]
+        have t := softplus_tangent (-1) (x - 1)
+        rw [e]
+        linarith
+    · rw [hv, max_eq_right hx.le, div_le_iff₀ hD]
+      by_cases h : 30 < x - 1
+      · have e : spc (x - 1) = x - 1 := by
+          unfold spc
+          simp only [h, ↓reduceIte]
+        rw [e]
+        linarith
+      · have e : spc (x - 1) = softplus (x - 1) := by
+          unfold spc spCode
+          have : ¬ x - 1 < -30 := by linarith
+          simp only [h, this, ↓reduceIte]
+        have n := softplus_neg (1 - x)
+        have n1 := softplus_neg (1 : ℝ)
+        have m := softplus_mono (show 1 - x ≤ 1 by linarith)
+        rw [show -(1 - x) = x - 1 by ring] at n
+        rw [e]
+        linarith
+    · rw [hv, hlagx]
+      refine div_le_div_of_nonneg_right ?_ hD.le
+      by_cases h : 30 < x - 1
+      · have e : spc (x - 1) = x - 1 := by
+          unfold spc
+          simp only [h, ↓reduceIte]
+        rw [e]
+        linarith
+      · have e : spc (x - 1) = softplus (x - 1) := by
+          unfold spc spCode
+          have : ¬ x - 1 < -30 := by linarith
+          simp only [h, this, ↓reduceIte]
+        rw [e]
+        linarith [softplus_gt (x - 1)]
+
+/-- `Network.streams` for a check valve: one forward stream g S checkSp(dp / S), and nothing back. (A hard
+max(0, dp) put a kink where a valve sits balanced, and Newton stalled on it in the game's networks; a softplus
+passed its tail g S e^(dp / S) through a shut valve, and a dead end behind one drained through it.) -/
+noncomputable def checkStreams (g S dp : ℝ) : ℝ × ℝ := (g * S * checkSp (dp / S), 0)
+
+/-- **A check valve passes nothing at or against balance**, exactly; forward it passes no more than a pipe would
+and no less than a pipe at checkLag bands less; and nothing backward at all. -/
 theorem checkStreams_spec {g S : ℝ} (hg : 0 ≤ g) (hS : 0 < S) (dp : ℝ) :
-    g * max 0 dp ≤ (checkStreams g S dp).1 ∧ 0 ≤ (checkStreams g S dp).1 ∧ (checkStreams g S dp).2 = 0 := by
-  have hnn : 0 ≤ (streams g S dp).1 := (streams_nonneg hg hS dp).1
-  have hge : g * dp ≤ (streams g S dp).1 := by
-    unfold streams
-    by_cases h : 30 < dp / S
-    · simp only [h, ↓reduceIte, le_refl]
-    · simp only [h, ↓reduceIte]
-      have h1 : dp / S < spCode (dp / S) := spCode_gt _
-      have h2 : dp < S * spCode (dp / S) := by
-        have := mul_lt_mul_of_pos_left h1 hS
-        rwa [mul_div_cancel₀ dp hS.ne'] at this
-      nlinarith
-  refine ⟨?_, hnn, rfl⟩
-  unfold checkStreams
-  rcases le_total 0 dp with h | h
-  · rw [max_eq_right h]; exact hge
-  · rw [max_eq_left h, mul_zero]; exact hnn
+    (dp ≤ 0 → (checkStreams g S dp).1 = 0) ∧ 0 ≤ (checkStreams g S dp).1 ∧
+    (checkStreams g S dp).1 ≤ g * max 0 dp ∧ g * (dp - checkLag * S) ≤ (checkStreams g S dp).1 ∧
+    (checkStreams g S dp).2 = 0 := by
+  obtain ⟨h0, hnn, hle, hlag⟩ := checkSp_spec (dp / S)
+  have hgS : 0 ≤ g * S := mul_nonneg hg hS.le
+  have hdp : S * (dp / S) = dp := by field_simp
+  have e : (checkStreams g S dp).1 = g * S * checkSp (dp / S) := rfl
+  refine ⟨fun h => ?_, ?_, ?_, ?_, rfl⟩
+  · rw [e, h0 (div_nonpos_of_nonpos_of_nonneg h hS.le), mul_zero]
+  · rw [e]
+    exact mul_nonneg hgS hnn
+  · rw [e]
+    have h1 : S * max 0 (dp / S) = max 0 dp := by
+      rw [mul_max_of_nonneg _ _ hS.le, mul_zero, hdp]
+    calc g * S * checkSp (dp / S) ≤ g * S * max 0 (dp / S) := mul_le_mul_of_nonneg_left hle hgS
+      _ = g * max 0 dp := by rw [mul_assoc, h1]
+  · rw [e]
+    calc g * (dp - checkLag * S) = g * S * (dp / S - checkLag) := by
+          conv_lhs => rw [← hdp]
+          ring
+      _ ≤ g * S * checkSp (dp / S) := mul_le_mul_of_nonneg_left hlag hgS
 
 /-! ### What the streams carry -/
 

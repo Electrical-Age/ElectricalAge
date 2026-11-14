@@ -32,6 +32,8 @@ open FluidSpec.Limiter
 #print axioms FluidSpec.Flux.streams_close
 #print axioms FluidSpec.Flux.streams_mirror
 #print axioms FluidSpec.Flux.streams_mirror_band
+#print axioms FluidSpec.Flux.softplus_tangent
+#print axioms FluidSpec.Flux.checkSp_spec
 #print axioms FluidSpec.Flux.checkStreams_spec
 #print axioms FluidSpec.Flux.carried_same
 #print axioms FluidSpec.Flux.carried_has

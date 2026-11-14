@@ -175,6 +175,13 @@ class FluxShapeTest {
                 last = v[0];
             }
         }
+        // (the spec's checkSp_spec: never more than a pipe's flow, never more than the lag behind it)
+        double lag = (1 + Math.log1p(Math.exp(-1))) / (1 - 1 / (1 + Math.E));
+        for (double x = -5; x <= 60; x += 0.0173) {
+            double v = Network.checkSp(x);
+            assertTrue(v <= Math.max(0, x) && v >= x - lag - 1e-12, "a check valve's stream between a pipe's and one the lag behind, at " + x);
+        }
+        assertEquals(60 - lag, Network.checkSp(60), 1e-12, "a check valve's stream far above");
         assertEquals(1, Network.checkSg(60), 1e-12, "a check valve's slope far above");
         assertEquals(1, Network.checkGate(60)[0], 1e-12, "a gate open far above");
         assertEquals(1, Network.checkRoot(60)[1], 1e-3, "a root law's drive rises as x far above");
