@@ -59,9 +59,9 @@ public final class OilLakeCases {
                 double perKg = furnace.heatPerKgAtBurner(), want = reg.byId(id).heatingValue * mods.eln.ElnConfig.heatFurnaceFuelFactor;
                 if (in != 10) bad += "the furnace refuses " + c + "; ";
                 else if (Math.abs(perKg - want) > 1e-6 * want || want <= 0) bad += String.format("%s gives %.0f J/kg at its burner (want %.0f); ", c, perKg, want);
-                int toGt = gt.tank.fill(new FluidStack(c.source.get(), 10), false);
-                if (c == Oil.Cut.HEAVYOIL && toGt != 10) bad += "the gas turbine refuses heavy oil; ";
-                if (c == Oil.Cut.RESIDUE && toGt != 0) bad += "the gas turbine takes residue; ";
+                boolean toGt = gt.fuelIn.takes(id);
+                if (c == Oil.Cut.HEAVYOIL && !toGt) bad += "the gas turbine refuses heavy oil; ";
+                if (c == Oil.Cut.RESIDUE && toGt) bad += "the gas turbine takes residue; ";
             }
         }
 

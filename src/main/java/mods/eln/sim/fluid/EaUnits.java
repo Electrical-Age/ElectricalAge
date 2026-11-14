@@ -243,6 +243,17 @@ public final class EaUnits {
         return m;
     }
 
+    /** The heating value (J/kg) of the layer species id is in: its species' by their shares. */
+    public static double layerHeatingValue(FluidNode n, int id) {
+        double total = layerLiquid(n, id);
+        if (total <= 0) return 0;
+        int layer = n.layerOf(id);
+        SpeciesRegistry reg = SpeciesRegistry.get();
+        double hv = 0;
+        for (int j = 2; j < n.speciesBound(); j++) if (n.layerOf(j) == layer) hv += n.liquid(j) / total * reg.byId(j).heatingValue;
+        return hv;
+    }
+
     /**
      * How much of the layer species ids[0] is in matches the shares given for ids (1 - total variation distance, 0..1):
      * 1 for a layer in exactly those proportions, the matching share for a layer of one of them, less for anything else

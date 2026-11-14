@@ -37,6 +37,8 @@ public final class GasPlantCases {
         cases.add(new MotorStart());
         cases.add(new NoSelfStart());
         cases.add(new RealGas());
+        cases.add(new LowHead());
+        cases.add(new LegacyTank());
         cases.add(new SteamRaiser());
         cases.add(new StackMergesAndSplits());
         cases.add(new Reheat());
@@ -122,7 +124,7 @@ public final class GasPlantCases {
                 }));
             }
             var fuels = FuelRegistry.INSTANCE.fluidListToFluids(FuelRegistry.INSTANCE.getGasolineList());
-            if (fuels.length > 0 && bucketFuel) gt.tank.fill(new FluidStack(fuels[0], GasTurbineElement.TANK_MB), true);
+            if (fuels.length > 0 && bucketFuel) gt.putFuel(fuels[0], GasTurbineElement.TANK_MB / 2);
         }
     }
 
@@ -215,7 +217,7 @@ public final class GasPlantCases {
                 if (tick == 500) {
                     kg0 = main.vapour(ng());
                     f0 = l.gt.totalFuelJ;
-                    tank0 = l.gt.tank.getFluidAmount();
+                    tank0 = l.gt.fuelGasKg();
                 }
             });
         }
@@ -224,10 +226,9 @@ public final class GasPlantCases {
             Eln.simulator.removeSlowProcess(watch);
             Eln.simulator.removeElectricalComponent(l.load);
             mods.eln.fluid.FluidWorld.remove(fx);
-            double perMb = mods.eln.fluid.FluidSpecies.kgPerMb(ng(), true);
-            double burnt = (kg0 - main.vapour(ng())) - (l.gt.tank.getFluidAmount() - tank0) * perMb, fuel = l.gt.totalFuelJ - f0, secs = (tick - 500) / 20.0;
-            String what = String.format("lit at %.1f s, load at %.1f s; %.3f g/s of gas, %.1f kW fuel heat (%.1f MJ/kg), tank %d mB, main %.2f bar; %s",
-                lit / 20.0, full / 20.0, burnt / secs * 1000, fuel / secs / 1000, fuel / Math.max(1e-12, burnt) / 1e6, l.gt.tank.getFluidAmount(), main.P() / 1e5, l.gt.getWaila());
+            double burnt = (kg0 - main.vapour(ng())) - (l.gt.fuelGasKg() - tank0), fuel = l.gt.totalFuelJ - f0, secs = (tick - 500) / 20.0;
+            String what = String.format("lit at %.1f s, load at %.1f s; %.3f g/s of gas, %.1f kW fuel heat (%.1f MJ/kg), vessel %.2f g, main %.2f bar; %s",
+                lit / 20.0, full / 20.0, burnt / secs * 1000, fuel / secs / 1000, fuel / Math.max(1e-12, burnt) / 1e6, l.gt.fuelGasKg() * 1000, main.P() / 1e5, l.gt.getWaila());
             ctx.line("gas turbine on real gas: " + what);
             ctx.check("gas turbine on natural gas: lights and carries its 7 kW load", lit > 0 && full > 0, what);
             ctx.check("gas turbine on natural gas: 50 MJ/kg (within 5 %)", Math.abs(fuel / Math.max(1e-12, burnt) - 50e6) < 2.5e6, what);
@@ -238,7 +239,7 @@ public final class GasPlantCases {
     /** Without a starter it can't light: it stays still and uses no fuel. */
     static final class NoSelfStart extends PlumbingCases.Big {
         GasLine l;
-        int fuel0;
+        double fuel0;
 
         public String id() {
             return "gas_turbine_cannot_self_start";
@@ -250,14 +251,107 @@ public final class GasPlantCases {
 
         public void build(TestContext ctx) {
             l = new GasLine(ctx, false, 1000);
-            fuel0 = l.gt.tank.getFluidAmount();
+            fuel0 = l.gt.fuelMb();
         }
 
         public void measure(TestContext ctx) {
             Eln.simulator.removeElectricalComponent(l.load);
-            ctx.check("gas turbine without a starter: still, no fuel used", l.gt.getShaft().getRads() < 1 && l.gt.tank.getFluidAmount() == fuel0 && fuel0 > 0,
-                String.format("%.1f rad/s, %d of %d mB", l.gt.getShaft().getRads(), l.gt.tank.getFluidAmount(), fuel0));
+            ctx.check("gas turbine without a starter: still, no fuel used", l.gt.getShaft().getRads() < 1 && Math.abs(l.gt.fuelMb() - fuel0) < 0.01 * fuel0 && fuel0 > 0 && l.gt.totalFuelJ == 0,
+                String.format("%.1f rad/s, %.0f of %.0f mB", l.gt.getShaft().getRads(), l.gt.fuelMb(), fuel0));
             ctx.check("gas turbine without a starter: Jade says it needs one", l.gt.status().startsWith("Needs a starter"), l.gt.status());
+        }
+    }
+
+    /**
+     * Gasoline under a low head (an open tank, 0.3 m of it over the fuel flange) and a motor-started turbine: the
+     * sealed fuel vessel takes only what squeezes its air cap at first, enough to light; running, the turbine lets the
+     * cap out through its burner, so the vessel fills (well past what the head alone would push in).
+     */
+    static final class LowHead extends PlumbingCases.Big {
+        GasLine l;
+        IProcess watch;
+        FluidDevice fx;
+        FluidNode main;
+        int tick, lit = -1;
+        double atLight;
+
+        public String id() {
+            return "gas_turbine_low_head_fuel";
+        }
+
+        public int ticks() {
+            return 900;
+        }
+
+        public void build(TestContext ctx) {
+            l = new GasLine(ctx, true, 7000, false);
+            int gasoline = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:gasoline");
+            main = new FluidNode(1.0, ctx.at(2, 2, 5).getY(), 1.0, false).fill(0, mods.eln.sim.fluid.Water.P_ATM, 293.15);
+            mods.eln.sim.fluid.EaUnits.add(main, gasoline, 0.8 * 740, 293.15, false);
+            main.mAir *= 0.2;   // (open to the air: 1 atm over the liquid)
+            main.energy = main.energyAt(293.15);
+            main.update();
+            fx = fixtures(l.gt.fluidLevel(), new Object[]{ctx.at(2, 2, 5), 0, main});
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                tick++;
+                l.tick();
+                if (lit < 0 && l.gt.burning) {
+                    lit = tick;
+                    atLight = l.gt.fuelMb();
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            Eln.simulator.removeElectricalComponent(l.load);
+            mods.eln.fluid.FluidWorld.remove(fx);
+            String what = String.format("lit at %.1f s with %.0f mB; now %.0f mB at %.2f bar, tank over it %.2f bar; %s", lit / 20.0, atLight, l.gt.fuelMb(),
+                l.gt.fuelIn.vessel.P() / 1e5, main.P() / 1e5, l.gt.getWaila());
+            ctx.line("gas turbine on a low head: " + what);
+            ctx.check("gas turbine on a low head of gasoline: it lights", lit > 0 && l.gt.totalFuelJ > 0, what);
+            ctx.check("gas turbine on a low head of gasoline: running, its vessel fills (over 3 B; the head alone squeezes in under 1 B)",
+                l.gt.fuelMb() > 3000, what);
+        }
+    }
+
+    /** An old save's fuel tank ("fuel", 8 buckets of gasoline) loads into the fuel vessel, at 1 atm. */
+    static final class LegacyTank extends PlumbingCases.Big {
+        String legacy = "not run";
+
+        public String id() {
+            return "gas_turbine_legacy_tank";
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(2, 1, 2);
+            ctx.placeTransparent(GAS_TURBINE, p);
+            var fuels = FuelRegistry.INSTANCE.fluidListToFluids(new String[]{"gasoline"});
+            ctx.after(2, () -> {
+                try {
+                    var r = mods.eln.gametest.Reload.node(ctx.level(), p, t -> {
+                        var el = OilCases.FuelBySpecies.holding(t, "fuelInVesselW");
+                        for (String k : new String[]{"W", "A", "U", "S", "Fv"}) el.remove("fuelInVessel" + k);
+                        var old = new mods.eln.fluid.ElementFluidHandler(GasTurbineElement.TANK_MB);
+                        old.fill(new FluidStack(fuels[0], 8000), true);
+                        old.writeToNBT(el, "fuel");
+                        return t;
+                    });
+                    var gt = (GasTurbineElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                    double mb = gt.fuelMb(), bar = gt.fuelIn.vessel.P() / 1e5;
+                    legacy = Math.abs(mb - 8000) < 80 && bar > 0.95 && bar < 1.3 ? "" : String.format("%.0f mB at %.2f bar; %s", mb, bar, gt.getWaila());
+                } catch (ReflectiveOperationException e) {
+                    legacy = e.toString();
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("gas turbine: an old save's 8 B of gasoline is in its fuel vessel at about 1 atm", legacy.isEmpty(), legacy);
         }
     }
 

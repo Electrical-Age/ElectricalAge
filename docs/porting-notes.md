@@ -173,6 +173,18 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   Neither product vents or leaves without a pipe: an outlet that is full stops the cracker as before. Rates,
   ratios and power are unchanged. `steam_cracker` (4000 mB of steam crack ~266 mB, was 320),
   `steam_cracker_legacy_tanks`, `oil_on_pipes_cracker_*`.
+- Gas turbine's fuel on a fluid node (2026-11-14, `fluid/DeviceInlet`): its 16-bucket fuel tank is a sealed vessel
+  behind its top flange, filled by the line's pressure or head through a filling valve (the old port pulled 2000
+  mB/s out of the run whatever the pressure). It takes gasoline, diesel and heavy oil as liquids and natural gas as
+  gas, through the one flange. Burning, it takes the vessel's gas first, the whole mix down to 1 atm (the fuel gas
+  in it burns; the air a new line pushed ahead leaves through the burner, so a liquid under a low head fills the
+  vessel once the turbine runs: at standstill the head only squeezes the air cap, which is enough to light), then
+  the liquid fuel layer, every species in it by its share. Gameplay: fuel now counts at the species' real heating
+  values, as the fuel heat furnace's (gasoline 44 MJ/kg = ~2200 J/mB, was 1743; diesel 43 MJ/kg = ~2440 J/mB, was
+  2640; heavy oil 41 MJ/kg; natural gas unchanged at 50 MJ/kg), fuel gas under 1 atm can't be burnt (Jade says
+  so), water in the vessel drains, and another liquid (crude, residue) stays and blocks it, named by Jade. Other
+  mods' fuels that are not fluid species no longer go in. `gas_turbine_low_head_fuel`, `gas_turbine_legacy_tank`,
+  `gas_turbine_real_gas`, `oil_on_pipes_turbine_fuel`.
 - Flare stack on a fluid node: its 4-bucket tank is a fluid node behind its front flange (half way up; buckets put
   any species in). Its tip passes every gas over the air's pressure between steps, each species by its share: natural
   gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took

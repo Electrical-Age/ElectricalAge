@@ -921,7 +921,7 @@ public final class OilCases {
                     ctx.check("oil on pipes: the fuel heat furnace's tank filled from the pipe on its front flange", got > 10, String.format("%.0f mB, %s", got, east.getWaila()));
                 }
                 case "turbine_fuel" -> {
-                    int f = ((mods.eln.mechanical.GasTurbineElement) east).tank.getFluidAmount();
+                    double f = ((mods.eln.mechanical.GasTurbineElement) east).fuelMb();
                     ctx.check("oil on pipes: the gas turbine's fuel tank filled from the pipe", f > 500, f + " mB of fuel, tank " + tank.getWaila());
                 }
             }

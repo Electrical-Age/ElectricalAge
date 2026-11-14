@@ -103,7 +103,7 @@ public final class ShaftMoreCases {
         final double rads;
         final boolean burns;
         TransparentNodeElement[] parts;
-        int filled;
+        double filled;
         String fluid = "none";
 
         GasTurbineCase(double rads, boolean burns) {
@@ -121,7 +121,8 @@ public final class ShaftMoreCases {
             Fluid[] fuels = FuelRegistry.INSTANCE.fluidListToFluids(FuelRegistry.INSTANCE.getGasolineList());
             if (fuels.length == 0) return;
             fluid = FuelRegistry.INSTANCE.fluidName(fuels[0]);
-            filled = ((mods.eln.mechanical.GasTurbineElement) parts[0]).tank.fill(new FluidStack(fuels[0], 1000), true);
+            ((mods.eln.mechanical.GasTurbineElement) parts[0]).putFuel(fuels[0], 1000);
+            filled = ((mods.eln.mechanical.GasTurbineElement) parts[0]).fuelMb();
         }
 
         public void measure(TestContext ctx) {
@@ -130,14 +131,13 @@ public final class ShaftMoreCases {
                 ctx.check(what + ": tank takes gasoline", false, "fluid " + fluid + ", filled " + filled + " mB");
                 return;
             }
-            FluidStack left = ((mods.eln.mechanical.GasTurbineElement) parts[0]).tank.drain(Integer.MAX_VALUE, false);
-            int mb = left == null ? 0 : left.getAmount();
+            double mb = ((mods.eln.mechanical.GasTurbineElement) parts[0]).fuelMb();
             double now = shaft(parts[0]).getRads();
             if (burns) {
-                ctx.check(what + ": burns fuel", mb < filled, String.format("%s %d -> %d mB", fluid, filled, mb));
+                ctx.check(what + ": burns fuel", mb < 0.99 * filled, String.format("%s %.1f -> %.1f mB", fluid, filled, mb));
                 ctx.check(what + ": holds the shaft near its speed (over 790 rad/s)", now > 790, String.format("%.2f rad/s", now));
             } else {
-                ctx.check(what + ": below cutoff, no fuel used", mb == filled, String.format("%s %d -> %d mB", fluid, filled, mb));
+                ctx.check(what + ": below cutoff, no fuel used", Math.abs(mb - filled) < 0.01 * filled, String.format("%s %.1f -> %.1f mB", fluid, filled, mb));
                 ctx.check(what + ": no power: it only slows (windage)", now <= rads, String.format("%.4f rad/s", now));
             }
         }

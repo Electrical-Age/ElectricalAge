@@ -141,6 +141,11 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   its flange keeps the old PortBridge stub's key `fuelIn*`. An older save's `tank*` (a 4-bucket fluid tank) is read
   only when `fuelInVesselW` is absent and goes into the vessel at the ambient; `drainCarry` is no longer read or
   written (under 1 mB). The vessel is the old tank's size at its 90 % filling level. `carbon_burner_legacy_tank`.
+- Gas turbine (2026-11-14, `DeviceInlet`): its fuel vessel is saved as `fuelInVessel*`, and the stub behind its top
+  flange keeps the old PortBridge stub's key `fuelIn*`. An older save's `fuel*` (a 16-bucket fluid tank) is read
+  only when `fuelInVesselW` is absent and goes into the sealed vessel at the ambient, with the air that fits over it
+  at 1 atm; its `fuelfixup` is dropped (under 1 mB). `fuelBank` is fuel heat (J) taken out of the vessel and not
+  yet burnt. `gas_turbine_legacy_tank`.
 - 230V compressor with latex ports (2026-11-14, `DeviceInlet` + `DeviceOutlet`): its IN vessel is saved as
   `latexInVessel*`, its OUT vessel as `latexOutVessel*` (`DeviceOutlet.keys`), and the nodes behind its flanges keep
   the old PortBridge stubs' keys `latexIn*` and `latexOut*`; `latexOwed` is latex a pressing used that the next fluid

@@ -324,7 +324,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         if (rest <= 0) return
         val id = burnerLayer(v)
         if (id < 0) return
-        val hv = layerHeatingValue(v, id)
+        val hv = mods.eln.sim.fluid.EaUnits.layerHeatingValue(v, id)
         if (hv <= 0) return
         val f = mods.eln.ElnConfig.heatFurnaceFuelFactor
         val index = layerCoking(v, id)
@@ -365,17 +365,6 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     var steamedKg = 0.0
     private var steamPuff = 0
 
-    /** The heating value (J/kg) of the layer species id is in: its species' by their shares. */
-    private fun layerHeatingValue(v: mods.eln.sim.fluid.FluidNode, id: Int): Double {
-        val total = mods.eln.sim.fluid.EaUnits.layerLiquid(v, id)
-        if (total <= 0) return 0.0
-        val layer = v.layerOf(id)
-        val reg = mods.eln.sim.fluid.SpeciesRegistry.get()
-        var hv = 0.0
-        for (j in 2 until v.speciesBound()) if (v.layerOf(j) == layer) hv += v.liquid(j) / total * reg.byId(j).heatingValue
-        return hv
-    }
-
     /** The coking index of the layer species id is in: its species' `coking` by their shares. */
     private fun layerCoking(v: mods.eln.sim.fluid.FluidNode, id: Int): Double {
         val total = mods.eln.sim.fluid.EaUnits.layerLiquid(v, id)
@@ -399,7 +388,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val v = vessel ?: return 0.0
         val id = burnerLayer(v)
         if (id < 0 || id == mods.eln.sim.fluid.SpeciesRegistry.WATER) return 0.0
-        return layerHeatingValue(v, id) * mods.eln.ElnConfig.heatFurnaceFuelFactor
+        return mods.eln.sim.fluid.EaUnits.layerHeatingValue(v, id) * mods.eln.ElnConfig.heatFurnaceFuelFactor
     }
 
     /** Put mB of fluid into its tank at the ambient, as a bucket would (a mixture alias dead: crude as its cuts). */

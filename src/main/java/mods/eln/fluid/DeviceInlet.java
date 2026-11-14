@@ -200,6 +200,12 @@ public final class DeviceInlet {
         return null;
     }
 
+    /** A species in the feed layer (for EaUnits' layer calls), or -1 if the vessel holds no feed. */
+    public int feedId() {
+        int[] f = feed();
+        return f == null ? -1 : f[1];
+    }
+
     /** The feed in the vessel (mB of the fluid it counts as). */
     public double feedMb() {
         int[] f = feed();
