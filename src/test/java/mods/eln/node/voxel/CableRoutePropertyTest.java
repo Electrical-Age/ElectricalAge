@@ -104,6 +104,13 @@ public class CableRoutePropertyTest {
         return over == 3 || over == 2 && touch == 1;
     }
 
+    /** A sample the property once failed on: a thin cable along a wall turns onto the floor at a block boundary,
+     *  where the wall's run can't reach on within its block; a short piece in the next block joins the two. */
+    @net.jqwik.api.Example
+    void wallToFloorAtABlockBoundaryIsJoined() {
+        routesAreWholeAndOutOfTheWay(211, 0, 4, 3, 6, 6);
+    }
+
     @Property(tries = 1000)
     void routesAreWholeAndOutOfTheWay(@ForAll long seed, @ForAll @IntRange(min = 0, max = 4) int tier, @ForAll @IntRange(min = 0, max = SX - 1) int ax, @ForAll @IntRange(min = 0, max = SZ - 1) int az,
                                       @ForAll @IntRange(min = 0, max = SX - 1) int bx, @ForAll @IntRange(min = 0, max = SZ - 1) int bz) {

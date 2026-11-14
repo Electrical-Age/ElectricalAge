@@ -191,8 +191,10 @@ public final class CableRouter {
             if (a.attach != b.attach) {   // inner corner: same point, new face
                 // (a run along the corner's edge, which only a stretch through the air allows, reaches on as round an
                 // outer corner: a one-voxel cable dropping off a ceiling met its run along the floor at an edge only)
-                alongEdge(poly, curKey, a.attach, b.attach, width);
+                long[] on = alongEdge(poly, curKey, a.attach, b.attach, width);
                 flush(out, curKey, poly);
+                // (at a block boundary the run can't reach on: a short piece on its face in the next block does)
+                if (on != null) stub(out, poly.get(poly.size() - 1), on, a.attach);
                 curKey = null;
                 poly = null;
                 inner = new int[]{a.attach, b.attach};
@@ -258,12 +260,28 @@ public final class CableRouter {
     /**
      * A run that comes along the edge to an outer corner ends at the corner point, but the next run's cross-section there
      * is the cable's width round it: reach on by that half of the width (as a bend inside a piece does), within the block.
+     * Returns where it should have reached if the block ends first, else null.
      */
-    private static void alongEdge(List<long[]> poly, List<Long> key, int from, int to, int width) {
-        if (poly == null || key == null || poly.size() < 2) return;
-        int d = dirOf(poly.get(poly.size() - 2), poly.get(poly.size() - 1));
-        if (d < 0 || axis(d) == axis(from) || axis(d) == axis(to)) return;
-        reach(poly, key, d % 2 == 1 ? width - width / 2 : width / 2, true);
+    private static long[] alongEdge(List<long[]> poly, List<Long> key, int from, int to, int width) {
+        if (poly == null || key == null || poly.size() < 2) return null;
+        long[] end = poly.get(poly.size() - 1);
+        int d = dirOf(poly.get(poly.size() - 2), end);
+        if (d < 0 || axis(d) == axis(from) || axis(d) == axis(to)) return null;
+        int h = d % 2 == 1 ? width - width / 2 : width / 2;
+        if (h == 0 || reach(poly, key, h, true)) return null;
+        return new long[]{end[0] + DV[d][0] * h, end[1] + DV[d][1] * h, end[2] + DV[d][2] * h};
+    }
+
+    /** A straight piece from p to q on a face, in the block it lies in. */
+    private static void stub(List<Piece> out, long[] p, long[] q, int face) {
+        long[] mid = {Math.floorDiv(p[0] + q[0], 2), Math.floorDiv(p[1] + q[1], 2), Math.floorDiv(p[2] + q[2], 2)};
+        long[] cell = cell(mid, face, -1);
+        int[] local = new int[6];
+        for (int a = 0; a < 3; a++) {
+            local[a] = (int) (p[a] - cell[a] * 16);
+            local[3 + a] = (int) (q[a] - cell[a] * 16);
+        }
+        out.add(new Piece(cell[0], cell[1], cell[2], face, local));
     }
 
     /** ... and a run that leaves an outer corner along the edge reaches back by the other half. */
