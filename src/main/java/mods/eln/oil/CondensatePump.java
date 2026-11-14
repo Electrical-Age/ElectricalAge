@@ -14,9 +14,11 @@ public final class CondensatePump {
      * Shut-off head over the turbine's rated inlet pressure; the back-pressure (over that rating) at which it still passes
      * RATED_MARGIN times the condensate. A governed turbine throttles, so its boiler sits well above its rating (a 10 bar
      * turbine's at ~14 bar, AdventurAgent on live): a turbine at its rating returns its own condensate while its boiler
-     * stays under ~1.5x, and an "overclocked" boiler past ~1.8x needs an inline pump (Baughn).
+     * stays under ~1.5x, and an "overclocked" boiler past ~1.6x needs an inline pump (Baughn). The shut-off is 1.8x
+     * (Baughn 2026-11-14; it was 2x): full boilers shut their feed floats and the line stands at this head, 18 bar for a
+     * 10 bar turbine, which iron pipe (20 bar) must take without its warning.
      */
-    public static final double SHUTOFF_OVER_NOMINAL = 2.0, RATED_OVER_NOMINAL = 1.5, RATED_MARGIN = 1.5;
+    public static final double SHUTOFF_OVER_NOMINAL = 1.8, RATED_OVER_NOMINAL = 1.5, RATED_MARGIN = 1.5;
     /** Shut-off head (Pa over the vessel), the rated back-pressure (Pa) and free flow (kg/s at full speed, no head). */
     public final double shutoffPa, ratedPa, freeKgPerS;
 

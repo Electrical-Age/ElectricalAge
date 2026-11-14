@@ -2187,7 +2187,7 @@ public final class OilCases {
      * one needs a pipe pump): a loaded 50V turbine on steam at boilerPa into a Small Steam Condenser whose front feeds a
      * boiler held at boilerPa (a fixed node, half water). At the rating (10 bar) the pump returns what the turbine
      * exhausts and the level holds, and so at 14 bar (a governed 10 bar turbine's boiler, AdventurAgent on live: the
-     * first cut's 13 bar shut-off flooded it); at 21 bar (past its 20 bar shut-off) it returns nothing and the vessel
+     * first cut's 13 bar shut-off flooded it); at 21 bar (past its 18 bar shut-off) it returns nothing and the vessel
      * fills; with a 200V Inline Pump between them at 21 bar it keeps up again.
      */
     static final class CondensateReturn extends PlumbingCases.Big {
@@ -3005,7 +3005,7 @@ public final class OilCases {
 
     /**
      * A sealed plant heated hard (Baughn: no caps; the pipe bursts, not the boiler): a boiler with one block of iron pipe
-     * on its top port, capped. The pressure climbs past 10 bar without pause, the pipe bursts at 40 and vents, and the
+     * on its top port, capped. The pressure climbs past 10 bar without pause, the pipe bursts at 25 and vents, and the
      * boiler survives.
      */
     static final class SealedPlant implements TestCase {

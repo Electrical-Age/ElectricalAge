@@ -55,6 +55,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   couldn't feed the HP's own 20 bar boiler. Its motor load now goes with the pressure it really pumps against. Speed
   still scales the flow only (the head stays at any speed). Was a straight line to a 15 bar shut-off for all.
   `CondensatePumpTest`, `oil_condensate_return_*`, `plant_condenser_pump_into_*`.
+  Shut-off 1.8 x since 2026-11-14 (Baughn; it was 2 x): boilers at their full mark shut their feed floats, the
+  condensate line then stands at the shut-off head, and 20 bar was over what its iron pipe works to. Small/Steam
+  Condenser: shut-off 18 bar, ~4.9 / 19.4 g/s at 10 bar, 3.0 / 11.9 at 15 (7.3 / 29 free), short of full-power
+  condensate above ~16.7 bar. Plant Steam Condenser: shut-off 36 bar, 97 g/s at 20 bar, 59 at 30 (145 free).
   Jade on both condensers, "Pump outlet": the pressure it works against and its flow there as a share of its rated
   (free) flow at its speed, or "shut off, needs a pipe pump" (Baughn 2026-11-03).
 - Iron pipe works to 20 bar and bursts at 25 (Baughn 2026-11-14; it was 10 and 40). A sound 10 bar plant's

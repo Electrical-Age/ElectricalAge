@@ -351,7 +351,7 @@ public final class ShaftPlantCases {
     /**
      * The plant condenser's condensate pump curve (Baughn 2026-11-03: sized to the HP turbine's 20 bar): primed with
      * water, its motor running, its front feeding a boiler held at boilerPa (a fixed node, half water). At 20 bar it
-     * returns more than a full HP's ~39 g/s; at 41 bar (past its 40 bar shut-off) nothing.
+     * returns more than a full HP's ~39 g/s; at 41 bar (past its 36 bar shut-off) nothing.
      */
     static final class PumpCurve extends PlumbingCases.Big {
         final double boilerPa;
