@@ -118,17 +118,30 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     a float vent and a vacuum breaker, as the furnace's tank.
   - Each stops making when its vessel is full or its vessel or line is at the 6 bar head, so a dead-ended line stops
     at it instead of the well's gas pushing it on (`oil_pump_dead_end`).
-- Industrial resin collector on a fluid node (2026-11-14, the first of the recipe machines whose private tanks become
-  vessels): its tank is an open basin with the same outlet pump (200 mB/s of latex free, shut-off at 6 bar) to the
-  flange on its top; latex goes in as it is tapped, not by the whole mB. Unpiped it still gives its latex to whatever
-  takes fluid above it. It stops tapping when the basin holds 4000 mB or its line is at 6 bar (it had stopped only on
-  a full tank, which a blocked line then filled). `resin_collector_taps`, `resin_collector_legacy_tank`.
   - Unpiped, the pump stands and the vessel's liquid goes into the block on the flange's face through its view
     (FluidExport), as the old push did; the pump's gas then leaves by a float vent to the air.
   - Their views name a liquid layer still in crude's proportions (80 % overlap, as the column's inlet) crude, so a
     bucket or another mod's pipe takes the pump's crude as crude (Baughn: buckets from the pump), though no one species
     of it is 90 %. Other devices' views keep the 90 % rule.
   `oil_pump_dead_end`, `oil_pump_legacy_tank`, `oil_separator_legacy_tank`.
+- Industrial resin collector on a fluid node (2026-11-14, the first of the recipe machines whose private tanks become
+  vessels): its tank is an open basin with the same outlet pump (200 mB/s of latex free, shut-off at 6 bar) to the
+  flange on its top; latex goes in as it is tapped, not by the whole mB. Unpiped it still gives its latex to whatever
+  takes fluid above it. It stops tapping when the basin holds 4000 mB or its line is at 6 bar (it had stopped only on
+  a full tank, which a blocked line then filled). `resin_collector_taps`, `resin_collector_legacy_tank`.
+- Carbon black burner on a fluid node (2026-11-14, `fluid/DeviceInlet`, the first inlet of the recipe machines): its
+  tank is a fuel vessel that the line on its IN flange fills through a filling valve at its top, a check valve it
+  opens by the room left under 90 % full (`Vessels.fillOpening`), so the vessel keeps a gas cap and never sees the
+  line's pressure. It burns in `beforeFluidStep`, between the view's sync and show. Gameplay:
+  - The inlet is passive: the line's pressure or head fills it. The old port pulled 200 mB/s from the whole run
+    whatever its pressure. Cold residue (50 Pa s) barely flows without pressure; hot from the tower it does.
+  - It takes whatever the line carries (the old port left a wrong fluid in the pipe). Its fuel is the lowest liquid
+    layer whose main species is residue or heavy oil, or one still in crude's proportions, burnt whole: a residue
+    layer with some diesel in it is residue. Water under it runs out of a drain at the floor (100 mB/s, lost: a
+    still's stripping steam condenses in every cut, and nothing else gets it out from under oil). Any other liquid
+    stays, and with no fuel over it Jade says what blocks the burner; the right fuel on top dilutes it until the
+    layer burns, and breaking the burner empties it. Gas that comes down the line leaves by its float vent.
+  `carbon_burner_water_drains`, `carbon_burner_wrong_oil`, `oil_on_pipes_carbon_burner_in`.
 - Flare stack on a fluid node: its 4-bucket tank is a fluid node behind its front flange (half way up; buckets put
   any species in). Its tip passes every gas over the air's pressure between steps, each species by its share: natural
   gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took

@@ -46,7 +46,8 @@ mods must address a multiblock's master block), simple nodes (gone; the exporter
   `ResourceHandler<FluidResource>` (e.g. the boiler: water in, steam out). Overrides: `mechanical/Turbines.kt`,
   `transparentnode/FuelHeatFurnace.kt`, `transparentnode/electricalmachine/OilSeparatorElement.java`,
   `transparentnode/electricalmachine/CompressorPortsElement.java` (its OUT tank),
-  `transparentnode/resincollector/IndustrialResinCollectorElement.java`, and in `oil/`:
+  `transparentnode/resincollector/IndustrialResinCollectorElement.java`,
+  `transparentnode/carbonblack/CarbonBlackBurnerElement.java` (its fuel vessel), and in `oil/`:
   `BoilerElement`, `SteamGeneratorElement`, `OilPumpElement`, `FlareStackElement`, `ColumnBaseElement`,
   `ColumnSegmentElement`.
 - Buckets: `TransparentNode.onBlockActivated` -> `fluid/FluidBuckets.use` on the same handler.

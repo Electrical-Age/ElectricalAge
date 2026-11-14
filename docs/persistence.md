@@ -137,6 +137,10 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   `vesselW` is absent and goes into the basin at the ambient, with its `carry` (latex made and not yet a whole mB;
   no longer written). The basin is the old tank's size at its rated 95 % fill, so a full tank loads with air over
   it. `resin_collector_legacy_tank`.
+- Carbon black burner (2026-11-14, `DeviceInlet`): its fuel vessel is saved as `fuelInVessel*`, and the stub behind
+  its flange keeps the old PortBridge stub's key `fuelIn*`. An older save's `tank*` (a 4-bucket fluid tank) is read
+  only when `fuelInVesselW` is absent and goes into the vessel at the ambient; `drainCarry` is no longer read or
+  written (under 1 mB). The vessel is the old tank's size at its 90 % filling level. `carbon_burner_legacy_tank`.
 - Flare stack (2026-11-11): its tank is a fluid node saved as `vessel*` (with `vesselFv`), plus `carry`. An older save's
   `tank*` (a 4-bucket fluid tank) and its flange stub `inlet*` (PortBridge) are read only when `vesselW` is absent and
   go into the vessel at the ambient (crude dead, as its cuts); a fluid no species names is dropped. Written back as

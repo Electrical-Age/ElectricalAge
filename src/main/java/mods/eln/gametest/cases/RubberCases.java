@@ -27,6 +27,7 @@ public final class RubberCases {
         cases.add(new ChainCase());
         cases.add(new TreeCase());
         for (String v : CollectorBasinCase.VARIANTS) cases.add(new CollectorBasinCase(v));
+        for (String v : BurnerVesselCase.VARIANTS) cases.add(new BurnerVesselCase(v));
         cases.add(new CarbonCase());
         cases.add(new DesulfuriserCase());
         cases.add(new SteamCrackerCase());
@@ -252,8 +253,7 @@ public final class RubberCases {
 
         public void build(TestContext c) {
             burner = (mods.eln.transparentnode.carbonblack.CarbonBlackBurnerElement) c.placeTransparent(0 + (93 << 6), c.at(2, 1, 1));
-            ((mods.eln.fluid.ElementFluidHandler) burner.getFluidHandler()).fill(
-                new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.Cut.RESIDUE.source.get(), 2000), true);
+            burner.putFuel(mods.eln.oil.Oil.Cut.RESIDUE.source.get(), 2000);
         }
 
         public void measure(TestContext c) {
@@ -263,6 +263,95 @@ public final class RubberCases {
             c.check("a carbon black compound vulcanises to 11 Rubber (Baughn: a filler)", h != null && h.out().get().getCount() == 11, String.valueOf(h));
             c.check("carbon black is a black dye (c:dyes/black)", new ItemStack(ElnRegistry.CARBON_BLACK.get()).is(net.minecraft.tags.TagKey.create(
                 net.minecraft.core.registries.Registries.ITEM, net.minecraft.resources.Identifier.parse("c:dyes/black"))), "");
+        }
+    }
+
+    /**
+     * The Carbon Black Burner's fuel vessel on the fluid core (its tank was a number outside it):
+     * <ul>
+     * <li>legacy_tank: an old save's tank (3000 mB of heavy oil) loads into the vessel, every kg, and it burns it;</li>
+     * <li>water_drains: 1000 mB of water under 2000 mB of residue run out of its drain (100 mB/s) while it burns the
+     *     residue over it at its 20 mB/s;</li>
+     * <li>wrong_oil: 500 mB of diesel in it: it doesn't burn it, and says what blocks it; 2000 mB of residue on top make
+     *     the layer residue, and it burns.</li>
+     * </ul>
+     */
+    static final class BurnerVesselCase implements TestCase {
+        static final String[] VARIANTS = {"legacy_tank", "water_drains", "wrong_oil"};
+        final String variant;
+        mods.eln.transparentnode.carbonblack.CarbonBlackBurnerElement d;
+        String legacy = "not loaded", blocked = "not looked at";
+        double burntBlocked = -1;
+
+        BurnerVesselCase(String variant) {
+            this.variant = variant;
+        }
+
+        public String id() {
+            return "carbon_burner_" + variant;
+        }
+
+        public int ticks() {
+            return variant.equals("water_drains") ? 300 : 100;
+        }
+
+        public void build(TestContext c) {
+            var p = c.at(2, 1, 1);
+            d = (mods.eln.transparentnode.carbonblack.CarbonBlackBurnerElement) c.placeTransparent(0 + (93 << 6), p);
+            switch (variant) {
+                case "water_drains" -> {
+                    d.putFuel(net.minecraft.world.level.material.Fluids.WATER, 1000);
+                    d.putFuel(mods.eln.oil.Oil.Cut.RESIDUE.source.get(), 2000);
+                }
+                case "wrong_oil" -> {
+                    d.putFuel(mods.eln.oil.Oil.Cut.DIESEL.source.get(), 500);
+                    c.after(40, () -> {
+                        blocked = String.valueOf(d.getWaila());
+                        burntBlocked = d.burnt();
+                        d.putFuel(mods.eln.oil.Oil.Cut.RESIDUE.source.get(), 2000);
+                    });
+                }
+                default -> c.after(2, () -> {
+                    try {
+                        var r = mods.eln.gametest.Reload.node(c.level(), p, t -> {
+                            var el = OilCases.FuelBySpecies.holding(t, "fuelInVesselW");
+                            for (String k : new String[]{"fuelInVesselW", "fuelInVesselA", "fuelInVesselU", "fuelInVesselS", "fuelInVesselFv"}) el.remove(k);
+                            var old = new mods.eln.fluid.ElementFluidHandler(mods.eln.transparentnode.carbonblack.CarbonBlackBurnerDescriptor.TANK_MB);
+                            old.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Oil.Cut.HEAVYOIL.source.get(), 3000), true);
+                            old.writeToNBT(el, "tank");
+                            el.putDouble("drainCarry", 0.5);
+                            return t;
+                        });
+                        d = (mods.eln.transparentnode.carbonblack.CarbonBlackBurnerElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                        legacy = "";
+                    } catch (ReflectiveOperationException e) {
+                        legacy = e.toString();
+                    }
+                });
+            }
+        }
+
+        public void measure(TestContext c) {
+            var v = d.inlet.vessel;
+            String st = String.format("%.1f mB of fuel, %.1f mB of water, %.1f mB burnt, %.3f bar, %.0f %% liquid, %s", d.inlet.feedMb(),
+                v.mLiquid() / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER, d.burnt(), v.P() / 1e5, 100 * v.liquidVolume() / v.volume, d.getWaila());
+            c.line("carbon burner " + variant + ": " + st);
+            switch (variant) {
+                case "water_drains" -> {
+                    c.check("carbon burner: the water under its fuel ran out of the drain", v.mLiquid() < 1e-6 && Math.abs(d.inlet.drainedKg / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER - 1000) < 1,
+                        String.format("%.1f mB drained; %s", d.inlet.drainedKg / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER, st));
+                    c.check("carbon burner: ... while it burnt the residue over it at 20 mB/s, and no more than it took", Math.abs(d.burnt() - 300) < 30 && Math.abs(d.inlet.feedMb() + d.burnt() - 2000) < 1, st);
+                }
+                case "wrong_oil" -> {
+                    c.check("carbon burner: diesel in its vessel isn't burnt, and it says what blocks it", burntBlocked == 0 && blocked.contains("blocked") && blocked.contains("diesel"), burntBlocked + " mB burnt, " + blocked);
+                    c.check("carbon burner: ... residue on top makes the layer residue, and it burns", d.burnt() > 40 && String.valueOf(d.getWaila()).contains("burning"), st);
+                }
+                default -> {
+                    c.check("carbon burner: an old save loads", legacy.isEmpty(), legacy);
+                    c.check("carbon burner: an old save's tank is in the vessel, every kg, and it burns it", d.burnt() > 60 && Math.abs(d.inlet.feedMb() + d.burnt() - 3000) < 1, st);
+                    c.check("carbon burner: ... with air over it, at the air's pressure", v.liquidVolume() / v.volume < 0.9 && Math.abs(v.P() - mods.eln.sim.fluid.Water.P_ATM) < 2000, st);
+                }
+            }
         }
     }
 
