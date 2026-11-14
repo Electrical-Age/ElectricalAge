@@ -115,4 +115,31 @@ class PoolSleepTest {
         net.step(0.05);
         assertFalse(net.asleep(), "a change wakes it");
     }
+
+    /** An open turbine, a regulator and a running pump at its shut-off head between vessels at rest pass nothing, and their networks sleep. */
+    @Test
+    void shutDevicesSleep() {
+        for (int kind = 0; kind < 3; kind++) {
+            Network net = new Network();
+            var a = net.add(new Network.Node(0.02, 0, 1, false).fill(0, 0.03, 300));
+            var b = net.add(new Network.Node(0.02, 0, 1, false).fill(0, kind == 2 ? 0.06 : 0.03, 300));
+            Network.Edge e;
+            if (kind == 0) {
+                e = net.connect(a, 1, b, 1, 0);
+                e.kind = Network.Kind.TURBINE;
+                e.nozzle = 2e-3;
+            } else if (kind == 1) {
+                e = net.connect(a, 1, b, 1, 1e-6);
+                e.kind = Network.Kind.REGULATOR;
+                e.setPa = Network.portP(b, 1) - 50;   // (shut by five bands: the softplus still passed exp(-5) of it)
+            } else {
+                // (a gas pump whose shut-off head is five bands under the vessels' difference)
+                e = PumpTest.pump(net, a, b, 1e-3, Network.portP(b, 1) - Network.portP(a, 1) - 50);
+                e.gas = true;
+            }
+            double m = a.mass();
+            assertTrue(stepsToSleep(net, 400) < 400, "kind " + kind + " sleeps: restless " + net.restless);
+            assertEquals(m, a.mass(), 0, "kind " + kind + " passed nothing");
+        }
+    }
 }

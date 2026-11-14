@@ -195,8 +195,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   inputs now count as changed past 1e-9 of themselves (`Network.sameInputs`). The comparison now also covers every
   field a step reads: the old hash left out a pump's speed and a turbine's throttle, so in the core a network asleep
   round a stopped pump slept on when the pump started (`PoolSleepTest.pumpStartingWakesIt`). `idle_inlets_sleep`,
-  `PoolSleepTest`, `FluxShapeTest`. Known, left: pumps past their shut-off head, regulators and turbines still have
-  the exponential tail.
+  `PoolSleepTest`, `FluxShapeTest`. The same for the other one-way laws: a pump past its shut-off head, a regulator
+  past its set point and a turbine's nozzle with no drop across it pass nothing, exactly (`Network.checkGate`,
+  `checkRoot`; an open turbine at standstill passed steam with no pressure drop, and pumped its inlet under its
+  exhaust). Far above the band each is its old law about 20-30 Pa late. `PoolSleepTest.shutDevicesSleep`,
+  `FluxShapeTest.shutOffShapes`.
 - Flare stack on a fluid node: its 4-bucket tank is a fluid node behind its front flange (half way up; buckets put
   any species in). Its tip passes every gas over the air's pressure between steps, each species by its share: natural
   gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took

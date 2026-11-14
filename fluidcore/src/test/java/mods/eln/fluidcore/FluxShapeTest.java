@@ -151,4 +151,32 @@ class FluxShapeTest {
         }
         assertTrue(mixed, "some port saw both layers");
     }
+
+    /**
+     * The shut-off shapes (a check valve's stream, a pump's gate, a root law's drive): nothing at or under 0, exactly,
+     * no jump in value or slope there, never falling, and their slopes are their differences'.
+     */
+    @Test
+    void shutOffShapes() {
+        java.util.function.DoubleFunction<double[]> sp = x -> new double[]{Network.checkSp(x), Network.checkSg(x)};
+        java.util.List<java.util.function.DoubleFunction<double[]>> shapes = java.util.List.of(sp, Network::checkGate, Network::checkRoot);
+        for (var f : shapes) {
+            for (double x = -50; x <= 0; x += 0.25) {
+                assertEquals(0, f.apply(x)[0], 0, "shut at " + x);
+                assertEquals(0, f.apply(x)[1], 0, "slope shut at " + x);
+            }
+            assertTrue(f.apply(1e-6)[0] < 1e-11 && f.apply(1e-6)[1] < 1e-5, "it opens from nothing");
+            double last = 0;
+            for (double x = 0.01; x <= 60; x += 0.0173) {
+                double[] v = f.apply(x);
+                double h = 1e-5, fd = (f.apply(x + h)[0] - f.apply(x - h)[0]) / (2 * h);
+                assertTrue(v[0] >= last, "never falling at " + x);
+                assertEquals(fd, v[1], 1e-6 * Math.max(1, Math.abs(fd)), "slope at " + x);
+                last = v[0];
+            }
+        }
+        assertEquals(1, Network.checkSg(60), 1e-12, "a check valve's slope far above");
+        assertEquals(1, Network.checkGate(60)[0], 1e-12, "a gate open far above");
+        assertEquals(1, Network.checkRoot(60)[1], 1e-3, "a root law's drive rises as x far above");
+    }
 }

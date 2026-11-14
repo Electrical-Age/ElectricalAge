@@ -33,9 +33,12 @@ class TurbineTest {
             var e = turbine(net, in, out, 1e-2, 0);
             net.step(DT);
             double pa = Network.portP(in, 1), pb = Network.portP(out, 1);
-            // (the law smoothed over SPLIT_DP: (p_a + p_b) S softplus((p_a - p_b) / S) for p_a^2 - p_b^2)
+            // (the law smoothed over SPLIT_DP: (p_a + p_b) S root((p_a - p_b) / S) for p_a^2 - p_b^2, root shut at
+            // balance and x less ~3 bands far above)
             double S = Network.SPLIT_DP, x = (pa - pb) / S;
-            double want = 1e-2 * Math.sqrt(in.fluid.rhoGas() / pa * (pa + pb) * S * Network.spc(x));
+            double want = 1e-2 * Math.sqrt(in.fluid.rhoGas() / pa * (pa + pb) * S * Network.checkRoot(x)[0]);
+            if (tb >= 453) assertEquals(0, e.flow, 0, "nothing passes at or under balance");
+            else assertEquals(1e-2 * Math.sqrt(in.fluid.rhoGas() / pa * (pa * pa - pb * pb)), e.flow, 1e-3 * want, "the ellipse law itself, far above the band");
             System.out.printf("turbine law: %.2f -> %.2f bar: %.6f kg/s, ellipse %.6f%n", pa / 1e5, pb / 1e5, e.flow, want);
             assertEquals(want, e.flow, 1e-3 * want + 1e-9, "flow at " + pb / pa);
         }
@@ -85,13 +88,18 @@ class TurbineTest {
         var b = net.add(new Network.Node(0.02, 0, 1, false).fill(0.5, 1e-4, 320));
         turbine(net, a, b, 2e-3, 4e5);
         net.step(DT);   // (the inlet gas's density is taken at a step's start and held: the slopes are of that step's law)
+        int balanced = 0;
         for (int s = 0; s < 40; s++) {
             String r = net.checkJacobian(DT);
             double worst = Double.parseDouble(r.substring(0, r.indexOf(' ')));
             // (to 10 %: the energy flux's slope against the inlet's air is two terms of 1e8 that cancel to 1e7, and
             // WaterAir's pressure slope against a trace of air at saturation is ~1 % off its differences; todo #364)
-            assertTrue(worst < 0.1, "step " + s + ": " + r);
+            // (while it drives: once the two sides balance, the differences' stencil spans the shut-off, tens of bands
+            // either way, and measures a secant, not the slope; the shut-off's own slopes are checked in FluxShapeTest)
+            if (Network.portP(a, 1) - Network.portP(b, 1) > 0.1 * Network.SPLIT_DP) assertTrue(worst < 0.1, "step " + s + ": " + r);
+            else balanced++;
             net.step(DT);
         }
+        assertTrue(balanced < 38, "it drove for a few steps: " + (40 - balanced));
     }
 }

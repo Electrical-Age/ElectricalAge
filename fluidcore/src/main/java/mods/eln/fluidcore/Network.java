@@ -447,7 +447,9 @@ public final class Network {
         double phi = Math.sqrt(sp), dphi = sgc(u) / (2 * phi);
         // (and shut past the shut-off head as a check valve shuts, over SPLIT_DP: the curve's own tail, h0 PUMP_W wide,
         // crept a stalled pump's full pipe up for ever)
-        double x = (h0 + arg) / SPLIT_DP, gate = sgc(x), dgate = gate * sgc(-x) / SPLIT_DP;
+        double[] gt = checkGate((h0 + arg) / SPLIT_DP);
+        if (gt[0] == 0) return new double[4];
+        double gate = gt[0], dgate = gt[1] / SPLIT_DP;
         double q = e.speed * qMax * phi * gate, dq = e.speed * qMax * (dphi / h0 * gate + phi * dgate);
         return new double[]{q, 0, dq, 0};
     }
@@ -504,9 +506,10 @@ public final class Network {
         double pa = portP(e.a, e.fa), pb = portP(e.b, e.fb), S = SPLIT_DP, x = (pa - pb) / S;
         double rho = Double.isNaN(e.rhoA) ? e.a.fluid.rhoGas() : e.rhoA;
         // (the ellipse law q = c sqrt(rho / p_a (p_a^2 - p_b^2)): choked, c p_a / sqrt(R T), as a nozzle passes)
-        double sp = S * spc(x), T = (pa + pb) * sp / pa;
+        double[] r = checkRoot(x);
+        double sp = S * r[0], T = (pa + pb) * sp / pa;
         if (!(T > 0) || !(rho > 0) || !(pa > 0)) return new double[3];
-        double c = e.nozzle * e.open, q = c * Math.sqrt(rho * T), dqdT = q / (2 * T), sg = (pa + pb) * sgc(x);
+        double c = e.nozzle * e.open, q = c * Math.sqrt(rho * T), dqdT = q / (2 * T), sg = (pa + pb) * r[1];
         return new double[]{q, dqdT * ((sp + sg) / pa - T / pa), dqdT * (sp - sg) / pa};
     }
 
@@ -529,7 +532,7 @@ public final class Network {
             da = sgc(y);
             db = -1;
         }
-        double S = SPLIT_DP, x = drive / S, q = e.g * S * spc(x), dq = e.g * sgc(x);
+        double S = SPLIT_DP, x = drive / S, q = e.g * S * checkSp(x), dq = e.g * checkSg(x);
         return new double[]{q, dq * da, dq * db};
     }
 
@@ -541,7 +544,6 @@ public final class Network {
         return new double[]{k * q[0] * xw, k * q[1] * xw, k * q[2] * xw, xw};
     }
 
-    /** softplus and its slope, cut 30 either side as the streams are. */
     /** A check valve's cracking pressure, in bands: its stream starts there. */
     static final double CRACK = 1;
 
@@ -564,6 +566,28 @@ public final class Network {
         return (sgc(x - CRACK) - s0) / (1 - s0);
     }
 
+    /**
+     * A gate that is shut at or under 0, exactly, and open (1) far above: checkSg squared, so its slope starts at 0
+     * too. Returns {gate, slope}.
+     */
+    static double[] checkGate(double x) {
+        if (x <= 0) return new double[2];
+        double s0 = sgc(-CRACK), s = sgc(x - CRACK), g = (s - s0) / (1 - s0);
+        return new double[]{g * g, 2 * g * s * (1 - s) / (1 - s0)};
+    }
+
+    /**
+     * A root law's drive over the band: f^2 / (f + 1) of checkSp's f, so its root starts at 0 with a finite slope (f
+     * itself starts as x^2, and its root would have a kink there) and is sqrt(x - CRACK's offset - 1) far above.
+     * Returns {value, slope}.
+     */
+    static double[] checkRoot(double x) {
+        if (x <= 0) return new double[2];
+        double f = checkSp(x), df = checkSg(x);
+        return new double[]{f * f / (f + 1), df * (f * f + 2 * f) / ((f + 1) * (f + 1))};
+    }
+
+    /** softplus and its slope, cut 30 either side as the streams are. */
     static double spc(double x) {
         return x > 30 ? x : x < -30 ? Math.exp(x) : Math.log1p(Math.exp(x));
     }
