@@ -118,6 +118,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     a float vent and a vacuum breaker, as the furnace's tank.
   - Each stops making when its vessel is full or its vessel or line is at the 6 bar head, so a dead-ended line stops
     at it instead of the well's gas pushing it on (`oil_pump_dead_end`).
+- Industrial resin collector on a fluid node (2026-11-14, the first of the recipe machines whose private tanks become
+  vessels): its tank is an open basin with the same outlet pump (200 mB/s of latex free, shut-off at 6 bar) to the
+  flange on its top; latex goes in as it is tapped, not by the whole mB. Unpiped it still gives its latex to whatever
+  takes fluid above it. It stops tapping when the basin holds 4000 mB or its line is at 6 bar (it had stopped only on
+  a full tank, which a blocked line then filled). `resin_collector_taps`, `resin_collector_legacy_tank`.
   - Unpiped, the pump stands and the vessel's liquid goes into the block on the flange's face through its view
     (FluidExport), as the old push did; the pump's gas then leaves by a float vent to the air.
   - Their views name a liquid layer still in crude's proportions (80 % overlap, as the column's inlet) crude, so a

@@ -31,8 +31,12 @@ public final class DeviceOutlet {
     static final double VENT_DEADBAND_PA = 300.0, FLOAT_SHUT = 0.97;
 
     final String outletKey;
-    final double vesselM3, headPa, freeKgPerS;
+    final double vesselM3, headPa, mbPerS;
+    double freeKgPerS;
     final boolean open;
+    /** The one fluid it makes (only()), or null: any, the pump rated on crude. */
+    private Fluid only;
+    private final NodeFluidView.Spec spec = new NodeFluidView.Spec().intake().liquidShare(0.95).aliases();
     public FluidNode vessel, outlet;
     FluidDevice.Link pump, gasLine;
     FluidDevice.Vent tip, airIn;
@@ -58,15 +62,31 @@ public final class DeviceOutlet {
         this.outletKey = outletKey;
         this.vesselM3 = vesselMb * EaUnits.KG_PER_MB_WATER / Water.RHO_L;
         this.headPa = headPa;
+        this.mbPerS = mbPerS;
         int crude = SpeciesRegistry.get().id("eln:crude_oil");
         this.freeKgPerS = mbPerS * (crude >= 0 ? FluidSpecies.kgPerMb(crude, false) : EaUnits.KG_PER_MB_WATER);
         this.open = open;
         this.live = live;
-        this.view = new NodeFluidView(new NodeFluidView.Spec().intake().liquidShare(0.95).aliases());
+        this.view = new NodeFluidView(spec);
+    }
+
+    /**
+     * It makes this one fluid (a machine's product, where the pump and separator make crude): the pump's free flow is
+     * mbPerS of it by its own weight, and the view takes no other liquid, as the old tank's filter.
+     */
+    public DeviceOutlet only(Fluid fluid) {
+        only = fluid;
+        spec.liquids(id -> {
+            var ph = FluidSpecies.of(only);
+            return ph != null && ph.id() == id;
+        });
+        return this;
     }
 
     /** Make the nodes: the vessel at y (its floor, m; one block tall), the outlet at its flange's height. */
     public void make(double y, double flangeY, double ambientK) {
+        var product = only == null ? null : FluidSpecies.of(only);
+        if (product != null) freeKgPerS = mbPerS * FluidSpecies.kgPerMb(product.id(), false);
         FluidNode v = new FluidNode(vesselM3, y, 1.0, false);
         if (loaded != null) {
             FluidSaves.restore(v, loaded);

@@ -26,6 +26,7 @@ public final class RubberCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new ChainCase());
         cases.add(new TreeCase());
+        for (String v : CollectorBasinCase.VARIANTS) cases.add(new CollectorBasinCase(v));
         cases.add(new CarbonCase());
         cases.add(new DesulfuriserCase());
         cases.add(new SteamCrackerCase());
@@ -120,6 +121,113 @@ public final class RubberCases {
             var r = c.level().recipeAccess().getRecipeFor(RecipeType.CRAFTING, input, c.level());
             c.check("a rubber sapling from jungle, oak, birch and acacia saplings",
                 r.isPresent() && r.get().value().assemble(input).is(mods.eln.rubber.RubberTrees.SAPLING_ITEM.get()), r.map(rh -> rh.value().assemble(input).toString()).orElse("none"));
+        }
+    }
+
+    /**
+     * The Industrial Resin Collector's basin on the fluid core (its tank was a number outside it):
+     * <ul>
+     * <li>taps: on 230 V against a six-log rubber trunk it makes 9.4 mB/s of latex (3/5 a day a log x 1.5 x 10, at 250 mB
+     *     a resin) into its basin, which stays at the air's pressure, and all of it is there;</li>
+     * <li>legacy_tank: an old save's full tank (4000 mB) and its part mB load into the basin, every kg, with air over
+     *     it; it is full (no room), and reads 4001 / 4000;</li>
+     * <li>unpiped: with no pipe on its top flange, 500 mB in its basin go into what takes latex above it (here a second
+     *     collector's basin, as another mod's tank would).</li>
+     * </ul>
+     */
+    static final class CollectorBasinCase implements TestCase {
+        static final String[] VARIANTS = {"taps", "legacy_tank", "unpiped"};
+        final String variant;
+        mods.eln.transparentnode.resincollector.IndustrialResinCollectorElement d;
+        mods.eln.sim.IProcess clock;
+        mods.eln.transparentnode.resincollector.IndustrialResinCollectorElement above;
+        double seconds;
+        String legacy = "not loaded";
+
+        CollectorBasinCase(String variant) {
+            this.variant = variant;
+        }
+
+        public String id() {
+            return "resin_collector_" + variant;
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return variant.equals("taps") ? 460 : 60;
+        }
+
+        static double latexMb(mods.eln.sim.fluid.FluidNode n) {
+            int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:latex");
+            return (n.liquid(id) + n.vapour(id)) / mods.eln.fluid.FluidSpecies.kgPerMb(id, false);
+        }
+
+        public void build(TestContext c) {
+            var l = new Wp10aCases.Layout(c, width());
+            var p = c.at(2, 1, 1);
+            d = (mods.eln.transparentnode.resincollector.IndustrialResinCollectorElement) l.device(0 + (92 << 6), 2, 1);
+            if (variant.equals("taps")) {
+                // (a rubber trunk of six logs behind it, leaves around its top)
+                var trunk = p.relative(d.front.back().toEnumFacing());
+                l.used.add(trunk);
+                for (int i = 0; i < 6; i++) c.level().setBlockAndUpdate(trunk.above(i), mods.eln.rubber.RubberTrees.LOG.get().defaultBlockState());
+                var leaf = mods.eln.rubber.RubberTrees.LEAVES.get().defaultBlockState().setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true);
+                c.level().setBlockAndUpdate(trunk.above(6), leaf);
+                for (var f : net.minecraft.core.Direction.Plane.HORIZONTAL) c.level().setBlockAndUpdate(trunk.above(5).relative(f), leaf);
+                l.feed(p, d.front.left(), 8 + (32 << 6), mods.eln.Eln.MVU);   // (a 230 V cable on its side)
+                mods.eln.Eln.simulator.addSlowProcess(clock = t -> seconds += t);
+                return;
+            }
+            if (variant.equals("unpiped")) {
+                above = (mods.eln.transparentnode.resincollector.IndustrialResinCollectorElement) c.placeTransparent(0 + (92 << 6), p.above());
+                d.putLatex(500);
+                return;
+            }
+            c.after(2, () -> {
+                try {
+                    var r = mods.eln.gametest.Reload.node(c.level(), p, t -> {
+                        var el = OilCases.FuelBySpecies.holding(t, "vesselW");
+                        for (String k : new String[]{"vesselW", "vesselA", "vesselU", "vesselS", "vesselFv"}) el.remove(k);
+                        var old = new mods.eln.fluid.ElementFluidHandler(mods.eln.transparentnode.resincollector.IndustrialResinCollectorDescriptor.TANK_MB);
+                        old.fill(new net.neoforged.neoforge.fluids.FluidStack(mods.eln.oil.Latex.SOURCE.get(), 4000), true);
+                        old.writeToNBT(el, "tank");
+                        el.putDouble("carry", 0.5);
+                        return t;
+                    });
+                    d = (mods.eln.transparentnode.resincollector.IndustrialResinCollectorElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                    legacy = "";
+                } catch (ReflectiveOperationException e) {
+                    legacy = e.toString();
+                }
+            });
+        }
+
+        public void measure(TestContext c) {
+            var v = d.outlet.vessel;
+            String st = String.format("%.1f mB of latex in the basin, %.3f bar, %.0f %% liquid, %s", latexMb(v), v.P() / 1e5, 100 * v.liquidVolume() / v.volume, d.getWaila());
+            c.line("resin collector " + variant + ": " + st);
+            if (variant.equals("taps")) {
+                mods.eln.Eln.simulator.removeSlowProcess(clock);
+                double want = 3.0 / 5 / 1440 * 6 * 1.5 * 10 * 250 * seconds;
+                c.check("resin collector: it taps a six-log rubber trunk at 9.4 mB/s into its basin", Math.abs(latexMb(v) - want) < 0.06 * want,
+                    String.format("want %.1f mB in %.1f s; %s", want, seconds, st));
+                c.check("resin collector: the basin breathes (at the air's pressure)", Math.abs(v.P() - mods.eln.sim.fluid.Water.P_ATM) < 2000, st);
+                c.check("resin collector: it shows its latex", d.latex() == Math.round(latexMb(v)) && d.outlet.view.amount(mods.eln.fluid.NodeFluidView.LIQUID) == d.latex(),
+                    d.latex() + " mB, view " + d.outlet.view.amount(mods.eln.fluid.NodeFluidView.LIQUID));
+                return;
+            }
+            if (variant.equals("unpiped")) {
+                c.check("resin collector: unpiped, its latex goes into what takes it above", latexMb(above.outlet.vessel) > 490 && latexMb(v) < 5,
+                    String.format("%.1f mB above; %s", latexMb(above.outlet.vessel), st));
+                return;
+            }
+            c.check("resin collector: an old save loads", legacy.isEmpty(), legacy);
+            c.check("resin collector: an old save's full tank and its part mB are in the basin, every kg", Math.abs(latexMb(v) - 4000.5) < 0.05, st);
+            c.check("resin collector: ... with air over it, at the air's pressure", v.liquidVolume() / v.volume < 0.96 && Math.abs(v.P() - mods.eln.sim.fluid.Water.P_ATM) < 2000, st);
+            c.check("resin collector: ... it is full, and says so", !d.outlet.room(1) && String.valueOf(d.getWaila()).contains("4001 / 4000 mB"), st);
         }
     }
 

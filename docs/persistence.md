@@ -132,6 +132,11 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   contents load as the outlet's. An older save's `tank*` (an 8- or 4-bucket fluid tank) is read only when `vesselW` is
   absent and goes into the vessel at the ambient (crude dead, as its cuts). Written back as `vessel*` only.
   `oil_pump_legacy_tank`, `oil_separator_legacy_tank`.
+- Industrial resin collector (2026-11-14): the same (`DeviceOutlet`): its basin is saved as `vessel*`, its outlet
+  node under the old stub's key `latexOut*`. An older save's `tank*` (a 4-bucket tank of latex) is read only when
+  `vesselW` is absent and goes into the basin at the ambient, with its `carry` (latex made and not yet a whole mB;
+  no longer written). The basin is the old tank's size at its rated 95 % fill, so a full tank loads with air over
+  it. `resin_collector_legacy_tank`.
 - Flare stack (2026-11-11): its tank is a fluid node saved as `vessel*` (with `vesselFv`), plus `carry`. An older save's
   `tank*` (a 4-bucket fluid tank) and its flange stub `inlet*` (PortBridge) are read only when `vesselW` is absent and
   go into the vessel at the ambient (crude dead, as its cuts); a fluid no species names is dropped. Written back as

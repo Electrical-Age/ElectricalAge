@@ -2,8 +2,7 @@ package mods.eln.transparentnode.resincollector;
 
 import mods.eln.api.element.ElementMachine;
 import mods.eln.api.element.Machines;
-import mods.eln.fluid.ElementFluidHandler;
-import mods.eln.fluid.PortBridge;
+import mods.eln.fluid.DeviceOutlet;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -20,8 +19,6 @@ import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorElement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -32,16 +29,18 @@ import java.util.Map;
  * The Industrial Resin Collector (IndustrialResinCollectorDescriptor). The trunk is the column of logs behind it (its
  * back face); it needs leaves, as the hand collector does (TreeResinCollectorElement.treeLeaves). Latex a second:
  * the hand collector's resin a second for that trunk (3/5 a day a log, at most MAX_LOGS of them, x the tree's factor) x SPEED_UP, at 250 mB a
- * resin, while it has power (less on a sagging line) and room in its tank.
+ * resin, while it has power (less on a sagging line) and room in its basin.
+ * <p>
+ * The basin is a vessel on the fluid core that breathes, with a pump from its floor to the flange on its top (DeviceOutlet,
+ * as the tar sand separator's): OUT_MB_PER_S of latex free, none at OUT_HEAD_PA. Unpiped, the latex goes into whatever
+ * takes fluid above it.
  */
 public class IndustrialResinCollectorElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice {
     final IndustrialResinCollectorDescriptor descriptor;
     public final ElementMachine machine;
-    final ElementFluidHandler tank = new ElementFluidHandler(IndustrialResinCollectorDescriptor.TANK_MB);
-    final PortBridge outPort = new PortBridge("latexOut", PortBridge.Mode.OUT, IndustrialResinCollectorDescriptor.OUT_MB_PER_S,
-        IndustrialResinCollectorDescriptor.OUT_HEAD_PA);
-    /** Latex made but not yet a whole mB. */
-    double carry;
+    /** Its basin and outlet, under the old PortBridge's key. TANK_MB is the basin's rated fill (95 %), so a full old tank loads with air over it. */
+    public final DeviceOutlet outlet = new DeviceOutlet("latexOut", IndustrialResinCollectorDescriptor.TANK_MB / 0.95,
+        IndustrialResinCollectorDescriptor.OUT_MB_PER_S, IndustrialResinCollectorDescriptor.OUT_HEAD_PA, true, false);
     /** The tree, looked at now and then: resin a second it would give a hand collector (0: not a tree). */
     double handRate;
     double sinceLook = 1e9;
@@ -52,7 +51,7 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
     public IndustrialResinCollectorElement(TransparentNode node, TransparentNodeDescriptor descriptor) {
         super(node, descriptor);
         this.descriptor = (IndustrialResinCollectorDescriptor) descriptor;
-        tank.setFilter(new Fluid[]{Latex.SOURCE.get()});
+        outlet.only(Latex.SOURCE.get());
         machine = Machines.forElement(this, this.descriptor.spec());
         slowProcessList.add(this::tick);
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
@@ -74,7 +73,7 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
             sinceLook = 0;
             handRate = handRate(node.coordonate.world(), node.coordonate.pos(), front.back());
         }
-        boolean room = tank.getCapacity() - tank.getFluidAmount() >= 1;
+        boolean room = outlet.room(1);
         boolean was = running;
         sinceTap += dt;
         if (handRate > 0 && room) {
@@ -82,18 +81,13 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
             double got = rated > 0 ? machine.takeJoules(rated) : 0;
             double share = rated > 0 ? got / rated : 0;
             if (share > 0.05) sinceTap = 0;
-            carry += handRate * IndustrialResinCollectorDescriptor.SPEED_UP * Latex.MB_PER_RUBBER * share * dt;
-            int whole = (int) Math.floor(carry);
-            if (whole > 0) {
-                carry -= whole;
-                tank.fill(new FluidStack(Latex.SOURCE.get(), whole), true);
-            }
+            outlet.made(Latex.SOURCE.get(), handRate * IndustrialResinCollectorDescriptor.SPEED_UP * Latex.MB_PER_RUBBER * share * dt);
         }
         running = sinceTap < 2;
         if (running != was) needPublish();
-        if (!outPort.piped() && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)
-            mods.eln.fluid.FluidExport.push(tank, level, node.coordonate.pos(), Direction.YP.toEnumFacing(),
-                (int) Math.ceil(IndustrialResinCollectorDescriptor.OUT_MB_PER_S * dt));
+        // (an EA pipe on its flange takes it, its pump; else whatever takes fluid above it)
+        if (node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)
+            outlet.export(level, node.coordonate.pos(), Direction.YP.toEnumFacing(), (int) Math.ceil(IndustrialResinCollectorDescriptor.OUT_MB_PER_S * dt));
     }
 
     /**
@@ -122,25 +116,40 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
 
     @Override
     public java.util.List<FluidPort> fluidPorts() {
-        if (outPort.stub == null) return java.util.List.of();
-        return java.util.List.of(outPort.port(node.coordonate.pos().asLong(), Direction.YP.toEnumFacing().get3DDataValue(), FluidPort.CENTRE));
+        if (outlet.outlet == null) return java.util.List.of();
+        return java.util.List.of(outlet.port(node.coordonate.pos().asLong(), Direction.YP.toEnumFacing().get3DDataValue(), FluidPort.CENTRE));
+    }
+
+    @Override
+    public java.util.List<Link> fluidLinks() {
+        return outlet.links();
+    }
+
+    @Override
+    public java.util.List<Vent> fluidVents() {
+        return outlet.vents();
     }
 
     @Override
     public void beforeFluidStep(double dt) {
-        outPort.step(tank, dt, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        outlet.before(mods.eln.sim.Ambient.kelvin(node.coordonate));
+    }
+
+    @Override
+    public void afterFluidStep(double dt) {
+        outlet.after();
     }
 
     @Override
     public void initialize() {
-        outPort.make(node.coordonate.y + 1, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        outlet.make(node.coordonate.y, node.coordonate.y + 1, mods.eln.sim.Ambient.kelvin(node.coordonate));
         connect();
     }
 
     @Override
     public void connectJob() {
         super.connectJob();
-        if (outPort.stub != null) mods.eln.fluid.FluidWorld.add(this);
+        if (outlet.outlet != null) mods.eln.fluid.FluidWorld.add(this);
     }
 
     @Override
@@ -151,12 +160,17 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
 
     @Override
     public Object getFluidHandler() {
-        return tank;
+        return outlet.view;
     }
 
-    /** Latex in its tank (mB; tests). */
+    /** Latex in its basin (mB). */
     public int latex() {
-        return tank.getFluidAmount();
+        return (int) Math.round(outlet.liquidMb());
+    }
+
+    /** Put mB of latex straight into its basin (tests). */
+    public void putLatex(int mB) {
+        outlet.put(Latex.SOURCE.get(), mB, mods.eln.sim.Ambient.kelvin(node.coordonate));
     }
 
     @Override
@@ -209,25 +223,24 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         onOff.write(nbt);
-        tank.writeToNBT(nbt, "tank");
-        outPort.write(nbt);
-        nbt.putDouble("carry", carry);
+        outlet.write(nbt);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         onOff.read(nbt);
-        tank.readFromNBT(nbt, "tank");
-        outPort.read(nbt);
-        carry = nbt.getDoubleOr("carry", 0);
+        // (an old save's tank goes into the basin, its PortBridge stub's contents into the outlet)
+        outlet.read(nbt, IndustrialResinCollectorDescriptor.TANK_MB);
+        // (and the latex it had made that wasn't yet a whole mB)
+        outlet.made(Latex.SOURCE.get(), nbt.getDoubleOr("carry", 0));
     }
 
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>(machine.wailaLines());
         if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
-        info.put(I18N.tr("Latex"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB");
+        info.put(I18N.tr("Latex"), latex() + " / " + IndustrialResinCollectorDescriptor.TANK_MB + " mB");
         info.put(I18N.tr("Tapping"), handRate <= 0 ? I18N.tr("no tree behind it (a trunk with leaves)")
             : String.format("%.0f mB/h", handRate * IndustrialResinCollectorDescriptor.SPEED_UP * Latex.MB_PER_RUBBER * 3600) + (running ? "" : " " + I18N.tr("(stopped)")));
         return info;

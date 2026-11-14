@@ -47,7 +47,7 @@ public final class FluidViewCases {
      * Devices whose capability is an int tank that is their real store (no node behind it to disagree with): pipes fill
      * it through a PortBridge, which inserts only what the tank takes.
      */
-    static final Set<String> INT_TANK_DEVICES = Set.of("DesulfuriserElement", "CarbonBlackBurnerElement", "IndustrialResinCollectorElement", "CompressorPortsElement", 
+    static final Set<String> INT_TANK_DEVICES = Set.of("DesulfuriserElement", "CarbonBlackBurnerElement", "CompressorPortsElement",
         "FuelHeatFurnaceElement", "GasTurbineElement", "ColumnBaseElement", "ColumnSegmentElement",
         "FuelGeneratorElement",
         // (its water is a number, capped at its tank; the well node feeds it through a float valve a bucket short of full)
