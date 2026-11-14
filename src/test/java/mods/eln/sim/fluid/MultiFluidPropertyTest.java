@@ -65,9 +65,10 @@ public class MultiFluidPropertyTest {
         }
     }
 
-    @org.junit.jupiter.api.Disabled("steps cut short in these random networks leave time owed at the end, so what is booked per tick runs ahead; returns with the failing-network fixes (todo #362)")
+    /** Heat and loss are booked over the time each step covered, as in FluidPropertyTest: a step cut short covers less than the tick. */
     @Test
     void openNetworksKeepTheBooks() {
+        List<Long> cut = new ArrayList<>();
         for (long seed = 1; seed <= CASES; seed++) {
             FluidPropertyTest.Case c = random(seed, false);
             int nb = bound(c.free());
@@ -78,13 +79,17 @@ public class MultiFluidPropertyTest {
             List<FluidEdge> leaving = new ArrayList<>(c.turbines());
             leaving.addAll(c.vents());
             for (int s = 0; s < 400; s++) {
+                double heat = 0, lossRate = 0;
                 for (int i = 0; i < c.free().size(); i++) {
                     FluidNode n = c.free().get(i);
                     n.heat = c.heat()[i];
-                    heatIn += c.heat()[i] * DT;
-                    loss += n.lossWPerK * (n.T() - Water.T_AMBIENT) * DT;
+                    heat += c.heat()[i];
+                    lossRate += n.lossWPerK * (n.T() - Water.T_AMBIENT);
                 }
                 c.net().step(DT);
+                double covered = c.net().core.net.done;
+                heatIn += heat * covered;
+                loss += lossRate * covered;
                 for (FluidEdge e : leaving) {
                     outH += e.fEnthalpy * DT;
                     if (e.fSpecies != null) for (int i = 0; i < Math.min(nb, e.fSpecies.length); i++) out[i] += e.fSpecies[i] * DT;
@@ -95,12 +100,15 @@ public class MultiFluidPropertyTest {
                 }
                 sane(c, seed, s);
             }
+            if (c.net().core.net.stats.cut > 0) cut.add(seed);
+            // (to 1e-10 kg: an edge's flows are as solved, before the limiter's cuts; FluidPropertyTest)
             for (int i = 0; i < nb; i++)
-                assertEquals(m0[i] - out[i], speciesSum(c.free(), i), 1e-9 * Math.max(1e-3, m0[i]), SpeciesRegistry.get().byId(i).key + ", seed " + seed);
+                assertEquals(m0[i] - out[i], speciesSum(c.free(), i), 1e-9 * Math.max(0.1, m0[i]), SpeciesRegistry.get().byId(i).key + ", seed " + seed);
             double u1 = FluidPropertyTest.sum(c.free(), n -> n.energy);
             double scale = Math.max(1e3, Math.abs(u0) + heatIn + Math.abs(outH));
             assertEquals(u0 + heatIn - loss - outH, u1, 1e-7 * scale, "energy, seed " + seed);
         }
+        assertTrue(cut.isEmpty(), "steps cut short: seeds " + cut);
     }
 
     @Test
