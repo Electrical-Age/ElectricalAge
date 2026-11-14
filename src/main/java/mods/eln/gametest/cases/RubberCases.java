@@ -36,6 +36,7 @@ public final class RubberCases {
         cases.add(new ButadienePipeCase());
         cases.add(new PolymeriserCase(false));
         cases.add(new PolymeriserCase(true));
+        cases.add(new PolymeriserLegacyCase());
     }
 
     /** Rubber trees (Baughn 2026-11-07): the sapling grows a rubber fig (Ficus elastica); a collector gets 1.5x the old rate on its trunk and
@@ -615,9 +616,59 @@ public final class RubberCases {
         }
     }
 
+    /** An old save's Polymeriser, its feed tank holding 1500 mB of liquid butadiene and 2000 mB of vapour: both are in its
+     *  sealed vessel, every kg, at the ambient and under the butadiene's own pressure with the air that fits over it. */
+    static final class PolymeriserLegacyCase implements TestCase {
+        mods.eln.transparentnode.polymeriser.PolymeriserElement d;
+        String legacy = "not loaded";
+
+        public String id() {
+            return "polymeriser_legacy_feed";
+        }
+
+        public int ticks() {
+            return 60;
+        }
+
+        public void build(TestContext c) {
+            var p = c.at(2, 1, 1);
+            d = (mods.eln.transparentnode.polymeriser.PolymeriserElement) c.placeTransparent(0 + (96 << 6), p);
+            c.after(2, () -> {
+                try {
+                    var r = mods.eln.gametest.Reload.node(c.level(), p, t -> {
+                        var el = OilCases.FuelBySpecies.holding(t, "butadieneInVesselW");
+                        for (String k : new String[]{"W", "A", "U", "S", "Fv"}) el.remove("butadieneInVessel" + k);
+                        el.remove("butadieneCharge");
+                        el.putInt("butadieneLiquid", 1500);
+                        el.putInt("butadieneGas", 2000);
+                        return t;
+                    });
+                    d = (mods.eln.transparentnode.polymeriser.PolymeriserElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                    legacy = "";
+                } catch (ReflectiveOperationException e) {
+                    legacy = e.toString();
+                }
+            });
+        }
+
+        public void measure(TestContext c) {
+            var v = d.inlet.vessel;
+            int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:butadiene");
+            double want = 1500 * mods.eln.fluid.FluidSpecies.kgPerMb(id, false) + 2000 * mods.eln.fluid.FluidSpecies.kgPerMb(id, true);
+            String st = String.format("%.2f g of butadiene (an old tank's: %.2f g), %.3f bar, %.1f K, %.0f %% liquid; %s", 1000 * v.mass(id), 1000 * want, v.P() / 1e5, v.T(),
+                100 * v.liquidVolume() / v.volume, d.getWaila());
+            c.line("polymeriser legacy feed: " + st);
+            c.check("polymeriser: an old save loads", legacy.isEmpty(), legacy);
+            c.check("polymeriser: an old save's feed, liquid and vapour, is in its vessel (or drawn toward the next Raw Rubber), every kg", Math.abs(v.mass(id) + d.charge() * mods.eln.fluid.FluidSpecies.kgPerMb(id, false) - want) < 1e-6 && d.butadieneMb() > 1450,
+                st + String.format("; %.1f mB drawn toward a Raw Rubber", d.charge()));
+            c.check("polymeriser: ... at the ambient, under its own vapour and the air over it (under 4 bar)", v.P() > 2e5 && v.P() < 4e5 && Math.abs(v.T() - mods.eln.sim.Ambient.kelvin(d.node.coordonate)) < 3, st);
+        }
+    }
+
     /**
-     * The Polymeriser (the oil route), on 230 V with 100 mB of butadiene (as liquid, or the same mass as vapour) and a Soul
-     * Dust: it makes 5 Raw Rubber (20 mB each), the dust initiating 3 more, and then waits for butadiene.
+     * The Polymeriser (the oil route), on 230 V with 100 mB of butadiene (as liquid, or the same mass as vapour) in its
+     * sealed feed vessel and a Soul Dust: it makes 4 Raw Rubber (20 mB each), the dust initiating 4 more, and then waits
+     * for butadiene: of the fifth 20 mB a part is the gas the vessel holds at 1 atm, which it can't draw.
      */
     static final class PolymeriserCase implements TestCase {
         final boolean vapour;
@@ -648,13 +699,15 @@ public final class RubberCases {
 
         public void measure(TestContext c) {
             var inv = d.getInventory();
-            String st = String.format("made %d, butadiene %.1f mB, soul %d, raw rubber %d; %s; %s", d.made(), d.butadieneMb(),
+            var v = d.inlet.vessel;
+            String st = String.format("made %d, butadiene %.1f mB (vessel %.3f bar, %.1f K, %.2f g butadiene), soul %d, raw rubber %d; %s; %s", d.made(), d.butadieneMb(),
+                v.P() / 1e5, v.T(), 1000 * d.inlet.gasFeedKg(),
                 inv.getItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.SOUL_SLOT).getCount(),
                 inv.getItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.RUBBER_SLOT).getCount(), d.status(), d.getWaila());
-            c.check("the polymeriser makes 100 mB of butadiene" + (vapour ? " (as vapour)" : "") + " into 5 Raw Rubber", d.made() == 5
+            c.check("the polymeriser makes 100 mB of butadiene" + (vapour ? " (as vapour)" : "") + " into 4 Raw Rubber, down to the gas its vessel holds at 1 atm", d.made() == 4
                 && inv.getItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.RUBBER_SLOT).is(ElnRegistry.RAW_RUBBER.get()), st);
             c.check("... using one Soul Dust (good for 8)", inv.getItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.SOUL_SLOT).isEmpty()
-                && st.contains("+3 rubber left"), st);
+                && st.contains("+4 rubber left"), st);
             c.check("... and then waits for butadiene", d.status().equals("no butadiene") && d.butadieneMb() < 20, st);
         }
     }

@@ -150,6 +150,11 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   vessel as `cutOutVessel*`, and the nodes behind its flanges keep the old PortBridge stubs' keys `cutIn*` and
   `cutOut*`. An older save's `cutInTank*` and `cutOutTank*` (1-bucket tanks) are read only when that vessel's `W`
   key is absent and go into the vessels at the ambient. `desulfuriser_legacy_tanks`.
+- Polymeriser (2026-11-14, a sealed `DeviceInlet`): its feed vessel is saved as `butadieneInVessel*`, the node behind
+  its flange keeps the old PortBridge stub's key `butadieneIn*`, and `butadieneCharge` is the butadiene drawn toward
+  the next Raw Rubber (mB as liquid). An older save's `butadieneLiquid` and `butadieneGas` (the feed tank's two
+  counts, mB) are read only when `butadieneInVesselW` is absent and go into the vessel at the ambient, with the air
+  that fits over the liquid at 1 atm. `polymeriser_legacy_feed`.
 - Flare stack (2026-11-11): its tank is a fluid node saved as `vessel*` (with `vesselFv`), plus `carry`. An older save's
   `tank*` (a 4-bucket fluid tank) and its flange stub `inlet*` (PortBridge) are read only when `vesselW` is absent and
   go into the vessel at the ambient (crude dead, as its cuts); a fluid no species names is dropped. Written back as

@@ -2,6 +2,7 @@ package mods.eln.transparentnode.polymeriser;
 
 import mods.eln.api.element.ElementMachine;
 import mods.eln.api.element.Machines;
+import mods.eln.fluid.DeviceInlet;
 import mods.eln.fluid.PortBridge;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
@@ -32,8 +33,10 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
     final PolymeriserDescriptor descriptor;
     public final ElementMachine machine;
     final PolymeriserInventory inventory = new PolymeriserInventory(this);
-    final ButadieneFeed feed = new ButadieneFeed(TANK_MB);
-    final PortBridge inPort = new PortBridge("butadieneIn", PortBridge.Mode.IN, PORT_MB_PER_S, 0);
+    /** Its feed vessel, sealed (butadiene boils in it at 2.4 bar), filled by the line on the blue flange. */
+    public final DeviceInlet inlet = new DeviceInlet("butadieneIn", TANK_MB, mods.eln.oil.Butadiene.SOURCE.get()).sealed();
+    /** Butadiene drawn out of the vessel toward the next Raw Rubber (mB as liquid, up to MB_PER_RUBBER). */
+    double charge;
     /** Energy toward the next Raw Rubber (J), Raw Rubber the current Soul Dust still initiates, made in all. */
     double progress;
     int initiator, made;
@@ -68,7 +71,7 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
         boolean was = running;
         sinceRun += dt;
         boolean soul = initiator > 0 || inventory.getItem(SOUL_SLOT).is(ElnRegistry.SOUL_DUST.get());
-        if (feed.asLiquid() < MB_PER_RUBBER - 0.5) status = "no butadiene";   // (vapour counts by mass: a part of a mB short is enough)
+        if (charge < MB_PER_RUBBER - 1e-6) status = "no butadiene";
         else if (!soul) status = "no Soul Dust";
         else if (!roomForRubber()) status = "its Raw Rubber is full";
         else {
@@ -85,7 +88,7 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
                     initiator = RUBBER_PER_SOUL_DUST;
                 }
                 initiator--;
-                feed.take(MB_PER_RUBBER);
+                charge = Math.max(0, charge - MB_PER_RUBBER);
                 ItemStack out = inventory.getItem(RUBBER_SLOT);
                 if (out.isEmpty()) inventory.setItem(RUBBER_SLOT, new ItemStack(ElnRegistry.RAW_RUBBER.get()));
                 else out.grow(1);
@@ -118,11 +121,23 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
 
     /** (tests) pour butadiene (liquid or vapour) into its feed. */
     public int fillIn(FluidStack f) {
-        return feed.fill(f);
+        inlet.put(f.getFluid(), f.getAmount(), mods.eln.sim.Ambient.kelvin(node.coordonate));
+        return f.getAmount();
     }
 
+    static double kgPerMb() {
+        return mods.eln.fluid.FluidSpecies.kgPerMb(mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:butadiene"), false);
+    }
+
+    /** The butadiene it can use: what it has drawn toward the next Raw Rubber, and the vessel's liquid and its vapour
+     *  over 1 atm (mB as liquid, by mass). What the vessel's gas holds at 1 atm stays in it: it has no vacuum pump. */
     public double butadieneMb() {
-        return feed.asLiquid();
+        return charge + inlet.usableKg() / kgPerMb();
+    }
+
+    /** Butadiene drawn toward the next Raw Rubber (mB as liquid; tests). */
+    public double charge() {
+        return charge;
     }
 
     public int made() {
@@ -174,27 +189,41 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
 
     @Override
     public java.util.List<FluidPort> fluidPorts() {
-        if (inPort.stub == null) return java.util.List.of();
+        if (inlet.stub == null) return java.util.List.of();
         Direction back = front.back();
-        return java.util.List.of(inPort.port(node.coordonate.pos().asLong(), back.toEnumFacing().get3DDataValue(),
+        return java.util.List.of(inlet.port(node.coordonate.pos().asLong(), back.toEnumFacing().get3DDataValue(),
             PortBridge.endSpot(front, back, FLANGE_Y, FLANGE_Z)));
     }
 
     @Override
+    public java.util.List<Link> fluidLinks() {
+        return inlet.links();
+    }
+
+    /** Switched on, it draws the next Raw Rubber's butadiene out of the vessel: the liquid first, then the gas, and
+     *  with the gas whatever else is in it (the air of a new line), which is how that leaves. */
+    @Override
     public void beforeFluidStep(double dt) {
-        inPort.step(feed, dt, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        inlet.sync(dt, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        if (onOff.on && charge < MB_PER_RUBBER) charge += inlet.drawKg((MB_PER_RUBBER - charge) * kgPerMb()) / kgPerMb();
+        inlet.settle(dt);
+    }
+
+    @Override
+    public void afterFluidStep(double dt) {
+        inlet.after();
     }
 
     @Override
     public void initialize() {
-        inPort.make(node.coordonate.y + FLANGE_Y / 16.0, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        inlet.make(node.coordonate.y, node.coordonate.y + FLANGE_Y / 16.0, mods.eln.sim.Ambient.kelvin(node.coordonate));
         connect();
     }
 
     @Override
     public void connectJob() {
         super.connectJob();
-        if (inPort.stub != null) mods.eln.fluid.FluidWorld.add(this);
+        if (inlet.stub != null) mods.eln.fluid.FluidWorld.add(this);
     }
 
     @Override
@@ -247,8 +276,8 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         onOff.write(nbt);
-        feed.write(nbt, "butadiene");
-        inPort.write(nbt);
+        inlet.write(nbt);
+        nbt.putDouble("butadieneCharge", charge);
         nbt.putDouble("progress", progress);
         nbt.putInt("initiator", initiator);
         nbt.putInt("made", made);
@@ -258,8 +287,12 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         onOff.read(nbt);
-        feed.read(nbt, "butadiene");
-        inPort.read(nbt);
+        if (!inlet.read(nbt)) {
+            // (an old save: its feed tank's two counts, liquid and vapour mB)
+            inlet.legacy(new FluidStack(mods.eln.oil.Butadiene.SOURCE.get(), nbt.getIntOr("butadieneLiquid", 0)));
+            inlet.legacy(new FluidStack(mods.eln.oil.Butadiene.GAS.get(), nbt.getIntOr("butadieneGas", 0)));
+        }
+        charge = nbt.getDoubleOr("butadieneCharge", 0);
         progress = nbt.getDoubleOr("progress", 0);
         initiator = nbt.getIntOr("initiator", 0);
         made = nbt.getIntOr("made", 0);
@@ -270,7 +303,9 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
         Map<String, String> info = new HashMap<>(machine.wailaLines());
         if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
         info.put(I18N.tr("Status"), I18N.tr(status));
-        info.put(I18N.tr("Butadiene (blue)"), String.format("%.0f / %d mB", feed.asLiquid(), TANK_MB));
+        String wrong = inlet.blockedBy();
+        if (wrong != null) info.put(I18N.tr("Blocked"), I18N.tr("it holds %1$, which it can't use", wrong));
+        info.put(I18N.tr("Butadiene (blue)"), String.format("%.0f / %d mB", butadieneMb(), TANK_MB));
         info.put(I18N.tr("Soul Dust"), inventory.getItem(SOUL_SLOT).getCount() + (initiator > 0 ? " (+" + initiator + " rubber left)" : ""));
         info.put(I18N.tr("Raw Rubber"), String.valueOf(inventory.getItem(RUBBER_SLOT).getCount()));
         return info;

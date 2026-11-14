@@ -155,6 +155,14 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   cut, and they mix there as in any vessel. Rate, power and Sulfur Dust are unchanged; the power is drawn per
   tick, the cut moves at the fluid step. `desulfuriser_closed_outlet`, `desulfuriser_legacy_tanks`,
   `desulfuriser_passes_mix`, `desulfuriser_water_drains`.
+- Polymeriser's feed on a fluid node (2026-11-14): its feed tank is a sealed vessel the line fills through a filling
+  valve (passive: the line's pressure fills it; butadiene stands in it as liquid under its own 2.4 bar). Switched
+  on, the polymeriser draws the next Raw Rubber's 20 mB out of it: liquid first, then the gas, and with the gas
+  everything else in it (the air a new line pushes ahead of the butadiene leaves that way; drawing butadiene alone
+  left the air in and the feed out). It never draws the vessel under 1 atm, so the gas the vessel holds at 1 atm
+  (about 8 mB as liquid) stays in it, and Jade counts what it can use. Water in it drains; another liquid stays
+  and Jade names it. Rate, power and Soul Dust are unchanged. `polymeriser`, `polymeriser_vapour` (100 mB make 4
+  Raw Rubber, was 5), `polymeriser_legacy_feed`, `oil_on_pipes_polymeriser_in`.
 - Flare stack on a fluid node: its 4-bucket tank is a fluid node behind its front flange (half way up; buckets put
   any species in). Its tip passes every gas over the air's pressure between steps, each species by its share: natural
   gas and oil vapours burn, steam and air just go up, so a flare burns all the gas a pipe brings (the 1.12 tank took
