@@ -39,6 +39,7 @@ public final class GasPlantCases {
         cases.add(new FuelQualityCase("gas_turbine_heavy_oil_fouls", 1));
         cases.add(new FuelQualityCase("gas_turbine_clean_fuel_clears", 2));
         cases.add(new FuelQualityCase("gas_turbine_crude_derated", 3));
+        FuelGeneratorCases.addTo(cases);
         cases.add(new NoSelfStart());
         cases.add(new RealGas());
         cases.add(new LowHead());

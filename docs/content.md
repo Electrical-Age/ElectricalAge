@@ -96,8 +96,13 @@ power; under the balance it clears at the same law; engines foul and clear 4 tim
 330 to 720 K, so gasoline, diesel and heavy oil all give full power, and heavy oil fouls it by ~10 % an hour at full
 power (diesel clears 0.8 % an hour, gasoline 1.5 %). Jade on the turbine shows the rating, whether the fuel fouls, the
 fuel's viscosity, and the fouling. Saved as `foul`, `fuelLight`, `fuelHeavy`, `fuelCoking` (absent: clean). The Fuel
-Generator has no fuel vessel yet (buckets of one named fluid), so it has no rating yet. GameTests
-gas_turbine_off_spec_derates, gas_turbine_heavy_oil_fouls, gas_turbine_clean_fuel_clears; unit test FuelQualityTest.
+Generator keeps its fuel in a sealed 2000 mB vessel (a `DeviceInlet` as the turbine's; pipe on its top flange, or
+buckets as before) and burns as much per joule as its old two-bucket tank did; its window is 330 to 400 K (gasoline
+and naphtha), so diesel or residue in its gasoline derate it, and coking fuel fouls it by the engines' law. An old
+save's tank (`tankLevel` x 2000 mB of `tankFluid`) goes into the vessel; an unknown fluid name (1.7.10 saved "lava")
+becomes gasoline, as the old tank burnt every fuel alike. GameTests gas_turbine_off_spec_derates,
+gas_turbine_heavy_oil_fouls, gas_turbine_clean_fuel_clears, fuel_generator_gasoline, fuel_generator_off_spec_derates,
+fuel_generator_clean_fuel_clears, fuel_generator_old_save; unit test FuelQualityTest.
 
 ### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)
 - Datapack JSON `data/<ns>/eln/fluid_species/<name>.json` defines species `<ns>:<name>` for the fluid core (fields in
