@@ -1,0 +1,17 @@
+{
+  "type": "neoforge:add_table",
+  "condition": {
+    "type": "minecraft:all_of",
+    "terms": [
+      {
+        "type": "neoforge:loot_table_id",
+        "loot_table_id": "minecraft:chests/village/village_cartographer"
+      },
+      {
+        "type": "minecraft:random_chance",
+        "chance": 0.3
+      }
+    ]
+  },
+  "table": "eln:chests/oil_survey_map"
+}

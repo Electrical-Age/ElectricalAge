@@ -58,12 +58,19 @@ Over half the lakes (a fixed roll on the lake's key) a small surface pond, its o
 with tar sand, is dug once the chunks over the lake's middle are loaded, in new and old worlds alike (`oil/OilPonds`,
 Baughn 2026-10-28; none where the ground isn't flat, dry and natural). Tests: `gametest/cases/OilCases`.
 
-Oil survey maps (todo #470, prototype): loot function `eln:oil_survey_map` (`oil/OilSurveyMapFunction`) turns a
+Oil survey maps (todo #470): loot function `eln:oil_survey_map` (`oil/OilSurveyMapFunction`) turns a
 filled map into one centred on an oil lake picked at random among those `min_distance`..`max_distance` blocks (600-3000)
 from where it is made, marked with a decoration, the position in the lore. `oil/OilSurvey` finds lakes from the
 structure set's placement arithmetic (no chunk loaded), skipping lakes under a quarter full and start chunks generated
 without a lake. Sold by cartographers at level 3 (`data/eln/villager_trade/cartographer/3/`, added to the vanilla tag
-`#minecraft:cartographer/level_3`). Tests: `OilSurveyTest`, GameTest `oil_survey_map`. The tar sand separator's list is `Eln.separatorRecipes`.
+`#minecraft:cartographer/level_3`; 12 emeralds + compass, 3 uses), by the wandering trader
+(`data/eln/villager_trade/wandering_trader/`, in `#minecraft:wandering_trader/uncommon`; 14 emeralds, 1 use), and found
+in chests: NeoForge global loot modifiers (`data/eln/loot_modifiers/`, `neoforge:add_table` with a `loot_table_id` and a
+`random_chance` condition) add the table `eln:chests/oil_survey_map` to village cartographer chests (30 %), shipwreck map
+chests (25 %), buried treasure (25 %), abandoned mineshafts (15 %), desert pyramids and ruined portals (10 % each). A
+chest's map is made around the chest; with no origin in the loot context the map is discarded. Name and lore are lang
+keys `item.eln.oil_survey_map` and `.lore` (ElnLang). Tests: `OilSurveyTest`, GameTests `oil_survey_map` and
+`oil_survey_chest`. The tar sand separator's list is `Eln.separatorRecipes`.
 
 Oil goes on EA pipes (Baughn 2026-11-03: data-driven multi-fluid pipes; species in "Fluid species" below): each oil
 device keeps its own tank and puts it on a pipe through a small port node on its drawn flange (`fluid/PortBridge`):
