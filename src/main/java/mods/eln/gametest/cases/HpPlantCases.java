@@ -92,7 +92,7 @@ public final class HpPlantCases {
 
     /** An Air Blower with nothing on its outlet: it stalls at its shut-off pressure, moves nothing, draws its idling. Unpowered: nothing. */
     static final class BlowerBlocked extends PlumbingCases.Big {
-        mods.eln.oil.AirBlowerElement on, off, half;
+        mods.eln.oil.AirBlowerElement on, off, half, signal;
         /** Its curve: blowers into air held at these gauge pressures (Pa) on their outlets. */
         static final double[] BACK = {0, 0.5e5, 1.0e5, 1.5e5};
         final mods.eln.oil.AirBlowerElement[] curve = new mods.eln.oil.AirBlowerElement[BACK.length];
@@ -111,6 +111,9 @@ public final class HpPlantCases {
             off = blower(ctx, ctx.at(3, 1, 6), Direction.XP, false);
             half = blower(ctx, ctx.at(6, 1, 3), Direction.XP, false);
             power(half, Eln.MVU / 2);
+            // full voltage, a half-scale speed signal on its back: it sets the pressure (todo #471)
+            signal = blower(ctx, ctx.at(6, 1, 6), Direction.XP, true);
+            Eln.simulator.addElectricalComponent(new mods.eln.sim.mna.component.VoltageSource("blower speed", signal.speed, null).setU(Eln.SVU / 2));
             for (int i = 0; i < BACK.length; i++) {
                 BlockPos p = ctx.at(1 + 2 * i, 1, 8);
                 curve[i] = blower(ctx, p, Direction.ZN, true);
@@ -127,6 +130,9 @@ public final class HpPlantCases {
                 + "; unpowered: " + off.getWaila());
             double shut = mods.eln.oil.AirBlowerDescriptor.SHUTOFF_PA;
             double gh = mods.eln.fluid.FluidWorld.nodeFor(half.outlet).P() - Water.P_ATM;
+            double gs = mods.eln.fluid.FluidWorld.nodeFor(signal.outlet).P() - Water.P_ATM;
+            ctx.check("blower: at full voltage with a half-scale speed signal it stalls at a quarter of its shut-off pressure (within 5 %)", Math.abs(gs - 0.25 * shut) < 0.05 * 0.25 * shut,
+                String.format("%.3f bar gauge, %.1f W, speed %.0f %%", gs / 1e5, signal.wantW, signal.share * 100));
             ctx.check("blower: at half its voltage it stalls at a quarter of its shut-off pressure (within 5 %)", Math.abs(gh - 0.25 * shut) < 0.05 * 0.25 * shut,
                 String.format("%.3f bar gauge, %.1f W", gh / 1e5, half.wantW));
             for (int i = 0; i < BACK.length; i++) {
