@@ -78,7 +78,7 @@ public class ParallelCondensateTest {
     /** One turbine carrying the load, the other turning idle: the fuller hotwell still returns all its condensate. */
     @Test
     void anIdleTurbinesCondenserDoesNotTakeTheFeed() {
-        for (double[] st : new double[][]{{1.9e-3, 0.02e-3}, {2.0e-3, 0}, {1.0e-3, 0.01e-3}, {0.3e-3, 0}, {2.4e-3, 0.1e-3}}) {
+        for (double[] st : new double[][]{{1.9e-3, 0.02e-3}, {2.0e-3, 0}, {1.0e-3, 0.01e-3}, {0.3e-3, 0}, {2.4e-3, 0.1e-3}, {2.14e-3, 0.33e-3}}) {
             double[] r = run(true, 3000, st);
             String what = String.format("%.2f and %.2f g/s: peak %.1f%%, now %.1f%% and %.1f%%; made up %.1f g for %.1f g lost in the last third",
                 st[0] * 1000, st[1] * 1000, r[0] * 100, r[3] * 100, r[4] * 100, r[1] * 1000, r[2] * 1000);
