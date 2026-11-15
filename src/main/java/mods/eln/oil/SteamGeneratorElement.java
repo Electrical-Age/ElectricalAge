@@ -150,7 +150,11 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
      */
     static final double DRAIN_SHARE_PER_S = 0.005;
 
-    /** The casing drain over time (s): liquid water leaves the inlet, with its heat. */
+    /**
+     * The casing drain over time (s): liquid water leaves the inlet, with its heat; with a condenser it drains into the
+     * condenser's vessel (a steam trap to the hotwell), else to the ground. Thrown away, the condensate of a bare steam
+     * line was a steady loss the makeup had to replace (2026-11-15, a player's plant: ~0.1 g/s of 0.8 g/s of steam).
+     */
     void drain(double time) {
         double mL = Math.min(inlet.mLiquid(), DRAIN_SHARE_PER_S * inlet.volume * Water.RHO_L * time);
         if (mL <= 0) return;
@@ -158,6 +162,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         inlet.mWater -= mL;
         inlet.energy -= mL * Water.hLiquid(T);
         inlet.update();
+        if (condenser != null && condenser.vessel != null) EaUnits.addWater(condenser.vessel, mL, T, false);
     }
 
     /** The share of the inlet's volume that is liquid water. */
