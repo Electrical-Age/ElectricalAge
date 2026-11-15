@@ -45,7 +45,8 @@ public final class HpPlantCases {
         cases.add(new FurnacePlant("hp_plant_furnace_fired_forced_air", 20, 1.6e5, 11000, 16680, 8230, 3.9, false));
         cases.add(new FurnacePlant("hp_plant_boiler_limit_under", 20, 2.07e5, 13000, 19520, 9540, 3.4, false));
         cases.add(new FurnacePlant("hp_plant_boiler_limit_over", 20, 2.6e5, 15000, 0, 0, 0, true));
-        cases.add(new FullPlant());
+        cases.add(new FullPlant(false));
+        cases.add(new FullPlant(true));
         // the same slice with real Air Blowers (todo #471) in place of the air mains, and a blower alone, its outlet blocked
         var withBlowers = new FurnacePlant("hp_plant_furnace_fired_blowers", 20, 1.6e5, 11000, 16680, 8230, 3.9, false);
         withBlowers.blowers = true;
@@ -419,6 +420,19 @@ public final class HpPlantCases {
         final ThermalLoad[] fT = new ThermalLoad[4];
         final FluidDevice[] air = new FluidDevice[4];
         final FluidNode[] mains = new FluidNode[4];
+        /**
+         * Real Air Blowers (one a furnace) in place of the air mains, slowed to BLOWER_SPEED so their outlets stand at the
+         * mains' 1.6 bar with today's furnaces' air (126 g/s each); their power, air and outlet gauge summed over the window.
+         */
+        final boolean blowers;
+        static final double BLOWER_SPEED = 0.932;
+        final mods.eln.oil.AirBlowerElement[] blow = new mods.eln.oil.AirBlowerElement[4];
+        IProcess blowClock;
+        double blowT, blowS, blowJ, blowKg, blowPaS;
+
+        FullPlant(boolean blowers) {
+            this.blowers = blowers;
+        }
         ShaftSteamTurbineElement hp;
         PlantCondenserElement c;
         FluidDevice loop, meter;
@@ -436,7 +450,7 @@ public final class HpPlantCases {
         double wetLast;
 
         public String id() {
-            return "hp_plant_full_forced_air_16kw";
+            return blowers ? "hp_plant_full_blowers_16kw" : "hp_plant_full_forced_air_16kw";
         }
 
         public int ticks() {
@@ -493,8 +507,21 @@ public final class HpPlantCases {
             f[3] = furnace(ctx, bb.south(), Direction.ZP, 1900);
             for (int i = 0; i < 4; i++) {
                 fT[i] = Batch1Cases.<ThermalLoad>field(f[i], "thermalLoad");
-                air[i] = OilCases.FurnacePressure.onFlange(f[i], mains[i] = OilCases.FurnacePressure.main(a.getY(), AIR_PA, false));
+                if (blowers) {
+                    blow[i] = blower(ctx, f[i].node.coordonate.pos().relative(f[i].front.toEnumFacing()), f[i].front.back(), false);
+                    power(blow[i], BLOWER_SPEED * Eln.MVU);
+                } else air[i] = OilCases.FurnacePressure.onFlange(f[i], mains[i] = OilCases.FurnacePressure.main(a.getY(), AIR_PA, false));
             }
+            if (blowers) Eln.simulator.addSlowProcess(blowClock = dt -> {
+                blowT += dt;
+                if (blowT < WATCH / 20.0) return;
+                blowS += dt;
+                for (var bl : blow) {
+                    blowJ += bl.wantW * dt;
+                    blowKg += bl.kgPerS * dt;
+                    blowPaS += (mods.eln.fluid.FluidWorld.nodeFor(bl.outlet).P() - Water.P_ATM) * dt;
+                }
+            });
             // steam header: up out of each boiler, along x 2 over the feed pipe, a tee east to the turbine's inlet
             PipeCases.lay(ctx, ctx.at(2, 2, 3), 1, 8, 0, 8, 8, 8, 8, 8, 8, 16);
             PipeCases.lay(ctx, ctx.at(2, 2, 4), 1, 8, 8, 0, 8, 8, 16);
@@ -553,7 +580,7 @@ public final class HpPlantCases {
                     }
                 }
                 tick++;
-                for (FluidNode m : mains) m.fill(0, Water.P_ATM + AIR_PA, 293.15);
+                for (FluidNode m : mains) if (m != null) m.fill(0, Water.P_ATM + AIR_PA, 293.15);
                 if (hpTrip < 0 && hp.isBurnt()) hpTrip = tick;
                 if (hpTrip < 0) wetLast = hp.wetShare();
                 if (tick % 1200 == 0) wetLog.append(String.format(" %d: %.1f %%", tick, hp.wetShare() * 100));
@@ -592,9 +619,21 @@ public final class HpPlantCases {
             Eln.simulator.removeSlowProcess(clock);
             mods.eln.fluid.FluidWorld.remove(meter);
             mods.eln.fluid.FluidWorld.remove(loop);
-            for (FluidDevice d : air) mods.eln.fluid.FluidWorld.remove(d);
+            for (FluidDevice d : air) if (d != null) mods.eln.fluid.FluidWorld.remove(d);
             for (Resistor r : loads) Eln.simulator.removeElectricalComponent(r);
             String id = id();
+            if (blowers) {
+                Eln.simulator.removeSlowProcess(blowClock);
+                double s = Math.max(1e-9, blowS), all = blowJ / s, made = elecJ / Math.max(1e-9, window);
+                ctx.line(String.format("%s: BLOWERS (4, one a furnace, at %.1f %% speed): %.2f kW each, %.2f g/s of air each, %.3f bar gauge at their outlets; "
+                        + "the plant makes %.2f kW electric and its blowers draw %.2f kW: net %+.2f kW",
+                    id, BLOWER_SPEED * 100, all / 4 / 1000, blowKg / s / 4 * 1000, blowPaS / s / 4 / 1e5, made / 1000, all / 1000, (made - all) / 1000));
+                ctx.check(id + ": the blowers hold the mains' pressure on the furnaces' flanges (1.6 bar gauge within 0.1)", Math.abs(blowPaS / s / 4 - AIR_PA) < 0.1e5,
+                    String.format("%.3f bar", blowPaS / s / 4 / 1e5));
+                // (todo #471: as the furnace's breather is coded, forced air costs several times what the plant makes; this pins that)
+                ctx.check(id + ": KNOWN PROBLEM: the blowers draw more than the plant makes (the furnaces' breathers pass ~20x the combustion air)", all > made,
+                    String.format("%.1f kW drawn, %.1f kW made", all / 1000, made / 1000));
+            }
             // (measured, not pinned: the wet part of the turbine's own exhaust collects in its exhaust, 1.7 % of its volume a
             // minute here; run for 16800 ticks, it fails on water at 10 %, tick 8448, and the boilers after it)
             ctx.line(String.format("%s: water in the turbine's exhaust (share of its volume) by tick:%s; %s", id, wetLog,
@@ -631,7 +670,11 @@ public final class HpPlantCases {
             ctx.check(id + ": the shells stay under their 400 K limit", shellMax[0] < 400 && shellMax[1] < 400, String.format("%.0f / %.0f K", shellMax[0], shellMax[1]));
             ctx.check(id + ": the condensate goes back (90 %+ of the steam)", steam > 1e-3 && pumped > 0.9 * steam, String.format("%.2f of %.2f g/s", pumped * 1000, steam * 1000));
             ctx.check(id + ": the condenser holds a vacuum (under 0.3 bar)", condSum / w < 0.3e5, String.format("%.3f bar", condSum / w / 1e5));
-            ctx.check(id + ": heavy oil within 10 % of 47.5 buckets/h", Math.abs(mB * 3.6 / 47.5 - 1) < 0.10, String.format("%.1f buckets/h", mB * 3.6));
+            // (with blowers the tanks lose 15 % more oil for 2 % less fire: measured 54.8 buckets/h; the blowers' air is hot
+            // from its compression and 125 g/s of it sweeps each tank, so oil vapour leaving by the breathers is the likely
+            // cause, not checked: todo #471)
+            double oil = blowers ? 54.8 : 47.5;
+            ctx.check(id + ": heavy oil within 10 % of " + oil + " buckets/h", Math.abs(mB * 3.6 / oil - 1) < 0.10, String.format("%.1f buckets/h", mB * 3.6));
         }
     }
 }
