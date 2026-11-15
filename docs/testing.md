@@ -112,6 +112,12 @@ add up. `publish_render` runs it for every device and fails if the chunk's share
 (98.9% when written; the INFO lines give it per device). `autominer_spin` runs it with a drill that stands until the
 chunk shows it and then turns. A new device with a render is covered by `publish_render` without more work; a test
 of a part that changes state can call the check with a draw that changes it.
+`publish_render` also draws transformer coils on their own (wire of each sprite set) and a transformer wound with 14
+and 7 turns on a cheap core through its render (a fresh one has no windings and draws no coils): its coils must be
+under `sprites/winding/` textures and leave the renderer no vertices once settled. The unit test
+`transparentnode/transformer/CoilBakeTest` checks the same with a host that knows a sprite only if it is a file
+`ModelSprites` stitches, that other turns or colour take the coil back until the chunk shows the new one, the sprite
+files against `WindingTexture`, and tint times sprite against the texture that was painted per configuration.
 
 `cases/`: `Batch1Cases`, `Wp9aCases` (six-node power), `Wp9bCases` (sensors, probes), `Wp9cCases` (logic, meters,
 wireless), `Wp10aCases`, `Wp10bCases` (machines, generators, thermal), `Wp11Cases` (shafts, poles, converters),

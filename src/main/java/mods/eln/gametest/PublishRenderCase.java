@@ -142,8 +142,84 @@ final class PublishRenderCase implements TestCase {
             }
             GoldenSlotsCase.clear(ctx);
         }
+        // a transformer's coils (a fresh one has no windings, so the loop above drew none): wire of each set of sprites
+        // (WindingTexture: normal, dark, bright), one coil overfull
+        {
+            var tr = mods.eln.transparentnode.transformer.Coil.of(12, 2.5, 150, 117);
+            var fine = mods.eln.transparentnode.transformer.Coil.of(58, 1.5, 150, 117);
+            var over = mods.eln.transparentnode.transformer.Coil.of(64, 2.5, 150, 320);
+            int[][] wires = {{0xB02E26, 0x1D1D21}, {0xF9FFFE, 0x3C44AA}};
+            for (int[] w : wires) {
+                boolean first = w == wires[0];
+                BakeOnceCheck.check(ctx, "Transformer coils " + (first ? "(red, black)" : "(white, blue overfull)"), new Object(), p, () -> {
+                    mods.eln.transparentnode.transformer.TransformerDescriptor.drawCoil(tr, w[0]);
+                    mods.eln.gl.GL11.glPushMatrix();
+                    mods.eln.gl.GL11.glRotatef(180, 0f, 1f, 0f);
+                    mods.eln.transparentnode.transformer.TransformerDescriptor.drawCoil(first ? fine : over, w[1]);
+                    mods.eln.gl.GL11.glPopMatrix();
+                });
+            }
+        }
+        woundTransformer(ctx, p);
         ctx.check("publish_render: devices", ok == all, ok + " of " + all);
         BakeOnceCheck.summary(ctx, 0.9);   // (98.9% when this was written)
+    }
+
+    /**
+     * A transformer with windings on a core, drawn by its render from its publish packet: its coils (todo #423) are the
+     * chunk's once settled, so winding it leaves the renderer no more vertices a frame than the bare one has.
+     */
+    private static void woundTransformer(TestContext ctx, BlockPos p) {
+        ServerLevel level = ctx.level();
+        String name = "DC-DC Converter wound (14 and 7 turns, cheap core)";
+        try {
+            ctx.floor(p.below());
+            var el = ctx.placeTransparent(0 + (2 << 6), p);   // (Wp10aCases.TRANSFORMER)
+            var core = Eln.sharedItem.getDescriptor(0 + (7 << 6));   // (Wp10aCases.CORE_CHEAP)
+            if (!(el instanceof mods.eln.transparentnode.transformer.TransformerElement tr) || !(core instanceof mods.eln.item.FerromagneticCoreDescriptor)) {
+                ctx.check("publish " + name + " placed", false, el + " with " + core);
+                return;
+            }
+            BlockPos at = el.node.coordonate.pos();
+            int[][] counts = new int[2][];
+            int coilVertices = 0;
+            for (int wound = 0; wound < 2; wound++) {
+                if (wound == 1) {
+                    var cable = mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor;
+                    tr.getInventory().setItem(mods.eln.transparentnode.transformer.TransformerContainer.primaryCableSlotId, cable.newItemStack(14));
+                    tr.getInventory().setItem(mods.eln.transparentnode.transformer.TransformerContainer.secondaryCableSlotId, cable.newItemStack(7));
+                    tr.getInventory().setItem(mods.eln.transparentnode.transformer.TransformerContainer.ferromagneticSlotId, core.newItemStack(1));
+                    tr.getInventory().setChanged();
+                }
+                TransparentNodeEntity be = new TransparentNodeEntity(at, level.getBlockState(at));
+                be.setLevel(level);
+                if (!roundTrip(ctx, wound == 1 ? name : "DC-DC Converter bare", el.node, be) || be.elementRender == null) return;
+                if (wound == 1) {
+                    GlFrame.beginRenderFrame();
+                    GlFrame f = GlFrame.open();
+                    try {
+                        be.elementRender.draw();
+                    } finally {
+                        GlFrame.close();
+                    }
+                    for (var b : f.batches().entrySet()) {
+                        var t = b.getKey().texture();
+                        if (t != null && t.getPath().startsWith("sprites/winding/")) coilVertices += b.getValue().vertices();
+                    }
+                }
+                counts[wound] = BakeOnceCheck.check(ctx, wound == 1 ? name : "DC-DC Converter bare", be, at, be.elementRender::draw);
+            }
+            int bareLeft = counts[0][0] - counts[0][1], woundLeft = counts[1][0] - counts[1][1];
+            ctx.check("publish " + name + ": it draws two coils", coilVertices >= 2 * mods.eln.transparentnode.transformer.TransformerDescriptor.coilVertices(1), coilVertices + " vertices under winding sprites");
+            ctx.check("publish " + name + ": the coils are the chunk's", woundLeft <= bareLeft && counts[1][1] - counts[0][1] >= coilVertices,
+                woundLeft + " vertices a frame left with the renderer (bare: " + bareLeft + "); the chunk has " + counts[1][1] + " (bare: " + counts[0][1] + ")");
+            ctx.line(String.format("INFO coil bake: a wound transformer draws %d vertices, %d of them coils; left with the renderer once settled: %d (bare: %d)",
+                counts[1][0], coilVertices, woundLeft, bareLeft));
+        } catch (RuntimeException ex) {
+            ctx.check("publish " + name, false, ex.toString());
+        } finally {
+            GoldenSlotsCase.clear(ctx);
+        }
     }
 
     /** Feed the node's publish packet to a client-side entity; it must read every byte. */
