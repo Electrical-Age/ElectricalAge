@@ -2592,8 +2592,8 @@ public final class OilCases {
         mods.eln.oil.CondenserElement c;
         mods.eln.sim.IProcess fire;
         int tick;
-        double makeup, makeup0, floodHi, fillEnd, fillHalf, power;
-        static final int TICKS = 9000, WATCH = 6000;
+        double makeup, makeup0, makeupLate0, floodHi, fillEnd, fillHalf, power;
+        static final int TICKS = 9000, WATCH = 6000, LATE = 8000;
 
         public String id() {
             return "fluid_makeup_plant_refills_boiler";
@@ -2659,6 +2659,7 @@ public final class OilCases {
                     makeup0 = makeup;
                     fillHalf = boiler.fill();
                 }
+                if (tick == LATE) makeupLate0 = makeup;
                 if (tick > WATCH) {
                     floodHi = Math.max(floodHi, c.floodShare());
                     power += turbine.source.getEffectiveP() / (TICKS - WATCH);
@@ -2669,8 +2670,9 @@ public final class OilCases {
 
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(fire);
-            ctx.line(String.format("makeup plant: boiler fill %.0f%% at %d ticks, %.0f%% at the end; condenser up to %.0f%%; %.1f g makeup over the watch; %.0f W; "
-                    + "boiler %s; turbine %s; condenser %s", fillHalf * 100, WATCH, fillEnd * 100, floodHi * 100, (makeup - makeup0) * 1000, power,
+            ctx.line(String.format("makeup plant: boiler fill %.0f%% at %d ticks, %.0f%% at the end; condenser up to %.0f%%; %.1f g makeup over the watch, %.3f g/s over the last %d ticks; %.0f W; "
+                    + "boiler %s; turbine %s; condenser %s", fillHalf * 100, WATCH, fillEnd * 100, floodHi * 100, (makeup - makeup0) * 1000,
+                (makeup - makeupLate0) * 1000 / ((TICKS - LATE) / 20.0), TICKS - LATE, power,
                 boiler.getWaila(), turbine.getWaila(), c.getWaila()));
             ctx.check("makeup plant: the boiler fills back up to its float (over 60 %)", fillEnd > 0.6, String.format("%.0f%%", fillEnd * 100));
             ctx.check("makeup plant: the condenser doesn't flood", floodHi < mods.eln.oil.CondenserVessel.LEVEL_FULL, String.format("%.0f%%", floodHi * 100));
