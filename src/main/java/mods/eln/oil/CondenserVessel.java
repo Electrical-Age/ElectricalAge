@@ -54,8 +54,13 @@ public final class CondenserVessel {
      * floats throttle, a low hotwell's pump shuts off first and the fuller one delivers; a low hotwell still fills
      * cold boilers and makes up losses into a boiler up to LOW_HEAD of the shut-off. While the line is under that
      * head a hotwell at LEVEL_FULL passes more than its turbine's condensate at full power, so it can't fill further.
+     * LOW_FLOW is 1 (2026-11-15, a player's small plant on makeup water ran its boiler dry at 10 bar): the makeup holds a
+     * plant that loses water at the makeup's shut level, and with 0.3 of its flow there the pump returned ~18 % of its
+     * rated flow against 10 bar, less than its turbine's steam; the water the plant lacked was missed in the boiler, which
+     * drained until its bare heating surface made no more steam than that. The head alone shares a line: a low hotwell's
+     * pump stops once the fuller one holds the line over LOW_HEAD of the shut-off.
      */
-    public static final double LEVEL_FULL = 0.40, LOW_HEAD = 1.6 / CondensatePump.SHUTOFF_OVER_NOMINAL, LOW_FLOW = 0.3;
+    public static final double LEVEL_FULL = 0.40, LOW_HEAD = 1.6 / CondensatePump.SHUTOFF_OVER_NOMINAL, LOW_FLOW = 1.0;
     /** The level control's share of the curve now (0 at the makeup's shut level and under, 1 from LEVEL_FULL), and
      *  the shut-off head it leaves the pump (Pa). */
     public double levelShare, headPa;
