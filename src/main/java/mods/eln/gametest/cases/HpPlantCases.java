@@ -1,0 +1,302 @@
+package mods.eln.gametest.cases;
+
+import mods.eln.Eln;
+import mods.eln.gametest.TestCase;
+import mods.eln.gametest.TestContext;
+import mods.eln.mechanical.GeneratorElement;
+import mods.eln.mechanical.ShaftSteamTurbineElement;
+import mods.eln.misc.Direction;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.oil.BoilerElement;
+import mods.eln.oil.Oil;
+import mods.eln.oil.PlantCondenserElement;
+import mods.eln.oil.SteamValveControl;
+import mods.eln.sim.IProcess;
+import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.fluid.EaUnits;
+import mods.eln.sim.fluid.FluidDevice;
+import mods.eln.sim.fluid.FluidNode;
+import mods.eln.sim.fluid.Water;
+import mods.eln.sim.mna.component.Resistor;
+import mods.eln.transparentnode.FuelHeatFurnaceContainer;
+import mods.eln.transparentnode.FuelHeatFurnaceElement;
+import net.minecraft.core.BlockPos;
+
+import java.util.List;
+
+import static mods.eln.gametest.cases.ShaftSteamCases.*;
+import static mods.eln.gametest.cases.Wp11Cases.*;
+
+/**
+ * A furnace-fired HP steam plant from the devices a player builds it with (todo #137): Fuel Heat Furnaces with Big
+ * burners on heavy oil against a Boiler's thermal faces, alloy pipe to an HP Steam Turbine with two loaded 8 kW
+ * generators, its exhaust into a Plant Steam Condenser (shaft motor on its pump), the condensate piped back to the
+ * boiler's feed flange. One boiler takes two furnaces (its third thermal face is its feed flange's), so this is a
+ * slice of the 16 kW plant: what it measures per furnace and per boiler scales to the whole by arithmetic
+ * (notes/parallel-2026-11-15/hpplant-137.md).
+ */
+public final class HpPlantCases {
+    private HpPlantCases() {
+    }
+
+    public static void addTo(List<TestCase> cases) {
+        cases.add(new FurnacePlant("hp_plant_furnace_fired_20bar", 20, 0, 4500, 6880, 3240, 9.9, false));
+        cases.add(new FurnacePlant("hp_plant_furnace_fired_10bar", 10, 0, 4500, 6970, 3100, 10.3, false));
+        cases.add(new FurnacePlant("hp_plant_furnace_fired_forced_air", 20, 1.6e5, 11000, 16680, 8230, 3.9, false));
+        cases.add(new FurnacePlant("hp_plant_boiler_limit_under", 20, 2.07e5, 13000, 19520, 9540, 3.4, false));
+        cases.add(new FurnacePlant("hp_plant_boiler_limit_over", 20, 2.6e5, 15000, 0, 0, 0, true));
+    }
+
+    /** A Fuel Heat Furnace at p, its fuel flange towards front (its thermal face is its back), a Big burner in it, lit,
+     *  at full setting, with mB of heavy oil in its tank. */
+    static FuelHeatFurnaceElement furnace(TestContext ctx, BlockPos p, Direction front, int mB) {
+        var f = (FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, p);
+        f.front = front;
+        f.reconnect();
+        f.getInventory().setItem(FuelHeatFurnaceContainer.Companion.getFuelBurnerSlot(), Eln.sharedItemStackOne.getDescriptor(2 + (124 << 6)).newItemStack());
+        f.inventoryChange(f.getInventory());
+        f.networkUnserialize(ctx.stream(o -> o.writeByte(FuelHeatFurnaceElement.Companion.getMainSwitchToggleEvent())));
+        f.networkUnserialize(ctx.stream(o -> {
+            o.writeByte(FuelHeatFurnaceElement.Companion.getSetManualControlValueEvent());
+            o.writeFloat(1f);
+        }));
+        f.putFuel(Oil.Cut.HEAVYOIL.source.get(), mB);
+        return f;
+    }
+
+    static final class FurnacePlant extends PlumbingCases.Big {
+        static final int WATCH = 3000, TICKS = 4800;
+        final String id;
+        final double bar, airPa, loadW, expectFurnaceW, expectShaftW, expectFurnaces16;
+        final boolean expectTrip;
+        /** The tick the boiler failed at (-1: it didn't), and what it showed just before: its boiling (W), shell (K over ambient), pressure (bar), fill (0..1). */
+        int tripTick = -1;
+        double lastBoilW, lastShell, lastBar, lastFill;
+        BoilerElement boiler;
+        final FuelHeatFurnaceElement[] f = new FuelHeatFurnaceElement[2];
+        final ThermalLoad[] fT = new ThermalLoad[2];
+        final FluidDevice[] air = new FluidDevice[2];
+        final FluidNode[] mains = new FluidNode[2];
+        ShaftSteamTurbineElement hp;
+        PlantCondenserElement c;
+        final Resistor[] loads = new Resistor[2];
+        IProcess clock;
+        FluidDevice meter;
+        int tick;
+        boolean counting;
+        // over the watch: sums (x dt) and counters' starts
+        double window, waterJ, meterS, elecJ, pSum, shellSum, shellMax, radsSum, condSum, overSum, gaugeSum, fillLo = 1e9, fillHi, floodHi;
+        final double[] furnaceSum = new double[2], furnaceMax = new double[2], given0 = new double[2], kg0 = new double[2], mb0 = new double[2];
+        double steam0, work0, pumped0, boilerKg0;
+
+        /**
+         * @param bar              the turbine's pressure regulator's setting
+         * @param airPa            air on the furnaces' fuel flanges (Pa gauge at the main; 0: natural draught)
+         * @param loadW            the two generators' resistors together, at their nominal volts
+         * @param expectFurnaceW   heat into the water per furnace, pinned within 10 % (0: not pinned)
+         * @param expectShaftW     the turbine's shaft power, pinned within 10 %
+         * @param expectFurnaces16 furnaces fired like this for 16 kW on the shaft, by proportion, pinned within 12 %
+         * @param expectTrip       the boiler is fired past its limit: its shell's watchdog fails it
+         */
+        FurnacePlant(String id, double bar, double airPa, double loadW, double expectFurnaceW, double expectShaftW, double expectFurnaces16, boolean expectTrip) {
+            this.id = id;
+            this.bar = bar;
+            this.airPa = airPa;
+            this.loadW = loadW;
+            this.expectFurnaceW = expectFurnaceW;
+            this.expectShaftW = expectShaftW;
+            this.expectFurnaces16 = expectFurnaces16;
+            this.expectTrip = expectTrip;
+        }
+
+        public String id() {
+            return id;
+        }
+
+        public int ticks() {
+            return TICKS;
+        }
+
+        public boolean checkLimitCycles() {
+            return false;   // (burner, regulator and feed float each hunt a little: the averages are what is pinned)
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos bp = ctx.at(2, 1, 5), tp = ctx.at(5, 1, 5), cp = ctx.at(6, 1, 5);
+            boiler = (BoilerElement) ctx.placeTransparent(8 + (82 << 6), bp);
+            boiler.front = Direction.XN;   // (feed flange south; thermal faces north, east and south)
+            boiler.reconnect();
+            boiler.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.fromTanks(8000, 0);
+            boiler.showTanks();
+            // two furnaces, their backs against the boiler's north and east faces
+            f[0] = furnace(ctx, bp.north(), Direction.ZN, 1900);
+            f[1] = furnace(ctx, bp.east(), Direction.XP, 1900);
+            for (int i = 0; i < 2; i++) fT[i] = Batch1Cases.<ThermalLoad>field(f[i], "thermalLoad");
+            if (airPa > 0) {
+                // (the Air Blower that doesn't exist yet: an air main on each fuel flange, kept at its pressure)
+                double y = bp.getY();
+                for (int i = 0; i < 2; i++) air[i] = OilCases.FurnacePressure.onFlange(f[i], mains[i] = OilCases.FurnacePressure.main(y, airPa, false));
+            }
+            // steam: alloy pipe up out of the boiler, east over the furnace, down into the turbine's inlet
+            PipeCases.lay(ctx, ctx.at(2, 2, 5), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(3, 2, 5), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(4, 2, 5), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(5, 2, 5), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);
+            TransparentNodeElement[] line = ShaftPlantCases.turbineLine(ctx, STEAM_TURBINE, tp, GENERATOR_8KW, GENERATOR_8KW);
+            hp = (ShaftSteamTurbineElement) line[0];
+            loads[0] = load((GeneratorElement) line[1], loadW / 2);
+            loads[1] = load((GeneratorElement) line[2], loadW / 2);
+            // (the player's pressure regulator in the turbine: it opens the valve as the boiler passes its set pressure;
+            // the load is a little more than the steam gives, so the governor stays open and the regulator has the valve)
+            hp.controls.inventory.setItem(SteamValveControl.REGULATOR_SLOT, Eln.sharedItem.getDescriptor(8 + (3 << 6)).newItemStack());
+            hp.controls.targetBar = bar;
+            hp.controls.computeInventory();
+            // the condenser's back against the turbine's exhaust, a powered shaft motor on its pump
+            c = ShaftPlantCases.condenser(ctx, cp, true, Direction.XP);
+            // condensate: alloy pipe out of the condenser's front (east), south, west along z 7, north into the boiler's feed flange
+            PipeCases.lay(ctx, ctx.at(7, 1, 5), 1, 0, 4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 16);   // (its flange is low on the face)
+            PipeCases.lay(ctx, ctx.at(7, 1, 6), 1, 8, 8, 0, 8, 8, 16);
+            PipeCases.lay(ctx, ctx.at(7, 1, 7), 1, 8, 8, 0, 8, 8, 8, 0, 8, 8);
+            for (int x = 6; x >= 3; x--) PipeCases.lay(ctx, ctx.at(x, 1, 7), 1, 16, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, ctx.at(2, 1, 7), 1, 16, 8, 8, 8, 8, 8, 8, 8, 0);
+            PipeCases.lay(ctx, ctx.at(2, 1, 6), 1, 8, 8, 16, 8, 8, 0);
+            meter = new FluidDevice() {
+                public Object fluidLevel() {
+                    return boiler.fluidLevel();
+                }
+
+                public List<FluidPort> fluidPorts() {
+                    return List.of();
+                }
+
+                public void afterFluidStep(double dt) {
+                    if (!counting || boiler.vessel == null) return;
+                    waterJ += boiler.vessel.wallJ;
+                    meterS += dt;
+                }
+            };
+            mods.eln.fluid.FluidWorld.add(meter);
+            Eln.simulator.addSlowProcess(clock = dt -> {
+                if (c.v.vessel == null || boiler.vessel == null) return;
+                if (tick == 0) {   // (as a plant that has run: water in the hotwell, in the pump's level band, and the feed run full)
+                    EaUnits.addWater(c.v.vessel, 0.28 * c.v.vessel.volume * Water.RHO_L, 320, false);
+                    var run = mods.eln.fluid.FluidWorld.nodeFor(boiler.feed);
+                    run.fill(0.995 * run.volume * Water.RHO_L, Water.P_ATM, 300);
+                    run.update();
+                }
+                tick++;
+                if (tripTick < 0 && boiler.isBurnt()) tripTick = tick;
+                if (tripTick < 0) {
+                    lastBoilW = boiler.boilW;
+                    lastShell = boiler.thermal.Tc;
+                    lastBar = boiler.vessel.P() / 1e5;
+                    lastFill = boiler.fill();
+                }
+                for (FluidNode m : mains) if (m != null) m.fill(0, Water.P_ATM + airPa, 293.15);
+                if (tick == WATCH) {
+                    counting = true;
+                    for (int i = 0; i < 2; i++) {
+                        given0[i] = f[i].getHeatGivenJ();
+                        kg0[i] = f[i].getFuelBurntKg();
+                        mb0[i] = f[i].fuelMb();
+                    }
+                    steam0 = hp.totalKg;
+                    work0 = hp.totalWork;
+                    pumped0 = c.v.totalPumpedKg;
+                    boilerKg0 = boiler.vessel.mLiquid();
+                }
+                if (tick > WATCH) {
+                    window += dt;
+                    for (Resistor r : loads) elecJ += r.getP() * dt;
+                    pSum += boiler.vessel.P() * dt;
+                    shellSum += boiler.thermal.Tc * dt;
+                    shellMax = Math.max(shellMax, boiler.thermal.Tc);
+                    radsSum += shaft(hp).getRads() * dt;
+                    condSum += c.v.vessel.P() * dt;
+                    for (int i = 0; i < 2; i++) {
+                        furnaceSum[i] += fT[i].Tc * dt;
+                        furnaceMax[i] = Math.max(furnaceMax[i], fT[i].Tc);
+                        overSum += f[i].overfire() * dt / 2;
+                        gaugeSum += (f[i].getVessel() == null ? 0 : f[i].getVessel().P() - Water.P_ATM) * dt / 2;
+                    }
+                    fillLo = Math.min(fillLo, boiler.fill());
+                    fillHi = Math.max(fillHi, boiler.fill());
+                    floodHi = Math.max(floodHi, c.floodShare());
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(clock);
+            mods.eln.fluid.FluidWorld.remove(meter);
+            for (FluidDevice d : air) if (d != null) mods.eln.fluid.FluidWorld.remove(d);
+            for (Resistor r : loads) Eln.simulator.removeElectricalComponent(r);
+            double w = Math.max(1e-9, window), fire = 0, kg = 0, mB = 0;
+            for (int i = 0; i < 2; i++) {
+                fire += (f[i].getHeatGivenJ() - given0[i]) / w;
+                kg += (f[i].getFuelBurntKg() - kg0[i]) / w;
+                mB += (mb0[i] - f[i].fuelMb()) / w;
+            }
+            double water = waterJ / Math.max(1e-9, meterS), steam = (hp.totalKg - steam0) / w, shaftW = (hp.totalWork - work0) / w, elec = elecJ / w;
+            double pumped = (c.v.totalPumpedKg - pumped0) / w, p = pSum / w, shell = shellSum / w, over = overSum / w;
+            double perFurnace = water / 2, share = water / Math.max(1e-9, fire), perKg = shaftW / Math.max(1e-9, steam);
+            // what a whole 16 kW plant takes at this slice's numbers: heat by shaft power, furnaces and fuel by heat
+            double heat16 = water * 16e3 / Math.max(1e-9, shaftW), furnaces16 = heat16 / Math.max(1e-9, perFurnace), bucketsH = mB * 3.6 / 2;
+            // the boiler's own limit at this pressure: its shell's watchdog (400 K over ambient) through 0.005 K/W into the water
+            double boilerLimit = shell <= 0 ? 0 : water * (400 - (shell - water * BoilerElement.SHELL_TO_WATER_K_PER_W)) / (water * BoilerElement.SHELL_TO_WATER_K_PER_W);
+            ctx.line(String.format("%s: fire %.2f kW (2 furnaces, overfire x%.2f, tank %.2f bar gauge), %.2f kW into the water (%.2f kW a furnace, %.1f %% of the fire); "
+                    + "boiler %.2f bar, shell %.0f K over ambient (max %.0f), fill %.0f..%.0f %%; furnaces %.0f / %.0f K over ambient (max %.0f / %.0f); "
+                    + "steam %.2f g/s, shaft %.2f kW (%.0f kJ/kg), electric %.2f kW, %.0f rad/s; condenser %.3f bar, up to %.0f %% full, pumped %.2f g/s; "
+                    + "boiler water %+.1f g over %.0f s; fuel %.3f g/s = %.2f mB/s = %.2f buckets/h a furnace; coke %.3f / %.3f",
+                id, fire / 1000, over, gaugeSum / w / 1e5, water / 1000, perFurnace / 1000, share * 100,
+                p / 1e5, shell, shellMax, fillLo * 100, fillHi * 100, furnaceSum[0] / w, furnaceSum[1] / w, furnaceMax[0], furnaceMax[1],
+                steam * 1000, shaftW / 1000, perKg / 1000, elec / 1000, radsSum / w, condSum / w / 1e5, floodHi * 100, pumped * 1000,
+                (boiler.vessel == null ? 0 : boiler.vessel.mLiquid() - boilerKg0) * 1000, w, kg * 1000, mB, bucketsH, f[0].getCoke(), f[1].getCoke()));
+            ctx.line(String.format("%s: scaled to 16 kW on the shaft: %.1f kW into the water, %.1f furnaces at this firing, %.1f buckets/h of heavy oil; "
+                    + "one boiler's limit at this pressure %.1f kW (%.1f such furnaces)",
+                id, heat16 / 1000, furnaces16, furnaces16 * bucketsH, boilerLimit / 1000, boilerLimit / Math.max(1e-9, perFurnace)));
+            ctx.line(id + ": boiler " + boiler.getWaila() + "; furnace " + f[0].getWaila() + "; HP " + hp.getWaila() + "; condenser " + c.getWaila());
+            if (expectTrip) {
+                // fired past what its shell can pass into the water: the shell passes its 400 K and, once its watchdog's
+                // budget (400 K s over the limit) is spent, the boiler fails
+                double limit = (400 - (Water.tsat(bar * 1e5) - 293.15)) / BoilerElement.SHELL_TO_WATER_K_PER_W;
+                ctx.line(String.format("%s: the boiler failed at tick %d, boiling %.1f kW at %.1f bar, its shell %.0f K over ambient (limit by its constants %.1f kW)",
+                    id, tripTick, lastBoilW / 1000, lastBar, lastShell, limit / 1000));
+                ctx.check(id + ": fired past its limit, the boiler fails", boiler.isBurnt() && tripTick > 0, "tick " + tripTick);
+                ctx.check(id + ": it failed on its shell's temperature (400-430 K over ambient), full of water", lastShell > 400 && lastShell < 430 && lastFill > 0.9,
+                    String.format("%.0f K, %.0f %% full", lastShell, lastFill * 100));
+                ctx.check(id + ": it was boiling over its limit, by under 15 %, when it failed", lastBoilW > limit && lastBoilW < 1.15 * limit,
+                    String.format("%.1f kW of %.1f", lastBoilW / 1000, limit / 1000));
+                return;
+            }
+            boolean joined = false;
+            for (var q : c.fluidPorts()) joined |= mods.eln.fluid.FluidWorld.networkOf(q.node()) == mods.eln.fluid.FluidWorld.networkOf(boiler.feed);
+            ctx.check(id + ": the condenser's pump feeds the boiler (one network)", joined && mods.eln.fluid.FluidWorld.networkOf(boiler.feed) != null, "");
+            ctx.check(id + ": nothing burnt out", !boiler.isBurnt() && !f[0].isBurnt() && !f[1].isBurnt() && !hp.isBurnt(),
+                String.format("boiler %b, furnaces %b %b, turbine %b", boiler.isBurnt(), f[0].isBurnt(), f[1].isBurnt(), hp.isBurnt()));
+            ctx.check(id + ": the boiler holds its pressure (within 1.5 bar of the regulator's)", Math.abs(p / 1e5 - bar) < 1.5, String.format("%.2f bar", p / 1e5));
+            ctx.check(id + ": the boiler neither boils dry nor overfills", fillLo > 0.3 && fillHi < 1.02, String.format("%.0f..%.0f %%", fillLo * 100, fillHi * 100));
+            ctx.check(id + ": the condensate goes back (90 %+ of the steam)", steam > 1e-3 && pumped > 0.9 * steam, String.format("%.2f of %.2f g/s", pumped * 1000, steam * 1000));
+            ctx.check(id + ": the condenser holds a vacuum (under 0.3 bar)", condSum / w < 0.3e5, String.format("%.3f bar", condSum / w / 1e5));
+            // the balance, pinned: a change to burners, furnace or boiler shells, the turbine or the condenser that moves
+            // what a 16 kW plant takes shows here
+            ctx.check(id + ": the fire is the burners' (10 kW each x their overfire, less coke; within 6 %)",
+                Math.abs(fire / (2 * 10e3 * over * (1 - (f[0].getCoke() + f[1].getCoke()) / 2)) - 1) < 0.06, String.format("%.2f kW at x%.2f", fire / 1000, over));
+            ctx.check(id + ": 65-78 % of the fire reaches the water", share > 0.65 && share < 0.78, String.format("%.1f %%", share * 100));
+            if (expectFurnaceW > 0) {
+                ctx.check(id + String.format(": heat into the water per furnace within 10 %% of %.2f kW", expectFurnaceW / 1000), Math.abs(perFurnace / expectFurnaceW - 1) < 0.10,
+                    String.format("%.2f kW", perFurnace / 1000));
+                ctx.check(id + String.format(": shaft power within 10 %% of %.2f kW", expectShaftW / 1000), Math.abs(shaftW / expectShaftW - 1) < 0.10,
+                    String.format("%.2f kW", shaftW / 1000));
+                ctx.check(id + String.format(": furnaces for 16 kW, by proportion, within 12 %% of %.1f", expectFurnaces16), Math.abs(furnaces16 / expectFurnaces16 - 1) < 0.12,
+                    String.format("%.1f", furnaces16));
+            }
+            // (the shell over the water by the heat through 0.005 K/W: the boiler's limit follows from its 400 K watchdog)
+            double wall = shell - water * BoilerElement.SHELL_TO_WATER_K_PER_W - (Water.tsat(p) - 293.15);
+            ctx.check(id + ": the shell stands over the boiling water by the heat through its wall (within 8 K), and under its 400 K limit",
+                Math.abs(wall) < 8 && shellMax < 400, String.format("%+.1f K off, shell max %.0f K", wall, shellMax));
+            ctx.check(id + ": the generators deliver most of the shaft power (over 80 %)", elec > 0.8 * shaftW && elec < shaftW, String.format("%.2f of %.2f kW", elec / 1000, shaftW / 1000));
+        }
+    }
+}
