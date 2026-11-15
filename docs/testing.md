@@ -15,7 +15,7 @@ self-test cases and the golden-data diffs on a headless server (`src/main/java/m
 
 `test` task system properties (`build.gradle`): `eln.deterministic=true` (`Utils.rand` returns the midpoint of its
 range; the 1.12 sim tests were written against that), `jqwik.database=build/jqwik-database` (failing seeds are kept
-there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid.cases`. jqwik defaults to 200 tries
+there and replayed first), `eln.guiDir` (LayoutTest, HubSlotsTest), `-PfluidCases=N` -> `fluid.cases`. jqwik defaults to 200 tries
 (`src/test/resources/junit-platform.properties`).
 
 ## Unit tests (`src/test/java/mods/eln/...`)
@@ -53,6 +53,7 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
 | `node/voxel/ChiselBrushTest` | Chisel brush boxes (cube, flat, tunnel) for every axis, size and hit voxel; brush validation. |
 | `client/gui/RadialMenuTest` | Radial menu hit test (ring and segment under the mouse). |
 | `gui/LayoutTest` | Layout engine; every `assets/eln/gui/*.json` has no overlaps and nothing outside its panel. |
+| `sixnode/hub/HubSlotsTest` | The hub screen against the world: the slot and link seen at each place on every face for every way the player faces, never mirrored; the device's slot -> world side and link tables (saved data) are unchanged; `gui/hub.json` has the places. |
 | `item/xray/XRayRayMarchTest` | X-ray ray march. |
 | `gametest/StructureFileTest` | The generated floor `.nbt` parses (3x3 stone floor). |
 | `robotics/motion/SegmentPropertyTest` (jqwik), `DriveTest` (jqwik) | Servo segments are continuous, within limits, arrive; retargets are seamless. Top speed follows the line; the energy rule: a step goes no further than its energy pays for, a cut move starts where the paid step ended at the speed the supply keeps paying for. |
@@ -130,6 +131,9 @@ device on the API passes `verifySpec` with the spec from its registered descript
 circuit at a vanilla barrel: a power face on a real line, turning, breaking; a `PortRef` link to a cable two blocks
 away, its WRONG_KIND and NO_NODE neighbours, the cable broken and placed back; a watchdog whose listener opens the
 load; one circuit per block entity, none on a machine's).
+`HubSlotCases` (`hub_slots_as_seen`: a fake player faces a way, opens a hub's menu and clicks a cable or a kit into
+the slot its screen shows at a place; the pin is on the side of the world seen there, on a floor, a wall and a
+ceiling; the pure table is `HubSlotsTest`).
 `GuiPacketFuzzCases` (`gui_packets_reject_bad_values_<element>`: one case per six-node and transparent element class
 that has its own `networkUnserialize`, found by enumerating the registries, so a new handler is covered unlisted;
 packet ids -128..127 with NaN, infinite, huge and negative numbers, out-of-range index bytes and a 3000-character

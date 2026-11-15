@@ -112,6 +112,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.ComputerCases.addTo(l);
         mods.eln.gametest.cases.HostedMachineCases.addTo(l);
         mods.eln.gametest.cases.LowLevelCases.addTo(l);
+        mods.eln.gametest.cases.HubSlotCases.addTo(l);
         return l;
     }
 

@@ -136,6 +136,19 @@ Rules:
   fed by `FunctionReference`.
 - Device screens live next to their devices (e.g. `sixnode/hub/HubScreen.java`, `oil/ElectricHeaterScreen.java`); the
   Kotlin devices' screens are in `KotlinDeviceScreens.kt`.
+- A screen may arrange its device slots itself: `ElnNodeMenu.moveDeviceSlot(index, x, y, comment...)` (client) shows
+  a slot elsewhere, with other tooltip lines. The Hub's does (`sixnode/hub/HubSlots`, pure, shared with the tests): its
+  layout's slot ids 3, 0, 2, 1 mark the places top, right, bottom, left, and the slot shown at a place is the one whose
+  edge the player sees there when the screen opens.
+
+  | Hub on | top | right | bottom | left |
+  |---|---|---|---|---|
+  | a floor | the way the player faces | their right | behind them | their left |
+  | a ceiling | behind the player | their right | the way they face | their left |
+  | a wall | up | their right, looking at the wall | down | their left |
+
+  The device's own table does not change: slot i is edge `LRDU` i (Left 0, Right 1, Down 2, Up 3) of the face, toward
+  `side.applyLRDU(edge)`. On a floor that is south, north, west, east for slots 0 to 3.
 
 Layout engine: `src/main/java/mods/eln/gui/layout/Layout.java` (pure Java, no client classes). Rows and columns of
 self-sizing leaves (`slot`, `text`, `button`, `slider`, `field`, `gauge`, `progress`, `inventory`, `canvas`, `space`),

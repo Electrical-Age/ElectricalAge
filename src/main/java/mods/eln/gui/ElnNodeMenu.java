@@ -77,6 +77,22 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         }
     }
 
+    /**
+     * Client: show the device slot of inventory index `index` at (x, y), with these tooltip lines (a screen that
+     * arranges its slots itself: the hub's follow the player's view). The slot keeps its place in the menu's list, so
+     * clicks and sync are as before; vanilla slots can't be moved, so it is replaced by one built there.
+     */
+    public void moveDeviceSlot(int index, int x, int y, String... comment) {
+        for (int i = 0; i < deviceSlots; i++) {
+            if (!(slots.get(i) instanceof ElnSlot old) || old.getContainerSlot() != index) continue;
+            SlotSpec s = old.spec;
+            ElnSlot moved = new ElnSlot(old.container, new SlotSpec(s.kind(), s.index(), x, y, s.limit(), s.filter(), s.skin(), comment), old.level);
+            moved.index = i;
+            slots.set(i, moved);
+            return;
+        }
+    }
+
     /** Worn-slot keys of the player's armour ("armor#head"...): MenuSpec.withArmor. */
     static final String ARMOR = "armor#";
     static final net.minecraft.world.entity.EquipmentSlot[] ARMOR_SLOTS = {net.minecraft.world.entity.EquipmentSlot.HEAD,

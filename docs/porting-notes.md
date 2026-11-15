@@ -721,6 +721,14 @@ In the port:
   reinforced deepslate, command blocks) and budding amethyst: in the shaft they end it as bedrock does, around it they
   are skipped. A finished or waiting miner looks for work once a second (1.12: every tick, rescanning its whole layer).
   Test `autominer_refuses_unbreakable_blocks`.
+- The Hub's screen was a fixed picture (slot 3 on top, 0 right, 2 bottom, 1 left), which is the hub as seen on a
+  wall, or on a floor by a player facing east. For a player facing south over a floor hub it was a quarter turn off:
+  the left and right slots were the north and south sides, the top and bottom ones east and west (AdventurAgent). The
+  screen now shows the hub as the player sees it when it opens (`sixnode/hub/HubSlots`): on a floor the top slot is
+  the side the player faces and left is their left; on a ceiling the top is behind them (the view looking up); on a
+  wall the top is up. The links are drawn between their slots, and an empty slot's tooltip names its side of the
+  world. The device is unchanged (slot i is still edge `LRDU` i of the face, link ids as saved), so placed hubs keep
+  their connections. Tests `HubSlotsTest`, `hub_slots_as_seen`.
 
 ## Deferred
 
