@@ -2820,7 +2820,8 @@ public final class OilCases {
             for (int x = 1; x <= 3; x++) l.used.add(ctx.at(x, 1, 2));
             PipeCases.lay(ctx, ctx.at(4, 2, 2), 0, 8, 0, 8, 8, 8, 8);   // (a stub on the makeup flange)
             mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
-                if (c.vessel == null || boiler.vessel == null || c.inlet == null) return;
+                // (and the turbine joined to its steam and its condenser before the start-up state is set)
+                if (c.vessel == null || boiler.vessel == null || c.inlet == null || turbine.inlet == null || turbine.condenser == null) return;
                 if (tick == 0) {   // (the hotwell at the makeup's shut level; the feed run full, as a plant that has run)
                     mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.25 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 310, false);
                     // the boiler as the player's was found: hot, at 10 bar, its water at 10 % of the gauge glass, the turbine turning
