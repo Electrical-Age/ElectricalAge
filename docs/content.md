@@ -86,6 +86,19 @@ much less: half after an hour at full power on crude, at most 90 % coked. A righ
 crude or residue puts out black smoke (Baughn 2026-11-03). Tests: `OilCases` oil_pump_into_pipe*, oil_on_pipes_*,
 fuel_furnace_coke.
 
+**Fuel quality** (refinery milestone M1, `sim/fluid/FuelQuality.java`; Baughn 2026-11-15) is one mechanism for the
+furnace burner and the engines. The liquid layer a device burns is rated: its mass share boiling outside the engine's
+window (a species without a boiling point, residue, is too heavy for any window) and its coking index. An engine loses
+2 % of its power per 1 % outside the window (the fuel burns all the same: the heat goes out of the exhaust). Fuel whose
+coking index is over the device's balance fouls it, up to 90 %, at `FOUL_PER_INDEX` x (index - balance) per 2 h of full
+power; under the balance it clears at the same law; wool cleans it at once; nothing is damaged. Balances: furnace
+burner 0.05, engines 0.02 (diesel with over 7 % heavy oil or 1 % residue fouls an engine). The Gas Turbine's window is
+330 to 720 K, so gasoline, diesel and heavy oil all give full power, and heavy oil fouls it by 39 % an hour at full
+power (diesel clears 3 % an hour, gasoline 6 %). Jade on the turbine shows the rating, whether the fuel fouls, the
+fuel's viscosity, and the fouling. Saved as `foul`, `fuelLight`, `fuelHeavy`, `fuelCoking` (absent: clean). The Fuel
+Generator has no fuel vessel yet (buckets of one named fluid), so it has no rating yet. GameTests
+gas_turbine_off_spec_derates, gas_turbine_heavy_oil_fouls, gas_turbine_clean_fuel_clears; unit test FuelQualityTest.
+
 ### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)
 - Datapack JSON `data/<ns>/eln/fluid_species/<name>.json` defines species `<ns>:<name>` for the fluid core (fields in
   the loader's javadoc: kind curve/none/gas, group, density, heat capacities, molar mass, boiling point, latent heat,

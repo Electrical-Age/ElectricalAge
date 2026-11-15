@@ -112,15 +112,15 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val SetManualControlValueEvent: Byte = 2
         val SetTemperatureEvent: Byte = 3
         /** The most a burner cokes: it still fires a tenth. */
-        const val COKE_MAX = 0.9
+        const val COKE_MAX = mods.eln.sim.fluid.FuelQuality.FOUL_MAX
         /**
          * The coking index (each species' `coking` by its share of what burns: residue 1, heavy oil 0.15, diesel 0.01,
          * light cuts 0) at which a burner neither cokes nor clears: a plausible refinery's fuel (Baughn 2026-11-11: on
          * better fuel "the ash gets pulled out with the smoke eventually"). Over it the burner cokes, under it it clears.
          */
-        const val COKE_BALANCE = 0.05
+        const val COKE_BALANCE = mods.eln.sim.fluid.FuelQuality.FURNACE_BALANCE
         /** Coking per unit of index over the balance: dead crude (index 0.216) cokes at rate 1, as before. */
-        const val COKE_PER_INDEX = 1 / (0.2159 - COKE_BALANCE)
+        const val COKE_PER_INDEX = mods.eln.sim.fluid.FuelQuality.FOUL_PER_INDEX
         /**
          * Its fuel tank (mB, two buckets: Baughn 2026-11-03, it fills by bucket) and its volume (m^3): two buckets under
          * the view's 95 % fill, with head space over them (AdventurAgent 2026-11-11: a second bucket didn't fit).
@@ -504,7 +504,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             // (the coking: per second at its full power on dead crude, 1 / (2 h); by the coking index of what burns, over
             // or under the balance: fuel better than a plausible refinery's clears the burner as it burns)
             val rate = cokeRate()
-            if (rate != 0.0 && nominalPower > 0) coke = Math.max(0.0, Math.min(COKE_MAX, coke + rate * flamePower / nominalPower * time / (2 * 3600)))
+            if (rate != 0.0 && nominalPower > 0) coke = mods.eln.sim.fluid.FuelQuality.foul(coke, cokingIndex, COKE_BALANCE, flamePower / nominalPower, time)
             thermalLoad.PcTemp += mods.eln.fluid.Flue.HEAT_SHARE * actualHeatPower   // (the rest leaves in the smoke: Flue)
         }
 

@@ -16,6 +16,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.fluid.FluidDevice;
 import mods.eln.sim.fluid.EaUnits;
 import mods.eln.sim.fluid.FluidNode;
+import mods.eln.sim.fluid.FuelQuality;
 import mods.eln.sim.fluid.SpeciesRegistry;
 import mods.eln.sim.fluid.Vessels;
 import mods.eln.sim.fluid.Water;
@@ -60,6 +61,14 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
      * (J): the flame burns out of the bank, and the vessel refills it between fluid steps.
      */
     double bank, wanted;
+    /**
+     * Fuel quality (refinery M1, Baughn 2026-11-15; sim.fluid.FuelQuality): what it burnt last, rated for its boiling
+     * window (it loses 2 % of its power per % outside it), and how fouled it is (0..FOUL_MAX, that share of its power
+     * gone): fuel over the engines' coking balance fouls it (heavy oil: ~39 % an hour at full power), cleaner fuel
+     * clears it again, wool cleans it at once. No damage. An old save loads clean.
+     */
+    public FuelQuality.Rating fuel = FuelQuality.Rating.CLEAN;
+    public double foul;
     /** Is there fuel the flame can get at: liquid fuel, or fuel gas over 1 atm. */
     volatile boolean fuelReady;
 
@@ -135,6 +144,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
                 if (sp.gas() && sp.heatingValue > 0) per += v.vapour(j) / v.vapour(g) * sp.heatingValue;
             }
             got += Vessels.drawMix(v, g, need / per) * per;
+            if (got > 0) fuel = FuelQuality.Rating.CLEAN;
         } else if (fuelIn.feedId() >= 0) {
             // (no fuel gas: let the gas cap out through the burner, half of what is over 1 atm a step)
             EaUnits.drainGas(v, 0.5 * Math.max(0, 1 - Water.P_ATM / v.P()) * (v.mVapour() + v.mAir));
@@ -143,7 +153,11 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         if (got >= need || id < 0) return got;
         double hv = EaUnits.layerHeatingValue(v, id);
         if (hv <= 0) return got;
-        return got + EaUnits.drainLayer(v, id, (need - got) / hv) * hv;
+        FuelQuality.Rating q = FuelQuality.rate(v, id, FuelQuality.TURBINE_LO, FuelQuality.TURBINE_HI);
+        double liquid = EaUnits.drainLayer(v, id, (need - got) / hv) * hv, w = liquid / Math.max(1e-9, got + liquid);
+        // (what it burns next: the liquid's rating by its share of the heat drawn; fuel gas is clean)
+        if (liquid > 0) fuel = new FuelQuality.Rating(q.light() * w, q.heavy() * w, q.coking() * w);
+        return got + liquid;
     }
 
     /** Its liquid fuel (mB), and its fuel gas (kg). */
@@ -186,6 +200,11 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         return !control.getConnectedComponents().isEmpty();
     }
 
+    /** The share of its power its fuel's quality and its fouling leave it. */
+    public double quality() {
+        return fuel.power() * (1 - foul);
+    }
+
     /** Its share of ETA at this speed share: none under CUTOFF, all at rated speed. */
     static double speedEfficiency(double r) {
         return Math.max(0, Math.min(1.05, (r - CUTOFF) / (1 - CUTOFF)));
@@ -210,7 +229,9 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
                 bank -= fuelJ;
                 wanted += want;
             }
-            double work = getShaft().drive(fuelJ * ETA * speedEfficiency(r) / time, time, 2 * NOMINAL_P / RATED_RADS);
+            // (fuel quality: off-window fuel and a fouled turbine give less work for the same fuel; the rest is exhaust heat)
+            double work = getShaft().drive(fuelJ * ETA * speedEfficiency(r) * quality() / time, time, 2 * NOMINAL_P / RATED_RADS);
+            if (fuelJ > 0) foul = FuelQuality.foul(foul, fuel.coking(), FuelQuality.ENGINE_BALANCE, fuelJ / (NOMINAL_P / ETA * time), time);
             double windage = Math.min(getShaft().getEnergy(), WINDAGE * NOMINAL_P * r * r * r * time);
             getShaft().setEnergy(getShaft().getEnergy() - windage);
             // the rest of the fuel's heat leaves as hot air at EXHAUST_T (air drawn in at the ambient, heated by it)
@@ -331,7 +352,13 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
 
     @Override
     public boolean onBlockActivated(net.minecraft.world.entity.player.Player player, Direction side, float vx, float vy, float vz) {
-        return false;
+        // (wool on a fouled turbine cleans it, and the wool is used: as the fuel heat furnace's burner)
+        var held = player == null ? null : player.getMainHandItem();
+        if (held == null || foul <= 0.01 || !held.is(net.minecraft.tags.ItemTags.WOOL)) return false;
+        foul = 0;
+        if (!player.isCreative()) held.shrink(1);
+        needPublish();
+        return true;
     }
 
     @Override
@@ -352,6 +379,10 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         nbt.putDouble("fuelBank", bank);
         nbt.putDouble("gate", gate);
         nbt.putBoolean("tripped", tripped);
+        nbt.putDouble("foul", foul);
+        nbt.putDouble("fuelLight", fuel.light());
+        nbt.putDouble("fuelHeavy", fuel.heavy());
+        nbt.putDouble("fuelCoking", fuel.coking());
         if (exhaust != null) {
             mods.eln.fluid.FluidSaves.put(nbt, "exhaust", exhaust);
         }
@@ -364,6 +395,8 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         bank = nbt.getDoubleOr("fuelBank", 0);
         gate = nbt.getDoubleOr("gate", 0);
         tripped = nbt.getBooleanOr("tripped", false);
+        foul = nbt.getDoubleOr("foul", 0);   // (an old save: clean)
+        fuel = new FuelQuality.Rating(nbt.getDoubleOr("fuelLight", 0), nbt.getDoubleOr("fuelHeavy", 0), nbt.getDoubleOr("fuelCoking", 0));
         if (nbt.contains("exhaustW"))
             loadedEx = mods.eln.fluid.FluidSaves.array(nbt, "exhaust");
         fuelIn.read(nbt, "fuel", TANK_MB);   // (an old save's fuel tank goes into the vessel; the 1.12 turbine's 4 mB "tank" is dropped)
@@ -385,6 +418,8 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         if (bank <= 0 && !fuelReady) return I18N.tr("Fuel gas under 1 atm: it needs pressure");
         if (!burning && rads < CUTOFF * RATED_RADS) return String.format(I18N.tr("Needs a starter: a Shaft Motor to spin it over %.0f rad/s"), CUTOFF * RATED_RADS);
         if (!burning) return I18N.tr("Fuel valve shut");
+        if (fuel.power() <= 0) return I18N.tr("Burning, but no power: half its fuel or more boils outside its range");
+        if (quality() < 0.995) return String.format(I18N.tr("Running at %.0f%% of its power: fuel quality %.0f%%, fouling %.0f%%"), quality() * 100, fuel.power() * 100, foul * 100);
         if (manual()) return I18N.tr("Manual control: no governor or trip");
         return exhaustPiped ? I18N.tr("Running") : I18N.tr("Running, its exhaust heat wasted");
     }
@@ -400,6 +435,14 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         info.put(I18N.tr("Shaft power"), Utils.plotPower("", shaftW));
         info.put(I18N.tr("Fuel"), fuelIn.vessel == null ? I18N.tr("empty") : String.format("%s, %.2f bar, %s", EaUnits.composition(fuelIn.vessel),
             fuelIn.vessel.P() / 1e5, Utils.plotPower("", fuelW)));
+        if (fuelIn.vessel != null && fuelIn.feedId() >= 0) {
+            var q = FuelQuality.rate(fuelIn.vessel, fuelIn.feedId(), FuelQuality.TURBINE_LO, FuelQuality.TURBINE_HI);
+            double rate = FuelQuality.foulRate(q.coking(), FuelQuality.ENGINE_BALANCE);
+            info.put(I18N.tr("Fuel quality"), String.format("%s; %s; %.1f mPa s", FuelQuality.describe(q),
+                rate > 0 ? String.format(I18N.tr("fouls it (coking %.3f, clean under %.2f)"), q.coking(), FuelQuality.ENGINE_BALANCE) : I18N.tr("burns clean"),
+                FuelQuality.layerViscosity(fuelIn.vessel, fuelIn.feedId()) * 1000));
+        }
+        if (foul > 0.01) info.put(I18N.tr("Fouling"), String.format(I18N.tr("%.0f%% fouled: %.0f%% power (clean fuel clears it slowly; right-click with wool to clean)"), foul * 100, (1 - foul) * 100));
         info.put(I18N.tr("Exhaust"), exhaustPiped ? String.format("%.0f °C, piped", exhaust == null ? 0 : exhaust.T() - Water.T0) : I18N.tr("to the air"));
         info.put(I18N.tr("Fuel valve"), tripped ? I18N.tr("tripped by overspeed") : String.format("%.0f%%%s", gate * 100, manual() ? I18N.tr(", by hand: no governor, no trip") : ""));
         return info;
