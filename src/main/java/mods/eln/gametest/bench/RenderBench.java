@@ -27,8 +27,9 @@ import java.util.Map;
 
 /**
  * The render benchmark's CPU tier (todo #424; Baughn 2026-11-12: "benchmarks as part of the test suite"). Run alone:
- * `gradlew runGameTestServer -PelnRenderBench=/path/result.json [-PelnBenchLabel=...]`; then no other test is
- * registered. No GPU and no client: every device with a render is placed and published as in
+ * `gradlew runGameTestServer -PelnRenderBench=/path/result.json [-PelnBenchLabel=...] [-PelnRenderBenchBase=/path/earlier.json]`;
+ * then no other test is registered, and with a base the test fails when a device's vertex or call counts differ from
+ * it ({@link RenderBenchGate}). No GPU and no client: every device with a render is placed and published as in
  * {@link PublishRenderCase}, and its draw code is timed into a {@link GlFrame}:
  * - vertices and ns per draw as the block entity renderer draws it without baking (record), and the ns to copy the
  *   frame's batches into a buffer in the entity vertex layout (pack: a stand-in for the write loop, not the game's
@@ -162,6 +163,18 @@ public final class RenderBench implements TestCase {
         }
         ctx.check("render_bench: result written to " + file, written, "");
         ctx.check("render_bench: devices measured", devices.size() > 100 && errors == 0, devices.size() + " devices, " + errors + " errors");
+        String base = System.getProperty("eln.bench.render.base");
+        if (base != null) {
+            // the gate: vertex and call counts as in an earlier result (times never gate)
+            try (java.io.Reader r = new java.io.FileReader(base)) {
+                JsonArray was = com.google.gson.JsonParser.parseReader(r).getAsJsonObject().getAsJsonArray("devices");
+                java.util.List<String> diff = RenderBenchGate.differences(was, devices);
+                for (String d : diff) ctx.line("render_bench: differs from the base: " + d);
+                ctx.check("render_bench: vertex and call counts as in " + base, diff.isEmpty(), diff.size() + " devices differ");
+            } catch (IOException | RuntimeException e) {
+                ctx.check("render_bench: base " + base + " read", false, e.toString());
+            }
+        }
         ctx.line(String.format("INFO render_bench: %d devices; one draw of each: %d vertices, %.2f ms recorded, %.2f ms packed; with the bake: "
                 + "%d vertices left with the renderer (%.1f%% in the chunk), %.2f ms recorded; meshing all: %.2f ms", devices.size(), totals[0],
             totals[4] / 1e6, totals[5] / 1e6, totals[1], totals[0] == 0 ? 0 : 100.0 * totals[2] / totals[0], totals[6] / 1e6, totals[7] / 1e6));

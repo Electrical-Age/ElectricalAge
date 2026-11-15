@@ -105,10 +105,12 @@ neoForge {
                 if (project.hasProperty('elnBenchConvert')) systemProperty 'eln.bench.convert', 'true'
                 if (project.hasProperty('elnBenchNoRthCache')) systemProperty 'eln.bench.noRthCache', 'true'
             }
-            // the render benchmark's CPU tier instead of the tests: -PelnRenderBench=result.json [-PelnBenchLabel=name]
+            // the render benchmark's CPU tier instead of the tests: -PelnRenderBench=result.json [-PelnBenchLabel=name] [-PelnRenderBenchBase=earlier.json]
             if (project.hasProperty('elnRenderBench')) {
                 systemProperty 'eln.bench.render', file(project.property('elnRenderBench')).absolutePath
                 systemProperty 'eln.bench.label', project.findProperty('elnBenchLabel') ?: 'unnamed'
+                // the gate: fail when a device's vertex or call counts differ from this earlier result
+                if (project.hasProperty('elnRenderBenchBase')) systemProperty 'eln.bench.render.base', file(project.property('elnRenderBenchBase')).absolutePath
             }
         }
         // Datagen (P5): lang, item tags, recipes -> src/generated/resources (committed)

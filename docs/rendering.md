@@ -175,6 +175,8 @@ the client's JFR showed nothing. Compare either with `tools/bench/render-bench-c
   `meshVertices` (`BakeMesh.write` of the settled calls: EA's part of a section compile). Times are the median and
   the minimum of 7 batches of 200 draws after 300 warm-up draws. The vertex and call counts are exact and the same
   from run to run; totals of times repeat within about 3 %, single devices within about 2x.
+  With `-PelnRenderBenchBase=/abs/EARLIER.json` the run fails when a device's exact fields (`gametest/bench/RenderBenchGate.java`)
+  differ from that result, and names the devices: the gate for "this change must not alter what is drawn".
 - Client tier (`client/RenderBenchClient.java`, counters in `gl/RenderProbe.java`, sums in `gl/BenchRun.java`):
   launch with `-Deln.renderBench=FILE.json` (or `ELN_RENDER_BENCH`; relative to the game directory), or type
   `/elnbench` in a world. Options `-Deln.renderBench.views="name=x,y,z,yaw,pitch[,spinDegPerSecond];name=here"`
