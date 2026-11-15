@@ -66,6 +66,12 @@ public final class WireDrawingCases {
             ItemStack w = mv.product();
             ctx.check("wire drawing: the 230 V machine winds 688 turns of 0.5 mm² 11 kV wire", WindingItem.is(w) && WindingItem.turns(w) == 688
                 && WindingItem.tier(w) == 4 && WindingItem.spec(w).equals(new CableSpec(0, CableSpec.RED)), w + " " + w.getComponents());
+            // todo #486: the tooltip names the wire's colour, as a kit's does (lang key item.eln.winding.wire)
+            var tip = new java.util.ArrayList<String>();
+            w.getItem().appendHoverText(w, net.minecraft.world.item.Item.TooltipContext.EMPTY, net.minecraft.world.item.component.TooltipDisplay.DEFAULT,
+                c -> tip.add(c.getString()), net.minecraft.world.item.TooltipFlag.NORMAL);
+            ctx.check("wire drawing: the winding's tooltip names its wire's colour", !tip.isEmpty() && tip.get(0).startsWith("688 turns of 0.5 mm², 11 kV")
+                && tip.get(0).endsWith(", Red") && net.minecraft.locale.Language.getInstance().has("item.eln.winding.wire"), String.join(" | ", tip));
             ctx.checkValue("wire drawing: ... from 86 blocks of wire's copper (ingots)", mv.copperNeeded(), 688 / 8.0 * 0.5 * 2 / 3 * 0.5 / 2.5);
             mv.configure(WireDrawingElement.KIT, 4, 1, CableSpec.BROWN, 64);
             ItemStack k = mv.product();

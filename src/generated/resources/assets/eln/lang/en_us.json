@@ -596,6 +596,7 @@
   "item.eln.white_brush": "White Brush",
   "item.eln.wind_turbine": "Wind Turbine",
   "item.eln.winding": "Winding",
+  "item.eln.winding.wire": "%s turns of %s, %s A, %s",
   "item.eln.wire_drawing_machine_230v": "230V Wire Drawing Machine",
   "item.eln.wire_drawing_machine_48v": "48V Wire Drawing Machine",
   "item.eln.wireless_analyzer": "Wireless Analyser",
