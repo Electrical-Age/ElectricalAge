@@ -105,10 +105,6 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
     /** The boiler, its gauge glass's water column at fill (0..1), its dial at celsius. */
     void draw(float fill, float celsius) {
         if (obj == null) return;
-        if (height > 1) {   // (PROTOTYPE, unseen: the Boiler's model over the whole 2x2x2, from its origin block's centre)
-            GL11.glTranslatef(0.5f, 0.5f, 0.5f);
-            GL11.glScalef(2f, 2f, 2f);
-        }
         for (String part : new String[]{"main", "body", "furnace"}) {
             var p = obj.getPart(part);
             if (p != null) p.draw();
