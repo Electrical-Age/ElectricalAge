@@ -198,6 +198,39 @@ class CoilBakeTest {
         assertTrue(settled.isEmpty());
     }
 
+    /** What the renderer is handed for a coil: two batches (sides, ends) under the wire's set of sprites, every vertex in the tint, seen from both sides. */
+    @Test
+    void aCoilIsTwoTintedBatches() {
+        Coil c = Coil.of(12, 2.5, 150, 117);
+        int[][] wires = {{RED, WindingTexture.NORMAL}, {BLACK, WindingTexture.DARK}, {WHITE, WindingTexture.BRIGHT}};
+        for (int[] w : wires) {
+            GlFrame.beginRenderFrame();
+            GlFrame f = GlFrame.openBlock(new Matrix4f(), new Matrix3f());
+            try {
+                TransformerDescriptor.drawCoil(c, w[0]);
+            } finally {
+                GlFrame.close();
+            }
+            assertEquals(2, f.batches().size());
+            int tint = 0xFF000000 | WindingTexture.tint(w[0], false), sides = 0, ends = 0;
+            for (Map.Entry<GlFrame.Key, GlFrame.Batch> e : f.batches().entrySet()) {
+                GlFrame.Key k = e.getKey();
+                GlFrame.Batch b = e.getValue();
+                assertFalse(k.cull());
+                assertEquals(GlFrame.Blend.NONE, k.blend());
+                if (k.texture().equals(WindingTexture.side(w[1]))) sides = b.vertices();
+                else if (k.texture().equals(WindingTexture.end(c.layers(), w[1]))) ends = b.vertices();
+                for (int i = 0; i < b.floats; i += GlFrame.STRIDE) {
+                    assertEquals(tint, Float.floatToRawIntBits(b.data[i + 5]), "the vertex colour is the tint");
+                    float u = b.data[i + 3], v = b.data[i + 4];
+                    assertTrue(u >= 0 && u <= 1 && v >= 0 && v <= 1, "inside the sprite");
+                }
+            }
+            assertEquals(16 * WindingTexture.bands(c.turnsPerLayer()), sides);
+            assertEquals(2080, ends);
+        }
+    }
+
     @Test
     void theSpritesAreFilesTheAtlasTakes() throws Exception {
         try (InputStream in = CoilBakeTest.class.getResourceAsStream("/assets/minecraft/atlases/blocks.json")) {
