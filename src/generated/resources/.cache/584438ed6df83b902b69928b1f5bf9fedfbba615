@@ -1,6 +1,7 @@
-// 26.3	2026-11-15T15:19:12.021252228	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-15T20:23:19.400830958	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
+98be7e719755f1d65131e906daa7a98b081c8ce8 data/eln/advancement/recipes/misc/230v_air_blower.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
 f8c433725bd671babaa8f2c127bb7d9a1d9b9f94 data/eln/advancement/recipes/misc/230v_compressor.json
 0d683034552ae10800a22663e83665fadeb34e02 data/eln/advancement/recipes/misc/230v_copper_heating_corp.json
@@ -389,6 +390,7 @@ e46ace98665bbeee9e00c278a1a7d497e969c14a data/eln/advancement/recipes/misc/xnor_
 01b586aaf0d8672f78ba0f0a789e68fbb01d3f64 data/eln/advancement/recipes/misc/yellow_brush.json
 4f937d8d1c4645d4749a5fa22eaa93eeecbb3255 data/eln/recipe/10a_diode.json
 b4d6506f82f2133968126d1aca892f7f3a5589d1 data/eln/recipe/230v_active_thermal_dissipator.json
+9b96c754fd5c9343b3c64e95880981e40954f4b2 data/eln/recipe/230v_air_blower.json
 3e6dcc1222f29dbbc067d96bf9c99f1e38152200 data/eln/recipe/230v_battery_charger.json
 2e32f14b4aa9b643c105e7653fba806ff70a4a8f data/eln/recipe/230v_compressor.json
 aa668fa690ce2675a979a5c2025a4c98168becec data/eln/recipe/230v_copper_heating_corp.json
