@@ -67,6 +67,7 @@ public final class OilCases {
         cases.add(new ClosedPlant());
         cases.add(new TwoUnitPlant());
         cases.add(new MakeupPlantRefills());
+        cases.add(new CasingDrainTrap());
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -2959,6 +2960,75 @@ public final class OilCases {
             flooded.repair();
             ctx.check("oil: repaired, the flooded turbine is drained and works", !flooded.isBurnt() && flooded.waterShare() < 0.001,
                 String.format("burnt %s, water %.1f%%", flooded.getBurnt(), flooded.waterShare() * 100));
+        }
+    }
+
+    /**
+     * The casing drain as a steam trap (Baughn 2026-11-15: into the condenser "when the condenser has space"): two
+     * stopped turbines, each with a Small Steam Condenser on its exhaust side, get 1 % of their inlets as water (~3 % of
+     * a hotwell). The one whose hotwell is at 30 % drains it into its condenser's vessel; the one whose hotwell is at 42 %
+     * (over the pump's LEVEL_FULL) drains it to the ground and its vessel gets none.
+     */
+    static final class CasingDrainTrap implements TestCase {
+        mods.eln.oil.SteamGeneratorElement roomy, full;
+        mods.eln.oil.CondenserElement cRoomy, cFull;
+        mods.eln.sim.IProcess feed;
+        double roomy0, full0, water;
+        int tick;
+
+        public String id() {
+            return "oil_steam_turbine_drain_trap";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            roomy = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 1, 1);
+            full = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 4, 1);
+            for (var t : new mods.eln.oil.SteamGeneratorElement[]{roomy, full}) {
+                t.front = mods.eln.misc.Direction.XN;
+                t.reconnect();
+            }
+            l.device(28 + (82 << 6), 1, 2);
+            l.device(28 + (82 << 6), 4, 2);
+            mods.eln.Eln.simulator.addSlowProcess(feed = t -> {
+                if (cRoomy == null) {
+                    cRoomy = condenserOf(ctx, ctx.at(1, 1, 2));
+                    cFull = condenserOf(ctx, ctx.at(4, 1, 2));
+                }
+                if (cRoomy == null || cFull == null || cRoomy.vessel == null || cFull.vessel == null || roomy.inlet == null || full.inlet == null
+                    || roomy.condenser == null || full.condenser == null) return;
+                if (++tick == 1) {
+                    mods.eln.sim.fluid.EaUnits.addWater(cRoomy.vessel, 0.30 * cRoomy.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 310, false);
+                    mods.eln.sim.fluid.EaUnits.addWater(cFull.vessel, 0.42 * cFull.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 310, false);
+                }
+                if (tick == 20) {
+                    roomy0 = cRoomy.vessel.mWater;
+                    full0 = cFull.vessel.mWater;
+                    water = 0.01 * roomy.inlet.volume * mods.eln.sim.fluid.Water.RHO_L;
+                    TurbineFloods.water(roomy, 0.01);
+                    TurbineFloods.water(full, 0.01);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(feed);
+            double gotRoomy = cRoomy.vessel.mWater - roomy0, gotFull = cFull.vessel.mWater - full0;
+            ctx.line(String.format("drain trap: %.2f g into each inlet; hotwell at 30%%: %.2f g into the condenser, %.2f g away, vessel %+.2f g; at 42%%: %.2f g in, %.2f g away, vessel %+.2f g",
+                water * 1000, roomy.drainedToCondenserKg * 1000, roomy.drainedAwayKg * 1000, gotRoomy * 1000, full.drainedToCondenserKg * 1000,
+                full.drainedAwayKg * 1000, gotFull * 1000));
+            ctx.check("drain trap: with room, the drain goes into the condenser", roomy.drainedToCondenserKg > 0.5 * water && roomy.drainedAwayKg == 0
+                && Math.abs(gotRoomy - roomy.drainedToCondenserKg) < 0.01 * water, String.format("%.2f g in, vessel %+.2f g", roomy.drainedToCondenserKg * 1000, gotRoomy * 1000));
+            ctx.check("drain trap: over LEVEL_FULL, it goes to the ground", full.drainedAwayKg > 0.5 * water && full.drainedToCondenserKg == 0
+                && Math.abs(gotFull) < 0.01 * water, String.format("%.2f g away, vessel %+.2f g", full.drainedAwayKg * 1000, gotFull * 1000));
         }
     }
 

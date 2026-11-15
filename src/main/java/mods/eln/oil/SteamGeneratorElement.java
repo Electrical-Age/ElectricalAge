@@ -151,9 +151,12 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
     static final double DRAIN_SHARE_PER_S = 0.005;
 
     /**
-     * The casing drain over time (s): liquid water leaves the inlet, with its heat; with a condenser it drains into the
+     * The casing drain over time (s): liquid water leaves the inlet, with its heat; with a condenser that has room (its
+     * hotwell under the pump's LEVEL_FULL, Baughn 2026-11-15: "when the condenser has space") it drains into the
      * condenser's vessel (a steam trap to the hotwell), else to the ground. Thrown away, the condensate of a bare steam
      * line was a steady loss the makeup had to replace (2026-11-15, a player's plant: ~0.1 g/s of 0.8 g/s of steam).
+     * A full hotwell gets none: the trap mustn't push it on toward FLOOD, and keeping the water in the inlet instead
+     * would let a high hotwell burn the turbine on a trickle the drain is there to clear (a slug still outruns it).
      */
     void drain(double time) {
         double mL = Math.min(inlet.mLiquid(), DRAIN_SHARE_PER_S * inlet.volume * Water.RHO_L * time);
@@ -162,8 +165,14 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         inlet.mWater -= mL;
         inlet.energy -= mL * Water.hLiquid(T);
         inlet.update();
-        if (condenser != null && condenser.vessel != null) EaUnits.addWater(condenser.vessel, mL, T, false);
+        if (condenser != null && condenser.vessel != null && condenser.floodShare() < CondenserVessel.LEVEL_FULL) {
+            EaUnits.addWater(condenser.vessel, mL, T, false);
+            drainedToCondenserKg += mL;
+        } else drainedAwayKg += mL;
     }
+
+    /** Totals since loaded (GameTests): what the casing drain sent into the condenser, and to the ground (kg). */
+    public double drainedToCondenserKg, drainedAwayKg;
 
     /** The share of the inlet's volume that is liquid water. */
     public double waterShare() {
