@@ -541,6 +541,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   their thermal loads in the simulation: they cool to ambient and do nothing else, make no working sound or
   animation, give no light, and a right-click only says what repairs them (a meter still reads them); no GUI.
   Contents drop when broken. See simulation.md "Failures"; `BurntCases`.
+- Stone heat furnace leaves its fuel's crafting remainder (nero 2026-11-14: it ate Occultism's unbreakable core piece,
+  which a vanilla furnace gives back): it asks the stack (`ItemStack.getCraftingRemainder()`, so per-stack remainders
+  count) and leaves the remainder in the fuel slot, or drops it at the furnace if more fuel is still in the slot. 1.12
+  gave an empty bucket for items named "bucket" and nothing else. It is EA's only slot that burns items. GameTest
+  "wp10b heat furnace leaves its fuel's remainder".
 - Repair parts cost less than the device (Baughn: a stone heat furnace took a Machine Block, which cost more than the
   furnace). Jade shows a burnt device's cause and repair part.
 

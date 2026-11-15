@@ -5,7 +5,6 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.server.SaveConfig;
 import mods.eln.sim.IProcess;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 
@@ -51,10 +50,7 @@ public class HeatFurnaceInventoryProcess implements IProcess, INBTTReady {
                     if (furnace.furnaceProcess.combustibleEnergy + combustibleBuffer < furnace.furnaceProcess.nominalCombustibleEnergy) {
                         //	furnace.furnaceProcess.combustibleEnergy += itemEnergy;
                         combustibleBuffer += itemEnergy;
-                        furnace.inventory.decrStackSize(HeatFurnaceContainer.combustibleId, 1);
-                        if (combustibleStack.getItem().getDescriptionId().toLowerCase().contains("bucket")) {
-                            furnace.inventory.setItem(HeatFurnaceContainer.combustibleId, new ItemStack(Items.BUCKET));
-                        }
+                        burnOne(combustibleStack);
                     }
                 }
             }
@@ -67,6 +63,24 @@ public class HeatFurnaceInventoryProcess implements IProcess, INBTTReady {
             double delta = furnace.furnaceProcess.nominalCombustibleEnergy - furnace.furnaceProcess.combustibleEnergy;
             furnace.furnaceProcess.combustibleEnergy += delta;
             combustibleBuffer -= delta;
+        }
+    }
+
+    /**
+     * Takes one item of the fuel slot, and leaves what burning it leaves: the stack's own crafting remainder, as a
+     * vanilla furnace does (a lava bucket's bucket; another mod's fuel that gives itself back). 1.12 knew only items
+     * named "bucket" and ate the rest (nero 2026-11-14: Occultism's unbreakable core piece). With more of the stack
+     * left in the slot, the remainder drops at the furnace.
+     */
+    void burnOne(ItemStack fuel) {
+        net.minecraft.world.item.ItemStackTemplate remainder = fuel.getCraftingRemainder();
+        furnace.inventory.decrStackSize(HeatFurnaceContainer.combustibleId, 1);
+        if (remainder == null) return;
+        ItemStack left = remainder.create();
+        if (Utils.isEmpty(furnace.inventory.getItem(HeatFurnaceContainer.combustibleId))) {
+            furnace.inventory.setItem(HeatFurnaceContainer.combustibleId, left);
+        } else {
+            furnace.node.dropItem(left);
         }
     }
 

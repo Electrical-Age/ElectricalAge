@@ -98,6 +98,7 @@ public final class Wp10bCases {
         cases.add(new TeleporterCase());
         cases.add(new IdleCase());
         cases.add(new HeatFurnaceExternalCase());
+        cases.add(new HeatFurnaceFuelRemainder());
         cases.add(new HeatFurnaceToggleKeepsSettings());
         cases.add(new SteamExplained());
         cases.add(new HeatFurnaceTrimmerCase());
@@ -637,6 +638,47 @@ public final class Wp10bCases {
             within(ctx, "wp10b heat furnace: full signal on its right side, full gain", off.furnaceProcess.getGain(), 1.0, 0.05);
             ctx.check("wp10b heat furnace: a signal takes fuel (left and right)", half.getTakeFuel() && off.getTakeFuel(),
                 "left " + half.getTakeFuel() + ", right " + off.getTakeFuel());
+        }
+    }
+
+    /**
+     * A stone heat furnace leaves what its fuel leaves when burnt (nero 2026-11-14: it ate Occultism's unbreakable core
+     * piece, which a vanilla furnace gives back): a lava bucket leaves its bucket in the fuel slot, coal leaves nothing.
+     */
+    static final class HeatFurnaceFuelRemainder implements TestCase {
+        HeatFurnaceElement lava, coal;
+
+        public String name() {
+            return "wp10b heat furnace leaves its fuel's remainder";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        HeatFurnaceElement place(TestContext ctx, int x, net.minecraft.world.item.ItemStack fuel) {
+            HeatFurnaceElement f = (HeatFurnaceElement) ctx.placeTransparent(HEAT_FURNACE, ctx.at(x, 1, 1));
+            f.getInventory().setItem(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer.combustibleId, fuel);
+            f.setTakeFuel(true);
+            f.furnaceProcess.setGain(1);
+            return f;
+        }
+
+        public void build(TestContext ctx) {
+            lava = place(ctx, 1, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.LAVA_BUCKET));
+            coal = place(ctx, 5, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COAL));
+        }
+
+        public void measure(TestContext ctx) {
+            var l = lava.getInventory().getItem(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer.combustibleId);
+            var c = coal.getInventory().getItem(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer.combustibleId);
+            ctx.check("wp10b heat furnace: a burnt lava bucket leaves its bucket in the fuel slot",
+                l.is(net.minecraft.world.item.Items.BUCKET) && l.getCount() == 1 && lava.furnaceProcess.combustibleEnergy > 0, String.valueOf(l));
+            ctx.check("wp10b heat furnace: burnt coal leaves nothing", c.isEmpty() && coal.furnaceProcess.combustibleEnergy > 0, String.valueOf(c));
         }
     }
 
