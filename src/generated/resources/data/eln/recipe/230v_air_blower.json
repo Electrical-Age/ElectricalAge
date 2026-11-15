@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "#c:rubbers",
+    "B": "minecraft:iron_bars",
+    "E": "eln:copper_cable",
+    "M": "eln:machine_block",
+    "m": "eln:electrical_motor",
+    "p": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "Bm ",
+    "pMp",
+    "AEA"
+  ],
+  "result": {
+    "id": "eln:230v_air_blower"
+  }
+}

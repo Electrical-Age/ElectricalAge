@@ -2141,6 +2141,12 @@
   "kind": "transparent_node",
   "name": "energy_converter_eln_to_other_hvublock"
  },
+ "eln:transparent_node@5396": {
+  "descriptor": "AirBlowerDescriptor",
+  "display": "230V Air Blower",
+  "kind": "transparent_node",
+  "name": "230v_air_blower"
+ },
  "eln:transparent_node@5440": {
   "descriptor": "ElectricalAnvilDescriptor",
   "display": "Electrical Anvil",

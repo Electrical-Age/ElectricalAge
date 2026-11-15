@@ -36,7 +36,13 @@ public class InlinePumpDescriptor extends TransparentNodeDescriptor {
     final Obj3D obj;
 
     public InlinePumpDescriptor(String name, double nominalU, ElectricalCableDescriptor cable, String model) {
-        super(name, InlinePumpElement.class, InlinePumpRender.class);
+        this(name, InlinePumpElement.class, nominalU, cable, model);
+    }
+
+    /** For a machine sharing its model and render (the Air Blower's stand-in). */
+    @SuppressWarnings("rawtypes")
+    protected InlinePumpDescriptor(String name, Class element, double nominalU, ElectricalCableDescriptor cable, String model) {
+        super(name, element, InlinePumpRender.class);
         this.nominalU = nominalU;
         this.cable = cable;
         this.obj = Eln.obj.getObj(model);
