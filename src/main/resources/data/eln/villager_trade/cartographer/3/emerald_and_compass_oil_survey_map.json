@@ -1,0 +1,40 @@
+{
+  "additional_wants": {
+    "id": "minecraft:compass"
+  },
+  "given_item_modifier": [
+    {
+      "type": "eln:oil_survey_map",
+      "decoration": "minecraft:red_x",
+      "min_distance": 600,
+      "max_distance": 3000
+    },
+    {
+      "type": "minecraft:filtered",
+      "item_filter": {
+        "predicates": {
+          "minecraft:map_id": {}
+        }
+      },
+      "on_fail": {
+        "type": "minecraft:discard"
+      }
+    }
+  ],
+  "gives": {
+    "id": "minecraft:filled_map",
+    "components": {
+      "minecraft:item_name": {
+        "translate": "item.eln.oil_survey_map",
+        "fallback": "Oil Survey Map"
+      }
+    }
+  },
+  "max_uses": 3,
+  "reputation_discount": 0.2,
+  "wants": {
+    "count": 12,
+    "id": "minecraft:emerald"
+  },
+  "xp": 10
+}

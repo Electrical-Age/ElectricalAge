@@ -443,6 +443,8 @@
   "item.eln.nor_chip": "NOR Chip",
   "item.eln.not_chip": "NOT Chip",
   "item.eln.nuclear_alarm": "Nuclear Alarm",
+  "item.eln.oil_survey_map": "Oil Survey Map",
+  "item.eln.oil_survey_map.lore": "Oil under X %s, Z %s",
   "item.eln.on_off_regulator_1": "On/OFF Regulator 1 Percent",
   "item.eln.on_off_regulator_10": "On/OFF Regulator 10 Percent",
   "item.eln.opamp": "OpAmp",

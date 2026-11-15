@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:filled_map",
+          "modifier": [
+            {
+              "type": "eln:oil_survey_map",
+              "decoration": "minecraft:red_x",
+              "min_distance": 600,
+              "max_distance": 3000
+            },
+            {
+              "type": "minecraft:filtered",
+              "item_filter": {
+                "predicates": {
+                  "minecraft:map_id": {}
+                }
+              },
+              "on_fail": {
+                "type": "minecraft:discard"
+              }
+            },
+            {
+              "type": "minecraft:set_name",
+              "target": "item_name",
+              "name": {
+                "translate": "item.eln.oil_survey_map",
+                "fallback": "Oil Survey Map"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
