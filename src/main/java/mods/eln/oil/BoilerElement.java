@@ -55,8 +55,18 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
      * The feed inlet's float valve (Baughn 2026-11-04: a boiler shouldn't overfill): it closes over this band of the
      * gauge glass below full (fill() 1). Without it a condensate pump fed the boiler everything its makeup drew from a
      * tank, eight times its rated fill, and the boiler had all that to heat.
+     * Its opening goes with the cube of the level's distance under full: a straight line opened so steeply that at the
+     * full mark it took a step's worth of feed in one gulp and shut again, the condensate line swung by bars with every
+     * gulp, and condensate pumps could not share a line by their heads (2026-11-14, a player's plant). With the cube it
+     * holds a steady feed about 0.4 % under the full mark.
      */
     public static final double FEED_FLOAT_BAND = 0.1;
+
+    /** The feed float's opening (0..1) at this fill() of the gauge glass. */
+    public static double feedFloat(double fill) {
+        double x = Math.max(0, Math.min(1, (1 - fill) / FEED_FLOAT_BAND));
+        return x * x * x;
+    }
     /** Its rated fill (kg of water): the gauge glass's full mark, where its feed float closes and its view stops taking. */
     public static final double RATED_KG = BoilerTanks.WATER_MB * EaUnits.KG_PER_MB_WATER;
     private double[] loaded, loadedFeed;
@@ -147,7 +157,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
     @Override
     public void beforeFluidStep(double dt) {
         syncTanks();
-        if (feedCheck != null) feedCheck.open = Math.max(0, Math.min(1, (1 - fill()) / FEED_FLOAT_BAND));
+        if (feedCheck != null) feedCheck.open = feedFloat(fill());
         // the shell heats the water through a heat link inside the fluid core's step (EA thermal temperatures are relative
         // to the ambient, Tref): implicit, so a boiler boiled dry, next to no heat capacity, settles at its shell's
         // temperature instead of overshooting it (the explicit heat needed a limiter: AdventurAgent saw 1300 C)

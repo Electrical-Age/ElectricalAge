@@ -69,6 +69,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   flood level (50 %) while its pump turns. A running condenser's level now sits between 25 and 40 % (it sat under
   25 %). Makeup alone still fills cold boilers and replaces losses, into boilers up to 1.6 x the rating. Jade's
   "Pump outlet" says "holding back, its hotwell is low" when that is why nothing flows. `ParallelCondensateTest`.
+  The boiler's feed float goes with it: its opening is now the cube of the level's distance under the full mark
+  (it was a straight line over the same 10 % band). The straight line was so steep at the full mark that the boiler
+  took its feed in single-step gulps, the condensate line swung between 14 and 17 bar with each, and during a gulp
+  both pumps delivered whatever their levels (with one turbine idling, the other's hotwell still flooded). A boiler
+  on a steady feed now sits about 0.4 % under its full mark; filling from cold is as fast as before.
   Jade on both condensers (Baughn 2026-11-14): "Water level" is in the headline, as a share of the level that floods
   the turbine or drowns the tubes (100 % = half the vessel), in place of "Fill" (a share of the vessel, in the
   details); "Contents" moved to the details. A turbine burnt by its flooded condenser says "water damage: its
