@@ -136,6 +136,17 @@ change, and the block entity renderer draws the rest. The draw code is untouched
 - Section: all of a device's calls go into the section of its block (`Device.home`), however far the model reaches.
   The game draws a block entity only while its own section is drawn, so chunk and renderer show the device under the
   same condition; and a section of nothing but air is never compiled, so a part could not be put where it lies.
+- Hanging lamps (Baughn 2026-11-15, todo #473; `sixnode/lampsocket/LampSwing.java`): **indoors a hanging lamp
+  hangs still** and so its chain and head settle into the chunk like any static part; **outdoors** the wind swings it
+  every frame in all weather (as 1.12) and the renderer draws chain and head every frame (only the base, which never
+  moved, is in the chunk). There is no "bake in clear weather" path, on purpose: it would only help the best case.
+  Outdoors = sky light at the lamp's block >= 14 (`LampSwing.OUTDOOR_SKY_LIGHT`: open sky, or beside it, as under
+  the arm of a lamp post; a hanging lamp always has its ceiling block above it, so "sees the sky straight up" would
+  not do). `LampSocketRender.refresh` reads it every 1 to 1.25 s, not per frame, so a roof built or removed is
+  noticed within that. Something moving past (a living thing or an arrow within 2 blocks, looked for every 0.1 s as
+  before) still pushes a lamp indoors: it goes back to the renderer in that frame, swings, the swing dies out (about
+  50 s from 9 degrees; the damping is 1.12's), and when its amplitude is under 0.1 degrees (`REST_ANGLE`) it is set
+  to exactly 0 and settles again. Tests: `LampSwingTest`, GameTest `lamp_rest`.
 - Far away: a block entity is drawn within 64 blocks. Past that the settled parts stay in the chunk (Baughn: keep
   them visible), and what moves or glows is not drawn, as before (Baughn 2026-11-13: left out rather than drawn
   standing still; most of it shows only up close). To keep the chunk's copy current without the
@@ -208,6 +219,7 @@ the client's JFR showed nothing. Compare either with `tools/bench/render-bench-c
 
 - GameTest `gametest/PublishRenderCase.java`: every device with a render: server publish packet read by a fresh client BE, consumed exactly, draw does not throw and emits vertices.
 - `gametest/BakeOnceCheck.java` (run by `publish_render` for every device, and by `autominer_spin` with a part that starts to move): the device drawn with its parts in the chunk shows every quad exactly once, in the same place and colour, also after only far frames; see testing.md. `src/test/java/mods/eln/gl/BakeTest.java`: settling, waits, the section, the override, far frames.
+- `src/test/java/mods/eln/sixnode/lampsocket/LampSwingTest.java` and GameTest `lamp_rest` (`gametest/LampRestCase.java`): a hanging lamp indoors leaves 0 vertices with the renderer, outdoors it moves every frame and stays there; see "Hanging lamps" above.
 - `gametest/ItemDrawCase.java`: every 3D item draw records vertices without exceptions. `gametest/XRayCase.java`: X-ray filter, state machine, menu, item draw. `src/test/java/mods/eln/item/xray/XRayRayMarchTest.java`.
 - `src/test/java/mods/eln/gl/FrameStatsTest.java`, `BenchRunTest.java`: the render benchmark's percentiles, view parsing and per-frame sums. The benchmark itself: "Render benchmark" above.
 - `/elnlab gallery|burn|cables` (`gametest/LabCommands.java`): visual comparison scenes and stress scenes for frame times.
