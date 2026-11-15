@@ -32,8 +32,8 @@ import static mods.eln.gametest.cases.Wp11Cases.*;
  * burners on heavy oil against a Boiler's thermal faces, alloy pipe to an HP Steam Turbine with two loaded 8 kW
  * generators, its exhaust into a Plant Steam Condenser (shaft motor on its pump), the condensate piped back to the
  * boiler's feed flange. One boiler takes two furnaces (its third thermal face is its feed flange's), so this is a
- * slice of the 16 kW plant: what it measures per furnace and per boiler scales to the whole by arithmetic
- * (notes/parallel-2026-11-15/hpplant-137.md).
+ * slice of the 16 kW plant: what it measures per furnace and per boiler scales to the whole by arithmetic. FullPlant
+ * is the whole plant with forced air: two boilers, four furnaces.
  */
 public final class HpPlantCases {
     private HpPlantCases() {
@@ -324,7 +324,12 @@ public final class HpPlantCases {
         boolean counting;
         double window, meterS, elecJ, radsSum, condSum, furnaceMax, fillLo = 1e9, fillHi, floodHi;
         final double[] waterJ = new double[2], pSum = new double[2], shellMax = new double[2];
-        double fire0, mb0, steam0, work0, pumped0, tubes0, boilerKg0;
+        double fire0, mb0, steam0, work0, pumped0, tubes0, boilerKg0, hotwell0, ejected0, taken0;
+        double[] inv0;
+        /** The tick the turbine failed at (-1: it didn't), and the water in its exhaust then (share of its volume). */
+        int hpTrip = -1;
+        final StringBuilder wetLog = new StringBuilder();
+        double wetLast;
 
         public String id() {
             return "hp_plant_full_forced_air_16kw";
@@ -348,6 +353,19 @@ public final class HpPlantCases {
             double m = 0;
             for (var x : f) m += x.fuelMb();
             return m;
+        }
+
+        /** Water (kg) in the plant's vessels, as the fluid core holds them: hotwell, pump outlet, makeup stub, turbine inlet and exhaust, boilers, feed runs. */
+        double[] inventory() {
+            FluidNode[] n = {c.v.vessel, c.v.outlet, c.v.inlet, hp.inlet, hp.exhaust, b[0].vessel, b[1].vessel, b[0].feed, b[1].feed};
+            double[] out = new double[n.length];
+            java.util.Set<FluidNode> seen = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+            for (int i = 0; i < n.length; i++) {
+                FluidNode r = n[i] == null ? null : mods.eln.fluid.FluidWorld.nodeFor(n[i]);
+                if (r == null) r = n[i];
+                out[i] = r == null || !seen.add(r) ? 0 : r.mWater;
+            }
+            return out;
         }
 
         double boilerKg() {
@@ -432,6 +450,9 @@ public final class HpPlantCases {
                 }
                 tick++;
                 for (FluidNode m : mains) m.fill(0, Water.P_ATM + AIR_PA, 293.15);
+                if (hpTrip < 0 && hp.isBurnt()) hpTrip = tick;
+                if (hpTrip < 0) wetLast = hp.wetShare();
+                if (tick % 1200 == 0) wetLog.append(String.format(" %d: %.1f %%", tick, hp.wetShare() * 100));
                 if (tick == WATCH) {
                     counting = true;
                     fire0 = fire();
@@ -441,6 +462,10 @@ public final class HpPlantCases {
                     pumped0 = c.v.totalPumpedKg;
                     tubes0 = c.totalTubesJ;
                     boilerKg0 = boilerKg();
+                    hotwell0 = c.v.vessel.mLiquid();
+                    inv0 = inventory();
+                    ejected0 = c.v.totalEjectedSteamKg;
+                    taken0 = c.v.totalSteamKg;
                 }
                 if (tick > WATCH) {
                     window += dt;
@@ -466,6 +491,10 @@ public final class HpPlantCases {
             for (FluidDevice d : air) mods.eln.fluid.FluidWorld.remove(d);
             for (Resistor r : loads) Eln.simulator.removeElectricalComponent(r);
             String id = id();
+            // (measured, not pinned: the wet part of the turbine's own exhaust collects in its exhaust, 1.7 % of its volume a
+            // minute here; run for 16800 ticks, it fails on water at 10 %, tick 8448, and the boilers after it)
+            ctx.line(String.format("%s: water in the turbine's exhaust (share of its volume) by tick:%s; %s", id, wetLog,
+                hpTrip < 0 ? "the turbine runs" : String.format("the turbine failed at tick %d with %.1f %% (%s)", hpTrip, wetLast * 100, hp.getBurnt())));
             boolean burnt = hp.isBurnt() || b[0].isBurnt() || b[1].isBurnt();
             for (var x : f) burnt |= x.isBurnt();
             ctx.check(id + ": nothing burnt out", !burnt, String.format("boilers %b %b, turbine %b", b[0].isBurnt(), b[1].isBurnt(), hp.isBurnt()));
@@ -476,10 +505,18 @@ public final class HpPlantCases {
             double tubes = (c.totalTubesJ - tubes0) / w, pA = pSum[0] / w, pB = pSum[1] / w;
             ctx.line(String.format("%s: fire %.2f kW (4 furnaces, max %.0f K over ambient), %.2f kW into the water (boilers %.2f + %.2f kW, %.1f %% of the fire); "
                     + "boilers %.2f / %.2f bar, shells max %.0f / %.0f K over ambient, fill %.0f..%.0f %%; steam %.2f g/s, shaft %.2f kW (%.0f kJ/kg), electric %.2f kW, %.0f rad/s; "
-                    + "condenser %.3f bar, up to %.0f %% full, pumped %.2f g/s, %.1f kW into the cooling water; boiler water %+.1f g over %.0f s; fuel %.2f mB/s = %.1f buckets/h; coke %.3f",
+                    + "condenser %.3f bar, up to %.0f %% full, pumped %.2f g/s, %.1f kW into the cooling water; boiler water %+.1f g and hotwell %+.1f g over %.0f s (condenser took %.2f g/s of steam, its ejector threw out %.2f g/s); fuel %.2f mB/s = %.1f buckets/h; coke %.3f",
                 id, fire / 1000, furnaceMax, water / 1000, wA / 1000, wB / 1000, 100 * water / Math.max(1e-9, fire),
                 pA / 1e5, pB / 1e5, shellMax[0], shellMax[1], fillLo * 100, fillHi * 100, steam * 1000, shaftW / 1000, shaftW / Math.max(1e-9, steam) / 1000, elec / 1000, radsSum / w,
-                condSum / w / 1e5, floodHi * 100, pumped * 1000, tubes / 1000, (boilerKg() - boilerKg0) * 1000, w, mB, mB * 3.6, f[0].getCoke()));
+                condSum / w / 1e5, floodHi * 100, pumped * 1000, tubes / 1000, (boilerKg() - boilerKg0) * 1000, (c.v.vessel.mLiquid() - hotwell0) * 1000, w, (c.v.totalSteamKg - taken0) / w * 1000, (c.v.totalEjectedSteamKg - ejected0) / w * 1000, mB, mB * 3.6, f[0].getCoke()));
+            double[] inv = inventory();
+            StringBuilder sb = new StringBuilder(id + ": water, g/s over the window (hotwell, pump outlet, makeup stub, turbine inlet, turbine exhaust, boiler A, boiler B, feed A, feed B):");
+            double net = 0;
+            for (int i = 0; i < inv.length; i++) {
+                sb.append(String.format(" %+.2f", (inv[i] - inv0[i]) / w * 1000));
+                net += (inv[i] - inv0[i]) / w;
+            }
+            ctx.line(sb + String.format("; together %+.2f g/s", net * 1000));
             ctx.line(id + ": boiler " + b[0].getWaila() + "; furnace " + f[0].getWaila() + "; HP " + hp.getWaila() + "; condenser " + c.getWaila());
             ctx.check(id + ": rated power on the shaft (over 16 kW, within 8 % of 17.1 kW)", shaftW > 16e3 && Math.abs(shaftW / 17100 - 1) < 0.08, String.format("%.2f kW", shaftW / 1000));
             ctx.check(id + ": the generators deliver over 14 kW", elec > 14e3 && elec < shaftW, String.format("%.2f kW", elec / 1000));
