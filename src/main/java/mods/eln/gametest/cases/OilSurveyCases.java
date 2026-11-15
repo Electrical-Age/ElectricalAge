@@ -84,6 +84,13 @@ public final class OilSurveyCases {
                 maps + " maps, " + other + " other maps");
             ctx.check("oil survey chest: every chest map has an id, a mark 600-3000 blocks from the chest and lore", good, bad);
 
+            // Nether ruined portals roll the same table: no lakes there, so the map is discarded.
+            ServerLevel nether = level.getServer().getLevel(net.minecraft.world.level.Level.NETHER);
+            ctx.check("oil survey chest: no lake is picked in the Nether", nether == null
+                || OilSurvey.pick(nether, BlockPos.ZERO, 600, 3000, nether.getRandom()) == null, "");
+            ctx.check("oil survey chest: the lang file has the map's name and lore", net.minecraft.locale.Language.getInstance().has("item.eln.oil_survey_map")
+                && net.minecraft.locale.Language.getInstance().has("item.eln.oil_survey_map.lore"), "");
+
             // The extra table rolled without an origin (no place to measure from): nothing, and no error.
             var table = level.getServer().reloadableRegistries().getLootTable(net.minecraft.resources.ResourceKey.create(Registries.LOOT_TABLE,
                 Identifier.fromNamespaceAndPath("eln", "chests/oil_survey_map")));
