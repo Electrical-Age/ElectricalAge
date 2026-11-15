@@ -64,7 +64,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     /**
      * Fuel quality (refinery M1, Baughn 2026-11-15; sim.fluid.FuelQuality): what it burnt last, rated for its boiling
      * window (it loses 2 % of its power per % outside it), and how fouled it is (0..FOUL_MAX, that share of its power
-     * gone): fuel over the engines' coking balance fouls it (heavy oil: ~39 % an hour at full power), cleaner fuel
+     * gone): fuel over the engines' coking balance fouls it (heavy oil: ~10 % an hour at full power), cleaner fuel
      * clears it again, wool cleans it at once. No damage. An old save loads clean.
      */
     public FuelQuality.Rating fuel = FuelQuality.Rating.CLEAN;
@@ -231,7 +231,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
             }
             // (fuel quality: off-window fuel and a fouled turbine give less work for the same fuel; the rest is exhaust heat)
             double work = getShaft().drive(fuelJ * ETA * speedEfficiency(r) * quality() / time, time, 2 * NOMINAL_P / RATED_RADS);
-            if (fuelJ > 0) foul = FuelQuality.foul(foul, fuel.coking(), FuelQuality.ENGINE_BALANCE, fuelJ / (NOMINAL_P / ETA * time), time);
+            if (fuelJ > 0) foul = FuelQuality.foulEngine(foul, fuel.coking(), fuelJ / (NOMINAL_P / ETA * time), time);
             double windage = Math.min(getShaft().getEnergy(), WINDAGE * NOMINAL_P * r * r * r * time);
             getShaft().setEnergy(getShaft().getEnergy() - windage);
             // the rest of the fuel's heat leaves as hot air at EXHAUST_T (air drawn in at the ambient, heated by it)
@@ -439,7 +439,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
             var q = FuelQuality.rate(fuelIn.vessel, fuelIn.feedId(), FuelQuality.TURBINE_LO, FuelQuality.TURBINE_HI);
             double rate = FuelQuality.foulRate(q.coking(), FuelQuality.ENGINE_BALANCE);
             info.put(I18N.tr("Fuel quality"), String.format("%s; %s; %.1f mPa s", FuelQuality.describe(q),
-                rate > 0 ? String.format(I18N.tr("fouls it (coking %.3f, clean under %.2f)"), q.coking(), FuelQuality.ENGINE_BALANCE) : I18N.tr("burns clean"),
+                rate > 0 ? String.format(I18N.tr("fouls it ~%.0f%% an hour at full power (coking %.3f, clean under %.2f)"), FuelQuality.engineFoulPerHour(q.coking()) * 100, q.coking(), FuelQuality.ENGINE_BALANCE) : I18N.tr("burns clean"),
                 FuelQuality.layerViscosity(fuelIn.vessel, fuelIn.feedId()) * 1000));
         }
         if (foul > 0.01) info.put(I18N.tr("Fouling"), String.format(I18N.tr("%.0f%% fouled: %.0f%% power (clean fuel clears it slowly; right-click with wool to clean)"), foul * 100, (1 - foul) * 100));

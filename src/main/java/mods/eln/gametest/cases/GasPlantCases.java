@@ -184,7 +184,7 @@ public final class GasPlantCases {
     /**
      * Fuel quality on the gas turbine (refinery M1, Baughn 2026-11-15), a motor-started turbine on a 4 kW load:
      * mode 0, diesel with 10 % residue by mass: 20 % less work for its fuel (22.4 % against 28 %), and it fouls;
-     * mode 1, heavy oil: full power for its fuel at first, fouling at the furnace burner's law over the engines' balance;
+     * mode 1, heavy oil: full power for its fuel at first, fouling at the furnace burner's law over the engines' balance, 4x slower;
      * mode 2, a half-fouled turbine on gasoline: half the work for its fuel, and it clears; wool cleans it;
      * mode 3, dead crude (it counts as its main cut, heavy oil, so the turbine takes it, as before): 15.8 % residue, so
      * 68 % of the work for its fuel, and it fouls faster than on heavy oil.
@@ -237,8 +237,8 @@ public final class GasPlantCases {
             Eln.simulator.removeElectricalComponent(l.load);
             var gt = l.gt;
             double fuelJ = gt.totalFuelJ - f0, eta = (gt.totalWork - w0) / Math.max(1, fuelJ), dFoul = gt.foul - foul0;
-            // (the fouling law: FOUL_PER_INDEX x (index - balance) per FOUL_SECONDS at full power = per that much fuel heat)
-            double full = GasTurbineElement.NOMINAL_P / GasTurbineElement.ETA * mods.eln.sim.fluid.FuelQuality.FOUL_SECONDS;
+            // (the fouling law: FOUL_PER_INDEX x (index - balance) per ENGINE_SLOWER x FOUL_SECONDS at full power = per that much fuel heat)
+            double full = GasTurbineElement.NOMINAL_P / GasTurbineElement.ETA * mods.eln.sim.fluid.FuelQuality.FOUL_SECONDS * mods.eln.sim.fluid.FuelQuality.ENGINE_SLOWER;
             double index = mode == 0 ? 0.9 * 0.01 + 0.1 : mode == 1 ? 0.15 : mode == 3 ? (0.35 * 0.15 + 0.25 * 0.01 + 0.15) / 0.95 : 0;
             double expect = mods.eln.sim.fluid.FuelQuality.foulRate(index, mods.eln.sim.fluid.FuelQuality.ENGINE_BALANCE) * fuelJ / full;
             double etaWant = GasTurbineElement.ETA * (mode == 0 ? 0.8 : mode == 3 ? 1 - 2 * 0.15 / 0.95 : 1) * (1 - (foul0 + gt.foul) / 2);

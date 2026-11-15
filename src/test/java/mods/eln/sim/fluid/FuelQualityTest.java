@@ -29,10 +29,13 @@ class FuelQualityTest {
         assertEquals(0, rate(LO, HI, "gasoline", 10.0).coking(), 1e-12);
         assertEquals(0.01, rate(LO, HI, "diesel", 10.0).coking(), 1e-12);
         assertEquals(0.15, rate(LO, HI, "heavy_oil", 10.0).coking(), 1e-12);
-        // gasoline and diesel clear an engine, heavy oil fouls it: 0.39 an hour at full power
+        // gasoline and diesel clear an engine, heavy oil fouls it: ~0.10 an hour at full power (4x slower than a burner
+        // at the same index, Baughn 2026-11-15)
         assertTrue(FuelQuality.foulRate(0, FuelQuality.ENGINE_BALANCE) < 0);
         assertTrue(FuelQuality.foulRate(0.01, FuelQuality.ENGINE_BALANCE) < 0);
-        assertEquals(0.39, FuelQuality.foul(0, 0.15, FuelQuality.ENGINE_BALANCE, 1, 3600), 0.005);
+        assertEquals(0.098, FuelQuality.foulEngine(0, 0.15, 1, 3600), 0.002);
+        assertEquals(FuelQuality.foulEngine(0, 0.15, 1, 3600), FuelQuality.engineFoulPerHour(0.15), 1e-12);
+        assertEquals(FuelQuality.foul(0, 0.15, FuelQuality.ENGINE_BALANCE, 1, 900), FuelQuality.foulEngine(0, 0.15, 1, 3600), 1e-12);
     }
 
     @Test

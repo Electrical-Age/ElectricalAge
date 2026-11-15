@@ -91,10 +91,10 @@ furnace burner and the engines. The liquid layer a device burns is rated: its ma
 window (a species without a boiling point, residue, is too heavy for any window) and its coking index. An engine loses
 2 % of its power per 1 % outside the window (the fuel burns all the same: the heat goes out of the exhaust). Fuel whose
 coking index is over the device's balance fouls it, up to 90 %, at `FOUL_PER_INDEX` x (index - balance) per 2 h of full
-power; under the balance it clears at the same law; wool cleans it at once; nothing is damaged. Balances: furnace
-burner 0.05, engines 0.02 (diesel with over 7 % heavy oil or 1 % residue fouls an engine). The Gas Turbine's window is
-330 to 720 K, so gasoline, diesel and heavy oil all give full power, and heavy oil fouls it by 39 % an hour at full
-power (diesel clears 3 % an hour, gasoline 6 %). Jade on the turbine shows the rating, whether the fuel fouls, the
+power; under the balance it clears at the same law; engines foul and clear 4 times slower (`ENGINE_SLOWER`, Baughn
+2026-11-15: time to consider a fix); wool cleans it at once; nothing is damaged. Balances: furnace burner 0.05, engines 0.02 (diesel with over 7 % heavy oil or 1 % residue fouls an engine). The Gas Turbine's window is
+330 to 720 K, so gasoline, diesel and heavy oil all give full power, and heavy oil fouls it by ~10 % an hour at full
+power (diesel clears 0.8 % an hour, gasoline 1.5 %). Jade on the turbine shows the rating, whether the fuel fouls, the
 fuel's viscosity, and the fouling. Saved as `foul`, `fuelLight`, `fuelHeavy`, `fuelCoking` (absent: clean). The Fuel
 Generator has no fuel vessel yet (buckets of one named fluid), so it has no rating yet. GameTests
 gas_turbine_off_spec_derates, gas_turbine_heavy_oil_fouls, gas_turbine_clean_fuel_clears; unit test FuelQualityTest.

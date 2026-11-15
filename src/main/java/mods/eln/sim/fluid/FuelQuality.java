@@ -31,9 +31,16 @@ public final class FuelQuality {
     public static final double FOUL_PER_INDEX = 1 / (0.2159 - FURNACE_BALANCE);
     /** At rate 1 and full power a device fouls completely in this long (s). */
     public static final double FOUL_SECONDS = 2 * 3600;
+    /**
+     * Engines foul (and clear) this many times slower than a furnace burner (Baughn 2026-11-15: "4x lower seems fine;
+     * that allows players time to consider a fix"): heavy oil takes ~10 % of a gas turbine's power an hour, not 39 %.
+     */
+    public static final double ENGINE_SLOWER = 4;
 
     /** The gas turbine's boiling window (K): naphtha to heavy oil (it burns heavy oil today, and real ones do, fouling). */
     public static final double TURBINE_LO = 330, TURBINE_HI = 720;
+    /** The Fuel Generator's (K): a spark-ignition engine, gasoline and naphtha (design-398); diesel and heavier derate it. */
+    public static final double GENERATOR_LO = 330, GENERATOR_HI = 400;
 
     /** What a layer is to an engine with a window: its shares too light and too heavy (0..1), and its coking index. */
     public record Rating(double light, double heavy, double coking) {
@@ -85,6 +92,16 @@ public final class FuelQuality {
     /** The fouling (0..FOUL_MAX) after dt s at this share of full power on fuel of this coking index. */
     public static double foul(double foul, double coking, double balance, double load, double dt) {
         return Math.max(0, Math.min(FOUL_MAX, foul + foulRate(coking, balance) * load * dt / FOUL_SECONDS));
+    }
+
+    /** An engine's fouling after dt s: the same law over ENGINE_BALANCE, ENGINE_SLOWER times slower. */
+    public static double foulEngine(double foul, double coking, double load, double dt) {
+        return foul(foul, coking, ENGINE_BALANCE, load, dt / ENGINE_SLOWER);
+    }
+
+    /** An engine's fouling per hour at full power on fuel of this coking index (under 0: it clears). */
+    public static double engineFoulPerHour(double coking) {
+        return foulRate(coking, ENGINE_BALANCE) * 3600 / (FOUL_SECONDS * ENGINE_SLOWER);
     }
 
     /** The viscosity (Pa s) of the liquid layer species id is in at the node's temperature: a log mix by mass (Arrhenius). */
