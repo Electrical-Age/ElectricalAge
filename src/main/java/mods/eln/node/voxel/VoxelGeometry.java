@@ -200,11 +200,11 @@ public final class VoxelGeometry {
 
     /**
      * A flat arrow lying on a face at height top on the stem axis: a shaft along axis from behind c to its middle, then a
-     * head of two steps narrowing toward flow's side (px; 0.5 px proud of the face).
+     * head of three steps narrowing toward flow's side (px; 0.5 px proud of the face).
      */
     static void arrow(Model m, int axis, int side, int stem, double[] c, int flow, double top) {
-        double[][] seg = {{-1.75, 0.25, 0.4}, {0.25, 1.0, 1.4}, {1.0, 1.75, 0.7}};   // (from, to along the flow; half width)
-        String[] name = {"flow arrow shaft", "flow arrow head", "flow arrow tip"};
+        double[][] seg = {{-1.8, 0, 0.35}, {0, 0.6, 1.8}, {0.6, 1.2, 1.2}, {1.2, 1.8, 0.6}};   // (from, to along the flow; half width)
+        String[] name = {"flow arrow shaft", "flow arrow head", "flow arrow head 2", "flow arrow tip"};
         for (int i = 0; i < seg.length; i++) {
             double[] lo = new double[3], hi = new double[3];
             double a0 = c[axis] + flow * seg[i][0], a1 = c[axis] + flow * seg[i][1];

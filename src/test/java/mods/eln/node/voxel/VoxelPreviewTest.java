@@ -116,4 +116,23 @@ public class VoxelPreviewTest {
             Raster.writeRow(Path.of(dir, "fittings-" + PipePart.TIER_NAME[tier].replace(' ', '-') + ".png"), row);
         }
     }
+    /** The pipe pressure valve before and after its flow arrow (2026-11-15), both flows, along x and along z. */
+    @Test
+    void pressureValveArrow() throws Exception {
+        String dir = System.getProperty("cad.previews");
+        Assumptions.assumeTrue(dir != null, "-PcadPreviews=DIR");
+        List<Raster> row = new java.util.ArrayList<>();
+        for (int flow : new int[]{1, -1}) {
+            PipePart pipe = new PipePart(0, new int[]{0, 8, 8, 16, 8, 8});
+            ValvePart v = new ValvePart(8, 8, 8, 0, PipePart.GRID[0], ValvePart.PRESSURE);
+            v.pmode = ValvePart.REDUCING;
+            v.flow = flow;
+            List<VoxelPart> parts = List.of(pipe, v);
+            double[] fit = {3, 4, 3, 13, 14, 13};
+            // (from above: the arrow lies on the dome's top; marked: faces that z-fight)
+            row.add(pic(faces(LegacyVoxelGeometry.of(parts)), fit, 30, -55, true));
+            row.add(pic(faces(VoxelGeometry.of(parts)), fit, 30, -55, true));
+        }
+        Raster.writeRow(Path.of(dir, "pressure-valve-arrow.png"), row);
+    }
 }
