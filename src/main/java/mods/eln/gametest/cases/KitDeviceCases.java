@@ -75,8 +75,10 @@ public final class KitDeviceCases {
                     if (CableItems.electricalTier(t) && (kd == null || kd.render == null)) noRender.append(t).append(' ');
                 }
                 var td = CableItems.descriptor(kit(HV, thick(), 1));
-                ctx.check("kits: every electrical kit, preset or not, has a cable render for the devices that hold it",
-                    noRender.length() == 0 && td != null && td.render != null, "none for tiers " + noRender);
+                var th = CableItems.thermal(CableKitItem.kit(5, 16));   // (a temperature probe's back slot)
+                ctx.check("kits: every electrical kit, preset or not, and the thermal kit have a cable render for the devices that hold them",
+                    noRender.length() == 0 && td != null && td.render != null && th != null && th.render != null,
+                    "none for tiers " + noRender + (th == null || th.render == null ? " and thermal" : ""));
                 ItemStack piece = CableItems.take(hv, 48);
                 ctx.check("kits: taking 3 blocks off 10 leaves 7, the piece keeps the spec",
                     CableItems.blocks(piece) == 3 && CableItems.blocks(hv) == 7 && thick().equals(CableKitItem.specOf(piece)),
