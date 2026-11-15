@@ -36,9 +36,19 @@ public class LampSocketRender extends SixNodeElementRender {
     boolean grounded = true;
     public boolean poweredByLampSupply;
 
-    float pertuVy = 0, pertuPy = 0;
-    float pertuVz = 0, pertuPz = 0;
-    float weatherAlphaZ = 0, weatherAlphaY = 0;
+    /** The hanging lamp's swing; at rest (indoors, nothing passing) the chain and head bake into the chunk. */
+    final LampSwing swing = new LampSwing();
+    /** Under the sky or right next to it (LampSwing.OUTDOOR_SKY_LIGHT); looked up about once a second, not per frame. */
+    boolean outdoors = false;
+    float skyTimeout = 0;
+
+    public LampSwing swing() {
+        return swing;
+    }
+
+    public boolean outdoors() {
+        return outdoors;
+    }
 
     List entityList = new ArrayList();
     float entityTimout = 0;
@@ -93,33 +103,18 @@ public class LampSocketRender extends SixNodeElementRender {
 
                 if (eFactor == 0)
                     continue;
-                pertuVz += e.getDeltaMovement().x * eFactor * dt;
-                pertuVy += e.getDeltaMovement().z * eFactor * dt;
+                swing.push(e.getDeltaMovement().x, e.getDeltaMovement().z, eFactor, dt);
             }
 
-            if (WorldCompat.getSavedLightValue(tileEntity.getLevel(), net.minecraft.world.level.LightLayer.SKY, tileEntity.getBlockPos().getX(), tileEntity.getBlockPos().getY(), tileEntity.getBlockPos().getZ()) > 3) {
-                float weather = (float) UtilsClient.getWeather(tileEntity.getLevel()) * 0.9f + 0.1f;
-
-                weatherAlphaY += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;
-                weatherAlphaZ += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;
-                if (weatherAlphaY > 2 * Math.PI)
-                    weatherAlphaY -= 2 * Math.PI;
-                if (weatherAlphaZ > 2 * Math.PI)
-                    weatherAlphaZ -= 2 * Math.PI;
-                pertuVy += Math.random() * Math.sin(weatherAlphaY) * weather * weather * dt * 3;
-                pertuVz += Math.random() * Math.cos(weatherAlphaY) * weather * weather * dt * 3;
-
-                pertuVy += 0.4 * dt * weather * Math.signum(pertuVy) * Math.random();
-                pertuVz += 0.4 * dt * weather * Math.signum(pertuVz) * Math.random();
+            skyTimeout -= dt;
+            if (skyTimeout < 0) {
+                outdoors = WorldCompat.getSavedLightValue(tileEntity.getLevel(), net.minecraft.world.level.LightLayer.SKY, tileEntity.getBlockPos().getX(), tileEntity.getBlockPos().getY(), tileEntity.getBlockPos().getZ()) >= LampSwing.OUTDOOR_SKY_LIGHT;
+                skyTimeout = LampSwing.SKY_CHECK_SECONDS * (1f + 0.25f * (float) Math.random());   // (lamps loaded together do not all look in one frame)
             }
 
-            pertuVy -= pertuPy / 10 * dt;
-            pertuVy *= (1 - 0.2 * dt);
-            pertuPy += pertuVy;
-
-            pertuVz -= pertuPz / 10 * dt;
-            pertuVz *= (1 - 0.2 * dt);
-            pertuPz += pertuVz;
+            // Indoors a lamp hangs still (Baughn, todo #473): no wind, so a swing dies out and the lamp bakes.
+            if (outdoors) swing.wind((float) UtilsClient.getWeather(tileEntity.getLevel()) * 0.9f + 0.1f, dt);
+            swing.step(dt, outdoors);
         }
     }
     void setLight(byte newLight) {

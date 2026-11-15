@@ -113,6 +113,13 @@ add up. `publish_render` runs it for every device and fails if the chunk's share
 chunk shows it and then turns. A new device with a render is covered by `publish_render` without more work; a test
 of a part that changes state can call the check with a draw that changes it.
 
+Hanging lamps (todo #473): `LampSwingTest` (unit, no GPU) draws the real suspended-lamp model through `Bake` with a
+test host, 50 ms frames: indoors 288 vertices a frame until settled and 0 after; outdoors it moves in 1200 of 1200
+frames in clear weather, rain and thunder and 240 vertices (chain and head) stay with the renderer; a push indoors
+and a roof built or removed switch between the two; the swing ends at the same size at 20, 60 and 300 fps.
+GameTest `lamp_rest` places one lamp under a single block and one under a 5 x 5 roof and checks that each render
+reads the sky light and swings or rests accordingly.
+
 `cases/`: `Batch1Cases`, `Wp9aCases` (six-node power), `Wp9bCases` (sensors, probes), `Wp9cCases` (logic, meters,
 wireless), `Wp10aCases`, `Wp10bCases` (machines, generators, thermal), `Wp11Cases` (shafts, poles, converters),
 `Wp12Cases`, `SolarCases` (first multiblock), `LogicTruthCases`, `ChipMoreCases`, `WirelessMoreCases`,
