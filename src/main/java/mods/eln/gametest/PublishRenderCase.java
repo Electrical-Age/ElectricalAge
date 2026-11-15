@@ -29,7 +29,14 @@ import java.util.Map;
  * faces after it), not throw, and emit vertices. Each device is then drawn with its unchanging parts in the chunk's
  * geometry ({@link BakeOnceCheck}): the picture must be the same.
  */
-final class PublishRenderCase implements TestCase {
+public final class PublishRenderCase implements TestCase {
+    /** Takes each device's draw in place of the checks on it (the render benchmark, gametest/bench/RenderBench). */
+    public interface Probe {
+        void device(String name, boolean six, Object owner, BlockPos pos, Runnable draw);
+    }
+
+    public static Probe probe;
+
     public String id() {
         return "publish_render";
     }
@@ -104,6 +111,9 @@ final class PublishRenderCase implements TestCase {
                 else if (INVISIBLE_IN_112.contains(d.name)) {
                     r.draw();
                     ok++;
+                } else if (probe != null) {
+                    ok++;
+                    probe.device(d.name, true, be, p, r::draw);
                 } else if (draw(ctx, d.name, r::draw)) {
                     ok++;
                     BakeOnceCheck.check(ctx, d.name, be, p, r::draw);
@@ -135,6 +145,9 @@ final class PublishRenderCase implements TestCase {
                 else if (INVISIBLE_IN_112.contains(d.name) || level.getBlockState(at).getRenderShape() == net.minecraft.world.level.block.RenderShape.MODEL) {
                     be.elementRender.draw();
                     ok++;
+                } else if (probe != null) {
+                    ok++;
+                    probe.device(d.name, false, be, at, be.elementRender::draw);
                 } else if (draw(ctx, d.name, be.elementRender::draw)) {
                     ok++;
                     BakeOnceCheck.check(ctx, d.name, be, at, be.elementRender::draw);
@@ -143,7 +156,7 @@ final class PublishRenderCase implements TestCase {
             GoldenSlotsCase.clear(ctx);
         }
         ctx.check("publish_render: devices", ok == all, ok + " of " + all);
-        BakeOnceCheck.summary(ctx, 0.9);   // (98.9% when this was written)
+        if (probe == null) BakeOnceCheck.summary(ctx, 0.9);   // (98.9% when this was written)
     }
 
     /** Feed the node's publish packet to a client-side entity; it must read every byte. */
