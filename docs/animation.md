@@ -72,6 +72,6 @@ code on purpose.
 | Shafts (all shaft parts, turbines, generator, motor) | rotors | `log(rads+1)/log(1.2)` deg-rate, unsmoothed | special: Baughn's 2015 curve (slow shafts turn visibly, fast ones don't strobe) |
 | Energy meter | disk, odometer | client integration of power | special |
 | Watch | hands | world time | special |
-| Suspended lamp | sway | damped spring, random forcing | special |
+| Suspended lamp | sway | damped spring (`LampSwing`); random forcing outdoors only, indoors it comes to rest and bakes (rendering.md) | special |
 | E-bike, elevator car, hand drill | wheels, car, bit | tick + partial tick (entities/items) | special |
 | Turret | yaw, elevation | `SlewLimiter`, also simulated on the server | special |

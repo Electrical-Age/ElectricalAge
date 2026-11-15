@@ -189,23 +189,9 @@ public class HubElement extends SixNodeElement {
         return cableDescriptor;
     }
 
+    /** The two edges link `id` joins (the table is HubSlots', which also draws the screen from it). */
     static LRDU[] connectionIdToSide(int id) {
-        switch (id) {
-            case 0:
-                return new LRDU[]{LRDU.Left, LRDU.Down};
-            case 1:
-                return new LRDU[]{LRDU.Right, LRDU.Up};
-            case 2:
-                return new LRDU[]{LRDU.Down, LRDU.Right};
-            case 3:
-                return new LRDU[]{LRDU.Up, LRDU.Left};
-            case 4:
-                return new LRDU[]{LRDU.Left, LRDU.Right};
-            case 5:
-                return new LRDU[]{LRDU.Down, LRDU.Up};
-        }
-
-        return null;
+        return HubSlots.linkEdges(id);
     }
 
     @Override

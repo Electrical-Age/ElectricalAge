@@ -34,6 +34,9 @@ public final class Oil {
     static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(Registries.FLUID, Eln.MODID);
     static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Eln.MODID);
     static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Eln.MODID);
+    /** Loot functions: eln:oil_survey_map (todo #470). */
+    static final DeferredRegister<com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.storage.loot.functions.LootItemFunction>> LOOT_FUNCTIONS =
+        DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Eln.MODID);
 
     public static final DeferredHolder<FluidType, FluidType> CRUDE_TYPE = TYPES.register("crude_oil", () -> new CrudeType(
         FluidType.Properties.create().descriptionId("block.eln.crude_oil").density(850).viscosity(6000).temperature(290)
@@ -152,6 +155,8 @@ public final class Oil {
         FLUIDS.register(modBus);
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
+        LOOT_FUNCTIONS.register("oil_survey_map", () -> OilSurveyMapFunction.MAP_CODEC);
+        LOOT_FUNCTIONS.register(modBus);
         mods.eln.reservoir.Reservoirs.register(modBus);
         OilReservoirs.register();
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.tick.ServerTickEvent.Post.class, OilReservoirs::tick);

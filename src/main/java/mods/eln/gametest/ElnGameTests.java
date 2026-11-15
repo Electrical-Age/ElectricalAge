@@ -32,7 +32,9 @@ public final class ElnGameTests {
     static List<TestCase> cases() {
         // the cable benchmark runs alone (-PelnBench=FILE; notes/cables/PERF.md)
         if (mods.eln.gametest.bench.CableBench.enabled()) return List.of(new mods.eln.gametest.bench.CableBench());
-        java.util.List<TestCase> l = new java.util.ArrayList<>(List.of(new SimTickCase(), new KotlinRuntimeCase(), new GoldenCase(), new GoldenRecipesCase(), new GoldenSlotsCase(), new PublishRenderCase(), new GuiPacketCase(), new MachineMenuCase(), new MenusOpenCase(), new AutoMinerSpinCase(), new ItemDrawCase(), new XRayCase()));
+        // so does the render benchmark's CPU tier (-PelnRenderBench=FILE)
+        if (mods.eln.gametest.bench.RenderBench.enabled()) return List.of(new mods.eln.gametest.bench.RenderBench());
+        java.util.List<TestCase> l = new java.util.ArrayList<>(List.of(new SimTickCase(), new KotlinRuntimeCase(), new GoldenCase(), new GoldenRecipesCase(), new GoldenSlotsCase(), new PublishRenderCase(), new GuiPacketCase(), new MachineMenuCase(), new MenusOpenCase(), new AutoMinerSpinCase(), new LampRestCase(), new ItemDrawCase(), new XRayCase()));
         l.addAll(mods.eln.gametest.cases.Batch1Cases.cases());
         l.addAll(mods.eln.gametest.cases.SolarCases.cases());
         mods.eln.gametest.cases.Wp9aCases.addTo(l);
@@ -113,6 +115,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.ComputerCases.addTo(l);
         mods.eln.gametest.cases.HostedMachineCases.addTo(l);
         mods.eln.gametest.cases.LowLevelCases.addTo(l);
+        mods.eln.gametest.cases.HubSlotCases.addTo(l);
         return l;
     }
 

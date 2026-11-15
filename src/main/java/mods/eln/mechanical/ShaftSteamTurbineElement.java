@@ -213,6 +213,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         totalKg += got;
         totalWork += work;
         totalInJ += Math.max(0, turbine.edge.fEnthalpy) * time;
+        carryOver(time);
         // meters
         meterKg += got;
         meterJ += work;
@@ -224,6 +225,47 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
             needPublish();
         }
     }
+
+    /** Water carried out of the exhaust with its steam, and drained from the inlet's casing, since loaded (kg; GameTests). */
+    public double totalCarriedKg, totalDrainedKg;
+
+    /**
+     * Wet exhaust (#474): an expansion to a vacuum ends 10-18 % wet, and the droplets go on with the steam, into the
+     * condenser (or out of an open exhaust as mist). The exhaust port is a point half-way up its node, which passes gas
+     * only, and the condenser's exhaust flange is higher still, so that water stayed in the exhaust: 4.3 g/s at rated
+     * load, 10 % of its volume and the blades after seven minutes. Here the liquid leaves in the share of the exhaust's
+     * vapour that left over the step (no slip between them), to where that steam went. Nothing goes to a neighbour that
+     * is itself full of water, or against steam coming back: a flooded condenser still backs up into the turbine.
+     */
+    void carryOver(double time) {
+        if (exhaust == null) return;
+        double mL = exhaust.mLiquid();
+        if (mL <= 0) return;
+        double mV = Math.max(1e-9, exhaust.mVapour()), T = exhaust.T(), left = mL;
+        boolean moved = false;
+        for (var e : FluidWorld.edgesOf(exhaust)) {
+            if (e == turbine.edge || left <= 0) continue;
+            double out = (e.a == exhaust ? e.fVapour : -e.fVapour) * time;
+            if (out <= 0) continue;
+            boolean vent = exhaustVent != null && e == exhaustVent.edge;
+            FluidNode to = e.a == exhaust ? e.b : e.a;
+            if (!vent && (to == null || to.level() > CARRY_FULL)) continue;
+            double m = Math.min(left, mL * Math.min(1, out / mV));
+            exhaust.mWater -= m;
+            exhaust.energy -= m * Water.hLiquid(T);
+            left -= m;
+            if (!vent) {
+                EaUnits.addWater(to, m, T, false);
+                to.update();
+            }
+            totalCarriedKg += m;
+            moved = true;
+        }
+        if (moved) exhaust.update();
+    }
+
+    /** A neighbour fuller of liquid than this (share of its height) takes no carried-over water: it is flooding. */
+    public static final double CARRY_FULL = 0.9;
 
     class Run implements IProcess {
         @Override
@@ -266,6 +308,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         inlet.mWater -= mL;
         inlet.energy -= mL * Water.hLiquid(T);
         inlet.update();
+        totalDrainedKg += mL;
     }
 
     /** Stripped blades (water) take a cheap Turbine Blade Set (Baughn 2026-10-29); other failures the usual part. */

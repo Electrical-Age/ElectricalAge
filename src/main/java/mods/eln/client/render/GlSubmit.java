@@ -40,6 +40,7 @@ public final class GlSubmit {
     public static void submit(GlFrame frame, PoseStack poseStack, SubmitNodeCollector collector, int light) {
         // extras last, from a copy: an item drawn by EA's own item renderer (an x-ray scanner in a battery charger)
         // reopens the shared frame, which clears its batches and extras (that crashed the game)
+        long probe = mods.eln.gl.RenderProbe.start();
         List<GlFrame.Extra> extras = frame.extras().isEmpty() ? List.of() : new java.util.ArrayList<>(frame.extras());
         for (Map.Entry<GlFrame.Key, GlFrame.Batch> e : frame.batches().entrySet()) {
             GlFrame.Batch b = e.getValue();
@@ -50,13 +51,16 @@ public final class GlSubmit {
             // the frame was opened with this pose: vertices and normals are already in its space
             if (e.getKey().blend() == GlFrame.Blend.LINES) {
                 collector.submitCustomGeometry(poseStack, RenderTypes.lines(), (PoseStack.Pose pose, VertexConsumer vc) -> {
+                    long t = mods.eln.gl.RenderProbe.start();
                     for (int i = 0; i < n; i += GlFrame.STRIDE)
                         vc.addVertex(d[i], d[i + 1], d[i + 2]).setColor(Float.floatToRawIntBits(d[i + 5]))
                             .setNormal(d[i + 6], d[i + 7], d[i + 8]).setLineWidth(d[i + 3]);
+                    if (t != 0) mods.eln.gl.RenderProbe.wrote(t, n / GlFrame.STRIDE);
                 });
                 continue;
             }
             collector.submitCustomGeometry(poseStack, renderType(e.getKey()), (PoseStack.Pose pose, VertexConsumer vc) -> {
+                long t = mods.eln.gl.RenderProbe.start();
                 for (int i = 0; i < n; i += GlFrame.STRIDE) {
                     vc.addVertex(d[i], d[i + 1], d[i + 2])
                         .setColor(Float.floatToRawIntBits(d[i + 5]))
@@ -65,9 +69,11 @@ public final class GlSubmit {
                         .setLight(l)
                         .setNormal(d[i + 6], d[i + 7], d[i + 8]);
                 }
+                if (t != 0) mods.eln.gl.RenderProbe.wrote(t, n / GlFrame.STRIDE);
             });
         }
         submitExtras(extras, collector, light);
+        if (probe != 0) mods.eln.gl.RenderProbe.submitted(probe);
     }
 
     /** Text and items the frame recorded, each at its own matrix (already in pose space). */
