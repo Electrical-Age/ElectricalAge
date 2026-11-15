@@ -118,6 +118,12 @@ public final class ElnClient {
         if (mods.eln.handbook.Handbook.guideAvailable())
             modBus.addListener(net.neoforged.neoforge.client.event.AddClientReloadListenersEvent.class, HandbookGuide::onAddReloadListeners);
         NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, FrameTime::onFrame);
+        // the render benchmark at any time (it also starts by itself with -Deln.renderBench=FILE.json)
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.RegisterClientCommandsEvent.class, e -> e.getDispatcher().register(
+            net.minecraft.commands.Commands.literal("elnbench").executes(c -> {
+                RenderBenchClient.start();
+                return 1;
+            })));
         mods.eln.gl.Bake.host = mods.eln.client.render.bake.ChunkBake.INSTANCE;
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterSpriteSourcesEvent.class,
             e -> e.register(mods.eln.client.render.bake.ModelSprites.ID, mods.eln.client.render.bake.ModelSprites.CODEC));

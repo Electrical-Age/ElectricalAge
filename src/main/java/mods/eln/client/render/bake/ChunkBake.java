@@ -267,6 +267,7 @@ public final class ChunkBake implements Bake.Host {
         long node = SectionPos.asLong(o.getX() >> 4, o.getY() >> 4, o.getZ() >> 4);
         Sec s = secs.get(node);
         if (s == null) return;
+        long probe = mods.eln.gl.RenderProbe.start();
         ArrayList<Bake.Call> live = new ArrayList<>(s.calls.size());
         for (Bake.Call c : s.calls) {
             // a block entity removed since its last draw: its block change is why this compile runs
@@ -293,11 +294,14 @@ public final class ChunkBake implements Bake.Host {
         e.addRenderer(context -> {
             try {
                 VertexConsumer[] buffers = new VertexConsumer[2];
-                compiledVertices.add(BakeMesh.write((cutout, x, y, z, color, u, v, light) -> {
+                long t = mods.eln.gl.RenderProbe.start();
+                int written = BakeMesh.write((cutout, x, y, z, color, u, v, light) -> {
                     int b = cutout ? 1 : 0;
                     if (buffers[b] == null) buffers[b] = context.getOrCreateChunkBuffer(cutout ? ChunkSectionLayer.CUTOUT : ChunkSectionLayer.SOLID);
                     buffers[b].addVertex(x, y, z, color, u, v, OverlayTexture.NO_OVERLAY, light, 0, 1, 0);
-                }, calls, lights, sprites, ox, oy, oz, nether));
+                }, calls, lights, sprites, ox, oy, oz, nether);
+                if (t != 0) mods.eln.gl.RenderProbe.meshed(t, written);
+                compiledVertices.add(written);
                 compiles.increment();
                 snap.complete = true;
             } catch (Throwable t) {
@@ -306,6 +310,7 @@ public final class ChunkBake implements Bake.Host {
                 failed = true;
             }
         });
+        if (probe != 0) mods.eln.gl.RenderProbe.snapshot(probe);
     }
 
     /** Forget the devices whose block entity is gone (client tick). */

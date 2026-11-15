@@ -31,15 +31,20 @@ public final class FrameTime {
         if (boot) boot = false;
         else deltaT = (now - oldNanoTime) * 1e-9f;
         oldNanoTime = now;
+        RenderBenchClient.onFrame(now);
         if (UtilsClient.isGameInPause() || Minecraft.getInstance().level == null) return;
         float dt = get();
+        long probe = mods.eln.gl.RenderProbe.start();
+        int refreshed = 0;
         for (NodeBlockEntity e : new ArrayList<>(NodeBlockEntity.clientList)) {
             if (e.getLevel() != Minecraft.getInstance().level) {
                 NodeBlockEntity.clientList.remove(e);
                 continue;
             }
             e.clientRefresh(dt);
+            refreshed++;
         }
+        if (probe != 0) mods.eln.gl.RenderProbe.refreshed(probe, refreshed);
         mods.eln.sound.LoopedSoundPlayer.update(dt);
     }
 }
