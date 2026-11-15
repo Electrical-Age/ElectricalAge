@@ -71,6 +71,7 @@ public final class OilCases {
         cases.add(new CasingDrainTrap());
         cases.add(new MakeupPlantRefills());
         cases.add(new MakeupPlantRefills(13));
+        cases.add(new MakeupPlantRefills(14));
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -2633,9 +2634,14 @@ public final class OilCases {
                 String.format("%.0f%% / %.0f%%", floodBusy * 100, floodLight * 100));
             ctx.check("two units: both turbines run, neither burnt", !busy.isBurnt() && !light.isBurnt() && power > 300, String.format("%.0f W", power));
             ctx.check("two units: the condensate goes back (pumps return water)", pumped > 0.02, String.format("%.1f g", pumped * 1000));
-            // (makeup refills what the plant lost or what the boiler is still taking up; none of it may pile up in a condenser)
-            if (checkPileUp()) ctx.check("two units: no water piles up in either condenser", busyGain < 0.01 * cBusy.vessel.volume * 1000 && lightGain < 0.01 * cLight.vessel.volume * 1000,
-                String.format("%+.1f / %+.1f g", busyGain * 1000, lightGain * 1000));
+            // (makeup refills what the plant lost or what the boiler is still taking up. With the level control by head
+            // alone (LOW_FLOW 1, 2026-11-15) the light unit's makeup-level pump passes water while the line is under its
+            // head, so the busy hotwell rises in its level band until its head holds the line there: +30 g, 25 -> 29 %, over
+            // this watch. It settles there, under LEVEL_FULL (fluid_two_unit_plant_long: 33.8 % at 40 minutes, the
+            // plant's water steady); none may pile up in the light one)
+            if (checkPileUp()) ctx.check("two units: no water piles up in the light condenser (the busy one rises in its band)",
+                lightGain < 0.01 * cLight.vessel.volume * 1000 && floodBusy < mods.eln.oil.CondenserVessel.LEVEL_FULL - 0.05,
+                String.format("%+.1f / %+.1f g, busy up to %.0f%%", busyGain * 1000, lightGain * 1000, floodBusy * 100));
             ctx.check("two units: the boiler neither boils dry nor overfills", fillLo > 0.3 && fillHi < 1.02, String.format("%.0f..%.0f%%", fillLo * 100, fillHi * 100));
         }
         /**
@@ -2683,7 +2689,7 @@ public final class OilCases {
                     settleMakeup = makeup;
                     settleInv = inv;
                 }
-                if (tick == LONG_TICKS) {   // (what the "rest" is: the nodes outside the named groups holding water)
+                if (tick == WATCH || tick == LONG_TICKS) {   // (what the "rest" is: the nodes outside the named groups holding water)
                     var net = mods.eln.fluid.FluidWorld.networkOf(boiler.vessel);
                     if (net != null) for (var n : net.nodes)
                         if (!n.fixed && n.mWater > 0.002) mods.eln.Eln.LOG.info(String.format("[%s] node z %.1f vol %.3g: %.1f g (liquid %.1f g) at %.2f bar%s", id(), n.z, n.volume,
@@ -2757,7 +2763,8 @@ public final class OilCases {
         int lateN() {
             return ticksN() - (TICKS - LATE);
         }
-        /** The turbine's regulator set point (bar): 10 as the player's; 13, a boiler held over its rated pressure. */
+        /** The turbine's regulator set point (bar): 10 as the player's; 13 and 14, a boiler held over its rated pressure (a
+         *  governed turbine's boiler sits at ~14 bar, CondensatePump). */
         final double bar;
         /** The load heater (kept cool in the longer variant: unregulated, it burns at 800 C after ~9000 ticks). */
         final java.util.List<mods.eln.oil.ElectricHeaterElement> heaters = new java.util.ArrayList<>();
