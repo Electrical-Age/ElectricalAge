@@ -67,6 +67,12 @@ These are about the formulas as transcribed, and assume of the fluids what `Flux
 random networks as they run: shares not negative and summing to at most 1, the liquid's shares to 1, windows in
 [0, 1], densities positive.
 
+F7, S5 and S6 have a gate family in doubles beside them: `GateFamilyTest` steps random networks whose edges include
+liquid and gas pumps, turbines, reducing and relief regulators and gas-only valves, half of them with a heated node,
+under the game's settings (CUT_SHORT, MAX_DEPTH 8). It asserts what the statements give together: masses kept,
+energy kept less the turbines' work plus the heat and the pumps' work, no negative mass, no pump, turbine or one-way
+edge running backward, and no step failed or cut short (400 networks with rings x 600 steps, 2026-11-15).
+
 Two things they make plain:
 
 - **The air cushion is never drawn.** Every node's gas holds a fixed cushion of air (1e-6 kg/m^3) that is not part
