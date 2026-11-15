@@ -1,4 +1,4 @@
-// 26.3	2026-11-11T17:50:45.931209067	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-15T15:19:12.021252228	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 73b4d389b6619fd76bc7d2c244e378928b290d26 data/eln/advancement/recipes/misc/230v_battery_charger.json
@@ -192,6 +192,7 @@ ff770d82fed48e779e22e4fd14615d03adb00d06 data/eln/advancement/recipes/misc/joint
 98ccd2883edccbf205091375f1c9f06feecdd1de data/eln/advancement/recipes/misc/lamp_socket_a.json
 32b3c166b438a27868bd920fddcaf86fe9cb6dd9 data/eln/advancement/recipes/misc/lamp_socket_b_projector.json
 7e78cc35fd761625e94b932f241f2759655eefdd data/eln/advancement/recipes/misc/lamp_supply.json
+b3db93ddba7c3ed67cbd9545b7a8d0f85142bbc8 data/eln/advancement/recipes/misc/large_boiler.json
 e1474de512f11c17eefe20ef125d348a17f44813 data/eln/advancement/recipes/misc/large_rheostat.json
 e6084bcb87beb312c3c7e54af126352353824e7b data/eln/advancement/recipes/misc/lead_fuse.json
 3e4e40a4ab1ebce58266031e5ae91a50bf12692e data/eln/advancement/recipes/misc/led_vumeter.json
@@ -579,6 +580,7 @@ e6776792e8a688b133e4ee88f8ec981d5c41d46e data/eln/recipe/joint.json
 d7f8bdad98b05b6430a6362df244cd3a333ca6a5 data/eln/recipe/lamp_socket_a.json
 b90ec63e04d89ed1c2d7121a7a74ae912a6cc9f5 data/eln/recipe/lamp_socket_b_projector.json
 31b32598f2a28b91bcfd9dfec823966fb62504df data/eln/recipe/lamp_supply.json
+753a066f008b0ccbdc8bbc3cc500c5548c687766 data/eln/recipe/large_boiler.json
 f85c8f50ce0422ca92a56a52d510ab5341f9ccb7 data/eln/recipe/large_rheostat.json
 67db7e1f6d6d5d98f1f2f0f15c9aa50c4b014b8d data/eln/recipe/lead_fuse.json
 bafa184500fd9b5f87410bece2c1fa2c195da2ed data/eln/recipe/led_vumeter.json

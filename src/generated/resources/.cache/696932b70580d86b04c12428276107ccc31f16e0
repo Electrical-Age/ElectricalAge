@@ -1,4 +1,4 @@
-// 26.3	2026-11-11T17:52:30.075649081	eln-global/EA models
+// 26.3	2026-11-15T15:19:47.604187574	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -65,6 +65,7 @@ f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.jso
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/iron_tank.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/joint.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/joint_hub.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/large_boiler.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/large_rheostat.json
 c2bee1c6fc75056694c923c1c2dcff8af9479337 assets/eln/blockstates/lead_ore.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/life_oriented_battery.json
@@ -308,6 +309,7 @@ ddfd8ed2bdcafbca54e67237e525a57e085c7254 assets/eln/items/joint_hub.json
 0b6f63ff3cbf9b2b6b0389e6517efaa92b52a17e assets/eln/items/lamp_socket_a.json
 0c5e2a5faa4966c9f5a8e8b9fda01ab0c3320b8f assets/eln/items/lamp_socket_b_projector.json
 28f6934cae6c4f86b2c92c45be482ffeb7bc5f67 assets/eln/items/lamp_supply.json
+0b85c5ff994534e6237b71e9657f4f08c1338a38 assets/eln/items/large_boiler.json
 6fa5f36f2359eef09ec258cef8df2b9ecadc5541 assets/eln/items/large_rheostat.json
 39375cf9931032f368d740c01525801b78cb4282 assets/eln/items/lead_dust.json
 1d52e5b2ceb69f34e6fb69f3856bcdb225f404cd assets/eln/items/lead_fuse_for_high_voltage_cables.json
@@ -798,6 +800,7 @@ bfae8aad220de2dc9babe6f6b39356717e184bc3 assets/eln/models/item/lamp_socket_b_pr
 f189888d8a65e22d52694235ff0ed93e24b30848 assets/eln/models/item/lamp_socket_b_projector_3d.json
 96dc0e4a5c6ec5ef124dfea72ab9456c2548ea91 assets/eln/models/item/lamp_supply.json
 f0b5134c9e58df8de33952b16d3e7618a4e85e71 assets/eln/models/item/lamp_supply_3d.json
+09c70a74e51db7dd1d394f0fd622870dbe16f1a8 assets/eln/models/item/large_boiler.json
 5445ae3a259c6d779aa9c67f0696d3845ccb939d assets/eln/models/item/large_rheostat.json
 6632e98585cc4a531dcba433bf0654ecd4a8d013 assets/eln/models/item/large_rheostat_3d.json
 6c3053c220fdc03b8e2b0062ab4cb6dfa780e546 assets/eln/models/item/lead_dust.json
