@@ -56,7 +56,14 @@ lakes) and well casing. Lake records are the saved data `eln:oil_reservoirs` (`R
 fractionating column, flare stack, electric heater, steam generator) are registered in `registry/batch/Wp10aContent`.
 Over half the lakes (a fixed roll on the lake's key) a small surface pond, its own reservoir `oil-pond:<lake>`, rimmed
 with tar sand, is dug once the chunks over the lake's middle are loaded, in new and old worlds alike (`oil/OilPonds`,
-Baughn 2026-10-28; none where the ground isn't flat, dry and natural). Tests: `gametest/cases/OilCases`. The tar sand separator's list is `Eln.separatorRecipes`.
+Baughn 2026-10-28; none where the ground isn't flat, dry and natural). Tests: `gametest/cases/OilCases`.
+
+Oil survey maps (todo #470, prototype): loot function `eln:oil_survey_map` (`oil/OilSurveyMapFunction`) turns a
+filled map into one centred on an oil lake picked at random among those `min_distance`..`max_distance` blocks (600-3000)
+from where it is made, marked with a decoration, the position in the lore. `oil/OilSurvey` finds lakes from the
+structure set's placement arithmetic (no chunk loaded), skipping lakes under a quarter full and start chunks generated
+without a lake. Sold by cartographers at level 3 (`data/eln/villager_trade/cartographer/3/`, added to the vanilla tag
+`#minecraft:cartographer/level_3`). Tests: `OilSurveyTest`, GameTest `oil_survey_map`. The tar sand separator's list is `Eln.separatorRecipes`.
 
 Oil goes on EA pipes (Baughn 2026-11-03: data-driven multi-fluid pipes; species in "Fluid species" below): each oil
 device keeps its own tank and puts it on a pipe through a small port node on its drawn flange (`fluid/PortBridge`):

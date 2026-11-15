@@ -29,6 +29,7 @@ public final class OilCases {
         cases.add(new Dam());
         cases.add(new CatchUp());
         cases.add(new LakeSizes());
+        OilSurveyCases.addTo(cases);
         cases.add(new Separator());
         cases.add(new Outlet(true));
         cases.add(new Outlet(false));
