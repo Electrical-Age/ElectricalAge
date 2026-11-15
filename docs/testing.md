@@ -11,6 +11,7 @@ self-test cases and the golden-data diffs on a headless server (`src/main/java/m
 | `./gradlew test` | Unit tests (JUnit 5 platform; JUnit 4 via vintage; jqwik). Run under ModDevGradle `unitTest`, so Minecraft is on the classpath (sim NBT uses `CompoundTag`). |
 | `./gradlew runGameTestServer` | Every registered GameTest, headless; exit code = number of failed required tests. Sets `neoforge.enabledGameTestNamespaces=eln` and `eln.golden=golden/1.12`. In game: `/test runall`. |
 | `./gradlew runGameTestServer -PelnBench=result.json [-PelnBenchLabel=name]` | The cable benchmark only (no other test registered). Extra: `-PelnBenchConvert` (same scene through the voxel-cable converter), `-PelnBenchNoRthCache` (`DelayInterSystem2.cacheRth` off, 1.12 behaviour). |
+| `./gradlew runGameTestServer -PelnRenderBench=/abs/result.json [-PelnBenchLabel=name]` | The render benchmark's CPU tier only (no other test registered, about 11 s of measuring): per device vertices, ns per draw with and without the static bake, what the chunk takes. No GPU. See "Render benchmark" in `rendering.md`. |
 | `./gradlew runClientData` | Datagen (lang, models, tags, recipes) into `src/generated/resources` (committed). There is no separate `runData` run. |
 
 `test` task system properties (`build.gradle`): `eln.deterministic=true` (`Utils.rand` returns the midpoint of its
@@ -163,6 +164,10 @@ machine, floor ghost, a mob carried, the cabin's walls; structure `floor_11x12x9
 - `NetDump` (`/elnlab netdump [pos [r]]`): the solved network (after Line collapse) to `eln-netdump/<stamp>.json` and
   `.falstad.txt` in the server directory.
 - `bench/CableBench`: ~20k cable blocks; per-tick sim cost in steady, churn, fault and teardown phases, written as JSON.
+- `bench/RenderBench`: every device with a render (the `publish_render` path), drawn some thousand times into a
+  `GlFrame` on the server thread; vertices (exact) and times (loose) as JSON. Compare two results with
+  `tools/bench/render-bench-compare.py A.json B.json` (exit 1 when an exact field differs). The client tier
+  (`client/RenderBenchClient.java`, `-Deln.renderBench=FILE.json` or `/elnbench`) is in the mod itself, not here.
 
 ## Adding a GameTest
 

@@ -39,13 +39,24 @@ def name_of(runs):
     return f"{r.get('label', '?')} ({r.get('commit', '?')}, {len(runs)} run{'s' if len(runs) > 1 else ''})"
 
 
-def cpu_devices(runs, notes, side):
-    """name -> fields: exact ones from the first run (a note when runs disagree), times as medians."""
+def keyed(devices):
+    """key -> device; two devices may share a name (two "Signal Switch"): the second is "Signal Switch #2"."""
     out = {}
-    for d in runs[0]['devices']:
-        out[d['name']] = dict(d)
+    for d in devices:
+        key, n = d['name'], 1
+        while key in out:
+            n += 1
+            key = f"{d['name']} #{n}"
+        out[key] = dict(d, name=key)
+    return out
+
+
+def cpu_devices(runs, notes, side):
+    """key -> fields: exact ones from the first run (a note when runs disagree), times as medians."""
+    out = keyed(runs[0]['devices'])
+    rest = [keyed(r['devices']) for r in runs[1:]]
     for name, d in out.items():
-        others = [next((x for x in r['devices'] if x['name'] == name), None) for r in runs[1:]]
+        others = [r.get(name) for r in rest]
         for k in EXACT:
             vals = {d[k]} | {o[k] for o in others if o}
             if len(vals) > 1:
