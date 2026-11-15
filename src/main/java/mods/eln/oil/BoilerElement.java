@@ -129,8 +129,20 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         if (feed == null) return ports;
         // (the feed flange turns with the boiler: a wrench turns it, and the network is rebuilt on the reconnect)
         var all = new java.util.ArrayList<>(ports);
-        all.add(new FluidPort(feed, node.coordonate.pos().asLong(), front.right().toEnumFacing().get3DDataValue(), 0.5, PORT_K));
+        all.add(feedPort());
         return all;
+    }
+
+    /** The feedwater flange's port on the feed stub: the Boiler's is on its right flank. */
+    protected FluidPort feedPort() {
+        return new FluidPort(feed, node.coordonate.pos().asLong(), front.right().toEnumFacing().get3DDataValue(), 0.5, PORT_K);
+    }
+
+    /** The steam ports on the vessel: the Boiler's dome flange underneath and its top port. */
+    protected List<FluidPort> steamPorts() {
+        long pos = node.coordonate.pos().asLong();
+        return List.of(new FluidPort(vessel, pos, 0, 0.97, PORT_K),    // the dome pipe's flange, underneath
+            new FluidPort(vessel, pos, 1, 1.0, PORT_K));                  // the top port
     }
 
     @Override
@@ -267,13 +279,12 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         // boil in ~5 minutes.
         thermal.set(desc.faceRs, desc.lossRp, desc.shellC);
         var c = node.coordonate;
-        vessel = new FluidNode(desc.volume, c.y, 1.0, false);
+        vessel = new FluidNode(desc.volume, c.y, desc.height, false);
         if (loaded != null) {
             mods.eln.fluid.FluidSaves.restore(vessel, loaded);
             vessel.update();
         } else fromTanks(tanks.water(), tanks.steam());
         showTanks();
-        long pos = c.pos().asLong();
         feed = new FluidNode(FEED_VOLUME, c.y + FEED_DRAW, 0.1, false);
         if (loadedFeed != null) {
             mods.eln.fluid.FluidSaves.restore(feed, loadedFeed);
@@ -282,8 +293,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         feed.lumpable = true;   // (it merges into the pipe on its flange: no stub to fill first)
         feed.resistance = 1 / PORT_K;
         feedCheck = new Link(feed, 0, vessel, FEED_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);
-        ports = List.of(new FluidPort(vessel, pos, 0, 0.97, PORT_K),    // the dome pipe's flange, underneath
-            new FluidPort(vessel, pos, 1, 1.0, PORT_K));                  // the top port
+        ports = steamPorts();
         connect();
     }
 

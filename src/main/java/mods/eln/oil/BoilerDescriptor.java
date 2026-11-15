@@ -30,9 +30,15 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
     public int waterMb = BoilerTanks.WATER_MB;
     public float maxBoom = 4;
     public boolean large;
+    /** The vessel's height (blocks): 2 for the 2x2x2 Large Boiler. */
+    public double height = 1.0;
 
     public BoilerDescriptor(String name, String model) {
-        super(name, BoilerElement.class, BoilerRender.class);
+        this(name, model, BoilerElement.class);
+    }
+
+    public BoilerDescriptor(String name, String model, Class<?> elementClass) {
+        super(name, elementClass, BoilerRender.class);
         obj = Eln.obj.getObj(model);
         cableTerminals = mods.eln.cable.CableTerminals.FRONT;   // the phase signal's plate (mods.eln.cad.models.Boiler)
     }
@@ -54,6 +60,22 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
         burstPa = 500e5;
         maxBoom = 6;
         return this;
+    }
+
+    /**
+     * The Large Boiler as Baughn asked for it (2026-11-15: "It needs at least one face free for a signal output. How
+     * about making it 2x2x2, physically?"): large()'s ratings in a 2x2x2 body, one node at its front-bottom-left block
+     * and seven ghost blocks to the right, back and up (LargeBoilerElement: twelve thermal faces, two steam outlets on
+     * top, the feed flange and the level signal on the front). PROTOTYPE: the Boiler's model at twice the size.
+     */
+    public static BoilerDescriptor twoByTwo(String name, String model) {
+        var d = new BoilerDescriptor(name, model, LargeBoilerElement.class).large();
+        d.height = 2;
+        var g = new mods.eln.ghost.GhostGroup();
+        g.addRectangle(0, 1, 0, 1, 0, 1);
+        g.removeElement(0, 0, 0);
+        d.setGhostGroup(g);
+        return d;
     }
 
     /** Its rated fill (kg of water): the gauge glass's full mark. */
@@ -83,6 +105,10 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
     /** The boiler, its gauge glass's water column at fill (0..1), its dial at celsius. */
     void draw(float fill, float celsius) {
         if (obj == null) return;
+        if (height > 1) {   // (PROTOTYPE, unseen: the Boiler's model over the whole 2x2x2, from its origin block's centre)
+            GL11.glTranslatef(0.5f, 0.5f, 0.5f);
+            GL11.glScalef(2f, 2f, 2f);
+        }
         for (String part : new String[]{"main", "body", "furnace"}) {
             var p = obj.getPart(part);
             if (p != null) p.draw();
@@ -97,8 +123,14 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add("Water in by pipe (right flank), heat in from a heater or furnace on the back or a flank, steam out by pipe");
-        list.add("Front: the gauge glass's level as a signal, 0 V empty to 5 V full");
+        if (height > 1) {
+            list.add("2 x 2 x 2 blocks, placed from its front bottom left; it grows right, back and up");
+            list.add("Heat in on all twelve faces of its back and flanks; steam out on the two rear top faces;");
+            list.add("water in at the front, low right; the level signal at the front, low left, 0 V empty to 5 V full");
+        } else {
+            list.add("Water in by pipe (right flank), heat in from a heater or furnace on the back or a flank, steam out by pipe");
+            list.add("Front: the gauge glass's level as a signal, 0 V empty to 5 V full");
+        }
         // (Erisi's chat review: how heater temperature and boiler pressure relate)
         list.add("Its pressure follows its water's temperature: 1 bar boils at 100 °C, 10 bar at 180 °C;");
         list.add("the heater must be hotter than that to keep it boiling");

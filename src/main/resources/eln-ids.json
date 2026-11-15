@@ -2123,7 +2123,7 @@
   "kind": "transparent_node",
   "name": "flare_stack"
  },
- "eln:transparent_node@5324": {
+ "eln:transparent_node@5328": {
   "descriptor": "BoilerDescriptor",
   "display": "Large Boiler",
   "kind": "transparent_node",
