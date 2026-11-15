@@ -46,6 +46,52 @@ public final class HpPlantCases {
         cases.add(new FurnacePlant("hp_plant_boiler_limit_under", 20, 2.07e5, 13000, 19520, 9540, 3.4, false));
         cases.add(new FurnacePlant("hp_plant_boiler_limit_over", 20, 2.6e5, 15000, 0, 0, 0, true));
         cases.add(new FullPlant());
+        // the same slice with real Air Blowers (todo #471) in place of the air mains, and a blower alone, its outlet blocked
+        var withBlowers = new FurnacePlant("hp_plant_furnace_fired_blowers", 20, 1.6e5, 11000, 16680, 8230, 3.9, false);
+        withBlowers.blowers = true;
+        cases.add(withBlowers);
+        cases.add(new BlowerBlocked());
+    }
+
+    static final int AIR_BLOWER = 20 + (84 << 6);
+
+    /** An Air Blower at p on MVU (a source straight on its load), its outlet (its right flank) facing out. */
+    static mods.eln.oil.AirBlowerElement blower(TestContext ctx, BlockPos p, Direction out, boolean powered) {
+        var b = (mods.eln.oil.AirBlowerElement) ctx.placeTransparent(AIR_BLOWER, p);
+        for (Direction d : new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP}) if (d.right() == out) b.front = d;
+        b.reconnect();
+        if (powered) Eln.simulator.addElectricalComponent(new mods.eln.sim.mna.component.VoltageSource("blower test", b.load, null).setU(Eln.MVU));
+        return b;
+    }
+
+    /** An Air Blower with nothing on its outlet: it stalls at its shut-off pressure, moves nothing, draws its idling. Unpowered: nothing. */
+    static final class BlowerBlocked extends PlumbingCases.Big {
+        mods.eln.oil.AirBlowerElement on, off;
+
+        public String id() {
+            return "air_blower_blocked_outlet_stalls";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            on = blower(ctx, ctx.at(3, 1, 3), Direction.XP, true);
+            off = blower(ctx, ctx.at(3, 1, 6), Direction.XP, false);
+        }
+
+        public void measure(TestContext ctx) {
+            double g = mods.eln.fluid.FluidWorld.nodeFor(on.outlet).P() - Water.P_ATM, g0 = mods.eln.fluid.FluidWorld.nodeFor(off.outlet).P() - Water.P_ATM;
+            ctx.line("air blower, blocked: " + on.getWaila() + String.format("; wants %.1f W, %.3f g/s, %.3f g in all", on.wantW, on.kgPerS * 1000, on.totalKg * 1000)
+                + "; unpowered: " + off.getWaila());
+            double shut = mods.eln.oil.AirBlowerDescriptor.SHUTOFF_PA;
+            ctx.check("blower: blocked, it stalls at its shut-off pressure (within 5 %)", Math.abs(g - shut) < 0.05 * shut, String.format("%.3f bar gauge", g / 1e5));
+            ctx.check("blower: that is under the furnace tank's relief (3 bar) and burst (6 bar)", g < 3e5, String.format("%.3f bar gauge", g / 1e5));
+            ctx.check("blower: stalled, it moves no air (under 0.05 g/s)", on.kgPerS < 5e-5, String.format("%.4f g/s", on.kgPerS * 1000));
+            ctx.check("blower: stalled, it draws its idling only (under 1.5 x)", on.wantW > 1 && on.wantW < 1.5 * mods.eln.oil.AirBlowerDescriptor.BLOWER_IDLE_W, String.format("%.1f W", on.wantW));
+            ctx.check("blower: unpowered, no pressure and no power", Math.abs(g0) < 500 && off.wantW == 0, String.format("%.0f Pa, %.1f W", g0, off.wantW));
+        }
     }
 
     /** A Fuel Heat Furnace at p, its fuel flange towards front (its thermal face is its back), a Big burner in it, lit,
@@ -78,6 +124,11 @@ public final class HpPlantCases {
         final ThermalLoad[] fT = new ThermalLoad[2];
         final FluidDevice[] air = new FluidDevice[2];
         final FluidNode[] mains = new FluidNode[2];
+        /** Real Air Blowers on the fuel flanges in place of the mains; their power, air and outlet gauge summed over the window. */
+        boolean blowers;
+        final mods.eln.oil.AirBlowerElement[] blow = new mods.eln.oil.AirBlowerElement[2];
+        IProcess blowClock;
+        double blowT, blowS, blowJ, blowKg, blowPaS;
         ShaftSteamTurbineElement hp;
         PlantCondenserElement c;
         final Resistor[] loads = new Resistor[2];
@@ -134,7 +185,19 @@ public final class HpPlantCases {
             f[0] = furnace(ctx, bp.north(), Direction.ZN, 1900);
             f[1] = furnace(ctx, bp.east(), Direction.XP, 1900);
             for (int i = 0; i < 2; i++) fT[i] = Batch1Cases.<ThermalLoad>field(f[i], "thermalLoad");
-            if (airPa > 0) {
+            if (blowers) {
+                for (int i = 0; i < 2; i++) blow[i] = blower(ctx, f[i].node.coordonate.pos().relative(f[i].front.toEnumFacing()), f[i].front.back(), true);
+                Eln.simulator.addSlowProcess(blowClock = dt -> {
+                    blowT += dt;
+                    if (blowT < WATCH / 20.0) return;
+                    blowS += dt;
+                    for (var b : blow) {
+                        blowJ += b.wantW * dt;
+                        blowKg += b.kgPerS * dt;
+                        blowPaS += (mods.eln.fluid.FluidWorld.nodeFor(b.outlet).P() - Water.P_ATM) * dt;
+                    }
+                });
+            } else if (airPa > 0) {
                 // (the Air Blower that doesn't exist yet: an air main on each fuel flange, kept at its pressure)
                 double y = bp.getY();
                 for (int i = 0; i < 2; i++) air[i] = OilCases.FurnacePressure.onFlange(f[i], mains[i] = OilCases.FurnacePressure.main(y, airPa, false));
@@ -233,6 +296,13 @@ public final class HpPlantCases {
             mods.eln.fluid.FluidWorld.remove(meter);
             for (FluidDevice d : air) if (d != null) mods.eln.fluid.FluidWorld.remove(d);
             for (Resistor r : loads) Eln.simulator.removeElectricalComponent(r);
+            if (blowers) {
+                Eln.simulator.removeSlowProcess(blowClock);
+                double s = Math.max(1e-9, blowS);
+                ctx.line(String.format("%s: BLOWERS (2, one a furnace): %.0f W each, %.2f g/s of air each, %.3f bar gauge at their outlets; ", id, blowJ / s / 2, blowKg / s / 2 * 1000, blowPaS / s / 2 / 1e5)
+                    + blow[0].getWaila() + " / " + blow[1].getWaila());
+                ctx.check(id + ": the blowers feed the furnaces' tanks (over 1 bar gauge at their outlets)", blowPaS / s / 2 > 1e5, String.format("%.3f bar", blowPaS / s / 2 / 1e5));
+            }
             double w = Math.max(1e-9, window), fire = 0, kg = 0, mB = 0;
             for (int i = 0; i < 2; i++) {
                 fire += (f[i].getHeatGivenJ() - given0[i]) / w;
