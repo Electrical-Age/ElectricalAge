@@ -120,7 +120,14 @@ change, and the block entity renderer draws the rest. The draw code is untouched
   waits twice as long next time, up to 60 s: blinking parts end up with the renderer.
 - Never in the chunk: blended draws, soot and ghost (preview) draws, a burnt device, immediate-mode geometry (not a
   display list), lines, texture coordinates outside 0..1 (a sprite cannot repeat), textures made at run time
-  (`eln:dynamic/...`, the coil windings), a frame whose pose is more than a translation, and text and item extras.
+  (`eln:dynamic/...`, the data logger's graph), a frame whose pose is more than a translation, and text and item extras.
+- Transformer coils are in the chunk (branch `coil-bake`, todo #423): a pattern that depends on the configuration is
+  made of geometry and vertex colour over a few greyscale sprites, not painted into a texture at run time. A coil's
+  sides are one quad a turn of a layer (64 at most), each the whole "one turn" sprite; its ends use one of ten "N
+  rings" sprites; the wire's colour is the call's colour (`WindingTexture.tint`). Three sets of sprites: normal,
+  bright wire (a channel over 212) and dark wire (black). The files are `assets/eln/sprites/winding/*.png`, written by
+  `tools/winding_sprites.py`; `CoilBakeTest` checks them against `WindingTexture` and that a settled coil leaves the
+  renderer no vertices.
 - Exactly once: a quad is on screen from the renderer or from the chunk, never both or neither. The mesh a section
   shows is found by its compile task's start time: each compile of a section with calls takes a snapshot on the
   render thread, and the mesh on screen holds the last snapshot taken before its task started. A mesh that maps to no
@@ -145,7 +152,7 @@ change, and the block entity renderer draws the rest. The draw code is untouched
 - Draw code at a distance (audited for far frames, 2026-11): no `draw()` sends packets beyond its own range (the
   data logger and the signal processor `watch()` only within 32 and 6 blocks), plays sounds or spawns particles;
   those happen in `refresh`, which runs for every loaded device whatever the distance. What draw code writes (random
-  LEDs, the breaker's clock, coil textures made on first draw) is harmless when drawn far.
+  LEDs, the breaker's clock) is harmless when drawn far.
 - Light: not part of a call. The snapshot reads each device's packed light as `BlockEntityRenderState` does, and the
   game meshes a section again when light in it changes. The colour carries the entity shader's shading (two lights
   of 0.6 over 0.4 ambient, the normal a signed byte per axis), since the chunk shader has none.

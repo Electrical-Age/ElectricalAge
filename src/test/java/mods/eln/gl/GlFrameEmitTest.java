@@ -85,19 +85,28 @@ class GlFrameEmitTest {
         GL11.glDeleteLists(list, 1);
     }
 
-    /** A transformer coil drawn from its compiled list gives the vertices of drawing its shape directly. */
+    /** A transformer coil drawn from its compiled lists (sides by build and bands, ends by build) gives the vertices of drawing its shape directly. */
     @Test
     void coilListMatchesItsShape() {
         Random r = new Random(11);
         for (float build : new float[]{0.3f, 1.25f, 2.9f}) {
-            Matrix4f m = matrix(r, 1);
-            int list = mods.eln.transparentnode.transformer.TransformerDescriptor.coilList(build);
-            float[] direct = frame(m, () -> mods.eln.transparentnode.transformer.TransformerDescriptor.coilShape(build));
-            float[] replayed = frame(m, () -> GL11.glCallList(list));
-            assertEquals(direct.length, replayed.length);
-            for (int i = 0; i < direct.length; i++)
-                if (i % GlFrame.STRIDE == 5) assertEquals(Float.floatToRawIntBits(direct[i]), Float.floatToRawIntBits(replayed[i]));
-                else assertEquals(direct[i], replayed[i], 2e-5f * Math.max(1, Math.abs(direct[i])));
+            for (int part = 0; part < 2; part++) {
+                Matrix4f m = matrix(r, 1);
+                int bands = 3 + (int) (build * 10);
+                boolean sides = part == 0;
+                int list = sides ? mods.eln.transparentnode.transformer.TransformerDescriptor.coilSidesList(build, bands)
+                    : mods.eln.transparentnode.transformer.TransformerDescriptor.coilEndsList(build);
+                float[] direct = frame(m, () -> {
+                    if (sides) mods.eln.transparentnode.transformer.TransformerDescriptor.coilSides(build, bands);
+                    else mods.eln.transparentnode.transformer.TransformerDescriptor.coilEnds(build);
+                });
+                float[] replayed = frame(m, () -> GL11.glCallList(list));
+                assertEquals(direct.length, replayed.length);
+                assertEquals((sides ? 16 * bands : 2080) * GlFrame.STRIDE, direct.length);
+                for (int i = 0; i < direct.length; i++)
+                    if (i % GlFrame.STRIDE == 5) assertEquals(Float.floatToRawIntBits(direct[i]), Float.floatToRawIntBits(replayed[i]));
+                    else assertEquals(direct[i], replayed[i], 2e-5f * Math.max(1, Math.abs(direct[i])));
+            }
         }
     }
 }
