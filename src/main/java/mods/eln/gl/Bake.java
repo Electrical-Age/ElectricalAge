@@ -266,6 +266,11 @@ public final class Bake {
         heldCalls = 0;
     }
 
+    /** For the render benchmark: devices known, calls in chunk meshes and their vertices, calls held (render thread). */
+    public static long[] benchState() {
+        return new long[]{DEVICES.size(), settledCalls, settledVertices, heldCalls};
+    }
+
     static String statsLine(int frames) {
         String s = "bake mode " + mode + ": " + DEVICES.size() + " devices, " + settledCalls + " settled calls (" + settledVertices
             + " vertices), " + settles + " settled and " + drops + " dropped in " + frames + " frames; far: " + farFrames + " frames, "
@@ -458,6 +463,7 @@ public final class Bake {
             c.settled = true;
             c.settledAt = now;
             settles++;
+            if (RenderProbe.on) RenderProbe.count(RenderProbe.SETTLES);
             settledCalls++;
             settledVertices += c.floats / GlFrame.STRIDE;
             host.settled(c);
@@ -467,6 +473,7 @@ public final class Bake {
         private void unsettle(Call c) {
             c.settled = false;
             drops++;
+            if (RenderProbe.on) RenderProbe.count(RenderProbe.DROPS);
             settledCalls--;
             settledVertices -= c.floats / GlFrame.STRIDE;
             host.unsettled(c);

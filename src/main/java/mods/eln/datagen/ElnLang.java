@@ -55,6 +55,8 @@ public class ElnLang extends LanguageProvider {
         // JEI (compat/jei/ResinCategory)
         add("jei.eln.tree_resin_collector", "Tree Resin Collector");
         add("jei.eln.anneal", "Heat treatment");
+        add("item.eln.oil_survey_map", "Oil Survey Map");
+        add("item.eln.oil_survey_map.lore", "Oil under X %s, Z %s");
         add("jei.eln.oil_rubber", "Oil to rubber");
         add("jei.eln.oil.energy", "%s kJ.");
         add("jei.eln.oil.desulfuriser", "Any cut piped through it comes out unchanged, leaving a Sulfur Dust every 2000 mB. 230 V, 1 kW.");

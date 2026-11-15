@@ -120,7 +120,14 @@ change, and the block entity renderer draws the rest. The draw code is untouched
   waits twice as long next time, up to 60 s: blinking parts end up with the renderer.
 - Never in the chunk: blended draws, soot and ghost (preview) draws, a burnt device, immediate-mode geometry (not a
   display list), lines, texture coordinates outside 0..1 (a sprite cannot repeat), textures made at run time
-  (`eln:dynamic/...`, the coil windings), a frame whose pose is more than a translation, and text and item extras.
+  (`eln:dynamic/...`, the data logger's graph), a frame whose pose is more than a translation, and text and item extras.
+- Transformer coils are in the chunk (branch `coil-bake`, todo #423): a pattern that depends on the configuration is
+  made of geometry and vertex colour over a few greyscale sprites, not painted into a texture at run time. A coil's
+  sides are one quad a turn of a layer (64 at most), each the whole "one turn" sprite; its ends use one of ten "N
+  rings" sprites; the wire's colour is the call's colour (`WindingTexture.tint`). Three sets of sprites: normal,
+  bright wire (a channel over 212) and dark wire (black). The files are `assets/eln/sprites/winding/*.png`, written by
+  `tools/winding_sprites.py`; `CoilBakeTest` checks them against `WindingTexture` and that a settled coil leaves the
+  renderer no vertices.
 - Exactly once: a quad is on screen from the renderer or from the chunk, never both or neither. The mesh a section
   shows is found by its compile task's start time: each compile of a section with calls takes a snapshot on the
   render thread, and the mesh on screen holds the last snapshot taken before its task started. A mesh that maps to no
@@ -129,6 +136,17 @@ change, and the block entity renderer draws the rest. The draw code is untouched
 - Section: all of a device's calls go into the section of its block (`Device.home`), however far the model reaches.
   The game draws a block entity only while its own section is drawn, so chunk and renderer show the device under the
   same condition; and a section of nothing but air is never compiled, so a part could not be put where it lies.
+- Hanging lamps (Baughn 2026-11-15, todo #473; `sixnode/lampsocket/LampSwing.java`): **indoors a hanging lamp
+  hangs still** and so its chain and head settle into the chunk like any static part; **outdoors** the wind swings it
+  every frame in all weather (as 1.12) and the renderer draws chain and head every frame (only the base, which never
+  moved, is in the chunk). There is no "bake in clear weather" path, on purpose: it would only help the best case.
+  Outdoors = sky light at the lamp's block >= 14 (`LampSwing.OUTDOOR_SKY_LIGHT`: open sky, or beside it, as under
+  the arm of a lamp post; a hanging lamp always has its ceiling block above it, so "sees the sky straight up" would
+  not do). `LampSocketRender.refresh` reads it every 1 to 1.25 s, not per frame, so a roof built or removed is
+  noticed within that. Something moving past (a living thing or an arrow within 2 blocks, looked for every 0.1 s as
+  before) still pushes a lamp indoors: it goes back to the renderer in that frame, swings, the swing dies out (about
+  50 s from 9 degrees; the damping is 1.12's), and when its amplitude is under 0.1 degrees (`REST_ANGLE`) it is set
+  to exactly 0 and settles again. Tests: `LampSwingTest`, GameTest `lamp_rest`.
 - Far away: a block entity is drawn within 64 blocks. Past that the settled parts stay in the chunk (Baughn: keep
   them visible), and what moves or glows is not drawn, as before (Baughn 2026-11-13: left out rather than drawn
   standing still; most of it shows only up close). To keep the chunk's copy current without the
@@ -145,7 +163,7 @@ change, and the block entity renderer draws the rest. The draw code is untouched
 - Draw code at a distance (audited for far frames, 2026-11): no `draw()` sends packets beyond its own range (the
   data logger and the signal processor `watch()` only within 32 and 6 blocks), plays sounds or spawns particles;
   those happen in `refresh`, which runs for every loaded device whatever the distance. What draw code writes (random
-  LEDs, the breaker's clock, coil textures made on first draw) is harmless when drawn far.
+  LEDs, the breaker's clock) is harmless when drawn far.
 - Light: not part of a call. The snapshot reads each device's packed light as `BlockEntityRenderState` does, and the
   game meshes a section again when light in it changes. The colour carries the entity shader's shading (two lights
   of 0.6 over 0.4 ambient, the normal a signed byte per axis), since the chunk shader has none.
@@ -161,6 +179,34 @@ change, and the block entity renderer draws the rest. The draw code is untouched
   const, moving, blended...), per render class, and why constant ones are still with the renderer (changed, waiting,
   waiting longer, no sprite, mesh not shown yet). At the workshop: 80-86% in the chunk.
 
+### Render benchmark (todo #424)
+
+Two tiers. Only the client tier says anything about fps: on 2026-11-12 a BufferBuilder microbenchmark showed 30 % and
+the client's JFR showed nothing. Compare either with `tools/bench/render-bench-compare.py A.json[,A2,A3] B.json[,...]`.
+
+- CPU tier (`gametest/bench/RenderBench.java`, no GPU):
+  `./gradlew runGameTestServer -PelnRenderBench=/abs/FILE.json [-PelnBenchLabel=NAME]`. Every device of
+  `publish_render`, as placed (empty, unpowered). Per device: `vertices` of one draw, `recordNs` (ns per draw into a
+  `GlFrame`, bake off), `packNs` (copying the batches into a buffer in the entity vertex layout: a scale for the
+  write loop, not BufferBuilder), then with a host that bakes: `settledCalls`, `settleFrame`, `rendererVertices` and
+  `chunkVertices` (who draws what once the mesh is shown), `bakedRecordNs` (ns per draw that is left), `meshNs` and
+  `meshVertices` (`BakeMesh.write` of the settled calls: EA's part of a section compile). Times are the median and
+  the minimum of 7 batches of 200 draws after 300 warm-up draws. The vertex and call counts are exact and the same
+  from run to run; totals of times repeat within about 3 %, single devices within about 2x.
+  With `-PelnRenderBenchBase=/abs/EARLIER.json` the run fails when a device's exact fields (`gametest/bench/RenderBenchGate.java`)
+  differ from that result, and names the devices: the gate for "this change must not alter what is drawn".
+- Client tier (`client/RenderBenchClient.java`, counters in `gl/RenderProbe.java`, sums in `gl/BenchRun.java`):
+  launch with `-Deln.renderBench=FILE.json` (or `ELN_RENDER_BENCH`; relative to the game directory), or type
+  `/elnbench` in a world. Options `-Deln.renderBench.views="name=x,y,z,yaw,pitch[,spinDegPerSecond];name=here"`
+  (default: where the player stands; a view with coordinates is reached with `/tp`, which needs the permission),
+  `.settle=40`, `.measure=30` (seconds), `.label=NAME`, `.quit=true`. Per view: frames, fps, frame ms and EA ms
+  (mean, p50, p95, p99, max), EA's share, per-frame means of the probe counters (`recordNs` device draw code and
+  GlFrame, `farNs` far frames, `submitNs`, `writeNs` and `writeVertices` the vertex write loop, `refreshNs`,
+  `snapshotNs`, `devices`, `batches`), per second `meshNs`/`meshVertices`/`meshSections` (chunk compile, worker
+  threads), `settles`/`drops`, and the bake's state. The file also says GPU, window, render distance, fps limit,
+  vsync and `capped`: run uncapped with vsync off, or frame times only show the cap.
+- The probe is off unless a benchmark runs (one static boolean per hook).
+
 | Class | Role |
 |---|---|
 | `gl/Bake.java` | calls, devices, settling; no client classes |
@@ -173,7 +219,9 @@ change, and the block entity renderer draws the rest. The draw code is untouched
 
 - GameTest `gametest/PublishRenderCase.java`: every device with a render: server publish packet read by a fresh client BE, consumed exactly, draw does not throw and emits vertices.
 - `gametest/BakeOnceCheck.java` (run by `publish_render` for every device, and by `autominer_spin` with a part that starts to move): the device drawn with its parts in the chunk shows every quad exactly once, in the same place and colour, also after only far frames; see testing.md. `src/test/java/mods/eln/gl/BakeTest.java`: settling, waits, the section, the override, far frames.
+- `src/test/java/mods/eln/sixnode/lampsocket/LampSwingTest.java` and GameTest `lamp_rest` (`gametest/LampRestCase.java`): a hanging lamp indoors leaves 0 vertices with the renderer, outdoors it moves every frame and stays there; see "Hanging lamps" above.
 - `gametest/ItemDrawCase.java`: every 3D item draw records vertices without exceptions. `gametest/XRayCase.java`: X-ray filter, state machine, menu, item draw. `src/test/java/mods/eln/item/xray/XRayRayMarchTest.java`.
+- `src/test/java/mods/eln/gl/FrameStatsTest.java`, `BenchRunTest.java`: the render benchmark's percentiles, view parsing and per-frame sums. The benchmark itself: "Render benchmark" above.
 - `/elnlab gallery|burn|cables` (`gametest/LabCommands.java`): visual comparison scenes and stress scenes for frame times.
 
 ## Gotchas

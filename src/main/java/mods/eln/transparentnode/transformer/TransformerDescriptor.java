@@ -120,7 +120,7 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 
     /**
      * The windings as coils (Coil; Baughn 2026-11-07) on the core: each side's coil around its leg, textured with its
-     * turns (WindingTexture), its wire's insulation colour (ARGB rgb), red when the window is overfull.
+     * turns (WindingTexture), its wire's insulation colour (rgb), red when the window is overfull.
      */
     void drawCoils(Obj3DPart fero, Coil primary, int primaryRgb, Coil secondary, int secondaryRgb, boolean hasCasing, float doorOpen) {
         if (main != null) main.draw();
@@ -141,58 +141,89 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
         }
     }
 
-    /** One coil around the leg at z = -5 px (x -1..1, z -6..-4), above the board's parts (y -0.75) to the yoke (y 4.9). */
-    static void drawCoil(Coil c, int rgb) {
-        net.minecraft.resources.Identifier tex = WindingTexture.of(c.turnsPerLayer(), c.layers(), rgb, c.over());
-        if (tex != null) {
-            GL11.bindTexture(tex);
-            GL11.glColor4f(1, 1, 1, 1);
-        } else {
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            GL11.glColor4f((rgb >> 16 & 255) / 255f, (rgb >> 8 & 255) / 255f, (rgb & 255) / 255f, 1);
-        }
-        mods.eln.misc.UtilsClient.disableCulling();
+    /**
+     * One coil around the leg at z = -5 px (x -1..1, z -6..-4), above the board's parts (y -0.75) to the yoke (y 4.9):
+     * its sides (a band a turn of a layer) and its ends (a ring a layer), each a display list under a greyscale sprite of
+     * the block atlas, tinted with the wire's colour. Nothing here changes from frame to frame, so the chunk draws it
+     * (Bake); other turns, layers or colour are another list, texture or tint, and the chunk section is meshed again.
+     */
+    public static void drawCoil(Coil c, int rgb) {
+        int kind = WindingTexture.kind(rgb, c.over());
+        int tint = WindingTexture.tint(rgb, c.over());
+        GL11.glColor4f((tint >> 16 & 255) / 255f, (tint >> 8 & 255) / 255f, (tint & 255) / 255f, 1);
+        GL11.glDisable(GL11.GL_CULL_FACE);
         GL11.glPushMatrix();
         GL11.glScalef(1 / 16f, 1 / 16f, 1 / 16f);
-        GL11.glCallList(coilList(c.build()));
+        GL11.bindTexture(WindingTexture.side(kind));
+        GL11.glCallList(coilSidesList(c.build(), WindingTexture.bands(c.turnsPerLayer())));
+        GL11.bindTexture(WindingTexture.end(c.layers(), kind));
+        GL11.glCallList(coilEndsList(c.build()));
         GL11.glPopMatrix();
-        mods.eln.misc.UtilsClient.enableCulling();
-        if (tex == null) GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_CULL_FACE);
         GL11.glColor4f(1, 1, 1, 1);
     }
 
     /**
-     * The coil's shape for a build, compiled once into a display list (its texture and colour are set around the call):
+     * The coil's shape for a build, compiled once into display lists (texture and colour are set around the call):
      * drawn vertex by vertex every frame, its ~4000 vertices were 9 % of a player's render thread (2026-11-12).
+     * The sides' list is also by its bands.
      */
-    private static final java.util.Map<Float, Integer> COIL_LISTS = new java.util.HashMap<>();
+    private static final java.util.Map<Long, Integer> COIL_SIDES = new java.util.HashMap<>();
+    private static final java.util.Map<Float, Integer> COIL_ENDS = new java.util.HashMap<>();
 
-    public static int coilList(double build) {
-        return COIL_LISTS.computeIfAbsent((float) build, b -> {
+    public static int coilSidesList(double build, int bands) {
+        float b = (float) build;
+        return COIL_SIDES.computeIfAbsent((long) Float.floatToIntBits(b) << 32 | bands, k -> {
             int list = GL11.glGenLists(1);
             GL11.glNewList(list, GL11.GL_COMPILE);
-            coilShape(b);
+            coilSides(b, bands);
             GL11.glEndList();
             return list;
         });
     }
 
-    /** The coil's quads in pixels (see drawCoil). */
-    public static void coilShape(float build) {
-        float hx = 1.15f, hz0 = -6.15f, hz1 = -3.85f, y0 = -0.75f, y1 = 4.9f;
+    public static int coilEndsList(double build) {
+        return COIL_ENDS.computeIfAbsent((float) build, b -> {
+            int list = GL11.glGenLists(1);
+            GL11.glNewList(list, GL11.GL_COMPILE);
+            coilEnds(b);
+            GL11.glEndList();
+            return list;
+        });
+    }
+
+    /** Vertices of one coil: its sides (4 faces of bands quads) and its two ends (4 straight stretches and 4 corners of 8 x 8 cells each). */
+    public static int coilVertices(int bands) {
+        return 16 * bands + 2 * (16 + 4 * 64 * 4);
+    }
+
+    private static final float HX = 1.15f, HZ0 = -6.15f, HZ1 = -3.85f, Y0 = -0.75f, Y1 = 4.9f;
+
+    /** The quads of the coil's sides in pixels (see drawCoil): each face is bands quads, one above the other, each the whole sprite. */
+    public static void coilSides(float build, int bands) {
+        float x1 = HX + Math.min(build, 2.8f), x0 = -x1;
+        float zIn = HZ1 + build, zOut = HZ0 - Math.min(build, 1.8f);
+        GL11.glBegin(GL11.GL_QUADS);
+        for (int k = 0; k < bands; k++) {
+            // (from the top down: a turn's light edge is its top)
+            float top = Y1 + (Y0 - Y1) * k / bands, foot = k + 1 == bands ? Y0 : Y1 + (Y0 - Y1) * (k + 1) / bands;
+            side(0, 0, 1, x0, zIn, x1, zIn, foot, top);
+            side(0, 0, -1, x1, zOut, x0, zOut, foot, top);
+            side(-1, 0, 0, x0, zOut, x0, zIn, foot, top);
+            side(1, 0, 0, x1, zIn, x1, zOut, foot, top);
+        }
+        GL11.glEnd();
+    }
+
+    /** The quads of the coil's ends in pixels: one ring a layer round the hole, straight along the leg's sides and rounded at its corners. */
+    public static void coilEnds(float build) {
+        float hx = HX, hz0 = HZ0, hz1 = HZ1;
         float x1 = hx + Math.min(build, 2.8f), x0 = -x1;
         float zIn = hz1 + build, zOut = hz0 - Math.min(build, 1.8f);
-        GL11.glBegin(GL11.GL_QUADS);
-        // the sides: stripes run round the coil (u across, v down)
-        side(0, 0, 1, x0, zIn, x1, zIn, y0, y1);
-        side(0, 0, -1, x1, zOut, x0, zOut, y0, y1);
-        side(-1, 0, 0, x0, zOut, x0, zIn, y0, y1);
-        side(1, 0, 0, x1, zIn, x1, zOut, y0, y1);
-        // the top: one ring a layer, out from the hole round the leg
-        // the ends: one ring a layer round the hole, straight along the leg's sides and rounded at its corners
         float bxs = x1 - hx, bin = zIn - hz1, bout = hz0 - zOut;
-        for (float y : new float[]{y1, y0}) {   // (and the underside: it stands clear of the board's parts)
-            GL11.glNormal3f(0, y == y1 ? 1 : -1, 0);
+        GL11.glBegin(GL11.GL_QUADS);
+        for (float y : new float[]{Y1, Y0}) {   // (and the underside: it stands clear of the board's parts)
+            GL11.glNormal3f(0, y == Y1 ? 1 : -1, 0);
             ring(y, -hx, hx, hz1, zIn, 0, 0, hz1, 1, 0, bin);         // along the leg's window side
             ring(y, -hx, hx, zOut, hz0, 0, 0, hz0, -1, 0, bout);    // its outer side
             ring(y, x0, -hx, hz0, hz1, -hx, -1, 0, 0, bxs, 0);       // its flanks
@@ -205,20 +236,22 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
         GL11.glEnd();
     }
 
+    /** One band of a side from a to b: the whole "one turn" sprite (it is the same across; v a hair inside its edge rows). */
     static void side(float nx, float ny, float nz, float ax, float az, float bx, float bz, float y0, float y1) {
+        float u0 = 0.1f, u1 = 0.9f, v0 = 1 / 512f, v1 = 511 / 512f;
         GL11.glNormal3f(nx, ny, nz);
-        GL11.glTexCoord2f(0.02f, 0);
+        GL11.glTexCoord2f(u0, v0);
         GL11.glVertex3f(ax, y1, az);
-        GL11.glTexCoord2f(0.02f, 1);
+        GL11.glTexCoord2f(u0, v1);
         GL11.glVertex3f(ax, y0, az);
-        GL11.glTexCoord2f(0.48f, 1);
+        GL11.glTexCoord2f(u1, v1);
         GL11.glVertex3f(bx, y0, bz);
-        GL11.glTexCoord2f(0.48f, 0);
+        GL11.glTexCoord2f(u1, v0);
         GL11.glVertex3f(bx, y1, bz);
     }
 
     /**
-     * A straight stretch of an end over [xa, xb] x [za, zb] at y: u (the layer) runs from 0.5 at the hole (x = ox, or
+     * A straight stretch of an end over [xa, xb] x [za, zb] at y: u (the layer) runs from 0 at the hole (x = ox, or
      * z = oz) to 1 at the coil's edge, sx (or sz) the direction out and bx (or bz) the build that way.
      */
     static void ring(float y, float xa, float xb, float za, float zb, float ox, float sx, float oz, float sz, float bx, float bz) {
@@ -246,6 +279,6 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 
     /** The end texture's u for a distance out (0 at the hole, 1 at the coil's edge). */
     static float layerU(float d) {
-        return Math.max(0.51f, Math.min(0.99f, 0.5f + 0.5f * d));
+        return Math.max(0.02f, Math.min(0.98f, d));
     }
 }

@@ -11,11 +11,12 @@ self-test cases and the golden-data diffs on a headless server (`src/main/java/m
 | `./gradlew test` | Unit tests (JUnit 5 platform; JUnit 4 via vintage; jqwik). Run under ModDevGradle `unitTest`, so Minecraft is on the classpath (sim NBT uses `CompoundTag`). |
 | `./gradlew runGameTestServer` | Every registered GameTest, headless; exit code = number of failed required tests. Sets `neoforge.enabledGameTestNamespaces=eln` and `eln.golden=golden/1.12`. In game: `/test runall`. |
 | `./gradlew runGameTestServer -PelnBench=result.json [-PelnBenchLabel=name]` | The cable benchmark only (no other test registered). Extra: `-PelnBenchConvert` (same scene through the voxel-cable converter), `-PelnBenchNoRthCache` (`DelayInterSystem2.cacheRth` off, 1.12 behaviour). |
+| `./gradlew runGameTestServer -PelnRenderBench=/abs/result.json [-PelnBenchLabel=name] [-PelnRenderBenchBase=/abs/earlier.json]` | The render benchmark's CPU tier only (no other test registered, about 11 s of measuring): per device vertices, ns per draw with and without the static bake, what the chunk takes. No GPU. With a base it fails (exit 1) when a device's vertex or call counts differ from that earlier result; times never fail it. See "Render benchmark" in `rendering.md`. |
 | `./gradlew runClientData` | Datagen (lang, models, tags, recipes) into `src/generated/resources` (committed). There is no separate `runData` run. |
 
 `test` task system properties (`build.gradle`): `eln.deterministic=true` (`Utils.rand` returns the midpoint of its
 range; the 1.12 sim tests were written against that), `jqwik.database=build/jqwik-database` (failing seeds are kept
-there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid.cases`. jqwik defaults to 200 tries
+there and replayed first), `eln.guiDir` (LayoutTest, HubSlotsTest), `-PfluidCases=N` -> `fluid.cases`. jqwik defaults to 200 tries
 (`src/test/resources/junit-platform.properties`).
 
 ## Unit tests (`src/test/java/mods/eln/...`)
@@ -53,6 +54,7 @@ there and replayed first), `eln.guiDir` (LayoutTest), `-PfluidCases=N` -> `fluid
 | `node/voxel/ChiselBrushTest` | Chisel brush boxes (cube, flat, tunnel) for every axis, size and hit voxel; brush validation. |
 | `client/gui/RadialMenuTest` | Radial menu hit test (ring and segment under the mouse). |
 | `gui/LayoutTest` | Layout engine; every `assets/eln/gui/*.json` has no overlaps and nothing outside its panel. |
+| `sixnode/hub/HubSlotsTest` | The hub screen against the world: the slot and link seen at each place on every face for every way the player faces, never mirrored; the device's slot -> world side and link tables (saved data) are unchanged; `gui/hub.json` has the places. |
 | `item/xray/XRayRayMarchTest` | X-ray ray march. |
 | `gametest/StructureFileTest` | The generated floor `.nbt` parses (3x3 stone floor). |
 | `robotics/motion/SegmentPropertyTest` (jqwik), `DriveTest` (jqwik) | Servo segments are continuous, within limits, arrive; retargets are seamless. Top speed follows the line; the energy rule: a step goes no further than its energy pays for, a cut move starts where the paid step ended at the speed the supply keeps paying for. |
@@ -112,6 +114,19 @@ add up. `publish_render` runs it for every device and fails if the chunk's share
 (98.9% when written; the INFO lines give it per device). `autominer_spin` runs it with a drill that stands until the
 chunk shows it and then turns. A new device with a render is covered by `publish_render` without more work; a test
 of a part that changes state can call the check with a draw that changes it.
+`publish_render` also draws transformer coils on their own (wire of each sprite set) and a transformer wound with 14
+and 7 turns on a cheap core through its render (a fresh one has no windings and draws no coils): its coils must be
+under `sprites/winding/` textures and leave the renderer no vertices once settled. The unit test
+`transparentnode/transformer/CoilBakeTest` checks the same with a host that knows a sprite only if it is a file
+`ModelSprites` stitches, that other turns or colour take the coil back until the chunk shows the new one, the sprite
+files against `WindingTexture`, and tint times sprite against the texture that was painted per configuration.
+
+Hanging lamps (todo #473): `LampSwingTest` (unit, no GPU) draws the real suspended-lamp model through `Bake` with a
+test host, 50 ms frames: indoors 288 vertices a frame until settled and 0 after; outdoors it moves in 1200 of 1200
+frames in clear weather, rain and thunder and 240 vertices (chain and head) stay with the renderer; a push indoors
+and a roof built or removed switch between the two; the swing ends at the same size at 20, 60 and 300 fps.
+GameTest `lamp_rest` places one lamp under a single block and one under a 5 x 5 roof and checks that each render
+reads the sky light and swings or rests accordingly.
 
 `cases/`: `Batch1Cases`, `Wp9aCases` (six-node power), `Wp9bCases` (sensors, probes), `Wp9cCases` (logic, meters,
 wireless), `Wp10aCases`, `Wp10bCases` (machines, generators, thermal), `Wp11Cases` (shafts, poles, converters),
@@ -130,6 +145,9 @@ device on the API passes `verifySpec` with the spec from its registered descript
 circuit at a vanilla barrel: a power face on a real line, turning, breaking; a `PortRef` link to a cable two blocks
 away, its WRONG_KIND and NO_NODE neighbours, the cable broken and placed back; a watchdog whose listener opens the
 load; one circuit per block entity, none on a machine's).
+`HubSlotCases` (`hub_slots_as_seen`: a fake player faces a way, opens a hub's menu and clicks a cable or a kit into
+the slot its screen shows at a place; the pin is on the side of the world seen there, on a floor, a wall and a
+ceiling; the pure table is `HubSlotsTest`).
 `GuiPacketFuzzCases` (`gui_packets_reject_bad_values_<element>`: one case per six-node and transparent element class
 that has its own `networkUnserialize`, found by enumerating the registries, so a new handler is covered unlisted;
 packet ids -128..127 with NaN, infinite, huge and negative numbers, out-of-range index bytes and a 3000-character
@@ -163,6 +181,10 @@ machine, floor ghost, a mob carried, the cabin's walls; structure `floor_11x12x9
 - `NetDump` (`/elnlab netdump [pos [r]]`): the solved network (after Line collapse) to `eln-netdump/<stamp>.json` and
   `.falstad.txt` in the server directory.
 - `bench/CableBench`: ~20k cable blocks; per-tick sim cost in steady, churn, fault and teardown phases, written as JSON.
+- `bench/RenderBench`: every device with a render (the `publish_render` path), drawn some thousand times into a
+  `GlFrame` on the server thread; vertices (exact) and times (loose) as JSON. Compare two results with
+  `tools/bench/render-bench-compare.py A.json B.json` (exit 1 when an exact field differs). The client tier
+  (`client/RenderBenchClient.java`, `-Deln.renderBench=FILE.json` or `/elnbench`) is in the mod itself, not here.
 
 ## Adding a GameTest
 

@@ -153,9 +153,9 @@ final class BakeOnceCheck {
 
     /**
      * Draw the device (owner = its block entity, at pos) through the states of a baked device and compare. Adds one
-     * check and one INFO line to the context.
+     * check and one INFO line to the context. Returns the vertices of a whole draw and those the chunk took.
      */
-    static void check(TestContext ctx, String name, Object owner, BlockPos pos, Runnable draw) {
+    static int[] check(TestContext ctx, String name, Object owner, BlockPos pos, Runnable draw) {
         Bake.Host oldHost = Bake.host;
         int oldMode = Bake.mode;
         Host host = new Host();
@@ -248,6 +248,7 @@ final class BakeOnceCheck {
         ctx.check("bake " + name + ": every quad drawn exactly once, near and far", errors.isEmpty(),
             errors.size() + " differences, the first: " + errors.subList(0, Math.min(3, errors.size())));
         ctx.line(String.format("INFO bake %s: %d of %d vertices from the chunk (%d the same in every draw; far frames: %d)", name, inChunk, total, fixed, farInChunk));
+        return new int[]{total, inChunk};
     }
 
     /**

@@ -42,7 +42,7 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
 
     @Override
     public void draw(LampSocketRender render, double distanceToPlayer) {
-        draw(render.front, render.alphaZ, render.light, render.pertuPy, render.pertuPz, distanceToPlayer);
+        draw(render.front, render.alphaZ, render.light, render.swing.py, render.swing.pz, distanceToPlayer);
     }
 
     public void draw(LRDU front, float alphaZ, byte light, float pertuPy, float pertuPz, double distanceToPlayer) {
