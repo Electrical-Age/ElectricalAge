@@ -45,6 +45,7 @@ public final class HpPlantCases {
         cases.add(new FurnacePlant("hp_plant_furnace_fired_forced_air", 20, 1.6e5, 11000, 16680, 8230, 3.9, false));
         cases.add(new FurnacePlant("hp_plant_boiler_limit_under", 20, 2.07e5, 13000, 19520, 9540, 3.4, false));
         cases.add(new FurnacePlant("hp_plant_boiler_limit_over", 20, 2.6e5, 15000, 0, 0, 0, true));
+        cases.add(new FullPlant());
     }
 
     /** A Fuel Heat Furnace at p, its fuel flange towards front (its thermal face is its back), a Big burner in it, lit,
@@ -297,6 +298,199 @@ public final class HpPlantCases {
             ctx.check(id + ": the shell stands over the boiling water by the heat through its wall (within 8 K), and under its 400 K limit",
                 Math.abs(wall) < 8 && shellMax < 400, String.format("%+.1f K off, shell max %.0f K", wall, shellMax));
             ctx.check(id + ": the generators deliver most of the shaft power (over 80 %)", elec > 0.8 * shaftW && elec < shaftW, String.format("%.2f of %.2f kW", elec / 1000, shaftW / 1000));
+        }
+    }
+
+    /**
+     * The whole 16 kW plant with forced air: two Boilers on one steam header and one feed line, two Big-burner furnaces
+     * on each with air at 1.6 bar gauge on their fuel flanges (the Air Blower that doesn't exist yet), the HP turbine
+     * with two loaded 8 kW generators, the Plant Condenser with cooling water through its tubes, its pump returning
+     * the condensate to both boilers. Rated shaft power is reached, not scaled to.
+     */
+    static final class FullPlant extends PlumbingCases.Big {
+        static final int WATCH = 3000, TICKS = 4800;
+        static final double BAR = 20, AIR_PA = 1.6e5, LOAD_W = 22000;
+        final BoilerElement[] b = new BoilerElement[2];
+        final FuelHeatFurnaceElement[] f = new FuelHeatFurnaceElement[4];
+        final ThermalLoad[] fT = new ThermalLoad[4];
+        final FluidDevice[] air = new FluidDevice[4];
+        final FluidNode[] mains = new FluidNode[4];
+        ShaftSteamTurbineElement hp;
+        PlantCondenserElement c;
+        FluidDevice loop, meter;
+        final Resistor[] loads = new Resistor[2];
+        IProcess clock;
+        int tick;
+        boolean counting;
+        double window, meterS, elecJ, radsSum, condSum, furnaceMax, fillLo = 1e9, fillHi, floodHi;
+        final double[] waterJ = new double[2], pSum = new double[2], shellMax = new double[2];
+        double fire0, mb0, steam0, work0, pumped0, tubes0, boilerKg0;
+
+        public String id() {
+            return "hp_plant_full_forced_air_16kw";
+        }
+
+        public int ticks() {
+            return TICKS;
+        }
+
+        public boolean checkLimitCycles() {
+            return false;   // (as the slices: burners, regulator and feed floats each hunt a little)
+        }
+
+        double fire() {
+            double j = 0;
+            for (var x : f) j += x.getHeatGivenJ();
+            return j;
+        }
+
+        double fuelMb() {
+            double m = 0;
+            for (var x : f) m += x.fuelMb();
+            return m;
+        }
+
+        double boilerKg() {
+            return b[0].vessel.mLiquid() + b[1].vessel.mLiquid();
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos a = ctx.at(2, 1, 3), bb = ctx.at(2, 1, 6), tp = ctx.at(5, 1, 4), cp = ctx.at(6, 1, 4);
+            // boiler A's feed flange faces south, B's north: one feed pipe between them; two thermal faces left on each
+            for (int i = 0; i < 2; i++) {
+                b[i] = (BoilerElement) ctx.placeTransparent(8 + (82 << 6), i == 0 ? a : bb);
+                b[i].front = i == 0 ? Direction.XN : Direction.XP;
+                b[i].reconnect();
+                b[i].thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+                b[i].fromTanks(8000, 0);
+                b[i].showTanks();
+            }
+            f[0] = furnace(ctx, a.north(), Direction.ZN, 1900);
+            f[1] = furnace(ctx, a.east(), Direction.XP, 1900);
+            f[2] = furnace(ctx, bb.west(), Direction.XN, 1900);
+            f[3] = furnace(ctx, bb.south(), Direction.ZP, 1900);
+            for (int i = 0; i < 4; i++) {
+                fT[i] = Batch1Cases.<ThermalLoad>field(f[i], "thermalLoad");
+                air[i] = OilCases.FurnacePressure.onFlange(f[i], mains[i] = OilCases.FurnacePressure.main(a.getY(), AIR_PA, false));
+            }
+            // steam header: up out of each boiler, along x 2 over the feed pipe, a tee east to the turbine's inlet
+            PipeCases.lay(ctx, ctx.at(2, 2, 3), 1, 8, 0, 8, 8, 8, 8, 8, 8, 16);
+            PipeCases.lay(ctx, ctx.at(2, 2, 4), 1, 8, 8, 0, 8, 8, 16);
+            String err = PipeCases.node(ctx, ctx.at(2, 2, 4)).addJoined(new mods.eln.node.voxel.PipePart(1, new int[]{8, 8, 8, 16, 8, 8}), 8, 8, 8);
+            if (err != null) throw new IllegalStateException("steam tee: " + err);
+            PipeCases.lay(ctx, ctx.at(2, 2, 5), 1, 8, 8, 0, 8, 8, 16);
+            PipeCases.lay(ctx, ctx.at(2, 2, 6), 1, 8, 8, 0, 8, 8, 8, 8, 0, 8);
+            PipeCases.lay(ctx, ctx.at(3, 2, 4), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(4, 2, 4), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(5, 2, 4), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);
+            TransparentNodeElement[] line = ShaftPlantCases.turbineLine(ctx, STEAM_TURBINE, tp, GENERATOR_8KW, GENERATOR_8KW);
+            hp = (ShaftSteamTurbineElement) line[0];
+            loads[0] = load((GeneratorElement) line[1], LOAD_W / 2);
+            loads[1] = load((GeneratorElement) line[2], LOAD_W / 2);
+            hp.controls.inventory.setItem(SteamValveControl.REGULATOR_SLOT, Eln.sharedItem.getDescriptor(8 + (3 << 6)).newItemStack());
+            hp.controls.targetBar = BAR;
+            hp.controls.computeInventory();
+            c = ShaftPlantCases.condenser(ctx, cp, true, Direction.XP);
+            // (front XP: its left is south, its right north; cooling water from a 2 bar supply through its tubes)
+            loop = ShaftPlantCases.coolingLoop(c, cp.south(), 2, cp.north(), 3, 2e5);
+            // condensate: out of the condenser's front (east), south, west along z 6, north, west into a tee between the feed flanges
+            PipeCases.lay(ctx, ctx.at(7, 1, 4), 1, 0, 4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 16);
+            PipeCases.lay(ctx, ctx.at(7, 1, 5), 1, 8, 8, 0, 8, 8, 16);
+            PipeCases.lay(ctx, ctx.at(7, 1, 6), 1, 8, 8, 0, 8, 8, 8, 0, 8, 8);
+            for (int x = 6; x >= 4; x--) PipeCases.lay(ctx, ctx.at(x, 1, 6), 1, 16, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, ctx.at(3, 1, 6), 1, 16, 8, 8, 8, 8, 8, 8, 8, 0);
+            PipeCases.lay(ctx, ctx.at(3, 1, 5), 1, 8, 8, 16, 8, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, ctx.at(2, 1, 5), 1, 8, 8, 0, 8, 8, 16);
+            err = PipeCases.node(ctx, ctx.at(2, 1, 5)).addJoined(new mods.eln.node.voxel.PipePart(1, new int[]{8, 8, 8, 16, 8, 8}), 8, 8, 8);
+            if (err != null) throw new IllegalStateException("feed tee: " + err);
+            PipeCases.lay(ctx, ctx.at(2, 1, 4), 1, 8, 8, 16, 8, 8, 0);
+            meter = new FluidDevice() {
+                public Object fluidLevel() {
+                    return b[0].fluidLevel();
+                }
+
+                public List<FluidPort> fluidPorts() {
+                    return List.of();
+                }
+
+                public void afterFluidStep(double dt) {
+                    if (!counting || b[0].vessel == null || b[1].vessel == null) return;
+                    for (int i = 0; i < 2; i++) waterJ[i] += b[i].vessel.wallJ;
+                    meterS += dt;
+                }
+            };
+            mods.eln.fluid.FluidWorld.add(meter);
+            Eln.simulator.addSlowProcess(clock = dt -> {
+                if (c.v.vessel == null || b[0].vessel == null || b[1].vessel == null) return;
+                if (tick == 0) {
+                    EaUnits.addWater(c.v.vessel, 0.28 * c.v.vessel.volume * Water.RHO_L, 320, false);
+                    for (int i = 0; i < 2; i++) {
+                        var run = mods.eln.fluid.FluidWorld.nodeFor(b[i].feed);
+                        run.fill(0.995 * run.volume * Water.RHO_L, Water.P_ATM, 300);
+                        run.update();
+                    }
+                }
+                tick++;
+                for (FluidNode m : mains) m.fill(0, Water.P_ATM + AIR_PA, 293.15);
+                if (tick == WATCH) {
+                    counting = true;
+                    fire0 = fire();
+                    mb0 = fuelMb();
+                    steam0 = hp.totalKg;
+                    work0 = hp.totalWork;
+                    pumped0 = c.v.totalPumpedKg;
+                    tubes0 = c.totalTubesJ;
+                    boilerKg0 = boilerKg();
+                }
+                if (tick > WATCH) {
+                    window += dt;
+                    for (Resistor r : loads) elecJ += r.getP() * dt;
+                    for (int i = 0; i < 2; i++) {
+                        pSum[i] += b[i].vessel.P() * dt;
+                        shellMax[i] = Math.max(shellMax[i], b[i].thermal.Tc);
+                        fillLo = Math.min(fillLo, b[i].fill());
+                        fillHi = Math.max(fillHi, b[i].fill());
+                    }
+                    for (var t : fT) furnaceMax = Math.max(furnaceMax, t.Tc);
+                    radsSum += shaft(hp).getRads() * dt;
+                    condSum += c.v.vessel.P() * dt;
+                    floodHi = Math.max(floodHi, c.floodShare());
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(clock);
+            mods.eln.fluid.FluidWorld.remove(meter);
+            mods.eln.fluid.FluidWorld.remove(loop);
+            for (FluidDevice d : air) mods.eln.fluid.FluidWorld.remove(d);
+            for (Resistor r : loads) Eln.simulator.removeElectricalComponent(r);
+            String id = id();
+            boolean burnt = hp.isBurnt() || b[0].isBurnt() || b[1].isBurnt();
+            for (var x : f) burnt |= x.isBurnt();
+            ctx.check(id + ": nothing burnt out", !burnt, String.format("boilers %b %b, turbine %b", b[0].isBurnt(), b[1].isBurnt(), hp.isBurnt()));
+            if (burnt || b[0].vessel == null || b[1].vessel == null) return;
+            double w = Math.max(1e-9, window), ms = Math.max(1e-9, meterS);
+            double fire = (fire() - fire0) / w, mB = (mb0 - fuelMb()) / w, wA = waterJ[0] / ms, wB = waterJ[1] / ms, water = wA + wB;
+            double steam = (hp.totalKg - steam0) / w, shaftW = (hp.totalWork - work0) / w, elec = elecJ / w, pumped = (c.v.totalPumpedKg - pumped0) / w;
+            double tubes = (c.totalTubesJ - tubes0) / w, pA = pSum[0] / w, pB = pSum[1] / w;
+            ctx.line(String.format("%s: fire %.2f kW (4 furnaces, max %.0f K over ambient), %.2f kW into the water (boilers %.2f + %.2f kW, %.1f %% of the fire); "
+                    + "boilers %.2f / %.2f bar, shells max %.0f / %.0f K over ambient, fill %.0f..%.0f %%; steam %.2f g/s, shaft %.2f kW (%.0f kJ/kg), electric %.2f kW, %.0f rad/s; "
+                    + "condenser %.3f bar, up to %.0f %% full, pumped %.2f g/s, %.1f kW into the cooling water; boiler water %+.1f g over %.0f s; fuel %.2f mB/s = %.1f buckets/h; coke %.3f",
+                id, fire / 1000, furnaceMax, water / 1000, wA / 1000, wB / 1000, 100 * water / Math.max(1e-9, fire),
+                pA / 1e5, pB / 1e5, shellMax[0], shellMax[1], fillLo * 100, fillHi * 100, steam * 1000, shaftW / 1000, shaftW / Math.max(1e-9, steam) / 1000, elec / 1000, radsSum / w,
+                condSum / w / 1e5, floodHi * 100, pumped * 1000, tubes / 1000, (boilerKg() - boilerKg0) * 1000, w, mB, mB * 3.6, f[0].getCoke()));
+            ctx.line(id + ": boiler " + b[0].getWaila() + "; furnace " + f[0].getWaila() + "; HP " + hp.getWaila() + "; condenser " + c.getWaila());
+            ctx.check(id + ": rated power on the shaft (over 16 kW, within 8 % of 17.1 kW)", shaftW > 16e3 && Math.abs(shaftW / 17100 - 1) < 0.08, String.format("%.2f kW", shaftW / 1000));
+            ctx.check(id + ": the generators deliver over 14 kW", elec > 14e3 && elec < shaftW, String.format("%.2f kW", elec / 1000));
+            ctx.check(id + ": both boilers hold their pressure (within 1.5 bar of the regulator's)", Math.abs(pA / 1e5 - BAR) < 1.5 && Math.abs(pB / 1e5 - BAR) < 1.5,
+                String.format("%.2f / %.2f bar", pA / 1e5, pB / 1e5));
+            ctx.check(id + ": the boilers share the heat and the feed (each 45-55 % of the heat; neither dry nor overfull)",
+                wA > 0.45 * water && wA < 0.55 * water && fillLo > 0.3 && fillHi < 1.02, String.format("%.2f + %.2f kW, fill %.0f..%.0f %%", wA / 1000, wB / 1000, fillLo * 100, fillHi * 100));
+            ctx.check(id + ": the shells stay under their 400 K limit", shellMax[0] < 400 && shellMax[1] < 400, String.format("%.0f / %.0f K", shellMax[0], shellMax[1]));
+            ctx.check(id + ": the condensate goes back (90 %+ of the steam)", steam > 1e-3 && pumped > 0.9 * steam, String.format("%.2f of %.2f g/s", pumped * 1000, steam * 1000));
+            ctx.check(id + ": the condenser holds a vacuum (under 0.3 bar)", condSum / w < 0.3e5, String.format("%.3f bar", condSum / w / 1e5));
+            ctx.check(id + ": heavy oil within 10 % of 47.5 buckets/h", Math.abs(mB * 3.6 / 47.5 - 1) < 0.10, String.format("%.1f buckets/h", mB * 3.6));
         }
     }
 }
