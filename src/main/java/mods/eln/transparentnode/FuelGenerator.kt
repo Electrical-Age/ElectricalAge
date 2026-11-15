@@ -119,7 +119,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
     internal val fuels = FuelRegistry.fluidListToFluids(descriptor.fuels).map { FuelRegistry.fluidName(it) } // 1.12: fluids by name (no ids)
     /** Its fuel vessel, filled from a pipe on its top flange or by bucket. */
     @JvmField
-    val inlet = mods.eln.fluid.DeviceInlet("fuelIn", TANK_MB.toDouble(), *FuelRegistry.fluidListToFluids(descriptor.fuels)).sealed()   // (sealed as the gas turbine's: gasoline's vapour stays in it)
+    val inlet = mods.eln.fluid.DeviceInlet("fuelIn", TANK_MB.toDouble(), *FuelRegistry.fluidListToFluids(descriptor.fuels))   // (not sealed: it breathes, so a gravity tank fills it; a sealed one's air stops the head at ~1 B)
     internal var on by published(false)
     internal var voltageGracePeriod = 0.0
     /** What it burnt last, rated for its window, and how fouled it is (0..FOUL_MAX). An old save loads clean. */

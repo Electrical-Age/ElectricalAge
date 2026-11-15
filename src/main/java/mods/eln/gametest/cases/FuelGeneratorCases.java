@@ -20,7 +20,9 @@ import java.util.List;
  * the engines' law (4x slower than a burner);
  * mode 2, a half-fouled one on gasoline: half power, it clears by the law; wool cleans it, one used;
  * mode 3, an old save (a tank of 0.75 of gasoline, and one of 0.5 of "lava", 1.7.10's default name): its fuel is in
- * the vessel, 1500 mB and 1000 mB of gasoline.
+ * the vessel, 1500 mB and 1000 mB of gasoline;
+ * mode 4, an empty one under an open tank of gasoline (1 atm, a pipe end on its top flange): the head fills its vessel
+ * past a bucket, and it runs on it.
  */
 public final class FuelGeneratorCases {
     private FuelGeneratorCases() {
@@ -31,6 +33,7 @@ public final class FuelGeneratorCases {
         cases.add(new Quality("fuel_generator_off_spec_derates", 1));
         cases.add(new Quality("fuel_generator_clean_fuel_clears", 2));
         cases.add(new Quality("fuel_generator_old_save", 3));
+        cases.add(new Quality("fuel_generator_piped", 4));
     }
 
     static final class Quality implements TestCase {
@@ -40,6 +43,8 @@ public final class FuelGeneratorCases {
         long t0;
         double mb0, foul0, burnt0;
         String legacy = "not run", legacyLava = "not run";
+        mods.eln.sim.fluid.FluidDevice fx;
+        mods.eln.sim.fluid.FluidNode main;
 
         Quality(String id, int mode) {
             this.id = id;
@@ -76,6 +81,24 @@ public final class FuelGeneratorCases {
             double kg = 1500 * mods.eln.fluid.FluidSpecies.kgPerMb(reg.id("eln:gasoline"), false);
             EaUnits.add(v, reg.id("eln:gasoline"), kg, 293.15, false);
             if (mode == 1) EaUnits.add(v, reg.id("eln:residue"), kg / 9, 293.15, false);
+            if (mode == 4) {
+                // (an open tank of gasoline over its top flange instead: 1 m^3, 80 % full, 1 atm over the liquid)
+                EaUnits.drainLiquid(v, reg.id("eln:gasoline"), v.liquid(reg.id("eln:gasoline")));
+                main = new mods.eln.sim.fluid.FluidNode(1.0, ctx.at(2, 2, 1).getY(), 1.0, false).fill(0, mods.eln.sim.fluid.Water.P_ATM, 293.15);
+                EaUnits.add(main, reg.id("eln:gasoline"), 0.8 * 740, 293.15, false);
+                main.mAir *= 0.2;
+                main.energy = main.energyAt(293.15);
+                main.update();
+                fx = GasPlantCases.fixtures(gen.fluidLevel(), new Object[]{ctx.at(2, 2, 1), 0, main});
+                v.update();
+                ctx.after(60, () -> Wp10bCases.click(ctx, gen, ItemStack.EMPTY));
+                ctx.after(100, () -> {
+                    t0 = ctx.world().getGameTime();
+                    mb0 = gen.inlet.feedMb();
+                    burnt0 = gen.burntMb;
+                });
+                return;
+            }
             v.update();
             if (mode == 2) gen.foul = 0.5;
             Wp10bCases.click(ctx, gen, ItemStack.EMPTY);   // (switch on)
@@ -113,6 +136,14 @@ public final class FuelGeneratorCases {
             if (mode == 3) {
                 ctx.check(id + ": an old save's 0.75 tank of gasoline is 1500 mB in its vessel", legacy.isEmpty(), legacy);
                 ctx.check(id + ": an old save's 0.5 tank of \"lava\" (1.7.10's name) is 1000 mB of gasoline, not lost", legacyLava.isEmpty(), legacyLava);
+                return;
+            }
+            if (mode == 4) {
+                mods.eln.fluid.FluidWorld.remove(fx);
+                String what = String.format("vessel %.0f mB at %.2f bar, burnt %.2f mB; %s", gen.inlet.feedMb(), gen.inlet.vessel.P() / 1e5, gen.burntMb - burnt0, gen.getWaila());
+                ctx.line(id + ": " + what);
+                ctx.check(id + ": an open tank's head fills its vessel past a bucket (over 1000 mB)", gen.inlet.feedMb() > 1000, what);
+                ctx.check(id + ": it runs on piped fuel", gen.running() && gen.burntMb - burnt0 > 1, what);
                 return;
             }
             double t = (ctx.world().getGameTime() - t0) / 20.0, used = mb0 - gen.inlet.feedMb(), burnt = gen.burntMb - burnt0;
