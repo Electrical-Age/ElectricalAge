@@ -66,8 +66,11 @@ public final class OilCases {
         cases.add(new CondensateReturn(21e5, true));
         cases.add(new ClosedPlant());
         cases.add(new TwoUnitPlant());
-        cases.add(new MakeupPlantRefills());
+        cases.add(new TwoUnitPlant.Long());
+        cases.add(new TwoUnitPlant.Long.Unloaded());
         cases.add(new CasingDrainTrap());
+        cases.add(new MakeupPlantRefills());
+        cases.add(new MakeupPlantRefills(13));
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -2427,7 +2430,7 @@ public final class OilCases {
      * flooded and burnt its turbine. Neither condenser floods now, makeup stays near the plant's losses, and both
      * turbines run.
      */
-    static final class TwoUnitPlant implements TestCase {
+    static class TwoUnitPlant implements TestCase {
         mods.eln.oil.BoilerElement boiler;
         mods.eln.oil.SteamGeneratorElement busy, light;
         mods.eln.oil.CondenserElement cBusy, cLight;
@@ -2435,9 +2438,56 @@ public final class OilCases {
         int tick;
         double makeup, makeup0, pumped0, ejected0, boiler0, busy0, light0, floodBusy, floodLight, fillLo = 1e9, fillHi, power;
         static final int WATCH = 2400, TICKS = 6000;
+        /** The load heaters (Long keeps them cool: without a regulator they heat until their watchdog burns them). */
+        final java.util.List<mods.eln.oil.ElectricHeaterElement> heaters = new java.util.ArrayList<>();
 
         public String id() {
             return "fluid_two_unit_plant_shares_condensate";
+        }
+
+        /** Whether the light unit has its load (Long.unloaded: no, it idles at speed on its governor). */
+        boolean lightLoaded() {
+            return true;
+        }
+
+        /** Whether water may not pile up in a hotwell over the watch (Long checks that it settles instead). */
+        boolean checkPileUp() {
+            return true;
+        }
+
+        /** A sample every so often (Long); called each tick after WATCH's bookkeeping. */
+        void sample() {
+        }
+
+        /** Where the plant's water is (g): boiler, hotwells busy/light, feed line, makeup stubs, turbine inlets, the rest (steam pipes). */
+        String breakdown(double total) {
+            double b = boiler.vessel.mWater, hb = cBusy.vessel.mWater, hl = cLight.vessel.mWater;
+            var feed = mods.eln.fluid.FluidWorld.nodeFor(boiler.feed);
+            double f = feed.mWater, mk = mods.eln.fluid.FluidWorld.nodeFor(cBusy.inlet).mWater + mods.eln.fluid.FluidWorld.nodeFor(cLight.inlet).mWater;
+            var ib = mods.eln.fluid.FluidWorld.nodeFor(busy.inlet);
+            var il = mods.eln.fluid.FluidWorld.nodeFor(light.inlet);
+            double in = ib.mWater + (il == ib ? 0 : il.mWater), inL = ib.mLiquid() + (il == ib ? 0 : il.mLiquid());
+            double restL = 0;
+            var counted = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<mods.eln.sim.fluid.FluidNode, Boolean>());
+            for (var n : new mods.eln.sim.fluid.FluidNode[]{boiler.vessel, cBusy.vessel, cLight.vessel, feed, mods.eln.fluid.FluidWorld.nodeFor(cBusy.inlet),
+                mods.eln.fluid.FluidWorld.nodeFor(cLight.inlet), ib, il}) counted.add(n);
+            var net = mods.eln.fluid.FluidWorld.networkOf(boiler.vessel);
+            if (net != null) for (var n : net.nodes) if (!n.fixed && !counted.contains(n)) restL += n.mLiquid();
+            return String.format("boiler %.1f, hotwells %.1f / %.1f, feed %.1f, makeup stubs %.1f, turbine inlets %.2f (liquid %.2f), rest %.2f (liquid on the boiler's network %.2f)",
+                b * 1000, hb * 1000, hl * 1000, f * 1000, mk * 1000, in * 1000, inL * 1000, (total - b - hb - hl - f - mk - in) * 1000, restL * 1000);
+        }
+
+        /** The water in the plant (kg): every node of the networks the boiler, the condensers and the turbines are on. */
+        double inventory() {
+            var nets = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<mods.eln.sim.fluid.FluidNetwork, Boolean>());
+            for (var n : new mods.eln.sim.fluid.FluidNode[]{boiler.vessel, boiler.feed, cBusy.vessel, cLight.vessel, cBusy.inlet, cLight.inlet,
+                cBusy.outlet, cLight.outlet, busy.inlet, light.inlet}) {
+                var net = n == null ? null : mods.eln.fluid.FluidWorld.networkOf(n);
+                if (net != null) nets.add(net);
+            }
+            double m = 0;
+            for (var net : nets) for (var n : net.nodes) if (!n.fixed) m += n.mWater;
+            return m;
         }
 
         public int width() {
@@ -2465,12 +2515,24 @@ public final class OilCases {
         }
 
         static mods.eln.oil.SteamGeneratorElement unit(Wp10aCases.Layout l, int dz) {
+            return unit(l, dz, null);
+        }
+
+        static mods.eln.oil.SteamGeneratorElement unit(Wp10aCases.Layout l, int dz, java.util.List<mods.eln.oil.ElectricHeaterElement> heaters) {
+            return unit(l, dz, heaters, true);
+        }
+
+        /** A turbine facing west with its condenser south of it, and (loaded) its load heater east of it. */
+        static mods.eln.oil.SteamGeneratorElement unit(Wp10aCases.Layout l, int dz, java.util.List<mods.eln.oil.ElectricHeaterElement> heaters, boolean loaded) {
             var t = (mods.eln.oil.SteamGeneratorElement) l.device(12 + (82 << 6), 4, dz);
-            var h = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 5, dz);
             t.front = mods.eln.misc.Direction.XN;
             t.reconnect();
-            h.front = mods.eln.misc.Direction.ZN;
-            h.reconnect();
+            if (loaded) {
+                var h = (mods.eln.oil.ElectricHeaterElement) l.device(0 + (82 << 6), 5, dz);
+                if (heaters != null) heaters.add(h);
+                h.front = mods.eln.misc.Direction.ZN;
+                h.reconnect();
+            }
             l.device(28 + (82 << 6), 4, dz + 1);
             return t;
         }
@@ -2489,9 +2551,9 @@ public final class OilCases {
             boiler.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
             boiler.fromTanks(8000, 0);
             boiler.showTanks();
-            busy = unit(l, 1);
-            light = unit(l, 4);
-            light.controls.throttle = 0.15;
+            busy = unit(l, 1, heaters);
+            light = unit(l, 4, heaters, lightLoaded());
+            light.controls.throttle = lightLoaded() ? 0.15 : 1;
             cBusy = facingWest(ctx, ctx.at(4, 1, 2));
             cLight = facingWest(ctx, ctx.at(4, 1, 5));
             // steam: up out of the boiler and east to the busy turbine; a tee at x 3 runs south to the light one
@@ -2552,8 +2614,9 @@ public final class OilCases {
                     floodLight = Math.max(floodLight, cLight.floodShare());
                     fillLo = Math.min(fillLo, boiler.fill());
                     fillHi = Math.max(fillHi, boiler.fill());
-                    power += (busy.source.getEffectiveP() + light.source.getEffectiveP()) / (TICKS - WATCH);
+                    power += (busy.source.getEffectiveP() + light.source.getEffectiveP()) / (ticks() - WATCH);
                 }
+                sample();
             });
         }
 
@@ -2571,9 +2634,96 @@ public final class OilCases {
             ctx.check("two units: both turbines run, neither burnt", !busy.isBurnt() && !light.isBurnt() && power > 300, String.format("%.0f W", power));
             ctx.check("two units: the condensate goes back (pumps return water)", pumped > 0.02, String.format("%.1f g", pumped * 1000));
             // (makeup refills what the plant lost or what the boiler is still taking up; none of it may pile up in a condenser)
-            ctx.check("two units: no water piles up in either condenser", busyGain < 0.01 * cBusy.vessel.volume * 1000 && lightGain < 0.01 * cLight.vessel.volume * 1000,
+            if (checkPileUp()) ctx.check("two units: no water piles up in either condenser", busyGain < 0.01 * cBusy.vessel.volume * 1000 && lightGain < 0.01 * cLight.vessel.volume * 1000,
                 String.format("%+.1f / %+.1f g", busyGain * 1000, lightGain * 1000));
             ctx.check("two units: the boiler neither boils dry nor overfills", fillLo > 0.3 && fillHi < 1.02, String.format("%.0f..%.0f%%", fillLo * 100, fillHi * 100));
+        }
+        /**
+         * The same plant at steady load for 40 simulated minutes (Baughn 2026-11-15, todo #493: does the busy hotwell
+         * settle, and where?). The load heaters are kept cool (unregulated, they burn at 800 C after ~9000 ticks and the
+         * turbines lose their load). Every 2400 ticks it logs the levels, the line, where the water is, and the plant's
+         * water against what came in (makeup) and went out (ejected steam, the casing drains to the ground) since WATCH:
+         * water moves between the hotwells, none is made or lost. Unloaded: the light unit idles at speed on its governor
+         * (its pump turns full on next to no condensate, the worst case for the busy hotwell).
+         */
+        static class Long extends TwoUnitPlant {
+            static final int LONG_TICKS = 48000, SETTLE = LONG_TICKS - 12000;
+            double inv0, settleBusy, settleMakeup, settleInv, out0, worstImbalance;
+
+            public String id() {
+                return "fluid_two_unit_plant_long";
+            }
+
+            public int ticks() {
+                return LONG_TICKS;
+            }
+
+            @Override
+            boolean checkPileUp() {
+                return false;
+            }
+
+            double outKg() {
+                return cBusy.v.totalEjectedSteamKg + cLight.v.totalEjectedSteamKg + busy.drainedAwayKg + light.drainedAwayKg;
+            }
+
+            @Override
+            void sample() {
+                for (var h : heaters) h.thermal.Tc = 20;
+                if (tick < WATCH) return;
+                double inv = inventory();
+                if (tick == WATCH) {
+                    inv0 = inv - makeup;
+                    out0 = outKg();
+                }
+                double out = outKg() - out0, imbalance = inv - (inv0 + makeup - out);
+                worstImbalance = Math.max(worstImbalance, Math.abs(imbalance));
+                if (tick == SETTLE) {
+                    settleBusy = cBusy.floodShare();
+                    settleMakeup = makeup;
+                    settleInv = inv;
+                }
+                if (tick == LONG_TICKS) {   // (what the "rest" is: the nodes outside the named groups holding water)
+                    var net = mods.eln.fluid.FluidWorld.networkOf(boiler.vessel);
+                    if (net != null) for (var n : net.nodes)
+                        if (!n.fixed && n.mWater > 0.002) mods.eln.Eln.LOG.info(String.format("[%s] node z %.1f vol %.3g: %.1f g (liquid %.1f g) at %.2f bar%s", id(), n.z, n.volume,
+                            n.mWater * 1000, n.mLiquid() * 1000, n.P() / 1e5, n == boiler.vessel ? " (boiler)" : n == mods.eln.fluid.FluidWorld.nodeFor(boiler.feed) ? " (feed)" : ""));
+                }
+                if (tick % 2400 == 0)
+                    mods.eln.Eln.LOG.info(String.format("[%s] t %5d: hotwells %.2f%% / %.2f%%, line %.2f bar, boiler %.0f%% %.2f bar, %.0f + %.0f W, speeds %.0f / %.0f%%, "
+                            + "pumps %.3f / %.3f g/s; water %.2f g (%s) = at WATCH %.2f + makeup since %.2f - out %.2f %+.3f",
+                        id(), tick, cBusy.floodShare() * 100, cLight.floodShare() * 100, mods.eln.fluid.FluidWorld.nodeFor(boiler.feed).P() / 1e5,
+                        boiler.fill() * 100, boiler.vessel.P() / 1e5, busy.source.getEffectiveP(), light.source.getEffectiveP(), busy.omega * 100, light.omega * 100,
+                        cBusy.v.flowShare() * cBusy.v.curve.freeKgPerS * 1000, cLight.v.flowShare() * cLight.v.curve.freeKgPerS * 1000,
+                        inv * 1000, breakdown(inv), (inv0 + makeup0) * 1000, (makeup - makeup0) * 1000, out * 1000, imbalance * 1000));
+            }
+
+            @Override
+            public void measure(TestContext ctx) {
+                super.measure(ctx);
+                double drift = cBusy.floodShare() - settleBusy, rate = (makeup - settleMakeup) / ((LONG_TICKS - SETTLE) / 20.0), gained = inventory() - settleInv;
+                ctx.line(String.format("two units long: busy hotwell %.2f%% -> %.2f%% over the last %d ticks, makeup %.4f g/s there, the plant's water %+.2f g; water unaccounted at most %.3f g",
+                    settleBusy * 100, cBusy.floodShare() * 100, LONG_TICKS - SETTLE, rate * 1000, gained * 1000, worstImbalance * 1000));
+                ctx.check("two units long: the plant's water is makeup less what left (no water made or lost)", worstImbalance < 1e-3,
+                    String.format("%.3f g", worstImbalance * 1000));
+                ctx.check("two units long: the busy hotwell settles under LEVEL_FULL", Math.abs(drift) < 0.005 && cBusy.floodShare() < mods.eln.oil.CondenserVessel.LEVEL_FULL,
+                    String.format("%.2f%% -> %.2f%%", settleBusy * 100, cBusy.floodShare() * 100));
+                // (the makeup goes on at the plant's loss, the ejector's steam: ~0.01 g/s; none of it may stay)
+                ctx.check("two units long: the makeup only replaces what leaves (the plant's water steady)", Math.abs(gained) < 1e-3,
+                    String.format("%+.2f g over %d ticks, makeup %.4f g/s", gained * 1000, LONG_TICKS - SETTLE, rate * 1000));
+            }
+
+            /** The light unit unloaded, idling at speed. */
+            static final class Unloaded extends Long {
+                public String id() {
+                    return "fluid_two_unit_plant_long_idle";
+                }
+
+                @Override
+                boolean lightLoaded() {
+                    return false;
+                }
+            }
         }
     }
 
@@ -2595,9 +2745,35 @@ public final class OilCases {
         int tick;
         double makeup, makeup0, makeupLate0, floodHi, fillEnd, fillHalf, power;
         static final int TICKS = 9000, WATCH = 6000, LATE = 8000;
+        /** The 13-bar variant runs longer (its pump has less head to spare over the boiler: a slower refill). */
+        int ticksN() {
+            return bar == 10 ? TICKS : 4 * TICKS;
+        }
+
+        int watchN() {
+            return ticksN() - (TICKS - WATCH);
+        }
+
+        int lateN() {
+            return ticksN() - (TICKS - LATE);
+        }
+        /** The turbine's regulator set point (bar): 10 as the player's; 13, a boiler held over its rated pressure. */
+        final double bar;
+        /** The load heater (kept cool in the longer variant: unregulated, it burns at 800 C after ~9000 ticks). */
+        final java.util.List<mods.eln.oil.ElectricHeaterElement> heaters = new java.util.ArrayList<>();
+        /** The boiler's fill every 3000 ticks (the longer variant's log). */
+        final StringBuilder fills = new StringBuilder();
+
+        MakeupPlantRefills() {
+            this(10);
+        }
+
+        MakeupPlantRefills(double bar) {
+            this.bar = bar;
+        }
 
         public String id() {
-            return "fluid_makeup_plant_refills_boiler";
+            return bar == 10 ? "fluid_makeup_plant_refills_boiler" : String.format("fluid_makeup_plant_refills_boiler_%.0fbar", bar);
         }
 
         public int width() {
@@ -2605,7 +2781,7 @@ public final class OilCases {
         }
 
         public int ticks() {
-            return TICKS;
+            return ticksN();
         }
 
         public boolean checkLimitCycles() {
@@ -2620,9 +2796,9 @@ public final class OilCases {
             boiler.thermal.Tc = 200 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
             boiler.fromTanks(800, 0);
             boiler.showTanks();
-            turbine = TwoUnitPlant.unit(l, 1);
+            turbine = TwoUnitPlant.unit(l, 1, heaters);
             turbine.controls.inventory.setItem(mods.eln.oil.SteamValveControl.REGULATOR_SLOT, mods.eln.Eln.sharedItem.getDescriptor(8 + (3 << 6)).newItemStack());
-            turbine.controls.targetBar = 10;
+            turbine.controls.targetBar = bar;
             turbine.controls.computeInventory();
             c = TwoUnitPlant.facingWest(ctx, ctx.at(4, 1, 2));
             // steam: alloy pipe up out of the boiler, east, down into the turbine (as the player's)
@@ -2641,13 +2817,16 @@ public final class OilCases {
                 if (tick == 0) {   // (the hotwell at the makeup's shut level; the feed run full, as a plant that has run)
                     mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.25 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 310, false);
                     // the boiler as the player's was found: hot, at 10 bar, its water at 10 % of the gauge glass, the turbine turning
-                    boiler.vessel.fill(0.10 * mods.eln.oil.BoilerElement.RATED_KG, mods.eln.sim.fluid.Water.psat(453.0), 453.0);
+                    double tb = mods.eln.sim.fluid.Water.tsat(bar * 1e5);
+                    boiler.vessel.fill(0.10 * mods.eln.oil.BoilerElement.RATED_KG, mods.eln.sim.fluid.Water.psat(tb), tb);
                     turbine.omega = 0.9;
                     var run = mods.eln.fluid.FluidWorld.nodeFor(boiler.feed);
                     run.fill(0.995 * run.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 300);
                     run.update();
                 }
                 tick++;
+                if (bar != 10) for (var h : heaters) h.thermal.Tc = 20;
+                if (tick % 3000 == 0) fills.append(String.format(" %.0f", boiler.fill() * 100));
                 // the furnaces: a 300 C source through 40 W/K (a thermostat'd furnace's worth: ~5 kW into a 180 C shell)
                 double shellC = boiler.thermal.Tc + mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius;
                 boiler.thermal.moveEnergyTo(Math.max(0, 40 * (300 - shellC)) * t);
@@ -2656,14 +2835,14 @@ public final class OilCases {
                     mods.eln.sim.fluid.EaUnits.addWater(n, 2e-5, 290, false);
                     makeup += 2e-5;
                 }
-                if (tick == WATCH) {
+                if (tick == watchN()) {
                     makeup0 = makeup;
                     fillHalf = boiler.fill();
                 }
-                if (tick == LATE) makeupLate0 = makeup;
-                if (tick > WATCH) {
+                if (tick == lateN()) makeupLate0 = makeup;
+                if (tick > watchN()) {
                     floodHi = Math.max(floodHi, c.floodShare());
-                    power += turbine.source.getEffectiveP() / (TICKS - WATCH);
+                    power += turbine.source.getEffectiveP() / (ticksN() - watchN());
                 }
                 fillEnd = boiler.fill();
             });
@@ -2672,9 +2851,10 @@ public final class OilCases {
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(fire);
             ctx.line(String.format("makeup plant: boiler fill %.0f%% at %d ticks, %.0f%% at the end; condenser up to %.0f%%; %.1f g makeup over the watch, %.3f g/s over the last %d ticks; %.0f W; "
-                    + "boiler %s; turbine %s; condenser %s", fillHalf * 100, WATCH, fillEnd * 100, floodHi * 100, (makeup - makeup0) * 1000,
-                (makeup - makeupLate0) * 1000 / ((TICKS - LATE) / 20.0), TICKS - LATE, power,
+                    + "boiler %s; turbine %s; condenser %s", fillHalf * 100, watchN(), fillEnd * 100, floodHi * 100, (makeup - makeup0) * 1000,
+                (makeup - makeupLate0) * 1000 / ((ticksN() - lateN()) / 20.0), ticksN() - lateN(), power,
                 boiler.getWaila(), turbine.getWaila(), c.getWaila()));
+            ctx.line("makeup plant: boiler fill every 3000 ticks (%):" + fills);
             ctx.check("makeup plant: the boiler fills back up to its float (over 60 %)", fillEnd > 0.6, String.format("%.0f%%", fillEnd * 100));
             ctx.check("makeup plant: the condenser doesn't flood", floodHi < mods.eln.oil.CondenserVessel.LEVEL_FULL, String.format("%.0f%%", floodHi * 100));
             ctx.check("makeup plant: the turbine runs, not burnt", !turbine.isBurnt() && power > 300, String.format("%.0f W", power));

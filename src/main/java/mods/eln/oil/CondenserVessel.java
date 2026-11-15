@@ -59,8 +59,16 @@ public final class CondenserVessel {
      * rated flow against 10 bar, less than its turbine's steam; the water the plant lacked was missed in the boiler, which
      * drained until its bare heating surface made no more steam than that. The head alone shares a line: a low hotwell's
      * pump stops once the fuller one holds the line over LOW_HEAD of the shut-off.
+     * LOW_HEAD is the pump's rated head, RATED_OVER_NOMINAL (15 bar for a 10 bar turbine; 2026-11-15, it was 1.6 / 1.8,
+     * 16 bar). With head alone a makeup-level pump passes water whenever the line is under its head, so on a shared line
+     * the busy hotwell has to rise until its head holds the line there; at 16 bar a full hotwell's pump passed only
+     * ~1.2 times its rated condensate, and a busy unit beside an idling one (whose pump turns full on next to no
+     * condensate) flooded its turbine (GameTest fluid_two_unit_plant_long_idle). Against a 15 bar line a hotwell at
+     * LEVEL_FULL passes speed x RATED_MARGIN times its rated condensate, so the busy one settles under LEVEL_FULL unless
+     * it condenses more than that. The cost: a makeup-level hotwell feeds a boiler only under 15 bar (still more than
+     * the old 0.3 of the flow at 16 bar up to ~14.9 bar).
      */
-    public static final double LEVEL_FULL = 0.40, LOW_HEAD = 1.6 / CondensatePump.SHUTOFF_OVER_NOMINAL, LOW_FLOW = 1.0;
+    public static final double LEVEL_FULL = 0.40, LOW_HEAD = CondensatePump.RATED_OVER_NOMINAL / CondensatePump.SHUTOFF_OVER_NOMINAL, LOW_FLOW = 1.0;
     /** The level control's share of the curve now (0 at the makeup's shut level and under, 1 from LEVEL_FULL), and
      *  the shut-off head it leaves the pump (Pa). */
     public double levelShare, headPa;
