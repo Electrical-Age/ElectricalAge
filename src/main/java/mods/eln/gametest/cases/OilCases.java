@@ -66,6 +66,7 @@ public final class OilCases {
         cases.add(new CondensateReturn(21e5, true));
         cases.add(new ClosedPlant());
         cases.add(new TwoUnitPlant());
+        cases.add(new MakeupPlantRefills());
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -2572,6 +2573,108 @@ public final class OilCases {
             ctx.check("two units: no water piles up in either condenser", busyGain < 0.01 * cBusy.vessel.volume * 1000 && lightGain < 0.01 * cLight.vessel.volume * 1000,
                 String.format("%+.1f / %+.1f g", busyGain * 1000, lightGain * 1000));
             ctx.check("two units: the boiler neither boils dry nor overfills", fillLo > 0.3 && fillHi < 1.02, String.format("%.0f..%.0f%%", fillLo * 100, fillHi * 100));
+        }
+    }
+
+
+    /**
+     * A small plant on makeup water that had lost water (a player's plant, 2026-11-15: its boiler ran dry at 10 bar): a
+     * boiler heated through its shell from a 300 C source (heat furnaces' worth), alloy steam pipe to a 48V turbine
+     * holding 10 bar at its inlet (regulator), a Small Steam Condenser, its pump back into the boiler's feed flange, and
+     * makeup water at 5 bar behind the condenser's float valve. It starts low: the boiler at 10 % of its gauge glass, the
+     * hotwell at the makeup's shut level. The steam line loses heat to the air and the turbine's casing drain throws that
+     * condensate away, so the makeup runs. The boiler must fill back up to its feed float, not sit with its heating
+     * surface uncovered.
+     */
+    static final class MakeupPlantRefills implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.SteamGeneratorElement turbine;
+        mods.eln.oil.CondenserElement c;
+        mods.eln.sim.IProcess fire;
+        int tick;
+        double makeup, makeup0, floodHi, fillEnd, fillHalf, power;
+        static final int TICKS = 9000, WATCH = 6000;
+
+        public String id() {
+            return "fluid_makeup_plant_refills_boiler";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return TICKS;
+        }
+
+        public boolean checkLimitCycles() {
+            return false;   // (the makeup flange is topped up in small amounts: a sawtooth by design)
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            boiler.front = mods.eln.misc.Direction.XN;   // (feed flange south)
+            boiler.reconnect();
+            boiler.thermal.Tc = 200 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.fromTanks(800, 0);
+            boiler.showTanks();
+            turbine = TwoUnitPlant.unit(l, 1);
+            turbine.controls.inventory.setItem(mods.eln.oil.SteamValveControl.REGULATOR_SLOT, mods.eln.Eln.sharedItem.getDescriptor(8 + (3 << 6)).newItemStack());
+            turbine.controls.targetBar = 10;
+            turbine.controls.computeInventory();
+            c = TwoUnitPlant.facingWest(ctx, ctx.at(4, 1, 2));
+            // steam: alloy pipe up out of the boiler, east, down into the turbine (as the player's)
+            PipeCases.lay(ctx, ctx.at(1, 2, 1), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(2, 2, 1), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(3, 2, 1), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(4, 2, 1), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);
+            // condensate: west out of the condenser's front, along, then north into the boiler's feed flange
+            PipeCases.lay(ctx, ctx.at(3, 1, 2), 0, 16, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, ctx.at(2, 1, 2), 0, 16, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, ctx.at(1, 1, 2), 0, 16, 8, 8, 8, 8, 8, 8, 8, 0);
+            for (int x = 1; x <= 3; x++) l.used.add(ctx.at(x, 1, 2));
+            PipeCases.lay(ctx, ctx.at(4, 2, 2), 0, 8, 0, 8, 8, 8, 8);   // (a stub on the makeup flange)
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
+                if (c.vessel == null || boiler.vessel == null || c.inlet == null) return;
+                if (tick == 0) {   // (the hotwell at the makeup's shut level; the feed run full, as a plant that has run)
+                    mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.25 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 310, false);
+                    // the boiler as the player's was found: hot, at 10 bar, its water at 10 % of the gauge glass, the turbine turning
+                    boiler.vessel.fill(0.10 * mods.eln.oil.BoilerElement.RATED_KG, mods.eln.sim.fluid.Water.psat(453.0), 453.0);
+                    turbine.omega = 0.9;
+                    var run = mods.eln.fluid.FluidWorld.nodeFor(boiler.feed);
+                    run.fill(0.995 * run.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 300);
+                    run.update();
+                }
+                tick++;
+                // the furnaces: a 300 C source through 40 W/K (a thermostat'd furnace's worth: ~5 kW into a 180 C shell)
+                double shellC = boiler.thermal.Tc + mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius;
+                boiler.thermal.moveEnergyTo(Math.max(0, 40 * (300 - shellC)) * t);
+                var n = mods.eln.fluid.FluidWorld.nodeFor(c.inlet);
+                for (int k = 0; k < 100 && n.P() < 5e5; k++) {
+                    mods.eln.sim.fluid.EaUnits.addWater(n, 2e-5, 290, false);
+                    makeup += 2e-5;
+                }
+                if (tick == WATCH) {
+                    makeup0 = makeup;
+                    fillHalf = boiler.fill();
+                }
+                if (tick > WATCH) {
+                    floodHi = Math.max(floodHi, c.floodShare());
+                    power += turbine.source.getEffectiveP() / (TICKS - WATCH);
+                }
+                fillEnd = boiler.fill();
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            ctx.line(String.format("makeup plant: boiler fill %.0f%% at %d ticks, %.0f%% at the end; condenser up to %.0f%%; %.1f g makeup over the watch; %.0f W; "
+                    + "boiler %s; turbine %s; condenser %s", fillHalf * 100, WATCH, fillEnd * 100, floodHi * 100, (makeup - makeup0) * 1000, power,
+                boiler.getWaila(), turbine.getWaila(), c.getWaila()));
+            ctx.check("makeup plant: the boiler fills back up to its float (over 60 %)", fillEnd > 0.6, String.format("%.0f%%", fillEnd * 100));
+            ctx.check("makeup plant: the condenser doesn't flood", floodHi < mods.eln.oil.CondenserVessel.LEVEL_FULL, String.format("%.0f%%", floodHi * 100));
+            ctx.check("makeup plant: the turbine runs, not burnt", !turbine.isBurnt() && power > 300, String.format("%.0f W", power));
         }
     }
 
