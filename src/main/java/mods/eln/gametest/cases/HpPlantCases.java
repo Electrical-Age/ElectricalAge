@@ -60,13 +60,21 @@ public final class HpPlantCases {
         var b = (mods.eln.oil.AirBlowerElement) ctx.placeTransparent(AIR_BLOWER, p);
         for (Direction d : new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP}) if (d.right() == out) b.front = d;
         b.reconnect();
-        if (powered) Eln.simulator.addElectricalComponent(new mods.eln.sim.mna.component.VoltageSource("blower test", b.load, null).setU(Eln.MVU));
+        if (powered) power(b, Eln.MVU);
         return b;
+    }
+
+    static void power(mods.eln.oil.AirBlowerElement b, double u) {
+        Eln.simulator.addElectricalComponent(new mods.eln.sim.mna.component.VoltageSource("blower test", b.load, null).setU(u));
     }
 
     /** An Air Blower with nothing on its outlet: it stalls at its shut-off pressure, moves nothing, draws its idling. Unpowered: nothing. */
     static final class BlowerBlocked extends PlumbingCases.Big {
-        mods.eln.oil.AirBlowerElement on, off;
+        mods.eln.oil.AirBlowerElement on, off, half;
+        /** Its curve: blowers into air held at these gauge pressures (Pa) on their outlets. */
+        static final double[] BACK = {0, 0.5e5, 1.0e5, 1.5e5};
+        final mods.eln.oil.AirBlowerElement[] curve = new mods.eln.oil.AirBlowerElement[BACK.length];
+        final FluidDevice[] sinks = new FluidDevice[BACK.length];
 
         public String id() {
             return "air_blower_blocked_outlet_stalls";
@@ -79,6 +87,16 @@ public final class HpPlantCases {
         public void build(TestContext ctx) {
             on = blower(ctx, ctx.at(3, 1, 3), Direction.XP, true);
             off = blower(ctx, ctx.at(3, 1, 6), Direction.XP, false);
+            half = blower(ctx, ctx.at(6, 1, 3), Direction.XP, false);
+            power(half, Eln.MVU / 2);
+            for (int i = 0; i < BACK.length; i++) {
+                BlockPos p = ctx.at(1 + 2 * i, 1, 8);
+                curve[i] = blower(ctx, p, Direction.ZN, true);
+                var sink = new FluidNode(1.0, p.getY(), 1.0, true).fill(0, Water.P_ATM + BACK[i], 293.15);
+                int face = Direction.ZP.toEnumFacing().get3DDataValue();
+                sinks[i] = GasPlantCases.fixtures(curve[i].fluidLevel(), new Object[]{p.relative(Direction.ZN.toEnumFacing()), face, sink,
+                    mods.eln.oil.TankElement.sideSpot(face, mods.eln.oil.InlinePumpElement.LINE_Y)});
+            }
         }
 
         public void measure(TestContext ctx) {
@@ -86,6 +104,22 @@ public final class HpPlantCases {
             ctx.line("air blower, blocked: " + on.getWaila() + String.format("; wants %.1f W, %.3f g/s, %.3f g in all", on.wantW, on.kgPerS * 1000, on.totalKg * 1000)
                 + "; unpowered: " + off.getWaila());
             double shut = mods.eln.oil.AirBlowerDescriptor.SHUTOFF_PA;
+            double gh = mods.eln.fluid.FluidWorld.nodeFor(half.outlet).P() - Water.P_ATM;
+            ctx.check("blower: at half its voltage it stalls at a quarter of its shut-off pressure (within 5 %)", Math.abs(gh - 0.25 * shut) < 0.05 * 0.25 * shut,
+                String.format("%.3f bar gauge, %.1f W", gh / 1e5, half.wantW));
+            for (int i = 0; i < BACK.length; i++) {
+                var b = curve[i];
+                mods.eln.fluid.FluidWorld.remove(sinks[i]);
+                var in = b.intake;
+                double rise = mods.eln.fluid.FluidWorld.nodeFor(b.outlet).P() - in.P(), rho = in.P() * 0.02897 / (8.314 * in.T());
+                double expectKg = rho * mods.eln.oil.AirBlowerDescriptor.FREE_M3_S * Math.sqrt(Math.max(0, 1 - rise / shut));
+                double expectW = b.kgPerS / rho * rise / mods.eln.oil.AirBlowerDescriptor.MOTOR_ETA + mods.eln.oil.AirBlowerDescriptor.BLOWER_IDLE_W;
+                ctx.line(String.format("air blower curve: against %.2f bar gauge: outlet %.3f bar over its inlet, %.1f g/s (%.4f m^3/s of inlet air; parabola %.1f g/s), %.0f W (flow x rise / motor + idle: %.0f W)",
+                    BACK[i] / 1e5, rise / 1e5, b.kgPerS * 1000, b.kgPerS / rho, expectKg * 1000, b.wantW, expectW));
+                ctx.check("blower curve at " + BACK[i] / 1e5 + " bar: its flow is on its parabola (within 10 %)", Math.abs(b.kgPerS - expectKg) < 0.1 * expectKg, String.format("%.1f of %.1f g/s", b.kgPerS * 1000, expectKg * 1000));
+                ctx.check("blower curve at " + BACK[i] / 1e5 + " bar: it draws the work on the air over its motor's efficiency, plus idling (within 10 %)",
+                    Math.abs(b.wantW - expectW) < 0.1 * expectW, String.format("%.0f of %.0f W", b.wantW, expectW));
+            }
             ctx.check("blower: blocked, it stalls at its shut-off pressure (within 5 %)", Math.abs(g - shut) < 0.05 * shut, String.format("%.3f bar gauge", g / 1e5));
             ctx.check("blower: that is under the furnace tank's relief (3 bar) and burst (6 bar)", g < 3e5, String.format("%.3f bar gauge", g / 1e5));
             ctx.check("blower: stalled, it moves no air (under 0.05 g/s)", on.kgPerS < 5e-5, String.format("%.4f g/s", on.kgPerS * 1000));

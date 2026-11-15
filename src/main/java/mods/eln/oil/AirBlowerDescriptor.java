@@ -28,6 +28,6 @@ public class AirBlowerDescriptor extends InlinePumpDescriptor {
         list.add("Blows air from around it into the pipe on its right:");
         list.add(String.format("up to %.1f bar gauge (blocked, it stalls there), less the more it moves.", SHUTOFF_PA / 1e5));
         list.add("For pressure-fed burners: 1 bar on a Fuel Heat Furnace's tank doubles its fire.");
-        list.add(String.format("%.0f V on its front; it draws power with the air it moves.", nominalU));
+        list.add(String.format("%.0f V on its front; it draws power with the air it moves. A speed signal on its back.", nominalU));
     }
 }

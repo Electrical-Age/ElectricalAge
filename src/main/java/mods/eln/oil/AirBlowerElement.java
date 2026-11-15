@@ -32,6 +32,8 @@ public class AirBlowerElement extends TransparentNodeElement implements FluidDev
     final AirBlowerDescriptor desc;
     public final NbtElectricalLoad load = new NbtElectricalLoad("load");
     final Resistor resistor = new Resistor(load, null);
+    /** A speed signal on its back (0-5 V; none: full speed), as the Inline Pump's: its pressure goes with the speed's square. */
+    public final mods.eln.sim.nbt.NbtElectricalGateInput speed = new mods.eln.sim.nbt.NbtElectricalGateInput("speed");
     public FluidNode intake, outlet;
     private double[] loadedOut;
     public Link blower;
@@ -44,6 +46,7 @@ public class AirBlowerElement extends TransparentNodeElement implements FluidDev
         super(node, d);
         desc = (AirBlowerDescriptor) d;
         electricalLoadList.add(load);
+        electricalLoadList.add(speed);
         electricalComponentList.add(resistor);
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         resistor.setR(1e9);
@@ -52,7 +55,8 @@ public class AirBlowerElement extends TransparentNodeElement implements FluidDev
     @Override
     public void beforeFluidStep(double dt) {
         if (blower == null) return;
-        share = Math.max(0, Math.min(1, load.getU() / desc.nominalU));
+        double signal = speed.getConnectedComponents().isEmpty() ? 1 : speed.getNormalized();
+        share = Math.max(0, Math.min(1, signal)) * Math.max(0, Math.min(1, load.getU() / desc.nominalU));
         // (the fan laws: flow with the speed, pressure with its square)
         blower.speed = share;
         blower.h0 = Math.max(1, AirBlowerDescriptor.SHUTOFF_PA * share * share);
@@ -138,7 +142,8 @@ public class AirBlowerElement extends TransparentNodeElement implements FluidDev
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-        return lrdu == LRDU.Down && side == front ? load : null;
+        if (lrdu != LRDU.Down) return null;
+        return side == front ? load : side == front.back() ? speed : null;
     }
 
     @Override
@@ -148,7 +153,8 @@ public class AirBlowerElement extends TransparentNodeElement implements FluidDev
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
-        return lrdu == LRDU.Down && side == front ? NodeBase.maskElectricalPower : 0;
+        if (lrdu != LRDU.Down) return 0;
+        return side == front ? NodeBase.maskElectricalPower : side == front.back() ? NodeBase.maskElectricalInputGate : 0;
     }
 
     @Override
