@@ -101,7 +101,7 @@ buckets as before) and burns as much per joule as its old two-bucket tank did; i
 and naphtha), so diesel or residue in its gasoline derate it, and coking fuel fouls it by the engines' law. An old
 save's tank (`tankLevel` x 2000 mB of `tankFluid`) goes into the vessel; an unknown fluid name (1.7.10 saved "lava")
 becomes gasoline, as the old tank burnt every fuel alike. GameTests gas_turbine_off_spec_derates,
-gas_turbine_heavy_oil_fouls, gas_turbine_clean_fuel_clears, fuel_generator_gasoline, fuel_generator_piped, fuel_generator_off_spec_derates,
+gas_turbine_heavy_oil_fouls, gas_turbine_clean_fuel_clears, fuel_generator_gasoline, fuel_generator_piped, fuel_generator_off_spec_derates, fuel_generator_diesel_derates, fuel_generator_restarts_after_dilution,
 fuel_generator_clean_fuel_clears, fuel_generator_old_save; unit test FuelQualityTest.
 
 ### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)

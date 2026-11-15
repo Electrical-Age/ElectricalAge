@@ -22,7 +22,11 @@ import java.util.List;
  * mode 3, an old save (a tank of 0.75 of gasoline, and one of 0.5 of "lava", 1.7.10's default name): its fuel is in
  * the vessel, 1500 mB and 1000 mB of gasoline;
  * mode 4, an empty one under an open tank of gasoline (1 atm, a pipe end on its top flange): the head fills its vessel
- * past a bucket, and it runs on it.
+ * past a bucket, and it runs on it;
+ * mode 5, gasoline with 10 % diesel by mass: 80 % power (diesel, 530 K, is over its 400 K window; the gas turbine's
+ * 720 K window would take it), and it burns clean;
+ * mode 6, 40 % gasoline, 30 % diesel, 30 % heavy oil (60 % off its window: no power): it won't run; topped up with
+ * gasoline (23 % off: 54 % power), a click starts it.
  */
 public final class FuelGeneratorCases {
     private FuelGeneratorCases() {
@@ -34,6 +38,8 @@ public final class FuelGeneratorCases {
         cases.add(new Quality("fuel_generator_clean_fuel_clears", 2));
         cases.add(new Quality("fuel_generator_old_save", 3));
         cases.add(new Quality("fuel_generator_piped", 4));
+        cases.add(new Quality("fuel_generator_diesel_derates", 5));
+        cases.add(new Quality("fuel_generator_restarts_after_dilution", 6));
     }
 
     static final class Quality implements TestCase {
@@ -45,6 +51,7 @@ public final class FuelGeneratorCases {
         String legacy = "not run", legacyLava = "not run";
         mods.eln.sim.fluid.FluidDevice fx;
         mods.eln.sim.fluid.FluidNode main;
+        boolean refused, restarted;
 
         Quality(String id, int mode) {
             this.id = id;
@@ -81,6 +88,26 @@ public final class FuelGeneratorCases {
             double kg = 1500 * mods.eln.fluid.FluidSpecies.kgPerMb(reg.id("eln:gasoline"), false);
             EaUnits.add(v, reg.id("eln:gasoline"), kg, 293.15, false);
             if (mode == 1) EaUnits.add(v, reg.id("eln:residue"), kg / 9, 293.15, false);
+            if (mode == 5) EaUnits.add(v, reg.id("eln:diesel"), kg / 9, 293.15, false);
+            if (mode == 6) {
+                // (200 mB of gasoline, by mass 40 %, diesel and heavy oil 30 % each)
+                EaUnits.drainLiquid(v, reg.id("eln:gasoline"), v.liquid(reg.id("eln:gasoline")));
+                double k = 200 * mods.eln.fluid.FluidSpecies.kgPerMb(reg.id("eln:gasoline"), false);
+                EaUnits.add(v, reg.id("eln:gasoline"), k, 293.15, false);
+                EaUnits.add(v, reg.id("eln:diesel"), k * 0.75, 293.15, false);
+                EaUnits.add(v, reg.id("eln:heavy_oil"), k * 0.75, 293.15, false);
+                v.update();
+                Wp10bCases.click(ctx, gen, ItemStack.EMPTY);   // (it can't: no power on this)
+                ctx.after(20, () -> {
+                    refused = !gen.running() && gen.fuel.power() == 0;
+                    // (4x as much gasoline again: 1.5 of 6.5 parts off its window, 23 %: 54 % power)
+                    EaUnits.add(gen.inlet.vessel, reg.id("eln:gasoline"), 4 * k, 293.15, false);
+                    gen.inlet.vessel.update();
+                    Wp10bCases.click(ctx, gen, ItemStack.EMPTY);
+                    restarted = gen.running();
+                });
+                return;
+            }
             if (mode == 4) {
                 // (an open tank of gasoline over its top flange instead: 1 m^3, 80 % full, 1 atm over the liquid)
                 EaUnits.drainLiquid(v, reg.id("eln:gasoline"), v.liquid(reg.id("eln:gasoline")));
@@ -138,6 +165,14 @@ public final class FuelGeneratorCases {
                 ctx.check(id + ": an old save's 0.5 tank of \"lava\" (1.7.10's name) is 1000 mB of gasoline, not lost", legacyLava.isEmpty(), legacyLava);
                 return;
             }
+            if (mode == 6) {
+                String what = String.format("refused %b, restarted %b, now on %b, rating %s, source %.1f W; %s", refused, restarted, gen.running(), gen.fuel, gen.sourceP(), gen.getWaila());
+                ctx.line(id + ": " + what);
+                ctx.check(id + ": 60 % off its window: no power, it won't run", refused, what);
+                ctx.check(id + ": topped up with gasoline, a click starts it and it runs at 54 %", restarted && gen.running()
+                    && Math.abs(gen.fuel.power() - (1 - 2 * 1.5 / 6.5)) < 0.01, what);
+                return;
+            }
             if (mode == 4) {
                 mods.eln.fluid.FluidWorld.remove(fx);
                 String what = String.format("vessel %.0f mB at %.2f bar, burnt %.2f mB; %s", gen.inlet.feedMb(), gen.inlet.vessel.P() / 1e5, gen.burntMb - burnt0, gen.getWaila());
@@ -149,7 +184,7 @@ public final class FuelGeneratorCases {
             double t = (ctx.world().getGameTime() - t0) / 20.0, used = mb0 - gen.inlet.feedMb(), burnt = gen.burntMb - burnt0;
             double pNom = 300 * Eln.fuelGeneratorPowerFactor;
             double rate = 1.375 * 0.1 * pNom / (Eln.fuelGeneratorTankCapacity * pNom) * FuelGeneratorElement.TANK_MB;   // (mB/s)
-            double power = mode == 1 ? 0.8 : 1;
+            double power = mode == 1 || mode == 5 ? 0.8 : 1;
             double index = mode == 1 ? 0.1 : 0;
             double dFoul = gen.foul - foul0;
             // (load 0.1 of nominal: the minimum load)
@@ -164,6 +199,8 @@ public final class FuelGeneratorCases {
             ctx.check(id + ": its power source gives " + String.format("%.0f %%", q * 100) + " of nominal",
                 Math.abs(gen.sourceP() - pNom * q) < 0.01 * pNom, String.format("%.1f W", gen.sourceP()));
             if (mode == 0) ctx.check(id + ": gasoline is in its window and clean", gen.fuel.off() == 0 && gen.foul == 0, gen.fuel + ", " + gen.foul);
+            if (mode == 5) ctx.check(id + ": diesel is 10 % too heavy for it, and burns clean", Math.abs(gen.fuel.heavy() - 0.1) < 0.002
+                && gen.fuel.light() == 0 && gen.foul == 0, gen.fuel + ", " + gen.foul);
             if (mode == 1) {
                 ctx.check(id + ": rated 10 % too heavy", Math.abs(gen.fuel.heavy() - 0.1) < 0.002 && gen.fuel.light() == 0, gen.fuel.toString());
                 ctx.check(id + ": it fouls slowly, by the engines' law", dFoul > 0 && Math.abs(dFoul / expect - 1) < 0.05, String.format("%.7f against %.7f", dFoul, expect));

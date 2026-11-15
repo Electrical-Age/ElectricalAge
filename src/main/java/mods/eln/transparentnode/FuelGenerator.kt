@@ -225,6 +225,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
                 if (on) {
                     on = false
                 } else {
+                    rate()   // (what is in the vessel now: a stop on bad fuel must not latch after it is diluted)
                     if (inlet.feedMb() > 0 && quality() > 0) {
                         on = true
                         voltageGracePeriod = FuelGeneratorDescriptor.VoltageStabilizationGracePeriod
@@ -327,6 +328,13 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
         mods.eln.fluid.FluidWorld.remove(this)
     }
 
+    /** Rate the feed in its vessel for its window (no feed: the last rating stays). */
+    fun rate() {
+        val v = inlet.vessel ?: return
+        val id = inlet.feedId()
+        if (id >= 0) fuel = mods.eln.sim.fluid.FuelQuality.rate(v, id, mods.eln.sim.fluid.FuelQuality.GENERATOR_LO, mods.eln.sim.fluid.FuelQuality.GENERATOR_HI)
+    }
+
     /**
      * A step's fuel out of the vessel: as much per joule as the old tank (tank energy / 2000 mB), at the old
      * efficiency-by-load curve and minimum load. Off-window fuel and fouling give less power for the same fuel (the
@@ -337,7 +345,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
         val d = descriptor
         val v = inlet.vessel ?: return
         val id = inlet.feedId()
-        if (id >= 0) fuel = mods.eln.sim.fluid.FuelQuality.rate(v, id, mods.eln.sim.fluid.FuelQuality.GENERATOR_LO, mods.eln.sim.fluid.FuelQuality.GENERATOR_HI)
+        rate()
         val quality = Math.max(0.05, quality())
         val power = Math.max(powerSource.effectiveP / quality, d.nominalPower * FuelGeneratorDescriptor.MinimalLoadFractionOfNominalPower)
         val want = dt * FuelGeneratorDescriptor.EfficiencyFactorVsLoadFactor(power / d.nominalPower) * power / (d.tankEnergyCapacity / TANK_MB)
