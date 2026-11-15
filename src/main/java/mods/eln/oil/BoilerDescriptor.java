@@ -19,11 +19,73 @@ import java.util.List;
 public class BoilerDescriptor extends TransparentNodeDescriptor {
     public static final double J_PER_MB_WATER = 175, STEAM_PER_WATER = 67.5, BOIL_C = 100;
     final Obj3D obj;
+    /**
+     * What sets a boiler's size (the Boiler's values; large() gives the Large Boiler's): the vessel (m3) and its rated
+     * water (mB, the gauge glass's full mark); the shell's heat capacity (J/K), its wall into the water (K/W), its
+     * thermal faces' series resistance and its loss to the air (K/W); the shell's limit (K over ambient, its
+     * watchdog) and the pressure it bursts at (Pa); the strongest explosion its burst makes (4: TNT).
+     */
+    public double volume = BoilerElement.VOLUME, shellC = BoilerElement.SHELL_C, shellToWater = BoilerElement.SHELL_TO_WATER_K_PER_W;
+    public double faceRs = 0.01, lossRp = 1.0, shellMaxK = 400, burstPa = BoilerElement.BURST_PA;
+    public int waterMb = BoilerTanks.WATER_MB;
+    public float maxBoom = 4;
+    public boolean large;
+    /** The vessel's height (blocks): 2 for the 2x2x2 Large Boiler. */
+    public double height = 1.0;
 
     public BoilerDescriptor(String name, String model) {
-        super(name, BoilerElement.class, BoilerRender.class);
+        this(name, model, BoilerElement.class);
+    }
+
+    public BoilerDescriptor(String name, String model, Class<?> elementClass) {
+        super(name, elementClass, BoilerRender.class);
         obj = Eln.obj.getObj(model);
         cableTerminals = mods.eln.cable.CableTerminals.FRONT;   // the phase signal's plate (mods.eln.cad.models.Boiler)
+    }
+
+    /**
+     * The Large Boiler (Baughn 2026-11-15: one block, about four Boilers, of alloy plate, with a higher pressure limit
+     * and accordingly a larger boom): four times the vessel, the water, the shell and the wall (166 kW at 20 bar
+     * against 41.5), faces of a quarter the resistance (a furnace against it runs cooler, and several furnaces on
+     * thermal cable can share a face), 500 bar against 350, and a burst of up to 6 against 4.
+     */
+    public BoilerDescriptor large() {
+        large = true;
+        volume *= 4;
+        waterMb *= 4;
+        shellC *= 4;
+        shellToWater /= 4;
+        faceRs /= 4;
+        lossRp = 0.4;   // (about 2.5 times the Boiler's surface)
+        burstPa = 500e5;
+        maxBoom = 6;
+        return this;
+    }
+
+    /**
+     * The Large Boiler as Baughn asked for it (2026-11-15: "It needs at least one face free for a signal output. How
+     * about making it 2x2x2, physically?"): large()'s ratings in a 2x2x2 body, one node at its front-bottom-left block
+     * and seven ghost blocks to the right, back and up (LargeBoilerElement: twelve thermal faces, two steam outlets on
+     * top, the feed flange and the level signal on the front). PROTOTYPE: the Boiler's model at twice the size.
+     */
+    public static BoilerDescriptor twoByTwo(String name, String model) {
+        var d = new BoilerDescriptor(name, model, LargeBoilerElement.class).large();
+        d.height = 2;
+        var g = new mods.eln.ghost.GhostGroup();
+        g.addRectangle(0, 1, 0, 1, 0, 1);
+        g.removeElement(0, 0, 0);
+        d.setGhostGroup(g);
+        return d;
+    }
+
+    /** Its rated fill (kg of water): the gauge glass's full mark. */
+    public double ratedKg() {
+        return waterMb * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
+    }
+
+    /** The heat (W) its wall passes into water boiling at pa with its shell at its limit: what it can take, sustained. */
+    public double heatLimitW(double pa) {
+        return (shellMaxK - (mods.eln.sim.fluid.Water.tsat(pa) - mods.eln.sim.fluid.Water.T_AMBIENT)) / shellToWater;
     }
 
     /** A boiler may also stand on another EA device (a steam turbine: its dome port feeds the turbine's inlet below). */
@@ -57,11 +119,19 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add("Water in by pipe (right flank), heat in from a heater or furnace on the back or a flank, steam out by pipe");
-        list.add("Front: the gauge glass's level as a signal, 0 V empty to 5 V full");
+        if (height > 1) {
+            list.add("2 x 2 x 2 blocks, placed from its front bottom left; it grows right, back and up");
+            list.add("Heat in on all twelve faces of its back and flanks; steam out on the two rear top faces;");
+            list.add("water in at the front, low right; the level signal at the front, low left, 0 V empty to 5 V full");
+        } else {
+            list.add("Water in by pipe (right flank), heat in from a heater or furnace on the back or a flank, steam out by pipe");
+            list.add("Front: the gauge glass's level as a signal, 0 V empty to 5 V full");
+        }
         // (Erisi's chat review: how heater temperature and boiler pressure relate)
         list.add("Its pressure follows its water's temperature: 1 bar boils at 100 °C, 10 bar at 180 °C;");
         list.add("the heater must be hotter than that to keep it boiling");
         list.add("1 bucket of water + 175 kJ: 67.5 buckets of steam");
+        list.add(String.format("Takes up to %.0f kW at 20 bar, %.0f kW at 10 bar; holds %d buckets of water", heatLimitW(20e5) / 1000, heatLimitW(10e5) / 1000, waterMb / 1000));
+        if (large) list.add("Of alloy plate: bursts at 500 bar, and harder than a Boiler");
     }
 }

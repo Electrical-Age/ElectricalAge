@@ -2336,6 +2336,14 @@ public final class ElnRecipes extends ElnRecipesBase {
             'C', stack(Items.CAULDRON),
             't', findItemStack("Copper Thermal Cable"),
             'I', stack(Items.IRON_INGOT));
+        // PLACEHOLDER (Baughn 2026-11-15: a somewhat expensive alloy-plate device): six Alloy Plates round two Boilers
+        addRecipe(findItemStack("Large Boiler", 1),
+            "PBP",
+            "PtP",
+            "PBP",
+            'B', findItemStack("Boiler"),
+            't', findItemStack("Copper Thermal Cable"),
+            'P', findItemStack("Alloy Plate"));
 
         addRecipe(findItemStack("48V Compressor", 1),
             "IRI",

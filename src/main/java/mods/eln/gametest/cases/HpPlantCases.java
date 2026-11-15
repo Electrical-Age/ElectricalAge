@@ -63,6 +63,10 @@ public final class HpPlantCases {
         cases.add(oneBlower("hp_plant_midgame_one_blower", 1.0, 11000, 16930, 8340, 3.8, 2770, 4800));
         cases.add(oneBlower("hp_plant_midgame_one_blower_low", 0.55, 7000, 9590, 4720, 6.8, 470, 3690));
         cases.add(new BlowerBlocked());
+        cases.add(new LargeBoilerBody());
+        cases.add(new LargeBoilerPlant(false));
+        cases.add(new LargeBoilerPlant(true));
+        cases.add(new LargeBoilerBurst());
     }
 
     static final int AIR_BLOWER = 20 + (84 << 6);
@@ -214,6 +218,357 @@ public final class HpPlantCases {
             ctx.check(id + ": five seconds on clean steam do no harm (water under 2 %)", cleanOk && cleanWet < 0.02, String.format("%.2f %%", cleanWet * 100));
             ctx.check(id + ": water held at 20 % of its " + (inlet ? "inlet" : "exhaust") + " strips the blades (water damage)",
                 t.getBurnt() == mods.eln.sim.process.destruct.FailureCause.WATER, "" + t.getBurnt());
+        }
+    }
+
+    /** The 2x2x2 Large Boiler's id (16 + (83 << 6); 12 was the one-block prototype's, never shipped). */
+    static final int LARGE_BOILER = 16 + (83 << 6);
+
+    /** Place a Large Boiler with its front west (XN) at p: the fake player looks east. Null if it can't be placed. */
+    static BoilerElement largeBoiler(TestContext ctx, BlockPos p) {
+        var level = ctx.level();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        player.setYRot(270f);
+        var d = Eln.transparentNodeItem.getDescriptor(LARGE_BOILER);
+        var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, p, Direction.YN);
+        player.setYRot(0f);
+        return node == null ? null : (BoilerElement) node.element;
+    }
+
+    /** The world positions of a Large Boiler's eight blocks (front XN at origin o): x back, y up, z right. */
+    static BlockPos[] cells(BlockPos o) {
+        BlockPos[] out = new BlockPos[8];
+        int i = 0;
+        for (int x = 0; x <= 1; x++)
+            for (int y = 0; y <= 1; y++)
+                for (int z = 0; z <= 1; z++) out[i++] = o.offset(x, y, z);
+        return out;
+    }
+
+    /**
+     * The 2x2x2 Large Boiler's body: placed, it fills its eight blocks (seven ghosts, each with its face node); a ninth
+     * block in the way refuses a second one ("Not enough space"); breaking one ghost takes the whole boiler.
+     */
+    static final class LargeBoilerBody extends PlumbingCases.Big {
+        BoilerElement a;
+        BlockPos o, o2;
+        boolean refused, ghostsOk, nodesOk, portsOk, lowerPlaced, stackPlaced, floatPlaced;
+        String stackWhy;
+        int tick, thermalFaces, signalFaces;
+
+        public String id() {
+            return "large_boiler_2x2_body";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext ctx) {
+            o = ctx.at(2, 1, 2);
+            a = largeBoiler(ctx, o);
+            if (a == null) throw new IllegalStateException("the Large Boiler could not be placed");
+            ghostsOk = a.front == Direction.XN;
+            nodesOk = true;
+            BlockPos[] c = cells(o);
+            for (int i = 1; i < 8; i++) {
+                var co = new mods.eln.misc.Coordonate(c[i], ctx.level());
+                ghostsOk &= Eln.ghostManager.getGhost(co) != null && ctx.level().getBlockState(c[i]).getBlock() instanceof mods.eln.ghost.GhostBlock;
+                nodesOk &= mods.eln.node.NodeManager.instance.getNodeFromCoordonate(co) instanceof mods.eln.oil.LargeBoilerElement.FaceNode;
+            }
+            // its faces as designed: 12 thermal (back and flanks), the signal on the origin's front, pipe ports where the pipe tool finds them
+            for (BlockPos q : c) {
+                var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(q, ctx.level()));
+                if (n == null) continue;
+                for (Direction side : Direction.values()) {
+                    int m = n.getSideConnectionMask(side, mods.eln.misc.LRDU.Down);
+                    if ((m & mods.eln.node.NodeBase.maskThermal) != 0 && n.getThermalLoad(side, mods.eln.misc.LRDU.Down) == a.thermal) thermalFaces++;
+                    if ((m & mods.eln.node.NodeBase.maskElectricalOutputGate) != 0 && n.getElectricalLoad(side, mods.eln.misc.LRDU.Down) == a.phaseOut) signalFaces++;
+                }
+            }
+            var lv = ctx.level();
+            portsOk = mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(0, 0, 1), net.minecraft.core.Direction.WEST) != null       // feed, ghost (0,0,1)
+                && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(1, 1, 0), net.minecraft.core.Direction.UP) != null          // steam, ghost (1,1,0)
+                && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(1, 1, 1), net.minecraft.core.Direction.UP) != null          // steam, ghost (1,1,1)
+                && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o, net.minecraft.core.Direction.WEST) == null                         // the signal face: no pipe
+                && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(0, 1, 0), net.minecraft.core.Direction.UP) == null           // top front: plain
+                && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(1, 0, 0), net.minecraft.core.Direction.DOWN) == null;        // underneath: plain
+            // furnaces for its upper ring: on a furnace (left flank), and floating at its back (no floor)
+            var fd = Eln.transparentNodeItem.getDescriptor(Wp10bCases.FUEL_HEAT_FURNACE);
+            var fItem = (mods.eln.node.transparent.TransparentNodeItem) fd.parentItem;
+            var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(lv);
+            lowerPlaced = fItem.placeAt(fd.newItemStack(), fp, lv, o.offset(0, 0, -1), Direction.YN) != null;
+            stackWhy = fd.checkCanPlace(new mods.eln.misc.Coordonate(o.offset(0, 1, -1), lv), Direction.ZN);
+            stackPlaced = fItem.placeAt(fd.newItemStack(), fp, lv, o.offset(0, 1, -1), Direction.YN) != null;
+            floatPlaced = fItem.placeAt(fd.newItemStack(), fp, lv, o.offset(2, 1, 0), Direction.YN) != null;
+            ctx.line(String.format("large_boiler_2x2_body: a Fuel Heat Furnace beside it on the floor: %s; on that furnace (upper ring): %s (%s); floating at its back, upper: %s",
+                lowerPlaced, stackPlaced, stackWhy, floatPlaced));
+            // a stone where a second one's top back right block would go
+            o2 = ctx.at(6, 1, 2);
+            ctx.level().setBlockAndUpdate(o2.offset(1, 1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            refused = largeBoiler(ctx, o2) == null && ctx.level().getBlockState(o2).isAir();
+            // break its top back right ghost
+            ctx.level().setBlockAndUpdate(c[7], net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("large boiler 2x2: placed facing west, its seven other blocks are ghosts", ghostsOk, "");
+            ctx.check("large boiler 2x2: each ghost block has its face node", nodesOk, "");
+            ctx.check("large boiler 2x2: twelve thermal faces, all its one shell (back and both flanks)", thermalFaces == 12, "" + thermalFaces);
+            ctx.check("large boiler 2x2: one level-signal face (the origin's front)", signalFaces == 1, "" + signalFaces);
+            ctx.check("large boiler 2x2: the pipe tool finds the feed flange (front low right) and both steam outlets (top rear) on its ghost blocks, and nothing on plain faces", portsOk, "");
+            ctx.check("large boiler 2x2: a block in its volume refuses it, and nothing is placed", refused, "");
+            boolean gone = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(o, ctx.level())) == null;
+            boolean ghostsGone = true, nodesGone = true;
+            BlockPos[] c = cells(o);
+            for (int i = 1; i < 8; i++) {
+                var co = new mods.eln.misc.Coordonate(c[i], ctx.level());
+                ghostsGone &= Eln.ghostManager.getGhost(co) == null && !(ctx.level().getBlockState(c[i]).getBlock() instanceof mods.eln.ghost.GhostBlock);
+                nodesGone &= mods.eln.node.NodeManager.instance.getNodeFromCoordonate(co) == null;
+            }
+            ctx.check("large boiler 2x2: breaking one ghost breaks the boiler", gone && a.node.isDestructing() , "node gone " + gone);
+            ctx.check("large boiler 2x2: ... with all its ghost blocks and face nodes", ghostsGone && nodesGone, "ghosts " + ghostsGone + ", face nodes " + nodesGone);
+        }
+    }
+
+    /**
+     * A 16 kW HP plant on one 2x2x2 Large Boiler (todo #472): four Fuel Heat Furnaces with Big burners on a 1.6 bar air
+     * main, their backs against four of its twelve thermal faces (the origin's own left flank and three ghost faces);
+     * steam out of its rear top right outlet (a ghost block's port) to the HP turbine; the condensate back into its
+     * feed flange (front, low right: a ghost block's port). About 67 kW into the water at 20 bar, no fixture. Also its
+     * level signal on the origin's front.
+     */
+    static final class LargeBoilerPlant extends PlumbingCases.Big {
+        static final int WATCH = 3000, TICKS = 4800;
+        /** Natural draught: ten furnaces, six on its lower ring and four on furnaces in its upper ring, two of each on
+         *  its back; otherwise four on a 1.6 bar air main. */
+        final boolean natural;
+        final int n;
+        BoilerElement boiler;
+        final FuelHeatFurnaceElement[] f;
+        final ThermalLoad[] fT;
+        final FluidDevice[] air;
+        final FluidNode[] mains;
+
+        LargeBoilerPlant(boolean natural) {
+            this.natural = natural;
+            n = natural ? 10 : 4;
+            f = new FuelHeatFurnaceElement[n];
+            fT = new ThermalLoad[n];
+            air = new FluidDevice[n];
+            mains = new FluidNode[n];
+        }
+        ShaftSteamTurbineElement hp;
+        PlantCondenserElement c;
+        FluidDevice cooling, meter;
+        final Resistor[] loads = new Resistor[2];
+        IProcess clock;
+        int tick;
+        boolean counting;
+        double window, waterJ, meterS, pSum, shellSum, shellMax, fillLo = 1e9, fillHi, sigErr;
+        double[] furnaceMax;
+        double steam0, work0, pumped0;
+
+        public String id() {
+            return natural ? "large_boiler_2x2_natural_10_furnaces" : "large_boiler_2x2_hp_plant_20bar";
+        }
+
+        public int ticks() {
+            return TICKS;
+        }
+
+        public boolean checkLimitCycles() {
+            return false;
+        }
+
+        public void build(TestContext ctx) {
+            furnaceMax = new double[n];
+            int dx = natural ? 1 : 0;   // (natural: the turbine one block further east, clear of the back furnaces' flanges)
+            BlockPos bp = ctx.at(2, 1, 4), tp = ctx.at(5 + dx, 1, 5), cp = ctx.at(6 + dx, 1, 5);
+            boiler = largeBoiler(ctx, bp);
+            if (boiler == null) throw new IllegalStateException("the Large Boiler could not be placed");
+            boiler.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.fromTanks(boiler.desc.waterMb, 0);
+            boiler.showTanks();
+            // four furnaces: two on its left (north) flank, two on its right (south) flank, lower row
+            f[0] = furnace(ctx, bp.north(), Direction.ZN, 1900);                  // the origin's own face
+            f[1] = furnace(ctx, bp.offset(1, 0, -1), Direction.ZN, 1900);        // ghost (1,0,0)
+            f[2] = furnace(ctx, bp.offset(0, 0, 2), Direction.ZP, 1900);         // ghost (0,0,1), above its feed flange's block
+            f[3] = furnace(ctx, bp.offset(1, 0, 2), Direction.ZP, 1900);         // ghost (1,0,1)
+            if (natural) {
+                f[4] = furnace(ctx, bp.offset(2, 0, 0), Direction.XP, 1900);     // back, lower: ghosts (1,0,0) and (1,0,1)
+                f[5] = furnace(ctx, bp.offset(2, 0, 1), Direction.XP, 1900);
+                f[6] = furnace(ctx, bp.offset(0, 1, -1), Direction.ZN, 1900);    // upper ring, each on a furnace: left flank
+                f[7] = furnace(ctx, bp.offset(1, 1, -1), Direction.ZN, 1900);
+                f[8] = furnace(ctx, bp.offset(2, 1, 0), Direction.XP, 1900);     // and back
+                f[9] = furnace(ctx, bp.offset(2, 1, 1), Direction.XP, 1900);
+            }
+            for (int i = 0; i < n; i++) {
+                fT[i] = Batch1Cases.<ThermalLoad>field(f[i], "thermalLoad");
+                if (!natural) air[i] = OilCases.FurnacePressure.onFlange(f[i], mains[i] = OilCases.FurnacePressure.main(bp.getY(), 1.6e5, false));
+            }
+            // steam: from the rear top right outlet (3,2,5) up, east, down into the turbine's inlet
+            PipeCases.lay(ctx, ctx.at(3, 3, 5), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+            for (int x = 4; x < 5 + dx; x++) PipeCases.lay(ctx, ctx.at(x, 3, 5), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(5 + dx, 3, 5), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);
+            PipeCases.lay(ctx, ctx.at(5 + dx, 2, 5), 1, 8, 16, 8, 8, 0, 8);
+            TransparentNodeElement[] line = ShaftPlantCases.turbineLine(ctx, STEAM_TURBINE, tp, GENERATOR_8KW, GENERATOR_8KW);
+            hp = (ShaftSteamTurbineElement) line[0];
+            loads[0] = load((GeneratorElement) line[1], 11000);
+            loads[1] = load((GeneratorElement) line[2], 11000);
+            hp.controls.inventory.setItem(SteamValveControl.REGULATOR_SLOT, Eln.sharedItem.getDescriptor(8 + (3 << 6)).newItemStack());
+            hp.controls.targetBar = 20;
+            hp.controls.computeInventory();
+            c = ShaftPlantCases.condenser(ctx, cp, true, Direction.XP);
+            cooling = ShaftPlantCases.coolingLoop(c, cp.south(), 2, cp.north(), 3, 2e5);
+            // condensate: out of the condenser's front (east), south to z 7, west to x 1, north to z 5, east into the feed flange
+            PipeCases.lay(ctx, ctx.at(7 + dx, 1, 5), 1, 0, 4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 16);
+            PipeCases.lay(ctx, ctx.at(7 + dx, 1, 6), 1, 8, 8, 0, 8, 8, 16);
+            PipeCases.lay(ctx, ctx.at(7 + dx, 1, 7), 1, 8, 8, 0, 8, 8, 8, 0, 8, 8);
+            for (int x = 6 + dx; x >= 2; x--) PipeCases.lay(ctx, ctx.at(x, 1, 7), 1, 16, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, ctx.at(1, 1, 7), 1, 16, 8, 8, 8, 8, 8, 8, 8, 0);
+            PipeCases.lay(ctx, ctx.at(1, 1, 6), 1, 8, 8, 16, 8, 8, 0);
+            PipeCases.lay(ctx, ctx.at(1, 1, 5), 1, 8, 8, 16, 8, 8, 8, 16, 8, 8);
+            meter = new FluidDevice() {
+                public Object fluidLevel() {
+                    return boiler.fluidLevel();
+                }
+
+                public List<FluidPort> fluidPorts() {
+                    return List.of();
+                }
+
+                public void afterFluidStep(double dt) {
+                    if (!counting || boiler.vessel == null) return;
+                    waterJ += boiler.vessel.wallJ;
+                    meterS += dt;
+                }
+            };
+            mods.eln.fluid.FluidWorld.add(meter);
+            Eln.simulator.addSlowProcess(clock = dt -> {
+                if (c.v.vessel == null || boiler.vessel == null) return;
+                if (tick == 0) {
+                    EaUnits.addWater(c.v.vessel, 0.28 * c.v.vessel.volume * Water.RHO_L, 320, false);
+                    var run = mods.eln.fluid.FluidWorld.nodeFor(boiler.feed);
+                    run.fill(0.995 * run.volume * Water.RHO_L, Water.P_ATM, 300);
+                    run.update();
+                }
+                tick++;
+                for (FluidNode m : mains) if (m != null) m.fill(0, Water.P_ATM + 1.6e5, 293.15);
+                if (tick == WATCH) {
+                    counting = true;
+                    steam0 = hp.totalKg;
+                    work0 = hp.totalWork;
+                    pumped0 = c.v.totalPumpedKg;
+                }
+                if (tick > WATCH) {
+                    window += dt;
+                    pSum += boiler.vessel.P() * dt;
+                    shellSum += boiler.thermal.Tc * dt;
+                    shellMax = Math.max(shellMax, boiler.thermal.Tc);
+                    for (int i = 0; i < n; i++) furnaceMax[i] = Math.max(furnaceMax[i], fT[i].Tc);
+                    fillLo = Math.min(fillLo, boiler.fill());
+                    fillHi = Math.max(fillHi, boiler.fill());
+                    sigErr = Math.max(sigErr, Math.abs(boiler.phaseOut.getU() - Eln.SVU * Math.max(0, Math.min(1, boiler.fill()))));
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(clock);
+            mods.eln.fluid.FluidWorld.remove(meter);
+            mods.eln.fluid.FluidWorld.remove(cooling);
+            for (FluidDevice d : air) if (d != null) mods.eln.fluid.FluidWorld.remove(d);
+            for (Resistor r : loads) Eln.simulator.removeElectricalComponent(r);
+            String id = id();
+            double w = Math.max(1e-9, window);
+            double water = waterJ / Math.max(1e-9, meterS), steam = (hp.totalKg - steam0) / w, shaftW = (hp.totalWork - work0) / w;
+            double pumped = (c.v.totalPumpedKg - pumped0) / w, p = pSum / w, shell = shellSum / w;
+            double hottest = 0, coolest = 1e9;
+            for (double t : furnaceMax) {
+                hottest = Math.max(hottest, t);
+                coolest = Math.min(coolest, t);
+            }
+            ctx.line(String.format("%s: %.2f kW into the water (%.2f kW a furnace, %d furnaces), boiler %.2f bar, shell %.0f K over ambient (max %.0f), fill %.0f..%.0f %%; furnaces %s K over ambient (max); "
+                    + "steam %.2f g/s, shaft %.2f kW, pumped back %.2f g/s; level signal off its gauge glass by up to %.3f V; heat limit %.1f kW at 20 bar",
+                id, water / 1000, water / n / 1000, n, p / 1e5, shell, shellMax, fillLo * 100, fillHi * 100, java.util.Arrays.toString(java.util.Arrays.stream(furnaceMax).mapToLong(Math::round).toArray()),
+                steam * 1000, shaftW / 1000, pumped * 1000, sigErr, boiler.desc.heatLimitW(20e5) / 1000));
+            ctx.line(id + ": boiler " + boiler.getWaila() + "; HP " + hp.getWaila());
+            boolean joined = false;
+            for (var q : c.fluidPorts()) joined |= mods.eln.fluid.FluidWorld.networkOf(q.node()) == mods.eln.fluid.FluidWorld.networkOf(boiler.feed);
+            boolean burnt = boiler.isBurnt() || hp.isBurnt();
+            for (var x : f) burnt |= x.isBurnt();
+            ctx.check(id + ": nothing burnt out", !burnt, "");
+            ctx.check(id + ": the feed flange on a ghost block takes the condensate (one network with the condenser)", joined && mods.eln.fluid.FluidWorld.networkOf(boiler.feed) != null, "");
+            ctx.check(id + ": the steam outlet on a ghost block feeds the turbine, and the condensate comes back (90 %+)", steam > 15e-3 && pumped > 0.9 * steam,
+                String.format("%.2f of %.2f g/s", pumped * 1000, steam * 1000));
+            ctx.check(id + ": " + n + " furnaces on " + n + " faces put 60 kW+ into the water", water > 60e3, String.format("%.1f kW", water / 1000));
+            ctx.check(id + ": every furnace passes its heat on (none runs hot: under 450 K over ambient, all within 30 K of each other)",
+                hottest < 450 && hottest - coolest < 30, String.format("%.0f..%.0f K", coolest, hottest));
+            ctx.check(id + ": it holds 20 bar (within 1.5 bar)", Math.abs(p / 1e5 - 20) < 1.5, String.format("%.2f bar", p / 1e5));
+            ctx.check(id + ": its shell stays well under its limit (320 K of 400 over ambient)", shellMax < 320, String.format("%.0f K", shellMax));
+            ctx.check(id + ": it neither boils dry nor overfills", fillLo > 0.3 && fillHi < 1.02, String.format("%.0f..%.0f %%", fillLo * 100, fillHi * 100));
+            ctx.check(id + ": one HP turbine at rated power (16 kW+ on the shaft)", shaftW > 16e3, String.format("%.2f kW", shaftW / 1000));
+            ctx.check(id + ": its level signal (the origin's front) follows the gauge glass (within 0.1 V)", sigErr < 0.1 && boiler.phaseOut.getU() > 1, String.format("%.3f V off, %.2f V", sigErr, boiler.phaseOut.getU()));
+        }
+    }
+
+
+    /**
+     * A Boiler and a Large Boiler, each full to its mark with water at 212 C (20 bar): what would flash if each burst,
+     * and the explosion that makes. Nothing is detonated (the explosion would take the neighbouring tests with it): the
+     * numbers are the ones BoilerElement hands to Failure when its pressure passes its rating.
+     */
+    static final class LargeBoilerBurst extends PlumbingCases.Big {
+        BoilerElement small, big;
+        double eSmall, eBig;
+        float sSmall, sBig;
+
+        public String id() {
+            return "large_boiler_burst_is_larger";
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        BoilerElement hot(TestContext ctx, int id, BlockPos p) {
+            return hot((BoilerElement) ctx.placeTransparent(id, p));
+        }
+
+        BoilerElement hot(BoilerElement b) {
+            b.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            b.fromTanks(b.desc.waterMb, 0);
+            b.vessel.energy += b.vessel.mWater * (Water.uLiquid(485.15) - Water.uLiquid(372.15));
+            b.vessel.update();
+            return b;
+        }
+
+        public void build(TestContext ctx) {
+            small = hot(ctx, 8 + (82 << 6), ctx.at(2, 1, 2));
+            big = largeBoiler(ctx, ctx.at(5, 1, 2));
+            hot(big);
+            eSmall = small.flashEnergy();
+            eBig = big.flashEnergy();
+            sSmall = small.burstStrength();
+            sBig = big.burstStrength();
+            ctx.line(String.format("large_boiler_burst_is_larger: Boiler %.2f kg of water at %.0f C, %.1f bar: %.0f kJ would flash, explosion %.2f (bursts at %.0f bar); "
+                    + "Large Boiler %.2f kg at %.0f C, %.1f bar: %.0f kJ, explosion %.2f (bursts at %.0f bar); heat limits at 20 bar %.1f and %.1f kW",
+                small.vessel.mWater, small.vessel.T() - Water.T0, small.vessel.P() / 1e5, eSmall / 1000, sSmall, small.desc.burstPa / 1e5,
+                big.vessel.mWater, big.vessel.T() - Water.T0, big.vessel.P() / 1e5, eBig / 1000, sBig, big.desc.burstPa / 1e5,
+                small.desc.heatLimitW(20e5) / 1000, big.desc.heatLimitW(20e5) / 1000));
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("large boiler: full and hot, it holds four times the Boiler's flash energy (within 10 %)", eSmall > 100e3 && Math.abs(eBig / eSmall / 4 - 1) < 0.10,
+                String.format("%.0f against %.0f kJ", eBig / 1000, eSmall / 1000));
+            ctx.check("large boiler: the Boiler's burst is TNT at most (4), the Large Boiler's larger, up to 6", sSmall <= 4 && sBig > sSmall + 1 && sBig <= 6,
+                String.format("%.2f against %.2f", sBig, sSmall));
+            ctx.check("large boiler: the same energy makes the same explosion in both (the formula is shared; only the cap differs)",
+                mods.eln.sim.process.destruct.Failure.explosionStrength(60e3, small.desc.maxBoom) == mods.eln.sim.process.destruct.Failure.explosionStrength(60e3, big.desc.maxBoom), "");
+            ctx.check("large boiler: it bursts at a higher pressure than the Boiler, and takes four times the heat at 20 bar",
+                big.desc.burstPa > small.desc.burstPa && Math.abs(big.desc.heatLimitW(20e5) / small.desc.heatLimitW(20e5) - 4) < 0.01,
+                String.format("%.0f against %.0f bar, %.1f against %.1f kW", big.desc.burstPa / 1e5, small.desc.burstPa / 1e5, big.desc.heatLimitW(20e5) / 1000, small.desc.heatLimitW(20e5) / 1000));
         }
     }
 
