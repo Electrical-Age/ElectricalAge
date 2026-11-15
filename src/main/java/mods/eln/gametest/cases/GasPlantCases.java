@@ -38,6 +38,7 @@ public final class GasPlantCases {
         cases.add(new FuelQualityCase("gas_turbine_off_spec_derates", 0));
         cases.add(new FuelQualityCase("gas_turbine_heavy_oil_fouls", 1));
         cases.add(new FuelQualityCase("gas_turbine_clean_fuel_clears", 2));
+        cases.add(new FuelQualityCase("gas_turbine_crude_derated", 3));
         cases.add(new NoSelfStart());
         cases.add(new RealGas());
         cases.add(new LowHead());
@@ -184,7 +185,9 @@ public final class GasPlantCases {
      * Fuel quality on the gas turbine (refinery M1, Baughn 2026-11-15), a motor-started turbine on a 4 kW load:
      * mode 0, diesel with 10 % residue by mass: 20 % less work for its fuel (22.4 % against 28 %), and it fouls;
      * mode 1, heavy oil: full power for its fuel at first, fouling at the furnace burner's law over the engines' balance;
-     * mode 2, a half-fouled turbine on gasoline: half the work for its fuel, and it clears.
+     * mode 2, a half-fouled turbine on gasoline: half the work for its fuel, and it clears; wool cleans it;
+     * mode 3, dead crude (it counts as its main cut, heavy oil, so the turbine takes it, as before): 15.8 % residue, so
+     * 68 % of the work for its fuel, and it fouls faster than on heavy oil.
      */
     static final class FuelQualityCase extends PlumbingCases.Big {
         final String id;
@@ -215,6 +218,7 @@ public final class GasPlantCases {
                 mods.eln.sim.fluid.EaUnits.add(v, reg.id("eln:diesel"), 0.45, 293.15, false);
                 mods.eln.sim.fluid.EaUnits.add(v, reg.id("eln:residue"), 0.05, 293.15, false);
             } else if (mode == 1) mods.eln.sim.fluid.EaUnits.add(v, reg.id("eln:heavy_oil"), 0.5, 293.15, false);
+            else if (mode == 3) mods.eln.sim.fluid.EaUnits.add(v, reg.id("eln:crude_oil"), 0.5, 293.15, false, false);
             else l.gt.foul = foulStart = 0.5;
             v.update();
             Eln.simulator.addSlowProcess(watch = dt -> {
@@ -235,14 +239,15 @@ public final class GasPlantCases {
             double fuelJ = gt.totalFuelJ - f0, eta = (gt.totalWork - w0) / Math.max(1, fuelJ), dFoul = gt.foul - foul0;
             // (the fouling law: FOUL_PER_INDEX x (index - balance) per FOUL_SECONDS at full power = per that much fuel heat)
             double full = GasTurbineElement.NOMINAL_P / GasTurbineElement.ETA * mods.eln.sim.fluid.FuelQuality.FOUL_SECONDS;
-            double index = mode == 0 ? 0.9 * 0.01 + 0.1 : mode == 1 ? 0.15 : 0;
+            double index = mode == 0 ? 0.9 * 0.01 + 0.1 : mode == 1 ? 0.15 : mode == 3 ? (0.35 * 0.15 + 0.25 * 0.01 + 0.15) / 0.95 : 0;
             double expect = mods.eln.sim.fluid.FuelQuality.foulRate(index, mods.eln.sim.fluid.FuelQuality.ENGINE_BALANCE) * fuelJ / full;
-            double etaWant = GasTurbineElement.ETA * (mode == 0 ? 0.8 : 1) * (1 - (foul0 + gt.foul) / 2);
+            double etaWant = GasTurbineElement.ETA * (mode == 0 ? 0.8 : mode == 3 ? 1 - 2 * 0.15 / 0.95 : 1) * (1 - (foul0 + gt.foul) / 2);
             ctx.line(String.format("%s: burning %b at %.0f rad/s, %.1f kW fuel -> %.1f kW, %.1f %% (want %.1f); rating %s; fouling %.5f -> %.5f (d %.6f, law %.6f); %s",
                 id, gt.burning, gt.getShaft().getRads(), gt.fuelW / 1000, gt.shaftW / 1000, eta * 100, etaWant * 100, gt.fuel, foul0, gt.foul, dFoul, expect, gt.getWaila()));
             ctx.check(id + ": it runs and carries its load at speed", gt.burning && l.loaded && gt.getShaft().getRads() > 760, String.format("%.0f rad/s", gt.getShaft().getRads()));
             ctx.check(id + ": work / fuel heat within 6 % of " + String.format("%.1f %%", etaWant * 100), Math.abs(eta / etaWant - 1) < 0.06, String.format("%.2f %%", eta * 100));
             if (mode == 0) ctx.check(id + ": rated 10 % too heavy", Math.abs(gt.fuel.heavy() - 0.1) < 0.005 && gt.fuel.light() == 0, gt.fuel.toString());
+            if (mode == 3) ctx.check(id + ": rated 15.8 % too heavy", Math.abs(gt.fuel.heavy() - 0.15 / 0.95) < 0.005 && gt.fuel.light() == 0, gt.fuel.toString());
             if (mode == 2) ctx.check(id + ": clean fuel clears it, by the law", dFoul < 0 && Math.abs(dFoul / expect - 1) < 0.02 && gt.foul < foulStart, String.format("%.6f against %.6f", dFoul, expect));
             else ctx.check(id + ": it fouls slowly, by the law", dFoul > 0 && Math.abs(dFoul / expect - 1) < 0.02 && gt.foul < 0.02, String.format("%.6f against %.6f", dFoul, expect));
             if (mode == 2) {
