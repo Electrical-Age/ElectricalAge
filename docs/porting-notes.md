@@ -280,6 +280,21 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   rooms and spills aren't tracked). Jade shows the overfiring and the venting. A pump-fed furnace now overfires by its
   line's pressure unless the line is regulated. GameTests `fuel_furnace_forced_air`, `_relief`, `_burst`, `_gas_first`,
   `_gas_fire`.
+- Fuel heat furnace's combustion air and the 230V Air Blower (`eln:transparent_node@5396`, new; todo #471, Baughn
+  2026-11-15). Pressure-fed, the burner now takes its combustion air out of its tank, 0.4 kg per MJ of fire (any
+  hydrocarbon's ~3 MJ per kg of air, 20 % excess), through an air register metered to that rate inside the fluid solve;
+  at or under the breather's deadband (natural draught) it draws the room's air as before and nothing changed. The
+  breather's float vent is a breathing vent now, 200 x narrower than its vacuum breaker (it was a ~2 cm hole: 146 g/s
+  of air at 1.5 bar, 20 x the combustion air, and that hot air carried oil vapour out: 15 % more oil for 2 % less
+  fire); it passes under 1 g/s at 1.4 bar, and a gas main still escapes through it (1 g/s) and sets the fire. Relief
+  (3 bar) and burst (6 bar) unchanged. The Air Blower: an electric centrifugal blower (230 V on its front, a speed
+  signal on its back setting its pressure with the speed's square) blowing air from around it into the pipe on its
+  right flank; 1.8 bar shut-off, 0.04 m^3/s free flow, power = flow x rise / 0.9 + 20 W idling. One feeds two Big
+  burners: at full speed ~1.5 bar, 20 g/s, 2.8 kW; at 55 % ~0.45 bar, 11 g/s, 0.47 kW. Measured on one Boiler, two Big
+  burners and an HP turbine (2.71 kW electric by natural draught): 7.58 kW electric - 2.77 kW = 4.81 kW net, or
+  4.18 - 0.47 = 3.71 kW net slowed; the 16 kW plant with four blowers 15.77 - 5.05 = 10.72 kW net. Stand-in model,
+  render and icon (the Inline Pump's); placeholder recipe. GameTests `air_blower_blocked_outlet_stalls`,
+  `hp_plant_furnace_fired_blowers`, `hp_plant_midgame_one_blower`, `_low`, `hp_plant_full_blowers_16kw`.
 - Pipe Mixer (`eln:transparent_node@5308`, new; Baughn 2026-11-11): a signal-controlled pipe T that works as two
   steerable check valves, not molar valves. Inlet A on its left flank, B on its right, the outlet out of its back, all
   4 px up; a signal on its front opens A by s and B by 1 - s (no signal: half each). Each inlet is a check valve with a

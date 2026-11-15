@@ -133,7 +133,24 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         const val FLANGE_Y = 4 / 16.0
         /** Its flange's conductance (as the oil devices' ports) and its breather's on top (small: a vent, not an opening). */
         const val PORT_K = 6e-11
+        /** The breather's vacuum breaker (air in as the fuel goes down). */
         const val BREATHER_K = 1e-11
+        /**
+         * The breather's float vent (gas out): a breathing vent of a few mm, 200 times narrower than the vacuum breaker
+         * (todo #471: at BREATHER_K it was a ~2 cm hole and passed 146 g/s of air at 1.5 bar gauge, 20 times what a
+         * pressure-fed Big burner burns; now under 1 g/s). It still lets live crude's gas and a gas main's excess out.
+         */
+        const val GAS_VENT_K = 5e-14
+        /**
+         * Combustion air per joule of the burner's heat (kg/J): any hydrocarbon fuel burns ~3 MJ per kg of air at
+         * stoichiometry, with 20 % excess air 0.4 kg/MJ. By the heat, not the fuel's kg, as heatFurnaceFuelFactor makes
+         * EA's fuels give ~2.5 x their real heat (a Big burner at its 10 kW: 0.1 g/s of heavy oil, 4 g/s of air). Over the
+         * deadband (pressure-fed) the burner draws it out of the tank through its air register (breathe); at or under it
+         * (natural draught) it draws the room's air, as it always did.
+         */
+        const val AIR_KG_PER_J = 0.4e-6
+        /** The air register's conductance wide open (as the old breather: ~150 g/s at 1.5 bar); breathe meters it. */
+        const val REGISTER_K = 1e-11
         /** The pressure difference (Pa) over which each breather vent starts to open, fully open at twice it. */
         const val BREATHER_DEADBAND_PA = 300.0
         /**
@@ -189,6 +206,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private var breather: mods.eln.sim.fluid.FluidDevice.Vent? = null
     private var airIn: mods.eln.sim.fluid.FluidDevice.Vent? = null
     private var relief: mods.eln.sim.fluid.FluidDevice.Vent? = null
+    /** The pressure-fed burner's air register: the tank's air into the flame (breathe). */
+    private var register: mods.eln.sim.fluid.FluidDevice.Vent? = null
     private var loaded: DoubleArray? = null
     /** An old save's tank (a 2-bucket fluid tank) and its flange's stub, put into the vessel when it is made. */
     private var legacyTank: net.neoforged.neoforge.fluids.FluidStack? = null
@@ -239,7 +258,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val out = breather ?: return listOf()
         val inn = airIn ?: return listOf()
         val rel = relief ?: return listOf(out, inn)
-        return listOf(out, inn, rel)
+        val reg = register ?: return listOf(out, inn, rel)
+        return listOf(out, inn, rel, reg)
     }
 
     /**
@@ -259,7 +279,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val v = vessel
         if (v != null) {
             view.sync(v, amb)
-            burn(v)
+            burn(v, dt)
             setBreather(v)
         }
         if (flue.step(if (isBurnt()) 0.0 else actualHeatPower, dt, amb)) needPublish()   // (burnt: its fire is out)
@@ -297,7 +317,46 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
      * the bank: kg = heat / (heatFurnaceFuelFactor x the layer's heating value), by drainLayer (every species in it by its
      * share). Water there boils off at the flame's cost and gives nothing.
      */
-    private fun burn(v: mods.eln.sim.fluid.FluidNode) {
+    private fun burn(v: mods.eln.sim.fluid.FluidNode, dt: Double) {
+        val bank0 = bank
+        burnFuel(v)
+        breathe(v, Math.max(0.0, bank - bank0), dt)
+    }
+
+    /** Combustion air drawn out of the pressurised tank by the burner's air register (kg, since loaded; kg/s, last step). */
+    var airBurntKg = 0.0
+        private set
+    var airKgPerS = 0.0
+        private set
+    /** What the burner's heat over the last step wants of the tank's air (kg/s), when pressure-fed. */
+    private var airWantKgS = 0.0
+
+    /**
+     * The pressure-fed burner's combustion air (todo #471): the heat J drawn from the fuel this step wants AIR_KG_PER_J x J
+     * of air. Over the deadband the burner takes it out of the tank through its air register (a gas-only vent into the
+     * flame, then up the stack), metered to that rate inside the core's solve; at or under it (natural draught) all of it
+     * comes from the room, as it always did, and the register stays shut. So a blower's air goes into the flame and its
+     * flow follows the fire.
+     */
+    private fun breathe(v: mods.eln.sim.fluid.FluidNode, heatJ: Double, dt: Double) {
+        val reg = register ?: return
+        val e = reg.edge
+        val total = e?.flow ?: 0.0
+        val air = e?.fSpecies?.let { if (it.size > mods.eln.sim.fluid.SpeciesRegistry.AIR) it[mods.eln.sim.fluid.SpeciesRegistry.AIR] else 0.0 } ?: 0.0
+        airKgPerS = Math.max(0.0, air)
+        if (dt > 0) airBurntKg += airKgPerS * dt
+        airWantKgS = if (dt > 0 && heatJ > 0) AIR_KG_PER_J * heatJ / dt else 0.0
+        val gauge = v.P() - mods.eln.sim.fluid.Water.P_ATM
+        // (shut in natural draught, with nothing to burn, or when what it would pass isn't air: a gas main's tank)
+        if (gauge <= 2 * BREATHER_DEADBAND_PA || airWantKgS <= 0 || (total > 1e-6 && air < 0.5 * total)) {
+            reg.open = 0.0
+            return
+        }
+        // (metered: the flow goes with the opening at a given pressure, so scale the opening by want over got)
+        reg.open = if (air < 1e-7) Math.max(reg.open, 1e-3) else Math.max(1e-6, Math.min(1.0, reg.open * Math.max(0.5, Math.min(2.0, airWantKgS / air))))
+    }
+
+    private fun burnFuel(v: mods.eln.sim.fluid.FluidNode) {
         if (burnerLayer(v) == mods.eln.sim.fluid.SpeciesRegistry.WATER) {
             drown(v)
             wanted = 0.0
@@ -608,9 +667,10 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         legacyStub = null
         loaded = null
         vessel = v
-        breather = mods.eln.sim.fluid.FluidDevice.Vent(v, 1.0, BREATHER_K).also { it.gasOnly = true }
+        breather = mods.eln.sim.fluid.FluidDevice.Vent(v, 1.0, GAS_VENT_K).also { it.gasOnly = true }
         relief = mods.eln.sim.fluid.FluidDevice.Vent(v, 1.0, RELIEF_K)
         airIn = mods.eln.sim.fluid.FluidDevice.Vent(v, 1.0, BREATHER_K).also { it.inward = true }
+        register = mods.eln.sim.fluid.FluidDevice.Vent(v, 1.0, REGISTER_K).also { it.gasOnly = true }
         setBreather(v)
         view.show(v)
         atBurner = burnerLayer(v)
@@ -771,9 +831,10 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         if (coke > 0.01 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER) info.put(I18N.tr("Burner"), String.format(I18N.tr("%.0f%% coked: fires %.0f%% (right-click with wool to clean)"), coke * 100, (1 - coke) * 100))
         val over = overfire()
         if (over > 1.01) info.put(I18N.tr("Fuel feed"), String.format(I18N.tr("pressure-fed at %.1f bar: fires %.1fx its setting"), (v!!.P() - mods.eln.sim.fluid.Water.P_ATM) / 1e5, over))
+        if (airKgPerS > 1e-5) info.put(I18N.tr("Combustion air"), String.format(I18N.tr("%.1f g/s from its tank"), airKgPerS * 1000))
         if (gasEscapingKgS > GAS_FIRE_KG_S) info.put(I18N.tr("Relief"), I18N.tr("venting fuel gas!"))
         if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade())
-        if (v != null && mods.eln.fluid.FluidWorld.edgesOf(v).any { it !== breather?.edge && it !== airIn?.edge && it !== relief?.edge }) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its front flange"))
+        if (v != null && mods.eln.fluid.FluidWorld.edgesOf(v).any { it !== breather?.edge && it !== airIn?.edge && it !== relief?.edge && it !== register?.edge }) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its front flange"))
         return info
     }
 
