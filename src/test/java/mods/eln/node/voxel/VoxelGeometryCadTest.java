@@ -51,6 +51,8 @@ public class VoxelGeometryCadTest {
         return c.parts().stream().anyMatch(p -> p instanceof SafetyValvePart || p instanceof PipeSensorPart || p instanceof AdapterPart)
             || c.name().startsWith("cable") && c.name().matches(".* (bend|tee|cross) on .*") || c.name().startsWith("large alloy S ")
             || c.name().contains("Field Bus")
+            // the pressure valve's flow arrow on its dome (2026-11-15: its nub alone showed no direction)
+            || c.parts().stream().anyMatch(p -> p instanceof ValvePart v && v.mode == ValvePart.PRESSURE)
             // power cables draw their spec's cross-section and insulation colour (Baughn 2026-11-06, Wires stage 3)
             || c.parts().stream().anyMatch(p -> p instanceof CablePart cp && cp.spec != null);
     }

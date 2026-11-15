@@ -199,6 +199,26 @@ public final class VoxelGeometry {
     // --- the parts ---
 
     /**
+     * A flat arrow lying on a face at height top on the stem axis: a shaft along axis from behind c to its middle, then a
+     * head of two steps narrowing toward flow's side (px; 0.5 px proud of the face).
+     */
+    static void arrow(Model m, int axis, int side, int stem, double[] c, int flow, double top) {
+        double[][] seg = {{-1.75, 0.25, 0.4}, {0.25, 1.0, 1.4}, {1.0, 1.75, 0.7}};   // (from, to along the flow; half width)
+        String[] name = {"flow arrow shaft", "flow arrow head", "flow arrow tip"};
+        for (int i = 0; i < seg.length; i++) {
+            double[] lo = new double[3], hi = new double[3];
+            double a0 = c[axis] + flow * seg[i][0], a1 = c[axis] + flow * seg[i][1];
+            lo[axis] = Math.min(a0, a1);
+            hi[axis] = Math.max(a0, a1);
+            lo[side] = c[side] - seg[i][2];
+            hi[side] = c[side] + seg[i][2];
+            lo[stem] = top;
+            hi[stem] = top + 0.5;
+            boxD(m, lo, hi, PIPE[0]).named(name[i]).rgb(0.85f, 0.85f, 0.2f);
+        }
+    }
+
+    /**
      * A gate valve: a body round the pipe, a stem, and a round handwheel wider than the pipe (Baughn: they looked like
      * buttons); the wheel red when shut, green when open. The control valve has a square actuator, the pressure valve a
      * dome and a nub showing its flow.
@@ -236,6 +256,9 @@ public final class VoxelGeometry {
             nlo[stem] = c[stem] + h - 1.5;
             nhi[stem] = c[stem] + h;
             boxD(m, nlo, nhi, PIPE[0]).named("flow nub").rgb(0.85f, 0.85f, 0.2f);
+            // and an arrow on the dome's top along the pipe (Baughn 2026-11-15: the nub, a 1.5 px tab under the dome,
+            // showed no direction to a player; the tooltip says "one way along its arrow")
+            arrow(m, v.axis, side, stem, c, v.flow, plane + 1.5);
             return;
         }
         if (v.mode == ValvePart.CONTROL) {
