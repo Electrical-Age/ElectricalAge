@@ -236,7 +236,7 @@ public final class PublishRenderCase implements TestCase {
     }
 
     /** Feed the node's publish packet to a client-side entity; it must read every byte. */
-    static boolean roundTrip(TestContext ctx, String name, NodeBase node, mods.eln.node.NodeBlockEntity be) {
+    public static boolean roundTrip(TestContext ctx, String name, NodeBase node, mods.eln.node.NodeBlockEntity be) {
         try {
             byte[] bytes = node.getPublishPacket().toByteArray();
             DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));

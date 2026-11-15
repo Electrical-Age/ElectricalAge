@@ -33,7 +33,7 @@ import java.util.Map;
  * Only quads that two reference draws agree on are compared (a part moving on the real clock differs between any
  * two draws), plus the vertex count of the whole frame.
  */
-final class BakeOnceCheck {
+public final class BakeOnceCheck {
     private BakeOnceCheck() {
     }
 
@@ -155,7 +155,7 @@ final class BakeOnceCheck {
      * Draw the device (owner = its block entity, at pos) through the states of a baked device and compare. Adds one
      * check and one INFO line to the context. Returns the vertices of a whole draw and those the chunk took.
      */
-    static int[] check(TestContext ctx, String name, Object owner, BlockPos pos, Runnable draw) {
+    public static int[] check(TestContext ctx, String name, Object owner, BlockPos pos, Runnable draw) {
         Bake.Host oldHost = Bake.host;
         int oldMode = Bake.mode;
         Host host = new Host();

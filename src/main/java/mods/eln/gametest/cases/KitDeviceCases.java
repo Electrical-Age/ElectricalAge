@@ -68,6 +68,15 @@ public final class KitDeviceCases {
                 ctx.check("kits: a 1.12 item is still its cable", CableItems.descriptor(Wp9aCases.lvCable()) == ElnDeviceRegistry.lowVoltageCableDescriptor, "");
                 ctx.check("kits: thermal and bus kits aren't electrical", !CableItems.isElectrical(CableKitItem.kit(5, 32))
                     && CableItems.isThermal(CableKitItem.kit(5, 32)) && !CableItems.isElectrical(CableKitItem.kit(CablePart.BUS, 32)), "");
+                // todo #484: a device holding a kit draws its connector with the kit's render (hub, breaker, probes)
+                StringBuilder noRender = new StringBuilder();
+                for (int t = 0; t < CablePart.TIERS.length; t++) {
+                    var kd = CableItems.descriptor(kit(t, null, 1));
+                    if (CableItems.electricalTier(t) && (kd == null || kd.render == null)) noRender.append(t).append(' ');
+                }
+                var td = CableItems.descriptor(kit(HV, thick(), 1));
+                ctx.check("kits: every electrical kit, preset or not, has a cable render for the devices that hold it",
+                    noRender.length() == 0 && td != null && td.render != null, "none for tiers " + noRender);
                 ItemStack piece = CableItems.take(hv, 48);
                 ctx.check("kits: taking 3 blocks off 10 leaves 7, the piece keeps the spec",
                     CableItems.blocks(piece) == 3 && CableItems.blocks(hv) == 7 && thick().equals(CableKitItem.specOf(piece)),

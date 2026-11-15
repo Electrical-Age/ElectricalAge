@@ -109,6 +109,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.JeiAuditCases.addTo(l);
         mods.eln.gametest.cases.RecipeClashCases.addTo(l);
         mods.eln.gametest.cases.KitDeviceCases.addTo(l);
+        mods.eln.gametest.cases.HubRenderCases.addTo(l);
         mods.eln.gametest.cases.ArmourEnchantCases.addTo(l);
         mods.eln.gametest.cases.OilPondCases.addTo(l);
         mods.eln.gametest.cases.ServoCases.addTo(l);
