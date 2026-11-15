@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "eln:boiler",
+    "P": "eln:alloy_plate",
+    "t": "eln:copper_thermal_cable"
+  },
+  "pattern": [
+    "PBP",
+    "PtP",
+    "PBP"
+  ],
+  "result": {
+    "id": "eln:large_boiler"
+  }
+}

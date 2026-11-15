@@ -2123,6 +2123,12 @@
   "kind": "transparent_node",
   "name": "flare_stack"
  },
+ "eln:transparent_node@5324": {
+  "descriptor": "BoilerDescriptor",
+  "display": "Large Boiler",
+  "kind": "transparent_node",
+  "name": "large_boiler"
+ },
  "eln:transparent_node@5376": {
   "descriptor": "EnergyConverterElnToOtherDescriptor",
   "display": "48V Electrical Age to other energy exporter",

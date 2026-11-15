@@ -19,11 +19,51 @@ import java.util.List;
 public class BoilerDescriptor extends TransparentNodeDescriptor {
     public static final double J_PER_MB_WATER = 175, STEAM_PER_WATER = 67.5, BOIL_C = 100;
     final Obj3D obj;
+    /**
+     * What sets a boiler's size (the Boiler's values; large() gives the Large Boiler's): the vessel (m3) and its rated
+     * water (mB, the gauge glass's full mark); the shell's heat capacity (J/K), its wall into the water (K/W), its
+     * thermal faces' series resistance and its loss to the air (K/W); the shell's limit (K over ambient, its
+     * watchdog) and the pressure it bursts at (Pa); the strongest explosion its burst makes (4: TNT).
+     */
+    public double volume = BoilerElement.VOLUME, shellC = BoilerElement.SHELL_C, shellToWater = BoilerElement.SHELL_TO_WATER_K_PER_W;
+    public double faceRs = 0.01, lossRp = 1.0, shellMaxK = 400, burstPa = BoilerElement.BURST_PA;
+    public int waterMb = BoilerTanks.WATER_MB;
+    public float maxBoom = 4;
+    public boolean large;
 
     public BoilerDescriptor(String name, String model) {
         super(name, BoilerElement.class, BoilerRender.class);
         obj = Eln.obj.getObj(model);
         cableTerminals = mods.eln.cable.CableTerminals.FRONT;   // the phase signal's plate (mods.eln.cad.models.Boiler)
+    }
+
+    /**
+     * The Large Boiler (Baughn 2026-11-15: one block, about four Boilers, of alloy plate, with a higher pressure limit
+     * and accordingly a larger boom): four times the vessel, the water, the shell and the wall (166 kW at 20 bar
+     * against 41.5), faces of a quarter the resistance (a furnace against it runs cooler, and several furnaces on
+     * thermal cable can share a face), 500 bar against 350, and a burst of up to 6 against 4.
+     */
+    public BoilerDescriptor large() {
+        large = true;
+        volume *= 4;
+        waterMb *= 4;
+        shellC *= 4;
+        shellToWater /= 4;
+        faceRs /= 4;
+        lossRp = 0.4;   // (about 2.5 times the Boiler's surface)
+        burstPa = 500e5;
+        maxBoom = 6;
+        return this;
+    }
+
+    /** Its rated fill (kg of water): the gauge glass's full mark. */
+    public double ratedKg() {
+        return waterMb * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
+    }
+
+    /** The heat (W) its wall passes into water boiling at pa with its shell at its limit: what it can take, sustained. */
+    public double heatLimitW(double pa) {
+        return (shellMaxK - (mods.eln.sim.fluid.Water.tsat(pa) - mods.eln.sim.fluid.Water.T_AMBIENT)) / shellToWater;
     }
 
     /** A boiler may also stand on another EA device (a steam turbine: its dome port feeds the turbine's inlet below). */
@@ -63,5 +103,7 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
         list.add("Its pressure follows its water's temperature: 1 bar boils at 100 °C, 10 bar at 180 °C;");
         list.add("the heater must be hotter than that to keep it boiling");
         list.add("1 bucket of water + 175 kJ: 67.5 buckets of steam");
+        list.add(String.format("Takes up to %.0f kW at 20 bar, %.0f kW at 10 bar; holds %d buckets of water", heatLimitW(20e5) / 1000, heatLimitW(10e5) / 1000, waterMb / 1000));
+        if (large) list.add("Of alloy plate: bursts at 500 bar, and harder than a Boiler");
     }
 }

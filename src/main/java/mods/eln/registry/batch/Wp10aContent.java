@@ -114,6 +114,9 @@ public class Wp10aContent implements ElnContent {
         transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.ColumnDescriptor(TR_NAME(Type.NONE, "Fractionating Column Base"), true, "columnbase"));
         transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.ColumnDescriptor(TR_NAME(Type.NONE, "Fractionating Column Segment"), false, "columnsegment"));
         transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.FlareStackDescriptor(TR_NAME(Type.NONE, "Flare Stack"), "flarestack"));
+        // Baughn 2026-11-15: a Large Boiler, one block for about four Boilers (here: the steam group 82 is full).
+        // PROTOTYPE: the Boiler's model stands in for its own.
+        transparentNodeItem.addDescriptor(12 + (id << 6), new mods.eln.oil.BoilerDescriptor(TR_NAME(Type.NONE, "Large Boiler"), "boiler").large());
     }
 
     /** 26.x oil & steam: electric heaters and the boiler (placeholder models). */

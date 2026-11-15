@@ -19,8 +19,13 @@ public class BoilerTanks extends NodeFluidView {
     public static final int WATER_MB = 8000;
 
     public BoilerTanks() {
+        this(WATER_MB, BoilerElement.VOLUME);
+    }
+
+    /** A boiler of this rated fill (mB of water) and vessel volume (m3): the Large Boiler has four times both. */
+    public BoilerTanks(int waterMb, double volume) {
         super(new Spec().liquids(id -> id == SpeciesRegistry.WATER).liquid(true, false).gas(false, true, 0, true)
-            .liquidShare(WATER_MB * EaUnits.KG_PER_MB_WATER / Water.RHO_L / BoilerElement.VOLUME));
+            .liquidShare(waterMb * EaUnits.KG_PER_MB_WATER / Water.RHO_L / volume));
     }
 
     public int water() {

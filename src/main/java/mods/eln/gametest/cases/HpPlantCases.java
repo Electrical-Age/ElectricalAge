@@ -46,6 +46,67 @@ public final class HpPlantCases {
         cases.add(new FurnacePlant("hp_plant_boiler_limit_under", 20, 2.07e5, 13000, 19520, 9540, 3.4, false));
         cases.add(new FurnacePlant("hp_plant_boiler_limit_over", 20, 2.6e5, 15000, 0, 0, 0, true));
         cases.add(new FullPlant());
+        // (PROTOTYPE, Large Boiler: two forced-air furnaces on its two free faces and 32 kW by fixture)
+        cases.add(new FurnacePlant("large_boiler_one_hp_turbine_20bar", 20, 1.6e5, 22000, 0, 0, 0, false).large(32000));
+        // (what its two free faces take with no thermal cable: two burners near their tanks' 3 bar relief; logged, and the common checks)
+        cases.add(new FurnacePlant("large_boiler_two_faces_hard_fired", 20, 3.3e5, 20000, 0, 0, 0, false).large(0));
+        cases.add(new LargeBoilerBurst());
+    }
+
+    static final int LARGE_BOILER = 12 + (83 << 6);
+
+    /**
+     * A Boiler and a Large Boiler, each full to its mark with water at 212 C (20 bar): what would flash if each burst,
+     * and the explosion that makes. Nothing is detonated (the explosion would take the neighbouring tests with it): the
+     * numbers are the ones BoilerElement hands to Failure when its pressure passes its rating.
+     */
+    static final class LargeBoilerBurst extends PlumbingCases.Big {
+        BoilerElement small, big;
+        double eSmall, eBig;
+        float sSmall, sBig;
+
+        public String id() {
+            return "large_boiler_burst_is_larger";
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        BoilerElement hot(TestContext ctx, int id, BlockPos p) {
+            var b = (BoilerElement) ctx.placeTransparent(id, p);
+            b.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            b.fromTanks(b.desc.waterMb, 0);
+            b.vessel.energy += b.vessel.mWater * (Water.uLiquid(485.15) - Water.uLiquid(372.15));
+            b.vessel.update();
+            return b;
+        }
+
+        public void build(TestContext ctx) {
+            small = hot(ctx, 8 + (82 << 6), ctx.at(2, 1, 2));
+            big = hot(ctx, LARGE_BOILER, ctx.at(5, 1, 2));
+            eSmall = small.flashEnergy();
+            eBig = big.flashEnergy();
+            sSmall = small.burstStrength();
+            sBig = big.burstStrength();
+            ctx.line(String.format("large_boiler_burst_is_larger: Boiler %.2f kg of water at %.0f C, %.1f bar: %.0f kJ would flash, explosion %.2f (bursts at %.0f bar); "
+                    + "Large Boiler %.2f kg at %.0f C, %.1f bar: %.0f kJ, explosion %.2f (bursts at %.0f bar); heat limits at 20 bar %.1f and %.1f kW",
+                small.vessel.mWater, small.vessel.T() - Water.T0, small.vessel.P() / 1e5, eSmall / 1000, sSmall, small.desc.burstPa / 1e5,
+                big.vessel.mWater, big.vessel.T() - Water.T0, big.vessel.P() / 1e5, eBig / 1000, sBig, big.desc.burstPa / 1e5,
+                small.desc.heatLimitW(20e5) / 1000, big.desc.heatLimitW(20e5) / 1000));
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("large boiler: full and hot, it holds four times the Boiler's flash energy (within 10 %)", eSmall > 100e3 && Math.abs(eBig / eSmall / 4 - 1) < 0.10,
+                String.format("%.0f against %.0f kJ", eBig / 1000, eSmall / 1000));
+            ctx.check("large boiler: the Boiler's burst is TNT at most (4), the Large Boiler's larger, up to 6", sSmall <= 4 && sBig > sSmall + 1 && sBig <= 6,
+                String.format("%.2f against %.2f", sBig, sSmall));
+            ctx.check("large boiler: the same energy makes the same explosion in both (the formula is shared; only the cap differs)",
+                mods.eln.sim.process.destruct.Failure.explosionStrength(60e3, small.desc.maxBoom) == mods.eln.sim.process.destruct.Failure.explosionStrength(60e3, big.desc.maxBoom), "");
+            ctx.check("large boiler: it bursts at a higher pressure than the Boiler, and takes four times the heat at 20 bar",
+                big.desc.burstPa > small.desc.burstPa && Math.abs(big.desc.heatLimitW(20e5) / small.desc.heatLimitW(20e5) - 4) < 0.01,
+                String.format("%.0f against %.0f bar, %.1f against %.1f kW", big.desc.burstPa / 1e5, small.desc.burstPa / 1e5, big.desc.heatLimitW(20e5) / 1000, small.desc.heatLimitW(20e5) / 1000));
+        }
     }
 
     /** A Fuel Heat Furnace at p, its fuel flange towards front (its thermal face is its back), a Big burner in it, lit,
@@ -70,6 +131,17 @@ public final class HpPlantCases {
         final String id;
         final double bar, airPa, loadW, expectFurnaceW, expectShaftW, expectFurnaces16;
         final boolean expectTrip;
+        /** The Large Boiler in the Boiler's place, cooling water through the condenser, and heat (W) the test puts straight
+         *  into the boiler's shell: the furnaces that would reach it by thermal cable (two faces are free). */
+        boolean large;
+        double fixtureW;
+        FluidDevice cooling;
+
+        FurnacePlant large(double fixtureW) {
+            large = true;
+            this.fixtureW = fixtureW;
+            return this;
+        }
         /** The tick the boiler failed at (-1: it didn't), and what it showed just before: its boiling (W), shell (K over ambient), pressure (bar), fill (0..1). */
         int tripTick = -1;
         double lastBoilW, lastShell, lastBar, lastFill;
@@ -124,11 +196,11 @@ public final class HpPlantCases {
 
         public void build(TestContext ctx) {
             BlockPos bp = ctx.at(2, 1, 5), tp = ctx.at(5, 1, 5), cp = ctx.at(6, 1, 5);
-            boiler = (BoilerElement) ctx.placeTransparent(8 + (82 << 6), bp);
+            boiler = (BoilerElement) ctx.placeTransparent(large ? LARGE_BOILER : 8 + (82 << 6), bp);
             boiler.front = Direction.XN;   // (feed flange south; thermal faces north, east and south)
             boiler.reconnect();
             boiler.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
-            boiler.fromTanks(8000, 0);
+            boiler.fromTanks(boiler.desc.waterMb, 0);
             boiler.showTanks();
             // two furnaces, their backs against the boiler's north and east faces
             f[0] = furnace(ctx, bp.north(), Direction.ZN, 1900);
@@ -155,6 +227,7 @@ public final class HpPlantCases {
             hp.controls.computeInventory();
             // the condenser's back against the turbine's exhaust, a powered shaft motor on its pump
             c = ShaftPlantCases.condenser(ctx, cp, true, Direction.XP);
+            if (large) cooling = ShaftPlantCases.coolingLoop(c, cp.south(), 2, cp.north(), 3, 2e5);   // (as the full plant: its shell alone can't condense 24 g/s)
             // condensate: alloy pipe out of the condenser's front (east), south, west along z 7, north into the boiler's feed flange
             PipeCases.lay(ctx, ctx.at(7, 1, 5), 1, 0, 4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 16);   // (its flange is low on the face)
             PipeCases.lay(ctx, ctx.at(7, 1, 6), 1, 8, 8, 0, 8, 8, 16);
@@ -187,6 +260,7 @@ public final class HpPlantCases {
                     run.update();
                 }
                 tick++;
+                if (fixtureW > 0 && !boiler.isBurnt()) boiler.thermal.moveEnergyTo(fixtureW * dt);
                 if (tripTick < 0 && boiler.isBurnt()) tripTick = tick;
                 if (tripTick < 0) {
                     lastBoilW = boiler.boilW;
@@ -231,6 +305,7 @@ public final class HpPlantCases {
         public void measure(TestContext ctx) {
             Eln.simulator.removeSlowProcess(clock);
             mods.eln.fluid.FluidWorld.remove(meter);
+            if (cooling != null) mods.eln.fluid.FluidWorld.remove(cooling);
             for (FluidDevice d : air) if (d != null) mods.eln.fluid.FluidWorld.remove(d);
             for (Resistor r : loads) Eln.simulator.removeElectricalComponent(r);
             double w = Math.max(1e-9, window), fire = 0, kg = 0, mB = 0;
@@ -241,11 +316,11 @@ public final class HpPlantCases {
             }
             double water = waterJ / Math.max(1e-9, meterS), steam = (hp.totalKg - steam0) / w, shaftW = (hp.totalWork - work0) / w, elec = elecJ / w;
             double pumped = (c.v.totalPumpedKg - pumped0) / w, p = pSum / w, shell = shellSum / w, over = overSum / w;
-            double perFurnace = water / 2, share = water / Math.max(1e-9, fire), perKg = shaftW / Math.max(1e-9, steam);
+            double perFurnace = (water - fixtureW) / 2, share = (water - fixtureW) / Math.max(1e-9, fire), perKg = shaftW / Math.max(1e-9, steam);
             // what a whole 16 kW plant takes at this slice's numbers: heat by shaft power, furnaces and fuel by heat
             double heat16 = water * 16e3 / Math.max(1e-9, shaftW), furnaces16 = heat16 / Math.max(1e-9, perFurnace), bucketsH = mB * 3.6 / 2;
             // the boiler's own limit at this pressure: its shell's watchdog (400 K over ambient) through 0.005 K/W into the water
-            double boilerLimit = shell <= 0 ? 0 : water * (400 - (shell - water * BoilerElement.SHELL_TO_WATER_K_PER_W)) / (water * BoilerElement.SHELL_TO_WATER_K_PER_W);
+            double boilerLimit = shell <= 0 ? 0 : water * (400 - (shell - water * boiler.desc.shellToWater)) / (water * boiler.desc.shellToWater);
             ctx.line(String.format("%s: fire %.2f kW (2 furnaces, overfire x%.2f, tank %.2f bar gauge), %.2f kW into the water (%.2f kW a furnace, %.1f %% of the fire); "
                     + "boiler %.2f bar, shell %.0f K over ambient (max %.0f), fill %.0f..%.0f %%; furnaces %.0f / %.0f K over ambient (max %.0f / %.0f); "
                     + "steam %.2f g/s, shaft %.2f kW (%.0f kJ/kg), electric %.2f kW, %.0f rad/s; condenser %.3f bar, up to %.0f %% full, pumped %.2f g/s; "
@@ -261,7 +336,7 @@ public final class HpPlantCases {
             if (expectTrip) {
                 // fired past what its shell can pass into the water: the shell passes its 400 K and, once its watchdog's
                 // budget (400 K s over the limit) is spent, the boiler fails
-                double limit = (400 - (Water.tsat(bar * 1e5) - 293.15)) / BoilerElement.SHELL_TO_WATER_K_PER_W;
+                double limit = (400 - (Water.tsat(bar * 1e5) - 293.15)) / boiler.desc.shellToWater;
                 ctx.line(String.format("%s: the boiler failed at tick %d, boiling %.1f kW at %.1f bar, its shell %.0f K over ambient (limit by its constants %.1f kW)",
                     id, tripTick, lastBoilW / 1000, lastBar, lastShell, limit / 1000));
                 ctx.check(id + ": fired past its limit, the boiler fails", boiler.isBurnt() && tripTick > 0, "tick " + tripTick);
@@ -284,7 +359,7 @@ public final class HpPlantCases {
             // what a 16 kW plant takes shows here
             ctx.check(id + ": the fire is the burners' (10 kW each x their overfire, less coke; within 6 %)",
                 Math.abs(fire / (2 * 10e3 * over * (1 - (f[0].getCoke() + f[1].getCoke()) / 2)) - 1) < 0.06, String.format("%.2f kW at x%.2f", fire / 1000, over));
-            ctx.check(id + ": 65-78 % of the fire reaches the water", share > 0.65 && share < 0.78, String.format("%.1f %%", share * 100));
+            ctx.check(id + ": 65-78 % of the fire reaches the water", share > 0.65 && share < (large ? 0.92 : 0.78), String.format("%.1f %%", share * 100));
             if (expectFurnaceW > 0) {
                 ctx.check(id + String.format(": heat into the water per furnace within 10 %% of %.2f kW", expectFurnaceW / 1000), Math.abs(perFurnace / expectFurnaceW - 1) < 0.10,
                     String.format("%.2f kW", perFurnace / 1000));
@@ -293,8 +368,13 @@ public final class HpPlantCases {
                 ctx.check(id + String.format(": furnaces for 16 kW, by proportion, within 12 %% of %.1f", expectFurnaces16), Math.abs(furnaces16 / expectFurnaces16 - 1) < 0.12,
                     String.format("%.1f", furnaces16));
             }
+            if (large && fixtureW > 0) {
+                ctx.check(id + ": the Large Boiler passes one HP turbine's heat (64 kW or more into the water)", water > 64e3, String.format("%.1f kW, %.1f kW of it from the test's fixture", water / 1000, fixtureW / 1000));
+                ctx.check(id + ": the turbine reaches its rating on it (16 kW or more on the shaft)", shaftW > 16e3, String.format("%.2f kW", shaftW / 1000));
+                ctx.check(id + ": its shell stays well under its limit (under 320 K over ambient)", shellMax < 320, String.format("%.0f K", shellMax));
+            }
             // (the shell over the water by the heat through 0.005 K/W: the boiler's limit follows from its 400 K watchdog)
-            double wall = shell - water * BoilerElement.SHELL_TO_WATER_K_PER_W - (Water.tsat(p) - 293.15);
+            double wall = shell - water * boiler.desc.shellToWater - (Water.tsat(p) - 293.15);
             ctx.check(id + ": the shell stands over the boiling water by the heat through its wall (within 8 K), and under its 400 K limit",
                 Math.abs(wall) < 8 && shellMax < 400, String.format("%+.1f K off, shell max %.0f K", wall, shellMax));
             ctx.check(id + ": the generators deliver most of the shaft power (over 80 %)", elec > 0.8 * shaftW && elec < shaftW, String.format("%.2f of %.2f kW", elec / 1000, shaftW / 1000));
