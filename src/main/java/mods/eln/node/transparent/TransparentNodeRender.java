@@ -49,6 +49,7 @@ public class TransparentNodeRender implements BlockEntityRenderer<TransparentNod
     @Override
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
         if (state.render == null || state.far && state.render.burnt) return;
+        long probe = mods.eln.gl.RenderProbe.start();
         GlFrame frame = GlSubmit.openBlock(poseStack);
         // (a burnt device draws twice, the second time as a soot overlay that needs the first one's depth)
         if (state.render.burnt) frame.noBake(mods.eln.gl.Bake.BURNT);
@@ -71,6 +72,7 @@ public class TransparentNodeRender implements BlockEntityRenderer<TransparentNod
         } finally {
             mods.eln.gl.BakeStats.endDevice();
             GlFrame.close();
+            if (probe != 0) mods.eln.gl.RenderProbe.device(probe, state.far);
         }
         if (!state.far) GlSubmit.submit(frame, poseStack, collector, state.lightCoords);
     }

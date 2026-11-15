@@ -161,6 +161,34 @@ change, and the block entity renderer draws the rest. The draw code is untouched
   const, moving, blended...), per render class, and why constant ones are still with the renderer (changed, waiting,
   waiting longer, no sprite, mesh not shown yet). At the workshop: 80-86% in the chunk.
 
+### Render benchmark (todo #424)
+
+Two tiers. Only the client tier says anything about fps: on 2026-11-12 a BufferBuilder microbenchmark showed 30 % and
+the client's JFR showed nothing. Compare either with `tools/bench/render-bench-compare.py A.json[,A2,A3] B.json[,...]`.
+
+- CPU tier (`gametest/bench/RenderBench.java`, no GPU):
+  `./gradlew runGameTestServer -PelnRenderBench=/abs/FILE.json [-PelnBenchLabel=NAME]`. Every device of
+  `publish_render`, as placed (empty, unpowered). Per device: `vertices` of one draw, `recordNs` (ns per draw into a
+  `GlFrame`, bake off), `packNs` (copying the batches into a buffer in the entity vertex layout: a scale for the
+  write loop, not BufferBuilder), then with a host that bakes: `settledCalls`, `settleFrame`, `rendererVertices` and
+  `chunkVertices` (who draws what once the mesh is shown), `bakedRecordNs` (ns per draw that is left), `meshNs` and
+  `meshVertices` (`BakeMesh.write` of the settled calls: EA's part of a section compile). Times are the median and
+  the minimum of 7 batches of 200 draws after 300 warm-up draws. The vertex and call counts are exact and the same
+  from run to run; totals of times repeat within about 3 %, single devices within about 2x.
+  With `-PelnRenderBenchBase=/abs/EARLIER.json` the run fails when a device's exact fields (`gametest/bench/RenderBenchGate.java`)
+  differ from that result, and names the devices: the gate for "this change must not alter what is drawn".
+- Client tier (`client/RenderBenchClient.java`, counters in `gl/RenderProbe.java`, sums in `gl/BenchRun.java`):
+  launch with `-Deln.renderBench=FILE.json` (or `ELN_RENDER_BENCH`; relative to the game directory), or type
+  `/elnbench` in a world. Options `-Deln.renderBench.views="name=x,y,z,yaw,pitch[,spinDegPerSecond];name=here"`
+  (default: where the player stands; a view with coordinates is reached with `/tp`, which needs the permission),
+  `.settle=40`, `.measure=30` (seconds), `.label=NAME`, `.quit=true`. Per view: frames, fps, frame ms and EA ms
+  (mean, p50, p95, p99, max), EA's share, per-frame means of the probe counters (`recordNs` device draw code and
+  GlFrame, `farNs` far frames, `submitNs`, `writeNs` and `writeVertices` the vertex write loop, `refreshNs`,
+  `snapshotNs`, `devices`, `batches`), per second `meshNs`/`meshVertices`/`meshSections` (chunk compile, worker
+  threads), `settles`/`drops`, and the bake's state. The file also says GPU, window, render distance, fps limit,
+  vsync and `capped`: run uncapped with vsync off, or frame times only show the cap.
+- The probe is off unless a benchmark runs (one static boolean per hook).
+
 | Class | Role |
 |---|---|
 | `gl/Bake.java` | calls, devices, settling; no client classes |
@@ -174,6 +202,7 @@ change, and the block entity renderer draws the rest. The draw code is untouched
 - GameTest `gametest/PublishRenderCase.java`: every device with a render: server publish packet read by a fresh client BE, consumed exactly, draw does not throw and emits vertices.
 - `gametest/BakeOnceCheck.java` (run by `publish_render` for every device, and by `autominer_spin` with a part that starts to move): the device drawn with its parts in the chunk shows every quad exactly once, in the same place and colour, also after only far frames; see testing.md. `src/test/java/mods/eln/gl/BakeTest.java`: settling, waits, the section, the override, far frames.
 - `gametest/ItemDrawCase.java`: every 3D item draw records vertices without exceptions. `gametest/XRayCase.java`: X-ray filter, state machine, menu, item draw. `src/test/java/mods/eln/item/xray/XRayRayMarchTest.java`.
+- `src/test/java/mods/eln/gl/FrameStatsTest.java`, `BenchRunTest.java`: the render benchmark's percentiles, view parsing and per-frame sums. The benchmark itself: "Render benchmark" above.
 - `/elnlab gallery|burn|cables` (`gametest/LabCommands.java`): visual comparison scenes and stress scenes for frame times.
 
 ## Gotchas

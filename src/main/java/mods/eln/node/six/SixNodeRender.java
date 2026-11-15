@@ -75,6 +75,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
 
     @Override
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+        long probe = mods.eln.gl.RenderProbe.start();
         GlFrame frame = GlSubmit.openBlock(poseStack);
         mods.eln.client.render.bake.ChunkBake.attach(frame, state.entity, state.far);
         if (mods.eln.gl.BakeStats.ON && !state.far) mods.eln.gl.BakeStats.device(state.blockPos.asLong(), "six");
@@ -119,6 +120,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
         } finally {
             mods.eln.gl.BakeStats.endDevice();
             GlFrame.close();
+            if (probe != 0) mods.eln.gl.RenderProbe.device(probe, state.far);
         }
         if (!state.far) GlSubmit.submit(frame, poseStack, collector, state.lightCoords);
     }
