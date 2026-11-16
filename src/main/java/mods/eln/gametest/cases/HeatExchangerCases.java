@@ -21,7 +21,8 @@ import static mods.eln.gametest.cases.GasPlantCases.*;
  * The Counterflow Heat Exchanger used as a player would (Baughn 2026-11-15: "a scenario test that demonstrates correct use
  * of the heat exchanger"; the Ledger's page quotes these numbers): a feed-water heater on bleed steam, one block and a 2 x
  * 2 x 2 stack; a cooler, hot water against cooling water through a 2 x 2 x 4 stack, run counterflow, then the two
- * mistakes (both streams in at the same end; the cooling side dead-ended); an exchanger saved at 8 L a side loaded at 1 B.
+ * mistakes (both streams in at the same end; the cooling side dead-ended); an exchanger saved at 8 L a side loaded at 1 B;
+ * condensate reheat on a furnace's flue in a small plant (a 230V Steam Turbine), with and without.
  * The streams come from and go to big vessels (GasPlantCases.fixtures) on the exchanger's ports, so each stream's flow
  * and the heat it carries are read off its two vessels.
  */
@@ -36,6 +37,7 @@ public final class HeatExchangerCases {
         cases.add(new Cooler(Cooler.PARALLEL));
         cases.add(new Cooler(Cooler.DEAD_END));
         cases.add(new OldSave());
+        cases.add(new CondensateReheat());
     }
 
     /** A source or sink of water: a lake-sized vessel (1000 m^3, 70 % full) whose pressure barely moves, so its mass and
@@ -357,6 +359,160 @@ public final class HeatExchangerCases {
         public void measure(TestContext ctx) {
             ctx.line("old save: " + detail);
             ctx.check("old save: each side 1 B at the saved pressure and temperature, the rest vented and shown, once", fail.isEmpty(), fail);
+        }
+    }
+
+    /**
+     * Condensate reheat in a small plant (Baughn 2026-11-16: "reheating of the condenser output in a smaller plant with
+     * just a 230V steam turbine"). Two plants side by side, the same but for the flue: a boiler fired at a fixed FIRE W (a
+     * furnace's 80 % share of its fire, Flue.HEAT_SHARE), an iron pipe from its top to a loaded 230V Steam Turbine, a Steam
+     * Condenser on its exhaust, and its pump's condensate back into the boiler's feed flange through a 2 x 2 x 1 exchanger
+     * (50 W/K; the water on A, west out of its front). In the second plant the exchanger's B side takes the furnace's
+     * flue: air at 300 C (Flue.SMOKE_K), ~FIRE x 35/80 over the ambient (Flue.SMOKE_SHARE), in at its west end and out at
+     * its east end, against the water. The first plant's exchanger is sealed: only a pipe. Same fire, so what the flue
+     * plant's turbine makes over the other's is what the reheat buys.
+     */
+    static final class CondensateReheat extends PlumbingCases.Big {
+        static final double FIRE = 12000;
+        /** The flue's drive over its exchanger (Pa) and its ports' throttle (m^3): ~19 g/s of 300 C air, the smoke of FIRE. */
+        static final double FLUE_DP = 2000, FLUE_K = 7.5e-10;
+        /** The boiler pressure each turbine's throttle holds (Pa): the player's regulator, as on a real plant. */
+        static final double HOLD_P = 8e5;
+        static final int WARM = 2000;
+        final mods.eln.oil.BoilerElement[] boiler = new mods.eln.oil.BoilerElement[2];
+        final mods.eln.oil.SteamGeneratorElement[] turbine = new mods.eln.oil.SteamGeneratorElement[2];
+        final mods.eln.oil.CondenserElement[] cond = new mods.eln.oil.CondenserElement[2];
+        @SuppressWarnings("unchecked")
+        final List<HeatExchangerElement>[] hx = new List[2];
+        FluidDevice fx;
+        FluidNode flueIn;
+        IProcess fire;
+        int tick;
+        final double[] power = new double[2], j0 = new double[2], pumped0 = new double[2], pBoiler = new double[2], tFeed = new double[2];
+        final double[] water0 = new double[2];
+        double flue0, window;
+
+        public String id() {
+            return "heat_exchanger_condensate_reheat";
+        }
+
+        public int ticks() {
+            return WARM + 800;
+        }
+
+        /** One plant at z offset oz: boiler (1,1,1), turbine (4,1,1) and its load (5,1,1), condenser (4,1,2), exchanger
+         *  (2,1..2,2..3), the condensate (3,1,2) -> exchanger -> (1,1,2) -> the boiler's feed flange. */
+        void plant(TestContext ctx, int i, int oz) {
+            var b = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), ctx.at(1, 1, 1 + oz));
+            b.front = Direction.XN;   // (feed flange south)
+            b.reconnect();
+            b.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            b.fromTanks(5600, 0);
+            b.showTanks();
+            boiler[i] = b;
+            var t = (mods.eln.oil.SteamGeneratorElement) ctx.placeTransparent(16 + (82 << 6), ctx.at(4, 1, 1 + oz));
+            t.front = Direction.XN;
+            t.reconnect();
+            turbine[i] = t;
+            var h = (mods.eln.oil.ElectricHeaterElement) ctx.placeTransparent(4 + (82 << 6), ctx.at(5, 1, 1 + oz));
+            h.front = Direction.ZN;
+            h.reconnect();
+            ctx.placeTransparent(32 + (82 << 6), ctx.at(4, 1, 2 + oz));
+            cond[i] = OilCases.condenserOf(ctx, ctx.at(4, 1, 2 + oz));
+            for (int k = 0; k < 4 && cond[i].front != Direction.XN; k++) mods.eln.fluid.FluidPlacement.turn(cond[i]);
+            List<HeatExchangerElement> s = new ArrayList<>();
+            for (int y = 1; y <= 2; y++)
+                for (int z = 2; z <= 3; z++) s.add((HeatExchangerElement) ctx.placeTransparent(HX, ctx.at(2, y, z + oz)));
+            for (HeatExchangerElement e : s) {
+                e.front = Direction.XN;   // (A in at its back, east, out at its front, west; B in at the west, out east)
+                e.reconnect();
+            }
+            hx[i] = s;
+            // steam: up out of the boiler, east, down into the turbine
+            PipeCases.lay(ctx, ctx.at(1, 2, 1 + oz), 0, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(2, 2, 1 + oz), 0, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(3, 2, 1 + oz), 0, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(4, 2, 1 + oz), 0, 0, 8, 8, 8, 8, 8, 8, 0, 8);
+            // condensate: west out of the condenser's front into the exchanger's east end (A), out its west end, north
+            // into the boiler's feed flange
+            PipeCases.lay(ctx, ctx.at(3, 1, 2 + oz), 0, 16, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, ctx.at(1, 1, 2 + oz), 0, 16, 8, 8, 8, 8, 8, 8, 8, 0);
+        }
+
+        public void build(TestContext ctx) {
+            plant(ctx, 0, 0);
+            plant(ctx, 1, 5);
+            int y = ctx.at(1, 1, 8).getY();
+            flueIn = new FluidNode(1.0, y, 1.0, true).fill(0, Water.P_ATM + FLUE_DP, mods.eln.fluid.Flue.SMOKE_K);
+            FluidNode flueOut = new FluidNode(1.0, y, 1.0, true).fill(0, Water.P_ATM, 293.15);
+            int hi = mods.eln.oil.TankElement.HIGH;
+            fx = fixtures(head(hx[1]).fluidLevel(),
+                new Object[]{ctx.at(1, 1, 8), 5, flueIn, mods.eln.oil.TankElement.sideSpot(5, hi), FLUE_K},
+                new Object[]{ctx.at(3, 1, 8), 4, flueOut, mods.eln.oil.TankElement.sideSpot(4, hi), FLUE_K});
+            Eln.simulator.addSlowProcess(fire = dt -> {
+                for (int i = 0; i < 2; i++) {
+                    if (cond[i].vessel == null || boiler[i].vessel == null) return;
+                }
+                if (tick == 0) for (int i = 0; i < 2; i++) {
+                    // (as fluid_closed_plant_feed_loop: the condenser in its pump's level band, the feed run full)
+                    mods.eln.sim.fluid.EaUnits.addWater(cond[i].vessel, 0.28 * cond[i].vessel.volume * Water.RHO_L, 320, false);
+                    var run = mods.eln.fluid.FluidWorld.nodeFor(boiler[i].feed);
+                    run.fill(0.995 * run.volume * Water.RHO_L, Water.P_ATM, 300);
+                    run.update();
+                    // (the exchangers' water sides full of condensate)
+                    var a = head(hx[i]).a;
+                    PlumbingCases.fill(a, 0.97 * a.volume * Water.RHO_L, Water.P_ATM, 320);
+                }
+                for (int i = 0; i < 2; i++) {
+                    boiler[i].thermal.moveEnergyTo(FIRE * dt);
+                    var c = turbine[i].controls;
+                    c.throttle = Math.max(0.02, Math.min(1, c.throttle + dt * 0.05 * (boiler[i].vessel.P() - HOLD_P) / 1e5));
+                }
+                if (++tick == WARM) {
+                    for (int i = 0; i < 2; i++) {
+                        j0[i] = head(hx[i]).totalJ;
+                        pumped0[i] = cond[i].v.totalPumpedKg;
+                        water0[i] = boiler[i].vessel.mWater + cond[i].vessel.mWater;
+                    }
+                }
+                if (tick > WARM) {
+                    window += dt;
+                    for (int i = 0; i < 2; i++) {
+                        power[i] += turbine[i].source.getEffectiveP() * dt;
+                        pBoiler[i] += boiler[i].vessel.P() * dt;
+                        tFeed[i] += head(hx[i]).tAout * dt;
+                    }
+                    flue0 += head(hx[1]).sideInflow(false)[0] * dt;
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(fire);
+            mods.eln.fluid.FluidWorld.remove(fx);
+            double[] p = new double[2], q = new double[2], fed = new double[2];
+            for (int i = 0; i < 2; i++) {
+                p[i] = power[i] / window;
+                q[i] = -(head(hx[i]).totalJ - j0[i]) / window;   // (B, the flue, to A, the water)
+                fed[i] = (cond[i].v.totalPumpedKg - pumped0[i]) / window;
+                String name = i == 0 ? "no reheat" : "flue reheat";
+                ctx.line(String.format("condensate reheat, %s: fire %.1f kW; turbine %.0f W; exchanger %.2f kW into %.2f g/s of condensate, out at %.0f C; boiler %.2f bar; "
+                        + "turbine throttle %.2f; boiler %s; turbine %s; condenser %s; exchanger %s", name, FIRE / 1000, p[i], q[i] / 1000, fed[i] * 1000, tFeed[i] / window - Water.T0,
+                    pBoiler[i] / window / 1e5, turbine[i].controls.throttle, boiler[i].getWaila(), turbine[i].getWaila(), cond[i].getWaila(), head(hx[i]).getWaila()));
+            }
+            double[] dw = new double[2];
+            for (int i = 0; i < 2; i++) dw[i] = (boiler[i].vessel.mWater + cond[i].vessel.mWater - water0[i]) / window;
+            ctx.line(String.format("condensate reheat: boiler and condenser water %+.2f and %+.2f g/s over the window", dw[0] * 1000, dw[1] * 1000));
+            ctx.check("condensate reheat: steady (the boilers and condensers gain or lose under 5 % of the flow)", Math.abs(dw[0]) < 0.05 * fed[0] && Math.abs(dw[1]) < 0.05 * fed[1],
+                String.format("%+.2f, %+.2f g/s", dw[0] * 1000, dw[1] * 1000));
+            double flue = flue0 / window, flueMax = flue * 1005 * (mods.eln.fluid.Flue.SMOKE_K - 293.15);
+            ctx.line(String.format("condensate reheat: flue %.1f g/s at 300 C (%.2f kW over 20 C); the reheat %.2f kW (%.0f %% of it), the turbine +%.0f W (+%.0f %%)",
+                flue * 1000, flueMax / 1000, q[1] / 1000, q[1] / Math.max(1, flueMax) * 100, p[1] - p[0], (p[1] / Math.max(1, p[0]) - 1) * 100));
+            ctx.check("condensate reheat: two exchangers of 50 W/K", stacked(hx[0], 50) && stacked(hx[1], 50), "");
+            ctx.check("condensate reheat: both turbines make power", p[0] > 200 && p[1] > 200, String.format("%.0f, %.0f W", p[0], p[1]));
+            ctx.check("condensate reheat: the sealed exchanger moves next to nothing (under 50 W)", Math.abs(q[0]) < 50, String.format("%.0f W", q[0]));
+            ctx.check("condensate reheat: the flue warms the condensate (over 1 kW)", q[1] > 1000, String.format("%.2f kW", q[1] / 1000));
+            ctx.check("condensate reheat: the same fire makes more power with it (over 10 %)", p[1] > 1.1 * p[0], String.format("%.0f vs %.0f W", p[1], p[0]));
         }
     }
 }
