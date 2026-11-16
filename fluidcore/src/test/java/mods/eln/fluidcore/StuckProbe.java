@@ -49,6 +49,14 @@ class StuckProbe {
             e.g = Double.parseDouble(eg.split(":")[1]);
             e.open = 1;
         }
+        String bd = System.getenv("STUCK_BAND");   // edges:Pa (all: every edge with its own band), e.g. 21,22:10
+        if (bd != null) {
+            String[] p = bd.split(":");
+            for (int i = 0; i < net.edges.size(); i++) {
+                Network.Edge e = net.edges.get(i);
+                if (p[0].equals("all") ? !Double.isNaN(e.band) : ("," + p[0] + ",").contains("," + i + ",")) e.band = Double.parseDouble(p[1]);
+            }
+        }
         String gs = System.getenv("STUCK_GSCALE");   // e.g. 8,9,21,22:0.1
         if (gs != null) {
             String[] p = gs.split(":");
