@@ -42,6 +42,13 @@ class StuckProbe {
             else f.setDouble(null, Double.parseDouble(p[1]));
             System.out.println("set " + kv);
         }
+        // (STUCK_EDGE_G=edge:g: set an edge's conductance and open it, e.g. the flare's tip as its in-step burner)
+        String eg = System.getenv("STUCK_EDGE_G");
+        if (eg != null) {
+            Network.Edge e = net.edges.get(Integer.parseInt(eg.split(":")[0]));
+            e.g = Double.parseDouble(eg.split(":")[1]);
+            e.open = 1;
+        }
         String gs = System.getenv("STUCK_GSCALE");   // e.g. 8,9,21,22:0.1
         if (gs != null) {
             String[] p = gs.split(":");
@@ -113,8 +120,14 @@ class StuckProbe {
                     n.update();
                 }
             }
+            String save = System.getenv("STUCK_SAVE");   // step:path,...: the network as a dump before that step
+            if (save != null) for (String sv : save.split(",")) {
+                String[] p = sv.split(":", 2);
+                if (Integer.parseInt(p[0]) == s) java.nio.file.Files.writeString(java.nio.file.Path.of(p[1]), NetworkDump.write(net, dt[0]));
+            }
             String jr = System.getenv("STUCK_JROWS");
-            if (jr != null && s % 10 == 5) { int[] rows = java.util.Arrays.stream(jr.split(",")).mapToInt(Integer::parseInt).toArray(); System.out.print("JROWS step " + s + "\n" + net.rowJacobianErrors(dt[0], rows)); }
+            String js = System.getenv("STUCK_JSTEPS");   // the steps JROWS reports at (default every tenth, from 5)
+            if (jr != null && (js == null ? s % 10 == 5 : ("," + js + ",").contains("," + s + ","))) { int[] rows = java.util.Arrays.stream(jr.split(",")).mapToInt(Integer::parseInt).toArray(); System.out.print("JROWS step " + s + "\n" + net.rowJacobianErrors(dt[0], rows)); }
             String fr = System.getenv("STUCK_FLUX");
             if (fr != null) for (String w : fr.split(",")) { Network.Node n = net.nodes.get(Integer.parseInt(w)); System.out.printf("flux %d node %s P %.6f T %.3f lvl %.5f:%s%n", s, w, n.P() / 1e5, n.T() - 273.15, n.level(), net.fluxReport(n)); }
             long u0 = Network.UPDATES, r0 = Network.RESIDUALS, j0 = Network.JACOBIANS, b0 = MixFluid.BRACKETS, p0 = MixFluid.POLISH_ITS, sm0 = MixFluid.SAME, ev0 = MixFluid.EVALS, be0 = MixFluid.BRACKET_EVALS;
