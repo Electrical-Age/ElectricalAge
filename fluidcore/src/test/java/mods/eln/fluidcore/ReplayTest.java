@@ -161,6 +161,64 @@ class ReplayTest {
         }
     }
 
+    /**
+     * The same network at 20:20, its feed at 4.1 bar: three liquid-full feed pipes with almost no gas (bubbles of 1e-9
+     * to 1e-6 of their volume). Their vapour's mass was the difference of two numbers 1e8 times its size, and the noise
+     * kept the flash's polish off its tolerance: every update fell back to the bracketed solve, 43 a step, 78 % of the
+     * flash's evaluations, 18 ms a step and 7.4 iterations. Now none, 4-5 iterations, and the end state is a tight
+     * solve's, the liquid-full pipes' pressures included.
+     */
+    @Test
+    void workshopLiquidFullFeedNeverBrackets() throws Exception {
+        int depth = Network.MAX_DEPTH;
+        boolean cut = Network.CUT_SHORT, count = MixFluid.COUNT;
+        double keepStall = Network.STALL_OK, keepCrawl = Network.CRAWL_OK;
+        int keepIters = Network.MAX_ITERS;
+        try {
+            Network.MAX_DEPTH = 8;
+            Network.CUT_SHORT = true;
+            String text;
+            try (var in = ReplayTest.class.getResourceAsStream("/replay/baughn-workshop-hx-4bar.txt")) {
+                text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+            double[] dt = new double[1];
+            int steps = 40;
+            Network net = NetworkDump.read(text, dt);
+            MixFluid.COUNT = true;
+            long b0 = MixFluid.BRACKETS;
+            for (int i = 0; i < steps; i++) net.step(dt[0]);
+            long brackets = MixFluid.BRACKETS - b0;
+            MixFluid.COUNT = count;
+            System.out.printf("workshop at 4 bar: %d steps, iterations %d, substeps %d, bracketed flashes %d%n", steps, net.stats.iterations,
+                net.stats.substeps, brackets);
+            assertEquals(0, net.stats.substeps, "sub-steps");
+            org.junit.jupiter.api.Assertions.assertTrue(brackets <= steps / 10, "bracketed flashes: " + brackets + " (43 a step before)");
+            org.junit.jupiter.api.Assertions.assertTrue(net.stats.iterations <= 6 * steps, "iterations: " + net.stats.iterations);
+            Network.STALL_OK = keepStall / 100;
+            Network.CRAWL_OK = keepCrawl / 100;
+            Network.MAX_ITERS = 200;
+            Network tight = NetworkDump.read(text, dt);
+            for (int i = 0; i < steps; i++) tight.step(dt[0]);
+            double worstT = 0, worstP = 0;
+            for (int i = 0; i < net.nodes.size(); i++) {
+                Network.Node a = net.nodes.get(i), b = tight.nodes.get(i);
+                if (a.fixed || a.mass() < 1e-6) continue;
+                worstT = Math.max(worstT, Math.abs(a.T() - b.T()));
+                worstP = Math.max(worstP, Math.abs(a.P() - b.P()));
+            }
+            System.out.printf("  against a tight solve: worst %.3g K, %.3g Pa (liquid-full pipes included)%n", worstT, worstP);
+            org.junit.jupiter.api.Assertions.assertTrue(worstT < 1e-4, "temperature off a tight solve by " + worstT);
+            org.junit.jupiter.api.Assertions.assertTrue(worstP < 1, "pressure off a tight solve by " + worstP);
+        } finally {
+            Network.MAX_DEPTH = depth;
+            Network.CUT_SHORT = cut;
+            MixFluid.COUNT = count;
+            Network.STALL_OK = keepStall;
+            Network.CRAWL_OK = keepCrawl;
+            Network.MAX_ITERS = keepIters;
+        }
+    }
+
     @Test
     void replayDumps() throws Exception {
         String dir = System.getenv("FLUIDCORE_REPLAY");
