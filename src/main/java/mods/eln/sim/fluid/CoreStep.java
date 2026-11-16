@@ -362,7 +362,6 @@ final class CoreStep {
         if (net.stats.failures > failures) failed(dt, m0, u0, h0);
         else if (net.stats.cut > cut0 || net.stats.substeps - sub0 > 64) slow(dt, m0, u0, h0, net.stats.substeps - sub0);
         dt = tick;
-        boolean asleep = net.stats.slept > slept;
         // contents out
         for (int i = 0; i < cn.length; i++) {
             FluidNode n = nodes.get(i);
@@ -377,8 +376,10 @@ final class CoreStep {
                 for (int j = 2; j < ids.length; j++) n.extra[ids[j] - 2] = c.m[j];
             }
             n.energy = c.U;
-            // (asleep, the core kept the last step's heat, but nothing passed: the state stood still)
-            n.wallJ = asleep ? 0 : c.wallJ;
+            // (asleep, the core keeps the last step's heat, as it keeps its edges' moves: a network sleeps in a steady
+            // state, and a condenser's cooling or a boiler's shell passes heat through it all the same; read as 0, a
+            // condenser asleep booked no heat)
+            n.wallJ = c.wallJ;
             n.update();
         }
         // what each edge carried

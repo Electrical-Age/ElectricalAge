@@ -91,6 +91,39 @@ public class FluidCoreTest {
         for (FluidNode n : net.nodes) assertTrue(Double.isFinite(n.P()) && n.mWater > 0, "finite and positive");
     }
 
+    /**
+     * Hot air from a reservoir through a vessel cooled by its wall, out to the air: the network settles and sleeps,
+     * and asleep the wall still reports the heat it passes (it read 0, so a condenser asleep booked no heat).
+     */
+    @Test
+    void aWallKeepsPassingHeatWhileItsNetworkSleeps() {
+        FluidNetwork net = new FluidNetwork();
+        FluidNode src = net.add(new FluidNode(1, 0, 1, true).fill(0, 2e5, 400));
+        FluidNode v = net.add(new FluidNode(0.01, 0, 0.2, false).fill(0, 1.5e5, 350));
+        FluidNode atm = net.add(FluidNode.atmosphere(0));
+        net.connect(src, 0.5, v, 0.5, 1e-11);
+        net.connect(v, 0.5, atm, 0.5, 1e-11);
+        int s = 0;
+        for (; s < 20000 && (net.core == null || !net.core.net.asleep()); s++) {
+            v.wallUA = 2;
+            v.wallT = 300;
+            net.step(DT);
+        }
+        assertTrue(net.core.net.asleep(), "asleep after " + s + " steps");
+        double awake = v.wallJ;
+        assertTrue(awake < -1e-3, "the wall takes heat: " + awake + " J a step");
+        long slept = net.core.net.stats.slept;
+        for (int i = 0; i < 20; i++) {
+            v.wallUA = 2;
+            v.wallT = 300;
+            net.step(DT);
+            assertEquals(awake, v.wallJ, 0, "asleep, step " + i);
+        }
+        assertEquals(slept + 20, net.core.net.stats.slept, "slept through");
+        // (and it is the heat the flow brings: what the wall takes, the stream through the vessel gave up)
+        assertEquals(awake / DT, 2 * (300 - v.T()), 1e-6 * Math.abs(awake / DT));
+    }
+
     @Test
     void checkValvePassesOneWayOnly() {
         // a high, b low: a check edge a -> b passes; b high, a low: it holds
