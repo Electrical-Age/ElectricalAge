@@ -81,6 +81,7 @@ public final class Network {
 
         /** Solve its state from m and U again: whoever changes those from outside (the game's adapter) calls it. */
         public void update() {
+            if (MixFluid.COUNT) UPDATES++;
             fluid.update(m, U);
         }
 
@@ -1120,7 +1121,27 @@ public final class Network {
     }
 
     /** The residual R = Y' - Y0 - dt (fluxes in + heat) at the nodes' current states (each node's C rows). */
+    /** Probe: each edge's net flux out of node n (masses kg/s, energy W incl. conduction) at the current states. */
+    String fluxReport(Node n) {
+        int C = C();
+        StringBuilder b = new StringBuilder();
+        for (int g = 0; g < edges.size(); g++) {
+            Edge e = edges.get(g);
+            if (e.a != n && e.b != n) continue;
+            double[] f = flux(e, C);
+            if (f == null) continue;
+            double sg = e.a == n ? 1 : -1;
+            b.append(String.format(" e%d[%s m0 %.3g E %.4g]", g, e.a == n ? "out" : "in", sg * f[0], sg * (f[C - 1] + f[C])));
+        }
+        b.append(String.format(" heat %.3g wall %.3g", n.heat, n.wallUA > 0 ? n.wallUA * (n.wallT - n.T()) : 0));
+        return b.toString();
+    }
+
+    /** Probe counters: node updates (flashes) and residual evaluations. */
+    public static long UPDATES, RESIDUALS, JACOBIANS;
+
     double[] residual(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt) {
+        if (MixFluid.COUNT) RESIDUALS++;
         int C = C(), S = C - 1;
         double[] r = new double[C * free.size()];
         for (int i = 0; i < free.size(); i++) {
@@ -1237,6 +1258,7 @@ public final class Network {
     }
 
     private Sparse jacobian(List<Node> free, java.util.Map<Node, Integer> idx, double dt) {
+        if (MixFluid.COUNT) JACOBIANS++;
         int C = C(), S = C - 1;
         int M = C * free.size();
         Sparse J = new Sparse(M);
@@ -1466,6 +1488,15 @@ public final class Network {
     public static double FLOOR = 1e-4;
     /** Tests: a trace of each Newton iteration (null: off). */
     public static StringBuilder DEBUG = null;
+    /** Probe: one line per Newton solve (dt, then per iteration the stop norm, its worst row and the accepted alpha; the outcome). */
+    public static StringBuilder TRACE = null;
+
+    private static int worstRow(double[] r, double[] t) {
+        int at = -1;
+        double w = -1;
+        for (int i = 0; i < r.length; i++) if (Math.abs(r[i] * t[i]) > w) { w = Math.abs(r[i] * t[i]); at = i; }
+        return at;
+    }
 
     /**
      * End the step conservatively whatever Newton reached: the contents become the start's plus dt times the fluxes
@@ -1591,7 +1622,17 @@ public final class Network {
         for (int i = 0; i < free.size(); i++) idx0.put(free.get(i), i);
         predict(free, idx0, y0, dt);
         boolean ok = newton(free, y0, dt);
+        double[] pIt = null, yIt = null; double[][] slopes = null;
+        if (TRACE != null) { pIt = new double[free.size()]; slopes = new double[free.size()][]; yIt = pack(free); for (int i = 0; i < pIt.length; i++) { pIt[i] = free.get(i).P(); slopes[i] = free.get(i).fluid.portPSlope(1).clone(); } }
         finish(free, idx0, y0, dt);
+        if (TRACE != null) {
+            int w = -1, w2 = -1; double dw = 0, dw2 = 0;
+            for (int i = 0; i < pIt.length; i++) { double d = Math.abs(free.get(i).P() - pIt[i]); if (d > dw) { dw2 = dw; w2 = w; dw = d; w = i; } else if (d > dw2) { dw2 = d; w2 = i; } }
+            TRACE.append(String.format("  finish kick: free %d %.3g Pa, free %d %.3g Pa;", w, dw, w2, dw2));
+            double[] ye = pack(free); int C = C();
+            if (w >= 0) for (int j = 0; j < C; j++) TRACE.append(String.format(" [c%d dy %.3g dP/dy %.3g -> %.3g Pa]", j, ye[C * w + j] - yIt[C * w + j], slopes[w][j], slopes[w][j] * (ye[C * w + j] - yIt[C * w + j])));
+            TRACE.append("\n");
+        }
         return ok;
     }
 
@@ -1607,8 +1648,9 @@ public final class Network {
         double nr = norm(r, s), ns = t == s ? nr : norm(r, t);
         stats.norms.clear();
         stats.norms.add(ns);
+        if (TRACE != null) TRACE.append(String.format("solve dt %.4g: %.2e@%d", dt, ns, worstRow(r, t)));
         for (int it = 0; it < MAX_ITERS; it++) {
-            if (ns < TOL) return true;
+            if (ns < TOL) { if (TRACE != null) TRACE.append(" OK\n"); return true; }
             stats.iterations++;
             Sparse J = jacobian(free, idx, dt);
             J.scale = s;
@@ -1724,6 +1766,18 @@ public final class Network {
                 }
             }
             stats.norms.add(ns);
+            if (TRACE != null) TRACE.append(accepted ? String.format(" %.2e@%d/a%.2g", ns, worstRow(r, t), alpha) : " STALL" + String.format("%.2e", ns));
+            if (TRACE != null && accepted && crawling) TRACE.append(" CRAWL\n");
+            if (TRACE != null && !accepted) {
+                TRACE.append(ns < STALL_OK ? " ok" : " FAIL");
+                Integer[] o = new Integer[r.length];
+                for (int i = 0; i < o.length; i++) o[i] = i;
+                final double[] rr = r, tt = t;
+                java.util.Arrays.sort(o, (a, b) -> Double.compare(Math.abs(rr[b] * tt[b]), Math.abs(rr[a] * tt[a])));
+                TRACE.append(" top:");
+                for (int i = 0; i < 6 && i < o.length; i++) TRACE.append(String.format(" %d=%.2e(raw %.2e,t %.2e)", o[i], r[o[i]] * t[o[i]], r[o[i]], t[o[i]]));
+                TRACE.append("\n");
+            }
             // (crawling at the precision floor: under CRAWL_OK and an iteration took less than half off; more iterations
             // only shave slivers. Accepted at once: on the clone, networks crawled to MAX_ITERS every tick, each
             // iteration a line search re-flashing every node, and three 4-9 node networks cost 2-4 ms a step)
@@ -1754,6 +1808,7 @@ public final class Network {
         // search never stalled, but rounding keeps it there; under CRAWL_OK, accepted: the step ends conservatively. A
         // steam jet into an emptied condenser failed every sub-step this way at 3e-10 to 3e-8, and its network made no
         // progress for seconds)
+        if (TRACE != null) TRACE.append(ns < TOL ? " OK\n" : ns < CRAWL_OK ? " MAXIT-crawl\n" : " MAXIT-FAIL\n");
         if (ns >= TOL && ns < CRAWL_OK) {
             stats.crawls++;
             return true;
@@ -1822,6 +1877,49 @@ public final class Network {
             }
         }
         return String.format("%.3g at %s", worst, at);
+    }
+
+    /** Probe: for each row in rows, its three largest |J - FD| entries against the row's largest entry, at the current states. */
+    String rowJacobianErrors(double dt, int[] rows) {
+        List<Node> free = new ArrayList<>();
+        for (Node n : nodes) if (!n.fixed) free.add(n);
+        java.util.Map<Node, Integer> idx = new java.util.IdentityHashMap<>();
+        for (int i = 0; i < free.size(); i++) idx.put(free.get(i), i);
+        int C = C();
+        double[] y = pack(free), y0 = y.clone();
+        double[][] J = jacobian(free, idx, dt).dense();
+        int M = y.length;
+        double[][] F = new double[M][M];
+        for (int j = 0; j < M; j++) {
+            boolean energy = j % C == C - 1;
+            double h = energy ? 1e-6 * Math.max(1, Math.abs(y[j])) : Math.max(1e-6 * y[j], CHECK_STEP * massOf(y, j - j % C, C - 1));
+            if (!energy && h == 0) continue;
+            double[] yp = y.clone(), ym = y.clone();
+            yp[j] += h;
+            if (energy || y[j] - h >= 0) ym[j] -= h;
+            h = (yp[j] - ym[j]) / 2;
+            set(free, yp);
+            double[] rp = residual(free, idx, y0, dt);
+            set(free, ym);
+            double[] rm = residual(free, idx, y0, dt);
+            set(free, y);
+            for (int i = 0; i < M; i++) F[i][j] = (rp[i] - rm[i]) / (2 * h);
+        }
+        double[] sc = scales(free, y0);
+        StringBuilder o = new StringBuilder();
+        for (int i : rows) {
+            List<double[]> errs = new ArrayList<>();
+            for (int j = 0; j < M; j++) {
+                // (each entry's effect on the scaled row per a scaled unit of its column)
+                double e = Math.abs(F[i][j] - J[i][j]) * sc[i] / sc[j];
+                if (e > 0) errs.add(new double[]{e, j, J[i][j], F[i][j]});
+            }
+            errs.sort((a, b) -> Double.compare(b[0], a[0]));
+            o.append("row ").append(i).append(':');
+            for (int k = 0; k < 4 && k < errs.size(); k++) o.append(String.format(" [c%d %.2e J %.5g FD %.5g]", (int) errs.get(k)[1], errs.get(k)[0], errs.get(k)[2], errs.get(k)[3]));
+            o.append('\n');
+        }
+        return o.toString();
     }
 
     /** Debugging: the five largest |J - FD| entries at the current states, scaled by the row and column scales. */

@@ -91,6 +91,76 @@ class ReplayTest {
         }
     }
 
+    /**
+     * Baughn's workshop network with his counterflow exchanger back in (2026-11-16, clone of the live server; /elnlab
+     * fluiddump of its 35 nodes: boiler, turbine, condenser, a lone exchanger block of two slices a side, its feed water at
+     * 12.4 bar, the furnaces' flue gas on the other side). It cost 16-20 ms a step on the server, 15 iterations and ~0.4
+     * sub-steps, never settling. Newton reached its tolerance's neighbourhood in a few iterations and then crawled or
+     * stalled on the flash's own noise (MixFluid's polish tolerances: 1e-9 J in a 14 mg flue pipe, 1e-13 of a liquid-full
+     * pipe's volume): 12 iterations, 24 solves and 0.4 sub-steps a step in this replay; 6, 12 and none with the tighter
+     * polish. The end state is a tight solve's (stall and crawl acceptances 100 times stricter, 200 iterations).
+     */
+    @Test
+    void workshopExchangerSettlesInAFewIterations() throws Exception {
+        int depth = Network.MAX_DEPTH;
+        boolean cut = Network.CUT_SHORT;
+        double keepStall = Network.STALL_OK, keepCrawl = Network.CRAWL_OK;
+        int keepIters = Network.MAX_ITERS;
+        try {
+            Network.MAX_DEPTH = 8;
+            Network.CUT_SHORT = true;
+            String text;
+            try (var in = ReplayTest.class.getResourceAsStream("/replay/baughn-workshop-hx.txt")) {
+                text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+            double[] dt = new double[1];
+            int steps = 40;
+            Network net = NetworkDump.read(text, dt);
+            if (System.getenv("HX_OLD") != null) MixFluid.OLD_TOL = true;
+            for (int i = 0; i < steps; i++) {
+                net.step(dt[0]);
+                assertEquals(dt[0], net.done, 1e-12, "step " + i + " covered");
+            }
+            MixFluid.OLD_TOL = false;
+            System.out.printf("workshop exchanger: %d steps, iterations %d, solves %d, substeps %d%n", steps, net.stats.iterations, net.stats.solves,
+                net.stats.substeps);
+            boolean old = System.getenv("HX_OLD") != null;
+            if (!old) {
+                assertEquals(0, net.stats.failures, "failed sub-steps");
+                assertEquals(0, net.stats.substeps, "sub-steps");
+                // (before: 12 iterations a step)
+                org.junit.jupiter.api.Assertions.assertTrue(net.stats.iterations <= 8 * steps, "iterations: " + net.stats.iterations);
+            }
+            Network.STALL_OK = keepStall / 100;
+            Network.CRAWL_OK = keepCrawl / 100;
+            Network.MAX_ITERS = 200;
+            Network tight = NetworkDump.read(text, dt);
+            for (int i = 0; i < steps; i++) tight.step(dt[0]);
+            // (a node with a gas space; the liquid-full feed pipe only printed: 1.5e10 Pa/kg there, so the residual a step ends
+            // on is a pressure, ~20 Pa against the old polish's 80, and noisy; the old polish was also 0.009 K and 1.2 Pa off
+            // elsewhere. HX_OLD=1: the old polish's numbers, unchecked)
+            double worstT = 0, worstP = 0, worstFull = 0;
+            for (int i = 0; i < net.nodes.size(); i++) {
+                Network.Node a = net.nodes.get(i), b = tight.nodes.get(i);
+                if (a.fixed || a.mass() < 1e-6) continue;
+                worstT = Math.max(worstT, Math.abs(a.T() - b.T()));
+                if (a.level() > 0.999) worstFull = Math.max(worstFull, Math.abs(a.P() - b.P()));
+                else worstP = Math.max(worstP, Math.abs(a.P() - b.P()));
+            }
+            System.out.printf("  against a tight solve: worst %.3g K, %.3g Pa (liquid-full: %.3g Pa)%n", worstT, worstP, worstFull);
+            if (!old) {
+                org.junit.jupiter.api.Assertions.assertTrue(worstT < 1e-4, "temperature off a tight solve by " + worstT);
+                org.junit.jupiter.api.Assertions.assertTrue(worstP < 0.5, "pressure off a tight solve by " + worstP);
+            }
+        } finally {
+            Network.MAX_DEPTH = depth;
+            Network.CUT_SHORT = cut;
+            Network.STALL_OK = keepStall;
+            Network.CRAWL_OK = keepCrawl;
+            Network.MAX_ITERS = keepIters;
+        }
+    }
+
     @Test
     void replayDumps() throws Exception {
         String dir = System.getenv("FLUIDCORE_REPLAY");
