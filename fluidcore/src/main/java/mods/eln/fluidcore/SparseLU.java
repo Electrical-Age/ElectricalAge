@@ -115,10 +115,13 @@ public final class SparseLU {
             work[k] = 0;
             int[] up = upper[k];
             double rowMax = Math.abs(d);
+            double[] sc = a.scale;
             for (int s = 0; s < up.length; s++) {
                 uv[k][s] = work[up[s]];
                 work[up[s]] = 0;
-                rowMax = Math.max(rowMax, Math.abs(uv[k][s]));
+                // (weighed by the unknowns' scales when the caller gave them: a liquid-full node's energy row holds
+                // dP/dm of ~1e12 J/kg against its own 1 J/J, and an unweighed test took that for a vanishing pivot)
+                rowMax = Math.max(rowMax, sc == null ? Math.abs(uv[k][s]) : Math.abs(uv[k][s]) * sc[r] / sc[perm[up[s]]]);
             }
             if (!(Math.abs(d) > 1e-12 * rowMax) || !Double.isFinite(d)) {
                 Arrays.fill(work, 0);

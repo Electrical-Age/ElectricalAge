@@ -51,6 +51,46 @@ class ReplayTest {
         }
     }
 
+    /**
+     * Baughn's workshop plant (2026-11-15; /elnlab fluiddump of a 48-node network: boiler, turbine, condenser, an 8-slice
+     * counterflow exchanger full of water at 11 bar, a flare): it cost 22-43 ms a step on the server, never asleep. Every
+     * linear solve fell back to the dense one: the sparse LU's pivot test took the energy row of a liquid-full node
+     * (dP/dm ~1e12 J/kg beside its diagonal of 1) for a vanishing pivot, and the dense solve's directions were poor enough
+     * that the whole step failed and sub-stepped. Weighed by the unknowns' scales, no solve falls back and a step takes
+     * a handful of iterations; the states agree with the old path's to the solve's precision.
+     */
+    @Test
+    void workshopPlantSolvesSparse() throws Exception {
+        int depth = Network.MAX_DEPTH;
+        boolean cut = Network.CUT_SHORT;
+        try {
+            Network.MAX_DEPTH = 8;
+            Network.CUT_SHORT = true;
+            String text;
+            try (var in = ReplayTest.class.getResourceAsStream("/replay/baughn-workshop-stuck.txt")) {
+                text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+            double[] dt = new double[1];
+            Network net = NetworkDump.read(text, dt);
+            long fallbacks = Sparse.FALLBACKS;
+            int steps = 40;
+            for (int i = 0; i < steps; i++) {
+                net.step(dt[0]);
+                assertEquals(dt[0], net.done, 1e-12, "step " + i + " covered");
+            }
+            System.out.printf("workshop: %d steps, iterations %d, solves %d, substeps %d, dense fallbacks %d%n", steps, net.stats.iterations,
+                net.stats.solves, net.stats.substeps, Sparse.FALLBACKS - fallbacks);
+            assertEquals(0, net.stats.failures, "failed sub-steps");
+            assertEquals(0, Sparse.FALLBACKS - fallbacks, "solves that fell back to the dense solve");
+            // (before: 11-13 iterations, ~75 solves and 1-2 sub-steps a step)
+            org.junit.jupiter.api.Assertions.assertTrue(net.stats.iterations <= 8 * steps, "iterations: " + net.stats.iterations);
+            org.junit.jupiter.api.Assertions.assertTrue(net.stats.substeps <= steps / 4, "sub-steps: " + net.stats.substeps);
+        } finally {
+            Network.MAX_DEPTH = depth;
+            Network.CUT_SHORT = cut;
+        }
+    }
+
     @Test
     void replayDumps() throws Exception {
         String dir = System.getenv("FLUIDCORE_REPLAY");

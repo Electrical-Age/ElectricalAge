@@ -19,6 +19,14 @@ public final class Sparse {
     final double[][] vals;
     final int[] len;
 
+    /**
+     * The unknowns' inverse scales (Network.scales: a node's masses by its contents, its energy by its contents times a
+     * typical specific energy), or null. The pivot tests weigh entry (r, c) by scale[r] / scale[c], so they compare
+     * like with like; unweighed, a liquid-full node's energy row (dP/dm ~1e12 against a diagonal of 1) failed the test
+     * in every solve, and each fell back to the dense solve (Baughn's workshop, 2026-11-15: 40 ms a step at 48 nodes).
+     */
+    public double[] scale;
+
     public Sparse(int n) {
         this.n = n;
         cols = new int[n][];
@@ -172,7 +180,8 @@ public final class Sparse {
             java.util.HashMap<Integer, Double> pr = rows[p];
             Double pv = pr.get(p);
             double rowMax = 0;
-            for (double v : pr.values()) rowMax = Math.max(rowMax, Math.abs(v));
+            for (var en : pr.entrySet())
+                rowMax = Math.max(rowMax, scale == null ? Math.abs(en.getValue()) : Math.abs(en.getValue()) * scale[p] / scale[en.getKey()]);
             if (pv == null || Math.abs(pv) < 1e-12 * Math.max(rowMax, 1e-300)) return null;
             // eliminate column p from every other unfinished row holding it
             for (int r : new ArrayList<>(colRows.get(p))) {

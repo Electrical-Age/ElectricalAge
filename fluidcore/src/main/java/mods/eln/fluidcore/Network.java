@@ -1361,6 +1361,7 @@ public final class Network {
             if (nr < TOL) return true;
             stats.iterations++;
             Sparse J = jacobian(free, idx, dt);
+            J.scale = s;
             double[] minus = new double[r.length];
             for (int i = 0; i < r.length; i++) minus[i] = -r[i];
             stats.solves++;
