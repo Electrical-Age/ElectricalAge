@@ -1403,6 +1403,59 @@ public final class Network {
         return x;
     }
 
+    /**
+     * Throughput-aware rows in the stop tests (true; false: today's row scales alone, for tests). A node's rows are
+     * judged against max(its contents, dt times the mass passing through it) instead of its contents alone (its energy
+     * row times 1e5 J/kg, as before): an exchanger's hot-gas slice holds 0.06 g of air with 19 g/s through it, so its
+     * rows were held to a millionth of what it holds while a step passed 30-50 times that, and the solves stalled just
+     * over STALL_OK and sub-stepped (the 4 L gas turbine's combined cycle: 45 iterations and 5 sub-steps a step; 17 and
+     * 0.8 with these rows). Only when to stop changes: the iterates, and finish's exact books, don't.
+     */
+    public static boolean THROUGHPUT = true;
+    /** Tests: the throughput also loosens the mass rows (true), or the energy rows alone. */
+    static boolean MASS_ROWS = true;
+
+    /**
+     * The stop tests' row scales: the row scales s, each node's rows by max(its mass, dt q) instead of its mass, q the
+     * mass through the node at the solve's start (the lesser of its gross inflow and gross outflow over its edges, so a
+     * node being filled or emptied keeps today's strictness), frozen for the solve (recomputed, a line search could
+     * pass by raising the flow). The masses are loosened only in a node holding no liquid. A node that passes less
+     * than it holds in a step keeps s exactly.
+     */
+    private double[] stopScales(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt, double[] s) {
+        if (!THROUGHPUT) return s;
+        int C = C(), S = C - 1;
+        double[] in = new double[free.size()], out = new double[free.size()];
+        for (Edge e : edges) {
+            double[] f = flux(e, C);
+            if (f == null) continue;
+            Integer ia = idx.get(e.a), ib = idx.get(e.b);
+            for (int k = 0; k < S; k++) {
+                double pos = Math.max(f[k], 0), neg = Math.max(-f[k], 0);
+                if (ia != null) {
+                    out[ia] += pos;
+                    in[ia] += neg;
+                }
+                if (ib != null) {
+                    in[ib] += pos;
+                    out[ib] += neg;
+                }
+            }
+        }
+        double[] t = null;
+        for (int i = 0; i < free.size(); i++) {
+            double m = Math.max(1e-6 * free.get(i).V, massOf(y0, C * i, S)), q = dt * Math.min(in[i], out[i]);
+            if (q > m) {
+                if (t == null) t = s.clone();
+                // (masses only where the node holds no liquid: in a liquid-full node a mass residual is a pressure, and
+                // water through a 10 mL node at 25 g a step ended 11 Pa off a tight solve's pressure)
+                if (MASS_ROWS && free.get(i).fluid.level() == 0) for (int k = 0; k < S; k++) t[C * i + k] = 1 / q;
+                t[C * i + S] = 1 / (q * 1e5);
+            }
+        }
+        return t == null ? s : t;
+    }
+
     public static double TOL = 1e-10, STALL_OK = 1e-6;
     /**
      * Out of iterations, a residual under this is accepted as the precision floor (Network.solve). In the GameTests such
@@ -1549,13 +1602,15 @@ public final class Network {
         java.util.Map<Node, Integer> idx = new java.util.IdentityHashMap<>();
         for (int i = 0; i < free.size(); i++) idx.put(free.get(i), i);
         double[] s = scales(free, y0);
+        // (the line search's merit stays on s, so the iterates are today's; the stop tests read the norm on t)
+        double[] t = stopScales(free, idx, y0, dt, s);
         double[] y = pack(free);
         double[] r = residual(free, idx, y0, dt);
-        double nr = norm(r, s);
+        double nr = norm(r, s), ns = t == s ? nr : norm(r, t);
         stats.norms.clear();
-        stats.norms.add(nr);
+        stats.norms.add(ns);
         for (int it = 0; it < MAX_ITERS; it++) {
-            if (nr < TOL) return true;
+            if (ns < TOL) return true;
             stats.iterations++;
             Sparse J = jacobian(free, idx, dt);
             J.scale = s;
@@ -1658,16 +1713,19 @@ public final class Network {
                 double[] rt = residual(free, idx, y0, dt);
                 double nt = norm(rt, s);
                 if (DEBUG != null && ls < 3) DEBUG.append(String.format("    ls %d alpha %.3e nt %.3e r*s %s%n", ls, alpha, nt, java.util.Arrays.toString(scaled(rt, s))));
-                if (nt < (1 - 1e-4 * alpha) * nr || nt < TOL) {
-                    crawling = nt >= TOL && nt < CRAWL_OK && nt > 0.5 * nr;
+                double ntS = t == s ? nt : norm(rt, t);
+                if (nt < (1 - 1e-4 * alpha) * nr || ntS < TOL) {
+                    // (the level on t, the progress on s: whenever today's test stops, this one does, as t <= s)
+                    crawling = ntS >= TOL && ntS < CRAWL_OK && nt > 0.5 * nr;
                     y = yt;
                     r = rt;
                     nr = nt;
+                    ns = ntS;
                     accepted = true;
                     break;
                 }
             }
-            stats.norms.add(nr);
+            stats.norms.add(ns);
             // (crawling at the precision floor: under CRAWL_OK and an iteration took less than half off; more iterations
             // only shave slivers. Accepted at once: on the clone, networks crawled to MAX_ITERS every tick, each
             // iteration a line search re-flashing every node, and three 4-9 node networks cost 2-4 ms a step)
@@ -1680,33 +1738,33 @@ public final class Network {
                 if (DEBUG != null) DEBUG.append("  stalled; scaled Jacobian errors: ").append(scaledJacobianErrors(free, idx, y0, dt, s)).append("\n");
                 // (stalled at the precision floor: a liquid-full node turns a rounding error in its mass into a pressure,
                 // so the residual can't go lower; the step still ends conservatively)
-                if (nr < STALL_OK) {
+                if (ns < STALL_OK) {
                     stats.stalls++;
                     return true;
                 }
-                if (nr >= 1e3 * TOL) {
+                if (ns >= 1e3 * TOL) {
                     stats.lastRows = new double[r.length];
-                    for (int i = 0; i < r.length; i++) stats.lastRows[i] = r[i] * s[i];
+                    for (int i = 0; i < r.length; i++) stats.lastRows[i] = r[i] * t[i];
                     stats.lastFail.clear();
                     stats.lastFail.addAll(stats.norms);
                     stats.lastFail.add(-alpha);
                 }
-                return nr < 1e3 * TOL;
+                return ns < 1e3 * TOL;
             }
         }
         // (out of iterations crawling at the precision floor: each iteration took a sliver off the residual, so the line
         // search never stalled, but rounding keeps it there; under CRAWL_OK, accepted: the step ends conservatively. A
         // steam jet into an emptied condenser failed every sub-step this way at 3e-10 to 3e-8, and its network made no
         // progress for seconds)
-        if (nr >= TOL && nr < CRAWL_OK) {
+        if (ns >= TOL && ns < CRAWL_OK) {
             stats.crawls++;
             return true;
         }
-        if (nr >= TOL) {
+        if (ns >= TOL) {
             stats.lastFail.clear();
             stats.lastFail.addAll(stats.norms);
         }
-        return nr < TOL;
+        return ns < TOL;
     }
 
     /** Tests: the Jacobian at the nodes' current states against central differences of the residual; the worst row-relative error and where. */
