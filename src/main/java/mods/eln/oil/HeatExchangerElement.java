@@ -502,9 +502,11 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
         if (a == null) return info;
         HeatExchangerElement h = head();
-        info.put(I18N.tr("Stream A"), String.format("%.0f -> %.0f °C, %.2f bar of %s", h.tAin - Water.T0, h.tAout - Water.T0, a.P() / 1e5,
+        // (not stepped yet, as just loaded: no inlet reading, so its sides' own temperatures)
+        boolean read = h.tAin > 0;
+        info.put(I18N.tr("Stream A"), String.format("%.0f -> %.0f °C, %.2f bar of %s", (read ? h.tAin : a.T()) - Water.T0, (read ? h.tAout : a.T()) - Water.T0, a.P() / 1e5,
             mods.eln.sim.fluid.EaUnits.contents(a)));
-        info.put(I18N.tr("Stream B"), String.format("%.0f -> %.0f °C, %.2f bar of %s", h.tBin - Water.T0, h.tBout - Water.T0, b.P() / 1e5,
+        info.put(I18N.tr("Stream B"), String.format("%.0f -> %.0f °C, %.2f bar of %s", (read ? h.tBin : b.T()) - Water.T0, (read ? h.tBout : b.T()) - Water.T0, b.P() / 1e5,
             mods.eln.sim.fluid.EaUnits.contents(b)));
         info.put(I18N.tr("A holds"), mods.eln.sim.fluid.EaUnits.composition(a));
         info.put(I18N.tr("B holds"), mods.eln.sim.fluid.EaUnits.composition(b));
@@ -514,7 +516,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
             vw += m.ventedA[0] + m.ventedB[0];
             vm += m.ventedA[1] + m.ventedB[1];
         }
-        if (vm > 1e-6) info.put(I18N.tr("Resized"), String.format(I18N.tr("1 B a side a block now; it vented %s it held over that"),
+        if (vm > 1e-6) info.put(I18N.tr("Resized"), String.format(I18N.tr("1 B a side a block now; it vented %s over that, both sides"),
             vw > 0.01 * vm ? mods.eln.sim.fluid.EaUnits.volume(vw / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER) + " water" : String.format("%.1f g of gas", vm * 1000)));
         info.put(I18N.tr("Exchanger"), group == null ? String.format(I18N.tr("one block, a quarter slice: %.1f W/K"), ua())
             : String.format(I18N.tr("2 x 2 x %d blocks: %.0f W/K"), group.length(), ua()));
