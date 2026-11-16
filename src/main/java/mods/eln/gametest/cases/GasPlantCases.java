@@ -601,6 +601,8 @@ public final class GasPlantCases {
         /** The feed valve (alloy) between the economizer and the raiser, against ~2 bar: ~6 g/s (the orifice law; the
          *  level is the player's circuit to hold, Baughn). */
         static final double FEED_OPEN = 0.008;
+        /** The feed port's throttle (m^3): ~6 g/s on a bar across it. */
+        static final double FEED_K = 6e-14;
         GasLine l;
         List<HeatExchangerElement> raiser, econ;
         mods.eln.node.voxel.ValvePart feedValve;
@@ -612,14 +614,25 @@ public final class GasPlantCases {
         FluidNode feed;
         int tick;
         double f0, g0, s0, k0, j0, e0, w0, x0, window;
+        mods.eln.oil.TankElement sep;
+        /** The energy (J) in the raiser's water side, the economizer's and the separator at the window's start. */
+        double store0;
+
+        double store() {
+            return head(raiser).b.energy + head(econ).b.energy + sep.vessel.energy;
+        }
 
         public String id() {
             return "gas_plant_combined_cycle";
         }
 
         public int ticks() {
-            return 1600;
+            return WARM + 800;
         }
+
+        /** Ticks run before the measured window, and the raiser's pressure the HP's throttle holds (Pa). */
+        static final int WARM = 1600;
+        static final double HOLD_P = 14e5;
 
         public void build(TestContext ctx) {
             l = new GasLine(ctx, true, 7000);
@@ -637,7 +650,7 @@ public final class GasPlantCases {
             // -> its top -> up, south, down into an HP turbine at (2,1,8); its generator at z 9
             PipeCases.lay(ctx, ctx.at(2, 2, 6), 1, 16, 12, 8, 8, 12, 8, 8, 12, 16);
             ctx.level().setBlockAndUpdate(ctx.at(2, 1, 7), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());   // (under it)
-            PlumbingCases.tank(ctx, PlumbingCases.ALLOY_TANK, ctx.at(2, 2, 7), Direction.ZP);   // (its back, north, to the pipe)
+            sep = PlumbingCases.tank(ctx, PlumbingCases.ALLOY_TANK, ctx.at(2, 2, 7), Direction.ZP);   // (its back, north, to the pipe)
             PipeCases.lay(ctx, ctx.at(2, 3, 7), 1, 8, 0, 8, 8, 8, 8, 8, 8, 16);
             PipeCases.lay(ctx, ctx.at(2, 3, 8), 1, 8, 8, 0, 8, 8, 8, 8, 0, 8);
             PipeCases.lay(ctx, ctx.at(2, 2, 8), 1, 8, 16, 8, 8, 0, 8);
@@ -659,7 +672,9 @@ public final class GasPlantCases {
             int y = ctx.at(8, 1, 5).getY();
             drain = new AirMeter(air(y));
             fx = fixtures(head(raiser).fluidLevel(), new Object[]{ctx.at(8, 1, 5), 4, drain.node},
-                new Object[]{ctx.at(8, 1, 6), 4, feed = water(y, 16e5, 293.15), B_AT});
+                // (the feed port throttled, as a pump's or a valve's outlet: open, the economizer's warm water ran back into the
+                // feed vessel by its own warmth, ~1 kW of its heat)
+                new Object[]{ctx.at(8, 1, 6), 4, feed = water(y, 17e5, 293.15), B_AT, FEED_K});
             Eln.simulator.addSlowProcess(watch = dt -> {
                 l.tick();
                 // (the player's level circuit: at 1 B a side a block the raiser holds 8 B, a few seconds of steaming,
@@ -667,7 +682,10 @@ public final class GasPlantCases {
                 var w = head(raiser).b;
                 double level = w.mLiquid() / (Water.RHO_L * w.volume);
                 feedValve.setting = FEED_OPEN * Math.max(0, Math.min(3, 1 + 8 * (0.5 - level)));
-                if (++tick == 1000) {
+                // (the player's pressure regulator on the HP's throttle: it holds the raiser at HOLD_P, so the HP takes what the
+                // heat raises and no more)
+                hp.controls.throttle = Math.max(0.02, Math.min(1, hp.controls.throttle + dt * 0.02 * (head(raiser).b.P() - HOLD_P) / 1e5));
+                if (++tick == WARM) {
                     f0 = l.gt.totalFuelJ;
                     g0 = l.gt.totalWork;
                     x0 = l.gt.totalExhaustJ;
@@ -677,8 +695,9 @@ public final class GasPlantCases {
                     e0 = head(econ).totalJ;
                     w0 = feed.mWater;
                     drain.start();
+                    store0 = store();
                 }
-                if (tick > 1000) window += dt;
+                if (tick > WARM) window += dt;
             });
         }
 
@@ -694,15 +713,21 @@ public final class GasPlantCases {
                     + "feed %.1f g/s, HP %.1f g/s at %.1f bar, %.1f kW; together %.1f kW = %.1f %% of the fuel (+%.0f %% over the gas turbine alone)",
                 fuel / 1000, gas / 1000, gas / fuel * 100, ex / 1000, qr / 1000, qe / 1000, left / 1000, drain.tOut(window) - Water.T0,
                 fed * 1000, kg * 1000, head(raiser).b.P() / 1e5, st / 1000, (gas + st) / 1000, (gas + st) / fuel * 100, st / Math.max(1, gas) * 100));
+            double stored = (store() - store0) / window;
+            ctx.line(String.format("combined cycle: the raiser, economizer and separator stored %.2f kW over the window; raiser at %.2f bar, HP throttle %.3f",
+                stored / 1000, head(raiser).b.P() / 1e5, hp.controls.throttle));
             ctx.line("combined cycle: raiser " + head(raiser).getWaila() + "; economizer " + head(econ).getWaila() + "; HP " + hp.getWaila());
             ctx.check("combined cycle: two exchangers of 100 W/K", stacked(raiser, 100) && stacked(econ, 100), "");
             ctx.check("combined cycle: heat is conserved (within 5 %)", Math.abs(qr + qe + left - ex) < 0.05 * ex,
                 String.format("%.1f + %.1f + %.1f vs %.1f kW", qr / 1000, qe / 1000, left / 1000, ex / 1000));
             ctx.check("combined cycle: the exchangers take most of the exhaust's heat (over 70 %)", qr + qe > 0.7 * ex, String.format("%.0f %%", (qr + qe) / ex * 100));
-            // (at 8 L a side the HP drew 6.6 g/s on 10.6 kW, 2.3 kW, likely helped by the raiser's 32 kg drum flashing as its pressure fell (inferred);
-            // at 1 B a side it holds 8 B, steam is what the heat makes, ~4.8 g/s, and the HP gives ~1.2 kW)
-            ctx.check("combined cycle: the exhaust raises steam that drives the HP (over 1 kW)", st > 1000, String.format("%.1f kW", st / 1000));
-            ctx.check("combined cycle: together they beat the gas turbine alone by over 12 %", gas + st > 1.12 * gas, "");
+            // (steady: what the vessels stored over the window is small against what the exchangers moved. At 8 L a side the
+            // raiser held a 30 kg drum, and the window caught it giving up 5.2 kW as its pressure fell: the HP's 2.3 kW then,
+            // +31 %, was never sustainable. Held at 14 bar it gave ~1.6 kW, +22 %, its storage taken out)
+            ctx.check("combined cycle: steady over the window (the vessels store under 5 % of the exchangers' heat)", Math.abs(stored) < 0.05 * (qr + qe),
+                String.format("%.2f of %.1f kW", stored / 1000, (qr + qe) / 1000));
+            ctx.check("combined cycle: the exhaust raises steam that drives the HP (over 1.5 kW)", st > 1500, String.format("%.1f kW", st / 1000));
+            ctx.check("combined cycle: together they beat the gas turbine alone by over 20 %", gas + st > 1.2 * gas, "");
         }
     }
 }

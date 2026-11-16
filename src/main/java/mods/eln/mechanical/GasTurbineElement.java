@@ -42,6 +42,13 @@ import java.util.Map;
 public class GasTurbineElement extends SimpleShaftElement implements FluidDevice, mods.eln.fluid.FluidPlacement.Turnable {
     /** Shaft power at full fuel and rated speed (W), the cycle's efficiency there, its exhaust's temperature (K). */
     public static final double NOMINAL_P = 10000, ETA = 0.28, EXHAUST_T = 773.15;
+    /**
+     * Its exhaust casing (m^3). Each tick's exhaust (~1.9 g at full power) goes in as one lump between fluid steps; in 4 L
+     * that was a pressure spike of over half its contents a tick, and the flow behind it came in a burst early in each
+     * step. A 1 B a side heat exchanger on it (0.7 g of gas a 2 x 2 x 2 side) passed the burst at too little NTU: the
+     * combined cycle's steam raiser gave 9.6 kW where it gives 10.5 (2026-11-16, todo #495). In 40 L the spike is 6 %.
+     */
+    public static final double EXHAUST_V = 0.04;
     public static final double RATED_RADS = ShaftNetworkKt.nominalShaftRads, CUTOFF = 0.5, DROOP = 0.05, VALVE_TAU = 0.3, TRIP = 1.1,
         WINDAGE = 0.02, H = 1.0;
     /** Its fuel vessel's filling level (mB): sixteen buckets. */
@@ -299,7 +306,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
 
     @Override
     public void initialize() {
-        exhaust = new FluidNode(0.004, node.coordonate.y, 1.0, false);
+        exhaust = new FluidNode(EXHAUST_V, node.coordonate.y, 1.0, false);
         if (loadedEx != null) {
             mods.eln.fluid.FluidSaves.restore(exhaust, loadedEx);
             exhaust.update();
