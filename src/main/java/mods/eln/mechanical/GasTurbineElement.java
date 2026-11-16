@@ -43,10 +43,11 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     /** Shaft power at full fuel and rated speed (W), the cycle's efficiency there, its exhaust's temperature (K). */
     public static final double NOMINAL_P = 10000, ETA = 0.28, EXHAUST_T = 773.15;
     /**
-     * Its exhaust casing (m^3). Each tick's exhaust (~1.9 g at full power) goes in as one lump between fluid steps; in 4 L
+     * Its exhaust casing (m^3). The exhaust (~1.9 g a tick at full power) went in as one lump between fluid steps; in 4 L
      * that was a pressure spike of over half its contents a tick, and the flow behind it came in a burst early in each
      * step. A 1 B a side heat exchanger on it (0.7 g of gas a 2 x 2 x 2 side) passed the burst at too little NTU: the
-     * combined cycle's steam raiser gave 9.6 kW where it gives 10.5 (2026-11-16, todo #495). In 40 L the spike is 6 %.
+     * combined cycle's steam raiser gave 9.6 kW where it gives 10.5 (2026-11-16, todo #495). In 40 L the spike was 6 %.
+     * Now a source inside the fluid step (exhaustFlow), so there is no spike.
      */
     public static final double EXHAUST_V = 0.04;
     public static final double RATED_RADS = ShaftNetworkKt.nominalShaftRads, CUTOFF = 0.5, DROOP = 0.05, VALVE_TAU = 0.3, TRIP = 1.1,
@@ -55,6 +56,15 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     public static final int TANK_MB = 16000;
     public final NbtElectricalGateInput control = new NbtElectricalGateInput("control");
     public FluidNode exhaust;
+    /**
+     * Its exhaust into the casing, a source inside the fluid step (FluidDevice.Flow: air at EXHAUST_T). exhaustOwed: air
+     * asked for and not yet delivered (kg; one tick's worth in the steady state, more after a step cut short: the next
+     * rate carries it, so the heat balance holds); exhaustDh: the heat a kg of it carries over the ambient air (J/kg).
+     * Not saved (at most a tick's exhaust is lost on a reload).
+     */
+    FluidDevice.Flow exhaustFlow;
+    private List<Flow> flows = List.of();
+    double exhaustOwed, exhaustDh = 1;
     private double[] loadedEx;
     private List<FluidPort> ports = List.of();
     /**
@@ -96,6 +106,12 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     @Override
     public void afterFluidStep(double dt) {
         fuelIn.after();
+        // (the exhaust's heat booked as it went in: the source delivers what it was asked unless a step was cut short)
+        if (exhaustFlow != null) {
+            double kg = exhaustFlow.delivered * dt;
+            exhaustOwed -= kg;
+            totalExhaustJ += kg * exhaustDh;
+        }
     }
 
     /** The fuel gas the vessel holds most of (by heat), or -1; a species that is a gas, not a liquid fuel's vapour. */
@@ -220,17 +236,19 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
             double work = getShaft().drive(fuelJ * ETA * speedEfficiency(r) / time, time, 2 * NOMINAL_P / RATED_RADS);
             double windage = Math.min(getShaft().getEnergy(), WINDAGE * NOMINAL_P * r * r * r * time);
             getShaft().setEnergy(getShaft().getEnergy() - windage);
-            // the rest of the fuel's heat leaves as hot air at EXHAUST_T (air drawn in at the ambient, heated by it)
-            double Tamb = mods.eln.sim.Ambient.kelvin(node.coordonate), heat = fuelJ - work;
-            if (heat > 0) {
-                double air = heat / Math.max(1, Water.hAir(EXHAUST_T) - Water.hAir(Tamb));
-                exhaust.mAir += air;
-                exhaust.energy += air * Water.hAir(EXHAUST_T);
-                exhaust.update();
-                totalExhaustJ += heat;
-            }
+            // the rest of the fuel's heat leaves as hot air at EXHAUST_T (air drawn in at the ambient, heated by it): piped, as
+            // a source into its casing inside the fluid step (exhaustFlow), at the air this tick's heat needs plus what
+            // the last steps didn't deliver; to the air, booked here (the casing stays at 1 atm and the ambient)
+            double Tamb = mods.eln.sim.Ambient.kelvin(node.coordonate), heat = Math.max(0, fuelJ - work);
+            exhaustDh = Math.max(1, Water.hAir(EXHAUST_T) - Water.hAir(Tamb));
             exhaustPiped = !FluidWorld.edgesOf(exhaust).isEmpty();
-            if (!exhaustPiped) exhaust.fill(0, Water.P_ATM, Tamb);
+            if (exhaustPiped) exhaustOwed += heat / exhaustDh;
+            else {
+                totalExhaustJ += heat + exhaustOwed * exhaustDh;
+                exhaustOwed = 0;
+                exhaust.fill(0, Water.P_ATM, Tamb);
+            }
+            exhaustFlow.rate = Math.max(0, exhaustOwed) / time;
             totalFuelJ += fuelJ;
             totalWork += work;
             meterFuel += fuelJ;
@@ -290,6 +308,11 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     }
 
     @Override
+    public List<Flow> fluidFlows() {
+        return flows;
+    }
+
+    @Override
     public void connectJob() {
         super.connectJob();
         if (exhaust != null) {
@@ -311,6 +334,8 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
             mods.eln.fluid.FluidSaves.restore(exhaust, loadedEx);
             exhaust.update();
         } else exhaust.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        exhaustFlow = Flow.source(exhaust, 0.5, SpeciesRegistry.AIR, EXHAUST_T);
+        flows = List.of(exhaustFlow);
         fuelIn.make(node.coordonate.y, node.coordonate.y + 1, mods.eln.sim.Ambient.kelvin(node.coordonate));
         makePorts();
         super.initialize();
