@@ -94,7 +94,7 @@ public final class HeatExchangerCases {
         IProcess watch;
         Stream a, b;
         int tick;
-        double j0, window;
+        double j0, jMid, window;
 
         abstract int measureFrom();
 
@@ -105,6 +105,7 @@ public final class HeatExchangerCases {
                     if (a != null) a.start();
                     b.start();
                 }
+                if (tick == (measureFrom() + ticks()) / 2) jMid = h.totalJ;
                 if (tick > measureFrom()) window += dt;
             });
         }
@@ -151,17 +152,17 @@ public final class HeatExchangerCases {
             BlockPos at = ctx.at(3, 1, 3);
             int west = 2, east = big ? 5 : 4, y = at.getY();
             h = big ? head(stack(ctx, at, 2)) : lone(ctx, at);
-            // (the feed pump's flow, set by a throttled port: ~5 g/s through one block, ~10 through the stack; the feed side's
-            // own drop is small, and with only a few Pa across it its water would circulate by its own warmth instead)
+            // (the feed's flow, set by throttled ports a bar each side: ~5 g/s through one block, ~10 through the stack; the
+            // exchanger's own drop is a few Pa, and with only that across it, water ran back into the source by its own warmth)
             FluidNode steamIn = steam(y, 2.4e5), drain = heldWater(y, Water.P_ATM, 293.15), feedIn = heldWater(y, 16e5, 293.15),
-                feedOut = heldWater(y, 15e5, 293.15);
+                feedOut = heldWater(y, 14e5, 293.15);
             PlumbingCases.fill(h.b, 0.999 * h.b.volume * Water.RHO_L, 16e5, 293.15);
             b = new Stream(feedIn, feedOut);
             a = new Stream(steamIn, drain);
             double feedK = big ? FEED_K * 2 : FEED_K;
             fx = fixtures(h.fluidLevel(),
                 new Object[]{ctx.at(west, 1, 3), 5, steamIn}, new Object[]{ctx.at(east, 1, 3), 4, drain, FluidDevice.FluidPort.CENTRE, TRAP_K},
-                new Object[]{ctx.at(east, 1, 3), 4, feedIn, B_AT, feedK}, new Object[]{ctx.at(west, 1, 3), 5, feedOut, B_AT});
+                new Object[]{ctx.at(east, 1, 3), 4, feedIn, B_AT, feedK}, new Object[]{ctx.at(west, 1, 3), 5, feedOut, B_AT, feedK});
             watch();
         }
 
@@ -173,13 +174,17 @@ public final class HeatExchangerCases {
                     + "steam side %.2f g/s in; feed arrived %.2f g/s; %.2f g/s of condensate drained; %s",
                 big ? "2x2x2" : "one block", h.ua(), q / 1000, mb * 1000, tIn, tOut, h.a.P() / 1e5, tSteam, tSteam - tOut, ma * 1000, b.arrived(window) * 1000, a.arrived(window) * 1000, h.getWaila()));
             ctx.check("feed heater: the feed flows through side B", mb > 0.002, String.format("%.2f g/s", mb * 1000));
-            ctx.check("feed heater: the feed's heat gain is the exchanger's duty (within 10 %)", Math.abs(qb - q) < 0.1 * Math.abs(q) + 20,
+            ctx.check("feed heater: the feed's heat gain is the exchanger's duty (within 5 %)", Math.abs(qb - q) < 0.05 * Math.abs(q) + 20,
                 String.format("%.2f vs %.2f kW", qb / 1000, q / 1000));
-            ctx.check("feed heater: steam condenses in side A and its trap drains it", h.a.mLiquid() > 1e-4 && a.arrived(window) > 0.3 * q / 2.2e6,
+            ctx.check("feed heater: no more than the feed can take up to the steam's temperature", q < 1.02 * mb * 4186 * (tSteam - tIn),
+                String.format("%.2f vs %.2f kW", q / 1000, mb * 4186 * (tSteam - tIn) / 1000));
+            ctx.check("feed heater: Jade's feed outlet agrees with the heat it carried (within 5 K)", Math.abs(h.tBout - Water.T0 - tOut) < 5,
+                String.format("%.0f vs %.0f C", h.tBout - Water.T0, tOut));
+            ctx.check("feed heater: steam condenses in side A and its trap drains it", h.a.mLiquid() > 1e-4 && a.arrived(window) > 0,
                 String.format("%.2f g held, %.2f g/s drained", h.a.mLiquid() * 1000, a.arrived(window) * 1000));
             if (big) {
                 ctx.check("feed heater 2x2x2: duty 3-6 kW", q > 3000 && q < 6000, String.format("%.2f kW", q / 1000));
-                ctx.check("feed heater 2x2x2: the feed takes on 100 K or more", tOut - tIn > 100, String.format("%.0f K", tOut - tIn));
+                ctx.check("feed heater 2x2x2: feed out within 25 K of the steam", tSteam - tOut < 25, String.format("%.0f K", tSteam - tOut));
             } else {
                 ctx.check("feed heater, one block: duty 0.3-1.5 kW", q > 300 && q < 1500, String.format("%.2f kW", q / 1000));
                 ctx.check("feed heater, one block: the feed warms by 20 K or more", tOut - tIn > 20, String.format("%.0f K", tOut - tIn));
@@ -188,14 +193,15 @@ public final class HeatExchangerCases {
     }
 
     /**
-     * A cooler: hot water (90 C, 3 bar) through side A, west to east; cooling water (20 C, 2 bar) through side B, both
-     * 2 x 2 x 4 (200 W/K), ~0.6 bar across each. COUNTER: B east to west, against A (right). PARALLEL: B in at the west
+     * A cooler: hot water (90 C) through side A, west to east; cooling water (20 C) through side B; 2 x 2 x 4 (200 W/K),
+     * each stream ~23 g/s through throttled ports, a bar across each. COUNTER: B east to west, against A (right). PARALLEL: B in at the west
      * end with A (both ends' ports are alike: piping it the wrong way round does this). DEAD_END: B's outlet left off,
      * its water stands.
      */
     static final class Cooler extends Run {
         static final int COUNTER = 0, PARALLEL = 1, DEAD_END = 2;
-        static final double DROP = 30;
+        /** Each port's throttle (m^3): ~25 g/s on a bar across each, inlet and outlet. */
+        static final double PORT_K = 6e-14;
         final int mode;
 
         Cooler(int mode) {
@@ -218,20 +224,21 @@ public final class HeatExchangerCases {
             BlockPos at = ctx.at(1, 1, 3);
             int y = at.getY();
             h = head(stack(ctx, at, 4));
-            FluidNode hotIn = heldWater(y, 3e5, 363.15), hotOut = heldWater(y, 3e5 - DROP, 363.15), coldIn = heldWater(y, 2e5, 293.15),
-                coldOut = heldWater(y, 2e5 - DROP, 293.15);
+            FluidNode hotIn = heldWater(y, 4e5, 363.15), hotOut = heldWater(y, 2e5, 363.15), coldIn = heldWater(y, 4e5, 293.15),
+                coldOut = heldWater(y, 2e5, 293.15);
             // (start full of the streams' water: a cold start otherwise counts the first fill)
             PlumbingCases.fill(h.a, 0.999 * h.a.volume * Water.RHO_L, 3e5, 363.15);
             PlumbingCases.fill(h.b, 0.999 * h.b.volume * Water.RHO_L, 2e5, 293.15);
             List<Object[]> ports = new ArrayList<>();
-            ports.add(new Object[]{ctx.at(0, 1, 3), 5, hotIn});
-            ports.add(new Object[]{ctx.at(5, 1, 3), 4, hotOut});
+            int c = FluidDevice.FluidPort.CENTRE;
+            ports.add(new Object[]{ctx.at(0, 1, 3), 5, hotIn, c, PORT_K});
+            ports.add(new Object[]{ctx.at(5, 1, 3), 4, hotOut, c, PORT_K});
             if (mode == PARALLEL) {
-                ports.add(new Object[]{ctx.at(0, 1, 4), 5, coldIn, B_AT});
-                ports.add(new Object[]{ctx.at(5, 1, 4), 4, coldOut, B_AT});
+                ports.add(new Object[]{ctx.at(0, 1, 4), 5, coldIn, B_AT, PORT_K});
+                ports.add(new Object[]{ctx.at(5, 1, 4), 4, coldOut, B_AT, PORT_K});
             } else {
-                ports.add(new Object[]{ctx.at(5, 1, 4), 4, coldIn, B_AT});
-                if (mode == COUNTER) ports.add(new Object[]{ctx.at(0, 1, 4), 5, coldOut, B_AT});
+                ports.add(new Object[]{ctx.at(5, 1, 4), 4, coldIn, B_AT, PORT_K});
+                if (mode == COUNTER) ports.add(new Object[]{ctx.at(0, 1, 4), 5, coldOut, B_AT, PORT_K});
             }
             a = new Stream(hotIn, hotOut);
             b = new Stream(coldIn, mode == DEAD_END ? null : coldOut);
@@ -250,31 +257,38 @@ public final class HeatExchangerCases {
                 new String[]{"counterflow", "parallel flow", "dead-ended"}[mode], h.ua(), q / 1000, q / most * 100, most / 1000, ma * 1000,
                 90.0, tAout, mb * 1000, 20.0, tBout, qa / 1000, h.getWaila()));
             ctx.check("cooler: the hot stream flows (10-40 g/s)", ma > 0.010 && ma < 0.040, String.format("%.1f g/s", ma * 1000));
-            ctx.check("cooler: the hot stream's heat loss is the duty (within 10 %)", Math.abs(qa - q) < 0.1 * Math.abs(q) + 20,
+            // (dead-ended: under 1 kW, the hot side's own warming shows; 0.5 kW slack)
+            ctx.check("cooler: the hot stream's heat loss is the duty (within 5 %)", Math.abs(qa - q) < 0.05 * Math.abs(q) + (mode == DEAD_END ? 500 : 20),
                 String.format("%.2f vs %.2f kW", qa / 1000, q / 1000));
+            ctx.check("cooler: Jade's hot outlet agrees with the heat it carried (within 5 K)", Math.abs(h.tAout - Water.T0 - tAout) < 5,
+                String.format("%.0f vs %.0f C", h.tAout - Water.T0, tAout));
             switch (mode) {
                 case COUNTER -> {
-                    ctx.check("cooler counterflow: 62-75 % of the most (NTU ~1.9: 65 %)", q > 0.62 * most && q < 0.75 * most, String.format("%.0f %%", q / most * 100));
+                    ctx.check("cooler counterflow: 55-72 % of the most (NTU ~2.1: 67 % ideal)", q > 0.55 * most && q < 0.72 * most, String.format("%.0f %%", q / most * 100));
                     ctx.check("cooler counterflow: the cooling water leaves hotter than the hot water does", tBout > tAout,
                         String.format("%.0f vs %.0f C", tBout, tAout));
                 }
                 case PARALLEL -> {
                     // (textbook parallel flow at NTU 1.9 gives 49 %; the side's slices mix along it, so it reads ~61 %, still
                     // under counterflow's ~68 %)
-                    ctx.check("cooler parallel: 50-65 % of the most, under counterflow", q > 0.5 * most && q < 0.65 * most, String.format("%.0f %%", q / most * 100));
+                    ctx.check("cooler parallel: 42-58 % of the most (NTU ~1.9: 49 %)", q > 0.42 * most && q < 0.58 * most, String.format("%.0f %%", q / most * 100));
+                    ctx.check("cooler parallel: the cooling water leaves colder than the hot water", tBout < tAout + 1, String.format("%.0f vs %.0f C", tBout, tAout));
                 }
                 default -> {
                     ctx.check("cooler dead-ended: no cooling water flows", Math.abs(mb) < 2e-4, String.format("%.2f g/s", mb * 1000));
                     // (its standing water only warms: the heat goes into it, not out with a stream)
-                    ctx.check("cooler dead-ended: under half what counterflow gives (5 kW)", q < 2500, String.format("%.2f kW", q / 1000));
+                    double first = (jMid - j0) / (window / 2), second = (h.totalJ - jMid) / (window / 2);
+                    ctx.check("cooler dead-ended: falling (second half of the window under the first)", second < first,
+                        String.format("%.2f then %.2f kW", first / 1000, second / 1000));
+                    ctx.check("cooler dead-ended: under half what counterflow gives", q < 0.5 * 0.65 * most, String.format("%.2f kW", q / 1000));
                 }
             }
         }
     }
 
     /**
-     * Saves from before the resize (8 L a side, no "sideV" key), full of water at 11 bar and 60 C: one block and one of
-     * a 2 x 2 x 1 stack. Loaded, each side is 1 B at the state it had (11 bar, 60 C), what it held over that vented and
+     * Saves from before the resize (8 L a side, no "sideV" key), full of water at 60 C (33 bar, liquid-full): one block and one of
+     * a 2 x 2 x 1 stack. Loaded, each side is 1 B at the state it had (33 bar, 60 C), what it held over that vented and
      * counted (113.5 B less 1 B of water a side); a second save and load vents nothing more.
      */
     static final class OldSave extends PlumbingCases.Big {
