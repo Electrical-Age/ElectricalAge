@@ -699,7 +699,7 @@ public final class GasPlantCases {
             ctx.check("combined cycle: heat is conserved (within 5 %)", Math.abs(qr + qe + left - ex) < 0.05 * ex,
                 String.format("%.1f + %.1f + %.1f vs %.1f kW", qr / 1000, qe / 1000, left / 1000, ex / 1000));
             ctx.check("combined cycle: the exchangers take most of the exhaust's heat (over 70 %)", qr + qe > 0.7 * ex, String.format("%.0f %%", (qr + qe) / ex * 100));
-            // (at 8 L a side the raiser's 32 kg drum flashed as its pressure fell, and the HP drew 6.6 g/s on 10.6 kW, 2.3 kW;
+            // (at 8 L a side the HP drew 6.6 g/s on 10.6 kW, 2.3 kW, likely helped by the raiser's 32 kg drum flashing as its pressure fell (inferred);
             // at 1 B a side it holds 8 B, steam is what the heat makes, ~4.8 g/s, and the HP gives ~1.2 kW)
             ctx.check("combined cycle: the exhaust raises steam that drives the HP (over 1 kW)", st > 1000, String.format("%.1f kW", st / 1000));
             ctx.check("combined cycle: together they beat the gas turbine alone by over 12 %", gas + st > 1.12 * gas, "");
