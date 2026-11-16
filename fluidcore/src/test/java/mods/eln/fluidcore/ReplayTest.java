@@ -55,8 +55,8 @@ class ReplayTest {
      * Baughn's workshop plant (2026-11-15; /elnlab fluiddump of a 48-node network: boiler, turbine, condenser, an 8-slice
      * counterflow exchanger full of water at 11 bar, a flare): it cost 22-43 ms a step on the server, never asleep. Every
      * linear solve fell back to the dense one: the sparse LU's pivot test took the energy row of a liquid-full node
-     * (dP/dm ~1e12 J/kg beside its diagonal of 1) for a vanishing pivot, and the dense solve's directions were poor enough
-     * that the whole step failed and sub-stepped. Weighed by the unknowns' scales, no solve falls back and a step takes
+     * (dP/dm ~1e12 J/kg beside its diagonal of 1) for a vanishing pivot; on that path the whole step also stalled and
+     * sub-stepped about half the time (the dense, unscaled elimination's directions, presumably). Weighed by the unknowns' scales, no solve falls back and a step takes
      * a handful of iterations; the states agree with the old path's to the solve's precision.
      */
     @Test
