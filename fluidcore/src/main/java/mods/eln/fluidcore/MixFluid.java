@@ -154,7 +154,17 @@ final class MixFluid implements NodeFluid {
         D[] top = new D[groups.length];
     }
 
+    /** The state at (T, Vg, masses), complete: what the network draws and reads included. */
     Eval eval(double Tv, double vgv, double[] mv) {
+        return complete(core(Tv, vgv, mv));
+    }
+
+    /**
+     * The split, pressure, energy and volume residual at (T, Vg, masses): all the flash's own solve reads. The rest (the gas's
+     * and the layers' shares and enthalpies, complete()) is for the solved state alone; worked out on every evaluation it
+     * was some third of the dual-number work of the polish and the bracket's searches.
+     */
+    private Eval core(double Tv, double vgv, double[] mv) {
         if (COUNT) EVALS++;
         Eval e = new Eval();
         int n = NG;
@@ -198,6 +208,14 @@ final class MixFluid implements NodeFluid {
         }
         e.E = E;
         e.rv = Vg.add(vl).mul(1 / V).add(-1);
+        return e;
+    }
+
+    /** core()'s state with the gas's and the layers' shares and enthalpies, the layers' order and their tops. */
+    private Eval complete(Eval e) {
+        int n = NG;
+        D T = e.T, p = e.p;
+        double cush = WaterAir.AIR_CUSHION * V;
         // the gas: per-kg shares (the cushion's share is drawn as nothing) and enthalpy
         D gm = D.c(cush, n);
         for (int i = 0; i < S; i++) if (sp[i].kind != Species.Kind.NONE) gm = gm.add(e.mv[i]);
@@ -511,7 +529,7 @@ final class MixFluid implements NodeFluid {
     /** The gas volume at T that fills V (the volume residual rises with Vg). */
     double gasVolume(double[] mv, double T) {
         double lo = Math.log(1e-14 * V), hi = Math.log(V);
-        double flo = eval(T, Math.exp(lo), mv).rv.v, fhi = eval(T, Math.exp(hi), mv).rv.v;
+        double flo = core(T, Math.exp(lo), mv).rv.v, fhi = core(T, Math.exp(hi), mv).rv.v;
         if (flo >= 0) return Math.exp(lo);
         if (fhi <= 0) return Math.exp(hi);
         int side = 0;
@@ -519,7 +537,7 @@ final class MixFluid implements NodeFluid {
         for (int i = 0; i < 200 && hi - lo > 1e-13; i++) {
             x = flo != fhi ? hi - fhi * (hi - lo) / (fhi - flo) : 0.5 * (lo + hi);
             if (!(x > lo && x < hi) || i % 8 == 7) x = 0.5 * (lo + hi);
-            double f = eval(T, Math.exp(x), mv).rv.v;
+            double f = core(T, Math.exp(x), mv).rv.v;
             if (Math.abs(f) < 1e-14) break;
             if (f < 0) {
                 lo = x;
@@ -537,7 +555,7 @@ final class MixFluid implements NodeFluid {
     }
 
     public double energyAt(double[] mv, double T) {
-        return eval(T, gasVolume(mv, T), mv).E.v;
+        return core(T, gasVolume(mv, T), mv).E.v;
     }
 
     /** The energy is outside what the masses hold between T_MIN and T_MAX: T is the bound and doesn't follow U or the masses. */
@@ -640,17 +658,19 @@ final class MixFluid implements NodeFluid {
     public static StringBuilder BRACKET_LOG;
     /** An update to the contents it already holds keeps its state (true; false: solved again, probe knob). */
     public static boolean SKIP_SAME = true;
+    /** The polish starts from the slopes' first-order guess (false: from the last state; probe knob). */
+    public static boolean PREDICT = true;
 
     private boolean newton() {
         double t = T, x = Math.log(vg), tolE = energyTol();
         for (int it = 0; it < POLISH_MAX; it++) {
             if (COUNT) POLISH_ITS++;
-            Eval e = eval(t, Math.exp(x), m);
+            Eval e = core(t, Math.exp(x), m);
             double r0 = e.E.v - U, r1 = e.rv.v;
             if (Math.abs(r0) < tolE && Math.abs(r1) < (OLD_TOL ? 1e-13 : FLASH_RV)) {
                 T = t;
                 vg = Math.exp(x);
-                st = e;
+                st = complete(e);
                 return true;
             }
             double vgv = Math.exp(x);
@@ -682,6 +702,20 @@ final class MixFluid implements NodeFluid {
         if (same && SKIP_SAME) {
             if (COUNT) SAME++;
             return;
+        }
+        // (the polish starts from the last state moved along its own slopes, d(T, Vg) / d(masses, U): a first-order
+        // guess, so most polishes take one Newton step where they took two)
+        if (PREDICT && st != null && dTheta != null && !pinned && vg > 0) {
+            double dT = dTheta[0][S] * (Unew - U), dV = dTheta[1][S] * (Unew - U);
+            for (int i = 0; i < S; i++) {
+                double dm = (Math.abs(mNew[i]) < 1e-100 ? 0 : mNew[i]) - m[i];
+                dT += dTheta[0][i] * dm;
+                dV += dTheta[1][i] * dm;
+            }
+            if (Double.isFinite(dT) && Double.isFinite(dV)) {
+                T += Math.max(-30, Math.min(30, dT));
+                vg *= Math.exp(Math.max(-1, Math.min(1, dV / vg)));
+            }
         }
         for (int i = 0; i < S; i++) m[i] = Math.abs(mNew[i]) < 1e-100 ? 0 : mNew[i];
         U = Unew;
@@ -734,6 +768,8 @@ final class MixFluid implements NodeFluid {
      * composition jumps when a first trace arrives).
      */
     private D portPD(double f) {
+        int c = slot(f);
+        if (c >= 0 && cPort[c] != null) return cPort[c];
         D p = st.p;
         D w = D.c(0.25 * BAND, NG);
         D below = D.softplus(D.c(-f, NG), w);
@@ -742,7 +778,30 @@ final class MixFluid implements NodeFluid {
             p = p.add(st.rhoRef[st.order[k]].mul(here.sub(below)).mul(G * H));
             below = here;
         }
+        if (c >= 0) cPort[c] = p;
         return p;
+    }
+
+    // (each port's head and draw, as gradients, kept for the state they were worked out on: the network asks for them
+    // per edge in every residual and Jacobian, several times over, and a state is solved once)
+    private Eval cached;
+    private final double[] cF = new double[6];
+    private final D[] cPort = new D[6];
+    private final D[][] cDraw = new D[6][];
+    private int cN;
+
+    /** f's slot in the cache of st's ports (-1: full), the cache emptied first if st has changed. */
+    private int slot(double f) {
+        if (cached != st) {
+            cached = st;
+            cN = 0;
+            java.util.Arrays.fill(cPort, null);
+            java.util.Arrays.fill(cDraw, null);
+        }
+        for (int i = 0; i < cN; i++) if (cF[i] == f) return i;
+        if (cN == cF.length) return -1;
+        cF[cN] = f;
+        return cN++;
     }
 
     public double portP(double f) {
@@ -766,6 +825,8 @@ final class MixFluid implements NodeFluid {
 
     /** {per species shares..., energy} drawn per kg at f, as gradients. */
     private D[] drawD(double f) {
+        int c = slot(f);
+        if (c >= 0 && cDraw[c] != null) return cDraw[c];
         D[] xs = windows(f);
         int L = groups.length;
         D[] out = new D[S + 1];
@@ -781,6 +842,7 @@ final class MixFluid implements NodeFluid {
         D gas = below.neg().add(1);
         for (int i = 0; i < S; i++) out[i] = out[i].add(gas.mul(st.yG[i]));
         out[S] = out[S].add(gas.mul(st.hG));
+        if (c >= 0) cDraw[c] = out;
         return out;
     }
 
