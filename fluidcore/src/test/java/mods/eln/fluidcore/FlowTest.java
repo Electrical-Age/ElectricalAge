@@ -119,7 +119,9 @@ class FlowTest {
                         assertTrue(e.moved[k] >= 0, what + " moved backwards at step " + s);
                     }
                 }
-                for (int k = 0; k < 2; k++) assertEquals(m0[k] - v.m[k], out[k], 1e-18, what + ": booked = left, m[" + k + "]");
+                // (to the rounding of the two sums, a few ulps of 1.2 g: 30-odd steps of a draining tail summed one way
+                // into out, the other way out of the node)
+                for (int k = 0; k < 2; k++) assertEquals(m0[k] - v.m[k], out[k], 1e-17, what + ": booked = left, m[" + k + "]");
                 // (ANY at the floor port reaches the liquid only while its surface is over the port's window: the last
                 // BAND of the height stays, as a pipe's floor port leaves it)
                 if (ph == Network.Phase.LIQUID) {

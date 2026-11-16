@@ -359,7 +359,22 @@ final class MixFluid implements NodeFluid {
         }
         for (int q = 0; q < n; q++) gN[q] = gN[q] / hx + om0 * wD.g[q];
         D N = new D(w * soft(t0), gN);
-        // lam: sum n_i / (N + lam c_i) = 1 (only the finite, volatile terms depend on lam)
+        // n_b - N, b's deficit: the vapour that the liquid leaves of b, written so it keeps its digits where it is a
+        // sliver of n_b (a liquid-full node with a bubble of 1e-6 of its volume: N = n_b - c_b to 1e-9). As n_b - N it
+        // lost them, and through lam and the shares so did the vapour's mass and partial pressure (noise of 1e-3 Pa,
+        // then 1e-12 of the volume through the liquid's compressibility), which held the flash's polish off its
+        // tolerance for good: every update fell back to the bracketed solve, 78 % of the flash's work in Baughn's
+        // workshop network (2026-11-16). y - w softplus(t0) = c_b + w (t0 - softplus(t0)) = c_b - w ln(1 + e^-t0), and
+        // n_b - y is exact where y is within a factor 2 of n_b (b's liquid there; elsewhere, b mostly vapour or a
+        // trace, n_b - N is the precise one).
+        double defV = t0 > 0 && y >= 0.5 * nn[b].v && y <= 2 * nn[b].v
+            ? (nn[b].v - y) + c[b].v - (t0 > 30 ? 0 : w * Math.log1p(Math.exp(-t0)))
+            : nn[b].v - N.v;
+        double[] gDef = new double[n];
+        for (int q = 0; q < n; q++) gDef[q] = nn[b].g[q] - gN[q];
+        D def = new D(defV, gDef);
+        // lam: sum n_i / (N + lam c_i) = 1 (only the finite, volatile terms depend on lam), b's term written as
+        // (def_b - lam c_b) / (N + lam c_b) + 1
         D lam;
         boolean lamMatters = false;
         for (int a = 0; a < k; a++) if (!inf[a] && c[a].v > 0 && nn[a].v > 0) lamMatters = true;
@@ -367,18 +382,19 @@ final class MixFluid implements NodeFluid {
         else {
             // (started from what one species alone would need, (n - N) / c summed over the volatiles: exact for one,
             // and never at lam = 0, where n / N overflows for a trace of liquid; kept positive)
-            double sumNC = 0, cMax = 0;
+            double sumNC = 0, rest = defV, cMax = 0, last = Double.POSITIVE_INFINITY;
             for (int a = 0; a < k; a++) if (!inf[a] && c[a].v > 0 && nn[a].v > 0) {
                 sumNC += nn[a].v / c[a].v;
                 cMax = Math.max(cMax, c[a].v);
             }
-            double l = Math.max(1e-300, sumNC * (1 - N.v / ntotD.v));
+            for (int a = 0; a < k; a++) if (!inf[a] && a != b) rest += nn[a].v;
+            double l = Math.max(1e-300, sumNC * rest / ntotD.v);
             for (int it = 0; it < 100; it++) {
-                double Gv = -1, dG = 0;
+                double Gv = 0, dG = 0;
                 for (int a = 0; a < k; a++) {
                     if (inf[a] || nn[a].v <= 0) continue;
                     double q = N.v + l * c[a].v;
-                    Gv += nn[a].v / q;
+                    Gv += a == b ? (defV - l * c[a].v) / q : nn[a].v / q;
                     dG -= nn[a].v * c[a].v / (q * q);
                 }
                 if (dG == 0) break;
@@ -390,16 +406,21 @@ final class MixFluid implements NodeFluid {
                 }
                 l = l + step > 0 ? l + step : 0.5 * l;
                 // (to where a step changes no share: against lam alone, a trace of liquid under much vapour stopped
-                // early and its shares did not sum to 1)
-                if (!(Math.abs(step) > 1e-15 * (l + N.v / cMax))) break;
+                // early and its shares did not sum to 1; then on while the steps still shrink, as the vapours, x_i lam c_i,
+                // are only as precise as lam: in a liquid-full node the first stop left them 1e-8 off. Where other
+                // liquids share the group, their terms leave G noise at about rounding times N / c, and the steps stop
+                // shrinking there)
+                double as = Math.abs(step);
+                if (!(as > 1e-15 * l) || !(as > 1e-15 * (l + N.v / cMax)) && !(as < 0.5 * last)) break;
+                last = as;
             }
-            D Gx = D.c(-1, n);
+            D Gx = D.c(0, n);
             double GL = 0;
             for (int a = 0; a < k; a++) {
                 if (inf[a]) continue;
                 D q = N.add(c[a].mul(l));
                 if (nn[a].v <= 0 && !(q.v > 1e-12 * ntotD.v)) continue;   // (an absent non-volatile in a dry group: no slope through it)
-                Gx = Gx.add(nn[a].div(q));
+                Gx = Gx.add(a == b ? def.sub(c[a].mul(l)).div(q) : nn[a].div(q));
                 GL -= nn[a].v * c[a].v / (q.v * q.v);
             }
             double[] gl = new double[n];
@@ -416,10 +437,24 @@ final class MixFluid implements NodeFluid {
                 continue;
             }
             D den = N.add(c[a].mul(lam));
-            D x = den.v > 1e-12 * ntotD.v || (nn[a].v > 0 && den.v > 0) ? nn[a].div(den) : D.c(0, n);
+            boolean share = den.v > 1e-12 * ntotD.v || (nn[a].v > 0 && den.v > 0);
+            D x = share ? nn[a].div(den) : D.c(0, n);
             e.x[g][a] = x;
-            e.ml[i] = s.kind == Species.Kind.NONE ? mm[i] : x.mul(N).mul(s.molarMass);
-            e.mv[i] = mm[i].sub(e.ml[i]);
+            if (s.kind == Species.Kind.NONE) {
+                e.ml[i] = mm[i];
+                e.mv[i] = mm[i].sub(e.ml[i]);
+            } else if (share && mm[i].v >= 0) {
+                // the vapour as x lam c (= n - x N, the same by x's definition), the liquid as the rest: as n - x N
+                // the vapour of a liquid-full node with a bubble of 1e-6 of its volume was the difference of two
+                // numbers 1e8 times its size, and the noise in its partial pressure (1e-3 Pa, then 1e-12 of the
+                // volume through the liquid's compressibility) held the flash's polish off its tolerance for good:
+                // every update fell back to the bracketed solve, 78 % of the flash's work in Baughn's workshop network
+                e.mv[i] = x.mul(lam).mul(c[a]).mul(s.molarMass);
+                e.ml[i] = mm[i].sub(e.mv[i]);
+            } else {
+                e.ml[i] = x.mul(N).mul(s.molarMass);
+                e.mv[i] = mm[i].sub(e.ml[i]);
+            }
         }
         finishVapour(e, g, T, Vg);
     }
@@ -585,6 +620,12 @@ final class MixFluid implements NodeFluid {
      */
     public static double FLASH_ABS = 0, FLASH_RV = 1e-14;
     public static boolean OLD_TOL = false;
+    /**
+     * The polish's iterations before the bracketed solve takes over (probe knob). 25: its steps in ln Vg are held to 1,
+     * and a bubble that shrinks by decades in one network iterate (a liquid-full node's, 1e-3 to 1e-6 of its volume)
+     * took 12-15 of them; a bracketed solve costs some 70 evaluations.
+     */
+    public static int POLISH_MAX = 25;
 
     private double energyTol() {
         if (OLD_TOL) return Math.max(1, Math.abs(U)) * 1e-13 + 1e-9;
@@ -602,7 +643,7 @@ final class MixFluid implements NodeFluid {
 
     private boolean newton() {
         double t = T, x = Math.log(vg), tolE = energyTol();
-        for (int it = 0; it < 12; it++) {
+        for (int it = 0; it < POLISH_MAX; it++) {
             if (COUNT) POLISH_ITS++;
             Eval e = eval(t, Math.exp(x), m);
             double r0 = e.E.v - U, r1 = e.rv.v;
