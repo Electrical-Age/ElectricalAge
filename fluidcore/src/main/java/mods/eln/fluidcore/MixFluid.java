@@ -511,6 +511,7 @@ final class MixFluid implements NodeFluid {
     private void solve() {
         pinned = false;
         if (vg > 0 && newton()) return;
+        BRACKETS++;
         double lo = WaterAir.T_MIN, hi = WaterAir.T_MAX;
         double t0 = Math.max(lo, Math.min(hi, T)), w = 1;
         double a = Math.max(lo, t0 - w), b = Math.min(hi, t0 + w);
@@ -564,12 +565,36 @@ final class MixFluid implements NodeFluid {
         st = eval(T, vg, m);
     }
 
+    /**
+     * The polish's tolerances: the energy to 1e-13 of the node's energy scale (its |U|, or its masses at 1e5 J/kg, the
+     * scale Network judges a node's energy row on), the volume to 1e-14 of the node's. They were 1e-13 max(1, |U|) +
+     * 1e-9 J and 1e-13; in Baughn's workshop network (a counterflow exchanger, 2026-11-16) that left the states noisy
+     * at the network's own tolerance: 1e-9 J in a 17 mL flue pipe of 14 mg (U ~3 J) is 1e-7 K, and through its pipes an
+     * energy row stuck near 1e-6 of the node (STALL_OK; the step failed and sub-stepped), and 1e-13 of a liquid-full
+     * 135 mL pipe's volume is 2e-4 Pa, and its neighbours' energy rows crawled at 1e-7. Newton spent half its
+     * iterations there (12 a step and 0.4 sub-steps; 6 and none with these). FLASH_ABS, FLASH_RV, OLD_TOL: probe knobs.
+     */
+    public static double FLASH_ABS = 0, FLASH_RV = 1e-14;
+    public static boolean OLD_TOL = false;
+
+    private double energyTol() {
+        if (OLD_TOL) return Math.max(1, Math.abs(U)) * 1e-13 + 1e-9;
+        double mt = 0;
+        for (double x : m) mt += Math.abs(x);
+        return 1e-13 * Math.max(1e-6, Math.max(Math.abs(U), 1e5 * mt)) + FLASH_ABS;
+    }
+    /** Probe counters: flashes that fell back to the bracketed solve, and polish iterations. */
+    public static long BRACKETS, POLISH_ITS, SAME;
+    /** An update to the contents it already holds keeps its state (true; false: solved again, probe knob). */
+    public static boolean SKIP_SAME = true;
+
     private boolean newton() {
-        double t = T, x = Math.log(vg);
+        double t = T, x = Math.log(vg), tolE = energyTol();
         for (int it = 0; it < 12; it++) {
+            POLISH_ITS++;
             Eval e = eval(t, Math.exp(x), m);
             double r0 = e.E.v - U, r1 = e.rv.v;
-            if (Math.abs(r0) < Math.max(1, Math.abs(U)) * 1e-13 + 1e-9 && Math.abs(r1) < 1e-13) {
+            if (Math.abs(r0) < tolE && Math.abs(r1) < (OLD_TOL ? 1e-13 : FLASH_RV)) {
                 T = t;
                 vg = Math.exp(x);
                 st = e;
@@ -596,6 +621,14 @@ final class MixFluid implements NodeFluid {
     public void update(double[] mNew, double Unew) {
         // (masses under 1e-100 kg count as none: denormal traces, which Newton's iterates leave behind, overflow the
         // split's reciprocals; the node's own masses, and so conservation, are untouched)
+        // (the same contents as its last update: the same state, as solving again from it would end where it starts; a
+        // fifth of the updates in Baughn's workshop network, a line search's nodes that its step didn't move)
+        boolean same = Unew == U && st != null && dTheta != null;
+        for (int i = 0; i < S && same; i++) same = (Math.abs(mNew[i]) < 1e-100 ? 0 : mNew[i]) == m[i];
+        if (same && SKIP_SAME) {
+            SAME++;
+            return;
+        }
         for (int i = 0; i < S; i++) m[i] = Math.abs(mNew[i]) < 1e-100 ? 0 : mNew[i];
         U = Unew;
         solve();
