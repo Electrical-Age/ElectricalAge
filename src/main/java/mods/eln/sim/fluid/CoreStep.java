@@ -79,6 +79,12 @@ final class CoreStep {
             if (k > 0 && pipeOfPair[k - 1] && e.entrySpan > 0) continue;
             Network.Node a = of.get(e.a), b = of.get(e.b);
             double fa = e.portA, fb = e.portB, za = e.a.z + fa * e.a.height, zb = e.b.z + fb * e.b.height;
+            if (e.kind == FluidEdge.Kind.FLOW) {
+                // (a prescribed flow: no head between its ends, its far end the outside)
+                ce[k] = net.connect(a, fa, b, fb, 0);
+                ce[k].kind = Network.Kind.FLOW;
+                continue;
+            }
             if (Math.abs(za - zb) > 1e-6) {
                 notLevel++;
                 String what = String.format("dz %.3f: %s %s at %.3f -> %s %s at %.3f (z %.3f / %.3f, h %.3f / %.3f)", za - zb,
@@ -106,6 +112,26 @@ final class CoreStep {
         }
     }
 
+    /**
+     * A source's mix in the core's order (each core species' share, then J/kg: Network.Edge.supply), into into if it fits;
+     * null for none (a sink, or a source with no mix: it gives its far end's draw).
+     */
+    double[] supply(FluidEdge e, double[] into) {
+        if (e.shares == null) return null;
+        int S = ids == null ? 2 : ids.length;
+        double[] out = into != null && into.length == S + 1 ? into : new double[S + 1];
+        double h = 0;
+        var reg = SpeciesRegistry.get();
+        for (int j = 0; j < S; j++) {
+            int id = ids == null ? j : ids[j];
+            double x = id < e.shares.length ? e.shares[id] : 0;
+            out[j] = x;
+            if (x != 0) h += x * reg.byId(id).hVapour(e.kelvin);
+        }
+        out[S] = h;
+        return out;
+    }
+
     /** A stream's conductance (kg/s/Pa) carrying packet pk at drive dp: rho k open / mu, or a valve's orifice law. */
     static double conductance(FluidEdge e, FluidNetwork.Packet pk, double dp, double open) {
         return e.area > 0
@@ -131,11 +157,16 @@ final class CoreStep {
         return true;
     }
 
-    /** Registry ids of every species held anywhere in the network (water and air first), or null for water and air alone. */
+    /**
+     * Registry ids of every species held anywhere in the network or declared by a source's mix (FluidEdge.shares, set or
+     * not this step: a source turned on or off doesn't rebuild the core), water and air first; or null for water and air alone.
+     */
     static int[] speciesOf(FluidNetwork fn) {
         java.util.TreeSet<Integer> extra = new java.util.TreeSet<>();
         for (FluidNode n : fn.nodes)
             if (n.extra != null) for (int i = 0; i < n.extra.length; i++) if (n.extra[i] > 0) extra.add(i + 2);
+        for (FluidEdge e : fn.edges)
+            if (e.kind == FluidEdge.Kind.FLOW && e.shares != null) for (int i = 2; i < e.shares.length; i++) if (e.shares[i] != 0) extra.add(i);
         if (extra.isEmpty()) return null;
         int[] ids = new int[2 + extra.size()];
         ids[0] = SpeciesRegistry.WATER;
@@ -280,6 +311,17 @@ final class CoreStep {
             Network.Edge c = ce[k];
             if (c == null) continue;
             FluidEdge e = edges.get(k);
+            if (e.kind == FluidEdge.Kind.FLOW) {
+                // (a prescribed flow: its rate, gates and what it carries; no conductance)
+                c.rate = e.rate;
+                c.phase = e.phase;
+                c.minPa = e.minPa;
+                c.maxPa = e.maxPa;
+                c.supply = supply(e, c.supply);
+                xl[k] = e.shares != null ? 0 : e.phase == Network.Phase.LIQUID ? 1 : e.phase == Network.Phase.GAS ? 0
+                    : FluidNetwork.packet(e.a, e.portA, 0).xl;
+                continue;
+            }
             c.boost = e.boost;
             c.conductance = e.conductance;
             c.band = e.band;

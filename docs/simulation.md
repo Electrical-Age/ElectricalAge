@@ -194,6 +194,17 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   point nor pumps past the shut-off. A chord from free flow overshot every step near the shut-off against a tight feed,
   and the pipe flipped between two pressures (`CondensatePumpTest`, `CondensatePumpPropertyTest`). Iron pipe holds
   0.03 L per block (tunable, not geometry); saves record the volume and older ones are rescaled on load.
+  Device sources and sinks (todo #498): mass a device writes into a node between steps lands as one lump at the next
+  step's start (a small node sawtooths, an exchanger behind it passes the burst at too little NTU, the network never
+  sleeps, and a lump written into a pipe run is lost if the run is rebuilt before the step). A `FluidDevice.Flow`
+  (`fluidFlows()`) is a prescribed flow inside the implicit step instead: the world joins it like a vent, to its
+  network's air node, as a `FluidEdge.Kind.FLOW` edge (the core's `Network.Kind.FLOW`: a source passes exactly `rate`
+  of its mix, `shares` by species id at `kelvin`, each species as a gas; a sink takes `rate` of its node's draw by
+  `phase`, smoothly less as it runs dry; `minPa`/`maxPa` gates). The device sets it before each step and books from
+  `delivered` (kg/s over the tick, so kg = delivered x dt; from what the core moved: a sink gets only what is there, a
+  step cut short delivers less) after it. `FluidWorld.edgesOf` leaves flows out (callers ask whether a node is piped or
+  sum its pipes); `flowsOf` has them. A source's species are in the core's set whether it runs or not (no rebuild on
+  toggle). A steady source lets its network sleep. Test: `pipe_flow_source_survives_rebuild`.
 - `src/main/java/mods/eln/solver/Equation.java`: expression parser/evaluator for the math chip (`ElectricalMathElement`)
   and `AnalogChips.kt`; not part of the MNA.
 

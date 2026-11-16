@@ -29,6 +29,7 @@ public final class FluidWorld implements IProcess {
     private final List<FluidNetwork> networks = new ArrayList<>();
     private final List<FluidDevice.Vent> vents = new ArrayList<>();
     private final List<FluidDevice.Link> links = new ArrayList<>();
+    private final List<FluidDevice.Flow> flows = new ArrayList<>();
     /** Pipe runs lumped into one node each (DESIGN.md section 5): lump -> its members, and member -> lump. */
     private final Map<FluidNode, List<FluidNode>> lumps = new IdentityHashMap<>();
     private final Map<FluidNode, FluidNode> lumpOf = new IdentityHashMap<>();
@@ -56,6 +57,7 @@ public final class FluidWorld implements IProcess {
         INSTANCE.networks.clear();
         INSTANCE.vents.clear();
         INSTANCE.links.clear();
+        INSTANCE.flows.clear();
         INSTANCE.lumps.clear();
         INSTANCE.lumpOf.clear();
         INSTANCE.dirty = false;
@@ -104,12 +106,25 @@ public final class FluidWorld implements IProcess {
         }
     }
 
-    /** The edges at a node this step (its ports' couplings and vents). */
+    /**
+     * The edges at a node this step (its ports' couplings, links and vents), without prescribed flows (flowsOf): callers
+     * ask whether a node is piped, or sum what its pipes carried, and a device's own source is neither.
+     */
     public static List<FluidEdge> edgesOf(FluidNode n) {
+        return edgesOf(n, false);
+    }
+
+    /** The prescribed flows (FluidDevice.Flow's edges, FluidEdge.Kind.FLOW) at a node this step. */
+    public static List<FluidEdge> flowsOf(FluidNode n) {
+        return edgesOf(n, true);
+    }
+
+    private static List<FluidEdge> edgesOf(FluidNode n, boolean flows) {
         List<FluidEdge> out = new ArrayList<>();
         FluidNetwork net = networkOf(n);
         n = INSTANCE.lumpOf.getOrDefault(n, n);
-        if (net != null) for (FluidEdge e : net.edges) if (e.a == n || e.b == n) out.add(e);
+        if (net != null)
+            for (FluidEdge e : net.edges) if ((e.a == n || e.b == n) && (e.kind == FluidEdge.Kind.FLOW) == flows) out.add(e);
         return out;
     }
 
@@ -196,7 +211,17 @@ public final class FluidWorld implements IProcess {
             l.edge.setPa = l.setPa;
             l.edge.relief = l.relief;
         }
+        for (FluidDevice.Flow f : flows) settings(f);
         for (FluidNetwork n : networks) n.step(time);
+        // (what each flow moved, onto its device's Flow at once: a trace below may rebuild the networks and their edges)
+        for (FluidDevice.Flow f : flows) {
+            f.delivered = f.edge.flow;
+            f.deliveredW = f.edge.fEnthalpy;
+            if (f.edge.fSpecies != null) {
+                if (f.deliveredSpecies == null || f.deliveredSpecies.length != f.edge.fSpecies.length) f.deliveredSpecies = new double[f.edge.fSpecies.length];
+                System.arraycopy(f.edge.fSpecies, 0, f.deliveredSpecies, 0, f.edge.fSpecies.length);
+            }
+        }
         if (traceSteps > 0 && traceNode != null) trace();
         if (scanSteps > 0) scan();
         if (watchAll) watch();
@@ -356,6 +381,7 @@ public final class FluidWorld implements IProcess {
         networks.clear();
         vents.clear();
         links.clear();
+        flows.clear();
         lumps.clear();
         lumpOf.clear();
         // ports by (level, block, face)
@@ -370,6 +396,7 @@ public final class FluidWorld implements IProcess {
         for (FluidDevice d : devices) {
             for (FluidDevice.FluidPort p : d.fluidPorts()) addNode(p.node(), parent, all, levelOf, d.fluidLevel());
             for (FluidDevice.Vent v : d.fluidVents()) addNode(v.node, parent, all, levelOf, d.fluidLevel());
+            for (FluidDevice.Flow f : d.fluidFlows()) addNode(f.node, parent, all, levelOf, d.fluidLevel());
             for (FluidDevice.Link l : d.fluidLinks()) {
                 addNode(l.a, parent, all, levelOf, d.fluidLevel());
                 addNode(l.b, parent, all, levelOf, d.fluidLevel());
@@ -535,6 +562,28 @@ public final class FluidWorld implements IProcess {
                 }
                 vents.add(v);
             }
+        // prescribed flows: as vents, to the network's air node (a source's far end is the outside it brings mass from, a
+        // sink's the outside it sends it to; the core carries a source's own mix, so the air node's contents don't matter)
+        for (FluidDevice d : devices)
+            for (FluidDevice.Flow f : d.fluidFlows()) {
+                FluidNode fn = repr.apply(f.node);   // (into a pipe: its run's lump)
+                FluidNetwork net = byRoot.get(find(fn, parent));
+                FluidNode atm = air.computeIfAbsent(net, k -> k.add(FluidNode.atmosphere(fn.z + fn.height)));
+                double dr = drawOn(fn, f.node, f.draw);
+                f.edge = (f.in ? net.connect(atm, 0, fn, dr, 0) : net.connect(fn, dr, atm, 0, 0)).kind(FluidEdge.Kind.FLOW);
+                settings(f);
+                flows.add(f);
+            }
+    }
+
+    /** A flow's settings onto its edge (before each step). */
+    private static void settings(FluidDevice.Flow f) {
+        f.edge.rate = Math.max(0, f.rate);
+        f.edge.shares = f.in ? f.shares : null;
+        f.edge.kelvin = f.kelvin;
+        f.edge.phase = f.phase;
+        f.edge.minPa = f.minPa;
+        f.edge.maxPa = f.maxPa;
     }
 
     /** The smallest node volume (m^3) the core is trusted with: a voxel of iron pipe is ~2e-6 (LabAgent: the trouble in
@@ -543,11 +592,12 @@ public final class FluidWorld implements IProcess {
     /** Nodes already reported (once each). */
     private static final java.util.Set<FluidNode> TOO_SMALL = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
 
-    /** A device's nodes: its ports', vents' and links' (as the rebuild gathers them). */
+    /** A device's nodes: its ports', vents', flows' and links' (as the rebuild gathers them). */
     private static List<FluidNode> nodesOf(FluidDevice d) {
         List<FluidNode> out = new ArrayList<>();
         for (FluidDevice.FluidPort p : d.fluidPorts()) out.add(p.node());
         for (FluidDevice.Vent v : d.fluidVents()) out.add(v.node);
+        for (FluidDevice.Flow f : d.fluidFlows()) out.add(f.node);
         for (FluidDevice.Link l : d.fluidLinks()) {
             out.add(l.a);
             out.add(l.b);

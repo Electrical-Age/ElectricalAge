@@ -6,7 +6,8 @@ package mods.eln.sim.fluid;
  * the port is below that node's liquid level, else its gas (vapour and air in proportion).
  */
 public final class FluidEdge {
-    public enum Kind { PIPE, CHECK, TURBINE, PUMP, REGULATOR }
+    /** FLOW: a prescribed flow (FluidDevice.Flow; Network.Kind.FLOW), no conductance. */
+    public enum Kind { PIPE, CHECK, TURBINE, PUMP, REGULATOR, FLOW }
 
     public final FluidNode a, b;
     /** Port heights on a and b (fractions of each node's height). */
@@ -58,6 +59,14 @@ public final class FluidEdge {
     public double conductance;
     /** Its own stream band (Pa; NaN: the core's): Network.Edge.band. */
     public double band = Double.NaN;
+    /**
+     * FLOW (Network.Edge.rate): rate (kg/s), a source's mix (shares by species id; null: a's own draw) at kelvin, what a
+     * sink draws (phase), and its gates (Pa; NaN: none). Copied from its FluidDevice.Flow before each step.
+     */
+    public double rate, kelvin;
+    public double[] shares;
+    public mods.eln.fluidcore.Network.Phase phase = mods.eln.fluidcore.Network.Phase.ANY;
+    public double minPa = Double.NaN, maxPa = Double.NaN;
     /** TURBINE: electric power made this step (W), at EFFICIENCY of the steam's heat above liquid at 100 C. */
     public double power;
     public static final double TURBINE_EFFICIENCY = 0.40;

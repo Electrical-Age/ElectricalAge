@@ -17,6 +17,64 @@ public interface FluidDevice {
         return List.of();
     }
 
+    /** Prescribed flows into or out of its nodes inside the fluid step (Flow); the same objects on every call. */
+    default List<Flow> fluidFlows() {
+        return List.of();
+    }
+
+    /**
+     * A prescribed flow between one of its nodes and the outside, inside the fluid core's implicit step (Network.Kind.FLOW):
+     * a source (in) puts rate kg/s of its gas mix (shares by species id, at kelvin) into node; a sink takes rate kg/s of
+     * what node's port at draw gives (phase), smoothly less as it runs dry. Gates: minPa on the outside's or node's port
+     * the flow comes from, maxPa on the one it goes to (NaN: none; Network.Edge.rate). The device sets rate (and the rest)
+     * before each step and books from delivered after it: a sink takes only what is there, and a step cut short delivers
+     * less. The world joins it like a vent, to its network's air node; FluidWorld.edgesOf leaves it out (flowsOf has it).
+     */
+    final class Flow {
+        public final FluidNode node;
+        public final double draw;
+        /** true: a source into node from outside; false: a sink out of node. */
+        public final boolean in;
+        /** A source's mix: each species' share of a kg by registry id (they sum to 1), and its temperature (K). */
+        public double[] shares;
+        public double kelvin = Water.T_AMBIENT;
+        public mods.eln.fluidcore.Network.Phase phase = mods.eln.fluidcore.Network.Phase.ANY;
+        public double minPa = Double.NaN, maxPa = Double.NaN;
+        /** What the device asks for (kg/s, >= 0), set before each step. */
+        public double rate;
+        /**
+         * What the last step moved (FluidEdge.flow and its parts: what left node for a sink, what came in for a source):
+         * kg/s over the tick, so kg = delivered x dt (a step that caught up owed time delivers more than rate, one cut short
+         * less); by species id (kg/s; null until it moved something); and its enthalpy (W).
+         */
+        public double delivered, deliveredW;
+        public double[] deliveredSpecies;
+        /** This step's edge (set by the world when it builds the network). */
+        public FluidEdge edge;
+
+        public Flow(FluidNode node, double draw, boolean in) {
+            this.node = node;
+            this.draw = draw;
+            this.in = in;
+        }
+
+        /** A source of one species at kelvin (a mix: set shares). */
+        public static Flow source(FluidNode node, double draw, int species, double kelvin) {
+            Flow f = new Flow(node, draw, true);
+            f.shares = new double[species + 1];
+            f.shares[species] = 1;
+            f.kelvin = kelvin;
+            return f;
+        }
+
+        /** The energy a kg of a source's mix carries (J/kg): each species as a gas at kelvin (Species.hVapour). */
+        public double enthalpy() {
+            double h = 0;
+            if (shares != null) for (int i = 0; i < shares.length; i++) if (shares[i] != 0) h += shares[i] * SpeciesRegistry.get().byId(i).hVapour(kelvin);
+            return h;
+        }
+    }
+
     /** Edges inside the device between its own nodes (a valve between two pipes); the device sets open before each
      *  step. */
     default List<Link> fluidLinks() {

@@ -55,6 +55,7 @@ public final class PipeCases {
         cases.add(new PipeRoutePreview());
         cases.add(new KitLengthNotDamage());
         cases.add(new LiquidStaysIncompressible());
+        cases.add(new FlowSourceSurvivesRebuild());
         cases.add(new VoxelGallery());
     }
 
@@ -1864,6 +1865,102 @@ public final class PipeCases {
             ctx.line(String.format("liquid-full pipe on a 50 bar reservoir: %.4f of its volume, %.1f bar", full, pipe.P() / 1e5));
             ctx.check("liquid-full: under 1 % over its volume", full < 1.01, String.format("%.4f", full));
             ctx.check("liquid-full: at about the reservoir's pressure (40-60 bar)", pipe.P() > 40e5 && pipe.P() < 60e5, String.format("%.1f bar", pipe.P() / 1e5));
+        }
+    }
+
+    /**
+     * A prescribed flow (FluidDevice.Flow, inside the fluid step): a test device's air source at 400 K into the middle of a
+     * sealed three-block run of iron pipe. The run gains exactly what the flow delivered, rate x the time stepped, also
+     * across a forced rebuild of the networks halfway (a lump written by hand between steps was lost at one); the flow is
+     * no edge of the run's (FluidWorld.edgesOf: the run reads as unpiped) but is in flowsOf.
+     */
+    static final class FlowSourceSurvivesRebuild implements TestCase {
+        BlockPos a, b, c;
+        mods.eln.sim.fluid.FluidDevice dev;
+        mods.eln.sim.fluid.FluidDevice.Flow flow;
+        double m0, rate, sent, sentJ, time;
+        int steps, edgesSeen = -1, flowsSeen = -1;
+
+        public String id() {
+            return "pipe_flow_source_survives_rebuild";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int ticks() {
+            return 100;
+        }
+
+        double mass(TestContext ctx) {
+            double m = 0;
+            for (BlockPos p : new BlockPos[]{a, b, c})
+                for (VoxelPart part : node(ctx, p).parts) if (part instanceof PipePart q) m += q.fluid.mWater + q.fluid.mAir;
+            return m;
+        }
+
+        public void build(TestContext ctx) {
+            a = ctx.at(1, 1, 1);
+            b = ctx.at(2, 1, 1);
+            c = ctx.at(3, 1, 1);
+            lay(ctx, a, 0, 4, 8, 8, 16, 8, 8);   // (capped at x 4 and at the far block's x 12)
+            lay(ctx, b, 0, 0, 8, 8, 16, 8, 8);
+            lay(ctx, c, 0, 0, 8, 8, 12, 8, 8);
+            mods.eln.sim.fluid.FluidNode mid = null;
+            for (BlockPos p : new BlockPos[]{a, b, c})
+                for (VoxelPart part : node(ctx, p).parts)
+                    if (part instanceof PipePart q) {
+                        q.fluid.fill(0, mods.eln.sim.fluid.Water.P_ATM, 293.15);
+                        if (p == b) mid = q.fluid;
+                    }
+            m0 = mass(ctx);
+            // (half the run's air again over the test: about 1.6 bar at the end, well under any burst)
+            rate = 0.5 * m0 / (ticks() * 0.05);
+            flow = mods.eln.sim.fluid.FluidDevice.Flow.source(mid, 0.5, mods.eln.sim.fluid.SpeciesRegistry.AIR, 400);
+            flow.rate = rate;
+            var flows = List.of(flow);
+            Object level = node(ctx, b).fluidLevel();
+            dev = new mods.eln.sim.fluid.FluidDevice() {
+                public Object fluidLevel() {
+                    return level;
+                }
+
+                public List<FluidPort> fluidPorts() {
+                    return List.of();
+                }
+
+                public List<Flow> fluidFlows() {
+                    return flows;
+                }
+
+                public void afterFluidStep(double dt) {
+                    steps++;
+                    time += dt;
+                    sent += flow.delivered * dt;
+                    sentJ += flow.deliveredW * dt;
+                    if (steps == ticks() / 2) {
+                        edgesSeen = mods.eln.fluid.FluidWorld.edgesOf(flow.node).size();
+                        flowsSeen = mods.eln.fluid.FluidWorld.flowsOf(flow.node).size();
+                        mods.eln.fluid.FluidWorld.changed(this);   // (a forced rebuild before the next step)
+                    }
+                }
+            };
+            mods.eln.fluid.FluidWorld.add(dev);
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.fluid.FluidWorld.remove(dev);
+            double gained = mass(ctx) - m0, h = mods.eln.sim.fluid.Water.hAir(400);
+            ctx.line(String.format("flow source: %d steps, %.6g s; asked %.6g kg, delivered %.6g kg, the run gained %.6g kg (%.3g relative); %.6g J/kg carried (hAir %.6g); run at %.3f bar",
+                steps, time, rate * time, sent, gained, (gained - sent) / sent, sentJ / sent, h, mods.eln.fluid.FluidWorld.nodeFor(flow.node).P() / 1e5));
+            ctx.check("flow source: it ran every step", steps >= ticks() - 2, steps + " steps");
+            ctx.check("flow source: the run gained what it delivered (to 1e-9), across a rebuild", Math.abs(gained - sent) < 1e-9 * sent,
+                String.format("%.9g vs %.9g kg", gained, sent));
+            ctx.check("flow source: it delivered its rate x the time stepped (to 1e-9)", Math.abs(sent - rate * time) < 1e-9 * sent,
+                String.format("%.9g vs %.9g kg", sent, rate * time));
+            ctx.check("flow source: each kg carried air's enthalpy at 400 K", Math.abs(sentJ / sent - h) < 1e-6 * h, String.format("%.6g J/kg", sentJ / sent));
+            ctx.check("flow source: no edge of the run's (edgesOf), one flow (flowsOf)", edgesSeen == 0 && flowsSeen == 1, edgesSeen + " / " + flowsSeen);
         }
     }
 }

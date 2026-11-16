@@ -69,6 +69,12 @@ public final class GasPlantCases {
         return d;
     }
 
+    /** The stats of n's fluid network (FluidNetwork.stats: ms/step, sleep), or "none". */
+    static String netStats(FluidNode n) {
+        var net = n == null ? null : mods.eln.fluid.FluidWorld.networkOf(n);
+        return net == null ? "none" : net.stats();
+    }
+
     /** A big reservoir of water under an air cushion at pa (1 m^3, 70 % water: free, not fixed, so it gives as a real
      *  vessel does; fixed nodes as stiff sources set liquid-full nodes between them swinging by tens of bar). */
     static FluidNode water(int y, double pa, double T) {
@@ -462,6 +468,8 @@ public final class GasPlantCases {
         public void measure(TestContext ctx) {
             Eln.simulator.removeSlowProcess(watch);
             Eln.simulator.removeElectricalComponent(l.load);
+            // (the exhaust's network's cost and sleep over the test, before taking the fixtures out rebuilds it)
+            ctx.line("steam raiser: exhaust network " + netStats(l.gt.exhaust));
             mods.eln.fluid.FluidWorld.remove(fx);
             HeatExchangerElement h = head(s);
             double q = (h.totalJ - j0) / window, ex = (l.gt.totalExhaustJ - x0) / window, left = drain.heat(window);
@@ -705,6 +713,7 @@ public final class GasPlantCases {
             Eln.simulator.removeSlowProcess(watch);
             Eln.simulator.removeElectricalComponent(l.load);
             Eln.simulator.removeElectricalComponent(hpLoad);
+            ctx.line("combined cycle: exhaust network " + netStats(l.gt.exhaust) + "; water network " + netStats(sep.vessel));
             mods.eln.fluid.FluidWorld.remove(fx);
             double fuel = (l.gt.totalFuelJ - f0) / window, gas = (l.gt.totalWork - g0) / window, st = (hp.totalWork - s0) / window,
                 kg = (hp.totalKg - k0) / window, qr = (head(raiser).totalJ - j0) / window, qe = (head(econ).totalJ - e0) / window,
