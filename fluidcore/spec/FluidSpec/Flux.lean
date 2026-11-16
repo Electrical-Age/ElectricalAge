@@ -567,6 +567,79 @@ theorem gasOnly_spec {q share : ℝ} (hq : 0 ≤ q) (h0 : 0 ≤ share) (h1 : sha
     0 ≤ share * q ∧ share * q ≤ q ∧ (share = 0 → share * q = 0) :=
   ⟨mul_nonneg h0 hq, mul_le_of_le_one_left hq h1, fun h => by rw [h, zero_mul]⟩
 
+/-! ### A prescribed flow -/
+
+/-- `Network.flowSigma`: x / (1 + x^4)^(1/4), the share of its rate a FLOW edge passes at x = M / (rate tau). -/
+noncomputable def flowSigma (x : ℝ) : ℝ := x / (1 + x ^ 4) ^ ((4 : ℝ)⁻¹)
+
+/-- **sigma is a share**, from 0 to 1, and never more than x itself. -/
+theorem flowSigma_spec {x : ℝ} (hx : 0 ≤ x) : 0 ≤ flowSigma x ∧ flowSigma x ≤ 1 ∧ flowSigma x ≤ x := by
+  have hb : 0 < 1 + x ^ 4 := by positivity
+  have hd : 0 < (1 + x ^ 4) ^ ((4 : ℝ)⁻¹) := Real.rpow_pos_of_pos hb _
+  have h1 : 1 ≤ (1 + x ^ 4) ^ ((4 : ℝ)⁻¹) :=
+    Real.one_le_rpow (by nlinarith [pow_nonneg hx 4]) (by norm_num)
+  have hxd : x ≤ (1 + x ^ 4) ^ ((4 : ℝ)⁻¹) := by
+    have e : (x ^ 4) ^ ((4 : ℝ)⁻¹) = x := by
+      have := Real.pow_rpow_inv_natCast hx (show (4 : ℕ) ≠ 0 by norm_num)
+      simpa using this
+    calc x = (x ^ 4) ^ ((4 : ℝ)⁻¹) := e.symm
+      _ ≤ (1 + x ^ 4) ^ ((4 : ℝ)⁻¹) :=
+        Real.rpow_le_rpow (pow_nonneg hx 4) (by linarith) (by norm_num)
+  unfold flowSigma
+  exact ⟨div_nonneg hx hd.le, (div_le_one hd).2 hxd, div_le_self hx h1⟩
+
+/-- `Network.flowRate`: a FLOW edge's flow, its rate x sigma of the mass M its draw can take over rate x tau, x a
+gate on a's port (minPa) and one on b's (maxPa), each over its band. -/
+noncomputable def flowQ (rate tau M W V minPa maxPa pa pb : ℝ) : ℝ :=
+  rate * flowSigma (M / (rate * tau)) * checkGate ((pa - minPa) / W) * checkGate ((maxPa - pb) / V)
+
+/-- **A FLOW edge shuts exactly at its gates** (it passes nothing once a's port is at or under minPa, or b's at or
+over maxPa); its flow is never negative, never more than its rate, and never more than M / tau: a sink takes a node
+dry no faster than its time constant, and from nothing takes nothing. -/
+theorem flow_spec {rate tau M W V : ℝ} (hr : 0 ≤ rate) (ht : 0 < tau) (hM : 0 ≤ M) (hW : 0 < W) (hV : 0 < V)
+    (minPa maxPa pa pb : ℝ) :
+    (pa ≤ minPa → flowQ rate tau M W V minPa maxPa pa pb = 0) ∧
+    (maxPa ≤ pb → flowQ rate tau M W V minPa maxPa pa pb = 0) ∧
+    0 ≤ flowQ rate tau M W V minPa maxPa pa pb ∧ flowQ rate tau M W V minPa maxPa pa pb ≤ rate ∧
+    flowQ rate tau M W V minPa maxPa pa pb ≤ M / tau := by
+  obtain ⟨ga0, gann, ga1⟩ := checkGate_spec ((pa - minPa) / W)
+  obtain ⟨gb0, gbnn, gb1⟩ := checkGate_spec ((maxPa - pb) / V)
+  have hx : 0 ≤ M / (rate * tau) := div_nonneg hM (mul_nonneg hr ht.le)
+  obtain ⟨s0, s1, sx⟩ := flowSigma_spec hx
+  have hg : 0 ≤ checkGate ((pa - minPa) / W) * checkGate ((maxPa - pb) / V) := mul_nonneg gann gbnn
+  have hg1 : checkGate ((pa - minPa) / W) * checkGate ((maxPa - pb) / V) ≤ 1 :=
+    (mul_le_mul ga1 gb1 gbnn zero_le_one).trans_eq (mul_one 1)
+  have e : flowQ rate tau M W V minPa maxPa pa pb =
+      rate * flowSigma (M / (rate * tau)) * (checkGate ((pa - minPa) / W) * checkGate ((maxPa - pb) / V)) := by
+    unfold flowQ
+    ring
+  have hrs : 0 ≤ rate * flowSigma (M / (rate * tau)) := mul_nonneg hr s0
+  -- (rate x sigma is at most M / tau: sigma(x) <= x, and rate x M / (rate tau) is M / tau, or 0 at no rate)
+  have hm : rate * flowSigma (M / (rate * tau)) ≤ M / tau := by
+    rcases hr.eq_or_lt with h | h
+    · rw [← h, zero_mul]
+      exact div_nonneg hM ht.le
+    · calc rate * flowSigma (M / (rate * tau)) ≤ rate * (M / (rate * tau)) := mul_le_mul_of_nonneg_left sx hr
+        _ = M / tau := by field_simp
+  refine ⟨fun h => ?_, fun h => ?_, ?_, ?_, ?_⟩
+  · unfold flowQ
+    rw [ga0 (div_nonpos_of_nonpos_of_nonneg (by linarith) hW.le)]
+    ring
+  · unfold flowQ
+    rw [gb0 (div_nonpos_of_nonpos_of_nonneg (by linarith) hV.le)]
+    ring
+  · rw [e]
+    exact mul_nonneg hrs hg
+  · rw [e]
+    calc rate * flowSigma (M / (rate * tau)) * _ ≤ rate * flowSigma (M / (rate * tau)) * 1 :=
+          mul_le_mul_of_nonneg_left hg1 hrs
+      _ ≤ rate * 1 := by rw [mul_one]; exact mul_le_mul_of_nonneg_left s1 hr
+      _ = rate := mul_one rate
+  · rw [e]
+    calc rate * flowSigma (M / (rate * tau)) * _ ≤ rate * flowSigma (M / (rate * tau)) * 1 :=
+          mul_le_mul_of_nonneg_left hg1 hrs
+      _ ≤ M / tau := by rw [mul_one]; exact hm
+
 /-! ### What the streams carry -/
 
 variable {ι : Type} [Fintype ι]

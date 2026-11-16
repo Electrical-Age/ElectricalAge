@@ -45,6 +45,8 @@ open FluidSpec.Limiter
 #print axioms FluidSpec.Flux.relief_spec
 #print axioms FluidSpec.Flux.turbineFlow_spec
 #print axioms FluidSpec.Flux.gasOnly_spec
+#print axioms FluidSpec.Flux.flowSigma_spec
+#print axioms FluidSpec.Flux.flow_spec
 #print axioms FluidSpec.Flux.carried_same
 #print axioms FluidSpec.Flux.carried_has
 #print axioms FluidSpec.Flux.carried_total_gap

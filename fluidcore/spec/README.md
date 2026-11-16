@@ -23,8 +23,8 @@ prebuilt files are fetched, which it does the first time). It:
 3. runs the Lean limiter on the recorded calls and compares bits;
 4. runs it again with one division computed as a multiplication by the inverse, which must be noticed.
 
-Last run: 1256 calls (153 unlimited, 757 scaled, 28 scaled until the last allowed pass, 318 with nodes silenced and
-scales raised again), no difference; the changed arithmetic differed on 246. One branch is in no recorded call: the
+Last run (2026-11-16, 80 theorems): 1256 calls (153 unlimited, 759 scaled, 26 scaled until the last allowed pass, 318
+with nodes silenced and scales raised again), no difference; the changed arithmetic differed on 237. One branch is in no recorded call: the
 limiter's last resort, all scales to zero when silencing has run as many passes as there are cells. Java's comment
 says it is never reached; the proofs cover it all the same.
 
@@ -62,11 +62,14 @@ the band `SPLIT_DP`):
 | F5 | **Windows.** A port's window is a share from 0 to 1 and never falls as the surface rises. The layers' shares of a draw are not negative and, with the gas's, make one whole; so a draw's shares sum to 1 less the gas part's cushion share. | `smoothStep_bounds`, `smoothStep_mono`, `window_mono`, `layerShare_nonneg`, `layerShare_total`, `draw_total` | `Network.smoothStep`, `MixFluid.drawD` |
 | F6 | **Rest.** A state where every net flux is zero solves the step from itself, whatever the step's length. | `rest_iff` | `Network.residual` |
 | F7 | **One-way devices shut exactly.** A pump passes nothing against its shut-off head or more, so it lifts no closed vessel past it; its flow is never negative and never more than its curve's. A reducing regulator passes nothing once its outlet is at its set point or its inlet's pressure; a relief regulator nothing until its inlet is over its set point and its outlet. A turbine passes nothing unless its inlet is over its outlet, and never more than the ellipse law's c sqrt(rho (p_a^2 - p_b^2) / p_a). A gas-only edge passes its stream times the share of its port above the liquid: nothing under it. None passes anything backward. | `checkGate_spec`, `checkRoot_spec`, `pumpFlow_spec`, `reducing_spec`, `relief_spec`, `turbineFlow_spec`, `gasOnly_spec` | `Network.pumpStreams`, `regulatorFlow`, `turbineFlow`, `streams` |
+| F8 | **A prescribed flow shuts exactly at its gates.** A FLOW edge (a device's source or sink) passes rate x sigma(M / (rate tau)) x its gates, sigma(x) = x / (1 + x^4)^(1/4): nothing once a's port is at or under its minPa or b's at or over its maxPa; never negative, never more than its rate, and never more than M / tau, so from a node with nothing to draw it takes nothing. sigma is a share from 0 to 1 and never more than x. (A gate left unset is 1; a fixed a passes its rate x its gates.) | `flowSigma_spec`, `flow_spec` | `Network.flowRate`, `flowSigma` |
 
 These are about the formulas as transcribed, and assume of the fluids what `FluxShapeTest` checks in doubles on
 random networks as they run: shares not negative and summing to at most 1, the liquid's shares to 1, windows in
 [0, 1], densities positive.
 
+F8 has `FlowTest` beside it: exact sources, sinks that never take a node below zero and book what left, gates
+that hold, and random networks with sources, sinks and flows between nodes that conserve with no failed step.
 F7, S5 and S6 have a gate family in doubles beside them: `GateFamilyTest` steps random networks whose edges include
 liquid and gas pumps, turbines, reducing and relief regulators and gas-only valves, half of them with a heated node,
 under the game's settings (CUT_SHORT, MAX_DEPTH 8). It asserts what the statements give together: masses kept,
