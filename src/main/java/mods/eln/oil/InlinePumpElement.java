@@ -259,7 +259,12 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
         // (gas at its inlet that is its own vapour, steam or water at boiling, is cavitation; air is priming)
         info.put(I18N.tr("Speed"), String.format("%.0f%%%s", share * 100, gasBound && !steamBound ? I18N.tr(", priming: air in its line")
             : cavitating ? I18N.tr(", CAVITATING: its water is at boiling") : ""));
-        info.put(I18N.tr("Head"), String.format("%.1f bar", pump == null ? 0 : pump.boost / 1e5));
+        // (the pressure it lifts by now, outlet over inlet, and the most it can make at this speed: a PUMP link's head is
+        // its curve (h0), never its boost, which stays 0, and Jade read 0 bar against a line 20 bar over its inlet;
+        // Baughn 2026-11-15)
+        if (pump != null && inlet != null && outlet != null)
+            info.put(I18N.tr("Head"), String.format(I18N.tr("outlet %.1f bar over its inlet (it makes up to %.1f bar)"),
+                (FluidWorld.nodeFor(outlet).P() - FluidWorld.nodeFor(inlet).P()) / 1e5, pump.h0 / 1e5));
         info.put(I18N.tr("Pumping"), String.format("%.0f mB/s", kgPerS / EaUnits.KG_PER_MB_WATER));
         info.put(I18N.tr("Power"), Utils.plotPower("", resistor.getP()));
         if (inlet != null) {
