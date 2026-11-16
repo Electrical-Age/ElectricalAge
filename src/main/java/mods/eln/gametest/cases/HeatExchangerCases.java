@@ -368,15 +368,17 @@ public final class HeatExchangerCases {
      * furnace's 80 % share of its fire, Flue.HEAT_SHARE), an iron pipe from its top to a loaded 230V Steam Turbine, a Steam
      * Condenser on its exhaust, and its pump's condensate back into the boiler's feed flange through a 2 x 2 x 1 exchanger
      * (50 W/K; the water on A, west out of its front). In the second plant the exchanger's B side takes the furnace's
-     * flue: air at 300 C (Flue.SMOKE_K), ~FIRE x 35/80 over the ambient (Flue.SMOKE_SHARE), in at its west end and out at
+     * flue: air at 300 C (Flue.SMOKE_K), FIRE x 35/80 over the ambient (Flue.SMOKE_SHARE), put into a 2 L node a tick at a
+ * time as a furnace's Flue does, in at its west end and out at
      * its east end, against the water. The first plant's exchanger is sealed: only a pipe. Same fire, so what the flue
      * plant's turbine makes over the other's is what the reheat buys.
      */
     static final class CondensateReheat extends PlumbingCases.Big {
         static final double FIRE = 12000;
-        /** The flue's drive over its exchanger (Pa) and its ports' throttle (m^3): ~19 g/s of 300 C air, 5.3 kW over the
-         *  ambient, the smoke of a fire whose 80 % is FIRE. */
-        static final double FLUE_DP = 2800, FLUE_K = 1.15e-9;
+        /** The flue's smoke over the ambient (W): what a fire whose 80 % is FIRE sends up it (Flue.SMOKE_SHARE). It goes into
+         *  a 2 L node (Flue.VOLUME) a tick at a time, before each fluid step, as Flue.step does, through a flange's port
+         *  (PortBridge.PORT_K); out through FLUE_K (m^3) to the air. */
+        static final double FLUE_W = FIRE * mods.eln.fluid.Flue.SMOKE_SHARE / mods.eln.fluid.Flue.HEAT_SHARE, FLUE_K = 1.15e-9;
         /** The boiler pressure each turbine's throttle holds (Pa): the player's regulator, as on a real plant. */
         static final double HOLD_P = 8e5;
         static final int WARM = 3200;
@@ -444,11 +446,11 @@ public final class HeatExchangerCases {
             plant(ctx, 0, 0);
             plant(ctx, 1, 5);
             int y = ctx.at(1, 1, 8).getY();
-            flueIn = new FluidNode(1.0, y, 1.0, true).fill(0, Water.P_ATM + FLUE_DP, mods.eln.fluid.Flue.SMOKE_K);
+            flueIn = new FluidNode(0.002, y, 0.25, false).fill(0, Water.P_ATM, mods.eln.fluid.Flue.SMOKE_K);
             FluidNode flueOut = new FluidNode(1.0, y, 1.0, true).fill(0, Water.P_ATM, 293.15);
             int hi = mods.eln.oil.TankElement.HIGH;
             fx = fixtures(head(hx[1]).fluidLevel(),
-                new Object[]{ctx.at(1, 1, 8), 5, flueIn, mods.eln.oil.TankElement.sideSpot(5, hi), FLUE_K},
+                new Object[]{ctx.at(1, 1, 8), 5, flueIn, mods.eln.oil.TankElement.sideSpot(5, hi), mods.eln.fluid.PortBridge.PORT_K},
                 new Object[]{ctx.at(3, 1, 8), 4, flueOut, mods.eln.oil.TankElement.sideSpot(4, hi), FLUE_K});
             Eln.simulator.addSlowProcess(fire = dt -> {
                 for (int i = 0; i < 2; i++) {
@@ -464,6 +466,11 @@ public final class HeatExchangerCases {
                     var a = head(hx[i]).a;
                     PlumbingCases.fill(a, 0.97 * a.volume * Water.RHO_L, Water.P_ATM, 320);
                 }
+                // (the furnace's smoke, as Flue.step: this tick's, at 300 C, in one go)
+                double smoke = FLUE_W * dt / (Water.hAir(mods.eln.fluid.Flue.SMOKE_K) - Water.hAir(293.15));
+                flueIn.mAir += smoke;
+                flueIn.energy += smoke * Water.hAir(mods.eln.fluid.Flue.SMOKE_K);
+                flueIn.update();
                 for (int i = 0; i < 2; i++) {
                     boiler[i].thermal.moveEnergyTo(FIRE * dt);
                     var c = turbine[i].controls;

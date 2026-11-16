@@ -677,7 +677,7 @@ public final class GasPlantCases {
                 new Object[]{ctx.at(8, 1, 6), 4, feed = water(y, 17e5, 293.15), B_AT, FEED_K});
             Eln.simulator.addSlowProcess(watch = dt -> {
                 l.tick();
-                // (the player's level circuit: at 1 B a side a block the raiser holds 8 B, a few seconds of steaming,
+                // (the player's level circuit: at 1 B a side a block the raiser holds 8 B, about a minute of steaming,
                 // so the feed valve follows its level, half full, as a regulator on the valve would)
                 var w = head(raiser).b;
                 double level = w.mLiquid() / (Water.RHO_L * w.volume);
