@@ -85,6 +85,7 @@ class StuckProbe {
                     e.rv.g[0], (tp.rv.v - tm.rv.v) / (2 * hT), e.E.g[0], (tp.E.v - tm.E.v) / (2 * hT), e.p.g[1] * vg, (xp.p.v - xm.p.v) / (2 * hx));
             }
         }
+        MixFluid.COUNT = true;
         String warm = System.getenv("STUCK_WARM");   // steps of a throwaway copy first (JIT warm-up)
         if (warm != null) {
             Network w = NetworkDump.read(text, new double[1]);

@@ -155,7 +155,7 @@ final class MixFluid implements NodeFluid {
     }
 
     Eval eval(double Tv, double vgv, double[] mv) {
-        EVALS++;
+        if (COUNT) EVALS++;
         Eval e = new Eval();
         int n = NG;
         D T = D.in(Tv, 0, n), Vg = D.in(vgv, 1, n);
@@ -513,10 +513,11 @@ final class MixFluid implements NodeFluid {
         pinned = false;
         double vg0 = vg, T0 = T;
         if (vg > 0 && newton()) return;
-        BRACKETS++;
+        if (COUNT) BRACKETS++;
         if (BRACKET_LOG != null && BRACKET_LOG.length() < 40000) BRACKET_LOG.append(String.format("bracket V %.3g m %s U %.6g from T %.3f vg %.3g%n", V, java.util.Arrays.toString(m), U, T0, vg0));
         long e0 = EVALS;
-        try { bracket(); } finally { BRACKET_EVALS += EVALS - e0; }
+        bracket();
+        if (COUNT) BRACKET_EVALS += EVALS - e0;
     }
 
     private void bracket() {
@@ -593,6 +594,8 @@ final class MixFluid implements NodeFluid {
     }
     /** Probe counters: flashes that fell back to the bracketed solve, and polish iterations. */
     public static long BRACKETS, POLISH_ITS, SAME, EVALS, BRACKET_EVALS;
+    /** Probe: keep the counters (off in the game, where networks step on several threads). */
+    public static boolean COUNT = false;
     public static StringBuilder BRACKET_LOG;
     /** An update to the contents it already holds keeps its state (true; false: solved again, probe knob). */
     public static boolean SKIP_SAME = true;
@@ -600,7 +603,7 @@ final class MixFluid implements NodeFluid {
     private boolean newton() {
         double t = T, x = Math.log(vg), tolE = energyTol();
         for (int it = 0; it < 12; it++) {
-            POLISH_ITS++;
+            if (COUNT) POLISH_ITS++;
             Eval e = eval(t, Math.exp(x), m);
             double r0 = e.E.v - U, r1 = e.rv.v;
             if (Math.abs(r0) < tolE && Math.abs(r1) < (OLD_TOL ? 1e-13 : FLASH_RV)) {
@@ -636,7 +639,7 @@ final class MixFluid implements NodeFluid {
         boolean same = Unew == U && st != null && dTheta != null;
         for (int i = 0; i < S && same; i++) same = (Math.abs(mNew[i]) < 1e-100 ? 0 : mNew[i]) == m[i];
         if (same && SKIP_SAME) {
-            SAME++;
+            if (COUNT) SAME++;
             return;
         }
         for (int i = 0; i < S; i++) m[i] = Math.abs(mNew[i]) < 1e-100 ? 0 : mNew[i];
@@ -824,7 +827,7 @@ final class MixFluid implements NodeFluid {
     }
 
     public Object saveState() {
-        return new Object[]{T, vg, st, dTheta};
+        return new Object[]{T, vg, st, dTheta, m.clone(), U};
     }
 
     public void restoreState(Object s) {
@@ -833,5 +836,8 @@ final class MixFluid implements NodeFluid {
         vg = (Double) a[1];
         st = (Eval) a[2];
         dTheta = (double[][]) a[3];
+        // (the contents too: update() keeps its state when handed the contents it holds, so they must be the state's)
+        System.arraycopy((double[]) a[4], 0, m, 0, m.length);
+        U = (Double) a[5];
     }
 }

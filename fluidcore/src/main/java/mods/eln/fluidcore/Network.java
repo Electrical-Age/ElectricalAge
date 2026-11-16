@@ -81,7 +81,7 @@ public final class Network {
 
         /** Solve its state from m and U again: whoever changes those from outside (the game's adapter) calls it. */
         public void update() {
-            UPDATES++;
+            if (MixFluid.COUNT) UPDATES++;
             fluid.update(m, U);
         }
 
@@ -1141,7 +1141,7 @@ public final class Network {
     public static long UPDATES, RESIDUALS, JACOBIANS;
 
     double[] residual(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt) {
-        RESIDUALS++;
+        if (MixFluid.COUNT) RESIDUALS++;
         int C = C(), S = C - 1;
         double[] r = new double[C * free.size()];
         for (int i = 0; i < free.size(); i++) {
@@ -1258,7 +1258,7 @@ public final class Network {
     }
 
     private Sparse jacobian(List<Node> free, java.util.Map<Node, Integer> idx, double dt) {
-        JACOBIANS++;
+        if (MixFluid.COUNT) JACOBIANS++;
         int C = C(), S = C - 1;
         int M = C * free.size();
         Sparse J = new Sparse(M);
