@@ -39,6 +39,7 @@ public final class GasPlantCases {
         cases.add(new RealGas());
         cases.add(new LowHead());
         cases.add(new LegacyTank());
+        cases.add(new ExhaustRescale());
         cases.add(new SteamRaiser());
         cases.add(new StackMergesAndSplits());
         cases.add(new Reheat());
@@ -175,6 +176,8 @@ public final class GasPlantCases {
         public void measure(TestContext ctx) {
             Eln.simulator.removeSlowProcess(watch);
             Eln.simulator.removeElectricalComponent(l.load);
+            // (its exhaust to the air: the casing's own network, which should sleep)
+            ctx.line("gas turbine: exhaust network " + netStats(l.gt.exhaust));
             double eta = (l.gt.totalWork - w0) / Math.max(1, l.gt.totalFuelJ - f0);
             ctx.line(String.format("gas turbine: lit at %.1f s, carrying its load at %.1f s (%.1f s after lighting); %.0f-%.0f rad/s; %.1f kW fuel -> %.1f kW: %.1f %%; %s",
                 lit / 20.0, full / 20.0, (full - lit) / 20.0, minR, maxR, l.gt.fuelW / 1000, l.gt.shaftW / 1000, eta * 100, l.gt.getWaila()));
@@ -360,6 +363,61 @@ public final class GasPlantCases {
 
         public void measure(TestContext ctx) {
             ctx.check("gas turbine: an old save's 8 B of gasoline is in its fuel vessel at about 1 atm", legacy.isEmpty(), legacy);
+        }
+    }
+
+    /**
+     * The exhaust casing's saved volume (GasTurbineElement.EXHAUST_V, "exhaustV"): a save from the 40 L casing loads into
+     * the 4 L one at the pressure and temperature it was saved at (its contents rescaled), and a save without the tag (a 4 L
+     * casing's) loads as it is.
+     */
+    static final class ExhaustRescale extends PlumbingCases.Big {
+        String big = "not run", old = "not run";
+
+        public String id() {
+            return "gas_turbine_exhaust_volume_rescale";
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        /** Reload the turbine at p with its casing saved as volume v (m^3; tagged if asked) holding air at pa and T. */
+        static String load(TestContext ctx, BlockPos p, double v, boolean tagged, double pa, double T) {
+            // (what the saved casing held, as a node of its own volume: the loaded one should read its pressure and temperature)
+            FluidNode saved = new FluidNode(v, p.getY(), 1.0, false).fill(0, pa, T);
+            try {
+                var r = mods.eln.gametest.Reload.node(ctx.level(), p, t -> {
+                    var el = OilCases.FuelBySpecies.holding(t, "exhaustW");
+                    mods.eln.fluid.FluidSaves.put(el, "exhaust", saved);
+                    if (tagged) el.putDouble("exhaustV", v);
+                    else el.remove("exhaustV");
+                    return t;
+                });
+                var gt = (GasTurbineElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                FluidNode ex = gt.exhaust;
+                String got = String.format("%.4f m^3 at %.4f bar, %.2f K, %.4g kg air", ex.volume, ex.P() / 1e5, ex.T(), ex.mAir);
+                ctx.line(String.format("gas turbine casing saved as %.3f m^3 %s at %.2f bar, %.0f K: loaded %s", v, tagged ? "(tagged)" : "(no tag)", pa / 1e5, T, got));
+                return Math.abs(ex.volume - GasTurbineElement.EXHAUST_V) < 1e-12 && Math.abs(ex.P() - saved.P()) < 1e-6 * saved.P()
+                    && Math.abs(ex.T() - saved.T()) < 1e-3 ? "" : got + String.format(" (saved: %.6f bar, %.4f K)", saved.P() / 1e5, saved.T());
+            } catch (ReflectiveOperationException e) {
+                return e.toString();
+            }
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(2, 1, 2), q = ctx.at(5, 1, 2);
+            ctx.placeTransparent(GAS_TURBINE, p);
+            ctx.placeTransparent(GAS_TURBINE, q);
+            ctx.after(2, () -> {
+                big = load(ctx, p, 0.04, true, 1.6e5, 600);
+                old = load(ctx, q, GasTurbineElement.EXHAUST_V, false, 1.4e5, 500);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("gas turbine: a 40 L casing's save loads into the 4 L one at its saved pressure and temperature", big.isEmpty(), big);
+            ctx.check("gas turbine: a save without the casing's volume (4 L) loads as it is", old.isEmpty(), old);
         }
     }
 

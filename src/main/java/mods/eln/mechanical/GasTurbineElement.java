@@ -46,10 +46,12 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
      * Its exhaust casing (m^3). The exhaust (~1.9 g a tick at full power) went in as one lump between fluid steps; in 4 L
      * that was a pressure spike of over half its contents a tick, and the flow behind it came in a burst early in each
      * step. A 1 B a side heat exchanger on it (0.7 g of gas a 2 x 2 x 2 side) passed the burst at too little NTU: the
-     * combined cycle's steam raiser gave 9.6 kW where it gives 10.5 (2026-11-16, todo #495). In 40 L the spike was 6 %.
-     * Now a source inside the fluid step (exhaustFlow), so there is no spike.
+     * combined cycle's steam raiser gave 9.6 kW where it gives 10.5 (2026-11-16, todo #495); for a while the casing was
+     * 40 L (the spike 6 %). The exhaust is now a source inside the fluid step (exhaustFlow), so 4 L again. Saves carry
+     * the casing's volume ("exhaustV", since the 40 L casing) and load rescaled to this one at the same pressure; saves
+     * without it are from a 4 L casing.
      */
-    public static final double EXHAUST_V = 0.04;
+    public static final double EXHAUST_V = 0.004;
     public static final double RATED_RADS = ShaftNetworkKt.nominalShaftRads, CUTOFF = 0.5, DROOP = 0.05, VALVE_TAU = 0.3, TRIP = 1.1,
         WINDAGE = 0.02, H = 1.0;
     /** Its fuel vessel's filling level (mB): sixteen buckets. */
@@ -66,6 +68,8 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     private List<Flow> flows = List.of();
     double exhaustOwed, exhaustDh = 1;
     private double[] loadedEx;
+    /** The saved casing's volume (m^3; 0: a save from before it was saved, a 4 L casing). */
+    private double loadedV;
     private List<FluidPort> ports = List.of();
     /**
      * Fuel in on its small top flange (mods.eln.cad.models.ShaftGas), into its fuel vessel: gasoline, diesel and heavy
@@ -332,6 +336,8 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         exhaust = new FluidNode(EXHAUST_V, node.coordonate.y, 1.0, false);
         if (loadedEx != null) {
             mods.eln.fluid.FluidSaves.restore(exhaust, loadedEx);
+            // (saved from another casing: its contents scaled to this one, so it loads at the pressure and temperature it had)
+            if (loadedV > 0 && loadedV != EXHAUST_V) scale(exhaust, EXHAUST_V / loadedV);
             exhaust.update();
         } else exhaust.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         exhaustFlow = Flow.source(exhaust, 0.5, SpeciesRegistry.AIR, EXHAUST_T);
@@ -398,9 +404,19 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         bank = nbt.getDoubleOr("fuelBank", 0);
         gate = nbt.getDoubleOr("gate", 0);
         tripped = nbt.getBooleanOr("tripped", false);
-        if (nbt.contains("exhaustW"))
+        if (nbt.contains("exhaustW")) {
             loadedEx = mods.eln.fluid.FluidSaves.array(nbt, "exhaust");
+            loadedV = nbt.getDoubleOr("exhaustV", 0);
+        }
         fuelIn.read(nbt, "fuel", TANK_MB);   // (an old save's fuel tank goes into the vessel; the 1.12 turbine's 4 mB "tank" is dropped)
+    }
+
+    /** Scale a node's contents (every species and its energy) by f, in place (no update). */
+    static void scale(FluidNode n, double f) {
+        n.mWater *= f;
+        n.mAir *= f;
+        n.energy *= f;
+        if (n.extra != null) for (int i = 0; i < n.extra.length; i++) n.extra[i] *= f;
     }
 
     /** Has it fuel: liquid fuel or fuel gas in its vessel, or heat in the bank. */

@@ -204,7 +204,11 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   `delivered` (kg/s over the tick, so kg = delivered x dt; from what the core moved: a sink gets only what is there, a
   step cut short delivers less) after it. `FluidWorld.edgesOf` leaves flows out (callers ask whether a node is piped or
   sum its pipes); `flowsOf` has them. A source's species are in the core's set whether it runs or not (no rebuild on
-  toggle). A steady source lets its network sleep. Test: `pipe_flow_source_survives_rebuild`.
+  toggle). A steady source lets its network sleep. Tests: `pipe_flow_source_survives_rebuild`, `FlowSourceTest`.
+  Users: the gas turbine's exhaust (`GasTurbineElement.exhaustFlow`, air at EXHAUST_T into its 4 L casing; the rate
+  carries what earlier steps didn't deliver, and the heat is booked from what was delivered). Its casing was 40 L for a
+  while to soften the lump; saves carry `exhaustV` since then and load rescaled to the current casing at their pressure
+  (`gas_turbine_exhaust_volume_rescale`); saves without it are a 4 L casing's.
 - `src/main/java/mods/eln/solver/Equation.java`: expression parser/evaluator for the math chip (`ElectricalMathElement`)
   and `AnalogChips.kt`; not part of the MNA.
 
