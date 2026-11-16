@@ -376,8 +376,8 @@ public final class HeatExchangerCases {
     static final class CondensateReheat extends PlumbingCases.Big {
         static final double FIRE = 12000;
         /** The flue's smoke over the ambient (W): what a fire whose 80 % is FIRE sends up it (Flue.SMOKE_SHARE). It goes into
-         *  a 2 L node (Flue.VOLUME) a tick at a time, before each fluid step, as Flue.step does, through a flange's port
-         *  (PortBridge.PORT_K); out through FLUE_K (m^3) to the air. */
+         *  a 2 L node (Flue.VOLUME) as a source inside the fluid step, as Flue.step's (shut over Flue.CHOKED_PA), through a
+         *  flange's port (PortBridge.PORT_K); out through FLUE_K (m^3) to the air. */
         static final double FLUE_W = FIRE * mods.eln.fluid.Flue.SMOKE_SHARE / mods.eln.fluid.Flue.HEAT_SHARE, FLUE_K = 1.15e-9;
         /** The boiler pressure each turbine's throttle holds (Pa): the player's regulator, as on a real plant. */
         static final double HOLD_P = 8e5;
@@ -387,8 +387,9 @@ public final class HeatExchangerCases {
         final mods.eln.oil.CondenserElement[] cond = new mods.eln.oil.CondenserElement[2];
         @SuppressWarnings("unchecked")
         final List<HeatExchangerElement>[] hx = new List[2];
-        FluidDevice fx;
+        FluidDevice fx, smokeDev;
         FluidNode flueIn;
+        FluidDevice.Flow smoke;
         IProcess fire;
         int tick;
         final double[] power = new double[2], j0 = new double[2], pumped0 = new double[2], pBoiler = new double[2], tFeed = new double[2];
@@ -452,6 +453,26 @@ public final class HeatExchangerCases {
             fx = fixtures(head(hx[1]).fluidLevel(),
                 new Object[]{ctx.at(1, 1, 8), 5, flueIn, mods.eln.oil.TankElement.sideSpot(5, hi), mods.eln.fluid.PortBridge.PORT_K},
                 new Object[]{ctx.at(3, 1, 8), 4, flueOut, mods.eln.oil.TankElement.sideSpot(4, hi), FLUE_K});
+            // (the furnace's smoke, as Flue's source: air at 300 C, inside the fluid step)
+            smoke = FluidDevice.Flow.source(flueIn, 0.5, mods.eln.sim.fluid.SpeciesRegistry.AIR, mods.eln.fluid.Flue.SMOKE_K);
+            smoke.maxPa = mods.eln.fluid.Flue.CHOKED_PA;
+            smoke.rate = FLUE_W / (Water.hAir(mods.eln.fluid.Flue.SMOKE_K) - Water.hAir(293.15));
+            var smokes = List.of(smoke);
+            Object level = head(hx[1]).fluidLevel();
+            smokeDev = new FluidDevice() {
+                public Object fluidLevel() {
+                    return level;
+                }
+
+                public List<FluidPort> fluidPorts() {
+                    return List.of();
+                }
+
+                public List<Flow> fluidFlows() {
+                    return smokes;
+                }
+            };
+            mods.eln.fluid.FluidWorld.add(smokeDev);
             Eln.simulator.addSlowProcess(fire = dt -> {
                 for (int i = 0; i < 2; i++) {
                     if (cond[i].vessel == null || boiler[i].vessel == null) return;
@@ -466,11 +487,6 @@ public final class HeatExchangerCases {
                     var a = head(hx[i]).a;
                     PlumbingCases.fill(a, 0.97 * a.volume * Water.RHO_L, Water.P_ATM, 320);
                 }
-                // (the furnace's smoke, as Flue.step: this tick's, at 300 C, in one go)
-                double smoke = FLUE_W * dt / (Water.hAir(mods.eln.fluid.Flue.SMOKE_K) - Water.hAir(293.15));
-                flueIn.mAir += smoke;
-                flueIn.energy += smoke * Water.hAir(mods.eln.fluid.Flue.SMOKE_K);
-                flueIn.update();
                 for (int i = 0; i < 2; i++) {
                     boiler[i].thermal.moveEnergyTo(FIRE * dt);
                     var c = turbine[i].controls;
@@ -499,6 +515,7 @@ public final class HeatExchangerCases {
         public void measure(TestContext ctx) {
             Eln.simulator.removeSlowProcess(fire);
             mods.eln.fluid.FluidWorld.remove(fx);
+            mods.eln.fluid.FluidWorld.remove(smokeDev);
             double[] p = new double[2], q = new double[2], fed = new double[2];
             for (int i = 0; i < 2; i++) {
                 p[i] = power[i] / window;
