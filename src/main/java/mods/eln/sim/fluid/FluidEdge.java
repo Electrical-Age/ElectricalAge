@@ -41,6 +41,8 @@ public final class FluidEdge {
     public double qMax, h0, speed = 1, eta = 0.7, work;
     /** PUMP: a gas pump (qMax a volume, m^3/s; Network.Edge.gas). */
     public boolean gas;
+    /** PUMP: keeps its shut-off head whatever it draws (Network.Edge.anyPhase). */
+    public boolean anyPhase;
     /** REGULATOR: its set point (Pa) and mode (relief: holds a; else reducing: holds b; Network.Edge.setPa). */
     public double setPa;
     public boolean relief;

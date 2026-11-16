@@ -314,6 +314,7 @@ final class CoreStep {
                 c.qMax = e.qMax;
                 c.h0 = e.h0;
                 c.gas = e.gas;
+                c.anyPhase = e.anyPhase;
                 c.eta = e.eta;
                 c.speed = e.speed * open;
                 continue;

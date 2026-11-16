@@ -82,16 +82,17 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
         share = speedNow();
         boolean was = cavitating;
         var in = FluidWorld.nodeFor(inlet);
-        // gas-bound (an unprimed line): it passes the gas on with next to no head, so water follows it in (priming);
-        // water too close to boiling: it cavitates, a vapour lock: it moves next to nothing
+        // gas at its inlet (air, or steam): it moves it as it moves water, with its full head (Baughn 2026-11-15: "as
+        // implausible as it may be, I think it ought to work equally well on gas and liquid"; the core's anyPhase pump).
+        // Water too close to boiling at its inlet still cavitates, a vapour lock: it moves next to nothing
         boolean gas = share > 0.05 && gasBound(in);
         gasBound = gas;
-        steamBound = gas && in.pVapour() > 0.5 * in.P();   // (the gas is its own vapour: Jade calls it cavitation)
-        cavitating = share > 0.05 && (gas || cavitates(in));
+        steamBound = gas && in.pVapour() > 0.5 * in.P();   // (the gas is its own vapour: Jade says steam)
+        cavitating = share > 0.05 && !gas && cavitates(in);
         // (the affinity laws: flow with the speed, head with its square; cavitating, a vapour lock passes next to nothing)
         pump.speed = cavitating ? 0.05 * share : share;
         pump.h0 = Math.max(1, (cavitating ? 0.02 : 1) * InlinePumpDescriptor.HEAD_PA * share * share);
-        // (gas-bound: its casing vent passes the gas at the top on, so the water behind it comes in: it primes itself)
+        // (gas-bound: its casing vent passes the gas at the top on too, so the water behind it comes in)
         purge.open = gas ? share : 0;
         purge.boost = 0.02 * InlinePumpDescriptor.HEAD_PA * share * share;
         if (was != cavitating) needPublish();
@@ -166,6 +167,7 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
         outlet = node(loadedOut);
         // (a centrifugal pump in the fluid core's solve: its rated flow with no head against it, none at the shut-off)
         pump = new Link(inlet, 0, outlet, 0, PORT_K).pump(InlinePumpDescriptor.RATED_KG_PER_S, InlinePumpDescriptor.HEAD_PA);
+        pump.anyPhase = true;   // (its head on gas as on water)
         pump.eta = InlinePumpDescriptor.EFFICIENCY;
         pump.speed = 0;
         purge = new Link(inlet, 1.0, outlet, 0.5, InlinePumpDescriptor.RATED_KG_PER_S / InlinePumpDescriptor.HEAD_PA * Water.MU_L / Water.RHO_L)
@@ -256,8 +258,8 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>();
-        // (gas at its inlet that is its own vapour, steam or water at boiling, is cavitation; air is priming)
-        info.put(I18N.tr("Speed"), String.format("%.0f%%%s", share * 100, gasBound && !steamBound ? I18N.tr(", priming: air in its line")
+        // (gas at its inlet it moves as water, air or steam; water at boiling at its inlet is cavitation)
+        info.put(I18N.tr("Speed"), String.format("%.0f%%%s", share * 100, gasBound ? (steamBound ? I18N.tr(", moving steam") : I18N.tr(", moving air"))
             : cavitating ? I18N.tr(", CAVITATING: its water is at boiling") : ""));
         // (the pressure it lifts by now, outlet over inlet, and the most it can make at this speed: a PUMP link's head is
         // its curve (h0), never its boost, which stays 0, and Jade read 0 bar against a line 20 bar over its inlet;

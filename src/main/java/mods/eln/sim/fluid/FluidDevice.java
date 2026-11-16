@@ -83,6 +83,9 @@ public interface FluidDevice {
         /** PUMP as a gas pump (Network.Edge.gas): qMax a volume (m^3/s), h0 the pressure it makes whatever it draws. */
         public boolean gas;
 
+        /** PUMP that keeps its head on gas as on liquid (Network.Edge.anyPhase: the inline pump). */
+        public boolean anyPhase;
+
         /** This link as a gas pump (an ejector): free flow qMax (m^3/s at full speed), shut-off pressure rise h0 (Pa). */
         public Link gasPump(double qMax, double h0) {
             pump(qMax, h0);

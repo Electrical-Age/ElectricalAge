@@ -74,6 +74,33 @@ class PumpTest {
         assertEquals(work, u1 - u0, 1e-6 * Math.abs(u0) + 1e-3 * work, "the fluid's energy rose by the work");
     }
 
+    /**
+     * On gas: a liquid pump loses its prime (head and flow scale with the density drawn), an anyPhase pump (the inline
+     * pump; Baughn 2026-11-15: it should work as well on gas as on liquid) keeps its head. From an atmosphere of steam-free
+     * air into a closed 1 L vessel of air, 2 bar shut-off head: the anyPhase pump lifts it most of the way; the liquid
+     * pump hardly at all. Mass is kept and nothing fails.
+     */
+    @Test
+    void anyPhasePumpKeepsItsHeadOnGas() {
+        double[] lift = new double[2];
+        for (int k = 0; k < 2; k++) {
+            Network net = new Network();
+            double h0 = 2e5;
+            var air = net.add(new Network.Node(1e3, 0, 1, true).fill(0, 1e5 * 1e3 / (287.05 * 300), 300));
+            var vessel = net.add(new Network.Node(1e-3, 0, 1, false).fill(0, 1e5 * 1e-3 / (287.05 * 300), 300));
+            var e = pump(net, air, vessel, 0.1, h0);
+            e.anyPhase = k == 1;
+            double m0 = vessel.mass();
+            for (int s = 0; s < 400; s++) net.step(DT);
+            lift[k] = vessel.P() - air.P();
+            System.out.printf("pump on air (anyPhase %s): lift %.3f bar, vessel %.3g -> %.3g kg, %.1f C, failures %d%n", e.anyPhase, lift[k] / 1e5,
+                m0, vessel.mass(), vessel.T() - 273.15, net.stats.failures);
+            assertEquals(0, net.stats.failures, "failed sub-steps");
+        }
+        assertTrue(lift[0] < 0.05 * 2e5, "a liquid pump on gas makes next to no head: " + lift[0]);
+        assertTrue(lift[1] > 0.7 * 2e5, "an anyPhase pump makes most of its head on gas: " + lift[1]);
+    }
+
     @Test
     void slopesMatchFiniteDifferences() {
         Network net = new Network();

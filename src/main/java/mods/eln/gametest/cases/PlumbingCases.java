@@ -284,8 +284,9 @@ public final class PlumbingCases {
 
     /**
      * The inline pump on MVU: tank A's low port -> pipe -> pump -> pipe -> tank B's low port. With cold water in A it
-     * moves it to B and draws power; with A full of water at its boiling point (1 atm, 100 C) it cavitates and moves
-     * next to nothing.
+     * moves it to B and draws power; with A full of water at its boiling point (1 atm, 100 C) its line flashes to steam,
+     * and it moves that as it moves water (Baughn 2026-11-15: the pump works on gas as on liquid), steam and water both
+     * reaching B. (Before, steam at its inlet was a vapour lock: it moved next to nothing and rattled.)
      */
     static final class PumpMovesWater extends Big {
         final boolean boiling;
@@ -293,7 +294,7 @@ public final class PlumbingCases {
         InlinePumpElement p;
         IProcess watch;
         double bWater0, maxW;
-        boolean sawCavitate, sawSteamBound;
+        boolean sawCavitate, sawSteamBound, sawSteamCavitating;
         String steamJade = "", airJade = "";
 
         PumpMovesWater(boolean boiling) {
@@ -332,9 +333,10 @@ public final class PlumbingCases {
             Eln.simulator.addSlowProcess(watch = dt -> {
                 sawCavitate |= boiling ? p.cavitating : p.cavitating && !p.gasBound;
                 maxW = Math.max(maxW, p.wantW);
-                // (Jade: gas at its inlet that is its own vapour reads cavitating, air reads priming: AdventurAgent)
+                // (Jade: gas at its inlet reads as what it moves, steam or air; Baughn 2026-11-15: the pump works on gas as on water)
                 if (p.gasBound && p.steamBound) {
                     sawSteamBound = true;
+                    sawSteamCavitating |= p.cavitating;
                     steamJade = p.getWaila().get("Speed");
                 }
                 if (p.gasBound && !p.steamBound) airJade = p.getWaila().get("Speed");
@@ -354,11 +356,11 @@ public final class PlumbingCases {
                 // against these low heads; the old law charged the full shut-off head on whatever moved)
                 ctx.check("pump: it draws power doing it", maxW > mods.eln.oil.InlinePumpDescriptor.IDLE_W + 1, String.format("%.0f W", maxW));
                 ctx.check("pump: it primed itself (passed the line's air on) and then pumped water", p.totalKg > 0.05, String.format("%.3f kg", p.totalKg));
-                ctx.check("pump: Jade calls air at its inlet priming", airJade.contains("priming"), airJade);
+                ctx.check("pump: Jade says it is moving the air at its inlet", airJade.contains("moving air"), airJade);
             } else {
-                ctx.check("pump: water at its boiling point vapour-locks it (cavitating, or its line full of steam)", sawCavitate, "");
-                ctx.check("pump: and it moves next to nothing (under 0.05 kg)", moved < 0.05, String.format("%.3f kg", moved));
-                ctx.check("pump: Jade calls steam at its inlet cavitating, not priming", !sawSteamBound || steamJade.contains("CAVITATING") && !steamJade.contains("priming"),
+                ctx.check("pump: boiling feed doesn't vapour-lock it: it keeps moving it (over 0.05 kg reach B)", moved > 0.05, String.format("%.3f kg", moved));
+                ctx.check("pump: steam at its inlet is not cavitation (no rattle)", !sawSteamCavitating, "");
+                ctx.check("pump: Jade says it is moving the steam at its inlet, not cavitating", !sawSteamBound || steamJade.contains("moving steam") && !steamJade.contains("CAVITATING"),
                     sawSteamBound + ": " + steamJade);
             }
         }

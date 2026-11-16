@@ -182,6 +182,13 @@ public final class Network {
          */
         public boolean gas;
         /**
+         * PUMP that keeps its shut-off head h0 whatever density it draws (the inline pump; Baughn 2026-11-15: "as implausible
+         * as it may be, I think it ought to work equally well on gas and liquid"). Its flow still scales with the density
+         * drawn under PUMP_PRIME_RHO, as a liquid pump's (a volume, roughly: on gas it moves about its rated volume a
+         * second), so a pump on a vessel's vapour slows as it thins it rather than pulling a hard vacuum at once.
+         */
+        public boolean anyPhase;
+        /**
          * TURBINE: a steam turbine from a (its inlet, drawn at its port) to b (its exhaust). Its nozzle passes q = nozzle
          * open sqrt(rho / p_a (p_a + p_b) S softplus((p_a - p_b) / S)) (the ellipse law, rho the inlet gas's density held for
          * the step), and takes eta x drop (J/kg, the isentropic drop to b's pressure, set by the game each step) for each kg
@@ -438,7 +445,7 @@ public final class Network {
         if (e.qMax <= 0 || e.h0 <= 0 || e.speed <= 0) return new double[4];
         // (a centrifugal pump moves a volume and makes a head in metres: drawing gas, its flow and shut-off pressure fall
         // with the density, so it loses its prime instead of pumping a vessel's vapour out to a hard vacuum)
-        double f = prime(e), h0 = e.gas ? e.h0 : e.h0 * f, qMax = e.gas ? e.qMax * drawRho(e) : e.qMax * f;
+        double f = prime(e), h0 = e.gas || e.anyPhase ? e.h0 : e.h0 * f, qMax = e.gas ? e.qMax * drawRho(e) : e.qMax * f;
         if (!(h0 > 0)) return new double[4];
         double arg = pumpDrive(e, dp), w = PUMP_W, u = (1 + arg / h0) / w;
         double sp = w * spc(u);
@@ -801,6 +808,7 @@ public final class Network {
             x[k++] = e.open;
             x[k++] = e.drop;
             x[k++] = e.gasOnly ? 1 : 0;
+            x[k++] = e.anyPhase ? 1 : 0;
         }
         return x;
     }
@@ -826,7 +834,7 @@ public final class Network {
 
     private static final String[] NODE_INPUTS = {"U", "heat", "wallUA", "wallT"};
     private static final String[] EDGE_INPUTS = {"g", "gBack", "boost", "conductance", "exchange", "kind", "setPa", "relief", "band", "qMax",
-        "h0", "speed", "eta", "gas", "nozzle", "open", "drop", "gasOnly"};
+        "h0", "speed", "eta", "gas", "nozzle", "open", "drop", "gasOnly", "anyPhase"};
 
     /** wokenBy in words: "node 2 heat", "edge 0 speed", "node 1 m[3]", "size", or "nothing". */
     public String wokenByName() {
