@@ -133,6 +133,11 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
     }
 
     @Override
+    public java.util.List<Flow> fluidFlows() {
+        return flue.flows();
+    }
+
+    @Override
     public void beforeFluidStep(double dt) {
         if (flue.step(isBurnt() ? 0 : furnaceProcess.getP(), dt, mods.eln.sim.Ambient.kelvin(node.coordonate))) needPublish();   // (burnt: its fire is out)
         smoking = flue.smoking;

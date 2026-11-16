@@ -235,6 +235,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             mods.eln.fluid.PortBridge.endSpot(front, front, 4, 8)), flue.port(pos))
     }
 
+    override fun fluidFlows(): List<mods.eln.sim.fluid.FluidDevice.Flow> = if (vessel == null) listOf() else flue.flows()
+
     override fun fluidVents(): List<mods.eln.sim.fluid.FluidDevice.Vent> {
         val out = breather ?: return listOf()
         val inn = airIn ?: return listOf()
