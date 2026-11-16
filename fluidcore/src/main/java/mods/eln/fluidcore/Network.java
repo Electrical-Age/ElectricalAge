@@ -1404,7 +1404,7 @@ public final class Network {
     }
 
     /**
-     * Throughput-aware rows in the stop tests (true; false: today's row scales alone, for tests). A node's rows are
+     * Throughput-aware rows in the stop tests (true; false: today's row scales alone, for tests). A gas node's rows are
      * judged against max(its contents, dt times the mass passing through it) instead of its contents alone (its energy
      * row times 1e5 J/kg, as before): an exchanger's hot-gas slice holds 0.06 g of air with 19 g/s through it, so its
      * rows were held to a millionth of what it holds while a step passed 30-50 times that, and the solves stalled just
@@ -1412,15 +1412,13 @@ public final class Network {
      * 0.8 with these rows). Only when to stop changes: the iterates, and finish's exact books, don't.
      */
     public static boolean THROUGHPUT = true;
-    /** Tests: the throughput also loosens the mass rows (true), or the energy rows alone. */
-    static boolean MASS_ROWS = true;
 
     /**
      * The stop tests' row scales: the row scales s, each node's rows by max(its mass, dt q) instead of its mass, q the
      * mass through the node at the solve's start (the lesser of its gross inflow and gross outflow over its edges, so a
      * node being filled or emptied keeps today's strictness), frozen for the solve (recomputed, a line search could
-     * pass by raising the flow). The masses are loosened only in a node holding no liquid. A node that passes less
-     * than it holds in a step keeps s exactly.
+     * pass by raising the flow). Only a node holding no liquid is loosened; one that holds liquid, or passes less
+     * than it holds in a step, keeps s exactly.
      */
     private double[] stopScales(List<Node> free, java.util.Map<Node, Integer> idx, double[] y0, double dt, double[] s) {
         if (!THROUGHPUT) return s;
@@ -1445,11 +1443,11 @@ public final class Network {
         double[] t = null;
         for (int i = 0; i < free.size(); i++) {
             double m = Math.max(1e-6 * free.get(i).V, massOf(y0, C * i, S)), q = dt * Math.min(in[i], out[i]);
-            if (q > m) {
+            // (only a node holding no liquid: in a liquid-full node a mass or energy residual is a pressure, and water at
+            // 350 K through a 10 mL node at 25 g a step ended 16 Pa off a tight solve's pressure, against today's 6)
+            if (q > m && free.get(i).fluid.level() == 0) {
                 if (t == null) t = s.clone();
-                // (masses only where the node holds no liquid: in a liquid-full node a mass residual is a pressure, and
-                // water through a 10 mL node at 25 g a step ended 11 Pa off a tight solve's pressure)
-                if (MASS_ROWS && free.get(i).fluid.level() == 0) for (int k = 0; k < S; k++) t[C * i + k] = 1 / q;
+                for (int k = 0; k < S; k++) t[C * i + k] = 1 / q;
                 t[C * i + S] = 1 / (q * 1e5);
             }
         }

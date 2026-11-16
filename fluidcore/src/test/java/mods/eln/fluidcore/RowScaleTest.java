@@ -34,7 +34,13 @@ class RowScaleTest {
         boolean keep = Network.THROUGHPUT;
         int keepIters = Network.MAX_ITERS;
         Network.THROUGHPUT = throughput;
+        double keepStall = Network.STALL_OK, keepCrawl = Network.CRAWL_OK;
         Network.MAX_ITERS = maxIters;
+        if (maxIters > keepIters) {
+            // (a tight solve: more iterations, and the precision-floor acceptances 100 times stricter)
+            Network.STALL_OK = keepStall / 100;
+            Network.CRAWL_OK = keepCrawl / 100;
+        }
         try {
             Network net = new Network();
             int n = 4;
@@ -75,6 +81,8 @@ class RowScaleTest {
         } finally {
             Network.THROUGHPUT = keep;
             Network.MAX_ITERS = keepIters;
+            Network.STALL_OK = keepStall;
+            Network.CRAWL_OK = keepCrawl;
         }
     }
 
@@ -135,15 +143,21 @@ class RowScaleTest {
         System.out.printf("quiet: %d iterations in %d steps either way%n", on.stats.iterations, on.stats.steps);
     }
 
-    /** Water through a liquid-full 10 mL node at 0.5 kg/s (25 g a step): its pressure turns a mass residual into bar. */
+    /** Water at 350 K through a liquid-full 10 mL node at 300 K, 0.5 kg/s (25 g a step): its pressure turns a mass residual into bar. */
     static Network liquid(boolean throughput, int steps, int maxIters) {
         boolean keep = Network.THROUGHPUT;
         int keepIters = Network.MAX_ITERS;
         Network.THROUGHPUT = throughput;
+        double keepStall = Network.STALL_OK, keepCrawl = Network.CRAWL_OK;
         Network.MAX_ITERS = maxIters;
+        if (maxIters > keepIters) {
+            // (a tight solve: more iterations, and the precision-floor acceptances 100 times stricter)
+            Network.STALL_OK = keepStall / 100;
+            Network.CRAWL_OK = keepCrawl / 100;
+        }
         try {
             Network net = new Network();
-            var hi = net.add(new Network.Node(1, 0, 1, true).fill(500, 3e5 * 0.5 / (287.05 * 300), 300));
+            var hi = net.add(new Network.Node(1, 0, 1, true).fill(500, 3e5 * 0.5 / (287.05 * 350), 350));
             var lo = net.add(new Network.Node(1, 0, 1, true).fill(500, 1e5 * 0.5 / (287.05 * 300), 300));
             var x = net.add(new Network.Node(1e-5, 0, 1, false).fill(9.9e-3, 1e-9, 300));
             net.connect(hi, 0, x, 0.5, 5e-6);
@@ -153,6 +167,8 @@ class RowScaleTest {
         } finally {
             Network.THROUGHPUT = keep;
             Network.MAX_ITERS = keepIters;
+            Network.STALL_OK = keepStall;
+            Network.CRAWL_OK = keepCrawl;
         }
     }
 
@@ -166,9 +182,12 @@ class RowScaleTest {
                 n.stats.stalls, n.stats.crawls, x.P() / 1e5, (x.m[0] + x.m[1]) * 1e3, x.T(), n.edges.get(0).flow);
         }
         Network.Node a = on.nodes.get(2), b = tight.nodes.get(2);
-        assertEquals(b.P(), a.P(), 1, "pressure (Pa)");
+        // (a liquid-full node isn't loosened: the same solve as today's, which ends 6 Pa off the tight one)
+        assertEquals(off.nodes.get(2).P(), a.P(), 0, "pressure as today's");
+        assertEquals(b.P(), a.P(), 10, "pressure (Pa)");
         assertEquals(b.T(), a.T(), 1e-4, "temperature");
-        assertEquals(tight.edges.get(0).flow, on.edges.get(0).flow, 1e-6 * tight.edges.get(0).flow, "flow");
+        assertEquals(off.edges.get(0).flow, on.edges.get(0).flow, 0, "flow as today's");
+        assertEquals(tight.edges.get(0).flow, on.edges.get(0).flow, 1e-4 * tight.edges.get(0).flow, "flow");
         assertTrue(on.stats.iterations <= off.stats.iterations, "iterations " + on.stats.iterations + " vs today " + off.stats.iterations);
     }
 }
