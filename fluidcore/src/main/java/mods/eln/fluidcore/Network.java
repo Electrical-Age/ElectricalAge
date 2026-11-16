@@ -754,6 +754,8 @@ public final class Network {
         public long cut, stuck;
         /** Solves accepted out of iterations while crawling at the precision floor (under STALL_OK; Network.solve). */
         public long crawls;
+        /** Solves given up early as crawling far from the answer (BAIL_ITS), and so sub-stepped. */
+        public long bails;
         /** The last failed solve's residual norms by iteration (tests). */
         public final List<Double> lastFail = new ArrayList<>();
         /** The last failed solve's scaled residual by row (tests). */
@@ -768,6 +770,8 @@ public final class Network {
      * in 100 random networks x 3000 steps, with or without conduction, and the deeper halvings cost nothing elsewhere.
      */
     public static int MAX_ITERS = 25, MAX_DEPTH = 8;
+    /** The current step's dt (the sub-steps' parent). */
+    private double stepDt;
 
     /** One step of dt seconds. */
     public void step(double dt) {
@@ -801,6 +805,7 @@ public final class Network {
         }
         progressed = false;
         stepSubsteps = 0;
+        stepDt = dt;
         if (solve(free, y0, dt)) done = dt;
         else {
             // (no convergence: two half steps, each from where the last ended)
@@ -954,7 +959,8 @@ public final class Network {
      * Backward Euler has a root past the transient for steps up to ~1e-2 s, so once through, the steps grow back.
      */
     private void adaptive(List<Node> free, double dt) {
-        double t = 0, h = dt / 2, hMin = dt / Math.pow(2, MAX_DEPTH + ADAPTIVE_EXTRA);
+        double t = 0, h = dt / 2, hMin = dt / Math.pow(2, MAX_DEPTH + ADAPTIVE_EXTRA), hBad = Double.POSITIVE_INFINITY;
+        int run = 0;
         while (t < dt * (1 - 1e-12)) {
             stats.substeps++;
             if (++stepSubsteps > MAX_SUBSTEPS) {
@@ -967,9 +973,17 @@ public final class Network {
                 progressed = true;
                 done += h;
                 t += h;
-                h *= 2;
+                // (back up to a size that failed in this step only after GROW_AFTER successes in a row: at once, a
+                // network whose solve fails at h and converges at h / 2 failed every other sub-step)
+                if (2 * h < hBad || ++run >= GROW_AFTER) {
+                    h *= 2;
+                    run = 0;
+                    if (h >= hBad) hBad = Double.POSITIVE_INFINITY;
+                }
             } else {
                 restore(free, y);
+                hBad = h;
+                run = 0;
                 h /= 2;
                 if (h < hMin) {
                     stats.failures++;
@@ -984,6 +998,8 @@ public final class Network {
     /** Adaptive sub-steps in the game (CUT_SHORT), and how many halvings below MAX_DEPTH they may go. */
     public static boolean ADAPTIVE = true;
     public static int ADAPTIVE_EXTRA = 12;
+    /** Adaptive sub-steps: successes in a row before the size grows back to one that failed this step (1: at once). */
+    public static int GROW_AFTER = 2;
 
     private boolean substep(List<Node> free, double dt, int depth) {
         stats.substeps++;
@@ -1482,6 +1498,10 @@ public final class Network {
      * solves end at 1e-10 to 1e-7 (a few thousand in 28 steam tests); the few over 1e-7 sub-step as other failures do.
      */
     public static double CRAWL_OK = 1e-7;
+    /** Newton gives up after this many iterations in a row of line-search steps at BAIL_ALPHA or less that took under a
+     *  tenth off the residual (0: never; it then runs to MAX_ITERS). */
+    public static int BAIL_ITS = 4;
+    public static double BAIL_ALPHA = 1.0 / 32;
     /** The pressure chop: an iteration moves no node's pressure by more than CHOP times itself or a bar (0: off). */
     public static double CHOP = 1;
     /** Fraction-to-the-boundary floor (share of the node's contents): components under it are damped on their own. */
@@ -1649,7 +1669,10 @@ public final class Network {
         stats.norms.clear();
         stats.norms.add(ns);
         if (TRACE != null) TRACE.append(String.format("solve dt %.4g: %.2e@%d", dt, ns, worstRow(r, t)));
+        int slow = 0;
+        double nrSlow = 0;
         for (int it = 0; it < MAX_ITERS; it++) {
+            double nrIt = nr;
             if (ns < TOL) { if (TRACE != null) TRACE.append(" OK\n"); return true; }
             stats.iterations++;
             Sparse J = jacobian(free, idx, dt);
@@ -1784,6 +1807,23 @@ public final class Network {
             if (accepted && crawling) {
                 stats.crawls++;
                 return true;
+            }
+            // (crawling far from the answer: BAIL_ITS iterations in a row whose line search had to cut the step to
+            // BAIL_ALPHA or less, together taking under a tenth off the residual. The Newton direction is then far longer
+            // than the residual's curvature allows: a feed check valve opening in Baughn's workshop network started a
+            // circulation through its exchanger's stiff joints and gas pockets, and its steps crawled at 1/128 of the
+            // Newton step to MAX_ITERS, then failed and sub-stepped, 25 iterations each time, to 600 iterations a step.
+            // Given up early, the step is halved at once; a half step's Newton steps are shorter. Only on steps of at
+            // least 1/16 of the tick, so a step already cut far down still crawls to its end)
+            if (accepted && BAIL_ITS > 0 && dt >= stepDt / 16) {
+                if (alpha <= BAIL_ALPHA) {
+                    if (slow++ == 0) nrSlow = nrIt;
+                } else slow = 0;
+                if (slow >= BAIL_ITS && nr > 0.9 * nrSlow && ns >= CRAWL_OK) {
+                    stats.bails++;
+                    if (TRACE != null) TRACE.append(" BAIL\n");
+                    return false;
+                }
             }
             if (!accepted) {
                 set(free, y);
