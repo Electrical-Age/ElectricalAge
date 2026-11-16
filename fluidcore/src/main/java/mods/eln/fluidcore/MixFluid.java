@@ -155,6 +155,7 @@ final class MixFluid implements NodeFluid {
     }
 
     Eval eval(double Tv, double vgv, double[] mv) {
+        EVALS++;
         Eval e = new Eval();
         int n = NG;
         D T = D.in(Tv, 0, n), Vg = D.in(vgv, 1, n);
@@ -510,8 +511,15 @@ final class MixFluid implements NodeFluid {
     /** Solve for (T, Vg): Newton from the last state with the exact Jacobian, else a bracket on T. */
     private void solve() {
         pinned = false;
+        double vg0 = vg, T0 = T;
         if (vg > 0 && newton()) return;
         BRACKETS++;
+        if (BRACKET_LOG != null && BRACKET_LOG.length() < 40000) BRACKET_LOG.append(String.format("bracket V %.3g m %s U %.6g from T %.3f vg %.3g%n", V, java.util.Arrays.toString(m), U, T0, vg0));
+        long e0 = EVALS;
+        try { bracket(); } finally { BRACKET_EVALS += EVALS - e0; }
+    }
+
+    private void bracket() {
         double lo = WaterAir.T_MIN, hi = WaterAir.T_MAX;
         double t0 = Math.max(lo, Math.min(hi, T)), w = 1;
         double a = Math.max(lo, t0 - w), b = Math.min(hi, t0 + w);
@@ -584,7 +592,8 @@ final class MixFluid implements NodeFluid {
         return 1e-13 * Math.max(1e-6, Math.max(Math.abs(U), 1e5 * mt)) + FLASH_ABS;
     }
     /** Probe counters: flashes that fell back to the bracketed solve, and polish iterations. */
-    public static long BRACKETS, POLISH_ITS, SAME;
+    public static long BRACKETS, POLISH_ITS, SAME, EVALS, BRACKET_EVALS;
+    public static StringBuilder BRACKET_LOG;
     /** An update to the contents it already holds keeps its state (true; false: solved again, probe knob). */
     public static boolean SKIP_SAME = true;
 
@@ -606,6 +615,7 @@ final class MixFluid implements NodeFluid {
             if (!(Math.abs(det) > 0) || !Double.isFinite(det)) return false;
             double dT = -(j22 * r0 - j12 * r1) / det, dx = -(-j21 * r0 + j11 * r1) / det;
             double kk = Math.min(1, Math.min(30 / Math.max(1e-30, Math.abs(dT)), 1 / Math.max(1e-30, Math.abs(dx))));
+            if (BRACKET_LOG != null && BRACKET_LOG.length() < 40000) BRACKET_LOG.append(String.format("  it %d r0 %.3g r1 %.3g dT %.3g dx %.3g kk %.3g x %.3f%n", it, r0, r1, dT, dx, kk, x));
             t += kk * dT;
             x += kk * dx;
             if (!(t > WaterAir.T_MIN && t < WaterAir.T_MAX) || x > Math.log(V) + 1e-9 || !Double.isFinite(x)) return false;

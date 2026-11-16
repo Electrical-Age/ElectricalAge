@@ -74,6 +74,7 @@ class StuckProbe {
             Network w = NetworkDump.read(text, new double[1]);
             for (int i = 0; i < Integer.parseInt(warm); i++) w.step(dt[0]);
         }
+        if (System.getenv("STUCK_BRACKETS") != null) MixFluid.BRACKET_LOG = new StringBuilder();
         double halfMs = 0;
         long tAll = System.nanoTime();
         for (int s = 0; s < steps; s++) {
@@ -99,7 +100,7 @@ class StuckProbe {
             if (jr != null && s % 10 == 5) { int[] rows = java.util.Arrays.stream(jr.split(",")).mapToInt(Integer::parseInt).toArray(); System.out.print("JROWS step " + s + "\n" + net.rowJacobianErrors(dt[0], rows)); }
             String fr = System.getenv("STUCK_FLUX");
             if (fr != null) for (String w : fr.split(",")) { Network.Node n = net.nodes.get(Integer.parseInt(w)); System.out.printf("flux %d node %s P %.6f T %.3f lvl %.5f:%s%n", s, w, n.P() / 1e5, n.T() - 273.15, n.level(), net.fluxReport(n)); }
-            long u0 = Network.UPDATES, r0 = Network.RESIDUALS, j0 = Network.JACOBIANS, b0 = MixFluid.BRACKETS, p0 = MixFluid.POLISH_ITS, sm0 = MixFluid.SAME;
+            long u0 = Network.UPDATES, r0 = Network.RESIDUALS, j0 = Network.JACOBIANS, b0 = MixFluid.BRACKETS, p0 = MixFluid.POLISH_ITS, sm0 = MixFluid.SAME, ev0 = MixFluid.EVALS, be0 = MixFluid.BRACKET_EVALS;
             long t0 = java.lang.management.ManagementFactory.getThreadMXBean().getCurrentThreadCpuTime();
             String vent = System.getenv("STUCK_VENT");
             if (vent != null) {
@@ -135,7 +136,7 @@ class StuckProbe {
             int at = net.restlessAt;
             String who = at < 0 ? "" : String.format("free node %d comp %d", at / C, at % C);
             Network.Node rn = at < 0 ? null : free.get(at / C);
-            System.out.printf("counts updates %d residuals %d jacobians %d brackets %d polish %d same %d%n", Network.UPDATES - u0, Network.RESIDUALS - r0, Network.JACOBIANS - j0, MixFluid.BRACKETS - b0, MixFluid.POLISH_ITS - p0, MixFluid.SAME - sm0);
+            System.out.printf("counts updates %d residuals %d jacobians %d brackets %d polish %d same %d evals %d bracket-evals %d%n", Network.UPDATES - u0, Network.RESIDUALS - r0, Network.JACOBIANS - j0, MixFluid.BRACKETS - b0, MixFluid.POLISH_ITS - p0, MixFluid.SAME - sm0, MixFluid.EVALS - ev0, MixFluid.BRACKET_EVALS - be0);
             System.out.printf("fallbacks %d rebuilds %d", Sparse.FALLBACKS - fb0, Sparse.REBUILDS - rb0);
             System.out.printf("step %d: %.2f ms it %d solves %d sub %d fail %d done %.4f restless %.3g at %d (%s)%s%n", s, ms, net.stats.iterations - it0,
                 net.stats.solves - so0, net.stats.substeps - ss0, net.stats.failures - f0, net.done, net.restless, at, who,
@@ -151,6 +152,7 @@ class StuckProbe {
                 System.out.println(b);
             }
         }
+        if (MixFluid.BRACKET_LOG != null) System.out.print(MixFluid.BRACKET_LOG);
         System.out.printf("total %.1f ms for %d steps; last half %.2f ms/step%n", (System.nanoTime() - tAll) / 1e6, steps, halfMs / (steps - steps / 2));
         for (int i = 0; i < net.nodes.size(); i++) {
             Network.Node n = net.nodes.get(i);
