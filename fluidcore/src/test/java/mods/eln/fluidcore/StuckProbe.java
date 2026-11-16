@@ -36,6 +36,18 @@ class StuckProbe {
         for (int s = 0; s < steps; s++) {
             long fb0 = Sparse.FALLBACKS, rb0 = Sparse.REBUILDS; long it0 = net.stats.iterations, so0 = net.stats.solves, ss0 = net.stats.substeps, f0 = net.stats.failures;
             long t0 = System.nanoTime();
+            String vent = System.getenv("STUCK_VENT");
+            if (vent != null) {
+                // (the flare stack between steps: the gas over the air's pressure leaves by its tip, FlareStackElement.burn;
+                // taken out at the node's own specific energy, a slight overestimate of what it keeps)
+                Network.Node v = net.nodes.get(Integer.parseInt(vent));
+                double f = 1 - 101325 / v.P();
+                if (f > 0) {
+                    for (int j = 0; j < v.m.length; j++) v.m[j] *= 1 - f;
+                    v.U *= 1 - f;
+                    v.update();
+                }
+            }
             String dbg = System.getenv("STUCK_DEBUG");
             if (dbg != null && Integer.parseInt(dbg) == s) Network.DEBUG = new StringBuilder();
             net.step(dt[0]);
