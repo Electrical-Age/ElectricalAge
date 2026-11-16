@@ -999,7 +999,7 @@ public final class Network {
     public static boolean ADAPTIVE = true;
     public static int ADAPTIVE_EXTRA = 12;
     /** Adaptive sub-steps: successes in a row before the size grows back to one that failed this step (1: at once). */
-    public static int GROW_AFTER = 2;
+    public static int GROW_AFTER = 4;
 
     private boolean substep(List<Node> free, double dt, int depth) {
         stats.substeps++;
