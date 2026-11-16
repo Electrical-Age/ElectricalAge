@@ -12,13 +12,20 @@ import java.util.List;
  * to the colder through UA (W/K), by effectiveness-NTU for counterflow when both flow (as a shell and a stagnant stream
  * when one doesn't). Either side may condense or boil. Blocks stack into one exchanger (HeatExchangerGroup): 2 x 2 across,
  * up to 8 long, SLICE_UA per 2 x 2 slice (Baughn 2026-10-29: 50 W/K, 400 at the most); a lone block or any other shape
- * is a quarter slice per block. Ports on its two end faces: A at their centres, B up high (its top row gives a steam
+ * is a quarter slice per block. Each side holds 1 B a block (SIDE_VOLUME). Ports on its two end faces: A at their centres, B up high (its top row gives a steam
  * raiser's steam). An economizer (gas exhaust to feedwater), a reheater between the HP and LP turbines, a steam raiser
  * for a combined cycle; separate jobs are separate exchangers piped in series. Model: mods.eln.cad.models.HeatExchanger.
  */
 public class HeatExchangerDescriptor extends TransparentNodeDescriptor {
     /** A 2 x 2 slice's UA (W/K; Baughn 2026-10-29). */
     public static final double SLICE_UA = 50;
+    /**
+     * Each side's volume in a block (m^3): 1 B of water (Baughn 2026-11-15: "1B a side seems sensible"; it was 8 L, 114 B,
+     * 14 x a boiler, and an economizer soaked up minutes of feed). UA is the tubes' area, not their volume: it stays.
+     */
+    public static final double SIDE_VOLUME = 1000 * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / mods.eln.sim.fluid.Water.RHO_L;
+    /** What a side held a block before (m^3; saves without a volume key): HeatExchangerElement spills the excess. */
+    public static final double OLD_SIDE_VOLUME = 0.008;
     /** A block's UA (W/K) and each side's volume in it (m^3). */
     public final double ua, sideVolume;
     final Obj3D obj;
@@ -43,6 +50,7 @@ public class HeatExchangerDescriptor extends TransparentNodeDescriptor {
         list.add("Stack 2 x 2 across and up to 8 long into one exchanger; a lone block is a quarter slice.");
         list.add("Ports on its two ends: stream A at their centres, B up high. For counterflow,");
         list.add("A in at the back end and out at the front; B in at the front and out at the back.");
-        list.add("Either side may condense steam or boil water: an economizer, a reheater, a steam raiser.");
+        list.add(String.format("Each side holds %.0f B a block: a pass-through, not a tank or a drum.", sideVolume * mods.eln.sim.fluid.Water.RHO_L / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / 1000));
+        list.add("Both streams must flow. Either may condense steam or boil water: an economizer, a feed heater, a reheater.");
     }
 }

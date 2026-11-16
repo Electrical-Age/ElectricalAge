@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * HeatExchangerDescriptor: two sides, each a chain of SLICES slices along the exchanger's length, the slices at each
- * position coupled by a heat conductance (UA / SLICES) inside the fluid core's step (notes 23-hx.md; Baughn 2026-11-10:
+ * HeatExchangerDescriptor: two sides, each a chain of slices along the exchanger's length (SLICES, 2 in a lone block:
+ * slices()), the slices at each position coupled by a heat conductance (UA / slices) inside the fluid core's step (notes 23-hx.md; Baughn 2026-11-10:
  * devices are components of the implicit step). Counterflow, parallel flow or a pool boiling off follow from how the
  * streams really run; 8 slices come within 4 % of ideal counterflow at NTU 2.5 (HeatChainTest). Blocks stack into one
  * exchanger (HeatExchangerGroup): `ownA`/`ownB` are this block's shares (what it saves), `a`/`b` the sides in use (its
@@ -71,6 +71,16 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
 
     /** Slices a side. */
     public static final int SLICES = 8;
+    /**
+     * The least a slice holds (m^3: an iron pipe block's). At 1 B a side a lone block's eight slices were 8.8 mL; liquid
+     * full, their dP/dm (2.4e14 Pa/kg) put the fluid core's Newton at its precision floor and it crawled at 257 sub-steps.
+     */
+    static final double MIN_SLICE = 3e-5;
+
+    /** How many slices a side of volume v (m^3) is cut into: SLICES, fewer for a small exchanger (a lone block: 2). */
+    static int slices(double v) {
+        return Math.max(2, Math.min(SLICES, (int) Math.floor(v / MIN_SLICE)));
+    }
     /** The slices (the head's: a lone block or a stack's corner), the sides they were cut from, and their links. */
     FluidNode[] sliceA, sliceB;
     private FluidNode slicedA, slicedB;
@@ -85,9 +95,10 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         slicedB = b;
         // (a joint's conductance: a large pipe's end, so a gas stream drops ~100 Pa a joint; wider, the drop fell under the
         // pipe streams' 10 Pa band and their return stream mixed the slices back towards one: 81 % against 88 %)
-        double k = mods.eln.node.voxel.PipePart.LARGE_END_K;
+        double k = endK();
         List<FluidDevice.Link> out = new java.util.ArrayList<>();
-        for (int i = 0; i + 1 < SLICES; i++)
+        int n = sliceA.length;
+        for (int i = 0; i + 1 < n; i++)
             for (FluidNode[] side : new FluidNode[][]{sliceA, sliceB}) {
                 // (floor to floor and ceiling to ceiling: liquid runs along under the gas, none trapped at mid-height)
                 for (double at : new double[]{0, 1}) {
@@ -98,19 +109,35 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
                     out.add(j);
                 }
             }
-        for (int i = 0; i < SLICES; i++) {
+        for (int i = 0; i < n; i++) {
             FluidDevice.Link c = new FluidDevice.Link(sliceA[i], 0.5, sliceB[i], 0.5, 0);
-            c.conductance = ua() / SLICES;
+            c.conductance = ua() / n;
             out.add(c);
         }
         links = out;
     }
 
+    /** A slice's volume when its joints and ports were made a large pipe's end (m^3: a lone block's at 8 L a side). */
+    static final double K_VOLUME = 1e-3;
+
+    /**
+     * Its joints' and ports' conductance (m^3): a large pipe's end, times its slices' volume over K_VOLUME (at most 1).
+     * At 1 B a side a lone block's slice is 8.8 mL; with a large pipe's end on it the fluid core crawled at 257 sub-steps
+     * a step on nine empty blocks at rest (conductance x dt over contents 114 x what it had). Scaled, a stream drops more
+     * across it: a quarter slice is for small streams, a 2 x 2 stack for the gas ones.
+     */
+    double endK() {
+        HeatExchangerElement h = head();
+        double v = h.a == null ? desc.sideVolume : h.a.volume, slice = v / slices(v);
+        return mods.eln.node.voxel.PipePart.LARGE_END_K * Math.min(1, slice / K_VOLUME);
+    }
+
     private static FluidNode[] split(FluidNode whole) {
-        FluidNode[] out = new FluidNode[SLICES];
-        for (int i = 0; i < SLICES; i++) {
-            FluidNode n = new FluidNode(whole.volume / SLICES, whole.z, whole.height, false);
-            n.setShareOf(whole, 1.0 / SLICES);
+        int count = slices(whole.volume);
+        FluidNode[] out = new FluidNode[count];
+        for (int i = 0; i < count; i++) {
+            FluidNode n = new FluidNode(whole.volume / count, whole.z, whole.height, false);
+            n.setShareOf(whole, 1.0 / count);
             n.update();
             out[i] = n;
         }
@@ -156,8 +183,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
 
     /**
      * Set a side's temperatures along its length, its masses kept: tHot at the end facing hotEnd, tCold at the other,
-     * linear between (a running exchanger's profile, for tests that start it running: one temperature through 64 L of
-     * water takes hours of flow to wash out).
+     * linear between (a running exchanger's profile, for tests that start it running).
      */
     public void profile(boolean sideA, Direction hotEnd, double tHot, double tCold) {
         HeatExchangerElement h = head();
@@ -165,8 +191,8 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         h.gather();
         FluidNode[] side = sideA ? h.sliceA : h.sliceB;
         boolean hotAtFront = hotEnd == front;
-        for (int i = 0; i < SLICES; i++) {
-            double x = (double) i / (SLICES - 1), t = hotAtFront ? tCold + (tHot - tCold) * x : tHot + (tCold - tHot) * x;
+        for (int i = 0; i < side.length; i++) {
+            double x = (double) i / (side.length - 1), t = hotAtFront ? tCold + (tHot - tCold) * x : tHot + (tCold - tHot) * x;
             side[i].energy = side[i].energyAt(t);
             side[i].update();
         }
@@ -182,7 +208,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         java.util.Set<FluidNode> own = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
         own.addAll(java.util.Arrays.asList(h.sliceA));
         own.addAll(java.util.Arrays.asList(h.sliceB));
-        for (FluidNode n : new FluidNode[]{h.sliceA[0], h.sliceA[SLICES - 1], h.sliceB[0], h.sliceB[SLICES - 1]})
+        for (FluidNode n : new FluidNode[]{h.sliceA[0], h.sliceA[h.sliceA.length - 1], h.sliceB[0], h.sliceB[h.sliceB.length - 1]})
             for (var e : FluidWorld.edgesOf(n)) if (!own.contains(e.a) || !own.contains(e.b)) return true;
         return false;
     }
@@ -293,7 +319,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
      */
     void makePorts() {
         long at = node.coordonate.pos().asLong();
-        double k = mods.eln.node.voxel.PipePart.LARGE_END_K;
+        double k = endK();
         List<FluidPort> out = new java.util.ArrayList<>();
         HeatExchangerElement h = head();
         h.slice();
@@ -303,7 +329,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
                 HeatExchangerElement o = HeatExchangerGroup.neighbour(this, d, null);
                 if (o != null && group.members.contains(o)) continue;   // (not an end)
             }
-            int f = d.toEnumFacing().get3DDataValue(), end = d == front ? SLICES - 1 : 0;   // (the slices run back to front)
+            int f = d.toEnumFacing().get3DDataValue(), end = d == front ? h.sliceA.length - 1 : 0;   // (the slices run back to front)
             out.add(new FluidPort(h.sliceA[end], at, f, (j * 16 + 8) / (16.0 * hh), k));
             out.add(new FluidPort(h.sliceB[end], at, f, (j * 16 + TankElement.HIGH) / (16.0 * hh), k, TankElement.sideSpot(f, TankElement.HIGH)));
         }
@@ -349,19 +375,41 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         }
     }
 
-    private FluidNode node(double[] saved) {
+    /**
+     * A side as saved. Saved for a bigger side (8 L before 2026-11-15, no volume key): kept at the state it had (pressure,
+     * temperature, mix) at the new size, the rest vented, counted in `vented` (kg: water, all) and shown. Vented, not
+     * spilled into the pipes: in a closed plant the old exchanger parked up to 113 B a block out of the loop, and a boiler
+     * holds 8 B and a hotwell floods; let out into the plant it would drown it.
+     */
+    private FluidNode node(double[] saved, double[] vented) {
         FluidNode n = new FluidNode(desc.sideVolume, node.coordonate.y, 1.0, false);
-        if (saved != null) {
+        if (saved != null && savedVolume > desc.sideVolume * (1 + 1e-9)) {
+            FluidNode old = new FluidNode(savedVolume, node.coordonate.y, 1.0, false);
+            mods.eln.fluid.FluidSaves.restore(old, saved);
+            old.update();
+            n.setShareOf(old, desc.sideVolume / savedVolume);
+            n.update();
+            vented[0] += old.mWater - n.mWater;
+            vented[1] += old.mass() - n.mass();
+            if (vented[1] > 1e-6) mods.eln.Eln.LOG.info("Electrical Age: heat exchanger at {} resized to {} L a side: vented {} kg ({} kg water) at {} bar, {} C",
+                node.coordonate, String.format("%.4f", desc.sideVolume * 1000), String.format("%.3f", old.mass() - n.mass()),
+                String.format("%.3f", old.mWater - n.mWater), String.format("%.2f", old.P() / 1e5), String.format("%.0f", old.T() - Water.T0));
+        } else if (saved != null) {
             mods.eln.fluid.FluidSaves.restore(n, saved);
             n.update();
         } else n.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         return n;
     }
 
+    /** The side volume its contents were saved for (m^3; its own if saved since the resize or new). */
+    private double savedVolume;
+    /** What the resize vented from this block's sides (kg): {water, all}, A then B; saved, for Jade. */
+    public final double[] ventedA = new double[2], ventedB = new double[2];
+
     @Override
     public void initialize() {
-        a = ownA = node(loadedA);
-        b = ownB = node(loadedB);
+        a = ownA = node(loadedA, ventedA);
+        b = ownB = node(loadedB, ventedB);
         makePorts();
         connect();
     }
@@ -425,6 +473,14 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
                 mods.eln.fluid.FluidSaves.putExtra(nbt, s[0] + "S", n);
                 nbt.putInt(s[0] + "Fv", mods.eln.fluid.FluidSaves.FORMAT);
             }
+            nbt.putDouble("sideV", ownA.volume);
+        }
+        for (Object[] s : new Object[][]{{"ventA", ventedA}, {"ventB", ventedB}}) {
+            double[] v = (double[]) s[1];
+            if (v[1] > 0) {
+                nbt.putDouble(s[0] + "W", v[0]);
+                nbt.putDouble(s[0] + "M", v[1]);
+            }
         }
     }
 
@@ -433,6 +489,12 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         super.readFromNBT(nbt);
         loadedA = CondenserVessel.get(nbt, "sideA");
         loadedB = CondenserVessel.get(nbt, "sideB");
+        // (no volume key: saved before the resize, 8 L a side)
+        savedVolume = nbt.getDoubleOr("sideV", HeatExchangerDescriptor.OLD_SIDE_VOLUME);
+        ventedA[0] = nbt.getDoubleOr("ventAW", 0);
+        ventedA[1] = nbt.getDoubleOr("ventAM", 0);
+        ventedB[0] = nbt.getDoubleOr("ventBW", 0);
+        ventedB[1] = nbt.getDoubleOr("ventBM", 0);
     }
 
     @Override
@@ -447,6 +509,13 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         info.put(I18N.tr("A holds"), mods.eln.sim.fluid.EaUnits.composition(a));
         info.put(I18N.tr("B holds"), mods.eln.sim.fluid.EaUnits.composition(b));
         info.put(I18N.tr("Heat A to B"), Utils.plotPower("", h.qShown));
+        double vw = 0, vm = 0;
+        for (HeatExchangerElement m : group == null ? List.of(this) : group.members) {
+            vw += m.ventedA[0] + m.ventedB[0];
+            vm += m.ventedA[1] + m.ventedB[1];
+        }
+        if (vm > 1e-6) info.put(I18N.tr("Resized"), String.format(I18N.tr("1 B a side a block now; it vented %s it held over that"),
+            vw > 0.01 * vm ? mods.eln.sim.fluid.EaUnits.volume(vw / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER) + " water" : String.format("%.1f g of gas", vm * 1000)));
         info.put(I18N.tr("Exchanger"), group == null ? String.format(I18N.tr("one block, a quarter slice: %.1f W/K"), ua())
             : String.format(I18N.tr("2 x 2 x %d blocks: %.0f W/K"), group.length(), ua()));
         return info;

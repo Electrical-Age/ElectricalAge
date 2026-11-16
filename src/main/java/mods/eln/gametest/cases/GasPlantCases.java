@@ -47,12 +47,14 @@ public final class GasPlantCases {
 
     static final int GAS_TURBINE = 11 + (4 << 6), HX = 56 + (82 << 6);
 
-    /** Fixed nodes behind ports on the faces of blocks (a lake, a drain, a steam main): {pos, face, node[, spot]} each. */
+    /** Fixed nodes behind ports on the faces of blocks (a lake, a drain, a steam main): {pos, face, node[, spot[, k]]} each
+     *  (k: the port's conductance, m^3, for a throttled one; else an iron pipe's end). */
     static FluidDevice fixtures(Object level, Object[]... ports) {
         List<FluidDevice.FluidPort> list = new ArrayList<>();
         for (Object[] p : ports)
             // (an iron pipe's end: a lake or a main through a modest pipe, not a firehose)
-            list.add(new FluidDevice.FluidPort((FluidNode) p[2], ((BlockPos) p[0]).asLong(), (Integer) p[1], 0.5, 2 * mods.eln.node.voxel.PipePart.K_PER_BLOCK[0] * 16,
+            list.add(new FluidDevice.FluidPort((FluidNode) p[2], ((BlockPos) p[0]).asLong(), (Integer) p[1], 0.5,
+                p.length > 4 ? (Double) p[4] : 2 * mods.eln.node.voxel.PipePart.K_PER_BLOCK[0] * 16,
                 p.length > 3 ? (Integer) p[3] : FluidDevice.FluidPort.CENTRE));
         var d = new FluidDevice() {
             public Object fluidLevel() {
@@ -439,6 +441,15 @@ public final class GasPlantCases {
                 new Object[]{ctx.at(2, 2, 6), 5, steam(ctx.at(2, 2, 6).getY(), 15e5), B_AT});   // (steam off its west end's top row)
             Eln.simulator.addSlowProcess(watch = dt -> {
                 l.tick();
+                // (makeup at its own temperature to half full: at 1 B a side a block it holds 8 B, under a minute of steaming)
+                var w = head(s).b;
+                double lack = 0.5 * w.volume * Water.RHO_L - w.mLiquid();
+                if (lack > 0) {
+                    double T = w.T();
+                    w.mWater += lack;
+                    w.energy = w.energyAt(T);
+                    w.update();
+                }
                 if (++tick == 500) {
                     j0 = head(s).totalJ;
                     x0 = l.gt.totalExhaustJ;
@@ -493,7 +504,7 @@ public final class GasPlantCases {
         public void build(TestContext ctx) {
             s = stack(ctx, ctx.at(1, 1, 1), 2);
             longOne = stack(ctx, ctx.at(0, 1, 5), 9);
-            wasStacked = stacked(s, 100) && Math.abs(s.get(0).b.volume - 8 * 0.008) < 1e-9;
+            wasStacked = stacked(s, 100) && Math.abs(s.get(0).b.volume - 8 * mods.eln.oil.HeatExchangerDescriptor.SIDE_VOLUME) < 1e-12;
             var b = head(s).b;
             PlumbingCases.fill(b, 0.5 * b.volume * Water.RHO_L, Water.P_ATM, 293.15);
             before = water(s);
@@ -517,7 +528,7 @@ public final class GasPlantCases {
 
         public void measure(TestContext ctx) {
             Eln.simulator.removeSlowProcess(watch);
-            ctx.check("stack: 2 x 2 x 2 blocks are one exchanger, 100 W/K, 64 L a side", wasStacked, "");
+            ctx.check("stack: 2 x 2 x 2 blocks are one exchanger, 100 W/K, 8 B a side", wasStacked, "");
             ctx.check("stack: one broken out leaves seven quarter slices of 12.5 W/K", split, "");
             ctx.check("stack: they keep 7/8 of the water", Math.abs(afterSplit - before * 7 / 8) < 0.02 * before, String.format("%.3f of %.3f kg", afterSplit, before));
             ctx.check("stack: put back, one exchanger again with all they had", stacked(s, 100) && Math.abs(water(s) - afterSplit) < 0.02 * before,
@@ -533,6 +544,9 @@ public final class GasPlantCases {
      * condensing in side A, the crossover's ~40 g/s of 2.4 bar steam through side B: it gets ~6 kW, the steam ~75 K hotter.
      */
     static final class Reheat extends PlumbingCases.Big {
+        /** The crossover's drop over the reheater and its fixtures (Pa): 900 at 8 L a side; at 1 B its joints and ports are
+         *  narrower (HeatExchangerElement.endK) and it takes ~1.5 kPa for the same ~40 g/s. */
+        static final double REHEAT_DROP = 1500;
         List<HeatExchangerElement> s;
         FluidDevice fx;
         IProcess watch;
@@ -553,7 +567,7 @@ public final class GasPlantCases {
             // (A: live steam into its west end; B: crossover steam in at its east end, out at its west end's top row to a
             // main a little lower)
             fx = fixtures(head(s).fluidLevel(), new Object[]{ctx.at(0, 1, 1), 5, steam(y, 20e5)},
-                new Object[]{ctx.at(5, 1, 2), 4, steam(y, 2.4e5), B_AT}, new Object[]{ctx.at(0, 2, 2), 5, steam(y, 2.4e5 - 900), B_AT});
+                new Object[]{ctx.at(5, 1, 2), 4, steam(y, 2.4e5), B_AT}, new Object[]{ctx.at(0, 2, 2), 5, steam(y, 2.4e5 - REHEAT_DROP), B_AT});
             Eln.simulator.addSlowProcess(watch = dt -> {
                 if (++tick == 300) j0 = head(s).totalJ;
                 if (tick > 300) {
@@ -589,6 +603,7 @@ public final class GasPlantCases {
         static final double FEED_OPEN = 0.008;
         GasLine l;
         List<HeatExchangerElement> raiser, econ;
+        mods.eln.node.voxel.ValvePart feedValve;
         ShaftSteamTurbineElement hp;
         Resistor hpLoad;
         FluidDevice fx;
@@ -616,7 +631,8 @@ public final class GasPlantCases {
             PipeCases.lay(ctx, ctx.at(5, 1, 6), 1, 0, 12, 8, 8, 12, 8, 16, 12, 8);
             var valveNode = PipeCases.node(ctx, ctx.at(5, 1, 6));
             valveNode.addValve(8, 12, 8, mods.eln.node.voxel.ValvePart.THROTTLE);
-            for (var part : valveNode.parts) if (part instanceof mods.eln.node.voxel.ValvePart v) v.setting = FEED_OPEN;
+            for (var part : valveNode.parts) if (part instanceof mods.eln.node.voxel.ValvePart v) feedValve = v;
+            feedValve.setting = FEED_OPEN;
             // steam: the raiser's west end, top row -> pipe west and south into a separator tank's high side port at (2,2,7)
             // -> its top -> up, south, down into an HP turbine at (2,1,8); its generator at z 9
             PipeCases.lay(ctx, ctx.at(2, 2, 6), 1, 16, 12, 8, 8, 12, 8, 8, 12, 16);
@@ -646,6 +662,11 @@ public final class GasPlantCases {
                 new Object[]{ctx.at(8, 1, 6), 4, feed = water(y, 16e5, 293.15), B_AT});
             Eln.simulator.addSlowProcess(watch = dt -> {
                 l.tick();
+                // (the player's level circuit: at 1 B a side a block the raiser holds 8 B, a few seconds of steaming,
+                // so the feed valve follows its level, half full, as a regulator on the valve would)
+                var w = head(raiser).b;
+                double level = w.mLiquid() / (Water.RHO_L * w.volume);
+                feedValve.setting = FEED_OPEN * Math.max(0, Math.min(3, 1 + 8 * (0.5 - level)));
                 if (++tick == 1000) {
                     f0 = l.gt.totalFuelJ;
                     g0 = l.gt.totalWork;
@@ -678,8 +699,10 @@ public final class GasPlantCases {
             ctx.check("combined cycle: heat is conserved (within 5 %)", Math.abs(qr + qe + left - ex) < 0.05 * ex,
                 String.format("%.1f + %.1f + %.1f vs %.1f kW", qr / 1000, qe / 1000, left / 1000, ex / 1000));
             ctx.check("combined cycle: the exchangers take most of the exhaust's heat (over 70 %)", qr + qe > 0.7 * ex, String.format("%.0f %%", (qr + qe) / ex * 100));
-            ctx.check("combined cycle: the exhaust raises steam that drives the HP (over 1.5 kW)", st > 1500, String.format("%.1f kW", st / 1000));
-            ctx.check("combined cycle: together they beat the gas turbine alone by over 20 %", gas + st > 1.2 * gas, "");
+            // (at 8 L a side the raiser's 32 kg drum flashed as its pressure fell, and the HP drew 6.6 g/s on 10.6 kW, 2.3 kW;
+            // at 1 B a side it holds 8 B, steam is what the heat makes, ~4.8 g/s, and the HP gives ~1.2 kW)
+            ctx.check("combined cycle: the exhaust raises steam that drives the HP (over 1 kW)", st > 1000, String.format("%.1f kW", st / 1000));
+            ctx.check("combined cycle: together they beat the gas turbine alone by over 12 %", gas + st > 1.12 * gas, "");
         }
     }
 }

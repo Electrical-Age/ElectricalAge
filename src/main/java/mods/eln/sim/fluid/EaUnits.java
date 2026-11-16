@@ -79,7 +79,7 @@ public final class EaUnits {
     }
 
     /** A liquid volume compactly (Baughn 2026-11-11: "18 g air, 14.6 B gasoline, 700 mB diesel"): buckets from 1000 mB. */
-    private static String volume(double mB) {
+    public static String volume(double mB) {
         if (mB < 1000) return compact(mB) + " mB";
         double b = mB / 1000;
         return String.format(b >= 100 ? "%.0f B" : "%.1f B", b);
