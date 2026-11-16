@@ -69,6 +69,22 @@ class StuckProbe {
             n.update();
         }
         String watch = System.getenv("STUCK_WATCH");   // node indices whose P and T are printed each step
+        String ec = System.getenv("STUCK_EVALCHECK");   // node: the flash's slopes in (T, ln vg) against differences
+        if (ec != null) {
+            Network.Node n = net.nodes.get(Integer.parseInt(ec));
+            MixFluid mf = (MixFluid) n.fluid;
+            double T = mf.T, vg = mf.vg;
+            var e = mf.eval(T, vg, mf.m);
+            System.out.printf("evalcheck node %s T %.6f vg %.4g P %.6g rv %.3g E-U %.3g%n", ec, T, vg, e.p.v, e.rv.v, e.E.v - mf.U);
+            for (double rel : new double[]{1e-4, 1e-6, 1e-8}) {
+                double hx = rel, hT = rel * T;
+                var xp = mf.eval(T, vg * Math.exp(hx), mf.m); var xm = mf.eval(T, vg * Math.exp(-hx), mf.m);
+                var tp = mf.eval(T + hT, vg, mf.m); var tm = mf.eval(T - hT, vg, mf.m);
+                System.out.printf("  h %.0e: drv/dx J %.6g FD %.6g | dE/dx J %.6g FD %.6g | drv/dT J %.6g FD %.6g | dE/dT J %.6g FD %.6g | dp/dx J %.6g FD %.6g%n", rel,
+                    e.rv.g[1] * vg, (xp.rv.v - xm.rv.v) / (2 * hx), e.E.g[1] * vg, (xp.E.v - xm.E.v) / (2 * hx),
+                    e.rv.g[0], (tp.rv.v - tm.rv.v) / (2 * hT), e.E.g[0], (tp.E.v - tm.E.v) / (2 * hT), e.p.g[1] * vg, (xp.p.v - xm.p.v) / (2 * hx));
+            }
+        }
         String warm = System.getenv("STUCK_WARM");   // steps of a throwaway copy first (JIT warm-up)
         if (warm != null) {
             Network w = NetworkDump.read(text, new double[1]);
