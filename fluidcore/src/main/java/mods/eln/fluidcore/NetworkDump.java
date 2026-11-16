@@ -12,7 +12,8 @@ import java.util.Locale;
  * species wa                                   (water and air, the fast path) or, per species:
  * species KEY GROUP KIND rho cpL cpV M tb lb
  * node V z H fixed U heat m0 m1 ... [w wallUA wallT]
- * edge a b fa fb g kind boost exchange conductance [gBack [qMax h0 speed eta [band [nozzle open drop [gas [setPa relief [gasOnly [anyPhase]]]]]]]]
+ * edge a b fa fb g kind boost exchange conductance [gBack [qMax h0 speed eta [band [nozzle open drop [gas [setPa relief [gasOnly [anyPhase
+ *     [rate phase minPa maxPa n supply0 .. supply(n-1)]]]]]]]]]       (n = 0: no supply)
  * </pre>
  */
 public final class NetworkDump {
@@ -36,12 +37,18 @@ public final class NetworkDump {
             if (n.wallUA != 0) s.append(" w ").append(h(n.wallUA)).append(' ').append(h(n.wallT));
             s.append('\n');
         }
-        for (Network.Edge e : net.edges)
+        for (Network.Edge e : net.edges) {
             s.append("edge ").append(idx.get(e.a)).append(' ').append(idx.get(e.b)).append(' ').append(h(e.fa)).append(' ').append(h(e.fb))
                 .append(' ').append(h(e.g)).append(' ').append(e.kind).append(' ').append(h(e.boost)).append(' ').append(h(e.exchange))
                 .append(' ').append(h(e.conductance)).append(' ').append(h(e.gBack)).append(' ').append(h(e.qMax)).append(' ').append(h(e.h0))
                 .append(' ').append(h(e.speed)).append(' ').append(h(e.eta)).append(' ').append(h(e.band))
-                .append(' ').append(h(e.nozzle)).append(' ').append(h(e.open)).append(' ').append(h(e.drop)).append(' ').append(e.gas).append(' ').append(h(e.setPa)).append(' ').append(e.relief).append(' ').append(e.gasOnly).append(' ').append(e.anyPhase).append('\n');
+                .append(' ').append(h(e.nozzle)).append(' ').append(h(e.open)).append(' ').append(h(e.drop)).append(' ').append(e.gas).append(' ').append(h(e.setPa)).append(' ').append(e.relief).append(' ').append(e.gasOnly).append(' ').append(e.anyPhase);
+            // (a FLOW edge's fields, on every edge; old dumps, without them, read as none)
+            s.append(' ').append(h(e.rate)).append(' ').append(e.phase).append(' ').append(h(e.minPa)).append(' ').append(h(e.maxPa))
+                .append(' ').append(e.supply == null ? 0 : e.supply.length);
+            if (e.supply != null) for (double x : e.supply) s.append(' ').append(h(x));
+            s.append('\n');
+        }
         return s.toString();
     }
 
@@ -107,6 +114,17 @@ public final class NetworkDump {
                     }
                     if (w.length > 22) e.gasOnly = Boolean.parseBoolean(w[22]);
                     if (w.length > 23) e.anyPhase = Boolean.parseBoolean(w[23]);
+                    if (w.length > 28) {
+                        e.rate = d(w[24]);
+                        e.phase = Network.Phase.valueOf(w[25]);
+                        e.minPa = d(w[26]);
+                        e.maxPa = d(w[27]);
+                        int n = Integer.parseInt(w[28]);
+                        if (n > 0) {
+                            e.supply = new double[n];
+                            for (int j = 0; j < n; j++) e.supply[j] = d(w[29 + j]);
+                        }
+                    }
                 }
                 default -> {
                 }

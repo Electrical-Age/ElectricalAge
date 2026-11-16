@@ -146,7 +146,10 @@ public final class Network {
         }
     }
 
-    public enum Kind { PIPE, CHECK, PUMP, TURBINE, REGULATOR }
+    public enum Kind { PIPE, CHECK, PUMP, TURBINE, REGULATOR, FLOW }
+
+    /** What a FLOW edge draws from a free a: its port's draw (ANY), its gas alone, or its liquid alone. */
+    public enum Phase { ANY, GAS, LIQUID }
 
     public static final class Edge {
         public final Node a, b;
@@ -227,6 +230,21 @@ public final class Network {
          * nothing to hold it, a near-empty node's temperature answers a joule by thousands of kelvin, and Newton failed).
          */
         public double conductance;
+        /**
+         * FLOW: a prescribed flow from a to b inside the implicit step (a device's source or sink: a fixed a is the
+         * outside a source brings mass from, a fixed b the outside a sink sends it to). It passes q = rate sigma(M /
+         * (rate FLOW_TAU)) gate, rate in kg/s (>= 0), M the mass a's draw can take (FLOW_TAU's smooth limit as a runs
+         * dry; a fixed a: sigma = 1, so a source passes exactly rate), sigma(x) = x / (1 + x^4)^(1/4). gate: shut at or
+         * past minPa on a's port (it passes only while a's port is over it: a sink that leaves a vessel at a pressure)
+         * and at or past maxPa on b's (only while b's port is under it: a source that stops filling there), over
+         * flowBand of each (checkGate; NaN: no gate). What a kg carries: supply (each species' share, then the energy,
+         * J/kg, as NodeFluid.draw gives them; C entries) where a is fixed and supply is set, else a's draw by phase
+         * (a free a can only give what it has, so supply is for sources alone).
+         */
+        public double rate;
+        public double[] supply;
+        public Phase phase = Phase.ANY;
+        public double minPa = Double.NaN, maxPa = Double.NaN;
         /** The last step's flow (kg/s, a to b positive). */
         public double flow;
         /**
@@ -351,6 +369,7 @@ public final class Network {
     static double flow(Edge e) {
         if (e.kind == Kind.TURBINE) return turbineFlow(e)[0];
         if (e.kind == Kind.REGULATOR) return regulatorFlow(e)[0];
+        if (e.kind == Kind.FLOW) return flowRate(e)[0];
         if (e.kind != Kind.PIPE || !e.plain()) {
             double[] q = streams(e);
             return q[0] - q[1];
@@ -384,7 +403,7 @@ public final class Network {
     static double[] streams0(Edge e) {
         double dp = portP(e.a, e.fa) - portP(e.b, e.fb) + e.boost;
         if (e.kind == Kind.PUMP) return pumpStreams(e, dp);
-        if (e.kind == Kind.TURBINE || e.kind == Kind.REGULATOR) return new double[4];
+        if (e.kind == Kind.TURBINE || e.kind == Kind.REGULATOR || e.kind == Kind.FLOW) return new double[4];
         if (!e.plain()) return headStreams(e, dp);
         // (a check valve: the forward stream alone; a hard max(0, dp) put a kink where a valve sits balanced, and Newton
         // stalled on it in the game's networks: openings and pumps at rest)
@@ -541,6 +560,76 @@ public final class Network {
         }
         double S = SPLIT_DP, x = drive / S, q = e.g * S * checkSp(x), dq = e.g * checkSg(x);
         return new double[]{q, dq * da, dq * db};
+    }
+
+    /**
+     * A FLOW edge's time constant as its a runs dry (s): far above rate FLOW_TAU of drawable mass it passes its rate,
+     * under it about M / FLOW_TAU, so a sink empties a node smoothly and stays stable under backward Euler.
+     */
+    public static double FLOW_TAU = 0.01;
+
+    /** sigma(x) = x / (1 + x^4)^(1/4) and its slope (1 + x^4)^(-5/4), without overflow for large x. */
+    static double[] flowSigma(double x) {
+        if (!(x > 0)) return new double[]{0, 1};
+        if (x == Double.POSITIVE_INFINITY) return new double[]{1, 0};
+        if (x <= 1) {
+            double b = 1 + x * x * x * x;
+            return new double[]{x / Math.pow(b, 0.25), Math.pow(b, -1.25)};
+        }
+        double u = 1 / (x * x * x * x), b = 1 + u;
+        return new double[]{Math.pow(b, -0.25), u / x * Math.pow(b, -1.25)};
+    }
+
+    /**
+     * The mass (kg) a FLOW edge's draw can take from a free a: its gas, its liquid, or (ANY) as its port draws, the
+     * liquid by the port's window and the gas the rest (all of a's mass was the first try: a sink at a port over the
+     * surface found its gas gone and the liquid out of reach, and went on at full rate drawing nothing).
+     */
+    static double flowMass(Edge e) {
+        Node a = e.a;
+        double liquid = 0, gas = 0;
+        for (int j = 0; j < a.m.length; j++) {
+            if (e.phase != Phase.GAS) liquid += a.fluid.liquidMass(j);
+            if (e.phase != Phase.LIQUID) gas += a.fluid.vapourMass(j);
+        }
+        double w = e.phase == Phase.ANY ? a.fluid.liquidWindow(e.fa) : e.phase == Phase.LIQUID ? 1 : 0;
+        return Math.max(0, w * liquid + (1 - w) * gas);
+    }
+
+    /** What a kg through a FLOW edge carries (Edge.rate): the supply into a fixed a's source, else a's draw by phase. */
+    static double[] flowCarries(Edge e) {
+        if (e.a.fixed && e.supply != null) return e.supply;
+        return switch (e.phase) {
+            case ANY -> e.a.fluid.draw(e.fa);
+            case GAS -> e.a.fluid.gasDraw();
+            case LIQUID -> e.a.fluid.liquidDraw(e.fa);
+        };
+    }
+
+    /** The band (Pa) over which a FLOW edge's gate at threshold p opens: a regulator's, max(SPLIT_DP, REG_W p). */
+    static double flowBand(double p) {
+        return Math.max(SPLIT_DP, REG_W * Math.abs(p));
+    }
+
+    /** A FLOW edge's flow {q, dq/dM, dq/dp_a, dq/dp_b} at the current states (Edge.rate; dq/dM 0 for a fixed a). */
+    static double[] flowRate(Edge e) {
+        if (!(e.rate > 0)) return new double[4];
+        double ga = 1, dga = 0, gb = 1, dgb = 0;
+        if (!Double.isNaN(e.minPa)) {
+            double W = flowBand(e.minPa);
+            double[] g = checkGate((portP(e.a, e.fa) - e.minPa) / W);
+            ga = g[0];
+            dga = g[1] / W;
+        }
+        if (!Double.isNaN(e.maxPa)) {
+            double W = flowBand(e.maxPa);
+            double[] g = checkGate((e.maxPa - portP(e.b, e.fb)) / W);
+            gb = g[0];
+            dgb = -g[1] / W;
+        }
+        double gate = ga * gb;
+        double[] s = e.a.fixed ? new double[]{1, 0} : flowSigma(flowMass(e) / (e.rate * FLOW_TAU));
+        return new double[]{e.rate * s[0] * gate, s[1] / FLOW_TAU * gate, e.rate * s[0] * dga * gb, e.rate * s[0] * ga * dgb};
     }
 
     /** A turbine's shaft power (W) and its slopes: eta drop x the water it passes ({W, dW/dp_a, dW/dp_b, water share}). */
@@ -778,7 +867,7 @@ public final class Network {
     /** Everything outside the solve that a step depends on. */
     private double[] inputs() {
         int C = nodes.isEmpty() ? 0 : nodes.get(0).m.length;
-        double[] x = new double[2 + nodes.size() * (C + 4) + edges.size() * EDGE_INPUTS.length];
+        double[] x = new double[2 + nodes.size() * (C + 4) + edges.size() * (EDGE_INPUTS.length + C + 1)];
         int k = 0;
         x[k++] = nodes.size();
         x[k++] = edges.size();
@@ -809,6 +898,12 @@ public final class Network {
             x[k++] = e.drop;
             x[k++] = e.gasOnly ? 1 : 0;
             x[k++] = e.anyPhase ? 1 : 0;
+            x[k++] = e.rate;
+            x[k++] = e.phase.ordinal();
+            x[k++] = e.minPa;
+            x[k++] = e.maxPa;
+            // (a FLOW edge's supply, NaN for none: C + 1 entries, as a node's are)
+            for (int j = 0; j <= C; j++) x[k++] = e.supply != null && j < e.supply.length ? e.supply[j] : Double.NaN;
         }
         return x;
     }
@@ -834,7 +929,7 @@ public final class Network {
 
     private static final String[] NODE_INPUTS = {"U", "heat", "wallUA", "wallT"};
     private static final String[] EDGE_INPUTS = {"g", "gBack", "boost", "conductance", "exchange", "kind", "setPa", "relief", "band", "qMax",
-        "h0", "speed", "eta", "gas", "nozzle", "open", "drop", "gasOnly", "anyPhase"};
+        "h0", "speed", "eta", "gas", "nozzle", "open", "drop", "gasOnly", "anyPhase", "rate", "phase", "minPa", "maxPa"};
 
     /** wokenBy in words: "node 2 heat", "edge 0 speed", "node 1 m[3]", "size", or "nothing". */
     public String wokenByName() {
@@ -846,7 +941,8 @@ public final class Network {
             return "node " + k / (C + 4) + " " + (f < C ? "m[" + f + "]" : NODE_INPUTS[f - C]);
         }
         k -= nodes.size() * (C + 4);
-        return k / EDGE_INPUTS.length < edges.size() ? "edge " + k / EDGE_INPUTS.length + " " + EDGE_INPUTS[k % EDGE_INPUTS.length] : "size";
+        int stride = EDGE_INPUTS.length + C + 1, f = k % stride;
+        return k / stride < edges.size() ? "edge " + k / stride + " " + (f < EDGE_INPUTS.length ? EDGE_INPUTS[f] : "supply[" + (f - EDGE_INPUTS.length) + "]") : "size";
     }
 
     /**
@@ -1006,6 +1102,15 @@ public final class Network {
             for (int k = 0; k < C; k++) f[k] += q * ca[k];
             return f;
         }
+        if (e.kind == Kind.FLOW) {
+            double q = flowRate(e)[0];
+            if (q == 0) return f;
+            double[] ca = flowCarries(e);
+            if (ca.length != C) throw new IllegalArgumentException("a FLOW edge's supply has " + ca.length + " entries, not " + C);
+            if (f == null) f = new double[C + 1];
+            for (int k = 0; k < C; k++) f[k] += q * ca[k];
+            return f;
+        }
         double[] qs = streams(e);
         if (qs[0] == 0 && qs[1] == 0) return f;
         double[] ca = qs[0] != 0 ? drawOf(e) : null, cb = qs[1] != 0 ? e.b.fluid.draw(e.fb) : null;
@@ -1081,6 +1186,56 @@ public final class Network {
         }
     }
 
+    /**
+     * A FLOW edge's entries: F_k = q c_k out of a into b. q's slopes in the gates' pressures through the ports' slopes;
+     * in M, and c's slopes (gasDraw and liquidDraw have none), by central differences over a's contents, local and cheap
+     * as the exchange's. Every entry of the four blocks is added, zeros too (the sparse pattern stays fixed).
+     */
+    private static void flowJacobian(Sparse J, Edge e, java.util.Map<Node, Integer> idx, int C, double dt) {
+        int S = C - 1;
+        Integer ia = idx.get(e.a), ib = idx.get(e.b);
+        double[] q = flowRate(e), c = flowCarries(e);
+        double[] dpa = e.a.fluid.portPSlope(e.fa), dpb = e.b.fluid.portPSlope(e.fb);
+        double[] dM = new double[C];
+        double[][] dc = new double[C][C];
+        if (ia != null && e.rate > 0) {
+            Node n = e.a;
+            Object state = n.fluid.saveState();
+            for (int j = 0; j < C; j++) {
+                double keep = j < S ? n.m[j] : n.U;
+                double h = j == S ? 1e-6 * Math.max(1, Math.abs(keep)) : Math.max(1e-12, 1e-6 * Math.abs(keep));
+                double lo = j < S ? Math.max(0, keep - h) : keep - h, hi = keep + h;
+                if (j < S && keep < 0) lo = keep;
+                double[] M = new double[2];
+                double[][] cs = new double[2][];
+                for (int side = 0; side < 2; side++) {
+                    if (j < S) n.m[j] = side == 0 ? hi : lo;
+                    else n.U = side == 0 ? hi : lo;
+                    n.update();
+                    M[side] = flowMass(e);
+                    cs[side] = flowCarries(e).clone();
+                }
+                if (j < S) n.m[j] = keep;
+                else n.U = keep;
+                n.fluid.restoreState(state);
+                dM[j] = (M[0] - M[1]) / (hi - lo);
+                for (int k = 0; k < C; k++) dc[k][j] = (cs[0][k] - cs[1][k]) / (hi - lo);
+            }
+        }
+        for (int side = 0; side < 2; side++) {
+            Integer col = side == 0 ? ia : ib;
+            if (col == null) continue;
+            for (int j = 0; j < C; j++) {
+                double dq = side == 0 ? q[1] * dM[j] + q[2] * dpa[j] : q[3] * dpb[j];
+                for (int k = 0; k < C; k++) {
+                    double dF = dq * c[k] + (side == 0 ? q[0] * dc[k][j] : 0);
+                    if (ia != null) J.add(C * ia + k, C * col + j, dt * dF);
+                    if (ib != null) J.add(C * ib + k, C * col + j, -dt * dF);
+                }
+            }
+        }
+    }
+
     private Sparse jacobian(List<Node> free, java.util.Map<Node, Integer> idx, double dt) {
         int C = C(), S = C - 1;
         int M = C * free.size();
@@ -1100,6 +1255,10 @@ public final class Network {
             if (e.kind == Kind.TURBINE || e.kind == Kind.REGULATOR) {
                 // (a regulator: the same entries without the work, its flow a function of p_a and p_b apart)
                 turbineJacobian(J, e, idx, C, dt);
+                continue;
+            }
+            if (e.kind == Kind.FLOW) {
+                flowJacobian(J, e, idx, C, dt);
                 continue;
             }
             // F_k = q+ ca_k - q- cb_k; dF_k = dq+ d(arg+) ca_k - dq- d(arg-) cb_k + q+ dca_k (a) - q- dcb_k (b), arg+ = dp + ha,
@@ -1289,6 +1448,7 @@ public final class Network {
             }
             e.workJ += e.pendingWork;
         }
+        List<int[]> sinks = null;
         // (an edge's net flux of each component: its two streams' swap of one species cancels here rather than in the
         // limiter, where two nearly empty nodes swapping a trace each way kept cutting each other's sends without end)
         for (int g = 0; g < edges.size(); g++) {
@@ -1306,6 +1466,35 @@ public final class Network {
             int a = ia == null ? -1 : ia, b = ib == null ? -1 : ib;
             for (int k = 0; k < C; k++) move(moves, a, b, k, dt * f[k], g);
             move(moves, a, b, S, dt * f[C], -1);
+            if (e.kind == Kind.FLOW && a >= 0) {
+                if (sinks == null) sinks = new ArrayList<>();
+                sinks.add(new int[]{g, a});
+            }
+        }
+        // (a FLOW edge from a free node books what the limiter lets it send, not what it asked: a device books from it,
+        // so a sink's readback must be what left. The limiter's scales again, as Limiter.apply takes them: each mass by
+        // its sender's scale, the energy the flow carries by the edge's masses' mean scale)
+        if (sinks != null) {
+            double[] sc = Limiter.scales(C, y0, moves, new int[1]);
+            for (int[] sk : sinks) {
+                Edge e = edges.get(sk[0]);
+                double sent = 0, asked = 0;
+                for (int k = 0; k < S; k++) {
+                    double p = e.pending[k];
+                    if (p <= 0) continue;
+                    double cut = p * sc[C * sk[1] + k];
+                    asked += p;
+                    sent += cut;
+                    e.moved[k] += cut - p;
+                    e.pending[k] = cut;
+                }
+                if (asked != 0 && sent != asked) {
+                    double[] f = flux(e, C);
+                    double carried = dt * f[S], cut = carried * (sent / asked);
+                    e.moved[S] += cut - carried;
+                    e.pending[S] += cut - carried;
+                }
+            }
         }
         // the limiter: a node can't send more of a mass than it started with plus what it receives (Newton's tolerance
         // is relative to the node's whole contents, so a dry node's water could end 1e-10 of its air below zero);
@@ -1524,6 +1713,14 @@ public final class Network {
     static double CHECK_STEP = 1e-8;
 
     String checkJacobian(double dt) {
+        return checkJacobian(dt, false);
+    }
+
+    /**
+     * byRow: each error against its row's largest entry (J or FD) instead of its own: a slope a millionth of its row's
+     * others (a gate just starting to shut, in a node's energy row at 1e6 J) is under the differences' rounding.
+     */
+    String checkJacobian(double dt, boolean byRow) {
         List<Node> free = new ArrayList<>();
         for (Node n : nodes) if (!n.fixed) free.add(n);
         java.util.Map<Node, Integer> idx = new java.util.IdentityHashMap<>();
@@ -1534,6 +1731,8 @@ public final class Network {
         int M = y.length;
         double worst = 0;
         String at = "";
+        double[][] F = new double[M][M];
+        boolean[] done = new boolean[M];
         for (int j = 0; j < M; j++) {
             // (a species' step is sized by its node's whole mass: against a trace's own mass the pressure moves by
             // 1e-7 of itself, under the state solve's precision, and the difference is 1 % noise. One-sided where the
@@ -1550,9 +1749,16 @@ public final class Network {
             set(free, ym);
             double[] rm = residual(free, idx, y0, dt);
             set(free, y);
-            for (int i = 0; i < M; i++) {
-                double fd = (rp[i] - rm[i]) / (2 * h);
-                double err = Math.abs(fd - J[i][j]) / Math.max(1e-3, Math.max(Math.abs(fd), Math.abs(J[i][j])));
+            for (int i = 0; i < M; i++) F[i][j] = (rp[i] - rm[i]) / (2 * h);
+            done[j] = true;
+        }
+        for (int i = 0; i < M; i++) {
+            double row = 0;
+            if (byRow) for (int j = 0; j < M; j++) if (done[j]) row = Math.max(row, Math.max(Math.abs(F[i][j]), Math.abs(J[i][j])));
+            for (int j = 0; j < M; j++) {
+                if (!done[j]) continue;
+                double fd = F[i][j];
+                double err = Math.abs(fd - J[i][j]) / Math.max(1e-3, Math.max(row, Math.max(Math.abs(fd), Math.abs(J[i][j]))));
                 if (Math.abs(fd - J[i][j]) > 1e-9 && err > worst) {
                     worst = err;
                     at = String.format("row %d col %d: J %.6g FD %.6g", i, j, J[i][j], fd);
