@@ -24,7 +24,8 @@ import java.util.Map;
  * HeatExchangerDescriptor: two sides, each a chain of slices along the exchanger's length (SLICES, 2 in a lone block:
  * slices()), the slices at each position coupled by a heat conductance (UA / slices) inside the fluid core's step (notes 23-hx.md; Baughn 2026-11-10:
  * devices are components of the implicit step). Counterflow, parallel flow or a pool boiling off follow from how the
- * streams really run; 8 slices come within 4 % of ideal counterflow at NTU 2.5 (HeatChainTest). Blocks stack into one
+ * streams really run; each slice's link gets cellBoost() over its share of UA, so 8 slices (2 in a lone block) come within
+ * a few % of ideal counterflow and parallel flow at any capacity ratio (without it, 8 % under on balanced streams). Blocks stack into one
  * exchanger (HeatExchangerGroup): `ownA`/`ownB` are this block's shares (what it saves), `a`/`b` the sides in use (its
  * own, or the stack's) as whole volumes, kept summed from the slices; the stack's lowest corner owns the slices.
  */
@@ -245,6 +246,35 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
     public void beforeFluidStep(double dt) {
         if (a == null || group != null && group.master() != this || sliceA == null) return;
         gather();   // (a side written to since the last step: into its slices)
+        double k = ua() / sliceA.length * cellBoost(ua() / sliceA.length, invCA, invCB);
+        for (FluidDevice.Link l : links) if (l.conductance > 0) l.conductance = k;
+    }
+
+    /**
+     * Each side's 1 / (capacity rate) (K/W, 0: a side boiling or condensing, or not known yet), smoothed over steps: the
+     * heat it took over the change in its temperature across the exchanger, last steps.
+     */
+    double invCA, invCB;
+
+    /**
+     * How much more conductance a slice's link gets than its share of UA (1..3), so a slice, both sides well mixed, passes
+     * what that length of a real exchanger would at these streams: a slice of conductance U between capacity rates C1 >=
+     * C2 passes 1 / (1 / U + 1 / C1 + 1 / C2) of the inlet difference, a length of exchanger of NTU n = U / C2 to second
+     * order n (1 - n (1 + Cr) / 2), the same for counterflow and parallel flow; so U' = U / (1 - n (1 + Cr) / 2). Without
+     * it 8 slices gave 59 % on balanced streams at NTU 2.1, where counterflow gives 67 % (2026-11-16, todo #495).
+     */
+    static double cellBoost(double u, double invCa, double invCb) {
+        double iMax = Math.max(invCa, invCb), iMin = Math.min(invCa, invCb);
+        if (!(iMax > 0)) return 1;
+        double n = u * iMax, cr = iMin / iMax, d = 1 - n * (1 + cr) / 2;
+        return d <= 1.0 / 3 ? 3 : 1 / d;
+    }
+
+    /** One side's 1 / (capacity rate) from a step (K/W): heat over its temperature change, NaN if it says nothing. */
+    private static double invC(double heat, double tIn, double tOut) {
+        if (Math.abs(heat) < 1) return Double.NaN;
+        double dT = Math.abs(tIn - tOut);
+        return dT < 0.5 ? 0 : dT / Math.abs(heat);
     }
 
     @Override
@@ -257,6 +287,12 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         tAout = ea[1];
         tBin = eb[0];
         tBout = eb[1];
+        // (smoothed: the boost moves the heat that measures it)
+        double ia = invC(heat, tAin, tAout), ib = invC(heat, tBin, tBout);
+        if (!Double.isNaN(ia) && !Double.isNaN(ib)) {
+            invCA += 0.1 * (ia - invCA);
+            invCB += 0.1 * (ib - invCB);
+        }
         gather();
         q = heat;
         totalJ += heat * dt;
