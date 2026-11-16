@@ -361,6 +361,8 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         nbt.putBoolean("tripped", tripped);
         if (exhaust != null) {
             mods.eln.fluid.FluidSaves.put(nbt, "exhaust", exhaust);
+            // the casing's volume with its contents: a later build with another EXHAUST_V rescales them on load
+            nbt.putDouble("exhaustV", EXHAUST_V);
         }
         fuelIn.write(nbt);
     }
