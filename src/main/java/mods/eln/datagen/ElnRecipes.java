@@ -949,11 +949,12 @@ public final class ElnRecipes extends ElnRecipesBase {
 
     /**
      * 1.12 made one Utility Pole recipe per ore name present at startup (aluminium, steel), and an iron one when there
-     * was none. 26.x: the same, decided when the recipes load (NeoForge conditions on the tags).
+     * was none. 26.x: aluminium and steel as they load (NeoForge conditions on the tags), and EA's own alloy always.
+     * The iron fallback is gone: it switched itself off whenever any mod made steel, so on Incognito poles needed
+     * Energized Power's steel (nero 1572028077159223347). Baughn (msg 1572028948240404481): "make it accept alloy
+     * ingots, and remove the iron fallback"; aluminium stays, for EA's own aluminium production later.
      */
     public static void recipeGridDevices() {
-        var aluminum = OreDictTags.tag("ingotAluminum");
-        var steel = OreDictTags.tag("ingotSteel");
         for (var t : new String[]{"ingotAluminum", "ingotSteel"}) {
             addRecipeIf(findItemStack("Utility Pole"),
                 new ICondition[]{new NotCondition(new TagEmptyCondition<>(OreDictTags.tag(t)))},
@@ -964,16 +965,12 @@ public final class ElnRecipes extends ElnRecipesBase {
                 'I', t
             );
         }
-        // Really? (1.12: with neither, iron.) 1.7.10 forgot the 'W' key here, which made two iron ingots a pole; the E36
-        // pack never loaded this fallback (it had aluminium). On 26.x without those mods it is the default, so the
-        // logs the other variants use are keyed in (26.x port fix).
-        addRecipeIf(findItemStack("Utility Pole"),
-            new ICondition[]{new TagEmptyCondition<>(aluminum), new TagEmptyCondition<>(steel)},
+        addRecipe(findItemStack("Utility Pole"),
             "WWW",
             "IWI",
             " W ",
             'W', "logWood",
-            'I', "ingotIron"
+            'I', "ingotAlloy"
         );
         // (the Utility Pole w/DC-DC Converter is retired: a Pole Transformer from the wire machine fits any pole, Baughn 2026-11-08)
         // a pole streetlight: an LED bulb, a light sensor (its dark sensor), an iron bar arm and a glass pane lens (Baughn 2026-11-08)
