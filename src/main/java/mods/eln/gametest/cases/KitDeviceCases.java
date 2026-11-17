@@ -95,21 +95,25 @@ public final class KitDeviceCases {
             public void build(TestContext ctx) {
                 b = (ElectricalBreakerElement) ctx.placeSix(Wp9aCases.BREAKER, ctx.at(1, 1, 1));
                 Batch1Cases.orient(b, f -> f, Direction.XN);
+                // a breaker saved before 2026-11-17 with a 6 mm² kit in its slot and no trip current set
                 b.getInventory().setItem(0, kit(HV, thick(), 1));
-                b.getInventory().setChanged();
+                var nbt = new net.minecraft.nbt.CompoundTag();
+                b.writeToNBT(nbt);
+                nbt.putFloat("tripAmps", 0f);
+                b.readFromNBT(nbt);
                 b.networkUnserialize(ctx.stream(out -> out.writeByte(ElectricalBreakerElement.toogleSwitchId)));
             }
 
             public void measure(TestContext ctx) {
-                var d = thick().descriptor(HV);
-                ctx.check("kits: a breaker on a 6 mm² kit has that cable's contacts", b.getSwitchState() && Math.abs(b.switchResistor.getR() - d.electricalRs) < 1e-9,
-                    b.getSwitchState() + ", " + b.switchResistor.getR() + " vs " + d.electricalRs);
-                ctx.check("kits: unset, it trips at 1.05 x 36 A", Math.abs(b.cableTripAmps() - 1.05 * 36) < 0.05, "" + b.cableTripAmps());
+                var mv = mods.eln.registry.ElnDeviceRegistry.meduimVoltageCableDescriptor;
+                ctx.check("kits: a breaker's contacts are its own (MV cable), kit or not", b.getSwitchState() && Math.abs(b.switchResistor.getR() - mv.electricalRs) < 1e-9,
+                    b.getSwitchState() + ", " + b.switchResistor.getR() + " vs " + mv.electricalRs);
+                ctx.check("kits: an old breaker's kit set its trip current (1.05 x 36 A)", Math.abs(b.tripAmpsNow() - 1.05 * 36) < 0.05, "" + b.tripAmpsNow());
             }
         });
 
         cases.add(new TestCase() {
-            ElectricalBreakerElement b;
+            mods.eln.sixnode.thermalsensor.ThermalSensorElement b;
             String clicked = "", shifted = "";
 
             public String id() {
@@ -125,10 +129,11 @@ public final class KitDeviceCases {
             }
 
             public void build(TestContext ctx) {
-                b = (ElectricalBreakerElement) ctx.placeSix(Wp9aCases.BREAKER, ctx.at(1, 1, 1));
+                // (the Temperature Probe's optional slot; the breaker's went 2026-11-17)
+                b = (mods.eln.sixnode.thermalsensor.ThermalSensorElement) ctx.placeSix(Ids.six("Temperature Probe"), ctx.at(1, 1, 1));
                 var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
                 var menu = mods.eln.node.NodeMenus.menu(1, fp, b.sixNode, b.side);
-                if (menu == null) throw new IllegalStateException("no breaker menu");
+                if (menu == null) throw new IllegalStateException("no probe menu");
                 // a cursor click with a 10-block kit: one block goes in
                 menu.setCarried(kit(HV, thick(), 10));
                 menu.clicked(0, 0, net.minecraft.world.inventory.ContainerInput.PICKUP, fp);

@@ -426,8 +426,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   (Baughn 2026-10-26). `pipe_throttle_and_control_valves`.
 - 50V/200V steam turbines take water damage: over 10% of the inlet liquid while the shaft turns above 20% speed burns them out (`FailureCause.WATER`, repairable; the repair drains the inlet). Baughn 2026-10-26; `oil_steam_turbine_floods`. A casing drain throws away 0.5% of the inlet volume a second in liquid water (Baughn 2026-10-29: condensate must get out, slugs stay fatal).
 - Cable slots removed: meters, electrical/voltage/thermal probes and lamp sockets have a built-in cable (LV, MV for the
-  200V socket, copper thermal cable); Ground Cable has no GUI. Kept: transformer (turns), hub (side selection), breaker
-  (trip rating); lamp supply and temperature probe slots are optional. Old cables stay in the hidden slot and drop on
+  200V socket, copper thermal cable); Ground Cable has no GUI. Kept: transformer (turns), hub (side selection); the
+  breaker's went too (Baughn 2026-11-17: MV contacts, trip current in its GUI; an old piece sets that once); lamp supply and temperature probe slots are optional. Old cables stay in the hidden slot and drop on
   break. Guarded by `CableSlotCases`, `GoldenSlotsCase.removedCableSlots`.
 - Six-node blocks (and voxel blocks) are waterloggable (`SixNodeBlock`, `VoxelNodeBlock`; test
   `port26_waterlogged_cable` in `PortHelperCases`). Shorting in water: not done.

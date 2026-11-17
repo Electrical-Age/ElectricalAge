@@ -68,10 +68,10 @@ public final class MenuSpecs {
         // ---- six-node devices
         // Baughn 2026-10-17: no more "a piece of cable in the GUI before it works" (notes/port26/cable-slots.md). The
         // ground cable, energy meters, electrical/voltage probes, thermal probe and lamp sockets lost their cable slot
-        // (built-in cable); the ground cable lost its GUI. Kept: breaker (trip rating), hub (which sides), transformer
+        // (built-in cable); the ground cable lost its GUI. Kept: hub (which sides), transformer
         // (turns); the lamp supply's and temperature probe's slots are optional (range, mode).
-        put(mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor.class, d -> MenuSpec.of(
-            cableSlot(0, 150, 21, 1)).panel(176, 140, 8, 58));
+        // the breaker lost its slot too (Baughn 2026-11-17: its trip current is set in its GUI)
+        put(mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor.class, d -> MenuSpec.of().panel(176, 140, 8, 58));
         put(mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor.class, d -> MenuSpec.of(
             filter(mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerContainer.paperSlotId, 176 / 2 - 44, 125, 64,
                 item(Items.PAPER), MEDIUM, "Paper Slot"),

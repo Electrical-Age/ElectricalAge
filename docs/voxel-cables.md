@@ -89,7 +89,8 @@ transparent neighbour).
   Signal Switch with LED, the pipe sensor devices (see Pipe sensor devices), the power sockets, the Ground Cable, the Hub and the anemometer; the Energy Meter and Advanced Energy Meter (in line on a power run: its sign follows
   which way it faces), the Weak 50V, 50V and 200V Battery Chargers (four power pins, one load) and the Nuclear and
   Standard Alarms; the in-line passives (Baughn, batch 3: the 10A, 25A and Signal Diodes, Power Capacitor, Power
-  Inductor, Power Resistor, Rheostat, Thermistor and Electrical Fuse Holder). Their models run their base and leads edge
+  Inductor, Power Resistor, Rheostat, Thermistor and Electrical Fuse Holder), and the Electrical Breaker (Baughn
+  2026-11-17, drawn as the fuse holder). Their models run their base and leads edge
   to edge for the face slot, which is kept as it was; off centre the same model is drawn with the base and leads
   stretched by `SixNodeDescriptor.SHORT_LEADS` (6/8) along them so they end at the pins, 6 voxels from the centre, and
   the body is the core (`inlineBounds`). Their renders don't call `super.draw()`, so they call `drawPins()` themselves.
@@ -198,7 +199,9 @@ items leave the creative tab (`ElnDeviceRegistry`: `addWithoutRegistry`). Device
 `node/voxel/CableItems` gives a stack's `ElectricalCableDescriptor` (a 1.12 item's, or the kit's spec:
 `CableSpec.descriptor(tier)`, the preset's if it has none), its thermal descriptor, tier, blocks (16 voxels) and
 `take(stack, voxels)` (a kit piece keeps the spec). Old items stay valid wherever they are, so saves need nothing.
-- Breaker and hub slots, the temperature probe's: `SlotSpec.cablePiece` (kind `CablePiece`) takes a block of a kit
+- The breaker has no slot since 2026-11-17 (Baughn): its contacts are a Medium Voltage Cable's, its trip current is set
+  in its GUI; a piece in an old breaker's slot sets that current once on load and drops with it.
+- Hub slots, the temperature probe's: `SlotSpec.cablePiece` (kind `CablePiece`) takes a block of a kit
   (`ElnSlot.safeInsert` for clicks, `ElnNodeMenu.quickMoveStack` for shift-clicks); the spec sets contacts, trip
   current and thermals.
 - Lamp supply: range + blocks (`AutoAcceptInventoryProxy.acceptCable`: a right click adds a block).

@@ -984,8 +984,6 @@ public final class LabCommands {
             if (row == 0) {
                 var b = (mods.eln.sixnode.electricalbreaker.ElectricalBreakerElement) host(level, player, sixId("Electrical Breaker"), o.offset(2, 0, 0));
                 orient(b, l -> l, mods.eln.misc.Direction.XN);
-                b.getInventory().setItem(0, mods.eln.Eln.findItemStack("Low Voltage Cable", 1));
-                b.getInventory().setChanged();
                 b.networkUnserialize(packet(out -> {
                     out.writeByte(mods.eln.sixnode.electricalbreaker.ElectricalBreakerElement.setVoltageMaxId);
                     out.writeFloat(100f);

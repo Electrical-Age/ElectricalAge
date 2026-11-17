@@ -83,7 +83,8 @@ final class GoldenSlotsCase implements TestCase {
     static java.util.Set<Integer> removedCableSlots(Object d) {
         if (d instanceof mods.eln.sixnode.energymeter.EnergyMeterDescriptor
             || d instanceof mods.eln.sixnode.electricalsensor.ElectricalSensorDescriptor
-            || d instanceof mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor t && !t.temperatureOnly) return Set.of(0);
+            || d instanceof mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor t && !t.temperatureOnly
+            || d instanceof mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor) return Set.of(0);   // (breaker: Baughn 2026-11-17)
         if (d instanceof mods.eln.sixnode.lampsocket.LampSocketDescriptor) return Set.of(1);
         return Set.of();
     }

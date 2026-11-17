@@ -148,7 +148,7 @@ public final class VoxelDeviceCases {
             "Wireless Signal Transmitter", "Wireless Signal Repeater", "Electrical Timer", "LED vuMeter", "Signal Switch with LED",
             "Ground Cable", "Hub", "Energy Meter", "Advanced Energy Meter", "Weak 48V Battery Charger", "48V Battery Charger",
             "230V Battery Charger", "Nuclear Alarm", "Standard Alarm", "10A Diode", "25A Diode", "Signal Diode", "Power Capacitor",
-            "Power Inductor", "Power Resistor", "Rheostat", "Thermistor", "Electrical Fuse Holder"};
+            "Power Inductor", "Power Resistor", "Rheostat", "Thermistor", "Electrical Fuse Holder", "Electrical Breaker"};
         static final String[] WALL_DEVICES = {"48V Power Socket", "230V Power Socket", "Electrical Anemometer Sensor"};
         String all = "", middle = "", lopsided = "", relays = "", stayed = "";
         boolean anywhereOk, middleOk, lopsidedOk, relaysOk, stayedOk;
@@ -1289,7 +1289,8 @@ public final class VoxelDeviceCases {
      * block between the source and a 100 ohm resistor to ground. A Power Resistor and a Thermistor add their resistance;
      * of two 10A Diodes, the second wrenched round, one conducts and the other blocks; a Power Capacitor blocks the
      * steady current; a Power Inductor with copper and a core passes it; a fuse holder with an LV fuse passes it, one
-     * without blocks; a Rheostat goes in line with its signal pin free.
+     * without blocks; a Rheostat goes in line with its signal pin free. An Electrical Breaker (Baughn 2026-11-17: placed
+     * anywhere, no cable piece) switched on passes it; one left off, as placed, blocks it.
      */
     static final class PassivesInLineCase implements TestCase {
         final java.util.Map<String, SixNodeElement> dev = new java.util.LinkedHashMap<>();
@@ -1352,6 +1353,15 @@ public final class VoxelDeviceCases {
             if (f != null) Wp9aCases.use(c, f, mods.eln.Eln.sharedItem.getDescriptor(Wp9aCases.FUSE_LV).newItemStack());
             row(c, "no fuse", "Electrical Fuse Holder", 7);
             row(c, "rheostat", "Rheostat", 8);
+            var br = row(c, "breaker", "Electrical Breaker", 9);
+            if (br != null) {
+                br.networkUnserialize(c.stream(out -> {
+                    out.writeByte(mods.eln.sixnode.electricalbreaker.ElectricalBreakerElement.setVoltageMaxId);
+                    out.writeFloat(100F);
+                }));
+                br.networkUnserialize(c.stream(out -> out.writeByte(mods.eln.sixnode.electricalbreaker.ElectricalBreakerElement.toogleSwitchId)));
+            }
+            row(c, "breaker off", "Electrical Breaker", 10);
         }
 
         double i(String k) {
@@ -1359,9 +1369,9 @@ public final class VoxelDeviceCases {
         }
 
         public void measure(TestContext c) {
-            c.check("passives: each put in line, both contacts on the run", dev.size() == 9 && dev.values().stream().allMatch(e ->
+            c.check("passives: each put in line, both contacts on the run", dev.size() == 11 && dev.values().stream().allMatch(e ->
                 e.slotMask.get(e.side.getLRDUGoingTo(Direction.XN)) && e.slotMask.get(e.side.getLRDUGoingTo(Direction.XP))), placed);
-            if (dev.size() != 9) return;
+            if (dev.size() != 11) return;
             for (String k : new String[]{"resistor", "thermistor"}) {
                 double rd = ((mods.eln.sixnode.resistor.ResistorElement) dev.get(k)).nominalRs, rl = load.get(k).nominalRs;
                 Wp9cCases.within(c, fmt("passives: a %s of %.1f ohm in line: 50 V over it and 100 ohm [A]", k, rd), i(k), 50 / (rl + rd), 0.03 * 50 / (rl + rd));
@@ -1373,6 +1383,8 @@ public final class VoxelDeviceCases {
             Wp9cCases.within(c, "passives: an inductor with copper and a core passes it [A]", i("inductor"), 0.5, 0.03);
             Wp9cCases.within(c, "passives: a fuse holder with an LV fuse passes it [A]", i("fuse"), 0.5, 0.03);
             c.check("passives: one without a fuse blocks it", i("no fuse") < 1e-3, fmt("%.4f A", i("no fuse")));
+            Wp9cCases.within(c, "passives: a breaker switched on passes it [A]", i("breaker"), 0.5, 0.03);
+            c.check("passives: one left off blocks it", i("breaker off") < 1e-3, fmt("%.4f A", i("breaker off")));
             var rh = dev.get("rheostat");
             c.check("passives: a rheostat in line has its signal pin too", rh.getConnectionMask(rh.front) != 0 && placed.contains("rheostat: null pins 3"), placed);
         }
