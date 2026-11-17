@@ -347,7 +347,7 @@ public final class HpPlantCases {
     static final class LargeBoilerBody extends PlumbingCases.Big {
         BoilerElement a;
         BlockPos o, o2;
-        boolean refused, ghostsOk, nodesOk, portsOk, lowerPlaced, stackPlaced, floatPlaced;
+        boolean refused, ghostsOk, nodesOk, portsOk, lowerPlaced, stackPlaced, floatPlaced, ownersOk = true;
         String stackWhy;
         int tick, thermalFaces, signalFaces;
 
@@ -369,6 +369,7 @@ public final class HpPlantCases {
             for (int i = 1; i < 8; i++) {
                 var co = new mods.eln.misc.Coordonate(c[i], ctx.level());
                 ghostsOk &= Eln.ghostManager.getGhost(co) != null && ctx.level().getBlockState(c[i]).getBlock() instanceof mods.eln.ghost.GhostBlock;
+                ownersOk &= mods.eln.ghost.GhostBlock.owner(ctx.level(), c[i]) == a;   // (what Jade shows on each cell)
                 nodesOk &= mods.eln.node.NodeManager.instance.getNodeFromCoordonate(co) instanceof mods.eln.oil.LargeBoilerElement.FaceNode;
             }
             // its faces as designed: 12 thermal (back and flanks), the signal on the origin's front, pipe ports where the pipe tool finds them
@@ -408,6 +409,7 @@ public final class HpPlantCases {
 
         public void measure(TestContext ctx) {
             ctx.check("large boiler 2x2: placed facing west, its seven other blocks are ghosts", ghostsOk, "");
+            ctx.check("large boiler 2x2: each of its seven other blocks names the boiler as its owner (Jade shows its lines there)", ownersOk, "");
             ctx.check("large boiler 2x2: each ghost block has its face node", nodesOk, "");
             ctx.check("large boiler 2x2: twelve thermal faces, all its one shell (back and both flanks)", thermalFaces == 12, "" + thermalFaces);
             ctx.check("large boiler 2x2: one level-signal face (the origin's front)", signalFaces == 1, "" + signalFaces);

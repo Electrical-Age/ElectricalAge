@@ -118,6 +118,18 @@ public class GhostBlock extends Block {
         return n instanceof mods.eln.node.Node node ? node.pickItem(null, level) : ItemStack.EMPTY;
     }
 
+    /**
+     * The machine a ghost cell at pos belongs to, on the server: its transparent node's element, or null (Jade shows its
+     * lines on every cell of a multiblock, not "Electrical Age Multiblock Part").
+     */
+    public static mods.eln.node.transparent.TransparentNodeElement owner(Level world, BlockPos pos) {
+        if (Eln.ghostManager == null || world.isClientSide()) return null;
+        GhostElement g = Eln.ghostManager.getGhost(new Coordonate(pos, world));
+        if (g == null) return null;
+        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(g.getObservatorCoordonate());
+        return n instanceof mods.eln.node.transparent.TransparentNode t ? t.element : null;
+    }
+
     GhostElement getElement(Level world, BlockPos pos) {
         return Eln.ghostManager.getGhost(new Coordonate(pos, world));
     }

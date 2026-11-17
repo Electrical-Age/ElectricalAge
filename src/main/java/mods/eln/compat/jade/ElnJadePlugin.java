@@ -39,12 +39,15 @@ public class ElnJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(Server.INSTANCE, NodeBlockEntity.class);
+        // (a multiblock's other cells: its owner's lines, as on the owner's own block)
+        registration.registerBlockDataProvider(Server.INSTANCE, mods.eln.ghost.GhostBlock.class);
         registration.registerBlockDataProvider(MachineServer.INSTANCE, BlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(Client.INSTANCE, NodeBlock.class);
+        registration.registerBlockComponent(Client.INSTANCE, mods.eln.ghost.GhostBlock.class);
         registration.registerBlockComponent(MachineClient.INSTANCE, Block.class);
     }
 
@@ -108,21 +111,31 @@ public class ElnJadePlugin implements IWailaPlugin {
         return v.nameAt(x, y, z);
     }
 
+    /**
+     * The machine a multiblock's other cell (a ghost block) belongs to, on the server: its transparent node's element
+     * (the Large Boiler's seven ghost cells showed only "Electrical Age Multiblock Part"), or null.
+     */
+    static mods.eln.node.transparent.TransparentNodeElement ghostOwner(BlockAccessor acc) {
+        if (!(acc.getBlock() instanceof mods.eln.ghost.GhostBlock) || !(acc.getLevel() instanceof net.minecraft.world.level.Level w)) return null;
+        return mods.eln.ghost.GhostBlock.owner(w, acc.getPosition());
+    }
+
     enum Server implements IServerDataProvider<BlockAccessor> {
         INSTANCE;
 
         @Override
         public void appendServerData(CompoundTag tag, BlockAccessor acc) {
             // (all of it: the client cuts it to the headline unless the player sneaks or the config asks for details)
+            var owner = ghostOwner(acc);
             Map<String, String> m;
             try {
-                m = lines(acc, true);
+                m = owner != null ? owner.getWaila() : lines(acc, true);
             } catch (RuntimeException e) {
                 return;   // (a device mid-change: no lines this time)
             }
-            String title = title(acc);
+            String title = owner != null ? owner.node.pickItem(null, acc.getLevel()).getHoverName().getString() : title(acc);
             if (title != null) tag.putString("elnTitle", title);
-            var b = burnable(acc);
+            var b = owner != null ? owner : burnable(acc);
             if (b != null && b.isBurnt()) {   // (first, in the headline: what happened and what repairs it)
                 var lines = new java.util.LinkedHashMap<String, String>();
                 lines.put(mods.eln.i18n.I18N.tr("Burnt out"), b.getBurnt().text);
@@ -132,7 +145,7 @@ public class ElnJadePlugin implements IWailaPlugin {
                 m = lines;
             }
             if (m == null || m.isEmpty()) return;
-            if (hasHeat(acc)) {   // (the ambient it cools towards: by biome, height, depth; Baughn 2026-10-26)
+            if (owner != null ? !owner.thermalLoadList.isEmpty() : hasHeat(acc)) {   // (the ambient it cools towards: by biome, height, depth; Baughn 2026-10-26)
                 m = new java.util.LinkedHashMap<>(m);
                 m.put(mods.eln.i18n.I18N.tr("Ambient"), mods.eln.misc.Utils.plotCelsius("", mods.eln.sim.Ambient.relative(acc.getLevel(), acc.getPosition())));
             }
