@@ -76,7 +76,8 @@ public final class FuelHeater {
         m.add(prism('y', FUEL_X, FUEL_Z, 1.0, 15.5, 15.7, "paint_fuel", 12));
         m.add(prism('y', FUEL_X, FUEL_Z, 1.45, 15.7, 15.9, "steel", 12));
         m.addAll(OilKit.boltRing('y', FUEL_X, FUEL_Z, 1.25, 15.9, 15.98, 4, "darksteel", 0.17, Math.PI / 4));
-        m.add(MachineKit.flangeLabelUp(15.9, FUEL_X, FUEL_Z, 0.7, "label_fuel"));
+        // (read from behind, where a player reaches it: from the front it is behind the flue; AdventurAgent saw it upside down)
+        m.add(MachineKit.flangeLabelUpFromBack(15.9, FUEL_X, FUEL_Z, 0.7, "label_fuel"));
         m.add(prism('x', AIR_Y, AIR_Z, 0.75, 14.2, 15.5, "darksteel", 8, false, false));
         m.add(prism('x', AIR_Y, AIR_Z, 1.0, 15.5, 15.7, "paint_air", 12));
         m.add(prism('x', AIR_Y, AIR_Z, 1.45, 15.7, 15.9, "steel", 12));

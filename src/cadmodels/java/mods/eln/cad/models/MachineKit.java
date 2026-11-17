@@ -107,6 +107,23 @@ final class MachineKit {
         return d;
     }
 
+    /** The label on a flange's face facing up at y, centre (x, z), radius r; readable from the back (x+, behind the machine). */
+    static Mesh flangeLabelUpFromBack(double y, double x, double z, double r, String mat) {
+        Mesh d = prism('y', x, z, r, y, y + 0.06, mat, 12, false, true);
+        d.uv(f -> {
+            float[] uv = new float[2 * f.n];
+            for (int i = 0; i < f.n; i++) {
+                double fx = f.xyz[3 * i], fz = f.xyz[3 * i + 2];
+                // seen from above with the back (x+) at the bottom: right is -z, up is -x
+                uv[2 * i] = (float) Math.min(1, Math.max(0, (z + r - fz) / (2 * r)));
+                uv[2 * i + 1] = (float) Math.min(1, Math.max(0, (x + r - fx) / (2 * r)));
+            }
+            return uv;
+        });
+        d.free("a label printed on the flange's face");
+        return d;
+    }
+
     /**
      * The label on a flange's face (it faces +x at x, centre (y, z), radius r): a thin disc whose face shows the label
      * material's whole cell, upright and readable from behind the machine.
