@@ -18,8 +18,23 @@ import net.minecraft.nbt.CompoundTag;
  * owner's (a turbine's shaft, or a shaft motor).
  */
 public final class CondenserVessel {
-    /** The float valve: open below this share of the vessel as water, shut at the other. */
+    /** The float valve: open below this share of the vessel as water, shut at the other (floatOpening). */
     public static final double MAKEUP_OPEN = 0.15, MAKEUP_SHUT = 0.25;
+
+    /**
+     * The makeup float valve's opening (0..1) at this hotwell level (share of the vessel as water): the cube of the
+     * level's distance under MAKEUP_SHUT across the band, as the boiler's feed float (BoilerElement.feedFloat). The valve
+     * is set once a tick from the level, and its port passes ~23 kg/s a bar wide open, so a straight line opened so
+     * steeply at the shut mark that one tick's opening took a band's worth of water and shut it again. On a player's
+     * small plant (2026-11-17) whose makeup inlet was teed into its condensate pump's discharge, the float then passed
+     * the pump's recirculation in gulps of ~150 g/s one tick in ten; each gulp emptied the feed line from 10 to ~1.5
+     * bar, refilling it cost the fluid core 100-300 Newton iterations a step, and the network never slept. With the cube
+     * it holds a steady opening a few tenths of a percent under the shut mark; wide open it fills as fast as before.
+     */
+    public static double floatOpening(double flood) {
+        double x = Math.max(0, Math.min(1, (MAKEUP_SHUT - flood) / (MAKEUP_SHUT - MAKEUP_OPEN)));
+        return x * x * x;
+    }
     /** The ejector's air offtake: this share up the vessel (over the tube bundle; flooding past it drowns it). */
     public static final double AIR_OFFTAKE = 0.6;
     public static final double OUTLET_VOLUME = 0.00002, PORT_K = BoilerElement.PORT_K;
@@ -148,7 +163,7 @@ public final class CondenserVessel {
         vessel.wallUA = Math.max(0, cooling) * nominalHeat / CondenserDescriptor.DT_VESSEL;
         if (this.ejector != null) this.ejector.speed = Math.max(0, Math.min(1, ejector));
         // the makeup's float valve
-        floatOpen = Math.max(0, Math.min(1, (MAKEUP_SHUT - floodShare()) / (MAKEUP_SHUT - MAKEUP_OPEN)));
+        floatOpen = floatOpening(floodShare());
         // (an unpiped makeup flange is blind: open, its few mL of air leaked into the vacuum until the node held next to
         // nothing, colder than the core's EOS goes, and the step stopped converging)
         if (makeup != null) makeup.open = piped(inlet) ? floatOpen * Math.max(0, Math.min(1, makeupGate)) : 0;

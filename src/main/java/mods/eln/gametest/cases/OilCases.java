@@ -72,6 +72,7 @@ public final class OilCases {
         cases.add(new MakeupPlantRefills());
         cases.add(new MakeupPlantRefills(13));
         cases.add(new MakeupPlantRefills(14));
+        cases.add(new TeedMakeupPlant());
         cases.add(new TurbineLoadDrop());
         cases.add(new TurbineRunaway());
         cases.add(new StackedPlant());
@@ -2883,6 +2884,130 @@ public final class OilCases {
             ctx.check("makeup plant: the boiler fills back up to its float (over 60 %)", fillEnd > 0.6, String.format("%.0f%%", fillEnd * 100));
             ctx.check("makeup plant: the condenser doesn't flood", floodHi < mods.eln.oil.CondenserVessel.LEVEL_FULL, String.format("%.0f%%", floodHi * 100));
             ctx.check("makeup plant: the turbine runs, not burnt", !turbine.isBurnt() && power > 300, String.format("%.0f W", power));
+        }
+    }
+
+    /**
+     * A player's small plant (2026-11-17) whose condenser's makeup flange is piped into its own condensate line, the
+     * pump's discharge to the boiler: the makeup float valve sees the line's 10 bar and passes the pump's surplus back
+     * into the hotwell. With a float opening in a straight line from its shut mark it did so in gulps (~150 g/s one tick
+     * in ten), the line swung between ~1.5 and 10 bar, and the fluid core took 100-300 Newton iterations a step, every
+     * step. The float (CondenserVessel.floatOpening) must hold a steady opening: the line stays up, the boiler is fed,
+     * and the network's steps are cheap. The rig is MakeupPlantRefills' with the boiler half full and the hotwell at
+     * the float's shut mark.
+     */
+    static final class TeedMakeupPlant implements TestCase {
+        mods.eln.oil.BoilerElement boiler;
+        mods.eln.oil.SteamGeneratorElement turbine;
+        mods.eln.oil.CondenserElement c;
+        mods.eln.sim.IProcess fire;
+        String err;
+        int tick, watched, shutTicks;
+        long it0, steps0;
+        double lineLo = Double.MAX_VALUE, lineHi, floatLo = Double.MAX_VALUE, floatHi, floodHi, fillLo = Double.MAX_VALUE, power, iterations, makeup, fillWatch, fillEnd;
+        static final int TICKS = 2400, WATCH = 1200;
+        final java.util.List<mods.eln.oil.ElectricHeaterElement> heaters = new java.util.ArrayList<>();
+
+        public String id() {
+            return "fluid_makeup_teed_into_condensate_line";
+        }
+
+        public int width() {
+            return 7;
+        }
+
+        public int ticks() {
+            return TICKS;
+        }
+
+        public void build(TestContext ctx) {
+            Wp10aCases.Layout l = new Wp10aCases.Layout(ctx, width());
+            boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
+            boiler.front = mods.eln.misc.Direction.XN;   // (feed flange south)
+            boiler.reconnect();
+            boiler.thermal.Tc = 200 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
+            boiler.fromTanks(800, 0);
+            boiler.showTanks();
+            turbine = TwoUnitPlant.unit(l, 1, heaters);
+            turbine.controls.inventory.setItem(mods.eln.oil.SteamValveControl.REGULATOR_SLOT, mods.eln.Eln.sharedItem.getDescriptor(8 + (3 << 6)).newItemStack());
+            turbine.controls.targetBar = 10;
+            turbine.controls.computeInventory();
+            c = TwoUnitPlant.facingWest(ctx, ctx.at(4, 1, 2));
+            PipeCases.lay(ctx, ctx.at(1, 2, 1), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(2, 2, 1), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(3, 2, 1), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, ctx.at(4, 2, 1), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);
+            PipeCases.lay(ctx, ctx.at(3, 1, 2), 0, 16, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, ctx.at(2, 1, 2), 0, 16, 8, 8, 0, 8, 8);
+            PipeCases.lay(ctx, ctx.at(1, 1, 2), 0, 16, 8, 8, 8, 8, 8, 8, 8, 0);
+            for (int x = 1; x <= 3; x++) l.used.add(ctx.at(x, 1, 2));
+            // the makeup flange (the condenser's top) routed into the condensate line mid-run: a tee onto the discharge
+            var level = ctx.level();
+            var a = mods.eln.node.voxel.PipePlacer.portAtForTests(level, ctx.at(4, 1, 2), net.minecraft.core.Direction.UP);
+            BlockPos j = ctx.at(2, 1, 2);
+            err = mods.eln.node.voxel.PipePlacer.routeAndJoinForTests(level, 0, a, new long[]{j.getX() * 16L + 8, j.getY() * 16L + 8, j.getZ() * 16L + 8});
+            mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
+                if (c.vessel == null || boiler.vessel == null || c.inlet == null || turbine.inlet == null || turbine.condenser == null) return;
+                if (tick == 0) {   // (the hotwell at the float's shut mark, the boiler hot and half full, the line full)
+                    mods.eln.sim.fluid.EaUnits.addWater(c.vessel, 0.25 * c.vessel.volume * mods.eln.sim.fluid.Water.RHO_L, 310, false);
+                    double tb = mods.eln.sim.fluid.Water.tsat(10e5);
+                    boiler.vessel.fill(0.5 * mods.eln.oil.BoilerElement.RATED_KG, mods.eln.sim.fluid.Water.psat(tb), tb);
+                    turbine.omega = 0.9;
+                    // (the feed run and the makeup's run full, as a plant that has run)
+                    for (var port : new mods.eln.sim.fluid.FluidNode[]{boiler.feed, c.inlet}) {
+                        var run = mods.eln.fluid.FluidWorld.nodeFor(port);
+                        run.fill(0.995 * run.volume * mods.eln.sim.fluid.Water.RHO_L, mods.eln.sim.fluid.Water.P_ATM, 300);
+                        run.update();
+                    }
+                }
+                tick++;
+                // (the player's makeup: a pump into the line, here topped up to 5 bar: it only runs when the line falls under that)
+                var in = mods.eln.fluid.FluidWorld.nodeFor(c.inlet);
+                for (int k = 0; k < 100 && in.P() < 5e5; k++) {
+                    mods.eln.sim.fluid.EaUnits.addWater(in, 2e-5, 290, false);
+                    makeup += 2e-5;
+                }
+                if (tick == WATCH) fillWatch = boiler.fill();
+                if (tick % 200 == 0) mods.eln.Eln.LOG.info(String.format("[%s] t %d: line %.2f bar, float %.3g, hotwell %.2f%%, boiler %.1f%%, makeup %.1f g", id(), tick,
+                    mods.eln.fluid.FluidWorld.nodeFor(boiler.feed).P() / 1e5, c.v.floatOpen, c.floodShare() * 100, boiler.fill() * 100, makeup * 1000));
+                double shellC = boiler.thermal.Tc + mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius;
+                boiler.thermal.moveEnergyTo(Math.max(0, 40 * (300 - shellC)) * t);
+                var net = mods.eln.fluid.FluidWorld.networkOf(mods.eln.fluid.FluidWorld.nodeFor(boiler.vessel));
+                var st = net == null ? null : net.coreStats();
+                if (tick == WATCH && st != null) {
+                    it0 = st.iterations;
+                    steps0 = st.steps;
+                }
+                if (tick > WATCH && st != null) {
+                    watched++;
+                    double line = mods.eln.fluid.FluidWorld.nodeFor(boiler.feed).P();
+                    lineLo = Math.min(lineLo, line);
+                    lineHi = Math.max(lineHi, line);
+                    floatLo = Math.min(floatLo, c.v.floatOpen);
+                    floatHi = Math.max(floatHi, c.v.floatOpen);
+                    if (c.v.floatOpen <= 0) shutTicks++;
+                    floodHi = Math.max(floodHi, c.floodShare());
+                    fillLo = Math.min(fillLo, boiler.fill());
+                    fillEnd = boiler.fill();
+                    power += turbine.source.getEffectiveP() / (TICKS - WATCH);
+                    iterations = (st.iterations - it0) / (double) Math.max(1, st.steps - steps0);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(fire);
+            ctx.line(String.format("teed makeup: %.1f Newton iterations a step over the last %d ticks; line %.2f..%.2f bar; float %.4f..%.4f open, shut %d ticks; hotwell up to %.1f%%; "
+                    + "boiler down to %.0f%%; %.0f W; condenser %s", iterations, TICKS - WATCH, lineLo / 1e5, lineHi / 1e5, floatLo, floatHi, shutTicks, floodHi * 100,
+                fillLo * 100, power, c.getWaila()));
+            ctx.check("teed makeup: the makeup flange is routed into the condensate line", err == null, String.valueOf(err));
+            ctx.check("teed makeup: the float holds a steady opening (never shut, under 1 % wide)", shutTicks == 0 && floatHi - floatLo < 0.01,
+                String.format("%.4f..%.4f, shut %d of %d ticks", floatLo, floatHi, shutTicks, watched));
+            ctx.check("teed makeup: the condensate line stays up at the boiler (no gulps)", lineLo > 9e5, String.format("%.2f..%.2f bar", lineLo / 1e5, lineHi / 1e5));
+            ctx.check("teed makeup: the network's steps are cheap (under 10 Newton iterations a step)", iterations < 10, String.format("%.1f", iterations));
+            ctx.check("teed makeup: the boiler is fed (holds its level), the hotwell doesn't flood, the turbine runs",
+                fillEnd > fillWatch - 0.02 && fillLo > 0.3 && floodHi < mods.eln.oil.CondenserVessel.LEVEL_FULL && power > 300,
+                String.format("boiler %.1f%% -> %.1f%% (down to %.1f%%), hotwell %.1f%%, %.0f W", fillWatch * 100, fillEnd * 100, fillLo * 100, floodHi * 100, power));
         }
     }
 
