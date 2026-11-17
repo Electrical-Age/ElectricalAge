@@ -95,6 +95,8 @@ public final class HeatExchangerCases {
         FluidDevice fx;
         IProcess watch;
         Stream a, b;
+        /** Side A itself as a stream with no sink (null: not watched): what it gives up from its store over the window. */
+        Stream storeA;
         int tick;
         double j0, jMid, window;
 
@@ -105,6 +107,7 @@ public final class HeatExchangerCases {
                 if (++tick == measureFrom()) {
                     j0 = h.totalJ;
                     if (a != null) a.start();
+                    if (storeA != null) storeA.start();
                     b.start();
                 }
                 if (tick == (measureFrom() + ticks()) / 2) jMid = h.totalJ;
@@ -161,6 +164,7 @@ public final class HeatExchangerCases {
             PlumbingCases.fill(h.b, 0.999 * h.b.volume * Water.RHO_L, 16e5, 293.15);
             b = new Stream(feedIn, feedOut);
             a = new Stream(steamIn, drain);
+            storeA = new Stream(h.a, null);
             double feedK = big ? FEED_K * 2 : FEED_K;
             fx = fixtures(h.fluidLevel(),
                 new Object[]{ctx.at(west, 1, 3), 5, steamIn}, new Object[]{ctx.at(east, 1, 3), 4, drain, FluidDevice.FluidPort.CENTRE, TRAP_K},
@@ -173,8 +177,9 @@ public final class HeatExchangerCases {
             double q = duty(), mb = b.flow(window), qb = b.gain(window), ma = h.sideInflow(true)[0], tIn = 20, tOut = 20 + qb / Math.max(1e-9, mb * 4186),
                 tSteam = Water.tsat(h.a.P()) - Water.T0;
             ctx.line(String.format("feed heater %s (%.1f W/K): %.2f kW into %.1f g/s of feed, %.0f -> %.0f C by the heat it carried (steam side at %.2f bar, %.0f C: approach %.0f K); "
-                    + "steam side %.2f g/s in; feed arrived %.2f g/s; %.2f g/s of condensate drained; %s",
-                big ? "2x2x2" : "one block", h.ua(), q / 1000, mb * 1000, tIn, tOut, h.a.P() / 1e5, tSteam, tSteam - tOut, ma * 1000, b.arrived(window) * 1000, a.arrived(window) * 1000, h.getWaila()));
+                    + "steam side %.2f g/s in (%.2f g/s taken from the steam main, %+.2f g/s out of side A's store); feed arrived %.2f g/s; %.2f g/s of condensate drained; %s",
+                big ? "2x2x2" : "one block", h.ua(), q / 1000, mb * 1000, tIn, tOut, h.a.P() / 1e5, tSteam, tSteam - tOut, ma * 1000, a.flow(window) * 1000,
+                storeA.flow(window) * 1000, b.arrived(window) * 1000, a.arrived(window) * 1000, h.getWaila()));
             ctx.check("feed heater: the feed flows through side B", mb > 0.002, String.format("%.2f g/s", mb * 1000));
             ctx.check("feed heater: the feed's heat gain is the exchanger's duty (within 5 %)", Math.abs(qb - q) < 0.05 * Math.abs(q) + 20,
                 String.format("%.2f vs %.2f kW", qb / 1000, q / 1000));
@@ -255,9 +260,9 @@ public final class HeatExchangerCases {
             double tAout = 90 - qa / Math.max(1e-9, ma * 4186), tBout = mode == DEAD_END ? h.b.T() - Water.T0 : 20 + qb / Math.max(1e-9, mb * 4186);
             double cMin = (mode == DEAD_END ? ma : Math.min(ma, mb)) * 4186, most = cMin * 70;
             ctx.line(String.format("cooler 2x2x4 %s (%.0f W/K): %.2f kW (%.0f %% of the most the smaller stream could take, %.2f kW); hot %.1f g/s %.0f -> %.0f C, "
-                    + "cooling %.1f g/s %.0f -> %.0f C; hot stream gives %.2f kW; %s",
+                    + "cooling %.1f g/s %.0f -> %.0f C; hot stream gives %.2f kW; joints drop %.0f and %.0f Pa; %s",
                 new String[]{"counterflow", "parallel flow", "dead-ended"}[mode], h.ua(), q / 1000, q / most * 100, most / 1000, ma * 1000,
-                90.0, tAout, mb * 1000, 20.0, tBout, qa / 1000, h.getWaila()));
+                90.0, tAout, mb * 1000, 20.0, tBout, qa / 1000, Math.abs(h.jointDrop(true)), Math.abs(h.jointDrop(false)), h.getWaila()));
             ctx.check("cooler: the hot stream flows (10-40 g/s)", ma > 0.010 && ma < 0.040, String.format("%.1f g/s", ma * 1000));
             // (dead-ended: under 1 kW, the hot side's own warming shows; 0.5 kW slack)
             ctx.check("cooler: the hot stream's heat loss is the duty (within 5 %)", Math.abs(qa - q) < 0.05 * Math.abs(q) + (mode == DEAD_END ? 500 : 20),

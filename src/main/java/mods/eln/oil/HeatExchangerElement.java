@@ -94,9 +94,9 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         sliceB = split(b);
         slicedA = a;
         slicedB = b;
-        // (a joint's conductance: a large pipe's end, so a gas stream drops ~100 Pa a joint; wider, the drop fell under the
-        // pipe streams' 10 Pa band and their return stream mixed the slices back towards one: 81 % against 88 %)
-        double k = endK();
+        // (a joint's conductance: a tenth of the ports', JOINT_SHARE; wider, the drop fell under the pipe streams' 10 Pa
+        // band and their return stream mixed the slices back towards one: 81 % against 88 %)
+        double k = endK() * JOINT_SHARE;
         List<FluidDevice.Link> out = new java.util.ArrayList<>();
         int n = sliceA.length;
         for (int i = 0; i + 1 < n; i++)
@@ -118,11 +118,29 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         links = out;
     }
 
+    /**
+     * A slice joint's conductance over its ports' (endK). At 1 the fluid core crawled whenever water circulated through a
+     * small exchanger (a feed check valve opening on a running plant: ~130 iterations a step for 10 steps, then 40 a step);
+     * joints that stiff turned a Pa of a Newton iterate's error into grams of flow between 35 mL slices. At 0.1 it takes ~70,
+     * then ~23. Softer joints also mix the slices less at rest (g band ln 2 a joint): counterflow 64 -> 67 % of its 67 %
+     * ideal. The cost is a stream's drop: a 2 x 2 x 4 stack's joints drop ~4 kPa for 44 g/s of 2.4 bar steam (0.35 at 1),
+     * a gas turbine's steam raiser backs its exhaust up 5 kPa more; water streams drop a few Pa (Baughn 2026-11-16: a
+     * higher drop is fine).
+     */
+    static final double JOINT_SHARE = 0.1;
+
+    /** The pressure difference between a side's two end slices (Pa, first minus last; 0 if not sliced): its joints' drop. */
+    public double jointDrop(boolean sideA) {
+        HeatExchangerElement h = head();
+        FluidNode[] side = sideA ? h.sliceA : h.sliceB;
+        return side == null ? 0 : side[0].P() - side[side.length - 1].P();
+    }
+
     /** A slice's volume when its joints and ports were made a large pipe's end (m^3: a lone block's at 8 L a side). */
     static final double K_VOLUME = 1e-3;
 
     /**
-     * Its joints' and ports' conductance (m^3): a large pipe's end, times its slices' volume over K_VOLUME (at most 1).
+     * Its ports' conductance (m^3; its joints take JOINT_SHARE of it): a large pipe's end, times its slices' volume over K_VOLUME (at most 1).
      * At 1 B a side a lone block's slice is 8.8 mL; with a large pipe's end on it the fluid core crawled at 257 sub-steps
      * a step on nine empty blocks at rest (conductance x dt over contents 114 x what it had). Scaled, a stream drops more
      * across it: a quarter slice is for small streams, a 2 x 2 stack for the gas ones.

@@ -63,6 +63,12 @@ class StuckProbe {
             double k = Double.parseDouble(p[1]);
             for (String e : p[0].split(",")) { Network.Edge ed = net.edges.get(Integer.parseInt(e)); ed.g *= k; ed.gBack *= k; }
         }
+        String jsc = System.getenv("STUCK_JSCALE");   // k: every exchanger slice joint (an edge with the joints' 0.5 Pa band) x k
+        if (jsc != null) {
+            int count = 0;
+            for (Network.Edge ed : net.edges) if (ed.band == 0.5) { ed.g *= Double.parseDouble(jsc); ed.gBack *= Double.parseDouble(jsc); count++; }
+            System.out.println("jscale " + jsc + " on " + count + " joints");
+        }
         String cs = System.getenv("STUCK_CSCALE");   // e.g. 25,26:0
         if (cs != null) {
             String[] p = cs.split(":");

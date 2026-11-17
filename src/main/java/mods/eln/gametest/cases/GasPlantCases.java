@@ -611,8 +611,9 @@ public final class GasPlantCases {
      */
     static final class Reheat extends PlumbingCases.Big {
         /** The crossover's drop over the reheater and its fixtures (Pa): 900 at 8 L a side; at 1 B its joints and ports are
-         *  narrower (HeatExchangerElement.endK) and it takes ~1.5 kPa for the same ~40 g/s. */
-        static final double REHEAT_DROP = 1500;
+         *  narrower (HeatExchangerElement.endK) and it took ~1.5 kPa for the same ~40 g/s; with its joints a tenth of its
+         *  ports (HeatExchangerElement.JOINT_SHARE) it takes ~5 kPa. */
+        static final double REHEAT_DROP = 5000;
         List<HeatExchangerElement> s;
         FluidDevice fx;
         IProcess watch;
@@ -649,7 +650,8 @@ public final class GasPlantCases {
             mods.eln.fluid.FluidWorld.remove(fx);
             HeatExchangerElement h = head(s);
             double q = (h.totalJ - j0) / window, m = flow / Math.max(1, n);
-            ctx.line(String.format("reheat 2x2x4 (%.0f W/K): %.1f kW into %.1f g/s of crossover steam; %s", h.ua(), q / 1000, m * 1000, h.getWaila()));
+            ctx.line(String.format("reheat 2x2x4 (%.0f W/K): %.1f kW into %.1f g/s of crossover steam, its joints dropping %.0f Pa of the %.0f; %s", h.ua(), q / 1000, m * 1000,
+                Math.abs(h.jointDrop(false)), REHEAT_DROP, h.getWaila()));
             ctx.check("reheat: one 2 x 2 x 4 exchanger (200 W/K)", stacked(s, 200), "");
             ctx.check("reheat: ~40 g/s of crossover steam (30-55)", m > 0.030 && m < 0.055, String.format("%.1f g/s", m * 1000));
             ctx.check("reheat: 5-8 kW into it", q > 5000 && q < 8000, String.format("%.1f kW", q / 1000));

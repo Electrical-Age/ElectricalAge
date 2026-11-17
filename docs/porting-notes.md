@@ -344,8 +344,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   fronts into one exchanger (HeatExchangerGroup, as tank boxes: merge, split on break, shares saved per block), 50 W/K
   a 2 x 2 slice (Baughn 2026-10-29), 1 B a side a block (Baughn 2026-11-15; it was 8 L, 113 B, 14 x a boiler, and an
   economizer soaked up minutes of feed); a lone block or any other shape is a quarter slice (12.5 W/K). At 1 B its slices'
-  joints and ports are a large pipe's end times slice volume over 1 L, and a side has at least 30 mL a slice (a lone block
-  2 slices, a stack 8): with the old conductances on 8.8 mL slices the fluid core crawled at 257 sub-steps a step. Saves
+  ports are a large pipe's end times slice volume over 1 L, its joints a tenth of that, and a side has at least 30 mL a
+  slice (a lone block 2 slices, a stack 8): with the old conductances on 8.8 mL slices the fluid core crawled at 257
+  sub-steps a step, and with joints as wide as its ports it crawled whenever water circulated through it (2026-11-16;
+  softer, they also mix the slices less: counterflow reaches its ideal; a gas stream drops more, ~4 kPa over a 2 x 2 x 4
+  stack's joints for 44 g/s of 2.4 bar steam). Saves
   without its "sideV" key (8 L) load at the state they had at 1 B; the rest is vented, logged, kept in "ventAW"/"ventBW"
   and shown in Jade ("Resized"): spilled into a closed plant it would drown a boiler or flood a hotwell.
   `HeatExchangerCases` (feed heater, cooler, wrong uses, old save).
