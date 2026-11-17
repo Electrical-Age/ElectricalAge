@@ -65,7 +65,7 @@ public final class HpPlantCases {
         // speed (~1.5 bar) and slowed to 55 % (~0.5 bar: a few hundred watts). Todo #504 (air ports, natural draught
         // beside the damper): before, 2.77 kW of blower for 4.80 kW net, and 0.47 kW for 3.69 kW net slowed
         cases.add(oneBlower("hp_plant_midgame_one_blower", 1.0, 11000, 17670, 8690, 3.7, 2590, 5300));
-        cases.add(oneBlower("hp_plant_midgame_one_blower_low", 0.55, 11000, 14440, 7160, 4.5, 390, 5920));
+        cases.add(oneBlower("hp_plant_midgame_one_blower_low", 0.55, 11000, 14440, 7160, 4.5, 390, 6120));
         cases.add(new BlowerBlocked());
         cases.add(new LargeBoilerBody());
         cases.add(new LargeBoilerPlant(false));
@@ -615,7 +615,7 @@ public final class HpPlantCases {
         }
     }
 
-    /** A Fuel Heat Furnace at p, its fuel flange towards front (its thermal face is its back), a Big burner in it, lit,
+    /** A Fuel Heat Furnace at p facing front (its thermal face and fuel flange on its back), a Big burner in it, lit,
      *  at full setting, with mB of heavy oil in its tank. */
     static FuelHeatFurnaceElement furnace(TestContext ctx, BlockPos p, Direction front, int mB) {
         var f = (FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, p);
@@ -867,7 +867,7 @@ public final class HpPlantCases {
             double heat16 = water * 16e3 / Math.max(1e-9, shaftW), furnaces16 = heat16 / Math.max(1e-9, perFurnace), bucketsH = mB * 3.6 / 2;
             // the boiler's own limit at this pressure: its shell's watchdog (400 K over ambient) through 0.005 K/W into the water
             double boilerLimit = shell <= 0 ? 0 : water * (400 - (shell - water * BoilerElement.SHELL_TO_WATER_K_PER_W)) / (water * BoilerElement.SHELL_TO_WATER_K_PER_W);
-            ctx.line(String.format("%s: fire %.2f kW (2 furnaces, overfire x%.2f, tank %.2f bar gauge), %.2f kW into the water (%.2f kW a furnace, %.1f %% of the fire); "
+            ctx.line(String.format("%s: fire %.2f kW (2 furnaces, air factor x%.2f, tank %.2f bar gauge), %.2f kW into the water (%.2f kW a furnace, %.1f %% of the fire); "
                     + "boiler %.2f bar, shell %.0f K over ambient (max %.0f), fill %.0f..%.0f %%; furnaces %.0f / %.0f K over ambient (max %.0f / %.0f); "
                     + "steam %.2f g/s, shaft %.2f kW (%.0f kJ/kg), electric %.2f kW, %.0f rad/s; condenser %.3f bar, up to %.0f %% full, pumped %.2f g/s; "
                     + "boiler water %+.1f g over %.0f s; fuel %.3f g/s = %.2f mB/s = %.2f buckets/h a furnace; coke %.3f / %.3f",
@@ -903,7 +903,7 @@ public final class HpPlantCases {
             ctx.check(id + ": the condenser holds a vacuum (under 0.3 bar)", condSum / w < 0.3e5, String.format("%.3f bar", condSum / w / 1e5));
             // the balance, pinned: a change to burners, furnace or boiler shells, the turbine or the condenser that moves
             // what a 16 kW plant takes shows here
-            ctx.check(id + ": the fire is the burners' (10 kW each x their overfire, less coke; within 6 %)",
+            ctx.check(id + ": the fire is the burners' (10 kW each x their air factor, less coke; within 6 %)",
                 Math.abs(fire / (2 * 10e3 * over * (1 - (f[0].getCoke() + f[1].getCoke()) / 2)) - 1) < 0.06, String.format("%.2f kW at x%.2f", fire / 1000, over));
             ctx.check(id + ": 65-78 % of the fire reaches the water", share > 0.65 && share < 0.78, String.format("%.1f %%", share * 100));
             if (expectFurnaceW > 0) {

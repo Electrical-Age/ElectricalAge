@@ -380,13 +380,13 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val d = damper ?: return
         val n = draught ?: return
         val nominal = nominalW()
-        val ref = if (nominal > 0) Math.max(fire.level, AIR_REF_MIN) else 0.0
+        // (none asked for, none burning: its draught and damper rest, so an idle furnace's network can sleep)
+        val ref = if (nominal > 0 && (fire.level > 0 || heaterControlValue > 0)) Math.max(fire.level, AIR_REF_MIN) else 0.0
         airAskKgS = AIR_KG_PER_J * ref * nominal
         d.open = Math.min(1.0, ref * nominal / damperRefW())
         val rho = mods.eln.sim.fluid.Water.P_ATM / (mods.eln.sim.fluid.Water.R_AIR * amb)
         n.speed = ref
         n.qMax = if (nominal > 0) AIR_KG_PER_J * nominal / rho else 0.0
-        intake?.fill(0.0, mods.eln.sim.fluid.Water.P_ATM, amb)
     }
 
     /** After a step: the air that came in by its damper (air alone: a gas or liquid in its windbox doesn't burn) and draught. */
@@ -948,7 +948,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             airRatio < 0.9 && back > 0.5 * DRAUGHT_PA -> String.format(I18N.tr("starved (%.0f%%): flue backed up %s"), airRatio * 100,
                 if (back < 1e4) String.format("%.0f Pa", back) else String.format("%.2f bar", back / 1e5))
             airRatio < 0.9 -> String.format(I18N.tr("starved (%.0f%%)"), airRatio * 100)
-            forcedKgS > 0.05 * airAskKgS -> String.format(I18N.tr("forced %.1f g/s, fires %.1fx its setting"), (forcedKgS + draughtKgS) * 1000, airFactor())
+            forcedKgS > 0.05 * airAskKgS -> String.format(I18N.tr("forced %.1f g/s + draught %.1f g/s, fires %.1fx its setting"), forcedKgS * 1000, draughtKgS * 1000, airFactor())
             else -> String.format(I18N.tr("natural draught %.1f g/s"), draughtKgS * 1000)
         }
     }

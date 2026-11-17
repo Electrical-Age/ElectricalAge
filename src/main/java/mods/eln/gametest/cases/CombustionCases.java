@@ -192,6 +192,15 @@ public final class CombustionCases {
                 flue(ctx, rig(ctx, "piped to the open air", 3, 3), 0, pipe, false);
                 flue(ctx, rig(ctx, "flue held at +75 Pa", 5, 3), 75, wide, false);
                 flue(ctx, rig(ctx, "flue held at +300 Pa", 7, 3), 300, wide, false);
+                // (switched off, and switched on at setting 0, nothing piped: does its network sleep?)
+                Rig off = new Rig("off");
+                off.f = furnace(ctx, ctx.at(6, 1, 7), Direction.XN, 1500, false);
+                rigs.add(off);
+                Rig idle = rig(ctx, "on, set to 0", 3, 7);
+                idle.f.networkUnserialize(ctx.stream(o -> {
+                    o.writeByte(FuelHeatFurnaceElement.Companion.getSetManualControlValueEvent());
+                    o.writeFloat(0f);
+                }));
             } else {
                 double dp = FuelHeatFurnaceElement.DAMPER_DP;
                 air(rig(ctx, "forced, unpiped", 1, 3), dp);
@@ -287,9 +296,19 @@ public final class CombustionCases {
                     id, r.name, fire, fire2, r.ratioS / t, r.ratioMin, r.ratioMax, air * 1000, fuel * 1000, out * 1000, out / Math.max(1e-12, air + fuel) * 100, smoke / 1000, share,
                     r.gaugeS / t, r.gaugeMax, r.f.isBurnt(), r.jade));
                 var fl = r.f.getFlue();
-                if (fl.sink != null && fl.node != null) ctx.line(String.format("%s: %s: firebox %.0f K; the sink took %.2f g/s at %.0f kJ/kg; the smoke went in at %.0f K",
-                    id, r.name, mods.eln.fluid.FluidWorld.nodeFor(fl.node).T(), fl.sink.delivered * 1000, fl.sink.delivered > 0 ? fl.sink.deliveredW / fl.sink.delivered / 1000 : 0, fl.flow.kelvin));
+                if (fl.sink != null && fl.node != null) {
+                    FluidNode fb = mods.eln.fluid.FluidWorld.nodeFor(fl.node);
+                    int fg = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:flue_gas");
+                    double gas = fb.mAir + (fg >= 2 ? fb.vapour(fg) : 0);
+                    ctx.line(String.format("%s: %s: firebox %.0f K, %.0f %% of its gas air; the sink took %.2f g/s at %.0f kJ/kg; the smoke went in at %.0f K; its network %s",
+                        id, r.name, fb.T(), gas > 0 ? 100 * fb.mAir / gas : 0, fl.sink.delivered * 1000, fl.sink.delivered > 0 ? fl.sink.deliveredW / fl.sink.delivered / 1000 : 0,
+                        fl.flow.kelvin, r.stats));
+                }
                 boolean finite = Double.isFinite(fire) && Double.isFinite(r.gaugeMax) && !r.f.isBurnt();
+                if (r.name.equals("on, set to 0") || r.name.equals("off")) {
+                    ctx.check(id + ": on at setting 0: no fire", fire < 1e-3, String.format("%.4f", fire));
+                    continue;
+                }
                 ctx.check(id + ": " + r.name + ": finite, nothing burnt", finite, String.format("fire %.3f, max gauge %.0f Pa", fire, r.gaugeMax));
                 switch (r.name) {
                     case "unpiped" -> {
@@ -500,6 +519,7 @@ public final class CombustionCases {
 
         public void measure(TestContext ctx) {
             Eln.simulator.removeSlowProcess(clock);
+            ctx.line("air port, switched off: its firebox's network " + GasPlantCases.netStats(wet.getFlue().node) + "; its tank's " + GasPlantCases.netStats(wet.getVessel()));
             mods.eln.fluid.FluidWorld.remove(fx);
             for (var f : new FuelHeatFurnaceElement[]{wet, high}) {
                 FluidNode w = mods.eln.fluid.FluidWorld.nodeFor(f.getWindbox()), fb = mods.eln.fluid.FluidWorld.nodeFor(f.getFlue().node);

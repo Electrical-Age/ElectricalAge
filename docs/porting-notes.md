@@ -270,7 +270,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   layer, or its flange) and switched on. Other mods' fuels with no species no longer go in (none
   on Incognito). `fuel_furnace_mixed_fuel`, `fuel_furnace_coke_balance`, `fuel_furnace_water_drowns_fire`,
   `fuel_furnace_legacy_tank`.
-- Fuel heat furnace under pressure (Baughn 2026-11-11, todo #399/#400): its burner is pressure-fed: over the breather's
+- Fuel heat furnace under pressure (Baughn 2026-11-11, todo #399/#400; the pressure-fed burner is superseded by the
+  combustion chamber, todo #504, below; the relief, burst and gas rules stand): its burner is pressure-fed: over the breather's
   300 Pa its tank's gauge pressure feeds it 1 + gauge / 1 bar times its setting (an air or gas line on its one flange
   pressurises the tank against its small breather; 1 bar doubles it; past its rating it overheats as before). Its
   breather gained a relief valve (opens at 3 bar, as large as its flange), and past 6 bar gauge the tank bursts
@@ -281,7 +282,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   line's pressure unless the line is regulated. GameTests `fuel_furnace_forced_air`, `_relief`, `_burst`, `_gas_first`,
   `_gas_fire`.
 - Fuel heat furnace's combustion air and the 230V Air Blower (`eln:transparent_node@5396`, new; todo #471, Baughn
-  2026-11-15). Pressure-fed, the burner now takes its combustion air out of its tank, 0.4 kg per MJ of fire (any
+  2026-11-15; the air register and the tank-fed air are superseded by the combustion chamber, todo #504, below; the
+  blower and the breathing vent stand). Pressure-fed, the burner now takes its combustion air out of its tank, 0.4 kg per MJ of fire (any
   hydrocarbon's ~3 MJ per kg of air, 20 % excess), through an air register metered to that rate inside the fluid solve;
   at or under the breather's deadband (natural draught) it draws the room's air as before and nothing changed. The
   breather's float vent is a breathing vent now, 200 x narrower than its vacuum breaker (it was a ~2 cm hole: 146 g/s
