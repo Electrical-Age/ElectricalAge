@@ -70,6 +70,18 @@ public final class PortBridge {
     }
 
     /**
+     * The spot (FluidPort.at) on a device's left or right flank of a point drawn at (x, y) px in its model's frame (front
+     * XN, x the depth from the front, right z+: docs/cad.md), for the device facing front.
+     */
+    public static int flankSpot(mods.eln.misc.Direction front, mods.eln.misc.Direction face, int x, int y) {
+        mods.eln.misc.Direction b = front.back();
+        boolean plus = b == mods.eln.misc.Direction.XP || b == mods.eln.misc.Direction.ZP;
+        int w = plus ? x : 16 - x;
+        int f = face.toEnumFacing().get3DDataValue();
+        return f <= 3 ? w * 17 + y : y * 17 + w;   // (north/south: x then y; west/east: y then z)
+    }
+
+    /**
      * Whether a pipe meets it: its run reaches another node, or holds more than its stub. (A pipe from one device's
      * flange straight to another's is one run of both stubs and the pipe, with no edge out of it: the Steam Cracker's
      * butadiene into a Polymeriser never left, LabAssistant.)

@@ -295,6 +295,24 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   4.18 - 0.47 = 3.71 kW net slowed; the 16 kW plant with four blowers 15.77 - 5.05 = 10.72 kW net. Stand-in model,
   render and icon (the Inline Pump's); placeholder recipe. GameTests `air_blower_blocked_outlet_stalls`,
   `hp_plant_furnace_fired_blowers`, `hp_plant_midgame_one_blower`, `_low`, `hp_plant_full_blowers_16kw`.
+- Fuel heat furnace as a combustion chamber (todo #504/#503; Baughn 2026-11-17: the burner must feel its exhaust's
+  back-pressure for the Air Blower to be realistic; flanges on the sides or back, not the front). Its flue's node is
+  now its firebox: air comes in by natural draught (a tiny gas pump from the room, 1 x the air of the burner's setting
+  at 0.4 kg/MJ, nothing against 150 Pa) or, through the new air port on its left flank (x 6, y 8 px), by its windbox
+  and damper (a check valve, an orifice opening with the setting, sized so 1.4 bar across it passes 2.5 x the air of
+  the big burner's full setting); the draught goes on beside it. The fire is its setting x
+  min(2.5, air in / air needed), the air measured over the last fluid step. The combustion is a sink of the air burnt
+  and a source of eln:flue_gas (that air plus the fuel), its heat what the sink took plus 35 % of the flame (mass and
+  smoke heat kept: what leaves carries 35 % of the flame over the air; smoke ~1100 K, was 573 K at 3 x the mass). Unpiped, a
+  wide stack vent keeps the firebox within a Pa of the air; piped, the pipe's back-pressure throttles the air (a
+  dead-ended flue puts the fire out, the firebox stalls at the blower's head). Natural draught can't push through an
+  EA pipe of any length: a piped flue starves a natural-draught fire to ~1/3 at best (forced air needed). The tank's
+  pressure no longer overfires it (the old 1 + gauge / 1 bar and the air register are gone): a gas main on the fuel
+  flange burns at the setting. The fuel flange moved to the back (y 6, z 8 px, above the thermal pad): pipes on the
+  front of furnaces built before are no longer connected. Drowning flashes its steam into the firebox over ~1 s.
+  Saves: new key `windbox` (old saves: empty at 1 atm). Two Big burners can no longer fire a Boiler past its limit
+  (`hp_plant_boiler_limit_over` now holds). GameTests `fuel_furnace_natural_draught`, `_flue_back_pressure`,
+  `_blower_speed`, `_drown_flue`, `_air_port_abuse`, `_port_spots`.
 - Pipe Mixer (`eln:transparent_node@5308`, new; Baughn 2026-11-11): a signal-controlled pipe T that works as two
   steerable check valves, not molar valves. Inlet A on its left flank, B on its right, the outlet out of its back, all
   4 px up; a signal on its front opens A by s and B by 1 - s (no signal: half each). Each inlet is a check valve with a

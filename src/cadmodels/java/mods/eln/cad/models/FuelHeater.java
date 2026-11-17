@@ -13,11 +13,12 @@ import static mods.eln.cad.models.Mc.tube;
  * The Fuel Heat Furnace as a small oil-fired heater (Baughn 2026-11-03, was the 1.12 OBJ "FuelHeater"): a painted steel
  * housing and lid on a dark steel skid, with a cast-iron front plate. On the front (XN, x = 0): a sight
  * port with a glass pane on the left showing the flame, the installed oil burner's mounting flange on the right (the
- * burner gun bolts on there), the power and heat lamps on a small panel above it, and low in the middle an iron pipe's
- * flange for the fuel (ShaftKit.pipeFlange, centre y 4, z 8, its face on x = 0; where a pipe will bring the oil), whose
- * stub runs into the front plate with a copper fuel line up to the burner's mount. On top a short flue to an iron
- * pipe's flange exactly at the top face's centre (x 8, z 8, top at y 16). The thermal contact is a copper pad on the
- * back at the floor, the control signal inputs are plates low on both flanks.
+ * burner gun bolts on there), the power and heat lamps on a small panel above it; nothing piped on the front (Baughn
+ * 2026-11-17: flanges on the sides or back). On the back (x = 16) the thermal contact, a copper pad at the floor, and
+ * above it, centred across, an iron pipe's flange for the fuel (ShaftKit.pipeFlange, centre y 6, z 8). On the left flank
+ * (z = 0), above the signal plate and nearer the burner, the air port's flange (centre x 6, y 8: a blower's pipe brings
+ * the combustion air there, todo #504). On top a short flue to an iron pipe's flange exactly at the top face's centre
+ * (x 8, z 8, top at y 16). The control signal inputs are plates low on both flanks.
  * <p>
  * Parts: main; burnerbig, burnermedium, burnersmall (the burner gun of each size: a red blower housing, a grille on its
  * intake, a motor on its right, an ignition box on top; FuelHeatFurnaceDescriptor draws the installed one); powerled,
@@ -34,8 +35,11 @@ public final class FuelHeater {
     static final double PLATE_X = 3.0, BODY_X = 3.5;
     /** The burner's axis (y, z) and the mount flange's face. */
     static final double BY = 8.0, BZ = 10.5, MOUNT_X = 2.6;
-    /** The fuel flange's centre on the front face (Baughn: low, centred across). */
-    static final double FUEL_Y = 4.0, FUEL_Z = 8.0;
+    /**
+     * The fuel flange's centre on the back face (centred across, above the thermal pad) and the air port's on the left
+     * flank (FuelHeatFurnaceElement FUEL_Y, FUEL_Z, AIR_X, AIR_Y: its ports are where these are drawn).
+     */
+    static final double FUEL_Y = 6.0, FUEL_Z = 8.0, AIR_X = 6.0, AIR_Y = 8.0;
 
     static List<Mesh> main() {
         List<Mesh> m = new ArrayList<>();
@@ -56,10 +60,10 @@ public final class FuelHeater {
         m.add(prism('y', 8, 8, 1.1, 13.7, 15.0, "castiron", 12, false, false));
         m.add(tube('y', 8, 8, 1.0, 1.3, 14.2, 14.5, "darksteel", 12, Double.NaN, false));
         m.addAll(ShaftKit.pipeFlange("y16", 8, 8, "small", 0.5, "steel", -1));
-        // the fuel: an iron pipe's flange low on the front, its stub into the front plate, and a copper line from the
-        // stub up into the burner's mounting flange
-        m.addAll(ShaftKit.pipeFlange("x0", FUEL_Y, FUEL_Z, "small", 2.1, "steel", -1));
-        m.add(prism('y', 2.7, 8.4, 0.25, 4.2, 7.3, "copper", 8, false, false));
+        // the fuel: an iron pipe's flange on the back over the thermal pad, its stub into the housing; the air: one on the
+        // left flank, its stub into the housing
+        m.addAll(ShaftKit.pipeFlange("x16", FUEL_Y, FUEL_Z, "small", 1.0, "steel", -1));
+        m.addAll(ShaftKit.pipeFlange("z0", AIR_X, AIR_Y, "small", 1.2, "steel", -1));
         // the sight port: a cast-iron frame round the window (bars meeting edge to edge), the soot-black firebox behind
         // (seen when the burner is out), two bolts top and bottom
         m.add(box(2.2, WIN_Y0 - 0.75, WIN_Z0 - 0.75, PLATE_X, WIN_Y0, WIN_Z1 + 0.75, "castiron", "nswud"));
@@ -131,8 +135,8 @@ public final class FuelHeater {
         n.part("heatled", led(11.8));
         n.part("glow", glow());
         n.part("glass", glass());
-        n.hitbox(2.0, 0, 0.8, 16, 13, 15.2,     // the housing, its front, the back pad and the flank plates
-            0, 2.5, 6.5, 2.0, 5.5, 9.5,          // the fuel flange
+        n.hitbox(2.0, 0, 0.8, 16, 13, 15.2,     // the housing, its front, the back pad and fuel flange, the flank plates
+            4.5, 6.5, 0, 7.5, 9.5, 0.8,          // the air port's flange
             0.3, 5.6, 8.1, 2.6, 10.6, 14.2,      // the burner (the big one)
             5, 13, 5, 11, 16, 11);               // the flue
         return List.of(n);

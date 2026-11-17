@@ -686,9 +686,9 @@ public final class OilCases {
                 case "fuel_furnace_in", "fuel_furnace_crude" -> {
                     tank = tank(ctx, w, XP);
                     east = ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, e);
-                    east.front = XN;   // (its front, with the fuel flange 4 px up, west)
+                    east.front = XP;   // (its back, with the fuel flange 6 px up, west: todo #504)
                     east.reconnect();
-                    lay(ctx, mid, 0, 4, 8, 16, 4, 8);
+                    lay(ctx, mid, 0, 4, 8, 8, 4, 8, 8, 6, 8, 16, 6, 8);
                     put(ctx, w, variant.equals("fuel_furnace_crude") ? Oil.CRUDE.get() : Oil.Cut.GASOLINE.source.get(), 6000);
                 }
                 case "fuel_furnace_buckets" -> {
@@ -1034,13 +1034,13 @@ public final class OilCases {
     /**
      * The fuel heat furnace's tank under pressure (Baughn 2026-11-11):
      * <ul>
-     * <li>forced_air: an air line at ~1.2 bar on its flange holds its tank at ~1 bar against its breather and feeds its
-     * pressure-fed burner: it fires ~2x its setting, against one beside it at the air's pressure;</li>
+     * <li>forced_air: an air line at ~1.2 bar on its air port (todo #504) goes through its damper into its firebox, not
+     * into its tank: it fires ~2.2x its setting, against one beside it on natural draught;</li>
      * <li>relief: its tank at 4.5 bar (a line's doing) lets air out by its relief valve too, and holds;</li>
      * <li>burst: a 20 bar line outruns the relief: past 6 bar gauge the tank bursts;</li>
      * <li>gas_first: a little natural gas in its head space burns in the flame, none escapes, nothing catches fire;</li>
      * <li>gas_fire: natural gas fed in faster than the flame takes it escapes by its vents with the fire lit and sets the
-     * blocks around it alight;</li>
+     * blocks around it alight; the main's pressure doesn't fire it over its setting (todo #504);</li>
      * <li>inertia: a small burner lit at full: its flame is at full at once, the heat it gives follows through its burner's
      * mass, 63 % in ~30 s (Baughn 2026-11-11), and it keeps giving heat for a while after the flame goes out;</li>
      * <li>buckets: two buckets of diesel go in, whole, through its capability (AdventurAgent 2026-11-11: the second
@@ -1111,12 +1111,18 @@ public final class OilCases {
             return n;
         }
 
-        /** The main coupled to its fuel flange (a pipe's end on it). */
+        /** The main coupled to its fuel flange on its back (a pipe's end on it). */
         static mods.eln.sim.fluid.FluidDevice onFlange(mods.eln.transparentnode.FuelHeatFurnaceElement f, mods.eln.sim.fluid.FluidNode main) {
             var front = f.front;
+            var back = front.back();
             var pos = f.node.coordonate.pos();
-            return GasPlantCases.fixtures(f.fluidLevel(), new Object[]{pos.relative(front.toEnumFacing()),
-                front.toEnumFacing().getOpposite().get3DDataValue(), main, mods.eln.fluid.PortBridge.endSpot(front, front, 4, 8)});
+            return GasPlantCases.fixtures(f.fluidLevel(), new Object[]{pos.relative(back.toEnumFacing()), front.toEnumFacing().get3DDataValue(), main,
+                mods.eln.fluid.PortBridge.endSpot(front, back, mods.eln.transparentnode.FuelHeatFurnaceElement.FUEL_Y, mods.eln.transparentnode.FuelHeatFurnaceElement.FUEL_Z)});
+        }
+
+        /** The main coupled to its air port on its left flank (todo #504). */
+        static mods.eln.sim.fluid.FluidDevice onAirPort(mods.eln.transparentnode.FuelHeatFurnaceElement f, mods.eln.sim.fluid.FluidNode main) {
+            return GasPlantCases.fixtures(f.fluidLevel(), CombustionCases.airFixture(f, main));
         }
 
         /** A fluid device with no ports that runs step after each fluid step (to read the tank's pressure as it stands). */
@@ -1146,7 +1152,7 @@ public final class OilCases {
                     a.putFuel(Oil.Cut.DIESEL.source.get(), 800);
                     b = FuelBySpecies.lit(ctx, 4);
                     b.putFuel(Oil.Cut.DIESEL.source.get(), 800);
-                    fx = onFlange(a, main = main(y, 1.2e5, false));
+                    fx = onAirPort(a, main = main(y, 1.2e5, false));
                     // (over 100 ticks once both burn steadily: on its bench nothing takes the heat, so it overheats later)
                     ctx.after(60, () -> {
                         heatA0 = a.getHeatGivenJ();
@@ -1155,7 +1161,7 @@ public final class OilCases {
                     ctx.after(140, () -> {
                         heatA1 = a.getHeatGivenJ();
                         heatB1 = b.getHeatGivenJ();
-                        over = a.overfire();
+                        over = a.airFactor();
                         gaugeAt = gauge(a);
                     });
                 }
@@ -1247,11 +1253,13 @@ public final class OilCases {
             switch (variant) {
                 case "forced_air" -> {
                     double pa = heatA1 - heatA0, pb = heatB1 - heatB0;
-                    String what = String.format("tank at %.2f bar gauge, fires %.2fx; %.0f J vs %.0f J beside it", gaugeAt / 1e5, over, pa, pb);
+                    String what = String.format("tank at %.2f bar gauge, fires %.2fx; %.0f J vs %.0f J beside it; %s", gaugeAt / 1e5, over, pa, pb, a.getWaila());
                     ctx.line("forced air: " + what);
-                    ctx.check("fuel furnace: an air line on its flange pressurises its tank (0.5-1.2 bar)", gaugeAt > 0.5e5 && gaugeAt < 1.2e5, what);
-                    ctx.check("fuel furnace: ... and it fires that much over its setting, against one beside it (within 15 %)",
-                        pb > 0 && Math.abs(pa / pb - over) < 0.15 * over && over > 1.4, what);
+                    // (todo #504: the air goes to its air port and through its damper into the firebox, not into its tank)
+                    ctx.check("fuel furnace: an air line on its air port leaves its tank alone (under 0.01 bar)", Math.abs(gaugeAt) < 1e3, what);
+                    ctx.check("fuel furnace: ... and it fires 2-2.5x its setting by the air (DAMPER_DP passes 2.5x)", over > 2 && over <= 2.5, what);
+                    ctx.check("fuel furnace: ... that much more heat than one beside it on natural draught (within 15 %)",
+                        pb > 0 && Math.abs(pa / pb - over) < 0.15 * over, what);
                 }
                 case "relief" -> ctx.check("fuel furnace: its tank at 4.5 bar lets air out by its relief valve, and holds",
                     a.getReliefKg() > 0 && gauge(a) < 0.1e5 && ctx.level().getBlockEntity(ctx.at(3, 1, 1)) != null && !a.isBurnt(),
@@ -1292,6 +1300,9 @@ public final class OilCases {
                     String what = String.format("%.4f kg from the main, %.4f kg burnt, escaping %.6f kg/s, %d fire blocks",
                         main0 - main.vapour(ng()), a.getGasBurntKg(), a.getGasEscapingKgS(), fires(ctx, ctx.at(3, 1, 1)));
                     ctx.check("fuel furnace: a gas main on its flange outruns the flame: the gas escapes and sets fire around it", fires(ctx, ctx.at(3, 1, 1)) > 0, what);
+                    // (todo #504: the tank's pressure no longer feeds the burner more)
+                    ctx.check("fuel furnace: ... and the gas main's pressure doesn't overfire it", a.getFlamePower() <= 1.02 * CombustionCases.bigW() && a.airFactor() <= 1.01,
+                        String.format("flame %.0f W, air factor %.2f", a.getFlamePower(), a.airFactor()));
                 }
             }
         }
@@ -1417,9 +1428,9 @@ public final class OilCases {
                     // (as oil_on_pipes_fuel_furnace_in, but on until it is full: a pressurised tank pushes on)
                     OilOnPipes.tank(ctx, ctx.at(1, 1, 1), mods.eln.misc.Direction.XP);
                     a = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(3, 1, 1));
-                    a.front = mods.eln.misc.Direction.XN;
+                    a.front = mods.eln.misc.Direction.XP;   // (its back, with its fuel flange 6 px up, west: todo #504)
                     a.reconnect();
-                    PipeCases.lay(ctx, ctx.at(2, 1, 1), 0, 0, 4, 8, 16, 4, 8);
+                    PipeCases.lay(ctx, ctx.at(2, 1, 1), 0, 0, 4, 8, 8, 4, 8, 8, 6, 8, 16, 6, 8);
                     OilOnPipes.put(ctx, ctx.at(1, 1, 1), Oil.Cut.GASOLINE.source.get(), 9000);
                     perKgGasoline = mods.eln.fluid.FluidSpecies.kgPerMb(mods.eln.fluid.FluidSpecies.of(Oil.Cut.GASOLINE.source.get()).id(), false);
                     ctx.after(2, () -> kg0 = gasolineIn(ctx));   // (the tank takes what was put in at its first step)
