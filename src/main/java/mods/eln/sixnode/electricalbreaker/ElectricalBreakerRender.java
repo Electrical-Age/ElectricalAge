@@ -6,7 +6,6 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.world.entity.player.Player;
 
 import java.io.ByteArrayOutputStream;
@@ -27,6 +26,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
     float switchAlpha = 0;
     public boolean switchState;
 
+    /** Its contacts' stubs (ElectricalBreakerElement.contacts). */
     CableRenderDescriptor cableRender;
 
     public ElectricalBreakerRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
@@ -38,10 +38,10 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 
     @Override
     public void draw() {
-        super.draw();
+        super.draw();   // (stubs in the face slot, pins off centre)
 
         front.glRotateOnX();
-        descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(tileEntity));
+        descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(tileEntity), slot >= 6);
     }
 
     @Override
@@ -58,19 +58,12 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
     @Override
     public void publishUnserialize(DataInputStream stream) {
         super.publishUnserialize(stream);
-        Utils.println("Front : " + front);
         try {
             switchState = stream.readBoolean();
             uMax = stream.readFloat();
             uMin = stream.readFloat();
             tripAmps = stream.readFloat();
-
-            ElectricalCableDescriptor desc = mods.eln.node.voxel.CableItems.descriptor(Utils.unserialiseItemStack(stream));
-
-            if (desc == null)
-                cableRender = null;
-            else
-                cableRender = desc.render;
+            cableRender = ElectricalBreakerElement.contacts().render;
         } catch (IOException e) {
             e.printStackTrace();
         }

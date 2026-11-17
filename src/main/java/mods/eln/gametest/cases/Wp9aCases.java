@@ -361,7 +361,7 @@ public final class Wp9aCases {
         }
     }
 
-    /** Breaker with an LV cable: z=0 vmax 100 V + switched on (GUI packets) conducts; z=2 vmax 40 V trips at 50 V. */
+    /** Breaker (no cable piece: Baughn 2026-11-17): z=0 vmax 100 V + switched on (GUI packets) conducts; z=2 vmax 40 V trips at 50 V. */
     static final class BreakerCase implements TestCase {
         ElectricalSourceElement srcA;
         ElectricalBreakerElement bA, bB;
@@ -379,8 +379,6 @@ public final class Wp9aCases {
         ElectricalBreakerElement breaker(TestContext ctx, int z, float vMax) {
             ElectricalBreakerElement b = (ElectricalBreakerElement) ctx.placeSix(BREAKER, ctx.at(1, 1, z));
             orient(b, f -> f, Direction.XN);
-            b.getInventory().setItem(0, lvCable()); // ElectricalBreakerContainer.cableSlotId
-            b.getInventory().setChanged();
             b.networkUnserialize(ctx.stream(out -> {
                 out.writeByte(ElectricalBreakerElement.setVoltageMaxId);
                 out.writeFloat(vMax);
@@ -404,7 +402,7 @@ public final class Wp9aCases {
         public void measure(TestContext ctx) {
             ctx.check("wp9a breaker (vmax 100 V) closed", bA.getSwitchState(), "");
             double rSw = bA.switchResistor.getR();
-            ctx.checkValue("wp9a breaker contact resistance [ohm] (LV cable Rs)", rSw, ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs);
+            ctx.checkValue("wp9a breaker contact resistance [ohm] (MV cable Rs: its contacts)", rSw, ElnDeviceRegistry.meduimVoltageCableDescriptor.electricalRs);
             double rt = link(srcA, bA) + rSw + link(bA, rA) + rA.nominalRs + link(rA, gA);
             ctx.checkValue("wp9a breaker current [A] (50 V / R_total)", current(rA), U / rt);
             double iB = current(rB);
@@ -440,8 +438,6 @@ public final class Wp9aCases {
             source(ctx, SOURCE, 0, z, U);
             ElectricalBreakerElement b = (ElectricalBreakerElement) ctx.placeSix(BREAKER, ctx.at(1, 1, z));
             orient(b, f -> f, Direction.XN);
-            b.getInventory().setItem(0, lvCable());
-            b.getInventory().setChanged();
             b.networkUnserialize(ctx.stream(out -> {
                 out.writeByte(ElectricalBreakerElement.setVoltageMaxId);
                 out.writeFloat(100F);
@@ -489,7 +485,9 @@ public final class Wp9aCases {
             ctx.check("trip: a fuse rated 2 A blows at 4.8 A", blew, "");
             ctx.check("trip: a new fuse rated 20 A then holds", fuse.getInstalledFuse() != null && fuse.getInstalledFuse().getCableDescriptor() != null,
                 fuse.getInstalledFuse() == null ? "none" : fuse.getInstalledFuse().name);
-            ctx.check("trip: unset, a breaker trips at its cable's 1.05 x nominal", Math.abs(low.cableTripAmps() - 1.05 * 1000 / Eln.LVU) < 0.01,
+            var mv = ElnDeviceRegistry.meduimVoltageCableDescriptor;
+            ctx.check("trip: unset, a breaker trips at its contacts' (MV cable) 1.05 x nominal",
+                Math.abs(low.cableTripAmps() - 1.05 * mv.electricalNominalPower / mv.electricalNominalVoltage) < 0.01,
                 "" + low.cableTripAmps());
         }
     }

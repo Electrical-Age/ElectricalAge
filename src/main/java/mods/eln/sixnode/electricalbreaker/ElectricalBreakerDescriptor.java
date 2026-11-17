@@ -65,7 +65,13 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
     }
 
     public void draw(float on, float distance) {
-        if (main != null) main.draw();
+        draw(on, distance, false);
+    }
+
+    /** short: off centre, its case shortened to its pins (SHORT_LEADS along it, model z). */
+    public void draw(float on, float distance, boolean short_) {
+        if (short_) drawStretched(2, SHORT_LEADS, main);
+        else if (main != null) main.draw();
         if (lever != null) {
             lever.draw(on * (alphaOn - alphaOff) + alphaOff, 0, 1, 0);
         }
@@ -74,7 +80,30 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, (tr("Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit").split("\n")));
+        Collections.addAll(list, (tr("Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds its trip current").split("\n")));
+    }
+
+    /** Small: placed anywhere on a face of a voxel block, and in line on a cable (Baughn 2026-11-17). In the face slot
+     *  it is drawn as before; off centre its case is shortened to its pins, as the fuse holder's. */
+    @Override
+    public boolean placeAnywhere() {
+        return true;
+    }
+
+    @Override
+    protected float[] bodyBounds() {
+        float[] b = boundsOf(main, lever);
+        if (b != null) {
+            b[2] = -4f;   // (along it: 4 px each way, the case shortened to its pins)
+            b[3] = 4f;
+        }
+        return b;
+    }
+
+    @Override
+    public void drawPlaced(Direction side, LRDU front) {
+        front.glRotateOnX();
+        draw(0f, 0f, true);
     }
 
     @Override
