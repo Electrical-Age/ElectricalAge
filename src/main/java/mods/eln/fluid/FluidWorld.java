@@ -99,10 +99,13 @@ public final class FluidWorld implements IProcess {
         return INSTANCE.lumpOf.getOrDefault(n, n);
     }
 
-    /** Write a run's lump back into its pieces now (before saving a piece whose run changed since the step). */
+    /**
+     * Write a run's lump back into its pieces now (before saving a piece whose run changed since the step); not a run
+     * handed back for editing since the step (handBack), whose pieces hold it now (its lump is stale).
+     */
     public static void writeBackOf(FluidNode piece) {
         FluidNode lump = INSTANCE.lumpOf.get(piece);
-        if (lump == null) return;
+        if (lump == null || INSTANCE.handedBack.contains(lump)) return;
         for (FluidNode m : INSTANCE.lumps.get(lump)) {
             m.setShareOf(lump, m.volume / lump.volume);
             m.update();

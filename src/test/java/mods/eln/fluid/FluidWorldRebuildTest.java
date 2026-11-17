@@ -115,4 +115,22 @@ class FluidWorldRebuildTest {
         assertEquals(total - taken.mWater, FluidWorld.nodeFor(a.node).mWater, 1e-12 * total, "the run's water: what's left, once");
         assertEquals(total * 7 / 8, FluidWorld.nodeFor(a.node).mWater, 1e-12 * total, "the run's water");
     }
+
+    /**
+     * After a hand-back and an edit, a save of another piece of the same run (writeBackOf, as a device's stub on the run
+     * does) leaves the pieces as edited: the run's lump is stale until the rebuild.
+     */
+    @Test
+    void aSaveAfterAHandBackKeepsTheEdit() {
+        FluidNode lump = FluidWorld.nodeFor(a.node);
+        lump.fill(0.4 * lump.volume * Water.RHO_L, 3 * Water.P_ATM, 320);
+        double total = lump.mWater;
+        FluidWorld.handBack(a.node);
+        a.node.setShareOf(a.node, 0.75);
+        FluidWorld.writeBackOf(b.node);
+        FluidWorld.handBack(b.node);   // (a second edit in the same tick: the pieces are already the authority)
+        assertEquals(total * 3 / 8, a.node.mWater, 1e-12 * total, "a as edited");
+        FluidWorld.changed(far);
+        assertEquals(total * 7 / 8, FluidWorld.nodeFor(a.node).mWater, 1e-12 * total, "the run's water");
+    }
 }
