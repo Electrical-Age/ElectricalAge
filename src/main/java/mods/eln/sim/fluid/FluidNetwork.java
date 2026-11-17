@@ -52,6 +52,11 @@ public final class FluidNetwork {
             n == null ? 0 : 100 * n.stats.slept / st, n == null ? 0 : n.stats.wakes, n == null ? "?" : n.wokenByName(), builds);
     }
 
+    /** Its core network's counters (iterations, sub-steps, ...; GameTests), or null before its first step. */
+    public mods.eln.fluidcore.Network.Stats coreStats() {
+        return core == null ? null : core.net.stats;
+    }
+
     /** The core network as a replayable dump (NetworkDump) at step length dt, or null before its first step. */
     public String dump(double dt) {
         return core == null ? null : mods.eln.fluidcore.NetworkDump.write(core.net, dt);

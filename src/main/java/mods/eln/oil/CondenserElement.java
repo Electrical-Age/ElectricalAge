@@ -239,8 +239,8 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
         var makeup = v.makeup;
         if (makeup != null) {
             // (Baughn 2026-11-03: whether its signal holds it)
-            String state = makeup.open >= 0.99 ? I18N.tr("open") : v.floatOpen <= 0.01 ? I18N.tr("shut (full enough)")
-                : v.makeupGate <= 0.01 ? I18N.tr("shut by its signal") : String.format("%.0f%% open", makeup.open * 100);
+            String state = makeup.open >= 0.99 ? I18N.tr("open") : v.floatOpen <= 1e-6 ? I18N.tr("shut (full enough)")
+                : v.makeupGate <= 0.01 ? I18N.tr("shut by its signal") : String.format(makeup.open < 0.01 ? "%.2f%% open" : "%.0f%% open", makeup.open * 100);
             String held = !signalled() ? I18N.tr("; no signal: its float valve alone")
                 : String.format(I18N.tr("; signal %.0f%%"), Math.max(0, Math.min(1, v.makeupGate)) * 100);
             info.put(I18N.tr("Makeup valve"), state + held);
