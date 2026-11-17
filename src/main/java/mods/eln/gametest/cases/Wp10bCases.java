@@ -330,7 +330,7 @@ public final class Wp10bCases {
         public void build(TestContext ctx) {
             gen = ctx.placeTransparent(FUEL_GENERATOR_50V, ctx.at(2, 1, 1));
             afterLava = click(ctx, gen, new ItemStack(Items.LAVA_BUCKET));
-            lavaLevel = field(gen, "tankLevel");
+            lavaLevel = ((mods.eln.transparentnode.FuelGeneratorElement) gen).getTankLevel();
             for (net.minecraft.world.level.material.Fluid fl : mods.eln.fluid.FuelRegistry.INSTANCE.fluidListToFluids(mods.eln.fluid.FuelRegistry.INSTANCE.getGasolineList())) {
                 String name = mods.eln.fluid.FuelRegistry.INSTANCE.fluidName(fl);
                 ItemStack bucket = new ItemStack(fl.getBucket()); // 26.x: the fluid's bucket item (AIR if none)
@@ -339,10 +339,10 @@ public final class Wp10bCases {
                 afterFuel = click(ctx, gen, bucket);
                 break;
             }
-            level0 = field(gen, "tankLevel");
+            level0 = ((mods.eln.transparentnode.FuelGeneratorElement) gen).getTankLevel();
             if (fuelName == null) {
                 level0 = 0.5;
-                setField(gen, "tankLevel", level0);
+                ((mods.eln.transparentnode.FuelGeneratorElement) gen).inlet.put(mods.eln.oil.Oil.Cut.GASOLINE.source.get(), 1000, 293.15);
             }
             click(ctx, gen, ItemStack.EMPTY); // switch on
             t0 = ctx.world().getGameTime();
@@ -350,13 +350,13 @@ public final class Wp10bCases {
 
         public void measure(TestContext ctx) {
             double t = elapsed(ctx, t0);
-            ctx.check("wp10b fuel generator refuses lava (not a fuel): tank empty, bucket kept", lavaLevel == 0
+            ctx.check("wp10b fuel generator refuses lava (not a fuel): tank empty, bucket kept", lavaLevel == 0 && gen.getWaila().get(mods.eln.i18n.I18N.tr("Fuel")) != null
                 && afterLava.getItem() == Items.LAVA_BUCKET, "level " + lavaLevel + ", hand " + afterLava);
             if (fuelName == null) {
                 ctx.line("wp10b fuel generator: SKIP bucket fill (no bucketable gasoline fuel registered); tank set to 0.5");
             } else {
                 ctx.check("wp10b fuel generator takes a bucket of " + fuelName + ": half tank, empty bucket back",
-                    Math.abs(level0 - 0.5) < 1e-9 && afterFuel.getItem() == Items.BUCKET, "level " + level0 + ", hand " + afterFuel);
+                    Math.abs(level0 - 0.5) < 1e-3 && afterFuel.getItem() == Items.BUCKET, "level " + level0 + ", hand " + afterFuel);
             }
             boolean on = (Boolean) callPrefix(gen, "getOn");
             double umax = Eln.LVU * 1.05;
@@ -365,7 +365,8 @@ public final class Wp10bCases {
             ctx.checkValue("wp10b fuel generator open-circuit voltage [V] (Umax = 1.05 * LVU)", pos.getU(), umax);
             double pNom = 300 * Eln.fuelGeneratorPowerFactor;
             double rate = 1.375 * 0.1 * pNom / (Eln.fuelGeneratorTankCapacity * pNom);
-            double level = field(gen, "tankLevel");
+            // (the fuel it burnt, as a share of the old tank: its vessel's liquid also flashes a little into its gas cap)
+            double level = level0 - ((mods.eln.transparentnode.FuelGeneratorElement) gen).burntMb / mods.eln.transparentnode.FuelGeneratorElement.TANK_MB;
             within(ctx, f("wp10b fuel generator fuel used in %.2f s (1.375 * 0.1 P_nom / tank energy * t)", t), level0 - level, rate * t,
                 rate * 1.5 * TICK + rate * t * 0.01);
         }

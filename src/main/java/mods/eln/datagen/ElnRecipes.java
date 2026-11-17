@@ -813,6 +813,18 @@ public final class ElnRecipes extends ElnRecipesBase {
             'B', stack(Items.BUCKET),
             'E', findItemStack("Copper Cable")
         );
+        // PLACEHOLDER (todo #471, prototype): the Inline Pump's with iron bars (an intake grille) for its bucket
+        addRecipe(findItemStack("230V Air Blower"),
+            "Bm ",
+            "pMp",
+            "AEA",
+            'm', findItemStack("Electrical Motor"),
+            'p', stack(Items.IRON_INGOT),
+            'M', findItemStack("Machine Block"),
+            'A', "itemRubber",
+            'B', stack(Items.IRON_BARS),
+            'E', findItemStack("Copper Cable")
+        );
         addRecipe(findItemStack("LP Steam Turbine"),
             "aAa",
             "ASA",
@@ -2321,6 +2333,14 @@ public final class ElnRecipes extends ElnRecipesBase {
             'C', stack(Items.CAULDRON),
             't', findItemStack("Copper Thermal Cable"),
             'I', stack(Items.IRON_INGOT));
+        // PLACEHOLDER (Baughn 2026-11-15: a somewhat expensive alloy-plate device): six Alloy Plates round two Boilers
+        addRecipe(findItemStack("Large Boiler", 1),
+            "PBP",
+            "PtP",
+            "PBP",
+            'B', findItemStack("Boiler"),
+            't', findItemStack("Copper Thermal Cable"),
+            'P', findItemStack("Alloy Plate"));
 
         addRecipe(findItemStack("48V Compressor", 1),
             "IRI",

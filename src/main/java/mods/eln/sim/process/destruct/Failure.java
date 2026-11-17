@@ -52,6 +52,8 @@ public class Failure implements IDestructable {
     private Kind kind = Kind.MACHINE;
     @Nullable
     private DoubleSupplier energy;
+    /** The strongest explosion this device makes (explosionStrength): 4, TNT, unless set (the Large Boiler: 6). */
+    private float strengthCap = 4;
 
     @Nullable
     private FailureCause pendingCause;
@@ -137,6 +139,12 @@ public class Failure implements IDestructable {
     public Failure pressureVessel(DoubleSupplier flashEnergy) {
         kind = Kind.PRESSURE_VESSEL;
         energy = flashEnergy;
+        return this;
+    }
+
+    /** A pressure vessel that holds more than the usual: its burst may be stronger than TNT, up to cap. */
+    public Failure strengthCap(float cap) {
+        strengthCap = cap;
         return this;
     }
 
@@ -245,14 +253,19 @@ public class Failure implements IDestructable {
 
     /** Explosion strength for a burst holding this much energy: 1 (small) .. 4 (TNT). */
     public static float explosionStrength(double energyJ) {
-        return (float) Math.max(1, Math.min(4, Math.sqrt(Math.max(0, energyJ) / 15000)));
+        return explosionStrength(energyJ, 4);
+    }
+
+    /** As explosionStrength, up to cap instead of 4. */
+    public static float explosionStrength(double energyJ, float cap) {
+        return (float) Math.max(1, Math.min(cap, Math.sqrt(Math.max(0, energyJ) / 15000)));
     }
 
     private void apply(Level w, FailureCause cause, double value) {
         double e = energy != null ? energy.getAsDouble() : 0;
         Outcome outcome = explosive ? Outcome.EXPLODE : outcome(kind, cause, value, e);
         if (outcome == Outcome.EXPLODE && !Eln.explosionEnable) outcome = explosive ? Outcome.POP : Outcome.BURN_FIRE;
-        float strength = explosive ? bankStrength(e) : explosionStrength(e);
+        float strength = explosive ? bankStrength(e) : explosionStrength(e, strengthCap);
         BlockPos pos = new BlockPos(c.x, c.y, c.z);
 
         switch (outcome) {

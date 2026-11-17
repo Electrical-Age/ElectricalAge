@@ -114,6 +114,9 @@ public class Wp10aContent implements ElnContent {
         transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.oil.ColumnDescriptor(TR_NAME(Type.NONE, "Fractionating Column Base"), true, "columnbase"));
         transparentNodeItem.addDescriptor(4 + (id << 6), new mods.eln.oil.ColumnDescriptor(TR_NAME(Type.NONE, "Fractionating Column Segment"), false, "columnsegment"));
         transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.FlareStackDescriptor(TR_NAME(Type.NONE, "Flare Stack"), "flarestack"));
+        // Baughn 2026-11-15: a Large Boiler of alloy plate, about four Boilers, 2x2x2 blocks (here: the steam group 82 is
+        // full). Sub-id 12 was its one-block prototype, never shipped: left unused. PROTOTYPE: the Boiler's model, scaled.
+        transparentNodeItem.addDescriptor(16 + (id << 6), mods.eln.oil.BoilerDescriptor.twoByTwo(TR_NAME(Type.NONE, "Large Boiler"), "boiler"));
     }
 
     /** 26.x oil & steam: electric heaters and the boiler (placeholder models). */
@@ -149,6 +152,9 @@ public class Wp10aContent implements ElnContent {
         transparentNodeItem.addDescriptor(44 + (id << 6), new mods.eln.oil.TankDescriptor(TR_NAME(Type.NONE, "Alloy Tank"),
             mods.eln.oil.TankDescriptor.bucketsVolume(12), 100e5, 300e5, "tankalloy"));
         transparentNodeItem.addDescriptor(48 + (id << 6), new mods.eln.oil.InlinePumpDescriptor(TR_NAME(Type.NONE, "230V Inline Pump"),
+            MVU, meduimVoltageCableDescriptor, "inlinepump200v"));
+        // the air blower (todo #471, prototype): air into a pipe for pressure-fed burners; the Inline Pump's model as a stand-in
+        transparentNodeItem.addDescriptor(20 + (84 << 6), new mods.eln.oil.AirBlowerDescriptor(TR_NAME(Type.NONE, "230V Air Blower"),
             MVU, meduimVoltageCableDescriptor, "inlinepump200v"));
         // the pipe mixer: a T of two check valves steered by a signal (Baughn 2026-11-11)
         transparentNodeItem.addDescriptor(60 + (id << 6), new mods.eln.oil.PipeMixerDescriptor(TR_NAME(Type.NONE, "Pipe Mixer"), "pipemixer"));

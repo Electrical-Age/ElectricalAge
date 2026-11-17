@@ -678,11 +678,15 @@ public abstract class NodeBase {
         return null;
     }
 
+    /** GameTests: told of every packet publishToAllPlayer sends (what a client watching the node gets), else null. */
+    public static java.util.function.BiConsumer<NodeBase, byte[]> publishWatch;
+
     public void publishToAllPlayer() {
         Level w = coordonate.world();
         if (w instanceof ServerLevel) {
             ByteArrayOutputStream bos = getPublishPacket();
             if (bos != null) mods.eln.network.ElnNet.sendToTracking((ServerLevel) w, coordonate.x, coordonate.z, bos);
+            if (bos != null && publishWatch != null) publishWatch.accept(this, bos.toByteArray());
         }
         if (needNotify) {
             needNotify = false;

@@ -76,7 +76,9 @@ public class WindingItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display,
                                 java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
         CableSpec spec = spec(stack);
-        out.accept(Component.literal(turns(stack) + " turns of " + spec.label(tier(stack)) + String.format(", %.0f A", spec.amps()))
+        // its wire's colour, as a cable kit's tooltip names it (todo #486)
+        out.accept(Component.translatable("item.eln.winding.wire", turns(stack), spec.label(tier(stack)), String.format("%.0f", spec.amps()),
+            Component.translatable("color.minecraft." + net.minecraft.world.item.DyeColor.byId(spec.colour()).getName()))
             .withStyle(net.minecraft.ChatFormatting.GRAY));
         out.accept(Component.literal("For a Transformer (DC-DC)'s winding slot").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
         // (Baughn 2026-11-13: say that they merge; HandWindingRecipe's rule)

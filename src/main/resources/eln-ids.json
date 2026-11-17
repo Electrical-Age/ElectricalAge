@@ -2123,6 +2123,12 @@
   "kind": "transparent_node",
   "name": "flare_stack"
  },
+ "eln:transparent_node@5328": {
+  "descriptor": "BoilerDescriptor",
+  "display": "Large Boiler",
+  "kind": "transparent_node",
+  "name": "large_boiler"
+ },
  "eln:transparent_node@5376": {
   "descriptor": "EnergyConverterElnToOtherDescriptor",
   "display": "48V Electrical Age to other energy exporter",
@@ -2140,6 +2146,12 @@
   "display": "400V Electrical Age to other energy exporter",
   "kind": "transparent_node",
   "name": "energy_converter_eln_to_other_hvublock"
+ },
+ "eln:transparent_node@5396": {
+  "descriptor": "AirBlowerDescriptor",
+  "display": "230V Air Blower",
+  "kind": "transparent_node",
+  "name": "230v_air_blower"
  },
  "eln:transparent_node@5440": {
   "descriptor": "ElectricalAnvilDescriptor",

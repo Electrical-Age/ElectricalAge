@@ -159,7 +159,10 @@ public final class PipePlacer {
         List<FluidDevice.FluidPort> ports = new ArrayList<>();
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         if (n instanceof VoxelNode v) ports.addAll(v.fluidPorts());
+        // (a multiblock's ports name their own blocks: the 2x2x2 Large Boiler's, at its node or on its ghost blocks)
+        else if (n instanceof TransparentNode t && t.element instanceof mods.eln.oil.LargeBoilerElement b) ports.addAll(b.portsAt(pos.asLong()));
         else if (n instanceof TransparentNode t && t.element instanceof FluidDevice d) ports.addAll(d.fluidPorts());
+        else if (n instanceof mods.eln.oil.LargeBoilerElement.FaceNode g) ports.addAll(g.fluidPorts());
         // (none on the face clicked, the click on the model inside the block rather than on its face: the side port
         // nearest the click, of any side. Baughn 2026-11-09: a tank box's blocks are its round shell, so a corner
         // block's side faces are empty air, and a click on the shell there hit a face of a step of it)

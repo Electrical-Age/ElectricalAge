@@ -48,7 +48,6 @@ public final class FluidViewCases {
      * it through a PortBridge, which inserts only what the tank takes.
      */
     static final Set<String> INT_TANK_DEVICES = Set.of("FuelHeatFurnaceElement", "ColumnBaseElement", "ColumnSegmentElement",
-        "FuelGeneratorElement",
         // (its water is a number, capped at its tank; the well node feeds it through a float valve a bucket short of full)
         "CompactTurbineElement");
 
