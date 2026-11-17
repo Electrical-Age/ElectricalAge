@@ -33,6 +33,8 @@ public final class FluidWorld implements IProcess {
     /** Pipe runs lumped into one node each (DESIGN.md section 5): lump -> its members, and member -> lump. */
     private final Map<FluidNode, List<FluidNode>> lumps = new IdentityHashMap<>();
     private final Map<FluidNode, FluidNode> lumpOf = new IdentityHashMap<>();
+    /** Lumps handed back to their pieces for editing since the last step (handBack): the pieces are the authority until then. */
+    private final Set<FluidNode> handedBack = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
     private boolean dirty;
 
     private FluidWorld() {
@@ -60,6 +62,7 @@ public final class FluidWorld implements IProcess {
         INSTANCE.flows.clear();
         INSTANCE.lumps.clear();
         INSTANCE.lumpOf.clear();
+        INSTANCE.handedBack.clear();
         INSTANCE.dirty = false;
         return INSTANCE;
     }
@@ -104,6 +107,17 @@ public final class FluidWorld implements IProcess {
             m.setShareOf(lump, m.volume / lump.volume);
             m.update();
         }
+    }
+
+    /**
+     * Write a run's lump back into its pieces before editing them between steps (a pipe cut for a junction, a junction's
+     * contents given to its last arm): a rebuild before the next step then keeps the pieces as edited, where it would
+     * otherwise write the run's lump over them (a later write into that lump before the step is lost at a rebuild).
+     */
+    public static void handBack(FluidNode piece) {
+        writeBackOf(piece);
+        FluidNode lump = INSTANCE.lumpOf.get(piece);
+        if (lump != null) INSTANCE.handedBack.add(lump);
     }
 
     /**
@@ -225,7 +239,8 @@ public final class FluidWorld implements IProcess {
         if (traceSteps > 0 && traceNode != null) trace();
         if (scanSteps > 0) scan();
         if (watchAll) watch();
-        writeBack();
+        writeBack(false);
+        handedBack.clear();
         burstThisStep.clear();
         for (FluidDevice d : stepping) if (devices.contains(d)) d.afterFluidStep(time);
     }
@@ -362,10 +377,14 @@ public final class FluidWorld implements IProcess {
         mods.eln.Eln.LOG.info(b.toString());
     }
 
-    /** Each lumped run's contents back into its members, by volume (they are what is saved and what is rebuilt from). */
-    private void writeBack() {
+    /**
+     * Each lumped run's contents back into its members, by volume (they are what is saved and what is rebuilt from); at a
+     * rebuild (skipHanded), not the runs handed back to their pieces for editing since the step (handBack).
+     */
+    private void writeBack(boolean skipHanded) {
         for (var e : lumps.entrySet()) {
             FluidNode lump = e.getKey();
+            if (skipHanded && handedBack.contains(lump)) continue;
             for (FluidNode m : e.getValue()) {
                 m.setShareOf(lump, m.volume / lump.volume);
                 m.update();
@@ -378,6 +397,12 @@ public final class FluidWorld implements IProcess {
     private void rebuildIfDirty() {
         if (!dirty) return;
         dirty = false;
+        // (between steps a run's lump holds its contents: what a device, a command or a test put into it since the step's
+        // write-back was lost when the new lumps were summed from the pieces, as a test's feed fill was when another
+        // test's device joined (batch-flake, 2026-11-16); written back first, a rebuild keeps it. A run handed back for
+        // editing keeps its pieces' edits instead)
+        writeBack(true);
+        handedBack.clear();
         networks.clear();
         vents.clear();
         links.clear();

@@ -438,6 +438,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 List<PipePart> arms = armsAt(j.x, j.y, j.z);
                 if (arms.size() >= 2) continue;
                 if (!arms.isEmpty() && arms.get(0).fluid != null && j.fluid != null) {
+                    // (the arm's piece holds its run's contents only after a write-back, and is edited here)
+                    mods.eln.fluid.FluidWorld.handBack(arms.get(0).fluid);
                     arms.get(0).fluid.addShareOf(j.fluid, 1);
                     arms.get(0).fluid.update();
                 }
@@ -713,6 +715,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             PipePart[] halves = pipe.splitAt(x, y, z);
             if (halves == null) return "the pipe ends here";
             mods.eln.sim.fluid.FluidNode saved = pipe.fluid;
+            if (saved != null) mods.eln.fluid.FluidWorld.writeBackOf(saved);   // (the halves take their shares of the run's contents)
             parts.remove(i);
             for (PipePart hp : halves) {
                 double share = hp.length() / (double) Math.max(1, pipe.length());
@@ -1283,7 +1286,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             j = new JunctionPart(x, y, z, Math.min(old.tier, part.tier));
             j.makeNode(coordonate.y, T0, null);
         }
-        if (saved != null) mods.eln.fluid.FluidWorld.writeBackOf(saved);
+        if (saved != null) mods.eln.fluid.FluidWorld.handBack(saved);   // (and edited below if joined at its end)
         double sj = fresh && saved != null ? j.fluid.volume / (j.fluid.volume + saved.volume) : 0;
         if (fresh && saved != null) {
             j.fluid.setShareOf(saved, sj);
