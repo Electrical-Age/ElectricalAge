@@ -72,6 +72,8 @@ public final class CondenserVessel {
     /** The level control's share of the curve now (0 at the makeup's shut level and under, 1 from LEVEL_FULL), and
      *  the shut-off head it leaves the pump (Pa). */
     public double levelShare, headPa;
+    /** The share of its flow the pump's suction leaves it now (suction). */
+    public double suctionShare = 1;
 
     public CondenserVessel(NbtThermalLoad shell, double volume, double nominalHeat, CondensatePump curve) {
         this.shell = shell;
@@ -156,7 +158,8 @@ public final class CondenserVessel {
             levelShare = levelShare(floodShare());
             headPa = curve.shutoffPa * headLevel(levelShare);
             pump.h0 = headPa;
-            pump.speed = speed * flowLevel(levelShare);
+            suctionShare = suction(floodShare());
+            pump.speed = speed * flowLevel(levelShare) * suctionShare;
         }
     }
 
@@ -186,6 +189,22 @@ public final class CondenserVessel {
         return LOW_HEAD + (1 - LOW_HEAD) * levelShare;
     }
 
+    /**
+     * The hotwell level (share of the vessel as water) under which the pump has lost its suction. From MAKEUP_OPEN down
+     * to it the pump's flow falls to nothing, as a condensate pump's does with too little water over its suction.
+     * With head-only level control (LOW_FLOW 1) a plant without makeup water otherwise pumped its hotwell dry into
+     * the boiler until the boiler's feed float shut. A flue-heated exchanger on that feed line then held water
+     * shut in, which boiled, burst the iron pipe at 25 bar and cycled the plant (GameTest heat_exchanger_condensate_reheat).
+     * The water is kept in the hotwell instead, and the boiler stays under its float. Over MAKEUP_OPEN, where a makeup
+     * float holds a plant that loses water, it changes nothing.
+     */
+    public static final double SUCTION_LOW = 0.05;
+
+    /** The share of its flow the pump's suction leaves it at this hotwell level (0..1). */
+    public static double suction(double flood) {
+        return Math.max(0, Math.min(1, (flood - SUCTION_LOW) / (MAKEUP_OPEN - SUCTION_LOW)));
+    }
+
     public static double flowLevel(double levelShare) {
         return LOW_FLOW + (1 - LOW_FLOW) * levelShare;
     }
@@ -193,7 +212,7 @@ public final class CondenserVessel {
     /** The pump's flow now against its back-pressure, at its speed and its hotwell's level, as a share of its rated
      *  (free) flow; 0: shut off. */
     public double flowShare() {
-        return headPa <= 0 ? 0 : speed * flowLevel(levelShare) * Math.sqrt(1 - Math.max(0, Math.min(1, backPa / headPa)));
+        return headPa <= 0 ? 0 : speed * flowLevel(levelShare) * suctionShare * Math.sqrt(1 - Math.max(0, Math.min(1, backPa / headPa)));
     }
 
     /**

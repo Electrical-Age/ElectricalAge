@@ -45,7 +45,7 @@ public class ParallelCondensateTest {
                 double fill = well[i].mLiquid() / Water.RHO_L / VOLUME;
                 double share = levelControl ? CondenserVessel.levelShare(fill) : 1;
                 pump[i].h0 = curve.shutoffPa * CondenserVessel.headLevel(share);
-                pump[i].speed = CondenserVessel.flowLevel(share);
+                pump[i].speed = CondenserVessel.flowLevel(share) * (levelControl ? CondenserVessel.suction(fill) : 1);
                 makeup[i].open = Math.max(0, Math.min(1, (CondenserVessel.MAKEUP_SHUT - fill) / (CondenserVessel.MAKEUP_SHUT - CondenserVessel.MAKEUP_OPEN)));
                 EaUnits.addWater(well[i], steam[i] * DT, 300, false);
                 if (i == 0) peak = Math.max(peak, fill);
