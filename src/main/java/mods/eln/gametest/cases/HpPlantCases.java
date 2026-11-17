@@ -55,17 +55,18 @@ public final class HpPlantCases {
         cases.add(new Flooded(true));
         cases.add(new Flooded(false));
         // the same slice with real Air Blowers (todo #471) in place of the air mains, and a blower alone, its outlet blocked
-        // (todo #504: piped to the air ports; before, on the tank, 2.53 kW of blowers for 4.91 kW net)
-        var withBlowers = new FurnacePlant("hp_plant_furnace_fired_blowers", 20, 1.36e5, 11000, 17670, 8690, 3.7, false);
+        // (todo #504: piped to the air ports on the backs, the furnaces on thermal cables, the draught shut, the blowers at
+        // OUTPUT_PER_WATT 2, pending Baughn; before, on the tank, 2.53 kW of blowers for 4.91 kW net)
+        var withBlowers = new FurnacePlant("hp_plant_furnace_fired_blowers", 20, 1.36e5, 11000, 14910, 7390, 4.3, false);
         withBlowers.blowers = true;
-        withBlowers.expectBlowerW = 2230;
-        withBlowers.expectNetW = 5660;
+        withBlowers.expectBlowerW = 1130;
+        withBlowers.expectNetW = 5590;
         cases.add(withBlowers);
         // the mid-game plant (todo #471): one Boiler, two Big burners and ONE blower feeding both through a pipe, at full
-        // speed (~1.5 bar) and slowed to 55 % (~0.5 bar: a few hundred watts). Todo #504 (air ports, natural draught
-        // beside the damper): before, 2.77 kW of blower for 4.80 kW net, and 0.47 kW for 3.69 kW net slowed
-        cases.add(oneBlower("hp_plant_midgame_one_blower", 1.0, 11000, 17670, 8690, 3.7, 2590, 5300));
-        cases.add(oneBlower("hp_plant_midgame_one_blower_low", 0.55, 11000, 14440, 7160, 4.5, 390, 6120));
+        // speed (~1.5 bar) and slowed to 55 % (~0.5 bar: a few hundred watts). Todo #504 (air ports, the draught shut,
+        // OUTPUT_PER_WATT 2 pending Baughn): before, 2.77 kW of blower for 4.80 kW net, and 0.47 kW for 3.69 kW net slowed
+        cases.add(oneBlower("hp_plant_midgame_one_blower", 1.0, 11000, 15860, 7840, 4.1, 1300, 5820));
+        cases.add(oneBlower("hp_plant_midgame_one_blower_low", 0.55, 11000, 7260, 3460, 9.3, 200, 2940));
         cases.add(new BlowerBlocked());
         cases.add(new LargeBoilerBody());
         cases.add(new LargeBoilerPlant(false));
@@ -99,7 +100,58 @@ public final class HpPlantCases {
      * todo #504), on its supply at speed x MVU.
      */
     static mods.eln.oil.AirBlowerElement blowerOnAirPort(TestContext ctx, FuelHeatFurnaceElement f, double speed) {
-        return blowerOnAirPort(ctx, f, speed, f.node.coordonate.pos().relative(f.front.toEnumFacing()), f.front.left());
+        // (beside it on its left, blowing back past it: the router lays the pipe round to its air port on its back)
+        return blowerOnAirPort(ctx, f, speed, f.node.coordonate.pos().relative(f.front.left().toEnumFacing()), f.front.back());
+    }
+
+    /**
+     * The pipe from f's air port through the block behind it (over its thermal cable: the router won't enter a block with
+     * a cable) out of that block's side towards side, at the pipes' low line (y 4) at the face's centre, where a blower's
+     * outlet meets it. Returns the block it comes out into.
+     */
+    static BlockPos gapPipe(TestContext ctx, FuelHeatFurnaceElement f, Direction side) {
+        BlockPos g = f.node.coordonate.pos().relative(f.front.back().toEnumFacing());
+        int[] a = faceCentre(f.front, FuelHeatFurnaceElement.AIR_Y), d = faceCentre(side, 4);
+        // (it steps down to the low line off to the side, clear of the cable along the block's middle)
+        var n = side.toEnumFacing().getUnitVec3i();
+        int ox = 8 + 5 * n.getX(), oz = 8 + 5 * n.getZ();
+        String err = mods.eln.node.voxel.PipeKitItem.place(ctx.level(), g, new mods.eln.node.voxel.PipePart(1,
+            new int[]{a[0], a[1], a[2], 8, a[1], 8, ox, a[1], oz, ox, 4, oz, d[0], d[1], d[2]}), null);
+        if (err != null) throw new IllegalStateException("air pipe at " + g + ": " + err);
+        return g.relative(side.toEnumFacing());
+    }
+
+    /** The centre of a block's face towards dir, at height y (local voxels). */
+    static int[] faceCentre(Direction dir, int y) {
+        var n = dir.toEnumFacing().getUnitVec3i();
+        return new int[]{n.getX() == 0 ? 8 : n.getX() > 0 ? 16 : 0, y, n.getZ() == 0 ? 8 : n.getZ() > 0 ? 16 : 0};
+    }
+
+    /** A blower on its supply at speed x MVU at p, blowing towards out (straight into a pipe end there). */
+    static mods.eln.oil.AirBlowerElement blowerAt(TestContext ctx, BlockPos p, Direction out, double speed) {
+        var b = blower(ctx, p, out, false);
+        power(b, speed * Eln.MVU);
+        return b;
+    }
+
+    /** A Copper Thermal Cable on the floor of the voxel block at p, across it along x (or z): a furnace's back to a boiler. */
+    static void thermalCable(TestContext ctx, BlockPos p, boolean alongX) {
+        int tier = mods.eln.node.voxel.CablePart.tierOf("Copper Thermal Cable");
+        String err = mods.eln.node.voxel.PipeKitItem.place(ctx.level(), p, new mods.eln.node.voxel.CablePart(tier, CableCases.DOWN,
+            alongX ? new int[]{0, 0, 8, 16, 0, 8} : new int[]{8, 0, 0, 8, 0, 16}), null);
+        if (err != null) throw new IllegalStateException("thermal cable at " + p + ": " + err);
+    }
+
+    /**
+     * The blowers' net at other OUTPUT_PER_WATT multipliers (todo #504, Baughn: "a table"): the multiplier scales only the
+     * work they draw, not their air, so the plant's electric stays and their draw is idle + work / m.
+     */
+    static String perWattTable(double elec, double blowW, double idleW) {
+        StringBuilder sb = new StringBuilder("net at OUTPUT_PER_WATT");
+        double work = (blowW - idleW) * mods.eln.oil.AirBlowerDescriptor.OUTPUT_PER_WATT;
+        for (double m : new double[]{1, 1.5, 2, 3, 4})
+            sb.append(String.format(" %.1fx: %.2f kW (blowers %.2f);", m, (elec - idleW - work / m) / 1000, (idleW + work / m) / 1000));
+        return sb.toString();
     }
 
     /** An Air Blower at bp, its outlet facing out, piped by the router to f's air port, on its supply at speed x MVU. */
@@ -107,7 +159,7 @@ public final class HpPlantCases {
         var b = blower(ctx, bp, out, false);
         power(b, speed * Eln.MVU);
         var start = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), bp, out.toEnumFacing());
-        var end = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), f.node.coordonate.pos(), f.front.left().toEnumFacing());
+        var end = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), f.node.coordonate.pos(), f.front.back().toEnumFacing());
         String err = mods.eln.node.voxel.PipePlacer.routeForTests(ctx.level(), 1, start, end);
         if (err != null) throw new IllegalStateException("blower to the air port of the furnace at " + f.node.coordonate.pos() + ": " + err);
         return b;
@@ -188,7 +240,7 @@ public final class HpPlantCases {
                 var in = b.intake;
                 double rise = mods.eln.fluid.FluidWorld.nodeFor(b.outlet).P() - in.P(), rho = in.P() * 0.02897 / (8.314 * in.T());
                 double expectKg = rho * mods.eln.oil.AirBlowerDescriptor.FREE_M3_S * Math.sqrt(Math.max(0, 1 - rise / shut));
-                double expectW = b.kgPerS / rho * rise / mods.eln.oil.AirBlowerDescriptor.MOTOR_ETA + mods.eln.oil.AirBlowerDescriptor.BLOWER_IDLE_W;
+                double expectW = b.kgPerS / rho * rise / (mods.eln.oil.AirBlowerDescriptor.MOTOR_ETA * mods.eln.oil.AirBlowerDescriptor.OUTPUT_PER_WATT) + mods.eln.oil.AirBlowerDescriptor.BLOWER_IDLE_W;
                 ctx.line(String.format("air blower curve: against %.2f bar gauge: outlet %.3f bar over its inlet, %.1f g/s (%.4f m^3/s of inlet air; parabola %.1f g/s), %.0f W (flow x rise / motor + idle: %.0f W)",
                     BACK[i] / 1e5, rise / 1e5, b.kgPerS * 1000, b.kgPerS / rho, expectKg * 1000, b.wantW, expectW));
                 ctx.check("blower curve at " + BACK[i] / 1e5 + " bar: its flow is on its parabola (within 10 %)", Math.abs(b.kgPerS - expectKg) < 0.1 * expectKg, String.format("%.1f of %.1f g/s", b.kgPerS * 1000, expectKg * 1000));
@@ -655,7 +707,7 @@ public final class HpPlantCases {
         double expectBlowerW, expectNetW;
         final mods.eln.oil.AirBlowerElement[] blow = new mods.eln.oil.AirBlowerElement[2];
         IProcess blowClock;
-        double blowT, blowS, blowJ, blowKg, blowPaS;
+        double blowT, blowS, blowJ, blowIdleJ, blowKg, blowPaS;
         ShaftSteamTurbineElement hp;
         PlantCondenserElement c;
         final Resistor[] loads = new Resistor[2];
@@ -708,23 +760,32 @@ public final class HpPlantCases {
             boiler.thermal.Tc = 99 - (mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius);
             boiler.fromTanks(8000, 0);
             boiler.showTanks();
-            // two furnaces, their backs against the boiler's north and east faces
-            f[0] = furnace(ctx, bp.north(), Direction.ZN, 1900);
-            f[1] = furnace(ctx, bp.east(), Direction.XP, 1900);
+            // two furnaces, their backs against the boiler's north and east faces; with blowers a block out, each on a
+            // Copper Thermal Cable (Baughn 2026-11-17: piped plants use thermal cables), its air port's pipe over the cable
+            if (blowers) {
+                f[0] = furnace(ctx, bp.north(2), Direction.ZN, 1900);
+                f[1] = furnace(ctx, bp.east(2), Direction.XP, 1900);
+                thermalCable(ctx, bp.north(), false);
+                thermalCable(ctx, bp.east(), true);
+            } else {
+                f[0] = furnace(ctx, bp.north(), Direction.ZN, 1900);
+                f[1] = furnace(ctx, bp.east(), Direction.XP, 1900);
+            }
             for (int i = 0; i < 2; i++) fT[i] = Batch1Cases.<ThermalLoad>field(f[i], "thermalLoad");
             if (blowers) {
                 if (oneBlower) {
-                    // (todo #504: the air ports, on the furnaces' left flanks) the blower in front of furnace 0 piped to its air
-                    // port by the router, and furnace 1's air port joined into that pipe, round furnace 1's front
-                    blow[0] = blowerOnAirPort(ctx, f[0], blowerSpeed);
-                    long[] j = joinOn(ctx, f[0].node.coordonate.pos().relative(f[0].front.toEnumFacing()).relative(f[0].front.left().toEnumFacing()));
-                    var start = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), f[1].node.coordonate.pos(), f[1].front.left().toEnumFacing());
-                    String err = mods.eln.node.voxel.PipePlacer.routeAndJoinForTests(ctx.level(), 1, start, j);
-                    if (err != null) throw new IllegalStateException("furnace 1's air port into the blower's pipe: " + err);
-                } else {
-                    blow[0] = blowerOnAirPort(ctx, f[0], blowerSpeed);
-                    // (furnace 1's blower south-east of it, blowing west: in front of it, its speed input faced the turbine)
-                    blow[1] = blowerOnAirPort(ctx, f[1], blowerSpeed, ctx.at(4, 1, 6), Direction.XN);
+                    // (todo #504: the air ports on the furnaces' backs, over their thermal cables) both air pipes come out
+                    // into (3, 1, 4), furnace 0's from the west, furnace 1's from the south: one pipe joins them there, and
+                    // the blower north of it at (3, 1, 3) blows into a tee off it
+                    BlockPos m = gapPipe(ctx, f[0], f[0].front.left());
+                    gapPipe(ctx, f[1], f[1].front.right());
+                    PipeCases.lay(ctx, m, 1, 0, 4, 8, 8, 4, 8, 8, 4, 16);
+                    String err = PipeCases.node(ctx, m).addJoined(new mods.eln.node.voxel.PipePart(1, new int[]{8, 4, 0, 8, 4, 8}), 8, 4, 8);
+                    if (err != null) throw new IllegalStateException("the blower's tee: " + err);
+                    blow[0] = blowerAt(ctx, m.north(), Direction.ZP, blowerSpeed);
+                } else for (int i = 0; i < 2; i++) {
+                    Direction side = f[i].front.left();
+                    blow[i] = blowerAt(ctx, gapPipe(ctx, f[i], side), side.getInverse(), blowerSpeed);
                 }
                 Eln.simulator.addSlowProcess(blowClock = dt -> {
                     blowT += dt;
@@ -733,6 +794,7 @@ public final class HpPlantCases {
                     for (var b : blow) {
                         if (b == null) continue;
                         blowJ += b.wantW * dt;
+                        blowIdleJ += b.idleW * dt;
                         blowKg += b.kgPerS * dt;
                         blowPaS += (mods.eln.fluid.FluidWorld.nodeFor(b.outlet).P() - Water.P_ATM) * dt;
                     }
@@ -857,7 +919,8 @@ public final class HpPlantCases {
             double perFurnace = water / 2, share = water / Math.max(1e-9, fire), perKg = shaftW / Math.max(1e-9, steam);
             if (blowers && !expectTrip) {
                 double blowW = blowJ / Math.max(1e-9, blowS), net = elec - blowW;
-                ctx.line(String.format("%s: NET: electric %.2f kW - blowers %.2f kW = %.2f kW", id, elec / 1000, blowW / 1000, net / 1000));
+                ctx.line(String.format("%s: NET: electric %.2f kW - blowers %.2f kW = %.2f kW; ", id, elec / 1000, blowW / 1000, net / 1000)
+                    + perWattTable(elec, blowW, blowIdleJ / Math.max(1e-9, blowS)));
                 if (expectBlowerW > 0) ctx.check(id + String.format(": the blowers draw within 15 %% of %.2f kW", expectBlowerW / 1000), Math.abs(blowW / expectBlowerW - 1) < 0.15,
                     String.format("%.2f kW", blowW / 1000));
                 if (expectNetW > 0) ctx.check(id + String.format(": net electric power within 10 %% of %.2f kW", expectNetW / 1000), Math.abs(net / expectNetW - 1) < 0.10,
@@ -951,7 +1014,7 @@ public final class HpPlantCases {
         static final double BLOWER_SPEED = 0.9;
         final mods.eln.oil.AirBlowerElement[] blow = new mods.eln.oil.AirBlowerElement[4];
         IProcess blowClock;
-        double blowT, blowS, blowJ, blowKg, blowPaS;
+        double blowT, blowS, blowJ, blowIdleJ, blowKg, blowPaS;
 
         FullPlant(String id, int ticks, boolean blowers) {
             this.id = id;
@@ -1043,13 +1106,25 @@ public final class HpPlantCases {
                 b[i].fromTanks(8000, 0);
                 b[i].showTanks();
             }
-            f[0] = furnace(ctx, a.north(), Direction.ZN, 1900);
-            f[1] = furnace(ctx, a.east(), Direction.XP, 1900);
-            f[2] = furnace(ctx, bb.west(), Direction.XN, 1900);
-            f[3] = furnace(ctx, bb.south(), Direction.ZP, 1900);
+            // with blowers, each furnace a block out on a Copper Thermal Cable (Baughn 2026-11-17: piped plants use thermal
+            // cables), its air port's pipe over the cable
+            int gap = blowers ? 2 : 1;
+            f[0] = furnace(ctx, a.north(gap), Direction.ZN, 1900);
+            f[1] = furnace(ctx, a.east(gap), Direction.XP, 1900);
+            f[2] = furnace(ctx, bb.west(gap), Direction.XN, 1900);
+            f[3] = furnace(ctx, bb.south(gap), Direction.ZP, 1900);
+            if (blowers) {
+                thermalCable(ctx, a.north(), false);
+                thermalCable(ctx, a.east(), true);
+                thermalCable(ctx, bb.west(), true);
+                thermalCable(ctx, bb.south(), false);
+            }
             for (int i = 0; i < 4; i++) {
                 fT[i] = Batch1Cases.<ThermalLoad>field(f[i], "thermalLoad");
-                if (blowers) blow[i] = blowerOnAirPort(ctx, f[i], BLOWER_SPEED); else air[i] = OilCases.FurnacePressure.onAirPort(f[i], mains[i] = OilCases.FurnacePressure.main(a.getY(), AIR_PA, false));
+                if (blowers) {
+                    Direction side = f[i].front.left();
+                    blow[i] = blowerAt(ctx, gapPipe(ctx, f[i], side), side.getInverse(), BLOWER_SPEED);
+                } else air[i] = OilCases.FurnacePressure.onAirPort(f[i], mains[i] = OilCases.FurnacePressure.main(a.getY(), AIR_PA, false));
             }
             if (blowers) Eln.simulator.addSlowProcess(blowClock = dt -> {
                 blowT += dt;
@@ -1057,6 +1132,7 @@ public final class HpPlantCases {
                 blowS += dt;
                 for (var bl : blow) {
                     blowJ += bl.wantW * dt;
+                    blowIdleJ += bl.idleW * dt;
                     blowKg += bl.kgPerS * dt;
                     blowPaS += (mods.eln.fluid.FluidWorld.nodeFor(bl.outlet).P() - Water.P_ATM) * dt;
                 }
@@ -1176,14 +1252,16 @@ public final class HpPlantCases {
                 double s = Math.max(1e-9, blowS), all = blowJ / s, made = elecJ / Math.max(1e-9, window);
                 ctx.line(String.format("%s: BLOWERS (4, one a furnace, at %.1f %% speed): %.2f kW each, %.2f g/s of air each, %.3f bar gauge at their outlets; "
                         + "the plant makes %.2f kW electric and its blowers draw %.2f kW: net %+.2f kW",
-                    id, BLOWER_SPEED * 100, all / 4 / 1000, blowKg / s / 4 * 1000, blowPaS / s / 4 / 1e5, made / 1000, all / 1000, (made - all) / 1000));
+                    id, BLOWER_SPEED * 100, all / 4 / 1000, blowKg / s / 4 * 1000, blowPaS / s / 4 / 1e5, made / 1000, all / 1000, (made - all) / 1000)
+                    + "; " + perWattTable(made, all, blowIdleJ / s));
                 ctx.check(id + ": the blowers hold the mains' pressure on the furnaces' flanges (1.36 bar gauge within 0.1)", Math.abs(blowPaS / s / 4 - AIR_PA) < 0.1e5,
                     String.format("%.3f bar", blowPaS / s / 4 / 1e5));
                 // (todo #471: before the furnace took its combustion air out of its tank and its float vent was cut to a breather,
                 // the four blowers drew 73.9 kW for 15.5 kW made)
-                // (todo #504, piped to the air ports, the natural draught beside the damper: before, 5.05 kW of blowers for 10.72 kW net)
-                ctx.check(id + ": the blowers draw within 15 % of 4.46 kW (1.12 kW a Big burner at 1.40 bar)", Math.abs(all / 4460 - 1) < 0.15, String.format("%.2f kW", all / 1000));
-                ctx.check(id + ": net electric power within 10 % of 12.29 kW", Math.abs((made - all) / 12290 - 1) < 0.10, String.format("%.2f kW", (made - all) / 1000));
+                // (todo #504, piped to the air ports on the backs, the furnaces on thermal cables, the draught shut, OUTPUT_PER_WATT
+                // 2 pending Baughn: before, 5.05 kW of blowers for 10.72 kW net)
+                ctx.check(id + ": the blowers draw within 15 % of 2.26 kW (0.57 kW a Big burner at 1.40 bar)", Math.abs(all / 2260 - 1) < 0.15, String.format("%.2f kW", all / 1000));
+                ctx.check(id + ": net electric power within 10 % of 11.95 kW", Math.abs((made - all) / 11950 - 1) < 0.10, String.format("%.2f kW", (made - all) / 1000));
             }
             // (measured, not pinned: the wet part of the turbine's own exhaust collects in its exhaust, 1.7 % of its volume a
             // minute here; run for 16800 ticks, it fails on water at 10 %, tick 8448, and the boilers after it)
@@ -1226,7 +1304,9 @@ public final class HpPlantCases {
                 ctx.check(id + ": the condensate goes back (97 %+ of the steam)", steam > 1e-3 && pumped > 0.97 * steam, String.format("%.2f of %.2f g/s", pumped * 1000, steam * 1000));
                 return;
             }
-            ctx.check(id + ": rated power on the shaft (over 16 kW, within 8 % of 17.1 kW)", shaftW > 16e3 && Math.abs(shaftW / 17100 - 1) < 0.08, String.format("%.2f kW", shaftW / 1000));
+            // (todo #504: on blowers at 90 % through their pipes the burners fire 2.1 x, not the cap: 15.3 kW on the shaft)
+            if (blowers) ctx.check(id + ": its shaft power (within 8 % of 15.33 kW)", Math.abs(shaftW / 15330 - 1) < 0.08, String.format("%.2f kW", shaftW / 1000));
+            else ctx.check(id + ": rated power on the shaft (over 16 kW, within 8 % of 17.1 kW)", shaftW > 16e3 && Math.abs(shaftW / 17100 - 1) < 0.08, String.format("%.2f kW", shaftW / 1000));
             ctx.check(id + ": the generators deliver over 14 kW", elec > 14e3 && elec < shaftW, String.format("%.2f kW", elec / 1000));
             ctx.check(id + ": both boilers hold their pressure (within 1.5 bar of the regulator's)", Math.abs(pA / 1e5 - BAR) < 1.5 && Math.abs(pB / 1e5 - BAR) < 1.5,
                 String.format("%.2f / %.2f bar", pA / 1e5, pB / 1e5));
@@ -1237,7 +1317,7 @@ public final class HpPlantCases {
             ctx.check(id + ": the condenser holds a vacuum (under 0.3 bar)", condSum / w < 0.3e5, String.format("%.3f bar", condSum / w / 1e5));
             // (before todo #471's furnace fix the blowers' tanks lost 15 % more oil for 2 % less fire, 54.8 buckets/h: 125 g/s
             // of hot air through each tank's float vent carried oil vapour out with it; now the tank's oil goes to the flame)
-            double oil = blowers ? 49.0 : 47.5;
+            double oil = blowers ? 42.8 : 47.5;
             ctx.check(id + ": heavy oil within 10 % of " + oil + " buckets/h", Math.abs(mB * 3.6 / oil - 1) < 0.10, String.format("%.1f buckets/h", mB * 3.6));
         }
     }

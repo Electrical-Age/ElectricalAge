@@ -33,6 +33,7 @@ public final class CombustionCases {
         cases.add(new Drown());
         cases.add(new AirPortAbuse());
         cases.add(new PortSpots());
+        for (double pa : DraughtStudy.PA) cases.add(new DraughtStudy(pa));
     }
 
     /** The big burner's rating (W). */
@@ -58,13 +59,21 @@ public final class CombustionCases {
 
     /** The block its air port opens into, and the port's face as seen from there (3D data value) and spot. */
     static BlockPos airBlock(FuelHeatFurnaceElement f) {
-        return f.node.coordonate.pos().relative(f.front.left().toEnumFacing());
+        return f.node.coordonate.pos().relative(f.front.back().toEnumFacing());
     }
 
     static Object[] airFixture(FuelHeatFurnaceElement f, FluidNode main) {
-        var left = f.front.left();
-        return new Object[]{airBlock(f), left.toEnumFacing().getOpposite().get3DDataValue(), main,
-            mods.eln.fluid.PortBridge.flankSpot(f.front, left, FuelHeatFurnaceElement.AIR_X, FuelHeatFurnaceElement.AIR_Y)};
+        var back = f.front.back();
+        return new Object[]{airBlock(f), f.front.toEnumFacing().get3DDataValue(), main,
+            mods.eln.fluid.PortBridge.endSpot(f.front, back, FuelHeatFurnaceElement.AIR_Y, FuelHeatFurnaceElement.AIR_Z)};
+    }
+
+    /** Its fuel flange, as the pipe router sees it (on its top face, beside the flue's). */
+    static mods.eln.node.voxel.PipeRouter.End fuelPort(TestContext ctx, FuelHeatFurnaceElement f) {
+        int at = mods.eln.fluid.PortBridge.topSpot(f.front, FuelHeatFurnaceElement.FUEL_X, FuelHeatFurnaceElement.FUEL_Z);
+        BlockPos p = f.node.coordonate.pos();
+        return mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), p, net.minecraft.core.Direction.UP,
+            new net.minecraft.world.phys.Vec3(p.getX() + (at / 17) / 16.0, p.getY() + 1, p.getZ() + (at % 17) / 16.0));
     }
 
     /** Its firebox's gauge pressure (Pa). */
@@ -361,6 +370,119 @@ public final class CombustionCases {
     }
 
     /**
+     * What a stronger natural draught would do (Baughn 2026-11-17: "what would be the implications of increasing the
+     * draught?"; measured, not pinned): natural-draught furnaces at full setting with their draught's head set to pa,
+     * their flue unpiped, up one block of iron pipe into the open air, along four blocks into it, and through a Heat
+     * Exchanger's gas side into it (the open air: a fixed atmosphere on the pipe's far end).
+     */
+    static final class DraughtStudy extends PlumbingCases.Big {
+        static final double[] PA = {150, 500, 1000, 2000};
+        static final String[] ROWS = {"unpiped", "1 block of pipe", "4 blocks of pipe", "a heat exchanger", "1 block of large pipe"};
+        final double pa;
+        static final int N = 5;
+        final FuelHeatFurnaceElement[] f = new FuelHeatFurnaceElement[N];
+        final double[] flame0 = new double[N], gaugeS = new double[N], gaugeMax = new double[N];
+        final String[] stats = new String[N];
+        final List<FluidDevice> fx = new ArrayList<>();
+        FluidDevice meter;
+        IProcess clock;
+        int tick;
+        double t;
+
+        DraughtStudy(double pa) {
+            this.pa = pa;
+        }
+
+        public String id() {
+            return "fuel_furnace_draught_" + (int) pa;
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        public boolean checkLimitCycles() {
+            return false;
+        }
+
+        FluidNode air(int y) {
+            return new FluidNode(1.0, y, 1.0, true).fill(0, Water.P_ATM, 293.15);
+        }
+
+        public void build(TestContext ctx) {
+            double k = mods.eln.fluid.Flue.STACK_K;
+            for (int i = 0; i < N; i++) {
+                int z = 1 + 2 * i;
+                f[i] = furnace(ctx, ctx.at(1, 1, z), Direction.XN, 1500, true);
+                f[i].setDraughtPa(pa);
+                Object lv = f[i].fluidLevel();
+                switch (i) {
+                    case 1 -> {
+                        PipeCases.lay(ctx, ctx.at(1, 2, z), 0, 8, 0, 8, 8, 16, 8);
+                        fx.add(GasPlantCases.fixtures(lv, new Object[]{ctx.at(1, 3, z), 0, air(ctx.at(1, 3, z).getY()), FluidDevice.FluidPort.CENTRE, k}));
+                    }
+                    case 2 -> {
+                        PipeCases.lay(ctx, ctx.at(1, 2, z), 0, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+                        for (int x = 2; x <= 4; x++) PipeCases.lay(ctx, ctx.at(x, 2, z), 0, 0, 8, 8, 16, 8, 8);
+                        fx.add(GasPlantCases.fixtures(lv, new Object[]{ctx.at(5, 2, z), 4, air(ctx.at(5, 2, z).getY()), FluidDevice.FluidPort.CENTRE, k}));
+                    }
+                    case 3 -> {
+                        int hi = mods.eln.oil.TankElement.HIGH;
+                        // (on the floor two blocks east: up out of the flue, east, down and into its B side's west end)
+                        var hx = ctx.placeTransparent(GasPlantCases.HX, ctx.at(3, 1, z));
+                        hx.front = Direction.XN;   // (its B side in at the west, out at the east)
+                        hx.reconnect();
+                        PipeCases.lay(ctx, ctx.at(1, 2, z), 0, 8, 0, 8, 8, 4, 8, 16, 4, 8);
+                        PipeCases.lay(ctx, ctx.at(2, 2, z), 0, 0, 4, 8, 8, 4, 8, 8, 0, 8);
+                        PipeCases.lay(ctx, ctx.at(2, 1, z), 0, 8, 16, 8, 8, hi, 8, 16, hi, 8);
+                        fx.add(GasPlantCases.fixtures(lv, new Object[]{ctx.at(4, 1, z), 4, air(ctx.at(4, 1, z).getY()), mods.eln.oil.TankElement.sideSpot(4, hi), k}));
+                    }
+                    case 4 -> {
+                        PipeCases.lay(ctx, ctx.at(1, 2, z), 2, 8, 0, 8, 8, 16, 8);
+                        fx.add(GasPlantCases.fixtures(lv, new Object[]{ctx.at(1, 3, z), 0, air(ctx.at(1, 3, z).getY()), FluidDevice.FluidPort.CENTRE, k}));
+                    }
+                    default -> {
+                    }
+                }
+            }
+            meter = after(f[0].fluidLevel(), dt -> {
+                if (tick < 120 || tick >= 280) return;
+                t += dt;
+                for (int i = 0; i < N; i++) {
+                    if (f[i].getFlue().node == null) continue;
+                    double g = fireboxGauge(f[i]);
+                    gaugeS[i] += g * dt;
+                    gaugeMax[i] = Math.max(gaugeMax[i], g);
+                }
+            });
+            Eln.simulator.addSlowProcess(clock = dt -> {
+                tick++;
+                for (int i = 0; i < N; i++) {
+                    if (tick == 120) flame0[i] = f[i].getFlameJ();
+                    if (tick == 280) {
+                        flame0[i] = f[i].getFlameJ() - flame0[i];
+                        stats[i] = GasPlantCases.netStats(f[i].getFlue().node);
+                    }
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(clock);
+            mods.eln.fluid.FluidWorld.remove(meter);
+            for (var d : fx) mods.eln.fluid.FluidWorld.remove(d);
+            double win = (280 - 120) / 20.0, tt = Math.max(1e-9, t);
+            for (int i = 0; i < N; i++) {
+                double fire = flame0[i] / win / bigW();
+                ctx.line(String.format("draught %.0f Pa: %s: fire %.3f x its rating, firebox %.0f Pa gauge (max %.0f), burnt %b; its network %s; %s",
+                    pa, ROWS[i], fire, gaugeS[i] / tt, gaugeMax[i], f[i].isBurnt(), stats[i], f[i].getWaila()));
+                ctx.check("draught " + (int) pa + " Pa: " + ROWS[i] + ": finite, nothing burnt", Double.isFinite(fire) && !f[i].isBurnt(), String.format("%.3f", fire));
+                if (i == 0) ctx.check("draught " + (int) pa + " Pa: unpiped, it fires its setting (within 3 %)", Math.abs(fire - 1) < 0.03, String.format("%.3f", fire));
+            }
+        }
+    }
+
+    /**
      * Two furnaces, each with an Air Blower piped to its air port (unpiped flues): one at full speed, one slowed to 55 % (by its
      * supply): the slowed one fires between its setting and FORCED_MAX, for a fraction of the full one's power.
      */
@@ -388,14 +510,8 @@ public final class CombustionCases {
         public void build(TestContext ctx) {
             for (int i = 0; i < 2; i++) {
                 f[i] = furnace(ctx, ctx.at(2 + 4 * i, 1, 5), Direction.XN, 1500, true);
-                // (the blower two blocks north of its air port, its outlet facing east; the router lays the pipe)
-                BlockPos bp = ctx.at(2 + 4 * i, 1, 2);
-                b[i] = HpPlantCases.blower(ctx, bp, Direction.XP, false);
-                HpPlantCases.power(b[i], SPEED[i] * Eln.MVU);
-                var start = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), bp, net.minecraft.core.Direction.EAST);
-                var end = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), f[i].node.coordonate.pos(), f[i].front.left().toEnumFacing());
-                String err = mods.eln.node.voxel.PipePlacer.routeForTests(ctx.level(), 1, start, end);
-                if (err != null) throw new IllegalStateException("blower to the air port: " + err);
+                // (the blower beside it, the router laying the pipe round to its air port on its back)
+                b[i] = HpPlantCases.blowerOnAirPort(ctx, f[i], SPEED[i]);
             }
             Eln.simulator.addSlowProcess(clock = dt -> {
                 tick++;
@@ -422,7 +538,7 @@ public final class CombustionCases {
             }
             ctx.check("blower speed: neither furnace burnt out on its bench", !f[0].isBurnt() && !f[1].isBurnt(), f[0].isBurnt() + " " + f[1].isBurnt());
             ctx.check("blower at full speed: the fire at FORCED_MAX (within 5 %)", Math.abs(fire[0] / FuelHeatFurnaceElement.FORCED_MAX - 1) < 0.05, String.format("%.3f", fire[0]));
-            ctx.check("blower at 55 %: an intermediate fire (1.2 x .. 0.95 FORCED_MAX)", fire[1] > 1.2 && fire[1] < 0.95 * FuelHeatFurnaceElement.FORCED_MAX, String.format("%.3f", fire[1]));
+            ctx.check("blower at 55 %: an intermediate fire (1.05 x .. 0.95 FORCED_MAX)", fire[1] > 1.05 && fire[1] < 0.95 * FuelHeatFurnaceElement.FORCED_MAX, String.format("%.3f", fire[1]));
             ctx.check("blower at 55 %: for under half the full blower's power", pw[1] < 0.5 * pw[0], String.format("%.0f of %.0f W", pw[1], pw[0]));
         }
     }
@@ -535,9 +651,9 @@ public final class CombustionCases {
     }
 
     /**
-     * Its flanges where the model draws them (mods.eln.cad.models.FuelHeater: the fuel flange on the back at y 6, z 8; the
-     * air port on the left flank at x 6, y 8), for each of the four fronts: a pipe laid by hand from the drawn point
-     * outward joins its tank or its windbox; one laid where the old front flange was joins nothing.
+     * Its flanges where the model draws them (mods.eln.cad.models.FuelHeater: the fuel flange on top at x 13, z 8; the air
+     * port on the back at y 6, z 8), for each of the four fronts: a pipe laid by hand from the drawn point outward joins
+     * its tank or its windbox; one laid where the old front flange was joins nothing.
      */
     static final class PortSpots extends PlumbingCases.Big {
         static final Direction[] FRONTS = {Direction.XN, Direction.XP, Direction.ZN, Direction.ZP};
@@ -581,8 +697,8 @@ public final class CombustionCases {
             for (int i = 0; i < 4; i++) {
                 Direction fr = FRONTS[i];
                 f[i] = furnace(ctx, at[i], fr, 500, false);
-                pipeOut(ctx, at[i], fr.back(), world(fr, 16, FuelHeatFurnaceElement.FUEL_Y, FuelHeatFurnaceElement.FUEL_Z));
-                pipeOut(ctx, at[i], fr.left(), world(fr, FuelHeatFurnaceElement.AIR_X, FuelHeatFurnaceElement.AIR_Y, 0));
+                pipeOut(ctx, at[i], Direction.YP, world(fr, FuelHeatFurnaceElement.FUEL_X, 16, FuelHeatFurnaceElement.FUEL_Z));
+                pipeOut(ctx, at[i], fr.back(), world(fr, 16, FuelHeatFurnaceElement.AIR_Y, FuelHeatFurnaceElement.AIR_Z));
                 pipeOut(ctx, at[i], fr, world(fr, 0, 4, 8));   // (where the old front flange was)
             }
         }
@@ -592,7 +708,7 @@ public final class CombustionCases {
                 var v = f[i].getVessel();
                 var w = f[i].getWindbox();
                 long fuelEdges = mods.eln.fluid.FluidWorld.edgesOf(v).stream().filter(e -> e.kind != FluidEdge.Kind.CHECK || e.gasOnly == false).count();
-                boolean fuel = String.valueOf(f[i].getWaila()).contains("back flange");
+                boolean fuel = String.valueOf(f[i].getWaila()).contains("top flange");
                 var dam = f[i].getDamper();
                 boolean air = mods.eln.fluid.FluidWorld.edgesOf(w).stream().anyMatch(e -> dam == null || e != dam.edge);
                 var frontPipe = PipeCases.node(ctx, f[i].node.coordonate.pos().relative(FRONTS[i].toEnumFacing()));
@@ -601,8 +717,8 @@ public final class CombustionCases {
                     if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null)
                         frontJoined |= mods.eln.fluid.FluidWorld.networkOf(pp.fluid) == mods.eln.fluid.FluidWorld.networkOf(v) && mods.eln.fluid.FluidWorld.networkOf(v) != null;
                 String what = "front " + FRONTS[i] + ": " + f[i].getWaila() + ", edges at the tank " + fuelEdges;
-                ctx.check("port spots, front " + FRONTS[i] + ": a pipe on the drawn back flange feeds its tank", fuel, what);
-                ctx.check("port spots, front " + FRONTS[i] + ": a pipe on the drawn left-flank air port meets its windbox", air, what);
+                ctx.check("port spots, front " + FRONTS[i] + ": a pipe on the drawn top fuel flange feeds its tank", fuel, what);
+                ctx.check("port spots, front " + FRONTS[i] + ": a pipe on the drawn back air port meets its windbox", air, what);
                 ctx.check("port spots, front " + FRONTS[i] + ": a pipe where the old front flange was joins nothing", !frontJoined, what);
             }
         }

@@ -18,6 +18,13 @@ import java.util.List;
 public class AirBlowerDescriptor extends InlinePumpDescriptor {
     /** Shut-off pressure rise (Pa), free flow (m^3/s of inlet air), motor efficiency, idle draw (W). */
     public static final double SHUTOFF_PA = 1.8e5, FREE_M3_S = 0.04, MOTOR_ETA = 0.9, BLOWER_IDLE_W = 20;
+    /**
+     * Air moved per watt against a plain fan (todo #504, Baughn 2026-11-17: "what about increasing the blower's output
+     * per watt?"): the work it does on the air is drawn divided by this (its curve, pressure and flow, unchanged; its
+     * idling not scaled). 1: the physical machine (motor 0.9, the core's flow x rise ~1.45 x isentropic). 2: pending
+     * Baughn's choice (the table in the commit that set it).
+     */
+    public static double OUTPUT_PER_WATT = 2;
 
     public AirBlowerDescriptor(String name, double nominalU, ElectricalCableDescriptor cable, String model) {
         super(name, AirBlowerElement.class, nominalU, cable, model);

@@ -40,6 +40,8 @@ public class AirBlowerElement extends TransparentNodeElement implements FluidDev
     private List<FluidPort> ports = List.of();
     /** Speed now (0..1), the air moved (kg/s, averaged over a second, and this step), the power wanted (W), air in all (kg). */
     public double share, kgPerS, stepKgPerS, wantW, totalKg;
+    /** Of wantW, its idling (W: not scaled by OUTPUT_PER_WATT). */
+    public double idleW;
     double meterKg, meterTime;
 
     public AirBlowerElement(TransparentNode node, TransparentNodeDescriptor d) {
@@ -77,7 +79,8 @@ public class AirBlowerElement extends TransparentNodeElement implements FluidDev
             needPublish();
         }
         double work = blower.edge == null ? 0 : Math.max(0, blower.edge.work);
-        wantW = share <= 0.01 ? 0 : work / AirBlowerDescriptor.MOTOR_ETA + AirBlowerDescriptor.BLOWER_IDLE_W * share;
+        idleW = share <= 0.01 ? 0 : AirBlowerDescriptor.BLOWER_IDLE_W * share;
+        wantW = share <= 0.01 ? 0 : work / (AirBlowerDescriptor.MOTOR_ETA * AirBlowerDescriptor.OUTPUT_PER_WATT) + idleW;
         double u = load.getU();
         resistor.setR(wantW > 1 && u > 1 ? u * u / wantW : 1e9);
     }

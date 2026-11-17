@@ -686,9 +686,13 @@ public final class OilCases {
                 case "fuel_furnace_in", "fuel_furnace_crude" -> {
                     tank = tank(ctx, w, XP);
                     east = ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, e);
-                    east.front = XP;   // (its back, with the fuel flange 6 px up, west: todo #504)
+                    east.front = XN;
                     east.reconnect();
-                    lay(ctx, mid, 0, 4, 8, 8, 4, 8, 8, 6, 8, 16, 6, 8);
+                    // (its fuel flange on top, beside the flue: todo #504; the router lays the pipe up and over)
+                    String err = mods.eln.node.voxel.PipePlacer.routeForTests(ctx.level(), 0,
+                        mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), w, net.minecraft.core.Direction.EAST),
+                        CombustionCases.fuelPort(ctx, (mods.eln.transparentnode.FuelHeatFurnaceElement) east));
+                    if (err != null) throw new IllegalStateException("tank to the furnace's fuel flange: " + err);
                     put(ctx, w, variant.equals("fuel_furnace_crude") ? Oil.CRUDE.get() : Oil.Cut.GASOLINE.source.get(), 6000);
                 }
                 case "fuel_furnace_buckets" -> {
@@ -926,7 +930,7 @@ public final class OilCases {
                 case "fuel_furnace_in", "fuel_furnace_crude" -> {
                     // (its tank's liquid, whatever mix: crude is its cuts, which a bucket wouldn't take as one fluid)
                     double got = ((mods.eln.transparentnode.FuelHeatFurnaceElement) east).fuelMb();
-                    ctx.check("oil on pipes: the fuel heat furnace's tank filled from the pipe on its front flange", got > 10, String.format("%.0f mB, %s", got, east.getWaila()));
+                    ctx.check("oil on pipes: the fuel heat furnace's tank filled from the pipe on its top flange", got > 10, String.format("%.0f mB, %s", got, east.getWaila()));
                 }
                 case "turbine_fuel" -> {
                     double f = ((mods.eln.mechanical.GasTurbineElement) east).fuelMb();
@@ -1111,16 +1115,14 @@ public final class OilCases {
             return n;
         }
 
-        /** The main coupled to its fuel flange on its back (a pipe's end on it). */
+        /** The main coupled to its fuel flange on its top (a pipe's end on it). */
         static mods.eln.sim.fluid.FluidDevice onFlange(mods.eln.transparentnode.FuelHeatFurnaceElement f, mods.eln.sim.fluid.FluidNode main) {
-            var front = f.front;
-            var back = front.back();
             var pos = f.node.coordonate.pos();
-            return GasPlantCases.fixtures(f.fluidLevel(), new Object[]{pos.relative(back.toEnumFacing()), front.toEnumFacing().get3DDataValue(), main,
-                mods.eln.fluid.PortBridge.endSpot(front, back, mods.eln.transparentnode.FuelHeatFurnaceElement.FUEL_Y, mods.eln.transparentnode.FuelHeatFurnaceElement.FUEL_Z)});
+            return GasPlantCases.fixtures(f.fluidLevel(), new Object[]{pos.above(), 0, main,
+                mods.eln.fluid.PortBridge.topSpot(f.front, mods.eln.transparentnode.FuelHeatFurnaceElement.FUEL_X, mods.eln.transparentnode.FuelHeatFurnaceElement.FUEL_Z)});
         }
 
-        /** The main coupled to its air port on its left flank (todo #504). */
+        /** The main coupled to its air port on its back (todo #504). */
         static mods.eln.sim.fluid.FluidDevice onAirPort(mods.eln.transparentnode.FuelHeatFurnaceElement f, mods.eln.sim.fluid.FluidNode main) {
             return GasPlantCases.fixtures(f.fluidLevel(), CombustionCases.airFixture(f, main));
         }
@@ -1428,9 +1430,12 @@ public final class OilCases {
                     // (as oil_on_pipes_fuel_furnace_in, but on until it is full: a pressurised tank pushes on)
                     OilOnPipes.tank(ctx, ctx.at(1, 1, 1), mods.eln.misc.Direction.XP);
                     a = (mods.eln.transparentnode.FuelHeatFurnaceElement) ctx.placeTransparent(Wp10bCases.FUEL_HEAT_FURNACE, ctx.at(3, 1, 1));
-                    a.front = mods.eln.misc.Direction.XP;   // (its back, with its fuel flange 6 px up, west: todo #504)
+                    a.front = mods.eln.misc.Direction.XN;
                     a.reconnect();
-                    PipeCases.lay(ctx, ctx.at(2, 1, 1), 0, 0, 4, 8, 8, 4, 8, 8, 6, 8, 16, 6, 8);
+                    // (its fuel flange on top, beside the flue: todo #504; the router lays the pipe up and over)
+                    String err = mods.eln.node.voxel.PipePlacer.routeForTests(ctx.level(), 0,
+                        mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), ctx.at(1, 1, 1), net.minecraft.core.Direction.EAST), CombustionCases.fuelPort(ctx, a));
+                    if (err != null) throw new IllegalStateException("tank to the furnace's fuel flange: " + err);
                     OilOnPipes.put(ctx, ctx.at(1, 1, 1), Oil.Cut.GASOLINE.source.get(), 9000);
                     perKgGasoline = mods.eln.fluid.FluidSpecies.kgPerMb(mods.eln.fluid.FluidSpecies.of(Oil.Cut.GASOLINE.source.get()).id(), false);
                     ctx.after(2, () -> kg0 = gasolineIn(ctx));   // (the tank takes what was put in at its first step)

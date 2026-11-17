@@ -100,7 +100,7 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
         list.add(I18N.tr("Generates heat when supplied with fuel."))
         list.add(I18N.tr("Burns gasoline, diesel, heavy oil, residue, crude oil and piped fuel gas."))
         list.add(I18N.tr("Crude, residue and heavy oil coke its burner; clean fuel clears it. Wool cleans it."))
-        list.add(I18N.tr("Fuel flange on its back; air port on its left flank: forced air fires it up to 2.5x."))
+        list.add(I18N.tr("Fuel flange on top; air port on its back: forced air fires it up to 2.5x."))
         list.add(I18N.tr("Natural draught can't push its smoke far: a backed-up flue starves its fire."))
         list.add(Utils.plotCelsius(I18N.tr("  Max. temperature: "), thermal.warmLimit))
     }
@@ -133,15 +133,14 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         /** The tank's height in the block (m). */
         const val TANK_H = 0.5
         /**
-         * Its fuel flange on the back, above the thermal pad, centred across, and its air port on its left flank (px, the
-         * model's frame: mods.eln.cad.models.FuelHeater FUEL_Y, FUEL_Z, AIR_X, AIR_Y; Baughn 2026-11-17: flanges on the
-         * sides or back, not the front).
+         * Its fuel flange on top beside the flue, toward the back, and its air port on the back above the thermal pad,
+         * centred across (px, the model's frame: mods.eln.cad.models.FuelHeater FUEL_X, FUEL_Z, AIR_Y, AIR_Z; Baughn
+         * 2026-11-17: "on top is fine ... back is also fine, e.g. for air"; nothing on the front or flanks).
          */
-        const val FUEL_Y = 6
+        const val FUEL_X = 13
         const val FUEL_Z = 8
-        const val AIR_X = 6
-        const val AIR_Y = 8
-        const val FLANGE_Y = FUEL_Y / 16.0
+        const val AIR_Y = 6
+        const val AIR_Z = 8
         /** Its flange's conductance (as the oil devices' ports) and its breather's on top (small: a vent, not an opening). */
         const val PORT_K = 6e-11
         /** The breather's vacuum breaker (air in as the fuel goes down). */
@@ -210,8 +209,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private val controlLoad = NbtElectricalGateInput("commandLoad")
 
     /**
-     * Its fuel tank, a fluid node (two buckets: Baughn 2026-11-03, it fills by bucket): its flange on its back (EA
-     * pipes, 6 px up) and buckets put any liquid in; a breather on top lets air in as it burns and live crude's gas
+     * Its fuel tank, a fluid node (two buckets: Baughn 2026-11-03, it fills by bucket): its flange on top (EA pipes,
+     * beside the flue, toward the back) and buckets put any liquid in; a breather on top lets air in as it burns and live crude's gas
      * out. What it holds burns species by species (heating_value): a mix burns as the mix it is (Baughn 2026-11-10:
      * "mixed on the machines").
      */
@@ -282,11 +281,10 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         if (flue.node == null) return listOf()
         val pos = node!!.coordonate.pos().asLong()
         val back = front.back()
-        val left = front.left()
-        return listOf(mods.eln.sim.fluid.FluidDevice.FluidPort(v, pos, back.toEnumFacing().get3DDataValue(), FLANGE_Y / TANK_H, PORT_K,
-            mods.eln.fluid.PortBridge.endSpot(front, back, FUEL_Y, FUEL_Z)),
-            mods.eln.sim.fluid.FluidDevice.FluidPort(w, pos, left.toEnumFacing().get3DDataValue(), 0.5, PORT_K,
-                mods.eln.fluid.PortBridge.flankSpot(front, left, AIR_X, AIR_Y)),
+        // (the fuel comes in at the tank's top)
+        return listOf(mods.eln.sim.fluid.FluidDevice.FluidPort(v, pos, 1, 1.0, PORT_K, mods.eln.fluid.PortBridge.topSpot(front, FUEL_X, FUEL_Z)),
+            mods.eln.sim.fluid.FluidDevice.FluidPort(w, pos, back.toEnumFacing().get3DDataValue(), 0.5, PORT_K,
+                mods.eln.fluid.PortBridge.endSpot(front, back, AIR_Y, AIR_Z)),
             flue.port(pos))
     }
 
@@ -385,8 +383,19 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         airAskKgS = AIR_KG_PER_J * ref * nominal
         d.open = Math.min(1.0, ref * nominal / damperRefW())
         val rho = mods.eln.sim.fluid.Water.P_ATM / (mods.eln.sim.fluid.Water.R_AIR * amb)
-        n.speed = ref
+        // (Baughn 2026-11-17: a blower needs the draught shut entirely; a pipe on its air port shuts the room inlet)
+        n.speed = if (airPiped()) 0.0 else ref
         n.qMax = if (nominal > 0) AIR_KG_PER_J * nominal / rho else 0.0
+        n.h0 = draughtPa
+    }
+
+    /** Its natural draught's head (Pa): DRAUGHT_PA, settable for measuring (not saved). */
+    var draughtPa = DRAUGHT_PA
+
+    /** Is something on its air port (an edge at its windbox other than its damper)? */
+    fun airPiped(): Boolean {
+        val w = windbox ?: return false
+        return mods.eln.fluid.FluidWorld.edgesOf(w).any { it !== damper?.edge }
     }
 
     /** After a step: the air that came in by its damper (air alone: a gas or liquid in its windbox doesn't burn) and draught. */
@@ -935,7 +944,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         airJade()?.let { info.put(I18N.tr("Air"), it) }
         if (gasEscapingKgS > GAS_FIRE_KG_S) info.put(I18N.tr("Relief"), I18N.tr("venting fuel gas!"))
         if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade())
-        if (v != null && mods.eln.fluid.FluidWorld.edgesOf(v).any { it !== breather?.edge && it !== airIn?.edge && it !== relief?.edge }) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its back flange"))
+        if (v != null && mods.eln.fluid.FluidWorld.edgesOf(v).any { it !== breather?.edge && it !== airIn?.edge && it !== relief?.edge }) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its top flange"))
         return info
     }
 
@@ -945,7 +954,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val fn = flue.node
         val back = if (fn == null) 0.0 else mods.eln.fluid.FluidWorld.nodeFor(fn).P() - mods.eln.sim.fluid.Water.P_ATM
         return when {
-            airRatio < 0.9 && back > 0.5 * DRAUGHT_PA -> String.format(I18N.tr("starved (%.0f%%): flue backed up %s"), airRatio * 100,
+            airRatio < 0.9 && back > 0.5 * draughtPa -> String.format(I18N.tr("starved (%.0f%%): flue backed up %s"), airRatio * 100,
                 if (back < 1e4) String.format("%.0f Pa", back) else String.format("%.2f bar", back / 1e5))
             airRatio < 0.9 -> String.format(I18N.tr("starved (%.0f%%)"), airRatio * 100)
             forcedKgS > 0.05 * airAskKgS -> String.format(I18N.tr("forced %.1f g/s + draught %.1f g/s, fires %.1fx its setting"), forcedKgS * 1000, draughtKgS * 1000, airFactor())

@@ -70,6 +70,21 @@ public final class PortBridge {
     }
 
     /**
+     * The spot (FluidPort.at) on a device's top face of a point drawn at (x, z) px in its model's frame (front XN, x the
+     * depth from the front, right z+: docs/cad.md), for the device facing front.
+     */
+    public static int topSpot(mods.eln.misc.Direction front, int x, int z) {
+        int[] d = unit(front.back()), r = unit(front.right());
+        int wx = 8 + (x - 8) * d[0] + (z - 8) * r[0], wz = 8 + (x - 8) * d[2] + (z - 8) * r[2];
+        return wx * 17 + wz;   // (up/down: x then z)
+    }
+
+    private static int[] unit(mods.eln.misc.Direction d) {
+        var n = d.toEnumFacing().getUnitVec3i();
+        return new int[]{n.getX(), n.getY(), n.getZ()};
+    }
+
+    /**
      * The spot (FluidPort.at) on a device's left or right flank of a point drawn at (x, y) px in its model's frame (front
      * XN, x the depth from the front, right z+: docs/cad.md), for the device facing front.
      */
