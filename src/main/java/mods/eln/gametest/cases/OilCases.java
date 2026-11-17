@@ -2031,7 +2031,8 @@ public final class OilCases {
                 && alone.vessel.T() > 273 && alone.vessel.T() < 320 && Math.abs(alone.heatW) < 50, alone == null ? "none" : alone.getWaila().toString());
             // (its outlet is dead-ended: it pumps, or stands at its shut-off head)
             ctx.check("oil: its condensate pump runs with the shaft", c.v.speed > 0.9 && (c.pumped > 0 || c.floodShare() < 0.01
-                || c.v.backPa > 0.95 * c.v.curve.shutoffPa), String.format("%.0f%% speed, %.0f mB/s pumped against %.2f bar", c.v.speed * 100, c.pumped, c.v.backPa / 1e5));
+                || c.v.backPa > 0.95 * c.v.headPa), String.format("%.0f%% speed, %.0f mB/s pumped against %.2f bar (head %.2f bar, hotwell %.1f%%)",
+                c.v.speed * 100, c.pumped, c.v.backPa / 1e5, c.v.headPa / 1e5, c.floodShare() * 100));
             // Jade says whether the pump runs, and why not (Baughn: a cold start gave no hint)
             String running = c.getWaila().get(mods.eln.i18n.I18N.tr("Condensate pump")), idle = alone.getWaila().get(mods.eln.i18n.I18N.tr("Condensate pump"));
             ctx.check("oil: Jade: the running condenser's pump shows its share and flow", running != null && running.endsWith("mB/s"), "" + running);
@@ -3818,7 +3819,23 @@ public final class OilCases {
                 // (fed smoothly with water at 27 C, as a feed pump on a level controller would; 1 mB is ~1/16 g here)
                 if (fed && boiler.vessel != null) {
                     double mB = Math.max(0, Math.min(400 * dt, (6000 - water()) * 0.5 * dt));
-                    mods.eln.sim.fluid.EaUnits.addWater(boiler.vessel, mB * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER, 300, false);
+                    double kg = mB * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
+                    // (the feed takes the condensate over the makeup level first, as the condenser's pump into the feed
+                    // line would: with its pump dead-ended the hotwell filled until it flooded the turbine, at ~190 s on
+                    // its own and inside the run once the casing drain trapped the turbine's start-up condensate into it)
+                    var hw = t.condenser == null ? null : t.condenser.v.vessel;
+                    if (hw != null) {
+                        double back = Math.min(kg, Math.max(0, hw.mLiquid() - mods.eln.oil.CondenserVessel.MAKEUP_SHUT * hw.volume * mods.eln.sim.fluid.Water.RHO_L));
+                        if (back > 0) {
+                            double T = hw.T();
+                            hw.mWater -= back;
+                            hw.energy -= back * mods.eln.sim.fluid.Water.hLiquid(T);
+                            hw.update();
+                            mods.eln.sim.fluid.EaUnits.addWater(boiler.vessel, back, T, false);
+                            kg -= back;
+                        }
+                    }
+                    mods.eln.sim.fluid.EaUnits.addWater(boiler.vessel, kg, 300, false);
                 }
                 time += dt;
                 peak = Math.max(peak, boiler.vessel.P());
