@@ -47,6 +47,8 @@ public class ComputerRender extends TransparentNodeElementRender {
     }
 
     long seenFocus = -1;
+    /** The last program focus the screen took (so that reopening it takes only newer ones). */
+    public long screenFocusSeq = -1;
 
     int monitorTab() {
         // a tab the program brings forward shows, as the screen would show it on opening

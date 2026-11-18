@@ -15,12 +15,18 @@ import static mods.eln.i18n.I18N.tr;
 /**
  * The signal processor's screen (Baughn 2026-10-30, board #45): its program in the code editor in the middle, the quick
  * reference beside it on the right as a handbook page, on the left the logger it will carry (a frame for now), the chip
- * slot and Apply. The chips needed or the first problem show live, as the program is typed; Apply sends it. Sized for
- * GUI scale 4 at 1080p (480 x 270).
+ * slot and Apply. The chips needed or the first problem show live, as the program is typed; Apply sends it.
  */
 public class ElectricalMathScreen extends ElnScreen {
-    public static final int WIDTH = 466, HEIGHT = 266, INV_X = 132, INV_Y = 188, CHIP_X = 41, CHIP_Y = 202;
-    static final int LEFT_X = 6, LEFT_W = 90, EDIT_X = 100, EDIT_W = 226, EDIT_Y = 16, EDIT_H = 148, REF_X = 332, REF_W = 128;
+    /**
+     * The editor shows 80 x 25 cells (Baughn 2026-11-18), with room for a three-digit gutter; the inventory under it. A
+     * window too small for the panel at the player's GUI scale takes the largest smaller scale that fits (ElnScreen).
+     */
+    static final int EDIT_X = 100, EDIT_Y = 16, EDIT_W = 80 * CodeEditor.CELL + 3 * CodeEditor.CELL + 4 * CodeEditor.PAD,
+        EDIT_H = 25 * CodeEditor.LINE + 2 * CodeEditor.PAD;
+    public static final int WIDTH = EDIT_X + EDIT_W + 4 + 128 + 6, HEIGHT = EDIT_Y + EDIT_H + 16 + 76 + 6,
+        INV_X = EDIT_X + (EDIT_W - 162) / 2, INV_Y = EDIT_Y + EDIT_H + 16, CHIP_X = 41, CHIP_Y = 202;
+    static final int LEFT_X = 6, LEFT_W = 90, REF_X = EDIT_X + EDIT_W + 4, REF_W = 128;
     final ElectricalMathRender render;
     CodeEditor editor;
     /** The guide's open categories, kept over a re-layout (all closed when the screen opens). */
@@ -33,6 +39,12 @@ public class ElectricalMathScreen extends ElnScreen {
     public ElectricalMathScreen(ElnNodeMenu menu, Inventory inventory, Component title, Object render) {
         super(menu, inventory, title);
         this.render = (ElectricalMathRender) render;
+        inventoryLabelY = -10000;   // (the status line is where its title would go)
+    }
+
+    @Override
+    protected boolean fitsGuiScale() {
+        return true;
     }
 
     @Override

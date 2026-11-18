@@ -29,12 +29,15 @@ import static mods.eln.i18n.I18N.tr;
  * (Baughn). Logs and lists scroll here. Under it: Reset, its state and address, the chip slots and drives.
  */
 public class ComputerScreen extends ElnScreen {
-    public static final int WIDTH = 498, HEIGHT = 385, CELL = 6, LINE = 10;
+    public static final int WIDTH = 498, HEIGHT = 358, CELL = 6, LINE = 10;
     /** The scene's area: cells from (AREA_X, AREA_Y), in panel pixels. */
-    public static final int AREA_X = 9, AREA_Y = 22;
-    /** Under the 80 x 25 cells (Baughn 2026-11-18): the buttons, then the slots on the left and the inventory on the right. */
-    public static final int SLOTS_Y = 313, INV_X = WIDTH - 9 - 162, INV_Y = 302;
-    static final int BOTTOM_Y = AREA_Y + Scene.DEFAULT_H * LINE + 6;
+    public static final int AREA_X = 9, AREA_Y = 18;
+    /**
+     * Under the 80 x 25 cells (Baughn 2026-11-18): on the left the slots, then the buttons; on the right the inventory
+     * (498 x 358: fits 640 x 360, a 720 px window at GUI scale 2; a smaller window takes a smaller scale, ElnScreen).
+     */
+    public static final int SLOTS_Y = 288, INV_X = WIDTH - 9 - 162, INV_Y = 276;
+    static final int BOTTOM_Y = SLOTS_Y + 24;
     final ComputerRender render;
 
     /** The tab shown, and the element with the keyboard. */
@@ -74,6 +77,17 @@ public class ComputerScreen extends ElnScreen {
         this.render = (ComputerRender) render;
         @SuppressWarnings("unchecked") Map<String, LineEdit> e = (Map<String, LineEdit>) (Map<?, ?>) this.render.screenState;
         edits = e;   // (kept in the render: a half-typed line survives closing the screen, AdventurAgent)
+        // it opens on the tab it last showed, unless the program brought one forward since (AdventurAgent)
+        tab = this.render.shownTab;
+        chose = tab >= 0;
+        seenFocus = this.render.shownTab >= 0 ? this.render.screenFocusSeq : -1;
+        titleLabelY = 5;
+        inventoryLabelY = -10000;   // (no room for the inventory's title above it)
+    }
+
+    @Override
+    protected boolean fitsGuiScale() {
+        return true;
     }
 
     @Override
@@ -221,6 +235,7 @@ public class ComputerScreen extends ElnScreen {
             focusId = -1;
         }
         render.shownTab = tab;   // (the monitor shows the same tab)
+        render.screenFocusSeq = seenFocus;
         return tab < 0 ? null : s.tabs.get(tab);
     }
 
@@ -364,8 +379,8 @@ public class ComputerScreen extends ElnScreen {
             String title = tabTitle(en.getKey(), en.getValue(), s.tabs.size());
             int w = font.width(title) + 8;
             boolean on = en.getKey() == tab;
-            g.fill(x, topPos + 5, x + w, topPos + 17, on ? 0xFF101418 : 0xFF8B8B8B);
-            g.text(font, title, x + 4, topPos + 7, on ? 0xFF9FE8A0 : 0xFF202020, false);
+            g.fill(x, topPos + 3, x + w, topPos + 15, on ? 0xFF101418 : 0xFF8B8B8B);
+            g.text(font, title, x + 4, topPos + 5, on ? 0xFF9FE8A0 : 0xFF202020, false);
             x += w + 2;
         }
     }
@@ -497,7 +512,7 @@ public class ComputerScreen extends ElnScreen {
         for (Map.Entry<Integer, Scene.Tab> en : s.tabs.entrySet()) {
             String title = tabTitle(en.getKey(), en.getValue(), s.tabs.size());
             int w = font.width(title) + 8;
-            if (mx >= x && mx < x + w && my >= topPos + 5 && my < topPos + 17) {
+            if (mx >= x && mx < x + w && my >= topPos + 3 && my < topPos + 15) {
                 if (ev.button() == InputConstants.MOUSE_BUTTON_RIGHT && en.getKey() > 1)
                     render.screenEvent(new Form.Symbol("close"), (long) en.getKey());   // (right-click closes a process's tab)
                 else {

@@ -229,7 +229,50 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
     protected void init() {
         refreshers.clear();
         drawers.clear();
+        if (fitsGuiScale()) fitGuiScale();
         super.init();
+    }
+
+    /**
+     * Does this screen take a smaller GUI scale when its panel doesn't fit the window at the player's own? Big screens
+     * (the computer's 80 x 25 terminal) say yes (Baughn 2026-11-18: "the largest GUI scale (&lt;= the set one) which
+     * makes it fit").
+     */
+    protected boolean fitsGuiScale() {
+        return false;
+    }
+
+    /** The window's GUI scale was lowered for this screen, and is put back when it closes. */
+    private boolean scaled;
+
+    /**
+     * Sets the window's GUI scale to the largest one at most the player's setting at which the panel fits (at least 1),
+     * and takes the screen's size from it. Called from init(), so it runs again on a window resize (Minecraft.resizeGui
+     * puts the player's scale back, then resizes the screen).
+     */
+    private void fitGuiScale() {
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        var window = mc.getWindow();
+        int set = window.calculateScale(mc.options.guiScale().get(), mc.isEnforceUnicode()), k = set;
+        while (k > 1 && (window.getWidth() / k < imageWidth || window.getHeight() / k < imageHeight)) k--;
+        if (k == window.getGuiScale()) return;
+        window.setGuiScale(k);
+        scaled = k != set;
+        width = window.getGuiScaledWidth();
+        height = window.getGuiScaledHeight();
+        mc.mouseHandler.resyncMousePosition();
+    }
+
+    @Override
+    public void removed() {
+        if (scaled) {
+            // the player's own scale again, before the next screen (or the HUD alone) is laid out
+            var mc = net.minecraft.client.Minecraft.getInstance();
+            mc.getWindow().setGuiScale(mc.getWindow().calculateScale(mc.options.guiScale().get(), mc.isEnforceUnicode()));
+            mc.mouseHandler.resyncMousePosition();
+            scaled = false;
+        }
+        super.removed();
     }
 
     // ---- small builders for the common screens (positions relative to the panel)
