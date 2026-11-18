@@ -256,6 +256,15 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
     }
 
     /**
+     * Placed anywhere, does a click in the middle of a free face put it in the face's own slot (its ports at the face's
+     * edges, meeting a machine beside it by EA's edge rule, drawn with cable stubs from it to those edges)? Else it goes
+     * off centre there too, with pins. Devices already in a face slot stay there either way.
+     */
+    public boolean centreInFaceSlot() {
+        return true;
+    }
+
+    /**
      * What the device's model takes on its face, in voxels: {half its width across the face (square, so it needn't follow
      * front), its height off the face}. From the model parts the descriptor holds (its Obj3DPart fields, else its whole
      * Obj3D), once; a device without a model takes the old plate (12 x 12, 3 high). Hosted in a voxel block, this is
