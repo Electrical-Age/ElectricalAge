@@ -58,18 +58,26 @@ def floppy(arrow=False, apps=False):
     return im
 
 def computer():
-    """The block's front: a green cabinet, two drive slots, the vent and the run lamp (ComputerParts)."""
+    """The front: the CRT monitor on the case, painted as the three-channel logger (paint_condenser 60,120,130; ComputerParts)."""
     im = blank(); px = im.load()
-    rect(px, 1, 1, 14, 14, (70, 140, 80))            # the cabinet (50 V green)
-    rect(px, 1, 1, 14, 1, (100, 170, 110))
-    rect(px, 1, 14, 14, 14, (40, 90, 50))
-    rect(px, 2, 3, 10, 4, (25, 30, 35))              # the status strip
-    rect(px, 12, 3, 13, 4, (90, 230, 90))            # the lamp
-    for x0 in (2, 8):                                 # the drives
-        rect(px, x0, 7, x0 + 5, 9, (45, 48, 55))
-        rect(px, x0 + 1, 8, x0 + 4, 8, (150, 155, 165))
-    for y in (11, 13):                                # the vent
-        rect(px, 3, y, 12, y, (45, 90, 55))
+    paint, lit, dark, steel = (60, 120, 130), (90, 150, 160), (35, 80, 90), (45, 48, 55)
+    # the monitor: shell, glass with two lines of text, power lamp
+    rect(px, 2, 0, 13, 7, paint)
+    rect(px, 2, 0, 13, 0, lit)
+    rect(px, 3, 1, 12, 5, (16, 22, 20))
+    rect(px, 4, 2, 8, 2, (200, 210, 190))
+    rect(px, 4, 4, 10, 4, (120, 200, 130))
+    rect(px, 11, 6, 11, 6, (90, 230, 90))
+    rect(px, 6, 8, 9, 8, steel)                       # its foot
+    # the case: drives, lamp, vent
+    rect(px, 0, 9, 15, 15, paint)
+    rect(px, 0, 9, 15, 9, lit)
+    rect(px, 0, 15, 15, 15, dark)
+    for x0 in (1, 8):
+        rect(px, x0, 11, x0 + 5, 12, steel)
+        rect(px, x0 + 1, 11, x0 + 4, 11, (150, 155, 165))
+    rect(px, 14, 11, 14, 11, (90, 230, 90))
+    rect(px, 2, 14, 13, 14, dark)
     return im
 
 if __name__ == "__main__":
