@@ -125,9 +125,9 @@
   (ui/desk-icon t 9 1 y "Shell" P-SHELL (fn [] (ui/restore 1) (ui/focus 1)))
   # applications in a grid to the right of them, clear of the bottom row (minimised windows' icons)
   (eachp [i dir] apps
-    (def col (% i 8))
-    (def row (math/floor (/ i 8)))
-    (ui/desk-icon t (+ 100 i) (+ 10 (* 8 col)) (* 5 row) (app/name dir) (app-picture dir) (fn [] (app/launch dir)))))
+    (def col (% i 7))   # (9 cells apart: 8-letter labels keep a gap)
+    (def row (math/floor (/ i 7)))
+    (ui/desk-icon t (+ 100 i) (+ 10 (* 9 col)) (* 5 row) (app/name dir) (app-picture dir) (fn [] (app/launch dir)))))
 
 (ui/menus t [["Desk" ["Open Shell" "s"] ["Look at the drives" "r"] nil ["Open A:" ""] ["Open B:" ""] ["Open RAM:" ""]]]
           (fn [menu item]
