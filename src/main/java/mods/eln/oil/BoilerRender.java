@@ -42,10 +42,7 @@ public class BoilerRender extends TransparentNodeElementRender {
     @Override
     public void draw() {
         front.glRotateXnRef();
-        if (desc.height > 1) {   // (PROTOTYPE, unseen: the Boiler's model over the whole 2x2x2, from its origin block's centre)
-            mods.eln.gl.GL11.glTranslatef(0.5f, 0.5f, 0.5f);
-            mods.eln.gl.GL11.glScalef(2f, 2f, 2f);
-        }
+        // (the Large Boiler's model, largeboiler, is drawn full size from its origin block: 0..32 px, todo #522)
         desc.draw(fill, celsius);
     }
 

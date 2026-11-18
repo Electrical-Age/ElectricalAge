@@ -61,6 +61,7 @@ hub/hub.obj
 industrialpanel/industrialpanel.obj
 inlinepump200v/inlinepump200v.obj
 lampsupply/lampsupply.obj
+largeboiler/largeboiler.obj
 largerheostat/largerheostat.obj
 led/led.obj
 ledswitch/ledswitch.obj

@@ -38,13 +38,19 @@ public class DeviceModelPreviewTest {
                         fit[k] = Math.min(fit[k], f.xyz[3 * i + k]);
                         fit[k + 3] = Math.max(fit[k + 3], f.xyz[3 * i + k]);
                     }
+            // (a margin round it: Raster fits 0.62 of the box's largest side to half the picture)
+            for (int k = 0; k < 3; k++) {
+                double c = (fit[k] + fit[k + 3]) / 2, h = (fit[k + 3] - fit[k]) / 2 * 1.35;
+                fit[k] = c - h;
+                fit[k + 3] = c + h;
+            }
             Raster.Sampler s = (f, u, v) -> {
                 if (tex == null || f.uv == null) return 0xFFB0B0B0;
                 int x = Math.max(0, Math.min(size[0] - 1, (int) Math.floor(u * size[0]))), y = Math.max(0, Math.min(size[1] - 1, (int) Math.floor((1 - v) * size[1])));
                 return tex[y * size[0] + x];
             };
             List<Raster> pics = new ArrayList<>();
-            for (double[] view : new double[][]{{-135, 25}, {-45, 25}, {45, 25}, {135, 25}, {-90, 70}}) {
+            for (double[] view : new double[][]{{-135, -25}, {-45, -25}, {45, -25}, {135, -25}, {-90, -70}}) {
                 Raster r = new Raster(320, 0xFF2B2F36);
                 r.draw(faces, s, view[0], view[1], fit);
                 pics.add(r);

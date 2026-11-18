@@ -69,6 +69,7 @@ public final class HpPlantCases {
         cases.add(oneBlower("hp_plant_midgame_one_blower_low", 0.55, 11000, 7260, 3460, 9.3, 200, 2940));
         cases.add(new BlowerBlocked());
         cases.add(new LargeBoilerBody());
+        cases.add(new LargeBoilerPortSpots());
         cases.add(new LargeBoilerPlant(false));
         cases.add(new LargeBoilerPlant(true));
         cases.add(new LargeBoilerBurst());
@@ -296,13 +297,93 @@ public final class HpPlantCases {
 
     /** Place a Large Boiler with its front west (XN) at p: the fake player looks east. Null if it can't be placed. */
     static BoilerElement largeBoiler(TestContext ctx, BlockPos p) {
+        return largeBoiler(ctx, p, 270f);
+    }
+
+    /** A Large Boiler placed at p by a player looking along yaw (degrees: 270 places it facing west, XN). */
+    static BoilerElement largeBoiler(TestContext ctx, BlockPos p, float yaw) {
         var level = ctx.level();
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
-        player.setYRot(270f);
+        player.setYRot(yaw);
         var d = Eln.transparentNodeItem.getDescriptor(LARGE_BOILER);
         var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, p, Direction.YN);
         player.setYRot(0f);
         return node == null ? null : (BoilerElement) node.element;
+    }
+
+    /**
+     * The Large Boiler's flanges where its model draws them (mods.eln.cad.models.LargeBoiler, todo #522; 0..32 px from its
+     * origin block, front XN, right z+): the feed on the front at (y 8, z 24), the two steam flanges on top at (x 24,
+     * z 8) and (x 24, z 24). Placed facing two ways, a pipe laid by hand from each drawn point outward joins its
+     * vessel (steam) or its feed; the model loads with its parts.
+     */
+    static final class LargeBoilerPortSpots extends PlumbingCases.Big {
+        static final float[] YAWS = {270f, 0f};
+        final BoilerElement[] b = new BoilerElement[2];
+        final List<BlockPos> feedPipe = new java.util.ArrayList<>(), steamPipe = new java.util.ArrayList<>();
+        final List<Integer> feedOf = new java.util.ArrayList<>(), steamOf = new java.util.ArrayList<>();
+
+        public String id() {
+            return "large_boiler_2x2_port_spots";
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        /** The block holding model point (mx, my, mz) px of a Large Boiler at o facing front, and the point in it. */
+        static Object[] spot(BlockPos o, Direction front, double mx, double my, double mz) {
+            int cx = (int) Math.min(1, Math.floor(mx / 16)), cy = (int) Math.min(1, Math.floor(my / 16)), cz = (int) Math.min(1, Math.floor(mz / 16));
+            var d = front.back().toEnumFacing().getUnitVec3i();
+            var r = front.right().toEnumFacing().getUnitVec3i();
+            BlockPos p = o.offset(cx * d.getX() + cz * r.getX(), cy, cx * d.getZ() + cz * r.getZ());
+            return new Object[]{p, CombustionCases.PortSpots.world(front, mx - 16 * cx, my - 16 * cy, mz - 16 * cz)};
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos[] at = {ctx.at(3, 1, 2), ctx.at(3, 1, 7)};
+            for (int i = 0; i < 2; i++) {
+                b[i] = largeBoiler(ctx, at[i], YAWS[i]);
+                if (b[i] == null) throw new IllegalStateException("the Large Boiler could not be placed at " + at[i]);
+                Direction f = b[i].front;
+                Object[] feed = spot(at[i], f, 0, 8, 24);
+                CombustionCases.PortSpots.pipeOut(ctx, (BlockPos) feed[0], f, (int[]) feed[1]);
+                feedPipe.add(((BlockPos) feed[0]).relative(f.toEnumFacing()));
+                feedOf.add(i);
+                for (double z : new double[]{8, 24}) {
+                    Object[] st = spot(at[i], f, 24, 32, z);
+                    CombustionCases.PortSpots.pipeOut(ctx, (BlockPos) st[0], Direction.YP, (int[]) st[1]);
+                    steamPipe.add(((BlockPos) st[0]).above());
+                    steamOf.add(i);
+                }
+            }
+        }
+
+        static boolean joins(TestContext ctx, BlockPos p, mods.eln.sim.fluid.FluidNode n) {
+            var node = PipeCases.node(ctx, p);
+            var net = mods.eln.fluid.FluidWorld.networkOf(n);
+            if (node == null || net == null) return false;
+            for (var part : node.parts)
+                if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null && mods.eln.fluid.FluidWorld.networkOf(pp.fluid) == net) return true;
+            return false;
+        }
+
+        public void measure(TestContext ctx) {
+            for (int k = 0; k < feedPipe.size(); k++) {
+                var bo = b[feedOf.get(k)];
+                ctx.check("large boiler ports, front " + bo.front + ": a pipe on the drawn feed flange (front, y 8, z 24) joins its feed",
+                    joins(ctx, feedPipe.get(k), bo.feed), "" + feedPipe.get(k));
+            }
+            for (int k = 0; k < steamPipe.size(); k++) {
+                var bo = b[steamOf.get(k)];
+                ctx.check("large boiler ports, front " + bo.front + ": a pipe on a drawn steam flange (top, x 24) joins its vessel",
+                    joins(ctx, steamPipe.get(k), bo.vessel), "" + steamPipe.get(k));
+            }
+            var obj = Eln.obj.getObj("largeboiler");
+            ctx.check("large boiler: its own model loads, with its gauge glass and needle", obj != null && obj.getPart("main") != null
+                && obj.getPart("level") != null && obj.getPart("needle") != null, "" + obj);
+            ctx.check("large boiler ports: the two boilers face different ways", b[0].front != b[1].front, b[0].front + " " + b[1].front);
+        }
     }
 
     /** The world positions of a Large Boiler's eight blocks (front XN at origin o): x back, y up, z right. */
