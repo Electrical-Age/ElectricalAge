@@ -581,15 +581,16 @@ public class ComputerScreen extends ElnScreen {
                 int ex = w.x + e.x(w), ey = w.y + e.y(w);
                 switch (e.kind) {
                     case "button" -> bevelCells(g, c, ex, ey, e.size(5, w, 4), 1, 0, !(pressWin == wid && pressId == en.getKey()), wid);
-                    case "line" -> bevelCells(g, c, ex, ey, e.size(5, w, 1), 1, 0, false, wid);
-                    case "list", "raw" -> bevelCells(g, c, ex, ey, e.size(5, w, 1), e.size(6, w, 1), 0, false, wid);
+                    // (fields sit in a pixel outside their cells: their first column's letters start at the cell's edge)
+                    case "line" -> bevelCells(g, c, ex, ey, e.size(5, w, 1), 1, -1, false, wid);
+                    case "list", "raw" -> bevelCells(g, c, ex, ey, e.size(5, w, 1), e.size(6, w, 1), -1, false, wid);
                     case "editor" -> {
                         if (!editorWidgets.containsKey(wid + "/" + en.getKey()))
-                            bevelCells(g, c, ex, ey, e.size(5, w, 1), e.size(6, w, 1), 0, false, wid);
+                            bevelCells(g, c, ex, ey, e.size(5, w, 1), e.size(6, w, 1), -1, false, wid);
                     }
                     case "log" -> {   // (a log filling its window is the window's own text; one beside other things sits in)
                         int lw = e.size(5, w, 1), lh = e.size(6, w, 1);
-                        if (lw < w.cw || lh < w.ch - 1) bevelCells(g, c, ex, ey, lw, lh, 0, false, wid);
+                        if (lw < w.cw || lh < w.ch - 1) bevelCells(g, c, ex, ey, lw, lh, -1, false, wid);
                     }
                     default -> {
                     }

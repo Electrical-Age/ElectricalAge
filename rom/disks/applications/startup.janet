@@ -37,14 +37,16 @@
   (defn show []
     (set names (try (disk/list here) ([e] @[])))
     (ui/window ft 8 4 50 14 here)
-    (ui/text ft 1 0 0 :light-gray (string/format "%-48s" (string here "  " (length names) " items")))
+    (def count (length names))
+    (ui/text ft 1 0 0 :light-gray (string/format "%-48s" (string here "  " count (if (= count 1) " item" " items"))))
     (ui/list ft 2 0 1 :fill [:fill 1] names
              (fn [i]
                (def n (get names i))
                (when n
                  (if (and (= n chosen) (< (- (now) chosen-at) 2))
                    (open n)
-                   (do (set chosen n) (set chosen-at (now)) (status (string "selected: " n))))))))
+                   (do (set chosen n) (set chosen-at (now)) (show) (status (string "selected: " n))))))
+             (find-index |(= $ chosen) names)))
   (set open
        (fn [n]
          (def p (path-of n))

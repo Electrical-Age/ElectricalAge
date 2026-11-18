@@ -47,9 +47,11 @@ public final class ScreenHost {
     public synchronized void console(byte[] bytes) {
         if (bytes.length == 0) return;
         if (!scene.windows.containsKey(CONSOLE_TAB)) {
-            List<Object> flags = List.of(Form.kw("close"), Form.kw("depth"), Form.kw("size"), Form.kw("drag"));
+            List<Object> flags = List.of(Form.kw("iconify"), Form.kw("depth"), Form.kw("size"), Form.kw("drag"));
             take(List.of(new Form.Symbol("window"), (long) CONSOLE_TAB, 2L, 3L, (long) Math.min(76, scene.w - 4), 12L, "Kernel", flags));
             take(List.of(new Form.Symbol("log"), (long) CONSOLE_TAB, (long) CONSOLE_LOG, 0L, 0L, Form.kw("fill"), Form.kw("fill")));
+            // (it waits as an icon on the desk: the boot banner shouldn't cover it; the system menu brings it back)
+            take(List.of(new Form.Symbol("minimize"), (long) CONSOLE_TAB));
         }
         take(List.of(new Form.Symbol("append"), (long) CONSOLE_TAB, (long) CONSOLE_LOG, Form.kw("white"),
             new String(bytes, StandardCharsets.UTF_8)));

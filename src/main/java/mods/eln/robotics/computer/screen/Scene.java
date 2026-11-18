@@ -452,7 +452,7 @@ public final class Scene {
     /** Where minimised window wid's icon sits: its top left cell, or null if it isn't minimised. */
     public int[] iconSlot(int wid) {
         int k = minimizedOrder().indexOf(wid);
-        return k < 0 ? null : new int[]{1 + (ICON_W + 1) * k, h - ICON_H};
+        return k < 0 ? null : new int[]{2 + (ICON_W + 3) * k, h - ICON_H};
     }
 
     /** The minimised window whose icon covers cell (x, y), or -1. */

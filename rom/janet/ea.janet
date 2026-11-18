@@ -528,9 +528,11 @@
 (defn ui/button "A button: a click calls (on-press) as a task." [t id x y w label on-press]
   (put ui-handlers [t id] (bound on-press))
   (ui/send 'button t id x y w label))
-(defn ui/list "A list of rows: a click calls (on-select index) as a task." [t id x y w h items on-select]
+(defn ui/list
+  "A list of rows: a click calls (on-select index) as a task; chosen (optional) is a row to show inverted."
+  [t id x y w h items on-select &opt chosen]
   (put ui-handlers [t id] (bound on-select))
-  (ui/send 'list t id x y w h items))
+  (if chosen (ui/send 'list t id x y w h items chosen) (ui/send 'list t id x y w h items)))
 (defn ui/raw
   "An area of w by h cells for full-screen programs (games, editors of your own): once clicked, it gets the keyboard.
   A key calls (on-key key mods) as a task: key is the character typed, or a name (\"enter\" \"backspace\" \"tab\"

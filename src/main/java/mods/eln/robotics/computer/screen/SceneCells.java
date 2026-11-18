@@ -146,8 +146,9 @@ public final class SceneCells {
             for (int xx = x + 1; xx < x + 5; xx++)
                 if (in(xx, yy)) owner[yy * w + xx] = painting;
         if (pic != null) image(x + 1, y, 4, 3, pic);
-        String l = label.length() > Scene.ICON_W ? label.substring(0, Scene.ICON_W) : label;
-        int lx = x + (Scene.ICON_W - l.length()) / 2;
+        // (a label may reach a cell past the icon on each side: "Calculator" reads as "Calculat")
+        String l = label.length() > Scene.ICON_W + 2 ? label.substring(0, Scene.ICON_W + 2) : label;
+        int lx = x + Math.floorDiv(Scene.ICON_W - l.length(), 2);
         fill(lx, y + 3, l.length(), 1, selected ? INK : PAPER);
         text(l, lx, y + 3, l.length(), selected ? PAPER : INK);
     }
@@ -218,7 +219,8 @@ public final class SceneCells {
         }
         String clock = local.clock();
         if (!s.title.isEmpty() && x + s.title.length() + clock.length() + 2 < w) text(s.title, x + 1, 0, w - x, TITLE_IDLE);
-        if (!clock.isEmpty()) text(clock, w - clock.length() - 1, 0, clock.length(), BAR_TEXT);
+        // (the clock stands clear of the corner, where inventory mods draw their buttons on the panel)
+        if (!clock.isEmpty()) text(clock, w - clock.length() - 9, 0, clock.length(), BAR_TEXT);
     }
 
     /** The menu bar's titles: the system menu, then the active window's (each menu's first entry). */
@@ -369,9 +371,14 @@ public final class SceneCells {
             case "list" -> {
                 int lw = e.size(5, win, 1), lh = e.size(6, win, 1);
                 List<?> items = m.size() > 7 && m.get(7) instanceof List<?> l ? l : List.of();
+                int sel = (int) Form.num(m, 8, -1);   // (the row the program marks as chosen: drawn inverted)
                 int off = Math.max(0, Math.min(local.scroll(wid, id), Math.max(0, items.size() - lh)));
                 fill(x, y, lw, lh, LIST);
-                for (int r = 0; r < lh && off + r < items.size(); r++) text(String.valueOf(items.get(off + r)), x, y + r, lw, LIST_INK);
+                for (int r = 0; r < lh && off + r < items.size(); r++) {
+                    boolean on = off + r == sel;
+                    if (on) fill(x, y + r, lw, 1, LIST_INK);
+                    text(String.valueOf(items.get(off + r)), x, y + r, lw, on ? LIST : LIST_INK);
+                }
             }
             case "editor" -> {
                 int ew = e.size(5, win, 1), eh = e.size(6, win, 1);
