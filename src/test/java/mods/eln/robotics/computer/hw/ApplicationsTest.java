@@ -117,7 +117,7 @@ class ApplicationsTest extends StdlibTest {
 
     /** Element id of tab t, or null. */
     static Scene.Element element(ScreenProbe s, int t, int id) {
-        Scene.Tab tab = s.scene.tabs.get(t);
+        Scene.Window tab = s.scene.windows.get(t);
         return tab == null ? null : tab.elements.get(id);
     }
 
@@ -142,7 +142,7 @@ class ApplicationsTest extends StdlibTest {
     /** What a failing test shows of a screen: the REPL, tab 2's texts and logs. */
     static String dump(ScreenProbe s) {
         StringBuilder b = new StringBuilder("[repl " + s.log() + "] [console " + s.console + "]");
-        Scene.Tab t = s.scene.tabs.get(2);
+        Scene.Window t = s.scene.windows.get(2);
         if (t != null)
             for (var en : t.elements.entrySet()) {
                 String k = en.getValue().kind;
@@ -193,7 +193,7 @@ class ApplicationsTest extends StdlibTest {
         run(20);
         m.editor.give(event(new Form.Symbol("close"), 2L));
         run(10);
-        assertNull(screen.scene.tabs.get(2), "the tab is gone; " + dump(screen));
+        assertNull(screen.scene.windows.get(2), "the tab is gone; " + dump(screen));
     }
 
     @Test

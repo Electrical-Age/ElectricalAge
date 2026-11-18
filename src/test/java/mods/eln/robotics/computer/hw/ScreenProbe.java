@@ -39,7 +39,7 @@ final class ScreenProbe {
 
     /** Tab t's log (element 1) as text. */
     String log(int tab) {
-        Scene.Tab t = scene.tabs.get(tab);
+        Scene.Window t = scene.windows.get(tab);
         Scene.Element e = t == null ? null : t.elements.get(1);
         if (e == null) return "";
         StringBuilder b = new StringBuilder();
@@ -54,13 +54,13 @@ final class ScreenProbe {
 
     /** The REPL's line is up. */
     boolean ready() {
-        Scene.Tab t = scene.tabs.get(1);
+        Scene.Window t = scene.windows.get(1);
         return t != null && t.elements.containsKey(2);
     }
 
     /** The last submission is finished (its busy mark cleared). */
     boolean done() {
-        Scene.Tab t = scene.tabs.get(1);
+        Scene.Window t = scene.windows.get(1);
         Scene.Element e = t == null ? null : t.elements.get(2);
         return e != null && e.busySeq >= seq && !e.busy;
     }
