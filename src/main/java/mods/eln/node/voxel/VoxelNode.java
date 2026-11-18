@@ -1019,10 +1019,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     /**
-     * The front a wrench click turns the device off centre in e's slot to: the next one clockwise; but if pins of it are
-     * joined to cables (in line, or on a cable's end), the next one clockwise at which pins of the same kinds are at
-     * all those places (an energy meter in line: straight round, reversing it; AdventurAgent: a quarter turn cut the
-     * run). Null, and why in err[0], if there is none or it would not fit.
+     * The front a wrench click turns the device off centre in e's slot to: the next one clockwise at which it fits (Baughn
+     * 2026-11-18, #512: a lopsided device with a cable beside it refused the quarter turn; it skips to the next that fits);
+     * if pins of it are joined to cables (in line, or on a cable's end), only fronts at which pins of the same kinds are
+     * at all those places (an energy meter in line: straight round, reversing it; AdventurAgent: a quarter turn cut the
+     * run). Null, and why in err[0], if no other front fits.
      */
     public LRDU wrenchTurn(mods.eln.node.six.SixNodeElement e, String[] err) {
         List<int[]> held = new ArrayList<>();   // (tip x, y, z, mask of each joined pin)
@@ -1047,11 +1048,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 }
             }
             if (!keeps) continue;
-            why = turnError(e, f);
-            if (why == null) return f;
-            if (held.isEmpty()) break;   // (not joined: the quarter turn or nothing, as before)
+            String no = turnError(e, f);
+            if (no == null) return f;
+            if (why == null) why = no;   // (the first refusal, the quarter turn's when that one is a candidate)
         }
-        err[0] = why != null ? why : "It can't turn here without taking its pins off the cables";
+        err[0] = why != null ? "No other way round fits here: " + why : "It can't turn here without taking its pins off the cables";
         return null;
     }
 

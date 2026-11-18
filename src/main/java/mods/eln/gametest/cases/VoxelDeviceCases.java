@@ -40,6 +40,7 @@ public final class VoxelDeviceCases {
         cases.add(new MetersChargersAlarmsCase());
         cases.add(new InLineChainCase());
         cases.add(new WrenchInLineCase());
+        cases.add(new WrenchSkipsCase());
         cases.add(new PassivesInLineCase());
         cases.add(new DiodeRigCase());
         cases.add(new RheostatThermistorCase());
@@ -1281,6 +1282,81 @@ public final class VoxelDeviceCases {
             c.check("wrench in line: it counts with the other sign", e1 * e2 < 0 && Math.abs(e2) > 10, fmt("%.1f J, %.1f J", e1, e2));
             String[] f = freeTurn.split(" -> ");
             c.check("wrench: a quarter turn, clockwise", f.length == 2 && LRDU.valueOf(f[0]).getNextClockwise() == LRDU.valueOf(f[1]), freeTurn);
+        }
+    }
+
+    /**
+     * The wrench skips fronts that don't fit (Baughn 2026-11-18, #512): a Voltage Probe (long on its front side) 4 voxels
+     * off centre toward the side the quarter turn would point it, so the quarter turn would put its long side past the
+     * block's edge, turns half round instead. One with a block edge on two sides and a thermal cable on the third, so only
+     * the front it has fits, stays and says why.
+     */
+    static final class WrenchSkipsCase implements TestCase {
+        String skip = "", stuck = "", fits = "", stuckFits = "";
+        boolean skipOk, stuckOk;
+
+        public String name() {
+            return "a wrench skips fronts that don't fit";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int height() {
+            return 4;
+        }
+
+        public int depth() {
+            return 3;
+        }
+
+        /** Which fronts e fits at, from its own clockwise. */
+        static String fronts(VoxelNode v, SixNodeElement e) {
+            StringBuilder sb = new StringBuilder();
+            LRDU f = e.front;
+            for (int k = 0; k < 4; k++, f = f.getNextClockwise()) {
+                String why = v.turnError(e, f);
+                sb.append(f).append(why == null ? " fits" : " no (" + why + ")").append("; ");
+            }
+            return sb.toString();
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 5; x++) for (int z = 0; z < 3; z++) c.floor(c.at(x, 0, z));
+            var yn = Direction.YN;
+            LRDU north = toward(yn, Direction.ZN), next = north.getNextClockwise();
+            Direction nextDir = yn.applyLRDU(next);
+            int[] o = {0, 0, 0};
+            if (nextDir == Direction.XP) o[0] = 4;
+            else if (nextDir == Direction.XN) o[0] = -4;
+            else if (nextDir == Direction.ZP) o[2] = 4;
+            else o[2] = -4;
+            var v = block(c, c.at(1, 1, 1));
+            var e = put(c, v, "Voltage Probe", yn, o[0], o[1], o[2], Direction.ZN);
+            fits = fronts(v, e);
+            LRDU before = e.front;
+            WrenchInLineCase.wrench(c, e);
+            skip = before + " -> " + e.front;
+            skipOk = before == north && e.front == next.getNextClockwise();
+
+            // only north fits: 4 voxels east and 4 south of the middle (the block's edges 4 away there), a thermal cable
+            // 6 voxels west of it (the long side, turned west, would reach it)
+            CableCases.voxel(c, c.at(3, 1, 1), List.of(new CablePart(THERMAL, FLOOR, new int[]{6, 0, 0, 6, 0, 16})));
+            var w = (VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(3, 1, 1), c.level()));
+            var s = put(c, w, "Voltage Probe", yn, 4, 0, 4, Direction.ZN);
+            stuckFits = fronts(w, s);
+            String[] err = new String[1];
+            LRDU to = w.wrenchTurn(s, err);
+            stuck = "turn " + to + ", said: " + err[0];
+            LRDU was = s.front;
+            WrenchInLineCase.wrench(c, s);
+            stuckOk = to == null && err[0] != null && err[0].startsWith("No other way round fits here") && s.front == was;
+        }
+
+        public void measure(TestContext c) {
+            c.check("wrench skips: the quarter turn doesn't fit, so it turns half round", skipOk, skip + " [" + fits + "]");
+            c.check("wrench skips: where only its front fits it stays and says why", stuckOk, stuck + " [" + stuckFits + "]");
         }
     }
 
