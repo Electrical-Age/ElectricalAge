@@ -228,6 +228,17 @@
         (buffer/push err (string "\nBreak: stopped " n " task" (if (= 1 n) "" "s") ".\n"))))
     (on-break)))
 
+(defn- about
+  "The system menu's About: a small window naming the machine and the system."
+  []
+  (def w 254)
+  (ui/send 'window w 20 7 40 7 "About Dynamo" [:close :drag])
+  (ui/send 'text w 1 2 1 :yellow "Dynamo 1.0")
+  (ui/send 'text w 2 2 2 :light-gray "Grid Cooperative Computing, 1991")
+  (ui/send 'text w 3 2 4 :gray "Kernel ROM 1.4 with Janet 1.41.2")
+  (put win-handlers w @{:close (fn [] (put win-handlers w nil) (ui/send 'unwindow w))})
+  (ui/send 'activate w))
+
 (defn- screen-event [m]
   (when (and (tuple? m) (> (length m) 2) (number? (m 1)) (number? (m 2)))
     (def f (get ui-handlers [(m 1) (m 2)]))
@@ -264,7 +275,11 @@
                 (ui/send 'unask w)
                 (when (number? (get m 3)) (spawn f (m 3))))
       'set (when-let [f (get ui-handlers [w (get m 2)])] (spawn f (get m 3)))
-      nil)))
+      'open (when-let [f (get ui-handlers [w (get m 2)])] (spawn f))
+      nil))
+  # the system menu's own items (window 0)
+  (when (and (tuple? m) (= 'pick (m 0)) (= 0 (get m 1)) (= "About Dynamo" (get m 3)))
+    (about)))
 
 (defn- screen-events "Read the screen's events and run their handlers as tasks." []
   (buffer/push display-in (ea/display-input))
@@ -385,12 +400,14 @@
 
 # ---- the floppies (A: and B:, FAT12): slurp, spit, file/open and import work on their paths, e.g. "a:/main.janet"
 
-(defn disk/format "Format the floppy in drive (:a or :b), erasing it; label it if given (11 letters at most)."
+(defn disk/format "Format the floppy in drive (:a or :b, or the ramdisk :ram), erasing it; label it if given (11 letters at most)."
   [drive &opt label]
   (if label (ea/disk-format drive label) (ea/disk-format drive)))
-(defn disk/list "The names in a directory of a floppy (a path, or :a or :b; default A:/); directories end in /."
+(defn disk/list "The names in a directory (a path, or :a, :b or :ram; default A:/); directories end in /."
   [&opt path]
-  (ea/disk-list (case path nil "A:/" :a "A:/" :b "B:/" path)))
+  (ea/disk-list (case path nil "A:/" :a "A:/" :b "B:/" :ram "RAM:/" path)))
+(defn disk/present? "Is there a readable disk in drive (:a or :b; the ramdisk :ram always is)?" [drive]
+  (try (do (ea/disk-list (case drive :a "A:/" :b "B:/" :ram "RAM:/")) true) ([_] false)))
 (defn disk/label "The floppy's label, or nil." [drive] (ea/disk-label drive))
 (defn disk/free "Bytes free on the floppy." [drive] (ea/disk-free drive))
 (defn disk/delete "Delete a file (or an empty directory)." [path] (ea/disk-delete path))
@@ -428,7 +445,8 @@
 (def ui/screen-height "The screen's height in character cells; row 0 is the screen bar." 25)
 (def ui/width "A program's window's content width as it opens, in cells (the screen less its frame)." 78)
 (def ui/height "A program's window's content height as it opens, in cells (the screen less the bar and the frame)." 22)
-(def ui/standard "The usual window: close box, depth box, size handle, dragged by its title." [:close :depth :size :drag])
+(def ui/standard "The usual window: close box, minimise and depth boxes, size handle, dragged by its title."
+  [:close :iconify :depth :size :drag])
 
 (defn ui/window
   "Open window w (1-255) with content cw x ch cells at (x, y), a title and flags (ui/standard, or any of :close
@@ -451,6 +469,28 @@
 (defn ui/back "Lower window w." [w] (ui/send 'back w))
 (defn ui/focus "Bring window w forward and give it the keyboard." [w] (ui/send 'activate w))
 (defn ui/title "The screen bar's title." [s] (ui/send 'title s))
+(defn ui/minimize "Minimise window w to an icon on the desk." [w] (ui/send 'minimize w))
+(defn ui/restore "Bring window w back from its icon." [w] (ui/send 'restore w))
+(defn ui/pixmap
+  "Make pixmap id (1-4095) from a picture: a struct {:w :h :palette [...] :data \"...\"} (pix/load reads one from a
+  .pix file). Palette entries are dyes (:white ...) or \"#rrggbb\"; data has a character a dot, 0-9 then a-z into the
+  palette, . clear."
+  [id pix]
+  (ui/send 'pixmap id (pix :w) (pix :h) (pix :palette) (pix :data)))
+(defn pix/load "A picture from a .pix file (a Janet struct {:w :h :palette :data})." [path]
+  (def p (parse (string (slurp path))))
+  (unless (and (dictionary? p) (number? (p :w)) (number? (p :h)) (indexed? (p :palette)) (string? (p :data)))
+    (error (string path ": not a picture")))
+  p)
+(defn ui/backdrop "The desk's picture: pixmap id (0: none)." [id] (ui/send 'backdrop id))
+(defn ui/icon "Window w's icon when it is minimised: pixmap id." [w id] (ui/send 'icon w id))
+(defn ui/image "Pixmap pic stretched over cells (x, y, cw, ch) of window w." [w id x y cw ch pic]
+  (ui/send 'image w id x y cw ch pic))
+(defn ui/desk-icon
+  "An icon in window w (a backdrop: the desk) at cell (x, y): pixmap pic over a label; a double-click calls (on-open)."
+  [w id x y label pic on-open]
+  (put ui-handlers [w id] (bound on-open))
+  (ui/send 'icon w id x y label pic))
 (defn- win-handler [w k f] (put win-handlers w (merge (or (get win-handlers w) @{}) @{k (bound f)})))
 (defn ui/on-close "Call (f) as a task when the player clicks window w's close box (else it ends its process)." [w f]
   (win-handler w :close f))
@@ -634,6 +674,54 @@
   "As proc/start, in a window of the given geometry: [x y cw ch title flags] as for ui/window."
   [name geometry f & args]
   (proc-start name geometry f ;args))
+
+# ---- applications: a directory NAME.app holding main.janet and icon.pix (Baughn 1572655325104832613)
+
+(defn app/dir "The application directory of this task's process (\"A:/Calculator.app/\"), or nil." []
+  (dyn :app-dir))
+
+(defn app/name "An application directory's name without .app: \"A:/Calculator.app/\" is \"Calculator\"." [dir]
+  (def base (last (filter |(not (empty? $)) (string/split "/" dir))))
+  (if (string/has-suffix? ".app" base) (string/slice base 0 -5) base))
+
+(defn app/list
+  "The application directories on a drive's disk (:a, :b or :ram): at its top and one directory down, as paths."
+  [drive]
+  (def root (case drive :a "A:/" :b "B:/" :ram "RAM:/"))
+  (def out @[])
+  (defn look [dir depth]
+    (each n (try (disk/list dir) ([_] @[]))
+      (when (string/has-suffix? "/" n)
+        (def path (string dir n))
+        (if (and (string/has-suffix? ".app/" n) (disk/exists? (string path "main.janet")))
+          (array/push out path)
+          (when (< depth 1) (look path (+ depth 1)))))))
+  (look root 0)
+  out)
+
+(defn app/launch
+  "Start the application in directory dir as a process of its own (its main.janet, with (app/dir) its directory). One
+  runs already: its window comes back and gets the keyboard instead (one of each)."
+  [dir]
+  (var running nil)
+  (eachp [t p] procs (when (= dir (p :app)) (set running t)))
+  (if running
+    (do (ui/restore running) (ui/focus running) running)
+    (do
+      (def name (app/name dir))
+      (def t (proc/new-tab name))
+      (def p (get procs t))
+      (put p :app dir)
+      (def env (p :env))
+      (put env :app-dir dir)
+      (ui/log t 1 0 0 :fill :fill)
+      (ui/output env t 1)
+      (when (disk/exists? (string dir "icon.pix"))
+        (def id (+ 3000 t))
+        (try (do (ui/pixmap id (pix/load (string dir "icon.pix"))) (ui/icon t id)) ([_] nil)))
+      (spawn-in env run-file (string dir "main.janet"))
+      (ui/focus t)
+      t)))
 
 (defn proc/list "The processes: [tab name tasks] each." []
   (seq [[t p] :pairs procs] [t (p :name) (length (filter |(env-of? $ (p :env)) (keys tasks)))]))
@@ -823,6 +911,8 @@
       (def name (last (string/split "/" p)))
       (buffer/push (env :out) (string "Running " p " (its own window)\n"))
       (proc-start name (if (= name "main.janet") [0 1 ui/screen-width (- ui/screen-height 1) name [:borderless :full]]) run-file p)
+      # (a desk on the floppy: the Shell waits as an icon, and in the system menu)
+      (when (= name "startup.janet") (ui/minimize 1))
       (break))))
 
 (defn ea/start

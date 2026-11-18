@@ -29,7 +29,7 @@ class SceneCellsTest {
     void aFramedWindowOverTheDesk() {
         Scene s = scene("(window 1 2 3 10 4 \"Shell\" [:close :depth :size :drag])", "(text 1 1 0 0 :lime \"hi\")", "(title \"Dynamo 1.0\")");
         SceneCells c = SceneCells.of(s);
-        assertEquals(" Dynamo 1.0", row(c, 0, 0, 11), "the screen bar");
+        assertEquals(" Dynamo   Dynamo 1.0", row(c, 0, 0, 20), "the menu bar: the system menu, then the screen's title");
         assertEquals(SceneCells.BAR, c.paper[0]);
         assertEquals("■ Shell", row(c, 2, 1, 7), "the title row: the close box, then the title");
         assertEquals(SceneCells.DEPTH, c.at(12, 2), "the depth box at its right end");

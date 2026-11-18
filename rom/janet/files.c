@@ -10,24 +10,38 @@
 #include "../common/devices.h"
 
 #define MAX_FILES 16
-static FATFS fs[2];
-static int mounted[2];
+static FATFS fs[3];
+static int mounted[3];
 static FIL *files[MAX_FILES];      /* fd 3 + i */
 static FRESULT last;
 
-static const char *const vol[2] = {"A:", "B:"};
+static const char *const vol[3] = {"A:", "B:", "RAM:"};
 
-/* The drive a path is on: an "a:" or "b:" prefix, else A. */
+/* The drive a path is on: an "a:", "b:" or "ram:" prefix, else A. */
 static int drive_of(const char *path) {
     if (path[0] && path[1] == ':') {
         char c = path[0] | 0x20;
         if (c == 'b') return 1;
     }
+    if ((path[0] | 0x20) == 'r' && (path[1] | 0x20) == 'a' && (path[2] | 0x20) == 'm' && path[3] == ':') return 2;
     return 0;
 }
 
-/* Mount the drive's disk if it changed or isn't mounted yet. */
+/* Mount the drive's disk if it changed or isn't mounted yet; RAM: is formatted the first time (empty). */
 static FRESULT ready(int d) {
+    if (d == 2) {
+        if (mounted[2]) return FR_OK;
+        FRESULT r = f_mount(&fs[2], vol[2], 1);
+        if (r == FR_NO_FILESYSTEM) {
+            static BYTE work[FF_MAX_SS];
+            MKFS_PARM opt = {FM_FAT | FM_SFD, 0, 0, 0, 0};
+            r = f_mkfs(vol[2], &opt, work, sizeof work);
+            if (r == FR_OK) r = f_mount(&fs[2], vol[2], 1);
+            if (r == FR_OK) f_setlabel("RAM:RAM DISK");
+        }
+        if (r == FR_OK) mounted[2] = 1;
+        return r;
+    }
     if (FD_CHANGED & (1u << d)) {
         FD_CHANGED = 1u << d;
         if (mounted[d]) f_mount(NULL, vol[d], 0);
@@ -189,7 +203,8 @@ static int getdrive(const Janet *argv, int32_t n) {
     JanetKeyword k = janet_getkeyword(argv, n);
     if ((k[0] | 0x20) == 'a' && k[1] == 0) return 0;
     if ((k[0] | 0x20) == 'b' && k[1] == 0) return 1;
-    janet_panic("drives are :a and :b");
+    if (strcmp((const char *) k, "ram") == 0) return 2;
+    janet_panic("drives are :a, :b and :ram");
     return 0;
 }
 

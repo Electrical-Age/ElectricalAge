@@ -6,6 +6,7 @@
 
 (defn snake []
   (def t (proc/tab))
+  (ui/place t 10 4 34 15)   # (its 30 x 12 field)
   (def rng (math/rng (ticks)))
   (var body @[])               # [x y] cells, head last
   (var dir [1 0])

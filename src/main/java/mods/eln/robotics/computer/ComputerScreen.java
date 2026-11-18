@@ -61,9 +61,6 @@ public class ComputerScreen extends ElnScreen {
     static final int MOVE = 1, SIZE = 2;
     int dragMode, dragWin, dragX, dragY, dragW, dragH;
     double dragFromX, dragFromY;
-    /** The menus open on the screen bar (the right button held): the menu and item under the pointer, -1 none. */
-    boolean menuOpen;
-    int menuAt = -1, itemAt = -1, lastMenu = -1;
 
     /** An editor element's state on this client: the revision and text it was opened at, the text now, a save. */
     static final class EditorState {
@@ -135,11 +132,13 @@ public class ComputerScreen extends ElnScreen {
                 focusId = -1;
             }
         }
-        if (!s.windows.containsKey(active)) {
-            // (gone: the frontmost window that isn't a backdrop, else none)
+        if (!s.windows.containsKey(active) || s.windows.get(active).minimized) {
+            // (gone or minimised: the frontmost window that isn't a backdrop or minimised, else none)
             active = -1;
-            for (int k = s.order.size() - 1; k >= 0 && active < 0; k--)
-                if (!s.windows.get(s.order.get(k)).has("backdrop")) active = s.order.get(k);
+            for (int k = s.order.size() - 1; k >= 0 && active < 0; k--) {
+                Scene.Window w = s.windows.get(s.order.get(k));
+                if (!w.has("backdrop") && !w.minimized) active = s.order.get(k);
+            }
             focusId = -1;
         }
         return active < 0 ? null : s.windows.get(active);
@@ -396,6 +395,16 @@ public class ComputerScreen extends ElnScreen {
         public boolean ownEditor(int win, int id) {
             return editorWidgets.containsKey(win + "/" + id);
         }
+
+        @Override
+        public boolean selected(String key) {
+            return key.equals(selected);
+        }
+
+        @Override
+        public String clock() {
+            return ComputerScreen.clock();
+        }
     };
 
     @Override
@@ -410,7 +419,7 @@ public class ComputerScreen extends ElnScreen {
             bevels(g, c, s);
             if (t != null) overlays(g, t);
             if (dragMode != 0) dragOutline(g);
-            if (menuOpen) menus(g, t);
+            if (menuOpen) menus(g);
         }
         // (off, or no chips: a dark screen, no text: Baughn 2026-11-18; the state shows under it)
         label(g, 9, SLOTS_Y - 11, tr("Expansion modules"));
@@ -425,7 +434,7 @@ public class ComputerScreen extends ElnScreen {
         label(g, 222, BOTTOM_Y + 6, tr("Address"));
     }
 
-    /** The composed cells: each row's paper in runs, then the glyphs, centred in their cells. */
+    /** The composed cells: each row's paper in runs, then the pictures over the cells they show on, then the glyphs. */
     void cells(GuiGraphicsExtractor g, SceneCells c) {
         for (int y = 0; y < c.h; y++) {
             int x = 0;
@@ -435,11 +444,32 @@ public class ComputerScreen extends ElnScreen {
                 g.fill(cx(x), cy(y), cx(e), cy(y + 1), p);
                 x = e;
             }
-            for (x = 0; x < c.w; x++) {
+        }
+        for (SceneCells.Image im : c.images) {
+            var tex = render.pixmapTexture(im.pixmap());
+            if (tex == null) continue;
+            for (int y = im.y(); y < im.y() + im.ch(); y++) {
+                int x = im.x();
+                while (x < im.x() + im.cw()) {   // (runs of cells it shows on, one blit each)
+                    if (!im.shows(c, x, y)) {
+                        x++;
+                        continue;
+                    }
+                    int e = x + 1;
+                    while (e < im.x() + im.cw() && im.shows(c, e, y)) e++;
+                    float u0 = (x - im.x()) / (float) im.cw(), u1 = (e - im.x()) / (float) im.cw();
+                    float v0 = (y - im.y()) / (float) im.ch(), v1 = (y + 1 - im.y()) / (float) im.ch();
+                    g.blit(tex, cx(x), cy(y), cx(e), cy(y + 1), u0, u1, v0, v1);
+                    x = e;
+                }
+            }
+        }
+        for (int y = 0; y < c.h; y++)
+            for (int x = 0; x < c.w; x++) {
                 int cp = c.glyph[y * c.w + x];
                 if (cp == ' ') continue;
                 int pp = c.paper[y * c.w + x];
-                if ((cp == SceneCells.DEPTH || cp == SceneCells.CLOSE || cp == SceneCells.SIZE)
+                if ((cp == SceneCells.DEPTH || cp == SceneCells.CLOSE || cp == SceneCells.SIZE || cp == SceneCells.ICONIFY)
                     && (pp == SceneCells.TITLE_ACTIVE || pp == SceneCells.TITLE_IDLE)) continue;   // (a window's boxes: gadget())
                 if (cp >= 0x2500 && cp <= 0x257F) boxGlyph(g, cp, x, y, c.ink[y * c.w + x]);
                 else {
@@ -447,7 +477,6 @@ public class ComputerScreen extends ElnScreen {
                     g.text(font, ch, cx(x) + (CELL - font.width(ch)) / 2, cy(y) + 1, c.ink[y * c.w + x], false);
                 }
             }
-        }
     }
 
     // ---- shading (Baughn 1572640714167419132: the period's desks were skeuomorphic, not flat): bevels in pixels, drawn
@@ -525,6 +554,7 @@ public class ComputerScreen extends ElnScreen {
                 g.fill(px + 3, py + 5, px + 5, py + 7, lit);
                 g.outline(px + 2, py + 4, 3, 3, ink);
             }
+            case 'i' -> g.fill(px + 1, py + 6, px + 5, py + 8, ink);   // (a bar at the bottom: down to an icon)
             default -> {
                 g.outline(px + 1, py + 2, 4, 6, ink);
                 g.outline(px + 1, py + 2, 2, 3, ink);
@@ -543,6 +573,7 @@ public class ComputerScreen extends ElnScreen {
                 bevelCells(g, c, w.x, w.y, w.cw, w.ch, -1, false, wid);                 // the content sits in it
                 if (w.has("close")) gadget(g, c, w.x - 1, w.y - 1, 'c', wid);
                 if (w.has("depth")) gadget(g, c, w.x + w.cw, w.y - 1, 'd', wid);
+                if (w.has("iconify")) gadget(g, c, w.x + w.cw - 1, w.y - 1, 'i', wid);
                 if (w.has("size")) gadget(g, c, w.x + w.cw, w.y + w.ch, 's', wid);
             }
             for (Map.Entry<Integer, Scene.Element> en : w.elements.entrySet()) {
@@ -628,23 +659,34 @@ public class ComputerScreen extends ElnScreen {
         g.outline(cx(dragX - f), cy(dragY - f), (dragW + 2 * f) * CELL, (dragH + 2 * f) * LINE, 0xFFFFFFFF);
     }
 
-    // ---- menus on the screen bar (the right button held: period-true, Baughn 1572601240842408048)
+    // ---- the menu bar (Baughn 1572655325104832613: a regular one, the system menu first, listing the windows)
 
-    /** Menu m's title cell on the bar: titles from cell 1, two cells apart. */
-    int menuX(Scene.Window t, int m) {
-        int x = 1;
-        for (int k = 0; k < m; k++) x += menuTitle(t, k).length() + 2;
-        return x;
-    }
+    /** The menu open on the bar (0: the system menu, k: the active window's menu k - 1), the item under the pointer. */
+    boolean menuOpen, menuDragging;
+    int menuAt = -1, itemAt = -1;
+    /** The window each system menu item stands for (-1: not a window). */
+    final List<Integer> systemWindows = new ArrayList<>();
 
-    static String menuTitle(Scene.Window t, int m) {
-        return t.menus.get(m) instanceof List<?> l && !l.isEmpty() ? String.valueOf(l.get(0)) : "";
-    }
-
-    /** Menu m's items: [label, key] each, or null for a separator. */
-    static List<String[]> menuItems(Scene.Window t, int m) {
+    /** Menu m's items: [label, key] each, or null for a line; the system menu's from the windows open now. */
+    List<String[]> menuItems(int m) {
         List<String[]> out = new ArrayList<>();
-        if (!(t.menus.get(m) instanceof List<?> l)) return out;
+        if (m == 0) {
+            systemWindows.clear();
+            out.add(new String[]{"About Dynamo", ""});
+            systemWindows.add(-1);
+            out.add(null);
+            systemWindows.add(-1);
+            for (var en : scene().windows.entrySet()) {
+                Scene.Window w = en.getValue();
+                if (w.has("backdrop")) continue;
+                String t = w.title.isEmpty() ? "Window " + en.getKey() : w.title;
+                out.add(new String[]{w.minimized ? "[" + t + "]" : t, ""});
+                systemWindows.add(en.getKey());
+            }
+            return out;
+        }
+        Scene.Window t = activeWindow();
+        if (t == null || m - 1 >= t.menus.size() || !(t.menus.get(m - 1) instanceof List<?> l)) return out;
         for (int k = 1; k < l.size(); k++) {
             Object o = l.get(k);
             if (o instanceof List<?> it && !it.isEmpty())
@@ -654,25 +696,39 @@ public class ComputerScreen extends ElnScreen {
         return out;
     }
 
-    int menuWidth(Scene.Window t, int m) {
+    static List<String[]> windowMenuItems(Scene.Window t, int m) {
+        List<String[]> out = new ArrayList<>();
+        if (!(t.menus.get(m) instanceof List<?> l)) return out;
+        for (int k = 1; k < l.size(); k++) {
+            Object o = l.get(k);
+            if (o instanceof List<?> it && !it.isEmpty())
+                out.add(new String[]{String.valueOf(it.get(0)), it.size() > 1 && it.get(1) instanceof String s ? s : ""});
+        }
+        return out;
+    }
+
+    static String menuTitle(Scene.Window t, int m) {
+        return t.menus.get(m) instanceof List<?> l && !l.isEmpty() ? String.valueOf(l.get(0)) : "";
+    }
+
+    int menuWidth(List<String[]> items) {
         int w = 8;
-        for (String[] it : menuItems(t, m)) if (it != null) w = Math.max(w, it[0].length() + (it[1].isEmpty() ? 2 : 7));
+        for (String[] it : items) if (it != null) w = Math.max(w, it[0].length() + (it[1].isEmpty() ? 2 : 7));
         return w;
     }
 
-    void menus(GuiGraphicsExtractor g, Scene.Window t) {
-        g.fill(cx(0), cy(0), cx(scene().w), cy(1), SceneCells.BAR);
-        if (t == null || t.menus.isEmpty()) return;
-        for (int m = 0; m < t.menus.size(); m++) {
-            int x = menuX(t, m);
-            String title = menuTitle(t, m);
-            boolean on = m == menuAt;
-            if (on) g.fill(cx(x - 1), cy(0), cx(x + title.length() + 1), cy(1), SceneCells.BAR_TEXT);
-            g.text(font, title, cx(x), cy(0) + 1, on ? SceneCells.BAR : SceneCells.BAR_TEXT, false);
-        }
+    /** The open menu's dropdown under its title. */
+    void menus(GuiGraphicsExtractor g) {
         if (menuAt < 0) return;
-        List<String[]> items = menuItems(t, menuAt);
-        int x = menuX(t, menuAt) - 1, w = menuWidth(t, menuAt);
+        List<String> titles = SceneCells.menuTitles(scene(), active);
+        if (menuAt >= titles.size()) return;
+        int tx = SceneCells.menuX(titles, menuAt);
+        String title = titles.get(menuAt);
+        g.fill(cx(tx - 1), cy(0), cx(tx + title.length() + 1), cy(1), SceneCells.BAR_TEXT);
+        g.text(font, title, cx(tx), cy(0) + 1, SceneCells.BAR, false);
+        List<String[]> items = menuItems(menuAt);
+        if (items.isEmpty()) return;
+        int x = tx - 1, w = menuWidth(items);
         g.fill(cx(x), cy(1), cx(x + w), cy(1 + items.size()), SceneCells.BAR);
         // (it stands up: lit along its top and left, shadowed along its bottom and right)
         int x0 = cx(x), y0 = cy(1), x1 = cx(x + w), y1 = cy(1 + items.size());
@@ -680,7 +736,7 @@ public class ComputerScreen extends ElnScreen {
         g.fill(x0, y0, x0 + 1, y1, 0xFFFFFFFF);
         g.fill(x0, y1 - 1, x1, y1, 0xFF5A5448);
         g.fill(x1 - 1, y0, x1, y1, 0xFF5A5448);
-        String menu = menuTitle(t, menuAt);
+        Scene.Window t = activeWindow();
         for (int i = 0; i < items.size(); i++) {
             String[] it = items.get(i);
             int y = 1 + i;
@@ -688,7 +744,7 @@ public class ComputerScreen extends ElnScreen {
                 g.fill(cx(x) + 2, cy(y) + LINE / 2, cx(x + w) - 2, cy(y) + LINE / 2 + 1, 0xFF8A90A0);
                 continue;
             }
-            boolean off = t.disabled.contains(menu + "/" + it[0]), on = i == itemAt && !off;
+            boolean off = menuAt > 0 && t != null && t.disabled.contains(title + "/" + it[0]), on = i == itemAt && !off;
             if (on) g.fill(cx(x) + 1, cy(y), cx(x + w) - 1, cy(y + 1), SceneCells.BAR_TEXT);
             int ink = off ? 0xFF9A9A9A : on ? SceneCells.BAR : SceneCells.BAR_TEXT;
             g.text(font, it[0], cx(x + 1), cy(y) + 1, ink, false);
@@ -696,30 +752,95 @@ public class ComputerScreen extends ElnScreen {
         }
     }
 
-    /** Which menu and item the pointer is over, while the menus are open. */
+    /** The menu title under cell (c, 0), or -1. */
+    int titleAt(int c) {
+        List<String> titles = SceneCells.menuTitles(scene(), active);
+        for (int k = 0; k < titles.size(); k++) {
+            int x = SceneCells.menuX(titles, k);
+            if (c >= x - 1 && c < x + titles.get(k).length() + 1) return k;
+        }
+        return -1;
+    }
+
+    /** While a menu is open: a title under the pointer opens instead; the item under it is marked. */
     void menuHover(double mx, double my) {
-        Scene.Window t = activeWindow();
-        menuAt = itemAt = -1;
-        if (t == null || t.menus.isEmpty() || !onScreen(mx, my)) return;
+        itemAt = -1;
+        if (!onScreen(mx, my)) return;
         int c = col(mx), r = row(my);
         if (r == 0) {
-            for (int m = 0; m < t.menus.size(); m++) {
-                int x = menuX(t, m);
-                if (c >= x - 1 && c < x + menuTitle(t, m).length() + 1) menuAt = m;
-            }
-            lastMenu = menuAt;
+            int k = titleAt(c);
+            if (k >= 0) menuAt = k;
             return;
         }
-        menuAt = lastMenu;
-        if (menuAt < 0 || menuAt >= t.menus.size()) return;
-        int x = menuX(t, menuAt) - 1, w = menuWidth(t, menuAt);
-        List<String[]> items = menuItems(t, menuAt);
+        if (menuAt < 0) return;
+        List<String> titles = SceneCells.menuTitles(scene(), active);
+        List<String[]> items = menuItems(menuAt);
+        int x = SceneCells.menuX(titles, menuAt) - 1, w = menuWidth(items);
         if (c >= x && c < x + w && r >= 1 && r < 1 + items.size()) itemAt = r - 1;
+    }
+
+    void closeMenu() {
+        menuOpen = menuDragging = false;
+        menuAt = itemAt = -1;
+    }
+
+    /** The item under the pointer picked: the system menu's here, the window's sent to its program. */
+    void pickHovered() {
+        List<String[]> items = menuItems(menuAt);
+        String[] it = itemAt >= 0 && itemAt < items.size() ? items.get(itemAt) : null;
+        int m = menuAt, i = itemAt;
+        closeMenu();
+        if (it == null) return;
+        if (m == 0) {
+            int wid = i < systemWindows.size() ? systemWindows.get(i) : -1;
+            if (wid >= 0) restoreAndActivate(wid);
+            else render.screenEvent(new Form.Symbol("pick"), 0L, SceneCells.SYSTEM_MENU, it[0]);
+            return;
+        }
+        Scene.Window t = activeWindow();
+        if (t != null) pick(t, menuTitle(t, m - 1), it[0]);
     }
 
     void pick(Scene.Window t, String menu, String item) {
         if (t.disabled.contains(menu + "/" + item)) return;
         render.screenEvent(new Form.Symbol("pick"), (long) active, menu, item);
+    }
+
+    /** A window brought back: restored if minimised (reported), raised and given the keyboard. */
+    void restoreAndActivate(int wid) {
+        Scene.Window w = scene().windows.get(wid);
+        if (w == null) return;
+        if (w.minimized) {
+            w.minimized = false;
+            render.screenEvent(new Form.Symbol("restored"), (long) wid);
+        }
+        active = -2;   // (so activate() acts even if it was the active one before it was minimised)
+        activate(wid);
+    }
+
+    /** Minimised here at once, and reported; the keyboard goes to the next window. */
+    void minimize(int wid) {
+        Scene.Window w = scene().windows.get(wid);
+        if (w == null) return;
+        w.minimized = true;
+        if (active == wid) {
+            active = -1;
+            scene().active = -1;
+        }
+        selected = "min/" + wid;
+        changed();
+        render.screenEvent(new Form.Symbol("minimized"), (long) wid);
+    }
+
+    /** The icon selected on this display ("w/id" a desk icon, "min/w" a minimised window), or null. */
+    String selected;
+
+    /** The world's time of day for the clock, as the display sees it. */
+    static String clock() {
+        var level = Minecraft.getInstance().level;
+        if (level == null) return "";
+        long t = Math.floorMod(level.getOverworldClockTime() + 6000, 24000);
+        return String.format("%02d:%02d", t / 1000, t % 1000 * 60 / 1000);
     }
 
     // ---- input
@@ -741,17 +862,55 @@ public class ComputerScreen extends ElnScreen {
     public boolean mouseClicked(MouseButtonEvent ev, boolean doubleClick) {
         Scene s = scene();
         double mx = ev.x(), my = ev.y();
-        if (!render.lit() || !onScreen(mx, my)) return super.mouseClicked(ev, doubleClick);
-        if (ev.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
-            menuOpen = true;
-            lastMenu = -1;
-            menuHover(mx, my);
-            return true;
+        if (!render.lit() || !onScreen(mx, my)) {
+            closeMenu();
+            return super.mouseClicked(ev, doubleClick);
         }
         int c = col(mx), r = row(my);
+        // the menu bar: a click on a title opens its menu (again: closes it); one on an open menu's item picks it
+        if (menuOpen) {
+            menuHover(mx, my);
+            if (r == 0 && titleAt(c) >= 0) {
+                if (titleAt(c) == menuAt && !menuDragging) closeMenu();
+                else menuDragging = true;
+            } else if (itemAt >= 0) pickHovered();
+            else closeMenu();
+            return true;
+        }
+        if (r == 0) {
+            int k = titleAt(c);
+            if (k >= 0) {
+                menuOpen = menuDragging = true;
+                menuAt = k;
+                itemAt = -1;
+            }
+            return true;
+        }
         int wid = s.windowAt(c, r);
-        if (wid < 0) return true;   // (the desk or the screen bar)
-        Scene.Window w = s.windows.get(wid);
+        Scene.Window w = wid < 0 ? null : s.windows.get(wid);
+        // the desk: minimised windows' icons (over backdrops), then a backdrop's own icons
+        if (w == null || w.has("backdrop")) {
+            int min = s.minimizedAt(c, r);
+            if (min >= 0) {
+                selected = "min/" + min;
+                if (doubleClick) restoreAndActivate(min);
+                return true;
+            }
+            if (w == null) {
+                selected = null;
+                return true;
+            }
+            for (Map.Entry<Integer, Scene.Element> en : w.elements.entrySet()) {
+                Scene.Element e = en.getValue();
+                if (!e.kind.equals("icon")) continue;
+                int ex = w.x + e.x(w), ey = w.y + e.y(w);
+                if (c < ex || r < ey || c >= ex + Scene.ICON_W || r >= ey + Scene.ICON_H) continue;
+                selected = wid + "/" + en.getKey();
+                if (doubleClick) render.screenEvent(new Form.Symbol("open"), (long) wid, (long) en.getKey());
+                return true;
+            }
+            selected = null;
+        }
         activate(wid);
         if (w.ask != null) {   // a requester: only its buttons
             int[][] lay = SceneCells.askLayout(w);
@@ -766,6 +925,7 @@ public class ComputerScreen extends ElnScreen {
         }
         if (w.framed() && r == w.y - 1) {   // the title row
             if (c == w.x - 1 && w.has("close")) render.screenEvent(new Form.Symbol("closed"), (long) wid);
+            else if (c == w.x + w.cw - 1 && w.has("iconify")) minimize(wid);
             else if (c == w.x + w.cw && w.has("depth")) {
                 s.lower(wid);
                 changed();
@@ -812,6 +972,12 @@ public class ComputerScreen extends ElnScreen {
         }
         setFocused(null);
         return true;
+    }
+
+    @Override
+    public void mouseMoved(double mx, double my) {
+        if (menuOpen) menuHover(mx, my);
+        super.mouseMoved(mx, my);
     }
 
     void startDrag(int mode, int wid, Scene.Window w, double mx, double my) {
@@ -875,14 +1041,10 @@ public class ComputerScreen extends ElnScreen {
             return true;
         }
         if (menuOpen) {
+            // pressed on a title and let go on an item: picked (the period's way); let go on the title: it stays open
             menuHover(ev.x(), ev.y());
-            Scene.Window t = activeWindow();
-            if (t != null && menuAt >= 0 && itemAt >= 0) {
-                String[] it = menuItems(t, menuAt).get(itemAt);
-                if (it != null) pick(t, menuTitle(t, menuAt), it[0]);
-            }
-            menuOpen = false;
-            menuAt = itemAt = lastMenu = -1;
+            if (menuDragging && itemAt >= 0) pickHovered();
+            menuDragging = false;
             return true;
         }
         if (dragMode != 0) {
@@ -960,12 +1122,16 @@ public class ComputerScreen extends ElnScreen {
     public boolean keyPressed(KeyEvent ev) {
         if (fieldHasKeys()) return super.keyPressed(ev);
         int k = ev.key();
+        if (menuOpen && k == InputConstants.KEY_ESCAPE) {
+            closeMenu();
+            return true;
+        }
         Scene.Window t = render.lit() ? activeWindow() : null;
         // Alt+letter: the active window's menu item with that key, without opening the menus
         if (t != null && ev.hasAltDown() && k >= InputConstants.KEY_A && k <= InputConstants.KEY_Z) {
             String letter = String.valueOf((char) ('a' + k - InputConstants.KEY_A));
             for (int m = 0; m < t.menus.size(); m++)
-                for (String[] it : menuItems(t, m))
+                for (String[] it : windowMenuItems(t, m))
                     if (it != null && it[1].equalsIgnoreCase(letter)) {
                         pick(t, menuTitle(t, m), it[0]);
                         return true;

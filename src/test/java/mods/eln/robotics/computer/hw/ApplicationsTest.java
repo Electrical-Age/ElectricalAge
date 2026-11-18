@@ -169,22 +169,52 @@ class ApplicationsTest extends StdlibTest {
         }
     }
 
+    /** The floppy's application directory of a program: calculator is A:/Calculator.app/. */
+    static String app(String file) {
+        return "A:/" + (file.equals("bbs") ? "BBS" : Character.toUpperCase(file.charAt(0)) + file.substring(1)) + ".app/";
+    }
+
     void start(String file) throws IOException {
         m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), applications(), false));
-        type("(proc/start \"" + file + "\" run-file \"a:/" + file + ".janet\")");
+        type("(app/launch \"" + app(file) + "\")");
         tick(40, "\n2\n> ");
     }
 
+    /**
+     * Baughn (2026-11-18): the desk is made by scanning the drives for NAME.app directories; a double-click on an
+     * application's icon starts it, one of each.
+     */
     @Test
-    void theMenuStartsAProgram() throws IOException {
+    void theDeskStartsAnApplicationOnce() throws IOException {
         m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), applications(), false));
-        type("(proc/start \"menu\" run-file \"a:/startup.janet\")");
+        type("(proc/start \"desk\" run-file \"a:/startup.janet\")");
         tick(40, "\n2\n> ");
-        run(20);
-        assertEquals("Applications", text(screen, 2, 1));
-        m.editor.give(event(new Form.Symbol("press"), 2L, 10L));   // Calculator
+        run(60);
+        var desk = screen.scene.windows.get(2);
+        assertNotNull(desk, dump(screen));
+        assertTrue(desk.has("backdrop"), "the desk is a backdrop");
+        assertTrue(screen.scene.pixmaps.containsKey(1), "the desk's picture");
+        long calc = -1;
+        java.util.List<String> labels = new java.util.ArrayList<>();
+        for (var en : desk.elements.entrySet())
+            if (en.getValue().kind.equals("icon")) {
+                String label = Form.str(en.getValue().msg, 5, "");
+                labels.add(label);
+                if (label.equals("Calculator")) calc = en.getKey();
+            }
+        assertTrue(labels.containsAll(java.util.List.of("A:", "RAM:", "Shell", "BBS", "Calculator", "Gorillas", "Snake")), labels + " " + dump(screen) + " console " + screen.console);
+        m.editor.give(event(new Form.Symbol("open"), 2L, calc));
         run(40);
-        assertNotNull(element(screen, 3, 30), "the calculator's tape in tab 3");
+        assertNotNull(element(screen, 3, 30), "the calculator's tape in window 3; " + dump(screen));
+        m.editor.give(event(new Form.Symbol("open"), 2L, calc));
+        run(20);
+        assertNull(screen.scene.windows.get(4), "one calculator");
+    }
+
+    @Test
+    void theRamdiskKeepsFiles() throws IOException {
+        type("(do (spit \"RAM:/note.txt\" \"hello\") [(string (slurp \"ram:/note.txt\")) (disk/list :ram) (disk/present? :ram)])");
+        tick(40, "(\"hello\" @[\"note.txt\"] true)");
     }
 
     @Test
@@ -276,7 +306,7 @@ class ApplicationsTest extends StdlibTest {
     void startBoth(Other o, String file) throws IOException {
         o.m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), applications(), false));
         m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), applications(), false));
-        String run = "(proc/start \"" + file + "\" run-file \"a:/" + file + ".janet\")";
+        String run = "(app/launch \"" + app(file) + "\")";
         type(run);
         o.type(run);
         both(o, 60, () -> element(screen, 2, 1) != null && element(o.screen, 2, 1) != null);
@@ -322,7 +352,7 @@ class ApplicationsTest extends StdlibTest {
         o.m.editor.give(event(new Form.Symbol("submit"), 2L, 4L, 1L, "/board trade"));
         o.m.editor.give(event(new Form.Symbol("submit"), 2L, 4L, 2L, "Buying steam turbines"));
         both(o, 200, () -> text(screen, 2, 1).contains("2 posts"));
-        o.type("(string (slurp \"a:/bbs/posts.jdn\"))");
+        o.type("(string (slurp \"a:/BBS.app/bbs/posts.jdn\"))");
         both(o, 40, () -> o.screen.log().contains("Buying steam turbines"));
         assertTrue(o.screen.log().contains("Selling 64 copper"), o.screen.log());
     }

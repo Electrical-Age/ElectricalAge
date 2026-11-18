@@ -16,6 +16,7 @@
 
 (defn calculator []
   (def t (proc/tab))
+  (ui/place t 6 3 54 16)   # (keys and tape)
   (var entry "0")        # the number being typed (or the last result)
   (var acc nil)          # the number before the pending operation
   (var pending nil)      # "+" "-" "*" "/", or nil

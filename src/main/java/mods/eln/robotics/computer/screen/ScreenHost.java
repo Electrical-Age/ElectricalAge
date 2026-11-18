@@ -20,7 +20,7 @@ public final class ScreenHost {
     /** The longest event a client may send: a save; the others are short. */
     public static final int MAX_SAVE = 40 * 1024, MAX_SUBMIT = 8192, MAX_EVENT = 256;
     static final Set<String> EVENTS = Set.of("submit", "press", "select", "save", "key", "click", "doc?", "close", "break",
-        "moved", "raised", "lowered", "active", "closed", "pick", "answer", "set", "open", "dropped");
+        "moved", "raised", "lowered", "active", "closed", "pick", "answer", "set", "open", "dropped", "minimized", "restored");
     /** The kernel's window (what the machine prints at the console device) and its log. */
     public static final int CONSOLE_TAB = Scene.KERNEL, CONSOLE_LOG = 1;
 
@@ -127,7 +127,8 @@ public final class ScreenHost {
     }
 
     /** Events about a window as a whole: the window's number is all they name (no element). */
-    static final Set<String> WINDOW_EVENTS = Set.of("break", "close", "closed", "moved", "raised", "lowered", "active", "pick");
+    static final Set<String> WINDOW_EVENTS = Set.of("break", "close", "closed", "moved", "raised", "lowered", "active", "pick",
+        "minimized", "restored");
 
     /**
      * As check(line); a player's report of what they did to the windows (moved, raised, lowered, active) is applied to
@@ -140,7 +141,8 @@ public final class ScreenHost {
         String v = Form.verb(m);
         if (!EVENTS.contains(v)) return null;
         if (line.length() > (v.equals("save") ? MAX_SAVE : v.equals("submit") ? MAX_SUBMIT : MAX_EVENT)) return null;
-        if (!(m.size() > 1 && m.get(1) instanceof Long t && scene.windows.containsKey((int) (long) t))) return null;
+        boolean system = v.equals("pick") && m.size() > 1 && Long.valueOf(0).equals(m.get(1));   // (the system menu: window 0)
+        if (!system && !(m.size() > 1 && m.get(1) instanceof Long t && scene.windows.containsKey((int) (long) t))) return null;
         if (!WINDOW_EVENTS.contains(v) && !(m.size() > 2 && m.get(2) instanceof Long)) return null;
         List<Object> told = scene.applyPlayer(m);
         if (told != null && echo != null) echo.add(Form.print(told));

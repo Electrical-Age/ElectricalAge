@@ -35,7 +35,55 @@ public final class Scene {
     public int active = -1;
     /** Counts the computer's asks to activate a window (a display takes each new one: the program brought it forward). */
     public long activateSeq;
+    /** Pictures by id (pixmap messages), screen-wide; the desk's picture (0: none). */
+    public final Map<Integer, Pixmap> pixmaps = new LinkedHashMap<>();
+    public int backdrop;
+    public static final int MAX_PIXMAPS = 256, PIXMAP_W = 256, PIXMAP_H = 128;
+    /** A minimised window's icon, and a desk icon element: a picture of 4 x 3 cells over a label 6 cells wide. */
+    public static final int ICON_W = 6, ICON_H = 4;
 
+    /**
+     * A picture of w x h dots, each ARGB (0: clear), from (pixmap id w h [palette] "data"): the palette's entries are dye
+     * keywords or "#rrggbb", the data one character a dot, "0".."9" then "a".."z" into the palette, "." clear (Baughn
+     * 1572655325104832613: icons, Gorillas' gorillas, the desk's picture). version counts changes, for displays' textures.
+     */
+    public record Pixmap(int w, int h, int[] argb, int version) {
+        static int versions;
+
+        static Pixmap of(List<Object> m) {
+            int w = (int) Form.num(m, 2, 0), h = (int) Form.num(m, 3, 0);
+            if (w < 1 || h < 1 || w > PIXMAP_W || h > PIXMAP_H || !(m.size() > 5 && m.get(4) instanceof List<?> pal)) return null;
+            String data = Form.str(m, 5, "");
+            if (data.length() != w * h || pal.size() > 36) return null;
+            int[] colours = new int[pal.size()];
+            for (int i = 0; i < colours.length; i++) {
+                Object o = pal.get(i);
+                if (o instanceof String hex && hex.matches("#[0-9a-fA-F]{6}")) colours[i] = 0xFF000000 | Integer.parseInt(hex.substring(1), 16);
+                else colours[i] = SceneCells.colour(o, 0xFF000000);
+            }
+            int[] argb = new int[w * h];
+            for (int i = 0; i < argb.length; i++) {
+                char c = data.charAt(i);
+                int k = c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'z' ? c - 'a' + 10 : -1;
+                argb[i] = k >= 0 && k < colours.length ? colours[k] : 0;
+            }
+            return new Pixmap(w, h, argb, ++versions);
+        }
+    }
+
+    /**
+     * The built-in icon of a minimised window that has none: a small window, its title bar amber (12 x 9 dots).
+     */
+    public static final Pixmap WINDOW_ICON;
+
+    static {
+        String rows = "............" + ".aaaaaaaaaa." + ".abbbbbbbba." + ".abccccccba." + ".abccccccba."
+            + ".abccccccba." + ".abccccccba." + ".abbbbbbbba." + "............";
+        int[] colours = {0, 0xFFE0A030, 0xFF8A90A0, 0xFF101418};
+        int[] argb = new int[rows.length()];
+        for (int i = 0; i < argb.length; i++) argb[i] = colours[rows.charAt(i) == '.' ? 0 : rows.charAt(i) - 'a' + 1];
+        WINDOW_ICON = new Pixmap(12, 9, argb, 0);
+    }
     public static final class Window {
         public String title;
         public int x, y, cw, ch;
@@ -48,6 +96,9 @@ public final class Scene {
         public final java.util.Set<String> disabled = new java.util.HashSet<>();
         /** The open requester's message (ask w id "title" "body" [buttons]), or null. */
         public List<Object> ask;
+        /** Minimised to an icon on the desk (shared: the last report wins), and that icon's picture (0: the built-in). */
+        public boolean minimized;
+        public int icon;
 
         Window(String title) {
             this.title = title;
@@ -137,8 +188,9 @@ public final class Scene {
         }
     }
 
-    static final java.util.Set<String> ELEMENTS = java.util.Set.of("box", "text", "log", "line", "button", "list", "editor", "raw");
-    static final java.util.Set<String> FLAGS = java.util.Set.of("close", "depth", "size", "drag", "backdrop", "borderless", "full");
+    static final java.util.Set<String> ELEMENTS = java.util.Set.of("box", "text", "log", "line", "button", "list", "editor", "raw",
+        "image", "icon");
+    static final java.util.Set<String> FLAGS = java.util.Set.of("close", "depth", "size", "drag", "iconify", "backdrop", "borderless", "full");
 
     /** Apply one of the computer's messages; false if it wasn't one (unknown, malformed, out of bounds). */
     public boolean apply(List<Object> m) {
@@ -152,11 +204,41 @@ public final class Scene {
                     order.clear();
                     active = -1;
                     title = "";
+                    pixmaps.clear();
+                    backdrop = 0;
                 } else for (Window win : windows.values()) fit(win);
                 return true;
             }
             case "title" -> {
                 title = Form.str(m, 1, "");
+                return true;
+            }
+            case "pixmap" -> {
+                int id = (int) Form.num(m, 1, -1);
+                Pixmap p = id >= 1 && id <= 4095 ? Pixmap.of(m) : null;
+                if (p == null || (!pixmaps.containsKey(id) && pixmaps.size() >= MAX_PIXMAPS)) return false;
+                pixmaps.put(id, p);
+                return true;
+            }
+            case "unpixmap" -> {
+                return pixmaps.remove((int) Form.num(m, 1, -1)) != null;
+            }
+            case "backdrop" -> {
+                backdrop = (int) Math.max(0, Form.num(m, 1, 0));
+                return true;
+            }
+            case "minimize", "restore" -> {
+                Window win = windows.get(win(m));
+                if (win == null) return false;
+                win.minimized = v.equals("minimize");
+                if (win.minimized && active == win(m)) active = -1;
+                return true;
+            }
+            case "icon" -> {
+                if (m.size() > 3) break;   // (an icon element: (icon w id x y "label" pixmap))
+                Window win = windows.get(win(m));
+                if (win == null) return false;
+                win.icon = (int) Math.max(0, Form.num(m, 2, 0));
                 return true;
             }
             case "window" -> {
@@ -179,6 +261,10 @@ public final class Scene {
                     // (open already: title and flags only; its place belongs to the players now)
                     win.title = Form.str(m, 6, win.title);
                     win.flags = flags;
+                    if (win.has("backdrop")) {   // (turned into the desk: behind everything)
+                        order.remove((Integer) id);
+                        order.add(0, id);
+                    }
                 }
                 fit(win);
                 return true;
@@ -280,21 +366,27 @@ public final class Scene {
                 return windows.containsKey(win(m));   // passed on to clients, not kept
             }
             default -> {
-                if (!ELEMENTS.contains(v)) return false;
-                Window win = windows.get(win(m));
-                int id = (int) Form.num(m, 2, -1);
-                if (win == null || id < 0 || id > 65535) return false;
-                Element old = win.elements.get(id);
-                if (old != null && old.kind.equals(v)) {
-                    old.msg = m;   // an update keeps its place and, for a log, its lines
-                    return true;
-                }
-                if (old == null && win.elements.size() >= MAX_ELEMENTS) return false;
-                win.elements.remove(id);
-                win.elements.put(id, new Element(v, m));
-                return true;
+                return element(v, m);
             }
         }
+        return element(v, m);   // (an icon element)
+    }
+
+    /** An element message (box, text, ..., image, icon): made, or changed in place. */
+    boolean element(String v, List<Object> m) {
+        if (!ELEMENTS.contains(v)) return false;
+        Window win = windows.get(win(m));
+        int id = (int) Form.num(m, 2, -1);
+        if (win == null || id < 0 || id > 65535) return false;
+        Element old = win.elements.get(id);
+        if (old != null && old.kind.equals(v)) {
+            old.msg = m;   // an update keeps its place and, for a log, its lines
+            return true;
+        }
+        if (old == null && win.elements.size() >= MAX_ELEMENTS) return false;
+        win.elements.remove(id);
+        win.elements.put(id, new Element(v, m));
+        return true;
     }
 
     /**
@@ -329,6 +421,11 @@ public final class Scene {
                 raise(id);
                 return List.of(new Form.Symbol("activate"), (long) id);
             }
+            case "minimized", "restored" -> {
+                win.minimized = v.equals("minimized");
+                if (win.minimized && active == id) active = -1;
+                return List.of(new Form.Symbol(win.minimized ? "minimize" : "restore"), (long) id);
+            }
             default -> {
                 return null;
             }
@@ -339,7 +436,30 @@ public final class Scene {
     public int windowAt(int x, int y) {
         for (int k = order.size() - 1; k >= 0; k--) {
             Window win = windows.get(order.get(k));
-            if (win != null && win.contains(x, y)) return order.get(k);
+            if (win != null && !win.minimized && win.contains(x, y)) return order.get(k);
+        }
+        return -1;
+    }
+
+    /** The minimised windows, in the order their icons sit along the desk's bottom row (by id: alike on every display). */
+    public List<Integer> minimizedOrder() {
+        List<Integer> out = new ArrayList<>();
+        for (var en : windows.entrySet()) if (en.getValue().minimized) out.add(en.getKey());
+        out.sort(null);
+        return out;
+    }
+
+    /** Where minimised window wid's icon sits: its top left cell, or null if it isn't minimised. */
+    public int[] iconSlot(int wid) {
+        int k = minimizedOrder().indexOf(wid);
+        return k < 0 ? null : new int[]{1 + (ICON_W + 1) * k, h - ICON_H};
+    }
+
+    /** The minimised window whose icon covers cell (x, y), or -1. */
+    public int minimizedAt(int x, int y) {
+        for (int wid : minimizedOrder()) {
+            int[] at = iconSlot(wid);
+            if (x >= at[0] && x < at[0] + ICON_W && y >= at[1] && y < at[1] + ICON_H) return wid;
         }
         return -1;
     }
@@ -401,6 +521,27 @@ public final class Scene {
         return win == null ? null : win.elements.get((int) Form.num(m, 2, -1));
     }
 
+    /** A pixmap as the message that makes it (its palette rebuilt from its colours). */
+    static String pixmapMessage(int id, Pixmap p) {
+        List<Integer> colours = new ArrayList<>();
+        StringBuilder data = new StringBuilder(p.argb().length);
+        for (int c : p.argb()) {
+            if (c == 0) {
+                data.append('.');
+                continue;
+            }
+            int k = colours.indexOf(c);
+            if (k < 0) {
+                k = colours.size();
+                colours.add(c);
+            }
+            data.append(k < 10 ? (char) ('0' + k) : (char) ('a' + k - 10));
+        }
+        List<Object> pal = new ArrayList<>();
+        for (int c : colours) pal.add(String.format("#%06x", c & 0xFFFFFF));
+        return Form.print(new Form.Symbol("pixmap"), (long) id, (long) p.w(), (long) p.h(), pal, data.toString());
+    }
+
     /** Is this message one that only replaces what an earlier one of the same (verb, window, id) said (coalescable)? */
     public static boolean replaces(List<Object> m) {
         String v = Form.verb(m);
@@ -412,6 +553,8 @@ public final class Scene {
         List<String> out = new ArrayList<>();
         out.add(Form.print(new Form.Symbol("reset"), (long) w, (long) h));
         if (!title.isEmpty()) out.add(Form.print(new Form.Symbol("title"), title));
+        for (var pe : pixmaps.entrySet()) out.add(pixmapMessage(pe.getKey(), pe.getValue()));
+        if (backdrop != 0) out.add(Form.print(new Form.Symbol("backdrop"), (long) backdrop));
         if (!baseDict.isEmpty()) out.add(Form.print(new Form.Symbol("dict"), 0L, baseDict));
         for (Map.Entry<Integer, Window> we : windows.entrySet()) {
             long t = we.getKey();
@@ -420,6 +563,8 @@ public final class Scene {
             for (String f : win.flags) fl.add(Form.kw(f));
             out.add(Form.print(new Form.Symbol("window"), t, (long) win.x, (long) win.y, (long) win.cw, (long) win.ch, win.title, fl));
             if (!win.menus.isEmpty()) out.add(Form.print(new Form.Symbol("menus"), t, win.menus));
+            if (win.icon != 0) out.add(Form.print(new Form.Symbol("icon"), t, (long) win.icon));
+            if (win.minimized) out.add(Form.print(new Form.Symbol("minimize"), t));
             for (String d : win.disabled) {
                 String[] p = d.split("/", 2);
                 out.add(Form.print(new Form.Symbol("enable"), t, p[0], p.length > 1 ? p[1] : "", false));

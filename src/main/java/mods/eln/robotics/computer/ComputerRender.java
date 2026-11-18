@@ -51,10 +51,42 @@ public class ComputerRender extends TransparentNodeElementRender {
         desc.drawPicture(picture.update(sceneVersion, () -> mods.eln.robotics.computer.screen.SceneCells.of(scene)));
     }
 
+    /** Each pixmap's texture on this client, made when first drawn and again when it changes (screen and monitor alike). */
+    final java.util.Map<Integer, Object[]> pixmapTextures = new java.util.HashMap<>();
+    static int pixmapNext;
+
+    /** The texture of a pixmap (nearest filtering: dots stay square), or null where there is no GPU. */
+    public net.minecraft.resources.Identifier pixmapTexture(mods.eln.robotics.computer.screen.Scene.Pixmap p) {
+        int key = System.identityHashCode(p);
+        Object[] have = pixmapTextures.get(key);
+        if (have != null && have[1] == p) return (net.minecraft.resources.Identifier) have[0];
+        try {
+            if (pixmapTextures.size() > 64) releasePixmaps();
+            var id = net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "dynamic/computer_pixmap_" + pixmapNext++);
+            var tex = new net.minecraft.client.renderer.texture.DynamicTexture(() -> "eln computer pixmap", p.w(), p.h(), true);
+            var img = tex.getPixels();
+            for (int y = 0; y < p.h(); y++)
+                for (int x = 0; x < p.w(); x++) img.setPixel(x, y, p.argb()[y * p.w() + x]);
+            tex.upload();
+            net.minecraft.client.Minecraft.getInstance().getTextureManager().register(id, tex);
+            pixmapTextures.put(key, new Object[]{id, p});
+            return id;
+        } catch (IllegalStateException e) {
+            return null;
+        }
+    }
+
+    void releasePixmaps() {
+        for (Object[] t : pixmapTextures.values())
+            net.minecraft.client.Minecraft.getInstance().getTextureManager().release((net.minecraft.resources.Identifier) t[0]);
+        pixmapTextures.clear();
+    }
+
     @Override
     public void destructor() {
         super.destructor();
         if (picture != null) picture.close();
+        releasePixmaps();
     }
 
     @Override

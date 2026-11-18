@@ -41,7 +41,7 @@ build/%.img: disks/%/*
 	mkdir -p build
 	rm -f $@
 	mformat -C -i $@ -f 1440 -N 45410001 -v $(shell echo $* | tr a-z A-Z | cut -c1-11) ::
-	mcopy -m -i $@ $^ ::
+	mcopy -s -m -i $@ $^ ::
 	@ls -l $@
 
 clean:

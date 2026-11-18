@@ -20,7 +20,9 @@ public final class SceneCells {
         FRAME_IDLE = 0xFF8A90A0, PAPER = 0xFF101418, INK = 0xFFE6E6E6, PROMPT = 0xFF8FB0FF, BUSY = 0xFFE0C060,
         BUTTON = 0xFF5A5A66, LIST = 0xFF181C22, LIST_INK = 0xFFD0D0D0, RAW = 0xFF0C0E10, BOX = 0xFF404040, EDITOR = 0xFF1C1D22,
         ASK = 0xFFD8D2C0, ASK_TEXT = 0xFF14161A, ASK_BUTTON = 0xFF8A90A0;
-    public static final int CLOSE = '■', DEPTH = '▒', SIZE = '╝';
+    public static final int CLOSE = '■', DEPTH = '▒', SIZE = '╝', ICONIFY = '▄';
+    /** The system menu's title, first on the menu bar (Baughn 1572655325104832613). */
+    public static final String SYSTEM_MENU = "Dynamo";
 
     /** What only one player's display has, for the cells it composes (the monitor has none of it). */
     public interface Local {
@@ -38,7 +40,39 @@ public final class SceneCells {
         default boolean ownEditor(int win, int id) {
             return false;
         }
+
+        /** Is this icon selected on this display ("w/id" for a desk icon, "min/w" for a minimised window's)? */
+        default boolean selected(String key) {
+            return false;
+        }
+
+        /** The clock at the menu bar's right end ("" for none). */
+        default String clock() {
+            return "";
+        }
     }
+
+    /**
+     * A picture stretched over cells (x, y, cw, ch), drawn only on the cells that are owner's (a window, the desk) and
+     * inside the clip [x0, x1) x [y0, y1) (its window's content).
+     */
+    public record Image(int owner, int x, int y, int cw, int ch, Scene.Pixmap pixmap, int x0, int y0, int x1, int y1) {
+        /** Is cell (cx, cy) one this picture shows on? */
+        public boolean shows(SceneCells c, int cx, int cy) {
+            return cx >= x && cy >= y && cx < x + cw && cy < y + ch && cx >= x0 && cy >= y0 && cx < x1 && cy < y1
+                && cx >= 0 && cy >= 0 && cx < c.w && cy < c.h
+                && (owner == OWNER_DESK ? c.deskOwners.contains(c.owner[cy * c.w + cx]) : c.owner[cy * c.w + cx] == owner);
+        }
+    }
+
+    void image(int x, int y, int cw, int ch, Scene.Pixmap pic) {
+        images.add(new Image(painting, x, y, cw, ch, pic, cx0, cy0, Math.min(cx1, w), Math.min(cy1, h)));
+    }
+
+    /** The pictures, in the order drawn (the desk's first). */
+    public final List<Image> images = new ArrayList<>();
+    /** Owners the desk's picture shows under: the desk, and backdrop windows (their icons stand on the picture). */
+    public final java.util.Set<Integer> deskOwners = new java.util.HashSet<>(List.of(OWNER_DESK));
 
     public static final Local NONE = new Local() {
     };
@@ -49,6 +83,7 @@ public final class SceneCells {
     public final int[] owner;
     public static final int OWNER_DESK = -1, OWNER_BAR = -2;
     int painting = OWNER_DESK;
+    Map<Integer, Scene.Pixmap> pixmaps;
 
     public SceneCells(int w, int h) {
         this.w = w;
@@ -70,13 +105,51 @@ public final class SceneCells {
     /** The screen with one display's own state, and its idea of the active window. */
     public static SceneCells of(Scene s, Local local, int active) {
         SceneCells c = new SceneCells(s.w, s.h);
+        c.pixmaps = s.pixmaps;
+        Scene.Pixmap back = s.pixmaps.get(s.backdrop);
+        if (back != null) c.images.add(new Image(OWNER_DESK, 0, 1, s.w, s.h - 1, back, 0, 1, s.w, s.h));
+        // backdrops, then the minimised windows' icons on the desk, then the other windows
         for (int id : s.order) {
             Scene.Window win = s.windows.get(id);
-            if (win == null) continue;
-            c.window(id, win, id == active, local);
+            if (win != null && !win.minimized && win.has("backdrop")) c.window(id, win, id == active, local);
         }
-        c.bar(s);
+        for (int id : s.minimizedOrder()) c.minimized(s, id, local);
+        for (int id : s.order) {
+            Scene.Window win = s.windows.get(id);
+            if (win != null && !win.minimized && !win.has("backdrop")) c.window(id, win, id == active, local);
+        }
+        c.bar(s, active, local);
         return c;
+    }
+
+    /** Owner value of a minimised window's icon (not its window: it isn't drawn). */
+    public static int iconOwner(int wid) {
+        return -1000 - wid;
+    }
+
+    /** A minimised window's icon at its slot on the desk: its picture, and its title under it. */
+    void minimized(Scene s, int id, Local local) {
+        Scene.Window win = s.windows.get(id);
+        int[] at = s.iconSlot(id);
+        if (win == null || at == null) return;
+        unclip();
+        painting = iconOwner(id);
+        iconAt(at[0], at[1], win.title, s.pixmaps.getOrDefault(win.icon, Scene.WINDOW_ICON), local.selected("min/" + id), true);
+    }
+
+    /**
+     * An icon at cell (x, y): its picture in the 4 x 3 cells from (x + 1, y), its label under it, centred in 6 cells
+     * (the label stands on its own paper, so it reads over a picture; selected, it is inverted).
+     */
+    void iconAt(int x, int y, String label, Scene.Pixmap pic, boolean selected, boolean ownPaper) {
+        for (int yy = y; yy < y + 3; yy++)
+            for (int xx = x + 1; xx < x + 5; xx++)
+                if (in(xx, yy)) owner[yy * w + xx] = painting;
+        if (pic != null) image(x + 1, y, 4, 3, pic);
+        String l = label.length() > Scene.ICON_W ? label.substring(0, Scene.ICON_W) : label;
+        int lx = x + (Scene.ICON_W - l.length()) / 2;
+        fill(lx, y + 3, l.length(), 1, selected ? INK : PAPER);
+        text(l, lx, y + 3, l.length(), selected ? PAPER : INK);
     }
 
     public int at(int x, int y) {
@@ -132,27 +205,56 @@ public final class SceneCells {
 
     // ---- the screen bar, windows, requesters
 
-    void bar(Scene s) {
+    /** The menu bar: the system menu, the active window's menus, the screen's title after them, the clock at the end. */
+    void bar(Scene s, int active, Local local) {
         unclip();
         painting = OWNER_BAR;
         fill(0, 0, w, 1, BAR);
-        text(" " + (s.title.isEmpty() ? "Dynamo" : s.title), 0, 0, w, BAR_TEXT);
+        List<String> titles = menuTitles(s, active);
+        int x = 1;
+        for (String t : titles) {
+            text(t, x, 0, w - x, BAR_TEXT);
+            x += t.length() + 2;
+        }
+        String clock = local.clock();
+        if (!s.title.isEmpty() && x + s.title.length() + clock.length() + 2 < w) text(s.title, x + 1, 0, w - x, TITLE_IDLE);
+        if (!clock.isEmpty()) text(clock, w - clock.length() - 1, 0, clock.length(), BAR_TEXT);
+    }
+
+    /** The menu bar's titles: the system menu, then the active window's (each menu's first entry). */
+    public static List<String> menuTitles(Scene s, int active) {
+        List<String> out = new ArrayList<>();
+        out.add(SYSTEM_MENU);
+        Scene.Window win = s.windows.get(active);
+        if (win != null)
+            for (Object o : win.menus) if (o instanceof List<?> l && !l.isEmpty()) out.add(String.valueOf(l.get(0)));
+        return out;
+    }
+
+    /** Menu title k's first cell on the bar (titles from cell 1, two cells apart). */
+    public static int menuX(List<String> titles, int k) {
+        int x = 1;
+        for (int i = 0; i < k; i++) x += titles.get(i).length() + 2;
+        return x;
     }
 
     void window(int id, Scene.Window win, boolean active, Local local) {
         int[] o = win.outer();
         painting = id;
         clip(o[0], o[1], o[2], o[3]);
-        // (a framed window's border is its title's colour all round, as the period's desks had it; a display bevels it)
-        fill(o[0], o[1], o[2], o[3], win.framed() ? (active ? TITLE_ACTIVE : TITLE_IDLE) : PAPER);
+        // (a framed window's border is its title's colour all round, as the period's desks had it; a display bevels it;
+        // a backdrop is the desk itself: its picture shows through)
+        if (win.has("backdrop")) deskOwners.add(id);
+        else fill(o[0], o[1], o[2], o[3], win.framed() ? (active ? TITLE_ACTIVE : TITLE_IDLE) : PAPER);
         if (win.framed()) {
             int x0 = win.x - 1, x1 = win.x + win.cw, y0 = win.y - 1, y1 = win.y + win.ch;
             fill(win.x, win.y, win.cw, win.ch, PAPER);
             int tink = active ? TITLE_ACTIVE_TEXT : TITLE_IDLE_TEXT;
             put(x0, y0, win.has("close") ? CLOSE : ' ', tink);
             put(x1, y0, win.has("depth") ? DEPTH : ' ', tink);
+            if (win.has("iconify")) put(x1 - 1, y0, ICONIFY, tink);
             String t = win.title;
-            int room = win.cw - 1;
+            int room = win.cw - (win.has("iconify") ? 2 : 1);
             text(t.length() > room ? t.substring(0, Math.max(0, room)) : t, win.x + 1, y0, room, tink);
             if (win.has("size")) put(x1, y1, SIZE, tink);
         }
@@ -279,6 +381,14 @@ public final class SceneCells {
                 for (int r = 0; r < eh - 1 && r < lines.length; r++) text(lines[r].replace('\t', ' '), x, y + r, ew, INK);
             }
             case "raw" -> fill(x, y, e.size(5, win, 1), e.size(6, win, 1), RAW);
+            case "image" -> {   // (image w id x y cw ch pixmap)
+                Scene.Pixmap pic = pixmaps == null ? null : pixmaps.get((int) Form.num(m, 7, 0));
+                if (pic != null) image(x, y, e.size(5, win, 1), e.size(6, win, 1), pic);
+            }
+            case "icon" -> {   // (icon w id x y "label" pixmap): a desk icon
+                Scene.Pixmap pic = pixmaps == null ? null : pixmaps.get((int) Form.num(m, 6, 0));
+                iconAt(x, y, Form.str(m, 5, ""), pic == null ? Scene.WINDOW_ICON : pic, local.selected(wid + "/" + id), false);
+            }
             default -> {
             }
         }

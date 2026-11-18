@@ -25,7 +25,7 @@
 
 (defn bbs []
   (def t (proc/tab))
-  (def dir (string (if (disk/exists? "a:/bbs.janet") "a:/" "b:/") "bbs/"))
+  (def dir (string (or (app/dir) "a:/") "bbs/"))   # (its posts live in its own application directory)
   (def posts @{})          # [station n] -> the post's record
   (def partial @{})        # [station n] -> @{piece bytes}
   (def heard @{})          # computers heard from -> when

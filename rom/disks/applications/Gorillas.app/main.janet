@@ -101,6 +101,7 @@
 
 (defn gorillas []
   (def t (proc/tab))
+  (ui/place t 1 2 ui/width ui/height)   # (its city is 76 x 20: as big as the screen allows)
   (def queue @[])        # [:key k] and [:packet p], oldest first
   (var peer nil)         # the other computer's address, during a game
   (var heard 0)          # when it was last heard from

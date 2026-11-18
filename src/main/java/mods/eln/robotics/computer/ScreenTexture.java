@@ -65,9 +65,25 @@ final class ScreenTexture {
         if (c != null) {
             java.util.Map<Integer, Long> g = glyphs();
             for (int y = 0; y < c.h; y++)
+                for (int x = 0; x < c.w; x++) img.fillRect(x * CELL, y * CELL, CELL, CELL, c.paper[y * c.w + x]);
+            // the pictures, dot by dot, over the cells they show on
+            for (SceneCells.Image im : c.images) {
+                var p = im.pixmap();
+                int pw = im.cw() * CELL, ph = im.ch() * CELL;
+                for (int y = im.y(); y < im.y() + im.ch(); y++)
+                    for (int x = im.x(); x < im.x() + im.cw(); x++) {
+                        if (!im.shows(c, x, y)) continue;
+                        for (int r = 0; r < CELL; r++)
+                            for (int b = 0; b < CELL; b++) {
+                                int u = ((x - im.x()) * CELL + b) * p.w() / pw, v = ((y - im.y()) * CELL + r) * p.h() / ph;
+                                int argb = p.argb()[v * p.w() + u];
+                                if ((argb >>> 24) != 0) img.setPixel(x * CELL + b, y * CELL + r, argb);
+                            }
+                    }
+            }
+            for (int y = 0; y < c.h; y++)
                 for (int x = 0; x < c.w; x++) {
-                    int i = y * c.w + x, paper = c.paper[i];
-                    img.fillRect(x * CELL, y * CELL, CELL, CELL, paper);
+                    int i = y * c.w + x;
                     int cp = c.glyph[i];
                     if (cp == ' ' || g == null) continue;
                     Long bits = g.getOrDefault(cp, g.get((int) '?'));
