@@ -13,7 +13,8 @@ import java.util.List;
  * there) to none at FREE_M3_S. Sized for the mid game: one blower feeds two Big burners at ~1.5 bar (20 g/s of air,
  * ~2.8 kW) or, slowed by its speed signal, less air at a lower pressure for a few hundred watts. It draws the work it does on the air (the core's flow x rise at the inlet's density, about 1.45 x the
  * isentropic work at 1.6 bar: an isentropic efficiency near 0.7) over its motor's efficiency, plus its idling.
- * Stand-in model and render: the Inline Pump's.
+ * Its model (mods.eln.cad.models.AirBlower): the Inline Pump's machine with an intake grille on its left flank; the
+ * Inline Pump's render.
  */
 public class AirBlowerDescriptor extends InlinePumpDescriptor {
     /** Shut-off pressure rise (Pa), free flow (m^3/s of inlet air), motor efficiency, idle draw (W). */

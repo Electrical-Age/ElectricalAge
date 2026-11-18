@@ -1,6 +1,7 @@
 200vactivethermaldissipatora/200vactivethermaldissipatora.obj
 activethermaldissipatora/activethermaldissipatora.obj
 advancedenergymeter/advancedenergymeter.obj
+airblower200v/airblower200v.obj
 alarmmedium/alarmmedium.obj
 analogchips/analogchips.obj
 anemometer/anemometer.obj
