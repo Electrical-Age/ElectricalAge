@@ -211,6 +211,18 @@ class ApplicationsTest extends StdlibTest {
         assertNull(screen.scene.windows.get(4), "one calculator");
     }
 
+    /** Baughn (2026-11-18): two text modes, 80 x 25 (the start) and 120 x 40; windows are kept on the screen. */
+    @Test
+    void theScreenHasTwoModes() throws IOException {
+        type("(do (ui/mode 120 40) [ui/screen-width ui/screen-height ui/width ui/height])");
+        tick(40, "(120 40 118 37)");
+        run(5);
+        assertEquals(120, screen.scene.w);
+        assertEquals(40, screen.scene.h);
+        type("(ui/mode 81 25)");
+        tick(40, "the modes are");
+    }
+
     @Test
     void theRamdiskKeepsFiles() throws IOException {
         type("(do (spit \"RAM:/note.txt\" \"hello\") [(string (slurp \"ram:/note.txt\")) (disk/list :ram) (disk/present? :ram)])");

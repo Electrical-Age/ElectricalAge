@@ -46,6 +46,11 @@ public class ComputerScreen extends ElnScreen {
      */
     public static final int SLOTS_Y = AREA_Y + Scene.DEFAULT_H * LINE + 20, INV_X = WIDTH - 9 - 162, INV_Y = AREA_Y + Scene.DEFAULT_H * LINE + 14;
     static final int BOTTOM_Y = SLOTS_Y + 24;
+    /**
+     * The layout for the screen's size now (Baughn: two text modes, 80 x 25 and 120 x 40): the slots, buttons and
+     * inventory sit under the cells, so they move with its size. Set by layout(); the constants above are 80 x 25's.
+     */
+    int slotsY = SLOTS_Y, invX = INV_X, invY = INV_Y, bottomY = BOTTOM_Y, laidW = Scene.DEFAULT_W, laidH = Scene.DEFAULT_H;
     final ComputerRender render;
 
     /** This display's active window (the keyboard's), and the element in it with the keyboard. */
@@ -84,7 +89,7 @@ public class ComputerScreen extends ElnScreen {
     }
 
     public ComputerScreen(ElnNodeMenu menu, Inventory inventory, Component title, Object render) {
-        super(menu, inventory, title, WIDTH, HEIGHT);
+        super(menu, inventory, title, widthFor((ComputerRender) render), heightFor((ComputerRender) render));
         this.render = (ComputerRender) render;
         @SuppressWarnings("unchecked") Map<String, LineEdit> e = (Map<String, LineEdit>) (Map<?, ?>) this.render.screenState;
         edits = e;   // (kept in the render: a half-typed line survives closing the screen, AdventurAgent)
@@ -99,13 +104,36 @@ public class ComputerScreen extends ElnScreen {
         return true;
     }
 
+    /** The panel's width and height for the computer's screen size now. */
+    static int widthFor(ComputerRender r) {
+        return Math.max(WIDTH, 2 * AREA_X + r.scene.w * CELL);
+    }
+
+    static int heightFor(ComputerRender r) {
+        return AREA_Y + r.scene.h * LINE + 14 + 76 + 6;
+    }
+
+    /** Moves the slots and the inventory under the cells (the panel was sized for them when the screen was made). */
+    void layout() {
+        laidW = render.scene.w;
+        laidH = render.scene.h;
+        slotsY = AREA_Y + laidH * LINE + 20;
+        invY = AREA_Y + laidH * LINE + 14;
+        invX = imageWidth - 9 - 162;
+        bottomY = slotsY + 24;
+        for (int k = 0; k < ComputerElement.CHIP_SLOTS; k++) menu.moveDeviceSlotTo(k, 9 + 18 * k, slotsY);
+        for (int k = 0; k < 2; k++) menu.moveDeviceSlotTo(ComputerElement.DRIVE_A + k, 9 + 18 * 8 + 14 + 18 * k, slotsY);
+        menu.movePlayerInventory(invX, invY);
+    }
+
     @Override
     protected void init() {
+        layout();
         super.init();
-        button(9, BOTTOM_Y, 50, () -> tr("Reset"), () -> render.clientSendId(ComputerElement.RESET_ID));
-        button(61, BOTTOM_Y, 62, () -> render.switchedOn ? tr("Power off") : tr("Power on"),
+        button(9, bottomY, 50, () -> tr("Reset"), () -> render.clientSendId(ComputerElement.RESET_ID));
+        button(61, bottomY, 62, () -> render.switchedOn ? tr("Power off") : tr("Power on"),
             () -> render.clientSendId(ComputerElement.POWER_ID));
-        field(268, BOTTOM_Y, 36, () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
+        field(268, bottomY, 36, () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
             float f = EaField.parse(v);
             render.clientSendFloat(ComputerElement.SET_ADDRESS_ID, Float.isNaN(f) ? 0 : Math.round(f));
         }, tr("Its RS485 address, 17 to 255: the source of the packets it sends."));
@@ -308,6 +336,10 @@ public class ComputerScreen extends ElnScreen {
     @Override
     protected void containerTick() {
         super.containerTick();
+        if (render.scene.w != laidW || render.scene.h != laidH) {   // (the text mode changed: a screen of the new size)
+            minecraft.gui.setScreen(new ComputerScreen(menu, minecraft.player.getInventory(), title, render));
+            return;
+        }
         syncEditors();
         for (List<Object> m; (m = render.replies.poll()) != null; ) {
             int t = (int) Form.num(m, 1, -1), id = (int) Form.num(m, 2, -1);
@@ -422,16 +454,16 @@ public class ComputerScreen extends ElnScreen {
             if (menuOpen) menus(g);
         }
         // (off, or no chips: a dark screen, no text: Baughn 2026-11-18; the state shows under it)
-        label(g, 9, SLOTS_Y - 11, tr("Expansion modules"));
-        label(g, 9 + 8 * 18 + 14, SLOTS_Y - 11, tr("Floppy drives"));
+        label(g, 9, slotsY - 11, tr("Expansion modules"));
+        label(g, 9 + 8 * 18 + 14, slotsY - 11, tr("Floppy drives"));
         // the module slots as ISA-style edge connectors (Baughn), under the item slots
         for (int k = 0; k < ComputerElement.CHIP_SLOTS; k++) {
-            int sx = leftPos + 9 + 18 * k, sy = topPos + SLOTS_Y + 11;   // (inside the slot, under the module)
+            int sx = leftPos + 9 + 18 * k, sy = topPos + slotsY + 11;   // (inside the slot, under the module)
             g.fill(sx + 1, sy, sx + 15, sy + 4, 0xFF2A2A2A);
             for (int p = 0; p < 6; p++) g.fill(sx + 2 + 2 * p, sy + 1, sx + 3 + 2 * p, sy + 3, 0xFFC8A040);
         }
-        label(g, 127, BOTTOM_Y + 6, render.stateTextClient());
-        label(g, 222, BOTTOM_Y + 6, tr("Address"));
+        label(g, 127, bottomY + 6, render.stateTextClient());
+        label(g, 222, bottomY + 6, tr("Address"));
     }
 
     /** The composed cells: each row's paper in runs, then the pictures over the cells they show on, then the glyphs. */

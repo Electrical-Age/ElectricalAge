@@ -129,9 +129,12 @@
     (def row (math/floor (/ i 7)))
     (ui/desk-icon t (+ 100 i) (+ 10 (* 9 col)) (* 5 row) (app/name dir) (app-picture dir) (fn [] (app/launch dir)))))
 
-(ui/menus t [["Desk" ["Open Shell" "s"] ["Look at the drives" "r"] nil ["Open A:" ""] ["Open B:" ""] ["Open RAM:" ""]]]
+(ui/menus t [["Desk" ["Open Shell" "s"] ["Look at the drives" "r"] nil ["Open A:" ""] ["Open B:" ""] ["Open RAM:" ""]]
+             ["Screen" ["80 x 25" ""] ["120 x 40" ""]]]
           (fn [menu item]
             (case item
+              "80 x 25" (do (ui/mode 80 25) (ui/window t 0 1 ui/screen-width (- ui/screen-height 1) "Switchboard" [:backdrop]))
+              "120 x 40" (do (ui/mode 120 40) (ui/window t 0 1 ui/screen-width (- ui/screen-height 1) "Switchboard" [:backdrop]))
               "Open Shell" (do (ui/restore 1) (ui/focus 1))
               "Look at the drives" (do (set shown nil) (layout (survey)))
               "Open A:" (open-filer "A:/")

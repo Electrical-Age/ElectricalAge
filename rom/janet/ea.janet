@@ -441,10 +441,20 @@
     (def env (curenv))
     (fn [& args] (fiber/setenv (fiber/current) env) (f ;args))))
 
-(def ui/screen-width "The screen's width in character cells (80 x 25 text mode)." 80)
-(def ui/screen-height "The screen's height in character cells; row 0 is the screen bar." 25)
-(def ui/width "A program's window's content width as it opens, in cells (the screen less its frame)." 78)
-(def ui/height "A program's window's content height as it opens, in cells (the screen less the bar and the frame)." 22)
+(var ui/screen-width "The screen's width in character cells (80 in the 80 x 25 text mode, 120 in 120 x 40)." 80)
+(var ui/screen-height "The screen's height in character cells; row 0 is the menu bar." 25)
+(var ui/width "A program's window's content width as it opens at most, in cells (the screen less its frame)." 78)
+(var ui/height "A program's window's content height as it opens at most, in cells (the screen less the bar and the frame)." 22)
+(def ui/modes "The text modes: 80 x 25 (the computer starts in it) and 120 x 40 (Baughn 2026-11-18)." [[80 25] [120 40]])
+(defn ui/mode
+  "Switch the screen to text mode [w h] (one of ui/modes); windows are kept on it, made smaller if they must be."
+  [w h]
+  (unless (find |(deep= $ [w h]) ui/modes) (error "the modes are 80 x 25 and 120 x 40"))
+  (set ui/screen-width w)
+  (set ui/screen-height h)
+  (set ui/width (- w 2))
+  (set ui/height (- h 3))
+  (ui/send 'screen w h))
 (def ui/standard "The usual window: close box, minimise and depth boxes, size handle, dragged by its title."
   [:close :iconify :depth :size :drag])
 
