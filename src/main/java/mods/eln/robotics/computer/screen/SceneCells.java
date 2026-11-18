@@ -219,13 +219,13 @@ public final class SceneCells {
 
     void draw(int wid, int id, Scene.Element e, Scene.Window win, Local local) {
         List<Object> m = e.msg;
-        int x = win.x + e.x(), y = win.y + e.y();
+        int x = win.x + e.x(win), y = win.y + e.y(win);
         switch (e.kind) {
             case "box" -> fill(x, y, e.size(5, win, 1), e.size(6, win, 1), colour(m.size() > 7 ? m.get(7) : null, BOX));
             case "text" -> {
                 String s = Form.str(m, 6, "");
                 if (m.size() > 7 && m.get(7) != null) fill(x, y, s.codePointCount(0, s.length()), 1, colour(m.get(7), 0));
-                text(s, x, y, win.cw - e.x(), colour(m.size() > 5 ? m.get(5) : null, INK));
+                text(s, x, y, win.cw - e.x(win), colour(m.size() > 5 ? m.get(5) : null, INK));
             }
             case "log" -> {
                 int lw = e.size(5, win, 1), lh = e.size(6, win, 1);

@@ -99,13 +99,25 @@ public final class Scene {
             return (int) Form.num(msg, 4, 0);
         }
 
+        /** Its column in the window's content: a negative x counts from the right edge (-1: the last column). */
+        public int x(Window win) {
+            int x = x();
+            return x < 0 ? Math.max(0, win.cw + x) : x;
+        }
+
+        /** Its row in the window's content: a negative y counts from the bottom (-1: the last row, a Shell's line). */
+        public int y(Window win) {
+            int y = y();
+            return y < 0 ? Math.max(0, win.ch + y) : y;
+        }
+
         /**
          * Its width (k 5) or height (k 6) in the window's content: a number, or :fill / [:fill n] for "to the edge, less
          * n cells" (so a window resized on a display lays itself out there, with no round trip).
          */
         public int size(int k, Window win, int dflt) {
             Object o = msg.size() > k ? msg.get(k) : null;
-            int room = k == 5 ? win.cw - x() : win.ch - y();
+            int room = k == 5 ? win.cw - x(win) : win.ch - y(win);
             if (o instanceof Form.Keyword kw && kw.name().equals("fill")) return Math.max(0, room);
             if (o instanceof List<?> l && !l.isEmpty() && l.get(0) instanceof Form.Keyword kw && kw.name().equals("fill"))
                 return Math.max(0, room - (l.size() > 1 && l.get(1) instanceof Long n ? (int) (long) n : 0));

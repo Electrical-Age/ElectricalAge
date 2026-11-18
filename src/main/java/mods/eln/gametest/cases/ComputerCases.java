@@ -354,7 +354,8 @@ public final class ComputerCases {
      * the ghost stands above it; Janet boots at 80 x 25 and says so; breaking the monitor breaks the computer.
      */
     static final class MonitorOnTop extends BootsJanet {
-        boolean ghostAbove, goneAfterBreak;
+        boolean ghostAbove, goneAfterBreak, shellMoved;
+        String shellTitle = "";
         int sceneW, sceneH;
         String size = "";
 
@@ -378,15 +379,23 @@ public final class ComputerCases {
                 tick++;
                 ComputerElement e = at(ctx, p);
                 if (e == null) return;
-                if (upAt < 0 && replUp(e)) {
-                    upAt = tick;
-                    submit(ctx, e, 1, "[ui/width ui/height]");
-                }
+                if (upAt < 0 && replUp(e)) upAt = tick;
                 if (upAt < 0) return;
+                if (tick == upAt + 5) submit(ctx, e, 1, "[ui/screen-width ui/screen-height]");
+                if (tick == upAt + 20) {
+                    // a player drags the Shell (Wire: the display tells the computer afterwards); the server keeps it
+                    e.networkUnserialize(ctx.stream(o -> {
+                        o.writeByte(ComputerElement.SCREEN_EVENT_ID);
+                        o.writeUTF("(moved 1 10 5 40 12)");
+                    }), null);
+                }
                 if (tick == upAt + 30) {
                     size = terminal(e);
                     sceneW = e.screen.scene.w;
                     sceneH = e.screen.scene.h;
+                    var shell = e.screen.scene.windows.get(1);
+                    shellMoved = shell != null && shell.x == 10 && shell.y == 5 && shell.cw == 40 && shell.ch == 12;
+                    shellTitle = shell == null ? "none" : shell.title;
                     ctx.level().setBlockAndUpdate(p.above(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
                 }
             });
@@ -396,10 +405,12 @@ public final class ComputerCases {
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(watch);
             goneAfterBreak = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, ctx.level())) == null;
-            ctx.line("computer monitor: ghost " + ghostAbove + " scene " + sceneW + "x" + sceneH + " gone " + goneAfterBreak);
+            ctx.line("computer monitor: ghost " + ghostAbove + " scene " + sceneW + "x" + sceneH + " gone " + goneAfterBreak + " shell " + shellTitle + " moved " + shellMoved + " terminal " + size.replace("\n", "|"));
             ctx.check("computer monitor: a ghost stands in the block above", ghostAbove, "");
             ctx.check("computer monitor: Janet's screen is 80 x 25", size.contains("(80 25)") || size.contains("[80 25]"), size);
             ctx.check("computer monitor: the scene is 80 x 25", sceneW == 80 && sceneH == 25, sceneW + "x" + sceneH);
+            ctx.check("computer: the REPL is the Shell window (Wire)", shellTitle.equals("Shell"), shellTitle);
+            ctx.check("computer: a player's move of a window is kept by the server", shellMoved, "");
             ctx.check("computer monitor: breaking the monitor breaks the computer", goneAfterBreak, "");
         }
     }

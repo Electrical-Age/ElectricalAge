@@ -248,7 +248,7 @@ public class ComputerScreen extends ElnScreen {
             for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
                 Scene.Element e = en.getValue();
                 if (!e.kind.equals("editor")) continue;
-                int ex = t.x + e.x(), ey = t.y + e.y(), ew = e.size(5, t, 10), eh = e.size(6, t, 5);
+                int ex = t.x + e.x(t), ey = t.y + e.y(t), ew = e.size(5, t, 10), eh = e.size(6, t, 5);
                 if (ew < 4 || eh < 2 || !uncovered(active, ex, ey, ew, eh)) continue;
                 String k = active + "/" + en.getKey();
                 want.add(k);
@@ -467,7 +467,7 @@ public class ComputerScreen extends ElnScreen {
         Scene.Element line = focusedLine(t);
         if (line != null && t.ask == null && focusedRaw(t) == null) {
             LineEdit le = edit(focusId);
-            int x = t.x + line.x(), y = t.y + line.y();
+            int x = t.x + line.x(t), y = t.y + line.y(t);
             String prompt = Form.str(line.msg, 6, "");
             int px = prompt.codePointCount(0, prompt.length()), room = line.size(5, t, 1) - px - 1;
             int start = Math.max(0, le.cursor - room + 1), cur = x + px + le.cursor - start;
@@ -486,7 +486,7 @@ public class ComputerScreen extends ElnScreen {
             if (!e.kind.equals("editor") || !editorWidgets.containsKey(active + "/" + en.getKey())) continue;
             EditorState st = editorState(active, en.getKey());
             if (st.status.isEmpty()) continue;
-            int ex = t.x + e.x(), ey = t.y + e.y() + e.size(6, t, 1) - 1, ew = e.size(5, t, 1);
+            int ex = t.x + e.x(t), ey = t.y + e.y(t) + e.size(6, t, 1) - 1, ew = e.size(5, t, 1);
             g.fill(cx(ex), cy(ey), cx(ex + ew), cy(ey + 1), 0xFF2A2E38);
             g.text(font, font.plainSubstrByWidth(st.status, ew * CELL), cx(ex) + 1, cy(ey) + 1, 0xFFE0C060, false);
         }
@@ -648,7 +648,7 @@ public class ComputerScreen extends ElnScreen {
         // (the last made is drawn on top, so it is hit first: a button over a raw area)
         for (Map.Entry<Integer, Scene.Element> en : new ArrayList<>(w.elements.entrySet()).reversed()) {
             Scene.Element e = en.getValue();
-            int ex = e.x(), ey = e.y(), ew = e.size(5, w, 1);
+            int ex = e.x(w), ey = e.y(w), ew = e.size(5, w, 1);
             int eh = e.kind.equals("line") || e.kind.equals("button") ? 1 : e.size(6, w, 1);
             if (col < ex || col >= ex + ew || row < ey || row >= ey + eh) continue;
             switch (e.kind) {
@@ -764,7 +764,7 @@ public class ComputerScreen extends ElnScreen {
                 for (Map.Entry<Integer, Scene.Element> en : w.elements.entrySet()) {
                     Scene.Element e = en.getValue();
                     if (!e.kind.equals("log") && !e.kind.equals("list")) continue;
-                    int ex = e.x(), ey = e.y(), ew = e.size(5, w, 1), eh = e.size(6, w, 1);
+                    int ex = e.x(w), ey = e.y(w), ew = e.size(5, w, 1), eh = e.size(6, w, 1);
                     if (colIn < ex || colIn >= ex + ew || rowIn < ey || rowIn >= ey + eh) continue;
                     String k = key(wid, en.getKey());
                     int step = e.kind.equals("log") ? (sy > 0 ? 3 : -3) : (sy > 0 ? -1 : 1);

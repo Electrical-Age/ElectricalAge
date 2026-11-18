@@ -382,7 +382,7 @@ class StdlibTest {
     void aLongLineIsTaken() {
         String expr = "(+ " + "1 ".repeat(200) + ")";
         var host = new mods.eln.robotics.computer.screen.ScreenHost();
-        host.fromComputer("(tab 1 \"REPL\")\n".getBytes(StandardCharsets.UTF_8));
+        host.fromComputer("(window 1 1 2 78 22 \"Shell\" [:close])\n".getBytes(StandardCharsets.UTF_8));
         assertNotNull(host.check(new String(screen.submit(expr), StandardCharsets.UTF_8).trim()));
         type(expr);
         tick(20, "\n200\n> ");
