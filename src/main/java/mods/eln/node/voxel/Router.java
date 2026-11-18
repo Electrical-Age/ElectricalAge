@@ -173,8 +173,14 @@ public final class Router {
         // the air opened new ground (a gap over a floor: 250 ms for a 5-block bridge)
         int airSlots = kind.airLimit() / lattice + 1;
         Map<SKey, long[]> byAir = new HashMap<>();
+        // the end: at t, on its face, arriving along arriveDir; or round an outer corner at t from the face whose support
+        // lies toward arriveDir, the way a route that starts at a device may leave it (a pin at the edge of a block on a
+        // pillar: up the pillar's side and over its edge onto the pin. Baughn 2026-11-18, #514: routes started at the
+        // three-channel logger's inputs went down the side, routes to them found no way)
         SKey goal = search(k0, k -> h(new long[]{k.x(), k.y(), k.z()}, t),
-            k -> k.x() == t[0] && k.y() == t[1] && k.z() == t[2] && (b.attach() < 0 || k.attach() == b.attach()) && (arriveDir < 0 || k.dir() == arriveDir),
+            k -> k.x() == t[0] && k.y() == t[1] && k.z() == t[2] && (b.attach() < 0 || k.attach() == b.attach())
+                && (arriveDir < 0 || k.dir() == arriveDir
+                    || k.dir() < 0 && outer.getOrDefault(k, false) && from.get(k) != null && from.get(k).attach() == arriveDir),
             (k, g0, push0) -> {
                 Push<SKey> push = airSlots == 1 ? push0 : (kk, nk, g) -> {
                     long[] best = byAir.computeIfAbsent(new SKey(nk.x(), nk.y(), nk.z(), nk.attach(), nk.dir(), 0), q -> {

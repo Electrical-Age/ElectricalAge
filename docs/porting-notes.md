@@ -788,6 +788,10 @@ In the port:
   wall the top is up. The links are drawn between their slots, and an empty slot's tooltip names its side of the
   world. The device is unchanged (slot i is still edge `LRDU` i of the face, link ids as saved), so placed hubs keep
   their connections. Tests `HubSlotsTest`, `hub_slots_as_seen`.
+- Cable routes to a device's pin at the edge of a block that stands alone (a three-channel logger on a pillar) found
+  no way, though routes started at that pin came down the pillar's side: the router's end only took a cable arriving
+  flat along the face, not one coming over the edge onto the pin. It now does, as a start may leave that way
+  (Baughn 2026-11-18, #514; `CableAirCases.ToPinOnPillarCase`).
 
 ## Deferred
 

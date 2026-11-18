@@ -264,6 +264,10 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
 - SURFACE kinds (cables): lattice 2 voxels, states (point, attach face, last dir), moves along a face / inner corner /
   outer corner (knuckle); `BEND` 4, `BLOCK_ENTERED` 1, `MAX_EXPANSIONS` 400000, budget `PipeRouter.TIME_BUDGET_MS`
   (200 ms).
+- A device end (`End.dir` >= 0) is left straight out, or round an outer corner at the pin; it is reached arriving
+  along `dir`, or round an outer corner at the pin from the face whose support lies toward `dir` (Baughn 2026-11-18,
+  #514: a pin at the edge of a block on a pillar took routes from it, down the pillar's side, but none to it).
+  `CableAirCases.ToPinOnPillarCase`.
 - Air runs (Baughn 2026-11-11, D5): a SURFACE kind's `airTiers` let it leave its support: cables `RouteKind.CABLE_AIR`,
   up to 10 voxels off any support at +4 per step and up to 20 at +16, never further (the same for every tier, Baughn
   2026-11-12). The state gains `air` (voxels since the last support, carried across waypoint legs). An air stretch is

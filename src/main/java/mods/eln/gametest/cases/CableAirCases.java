@@ -26,6 +26,7 @@ public final class CableAirCases {
         cases.add(new BridgeCase());
         cases.add(new DeviceInAirCase());
         cases.add(new AfterLayingCase());
+        cases.add(new ToPinOnPillarCase());
     }
 
     static VoxelNode voxel(TestContext c, BlockPos p) {
@@ -207,6 +208,93 @@ public final class CableAirCases {
             c.check(name() + ": laid", err == null, String.valueOf(err));
             c.check(name() + ": aiming at its end starts a route there", !"null".equals(onCable), onCable);
             c.check(name() + ": aiming just beside it in the block too", !"null".equals(beside), beside + " " + besideMsg);
+        }
+    }
+
+    /**
+     * A route to a device's pin at the edge of a block that stands alone (Baughn 2026-11-18, #514): a three-channel data
+     * logger on top of a one-block pillar, its inputs on its west edge, and a Signal Source on the floor west of it. A route
+     * from the source to the logger's middle input climbs the pillar's side and comes over its edge onto the pin (routes
+     * started at the pin went that way; routes ending there found "no way"); the same route the other way round, on a
+     * second rig, still lays. Each input then sees its source's signal. A route from the floor to the edge of a Signal
+     * Source centred on a pillar's top (one connector per edge) lays too.
+     */
+    static final class ToPinOnPillarCase implements TestCase {
+        final mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement[] logger = new mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement[2];
+        final String[] err = new String[2];
+        final int[] channel = new int[2];
+        static final double U = 0.5 * mods.eln.Eln.SVU;
+        static final int SIGNAL = CablePart.tierOf("Signal Cable");
+
+        public String name() {
+            return "cable to a pin on a pillar";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 5; x++) for (int z = 0; z < 5; z++) c.floor(c.at(x, 0, z));
+            for (int k = 0; k < 2; k++) {
+                int z = 1 + 2 * k;
+                BlockPos sp = c.at(0, 1, z), pillar = c.at(3, 1, z), lp = c.at(3, 2, z);
+                c.floor(pillar);
+                var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) CableCases.host(c, Wp9aCases.SIGNAL_SOURCE, sp, Direction.YN);
+                Wp9aCases.orient(src, l -> l, Direction.XP);
+                src.networkUnserialize(c.stream(o -> {
+                    o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+                    o.writeFloat((float) U);
+                }));
+                var lg = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement) CableCases.host(c, Wp9cCases.THREE_CHANNEL_LOGGER, lp, Direction.YN);
+                Wp9aCases.orient(lg, mods.eln.misc.LRDU::inverse, Direction.XN);
+                logger[k] = lg;
+                for (int ch = 0; ch < lg.edgePins().size(); ch++) if (lg.edgePins().get(ch).offset() == 0) channel[k] = ch;
+                var vs = voxel(c, sp);
+                var vl = voxel(c, lp);
+                var a = mods.eln.node.voxel.CablePlacer.deviceEnd(vs, sp, Direction.YN.getInt(), new double[]{0.98, 0.02, 0.5}, k == 0, SIGNAL);
+                var b = mods.eln.node.voxel.CablePlacer.deviceEnd(vl, lp, Direction.YN.getInt(), new double[]{0.02, 0.02, 0.5}, k == 1, SIGNAL);
+                if (a == null || b == null) {
+                    err[k] = "no end: source " + a + ", logger " + b;
+                    continue;
+                }
+                err[k] = k == 0 ? mods.eln.node.voxel.CablePlacer.routeAndLayForTests(c.level(), SIGNAL, a, b)
+                    : mods.eln.node.voxel.CablePlacer.routeAndLayForTests(c.level(), SIGNAL, b, a);
+            }
+            // a device centred on its face (one connector per edge) on a pillar: a route from the floor to its west edge
+            BlockPos pillar = c.at(3, 1, 5), sp = c.at(3, 2, 5), start = c.at(0, 1, 5);
+            c.floor(pillar);
+            var src = CableCases.host(c, Wp9aCases.SIGNAL_SOURCE, sp, Direction.YN);
+            Wp9aCases.orient(src, l -> l, Direction.XN);
+            var b = mods.eln.node.voxel.CablePlacer.deviceEnd(voxel(c, sp), sp, Direction.YN.getInt(), new double[]{0.02, 0.02, 0.5}, false, SIGNAL);
+            var a = new mods.eln.node.voxel.CableRouter.End(start.getX() * 16L + 8, start.getY() * 16L, start.getZ() * 16L + 8, 0, -1);
+            centred = b == null ? "no end at the source" : mods.eln.node.voxel.CablePlacer.routeAndLayForTests(c.level(), SIGNAL, a, b);
+        }
+
+        String centred;
+
+        public void measure(TestContext c) {
+            String[] what = {"to the pin", "from the pin"};
+            for (int k = 0; k < 2; k++) {
+                c.check("pin on a pillar: a route " + what[k] + " lays", err[k] == null, String.valueOf(err[k]));
+                var in = (mods.eln.sim.nbt.NbtElectricalGateInput[]) mods.eln.gametest.LabCommands.field(logger[k], "inputs");
+                double u = in[channel[k]].getU();
+                c.check("pin on a pillar: the input " + what[k] + " sees the source", Math.abs(u - U) < 0.05 * U,
+                    String.format("%.3f V, wanted %.3f V (channel %d)", u, U, channel[k]));
+            }
+            c.check("pin on a pillar: a route to the edge of a device centred on its face lays", centred == null, String.valueOf(centred));
         }
     }
 }
