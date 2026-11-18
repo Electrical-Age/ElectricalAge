@@ -84,6 +84,8 @@ public final class ElnClient {
             net.neoforged.neoforge.client.gui.VanillaGuiLayers.HOTBAR, net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "battery_belt"), BeltHud::render));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class, e -> e.registerAbove(
             net.neoforged.neoforge.client.gui.VanillaGuiLayers.HOTBAR, net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "bike_speedometer"), BikeHud::render));
+        modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class, e -> e.registerAbove(
+            net.neoforged.neoforge.client.gui.VanillaGuiLayers.OVERLAY_MESSAGE, net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "route_note"), RouteNoteHud::render));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class,
             e -> e.registerAboveAll(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "tutorial_sign"),
                 mods.eln.sixnode.tutorialsign.TutorialSignHud::render));

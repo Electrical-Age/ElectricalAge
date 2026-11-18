@@ -133,6 +133,9 @@ public class Eln {
     public static final byte packetDevicePreview = 25;
     /** 26.x, server -> client: open a throttle valve's screen (x, y, z, part index, setting; node.voxel.VoxelNode). */
     public static final byte packetValveScreen = 26;
+    /** 26.x, server -> client: why a kit's route click failed, shown above the action bar for a while (UTF string;
+     *  node.voxel.KitPreview.note, client.RouteNoteHud). */
+    public static final byte packetRouteNote = 27;
 
     // Voltage / power levels: real-world values (Baughn 2026-11-06: 48 V, 230 V, 400 V and 11 kV replace 1.12's 50, 200,
     // 800 and 3200 V; signals are 0-5 V instead of 0-50 V). Cable resistances follow from U and P, so power limits stay.

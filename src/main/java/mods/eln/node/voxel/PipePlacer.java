@@ -350,7 +350,7 @@ public final class PipePlacer {
             PipeRouter.Result r = route(level, plan, null);
             if (r.error != null) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
-                player.sendOverlayMessage(Component.literal("Can't reach that waypoint: " + r.error));
+                KitPreview.note(player, "Can't reach that waypoint: " + r.error);
             } else {
                 player.sendOverlayMessage(Component.literal(String.format("Waypoint %d: %.1f blocks so far (click it again to end the pipe there)",
                     plan.waypoints.size(), r.length() / 16.0)));
@@ -362,7 +362,7 @@ public final class PipePlacer {
         PipeRouter.End end = port != null ? port : join != null ? new PipeRouter.End(join[0], join[1], join[2], -1) : null;
         PipeRouter.Result r = route(level, plan, end, join);
         if (r.error != null) {
-            player.sendOverlayMessage(Component.literal("No route: " + r.error));
+            KitPreview.note(player, "No route: " + r.error);
             return true;
         }
         int len = r.length();
@@ -377,7 +377,7 @@ public final class PipePlacer {
         if (join != null) joins.add(join);
         String err = layJoined(level, plan.tier, r.points, joins, player);
         if (err != null) {
-            player.sendOverlayMessage(Component.literal("Can't lay it: " + err));
+            KitPreview.note(player, "Can't lay it: " + err);
             return true;
         }
         PLANS.remove(player.getUUID());

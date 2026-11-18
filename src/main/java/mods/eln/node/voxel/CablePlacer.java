@@ -544,7 +544,7 @@ public final class CablePlacer {
             KitPreview.slow("waypoint route (server thread)", tRoute, (plan.startJoin != null ? "from a cable, " : "") + Router.LAST_EXPANSIONS.get() + " expansions");
             if (r.error != null) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
-                player.sendOverlayMessage(Component.literal("Can't reach that waypoint: " + r.error + " (sneak-click to cancel the route)"));
+                KitPreview.note(player, "Can't reach that waypoint: " + r.error + " (sneak-click to cancel the route)");
             } else {
                 player.sendOverlayMessage(Component.literal(String.format("Waypoint %d: %.1f blocks so far", plan.waypoints.size(), r.length() / 16.0)));
                 show(player, level, r.steps);
@@ -558,7 +558,7 @@ public final class CablePlacer {
         KitPreview.slow("click route (server thread)", tRoute, (plan.startJoin != null ? "from a cable, " : "") + Router.LAST_EXPANSIONS.get() + " expansions");
         if (r.error != null) {
             if (again) plan.waypoints.add(end);
-            player.sendOverlayMessage(Component.literal("No route: " + r.error + " (sneak-click to cancel the route)"));
+            KitPreview.note(player, "No route: " + r.error + " (sneak-click to cancel the route)");
             return true;
         }
         int len = r.length();
@@ -571,7 +571,7 @@ public final class CablePlacer {
         }
         String err = lay(level, tier, spec, r.steps, player);
         if (err != null) {
-            player.sendOverlayMessage(Component.literal("Can't lay it: " + err));
+            KitPreview.note(player, "Can't lay it: " + err);
             return true;
         }
         PLANS.remove(player.getUUID());

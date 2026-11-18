@@ -126,6 +126,20 @@ public final class KitPreview {
         });
     }
 
+    /**
+     * Why a route click failed, on its own line above the action bar for a few seconds (Baughn 2026-11-18, #521: the
+     * preview's next line, the route's length, replaced it on the action bar at once; client.RouteNoteHud).
+     */
+    static void note(ServerPlayer p, String message) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (DataOutputStream out = new DataOutputStream(bos)) {
+            out.writeByte(Eln.packetRouteNote);
+            out.writeUTF(message.length() > 300 ? message.substring(0, 300) : message);
+        } catch (IOException ignored) {
+        }
+        ElnNet.sendToPlayer(p, bos);
+    }
+
     /** Log a step that took long (Baughn 2026-11-12: routes from a cable were slow to start; where does the time go?). */
     static void slow(String what, long t0, String detail) {
         long ms = (System.nanoTime() - t0) / 1_000_000;
