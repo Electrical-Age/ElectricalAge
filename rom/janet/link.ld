@@ -2,7 +2,7 @@
 OUTPUT_ARCH(riscv)
 ENTRY(_start)
 MEMORY {
-    ROM (rx)  : ORIGIN = 0x400, LENGTH = 0x100000 - 0x400
+    ROM (rx)  : ORIGIN = 0x1000, LENGTH = 0x100000 - 0x1000
     RAM (rwx) : ORIGIN = 0x100000, LENGTH = 7M
 }
 SECTIONS {

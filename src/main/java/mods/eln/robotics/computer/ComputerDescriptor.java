@@ -18,7 +18,7 @@ import static mods.eln.i18n.I18N.tr;
 
 /**
  * The robotics computer (Baughn 2026-11-05): an RV32 machine with 8 chip slots of 1 MB (RAM or ROM; it starts at
- * 0x400 in slot 1's chip) and two floppy drives, running off the server thread (hw.Runner). 50 V on the back; the
+ * 0x1000 in slot 1's chip) and two floppy drives, running off the server thread (hw.Runner). 50 V on the back; the
  * RS485 bus pin on the right flank's floor edge, at its right end (left and right facing the flank), as on the servo
  * drive. Its draw follows how busy it is. Its CRT monitor stands on it, in the block above (a ghost), and shows
  * the screen. Model: mods.eln.cad.models.ComputerParts.

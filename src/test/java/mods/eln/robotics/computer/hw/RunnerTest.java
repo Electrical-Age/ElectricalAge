@@ -74,7 +74,7 @@ class RunnerTest {
         other.mem.setRam(1, Machine.RAM_CHIP);
         other.mem.setRam(2, Machine.RAM_CHIP);
         assertFalse(other.load(saved));
-        assertEquals(0x400, other.cpu.pc);
+        assertEquals(0x1000, other.cpu.pc);
     }
 
     @Test

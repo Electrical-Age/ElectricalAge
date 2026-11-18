@@ -22,26 +22,26 @@ class MemoryTest {
         Memory m = new Memory();
         m.setRam(0, MB);
         assertEquals(Trap.LOAD_FAULT, cause(() -> m.load32(0)));
-        assertEquals(Trap.STORE_FAULT, cause(() -> m.store32(0x3FC, 1)));
-        assertEquals(Trap.STORE_FAULT, cause(() -> m.store32(0x3FE, 1)), "a store straddling the guard writes nothing");
-        assertEquals(0, m.load32(0x400));
-        m.store32(0x400, 0x12345678);
-        assertEquals(0x12345678, m.load32(0x400));
-        assertEquals(0x1234, m.load16(0x402));
+        assertEquals(Trap.STORE_FAULT, cause(() -> m.store32(0xFFC, 1)));
+        assertEquals(Trap.STORE_FAULT, cause(() -> m.store32(0xFFE, 1)), "a store straddling the guard writes nothing");
+        assertEquals(0, m.load32(0x1000));
+        m.store32(0x1000, 0x12345678);
+        assertEquals(0x12345678, m.load32(0x1000));
+        assertEquals(0x1234, m.load16(0x1002));
     }
 
     @Test
     void romReadsAndRefusesWrites() {
-        byte[] img = new byte[0x800];
-        img[0x400] = 0x13;   // a nop's low byte at the boot vector
+        byte[] img = new byte[0x1800];
+        img[0x1000] = 0x13;   // a nop's low byte at the boot vector
         Rom rom = new Rom(img);
         Memory m = new Memory();
         m.setRom(0, rom);
-        assertEquals(0x13, m.load8(0x400));
-        assertEquals(Trap.STORE_FAULT, cause(() -> m.store8(0x400, 0)));
-        assertEquals(0, m.load8(0x800), "the rest of its last page reads as zeros");
-        assertEquals(Trap.LOAD_FAULT, cause(() -> m.load8(0x1000)), "past the chip's last page");
-        assertEquals(Trap.LOAD_FAULT, cause(() -> m.load8(0x100)), "the NULL guard");
+        assertEquals(0x13, m.load8(0x1000));
+        assertEquals(Trap.STORE_FAULT, cause(() -> m.store8(0x1000, 0)));
+        assertEquals(0, m.load8(0x1800), "the rest of its last page reads as zeros");
+        assertEquals(Trap.LOAD_FAULT, cause(() -> m.load8(0x2000)), "past the chip's last page");
+        assertEquals(Trap.LOAD_FAULT, cause(() -> m.load8(0x800)), "the NULL guard");
     }
 
     @Test
@@ -72,22 +72,22 @@ class MemoryTest {
         Memory m = new Memory();
         m.setRam(0, MB);
         m.setRam(1, MB);
-        m.store32(0x400, 1);
+        m.store32(0x1000, 1);
         m.store32(MB, 2);
         int[][] snap = m.snapshotRam();
         assertNull(snap[2], "never written");
-        m.store32(0x400, 10);
+        m.store32(0x1000, 10);
         m.store32(MB, 20);
-        assertEquals(10, m.load32(0x400));
+        assertEquals(10, m.load32(0x1000));
         assertEquals(20, m.load32(MB));
-        assertEquals(1, snap[0][0x400 >> 2], "the snapshot kept page 0 as it was");
+        assertEquals(1, snap[0x1000 >> Memory.PAGE_SHIFT][0], "the snapshot kept page 1 as it was");
         assertEquals(2, snap[MB >> Memory.PAGE_SHIFT][0]);
 
         Memory n = new Memory();
         n.setRam(0, MB);
         n.setRam(1, MB);
         n.restoreRam(snap);
-        assertEquals(1, n.load32(0x400));
+        assertEquals(1, n.load32(0x1000));
         assertEquals(2, n.load32(MB));
         assertEquals(0, n.load32(MB + 8192));
     }

@@ -22,10 +22,10 @@ build/janet.c build/janet.h: janet/janetconf.h
 build/janet.elf: janet/start.S janet/blob.S janet/ea.janet janet/syscalls.c janet/main.c janet/ea.c janet/files.c janet/diskio.c fatfs/ff.c fatfs/ffunicode.c fatfs/ffconf.h janet/link.ld build/janet.c build/janet.h common/devices.h
 	$(CC_X) $(CFLAGS) -T janet/link.ld $(LDFLAGS) janet/start.S janet/blob.S janet/syscalls.c janet/main.c janet/ea.c janet/files.c janet/diskio.c fatfs/ff.c fatfs/ffunicode.c build/janet.c -lm -o $@
 
-# The slot image: the boot vector is at offset 0x400
+# The slot image: the boot vector is at offset 0x1000
 build/janet.rom: build/janet.elf
 	$(OBJCOPY) -O binary $< build/janet.bin
-	( head -c 1024 /dev/zero; cat build/janet.bin ) > $@
+	( head -c 4096 /dev/zero; cat build/janet.bin ) > $@
 	@ls -l $@
 
 # The Floppy Boot ROM: a few instructions, no C
@@ -33,7 +33,7 @@ build/boot.rom: boot/boot.S boot/link.ld
 	mkdir -p build
 	$(CC_X) -nostdlib -nostartfiles -T boot/link.ld boot/boot.S -o build/boot.elf
 	$(OBJCOPY) -O binary build/boot.elf build/boot.bin
-	( head -c 1024 /dev/zero; cat build/boot.bin ) > $@
+	( head -c 4096 /dev/zero; cat build/boot.bin ) > $@
 	@ls -l $@
 
 # Canned floppies (FAT12, 1.44 MB): the files in disks/NAME. A fixed serial and the sources' times make them reproducible.

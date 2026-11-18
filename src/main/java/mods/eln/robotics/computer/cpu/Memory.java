@@ -1,8 +1,8 @@
 package mods.eln.robotics.computer.cpu;
 
 /**
- * The computer's address space, little-endian (Baughn: 8 slots of 1 MB, boot vector at 0x400, NULL unmapped).
- * Slot k covers k MB .. k+1 MB and holds a RAM chip, a ROM chip or nothing; the first 1 KB, empty slots, the part
+ * The computer's address space, little-endian (Baughn: 8 slots of 1 MB, boot vector at 0x1000, NULL unmapped).
+ * Slot k covers k MB .. k+1 MB and holds a RAM chip, a ROM chip or nothing; the first 4 KB page, empty slots, the part
  * of a slot past its chip's last page, and everything outside the slots and the I/O window fault.
  * <p>
  * Memory is 4 KB pages. RAM pages are allocated on their first write (until then they read as zeros), so an unused
@@ -12,7 +12,7 @@ package mods.eln.robotics.computer.cpu;
  */
 public final class Memory {
     public static final int SLOTS = 8, SLOT_BYTES = 1 << 20, PAGE_SHIFT = 12, PAGE_BYTES = 1 << PAGE_SHIFT;
-    public static final int NULL_GUARD = 0x400, BOOT_VECTOR = 0x400;
+    public static final int NULL_GUARD = 0x1000, BOOT_VECTOR = 0x1000;   // (Baughn 2026-11-18: page-aligned, was 0x400)
     public static final int IO_BASE = 0x1000_0000, IO_SIZE = 0x0001_0000;
     static final int PAGES = SLOTS * SLOT_BYTES >> PAGE_SHIFT, WORDS = PAGE_BYTES >> 2;
     private static final int[] ZERO = new int[WORDS];
