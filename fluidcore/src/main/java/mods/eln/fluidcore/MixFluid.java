@@ -917,6 +917,13 @@ final class MixFluid implements NodeFluid {
         return o;
     }
 
+    public double[][] gasDrawSlope() {
+        double[][] o = new double[S + 1][];
+        for (int i = 0; i < S; i++) o[i] = slope(st.yG[i]);
+        o[S] = slope(st.hG);
+        return o;
+    }
+
     public double liquidMass(int i) {
         return st.ml[i] == null ? 0 : st.ml[i].v;
     }

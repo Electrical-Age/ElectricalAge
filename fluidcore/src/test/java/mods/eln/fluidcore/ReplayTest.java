@@ -162,6 +162,43 @@ class ReplayTest {
     }
 
     /**
+     * A player's plant (2026-11-17 18:15, the game's slow-step dump): boiler, turbine and condenser, two furnace flues
+     * through an exchanger on its makeup line and out of a gas-only check to the air; the makeup's pump unpowered, so the
+     * line stood under vacuum, boiling. The check passes a dozen times its small node's gas a step, and the Jacobian left
+     * out the gas draw's composition slopes: that node's energy row was 1.3 % off an entry that nearly cancels its mass
+     * column's, and Newton halved every iteration: 2441 iterations and 179 sub-steps on the first step, ~100 a step after.
+     * With the slopes: 10 and none, then a handful.
+     */
+    @Test
+    void flueChimneyCheckConverges() throws Exception {
+        int depth = Network.MAX_DEPTH;
+        boolean cut = Network.CUT_SHORT;
+        try {
+            Network.MAX_DEPTH = 8;
+            Network.CUT_SHORT = true;
+            String text;
+            try (var in = ReplayTest.class.getResourceAsStream("/replay/flue-chimney-dry-hotwell.txt")) {
+                text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+            double[] dt = new double[1];
+            Network net = NetworkDump.read(text, dt);
+            int steps = 100;
+            for (int i = 0; i < steps; i++) {
+                net.step(dt[0]);
+                assertEquals(dt[0], net.done, 1e-12, "step " + i + " covered");
+            }
+            System.out.printf("flue chimney: %d steps, iterations %d, substeps %d%n", steps, net.stats.iterations, net.stats.substeps);
+            assertEquals(0, net.stats.failures, "failed sub-steps");
+            assertEquals(0, net.stats.substeps, "sub-steps");
+            // (before: 11,566 iterations and 937 sub-steps over these steps; now ~320 and none)
+            org.junit.jupiter.api.Assertions.assertTrue(net.stats.iterations <= 6 * steps, "iterations: " + net.stats.iterations);
+        } finally {
+            Network.MAX_DEPTH = depth;
+            Network.CUT_SHORT = cut;
+        }
+    }
+
+    /**
      * The same network at 20:20, its feed at 4.1 bar: three liquid-full feed pipes with almost no gas (bubbles of 1e-9
      * to 1e-6 of their volume). Their vapour's mass was the difference of two numbers 1e8 times its size, and the noise
      * kept the flash's polish off its tolerance: every update fell back to the bracketed solve, 43 a step, 78 % of the

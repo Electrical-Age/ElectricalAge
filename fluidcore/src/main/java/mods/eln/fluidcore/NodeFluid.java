@@ -47,6 +47,9 @@ interface NodeFluid {
 
     double[] gasDraw();
 
+    /** gasDraw's slopes [C][C]. */
+    double[][] gasDrawSlope();
+
     /** Species i's liquid and vapour (or gas) mass (kg) in the solved state, and its partial pressure in the gas (Pa). */
     double liquidMass(int i);
 

@@ -142,6 +142,10 @@ final class WaterAirFluid implements NodeFluid {
         return new double[]{out[WaterAir.YV], out[WaterAir.YA], out[WaterAir.HG]};
     }
 
+    public double[][] gasDrawSlope() {
+        return new double[][]{slopes()[WaterAir.YV].clone(), slopes()[WaterAir.YA].clone(), slopes()[WaterAir.HG].clone()};
+    }
+
     public double liquidMass(int i) {
         return i == 0 ? out[WaterAir.ML] : 0;
     }

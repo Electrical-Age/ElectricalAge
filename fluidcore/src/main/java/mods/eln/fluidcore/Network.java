@@ -1303,8 +1303,11 @@ public final class Network {
             // arg- = dp + hb (level: both dp)
             double[] qs = streams(e);
             double[] ca = drawOf(e), cb = e.b.fluid.draw(e.fb);
-            // (a gas pump's gas-only draw: its composition's slopes left out, as small as the gas share's changes)
-            double[][] dca = qs[0] != 0 && !gasOnly(e) ? e.a.fluid.drawSlope(e.fa) : null, dcb = qs[1] != 0 ? e.b.fluid.drawSlope(e.fb) : null;
+            // (a gas-only draw (a gas pump, a flue's check to the air) with its gas's composition slopes: they were left out,
+            // and a chimney check passing a dozen times its small node's gas a step then had its node's energy row off by
+            // q dt dh/dU, a fraction of a large entry that nearly cancels the mass column's; Newton crawled, halving each
+            // step, on a player's flue network (2026-11-18). The gas share stays frozen at the step's start.)
+            double[][] dca = qs[0] != 0 ? gasOnly(e) ? e.a.fluid.gasDrawSlope() : e.a.fluid.drawSlope(e.fa) : null, dcb = qs[1] != 0 ? e.b.fluid.drawSlope(e.fb) : null;
             double[] dpa = e.a.fluid.portPSlope(e.fa), dpb = e.b.fluid.portPSlope(e.fb);
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
             double[] dha = e.dz != 0 && ia != null && Double.isNaN(e.rhoA) ? rhoSlopes.computeIfAbsent(new PortKey(e.a, e.fa), p -> rhoDrawSlope(e.a, e.fa)) : null;
