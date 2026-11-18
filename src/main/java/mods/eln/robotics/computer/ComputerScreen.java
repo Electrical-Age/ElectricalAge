@@ -36,14 +36,15 @@ import static mods.eln.i18n.I18N.tr;
  * here. Under it: Reset, power, its state and address, the chip slots and drives.
  */
 public class ComputerScreen extends ElnScreen {
-    public static final int WIDTH = 498, HEIGHT = 348, CELL = 6, LINE = 10;
+    public static final int WIDTH = 498, HEIGHT = 358, CELL = 6, LINE = 10;
     /** The screen's cells start at (AREA_X, AREA_Y), in panel pixels. */
-    public static final int AREA_X = 9, AREA_Y = 8;
+    public static final int AREA_X = 9, AREA_Y = 12;
     /**
      * Under the 80 x 25 cells (Baughn 2026-11-18): on the left the slots, then the buttons; on the right the inventory
-     * (498 x 348: fits 640 x 360, a 720 px window at GUI scale 2; a smaller window takes a smaller scale, ElnScreen).
+     * (498 x 358: fits 640 x 360, a 720 px window at GUI scale 2; a smaller window takes a smaller scale, ElnScreen).
+     * The inventory sits 14 px under the cells: inventory mods draw their buttons just above its corner (AdventurAgent).
      */
-    public static final int SLOTS_Y = AREA_Y + Scene.DEFAULT_H * LINE + 20, INV_X = WIDTH - 9 - 162, INV_Y = AREA_Y + Scene.DEFAULT_H * LINE + 8;
+    public static final int SLOTS_Y = AREA_Y + Scene.DEFAULT_H * LINE + 20, INV_X = WIDTH - 9 - 162, INV_Y = AREA_Y + Scene.DEFAULT_H * LINE + 14;
     static final int BOTTOM_Y = SLOTS_Y + 24;
     final ComputerRender render;
 
@@ -437,6 +438,9 @@ public class ComputerScreen extends ElnScreen {
             for (x = 0; x < c.w; x++) {
                 int cp = c.glyph[y * c.w + x];
                 if (cp == ' ') continue;
+                int pp = c.paper[y * c.w + x];
+                if ((cp == SceneCells.DEPTH || cp == SceneCells.CLOSE || cp == SceneCells.SIZE)
+                    && (pp == SceneCells.TITLE_ACTIVE || pp == SceneCells.TITLE_IDLE)) continue;   // (a window's boxes: gadget())
                 if (cp >= 0x2500 && cp <= 0x257F) boxGlyph(g, cp, x, y, c.ink[y * c.w + x]);
                 else {
                     String ch = new String(Character.toChars(cp));
@@ -482,6 +486,12 @@ public class ComputerScreen extends ElnScreen {
     /** A bevel round the pixel rectangle: raised (light top and left, dark bottom and right) or sunk in. */
     void bevel(GuiGraphicsExtractor g, SceneCells c, int x0, int y0, int x1, int y1, boolean raised, int paper, int wid) {
         int light = mix(paper, 0xFFFFFFFF, 0.5f), dark = mix(paper, 0xFF000000, 0.55f);
+        // (on a dark paper black doesn't show: the shadow side is a dim grey instead, the lit side brighter; the tape)
+        int lum = ((paper >> 16) & 255) + ((paper >> 8) & 255) + (paper & 255);
+        if (lum < 3 * 60) {
+            dark = mix(paper, 0xFFFFFFFF, 0.16f);
+            light = mix(paper, 0xFFFFFFFF, 0.55f);
+        }
         int tl = raised ? light : dark, br = raised ? dark : light;
         hline(g, c, x0, x1, y0, tl, wid);
         vline(g, c, x0, y0, y1, tl, wid);
@@ -495,6 +505,33 @@ public class ComputerScreen extends ElnScreen {
         bevel(g, c, cx(x) + in, cy(y) + in, cx(x + w) - in, cy(y + h) - in, raised, c.paper[y * c.w + x], wid);
     }
 
+    /**
+     * A window's close (c), depth (d) or size (s) box drawn over its cell, if the cell shows: a raised button with a
+     * dot, two overlapping frames, or a small frame in a big one (the glyphs the monitor uses are wider than a cell).
+     */
+    void gadget(GuiGraphicsExtractor g, SceneCells c, int x, int y, char kind, int wid) {
+        if (x < 0 || y < 0 || x >= c.w || y >= c.h || c.owner[y * c.w + x] != wid) return;
+        int paper = c.paper[y * c.w + x], ink = mix(paper, 0xFF000000, 0.7f), lit = mix(paper, 0xFFFFFFFF, 0.6f);
+        int px = cx(x), py = cy(y);
+        g.fill(px, py, px + CELL, py + LINE, paper);
+        bevel(g, c, px, py + 1, px + CELL, py + LINE - 1, true, paper, wid);
+        switch (kind) {
+            case 'c' -> {
+                g.fill(px + 2, py + 4, px + 4, py + 6, ink);
+                g.fill(px + 2, py + 4, px + 3, py + 5, lit);
+            }
+            case 'd' -> {
+                g.outline(px + 1, py + 3, 3, 3, ink);
+                g.fill(px + 3, py + 5, px + 5, py + 7, lit);
+                g.outline(px + 2, py + 4, 3, 3, ink);
+            }
+            default -> {
+                g.outline(px + 1, py + 2, 4, 6, ink);
+                g.outline(px + 1, py + 2, 2, 3, ink);
+            }
+        }
+    }
+
     void bevels(GuiGraphicsExtractor g, SceneCells c, Scene s) {
         bevel(g, c, cx(0), cy(0), cx(c.w), cy(1), true, SceneCells.BAR, SceneCells.OWNER_BAR);   // the screen bar
         for (int wid : s.order) {
@@ -504,9 +541,9 @@ public class ComputerScreen extends ElnScreen {
                 int[] o = w.outer();
                 bevelCells(g, c, o[0], o[1], o[2], o[3], 0, true, wid);                 // the frame stands up
                 bevelCells(g, c, w.x, w.y, w.cw, w.ch, -1, false, wid);                 // the content sits in it
-                if (w.has("close")) bevelCells(g, c, w.x - 1, w.y - 1, 1, 1, 1, true, wid);
-                if (w.has("depth")) bevelCells(g, c, w.x + w.cw, w.y - 1, 1, 1, 1, true, wid);
-                if (w.has("size")) bevelCells(g, c, w.x + w.cw, w.y + w.ch, 1, 1, 1, true, wid);
+                if (w.has("close")) gadget(g, c, w.x - 1, w.y - 1, 'c', wid);
+                if (w.has("depth")) gadget(g, c, w.x + w.cw, w.y - 1, 'd', wid);
+                if (w.has("size")) gadget(g, c, w.x + w.cw, w.y + w.ch, 's', wid);
             }
             for (Map.Entry<Integer, Scene.Element> en : w.elements.entrySet()) {
                 Scene.Element e = en.getValue();
@@ -637,9 +674,12 @@ public class ComputerScreen extends ElnScreen {
         List<String[]> items = menuItems(t, menuAt);
         int x = menuX(t, menuAt) - 1, w = menuWidth(t, menuAt);
         g.fill(cx(x), cy(1), cx(x + w), cy(1 + items.size()), SceneCells.BAR);
-        g.outline(cx(x), cy(1), w * CELL, items.size() * LINE, SceneCells.BAR_TEXT);
-        g.fill(cx(x) + 1, cy(1) + 1, cx(x + w) - 1, cy(1) + 2, 0xFFFFFFFF);   // (lit along its top and left: it stands up)
-        g.fill(cx(x) + 1, cy(1) + 1, cx(x) + 2, cy(1 + items.size()) - 1, 0xFFFFFFFF);
+        // (it stands up: lit along its top and left, shadowed along its bottom and right)
+        int x0 = cx(x), y0 = cy(1), x1 = cx(x + w), y1 = cy(1 + items.size());
+        g.fill(x0, y0, x1, y0 + 1, 0xFFFFFFFF);
+        g.fill(x0, y0, x0 + 1, y1, 0xFFFFFFFF);
+        g.fill(x0, y1 - 1, x1, y1, 0xFF5A5448);
+        g.fill(x1 - 1, y0, x1, y1, 0xFF5A5448);
         String menu = menuTitle(t, menuAt);
         for (int i = 0; i < items.size(); i++) {
             String[] it = items.get(i);
@@ -752,8 +792,7 @@ public class ComputerScreen extends ElnScreen {
                     render.screenEvent(new Form.Symbol("click"), (long) wid, (long) en.getKey(), (long) (col - ex), (long) (row - ey));
                 }
                 case "button" -> {
-                    render.screenEvent(new Form.Symbol("press"), (long) wid, (long) en.getKey());
-                    pressWin = wid;   // (drawn pressed in while the button is held)
+                    pressWin = wid;   // (drawn pressed in while held; it acts when let go over it, as the period's did)
                     pressId = en.getKey();
                 }
                 case "list" -> {
@@ -823,7 +862,18 @@ public class ComputerScreen extends ElnScreen {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent ev) {
-        pressWin = pressId = -1;
+        if (pressWin >= 0) {
+            Scene.Window w = scene().windows.get(pressWin);
+            Scene.Element e = w == null ? null : w.elements.get(pressId);
+            int c = col(ev.x()), r = row(ev.y());
+            if (e != null && e.kind.equals("button") && scene().windowAt(c, r) == pressWin) {
+                int ex = w.x + e.x(w), ey = w.y + e.y(w);
+                if (c >= ex && c < ex + e.size(5, w, 4) && r == ey)
+                    render.screenEvent(new Form.Symbol("press"), (long) pressWin, (long) pressId);
+            }
+            pressWin = pressId = -1;
+            return true;
+        }
         if (menuOpen) {
             menuHover(ev.x(), ev.y());
             Scene.Window t = activeWindow();
