@@ -129,17 +129,26 @@
     (def row (math/floor (/ i 7)))
     (ui/desk-icon t (+ 100 i) (+ 10 (* 9 col)) (* 5 row) (app/name dir) (app-picture dir) (fn [] (app/launch dir)))))
 
-(ui/menus t [["Desk" ["Open Shell" "s"] ["Look at the drives" "r"] nil ["Open A:" ""] ["Open B:" ""] ["Open RAM:" ""]]
-             ["Screen" ["80 x 25" ""] ["120 x 40" ""]]]
-          (fn [menu item]
-            (case item
-              "80 x 25" (do (ui/mode 80 25) (ui/window t 0 1 ui/screen-width (- ui/screen-height 1) "Switchboard" [:backdrop]))
-              "120 x 40" (do (ui/mode 120 40) (ui/window t 0 1 ui/screen-width (- ui/screen-height 1) "Switchboard" [:backdrop]))
-              "Open Shell" (do (ui/restore 1) (ui/focus 1))
-              "Look at the drives" (do (set shown nil) (layout (survey)))
-              "Open A:" (open-filer "A:/")
-              "Open B:" (open-filer "B:/")
-              "Open RAM:" (open-filer "RAM:/"))))
+(var desk-menus nil)   # (set below: the menus mark the text mode in use)
+(defn mode-item [w h] (string (if (= w ui/screen-width) "* " "  ") w " x " h))
+(defn set-mode [w h]
+  (ui/mode w h)
+  (ui/window t 0 1 ui/screen-width (- ui/screen-height 1) "Switchboard" [:backdrop])
+  (desk-menus))
+(set desk-menus
+     (fn []
+       (ui/menus t [["Desk" ["Open Shell" "s"] ["Look at the drives" "r"] nil ["Open A:" ""] ["Open B:" ""] ["Open RAM:" ""]]
+                    ["Screen" [(mode-item 80 25) ""] [(mode-item 120 40) ""]]]
+                 (fn [menu item]
+                   (case (string/trim item "* ")
+                     "80 x 25" (set-mode 80 25)
+                     "120 x 40" (set-mode 120 40)
+                     "Open Shell" (do (ui/restore 1) (ui/focus 1))
+                     "Look at the drives" (do (set shown nil) (layout (survey)))
+                     "Open A:" (open-filer "A:/")
+                     "Open B:" (open-filer "B:/")
+                     "Open RAM:" (open-filer "RAM:/"))))))
+(desk-menus)
 
 # (the desk's window can't be closed: its close box is the desk's to ignore)
 (ui/on-close t (fn [] nil))
