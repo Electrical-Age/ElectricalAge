@@ -104,10 +104,16 @@ the rules above; the joints are kept alongside:
   rule: the model box (`SixNodeDescriptor.footprint()`, chips drawn at `CHIP_SCALE` 0.75: a case 6 voxels across) is
   clear, with a voxel of air all round, except where a pin touches a cable of a matching kind or meets another
   device's pin tip to tip.
+- A device that goes anywhere always goes off centre, a click in the middle of a free face too, and connects only at
+  its pins: no face slot, so no cable stubs drawn to the face's edges and no edge-rule link to a machine beside it
+  (Baughn 2026-11-18, #515: "I'd like all cables to be explicit"; a cable is laid to the machine). Devices placed
+  earlier in a face slot stay there and keep working as they were.
 - Ports are pins (`VoxelNode.pins`): a tip on the face plane at the model's edge, and a contact box just outside it.
   `connectPins` links a pin to every cable conductor whose boxes take its contact box, and to another device's pin
   that meets it. These devices draw no cable stubs to the block's edges. The cable kit ends at the nearest pin; routes
-  keep their usual clearance (`CableRouter.CLEARANCE`).
+  keep their usual clearance (`CableRouter.CLEARANCE`). In the block's outline (what the crosshair hits) each pin's box
+  is grown by `VoxelNodeEntity.PIN_AIM` (1 voxel), so a click just beside a pin still ends the kit there (Baughn
+  2026-11-18, #515); the drawn box, the highlight and the used voxels stay the pin's own.
 - A pin at the block's edge reaches the next voxel block (`connectPinsAcross`): a cable there taking its contact voxel,
   or a pin there tip to tip (a NodeConnection, dropped when either block disconnects).
 - A device whose model is not a square round its centre gives its model's bounds across the face

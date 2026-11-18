@@ -42,6 +42,7 @@ public final class VoxelDeviceCases {
         cases.add(new WrenchInLineCase());
         cases.add(new WrenchSkipsCase());
         cases.add(new TurnBeforePlacingCase());
+        cases.add(new ProbeInMiddleCase());
         cases.add(new PassivesInLineCase());
         cases.add(new DiodeRigCase());
         cases.add(new RheostatThermistorCase());
@@ -139,8 +140,8 @@ public final class VoxelDeviceCases {
     }
 
     /**
-     * Every device converted here: placed anywhere, a click in the middle of a free face still puts it in the face's own
-     * slot (the old placement, ports at the face's edges); its body follows its drawn model (logged: the body box and reach
+     * Every device converted here: placed anywhere, a click in the middle of a free face puts it off centre too, with
+     * pins and no stubs (Baughn 2026-11-18, #515: "all cables explicit") (the old placement, ports at the face's edges); its body follows its drawn model (logged: the body box and reach
      * of each, centred, front north); lopsided models keep their pins at the model's edges (a Voltage Probe's signal
      * pin 6 voxels from its centre on the long side, its cable pin 4 on the short side); the relays at their half size.
      */
@@ -193,9 +194,10 @@ public final class VoxelDeviceCases {
                 BlockPos p = c.at(i % 8 * 2, 1, i / 8 * 2);
                 c.floor(p.below());
                 var v = block(c, p);
-                // a click in the middle of the free floor: the face's own slot
+                // a click in the middle of the free floor: off centre there too, the face's slot left empty (#515)
                 String err = v.placeAnywhere(desc(n).newItemStack(), yn, 0.5, 0, 0.5, player(c));
-                boolean ok = err == null && v.getElement(yn) != null && v.getElement(yn).sixNodeElementDescriptor.name.equals(n);
+                var in = v.getElement(yn) == null ? TapCase.placed(v) : null;
+                boolean ok = err == null && in != null && in.sixNodeElementDescriptor.name.equals(n);
                 middleOk &= ok;
                 if (!ok) mid.append(n).append(": ").append(err).append("; ");
                 i++;
@@ -206,7 +208,7 @@ public final class VoxelDeviceCases {
                 c.floor(p.north());
                 var v = block(c, p);
                 String err = v.placeAnywhere(desc(n).newItemStack(), zn, 0.5, 0.5, 0, player(c));
-                boolean ok = err == null && v.getElement(zn) != null;
+                boolean ok = err == null && v.getElement(zn) == null && TapCase.placed(v) != null;
                 middleOk &= ok;
                 if (!ok) mid.append(n).append(": ").append(err).append("; ");
                 i++;
@@ -246,7 +248,7 @@ public final class VoxelDeviceCases {
         public void measure(TestContext c) {
             c.line(all);
             c.check("voxel devices: each converted device goes anywhere; the analog vuMeter, power switches and redstone converters don't", anywhereOk && stayedOk, stayed);
-            c.check("voxel devices: a click in the middle of a free face puts each in the face's own slot (as before)", middleOk, middle);
+            c.check("voxel devices: a click in the middle of a free face puts each off centre, not in the face's slot", middleOk, middle);
             c.check("voxel devices: a lopsided model's body follows it, turned with its front", lopsidedOk, lopsided);
             c.check("voxel devices: a relay's body is its half-size model (contacts along, gate across)", relaysOk, relays);
         }
@@ -1364,7 +1366,7 @@ public final class VoxelDeviceCases {
     /**
      * The wrench key before placing (Baughn 2026-11-18, #513): a player looking down at a floor with a Voltage Probe in hand
      * sees its preview at their facing; a press of C turns the preview a quarter clockwise, and the click places it so. A
-     * second probe, placed in the middle of a free floor (the face's own slot), keeps the turn chosen for that kind.
+     * second probe, placed in the middle of a free floor, keeps the turn chosen for that kind.
      */
     static final class TurnBeforePlacingCase implements TestCase {
         String log = "";
@@ -1412,14 +1414,15 @@ public final class VoxelDeviceCases {
                 var e = v == null ? null : TapCase.placed(v);
                 placed = e == null ? null : e.front;
                 log = "use " + res;
-                // in the middle of a free floor: the face's own slot, the same turn
+                // in the middle of a free floor (a probe: off centre there too, #515), the same turn
                 BlockPos q = c.at(3, 1, 1);
                 pl.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, d.newItemStack());
                 var hq = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atLowerCornerOf(q).add(0.5, 0, 0.5),
                     net.minecraft.core.Direction.UP, q.below(), false);
                 d.parentItem.useOn(new net.minecraft.world.item.context.UseOnContext(pl, net.minecraft.world.InteractionHand.MAIN_HAND, hq));
                 var w = (VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(q, c.level()));
-                middle = w == null || w.getElement(Direction.YN) == null ? null : w.getElement(Direction.YN).front;
+                var mid = w == null ? null : w.getElement(Direction.YN) != null ? w.getElement(Direction.YN) : TapCase.placed(w);
+                middle = mid == null ? null : mid.front;
             } finally {
                 mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
                 pl.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
@@ -1433,7 +1436,117 @@ public final class VoxelDeviceCases {
             c.check("turn before placing: the preview shows it at the player's facing", shown0 != null && shown0 == facing, got);
             c.check("turn before placing: C turns the preview a quarter clockwise", shown1 != null && shown1 == facing.getNextClockwise(), got);
             c.check("turn before placing: the click places it as shown", placed != null && placed == shown1, got);
-            c.check("turn before placing: in a face's own slot too", middle != null && middle == facing.getNextClockwise(), got);
+            c.check("turn before placing: in the middle of a face too", middle != null && middle == facing.getNextClockwise(), got);
+        }
+    }
+
+    /**
+     * Probes without cable stubs (Baughn 2026-11-18, #515): a Voltage Probe clicked in the middle of a free floor goes off
+     * centre (pins; a device in a face slot draws cable stubs to the face's edges), and a cable routed from a 0.6 LVU
+     * Electrical Source to its cable pin feeds it. One hosted in the face's slot, as the old click put it, still meets a
+     * source beside it by the edge rule after the harness's save round trip. A pin is aimed at a voxel beyond its drawn
+     * box (the block's outline), where the kit ends at that pin; three voxels off, it isn't.
+     */
+    static final class ProbeInMiddleCase implements TestCase {
+        SixNodeElement placed, old;
+        String err, aim = "";
+        boolean faceEmpty, aimOk;
+
+        public String name() {
+            return "a probe in the middle has pins, not stubs";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 8; x++) for (int z = 0; z < 10; z++) c.floor(c.at(x, 0, z));
+            boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
+            mods.eln.node.voxel.CableConverter.convertOnLoad = true;
+            var pl = player(c);
+            var d = desc("Voltage Probe");
+            BlockPos p = c.at(1, 1, 4);
+            try {
+                pl.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, d.newItemStack());
+                var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atLowerCornerOf(p).add(0.5, 0, 0.5),
+                    net.minecraft.core.Direction.UP, p.below(), false);
+                d.parentItem.useOn(new net.minecraft.world.item.context.UseOnContext(pl, net.minecraft.world.InteractionHand.MAIN_HAND, hit));
+            } finally {
+                mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
+                pl.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+            }
+            var v = (VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, c.level()));
+            if (v == null) {
+                err = "not placed";
+                return;
+            }
+            faceEmpty = v.getElement(Direction.YN) == null;
+            placed = TapCase.placed(v);
+            if (placed == null) {
+                err = "not off centre";
+                return;
+            }
+            // (before any cable is on it) the pin's aim: a voxel above its drawn box is in the outline and ends the kit at it;
+            // three voxels up isn't
+            var ve = (mods.eln.node.voxel.VoxelNodeEntity) c.level().getBlockEntity(p);
+            List<int[]> drawn = ve.slotBoxes(placed.slot);
+            if (drawn.size() > 1) {
+                int[] pin = drawn.get(1);
+                double cx = (pin[0] + pin[3]) / 32.0, cz = (pin[2] + pin[5]) / 32.0, near = (pin[4] + 0.5) / 16, far = (pin[4] + 2.5) / 16;
+                boolean inNear = false, inFar = false, inDrawn = false;
+                for (int[] bx : ve.aimBoxes()) {
+                    inNear |= mods.eln.node.voxel.VoxelPart.contains(bx, cx, near, cz, 0);
+                    inFar |= mods.eln.node.voxel.VoxelPart.contains(bx, cx, far, cz, 0);
+                }
+                for (int[] bx : ve.deviceBoxes()) inDrawn |= mods.eln.node.voxel.VoxelPart.contains(bx, cx, near, cz, 0);
+                var atPin = mods.eln.node.voxel.CablePlacer.deviceEnd(v, p, placed.slot, new double[]{cx, pin[1] / 16.0, cz}, true, -1);
+                var kit = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), p, net.minecraft.core.Direction.UP,
+                    net.minecraft.world.phys.Vec3.atLowerCornerOf(p).add(cx, near, cz), true, new long[1][]);
+                aimOk = inNear && !inDrawn && !inFar && atPin != null && kit != null && kit.equals(atPin);
+                aim = "pin " + java.util.Arrays.toString(pin) + ": just above in the outline " + inNear + ", in the drawn box " + inDrawn
+                    + ", 3 up in the outline " + inFar + "; kit end " + kit + ", the pin's " + atPin;
+            }
+
+            // a cable from a source two blocks south to its cable pin, routed by the kit's rules
+            BlockPos sp = c.at(1, 1, 6);
+            source(c, Wp9aCases.SOURCE, sp, 0.6 * mods.eln.Eln.LVU);
+            var a = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), sp, net.minecraft.core.Direction.NORTH,
+                net.minecraft.world.phys.Vec3.atLowerCornerOf(sp).add(0.5, 0.05, 0.0), true, new long[1][], LV);
+            var b = mods.eln.node.voxel.CablePlacer.deviceEnd(v, p, placed.slot, new double[]{0.5, 0, 0.5}, false, LV);
+            err = a == null || b == null ? "no end: source " + a + ", probe " + b : mods.eln.node.voxel.CablePlacer.routeAndLayForTests(c.level(), LV, a, b);
+
+            // the old placement: the probe in the face's slot, its cable edge toward a source in the next block
+            BlockPos op = c.at(5, 1, 4);
+            old = CableCases.host(c, VoxelDeviceCases.id("Voltage Probe"), op, Direction.YN);
+            Wp9aCases.orient(old, LRDU::inverse, Direction.ZP);
+            source(c, Wp9aCases.SOURCE, op.south(), 0.6 * mods.eln.Eln.LVU);
+        }
+
+        static double best(SixNodeElement e) {
+            double m = Double.NaN;
+            for (Direction dir : new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP}) {
+                double x = u(e, dir);
+                if (!Double.isNaN(x) && (Double.isNaN(m) || x > m)) m = x;
+            }
+            return m;
+        }
+
+        public void measure(TestContext c) {
+            c.check("probe in the middle: off centre, not in the face's slot", faceEmpty && placed != null && placed.slot >= 6, String.valueOf(err));
+            c.check("probe in the middle: a cable routed to its pin lays", err == null, String.valueOf(err));
+            if (placed != null) Wp9cCases.within(c, "probe in the middle: its cable pin reads the source [V]", best(placed), 0.6 * mods.eln.Eln.LVU, 0.02 * mods.eln.Eln.LVU);
+            c.check("probe in the middle: a pin is aimed at a voxel past its drawn box", aimOk, aim);
+            c.check("old probe in the face's slot: still there", old != null && old.slot == Direction.YN.getInt(), String.valueOf(old));
+            if (old != null) Wp9cCases.within(c, "old probe in the face's slot: meets the source beside it [V]", u(old, Direction.ZP), 0.6 * mods.eln.Eln.LVU, 0.02 * mods.eln.Eln.LVU);
         }
     }
 

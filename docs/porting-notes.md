@@ -563,6 +563,13 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Tools (Baughn 2026-11-03): a pickaxe breaks machines, devices and pipes as fast as stone, shears break cables as fast
   as wool; in a block holding both, the part under the crosshair decides. No part breaks in under two ticks, so with
   vanilla's pause after each block it is at best one part per 7 ticks (`node/BreakTool`, `BreakToolCases`).
+- All cables explicit (Baughn 2026-11-18, #515: first the probes, then "the same for every other device as well; I'd
+  like all cables to be explicit"): every device that goes anywhere is placed off centre, with pins, also when clicked
+  in the middle of a free face. Before, that click put it in the face's own slot, where it drew cable stubs to the
+  face's edges and met a machine beside it by EA's edge rule; now a cable is laid to the machine. Devices already in a
+  face slot are left as they are and keep working. Devices that never went anywhere (the redstone converters, power
+  switches, analog vuMeter, loggers, signal processor, bus devices, lamp sockets and supplies, ...) still take the face.
+  A pin's click target is a voxel larger than the pin is drawn. `ProbeInMiddleCase`, `GeometryCase`.
 - Turning voxel devices (Baughn 2026-11-18, #512/#513): a wrench click on a device placed off centre skips fronts at
   which it doesn't fit and turns to the next one clockwise that does (with none it stays and says why); a press of the
   wrench key (C) with such a device in hand turns its placement preview the same way, and the click places it as shown.

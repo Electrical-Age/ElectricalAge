@@ -993,7 +993,8 @@ public final class CableCases {
      * Chips anywhere on a face (Baughn: 6 voxels across; pins that touch connect; a voxel of air otherwise):
      * two NOT chips on one floor, pin to pin: the first's output (high, its input open) drives the second (low). A NOT
      * placed at a click, its input pin touched by a floor cable from a Signal Source at 50 V next door: low. A chip with
-     * no pin toward another is refused beside it; a chip over another is refused.
+     * no pin toward another is refused beside it; a chip over another is refused. The clicked NOT, in the middle of the
+     * face, goes off centre there (Baughn 2026-11-18, #515), its input pin on the cable's end.
      */
     static final class ChipsPackedCase implements TestCase {
         mods.eln.node.six.SixNodeElement a, b, e;
@@ -1041,7 +1042,7 @@ public final class CableCases {
             // a NOT placed at a click; a Signal Source (SVU) in the next block west, a floor cable to the chip's input
             var w = block(c, c.at(4, 1, 1));
             String err = w.placeAnywhere(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), yn, 0.52, 0, 0.47, player);
-            e = w.getElement(yn);
+            e = VoxelDeviceCases.TapCase.placed(w);   // (off centre, even in the middle: #515)
             if (e != null) Wp9aCases.orient(e, l -> l, xp);
             voxel(c, c.at(4, 1, 1), List.of(new CablePart(0, DOWN, new int[]{0, 0, 8, 4, 0, 8})));
             var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(c, Wp9aCases.SIGNAL_SOURCE, c.at(3, 1, 1), yn);
@@ -1050,7 +1051,7 @@ public final class CableCases {
                 o.writeFloat((float) mods.eln.Eln.SVU);
             }));
             placed = "click: " + err + ", slot " + (e == null ? -1 : e.slot) + " at " + (e == null ? "-" : e.ox + "," + e.oy + "," + e.oz);
-            placedOk = err == null && e != null && e.slot == yn.getInt();   // (the middle of a free face: its own slot)
+            placedOk = err == null && e != null && e.slot >= 6 && w.getElement(yn) == null && e.ox == 0 && e.oy == 0 && e.oz == 0;
             // beside a chip whose side toward it has no pin: too close
             var u = block(c, c.at(6, 1, 1));
             u.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT).newItemStack(), 6, yn, -4, 0, 0, player);
@@ -1077,7 +1078,7 @@ public final class CableCases {
         }
 
         public void measure(TestContext c) {
-            c.check("chips: placed at a click in the middle of a free face: the face's slot", placedOk, placed);
+            c.check("chips: placed at a click in the middle of a free face: off centre there, not in the face's slot", placedOk, placed);
             c.check("chips: refused over a chip, and beside one with no pin toward it", refusedOk, refused);
             c.check("chips: four fit a face (pins met along x, two voxels of air along z)", fourOk, four);
             c.checkValue("chips: the first NOT (input open) [V]", Wp9cCases.out(a), mods.eln.Eln.SVU);

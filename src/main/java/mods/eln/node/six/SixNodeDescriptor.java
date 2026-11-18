@@ -250,7 +250,9 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
         return false;
     }
 
-    /** May it be placed anywhere on a face of a voxel block (off centre, several to a face)? Chips. */
+    /** May it be placed anywhere on a face of a voxel block (off centre, several to a face)? Chips. Such a device always
+     *  goes off centre, a click in the middle of a free face too, and connects only at its pins (Baughn 2026-11-18,
+     *  #515: "I'd like all cables to be explicit"); ones placed earlier in a face's own slot stay there. */
     public boolean placeAnywhere() {
         return false;
     }

@@ -83,7 +83,7 @@ public final class DevicePreview {
                     int slot = v.freeSlot();
                     if (slot < 0) err = "full";
                     else if (!item.descriptor.allowedOnSide(side)) err = "side";
-                    else if (!(o[0] == 0 && o[1] == 0 && o[2] == 0 && v.sideElementList[side.getInt()] == null && v.canPlaceElement(side.getInt()))) {
+                    else {
                         // where the click would put it: in line on a cable, at its end, beside it, or at the click
                         var plan = DevicePlacer.plan(v, p.getMainHandItem(), slot, side, new double[]{h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ()}, p, turn);
                         err = plan.err();

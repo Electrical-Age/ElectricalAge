@@ -1187,10 +1187,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (!d.allowedOnSide(face)) return "It can't go on that side";
         LRDU front = DevicePreview.placeFront(d, face, player);
         int[] o = snap(d, face, front, hx, hy, hz);
-        // in the middle of a free face: the face's own slot, as before (ports at the face's edges, which meet the
-        // next block, a machine beside it, by EA's edge rule: a trimmer beside a furnace)
-        if (o[0] == 0 && o[1] == 0 && o[2] == 0 && sideElementList[face.getInt()] == null && canPlaceElement(face.getInt()))
-            return createSubBlock(stack, face, player) ? null : "Can't place that";
+        // (in the middle of a free face too: off centre, its pins its only ports, no face slot with stubs to the face's
+        // edges; Baughn 2026-11-18, #515: "I'd like all cables to be explicit")
         // where it goes, in line on a cable, on a cable's end or beside one (DevicePlacer)
         var plan = DevicePlacer.plan(this, stack, slot, face, new double[]{hx, hy, hz}, player);
         if (plan.err() != null) return plan.err();
