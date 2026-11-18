@@ -45,6 +45,7 @@ public class SixNodeRender<E extends SixNodeEntity> implements BlockEntityRender
         boolean elements = false;
         for (SixNodeElementRender r : be.elementRenderList) if (r != null) elements = true;
         boolean glow = be instanceof mods.eln.node.voxel.VoxelNodeEntity v && !v.clientGlow.isEmpty();
+        if (!elements) mods.eln.client.render.bake.ChunkBake.forget(be);   // (else its last device's baked copy stayed)
         if (!elements && !glow) return false;
         if (BlockEntityRenderer.super.shouldRender(be, cameraPosition)) return true;
         return elements && mods.eln.client.render.bake.ChunkBake.farDue(be);

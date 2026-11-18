@@ -139,6 +139,11 @@ public final class ChunkBake implements Bake.Host {
         return Bake.mode != 0 && bakes(be) && Bake.farDue(be, be.getBlockPos().asLong());
     }
 
+    /** This block entity draws nothing baked any more (its last device went): its baked copy leaves the chunk. */
+    public static void forget(BlockEntity be) {
+        if (Bake.mode != 0) Bake.forget(be);
+    }
+
     /** The server sent this block entity new state (main thread). */
     public static void published(BlockEntity be) {
         if (Bake.mode != 0) Bake.published(be);

@@ -258,6 +258,22 @@ public final class Bake {
         }
     }
 
+    /**
+     * Forget one owner's device now: its settled calls leave the chunk. For a block entity that stays but no longer
+     * draws anything baked (a voxel block whose last device was broken, its cable left to the block model): its renderer
+     * is no longer run, so the frame-by-frame comparison that takes calls out never comes, and the chunk kept drawing
+     * the device that had gone (Baughn, msg 1572429699550937098).
+     */
+    public static void forget(Object owner) {
+        Device d = DEVICES.remove(owner);
+        if (d == null) return;
+        for (int i = 0; i < d.prevN; i++) {
+            Call c = d.prev[i];
+            if (c.settled) d.unsettle(c);
+        }
+        d.release();
+    }
+
     /** Forget everything without telling the host (the level changed, or the atlas was rebuilt). */
     public static void clear() {
         DEVICES.clear();
