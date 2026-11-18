@@ -404,7 +404,9 @@ public class ComputerScreen extends ElnScreen {
         g.fill(x0, y0, x0 + s.w * CELL + 8, y0 + s.h * LINE + 6, 0xFF101418);
         if (render.lit()) {
             Scene.Window t = activeWindow();
-            cells(g, SceneCells.of(s, local, active));
+            SceneCells c = SceneCells.of(s, local, active);
+            cells(g, c);
+            bevels(g, c, s);
             if (t != null) overlays(g, t);
             if (dragMode != 0) dragOutline(g);
             if (menuOpen) menus(g, t);
@@ -440,6 +442,96 @@ public class ComputerScreen extends ElnScreen {
                     String ch = new String(Character.toChars(cp));
                     g.text(font, ch, cx(x) + (CELL - font.width(ch)) / 2, cy(y) + 1, c.ink[y * c.w + x], false);
                 }
+            }
+        }
+    }
+
+    // ---- shading (Baughn 1572640714167419132: the period's desks were skeuomorphic, not flat): bevels in pixels, drawn
+    // only over cells that show of their window
+
+    /** The button the pointer is holding down (drawn pressed in), or -1. */
+    int pressWin = -1, pressId = -1;
+
+    static int mix(int a, int b, float t) {
+        int r = Math.round(((a >> 16) & 255) * (1 - t) + ((b >> 16) & 255) * t), gg = Math.round(((a >> 8) & 255) * (1 - t) + ((b >> 8) & 255) * t),
+            bl = Math.round((a & 255) * (1 - t) + (b & 255) * t);
+        return 0xFF000000 | r << 16 | gg << 8 | bl;
+    }
+
+    /** A horizontal pixel line from x0 to x1 (exclusive) at y, where the cells under it are window wid's. */
+    void hline(GuiGraphicsExtractor g, SceneCells c, int x0, int x1, int y, int ink, int wid) {
+        int row = Math.floorDiv(y - cy(0), LINE);
+        if (row < 0 || row >= c.h) return;
+        for (int col = Math.max(0, Math.floorDiv(x0 - cx(0), CELL)); col < c.w && cx(col) < x1; col++) {
+            if (c.owner[row * c.w + col] != wid) continue;
+            int a = Math.max(x0, cx(col)), b = Math.min(x1, cx(col + 1));
+            if (a < b) g.fill(a, y, b, y + 1, ink);
+        }
+    }
+
+    void vline(GuiGraphicsExtractor g, SceneCells c, int x, int y0, int y1, int ink, int wid) {
+        int col = Math.floorDiv(x - cx(0), CELL);
+        if (col < 0 || col >= c.w) return;
+        for (int row = Math.max(0, Math.floorDiv(y0 - cy(0), LINE)); row < c.h && cy(row) < y1; row++) {
+            if (c.owner[row * c.w + col] != wid) continue;
+            int a = Math.max(y0, cy(row)), b = Math.min(y1, cy(row + 1));
+            if (a < b) g.fill(x, a, x + 1, b, ink);
+        }
+    }
+
+    /** A bevel round the pixel rectangle: raised (light top and left, dark bottom and right) or sunk in. */
+    void bevel(GuiGraphicsExtractor g, SceneCells c, int x0, int y0, int x1, int y1, boolean raised, int paper, int wid) {
+        int light = mix(paper, 0xFFFFFFFF, 0.5f), dark = mix(paper, 0xFF000000, 0.55f);
+        int tl = raised ? light : dark, br = raised ? dark : light;
+        hline(g, c, x0, x1, y0, tl, wid);
+        vline(g, c, x0, y0, y1, tl, wid);
+        hline(g, c, x0, x1, y1 - 1, br, wid);
+        vline(g, c, x1 - 1, y0, y1, br, wid);
+    }
+
+    /** A bevel round cells (x, y, w, h), inset by in pixels. */
+    void bevelCells(GuiGraphicsExtractor g, SceneCells c, int x, int y, int w, int h, int in, boolean raised, int wid) {
+        if (w <= 0 || h <= 0 || x < 0 || y < 0 || x >= c.w || y >= c.h) return;
+        bevel(g, c, cx(x) + in, cy(y) + in, cx(x + w) - in, cy(y + h) - in, raised, c.paper[y * c.w + x], wid);
+    }
+
+    void bevels(GuiGraphicsExtractor g, SceneCells c, Scene s) {
+        bevel(g, c, cx(0), cy(0), cx(c.w), cy(1), true, SceneCells.BAR, SceneCells.OWNER_BAR);   // the screen bar
+        for (int wid : s.order) {
+            Scene.Window w = s.windows.get(wid);
+            if (w == null) continue;
+            if (w.framed()) {
+                int[] o = w.outer();
+                bevelCells(g, c, o[0], o[1], o[2], o[3], 0, true, wid);                 // the frame stands up
+                bevelCells(g, c, w.x, w.y, w.cw, w.ch, -1, false, wid);                 // the content sits in it
+                if (w.has("close")) bevelCells(g, c, w.x - 1, w.y - 1, 1, 1, 1, true, wid);
+                if (w.has("depth")) bevelCells(g, c, w.x + w.cw, w.y - 1, 1, 1, 1, true, wid);
+                if (w.has("size")) bevelCells(g, c, w.x + w.cw, w.y + w.ch, 1, 1, 1, true, wid);
+            }
+            for (Map.Entry<Integer, Scene.Element> en : w.elements.entrySet()) {
+                Scene.Element e = en.getValue();
+                int ex = w.x + e.x(w), ey = w.y + e.y(w);
+                switch (e.kind) {
+                    case "button" -> bevelCells(g, c, ex, ey, e.size(5, w, 4), 1, 0, !(pressWin == wid && pressId == en.getKey()), wid);
+                    case "line" -> bevelCells(g, c, ex, ey, e.size(5, w, 1), 1, 0, false, wid);
+                    case "list", "raw" -> bevelCells(g, c, ex, ey, e.size(5, w, 1), e.size(6, w, 1), 0, false, wid);
+                    case "editor" -> {
+                        if (!editorWidgets.containsKey(wid + "/" + en.getKey()))
+                            bevelCells(g, c, ex, ey, e.size(5, w, 1), e.size(6, w, 1), 0, false, wid);
+                    }
+                    case "log" -> {   // (a log filling its window is the window's own text; one beside other things sits in)
+                        int lw = e.size(5, w, 1), lh = e.size(6, w, 1);
+                        if (lw < w.cw || lh < w.ch - 1) bevelCells(g, c, ex, ey, lw, lh, 0, false, wid);
+                    }
+                    default -> {
+                    }
+                }
+            }
+            if (w.ask != null) {
+                int[][] lay = SceneCells.askLayout(w);
+                bevelCells(g, c, lay[0][0], lay[0][1], lay[0][2], lay[0][3], 0, true, wid);
+                int by = lay[0][1] + lay[0][3] - 2;
+                for (int i = 1; i < lay.length; i++) bevelCells(g, c, lay[i][0], by, lay[i][1], 1, 0, true, wid);
             }
         }
     }
@@ -546,6 +638,8 @@ public class ComputerScreen extends ElnScreen {
         int x = menuX(t, menuAt) - 1, w = menuWidth(t, menuAt);
         g.fill(cx(x), cy(1), cx(x + w), cy(1 + items.size()), SceneCells.BAR);
         g.outline(cx(x), cy(1), w * CELL, items.size() * LINE, SceneCells.BAR_TEXT);
+        g.fill(cx(x) + 1, cy(1) + 1, cx(x + w) - 1, cy(1) + 2, 0xFFFFFFFF);   // (lit along its top and left: it stands up)
+        g.fill(cx(x) + 1, cy(1) + 1, cx(x) + 2, cy(1 + items.size()) - 1, 0xFFFFFFFF);
         String menu = menuTitle(t, menuAt);
         for (int i = 0; i < items.size(); i++) {
             String[] it = items.get(i);
@@ -657,7 +751,11 @@ public class ComputerScreen extends ElnScreen {
                     focusId = en.getKey();
                     render.screenEvent(new Form.Symbol("click"), (long) wid, (long) en.getKey(), (long) (col - ex), (long) (row - ey));
                 }
-                case "button" -> render.screenEvent(new Form.Symbol("press"), (long) wid, (long) en.getKey());
+                case "button" -> {
+                    render.screenEvent(new Form.Symbol("press"), (long) wid, (long) en.getKey());
+                    pressWin = wid;   // (drawn pressed in while the button is held)
+                    pressId = en.getKey();
+                }
                 case "list" -> {
                     int index = row - ey + scrolls.getOrDefault(key(wid, en.getKey()), 0);
                     render.screenEvent(new Form.Symbol("select"), (long) wid, (long) en.getKey(), (long) index);
@@ -725,6 +823,7 @@ public class ComputerScreen extends ElnScreen {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent ev) {
+        pressWin = pressId = -1;
         if (menuOpen) {
             menuHover(ev.x(), ev.y());
             Scene.Window t = activeWindow();

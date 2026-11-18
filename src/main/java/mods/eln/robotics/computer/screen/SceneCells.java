@@ -45,6 +45,10 @@ public final class SceneCells {
 
     public final int w, h;
     public final int[] glyph, ink, paper;
+    /** Whose each cell is: a window's id, OWNER_DESK or OWNER_BAR (a display shades only what shows of a window). */
+    public final int[] owner;
+    public static final int OWNER_DESK = -1, OWNER_BAR = -2;
+    int painting = OWNER_DESK;
 
     public SceneCells(int w, int h) {
         this.w = w;
@@ -52,6 +56,8 @@ public final class SceneCells {
         glyph = new int[w * h];
         ink = new int[w * h];
         paper = new int[w * h];
+        owner = new int[w * h];
+        java.util.Arrays.fill(owner, OWNER_DESK);
         java.util.Arrays.fill(paper, DESK);
         java.util.Arrays.fill(glyph, ' ');
     }
@@ -120,6 +126,7 @@ public final class SceneCells {
                 if (in(xx, yy)) {
                     paper[yy * w + xx] = colour;
                     glyph[yy * w + xx] = ' ';
+                    owner[yy * w + xx] = painting;
                 }
     }
 
@@ -127,31 +134,27 @@ public final class SceneCells {
 
     void bar(Scene s) {
         unclip();
+        painting = OWNER_BAR;
         fill(0, 0, w, 1, BAR);
         text(" " + (s.title.isEmpty() ? "Dynamo" : s.title), 0, 0, w, BAR_TEXT);
     }
 
     void window(int id, Scene.Window win, boolean active, Local local) {
         int[] o = win.outer();
+        painting = id;
         clip(o[0], o[1], o[2], o[3]);
-        fill(o[0], o[1], o[2], o[3], PAPER);
+        // (a framed window's border is its title's colour all round, as the period's desks had it; a display bevels it)
+        fill(o[0], o[1], o[2], o[3], win.framed() ? (active ? TITLE_ACTIVE : TITLE_IDLE) : PAPER);
         if (win.framed()) {
-            int fr = active ? FRAME_ACTIVE : FRAME_IDLE;
             int x0 = win.x - 1, x1 = win.x + win.cw, y0 = win.y - 1, y1 = win.y + win.ch;
-            fill(x0, y0, o[2], 1, active ? TITLE_ACTIVE : TITLE_IDLE);
+            fill(win.x, win.y, win.cw, win.ch, PAPER);
             int tink = active ? TITLE_ACTIVE_TEXT : TITLE_IDLE_TEXT;
             put(x0, y0, win.has("close") ? CLOSE : ' ', tink);
             put(x1, y0, win.has("depth") ? DEPTH : ' ', tink);
             String t = win.title;
             int room = win.cw - 1;
             text(t.length() > room ? t.substring(0, Math.max(0, room)) : t, win.x + 1, y0, room, tink);
-            for (int y = win.y; y < y1; y++) {
-                put(x0, y, '│', fr);
-                put(x1, y, '│', fr);
-            }
-            put(x0, y1, '└', fr);
-            for (int x = win.x; x < x1; x++) put(x, y1, '─', fr);
-            put(x1, y1, win.has("size") ? SIZE : '┘', fr);
+            if (win.has("size")) put(x1, y1, SIZE, tink);
         }
         clip(win.x, win.y, win.cw, win.ch);
         for (Map.Entry<Integer, Scene.Element> en : win.elements.entrySet()) draw(id, en.getKey(), en.getValue(), win, local);
