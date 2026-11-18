@@ -72,8 +72,7 @@ public final class CablePlacer {
     static void checkLapse(ServerPlayer p, long now) {
         Plan plan = PLANS.get(p.getUUID());
         if (plan == null) return;
-        boolean holding = p.getMainHandItem().getItem() instanceof CableKitItem k && k.tier == plan.tier
-            && java.util.Objects.equals(CableKitItem.specOf(p.getMainHandItem()), plan.spec);
+        boolean holding = KitSupply.lays(KitSupply.held(p), false, plan.tier, plan.spec);
         String why = lapse(plan, now, holding, plan.dim == p.level().dimension(), p.position());
         if (why == null) return;
         PLANS.remove(p.getUUID());
@@ -498,9 +497,15 @@ public final class CablePlacer {
 
     /** A cable kit used on a block face: start, extend or finish a route. Returns true if it handled the click. */
     public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, ItemStack kit, int tier, Vec3 hit) {
+        return use(player, level, pos, face, KitSupply.of(kit), hit);
+    }
+
+    /** The same, laid from a supply (a kit, or several taken as one). */
+    public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, KitSupply kit, Vec3 hit) {
+        int tier = kit.tier();
         Plan plan = PLANS.get(player.getUUID());
         long now = level.getGameTime();
-        CableSpec spec = CableKitItem.specOf(kit);
+        CableSpec spec = kit.spec();
         boolean other = plan != null && (plan.tier != tier || !java.util.Objects.equals(plan.spec, spec));
         if (plan != null && (other || lapse(plan, now, true, plan.dim == level.dimension(), player.position()) != null)) {
             PLANS.remove(player.getUUID());
@@ -563,9 +568,9 @@ public final class CablePlacer {
         }
         int len = r.length();
         boolean creative = player.isCreative();
-        if (!creative && KitItem.length(kit) < len) {
+        if (!creative && kit.length() < len) {
             if (again) plan.waypoints.add(end);
-            player.sendOverlayMessage(Component.literal(String.format("This route takes %.1f blocks of cable; the kit holds %.1f", len / 16.0, KitItem.length(kit) / 16.0)));
+            player.sendOverlayMessage(Component.literal(String.format("This route takes %.1f blocks of cable; the kit holds %.1f", len / 16.0, kit.length() / 16.0)));
             show(player, level, r.steps);
             return true;
         }
@@ -576,9 +581,7 @@ public final class CablePlacer {
         }
         PLANS.remove(player.getUUID());
         if (!creative) {
-            int left = KitItem.length(kit) - len;
-            if (left <= 0) kit.shrink(1);
-            else KitItem.setLength(kit, left);
+            kit.take(len);
         }
         player.sendOverlayMessage(Component.literal(String.format("Laid %.1f blocks of cable", len / 16.0)));
         return true;
@@ -606,7 +609,7 @@ public final class CablePlacer {
      * 2026-11-11): every burnt piece joined to the clicked one through the blocks' faces, for the kit length they
      * hold. False if the click isn't on a burnt cable (the kit then routes as usual).
      */
-    static boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, ItemStack kit, int tier, CableSpec spec) {
+    static boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, KitSupply kit, int tier, CableSpec spec) {
         if (!(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return false;
         int idx = n.partAt(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ());
         if (idx < 0 || !(n.parts.get(idx) instanceof CablePart c) || c.burnt == null) return false;
@@ -618,15 +621,13 @@ public final class CablePlacer {
         int len = 0;
         for (Object[] r : run) len += ((CablePart) r[1]).isKnuckle() ? 0 : ((CablePart) r[1]).length();
         boolean creative = player.isCreative();
-        if (!creative && KitItem.length(kit) < len) {
-            player.sendOverlayMessage(Component.literal(String.format("Mending it takes %.1f blocks of cable; the kit holds %.1f", len / 16.0, KitItem.length(kit) / 16.0)));
+        if (!creative && kit.length() < len) {
+            player.sendOverlayMessage(Component.literal(String.format("Mending it takes %.1f blocks of cable; the kit holds %.1f", len / 16.0, kit.length() / 16.0)));
             return true;
         }
         for (Object[] r : run) ((VoxelNode) r[0]).repairCable((CablePart) r[1]);
         if (!creative) {
-            int left = KitItem.length(kit) - len;
-            if (left <= 0) kit.shrink(1);
-            else KitItem.setLength(kit, left);
+            kit.take(len);
         }
         player.sendOverlayMessage(Component.literal(String.format("Mended %.1f blocks of burnt cable", len / 16.0)));
         return true;

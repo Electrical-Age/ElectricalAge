@@ -56,7 +56,7 @@ public final class PipePlacer {
         if (plan == null) return;
         String why = null;
         if (plan.dim != p.level().dimension()) why = "another dimension";
-        else if (!(p.getMainHandItem().getItem() instanceof PipeKitItem k && k.tier == plan.tier)) why = "another item in hand";
+        else if (!KitSupply.lays(KitSupply.held(p), true, plan.tier, null)) why = "another item in hand";
         else if (now - plan.touched > CablePlacer.IDLE_TICKS) why = "a minute without a click";
         else {
             PipeRouter.End last = plan.waypoints.isEmpty() ? plan.start : plan.waypoints.get(plan.waypoints.size() - 1);
@@ -297,6 +297,12 @@ public final class PipePlacer {
      */
     public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, ItemStack kit, int tier,
                               net.minecraft.world.phys.Vec3 hit) {
+        return use(player, level, pos, face, KitSupply.of(kit), hit);
+    }
+
+    /** The same, laid from a supply (a kit, or several taken as one). */
+    public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, KitSupply kit, net.minecraft.world.phys.Vec3 hit) {
+        int tier = kit.tier();
         Plan plan = PLANS.get(player.getUUID());
         long now = level.getGameTime();
         if (plan != null && (plan.dim != level.dimension() || plan.tier != tier)) {
@@ -367,8 +373,8 @@ public final class PipePlacer {
         }
         int len = r.length();
         boolean creative = player.isCreative();
-        if (!creative && PipeKitItem.length(kit) < len) {
-            player.sendOverlayMessage(Component.literal(String.format("This route takes %.1f blocks of pipe; the kit holds %.1f", len / 16.0, PipeKitItem.length(kit) / 16.0)));
+        if (!creative && kit.length() < len) {
+            player.sendOverlayMessage(Component.literal(String.format("This route takes %.1f blocks of pipe; the kit holds %.1f", len / 16.0, kit.length() / 16.0)));
             show(player, level, r.points);
             return true;
         }
@@ -381,11 +387,7 @@ public final class PipePlacer {
             return true;
         }
         PLANS.remove(player.getUUID());
-        if (!creative) {
-            int left = PipeKitItem.length(kit) - len;
-            if (left <= 0) kit.shrink(1);
-            else KitItem.setLength(kit, left);
-        }
+        if (!creative) kit.take(len);
         player.sendOverlayMessage(Component.literal(String.format("Laid %.1f blocks of pipe", len / 16.0)));
         return true;
     }
