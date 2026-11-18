@@ -47,7 +47,24 @@ public final class RouteLeakCases {
         static final int[] ISLANDS = {2, 3, 5, 6};
         final Set<Object> gone = Collections.newSetFromMap(new IdentityHashMap<>());
         final Set<NodeBase> goneNodes = Collections.newSetFromMap(new IdentityHashMap<>());
-        int laid, broken, refused, liveSeen, liveSampled, junctions, airLaid;
+        int laid, broken, refused, liveSeen, liveSampled, junctions, airLaid, verified, layersJoints;
+        final List<String> linkProblems = new ArrayList<>();
+
+        /** The pad's stored joints against its live network now (routing phase 3a: they must agree after every edit). */
+        void verifyLinks(TestContext c, String when) {
+            List<VoxelNode> scope = new ArrayList<>();
+            for (BlockPos p : padBlocks(c)) {
+                VoxelNode v = node(c, p);
+                if (v != null) scope.add(v);
+            }
+            if (scope.isEmpty()) return;
+            var rep = mods.eln.node.voxel.CableVerify.verify(scope);
+            verified++;
+            for (VoxelNode v : scope)
+                for (var part : v.parts)
+                    if (part instanceof CablePart cp) for (int[] j : cp.joints) if (!mods.eln.node.voxel.CableLinks.implied(j)) layersJoints++;
+            for (String pr : rep.problems()) if (linkProblems.size() < 8) linkProblems.add(when + ": " + pr);
+        }
         final java.util.TreeMap<String, int[]> coverage = new java.util.TreeMap<>();
 
         public String id() {
@@ -143,6 +160,7 @@ public final class RouteLeakCases {
                         break;
                     }
                 }
+                verifyLinks(c, "round " + round + " laid");
                 // break: some random pieces, or (every few rounds) everything
                 boolean all = round % 4 == 3;   // (the last rounds leave blocks standing, for the census check)
                 for (BlockPos p : padBlocks(c)) {
@@ -155,6 +173,7 @@ public final class RouteLeakCases {
                         if (node(c, p) == null) break;
                     }
                 }
+                verifyLinks(c, "round " + round + " broken");
             }
         }
 
@@ -240,6 +259,9 @@ public final class RouteLeakCases {
             }
             c.line("lay/break/relay: " + laid + " routes laid, " + refused + " refused, " + broken + " pieces broken, " + goneNodes.size() + " blocks gone, "
                 + gone.size() + " objects to be gone");
+            c.check("lay/break/relay: the stored joints matched the network after every round (routing phase 3a)", linkProblems.isEmpty() && verified > 0,
+                verified + " checks; " + String.join("; ", linkProblems));
+            c.check("lay/break/relay: laying wrote its own joints (not only the rules' implied ones)", layersJoints > 0, layersJoints + " seen");
             c.check("lay/break/relay: routes were laid and blocks went", laid >= ROUNDS && goneNodes.size() >= 20, laid + " laid, " + goneNodes.size() + " gone");
             c.line("lay/break/relay: " + junctions + " pipe junctions made, " + airLaid + " cable pieces laid over the islands' gap");
             c.check("lay/break/relay: junctions and air runs came and went too (routing phase 2)", junctions > 0 && airLaid > 0, junctions + " junctions, " + airLaid + " air pieces");

@@ -12,6 +12,7 @@ public final class ElnConfig {
     static final ModConfigSpec.IntValue AUTOMINER_RANGE;
     static final ModConfigSpec.BooleanValue PROBE_DETAILS;
     static final ModConfigSpec.BooleanValue CONVERT_CABLES;
+    static final ModConfigSpec.BooleanValue LINKS_BUILD;
     static final ModConfigSpec.BooleanValue INTROSPECT_REMOTE;
     static final ModConfigSpec.DoubleValue COAL_LAG, MIN_FIRE, COAL_KINDLE, OIL_LIGHT;
     static final ModConfigSpec.DoubleValue DEPTH_C, DEPTH_PER_BLOCK, NETHER_C, HEAT_FURNACE_FUEL;
@@ -54,6 +55,9 @@ public final class ElnConfig {
         CONVERT_CABLES = b.comment("Convert six-node cables to voxel cables as their chunks load (blocks holding only cables; the",
                 "six-node block is kept inside for /elnlab voxelcables revert). Off until the conversion is approved.")
             .define("convertOnLoad", false);
+        LINKS_BUILD = b.comment("Build voxel cables' connections from their stored joints (routing phase 3b); false: from the",
+                "connection rules directly, as before (the joints are still recorded). A quick revert without a jar swap.")
+            .define("linksBuild", true);
         b.pop();
         // the electric bike (Baughn 2026-10-28: "might adjust values in playtesting"): synced, as the rider's client moves it
         b.push("bike");
@@ -151,6 +155,7 @@ public final class ElnConfig {
         Eln.wailaEasyMode = PROBE_DETAILS.get();
         mods.eln.introspect.Introspect.remote = INTROSPECT_REMOTE.get();
         mods.eln.node.voxel.CableConverter.convertOnLoad = CONVERT_CABLES.get();
+        mods.eln.node.voxel.VoxelNode.linksBuild = LINKS_BUILD.get();
         mods.eln.sim.Fire.COAL.lag = COAL_LAG.get();
         mods.eln.sim.Fire.COAL.kindle = COAL_KINDLE.get();
         mods.eln.sim.Fire.OIL.kindle = OIL_LIGHT.get();

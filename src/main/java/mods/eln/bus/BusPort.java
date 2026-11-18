@@ -14,6 +14,11 @@ public final class BusPort {
     public static final int INBOX = 64;
 
     final java.util.Set<BusPort> links = new java.util.LinkedHashSet<>();
+
+    /** The ports it is linked to (read only). */
+    public java.util.Set<BusPort> linked() {
+        return java.util.Collections.unmodifiableSet(links);
+    }
     int claims;
     Bus bus;
     int address;

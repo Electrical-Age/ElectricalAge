@@ -11,6 +11,15 @@ public class ElectricalConnection extends InterSystem {
         this.L2 = L2;
     }
 
+    /** Its two loads. */
+    public ElectricalLoad a() {
+        return L1;
+    }
+
+    public ElectricalLoad b() {
+        return L2;
+    }
+
     /** Does it join a and b (either way round)? */
     public boolean joins(ElectricalLoad a, ElectricalLoad b) {
         return L1 == a && L2 == b || L1 == b && L2 == a;

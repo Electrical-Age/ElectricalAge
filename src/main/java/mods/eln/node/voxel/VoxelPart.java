@@ -14,6 +14,13 @@ import java.util.List;
  * devices are to become parts too (Baughn's endgame), so nothing here assumes pipes.
  */
 public abstract class VoxelPart {
+    /**
+     * Its id in its block (routing phase 3: stored links name the part they lead to), unique there and never reused
+     * (VoxelNode.nextPartId); -1 until the node gives it one (VoxelNode.ensureIds). Saved by the node beside the part's
+     * own data (key "id").
+     */
+    public int id = -1;
+
     public abstract String kind();
 
     /** The voxels it occupies, as boxes (x0 y0 z0 x1 y1 z1, 0..16). */

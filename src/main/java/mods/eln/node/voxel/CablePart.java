@@ -190,6 +190,27 @@ public final class CablePart extends VoxelPart {
         return Double.NaN;
     }
 
+    /**
+     * What it connects to (routing phase 3; nothing reads them before 3b): each a {kind, end, ...} array (CableLinks:
+     * the kinds and their fields), end 0/1 for its ends (a knuckle: its two ports) or -1 for the piece as a whole.
+     * NBT "j": a list of int arrays.
+     */
+    public List<int[]> joints = new ArrayList<>();
+
+    /** Everything but its geometry and spec from c (a recoloured piece is the same piece: its id and links stay). */
+    public void copyStateFrom(CablePart c) {
+        id = c.id;
+        burnt = c.burnt;
+        paid = c.paid;
+        hang = c.hang;
+        hang2 = c.hang2;
+        byConverter = c.byConverter;
+        u = c.u;
+        t = c.t;
+        joints = new ArrayList<>();
+        for (int[] j : c.joints) joints.add(j.clone());
+    }
+
     /** Laid by the converter (a knuckle round an outer corner): a revert takes it out. */
     public boolean byConverter;
     /** Saved state (server): voltage and temperature, restored into its conductor. */
@@ -472,6 +493,14 @@ public final class CablePart extends VoxelPart {
         if (paid >= 0) tag.putInt("paid", paid);
         if (hang != null) tag.putIntArray("hang", hang);
         if (hang2 != null) tag.putIntArray("hang2", hang2);
+        if (!joints.isEmpty()) {
+            net.minecraft.nbt.ListTag l = new net.minecraft.nbt.ListTag();
+            // (in a fixed order: implied joints are recorded afresh at each connect, in whatever order the rules run)
+            List<int[]> sorted = new ArrayList<>(joints);
+            sorted.sort(java.util.Arrays::compare);
+            for (int[] j : sorted) l.add(new net.minecraft.nbt.IntArrayTag(j));
+            tag.put("j", l);
+        }
         tag.putDouble("u", u);
         tag.putDouble("t", t);
     }
@@ -498,6 +527,9 @@ public final class CablePart extends VoxelPart {
         if (hg != null && hg.length >= 3) p.hang = hg;
         int[] hg2 = tag.getIntArray("hang2").orElse(null);
         if (hg2 != null && hg2.length >= 3) p.hang2 = hg2;
+        tag.getList("j").ifPresent(l -> {
+            for (int i = 0; i < l.size(); i++) l.getIntArray(i).filter(a -> a.length >= 2).ifPresent(a -> p.joints.add(a));
+        });
         p.u = tag.getDoubleOr("u", 0);
         p.t = tag.getDoubleOr("t", 0);
         return p;

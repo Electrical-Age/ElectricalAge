@@ -39,6 +39,7 @@ public final class ElnGameTests {
         l.addAll(mods.eln.gametest.cases.SolarCases.cases());
         mods.eln.gametest.cases.Wp9aCases.addTo(l);
         mods.eln.gametest.cases.RouteLeakCases.addTo(l);
+        mods.eln.gametest.cases.LinksCases.addTo(l);
         mods.eln.gametest.cases.Wp9bCases.addTo(l);
         mods.eln.gametest.cases.Wp9cCases.addTo(l);
         mods.eln.gametest.cases.LogicTruthCases.addTo(l);
@@ -180,6 +181,8 @@ public final class ElnGameTests {
             mods.eln.introspect.DescribeCheck.run(helper.getLevel(), helper.getBounds(), ctx::check);
             stalls(helper, ctx);
             if (c.checkLimitCycles()) limitCycles(helper, ctx);   // (before the round trip: reloaded nodes start a fresh record)
+            links(helper, ctx);
+            linksNeutral(helper, ctx);
             persistence(helper, ctx);
             ctx.finish();
         });
@@ -242,6 +245,49 @@ public final class ElnGameTests {
             event.registerTest(id, new FunctionGameTestInstance(fn, new TestData<>(env, net.minecraft.world.level.Level.OVERWORLD,
                 structure, c.ticks() + 40, 0, true, net.minecraft.world.level.block.Rotation.NONE, false, 1, 1, false, PADDING)));
         }
+    }
+
+    /**
+     * Routing phase 3b: the voxel blocks in the test's bounds, reconnected with `[cables] linksBuild` off (the rules make
+     * the links) and then on (the joints do), have the same links and connection flags (LinksDiff).
+     */
+    static void linksNeutral(GameTestHelper helper, GameTestContext ctx) {
+        net.minecraft.world.phys.AABB bounds = helper.getBounds();
+        java.util.List<mods.eln.node.NodeBase> in = new java.util.ArrayList<>();
+        for (mods.eln.node.NodeBase n : new java.util.ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
+            if (n.coordonate.dimention != mods.eln.misc.Dimensions.id(helper.getLevel())) continue;
+            if (bounds.contains(n.coordonate.x + .5, n.coordonate.y + .5, n.coordonate.z + .5)) in.add(n);
+        }
+        var scope = LinksDiff.added(in);
+        if (scope.isEmpty()) return;
+        var off = LinksDiff.connectedWith(scope, false);
+        var on = LinksDiff.connectedWith(scope, true);
+        ctx.check("links: the joints build the same network as the rules", off.equals(on),
+            off.size() + " vs " + on.size() + " lines; " + LinksDiff.difference(off, on, 6));
+        // one block at a time (second opinion, 11-13: a block reconnecting alone builds its links against neighbours
+        // whose joints were confirmed in their own passes): after each single reconnect, still the rules' network
+        String single = "";
+        for (var v : scope) {
+            var now = LinksDiff.connectedWith(java.util.List.of(v), true);
+            var all = LinksDiff.canonical(scope);
+            if (!all.equals(off) && single.isEmpty())
+                single = v.coordonate + ": " + LinksDiff.difference(off, all, 6);
+        }
+        ctx.check("links: each block reconnected alone keeps the rules' network", single.isEmpty(), single);
+    }
+
+    /** The cable pieces' stored joints say what the live network has (CableVerify), over the voxel blocks in the test's bounds. */
+    static void links(GameTestHelper helper, GameTestContext ctx) {
+        net.minecraft.world.phys.AABB bounds = helper.getBounds();
+        java.util.List<mods.eln.node.voxel.VoxelNode> scope = new java.util.ArrayList<>();
+        for (mods.eln.node.NodeBase n : new java.util.ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
+            if (!(n instanceof mods.eln.node.voxel.VoxelNode v) || n.isDestructing() || n.coordonate.dimention != mods.eln.misc.Dimensions.id(helper.getLevel())) continue;
+            if (bounds.contains(n.coordonate.x + .5, n.coordonate.y + .5, n.coordonate.z + .5)) scope.add(v);
+        }
+        if (scope.isEmpty()) return;
+        var rep = mods.eln.node.voxel.CableVerify.verify(scope);
+        ctx.check("links: the cables' joints match the network", rep.ok(),
+            rep.summary() + (rep.ok() ? "" : "; " + String.join("; ", rep.problems().subList(0, Math.min(6, rep.problems().size())))));
     }
 
     /**

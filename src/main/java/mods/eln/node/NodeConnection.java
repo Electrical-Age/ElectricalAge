@@ -18,6 +18,11 @@ public class NodeConnection {
         return EC;
     }
 
+    /** Its thermal link, or null. */
+    public ThermalConnection thermal() {
+        return TC;
+    }
+
     /** The node at the other end from n. */
     public NodeBase other(NodeBase n) {
         return n == N1 ? N2 : N1;

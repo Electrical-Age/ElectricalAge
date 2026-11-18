@@ -95,7 +95,7 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 | Node | + `lastLight` | `node/Node` |
 | TransparentNode | `node` {NodeBase}, `eid` (short, 1.12 device id), `element` {element} | `node/transparent/TransparentNode` |
 | SixNode | `node` {NodeBase}, `cacheBlockId` (always 0), `cacheBlockMeta`, `EID0..5` (short, 0 = empty face), `ED0..5` {element}; slots past the faces (voxel blocks: devices off centre, `SixNode.SLOTS`): `EID<s>`, `ED<s>`, `EP<s>` = int[]{face, ox, oy, oz} (world voxels off the face's centre), only for taken slots. An older version ignores them (those devices are lost on a rollback). | `node/six/SixNode` |
-| VoxelNode | SixNode keys + NodeBase keys copied to the root (older versions read them there), `legacy` {six-node tag}, `host` {block state}, `carved` (long[]), `parts`, `p0..` {`kind` + part data} | `node/voxel/VoxelNode`, `VoxelPart.read` |
+| VoxelNode | SixNode keys + NodeBase keys copied to the root (older versions read them there), `legacy` {six-node tag}, `host` {block state}, `carved` (long[]), `parts`, `nextPartId`, `p0..` {`kind`, `id` + part data; a cable's joints `j`} | `node/voxel/VoxelNode`, `VoxelPart.read` |
 | Transparent element | `others` (front + 8 if grounded), `burnt`, `burntKind`, `inv`, sim parts | `node/transparent/TransparentNodeElement` |
 | Six element | `sixFront`, `burnt`, `burntKind`, `inv`, sim parts | `node/six/SixNodeElement` |
 | GhostElement | flat `elemCoordx/y/z/d`, `obserCoordx/y/z/d`, `UUID` | `ghost/GhostElement` |

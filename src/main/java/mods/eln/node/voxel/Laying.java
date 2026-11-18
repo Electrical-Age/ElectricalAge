@@ -63,6 +63,7 @@ final class Laying {
             }
             placed.add(i);
         }
+        CableLinks.laid(at, parts);
         return null;
     }
 

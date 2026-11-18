@@ -254,6 +254,7 @@ final class CableNet {
             for (int j = i + 1; j < n; j++) {
                 CablePart a = cables.get(i), b = cables.get(j);
                 if (a.isKnuckle() || b.isKnuckle() || !a.sameCable(b) || a.face != b.face || !a.touches(b)) continue;
+                CableLinks.recordTouching(a, b);
                 int ra = find(root, i), rb = find(root, j);
                 if (ra != rb) root[ra] = rb;
             }
@@ -270,17 +271,74 @@ final class CableNet {
         for (int i = 0; i < conductors.size(); i++)
             for (int j = i + 1; j < conductors.size(); j++) {
                 Conductor a = conductors.get(i), b = conductors.get(j);
-                if (!a.valid() || !b.valid() || a.isBurntNow() || b.isBurntNow()) continue;
-                if (!NodeBase.compareConnectionMask(a.mask(), b.mask()) || !touch(a, b)) continue;
+                if (!a.valid() || !b.valid() || !NodeBase.compareConnectionMask(a.mask(), b.mask())) continue;
+                CablePart[] pq = touching(a, b);
+                if (pq == null) continue;
+                CableLinks.recordTouching(pq[0], pq[1]);   // (a burnt piece keeps its joints: it is repaired in place)
+                if (a.isBurntNow() || b.isBurntNow()) continue;
                 if (a.load != null && b.load != null) internalE.add(new ElectricalConnection(a.load, b.load));
                 if (a.thermal != null && b.thermal != null) internalT.add(new ThermalConnection(a.thermal, b.thermal));
                 if (a.port != null && b.port != null) internalB.add(new mods.eln.bus.BusPort[]{a.port, b.port});
             }
     }
 
-    private static boolean touch(Conductor a, Conductor b) {
-        for (CablePart p : a.parts) for (CablePart q : b.parts) if (p.touches(q)) return true;
-        return false;
+    /**
+     * Group the node's pieces into conductors from their joints (routing phase 3b) and make their loads: pieces of one
+     * cable on one face joined by a same-block CONT or SPLICE the predicate accepts are one conductor (knuckles alone);
+     * a joint between pieces of different conductors pairs them, one link per pair (as build: inner corners, tier
+     * changes, knuckles).
+     */
+    void buildFromJoints(java.util.function.Predicate<int[]> ok) {
+        conductors.clear();
+        of.clear();
+        internalE.clear();
+        internalT.clear();
+        internalB.clear();
+        List<CablePart> cables = new ArrayList<>();
+        for (VoxelPart p : node.parts) if (p instanceof CablePart c) cables.add(c);
+        int n = cables.size();
+        Map<CablePart, Integer> idx = new java.util.IdentityHashMap<>();
+        for (int i = 0; i < n; i++) idx.put(cables.get(i), i);
+        int[] root = new int[n];
+        for (int i = 0; i < n; i++) root[i] = i;
+        List<CablePart[]> pairs = new ArrayList<>();
+        for (CablePart a : cables)
+            for (int[] j : a.joints) {
+                int kind = CableLinks.kind(j);
+                if ((kind != CableLinks.CONT && kind != CableLinks.SPLICE) || j[2] != 0 || j[3] != 0 || j[4] != 0 || !ok.test(j)) continue;
+                if (!(node.partById(j[5]) instanceof CablePart b) || !idx.containsKey(b) || b == a) continue;
+                if (!a.isKnuckle() && !b.isKnuckle() && a.sameCable(b) && a.face == b.face) {
+                    int ra = find(root, idx.get(a)), rb = find(root, idx.get(b));
+                    if (ra != rb) root[ra] = rb;
+                } else pairs.add(new CablePart[]{a, b});
+            }
+        Map<Integer, Conductor> byRoot = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < n; i++) {
+            CablePart c = cables.get(i);
+            Conductor k = byRoot.computeIfAbsent(find(root, i), r -> new Conductor(c.tier, c.spec, c.face));
+            k.parts.add(c);
+            of.put(c, k);
+        }
+        conductors.addAll(byRoot.values());
+        for (Conductor k : conductors) if (k.valid()) k.make();
+        // (a pair can also come from same-cable pieces on one face that the union didn't group: none, by the rule)
+        java.util.Set<Long> done = new java.util.HashSet<>();
+        for (CablePart[] pq : pairs) {
+            Conductor a = of.get(pq[0]), b = of.get(pq[1]);
+            if (a == b || !a.valid() || !b.valid() || a.isBurntNow() || b.isBurntNow()) continue;
+            if (!NodeBase.compareConnectionMask(a.mask(), b.mask())) continue;
+            int ia = conductors.indexOf(a), ib = conductors.indexOf(b);
+            if (!done.add((long) Math.min(ia, ib) << 32 | Math.max(ia, ib))) continue;
+            if (a.load != null && b.load != null) internalE.add(new ElectricalConnection(a.load, b.load));
+            if (a.thermal != null && b.thermal != null) internalT.add(new ThermalConnection(a.thermal, b.thermal));
+            if (a.port != null && b.port != null) internalB.add(new mods.eln.bus.BusPort[]{a.port, b.port});
+        }
+    }
+
+    /** The first pair of pieces, one of each conductor, that touch; null if none. */
+    private static CablePart[] touching(Conductor a, Conductor b) {
+        for (CablePart p : a.parts) for (CablePart q : b.parts) if (p.touches(q)) return new CablePart[]{p, q};
+        return null;
     }
 
     private static int find(int[] root, int i) {
