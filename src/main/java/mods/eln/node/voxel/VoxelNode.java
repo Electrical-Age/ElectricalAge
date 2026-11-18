@@ -1185,7 +1185,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         int slot = freeSlot();
         if (slot < 0) return "No more devices fit in this block";
         if (!d.allowedOnSide(face)) return "It can't go on that side";
-        LRDU front = d.getFrontFromPlace(face, player);
+        LRDU front = DevicePreview.placeFront(d, face, player);
         int[] o = snap(d, face, front, hx, hy, hz);
         // in the middle of a free face: the face's own slot, as before (ports at the face's edges, which meet the
         // next block, a machine beside it, by EA's edge rule: a trimmer beside a furnace)

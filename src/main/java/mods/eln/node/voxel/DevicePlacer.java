@@ -22,7 +22,8 @@ import java.util.List;
  * <li>beside the cable: one of its pins of the cable's kind touching the cable's side (a tap);</li>
  * </ul>
  * and else where the click is, as before. A device in line, once broken, leaves the gap: the two ends stay where they are.
- * The front follows the player where the cable leaves a choice (the facing is tried first, then turned clockwise).
+ * The front follows the player where the cable leaves a choice (the facing is tried first, then turned clockwise); the
+ * facing is first turned as the player chose with the wrench key before placing (DevicePreview.turn).
  */
 public final class DevicePlacer {
     private DevicePlacer() {
@@ -52,8 +53,13 @@ public final class DevicePlacer {
      * refused next to one.
      */
     public static Plan plan(VoxelNode v, ItemStack stack, int slot, Direction face, double[] h, Player player) {
+        return plan(v, stack, slot, face, h, player, DevicePreview.turn(player, stack));
+    }
+
+    /** The same with the player's facing turned `turn` quarters clockwise first (the wrench key before placing, #513). */
+    static Plan plan(VoxelNode v, ItemStack stack, int slot, Direction face, double[] h, Player player, int turn) {
         SixNodeDescriptor d = Eln.sixNodeItem.getDescriptor(stack);
-        LRDU front0 = d.getFrontFromPlace(face, player);
+        LRDU front0 = DevicePreview.turned(d.getFrontFromPlace(face, player), turn);
         int[] o = VoxelNode.snap(d, face, front0, h[0], h[1], h[2]);
         Seg seg = nearest(v, face, h);
         boolean onCable = seg != null && seg.dist <= seg.c.tierInfo().width() / 2.0 + 1;

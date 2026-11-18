@@ -161,7 +161,12 @@ the rules above; the joints are kept alongside:
   and a Wireless Button left a phantom transmitter on "Default channel" for every probe the preview built.
   `VoxelDeviceCases.ProbesLeaveNoTraceCase` checks every device that goes anywhere.
 - Holding such a device shows it see-through where a click would put it (`DevicePreview`, client
-  `DevicePreviewRender`, `GlFrame.ghost`), reddish where it may not go. A click on a device in a voxel block places on
+  `DevicePreviewRender`, `GlFrame.ghost`), reddish where it may not go. A press of the wrench key (C) with it in hand
+  turns it before it is placed (Baughn 2026-11-18, #513; `DevicePreview.wrenchPressed`, sent as the key's down state):
+  to the next front clockwise at which the preview shows another place it may go, as a wrench click on a placed device
+  skips fronts that don't fit; the turn is kept per player for that kind of device and applied by every placement path
+  (`DevicePreview.placeFront`, `SixNode.frontFor`, `DevicePlacer.plan`). Not while aiming at a device in a voxel block
+  or another EA block (C there is for turning it). A click on a device in a voxel block places on
   that device's face (`placeFace`).
 - `CableConverter.revert` refuses a block holding such devices.
 

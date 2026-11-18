@@ -41,6 +41,7 @@ public final class VoxelDeviceCases {
         cases.add(new InLineChainCase());
         cases.add(new WrenchInLineCase());
         cases.add(new WrenchSkipsCase());
+        cases.add(new TurnBeforePlacingCase());
         cases.add(new PassivesInLineCase());
         cases.add(new DiodeRigCase());
         cases.add(new RheostatThermistorCase());
@@ -1357,6 +1358,82 @@ public final class VoxelDeviceCases {
         public void measure(TestContext c) {
             c.check("wrench skips: the quarter turn doesn't fit, so it turns half round", skipOk, skip + " [" + fits + "]");
             c.check("wrench skips: where only its front fits it stays and says why", stuckOk, stuck + " [" + stuckFits + "]");
+        }
+    }
+
+    /**
+     * The wrench key before placing (Baughn 2026-11-18, #513): a player looking down at a floor with a Voltage Probe in hand
+     * sees its preview at their facing; a press of C turns the preview a quarter clockwise, and the click places it so. A
+     * second probe, placed in the middle of a free floor (the face's own slot), keeps the turn chosen for that kind.
+     */
+    static final class TurnBeforePlacingCase implements TestCase {
+        String log = "";
+        LRDU facing, shown0, shown1, placed, middle;
+
+        public String name() {
+            return "the wrench key turns a device before placing";
+        }
+
+        public int width() {
+            return 5;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 3;
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 5; x++) for (int z = 0; z < 3; z++) c.floor(c.at(x, 0, z));
+            boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
+            mods.eln.node.voxel.CableConverter.convertOnLoad = true;
+            var pl = (net.minecraft.server.level.ServerPlayer) player(c);
+            var d = desc("Voltage Probe");
+            // (the FakePlayer is shared: its pose is put back after)
+            double px = pl.getX(), py = pl.getY(), pz = pl.getZ();
+            float yaw = pl.getYRot(), pitch = pl.getXRot();
+            try {
+                pl.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, d.newItemStack());
+                BlockPos p = c.at(1, 1, 1);
+                // straight down at a point off the middle of the floor there
+                pl.snapTo(p.getX() + 0.75, p.getY() + 0.5, p.getZ() + 0.5, 30, 90);
+                facing = d.getFrontFromPlace(Direction.YN, pl);
+                shown0 = mods.eln.node.voxel.DevicePreview.previewFrontForTests(pl);
+                mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, true);
+                mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, false);
+                shown1 = mods.eln.node.voxel.DevicePreview.previewFrontForTests(pl);
+                var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atLowerCornerOf(p).add(0.75, 0, 0.5),
+                    net.minecraft.core.Direction.UP, p.below(), false);
+                var res = d.parentItem.useOn(new net.minecraft.world.item.context.UseOnContext(pl, net.minecraft.world.InteractionHand.MAIN_HAND, hit));
+                var v = (VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, c.level()));
+                var e = v == null ? null : TapCase.placed(v);
+                placed = e == null ? null : e.front;
+                log = "use " + res;
+                // in the middle of a free floor: the face's own slot, the same turn
+                BlockPos q = c.at(3, 1, 1);
+                pl.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, d.newItemStack());
+                var hq = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atLowerCornerOf(q).add(0.5, 0, 0.5),
+                    net.minecraft.core.Direction.UP, q.below(), false);
+                d.parentItem.useOn(new net.minecraft.world.item.context.UseOnContext(pl, net.minecraft.world.InteractionHand.MAIN_HAND, hq));
+                var w = (VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(q, c.level()));
+                middle = w == null || w.getElement(Direction.YN) == null ? null : w.getElement(Direction.YN).front;
+            } finally {
+                mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
+                pl.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+                mods.eln.node.voxel.DevicePreview.forget(pl.getUUID());
+                pl.snapTo(px, py, pz, yaw, pitch);
+            }
+        }
+
+        public void measure(TestContext c) {
+            String got = fmt("facing %s, shown %s, after C shown %s, placed %s, in the middle %s (%s)", facing, shown0, shown1, placed, middle, log);
+            c.check("turn before placing: the preview shows it at the player's facing", shown0 != null && shown0 == facing, got);
+            c.check("turn before placing: C turns the preview a quarter clockwise", shown1 != null && shown1 == facing.getNextClockwise(), got);
+            c.check("turn before placing: the click places it as shown", placed != null && placed == shown1, got);
+            c.check("turn before placing: in a face's own slot too", middle != null && middle == facing.getNextClockwise(), got);
         }
     }
 

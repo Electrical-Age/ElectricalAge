@@ -16,6 +16,7 @@ import java.io.IOException;
 /**
  * EA's keys (1.12 ClientKeyHandler): the wrench key (C), held while clicking a switch to open its screen. With a chisel
  * in the main hand it opens the chisel's brush menu instead (ChiselRadial), and the server is not told the key is down.
+ * A press with a device in hand turns its placement preview (DevicePreview.wrenchPressed, on the server).
  */
 final class ClientKeys {
     private ClientKeys() {
@@ -58,6 +59,8 @@ final class ClientKeys {
             mc.gui.setScreen(ChiselRadial.create(mc.player.getMainHandItem(), WRENCH, down));
             return;
         }
+        // (a tap shorter than a tick: down and up, so the server sees the press; it turns a device in hand before placing)
+        if (clicked && !down && !wrenchDown && mc.gui.screen() == null) syncWrench(true);
         syncWrench(down);
     }
 

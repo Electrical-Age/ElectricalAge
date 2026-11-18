@@ -118,9 +118,10 @@ public class SixNode extends Node {
 
     /** A device into a slot: on face direction, its centre (ox, oy, oz) world voxels from the face's centre (0 for the
      *  six face slots). */
-    /** The front a device placed on side gets: the player's facing, by the descriptor. */
+    /** The front a device placed on side gets: the player's facing, by the descriptor, turned as the player chose with
+     *  the wrench key before placing (DevicePreview.placeFront). */
     protected LRDU frontFor(SixNodeDescriptor d, Direction side, Player player) {
-        return d.getFrontFromPlace(side, player);
+        return mods.eln.node.voxel.DevicePreview.placeFront(d, side, player);
     }
 
     public boolean createSubBlockAt(ItemStack itemStack, int slot, Direction direction, int ox, int oy, int oz, Player player) {

@@ -563,6 +563,11 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Tools (Baughn 2026-11-03): a pickaxe breaks machines, devices and pipes as fast as stone, shears break cables as fast
   as wool; in a block holding both, the part under the crosshair decides. No part breaks in under two ticks, so with
   vanilla's pause after each block it is at best one part per 7 ticks (`node/BreakTool`, `BreakToolCases`).
+- Turning voxel devices (Baughn 2026-11-18, #512/#513): a wrench click on a device placed off centre skips fronts at
+  which it doesn't fit and turns to the next one clockwise that does (with none it stays and says why); a press of the
+  wrench key (C) with such a device in hand turns its placement preview the same way, and the click places it as shown.
+  The chosen turn is kept per player for that kind of device until changed (or logout), not reset after placing.
+  `WrenchSkipsCase`, `TurnBeforePlacingCase`.
 
 ### Multi-fluid pipes (2026-11-03)
 - Baughn: EA pipes carry oil "the complex way": fluids are data (datapack species JSON), Raoult mixing within a

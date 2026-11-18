@@ -8,7 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Which players hold EA's wrench key (1.12 PlayerManager interactEnable, sent as packetPlayerKey). With it, a click on
- * a switch, button or wireless switch opens its screen instead of toggling it.
+ * a switch, button or wireless switch opens its screen instead of toggling it. A press with a device that goes anywhere
+ * in hand turns it before it is placed (DevicePreview.wrenchPressed).
  */
 public final class PlayerKeys {
     private PlayerKeys() {
@@ -25,8 +26,10 @@ public final class PlayerKeys {
             return;
         }
         if (key != WRENCH) return;
-        if (down) WRENCH_DOWN.add(p.getUUID());
-        else WRENCH_DOWN.remove(p.getUUID());
+        if (down) {
+            // a press (not the key held): turns a device in hand before it is placed (Baughn 2026-11-18, #513)
+            if (WRENCH_DOWN.add(p.getUUID())) mods.eln.node.voxel.DevicePreview.wrenchPressed(p);
+        } else WRENCH_DOWN.remove(p.getUUID());
     }
 
     /** 1.12 Utils.isPlayerUsingWrench: the wrench key, or an item called a wrench in hand. */
