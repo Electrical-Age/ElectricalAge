@@ -416,6 +416,14 @@
 
 # ---- the screen's elements (see the handbook's "The Screen Protocol")
 
+(defn- bound
+  "f, to run in the environment of the task that registers it (so what an event's handler prints goes where that
+  task prints, not to the Kernel window: AdventurAgent's requester)."
+  [f]
+  (when f
+    (def env (curenv))
+    (fn [& args] (fiber/setenv (fiber/current) env) (f ;args))))
+
 (def ui/screen-width "The screen's width in character cells (80 x 25 text mode)." 80)
 (def ui/screen-height "The screen's height in character cells; row 0 is the screen bar." 25)
 (def ui/width "A program's window's content width as it opens, in cells (the screen less its frame)." 78)
@@ -443,7 +451,7 @@
 (defn ui/back "Lower window w." [w] (ui/send 'back w))
 (defn ui/focus "Bring window w forward and give it the keyboard." [w] (ui/send 'activate w))
 (defn ui/title "The screen bar's title." [s] (ui/send 'title s))
-(defn- win-handler [w k f] (put win-handlers w (merge (or (get win-handlers w) @{}) @{k f})))
+(defn- win-handler [w k f] (put win-handlers w (merge (or (get win-handlers w) @{}) @{k (bound f)})))
 (defn ui/on-close "Call (f) as a task when the player clicks window w's close box (else it ends its process)." [w f]
   (win-handler w :close f))
 (defn ui/on-move "Call (f cw ch) as a task when a player moves or sizes window w." [w f] (win-handler w :move f))
@@ -458,7 +466,7 @@
   "A requester over window w: a title, a body (it may hold newlines) and buttons; (on-answer i) runs as a task with the
   button's index. The window takes nothing else until it is answered."
   [w id title body buttons on-answer]
-  (put ui-handlers [w id :ask] on-answer)
+  (put ui-handlers [w id :ask] (bound on-answer))
   (ui/send 'ask w id title body buttons))
 (defn ui/tab
   "Old programs' tab: window t, as big as the screen allows under its bar (a program's usual window)."
@@ -474,14 +482,14 @@
 (defn ui/line
   "An editable line: the player edits it on their own client; Enter calls (on-submit text seq) as a task."
   [t id x y w prompt on-submit]
-  (put ui-handlers [t id] on-submit)
+  (put ui-handlers [t id] (bound on-submit))
   (ui/send 'line t id x y w prompt))
 (defn ui/busy "A line's busy mark for submission seq." [t id seq on] (ui/send 'busy t id seq on))
 (defn ui/button "A button: a click calls (on-press) as a task." [t id x y w label on-press]
-  (put ui-handlers [t id] on-press)
+  (put ui-handlers [t id] (bound on-press))
   (ui/send 'button t id x y w label))
 (defn ui/list "A list of rows: a click calls (on-select index) as a task." [t id x y w h items on-select]
-  (put ui-handlers [t id] on-select)
+  (put ui-handlers [t id] (bound on-select))
   (ui/send 'list t id x y w h items))
 (defn ui/raw
   "An area of w by h cells for full-screen programs (games, editors of your own): once clicked, it gets the keyboard.
@@ -490,7 +498,7 @@
   with Ctrl or Alt held; mods adds 1 for Shift, 2 for Ctrl, 4 for Alt (0 for a typed character). A click calls (on-click x y), in cells from
   the area's corner. Draw on it with ui/text and ui/box made after it."
   [t id x y w h on-key &opt on-click]
-  (put ui-handlers [t id] {:key on-key :click on-click})
+  (put ui-handlers [t id] {:key (bound on-key) :click (bound on-click)})
   (ui/send 'raw t id x y w h))
 (defn ui/remove "Remove an element." [t id]
   (put ui-handlers [t id] nil)
@@ -597,7 +605,10 @@
   (while (or (get procs t) (= t 1)) (++ t))
   (when (> t 255) (error "too many processes"))
   (put procs t @{:name name :env (make-env root-env-of-os) :tab t})
-  (if geometry (ui/window t ;geometry) (ui/window t 1 2 ui/width ui/height name))
+  # (a usual window, smaller than the screen and stepped down and right from the last: Files and the like open beside
+  # each other; AdventurAgent's look)
+  (def k (% (length procs) 6))
+  (if geometry (ui/window t ;geometry) (ui/window t (+ 4 (* 3 k)) (+ 3 k) 60 16 name))
   t)
 
 (def proc/new-window "A window for a process of its own: proc/new-tab's newer name." proc/new-tab)
@@ -618,6 +629,11 @@
   it) where what it prints goes. Returns its window. Break on that window stops its tasks; its close box ends it."
   [name f & args]
   (proc-start name nil f ;args))
+
+(defn proc/start-window
+  "As proc/start, in a window of the given geometry: [x y cw ch title flags] as for ui/window."
+  [name geometry f & args]
+  (proc-start name geometry f ;args))
 
 (defn proc/list "The processes: [tab name tasks] each." []
   (seq [[t p] :pairs procs] [t (p :name) (length (filter |(env-of? $ (p :env)) (keys tasks)))]))

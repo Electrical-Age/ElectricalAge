@@ -15,7 +15,12 @@
 (ui/clear t)
 (ui/text t 1 1 1 :yellow "Applications")
 (eachp [i [name file about]] programs
-  (ui/button t (+ 10 i) 1 (+ 3 (* 2 i)) 12 name (fn [] (proc/start name run-file (string dir file))))
+  # (Gorillas' city is 76 x 20: it gets a window as big as the screen allows)
+  (ui/button t (+ 10 i) 1 (+ 3 (* 2 i)) 12 name
+             (fn [] (if (= name "Gorillas")
+                      (proc/start-window name [1 2 ui/width ui/height name ui/standard] run-file (string dir file))
+                      (proc/start name run-file (string dir file))))))
+(eachp [i [name file about]] programs
   (ui/text t (+ 20 i) 14 (+ 3 (* 2 i)) :light-gray about))
 (ui/text t 2 1 -1 :gray "Snake and Gorillas: click the field first.")
 (ui/menus t [["Project" ["Files" "f"] ["Shell" "s"] nil ["Close" "q"]]]
