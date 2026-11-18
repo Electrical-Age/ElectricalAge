@@ -104,6 +104,12 @@ public class ComputerScreen extends ElnScreen {
         return true;
     }
 
+    /** The address field's column: right of the drives, and of their label (its width differs by language). */
+    int addressX() {
+        int drives = 9 + 8 * 18 + 14;
+        return Math.max(drives + 2 * 18 + 14, drives + font.width(tr("Floppy drives")) + 10);
+    }
+
     /** The panel's width and height for the computer's screen size now. */
     static int widthFor(ComputerRender r) {
         return Math.max(WIDTH, 2 * AREA_X + r.scene.w * CELL);
@@ -133,7 +139,7 @@ public class ComputerScreen extends ElnScreen {
         button(9, bottomY, 50, () -> tr("Reset"), () -> render.clientSendId(ComputerElement.RESET_ID));
         button(61, bottomY, 62, () -> render.switchedOn ? tr("Power off") : tr("Power on"),
             () -> render.clientSendId(ComputerElement.POWER_ID));
-        field(9 + 8 * 18 + 14 + 2 * 18 + 14, slotsY, 36, () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
+        field(addressX(), slotsY, 36, () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
             float f = EaField.parse(v);
             render.clientSendFloat(ComputerElement.SET_ADDRESS_ID, Float.isNaN(f) ? 0 : Math.round(f));
         }, tr("Its RS485 address, 17 to 255: the source of the packets it sends."));
@@ -463,7 +469,7 @@ public class ComputerScreen extends ElnScreen {
             for (int p = 0; p < 6; p++) g.fill(sx + 2 + 2 * p, sy + 1, sx + 3 + 2 * p, sy + 3, 0xFFC8A040);
         }
         label(g, 127, bottomY + 6, render.stateTextClient());
-        label(g, 9 + 8 * 18 + 14 + 2 * 18 + 14, slotsY - 11, tr("Address"));   // (over its field, beside the drives: Baughn)
+        label(g, addressX(), slotsY - 11, tr("Address"));   // (over its field, beside the drives: Baughn)
     }
 
     /** The composed cells: each row's paper in runs, then the pictures over the cells they show on, then the glyphs. */
