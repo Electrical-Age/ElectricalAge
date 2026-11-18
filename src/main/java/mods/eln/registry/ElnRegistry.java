@@ -47,6 +47,8 @@ public final class ElnRegistry {
         MENUS.register("node", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(mods.eln.gui.ElnNodeMenu::fromNetwork));
     public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.item.belt.BeltMenu>> BELT_MENU =
         MENUS.register("battery_belt", () -> new net.minecraft.world.inventory.MenuType<>(mods.eln.item.belt.BeltMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
+    public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.node.voxel.ToolbagMenu>> TOOLBAG_MENU =
+        MENUS.register("toolbag", () -> new net.minecraft.world.inventory.MenuType<>(mods.eln.node.voxel.ToolbagMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
     public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.item.xray.XRayScannerMenu>> XRAY_MENU =
         MENUS.register("xray_scanner", () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(mods.eln.item.xray.XRayScannerMenu::fromNetwork));
     /** The electric bike's trunk (Baughn 2026-10-28). */
@@ -194,6 +196,9 @@ public final class ElnRegistry {
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ValveItem> PIPE_PRESSURE_VALVE =
         ITEMS.registerItem("pipe_pressure_valve", p -> new mods.eln.node.voxel.ValveItem(p, mods.eln.node.voxel.ValvePart.PRESSURE));
     /** Baughn 2026-10-27: the battery belt (moved from Stasis Delvers, which keeps an alias for its old id). */
+    /** Baughn 2026-11-18 (todos #510, #517): a bag of cable and pipe kits used in place of a kit. */
+    public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.node.voxel.ToolbagItem> TOOLBAG =
+        ITEMS.registerItem("toolbag", mods.eln.node.voxel.ToolbagItem::new);
     public static final net.neoforged.neoforge.registries.DeferredItem<mods.eln.item.belt.BatteryBeltItem> BATTERY_BELT =
         ITEMS.registerItem("battery_belt", mods.eln.item.belt.BatteryBeltItem::new, p -> p.stacksTo(1));
     /** Baughn 2026-10-30: the headlamp, a flashlight on a band: the helmet slot (a leather cap's protection) or Curios' head slot. */
@@ -370,6 +375,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(BATTERY_BELT);
         ALL_ITEMS.add(HEADLAMP);
         ALL_ITEMS.addAll(CABLE_KITS);   // (voxel cables, 26.x)
+        ALL_ITEMS.add(TOOLBAG);
         ALL_ITEMS.add(CHISEL);
         ALL_ITEMS.add(HANDBOOK);
         ALL_ITEMS.add(FIELD_BUS_CABLE);

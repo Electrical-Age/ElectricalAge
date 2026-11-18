@@ -36,7 +36,8 @@ public final class KitOutline {
     public static void onExtract(ExtractBlockOutlineRenderStateEvent e) {
         var player = Minecraft.getInstance().player;
         List<int[]> bs = boxes;
-        if (player == null || bs.isEmpty() || !(player.getMainHandItem().getItem() instanceof KitItem)) return;   // (cable and pipe kits)
+        if (player == null || bs.isEmpty() || !(player.getMainHandItem().getItem() instanceof KitItem
+            || player.getMainHandItem().getItem() instanceof mods.eln.node.voxel.ToolbagItem)) return;   // (cable and pipe kits, the Toolbag)
         int st = state;
         int color = st == 2 ? 0xE040D8FF : st == 1 ? 0xC040FF60 : 0xC0FF4040;   // (cyan: into a machine's port)
         long arrived = debugArrived;

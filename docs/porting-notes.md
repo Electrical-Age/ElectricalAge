@@ -417,6 +417,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   (`TransparentNodeElement.wrenchTurn`, `FluidPlacement.turn`). Tanks and exchangers in a box or stack don't turn. Before,
   placing turned the device and its neighbours to meet the most ports, and nothing turned them back.
   `machines_face_the_player_and_the_wrench_turns_them`.
+- Toolbag (new, Baughn 2026-11-18, todos #510/#517; `node/voxel/ToolbagItem`): a bag of 15 cable and pipe kits (and a
+  shears slot for the cutting to come) that lays routes as a kit does, the kind taken from the cable clicked or chosen
+  on a radial (voltage or pipe, cross-section, colour). Recipe: leather round a chest, an iron ingot on top (a default
+  pending Baughn). docs/voxel-cables.md, Toolbag.
 - Battery Belt (new, Baughn 2026-10-27; `item/belt`, first shipped in Stasis Delvers, which aliases its old id
   `stasisdelvers:battery_belt` to this one): a Curios belt (optional dependency) with four pockets for EA portable
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item

@@ -33,6 +33,9 @@ public class RadialMenu extends Screen {
     final KeyMapping holdKey;
     final Runnable commit;
     boolean held;
+    /** Clicks on the rings pick and stay open (the centre, or a pick that calls commitAndClose, takes the choices):
+     *  rings whose choices depend on each other, as the Toolbag's. Off for the chisel. */
+    boolean stayOpen;
     double mouseX, mouseY;
 
     /**
@@ -46,6 +49,18 @@ public class RadialMenu extends Screen {
         this.holdKey = holdKey;
         this.held = held;
         this.commit = commit;
+    }
+
+    /** The same, a click on a ring picking without closing (stayOpen). */
+    public RadialMenu(Component title, List<List<Segment>> rings, Supplier<Component> centre, KeyMapping holdKey, Runnable commit, boolean stayOpen) {
+        this(title, rings, centre, holdKey, false, commit);
+        this.stayOpen = stayOpen;
+    }
+
+    /** Take the choices so far and close (a pick that completes them). */
+    public void commitAndClose() {
+        commit.run();
+        onClose();
     }
 
     static int inner(int ring) {
@@ -168,6 +183,10 @@ public class RadialMenu extends Screen {
         if (e.button() != com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) return false;   // (26.3: left is 1, AdventurAgent)
         int[] h = at(e.x() - width / 2.0, e.y() - height / 2.0, counts());
         if (h == null) return true;
+        if (stayOpen && h[0] >= 0) {
+            rings.get(h[0]).get(h[1]).pick().run();
+            return true;
+        }
         if (h[0] < 0 || !held) {
             mouseX = e.x();
             mouseY = e.y();

@@ -42,6 +42,10 @@ public final class ServerPacketHandler {
                 mods.eln.node.voxel.ChiselItem.applyBrush(player, stream.readByte(), stream.readByte());
                 return;
             }
+            if (type == Eln.packetToolbagChoice) {
+                mods.eln.node.voxel.ToolbagItem.choice(player, stream);
+                return;
+            }
             if (type != Eln.packetPublishForNode) return;
             Coordonate c = new Coordonate(stream.readInt(), stream.readInt(), stream.readInt(), stream.readInt());
             NodeBase node = NodeManager.instance.getNodeFromCoordonate(c);

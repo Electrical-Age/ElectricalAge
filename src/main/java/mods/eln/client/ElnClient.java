@@ -86,6 +86,8 @@ public final class ElnClient {
             net.neoforged.neoforge.client.gui.VanillaGuiLayers.HOTBAR, net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "bike_speedometer"), BikeHud::render));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class, e -> e.registerAbove(
             net.neoforged.neoforge.client.gui.VanillaGuiLayers.OVERLAY_MESSAGE, net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "route_note"), RouteNoteHud::render));
+        modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class, e -> e.registerAbove(
+            net.neoforged.neoforge.client.gui.VanillaGuiLayers.OVERLAY_MESSAGE, net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "toolbag_hint"), ToolbagHud::render));
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent.class,
             e -> e.registerAboveAll(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "tutorial_sign"),
                 mods.eln.sixnode.tutorialsign.TutorialSignHud::render));
@@ -154,6 +156,7 @@ public final class ElnClient {
                 e.register(ElnRegistry.NODE_MENU.get(), mods.eln.client.gui.ElnScreens::create);
                 e.register(ElnRegistry.XRAY_MENU.get(), mods.eln.client.gui.XRayScannerScreen::new);
                 e.register(ElnRegistry.BELT_MENU.get(), mods.eln.client.gui.BeltScreen::new);
+                e.register(ElnRegistry.TOOLBAG_MENU.get(), mods.eln.client.gui.ToolbagScreen::new);
                 e.register(ElnRegistry.BIKE_TRUNK_MENU.get(), mods.eln.client.gui.BikeTrunkScreen::new);
             });
         XRayScan.install();

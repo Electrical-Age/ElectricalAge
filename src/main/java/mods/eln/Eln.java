@@ -136,6 +136,10 @@ public class Eln {
     /** 26.x, server -> client: why a kit's route click failed, shown above the action bar for a while (UTF string;
      *  node.voxel.KitPreview.note, client.RouteNoteHud). */
     public static final byte packetRouteNote = 27;
+    /** 26.x, server -> client: open the Toolbag's radial (route on, chosen kind, the kinds held: node.voxel.ToolbagItem). */
+    public static final byte packetToolbagRadial = 28;
+    /** 26.x, client -> server: the Toolbag radial's choice (action, kind: ToolbagItem.choice). */
+    public static final byte packetToolbagChoice = 29;
 
     // Voltage / power levels: real-world values (Baughn 2026-11-06: 48 V, 230 V, 400 V and 11 kV replace 1.12's 50, 200,
     // 800 and 3200 V; signals are 0-5 V instead of 0-50 V). Cable resistances follow from U and P, so power limits stay.
@@ -302,6 +306,7 @@ public class Eln {
             e -> {
                 mods.eln.node.voxel.KitPreview.forget(e.getEntity().getUUID());
                 mods.eln.node.voxel.DevicePreview.forget(e.getEntity().getUUID());
+                mods.eln.node.voxel.ToolbagItem.forget(e.getEntity().getUUID());
             });
         // pipe routes being laid: forgotten on logout and death
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class,

@@ -25,7 +25,7 @@ public final class VoxelOutline {
 
     public static void onExtract(ExtractBlockOutlineRenderStateEvent e) {
         var player = Minecraft.getInstance().player;
-        if (player == null || player.getMainHandItem().getItem() instanceof KitItem
+        if (player == null || player.getMainHandItem().getItem() instanceof KitItem || player.getMainHandItem().getItem() instanceof mods.eln.node.voxel.ToolbagItem
             || player.getMainHandItem().getItem() instanceof mods.eln.node.voxel.ChiselItem) return;
         BlockPos at = e.getBlockPos();
         if (!(e.getLevel().getBlockEntity(at) instanceof VoxelNodeEntity v)) return;

@@ -322,6 +322,27 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
 - Tests: `RouteLeakCases` (lay/break/re-lay rounds leave nothing in the simulator or fluid world),
   `PipeCases` (`pipe_laying_all_or_nothing`, `pipe_kit_starts_anywhere_and_caps`, `pipe_kit_branches_pipe_to_pipe`).
 
+## Toolbag
+
+- `ToolbagItem` (`eln:toolbag`; Baughn 2026-11-18, todos #510/#517): a bag of cable and pipe kits used in place of a
+  kit. Its contents are a `DataComponents.CONTAINER` of `SLOTS` 16: kit slots 0..14 (three rows of five; cable and pipe
+  kits only) and `SHEARS_SLOT` 15 (vanilla shears, for cutting cables: phase B, not used yet). `ToolbagMenu` /
+  client `ToolbagScreen` as the battery belt's (written back on every change, its hotbar slot locked). The chosen kind
+  (`Kind`: pipe or cable tier, a power cable's mm² index and colour) is in its custom data (`toolbagKind`).
+- Placers read the main hand through `KitSupply` (a kit, or the bag's kits of its chosen kind taken together:
+  `ToolbagItem.supply`, its length their sum, `take` from the first slots on, emptied kits removed).
+- Right-click: the air opens it (sneaking: the radial); a cable or pipe (no route on) takes its kind (a cable laid
+  without a spec is its tier's preset; colour must match) and starts or finishes a route from it as that kit would,
+  else "No ... kit in the toolbag" (`KitPreview.note`); anywhere else with no route on, or sneaking, opens the radial
+  (`packetToolbagRadial` -> client `ToolbagRadial`, `RadialMenu` with `stayOpen`): kind or voltage, then cross-section,
+  then colour, only what it holds; a pick that leaves no choice beyond, or the centre, sends `packetToolbagChoice`.
+  The click that opened it is kept (`PENDING`, 30 s, same dimension, within 10 blocks) and replayed as the route's
+  start once the kind is chosen. With a route on the radial adds Undo and Cancel (the bag's sneak-click is the radial),
+  and a new kind restarts the route from its start click (`STARTED`), a cable's waypoints kept for a cable.
+- Client `ToolbagHud`: the chosen kind and a terse usage line above the route note while the bag is in hand.
+- `ToolbagCases`: slots; a cable click lays its kind across two kits; a kind it lacks; the radial starts at the click
+  and a new kind keeps the start; a pipe click; Cancel.
+
 ## Chisel
 
 - Left-click carves the brush out of the block just inside the face hit (cancels mining, both sides:

@@ -497,11 +497,11 @@ public final class CablePlacer {
 
     /** A cable kit used on a block face: start, extend or finish a route. Returns true if it handled the click. */
     public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, ItemStack kit, int tier, Vec3 hit) {
-        return use(player, level, pos, face, KitSupply.of(kit), hit);
+        return use(player, level, pos, face, KitSupply.of(kit), hit, player.isSecondaryUseActive());
     }
 
-    /** The same, laid from a supply (a kit, or several taken as one). */
-    public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, KitSupply kit, Vec3 hit) {
+    /** The same, laid from a supply (a kit, or several taken as one); sneak: the click takes back a waypoint or cancels. */
+    public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, KitSupply kit, Vec3 hit, boolean sneak) {
         int tier = kit.tier();
         Plan plan = PLANS.get(player.getUUID());
         long now = level.getGameTime();
@@ -513,18 +513,8 @@ public final class CablePlacer {
             plan = null;
         }
         if (plan != null) plan.touched = now;
-        if (plan == null && !player.isSecondaryUseActive() && hit != null && repair(player, level, pos, hit, kit, tier, spec)) return true;
-        if (player.isSecondaryUseActive()) {
-            if (plan == null) return false;
-            if (plan.waypoints.isEmpty()) {
-                PLANS.remove(player.getUUID());
-                player.sendOverlayMessage(Component.literal("Cable route cancelled"));
-            } else {
-                plan.waypoints.remove(plan.waypoints.size() - 1);
-                player.sendOverlayMessage(Component.literal("Waypoint taken back (" + plan.waypoints.size() + " left)"));
-            }
-            return true;
-        }
+        if (plan == null && !sneak && hit != null && repair(player, level, pos, hit, kit, tier, spec)) return true;
+        if (sneak) return undo(player);
         long[][] join = new long[1][];
         CableRouter.End at = endAt(level, pos, face, hit, plan == null, join, tier);
         if (at == null) {
@@ -537,7 +527,7 @@ public final class CablePlacer {
             p.spec = spec;
             p.touched = now;
             PLANS.put(player.getUUID(), p);
-            player.sendOverlayMessage(Component.literal("Cable route started: click faces for waypoints, a device or cable (or the last waypoint again) to finish, sneak-click to undo"));
+            player.sendOverlayMessage(Component.literal("Cable route started: click faces for waypoints, a device or cable (or the last waypoint again) to finish, " + kit.undoHint() + " to undo"));
             return true;
         }
         CableRouter.End last = plan.waypoints.isEmpty() ? null : plan.waypoints.get(plan.waypoints.size() - 1);
@@ -549,7 +539,7 @@ public final class CablePlacer {
             KitPreview.slow("waypoint route (server thread)", tRoute, (plan.startJoin != null ? "from a cable, " : "") + Router.LAST_EXPANSIONS.get() + " expansions");
             if (r.error != null) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
-                KitPreview.note(player, "Can't reach that waypoint: " + r.error + " (sneak-click to cancel the route)");
+                KitPreview.note(player, "Can't reach that waypoint: " + r.error + " (" + kit.undoHint() + " to cancel the route)");
             } else {
                 player.sendOverlayMessage(Component.literal(String.format("Waypoint %d: %.1f blocks so far", plan.waypoints.size(), r.length() / 16.0)));
                 show(player, level, r.steps);
@@ -563,7 +553,7 @@ public final class CablePlacer {
         KitPreview.slow("click route (server thread)", tRoute, (plan.startJoin != null ? "from a cable, " : "") + Router.LAST_EXPANSIONS.get() + " expansions");
         if (r.error != null) {
             if (again) plan.waypoints.add(end);
-            KitPreview.note(player, "No route: " + r.error + " (sneak-click to cancel the route)");
+            KitPreview.note(player, "No route: " + r.error + " (" + kit.undoHint() + " to cancel the route)");
             return true;
         }
         int len = r.length();
@@ -585,6 +575,37 @@ public final class CablePlacer {
         }
         player.sendOverlayMessage(Component.literal(String.format("Laid %.1f blocks of cable", len / 16.0)));
         return true;
+    }
+
+    /** Take back the route's last waypoint, or cancel it if it has none; false if there is no route. */
+    public static boolean undo(ServerPlayer player) {
+        Plan plan = PLANS.get(player.getUUID());
+        if (plan == null) return false;
+        if (plan.waypoints.isEmpty()) {
+            PLANS.remove(player.getUUID());
+            player.sendOverlayMessage(Component.literal("Cable route cancelled"));
+        } else {
+            plan.waypoints.remove(plan.waypoints.size() - 1);
+            player.sendOverlayMessage(Component.literal("Waypoint taken back (" + plan.waypoints.size() + " left)"));
+        }
+        return true;
+    }
+
+    /** Is a route being laid by this player? */
+    public static boolean active(UUID player) {
+        return PLANS.containsKey(player);
+    }
+
+    /** Drop the player's route; its waypoints (empty if none). */
+    static List<CableRouter.End> drop(UUID player) {
+        Plan p = PLANS.remove(player);
+        return p == null ? List.of() : new ArrayList<>(p.waypoints);
+    }
+
+    /** Add waypoints to the player's route (a Toolbag's new kind keeps them). */
+    static void addWaypoints(UUID player, List<CableRouter.End> wps) {
+        Plan p = PLANS.get(player);
+        if (p != null) p.waypoints.addAll(wps);
     }
 
     static CableRouter.Result route(Level level, Plan plan, CableRouter.End end, long[] endJoin) {

@@ -39,6 +39,7 @@ public final class ClientPacketHandler {
                     case Eln.packetDevicePreview -> mods.eln.client.render.DevicePreviewRender.read(stream);
                     case Eln.packetValveScreen -> mods.eln.client.ThrottleValveScreen.open(stream, level);
                     case Eln.packetRouteNote -> RouteNoteHud.read(stream);
+                    case Eln.packetToolbagRadial -> ToolbagRadial.open(stream);
                     default -> {
                     }
                 }

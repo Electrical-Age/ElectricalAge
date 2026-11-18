@@ -297,11 +297,12 @@ public final class PipePlacer {
      */
     public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, ItemStack kit, int tier,
                               net.minecraft.world.phys.Vec3 hit) {
-        return use(player, level, pos, face, KitSupply.of(kit), hit);
+        return use(player, level, pos, face, KitSupply.of(kit), hit, player.isSecondaryUseActive());
     }
 
-    /** The same, laid from a supply (a kit, or several taken as one). */
-    public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, KitSupply kit, net.minecraft.world.phys.Vec3 hit) {
+    /** The same, laid from a supply (a kit, or several taken as one); sneak: the click takes back a waypoint or cancels. */
+    public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, KitSupply kit, net.minecraft.world.phys.Vec3 hit,
+                              boolean sneak) {
         int tier = kit.tier();
         Plan plan = PLANS.get(player.getUUID());
         long now = level.getGameTime();
@@ -314,18 +315,7 @@ public final class PipePlacer {
         PipeRouter.End port = portAt(level, pos, face, hit);
         boolean device = false;
         if (port == null) device = (port = devicePort(level, pos, hit)) != null;
-        if (player.isSecondaryUseActive()) {
-            if (plan == null) return false;
-            if (plan.waypoints.isEmpty()) {
-                PLANS.remove(player.getUUID());
-                player.sendOverlayMessage(Component.literal("Pipe route cancelled"));
-            } else {
-                plan.waypoints.remove(plan.waypoints.size() - 1);
-                player.sendOverlayMessage(Component.literal("Waypoint taken back (" + plan.waypoints.size() + " left)"));
-                preview(player, level, plan, null);
-            }
-            return true;
-        }
+        if (sneak) return undo(player, level);
         if (device && portTaken(level, pos, hit)) {
             player.sendOverlayMessage(Component.literal(PORT_TAKEN));
             return true;
@@ -342,7 +332,7 @@ public final class PipePlacer {
             p.touched = now;
             PLANS.put(player.getUUID(), p);
             player.sendOverlayMessage(Component.literal((join != null ? "Pipe route started on the pipe" : "Pipe route started")
-                + ": click for waypoints, a port or pipe to finish, the last waypoint again to end it there; sneak-click to undo"));
+                + ": click for waypoints, a port or pipe to finish, the last waypoint again to end it there; " + kit.undoHint() + " to undo"));
             return true;
         }
         PipeRouter.End lastWp = plan.waypoints.isEmpty() ? null : plan.waypoints.get(plan.waypoints.size() - 1);
@@ -390,6 +380,31 @@ public final class PipePlacer {
         if (!creative) kit.take(len);
         player.sendOverlayMessage(Component.literal(String.format("Laid %.1f blocks of pipe", len / 16.0)));
         return true;
+    }
+
+    /** Take back the route's last waypoint, or cancel it if it has none; false if there is no route. */
+    public static boolean undo(ServerPlayer player, ServerLevel level) {
+        Plan plan = PLANS.get(player.getUUID());
+        if (plan == null) return false;
+        if (plan.waypoints.isEmpty()) {
+            PLANS.remove(player.getUUID());
+            player.sendOverlayMessage(Component.literal("Pipe route cancelled"));
+        } else {
+            plan.waypoints.remove(plan.waypoints.size() - 1);
+            player.sendOverlayMessage(Component.literal("Waypoint taken back (" + plan.waypoints.size() + " left)"));
+            preview(player, level, plan, null);
+        }
+        return true;
+    }
+
+    /** Is a pipe route being laid by this player? */
+    public static boolean active(UUID player) {
+        return PLANS.containsKey(player);
+    }
+
+    /** Drop the player's pipe route. */
+    static void drop(UUID player) {
+        PLANS.remove(player);
     }
 
     /** The point on the pipe under the crosshair where a route could join it (world voxels: a lattice point on its

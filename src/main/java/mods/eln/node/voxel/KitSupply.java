@@ -4,7 +4,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * What a route is laid from: a cable or pipe kit (one stack, or several taken as one). The placers
+ * What a route is laid from: a cable or pipe kit, or a Toolbag's kits of its chosen kind taken as one (ToolbagItem). The placers
  * (CablePlacer, PipePlacer), their preview (KitPreview) and their lapse checks ask the item in the main hand for one.
  */
 public interface KitSupply {
@@ -58,11 +58,12 @@ public interface KitSupply {
         };
     }
 
-    /** The supply in p's main hand: a kit; else null. */
+    /** The supply in p's main hand: a kit, or a Toolbag with a kind chosen that it holds; else null. */
     static KitSupply held(Player p) {
         if (p == null) return null;
         ItemStack s = p.getMainHandItem();
         if (s.getItem() instanceof CableKitItem || s.getItem() instanceof PipeKitItem) return of(s);
+        if (s.getItem() instanceof ToolbagItem) return ToolbagItem.supply(s);
         return null;
     }
 
