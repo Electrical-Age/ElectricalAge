@@ -33,7 +33,10 @@ public class ComputerRender extends TransparentNodeElementRender {
         desc = (ComputerDescriptor) d;
     }
 
-    /** The tab this client's open screen shows (-1: none open; the monitor then shows SceneCells.defaultTab). */
+    /**
+     * The tab this client's screen shows or last showed (-1: never opened; the monitor then shows SceneCells.defaultTab).
+     * Kept after the screen closes, so the monitor goes on showing what the screen did (AdventurAgent's look).
+     */
     public int shownTab = -1;
     ScreenTexture picture;
     boolean noPicture;
@@ -43,7 +46,14 @@ public class ComputerRender extends TransparentNodeElementRender {
         return switchedOn && (status == ComputerElement.RUNNING || status == ComputerElement.SLEEPING || status == ComputerElement.HALTED);
     }
 
+    long seenFocus = -1;
+
     int monitorTab() {
+        // a tab the program brings forward shows, as the screen would show it on opening
+        if (scene.focusSeq != seenFocus) {
+            seenFocus = scene.focusSeq;
+            if (shownTab >= 0 && scene.tabs.containsKey(scene.focus)) shownTab = scene.focus;
+        }
         return shownTab >= 0 && scene.tabs.containsKey(shownTab) ? shownTab : mods.eln.robotics.computer.screen.SceneCells.defaultTab(scene);
     }
 

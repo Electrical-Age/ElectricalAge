@@ -199,7 +199,6 @@ public class ComputerScreen extends ElnScreen {
     @Override
     public void removed() {
         Minecraft.getInstance().onTextInputFocusChange(this, false);
-        render.shownTab = -1;
         super.removed();
     }
 
