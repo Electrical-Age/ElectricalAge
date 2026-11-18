@@ -16,6 +16,7 @@
 
 (defn calculator []
   (def t (proc/tab))
+  (ui/place t 6 3 54 16)   # (keys and tape)
   (var entry "0")        # the number being typed (or the last result)
   (var acc nil)          # the number before the pending operation
   (var pending nil)      # "+" "-" "*" "/", or nil
@@ -91,7 +92,7 @@
     (draw))
 
   (ui/clear t)
-  (ui/raw t 1 0 0 36 ui/height
+  (ui/raw t 1 0 0 36 :fill
           (fn [k mods]
             (press (case k
                      "enter" "=" "backspace" "back" "delete" "C" "c" "C" "x" "*" "r" "sqrt"
@@ -101,7 +102,7 @@
     (eachp [col k] ks
       (ui/button t (+ 100 (* 10 row) col) (+ 1 (* 7 col)) (+ 5 (* 2 row)) 6 k (fn [] (press k)))))
   (ui/text t 5 37 0 :gray "tape")
-  (ui/log t 30 37 1 15 (- ui/height 1))
+  (ui/log t 30 37 1 :fill [:fill 0])
   (draw)
   (ui/focus t))
 

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** The monitor's cells (SceneCells): what a tab of a scene shows, cell by cell. */
+/** The screen composed in cells (SceneCells): the desk, framed windows back to front, elements, requesters, the bar. */
 class SceneCellsTest {
     static Scene scene(String... lines) {
         Scene s = new Scene();
@@ -26,36 +26,77 @@ class SceneCellsTest {
     }
 
     @Test
-    void laysOutTextLogsLinesAndButtons() {
-        Scene s = scene("(reset 80 25)", "(tab 1 \"REPL\")", "(log 1 1 0 0 80 24)", "(append 1 1 :red \"first\\nsecond \")",
-            "(append 1 1 :white \"line\")", "(line 1 2 0 24 80 \"> \")", "(button 1 3 70 0 6 \"Run\")", "(text 1 4 0 5 :lime \"hi\" :blue)");
-        SceneCells c = SceneCells.of(s, 1);
-        assertEquals("first", row(c, 0, 0, 5));
-        assertEquals("second line", row(c, 1, 0, 11));
-        assertEquals(c.ink[1 * 80], SceneCells.colour(Form.kw("red"), 0));
-        assertEquals(c.ink[1 * 80 + 7], SceneCells.colour(Form.kw("white"), 0));
+    void aFramedWindowOverTheDesk() {
+        Scene s = scene("(window 1 2 3 10 4 \"Shell\" [:close :depth :size :drag])", "(text 1 1 0 0 :lime \"hi\")", "(title \"Dynamo 1.0\")");
+        SceneCells c = SceneCells.of(s);
+        assertEquals(" Dynamo   Dynamo 1.0", row(c, 0, 0, 20), "the menu bar: the system menu, then the screen's title");
+        assertEquals(SceneCells.BAR, c.paper[0]);
+        assertEquals("■ Shell", row(c, 2, 1, 7), "the title row: the close box, then the title");
+        assertEquals(SceneCells.DEPTH, c.at(12, 2), "the depth box at its right end");
+        assertEquals(SceneCells.TITLE_IDLE, c.paper[3 * 80 + 1], "the border: the title's colour all round");
+        assertEquals(1, c.owner[3 * 80 + 1]);
+        assertEquals(SceneCells.OWNER_BAR, c.owner[5]);
+        assertEquals(SceneCells.OWNER_DESK, c.owner[20 * 80 + 40]);
+        assertEquals("hi", row(c, 3, 2, 2), "content from (x, y)");
+        assertEquals(SceneCells.SIZE, c.at(12, 7), "the size handle");
+        assertEquals(SceneCells.DESK, c.paper[20 * 80 + 40], "the desk");
+        assertEquals(SceneCells.TITLE_IDLE, c.paper[2 * 80 + 5], "not active");
+        assertEquals(SceneCells.TITLE_ACTIVE, SceneCells.of(s, SceneCells.NONE, 1).paper[2 * 80 + 5], "active");
+    }
+
+    @Test
+    void theFrontWindowCoversTheOneBehind() {
+        Scene s = scene("(window 1 2 3 20 6 \"A\" [:drag])", "(text 1 1 0 1 :white \"aaaaaaaaaaaaaaaaaaaa\")",
+            "(window 2 6 4 10 3 \"B\" [:drag])", "(text 2 1 0 0 :white \"bbbb\")");
+        SceneCells c = SceneCells.of(s);
+        assertEquals("aaa bbbb", row(c, 4, 2, 8), "B's border and text over A's");
+        assertEquals(2, c.owner[4 * 80 + 5]);
+        s.apply(Form.parse("(front 1)"));
+        assertEquals("aaaaaaaa", row(SceneCells.of(s), 4, 2, 8));
+    }
+
+    @Test
+    void contentIsClippedToItsWindow() {
+        Scene s = scene("(window 1 2 3 5 2 \"A\" [])", "(text 1 1 0 0 :white \"0123456789\")");
+        SceneCells c = SceneCells.of(s);
+        assertEquals("01234 ", row(c, 3, 2, 6), "the border, not the text's rest");
+    }
+
+    @Test
+    void logsLinesAndButtons() {
+        Scene s = scene("(window 1 0 1 80 24 \"REPL\" [:borderless])", "(log 1 1 0 0 80 23)", "(append 1 1 :red \"first\\nsecond \")",
+            "(append 1 1 :white \"line\")", "(line 1 2 0 23 80 \"> \")", "(button 1 3 70 0 6 \"Run\")");
+        SceneCells c = SceneCells.of(s);
+        assertEquals("first", row(c, 1, 0, 5));
+        assertEquals("second line", row(c, 2, 0, 11));
+        assertEquals(SceneCells.colour(Form.kw("red"), 0), c.ink[2 * 80]);
         assertEquals("> ", row(c, 24, 0, 2));
-        assertEquals(" Run  ", row(c, 0, 70, 6));
-        assertEquals(SceneCells.BUTTON, c.paper[70]);
-        assertEquals("hi", row(c, 5, 0, 2));
-        assertEquals(SceneCells.colour(Form.kw("blue"), 0), c.paper[5 * 80]);
+        assertEquals(" Run  ", row(c, 1, 70, 6));
+        SceneCells mine = SceneCells.of(s, new SceneCells.Local() {
+            @Override
+            public String lineText(int win, int id) {
+                return "(+ 1 2)";
+            }
+        }, 1);
+        assertEquals("> (+ 1 2)", row(mine, 24, 0, 9), "a display's own half-typed line");
     }
 
     @Test
     void aLogShowsItsNewestRowsWrapped() {
-        Scene s = scene("(reset 10 3)", "(tab 1 \"t\")", "(log 1 1 0 0 4 2)", "(append 1 1 :white \"a\\nb\\ncdefgh\")");
-        SceneCells c = SceneCells.of(s, 1);
-        assertEquals("cdef", row(c, 0, 0, 4));
-        assertEquals("gh  ", row(c, 1, 0, 4));
+        Scene s = scene("(window 1 0 1 10 3 \"t\" [:borderless])", "(log 1 1 0 0 4 2)", "(append 1 1 :white \"a\\nb\\ncdefgh\")");
+        SceneCells c = SceneCells.of(s);
+        assertEquals("cdef", row(c, 1, 0, 4));
+        assertEquals("gh  ", row(c, 2, 0, 4));
     }
 
     @Test
-    void theMonitorFollowsTheFocusThenTheRepl() {
-        Scene s = scene("(tab 0 \"Console\")", "(tab 1 \"REPL\")", "(tab 2 \"edit\")");
-        assertEquals(1, SceneCells.defaultTab(s));
-        s.apply(Form.parse("(focus 2)"));
-        assertEquals(2, SceneCells.defaultTab(s));
-        assertEquals(-1, SceneCells.defaultTab(new Scene()));
-        assertEquals(' ', SceneCells.of(new Scene(), 3).at(0, 0));
+    void aRequesterOverItsWindow() {
+        Scene s = scene("(window 1 2 3 40 10 \"Ed\" [:close])", "(ask 1 7 \"Quit\" \"Save changes?\" [\"Save\" \"Discard\"])");
+        int[][] lay = SceneCells.askLayout(s.windows.get(1));
+        SceneCells c = SceneCells.of(s);
+        assertEquals('╔', c.at(lay[0][0], lay[0][1]));
+        int by = lay[0][1] + lay[0][3] - 2;
+        assertEquals(" Save ", row(c, by, lay[1][0], lay[1][1]));
+        assertEquals(" Discard ", row(c, by, lay[2][0], lay[2][1]));
     }
 }

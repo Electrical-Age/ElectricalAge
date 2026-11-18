@@ -40,24 +40,27 @@ public class ComputerDescriptor extends TransparentNodeDescriptor {
     }
 
     /** The CRT's glass, block units centred as the model (ComputerParts.SCREEN_*: px x, rows y, columns z), 0.1 px out. */
-    static final float GLASS_X = (0.5f - 0.1f) / 16 - 0.5f, GLASS_Y0 = 20.0f / 16 - 0.5f, GLASS_Y1 = 28.25f / 16 - 0.5f,
-        GLASS_Z0 = 2.5f / 16 - 0.5f, GLASS_Z1 = 13.5f / 16 - 0.5f;
+    static final float GLASS_X = (0.5f - 0.1f) / 16 - 0.5f, GLASS_Y0 = 20.0f / 16 - 0.5f, GLASS_Y1 = (20.0f + 12.8f / 1.92f) / 16 - 0.5f,
+        GLASS_Z0 = 1.6f / 16 - 0.5f, GLASS_Z1 = 14.4f / 16 - 0.5f;
 
     /** The monitor's picture on its glass, full bright: its top row at the top, its first column on the left seen from the front. */
-    void drawPicture(net.minecraft.resources.Identifier texture) {
+    void drawPicture(net.minecraft.resources.Identifier texture, float aspect) {
+        // the glass is the 80 x 25 screen's shape; another shape (120 x 40) gets bars, the glass's own dark showing
+        float gw = GLASS_Z1 - GLASS_Z0, gh = GLASS_Y1 - GLASS_Y0, ph = Math.min(gh, gw / aspect), pw = Math.min(gw, gh * aspect);
+        float z0 = GLASS_Z0 + (gw - pw) / 2, z1 = z0 + pw, y0 = GLASS_Y0 + (gh - ph) / 2, y1 = y0 + ph;
         mods.eln.gl.GL11.bindTexture(texture);
         mods.eln.gl.GL11.setFullBright(true);
         mods.eln.misc.UtilsClient.disableCulling();
         mods.eln.gl.GL11.glColor4f(1, 1, 1, 1);
         mods.eln.gl.GL11.glBegin(mods.eln.gl.GL11.GL_QUADS);
         mods.eln.gl.GL11.glTexCoord2f(0, 0);
-        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y1, GLASS_Z0);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, y1, z0);
         mods.eln.gl.GL11.glTexCoord2f(0, 1);
-        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y0, GLASS_Z0);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, y0, z0);
         mods.eln.gl.GL11.glTexCoord2f(1, 1);
-        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y0, GLASS_Z1);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, y0, z1);
         mods.eln.gl.GL11.glTexCoord2f(1, 0);
-        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y1, GLASS_Z1);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, y1, z1);
         mods.eln.gl.GL11.glEnd();
         mods.eln.misc.UtilsClient.enableCulling();
         mods.eln.gl.GL11.setFullBright(false);

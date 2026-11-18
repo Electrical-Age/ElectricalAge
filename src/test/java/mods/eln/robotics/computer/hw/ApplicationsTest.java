@@ -117,7 +117,7 @@ class ApplicationsTest extends StdlibTest {
 
     /** Element id of tab t, or null. */
     static Scene.Element element(ScreenProbe s, int t, int id) {
-        Scene.Tab tab = s.scene.tabs.get(t);
+        Scene.Window tab = s.scene.windows.get(t);
         return tab == null ? null : tab.elements.get(id);
     }
 
@@ -142,7 +142,7 @@ class ApplicationsTest extends StdlibTest {
     /** What a failing test shows of a screen: the REPL, tab 2's texts and logs. */
     static String dump(ScreenProbe s) {
         StringBuilder b = new StringBuilder("[repl " + s.log() + "] [console " + s.console + "]");
-        Scene.Tab t = s.scene.tabs.get(2);
+        Scene.Window t = s.scene.windows.get(2);
         if (t != null)
             for (var en : t.elements.entrySet()) {
                 String k = en.getValue().kind;
@@ -169,22 +169,64 @@ class ApplicationsTest extends StdlibTest {
         }
     }
 
+    /** The floppy's application directory of a program: calculator is A:/Calculator.app/. */
+    static String app(String file) {
+        return "A:/" + (file.equals("bbs") ? "BBS" : Character.toUpperCase(file.charAt(0)) + file.substring(1)) + ".app/";
+    }
+
     void start(String file) throws IOException {
         m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), applications(), false));
-        type("(proc/start \"" + file + "\" run-file \"a:/" + file + ".janet\")");
+        type("(app/launch \"" + app(file) + "\")");
         tick(40, "\n2\n> ");
     }
 
+    /**
+     * Baughn (2026-11-18): the desk is made by scanning the drives for NAME.app directories; a double-click on an
+     * application's icon starts it, one of each.
+     */
     @Test
-    void theMenuStartsAProgram() throws IOException {
+    void theDeskStartsAnApplicationOnce() throws IOException {
         m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), applications(), false));
-        type("(proc/start \"menu\" run-file \"a:/startup.janet\")");
+        type("(proc/start \"desk\" run-file \"a:/startup.janet\")");
         tick(40, "\n2\n> ");
-        run(20);
-        assertEquals("Applications", text(screen, 2, 1));
-        m.editor.give(event(new Form.Symbol("press"), 2L, 10L));   // Calculator
+        run(60);
+        var desk = screen.scene.windows.get(2);
+        assertNotNull(desk, dump(screen));
+        assertTrue(desk.has("backdrop"), "the desk is a backdrop");
+        assertTrue(screen.scene.pixmaps.containsKey(1), "the desk's picture");
+        long calc = -1;
+        java.util.List<String> labels = new java.util.ArrayList<>();
+        for (var en : desk.elements.entrySet())
+            if (en.getValue().kind.equals("icon")) {
+                String label = Form.str(en.getValue().msg, 5, "");
+                labels.add(label);
+                if (label.equals("Calculator")) calc = en.getKey();
+            }
+        assertTrue(labels.containsAll(java.util.List.of("A:", "RAM:", "Shell", "BBS", "Calculator", "Gorillas", "Snake")), labels + " " + dump(screen) + " console " + screen.console);
+        m.editor.give(event(new Form.Symbol("open"), 2L, calc));
         run(40);
-        assertNotNull(element(screen, 3, 30), "the calculator's tape in tab 3");
+        assertNotNull(element(screen, 3, 30), "the calculator's tape in window 3; " + dump(screen));
+        m.editor.give(event(new Form.Symbol("open"), 2L, calc));
+        run(20);
+        assertNull(screen.scene.windows.get(4), "one calculator");
+    }
+
+    /** Baughn (2026-11-18): two text modes, 80 x 25 (the start) and 120 x 40; windows are kept on the screen. */
+    @Test
+    void theScreenHasTwoModes() throws IOException {
+        type("(do (ui/mode 120 40) [ui/screen-width ui/screen-height ui/width ui/height])");
+        tick(40, "(120 40 118 37)");
+        run(5);
+        assertEquals(120, screen.scene.w);
+        assertEquals(40, screen.scene.h);
+        type("(ui/mode 81 25)");
+        tick(40, "the modes are");
+    }
+
+    @Test
+    void theRamdiskKeepsFiles() throws IOException {
+        type("(do (spit \"RAM:/note.txt\" \"hello\") [(string (slurp \"ram:/note.txt\")) (disk/list :ram) (disk/present? :ram)])");
+        tick(40, "(\"hello\" @[\"note.txt\"] true)");
     }
 
     @Test
@@ -193,7 +235,7 @@ class ApplicationsTest extends StdlibTest {
         run(20);
         m.editor.give(event(new Form.Symbol("close"), 2L));
         run(10);
-        assertNull(screen.scene.tabs.get(2), "the tab is gone; " + dump(screen));
+        assertNull(screen.scene.windows.get(2), "the tab is gone; " + dump(screen));
     }
 
     @Test
@@ -276,7 +318,7 @@ class ApplicationsTest extends StdlibTest {
     void startBoth(Other o, String file) throws IOException {
         o.m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), applications(), false));
         m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), applications(), false));
-        String run = "(proc/start \"" + file + "\" run-file \"a:/" + file + ".janet\")";
+        String run = "(app/launch \"" + app(file) + "\")";
         type(run);
         o.type(run);
         both(o, 60, () -> element(screen, 2, 1) != null && element(o.screen, 2, 1) != null);
@@ -322,7 +364,7 @@ class ApplicationsTest extends StdlibTest {
         o.m.editor.give(event(new Form.Symbol("submit"), 2L, 4L, 1L, "/board trade"));
         o.m.editor.give(event(new Form.Symbol("submit"), 2L, 4L, 2L, "Buying steam turbines"));
         both(o, 200, () -> text(screen, 2, 1).contains("2 posts"));
-        o.type("(string (slurp \"a:/bbs/posts.jdn\"))");
+        o.type("(string (slurp \"a:/BBS.app/bbs/posts.jdn\"))");
         both(o, 40, () -> o.screen.log().contains("Buying steam turbines"));
         assertTrue(o.screen.log().contains("Selling 64 copper"), o.screen.log());
     }

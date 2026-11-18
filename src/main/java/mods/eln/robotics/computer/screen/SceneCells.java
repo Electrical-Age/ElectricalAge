@@ -5,17 +5,85 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * One tab of a scene laid out in character cells, as the monitor shows it (Baughn 2026-11-18: the monitor shows what
- * the screen shows): each cell's code point, ink and paper (ARGB), in the screen's colours. What only a player's own
- * screen has (a half-typed line, scrolling, an editor's unsaved text) isn't here: lines show their prompt, logs and
- * lists their newest and first rows, editors the text the computer sent.
+ * The whole screen composed in character cells (each cell's code point, ink and paper, ARGB): the desk, the windows
+ * back to front with their frames and title rows, their elements, a requester, and the screen bar on row 0. The
+ * monitor paints exactly this; the computer's screen draws it too, with what only its own player has (a half-typed
+ * line, scrolling) given by a {@link Local}, and overlays (the cursor, menus, a drag) on top.
+ * <p>
+ * Frames use the game font's box-drawing glyphs: a window's title row has the close box (■) at its left end and the
+ * depth box (▒) at its right; its bottom right corner is the size handle (╝).
  */
 public final class SceneCells {
-    public static final int PAPER = 0xFF101418, INK = 0xFFE6E6E6, PROMPT = 0xFF8FB0FF, BUSY = 0xFFE0C060, BUTTON = 0xFF5A5A66,
-        LIST = 0xFF181C22, LIST_INK = 0xFFD0D0D0, RAW = 0xFF0C0E10, BOX = 0xFF404040, EDITOR = 0xFF1C1D22;
+    // the pens (Dynamo's default scheme: slate desk, cream text, amber marks)
+    public static final int DESK = 0xFF3B5470, BAR = 0xFFE8E0C8, BAR_TEXT = 0xFF14161A, TITLE_ACTIVE = 0xFFE0A030,
+        TITLE_ACTIVE_TEXT = 0xFF14161A, TITLE_IDLE = 0xFF5A6070, TITLE_IDLE_TEXT = 0xFFD8D2C0, FRAME_ACTIVE = 0xFFE8E0C8,
+        FRAME_IDLE = 0xFF8A90A0, PAPER = 0xFF101418, INK = 0xFFE6E6E6, PROMPT = 0xFF8FB0FF, BUSY = 0xFFE0C060,
+        BUTTON = 0xFF5A5A66, LIST = 0xFF181C22, LIST_INK = 0xFFD0D0D0, RAW = 0xFF0C0E10, BOX = 0xFF404040, EDITOR = 0xFF1C1D22,
+        ASK = 0xFFD8D2C0, ASK_TEXT = 0xFF14161A, ASK_BUTTON = 0xFF8A90A0;
+    public static final int CLOSE = '■', DEPTH = '▒', SIZE = '╝', ICONIFY = '▄';
+    /** The system menu's title, first on the menu bar (Baughn 1572655325104832613). */
+    public static final String SYSTEM_MENU = "Dynamo";
+
+    /** What only one player's display has, for the cells it composes (the monitor has none of it). */
+    public interface Local {
+        /** A line's text as this player is editing it (after the prompt), or null: none. */
+        default String lineText(int win, int id) {
+            return null;
+        }
+
+        /** How far this player scrolled a log back, or a list down. */
+        default int scroll(int win, int id) {
+            return 0;
+        }
+
+        /** An editor this display draws itself (a widget): its cells are left as paper. */
+        default boolean ownEditor(int win, int id) {
+            return false;
+        }
+
+        /** Is this icon selected on this display ("w/id" for a desk icon, "min/w" for a minimised window's)? */
+        default boolean selected(String key) {
+            return false;
+        }
+
+        /** The clock at the menu bar's right end ("" for none). */
+        default String clock() {
+            return "";
+        }
+    }
+
+    /**
+     * A picture stretched over cells (x, y, cw, ch), drawn only on the cells that are owner's (a window, the desk) and
+     * inside the clip [x0, x1) x [y0, y1) (its window's content).
+     */
+    public record Image(int owner, int x, int y, int cw, int ch, Scene.Pixmap pixmap, int x0, int y0, int x1, int y1) {
+        /** Is cell (cx, cy) one this picture shows on? */
+        public boolean shows(SceneCells c, int cx, int cy) {
+            return cx >= x && cy >= y && cx < x + cw && cy < y + ch && cx >= x0 && cy >= y0 && cx < x1 && cy < y1
+                && cx >= 0 && cy >= 0 && cx < c.w && cy < c.h
+                && (owner == OWNER_DESK ? c.deskOwners.contains(c.owner[cy * c.w + cx]) : c.owner[cy * c.w + cx] == owner);
+        }
+    }
+
+    void image(int x, int y, int cw, int ch, Scene.Pixmap pic) {
+        images.add(new Image(painting, x, y, cw, ch, pic, cx0, cy0, Math.min(cx1, w), Math.min(cy1, h)));
+    }
+
+    /** The pictures, in the order drawn (the desk's first). */
+    public final List<Image> images = new ArrayList<>();
+    /** Owners the desk's picture shows under: the desk, and backdrop windows (their icons stand on the picture). */
+    public final java.util.Set<Integer> deskOwners = new java.util.HashSet<>(List.of(OWNER_DESK));
+
+    public static final Local NONE = new Local() {
+    };
 
     public final int w, h;
     public final int[] glyph, ink, paper;
+    /** Whose each cell is: a window's id, OWNER_DESK or OWNER_BAR (a display shades only what shows of a window). */
+    public final int[] owner;
+    public static final int OWNER_DESK = -1, OWNER_BAR = -2;
+    int painting = OWNER_DESK;
+    Map<Integer, Scene.Pixmap> pixmaps;
 
     public SceneCells(int w, int h) {
         this.w = w;
@@ -23,97 +91,311 @@ public final class SceneCells {
         glyph = new int[w * h];
         ink = new int[w * h];
         paper = new int[w * h];
-        java.util.Arrays.fill(paper, PAPER);
+        owner = new int[w * h];
+        java.util.Arrays.fill(owner, OWNER_DESK);
+        java.util.Arrays.fill(paper, DESK);
         java.util.Arrays.fill(glyph, ' ');
     }
 
-    /** The tab a viewer without the screen open sees: the one the program brought forward, else the REPL's, else the first. */
-    public static int defaultTab(Scene s) {
-        if (s.tabs.containsKey(s.focus)) return s.focus;
-        if (s.tabs.containsKey(1)) return 1;
-        return s.tabs.isEmpty() ? -1 : s.tabs.keySet().iterator().next();
+    /** The screen as everyone sees it. */
+    public static SceneCells of(Scene s) {
+        return of(s, NONE, s.active);
     }
 
-    /** Tab t of s in cells (all blank if there is no such tab). */
-    public static SceneCells of(Scene s, int t) {
+    /** The screen with one display's own state, and its idea of the active window. */
+    public static SceneCells of(Scene s, Local local, int active) {
         SceneCells c = new SceneCells(s.w, s.h);
-        Scene.Tab tab = s.tabs.get(t);
-        if (tab != null) for (Map.Entry<Integer, Scene.Element> en : tab.elements.entrySet()) c.draw(en.getValue());
+        c.pixmaps = s.pixmaps;
+        Scene.Pixmap back = s.pixmaps.get(s.backdrop);
+        if (back != null) c.images.add(new Image(OWNER_DESK, 0, 1, s.w, s.h - 1, back, 0, 1, s.w, s.h));
+        // backdrops, then the minimised windows' icons on the desk, then the other windows
+        for (int id : s.order) {
+            Scene.Window win = s.windows.get(id);
+            if (win != null && !win.minimized && win.has("backdrop")) c.window(id, win, id == active, local);
+        }
+        for (int id : s.minimizedOrder()) c.minimized(s, id, local);
+        for (int id : s.order) {
+            Scene.Window win = s.windows.get(id);
+            if (win != null && !win.minimized && !win.has("backdrop")) c.window(id, win, id == active, local);
+        }
+        c.bar(s, active, local);
         return c;
+    }
+
+    /** Owner value of a minimised window's icon (not its window: it isn't drawn). */
+    public static int iconOwner(int wid) {
+        return -1000 - wid;
+    }
+
+    /** A minimised window's icon at its slot on the desk: its picture, and its title under it. */
+    void minimized(Scene s, int id, Local local) {
+        Scene.Window win = s.windows.get(id);
+        int[] at = s.iconSlot(id);
+        if (win == null || at == null) return;
+        unclip();
+        painting = iconOwner(id);
+        iconAt(at[0], at[1], win.title, s.pixmaps.getOrDefault(win.icon, Scene.WINDOW_ICON), local.selected("min/" + id), true);
+    }
+
+    /**
+     * An icon at cell (x, y): its picture in the 4 x 3 cells from (x + 1, y), its label under it, centred in 6 cells
+     * (the label stands on its own paper, so it reads over a picture; selected, it is inverted).
+     */
+    void iconAt(int x, int y, String label, Scene.Pixmap pic, boolean selected, boolean ownPaper) {
+        for (int yy = y; yy < y + 3; yy++)
+            for (int xx = x + 1; xx < x + 5; xx++)
+                if (in(xx, yy)) owner[yy * w + xx] = painting;
+        if (pic != null) image(x + 1, y, 4, 3, pic);
+        // (a label may reach a cell past the icon on each side: "Calculator" reads as "Calculat")
+        String l = label.length() > Scene.ICON_W + 2 ? label.substring(0, Scene.ICON_W + 2) : label;
+        int lx = x + Math.floorDiv(Scene.ICON_W - l.length(), 2);
+        fill(lx, y + 3, l.length(), 1, selected ? INK : PAPER);
+        text(l, lx, y + 3, l.length(), selected ? PAPER : INK);
     }
 
     public int at(int x, int y) {
         return glyph[y * w + x];
     }
 
+    // ---- painting, clipped to a rectangle (the window being drawn)
+
+    int cx0, cy0, cx1 = Integer.MAX_VALUE, cy1 = Integer.MAX_VALUE;
+
+    void clip(int x, int y, int cw, int ch) {
+        cx0 = Math.max(0, x);
+        cy0 = Math.max(0, y);
+        cx1 = Math.min(w, x + cw);
+        cy1 = Math.min(h, y + ch);
+    }
+
+    void unclip() {
+        cx0 = 0;
+        cy0 = 0;
+        cx1 = w;
+        cy1 = h;
+    }
+
+    boolean in(int x, int y) {
+        return x >= cx0 && y >= cy0 && x < cx1 && y < cy1 && x < w && y < h;
+    }
+
+    void put(int x, int y, int cp, int colour) {
+        if (!in(x, y)) return;
+        glyph[y * w + x] = cp;
+        ink[y * w + x] = colour;
+    }
+
     /** Text from cell (x, y), at most max cells; spaces leave the paper alone. */
     void text(String s, int x, int y, int max, int colour) {
-        if (y < 0 || y >= h) return;
         for (int k = 0, c = 0; k < s.length() && c < max; c++) {
             int cp = s.codePointAt(k);
             k += Character.charCount(cp);
-            int cx = x + c;
-            if (cx < 0 || cx >= w) continue;
-            glyph[y * w + cx] = cp;
-            ink[y * w + cx] = colour;
+            put(x + c, y, cp, colour);
         }
     }
 
     void fill(int x, int y, int fw, int fh, int colour) {
-        for (int yy = Math.max(0, y); yy < Math.min(h, y + fh); yy++)
-            for (int xx = Math.max(0, x); xx < Math.min(w, x + fw); xx++) paper[yy * w + xx] = colour;
+        for (int yy = y; yy < y + fh; yy++)
+            for (int xx = x; xx < x + fw; xx++)
+                if (in(xx, yy)) {
+                    paper[yy * w + xx] = colour;
+                    glyph[yy * w + xx] = ' ';
+                    owner[yy * w + xx] = painting;
+                }
     }
 
-    void draw(Scene.Element e) {
+    // ---- the screen bar, windows, requesters
+
+    /** The menu bar: the system menu, the active window's menus, the screen's title after them, the clock at the end. */
+    void bar(Scene s, int active, Local local) {
+        unclip();
+        painting = OWNER_BAR;
+        fill(0, 0, w, 1, BAR);
+        List<String> titles = menuTitles(s, active);
+        int x = 1;
+        for (String t : titles) {
+            text(t, x, 0, w - x, BAR_TEXT);
+            x += t.length() + 2;
+        }
+        String clock = local.clock();
+        if (!s.title.isEmpty() && x + s.title.length() + clock.length() + 2 < w) text(s.title, x + 1, 0, w - x, TITLE_IDLE);
+        // (the clock stands clear of the corner, where inventory mods draw their buttons on the panel)
+        if (!clock.isEmpty()) text(clock, w - clock.length() - 9, 0, clock.length(), BAR_TEXT);
+    }
+
+    /** The menu bar's titles: the system menu, then the active window's (each menu's first entry). */
+    public static List<String> menuTitles(Scene s, int active) {
+        List<String> out = new ArrayList<>();
+        out.add(SYSTEM_MENU);
+        Scene.Window win = s.windows.get(active);
+        if (win != null)
+            for (Object o : win.menus) if (o instanceof List<?> l && !l.isEmpty()) out.add(String.valueOf(l.get(0)));
+        return out;
+    }
+
+    /** Menu title k's first cell on the bar (titles from cell 1, two cells apart). */
+    public static int menuX(List<String> titles, int k) {
+        int x = 1;
+        for (int i = 0; i < k; i++) x += titles.get(i).length() + 2;
+        return x;
+    }
+
+    void window(int id, Scene.Window win, boolean active, Local local) {
+        int[] o = win.outer();
+        painting = id;
+        clip(o[0], o[1], o[2], o[3]);
+        // (a framed window's border is its title's colour all round, as the period's desks had it; a display bevels it;
+        // a backdrop is the desk itself: its picture shows through)
+        if (win.has("backdrop")) deskOwners.add(id);
+        else fill(o[0], o[1], o[2], o[3], win.framed() ? (active ? TITLE_ACTIVE : TITLE_IDLE) : PAPER);
+        if (win.framed()) {
+            int x0 = win.x - 1, x1 = win.x + win.cw, y0 = win.y - 1, y1 = win.y + win.ch;
+            fill(win.x, win.y, win.cw, win.ch, PAPER);
+            int tink = active ? TITLE_ACTIVE_TEXT : TITLE_IDLE_TEXT;
+            put(x0, y0, win.has("close") ? CLOSE : ' ', tink);
+            put(x1, y0, win.has("depth") ? DEPTH : ' ', tink);
+            if (win.has("iconify")) put(x1 - 1, y0, ICONIFY, tink);
+            String t = win.title;
+            int room = win.cw - (win.has("iconify") ? 2 : 1);
+            text(t.length() > room ? t.substring(0, Math.max(0, room)) : t, win.x + 1, y0, room, tink);
+            if (win.has("size")) put(x1, y1, SIZE, tink);
+        }
+        clip(win.x, win.y, win.cw, win.ch);
+        for (Map.Entry<Integer, Scene.Element> en : win.elements.entrySet()) draw(id, en.getKey(), en.getValue(), win, local);
+        if (win.ask != null) ask(win);
+        unclip();
+    }
+
+    /** A requester's box over its window: [x, y, w, h] in cells, and each button's [x, w] on its last row. */
+    public static int[][] askLayout(Scene.Window win) {
+        List<Object> m = win.ask;
+        String title = Form.str(m, 3, ""), body = Form.str(m, 4, "");
+        List<String> buttons = buttons(m);
+        String[] lines = body.split("\n", -1);
+        int bw = 0;
+        for (String b : buttons) bw += b.length() + 4;
+        int inner = Math.max(title.length() + 2, bw);
+        for (String l : lines) inner = Math.max(inner, l.length() + 2);
+        inner = Math.min(inner, win.cw - 2);
+        int bh = lines.length + 4;
+        int x = win.x + Math.max(0, (win.cw - inner - 2) / 2), y = win.y + Math.max(0, (win.ch - bh) / 2);
+        int[][] out = new int[1 + buttons.size()][];
+        out[0] = new int[]{x, y, inner + 2, bh};
+        int bx = x + 1 + Math.max(0, (inner - bw) / 2) + 1;
+        for (int i = 0; i < buttons.size(); i++) {
+            out[1 + i] = new int[]{bx, buttons.get(i).length() + 2};
+            bx += buttons.get(i).length() + 4;
+        }
+        return out;
+    }
+
+    public static List<String> buttons(List<Object> m) {
+        List<String> out = new ArrayList<>();
+        if (m.size() > 5 && m.get(5) instanceof List<?> l) for (Object o : l) if (o instanceof String s) out.add(s);
+        if (out.isEmpty()) out.add("OK");
+        return out;
+    }
+
+    void ask(Scene.Window win) {
+        int[][] lay = askLayout(win);
+        int x = lay[0][0], y = lay[0][1], bw = lay[0][2], bh = lay[0][3];
+        fill(x, y, bw, bh, ASK);
+        put(x, y, '╔', ASK_TEXT);
+        put(x + bw - 1, y, '╗', ASK_TEXT);
+        put(x, y + bh - 1, '╚', ASK_TEXT);
+        put(x + bw - 1, y + bh - 1, '╝', ASK_TEXT);
+        for (int xx = x + 1; xx < x + bw - 1; xx++) {
+            put(xx, y, '═', ASK_TEXT);
+            put(xx, y + bh - 1, '═', ASK_TEXT);
+        }
+        for (int yy = y + 1; yy < y + bh - 1; yy++) {
+            put(x, yy, '║', ASK_TEXT);
+            put(x + bw - 1, yy, '║', ASK_TEXT);
+        }
+        String title = Form.str(win.ask, 3, "");
+        if (!title.isEmpty()) text(" " + title + " ", x + 1, y, bw - 2, ASK_TEXT);
+        String[] lines = Form.str(win.ask, 4, "").split("\n", -1);
+        for (int i = 0; i < lines.length; i++) text(lines[i], x + 2, y + 1 + i, bw - 4, ASK_TEXT);
+        List<String> b = buttons(win.ask);
+        for (int i = 0; i < b.size(); i++) {
+            int[] at = lay[1 + i];
+            fill(at[0], y + bh - 2, at[1], 1, ASK_BUTTON);
+            text(" " + b.get(i) + " ", at[0], y + bh - 2, at[1], ASK_TEXT);
+        }
+    }
+
+    void draw(int wid, int id, Scene.Element e, Scene.Window win, Local local) {
         List<Object> m = e.msg;
-        int x = e.x(), y = e.y();
+        int x = win.x + e.x(win), y = win.y + e.y(win);
         switch (e.kind) {
-            case "box" -> fill(x, y, (int) Form.num(m, 5, 1), (int) Form.num(m, 6, 1), colour(m.size() > 7 ? m.get(7) : null, BOX));
+            case "box" -> fill(x, y, e.size(5, win, 1), e.size(6, win, 1), colour(m.size() > 7 ? m.get(7) : null, BOX));
             case "text" -> {
                 String s = Form.str(m, 6, "");
                 if (m.size() > 7 && m.get(7) != null) fill(x, y, s.codePointCount(0, s.length()), 1, colour(m.get(7), 0));
-                text(s, x, y, w - x, colour(m.size() > 5 ? m.get(5) : null, INK));
+                text(s, x, y, win.cw - e.x(win), colour(m.size() > 5 ? m.get(5) : null, INK));
             }
             case "log" -> {
-                int lw = (int) Form.num(m, 5, 1), lh = (int) Form.num(m, 6, 1);
+                int lw = e.size(5, win, 1), lh = e.size(6, win, 1);
                 List<List<Scene.Run>> rows = new ArrayList<>();
+                int need = lh + local.scroll(wid, id);
                 var it = e.lines.descendingIterator();
-                while (it.hasNext() && rows.size() < lh) {
+                while (it.hasNext() && rows.size() < need) {
                     List<List<Scene.Run>> wrapped = wrap(it.next(), lw);
-                    for (int k = wrapped.size() - 1; k >= 0 && rows.size() < lh; k--) rows.add(0, wrapped.get(k));
+                    for (int k = wrapped.size() - 1; k >= 0 && rows.size() < need; k--) rows.add(0, wrapped.get(k));
                 }
-                for (int r = 0; r < rows.size(); r++) {
+                int off = Math.max(0, Math.min(local.scroll(wid, id), Math.max(0, rows.size() - lh)));
+                int first = Math.max(0, rows.size() - lh - off);
+                for (int r = 0; r < lh && first + r < rows.size(); r++) {
                     int c = 0;
-                    for (Scene.Run run : rows.get(r)) {
+                    for (Scene.Run run : rows.get(first + r)) {
                         text(run.text(), x + c, y + r, lw - c, colour(Form.kw(run.colour()), INK));
                         c += run.text().codePointCount(0, run.text().length());
                     }
                 }
             }
             case "line" -> {
-                int lw = (int) Form.num(m, 5, 1);
-                text(Form.str(m, 6, ""), x, y, lw, PROMPT);
+                int lw = e.size(5, win, 1);
+                String prompt = Form.str(m, 6, "");
+                text(prompt, x, y, lw, PROMPT);
+                String own = local.lineText(wid, id);
+                int px = prompt.codePointCount(0, prompt.length());
+                if (own != null) text(own, x + px, y, lw - px - 1, INK);
                 if (e.busy) text("*", x + lw - 1, y, 1, BUSY);
             }
             case "button" -> {
-                int bw = (int) Form.num(m, 5, 4);
+                int bw = e.size(5, win, 4);
                 String label = Form.str(m, 6, "");
                 fill(x, y, bw, 1, BUTTON);
                 text(label, x + Math.max(0, (bw - label.length()) / 2), y, bw, 0xFFFFFFFF);
             }
             case "list" -> {
-                int lw = (int) Form.num(m, 5, 1), lh = (int) Form.num(m, 6, 1);
+                int lw = e.size(5, win, 1), lh = e.size(6, win, 1);
                 List<?> items = m.size() > 7 && m.get(7) instanceof List<?> l ? l : List.of();
+                int sel = (int) Form.num(m, 8, -1);   // (the row the program marks as chosen: drawn inverted)
+                int off = Math.max(0, Math.min(local.scroll(wid, id), Math.max(0, items.size() - lh)));
                 fill(x, y, lw, lh, LIST);
-                for (int r = 0; r < lh && r < items.size(); r++) text(String.valueOf(items.get(r)), x, y + r, lw, LIST_INK);
+                for (int r = 0; r < lh && off + r < items.size(); r++) {
+                    boolean on = off + r == sel;
+                    if (on) fill(x, y + r, lw, 1, LIST_INK);
+                    text(String.valueOf(items.get(off + r)), x, y + r, lw, on ? LIST : LIST_INK);
+                }
             }
             case "editor" -> {
-                int ew = (int) Form.num(m, 5, 1), eh = (int) Form.num(m, 6, 1);
+                int ew = e.size(5, win, 1), eh = e.size(6, win, 1);
                 fill(x, y, ew, eh, EDITOR);
+                if (local.ownEditor(wid, id)) break;
                 String[] lines = Form.str(m, 10, "").split("\n", -1);
                 for (int r = 0; r < eh - 1 && r < lines.length; r++) text(lines[r].replace('\t', ' '), x, y + r, ew, INK);
             }
-            case "raw" -> fill(x, y, (int) Form.num(m, 5, 1), (int) Form.num(m, 6, 1), RAW);
+            case "raw" -> fill(x, y, e.size(5, win, 1), e.size(6, win, 1), RAW);
+            case "image" -> {   // (image w id x y cw ch pixmap)
+                Scene.Pixmap pic = pixmaps == null ? null : pixmaps.get((int) Form.num(m, 7, 0));
+                if (pic != null) image(x, y, e.size(5, win, 1), e.size(6, win, 1), pic);
+            }
+            case "icon" -> {   // (icon w id x y "label" pixmap): a desk icon
+                Scene.Pixmap pic = pixmaps == null ? null : pixmaps.get((int) Form.num(m, 6, 0));
+                iconAt(x, y, Form.str(m, 5, ""), pic == null ? Scene.WINDOW_ICON : pic, local.selected(wid + "/" + id), false);
+            }
             default -> {
             }
         }
@@ -133,7 +415,7 @@ public final class SceneCells {
         int col = 0;
         for (Scene.Run r : line) {
             String t = r.text();
-            while (!t.isEmpty()) {
+            while (!t.isEmpty() && w > 0) {
                 int room = w - col;
                 if (room <= 0) {
                     out.add(cur);

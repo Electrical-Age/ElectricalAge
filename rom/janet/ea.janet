@@ -20,14 +20,16 @@
 (def- tasks @{})       # every task alive -> true
 (var- broke nil)       # a Break already stopped the task that was running
 (var- break-pending nil) # Break was pressed; the screen's (break tab) says for which tab
-(def- procs @{})       # tab -> @{:name :env :tab}: processes, each with a tab of its own
+(def- procs @{})       # window -> @{:name :env :tab}: processes, each with a window of its own (:tab is the window)
 (var- root-env-of-os nil) # the environment the stdlib was compiled in (processes start from it)
 (var- repl-env nil)    # the REPL's environment (tab 1)
 (def- system @{})      # the REPL task, which Break leaves alone
 (def- display-in @"")  # bytes from the screen not yet read as lines
 (def- display-out @"") # messages for the screen not yet sent (its channel was full)
 (def- outputs @[])     # [buffer tab log colour]: print output to move into a log
-(def- ui-handlers @{}) # [tab id] -> the function for its events
+(def- ui-handlers @{}) # [window id] -> the function for its events
+(def- win-handlers @{}) # window -> @{:close f :move f :pick f}: a window's own events
+(def- win-sizes @{})   # window -> [cw ch]: its content's size as last opened, placed or reported
 (def- line-waiters @{}) # tab -> the task waiting in getline for a line typed there
 (def- repl-tabs @{})   # tabs with a REPL (their line is element 2)
 (def- line-taken @{})  # tab -> the last submission a getline took there
@@ -211,7 +213,9 @@
   (array/clear outputs)
   (array/concat outputs keep)
   (eachk k ui-handlers (when (= t (k 0)) (put ui-handlers k nil)))
-  (ui/send 'untab t))
+  (put win-handlers t nil)
+  (put win-sizes t nil)
+  (ui/send 'unwindow t))
 
 (defn- screen-break "Break for tab t: the REPL's (tab 1) or a process's." [t]
   (set break-pending nil)
@@ -223,6 +227,17 @@
       (when-let [err ((p :env) :err)]   # (a proc/new-tab process may print nowhere)
         (buffer/push err (string "\nBreak: stopped " n " task" (if (= 1 n) "" "s") ".\n"))))
     (on-break)))
+
+(defn- about
+  "The system menu's About: a small window naming the machine and the system."
+  []
+  (def w 254)
+  (ui/send 'window w 20 7 40 7 "About Dynamo" [:close :drag])
+  (ui/send 'text w 1 2 1 :yellow "Dynamo 1.0")
+  (ui/send 'text w 2 2 2 :light-gray "Grid Cooperative Computing, 1991")
+  (ui/send 'text w 3 2 4 :gray "Kernel ROM 1.4 with Janet 1.41.2")
+  (put win-handlers w @{:close (fn [] (put win-handlers w nil) (ui/send 'unwindow w))})
+  (ui/send 'activate w))
 
 (defn- screen-event [m]
   (when (and (tuple? m) (> (length m) 2) (number? (m 1)) (number? (m 2)))
@@ -243,10 +258,28 @@
       'save (when (and f (string? (get m 4)) (indexed? (get m 5))) (spawn f (get m 3 0) (m 4) (m 5)))
       nil))
   (when (and (tuple? m) (> (length m) 1) (number? (m 1)))
+    (def w (m 1))
+    (def wh (get win-handlers w))
     (case (m 0)
-      'break (screen-break (m 1))
-      'close (when (get procs (m 1)) (proc-close (m 1)))
-      nil)))
+      'break (screen-break w)
+      'close (when (get procs w) (proc-close w))
+      # (Wire: the window's close box; a window that says nothing about it ends its process)
+      'closed (cond (and wh (wh :close)) (spawn (wh :close))
+                    (get procs w) (proc-close w))
+      'moved (when (and (number? (get m 4)) (number? (get m 5)))
+               (put win-sizes w [(m 4) (m 5)])
+               (when (and wh (wh :move)) (spawn (wh :move) (m 4) (m 5))))
+      'pick (when (and wh (wh :pick) (string? (get m 2)) (string? (get m 3))) (spawn (wh :pick) (m 2) (m 3)))
+      'answer (when-let [f (get ui-handlers [w (get m 2) :ask])]
+                (put ui-handlers [w (get m 2) :ask] nil)
+                (ui/send 'unask w)
+                (when (number? (get m 3)) (spawn f (m 3))))
+      'set (when-let [f (get ui-handlers [w (get m 2)])] (spawn f (get m 3)))
+      'open (when-let [f (get ui-handlers [w (get m 2)])] (spawn f))
+      nil))
+  # the system menu's own items (window 0)
+  (when (and (tuple? m) (= 'pick (m 0)) (= 0 (get m 1)) (= "About Dynamo" (get m 3)))
+    (about)))
 
 (defn- screen-events "Read the screen's events and run their handlers as tasks." []
   (buffer/push display-in (ea/display-input))
@@ -367,12 +400,14 @@
 
 # ---- the floppies (A: and B:, FAT12): slurp, spit, file/open and import work on their paths, e.g. "a:/main.janet"
 
-(defn disk/format "Format the floppy in drive (:a or :b), erasing it; label it if given (11 letters at most)."
+(defn disk/format "Format the floppy in drive (:a or :b, or the ramdisk :ram), erasing it; label it if given (11 letters at most)."
   [drive &opt label]
   (if label (ea/disk-format drive label) (ea/disk-format drive)))
-(defn disk/list "The names in a directory of a floppy (a path, or :a or :b; default A:/); directories end in /."
+(defn disk/list "The names in a directory (a path, or :a, :b or :ram; default A:/); directories end in /."
   [&opt path]
-  (ea/disk-list (case path nil "A:/" :a "A:/" :b "B:/" path)))
+  (ea/disk-list (case path nil "A:/" :a "A:/" :b "B:/" :ram "RAM:/" path)))
+(defn disk/present? "Is there a readable disk in drive (:a or :b; the ramdisk :ram always is)?" [drive]
+  (try (do (ea/disk-list (case drive :a "A:/" :b "B:/" :ram "RAM:/")) true) ([_] false)))
 (defn disk/label "The floppy's label, or nil." [drive] (ea/disk-label drive))
 (defn disk/free "Bytes free on the floppy." [drive] (ea/disk-free drive))
 (defn disk/delete "Delete a file (or an empty directory)." [path] (ea/disk-delete path))
@@ -398,15 +433,97 @@
 
 # ---- the screen's elements (see the handbook's "The Screen Protocol")
 
-(def ui/width "The screen's width in character cells." 80)
-(def ui/height "The screen's height in character cells." 25)
+(defn- bound
+  "f, to run in the environment of the task that registers it (so what an event's handler prints goes where that
+  task prints, not to the Kernel window: AdventurAgent's requester)."
+  [f]
+  (when f
+    (def env (curenv))
+    (fn [& args] (fiber/setenv (fiber/current) env) (f ;args))))
 
-(defn ui/tab "Add tab t (1-255), or rename it." [t title] (ui/send 'tab t title))
-(defn ui/untab "Remove tab t." [t]
-  (eachk k ui-handlers (when (= t (k 0)) (put ui-handlers k nil)))
-  (ui/send 'untab t))
-(defn ui/focus "Bring tab t forward." [t] (ui/send 'focus t))
-(defn ui/clear "Empty tab t." [t] (ui/send 'clear t))
+(var ui/screen-width "The screen's width in character cells (80 in the 80 x 25 text mode, 120 in 120 x 40)." 80)
+(var ui/screen-height "The screen's height in character cells; row 0 is the menu bar." 25)
+(var ui/width "A program's window's content width as it opens at most, in cells (the screen less its frame)." 78)
+(var ui/height "A program's window's content height as it opens at most, in cells (the screen less the bar and the frame)." 22)
+(def ui/modes "The text modes: 80 x 25 (the computer starts in it) and 120 x 40 (Baughn 2026-11-18)." [[80 25] [120 40]])
+(defn ui/mode
+  "Switch the screen to text mode [w h] (one of ui/modes); windows are kept on it, made smaller if they must be."
+  [w h]
+  (unless (find |(deep= $ [w h]) ui/modes) (error "the modes are 80 x 25 and 120 x 40"))
+  (set ui/screen-width w)
+  (set ui/screen-height h)
+  (set ui/width (- w 2))
+  (set ui/height (- h 3))
+  (ui/send 'screen w h))
+(def ui/standard "The usual window: close box, minimise and depth boxes, size handle, dragged by its title."
+  [:close :iconify :depth :size :drag])
+
+(defn ui/window
+  "Open window w (1-255) with content cw x ch cells at (x, y), a title and flags (ui/standard, or any of :close
+  :depth :size :drag :borderless :backdrop :full). Sent again for an open window it changes the title and flags only:
+  where it is belongs to the players, who move and size it on their own screens."
+  [w x y cw ch title &opt flags]
+  (put win-sizes w [cw ch])
+  (ui/send 'window w x y cw ch title (or flags ui/standard)))
+(defn ui/place "Move and size window w on purpose (rare: the players place windows)." [w x y cw ch]
+  (put win-sizes w [cw ch])
+  (ui/send 'place w x y cw ch))
+(defn ui/size "Window w's content size [cw ch], as last opened, placed or sized by a player." [w]
+  (get win-sizes w [ui/width ui/height]))
+(defn ui/unwindow "Close window w." [w]
+  (eachk k ui-handlers (when (= w (k 0)) (put ui-handlers k nil)))
+  (put win-handlers w nil)
+  (put win-sizes w nil)
+  (ui/send 'unwindow w))
+(defn ui/front "Raise window w." [w] (ui/send 'front w))
+(defn ui/back "Lower window w." [w] (ui/send 'back w))
+(defn ui/focus "Bring window w forward and give it the keyboard." [w] (ui/send 'activate w))
+(defn ui/title "The screen bar's title." [s] (ui/send 'title s))
+(defn ui/minimize "Minimise window w to an icon on the desk." [w] (ui/send 'minimize w))
+(defn ui/restore "Bring window w back from its icon." [w] (ui/send 'restore w))
+(defn ui/pixmap
+  "Make pixmap id (1-4095) from a picture: a struct {:w :h :palette [...] :data \"...\"} (pix/load reads one from a
+  .pix file). Palette entries are dyes (:white ...) or \"#rrggbb\"; data has a character a dot, 0-9 then a-z into the
+  palette, . clear."
+  [id pix]
+  (ui/send 'pixmap id (pix :w) (pix :h) (pix :palette) (pix :data)))
+(defn pix/load "A picture from a .pix file (a Janet struct {:w :h :palette :data})." [path]
+  (def p (parse (string (slurp path))))
+  (unless (and (dictionary? p) (number? (p :w)) (number? (p :h)) (indexed? (p :palette)) (string? (p :data)))
+    (error (string path ": not a picture")))
+  p)
+(defn ui/backdrop "The desk's picture: pixmap id (0: none)." [id] (ui/send 'backdrop id))
+(defn ui/icon "Window w's icon when it is minimised: pixmap id." [w id] (ui/send 'icon w id))
+(defn ui/image "Pixmap pic stretched over cells (x, y, cw, ch) of window w." [w id x y cw ch pic]
+  (ui/send 'image w id x y cw ch pic))
+(defn ui/desk-icon
+  "An icon in window w (a backdrop: the desk) at cell (x, y): pixmap pic over a label; a double-click calls (on-open)."
+  [w id x y label pic on-open]
+  (put ui-handlers [w id] (bound on-open))
+  (ui/send 'icon w id x y label pic))
+(defn- win-handler [w k f] (put win-handlers w (merge (or (get win-handlers w) @{}) @{k (bound f)})))
+(defn ui/on-close "Call (f) as a task when the player clicks window w's close box (else it ends its process)." [w f]
+  (win-handler w :close f))
+(defn ui/on-move "Call (f cw ch) as a task when a player moves or sizes window w." [w f] (win-handler w :move f))
+(defn ui/menus
+  "Window w's menus, on the screen bar while it is active and the right button is held: a list of menus, each
+  [\"Title\" [\"Item\" \"k\"] nil ...] (nil: a line between items; \"k\": Alt+k picks it). (on-pick menu item) runs as a task."
+  [w menus on-pick]
+  (win-handler w :pick on-pick)
+  (ui/send 'menus w menus))
+(defn ui/enable "Grey a menu item out (false) or back (true)." [w menu item on] (ui/send 'enable w menu item on))
+(defn ui/ask
+  "A requester over window w: a title, a body (it may hold newlines) and buttons; (on-answer i) runs as a task with the
+  button's index. The window takes nothing else until it is answered."
+  [w id title body buttons on-answer]
+  (put ui-handlers [w id :ask] (bound on-answer))
+  (ui/send 'ask w id title body buttons))
+(defn ui/tab
+  "Old programs' tab: window t, as big as the screen allows under its bar (a program's usual window)."
+  [t title]
+  (ui/window t 1 2 ui/width ui/height title))
+(defn ui/untab "Close window t (old programs' name)." [t] (ui/unwindow t))
+(defn ui/clear "Empty window t." [t] (ui/send 'clear t))
 (defn ui/box "A filled rectangle, in cells." [t id x y w h colour] (ui/send 'box t id x y w h colour))
 (defn ui/text "A line of text; bg: a background colour." [t id x y colour s &opt bg]
   (if bg (ui/send 'text t id x y colour s bg) (ui/send 'text t id x y colour s)))
@@ -415,15 +532,17 @@
 (defn ui/line
   "An editable line: the player edits it on their own client; Enter calls (on-submit text seq) as a task."
   [t id x y w prompt on-submit]
-  (put ui-handlers [t id] on-submit)
+  (put ui-handlers [t id] (bound on-submit))
   (ui/send 'line t id x y w prompt))
 (defn ui/busy "A line's busy mark for submission seq." [t id seq on] (ui/send 'busy t id seq on))
 (defn ui/button "A button: a click calls (on-press) as a task." [t id x y w label on-press]
-  (put ui-handlers [t id] on-press)
+  (put ui-handlers [t id] (bound on-press))
   (ui/send 'button t id x y w label))
-(defn ui/list "A list of rows: a click calls (on-select index) as a task." [t id x y w h items on-select]
-  (put ui-handlers [t id] on-select)
-  (ui/send 'list t id x y w h items))
+(defn ui/list
+  "A list of rows: a click calls (on-select index) as a task; chosen (optional) is a row to show inverted."
+  [t id x y w h items on-select &opt chosen]
+  (put ui-handlers [t id] (bound on-select))
+  (if chosen (ui/send 'list t id x y w h items chosen) (ui/send 'list t id x y w h items)))
 (defn ui/raw
   "An area of w by h cells for full-screen programs (games, editors of your own): once clicked, it gets the keyboard.
   A key calls (on-key key mods) as a task: key is the character typed, or a name (\"enter\" \"backspace\" \"tab\"
@@ -431,12 +550,12 @@
   with Ctrl or Alt held; mods adds 1 for Shift, 2 for Ctrl, 4 for Alt (0 for a typed character). A click calls (on-click x y), in cells from
   the area's corner. Draw on it with ui/text and ui/box made after it."
   [t id x y w h on-key &opt on-click]
-  (put ui-handlers [t id] {:key on-key :click on-click})
+  (put ui-handlers [t id] {:key (bound on-key) :click (bound on-click)})
   (ui/send 'raw t id x y w h))
 (defn ui/remove "Remove an element." [t id]
   (put ui-handlers [t id] nil)
   (ui/send 'remove t id))
-(defn ui/dict "Names the screen may complete in tab t (0: every tab)." [t names] (ui/send 'dict t names))
+(defn ui/dict "Names the screen may complete in window t (0: every window)." [t names] (ui/send 'dict t names))
 (defn ui/output
   "Send what tasks running in env print (and eprint, in red) into log id of tab t."
   [env t id]
@@ -471,8 +590,8 @@
   (put repl-tabs t true)
   (def p (parser/new))
   (ui/output env t 1)
-  (ui/tab t (or name "REPL"))
-  (ui/log t 1 0 0 ui/width (- ui/height 1))
+  (ui/window t 1 2 ui/width ui/height (or name "Shell"))
+  (ui/log t 1 0 0 :fill [:fill 1])
   (var taken false)
   (defn on-submit [text seq]
     (put system (fiber/current) true)   # the REPL's own machinery: Break stops what it runs, not it
@@ -497,14 +616,14 @@
       (parser/flush p))
     (flush-outputs)
     (def open (parser/state p :delimiters))
-    (ui/line t 2 0 (- ui/height 1) ui/width (if (empty? open) "> " (string open "> ")) on-submit)
+    (ui/line t 2 0 -1 :fill (if (empty? open) "> " (string open "> ")) on-submit)
     # (a getline in the form may have taken a later line: the screen shows a line's latest mark, so end with that one)
     (ui/busy t 2 (max seq (get line-taken t 0)) false)
     (ui/dict t (ea/names env))   # the REPL's own definitions, for completion
     (set taken false)
     (put system (fiber/current) nil))
   (ui/dict 0 (core-names))
-  (ui/line t 2 0 (- ui/height 1) ui/width "> " on-submit))
+  (ui/line t 2 0 -1 :fill "> " on-submit))
 
 (defn- revision [text] (string (hash text)))
 
@@ -530,30 +649,91 @@
   (run-file path (curenv)))
 
 (defn proc/new-tab
-  "A tab for a process of its own, empty (proc/start puts a log in it): returns its number. The process's environment
-  is ((proc/env t))."
-  [name]
+  "A window for a process of its own, empty (proc/start puts a log in it): returns its number. The process's
+  environment is ((proc/env t)). geometry: [x y cw ch title flags] for ui/window (default: a usual window as big as
+  the screen allows)."
+  [name &opt geometry]
   (var t 2)
   (while (or (get procs t) (= t 1)) (++ t))
   (when (> t 255) (error "too many processes"))
   (put procs t @{:name name :env (make-env root-env-of-os) :tab t})
-  (ui/tab t name)
+  # (a usual window, smaller than the screen and stepped down and right from the last: Files and the like open beside
+  # each other; AdventurAgent's look)
+  (def k (% (length procs) 6))
+  (if geometry (ui/window t ;geometry) (ui/window t (+ 4 (* 3 k)) (+ 3 k) 60 16 name))
   t)
 
+(def proc/new-window "A window for a process of its own: proc/new-tab's newer name." proc/new-tab)
 (defn proc/env "The environment of the process in tab t." [t] (get-in procs [t :env]))
 (defn- proc-env-of [t] (if (= t 1) repl-env (proc/env t)))
 
-(defn proc/start
-  "Start a process: (f ;args) as its first task, in an environment of its own, with a tab of its own (a log over the
-  whole tab) where what it prints goes. Returns its tab. Break on that tab stops its tasks; closing the tab ends it."
-  [name f & args]
-  (def t (proc/new-tab name))
+(defn- proc-start [name geometry f & args]
+  (def t (proc/new-tab name geometry))
   (def env ((get procs t) :env))
-  (ui/log t 1 0 0 ui/width ui/height)
+  (ui/log t 1 0 0 :fill :fill)
   (ui/output env t 1)
   (spawn-in env f ;args)
   (ui/focus t)
   t)
+
+(defn proc/start
+  "Start a process: (f ;args) as its first task, in an environment of its own, with a window of its own (a log filling
+  it) where what it prints goes. Returns its window. Break on that window stops its tasks; its close box ends it."
+  [name f & args]
+  (proc-start name nil f ;args))
+
+(defn proc/start-window
+  "As proc/start, in a window of the given geometry: [x y cw ch title flags] as for ui/window."
+  [name geometry f & args]
+  (proc-start name geometry f ;args))
+
+# ---- applications: a directory NAME.app holding main.janet and icon.pix (Baughn 1572655325104832613)
+
+(defn app/dir "The application directory of this task's process (\"A:/Calculator.app/\"), or nil." []
+  (dyn :app-dir))
+
+(defn app/name "An application directory's name without .app: \"A:/Calculator.app/\" is \"Calculator\"." [dir]
+  (def base (last (filter |(not (empty? $)) (string/split "/" dir))))
+  (if (string/has-suffix? ".app" base) (string/slice base 0 -5) base))
+
+(defn app/list
+  "The application directories on a drive's disk (:a, :b or :ram): at its top and one directory down, as paths."
+  [drive]
+  (def root (case drive :a "A:/" :b "B:/" :ram "RAM:/"))
+  (def out @[])
+  (defn look [dir depth]
+    (each n (try (disk/list dir) ([_] @[]))
+      (when (string/has-suffix? "/" n)
+        (def path (string dir n))
+        (if (and (string/has-suffix? ".app/" n) (disk/exists? (string path "main.janet")))
+          (array/push out path)
+          (when (< depth 1) (look path (+ depth 1)))))))
+  (look root 0)
+  out)
+
+(defn app/launch
+  "Start the application in directory dir as a process of its own (its main.janet, with (app/dir) its directory). One
+  runs already: its window comes back and gets the keyboard instead (one of each)."
+  [dir]
+  (var running nil)
+  (eachp [t p] procs (when (= dir (p :app)) (set running t)))
+  (if running
+    (do (ui/restore running) (ui/focus running) running)
+    (do
+      (def name (app/name dir))
+      (def t (proc/new-tab name))
+      (def p (get procs t))
+      (put p :app dir)
+      (def env (p :env))
+      (put env :app-dir dir)
+      (ui/log t 1 0 0 :fill :fill)
+      (ui/output env t 1)
+      (when (disk/exists? (string dir "icon.pix"))
+        (def id (+ 3000 t))
+        (try (do (ui/pixmap id (pix/load (string dir "icon.pix"))) (ui/icon t id)) ([_] nil)))
+      (spawn-in env run-file (string dir "main.janet"))
+      (ui/focus t)
+      t)))
 
 (defn proc/list "The processes: [tab name tasks] each." []
   (seq [[t p] :pairs procs] [t (p :name) (length (filter |(env-of? $ (p :env)) (keys tasks)))]))
@@ -574,11 +754,11 @@
   (def t (or (proc/tab) (if (env-of? (fiber/current) repl-env) 1) (error "getline: this task has no tab")))
   (when (get line-waiters t) (error "getline: another task is waiting for a line on this tab"))
   (def id (if (get repl-tabs t) 2 65000))
-  (ui/send 'line t id 0 (- ui/height 1) ui/width (or prompt ""))
+  (ui/send 'line t id 0 -1 :fill (or prompt ""))
   (when (= id 65000) (put ui-handlers [t id] (fn [&] nil)))
   (def text (yield [:line t]))
   (if (get repl-tabs t)
-    (ui/send 'line t id 0 (- ui/height 1) ui/width "> ")
+    (ui/send 'line t id 0 -1 :fill "> ")
     (ui/remove t id))
   (print (or prompt "") text)
   (flush-outputs)
@@ -612,8 +792,8 @@
   (def t (proc/new-tab (last (string/split "/" path))))
   (var rev (revision text))
   (ui/text t 1 0 0 :light-gray (string path " (Ctrl+S saves)"))
-  (ui/button t 2 (- ui/width 13) 0 6 "Run" (fn [] (proc/start (last (string/split "/" path)) run-file path)))
-  (ui/button t 3 (- ui/width 6) 0 6 "Close" (fn [] (proc/close t)))
+  (ui/button t 2 -13 0 6 "Run" (fn [] (proc/start (last (string/split "/" path)) run-file path)))
+  (ui/button t 3 -6 0 6 "Close" (fn [] (proc/close t)))
   (put ui-handlers [t 4]
        (fn [seq base hunks]
          (try
@@ -627,7 +807,7 @@
                  (set rev (revision new))
                  (ui/send 'saved t 4 seq rev))))
            ([err] (ui/text t 1 0 0 :red (string path ": " err))))))
-  (ui/send 'editor t 4 0 1 ui/width (- ui/height 1) :janet path rev text)
+  (ui/send 'editor t 4 0 1 :fill :fill :janet path rev text)
   (ui/focus t)
   t)
 
@@ -639,7 +819,7 @@
   (defn show [dir]
     (def names (try (disk/list dir) ([e] @[(string e)])))
     (ui/text t 1 0 0 :light-gray (string dir "  (" (length names) ")"))
-    (ui/list t 2 0 1 ui/width (- ui/height 1) names
+    (ui/list t 2 0 1 :fill :fill names
              (fn [i]
                (def n (get names i))
                (when n
@@ -718,28 +898,33 @@
                :fiber (row (string "task " (task-line v)) [:task v "task"])
                (row (short v) nil)))
     (def header (string (if (empty? path) "" (string (length path) ": ")) label))
-    (ui/text t 1 0 0 :light-gray (string/slice header 0 (min (- ui/width 27) (length header))))
-    (ui/list t 2 0 1 ui/width (- ui/height 1) items
+    (ui/text t 1 0 0 :light-gray (string/slice header 0 (min (- ((ui/size t) 0) 27) (length header))))
+    (ui/list t 2 0 1 :fill :fill items
              (fn [i]
                (def what (get rows i))
                (when what (array/push path what) (show)))))
-  (ui/button t 3 (- ui/width 26) 0 6 "Back" (fn [] (unless (empty? path) (array/pop path)) (show)))
-  (ui/button t 4 (- ui/width 19) 0 11 "REPL here"
+  (ui/button t 3 -26 0 6 "Back" (fn [] (unless (empty? path) (array/pop path)) (show)))
+  (ui/button t 4 -19 0 11 "REPL here"
              (fn []
                (def e (or (find |(= :env ($ 0)) (reverse path)) [:env (proc-env-of 1) "REPL"]))
                (def nt (proc/new-tab (string "repl " (e 2))))
                (repl-tab (e 1) nt (string "repl " (e 2)))))
-  (ui/button t 5 (- ui/width 7) 0 7 "Close" (fn [] (proc/close t)))
+  (ui/button t 5 -7 0 7 "Close" (fn [] (proc/close t)))
   (put (procs t) :inspector (fn [] (array/clear path) (show)))
   (show)
   (ui/focus t)
   t)
 
 (defn- autorun [env]
+  # a floppy's startup.janet gets a usual window; its main.janet is an industrial machine's program: one window
+  # filling the screen, no frame and no desk (Baughn 1572601240842408048)
   (each p ["A:/startup.janet" "B:/startup.janet" "A:/main.janet" "B:/main.janet"]
     (when (disk/exists? p)
-      (buffer/push (env :out) (string "Running " p " (its own tab)\n"))
-      (proc/start (last (string/split "/" p)) run-file p)
+      (def name (last (string/split "/" p)))
+      (buffer/push (env :out) (string "Running " p " (its own window)\n"))
+      (proc-start name (if (= name "main.janet") [0 1 ui/screen-width (- ui/screen-height 1) name [:borderless :full]]) run-file p)
+      # (a desk on the floppy: the Shell waits as an icon, and in the system menu)
+      (when (= name "startup.janet") (ui/minimize 1))
       (break))))
 
 (defn ea/start
@@ -749,7 +934,8 @@
   (set root-env-of-os (curenv))
   (def env (make-env (curenv)))
   (set repl-env env)
-  (ui/send 'screen ui/width ui/height)
+  (ui/send 'screen ui/screen-width ui/screen-height)
+  (ui/title "GCC Field Computer   Kernel ROM 1.4")
   (repl-tab env)
   (autorun env)
   (run))

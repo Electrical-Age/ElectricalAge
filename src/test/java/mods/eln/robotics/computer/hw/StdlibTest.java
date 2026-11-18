@@ -57,7 +57,7 @@ class StdlibTest {
             out.append(log, Math.min(logMark, log.length()), log.length()).append(screen.console.substring(consoleMark));
             if (want != null && (w.equals("\n") || out.indexOf(w) >= 0) && (!prompt || screen.done())) return t;
         }
-        if (want != null) fail("no \"" + want + "\"; got: " + out + " [log " + screen.log() + "] [tabs " + screen.scene.tabs.keySet() + " done " + screen.done() + "]");
+        if (want != null) fail("no \"" + want + "\"; got: " + out + " [log " + screen.log() + "] [tabs " + screen.scene.windows.keySet() + " done " + screen.done() + "]");
         return max;
     }
 
@@ -210,7 +210,7 @@ class StdlibTest {
         tick(80, "Running A:/main.janet");
         for (int t = 0; t < 40 && !screen.log(2).contains("42"); t++) tick(1, null);
         assertTrue(screen.log(2).contains("42"), "it prints in its own tab: " + screen.log(2));
-        assertEquals("main.janet", screen.scene.tabs.get(2).title);
+        assertEquals("main.janet", screen.scene.windows.get(2).title);
     }
 
     @Test
@@ -249,7 +249,7 @@ class StdlibTest {
         tick(5, "@[(2 \"ticker\" 0)]\n> ");
         m.editor.give("(close 2)\n".getBytes(StandardCharsets.UTF_8));
         tick(3, null);
-        assertNull(screen.scene.tabs.get(2), "closed");
+        assertNull(screen.scene.windows.get(2), "closed");
     }
 
     @Test
@@ -257,7 +257,7 @@ class StdlibTest {
         m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), null, false));
         type("(do (disk/format :a) (spit \"a:/t.janet\" \"one\\ntwo\\nthree\") (edit \"a:/t.janet\"))");
         tick(60, "\n2\n> ");
-        var ed = screen.scene.tabs.get(2).elements.get(4);
+        var ed = screen.scene.windows.get(2).elements.get(4);
         assertEquals("editor", ed.kind);
         assertEquals("one\ntwo\nthree", ed.msg.get(10));
         String rev = (String) ed.msg.get(9);
@@ -293,33 +293,33 @@ class StdlibTest {
         tick(20, "\n2\n> ");
         type("(inspect)");
         tick(20, "\n3\n> ");
-        var list = screen.scene.tabs.get(3).elements.get(2);
+        var list = screen.scene.windows.get(3).elements.get(2);
         String rows = list.msg.get(7).toString();
         assertTrue(rows.contains("sleeper (tab 2)") && rows.contains("task pending"), rows);
         // select the task row (the third: REPL, sleeper, its task), then its frames, then a frame's slots
         int task = ((java.util.List<?>) list.msg.get(7)).indexOf(((java.util.List<?>) list.msg.get(7)).stream().filter(r -> r.toString().startsWith("  task")).findFirst().get());
         m.editor.give(("(select 3 2 " + task + ")\n").getBytes(StandardCharsets.UTF_8));
         tick(5, null);
-        String frames = screen.scene.tabs.get(3).elements.get(2).msg.get(7).toString();
+        String frames = screen.scene.windows.get(3).elements.get(2).msg.get(7).toString();
         assertTrue(frames.contains("#0 sleep") && frames.contains("#1"), frames);
         m.editor.give("(select 3 2 1)\n".getBytes(StandardCharsets.UTF_8));
         tick(5, null);
-        String slots = screen.scene.tabs.get(3).elements.get(2).msg.get(7).toString();
+        String slots = screen.scene.windows.get(3).elements.get(2).msg.get(7).toString();
         assertTrue(slots.contains("= 42"), slots);
         // the header says where it is, whole; Back goes up a level at a time
-        String header = screen.scene.tabs.get(3).elements.get(1).msg.get(6).toString();
+        String header = screen.scene.windows.get(3).elements.get(1).msg.get(6).toString();
         assertTrue(header.startsWith("2: #1"), header);
         m.editor.give("(press 3 3)\n".getBytes(StandardCharsets.UTF_8));
         tick(5, null);
-        assertEquals(frames, screen.scene.tabs.get(3).elements.get(2).msg.get(7).toString());
+        assertEquals(frames, screen.scene.windows.get(3).elements.get(2).msg.get(7).toString());
         m.editor.give("(press 3 3)\n".getBytes(StandardCharsets.UTF_8));
         tick(5, null);
-        assertTrue(screen.scene.tabs.get(3).elements.get(2).msg.get(7).toString().contains("sleeper (tab 2)"));
+        assertTrue(screen.scene.windows.get(3).elements.get(2).msg.get(7).toString().contains("sleeper (tab 2)"));
         // (inspect) again brings the same tab forward instead of opening another
         type("(inspect)");
         tick(20, "\n3\n> ");
-        assertNull(screen.scene.tabs.get(4));
-        assertEquals(3, screen.scene.focus);
+        assertNull(screen.scene.windows.get(4));
+        assertEquals(3, screen.scene.active);
     }
 
     @Test
@@ -328,20 +328,20 @@ class StdlibTest {
         type("(do (disk/format :a) (spit \"a:/x.janet\" \"(print 1)\") (files))");
         tick(60, "\n2\n> ");
         m.editor.give("(select 2 2 0)\n".getBytes(StandardCharsets.UTF_8));
-        for (int t = 0; t < 20 && screen.scene.tabs.get(3) == null; t++) tick(1, null);
-        assertNotNull(screen.scene.tabs.get(3), "an editor tab; console: " + screen.console);
-        assertEquals("(print 1)", screen.scene.tabs.get(3).elements.get(4).msg.get(10));
+        for (int t = 0; t < 20 && screen.scene.windows.get(3) == null; t++) tick(1, null);
+        assertNotNull(screen.scene.windows.get(3), "an editor tab; console: " + screen.console);
+        assertEquals("(print 1)", screen.scene.windows.get(3).elements.get(4).msg.get(10));
     }
 
     @Test
     void aRawAreaGetsKeysAndClicks() {
         type("(do (def t (proc/new-tab \"game\")) (ui/raw t 1 0 0 20 5 (fn [k m] (ui/text t 2 0 0 :white (string \"key \" k \" \" m))) (fn [x y] (ui/text t 3 0 1 :white (string \"click \" x \" \" y)))) t)");
         tick(20, "\n2\n> ");
-        assertEquals("raw", screen.scene.tabs.get(2).elements.get(1).kind);
+        assertEquals("raw", screen.scene.windows.get(2).elements.get(1).kind);
         m.editor.give("(key 2 1 \"left\" 2)\n(click 2 1 4 3)\n".getBytes(StandardCharsets.UTF_8));
         tick(5, null);
-        assertEquals("key left 2", screen.scene.tabs.get(2).elements.get(2).msg.get(6));
-        assertEquals("click 4 3", screen.scene.tabs.get(2).elements.get(3).msg.get(6));
+        assertEquals("key left 2", screen.scene.windows.get(2).elements.get(2).msg.get(6));
+        assertEquals("click 4 3", screen.scene.windows.get(2).elements.get(3).msg.get(6));
     }
 
     /** The handbook's example (janet.md, "Drawing your own screen"), as printed there. */
@@ -359,10 +359,10 @@ class StdlibTest {
         tick(20, "> ");
         type("(proc/start \"counter\" counter)");
         tick(20, "\n2\n> ");
-        assertEquals("count: 0", screen.scene.tabs.get(2).elements.get(2).msg.get(6));
+        assertEquals("count: 0", screen.scene.windows.get(2).elements.get(2).msg.get(6));
         m.editor.give("(press 2 3)\n(press 2 3)\n(press 2 4)\n".getBytes(StandardCharsets.UTF_8));
         tick(5, null);
-        assertEquals("count: 1", screen.scene.tabs.get(2).elements.get(2).msg.get(6));
+        assertEquals("count: 1", screen.scene.windows.get(2).elements.get(2).msg.get(6));
     }
 
     /** Ctrl+C on a tab made by proc/new-tab (whose process prints nowhere) used to halt the computer (check 8). */
@@ -382,7 +382,7 @@ class StdlibTest {
     void aLongLineIsTaken() {
         String expr = "(+ " + "1 ".repeat(200) + ")";
         var host = new mods.eln.robotics.computer.screen.ScreenHost();
-        host.fromComputer("(tab 1 \"REPL\")\n".getBytes(StandardCharsets.UTF_8));
+        host.fromComputer("(window 1 1 2 78 22 \"Shell\" [:close])\n".getBytes(StandardCharsets.UTF_8));
         assertNotNull(host.check(new String(screen.submit(expr), StandardCharsets.UTF_8).trim()));
         type(expr);
         tick(20, "\n200\n> ");

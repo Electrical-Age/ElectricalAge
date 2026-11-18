@@ -93,6 +93,29 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         }
     }
 
+    /** Client: device slot `index` moved to (x, y), keeping its tooltip lines (a screen whose layout changes size). */
+    public void moveDeviceSlotTo(int index, int x, int y) {
+        for (int i = 0; i < deviceSlots; i++)
+            if (slots.get(i) instanceof ElnSlot old && old.getContainerSlot() == index) {
+                if (old.x != x || old.y != y) moveDeviceSlot(index, x, y, old.spec.comment());
+                return;
+            }
+    }
+
+    /** Client: the player's inventory (27 + 9 slots) moved to (x0, y0), as the constructor lays it out. */
+    public void movePlayerInventory(int x0, int y0) {
+        if (!spec.playerInventory()) return;
+        for (int k = 0; k < 36; k++) {
+            int i = deviceSlots + k;
+            Slot old = slots.get(i);
+            int x = k < 27 ? x0 + (k % 9) * 18 : x0 + (k - 27) * 18, y = k < 27 ? y0 + (k / 9) * 18 : y0 + 58;
+            if (old.x == x && old.y == y) continue;
+            Slot moved = new Slot(old.container, old.getContainerSlot(), x, y);
+            moved.index = i;
+            slots.set(i, moved);
+        }
+    }
+
     /** Worn-slot keys of the player's armour ("armor#head"...): MenuSpec.withArmor. */
     static final String ARMOR = "armor#";
     static final net.minecraft.world.entity.EquipmentSlot[] ARMOR_SLOTS = {net.minecraft.world.entity.EquipmentSlot.HEAD,

@@ -23,7 +23,8 @@ public final class ComputerParts {
     }
 
     /** The CRT's glass on the monitor's front, px: x of its face, its rows (y) and columns (z), 4:3. */
-    public static final double SCREEN_X = 0.5, SCREEN_Y0 = 20.0, SCREEN_Y1 = 28.25, SCREEN_Z0 = 2.5, SCREEN_Z1 = 13.5;
+    /** (shaped as the 80 x 25 screen of 6 x 10 px cells, 1.92:1: Baughn; the 120 x 40 mode gets bars at its sides) */
+    public static final double SCREEN_X = 0.5, SCREEN_Y0 = 20.0, SCREEN_Y1 = 20.0 + 12.8 / 1.92, SCREEN_Z0 = 1.6, SCREEN_Z1 = 14.4;
     /** The monitor's front face (its bezel), px. */
     static final double BEZEL_X = 0.9;
 
@@ -63,9 +64,9 @@ public final class ComputerParts {
         List<Mesh> m = new ArrayList<>();
         m.add(box(4.0, 15.4, 4.0, 12.0, 16.2, 12.0, "darksteel"));               // the swivel foot on the lid
         m.add(box(5.5, 16.2, 6.0, 10.5, 17.6, 10.0, "darksteel"));               // its neck
-        m.add(box(BEZEL_X, 17.5, 1.0, 9.0, 30.8, 15.0, "paint"));                // the front shell
+        m.add(box(BEZEL_X, 17.5, 0.6, 9.0, 28.2, 15.4, "paint"));                // the front shell
         // the tube's back, a square frustum tapering to the rear (its corners on the diagonals: phase pi / 4)
-        double cy = 24.15, cz = 8.0, half = 5.6, halfEnd = 3.2;
+        double cy = 22.85, cz = 8.0, half = 5.0, halfEnd = 2.8;
         m.add(prism('x', cy, cz, half * Math.sqrt(2), 9.0, 14.8, "paint", 4, halfEnd * Math.sqrt(2), true, true, Math.PI / 4));
         m.add(box(14.6, cy - 2.6, cz - 2.6, 15.6, cy + 2.6, cz + 2.6, "darksteel"));   // the cap at the tube's end
         for (double y = cy - 1.8; y < cy + 2.0; y += 1.2) m.add(box(15.6, y, cz - 1.8, 15.9, y + 0.5, cz + 1.8, "darksteel", "nsewu"));   // its vents

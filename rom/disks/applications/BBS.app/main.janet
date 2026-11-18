@@ -25,7 +25,7 @@
 
 (defn bbs []
   (def t (proc/tab))
-  (def dir (string (if (disk/exists? "a:/bbs.janet") "a:/" "b:/") "bbs/"))
+  (def dir (string (or (app/dir) "a:/") "bbs/"))   # (its posts live in its own application directory)
   (def posts @{})          # [station n] -> the post's record
   (def partial @{})        # [station n] -> @{piece bytes}
   (def heard @{})          # computers heard from -> when
@@ -90,15 +90,15 @@
   (var draw-board nil)
   (defn draw-boards []
     (def names (boards))
-    (ui/list t 2 0 1 14 (- ui/height 2)
+    (ui/list t 2 0 1 14 [:fill 1]
              (map |(string (if (= $ board) "> " "  ") $ " " (length (board-posts $))) names)
              (fn [i] (when-let [b (get names i)] (set board b) (draw-board)))))
 
   (set draw-board (fn []
     (ui/remove t 3)
-    (ui/log t 3 15 1 (- ui/width 15) (- ui/height 2))
+    (ui/log t 3 15 1 :fill [:fill 1])
     (ui/append t 3 :yellow (string "#" board "\n"))
-    (ui/send 'line t 4 0 (- ui/height 1) ui/width (string "#" board "> "))   # (its prompt names the board posts go to)
+    (ui/send 'line t 4 0 -1 :fill (string "#" board "> "))   # (its prompt names the board posts go to)
     (set shown (board-posts board))
     (each r shown (show-post r))
     (draw-boards)
@@ -202,13 +202,13 @@
           (status)))
       (> (length text) max-text) (ui/append t 3 :red (string "A post holds " max-text " characters at most.\n"))
       (not (empty? text)) (post text))
-    (ui/line t 4 0 (- ui/height 1) ui/width (string "#" board "> ") on-submit)
+    (ui/line t 4 0 -1 :fill (string "#" board "> ") on-submit)
     (ui/busy t 4 seq false))
 
   (ui/clear t)
   (start-floppy)
   (draw-board)
-  (ui/line t 4 0 (- ui/height 1) ui/width (string "#" board "> ") on-submit)
+  (ui/line t 4 0 -1 :fill (string "#" board "> ") on-submit)
   (ui/focus t)
   (bus/on (fn [p] (and (= :data (p :type)) (index-of (p :index) [SUMMARY WANT PART])))
           (fn [p]

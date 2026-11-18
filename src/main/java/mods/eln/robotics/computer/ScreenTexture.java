@@ -7,15 +7,15 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 
 /**
- * The monitor's picture (Baughn 2026-11-18): the shown tab in 8 x 8 cells, as a colour text mode on a CRT (80 x 25
+ * The monitor's picture (Baughn 2026-11-18): the screen (SceneCells) in 8 x 8 cells, as a colour text mode on a CRT (80 x 25
  * is 640 x 200, stretched to the 4:3 glass), the glyphs from the game's own ascii font. Painted again only when the
- * scene, the tab or the power changes. Client only; close() when the render goes.
+ * scene or the power changes. Client only; close() when the render goes.
  */
 final class ScreenTexture {
     static int next;
     static final int CELL = 8;
-    /** The ascii font's glyphs as 8 x 8 bit rows (glyph c's row r: bit x set where it is inked), null until read. */
-    static long[] glyphs;
+    /** The ascii font's glyphs as 8 x 8 bits by code point (row r, column x: bit r * 8 + x), null until read. */
+    static java.util.Map<Integer, Long> glyphs;
     static boolean glyphsTried;
 
     final Identifier id;
@@ -63,14 +63,31 @@ final class ScreenTexture {
         if (img == null) return id;
         img.fillRect(0, 0, tw, th, 0xFF0A0C0B);
         if (c != null) {
-            long[] g = glyphs();
+            java.util.Map<Integer, Long> g = glyphs();
+            for (int y = 0; y < c.h; y++)
+                for (int x = 0; x < c.w; x++) img.fillRect(x * CELL, y * CELL, CELL, CELL, c.paper[y * c.w + x]);
+            // the pictures, dot by dot, over the cells they show on
+            for (SceneCells.Image im : c.images) {
+                var p = im.pixmap();
+                int pw = im.cw() * CELL, ph = im.ch() * CELL;
+                for (int y = im.y(); y < im.y() + im.ch(); y++)
+                    for (int x = im.x(); x < im.x() + im.cw(); x++) {
+                        if (!im.shows(c, x, y)) continue;
+                        for (int r = 0; r < CELL; r++)
+                            for (int b = 0; b < CELL; b++) {
+                                int u = ((x - im.x()) * CELL + b) * p.w() / pw, v = ((y - im.y()) * CELL + r) * p.h() / ph;
+                                int argb = p.argb()[v * p.w() + u];
+                                if ((argb >>> 24) != 0) img.setPixel(x * CELL + b, y * CELL + r, argb);
+                            }
+                    }
+            }
             for (int y = 0; y < c.h; y++)
                 for (int x = 0; x < c.w; x++) {
-                    int i = y * c.w + x, paper = c.paper[i];
-                    img.fillRect(x * CELL, y * CELL, CELL, CELL, paper);
+                    int i = y * c.w + x;
                     int cp = c.glyph[i];
                     if (cp == ' ' || g == null) continue;
-                    long bits = g[cp > 0 && cp < 256 ? cp : '?'];
+                    Long bits = g.getOrDefault(cp, g.get((int) '?'));
+                    if (bits == null) continue;
                     int ink = c.ink[i];
                     for (int r = 0; r < CELL; r++)
                         for (int b = 0; b < CELL; b++)
@@ -83,17 +100,23 @@ final class ScreenTexture {
 
     /**
      * The glyphs of minecraft:textures/font/ascii.png (16 x 16 cells; a resource pack's larger font is sampled down),
-     * each moved to the middle of its cell by its inked width, as the screen centres characters in cells.
+     * each moved to the middle of its cell by its inked width, as the screen centres characters in cells. Which code
+     * point each cell is comes from the font's own map (font/include/default.json: its rows of characters), so the
+     * box-drawing glyphs Wire draws frames with (│ ─ ┘ ╔ ═ ■ ▒) are found where the font has them. Keyed by code point.
      */
-    static long[] glyphs() {
+    static java.util.Map<Integer, Long> glyphs() {
         if (glyphsTried) return glyphs;
         glyphsTried = true;
-        try (var in = Minecraft.getInstance().getResourceManager()
-            .open(Identifier.withDefaultNamespace("textures/font/ascii.png"))) {
+        var rm = Minecraft.getInstance().getResourceManager();
+        try (var in = rm.open(Identifier.withDefaultNamespace("textures/font/ascii.png"))) {
             NativeImage img = NativeImage.read(in);
+            String[] rows = charRows();
             int cell = img.getWidth() / 16;
-            long[] out = new long[256];
+            java.util.Map<Integer, Long> out = new java.util.HashMap<>();
             for (int c = 0; c < 256; c++) {
+                int cp = rows == null ? c : c / 16 < rows.length && c % 16 < rows[c / 16].codePointCount(0, rows[c / 16].length())
+                    ? rows[c / 16].codePointAt(rows[c / 16].offsetByCodePoints(0, c % 16)) : 0;
+                if (cp == 0) continue;
                 boolean[][] on = new boolean[CELL][CELL];
                 int right = -1;
                 for (int r = 0; r < CELL; r++)
@@ -104,11 +127,13 @@ final class ScreenTexture {
                             right = Math.max(right, b);
                         }
                     }
-                int shift = right < 0 ? 0 : Math.max(0, (CELL - (right + 1)) / 2);
+                // (box-drawing glyphs fill their cell edge to edge: they aren't centred)
+                boolean box = cp >= 0x2500 && cp <= 0x25FF;
+                int shift = box || right < 0 ? 0 : Math.max(0, (CELL - (right + 1)) / 2);
                 long bits = 0;
                 for (int r = 0; r < CELL; r++)
                     for (int b = 0; b + shift < CELL; b++) if (on[r][b]) bits |= 1L << (r * CELL + b + shift);
-                out[c] = bits;
+                out.put(cp, bits);
             }
             img.close();
             glyphs = out;
@@ -116,6 +141,25 @@ final class ScreenTexture {
             glyphs = null;
         }
         return glyphs;
+    }
+
+    /** The ascii.png provider's "chars" rows from minecraft:font/include/default.json, or null (then cell = code point). */
+    static String[] charRows() {
+        try (var in = Minecraft.getInstance().getResourceManager().open(Identifier.withDefaultNamespace("font/include/default.json"));
+             var r = new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8)) {
+            var root = com.google.gson.JsonParser.parseReader(r).getAsJsonObject();
+            for (var p : root.getAsJsonArray("providers")) {
+                var o = p.getAsJsonObject();
+                if (!o.has("file") || !o.get("file").getAsString().endsWith("ascii.png")) continue;
+                var a = o.getAsJsonArray("chars");
+                String[] rows = new String[a.size()];
+                for (int i = 0; i < rows.length; i++) rows[i] = a.get(i).getAsString();
+                return rows;
+            }
+        } catch (Exception e) {
+            return null;
+        }
+        return null;
     }
 
     void close() {

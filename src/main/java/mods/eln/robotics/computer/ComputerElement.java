@@ -336,7 +336,13 @@ public class ComputerElement extends TransparentNodeElement {
             if (!typing.contains(player)) return;
             if (eventsThisTick.merge(player.getUUID(), 1, Integer::sum) > EVENTS_PER_TICK) return;
         }
-        String ok = screen.check(line);
+        List<String> echo = new ArrayList<>(1);
+        String ok;
+        synchronized (screen) {
+            ok = screen.check(line, echo);
+            // (a player moved, stacked or activated a window: the other displays are told, now; the last report wins)
+            if (!echo.isEmpty()) for (ServerPlayer p : watching) if (p != player) sendScreen(p, echo);
+        }
         if (ok == null) return;
         if (ok.startsWith("(break ")) r.pressBreak();   // (the interrupt stops a running task; the event says whose tab)
         r.toEditor((ok + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
@@ -376,8 +382,8 @@ public class ComputerElement extends TransparentNodeElement {
     public String screenText() {
         StringBuilder b = new StringBuilder();
         synchronized (screen) {
-            for (var tab : screen.scene.tabs.values())
-                for (var e : tab.elements.values())
+            for (var win : screen.scene.windows.values())
+                for (var e : win.elements.values())
                     for (var line : e.lines) {
                         for (var r : line) b.append(r.text());
                         b.append('\n');

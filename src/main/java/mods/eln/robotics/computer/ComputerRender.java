@@ -33,30 +33,12 @@ public class ComputerRender extends TransparentNodeElementRender {
         desc = (ComputerDescriptor) d;
     }
 
-    /**
-     * The tab this client's screen shows or last showed (-1: never opened; the monitor then shows SceneCells.defaultTab).
-     * Kept after the screen closes, so the monitor goes on showing what the screen did (AdventurAgent's look).
-     */
-    public int shownTab = -1;
     ScreenTexture picture;
     boolean noPicture;
 
     /** Is it on (anything to show)? Off, or without chips, the screen and the monitor show nothing (Baughn 2026-11-18). */
     public boolean lit() {
         return switchedOn && (status == ComputerElement.RUNNING || status == ComputerElement.SLEEPING || status == ComputerElement.HALTED);
-    }
-
-    long seenFocus = -1;
-    /** The last program focus the screen took (so that reopening it takes only newer ones). */
-    public long screenFocusSeq = -1;
-
-    int monitorTab() {
-        // a tab the program brings forward shows, as the screen would show it on opening
-        if (scene.focusSeq != seenFocus) {
-            seenFocus = scene.focusSeq;
-            if (shownTab >= 0 && scene.tabs.containsKey(scene.focus)) shownTab = scene.focus;
-        }
-        return shownTab >= 0 && scene.tabs.containsKey(shownTab) ? shownTab : mods.eln.robotics.computer.screen.SceneCells.defaultTab(scene);
     }
 
     @Override
@@ -66,15 +48,47 @@ public class ComputerRender extends TransparentNodeElementRender {
         if (!lit()) return;
         if (picture == null && !noPicture) noPicture = (picture = ScreenTexture.make()) == null;
         if (picture == null) return;
-        int t = monitorTab();
-        long key = (long) sceneVersion << 9 | (t & 0xFF) << 1 | 1;
-        desc.drawPicture(picture.update(key, () -> mods.eln.robotics.computer.screen.SceneCells.of(scene, t)));
+        // (the picture keeps the screen's shape, 6 x 10 px cells, with black bars on the glass: Baughn)
+        float aspect = scene.w * ComputerScreen.CELL / (float) (scene.h * ComputerScreen.LINE);
+        desc.drawPicture(picture.update(sceneVersion, () -> mods.eln.robotics.computer.screen.SceneCells.of(scene)), aspect);
+    }
+
+    /** Each pixmap's texture on this client, made when first drawn and again when it changes (screen and monitor alike). */
+    final java.util.Map<Integer, Object[]> pixmapTextures = new java.util.HashMap<>();
+    static int pixmapNext;
+
+    /** The texture of a pixmap (nearest filtering: dots stay square), or null where there is no GPU. */
+    public net.minecraft.resources.Identifier pixmapTexture(mods.eln.robotics.computer.screen.Scene.Pixmap p) {
+        int key = System.identityHashCode(p);
+        Object[] have = pixmapTextures.get(key);
+        if (have != null && have[1] == p) return (net.minecraft.resources.Identifier) have[0];
+        try {
+            if (pixmapTextures.size() > 64) releasePixmaps();
+            var id = net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "dynamic/computer_pixmap_" + pixmapNext++);
+            var tex = new net.minecraft.client.renderer.texture.DynamicTexture(() -> "eln computer pixmap", p.w(), p.h(), true);
+            var img = tex.getPixels();
+            for (int y = 0; y < p.h(); y++)
+                for (int x = 0; x < p.w(); x++) img.setPixel(x, y, p.argb()[y * p.w() + x]);
+            tex.upload();
+            net.minecraft.client.Minecraft.getInstance().getTextureManager().register(id, tex);
+            pixmapTextures.put(key, new Object[]{id, p});
+            return id;
+        } catch (IllegalStateException e) {
+            return null;
+        }
+    }
+
+    void releasePixmaps() {
+        for (Object[] t : pixmapTextures.values())
+            net.minecraft.client.Minecraft.getInstance().getTextureManager().release((net.minecraft.resources.Identifier) t[0]);
+        pixmapTextures.clear();
     }
 
     @Override
     public void destructor() {
         super.destructor();
         if (picture != null) picture.close();
+        releasePixmaps();
     }
 
     @Override
