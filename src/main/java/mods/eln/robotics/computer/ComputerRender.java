@@ -48,7 +48,9 @@ public class ComputerRender extends TransparentNodeElementRender {
         if (!lit()) return;
         if (picture == null && !noPicture) noPicture = (picture = ScreenTexture.make()) == null;
         if (picture == null) return;
-        desc.drawPicture(picture.update(sceneVersion, () -> mods.eln.robotics.computer.screen.SceneCells.of(scene)));
+        // (the picture keeps the screen's shape, 6 x 10 px cells, with black bars on the glass: Baughn)
+        float aspect = scene.w * ComputerScreen.CELL / (float) (scene.h * ComputerScreen.LINE);
+        desc.drawPicture(picture.update(sceneVersion, () -> mods.eln.robotics.computer.screen.SceneCells.of(scene)), aspect);
     }
 
     /** Each pixmap's texture on this client, made when first drawn and again when it changes (screen and monitor alike). */

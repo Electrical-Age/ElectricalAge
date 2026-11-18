@@ -44,20 +44,23 @@ public class ComputerDescriptor extends TransparentNodeDescriptor {
         GLASS_Z0 = 2.5f / 16 - 0.5f, GLASS_Z1 = 13.5f / 16 - 0.5f;
 
     /** The monitor's picture on its glass, full bright: its top row at the top, its first column on the left seen from the front. */
-    void drawPicture(net.minecraft.resources.Identifier texture) {
+    void drawPicture(net.minecraft.resources.Identifier texture, float aspect) {
+        // letterboxed: the glass is 4:3, the screen wider; the glass's own dark shows above and below
+        float gw = GLASS_Z1 - GLASS_Z0, gh = GLASS_Y1 - GLASS_Y0, ph = Math.min(gh, gw / aspect), pw = Math.min(gw, gh * aspect);
+        float z0 = GLASS_Z0 + (gw - pw) / 2, z1 = z0 + pw, y0 = GLASS_Y0 + (gh - ph) / 2, y1 = y0 + ph;
         mods.eln.gl.GL11.bindTexture(texture);
         mods.eln.gl.GL11.setFullBright(true);
         mods.eln.misc.UtilsClient.disableCulling();
         mods.eln.gl.GL11.glColor4f(1, 1, 1, 1);
         mods.eln.gl.GL11.glBegin(mods.eln.gl.GL11.GL_QUADS);
         mods.eln.gl.GL11.glTexCoord2f(0, 0);
-        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y1, GLASS_Z0);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, y1, z0);
         mods.eln.gl.GL11.glTexCoord2f(0, 1);
-        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y0, GLASS_Z0);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, y0, z0);
         mods.eln.gl.GL11.glTexCoord2f(1, 1);
-        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y0, GLASS_Z1);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, y0, z1);
         mods.eln.gl.GL11.glTexCoord2f(1, 0);
-        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y1, GLASS_Z1);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, y1, z1);
         mods.eln.gl.GL11.glEnd();
         mods.eln.misc.UtilsClient.enableCulling();
         mods.eln.gl.GL11.setFullBright(false);
