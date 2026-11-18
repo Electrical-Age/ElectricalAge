@@ -6,6 +6,7 @@ import mods.eln.client.gui.ElnScreen;
 import mods.eln.gui.ElnNodeMenu;
 import mods.eln.robotics.computer.screen.Form;
 import mods.eln.robotics.computer.screen.Scene;
+import mods.eln.robotics.computer.screen.SceneCells;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.CharacterEvent;
@@ -22,34 +23,46 @@ import java.util.Map;
 import static mods.eln.i18n.I18N.tr;
 
 /**
- * The computer's screen: this client's copy of its scene (ComputerRender.scene), drawn in character cells (Baughn:
- * the client draws everything, the prompt included, so typing never waits for the network). Tabs sit beside the title
- * and switch here, without asking the computer. Lines are edited here, with history and completion from the names the
- * computer sent; Enter sends the line and shows it greyed until the computer has taken it; Ctrl+C is Break for the tab
- * (Baughn). Logs and lists scroll here. Under it: Reset, its state and address, the chip slots and drives.
+ * The computer's screen, a Wire display (Baughn 2026-11-18: Dynamo; the client draws everything, so nothing the hand
+ * does waits for the network). It composes this client's copy of the scene (ComputerRender.scene) in character cells
+ * (SceneCells: the desk, the windows back to front, the screen bar) and acts on it at once: a window is dragged by its
+ * title row, sized by its corner, raised or lowered by a click or its depth box, activated by a click; the menus of the
+ * active window open on the screen bar while the right button is held. Each of these is applied to its own copy and
+ * reported to the computer (moved, raised, lowered, active, pick, closed), which passes it to the other displays: the
+ * last report wins (eventual consistency, Baughn 1572606714631561411).
+ * <p>
+ * Lines are edited here, with history and completion from the names the computer sent; Enter sends the line and shows
+ * it greyed until the computer has taken it; Ctrl+C is Break for the active window (Baughn). Logs and lists scroll
+ * here. Under it: Reset, power, its state and address, the chip slots and drives.
  */
 public class ComputerScreen extends ElnScreen {
-    public static final int WIDTH = 498, HEIGHT = 358, CELL = 6, LINE = 10;
-    /** The scene's area: cells from (AREA_X, AREA_Y), in panel pixels. */
-    public static final int AREA_X = 9, AREA_Y = 18;
+    public static final int WIDTH = 498, HEIGHT = 348, CELL = 6, LINE = 10;
+    /** The screen's cells start at (AREA_X, AREA_Y), in panel pixels. */
+    public static final int AREA_X = 9, AREA_Y = 8;
     /**
      * Under the 80 x 25 cells (Baughn 2026-11-18): on the left the slots, then the buttons; on the right the inventory
-     * (498 x 358: fits 640 x 360, a 720 px window at GUI scale 2; a smaller window takes a smaller scale, ElnScreen).
+     * (498 x 348: fits 640 x 360, a 720 px window at GUI scale 2; a smaller window takes a smaller scale, ElnScreen).
      */
-    public static final int SLOTS_Y = 288, INV_X = WIDTH - 9 - 162, INV_Y = 276;
+    public static final int SLOTS_Y = AREA_Y + Scene.DEFAULT_H * LINE + 20, INV_X = WIDTH - 9 - 162, INV_Y = AREA_Y + Scene.DEFAULT_H * LINE + 8;
     static final int BOTTOM_Y = SLOTS_Y + 24;
     final ComputerRender render;
 
-    /** The tab shown, and the element with the keyboard. */
-    int tab = -1, focusId = -1;
-    long seenFocus = -1;
-    /** The player picked the tab shown (the Console tab is only the default while there is no REPL). */
-    boolean chose;
+    /** This display's active window (the keyboard's), and the element in it with the keyboard. */
+    int active = -1, focusId = -1;
+    long seenActivate = -1;
     /** What only this player has: each line's edit, each log's and list's scroll. */
     final Map<String, LineEdit> edits;
     final Map<String, Integer> scrolls = new HashMap<>();
     static long seq;
     String hint = "";
+
+    /** A window being dragged (MOVE) or sized (SIZE) by this player: its new geometry so far. */
+    static final int MOVE = 1, SIZE = 2;
+    int dragMode, dragWin, dragX, dragY, dragW, dragH;
+    double dragFromX, dragFromY;
+    /** The menus open on the screen bar (the right button held): the menu and item under the pointer, -1 none. */
+    boolean menuOpen;
+    int menuAt = -1, itemAt = -1, lastMenu = -1;
 
     /** An editor element's state on this client: the revision and text it was opened at, the text now, a save. */
     static final class EditorState {
@@ -77,12 +90,10 @@ public class ComputerScreen extends ElnScreen {
         this.render = (ComputerRender) render;
         @SuppressWarnings("unchecked") Map<String, LineEdit> e = (Map<String, LineEdit>) (Map<?, ?>) this.render.screenState;
         edits = e;   // (kept in the render: a half-typed line survives closing the screen, AdventurAgent)
-        // it opens on the tab it last showed, unless the program brought one forward since (AdventurAgent)
-        tab = this.render.shownTab;
-        chose = tab >= 0;
-        seenFocus = this.render.shownTab >= 0 ? this.render.screenFocusSeq : -1;
-        titleLabelY = 5;
-        inventoryLabelY = -10000;   // (no room for the inventory's title above it)
+        active = this.render.scene.active;
+        seenActivate = this.render.scene.activateSeq;
+        titleLabelY = -10000;      // (the screen bar is its title)
+        inventoryLabelY = -10000;  // (no room for the inventory's title above it)
     }
 
     @Override
@@ -107,21 +118,145 @@ public class ComputerScreen extends ElnScreen {
         return (EditorState) render.screenState.computeIfAbsent("ed/" + t + "/" + id, k -> new EditorState());
     }
 
-    /** The current tab's editor elements as code editor widgets (made, moved, removed to match the scene). */
+    // ---- the scene and this display's view of it
+
+    Scene scene() {
+        return render.scene;
+    }
+
+    /** The active window, taking the computer's (or another display's) newest activation. */
+    Scene.Window activeWindow() {
+        Scene s = scene();
+        if (s.activateSeq != seenActivate) {
+            seenActivate = s.activateSeq;
+            if (s.windows.containsKey(s.active) && active != s.active) {
+                active = s.active;
+                focusId = -1;
+            }
+        }
+        if (!s.windows.containsKey(active)) {
+            // (gone: the frontmost window that isn't a backdrop, else none)
+            active = -1;
+            for (int k = s.order.size() - 1; k >= 0 && active < 0; k--)
+                if (!s.windows.get(s.order.get(k)).has("backdrop")) active = s.order.get(k);
+            focusId = -1;
+        }
+        return active < 0 ? null : s.windows.get(active);
+    }
+
+    /** This display changed its copy of the scene (a move, a raise): the monitor repaints. */
+    void changed() {
+        render.sceneVersion++;
+    }
+
+    static String key(int t, int id) {
+        return t + "/" + id;
+    }
+
+    LineEdit edit(int id) {
+        return edits.computeIfAbsent(key(active, id), k -> new LineEdit());
+    }
+
+    /** The raw area that has the keyboard: the one clicked last, or the window's first if it has no line. */
+    Scene.Element focusedRaw(Scene.Window t) {
+        if (t == null) return null;
+        Scene.Element e = t.elements.get(focusId);
+        if (e != null && (e.kind.equals("raw") || e.kind.equals("line"))) return e.kind.equals("raw") ? e : null;
+        Scene.Element raw = null;
+        for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
+            if (en.getValue().kind.equals("line")) return null;
+            if (raw == null && en.getValue().kind.equals("raw")) {
+                raw = en.getValue();
+                focusId = en.getKey();
+            }
+        }
+        return raw;
+    }
+
+    /** The focused line, or the window's first line. */
+    Scene.Element focusedLine(Scene.Window t) {
+        if (t == null) return null;
+        Scene.Element e = t.elements.get(focusId);
+        if (e != null && e.kind.equals("line")) return e;
+        if (e != null && e.kind.equals("raw")) return null;   // (anything else focused: the window's first line)
+        for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet())
+            if (en.getValue().kind.equals("line")) {
+                focusId = en.getKey();
+                return en.getValue();
+            }
+        return null;
+    }
+
+    /** A raw area's name for a key that types no character (null: none, or one charTyped sends). */
+    static String keyName(int k, boolean ctrlOrAlt) {
+        if (ctrlOrAlt && k >= InputConstants.KEY_A && k <= InputConstants.KEY_Z) return String.valueOf((char) ('a' + k - InputConstants.KEY_A));
+        if (k >= InputConstants.KEY_F1 && k <= InputConstants.KEY_F12) return "f" + (k - InputConstants.KEY_F1 + 1);
+        return switch (k) {
+            case InputConstants.KEY_RETURN, InputConstants.KEY_NUMPADENTER -> "enter";
+            case InputConstants.KEY_BACKSPACE -> "backspace";
+            case InputConstants.KEY_TAB -> "tab";
+            case InputConstants.KEY_DELETE -> "delete";
+            case InputConstants.KEY_INSERT -> "insert";
+            case InputConstants.KEY_LEFT -> "left";
+            case InputConstants.KEY_RIGHT -> "right";
+            case InputConstants.KEY_UP -> "up";
+            case InputConstants.KEY_DOWN -> "down";
+            case InputConstants.KEY_HOME -> "home";
+            case InputConstants.KEY_END -> "end";
+            case InputConstants.KEY_PAGEUP -> "pageup";
+            case InputConstants.KEY_PAGEDOWN -> "pagedown";
+            default -> null;
+        };
+    }
+
+    int cx(int x) {
+        return leftPos + AREA_X + x * CELL;
+    }
+
+    int cy(int y) {
+        return topPos + AREA_Y + y * LINE;
+    }
+
+    int col(double mx) {
+        return (int) Math.floor((mx - cx(0)) / CELL);
+    }
+
+    int row(double my) {
+        return (int) Math.floor((my - cy(0)) / LINE);
+    }
+
+    boolean onScreen(double mx, double my) {
+        Scene s = scene();
+        return mx >= cx(0) && my >= cy(0) && mx < cx(s.w) && my < cy(s.h);
+    }
+
+    // ---- editors: code editor widgets over editor elements this display can show whole
+
+    /** Is window wid's rectangle (x, y, w, h in cells) on top everywhere (no other window over it)? */
+    boolean uncovered(int wid, int x, int y, int w, int h) {
+        Scene s = scene();
+        for (int yy = y; yy < y + h; yy++)
+            for (int xx = x; xx < x + w; xx++) if (s.windowAt(xx, yy) != wid) return false;
+        return true;
+    }
+
+    /** The editor elements of the active window, when nothing covers them, as code editor widgets placed over them. */
     void syncEditors() {
-        Scene.Tab t = render.lit() ? currentTab() : null;   // (off: no editors either)
+        Scene.Window t = render.lit() && dragMode == 0 ? activeWindow() : null;   // (off, or a drag: none)
         java.util.Set<String> want = new java.util.HashSet<>();
-        if (t != null)
+        if (t != null && t.ask == null)
             for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
                 Scene.Element e = en.getValue();
                 if (!e.kind.equals("editor")) continue;
-                String k = tab + "/" + en.getKey();
+                int ex = t.x + e.x(), ey = t.y + e.y(), ew = e.size(5, t, 10), eh = e.size(6, t, 5);
+                if (ew < 4 || eh < 2 || !uncovered(active, ex, ey, ew, eh)) continue;
+                String k = active + "/" + en.getKey();
                 want.add(k);
                 List<Object> m = e.msg;
-                EditorState st = editorState(tab, en.getKey());
+                EditorState st = editorState(active, en.getKey());
                 boolean replaced = false;
                 if (st.opened != m) {
-                    // a new editor message: the file opened again (a reused tab number, AdventurAgent): start from it
+                    // a new editor message: the file opened again (a reused window number, AdventurAgent): start from it
                     st.opened = m;
                     st.baseRev = Form.str(m, 9, "");
                     st.baseText = st.text = Form.str(m, 10, "");
@@ -129,20 +264,23 @@ public class ComputerScreen extends ElnScreen {
                     replaced = true;
                 }
                 var w = editorWidgets.get(k);
+                // (its last row is left for the save status, which the widget would cover)
+                int px = cx(ex), py = cy(ey), pw = ew * CELL, ph = Math.max(1, eh - 1) * LINE;
                 if (w == null) {
-                    int ex = (int) Form.num(m, 3, 0), ey = (int) Form.num(m, 4, 0), ew = (int) Form.num(m, 5, 10), eh = (int) Form.num(m, 6, 5);
                     boolean janet = "janet".equals(Form.kwName(m, 7, ""));
-                    // (its last row is left for the save status, which the widget would cover)
-                    w = new mods.eln.client.gui.CodeEditor(cx(ex), cy(ey), ew * CELL, Math.max(1, eh - 1) * LINE, st.text, 32768,
-                        janet ? JANET : PLAIN, s2 -> {
-                            st.text = s2;
-                            st.status = "";
-                        });
+                    w = new mods.eln.client.gui.CodeEditor(px, py, pw, ph, st.text, 32768, janet ? JANET : PLAIN, s2 -> {
+                        st.text = s2;
+                        st.status = "";
+                    });
                     editorWidgets.put(k, addRenderableWidget(w));
-                } else if (replaced && !w.buffer.text().equals(st.text)) w.buffer.setText(st.text);
+                } else {
+                    if (w.getX() != px || w.getY() != py) w.setPosition(px, py);
+                    if (w.getWidth() != pw || w.getHeight() != ph) w.setSize(pw, ph);
+                    if (replaced && !w.buffer.text().equals(st.text)) w.buffer.setText(st.text);
+                }
             }
-        // states of editors whose tab is gone are forgotten
-        render.screenState.keySet().removeIf(key -> key.startsWith("ed/") && !scene().tabs.containsKey(Integer.parseInt(key.split("/")[1])));
+        // states of editors whose window is gone are forgotten
+        render.screenState.keySet().removeIf(key -> key.startsWith("ed/") && !scene().windows.containsKey(Integer.parseInt(key.split("/")[1])));
         for (var it = editorWidgets.entrySet().iterator(); it.hasNext(); ) {
             var en = it.next();
             if (!want.contains(en.getKey())) {
@@ -185,6 +323,20 @@ public class ComputerScreen extends ElnScreen {
                 st.status = tr("Changed on the disk meanwhile: Ctrl+S again overwrites it");
             }
         }
+        // lines the computer took are in its log now; ones it never took (off, stuck, refused) come back after 10 s
+        for (var en : edits.entrySet()) {
+            LineEdit le = en.getValue();
+            String[] p = en.getKey().split("/");
+            if (le.pending == null || p.length != 2) continue;
+            Scene.Window w = scene().windows.get(Integer.parseInt(p[0]));
+            Scene.Element e = w == null ? null : w.elements.get(Integer.parseInt(p[1]));
+            if (e != null && e.busySeq >= le.pendingSeq) le.pending = null;
+            else if (System.currentTimeMillis() - le.pendingAt > 10_000) {
+                if (le.text.isEmpty()) le.text.append(le.pending);
+                le.cursor = le.text.length();
+                le.pending = null;
+            }
+        }
     }
 
     /** Ctrl+S in an editor: its changes as hunks against the revision it was opened (or last saved) at. */
@@ -216,136 +368,48 @@ public class ComputerScreen extends ElnScreen {
         super.removed();
     }
 
-    // ---- the scene
-
-    Scene scene() {
-        return render.scene;
-    }
-
-    Scene.Tab currentTab() {
-        Scene s = scene();
-        if (s.focusSeq != seenFocus && s.tabs.containsKey(s.focus)) {
-            seenFocus = s.focusSeq;
-            if (tab != s.focus) focusId = -1;   // (an element id of the old tab means nothing in this one)
-            tab = s.focus;
-        }
-        if (!s.tabs.containsKey(tab)) chose = false;   // (gone, e.g. after a reset: back to the REPL once it is up)
-        if (!s.tabs.containsKey(tab) || (tab == 0 && !chose && s.tabs.containsKey(1))) {
-            tab = s.tabs.containsKey(1) ? 1 : s.tabs.isEmpty() ? -1 : s.tabs.keySet().iterator().next();
-            focusId = -1;
-        }
-        render.shownTab = tab;   // (the monitor shows the same tab)
-        render.screenFocusSeq = seenFocus;
-        return tab < 0 ? null : s.tabs.get(tab);
-    }
-
-    static String key(int t, int id) {
-        return t + "/" + id;
-    }
-
-    LineEdit edit(int id) {
-        return edits.computeIfAbsent(key(tab, id), k -> new LineEdit());
-    }
-
-    /** The raw area that has the keyboard: the one clicked last, or the tab's first if it has no line. */
-    Scene.Element focusedRaw(Scene.Tab t) {
-        if (t == null) return null;
-        Scene.Element e = t.elements.get(focusId);
-        if (e != null && (e.kind.equals("raw") || e.kind.equals("line"))) return e.kind.equals("raw") ? e : null;
-        Scene.Element raw = null;
-        for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
-            if (en.getValue().kind.equals("line")) return null;
-            if (raw == null && en.getValue().kind.equals("raw")) {
-                raw = en.getValue();
-                focusId = en.getKey();
-            }
-        }
-        return raw;
-    }
-
-    /** A raw area's name for a key that types no character (null: none, or one charTyped sends). */
-    static String keyName(int k, boolean ctrlOrAlt) {
-        if (ctrlOrAlt && k >= InputConstants.KEY_A && k <= InputConstants.KEY_Z) return String.valueOf((char) ('a' + k - InputConstants.KEY_A));
-        if (k >= InputConstants.KEY_F1 && k <= InputConstants.KEY_F12) return "f" + (k - InputConstants.KEY_F1 + 1);
-        return switch (k) {
-            case InputConstants.KEY_RETURN, InputConstants.KEY_NUMPADENTER -> "enter";
-            case InputConstants.KEY_BACKSPACE -> "backspace";
-            case InputConstants.KEY_TAB -> "tab";
-            case InputConstants.KEY_DELETE -> "delete";
-            case InputConstants.KEY_INSERT -> "insert";
-            case InputConstants.KEY_LEFT -> "left";
-            case InputConstants.KEY_RIGHT -> "right";
-            case InputConstants.KEY_UP -> "up";
-            case InputConstants.KEY_DOWN -> "down";
-            case InputConstants.KEY_HOME -> "home";
-            case InputConstants.KEY_END -> "end";
-            case InputConstants.KEY_PAGEUP -> "pageup";
-            case InputConstants.KEY_PAGEDOWN -> "pagedown";
-            default -> null;
-        };
-    }
-
-    /** The focused line, or the tab's first line. */
-    Scene.Element focusedLine(Scene.Tab t) {
-        if (t == null) return null;
-        Scene.Element e = t.elements.get(focusId);
-        if (e != null && e.kind.equals("line")) return e;
-        if (e != null && e.kind.equals("raw")) return null;   // (anything else focused: the tab's first line)
-        for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet())
-            if (en.getValue().kind.equals("line")) {
-                focusId = en.getKey();
-                return en.getValue();
-            }
-        return null;
-    }
-
-    static int colour(Object kw, int dflt) {
-        if (!(kw instanceof Form.Keyword k)) return dflt;
-        String n = k.name().replace('-', '_');
-        int c = mods.eln.bus.BusChannel.byName(n);
-        return c < 0 ? dflt : 0xFF000000 | mods.eln.bus.BusChannel.rgb(c);
-    }
-
-    int cx(int x) {
-        return leftPos + AREA_X + x * CELL;
-    }
-
-    int cy(int y) {
-        return topPos + AREA_Y + y * LINE;
-    }
-
-    void cells(GuiGraphicsExtractor g, String s, int x, int y, int maxCells, int colour) {
-        for (int k = 0, c = 0; k < s.length() && c < maxCells; c++) {
-            int cp = s.codePointAt(k);
-            String ch = new String(Character.toChars(cp));
-            k += Character.charCount(cp);
-            if (cp == ' ') continue;
-            g.text(font, ch, cx(x + c) + (CELL - font.width(ch)) / 2, cy(y) + 1, colour, false);
-        }
-    }
-
     // ---- drawing
+
+    /** What only this player has, for the cells: the line being edited, scrolling, the editors drawn as widgets. */
+    final SceneCells.Local local = new SceneCells.Local() {
+        @Override
+        public String lineText(int win, int id) {
+            LineEdit le = edits.get(key(win, id));
+            if (le == null) return null;
+            if (le.pending != null) return le.pending;
+            Scene.Window w = scene().windows.get(win);
+            Scene.Element e = w == null ? null : w.elements.get(id);
+            if (e == null) return le.text.toString();
+            String prompt = Form.str(e.msg, 6, "");
+            int room = e.size(5, w, 1) - prompt.codePointCount(0, prompt.length()) - 1;
+            int start = Math.max(0, le.cursor - room + 1);
+            return le.text.substring(Math.min(start, le.text.length()));
+        }
+
+        @Override
+        public int scroll(int win, int id) {
+            return scrolls.getOrDefault(key(win, id), 0);
+        }
+
+        @Override
+        public boolean ownEditor(int win, int id) {
+            return editorWidgets.containsKey(win + "/" + id);
+        }
+    };
 
     @Override
     protected void extractDevice(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
         Scene s = scene();
         int x0 = leftPos + AREA_X - 4, y0 = topPos + AREA_Y - 3;
         g.fill(x0, y0, x0 + s.w * CELL + 8, y0 + s.h * LINE + 6, 0xFF101418);
-        Scene.Tab t = currentTab();
-        if (!render.lit()) {
-            // off, or no chips: a dark screen, no text (Baughn 2026-11-18); the state shows under it
-        } else if (t == null) {
-            cells(g, "...", 1, 1, s.w, 0xFF6A7A6A);
-        } else {
-            drawTabs(g, s);
-            Scene.Element line = focusedLine(t), raw = line == null ? focusedRaw(t) : null;
-            for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet())
-                draw(g, en.getKey(), en.getValue(), en.getValue() == line || en.getValue() == raw);
+        if (render.lit()) {
+            Scene.Window t = activeWindow();
+            cells(g, SceneCells.of(s, local, active));
+            if (t != null) overlays(g, t);
+            if (dragMode != 0) dragOutline(g);
+            if (menuOpen) menus(g, t);
         }
-        if (!hint.isEmpty() && render.lit()) {   // the completion choices, over the row above the line
-            g.fill(cx(0), cy(s.h - 2), cx(s.w), cy(s.h - 1), 0xFF2A2E38);
-            g.text(font, font.plainSubstrByWidth(hint, s.w * CELL), cx(0) + 1, cy(s.h - 2) + 1, 0xFFB0B0C0, false);
-        }
+        // (off, or no chips: a dark screen, no text: Baughn 2026-11-18; the state shows under it)
         label(g, 9, SLOTS_Y - 11, tr("Expansion modules"));
         label(g, 9 + 8 * 18 + 14, SLOTS_Y - 11, tr("Floppy drives"));
         // the module slots as ISA-style edge connectors (Baughn), under the item slots
@@ -358,219 +422,355 @@ public class ComputerScreen extends ElnScreen {
         label(g, 222, BOTTOM_Y + 6, tr("Address"));
     }
 
-    /** A tab's title, shortened when there are many (the bar must stop short of inventory mods' sort buttons). */
-    /** Where the tabs may go: from beside the title to short of the inventory mods' buttons. */
-    static final int TABS_X = 60, TABS_END = WIDTH - 44;
-
-    /** A tab's title, shortened so that all the tabs fit their row. */
-    String tabTitle(int t, Scene.Tab tab, int count) {
-        String title = tab.title.isEmpty() ? String.valueOf(t) : tab.title;
-        int room = Math.max(font.width("W."), (TABS_END - TABS_X) / Math.max(1, count) - 10);
-        if (font.width(title) <= room) return title;
-        int n = title.length();
-        while (n > 1 && font.width(title.substring(0, n) + ".") > room) n--;
-        return title.substring(0, n) + ".";
-    }
-
-    /** The tabs, beside the title (inventory mods draw their sort buttons at the top right). */
-    void drawTabs(GuiGraphicsExtractor g, Scene s) {
-        int x = leftPos + TABS_X;
-        for (Map.Entry<Integer, Scene.Tab> en : s.tabs.entrySet()) {
-            String title = tabTitle(en.getKey(), en.getValue(), s.tabs.size());
-            int w = font.width(title) + 8;
-            boolean on = en.getKey() == tab;
-            g.fill(x, topPos + 3, x + w, topPos + 15, on ? 0xFF101418 : 0xFF8B8B8B);
-            g.text(font, title, x + 4, topPos + 5, on ? 0xFF9FE8A0 : 0xFF202020, false);
-            x += w + 2;
-        }
-    }
-
-    void draw(GuiGraphicsExtractor g, int id, Scene.Element e, boolean focused) {
-        List<Object> m = e.msg;
-        int x = e.x(), y = e.y();
-        switch (e.kind) {
-            case "box" -> {
-                int w = (int) Form.num(m, 5, 1), h = (int) Form.num(m, 6, 1);
-                g.fill(cx(x), cy(y), cx(x + w), cy(y + h), colour(m.size() > 7 ? m.get(7) : null, 0xFF404040));
+    /** The composed cells: each row's paper in runs, then the glyphs, centred in their cells. */
+    void cells(GuiGraphicsExtractor g, SceneCells c) {
+        for (int y = 0; y < c.h; y++) {
+            int x = 0;
+            while (x < c.w) {
+                int p = c.paper[y * c.w + x], e = x + 1;
+                while (e < c.w && c.paper[y * c.w + e] == p) e++;
+                g.fill(cx(x), cy(y), cx(e), cy(y + 1), p);
+                x = e;
             }
-            case "text" -> {
-                String s = Form.str(m, 6, "");
-                if (m.size() > 7 && m.get(7) != null)
-                    g.fill(cx(x), cy(y), cx(x + s.codePointCount(0, s.length())), cy(y + 1), colour(m.get(7), 0));
-                cells(g, s, x, y, scene().w - x, colour(m.size() > 5 ? m.get(5) : null, 0xFFE6E6E6));
-            }
-            case "log" -> drawLog(g, id, e, x, y, (int) Form.num(m, 5, 1), (int) Form.num(m, 6, 1));
-            case "line" -> drawLine(g, id, e, x, y, (int) Form.num(m, 5, 1), Form.str(m, 6, ""), focused);
-            case "button" -> {
-                int w = (int) Form.num(m, 5, 4);
-                String label = Form.str(m, 6, "");
-                g.fill(cx(x), cy(y), cx(x + w), cy(y + 1), 0xFF5A5A66);
-                cells(g, label, x + Math.max(0, (w - label.length()) / 2), y, w, 0xFFFFFFFF);
-            }
-            case "list" -> {
-                int w = (int) Form.num(m, 5, 1), h = (int) Form.num(m, 6, 1);
-                List<?> items = m.size() > 7 && m.get(7) instanceof List<?> l ? l : List.of();
-                int off = scrolls.getOrDefault(key(tab, id), 0);
-                g.fill(cx(x), cy(y), cx(x + w), cy(y + h), 0xFF181C22);
-                for (int r = 0; r < h && off + r < items.size(); r++)
-                    cells(g, String.valueOf(items.get(off + r)), x, y + r, w, 0xFFD0D0D0);
-            }
-            case "editor" -> {
-                EditorState st = editorState(tab, id);
-                if (!st.status.isEmpty()) {
-                    int ey = y + (int) Form.num(m, 6, 1) - 1, ew = (int) Form.num(m, 5, 1);
-                    g.fill(cx(x), cy(ey), cx(x + ew), cy(ey + 1), 0xFF2A2E38);
-                    cells(g, st.status, x, ey, ew, 0xFFE0C060);
+            for (x = 0; x < c.w; x++) {
+                int cp = c.glyph[y * c.w + x];
+                if (cp == ' ') continue;
+                if (cp >= 0x2500 && cp <= 0x257F) boxGlyph(g, cp, x, y, c.ink[y * c.w + x]);
+                else {
+                    String ch = new String(Character.toChars(cp));
+                    g.text(font, ch, cx(x) + (CELL - font.width(ch)) / 2, cy(y) + 1, c.ink[y * c.w + x], false);
                 }
             }
-            case "raw" -> {
-                int w = (int) Form.num(m, 5, 1), h = (int) Form.num(m, 6, 1);
-                g.fill(cx(x), cy(y), cx(x + w), cy(y + h), 0xFF0C0E10);
-                if (focused) g.outline(cx(x) - 1, cy(y) - 1, w * CELL + 2, h * LINE + 2, 0xFF3A4A3A);
-            }
-            default -> cells(g, "[" + e.kind + "]", x, y, 20, 0xFF707070);
         }
     }
 
-    /** A log's last lines, wrapped at its width, scrolled back by this player. */
-    void drawLog(GuiGraphicsExtractor g, int id, Scene.Element e, int x, int y, int w, int h) {
-        List<List<Scene.Run>> rows = new ArrayList<>();
-        int need = h + scrolls.getOrDefault(key(tab, id), 0);
-        var it = e.lines.descendingIterator();
-        while (it.hasNext() && rows.size() < need) {
-            List<List<Scene.Run>> wrapped = wrap(it.next(), w);
-            for (int k = wrapped.size() - 1; k >= 0 && rows.size() < need; k--) rows.add(0, wrapped.get(k));
-        }
-        int off = Math.max(0, Math.min(scrolls.getOrDefault(key(tab, id), 0), Math.max(0, rows.size() - h)));
-        int first = Math.max(0, rows.size() - h - off);
-        for (int r = 0; r < h && first + r < rows.size(); r++) {
-            int c = 0;
-            for (Scene.Run run : rows.get(first + r)) {
-                cells(g, run.text(), x + c, y + r, w - c, colour(Form.kw(run.colour()), 0xFFE6E6E6));
-                c += run.text().codePointCount(0, run.text().length());
-            }
+    /**
+     * A box-drawing glyph drawn as lines through its cell, so frames join cell to cell (the font's glyphs are 6 x 8 and
+     * leave gaps between rows of 10 px cells): single lines 1 px, double lines two 1 px lines.
+     */
+    void boxGlyph(GuiGraphicsExtractor g, int cp, int x, int y, int ink) {
+        int px = cx(x), py = cy(y), mx = px + CELL / 2 - 1, my = py + LINE / 2 - 1;
+        String s = String.valueOf((char) cp);
+        boolean dbl = "═║╔╗╚╝╬╦╩╠╣".contains(s);
+        boolean up = "│┘└┤├┼║╝╚╬╩╠╣".contains(s), down = "│┐┌┤├┼║╗╔╬╦╠╣".contains(s);
+        boolean left = "─┘┐┤┴┬┼═╝╗╬╩╦╣".contains(s), right = "─└┌├┴┬┼═╚╔╬╩╦╠".contains(s);
+        for (int o : dbl ? new int[]{-1, 1} : new int[]{0}) {
+            if (up) g.fill(mx + o, py, mx + o + 1, my + 1, ink);
+            if (down) g.fill(mx + o, my, mx + o + 1, py + LINE, ink);
+            if (left) g.fill(px, my + o, mx + 1, my + o + 1, ink);
+            if (right) g.fill(mx, my + o, px + CELL, my + o + 1, ink);
         }
     }
 
-    static List<List<Scene.Run>> wrap(List<Scene.Run> line, int w) {
-        List<List<Scene.Run>> out = new ArrayList<>();
-        List<Scene.Run> cur = new ArrayList<>();
-        int col = 0;
-        for (Scene.Run r : line) {
-            String t = r.text();
-            while (!t.isEmpty()) {
-                int room = w - col;
-                if (room <= 0) {
-                    out.add(cur);
-                    cur = new ArrayList<>();
-                    col = 0;
-                    room = w;
-                }
-                int n = Math.min(room, t.length());
-                cur.add(new Scene.Run(r.colour(), t.substring(0, n)));
-                col += n;
-                t = t.substring(n);
+    /** The active window's cursor and completion hint, where nothing covers them, and its editors' save status. */
+    void overlays(GuiGraphicsExtractor g, Scene.Window t) {
+        Scene.Element line = focusedLine(t);
+        if (line != null && t.ask == null && focusedRaw(t) == null) {
+            LineEdit le = edit(focusId);
+            int x = t.x + line.x(), y = t.y + line.y();
+            String prompt = Form.str(line.msg, 6, "");
+            int px = prompt.codePointCount(0, prompt.length()), room = line.size(5, t, 1) - px - 1;
+            int start = Math.max(0, le.cursor - room + 1), cur = x + px + le.cursor - start;
+            if (le.pending == null && (System.currentTimeMillis() / 500) % 2 == 0 && scene().windowAt(cur, y) == active
+                && cur < t.x + t.cw && y < t.y + t.ch)
+                g.fill(cx(cur), cy(y) + 1, cx(cur) + 1, cy(y + 1) - 1, 0xFFE6E6E6);
+            if (le.pending != null)   // (sent, not yet taken: underlined grey)
+                g.fill(cx(x + px), cy(y + 1) - 1, cx(x + px + Math.min(room, le.pending.length())), cy(y + 1), 0xFF707070);
+            if (!hint.isEmpty() && y - 1 >= t.y) {   // the completion choices, over the row above the line
+                g.fill(cx(t.x), cy(y - 1), cx(t.x + t.cw), cy(y), 0xFF2A2E38);
+                g.text(font, font.plainSubstrByWidth(hint, t.cw * CELL), cx(t.x) + 1, cy(y - 1) + 1, 0xFFB0B0C0, false);
             }
         }
-        out.add(cur);
+        for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
+            Scene.Element e = en.getValue();
+            if (!e.kind.equals("editor") || !editorWidgets.containsKey(active + "/" + en.getKey())) continue;
+            EditorState st = editorState(active, en.getKey());
+            if (st.status.isEmpty()) continue;
+            int ex = t.x + e.x(), ey = t.y + e.y() + e.size(6, t, 1) - 1, ew = e.size(5, t, 1);
+            g.fill(cx(ex), cy(ey), cx(ex + ew), cy(ey + 1), 0xFF2A2E38);
+            g.text(font, font.plainSubstrByWidth(st.status, ew * CELL), cx(ex) + 1, cy(ey) + 1, 0xFFE0C060, false);
+        }
+    }
+
+    void dragOutline(GuiGraphicsExtractor g) {
+        Scene.Window w = scene().windows.get(dragWin);
+        if (w == null) return;
+        int f = w.framed() ? 1 : 0;
+        g.outline(cx(dragX - f), cy(dragY - f), (dragW + 2 * f) * CELL, (dragH + 2 * f) * LINE, 0xFFFFFFFF);
+    }
+
+    // ---- menus on the screen bar (the right button held: period-true, Baughn 1572601240842408048)
+
+    /** Menu m's title cell on the bar: titles from cell 1, two cells apart. */
+    int menuX(Scene.Window t, int m) {
+        int x = 1;
+        for (int k = 0; k < m; k++) x += menuTitle(t, k).length() + 2;
+        return x;
+    }
+
+    static String menuTitle(Scene.Window t, int m) {
+        return t.menus.get(m) instanceof List<?> l && !l.isEmpty() ? String.valueOf(l.get(0)) : "";
+    }
+
+    /** Menu m's items: [label, key] each, or null for a separator. */
+    static List<String[]> menuItems(Scene.Window t, int m) {
+        List<String[]> out = new ArrayList<>();
+        if (!(t.menus.get(m) instanceof List<?> l)) return out;
+        for (int k = 1; k < l.size(); k++) {
+            Object o = l.get(k);
+            if (o instanceof List<?> it && !it.isEmpty())
+                out.add(new String[]{String.valueOf(it.get(0)), it.size() > 1 && it.get(1) instanceof String s ? s : ""});
+            else out.add(null);
+        }
         return out;
     }
 
-    void drawLine(GuiGraphicsExtractor g, int id, Scene.Element e, int x, int y, int w, String prompt, boolean focused) {
-        LineEdit le = edit(id);
-        // the computer took the pending submission: it is in the log now
-        if (le.pending != null && e.busySeq >= le.pendingSeq) le.pending = null;
-        if (le.pending != null && System.currentTimeMillis() - le.pendingAt > 10_000) {
-            // never taken (the computer is off, stuck, or refused it): the text comes back to edit and send again
-            if (le.text.isEmpty()) le.text.append(le.pending);
-            le.cursor = le.text.length();
-            le.pending = null;
+    int menuWidth(Scene.Window t, int m) {
+        int w = 8;
+        for (String[] it : menuItems(t, m)) if (it != null) w = Math.max(w, it[0].length() + (it[1].isEmpty() ? 2 : 7));
+        return w;
+    }
+
+    void menus(GuiGraphicsExtractor g, Scene.Window t) {
+        g.fill(cx(0), cy(0), cx(scene().w), cy(1), SceneCells.BAR);
+        if (t == null || t.menus.isEmpty()) return;
+        for (int m = 0; m < t.menus.size(); m++) {
+            int x = menuX(t, m);
+            String title = menuTitle(t, m);
+            boolean on = m == menuAt;
+            if (on) g.fill(cx(x - 1), cy(0), cx(x + title.length() + 1), cy(1), SceneCells.BAR_TEXT);
+            g.text(font, title, cx(x), cy(0) + 1, on ? SceneCells.BAR : SceneCells.BAR_TEXT, false);
         }
-        boolean busy = le.pending != null || (e.busy && le.pendingSeq > 0 && e.busySeq >= le.pendingSeq);
-        cells(g, prompt, x, y, w, 0xFF8FB0FF);
-        int px = prompt.codePointCount(0, prompt.length());
-        int room = w - px - 1;
-        if (le.pending != null) {
-            cells(g, le.pending, x + px, y, room, 0xFF707070);
-        } else {
-            String t = le.text.toString();
-            int start = Math.max(0, le.cursor - room + 1);
-            cells(g, t.substring(Math.min(start, t.length())), x + px, y, room, 0xFFE6E6E6);
-            if (focused && (System.currentTimeMillis() / 500) % 2 == 0)
-                g.fill(cx(x + px + le.cursor - start), cy(y) + 1, cx(x + px + le.cursor - start) + 1, cy(y + 1) - 1, 0xFFE6E6E6);
+        if (menuAt < 0) return;
+        List<String[]> items = menuItems(t, menuAt);
+        int x = menuX(t, menuAt) - 1, w = menuWidth(t, menuAt);
+        g.fill(cx(x), cy(1), cx(x + w), cy(1 + items.size()), SceneCells.BAR);
+        g.outline(cx(x), cy(1), w * CELL, items.size() * LINE, SceneCells.BAR_TEXT);
+        String menu = menuTitle(t, menuAt);
+        for (int i = 0; i < items.size(); i++) {
+            String[] it = items.get(i);
+            int y = 1 + i;
+            if (it == null) {
+                g.fill(cx(x) + 2, cy(y) + LINE / 2, cx(x + w) - 2, cy(y) + LINE / 2 + 1, 0xFF8A90A0);
+                continue;
+            }
+            boolean off = t.disabled.contains(menu + "/" + it[0]), on = i == itemAt && !off;
+            if (on) g.fill(cx(x) + 1, cy(y), cx(x + w) - 1, cy(y + 1), SceneCells.BAR_TEXT);
+            int ink = off ? 0xFF9A9A9A : on ? SceneCells.BAR : SceneCells.BAR_TEXT;
+            g.text(font, it[0], cx(x + 1), cy(y) + 1, ink, false);
+            if (!it[1].isEmpty()) g.text(font, "Alt-" + it[1].toUpperCase(), cx(x + w - 6), cy(y) + 1, ink, false);
         }
-        if (busy) cells(g, "*", x + w - 1, y, 1, 0xFFE0C060);
+    }
+
+    /** Which menu and item the pointer is over, while the menus are open. */
+    void menuHover(double mx, double my) {
+        Scene.Window t = activeWindow();
+        menuAt = itemAt = -1;
+        if (t == null || t.menus.isEmpty() || !onScreen(mx, my)) return;
+        int c = col(mx), r = row(my);
+        if (r == 0) {
+            for (int m = 0; m < t.menus.size(); m++) {
+                int x = menuX(t, m);
+                if (c >= x - 1 && c < x + menuTitle(t, m).length() + 1) menuAt = m;
+            }
+            lastMenu = menuAt;
+            return;
+        }
+        menuAt = lastMenu;
+        if (menuAt < 0 || menuAt >= t.menus.size()) return;
+        int x = menuX(t, menuAt) - 1, w = menuWidth(t, menuAt);
+        List<String[]> items = menuItems(t, menuAt);
+        if (c >= x && c < x + w && r >= 1 && r < 1 + items.size()) itemAt = r - 1;
+    }
+
+    void pick(Scene.Window t, String menu, String item) {
+        if (t.disabled.contains(menu + "/" + item)) return;
+        render.screenEvent(new Form.Symbol("pick"), (long) active, menu, item);
     }
 
     // ---- input
+
+    /** This display makes window wid the active one: raised, and the computer and the other displays told. */
+    void activate(int wid) {
+        Scene s = scene();
+        if (wid == active && !s.order.isEmpty() && s.order.getLast() == wid) return;
+        active = wid;
+        focusId = -1;
+        hint = "";
+        s.active = wid;
+        s.raise(wid);
+        changed();
+        render.screenEvent(new Form.Symbol("active"), (long) wid);
+    }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent ev, boolean doubleClick) {
         Scene s = scene();
         double mx = ev.x(), my = ev.y();
-        int x = leftPos + TABS_X;
-        for (Map.Entry<Integer, Scene.Tab> en : s.tabs.entrySet()) {
-            String title = tabTitle(en.getKey(), en.getValue(), s.tabs.size());
-            int w = font.width(title) + 8;
-            if (mx >= x && mx < x + w && my >= topPos + 3 && my < topPos + 15) {
-                if (ev.button() == InputConstants.MOUSE_BUTTON_RIGHT && en.getKey() > 1)
-                    render.screenEvent(new Form.Symbol("close"), (long) en.getKey());   // (right-click closes a process's tab)
-                else {
-                    tab = en.getKey();
-                    chose = true;
-                    focusId = -1;
+        if (!render.lit() || !onScreen(mx, my)) return super.mouseClicked(ev, doubleClick);
+        if (ev.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
+            menuOpen = true;
+            lastMenu = -1;
+            menuHover(mx, my);
+            return true;
+        }
+        int c = col(mx), r = row(my);
+        int wid = s.windowAt(c, r);
+        if (wid < 0) return true;   // (the desk or the screen bar)
+        Scene.Window w = s.windows.get(wid);
+        activate(wid);
+        if (w.ask != null) {   // a requester: only its buttons
+            int[][] lay = SceneCells.askLayout(w);
+            int by = lay[0][1] + lay[0][3] - 2;
+            for (int i = 1; i < lay.length; i++)
+                if (r == by && c >= lay[i][0] && c < lay[i][0] + lay[i][1]) {
+                    render.screenEvent(new Form.Symbol("answer"), (long) wid, Form.num(w.ask, 2, 0), (long) (i - 1));
+                    w.ask = null;   // (gone at once here; the computer's unask follows)
+                    changed();
+                }
+            return true;
+        }
+        if (w.framed() && r == w.y - 1) {   // the title row
+            if (c == w.x - 1 && w.has("close")) render.screenEvent(new Form.Symbol("closed"), (long) wid);
+            else if (c == w.x + w.cw && w.has("depth")) {
+                s.lower(wid);
+                changed();
+                render.screenEvent(new Form.Symbol("lowered"), (long) wid);
+            } else if (w.has("drag")) startDrag(MOVE, wid, w, mx, my);
+            return true;
+        }
+        if (w.framed() && r == w.y + w.ch && c == w.x + w.cw && w.has("size")) {
+            startDrag(SIZE, wid, w, mx, my);
+            return true;
+        }
+        if (c < w.x || r < w.y || c >= w.x + w.cw || r >= w.y + w.ch) return true;   // (the frame)
+        int col = c - w.x, row = r - w.y;
+        // (the last made is drawn on top, so it is hit first: a button over a raw area)
+        for (Map.Entry<Integer, Scene.Element> en : new ArrayList<>(w.elements.entrySet()).reversed()) {
+            Scene.Element e = en.getValue();
+            int ex = e.x(), ey = e.y(), ew = e.size(5, w, 1);
+            int eh = e.kind.equals("line") || e.kind.equals("button") ? 1 : e.size(6, w, 1);
+            if (col < ex || col >= ex + ew || row < ey || row >= ey + eh) continue;
+            switch (e.kind) {
+                case "line" -> focusId = en.getKey();
+                case "raw" -> {
+                    focusId = en.getKey();
+                    render.screenEvent(new Form.Symbol("click"), (long) wid, (long) en.getKey(), (long) (col - ex), (long) (row - ey));
+                }
+                case "button" -> render.screenEvent(new Form.Symbol("press"), (long) wid, (long) en.getKey());
+                case "list" -> {
+                    int index = row - ey + scrolls.getOrDefault(key(wid, en.getKey()), 0);
+                    render.screenEvent(new Form.Symbol("select"), (long) wid, (long) en.getKey(), (long) index);
+                }
+                case "editor" -> {
                     syncEditors();
+                    return super.mouseClicked(ev, doubleClick);   // (its widget takes it)
                 }
-                return true;
-            }
-            x += w + 2;
-        }
-        Scene.Tab t = currentTab();
-        if (t != null && mx >= cx(0) && my >= cy(0) && mx < cx(s.w) && my < cy(s.h)) {
-            int col = (int) ((mx - cx(0)) / CELL), row = (int) ((my - cy(0)) / LINE);
-            // (the last made is drawn on top, so it is hit first: a button over a raw area)
-            for (Map.Entry<Integer, Scene.Element> en : new ArrayList<>(t.elements.entrySet()).reversed()) {
-                Scene.Element e = en.getValue();
-                List<Object> m = e.msg;
-                int ex = e.x(), ey = e.y(), w = (int) Form.num(m, 5, 1);
-                int h = e.kind.equals("line") || e.kind.equals("button") ? 1 : (int) Form.num(m, 6, 1);
-                if (col < ex || col >= ex + w || row < ey || row >= ey + h) continue;
-                switch (e.kind) {
-                    case "line" -> focusId = en.getKey();
-                    case "raw" -> {
-                        focusId = en.getKey();
-                        render.screenEvent(new Form.Symbol("click"), (long) tab, (long) en.getKey(), (long) (col - ex), (long) (row - ey));
-                    }
-                    case "button" -> render.screenEvent(new Form.Symbol("press"), (long) tab, (long) en.getKey());
-                    case "list" -> {
-                        int index = row - ey + scrolls.getOrDefault(key(tab, en.getKey()), 0);
-                        render.screenEvent(new Form.Symbol("select"), (long) tab, (long) en.getKey(), (long) index);
-                    }
-                    default -> {
-                        continue;
-                    }
+                default -> {
+                    continue;
                 }
-                setFocused(null);   // (the keyboard is the screen's again, not the address field's)
-                return true;
             }
+            setFocused(null);   // (the keyboard is the screen's again, not the address field's)
+            return true;
         }
-        return super.mouseClicked(ev, doubleClick);
+        setFocused(null);
+        return true;
+    }
+
+    void startDrag(int mode, int wid, Scene.Window w, double mx, double my) {
+        dragMode = mode;
+        dragWin = wid;
+        dragX = w.x;
+        dragY = w.y;
+        dragW = w.cw;
+        dragH = w.ch;
+        dragFromX = mx;
+        dragFromY = my;
+        syncEditors();   // (editors hide while a window moves)
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent ev, double dx, double dy) {
+        if (menuOpen) {
+            menuHover(ev.x(), ev.y());
+            return true;
+        }
+        if (dragMode == 0) return super.mouseDragged(ev, dx, dy);
+        Scene.Window w = scene().windows.get(dragWin);
+        if (w == null) {
+            dragMode = 0;
+            return true;
+        }
+        int dc = (int) Math.round((ev.x() - dragFromX) / CELL), dr = (int) Math.round((ev.y() - dragFromY) / LINE);
+        // (the outline follows the hand, kept on the screen as Scene.fit keeps windows; the window moves when it lets go)
+        int x = w.x, y = w.y, cw = w.cw, ch = w.ch;
+        if (dragMode == MOVE) {
+            w.x += dc;
+            w.y += dr;
+        } else {
+            w.cw += dc;
+            w.ch += dr;
+        }
+        scene().fit(w);
+        dragX = w.x;
+        dragY = w.y;
+        dragW = w.cw;
+        dragH = w.ch;
+        w.x = x;
+        w.y = y;
+        w.cw = cw;
+        w.ch = ch;
+        return true;
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent ev) {
+        if (menuOpen) {
+            menuHover(ev.x(), ev.y());
+            Scene.Window t = activeWindow();
+            if (t != null && menuAt >= 0 && itemAt >= 0) {
+                String[] it = menuItems(t, menuAt).get(itemAt);
+                if (it != null) pick(t, menuTitle(t, menuAt), it[0]);
+            }
+            menuOpen = false;
+            menuAt = itemAt = lastMenu = -1;
+            return true;
+        }
+        if (dragMode != 0) {
+            Scene.Window w = scene().windows.get(dragWin);
+            dragMode = 0;
+            if (w != null && (w.x != dragX || w.y != dragY || w.cw != dragW || w.ch != dragH)) {
+                w.x = dragX;
+                w.y = dragY;
+                w.cw = dragW;
+                w.ch = dragH;
+                changed();
+                render.screenEvent(new Form.Symbol("moved"), (long) dragWin, (long) w.x, (long) w.y, (long) w.cw, (long) w.ch);
+            }
+            syncEditors();
+            return true;
+        }
+        return super.mouseReleased(ev);
     }
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
-        Scene.Tab t = currentTab();
-        if (t != null) {
-            int col = (int) ((mx - cx(0)) / CELL), row = (int) ((my - cy(0)) / LINE);
-            for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
-                Scene.Element e = en.getValue();
-                if (!e.kind.equals("log") && !e.kind.equals("list")) continue;
-                int ex = e.x(), ey = e.y(), w = (int) Form.num(e.msg, 5, 1), h = (int) Form.num(e.msg, 6, 1);
-                if (col < ex || col >= ex + w || row < ey || row >= ey + h) continue;
-                String k = key(tab, en.getKey());
-                int step = e.kind.equals("log") ? (sy > 0 ? 3 : -3) : (sy > 0 ? -1 : 1);
-                scrolls.put(k, Math.max(0, scrolls.getOrDefault(k, 0) + step));
-                return true;
+        Scene s = scene();
+        if (render.lit() && onScreen(mx, my)) {
+            int c = col(mx), r = row(my), wid = s.windowAt(c, r);
+            Scene.Window w = s.windows.get(wid);
+            if (w != null) {
+                int colIn = c - w.x, rowIn = r - w.y;
+                for (Map.Entry<Integer, Scene.Element> en : w.elements.entrySet()) {
+                    Scene.Element e = en.getValue();
+                    if (!e.kind.equals("log") && !e.kind.equals("list")) continue;
+                    int ex = e.x(), ey = e.y(), ew = e.size(5, w, 1), eh = e.size(6, w, 1);
+                    if (colIn < ex || colIn >= ex + ew || rowIn < ey || rowIn >= ey + eh) continue;
+                    String k = key(wid, en.getKey());
+                    int step = e.kind.equals("log") ? (sy > 0 ? 3 : -3) : (sy > 0 ? -1 : 1);
+                    scrolls.put(k, Math.max(0, scrolls.getOrDefault(k, 0) + step));
+                    return true;
+                }
             }
         }
         return super.mouseScrolled(mx, my, sx, sy);
@@ -584,9 +784,10 @@ public class ComputerScreen extends ElnScreen {
     public boolean charTyped(CharacterEvent event) {
         String ed = focusedEditor();
         if (ed != null) return editorWidgets.get(ed).charTyped(event);
-        Scene.Tab t = currentTab();
+        Scene.Window t = render.lit() ? activeWindow() : null;
+        if (t == null || t.ask != null) return super.charTyped(event);
         if (!fieldHasKeys() && focusedRaw(t) != null) {
-            render.screenEvent(new Form.Symbol("key"), (long) tab, (long) focusId, event.codepointAsString(), 0L);   // (Shift is in the character)
+            render.screenEvent(new Form.Symbol("key"), (long) active, (long) focusId, event.codepointAsString(), 0L);   // (Shift is in the character)
             return true;
         }
         Scene.Element line = focusedLine(t);
@@ -609,24 +810,35 @@ public class ComputerScreen extends ElnScreen {
     @Override
     public boolean keyPressed(KeyEvent ev) {
         if (fieldHasKeys()) return super.keyPressed(ev);
+        int k = ev.key();
+        Scene.Window t = render.lit() ? activeWindow() : null;
+        // Alt+letter: the active window's menu item with that key, without opening the menus
+        if (t != null && ev.hasAltDown() && k >= InputConstants.KEY_A && k <= InputConstants.KEY_Z) {
+            String letter = String.valueOf((char) ('a' + k - InputConstants.KEY_A));
+            for (int m = 0; m < t.menus.size(); m++)
+                for (String[] it : menuItems(t, m))
+                    if (it != null && it[1].equalsIgnoreCase(letter)) {
+                        pick(t, menuTitle(t, m), it[0]);
+                        return true;
+                    }
+        }
         String ed = focusedEditor();
-        if (ed != null && ev.key() != InputConstants.KEY_ESCAPE) {
-            if (ev.key() == InputConstants.KEY_S && ev.hasControlDownWithQuirk()) save(ed);
+        if (ed != null && k != InputConstants.KEY_ESCAPE) {
+            if (k == InputConstants.KEY_S && ev.hasControlDownWithQuirk()) save(ed);
             else editorWidgets.get(ed).keyPressed(ev);
             return true;
         }
-        Scene.Tab t = currentTab();
+        if (t == null || t.ask != null) return super.keyPressed(ev);
         Scene.Element line = focusedLine(t);
-        int k = ev.key();
         if (k == InputConstants.KEY_C && ev.hasControlDownWithQuirk() && !ev.hasShiftDown()) {
-            if (tab >= 0) render.screenEvent(new Form.Symbol("break"), (long) tab);   // (on any tab, a line or not)
+            render.screenEvent(new Form.Symbol("break"), (long) active);   // (on any window, a line or not)
             return true;
         }
         if (k != InputConstants.KEY_ESCAPE && focusedRaw(t) != null) {
             // (characters come through charTyped; Escape still closes the screen)
             int mods = (ev.hasShiftDown() ? 1 : 0) | (ev.hasControlDown() ? 2 : 0) | (ev.hasAltDown() ? 4 : 0);
             String name = keyName(k, (mods & 6) != 0);
-            if (name != null) render.screenEvent(new Form.Symbol("key"), (long) tab, (long) focusId, name, (long) mods);
+            if (name != null) render.screenEvent(new Form.Symbol("key"), (long) active, (long) focusId, name, (long) mods);
             return true;
         }
         if (line == null || k == InputConstants.KEY_ESCAPE) return super.keyPressed(ev);
@@ -639,7 +851,7 @@ public class ComputerScreen extends ElnScreen {
             le.cursor += p.length();
             return true;
         }
-        // Ctrl+C is Break for this tab, as in a terminal (Baughn, above); Ctrl+Shift+C copies the line
+        // Ctrl+C is Break for this window, as in a terminal (Baughn, above); Ctrl+Shift+C copies the line
         if (k == InputConstants.KEY_C && ev.hasControlDownWithQuirk()) {
             clip.setClipboard(le.text.toString());
             return true;
@@ -692,11 +904,11 @@ public class ComputerScreen extends ElnScreen {
         le.cursor = 0;
         hint = "";
         for (var en : scrolls.entrySet()) en.setValue(0);
-        render.screenEvent(new Form.Symbol("submit"), (long) tab, (long) focusId, le.pendingSeq, text);
+        render.screenEvent(new Form.Symbol("submit"), (long) active, (long) focusId, le.pendingSeq, text);
     }
 
     /** Completion from the names the computer sent (Tab): the common part, and the choices as a hint. */
-    void complete(LineEdit le, Scene.Tab t) {
+    void complete(LineEdit le, Scene.Window t) {
         int start = le.cursor;
         while (start > 0 && "()[]{} \"'".indexOf(le.text.charAt(start - 1)) < 0) start--;
         String word = le.text.substring(start, le.cursor);

@@ -33,30 +33,12 @@ public class ComputerRender extends TransparentNodeElementRender {
         desc = (ComputerDescriptor) d;
     }
 
-    /**
-     * The tab this client's screen shows or last showed (-1: never opened; the monitor then shows SceneCells.defaultTab).
-     * Kept after the screen closes, so the monitor goes on showing what the screen did (AdventurAgent's look).
-     */
-    public int shownTab = -1;
     ScreenTexture picture;
     boolean noPicture;
 
     /** Is it on (anything to show)? Off, or without chips, the screen and the monitor show nothing (Baughn 2026-11-18). */
     public boolean lit() {
         return switchedOn && (status == ComputerElement.RUNNING || status == ComputerElement.SLEEPING || status == ComputerElement.HALTED);
-    }
-
-    long seenFocus = -1;
-    /** The last program focus the screen took (so that reopening it takes only newer ones). */
-    public long screenFocusSeq = -1;
-
-    int monitorTab() {
-        // a tab the program brings forward shows, as the screen would show it on opening
-        if (scene.focusSeq != seenFocus) {
-            seenFocus = scene.focusSeq;
-            if (shownTab >= 0 && scene.tabs.containsKey(scene.focus)) shownTab = scene.focus;
-        }
-        return shownTab >= 0 && scene.tabs.containsKey(shownTab) ? shownTab : mods.eln.robotics.computer.screen.SceneCells.defaultTab(scene);
     }
 
     @Override
@@ -66,9 +48,7 @@ public class ComputerRender extends TransparentNodeElementRender {
         if (!lit()) return;
         if (picture == null && !noPicture) noPicture = (picture = ScreenTexture.make()) == null;
         if (picture == null) return;
-        int t = monitorTab();
-        long key = (long) sceneVersion << 9 | (t & 0xFF) << 1 | 1;
-        desc.drawPicture(picture.update(key, () -> mods.eln.robotics.computer.screen.SceneCells.of(scene, t)));
+        desc.drawPicture(picture.update(sceneVersion, () -> mods.eln.robotics.computer.screen.SceneCells.of(scene)));
     }
 
     @Override

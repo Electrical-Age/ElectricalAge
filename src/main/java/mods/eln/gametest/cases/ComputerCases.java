@@ -66,7 +66,7 @@ public final class ComputerCases {
     }
 
     static boolean replUp(ComputerElement e) {
-        var t = e.screen.scene.tabs.get(1);
+        var t = e.screen.scene.windows.get(1);
         return t != null && t.elements.containsKey(2);
     }
 
@@ -293,7 +293,7 @@ public final class ComputerCases {
             ComputerElement a = at(ctx, pa);
             ctx.line("data: A " + ta.replace("\n", "|") + " B " + tb.replace("\n", "|"));
             ctx.check("applications floppy: its menu opened at boot", ta.contains("Running A:/startup.janet")
-                && a.screen.scene.tabs.values().stream().anyMatch(t -> t.elements.size() > 5), ta);
+                && a.screen.scene.windows.values().stream().anyMatch(t -> t.elements.size() > 5), ta);
             ctx.check("data packets: B got A's 40 bytes", tb.contains("\"" + "bus!".repeat(10) + "\""), tb);
         }
     }
