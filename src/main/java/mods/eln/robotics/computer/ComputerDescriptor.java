@@ -20,7 +20,8 @@ import static mods.eln.i18n.I18N.tr;
  * The robotics computer (Baughn 2026-11-05): an RV32 machine with 8 chip slots of 1 MB (RAM or ROM; it starts at
  * 0x400 in slot 1's chip) and two floppy drives, running off the server thread (hw.Runner). 50 V on the back; the
  * RS485 bus pin on the right flank's floor edge, at its right end (left and right facing the flank), as on the servo
- * drive. Its draw follows how busy it is. Model: mods.eln.cad.models.ComputerParts.
+ * drive. Its draw follows how busy it is. Its CRT monitor stands on it, in the block above (a ghost), and shows
+ * the screen. Model: mods.eln.cad.models.ComputerParts.
  */
 public class ComputerDescriptor extends TransparentNodeDescriptor {
     /** Idle (asleep or waiting) and flat-out draw, W. */
@@ -32,6 +33,34 @@ public class ComputerDescriptor extends TransparentNodeDescriptor {
         obj = Eln.obj.getObj(model);
         voltageLevelColor = mods.eln.sixnode.electricalcable.ElectricalCableDescriptor.voltageLevelColorOf(
             mods.eln.registry.ElnDeviceRegistry.lowVoltageCableDescriptor);
+        // its monitor stands in the block above (Baughn 2026-11-18: a 1 x 2 multiblock)
+        mods.eln.ghost.GhostGroup g = new mods.eln.ghost.GhostGroup();
+        g.addElement(0, 1, 0);
+        setGhostGroup(g);
+    }
+
+    /** The CRT's glass, block units centred as the model (ComputerParts.SCREEN_*: px x, rows y, columns z), 0.1 px out. */
+    static final float GLASS_X = (0.5f - 0.1f) / 16 - 0.5f, GLASS_Y0 = 20.0f / 16 - 0.5f, GLASS_Y1 = 28.25f / 16 - 0.5f,
+        GLASS_Z0 = 2.5f / 16 - 0.5f, GLASS_Z1 = 13.5f / 16 - 0.5f;
+
+    /** The monitor's picture on its glass, full bright: its top row at the top, its first column on the left seen from the front. */
+    void drawPicture(net.minecraft.resources.Identifier texture) {
+        mods.eln.gl.GL11.bindTexture(texture);
+        mods.eln.gl.GL11.setFullBright(true);
+        mods.eln.misc.UtilsClient.disableCulling();
+        mods.eln.gl.GL11.glColor4f(1, 1, 1, 1);
+        mods.eln.gl.GL11.glBegin(mods.eln.gl.GL11.GL_QUADS);
+        mods.eln.gl.GL11.glTexCoord2f(0, 0);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y1, GLASS_Z0);
+        mods.eln.gl.GL11.glTexCoord2f(0, 1);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y0, GLASS_Z0);
+        mods.eln.gl.GL11.glTexCoord2f(1, 1);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y0, GLASS_Z1);
+        mods.eln.gl.GL11.glTexCoord2f(1, 0);
+        mods.eln.gl.GL11.glVertex3f(GLASS_X, GLASS_Y1, GLASS_Z1);
+        mods.eln.gl.GL11.glEnd();
+        mods.eln.misc.UtilsClient.enableCulling();
+        mods.eln.gl.GL11.setFullBright(false);
     }
 
     /**
@@ -61,6 +90,8 @@ public class ComputerDescriptor extends TransparentNodeDescriptor {
         }
         if (on) mods.eln.misc.UtilsClient.disableLight();
         lamp.draw();
+        var lamp2 = obj.getPart("lamp2");   // the monitor's power lamp: lit while it is on
+        if (lamp2 != null) lamp2.draw();
         if (on) mods.eln.misc.UtilsClient.enableLight();
         mods.eln.gl.GL11.glColor4f(1f, 1f, 1f, 1f);
     }

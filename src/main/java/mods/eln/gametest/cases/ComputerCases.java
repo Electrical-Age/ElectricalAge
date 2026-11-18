@@ -22,6 +22,7 @@ public final class ComputerCases {
         cases.add(new RunsTheElevator());
         cases.add(new PausesWithoutPower());
         cases.add(new TalkInDataPackets());
+        cases.add(new MonitorOnTop());
     }
 
     /** The source behind the last computer powered() placed. */
@@ -345,6 +346,61 @@ public final class ComputerCases {
             ctx.line("computer power: screen " + after.replace("\n", "|"));
             ctx.check("computer power: off while the line is dead", cut == ComputerElement.OFF, "" + cut);
             ctx.check("computer power: goes on where it was (x still 99)", after.contains("> (+ x 1)\n100\n"), after);
+        }
+    }
+
+    /**
+     * Baughn (2026-11-18): a CRT monitor on the computer, in the block above (a ghost), and an 80 x 25 screen. Placed,
+     * the ghost stands above it; Janet boots at 80 x 25 and says so; breaking the monitor breaks the computer.
+     */
+    static final class MonitorOnTop extends BootsJanet {
+        boolean ghostAbove, goneAfterBreak;
+        int sceneW, sceneH;
+        String size = "";
+
+        @Override
+        public String id() {
+            return "computer_monitor_on_top_80x25";
+        }
+
+        @Override
+        public void build(TestContext ctx) {
+            p = ctx.at(4, 1, 3);
+            ComputerElement c = powered(ctx, p);
+            c.getInventory().setItem(0, new ItemStack(Robotics.JANET_ROM.get()));
+            c.getInventory().setItem(1, new ItemStack(Robotics.RAM_CHIP.get()));
+            c.getInventory().setItem(2, new ItemStack(Robotics.RAM_CHIP.get()));
+            c.getInventory().setChanged();
+            var above = new mods.eln.misc.Coordonate(p.above(), ctx.level());
+            ghostAbove = mods.eln.Eln.ghostManager.getGhost(above) != null
+                && ctx.level().getBlockState(p.above()).getBlock() instanceof mods.eln.ghost.GhostBlock;
+            mods.eln.Eln.simulator.addSlowProcess(watch = dt -> {
+                tick++;
+                ComputerElement e = at(ctx, p);
+                if (e == null) return;
+                if (upAt < 0 && replUp(e)) {
+                    upAt = tick;
+                    submit(ctx, e, 1, "[ui/width ui/height]");
+                }
+                if (upAt < 0) return;
+                if (tick == upAt + 30) {
+                    size = terminal(e);
+                    sceneW = e.screen.scene.w;
+                    sceneH = e.screen.scene.h;
+                    ctx.level().setBlockAndUpdate(p.above(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+                }
+            });
+        }
+
+        @Override
+        public void measure(TestContext ctx) {
+            mods.eln.Eln.simulator.removeSlowProcess(watch);
+            goneAfterBreak = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, ctx.level())) == null;
+            ctx.line("computer monitor: ghost " + ghostAbove + " scene " + sceneW + "x" + sceneH + " gone " + goneAfterBreak);
+            ctx.check("computer monitor: a ghost stands in the block above", ghostAbove, "");
+            ctx.check("computer monitor: Janet's screen is 80 x 25", size.contains("(80 25)") || size.contains("[80 25]"), size);
+            ctx.check("computer monitor: the scene is 80 x 25", sceneW == 80 && sceneH == 25, sceneW + "x" + sceneH);
+            ctx.check("computer monitor: breaking the monitor breaks the computer", goneAfterBreak, "");
         }
     }
 }

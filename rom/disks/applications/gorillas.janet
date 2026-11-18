@@ -12,8 +12,8 @@
 #   ACK    the throw arrived
 #   ALIVE  every 3 s during a game; 12 s of silence ends it
 
-(def W 52)            # the field in cells; row 0 is the top. A cell is about twice as tall as it is wide, so a row
-(def H 15)            # is 2 units of height and a column 1 unit of width.
+(def W 80)            # the field in cells; row 0 is the top. A cell is about twice as tall as it is wide, so a row
+(def H 23)            # is 2 units of height and a column 1 unit of width.
 (def HELLO 0xA0)
 (def START 0xB0)
 (def THROW 0xC0)
@@ -36,7 +36,7 @@
   (var x 0)
   (while (< x W)
     (def w (if (< (- W x) 8) (- W x) (+ 4 (math/rng-int rng 4))))
-    (def h (+ 2 (math/rng-int rng 7)))
+    (def h (+ 3 (math/rng-int rng 11)))   # (2-8 rows on the 52x15 screen; scaled to 80x25)
     (def c (math/rng-int rng (length colours)))
     (def lit (seq [_ :range [0 (* w h)]] (< (math/rng-int rng 3) 2)))
     (array/push buildings [x w h c lit])
@@ -108,8 +108,8 @@
   (var holes 0)
   (var me 0)             # this computer's address
 
-  (defn status [colour s] (ui/text t 3 0 0 colour (string/format "%-52s" s)))
-  (defn say [colour s] (ui/text t 4 0 16 colour (string/format "%-52s" s)))
+  (defn status [colour s] (ui/text t 3 0 0 colour (string/format "%-80s" s)))
+  (defn say [colour s] (ui/text t 4 0 24 colour (string/format "%-80s" s)))
 
   (bus/on (fn [p] (and (= :reply (p :type)) (>= (p :index) HELLO)))
           (fn [p]

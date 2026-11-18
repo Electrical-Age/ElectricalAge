@@ -10,7 +10,10 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-/** The computer (ComputerDescriptor): its cabinet and run lamp, and this client's copy of its screen (Scene). */
+/**
+ * The computer (ComputerDescriptor): its case, monitor and lamps, this client's copy of its screen (Scene), and the
+ * monitor's picture of it (ScreenTexture), dark while it is off.
+ */
 public class ComputerRender extends TransparentNodeElementRender {
     final ComputerDescriptor desc;
     public byte status;
@@ -30,10 +33,36 @@ public class ComputerRender extends TransparentNodeElementRender {
         desc = (ComputerDescriptor) d;
     }
 
+    /** The tab this client's open screen shows (-1: none open; the monitor then shows SceneCells.defaultTab). */
+    public int shownTab = -1;
+    ScreenTexture picture;
+    boolean noPicture;
+
+    /** Is it on (anything to show)? Off, or without chips, the screen and the monitor show nothing (Baughn 2026-11-18). */
+    public boolean lit() {
+        return switchedOn && (status == ComputerElement.RUNNING || status == ComputerElement.SLEEPING || status == ComputerElement.HALTED);
+    }
+
+    int monitorTab() {
+        return shownTab >= 0 && scene.tabs.containsKey(shownTab) ? shownTab : mods.eln.robotics.computer.screen.SceneCells.defaultTab(scene);
+    }
+
     @Override
     public void draw() {
         front.glRotateXnRef();
         desc.draw(status);
+        if (!lit()) return;
+        if (picture == null && !noPicture) noPicture = (picture = ScreenTexture.make()) == null;
+        if (picture == null) return;
+        int t = monitorTab();
+        long key = (long) sceneVersion << 9 | (t & 0xFF) << 1 | 1;
+        desc.drawPicture(picture.update(key, () -> mods.eln.robotics.computer.screen.SceneCells.of(scene, t)));
+    }
+
+    @Override
+    public void destructor() {
+        super.destructor();
+        if (picture != null) picture.close();
     }
 
     @Override

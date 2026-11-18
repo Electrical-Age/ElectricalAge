@@ -67,8 +67,13 @@ public class ComputerElement extends TransparentNodeElement {
     boolean loadPending = true;
     byte status = OFF;
     public final mods.eln.robotics.computer.screen.ScreenHost screen = new mods.eln.robotics.computer.screen.ScreenHost();
-    /** The players watching the screen, as watch() last saw them (read by the pool and network threads). */
-    volatile List<ServerPlayer> watching = List.of();
+    /**
+     * The players watching the screen, as watch() last saw them (read by the pool and network threads): those with it
+     * open, and those near enough to see the monitor (Baughn 2026-11-18). Only the first may type (typing).
+     */
+    volatile List<ServerPlayer> watching = List.of(), typing = List.of();
+    /** How near a player must be to get the monitor's picture, blocks. */
+    public static final double MONITOR_RANGE = 24;
     final Map<UUID, Integer> eventsThisTick = new java.util.concurrent.ConcurrentHashMap<>();
     int seenResets = -1;
     /** Its power switch (Baughn: power on/off beside Reset). Off: it stops and its RAM is lost; on: a cold boot. */
@@ -268,19 +273,32 @@ public class ComputerElement extends TransparentNodeElement {
         return l;
     }
 
+    /** The viewers, and the players in the same level within MONITOR_RANGE of it (they see the monitor). */
+    List<ServerPlayer> audience(List<ServerPlayer> viewers) {
+        List<ServerPlayer> l = new ArrayList<>(viewers);
+        var level = node.coordonate.world();
+        if (level == null) return l;
+        var c = net.minecraft.world.phys.Vec3.atCenterOf(node.coordonate.pos()).add(0, 1, 0);
+        for (var p : level.players())
+            if (p instanceof ServerPlayer sp && !l.contains(sp) && sp.distanceToSqr(c) < MONITOR_RANGE * MONITOR_RANGE) l.add(sp);
+        return l;
+    }
+
     /**
-     * New viewers get the whole scene; the others what is left of this tick's batch; viewers who left are forgotten.
+     * New viewers get the whole scene (as does a player who opens the screen, in case its copy went with a reloaded
+     * block entity); the others what is left of this tick's batch; viewers who left are forgotten.
      * Under the screen's lock, so a new viewer's replay and the pool's batches (screenOutput) can't miss each other.
      */
     void watch() {
-        List<ServerPlayer> v = viewers();
+        List<ServerPlayer> gui = viewers(), v = audience(gui);
         synchronized (screen) {
             List<String> batch = screen.takeBatch();
-            java.util.Set<ServerPlayer> before = new java.util.HashSet<>(watching);
+            java.util.Set<ServerPlayer> before = new java.util.HashSet<>(watching), opened = new java.util.HashSet<>(typing);
             for (ServerPlayer p : v)
-                if (!before.contains(p) || batch == null) sendScreen(p, screen.replay());
+                if (!before.contains(p) || batch == null || gui.contains(p) && !opened.contains(p)) sendScreen(p, screen.replay());
                 else if (!batch.isEmpty()) sendScreen(p, batch);
             watching = List.copyOf(v);
+            typing = List.copyOf(gui);
         }
     }
 
@@ -315,7 +333,7 @@ public class ComputerElement extends TransparentNodeElement {
         Runner r = runner;
         if (r == null) return;
         if (player != null) {
-            if (!watching.contains(player)) return;
+            if (!typing.contains(player)) return;
             if (eventsThisTick.merge(player.getUUID(), 1, Integer::sum) > EVENTS_PER_TICK) return;
         }
         String ok = screen.check(line);

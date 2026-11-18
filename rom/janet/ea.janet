@@ -398,8 +398,8 @@
 
 # ---- the screen's elements (see the handbook's "The Screen Protocol")
 
-(def ui/width "The screen's width in character cells." 52)
-(def ui/height "The screen's height in character cells." 17)
+(def ui/width "The screen's width in character cells." 80)
+(def ui/height "The screen's height in character cells." 25)
 
 (defn ui/tab "Add tab t (1-255), or rename it." [t title] (ui/send 'tab t title))
 (defn ui/untab "Remove tab t." [t]

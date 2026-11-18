@@ -16,7 +16,7 @@ import java.util.List;
  * -PcadPreviews=DIR writes DIR/model-NAME.png for each model in MODELS.
  */
 public class DeviceModelPreviewTest {
-    static final String[] MODELS = {"airblower200v", "largeboiler", "boiler", "fuelheater"};
+    static final String[] MODELS = {"airblower200v", "largeboiler", "boiler", "fuelheater", "computer", "fieldlogger"};
 
     @Test
     void devices() throws Exception {

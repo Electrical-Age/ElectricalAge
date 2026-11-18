@@ -29,10 +29,11 @@ import static mods.eln.i18n.I18N.tr;
  * (Baughn). Logs and lists scroll here. Under it: Reset, its state and address, the chip slots and drives.
  */
 public class ComputerScreen extends ElnScreen {
-    public static final int WIDTH = 330, HEIGHT = 346, CELL = 6, LINE = 10;
+    public static final int WIDTH = 498, HEIGHT = 385, CELL = 6, LINE = 10;
     /** The scene's area: cells from (AREA_X, AREA_Y), in panel pixels. */
     public static final int AREA_X = 9, AREA_Y = 22;
-    public static final int SLOTS_Y = 234, INV_X = 84, INV_Y = 264;   // (346 px high: fits a 720 px window at GUI scale 2)
+    /** Under the 80 x 25 cells (Baughn 2026-11-18): the buttons, then the slots on the left and the inventory on the right. */
+    public static final int SLOTS_Y = 313, INV_X = WIDTH - 9 - 162, INV_Y = 302;
     static final int BOTTOM_Y = AREA_Y + Scene.DEFAULT_H * LINE + 6;
     final ComputerRender render;
 
@@ -94,7 +95,7 @@ public class ComputerScreen extends ElnScreen {
 
     /** The current tab's editor elements as code editor widgets (made, moved, removed to match the scene). */
     void syncEditors() {
-        Scene.Tab t = currentTab();
+        Scene.Tab t = render.lit() ? currentTab() : null;   // (off: no editors either)
         java.util.Set<String> want = new java.util.HashSet<>();
         if (t != null)
             for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
@@ -198,6 +199,7 @@ public class ComputerScreen extends ElnScreen {
     @Override
     public void removed() {
         Minecraft.getInstance().onTextInputFocusChange(this, false);
+        render.shownTab = -1;
         super.removed();
     }
 
@@ -219,6 +221,7 @@ public class ComputerScreen extends ElnScreen {
             tab = s.tabs.containsKey(1) ? 1 : s.tabs.isEmpty() ? -1 : s.tabs.keySet().iterator().next();
             focusId = -1;
         }
+        render.shownTab = tab;   // (the monitor shows the same tab)
         return tab < 0 ? null : s.tabs.get(tab);
     }
 
@@ -315,15 +318,17 @@ public class ComputerScreen extends ElnScreen {
         int x0 = leftPos + AREA_X - 4, y0 = topPos + AREA_Y - 3;
         g.fill(x0, y0, x0 + s.w * CELL + 8, y0 + s.h * LINE + 6, 0xFF101418);
         Scene.Tab t = currentTab();
-        drawTabs(g, s);
-        if (t == null) {
-            cells(g, render.status == ComputerElement.NO_CHIPS ? tr("No chips") : render.status == ComputerElement.OFF ? tr("Off") : "...", 1, 1, s.w, 0xFF6A7A6A);
+        if (!render.lit()) {
+            // off, or no chips: a dark screen, no text (Baughn 2026-11-18); the state shows under it
+        } else if (t == null) {
+            cells(g, "...", 1, 1, s.w, 0xFF6A7A6A);
         } else {
+            drawTabs(g, s);
             Scene.Element line = focusedLine(t), raw = line == null ? focusedRaw(t) : null;
             for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet())
                 draw(g, en.getKey(), en.getValue(), en.getValue() == line || en.getValue() == raw);
         }
-        if (!hint.isEmpty()) {   // the completion choices, over the row above the line
+        if (!hint.isEmpty() && render.lit()) {   // the completion choices, over the row above the line
             g.fill(cx(0), cy(s.h - 2), cx(s.w), cy(s.h - 1), 0xFF2A2E38);
             g.text(font, font.plainSubstrByWidth(hint, s.w * CELL), cx(0) + 1, cy(s.h - 2) + 1, 0xFFB0B0C0, false);
         }

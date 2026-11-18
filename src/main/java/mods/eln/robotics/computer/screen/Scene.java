@@ -13,7 +13,7 @@ import java.util.Map;
  * messages that rebuild it from nothing.
  */
 public final class Scene {
-    public static final int LOG_LINES = 1000, MAX_TABS = 32, MAX_ELEMENTS = 256, DEFAULT_W = 52, DEFAULT_H = 17;
+    public static final int LOG_LINES = 1000, MAX_TABS = 32, MAX_ELEMENTS = 256, DEFAULT_W = 80, DEFAULT_H = 25;   // (Baughn 2026-11-18: 80 x 25)
 
     public int w = DEFAULT_W, h = DEFAULT_H;
     public final Map<Integer, Tab> tabs = new LinkedHashMap<>();
