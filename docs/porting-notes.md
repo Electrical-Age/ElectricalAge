@@ -304,7 +304,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Fuel heat furnace as a combustion chamber (todo #504/#503; Baughn 2026-11-17: the burner must feel its exhaust's
   back-pressure for the Air Blower to be realistic; flanges on the sides or back, not the front). Its flue's node is
   now its firebox: air comes in by natural draught (a tiny gas pump from the room, 1 x the air of the burner's setting
-  at 0.4 kg/MJ, nothing against 150 Pa) or, through the new air port on its back (y 6, z 8 px, above the thermal pad),
+  at 0.4 kg/MJ, nothing against 150 Pa) or, through the new air port on its back (y 8, z 8 px, above the thermal pad; y 6 until #520),
   by its windbox and damper (a check valve, an orifice opening with the setting, sized so 1.4 bar across it passes
   2.5 x the air of the big burner's full setting); a pipe on the air port shuts the draught entirely (Baughn
   2026-11-17: "a blower would normally require shutting draught entirely"). The fire is its setting x

@@ -33,6 +33,7 @@ public final class CombustionCases {
         cases.add(new Drown());
         cases.add(new AirPortAbuse());
         cases.add(new PortSpots());
+        cases.add(new AirPipeOverThermalCable());
         for (double pa : DraughtStudy.PA) cases.add(new DraughtStudy(pa));
     }
 
@@ -651,8 +652,63 @@ public final class CombustionCases {
     }
 
     /**
+     * Its air port with a thermal cable on its back pad (Baughn 2026-11-18, #520: the router found no way to the air port
+     * over the cable, so plants hand-laid that pipe): for each of the four fronts, a Copper Thermal Cable routed by the kit
+     * from the furnace's back pad out across the block behind it, then an Air Blower beside the furnace piped to the air
+     * port by the router. Both lay, and the pipe meets the windbox.
+     */
+    static final class AirPipeOverThermalCable extends PlumbingCases.Big {
+        final FuelHeatFurnaceElement[] f = new FuelHeatFurnaceElement[4];
+        final String[] err = new String[4];
+
+        public String id() {
+            return "fuel_furnace_air_pipe_over_thermal_cable";
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos[] at = {ctx.at(1, 1, 2), ctx.at(8, 1, 2), ctx.at(2, 1, 6), ctx.at(7, 1, 8)};
+            int thermal = mods.eln.node.voxel.CablePart.tierOf("Copper Thermal Cable");
+            for (int i = 0; i < 4; i++) {
+                Direction fr = PortSpots.FRONTS[i];
+                f[i] = furnace(ctx, at[i], fr, 500, false);
+                var back = fr.back().toEnumFacing();
+                var n = back.getUnitVec3i();
+                // the kit clicked low on its back face, then on the floor two blocks further back
+                var hit = net.minecraft.world.phys.Vec3.atCenterOf(at[i]).add(n.getX() * 0.5, -0.45, n.getZ() * 0.5);
+                var a = mods.eln.node.voxel.CablePlacer.endAtForTests(ctx.level(), at[i], back, hit, true, new long[1][], thermal);
+                BlockPos far = at[i].relative(back, 2);
+                var b = new mods.eln.node.voxel.CableRouter.End(far.getX() * 16L + 8, far.getY() * 16L, far.getZ() * 16L + 8, 0, -1);
+                err[i] = a == null ? "no end at its back pad" : mods.eln.node.voxel.CablePlacer.routeAndLayForTests(ctx.level(), thermal, a, b);
+                if (err[i] != null) {
+                    err[i] = "thermal cable: " + err[i];
+                    continue;
+                }
+                try {
+                    HpPlantCases.blowerOnAirPort(ctx, f[i], 1.0);
+                } catch (IllegalStateException e) {
+                    err[i] = e.getMessage();
+                }
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            for (int i = 0; i < 4; i++) {
+                ctx.check("air pipe over a thermal cable, front " + PortSpots.FRONTS[i] + ": the cable and the routed pipe lay", err[i] == null, String.valueOf(err[i]));
+                var w = f[i].getWindbox();
+                var dam = f[i].getDamper();
+                boolean air = mods.eln.fluid.FluidWorld.edgesOf(w).stream().anyMatch(e -> dam == null || e != dam.edge);
+                ctx.check("air pipe over a thermal cable, front " + PortSpots.FRONTS[i] + ": the pipe meets its windbox", air, String.valueOf(f[i].getWaila()));
+            }
+        }
+    }
+
+    /**
      * Its flanges where the model draws them (mods.eln.cad.models.FuelHeater: the fuel flange on top at x 13, z 8; the air
-     * port on the back at y 6, z 8), for each of the four fronts: a pipe laid by hand from the drawn point outward joins
+     * port on the back at y 8, z 8), for each of the four fronts: a pipe laid by hand from the drawn point outward joins
      * its tank or its windbox; one laid where the old front flange was joins nothing.
      */
     static final class PortSpots extends PlumbingCases.Big {

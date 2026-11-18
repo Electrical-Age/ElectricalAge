@@ -135,11 +135,13 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         /**
          * Its fuel flange on top beside the flue, toward the back, and its air port on the back above the thermal pad,
          * centred across (px, the model's frame: mods.eln.cad.models.FuelHeater FUEL_X, FUEL_Z, AIR_Y, AIR_Z; Baughn
-         * 2026-11-17: "on top is fine ... back is also fine, e.g. for air"; nothing on the front or flanks).
+         * 2026-11-17: "on top is fine ... back is also fine, e.g. for air"; nothing on the front or flanks). The air port at
+         * y 8, on the pipes' lattice (Baughn 2026-11-18, #520: "move the flange up a bit"): at y 6 the router's pipe to it
+         * stepped down onto the thermal cable on the back pad and couldn't be laid.
          */
         const val FUEL_X = 13
         const val FUEL_Z = 8
-        const val AIR_Y = 6
+        const val AIR_Y = 8
         const val AIR_Z = 8
         /** Its flange's conductance (as the oil devices' ports) and its breather's on top (small: a vent, not an opening). */
         const val PORT_K = 6e-11

@@ -17,7 +17,7 @@ import static mods.eln.cad.models.Mc.tube;
  * (Baughn 2026-11-17: "on top is fine ... back is also fine, e.g. for air"). On top a short flue to an iron pipe's flange
  * exactly at the top face's centre (x 8, z 8, top at y 16), and toward the back beside it the fuel flange (centre x 13,
  * z 8; orange, FUEL printed on its face). On the back (x = 16) the thermal contact, a copper pad at the floor, and above
- * it, centred across, the air port's flange (centre y 6, z 8; blue, AIR printed on its face: a blower's pipe brings the
+ * it, centred across, the air port's flange (centre y 8, z 8, clear above a thermal cable on the pad, Baughn 2026-11-18; blue, AIR printed on its face: a blower's pipe brings the
  * combustion air there, todo #504). The labels are a whole atlas cell on a 1.4 px disc (MachineKit.flangeLabel): read
  * only up close (todo #506). The control signal inputs are plates low on both flanks.
  * <p>
@@ -41,7 +41,7 @@ public final class FuelHeater {
      * (centred across, above the thermal pad) (FuelHeatFurnaceElement FUEL_X, FUEL_Z, AIR_Y, AIR_Z: its ports are where
      * these are drawn).
      */
-    static final double FUEL_X = 13.0, FUEL_Z = 8.0, AIR_Y = 6.0, AIR_Z = 8.0;
+    static final double FUEL_X = 13.0, FUEL_Z = 8.0, AIR_Y = 8.0, AIR_Z = 8.0;
 
     static {
         org.erisia.cad.tex.Palette.put("label_fuel", 196, 112, 32, 0, Compressor.text("FUEL", 0, 5));

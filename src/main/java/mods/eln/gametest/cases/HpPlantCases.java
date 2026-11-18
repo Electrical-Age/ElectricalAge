@@ -104,34 +104,9 @@ public final class HpPlantCases {
         return blowerOnAirPort(ctx, f, speed, f.node.coordonate.pos().relative(f.front.left().toEnumFacing()), f.front.back());
     }
 
-    /**
-     * The pipe from f's air port through the block behind it (over its thermal cable: the router won't enter a block with
-     * a cable) out of that block's side towards side, at the pipes' low line (y 4) at the face's centre, where a blower's
-     * outlet meets it. Returns the block it comes out into.
-     */
-    static BlockPos gapPipe(TestContext ctx, FuelHeatFurnaceElement f, Direction side) {
-        BlockPos g = f.node.coordonate.pos().relative(f.front.back().toEnumFacing());
-        int[] a = faceCentre(f.front, FuelHeatFurnaceElement.AIR_Y), d = faceCentre(side, 4);
-        // (it steps down to the low line off to the side, clear of the cable along the block's middle)
-        var n = side.toEnumFacing().getUnitVec3i();
-        int ox = 8 + 5 * n.getX(), oz = 8 + 5 * n.getZ();
-        String err = mods.eln.node.voxel.PipeKitItem.place(ctx.level(), g, new mods.eln.node.voxel.PipePart(1,
-            new int[]{a[0], a[1], a[2], 8, a[1], 8, ox, a[1], oz, ox, 4, oz, d[0], d[1], d[2]}), null);
-        if (err != null) throw new IllegalStateException("air pipe at " + g + ": " + err);
-        return g.relative(side.toEnumFacing());
-    }
-
-    /** The centre of a block's face towards dir, at height y (local voxels). */
-    static int[] faceCentre(Direction dir, int y) {
-        var n = dir.toEnumFacing().getUnitVec3i();
-        return new int[]{n.getX() == 0 ? 8 : n.getX() > 0 ? 16 : 0, y, n.getZ() == 0 ? 8 : n.getZ() > 0 ? 16 : 0};
-    }
-
-    /** A blower on its supply at speed x MVU at p, blowing towards out (straight into a pipe end there). */
-    static mods.eln.oil.AirBlowerElement blowerAt(TestContext ctx, BlockPos p, Direction out, double speed) {
-        var b = blower(ctx, p, out, false);
-        power(b, speed * Eln.MVU);
-        return b;
+    /** The block behind furnace f, where its air port opens (and its thermal cable lies). */
+    static BlockPos airBlock(FuelHeatFurnaceElement f) {
+        return f.node.coordonate.pos().relative(f.front.back().toEnumFacing());
     }
 
     /** A Copper Thermal Cable on the floor of the voxel block at p, across it along x (or z): a furnace's back to a boiler. */
@@ -779,15 +754,16 @@ public final class HpPlantCases {
                     // (todo #504: the air ports on the furnaces' backs, over their thermal cables) both air pipes come out
                     // into (3, 1, 4), furnace 0's from the west, furnace 1's from the south: one pipe joins them there, and
                     // the blower north of it at (3, 1, 3) blows into a tee off it
-                    BlockPos m = gapPipe(ctx, f[0], f[0].front.left());
-                    gapPipe(ctx, f[1], f[1].front.right());
-                    PipeCases.lay(ctx, m, 1, 0, 4, 8, 8, 4, 8, 8, 4, 16);
-                    String err = PipeCases.node(ctx, m).addJoined(new mods.eln.node.voxel.PipePart(1, new int[]{8, 4, 0, 8, 4, 8}), 8, 4, 8);
-                    if (err != null) throw new IllegalStateException("the blower's tee: " + err);
-                    blow[0] = blowerAt(ctx, m.north(), Direction.ZP, blowerSpeed);
+                    // (#520: routed now, the air ports clear of the cables) the blower's pipe to furnace 0, and furnace
+                    // 1's joined to it there
+                    BlockPos m = airBlock(f[0]).relative(f[0].front.left().toEnumFacing());
+                    blow[0] = blowerOnAirPort(ctx, f[0], blowerSpeed, m.north(), Direction.ZP);
+                    var from1 = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), f[1].node.coordonate.pos(), f[1].front.back().toEnumFacing());
+                    String err = mods.eln.node.voxel.PipePlacer.routeAndJoinForTests(ctx.level(), 1, from1, joinOn(ctx, m));
+                    if (err != null) throw new IllegalStateException("furnace 1's air pipe onto the blower's: " + err);
                 } else for (int i = 0; i < 2; i++) {
                     Direction side = f[i].front.left();
-                    blow[i] = blowerAt(ctx, gapPipe(ctx, f[i], side), side.getInverse(), blowerSpeed);
+                    blow[i] = blowerOnAirPort(ctx, f[i], blowerSpeed, airBlock(f[i]).relative(side.toEnumFacing()), side.getInverse());
                 }
                 Eln.simulator.addSlowProcess(blowClock = dt -> {
                     blowT += dt;
@@ -1125,7 +1101,7 @@ public final class HpPlantCases {
                 fT[i] = Batch1Cases.<ThermalLoad>field(f[i], "thermalLoad");
                 if (blowers) {
                     Direction side = f[i].front.left();
-                    blow[i] = blowerAt(ctx, gapPipe(ctx, f[i], side), side.getInverse(), BLOWER_SPEED);
+                    blow[i] = blowerOnAirPort(ctx, f[i], BLOWER_SPEED, airBlock(f[i]).relative(side.toEnumFacing()), side.getInverse());
                 } else air[i] = OilCases.FurnacePressure.onAirPort(f[i], mains[i] = OilCases.FurnacePressure.main(a.getY(), AIR_PA, false));
             }
             if (blowers) Eln.simulator.addSlowProcess(blowClock = dt -> {
