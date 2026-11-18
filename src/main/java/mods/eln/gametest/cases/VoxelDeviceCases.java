@@ -140,8 +140,8 @@ public final class VoxelDeviceCases {
     }
 
     /**
-     * Every device converted here: placed anywhere, a click in the middle of a free face still puts it in the face's own
-     * slot (the probes off centre there, with pins and no stubs: Baughn 2026-11-18, #515) (the old placement, ports at the face's edges); its body follows its drawn model (logged: the body box and reach
+     * Every device converted here: placed anywhere, a click in the middle of a free face puts it off centre too, with
+     * pins and no stubs (Baughn 2026-11-18, #515: "all cables explicit") (the old placement, ports at the face's edges); its body follows its drawn model (logged: the body box and reach
      * of each, centred, front north); lopsided models keep their pins at the model's edges (a Voltage Probe's signal
      * pin 6 voxels from its centre on the long side, its cable pin 4 on the short side); the relays at their half size.
      */
@@ -194,9 +194,9 @@ public final class VoxelDeviceCases {
                 BlockPos p = c.at(i % 8 * 2, 1, i / 8 * 2);
                 c.floor(p.below());
                 var v = block(c, p);
-                // a click in the middle of the free floor: the face's own slot; the probes off centre there (#515)
+                // a click in the middle of the free floor: off centre there too, the face's slot left empty (#515)
                 String err = v.placeAnywhere(desc(n).newItemStack(), yn, 0.5, 0, 0.5, player(c));
-                var in = desc(n).centreInFaceSlot() ? v.getElement(yn) : v.getElement(yn) == null ? TapCase.placed(v) : null;
+                var in = v.getElement(yn) == null ? TapCase.placed(v) : null;
                 boolean ok = err == null && in != null && in.sixNodeElementDescriptor.name.equals(n);
                 middleOk &= ok;
                 if (!ok) mid.append(n).append(": ").append(err).append("; ");
@@ -208,7 +208,7 @@ public final class VoxelDeviceCases {
                 c.floor(p.north());
                 var v = block(c, p);
                 String err = v.placeAnywhere(desc(n).newItemStack(), zn, 0.5, 0.5, 0, player(c));
-                boolean ok = err == null && v.getElement(zn) != null;
+                boolean ok = err == null && v.getElement(zn) == null && TapCase.placed(v) != null;
                 middleOk &= ok;
                 if (!ok) mid.append(n).append(": ").append(err).append("; ");
                 i++;
@@ -248,7 +248,7 @@ public final class VoxelDeviceCases {
         public void measure(TestContext c) {
             c.line(all);
             c.check("voxel devices: each converted device goes anywhere; the analog vuMeter, power switches and redstone converters don't", anywhereOk && stayedOk, stayed);
-            c.check("voxel devices: a click in the middle of a free face puts each in the face's own slot (as before), the probes off centre", middleOk, middle);
+            c.check("voxel devices: a click in the middle of a free face puts each off centre, not in the face's slot", middleOk, middle);
             c.check("voxel devices: a lopsided model's body follows it, turned with its front", lopsidedOk, lopsided);
             c.check("voxel devices: a relay's body is its half-size model (contacts along, gate across)", relaysOk, relays);
         }

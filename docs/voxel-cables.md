@@ -104,10 +104,10 @@ the rules above; the joints are kept alongside:
   rule: the model box (`SixNodeDescriptor.footprint()`, chips drawn at `CHIP_SCALE` 0.75: a case 6 voxels across) is
   clear, with a voxel of air all round, except where a pin touches a cable of a matching kind or meets another
   device's pin tip to tip.
-- A click in the middle of a free face puts a device that goes anywhere in the face's own slot (its ports at the
-  face's edges, meeting a machine beside it by EA's edge rule, drawn with cable stubs to those edges), except the four
-  probes (`SixNodeDescriptor.centreInFaceSlot()` false: Electrical, Voltage, Thermal and Temperature Probe), which go
-  off centre there too: pins, no stubs (Baughn 2026-11-18, #515). Probes already in a face slot stay there, as they were.
+- A device that goes anywhere always goes off centre, a click in the middle of a free face too, and connects only at
+  its pins: no face slot, so no cable stubs drawn to the face's edges and no edge-rule link to a machine beside it
+  (Baughn 2026-11-18, #515: "I'd like all cables to be explicit"; a cable is laid to the machine). Devices placed
+  earlier in a face slot stay there and keep working as they were.
 - Ports are pins (`VoxelNode.pins`): a tip on the face plane at the model's edge, and a contact box just outside it.
   `connectPins` links a pin to every cable conductor whose boxes take its contact box, and to another device's pin
   that meets it. These devices draw no cable stubs to the block's edges. The cable kit ends at the nearest pin; routes

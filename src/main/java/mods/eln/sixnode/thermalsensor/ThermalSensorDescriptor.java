@@ -73,12 +73,6 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor {
         return true;
     }
 
-    /** Off centre even in the middle of a face: pins, no cable stubs to the face's edges (Baughn 2026-11-18, #515). */
-    @Override
-    public boolean centreInFaceSlot() {
-        return false;
-    }
-
     @Override
     public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
         front.glRotateOnX();

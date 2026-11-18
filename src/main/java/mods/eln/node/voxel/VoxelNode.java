@@ -1187,9 +1187,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (!d.allowedOnSide(face)) return "It can't go on that side";
         LRDU front = DevicePreview.placeFront(d, face, player);
         int[] o = snap(d, face, front, hx, hy, hz);
-        // in the middle of a free face: the face's own slot, as before (ports at the face's edges, which meet the
-        // next block, a machine beside it, by EA's edge rule: a trimmer beside a furnace); not the probes
-        if (inFaceSlot(d, face, o)) return createSubBlock(stack, face, player) ? null : "Can't place that";
+        // (in the middle of a free face too: off centre, its pins its only ports, no face slot with stubs to the face's
+        // edges; Baughn 2026-11-18, #515: "I'd like all cables to be explicit")
         // where it goes, in line on a cable, on a cable's end or beside one (DevicePlacer)
         var plan = DevicePlacer.plan(this, stack, slot, face, new double[]{hx, hy, hz}, player);
         if (plan.err() != null) return plan.err();
@@ -1234,13 +1233,6 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         } finally {
             placingFront = null;
         }
-    }
-
-    /** Does placeAnywhere put a device of d snapped to offset o on face in the face's own slot (centred, the slot free,
-     *  and d one that goes there: SixNodeDescriptor.centreInFaceSlot)? The preview asks the same. */
-    boolean inFaceSlot(mods.eln.node.six.SixNodeDescriptor d, Direction face, int[] o) {
-        return o[0] == 0 && o[1] == 0 && o[2] == 0 && d.centreInFaceSlot() && sideElementList[face.getInt()] == null
-            && canPlaceElement(face.getInt());
     }
 
     /** The front of the device being placed by placeAnywhere (its plan), else null: the player's facing. */

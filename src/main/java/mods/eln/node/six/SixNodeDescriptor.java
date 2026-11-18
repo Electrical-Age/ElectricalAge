@@ -250,18 +250,11 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
         return false;
     }
 
-    /** May it be placed anywhere on a face of a voxel block (off centre, several to a face)? Chips. */
+    /** May it be placed anywhere on a face of a voxel block (off centre, several to a face)? Chips. Such a device always
+     *  goes off centre, a click in the middle of a free face too, and connects only at its pins (Baughn 2026-11-18,
+     *  #515: "I'd like all cables to be explicit"); ones placed earlier in a face's own slot stay there. */
     public boolean placeAnywhere() {
         return false;
-    }
-
-    /**
-     * Placed anywhere, does a click in the middle of a free face put it in the face's own slot (its ports at the face's
-     * edges, meeting a machine beside it by EA's edge rule, drawn with cable stubs from it to those edges)? Else it goes
-     * off centre there too, with pins. Devices already in a face slot stay there either way.
-     */
-    public boolean centreInFaceSlot() {
-        return true;
     }
 
     /**
