@@ -79,10 +79,9 @@ public final class ToolbagCases {
         ToolbagItem.click(pl, c.level(), bag, p.below(), Direction.UP, Vec3.atLowerCornerOf(p).add(0.5, 0, 0.5), false);
     }
 
-    static void radial(ServerPlayer pl, int action, int[] kind) throws java.io.IOException {
-        byte[] b = ToolbagItem.choicePacket(action, kind);
-        var in = new java.io.DataInputStream(new java.io.ByteArrayInputStream(b, 1, b.length - 1));
-        ToolbagItem.choice(pl, in);
+    /** The radial's choice as the client sends it: ToolbagRadial's packet bytes into the server's packet handler. */
+    static void radial(ServerPlayer pl, int action, int[] kind) {
+        mods.eln.network.ServerPacketHandler.handle(ToolbagItem.choicePacket(action, kind), pl);
     }
 
     static ServerPlayer player(TestContext c) {
@@ -295,8 +294,21 @@ public final class ToolbagCases {
                 boolean farKit = CablePlacer.active(pl.getUUID());
                 CablePlacer.use(pl, level, near, Direction.UP, kit, LV, Vec3.atLowerCornerOf(near).add(0.5, 2.5, 0.5));
                 boolean airKit = CablePlacer.active(pl.getUUID());
-                reach = String.format("route or pending: bag far %b, bag mid-air %b, kit far %b, kit mid-air %b", farBag, airBag, farKit, airKit);
-                reachOk = !farBag && !airBag && !farKit && !airKit;
+                // just past reach (5 blocks east, 5.3 from the eyes: inside the server's block of slack), through the kit
+                // item's own use, as the client's click arrives
+                pl.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                BlockPos past = c.at(6, 0, 3);
+                var ctx = new net.minecraft.world.item.context.UseOnContext(pl, InteractionHand.MAIN_HAND,
+                    new net.minecraft.world.phys.BlockHitResult(Vec3.atLowerCornerOf(past).add(0.5, 1, 0.5), Direction.UP, past, false));
+                kit.getItem().useOn(ctx);
+                boolean pastKit = CablePlacer.active(pl.getUUID());
+                BlockPos in = c.at(4, 0, 3);
+                kit.getItem().useOn(new net.minecraft.world.item.context.UseOnContext(pl, InteractionHand.MAIN_HAND,
+                    new net.minecraft.world.phys.BlockHitResult(Vec3.atLowerCornerOf(in).add(0.5, 1, 0.5), Direction.UP, in, false)));
+                boolean inKit = CablePlacer.active(pl.getUUID());
+                reach = String.format("route or pending: bag far %b, bag mid-air %b, kit far %b, kit mid-air %b, kit just past reach %b; within reach %b",
+                    farBag, airBag, farKit, airKit, pastKit, inKit);
+                reachOk = !farBag && !airBag && !farKit && !airKit && !pastKit && inKit;
                 clean(pl);
 
                 // 2. a pipe route, then a sneak-click on the pipe

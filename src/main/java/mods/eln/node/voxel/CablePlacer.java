@@ -589,7 +589,19 @@ public final class CablePlacer {
     public static boolean reachable(net.minecraft.world.entity.player.Player p, BlockPos pos, Vec3 hit) {
         if (hit == null) return false;
         var box = new net.minecraft.world.phys.AABB(pos).inflate(0.01);
-        return box.contains(hit) && p.getEyePosition().distanceTo(hit) <= p.blockInteractionRange() + 1.0;
+        // (the player's own reach, a little slack for the eye moving between client and server: the server takes a click
+        // up to a block past it, which a client only sends with more reach than the server gives; AdventurAgent's clicks
+        // past reach still laid with a block's slack)
+        return box.contains(hit) && p.getEyePosition().distanceTo(hit) <= p.blockInteractionRange() + REACH_SLACK;
+    }
+
+    /** Blocks past the player's reach a click may be (client and server eyes differ by a tick's movement). */
+    static final double REACH_SLACK = 0.25;
+
+    /** Keep the player's route from lapsing as idle (the Toolbag's radial is open). */
+    static void touch(UUID player, long now) {
+        Plan p = PLANS.get(player);
+        if (p != null) p.touched = now;
     }
 
     /** Take back the route's last waypoint, or cancel it if it has none; false if there is no route. */
@@ -598,10 +610,12 @@ public final class CablePlacer {
         if (plan == null) return false;
         if (plan.waypoints.isEmpty()) {
             PLANS.remove(player.getUUID());
-            player.sendOverlayMessage(Component.literal("Cable route cancelled"));
+            KitPreview.note(player, "Cable route cancelled");
         } else {
             plan.waypoints.remove(plan.waypoints.size() - 1);
-            player.sendOverlayMessage(Component.literal("Waypoint taken back (" + plan.waypoints.size() + " left)"));
+            // (on the note line: the preview's next line takes the action bar at once, and a waypoint on the way to the
+            // aim changes neither the route drawn nor its length; AdventurAgent read an Undo as doing nothing)
+            KitPreview.note(player, "Waypoint taken back (" + plan.waypoints.size() + " left)");
         }
         return true;
     }

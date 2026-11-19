@@ -305,6 +305,8 @@ public class ToolbagItem extends Item implements PipeTool {
             KitPreview.note(p, "The toolbag holds no kits: right-click the air to open it");
             return;
         }
+        CablePlacer.touch(p.getUUID(), p.level().getGameTime());   // (the radial open isn't idleness)
+        PipePlacer.touch(p.getUUID(), p.level().getGameTime());
         if (start != null) PENDING.put(p.getUUID(), start);
         else PENDING.remove(p.getUUID());
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -337,13 +339,15 @@ public class ToolbagItem extends Item implements PipeTool {
         ItemStack bag = p.getMainHandItem();
         if (!(bag.getItem() instanceof ToolbagItem) || !(p.level() instanceof ServerLevel level)) return;
         Click pending = PENDING.remove(p.getUUID());
+        CablePlacer.touch(p.getUUID(), level.getGameTime());
+        PipePlacer.touch(p.getUUID(), level.getGameTime());
         if (action == UNDO || action == CANCEL) {
             if (action == CANCEL) {
                 boolean had = routing(p);
                 CablePlacer.drop(p.getUUID());
                 PipePlacer.drop(p.getUUID());
                 STARTED.remove(p.getUUID());
-                if (had) p.sendOverlayMessage(Component.literal("Route cancelled"));
+                if (had) KitPreview.note(p, "Route cancelled");
             } else if (!CablePlacer.undo(p)) PipePlacer.undo(p, level);
             return;
         }

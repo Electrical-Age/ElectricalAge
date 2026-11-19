@@ -341,7 +341,8 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   and a new kind restarts the route from its start click (`STARTED`), a cable's waypoints kept for a cable.
 - Client `ToolbagHud`: the chosen kind and a terse usage line above the route note while the bag is in hand.
 - A kit or bag click must be within reach, its point on or in the clicked block (`CablePlacer.reachable`; else "Out
-  of reach"): AdventurAgent's click past reach, its point in mid-air, made a waypoint in the air. With the bag in hand
+  of reach"; the player's reach plus `REACH_SLACK` 0.25, where the server itself takes a block more): AdventurAgent's
+  clicks past reach made waypoints. With the bag in hand
   the client sends its sneak state before a click (`ClientKeys.beforeClick`), so a sneak-click opens the radial even
   when shift goes down in the same tick. Its tooltip lists the kits by kind only (the container's own list hidden).
 - Shears (`ToolbagShears`, #517): with shears in the bag, a left-click on a cable or pipe (no block is broken with the

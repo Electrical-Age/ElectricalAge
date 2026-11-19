@@ -392,13 +392,21 @@ public final class PipePlacer {
         if (plan == null) return false;
         if (plan.waypoints.isEmpty()) {
             PLANS.remove(player.getUUID());
-            player.sendOverlayMessage(Component.literal("Pipe route cancelled"));
+            KitPreview.note(player, "Pipe route cancelled");
         } else {
             plan.waypoints.remove(plan.waypoints.size() - 1);
-            player.sendOverlayMessage(Component.literal("Waypoint taken back (" + plan.waypoints.size() + " left)"));
+            // (on the note line: the preview's next line takes the action bar at once, and a waypoint on the way to the
+            // aim changes neither the route drawn nor its length; AdventurAgent read an Undo as doing nothing)
+            KitPreview.note(player, "Waypoint taken back (" + plan.waypoints.size() + " left)");
             preview(player, level, plan, null);
         }
         return true;
+    }
+
+    /** Keep the player's pipe route from lapsing as idle (the Toolbag's radial is open). */
+    static void touch(UUID player, long now) {
+        Plan p = PLANS.get(player);
+        if (p != null) p.touched = now;
     }
 
     /** Is a pipe route being laid by this player? */
