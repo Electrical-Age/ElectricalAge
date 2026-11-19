@@ -298,6 +298,7 @@ public class Eln {
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent.class, mods.eln.node.voxel.CableKitRecipes::crafted);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent.class, mods.eln.node.voxel.PipeKitRecipes::crafted);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.class, mods.eln.node.voxel.ChiselItem::onLeftClick);
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.class, mods.eln.node.voxel.ToolbagShears::onLeftClick);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class, mods.eln.node.voxel.ChiselItem::forget);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post.class, mods.eln.node.voxel.KitPreview::tick);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post.class, mods.eln.node.voxel.DevicePreview::tick);
@@ -307,6 +308,7 @@ public class Eln {
                 mods.eln.node.voxel.KitPreview.forget(e.getEntity().getUUID());
                 mods.eln.node.voxel.DevicePreview.forget(e.getEntity().getUUID());
                 mods.eln.node.voxel.ToolbagItem.forget(e.getEntity().getUUID());
+                mods.eln.node.voxel.ToolbagShears.forget(e.getEntity().getUUID());
             });
         // pipe routes being laid: forgotten on logout and death
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class,

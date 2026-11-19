@@ -17,7 +17,7 @@ public final class ToolbagHud {
         var mc = Minecraft.getInstance();
         if (mc.player == null || mc.gui.screen() != null || !(mc.player.getMainHandItem().getItem() instanceof ToolbagItem)) return;
         var k = ToolbagItem.selected(mc.player.getMainHandItem());
-        String text = (k == null ? "" : k.label() + " | ") + "R-click cable: lay its kind | elsewhere or sneak: choose | air: open";
+        String text = (k == null ? "" : k.label() + " | ") + "R-click cable: lay its kind | elsewhere or sneak: choose | air: open | L-click: cut";
         int w = mc.font.width(text);
         g.text(mc.font, text, (g.guiWidth() - w) / 2, g.guiHeight() - 68 - 4 - 24, 0xC0D0D0D0, true);
     }

@@ -42,6 +42,7 @@ public final class KitPreview {
         if (!(e.getEntity() instanceof ServerPlayer p) || !(p.level() instanceof ServerLevel level)) return;
         CablePlacer.checkLapse(p, level.getGameTime());   // (every tick: Baughn found the outline slow at 4 ticks)
         PipePlacer.checkLapse(p, level.getGameTime());
+        if (ToolbagShears.tick(p, level)) return;   // (the Toolbag's shears outline the run to cut instead)
         Last last = LAST.get(p.getUUID());
         KitSupply kit = KitSupply.held(p);
         if (kit != null && kit.pipe()) {

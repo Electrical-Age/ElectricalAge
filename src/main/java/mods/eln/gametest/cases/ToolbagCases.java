@@ -37,6 +37,7 @@ public final class ToolbagCases {
         cases.add(new SlotsCase());
         cases.add(new LayCase());
         cases.add(new ReachSneakUndoCase());
+        cases.add(new ShearsCase());
     }
 
     static final int SIGNAL = CablePart.tierOf("Signal Cable"), LV = CablePart.tierOf("Low Voltage Cable"), MV = CablePart.tierOf("Medium Voltage Cable");
@@ -342,6 +343,165 @@ public final class ToolbagCases {
             c.check("toolbag and kit: a click past reach or in mid-air starts nothing", reachOk, reach);
             c.check("toolbag: on a pipe route a sneak-click opens the radial, lays nothing", sneakOk, sneak);
             c.check("toolbag: Undo takes back the last waypoint", undoOk, undo);
+        }
+    }
+
+    /**
+     * The shears (#517). Runs of LV cable along x on a floor, each block one straight piece, a Signal Source at x 0
+     * (a device) and a branch spliced onto the piece at x 4 (a junction). (a) A cut started at x 2 and aimed at x 3:
+     * those two pieces go, 32 voxels back into the bag's LV kit, a point off the shears; aimed at x 4 (the junction) the
+     * span doesn't reach it; x 1 and x 4 stay. (b) The bag full of full LV kits: the cut drops its length at the player.
+     * (c) No shears: no cut starts. (d) A right-click cancels: the run stays whole. (e) An iron pipe run of two blocks
+     * cut whole: its length back as an iron pipe kit.
+     */
+    static final class ShearsCase implements TestCase {
+        String err = "", a = "", b = "", cc = "", d = "", e = "";
+        boolean aOk, bOk, cOk, dOk, eOk;
+
+        public String id() {
+            return "toolbag_shears_cut_runs";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        /** An LV run along x at row z from x 1 to 4, a source at x 0, a branch onto x 4's piece. */
+        static void run(TestContext c, int z) {
+            for (int x = 1; x <= 4; x++)
+                mods.eln.node.voxel.PipeKitItem.place(c.level(), c.at(x, 1, z), new CablePart(LV, CableCases.DOWN, new int[]{0, 0, 8, 16, 0, 8}), null);
+            mods.eln.node.voxel.PipeKitItem.place(c.level(), c.at(4, 1, z), new CablePart(LV, CableCases.DOWN, new int[]{8, 0, 8, 8, 0, 16}), null);
+            c.placeSix(Wp9aCases.SOURCE, c.at(0, 1, z));
+        }
+
+        static Vec3 on(BlockPos p) {
+            return Vec3.atLowerCornerOf(p).add(0.3, 0.5 / 16, 0.5);
+        }
+
+        static ItemStack withShears(ItemStack bag) {
+            var items = new ArrayList<>(ToolbagItem.contents(bag));
+            items.set(ToolbagItem.SHEARS_SLOT, new ItemStack(Items.SHEARS));
+            ToolbagItem.setContents(bag, items);
+            return bag;
+        }
+
+        static int pieces(TestContext c, BlockPos p) {
+            var v = node(c, p);
+            return v == null ? 0 : v.parts.size();
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 9; x++) for (int z = 0; z < 7; z++) c.floor(c.at(x, 0, z));
+            run(c, 0);
+            run(c, 2);
+            run(c, 4);
+            for (int x = 6; x <= 7; x++)
+                mods.eln.node.voxel.PipeKitItem.place(c.level(), c.at(x, 1, 6), new PipePart(0, new int[]{0, 4, 8, 16, 4, 8}), null);
+            // (cut once the blocks have connected and recorded their joints)
+            c.after(5, () -> cut(c));
+        }
+
+        void cut(TestContext c) {
+            var pl = player(c);
+            var level = c.level();
+            double px = pl.getX(), py = pl.getY(), pz = pl.getZ();
+            BlockPos mid = c.at(3, 1, 3);
+            pl.snapTo(mid.getX() + 0.5, mid.getY(), mid.getZ() + 0.5, 0, 0);
+            try {
+                // (a)
+                ItemStack bag = withShears(bag(CableKitItem.kit(LV, 100)));
+                pl.setItemInHand(InteractionHand.MAIN_HAND, bag);
+                BlockPos b2 = c.at(2, 1, 0), b3 = c.at(3, 1, 0), b4 = c.at(4, 1, 0);
+                mods.eln.node.voxel.ToolbagShears.leftClick(pl, level, bag, b2, on(b2));
+                boolean started = mods.eln.node.voxel.ToolbagShears.active(pl.getUUID());
+                mods.eln.node.voxel.ToolbagShears.aimForTests(pl, level, b4, on(b4));   // (the junction: not in the run)
+                mods.eln.node.voxel.ToolbagShears.aimForTests(pl, level, b3, on(b3));
+                mods.eln.node.voxel.ToolbagShears.leftClick(pl, level, bag, b3, on(b3));
+                int wear = ToolbagItem.contents(bag).get(ToolbagItem.SHEARS_SLOT).getDamageValue();
+                a = String.format("started %b; pieces x1..4: %d %d %d %d; LV in the bag %d; shears wear %d", started, pieces(c, c.at(1, 1, 0)),
+                    pieces(c, b2), pieces(c, b3), pieces(c, b4), held(bag, LV)[0], wear);
+                aOk = started && pieces(c, c.at(1, 1, 0)) == 1 && pieces(c, b2) == 0 && pieces(c, b3) == 0 && pieces(c, b4) == 2
+                    && held(bag, LV)[0] == 132 && wear == 1 && !mods.eln.node.voxel.ToolbagShears.active(pl.getUUID());
+                clean(pl);
+
+                // (b) a full bag
+                ItemStack[] full = new ItemStack[ToolbagItem.KITS];
+                for (int k = 0; k < full.length; k++) full[k] = CableKitItem.kit(LV, KitItem.MAX);
+                ItemStack fb = withShears(bag(full));
+                pl.setItemInHand(InteractionHand.MAIN_HAND, fb);
+                BlockPos r2 = c.at(2, 1, 2);
+                var box = new net.minecraft.world.phys.AABB(pl.blockPosition()).inflate(3);
+                int before = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, box).size();
+                mods.eln.node.voxel.ToolbagShears.leftClick(pl, level, fb, r2, on(r2));
+                mods.eln.node.voxel.ToolbagShears.leftClick(pl, level, fb, r2, on(r2));
+                var drops = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, box);
+                int dropLen = 0;
+                for (var it : drops) if (it.getItem().getItem() instanceof CableKitItem) dropLen += KitItem.lengthForTests(it.getItem());
+                b = String.format("piece at x2 %d; dropped %d item(s), %d voxels of kit; bag %d", pieces(c, r2), drops.size() - before, dropLen, held(fb, LV)[0]);
+                bOk = pieces(c, r2) == 0 && dropLen == 16 && held(fb, LV)[0] == ToolbagItem.KITS * KitItem.MAX;
+                for (var it : drops) it.discard();
+                clean(pl);
+
+                // (c) no shears
+                ItemStack ns = bag(CableKitItem.kit(LV, 100));
+                pl.setItemInHand(InteractionHand.MAIN_HAND, ns);
+                BlockPos s2 = c.at(2, 1, 4);
+                mods.eln.node.voxel.ToolbagShears.leftClick(pl, level, ns, s2, on(s2));
+                cc = "cut started " + mods.eln.node.voxel.ToolbagShears.active(pl.getUUID()) + ", piece " + pieces(c, s2);
+                cOk = !mods.eln.node.voxel.ToolbagShears.active(pl.getUUID()) && pieces(c, s2) == 1;
+
+                // (d) a right-click cancels
+                ItemStack cb = withShears(bag(CableKitItem.kit(LV, 100)));
+                pl.setItemInHand(InteractionHand.MAIN_HAND, cb);
+                mods.eln.node.voxel.ToolbagShears.leftClick(pl, level, cb, s2, on(s2));
+                boolean on = mods.eln.node.voxel.ToolbagShears.active(pl.getUUID());
+                ToolbagItem.click(pl, level, cb, s2, Direction.UP, on(s2), false);
+                d = String.format("cut on %b, after the right-click %b; pieces x1..3 %d %d %d; bag %d", on, mods.eln.node.voxel.ToolbagShears.active(pl.getUUID()),
+                    pieces(c, c.at(1, 1, 4)), pieces(c, s2), pieces(c, c.at(3, 1, 4)), held(cb, LV)[0]);
+                dOk = on && !mods.eln.node.voxel.ToolbagShears.active(pl.getUUID()) && pieces(c, c.at(1, 1, 4)) == 1 && pieces(c, s2) == 1
+                    && pieces(c, c.at(3, 1, 4)) == 1 && held(cb, LV)[0] == 100 && !CablePlacer.active(pl.getUUID());
+                clean(pl);
+
+                // (e) a pipe run
+                ItemStack pb = withShears(bag());
+                pl.setItemInHand(InteractionHand.MAIN_HAND, pb);
+                BlockPos p6 = c.at(6, 1, 6), p7 = c.at(7, 1, 6);
+                Vec3 h6 = Vec3.atLowerCornerOf(p6).add(0.5, 4.5 / 16, 0.5), h7 = Vec3.atLowerCornerOf(p7).add(0.5, 4.5 / 16, 0.5);
+                mods.eln.node.voxel.ToolbagShears.leftClick(pl, level, pb, p6, h6);
+                mods.eln.node.voxel.ToolbagShears.aimForTests(pl, level, p7, h7);
+                mods.eln.node.voxel.ToolbagShears.leftClick(pl, level, pb, p7, h7);
+                int pipeLen = 0;
+                for (ItemStack s : ToolbagItem.contents(pb)) if (s.getItem() instanceof PipeKitItem) pipeLen += KitItem.lengthForTests(s);
+                e = String.format("pipes left %d %d; iron pipe in the bag %d voxels", pieces(c, p6), pieces(c, p7), pipeLen);
+                eOk = pieces(c, p6) == 0 && pieces(c, p7) == 0 && pipeLen == 32;
+            } catch (Exception ex) {
+                err = String.valueOf(ex);
+            } finally {
+                clean(pl);
+                mods.eln.node.voxel.ToolbagShears.forget(pl.getUUID());
+                pl.snapTo(px, py, pz, 0, 0);
+            }
+        }
+
+        public void measure(TestContext c) {
+            c.check("shears: no error", err.isEmpty(), err);
+            c.check("shears: a cut takes the span back into the bag, not past a junction, a point of wear", aOk, a);
+            c.check("shears: what doesn't fit in a full bag drops", bOk, b);
+            c.check("shears: no shears, no cut", cOk, cc);
+            c.check("shears: a right-click cancels, the run stays", dOk, d);
+            c.check("shears: a pipe run cut whole goes back as a pipe kit", eOk, e);
         }
     }
 }

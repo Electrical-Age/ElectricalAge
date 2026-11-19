@@ -326,7 +326,7 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
 
 - `ToolbagItem` (`eln:toolbag`; Baughn 2026-11-18, todos #510/#517): a bag of cable and pipe kits used in place of a
   kit. Its contents are a `DataComponents.CONTAINER` of `SLOTS` 16: kit slots 0..14 (three rows of five; cable and pipe
-  kits only) and `SHEARS_SLOT` 15 (vanilla shears, for cutting cables: phase B, not used yet). `ToolbagMenu` /
+  kits only) and `SHEARS_SLOT` 15 (vanilla shears: the cutting below). `ToolbagMenu` /
   client `ToolbagScreen` as the battery belt's (written back on every change, its hotbar slot locked). The chosen kind
   (`Kind`: pipe or cable tier, a power cable's mm² index and colour) is in its custom data (`toolbagKind`).
 - Placers read the main hand through `KitSupply` (a kit, or the bag's kits of its chosen kind taken together:
@@ -344,8 +344,17 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   of reach"): AdventurAgent's click past reach, its point in mid-air, made a waypoint in the air. With the bag in hand
   the client sends its sneak state before a click (`ClientKeys.beforeClick`), so a sneak-click opens the radial even
   when shift goes down in the same tick. Its tooltip lists the kits by kind only (the container's own list hidden).
+- Shears (`ToolbagShears`, #517): with shears in the bag, a left-click on a cable or pipe (no block is broken with the
+  bag) starts a cut; the run through that piece is found once (a cable by its CONT joints, stopping at a device
+  joint, at an end where several pieces or a splice meet, and before a piece another's end splices onto; a pipe by its
+  ends, in the block or across a face, stopping at fittings and where several pipes meet), and the span from the first
+  piece to the one aimed at is outlined red (KitPreview's outline packet, sent from `KitPreview.tick` instead of the
+  route preview) with its length on the action bar. A second left-click removes the span (`VoxelNode.partItem` for
+  each: burnt pieces give nothing), puts it back into the bag (its kits of that kind topped up, then empty slots, the
+  rest dropped at the player) and wears the shears by one. A right-click, or the bag leaving the hand, cancels.
 - `ToolbagCases`: slots; a cable click lays its kind across two kits; a kind it lacks; the radial starts at the click
-  and a new kind keeps the start; a pipe click; Cancel.
+  and a new kind keeps the start; a pipe click; Cancel; reach, sneak on a pipe route, Undo; the shears (a span back
+  into the bag, not past a junction; a full bag drops; no shears; cancel; a pipe run).
 
 ## Chisel
 

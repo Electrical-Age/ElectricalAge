@@ -29,7 +29,7 @@ import java.util.UUID;
 
 /**
  * The Toolbag (Baughn 2026-11-18, todos #510/#517): a bag of cable and pipe kits (KITS slots) and a pair of shears
- * (SHEARS_SLOT, for cutting cables: to come), used in place of a kit. Right-click in the air opens it (ToolbagMenu).
+ * (SHEARS_SLOT: a left-click cuts cables and pipes back into the bag, ToolbagShears), used in place of a kit. Right-click in the air opens it (ToolbagMenu).
  * Right-click on a cable or pipe takes its kind from the bag and starts or finishes a route as that kit would (an error
  * if the bag holds none); right-click anywhere else to start a route, or sneak-right-click, opens a radial menu of the
  * kinds it holds (client ToolbagRadial; kind or voltage, then cross-section, then colour), the start kept. The route is
@@ -220,6 +220,10 @@ public class ToolbagItem extends Item implements PipeTool {
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
+        if (!level.isClientSide() && player instanceof ServerPlayer sp && ToolbagShears.active(sp.getUUID())) {
+            ToolbagShears.cancel(sp, "Cut cancelled");
+            return InteractionResult.SUCCESS;
+        }
         if (!level.isClientSide() && player instanceof ServerPlayer sp) {
             if (sp.isSecondaryUseActive()) openRadial(sp, player.getMainHandItem(), null);
             else ToolbagMenu.open(sp);
@@ -238,6 +242,10 @@ public class ToolbagItem extends Item implements PipeTool {
 
     /** A right-click on a block with the bag (sneak: the radial). */
     public static void click(ServerPlayer p, ServerLevel level, ItemStack bag, BlockPos pos, net.minecraft.core.Direction face, Vec3 hit, boolean sneak) {
+        if (ToolbagShears.active(p.getUUID())) {   // (a right-click cancels a cut)
+            ToolbagShears.cancel(p, "Cut cancelled");
+            return;
+        }
         Click c = new Click(level.dimension(), pos, face, hit, level.getGameTime());
         boolean routing = routing(p), reach = CablePlacer.reachable(p, pos, hit);
         if (sneak) {   // (always the radial, a route on or not: AdventurAgent saw a sneak-click on a pipe try to lay)
