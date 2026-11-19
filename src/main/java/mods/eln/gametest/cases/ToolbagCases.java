@@ -36,6 +36,7 @@ public final class ToolbagCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new SlotsCase());
         cases.add(new LayCase());
+        cases.add(new ReachSneakUndoCase());
     }
 
     static final int SIGNAL = CablePart.tierOf("Signal Cable"), LV = CablePart.tierOf("Low Voltage Cable"), MV = CablePart.tierOf("Medium Voltage Cable");
@@ -241,6 +242,106 @@ public final class ToolbagCases {
             c.check("toolbag: a cable kind it lacks is refused", refusedOk, refused);
             c.check("toolbag: the radial's choice starts the route at the click; a new kind keeps the start", radialOk, radial);
             c.check("toolbag: a pipe click takes the pipe kind; Cancel drops the route", pipeOk, pipe);
+        }
+    }
+
+    /**
+     * AdventurAgent's client look: a click past reach, or with its point in mid-air off the clicked block, starts nothing
+     * (bag and plain kit alike); on a pipe route a sneak-click on the pipe opens the radial and lays nothing; the
+     * radial's Undo takes back the last waypoint, and the route then ends at the one before.
+     */
+    static final class ReachSneakUndoCase implements TestCase {
+        String err = "", reach = "", sneak = "", undo = "";
+        boolean reachOk, sneakOk, undoOk;
+
+        public String id() {
+            return "toolbag_reach_sneak_undo";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        public void build(TestContext c) {
+            for (int x = 0; x < 9; x++) for (int z = 0; z < 7; z++) c.floor(c.at(x, 0, z));
+            var pl = player(c);
+            var level = c.level();
+            double px = pl.getX(), py = pl.getY(), pz = pl.getZ();
+            BlockPos mid = c.at(1, 1, 3);
+            pl.snapTo(mid.getX() + 0.5, mid.getY(), mid.getZ() + 0.5, 0, 0);
+            try {
+                // 1. past reach (8 blocks off), and a point in mid-air off the clicked block
+                ItemStack bag = bag(CableKitItem.kit(LV, 600));
+                ToolbagItem.select(bag, ToolbagItem.Kind.cable(LV, null));
+                pl.setItemInHand(InteractionHand.MAIN_HAND, bag);
+                BlockPos farFloor = c.at(8, 0, 3);
+                ToolbagItem.click(pl, level, bag, farFloor, Direction.UP, Vec3.atLowerCornerOf(farFloor).add(0.5, 1, 0.5), false);
+                boolean farBag = CablePlacer.active(pl.getUUID()) || ToolbagItem.pendingForTests(pl.getUUID());
+                BlockPos near = c.at(2, 0, 3);
+                ToolbagItem.click(pl, level, bag, near, Direction.UP, Vec3.atLowerCornerOf(near).add(0.5, 2.5, 0.5), false);
+                boolean airBag = CablePlacer.active(pl.getUUID()) || ToolbagItem.pendingForTests(pl.getUUID());
+                ItemStack kit = CableKitItem.kit(LV, 600);
+                pl.setItemInHand(InteractionHand.MAIN_HAND, kit);
+                CablePlacer.use(pl, level, farFloor, Direction.UP, kit, LV, Vec3.atLowerCornerOf(farFloor).add(0.5, 1, 0.5));
+                boolean farKit = CablePlacer.active(pl.getUUID());
+                CablePlacer.use(pl, level, near, Direction.UP, kit, LV, Vec3.atLowerCornerOf(near).add(0.5, 2.5, 0.5));
+                boolean airKit = CablePlacer.active(pl.getUUID());
+                reach = String.format("route or pending: bag far %b, bag mid-air %b, kit far %b, kit mid-air %b", farBag, airBag, farKit, airKit);
+                reachOk = !farBag && !airBag && !farKit && !airKit;
+                clean(pl);
+
+                // 2. a pipe route, then a sneak-click on the pipe
+                BlockPos pp = c.at(2, 1, 1);
+                mods.eln.node.voxel.PipeKitItem.place(level, pp, new PipePart(0, new int[]{8, 4, 0, 8, 4, 16}), null);
+                ItemStack pipes = bag(PipeKitItem.kit(0, 300));
+                pl.setItemInHand(InteractionHand.MAIN_HAND, pipes);
+                Vec3 onPipe = Vec3.atLowerCornerOf(pp).add(0.5, 4.5 / 16, 0.5);
+                ToolbagItem.click(pl, level, pipes, pp, Direction.UP, onPipe, false);
+                boolean on = PipePlacer.active(pl.getUUID());
+                int parts = node(c, pp).parts.size();
+                ToolbagItem.click(pl, level, pipes, pp, Direction.UP, onPipe, true);
+                sneak = String.format("pipe route %b; after the sneak-click: still on %b, parts %d -> %d", on, PipePlacer.active(pl.getUUID()), parts,
+                    node(c, pp).parts.size());
+                sneakOk = on && PipePlacer.active(pl.getUUID()) && node(c, pp).parts.size() == parts;
+                clean(pl);
+
+                // 3. Undo: start at (1,1,5), waypoints (4,1,5) and (4,1,3); Undo; (4,1,5) again ends it there
+                ItemStack lv = bag(CableKitItem.kit(LV, 600));
+                pl.setItemInHand(InteractionHand.MAIN_HAND, lv);
+                floorClick(c, pl, lv, c.at(1, 1, 5));
+                var preset = mods.eln.node.voxel.CableSpec.preset(LV);
+                radial(pl, ToolbagItem.CHOOSE, new int[]{0, LV, preset.mm2(), preset.colour()});
+                floorClick(c, pl, lv, c.at(4, 1, 5));
+                floorClick(c, pl, lv, c.at(4, 1, 3));
+                int before = CablePlacer.waypoints(pl.getUUID());
+                radial(pl, ToolbagItem.UNDO, null);
+                int after = CablePlacer.waypoints(pl.getUUID());
+                floorClick(c, pl, lv, c.at(4, 1, 5));
+                undo = String.format("waypoints %d -> %d after Undo; laid at (3,1,5) [%s], at (4,1,4) [%s], route left %b", before, after,
+                    tiers(c, c.at(3, 1, 5)), tiers(c, c.at(4, 1, 4)), CablePlacer.active(pl.getUUID()));
+                undoOk = before == 2 && after == 1 && tiers(c, c.at(3, 1, 5)).equals(String.valueOf(LV)) && tiers(c, c.at(4, 1, 4)).equals("none")
+                    && !CablePlacer.active(pl.getUUID());
+            } catch (Exception ex) {
+                err = String.valueOf(ex);
+            } finally {
+                clean(pl);
+                pl.snapTo(px, py, pz, 0, 0);
+            }
+        }
+
+        public void measure(TestContext c) {
+            c.check("toolbag: no error", err.isEmpty(), err);
+            c.check("toolbag and kit: a click past reach or in mid-air starts nothing", reachOk, reach);
+            c.check("toolbag: on a pipe route a sneak-click opens the radial, lays nothing", sneakOk, sneak);
+            c.check("toolbag: Undo takes back the last waypoint", undoOk, undo);
         }
     }
 }

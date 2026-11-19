@@ -40,7 +40,9 @@ public class ToolbagItem extends Item implements PipeTool {
     public static final int KITS = 15, SHEARS_SLOT = 15, SLOTS = 16;
 
     public ToolbagItem(Properties p) {
-        super(p.stacksTo(1));
+        // (its kits are listed by kind in its tooltip: not again one by one, as the container's own tooltip would)
+        super(p.stacksTo(1).component(DataComponents.TOOLTIP_DISPLAY,
+            net.minecraft.world.item.component.TooltipDisplay.DEFAULT.withHidden(DataComponents.CONTAINER, true)));
     }
 
     // ---- what it holds
@@ -72,7 +74,7 @@ public class ToolbagItem extends Item implements PipeTool {
             return null;
         }
 
-        static Kind cable(int tier, CableSpec spec) {
+        public static Kind cable(int tier, CableSpec spec) {
             if (CableSpec.power(tier) && spec == null) spec = CableSpec.preset(tier);   // (a cable laid without one: the preset)
             return spec == null ? new Kind(false, tier, -1, -1) : new Kind(false, tier, spec.mm2(), spec.colour());
         }
@@ -142,7 +144,7 @@ public class ToolbagItem extends Item implements PipeTool {
         return Kind.of(data.copyTag().getIntArray(SEL_KEY).orElse(null));
     }
 
-    static void select(ItemStack bag, Kind k) {
+    public static void select(ItemStack bag, Kind k) {
         CustomData.update(DataComponents.CUSTOM_DATA, bag, t -> t.putIntArray(SEL_KEY, k.ints()));
     }
 
@@ -201,6 +203,11 @@ public class ToolbagItem extends Item implements PipeTool {
     /** A pending click is kept this long (ticks). */
     static final long PENDING_TICKS = 20 * 30;
 
+    /** Is a click waiting for the radial's choice (GameTests)? */
+    public static boolean pendingForTests(UUID p) {
+        return PENDING.containsKey(p);
+    }
+
     public static void forget(UUID p) {
         PENDING.remove(p);
         STARTED.remove(p);
@@ -232,9 +239,13 @@ public class ToolbagItem extends Item implements PipeTool {
     /** A right-click on a block with the bag (sneak: the radial). */
     public static void click(ServerPlayer p, ServerLevel level, ItemStack bag, BlockPos pos, net.minecraft.core.Direction face, Vec3 hit, boolean sneak) {
         Click c = new Click(level.dimension(), pos, face, hit, level.getGameTime());
-        boolean routing = routing(p);
-        if (sneak) {
-            openRadial(p, bag, routing ? null : c);
+        boolean routing = routing(p), reach = CablePlacer.reachable(p, pos, hit);
+        if (sneak) {   // (always the radial, a route on or not: AdventurAgent saw a sneak-click on a pipe try to lay)
+            openRadial(p, bag, routing || !reach ? null : c);
+            return;
+        }
+        if (!reach) {
+            KitPreview.note(p, "Out of reach");
             return;
         }
         if (!routing) {

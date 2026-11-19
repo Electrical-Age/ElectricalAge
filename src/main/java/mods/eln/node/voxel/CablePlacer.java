@@ -513,8 +513,12 @@ public final class CablePlacer {
             plan = null;
         }
         if (plan != null) plan.touched = now;
-        if (plan == null && !sneak && hit != null && repair(player, level, pos, hit, kit, tier, spec)) return true;
         if (sneak) return undo(player);
+        if (!reachable(player, pos, hit)) {
+            KitPreview.note(player, "Out of reach");
+            return true;
+        }
+        if (plan == null && repair(player, level, pos, hit, kit, tier, spec)) return true;
         long[][] join = new long[1][];
         CableRouter.End at = endAt(level, pos, face, hit, plan == null, join, tier);
         if (at == null) {
@@ -577,6 +581,17 @@ public final class CablePlacer {
         return true;
     }
 
+    /**
+     * Is the click a real one within reach: its point on or in the clicked block, and no further from the player's eyes
+     * than they can reach (AdventurAgent: a click past reach, its point in mid-air, made a waypoint in the air and left a
+     * riser stub)?
+     */
+    public static boolean reachable(net.minecraft.world.entity.player.Player p, BlockPos pos, Vec3 hit) {
+        if (hit == null) return false;
+        var box = new net.minecraft.world.phys.AABB(pos).inflate(0.01);
+        return box.contains(hit) && p.getEyePosition().distanceTo(hit) <= p.blockInteractionRange() + 1.0;
+    }
+
     /** Take back the route's last waypoint, or cancel it if it has none; false if there is no route. */
     public static boolean undo(ServerPlayer player) {
         Plan plan = PLANS.get(player.getUUID());
@@ -589,6 +604,12 @@ public final class CablePlacer {
             player.sendOverlayMessage(Component.literal("Waypoint taken back (" + plan.waypoints.size() + " left)"));
         }
         return true;
+    }
+
+    /** The waypoints of the player's route (-1 if none). */
+    public static int waypoints(UUID player) {
+        Plan p = PLANS.get(player);
+        return p == null ? -1 : p.waypoints.size();
     }
 
     /** Is a route being laid by this player? */

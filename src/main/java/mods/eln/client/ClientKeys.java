@@ -76,6 +76,17 @@ final class ClientKeys {
      */
     static void beforeClick(net.neoforged.neoforge.client.event.InputEvent.InteractionKeyMappingTriggered e) {
         var mc = Minecraft.getInstance();
+        if (mc.getConnection() != null && mc.player != null && mc.player.getMainHandItem().getItem() instanceof mods.eln.node.voxel.ToolbagItem) {
+            // (the Toolbag's sneak-click opens its radial: shift pressed in the same tick as the click would reach the
+            // server after it, as the wrench key did, and the click lay instead; AdventurAgent on a pipe route)
+            boolean shift = mc.options.keyShift.isDown();
+            var last = mc.player.getLastSentInput();
+            if (last.shift() != shift) {
+                var k = mc.player.input.keyPresses;
+                mc.getConnection().send(new net.minecraft.network.protocol.game.ServerboundPlayerInputPacket(
+                    new net.minecraft.world.entity.player.Input(k.forward(), k.backward(), k.left(), k.right(), k.jump(), shift, k.sprint())));
+            }
+        }
         if (mc.getConnection() == null || mc.player == null || mc.player.getMainHandItem().getItem() instanceof mods.eln.node.voxel.ChiselItem) return;
         syncWrench(WRENCH.isDown());
     }

@@ -340,6 +340,10 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   start once the kind is chosen. With a route on the radial adds Undo and Cancel (the bag's sneak-click is the radial),
   and a new kind restarts the route from its start click (`STARTED`), a cable's waypoints kept for a cable.
 - Client `ToolbagHud`: the chosen kind and a terse usage line above the route note while the bag is in hand.
+- A kit or bag click must be within reach, its point on or in the clicked block (`CablePlacer.reachable`; else "Out
+  of reach"): AdventurAgent's click past reach, its point in mid-air, made a waypoint in the air. With the bag in hand
+  the client sends its sneak state before a click (`ClientKeys.beforeClick`), so a sneak-click opens the radial even
+  when shift goes down in the same tick. Its tooltip lists the kits by kind only (the container's own list hidden).
 - `ToolbagCases`: slots; a cable click lays its kind across two kits; a kind it lacks; the radial starts at the click
   and a new kind keeps the start; a pipe click; Cancel.
 

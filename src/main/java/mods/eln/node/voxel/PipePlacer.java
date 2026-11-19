@@ -316,6 +316,10 @@ public final class PipePlacer {
         boolean device = false;
         if (port == null) device = (port = devicePort(level, pos, hit)) != null;
         if (sneak) return undo(player, level);
+        if (!CablePlacer.reachable(player, pos, hit)) {
+            KitPreview.note(player, "Out of reach");
+            return true;
+        }
         if (device && portTaken(level, pos, hit)) {
             player.sendOverlayMessage(Component.literal(PORT_TAKEN));
             return true;

@@ -964,10 +964,17 @@ public final class PipeCases {
         }
     }
 
-    /** A click with a pipe kit, as a player (the cable kit's UX for pipes, routing phase 1). */
+    /** A click with a pipe kit, as a player (the cable kit's UX for pipes, routing phase 1), standing over the point
+     *  clicked (a click must be within reach: CablePlacer.reachable); the FakePlayer is put back after. */
     static boolean kitClick(TestContext ctx, net.minecraft.server.level.ServerPlayer p, ItemStack kit, int tier, BlockPos pos,
                             net.minecraft.core.Direction face, net.minecraft.world.phys.Vec3 hit) {
-        return mods.eln.node.voxel.PipePlacer.use(p, ctx.level(), pos, face, kit, tier, hit);
+        double x = p.getX(), y = p.getY(), z = p.getZ();
+        p.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);
+        try {
+            return mods.eln.node.voxel.PipePlacer.use(p, ctx.level(), pos, face, kit, tier, hit);
+        } finally {
+            p.snapTo(x, y, z, 0, 0);
+        }
     }
 
     /** The pipe kit as the cable kit (Baughn 2026-11-11): a route starts on a plain floor, a waypoint further along, the
