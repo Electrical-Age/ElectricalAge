@@ -194,9 +194,16 @@ public class ElectricalPoleElement extends GridElement {
             Utils.sendMessage(player, "This pole already has " + what);
             return true;
         }
-        inventory.setItem(slot, s.copyWithCount(1));
+        ItemStack fitted = s.copyWithCount(1);
+        inventory.setItem(slot, fitted);
         if (!player.isCreative()) s.shrink(1);
         inventory.setChanged();   // (setItem alone doesn't tell the element)
+        if (slot == TRANSFORMER) {
+            // say what its foot gives: a lower tier's cable there burns at once (AdventurAgent, nero's grid)
+            int tier = PoleTransformerItem.tier(fitted);
+            Utils.sendMessage(player, "Fitted a " + (int) PoleTransformerItem.volts(fitted) + " V pole transformer: its foot takes "
+                + mods.eln.node.voxel.CablePart.TIERS[tier].name() + " or higher (lower ones burn)");
+        } else Utils.sendMessage(player, "Fitted " + what);
         return true;
     }
 
