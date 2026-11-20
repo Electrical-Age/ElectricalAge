@@ -26,6 +26,7 @@ public final class PoleCableCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new FootKit());
+        cases.add(new Pickup());
     }
 
     static final class FootKit implements TestCase {
@@ -80,6 +81,38 @@ public final class PoleCableCases {
             c.check("pole foot: the kit laid cable up to the pole", n instanceof mods.eln.node.voxel.VoxelNode, String.valueOf(n));
             int after = pole.secondaryLoad.getConnectedComponents().size();
             c.check("pole foot: the cable joins the transformer's low side", after > before, before + " -> " + after);
+        }
+    }
+
+    /** Picked-up overhead cable tops up the player's piece of the same cross-section (nero 1573459054402084968). */
+    static final class Pickup implements TestCase {
+        String said;
+
+        public String id() {
+            return "overhead_cable_merges_on_pickup";
+        }
+
+        public void build(TestContext c) {
+            var player = Wp9cCases.player(c);
+            var inv = player.getInventory();
+            inv.clearContent();
+            ItemStack mine = mods.eln.gridnode.OverheadCableItem.make(4, 480), other = mods.eln.gridnode.OverheadCableItem.make(3, 10);
+            inv.setItem(0, mine);
+            inv.setItem(1, other);
+            var drop = new net.minecraft.world.entity.item.ItemEntity(c.level(), player.getX(), player.getY(), player.getZ(),
+                mods.eln.gridnode.OverheadCableItem.make(4, 30));
+            drop.setNoPickUpDelay();
+            c.level().addFreshEntity(drop);
+            mods.eln.gridnode.OverheadCableItem.onPickup(new net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre(player, drop));
+            said = mods.eln.gridnode.OverheadCableItem.blocks(mine) + "," + mods.eln.gridnode.OverheadCableItem.blocks(other) + ","
+                + mods.eln.gridnode.OverheadCableItem.blocks(drop.getItem()) + "," + drop.isRemoved();
+            drop.discard();
+            inv.clearContent();
+        }
+
+        public void measure(TestContext c) {
+            c.check("overhead cable: a picked-up piece tops up the same cross-section to 500, the rest stays on the ground",
+                said.equals("500,10,10,false"), said);
         }
     }
 }

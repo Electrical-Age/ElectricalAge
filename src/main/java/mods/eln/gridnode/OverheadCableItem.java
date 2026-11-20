@@ -112,4 +112,35 @@ public class OverheadCableItem extends Item {
         take(other, n);
         return true;
     }
+
+    /**
+     * Picking up a piece tops up the player's pieces of the same cross-section first, up to MAX_BLOCKS each (nero
+     * 1573459054402084968: they stayed apart, to be clicked together by hand), as kits do. What's left is picked up as
+     * usual.
+     */
+    public static void onPickup(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre e) {
+        var ent = e.getItemEntity();
+        ItemStack s = ent.getItem();
+        if (!is(s) || e.getPlayer().level().isClientSide() || ent.hasPickUpDelay()) return;
+        int len = blocks(s), mm2 = mm2(s);
+        var inv = e.getPlayer().getInventory();
+        for (int i = 0; i < inv.getContainerSize() && len > 0; i++) {
+            ItemStack o = inv.getItem(i);
+            if (o == s || !is(o) || mm2(o) != mm2) continue;
+            int room = MAX_BLOCKS - blocks(o);
+            if (room <= 0) continue;
+            int n = Math.min(room, len), now = blocks(o) + n;
+            net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, o, t -> t.putInt(BLOCKS, now));
+            len -= n;
+        }
+        if (len == blocks(s)) return;
+        if (len <= 0) {
+            e.getPlayer().take(ent, 1);
+            ent.discard();
+            e.setCanPickup(net.minecraft.util.TriState.FALSE);
+        } else {
+            int left = len;
+            net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, s, t -> t.putInt(BLOCKS, left));
+        }
+    }
 }
