@@ -644,8 +644,10 @@ public final class VoxelDeviceCases {
                 BlockPos air = c.at(12, 1, 1);
                 boolean placed = ((mods.eln.node.six.SixNodeItem) wd.parentItem).placeAt(wd.newItemStack(), player(c), c.level(), air, Direction.YN,
                     new double[]{0.3, 0, 0.5});
-                openFloor = "placed " + placed + ", block " + c.level().getBlockState(air).getBlock().getName().getString();
-                openFloorOk = !placed && c.level().getBlockState(air).isAir();
+                var left = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(air, c.level()));
+                openFloor = "placed " + placed + ", block " + c.level().getBlockState(air).getBlock().getName().getString()
+                    + ", node " + (left == null ? "none" : left.getClass().getSimpleName());
+                openFloorOk = !placed && c.level().getBlockState(air).isAir() && left == null;
             } finally {
                 mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
             }
@@ -684,7 +686,7 @@ public final class VoxelDeviceCases {
                 fmt("%s, mask %d, %.3f A", hubBare, hub.slotMask.mask, Wp9aCases.current(rHub)));
             c.check("sockets and anemometer: not on a floor", floorSocket.startsWith("It can't go on that side") && floorWind.startsWith("It can't go on that side"),
                 floorSocket + " / " + floorWind);
-            c.check("anemometer: clicked on an open floor, refused without leaving an empty block", openFloorOk, openFloor);
+            c.check("anemometer: clicked on an open floor, refused without leaving an empty block or a node", openFloorOk, openFloor);
             c.check("socket: off centre on a wall, its pin down on a cable", socket != null && linked(socket, Direction.YN), socket == null ? "-" : "mask " + socket.slotMask.mask);
             c.check("anemometer: off centre on a wall, its pin on a cable", wind != null && wind.slotMask.mask != 0, wind == null ? floorWind : "mask " + wind.slotMask.mask);
         }

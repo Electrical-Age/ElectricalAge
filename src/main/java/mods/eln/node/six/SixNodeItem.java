@@ -112,6 +112,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
                     String err = v.placeAnywhere(stack, direction, at[0], at[1], at[2], player);
                     if (err != null) {
                         if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(err));
+                        v.onBreakBlock();   // (it joined NodeManager above: refused, no block, it must go too)
                         return false;
                     }
                 } else v.createSubBlock(stack, direction, player);
