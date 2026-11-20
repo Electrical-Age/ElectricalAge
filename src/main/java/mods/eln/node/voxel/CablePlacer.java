@@ -213,6 +213,10 @@ public final class CablePlacer {
 
     static String noEnd(Level level, BlockPos pos) {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
+        // a utility pole's foot is a socket only with a pole transformer fitted (its low side)
+        if (n instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof mods.eln.gridnode.electricalpole.ElectricalPoleElement pole
+            && !pole.hasTransformer())
+            return "This pole has no transformer: fit a Pole Transformer (right-click the pole with it), then its foot takes a cable";
         return n != null && !(n instanceof VoxelNode) ? "No connector there: try another face or edge of the machine" : "Not a place for a cable";
     }
 

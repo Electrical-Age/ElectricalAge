@@ -34,6 +34,8 @@ public abstract class GridRender extends TransparentNodeElementRender {
     private final mods.eln.anim.Spin[] haloPhase = {new mods.eln.anim.Spin(90, 0.01).speed(1).randomPhase(),
         new mods.eln.anim.Spin(90 / 1.6180339887, 0.01).speed(1).randomPhase(), new mods.eln.anim.Spin(90 / 2.4142135624, 0.01).speed(1).randomPhase()};
     private float idealRenderingAngle;
+    /** Where this pole draws: its block and 3 round it, and its spans out to their far ends (sagging), or null. */
+    private net.minecraft.world.phys.AABB spanBounds;
 
     public GridRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
@@ -128,6 +130,8 @@ public abstract class GridRender extends TransparentNodeElementRender {
             haloCatenaries.clear();
             idealRenderingAngle = stream.readFloat();
             int linkCount = stream.readInt();
+            var at = tileEntity.getBlockPos();
+            var bounds = new net.minecraft.world.phys.AABB(at).inflate(3);
             for (int i = 0; i < linkCount; i++) {
                 // Links always come in pairs.
                 Vec3 splus = readVec(stream);
@@ -142,14 +146,27 @@ public abstract class GridRender extends TransparentNodeElementRender {
                 dgnd = sgnd.vectorTo(tplus).normalize();
                 double crossV = dplus.dot(dgnd);
                 Vec3[][] pairs = crossV < straightV ? new Vec3[][]{{splus, tplus}, {sgnd, tgnd}} : new Vec3[][]{{splus, tgnd}, {sgnd, tplus}};
+                for (Vec3 v : new Vec3[]{splus, tplus, sgnd, tgnd})
+                    bounds = bounds.minmax(new net.minecraft.world.phys.AABB(at.getX() + 0.5 + v.x, at.getY() + 0.5 + v.y, at.getZ() + 0.5 + v.z,
+                        at.getX() + 0.5 + v.x, at.getY() + 0.5 + v.y, at.getZ() + 0.5 + v.z).inflate(1, 3, 1));   // (the sag below)
                 for (Vec3[] pr : pairs) {
                     catenaries.add(new Catenary(pr[0], pr[1], CABLE_WIDTH));
                     if (halo) for (int k = 0; k < HALO_LAYERS; k++) haloCatenaries.add(new Catenary(pr[0], pr[1], haloWidth(k)));
                 }
             }
+            spanBounds = bounds;
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * The spans reach up to 24 blocks from the pole: culled by the pole's own box, a span vanished as soon as its pole
+     * left the view, at the screen's edge (nero 1573457386071527568).
+     */
+    @Override
+    public net.minecraft.world.phys.AABB renderBounds() {
+        return spanBounds;
     }
 
     @Override
