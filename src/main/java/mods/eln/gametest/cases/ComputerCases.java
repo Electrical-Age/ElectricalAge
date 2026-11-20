@@ -204,12 +204,16 @@ public final class ComputerCases {
                 for (mods.eln.bus.Packet k; (k = button.poll()) != null; )
                     if (k.type() == mods.eln.bus.PacketType.POWER) lamp.add(k.value());
                 terminal = terminal(e);
+                if ((e.spinning() & 1) != 0) spun = true;   // (drive sounds: the client's whir follows this)
             });
         }
+
+        boolean spun;
 
         public void measure(TestContext ctx) {
             unwatch();
             mods.eln.bus.BusNet.detach(java.util.List.of(button));
+            ctx.check("elevator disk: drive A spun while the computer read its disk", spun, "");
             ctx.line("elevator: terminal " + terminal.replace("\n", "|") + " lamp " + lamp + " car " + s.carFloor(ctx));
             ctx.check("elevator disk: it ran at boot", terminal.contains("Running A:/main.janet") && terminal.contains("Elevator: drive 40, 3 floors"), terminal);
             ctx.check("elevator disk: the car stood at the bottom before the press", Math.abs(floorAtPress) < 1e-6, "" + floorAtPress);

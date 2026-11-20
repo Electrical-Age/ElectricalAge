@@ -24,6 +24,12 @@ public final class FloppyController implements Device {
     private int done;             // sectors moved of it
     private boolean finished;
     private int movedThisTick;
+    /** Each drive's head (cylinder: 18 sectors a side, two sides), for the drive sounds. */
+    private final int[] head = new int[2];
+    /** Sounds since the host last asked (takeSteps, takeAccess), read on the server thread. */
+    private final java.util.concurrent.atomic.AtomicIntegerArray steps = new java.util.concurrent.atomic.AtomicIntegerArray(2),
+            accessed = new java.util.concurrent.atomic.AtomicIntegerArray(2);
+    public static final int SECTORS_PER_CYLINDER = 36;
 
     FloppyController(Memory mem) {
         this.mem = mem;
@@ -104,9 +110,15 @@ public final class FloppyController implements Device {
         }
         int n = Math.min(max, count - done);
         movedThisTick += n;
+        if (n > 0) accessed.set(drive, 1);
         try {
             for (int s = 0; s < n; s++) {
-                int sector = lba + done, base = addr + done * Floppy.SECTOR, off = sector * Floppy.SECTOR;
+                int sector = lba + done, cyl = sector / SECTORS_PER_CYLINDER;
+                if (cyl != head[drive]) {
+                    steps.addAndGet(drive, Math.abs(cyl - head[drive]));
+                    head[drive] = cyl;
+                }
+                int base = addr + done * Floppy.SECTOR, off = sector * Floppy.SECTOR;
                 if (cmd == 1) for (int i = 0; i < Floppy.SECTOR; i++) mem.store8(base + i, f.data[off + i]);
                 else {
                     for (int i = 0; i < Floppy.SECTOR; i++) f.data[off + i] = (byte) mem.load8(base + i);
@@ -135,6 +147,16 @@ public final class FloppyController implements Device {
         if (cmd != 0 && drive == d) fail(ERR_NO_DISK);
         drives[d] = f;
         changed |= 1 << d;
+    }
+
+    /** Host (server thread): track steps the drive's head made since the last call. */
+    public int takeSteps(int d) {
+        return steps.getAndSet(d, 0);
+    }
+
+    /** Host (server thread): did the drive read or write since the last call? */
+    public boolean takeAccess(int d) {
+        return accessed.getAndSet(d, 0) != 0;
     }
 
     public Floppy disk(int d) {

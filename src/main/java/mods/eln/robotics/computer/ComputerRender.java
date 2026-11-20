@@ -31,6 +31,27 @@ public class ComputerRender extends TransparentNodeElementRender {
     public ComputerRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
         desc = (ComputerDescriptor) d;
+        addLoopedSound(new mods.eln.sound.LoopedSound("eln:floppy_spin", coordonate()) {
+            @Override
+            public float getVolume() {
+                return SPIN_VOLUME * Math.max(0, Math.min(1, spin.get()));
+            }
+
+            @Override
+            public float getPitch() {   // spins up and down
+                return 0.6f + 0.4f * Math.max(0, Math.min(1, spin.get()));
+            }
+        });
+    }
+
+    /** A drive's motor (ComputerElement.spinning), smoothed: the whir rises and falls in about a third of a second. */
+    final mods.eln.misc.RcInterpolator spin = new mods.eln.misc.RcInterpolator(0.3f);
+    static final float SPIN_VOLUME = 0.18f;
+
+    @Override
+    public void refresh(float deltaT) {
+        super.refresh(deltaT);
+        spin.step(deltaT);
     }
 
     ScreenTexture picture;
@@ -99,6 +120,7 @@ public class ComputerRender extends TransparentNodeElementRender {
             address = stream.readByte() & 0xFF;
             onBus = stream.readBoolean();
             switchedOn = stream.readBoolean();
+            spin.setTarget(stream.readByte() != 0 ? 1 : 0);
         } catch (IOException e) {
             e.printStackTrace();
         }

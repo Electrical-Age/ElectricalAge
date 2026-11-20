@@ -114,4 +114,22 @@ class DevicesTest {
         cmd(m.floppy, 0, 2879, Memory.SLOT_BYTES, 2, 1);    // off the end of the disk
         assertEquals(FloppyController.ERR_RANGE, m.floppy.read(FloppyController.ERROR));
     }
+
+    @Test
+    void floppyCountsHeadStepsForTheDriveSounds() {
+        Machine m = withRam();
+        m.floppy.insert(1, new Floppy(java.util.UUID.randomUUID(), null, false));
+        assertFalse(m.floppy.takeAccess(1));
+        cmd(m.floppy, 1, 0, Memory.SLOT_BYTES, 36, 1);   // cylinder 0: no step
+        assertTrue(m.floppy.takeAccess(1));
+        assertEquals(0, m.floppy.takeSteps(1));
+        m.tick();   // (a new tick's share of sectors)
+        cmd(m.floppy, 1, 10 * 36, Memory.SLOT_BYTES, 37, 1);   // a seek to 10, then a step onto 11
+        assertEquals(11, m.floppy.takeSteps(1));
+        assertEquals(0, m.floppy.takeSteps(1), "taken");
+        cmd(m.floppy, 1, 0, Memory.SLOT_BYTES, 1, 1);
+        assertEquals(11, m.floppy.takeSteps(1), "back to 0");
+        assertEquals(0, m.floppy.takeSteps(0), "the other drive never moved");
+        assertFalse(m.floppy.takeAccess(0));
+    }
 }

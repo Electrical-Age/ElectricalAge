@@ -79,6 +79,11 @@ public class ComputerElement extends TransparentNodeElement {
     /** Its power switch (Baughn: power on/off beside Reset). Off: it stops and its RAM is lost; on: a cold boot. */
     boolean switchedOn = true;
     final UUID[] mountedDisk = new UUID[2];
+    /** Drive sounds (todo #541): ticks each drive's motor keeps spinning, and the drives spinning as last synced. */
+    final int[] spinTicks = new int[2];
+    byte spinning;
+    /** How long a drive spins on after its last read or write (and after a disk goes in). */
+    static final int SPIN_ON_TICKS = 50, SPIN_INSERT_TICKS = 20;
     final Floppy[] floppies = new Floppy[2];
     final double[] levels = new double[BusChannel.COUNT];
 
@@ -203,8 +208,14 @@ public class ComputerElement extends TransparentNodeElement {
     @Override
     public void inventoryChange(Container inv) {
         super.inventoryChange(inv);
+        UUID[] before = mountedDisk.clone();
         if (!chipsNow().equals(builtFrom)) rebuild();
         else syncDisks();
+        for (int d = 0; d < 2; d++)
+            if (!java.util.Objects.equals(before[d], mountedDisk[d])) {
+                driveSound(mountedDisk[d] != null ? "eln:floppy_insert" : "eln:floppy_eject", 0.6f, 1f);
+                if (mountedDisk[d] != null) spinTicks[d] = Math.max(spinTicks[d], SPIN_INSERT_TICKS);
+            }
         needPublish();
     }
 
@@ -231,10 +242,35 @@ public class ComputerElement extends TransparentNodeElement {
             for (Packet p : runner.takePackets()) port.send(p);
             if (powered) machine.takeJoules(machine.ratedJoulesPerTick() * Math.min(1.0, runner.lastRan() / (double) runner.budget));
         }
+        driveSounds(runner.machine.floppy);
         watch();
         eventsThisTick.clear();
         Machine m = runner.machine;   // (halted is volatile)
         setStatus(!powered ? OFF : m.halted() ? HALTED : runner.running() || runner.lastRan() > 0 ? RUNNING : SLEEPING);
+    }
+
+    /** The drives' head steps as ticks (a seek's burst if several this tick), and their motors' spin for the client's whir. */
+    void driveSounds(mods.eln.robotics.computer.hw.FloppyController fc) {
+        byte spin = 0;
+        for (int d = 0; d < 2; d++) {
+            if (fc.takeAccess(d)) spinTicks[d] = Math.max(spinTicks[d], SPIN_ON_TICKS);
+            int n = fc.takeSteps(d);
+            if (n == 1) driveSound("eln:floppy_step", 0.25f, 0.95f + 0.1f * (float) Math.random());
+            else if (n > 1) driveSound("eln:floppy_seek", 0.25f, 0.95f + 0.1f * (float) Math.random());
+            if (spinTicks[d] > 0) {
+                spinTicks[d]--;
+                spin |= (byte) (1 << d);
+            }
+        }
+        if (spin != spinning) {
+            spinning = spin;
+            needPublish();
+        }
+    }
+
+    void driveSound(String event, float volume, float pitch) {
+        if (node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl)
+            sl.playSound(null, node.coordonate.pos(), mods.eln.sound.ElnSounds.event(event), net.minecraft.sounds.SoundSource.BLOCKS, volume, pitch);
     }
 
     void setStatus(byte s) {
@@ -494,6 +530,7 @@ public class ComputerElement extends TransparentNodeElement {
             stream.writeByte(port.address());
             stream.writeBoolean(port.bus() != null);
             stream.writeBoolean(switchedOn);
+            stream.writeByte(spinning);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -554,6 +591,11 @@ public class ComputerElement extends TransparentNodeElement {
     void unlist() {
         var l = node.coordonate.world();
         if (l != null) ScreenEventPayload.remove(l, node.coordonate.pos(), this);
+    }
+
+    /** The drives whose motors spin (bit 0 A, bit 1 B), as the client has it for the whir. */
+    public byte spinning() {
+        return spinning;
     }
 
     public byte status() {

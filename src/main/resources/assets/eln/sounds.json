@@ -376,5 +376,50 @@
                 "stream": false
             }
         ]
+    },
+    "floppy_spin": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:floppy_spin",
+                "stream": false
+            }
+        ]
+    },
+    "floppy_step": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:floppy_step",
+                "stream": false
+            }
+        ]
+    },
+    "floppy_seek": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:floppy_seek",
+                "stream": false
+            }
+        ]
+    },
+    "floppy_insert": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:floppy_insert",
+                "stream": false
+            }
+        ]
+    },
+    "floppy_eject": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "eln:floppy_eject",
+                "stream": false
+            }
+        ]
     }
 }
