@@ -80,24 +80,41 @@ def seek():
     return x
 
 
-def insert():
-    n = int(SR * 0.45)
+def rustle(n, t0, t1, level):
+    """The disk's jacket sliding in the slot: low-heavy friction noise with a grainy, uneven amplitude."""
     t = np.arange(n) / SR
-    slide_env = np.clip((t - 0.0) / 0.03, 0, 1) * np.exp(-np.maximum(t - 0.05, 0) / 0.03) * (t < 0.16)
-    slide = band_noise(n, 900, 5000, periodic=False) * slide_env * 0.25
-    latch = click(n, 0.15, 1.6, bright=1.2) + 0.6 * resonator(n, 230, 0.02, 0.15)   # disk seats, shutter opens
-    head = click(n, 0.30, 0.8, bright=0.7) + 0.4 * resonator(n, 180, 0.015, 0.30)  # head load pads close
-    return slide + latch + head
+    env = np.clip((t - t0) / 0.02, 0, 1) * np.clip((t1 - t) / 0.04, 0, 1)
+    grain = np.abs(band_noise(n, 15, 60)) ** 1.5          # slow random swells (the hand's push)
+    grain /= grain.max()
+    return band_noise(n, 120, 3000, tilt=-0.4, periodic=False) * env * (0.4 + grain) * level
+
+
+def clack(n, t0, strength, centroid=2500, ring=0.2):
+    """A latch snapping home in a plastic housing (nero's reference, 2026-11-20: centroid ~2.5 kHz, ~0.2 s to
+    -20 dB): a bright snap plus the case's body modes ringing on."""
+    x = click(n, t0, 1.0, bright=1.2)
+    for fr, a, dec in ((centroid * 0.9, 0.5, ring / 2.5), (centroid * 1.6, 0.3, ring / 3), (centroid * 0.45, 0.4, ring / 2.5),
+                       (650, 0.15, ring / 4), (330, 0.18, ring / 3), (170, 0.2, ring / 3)):
+        x += a * resonator(n, fr * rng.uniform(0.97, 1.03), dec, t0)
+    t = np.arange(n) / SR - t0
+    x += 0.3 * band_noise(n, 1500, 7000, periodic=False) * np.where(t >= 0, np.exp(-np.maximum(t, 0) / (ring / 4)), 0)
+    return strength * x
+
+
+def insert():
+    # (in the reference the hand takes 2 s; in the game the disk just goes in, so the slide is short)
+    n = int(SR * 0.75)
+    return (rustle(n, 0.0, 0.36, 0.08) + click(n, 0.03, 0.25, bright=0.6)
+            + clack(n, 0.36, 1.0, centroid=2700, ring=0.21) + 0.25 * clack(n, 0.46, 1.0, centroid=1300, ring=0.1))
 
 
 def eject():
-    n = int(SR * 0.40)
-    t = np.arange(n) / SR
-    button = click(n, 0.005, 0.9, bright=0.8)
-    thunk = click(n, 0.06, 1.5, bright=1.0) + 0.9 * resonator(n, 160, 0.03, 0.06)   # spring throws the disk out
-    slide_env = np.clip((t - 0.065) / 0.01, 0, 1) * np.exp(-np.maximum(t - 0.07, 0) / 0.05) * (t > 0.065)
-    slide = band_noise(n, 900, 5000, periodic=False) * slide_env * 0.25
-    return button + thunk + slide
+    # reference: a dull press of the button (centroid ~430 Hz), 60 ms later the spring's bright clack
+    # (~2.3 kHz, 0.25 s), then the disk rustling out
+    n = int(SR * 0.75)
+    press = click(n, 0.005, 0.35, bright=0.2) + 0.5 * resonator(n, 200, 0.03, 0.005)
+    return (press + clack(n, 0.065, 1.0, centroid=2300, ring=0.25)
+            + rustle(n, 0.09, 0.5, 0.07) + click(n, 0.42, 0.2, bright=0.5))
 
 
 def main():
