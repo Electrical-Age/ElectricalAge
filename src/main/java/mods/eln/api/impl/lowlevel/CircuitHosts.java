@@ -51,13 +51,7 @@ public final class CircuitHosts {
     /** Before each step: retire the gone, place the queued, follow turned blocks. */
     public void tick() {
         if (NodeManager.instance == null) return;
-        for (Iterator<CircuitNode> i = nodes.values().iterator(); i.hasNext(); ) {
-            CircuitNode n = i.next();
-            if (gone(n)) {
-                i.remove();
-                n.retire();
-            }
-        }
+        retireGone();
         for (CircuitNode n : new ArrayList<>(queued.values())) {
             queued.remove(n.be);
             if (gone(n)) {
@@ -80,6 +74,17 @@ public final class CircuitHosts {
             }
         }
         for (CircuitNode n : new ArrayList<>(nodes.values())) n.followFacing();
+    }
+
+    /** Retires the placed circuits whose block entity went (each step does it first; the GameTest clean-up at once). */
+    public void retireGone() {
+        for (Iterator<CircuitNode> i = nodes.values().iterator(); i.hasNext(); ) {
+            CircuitNode n = i.next();
+            if (gone(n)) {
+                i.remove();
+                n.retire();
+            }
+        }
     }
 
     private static boolean gone(CircuitNode n) {

@@ -159,6 +159,7 @@ public final class ElnGameTests {
             if (n.coordonate.dimention == mods.eln.misc.Dimensions.id(helper.getLevel())
                 && bounds.contains(n.coordonate.x + .5, n.coordonate.y + .5, n.coordonate.z + .5)) {
                 ctx.check(c.id() + ": no leaked node from a previous test", false, n.getClass().getSimpleName() + " at " + n.coordonate);
+                cleanUp(helper, ctx);
                 ctx.finish();
                 return;
             }
@@ -170,6 +171,7 @@ public final class ElnGameTests {
             c.build(ctx);
         } catch (RuntimeException e) {
             ctx.check(c.id() + " build", false, e.toString());
+            cleanUp(helper, ctx);
             ctx.finish();
             return;
         }
@@ -185,8 +187,38 @@ public final class ElnGameTests {
             links(helper, ctx);
             linksNeutral(helper, ctx);
             persistence(helper, ctx);
+            cleanUp(helper, ctx);
             ctx.finish();
         });
+    }
+
+    /**
+     * Clears the test's structure and padding when it is done: every block (but the test instance block) to air, its
+     * entities discarded. The test server keeps every earlier batch's structures, and EA simulates nodes in unloaded
+     * chunks, so without this every device a test built kept running to the end of the suite (by the oil batches the
+     * server ticked at ~18 tps; the suite took 70 min). Removing the blocks removes their nodes as a player's breaking
+     * them would; any node still in the bounds after that is a leak and fails the test.
+     */
+    static void cleanUp(GameTestHelper helper, GameTestContext ctx) {
+        var level = helper.getLevel();
+        net.minecraft.world.phys.AABB b = helper.getBoundsWithPadding();
+        net.minecraft.core.BlockPos lo = net.minecraft.core.BlockPos.containing(b.minX, b.minY, b.minZ);
+        net.minecraft.core.BlockPos hi = net.minecraft.core.BlockPos.containing(b.maxX - 1e-6, b.maxY - 1e-6, b.maxZ - 1e-6);
+        for (net.minecraft.core.BlockPos p : net.minecraft.core.BlockPos.betweenClosed(lo, hi)) {
+            var st = level.getBlockState(p);
+            if (st.isAir() || st.is(net.minecraft.world.level.block.Blocks.TEST_INSTANCE_BLOCK)) continue;
+            level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+        }
+        for (var e : level.getEntitiesOfClass(net.minecraft.world.entity.Entity.class, b, e -> !(e instanceof net.minecraft.world.entity.player.Player)))
+            e.discard();
+        mods.eln.api.impl.HostedMachines.INSTANCE.retireGone();   // (the API's nodes go before the next step, by design: now)
+        int dim = mods.eln.misc.Dimensions.id(level);
+        for (mods.eln.node.NodeBase n : new java.util.ArrayList<>(mods.eln.node.NodeManager.instance.getNodes())) {
+            if (n.coordonate.dimention != dim || !b.contains(n.coordonate.x + .5, n.coordonate.y + .5, n.coordonate.z + .5)) continue;
+            ctx.check("clean-up: no node left once the test's blocks are gone", false, n.getClass().getSimpleName() + " at " + n.coordonate
+                + " (block there: " + level.getBlockState(new net.minecraft.core.BlockPos(n.coordonate.x, n.coordonate.y, n.coordonate.z)) + ")");
+            n.onBreakBlock();
+        }
     }
 
     /**

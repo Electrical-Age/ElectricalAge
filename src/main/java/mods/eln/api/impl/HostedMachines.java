@@ -137,13 +137,7 @@ public final class HostedMachines implements MachineRegistry {
     /** Before each step: retire the gone, host the new, follow turned blocks. */
     void tick() {
         if (NodeManager.instance == null) return;
-        for (Iterator<MachineNode> i = hosted.values().iterator(); i.hasNext(); ) {
-            MachineNode n = i.next();
-            if (n.be.isRemoved() || n.be.getLevel() != n.level) {
-                i.remove();
-                retire(n);
-            }
-        }
+        retireGone();
         for (BlockEntity be; (be = added.poll()) != null; ) {
             if (be.isRemoved() || !(be.getLevel() instanceof ServerLevel)) continue;
             MachineData d = be.getData(DATA.get());
@@ -183,6 +177,18 @@ public final class HostedMachines implements MachineRegistry {
             n.be.getBlockPos().toShortString(), n.host.state(), n.host.bufferJoules());
         n.retire();
         if (n.data.handle instanceof HostedMachine m) m.detach();
+    }
+
+    /** Retires the machines whose block entity went (each step does it first; the GameTest clean-up at once). */
+    public void retireGone() {
+        for (Iterator<MachineNode> i = hosted.values().iterator(); i.hasNext(); ) {
+            MachineNode n = i.next();
+            if (n.be.isRemoved() || n.be.getLevel() != n.level) {
+                i.remove();
+                retire(n);
+            }
+        }
+        mods.eln.api.impl.lowlevel.CircuitHosts.INSTANCE.retireGone();
     }
 
     /** The node hosting be's machine now, or null (tests). */

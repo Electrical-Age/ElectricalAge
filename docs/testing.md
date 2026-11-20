@@ -93,6 +93,10 @@ there and replayed first), `eln.guiDir` (LayoutTest, HubSlotsTest), `-PfluidCase
   4. `persistence`: `Reload.node` on every non-destructing, saved (`mustBeSaved`) node in the bounds (save -> unload -> fresh node from the
      tag -> save again; also compares `networkSerialize` bytes). Differences in keys ending `Uc` or `State`
      (`Reload.isTransient`) are allowed; anything else fails.
+  5. `cleanUp`: the structure and its padding are cleared (every block but the test instance block to air, entities
+     discarded, the API's hosted nodes retired at once), and any EA node still in the bounds fails the case. The test
+     server keeps every earlier batch's structures and EA simulates unloaded chunks, so without it every device built
+     kept running to the end of the suite (70 min; 9 with it, 2026-11-20).
 - Structures: `src/main/resources/data/eln/structure/floor_WxHxD.nbt`, made by `script/gen_test_structures.py WxHxD ...`
   (empty box, stone floor). A case's size must name an existing file.
 
