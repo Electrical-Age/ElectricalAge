@@ -23,6 +23,9 @@ public class ComputerRender extends TransparentNodeElementRender {
     public final Scene scene = new Scene();
     /** The screen's own state that outlives one opening of it (each line's half-typed text and history). */
     public final java.util.Map<String, Object> screenState = new java.util.HashMap<>();
+    /** The open text editors' states (ComputerScreen.EditorState), kept apart from screenState's half-typed lines: in
+     *  one map the screen's tick took an editor's state for a line's and crashed the client (lashtear, 2026-11-20). */
+    public final java.util.Map<String, Object> editorStates = new java.util.HashMap<>();
     /** Replies to editors' saves, for the screen to take. */
     public final java.util.ArrayDeque<java.util.List<Object>> replies = new java.util.ArrayDeque<>();
     /** Bumped when the scene changes, so the screen can see it. */

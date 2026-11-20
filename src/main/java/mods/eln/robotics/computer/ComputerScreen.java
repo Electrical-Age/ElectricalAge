@@ -147,7 +147,7 @@ public class ComputerScreen extends ElnScreen {
     }
 
     EditorState editorState(int t, int id) {
-        return (EditorState) render.screenState.computeIfAbsent("ed/" + t + "/" + id, k -> new EditorState());
+        return (EditorState) render.editorStates.computeIfAbsent("ed/" + t + "/" + id, k -> new EditorState());
     }
 
     // ---- the scene and this display's view of it
@@ -314,7 +314,7 @@ public class ComputerScreen extends ElnScreen {
                 }
             }
         // states of editors whose window is gone are forgotten
-        render.screenState.keySet().removeIf(key -> key.startsWith("ed/") && !scene().windows.containsKey(Integer.parseInt(key.split("/")[1])));
+        render.editorStates.keySet().removeIf(key -> !scene().windows.containsKey(Integer.parseInt(key.split("/")[1])));
         for (var it = editorWidgets.entrySet().iterator(); it.hasNext(); ) {
             var en = it.next();
             if (!want.contains(en.getKey())) {
