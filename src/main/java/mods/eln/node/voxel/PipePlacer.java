@@ -26,8 +26,7 @@ public final class PipePlacer {
     }
 
     /** The pipe kit in RoutePlacer's one flow. */
-    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("pipe", true, 0x55C8FF, 0.8f, false, false, true, false, false, false, true, true,
-        false, true) {
+    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("pipe", true, 0x55C8FF, 0.8f, true, true, false, true) {
         @Override
         RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, net.minecraft.world.phys.Vec3 hit, int tier, boolean start, boolean click) {
             PipeRouter.End port = portAt(level, pos, face, hit);
@@ -63,8 +62,8 @@ public final class PipePlacer {
 
         @Override
         KitPreview.Answer answer(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-                                 CableRouter.End end, long[] endJoin, int have, RoutePlacer.Click c) {
-            return KitPreview.pipeAnswer(view, endJoin, startJoin, tier, end(start), ends(wps), end(end), have, c.port());
+                                 CableRouter.End end, long[] endJoin, int have) {
+            return KitPreview.pipeRoute(view, endJoin, startJoin, tier, end(start), ends(wps), end(end), have);
         }
 
         @Override

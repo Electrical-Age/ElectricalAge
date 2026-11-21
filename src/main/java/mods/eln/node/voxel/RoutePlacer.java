@@ -55,18 +55,6 @@ public final class RoutePlacer {
         /** The route's particles (show): colour and size. */
         final int particle;
         final float particleSize;
-        /** The first waypoint may not be the start spot (else a route from a point back to it). */
-        final boolean refuseWaypointAtStart;
-        /** Failure notes end with how to cancel the route. */
-        final boolean hints;
-        /** Undo shows the route left as particles. */
-        final boolean redrawOnUndo;
-        /** A click's route times go to the log when slow (KitPreview.slow), and the route debug kit reports previews. */
-        final boolean telemetry;
-        /** A Toolbag's switch to another kind of the same family keeps the waypoints. */
-        final boolean keepsWaypointsOnSwitch;
-        /** A click checks the whole lapse (idle, distance too), not only the dimension. */
-        final boolean lapseOnClick;
         /** A finish at the last waypoint keeps it when the lay fails. */
         final boolean keepsWaypointOnLayFailure;
         /** Before a start, the preview marks any end with the port cube (else only a machine's port). */
@@ -76,19 +64,12 @@ public final class RoutePlacer {
         /** The preview aimed at the last waypoint routes to it as the click would (ending there). */
         final boolean previewAgain;
 
-        Spec(String noun, boolean pipe, int particle, float particleSize, boolean refuseWaypointAtStart, boolean hints, boolean redrawOnUndo,
-             boolean telemetry, boolean keepsWaypointsOnSwitch, boolean lapseOnClick, boolean keepsWaypointOnLayFailure, boolean bigStartMarker,
-             boolean portCube, boolean previewAgain) {
+        Spec(String noun, boolean pipe, int particle, float particleSize, boolean keepsWaypointOnLayFailure, boolean bigStartMarker, boolean portCube,
+             boolean previewAgain) {
             this.noun = noun;
             this.pipe = pipe;
             this.particle = particle;
             this.particleSize = particleSize;
-            this.refuseWaypointAtStart = refuseWaypointAtStart;
-            this.hints = hints;
-            this.redrawOnUndo = redrawOnUndo;
-            this.telemetry = telemetry;
-            this.keepsWaypointsOnSwitch = keepsWaypointsOnSwitch;
-            this.lapseOnClick = lapseOnClick;
             this.keepsWaypointOnLayFailure = keepsWaypointOnLayFailure;
             this.bigStartMarker = bigStartMarker;
             this.portCube = portCube;
@@ -112,7 +93,7 @@ public final class RoutePlacer {
 
         /** The preview's answer for a route to end (KitPreview.Answer: ok, its outline, the action-bar line). */
         abstract KitPreview.Answer answer(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-                                          CableRouter.End end, long[] endJoin, int have, Click c);
+                                          CableRouter.End end, long[] endJoin, int have);
 
         /** The route's polyline for its particles: {x, y, z} in world voxels, then the offset (blocks) of the leg ending there. */
         abstract List<double[]> trace(Routed r);
@@ -205,6 +186,12 @@ public final class RoutePlacer {
         return p != null && p.kind == kind;
     }
 
+    /** The waypoints of the player's route (-1 if none). */
+    public static int waypoints(UUID player) {
+        Plan p = PLANS.get(player);
+        return p == null ? -1 : p.waypoints.size();
+    }
+
     /** Keep the player's route from lapsing as idle (the Toolbag's radial is open). */
     static void touch(UUID player, long now) {
         Plan p = PLANS.get(player);
@@ -274,8 +261,7 @@ public final class RoutePlacer {
             plan = null;
         }
         boolean other = plan != null && (plan.tier != tier || !java.util.Objects.equals(plan.spec, spec));
-        boolean lapsed = plan != null && (k.lapseOnClick ? lapse(plan, now, true, plan.dim == level.dimension(), player.position()) != null
-            : plan.dim != level.dimension());
+        boolean lapsed = plan != null && lapse(plan, now, true, plan.dim == level.dimension(), player.position()) != null;
         if (plan != null && (other || lapsed)) {
             PLANS.remove(id);
             if (other) player.sendOverlayMessage(Component.literal(k.title() + " route cancelled (another kind of " + k.noun + " in hand)"));
@@ -301,19 +287,19 @@ public final class RoutePlacer {
             player.sendOverlayMessage(Component.literal(k.started(kit, c.join() != null)));
             return true;
         }
-        String hint = k.hints ? " (" + kit.undoHint() + " to cancel the route)" : "";
+        String hint = " (" + kit.undoHint() + " to cancel the route)";
         String from = plan.startJoin != null ? "from a " + k.noun + ", " : "";
         // (a click on the surface at the last waypoint again ends the route there)
         boolean again = !c.finish() && c.join() == null && !plan.waypoints.isEmpty() && same(plan.waypoints.get(plan.waypoints.size() - 1), at);
         if (!c.finish() && c.join() == null && !again) {
-            if (k.refuseWaypointAtStart && plan.waypoints.isEmpty() && sameSpot(plan.start, at)) {
-                KitPreview.note(player, "That's where the route started: click somewhere else (" + kit.undoHint() + " to cancel)");
+            if (plan.waypoints.isEmpty() && sameSpot(plan.start, at)) {
+                KitPreview.note(player, "That's where the " + k.startedWhat() + " started: click somewhere else (" + kit.undoHint() + " to cancel)");
                 return true;
             }
             plan.waypoints.add(at);
             long tRoute = System.nanoTime();
             Routed r = route(level, plan, null, null);
-            if (k.telemetry) KitPreview.slow("waypoint route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
+            KitPreview.slow("waypoint route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
             if (r.error() != null) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
                 KitPreview.note(player, "Can't reach that waypoint: " + r.error() + hint);
@@ -333,7 +319,7 @@ public final class RoutePlacer {
         CableRouter.End end = again ? plan.waypoints.remove(plan.waypoints.size() - 1) : at;
         long tRoute = System.nanoTime();
         Routed r = route(level, plan, end, c.join());
-        if (k.telemetry) KitPreview.slow("click route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
+        KitPreview.slow("click route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
         if (r.error() != null) {
             if (again) plan.waypoints.add(end);
             KitPreview.note(player, "No route: " + r.error() + hint);
@@ -372,10 +358,8 @@ public final class RoutePlacer {
             // (on the note line: the preview's next line takes the action bar at once, and a waypoint on the way to the
             // aim changes neither the route drawn nor its length; AdventurAgent read an Undo as doing nothing)
             KitPreview.note(player, "Waypoint taken back (" + plan.waypoints.size() + " left)");
-            if (plan.kind.redrawOnUndo) {
-                Routed r = route(level, plan, null, null);
-                if (r.error() == null) show(player, level, plan.kind, r);
-            }
+            Routed r = route(level, plan, null, null);   // (and the route left drawn again)
+            if (r.error() == null) show(player, level, plan.kind, r);
         }
         return true;
     }

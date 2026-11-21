@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * The route debug kit (Baughn 2026-11-12: "a debug kit, creative only, which outputs timing statistics plus a command to
- * replicate it"): a cable kit tagged by /elnlab debugkit. In a creative player's hand, every route preview it shows says
+ * replicate it"): a cable or pipe kit tagged by /elnlab debugkit. In a creative player's hand, every route preview it shows says
  * in chat where its time went (the snapshot on the server thread, the wait for the worker, the route itself, the whole
  * aim-to-packet time), the client adds when the outline was first drawn after the packet came, and a clickable
  * /elnlab routereplay command runs the same route again, on the same world, timed both ways (the preview's snapshot and
@@ -30,13 +30,13 @@ public final class RouteDebug {
     public static boolean on(ServerPlayer p) {
         if (!p.isCreative()) return false;
         ItemStack s = p.getMainHandItem();
-        return s.getItem() instanceof CableKitItem && s.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getBooleanOr(TAG, false);
+        return s.getItem() instanceof KitItem && s.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getBooleanOr(TAG, false);
     }
 
-    /** /elnlab debugkit: tag the held cable kit (a copy, named). */
+    /** /elnlab debugkit: tag the held cable or pipe kit (a copy, named). */
     public static String give(ServerPlayer p) {
         ItemStack s = p.getMainHandItem();
-        if (!(s.getItem() instanceof CableKitItem)) return "Hold a cable kit";
+        if (!(s.getItem() instanceof KitItem)) return "Hold a cable or pipe kit";
         ItemStack d = s.copy();
         CustomData.update(DataComponents.CUSTOM_DATA, d, t -> t.putBoolean(TAG, true));
         d.set(DataComponents.CUSTOM_NAME, Component.literal("Route debug kit"));
@@ -44,8 +44,11 @@ public final class RouteDebug {
         return "Given: Route debug kit (works in creative)";
     }
 
+    /** A pipe route's token starts with this (a cable's with its tier). */
+    static final String PIPE = "p_";
+
     /** The replay token for a route: tier, the start, its join, the waypoints, the end and its join. */
-    static String token(int tier, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps, CableRouter.End at, long[] endJoin) {
+    static String token(RoutePlacer.Spec k, int tier, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps, CableRouter.End at, long[] endJoin) {
         List<Long> v = new ArrayList<>();
         v.add((long) tier);
         end(v, start);
@@ -56,7 +59,7 @@ public final class RouteDebug {
         join(v, endJoin);
         StringBuilder sb = new StringBuilder();
         for (Long x : v) sb.append(sb.isEmpty() ? "" : ".").append(Long.toString(x, 36));
-        return sb.toString();
+        return (k.pipe ? PIPE : "") + sb;
     }
 
     private static void end(List<Long> v, CableRouter.End e) {
@@ -72,16 +75,19 @@ public final class RouteDebug {
         if (j != null) for (long x : j) v.add(x);
     }
 
-    /** Tell the player where a preview's time went, with the replay command (clickable). */
-    static void report(ServerPlayer p, long aimToSentMs, long snapMs, long waitMs, long routeMs, int expansions, boolean fromCable, String token) {
+    /** Tell the player where a preview's time went, with the replay command (clickable); from: "cable" or "pipe" for a route
+     *  started on one, else null. */
+    static void report(ServerPlayer p, long aimToSentMs, long snapMs, long waitMs, long routeMs, int expansions, String from, String token) {
         p.sendSystemMessage(Component.literal(String.format("[route debug] aim->packet %d ms: snapshot %d (server thread), wait %d, route %d (%d expansions)%s",
-            aimToSentMs, snapMs, waitMs, routeMs, expansions, fromCable ? ", from a cable" : "")));
+            aimToSentMs, snapMs, waitMs, routeMs, expansions, from != null ? ", from a " + from : "")));
         String cmd = "/elnlab routereplay " + token;
         p.sendSystemMessage(Component.literal("[route debug] replay: " + cmd).withStyle(Style.EMPTY.withClickEvent(new ClickEvent.SuggestCommand(cmd))));
     }
 
     /** /elnlab routereplay TOKEN: the same route on this world, timed as the preview does it and as the click does. */
     public static String replay(ServerLevel level, net.minecraft.world.entity.player.Player player, String token) {
+        RoutePlacer.Spec k = token.startsWith(PIPE) ? PipePlacer.ROUTE : CablePlacer.ROUTE;
+        if (k.pipe) token = token.substring(PIPE.length());
         String[] f = token.split("\\.");
         long[] v = new long[f.length];
         for (int i = 0; i < f.length; i++) v[i] = Long.parseLong(f[i], 36);
@@ -91,7 +97,7 @@ public final class RouteDebug {
         long[] sj = readJoin(v, i);
         int nw = (int) v[i[0]++];
         List<CableRouter.End> wps = new ArrayList<>();
-        for (int k = 0; k < nw; k++) wps.add(readEnd(v, i));
+        for (int w = 0; w < nw; w++) wps.add(readEnd(v, i));
         CableRouter.End at = readEnd(v, i);
         long[] ej = readJoin(v, i);
         List<long[]> ends = new ArrayList<>();
@@ -102,18 +108,14 @@ public final class RouteDebug {
         RouteView view = player instanceof ServerPlayer sp ? KitPreview.snapshotAround(sp, level, ends, true) : RouteView.live(level);
         long snap = (System.nanoTime() - t0) / 1_000_000;
         t0 = System.nanoTime();
-        KitPreview.Answer a = KitPreview.answer(view, tier, null, start, sj, wps, at, ej, Integer.MAX_VALUE);
+        KitPreview.Answer a = k.answer(view, tier, null, start, sj, wps, at, ej, Integer.MAX_VALUE);
         long pre = (System.nanoTime() - t0) / 1_000_000;
         int preExp = Router.LAST_EXPANSIONS.get();
-        CableRouter.Space s = CablePlacer.space(level);
-        if (sj != null) s = CablePlacer.around(s, sj);
-        if (ej != null) s = CablePlacer.around(s, ej);
-        CablePart.Tier t = CablePlacer.tierOf(tier, null);
         t0 = System.nanoTime();
-        CableRouter.Result r = CableRouter.route(s, t.width(), t.height(), start, wps, at);
+        RoutePlacer.Routed r = k.route(RouteView.live(level), tier, null, start, sj, wps, at, ej, PipeRouter.TIME_BUDGET_MS);
         long live = (System.nanoTime() - t0) / 1_000_000;
         return String.format("replay: snapshot %d ms, preview route %d ms (%d expansions, %s); click route on the live world %d ms (%d expansions, %s)",
-            snap, pre, preExp, a.ok() ? "ok" : a.message(), live, Router.LAST_EXPANSIONS.get(), r.error == null ? "ok" : r.error);
+            snap, pre, preExp, a.ok() ? "ok" : a.message(), live, Router.LAST_EXPANSIONS.get(), r.error() == null ? "ok" : r.error());
     }
 
     private static CableRouter.End readEnd(long[] v, int[] i) {

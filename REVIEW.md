@@ -12,6 +12,7 @@ here.
 | Need | Use | Not |
 |---|---|---|
 | Route a cable or pipe (A*) | `node/voxel/Router`; what's in the way: `RouteView.obstacles` (and `freeAround` a junction) | another pathfinder; a cable-only or pipe-only copy of a router step or of the obstacle test |
+| A kit's route UX (start, waypoints, finish, undo, lapse, preview) | `node/voxel/RoutePlacer` with the kind's `RoutePlacer.Spec` (`CablePlacer.ROUTE`, `PipePlacer.ROUTE`); the preview `KitPreview.tick`; laying `Laying.lay` (joins included) | a per-kind plan, plans map, click handler or preview tick; a kind check (`pipe()`) in a caller instead of a spec hook |
 | A device with one static model and nothing animated | `node/transparent/FrontDrawnRender` (the descriptor implements `FrontDrawnRender.Drawn`) | a new `XRender` whose draw() is `front.glRotateXnRef(); desc.draw();` |
 | Item custom data (counters, lengths, settings) | `generic/ItemNbt` | hand-rolled `CustomData` get/put in the item class |
 | Numbers with units in text | `api/Meters` (`volts`, `amps`, `watts`, `joules`, `ohms`, `celsius`, `kelvin`, `number`) for a bare value; `misc/Utils.plot*(header, v)` only for the padded meter lines built from them | `String.format("%.2f kV", …)`, `(int) w + " W"`, `plotPower("", w).trim()`, a local `fmt()` |
@@ -58,8 +59,6 @@ here.
 
 ## Known duplication not yet folded (don't add to it)
 
-Pending Baughn's decision where the UX differs:
-CablePlacer/PipePlacer route state machine, KitPreview cable/pipe ticks.
 `EaUnits.compact` (two significant figures, no prefix) stays beside `Meters.number`: fluid units switch unit
 themselves (mB to B, g to kg), and Meters.number would print "120m mB". Descriptor tooltips that state ratings in
 prose (`"%.0f V, %.0f W"`), amps in cable and winding names (`"%.0f A"`) and mB/s rates are not yet on the formatters.

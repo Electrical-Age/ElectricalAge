@@ -351,19 +351,19 @@ public class ToolbagItem extends Item implements PipeTool {
         select(bag, kind);
         KitSupply s = supply(bag, kind);
         if (routing(p)) {
-            // a route on: the new kind from the same start; its waypoints kept where the kind's spec keeps them for its own
-            // family (they are points on a cable's face or in a pipe's block centre: they don't carry over between the two)
+            // a route on: the new kind from the same start, its waypoints kept where they fit: a cable's for a cable, a
+            // pipe's for a pipe (points on a face, points in a block's middle: they don't carry over between the two)
             if (kind.equals(was)) return;
             Click start = STARTED.get(p.getUUID());
             RoutePlacer.Plan old = RoutePlacer.drop(p.getUUID());
             boolean wasPipe = old != null && old.kind.pipe;
-            List<CableRouter.End> wps = old == null || !old.kind.keepsWaypointsOnSwitch ? List.of() : old.waypoints;
+            List<CableRouter.End> wps = old == null ? List.of() : old.waypoints;
             if (start == null || start.dim() != level.dimension()) {
                 KitPreview.note(p, "Route dropped: start it again with the new kind");
                 return;
             }
             lay(p, level, s, start);
-            if (old != null && old.kind == RoutePlacer.of(s) && old.kind.keepsWaypointsOnSwitch) RoutePlacer.addWaypoints(p.getUUID(), wps);
+            if (old != null && old.kind == RoutePlacer.of(s)) RoutePlacer.addWaypoints(p.getUUID(), wps);
             else if (!wps.isEmpty() || wasPipe != s.pipe()) p.sendOverlayMessage(Component.literal("Route restarted as " + kind.label() + " (waypoints dropped)"));
             return;
         }

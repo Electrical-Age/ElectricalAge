@@ -25,8 +25,7 @@ public final class CablePlacer {
     }
 
     /** The cable kit in RoutePlacer's one flow. */
-    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("cable", false, 0xFFB040, 0.7f, true, true, false, true, true, true, false, false,
-        true, false) {
+    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("cable", false, 0xFFB040, 0.7f, false, false, true, false) {
         @Override
         RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, int tier, boolean start, boolean click) {
             long[][] join = new long[1][];
@@ -56,7 +55,7 @@ public final class CablePlacer {
 
         @Override
         KitPreview.Answer answer(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-                                 CableRouter.End end, long[] endJoin, int have, RoutePlacer.Click c) {
+                                 CableRouter.End end, long[] endJoin, int have) {
             return KitPreview.answer(view, tier, spec, start, startJoin, wps, end, endJoin, have);
         }
 

@@ -128,11 +128,12 @@ public final class ToolbagCases {
      * floor at (4,1,1): an LV cable laid from it, more than one kit's length, drawn from both kits (the first used up).
      * A signal cable at (1,1,3) clicked with a bag that has none: no route. An empty floor at (1,1,5) clicked: no route
      * yet; the radial's 230 V choice starts it there; then 48 V chosen mid-route keeps the start; ended at (5,1,5): 48 V
-     * laid. An iron pipe at (7,1,1) clicked: a pipe route with the pipe kind; Cancel drops it.
+     * laid. An iron pipe at (7,1,1) clicked: a pipe route with the pipe kind; Cancel drops it. A pipe route from (1,1,6)
+     * with a waypoint at (3,1,6): another pipe kind chosen keeps the waypoint, a cable kind restarts without it.
      */
     static final class LayCase implements TestCase {
-        String err = "", laid = "", refused = "", radial = "", pipe = "";
-        boolean laidOk, refusedOk, radialOk, pipeOk;
+        String err = "", laid = "", refused = "", radial = "", pipe = "", kept = "";
+        boolean laidOk, refusedOk, radialOk, pipeOk, keptOk;
 
         public String id() {
             return "toolbag_lays_from_its_kits";
@@ -219,6 +220,27 @@ public final class ToolbagCases {
                 radial(pl, ToolbagItem.CANCEL, null);
                 pipe = String.format("pipe route %b, kind %s, after Cancel %b", pipeOn, pk == null ? null : pk.label(), PipePlacer.active(pl.getUUID()));
                 pipeOk = pipeOn && pk != null && pk.pipe() && pk.tier() == 0 && !PipePlacer.active(pl.getUUID());
+
+                clean(pl);
+                // 5. a pipe route with a waypoint: another pipe kind keeps the waypoint; a cable kind restarts without it
+                BlockPos row = c.at(2, 1, 6);
+                pl.snapTo(row.getX() + 0.5, row.getY(), row.getZ() + 0.5, 0, 0);
+                ItemStack mixed = bag(PipeKitItem.kit(0, 300), PipeKitItem.kit(1, 300), CableKitItem.kit(LV, 300));
+                pl.setItemInHand(InteractionHand.MAIN_HAND, mixed);
+                floorClick(c, pl, mixed, c.at(1, 1, 6));
+                radial(pl, ToolbagItem.CHOOSE, new int[]{1, 0, -1, -1});
+                boolean iron = PipePlacer.active(pl.getUUID());
+                floorClick(c, pl, mixed, c.at(3, 1, 6));
+                int w0 = mods.eln.node.voxel.RoutePlacer.waypoints(pl.getUUID());
+                radial(pl, ToolbagItem.CHOOSE, new int[]{1, 1, -1, -1});
+                boolean other = PipePlacer.active(pl.getUUID()) && ToolbagItem.selected(mixed).tier() == 1;
+                int w1 = mods.eln.node.voxel.RoutePlacer.waypoints(pl.getUUID());
+                var lvKind2 = mods.eln.node.voxel.CableSpec.preset(LV);
+                radial(pl, ToolbagItem.CHOOSE, new int[]{0, LV, lvKind2.mm2(), lvKind2.colour()});
+                boolean cable = CablePlacer.active(pl.getUUID());
+                int w2 = mods.eln.node.voxel.RoutePlacer.waypoints(pl.getUUID());
+                kept = String.format("pipe route %b, waypoints %d; other pipe kind %b, waypoints %d; cable kind %b, waypoints %d", iron, w0, other, w1, cable, w2);
+                keptOk = iron && w0 == 1 && other && w1 == 1 && cable && w2 == 0;
             } catch (Exception ex) {
                 err = String.valueOf(ex);
             } finally {
@@ -233,6 +255,7 @@ public final class ToolbagCases {
             c.check("toolbag: a cable kind it lacks is refused", refusedOk, refused);
             c.check("toolbag: the radial's choice starts the route at the click; a new kind keeps the start", radialOk, radial);
             c.check("toolbag: a pipe click takes the pipe kind; Cancel drops the route", pipeOk, pipe);
+            c.check("toolbag: a new pipe kind mid-route keeps the waypoints, a cable kind doesn't", keptOk, kept);
         }
     }
 

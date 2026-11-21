@@ -39,6 +39,7 @@ public final class PipeCases {
         cases.add(new LayingAllOrNothing());
         cases.add(new KitStartsAnywhereAndCaps());
         cases.add(new KitBranchesPipeToPipe());
+        cases.add(new KitPreviewSaysWhatTheClickDoes());
         cases.add(new KitCrafting());
         cases.add(new ThrottleAndControlValves());
         cases.add(new Burst());
@@ -977,10 +978,12 @@ public final class PipeCases {
         }
     }
 
-    /** The pipe kit as the cable kit (Baughn 2026-11-11): a route starts on a plain floor, a waypoint further along, the
-     *  same spot clicked again ends it capped there; it lies low along the floor, and the kit pays its length. */
+    /** The pipe kit as the cable kit (Baughn 2026-11-11): a route starts on a plain floor; the start spot clicked again
+     *  is refused as a waypoint (the cable kit's rule); a waypoint further along, the same spot clicked again ends it
+     *  capped there; it lies low along the floor, and the kit pays its length. */
     static final class KitStartsAnywhereAndCaps implements TestCase {
-        boolean started, waypoint, finished;
+        boolean started, waypoint, finished, startRefused;
+        String startSpot = "";
         int blocks, lowest = 99, kitBefore, kitAfter;
         boolean validStarts = true;
         String bad = "";
@@ -1006,6 +1009,11 @@ public final class PipeCases {
             BlockPos a = ctx.at(1, 0, 1), b = ctx.at(5, 0, 1);
             var up = net.minecraft.core.Direction.UP;
             started = kitClick(ctx, p, kit, 0, a, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(a).add(0.5, 1, 0.5));
+            boolean handled = kitClick(ctx, p, kit, 0, a, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(a).add(0.5, 1, 0.5));
+            int wps = mods.eln.node.voxel.RoutePlacer.waypoints(p.getUUID());
+            boolean on = mods.eln.node.voxel.PipePlacer.active(p.getUUID());
+            startRefused = handled && wps == 0 && on;
+            startSpot = "handled " + handled + ", waypoints " + wps + ", route on " + on;
             waypoint = kitClick(ctx, p, kit, 0, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 1, 0.5));
             finished = kitClick(ctx, p, kit, 0, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 1, 0.5));
             kitAfter = PipeKitItem.length(kit);
@@ -1033,6 +1041,7 @@ public final class PipeCases {
 
         public void measure(TestContext ctx) {
             ctx.check("pipe kit: a route starts on a plain floor", started && waypoint && finished, started + " " + waypoint + " " + finished);
+            ctx.check("pipe kit: the start spot is no waypoint, the route stays on", startRefused, startSpot);
             ctx.check("pipe kit: clicking the last waypoint again lays it, ended there", blocks >= 5, blocks + " blocks");
             ctx.check("pipe kit: it lies low along the floor", lowest == 4, "lowest point y " + lowest);
             ctx.check("pipe kit: the kit pays its length", kitBefore - kitAfter >= 4 * 16, (kitBefore - kitAfter) + " voxels");
@@ -1090,6 +1099,81 @@ public final class PipeCases {
             ctx.check("pipe kit: each run is cut at its junction, plus the new pipe: 3 pieces each", partsA == 3 && partsB == 3, partsA + " / " + partsB);
             ctx.check("pipe kit: a junction fitting at each", junctions == 2, junctions + "");
             ctx.check("pipe kit: both runs and the branch are one network", netA != null && netA == netB, netA + " / " + netB);
+        }
+    }
+
+    /**
+     * The preview's line says what the next click would do, for cables and pipes alike (the pipes' suffix, Baughn: one
+     * kit UX): a route started on the floor and aimed at more floor adds a waypoint; aimed at an old cable or pipe of
+     * the kind, it joins it.
+     */
+    static final class KitPreviewSaysWhatTheClickDoes implements TestCase {
+        String cableFloor, cableJoin, pipeFloor, pipeJoin;
+
+        public String id() {
+            return "kit_preview_says_what_the_click_does";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        public void build(TestContext ctx) {
+            var level = ctx.level();
+            for (int x = 0; x < 9; x++) for (int z = 0; z < 7; z++) ctx.floor(ctx.at(x, 0, z));
+            int lv = mods.eln.node.voxel.CablePart.tierOf("Low Voltage Cable");
+            // an LV cable along the floor at z 5, a pipe one block up at z 3
+            BlockPos c0 = ctx.at(1, 0, 5), c1 = ctx.at(5, 0, 5);
+            mods.eln.node.voxel.CablePlacer.routeAndLayForTests(level, lv,
+                new mods.eln.node.voxel.CableRouter.End(c0.getX() * 16L + 8, (c0.getY() + 1) * 16L, c0.getZ() * 16L + 8, 0, -1),
+                new mods.eln.node.voxel.CableRouter.End(c1.getX() * 16L + 8, (c1.getY() + 1) * 16L, c1.getZ() * 16L + 8, 0, -1));
+            for (int x = 1; x < 6; x++) lay(ctx, ctx.at(x, 1, 3), 0, 0, 8, 8, 16, 8, 8);
+            var p = ctx.player();
+            p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            var up = net.minecraft.core.Direction.UP;
+            BlockPos start = ctx.at(1, 0, 1), floor = ctx.at(4, 0, 1);
+            var startHit = net.minecraft.world.phys.Vec3.atLowerCornerOf(start).add(0.5, 1, 0.5);
+            var floorHit = net.minecraft.world.phys.Vec3.atLowerCornerOf(floor).add(0.5, 1, 0.5);
+            double x = p.getX(), y = p.getY(), z = p.getZ();
+            p.snapTo(startHit.x, startHit.y + 0.5, startHit.z, 0, 90);
+            try {
+                mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+                mods.eln.node.voxel.KitPreview.forget(p.getUUID());   // (no snapshot left from another case)
+                ItemStack cable = mods.eln.node.voxel.CableKitItem.kit(lv, 16 * 16);
+                var cs = mods.eln.node.voxel.KitSupply.of(cable);
+                mods.eln.node.voxel.CablePlacer.use(p, level, start, up, cs, startHit, false);
+                cableFloor = mods.eln.node.voxel.KitPreview.previewForTests(p, cs, floor, up, floorHit);
+                BlockPos onCable = ctx.at(4, 1, 5);
+                cableJoin = mods.eln.node.voxel.KitPreview.previewForTests(p, cs, onCable, up,
+                    net.minecraft.world.phys.Vec3.atLowerCornerOf(onCable).add(0.5, 0.5 / 16, 0.5));
+                mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+                ItemStack pipe = PipeKitItem.kit(0, 16 * 16);
+                var ps = mods.eln.node.voxel.KitSupply.of(pipe);
+                mods.eln.node.voxel.PipePlacer.use(p, level, start, up, ps, startHit, false);
+                pipeFloor = mods.eln.node.voxel.KitPreview.previewForTests(p, ps, floor, up, floorHit);
+                BlockPos onPipe = ctx.at(4, 1, 3);
+                pipeJoin = mods.eln.node.voxel.KitPreview.previewForTests(p, ps, onPipe, up,
+                    net.minecraft.world.phys.Vec3.atLowerCornerOf(onPipe).add(0.5, 9.0 / 16, 0.5));
+            } finally {
+                mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+                p.snapTo(x, y, z, 0, 0);
+                p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("kit preview: a cable route aimed at the floor adds a waypoint", cableFloor != null && cableFloor.endsWith(" (waypoint)"), cableFloor);
+            ctx.check("kit preview: a cable route aimed at a cable joins it", cableJoin != null && cableJoin.endsWith(" (joins the cable)"), cableJoin);
+            ctx.check("kit preview: a pipe route aimed at the floor adds a waypoint", pipeFloor != null && pipeFloor.endsWith(" (waypoint)"), pipeFloor);
+            ctx.check("kit preview: a pipe route aimed at a pipe joins it", pipeJoin != null && pipeJoin.endsWith(" (joins the pipe)"), pipeJoin);
         }
     }
 
