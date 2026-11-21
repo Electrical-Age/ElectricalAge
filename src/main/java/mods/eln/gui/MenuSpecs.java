@@ -102,9 +102,9 @@ public final class MenuSpecs {
             filter(0, 184, 144, 64, mods.eln.node.voxel.CableItems::isElectrical, MEDIUM,
                 tr("Cable kit slot (optional)\nBase range is 32 blocks.\nEach block of cable\nincreases range by one.").split("\n"))).panel(220, 205, 8, 125));
         put(mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor.class, d -> MenuSpec.of(
-            filter(mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixContainer.redId, 132, 8, 13, item(Items.REDSTONE), MEDIUM,
+            filter(mods.eln.powerprimitives.PowerCapacitorContainer.redId, 132, 8, 13, item(Items.REDSTONE), MEDIUM,
                 tr("Redstone slot"), tr("(Increases capacity)")),
-            descriptor(mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixContainer.dielectricId, 132 + 20, 8, 20, DielectricItem.class,
+            descriptor(mods.eln.powerprimitives.PowerCapacitorContainer.dielectricId, 132 + 20, 8, 20, DielectricItem.class,
                 MEDIUM, tr("Dielectric slot"), tr("(Increases maximum voltage)"))).panel(176, 112, 8, 30));
         put(mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor.class, d -> MenuSpec.of(
             descriptor(mods.eln.sixnode.powerinductorsix.PowerInductorSixContainer.cableId, 132, 8, 19, CopperCableDescriptor.class,
@@ -227,9 +227,9 @@ public final class MenuSpecs {
             descriptor(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer.isolatorId, 8 + 36, 58, 1,
                 ThermalIsolatorElement.class, MEDIUM, tr("Thermal isolator slot"))).publishing(0));
         put(mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor.class, d -> MenuSpec.of(
-            filter(mods.eln.transparentnode.powercapacitor.PowerCapacitorContainer.redId, 132, 8, 13, item(Items.REDSTONE), MEDIUM,
+            filter(mods.eln.powerprimitives.PowerCapacitorContainer.redId, 132, 8, 13, item(Items.REDSTONE), MEDIUM,
                 tr("Redstone slot"), tr("(Increases capacity)")),
-            descriptor(mods.eln.transparentnode.powercapacitor.PowerCapacitorContainer.dielectricId, 132 + 20, 8, 20,
+            descriptor(mods.eln.powerprimitives.PowerCapacitorContainer.dielectricId, 132 + 20, 8, 20,
                 DielectricItem.class, MEDIUM, tr("Dielectric slot"), tr("(Increases maximal voltage)"))).panel(176, 112, 8, 30));
         put(mods.eln.transparentnode.powerinductor.PowerInductorDescriptor.class, d -> MenuSpec.of(
             descriptor(mods.eln.transparentnode.powerinductor.PowerInductorContainer.cableId, 132, 8, 19, CopperCableDescriptor.class,

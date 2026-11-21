@@ -1,79 +1,41 @@
 package mods.eln.transparentnode.powercapacitor;
 
-
-import mods.eln.registry.ElnDeviceRegistry;
-import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.powerprimitives.PowerCapacitorCore;
 import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.mna.component.Capacitor;
-import mods.eln.sim.mna.component.Resistor;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.process.destruct.BipoleVoltageWatchdog;
 import mods.eln.sim.process.destruct.Failure;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.Container;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 
-import java.io.DataInputStream;
-
+/**
+ * The full-block Power Capacitor: PowerCapacitorCore on a transparent node, its + pin on the front's left and its -
+ * pin on the front's right, both on the floor (the six-node's + is on its front's right). Jade shows the base
+ * class's line, the multimeter's (the six-node lists capacity and charge).
+ */
 public class PowerCapacitorElement extends TransparentNodeElement {
 
-    PowerCapacitorDescriptor descriptor;
-    NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
-    NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
-
-    Capacitor capacitor = new Capacitor(positiveLoad, negativeLoad);
-    Resistor dischargeResistor = new Resistor(positiveLoad, negativeLoad);
-    PunkProcess punkProcess = new PunkProcess();
-    BipoleVoltageWatchdog watchdog = new BipoleVoltageWatchdog().set(capacitor);
+    final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
+    public final PowerCapacitorCore core;
 
     public PowerCapacitorElement(TransparentNode transparentNode,
                                  TransparentNodeDescriptor descriptor) {
         super(transparentNode, descriptor);
-        this.descriptor = (PowerCapacitorDescriptor) descriptor;
-
-        electricalLoadList.add(positiveLoad);
-        electricalLoadList.add(negativeLoad);
-        electricalComponentList.add(capacitor);
-        electricalComponentList.add(dischargeResistor);
-        electricalProcessList.add(punkProcess);
-        slowProcessList.add(watchdog);
-
-        watchdog.set(new Failure(this).capacitor());
-        positiveLoad.setAsMustBeFarFromInterSystem();
-    }
-
-
-    class PunkProcess implements IProcess {
-        double eLeft = 0;
-        double eLegaliseResistor;
-
-        @Override
-        public void process(double time) {
-            if (eLeft <= 0) {
-                eLeft = 0;
-                dischargeResistor.setR(stdDischargeResistor);
-            } else {
-                eLeft -= dischargeResistor.getP() * time;
-                dischargeResistor.setR(eLegaliseResistor);
-            }
-        }
+        core = new PowerCapacitorCore((PowerCapacitorDescriptor) descriptor, inventory, new Failure(this).capacitor());
+        core.addTo(electricalLoadList, electricalComponentList, electricalProcessList, slowProcessList);
     }
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return null;
-        if (side == front.left()) return positiveLoad;
-        if (side == front.right()) return negativeLoad;
+        if (side == front.left()) return core.positiveLoad;
+        if (side == front.right()) return core.negativeLoad;
         return null;
     }
 
@@ -90,9 +52,10 @@ public class PowerCapacitorElement extends TransparentNodeElement {
         return 0;
     }
 
+    /** The current alone (the six-node shows the voltage too). */
     @Override
     public String multiMeterString(Direction side) {
-        return Utils.plotAmpere("I", capacitor.getCurrent());
+        return core.multiMeterString(false);
     }
 
     @Override
@@ -102,101 +65,36 @@ public class PowerCapacitorElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
-        ElnDeviceRegistry.applySmallRs(positiveLoad);
-        ElnDeviceRegistry.applySmallRs(negativeLoad);
-
-        setupPhysical();
-
-
-        connect();
+        core.initialize();
+        connect();   // (the six-node element doesn't: its node connects it)
     }
 
     @Override
     public void inventoryChange(Container inventory) {
         super.inventoryChange(inventory);
-        setupPhysical();
-    }
-
-    double stdDischargeResistor;
-
-    boolean fromNbt = false;
-
-    public void setupPhysical() {
-        double eOld = capacitor.getE();
-        capacitor.setC(descriptor.getCValue(inventory));
-        stdDischargeResistor = descriptor.dischargeTao / capacitor.getC();
-
-        watchdog.setUNominal(descriptor.getUNominalValue(inventory));
-        punkProcess.eLegaliseResistor = Math.pow(descriptor.getUNominalValue(inventory), 2) / 400;
-
-        if (fromNbt) {
-            dischargeResistor.setR(stdDischargeResistor);
-            fromNbt = false;
-        } else {
-            double deltaE = capacitor.getE() - eOld;
-            punkProcess.eLeft += deltaE;
-            if (deltaE < 0) {
-                dischargeResistor.setR(stdDischargeResistor);
-            } else {
-                dischargeResistor.setR(punkProcess.eLegaliseResistor);
-            }
-        }
+        core.setupPhysical();
     }
 
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side,
                                     float vx, float vy, float vz) {
-
         return false;
     }
 
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        nbt.putDouble("punkELeft", punkProcess.eLeft);
+        core.writeToNBT(nbt);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        punkProcess.eLeft = nbt.getDoubleOr("punkELeft", 0.0);
-        if (Double.isNaN(punkProcess.eLeft)) punkProcess.eLeft = 0;
-        fromNbt = true;
+        core.readFromNBT(nbt);
     }
-
-    public void networkSerialize(java.io.DataOutputStream stream) {
-        super.networkSerialize(stream);
-        /*
-		 * try {
-		 * 
-		 * 
-		 * } catch (IOException e) {
-		 * 
-		 * e.printStackTrace(); }
-		 */
-    }
-
-    public static final byte unserializePannelAlpha = 0;
-
-    public byte networkUnserialize(DataInputStream stream) {
-
-        byte packetType = super.networkUnserialize(stream);
-		/*
-		 * try { switch(packetType) {
-		 * 
-		 * 
-		 * default: return packetType; } } catch (IOException e) {
-		 * 
-		 * e.printStackTrace(); }
-		 */
-        return unserializeNulldId;
-    }
-
-    TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
 
     @Override
     public Container getInventory() {
-
         return inventory;
     }
 

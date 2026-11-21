@@ -3,9 +3,6 @@ package mods.eln.sixnode.powercapacitorsix;
 import mods.eln.gl.GL11;
 
 
-import mods.eln.misc.Utils;
-import mods.eln.Eln;
-import mods.eln.item.DielectricItem;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
@@ -13,12 +10,11 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.powerprimitives.PowerCapacitorCore;
 import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
 
-public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
+public class PowerCapacitorSixDescriptor extends SixNodeDescriptor implements PowerCapacitorCore.Spec {
 
     private Obj3D obj;
 
@@ -46,30 +42,20 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
-    public double getCValue(int cableCount, double nominalDielVoltage) {
-        if (cableCount == 0) return 1e-6;
-        double uTemp = nominalDielVoltage / Eln.LVU;
-        return serie.getValue(cableCount - 1) / uTemp / uTemp;
+    @Override
+    public ISerie capacitanceSerie() {
+        return serie;
     }
 
-    public double getCValue(Container inventory) {
-        ItemStack core = inventory.getItem(PowerCapacitorSixContainer.redId);
-        ItemStack diel = inventory.getItem(PowerCapacitorSixContainer.dielectricId);
-        if (Utils.isEmpty(core) || Utils.isEmpty(diel))
-            return getCValue(0, 0);
-        else {
-            return getCValue(core.getCount(), getUNominalValue(inventory));
-        }
+    /** 1 uF with an empty slot (the transparent node's is 0 F). */
+    @Override
+    public double emptyCapacitance() {
+        return 1e-6;
     }
 
-    public double getUNominalValue(Container inventory) {
-        ItemStack diel = inventory.getItem(PowerCapacitorSixContainer.dielectricId);
-        if (Utils.isEmpty(diel))
-            return 10000;
-        else {
-            DielectricItem desc = (DielectricItem) DielectricItem.getDescriptor(diel);
-            return desc.uNominal * diel.getCount();
-        }
+    @Override
+    public double dischargeTao() {
+        return dischargeTao;
     }
 
     public void setParent(net.minecraft.world.item.Item item, int damage) {

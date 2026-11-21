@@ -1420,7 +1420,7 @@ public final class Wp10aCases {
                 ctx.check("wp10a power capacitor placed", cap != null, "");
                 return;
             }
-            Capacitor c = field(cap, "capacitor");
+            Capacitor c = cap.core.capacitor;
             double cExp = 0.01 / 100.0;
             ctx.checkValue("wp10a power capacitor C [F]", c.getC(), cExp);
             ctx.checkValue("wp10a power capacitor voltage [V]", Math.abs(c.getU()), U);

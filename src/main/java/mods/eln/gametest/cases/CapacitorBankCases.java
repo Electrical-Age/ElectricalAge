@@ -62,16 +62,16 @@ public final class CapacitorBankCases {
             cap.getInventory().setItem(0, new ItemStack(Items.REDSTONE, 13));
             cap.getInventory().setItem(1, mods.eln.Eln.findItemStack("Dielectric", 16));
             cap.getInventory().setChanged();
-            cap.positiveLoad.setU(mods.eln.Eln.HVU);
-            cap.negativeLoad.setU(0);
+            cap.core.positiveLoad.setU(mods.eln.Eln.HVU);
+            cap.core.negativeLoad.setU(0);
         }
 
         public void measure(TestContext ctx) {
-            double c = cap.capacitor.getC(), u = cap.capacitor.getU(), want = mods.eln.Eln.HVU * Math.exp(-20.0 / 1800);
-            ctx.line(String.format("power capacitor: C %.4f F, R %.0f ohm, %.2f V after 20 s (want %.2f)", c, cap.dischargeResistor.getR(), u, want));
+            double c = cap.core.capacitor.getC(), u = cap.core.capacitor.getU(), want = mods.eln.Eln.HVU * Math.exp(-20.0 / 1800);
+            ctx.line(String.format("power capacitor: C %.4f F, R %.0f ohm, %.2f V after 20 s (want %.2f)", c, cap.core.dischargeResistor.getR(), u, want));
             ctx.check("power capacitor: 13 redstone, 16 Dielectrics is 39 mF", Math.abs(c - 10.0 / 256) < 1e-6, String.format("%.5f F", c));
-            ctx.check("power capacitor: its leak is RC 30 min (R = 1800 s / C)", Math.abs(cap.dischargeResistor.getR() * c - 1800) < 1,
-                String.format("RC %.1f s", cap.dischargeResistor.getR() * c));
+            ctx.check("power capacitor: its leak is RC 30 min (R = 1800 s / C)", Math.abs(cap.core.dischargeResistor.getR() * c - 1800) < 1,
+                String.format("RC %.1f s", cap.core.dischargeResistor.getR() * c));
             ctx.check("power capacitor: HVU falls to HVU e^(-20/1800) in 20 s (e^-2 in an hour)", Math.abs(u - want) < 1.0,
                 String.format("%.2f V", u));
         }

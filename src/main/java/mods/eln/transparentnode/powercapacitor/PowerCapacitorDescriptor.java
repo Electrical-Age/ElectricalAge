@@ -1,16 +1,12 @@
 package mods.eln.transparentnode.powercapacitor;
 
 
-import mods.eln.misc.Utils;
-import mods.eln.Eln;
-import mods.eln.item.DielectricItem;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
+import mods.eln.powerprimitives.PowerCapacitorCore;
 
-public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
+public class PowerCapacitorDescriptor extends TransparentNodeDescriptor implements PowerCapacitorCore.Spec {
 
     private Obj3D obj;
 
@@ -34,30 +30,20 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
     ISerie serie;
     public double dischargeTao;
 
-    public double getCValue(int cableCount, double nominalDielVoltage) {
-        if (cableCount == 0) return 0;
-        double uTemp = nominalDielVoltage / Eln.LVU;
-        return serie.getValue(cableCount - 1) / uTemp / uTemp;
+    @Override
+    public ISerie capacitanceSerie() {
+        return serie;
     }
 
-    public double getCValue(Container inventory) {
-        ItemStack core = inventory.getItem(PowerCapacitorContainer.redId);
-        ItemStack diel = inventory.getItem(PowerCapacitorContainer.dielectricId);
-        if (Utils.isEmpty(core) || Utils.isEmpty(diel))
-            return getCValue(0, 0);
-        else {
-            return getCValue(core.getCount(), getUNominalValue(inventory));
-        }
+    /** 0 F with an empty slot (the six-node's is 1 uF): its discharge resistor is then dischargeTao / 0, infinite. */
+    @Override
+    public double emptyCapacitance() {
+        return 0;
     }
 
-    public double getUNominalValue(Container inventory) {
-        ItemStack diel = inventory.getItem(PowerCapacitorContainer.dielectricId);
-        if (Utils.isEmpty(diel))
-            return 10000;
-        else {
-            DielectricItem desc = (DielectricItem) DielectricItem.getDescriptor(diel);
-            return desc.uNominal * diel.getCount();
-        }
+    @Override
+    public double dischargeTao() {
+        return dischargeTao;
     }
 
     public void setParent(net.minecraft.world.item.Item item, int damage) {
