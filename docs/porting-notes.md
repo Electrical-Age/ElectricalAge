@@ -587,6 +587,20 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   on to the held item. A socket that only looks right one way up (the sconce) still turns by half turns
   (`SixNodeElement.wrenchStep`), and the Modbus RTU still turns only on a floor or ceiling, as in 1.12.
   `wrench_turn_*`, `wrench_cable_colour_care`.
+- One way to write a quantity (todo #553, Baughn 2026-11-21): screens, Jade, tooltips and item names format volts,
+  watts, joules and temperatures as the meters do (Meters: "230V", "1.50kW", "85.0°C", no space before the unit) and
+  percent as a whole number (`Utils.plotPercent`, "50%"; 1.12's meters showed "50.0%"). A power tier reads "48.0V",
+  "230V", "400V", "11.0kV" (`CableSpec.voltsLabel`) in cable kit and winding names, the toolbag ring and the wire
+  drawing and pole screens; the pole screen's line voltage lost its two decimals. Power sliders (teleporter, turret,
+  energy converter, heat furnace) read "5.00kW", not "5000W". Tank lines in Jade switch to buckets at a bucket of
+  capacity (`EaUnits.tank`, "2.35 / 4 B", rounded down so a tank short of full doesn't read full). Temperatures over
+  999 °C read "1.00k°C", as the meters already did.
+- Device refusals on the action bar (todo #554, Baughn 2026-11-21): placement refusals, the pole spans' and pole gear's
+  messages, a burnt device's repair hint, mode toggles (electrical tools, flashlight, wire colour care), the brush
+  being dry and the resin pot's reading go to the action bar instead of the chat, as most devices' messages already
+  did; a cable kit on a pole says so on the route note line. Meter readings, the wireless analyser's report, the
+  unloadable-device notices, the pole transformer's foot warning, the toolbag shears breaking and debug output stay
+  in the chat. `burnt_heat_furnace_cools_and_burns_nothing`.
 
 ### Multi-fluid pipes (2026-11-03)
 - Baughn: EA pipes carry oil "the complex way": fluids are data (datapack species JSON), Raoult mixing within a
@@ -725,6 +739,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   beside the others (`BenchTest.slowConsumersShareAWeakLine`).
 
 ## Bugs fixed
+
+- Temperatures read 20 °C off in five places (found by the unit consolidation, 2026-11-21): the tank's and the linear
+  servo drive's thermometer lines added the 20 °C reference to a temperature already in °C, the turbine's dT added it
+  to a difference (it reads in kelvin now), and the thermal cable, dissipator and heat furnace tooltips showed limits
+  on the simulation's Tc scale as if in °C (1.12 did the same). The transformer screen's "turns ratio is x %% off"
+  showed the literal "%%".
 
 - Shafts stored mass^2 x 0.25 J per rad/s (linear in speed): a line's inertia grew with the square of its total mass,
   and a joule bought as much speed at 10 rad/s as at 800. Now E = 1/2 I w^2, I summed over the blocks, each sized by

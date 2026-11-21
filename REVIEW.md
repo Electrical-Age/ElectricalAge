@@ -14,8 +14,12 @@ here.
 | Route a cable or pipe (A*) | `node/voxel/Router` | another pathfinder; a cable-only or pipe-only copy of a router step |
 | A device with one static model and nothing animated | `node/transparent/FrontDrawnRender` (the descriptor implements `FrontDrawnRender.Drawn`) | a new `XRender` whose draw() is `front.glRotateXnRef(); desc.draw();` |
 | Item custom data (counters, lengths, settings) | `generic/ItemNbt` | hand-rolled `CustomData` get/put in the item class |
-| Numbers with units in text | `api/Meters` (`volts`, `amps`, `watts`, `joules`, `ohms`, `celsius`, `kelvin`, `number`); `misc/Utils.plot*` | `String.format("%.2f kV", …)`, `(int) w + " W"`, a local `fmt()` |
-| Fluid amounts and contents | `sim/fluid/EaUnits` (`volume`, `contents`, `composition`, `steamGrams`) | `+ " mB"` by hand (EaUnits switches to buckets at 1000 mB) |
+| Numbers with units in text | `api/Meters` (`volts`, `amps`, `watts`, `joules`, `ohms`, `celsius`, `kelvin`, `number`) for a bare value; `misc/Utils.plot*(header, v)` only for the padded meter lines built from them | `String.format("%.2f kV", …)`, `(int) w + " W"`, `plotPower("", w).trim()`, a local `fmt()` |
+| A power tier's voltage (48 V … 11 kV) | `node/voxel/CableSpec.voltsLabel(tier)` (Meters.volts: "48.0V", "11.0kV") | `(int) v / 1000 + " kV"` |
+| Temperatures | Tc scale (K above ambient, thermal loads): `Utils.plotCelsius(t)`; absolute °C: `Meters.celsius`; a difference: `Meters.kelvin` | `plotValue(t + Tamb) + "°C"`, `"%.0f °C"`, plotCelsius on an absolute °C or a difference |
+| Percent | `Utils.plotPercent(share)` ("50%"; 1 is 100 %) | `(int) (x * 100) + "%"`, `tr("…%1$%", round(x * 100))`, `plotPercent("", x).trim()` |
+| Fluid amounts and contents | `sim/fluid/EaUnits` (`volume`, `tank` for "fill / capacity", `contents`, `composition`, `steamGrams`) | `+ " mB"` or `"%.0f / %d mB"` by hand (EaUnits switches to buckets at 1000 mB) |
+| Telling the player something | Transient (a refusal, "needs X", a mode toggle, out of range, a passing reading): the action bar, `player.sendOverlayMessage(Component.literal(…))`; why a kit click failed: `KitPreview.note` (the kit's preview owns the action bar). Chat (`Utils.sendMessage`) only for what is read later: meter readings, multi-line reports, lasting warnings, commands and debug | `Utils.sendMessage` for a refusal |
 | Voltage tiers | `Eln.LVU/MVU/HVU/VVU` (48, 230, 400, 11000 V) | a literal 50, 200, 800 or other old 1.12 voltage in code or comments |
 | Wrench turning | six-node: `SixNodeElement.onBlockActivatedRotate` (`wrenchStep` for half turns); transparent: override `TransparentNodeElement.wrenchTurn`; voxel: `VoxelNode.wrenchTurn`; fluid devices: implement `fluid/FluidPlacement.Turnable` (the base wrenchTurn turns it); a wire's colour care and brush: `SixNodeElement.toggleColorCare` / `brushPaint` | a per-device rotate handler; a wrench turn in onBlockActivated |
 | A battery-charge bar | `client/gui/EaGauge.chargeBar` (`chargeColor`) | another bar fill or charge palette |
@@ -30,7 +34,7 @@ here.
   results and failures appear in the same place. A new placement or configuration path matches the existing one, or
   the change says why it's different and Baughn agreed.
 - **Text the player reads uses the canonical formatters,** so the same quantity reads the same everywhere (same
-  unit, prefix and precision).
+  unit, prefix and precision). Check the GUI JSON `sample` of a fixed-width line when its text changes.
 - **GameTest outcomes don't depend on neighbours** (21-block padding; Baughn). Cases that differ only in parameters
   are rows of one parameterised case (see `HpPlantCases.addTo`), not copies.
 - **The simulation runs in unloaded chunks too:** nodes stay. A test or feature that assumes otherwise is wrong.
@@ -40,7 +44,9 @@ here.
 ## Findings that keep coming back
 
 - Unit formatting re-done locally (consolidation 2026-11-21 found 5 voltage formatters, 3 Celsius formatters, and
-  4 ways of showing percent). Use `Meters`/`Utils.plot*`.
+  4 ways of showing percent; folded the same day, todo #553). Use `Meters`/`Utils.plot*`/`EaUnits`.
+- Feeding the wrong scale to a formatter: plotCelsius takes the Tc scale, so an absolute °C or a difference read
+  20 °C off (the tank's and servo's thermometers, the turbine's dT, until 2026-11-21).
 - Hard-coded GUI colours (the error red `0xFFA02020` appears in 8 places). Put a named constant in `ElnScreen`.
 - Copy-pasted GameTest fixtures (sources, resistors, `node()`, `player()`). Use or extend `TestContext`.
 - Copy-pasted Element/Render/Container pairs differing only in constants (capacitor vs inductor, six-node vs
@@ -49,4 +55,7 @@ here.
 ## Known duplication not yet folded (don't add to it)
 
 Pending Baughn's decision where the UX differs:
-CablePlacer/PipePlacer route state machine, KitPreview cable/pipe ticks, chat vs action-bar error messages.
+CablePlacer/PipePlacer route state machine, KitPreview cable/pipe ticks.
+`EaUnits.compact` (two significant figures, no prefix) stays beside `Meters.number`: fluid units switch unit
+themselves (mB to B, g to kg), and Meters.number would print "120m mB". Descriptor tooltips that state ratings in
+prose (`"%.0f V, %.0f W"`) and mB/s rates are not yet on the formatters.
