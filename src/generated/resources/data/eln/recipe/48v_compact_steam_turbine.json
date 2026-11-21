@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "B": "minecraft:bucket",
-    "C": "#eln:high_quality_plates/copper",
+    "C": "#c:plates/copper",
     "E": "eln:copper_cable",
     "I": "minecraft:iron_ingot",
     "m": "eln:electrical_motor"

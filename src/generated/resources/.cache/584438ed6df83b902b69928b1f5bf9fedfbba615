@@ -1,4 +1,4 @@
-// 26.3	2026-11-17T15:24:52.411916729	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-21T12:07:07.01300504	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 98be7e719755f1d65131e906daa7a98b081c8ce8 data/eln/advancement/recipes/misc/230v_air_blower.json
@@ -41,7 +41,7 @@ cf9a542869d932b0467be73079c897ff6e4c4e30 data/eln/advancement/recipes/misc/2x3_s
 2aa5d5aabaee768ecfe95a0d4e62f777abc8afe5 data/eln/advancement/recipes/misc/48v_battery_charger.json
 2c4eacf5b539b827c0b62e820ef7cf271f2dfe18 data/eln/advancement/recipes/misc/48v_carbon_incandescent_light_bulb.json
 ca6faaa9b235a5f87233d04c0ba84e84c4386309 data/eln/advancement/recipes/misc/48v_carbon_incandescent_light_bulb_2.json
-2238bc3d9438868792472b3b64ff4d4295ee112c data/eln/advancement/recipes/misc/48v_compact_steam_turbine.json
+09dc762a9add8ffbe181cd97ee766e79e986b27e data/eln/advancement/recipes/misc/48v_compact_steam_turbine.json
 1273cd9f23219a12a3b1ab8410f8e1113cc2c435 data/eln/advancement/recipes/misc/48v_compressor.json
 a94386f961dec7d14d3dd30559fec18b0731fc12 data/eln/advancement/recipes/misc/48v_copper_heating_corp.json
 abdfeeab72fb1e970bc2cac108a065b958c89045 data/eln/advancement/recipes/misc/48v_economic_light_bulb.json
@@ -430,7 +430,7 @@ fe2f010c0e86a4a3c976e6478fba8648c22ff18c data/eln/recipe/400v_electrical_age_to_
 1bc9e9b3a5049695827e2569520998520d075d7f data/eln/recipe/48v_battery_charger.json
 4de32c8741f8fd4498b8f057c10f70373ef7afa1 data/eln/recipe/48v_carbon_incandescent_light_bulb.json
 fc4b23a7104bb71f84d300d37f3b69432482065b data/eln/recipe/48v_carbon_incandescent_light_bulb_2.json
-6b2a20d3fb4f06a798967d41c97a02f3e96c5272 data/eln/recipe/48v_compact_steam_turbine.json
+7cfb2ce6edae22ff2c22549e1f35a2ef95cd3d70 data/eln/recipe/48v_compact_steam_turbine.json
 de1c21a0c92701b9b858b06cdf83985e30f92322 data/eln/recipe/48v_compressor.json
 3af367cf509b01da7f98188b4f559d9db5fa4d62 data/eln/recipe/48v_copper_heating_corp.json
 dfc98b6885badee733c6a55ae303a7b8e5d3e62d data/eln/recipe/48v_economic_light_bulb.json

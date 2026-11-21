@@ -2191,12 +2191,14 @@ public final class ElnRecipes extends ElnRecipesBase {
             'E', findItemStack("Copper Cable"),
             'm', findItemStack("Advanced Electrical Motor"));
         // the bootstrap turbine (Baughn 2026-10-27): cheaper than the 50V Steam Turbine and no boiler to buy; a bucket for
-        // its tank, copper plates for its condenser
+        // its tank, copper plates for its condenser. Any mod's copper plates (c:plates/copper), not only EA's own, so it
+        // can be made by hand in packs with hammers (Baughn 1573669111920066631: EA's plates need a powered Plate Machine)
         addRecipe(findItemStack("48V Compact Steam Turbine", 1),
             "CBC",
             "ImI",
             "IEI",
-            'C', "plateCopper",
+            'C', net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+                net.minecraft.resources.Identifier.fromNamespaceAndPath("c", "plates/copper")),
             'B', stack(Items.BUCKET),
             'I', stack(Items.IRON_INGOT),
             'm', findItemStack("Electrical Motor"),
