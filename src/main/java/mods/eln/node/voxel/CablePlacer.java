@@ -326,7 +326,10 @@ public final class CablePlacer {
             double bd = Double.MAX_VALUE;
             for (int g = 0; g < 6; g++) {
                 if (CableRouter.axis(g) == fa) continue;
-                if (n.getSideConnectionMask(side, side.getLRDUGoingTo(mods.eln.misc.Direction.fromEnumFacing(Direction.from3DDataValue(g)))) == 0) continue;
+                int m = n.getSideConnectionMask(side, side.getLRDUGoingTo(mods.eln.misc.Direction.fromEnumFacing(Direction.from3DDataValue(g))));
+                // (a connector of the kit's kind: an LV kit laid to a heater's thermal back said "Laid" and carried
+                // nothing, AdventurAgent's handbook replay)
+                if (m == 0 || !kindOn(n, side, g, m, tier)) continue;
                 double d = g % 2 == 0 ? h[CableRouter.axis(g)] : 1 - h[CableRouter.axis(g)];
                 if (d < bd) {
                     bd = d;
@@ -349,7 +352,7 @@ public final class CablePlacer {
                 int lw = w == 0 ? -face.getStepZ() : w == 2 ? face.getStepX() : 0;   // (left, seen facing the face from outside)
                 for (var pin : fp.facePins(side)) {
                     if (side.applyLRDU(pin.lrdu()).toEnumFacing().get3DDataValue() != edge) continue;
-                    if (tier >= 0 && !mods.eln.node.NodeBase.compareConnectionMask(pin.mask(), DevicePlacer.tierMask(tier))) continue;
+                    if (!DevicePlacer.fits(pin.mask(), tier)) continue;
                     int at = 8 + pin.leftward() * lw;
                     double d = Math.abs(at - h[w] * 16);
                     if (d < best) {
@@ -363,6 +366,23 @@ public final class CablePlacer {
         CableRouter.End snapped = snapToPort(level, pos, face, hx, hy, hz, start, join, tier);
         if (snapped != null) return snapped;
         return surface(pos, face, hx, hy, hz);
+    }
+
+    /**
+     * Has the machine's face side a connector of the kit's tier on edge g (mask m)? On a FacePins edge only its pins
+     * count: such an edge takes no plain connection.
+     */
+    static boolean kindOn(mods.eln.node.NodeBase n, mods.eln.misc.Direction side, int g, int m, int tier) {
+        if (n instanceof mods.eln.node.FacePins fp) {
+            boolean pinned = false;
+            for (var pin : fp.facePins(side)) {
+                if (side.applyLRDU(pin.lrdu()).toEnumFacing().get3DDataValue() != g) continue;
+                pinned = true;
+                if (DevicePlacer.fits(pin.mask(), tier)) return true;
+            }
+            if (pinned) return false;
+        }
+        return DevicePlacer.fits(m, tier);
     }
 
     /** The end at the hosted device in slot el (0..5: centred on that face) of v: the edge of its face nearest the block-local
@@ -380,7 +400,7 @@ public final class CablePlacer {
             double bd = Double.MAX_VALUE;
             for (VoxelNode.Pin p : VoxelNode.pins(e)) {
                 // a pin of the kit's kind (AdventurAgent: a thermal kit ended at a thermal probe's signal pin)
-                if (tier >= 0 && !mods.eln.node.NodeBase.compareConnectionMask(p.mask(), DevicePlacer.tierMask(tier)))
+                if (!DevicePlacer.fits(p.mask(), tier))
                     continue;
                 double d = sq(p.tip()[0] - h[0] * 16) + sq(p.tip()[1] - h[1] * 16) + sq(p.tip()[2] - h[2] * 16);
                 if (d < bd) {
@@ -421,7 +441,7 @@ public final class CablePlacer {
                 }
                 if (!pinned) points.add(new int[]{c[0], c[1], c[2], host.getConnectionMask(lrdu)});
                 for (int[] q : points) {
-                    if (q[3] == 0 || tier >= 0 && !mods.eln.node.NodeBase.compareConnectionMask(q[3], DevicePlacer.tierMask(tier))) continue;
+                    if (q[3] == 0 || !DevicePlacer.fits(q[3], tier)) continue;
                     double d = sq(q[0] - h[0] * 16) + sq(q[1] - h[1] * 16) + sq(q[2] - h[2] * 16);
                     if (d < bd) {
                         bd = d;
@@ -439,7 +459,7 @@ public final class CablePlacer {
             if (CableRouter.axis(g) == fa) continue;
             var out = mods.eln.misc.Direction.fromEnumFacing(Direction.from3DDataValue(g));
             int m = v.getSideConnectionMask(out, out.getLRDUGoingTo(side));
-            if (m == 0 || tier >= 0 && !mods.eln.node.NodeBase.compareConnectionMask(m, DevicePlacer.tierMask(tier))) continue;
+            if (m == 0 || !DevicePlacer.fits(m, tier)) continue;
             double d = g % 2 == 0 ? h[CableRouter.axis(g)] : 1 - h[CableRouter.axis(g)];
             if (d < bd) {
                 bd = d;

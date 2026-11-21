@@ -112,6 +112,11 @@ public final class DevicePlacer {
     }
 
     /** The connection mask of a cable tier (CablePart.TIERS index). */
+    /** Does a connector of this mask take the kit of this tier (any, tier < 0)? */
+    static boolean fits(int mask, int tier) {
+        return tier < 0 || mods.eln.node.NodeBase.compareConnectionMask(mask, tierMask(tier));
+    }
+
     static int tierMask(int tier) {
         return CablePart.TIERS[tier].mask();
     }
