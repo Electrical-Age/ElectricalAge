@@ -91,6 +91,9 @@ GlSubmit.submit(frame, pose, collector, light)      per batch: collector.submitC
 ## X-ray scanner, tutorial sign, probes
 
 - X-ray: `client/XRayScan.java` (client) scans the grid every other client tick for the held, switched-on scanner and installs `XRayScannerDescriptor.pictures`; the item draw shows it. Ray marching in `item/xray/XRayRayMarch.java`, ore matching by tags in `item/xray/XRayFilter.java` (invalidated on `TagsUpdatedEvent`), filter screen `client/gui/XRayScannerScreen.java`.
+- Battery-charge bars on the HUD (the worn belt's, `client/BeltHud`; the bike's, `client/BikeHud`) are one drawer,
+  `client/gui/EaGauge.chargeBar`: rim, dark inside, fill by charge from the left or the bottom, green over half, amber
+  over a fifth, red below; each HUD keeps its own place and size.
 - Tutorial sign HUD: `sixnode/tutorialsign/TutorialSignHud.java`, GUI layer `eln:tutorial_sign` (registered above all): nearest sign within one block shows its text top-left.
 - Jade: `compat/jade/ElnJadePlugin.java` (`@WailaPlugin`, compileOnly dep): server data provider on `NodeBlockEntity`, lines from the device's `getWaila`; details while sneaking or with config `probe.details`. TheOneProbe: not ported (no 26.x build).
 

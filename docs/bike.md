@@ -166,7 +166,8 @@ GameTest `bike_recipe` crafts it.
 - `client/BikeHud` (GUI layer `eln:bike_speedometer`, above the hotbar; Baughn: tell players it needs a battery): while
   the local player rides a bike, a round dial left of the hotbar (past the offhand slot): needle 0 to `poweredSpeed` in
   km/h (b/s x 3.6) over 270 degrees, ticks every tenth (the last red), a digital readout; the speed is the bike's
-  horizontal speed, smoothed. Beside it the battery, filled by charge (green, yellow under 50%, red under 20%); with no
+  horizontal speed, smoothed. Beside it the battery, filled by charge (`EaGauge.chargeBar`, the belt's bar too: green,
+  amber at 50% and under, red at 20% and under); with no
   battery or a flat one, a red outlined battery with a slash, blinking (1 s on, 0.5 s off). Drawn with fills.
 - The charge comes from the synced `charge` (0..1, `NO_BATTERY` = -1 when the slot holds no battery), sent by the server
   when it moves by half a percent, reaches 0 or 1, or the battery comes or goes (`syncCharge`). Getting on with no

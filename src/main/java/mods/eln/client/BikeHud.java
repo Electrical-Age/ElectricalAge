@@ -72,7 +72,7 @@ public final class BikeHud {
         }
     }
 
-    /** An upright battery 8 x 18 at (x, y): filled by charge, green to red; with none or flat, a red outline with a slash. */
+    /** An upright battery 8 x 18 at (x, y): a charge bar (EaGauge.chargeBar) with a terminal; with none or flat, a red outline with a slash. */
     static void battery(GuiGraphicsExtractor g, int x, int y, float charge, int ticks) {
         boolean empty = charge <= 0.001f;
         int bw = 8, bh = 18;
@@ -85,11 +85,7 @@ public final class BikeHud {
             for (int i = 0; i < bh - 2; i++) dot(g, x + 1 + (bw - 3) * (1 - i / (float) (bh - 3)), y + 1 + i, red);
             return;
         }
-        g.fill(x + 2, y - 2, x + bw - 2, y, 0xFF9AA4AE);
-        g.fill(x, y, x + bw, y + bh, 0xFF9AA4AE);
-        g.fill(x + 1, y + 1, x + bw - 1, y + bh - 1, 0xFF15181C);
-        int fill = Math.max(1, Math.round((bh - 2) * Math.min(1, charge)));
-        int c = charge > 0.5f ? 0xFF50C060 : charge > 0.2f ? 0xFFD0B030 : 0xFFE05030;
-        g.fill(x + 1, y + bh - 1 - fill, x + bw - 1, y + bh - 1, c);
+        g.fill(x + 2, y - 2, x + bw - 2, y, mods.eln.client.gui.EaGauge.RIM);
+        mods.eln.client.gui.EaGauge.chargeBar(g, x, y, bw, bh, charge, true);
     }
 }
