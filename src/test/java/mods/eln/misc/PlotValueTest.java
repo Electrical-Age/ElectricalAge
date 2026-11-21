@@ -51,7 +51,8 @@ public class PlotValueTest {
         try {
             assertEquals("50%", Utils.plotPercent(0.5));
             assertEquals("0%", Utils.plotPercent(0.004));
-            assertEquals("100%", Utils.plotPercent(0.996));
+            assertEquals("99%", Utils.plotPercent(0.996));   // (rounded down: only full reads 100%)
+            assertEquals("100%", Utils.plotPercent(1.0));
             assertEquals("120%", Utils.plotPercent(1.2));
             assertEquals("Eff: 50%   ", Utils.plotPercent("Eff:", 0.5));
         } finally {

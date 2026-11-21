@@ -589,8 +589,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `wrench_turn_*`, `wrench_cable_colour_care`.
 - One way to write a quantity (todo #553, Baughn 2026-11-21): screens, Jade, tooltips and item names format volts,
   watts, joules and temperatures as the meters do (Meters: "230V", "1.50kW", "85.0°C", no space before the unit) and
-  percent as a whole number (`Utils.plotPercent`, "50%"; 1.12's meters showed "50.0%"). A power tier reads "48.0V",
-  "230V", "400V", "11.0kV" (`CableSpec.voltsLabel`) in cable kit and winding names, the toolbag ring and the wire
+  percent as a whole number, rounded down (`Utils.plotPercent`, "50%"; only full reads "100%"; 1.12's meters showed "50.0%"). A power tier reads "48V",
+  "230V", "400V", "11kV" (`CableSpec.voltsLabel`) in cable kit and winding names, the toolbag ring and the wire
   drawing and pole screens; the pole screen's line voltage lost its two decimals. Power sliders (teleporter, turret,
   energy converter, heat furnace) read "5.00kW", not "5000W". Tank lines in Jade switch to buckets at a bucket of
   capacity (`EaUnits.tank`, "700 mB / 4.0 B", the fill rounded down so a tank short of full doesn't read full). Temperatures over

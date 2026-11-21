@@ -260,8 +260,9 @@ public class Utils {
      * A share (1 is 100 %) as a whole percentage, "50%": the form most of EA's text had already (1.12's meters showed
      * "50.0%" under 100 % and "100%" over it).
      */
+    /** A share as a whole percent, rounded down so that only a full battery or tank reads "100%". */
     public static String plotPercent(double value) {
-        return String.format("%.0f%%", value * 100.0);
+        return (long) Math.floor(value * 100.0 + 1e-9) + "%";
     }
 
     public static String plotPercent(String header, double value) {

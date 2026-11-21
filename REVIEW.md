@@ -15,7 +15,7 @@ here.
 | A device with one static model and nothing animated | `node/transparent/FrontDrawnRender` (the descriptor implements `FrontDrawnRender.Drawn`) | a new `XRender` whose draw() is `front.glRotateXnRef(); desc.draw();` |
 | Item custom data (counters, lengths, settings) | `generic/ItemNbt` | hand-rolled `CustomData` get/put in the item class |
 | Numbers with units in text | `api/Meters` (`volts`, `amps`, `watts`, `joules`, `ohms`, `celsius`, `kelvin`, `number`) for a bare value; `misc/Utils.plot*(header, v)` only for the padded meter lines built from them | `String.format("%.2f kV", …)`, `(int) w + " W"`, `plotPower("", w).trim()`, a local `fmt()` |
-| A power tier's voltage (48 V … 11 kV) | `node/voxel/CableSpec.voltsLabel(tier)` (Meters.volts: "48.0V", "11.0kV") | `(int) v / 1000 + " kV"` |
+| A power tier's voltage (48 V … 11 kV) | `node/voxel/CableSpec.voltsLabel(tier)` ("48V", "11kV", as the device names; readings use Meters.volts) | `(int) v / 1000 + " kV"` |
 | Temperatures | Tc scale (K above ambient, thermal loads): `Utils.plotCelsius(t)`; absolute °C: `Meters.celsius`; a difference: `Meters.kelvin` | `plotValue(t + Tamb) + "°C"`, `"%.0f °C"`, plotCelsius on an absolute °C or a difference |
 | Percent | `Utils.plotPercent(share)` ("50%"; 1 is 100 %) | `(int) (x * 100) + "%"`, `tr("…%1$%", round(x * 100))`, `plotPercent("", x).trim()` |
 | Fluid amounts and contents | `sim/fluid/EaUnits` (`volume`, `tank` for "fill / capacity", `contents`, `composition`, `steamGrams`) | `+ " mB"` or `"%.0f / %d mB"` by hand (EaUnits switches to buckets at 1000 mB) |
