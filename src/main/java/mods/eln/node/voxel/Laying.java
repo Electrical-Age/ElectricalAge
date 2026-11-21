@@ -52,19 +52,55 @@ final class Laying {
 
     /** Check, then place every part; null if all are laid, else why not (and none is left laid). */
     static String lay(Level level, List<BlockPos> at, List<VoxelPart> parts, Player player) {
+        return lay(level, at, parts, List.of(), player);
+    }
+
+    /**
+     * A pipe joined into an old pipe of its block (VoxelNode.addJoined: the pipe there is split and a junction put in);
+     * x, y, z block-local voxels of the join point.
+     */
+    record Join(BlockPos pos, PipePart part, int x, int y, int z) {
+    }
+
+    /**
+     * The same with the route's joins into old pipes: each join is checked first (its own block, which the parts never
+     * touch), then the parts; the joins go in after the parts, and a refused one takes the parts back. A join already
+     * made can't be taken back (its pipe is split), so a second join in the same lay could leave the first; a route has a
+     * join at each end at most, in two blocks, each checked beforehand, and nothing between the check and the join
+     * changes those blocks.
+     */
+    static String lay(Level level, List<BlockPos> at, List<VoxelPart> parts, List<Join> joins, Player player) {
+        for (Join j : joins) {
+            if (!(level.getBlockEntity(j.pos()) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return "the pipe is gone";
+            String err = n.joinError(j.part(), j.x(), j.y(), j.z());
+            if (err != null) return err;
+        }
         String err = check(level, at, parts);
         if (err != null) return err;
         List<Integer> placed = new ArrayList<>();
         for (int i = 0; i < parts.size(); i++) {
             err = PipeKitItem.place(level, at.get(i), parts.get(i), player);
             if (err != null) {
-                for (int k = placed.size() - 1; k >= 0; k--) takeBack(level, at.get(placed.get(k)), parts.get(placed.get(k)));
+                takeBack(level, at, parts, placed);
                 return err + " at " + at.get(i).toShortString();
             }
             placed.add(i);
         }
+        for (Join j : joins) {
+            err = level.getBlockEntity(j.pos()) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n
+                ? n.addJoined(j.part(), j.x(), j.y(), j.z()) : "the pipe is gone";
+            if (err != null) {
+                takeBack(level, at, parts, placed);
+                return err;
+            }
+        }
         CableLinks.laid(at, parts);
         return null;
+    }
+
+    /** Take back the parts placed so far (indices into at and parts), last first. */
+    private static void takeBack(Level level, List<BlockPos> at, List<VoxelPart> parts, List<Integer> placed) {
+        for (int k = placed.size() - 1; k >= 0; k--) takeBack(level, at.get(placed.get(k)), parts.get(placed.get(k)));
     }
 
     /** Remove a part just laid (by identity), and its block if nothing else is left in it. */

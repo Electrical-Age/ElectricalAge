@@ -212,11 +212,7 @@ public final class PipePlacer {
     public static String layFailingForTests(Level level, int tier, List<long[]> points, int failAt) {
         List<BlockPos> at = new ArrayList<>();
         List<VoxelPart> parts = new ArrayList<>();
-        for (var e : PipeRouter.perBlock(points).entrySet())
-            for (int[] pts : e.getValue()) {
-                at.add(new BlockPos(e.getKey().get(0).intValue(), e.getKey().get(1).intValue(), e.getKey().get(2).intValue()));
-                parts.add(new PipePart(tier, pts));
-            }
+        pieceParts(tier, PipeRouter.perBlock(points), at, parts);
         return Laying.layFailingAtForTests(level, at, parts, failAt < 0 ? parts.size() + failAt : failAt);
     }
 
@@ -415,36 +411,30 @@ public final class PipePlacer {
 
     /**
      * Lay a route whose ends may join old pipes (world voxel points: a start on a pipe, a finish on one): each join
-     * block's piece goes in as a junction. Every junction and every other piece is checked before anything is laid.
+     * block's piece goes in as a junction, in the same all-or-nothing lay as the other pieces (Laying: every junction
+     * and every other piece is checked before anything is laid).
      */
     public static String layJoined(Level level, int tier, List<long[]> points, List<long[]> joins, net.minecraft.world.entity.player.Player player) {
         var pieces = PipeRouter.perBlock(points);
+        List<Laying.Join> js = new ArrayList<>();
         List<BlockPos> jbs = new ArrayList<>();
-        List<int[]> jpieces = new ArrayList<>();
         for (long[] join : joins) {
             BlockPos jb = new BlockPos((int) Math.floorDiv(join[0], 16), (int) Math.floorDiv(join[1], 16), (int) Math.floorDiv(join[2], 16));
             if (jbs.contains(jb)) return "it starts and ends on the same pipe block";
             List<int[]> mine = pieces.remove(List.of((long) jb.getX(), (long) jb.getY(), (long) jb.getZ()));
             if (mine == null || mine.size() != 1) return "the route doesn't end in the pipe's block";
             if (!(level.getBlockEntity(jb) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return "the pipe is gone";
-            // (check the junction before laying anything, so a refused join leaves no pipe behind)
-            String jerr = n.joinError(new PipePart(tier, mine.get(0)), (int) (join[0] - jb.getX() * 16L), (int) (join[1] - jb.getY() * 16L),
+            Laying.Join j = new Laying.Join(jb, new PipePart(tier, mine.get(0)), (int) (join[0] - jb.getX() * 16L), (int) (join[1] - jb.getY() * 16L),
                 (int) (join[2] - jb.getZ() * 16L));
+            String jerr = n.joinError(j.part(), j.x(), j.y(), j.z());   // (each join's refusal before the next join's)
             if (jerr != null) return jerr;
             jbs.add(jb);
-            jpieces.add(mine.get(0));
+            js.add(j);
         }
-        String err = lay(level, tier, pieces, player);
-        if (err != null) return err;
-        for (int k = 0; k < jbs.size(); k++) {
-            BlockPos jb = jbs.get(k);
-            long[] join = joins.get(k);
-            if (!(level.getBlockEntity(jb) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return "the pipe is gone";
-            err = n.addJoined(new PipePart(tier, jpieces.get(k)), (int) (join[0] - jb.getX() * 16L), (int) (join[1] - jb.getY() * 16L),
-                (int) (join[2] - jb.getZ() * 16L));
-            if (err != null) return err;
-        }
-        return null;
+        List<BlockPos> at = new ArrayList<>();
+        List<VoxelPart> parts = new ArrayList<>();
+        pieceParts(tier, pieces, at, parts);
+        return Laying.lay(level, at, parts, js, player);   // (all or nothing, the junctions too)
     }
 
     static PipeRouter.Result route(Level level, Plan plan, PipeRouter.End end) {
@@ -473,12 +463,17 @@ public final class PipePlacer {
     static String lay(Level level, int tier, java.util.Map<List<Long>, List<int[]>> pieces, net.minecraft.world.entity.player.Player player) {
         List<BlockPos> at = new ArrayList<>();
         List<VoxelPart> parts = new ArrayList<>();
+        pieceParts(tier, pieces, at, parts);
+        return Laying.lay(level, at, parts, player);   // (all or nothing)
+    }
+
+    /** One pipe part per block piece, into at and parts (in the same order). */
+    static void pieceParts(int tier, java.util.Map<List<Long>, List<int[]>> pieces, List<BlockPos> at, List<VoxelPart> parts) {
         for (var e : pieces.entrySet())
             for (int[] pts : e.getValue()) {
                 at.add(new BlockPos(e.getKey().get(0).intValue(), e.getKey().get(1).intValue(), e.getKey().get(2).intValue()));
                 parts.add(new PipePart(tier, pts));
             }
-        return Laying.lay(level, at, parts, player);   // (all or nothing)
     }
 
     static void preview(ServerPlayer player, ServerLevel level, Plan plan, PipeRouter.End end) {
