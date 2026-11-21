@@ -22,7 +22,7 @@
   },
   {
    "text": "charge",
-   "sample": "Recharge power: 5000W"
+   "sample": "Recharge power: 5.00kW"
   },
   {
    "slider": "charge",

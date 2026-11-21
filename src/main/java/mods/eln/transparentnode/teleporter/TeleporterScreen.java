@@ -29,11 +29,11 @@ public class TeleporterScreen extends ElnScreen {
             tr("Transporter name"));
         field("target", () -> render.targetName == null ? "" : render.targetName,
             v -> render.clientSendString(TeleporterElement.setTargetNameId, v), tr("Destination transporter"));
-        charge = slider("charge", 2000, 20000, 200, render.chargePower, v -> Component.literal(tr("Power consumption: %1$W", (int) v)),
+        charge = slider("charge", 2000, 20000, 200, render.chargePower, v -> Component.literal(tr("Power consumption: %1$", mods.eln.api.Meters.watts(v))),
             v -> render.clientSendFloat(TeleporterElement.setChargePowerId, (float) v));
         render.chargePowerNew = false;
         gauge("energy", () -> render.energyTarget <= 0 ? 0 : render.energyHit / render.energyTarget,
-            () -> Component.literal(tr("Required energy: %1$J", (int) render.energyTarget) + "  " + mods.eln.misc.Utils.plotPercent(render.processRatio)),
+            () -> Component.literal(tr("Required energy: %1$", mods.eln.api.Meters.joules(render.energyTarget)) + "  " + mods.eln.misc.Utils.plotPercent(render.processRatio)),
             2, 2);
         start = button("start", () -> tr("Start"), () -> render.clientSendId(TeleporterElement.startId));
         update();

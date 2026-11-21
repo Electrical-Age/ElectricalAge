@@ -31,7 +31,7 @@ public class HeatFurnaceScreen extends ElnScreen {
         fuel = button("fuel", () -> render.takeFuel ? tr("Taking fuel") : tr("Declining fuel"), render::clientToogleTakeFuel);
         gain = slider("gain", 0.1, 1.0, 0.01, render.gainSyncValue,
             v -> Component.literal(tr("Control gauge at %1$", Utils.plotPercent(v)) + "  (" + (regulator() && !render.controleExternal
-                ? tr("the regulator sets it") : tr("Power: %1$W", render.power)) + ")"),
+                ? tr("the regulator sets it") : tr("Power: %1$", mods.eln.api.Meters.watts(render.power))) + ")"),
             v -> render.clientSetGain((float) v));
         text("fire", () -> !render.takeFuel && render.fire <= 0 ? tr("Fire: out (declining fuel: click \"Declining fuel\" to take it)")
             : fireLine(render.fire, render.gainSyncValue, render.lighting, mods.eln.sim.Fire.COAL, refuels()));

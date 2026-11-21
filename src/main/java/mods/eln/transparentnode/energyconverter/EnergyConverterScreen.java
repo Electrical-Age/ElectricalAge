@@ -22,7 +22,7 @@ public class EnergyConverterScreen extends ElnScreen {
     protected void init() {
         super.init();
         limit = slider("limit", 0, 1, 0.01, render.inPowerFactor,
-            v -> Component.literal(tr("Input power is limited to %1$W", (int) (v * render.inPowerMax))),
+            v -> Component.literal(tr("Input power is limited to %1$", mods.eln.api.Meters.watts(v * render.inPowerMax))),
             v -> render.clientSendFloat(EnergyConverterElnToOtherElement.setInPowerFactor, (float) v));
         render.hasChanges = false;
     }

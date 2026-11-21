@@ -105,7 +105,7 @@ public class XRayScannerDescriptor extends GenericItemUsingDamageDescriptor impl
         super.addInformation(stack, player, list, par4);
         list.add(tr("Shows the ores you choose through rock, %1$ blocks ahead.", (int) range));
         list.add(tr("Use: on/off. Sneak + use: choose the ores (4 slots: ore blocks or raw chunks)."));
-        list.add(tr("Power: %1$W", (int) dischargePower));
+        list.add(tr("Power: %1$", mods.eln.api.Meters.watts(dischargePower)));
     }
 
     @Override

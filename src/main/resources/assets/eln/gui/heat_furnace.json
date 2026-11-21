@@ -27,7 +27,7 @@
   },
   {
    "text": "gain",
-   "sample": "Control gauge at 100%  (Power: 9999W)"
+   "sample": "Control gauge at 100%  (Power: 9.99kW)"
   },
   {
    "slider": "gain",

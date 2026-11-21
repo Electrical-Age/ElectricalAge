@@ -34,7 +34,7 @@
   },
   {
    "text": "charge",
-   "sample": "Power consumption: 20000W"
+   "sample": "Power consumption: 20.0kW"
   },
   {
    "slider": "charge",
