@@ -59,6 +59,8 @@ public final class CableRouter {
         }
     }
 
+    /** Unit steps by face (0..5 = -y +y -z +z -x +x, the Direction 3D values). PipeRouter.D has the same six in pipe
+     *  order (-x +x -y +y -z +z); the two indices don't mix. */
     static final int[][] DV = {{0, -1, 0}, {0, 1, 0}, {0, 0, -1}, {0, 0, 1}, {-1, 0, 0}, {1, 0, 0}};
 
     static int axis(int dir) {
@@ -115,10 +117,6 @@ public final class CableRouter {
             else c[a] = Math.floorDiv(p[a], 16);
         }
         return c;
-    }
-
-    static long h(long[] p, long[] t) {
-        return Math.abs(p[0] - t[0]) + Math.abs(p[1] - t[1]) + Math.abs(p[2] - t[2]);
     }
 
     /** A cable piece to lay: block, face (attach), local polyline; or a knuckle (face -1, one point). */
