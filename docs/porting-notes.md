@@ -426,7 +426,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   batteries/condensators and `#eln:battery_belt_items`; right-click opens them, sneak-right-click wears it. An EA item
   battery standing for its contents (charged whole; gives only from what can discharge). Worn, it joins the player's
   item energy (ItemEnergyInventoryProcess) and shows a HUD bar (client BeltHud; `BatteryBeltItem.hudAbove` for a mod's bar
-  above it). `battery_belt_pockets_and_charge`.
+  above it). The bar is the bike's battery bar (`EaGauge.chargeBar`, todo #555): green over half, amber, red at a fifth. `battery_belt_pockets_and_charge`.
 - DC-DC converter (Baughn 2026-10-27): connects to nothing (no masks, no loads) unless both winding slots and the core
   slot are filled (1.12 kept its sides connected through high-impedance loads); its screen frames the primary slot green
   and the secondary yellow, as the model's marks. `wp10a_transformer_connects_only_when_complete`.
@@ -581,6 +581,13 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   wrench key (C) with such a device in hand turns its placement preview the same way, and the click places it as shown.
   The chosen turn is kept per player for that kind of device until changed (or logout), not reset after placing.
   `WrenchSkipsCase`, `TurnBeforePlacingCase`.
+- One wrench turn (todo #556, Baughn 2026-11-21): every device turns by the shared helpers
+  (`SixNodeElement.onBlockActivatedRotate`, `TransparentNodeElement.wrenchTurn`, `FluidPlacement.Turnable`), and a
+  wrench click that turns or toggles something is used. Before, the wind turbine's and a cable's colour-care click went
+  on to the held item; an antenna's or a lamp socket's turn didn't show until something else published; a lamp socket
+  or Modbus RTU off centre in a voxel block turned without the fit check. A socket that only looks right one way up
+  (the sconce) still turns by half turns, and the Modbus RTU still turns only on a floor or ceiling, as in 1.12.
+  `wrench_turn_*`, `wrench_cable_colour_care`.
 
 ### Multi-fluid pipes (2026-11-03)
 - Baughn: EA pipes carry oil "the complex way": fluids are data (datapack species JSON), Raoult mixing within a

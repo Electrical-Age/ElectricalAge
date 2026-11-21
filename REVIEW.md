@@ -17,7 +17,8 @@ here.
 | Numbers with units in text | `api/Meters` (`volts`, `amps`, `watts`, `joules`, `ohms`, `celsius`, `kelvin`, `number`); `misc/Utils.plot*` | `String.format("%.2f kV", …)`, `(int) w + " W"`, a local `fmt()` |
 | Fluid amounts and contents | `sim/fluid/EaUnits` (`volume`, `contents`, `composition`, `steamGrams`) | `+ " mB"` by hand (EaUnits switches to buckets at 1000 mB) |
 | Voltage tiers | `Eln.LVU/MVU/HVU/VVU` (48, 230, 400, 11000 V) | a literal 50, 200, 800 or other old 1.12 voltage in code or comments |
-| Wrench turning | six-node: `SixNodeElement.onBlockActivatedRotate`; transparent: `TransparentNodeElement.wrenchTurn`; voxel: `VoxelNode.wrenchTurn`; fluid devices: `fluid/FluidPlacement.Turnable` | a per-device rotate handler |
+| Wrench turning | six-node: `SixNodeElement.onBlockActivatedRotate` (`wrenchStep` for half turns); transparent: override `TransparentNodeElement.wrenchTurn`; voxel: `VoxelNode.wrenchTurn`; fluid devices: implement `fluid/FluidPlacement.Turnable` (the base wrenchTurn turns it); a wire's colour care and brush: `SixNodeElement.toggleColorCare` / `brushPaint` | a per-device rotate handler; a wrench turn in onBlockActivated |
+| A battery-charge bar | `client/gui/EaGauge.chargeBar` (`chargeColor`) | another bar fill or charge palette |
 | Clamping | `misc/Utils.limit` | another local `clamp` |
 | Kit recipes | `node/voxel/KitRecipes` | a per-kit recipe skeleton |
 | GameTest ids | `gametest/cases/Ids` | a per-file `transparent(String)` / `six(String)` lookup |
@@ -48,5 +49,4 @@ here.
 ## Known duplication not yet folded (don't add to it)
 
 Pending Baughn's decision where the UX differs:
-CablePlacer/PipePlacer route state machine, KitPreview cable/pipe ticks, the two battery-charge HUD bars, chat
-vs action-bar error messages.
+CablePlacer/PipePlacer route state machine, KitPreview cable/pipe ticks, chat vs action-bar error messages.
