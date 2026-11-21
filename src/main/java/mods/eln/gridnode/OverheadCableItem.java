@@ -77,7 +77,7 @@ public class OverheadCableItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display,
                                 java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
         CableSpec spec = new CableSpec(mm2(stack), 0);
-        out.accept(Component.literal(mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor.fmt(CableSpec.MM2[spec.mm2()])
+        out.accept(Component.literal(CableSpec.mm2Number(CableSpec.MM2[spec.mm2()])
             + String.format(" mm² bare copper, %.0f A", spec.amps())).withStyle(net.minecraft.ChatFormatting.GRAY));
         out.accept(Component.literal("For the spans between utility poles: right-click one pole, then the next")
             .withStyle(net.minecraft.ChatFormatting.DARK_GRAY));

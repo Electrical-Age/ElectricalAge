@@ -98,9 +98,9 @@ public class WireDrawingScreen extends ElnScreen {
         java.util.function.BooleanSupplier poleMode = () -> r.mode == WireDrawingElement.POLE;
         text("mm2l", shown(wire, () -> poleMode.getAsBoolean() ? tr("Low-side wire") : tr("Wire")));
         when(wire, locked(button("mm2dn", () -> "<", () -> set(r.mode, r.mm2 - 1, r.tier, r.colour, r.amount))));
-        text("mm2", shown(wire, () -> WireDrawingDescriptor.fmt(CableSpec.MM2[r.mm2]) + " mm², " + String.format("%.0f A", CableSpec.AMPS[r.mm2])));
+        text("mm2", shown(wire, () -> CableSpec.mm2Number(CableSpec.MM2[r.mm2]) + " mm², " + String.format("%.0f A", CableSpec.AMPS[r.mm2])));
         when(wire, locked(button("mm2up", () -> ">", () -> set(r.mode, r.mm2 + 1, r.tier, r.colour, r.amount),
-            tr("Up to %1$ mm² on this machine", WireDrawingDescriptor.fmt(CableSpec.MM2[r.desc.maxMm2])))));
+            tr("Up to %1$ mm² on this machine", CableSpec.mm2Number(CableSpec.MM2[r.desc.maxMm2])))));
         text("insl", shown(ins, () -> poleMode.getAsBoolean() ? tr("Low side") : tr("Insulation")));
         when(ins, locked(button("insdn", () -> "<", () -> set(r.mode, r.mm2, r.tier - 1, r.colour, r.amount))));
         text("ins", shown(ins, () -> CableSpec.voltsLabel(r.tier)));

@@ -98,9 +98,12 @@ public record CableSpec(int mm2, int colour) {
 
     /** "2.5 mm², 48V". */
     public String label(int tier) {
-        double m = MM2[mm2];
-        String mm = m == Math.floor(m) ? String.valueOf((int) m) : String.valueOf(m);
-        return mm + " mm², " + voltsLabel(tier);
+        return mm2Number(MM2[mm2]) + " mm², " + voltsLabel(tier);
+    }
+
+    /** A cross-section in mm² as text without the unit: "4", "2.5" (whole sizes without ".0"). */
+    public static String mm2Number(double m) {
+        return m == Math.floor(m) ? String.valueOf((int) m) : String.valueOf(m);
     }
 
     /** A power tier's voltage for players, as the device names write it: "48V", "230V", "400V", "11kV". A tier is a name,
