@@ -48,7 +48,9 @@ abstract public class GridElement extends TransparentNodeElement {
         // overhead cable only (Baughn 2026-11-09: air insulates a line, so spans take bare copper, no rubber)
         if (OverheadCableItem.is(stack)) return onTryGridConnect(entityPlayer, stack, side);
         if (mods.eln.node.voxel.CableItems.descriptor(stack) != null) {
-            Utils.sendMessage(entityPlayer, "Lines between poles take Overhead Cable, made on a wire drawing machine, not cable kits");
+            // (on the route note's line: the kit's preview owns the action bar while it is held)
+            if (entityPlayer instanceof net.minecraft.server.level.ServerPlayer sp)
+                mods.eln.node.voxel.KitPreview.note(sp, "Lines between poles take Overhead Cable, made on a wire drawing machine, not cable kits");
             return true;
         }
         // TODO: Scissors. Break the connection without breaking the pole.
@@ -66,29 +68,29 @@ abstract public class GridElement extends TransparentNodeElement {
             other = GridLink.getElementFromCoordinate(p.getLeft());
         }
         if (other == null || other == this) {
-            Utils.sendMessage(entityPlayer, "Setting starting point");
+            entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Setting starting point"));
             pending.put(uuid, Pair.of(this.coordonate(), side));
         } else {
             final double distance = other.coordonate().trueDistanceTo(this.coordonate());
             final int cableLength = (int) Math.ceil(distance);
             final int range = Math.min(connectRange, other.connectRange);
             if (OverheadCableItem.blocks(stack) < cableLength) {
-                Utils.sendMessage(entityPlayer, "You need " + cableLength + " blocks of cable");
+                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("You need " + cableLength + " blocks of cable"));
             } else if (distance > range) {
-                Utils.sendMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks");
+                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks"));
             } else if (!this.canConnect(other)) {
-                Utils.sendMessage(entityPlayer, "Cannot connect these two objects");
+                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cannot connect these two objects"));
             } else if (!this.validLOS(other)) {
-                Utils.sendMessage(entityPlayer, "Cannot connect, no line of sight");
+                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cannot connect, no line of sight"));
             } else {
                 ItemStack piece = OverheadCableItem.make(OverheadCableItem.mm2(stack), cableLength);
                 if (GridLink.addLink(this, other, side, p.getRight(), piece, OverheadCableItem.rsPerBlock(stack) * cableLength)) {
-                    Utils.sendMessage(entityPlayer, "Added connection");
+                    entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Added connection"));
                     onLinksChanged();
                     other.onLinksChanged();
                     OverheadCableItem.take(stack, cableLength);
                 } else {
-                    Utils.sendMessage(entityPlayer, "Already connected");
+                    entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Already connected"));
                 }
             }
             pending.remove(uuid);

@@ -132,7 +132,7 @@ public final class KitPreview {
      * Why a route click failed, on its own line above the action bar for a few seconds (Baughn 2026-11-18, #521: the
      * preview's next line, the route's length, replaced it on the action bar at once; client.RouteNoteHud).
      */
-    static void note(ServerPlayer p, String message) {
+    public static void note(ServerPlayer p, String message) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (DataOutputStream out = new DataOutputStream(bos)) {
             out.writeByte(Eln.packetRouteNote);

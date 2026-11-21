@@ -191,7 +191,7 @@ public class ElectricalPoleElement extends GridElement {
         if (slot < 0) return super.onBlockActivated(player, side, vx, vy, vz);
         if (coordonate().world().isClientSide()) return true;
         if (!inventory.getItem(slot).isEmpty()) {
-            Utils.sendMessage(player, "This pole already has " + what);
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("This pole already has " + what));
             return true;
         }
         ItemStack fitted = s.copyWithCount(1);
@@ -203,7 +203,7 @@ public class ElectricalPoleElement extends GridElement {
             int tier = PoleTransformerItem.tier(fitted);
             Utils.sendMessage(player, "Fitted a " + mods.eln.node.voxel.CableSpec.voltsLabel(PoleTransformerItem.tier(fitted)) + " pole transformer: its foot takes "
                 + mods.eln.node.voxel.CablePart.TIERS[tier].name() + " or higher (lower ones burn)");
-        } else Utils.sendMessage(player, "Fitted " + what);
+        } else player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Fitted " + what));
         return true;
     }
 

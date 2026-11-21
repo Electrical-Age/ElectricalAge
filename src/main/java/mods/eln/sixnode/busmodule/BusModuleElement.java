@@ -209,11 +209,11 @@ public class BusModuleElement extends SixNodeElement {
         if (!(mods.eln.item.BrushDescriptor.getDescriptor(stack) instanceof mods.eln.item.BrushDescriptor brush))
             return super.onBlockActivated(player, side, vx, vy, vz);
         int i = terminalAt(vx, vy, vz);
-        if (i == BUS_PIN) Utils.sendMessage(player, tr("That is the bus pin: brush a terminal to tune it"));
+        if (i == BUS_PIN) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("That is the bus pin: brush a terminal to tune it")));
         if (i < 0) return true;
         int c = BusChannel.fromBrush(brush.getColor(stack));
         if (c != channels[i] && brush.use(stack, player)) setChannel(i, c);
-        Utils.sendMessage(player, tr("Terminal %1$: %2$", i + 1, channels[i] == BusChannel.UNUSED ? tr("unused") : BusChannel.label(channels[i])));
+        player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("Terminal %1$: %2$", i + 1, channels[i] == BusChannel.UNUSED ? tr("unused") : BusChannel.label(channels[i]))));
         return true;
     }
 

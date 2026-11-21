@@ -70,7 +70,7 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
     }
 
     override fun onItemRightClick(s: ItemStack, w: Level, p: Player): ItemStack {
-        if (!w.isClientSide()) Utils.sendMessage(p as ServerPlayer, "Flashlight " + step(s))
+        if (!w.isClientSide()) p.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Flashlight " + step(s)))
         return s
     }
 

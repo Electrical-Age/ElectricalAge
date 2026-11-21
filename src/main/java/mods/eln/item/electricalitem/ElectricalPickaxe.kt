@@ -68,7 +68,7 @@ class ElectricalPickaxe(name: String, strengthOn: Float, strengthOff: Float,
     private fun setConservative(p: Player?, s: ItemStack, state: Boolean) {
         editNbt(s) { it.putBoolean("conservative", state) }
         if (p != null) {
-            Utils.sendMessage(p, "Set land conservation to $state")
+            p.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Set land conservation to $state"))
         }
     }
 

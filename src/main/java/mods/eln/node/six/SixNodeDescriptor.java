@@ -46,7 +46,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
                 if (d == side)
                     return true;
             }
-            Utils.sendMessage(player, tr("You can't place this block at this side"));
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("You can't place this block at this side")));
             return false;
         }
         return true;

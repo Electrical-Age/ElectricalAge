@@ -115,7 +115,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
      */
     protected int toggleColorCare(Player player, int colorCare) {
         colorCare ^= 1;
-        Utils.sendMessage(player, "Wire color care " + colorCare);
+        player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Wire color care " + colorCare));
         sixNode.reconnect();
         return colorCare;
     }

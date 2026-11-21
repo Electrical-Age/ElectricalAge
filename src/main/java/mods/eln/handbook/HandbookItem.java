@@ -18,7 +18,7 @@ public class HandbookItem extends Item {
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (player instanceof ServerPlayer sp) {
             if (Handbook.guideAvailable()) GuideMeBridge.open(sp);
-            else sp.sendSystemMessage(Component.translatable("item.eln.handbook.no_guideme"));
+            else sp.sendOverlayMessage(Component.translatable("item.eln.handbook.no_guideme"));
         }
         return InteractionResult.SUCCESS;
     }

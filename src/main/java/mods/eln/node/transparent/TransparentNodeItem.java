@@ -57,7 +57,7 @@ public class TransparentNodeItem extends Item implements IDescriptorItem {
 
         String error;
         if ((error = descriptor.checkCanPlace(coord, front)) != null) {
-            if (player != null) Utils.sendMessage(player, error);
+            if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(error));
             return null;
         }
 

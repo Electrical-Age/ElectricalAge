@@ -67,7 +67,7 @@ class BrushDescriptor(name: String) : GenericItemUsingDamageDescriptor(name) {
             }
             true
         } else {
-            Utils.sendMessage(entityPlayer, tr("Brush is dry"))
+            entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("Brush is dry")))
             false
         }
     }

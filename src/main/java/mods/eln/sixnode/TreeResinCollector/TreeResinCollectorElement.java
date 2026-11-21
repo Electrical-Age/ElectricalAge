@@ -198,7 +198,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
             if (ElnDeviceRegistry.treeResin != null) sixNode.dropItem(ElnDeviceRegistry.treeResin.newItemStack(1));
         }
 
-        Utils.sendMessage(entityPlayer, "Tree Resin in pot : " + String.format("%1.2f", productPerSeconde * timeFromLastActivated));
+        entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Tree Resin in pot : " + String.format("%1.2f", productPerSeconde * timeFromLastActivated)));
         needPublish();
         return true;
     }

@@ -18,6 +18,11 @@ public interface TestContext {
 
     BlockPos at(int dx, int dy, int dz);
 
+    /** A fake player that records its chat and action-bar messages (where a device's message goes). */
+    default ListeningPlayer listener() {
+        return new ListeningPlayer(level());
+    }
+
     /** Put a stone block at the absolute position p (support for a device outside the floor). */
     void floor(BlockPos p);
 

@@ -95,13 +95,18 @@ public final class BurntCases {
             ctx.check("stone heat furnace: repaired with a Combustion Chamber",
                 ItemStack.isSameItem(part, Eln.findItemStack("Combustion Chamber")), String.valueOf(part));
 
-            FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());
+            // (todo #554: what to repair it with and "Repaired." are on the action bar, not in the chat)
+            mods.eln.gametest.ListeningPlayer fp = ctx.listener();
+            boolean emptyHanded = Repair.onActivated(spare, fp);
+            ctx.check("a burnt furnace right-clicked empty-handed says what repairs it, on the action bar", !emptyHanded && fp.chat.isEmpty()
+                && fp.lastActionBar().startsWith("Burnt out") && fp.lastActionBar().contains("Combustion Chamber"), fp.actionBar + " chat " + fp.chat);
             ItemStack held = Eln.findItemStack("Combustion Chamber", 2);
             fp.setItemInHand(InteractionHand.MAIN_HAND, held);
             try {
                 boolean repaired = Repair.onActivated(spare, fp);
                 ctx.check("a right-click with a Combustion Chamber repairs it and uses one", repaired && !spare.isBurnt() && held.getCount() == 1,
                     "repaired " + repaired + ", burnt " + spare.isBurnt() + ", left " + held.getCount());
+                ctx.check("... and says so on the action bar", fp.chat.isEmpty() && fp.lastActionBar().equals("Repaired."), fp.actionBar + " chat " + fp.chat);
                 // (Baughn 2026-11-04, todo #218: repaired, a furnace stays off until the player relights it)
                 ctx.check("stone heat furnace: repaired, it declines fuel", !spare.getTakeFuel(), "");
                 boolean wasOn = fuel.burnerOn();

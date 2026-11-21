@@ -91,7 +91,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
     public boolean canBePlacedOnSide(Player player, Coordonate c, Direction side) {
         Block b = c.getBlock();
         if (!isWood(b) || side.isY()) {
-            Utils.sendMessage(player, tr("This block can only be placed on the side of a tree!"));
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("This block can only be placed on the side of a tree!")));
             return false;
         }
         return true;
