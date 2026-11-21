@@ -1058,8 +1058,8 @@ public final class Network {
     public static int MAX_SUBSTEPS = 256;
     private int stepSubsteps;
     /**
-     * With CUT_SHORT: the most wall time (ns) one network's step may take (0: no limit); then it ends where it is, as
-     * after MAX_SUBSTEPS, and owes the rest. Its sub-step and iteration caps still let a large network that every
+     * With CUT_SHORT: the most wall time (ns) one network's step may take once it has had to sub-step (0: no limit); then
+     * it ends where it is, as after MAX_SUBSTEPS, and owes the rest. Its sub-step and iteration caps still let a large network that every
      * sub-step makes stiff (flashing water) build thousands of Jacobians in one tick: Incognito's watchdog killed the
      * server on a 60 s tick (2026-11-21, a steam line with water in it vented to near the air's pressure).
      */
@@ -1069,7 +1069,9 @@ public final class Network {
     public boolean overBudget;
 
     private boolean outOfTime() {
-        if (deadline == Long.MAX_VALUE || System.nanoTime() < deadline) return false;
+        // (only a step that has had to sub-step, a stiff one: a big healthy network converging at once, 117 nodes at
+        // 12-35 ms on Incognito, is left to finish)
+        if (stepSubsteps == 0 || deadline == Long.MAX_VALUE || System.nanoTime() < deadline) return false;
         if (!overBudget) stats.overBudget++;
         overBudget = true;
         return true;

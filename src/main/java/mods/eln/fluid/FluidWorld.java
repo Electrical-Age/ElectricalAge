@@ -171,15 +171,12 @@ public final class FluidWorld implements IProcess {
         return out;
     }
 
-    /** When each network's running out of its step time was last logged (ms), so a stiff one says so once a minute. */
-    private final Map<FluidNetwork, Long> overBudgetLogged = new java.util.WeakHashMap<>();
+    /** When running out of step time was last logged near each place (ms), so a stiff network says so once a minute
+     *  (by place: a stiff network is often rebuilt every few seconds). */
+    private final Map<String, Long> overBudgetLogged = new HashMap<>();
 
     /** A network's step ran out of its time (Network.MAX_STEP_NANOS): log where, once a minute. */
     private void overBudget(FluidNetwork n) {
-        long now = System.currentTimeMillis();
-        Long last = overBudgetLogged.get(n);
-        if (last != null && now - last < 60_000) return;
-        overBudgetLogged.put(n, now);
         String where = "?";
         outer:
         for (FluidDevice d : devices)
@@ -188,6 +185,11 @@ public final class FluidWorld implements IProcess {
                     where = d.getClass().getSimpleName() + " " + BlockPos.of(p.pos()).toShortString();
                     break outer;
                 }
+        long now = System.currentTimeMillis();
+        Long last = overBudgetLogged.get(where);
+        if (last != null && now - last < 60_000) return;
+        if (overBudgetLogged.size() > 256) overBudgetLogged.clear();
+        overBudgetLogged.put(where, now);
         mods.eln.Eln.LOG.warn("[fluidcore] a network of {} nodes ran out of its step time ({} ms) and runs slow, near {}",
             n.nodes.size(), mods.eln.fluidcore.Network.MAX_STEP_NANOS / 1_000_000, where);
     }
