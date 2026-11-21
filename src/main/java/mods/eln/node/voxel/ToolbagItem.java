@@ -368,8 +368,13 @@ public class ToolbagItem extends Item implements PipeTool {
                 return;
             }
             lay(p, level, s, start);
-            if (old.kind == RoutePlacer.of(s)) RoutePlacer.addWaypoints(p.getUUID(), old.waypoints);
-            else p.sendOverlayMessage(Component.literal("Restarted as " + kind.label() + " \u2014 waypoints cleared"));
+            if (old.kind == RoutePlacer.of(s)) {
+                // (over the start message: the route goes on, as a new kind; AdventurAgent read "route started" as a restart.
+                // A start refused at the new kind keeps its own reason)
+                if (!RoutePlacer.active(p.getUUID())) return;
+                RoutePlacer.addWaypoints(p.getUUID(), old.waypoints);
+                p.sendOverlayMessage(Component.literal("Now " + kind.label() + (old.waypoints.isEmpty() ? "." : "; waypoints kept.")));
+            } else p.sendOverlayMessage(Component.literal("Restarted as " + kind.label() + " \u2014 waypoints cleared"));
             return;
         }
         if (pending == null) {

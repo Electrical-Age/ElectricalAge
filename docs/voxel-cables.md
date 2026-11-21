@@ -363,7 +363,7 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   start once the kind is chosen. With a route on the radial adds Undo and Cancel (the bag's sneak-click is the radial),
   and a new kind restarts the route from its start click (`STARTED`), its waypoints kept where they fit: a cable's for
   another cable kind, a pipe's for another pipe kind (a cable's face points and a pipe's block-middle points don't carry
-  over between the two; "Restarted as ... — waypoints cleared").
+  over between the two; "Restarted as ... — waypoints cleared"; within a family "Now ...; waypoints kept.").
 - Client `ToolbagHud`: the chosen kind and a terse usage line above the route note while the bag is in hand.
 - A kit or bag click must be within reach, its point on or in the clicked block (`CablePlacer.reachable`; else "Out
   of reach"; the player's reach plus `REACH_SLACK` 0.25, where the server itself takes a block more): AdventurAgent's
