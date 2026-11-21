@@ -3,10 +3,11 @@ package mods.eln.transparentnode.powercapacitor;
 
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.series.ISerie;
+import mods.eln.node.transparent.FrontDrawnRender;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.powerprimitives.PowerCapacitorCore;
 
-public class PowerCapacitorDescriptor extends TransparentNodeDescriptor implements PowerCapacitorCore.Spec {
+public class PowerCapacitorDescriptor extends TransparentNodeDescriptor implements PowerCapacitorCore.Spec, FrontDrawnRender.Drawn {
 
     private Obj3D obj;
 
@@ -51,7 +52,8 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor implemen
         //Data.addEnergy(newItemStack());
     }
 
-    void draw() {
+    @Override
+    public void draw() {   // (empty: an invisible block in 1.12 too)
 
     }
 

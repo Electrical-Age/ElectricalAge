@@ -5,9 +5,10 @@ package mods.eln.transparentnode.powerinductor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.series.ISerie;
 import mods.eln.powerprimitives.PowerInductorCore;
+import mods.eln.node.transparent.FrontDrawnRender;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 
-public class PowerInductorDescriptor extends TransparentNodeDescriptor implements PowerInductorCore.Spec {
+public class PowerInductorDescriptor extends TransparentNodeDescriptor implements PowerInductorCore.Spec, FrontDrawnRender.Drawn {
 
     private Obj3D obj;
 
@@ -38,7 +39,8 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor implement
         //Data.addEnergy(newItemStack());
     }
 
-    void draw() {
+    @Override
+    public void draw() {   // (empty: an invisible block in 1.12 too)
 
     }
 
