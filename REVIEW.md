@@ -58,4 +58,5 @@ Pending Baughn's decision where the UX differs:
 CablePlacer/PipePlacer route state machine, KitPreview cable/pipe ticks.
 `EaUnits.compact` (two significant figures, no prefix) stays beside `Meters.number`: fluid units switch unit
 themselves (mB to B, g to kg), and Meters.number would print "120m mB". Descriptor tooltips that state ratings in
-prose (`"%.0f V, %.0f W"`) and mB/s rates are not yet on the formatters.
+prose (`"%.0f V, %.0f W"`), amps in cable and winding names (`"%.0f A"`) and mB/s rates are not yet on the formatters.
+Many Jade lines still use the padded `Utils.plot*("", v)` (trailing spaces in the value); new ones use `Meters`.

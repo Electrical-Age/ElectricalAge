@@ -40,7 +40,7 @@
   },
   {
    "text": "heat",
-   "sample": "Set point: 1000°C  (Actual: 1000°C)"
+   "sample": "Set point: 1.00k°C  (Actual: 1.00k°C)"
   },
   {
    "slider": "heat",

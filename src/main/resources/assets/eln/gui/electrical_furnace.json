@@ -31,7 +31,7 @@
   },
   {
    "text": "target",
-   "sample": "Target 1000°C  (now 1000°C)"
+   "sample": "Target 1.00k°C  (now 1.00k°C)"
   },
   {
    "slider": "target",

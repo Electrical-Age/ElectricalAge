@@ -18,7 +18,7 @@
   },
   {
    "text": "target",
-   "sample": "Set point 1000°C  (now 1000°C, 9.99kW)"
+   "sample": "Set point 1.00k°C  (now 1.00k°C, 9.99kW)"
   },
   {
    "slider": "target",
