@@ -45,8 +45,8 @@ public final class ClientRenders {
         ElnRenders.six(mods.eln.sixnode.hub.HubDescriptor.class, mods.eln.sixnode.hub.HubRender::new);
         ElnRenders.six(mods.eln.sixnode.lampsocket.LampSocketDescriptor.class, mods.eln.sixnode.lampsocket.LampSocketRender::new);
         ElnRenders.six(mods.eln.sixnode.lampsupply.LampSupplyDescriptor.class, mods.eln.sixnode.lampsupply.LampSupplyRender::new);
-        ElnRenders.six(mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor.class, mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixRender::new);
-        ElnRenders.six(mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor.class, mods.eln.sixnode.powerinductorsix.PowerInductorSixRender::new);
+        ElnRenders.six(mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor.class, mods.eln.powerprimitives.PowerPrimitiveSixRender::new);
+        ElnRenders.six(mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor.class, mods.eln.powerprimitives.PowerPrimitiveSixRender::new);
         ElnRenders.six(mods.eln.sixnode.powersocket.PowerSocketDescriptor.class, mods.eln.sixnode.powersocket.PowerSocketRender::new);
         ElnRenders.six(mods.eln.sixnode.resistor.ResistorDescriptor.class, mods.eln.sixnode.resistor.ResistorRender::new);
         ElnRenders.six(mods.eln.sixnode.thermalcable.ThermalCableDescriptor.class, mods.eln.sixnode.thermalcable.ThermalCableRender::new);
