@@ -60,6 +60,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.HeatExchangerCases.addTo(l);
         mods.eln.gametest.cases.MixerCases.addTo(l);
         mods.eln.gametest.cases.ShaftArtCases.addTo(l);
+        mods.eln.gametest.cases.WrenchTurnCases.addTo(l);
         l.addAll(mods.eln.gametest.cases.HitboxCases.cases());
         mods.eln.gametest.cases.PortHelperCases.addTo(l);
         mods.eln.gametest.cases.LampSupplyCases.addTo(l);
