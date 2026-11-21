@@ -50,7 +50,7 @@ public class modbusAnalogIoSlot extends ModbusSlot {
     public boolean getInput(int id) {
         switch (id) {
             case 1:
-                return gate.isInputHigh();
+                return gate.stateHigh();
         }
         return false;
     }
@@ -59,13 +59,13 @@ public class modbusAnalogIoSlot extends ModbusSlot {
     public short getInputRegister(int id) {
         switch (id) {
             case 1:
-                double f = gate.getInputNormalized();
+                double f = gate.getNormalized();
                 getInputRegister_2 = Utils.modbusToShort(f, 1);
                 return Utils.modbusToShort(f, 0);
             case 2:
                 return getInputRegister_2;
             case 3:
-                return (short) (65535.0 * gate.getInputNormalized());
+                return (short) (65535.0 * gate.getNormalized());
         }
         return 0;
     }
