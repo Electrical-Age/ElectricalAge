@@ -15,7 +15,7 @@ import static mods.eln.cad.models.OilKit.turned;
 /**
  * Submersible pump (50V / 200V): a motor in a can standing in water, an intake screen round its foot, a pump head on
  * top and a riser up to an iron pipe's flange at the centre of the top face (SubmersiblePumpElement's outlet port).
- * Drawn by SubmersiblePumpRender -> SubmersiblePumpDescriptor.draw() (part main), after front.glRotateXnRef().
+ * Drawn by FrontDrawnRender -> SubmersiblePumpDescriptor.draw() (part main), after front.glRotateXnRef().
  * Connections: the speed signal on the front (x = 0), power on both flanks (z = 0 and z = 16), all at the floor on
  * terminal plates; the outlet is the flange on top. Front XN (x = 0):
  * <ul>

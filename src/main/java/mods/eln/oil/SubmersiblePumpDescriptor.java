@@ -22,7 +22,7 @@ import static mods.eln.i18n.I18N.tr;
  * its voltage turns into steam (NOMINAL_TURBINES), falling to nothing at shutoffPa against the pipe. Power on its
  * flanks; a signal on its front sets its speed (no cable there: full speed). Model: mods.eln.cad.models.SubmersiblePump.
  */
-public class SubmersiblePumpDescriptor extends TransparentNodeDescriptor {
+public class SubmersiblePumpDescriptor extends TransparentNodeDescriptor implements mods.eln.node.transparent.FrontDrawnRender.Drawn {
     /** Nominal flow, in turbines' worth of feedwater (a turbine of the same voltage at full power). */
     public static final double NOMINAL_TURBINES = 3.5;
     /**
@@ -38,7 +38,7 @@ public class SubmersiblePumpDescriptor extends TransparentNodeDescriptor {
     final Obj3D obj;
 
     public SubmersiblePumpDescriptor(String name, double nominalU, double nominalP, double turbineP, double shutoffPa, ElectricalCableDescriptor cable, String model) {
-        super(name, SubmersiblePumpElement.class, SubmersiblePumpRender.class);
+        super(name, SubmersiblePumpElement.class, mods.eln.node.transparent.FrontDrawnRender.class);
         this.shutoffPa = shutoffPa;
         this.nominalU = nominalU;
         this.nominalP = nominalP;
@@ -60,7 +60,8 @@ public class SubmersiblePumpDescriptor extends TransparentNodeDescriptor {
         return super.checkCanPlace(coord, front);
     }
 
-    void draw() {
+    @Override
+    public void draw() {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();

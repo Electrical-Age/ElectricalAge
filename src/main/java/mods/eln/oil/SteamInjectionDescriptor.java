@@ -13,11 +13,11 @@ import java.util.List;
  * casing's head of crude. Steam it puts into a lake in its seepage tail pays for crude (OilRecovery), and the lake's
  * pumps run at their full rate on it. Model: the 50V oil pump's until its own.
  */
-public class SteamInjectionDescriptor extends TransparentNodeDescriptor {
+public class SteamInjectionDescriptor extends TransparentNodeDescriptor implements mods.eln.node.transparent.FrontDrawnRender.Drawn {
     final Obj3D obj;
 
     public SteamInjectionDescriptor(String name, String model) {
-        super(name, SteamInjectionElement.class, SteamInjectionRender.class);
+        super(name, SteamInjectionElement.class, mods.eln.node.transparent.FrontDrawnRender.class);
         this.obj = Eln.obj.getObj(model);
     }
 
@@ -26,7 +26,8 @@ public class SteamInjectionDescriptor extends TransparentNodeDescriptor {
         return true;
     }
 
-    void draw() {
+    @Override
+    public void draw() {
         var main = obj == null ? null : obj.getPart("main");
         if (main != null) main.draw();
     }

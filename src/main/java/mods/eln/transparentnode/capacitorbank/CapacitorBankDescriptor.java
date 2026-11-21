@@ -22,13 +22,13 @@ import static mods.eln.i18n.I18N.tr;
  * batteries stay the way to keep energy (Baughn). Polar: + on the left of the front, - on the right (the model's
  * coloured plates). Model: mods.eln.cad.models.CapacitorBank.
  */
-public class CapacitorBankDescriptor extends TransparentNodeDescriptor {
+public class CapacitorBankDescriptor extends TransparentNodeDescriptor implements mods.eln.node.transparent.FrontDrawnRender.Drawn {
     /** Its capacitance (F), rating (V) and leakage time constant R C (s); config [capacitorBank]. */
     public static double farads = 1.44, ratedVolts = 500, leakTauS = 1800;
     final Obj3D obj;
 
     public CapacitorBankDescriptor(String name, String model) {
-        super(name, CapacitorBankElement.class, CapacitorBankRender.class);
+        super(name, CapacitorBankElement.class, mods.eln.node.transparent.FrontDrawnRender.class);
         obj = Eln.obj.getObj(model);
         voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(mods.eln.registry.ElnDeviceRegistry.highVoltageCableDescriptor);
         cableTerminals = mods.eln.cable.CableTerminals.FLANKS;
@@ -39,7 +39,8 @@ public class CapacitorBankDescriptor extends TransparentNodeDescriptor {
         return 0.5 * farads * u * u;
     }
 
-    void draw() {
+    @Override
+    public void draw() {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();

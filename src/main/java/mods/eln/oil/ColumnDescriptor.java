@@ -13,7 +13,7 @@ import java.util.List;
  * distils crude at {@link #J_PER_MB} per mB. Segments stacked on the base collect the cuts, top to bottom; the residue
  * stays in the base. With fewer than four segments the missing cuts fold into the next heavier one. Placeholder models.
  */
-public class ColumnDescriptor extends TransparentNodeDescriptor {
+public class ColumnDescriptor extends TransparentNodeDescriptor implements mods.eln.node.transparent.FrontDrawnRender.Drawn {
     /** Crude to ~350 C and boiled off: ~1 MJ/kg x 0.85 kg/L x 6.75e-5 L/mB (litresPerMilliBucket). */
     public static final double J_PER_MB = 60, DISTIL_C = 350;
     /** On EA pipes (its nozzles; Baughn 2026-11-03): what moves through a port each second (mB) and the head it pushes against (Pa). */
@@ -24,7 +24,7 @@ public class ColumnDescriptor extends TransparentNodeDescriptor {
     final Obj3D obj;
 
     public ColumnDescriptor(String name, boolean base, String model) {
-        super(name, base ? ColumnBaseElement.class : ColumnSegmentElement.class, ColumnRender.class);
+        super(name, base ? ColumnBaseElement.class : ColumnSegmentElement.class, mods.eln.node.transparent.FrontDrawnRender.class);
         this.base = base;
         this.obj = Eln.obj.getObj(model);
     }
@@ -35,7 +35,8 @@ public class ColumnDescriptor extends TransparentNodeDescriptor {
         return base;
     }
 
-    void draw() {
+    @Override
+    public void draw() {
         if (obj != null) for (var p : obj.parts()) p.draw();
     }
 

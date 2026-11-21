@@ -66,9 +66,9 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor.class, mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor.class, mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.electricalmachine.ElectricalMachineDescriptor.class, mods.eln.transparentnode.electricalmachine.ElectricalMachineRender::new);
-        ElnRenders.transparent(mods.eln.oil.OilPumpDescriptor.class, mods.eln.oil.OilPumpRender::new);
-        ElnRenders.transparent(mods.eln.oil.SteamInjectionDescriptor.class, mods.eln.oil.SteamInjectionRender::new);
-        ElnRenders.transparent(mods.eln.oil.SubmersiblePumpDescriptor.class, mods.eln.oil.SubmersiblePumpRender::new);
+        ElnRenders.transparent(mods.eln.oil.OilPumpDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
+        ElnRenders.transparent(mods.eln.oil.SteamInjectionDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
+        ElnRenders.transparent(mods.eln.oil.SubmersiblePumpDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
         ElnRenders.transparent(mods.eln.oil.ElectricHeaterDescriptor.class, mods.eln.oil.ElectricHeaterRender::new);
         // the exporter: GUI values only (drawn by its block model)
         ElnRenders.transparent(mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherDescriptor.class,
@@ -79,7 +79,7 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.oil.TankDescriptor.class, mods.eln.oil.TankRender::new);
         ElnRenders.transparent(mods.eln.oil.InlinePumpDescriptor.class, mods.eln.oil.InlinePumpRender::new);
         ElnRenders.transparent(mods.eln.oil.AirBlowerDescriptor.class, mods.eln.oil.InlinePumpRender::new);
-        ElnRenders.transparent(mods.eln.oil.PipeMixerDescriptor.class, mods.eln.oil.PipeMixerRender::new);
+        ElnRenders.transparent(mods.eln.oil.PipeMixerDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
         ElnRenders.transparent(mods.eln.oil.PlantCondenserDescriptor.class, mods.eln.oil.PlantCondenserRender::new);
         ElnRenders.transparent(mods.eln.oil.HeatExchangerDescriptor.class, mods.eln.oil.HeatExchangerRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.smelter.SmelterDescriptor.class, mods.eln.transparentnode.smelter.SmelterRender::new);
@@ -93,9 +93,9 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.transparentnode.polymeriser.PolymeriserDescriptor.class, mods.eln.transparentnode.polymeriser.PolymeriserRender::new);
         ElnRenders.transparent(mods.eln.robotics.servo.LinearServoDriveDescriptor.class, mods.eln.robotics.servo.LinearServoDriveRender::new);
         ElnRenders.transparent(mods.eln.robotics.computer.ComputerDescriptor.class, mods.eln.robotics.computer.ComputerRender::new);
-        ElnRenders.transparent(mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.class, mods.eln.transparentnode.capacitorbank.CapacitorBankRender::new);
+        ElnRenders.transparent(mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
         ElnRenders.transparent(mods.eln.oil.CondenserDescriptor.class, mods.eln.oil.CondenserRender::new);
-        ElnRenders.transparent(mods.eln.oil.ColumnDescriptor.class, mods.eln.oil.ColumnRender::new);
+        ElnRenders.transparent(mods.eln.oil.ColumnDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
         ElnRenders.transparent(mods.eln.oil.FlareStackDescriptor.class, mods.eln.oil.FlareStackRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor.class, mods.eln.transparentnode.heatfurnace.HeatFurnaceRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor.class, mods.eln.transparentnode.powercapacitor.PowerCapacitorRender::new);
@@ -103,7 +103,7 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.transparentnode.solarpanel.SolarPanelDescriptor.class, mods.eln.transparentnode.solarpanel.SolarPanelRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.teleporter.TeleporterDescriptor.class, mods.eln.transparentnode.teleporter.TeleporterRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveDescriptor.class, mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveRender::new);
-        ElnRenders.transparent(mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor.class, mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveRender::new);
+        ElnRenders.transparent(mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.transformer.TransformerDescriptor.class, mods.eln.transparentnode.transformer.TransformerRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.turbine.TurbineDescriptor.class, mods.eln.transparentnode.turbine.TurbineRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.turret.TurretDescriptor.class, mods.eln.transparentnode.turret.TurretRender::new);

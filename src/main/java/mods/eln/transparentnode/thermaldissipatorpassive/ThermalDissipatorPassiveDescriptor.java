@@ -15,7 +15,7 @@ import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescriptor {
+public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescriptor implements mods.eln.node.transparent.FrontDrawnRender.Drawn {
     public double thermalRs, thermalRp, thermalC;
     public Obj3D obj;
     Obj3DPart main;
@@ -67,6 +67,7 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
     }
 
 
+    @Override
     public void draw() {
         if (main != null) main.draw();
     }

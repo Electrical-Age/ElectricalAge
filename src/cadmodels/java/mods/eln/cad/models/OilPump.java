@@ -15,7 +15,7 @@ import static mods.eln.cad.models.OilKit.turned;
 
 /**
  * Oil pump (50V / 200V): an electric well-head pump (progressing-cavity style drive head) on top of the well casing.
- * Drawn by OilPumpRender -> OilPumpDescriptor.draw() (part main), after front.glRotateXnRef(). Connections
+ * Drawn by FrontDrawnRender -> OilPumpDescriptor.draw() (part main), after front.glRotateXnRef(). Connections
  * (OilPumpElement): electrical power on all four horizontal faces at the floor. The block below is the well casing, so
  * the wellhead stands at the bottom centre. Crude/water leaves through the fluid capability (pipes on any side): the
  * discharge line is decoration. Front XN (x = 0):

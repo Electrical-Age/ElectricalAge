@@ -13,7 +13,7 @@ import static mods.eln.cad.models.Mc.tube;
  * Capacitor bank (Baughn 2026-10-28, was tools/models/capacitorbank.py): six big capacitor cans in two layers of three
  * on a steel rack, joined by copper busbars, with a terminal plate on each flank: + (red band, Baughn: polarities
  * red/blue) on the left of the front, - (blue band) on the right, as you face its front. Internally one large capacitor
- * (CapacitorBankElement). The cans' band carries the tier colour. Drawn by CapacitorBankRender through Obj3D. Front XN
+ * (CapacitorBankElement). The cans' band carries the tier colour. Drawn by FrontDrawnRender through Obj3D. Front XN
  * (x = 0); after glRotateXnRef, front.left() of XN is ZN: the + plate sits at z = 0, the - plate at z = 16.
  * (The Python also wrote the item icons textures/item/capacitor_bank.png and capacitor_cell.png; not ported here.)
  */

@@ -14,16 +14,17 @@ import java.util.List;
  * What it mixes follows the pressures on both inlets and against its outlet, so a set mix takes pressure math or
  * feedback from the outlet's contents. Model: mods.eln.cad.models.PipeMixer.
  */
-public class PipeMixerDescriptor extends TransparentNodeDescriptor {
+public class PipeMixerDescriptor extends TransparentNodeDescriptor implements mods.eln.node.transparent.FrontDrawnRender.Drawn {
     final Obj3D obj;
 
     public PipeMixerDescriptor(String name, String model) {
-        super(name, PipeMixerElement.class, PipeMixerRender.class);
+        super(name, PipeMixerElement.class, mods.eln.node.transparent.FrontDrawnRender.class);
         this.obj = Eln.obj.getObj(model);
         cableTerminals = mods.eln.cable.CableTerminals.FRONT;
     }
 
-    void draw() {
+    @Override
+    public void draw() {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();
