@@ -43,6 +43,8 @@ public class ElectricalCableElement extends SixNodeElement {
     VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
 
     int color;
+    /** Whether it joins only wires of its colour. 1.12 toggled it with the wrench; the toggle is gone (Baughn 2026-11-21:
+     *  obsolete, six-node cables are legacy), and a placed cable keeps what it saved, so old networks keep their joins. */
     int colorCare;
 
     public ElectricalCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
@@ -168,10 +170,6 @@ public class ElectricalCableElement extends SixNodeElement {
 	/*	World w = sixNode.coordonate.world();
 		boolean exist = WorldCompat.blockExists(w, 10000, 0, 0);
 		int id = w.getBlockId(10000, 0, 0);*/
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            colorCare = toggleColorCare(entityPlayer, colorCare);
-            return true;
-        }
         color = brushPaint(entityPlayer, color);
         return false;
     }

@@ -109,17 +109,6 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return false;
     }
 
-    /**
-     * The wrench on a wire (which has no front to turn) toggles its colour care, whether it joins only wires of its own
-     * colour: the new flag (0 or 1), told to the player, the wire reconnected.
-     */
-    protected int toggleColorCare(Player player, int colorCare) {
-        colorCare ^= 1;
-        player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Wire color care " + colorCare));
-        sixNode.reconnect();
-        return colorCare;
-    }
-
     /** A brush in hand paints it: the brush's colour if that differs and the brush had paint (reconnected), else color. */
     protected int brushPaint(Player player, int color) {
         ItemStack held = player.getMainHandItem();
@@ -168,7 +157,6 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         mods.eln.sim.Ambient.stamp(thermalLoadList, ambient);
         for (NbtThermalLoad load : thermalLoadList)
             Eln.simulator.addThermalLoad(load);
-
 
         for (IProcess process : slowProcessList)
             Eln.simulator.addSlowProcess(process);
@@ -254,7 +242,6 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
          initialize();
      }*/
     public abstract void initialize();
-
 
     @Override
     public void stop(int uuid) {

@@ -13,8 +13,8 @@ import java.util.function.UnaryOperator;
 /**
  * The wrench key and a click turn each device the same way, by the shared helpers (todo #556, Baughn): the click is
  * used (true) and the device's turned state moves one step. Rows, one per device that had turned by hand: the wind
- * turbine (its click had gone on to the held item), the antennas, a lamp socket that turns by half turns, the Modbus RTU,
- * and a cable's colour care (a wire has no front; its click had gone on too).
+ * turbine (its click had gone on to the held item), the antennas, a lamp socket that turns by half turns and the Modbus
+ * RTU. (A six-node cable's wrench colour-care toggle is gone: Baughn, obsolete with voxel cables.)
  */
 public final class WrenchTurnCases {
     private WrenchTurnCases() {
@@ -35,8 +35,6 @@ public final class WrenchTurnCases {
         }, "front", o -> ((mods.eln.misc.LRDU) o).inverse()));
         cases.add(new Row("wrench_turn_modbus_rtu", ctx -> ctx.placeSix(Wp9cCases.MODBUS_RTU, ctx.at(2, 1, 1)),
             "front", o -> ((mods.eln.misc.LRDU) o).getNextClockwise()));
-        cases.add(new Row("wrench_cable_colour_care", ctx -> ctx.placeSix(Ids.six("Medium Voltage Cable"), ctx.at(2, 1, 1)),
-            "colorCare", o -> ((Integer) o) ^ 1));
     }
 
     /** Place a device, click it holding the wrench key, and check the click was used and field moved to next(was). */

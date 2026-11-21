@@ -596,7 +596,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   capacity (`EaUnits.tank`, "700 mB / 4.0 B", the fill rounded down so a tank short of full doesn't read full). Temperatures over
   999 °C read "1.00k°C", as the meters already did.
 - Device refusals on the action bar (todo #554, Baughn 2026-11-21): placement refusals, the pole spans' and pole gear's
-  messages, a burnt device's repair hint, mode toggles (electrical tools, flashlight, wire colour care), the brush
+  messages, a burnt device's repair hint, mode toggles (electrical tools, flashlight), the brush
   being dry and the resin pot's reading go to the action bar instead of the chat, as most devices' messages already
   did; a cable kit on a pole says so on the route note line. Meter readings, the wireless analyser's report, the
   unloadable-device notices, the pole transformer's foot warning, the toolbag shears breaking and debug output stay
@@ -1048,3 +1048,5 @@ on 1.7.10) onto 26.x.
   clipboard, scrolling) instead of the one-line field, a quick reference of the functions beside it (click to insert),
   and the chips needed or the first problem shown as you type; Apply sends the program. Inputs A, B and C always
   connect, whether or not the program reads them (1.12 offered only the ones it read). GameTest `wp9c signal processor`.
+- **Wire colour care toggle removed** (Baughn 2026-11-21: obsolete). The wrench no longer toggles whether a six-node
+  cable joins only wires of its own colour; a placed cable keeps the setting it saved, so existing networks are unchanged.

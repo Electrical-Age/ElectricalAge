@@ -42,6 +42,8 @@ public class ThermalCableElement extends SixNodeElement {
     ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
 
     int color = 0;
+    /** Whether it joins only wires of its colour. 1.12 toggled it with the wrench; the toggle is gone (Baughn 2026-11-21:
+     *  obsolete, six-node cables are legacy), and a placed cable keeps what it saved, so old networks keep their joins. */
     int colorCare = 1;
 
     public ThermalCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
@@ -144,10 +146,6 @@ public class ThermalCableElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            colorCare = toggleColorCare(entityPlayer, colorCare);
-            return true;
-        }
         color = brushPaint(entityPlayer, color);
         return false;
     }
