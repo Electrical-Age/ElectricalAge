@@ -81,12 +81,17 @@ public class WindTurbineElement extends TransparentNodeElement {
         descriptor.cable.applyTo(positiveLoad);
     }
 
+    /** The wrench turns its terminals a quarter turn round the mast (the rotor faces the wind, not a front). */
+    @Override
+    public boolean wrenchTurn(Player player) {
+        cableFront = cableFront.right();
+        reconnect();
+        needPublish();
+        return true;
+    }
+
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            cableFront = cableFront.right();
-            reconnect();
-        }
         return false;
     }
 

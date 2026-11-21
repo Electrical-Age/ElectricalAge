@@ -100,13 +100,17 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement {
         connect();
     }
 
+    /** The wrench turns its power and signal terminals a quarter turn round its front (the dish keeps facing its partner). */
+    @Override
+    public boolean wrenchTurn(Player player) {
+        rot = rot.getNextClockwise();
+        reconnect();
+        needPublish();
+        return true;
+    }
+
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            rot = rot.getNextClockwise();
-            node.reconnect();
-            return true;
-        }
         return false;
     }
 
