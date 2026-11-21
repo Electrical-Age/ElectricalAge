@@ -90,10 +90,14 @@ public final class EaUnits {
      * rounded down, so a tank short of full doesn't read full.
      */
     public static String tank(double mB, double capacityMb) {
+        // (rounded down, so only a full tank reads full; the epsilon absorbs a full tank's mass/rho coming out as 3999.9999)
+        double f = Math.max(0, Math.min(mB, capacityMb)) + 1e-6;
         String fill;
-        if (mB < 1000) fill = compact(mB) + " mB";
+        if (f < 1) fill = "0 mB";
+        else if (f < 10) fill = String.format("%.1f mB", Math.floor(f * 10) / 10);
+        else if (f < 1000) fill = String.format("%.0f mB", Math.floor(f));
         else {
-            double b = mB / 1000;
+            double b = f / 1000;
             fill = b >= 100 ? String.format("%.0f B", Math.floor(b)) : String.format("%.1f B", Math.floor(b * 10) / 10);
         }
         return fill + " / " + volume(capacityMb);

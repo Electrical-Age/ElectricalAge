@@ -48,5 +48,8 @@ public class CompositionTest {
         assertEquals("2.3 B / 4.0 B", EaUnits.tank(2351, 4000));
         assertEquals("3.9 B / 4.0 B", EaUnits.tank(3999, 4000));
         assertEquals("4.0 B / 4.0 B", EaUnits.tank(4001, 4000));
+        assertEquals("0 mB / 4.0 B", EaUnits.tank(0, 4000));
+        assertEquals("4.0 B / 4.0 B", EaUnits.tank(3999.99999, 4000));   // (a full tank's mass/rho rounding)
+        assertEquals("499 mB / 500 mB", EaUnits.tank(499.6, 500));
     }
 }
