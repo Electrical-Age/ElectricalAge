@@ -91,7 +91,7 @@ public final class EaUnits {
      */
     public static String tank(double mB, double capacityMb) {
         // (rounded down, so only a full tank reads full; the epsilon absorbs a full tank's mass/rho coming out as 3999.9999)
-        double f = Math.max(0, Math.min(mB, capacityMb)) + 1e-6;
+        double f = Math.max(0, Math.min(mB, capacityMb)) + 1e-6 * Math.max(1, capacityMb);
         String fill;
         if (f < 1) fill = "0 mB";
         else if (f < 10) fill = String.format("%.1f mB", Math.floor(f * 10) / 10);
