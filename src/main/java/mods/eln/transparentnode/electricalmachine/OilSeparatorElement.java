@@ -139,7 +139,7 @@ public class OilSeparatorElement extends ElectricalMachineElement implements mod
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = super.getWaila();
-        info.put(I18N.tr("Crude oil"), String.format("%.0f / %.0f mB", outlet.liquidMb(), outlet.capacityMb()));
+        info.put(I18N.tr("Crude oil"), mods.eln.sim.fluid.EaUnits.tank(outlet.liquidMb(), outlet.capacityMb()));
         info.put(I18N.tr("Outlet"), I18N.tr("the pipe on its back"));
         return info;
     }

@@ -267,8 +267,8 @@ public class ColumnBaseElement extends TransparentNodeElement implements mods.el
         Map<String, String> info = new HashMap<>();
         info.put(I18N.tr("Status"), status);
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
-        info.put(I18N.tr("Crude"), tanks.crude() + " / " + ColumnDescriptor.CRUDE_MB + " mB");
-        info.put(I18N.tr("Residue"), tanks.residue() + " / " + ColumnDescriptor.RESIDUE_MB + " mB");
+        info.put(I18N.tr("Crude"), mods.eln.sim.fluid.EaUnits.tank(tanks.crude(), ColumnDescriptor.CRUDE_MB));
+        info.put(I18N.tr("Residue"), mods.eln.sim.fluid.EaUnits.tank(tanks.residue(), ColumnDescriptor.RESIDUE_MB));
         info.put(I18N.tr("Segments"), String.valueOf(segments.size()));
         info.put(I18N.tr("Crude distilled"), String.format("%.1f mB/s", crudeRate));
         return info;

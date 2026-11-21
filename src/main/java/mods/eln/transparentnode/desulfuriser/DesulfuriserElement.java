@@ -288,8 +288,8 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
         if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
         String wrong = inlet.blockedBy();
         if (onOff.on && wrong != null) info.put(I18N.tr("State"), I18N.tr("blocked: it holds %1$, which it can't treat", wrong));
-        info.put(I18N.tr("In (blue)"), inMb() + " / " + DesulfuriserDescriptor.TANK_MB + " mB");
-        info.put(I18N.tr("Out (red)"), outMb() + " / " + DesulfuriserDescriptor.TANK_MB + " mB");
+        info.put(I18N.tr("In (blue)"), mods.eln.sim.fluid.EaUnits.tank(inMb(), DesulfuriserDescriptor.TANK_MB));
+        info.put(I18N.tr("Out (red)"), mods.eln.sim.fluid.EaUnits.tank(outMb(), DesulfuriserDescriptor.TANK_MB));
         info.put(I18N.tr("Sulfur Dust"), String.valueOf(sulfur));
         return info;
     }

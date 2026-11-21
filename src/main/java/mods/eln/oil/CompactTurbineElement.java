@@ -292,7 +292,7 @@ public class CompactTurbineElement extends TransparentNodeElement implements Flu
         // (Erisi's chat review: nobody knew they needed more combustion chambers)
         info.put(I18N.tr("Heat in"), Utils.plotPower("", heatIn) + " / " + Utils.plotPower("", desc.nominalHeat()) + " " + I18N.tr("for full power"));
         info.put(I18N.tr("Boiler"), mods.eln.api.Meters.celsius(celsius()));
-        info.put(I18N.tr("Water"), String.format("%.0f / %d mB (%.2f mB/s)", water, CompactTurbineDescriptor.WATER_MB, waterRate));
+        info.put(I18N.tr("Water"), mods.eln.sim.fluid.EaUnits.tank(water, CompactTurbineDescriptor.WATER_MB) + String.format(" (%.2f mB/s)", waterRate));
         info.put(I18N.tr("Voltage"), Utils.plotVolt("", load.getU()));
         return info;
     }

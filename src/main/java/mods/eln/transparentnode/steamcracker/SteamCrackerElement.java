@@ -314,10 +314,10 @@ public class SteamCrackerElement extends TransparentNodeElement implements mods.
         info.put(I18N.tr("Status"), I18N.tr(status));
         String wrong = gasolineIn.blockedBy();
         if (wrong != null) info.put(I18N.tr("Blocked"), I18N.tr("it holds %1$, which it can't crack", wrong));
-        info.put(I18N.tr("Gasoline (blue C8)"), gasolineMb() + " / " + GASOLINE_TANK_MB + " mB");
+        info.put(I18N.tr("Gasoline (blue C8)"), mods.eln.sim.fluid.EaUnits.tank(gasolineMb(), GASOLINE_TANK_MB));
         info.put(I18N.tr("Steam (blue H2O)"), mods.eln.sim.fluid.EaUnits.steamGrams(steamMb()) + String.format(", %.1f bar", steamIn.vessel == null ? 0 : steamIn.vessel.P() / 1e5));
-        info.put(I18N.tr("Butadiene (red C4H6)"), butadieneMb() + " / " + BUTADIENE_TANK_MB + " mB");
-        info.put(I18N.tr("Natural gas (red CH4)"), gasMb() + " mB" + String.format(", %.1f bar", gasOut.vessel == null ? 0 : gasOut.vessel.P() / 1e5));
+        info.put(I18N.tr("Butadiene (red C4H6)"), mods.eln.sim.fluid.EaUnits.tank(butadieneMb(), BUTADIENE_TANK_MB));
+        info.put(I18N.tr("Natural gas (red CH4)"), mods.eln.sim.fluid.EaUnits.volume(gasMb()) + String.format(", %.1f bar", gasOut.vessel == null ? 0 : gasOut.vessel.P() / 1e5));
         return info;
     }
 }

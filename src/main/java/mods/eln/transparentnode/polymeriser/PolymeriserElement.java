@@ -305,7 +305,7 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
         info.put(I18N.tr("Status"), I18N.tr(status));
         String wrong = inlet.blockedBy();
         if (wrong != null) info.put(I18N.tr("Blocked"), I18N.tr("it holds %1$, which it can't use", wrong));
-        info.put(I18N.tr("Butadiene (blue)"), String.format("%.0f / %d mB", butadieneMb(), TANK_MB));
+        info.put(I18N.tr("Butadiene (blue)"), mods.eln.sim.fluid.EaUnits.tank(butadieneMb(), TANK_MB));
         info.put(I18N.tr("Soul Dust"), inventory.getItem(SOUL_SLOT).getCount() + (initiator > 0 ? " (+" + initiator + " rubber left)" : ""));
         info.put(I18N.tr("Raw Rubber"), String.valueOf(inventory.getItem(RUBBER_SLOT).getCount()));
         return info;

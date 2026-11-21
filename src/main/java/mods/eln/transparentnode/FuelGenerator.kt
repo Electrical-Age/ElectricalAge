@@ -279,7 +279,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
             Pair(I18N.tr("Voltage"), Utils.plotVolt("", powerSource.u))
         )
         val v = inlet.vessel
-        if (v != null) info[I18N.tr("Fuel")] = String.format("%.0f / %d mB, %s", inlet.feedMb(), TANK_MB, mods.eln.sim.fluid.EaUnits.composition(v))
+        if (v != null) info[I18N.tr("Fuel")] = mods.eln.sim.fluid.EaUnits.tank(inlet.feedMb(), TANK_MB.toDouble()) + ", " + mods.eln.sim.fluid.EaUnits.composition(v)
         val wrong = inlet.blockedBy()
         if (wrong != null) info[I18N.tr("State")] = I18N.tr("blocked: it holds %1$, which it can't burn", wrong)
         if (v != null && inlet.feedId() >= 0) {

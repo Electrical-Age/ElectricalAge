@@ -373,7 +373,7 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
                 mods.eln.api.Meters.celsius(Water.tsat(Math.max(vessel.P(), Water.P_ATM)) - Water.T0), vessel.P() / 1e5));
         // (the vessel's own water, not the capability's view capped at the rating: an overfilled boiler showed 8000)
         int water = vessel != null ? (int) Math.floor(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER) : tanks.water();
-        info.put(I18N.tr("Water"), water + " / " + desc.waterMb + " mB" + (water > desc.waterMb ? I18N.tr(": overfull") : ""));
+        info.put(I18N.tr("Water"), mods.eln.sim.fluid.EaUnits.tank(water, desc.waterMb) + (water > desc.waterMb ? I18N.tr(": overfull") : ""));
         // (Baughn: steam in grams, not mB)
         info.put(I18N.tr("Steam to give"), EaUnits.steamGrams(tanks.steam()));
         info.put(I18N.tr("Steam made"), EaUnits.steamGrams(steamRate) + "/s");

@@ -123,7 +123,7 @@ public class ColumnSegmentElement extends TransparentNodeElement implements mods
         Map<String, String> info = new HashMap<>();
         info.put(I18N.tr("Cut"), cut == null ? I18N.tr("not on a column base") : cut.display);
         var f = tank.getFluid();
-        info.put(I18N.tr("Tank"), tank.getFluidAmount() + " / " + tank.getCapacity() + " mB" + (f.isEmpty() ? "" : " " + f.getHoverName().getString()));
+        info.put(I18N.tr("Tank"), mods.eln.sim.fluid.EaUnits.tank(tank.getFluidAmount(), tank.getCapacity()) + (f.isEmpty() ? "" : " " + f.getHoverName().getString()));
         return info;
     }
 }

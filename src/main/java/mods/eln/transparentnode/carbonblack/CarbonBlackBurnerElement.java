@@ -229,7 +229,7 @@ public class CarbonBlackBurnerElement extends TransparentNodeElement implements 
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Fuel"), Math.round(inlet.feedMb()) + " / " + CarbonBlackBurnerDescriptor.TANK_MB + " mB");
+        info.put(I18N.tr("Fuel"), mods.eln.sim.fluid.EaUnits.tank(inlet.feedMb(), CarbonBlackBurnerDescriptor.TANK_MB));
         info.put(I18N.tr("Carbon Black"), carbon + (carbon >= CarbonBlackBurnerDescriptor.MAX_CARBON ? " " + I18N.tr("(full: take it)") : ""));
         String wrong = burning ? null : inlet.blockedBy();
         info.put(I18N.tr("State"), burning ? I18N.tr("burning") : wrong != null ? I18N.tr("blocked: it holds %1$, which it can't burn", wrong) : I18N.tr("out of fuel"));

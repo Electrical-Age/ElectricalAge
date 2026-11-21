@@ -240,7 +240,7 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>(machine.wailaLines());
         if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
-        info.put(I18N.tr("Latex"), latex() + " / " + IndustrialResinCollectorDescriptor.TANK_MB + " mB");
+        info.put(I18N.tr("Latex"), mods.eln.sim.fluid.EaUnits.tank(latex(), IndustrialResinCollectorDescriptor.TANK_MB));
         info.put(I18N.tr("Tapping"), handRate <= 0 ? I18N.tr("no tree behind it (a trunk with leaves)")
             : String.format("%.0f mB/h", handRate * IndustrialResinCollectorDescriptor.SPEED_UP * Latex.MB_PER_RUBBER * 3600) + (running ? "" : " " + I18N.tr("(stopped)")));
         return info;

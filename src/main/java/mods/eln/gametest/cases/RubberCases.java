@@ -233,7 +233,7 @@ public final class RubberCases {
             c.check("resin collector: an old save loads", legacy.isEmpty(), legacy);
             c.check("resin collector: an old save's full tank and its part mB are in the basin, every kg", Math.abs(latexMb(v) - 4000.5) < 0.05, st);
             c.check("resin collector: ... with air over it, at the air's pressure", v.liquidVolume() / v.volume < 0.96 && Math.abs(v.P() - mods.eln.sim.fluid.Water.P_ATM) < 2000, st);
-            c.check("resin collector: ... it is full, and says so", !d.outlet.room(1) && String.valueOf(d.getWaila()).contains("4001 / 4000 mB"), st);
+            c.check("resin collector: ... it is full, and says so", !d.outlet.room(1) && String.valueOf(d.getWaila()).contains("4.00 / 4 B"), st);
         }
     }
 
@@ -453,7 +453,7 @@ public final class RubberCases {
                         rubber >= 2 && Math.abs(CollectorBasinCase.latexMb(vi) + 250 * rubber - 1500) < 0.5 && Math.abs(CollectorBasinCase.latexMb(vo) - 4000) < 0.5, st);
                     c.check("compressor: ... with air over them, at the air's pressure", vo.liquidVolume() / vo.volume < 0.96 && Math.abs(vo.P() - mods.eln.sim.fluid.Water.P_ATM) < 2000
                         && Math.abs(vi.P() - mods.eln.sim.fluid.Water.P_ATM) < 2000, st);
-                    c.check("compressor: ... its OUT vessel is full", !d.outlet.room(mods.eln.oil.Latex.MB_PER_RUBBER) && String.valueOf(d.getWaila()).contains("4000 / 4000 mB"), st);
+                    c.check("compressor: ... its OUT vessel is full", !d.outlet.room(mods.eln.oil.Latex.MB_PER_RUBBER) && String.valueOf(d.getWaila()).contains("4.00 / 4 B"), st);
                 }
             }
         }

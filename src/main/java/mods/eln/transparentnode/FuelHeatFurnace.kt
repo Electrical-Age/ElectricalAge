@@ -939,7 +939,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val v = vessel
         if (v != null) {
             val mb = fuelMb()
-            info.put(I18N.tr("Fuel tank"), if (mb < 0.5) I18N.tr("empty") else String.format("%.0f / %.0f mB: %s", mb, TANK_MB, mods.eln.sim.fluid.EaUnits.composition(v)))
+            info.put(I18N.tr("Fuel tank"), if (mb < 0.5) I18N.tr("empty") else mods.eln.sim.fluid.EaUnits.tank(mb, TANK_MB) + ": " + mods.eln.sim.fluid.EaUnits.composition(v))
             if (atBurner == mods.eln.sim.fluid.SpeciesRegistry.WATER) info.put(I18N.tr("Burner"), I18N.tr("water at the burner: the fire is out; drain it to relight"))
         }
         if (coke > 0.01 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER) info.put(I18N.tr("Burner"), String.format(I18N.tr("%.0f%% coked: fires %.0f%% (right-click with wool to clean)"), coke * 100, (1 - coke) * 100))

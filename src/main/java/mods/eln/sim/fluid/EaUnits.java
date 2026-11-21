@@ -85,6 +85,15 @@ public final class EaUnits {
         return String.format(b >= 100 ? "%.0f B" : "%.1f B", b);
     }
 
+    /**
+     * A tank's fill against its capacity in the capacity's unit (buckets from 1000 mB, as volume): "350 / 500 mB",
+     * "2.35 / 4 B". Buckets keep two decimals rounded down, so a tank 10 mB short of full doesn't read full.
+     */
+    public static String tank(double mB, double capacityMb) {
+        if (capacityMb < 1000) return String.format("%.0f / %.0f mB", mB, capacityMb);
+        double cap = capacityMb / 1000;
+        return String.format("%.2f / %s B", Math.floor(mB / 10) / 100, cap == Math.floor(cap) ? String.valueOf((long) cap) : String.valueOf(cap));
+    }
 
     private static String grams(double g) {
         return g >= 1000 ? compact(g / 1000) + " kg" : compact(g) + " g";
@@ -97,7 +106,7 @@ public final class EaUnits {
         SpeciesRegistry reg = SpeciesRegistry.get();
         for (int id = 2; id < n.speciesBound(); id++) {
             if (n.mass(id) <= 0) continue;
-            String liq = n.liquid(id) > 0 ? String.format("%.0f mB", n.liquid(id) / kgPerMbLiquid.applyAsDouble(id)) : "";
+            String liq = n.liquid(id) > 0 ? volume(n.liquid(id) / kgPerMbLiquid.applyAsDouble(id)) : "";
             String gas = n.vapour(id) > 1e-7 ? String.format("%.1f g gas", n.vapour(id) * 1000) : "";
             out.add(new String[]{reg.byId(id).displayName(), liq.isEmpty() ? gas : gas.isEmpty() ? liq : liq + ", " + gas});
         }

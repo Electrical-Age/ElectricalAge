@@ -355,7 +355,7 @@ public class FlareStackElement extends TransparentNodeElement implements FluidDe
         Map<String, String> info = new HashMap<>();
         if (vessel != null) {
             info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
-            info.put(I18N.tr("Tank"), String.format("%.0f / %.0f mB of liquid", liquidMb(), VESSEL_MB));
+            info.put(I18N.tr("Tank"), mods.eln.sim.fluid.EaUnits.tank(liquidMb(), VESSEL_MB) + " of liquid");
         }
         if (!plume()) info.put(I18N.tr("Burning"), String.format("%.0f mB/s", burnRate));
         else if (mods.eln.anim.Plume.burnt(burning) == mods.eln.anim.Plume.STEAM)
