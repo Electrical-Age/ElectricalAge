@@ -84,13 +84,18 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return sixNode.coordonate;
     }
 
+    /**
+     * The wrench turns it to its next front clockwise (wrenchStep quarter turns), reconnected and published; true when
+     * the wrench was used, turned or not. Every six-node device turns by this.
+     */
     protected boolean onBlockActivatedRotate(Player entityPlayer) {
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             // off centre in a voxel block: only where its body and pins, turned, still fit
-            LRDU next = front.getNextClockwise();
+            LRDU next = front;
+            for (int i = 0; i < wrenchStep(); i++) next = next.getNextClockwise();
             if (slot >= 6 && sixNode instanceof mods.eln.node.voxel.VoxelNode v) {
                 String[] err = new String[1];
-                next = v.wrenchTurn(this, err);
+                next = v.wrenchTurn(this, wrenchStep(), err);
                 if (next == null) {
                     if (entityPlayer != null) entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(err[0]));
                     return true;
@@ -102,6 +107,11 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
             return true;
         }
         return false;
+    }
+
+    /** Quarter turns per wrench click: 1, or 2 for a device that only looks right one way up (a lamp socket's). */
+    protected int wrenchStep() {
+        return 1;
     }
 
     public void sendPacketToAllClient(ByteArrayOutputStream bos) {

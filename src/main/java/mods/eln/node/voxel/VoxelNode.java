@@ -1026,12 +1026,17 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      * run). Null, and why in err[0], if no other front fits.
      */
     public LRDU wrenchTurn(mods.eln.node.six.SixNodeElement e, String[] err) {
+        return wrenchTurn(e, 1, err);
+    }
+
+    /** As wrenchTurn(e, err), stepping step quarter turns at a time (SixNodeElement.wrenchStep: 2 skips the quarter turns). */
+    public LRDU wrenchTurn(mods.eln.node.six.SixNodeElement e, int step, String[] err) {
         List<int[]> held = new ArrayList<>();   // (tip x, y, z, mask of each joined pin)
         for (Pin p : pins(e)) if (e.slotMask.get(p.lrdu())) held.add(new int[]{p.tip()[0], p.tip()[1], p.tip()[2], p.mask()});
         LRDU was = e.front, f = was;
         String why = null;
-        for (int k = 0; k < 3; k++) {
-            f = f.getNextClockwise();
+        for (int k = step; k < 4; k += step) {
+            for (int i = 0; i < step; i++) f = f.getNextClockwise();
             boolean keeps = true;
             if (!held.isEmpty()) {
                 e.front = f;

@@ -183,16 +183,9 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
 
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            if (side.isY()) {
-                front = front.getNextClockwise();
-                sixNode.reconnect();
-                sixNode.setNeedPublish(true);
-            }
-            return true;
-        } else {
-            return false;
-        }
+        // (as in 1.12: on a floor or ceiling the wrench turns it; on a wall it stays upright, the click used)
+        if (side.isY()) return onBlockActivatedRotate(entityPlayer);
+        return Utils.isPlayerUsingWrench(entityPlayer);
     }
 
     @Override
