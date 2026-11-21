@@ -465,8 +465,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   clock time, so after the first day it only grew and `daytime>0.5` stayed true. `wp9c_signal_processor`.
 - Plates in EA recipes (Baughn 2026-10-27): crafting recipes and pipe kits take `eln:high_quality_plates/<metal>`
   (OreDictTags.recipeTag), which holds EA's own plates, instead of `c:plates/<metal>` or the exact item; a modpack can
-  add plates to it. EA's plates say so in their tooltip. `recipes_take_high_quality_plates`.
-- 50V Compact Steam Turbine (new, Baughn 2026-10-27: the bootstrap option, eln:transparent_node@5284): heat on its left
+  add plates to it. EA's plates say so in their tooltip. `recipes_take_high_quality_plates`. Exception: the 48V Compact
+  Steam Turbine takes any `c:plates/copper`, so the bootstrap generator can be made by hand in packs with hammers
+  (Baughn 1573669111920066631).
+- 48V Compact Steam Turbine (new, Baughn 2026-10-27: the bootstrap option, eln:transparent_node@5284): heat on its left
   flank, water by bucket / top flange (float valve) / capability, 50 V front and back, no settings. 10% of the heat
   (Baughn) up to 300 W, so a stone heat furnace with 4 chambers runs it at full; governor from 105 to 140 C, bypass to
   its built-in condenser over 150 C (3.5 kW, costs fuel), safety valve over 180 C (costs water); 3% makeup water.

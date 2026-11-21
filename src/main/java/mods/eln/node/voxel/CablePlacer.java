@@ -220,9 +220,8 @@ public final class CablePlacer {
         return noEnd(level, pos, hit);
     }
 
-    /** Two ends at the same point (within a voxel). */
     static boolean sameSpot(CableRouter.End a, CableRouter.End b) {
-        return a != null && b != null && Math.abs(a.x() - b.x()) <= 1 && Math.abs(a.y() - b.y()) <= 1 && Math.abs(a.z() - b.z()) <= 1;
+        return a != null && b != null && Router.sameSpot(a.x(), a.y(), a.z(), b.x(), b.y(), b.z());
     }
 
     /** The same, for a click at hit: a Lamp Socket still in Lamp Supply mode (as every socket ships) has no cable pin;
@@ -570,6 +569,10 @@ public final class CablePlacer {
         }
         CableRouter.End last = plan.waypoints.isEmpty() ? null : plan.waypoints.get(plan.waypoints.size() - 1);
         boolean again = last != null && last.x() == at.x() && last.y() == at.y() && last.z() == at.z() && last.attach() == at.attach();
+        if (!device && join[0] == null && !again && plan.waypoints.isEmpty() && sameSpot(plan.start, at)) {
+            KitPreview.note(player, "That's where the route started: click somewhere else (" + kit.undoHint() + " to cancel)");
+            return true;
+        }
         if (!device && join[0] == null && !again) {
             plan.waypoints.add(at);
             long tRoute = System.nanoTime();

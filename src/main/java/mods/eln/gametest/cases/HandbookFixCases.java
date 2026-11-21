@@ -54,6 +54,8 @@ public final class HandbookFixCases {
             kitBefore = mods.eln.node.voxel.KitItem.lengthForTests(kit);
             handled1 = mods.eln.node.voxel.CablePlacer.use(player, c.level(), floor.below(), net.minecraft.core.Direction.UP, kit, lv, hit);
             handled2 = mods.eln.node.voxel.CablePlacer.use(player, c.level(), floor.below(), net.minecraft.core.Direction.UP, kit, lv, hit);
+            // (a third click: before, the second was a waypoint at the start and this one finished a loop there)
+            mods.eln.node.voxel.CablePlacer.use(player, c.level(), floor.below(), net.minecraft.core.Direction.UP, kit, lv, hit);
             kitAfter = mods.eln.node.voxel.KitItem.lengthForTests(kit);
             mods.eln.node.voxel.CablePlacer.cancelForTests(player.getUUID());
             player.snapTo(px, py, pz, 0, 0);

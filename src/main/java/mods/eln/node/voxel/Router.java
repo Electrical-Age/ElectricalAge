@@ -15,6 +15,11 @@ import java.util.PriorityQueue;
  * behind the Space interfaces. CableRouter and PipeRouter are the kinds' entry points and output stages.
  */
 public final class Router {
+    /** Two route ends at the same point (within a voxel): a kit route must not end where it started (todo #497). */
+    public static boolean sameSpot(long ax, long ay, long az, long bx, long by, long bz) {
+        return Math.abs(ax - bx) <= 1 && Math.abs(ay - by) <= 1 && Math.abs(az - bz) <= 1;
+    }
+
     private Router() {
     }
 
