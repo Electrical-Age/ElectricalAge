@@ -44,7 +44,7 @@ public final class HandbookFixCases {
             lamp = (LampSocketElement) c.placeSix(LampLightCases.LAMP_ID << 6, lampAt);
             // a kit clicked twice on the same floor spot: start, then "finish" there
             floor = c.at(7, 1, 1);
-            var player = Wp10bCases.player(c);
+            var player = c.player();
             player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
             Vec3 hit = Vec3.atLowerCornerOf(floor).add(0.5, 0, 0.5);
             double px = player.getX(), py = player.getY(), pz = player.getZ();
