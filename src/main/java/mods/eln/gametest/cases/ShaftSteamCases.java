@@ -52,11 +52,16 @@ public final class ShaftSteamCases {
         if (t.inlet != null && t.inlet.P() < pa) EaUnits.addWater(t.inlet, 0.01, Water.tsat(pa), true);
     }
 
-    /** Place a turbine at p facing XN (exhaust behind it, to the east), then parts along its shaft, alternately on
-     *  each side, nearest first. Returns the turbine first, then the parts in order. */
+    /** Place a Steam Turbine at p facing XN (exhaust behind it, to the east), then parts along its shaft, alternately
+     *  on each side, nearest first. Returns the turbine first, then the parts in order. */
     static TransparentNodeElement[] line(TestContext ctx, BlockPos p, int... parts) {
+        return turbineLine(ctx, STEAM_TURBINE, p, parts);
+    }
+
+    /** {@link #line} with a turbine of a kind (its transparent-node id). */
+    static TransparentNodeElement[] turbineLine(TestContext ctx, int turbine, BlockPos p, int... parts) {
         TransparentNodeElement[] out = new TransparentNodeElement[parts.length + 1];
-        out[0] = orient(ctx.placeTransparent(STEAM_TURBINE, p));
+        out[0] = orient(ctx.placeTransparent(turbine, p));
         Direction axis = out[0].front.left();
         for (int i = 0; i < parts.length; i++) {
             int k = i / 2 + 1;

@@ -20,7 +20,6 @@ import net.minecraft.core.BlockPos;
 import java.util.List;
 
 import static mods.eln.gametest.cases.ShaftSteamCases.*;
-import static mods.eln.gametest.cases.Wp10aCases.off;
 import static mods.eln.gametest.cases.Wp11Cases.*;
 
 /**
@@ -47,21 +46,6 @@ public final class ShaftPlantCases {
     }
 
     static final int LP_TURBINE = 18 + (4 << 6), CONDENSER = 52 + (82 << 6);
-
-    /** A turbine of a kind at p facing XN, with parts along its shaft (as ShaftSteamCases.line). */
-    static TransparentNodeElement[] turbineLine(TestContext ctx, int turbine, BlockPos p, int... parts) {
-        TransparentNodeElement[] out = new TransparentNodeElement[parts.length + 1];
-        out[0] = orient(ctx.placeTransparent(turbine, p));
-        Direction axis = out[0].front.left();
-        for (int i = 0; i < parts.length; i++) {
-            int k = i / 2 + 1;
-            Direction d = i % 2 == 0 ? axis : axis.getInverse();
-            BlockPos q = p;
-            for (int j = 0; j < k; j++) q = off(q, d);
-            out[i + 1] = orient(ctx.placeTransparent(parts[i], q));
-        }
-        return out;
-    }
 
     /** A plant condenser at p facing XN (or front), and a powered shaft motor against its north side (motor: or none). */
     static PlantCondenserElement condenser(TestContext ctx, BlockPos p, boolean motor) {
