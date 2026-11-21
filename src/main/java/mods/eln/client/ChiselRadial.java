@@ -8,7 +8,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,9 +33,7 @@ final class ChiselRadial {
         return new RadialMenu(Component.translatable("gui.eln.chisel.brush"), List.of(sizes, shapes),
             () -> Component.literal(size[0] + ", ").append(ChiselItem.shapeName(shape[0])), key, held, () -> {
                 if (size[0] == size0 && shape[0] == shape0) return;
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                bos.writeBytes(ChiselItem.brushPacket(size[0], shape[0]));
-                ElnNet.sendToServer(bos);
+                ElnNet.sendToServer(ChiselItem.brushPacket(size[0], shape[0]));
             });
     }
 }

@@ -81,4 +81,9 @@ public final class ElnNet {
     public static void sendToServer(ByteArrayOutputStream bos) {
         net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new Data(bos.toByteArray()));
     }
+
+    /** Send a whole packet (bytes from a packet builder, such as ToolbagItem.choicePacket). */
+    public static void sendToServer(byte[] packet) {
+        net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new Data(packet));
+    }
 }

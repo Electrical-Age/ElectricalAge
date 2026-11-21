@@ -7,7 +7,6 @@ import mods.eln.node.voxel.ToolbagItem.Kind;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -99,9 +98,7 @@ final class ToolbagRadial {
                 : cur[0].size(), kinds.getOrDefault(cur[0], 0) / 16.0)),
             ClientKeys.WRENCH, () -> {
                 if (act[0] || cur[0] == null) return;
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                bos.writeBytes(ToolbagItem.choicePacket(ToolbagItem.CHOOSE, new int[]{cur[0].pipe() ? 1 : 0, cur[0].tier(), cur[0].mm2(), cur[0].colour()}));
-                ElnNet.sendToServer(bos);
+                ElnNet.sendToServer(ToolbagItem.choicePacket(ToolbagItem.CHOOSE, new int[]{cur[0].pipe() ? 1 : 0, cur[0].tier(), cur[0].mm2(), cur[0].colour()}));
             }, true);
         return menu[0];
     }
@@ -123,9 +120,7 @@ final class ToolbagRadial {
 
     static void send(int action, int[] kind, boolean[] act, RadialMenu[] menu) {
         act[0] = true;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bos.writeBytes(ToolbagItem.choicePacket(action, kind));
-        ElnNet.sendToServer(bos);
+        ElnNet.sendToServer(ToolbagItem.choicePacket(action, kind));
         menu[0].commitAndClose();
     }
 }
