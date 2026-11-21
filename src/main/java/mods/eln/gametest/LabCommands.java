@@ -529,16 +529,7 @@ public final class LabCommands {
         for (int i = 0; i < 3; i++) {
             var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 1 + (3 << 6), pos.offset(at[i][0], at[i][1], at[i][2]));
             orient(s, l -> l, toward[i]);
-            float u = volts[i];
-            try {
-                var bos = new java.io.ByteArrayOutputStream();
-                var o = new java.io.DataOutputStream(bos);
-                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                o.writeFloat(u);
-                s.networkUnserialize(new java.io.DataInputStream(new java.io.ByteArrayInputStream(bos.toByteArray())));
-            } catch (java.io.IOException e) {
-                throw new IllegalStateException(e);
-            }
+            volts(s, volts[i]);
         }
         for (int[] pts : new int[][]{{16, 0, 4, 8, 0, 4, 8, 0, 0}, {16, 0, 8, 0, 0, 8}, {16, 0, 12, 8, 0, 12, 8, 0, 16}}) {
             String err = mods.eln.node.voxel.PipeKitItem.place(level, pos, new mods.eln.node.voxel.CablePart(0, 0, pts), null);
@@ -620,10 +611,7 @@ public final class LabCommands {
         host(level, player, cable, step(p, side));
         var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, step(step(p, side), side));
         orient(src, l -> l, side.getInverse());
-        src.networkUnserialize(packet(o -> {
-            o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-            o.writeFloat((float) volts);
-        }));
+        volts(src, volts);
     }
 
     /**
@@ -719,10 +707,7 @@ public final class LabCommands {
             host(level, player, lv, step(p, left));
             var feed = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, step(step(p, left), left));
             orient(feed, l -> l, right);
-            feed.networkUnserialize(packet(o -> {
-                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                o.writeFloat((float) mods.eln.Eln.LVU);
-            }));
+            volts(feed, mods.eln.Eln.LVU);
             host(level, player, (int) r[3], step(p, right));
             if ((boolean) r[6]) host(level, player, sixId("Ground Cable"), step(step(p, right), right));
             if (t instanceof mods.eln.transparentnode.transformer.VariableTransformerElement) {
@@ -1002,10 +987,7 @@ public final class LabCommands {
             host(level, player, hv ? 12 + (32 << 6) : lv ? 4 + (32 << 6) : 8 + (32 << 6), step(p, side));   // a Low/Medium/High Voltage Cable
             var feed = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, step(step(p, side), side));
             orient(feed, l -> l, side.getInverse());
-            feed.networkUnserialize(packet(o -> {
-                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                o.writeFloat((float) (hv ? mods.eln.Eln.HVU : lv ? mods.eln.Eln.LVU : mods.eln.Eln.MVU));
-            }));
+            volts(feed, (hv ? mods.eln.Eln.HVU : lv ? mods.eln.Eln.LVU : mods.eln.Eln.MVU));
             if (e instanceof mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement f) {
                 f.getInventory().setItem(mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceElement.heatingCorpSlotId,
                     mods.eln.Eln.findItemStack("230V Tungsten Heating Corp", 1));
@@ -1038,10 +1020,7 @@ public final class LabCommands {
         for (int row = 0; row < 2; row++) {
             BlockPos o = pos.offset(0, 0, 3 * row);
             var feed = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, o);
-            feed.networkUnserialize(packet(out -> {
-                out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                out.writeFloat((float) mods.eln.Eln.LVU);
-            }));
+            volts(feed, mods.eln.Eln.LVU);
             for (int x : new int[]{1, 3, 5})
                 for (var part : mods.eln.node.voxel.CablePart.arms(lv, 0, 4, 5)) {   // (on the floor, west to east)
                     String err = mods.eln.node.voxel.PipeKitItem.place(level, o.offset(x, 0, 0), part, null);
@@ -1099,10 +1078,7 @@ public final class LabCommands {
         var back = c.front.back().toEnumFacing();
         host(level, player, 4 + (32 << 6), p.relative(back));   // a low voltage cable
         var source = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) host(level, player, 3 << 6, p.relative(back, 2));
-        source.networkUnserialize(packet(o -> {
-            o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-            o.writeFloat(50f);
-        }));
+        volts(source, 50f);
         c.getInventory().setItem(0, new net.minecraft.world.item.ItemStack(mods.eln.robotics.Robotics.JANET_ROM.get()));
         c.getInventory().setItem(1, new net.minecraft.world.item.ItemStack(mods.eln.robotics.Robotics.RAM_CHIP.get()));
         c.getInventory().setItem(2, new net.minecraft.world.item.ItemStack(mods.eln.robotics.Robotics.RAM_CHIP.get()));
@@ -1118,6 +1094,14 @@ public final class LabCommands {
 
     interface PacketWriter {
         void write(java.io.DataOutputStream o) throws java.io.IOException;
+    }
+
+    /** Set an Electrical (or Signal) Source to u volts through its GUI packet (as TestContext.setVolts). */
+    static void volts(mods.eln.node.six.SixNodeElement source, double u) {
+        source.networkUnserialize(packet(o -> {
+            o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+            o.writeFloat((float) u);
+        }));
     }
 
     static java.io.DataInputStream packet(PacketWriter w) {
