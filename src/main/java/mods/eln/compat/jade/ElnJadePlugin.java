@@ -144,6 +144,9 @@ public class ElnJadePlugin implements IWailaPlugin {
                 if (m != null) lines.putAll(m);
                 m = lines;
             }
+            // (first of all, in red: Baughn 1573807986227544245; AdventurAgent read past it in grey)
+            if (mods.eln.fluid.FluidWorld.solverFailedAt(acc.getPosition().asLong()))
+                tag.putString("elnAlarm", mods.eln.i18n.I18N.tr("SOLVER FAILED: CALL BAUGHN"));
             if (m == null || m.isEmpty()) return;
             if (owner != null ? !owner.thermalLoadList.isEmpty() : hasHeat(acc)) {   // (the ambient it cools towards: by biome, height, depth; Baughn 2026-10-26)
                 m = new java.util.LinkedHashMap<>(m);
@@ -167,6 +170,8 @@ public class ElnJadePlugin implements IWailaPlugin {
         public void appendTooltip(ITooltip tooltip, BlockAccessor acc, IPluginConfig config) {
             String title = acc.getServerData().getStringOr("elnTitle", "");
             if (!title.isEmpty()) tooltip.replace(snownee.jade.api.JadeIds.CORE_OBJECT_NAME, Component.literal(title));
+            String alarm = acc.getServerData().getStringOr("elnAlarm", "");
+            if (!alarm.isEmpty()) tooltip.add(Component.literal(alarm).withStyle(net.minecraft.ChatFormatting.RED, net.minecraft.ChatFormatting.BOLD));
             var list = acc.getServerData().getListOrEmpty("elnProbe");
             boolean details = mods.eln.Eln.wailaEasyMode || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
             int n = details ? list.size() : Math.min(HEADLINE, list.size());

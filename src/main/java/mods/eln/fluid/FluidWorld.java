@@ -64,6 +64,8 @@ public final class FluidWorld implements IProcess {
         INSTANCE.lumpOf.clear();
         INSTANCE.handedBack.clear();
         INSTANCE.dirty = false;
+        INSTANCE.slowAt.clear();
+        INSTANCE.overBudgetLogged.clear();
         return INSTANCE;
     }
 
@@ -171,6 +173,24 @@ public final class FluidWorld implements IProcess {
         return out;
     }
 
+    /** A network over its step time and stalled this long (s: its steps covering under half the tick) is called out. */
+    static final double STUCK_SECONDS = 2;
+
+    /** Blocks (BlockPos.asLong) of stuck networks whose step last ran out of its time, and when (ms): Jade calls it out. */
+    private final Map<Long, Long> slowAt = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * Did the fluid network at this block run out of its step time in the last few seconds (Baughn 1573807986227544245:
+     * "Solver failed: Call Baughn" at the top of the Jade readout)?
+     */
+    public static boolean solverFailedAt(long pos) {
+        Long t = INSTANCE.slowAt.get(pos);
+        if (t == null) return false;
+        if (System.currentTimeMillis() - t < 5_000) return true;
+        INSTANCE.slowAt.remove(pos);
+        return false;
+    }
+
     /** When running out of step time was last logged near each place (ms), so a stiff network says so once a minute
      *  (by place: a stiff network is often rebuilt every few seconds). */
     private final Map<String, Long> overBudgetLogged = new HashMap<>();
@@ -178,14 +198,20 @@ public final class FluidWorld implements IProcess {
     /** A network's step ran out of its time (Network.MAX_STEP_NANOS): log where, once a minute. */
     private void overBudget(FluidNetwork n) {
         String where = "?";
-        outer:
+        long now = System.currentTimeMillis();
+        java.util.Set<FluidNode> in = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
+        in.addAll(n.nodes);
+        // (Jade calls out only a network stuck for a while, not a healthy one over its time for a moment: AdventurAgent saw
+        // Dysnomia's plant flagged after a restart)
+        double stall = 0;
+        for (FluidNode x : n.nodes) stall = Math.max(stall, x.stallNow);
+        boolean stuck = stall >= STUCK_SECONDS;
         for (FluidDevice d : devices)
             for (FluidDevice.FluidPort p : d.fluidPorts())
-                if (n.nodes.contains(nodeFor(p.node()))) {
-                    where = d.getClass().getSimpleName() + " " + BlockPos.of(p.pos()).toShortString();
-                    break outer;
+                if (in.contains(nodeFor(p.node()))) {
+                    if (where.equals("?")) where = d.getClass().getSimpleName() + " " + BlockPos.of(p.pos()).toShortString();
+                    if (stuck) slowAt.put(p.pos(), now);   // (Jade calls it out on every block of the network)
                 }
-        long now = System.currentTimeMillis();
         Long last = overBudgetLogged.get(where);
         if (last != null && now - last < 60_000) return;
         if (overBudgetLogged.size() > 256) overBudgetLogged.clear();
