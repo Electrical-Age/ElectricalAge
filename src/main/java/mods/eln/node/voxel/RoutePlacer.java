@@ -59,17 +59,14 @@ public final class RoutePlacer {
         final boolean bigStartMarker;
         /** The preview of a route to a machine's port adds the port cube at it. */
         final boolean portCube;
-        /** The preview aimed at the last waypoint routes to it as the click would (ending there). */
-        final boolean previewAgain;
 
-        Spec(String noun, boolean pipe, int particle, float particleSize, boolean bigStartMarker, boolean portCube, boolean previewAgain) {
+        Spec(String noun, boolean pipe, int particle, float particleSize, boolean bigStartMarker, boolean portCube) {
             this.noun = noun;
             this.pipe = pipe;
             this.particle = particle;
             this.particleSize = particleSize;
             this.bigStartMarker = bigStartMarker;
             this.portCube = portCube;
-            this.previewAgain = previewAgain;
         }
 
         /** "Cable" or "Pipe". */
@@ -102,14 +99,9 @@ public final class RoutePlacer {
         /** What the player reads when a route starts (onJoin: on an old cable or pipe). */
         abstract String started(KitSupply kit, boolean onJoin);
 
-        /** Added to "Waypoint n: x blocks so far". */
+        /** Added to "Waypoint n: x blocks so far" (both kinds end on the last waypoint clicked again). */
         String waypointTail() {
-            return "";
-        }
-
-        /** What "That's where the ... started" names. */
-        String startedWhat() {
-            return "route";
+            return ". Click it again to end there.";
         }
     }
 
@@ -283,13 +275,13 @@ public final class RoutePlacer {
             player.sendOverlayMessage(Component.literal(k.started(kit, c.join() != null)));
             return true;
         }
-        String hint = " (" + kit.undoHint() + " to cancel the route)";
+        String hint = ". " + kit.undoSentence();   // (wording: Neon, 2026-11-21)
         String from = plan.startJoin != null ? "from a " + k.noun + ", " : "";
         // (a click on the surface at the last waypoint again ends the route there)
         boolean again = !c.finish() && c.join() == null && !plan.waypoints.isEmpty() && same(plan.waypoints.get(plan.waypoints.size() - 1), at);
         if (!c.finish() && c.join() == null && !again) {
             if (plan.waypoints.isEmpty() && sameSpot(plan.start, at)) {
-                KitPreview.note(player, "That's where the " + k.startedWhat() + " started: click somewhere else (" + kit.undoHint() + " to cancel)");
+                KitPreview.note(player, "That's the start. Click elsewhere, or " + kit.cancelClause() + ".");
                 return true;
             }
             plan.waypoints.add(at);
@@ -298,7 +290,7 @@ public final class RoutePlacer {
             KitPreview.slow("waypoint route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
             if (r.error() != null) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
-                KitPreview.note(player, "Can't reach that waypoint: " + r.error() + hint);
+                KitPreview.note(player, "Can't reach: " + r.error() + hint);
             } else {
                 player.sendOverlayMessage(Component.literal(String.format("Waypoint %d: %.1f blocks so far", plan.waypoints.size(), r.length() / 16.0)
                     + k.waypointTail()));
@@ -309,7 +301,7 @@ public final class RoutePlacer {
         // finish: at a machine, a cable or pipe, or the last waypoint; never back where it started (AdventurAgent: a socket
         // clicked twice laid a loop from its pin back to the same pin)
         if (!again && plan.waypoints.isEmpty() && sameSpot(plan.start, at)) {
-            KitPreview.note(player, "That's where the " + k.startedWhat() + " started: finish it somewhere else (" + kit.undoHint() + " to cancel)");
+            KitPreview.note(player, "That's the start. Finish elsewhere, or " + kit.cancelClause() + ".");
             return true;
         }
         CableRouter.End end = again ? plan.waypoints.remove(plan.waypoints.size() - 1) : at;

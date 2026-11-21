@@ -331,8 +331,8 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   The placers' end is `CableRouter.End` for both (a pipe's: attach -1, dir as a face; `PipePlacer.end` adapts it,
   `PipeEndAdapterTest`); the routers and their direction orders are unchanged.
 - The preview (`KitPreview.tick`, one for both): the start before a route, then the route to the aim on the preview
-  thread over a snapshot (`KitPreview.Job`), its line ending with what the click would do: nothing more at a machine,
-  " (joins the cable)" / " (joins the pipe)", or " (waypoint)". Slow steps go to the log (`KitPreview.slow`) and the
+  thread over a snapshot (`KitPreview.Job`), its line ("Cable: 7.5 blocks") ending with what the click would do:
+  " — connects" at a machine, " — joins", " — open end" at the last waypoint, or " — waypoint" (wording: Neon). Slow steps go to the log (`KitPreview.slow`) and the
   route debug kit (`RouteDebug`, `/elnlab debugkit` on a cable or pipe kit; a pipe's replay token starts `p_`) reports
   each preview, for both kinds.
 - Tests: `RouteLeakCases` (lay/break/re-lay rounds leave nothing in the simulator or fluid world),
@@ -358,7 +358,7 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   start once the kind is chosen. With a route on the radial adds Undo and Cancel (the bag's sneak-click is the radial),
   and a new kind restarts the route from its start click (`STARTED`), its waypoints kept where they fit: a cable's for
   another cable kind, a pipe's for another pipe kind (a cable's face points and a pipe's block-middle points don't carry
-  over between the two; "Route restarted as ... (waypoints dropped)").
+  over between the two; "Restarted as ... — waypoints cleared").
 - Client `ToolbagHud`: the chosen kind and a terse usage line above the route note while the bag is in hand.
 - A kit or bag click must be within reach, its point on or in the clicked block (`CablePlacer.reachable`; else "Out
   of reach"; the player's reach plus `REACH_SLACK` 0.25, where the server itself takes a block more): AdventurAgent's

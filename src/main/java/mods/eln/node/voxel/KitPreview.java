@@ -119,10 +119,11 @@ public final class KitPreview {
 
     /** A route preview to work out on the preview thread: the plan's route to the aim (to), over a snapshot round it. */
     record Job(RoutePlacer.Spec k, RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-               CableRouter.End to, long[] endJoin, int have, RoutePlacer.Click c) {
+               CableRouter.End to, long[] endJoin, int have, RoutePlacer.Click c, boolean again) {
         /**
-         * The kind's answer; a route that works says what the click would do there: finish at a machine (nothing more),
-         * join the cable or pipe aimed at, or add a waypoint (Baughn: the pipes' suffix, for both kinds).
+         * The kind's answer; a route that works says what the click would do there: connect to a machine, join the cable
+         * or pipe aimed at, end at the last waypoint (an open end), or add a waypoint (Baughn: the pipes' suffix, for both
+         * kinds; wording Neon's: "Cable: 7.5 blocks \u2014 joins").
          */
         Answer answer() {
             Answer a = k.answer(view, tier, spec, start, startJoin, wps, to, endJoin, have);
@@ -132,7 +133,7 @@ public final class KitPreview {
                 bs = new ArrayList<>(bs);
                 bs.add(port(to));
             }
-            return new Answer(true, bs, a.message + (c.finish() ? "" : c.join() != null ? " (joins the " + k.noun + ")" : " (waypoint)"));
+            return new Answer(true, bs, a.message + suffix(again, c.join() != null, c.finish()));
         }
     }
 
@@ -142,15 +143,20 @@ public final class KitPreview {
         List<CableRouter.End> wps = new ArrayList<>(plan.waypoints);
         CableRouter.End to = c.at();
         // (aimed at the last waypoint: the route ends there, as the click would)
-        if (k.previewAgain && !c.finish() && c.join() == null && !wps.isEmpty() && RoutePlacer.same(wps.get(wps.size() - 1), to))
-            to = wps.remove(wps.size() - 1);
+        boolean again = !c.finish() && c.join() == null && !wps.isEmpty() && RoutePlacer.same(wps.get(wps.size() - 1), to);
+        if (again) to = wps.remove(wps.size() - 1);
         List<long[]> ends = new ArrayList<>();
         for (CableRouter.End w : plan.waypoints) ends.add(new long[]{w.x(), w.y(), w.z()});
         ends.add(new long[]{plan.start.x(), plan.start.y(), plan.start.z()});
         ends.add(new long[]{to.x(), to.y(), to.z()});
         RouteView view = snapshotAround(p, level, ends);
         int have = p.isCreative() ? Integer.MAX_VALUE : kit.length();
-        return new Job(k, view, plan.tier, plan.spec, plan.start, plan.startJoin, List.copyOf(wps), to, c.join(), have, c);
+        return new Job(k, view, plan.tier, plan.spec, plan.start, plan.startJoin, List.copyOf(wps), to, c.join(), have, c, again);
+    }
+
+    /** What the click would do, after the preview's length: " \u2014 open end", " \u2014 joins", " \u2014 connects" or " \u2014 waypoint". */
+    static String suffix(boolean again, boolean join, boolean finish) {
+        return again ? " \u2014 open end" : join ? " \u2014 joins" : finish ? " \u2014 connects" : " \u2014 waypoint";
     }
 
     /**
@@ -206,7 +212,7 @@ public final class KitPreview {
         List<int[]> boxes = new ArrayList<>();
         if (r.error != null) {
             boxes.add(marker(at));
-            return new Answer(false, boxes, "Can't reach there: " + r.error + " (sneak-click to cancel the route)");
+            return new Answer(false, boxes, "Can't reach: " + r.error);
         }
         for (CableRouter.Piece pc : CableRouter.pieces(r.steps, t.width(), t.height())) {
             CablePart part = pc.face() < 0 ? CablePart.knuckle(tier, spec, pc.points()[0], pc.points()[1], pc.points()[2]) : new CablePart(tier, spec, pc.face(), pc.points());
@@ -217,7 +223,7 @@ public final class KitPreview {
         int len = r.length();
         if (have < len)
             return new Answer(false, boxes, String.format("Too long: %.1f blocks of cable, the kit holds %.1f", len / 16.0, have / 16.0));
-        return new Answer(true, boxes, String.format("Route: %.1f blocks of cable", len / 16.0));
+        return new Answer(true, boxes, String.format("Cable: %.1f blocks", len / 16.0));
     }
 
     /** The preview thread's time for one route (more than the click's: it doesn't hold up the server). */
@@ -308,7 +314,7 @@ public final class KitPreview {
     public static Answer pipeAnswer(RouteView view, long[] join, long[] startJoin, int tier, PipeRouter.End start, List<PipeRouter.End> wps,
                                     PipeRouter.End end, int have, boolean toPort) {
         Answer a = pipeRoute(view, join, startJoin, tier, start, wps, end, have);
-        return !a.ok ? a : new Answer(true, a.boxes, a.message + (toPort ? "" : join != null ? " (joins the pipe)" : " (waypoint)"));
+        return !a.ok ? a : new Answer(true, a.boxes, a.message + suffix(false, join != null, toPort));
     }
 
     /** ... the line without what the click would do (the pipe spec's: KitPreview.Job adds it, for both kinds). */
@@ -323,7 +329,7 @@ public final class KitPreview {
         String msg;
         if (!ok) {
             bs.add(new int[]{(int) end.x() - 1, (int) end.y() - 1, (int) end.z() - 1, (int) end.x() + 1, (int) end.y() + 1, (int) end.z() + 1});
-            msg = "Can't reach there: " + r.error + " (sneak-click to cancel the route)";
+            msg = "Can't reach: " + r.error;
         } else {
             for (var e : PipeRouter.perBlock(r.points).entrySet()) {
                 long bx = e.getKey().get(0), by = e.getKey().get(1), bz = e.getKey().get(2);
@@ -335,7 +341,7 @@ public final class KitPreview {
             if (have < len) {
                 ok = false;
                 msg = String.format("Too long: %.1f blocks of pipe, the kit holds %.1f", len / 16.0, have / 16.0);
-            } else msg = String.format("Route: %.1f blocks of pipe", len / 16.0);
+            } else msg = String.format("Pipe: %.1f blocks", len / 16.0);
         }
         return new Answer(ok, bs, msg);
     }

@@ -28,6 +28,16 @@ public interface KitSupply {
         return "sneak-click";
     }
 
+    /** The undo, as a sentence after a refusal: "Sneak-click to undo." (the Toolbag: "Sneak-click for Undo."). */
+    default String undoSentence() {
+        return "Sneak-click to undo.";
+    }
+
+    /** How to give up instead: "sneak-click to cancel" (the Toolbag: "sneak-click for Undo"). */
+    default String cancelClause() {
+        return "sneak-click to cancel";
+    }
+
     /** One kit. */
     static KitSupply of(ItemStack kit) {
         boolean pipe = kit.getItem() instanceof PipeKitItem;

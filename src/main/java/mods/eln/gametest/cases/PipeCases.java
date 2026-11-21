@@ -1170,10 +1170,10 @@ public final class PipeCases {
         }
 
         public void measure(TestContext ctx) {
-            ctx.check("kit preview: a cable route aimed at the floor adds a waypoint", cableFloor != null && cableFloor.endsWith(" (waypoint)"), cableFloor);
-            ctx.check("kit preview: a cable route aimed at a cable joins it", cableJoin != null && cableJoin.endsWith(" (joins the cable)"), cableJoin);
-            ctx.check("kit preview: a pipe route aimed at the floor adds a waypoint", pipeFloor != null && pipeFloor.endsWith(" (waypoint)"), pipeFloor);
-            ctx.check("kit preview: a pipe route aimed at a pipe joins it", pipeJoin != null && pipeJoin.endsWith(" (joins the pipe)"), pipeJoin);
+            ctx.check("kit preview: a cable route aimed at the floor adds a waypoint", cableFloor != null && cableFloor.endsWith(" \u2014 waypoint"), cableFloor);
+            ctx.check("kit preview: a cable route aimed at a cable joins it", cableJoin != null && cableJoin.endsWith(" \u2014 joins"), cableJoin);
+            ctx.check("kit preview: a pipe route aimed at the floor adds a waypoint", pipeFloor != null && pipeFloor.endsWith(" \u2014 waypoint"), pipeFloor);
+            ctx.check("kit preview: a pipe route aimed at a pipe joins it", pipeJoin != null && pipeJoin.endsWith(" \u2014 joins"), pipeJoin);
         }
     }
 

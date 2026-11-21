@@ -26,7 +26,7 @@ public final class PipePlacer {
     }
 
     /** The pipe kit in RoutePlacer's one flow. */
-    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("pipe", true, 0x55C8FF, 0.8f, true, false, true) {
+    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("pipe", true, 0x55C8FF, 0.8f, true, false) {
         @Override
         RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, net.minecraft.world.phys.Vec3 hit, int tier, boolean start, boolean click) {
             PipeRouter.End port = portAt(level, pos, face, hit);
@@ -80,15 +80,7 @@ public final class PipePlacer {
                 + ": click for waypoints, a port or pipe to finish, the last waypoint again to end it there; " + kit.undoHint() + " to undo";
         }
 
-        @Override
-        String waypointTail() {
-            return " (click it again to end the pipe there)";
-        }
 
-        @Override
-        String startedWhat() {
-            return "pipe";
-        }
     };
 
     /** A face (3D value) by pipe direction (0..5 = -x +x -y +y -z +z, dirOf), and back: RoutePlacer's ends name faces. */

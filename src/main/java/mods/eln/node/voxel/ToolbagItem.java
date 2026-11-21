@@ -183,6 +183,16 @@ public class ToolbagItem extends Item implements PipeTool {
                 setContents(bag, c);
             }
 
+            public String undoSentence() {
+                return "Sneak-click for Undo.";
+            }
+
+            @Override
+            public String cancelClause() {
+                return "sneak-click for Undo";
+            }
+
+            @Override
             public String undoHint() {
                 return "sneak-click for Undo";
             }
@@ -364,7 +374,7 @@ public class ToolbagItem extends Item implements PipeTool {
             }
             lay(p, level, s, start);
             if (old != null && old.kind == RoutePlacer.of(s)) RoutePlacer.addWaypoints(p.getUUID(), wps);
-            else if (!wps.isEmpty() || wasPipe != s.pipe()) p.sendOverlayMessage(Component.literal("Route restarted as " + kind.label() + " (waypoints dropped)"));
+            else if (!wps.isEmpty() || wasPipe != s.pipe()) p.sendOverlayMessage(Component.literal("Restarted as " + kind.label() + " \u2014 waypoints cleared"));
             return;
         }
         if (pending == null) {

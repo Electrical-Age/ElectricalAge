@@ -25,7 +25,7 @@ public final class CablePlacer {
     }
 
     /** The cable kit in RoutePlacer's one flow. */
-    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("cable", false, 0xFFB040, 0.7f, false, true, false) {
+    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("cable", false, 0xFFB040, 0.7f, false, true) {
         @Override
         RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, int tier, boolean start, boolean click) {
             long[][] join = new long[1][];
