@@ -15,8 +15,8 @@ import java.util.List;
  * crude's heat value (the overhead), or a flat 20 J/mB for water. Placeholder model: the compressor's.
  */
 public class OilPumpDescriptor extends TransparentNodeDescriptor implements mods.eln.node.transparent.FrontDrawnRender.Drawn {
-    /** Real litres per game mB (design v2's litresPerMilliBucket, = Eln.fuelHeatValueFactor). */
-    public static final double LITRES_PER_MB = 6.75e-5;
+    /** Real litres per game mB (EaUnits.LITRES_PER_MB, = Eln.fuelHeatValueFactor). */
+    public static final double LITRES_PER_MB = mods.eln.sim.fluid.EaUnits.LITRES_PER_MB;
     public static final double CRUDE_KG_PER_L = 0.85, WATER_KG_PER_L = 1.0;
     /** Crude's heat value per mB (38 MJ/L real), and the pumping overhead: 5% of it. */
     public static final double CRUDE_J_PER_MB = 38e6 * LITRES_PER_MB, OVERHEAD = 0.05;

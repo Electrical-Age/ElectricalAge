@@ -17,7 +17,7 @@ import java.util.List;
  * Placeholder model: the electric furnace.
  */
 public class BoilerDescriptor extends TransparentNodeDescriptor {
-    public static final double J_PER_MB_WATER = 175, STEAM_PER_WATER = 67.5, BOIL_C = 100;
+    public static final double J_PER_MB_WATER = 175, STEAM_PER_WATER = mods.eln.sim.fluid.EaUnits.STEAM_MB_PER_WATER_MB, BOIL_C = 100;
     final Obj3D obj;
     /**
      * What sets a boiler's size (the Boiler's values; large() gives the Large Boiler's): the vessel (m3) and its rated

@@ -2,13 +2,17 @@ package mods.eln.sim.fluid;
 
 /**
  * EA's fluid scale against the core's SI units (notes/pipes/DESIGN.md 6b): 1 mB of water is 6.75e-5 L = 67.5 mg
- * (OilPumpDescriptor.LITRES_PER_MB), and 1 mB of steam is 1 mg (67.5 mB of steam per mB of water boiled).
+ * (LITRES_PER_MB), and 1 mB of steam is 1 mg (67.5 mB of steam per mB of water boiled).
  */
 public final class EaUnits {
     private EaUnits() {
     }
 
-    public static final double KG_PER_MB_WATER = 6.75e-5, KG_PER_MB_STEAM = 1e-6;
+    /** Real litres per game mB (design v2's litresPerMilliBucket); water is 1 kg/L. */
+    public static final double LITRES_PER_MB = 6.75e-5;
+    public static final double KG_PER_MB_WATER = LITRES_PER_MB, KG_PER_MB_STEAM = 1e-6;
+    /** mB of steam that 1 mB of water boils into (KG_PER_MB_WATER / KG_PER_MB_STEAM). */
+    public static final double STEAM_MB_PER_WATER_MB = 67.5;
 
     /** Steam for players (Baughn: mB of a gas never made sense; grams do): mB of steam (or a rate in mB/s) as grams. */
     public static String steamGrams(double mB) {
