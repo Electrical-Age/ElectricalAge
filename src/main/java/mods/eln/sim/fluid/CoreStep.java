@@ -42,9 +42,11 @@ public final class CoreStep {
      * The most wall time one network's step may take in the game (ns; 0: no limit; Network.MAX_STEP_NANOS): a stiff
      * network once took a 60 s tick and the watchdog killed Incognito, in a loop, since its chunks are kept loaded (a
      * steam line with water in it, 2026-11-21). At 40 ms the server lived at 15 TPS; at 10 ms it held 20 TPS and the
-     * stiff network ran slow. GameTests set 0: their outcome mustn't hang on the machine's speed.
+     * stiff network ran slow. Off (0) until a server starts (Eln, GAME_BUDGET), and GameTests set 0: unit and GameTest
+     * outcomes mustn't hang on the machine's speed.
      */
-    public static long budgetNanos = 10_000_000L;
+    public static long budgetNanos = 0;
+    public static final long GAME_BUDGET = 10_000_000L;
 
     final Network net = new Network();
     /** Its last step ran out of Network.MAX_STEP_NANOS (FluidWorld says where). */
