@@ -277,13 +277,13 @@ public final class RoutePlacer {
         }
         String hint = ". " + kit.undoSentence();   // (wording: Neon, 2026-11-21)
         String from = plan.startJoin != null ? "from a " + k.noun + ", " : "";
-        // (a click on the surface at the last waypoint again ends the route there)
-        boolean again = !c.finish() && c.join() == null && !plan.waypoints.isEmpty() && same(plan.waypoints.get(plan.waypoints.size() - 1), at);
+        boolean again = again(plan, c);
+        String refused = startRefusal(plan, c, again, kit);
+        if (refused != null) {
+            KitPreview.note(player, refused);
+            return true;
+        }
         if (!c.finish() && c.join() == null && !again) {
-            if (plan.waypoints.isEmpty() && sameSpot(plan.start, at)) {
-                KitPreview.note(player, "That's the start. Click elsewhere, or " + kit.cancelClause() + ".");
-                return true;
-            }
             plan.waypoints.add(at);
             long tRoute = System.nanoTime();
             Routed r = route(level, plan, null, null);
@@ -298,19 +298,14 @@ public final class RoutePlacer {
             }
             return true;
         }
-        // finish: at a machine, a cable or pipe, or the last waypoint; never back where it started (AdventurAgent: a socket
-        // clicked twice laid a loop from its pin back to the same pin)
-        if (!again && plan.waypoints.isEmpty() && sameSpot(plan.start, at)) {
-            KitPreview.note(player, "That's the start. Finish elsewhere, or " + kit.cancelClause() + ".");
-            return true;
-        }
+        // finish: at a machine, a cable or pipe, or the last waypoint
         CableRouter.End end = again ? plan.waypoints.remove(plan.waypoints.size() - 1) : at;
         long tRoute = System.nanoTime();
         Routed r = route(level, plan, end, c.join());
         KitPreview.slow("click route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
         if (r.error() != null) {
             if (again) plan.waypoints.add(end);
-            KitPreview.note(player, "No route: " + r.error() + hint);
+            KitPreview.note(player, "Can't reach: " + r.error() + hint);
             return true;
         }
         int len = r.length();
@@ -350,6 +345,22 @@ public final class RoutePlacer {
             if (r.error() == null) show(player, level, plan.kind, r);
         }
         return true;
+    }
+
+    /** Is the aim c at the plan's last waypoint again (a plain surface click there: the route ends there)? */
+    static boolean again(Plan plan, Click c) {
+        return !c.finish() && c.join() == null && !plan.waypoints.isEmpty() && same(plan.waypoints.get(plan.waypoints.size() - 1), c.at());
+    }
+
+    /**
+     * Why a click at c is refused for being back at the start spot (no waypoints yet: as the first waypoint, or as the
+     * finish; AdventurAgent: a socket clicked twice laid a loop from its pin back to the same pin), or null. The click and
+     * the preview both ask.
+     */
+    static String startRefusal(Plan plan, Click c, boolean again, KitSupply kit) {
+        if (again || !plan.waypoints.isEmpty() || !sameSpot(plan.start, c.at())) return null;
+        return c.finish() || c.join() != null ? "That's the start. Finish elsewhere, or " + kit.cancelClause() + "."
+            : "That's the start. Click elsewhere, or " + kit.cancelClause() + ".";
     }
 
     /** The plan's route to end (null: to its last waypoint), free round its start join and endJoin (or null), on the live world. */

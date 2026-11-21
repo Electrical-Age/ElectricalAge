@@ -119,13 +119,15 @@ public final class KitPreview {
 
     /** A route preview to work out on the preview thread: the plan's route to the aim (to), over a snapshot round it. */
     record Job(RoutePlacer.Spec k, RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-               CableRouter.End to, long[] endJoin, int have, RoutePlacer.Click c, boolean again) {
+               CableRouter.End to, long[] endJoin, int have, RoutePlacer.Click c, boolean again, String refused) {
         /**
-         * The kind's answer; a route that works says what the click would do there: connect to a machine, join the cable
-         * or pipe aimed at, end at the last waypoint (an open end), or add a waypoint (Baughn: the pipes' suffix, for both
-         * kinds; wording Neon's: "Cable: 7.5 blocks \u2014 joins").
+         * The answer: the click's refusal if it would be refused (RoutePlacer.startRefusal), else the kind's answer; a
+         * route that works says what the click would do there: connect to a machine, join the cable or pipe aimed at, end
+         * at the last waypoint (an open end), or add a waypoint (Baughn: the pipes' suffix, for both kinds; wording
+         * Neon's: "Cable: 7.5 blocks \u2014 joins").
          */
         Answer answer() {
+            if (refused != null) return new Answer(false, new ArrayList<>(List.of(marker(to))), refused);
             Answer a = k.answer(view, tier, spec, start, startJoin, wps, to, endJoin, have);
             if (!a.ok) return a;
             List<int[]> bs = a.boxes;
@@ -143,15 +145,19 @@ public final class KitPreview {
         List<CableRouter.End> wps = new ArrayList<>(plan.waypoints);
         CableRouter.End to = c.at();
         // (aimed at the last waypoint: the route ends there, as the click would)
-        boolean again = !c.finish() && c.join() == null && !wps.isEmpty() && RoutePlacer.same(wps.get(wps.size() - 1), to);
+        boolean again = RoutePlacer.again(plan, c);
         if (again) to = wps.remove(wps.size() - 1);
-        List<long[]> ends = new ArrayList<>();
-        for (CableRouter.End w : plan.waypoints) ends.add(new long[]{w.x(), w.y(), w.z()});
-        ends.add(new long[]{plan.start.x(), plan.start.y(), plan.start.z()});
-        ends.add(new long[]{to.x(), to.y(), to.z()});
-        RouteView view = snapshotAround(p, level, ends);
+        String refused = RoutePlacer.startRefusal(plan, c, again, kit);
+        RouteView view = null;
+        if (refused == null) {
+            List<long[]> ends = new ArrayList<>();
+            for (CableRouter.End w : plan.waypoints) ends.add(new long[]{w.x(), w.y(), w.z()});
+            ends.add(new long[]{plan.start.x(), plan.start.y(), plan.start.z()});
+            ends.add(new long[]{to.x(), to.y(), to.z()});
+            view = snapshotAround(p, level, ends);
+        }
         int have = p.isCreative() ? Integer.MAX_VALUE : kit.length();
-        return new Job(k, view, plan.tier, plan.spec, plan.start, plan.startJoin, List.copyOf(wps), to, c.join(), have, c, again);
+        return new Job(k, view, plan.tier, plan.spec, plan.start, plan.startJoin, List.copyOf(wps), to, c.join(), have, c, again, refused);
     }
 
     /** What the click would do, after the preview's length: " \u2014 open end", " \u2014 joins", " \u2014 connects" or " \u2014 waypoint". */
@@ -160,15 +166,16 @@ public final class KitPreview {
     }
 
     /**
-     * The preview's action-bar line for the player aiming at hit on face of pos with kit, worked out at once (GameTests);
-     * null when it shows no route (no route started yet, or no end there).
+     * The preview's action-bar line for the player aiming at hit on face of pos with kit, worked out at once (GameTests):
+     * why there is no end there, the route's line, or null (no route started and nothing to say).
      */
     public static String previewForTests(ServerPlayer p, KitSupply kit, BlockPos pos, net.minecraft.core.Direction face, net.minecraft.world.phys.Vec3 hit) {
         ServerLevel level = (ServerLevel) p.level();
         RoutePlacer.Plan plan = RoutePlacer.plan(p.getUUID());
-        if (plan == null || plan.kind != RoutePlacer.of(kit)) return null;
-        RoutePlacer.Click c = plan.kind.endAt(level, pos, face, hit, kit.tier(), false, false);
-        return c.at() == null ? null : job(p, level, kit, plan, c).answer().message;
+        if (plan != null && plan.kind != RoutePlacer.of(kit)) plan = null;
+        RoutePlacer.Click c = RoutePlacer.of(kit).endAt(level, pos, face, hit, kit.tier(), plan == null, false);
+        if (c.at() == null) return c.refusal();
+        return plan == null ? null : job(p, level, kit, plan, c).answer().message;
     }
 
     /**

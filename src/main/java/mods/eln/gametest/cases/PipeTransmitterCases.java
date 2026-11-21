@@ -302,7 +302,7 @@ public final class PipeTransmitterCases {
      */
     static final class LabFixes implements TestCase {
         BlockPos under, crowded, a, r;
-        String errUnder, errCrowded, errRoute;
+        String errUnder, errCrowded, errRoute, previewTaken;
         int piecesBefore, piecesAfter;
         net.minecraft.network.chat.Component lastMessage;
 
@@ -348,6 +348,7 @@ public final class PipeTransmitterCases {
             piecesBefore = (int) c.voxelByEntity(a).parts.stream().filter(q -> q instanceof PipePart).count();
             PipePlacer.use(fp, sl, r, net.minecraft.core.Direction.EAST, kit, 0, new Vec3(r.getX() + 1, r.getY() + 0.25, r.getZ() + 0.5));
             boolean handled = PipePlacer.use(fp, sl, a, net.minecraft.core.Direction.UP, kit, 0, body);
+            previewTaken = mods.eln.node.voxel.KitPreview.previewForTests(fp, mods.eln.node.voxel.KitSupply.of(kit), a, net.minecraft.core.Direction.UP, body);
             piecesAfter = (int) c.voxelByEntity(a).parts.stream().filter(q -> q instanceof PipePart).count();
             fp.snapTo(px, py, pz, 0, 0);
             if (!handled) errRoute = "the second click on the device wasn't taken";
@@ -361,6 +362,8 @@ public final class PipeTransmitterCases {
             c.check("pipe transmitter: refused in a cell full of pipes", errCrowded != null && errCrowded.startsWith("Too close to a pipe") && device(c, crowded) == null, "" + errCrowded);
             c.check("pipe transmitter: a route laid to its port by a pipe kit", errRoute == null && piecesBefore >= 1, errRoute + " " + piecesBefore);
             c.check("pipe transmitter: a second route to a port that has a pipe is refused", piecesAfter == piecesBefore, piecesBefore + " -> " + piecesAfter);
+            c.check("pipe transmitter: the kit's preview at that port says it's taken", previewTaken != null && previewTaken.startsWith("Its port already has a pipe"),
+                "" + previewTaken);
             if (errRoute != null) return;
             var t = device(c, a);
             var v = c.voxelByEntity(a);

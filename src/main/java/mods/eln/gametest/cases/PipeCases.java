@@ -1105,10 +1105,10 @@ public final class PipeCases {
     /**
      * The preview's line says what the next click would do, for cables and pipes alike (the pipes' suffix, Baughn: one
      * kit UX): a route started on the floor and aimed at more floor adds a waypoint; aimed at an old cable or pipe of
-     * the kind, it joins it.
+     * the kind, it joins it; aimed back at the start, the click's refusal.
      */
     static final class KitPreviewSaysWhatTheClickDoes implements TestCase {
-        String cableFloor, cableJoin, pipeFloor, pipeJoin;
+        String cableFloor, cableJoin, pipeFloor, pipeJoin, cableStart, pipeStart;
 
         public String id() {
             return "kit_preview_says_what_the_click_does";
@@ -1151,6 +1151,7 @@ public final class PipeCases {
                 var cs = mods.eln.node.voxel.KitSupply.of(cable);
                 mods.eln.node.voxel.CablePlacer.use(p, level, start, up, cs, startHit, false);
                 cableFloor = mods.eln.node.voxel.KitPreview.previewForTests(p, cs, floor, up, floorHit);
+                cableStart = mods.eln.node.voxel.KitPreview.previewForTests(p, cs, start, up, startHit);
                 BlockPos onCable = ctx.at(4, 1, 5);
                 cableJoin = mods.eln.node.voxel.KitPreview.previewForTests(p, cs, onCable, up,
                     net.minecraft.world.phys.Vec3.atLowerCornerOf(onCable).add(0.5, 0.5 / 16, 0.5));
@@ -1159,6 +1160,7 @@ public final class PipeCases {
                 var ps = mods.eln.node.voxel.KitSupply.of(pipe);
                 mods.eln.node.voxel.PipePlacer.use(p, level, start, up, ps, startHit, false);
                 pipeFloor = mods.eln.node.voxel.KitPreview.previewForTests(p, ps, floor, up, floorHit);
+                pipeStart = mods.eln.node.voxel.KitPreview.previewForTests(p, ps, start, up, startHit);
                 BlockPos onPipe = ctx.at(4, 1, 3);
                 pipeJoin = mods.eln.node.voxel.KitPreview.previewForTests(p, ps, onPipe, up,
                     net.minecraft.world.phys.Vec3.atLowerCornerOf(onPipe).add(0.5, 9.0 / 16, 0.5));
@@ -1173,6 +1175,9 @@ public final class PipeCases {
             ctx.check("kit preview: a cable route aimed at the floor adds a waypoint", cableFloor != null && cableFloor.endsWith(" \u2014 waypoint"), cableFloor);
             ctx.check("kit preview: a cable route aimed at a cable joins it", cableJoin != null && cableJoin.endsWith(" \u2014 joins"), cableJoin);
             ctx.check("kit preview: a pipe route aimed at the floor adds a waypoint", pipeFloor != null && pipeFloor.endsWith(" \u2014 waypoint"), pipeFloor);
+            ctx.check("kit preview: aimed back at the start, the click's refusal (cable, pipe)",
+                cableStart != null && cableStart.startsWith("That's the start.") && pipeStart != null && pipeStart.startsWith("That's the start."),
+                cableStart + " / " + pipeStart);
             ctx.check("kit preview: a pipe route aimed at a pipe joins it", pipeJoin != null && pipeJoin.endsWith(" \u2014 joins"), pipeJoin);
         }
     }

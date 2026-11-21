@@ -30,8 +30,7 @@ public final class CablePlacer {
         RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, int tier, boolean start, boolean click) {
             long[][] join = new long[1][];
             CableRouter.End at = CablePlacer.endAt(level, pos, face, hit, start, join, tier);
-            // (the click says why with the Lamp Socket's hint; the preview's aim the plain reason)
-            if (at == null) return RoutePlacer.Click.none(click ? noEnd(level, pos, hit) : noEnd(level, pos));
+            if (at == null) return RoutePlacer.Click.none(noEnd(level, pos, hit));
             // a machine's port: snapped to it and in its own colour (Baughn: it wasn't obvious that cables connect to machines)
             return new RoutePlacer.Click(at, join[0], at.dir() >= 0, isDevice(level, pos, hit), null);
         }
@@ -76,7 +75,7 @@ public final class CablePlacer {
 
         @Override
         String started(KitSupply kit, boolean onJoin) {
-            return "Cable route started: click faces for waypoints, a device or cable (or the last waypoint again) to finish, " + kit.undoHint() + " to undo";
+            return "Cable route started. Click waypoints, then a device or cable.";
         }
     };
 

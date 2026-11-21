@@ -32,7 +32,7 @@ public final class PipePlacer {
             PipeRouter.End port = portAt(level, pos, face, hit);
             boolean device = false;
             if (port == null) device = (port = devicePort(level, pos, hit)) != null;
-            if (click && device && portTaken(level, pos, hit)) return RoutePlacer.Click.none(PORT_TAKEN);
+            if (device && portTaken(level, pos, hit)) return RoutePlacer.Click.none(PORT_TAKEN);   // (the preview too)
             long[] join = port == null ? joinPoint(level, pos, hit) : null;
             PipeRouter.End surface = port == null && join == null ? surfacePoint(RouteView.obstacles(level), pos, face, hit, PipePart.GRID[tier]) : null;
             PipeRouter.End at = port != null ? port : join != null ? new PipeRouter.End(join[0], join[1], join[2], -1) : surface;
@@ -76,8 +76,7 @@ public final class PipePlacer {
 
         @Override
         String started(KitSupply kit, boolean onJoin) {
-            return (onJoin ? "Pipe route started on the pipe" : "Pipe route started")
-                + ": click for waypoints, a port or pipe to finish, the last waypoint again to end it there; " + kit.undoHint() + " to undo";
+            return "Pipe route started. Click waypoints, then a port or pipe.";
         }
 
 
