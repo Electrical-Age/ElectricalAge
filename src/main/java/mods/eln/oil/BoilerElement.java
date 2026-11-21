@@ -378,9 +378,9 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         info.put(I18N.tr("Steam to give"), EaUnits.steamGrams(tanks.steam()));
         info.put(I18N.tr("Steam made"), EaUnits.steamGrams(steamRate) + "/s");
         // (Baughn: "At half height: liquid" didn't say what it meant)
-        info.put(I18N.tr("Front signal"), I18N.tr("%1$% of the gauge glass", Math.round(100 * Math.max(0, Math.min(1, fill())))));
+        info.put(I18N.tr("Front signal"), I18N.tr("%1$ of the gauge glass", Utils.plotPercent(Math.max(0, Math.min(1, fill())))));
         double wet = heatingShare();
-        if (wet < 0.999) info.put(I18N.tr("Heating surface"), I18N.tr("%1$% under water: the shell runs hot", Math.round(100 * (wet - DRY_SHARE) / (1 - DRY_SHARE))));
+        if (wet < 0.999) info.put(I18N.tr("Heating surface"), I18N.tr("%1$ under water: the shell runs hot", Utils.plotPercent((wet - DRY_SHARE) / (1 - DRY_SHARE))));
         return info;
     }
 }

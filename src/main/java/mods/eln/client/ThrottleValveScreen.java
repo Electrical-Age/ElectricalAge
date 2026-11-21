@@ -111,7 +111,7 @@ public class ThrottleValveScreen extends Screen {
     Component label(double v) {
         if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY) return Component.literal(String.format("Lifts at: %.1f bar", toBar(v)));
         if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE) return Component.literal(String.format("Set point: %.2f bar", toBarP(v)));
-        return Component.literal(String.format("Open: %.0f%%", v * 100));
+        return Component.literal("Open: " + mods.eln.misc.Utils.plotPercent(v));
     }
 
     void send(double v) {

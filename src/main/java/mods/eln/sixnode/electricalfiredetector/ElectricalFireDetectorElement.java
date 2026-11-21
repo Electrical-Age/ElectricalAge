@@ -100,7 +100,7 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
             info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
         }
         if (descriptor.batteryPowered) {
-            info.put(I18N.tr("Battery level"), Utils.plotPercent("", slowProcess.getBatteryLevel()));
+            info.put(I18N.tr("Battery level"), Utils.plotPercent(slowProcess.getBatteryLevel()));
         }
         return info;
     }

@@ -24,7 +24,7 @@ public class ElectricalGateSourceScreen extends ElnScreen {
         super.init();
         // 1.12: a track bar over the signal range in 100 steps, shown as %, sent in volts
         level = slider("level", 0, mods.eln.Eln.SVU, mods.eln.Eln.SVU / 100, render.voltageSyncValue,
-            v -> Component.literal(tr("Output: %1$%", (int) Math.round(v / mods.eln.Eln.SVU * 100))),
+            v -> Component.literal(tr("Output: %1$", mods.eln.misc.Utils.plotPercent(v / mods.eln.Eln.SVU))),
             v -> render.clientSetFloat(ElectricalGateSourceElement.setVoltagerId, (float) v));
     }
 

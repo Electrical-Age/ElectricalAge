@@ -544,7 +544,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         if (inlet != null) info.put(I18N.tr("Work per kg"), String.format("%.0f kJ/kg", jPerKg() / 1000));
         if (wetShare() > 0.01) info.put(I18N.tr("Water in its way"), String.format("%.0f%%%s", wetShare() * 100,
             brakeW > 0 ? String.format(", braking %.1f kW", brakeW / 1000) : ""));
-        info.put(I18N.tr("Steam valve"), tripped ? I18N.tr("tripped by overspeed") : String.format("%.0f%%", Math.min(gate, controls.limit) * 100));
+        info.put(I18N.tr("Steam valve"), tripped ? I18N.tr("tripped by overspeed") : Utils.plotPercent(Math.min(gate, controls.limit)));
         info.put(I18N.tr("Governor"), controls.isManual() ? I18N.tr("off: manual control, no overspeed trip") : I18N.tr("automatic, trips over 880 rad/s"));
         info.put(I18N.tr("Control"), controls.controlExternal ? String.format("external, %.0f%%", controls.limit * 100)
             : controls.hasRegulator() ? String.format("holds %.1f bar at the inlet", controls.targetBar) : String.format("throttle %.0f%%", controls.throttle * 100));

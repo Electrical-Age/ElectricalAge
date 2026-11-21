@@ -33,7 +33,7 @@ public class TeleporterScreen extends ElnScreen {
             v -> render.clientSendFloat(TeleporterElement.setChargePowerId, (float) v));
         render.chargePowerNew = false;
         gauge("energy", () -> render.energyTarget <= 0 ? 0 : render.energyHit / render.energyTarget,
-            () -> Component.literal(tr("Required energy: %1$J", (int) render.energyTarget) + "  " + (int) (render.processRatio * 100) + "%"),
+            () -> Component.literal(tr("Required energy: %1$J", (int) render.energyTarget) + "  " + mods.eln.misc.Utils.plotPercent(render.processRatio)),
             2, 2);
         start = button("start", () -> tr("Start"), () -> render.clientSendId(TeleporterElement.startId));
         update();

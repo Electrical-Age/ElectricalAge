@@ -256,13 +256,18 @@ public class Utils {
         return header + plotCelsius(value) + " ";
     }
 
+    /**
+     * A share (1 is 100 %) as a whole percentage, "50%": the form most of EA's text had already (1.12's meters showed
+     * "50.0%" under 100 % and "100%" over it).
+     */
+    public static String plotPercent(double value) {
+        return String.format("%.0f%%", value * 100.0);
+    }
+
     public static String plotPercent(String header, double value) {
         if (!header.equals(""))
             header += " ";
-        if (value >= 1.0)
-            return header + String.format("%3.0f", value * 100.0) + "%   ";
-        else
-            return header + String.format("%3.1f", value * 100.0) + "%   ";
+        return header + plotPercent(value) + "   ";
     }
 
     public static String plotEnergy(double value) {

@@ -198,7 +198,7 @@ public class SubmersiblePumpElement extends TransparentNodeElement implements Fl
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>();
         info.put(I18N.tr("In water"), submerged ? I18N.tr("yes") : I18N.tr("no: place it in water"));
-        info.put(I18N.tr("Speed"), String.format("%.0f%%", speed * 100));
+        info.put(I18N.tr("Speed"), Utils.plotPercent(speed));
         info.put(I18N.tr("Flow"), String.format("%.0f mB/s", rate));
         if (outlet != null) info.put(I18N.tr("Outlet pressure"), String.format("%.2f bar", outlet.P() / 1e5));
         info.put(I18N.tr("Power"), Utils.plotPower("", motor.getP()));

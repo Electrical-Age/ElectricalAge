@@ -347,7 +347,7 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
         boolean regulated = !Utils.isEmpty(inventory.getItem(HeatFurnaceContainer.regulatorId)) && !controlExternal;
         info.put(I18N.tr("Control"), controlExternal ? I18N.tr("by the signal on its sides")
             : regulated ? I18N.tr("its regulator holds %1$", Utils.plotCelsius("", regulator.getTarget()))
-            : I18N.tr("its gauge, at %1$%", Math.round(furnaceProcess.getGain() * 100)));
+            : I18N.tr("its gauge, at %1$", Utils.plotPercent(furnaceProcess.getGain())));
         // (Erisi: "the set point is never reached")
         if (regulated && thermalLoad.Tc < regulator.getTarget() - 5 && furnaceProcess.fire.level > 0.95)
             info.put(I18N.tr("Short of heat"), n < descriptor.combustionChamberMax

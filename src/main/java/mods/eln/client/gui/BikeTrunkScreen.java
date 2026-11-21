@@ -81,7 +81,7 @@ public class BikeTrunkScreen extends AbstractContainerScreen<BikeTrunkMenu> {
     protected void extractLabels(GuiGraphicsExtractor g, int xm, int ym) {
         g.text(font, title, titleLabelX, titleLabelY, ElnScreen.LABEL, false);
         g.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, ElnScreen.LABEL, false);
-        g.text(font, Component.literal(Math.round(menu.charge() * 100) + "%"), BikeTrunkMenu.BATTERY_X + 20, BikeTrunkMenu.SLOT_Y + 5, ElnScreen.LABEL, false);
+        g.text(font, Component.literal(mods.eln.misc.Utils.plotPercent(menu.charge())), BikeTrunkMenu.BATTERY_X + 20, BikeTrunkMenu.SLOT_Y + 5, ElnScreen.LABEL, false);
         int k = menu.openTab();
         if (k != 0 && menu.panelSize() > 0)
             g.text(font, menu.slots.get(k).getItem().getHoverName(), PANEL_LEFT + 8, PANEL_TOP + 4, ElnScreen.LABEL, false);

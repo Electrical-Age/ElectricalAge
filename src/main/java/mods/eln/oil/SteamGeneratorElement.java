@@ -512,9 +512,9 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
         if (condenser != null) info.put(I18N.tr("Exhaust"), String.format("condenser, %.2f bar", condenser.vessel.P() / 1e5));
         if (inlet != null) info.put(I18N.tr("Pressure efficiency"), String.format("%.0f%% of its %.0f bar rating", pressureEfficiency() * 100,
             SteamGeneratorDescriptor.NOMINAL_PA / 1e5));
-        if (waterShare() > 0.01) info.put(I18N.tr("Water in inlet"), String.format("%.0f%%", waterShare() * 100));
-        info.put(I18N.tr("Speed"), String.format("%.0f%%", omega * 100));
-        info.put(I18N.tr("Steam valve"), String.format("%.0f%%", Math.min(gate, limit) * 100));
+        if (waterShare() > 0.01) info.put(I18N.tr("Water in inlet"), Utils.plotPercent(waterShare()));
+        info.put(I18N.tr("Speed"), Utils.plotPercent(omega));
+        info.put(I18N.tr("Steam valve"), Utils.plotPercent(Math.min(gate, limit)));
         info.put(I18N.tr("Control"), controls.controlExternal ? String.format("external, %.0f%%", limit * 100)
             : controls.hasRegulator() ? String.format("holds %.1f bar at the inlet", controls.targetBar) : String.format("throttle %.0f%%", controls.throttle * 100));
         info.put(I18N.tr("Generated power"), Utils.plotPower("", source.getEffectiveP()));

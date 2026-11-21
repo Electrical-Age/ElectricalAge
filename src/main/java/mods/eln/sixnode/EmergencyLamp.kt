@@ -188,7 +188,7 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
             charge <= 0.0 -> "Batteries empty"
             else -> "Fully charged"
         },
-        "Charge" to Utils.plotPercent("", charge / (sixNodeElementDescriptor as EmergencyLampDescriptor).batteryCapacity)
+        "Charge" to Utils.plotPercent(charge / (sixNodeElementDescriptor as EmergencyLampDescriptor).batteryCapacity)
     )
 
     override fun networkSerialize(stream: DataOutputStream) {

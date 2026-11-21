@@ -22,8 +22,8 @@ public class BatteryScreen extends ElnScreen {
     @Override
     protected void init() {
         super.init();
-        gauge("energy", this::fill, () -> Component.literal(Utils.plotPercent("", fill()).trim()), 2, 2);
-        text("l1", () -> render.descriptor.lifeEnable ? tr("Life:") + " " + Utils.plotPercent("", render.life) : "");
+        gauge("energy", this::fill, () -> Component.literal(Utils.plotPercent(fill())), 2, 2);
+        text("l1", () -> render.descriptor.lifeEnable ? tr("Life:") + " " + Utils.plotPercent(render.life) : "");
         text("l2", () -> tr("Energy:") + " " + Utils.plotValue(render.energy, "J/") + Utils.plotValue(full(), "J"));
         text("l3", () -> (render.power >= 0 ? tr("Power out:") : tr("Power in:")) + " "
             + Utils.plotValue(Math.abs(render.power), "W/") + Utils.plotValue(render.descriptor.electricalStdP, "W"));

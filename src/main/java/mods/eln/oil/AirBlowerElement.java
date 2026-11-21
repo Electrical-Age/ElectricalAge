@@ -202,7 +202,7 @@ public class AirBlowerElement extends TransparentNodeElement implements FluidDev
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Speed"), String.format("%.0f%%", share * 100));
+        info.put(I18N.tr("Speed"), Utils.plotPercent(share));
         if (outlet != null) info.put(I18N.tr("Outlet"), String.format("%.2f bar gauge", (FluidWorld.nodeFor(outlet).P() - Water.P_ATM) / 1e5));
         info.put(I18N.tr("Air"), String.format("%.1f g/s", kgPerS * 1000));
         info.put(I18N.tr("Power"), Utils.plotPower("", resistor.getP()));

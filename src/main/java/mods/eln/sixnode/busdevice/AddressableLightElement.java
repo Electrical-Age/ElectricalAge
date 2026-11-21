@@ -64,7 +64,7 @@ public class AddressableLightElement extends BusDeviceElement {
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = super.getWaila();
-        info.put(I18N.tr("Power"), Math.round(level * 100) + "%");
+        info.put(I18N.tr("Power"), mods.eln.misc.Utils.plotPercent(level));
         return info;
     }
 }

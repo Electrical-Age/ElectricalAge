@@ -30,7 +30,7 @@ public class HeatFurnaceScreen extends ElnScreen {
         // (states, as the other toggles: Baughn read "Decline fuel" as the button's action)
         fuel = button("fuel", () -> render.takeFuel ? tr("Taking fuel") : tr("Declining fuel"), render::clientToogleTakeFuel);
         gain = slider("gain", 0.1, 1.0, 0.01, render.gainSyncValue,
-            v -> Component.literal(tr("Control gauge at %1$%", (int) Math.round(v * 100)) + "  (" + (regulator() && !render.controleExternal
+            v -> Component.literal(tr("Control gauge at %1$", Utils.plotPercent(v)) + "  (" + (regulator() && !render.controleExternal
                 ? tr("the regulator sets it") : tr("Power: %1$W", render.power)) + ")"),
             v -> render.clientSetGain((float) v));
         text("fire", () -> !render.takeFuel && render.fire <= 0 ? tr("Fire: out (declining fuel: click \"Declining fuel\" to take it)")
@@ -66,7 +66,7 @@ public class HeatFurnaceScreen extends ElnScreen {
         if (fire <= 0) return tr("Fire: out");
         String trend = Math.abs(fire - setting) < 0.01 ? "" : fire < setting ? "  " + (refuels ? tr("rising") : tr("last fuel"))
             : "  " + tr("falling");
-        return tr("Fire: burning at %1$%", (int) Math.round(fire * 100)) + trend;
+        return tr("Fire: burning at %1$", Utils.plotPercent(fire)) + trend;
     }
 
     /** A regulator in its slot (it then follows the set point; without one, the gauge). */
