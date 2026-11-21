@@ -278,7 +278,8 @@ public class CompactTurbineElement extends TransparentNodeElement implements Flu
         if (water <= 0) return I18N.tr("out of water: a bucket, or a pipe on top");
         if (t < 100) return I18N.tr("heating up: it boils at 100 °C");
         if (ventW > 0) return I18N.tr("venting: more heat than it can use or shed");
-        if (governor < 0.9) return I18N.tr("short of heat: add combustion chambers for more power");
+        // (it can't see the furnace: it may already have all its chambers. AdventurAgent saw this at 4/4)
+        if (governor < 0.9) return I18N.tr("short of heat: a hotter fire (more combustion chambers, if the furnace has room) or less load");
         if (bypassW > 0) return I18N.tr("running; the heat the load doesn't take goes to its condenser");
         return I18N.tr("running");
     }
