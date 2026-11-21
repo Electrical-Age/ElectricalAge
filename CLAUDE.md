@@ -68,3 +68,4 @@ JDKs: Gradle and the mod use JDK 25, and NeoForge's data and game-test runs also
 - [docs/animation.md](docs/animation.md): the animation library (`mods.eln.anim`: spins, levers, blinks, particles, LEDs, glow, levels, progress, belts) and the index of every animated device. New animations use it.
 - [docs/api.md](docs/api.md): the Machine API and its low level for other mods: task-oriented guide, compiled samples, testing.
 - [docs/porting-notes.md](docs/porting-notes.md): 26.x decisions, differences from 1.12, gameplay changes, deferred work.
+- [REVIEW.md](REVIEW.md): canonical helpers and invariants a pre-push review checks; read it before adding a helper, fixture or UX.
