@@ -70,6 +70,10 @@ class RowScaleTest {
             }
             double mIn = 0, mOut = 0, eIn = 0, eOut = 0;
             for (int s = 0; s < steps; s++) {
+                // (kept awake: compared step for step and booked from each step's moves. With the water/air solve's
+                // energy tolerance on the node's scale, WaterAir.energyTol, today's rows settle and it slept after ~110
+                // steps, where a sleeping step keeps its last moves and these books drifted by 1e-15 kg a step)
+                net.wake();
                 net.step(DT);
                 mIn += src.moved[0] + src.moved[1];
                 eIn += src.moved[2];

@@ -256,6 +256,44 @@ class ReplayTest {
         }
     }
 
+    /**
+     * A player's turbine plant on Incognito (2026-11-21, the game's slow-step dump; 36 nodes): the server crash-looped
+     * on its step. A 0.1 L pump suction between two stopped pumps had been drawn down to 4 ug of air at 3e-5 bar, its
+     * only live link a wall of 3 W/K. The water/air solve accepted an energy within 1e-9 J, 4e-4 K in that pocket, and
+     * Newton's correction to its energy (the wall heat's residual over the wall's slope, ~1e-9 J) fell inside it: the
+     * state never moved, and its energy row stalled at 0.1 of the node, falling only with the step, down to 6e-6 s. With
+     * these settings each step hit the 256 sub-step cap in ~1200-1450 iterations, covering 0.038 s of the first tick and
+     * 0.0003 s of the next. With WaterAir.energyTol: no sub-steps over these 40 steps, ~20 iterations a step.
+     */
+    @Test
+    void vacuumPocketBehindAWallSteps() throws Exception {
+        int depth = Network.MAX_DEPTH;
+        boolean cut = Network.CUT_SHORT;
+        try {
+            Network.MAX_DEPTH = 8;
+            Network.CUT_SHORT = true;
+            String text;
+            try (var in = ReplayTest.class.getResourceAsStream("/replay/turbine-plant-vacuum-pocket-behind-a-wall.txt")) {
+                text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+            double[] dt = new double[1];
+            Network net = NetworkDump.read(text, dt);
+            int steps = 40;
+            for (int i = 0; i < steps; i++) {
+                net.step(dt[0]);
+                assertEquals(dt[0], net.done, 1e-12, "step " + i + " covered");
+            }
+            System.out.printf("vacuum pocket: %d steps, iterations %d, substeps %d%n", steps, net.stats.iterations, net.stats.substeps);
+            assertEquals(0, net.stats.failures, "failed sub-steps");
+            assertEquals(0, net.stats.substeps, "sub-steps");
+            // (before: the sub-step cap and ~1200-1450 iterations on each step; now ~850 over these steps)
+            org.junit.jupiter.api.Assertions.assertTrue(net.stats.iterations <= 30 * steps, "iterations: " + net.stats.iterations);
+        } finally {
+            Network.MAX_DEPTH = depth;
+            Network.CUT_SHORT = cut;
+        }
+    }
+
     @Test
     void replayDumps() throws Exception {
         String dir = System.getenv("FLUIDCORE_REPLAY");
