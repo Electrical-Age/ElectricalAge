@@ -46,7 +46,12 @@ public final class CoreStep {
      * outcomes mustn't hang on the machine's speed.
      */
     public static long budgetNanos = 0;
-    public static final long GAME_BUDGET = 10_000_000L;
+    /**
+     * 250 ms (Baughn 1573837175051522166: at 10 ms more or less every plant was broken): only a watchdog-sized stall is
+     * cut. 10 ms cut every network that sub-stepped for a moment, so it ran slow and kept owing time, and boilers sat at
+     * 0 g/s; the tests, run without the budget, couldn't see it.
+     */
+    public static final long GAME_BUDGET = 250_000_000L;
 
     final Network net = new Network();
     /** Its last step ran out of Network.MAX_STEP_NANOS (FluidWorld says where). */
