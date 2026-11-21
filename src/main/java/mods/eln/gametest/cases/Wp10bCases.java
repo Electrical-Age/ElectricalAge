@@ -756,7 +756,7 @@ public final class Wp10bCases {
                 o.writeByte(HeatFurnaceElement.unserializeGain);
                 o.writeFloat(0.6f);
             }));
-            f.networkUnserialize(ctx.stream(o -> o.writeByte(HeatFurnaceElement.unserializeToogleTakeFuelId)));
+            // (a new furnace already takes fuel: Baughn 1573669111920066631)
             f.networkUnserialize(ctx.stream(o -> o.writeByte(HeatFurnaceElement.unserializeToogleControlExternalId)));
             mods.eln.Eln.simulator.addSlowProcess(watch = dt -> {
                 if (++tick == 20) {   // (the signal has driven it a while: read, then back to internal control)

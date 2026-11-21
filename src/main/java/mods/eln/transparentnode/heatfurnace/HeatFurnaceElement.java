@@ -54,7 +54,9 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
     public static final byte unserializeToogleControlExternalId = 3;
     public static final byte unserializeToogleTakeFuelId = 4;
 
-    public boolean controlExternal = false, takeFuel = false;
+    /** A new furnace takes fuel at once (Baughn 1573669111920066631: coal wouldn't go in until the button was found);
+     *  a saved one keeps its setting. */
+    public boolean controlExternal = false, takeFuel = true;
     /**
      * The player's settings under internal control, kept while the signal drives it (external control sets the gauge
      * and the fuel intake itself): toggling back gives them back (AdventurAgent: the gauge came back at 10 %, the fuel
