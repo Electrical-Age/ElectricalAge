@@ -583,10 +583,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `WrenchSkipsCase`, `TurnBeforePlacingCase`.
 - One wrench turn (todo #556, Baughn 2026-11-21): every device turns by the shared helpers
   (`SixNodeElement.onBlockActivatedRotate`, `TransparentNodeElement.wrenchTurn`, `FluidPlacement.Turnable`), and a
-  wrench click that turns or toggles something is used. Before, the wind turbine's and a cable's colour-care click went
-  on to the held item. A socket that only looks right one way up (the sconce) still turns by half turns
+  wrench click on a device is used. Before, the wind turbine's click went on to the held item (a six-node cable's
+  wrench toggled colour care, now removed; the click is still used). A socket that only looks right one way up (the sconce) still turns by half turns
   (`SixNodeElement.wrenchStep`), and the Modbus RTU still turns only on a floor or ceiling, as in 1.12.
-  `wrench_turn_*`, `wrench_cable_colour_care`.
+  `wrench_turn_*`.
 - One way to write a quantity (todo #553, Baughn 2026-11-21): screens, Jade, tooltips and item names format volts,
   watts, joules and temperatures as the meters do (Meters: "230V", "1.50kW", "85.0°C", no space before the unit) and
   percent as a whole number, rounded down (`Utils.plotPercent`, "50%"; only full reads "100%"; 1.12's meters showed "50.0%"). A power tier reads "48V",

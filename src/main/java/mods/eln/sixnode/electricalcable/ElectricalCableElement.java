@@ -170,6 +170,7 @@ public class ElectricalCableElement extends SixNodeElement {
 	/*	World w = sixNode.coordonate.world();
 		boolean exist = WorldCompat.blockExists(w, 10000, 0, 0);
 		int id = w.getBlockId(10000, 0, 0);*/
+        if (Utils.isPlayerUsingWrench(entityPlayer)) return true;   // (a wire has nothing to turn; the click is used, as on every device)
         color = brushPaint(entityPlayer, color);
         return false;
     }

@@ -137,7 +137,7 @@ public class WireDrawingScreen extends ElnScreen {
             var ru = menu.getSlot(WireDrawingElement.RUBBER).getItem();
             double copper = r.copper + (WireDrawingElement.isCopper(cu) ? cu.getCount() : 0);
             double rubber = r.rubber + (WireDrawingElement.isRubber(ru) ? ru.getCount() : 0);
-            return tr("Has %1$ copper, %2$ rubber", String.format("%.1f", copper), String.format("%.1f", rubber));
+            return tr("Has %1$ copper, %2$ rubber", String.format("%.1f", Math.floor(copper * 10 + 1e-9) / 10), String.format("%.1f", Math.floor(rubber * 10 + 1e-9) / 10));   // (rounded down)
         });
         text("status", () -> WireDrawingElement.statusText(r.status), () -> switch (r.status) {
             case WireDrawingElement.NO_COPPER, WireDrawingElement.NO_RUBBER, WireDrawingElement.NO_POWER, WireDrawingElement.NO_CORE -> 0xFFA02020;

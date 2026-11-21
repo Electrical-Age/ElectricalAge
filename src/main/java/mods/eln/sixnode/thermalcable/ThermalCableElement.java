@@ -146,6 +146,7 @@ public class ThermalCableElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (Utils.isPlayerUsingWrench(entityPlayer)) return true;   // (a wire has nothing to turn; the click is used, as on every device)
         color = brushPaint(entityPlayer, color);
         return false;
     }
