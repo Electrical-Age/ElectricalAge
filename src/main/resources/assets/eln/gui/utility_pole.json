@@ -53,7 +53,7 @@
   },
   {
    "text": "line",
-   "sample": "Line: 11 kV kits, 10.95 kV, 999.9 kW"
+   "sample": "Line: 11.0kV kits, 10.9kV, 999kW"
   },
   {
    "text": "xfmr",
@@ -61,7 +61,7 @@
   },
   {
    "text": "lights",
-   "sample": "Streetlights: 4, lit (400 W)"
+   "sample": "Streetlights: 4, lit (400W)"
   },
   {
    "text": "anchor",

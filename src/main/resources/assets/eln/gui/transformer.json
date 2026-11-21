@@ -84,15 +84,15 @@
   },
   {
    "text": "ratio",
-   "sample": "Turns 1000 : 1000 (x 99.99), core 16 V a turn"
+   "sample": "Turns 1000 : 1000 (x 99.99), core 16.0V a turn"
   },
   {
    "text": "expect",
-   "sample": "Off: 9999 V on the primary, the secondary would be 99999 V"
+   "sample": "Off: 9.99kV on the primary; the secondary would be 99.9kV"
   },
   {
    "text": "vpt",
-   "sample": "Volts a turn 99.9 of 16 (saturates over 17.6)"
+   "sample": "Volts a turn 99.9V of 16.0V (saturates over 17.6V)"
   },
   {
    "text": "window",

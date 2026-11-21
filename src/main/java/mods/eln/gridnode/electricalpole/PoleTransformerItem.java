@@ -75,20 +75,16 @@ public class PoleTransformerItem extends Item {
         return CableSpec.AMPS[mm2(s)];
     }
 
-    static String voltsLabel(double v) {
-        return v >= 1000 ? (int) (v / 1000) + " kV" : (int) v + " V";
-    }
-
     @Override
     public Component getName(ItemStack stack) {
-        return Component.translatable(getDescriptionId()).append(" (" + voltsLabel(volts(stack)) + ")");
+        return Component.translatable(getDescriptionId()).append(" (" + CableSpec.voltsLabel(tier(stack)) + ")");
     }
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display,
                                 java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
         double v = volts(stack), a = amps(stack);
-        out.accept(Component.literal(String.format("Line to %s, %.0f A (%s)", voltsLabel(v), a, mods.eln.misc.Utils.plotValue(v * a, "W")))
+        out.accept(Component.literal(String.format("Line to %s, %.0f A (%s)", CableSpec.voltsLabel(tier(stack)), a, mods.eln.api.Meters.watts(v * a)))
             .withStyle(net.minecraft.ChatFormatting.GRAY));
         out.accept(Component.literal("On a " + CORE_NAMES[core(stack)] + " core").withStyle(net.minecraft.ChatFormatting.GRAY));
         out.accept(Component.literal("Right-click a utility pole to fit it").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));

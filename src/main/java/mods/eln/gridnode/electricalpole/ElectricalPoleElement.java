@@ -201,7 +201,7 @@ public class ElectricalPoleElement extends GridElement {
         if (slot == TRANSFORMER) {
             // say what its foot gives: a lower tier's cable there burns at once (AdventurAgent, nero's grid)
             int tier = PoleTransformerItem.tier(fitted);
-            Utils.sendMessage(player, "Fitted a " + (int) PoleTransformerItem.volts(fitted) + " V pole transformer: its foot takes "
+            Utils.sendMessage(player, "Fitted a " + mods.eln.node.voxel.CableSpec.voltsLabel(PoleTransformerItem.tier(fitted)) + " pole transformer: its foot takes "
                 + mods.eln.node.voxel.CablePart.TIERS[tier].name() + " or higher (lower ones burn)");
         } else Utils.sendMessage(player, "Fitted " + what);
         return true;

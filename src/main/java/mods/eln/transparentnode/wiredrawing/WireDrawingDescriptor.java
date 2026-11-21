@@ -152,9 +152,9 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        String volts = CableSpec.volts(maxTier) >= 1000 ? (int) (CableSpec.volts(maxTier) / 1000) + " kV" : (int) CableSpec.volts(maxTier) + " V";
-        Collections.addAll(list, tr("Draws copper and rubber into cable kits\nand transformer windings to any spec:\nup to %1$ mm², %2$ insulation;\nand bare Copper Cable.\nNominal power: %3$W",
-            fmt(CableSpec.MM2[maxMm2]), volts, mods.eln.misc.Utils.plotValue(nominalP)).split("\n"));
+        String volts = CableSpec.voltsLabel(maxTier);
+        Collections.addAll(list, tr("Draws copper and rubber into cable kits\nand transformer windings to any spec:\nup to %1$ mm², %2$ insulation;\nand bare Copper Cable.\nNominal power: %3$",
+            fmt(CableSpec.MM2[maxMm2]), volts, mods.eln.api.Meters.watts(nominalP)).split("\n"));
     }
 
     public static String fmt(double m) {

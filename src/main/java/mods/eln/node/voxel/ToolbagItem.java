@@ -88,10 +88,7 @@ public class ToolbagItem extends Item implements PipeTool {
             if (pipe) return new String[]{"Iron pipe", "Alloy pipe", "Large pipe"}[Math.max(0, Math.min(2, tier))];
             return switch (tier) {
                 case 0 -> "Signal";
-                case 1 -> "48 V";
-                case 2 -> "230 V";
-                case 3 -> "400 V";
-                case 4 -> "11 kV";
+                case 1, 2, 3, 4 -> CableSpec.voltsLabel(tier);
                 case 5 -> "Thermal";
                 default -> "Bus";
             };

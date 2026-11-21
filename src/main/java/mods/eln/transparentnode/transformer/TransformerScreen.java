@@ -8,6 +8,7 @@ import mods.eln.misc.Utils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
+import static mods.eln.api.Meters.volts;
 import static mods.eln.i18n.I18N.tr;
 
 /** DC-DC converter / transformer (P4b; layout gui/transformer.json): windings, core, casing; network isolation. */
@@ -42,12 +43,12 @@ public class TransformerScreen extends ElnScreen {
         text("onl", () -> r.switchedOn ? "" : tr("Check, then switch on"));
         text("ratio", () -> r.primaryTurns <= 0 || r.secondaryTurns <= 0 ? tr("Needs both windings and a core")
             : tr("Turns %1$ : %2$ (x %3$)", r.primaryTurns, r.secondaryTurns, String.format("%.2f", (double) r.secondaryTurns / r.primaryTurns))
-                + (r.coreVoltsPerTurn > 0 ? tr(", core %1$ V a turn", fmt(r.coreVoltsPerTurn)) : tr(", no core")));
+                + (r.coreVoltsPerTurn > 0 ? tr(", core %1$ a turn", volts(r.coreVoltsPerTurn)) : tr(", no core")));
         text("expect", () -> expectText(r), () -> ratioOff(r) > 0.05 ? 0xFFA02020 : LABEL);
         text("vpt", () -> {
             double v = voltsPerTurn(r);
             if (r.coreVoltsPerTurn <= 0 || v <= 0) return "";
-            return tr("Volts a turn %1$ of %2$ (saturates over %3$)", fmt(v), fmt(r.coreVoltsPerTurn), fmt(r.coreVoltsPerTurn * 1.1))
+            return tr("Volts a turn %1$ of %2$ (saturates over %3$)", volts(v), volts(r.coreVoltsPerTurn), volts(r.coreVoltsPerTurn * 1.1))
                 + (r.saturated ? tr(": saturated!") : "");
         }, () -> r.saturated || voltsPerTurn(r) > 1.1 * r.coreVoltsPerTurn && r.coreVoltsPerTurn > 0 ? 0xFFA02020 : LABEL);
         text("window", () -> r.window <= 0 ? "" : tr("Window %1$ of %2$ mm² turns", String.format("%.0f", r.windowUsed), String.format("%.0f", r.window))
@@ -55,10 +56,6 @@ public class TransformerScreen extends ElnScreen {
         button("isolator", () -> render.isIsolator ? tr("Isolated") : tr("Not isolated"),
             () -> render.clientSendId(TransformerElement.toogleIsIsolator),
             tr("Isolated: the networks on both sides are simulated apart. Faster for circuits that switch very often, at the cost of a little capacitance."));
-    }
-
-    static String fmt(double v) {
-        return Math.abs(v) >= 100 ? String.format("%.0f", v) : String.format("%.1f", v);
     }
 
     static final double LIVE = 1;
@@ -81,13 +78,13 @@ public class TransformerScreen extends ElnScreen {
     static String expectText(TransformerRender r) {
         if (r.primaryTurns <= 0 || r.secondaryTurns <= 0) return "";
         double k = (double) r.secondaryTurns / r.primaryTurns, up = Math.abs(r.primaryU), us = Math.abs(r.secondaryU);
-        if (r.switchedOn) return tr("Primary %1$ V, secondary %2$ V", fmt(up), fmt(us));
+        if (r.switchedOn) return tr("Primary %1$, secondary %2$", volts(up), volts(us));
         if (up >= LIVE && us >= LIVE) {
             double off = (double) r.secondaryTurns / r.primaryTurns / (us / up) - 1;
-            return tr("Both sides live (%1$ V, %2$ V): the turns ratio is %3$ %% off", fmt(up), fmt(us), String.format("%+.1f", off * 100));
+            return tr("Both sides live (%1$, %2$): the turns ratio is %3$ % off", volts(up), volts(us), String.format("%+.1f", off * 100));
         }
-        if (up >= LIVE) return tr("Off: %1$ V on the primary; the secondary would be %2$ V", fmt(up), fmt(up * k));
-        if (us >= LIVE) return tr("Off: %1$ V on the secondary; the primary would be %2$ V", fmt(us), fmt(us / k));
+        if (up >= LIVE) return tr("Off: %1$ on the primary; the secondary would be %2$", volts(up), volts(up * k));
+        if (us >= LIVE) return tr("Off: %1$ on the secondary; the primary would be %2$", volts(us), volts(us / k));
         return tr("Off: neither side is live");
     }
 }

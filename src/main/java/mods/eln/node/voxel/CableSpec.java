@@ -96,12 +96,16 @@ public record CableSpec(int mm2, int colour) {
         return tier == 4 || MM2[mm2] >= 16 ? 2 : 1;
     }
 
-    /** "2.5 mm², 48 V". */
+    /** "2.5 mm², 48.0V". */
     public String label(int tier) {
         double m = MM2[mm2];
         String mm = m == Math.floor(m) ? String.valueOf((int) m) : String.valueOf(m);
-        double v = volts(tier);
-        return mm + " mm², " + (v >= 1000 ? (int) (v / 1000) + " kV" : (int) v + " V");
+        return mm + " mm², " + voltsLabel(tier);
+    }
+
+    /** A power tier's voltage for players, as the meters show volts (Meters.volts): "48.0V", "230V", "11.0kV". */
+    public static String voltsLabel(int tier) {
+        return mods.eln.api.Meters.volts(volts(tier));
     }
 
     private static final java.util.Map<Integer, ElectricalCableDescriptor> DESCRIPTORS = new java.util.concurrent.ConcurrentHashMap<>();

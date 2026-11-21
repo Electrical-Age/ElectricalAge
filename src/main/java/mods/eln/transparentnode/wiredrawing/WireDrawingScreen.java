@@ -72,11 +72,6 @@ public class WireDrawingScreen extends ElnScreen {
         return () -> used.getAsBoolean() ? s.get() : "";
     }
 
-    static String volts(int tier) {
-        double v = CableSpec.volts(tier);
-        return v >= 1000 ? (int) (v / 1000) + " kV" : (int) v + " V";
-    }
-
     @Override
     protected void init() {
         super.init();
@@ -108,9 +103,9 @@ public class WireDrawingScreen extends ElnScreen {
             tr("Up to %1$ mm² on this machine", WireDrawingDescriptor.fmt(CableSpec.MM2[r.desc.maxMm2])))));
         text("insl", shown(ins, () -> poleMode.getAsBoolean() ? tr("Low side") : tr("Insulation")));
         when(ins, locked(button("insdn", () -> "<", () -> set(r.mode, r.mm2, r.tier - 1, r.colour, r.amount))));
-        text("ins", shown(ins, () -> volts(r.tier)));
+        text("ins", shown(ins, () -> CableSpec.voltsLabel(r.tier)));
         when(ins, locked(button("insup", () -> ">", () -> set(r.mode, r.mm2, r.tier + 1, r.colour, r.amount),
-            tr("Up to %1$ on this machine (pole transformers: 48, 230 or 400 V on the low side)", volts(r.desc.maxTier)))));
+            tr("Up to %1$ on this machine (pole transformers: 48, 230 or 400 V on the low side)", CableSpec.voltsLabel(r.desc.maxTier)))));
         text("coll", shown(colour, () -> tr("Colour")));
         when(colour, locked(button("coldn", () -> "<", () -> set(r.mode, r.mm2, r.tier, r.colour - 1, r.amount))));
         text("col", shown(colour, () -> DyeColor.byId(r.colour).getName().replace('_', ' ')));

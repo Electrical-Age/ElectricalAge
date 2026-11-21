@@ -342,7 +342,7 @@ public class WireDrawingElement extends TransparentNodeElement {
     public static String jobText(int mode, int mm2, int tier, int colour, int amount) {
         if (mode == BARE) return I18N.tr("Bare wire: %1$ Copper Cable", amount);
         if (mode == OVERHEAD) return I18N.tr("Overhead cable: %1$ blocks of %2$ mm²", amount, WireDrawingDescriptor.fmt(CableSpec.MM2[mm2]));
-        if (mode == POLE) return I18N.tr("Pole transformer: line to %1$, %2$ mm²", (int) CableSpec.volts(tier) + " V", WireDrawingDescriptor.fmt(CableSpec.MM2[mm2]));
+        if (mode == POLE) return I18N.tr("Pole transformer: line to %1$, %2$ mm²", CableSpec.voltsLabel(tier), WireDrawingDescriptor.fmt(CableSpec.MM2[mm2]));
         String what = new CableSpec(mm2, colour).label(tier) + ", " + net.minecraft.world.item.DyeColor.byId(colour).getName().replace('_', ' ');
         return mode == KIT ? I18N.tr("Cable kit: %1$ blocks of %2$", amount, what) : I18N.tr("Winding: %1$ turns of %2$", amount, what);
     }
