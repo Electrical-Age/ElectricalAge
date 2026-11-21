@@ -22,7 +22,8 @@ import static mods.eln.cad.models.OilKit.turned;
  * <ul>
  * <li>x = 0 (XN) FRONT: generator end, terminal plate at the floor (electric out), the drum's sight glass;</li>
  * <li>x = 16 (XP) BACK: turbine end, second terminal plate;</li>
- * <li>z = 0 LEFT (seen from the front): heat plate flush with the face (a heat furnace touches it), the drum behind it;</li>
+ * <li>z = 0 LEFT (seen from the front): the heat contact, EA's thermal look (a copper pad with four bolts at the floor,
+ * where a heat furnace touches), the drum behind it;</li>
  * <li>z = 16 RIGHT: tiny finned air-cooled condenser, vent stack with rain cap on top (ventX/Y/Z in the .txt, part main);</li>
  * <li>top: water inlet, a laid pipe's flange (r 2.75 px, 4 bolts) centred on the top face, piped down into the drum.</li>
  * </ul>
@@ -60,16 +61,13 @@ public final class CompactTurbine {
         // --- skid: cross members (the firebox and the condenser base are the rails)
         for (double x : new double[]{3.0, 10.0}) m.add(box(x, 0.2, 5.0, x + 1.25, 0.9, 12.0, "darksteel", "newu"));
 
-        // --- LEFT flank (z = 0): the heat plate, where a heat furnace touches: lapped copper recessed behind vertical
-        // copper ribs that reach the face, a heat-red rim, a cast-iron firebox backing; the drum sits on it
-        m.add(box(2.5, 0.0, 0.6, 13.5, 6.5, 1.0, "castiron", "n"));
-        for (int k = 0; k < 7; k++) {
-            double x = 2.95 + 1.6 * k;
-            m.add(box(x, 0.0, 0.0, x + 0.8, 6.25, 0.6, "hotcopper", "newu"));
-        }
-        m.add(box(2.0, 6.5, 0.1, 14.0, 7.0, 1.0, "red", "nsewu"));                       // rim: top
-        m.add(box(2.0, 0.0, 0.1, 2.5, 6.5, 1.0, "red", "nwe"));
-        m.add(box(13.5, 0.0, 0.1, 14.0, 6.5, 1.0, "red", "nwe"));
+        // --- LEFT flank (z = 0): the heat contact, in EA's thermal look (Baughn 1570564929214349486: no side had it): a
+        // heat-tinted copper pad 8 px wide and 4 high at the floor, 0.1 px short of the face, on a cast-iron backing
+        // plate (the firebox's front), four brass bolt heads; the drum sits on the firebox behind it
+        m.add(box(2.5, 0.0, 0.6, 13.5, 6.5, 1.0, "castiron", "newu"));
+        m.add(box(4.0, 0.0, 0.1, 12.0, 4.0, 0.6, "hotcopper", "newu"));
+        for (double[] yx : new double[][]{{3.1, 4.9}, {3.1, 11.1}, {0.9, 4.9}, {0.9, 11.1}})
+            m.add(prism('z', yx[1], yx[0], 0.35, 0.0, 0.1, "brass", 6, true, false));
         // (the checker: the firebox's ends z-fought the drum heads' caps in the planes x = 2 and 14; it is 0.1 px shorter
         // at each end)
         m.add(box(2.1, 0.0, 1.0, 13.9, 6.0, 5.0, "castiron", "ewu"));                     // firebox
