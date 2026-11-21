@@ -17,6 +17,8 @@ import java.io.IOException;
 public class HeatFurnaceRender extends TransparentNodeElementRender {
     /** The fire's real burn level (it lags the setting) and whether it's being lit. */
     public float fire;
+    /** Its fire's hot bed and air valve (0..1, Fire). */
+    public float bed, air;
     public boolean lighting;
     /** Smoke up its stack (burning, nothing piped on its flue's flange). */
     boolean smoking;
@@ -97,6 +99,8 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
             power = stream.readShort();
             fire = stream.readFloat();
             lighting = stream.readBoolean();
+            bed = stream.readFloat();
+            air = stream.readFloat();
 
             entityItemIn = unserializeItemStackToEntityItem(stream, entityItemIn);
             smoking = stream.readBoolean();

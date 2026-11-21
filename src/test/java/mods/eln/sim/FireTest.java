@@ -15,17 +15,37 @@ public class FireTest {
     @Test
     void coalFollowsItsSettingOverMinutes() {
         Fire f = new Fire(Fire.COAL);
-        f.level = 0.2;
+        f.set(0.2);
         run(f, 1.0, true, 180);   // one time constant
         assertEquals(0.2 + 0.8 * (1 - Math.exp(-1)), f.level, 0.02);
         run(f, 1.0, true, 900);
         assertEquals(1.0, f.level, 0.01);
     }
 
+    /** Baughn 1573753560456499223: a coal fire's air valve cuts it in seconds; a hot bed answers at once, a cold one slowly. */
+    @Test
+    void theAirCutsItAtOnceAndAHotBedAnswersAtOnce() {
+        Fire f = new Fire(Fire.COAL);
+        f.set(1.0);
+        run(f, 0.0, true, 15);   // three of the air valve's time constants
+        assertTrue(f.level < 0.1, "the air shut: " + f.level);
+        assertTrue(f.bed > 0.9, "the bed is still hot: " + f.bed);
+        run(f, 1.0, true, 15);
+        assertTrue(f.level > 0.85, "the air opened on a hot bed: " + f.level);
+    }
+
+    @Test
+    void aColdBedCatchesSlowlyWhateverTheAir() {
+        Fire f = new Fire(Fire.COAL);
+        f.set(0.2);
+        run(f, 1.0, true, 15);
+        assertTrue(f.air > 0.9 && f.level < 0.3, "the air is open, the bed still catching: air " + f.air + ", level " + f.level);
+    }
+
     @Test
     void askedBelowItsMinimumItGoesOutAndRelightingTakesTime() {
         Fire f = new Fire(Fire.COAL);
-        f.level = 0.5;
+        f.set(0.5);
         run(f, 0.0, true, 1200);
         assertEquals(0.0, f.level, 0.0, "out");
         run(f, 1.0, true, Fire.COAL.kindle - 1);
@@ -38,7 +58,7 @@ public class FireTest {
     void aHotBurnerCatchesAtOnce() {
         Fire f = new Fire(Fire.OIL);
         f.instant = true;
-        f.level = 0.5;
+        f.set(0.5);
         f.step(0.0, true, DT);
         assertEquals(0.0, f.level, 0.0, "out");
         f.hot = true;
@@ -53,11 +73,11 @@ public class FireTest {
     @Test
     void noFuelNoFireAndOilIsQuick() {
         Fire f = new Fire(Fire.COAL);
-        f.level = 0.8;
+        f.set(0.8);
         f.step(0.8, false, DT);
         assertEquals(0, f.level);
         Fire o = new Fire(Fire.OIL);
-        o.level = 0.2;
+        o.set(0.2);
         run(o, 1.0, true, 60);
         assertTrue(o.level > 0.9, "oil: " + o.level);
     }
@@ -72,7 +92,7 @@ public class FireTest {
         p.nominalCombustibleEnergy = 40000;
         p.nominalPower = 3000;
         p.setGain(1);
-        p.fire.level = 0.5;
+        p.fire.set(0.5);
         p.combustibleEnergy = 20000;   // (a half-spent bed, nothing coming)
         double maxLevelLate = 0;
         for (double t = 0; t < 3600; t += DT) {
@@ -87,5 +107,26 @@ public class FireTest {
         for (double t = 0; t < 31; t += DT) p.process(DT);
         p.combustibleEnergy = 40000;
         assertTrue(p.getP() < 0.25 * p.nominalPower, "no flare: " + p.getP() + " W");
+    }
+
+    /** A fire held low by a shut air keeps smouldering instead of going out (it would wait 30 s to be lit again). */
+    @Test
+    void heldLowItSmouldersRatherThanGoingOut() {
+        Fire f = new Fire(Fire.COAL);
+        f.set(0.5);
+        run(f, 0.12, true, 1800);
+        assertTrue(f.level > 0.1, "still burning: " + f.level);
+    }
+
+    /** A save from before the air valve: burning at its level, air and bed alike. */
+    @Test
+    void anOldSaveBurnsAtItsLevel() {
+        var t = new net.minecraft.nbt.CompoundTag();
+        t.putDouble("xfire", 0.7);
+        Fire f = new Fire(Fire.COAL);
+        f.read(t, "x");
+        assertEquals(0.7, f.level, 0);
+        assertEquals(0.7, f.air, 0);
+        assertEquals(0.7, f.bed, 0);
     }
 }

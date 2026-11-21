@@ -43,11 +43,14 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
 
     TransparentNodeElementInventory inventory = new HeatFurnaceInventory(4, 64, this);
 
-    HeatFurnaceThermalProcess regulator = new HeatFurnaceThermalProcess("regulator", furnaceProcess, this);
+    public HeatFurnaceThermalProcess regulator = new HeatFurnaceThermalProcess("regulator", furnaceProcess, this);
 
     HeatFurnaceDescriptor descriptor;
 
     ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
+
+    /** The Analogic Regulator's PID (per kelvin; see RegulatorProcess.setPid), tuned in FurnaceControlCases. */
+    public static final double PID_KP = 0.0125, PID_KI = 1.6e-4, PID_KD = 0.025, PID_TF = 2;
 
     public static final byte unserializeGain = 1;
     public static final byte unserializeTemperatureTarget = 2;
@@ -71,7 +74,7 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
 
         this.descriptor = (HeatFurnaceDescriptor) descriptor;
 
-        furnaceProcess.setGainMin(0.1);
+        // (the 10 % floor by hand is set in computeInventory, after a load: a regulator's saved command may be under it)
 
         thermalLoadList.add(thermalLoad);
         thermalFastProcessList.add(furnaceProcess);
@@ -193,6 +196,8 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
             stream.writeShort(isBurnt() ? 0 : (int) furnaceProcess.getP());   // (burnt out: no glow, whatever it last burnt)
             stream.writeFloat(isBurnt() ? 0f : (float) furnaceProcess.fire.level);
             stream.writeBoolean(furnaceProcess.fire.lighting());
+            stream.writeFloat((float) furnaceProcess.fire.bed);   // (the screen: why the air alone doesn't give full heat)
+            stream.writeFloat((float) furnaceProcess.fire.air);
 
             serialiseItemStack(stream, inventory.getItem(HeatFurnaceContainer.combustibleId));
             stream.writeBoolean(smoking);
@@ -302,10 +307,17 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
         if (!Utils.isEmpty(regulatorStack) && !controlExternal) {
             IRegulatorDescriptor regulator = (IRegulatorDescriptor) Utils.getItemObject(regulatorStack);
 
-            regulator.applyTo(this.regulator, 500.0, 10.0, 0.1, 0.1);
+            // (a regulator may shut the air: no 10 % floor, which kept a 4-chamber fire at 300 W with nothing taking it)
+            furnaceProcess.setGainMin(0);
+            double held = furnaceProcess.getGain();   // (an on/off regulator starts off: a loaded furnace keeps what it was at)
+            // (the Analogic Regulator: a PID tuned for this furnace, Baughn 1573753560456499223)
+            if (regulator.getType() == IRegulatorDescriptor.RegulatorType.Analog) this.regulator.setPid(PID_KP, PID_KI, PID_KD, PID_TF);
+            else regulator.applyTo(this.regulator, 500.0, 10.0, 0.1, 0.1);
+            furnaceProcess.setGain(held);
             //	furnace.regulator.target = 240;
         } else {
             regulator.setManual();
+            furnaceProcess.setGainMin(0.1);
         }
     }
 
@@ -344,6 +356,10 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
         int n = Utils.isEmpty(chambers) ? 0 : chambers.getCount();
         info.put(I18N.tr("Power"), I18N.tr("%1$W now, %2$W at full fire (%3$ of %4$ combustion chambers)",
             Utils.plotValue(isBurnt() ? 0 : furnaceProcess.getP()), Utils.plotValue(furnaceProcess.nominalPower), n, descriptor.combustionChamberMax));
+        // (why opening the air doesn't give full heat at once: the bed is still catching, Baughn 1573753560456499223)
+        var fire = furnaceProcess.fire;
+        if (!isBurnt() && fire.level > 0)
+            info.put(I18N.tr("Fire"), I18N.tr("bed %1$ hot, air %2$ open", Utils.plotPercent(fire.bed), Utils.plotPercent(fire.air)));
         boolean regulated = !Utils.isEmpty(inventory.getItem(HeatFurnaceContainer.regulatorId)) && !controlExternal;
         info.put(I18N.tr("Control"), controlExternal ? I18N.tr("by the signal on its sides")
             : regulated ? I18N.tr("its regulator holds %1$", Utils.plotCelsius("", regulator.getTarget()))

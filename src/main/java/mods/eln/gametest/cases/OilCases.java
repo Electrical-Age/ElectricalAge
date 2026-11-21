@@ -1067,7 +1067,7 @@ public final class OilCases {
         int tick, litAt = -1, at63 = -1;
         mods.eln.sim.IProcess clock;
         /** The thermostat variant's furnaces: regulator (sub-id) and set point each, the hottest each got and its sum over the third minute. */
-        static final int[][] THERMOSTATS = {{0, 600}, {8, 600}, {0, 700}, {8, 700}};
+        static final int[][] THERMOSTATS = {{0, 600}, {8, 600}, {0, 700}, {8, 700}, {8, 300}};
         final mods.eln.transparentnode.FuelHeatFurnaceElement[] th = new mods.eln.transparentnode.FuelHeatFurnaceElement[THERMOSTATS.length];
         final double[] thMax = new double[THERMOSTATS.length], thSum = new double[THERMOSTATS.length];
 
@@ -1094,7 +1094,7 @@ public final class OilCases {
         }
 
         public int width() {
-            return variant.equals("thermostat") ? 9 : 7;
+            return variant.equals("thermostat") ? 11 : 7;
         }
 
         public int ticks() {
@@ -1286,6 +1286,9 @@ public final class OilCases {
                         String what = String.format("peak %.0f, mean %.0f over the third minute, burnt %s, %d ticks", thMax[i], thSum[i] / n, th[i].isBurnt(), tick);
                         ctx.check("fuel furnace: " + name + " never takes it over its setting (the burner's stored heat took it 230 over)", !th[i].isBurnt() && thMax[i] < set + 10, what);
                         ctx.check("fuel furnace: " + name + " holds it there", thSum[i] / n > set - 30 && thSum[i] / n < set + 5, what);
+                        // (the Analogic Regulator is a tuned PID: within 5 K where the burner can reach it (at 600 and 700 the
+                        // natural draught still holds it back in the third minute), Baughn 1573753560456499223)
+                        if (THERMOSTATS[i][0] == 8 && set == 300) ctx.check("fuel furnace: " + name + " holds it within 5 K", Math.abs(thSum[i] / n - set) <= 5, what);
                     }
                 }
                 case "inertia" -> {

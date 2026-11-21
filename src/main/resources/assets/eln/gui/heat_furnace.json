@@ -39,6 +39,10 @@
    "sample": "Fire: burning at 100%  falling"
   },
   {
+   "text": "bed",
+   "sample": "Bed 100% hot, air 100% open"
+  },
+  {
    "text": "heat",
    "sample": "Set point: 1.00k°C  (needs a regulator)"
   },

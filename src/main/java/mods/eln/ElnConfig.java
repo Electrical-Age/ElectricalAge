@@ -36,10 +36,12 @@ public final class ElnConfig {
             .defineInRange("autominerRange", 24, 1, 64);
         b.pop();
         b.push("fire");
-        COAL_LAG = b.comment("Seconds a coal fire (the stone heat furnace) takes to follow its setting: a first-order lag (Baughn: coal",
-                "plants change burn rate slowly).").defineInRange("coalLagSeconds", 180.0, 0.0, 3600.0);
+        COAL_LAG = b.comment("Seconds a coal fire (the stone heat furnace) takes to spread through its bed towards its air setting",
+                "(Baughn: coal plants change burn rate slowly). Its air valve (5 s) and a hot bed's cooling with the air shut (300 s)",
+                "are fixed: sim/Fire.java.").defineInRange("coalLagSeconds", 180.0, 0.0, 3600.0);
         // (no oil lag: the fuel heat furnace's inertia is its burner's mass, Baughn 2026-11-11)
-        MIN_FIRE = b.comment("Below this share of full power a fire asked to burn lower goes out.").defineInRange("minFire", 0.15, 0.0, 1.0);
+        MIN_FIRE = b.comment("Below this share of full power an oil flame asked to burn lower goes out, and a fire is lit at it. A coal",
+            "fire with its air shut smoulders until its bed is down to embers (sim/Fire.java EMBERS).").defineInRange("minFire", 0.15, 0.0, 1.0);
         COAL_KINDLE = b.comment("Seconds to relight a coal fire that went out.").defineInRange("coalKindleSeconds", 30.0, 0.0, 3600.0);
         OIL_LIGHT = b.comment("Seconds to light an oil burner.").defineInRange("oilLightSeconds", 3.0, 0.0, 3600.0);
         b.pop();

@@ -107,7 +107,9 @@ public class Wp10bContent implements ElnContent {
                 // nominalCombustibleEnergy,
                 4, 500,// int combustionChamberMax (Baughn 2026-10-26: 4, was 2, with turbines by the expansion),double
                 // combustionChamberPower,
-                new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2) // thermal
+                // thermal: C = 1 kW x heatingTao / 780 K. Baughn 1573756878134185985: a stone furnace's mass, ~600 J/K (was
+                // 10 s, ~13 J/K: four chambers heated it 190 K/s, past any regulator); a minute from cold to 250 C at full fire
+                new ThermalLoadInitializerByPowerDrop(780, -100, 468, 2)
             );
             desc.repairPart = "Combustion Chamber";   // (4 stone; Baughn: not a Machine Block, which cost more than the furnace)
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);

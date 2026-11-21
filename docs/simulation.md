@@ -149,7 +149,7 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
 `NbtResistor` `<name>R`; `ResistorSwitch` `<name>R`, `<name>State`; `VoltageSource` `<name>U`, `<name>Istate`;
 `Inductor` `<name>Istate`; `PowerSource` `<name>P/Umax/Imax`; `PowerSourceBipole` `P`, `Umax`, `Imax` (no name);
 `NbtBatteryProcess` `NBPQ`, `NBPlife` (no name); `NbtFurnaceProcess` `<name>Q`, `<name>gain`, + `Fire` `<name>fire`,
-`<name>fireLighting`; `RegulatorProcess` `<name>errorIntegrated`, `<name>target`; `NbtElectricalGateOutputProcess`
+`<name>fireLighting`, `<name>fireAir`, `<name>fireBed` (both default to `<name>fire`); `RegulatorProcess` `<name>errorIntegrated`, `<name>target`; `NbtElectricalGateOutputProcess`
 `<name>highImpedance`, `<name>U`; `NodeElectricalGateInputHysteresisProcess` `<name>state`. See persistence.md.
 
 ## Other simulators (pointers)

@@ -15,14 +15,15 @@ public class FurnaceProcess implements IProcess {
         this.load = load;
     }
 
-    /** The fire's real burn level, lagging the gain (Fire.COAL). */
+    /** The fire: its air follows the gain, its bed spreads behind it (Fire.COAL). */
     public final Fire fire = new Fire(Fire.COAL);
 
     @Override
     public void process(double time) {
         // the fire can't burn harder than its bed has fuel for (Baughn: with nothing to burn it banks until it's out,
         // rather than climbing to the setting on embers and flaring to full power when fuel comes back)
-        fire.step(Math.min(gain, fuelShare()), combustibleEnergy > 0, time);
+        fire.hot = load.Tc > HOT_FIREBOX;
+        fire.step(gain, fuelShare(), combustibleEnergy > 0, time);
         double energyConsumed = getP() * time;
         combustibleEnergy -= energyConsumed;
         load.PcTemp += heatShare * energyConsumed / time;
@@ -47,6 +48,9 @@ public class FurnaceProcess implements IProcess {
     public double fuelShare() {
         return nominalCombustibleEnergy <= 0 ? 0 : Math.max(0, Math.min(1, combustibleEnergy / nominalCombustibleEnergy));
     }
+
+    /** A firebox this far over the ambient (K) lights fresh coal at once (Fire.hot): ~350 C, about where coal ignites. */
+    public static final double HOT_FIREBOX = 330;
 
     public double getP() {
         return combustibleEnergy / nominalCombustibleEnergy * nominalPower * fire.level;

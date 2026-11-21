@@ -20,7 +20,7 @@ public class NbtFurnaceProcess extends FurnaceProcess implements INBTTReady {
         setGain(nbttagcompound.getDoubleOr(str + name + "gain", 0.0));
         // (saves from before the lag: the fire burns at its setting)
         if (nbttagcompound.contains(str + name + "fire")) fire.read(nbttagcompound, str + name);
-        else fire.level = getGain();
+        else fire.set(getGain());
     }
 
     @Override

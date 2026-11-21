@@ -888,7 +888,7 @@ public final class Wp10bCases {
             f.getInventory().setItem(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer.combustibleId, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COAL, 16));
             f.setTakeFuel(true);
             f.furnaceProcess.setGain(1);
-            f.furnaceProcess.fire.level = 1;   // (lit and burning hard already: a coal fire takes minutes to come up)
+            f.furnaceProcess.fire.set(1);   // (lit and burning hard already: a coal fire takes minutes to come up)
             f.furnaceProcess.combustibleEnergy = f.furnaceProcess.nominalCombustibleEnergy;   // (a full fire bed)
             return f;
         }

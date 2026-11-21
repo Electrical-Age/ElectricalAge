@@ -628,7 +628,14 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 ## Behaviour changes vs 1.12
 
 - Meters, probes and power sockets no longer burn at their (former slot) cable's voltage: those watchdogs are off.
-- Fires lag their setting (coal ~3 min, oil ~20 s), go out below 15%, take time to relight (`sim/Fire.java`, `FireTest`).
+- Fires lag their setting (oil ~20 s; an oil flame goes out below 15%), take time to relight (`sim/Fire.java`, `FireTest`). A coal fire
+  (the stone heat furnace, Baughn 1573753560456499223) has an air valve, 5 s, and a hot bed that spreads towards it over
+  ~3 min and cools over 300 s with the air shut; it burns at the lesser (plus 3 % of its bed past a shut damper), so a
+  regulator cuts it in seconds and a hot bed answers at once; a shut fire smoulders until its bed is down to embers, and
+  a firebox over ~350 C lights fresh coal at once. The stone furnace has a stone furnace's mass, ~600 J/K (was ~13 J/K,
+  which four chambers heated 190 K/s past any regulator). With an Analogic Regulator the stone and fuel heat furnaces run
+  a tuned PID (`RegulatorProcess.setPid`: derivative on the measurement, no windup, gains per furnace); with a regulator
+  the stone furnace has no 10 % command floor. `FurnaceControlCases`, `RegulatorPidTest`.
 - Battery wear divided by `batteryLifeFactor` (default 25), doubled every 10 C above ambient, up to 4x at low charge.
 - Burnt devices (Baughn: they kept their temperature, made their sounds and opened their GUI) keep only
   their thermal loads in the simulation: they cool to ambient and do nothing else, make no working sound or

@@ -35,6 +35,8 @@ public class HeatFurnaceScreen extends ElnScreen {
             v -> render.clientSetGain((float) v));
         text("fire", () -> !render.takeFuel && render.fire <= 0 ? tr("Fire: out (declining fuel)")
             : fireLine(render.fire, render.gainSyncValue, render.lighting, mods.eln.sim.Fire.COAL, refuels()));
+        // (Baughn 1573753560456499223: the air answers at once, a cold bed only as it catches)
+        text("bed", () -> render.fire > 0 ? tr("Bed %1$ hot, air %2$ open", Utils.plotPercent(render.bed), Utils.plotPercent(render.air)) : "");
         heat = slider("heat", 0, 980, 10, render.temperatureTargetSyncValue,
             // (in °C, as Jade shows them: the simulation's temperatures are above the 20 °C reference; Baughn saw the GUI
             // and Jade disagree by that much)
