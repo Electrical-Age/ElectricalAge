@@ -58,6 +58,19 @@ public final class PipeCases {
         cases.add(new VoxelGallery());
     }
 
+    /** Fill every pipe (and junction) in these blocks with steam at about 6 bar and 150 C. */
+    static void steam(TestContext c, BlockPos... blocks) {
+        for (BlockPos p : blocks)
+            for (mods.eln.node.voxel.VoxelPart q : c.voxelByEntity(p).parts)
+                if (q instanceof PipePart || q instanceof mods.eln.node.voxel.JunctionPart) {
+                    // (a junction too: a cold fitting on a line of hot steam condenses it all, as cold iron would)
+                    var f = q instanceof PipePart pipe ? pipe.fluid : ((mods.eln.node.voxel.JunctionPart) q).fluid;
+                    f.fill(0, 1, 423.15);
+                    mods.eln.sim.fluid.EaUnits.addWater(f, 6e5 * f.volume / (461.5 * 423.15), 423.15, true);
+                    mods.eln.fluid.FluidWorld.changed(c.voxelByEntity(p));
+                }
+    }
+
     /** The walls of every pipe at p at T (K): a line that has been in service. */
     static void warm(TestContext ctx, BlockPos p, double T) {
         VoxelNode n = ctx.voxelByEntity(p);
@@ -549,12 +562,7 @@ public final class PipeCases {
                 String ce = PipeKitItem.place(ctx.level(), p, new mods.eln.node.voxel.CablePart(0, 0, new int[]{0, 0, 3, 16, 0, 3}), null);
                 if (ce != null) errP = "cable: " + ce;
             }
-            for (BlockPos p : new BlockPos[]{a, b, c}) {
-                var f = ((PipePart) ctx.voxelByEntity(p).parts.get(0)).fluid;
-                f.fill(0, 1, 423.15);
-                mods.eln.sim.fluid.EaUnits.addWater(f, 6e5 * f.volume / (461.5 * 423.15), 423.15, true);   // (~6 bar of vapour at 150 C)
-                mods.eln.fluid.FluidWorld.changed(ctx.voxelByEntity(p));
-            }
+            steam(ctx, a, b, c);
         }
 
         public void measure(TestContext ctx) {

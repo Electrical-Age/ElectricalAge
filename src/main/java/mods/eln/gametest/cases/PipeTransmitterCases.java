@@ -9,7 +9,6 @@ import mods.eln.node.voxel.PipeRouter;
 import mods.eln.node.voxel.PipeSensorItem;
 import mods.eln.node.voxel.PipeSensorPart;
 import mods.eln.node.voxel.VoxelNode;
-import mods.eln.node.voxel.VoxelPart;
 import mods.eln.sixnode.pipetransmitter.PipeTransmitterElement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
@@ -38,19 +37,6 @@ public final class PipeTransmitterCases {
         if (v == null) return null;
         for (var e : v.sideElementList) if (e instanceof PipeTransmitterElement t) return t;
         return null;
-    }
-
-    /** Fill every pipe in these blocks with steam at about 6 bar and 150 C (as PipeCases.Sensors). */
-    static void steam(TestContext c, BlockPos... blocks) {
-        for (BlockPos p : blocks)
-            for (VoxelPart q : c.voxelByEntity(p).parts)
-                if (q instanceof PipePart || q instanceof mods.eln.node.voxel.JunctionPart) {
-                    // (a junction too: a cold fitting on a line of hot steam condenses it all, as cold iron would)
-                    var f = q instanceof PipePart pipe ? pipe.fluid : ((mods.eln.node.voxel.JunctionPart) q).fluid;
-                    f.fill(0, 1, 423.15);
-                    mods.eln.sim.fluid.EaUnits.addWater(f, 6e5 * f.volume / (461.5 * 423.15), 423.15, true);
-                    mods.eln.fluid.FluidWorld.changed(c.voxelByEntity(p));
-                }
     }
 
     /** The world direction its signal pin points. */
@@ -110,7 +96,7 @@ public final class PipeTransmitterCases {
             port = PipePlacer.devicePortForTests(c.level(), a, new Vec3(a.getX() + (8 + t.ox) / 16.0, a.getY() + 1 / 16.0, a.getZ() + (8 + t.oz) / 16.0));
             var end = PipePlacer.portAtForTests(c.level(), b, net.minecraft.core.Direction.WEST);
             route = port == null || end == null ? "no port: device " + port + ", run " + end : PipePlacer.routeForTests(c.level(), 0, port, end);
-            steam(c, a, b, c2);
+            PipeCases.steam(c, a, b, c2);
         }
 
         public void measure(TestContext c) {
@@ -181,7 +167,7 @@ public final class PipeTransmitterCases {
             String e = c.voxelByEntity(p).addPart(new PipePart(0, new int[]{o[0], o[1], o[2], 16, o[1], o[2]}));
             if (e != null) err = "pipe: " + e;
             PipeCases.lay(c, q, 0, 0, o[1], o[2], 16, o[1], o[2]);
-            steam(c, p, q);
+            PipeCases.steam(c, p, q);
         }
 
         public void measure(TestContext c) {
@@ -293,7 +279,7 @@ public final class PipeTransmitterCases {
             var port = PipePlacer.devicePortForTests(c.level(), a, new Vec3(a.getX() + (8 + t.ox) / 16.0, a.getY() + 1 / 16.0, a.getZ() + (8 + t.oz) / 16.0));
             long[] join = {run.getX() * 16L + 8, run.getY() * 16L + 8, run.getZ() * 16L + 8};
             err = port == null ? "no port" : PipePlacer.routeAndJoinForTests(c.level(), 0, port, join);
-            if (err == null) steam(c, a, a.east(), run);
+            if (err == null) PipeCases.steam(c, a, a.east(), run);
         }
 
         public void measure(TestContext c) {
