@@ -352,7 +352,7 @@ public final class WaterAir {
         for (int it = 0; it < 12; it++) {
             double vg = Math.exp(x);
             double[] r = residuals(mw, ma, U, V, T, vg);
-            if (Math.abs(r[0]) < energyTol(mw, ma, U) && Math.abs(r[1]) < 1e-13) return split(mw, ma, V, T, vg);
+            if (Math.abs(r[0]) < energyTol(Math.abs(mw) + Math.abs(ma), U) && Math.abs(r[1]) < 1e-13) return split(mw, ma, V, T, vg);
             double hT = 1e-6 * T, hx = 1e-7;
             double[] rT = residuals(mw, ma, U, V, T + hT, vg), rX = residuals(mw, ma, U, V, T, Math.exp(x + hx));
             double j11 = (rT[0] - r[0]) / hT, j21 = (rT[1] - r[1]) / hT, j12 = (rX[0] - r[0]) / hx, j22 = (rX[1] - r[1]) / hx;
@@ -378,14 +378,14 @@ public final class WaterAir {
 
     /**
      * The solve's energy tolerance: 1e-13 of the node's energy scale, its |U| or its masses at 1e5 J/kg (the scale
-     * Network judges a node's energy row on; MixFluid.energyTol). It was 1e-13 max(1, |U|) + 1e-9 J: in a pocket of
+     * Network judges a node's energy row on; MixFluid uses it too). It was 1e-13 max(1, |U|) + 1e-9 J: in a pocket of
      * 4 ug of air under vacuum (2.8 uJ/K) behind a wall of 3 W/K, 1e-9 J is 4e-4 K, and Newton's correction to the
      * node's energy (its wall heat's residual over the wall's slope, ~1e-9 J) fell inside it: the state never moved,
      * its energy row stalled, and the network hit the sub-step cap every tick (a player's turbine plant, 2026-11-21;
      * ReplayTest.vacuumPocketBehindAWallSteps).
      */
-    static double energyTol(double mw, double ma, double U) {
-        return 1e-13 * Math.max(1e-6, Math.max(Math.abs(U), 1e5 * (Math.abs(mw) + Math.abs(ma))));
+    static double energyTol(double mass, double U) {
+        return 1e-13 * Math.max(1e-6, Math.max(Math.abs(U), 1e5 * mass));
     }
 
     /** Solve (water mw, air ma, internal energy U, volume V) for the split; tHint speeds the bracket. */
@@ -409,7 +409,7 @@ public final class WaterAir {
             b = Math.min(hi, t0 + w);
             fb = energyAt(mw, ma, V, b) - U;
         }
-        double t = 0.5 * (a + b), tol = energyTol(mw, ma, U);
+        double t = 0.5 * (a + b), tol = energyTol(Math.abs(mw) + Math.abs(ma), U);
         int side = 0;
         for (int i = 0; i < 200 && b - a > 1e-11; i++) {
             t = fb != fa ? b - fb * (b - a) / (fb - fa) : 0.5 * (a + b);
