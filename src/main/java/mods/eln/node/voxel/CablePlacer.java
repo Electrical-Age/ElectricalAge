@@ -211,6 +211,36 @@ public final class CablePlacer {
         return noEnd(level, pos);
     }
 
+    /** Drops a player's unfinished route (tests: mock players share one UUID, so a plan left over leaks into the next case). */
+    public static void cancelForTests(UUID player) {
+        PLANS.remove(player);
+    }
+
+    public static String noEndForTests(Level level, BlockPos pos, Vec3 hit) {
+        return noEnd(level, pos, hit);
+    }
+
+    /** Two ends at the same point (within a voxel). */
+    static boolean sameSpot(CableRouter.End a, CableRouter.End b) {
+        return a != null && b != null && Math.abs(a.x() - b.x()) <= 1 && Math.abs(a.y() - b.y()) <= 1 && Math.abs(a.z() - b.z()) <= 1;
+    }
+
+    /** The same, for a click at hit: a Lamp Socket still in Lamp Supply mode (as every socket ships) has no cable pin;
+     *  it says how to give it one (AdventurAgent, the handbook play-through: "Not a place for a cable" told nothing). */
+    static final String LAMP_SUPPLY = "This socket takes wireless Lamp Supply power: switch it to Cable in its screen first";
+
+    static String noEnd(Level level, BlockPos pos, Vec3 hit) {
+        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
+        if (n instanceof VoxelNode v && hit != null) {
+            int el = v.elementAt(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ(), 2);
+            if (el >= 0 && v.sideElementList[el] instanceof mods.eln.sixnode.lampsocket.LampSocketElement ls && ls.poweredByLampSupply())
+                return LAMP_SUPPLY;
+        } else if (n instanceof mods.eln.node.six.SixNode six)   // (a socket in an old six-node block)
+            for (var e : six.sideElementList)
+                if (e instanceof mods.eln.sixnode.lampsocket.LampSocketElement ls && ls.poweredByLampSupply()) return LAMP_SUPPLY;
+        return noEnd(level, pos);
+    }
+
     static String noEnd(Level level, BlockPos pos) {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         // a utility pole's foot is a socket only with a pole transformer fitted (its low side)
@@ -526,7 +556,7 @@ public final class CablePlacer {
         long[][] join = new long[1][];
         CableRouter.End at = endAt(level, pos, face, hit, plan == null, join, tier);
         if (at == null) {
-            player.sendOverlayMessage(Component.literal(noEnd(level, pos)));
+            player.sendOverlayMessage(Component.literal(noEnd(level, pos, hit)));
             return true;
         }
         boolean device = at.dir() >= 0;
@@ -554,7 +584,12 @@ public final class CablePlacer {
             }
             return true;
         }
-        // finish: at a device, a cable, or the last waypoint
+        // finish: at a device, a cable, or the last waypoint; never back where it started (AdventurAgent: a socket clicked
+        // twice laid a loop from its pin back to the same pin)
+        if (!again && plan.waypoints.isEmpty() && sameSpot(plan.start, at)) {
+            KitPreview.note(player, "That's where the route started: finish it somewhere else (" + kit.undoHint() + " to cancel)");
+            return true;
+        }
         CableRouter.End end = again ? plan.waypoints.remove(plan.waypoints.size() - 1) : at;
         long tRoute = System.nanoTime();
         CableRouter.Result r = route(level, plan, end, join[0]);

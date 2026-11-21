@@ -360,6 +360,12 @@ public final class PipePlacer {
         }
         // finish: at a port, joining a pipe, or capped at the last waypoint
         PipeRouter.End end = port != null ? port : join != null ? new PipeRouter.End(join[0], join[1], join[2], -1) : null;
+        // never back where it started (the cable kit's rule: a loop from a port to itself)
+        if (end != null && plan.waypoints.isEmpty() && plan.start != null && Math.abs(end.x() - plan.start.x()) <= 1
+            && Math.abs(end.y() - plan.start.y()) <= 1 && Math.abs(end.z() - plan.start.z()) <= 1) {
+            KitPreview.note(player, "That's where the pipe started: finish it somewhere else (" + kit.undoHint() + " to cancel)");
+            return true;
+        }
         PipeRouter.Result r = route(level, plan, end, join);
         if (r.error != null) {
             KitPreview.note(player, "No route: " + r.error);

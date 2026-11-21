@@ -46,6 +46,11 @@ public class LampSocketElement extends SixNodeElement {
     public Resistor lampResistor = new Resistor(positiveLoad, null);
 
     boolean poweredByLampSupply = true;
+
+    /** Does it take its power wirelessly from a Lamp Supply (it then has no cable pin)? */
+    public boolean poweredByLampSupply() {
+        return poweredByLampSupply;
+    }
     boolean grounded = true;
 
     /**
