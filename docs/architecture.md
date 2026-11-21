@@ -29,6 +29,7 @@ Tick data flow: `ServerTickEvent.Pre` -> `Simulator.tick()` (see simulation.md) 
 | `node` | NodeBase/Node, NodeManager, NodeBlock/NodeBlockEntity, ElementInventory, DescriptorRegistry, ElnRenders, NodeOrphans; `node/six`, `node/transparent`, `node/voxel` |
 | `sixnode` | wall-mounted devices (cables, gates, lamps, sensors, wireless...) |
 | `transparentnode` | full-block machines (battery, furnaces, turbines, transformers, FE exporter `energyconverter`...) |
+| `powerprimitives` | what the six-node and full-block Power Capacitor and Power Inductor share: `PowerCapacitorCore` and `PowerInductorCore` (circuit, state, slot values, NBT, meter and Jade text; each element keeps its pins and inventory), their slot ids, the six-node descriptor base and render |
 | `gridnode` | utility poles, grid transformer, downlink: `GridElement`, `GridLink`, `GridRender` catenaries |
 | `ghost` | multiblock filler blocks: GhostBlock, GhostElement, GhostGroup, GhostManager, GhostObserver |
 | `sim` | simulator, loads, processes; `sim/mna` (circuit solver), `sim/nbt`, `sim/process` (incl. `destruct`: Failure/Repair), `sim/fluid` |

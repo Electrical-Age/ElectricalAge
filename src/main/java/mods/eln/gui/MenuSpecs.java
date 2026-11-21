@@ -226,6 +226,7 @@ public final class MenuSpecs {
                 d.combustionChamberMax, CombustionChamber.class, MEDIUM, tr("Combustion chamber slot")),
             descriptor(mods.eln.transparentnode.heatfurnace.HeatFurnaceContainer.isolatorId, 8 + 36, 58, 1,
                 ThermalIsolatorElement.class, MEDIUM, tr("Thermal isolator slot"))).publishing(0));
+        // ("maximal" here, "maximum" on the six-node's: each keeps its own tooltip)
         put(mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor.class, d -> MenuSpec.of(
             filter(mods.eln.powerprimitives.PowerCapacitorContainer.redId, 132, 8, 13, item(Items.REDSTONE), MEDIUM,
                 tr("Redstone slot"), tr("(Increases capacity)")),
