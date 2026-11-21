@@ -79,8 +79,8 @@ public final class AutoMinerCases {
             miner.getInventory().setItem(AutoMinerContainer.electricalDrillSlotId, drill());
             miner.getInventory().setItem(AutoMinerContainer.MiningPipeSlotId, ElnDeviceRegistry.miningPipeDescriptor.newItemStack(64));
             miner.getInventory().setChanged();
-            ElectricalLoad load = Batch1Cases.field(miner, "inPowerLoad");
-            double u = Batch1Cases.<Double>field(miner.getDescriptor(), "nominalVoltage");
+            ElectricalLoad load = TestContext.field(miner, "inPowerLoad");
+            double u = TestContext.<Double>field(miner.getDescriptor(), "nominalVoltage");
             source = new VoltageSource("autominer test", load, null).setU(u);
             Eln.simulator.addElectricalComponent(source);
         }
@@ -97,7 +97,7 @@ public final class AutoMinerCases {
         Object jobBefore;
 
         int setups() {
-            return Batch1Cases.<Integer>field(Batch1Cases.field(miner, "slowProcess"), "setups");
+            return TestContext.<Integer>field(TestContext.field(miner, "slowProcess"), "setups");
         }
 
         /** Counts the job setups over the case's last WATCH ticks. */
@@ -109,11 +109,11 @@ public final class AutoMinerCases {
         }
 
         Object job() {
-            return Batch1Cases.field(Batch1Cases.field(miner, "slowProcess"), "job");
+            return TestContext.field(TestContext.field(miner, "slowProcess"), "job");
         }
 
         int pipeLength() {
-            return Batch1Cases.<Integer>field(Batch1Cases.field(miner, "slowProcess"), "pipeLength");
+            return TestContext.<Integer>field(TestContext.field(miner, "slowProcess"), "pipeLength");
         }
 
         void unpower() {
@@ -212,13 +212,13 @@ public final class AutoMinerCases {
                 Eln.ghostManager.renumberGhost(minus1, miner.node.coordonate, atMinus1.getUUID(), miner.getDescriptor().getGhostGroupUuid());
                 // a queued stack survives a save and load
                 unpower();
-                Batch1Cases.<List<ItemStack>>field(Batch1Cases.field(miner, "slowProcess"), "itemsToDrop").add(new ItemStack(Items.DIAMOND, 3));
+                TestContext.<List<ItemStack>>field(TestContext.field(miner, "slowProcess"), "itemsToDrop").add(new ItemStack(Items.DIAMOND, 3));
                 mods.eln.gametest.Reload r = mods.eln.gametest.Reload.node(ctx.level(), node);
                 miner = (AutoMinerElement) ((TransparentNode) r.fresh).element;
-                List<ItemStack> queued = Batch1Cases.field(Batch1Cases.field(miner, "slowProcess"), "itemsToDrop");
+                List<ItemStack> queued = TestContext.field(TestContext.field(miner, "slowProcess"), "itemsToDrop");
                 ctx.check("autominer: the stacks waiting for room in the chest are saved", queued.size() == 1 && queued.get(0).is(Items.DIAMOND)
                     && queued.get(0).getCount() == 3, String.valueOf(queued));
-                Batch1Cases.<mods.eln.sim.IProcess>field(miner, "slowProcess").process(0.05);   // (its first step after the load)
+                TestContext.<mods.eln.sim.IProcess>field(miner, "slowProcess").process(0.05);   // (its first step after the load)
 
                 // breaking the segment at y = -1: the pipe comes up, the miner stays
                 ctx.level().removeBlock(new BlockPos(x, -1, z), false);
@@ -253,7 +253,7 @@ public final class AutoMinerCases {
         public void build(TestContext ctx) {
             try {
                 rig(ctx);
-                Wp9cCases.setField(Batch1Cases.field(miner, "slowProcess"), "silkTouch", true);
+                Wp9cCases.setField(TestContext.field(miner, "slowProcess"), "silkTouch", true);
                 set(ctx, node.below(), Blocks.SPAWNER.defaultBlockState());
             } catch (RuntimeException e) {
                 cleanUp(ctx);

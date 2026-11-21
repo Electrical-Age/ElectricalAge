@@ -77,10 +77,7 @@ public final class ServoCases {
                 r.getInventory().setChanged();
             }
             ElectricalSourceElement s = (ElectricalSourceElement) ctx.placeSix(Wp11Cases.SOURCE, at.relative(back));
-            s.networkUnserialize(ctx.stream(out -> {
-                out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat((float) mods.eln.Eln.MVU);
-            }));
+            ctx.setVolts(s, mods.eln.Eln.MVU);
         }
 
         /** The drive now (a reload swaps the element). */

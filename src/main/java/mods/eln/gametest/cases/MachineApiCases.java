@@ -106,7 +106,7 @@ public final class MachineApiCases {
     }
 
     static ElectricalStackMachineProcess process(ElectricalMachineElement m) {
-        return Wp10aCases.field(m, "slowRefreshProcess");
+        return TestContext.field(m, "slowRefreshProcess");
     }
 
     /** Places machine id at x = 2 fed on its left at ratio x its nominal volts (LV cable at 50 V, MV at 200 V). */
@@ -355,10 +355,7 @@ public final class MachineApiCases {
                 }
                 m = element(ctx, ctx.at(2, 1, 1));
                 burntAfterLoad = m.isBurnt();
-                src.networkUnserialize(ctx.stream(out -> {
-                    out.writeByte(ElectricalSourceElement.setVoltageId);
-                    out.writeFloat(50f);
-                }));
+                ctx.setVolts(src, 50f);
                 m.repair();
             });
         }

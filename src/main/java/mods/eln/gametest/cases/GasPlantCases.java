@@ -132,10 +132,7 @@ public final class GasPlantCases {
                 motor = (ShaftMotorElement) orient(ctx.placeTransparent(MOTOR, ctx.at(2, 1, 6)));
                 ctx.placeSix(Ids.six("Medium Voltage Cable"), ctx.at(1, 1, 6));
                 var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) ctx.placeSix(SOURCE, ctx.at(0, 1, 6));
-                s.networkUnserialize(ctx.stream(out -> {
-                    out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                    out.writeFloat(200f);
-                }));
+                ctx.setVolts(s, 200f);
             }
             var fuels = FuelRegistry.INSTANCE.fluidListToFluids(FuelRegistry.INSTANCE.getGasolineList());
             if (fuels.length > 0 && bucketFuel) gt.putFuel(fuels[0], GasTurbineElement.TANK_MB / 2);
@@ -810,7 +807,7 @@ public final class GasPlantCases {
             // east end (B's spot, up high)
             PipeCases.lay(ctx, ctx.at(5, 1, 5), 1, 0, 8, 8, 16, 8, 8);
             PipeCases.lay(ctx, ctx.at(5, 1, 6), 1, 0, 12, 8, 8, 12, 8, 16, 12, 8);
-            var valveNode = PipeCases.node(ctx, ctx.at(5, 1, 6));
+            var valveNode = ctx.voxelByEntity(ctx.at(5, 1, 6));
             valveNode.addValve(8, 12, 8, mods.eln.node.voxel.ValvePart.THROTTLE);
             for (var part : valveNode.parts) if (part instanceof mods.eln.node.voxel.ValvePart v) feedValve = v;
             feedValve.setting = FEED_OPEN;

@@ -17,7 +17,6 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.transparent.TransparentNodeElement;
-import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.registry.batch.Wp11Content;
 import mods.eln.gametest.TestCase;
 import mods.eln.gametest.TestContext;
@@ -30,8 +29,11 @@ import net.minecraft.core.BlockPos;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
-import java.lang.reflect.Field;
 import java.util.List;
+
+import static mods.eln.gametest.cases.Wp10aCases.rs;
+import static mods.eln.gametest.cases.Wp10aCases.off;
+import static mods.eln.gametest.TestContext.field;
 
 /**
  * Selftest cases of device batch Wp11 (registry/batch/Wp11Content). Feeds use an LVU electrical source and one LV
@@ -71,40 +73,12 @@ public final class Wp11Cases {
 
     // ---- helpers ----
 
-    static double rs() {
-        return ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs;
-    }
-
-    static BlockPos off(BlockPos p, Direction d) {
-        int[] v = {0, 0, 0};
-        d.applyTo(v, 1);
-        return p.offset(v[0], v[1], v[2]);
-    }
-
-    @SuppressWarnings("unchecked")
-    static <T> T field(Object o, String name) {
-        for (Class<?> c = o.getClass(); c != null; c = c.getSuperclass()) {
-            try {
-                Field f = c.getDeclaredField(name);
-                f.setAccessible(true);
-                return (T) f.get(o);
-            } catch (NoSuchFieldException ignored) {
-                // superclass
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        throw new IllegalStateException("no field " + name + " in " + o.getClass());
-    }
 
     /** LVU source at `src` feeding an LV cable at `cable` (both on the floor). */
     static SixNodeElement feed(TestContext ctx, BlockPos cable, BlockPos src) {
         SixNodeElement c = ctx.placeSix(LV_CABLE, cable);
         ElectricalSourceElement s = (ElectricalSourceElement) ctx.placeSix(SOURCE, src);
-        s.networkUnserialize(ctx.stream(out -> {
-            out.writeByte(ElectricalSourceElement.setVoltageId);
-            out.writeFloat((float) U);
-        }));
+        ctx.setVolts(s, U);
         return c;
     }
 
@@ -282,7 +256,7 @@ public final class Wp11Cases {
         }
 
         static boolean fit(TestContext ctx, ElectricalPoleElement pole, ItemStack held, double px, double pz) {
-            var p = Wp9aCases.player(ctx);
+            var p = ctx.player();
             p.setPos(px, pole.coordonate().y, pz);
             p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, held);
             try {

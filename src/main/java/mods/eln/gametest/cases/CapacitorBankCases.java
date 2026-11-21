@@ -5,7 +5,6 @@ import mods.eln.gametest.TestCase;
 import mods.eln.gametest.TestContext;
 import mods.eln.misc.Direction;
 import mods.eln.node.six.SixNodeElement;
-import mods.eln.sixnode.electricalsource.ElectricalSourceElement;
 import mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor;
 import mods.eln.transparentnode.capacitorbank.CapacitorBankElement;
 import net.minecraft.core.BlockPos;
@@ -57,7 +56,7 @@ public final class CapacitorBankCases {
 
         public void build(TestContext ctx) {
             cap = (mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixElement) ctx.placeSix(Wp9aCases.POWER_CAPACITOR, ctx.at(1, 1, 1));
-            Batch1Cases.orient(cap, mods.eln.misc.LRDU::left, Direction.XN);   // (its - terminal, the front's left, west)
+            Wp9aCases.orient(cap, mods.eln.misc.LRDU::left, Direction.XN);   // (its - terminal, the front's left, west)
             ctx.placeSix(Wp10aCases.GROUND, ctx.at(0, 1, 1));
             cap.getInventory().setItem(0, new ItemStack(Items.REDSTONE, 13));
             cap.getInventory().setItem(1, mods.eln.Eln.findItemStack("Dielectric", 16));
@@ -97,12 +96,7 @@ public final class CapacitorBankCases {
     }
 
     static SixNodeElement source(TestContext ctx, BlockPos p, double volts) {   // (an Electrical Source at volts)
-        SixNodeElement src = ctx.placeSix(Wp10aCases.SOURCE, p);
-        src.networkUnserialize(ctx.stream(out -> {
-            out.writeByte(ElectricalSourceElement.setVoltageId);
-            out.writeFloat((float) volts);
-        }));
-        return src;
+        return ctx.source(Wp10aCases.SOURCE, p, volts);
     }
 
     /**
@@ -251,10 +245,7 @@ public final class CapacitorBankCases {
                 clock += t;
                 maxT = Math.max(maxT, bank.thermal.Tc);
                 double v = ((int) (clock / 2)) % 2 == 0 ? mods.eln.Eln.HVU : 0;
-                src.networkUnserialize(ctx.stream(out -> {
-                    out.writeByte(ElectricalSourceElement.setVoltageId);
-                    out.writeFloat((float) v);
-                }));
+                ctx.setVolts(src, v);
             });
         }
 

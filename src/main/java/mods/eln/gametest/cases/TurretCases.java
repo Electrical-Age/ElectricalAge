@@ -43,7 +43,7 @@ public final class TurretCases {
     }
 
     static double u(TurretElement t) {
-        mods.eln.sim.ElectricalLoad l = Batch1Cases.field(t, "load");
+        mods.eln.sim.ElectricalLoad l = TestContext.field(t, "load");
         return l.getU();
     }
 
@@ -101,10 +101,7 @@ public final class TurretCases {
             if (powered) {
                 mods.eln.sixnode.electricalsource.ElectricalSourceElement s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement)
                     ctx.placeSix(SOURCE, at.relative(front.back().toEnumFacing()));
-                s.networkUnserialize(ctx.stream(out -> {
-                    out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                    out.writeFloat(800);
-                }));
+                ctx.setVolts(s, 800);
             }
             if (filterClass != null) {
                 p.turret.getInventory().setItem(TurretContainer.filterId, filter(filterClass).newItemStack());

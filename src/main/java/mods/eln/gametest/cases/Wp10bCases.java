@@ -29,20 +29,17 @@ import mods.eln.transparentnode.turbine.TurbineElement;
 import mods.eln.transparentnode.turret.TurretElement;
 import mods.eln.transparentnode.waterturbine.WaterTurbineElement;
 import mods.eln.transparentnode.windturbine.WindTurbineElement;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static mods.eln.gametest.cases.Batch1Cases.field;
-import static mods.eln.gametest.cases.Batch1Cases.off;
+import static mods.eln.gametest.TestContext.field;
+import static mods.eln.gametest.cases.Wp10aCases.off;
 import static mods.eln.gametest.cases.Wp9aCases.f;
 import static mods.eln.gametest.cases.Wp9cCases.TICK;
 import static mods.eln.gametest.cases.Wp9cCases.elapsed;
@@ -108,25 +105,17 @@ public final class Wp10bCases {
 
     // ------------------------------------------------------------------ helpers
 
-    static FakePlayer player(TestContext ctx) {
-        return FakePlayerFactory.getMinecraft(ctx.world());
-    }
-
     /** Right click on a transparent node with `held` in the main hand; returns what the hand holds afterwards. */
     static ItemStack click(TestContext ctx, TransparentNodeElement e, ItemStack held) {
-        Player p = player(ctx);
-        p.setItemInHand(InteractionHand.MAIN_HAND, held);
-        try {
+        return ctx.holding(held, p -> {
             e.onBlockActivated(p, Direction.YP, 0.5F, 1F, 0.5F);
             return p.getMainHandItem().copy();
-        } finally {
-            p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        }
+        });
     }
 
     /** Place with the fake player's view chosen so that the placed element's front is `front` (PlayerViewHorizontal). */
     public static TransparentNodeElement placeFacing(TestContext ctx, int damage, BlockPos p, Direction front) {
-        FakePlayer fp = player(ctx);
+        FakePlayer fp = ctx.player();
         TransparentNodeDescriptor d = Eln.transparentNodeItem.getDescriptor(damage);
         Direction clicked = Direction.fromIntMinecraftSide(net.minecraft.core.Direction.UP.get3DDataValue()).getInverse();
         float oldYaw = fp.getYRot();
@@ -200,8 +189,8 @@ public final class Wp10bCases {
             a = (ThermalDissipatorPassiveElement) ctx.placeTransparent(DISSIPATOR_PASSIVE, ctx.at(1, 1, 1));
             b = (ThermalDissipatorPassiveElement) ctx.placeTransparent(DISSIPATOR_PASSIVE, ctx.at(4, 1, 1));
             active = ctx.placeTransparent(DISSIPATOR_ACTIVE, ctx.at(7, 1, 1));
-            Wp10aCases.<ThermalLoad>field(a, "thermalLoad").Tc = 100;
-            Wp10aCases.<ThermalLoad>field(b, "thermalLoad").Tc = 100;
+            TestContext.<ThermalLoad>field(a, "thermalLoad").Tc = 100;
+            TestContext.<ThermalLoad>field(b, "thermalLoad").Tc = 100;
             afterWater = click(ctx, a, new ItemStack(Items.WATER_BUCKET));
             afterIce = click(ctx, b, new ItemStack(Blocks.ICE, 2));
             t0 = ctx.world().getGameTime();
@@ -256,10 +245,7 @@ public final class Wp10bCases {
             gnd = l.six(GROUND, off(p, rh.front.left()));
             BlockPos cp = off(p, rh.front);
             ElectricalSourceElement s = (ElectricalSourceElement) l.six(SIGNAL_SOURCE, cp);
-            s.networkUnserialize(ctx.stream(o -> {
-                o.writeByte(ElectricalSourceElement.setVoltageId);
-                o.writeFloat((float) Eln.SVU);
-            }));
+            ctx.setVolts(s, Eln.SVU);
         }
 
         public void measure(TestContext ctx) {
@@ -620,10 +606,7 @@ public final class Wp10bCases {
             BlockPos cp = off(p, right ? f.front.right() : f.front.left());
             l.six(0 + (32 << 6), cp);   // (signal cable)
             ElectricalSourceElement s = (ElectricalSourceElement) l.six(SIGNAL_SOURCE, cp.south());   // (beside the cable, on the platform)
-            s.networkUnserialize(ctx.stream(o -> {
-                o.writeByte(ElectricalSourceElement.setVoltageId);
-                o.writeFloat(volts);
-            }));
+            ctx.setVolts(s, volts);
             return f;
         }
 
@@ -843,9 +826,9 @@ public final class Wp10bCases {
             within(ctx, "wp10b heat furnace: a voxel-hosted trimmer on its right, no cable [V]", right.electricalCmdLoad.getU(), Eln.SVU / 2, 0.05 * Eln.SVU);
             within(ctx, "wp10b heat furnace: half the signal from a trimmer, half the gain", right.furnaceProcess.getGain(), 0.5, 0.05);
             within(ctx, "wp10b fuel heat furnace: a voxel-hosted trimmer on its left [V]",
-                Batch1Cases.<ElectricalLoad>field(fuelLeft, "controlLoad").getU(), Eln.SVU / 2, 0.05 * Eln.SVU);
+                TestContext.<ElectricalLoad>field(fuelLeft, "controlLoad").getU(), Eln.SVU / 2, 0.05 * Eln.SVU);
             within(ctx, "wp10b fuel heat furnace: a six-node trimmer on its right [V]",
-                Batch1Cases.<ElectricalLoad>field(fuelRight, "controlLoad").getU(), Eln.SVU / 2, 0.05 * Eln.SVU);
+                TestContext.<ElectricalLoad>field(fuelRight, "controlLoad").getU(), Eln.SVU / 2, 0.05 * Eln.SVU);
         }
     }
 

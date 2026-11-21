@@ -69,8 +69,8 @@ public final class LampMonsterCases {
         }
 
         public void measure(TestContext ctx) {
-            Object process = Wp10aCases.field(lamp, "lampProcess");
-            int light = Wp10aCases.<Integer>field(process, "light");
+            Object process = TestContext.field(lamp, "lampProcess");
+            int light = TestContext.<Integer>field(process, "light");
             Monster zombie = EntityTypes.ZOMBIE.create(ctx.level(), EntitySpawnReason.NATURAL);
             var p = ctx.at(3, 1, 1);
             zombie.setPos(p.getX() + 0.5, p.getY(), p.getZ() + 0.5);

@@ -42,7 +42,7 @@ public final class JunctionCases {
     /** A sealed level pipe (x 2..14, 4 px up) in a block, a riser joined to its middle up into the block above (sealed). */
     static VoxelNode tee(TestContext c, BlockPos at) {
         PipeCases.lay(c, at, 0, 2, 4, 8, 14, 4, 8);
-        VoxelNode n = PipeCases.node(c, at);
+        VoxelNode n = c.voxelByEntity(at);
         String err = n.addJoined(new PipePart(0, new int[]{8, 4, 8, 8, 16, 8}), 8, 4, 8);
         if (err != null) throw new IllegalStateException("tee: " + err);
         PipeCases.lay(c, at.above(), 0, 8, 0, 8, 8, 12, 8);
@@ -82,17 +82,17 @@ public final class JunctionCases {
         public void build(TestContext c) {
             at = c.at(1, 1, 1);
             VoxelNode n = tee(c, at);
-            for (VoxelNode v : new VoxelNode[]{n, PipeCases.node(c, at.above())})
+            for (VoxelNode v : new VoxelNode[]{n, c.voxelByEntity(at.above())})
                 for (VoxelPart p : v.parts)
                     if (p instanceof PipePart pp && pp.points[0] == pp.points[3] && pp.points[2] == pp.points[5])   // (the vertical ones)
                         pp.fluid.fill(0.6 * pp.fluid.volume * Water.RHO_L, Water.P_ATM, 293);
-            for (VoxelNode v : new VoxelNode[]{n, PipeCases.node(c, at.above())}) mods.eln.fluid.FluidWorld.changed(v);
-            before = water(n, PipeCases.node(c, at.above()));
+            for (VoxelNode v : new VoxelNode[]{n, c.voxelByEntity(at.above())}) mods.eln.fluid.FluidWorld.changed(v);
+            before = water(n, c.voxelByEntity(at.above()));
             riserBefore = before;
         }
 
         public void measure(TestContext c) {
-            VoxelNode n = PipeCases.node(c, at), up = PipeCases.node(c, at.above());
+            VoxelNode n = c.voxelByEntity(at), up = c.voxelByEntity(at.above());
             double low = 0;
             for (VoxelPart p : n.parts) {
                 if (p instanceof PipePart pp && pp.points[1] == pp.points[4]) low += pp.fluid.mWater;   // (the level arms)
@@ -194,7 +194,7 @@ public final class JunctionCases {
             at = c.at(1, 1, 2);
             PipeCases.lay(c, at.north(), 0, 8, 8, 4, 8, 8, 16);   // (capped at z 4)
             PipeCases.lay(c, at, 0, 8, 8, 0, 8, 8, 8);           // (ends at the block's centre)
-            VoxelNode n = PipeCases.node(c, at);
+            VoxelNode n = c.voxelByEntity(at);
             PipePart end = null;
             for (VoxelPart p : n.parts) if (p instanceof PipePart pp) end = pp;
             var run = mods.eln.fluid.FluidWorld.nodeFor(end.fluid);
@@ -205,7 +205,7 @@ public final class JunctionCases {
             endJoin = n.parts.contains(end) && n.parts.stream().anyMatch(q -> q instanceof JunctionPart);
             for (VoxelPart p : n.parts) if (p instanceof JunctionPart j) junction = j.fluid.mWater;
             mods.eln.fluid.FluidWorld.changed(n);
-            after = runWater(n, PipeCases.node(c, at.north()));
+            after = runWater(n, c.voxelByEntity(at.north()));
         }
 
         public void measure(TestContext c) {

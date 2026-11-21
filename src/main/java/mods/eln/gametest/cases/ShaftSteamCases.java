@@ -19,6 +19,8 @@ import net.minecraft.core.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 
+import static mods.eln.gametest.TestContext.field;
+import static mods.eln.gametest.cases.Wp10aCases.off;
 import static mods.eln.gametest.cases.Wp11Cases.*;
 
 /**
@@ -420,10 +422,7 @@ public final class ShaftSteamCases {
             BlockPos cable = off(p, m.front), src = off(cable, m.front);
             ctx.placeSix(Ids.six("Medium Voltage Cable"), cable);
             var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) ctx.placeSix(SOURCE, src);
-            s.networkUnserialize(ctx.stream(out -> {
-                out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                out.writeFloat(200f);
-            }));
+            ctx.setVolts(s, 200f);
             Eln.simulator.addSlowProcess(watch = dt -> {
                 if (++tick == 10) at5s = shaft(m).getRads();
             });

@@ -54,10 +54,10 @@ public final class SolarCases {
         }
 
         public void measure(TestContext ctx) {
-            SolarPannelSlowProcess process = Batch1Cases.field(panel, "slowProcess");
+            SolarPannelSlowProcess process = TestContext.field(panel, "slowProcess");
             double light = process.getSolarLight();
-            double pmax = Batch1Cases.<Double>field(Batch1Cases.field(panel, "descriptor"), "electricalPmax");
-            PowerSourceBipole src = Batch1Cases.field(panel, "powerSource");
+            double pmax = TestContext.<Double>field(TestContext.field(panel, "descriptor"), "electricalPmax");
+            PowerSourceBipole src = TestContext.field(panel, "powerSource");
             double tol = 0.01 * pmax * light + 0.005 * pmax;
             ctx.check(String.format("solar power [W] (Pmax %.1f * light %.4f)", pmax, light),
                 Math.abs(src.getP() - pmax * light) <= tol, String.format("measured %.4f, expected %.4f +- %.3f", src.getP(), pmax * light, tol));

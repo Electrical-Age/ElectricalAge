@@ -32,12 +32,10 @@ import mods.eln.sixnode.tutorialsign.TutorialSignElement;
 import mods.eln.sixnode.wirelesssignal.WirelessSignalAnalyserItemDescriptor;
 import mods.eln.sixnode.wirelesssignal.rx.WirelessSignalRxElement;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -45,8 +43,8 @@ import java.util.List;
 import static mods.eln.gametest.cases.Wp9aCases.f;
 import static mods.eln.gametest.cases.Wp9aCases.link;
 import static mods.eln.gametest.cases.Wp9aCases.orient;
-import static mods.eln.gametest.cases.Batch1Cases.field;
-import static mods.eln.gametest.cases.Batch1Cases.off;
+import static mods.eln.gametest.TestContext.field;
+import static mods.eln.gametest.cases.Wp10aCases.off;
 
 /**
  * Selftest cases of device batch Wp9c (registry/batch/Wp9cContent): six-node logic and misc devices.
@@ -125,12 +123,7 @@ public final class Wp9cCases {
     // ------------------------------------------------------------------ helpers
 
     static ElectricalSourceElement signal(TestContext ctx, BlockPos p, double u) {
-        ElectricalSourceElement s = (ElectricalSourceElement) ctx.placeSix(SIGNAL_SOURCE, p);
-        s.networkUnserialize(ctx.stream(out -> {
-            out.writeByte(ElectricalSourceElement.setVoltageId);
-            out.writeFloat((float) u);
-        }));
-        return s;
+        return ctx.source(SIGNAL_SOURCE, p, u);
     }
 
     /** Position next to a floor element's pin `lrdu`. */
@@ -140,10 +133,6 @@ public final class Wp9cCases {
 
     static double out(SixNodeElement e) {
         return e.getElectricalLoad(e.front).getU();
-    }
-
-    static ServerPlayer player(TestContext ctx) {
-        return FakePlayerFactory.getMinecraft(ctx.world());
     }
 
     static double elapsed(TestContext ctx, long t0) {
@@ -299,7 +288,7 @@ public final class Wp9cCases {
             m.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(1); // ElectricalMathElement.setExpressionId
                 o.writeUTF(expression);
-            }), player(ctx));
+            }), ctx.player());
             if (chips > 0) {
                 m.getInventory().setItem(0, mods.eln.Eln.findItemStack("Cheap Chip", chips));
                 m.getInventory().setChanged();
@@ -631,10 +620,7 @@ public final class Wp9cCases {
             Wp9aCases.orient(s[2], l -> l, Direction.ZN);
             for (int i = 0; i < 3; i++) {
                 float u = (float) volts[i];
-                s[i].networkUnserialize(ctx.stream(o -> {
-                    o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                    o.writeFloat(u);
-                }));
+                ctx.setVolts(s[i], u);
             }
             int down = CableCases.DOWN;
             try {
@@ -670,11 +656,11 @@ public final class Wp9cCases {
 
         String pick(TestContext ctx, BlockPos p) {
             var st = ctx.level().getBlockState(p);
-            return st.getCloneItemStack(p, ctx.level(), false, player(ctx)).getHoverName().getString();
+            return st.getCloneItemStack(p, ctx.level(), false, ctx.player()).getHoverName().getString();
         }
 
         public void build(TestContext ctx) {
-            var pl = player(ctx);
+            var pl = ctx.player();
             ctx.placeSix(SIGNAL_PROCESSOR, ctx.at(1, 1, 1));
             mods.eln.gametest.LabCommands.host(ctx.level(), pl, SIGNAL_PROCESSOR, ctx.at(3, 1, 1), Direction.YN);
             mods.eln.node.voxel.PipeKitItem.place(ctx.level(), ctx.at(5, 1, 1), new mods.eln.node.voxel.CablePart(0, 0, new int[]{16, 0, 8, 1, 0, 8}), null);
@@ -710,12 +696,12 @@ public final class Wp9cCases {
             m.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(1); // ElectricalMathElement.setExpressionId
                 o.writeUTF("0.9");
-            }), player(ctx));
+            }), ctx.player());
             return m;
         }
 
         public void build(TestContext ctx) {
-            var pl = player(ctx);
+            var pl = ctx.player();
             BlockPos sp = ctx.at(2, 1, 1), alone = ctx.at(5, 1, 1);
             ctx.level().setBlock(sp.west(), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 3);
             ctx.level().setBlock(alone.west(), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 3);
@@ -765,7 +751,7 @@ public final class Wp9cCases {
             // shift-C the way a player does it: the wrench key's state on the server (the client's key packet), sneaking,
             // an empty hand, a right-click on the block (the block's use, as the server runs it)
             used = (ElectricalDataLoggerElement) ctx.placeSix(TILTED_TERMINAL, ctx.at(1, 1, 2));
-            var pl = player(ctx);
+            var pl = ctx.player();
             BlockPos at = ctx.at(1, 1, 2);
             var before = used.pinEdge();
             pl.setShiftKeyDown(true);
@@ -787,7 +773,7 @@ public final class Wp9cCases {
         public void measure(TestContext ctx) {
             var tilted = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor) Eln.sixNodeItem.getDescriptor(TILTED_TERMINAL);
             var plain = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor) Eln.sixNodeItem.getDescriptor(DATA_LOGGER);
-            var pl = player(ctx);
+            var pl = ctx.player();
             // on a wall it faces down (its screen leans out and down toward a player below)
             var front = tilted.getFrontFromPlace(Direction.ZN, pl);
             ctx.check("wp9c tilted terminal: shift-C through the block's use moves the inputs, and publishes the turn",
@@ -848,7 +834,7 @@ public final class Wp9cCases {
             m.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(1);   // ElectricalMathElement.setExpressionId
                 o.writeUTF("A*0.5 + A*0.5 + A*0.5 + A*0.5 + A*0.5");
-            }), player(ctx));
+            }), ctx.player());
             if (n > 0) {
                 m.getInventory().setItem(0, mods.eln.Eln.findItemStack(chip, n));
                 m.getInventory().setChanged();
@@ -957,7 +943,7 @@ public final class Wp9cCases {
             logger = logger(ctx, 1, true);
             logger.getInventory().setItem(ElectricalDataLoggerContainer.paperSlotId, new ItemStack(Items.PAPER, 2));
             logger.getInventory().setChanged();
-            logger.networkUnserialize(ctx.stream(o -> o.writeByte(ElectricalDataLoggerElement.printId)), player(ctx));
+            logger.networkUnserialize(ctx.stream(o -> o.writeByte(ElectricalDataLoggerElement.printId)), ctx.player());
             history = logger(ctx, 4, true);
             for (int t = 0; t < SEEDED; t++) history.store.tick(new float[]{seed(t)});
             migrated = logger(ctx, 6, false);
@@ -985,7 +971,7 @@ public final class Wp9cCases {
             history.networkUnserialize(ctx.stream(o -> {
                 o.writeByte(ElectricalDataLoggerElement.setSamplingPeriodeId);
                 o.writeFloat(p);
-            }), player(ctx));
+            }), ctx.player());
             return history.store.view(DataLogs.POINTS);
         }
 
@@ -1097,8 +1083,8 @@ public final class Wp9cCases {
             TreeResinCollectorDescriptor d = (TreeResinCollectorDescriptor) Eln.sixNodeItem.getDescriptor(RESIN_COLLECTOR);
             Direction clicked = Direction.fromIntMinecraftSide(net.minecraft.core.Direction.WEST.get3DDataValue()).getInverse();
             BlockPos log = ctx.at(2, 1, 1), stone = ctx.at(0, 0, 1);
-            boolean onLog = d.canBePlacedOnSide(player(ctx), new Coordonate(log.getX(), log.getY(), log.getZ(), ctx.world()), clicked);
-            boolean onStone = d.canBePlacedOnSide(player(ctx), new Coordonate(stone.getX(), stone.getY(), stone.getZ(), ctx.world()), clicked);
+            boolean onLog = d.canBePlacedOnSide(ctx.player(), new Coordonate(log.getX(), log.getY(), log.getZ(), ctx.world()), clicked);
+            boolean onStone = d.canBePlacedOnSide(ctx.player(), new Coordonate(stone.getX(), stone.getY(), stone.getZ(), ctx.world()), clicked);
             ctx.check("wp9c resin collector placement: on the side of a log yes, of stone no", onLog && !onStone,
                 "log " + onLog + ", stone " + onStone);
             // (x 0.5 on a tree that isn't a rubber tree: Baughn 2026-11-07)

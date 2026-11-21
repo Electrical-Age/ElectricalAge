@@ -252,7 +252,7 @@ public final class FluidViewCases {
         }
 
         public void measure(TestContext ctx) {
-            var n = PipeCases.node(ctx, at);
+            var n = ctx.voxelByEntity(at);
             mods.eln.node.voxel.PipePart stub = null;
             if (n != null) for (var p : n.parts) if (p instanceof mods.eln.node.voxel.PipePart pp) stub = pp;
             ctx.check("adapter: placed with its pipe stub", stub != null, "");

@@ -57,10 +57,6 @@ public final class VoxelDeviceCases {
         return mods.eln.Eln.sixNodeItem.getDescriptor(id(name));
     }
 
-    static net.minecraft.world.entity.player.Player player(TestContext c) {
-        return net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
-    }
-
     /** The edge of face that points toward dir. */
     static LRDU toward(Direction face, Direction dir) {
         for (LRDU l : LRDU.values()) if (face.applyLRDU(l) == dir) return l;
@@ -80,7 +76,7 @@ public final class VoxelDeviceCases {
         int slot = v.freeSlot();
         String err = v.placeErrorAt(d.newItemStack(), slot, face, ox, oy, oz, f);
         if (err != null) throw new IllegalStateException(name + " off centre at " + ox + "," + oy + "," + oz + ": " + err);
-        if (!v.createSubBlockAt(d.newItemStack(), slot, face, ox, oy, oz, player(c))) throw new IllegalStateException(name + " not created");
+        if (!v.createSubBlockAt(d.newItemStack(), slot, face, ox, oy, oz, c.player())) throw new IllegalStateException(name + " not created");
         var e = v.getElement(slot);
         e.front = f;
         v.reconnect();
@@ -116,23 +112,9 @@ public final class VoxelDeviceCases {
         return l == null ? Double.NaN : l.getU();
     }
 
-    /** A six-node Signal Source or Electrical Source at p on its floor, at u volts. */
-    static mods.eln.sixnode.electricalsource.ElectricalSourceElement source(TestContext c, int damage, BlockPos p, double u) {
-        var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) c.placeSix(damage, p);
-        s.networkUnserialize(c.stream(o -> {
-            o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-            o.writeFloat((float) u);
-        }));
-        return s;
-    }
-
     /** A six-node Power Resistor at p, terminals along dir's axis, n core items (Wp9aCases.resistor). */
     static mods.eln.sixnode.resistor.ResistorElement resistor(TestContext c, BlockPos p, Direction dir, int n) {
-        var r = (mods.eln.sixnode.resistor.ResistorElement) c.placeSix(Wp9aCases.POWER_RESISTOR, p);
-        Wp9aCases.orient(r, LRDU::right, dir);
-        r.getInventory().setItem(0, Wp9aCases.coal(n));
-        r.getInventory().setChanged();
-        return r;
+        return Wp9aCases.resistor(c, Wp9aCases.POWER_RESISTOR, p, dir, n);
     }
 
     static String fmt(String f, Object... a) {
@@ -195,7 +177,7 @@ public final class VoxelDeviceCases {
                 c.floor(p.below());
                 var v = block(c, p);
                 // a click in the middle of the free floor: off centre there too, the face's slot left empty (#515)
-                String err = v.placeAnywhere(desc(n).newItemStack(), yn, 0.5, 0, 0.5, player(c));
+                String err = v.placeAnywhere(desc(n).newItemStack(), yn, 0.5, 0, 0.5, c.player());
                 var in = v.getElement(yn) == null ? TapCase.placed(v) : null;
                 boolean ok = err == null && in != null && in.sixNodeElementDescriptor.name.equals(n);
                 middleOk &= ok;
@@ -207,7 +189,7 @@ public final class VoxelDeviceCases {
                 c.floor(p.below());
                 c.floor(p.north());
                 var v = block(c, p);
-                String err = v.placeAnywhere(desc(n).newItemStack(), zn, 0.5, 0.5, 0, player(c));
+                String err = v.placeAnywhere(desc(n).newItemStack(), zn, 0.5, 0.5, 0, c.player());
                 boolean ok = err == null && v.getElement(zn) == null && TapCase.placed(v) != null;
                 middleOk &= ok;
                 if (!ok) mid.append(n).append(": ").append(err).append("; ");
@@ -216,7 +198,7 @@ public final class VoxelDeviceCases {
             middle = mid.toString();
             // every one's body and pins, centred in a slot past the faces (computed, not placed)
             for (String n : FLOOR_DEVICES) log.append(' ').append(n).append(describe(desc(n), yn, toward(yn, zn))).append(';');
-            for (String n : WALL_DEVICES) log.append(' ').append(n).append(describe(desc(n), zn, desc(n).getFrontFromPlace(zn, player(c)))).append(';');
+            for (String n : WALL_DEVICES) log.append(' ').append(n).append(describe(desc(n), zn, desc(n).getFrontFromPlace(zn, c.player()))).append(';');
             all = log.toString();
             // a Voltage Probe, front north: its signal pin on the model's long side (5 px: tip 6 voxels out), its cable
             // pin on the short side (3 px: tip 4 voxels out); its body 4 voxels across the other way (2 px each side)
@@ -290,8 +272,8 @@ public final class VoxelDeviceCases {
             cableOut(c, v, p, e, Direction.XN, tier, FLOOR);
             cableOut(c, v, p, e, Direction.XP, tier, FLOOR);
             cableOut(c, v, p, e, Direction.ZN, SIGNAL, FLOOR);
-            source(c, power ? Wp9aCases.SOURCE : Wp9aCases.SIGNAL_SOURCE, c.at(0, 1, z), power ? mods.eln.Eln.LVU : mods.eln.Eln.SVU);
-            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(1, 1, z - 1), gate);
+            c.source(power ? Wp9aCases.SOURCE : Wp9aCases.SIGNAL_SOURCE, c.at(0, 1, z), power ? mods.eln.Eln.LVU : mods.eln.Eln.SVU);
+            c.source(Wp9aCases.SIGNAL_SOURCE, c.at(1, 1, z - 1), gate);
             if (z == 1) vOn = v;
             return e;
         }
@@ -357,7 +339,7 @@ public final class VoxelDeviceCases {
             cableOut(c, vProbe, pProbe, probe, Direction.XN, LV, FLOOR);
             cableOut(c, vProbe, pProbe, probe, Direction.XP, LV, FLOOR);
             cableOut(c, vProbe, pProbe, probe, Direction.ZN, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 0.5 * mods.eln.Eln.LVU);
+            c.source(Wp9aCases.SOURCE, c.at(0, 1, 1), 0.5 * mods.eln.Eln.LVU);
             resistor(c, c.at(2, 1, 1), Direction.XN, 48);
             c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 1));
             pVolt = c.at(1, 1, 4);
@@ -365,7 +347,7 @@ public final class VoxelDeviceCases {
             volt = put(c, vVolt, "Voltage Probe", Direction.YN, 2, 0, 0, Direction.ZN);
             cableOut(c, vVolt, pVolt, volt, Direction.ZP, LV, FLOOR);
             cableOut(c, vVolt, pVolt, volt, Direction.ZN, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SOURCE, c.at(1, 1, 5), 0.6 * mods.eln.Eln.LVU);
+            c.source(Wp9aCases.SOURCE, c.at(1, 1, 5), 0.6 * mods.eln.Eln.LVU);
         }
 
         static double cableU(VoxelNode v, int[] t, Direction dir) {
@@ -528,7 +510,7 @@ public final class VoxelDeviceCases {
             var vt = block(c, pt);
             tx = put(c, vt, "Wireless Signal Transmitter", Direction.YN, 2, 0, 0, Direction.ZN);
             cableOut(c, vt, pt, tx, Direction.ZN, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(1, 1, 1), 0.7 * mods.eln.Eln.SVU);
+            c.source(Wp9aCases.SIGNAL_SOURCE, c.at(1, 1, 1), 0.7 * mods.eln.Eln.SVU);
             tx.networkUnserialize(c.stream(o -> {
                 o.writeByte(mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement.setChannelId);
                 o.writeUTF(channel);
@@ -551,20 +533,20 @@ public final class VoxelDeviceCases {
             timer = put(c, vTimer, "Electrical Timer", Direction.YN, 2, 0, 0, Direction.ZN);
             cableOut(c, vTimer, pm, timer, Direction.ZN, SIGNAL, FLOOR);
             cableOut(c, vTimer, pm, timer, Direction.ZP, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(8, 1, 1), mods.eln.Eln.SVU);
+            c.source(Wp9aCases.SIGNAL_SOURCE, c.at(8, 1, 1), mods.eln.Eln.SVU);
             // LED vuMeter, its input north on 0.6 SVU
             BlockPos pv = c.at(10, 1, 2);
             var vv = block(c, pv);
             vu = put(c, vv, "LED vuMeter", Direction.YN, -2, 0, 0, Direction.ZN);
             cableOut(c, vv, pv, vu, Direction.ZN, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(10, 1, 1), 0.6 * mods.eln.Eln.SVU);
+            c.source(Wp9aCases.SIGNAL_SOURCE, c.at(10, 1, 1), 0.6 * mods.eln.Eln.SVU);
             // LED switch, closed: north on SVU, its south contact follows
             BlockPos ps = c.at(12, 1, 2);
             var vs = block(c, ps);
             sw = put(c, vs, "Signal Switch with LED", Direction.YN, 2, 0, 0, Direction.ZN);
             cableOut(c, vs, ps, sw, Direction.ZN, SIGNAL, FLOOR);
             cableOut(c, vs, ps, sw, Direction.ZP, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(12, 1, 1), mods.eln.Eln.SVU);
+            c.source(Wp9aCases.SIGNAL_SOURCE, c.at(12, 1, 1), mods.eln.Eln.SVU);
             ((mods.eln.sixnode.electricalswitch.ElectricalSwitchElement) sw).setSwitchState(true);
         }
 
@@ -618,7 +600,7 @@ public final class VoxelDeviceCases {
             ground = put(c, vg, "Ground Cable", Direction.YN, 2, 0, 0, Direction.ZN);
             cableOut(c, vg, pg, ground, Direction.XN, LV, FLOOR);
             rGround = resistor(c, c.at(2, 1, 1), Direction.XN, 48);
-            source(c, Wp9aCases.SOURCE, c.at(1, 1, 1), 50);
+            c.source(Wp9aCases.SOURCE, c.at(1, 1, 1), 50);
             // hub: placed bare (no pins), then LV cables in its west and east slots
             BlockPos ph = c.at(6, 1, 1);
             var vh = block(c, ph);
@@ -629,20 +611,20 @@ public final class VoxelDeviceCases {
             hub.getInventory().setChanged();
             cableOut(c, vh, ph, hub, Direction.XN, LV, FLOOR);
             cableOut(c, vh, ph, hub, Direction.XP, LV, FLOOR);
-            source(c, Wp9aCases.SOURCE, c.at(5, 1, 1), 50);
+            c.source(Wp9aCases.SOURCE, c.at(5, 1, 1), 50);
             rHub = resistor(c, c.at(7, 1, 1), Direction.XN, 48);
             c.placeSix(Wp9aCases.GROUND, c.at(8, 1, 1));
             // sockets and the anemometer: refused on the floor
             var vf = block(c, c.at(10, 1, 1));
-            floorSocket = String.valueOf(vf.placeAnywhere(desc("48V Power Socket").newItemStack(), Direction.YN, 0.3, 0, 0.5, player(c)));
-            floorWind = String.valueOf(vf.placeAnywhere(desc("Electrical Anemometer Sensor").newItemStack(), Direction.YN, 0.3, 0, 0.5, player(c)));
+            floorSocket = String.valueOf(vf.placeAnywhere(desc("48V Power Socket").newItemStack(), Direction.YN, 0.3, 0, 0.5, c.player()));
+            floorWind = String.valueOf(vf.placeAnywhere(desc("Electrical Anemometer Sensor").newItemStack(), Direction.YN, 0.3, 0, 0.5, c.player()));
             // a click on the floor in the open, as a player with voxel cables on: refused, no empty block left, item kept
             boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
             mods.eln.node.voxel.CableConverter.convertOnLoad = true;
             try {
                 var wd = desc("Electrical Anemometer Sensor");
                 BlockPos air = c.at(12, 1, 1);
-                boolean placed = ((mods.eln.node.six.SixNodeItem) wd.parentItem).placeAt(wd.newItemStack(), player(c), c.level(), air, Direction.YN,
+                boolean placed = ((mods.eln.node.six.SixNodeItem) wd.parentItem).placeAt(wd.newItemStack(), c.player(), c.level(), air, Direction.YN,
                     new double[]{0.3, 0, 0.5});
                 var left = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(air, c.level()));
                 openFloor = "placed " + placed + ", block " + c.level().getBlockState(air).getBlock().getName().getString()
@@ -654,10 +636,7 @@ public final class VoxelDeviceCases {
             // a socket on a north wall (y 2), its pin down; a source on the wall of the block below
             for (int y = 1; y <= 2; y++) c.floor(c.at(1, y, 3));
             var below = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) c.placeSix(Wp9aCases.SOURCE, c.at(1, 1, 4), Direction.ZN);
-            below.networkUnserialize(c.stream(o -> {
-                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                o.writeFloat(50f);
-            }));
+            c.setVolts(below, 50f);
             BlockPos ps = c.at(1, 2, 4);
             var vs = block(c, ps);
             socket = put(c, vs, "48V Power Socket", Direction.ZN, 2, 0, 0, Direction.YN);
@@ -667,10 +646,10 @@ public final class VoxelDeviceCases {
             BlockPos pw = c.at(4, 2, 4);
             var vw = block(c, pw);
             var d = desc("Electrical Anemometer Sensor");
-            LRDU f = d.getFrontFromPlace(Direction.ZN, player(c));
+            LRDU f = d.getFrontFromPlace(Direction.ZN, c.player());
             int slot = vw.freeSlot();
             String err = vw.placeErrorAt(d.newItemStack(), slot, Direction.ZN, 2, -2, 0, f);
-            if (err == null && vw.createSubBlockAt(d.newItemStack(), slot, Direction.ZN, 2, -2, 0, player(c))) {
+            if (err == null && vw.createSubBlockAt(d.newItemStack(), slot, Direction.ZN, 2, -2, 0, c.player())) {
                 wind = vw.getElement(slot);
                 for (int[] t : vw.pinTips(slot)) cableOut(c, vw, pw, wind, Direction.ZN.applyLRDU(LRDU.fromInt(t[0])), SIGNAL, NORTH_WALL);
             } else floorWind += "; wall: " + err;
@@ -730,14 +709,14 @@ public final class VoxelDeviceCases {
 
         SixNodeElement row(TestContext c, String name, int z, Double gate) {
             for (int x = 0; x < 5; x++) for (int dz = -1; dz <= 1; dz++) c.floor(c.at(x, 0, z + dz));
-            source(c, Wp9aCases.SOURCE, c.at(0, 1, z), 50);
+            c.source(Wp9aCases.SOURCE, c.at(0, 1, z), 50);
             BlockPos p = c.at(1, 1, z);
             var v = block(c, p);
             CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
             var stack = desc(name).newItemStack();
             double[] h = {0.55, 0, 0.5};
-            var plan = mods.eln.node.voxel.DevicePlacer.plan(v, stack, v.freeSlot(), Direction.YN, h, player(c));
-            String err = v.placeAnywhere(stack, Direction.YN, h[0], h[1], h[2], player(c));
+            var plan = mods.eln.node.voxel.DevicePlacer.plan(v, stack, v.freeSlot(), Direction.YN, h, c.player());
+            String err = v.placeAnywhere(stack, Direction.YN, h[0], h[1], h[2], c.player());
             SixNodeElement e = null;
             for (int i = 6; i < mods.eln.node.six.SixNode.SLOTS; i++) if (v.getElement(i) != null) e = v.getElement(i);
             int left = cableLength(v), back = plan.cut() == null ? -1 : plan.cut().returned();
@@ -748,7 +727,7 @@ public final class VoxelDeviceCases {
             cableOut(c, v, p, e, front, SIGNAL, FLOOR);
             if (gate != null) {
                 BlockPos g = front == Direction.ZN ? c.at(1, 1, z - 1) : c.at(1, 1, z + 1);
-                source(c, Wp9aCases.SIGNAL_SOURCE, g, gate);
+                c.source(Wp9aCases.SIGNAL_SOURCE, g, gate);
             }
             if (name.equals("Electrical Probe")) vProbe = v;
             return e;
@@ -814,23 +793,23 @@ public final class VoxelDeviceCases {
 
         public void build(TestContext c) {
             for (int x = 0; x < 4; x++) for (int z = 0; z < 9; z++) c.floor(c.at(x, 0, z));
-            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
+            c.source(Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
             BlockPos p = c.at(1, 1, 1);
             var v = block(c, p);
             // (the run a quarter of the way across: a Voltage Probe is 10 voxels tip to tip, more than half a block)
             CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 4, 16, 0, 4})));
-            voltErr = String.valueOf(v.placeAnywhere(desc("Voltage Probe").newItemStack(), Direction.YN, 0.5, 0, 0.35, player(c)));
+            voltErr = String.valueOf(v.placeAnywhere(desc("Voltage Probe").newItemStack(), Direction.YN, 0.5, 0, 0.35, c.player()));
             volt = placed(v);
             BlockPos q = c.at(1, 1, 4);
             var w = block(c, q);
             CableCases.voxel(c, q, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
-            rxErr = String.valueOf(w.placeAnywhere(desc("Wireless Signal Receiver").newItemStack(), Direction.YN, 0.6, 0, 0.5, player(c)));
+            rxErr = String.valueOf(w.placeAnywhere(desc("Wireless Signal Receiver").newItemStack(), Direction.YN, 0.6, 0, 0.5, c.player()));
             // a wall to the north at y 2, an LV cable across it at y 4
             c.floor(c.at(1, 2, 6));
             BlockPos s = c.at(1, 2, 7);
             var u = block(c, s);
             CableCases.voxel(c, s, List.of(new CablePart(LV, NORTH_WALL, new int[]{0, 4, 0, 16, 4, 0})));
-            socketErr = String.valueOf(u.placeAnywhere(desc("48V Power Socket").newItemStack(), Direction.ZN, 0.5, 0.45, 0, player(c)));
+            socketErr = String.valueOf(u.placeAnywhere(desc("48V Power Socket").newItemStack(), Direction.ZN, 0.5, 0.45, 0, c.player()));
             socket = placed(u);
         }
 
@@ -1003,8 +982,8 @@ public final class VoxelDeviceCases {
                 CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 8, 0, 8})));
                 var stack = desc("Voltage Probe").newItemStack();
                 double[] h = {aims[i][0] / 16, 0.5 / 16, aims[i][1] / 16};
-                var plan = mods.eln.node.voxel.DevicePlacer.plan(v, stack, v.freeSlot(), Direction.YN, h, player(c));
-                String err = v.placeAnywhere(stack, Direction.YN, h[0], h[1], h[2], player(c));
+                var plan = mods.eln.node.voxel.DevicePlacer.plan(v, stack, v.freeSlot(), Direction.YN, h, c.player());
+                String err = v.placeAnywhere(stack, Direction.YN, h[0], h[1], h[2], c.player());
                 var e = TapCase.placed(v);
                 int back = plan.cut() == null ? 0 : plan.cut().returned();
                 String at = e == null ? "-" : e.ox + "," + e.oy + "," + e.oz + " " + e.front;
@@ -1067,16 +1046,16 @@ public final class VoxelDeviceCases {
         public void build(TestContext c) {
             for (int x = 0; x < 10; x++) for (int z = 0; z < 10; z++) c.floor(c.at(x, 0, z));
             // an Energy Meter clicked onto a run: in line
-            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
+            c.source(Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
             BlockPos pm = c.at(1, 1, 1);
             var vm = block(c, pm);
             CableCases.voxel(c, pm, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
-            placed += "meter: " + vm.placeAnywhere(desc("Energy Meter").newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c)) + "; ";
+            placed += "meter: " + vm.placeAnywhere(desc("Energy Meter").newItemStack(), Direction.YN, 0.55, 0, 0.5, c.player()) + "; ";
             meter = TapCase.placed(vm);   // (in line: it starts closed)
             rMeter = resistor(c, c.at(2, 1, 1), Direction.XN, 48);
             c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 1));
             // an Advanced Energy Meter off centre, its pins west and east
-            source(c, Wp9aCases.SOURCE, c.at(0, 1, 4), 50);
+            c.source(Wp9aCases.SOURCE, c.at(0, 1, 4), 50);
             BlockPos pa = c.at(1, 1, 4);
             var va = block(c, pa);
             adv = put(c, va, "Advanced Energy Meter", Direction.YN, 0, 0, 2, Direction.XN);
@@ -1086,35 +1065,35 @@ public final class VoxelDeviceCases {
             rAdv = resistor(c, c.at(2, 1, 4), Direction.XN, 48);
             c.placeSix(Wp9aCases.GROUND, c.at(3, 1, 4));
             // a 200V charger off centre, fed from the west
-            source(c, Wp9aCases.SOURCE, c.at(0, 1, 7), 200);
+            c.source(Wp9aCases.SOURCE, c.at(0, 1, 7), 200);
             BlockPos p2 = c.at(1, 1, 7);
             var v2 = block(c, p2);
             c200 = put(c, v2, "230V Battery Charger", Direction.YN, 0, 0, 2, Direction.ZN);
             cableOut(c, v2, p2, c200, Direction.XN, mods.eln.node.voxel.CablePart.tierOf("Medium Voltage Cable"), FLOOR);
             // a 50V charger clicked onto a 50 V run
-            source(c, Wp9aCases.SOURCE, c.at(4, 1, 1), 50);
+            c.source(Wp9aCases.SOURCE, c.at(4, 1, 1), 50);
             BlockPos p5 = c.at(5, 1, 1);
             var v5 = block(c, p5);
             CableCases.voxel(c, p5, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
-            placed += "charger: " + v5.placeAnywhere(desc("48V Battery Charger").newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c));
+            placed += "charger: " + v5.placeAnywhere(desc("48V Battery Charger").newItemStack(), Direction.YN, 0.55, 0, 0.5, c.player());
             c50 = TapCase.placed(v5);
             // a weak one off centre, fed from the east
             BlockPos pw = c.at(5, 1, 4);
             var vw = block(c, pw);
             cWeak = put(c, vw, "Weak 48V Battery Charger", Direction.YN, 0, 0, 2, Direction.ZN);
             cableOut(c, vw, pw, cWeak, Direction.XP, LV, FLOOR);
-            source(c, Wp9aCases.SOURCE, c.at(6, 1, 4), 50);
+            c.source(Wp9aCases.SOURCE, c.at(6, 1, 4), 50);
             // the alarms, their pin north on SVU
             BlockPos pn = c.at(5, 1, 8);
             var vn = block(c, pn);
             nuclear = put(c, vn, "Nuclear Alarm", Direction.YN, 2, 0, 0, Direction.ZN);
             cableOut(c, vn, pn, nuclear, Direction.ZN, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(5, 1, 7), mods.eln.Eln.SVU);
+            c.source(Wp9aCases.SIGNAL_SOURCE, c.at(5, 1, 7), mods.eln.Eln.SVU);
             BlockPos ps = c.at(8, 1, 8);
             var vs = block(c, ps);
             standard = put(c, vs, "Standard Alarm", Direction.YN, 2, 0, 0, Direction.ZN);
             cableOut(c, vs, ps, standard, Direction.ZN, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SIGNAL_SOURCE, c.at(8, 1, 7), mods.eln.Eln.SVU);
+            c.source(Wp9aCases.SIGNAL_SOURCE, c.at(8, 1, 7), mods.eln.Eln.SVU);
         }
 
         public void measure(TestContext c) {
@@ -1165,14 +1144,14 @@ public final class VoxelDeviceCases {
 
         public void build(TestContext c) {
             for (int x = 0; x < 10; x++) c.floor(c.at(x, 0, 1));
-            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
+            c.source(Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
             for (int x = 1; x <= 5; x++) {
                 block(c, c.at(x, 1, 1));
                 CableCases.voxel(c, c.at(x, 1, 1), List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
             }
             boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
             mods.eln.node.voxel.CableConverter.convertOnLoad = true;
-            var player = player(c);
+            var player = c.player();
             try {
                 String[] names = {"Energy Meter", "Advanced Energy Meter", "48V Battery Charger"};
                 for (int i = 0; i < 3; i++) {
@@ -1236,7 +1215,7 @@ public final class VoxelDeviceCases {
         }
 
         static void wrench(TestContext c, SixNodeElement e) {
-            var pl = player(c);
+            var pl = c.player();
             pl.setShiftKeyDown(true);
             mods.eln.server.PlayerKeys.set(pl, mods.eln.server.PlayerKeys.WRENCH, true);
             try {
@@ -1249,7 +1228,7 @@ public final class VoxelDeviceCases {
 
         public void build(TestContext c) {
             for (int x = 0; x < 10; x++) for (int z = 0; z < 5; z++) c.floor(c.at(x, 0, z));
-            source(c, Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
+            c.source(Wp9aCases.SOURCE, c.at(0, 1, 1), 50);
             for (int x = 1; x <= 2; x++) {
                 block(c, c.at(x, 1, 1));
                 CableCases.voxel(c, c.at(x, 1, 1), List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
@@ -1257,7 +1236,7 @@ public final class VoxelDeviceCases {
             SixNodeElement[] m = new SixNodeElement[2];
             for (int i = 0; i < 2; i++) {
                 var v = (VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(1 + i, 1, 1), c.level()));
-                v.placeAnywhere(desc("Energy Meter").newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c));
+                v.placeAnywhere(desc("Energy Meter").newItemStack(), Direction.YN, 0.55, 0, 0.5, c.player());
                 m[i] = TapCase.placed(v);
             }
             first = m[0];
@@ -1394,7 +1373,7 @@ public final class VoxelDeviceCases {
             for (int x = 0; x < 5; x++) for (int z = 0; z < 3; z++) c.floor(c.at(x, 0, z));
             boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
             mods.eln.node.voxel.CableConverter.convertOnLoad = true;
-            var pl = (net.minecraft.server.level.ServerPlayer) player(c);
+            var pl = (net.minecraft.server.level.ServerPlayer) c.player();
             var d = desc("Voltage Probe");
             // (the FakePlayer is shared: its pose is put back after)
             double px = pl.getX(), py = pl.getY(), pz = pl.getZ();
@@ -1474,7 +1453,7 @@ public final class VoxelDeviceCases {
             for (int x = 0; x < 8; x++) for (int z = 0; z < 10; z++) c.floor(c.at(x, 0, z));
             boolean conv = mods.eln.node.voxel.CableConverter.convertOnLoad;
             mods.eln.node.voxel.CableConverter.convertOnLoad = true;
-            var pl = player(c);
+            var pl = c.player();
             var d = desc("Voltage Probe");
             BlockPos p = c.at(1, 1, 4);
             try {
@@ -1520,7 +1499,7 @@ public final class VoxelDeviceCases {
 
             // a cable from a source two blocks south to its cable pin, routed by the kit's rules
             BlockPos sp = c.at(1, 1, 6);
-            source(c, Wp9aCases.SOURCE, sp, 0.6 * mods.eln.Eln.LVU);
+            c.source(Wp9aCases.SOURCE, sp, 0.6 * mods.eln.Eln.LVU);
             var a = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), sp, net.minecraft.core.Direction.NORTH,
                 net.minecraft.world.phys.Vec3.atLowerCornerOf(sp).add(0.5, 0.05, 0.0), true, new long[1][], LV);
             var b = mods.eln.node.voxel.CablePlacer.deviceEnd(v, p, placed.slot, new double[]{0.5, 0, 0.5}, false, LV);
@@ -1530,7 +1509,7 @@ public final class VoxelDeviceCases {
             BlockPos op = c.at(5, 1, 4);
             old = CableCases.host(c, VoxelDeviceCases.id("Voltage Probe"), op, Direction.YN);
             Wp9aCases.orient(old, LRDU::inverse, Direction.ZP);
-            source(c, Wp9aCases.SOURCE, op.south(), 0.6 * mods.eln.Eln.LVU);
+            c.source(Wp9aCases.SOURCE, op.south(), 0.6 * mods.eln.Eln.LVU);
         }
 
         static double best(SixNodeElement e) {
@@ -1584,11 +1563,11 @@ public final class VoxelDeviceCases {
         SixNodeElement row(TestContext c, String key, String name, int i) {
             int x0 = i / 5 * 6, z = 1 + i % 5 * 3;
             for (int x = x0; x < x0 + 5; x++) c.floor(c.at(x, 0, z));
-            source(c, Wp9aCases.SOURCE, c.at(x0, 1, z), 50);
+            c.source(Wp9aCases.SOURCE, c.at(x0, 1, z), 50);
             BlockPos p = c.at(x0 + 1, 1, z);
             var v = block(c, p);
             CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
-            String err = v.placeAnywhere(desc(name).newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c));
+            String err = v.placeAnywhere(desc(name).newItemStack(), Direction.YN, 0.55, 0, 0.5, c.player());
             var e = TapCase.placed(v);
             placed += key + ": " + err + (e == null ? "" : " pins " + v.pinTips(e.slot).size()) + "; ";
             load.put(key, resistor(c, c.at(x0 + 2, 1, z), Direction.XN, 48));
@@ -1686,7 +1665,7 @@ public final class VoxelDeviceCases {
         }
 
         static SixNodeElement use(TestContext c, String name, BlockPos p) {
-            var player = player(c);
+            var player = c.player();
             var d = desc(name);
             player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, d.newItemStack());
             var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atLowerCornerOf(p).add(0.55, 1 / 16.0, 0.5),
@@ -1716,10 +1695,7 @@ public final class VoxelDeviceCases {
         }
 
         static void volts(TestContext c, SixNodeElement src, double u) {
-            if (src != null) src.networkUnserialize(c.stream(o -> {
-                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                o.writeFloat((float) u);
-            }));
+            if (src != null) c.setVolts(src, u);
         }
 
         void row(TestContext c, int z, String diode, boolean flip) {
@@ -1809,11 +1785,11 @@ public final class VoxelDeviceCases {
 
         SixNodeElement row(TestContext c, String name, int z) {
             for (int x = 0; x < 5; x++) for (int dz = -1; dz <= 1; dz++) c.floor(c.at(x, 0, z + dz));
-            source(c, Wp9aCases.SOURCE, c.at(0, 1, z), 50);
+            c.source(Wp9aCases.SOURCE, c.at(0, 1, z), 50);
             BlockPos p = c.at(1, 1, z);
             var v = block(c, p);
             CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
-            v.placeAnywhere(desc(name).newItemStack(), Direction.YN, 0.55, 0, 0.5, player(c));
+            v.placeAnywhere(desc(name).newItemStack(), Direction.YN, 0.55, 0, 0.5, c.player());
             var e = TapCase.placed(v);
             if (e != null) {
                 e.getInventory().setItem(0, Wp9aCases.coal(46));
@@ -1827,7 +1803,7 @@ public final class VoxelDeviceCases {
             Direction f = e.side.applyLRDU(e.front);
             var v = (VoxelNode) e.sixNode;
             cableOut(c, v, c.at(1, 1, z), e, f, SIGNAL, FLOOR);
-            source(c, Wp9aCases.SIGNAL_SOURCE, f == Direction.ZN ? c.at(1, 1, z - 1) : c.at(1, 1, z + 1), u);
+            c.source(Wp9aCases.SIGNAL_SOURCE, f == Direction.ZN ? c.at(1, 1, z - 1) : c.at(1, 1, z + 1), u);
         }
 
         public void build(TestContext c) {
@@ -1914,7 +1890,7 @@ public final class VoxelDeviceCases {
             CableCases.voxel(c, p, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 16, 0, 8})));
             var w = block(c, q);
             CableCases.voxel(c, q, List.of(new CablePart(LV, NORTH_WALL, new int[]{0, 4, 0, 16, 4, 0})));
-            var player = player(c);
+            var player = c.player();
             StringBuilder pl = new StringBuilder(), ba = new StringBuilder();
             for (var d : new java.util.TreeMap<>(mods.eln.Eln.sixNodeItem.all()).values()) {
                 if (!d.placeAnywhere()) continue;

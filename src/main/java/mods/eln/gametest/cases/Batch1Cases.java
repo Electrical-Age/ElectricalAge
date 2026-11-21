@@ -6,15 +6,16 @@ import mods.eln.gametest.TestContext;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeElement;
-import mods.eln.sim.ElectricalLoad;
 import mods.eln.sixnode.electricalsource.ElectricalSourceElement;
 import mods.eln.sixnode.resistor.ResistorDescriptor;
 import mods.eln.sixnode.resistor.ResistorElement;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 import java.util.List;
-import java.util.function.UnaryOperator;
+
+import static mods.eln.gametest.cases.Wp9aCases.current;
+import static mods.eln.gametest.cases.Wp9aCases.link;
+import static mods.eln.gametest.cases.Wp9aCases.load;
+import static mods.eln.gametest.cases.Wp9aCases.orient;
 
 /**
  * P1 batch 1 (ground, electrical source, LV cable, power resistor), ported from the 1.12 selftest
@@ -34,50 +35,15 @@ public final class Batch1Cases {
         return List.of(new ResistorCase(), new CableChainCase(), new BatteryCase());
     }
 
-    // ---- helpers (1.12 Wp9aCases) ----
-
-    /** Turn e so that terminal(front) points to world direction `toward`, then reconnect (what the wrench does). */
-    static void orient(SixNodeElement e, UnaryOperator<LRDU> terminal, Direction toward) {
-        for (LRDU f : LRDU.values()) {
-            if (e.side.applyLRDU(terminal.apply(f)) == toward) {
-                e.front = f;
-                e.sixNode.reconnect();
-                e.sixNode.setNeedPublish(true);
-                return;
-            }
-        }
-        throw new IllegalStateException("cannot orient " + e + " toward " + toward);
-    }
-
-    static ElectricalLoad load(SixNodeElement e, Direction dir) {
-        ElectricalLoad l = e.getElectricalLoad(e.side.getLRDUGoingTo(dir));
-        if (l == null) throw new IllegalStateException("no load toward " + dir + " on " + e);
-        return l;
-    }
-
-    static double link(SixNodeElement a, SixNodeElement b) {
-        return load(a, Direction.XP).getRs() + load(b, Direction.XN).getRs();
-    }
+    // ---- helpers (1.12 Wp9aCases; orient, load, link and current are Wp9aCases') ----
 
     static ElectricalSourceElement source(TestContext ctx, int x, int z, double u) {
-        ElectricalSourceElement s = (ElectricalSourceElement) ctx.placeSix(SOURCE, ctx.at(x, 1, z));
-        s.networkUnserialize(ctx.stream(out -> {
-            out.writeByte(ElectricalSourceElement.setVoltageId);
-            out.writeFloat((float) u);
-        }));
-        return s;
+        return Wp9aCases.source(ctx, SOURCE, x, z, u);
     }
 
+    /** Power Resistor with n items in the core slot, terminals along X. */
     static ResistorElement resistor(TestContext ctx, int x, int z, int n) {
-        ResistorElement r = (ResistorElement) ctx.placeSix(POWER_RESISTOR, ctx.at(x, 1, z));
-        orient(r, LRDU::right, Direction.XN);
-        r.getInventory().setItem(ResistorElement.coreSlotId, new ItemStack(Items.COAL, n)); // only the count matters
-        r.getInventory().setChanged();
-        return r;
-    }
-
-    static double current(ResistorElement r) {
-        return (load(r, Direction.XN).getU() - load(r, Direction.XP).getU()) / r.nominalRs;
+        return Wp9aCases.resistor(ctx, POWER_RESISTOR, x, z, n);
     }
 
     /** Source 50 V -> Power Resistor (48 core items = 100 ohm, E12) -> ground: I = U / R_total, plus heating. */
@@ -181,25 +147,4 @@ public final class Batch1Cases {
         }
     }
 
-    /** Reflection read of a (private) field, as the 1.12 cases' field() helper. */
-    @SuppressWarnings("unchecked")
-    /** p moved one block toward d. */
-    static net.minecraft.core.BlockPos off(net.minecraft.core.BlockPos p, mods.eln.misc.Direction d) {
-        return p.relative(d.toEnumFacing());
-    }
-
-    static <T> T field(Object o, String name) {
-        for (Class<?> c = o.getClass(); c != null; c = c.getSuperclass()) {
-            try {
-                java.lang.reflect.Field f = c.getDeclaredField(name);
-                f.setAccessible(true);
-                return (T) f.get(o);
-            } catch (NoSuchFieldException ignored) {
-                // superclass
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        throw new IllegalStateException("no field " + name + " in " + o.getClass());
-    }
 }

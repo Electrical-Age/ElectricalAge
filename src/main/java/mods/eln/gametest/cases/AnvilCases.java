@@ -5,7 +5,6 @@ import mods.eln.gametest.TestCase;
 import mods.eln.gametest.TestContext;
 import mods.eln.misc.Direction;
 import mods.eln.node.six.SixNodeElement;
-import mods.eln.sixnode.electricalsource.ElectricalSourceElement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -308,10 +307,7 @@ public final class AnvilCases {
             BlockPos cp = Wp10aCases.off(p, back), sp = Wp10aCases.off(cp, back);
             ctx.placeSix(HV_CABLE, cp);
             SixNodeElement src = ctx.placeSix(Wp10aCases.SOURCE, sp);
-            src.networkUnserialize(ctx.stream(out -> {
-                out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat((float) volts);
-            }));
+            ctx.setVolts(src, volts);
             put(a, pick(ctx, 1500, 15, false), new ItemStack(Items.DIAMOND, 4));
             return a;
         }

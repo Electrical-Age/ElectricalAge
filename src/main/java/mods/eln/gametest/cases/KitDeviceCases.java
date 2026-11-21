@@ -105,7 +105,7 @@ public final class KitDeviceCases {
 
             public void build(TestContext ctx) {
                 b = (ElectricalBreakerElement) ctx.placeSix(Wp9aCases.BREAKER, ctx.at(1, 1, 1));
-                Batch1Cases.orient(b, f -> f, Direction.XN);
+                Wp9aCases.orient(b, f -> f, Direction.XN);
                 // a breaker saved before 2026-11-17 with a 6 mm² kit in its slot and no trip current set
                 b.getInventory().setItem(0, kit(HV, thick(), 1));
                 var nbt = new net.minecraft.nbt.CompoundTag();
@@ -254,7 +254,7 @@ public final class KitDeviceCases {
                 BlockPos pa = ctx.at(1, 1, 1), pb = ctx.at(6, 1, 1);
                 a = (ElectricalPoleElement) ctx.placeTransparent(Wp11Cases.UTILITY_POLE, pa);
                 b = (ElectricalPoleElement) ctx.placeTransparent(Wp11Cases.UTILITY_POLE, pb);
-                Player p = Wp9aCases.player(ctx);
+                Player p = ctx.player();
                 hand = mods.eln.gridnode.OverheadCableItem.make(thick().mm2(), 10);
                 p.setItemInHand(InteractionHand.MAIN_HAND, hand);
                 try {

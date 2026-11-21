@@ -11,7 +11,6 @@ import mods.eln.node.voxel.PipePart;
 import mods.eln.node.voxel.PipePlacer;
 import mods.eln.node.voxel.ToolbagItem;
 import mods.eln.node.voxel.ToolbagMenu;
-import mods.eln.node.voxel.VoxelNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -61,13 +60,9 @@ public final class ToolbagCases {
         return new int[]{len, n};
     }
 
-    static VoxelNode node(TestContext c, BlockPos p) {
-        return mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, c.level())) instanceof VoxelNode v ? v : null;
-    }
-
     /** Tiers of the cable pieces in the block at p. */
     static String tiers(TestContext c, BlockPos p) {
-        var v = node(c, p);
+        var v = c.voxelAt(p);
         if (v == null) return "none";
         StringBuilder sb = new StringBuilder();
         for (var part : v.parts) if (part instanceof CablePart cp) sb.append(cp.tier).append(' ');
@@ -82,10 +77,6 @@ public final class ToolbagCases {
     /** The radial's choice as the client sends it: ToolbagRadial's packet bytes into the server's packet handler. */
     static void radial(ServerPlayer pl, int action, int[] kind) {
         mods.eln.network.ServerPacketHandler.handle(ToolbagItem.choicePacket(action, kind), pl);
-    }
-
-    static ServerPlayer player(TestContext c) {
-        return net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
     }
 
     static void clean(ServerPlayer pl) {
@@ -109,7 +100,7 @@ public final class ToolbagCases {
         }
 
         public void build(TestContext c) {
-            var pl = player(c);
+            var pl = c.player();
             ItemStack bag = bag();
             var m = ToolbagMenu.forTests(pl.getInventory(), bag, 0);
             var kitSlot = m.slots.get(0);
@@ -161,7 +152,7 @@ public final class ToolbagCases {
 
         public void build(TestContext c) {
             for (int x = 0; x < 9; x++) for (int z = 0; z < 7; z++) c.floor(c.at(x, 0, z));
-            var pl = player(c);
+            var pl = c.player();
             var level = c.level();
             // (the FakePlayer stands by the rig, as a player laying routes does: a route lapses far from its last point)
             double px = pl.getX(), py = pl.getY(), pz = pl.getZ();
@@ -272,7 +263,7 @@ public final class ToolbagCases {
 
         public void build(TestContext c) {
             for (int x = 0; x < 9; x++) for (int z = 0; z < 7; z++) c.floor(c.at(x, 0, z));
-            var pl = player(c);
+            var pl = c.player();
             var level = c.level();
             double px = pl.getX(), py = pl.getY(), pz = pl.getZ();
             BlockPos mid = c.at(1, 1, 3);
@@ -319,11 +310,11 @@ public final class ToolbagCases {
                 Vec3 onPipe = Vec3.atLowerCornerOf(pp).add(0.5, 4.5 / 16, 0.5);
                 ToolbagItem.click(pl, level, pipes, pp, Direction.UP, onPipe, false);
                 boolean on = PipePlacer.active(pl.getUUID());
-                int parts = node(c, pp).parts.size();
+                int parts = c.voxelAt(pp).parts.size();
                 ToolbagItem.click(pl, level, pipes, pp, Direction.UP, onPipe, true);
                 sneak = String.format("pipe route %b; after the sneak-click: still on %b, parts %d -> %d", on, PipePlacer.active(pl.getUUID()), parts,
-                    node(c, pp).parts.size());
-                sneakOk = on && PipePlacer.active(pl.getUUID()) && node(c, pp).parts.size() == parts;
+                    c.voxelAt(pp).parts.size());
+                sneakOk = on && PipePlacer.active(pl.getUUID()) && c.voxelAt(pp).parts.size() == parts;
                 clean(pl);
 
                 // 3. Undo: start at (1,1,5), waypoints (4,1,5) and (4,1,3); Undo; (4,1,5) again ends it there
@@ -410,7 +401,7 @@ public final class ToolbagCases {
         }
 
         static int pieces(TestContext c, BlockPos p) {
-            var v = node(c, p);
+            var v = c.voxelAt(p);
             return v == null ? 0 : v.parts.size();
         }
 
@@ -426,7 +417,7 @@ public final class ToolbagCases {
         }
 
         void cut(TestContext c) {
-            var pl = player(c);
+            var pl = c.player();
             var level = c.level();
             double px = pl.getX(), py = pl.getY(), pz = pl.getZ();
             BlockPos mid = c.at(3, 1, 3);

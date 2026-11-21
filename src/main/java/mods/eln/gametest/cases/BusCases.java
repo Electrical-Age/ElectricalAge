@@ -25,7 +25,7 @@ public final class BusCases {
     static final int BUS = CablePart.BUS, DOWN = 0, WEST = 4, EAST = 5;
 
     static VoxelNode node(TestContext c, int x, int y, int z) {
-        return (VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(c.at(x, y, z), c.level()));
+        return (VoxelNode) c.nodeAt(c.at(x, y, z));   // (a ClassCastException when the block holds another node kind)
     }
 
     /** The bus of a voxel block's first bus port, or null. */

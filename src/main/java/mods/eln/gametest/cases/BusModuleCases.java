@@ -52,11 +52,7 @@ public final class BusModuleCases {
     static void source(TestContext c, BlockPos p, Direction dir, double u) {
         var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) c.placeSix(Wp9aCases.SIGNAL_SOURCE, p);
         Wp9aCases.orient(s, l -> l, dir);
-        float v = (float) u;
-        s.networkUnserialize(c.stream(o -> {
-            o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-            o.writeFloat(v);
-        }));
+        c.setVolts(s, u);
     }
 
     /** A floor cable of tier straight across the block at p, west to east. */

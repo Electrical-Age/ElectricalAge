@@ -96,9 +96,9 @@ public final class LampLightCases {
         }
 
         public void measure(TestContext ctx) {
-            Object process = Wp10aCases.field(lamp, "lampProcess");
-            int light = Wp10aCases.<Integer>field(process, "light");
-            Coordonate lb = Wp10aCases.field(process, "lbCoord");
+            Object process = TestContext.field(lamp, "lampProcess");
+            int light = TestContext.<Integer>field(process, "light");
+            Coordonate lb = TestContext.field(process, "lbCoord");
             settle(ctx);
             BlockPos at = lb.pos();
             int world = ctx.level().getBrightness(LightLayer.BLOCK, at);

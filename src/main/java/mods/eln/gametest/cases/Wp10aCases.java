@@ -37,9 +37,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+
+import static mods.eln.gametest.TestContext.field;
 
 /**
  * Selftest cases of device batch Wp10a (registry/batch/Wp10aContent). Every case feeds its device from an LVU
@@ -111,6 +112,7 @@ public final class Wp10aCases {
         return ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs;
     }
 
+    /** p moved one block toward d. */
     static BlockPos off(BlockPos p, Direction d) {
         int[] v = {0, 0, 0};
         d.applyTo(v, 1);
@@ -128,21 +130,6 @@ public final class Wp10aCases {
         return Eln.sixNodeItem.getDescriptor(LV_CABLE).newItemStack(count);
     }
 
-    @SuppressWarnings("unchecked")
-    static <T> T field(Object o, String name) {
-        for (Class<?> c = o.getClass(); c != null; c = c.getSuperclass()) {
-            try {
-                Field f = c.getDeclaredField(name);
-                f.setAccessible(true);
-                return (T) f.get(o);
-            } catch (NoSuchFieldException ignored) {
-                // superclass
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        throw new IllegalStateException("no field " + name + " in " + o.getClass());
-    }
 
     static double loadU(SixNodeElement e) {
         return e.getElectricalLoad(LRDU.Up).getU();
@@ -213,10 +200,7 @@ public final class Wp10aCases {
             if (!onPlatform(cp) || used.contains(cp)) throw new IllegalStateException("feed side " + side + " blocked at " + cp);
             SixNodeElement cable = six(cableId, cp);
             ElectricalSourceElement src = (ElectricalSourceElement) six(SOURCE, next(cp, side));
-            src.networkUnserialize(ctx.stream(out -> {
-                out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat((float) volts);
-            }));
+            ctx.setVolts(src, volts);
             return new SixNodeElement[]{src, cable};
         }
     }
@@ -711,15 +695,9 @@ public final class Wp10aCases {
             battery = (mods.eln.transparentnode.battery.BatteryElement) l.device(5 + (16 << 6), 3, 1);
             startCharge = battery.batteryProcess.getCharge();
             SixNodeElement[] plus = l.feed(ctx.at(3, 1, 1), battery.front.left());
-            ((ElectricalSourceElement) plus[0]).networkUnserialize(ctx.stream(out -> {
-                out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat(100f);
-            }));
+            ctx.setVolts(plus[0], 100f);
             SixNodeElement[] minus = l.feed(ctx.at(3, 1, 1), battery.front.right());
-            ((ElectricalSourceElement) minus[0]).networkUnserialize(ctx.stream(out -> {
-                out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat(0f);
-            }));
+            ctx.setVolts(minus[0], 0f);
         }
 
         public void measure(TestContext ctx) {
@@ -761,15 +739,9 @@ public final class Wp10aCases {
             battery.getInventory().setItem(0, new ItemStack(mods.eln.Eln.itemsByName.get("Overvoltage Protection")));
             battery.getInventory().setItem(1, new ItemStack(mods.eln.Eln.itemsByName.get("Overheating Protection")));
             SixNodeElement[] plus = l.feed(ctx.at(3, 1, 1), battery.front.left());
-            ((ElectricalSourceElement) plus[0]).networkUnserialize(ctx.stream(out -> {
-                out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat((float) Eln.LVU);
-            }));
+            ctx.setVolts(plus[0], Eln.LVU);
             SixNodeElement[] minus = l.feed(ctx.at(3, 1, 1), battery.front.right());
-            ((ElectricalSourceElement) minus[0]).networkUnserialize(ctx.stream(out -> {
-                out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat(0f);
-            }));
+            ctx.setVolts(minus[0], 0f);
             mods.eln.Eln.simulator.addSlowProcess(watch = t -> {
                 peak = Math.max(peak, battery.thermalLoad.Tc);
                 peakCharge = Math.max(peakCharge, -battery.batteryProcess.getDischargeCurrent());
@@ -826,10 +798,7 @@ public final class Wp10aCases {
             if (withChip) b.getInventory().setItem(0, new ItemStack(mods.eln.Eln.itemsByName.get("Overvoltage Protection")));
             for (var side : onlyPlus ? new mods.eln.misc.Direction[]{b.front.left()} : new mods.eln.misc.Direction[]{b.front.left(), b.front.right()}) {
                 SixNodeElement[] f = l.feed(ctx.at(x, 1, z), side);
-                ((ElectricalSourceElement) f[0]).networkUnserialize(ctx.stream(out -> {
-                    out.writeByte(ElectricalSourceElement.setVoltageId);
-                    out.writeFloat(0f);
-                }));
+                ctx.setVolts(f[0], 0f);
             }
             return b;
         }
@@ -878,10 +847,7 @@ public final class Wp10aCases {
             Layout l = new Layout(ctx, width());
             macerator = (ElectricalMachineElement) l.device(MACHINES[0], 2, 1);
             SixNodeElement[] f = l.feed(ctx.at(2, 1, 1), macerator.front.left());
-            ((ElectricalSourceElement) f[0]).networkUnserialize(ctx.stream(out -> {
-                out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat((float) -U);
-            }));
+            ctx.setVolts(f[0], -U);
             macerator.getInventory().setItem(macerator.inSlotId, new ItemStack(Items.COPPER_INGOT));
             macerator.getInventory().setChanged();
         }
@@ -921,10 +887,7 @@ public final class Wp10aCases {
         ElectricalMachineElement place(TestContext ctx, Layout l, int x) {
             ElectricalMachineElement m = (ElectricalMachineElement) l.device(MACHINES[0], x, 1);
             SixNodeElement[] f = l.feed(ctx.at(x, 1, 1), m.front.left());
-            ((ElectricalSourceElement) f[0]).networkUnserialize(ctx.stream(out -> {
-                out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat((float) U);
-            }));
+            ctx.setVolts(f[0], U);
             m.getInventory().setItem(m.inSlotId, new ItemStack(Items.COPPER_INGOT, 16));
             m.getInventory().setChanged();
             return m;
@@ -1208,12 +1171,7 @@ public final class Wp10aCases {
      * taps the secondary: half of SVU -> 14 turns, 48 V out; all of SVU -> 28 turns, 96 V.
      */
     static ElectricalSourceElement source(TestContext ctx, BlockPos at, double volts) {
-        ElectricalSourceElement src = (ElectricalSourceElement) ctx.placeSix(SOURCE, at);
-        src.networkUnserialize(ctx.stream(out -> {
-            out.writeByte(ElectricalSourceElement.setVoltageId);
-            out.writeFloat((float) volts);
-        }));
-        return src;
+        return ctx.source(SOURCE, at, volts);
     }
 
     static class VariableTransformerCase implements TestCase {
@@ -1532,7 +1490,7 @@ public final class Wp10aCases {
             int expected = group.size();
             int found = ghosts(ctx);
             ctx.check("wp10a auto miner ghost blocks", expected == 19 && found == expected, found + " of " + expected + " (19 by its GhostGroup)");
-            List<NodeBase> power = new ArrayList<>(Wp10aCases.<List<NodeBase>>field(miner, "powerNodeList")); // cleared on break
+            List<NodeBase> power = new ArrayList<>(TestContext.<List<NodeBase>>field(miner, "powerNodeList")); // cleared on break
             int registered = 0;
             for (NodeBase n : power) if (NodeManager.instance.getNodeFromCoordonate(n.coordonate) == n) registered++;
             ctx.check("wp10a auto miner power nodes registered", power.size() == 2 && registered == 2, registered + "/" + power.size());

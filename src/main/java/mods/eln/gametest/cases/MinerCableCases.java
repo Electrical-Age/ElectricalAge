@@ -58,7 +58,7 @@ public final class MinerCableCases {
             c.check("autominer: a power port on a ghost block", p != null && c.level().getBlockState(p).getBlock() instanceof mods.eln.ghost.GhostBlock,
                 p == null ? "none" : c.level().getBlockState(p).toString());
             if (p == null) return;
-            var player = Wp9cCases.player(c);
+            var player = c.player();
             var kit = new net.minecraft.world.item.ItemStack(mods.eln.registry.ElnRegistry.CABLE_KITS.get(1).get());
             var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(p), Direction.NORTH, p, false);
             InteractionResult r = c.level().getBlockState(p).useItemOn(kit, c.level(), player, InteractionHand.MAIN_HAND, hit);

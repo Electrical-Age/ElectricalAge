@@ -49,10 +49,6 @@ public final class LowLevelCases {
         return c.level().getBlockEntity(p);
     }
 
-    static NodeBase nodeAt(TestContext c, BlockPos p) {
-        return HostedMachineCases.nodeAt(c, p);
-    }
-
     /** Source at 1, cable at 2, a barrel at 3 facing east (its back toward the cable) with a 10 ohm heater on its back. */
     abstract static class Fed implements TestCase {
         BlockEntity be;
@@ -109,7 +105,7 @@ public final class LowLevelCases {
                 frontAt15 = node.connected(RelativeFace.FRONT);
                 volts15 = line.volts();
                 amps15 = heater.amps();
-                nodeAt15 = nodeAt(c, be.getBlockPos());
+                nodeAt15 = c.nodeAt(be.getBlockPos());
                 // turned west: its back faces east, away from the cable
                 c.level().setBlock(be.getBlockPos(), c.level().getBlockState(be.getBlockPos()).setValue(BlockStateProperties.FACING, Direction.WEST), 3);
             });
@@ -121,7 +117,7 @@ public final class LowLevelCases {
             c.after(30, () -> {
                 retiredAt30 = node.retired();
                 attachedAt30 = circuit.attached();
-                nodeAt30 = nodeAt(c, be.getBlockPos());
+                nodeAt30 = c.nodeAt(be.getBlockPos());
             });
         }
 

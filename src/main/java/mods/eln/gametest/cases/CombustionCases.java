@@ -767,7 +767,7 @@ public final class CombustionCases {
                 boolean fuel = String.valueOf(f[i].getWaila()).contains("top flange");
                 var dam = f[i].getDamper();
                 boolean air = mods.eln.fluid.FluidWorld.edgesOf(w).stream().anyMatch(e -> dam == null || e != dam.edge);
-                var frontPipe = PipeCases.node(ctx, f[i].node.coordonate.pos().relative(FRONTS[i].toEnumFacing()));
+                var frontPipe = ctx.voxelByEntity(f[i].node.coordonate.pos().relative(FRONTS[i].toEnumFacing()));
                 boolean frontJoined = false;
                 if (frontPipe != null) for (var part : frontPipe.parts)
                     if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null)

@@ -276,7 +276,7 @@ public final class OilCases {
         public void measure(TestContext ctx) {
             ItemStack in = sep.getInventory().getItem(sep.inSlotId), out = sep.getInventory().getItem(sep.outSlotId);
             int crudeMb = sep.outlet.view.amount(mods.eln.fluid.NodeFluidView.LIQUID);
-            mods.eln.sim.ElectricalStackMachineProcess proc = Wp10aCases.field(sep, "slowRefreshProcess");
+            mods.eln.sim.ElectricalStackMachineProcess proc = TestContext.field(sep, "slowRefreshProcess");
             ctx.check("oil: separator used the tar sand and made sand", in.isEmpty() && out.is(net.minecraft.world.item.Items.SAND) && out.getCount() == 1,
                 "in " + in + ", out " + out + ", recipes " + mods.eln.Eln.separatorRecipes.getRecipes().size() + ", can " + proc.smeltCan()
                     + ", extra " + proc.extraCondition.getAsBoolean() + ", P " + proc.getPower() + ", state " + proc.processState());
@@ -495,7 +495,7 @@ public final class OilCases {
             // (a purge valve on the tank's top: the well's crude is live, its natural gas comes out in the tank; Baughn
             // 2026-11-10)
             PipeCases.lay(ctx, ctx.at(3, 2 + rise, 1), 0, 8, 0, 8, 8, 12, 8);
-            purgeErr = PipeCases.node(ctx, ctx.at(3, 2 + rise, 1)).addSafetyValveNear(0.5, 8 / 16.0, 0.5, true);
+            purgeErr = ctx.voxelByEntity(ctx.at(3, 2 + rise, 1)).addSafetyValveNear(0.5, 8 / 16.0, 0.5, true);
             // (routed as a player's pipe kit routes it: the flange is 6 px up, off the router's lattice)
             var level = ctx.level();
             var a = mods.eln.node.voxel.PipePlacer.portAtForTests(level, p, net.minecraft.core.Direction.EAST);
@@ -955,7 +955,7 @@ public final class OilCases {
         public void measure(TestContext ctx) {
             for (int sub : new int[]{0, 4}) {
                 Object d = mods.eln.Eln.transparentNodeItem.getDescriptor(sub + (80 << 6));
-                String s = Batch1Cases.field(d, "runningSound");
+                String s = TestContext.field(d, "runningSound");
                 ctx.check("oil: the separator runs to its own sound (" + sub + ")", "eln:separator".equals(s), "" + s);
             }
             boolean asset = OilCases.class.getResource("/assets/eln/sounds/separator.ogg") != null;
@@ -1491,7 +1491,7 @@ public final class OilCases {
             double kg = 0;
             for (var n : new mods.eln.sim.fluid.FluidNode[]{t.vessel, a.getVessel()})
                 if (n != null) kg += n.liquid(id) + n.vapour(id);
-            for (var part : PipeCases.node(ctx, ctx.at(2, 1, 1)).parts)
+            for (var part : ctx.voxelByEntity(ctx.at(2, 1, 1)).parts)
                 if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null) {
                     mods.eln.fluid.FluidWorld.writeBackOf(pp.fluid);
                     kg += pp.fluid.liquid(id) + pp.fluid.vapour(id);
@@ -2107,7 +2107,7 @@ public final class OilCases {
 
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(feed);
-            var run = PipeCases.node(ctx, stub);
+            var run = ctx.voxelByEntity(stub);
             var n = run == null ? null : mods.eln.fluid.FluidWorld.nodeFor(((mods.eln.node.voxel.PipePart) run.parts.get(0)).fluid);
             ctx.line("dry makeup stub: condenser " + (c == null ? "none" : c.getWaila()) + "; stub "
                 + (n == null ? "none" : String.format("%.4f bar, %.0f K, %.3g kg", n.P() / 1e5, n.T(), n.mass())));
@@ -2269,10 +2269,7 @@ public final class OilCases {
                 BlockPos src = pump.front == mods.eln.misc.Direction.ZN ? cable.north() : cable.south();
                 ctx.placeSix(Ids.six("Medium Voltage Cable"), cable);
                 var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) ctx.placeSix(Wp11Cases.SOURCE, src);
-                s.networkUnserialize(ctx.stream(out -> {
-                    out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                    out.writeFloat((float) mods.eln.Eln.MVU);
-                }));
+                ctx.setVolts(s, mods.eln.Eln.MVU);
                 boilerAt = pp.west();
                 spot = mods.eln.oil.TankElement.sideSpot(5, mods.eln.oil.InlinePumpElement.LINE_Y);
             }
@@ -2581,7 +2578,7 @@ public final class OilCases {
             PipeCases.lay(ctx, ctx.at(1, 2, 1), 0, 8, 0, 8, 8, 8, 8, 16, 8, 8);
             PipeCases.lay(ctx, ctx.at(2, 2, 1), 0, 0, 8, 8, 16, 8, 8);
             PipeCases.lay(ctx, ctx.at(3, 2, 1), 0, 0, 8, 8, 16, 8, 8);
-            String err = PipeCases.node(ctx, ctx.at(3, 2, 1)).addJoined(new mods.eln.node.voxel.PipePart(0, new int[]{8, 8, 8, 8, 8, 16}), 8, 8, 8);
+            String err = ctx.voxelByEntity(ctx.at(3, 2, 1)).addJoined(new mods.eln.node.voxel.PipePart(0, new int[]{8, 8, 8, 8, 8, 16}), 8, 8, 8);
             if (err != null) throw new IllegalStateException("steam tee: " + err);
             PipeCases.lay(ctx, ctx.at(4, 2, 1), 0, 0, 8, 8, 8, 8, 8, 8, 0, 8);
             PipeCases.lay(ctx, ctx.at(3, 2, 2), 0, 8, 8, 0, 8, 8, 16);
@@ -2592,7 +2589,7 @@ public final class OilCases {
             // the busy one's, which goes on into the boiler's feed flange
             PipeCases.lay(ctx, ctx.at(3, 1, 2), 0, 16, 8, 8, 0, 8, 8);
             PipeCases.lay(ctx, ctx.at(2, 1, 2), 0, 16, 8, 8, 0, 8, 8);
-            err = PipeCases.node(ctx, ctx.at(2, 1, 2)).addJoined(new mods.eln.node.voxel.PipePart(0, new int[]{8, 8, 8, 8, 8, 16}), 8, 8, 8);
+            err = ctx.voxelByEntity(ctx.at(2, 1, 2)).addJoined(new mods.eln.node.voxel.PipePart(0, new int[]{8, 8, 8, 8, 8, 16}), 8, 8, 8);
             if (err != null) throw new IllegalStateException("condensate tee: " + err);
             PipeCases.lay(ctx, ctx.at(1, 1, 2), 0, 16, 8, 8, 8, 8, 8, 8, 8, 0);
             PipeCases.lay(ctx, ctx.at(3, 1, 5), 0, 16, 8, 8, 0, 8, 8);
@@ -3974,7 +3971,7 @@ public final class OilCases {
             PipeCases.lay(ctx, ctx.at(1, 2, 1), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);   // up out of the boiler, then east
             PipeCases.lay(ctx, ctx.at(2, 2, 1), 1, 0, 8, 8, 16, 8, 8);
             PipeCases.lay(ctx, ctx.at(3, 2, 1), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);   // down into the turbine
-            valveNode = PipeCases.node(ctx, ctx.at(2, 2, 1));
+            valveNode = ctx.voxelByEntity(ctx.at(2, 2, 1));
             err = valveNode.addSafetyValveNear(0.5, 8 / 16.0, 0.5);
             for (var p : valveNode.parts) if (p instanceof mods.eln.node.voxel.SafetyValvePart sv) sv.setPa = 13e5;
             mods.eln.Eln.simulator.addSlowProcess(fire = dt -> {
@@ -4242,15 +4239,11 @@ public final class OilCases {
         }
 
         static ItemStack use(TestContext ctx, mods.eln.node.transparent.TransparentNodeElement e, ItemStack held) {
-            var p = Wp10bCases.player(ctx);
-            p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
-            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, held);
-            try {
+            ctx.player().setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            return ctx.holding(held, p -> {
                 e.node.onBlockActivated(p, mods.eln.misc.Direction.YP, 0.5F, 1F, 0.5F);
                 return p.getMainHandItem().copy();
-            } finally {
-                p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-            }
+            });
         }
 
         public void build(TestContext ctx) {
@@ -4487,7 +4480,7 @@ public final class OilCases {
         double ngIn(TestContext ctx) {
             int id = ng();
             double kg = tank.vessel.vapour(id) + flare.vessel.vapour(id);
-            for (var part : PipeCases.node(ctx, ctx.at(2, 1, 1)).parts)
+            for (var part : ctx.voxelByEntity(ctx.at(2, 1, 1)).parts)
                 if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null) {
                     mods.eln.fluid.FluidWorld.writeBackOf(pp.fluid);
                     kg += pp.fluid.vapour(id);

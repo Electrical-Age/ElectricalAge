@@ -8,7 +8,6 @@ import mods.eln.node.voxel.CablePart;
 import mods.eln.node.voxel.CablePlacer;
 import mods.eln.node.voxel.CableRouter;
 import mods.eln.node.voxel.VoxelNode;
-import mods.eln.node.voxel.VoxelNodeEntity;
 import net.minecraft.core.BlockPos;
 
 import java.util.ArrayList;
@@ -27,10 +26,6 @@ public final class LinksCases {
         cases.add(new LaidCutBroken());
         cases.add(new TrimBurnRepair());
         cases.add(new FrozenBoundary());
-    }
-
-    static VoxelNode node(TestContext c, BlockPos p) {
-        return c.level().getBlockEntity(p) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode v ? v : null;
     }
 
     /** The joints of every cable piece in the block, as text, the implied ones marked. */
@@ -63,14 +58,14 @@ public final class LinksCases {
     static String dangling(TestContext c, List<BlockPos> at) {
         StringBuilder b = new StringBuilder();
         for (BlockPos p : at) {
-            VoxelNode v = node(c, p);
+            VoxelNode v = c.voxelByEntity(p);
             if (v == null) continue;
             for (var part : v.parts)
                 if (part instanceof CablePart cp)
                     for (int[] j : cp.joints) {
                         int k = CableLinks.kind(j);
                         if (k != CableLinks.CONT && k != CableLinks.SPLICE && k != CableLinks.TOUCH) continue;
-                        VoxelNode t = node(c, p.offset(j[2], j[3], j[4]));
+                        VoxelNode t = c.voxelByEntity(p.offset(j[2], j[3], j[4]));
                         if (t == null || t.partById(j[5]) == null) b.append(p.toShortString()).append(" #").append(cp.id).append(' ').append(CableLinks.describe(j)).append("; ");
                     }
         }
@@ -80,7 +75,7 @@ public final class LinksCases {
     /** Every joint of the cable pieces in these blocks, as text (to compare states). */
     static String allJoints(TestContext c, List<BlockPos> at) {
         StringBuilder b = new StringBuilder();
-        for (BlockPos p : at) b.append(p.toShortString()).append(':').append(joints(node(c, p))).append(' ');
+        for (BlockPos p : at) b.append(p.toShortString()).append(':').append(joints(c.voxelByEntity(p))).append(' ');
         return b.toString();
     }
 
@@ -109,11 +104,11 @@ public final class LinksCases {
             layErr = CablePlacer.routeAndLayForTests(c.level(), tier, a, b);
             List<BlockPos> run = new ArrayList<>();
             for (int x = 0; x < 5; x++) run.add(c.at(x, 1, 1));
-            VoxelNode mid = node(c, c.at(2, 1, 1)), left = node(c, c.at(1, 1, 1)), right = node(c, c.at(3, 1, 1));
+            VoxelNode mid = c.voxelByEntity(c.at(2, 1, 1)), left = c.voxelByEntity(c.at(1, 1, 1)), right = c.voxelByEntity(c.at(3, 1, 1));
             if (mid == null || left == null || right == null) return;
             // let every block connect first (new blocks connect when their block entity loads)
             for (BlockPos p : run) {
-                VoxelNode v = node(c, p);
+                VoxelNode v = c.voxelByEntity(p);
                 if (v != null && !v.isAdded()) v.connect();
             }
             before = allJoints(c, run);
@@ -125,7 +120,7 @@ public final class LinksCases {
                 right.reconnect();
                 frozenState = allJoints(c, run);
                 List<VoxelNode> scope = new ArrayList<>();
-                for (BlockPos p : run) if (node(c, p) != null) scope.add(node(c, p));
+                for (BlockPos p : run) if (c.voxelByEntity(p) != null) scope.add(c.voxelByEntity(p));
                 var rep = mods.eln.node.voxel.CableVerify.verify(scope);
                 frozenOk = rep.ok() && !mid.isAdded();
                 outCounted = rep.excludedBlocks() == 1 && rep.unjoinedToAbsent() == 0;
@@ -138,7 +133,7 @@ public final class LinksCases {
             right.reconnect();
             thawed = allJoints(c, run);
             List<VoxelNode> scope = new ArrayList<>();
-            for (BlockPos p : run) if (node(c, p) != null) scope.add(node(c, p));
+            for (BlockPos p : run) if (c.voxelByEntity(p) != null) scope.add(c.voxelByEntity(p));
             var rep = mods.eln.node.voxel.CableVerify.verify(scope);
             thawedOk = rep.ok() && mid.isAdded();
             thawedReport = rep.summary() + " " + String.join("; ", rep.problems());
@@ -177,30 +172,30 @@ public final class LinksCases {
             var a = new CableRouter.End(o.getX() * 16L + 4, (o.getY() + 1) * 16L, (o.getZ() + 1) * 16L + 8, 0, -1);
             var b = new CableRouter.End((o.getX() + 3) * 16L + 8, (o.getY() + 1) * 16L, (o.getZ() + 1) * 16L + 8, 0, -1);
             layErr = CablePlacer.routeAndLayForTests(c.level(), tier, a, b);
-            VoxelNode end = node(c, c.at(3, 1, 1));
+            VoxelNode end = c.voxelByEntity(c.at(3, 1, 1));
             if (end != null) {
                 var stack = VoxelDeviceCases.desc("Voltage Probe").newItemStack();
-                trimErr = end.placeAnywhere(stack, Direction.YN, 9.5 / 16, 0.5 / 16, 8.0 / 16, VoxelDeviceCases.player(c));
+                trimErr = end.placeAnywhere(stack, Direction.YN, 9.5 / 16, 0.5 / 16, 8.0 / 16, c.player());
             }
             List<BlockPos> run = new ArrayList<>();
             for (int x = 0; x < 4; x++) run.add(c.at(x, 1, 1));
             danglingAfterTrim = dangling(c, run);
-            VoxelNode before = node(c, c.at(2, 1, 1));
+            VoxelNode before = c.voxelByEntity(c.at(2, 1, 1));
             contsToTrimmed = laidConts(before, 1, 0, 0);
             trimmedJoints = joints(end);
             // burn the middle block's piece, then repair it
-            VoxelNode mid = node(c, c.at(1, 1, 1));
+            VoxelNode mid = c.voxelByEntity(c.at(1, 1, 1));
             laidBeforeBurn = laidConts(mid, 1, 0, 0) + laidConts(mid, -1, 0, 0);
             CablePart piece = null;
             if (mid != null) for (var part : mid.parts) if (part instanceof CablePart cp) piece = cp;
             if (piece != null && mid.burnableOf(piece) != null) {
                 mid.burnableOf(piece).burn(mods.eln.sim.process.destruct.FailureCause.OVERHEAT, mods.eln.sim.process.destruct.Failure.Kind.CABLE);
                 laidWhileBurnt = laidConts(mid, 1, 0, 0) + laidConts(mid, -1, 0, 0)
-                    + laidConts(node(c, c.at(0, 1, 1)), 1, 0, 0) + laidConts(node(c, c.at(2, 1, 1)), -1, 0, 0);
+                    + laidConts(c.voxelByEntity(c.at(0, 1, 1)), 1, 0, 0) + laidConts(c.voxelByEntity(c.at(2, 1, 1)), -1, 0, 0);
                 burnt = joints(mid);
                 if (mid.burnableOf(piece) != null) mid.burnableOf(piece).repair();
                 laidAfterRepair = laidConts(mid, 1, 0, 0) + laidConts(mid, -1, 0, 0)
-                    + laidConts(node(c, c.at(0, 1, 1)), 1, 0, 0) + laidConts(node(c, c.at(2, 1, 1)), -1, 0, 0);
+                    + laidConts(c.voxelByEntity(c.at(0, 1, 1)), 1, 0, 0) + laidConts(c.voxelByEntity(c.at(2, 1, 1)), -1, 0, 0);
                 repaired = joints(mid);
             }
         }
@@ -235,25 +230,25 @@ public final class LinksCases {
             var a = new CableRouter.End(o.getX() * 16L + 4, (o.getY() + 1) * 16L, (o.getZ() + 1) * 16L + 8, 0, -1);
             var b = new CableRouter.End((o.getX() + 4) * 16L + 12, (o.getY() + 1) * 16L, (o.getZ() + 1) * 16L + 8, 0, -1);
             layErr = CablePlacer.routeAndLayForTests(c.level(), tier, a, b);
-            VoxelNode mid = node(c, c.at(2, 1, 1));
+            VoxelNode mid = c.voxelByEntity(c.at(2, 1, 1));
             laidBefore = joints(mid);
             contsBefore = laidConts(mid, 1, 0, 0) + laidConts(mid, -1, 0, 0);
             // a relay in line in the middle block (DevicePlacer cuts the piece in two)
             if (mid != null) {
                 var stack = VoxelDeviceCases.desc("Low Voltage Relay").newItemStack();
-                cutErr = mid.placeAnywhere(stack, Direction.YN, 0.55, 0, 0.5, VoxelDeviceCases.player(c));
+                cutErr = mid.placeAnywhere(stack, Direction.YN, 0.55, 0, 0.5, c.player());
             }
             afterCut = joints(mid);
             contsAfterCut = laidConts(mid, 1, 0, 0) + laidConts(mid, -1, 0, 0);
             // break the last block's piece: the block before it keeps no joint to it
-            VoxelNode last = node(c, c.at(4, 1, 1));
+            VoxelNode last = c.voxelByEntity(c.at(4, 1, 1));
             if (last != null)
                 for (int i = last.parts.size() - 1; i >= 0; i--)
                     if (last.parts.get(i) instanceof CablePart) {
                         if (last.removePart(i, false)) last.removeEmptyBlock();
                         break;
                     }
-            VoxelNode before = node(c, c.at(3, 1, 1));
+            VoxelNode before = c.voxelByEntity(c.at(3, 1, 1));
             leftToBroken = laidConts(before, 1, 0, 0);
             afterBreak = joints(before);
         }
@@ -266,7 +261,7 @@ public final class LinksCases {
             c.check("links: no joint points at a broken piece", leftToBroken == 0, leftToBroken + ": " + afterBreak);
             List<VoxelNode> scope = new ArrayList<>();
             for (int x = 0; x < 5; x++) {
-                VoxelNode v = node(c, c.at(x, 1, 1));
+                VoxelNode v = c.voxelByEntity(c.at(x, 1, 1));
                 if (v != null) scope.add(v);
             }
             var rep = mods.eln.node.voxel.CableVerify.verify(scope);

@@ -72,7 +72,7 @@ public final class HubSlotCases {
 
         public void build(TestContext c) {
             for (int x = 0; x < 10; x++) for (int z = 0; z < 10; z++) c.floor(c.at(x, 0, z));
-            Player player = VoxelDeviceCases.player(c);
+            Player player = c.player();
             float yaw = player.getYRot();
             try {
                 // a hub off centre on the floor of a voxel block, the player facing south: the top slot is the south side
@@ -86,7 +86,7 @@ public final class HubSlotCases {
                 floorPins = pins.toString().trim();
                 // a cable from that pin south to a 50 V source: the hub is live (measure)
                 VoxelDeviceCases.cableOut(c, vh, ph, floor, Direction.ZP, VoxelDeviceCases.LV, VoxelDeviceCases.FLOOR);
-                VoxelDeviceCases.source(c, Wp9aCases.SOURCE, c.at(2, 1, 3), 50);
+                c.source(Wp9aCases.SOURCE, c.at(2, 1, 3), 50);
                 // a kit in the left slot: east; then facing west, the top slot is the west side and the right one north
                 click(player, SOUTH, vh, floor, Place.LEFT, KitDeviceCases.kit(KitDeviceCases.LV, null, 4));
                 floorSecond = sides(floor);

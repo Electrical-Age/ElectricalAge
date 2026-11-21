@@ -143,7 +143,7 @@ public final class HpPlantCases {
 
     /** A point (absolute voxels) mid-way along the longest straight run of the first pipe in block p: where to join it. */
     static long[] joinOn(TestContext ctx, BlockPos p) {
-        var n = PipeCases.node(ctx, p);
+        var n = ctx.voxelByEntity(p);
         if (n != null) for (var part : n.parts)
             if (part instanceof mods.eln.node.voxel.PipePart pp) {
                 int[] q = pp.points;
@@ -360,7 +360,7 @@ public final class HpPlantCases {
         }
 
         static boolean joins(TestContext ctx, BlockPos p, mods.eln.sim.fluid.FluidNode n) {
-            var node = PipeCases.node(ctx, p);
+            var node = ctx.voxelByEntity(p);
             var net = mods.eln.fluid.FluidWorld.networkOf(n);
             if (node == null || net == null) return false;
             for (var part : node.parts)
@@ -557,7 +557,7 @@ public final class HpPlantCases {
                 f[9] = furnace(ctx, bp.offset(2, 1, 1), Direction.XP, 1900);
             }
             for (int i = 0; i < n; i++) {
-                fT[i] = Batch1Cases.<ThermalLoad>field(f[i], "thermalLoad");
+                fT[i] = TestContext.<ThermalLoad>field(f[i], "thermalLoad");
                 if (!natural) air[i] = OilCases.FurnacePressure.onAirPort(f[i], mains[i] = OilCases.FurnacePressure.main(bp.getY(), 1.6e5, false));
             }
             // steam: from the rear top right outlet (3,2,5) up, east, down into the turbine's inlet
@@ -829,7 +829,7 @@ public final class HpPlantCases {
                 f[0] = furnace(ctx, bp.north(), Direction.ZN, 1900);
                 f[1] = furnace(ctx, bp.east(), Direction.XP, 1900);
             }
-            for (int i = 0; i < 2; i++) fT[i] = Batch1Cases.<ThermalLoad>field(f[i], "thermalLoad");
+            for (int i = 0; i < 2; i++) fT[i] = TestContext.<ThermalLoad>field(f[i], "thermalLoad");
             if (blowers) {
                 if (oneBlower) {
                     // (todo #504: the air ports on the furnaces' backs, over their thermal cables) both air pipes come out
@@ -1179,7 +1179,7 @@ public final class HpPlantCases {
                 thermalCable(ctx, bb.south(), false);
             }
             for (int i = 0; i < 4; i++) {
-                fT[i] = Batch1Cases.<ThermalLoad>field(f[i], "thermalLoad");
+                fT[i] = TestContext.<ThermalLoad>field(f[i], "thermalLoad");
                 if (blowers) {
                     Direction side = f[i].front.left();
                     blow[i] = blowerOnAirPort(ctx, f[i], BLOWER_SPEED, airBlock(f[i]).relative(side.toEnumFacing()), side.getInverse());
@@ -1199,7 +1199,7 @@ public final class HpPlantCases {
             // steam header: up out of each boiler, along x 2 over the feed pipe, a tee east to the turbine's inlet
             PipeCases.lay(ctx, ctx.at(2, 2, 3), 1, 8, 0, 8, 8, 8, 8, 8, 8, 16);
             PipeCases.lay(ctx, ctx.at(2, 2, 4), 1, 8, 8, 0, 8, 8, 16);
-            String err = PipeCases.node(ctx, ctx.at(2, 2, 4)).addJoined(new mods.eln.node.voxel.PipePart(1, new int[]{8, 8, 8, 16, 8, 8}), 8, 8, 8);
+            String err = ctx.voxelByEntity(ctx.at(2, 2, 4)).addJoined(new mods.eln.node.voxel.PipePart(1, new int[]{8, 8, 8, 16, 8, 8}), 8, 8, 8);
             if (err != null) throw new IllegalStateException("steam tee: " + err);
             PipeCases.lay(ctx, ctx.at(2, 2, 5), 1, 8, 8, 0, 8, 8, 16);
             PipeCases.lay(ctx, ctx.at(2, 2, 6), 1, 8, 8, 0, 8, 8, 8, 8, 0, 8);
@@ -1224,7 +1224,7 @@ public final class HpPlantCases {
             PipeCases.lay(ctx, ctx.at(3, 1, 6), 1, 16, 8, 8, 8, 8, 8, 8, 8, 0);
             PipeCases.lay(ctx, ctx.at(3, 1, 5), 1, 8, 8, 16, 8, 8, 8, 0, 8, 8);
             PipeCases.lay(ctx, ctx.at(2, 1, 5), 1, 8, 8, 0, 8, 8, 16);
-            err = PipeCases.node(ctx, ctx.at(2, 1, 5)).addJoined(new mods.eln.node.voxel.PipePart(1, new int[]{8, 8, 8, 16, 8, 8}), 8, 8, 8);
+            err = ctx.voxelByEntity(ctx.at(2, 1, 5)).addJoined(new mods.eln.node.voxel.PipePart(1, new int[]{8, 8, 8, 16, 8, 8}), 8, 8, 8);
             if (err != null) throw new IllegalStateException("feed tee: " + err);
             PipeCases.lay(ctx, ctx.at(2, 1, 4), 1, 8, 8, 16, 8, 8, 0);
             meter = new FluidDevice() {

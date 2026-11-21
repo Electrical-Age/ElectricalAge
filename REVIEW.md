@@ -26,7 +26,7 @@ here.
 | Clamping | `misc/Utils.limit` | another local `clamp` |
 | Kit recipes | `node/voxel/KitRecipes` | a per-kit recipe skeleton |
 | GameTest ids | `gametest/cases/Ids` | a per-file `transparent(String)` / `six(String)` lookup |
-| GameTest world access | `TestContext` (`at`, `floor`, `placeSix`, …; docs/testing.md) | per-file `node(ctx,pos)`, `player(ctx)`, `source(u)` or `resistor()` copies (consolidation found 6-7 of each) |
+| GameTest world access | `TestContext` (`at`, `floor`, `placeSix`, `player()`, `holding`, `nodeAt`/`voxelAt`/`voxelByEntity`, `source`/`setVolts`, static `field`; docs/testing.md); six-node electrical fixtures `Wp9aCases` (`orient`, `load`, `resistor`, `current`); `Wp10aCases.rs()`/`off()` | per-file `node(ctx,pos)`, `player(ctx)`, `source(u)`, `resistor()` or reflective `field()` copies; a hand-written `setVoltageId` packet |
 
 ## Invariants
 
@@ -48,7 +48,7 @@ here.
 - Feeding the wrong scale to a formatter: plotCelsius takes the Tc scale, so an absolute °C or a difference read
   20 °C off (the tank's and servo's thermometers, the turbine's dT, until 2026-11-21).
 - Hard-coded GUI colours (the error red `0xFFA02020` appears in 8 places). Put a named constant in `ElnScreen`.
-- Copy-pasted GameTest fixtures (sources, resistors, `node()`, `player()`). Use or extend `TestContext`.
+- Copy-pasted GameTest fixtures (sources, resistors, `node()`, `player()`; folded into `TestContext` 2026-11-21). Use or extend `TestContext`.
 - Copy-pasted Element/Render/Container pairs differing only in constants (capacitor vs inductor, six-node vs
   transparent power capacitor). Parameterise the descriptor instead of copying the class.
 

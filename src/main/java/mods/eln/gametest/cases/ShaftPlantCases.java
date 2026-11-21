@@ -20,6 +20,7 @@ import net.minecraft.core.BlockPos;
 import java.util.List;
 
 import static mods.eln.gametest.cases.ShaftSteamCases.*;
+import static mods.eln.gametest.cases.Wp10aCases.off;
 import static mods.eln.gametest.cases.Wp11Cases.*;
 
 /**
@@ -80,10 +81,7 @@ public final class ShaftPlantCases {
             BlockPos cable = mp.north(), src = cable.north();
             ctx.placeSix(Ids.six("Medium Voltage Cable"), cable);
             var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) ctx.placeSix(SOURCE, src);
-            s.networkUnserialize(ctx.stream(out -> {
-                out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                out.writeFloat(200f);
-            }));
+            ctx.setVolts(s, 200f);
         }
         return c;
     }
@@ -300,7 +298,7 @@ public final class ShaftPlantCases {
             PipeCases.lay(ctx, ctx.at(3, 2, 4), 2, 8, 8, 16, 8, 8, 0);
             PipeCases.lay(ctx, ctx.at(3, 2, 3), 2, 8, 8, 16, 8, 8, 8, 0, 8, 8);
             PipeCases.lay(ctx, ctx.at(2, 2, 3), 2, 16, 8, 8, 8, 8, 8, 8, 0, 8);
-            for (var part : PipeCases.node(ctx, ctx.at(3, 2, 4)).parts) if (part instanceof mods.eln.node.voxel.PipePart pp) cross = pp;
+            for (var part : ctx.voxelByEntity(ctx.at(3, 2, 4)).parts) if (part instanceof mods.eln.node.voxel.PipePart pp) cross = pp;
             c = condenser(ctx, cp, true, Direction.XP);
             loop = coolingLoop(c, cp.south(), 2, cp.north(), 3, 2e5);
             Eln.simulator.addSlowProcess(feed = dt -> {
@@ -608,7 +606,7 @@ public final class ShaftPlantCases {
             PipeCases.lay(ctx, ctx.at(7, 3, 5), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);
             PipeCases.lay(ctx, ctx.at(7, 2, 5), 1, 8, 16, 8, 8, 0, 8);
             PipeCases.lay(ctx, ctx.at(7, 1, 5), 1, 8, 16, 8, 8, 8, 8, 0, 8, 8);
-            VoxelNode n = PipeCases.node(ctx, ctx.at(4, 3, 5));
+            VoxelNode n = ctx.voxelByEntity(ctx.at(4, 3, 5));
             String err = n.addValve(8, 8, 8, ValvePart.PRESSURE);
             if (err != null) throw new IllegalStateException("dump valve: " + err);
             for (var part : n.parts) if (part instanceof ValvePart vp) dump = vp;

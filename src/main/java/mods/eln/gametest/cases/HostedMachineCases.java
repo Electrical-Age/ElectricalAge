@@ -13,10 +13,8 @@ import mods.eln.apitest.ApiTestMachineEntity;
 import mods.eln.apitest.ApiTestMachines;
 import mods.eln.gametest.TestCase;
 import mods.eln.gametest.TestContext;
-import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeConnection;
-import mods.eln.node.NodeManager;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.voxel.CablePart;
 import mods.eln.node.voxel.VoxelNode;
@@ -57,14 +55,6 @@ public final class HostedMachineCases {
         cases.add(new Burns());
     }
 
-    /** Sets source's volts. */
-    static void volts(TestContext c, ElectricalSourceElement source, float volts) {
-        source.networkUnserialize(c.stream(out -> {
-            out.writeByte(ElectricalSourceElement.setVoltageId);
-            out.writeFloat(volts);
-        }));
-    }
-
     /** One tick's rated work energy of the fixture, J (100 W, no idle). */
     static final double TICK_J = 100 * 0.05;
 
@@ -79,10 +69,6 @@ public final class HostedMachineCases {
         return c.level().getBlockEntity(p) instanceof ApiTestMachineEntity e ? e : null;
     }
 
-    static NodeBase nodeAt(TestContext c, BlockPos p) {
-        return NodeManager.instance.getNodeFromCoordonate(new Coordonate(p, c.level()));
-    }
-
     /** An LV cable at x on the floor. */
     static SixNodeElement cable(TestContext c, int x) {
         return c.placeSix(Wp10aCases.LV_CABLE, c.at(x, 1, 1));
@@ -90,11 +76,7 @@ public final class HostedMachineCases {
 
     /** A 50 V source at x on the floor. */
     static void source(TestContext c, int x) {
-        ElectricalSourceElement src = (ElectricalSourceElement) c.placeSix(Wp10aCases.SOURCE, c.at(x, 1, 1));
-        src.networkUnserialize(c.stream(out -> {
-            out.writeByte(ElectricalSourceElement.setVoltageId);
-            out.writeFloat(50f);
-        }));
+        c.source(Wp10aCases.SOURCE, c.at(x, 1, 1), 50);
     }
 
     /** The NodeConnections between a and b (each sits in both nodes' lists). */
@@ -155,8 +137,8 @@ public final class HostedMachineCases {
             c.checkValue("hosted: 20 ticks of work at its rated 100 W [J]", w1 - w0, 20 * TICK_J);
             c.check("hosted: the line at the machine is near 50 V", Math.abs(m.volts() - 50) < 1, m.volts() + " V");
             MachineNode n = HostedMachines.INSTANCE.node(e);
-            c.check("hosted: a node of its own at the block, linked to the cable", n != null && nodeAt(c, pos) == n
-                && linked(n, nodeAt(c, c.at(2, 1, 1))), String.valueOf(n));
+            c.check("hosted: a node of its own at the block, linked to the cable", n != null && c.nodeAt(pos) == n
+                && linked(n, c.nodeAt(c.at(2, 1, 1))), String.valueOf(n));
             c.check("hosted: it draws through its back", n != null && n.activeFace() == RelativeFace.BACK, n == null ? "-" : String.valueOf(n.activeFace()));
             c.check("hosted: it shows LIT while it works", c.level().getBlockState(pos).getValue(BlockStateProperties.LIT), "");
             c.check("hosted: of() is the same handle each time", m == ElnApi.machines().of(e), "");
@@ -293,7 +275,7 @@ public final class HostedMachineCases {
                     double work = entity(c, pos).workJoules();
                     if (n != n0) bad.add(tick + ": a new node");
                     else if (n.connects() != connects0) bad.add(tick + ": the node reconnected");
-                    else if (!linked(n, nodeAt(c, c.at(2, 1, 1))) || n.activeFace() != RelativeFace.BACK) bad.add(tick + ": unlinked");
+                    else if (!linked(n, c.nodeAt(c.at(2, 1, 1))) || n.activeFace() != RelativeFace.BACK) bad.add(tick + ": unlinked");
                     if (m.state() != MachineState.RUNNING) bad.add(tick + ": " + m.state());
                     if (m.joulesDelivered() < delivered0) bad.add(tick + ": the books restarted");
                     if (Math.abs(work - work0 - TICK_J) > 0.05 * TICK_J) bad.add(tick + ": worked " + (work - work0) + " J");
@@ -325,16 +307,16 @@ public final class HostedMachineCases {
             super.build(c);
             c.after(40, () -> {
                 kept = m(c);
-                NodeBase cn = nodeAt(c, c.at(2, 1, 1));
+                NodeBase cn = c.nodeAt(c.at(2, 1, 1));
                 cableLinks = cn.nodeConnectionList.size();
-                toMachine = links(cn, nodeAt(c, pos));
+                toMachine = links(cn, c.nodeAt(pos));
                 c.level().destroyBlock(pos, false);
             });
         }
 
         public void measure(TestContext c) {
-            int now = nodeAt(c, c.at(2, 1, 1)).nodeConnectionList.size();
-            c.check("broken: no node at the block", nodeAt(c, pos) == null, String.valueOf(nodeAt(c, pos)));
+            int now = c.nodeAt(c.at(2, 1, 1)).nodeConnectionList.size();
+            c.check("broken: no node at the block", c.nodeAt(pos) == null, String.valueOf(c.nodeAt(pos)));
             c.check("broken: the cable lost its links to the machine, only those", toMachine > 0 && now == cableLinks - toMachine,
                 cableLinks + " - " + toMachine + " -> " + now);
             c.check("broken: the kept handle reads DETACHED and gives nothing", kept != null && kept.state() == MachineState.DETACHED
@@ -380,14 +362,14 @@ public final class HostedMachineCases {
             c.after(40, () -> {
                 mods.eln.Eln.simulator.removeSlowProcess(saver);
                 old = m(c);
-                NodeBase cn = nodeAt(c, c.at(2, 1, 1));
+                NodeBase cn = c.nodeAt(c.at(2, 1, 1));
                 cableLinks = cn.nodeConnectionList.size();
-                toMachine = links(cn, nodeAt(c, pos));
+                toMachine = links(cn, c.nodeAt(pos));
                 c.level().removeBlockEntity(pos);
             });
             c.after(42, () -> {
-                goneBetween = nodeAt(c, pos) == null && old.state() == MachineState.DETACHED;
-                cableFreeBetween = toMachine > 0 && nodeAt(c, c.at(2, 1, 1)).nodeConnectionList.size() == cableLinks - toMachine;
+                goneBetween = c.nodeAt(pos) == null && old.state() == MachineState.DETACHED;
+                cableFreeBetween = toMachine > 0 && c.nodeAt(c.at(2, 1, 1)).nodeConnectionList.size() == cableLinks - toMachine;
                 fresh = BlockEntity.loadStatic(pos, c.level().getBlockState(pos), saved, c.level().registryAccess());
                 c.level().setBlockEntity(fresh);
             });
@@ -406,8 +388,8 @@ public final class HostedMachineCases {
             c.check("reload: unloaded, the node goes and the kept handle reads DETACHED", goneBetween, "");
             c.check("reload: unloaded, the cable that stays links to nothing there", cableFreeBetween, "");
             MachineNode n = fresh == null ? null : HostedMachines.INSTANCE.node(fresh);
-            c.check("reload: a new node for the loaded block entity, the cable linked to it", n != null && nodeAt(c, pos) == n
-                && linked(n, nodeAt(c, c.at(2, 1, 1))), String.valueOf(n));
+            c.check("reload: a new node for the loaded block entity, the cable linked to it", n != null && c.nodeAt(pos) == n
+                && linked(n, c.nodeAt(c.at(2, 1, 1))), String.valueOf(n));
             c.check("reload: saved running, it runs at once (no half-second start)", first == MachineState.RUNNING, String.valueOf(first));
             c.check("reload: its restored buffer is booked as delivered", firstDelivered >= buffer - 1e-9, firstDelivered + " >= " + buffer);
             c.check("reload: it works on", entity(c, pos) == fresh && ((ApiTestMachineEntity) fresh).workJoules() > 0, "");
@@ -442,7 +424,7 @@ public final class HostedMachineCases {
             Machine a = ElnApi.machines().of(entity(c, m1)), z = ElnApi.machines().of(entity(c, m2));
             MachineNode na = HostedMachines.INSTANCE.node(entity(c, m1));
             c.check("leaves: the first machine runs", a.state() == MachineState.RUNNING, a.state().name());
-            c.check("leaves: cable B is linked to the first machine's front", linked(na, nodeAt(c, c.at(3, 1, 1))), "");
+            c.check("leaves: cable B is linked to the first machine's front", linked(na, c.nodeAt(c.at(3, 1, 1))), "");
             double ub = Wp10aCases.loadU(b);
             c.check("leaves: no power through it: cable B is dead", Math.abs(ub) < 0.01, ub + " V");
             c.check("leaves: the second machine is unpowered", z.state() == MachineState.UNPOWERED && z.volts() < 0.01, z.state() + " " + z.volts());
@@ -466,7 +448,7 @@ public final class HostedMachineCases {
         }
 
         public void measure(TestContext c) {
-            VoxelNode v = (VoxelNode) nodeAt(c, c.at(3, 1, 0));
+            VoxelNode v = (VoxelNode) c.nodeAt(c.at(3, 1, 0));
             var ports = v.busPorts();
             double level = ports.isEmpty() ? -1 : ports.get(0).read(ApiTestMachines.BUSY_CHANNEL);
             c.check("bus: the machine is running", m(c).state() == MachineState.RUNNING, m(c).state().name());
@@ -502,7 +484,7 @@ public final class HostedMachineCases {
 
         public void build(TestContext c) {
             src = (ElectricalSourceElement) c.placeSix(Wp10aCases.SOURCE, c.at(1, 1, 1));
-            volts(c, src, 50);
+            c.setVolts(src, 50);
             c.placeSix(MachineApiCases.MV_CABLE, c.at(2, 1, 1));
             pos = machine(c, 3, Direction.EAST);
             entity(c, pos).useSpec(ApiTestMachines.BURNING_SPEC);
@@ -516,10 +498,10 @@ public final class HostedMachineCases {
             c.level().removeBlock(q, false);
             c.after(30, () -> {
                 before = ElnApi.machines().of(entity(c, pos)).state();
-                volts(c, src, 80);
+                c.setVolts(src, 80);
             });
             c.after(40, () -> workAtBurn = entity(c, pos).workJoules());
-            c.after(60, () -> volts(c, src, 50));
+            c.after(60, () -> c.setVolts(src, 50));
             c.after(70, () -> {   // saved burnt, unloaded and loaded again
                 ApiTestMachineEntity e = entity(c, pos);
                 causesBeforeReload = e.burnCauses();

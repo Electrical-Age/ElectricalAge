@@ -248,10 +248,7 @@ public final class Wp9bCases {
         @Override
         public void build(TestContext ctx) {
             src = ctx.placeSix(SOURCE, ctx.at(0, 1, 1));
-            src.networkUnserialize(ctx.stream(out -> {
-                out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                out.writeFloat(30f);
-            }));
+            ctx.setVolts(src, 30f);
             lv = ctx.placeSix(LV_CABLE, ctx.at(1, 1, 1));
             // geometry on the output pin (front, toward +X); the input pin (front.inverse()) connects with no cable in
             // a slot (built-in LV cable, Baughn 2026-10-17)

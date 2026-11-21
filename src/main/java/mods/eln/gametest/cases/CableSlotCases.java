@@ -77,7 +77,7 @@ public final class CableSlotCases {
                 probe.getConnectionMask(probe.front.left()) != 0 && probe.getConnectionMask(probe.front.right()) != 0, "");
             ctx.checkValue("electrical probe: series resistor = 2 x LV cable Rs [ohm]", probe.resistor.getR(),
                 2 * ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs);
-            double i = Batch1Cases.current(r);
+            double i = Wp9aCases.current(r);
             ctx.check("electrical probe: current flows (50 V through the resistor)", i > 0.1, f("I = %.4f A", i));
             ctx.checkValue("electrical probe: its current [A] = the resistor's", Math.abs(probe.resistor.getCurrent()), i);
             ctx.checkValue("electrical probe: output [V] = I / 2 A * SVU", probe.outputGate.getU(), Math.min(1, i / 2) * Eln.SVU);

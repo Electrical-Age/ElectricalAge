@@ -208,7 +208,7 @@ public final class FuelGeneratorCases {
             if (mode == 2) {
                 ctx.check(id + ": clean fuel clears it, by the engines' law", dFoul < 0 && Math.abs(dFoul / expect - 1) < 0.05, String.format("%.7f against %.7f", dFoul, expect));
                 boolean jade = gen.getWaila().containsKey(mods.eln.i18n.I18N.tr("Fouling"));
-                var p = Wp10bCases.player(ctx);
+                var p = ctx.player();
                 p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(net.minecraft.world.level.block.Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE), 3));
                 gen.onBlockActivated(p, mods.eln.misc.Direction.YP, 0.5f, 1f, 0.5f);
                 int left = p.getMainHandItem().getCount();

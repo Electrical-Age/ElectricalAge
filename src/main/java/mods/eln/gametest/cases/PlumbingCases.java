@@ -205,20 +205,20 @@ public final class PlumbingCases {
             t = tank(ctx, IRON_TANK, ctx.at(2, 1, 1), Direction.XN);
             pipeAt = ctx.at(2, 2, 1);
             PipeCases.lay(ctx, pipeAt, 0, 8, 0, 8, 8, 12, 8);
-            var n = PipeCases.node(ctx, pipeAt);
+            var n = ctx.voxelByEntity(pipeAt);
             err = n.addSafetyValveNear(0.5, 8 / 16.0, 0.5, true);
             fill(t.vessel, (full ? 0.995 : 0.5) * t.vessel.volume * Water.RHO_L, 3e5, 300);
             water0 = t.vessel.mWater;
         }
 
         public void measure(TestContext ctx) {
-            var run = mods.eln.fluid.FluidWorld.nodeFor(((mods.eln.node.voxel.PipePart) PipeCases.node(ctx, pipeAt).parts.get(0)).fluid);
+            var run = mods.eln.fluid.FluidWorld.nodeFor(((mods.eln.node.voxel.PipePart) ctx.voxelByEntity(pipeAt).parts.get(0)).fluid);
             double water = t.vessel.mWater + run.mWater;
             ctx.line(String.format("purge valve (%s): tank %.3f bar, %.4f -> %.4f kg of water; %s", full ? "full" : "half", t.vessel.P() / 1e5, water0, water,
-                PipeCases.node(ctx, pipeAt).getWaila(false)));
+                ctx.voxelByEntity(pipeAt).getWaila(false)));
             ctx.check("purge valve: it fits on the pipe", err == null, "" + err);
             // (a client check: Jade's header read "Pipes and Cables" with the crosshair on the valve)
-            var vn = PipeCases.node(ctx, pipeAt);
+            var vn = ctx.voxelByEntity(pipeAt);
             String onValve = null, onPipe = vn.nameAt(0.5, 1 / 16.0, 0.5);
             for (var part : vn.parts)
                 if (part instanceof mods.eln.node.voxel.SafetyValvePart sv) {
@@ -321,10 +321,7 @@ public final class PlumbingCases {
             BlockPos cable = pp.west(), src = cable.west();
             ctx.placeSix(Ids.six("Medium Voltage Cable"), cable);
             var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) ctx.placeSix(SOURCE, src);
-            s.networkUnserialize(ctx.stream(out -> {
-                out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                out.writeFloat((float) mods.eln.Eln.MVU);
-            }));
+            ctx.setVolts(s, mods.eln.Eln.MVU);
             double T = boiling ? Water.TB : Water.T_AMBIENT;
             fill(a.vessel, 0.8 * a.vessel.volume * Water.RHO_L, Water.P_ATM, T);
             bWater0 = b.vessel.mLiquid();
@@ -393,7 +390,7 @@ public final class PlumbingCases {
             a = tank(ctx, ALLOY_TANK, pa, Direction.XN);   // (its back, +x, faces the valve)
             b = tank(ctx, ALLOY_TANK, pb, Direction.XP);   // (its back, -x, faces the valve)
             PipeCases.lay(ctx, pv, 1, 0, 12, 8, 8, 12, 8, 16, 12, 8);   // (between the tanks' high, vapour ports)
-            VoxelNode n = PipeCases.node(ctx, pv);
+            VoxelNode n = ctx.voxelByEntity(pv);
             String err = n == null ? "no pipe node" : n.addValve(8, 12, 8, ValvePart.PRESSURE);
             if (err != null) throw new IllegalStateException("valve: " + err);
             for (var part : n.parts) if (part instanceof ValvePart vp) v = vp;
@@ -408,7 +405,7 @@ public final class PlumbingCases {
 
         public void measure(TestContext ctx) {
             double pa = a.vessel.P() / 1e5, pb = b.vessel.P() / 1e5;
-            ctx.line("pressure valve: A " + a.getWaila() + "; B " + b.getWaila() + "; pipe " + PipeCases.node(ctx, ctx.at(3, 1, 1)).getWaila(true));
+            ctx.line("pressure valve: A " + a.getWaila() + "; B " + b.getWaila() + "; pipe " + ctx.voxelByEntity(ctx.at(3, 1, 1)).getWaila(true));
             ctx.line(String.format("pressure valve (%s): A %.2f bar, B %.2f bar, %.0f%% open", pmode == ValvePart.REDUCING ? "reducing 3" : "relief 9", pa, pb, v.lift * 100));
             if (pmode == ValvePart.REDUCING) {
                 ctx.check("reducing valve: B held near 3 bar (2.5-3.6)", pb > 2.5 && pb < 3.6, String.format("%.2f bar", pb));
@@ -845,7 +842,7 @@ public final class PlumbingCases {
             BlockPos pv = ctx.at(3, 1, 1), pb = ctx.at(4, 1, 1);
             b = tank(ctx, IRON_TANK, pb, Direction.XP);   // (its back, -x, faces the pipe)
             PipeCases.lay(ctx, pv, 1, 0, 4, 8, 16, 4, 8);   // (between their low, liquid ports)
-            VoxelNode n = PipeCases.node(ctx, pv);
+            VoxelNode n = ctx.voxelByEntity(pv);
             for (var part : n.parts) if (part instanceof mods.eln.node.voxel.PipePart pp) pipe = pp;
             fill(a.vessel, 0.6 * a.vessel.volume * Water.RHO_L, 10e5, Water.tsat(10e5));
             mass0 = a.vessel.mWater + b.vessel.mWater + pipe.fluid.mWater;
@@ -913,7 +910,7 @@ public final class PlumbingCases {
         public void build(TestContext ctx) {
             BlockPos pv = ctx.at(4, 1, 4);
             PipeCases.lay(ctx, pv, 1, 0, 8, 8, 8, 8, 8, 16, 8, 8);
-            VoxelNode n = PipeCases.node(ctx, pv);
+            VoxelNode n = ctx.voxelByEntity(pv);
             n.addValve(8, 8, 8, ValvePart.THROTTLE);
             for (var part : n.parts) if (part instanceof ValvePart v) v.setting = 0.02;
             src = reservoir(pv.getY(), 6e5);

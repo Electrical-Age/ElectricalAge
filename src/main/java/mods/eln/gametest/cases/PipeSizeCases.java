@@ -143,9 +143,9 @@ public final class PipeSizeCases {
             BlockPos a = ctx.at(2, 1, 1), b = ctx.at(4, 1, 1);
             PipeCases.lay(ctx, a, 2, 8, 8, 0, 8, 8, 16);
             PipeCases.lay(ctx, b, 2, 8, 8, 0, 8, 8, 16);
-            n = PipeCases.node(ctx, a);
+            n = ctx.voxelByEntity(a);
             valve = n.addValve(8, 8, 8, ValvePart.ON_OFF);
-            safety = PipeCases.node(ctx, b).addSafetyValveNear(0.5, 0.68, 0.5);   // (on its top: the 6-voxel pipe reaches to 11)
+            safety = ctx.voxelByEntity(b).addSafetyValveNear(0.5, 0.68, 0.5);   // (on its top: the 6-voxel pipe reaches to 11)
         }
 
         public void measure(TestContext ctx) {

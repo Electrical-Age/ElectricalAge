@@ -217,7 +217,7 @@ public final class ItemCapabilityCases {
             if (!ctx.level().getBlockState(target).isAir()) ctx.level().removeBlock(target, false);
             TransparentNodeElement m = ctx.placeTransparent(LabCommands.transparentId("48V Macerator"), target);
             int in = ((mods.eln.transparentnode.electricalmachine.ElectricalMachineElement) m).inSlotId;
-            AutoMinerSlowProcess p = Batch1Cases.field(miner, "slowProcess");
+            AutoMinerSlowProcess p = TestContext.field(miner, "slowProcess");
             boolean stick = p.drop(new ItemStack(Items.STICK));
             boolean ore = p.drop(new ItemStack(Items.IRON_ORE, 5));
             ctx.check("autominer: drops ore into the macerator below (capability only)", ore

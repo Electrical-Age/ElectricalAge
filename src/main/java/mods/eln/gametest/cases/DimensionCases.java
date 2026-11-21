@@ -133,7 +133,7 @@ public final class DimensionCases {
                 this.there = (ElectricalPoleElement) there.placeTransparent(Wp11Cases.UTILITY_POLE, poleThere);
                 netherNodes.add(this.there.node.coordonate.pos());
                 here = (ElectricalPoleElement) ctx.placeTransparent(Wp11Cases.UTILITY_POLE, poleHere);
-                Player p = Wp9aCases.player(ctx);
+                Player p = ctx.player();
                 ItemStack hand = mods.eln.gridnode.OverheadCableItem.make(KitDeviceCases.thick().mm2(), 10);
                 p.setItemInHand(InteractionHand.MAIN_HAND, hand);
                 try {

@@ -23,6 +23,42 @@ public interface TestContext {
         return new ListeningPlayer(level());
     }
 
+    /** The level's shared fake player (the same one each call: clear what you put in its hand). */
+    default net.neoforged.neoforge.common.util.FakePlayer player() {
+        return net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level());
+    }
+
+    /** Runs r with held in the fake player's main hand, then empties the hand (also when r throws). */
+    default <T> T holding(net.minecraft.world.item.ItemStack held,
+                          java.util.function.Function<net.neoforged.neoforge.common.util.FakePlayer, T> r) {
+        var p = player();
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, held);
+        try {
+            return r.apply(p);
+        } finally {
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+        }
+    }
+
+    /** The node at the absolute position p, as the node manager has it (null when there is none). */
+    default mods.eln.node.NodeBase nodeAt(BlockPos p) {
+        return mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, level()));
+    }
+
+    /** The voxel node at p, as the node manager has it; null when there is none or it isn't a voxel node. */
+    default mods.eln.node.voxel.VoxelNode voxelAt(BlockPos p) {
+        return nodeAt(p) instanceof mods.eln.node.voxel.VoxelNode v ? v : null;
+    }
+
+    /**
+     * The voxel node at p through its block entity, which caches the node it found (so after a reload it can differ
+     * from {@link #voxelAt}); null when there is no voxel block entity or node.
+     */
+    default mods.eln.node.voxel.VoxelNode voxelByEntity(BlockPos p) {
+        return level().getBlockEntity(p) instanceof mods.eln.node.voxel.VoxelNodeEntity e
+            && e.getNode() instanceof mods.eln.node.voxel.VoxelNode v ? v : null;
+    }
+
     /** Put a stone block at the absolute position p (support for a device outside the floor). */
     void floor(BlockPos p);
 
@@ -78,6 +114,38 @@ public interface TestContext {
 
     interface Writer {
         void write(java.io.DataOutputStream out) throws java.io.IOException;
+    }
+
+    /** Set an Electrical (or Signal) Source to u volts through its GUI packet. */
+    default void setVolts(mods.eln.node.six.SixNodeElement source, double u) {
+        source.networkUnserialize(stream(out -> {
+            out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
+            out.writeFloat((float) u);
+        }));
+    }
+
+    /** Place an Electrical (or Signal) Source (six-node id damage) at p on its floor, at u volts. */
+    default mods.eln.sixnode.electricalsource.ElectricalSourceElement source(int damage, BlockPos p, double u) {
+        var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) placeSix(damage, p);
+        setVolts(s, u);
+        return s;
+    }
+
+    /** A field read by reflection, searched up the class chain (for state a device keeps private). */
+    @SuppressWarnings("unchecked")
+    static <T> T field(Object o, String name) {
+        for (Class<?> c = o.getClass(); c != null; c = c.getSuperclass()) {
+            try {
+                java.lang.reflect.Field f = c.getDeclaredField(name);
+                f.setAccessible(true);
+                return (T) f.get(o);
+            } catch (NoSuchFieldException ignored) {
+                // superclass
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        throw new IllegalStateException("no field " + name + " in " + o.getClass());
     }
 
     /** Runs r ticks from now, as the test's own measure runs (outside the simulator's tick: a node may be reloaded). */

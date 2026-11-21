@@ -28,13 +28,6 @@ public final class ComputerCases {
     /** The source behind the last computer powered() placed. */
     static ElectricalSourceElement lastSource;
 
-    static void volts(TestContext ctx, ElectricalSourceElement s, float v) {
-        s.networkUnserialize(ctx.stream(out -> {
-            out.writeByte(ElectricalSourceElement.setVoltageId);
-            out.writeFloat(v);
-        }));
-    }
-
     /** A computer at p with 50 V behind it (a low voltage cable, then a source). */
     static ComputerElement powered(TestContext ctx, BlockPos p) {
         var c = (ComputerElement) ShaftArtCases.placeLooking(ctx, Robotics.COMPUTER_ID, p, ShaftArtCases.SOUTH);
@@ -42,7 +35,7 @@ public final class ComputerCases {
         var back = c.front.back().toEnumFacing();
         ctx.placeSix(Wp10aCases.LV_CABLE, p.relative(back));
         ElectricalSourceElement s = (ElectricalSourceElement) ctx.placeSix(Wp11Cases.SOURCE, p.relative(back, 2));
-        volts(ctx, s, 50f);
+        ctx.setVolts(s, 50f);
         lastSource = s;
         return c;
     }
@@ -336,9 +329,9 @@ public final class ComputerCases {
                     submit(ctx, e, 1, "(def x 99)");
                 }
                 if (upAt < 0) return;
-                if (tick == upAt + 10) volts(ctx, source, 0);
+                if (tick == upAt + 10) ctx.setVolts(source, 0);
                 if (tick == upAt + 25) cut = e.status();
-                if (tick == upAt + 26) volts(ctx, source, 50);
+                if (tick == upAt + 26) ctx.setVolts(source, 50);
                 if (tick == upAt + 45) submit(ctx, e, 2, "(+ x 1)");
                 if (tick == upAt + 75) after = terminal(e);
             });

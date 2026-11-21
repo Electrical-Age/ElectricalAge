@@ -55,7 +55,7 @@ public final class HubRenderCases {
         public void build(TestContext c) {
             mods.eln.client.ClientRenders.registerAll();
             for (int x = 0; x < 12; x++) for (int z = 0; z < 3; z++) c.floor(c.at(x, 0, z));
-            Player player = VoxelDeviceCases.player(c);
+            Player player = c.player();
             for (int k = 0; k < 2; k++) {
                 at[k] = c.at(2 + 5 * k, 1, 0);
                 VoxelNode v = VoxelDeviceCases.block(c, at[k]);

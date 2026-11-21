@@ -67,10 +67,7 @@ public final class CableAirCases {
         public void build(TestContext c) {
             for (int x = 0; x < 10; x++) if (x != 4) c.floor(c.at(x, 2, 1));
             var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) c.placeSix(SOURCE, c.at(0, 3, 1));
-            src.networkUnserialize(c.stream(o -> {
-                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                o.writeFloat(50);
-            }));
+            c.setVolts(src, 50);
             r = VoxelDeviceCases.resistor(c, c.at(7, 3, 1), Direction.XP, CableCases.CORE);
             c.placeSix(GROUND, c.at(8, 3, 1));
             var hitS = Vec3.atLowerCornerOf(c.at(0, 3, 1)).add(1.0, 0.05, 0.5);
@@ -147,10 +144,7 @@ public final class CableAirCases {
             for (int y = 1; y <= 3; y++) c.floor(wall.atY(c.at(0, y, 0).getY()));
             BlockPos top = wall.atY(c.at(0, 4, 0).getY());
             var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) c.placeSix(SOURCE, top);
-            src.networkUnserialize(c.stream(o -> {
-                o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                o.writeFloat(20);
-            }));
+            c.setVolts(src, 20);
             net.minecraft.core.Direction toBank = r.toEnumFacing(), bankFace = l.toEnumFacing();
             Vec3 hitS = Vec3.atCenterOf(top).add(toBank.getStepX() * 0.5, -0.45, toBank.getStepZ() * 0.5);
             Vec3 hitB = Vec3.atCenterOf(at).add(bankFace.getStepX() * 0.5, -0.45, bankFace.getStepZ() * 0.5);
@@ -254,10 +248,7 @@ public final class CableAirCases {
                 c.floor(pillar);
                 var src = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) CableCases.host(c, Wp9aCases.SIGNAL_SOURCE, sp, Direction.YN);
                 Wp9aCases.orient(src, l -> l, Direction.XP);
-                src.networkUnserialize(c.stream(o -> {
-                    o.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-                    o.writeFloat((float) U);
-                }));
+                c.setVolts(src, U);
                 var lg = (mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement) CableCases.host(c, Wp9cCases.THREE_CHANNEL_LOGGER, lp, Direction.YN);
                 Wp9aCases.orient(lg, mods.eln.misc.LRDU::inverse, Direction.XN);
                 logger[k] = lg;

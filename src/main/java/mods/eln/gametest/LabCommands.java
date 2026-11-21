@@ -1345,19 +1345,9 @@ public final class LabCommands {
         return out.toString();
     }
 
+    /** TestContext.field, as an Object (its callers here format or cast the value). */
     public static Object field(Object o, String name) {
-        for (Class<?> c = o.getClass(); c != null; c = c.getSuperclass()) {
-            try {
-                var f = c.getDeclaredField(name);
-                f.setAccessible(true);
-                return f.get(o);
-            } catch (NoSuchFieldException e) {
-                // superclass
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        throw new IllegalStateException("no field " + name + " in " + o.getClass());
+        return TestContext.field(o, name);
     }
 
     public static int sixId(String name) {

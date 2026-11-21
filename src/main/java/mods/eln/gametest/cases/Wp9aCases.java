@@ -27,11 +27,8 @@ import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
 import mods.eln.sixnode.powersocket.PowerSocketElement;
 import mods.eln.sixnode.resistor.ResistorDescriptor;
 import mods.eln.sixnode.resistor.ResistorElement;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.InteractionHand;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import net.minecraft.core.BlockPos;
 
@@ -114,12 +111,7 @@ public final class Wp9aCases {
     }
 
     static ElectricalSourceElement source(TestContext ctx, int damage, int x, int z, double u) {
-        ElectricalSourceElement s = (ElectricalSourceElement) ctx.placeSix(damage, ctx.at(x, 1, z));
-        s.networkUnserialize(ctx.stream(out -> {
-            out.writeByte(ElectricalSourceElement.setVoltageId);
-            out.writeFloat((float) u);
-        }));
-        return s;
+        return ctx.source(damage, ctx.at(x, 1, z), u);
     }
 
     static ItemStack coal(int n) {
@@ -129,9 +121,14 @@ public final class Wp9aCases {
 
     /** Power Resistor (or rheostat) with n items in the core slot, terminals along X. */
     static ResistorElement resistor(TestContext ctx, int damage, int x, int z, int n) {
-        ResistorElement r = (ResistorElement) ctx.placeSix(damage, ctx.at(x, 1, z));
-        orient(r, LRDU::right, Direction.XN);
-        r.getInventory().setItem(0, coal(n)); // ResistorContainer.coreId = 0
+        return resistor(ctx, damage, ctx.at(x, 1, z), Direction.XN, n);
+    }
+
+    /** Power Resistor (or rheostat) at p on its floor with n items in the core slot, its right terminal toward dir. */
+    static ResistorElement resistor(TestContext ctx, int damage, BlockPos p, Direction dir, int n) {
+        ResistorElement r = (ResistorElement) ctx.placeSix(damage, p);
+        orient(r, LRDU::right, dir);
+        r.getInventory().setItem(ResistorElement.coreSlotId, coal(n));
         r.getInventory().setChanged();
         return r;
     }
@@ -145,18 +142,8 @@ public final class Wp9aCases {
         return Eln.sixNodeItem.getDescriptor(LV_CABLE).newItemStack();
     }
 
-    static Player player(TestContext ctx) {
-        return FakePlayerFactory.getMinecraft(ctx.world());
-    }
-
     static void use(TestContext ctx, SixNodeElement e, ItemStack held) {
-        Player p = player(ctx);
-        p.setItemInHand(InteractionHand.MAIN_HAND, held);
-        try {
-            e.onBlockActivated(p, e.side, 0.5F, 0.5F, 0.5F);
-        } finally {
-            p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        }
+        ctx.holding(held, p -> e.onBlockActivated(p, e.side, 0.5F, 0.5F, 0.5F));
     }
 
     static String f(String fmt, Object... args) {
@@ -638,10 +625,7 @@ public final class Wp9aCases {
         public void build(TestContext ctx) {
             // wall lane: both on the +Z side face of the platform's last row (z=2), in blocks (0..1, 0, 3)
             ElectricalSourceElement srcS = (ElectricalSourceElement) placeOnWall(ctx, SOURCE, ctx.at(0, 0, 3));
-            srcS.networkUnserialize(ctx.stream(out -> {
-                out.writeByte(ElectricalSourceElement.setVoltageId);
-                out.writeFloat((float) U);
-            }));
+            ctx.setVolts(srcS, U);
             socket = (PowerSocketElement) placeOnWall(ctx, SOCKET_50V, ctx.at(1, 0, 3));
             orient(socket, f -> f, Direction.XN);
             // no cable in its (1.12, hidden) slot: built-in LV cable (Baughn 2026-10-17)

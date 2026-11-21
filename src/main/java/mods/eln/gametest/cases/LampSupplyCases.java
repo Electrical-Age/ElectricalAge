@@ -71,7 +71,7 @@ public final class LampSupplyCases {
 
         /** The lamp's light level (LampSocketProcess.light), wherever it is put (own block or a LightBlock ahead). */
         static int light(LampSocketElement l) {
-            Integer v = Wp10aCases.field(Wp10aCases.field(l, "lampProcess"), "light");
+            Integer v = TestContext.field(TestContext.field(l, "lampProcess"), "light");
             return v;
         }
 

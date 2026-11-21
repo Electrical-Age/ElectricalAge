@@ -800,16 +800,16 @@ public final class RubberCases {
         public void build(TestContext c) {
             a = c.at(1, 1, 1);
             for (BlockPos p : new BlockPos[]{a, c.at(2, 1, 1)}) PipeCases.lay(c, p, 0, 0, 8, 8, 16, 8, 8);
-            var f = PipeCases.node(c, a).parts.get(0) instanceof mods.eln.node.voxel.PipePart pp ? pp.fluid : null;
+            var f = c.voxelByEntity(a).parts.get(0) instanceof mods.eln.node.voxel.PipePart pp ? pp.fluid : null;
             int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:butadiene");
             f.fill(0, 1, 293.15);
             mods.eln.sim.fluid.EaUnits.add(f, id, 0.3 * f.volume * 615, 293.15, false);   // (a third full of liquid, no air)
             f.update();
-            mods.eln.fluid.FluidWorld.changed(PipeCases.node(c, a));
+            mods.eln.fluid.FluidWorld.changed(c.voxelByEntity(a));
         }
 
         public void measure(TestContext c) {
-            var f = ((mods.eln.node.voxel.PipePart) PipeCases.node(c, a).parts.get(0)).fluid;
+            var f = ((mods.eln.node.voxel.PipePart) c.voxelByEntity(a).parts.get(0)).fluid;
             int id = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:butadiene");
             double p = f.P(), liq = f.liquid(id), vap = f.vapour(id);
             String st = String.format("P %.3g Pa, T %.1f K, liquid %.3g kg, vapour %.3g kg", p, f.T(), liq, vap);

@@ -63,7 +63,7 @@ public final class BusSpCases {
         m.networkUnserialize(c.stream(o -> {
             o.writeByte(1); // ElectricalMathElement.setExpressionId
             o.writeUTF(program);
-        }), Wp9cCases.player(c));
+        }), c.player());
     }
 
     /** Where along its output edge (block voxels) the processor's bus pin is. */
@@ -79,11 +79,11 @@ public final class BusSpCases {
     }
 
     static String error(ElectricalMathElement m) {
-        return Batch1Cases.field(m, "error");
+        return TestContext.field(m, "error");
     }
 
     static boolean valid(ElectricalMathElement m) {
-        return Batch1Cases.field(m, "equationIsValid");
+        return TestContext.field(m, "equationIsValid");
     }
 
     /**
@@ -252,7 +252,7 @@ public final class BusSpCases {
                 return;
             }
             var fresh = (ElectricalMathElement) ((SixNode) r.fresh).sideElementList[Direction.YN.getInt()];
-            String expr = Batch1Cases.field(fresh, "expression");
+            String expr = TestContext.field(fresh, "expression");
             c.check("bus sp saved: the program comes back", PROGRAM.equals(expr) && valid(fresh), expr + " / " + error(fresh));
             c.check("bus sp saved: claimed again on load", fresh.port.claims() == claims, "" + fresh.port.claims());
             BusNet.refresh();
@@ -300,7 +300,7 @@ public final class BusSpCases {
                     o.writeByte(mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerElement.setBusId);
                     o.writeByte(1);
                     o.writeByte(LIGHT_BLUE);
-                }), Wp9cCases.player(c));
+                }), c.player());
             } catch (RuntimeException e) {
                 why = String.valueOf(e);
             }

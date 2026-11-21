@@ -68,7 +68,11 @@ there and replayed first), `eln.guiDir` (LayoutTest, HubSlotsTest), `-PfluidCase
   `build(ctx)`, `measure(ctx)`. The 26.x form of the 1.12 selftest's SelfTestCase.
 - `TestContext`: `at(dx,dy,dz)` (relative to the structure; y=0 floor, devices at y=1), `floor(p)`, `placeSix(id, p[, side])`,
   `placeTransparent(id, p)` (as a FakePlayer click), `stream(writer)` (GUI packet bytes), `listener()` (a fake player
-  that records its chat and action-bar messages apart), `check`, `checkValue` (1%).
+  that records its chat and action-bar messages apart), `player()` (the level's shared fake player) and
+  `holding(stack, p -> ...)` (with the stack in its hand, emptied after), `nodeAt(p)` / `voxelAt(p)` (the node
+  manager's node) and `voxelByEntity(p)` (through the block entity's cached node), `source(id, p, u)` /
+  `setVolts(source, u)` (an Electrical or Signal Source at u volts), static `TestContext.field(o, name)`
+  (reflection read up the class chain), `check`, `checkValue` (1%).
   Implementations: `GameTestContext` (fails the test at the end if any check failed), `WorldTestContext` (live
   world, log only; used by `LabCommands`).
 - Device ids: the int passed to `placeSix`/`placeTransparent` is the 1.12 `sub + (id << 6)` key of the descriptor

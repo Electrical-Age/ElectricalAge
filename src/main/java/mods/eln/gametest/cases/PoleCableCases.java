@@ -53,7 +53,7 @@ public final class PoleCableCases {
             pole = (ElectricalPoleElement) c.placeTransparent(Wp11Cases.UTILITY_POLE, at);
             Wp11Cases.PoleGearCase.fit(c, pole, mods.eln.gridnode.electricalpole.PoleTransformerItem.make(2, 8, 2), at.getX() + 3, at.getZ() + 0.5);
             before = pole.secondaryLoad.getConnectedComponents().size();
-            var player = Wp9cCases.player(c);
+            var player = c.player();
             ItemStack kit = new ItemStack(mods.eln.registry.ElnRegistry.CABLE_KITS.get(1).get(), 64);
             player.setItemInHand(InteractionHand.MAIN_HAND, kit);
             try {
@@ -93,7 +93,7 @@ public final class PoleCableCases {
         }
 
         public void build(TestContext c) {
-            var player = Wp9cCases.player(c);
+            var player = c.player();
             var inv = player.getInventory();
             inv.clearContent();
             ItemStack mine = mods.eln.gridnode.OverheadCableItem.make(4, 480), other = mods.eln.gridnode.OverheadCableItem.make(3, 10);

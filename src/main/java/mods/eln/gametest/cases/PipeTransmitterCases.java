@@ -32,17 +32,9 @@ public final class PipeTransmitterCases {
         cases.add(new LabFixes());
     }
 
-    static VoxelNode node(TestContext c, BlockPos p) {
-        return PipeCases.node(c, p);
-    }
-
-    static net.minecraft.world.entity.player.Player player(TestContext c) {
-        return VoxelDeviceCases.player(c);
-    }
-
     /** The pipe sensor device in the block at p (the first), or null. */
     static PipeTransmitterElement device(TestContext c, BlockPos p) {
-        VoxelNode v = node(c, p);
+        VoxelNode v = c.voxelByEntity(p);
         if (v == null) return null;
         for (var e : v.sideElementList) if (e instanceof PipeTransmitterElement t) return t;
         return null;
@@ -51,13 +43,13 @@ public final class PipeTransmitterCases {
     /** Fill every pipe in these blocks with steam at about 6 bar and 150 C (as PipeCases.Sensors). */
     static void steam(TestContext c, BlockPos... blocks) {
         for (BlockPos p : blocks)
-            for (VoxelPart q : node(c, p).parts)
+            for (VoxelPart q : c.voxelByEntity(p).parts)
                 if (q instanceof PipePart || q instanceof mods.eln.node.voxel.JunctionPart) {
                     // (a junction too: a cold fitting on a line of hot steam condenses it all, as cold iron would)
                     var f = q instanceof PipePart pipe ? pipe.fluid : ((mods.eln.node.voxel.JunctionPart) q).fluid;
                     f.fill(0, 1, 423.15);
                     mods.eln.sim.fluid.EaUnits.addWater(f, 6e5 * f.volume / (461.5 * 423.15), 423.15, true);
-                    mods.eln.fluid.FluidWorld.changed(node(c, p));
+                    mods.eln.fluid.FluidWorld.changed(c.voxelByEntity(p));
                 }
     }
 
@@ -111,10 +103,10 @@ public final class PipeTransmitterCases {
             PipeCases.lay(c, b, 0, 0, 4, 8, 16, 4, 8);
             PipeCases.lay(c, c2, 0, 0, 4, 8, 16, 4, 8);
             err = PipeSensorItem.place(c.level(), a.below(), net.minecraft.core.Direction.UP, new Vec3(a.getX() + 0.5, a.getY(), a.getZ() + 0.5),
-                PipeSensorPart.PRESSURE, player(c));
+                PipeSensorPart.PRESSURE, c.player());
             if (err != null) return;
             var t = device(c, a);
-            VoxelDeviceCases.cableOut(c, node(c, a), a, t, out(t), VoxelDeviceCases.SIGNAL, cableFace(t));
+            VoxelDeviceCases.cableOut(c, c.voxelByEntity(a), a, t, out(t), VoxelDeviceCases.SIGNAL, cableFace(t));
             port = PipePlacer.devicePortForTests(c.level(), a, new Vec3(a.getX() + (8 + t.ox) / 16.0, a.getY() + 1 / 16.0, a.getZ() + (8 + t.oz) / 16.0));
             var end = PipePlacer.portAtForTests(c.level(), b, net.minecraft.core.Direction.WEST);
             route = port == null || end == null ? "no port: device " + port + ", run " + end : PipePlacer.routeForTests(c.level(), 0, port, end);
@@ -129,8 +121,8 @@ public final class PipeTransmitterCases {
             c.check("pipe transmitter: its port is 4 voxels over its centre, on the routers' lattice",
                 t.side == Direction.YN && p[1] == 4 && p[0] % 4 == 0 && p[2] % 4 == 0 && port != null, java.util.Arrays.toString(p) + " " + port);
             c.check("pipe transmitter: a pipe route ends at its port", route == null, "" + route);
-            var run = mods.eln.fluid.FluidWorld.nodeFor(((PipePart) node(c, b).parts.get(0)).fluid);
-            double u = cableU(node(c, a), t);
+            var run = mods.eln.fluid.FluidWorld.nodeFor(((PipePart) c.voxelByEntity(b).parts.get(0)).fluid);
+            double u = cableU(c.voxelByEntity(a), t);
             c.line(String.format("pipe transmitter: run %.2f bar; sensor %.2f bar, connected %b, out %.2f V, cable %.2f V; %s",
                 run.P() / 1e5, t.reading, t.connected, t.outputGate.getU(), u, t.getWaila()));
             c.check("pipe transmitter: connected through the routed pipe", t.connected && t.pipe() != null, "");
@@ -141,7 +133,7 @@ public final class PipeTransmitterCases {
             // an empty-hand right-click steps the full scale; it survives the element's NBT
             var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
             fp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
-            node(c, a).onSlotActivated(fp, t.slot, (8 + t.ox) / 16f, 1 / 16f, (8 + t.oz) / 16f);
+            c.voxelByEntity(a).onSlotActivated(fp, t.slot, (8 + t.ox) / 16f, 1 / 16f, (8 + t.oz) / 16f);
             var tag = new net.minecraft.nbt.CompoundTag();
             t.writeToNBT(tag);
             double stepped = t.scale;
@@ -179,14 +171,14 @@ public final class PipeTransmitterCases {
             c.floor(p.north());
             c.floor(ceil.above());
             err = PipeSensorItem.place(c.level(), p.north(), net.minecraft.core.Direction.SOUTH, new Vec3(p.getX() + 0.5, p.getY() + 0.5, p.getZ()),
-                PipeSensorPart.TEMPERATURE, player(c));
+                PipeSensorPart.TEMPERATURE, c.player());
             errCeil = PipeSensorItem.place(c.level(), ceil.above(), net.minecraft.core.Direction.DOWN, new Vec3(ceil.getX() + 0.5, ceil.getY() + 1, ceil.getZ() + 0.5),
-                PipeSensorPart.QUALITY, player(c));
+                PipeSensorPart.QUALITY, c.player());
             if (err != null) return;
             var t = device(c, p);
-            VoxelDeviceCases.cableOut(c, node(c, p), p, t, out(t), VoxelDeviceCases.SIGNAL, cableFace(t));
+            VoxelDeviceCases.cableOut(c, c.voxelByEntity(p), p, t, out(t), VoxelDeviceCases.SIGNAL, cableFace(t));
             int[] o = t.port();
-            String e = node(c, p).addPart(new PipePart(0, new int[]{o[0], o[1], o[2], 16, o[1], o[2]}));
+            String e = c.voxelByEntity(p).addPart(new PipePart(0, new int[]{o[0], o[1], o[2], 16, o[1], o[2]}));
             if (e != null) err = "pipe: " + e;
             PipeCases.lay(c, q, 0, 0, o[1], o[2], 16, o[1], o[2]);
             steam(c, p, q);
@@ -201,8 +193,8 @@ public final class PipeTransmitterCases {
                     && "not connected to a pipe".equals(device(c, ceil).getWaila().get("Steam quality sensor")) && Math.abs(device(c, ceil).outputGate.getU()) < 0.1, "" + device(c, ceil).getWaila());
             if (err != null) return;
             var t = device(c, p);
-            var run = mods.eln.fluid.FluidWorld.nodeFor(((PipePart) node(c, q).parts.get(0)).fluid);
-            double u = cableU(node(c, p), t);
+            var run = mods.eln.fluid.FluidWorld.nodeFor(((PipePart) c.voxelByEntity(q).parts.get(0)).fluid);
+            double u = cableU(c.voxelByEntity(p), t);
             c.line(String.format("pipe transmitter (wall): side %s front %s; run %.0f C; sensor %.0f C, out %.2f V, cable %.2f V", t.side, t.front,
                 run.T() - 273.15, t.reading, t.outputGate.getU(), u));
             c.check("pipe transmitter: its signal pin points down the wall", out(t) == Direction.YN, "" + out(t));
@@ -238,35 +230,35 @@ public final class PipeTransmitterCases {
             run = c.at(3, 1, 1);
             air = c.at(1, 3, 1);
             err = PipeSensorItem.place(c.level(), a.below(), net.minecraft.core.Direction.UP, new Vec3(a.getX() + 0.3, a.getY(), a.getZ() + 0.3),
-                PipeSensorPart.PRESSURE, player(c));
+                PipeSensorPart.PRESSURE, c.player());
             if (err == null) {
                 int[] o = device(c, a).port();
-                String e = node(c, a).addPart(new PipePart(0, new int[]{o[0], o[1], o[2], 16, o[1], o[2]}));
+                String e = c.voxelByEntity(a).addPart(new PipePart(0, new int[]{o[0], o[1], o[2], 16, o[1], o[2]}));
                 if (e != null) err = "pipe: " + e;
             }
             midAir = PipeSensorItem.place(c.level(), air, net.minecraft.core.Direction.UP, new Vec3(air.getX() + 0.5, air.getY() + 1, air.getZ() + 0.5),
-                PipeSensorPart.PRESSURE, player(c));
+                PipeSensorPart.PRESSURE, c.player());
             PipeCases.lay(c, run, 0, 0, 8, 8, 16, 8, 8);
             onPipe = PipeSensorItem.place(c.level(), run, net.minecraft.core.Direction.UP, new Vec3(run.getX() + 0.5, run.getY() + 9 / 16.0, run.getZ() + 0.5),
-                PipeSensorPart.PRESSURE, player(c));
+                PipeSensorPart.PRESSURE, c.player());
         }
 
         public void measure(TestContext c) {
             c.check("pipe transmitter: placed off centre on a lattice point near the click", err == null && device(c, a) != null
                 && device(c, a).ox % 4 == 0 && device(c, a).oz % 4 == 0 && device(c, a).ox + device(c, a).oz < 0, err + (device(c, a) == null ? "" : " at " + device(c, a).ox + "," + device(c, a).oz));
-            c.check("pipe transmitter: refused in mid-air", midAir != null && node(c, air.above()) == null, "" + midAir);
-            c.check("pipe transmitter: refused on a pipe (no sensor fitted on it)", onPipe != null && node(c, run).parts.size() == 1, "" + onPipe);
+            c.check("pipe transmitter: refused in mid-air", midAir != null && c.voxelByEntity(air.above()) == null, "" + midAir);
+            c.check("pipe transmitter: refused on a pipe (no sensor fitted on it)", onPipe != null && c.voxelByEntity(run).parts.size() == 1, "" + onPipe);
             if (err != null) return;
             var t = device(c, a);
             c.check("pipe transmitter: it drops its pipe sensor item", t.getDropItemStack().is(mods.eln.registry.ElnRegistry.PIPE_PRESSURE_SENSOR.get()), "" + t.getDropItemStack());
-            var v = node(c, a);
+            var v = c.voxelByEntity(a);
             var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
             broke = v.playerAskToBreakSlot(fp, t.slot);
             var drops = c.level().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(a).inflate(1),
                 ie -> ie.getItem().is(mods.eln.registry.ElnRegistry.PIPE_PRESSURE_SENSOR.get()));
-            c.check("pipe transmitter: broken, it drops the sensor and the pipe laid to it stays", broke && device(c, a) == null && node(c, a) != null
-                && node(c, a).parts.size() == 1 && node(c, a).parts.get(0) instanceof PipePart && !drops.isEmpty(),
-                broke + " " + (node(c, a) == null ? "no block" : node(c, a).parts.size() + " parts") + ", drops " + drops.size());
+            c.check("pipe transmitter: broken, it drops the sensor and the pipe laid to it stays", broke && device(c, a) == null && c.voxelByEntity(a) != null
+                && c.voxelByEntity(a).parts.size() == 1 && c.voxelByEntity(a).parts.get(0) instanceof PipePart && !drops.isEmpty(),
+                broke + " " + (c.voxelByEntity(a) == null ? "no block" : c.voxelByEntity(a).parts.size() + " parts") + ", drops " + drops.size());
         }
     }
 
@@ -295,7 +287,7 @@ public final class PipeTransmitterCases {
             run = c.at(3, 1, 1);
             PipeCases.lay(c, run, 0, 0, 8, 8, 16, 8, 8);
             err = PipeSensorItem.place(c.level(), a.below(), net.minecraft.core.Direction.UP, new Vec3(a.getX() + 0.5, a.getY(), a.getZ() + 0.5),
-                PipeSensorPart.PRESSURE, player(c));
+                PipeSensorPart.PRESSURE, c.player());
             if (err != null) return;
             var t = device(c, a);
             var port = PipePlacer.devicePortForTests(c.level(), a, new Vec3(a.getX() + (8 + t.ox) / 16.0, a.getY() + 1 / 16.0, a.getZ() + (8 + t.oz) / 16.0));
@@ -308,8 +300,8 @@ public final class PipeTransmitterCases {
             c.check("pipe transmitter: a route from its port joins a run mid-way", err == null, "" + err);
             if (err != null) return;
             var t = device(c, a);
-            long pipes = node(c, run).parts.stream().filter(q -> q instanceof PipePart).count();
-            var n = mods.eln.fluid.FluidWorld.nodeFor(((PipePart) node(c, run).parts.get(0)).fluid);
+            long pipes = c.voxelByEntity(run).parts.stream().filter(q -> q instanceof PipePart).count();
+            var n = mods.eln.fluid.FluidWorld.nodeFor(((PipePart) c.voxelByEntity(run).parts.get(0)).fluid);
             c.line(String.format("pipe transmitter (joined): run %.2f bar, %d pieces in its block; sensor %.2f bar, connected %b", n.P() / 1e5, pipes, t.reading, t.connected));
             c.check("pipe transmitter: the run is cut into a junction", pipes == 3, "" + pipes);
             c.check("pipe transmitter: reads the joined run's pressure", t.connected && Math.abs(t.reading - n.P() / 1e5) < 0.05 && t.reading > 2, String.format("%.2f", t.reading));
@@ -347,14 +339,14 @@ public final class PipeTransmitterCases {
             r = c.at(3, 1, 2);
             PipeCases.lay(c, under, 0, 0, 4, 8, 16, 4, 8);
             errUnder = PipeSensorItem.place(c.level(), under.below(), net.minecraft.core.Direction.UP, new Vec3(under.getX() + 0.5, under.getY(), under.getZ() + 0.5),
-                PipeSensorPart.PRESSURE, player(c));
+                PipeSensorPart.PRESSURE, c.player());
             for (int z = 4; z <= 12; z += 4) PipeCases.lay(c, crowded, 0, 0, 4, z, 16, 4, z);
             errCrowded = PipeSensorItem.place(c.level(), crowded.below(), net.minecraft.core.Direction.UP, new Vec3(crowded.getX() + 0.5, crowded.getY(), crowded.getZ() + 0.5),
-                PipeSensorPart.PRESSURE, player(c));
+                PipeSensorPart.PRESSURE, c.player());
             // a pipe kit, as a player: from the run's open end to the device, twice
             PipeCases.lay(c, r, 0, 0, 4, 8, 16, 4, 8);
             errRoute = PipeSensorItem.place(c.level(), a.below(), net.minecraft.core.Direction.UP, new Vec3(a.getX() + 0.5, a.getY(), a.getZ() + 0.5),
-                PipeSensorPart.PRESSURE, player(c));
+                PipeSensorPart.PRESSURE, c.player());
             if (errRoute != null) return;
             var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
             PipePlacer.forget(fp.getUUID());
@@ -367,10 +359,10 @@ public final class PipeTransmitterCases {
             PipePlacer.use(fp, sl, r, net.minecraft.core.Direction.WEST, kit, 0, new Vec3(r.getX(), r.getY() + 0.25, r.getZ() + 0.5));
             PipePlacer.use(fp, sl, a, net.minecraft.core.Direction.UP, kit, 0, body);
             if (t.pipe() == null) errRoute = "the first route didn't reach the port";
-            piecesBefore = (int) node(c, a).parts.stream().filter(q -> q instanceof PipePart).count();
+            piecesBefore = (int) c.voxelByEntity(a).parts.stream().filter(q -> q instanceof PipePart).count();
             PipePlacer.use(fp, sl, r, net.minecraft.core.Direction.EAST, kit, 0, new Vec3(r.getX() + 1, r.getY() + 0.25, r.getZ() + 0.5));
             boolean handled = PipePlacer.use(fp, sl, a, net.minecraft.core.Direction.UP, kit, 0, body);
-            piecesAfter = (int) node(c, a).parts.stream().filter(q -> q instanceof PipePart).count();
+            piecesAfter = (int) c.voxelByEntity(a).parts.stream().filter(q -> q instanceof PipePart).count();
             fp.snapTo(px, py, pz, 0, 0);
             if (!handled) errRoute = "the second click on the device wasn't taken";
             PipePlacer.forget(fp.getUUID());
@@ -385,7 +377,7 @@ public final class PipeTransmitterCases {
             c.check("pipe transmitter: a second route to a port that has a pipe is refused", piecesAfter == piecesBefore, piecesBefore + " -> " + piecesAfter);
             if (errRoute != null) return;
             var t = device(c, a);
-            var v = node(c, a);
+            var v = c.voxelByEntity(a);
             int[] p = t.port();
             // on the pipe's end over the device, and just over its body
             var onPipe = v.aimed((p[0] + 0.5) / 16.0, (p[1] + 1.2) / 16.0, (p[2] + 0.5) / 16.0);

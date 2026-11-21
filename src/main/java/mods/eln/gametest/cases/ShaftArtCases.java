@@ -245,10 +245,7 @@ public final class ShaftArtCases {
         BlockPos cable = p.relative(m.front.toEnumFacing());
         ctx.placeSix(Ids.six("Medium Voltage Cable"), cable);
         var s = (mods.eln.sixnode.electricalsource.ElectricalSourceElement) ctx.placeSix(Wp11Cases.SOURCE, cable.relative(m.front.toEnumFacing()));
-        s.networkUnserialize(ctx.stream(out -> {
-            out.writeByte(mods.eln.sixnode.electricalsource.ElectricalSourceElement.setVoltageId);
-            out.writeFloat(200f);
-        }));
+        ctx.setVolts(s, 200f);
         return m;
     }
 
