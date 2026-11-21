@@ -55,8 +55,6 @@ public final class RoutePlacer {
         /** The route's particles (show): colour and size. */
         final int particle;
         final float particleSize;
-        /** A finish at the last waypoint keeps it when the lay fails. */
-        final boolean keepsWaypointOnLayFailure;
         /** Before a start, the preview marks any end with the port cube (else only a machine's port). */
         final boolean bigStartMarker;
         /** The preview of a route to a machine's port adds the port cube at it. */
@@ -64,13 +62,11 @@ public final class RoutePlacer {
         /** The preview aimed at the last waypoint routes to it as the click would (ending there). */
         final boolean previewAgain;
 
-        Spec(String noun, boolean pipe, int particle, float particleSize, boolean keepsWaypointOnLayFailure, boolean bigStartMarker, boolean portCube,
-             boolean previewAgain) {
+        Spec(String noun, boolean pipe, int particle, float particleSize, boolean bigStartMarker, boolean portCube, boolean previewAgain) {
             this.noun = noun;
             this.pipe = pipe;
             this.particle = particle;
             this.particleSize = particleSize;
-            this.keepsWaypointOnLayFailure = keepsWaypointOnLayFailure;
             this.bigStartMarker = bigStartMarker;
             this.portCube = portCube;
             this.previewAgain = previewAgain;
@@ -336,7 +332,7 @@ public final class RoutePlacer {
         }
         String err = k.lay(level, plan.tier, plan.spec, r, plan.startJoin, c.join(), player);
         if (err != null) {
-            if (again && k.keepsWaypointOnLayFailure) plan.waypoints.add(end);
+            if (again) plan.waypoints.add(end);
             KitPreview.note(player, "Can't lay it: " + err);
             return true;
         }

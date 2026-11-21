@@ -26,7 +26,7 @@ public final class PipePlacer {
     }
 
     /** The pipe kit in RoutePlacer's one flow. */
-    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("pipe", true, 0x55C8FF, 0.8f, true, true, false, true) {
+    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("pipe", true, 0x55C8FF, 0.8f, true, false, true) {
         @Override
         RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, net.minecraft.world.phys.Vec3 hit, int tier, boolean start, boolean click) {
             PipeRouter.End port = portAt(level, pos, face, hit);
