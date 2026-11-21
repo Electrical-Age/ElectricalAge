@@ -11,23 +11,26 @@ here.
 
 | Need | Use | Not |
 |---|---|---|
-| Route a cable or pipe (A*) | `node/voxel/Router` | another pathfinder; a cable-only or pipe-only copy of a router step |
+| Route a cable or pipe (A*) | `node/voxel/Router`; what's in the way: `RouteView.obstacles` (and `freeAround` a junction) | another pathfinder; a cable-only or pipe-only copy of a router step or of the obstacle test |
 | A device with one static model and nothing animated | `node/transparent/FrontDrawnRender` (the descriptor implements `FrontDrawnRender.Drawn`) | a new `XRender` whose draw() is `front.glRotateXnRef(); desc.draw();` |
 | Item custom data (counters, lengths, settings) | `generic/ItemNbt` | hand-rolled `CustomData` get/put in the item class |
 | Numbers with units in text | `api/Meters` (`volts`, `amps`, `watts`, `joules`, `ohms`, `celsius`, `kelvin`, `number`) for a bare value; `misc/Utils.plot*(header, v)` only for the padded meter lines built from them | `String.format("%.2f kV", …)`, `(int) w + " W"`, `plotPower("", w).trim()`, a local `fmt()` |
+| A cable cross-section in text | `CableSpec.mm2Number(mm2)` ("2.5", "4") | a local `fmt()` dropping ".0" |
 | A power tier's voltage (48 V … 11 kV) | `node/voxel/CableSpec.voltsLabel(tier)` ("48V", "11kV", as the device names; readings use Meters.volts) | `(int) v / 1000 + " kV"` |
 | Temperatures | Tc scale (K above ambient, thermal loads): `Utils.plotCelsius(t)`; absolute °C: `Meters.celsius`; a difference: `Meters.kelvin` | `plotValue(t + Tamb) + "°C"`, `"%.0f °C"`, plotCelsius on an absolute °C or a difference |
 | Percent | `Utils.plotPercent(share)` ("50%"; 1 is 100 %) | `(int) (x * 100) + "%"`, `tr("…%1$%", round(x * 100))`, `plotPercent("", x).trim()` |
-| Fluid amounts and contents | `sim/fluid/EaUnits` (`volume`, `tank` for "fill / capacity", `contents`, `composition`, `steamGrams`) | `+ " mB"` or `"%.0f / %d mB"` by hand (EaUnits switches to buckets at 1000 mB) |
+| Fluid amounts and contents | `sim/fluid/EaUnits` (`volume`, `tank` for "fill / capacity", `contents`, `composition`, `steamGrams`; the scale: `LITRES_PER_MB`, `KG_PER_MB_WATER`, `STEAM_MB_PER_WATER_MB`) | `+ " mB"` or `"%.0f / %d mB"` by hand (EaUnits switches to buckets at 1000 mB); a restated 6.75e-5 or 67.5 |
 | Telling the player something | Transient (a refusal, "needs X", a mode toggle, out of range, a passing reading): the action bar, `player.sendOverlayMessage(Component.literal(…))`; why a kit click failed: `KitPreview.note` (the kit's preview owns the action bar). Chat (`Utils.sendMessage`) only for what is read later: meter readings, multi-line reports, lasting warnings, commands and debug | `Utils.sendMessage` for a refusal |
 | Voltage tiers | `Eln.LVU/MVU/HVU/VVU` (48, 230, 400, 11000 V) | a literal 50, 200, 800 or other old 1.12 voltage in code or comments |
 | Wrench turning | six-node: `SixNodeElement.onBlockActivatedRotate` (`wrenchStep` for half turns); transparent: override `TransparentNodeElement.wrenchTurn`; voxel: `VoxelNode.wrenchTurn`; fluid devices: implement `fluid/FluidPlacement.Turnable` (the base wrenchTurn turns it); a wire's brush: `SixNodeElement.brushPaint` | a per-device rotate handler; a wrench turn in onBlockActivated |
 | GUI text colours | `ElnScreen.LABEL`, `ERROR_TEXT` (a fault, a missing input), `ERROR_TEXT_BRIGHT`, `OK_TEXT` (at work) | a literal `0xFFA02020` / `0xFF206020` in a screen |
 | A battery-charge bar | `client/gui/EaGauge.chargeBar` (`chargeColor`) | another bar fill or charge palette |
 | Clamping | `misc/Utils.limit` | another local `clamp` |
+| A saved or computed value that may be NaN/infinite | `misc/Utils.finiteOr(v, fallback)` | `if (isNaN(x)) x = 0; if (x == POSITIVE_INFINITY) …` |
+| A client packet to the server | `ElnNet.sendToServer(byte[])` (or the stream form) | a ByteArrayOutputStream filled only to be sent |
 | Kit recipes | `node/voxel/KitRecipes` | a per-kit recipe skeleton |
 | GameTest ids | `gametest/cases/Ids` | a per-file `transparent(String)` / `six(String)` lookup |
-| GameTest world access | `TestContext` (`at`, `floor`, `placeSix`, `player()`, `holding`, `nodeAt`/`voxelAt`/`voxelByEntity`, `source`/`setVolts`, static `field`; docs/testing.md); six-node electrical fixtures `Wp9aCases` (`orient`, `load`, `resistor`, `current`); `Wp10aCases.rs()`/`off()` | per-file `node(ctx,pos)`, `player(ctx)`, `source(u)`, `resistor()` or reflective `field()` copies; a hand-written `setVoltageId` packet |
+| GameTest world access | `TestContext` (`at`, `floor`, `placeSix`, `player()`, `holding`, `nodeAt`/`voxelAt`/`voxelByEntity`, `source`/`setVolts`, static `field`; docs/testing.md); six-node electrical fixtures `Wp9aCases` (`orient`, `load`, `resistor`, `current`); `Wp10aCases.rs()`/`off()`; shaft lines `ShaftSteamCases.turbineLine`; HP plants `HpPlantCases.hpTurbine`/`condensateOut`/`WallMeter`; steam in pipes `PipeCases.steam` | per-file `node(ctx,pos)`, `player(ctx)`, `source(u)`, `resistor()` or reflective `field()` copies; a hand-written `setVoltageId` packet |
 
 ## Invariants
 
