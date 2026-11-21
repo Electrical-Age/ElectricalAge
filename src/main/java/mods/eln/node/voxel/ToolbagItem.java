@@ -183,6 +183,7 @@ public class ToolbagItem extends Item implements PipeTool {
                 setContents(bag, c);
             }
 
+            @Override
             public String undoSentence() {
                 return "Sneak-click for Undo.";
             }
@@ -365,16 +366,14 @@ public class ToolbagItem extends Item implements PipeTool {
             // pipe's for a pipe (points on a face, points in a block's middle: they don't carry over between the two)
             if (kind.equals(was)) return;
             Click start = STARTED.get(p.getUUID());
-            RoutePlacer.Plan old = RoutePlacer.drop(p.getUUID());
-            boolean wasPipe = old != null && old.kind.pipe;
-            List<CableRouter.End> wps = old == null ? List.of() : old.waypoints;
+            RoutePlacer.Plan old = RoutePlacer.drop(p.getUUID());   // (not null: a route is on)
             if (start == null || start.dim() != level.dimension()) {
                 KitPreview.note(p, "Route dropped: start it again with the new kind");
                 return;
             }
             lay(p, level, s, start);
-            if (old != null && old.kind == RoutePlacer.of(s)) RoutePlacer.addWaypoints(p.getUUID(), wps);
-            else if (!wps.isEmpty() || wasPipe != s.pipe()) p.sendOverlayMessage(Component.literal("Restarted as " + kind.label() + " \u2014 waypoints cleared"));
+            if (old.kind == RoutePlacer.of(s)) RoutePlacer.addWaypoints(p.getUUID(), old.waypoints);
+            else p.sendOverlayMessage(Component.literal("Restarted as " + kind.label() + " \u2014 waypoints cleared"));
             return;
         }
         if (pending == null) {

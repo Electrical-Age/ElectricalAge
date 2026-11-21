@@ -40,18 +40,19 @@ public final class RoutePlacer {
         }
     }
 
-    /** A route found, or why not (error); its length (voxels) and its path in the kind's own form (Spec.trace, Spec.lay). */
-    record Routed(String error, int length, List<?> path) {
+    /** A route found, or why not (error); its length (voxels) and its path in the kind's own form P (cable steps, pipe points). */
+    record Routed<P>(String error, int length, P path) {
     }
 
     /**
-     * What differs between cables and pipes. The ends are CableRouter.End for both kinds (a pipe's: attach -1, dir as a
-     * face, 3D value), adapted to the kind's router inside its hooks; Router itself is shared.
+     * What differs between cables and pipes (P: the kind's route path). The ends are CableRouter.End for both kinds (a
+     * pipe's: attach -1, dir as a face, 3D value), adapted to the kind's router inside its hooks; Router itself is shared.
      */
-    abstract static class Spec {
+    abstract static class Spec<P> {
         /** "cable" or "pipe", in the player's messages. */
         final String noun;
-        final boolean pipe;
+        /** Where a route finishes, for the start message: "a device or cable", "a port or pipe". */
+        final String finishAt;
         /** The route's particles (show): colour and size. */
         final int particle;
         final float particleSize;
@@ -60,9 +61,9 @@ public final class RoutePlacer {
         /** The preview of a route to a machine's port adds the port cube at it. */
         final boolean portCube;
 
-        Spec(String noun, boolean pipe, int particle, float particleSize, boolean bigStartMarker, boolean portCube) {
+        Spec(String noun, String finishAt, int particle, float particleSize, boolean bigStartMarker, boolean portCube) {
             this.noun = noun;
-            this.pipe = pipe;
+            this.finishAt = finishAt;
             this.particle = particle;
             this.particleSize = particleSize;
             this.bigStartMarker = bigStartMarker;
@@ -78,41 +79,32 @@ public final class RoutePlacer {
         abstract Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, int tier, boolean start, boolean click);
 
         /** The route from start over the waypoints to end, free round the joins (or null), over view, within budgetMs. */
-        abstract Routed route(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-                              CableRouter.End end, long[] endJoin, long budgetMs);
+        abstract Routed<P> route(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
+                                 CableRouter.End end, long[] endJoin, long budgetMs);
 
         /** Lay a route found by route (all or nothing, joins included); null if laid, else why not. */
-        abstract String lay(Level level, int tier, CableSpec spec, Routed r, long[] startJoin, long[] endJoin, Player player);
+        abstract String lay(Level level, int tier, CableSpec spec, Routed<P> r, long[] startJoin, long[] endJoin, Player player);
 
-        /** The preview's answer for a route to end (KitPreview.Answer: ok, its outline, the action-bar line). */
-        abstract KitPreview.Answer answer(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-                                          CableRouter.End end, long[] endJoin, int have);
+        /** The parts a route found by route would lay, as boxes in world voxels (the preview's outline). */
+        abstract List<int[]> boxes(Routed<P> r, int tier, CableSpec spec);
 
         /** The route's polyline for its particles: {x, y, z} in world voxels, then the offset (blocks) of the leg ending there. */
-        abstract List<double[]> trace(Routed r);
+        abstract List<double[]> trace(Routed<P> r);
 
         /** A click with no route yet that this kind handles itself (cables: mending a burnt run); true if handled. */
         boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, KitSupply kit) {
             return false;
         }
-
-        /** What the player reads when a route starts (onJoin: on an old cable or pipe). */
-        abstract String started(KitSupply kit, boolean onJoin);
-
-        /** Added to "Waypoint n: x blocks so far" (both kinds end on the last waypoint clicked again). */
-        String waypointTail() {
-            return ". Click it again to end there.";
-        }
     }
 
     /** The spec for what a supply lays. */
-    static Spec of(KitSupply kit) {
+    static Spec<?> of(KitSupply kit) {
         return kit.pipe() ? PipePlacer.ROUTE : CablePlacer.ROUTE;
     }
 
     /** A route being laid by a player. */
     static class Plan {
-        final Spec kind;
+        final Spec<?> kind;
         final int tier;
         /** The kit's spec (power cables): a route is laid of one cable. Null for pipes. */
         CableSpec spec;
@@ -123,7 +115,7 @@ public final class RoutePlacer {
         final net.minecraft.resources.ResourceKey<Level> dim;
         long touched;
 
-        Plan(Spec kind, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, net.minecraft.resources.ResourceKey<Level> dim) {
+        Plan(Spec<?> kind, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, net.minecraft.resources.ResourceKey<Level> dim) {
             this.kind = kind;
             this.tier = tier;
             this.spec = spec;
@@ -134,6 +126,11 @@ public final class RoutePlacer {
 
         CableRouter.End last() {
             return waypoints.isEmpty() ? start : waypoints.get(waypoints.size() - 1);
+        }
+
+        /** Does supply s lay this route (its kind, tier and spec)? */
+        boolean laidBy(KitSupply s) {
+            return s != null && of(s) == kind && s.tier() == tier && java.util.Objects.equals(s.spec(), spec);
         }
     }
 
@@ -153,7 +150,7 @@ public final class RoutePlacer {
     }
 
     /** Forget the player's route if it is of this kind. */
-    static void forget(UUID player, Spec kind) {
+    static void forget(UUID player, Spec<?> kind) {
         Plan p = PLANS.get(player);
         if (p != null && p.kind == kind) PLANS.remove(player);
     }
@@ -169,7 +166,7 @@ public final class RoutePlacer {
     }
 
     /** ... of this kind? */
-    static boolean active(UUID player, Spec kind) {
+    static boolean active(UUID player, Spec<?> kind) {
         Plan p = PLANS.get(player);
         return p != null && p.kind == kind;
     }
@@ -215,8 +212,7 @@ public final class RoutePlacer {
     static void checkLapse(ServerPlayer p, long now) {
         Plan plan = PLANS.get(p.getUUID());
         if (plan == null) return;
-        boolean holding = KitSupply.lays(KitSupply.held(p), plan.kind.pipe, plan.tier, plan.spec);
-        String why = lapse(plan, now, holding, plan.dim == p.level().dimension(), p.position());
+        String why = lapse(plan, now, plan.laidBy(KitSupply.held(p)), plan.dim == p.level().dimension(), p.position());
         if (why == null) return;
         PLANS.remove(p.getUUID());
         p.sendOverlayMessage(Component.literal(plan.kind.title() + " route dropped (" + why + ")"));
@@ -236,7 +232,11 @@ public final class RoutePlacer {
      * only for a sneak-click with no route (nothing to do).
      */
     public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, KitSupply kit, Vec3 hit, boolean sneak) {
-        Spec k = of(kit);
+        return use(of(kit), player, level, pos, face, kit, hit, sneak);
+    }
+
+    private static <P> boolean use(Spec<P> k, ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, KitSupply kit, Vec3 hit,
+                                   boolean sneak) {
         int tier = kit.tier();
         CableSpec spec = kit.spec();
         UUID id = player.getUUID();
@@ -272,7 +272,7 @@ public final class RoutePlacer {
             Plan p = new Plan(k, tier, spec, at, c.join(), level.dimension());
             p.touched = now;
             PLANS.put(id, p);
-            player.sendOverlayMessage(Component.literal(k.started(kit, c.join() != null)));
+            player.sendOverlayMessage(Component.literal(k.title() + " route started. Click waypoints, then " + k.finishAt + "."));
             return true;
         }
         String hint = ". " + kit.undoSentence();   // (wording: Neon, 2026-11-21)
@@ -286,14 +286,14 @@ public final class RoutePlacer {
         if (!c.finish() && c.join() == null && !again) {
             plan.waypoints.add(at);
             long tRoute = System.nanoTime();
-            Routed r = route(level, plan, null, null);
+            Routed<P> r = route(k, level, plan, null, null);
             KitPreview.slow("waypoint route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
             if (r.error() != null) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
                 KitPreview.note(player, "Can't reach: " + r.error() + hint);
             } else {
                 player.sendOverlayMessage(Component.literal(String.format("Waypoint %d: %.1f blocks so far", plan.waypoints.size(), r.length() / 16.0)
-                    + k.waypointTail()));
+                    + ". Click it again to end there."));
                 show(player, level, k, r);
             }
             return true;
@@ -301,7 +301,7 @@ public final class RoutePlacer {
         // finish: at a machine, a cable or pipe, or the last waypoint
         CableRouter.End end = again ? plan.waypoints.remove(plan.waypoints.size() - 1) : at;
         long tRoute = System.nanoTime();
-        Routed r = route(level, plan, end, c.join());
+        Routed<P> r = route(k, level, plan, end, c.join());
         KitPreview.slow("click route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
         if (r.error() != null) {
             if (again) plan.waypoints.add(end);
@@ -341,10 +341,15 @@ public final class RoutePlacer {
             // (on the note line: the preview's next line takes the action bar at once, and a waypoint on the way to the
             // aim changes neither the route drawn nor its length; AdventurAgent read an Undo as doing nothing)
             KitPreview.note(player, "Waypoint taken back (" + plan.waypoints.size() + " left)");
-            Routed r = route(level, plan, null, null);   // (and the route left drawn again)
-            if (r.error() == null) show(player, level, plan.kind, r);
+            redraw(plan.kind, player, level, plan);   // (and the route left drawn again)
         }
         return true;
+    }
+
+    /** Draw the plan's route to its last waypoint as particles, if there is one. */
+    private static <P> void redraw(Spec<P> k, ServerPlayer player, ServerLevel level, Plan plan) {
+        Routed<P> r = route(k, level, plan, null, null);
+        if (r.error() == null) show(player, level, k, r);
     }
 
     /** Is the aim c at the plan's last waypoint again (a plain surface click there: the route ends there)? */
@@ -364,18 +369,19 @@ public final class RoutePlacer {
     }
 
     /** The plan's route to end (null: to its last waypoint), free round its start join and endJoin (or null), on the live world. */
-    static Routed route(Level level, Plan plan, CableRouter.End end, long[] endJoin) {
+    static <P> Routed<P> route(Spec<P> k, Level level, Plan plan, CableRouter.End end, long[] endJoin) {
         List<CableRouter.End> wps = new ArrayList<>(plan.waypoints);
         CableRouter.End last = end;
         if (last == null) {
-            if (wps.isEmpty()) return new Routed(null, 0, List.of());
+            if (wps.isEmpty()) return new Routed<>(null, 0, null);
             last = wps.remove(wps.size() - 1);
         }
-        return plan.kind.route(RouteView.live(level), plan.tier, plan.spec, plan.start, plan.startJoin, wps, last, endJoin, PipeRouter.TIME_BUDGET_MS);
+        return k.route(RouteView.live(level), plan.tier, plan.spec, plan.start, plan.startJoin, wps, last, endJoin, PipeRouter.TIME_BUDGET_MS);
     }
 
     /** The route as particles, for this player only. */
-    static void show(ServerPlayer player, ServerLevel level, Spec k, Routed r) {
+    static <P> void show(ServerPlayer player, ServerLevel level, Spec<P> k, Routed<P> r) {
+        if (r.path() == null) return;
         var dust = new net.minecraft.core.particles.DustParticleOptions(k.particle, k.particleSize);
         List<double[]> pts = k.trace(r);
         for (int i = 1; i < pts.size(); i++) {

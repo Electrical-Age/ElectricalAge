@@ -118,17 +118,17 @@ public final class KitPreview {
     }
 
     /** A route preview to work out on the preview thread: the plan's route to the aim (to), over a snapshot round it. */
-    record Job(RoutePlacer.Spec k, RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
+    record Job(RoutePlacer.Spec<?> k, RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
                CableRouter.End to, long[] endJoin, int have, RoutePlacer.Click c, boolean again, String refused) {
         /**
-         * The answer: the click's refusal if it would be refused (RoutePlacer.startRefusal), else the kind's answer; a
-         * route that works says what the click would do there: connect to a machine, join the cable or pipe aimed at, end
-         * at the last waypoint (an open end), or add a waypoint (Baughn: the pipes' suffix, for both kinds; wording
-         * Neon's: "Cable: 7.5 blocks \u2014 joins").
+         * The answer: the click's refusal if it would be refused (RoutePlacer.startRefusal), else the route; one that
+         * works says what the click would do there: connect to a machine, join the cable or pipe aimed at, end at the
+         * last waypoint (an open end), or add a waypoint (Baughn: the pipes' suffix, for both kinds; wording Neon's:
+         * "Cable: 7.5 blocks \u2014 joins").
          */
         Answer answer() {
             if (refused != null) return new Answer(false, new ArrayList<>(List.of(marker(to))), refused);
-            Answer a = k.answer(view, tier, spec, start, startJoin, wps, to, endJoin, have);
+            Answer a = KitPreview.answer(k, view, tier, spec, start, startJoin, wps, to, endJoin, have);
             if (!a.ok) return a;
             List<int[]> bs = a.boxes;
             if (k.portCube && c.port()) {
@@ -141,7 +141,6 @@ public final class KitPreview {
 
     /** The preview's route for the player's plan to the aim c (its snapshot taken now, on the server thread). */
     static Job job(ServerPlayer p, ServerLevel level, KitSupply kit, RoutePlacer.Plan plan, RoutePlacer.Click c) {
-        RoutePlacer.Spec k = plan.kind;
         List<CableRouter.End> wps = new ArrayList<>(plan.waypoints);
         CableRouter.End to = c.at();
         // (aimed at the last waypoint: the route ends there, as the click would)
@@ -157,7 +156,7 @@ public final class KitPreview {
             view = snapshotAround(p, level, ends);
         }
         int have = p.isCreative() ? Integer.MAX_VALUE : kit.length();
-        return new Job(k, view, plan.tier, plan.spec, plan.start, plan.startJoin, List.copyOf(wps), to, c.join(), have, c, again, refused);
+        return new Job(plan.kind, view, plan.tier, plan.spec, plan.start, plan.startJoin, List.copyOf(wps), to, c.join(), have, c, again, refused);
     }
 
     /** What the click would do, after the preview's length: " \u2014 open end", " \u2014 joins", " \u2014 connects" or " \u2014 waypoint". */
@@ -203,34 +202,22 @@ public final class KitPreview {
     /** What the preview shows for a route: ok or not, its boxes (or a marker at the end), and the action-bar line. */
     public record Answer(boolean ok, List<int[]> boxes, String message) {}
 
-    /** The route to {@code at}, over a view of the world (the preview thread). */
+    /** A cable route to {@code at}, over a view of the world (GameTests: the snapshot gives the live route). */
     public static Answer answer(RouteView view, int tier, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps, CableRouter.End at,
-                         long[] endJoin, int have) {
-        return answer(view, tier, null, start, startJoin, wps, at, endJoin, have);
+                                long[] endJoin, int have) {
+        return answer(CablePlacer.ROUTE, view, tier, null, start, startJoin, wps, at, endJoin, have);
     }
 
-    public static Answer answer(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-                                CableRouter.End at, long[] endJoin, int have) {
-        CableRouter.Space sp = CablePlacer.space(view);
-        if (startJoin != null) sp = CablePlacer.around(sp, startJoin);
-        if (endJoin != null) sp = CablePlacer.around(sp, endJoin);
-        CablePart.Tier t = CablePlacer.tierOf(tier, spec);
-        CableRouter.Result r = CableRouter.route(sp, t.width(), t.height(), start, wps, at, PREVIEW_BUDGET_MS);
-        List<int[]> boxes = new ArrayList<>();
-        if (r.error != null) {
-            boxes.add(marker(at));
-            return new Answer(false, boxes, "Can't reach: " + r.error);
-        }
-        for (CableRouter.Piece pc : CableRouter.pieces(r.steps, t.width(), t.height())) {
-            CablePart part = pc.face() < 0 ? CablePart.knuckle(tier, spec, pc.points()[0], pc.points()[1], pc.points()[2]) : new CablePart(tier, spec, pc.face(), pc.points());
-            for (int[] b : part.boxes())
-                boxes.add(new int[]{(int) pc.bx() * 16 + b[0], (int) pc.by() * 16 + b[1], (int) pc.bz() * 16 + b[2],
-                    (int) pc.bx() * 16 + b[3], (int) pc.by() * 16 + b[4], (int) pc.bz() * 16 + b[5]});
-        }
+    /** The kind's route to end over a view of the world (the preview thread): its outline and length, or why not. */
+    static <P> Answer answer(RoutePlacer.Spec<P> k, RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin,
+                             List<CableRouter.End> wps, CableRouter.End end, long[] endJoin, int have) {
+        RoutePlacer.Routed<P> r = k.route(view, tier, spec, start, startJoin, wps, end, endJoin, PREVIEW_BUDGET_MS);
+        if (r.error() != null) return new Answer(false, new ArrayList<>(List.of(marker(end))), "Can't reach: " + r.error());
+        List<int[]> boxes = k.boxes(r, tier, spec);
         int len = r.length();
         if (have < len)
-            return new Answer(false, boxes, String.format("Too long: %.1f blocks of cable, the kit holds %.1f", len / 16.0, have / 16.0));
-        return new Answer(true, boxes, String.format("Cable: %.1f blocks", len / 16.0));
+            return new Answer(false, boxes, String.format("Too long: %.1f blocks of %s, the kit holds %.1f", len / 16.0, k.noun, have / 16.0));
+        return new Answer(true, boxes, String.format("%s: %.1f blocks", k.title(), len / 16.0));
     }
 
     /** The preview thread's time for one route (more than the click's: it doesn't hold up the server). */
@@ -311,54 +298,13 @@ public final class KitPreview {
         ElnNet.sendToPlayer(p, bos);
     }
 
-    /** A pipe route's preview: the pipe as it would be laid from start over the waypoints to end (world voxels). */
-    public static Answer pipeAnswer(RouteView view, long[] join, int tier, PipeRouter.End start, List<PipeRouter.End> wps, PipeRouter.End end,
-                                    int have, boolean toPort) {
-        return pipeAnswer(view, join, null, tier, start, wps, end, have, toPort);
-    }
-
-    /** ... free round a start on a pipe too (startJoin, or null); a route that works says what the click would do there. */
-    public static Answer pipeAnswer(RouteView view, long[] join, long[] startJoin, int tier, PipeRouter.End start, List<PipeRouter.End> wps,
-                                    PipeRouter.End end, int have, boolean toPort) {
-        Answer a = pipeRoute(view, join, startJoin, tier, start, wps, end, have);
-        return !a.ok ? a : new Answer(true, a.boxes, a.message + suffix(false, join != null, toPort));
-    }
-
-    /** ... the line without what the click would do (the pipe spec's: KitPreview.Job adds it, for both kinds). */
-    static Answer pipeRoute(RouteView view, long[] join, long[] startJoin, int tier, PipeRouter.End start, List<PipeRouter.End> wps,
-                           PipeRouter.End end, int have) {
-        PipeRouter.Space sp = RouteView.obstacles(view);
-        if (join != null) sp = RouteView.freeAround(sp, join, PipePart.JOIN_CLEAR);
-        if (startJoin != null) sp = RouteView.freeAround(sp, startJoin, PipePart.JOIN_CLEAR);
-        PipeRouter.Result r = PipeRouter.route(sp, PipePart.GRID[tier], start, wps, end, PREVIEW_BUDGET_MS);
-        List<int[]> bs = new ArrayList<>();
-        boolean ok = r.error == null;
-        String msg;
-        if (!ok) {
-            bs.add(new int[]{(int) end.x() - 1, (int) end.y() - 1, (int) end.z() - 1, (int) end.x() + 1, (int) end.y() + 1, (int) end.z() + 1});
-            msg = "Can't reach: " + r.error;
-        } else {
-            for (var e : PipeRouter.perBlock(r.points).entrySet()) {
-                long bx = e.getKey().get(0), by = e.getKey().get(1), bz = e.getKey().get(2);
-                for (int[] pts : e.getValue())
-                    for (int[] b : new PipePart(tier, pts).boxes())
-                        bs.add(new int[]{(int) bx * 16 + b[0], (int) by * 16 + b[1], (int) bz * 16 + b[2], (int) bx * 16 + b[3], (int) by * 16 + b[4], (int) bz * 16 + b[5]});
-            }
-            int len = r.length();
-            if (have < len) {
-                ok = false;
-                msg = String.format("Too long: %.1f blocks of pipe, the kit holds %.1f", len / 16.0, have / 16.0);
-            } else msg = String.format("Pipe: %.1f blocks", len / 16.0);
-        }
-        return new Answer(ok, bs, msg);
-    }
-
-    /** pipeAnswer from start to end with no waypoints, on a snapshot round them (GameTests). */
+    /** A pipe route's preview from start to end with no waypoints, on a snapshot round them (GameTests). */
     public static Answer pipeAnswerForTests(ServerLevel level, int tier, PipeRouter.End start, PipeRouter.End end) {
         int m = PipeRouter.MARGIN / 16 + 2;
         int x0 = (int) Math.floorDiv(Math.min(start.x(), end.x()), 16) - m, y0 = (int) Math.floorDiv(Math.min(start.y(), end.y()), 16) - m;
         int z0 = (int) Math.floorDiv(Math.min(start.z(), end.z()), 16) - m, x1 = (int) Math.floorDiv(Math.max(start.x(), end.x()), 16) + m;
         int y1 = (int) Math.floorDiv(Math.max(start.y(), end.y()), 16) + m, z1 = (int) Math.floorDiv(Math.max(start.z(), end.z()), 16) + m;
-        return pipeAnswer(RouteView.snapshot(level, x0, y0, z0, x1, y1, z1), null, tier, start, List.of(), end, Integer.MAX_VALUE, false);
+        return answer(PipePlacer.ROUTE, RouteView.snapshot(level, x0, y0, z0, x1, y1, z1), tier, null, PipePlacer.end(start), null, List.of(),
+            PipePlacer.end(end), null, Integer.MAX_VALUE);
     }
 }

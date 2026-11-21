@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * another dimension; and holds otherwise.
  */
 public class CableRouteLapseTest {
-    static CablePlacer.Plan plan(long touched) {
-        CablePlacer.Plan p = new CablePlacer.Plan(1, new CableRouter.End(0, 16, 0, 0, -1), null, null);
+    static RoutePlacer.Plan plan(long touched) {
+        RoutePlacer.Plan p = new RoutePlacer.Plan(CablePlacer.ROUTE, 1, null, new CableRouter.End(0, 16, 0, 0, -1), null, null);
         p.touched = touched;
         return p;
     }
@@ -23,12 +23,12 @@ public class CableRouteLapseTest {
     @Property(tries = 300)
     void lapsesExactlyWhenItShould(@ForAll @LongRange(min = 0, max = 4000) long idle, @ForAll boolean holding, @ForAll boolean sameDim,
                                    @ForAll @IntRange(min = 0, max = 120) int blocksAway, @ForAll @IntRange(min = 0, max = 3) int waypoints) {
-        CablePlacer.Plan p = plan(1000);
+        RoutePlacer.Plan p = plan(1000);
         for (int i = 0; i < waypoints; i++) p.waypoints.add(new CableRouter.End(16L * 10 * (i + 1), 16, 0, 0, -1));
         CableRouter.End last = p.waypoints.isEmpty() ? p.start : p.waypoints.get(p.waypoints.size() - 1);
         Vec3 at = new Vec3(last.x() / 16.0 + blocksAway, last.y() / 16.0, last.z() / 16.0);
-        String why = CablePlacer.lapse(p, 1000 + idle, holding, sameDim, at);
-        boolean should = !holding || !sameDim || idle > CablePlacer.IDLE_TICKS || blocksAway * 16 > KitItem.MAX;
+        String why = RoutePlacer.lapse(p, 1000 + idle, holding, sameDim, at);
+        boolean should = !holding || !sameDim || idle > RoutePlacer.IDLE_TICKS || blocksAway * 16 > KitItem.MAX;
         assertEquals(should, why != null, "idle " + idle + " holding " + holding + " same dim " + sameDim + " away " + blocksAway + ": " + why);
     }
 }

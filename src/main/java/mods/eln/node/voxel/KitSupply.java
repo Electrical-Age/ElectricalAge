@@ -76,9 +76,4 @@ public interface KitSupply {
         if (s.getItem() instanceof ToolbagItem) return ToolbagItem.supply(s);
         return null;
     }
-
-    /** Does supply s lay what a route of this kind was started with (pipe or cable, tier, spec)? */
-    static boolean lays(KitSupply s, boolean pipe, int tier, CableSpec spec) {
-        return s != null && s.pipe() == pipe && s.tier() == tier && java.util.Objects.equals(s.spec(), spec);
-    }
 }

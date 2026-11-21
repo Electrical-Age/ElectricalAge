@@ -48,7 +48,7 @@ public final class RouteDebug {
     static final String PIPE = "p_";
 
     /** The replay token for a route: tier, the start, its join, the waypoints, the end and its join. */
-    static String token(RoutePlacer.Spec k, int tier, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps, CableRouter.End at, long[] endJoin) {
+    static String token(RoutePlacer.Spec<?> k, int tier, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps, CableRouter.End at, long[] endJoin) {
         List<Long> v = new ArrayList<>();
         v.add((long) tier);
         end(v, start);
@@ -59,7 +59,7 @@ public final class RouteDebug {
         join(v, endJoin);
         StringBuilder sb = new StringBuilder();
         for (Long x : v) sb.append(sb.isEmpty() ? "" : ".").append(Long.toString(x, 36));
-        return (k.pipe ? PIPE : "") + sb;
+        return (k == PipePlacer.ROUTE ? PIPE : "") + sb;
     }
 
     private static void end(List<Long> v, CableRouter.End e) {
@@ -86,8 +86,8 @@ public final class RouteDebug {
 
     /** /elnlab routereplay TOKEN: the same route on this world, timed as the preview does it and as the click does. */
     public static String replay(ServerLevel level, net.minecraft.world.entity.player.Player player, String token) {
-        RoutePlacer.Spec k = token.startsWith(PIPE) ? PipePlacer.ROUTE : CablePlacer.ROUTE;
-        if (k.pipe) token = token.substring(PIPE.length());
+        RoutePlacer.Spec<?> k = token.startsWith(PIPE) ? PipePlacer.ROUTE : CablePlacer.ROUTE;
+        if (k == PipePlacer.ROUTE) token = token.substring(PIPE.length());
         String[] f = token.split("\\.");
         long[] v = new long[f.length];
         for (int i = 0; i < f.length; i++) v[i] = Long.parseLong(f[i], 36);
@@ -108,11 +108,11 @@ public final class RouteDebug {
         RouteView view = player instanceof ServerPlayer sp ? KitPreview.snapshotAround(sp, level, ends, true) : RouteView.live(level);
         long snap = (System.nanoTime() - t0) / 1_000_000;
         t0 = System.nanoTime();
-        KitPreview.Answer a = k.answer(view, tier, null, start, sj, wps, at, ej, Integer.MAX_VALUE);
+        KitPreview.Answer a = KitPreview.answer(k, view, tier, null, start, sj, wps, at, ej, Integer.MAX_VALUE);
         long pre = (System.nanoTime() - t0) / 1_000_000;
         int preExp = Router.LAST_EXPANSIONS.get();
         t0 = System.nanoTime();
-        RoutePlacer.Routed r = k.route(RouteView.live(level), tier, null, start, sj, wps, at, ej, PipeRouter.TIME_BUDGET_MS);
+        RoutePlacer.Routed<?> r = k.route(RouteView.live(level), tier, null, start, sj, wps, at, ej, PipeRouter.TIME_BUDGET_MS);
         long live = (System.nanoTime() - t0) / 1_000_000;
         return String.format("replay: snapshot %d ms, preview route %d ms (%d expansions, %s); click route on the live world %d ms (%d expansions, %s)",
             snap, pre, preExp, a.ok() ? "ok" : a.message(), live, Router.LAST_EXPANSIONS.get(), r.error() == null ? "ok" : r.error());

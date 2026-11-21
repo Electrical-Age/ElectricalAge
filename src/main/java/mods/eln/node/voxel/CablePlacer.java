@@ -24,8 +24,8 @@ public final class CablePlacer {
     private CablePlacer() {
     }
 
-    /** The cable kit in RoutePlacer's one flow. */
-    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("cable", false, 0xFFB040, 0.7f, false, true) {
+    /** The cable kit in RoutePlacer's one flow (a route's path: the router's steps). */
+    static final RoutePlacer.Spec<List<CableRouter.Step>> ROUTE = new RoutePlacer.Spec<>("cable", "a device or cable", 0xFFB040, 0.7f, false, true) {
         @Override
         RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, int tier, boolean start, boolean click) {
             long[][] join = new long[1][];
@@ -36,33 +36,39 @@ public final class CablePlacer {
         }
 
         @Override
-        RoutePlacer.Routed route(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-                                 CableRouter.End end, long[] endJoin, long budgetMs) {
+        RoutePlacer.Routed<List<CableRouter.Step>> route(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin,
+                                                        List<CableRouter.End> wps, CableRouter.End end, long[] endJoin, long budgetMs) {
             CableRouter.Space s = space(view);
             if (startJoin != null) s = around(s, startJoin);
             if (endJoin != null) s = around(s, endJoin);
             CablePart.Tier t = tierOf(tier, spec);
             CableRouter.Result r = CableRouter.route(s, t.width(), t.height(), start, wps, end, budgetMs);
-            return new RoutePlacer.Routed(r.error, r.error == null ? r.length() : 0, r.steps);
+            return new RoutePlacer.Routed<>(r.error, r.error == null ? r.length() : 0, r.steps);
         }
 
         @Override
-        @SuppressWarnings("unchecked")
-        String lay(Level level, int tier, CableSpec spec, RoutePlacer.Routed r, long[] startJoin, long[] endJoin, net.minecraft.world.entity.player.Player player) {
-            return CablePlacer.lay(level, tier, spec, (List<CableRouter.Step>) r.path(), player);
+        String lay(Level level, int tier, CableSpec spec, RoutePlacer.Routed<List<CableRouter.Step>> r, long[] startJoin, long[] endJoin,
+                   net.minecraft.world.entity.player.Player player) {
+            return CablePlacer.lay(level, tier, spec, r.path(), player);
         }
 
         @Override
-        KitPreview.Answer answer(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-                                 CableRouter.End end, long[] endJoin, int have) {
-            return KitPreview.answer(view, tier, spec, start, startJoin, wps, end, endJoin, have);
+        List<int[]> boxes(RoutePlacer.Routed<List<CableRouter.Step>> r, int tier, CableSpec spec) {
+            CablePart.Tier t = tierOf(tier, spec);
+            List<int[]> boxes = new ArrayList<>();
+            for (CableRouter.Piece pc : CableRouter.pieces(r.path(), t.width(), t.height())) {
+                CablePart part = pc.face() < 0 ? CablePart.knuckle(tier, spec, pc.points()[0], pc.points()[1], pc.points()[2]) : new CablePart(tier, spec, pc.face(), pc.points());
+                for (int[] b : part.boxes())
+                    boxes.add(new int[]{(int) pc.bx() * 16 + b[0], (int) pc.by() * 16 + b[1], (int) pc.bz() * 16 + b[2],
+                        (int) pc.bx() * 16 + b[3], (int) pc.by() * 16 + b[4], (int) pc.bz() * 16 + b[5]});
+            }
+            return boxes;
         }
 
         @Override
-        @SuppressWarnings("unchecked")
-        List<double[]> trace(RoutePlacer.Routed r) {
+        List<double[]> trace(RoutePlacer.Routed<List<CableRouter.Step>> r) {
             List<double[]> out = new ArrayList<>();
-            for (CableRouter.Step st : (List<CableRouter.Step>) r.path())   // (just off the face it lies on)
+            for (CableRouter.Step st : r.path())   // (just off the face it lies on)
                 out.add(new double[]{st.x(), st.y(), st.z(), CableRouter.DV[st.attach()][0] * -0.05, CableRouter.DV[st.attach()][1] * -0.05,
                     CableRouter.DV[st.attach()][2] * -0.05});
             return out;
@@ -72,29 +78,11 @@ public final class CablePlacer {
         boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, KitSupply kit) {
             return CablePlacer.repair(player, level, pos, hit, kit, kit.tier(), kit.spec());
         }
-
-        @Override
-        String started(KitSupply kit, boolean onJoin) {
-            return "Cable route started. Click waypoints, then a device or cable.";
-        }
     };
-
-    /** RoutePlacer's plan for a cable (tests). */
-    public static final class Plan extends RoutePlacer.Plan {
-        Plan(int tier, CableRouter.End start, long[] startJoin, net.minecraft.resources.ResourceKey<Level> dim) {
-            super(ROUTE, tier, null, start, startJoin, dim);
-        }
-    }
 
     /** Drop the player's route if it is a cable's (tests: mock players share one UUID). */
     public static void forget(UUID player) {
         RoutePlacer.forget(player, ROUTE);
-    }
-
-    public static final long IDLE_TICKS = RoutePlacer.IDLE_TICKS;
-
-    static String lapse(RoutePlacer.Plan plan, long now, boolean holdingItsKit, boolean sameDim, Vec3 at) {
-        return RoutePlacer.lapse(plan, now, holdingItsKit, sameDim, at);
     }
 
     /** The world for the cable router: the pipe router's obstacles, and full solid blocks to lay cables on. */
@@ -559,7 +547,7 @@ public final class CablePlacer {
     }
 
     /** A cable kit used on a block face: start, extend or finish a route (RoutePlacer). Returns true if it handled the click. */
-    public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, ItemStack kit, int tier, Vec3 hit) {
+    public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, ItemStack kit, Vec3 hit) {
         return use(player, level, pos, face, KitSupply.of(kit), hit, player.isSecondaryUseActive());
     }
 

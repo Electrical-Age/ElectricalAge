@@ -124,7 +124,7 @@ public class CableKitItem extends Item implements PipeTool, KitItem {
     public InteractionResult useOn(UseOnContext ctx) {
         if (ctx.getLevel().isClientSide()) return InteractionResult.SUCCESS;
         if (ctx.getPlayer() instanceof net.minecraft.server.level.ServerPlayer sp && ctx.getLevel() instanceof net.minecraft.server.level.ServerLevel sl
-            && CablePlacer.use(sp, sl, ctx.getClickedPos(), ctx.getClickedFace(), ctx.getItemInHand(), tier, ctx.getClickLocation()))
+            && CablePlacer.use(sp, sl, ctx.getClickedPos(), ctx.getClickedFace(), ctx.getItemInHand(), ctx.getClickLocation()))
             return InteractionResult.SUCCESS;
         return InteractionResult.PASS;
     }

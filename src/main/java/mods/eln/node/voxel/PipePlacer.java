@@ -25,14 +25,14 @@ public final class PipePlacer {
     private PipePlacer() {
     }
 
-    /** The pipe kit in RoutePlacer's one flow. */
-    static final RoutePlacer.Spec ROUTE = new RoutePlacer.Spec("pipe", true, 0x55C8FF, 0.8f, true, false) {
+    /** The pipe kit in RoutePlacer's one flow (a route's path: the router's points). */
+    static final RoutePlacer.Spec<List<long[]>> ROUTE = new RoutePlacer.Spec<>("pipe", "a port or pipe", 0x55C8FF, 0.8f, true, false) {
         @Override
         RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, net.minecraft.world.phys.Vec3 hit, int tier, boolean start, boolean click) {
             PipeRouter.End port = portAt(level, pos, face, hit);
             boolean device = false;
             if (port == null) device = (port = devicePort(level, pos, hit)) != null;
-            if (device && portTaken(level, pos, hit)) return RoutePlacer.Click.none(PORT_TAKEN);   // (the preview too)
+            if (device && portTaken(level, pos, hit)) return RoutePlacer.Click.none(PORT_TAKEN);
             long[] join = port == null ? joinPoint(level, pos, hit) : null;
             PipeRouter.End surface = port == null && join == null ? surfacePoint(RouteView.obstacles(level), pos, face, hit, PipePart.GRID[tier]) : null;
             PipeRouter.End at = port != null ? port : join != null ? new PipeRouter.End(join[0], join[1], join[2], -1) : surface;
@@ -42,44 +42,44 @@ public final class PipePlacer {
         }
 
         @Override
-        RoutePlacer.Routed route(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-                                 CableRouter.End end, long[] endJoin, long budgetMs) {
+        RoutePlacer.Routed<List<long[]>> route(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
+                                               CableRouter.End end, long[] endJoin, long budgetMs) {
+            // (the two cubes are freed in either order alike: obstacles are boxes, so a box is blocked by what it overlaps
+            // outside both)
             PipeRouter.Space sp = RouteView.obstacles(view);
             if (startJoin != null) sp = RouteView.freeAround(sp, startJoin, PipePart.JOIN_CLEAR);
             if (endJoin != null) sp = RouteView.freeAround(sp, endJoin, PipePart.JOIN_CLEAR);
             PipeRouter.Result r = PipeRouter.route(sp, PipePart.GRID[tier], end(start), ends(wps), end(end), budgetMs);
-            return new RoutePlacer.Routed(r.error, r.error == null ? r.length() : 0, r.points);
+            return new RoutePlacer.Routed<>(r.error, r.error == null ? r.length() : 0, r.points);
         }
 
         @Override
-        @SuppressWarnings("unchecked")
-        String lay(Level level, int tier, CableSpec spec, RoutePlacer.Routed r, long[] startJoin, long[] endJoin, net.minecraft.world.entity.player.Player player) {
+        String lay(Level level, int tier, CableSpec spec, RoutePlacer.Routed<List<long[]>> r, long[] startJoin, long[] endJoin,
+                   net.minecraft.world.entity.player.Player player) {
             List<long[]> joins = new ArrayList<>();
             if (startJoin != null) joins.add(startJoin);
             if (endJoin != null) joins.add(endJoin);
-            return layJoined(level, tier, (List<long[]>) r.path(), joins, player);
+            return layJoined(level, tier, r.path(), joins, player);
         }
 
         @Override
-        KitPreview.Answer answer(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
-                                 CableRouter.End end, long[] endJoin, int have) {
-            return KitPreview.pipeRoute(view, endJoin, startJoin, tier, end(start), ends(wps), end(end), have);
+        List<int[]> boxes(RoutePlacer.Routed<List<long[]>> r, int tier, CableSpec spec) {
+            List<int[]> bs = new ArrayList<>();
+            for (var e : PipeRouter.perBlock(r.path()).entrySet()) {
+                long bx = e.getKey().get(0), by = e.getKey().get(1), bz = e.getKey().get(2);
+                for (int[] pts : e.getValue())
+                    for (int[] b : new PipePart(tier, pts).boxes())
+                        bs.add(new int[]{(int) bx * 16 + b[0], (int) by * 16 + b[1], (int) bz * 16 + b[2], (int) bx * 16 + b[3], (int) by * 16 + b[4], (int) bz * 16 + b[5]});
+            }
+            return bs;
         }
 
         @Override
-        @SuppressWarnings("unchecked")
-        List<double[]> trace(RoutePlacer.Routed r) {
+        List<double[]> trace(RoutePlacer.Routed<List<long[]>> r) {
             List<double[]> out = new ArrayList<>();
-            for (long[] q : (List<long[]>) r.path()) out.add(new double[]{q[0], q[1], q[2], 0, 0, 0});
+            for (long[] q : r.path()) out.add(new double[]{q[0], q[1], q[2], 0, 0, 0});
             return out;
         }
-
-        @Override
-        String started(KitSupply kit, boolean onJoin) {
-            return "Pipe route started. Click waypoints, then a port or pipe.";
-        }
-
-
     };
 
     /** A face (3D value) by pipe direction (0..5 = -x +x -y +y -z +z, dirOf), and back: RoutePlacer's ends name faces. */
@@ -276,8 +276,7 @@ public final class PipePlacer {
     }
 
     /** A kit used on a block face: start, extend or finish a route (RoutePlacer). Returns false only for a sneak-click with no route. */
-    public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, ItemStack kit, int tier,
-                              net.minecraft.world.phys.Vec3 hit) {
+    public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, ItemStack kit, net.minecraft.world.phys.Vec3 hit) {
         return use(player, level, pos, face, KitSupply.of(kit), hit, player.isSecondaryUseActive());
     }
 
@@ -333,13 +332,9 @@ public final class PipePlacer {
             if (jbs.contains(jb)) return "it starts and ends on the same pipe block";
             List<int[]> mine = pieces.remove(List.of((long) jb.getX(), (long) jb.getY(), (long) jb.getZ()));
             if (mine == null || mine.size() != 1) return "the route doesn't end in the pipe's block";
-            if (!(level.getBlockEntity(jb) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return "the pipe is gone";
-            Laying.Join j = new Laying.Join(jb, new PipePart(tier, mine.get(0)), (int) (join[0] - jb.getX() * 16L), (int) (join[1] - jb.getY() * 16L),
-                (int) (join[2] - jb.getZ() * 16L));
-            String jerr = n.joinError(j.part(), j.x(), j.y(), j.z());   // (each join's refusal before the next join's)
-            if (jerr != null) return jerr;
             jbs.add(jb);
-            js.add(j);
+            js.add(new Laying.Join(jb, new PipePart(tier, mine.get(0)), (int) (join[0] - jb.getX() * 16L), (int) (join[1] - jb.getY() * 16L),
+                (int) (join[2] - jb.getZ() * 16L)));
         }
         List<BlockPos> at = new ArrayList<>();
         List<VoxelPart> parts = new ArrayList<>();

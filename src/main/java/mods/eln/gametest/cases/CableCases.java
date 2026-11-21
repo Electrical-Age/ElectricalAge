@@ -697,11 +697,11 @@ public final class CableCases {
             var wrong = mods.eln.node.voxel.CableKitItem.kit(CablePart.tierOf("Signal Cable"), 16 * 20);
             double px = player.getX(), py = player.getY(), pz = player.getZ();
             player.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);   // (over the cable: a click must be within reach)
-            handledWrong = mods.eln.node.voxel.CablePlacer.use(player, c.level(), at, net.minecraft.core.Direction.UP, wrong, CablePart.tierOf("Signal Cable"), hit);
+            handledWrong = mods.eln.node.voxel.CablePlacer.use(player, c.level(), at, net.minecraft.core.Direction.UP, wrong, hit);
             burntAfterWrong = burnt(c);
             var kit = mods.eln.node.voxel.CableKitItem.kit(LV, 16 * 20);
             kitBefore = mods.eln.node.voxel.KitItem.lengthForTests(kit);
-            handled = mods.eln.node.voxel.CablePlacer.use(player, c.level(), at, net.minecraft.core.Direction.UP, kit, LV, hit);
+            handled = mods.eln.node.voxel.CablePlacer.use(player, c.level(), at, net.minecraft.core.Direction.UP, kit, hit);
             kitAfter = mods.eln.node.voxel.KitItem.lengthForTests(kit);
             player.snapTo(px, py, pz, 0, 0);
             burntAfter = burnt(c);

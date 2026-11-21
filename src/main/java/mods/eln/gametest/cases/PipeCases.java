@@ -972,7 +972,7 @@ public final class PipeCases {
         double x = p.getX(), y = p.getY(), z = p.getZ();
         p.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);
         try {
-            return mods.eln.node.voxel.PipePlacer.use(p, ctx.level(), pos, face, kit, tier, hit);
+            return mods.eln.node.voxel.PipePlacer.use(p, ctx.level(), pos, face, kit, hit);
         } finally {
             p.snapTo(x, y, z, 0, 0);
         }

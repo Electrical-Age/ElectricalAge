@@ -326,13 +326,16 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
 - Per kind, in its spec (`RoutePlacer.Spec`): the ends (`endAt`: a cable's connectors and edge rule, a pipe's ports,
   with the pipe sensor's "Its port already has a pipe"), routing (surface or free), laying (cables with their hang,
   pipes with their junctions), the join rule (cables: the same tier or two power cables; pipes: any pipe tier, the
-  junction takes the lower; Baughn 2026-11-21), mending a burnt cable run by clicking it (cables; a pipe bursts), the
-  particles' colour, the start and waypoint texts, and the preview's markers (a pipe's start always the port cube).
+  junction takes the lower; Baughn 2026-11-21), the parts' outline for the preview (`boxes`), mending a burnt cable run
+  by clicking it (cables; a pipe bursts), the particles' colour, what the start message names as a finish, and the
+  preview's markers (a pipe's start always the port cube). A route's path is the spec's type (`Spec<P>`, `Routed<P>`).
   The placers' end is `CableRouter.End` for both (a pipe's: attach -1, dir as a face; `PipePlacer.end` adapts it,
   `PipeEndAdapterTest`); the routers and their direction orders are unchanged.
 - The preview (`KitPreview.tick`, one for both): the start before a route, then the route to the aim on the preview
-  thread over a snapshot (`KitPreview.Job`), its line ("Cable: 7.5 blocks") ending with what the click would do:
-  " — connects" at a machine, " — joins", " — open end" at the last waypoint, or " — waypoint" (wording: Neon). Slow steps go to the log (`KitPreview.slow`) and the
+  thread over a snapshot (`KitPreview.Job`, one `KitPreview.answer` through the spec: "Can't reach: ...", "Too long:
+  ...", or "Cable: 7.5 blocks") ending with what the click would do: " — connects" at a machine, " — joins", " — open
+  end" at the last waypoint, or " — waypoint" (wording: Neon). It shows the click's refusals too: back at the start
+  spot (`RoutePlacer.startRefusal`), a pipe sensor's port that has a pipe. Slow steps go to the log (`KitPreview.slow`) and the
   route debug kit (`RouteDebug`, `/elnlab debugkit` on a cable or pipe kit; a pipe's replay token starts `p_`) reports
   each preview, for both kinds.
 - Tests: `RouteLeakCases` (lay/break/re-lay rounds leave nothing in the simulator or fluid world),

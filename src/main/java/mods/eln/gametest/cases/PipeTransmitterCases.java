@@ -342,12 +342,12 @@ public final class PipeTransmitterCases {
             var sl = c.level();
             double px = fp.getX(), py = fp.getY(), pz = fp.getZ();
             fp.snapTo(a.getX() + 0.5, a.getY() + 0.5, a.getZ() + 0.5, 0, 90);   // (by the rig: a click must be within reach)
-            PipePlacer.use(fp, sl, r, net.minecraft.core.Direction.WEST, kit, 0, new Vec3(r.getX(), r.getY() + 0.25, r.getZ() + 0.5));
-            PipePlacer.use(fp, sl, a, net.minecraft.core.Direction.UP, kit, 0, body);
+            PipePlacer.use(fp, sl, r, net.minecraft.core.Direction.WEST, kit, new Vec3(r.getX(), r.getY() + 0.25, r.getZ() + 0.5));
+            PipePlacer.use(fp, sl, a, net.minecraft.core.Direction.UP, kit, body);
             if (t.pipe() == null) errRoute = "the first route didn't reach the port";
             piecesBefore = (int) c.voxelByEntity(a).parts.stream().filter(q -> q instanceof PipePart).count();
-            PipePlacer.use(fp, sl, r, net.minecraft.core.Direction.EAST, kit, 0, new Vec3(r.getX() + 1, r.getY() + 0.25, r.getZ() + 0.5));
-            boolean handled = PipePlacer.use(fp, sl, a, net.minecraft.core.Direction.UP, kit, 0, body);
+            PipePlacer.use(fp, sl, r, net.minecraft.core.Direction.EAST, kit, new Vec3(r.getX() + 1, r.getY() + 0.25, r.getZ() + 0.5));
+            boolean handled = PipePlacer.use(fp, sl, a, net.minecraft.core.Direction.UP, kit, body);
             previewTaken = mods.eln.node.voxel.KitPreview.previewForTests(fp, mods.eln.node.voxel.KitSupply.of(kit), a, net.minecraft.core.Direction.UP, body);
             piecesAfter = (int) c.voxelByEntity(a).parts.stream().filter(q -> q instanceof PipePart).count();
             fp.snapTo(px, py, pz, 0, 0);

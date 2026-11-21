@@ -304,9 +304,9 @@ public final class ToolbagCases {
                 boolean airBag = CablePlacer.active(pl.getUUID()) || ToolbagItem.pendingForTests(pl.getUUID());
                 ItemStack kit = CableKitItem.kit(LV, 600);
                 pl.setItemInHand(InteractionHand.MAIN_HAND, kit);
-                CablePlacer.use(pl, level, farFloor, Direction.UP, kit, LV, Vec3.atLowerCornerOf(farFloor).add(0.5, 1, 0.5));
+                CablePlacer.use(pl, level, farFloor, Direction.UP, kit, Vec3.atLowerCornerOf(farFloor).add(0.5, 1, 0.5));
                 boolean farKit = CablePlacer.active(pl.getUUID());
-                CablePlacer.use(pl, level, near, Direction.UP, kit, LV, Vec3.atLowerCornerOf(near).add(0.5, 2.5, 0.5));
+                CablePlacer.use(pl, level, near, Direction.UP, kit, Vec3.atLowerCornerOf(near).add(0.5, 2.5, 0.5));
                 boolean airKit = CablePlacer.active(pl.getUUID());
                 // just past reach (5 blocks east, 5.3 from the eyes: inside the server's block of slack), through the kit
                 // item's own use, as the client's click arrives

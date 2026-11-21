@@ -97,7 +97,7 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
         var face = ctx.getClickedFace();
         // a route, laid as a cable kit lays one (RoutePlacer; Baughn 2026-11-11: the one-straight-block click is gone)
         if (player instanceof net.minecraft.server.level.ServerPlayer sp && level instanceof net.minecraft.server.level.ServerLevel sl
-            && PipePlacer.use(sp, sl, ctx.getClickedPos(), face, stack, tier, ctx.getClickLocation())) return InteractionResult.SUCCESS;
+            && PipePlacer.use(sp, sl, ctx.getClickedPos(), face, stack, ctx.getClickLocation())) return InteractionResult.SUCCESS;
         return InteractionResult.PASS;
     }
 
