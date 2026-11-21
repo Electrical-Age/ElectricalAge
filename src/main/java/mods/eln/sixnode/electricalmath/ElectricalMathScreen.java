@@ -130,8 +130,8 @@ public class ElectricalMathScreen extends ElnScreen {
     int statusColor() {
         String t = editor.buffer.text();
         if (t.isBlank()) return LABEL;
-        if (!editor.problems().isEmpty() || draft == null || !draft.isValid()) return 0xFFC02020;
-        return chips() >= ElectricalMathElement.chipsFor(draft.getOperatorCount()) ? 0xFF108F00 : 0xFFC02020;
+        if (!editor.problems().isEmpty() || draft == null || !draft.isValid()) return ERROR_TEXT_BRIGHT;
+        return chips() >= ElectricalMathElement.chipsFor(draft.getOperatorCount()) ? 0xFF108F00 : ERROR_TEXT_BRIGHT;
     }
 
     @Override

@@ -38,8 +38,8 @@ public class ElectricalAnvilScreen extends ElnScreen {
                 + (render.welding ? " " + mods.eln.misc.Utils.plotPower("", render.powerW) : ""),
             () -> switch (render.status) {
                 // (ARGB: 26.x draws no text whose alpha is 0, which hid this line: AdventurAgent)
-                case ElectricalAnvilElement.SAGGING, ElectricalAnvilElement.CANT, ElectricalAnvilElement.NO_MATERIAL -> 0xFFA02020;
-                case ElectricalAnvilElement.WELDING, ElectricalAnvilElement.ENGRAVING -> 0xFF206020;
+                case ElectricalAnvilElement.SAGGING, ElectricalAnvilElement.CANT, ElectricalAnvilElement.NO_MATERIAL -> ERROR_TEXT;
+                case ElectricalAnvilElement.WELDING, ElectricalAnvilElement.ENGRAVING -> OK_TEXT;
                 default -> LABEL;
             });
         text("credit", () -> {

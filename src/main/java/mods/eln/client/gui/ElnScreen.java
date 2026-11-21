@@ -23,6 +23,9 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
     public static final Identifier INSET = Identifier.fromNamespaceAndPath("eln", "inset");
     public static final Identifier SLOT = Identifier.withDefaultNamespace("container/slot");
     public static final int LABEL = 0xFF404040;
+    /** Text colours: a fault or a missing input (ERROR_TEXT; ERROR_TEXT_BRIGHT, a lighter red, on the Auto Miner and
+     *  the Electrical Math screens), a machine at work (OK_TEXT). */
+    public static final int ERROR_TEXT = 0xFFA02020, ERROR_TEXT_BRIGHT = 0xFFC02020, OK_TEXT = 0xFF206020;
 
     /** The device's laid-out screen (assets/eln/gui), or null: then the screen places things itself. */
     protected final mods.eln.gui.layout.Layout.Result layout;

@@ -22,6 +22,7 @@ here.
 | Telling the player something | Transient (a refusal, "needs X", a mode toggle, out of range, a passing reading): the action bar, `player.sendOverlayMessage(Component.literal(…))`; why a kit click failed: `KitPreview.note` (the kit's preview owns the action bar). Chat (`Utils.sendMessage`) only for what is read later: meter readings, multi-line reports, lasting warnings, commands and debug | `Utils.sendMessage` for a refusal |
 | Voltage tiers | `Eln.LVU/MVU/HVU/VVU` (48, 230, 400, 11000 V) | a literal 50, 200, 800 or other old 1.12 voltage in code or comments |
 | Wrench turning | six-node: `SixNodeElement.onBlockActivatedRotate` (`wrenchStep` for half turns); transparent: override `TransparentNodeElement.wrenchTurn`; voxel: `VoxelNode.wrenchTurn`; fluid devices: implement `fluid/FluidPlacement.Turnable` (the base wrenchTurn turns it); a wire's brush: `SixNodeElement.brushPaint` | a per-device rotate handler; a wrench turn in onBlockActivated |
+| GUI text colours | `ElnScreen.LABEL`, `ERROR_TEXT` (a fault, a missing input), `ERROR_TEXT_BRIGHT`, `OK_TEXT` (at work) | a literal `0xFFA02020` / `0xFF206020` in a screen |
 | A battery-charge bar | `client/gui/EaGauge.chargeBar` (`chargeColor`) | another bar fill or charge palette |
 | Clamping | `misc/Utils.limit` | another local `clamp` |
 | Kit recipes | `node/voxel/KitRecipes` | a per-kit recipe skeleton |
@@ -47,7 +48,7 @@ here.
   4 ways of showing percent; folded the same day, todo #553). Use `Meters`/`Utils.plot*`/`EaUnits`.
 - Feeding the wrong scale to a formatter: plotCelsius takes the Tc scale, so an absolute °C or a difference read
   20 °C off (the tank's and servo's thermometers, the turbine's dT, until 2026-11-21).
-- Hard-coded GUI colours (the error red `0xFFA02020` appears in 8 places). Put a named constant in `ElnScreen`.
+- Hard-coded GUI colours (the error red `0xFFA02020` was in 8 places; now `ElnScreen.ERROR_TEXT`). Put a named constant in `ElnScreen`.
 - Copy-pasted GameTest fixtures (sources, resistors, `node()`, `player()`; folded into `TestContext` 2026-11-21). Use or extend `TestContext`.
 - Copy-pasted Element/Render/Container pairs differing only in constants (capacitor vs inductor, six-node vs
   transparent power capacitor). Parameterise the descriptor instead of copying the class.

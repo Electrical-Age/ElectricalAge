@@ -140,8 +140,8 @@ public class WireDrawingScreen extends ElnScreen {
             return tr("Has %1$ copper, %2$ rubber", String.format("%.1f", Math.floor(copper * 10 + 1e-9) / 10), String.format("%.1f", Math.floor(rubber * 10 + 1e-9) / 10));   // (rounded down)
         });
         text("status", () -> WireDrawingElement.statusText(r.status), () -> switch (r.status) {
-            case WireDrawingElement.NO_COPPER, WireDrawingElement.NO_RUBBER, WireDrawingElement.NO_POWER, WireDrawingElement.NO_CORE -> 0xFFA02020;
-            case WireDrawingElement.RUNNING -> 0xFF206020;
+            case WireDrawingElement.NO_COPPER, WireDrawingElement.NO_RUBBER, WireDrawingElement.NO_POWER, WireDrawingElement.NO_CORE -> ERROR_TEXT;
+            case WireDrawingElement.RUNNING -> OK_TEXT;
             default -> LABEL;
         });
         // one item a Start, no Stop (Baughn 2026-11-07: twice he made a second one he didn't mean to); greyed while drawing

@@ -25,8 +25,8 @@ public class AutoMinerScreen extends ElnScreen {
         silk = button("silk", () -> tr("Silk Touch") + " " + (render.silkTouch ? tr("On") : tr("Off")),
             () -> render.clientSendId(AutoMinerElement.toggleSilkTouch), tr("Halves speed, triples power draw"));
         String[] t = tr("Chest missing on the\nback of the auto miner!").split("\n");
-        text("chest1", () -> chestFull() ? t[0] : "", () -> 0xFFC02020);
-        text("chest2", () -> chestFull() && t.length > 1 ? t[1] : "", () -> 0xFFC02020);
+        text("chest1", () -> chestFull() ? t[0] : "", () -> ERROR_TEXT_BRIGHT);
+        text("chest2", () -> chestFull() && t.length > 1 ? t[1] : "", () -> ERROR_TEXT_BRIGHT);
     }
 
     net.minecraft.client.gui.components.Button silk;

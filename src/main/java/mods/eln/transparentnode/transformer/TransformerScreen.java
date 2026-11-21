@@ -44,15 +44,15 @@ public class TransformerScreen extends ElnScreen {
         text("ratio", () -> r.primaryTurns <= 0 || r.secondaryTurns <= 0 ? tr("Needs both windings and a core")
             : tr("Turns %1$ : %2$ (x %3$)", r.primaryTurns, r.secondaryTurns, String.format("%.2f", (double) r.secondaryTurns / r.primaryTurns))
                 + (r.coreVoltsPerTurn > 0 ? tr(", core %1$ a turn", volts(r.coreVoltsPerTurn)) : tr(", no core")));
-        text("expect", () -> expectText(r), () -> ratioOff(r) > 0.05 ? 0xFFA02020 : LABEL);
+        text("expect", () -> expectText(r), () -> ratioOff(r) > 0.05 ? ERROR_TEXT : LABEL);
         text("vpt", () -> {
             double v = voltsPerTurn(r);
             if (r.coreVoltsPerTurn <= 0 || v <= 0) return "";
             return tr("Volts a turn %1$ of %2$ (saturates over %3$)", volts(v), volts(r.coreVoltsPerTurn), volts(r.coreVoltsPerTurn * 1.1))
                 + (r.saturated ? tr(": saturated!") : "");
-        }, () -> r.saturated || voltsPerTurn(r) > 1.1 * r.coreVoltsPerTurn && r.coreVoltsPerTurn > 0 ? 0xFFA02020 : LABEL);
+        }, () -> r.saturated || voltsPerTurn(r) > 1.1 * r.coreVoltsPerTurn && r.coreVoltsPerTurn > 0 ? ERROR_TEXT : LABEL);
         text("window", () -> r.window <= 0 ? "" : tr("Window %1$ of %2$ mm² turns", String.format("%.0f", r.windowUsed), String.format("%.0f", r.window))
-            + (r.windowUsed > r.window ? tr(": too full") : ""), () -> r.windowUsed > r.window ? 0xFFA02020 : LABEL);
+            + (r.windowUsed > r.window ? tr(": too full") : ""), () -> r.windowUsed > r.window ? ERROR_TEXT : LABEL);
         button("isolator", () -> render.isIsolator ? tr("Isolated") : tr("Not isolated"),
             () -> render.clientSendId(TransformerElement.toogleIsIsolator),
             tr("Isolated: the networks on both sides are simulated apart. Faster for circuits that switch very often, at the cost of a little capacitance."));

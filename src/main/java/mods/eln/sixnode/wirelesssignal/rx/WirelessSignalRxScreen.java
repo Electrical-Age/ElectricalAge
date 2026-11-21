@@ -24,7 +24,7 @@ public class WirelessSignalRxScreen extends ElnScreen {
         super.init();
         field("channel", () -> render.channel, v -> render.clientSetString(WirelessSignalRxElement.setChannelId, v),
             tr("Specify the channel"));
-        text("connection", () -> render.connection ? tr("Connected") : tr("Not connected"), () -> render.connection ? 0xFF207020 : 0xFFA02020);
+        text("connection", () -> render.connection ? tr("Connected") : tr("Not connected"), () -> render.connection ? 0xFF207020 : ERROR_TEXT);
         String[] names = {tr("Biggest"), tr("Smallest"), tr("Toggle")};
         String[] tips = {tr("Uses the biggest value on the channel."), tr("Uses the smallest value on the channel."),
             tr("Toggles the output each time an emitter's value rises. Useful to allow multiple buttons to control the same light.")};
