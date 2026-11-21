@@ -38,7 +38,7 @@ import java.util.Map;
  * above 1 atm can give over the next second, up to nominal; the steam actually used (exhausted) follows the power the
  * load really takes, so an idle turbine keeps its steam.
  */
-public class SteamGeneratorElement extends TransparentNodeElement implements FluidDevice {
+public class SteamGeneratorElement extends TransparentNodeElement implements FluidDevice, mods.eln.fluid.FluidPlacement.Turnable {
     final SteamGeneratorDescriptor desc;
     public final NbtElectricalLoad load = new NbtElectricalLoad("load");
     /** Its controls (SteamValveControl: throttle, regulator holding an inlet pressure, external signal on its left). */
@@ -208,15 +208,12 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
     }
 
     /**
-     * The wrench turns it a quarter turn (Baughn 2026-10-31), so its exhaust side can face a condenser beside it; its
-     * terminals follow its front, and the condenser finds it again within a second.
+     * The wrench turns it a quarter turn (Baughn 2026-10-31; FluidPlacement), so its exhaust side can face a condenser
+     * beside it; its terminals follow its front, and the condenser finds it again within a second. Its steam inlet is
+     * on top, so no port moves.
      */
     @Override
-    public boolean wrenchTurn(net.minecraft.world.entity.player.Player player) {
-        front = front.right();
-        reconnect();
-        needPublish();
-        return true;
+    public void remakePorts() {
     }
 
     /** "Under Pressure" (data/eln/advancement/guide/low_pressure.json) to its placer, if online. */

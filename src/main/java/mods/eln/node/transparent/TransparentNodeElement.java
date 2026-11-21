@@ -373,10 +373,12 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     /**
      * The wrench key and a click turn the device a quarter turn, where it may turn (Baughn 2026-10-31: placing a
-     * machine had turned its neighbours, and nothing turned them back). True when it turned; most devices don't.
+     * machine had turned its neighbours, and nothing turned them back). True when it turned. A fluid device that
+     * implements FluidPlacement.Turnable turns by it; one with more to turn overrides this (an antenna's terminals, a
+     * shaft machine's shaft); most devices don't turn.
      */
     public boolean wrenchTurn(Player player) {
-        return false;
+        return mods.eln.fluid.FluidPlacement.turn(this);
     }
 
 

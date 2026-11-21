@@ -385,25 +385,9 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         return ports;
     }
 
-    /** Placed facing the player, its ports made from that front; the wrench turns it (FluidPlacement). */
-    @Override
-    public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
-        super.initializeFromThat(front, entityLiving, itemStackNbt);
-        remakePorts();
-    }
-
-    @Override
-    public Direction[] fronts() {
-        return mods.eln.fluid.FluidPlacement.horizontal();
-    }
-
+    /** Its ports, from where it faces now (a turned turbine's exhaust moves with it). */
     @Override
     public void remakePorts() {
-        makePorts();
-    }
-
-    /** Its ports, from where it faces now (a turned turbine's exhaust moves with it). */
-    void makePorts() {
         long pos = node.coordonate.pos().asLong();
         ports = List.of(new FluidPort(inlet, pos, 1, 1.0, spec.portK),   // the inlet on top
             // the exhaust behind: made for a large alloy pipe (low-pressure steam, to an LP turbine or a condenser)
@@ -414,7 +398,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
     public void connectJob() {
         super.connectJob();
         if (inlet != null) {
-            makePorts();
+            remakePorts();
             FluidWorld.add(this);
         }
     }
@@ -454,7 +438,7 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
         load(exhaust, loadedEx, T);
         turbine = new FluidDevice.Link(inlet, 1.0, exhaust, 0.5, spec.portK).turbine(nozzle(), spec.eta);
         exhaustVent = new FluidDevice.Vent(exhaust, 0.5, mods.eln.node.voxel.PipePart.LARGE_END_K);
-        makePorts();
+        remakePorts();
         super.initialize();
     }
 

@@ -14,9 +14,14 @@ public final class FluidPlacement {
     private FluidPlacement() {
     }
 
-    /** A device the wrench turns: the fronts it may take, and its ports remade from its front. */
+    /**
+     * A device the wrench turns (TransparentNodeElement.wrenchTurn turns any Turnable): the fronts it may take, any
+     * horizontal one unless it says otherwise, and its ports remade from its front (in initialize too).
+     */
     public interface Turnable {
-        Direction[] fronts();
+        default Direction[] fronts() {
+            return horizontal();
+        }
 
         void remakePorts();
     }

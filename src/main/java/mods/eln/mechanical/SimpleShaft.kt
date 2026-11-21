@@ -210,18 +210,21 @@ abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeD
 
     /**
      * The wrench key and a click: a quarter turn (Baughn 2026-10-31). It leaves its shaft and joins whatever its turned
-     * ends meet, keeping its speed; a fluid machine's ports follow its front.
+     * ends meet, keeping its speed; a fluid machine (FluidPlacement.Turnable) turns by FluidPlacement, its ports
+     * following its front.
      */
     override fun wrenchTurn(player: net.minecraft.world.entity.player.Player?): Boolean {
         val rads = shaft.rads
         shaft.disconnectShaft(this)
         shaft.rads = rads
-        front = front.right()
-        (this as? mods.eln.fluid.FluidPlacement.Turnable)?.remakePorts()
-        reconnect()
+        val turned = if (this is mods.eln.fluid.FluidPlacement.Turnable) super.wrenchTurn(player) else {
+            front = front.right()
+            reconnect()
+            needPublish()
+            true
+        }
         shaft.connectShaft(this)
-        needPublish()
-        return true
+        return turned
     }
 
     override fun networkSerialize(stream: DataOutputStream) {

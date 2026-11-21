@@ -181,7 +181,7 @@ public final class TankGroup {
             for (TankElement m : comp) {
                 m.group = g;
                 m.vessel = g == null ? m.own : g.node;
-                m.makePorts();
+                m.remakePorts();
                 m.showWater();
                 FluidWorld.changed(m);
                 m.needPublish();

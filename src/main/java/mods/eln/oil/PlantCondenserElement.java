@@ -149,29 +149,8 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         if (motor != null && motorShare > 0) motor.takeShaftPower(pumpW, dt);
     }
 
-    /** Placed facing the player, its ports made from that front; the wrench turns it (FluidPlacement). */
-    @Override
-    public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
-        super.initializeFromThat(front, entityLiving, itemStackNbt);
-        remakePorts();
-    }
-
-    @Override
-    public Direction[] fronts() {
-        return new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP};
-    }
-
-    @Override
-    public boolean wrenchTurn(net.minecraft.world.entity.player.Player player) {
-        return mods.eln.fluid.FluidPlacement.turn(this);
-    }
-
     @Override
     public void remakePorts() {
-        makePorts();
-    }
-
-    void makePorts() {
         long at = node.coordonate.pos().asLong();
         int back = front.back().toEnumFacing().get3DDataValue(), right = front.right().toEnumFacing().get3DDataValue(),
             fr = front.toEnumFacing().get3DDataValue(), left = front.left().toEnumFacing().get3DDataValue();
@@ -190,7 +169,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     public void connectJob() {
         super.connectJob();
         if (v.vessel != null) {
-            makePorts();
+            remakePorts();
             FluidWorld.add(this);
         }
         findMotor();
@@ -213,7 +192,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
         } else tubes.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(c));
         tubesLink = new FluidDevice.Link(v.vessel, 0.5, tubes, 0.5, 0);
         tubesLink.conductance = TUBES_UA;
-        makePorts();
+        remakePorts();
         connect();
     }
 

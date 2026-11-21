@@ -174,11 +174,6 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
     }
 
     @Override
-    public Direction[] fronts() {
-        return mods.eln.fluid.FluidPlacement.horizontal();
-    }
-
-    @Override
     public void remakePorts() {
         long at = node.coordonate.pos().asLong();
         ports = List.of(new FluidPort(outlet, at, front.toEnumFacing().get3DDataValue(), 0.0, PORT_K),   // condensate out, front
@@ -188,7 +183,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
     /** The wrench turns it (AdventurAgent 2026-10-31: placed facing the player, nothing could turn it to a turbine). */
     @Override
     public boolean wrenchTurn(net.minecraft.world.entity.player.Player player) {
-        if (!mods.eln.fluid.FluidPlacement.turn(this)) return false;
+        if (!super.wrenchTurn(player)) return false;
         findTurbine();
         return true;
     }

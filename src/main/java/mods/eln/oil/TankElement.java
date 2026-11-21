@@ -164,31 +164,15 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         return face <= 3 ? 8 * 17 + y : y * 17 + 8;   // (north/south: x then y; west/east: y then z)
     }
 
-    /** Placed facing the player, its ports made from that front; the wrench turns it (FluidPlacement). */
-    @Override
-    public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
-        super.initializeFromThat(front, entityLiving, itemStackNbt);
-        remakePorts();
-    }
-
     @Override
     public Direction[] fronts() {
         // (one of a box, or about to be: it stays as placed; turning would re-form the box under it)
         if (group != null || !neighbours().isEmpty()) return new Direction[]{front};
-        return new Direction[]{Direction.XN, Direction.XP, Direction.ZN, Direction.ZP};
-    }
-
-    @Override
-    public boolean wrenchTurn(net.minecraft.world.entity.player.Player player) {
-        return mods.eln.fluid.FluidPlacement.turn(this);
+        return mods.eln.fluid.FluidPlacement.horizontal();
     }
 
     @Override
     public void remakePorts() {
-        makePorts();
-    }
-
-    void makePorts() {
         long at = node.coordonate.pos().asLong();
         List<FluidPort> out = new ArrayList<>();
         if (group == null) {
@@ -255,7 +239,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     public void connectJob() {
         super.connectJob();
         if (vessel != null) {
-            makePorts();
+            remakePorts();
             FluidWorld.add(this);
             // (with its neighbours: a box may form)
             List<TankElement> seeds = neighbours();
@@ -293,7 +277,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             own.update();
         } else own.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         vessel = own;
-        makePorts();
+        remakePorts();
         connect();
     }
 

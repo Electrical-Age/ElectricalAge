@@ -162,7 +162,7 @@ public final class HeatExchangerGroup {
             }
             // (every member's sides set before any makes its ports: the head cuts its slices from them)
             for (HeatExchangerElement m : comp) {
-                m.makePorts();
+                m.remakePorts();
                 FluidWorld.changed(m);
                 m.needPublish();
             }

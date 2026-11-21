@@ -303,24 +303,8 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         return ports;
     }
 
-    /** Placed facing the player, its ports made from that front; the wrench turns it (FluidPlacement). */
-    @Override
-    public void initializeFromThat(Direction front, net.minecraft.world.entity.LivingEntity entityLiving, net.minecraft.nbt.CompoundTag itemStackNbt) {
-        super.initializeFromThat(front, entityLiving, itemStackNbt);
-        remakePorts();
-    }
-
-    @Override
-    public Direction[] fronts() {
-        return mods.eln.fluid.FluidPlacement.horizontal();
-    }
-
     @Override
     public void remakePorts() {
-        makePorts();
-    }
-
-    void makePorts() {
         var exhaustPort = new FluidPort(exhaust, node.coordonate.pos().asLong(), front.back().toEnumFacing().get3DDataValue(), 0.5,
             mods.eln.node.voxel.PipePart.LARGE_END_K);   // (its exhaust: a large pipe's flange)
         ports = fuelIn.stub == null ? List.of(exhaustPort)
@@ -341,7 +325,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     public void connectJob() {
         super.connectJob();
         if (exhaust != null) {
-            makePorts();
+            remakePorts();
             FluidWorld.add(this);
         }
     }
@@ -364,7 +348,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         exhaustFlow = Flow.source(exhaust, 0.5, SpeciesRegistry.AIR, EXHAUST_T);
         flows = List.of(exhaustFlow);
         fuelIn.make(node.coordonate.y, node.coordonate.y + 1, mods.eln.sim.Ambient.kelvin(node.coordonate));
-        makePorts();
+        remakePorts();
         super.initialize();
     }
 
