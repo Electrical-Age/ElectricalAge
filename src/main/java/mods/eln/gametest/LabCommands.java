@@ -909,7 +909,7 @@ public final class LabCommands {
             var pb = mods.eln.node.voxel.PipePlacer.portAtForTests(level, pp, pe.front.back().toEnumFacing());
             if (pa == null || pb == null) b = "ports " + pa + " " + pb + " (polymeriser front " + pe.front + ")";
             else {
-                var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, pa, java.util.List.of(), pb);
+                var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(level), 4, pa, java.util.List.of(), pb);
                 String err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
                 b = err == null ? "piped to the polymeriser at " + pp.toShortString() : err;
             }
@@ -966,7 +966,7 @@ public final class LabCommands {
         final String poured = "filling in a second";
         var b = toDev == null ? null : mods.eln.node.voxel.PipePlacer.portAtForTests(level, tp, toDev);
         if (a == null || b == null) return "ports " + a + " " + b;
-        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, a, java.util.List.of(), b);
+        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(level), 4, a, java.util.List.of(), b);
         String err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
         return (err == null ? "piped" : err) + (latexMb > 0 ? ", " + poured : "");
     }

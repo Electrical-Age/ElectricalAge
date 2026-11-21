@@ -502,7 +502,7 @@ public final class OilCases {
             var b = mods.eln.node.voxel.PipePlacer.portAtForTests(level, ctx.at(3, 1 + rise, 1), net.minecraft.core.Direction.WEST);
             if (a == null || b == null) err = "ports not found: " + a + " " + b;
             else {
-                var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, a, java.util.List.of(), b);
+                var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(level), 4, a, java.util.List.of(), b);
                 err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(level, 0, r.points, null);
             }
             // (uphill: a full pump tank, more than the riser holds, as a pump on a lake keeps it supplied)
@@ -681,7 +681,7 @@ public final class OilCases {
                     var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
                     if (a == null || b == null || a.y() % 16 != at / 17) err = "ports: " + a + " " + b;
                     else {
-                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(ctx.level()), 4, a, java.util.List.of(), b);
                         err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
                     }
                     ((mods.eln.transparentnode.electricalmachine.OilSeparatorElement) west).putFluid(Oil.CRUDE.get(), 2000);
@@ -730,7 +730,7 @@ public final class OilCases {
                     var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
                     if (a == null || b == null || a.y() % 16 != at / 17) err = "ports: " + a + " " + b + " (want y " + at / 17 + ")";
                     else {
-                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(ctx.level()), 4, a, java.util.List.of(), b);
                         err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
                     }
                     if (out) ((mods.eln.transparentnode.electricalmachine.CompressorPortsElement) west).putLatex(false, 2000);
@@ -751,7 +751,7 @@ public final class OilCases {
                     var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
                     if (a == null || b == null || Math.floorMod(a.z(), 16) != at % 17) err = "ports: " + a + " " + b + " (want z " + at % 17 + ")";
                     else {
-                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(ctx.level()), 4, a, java.util.List.of(), b);
                         err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
                     }
                     switch (variant) {
@@ -781,7 +781,7 @@ public final class OilCases {
                     var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
                     if (a == null || b == null) err = "ports: " + a + " " + b;
                     else {
-                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(ctx.level()), 4, a, java.util.List.of(), b);
                         err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
                     }
                     // (sealed: 1000 mB at once would crush its air past the pump's head; and the pipe between holds a few hundred)
@@ -797,7 +797,7 @@ public final class OilCases {
                     var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
                     if (a == null || b == null) err = "ports: " + a + " " + b;
                     else {
-                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(ctx.level()), 4, a, java.util.List.of(), b);
                         err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
                     }
                     put(ctx, w, mods.eln.oil.Butadiene.SOURCE.get(), 6000);
@@ -811,7 +811,7 @@ public final class OilCases {
                     var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
                     if (a == null || b == null) err = "ports: " + a + " " + b;
                     else {
-                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(ctx.level()), 4, a, java.util.List.of(), b);
                         err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
                     }
                     put(ctx, w, Oil.Cut.DIESEL.source.get(), 6000);
@@ -825,7 +825,7 @@ public final class OilCases {
                     var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
                     if (a == null || b == null) err = "ports: " + a + " " + b;
                     else {
-                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(ctx.level()), 4, a, java.util.List.of(), b);
                         err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
                     }
                     put(ctx, w, Oil.CRUDE.get(), 6000);   // (cold residue barely flows in a pipe, by its species: crude shows the flange works)
@@ -837,7 +837,7 @@ public final class OilCases {
                     var b = mods.eln.node.voxel.PipePlacer.portAtForTests(ctx.level(), e, net.minecraft.core.Direction.WEST);
                     if (a == null || b == null) err = "ports: " + a + " " + b;
                     else {
-                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(ctx.level()), 4, a, java.util.List.of(), b);
+                        var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(ctx.level()), 4, a, java.util.List.of(), b);
                         err = r.error != null ? r.error : mods.eln.node.voxel.PipePlacer.lay(ctx.level(), 0, r.points, null);
                     }
                     ((mods.eln.transparentnode.resincollector.IndustrialResinCollectorElement) west).putLatex(2000);

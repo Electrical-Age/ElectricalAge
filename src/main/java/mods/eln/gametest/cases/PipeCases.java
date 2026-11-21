@@ -744,7 +744,7 @@ public final class PipeCases {
                 err = "ports not found: " + a + " " + b;
                 return;
             }
-            var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.PipePlacer.space(level), 4, a, List.of(), b);
+            var r = mods.eln.node.voxel.PipeRouter.route(mods.eln.node.voxel.RouteView.obstacles(level), 4, a, List.of(), b);
             if (r.error != null) {
                 err = r.error;
                 return;

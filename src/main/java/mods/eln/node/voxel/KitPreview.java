@@ -294,7 +294,7 @@ public final class KitPreview {
         if (port == null) port = PipePlacer.devicePort(level, bh.getBlockPos(), bh.getLocation());
         long[] join = port == null ? PipePlacer.joinPoint(level, bh.getBlockPos(), bh.getLocation()) : null;
         PipeRouter.End surface = port == null && join == null
-            ? PipePlacer.surfacePoint(PipePlacer.space(level), bh.getBlockPos(), bh.getDirection(), bh.getLocation(), PipePart.GRID[kit.tier()]) : null;
+            ? PipePlacer.surfacePoint(RouteView.obstacles(level), bh.getBlockPos(), bh.getDirection(), bh.getLocation(), PipePart.GRID[kit.tier()]) : null;
         if (plan == null) {   // (where it would start: a port, a point on a pipe, or a point on the surface)
             PipeRouter.End s = port != null ? port : join != null ? new PipeRouter.End(join[0], join[1], join[2], -1) : surface;
             if (s != null) boxes.add(new int[]{(int) s.x() - 2, (int) s.y() - 2, (int) s.z() - 2, (int) s.x() + 2, (int) s.y() + 2, (int) s.z() + 2});
@@ -354,9 +354,9 @@ public final class KitPreview {
     /** ... free round a start on a pipe too (startJoin, or null). */
     public static Answer pipeAnswer(RouteView view, long[] join, long[] startJoin, int tier, PipeRouter.End start, List<PipeRouter.End> wps,
                                     PipeRouter.End end, int have, boolean toPort) {
-        PipeRouter.Space sp = PipePlacer.space(view);
-        if (join != null) sp = PipePlacer.spaceAround(sp, join, PipePart.JOIN_CLEAR);
-        if (startJoin != null) sp = PipePlacer.spaceAround(sp, startJoin, PipePart.JOIN_CLEAR);
+        PipeRouter.Space sp = RouteView.obstacles(view);
+        if (join != null) sp = RouteView.freeAround(sp, join, PipePart.JOIN_CLEAR);
+        if (startJoin != null) sp = RouteView.freeAround(sp, startJoin, PipePart.JOIN_CLEAR);
         PipeRouter.Result r = PipeRouter.route(sp, PipePart.GRID[tier], start, wps, end, PREVIEW_BUDGET_MS);
         List<int[]> bs = new ArrayList<>();
         boolean ok = r.error == null;

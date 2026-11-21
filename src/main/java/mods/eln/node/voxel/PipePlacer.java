@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,7 +92,7 @@ public final class PipePlacer {
     }
 
     public static PipeRouter.End surfacePointForTests(Level level, BlockPos pos, Direction face, net.minecraft.world.phys.Vec3 hit, int bore) {
-        return surfacePoint(space(level), pos, face, hit, bore);
+        return surfacePoint(RouteView.obstacles(level), pos, face, hit, bore);
     }
 
     /** Forget a player's route (logout, death, server stop). */
@@ -103,44 +102,6 @@ public final class PipePlacer {
 
     public static void forgetAll() {
         PLANS.clear();
-    }
-
-    /** The world as the router sees it: solid blocks and other devices are in the way, and so are used voxels of
-     *  voxel nodes; air, replaceable blocks and liquids are free. */
-    public static PipeRouter.Space space(Level level) {
-        return space(RouteView.live(level));
-    }
-
-    /** What's in the way, read through a view of the world (live, or a snapshot for the preview thread). */
-    public static PipeRouter.Space space(RouteView view) {
-        return (x0, y0, z0, x1, y1, z1) -> {
-            for (long bx = Math.floorDiv(x0, 16); bx <= Math.floorDiv(x1 - 1, 16); bx++)
-                for (long by = Math.floorDiv(y0, 16); by <= Math.floorDiv(y1 - 1, 16); by++)
-                    for (long bz = Math.floorDiv(z0, 16); bz <= Math.floorDiv(z1 - 1, 16); bz++) {
-                        BlockPos p = new BlockPos((int) bx, (int) by, (int) bz);
-                        if (!view.loaded(p)) return true;
-                        BlockState s = view.state(p);
-                        if (s.isAir() || s.canBeReplaced() || s.getBlock() instanceof net.minecraft.world.level.block.LiquidBlock) continue;
-                        if (Mimic.allowed(s)) {   // (a stair, fence, slab: only its own voxels are in the way)
-                            int lx0 = (int) (x0 - bx * 16), ly0 = (int) (y0 - by * 16), lz0 = (int) (z0 - bz * 16);
-                            int lx1 = (int) (x1 - bx * 16), ly1 = (int) (y1 - by * 16), lz1 = (int) (z1 - bz * 16);
-                            for (int[] b : Mimic.boxes(s, view.shapes(), p))
-                                if (b[0] < lx1 && lx0 < b[3] && b[1] < ly1 && ly0 < b[4] && b[2] < lz1 && lz0 < b[5]) return true;
-                            continue;
-                        }
-                        if (s.getBlock() instanceof VoxelNodeBlock) {
-                            RouteView.Voxels v = view.voxels(p);
-                            if (v != null) {
-                                int lx0 = (int) (x0 - bx * 16), ly0 = (int) (y0 - by * 16), lz0 = (int) (z0 - bz * 16);
-                                int lx1 = (int) (x1 - bx * 16), ly1 = (int) (y1 - by * 16), lz1 = (int) (z1 - bz * 16);
-                                if (v.usedIn(lx0, ly0, lz0, lx1, ly1, lz1)) return true;
-                                continue;
-                            }
-                        }
-                        return true;
-                    }
-            return false;
-        };
     }
 
     /** The port on this block's face, if any (a device's flange, or a pipe's end on that face), as a routing end
@@ -231,7 +192,7 @@ public final class PipePlacer {
 
     /** Route from start to end (ports, or a device's port) and lay it (GameTests). Null if done, else why not. */
     public static String routeForTests(Level level, int tier, PipeRouter.End start, PipeRouter.End end) {
-        var r = PipeRouter.route(space(level), PipePart.GRID[tier], start, List.of(), end);
+        var r = PipeRouter.route(RouteView.obstacles(level), PipePart.GRID[tier], start, List.of(), end);
         return r.error != null ? r.error : lay(level, tier, r.points, null);
     }
 
@@ -241,7 +202,7 @@ public final class PipePlacer {
 
     /** Route from a port to join a pipe at join (world voxels) and lay it (GameTests). Null if done, else why not. */
     public static String routeAndJoinForTests(Level level, int tier, PipeRouter.End start, long[] join) {
-        var r = PipeRouter.route(spaceAround(space(level), join, PipePart.JOIN_CLEAR), PipePart.GRID[tier], start, List.of(),
+        var r = PipeRouter.route(RouteView.freeAround(RouteView.obstacles(level), join, PipePart.JOIN_CLEAR), PipePart.GRID[tier], start, List.of(),
             new PipeRouter.End(join[0], join[1], join[2], -1));
         if (r.error != null) return r.error;
         return layJoined(level, tier, r.points, join, null);
@@ -325,7 +286,7 @@ public final class PipePlacer {
             return true;
         }
         long[] join = port == null ? joinPoint(level, pos, hit) : null;
-        PipeRouter.End surface = port == null && join == null ? surfacePoint(space(level), pos, face, hit, PipePart.GRID[tier]) : null;
+        PipeRouter.End surface = port == null && join == null ? surfacePoint(RouteView.obstacles(level), pos, face, hit, PipePart.GRID[tier]) : null;
         if (plan == null) {
             PipeRouter.End start = port != null ? port : join != null ? new PipeRouter.End(join[0], join[1], join[2], -1) : surface;
             if (start == null) {
@@ -447,27 +408,6 @@ public final class PipePlacer {
         return best;
     }
 
-    /** The space, but free around a junction point (the new pipe may meet the old one there). */
-    static PipeRouter.Space spaceAround(PipeRouter.Space s, long[] p, int h) {
-        return (x0, y0, z0, x1, y1, z1) -> {
-            if (x0 >= p[0] - h && x1 <= p[0] + h && y0 >= p[1] - h && y1 <= p[1] + h && z0 >= p[2] - h && z1 <= p[2] + h) return false;
-            // a box reaching into the cube: check only its part outside (axis by axis: enough for lattice steps)
-            if (x0 < p[0] + h && x1 > p[0] - h && y0 < p[1] + h && y1 > p[1] - h && z0 < p[2] + h && z1 > p[2] - h) {
-                long[][] parts = {{x0, Math.min(x1, p[0] - h)}, {Math.max(x0, p[0] + h), x1}};
-                boolean b = false;
-                for (long[] xr : parts) if (xr[0] < xr[1]) b |= s.blocked(xr[0], y0, z0, xr[1], y1, z1);
-                long cx0 = Math.max(x0, p[0] - h), cx1 = Math.min(x1, p[0] + h);
-                long[][] ys = {{y0, Math.min(y1, p[1] - h)}, {Math.max(y0, p[1] + h), y1}};
-                for (long[] yr : ys) if (yr[0] < yr[1]) b |= s.blocked(cx0, yr[0], z0, cx1, yr[1], z1);
-                long cy0 = Math.max(y0, p[1] - h), cy1 = Math.min(y1, p[1] + h);
-                long[][] zs = {{z0, Math.min(z1, p[2] - h)}, {Math.max(z0, p[2] + h), z1}};
-                for (long[] zr : zs) if (zr[0] < zr[1]) b |= s.blocked(cx0, cy0, zr[0], cx1, cy1, zr[1]);
-                return b;
-            }
-            return s.blocked(x0, y0, z0, x1, y1, z1);
-        };
-    }
-
     /** Lay a route that ends joining a pipe at join (world voxels): the last block's piece goes in as a junction. */
     public static String layJoined(Level level, int tier, List<long[]> points, long[] join, net.minecraft.world.entity.player.Player player) {
         return layJoined(level, tier, points, join == null ? List.of() : List.of(join), player);
@@ -519,9 +459,9 @@ public final class PipePlacer {
             if (wps.isEmpty()) return new PipeRouter.Result(List.of(), null);
             last = wps.remove(wps.size() - 1);
         }
-        PipeRouter.Space sp = space(level);
-        if (plan.startJoin != null) sp = spaceAround(sp, plan.startJoin, PipePart.JOIN_CLEAR);
-        if (endJoin != null) sp = spaceAround(sp, endJoin, PipePart.JOIN_CLEAR);
+        PipeRouter.Space sp = RouteView.obstacles(level);
+        if (plan.startJoin != null) sp = RouteView.freeAround(sp, plan.startJoin, PipePart.JOIN_CLEAR);
+        if (endJoin != null) sp = RouteView.freeAround(sp, endJoin, PipePart.JOIN_CLEAR);
         return PipeRouter.route(sp, PipePart.GRID[plan.tier], plan.start, wps, last);
     }
 

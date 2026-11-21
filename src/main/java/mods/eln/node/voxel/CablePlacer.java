@@ -90,7 +90,7 @@ public final class CablePlacer {
 
     /** ... read through a view of the world (live, or a snapshot for the preview thread). */
     public static CableRouter.Space space(RouteView view) {
-        PipeRouter.Space blocked = PipePlacer.space(view);
+        PipeRouter.Space blocked = RouteView.obstacles(view);
         return new CableRouter.Space() {
             @Override
             public boolean blocked(long x0, long y0, long z0, long x1, long y1, long z1) {
@@ -160,7 +160,7 @@ public final class CablePlacer {
      *  cable; solid blocks stay solid (they were free too, and a route could pass through a floor beside a junction). */
     static CableRouter.Space around(CableRouter.Space s, long[] p) {
         final int h = 4;
-        PipeRouter.Space free = PipePlacer.spaceAround(s, p, h);
+        PipeRouter.Space free = RouteView.freeAround(s, p, h);
         // (the cube's solid voxels worked out once: asked per query, each voxel of a voxel block recomputed that block's
         // shapes, and a route from a cable spent 100 ms over 43 steps on the server thread: Baughn's slow start)
         boolean[] solidIn = new boolean[8 * h * h * h];
