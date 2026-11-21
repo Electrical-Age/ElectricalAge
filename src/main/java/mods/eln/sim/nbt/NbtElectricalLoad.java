@@ -1,6 +1,7 @@
 package mods.eln.sim.nbt;
 
 import mods.eln.misc.INBTTReady;
+import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalLoad;
 import net.minecraft.nbt.CompoundTag;
 
@@ -27,10 +28,7 @@ public class NbtElectricalLoad extends ElectricalLoad implements INBTTReady {
     }
 
     public void readFromNBT(CompoundTag nbttagcompound, String str) {
-        setU(nbttagcompound.getFloatOr(str + nbtName + "Uc", 0f));
-        if (Double.isNaN(getU())) setU(0);
-        if (getU() == Float.NEGATIVE_INFINITY) setU(0);
-        if (getU() == Float.POSITIVE_INFINITY) setU(0);
+        setU(Utils.finiteOr(nbttagcompound.getFloatOr(str + nbtName + "Uc", 0f), 0));
     }
 
     public void writeToNBT(CompoundTag nbttagcompound, String str) {

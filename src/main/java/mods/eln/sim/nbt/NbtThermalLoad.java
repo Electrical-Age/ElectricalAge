@@ -1,6 +1,7 @@
 package mods.eln.sim.nbt;
 
 import mods.eln.misc.INBTTReady;
+import mods.eln.misc.Utils;
 import mods.eln.sim.ThermalLoad;
 import net.minecraft.nbt.CompoundTag;
 
@@ -24,10 +25,7 @@ public class NbtThermalLoad extends ThermalLoad implements INBTTReady {
     }
 
     public void readFromNBT(CompoundTag nbttagcompound, String str) {
-        Tc = nbttagcompound.getFloatOr(str + name + "Tc", 0f);
-        if (Double.isNaN(Tc)) Tc = 0;
-        if (Tc == Float.NEGATIVE_INFINITY) Tc = 0;
-        if (Tc == Float.POSITIVE_INFINITY) Tc = 0;
+        Tc = Utils.finiteOr(nbttagcompound.getFloatOr(str + name + "Tc", 0f), 0);
     }
 
     public void writeToNBT(CompoundTag nbttagcompound, String str) {

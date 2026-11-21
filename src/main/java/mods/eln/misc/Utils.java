@@ -360,6 +360,11 @@ public class Utils {
         return Math.max(Math.min(value, max), min);
     }
 
+    /** value, or fallback when it is NaN or infinite (a saved value from a run that went non-finite). */
+    public static double finiteOr(double value, double fallback) {
+        return Double.isFinite(value) ? value : fallback;
+    }
+
     public static void printFunction(FunctionTable func, double start, double end, double step) {
         Utils.println("********");
         double x;
