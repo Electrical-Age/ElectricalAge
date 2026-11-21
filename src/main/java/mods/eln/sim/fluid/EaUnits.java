@@ -86,13 +86,17 @@ public final class EaUnits {
     }
 
     /**
-     * A tank's fill against its capacity in the capacity's unit (buckets from 1000 mB, as volume): "350 / 500 mB",
-     * "2.35 / 4 B". Buckets keep two decimals rounded down, so a tank 10 mB short of full doesn't read full.
+     * A tank's fill against its capacity, both as volume: "700 mB / 4.0 B", "3.9 B / 4.0 B". The fill's buckets are
+     * rounded down, so a tank short of full doesn't read full.
      */
     public static String tank(double mB, double capacityMb) {
-        if (capacityMb < 1000) return String.format("%.0f / %.0f mB", mB, capacityMb);
-        double cap = capacityMb / 1000;
-        return String.format("%.2f / %s B", Math.floor(mB / 10) / 100, cap == Math.floor(cap) ? String.valueOf((long) cap) : String.valueOf(cap));
+        String fill;
+        if (mB < 1000) fill = compact(mB) + " mB";
+        else {
+            double b = mB / 1000;
+            fill = b >= 100 ? String.format("%.0f B", Math.floor(b)) : String.format("%.1f B", Math.floor(b * 10) / 10);
+        }
+        return fill + " / " + volume(capacityMb);
     }
 
     private static String grams(double g) {

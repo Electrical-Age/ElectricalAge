@@ -593,7 +593,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   "230V", "400V", "11.0kV" (`CableSpec.voltsLabel`) in cable kit and winding names, the toolbag ring and the wire
   drawing and pole screens; the pole screen's line voltage lost its two decimals. Power sliders (teleporter, turret,
   energy converter, heat furnace) read "5.00kW", not "5000W". Tank lines in Jade switch to buckets at a bucket of
-  capacity (`EaUnits.tank`, "2.35 / 4 B", rounded down so a tank short of full doesn't read full). Temperatures over
+  capacity (`EaUnits.tank`, "700 mB / 4.0 B", the fill rounded down so a tank short of full doesn't read full). Temperatures over
   999 °C read "1.00k°C", as the meters already did.
 - Device refusals on the action bar (todo #554, Baughn 2026-11-21): placement refusals, the pole spans' and pole gear's
   messages, a burnt device's repair hint, mode toggles (electrical tools, flashlight, wire colour care), the brush
