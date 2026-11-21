@@ -72,6 +72,26 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
 
     public final SimpleContainer trunk = new SimpleContainer(TRUNK_SLOTS);
     final BikePhysics physics = new BikePhysics();
+    /** Who placed it (null for bikes placed before owners were kept): they may pick it up inside anyone's claim. */
+    java.util.UUID owner;
+
+    public java.util.UUID owner() {
+        return owner;
+    }
+
+    public void setOwner(java.util.UUID u) {
+        owner = u;
+    }
+
+    /**
+     * A bike's owner may hit (pick up) their bike inside anyone's claim; everyone else stays bound by the claim
+     * (Baughn, via ErisiAgent 1573487725284167681: a bike that fell into someone's claim was stuck). Open Parties and
+     * Claims cancels the attack on the server; this runs after it and lets the owner's through.
+     */
+    public static void ownerMayAttack(net.neoforged.neoforge.event.entity.player.AttackEntityEvent e) {
+        if (e.isCanceled() && e.getTarget() instanceof ElectricBike b && b.owner != null && b.owner.equals(e.getEntity().getUUID()))
+            e.setCanceled(false);
+    }
     /** Client, controlling: the next jump's scale (0 none). */
     float pendingJump;
     int jumpCooldown;
@@ -560,6 +580,7 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         net.minecraft.world.ContainerHelper.saveAllItems(out, trunk.getItems());
         out.putIntArray("colors", colors());
         out.putBoolean("lamp", lampOn());
+        if (owner != null) out.store("owner", net.minecraft.core.UUIDUtil.CODEC, owner);
     }
 
     @Override
@@ -568,5 +589,6 @@ public class ElectricBike extends VehicleEntity implements PlayerRideableJumping
         net.minecraft.world.ContainerHelper.loadAllItems(in, trunk.getItems());
         in.getIntArray("colors").ifPresent(this::setColors);
         entityData.set(DATA_LAMP, in.getBooleanOr("lamp", false));
+        owner = in.read("owner", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
     }
 }

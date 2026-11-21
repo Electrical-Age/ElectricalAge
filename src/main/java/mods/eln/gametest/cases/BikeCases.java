@@ -124,6 +124,29 @@ public final class BikeCases {
                     .filter(e -> !before.contains(e.getId())).findFirst().orElse(null);
                 ctx.check("put down again, it has the same paint", placed != null && java.util.Arrays.equals(placed.colors(), want),
                     placed == null ? "not placed" : java.util.Arrays.toString(placed.colors()));
+                // its owner (Baughn via ErisiAgent 1573487725284167681): kept over a save; a claim's cancel of the
+                // owner's hit is undone, anyone else's stands
+                if (placed != null) {
+                    ctx.check("a placed bike remembers who placed it", p.getUUID().equals(placed.owner()), String.valueOf(placed.owner()));
+                    var o2 = net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, ctx.level().registryAccess());
+                    placed.saveWithoutId(o2);
+                    ElectricBike c2 = ElnRegistry.ELECTRIC_BIKE_ENTITY.get().create(ctx.level(), EntitySpawnReason.LOAD);
+                    c2.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, ctx.level().registryAccess(), o2.buildResult()));
+                    ctx.check("the owner survives a save", p.getUUID().equals(c2.owner()), String.valueOf(c2.owner()));
+                    var mine = new net.neoforged.neoforge.event.entity.player.AttackEntityEvent(p, placed);
+                    mine.setCanceled(true);
+                    ElectricBike.ownerMayAttack(mine);
+                    placed.setOwner(java.util.UUID.randomUUID());
+                    var theirs = new net.neoforged.neoforge.event.entity.player.AttackEntityEvent(p, placed);
+                    theirs.setCanceled(true);
+                    ElectricBike.ownerMayAttack(theirs);
+                    copy.setOwner(null);
+                    var old = new net.neoforged.neoforge.event.entity.player.AttackEntityEvent(p, copy);
+                    old.setCanceled(true);
+                    ElectricBike.ownerMayAttack(old);
+                    ctx.check("in a claim the owner may hit their bike; someone else, or anyone at an ownerless bike, may not",
+                        !mine.isCanceled() && theirs.isCanceled() && old.isCanceled(), mine.isCanceled() + "," + theirs.isCanceled() + "," + old.isCanceled());
+                }
                 ctx.check("a plain bike's item carries no paint data", !new ItemStack(ElnRegistry.ELECTRIC_BIKE.get()).has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)
                     && java.util.Arrays.equals(mods.eln.bike.BikeColors.of(new ItemStack(ElnRegistry.ELECTRIC_BIKE.get())), new int[]{-1, -1, -1, -1}), "");
             } finally {

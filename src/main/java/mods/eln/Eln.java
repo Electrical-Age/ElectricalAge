@@ -295,6 +295,9 @@ public class Eln {
         // 1.12 ran the simulator in ServerTickEvent phase START
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Pre.class, e -> simulator.tick());
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre.class, mods.eln.node.voxel.KitItem::onPickup);
+        // (after Open Parties and Claims' cancel, and seeing it: a bike's owner may pick it up in any claim)
+        NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.LOWEST, true,
+            net.neoforged.neoforge.event.entity.player.AttackEntityEvent.class, mods.eln.bike.ElectricBike::ownerMayAttack);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre.class, mods.eln.gridnode.OverheadCableItem::onPickup);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent.class, mods.eln.node.voxel.CableKitRecipes::crafted);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent.class, mods.eln.node.voxel.PipeKitRecipes::crafted);
