@@ -145,7 +145,8 @@ public class ElnJadePlugin implements IWailaPlugin {
                 m = lines;
             }
             // (first of all, in red: Baughn 1573807986227544245; AdventurAgent read past it in grey)
-            if (mods.eln.fluid.FluidWorld.solverFailedAt(acc.getPosition().asLong()))
+            if (mods.eln.fluid.FluidWorld.solverFailedAt(acc.getPosition().asLong())
+                || owner != null && mods.eln.fluid.FluidWorld.solverFailedAt(owner.node.coordonate.pos().asLong()))   // (a multiblock's ghost cells too)
                 tag.putString("elnAlarm", mods.eln.i18n.I18N.tr("SOLVER FAILED: CALL BAUGHN"));
             if (m == null || m.isEmpty()) return;
             if (owner != null ? !owner.thermalLoadList.isEmpty() : hasHeat(acc)) {   // (the ambient it cools towards: by biome, height, depth; Baughn 2026-10-26)

@@ -173,7 +173,7 @@ public final class FluidWorld implements IProcess {
         return out;
     }
 
-    /** A network over its step time and stalled this long (s: its steps covering under half the tick) is called out. */
+    /** A network stalled this long (s: its steps covering under half the tick) is called out in Jade. */
     static final double STUCK_SECONDS = 2;
 
     /** Blocks (BlockPos.asLong) of stuck networks whose step last ran out of its time, and when (ms): Jade calls it out. */
@@ -197,27 +197,46 @@ public final class FluidWorld implements IProcess {
 
     /** A network's step ran out of its time (Network.MAX_STEP_NANOS): log where, once a minute. */
     private void overBudget(FluidNetwork n) {
-        String where = "?";
         long now = System.currentTimeMillis();
-        java.util.Set<FluidNode> in = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
-        in.addAll(n.nodes);
-        // (Jade calls out only a network stuck for a while, not a healthy one over its time for a moment: AdventurAgent saw
-        // Dysnomia's plant flagged after a restart)
-        double stall = 0;
-        for (FluidNode x : n.nodes) stall = Math.max(stall, x.stallNow);
-        boolean stuck = stall >= STUCK_SECONDS;
-        for (FluidDevice d : devices)
-            for (FluidDevice.FluidPort p : d.fluidPorts())
-                if (in.contains(nodeFor(p.node()))) {
-                    if (where.equals("?")) where = d.getClass().getSimpleName() + " " + BlockPos.of(p.pos()).toShortString();
-                    if (stuck) slowAt.put(p.pos(), now);   // (Jade calls it out on every block of the network)
-                }
+        String where = where(n, now, false);
         Long last = overBudgetLogged.get(where);
         if (last != null && now - last < 60_000) return;
         if (overBudgetLogged.size() > 256) overBudgetLogged.clear();
         overBudgetLogged.put(where, now);
         mods.eln.Eln.LOG.warn("[fluidcore] a network of {} nodes ran out of its step time ({} ms) and runs slow, near {}",
             n.nodes.size(), mods.eln.fluidcore.Network.MAX_STEP_NANOS / 1_000_000, where);
+    }
+
+    /**
+     * A device of n and its port's block ("?" for none); with mark, every port block of n's devices goes into slowAt
+     * (now), for Jade. Without, it stops at the first.
+     */
+    private String where(FluidNetwork n, long now, boolean mark) {
+        String where = "?";
+        java.util.Set<FluidNode> in = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
+        in.addAll(n.nodes);
+        for (FluidDevice d : devices)
+            for (FluidDevice.FluidPort p : d.fluidPorts())
+                if (in.contains(nodeFor(p.node()))) {
+                    if (where.equals("?")) where = d.getClass().getSimpleName() + " " + BlockPos.of(p.pos()).toShortString();
+                    if (!mark) return where;
+                    slowAt.put(p.pos(), now);
+                }
+        return where;
+    }
+
+    /**
+     * A network stalled STUCK_SECONDS (its steps covering under half the tick: over its time, or its solves failing)
+     * marks its blocks for Jade's "SOLVER FAILED" (Baughn 1573807986227544245); a healthy one over its time for a
+     * moment isn't (AdventurAgent saw Dysnomia's plant flagged after a restart).
+     */
+    private void markIfStuck(FluidNetwork n) {
+        double stall = 0;
+        for (FluidNode x : n.nodes) stall = Math.max(stall, x.stallNow);
+        if (stall < STUCK_SECONDS) return;
+        long now = System.currentTimeMillis();
+        if (slowAt.size() > 4096) slowAt.values().removeIf(t -> now - t > 5_000);
+        where(n, now, true);
     }
 
     /** A network's progress after a step (CoreStep), onto its nodes and their runs' pieces (FluidNode.stallNow). */
@@ -281,6 +300,7 @@ public final class FluidWorld implements IProcess {
         for (FluidNetwork n : networks) {
             n.step(time);
             if (n.overBudget()) overBudget(n);
+            markIfStuck(n);
         }
         // (what each flow moved, onto its device's Flow at once: a trace below may rebuild the networks and their edges)
         for (FluidDevice.Flow f : flows) {
