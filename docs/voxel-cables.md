@@ -188,7 +188,9 @@ the rules above; the joints are kept alongside:
   port (`PipeTransmitterElement.aimBoxes`): the end of the pipe laid to it covered the body from most angles, so Jade
   and clicks got the pipe. Breaking still picks by `VoxelNodeBlock`'s own rule.
 - A pipe kit route doesn't start or end at a device's port that already has a pipe (`PipePlacer.portTaken`; a lab test
-  laid a second pipe beside the first).
+  laid a second pipe beside the first). The same holds for every machine's fluid port, the Large Boiler's ghost ports
+  included (`PipePlacer.coupled`: a port in front of its face facing back at the same spot, FluidWorld's coupling rule;
+  AdventurAgent: a second route to a tank's piped port "gave up"), in the preview and on the click.
 - Its kind shows on the body's top: a coloured plate (pressure blue, temperature red, quality green) with a raised white
   letter P, T or Q for colourblind players. Jade's three headline lines: the reading, the output volts, the full scale.
 - Its own hidden items are out of the creative tab (`addWithoutRegistry`) and JEI (`compat/JeiPages.hidden`).
@@ -324,7 +326,7 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   kind. The pipe kit's old one-straight-block click is gone (Baughn). A pipe route may start and end on pipes
   (`PipePlacer.layJoined` with both joins).
 - Per kind, in its spec (`RoutePlacer.Spec`): the ends (`endAt`: a cable's connectors and edge rule, a pipe's ports,
-  with the pipe sensor's "Its port already has a pipe"), routing (surface or free), laying (cables with their hang,
+  with "Its port already has a pipe" for a machine's piped port or a pipe sensor's), routing (surface or free), laying (cables with their hang,
   pipes with their junctions), the join rule (cables: the same tier or two power cables; pipes: any pipe tier, the
   junction takes the lower; Baughn 2026-11-21), the parts' outline for the preview (`boxes`), mending a burnt cable run
   by clicking it (cables; a pipe bursts), the particles' colour, what the start message names as a finish, and the
@@ -340,8 +342,8 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   each preview, for both kinds.
 - Tests: `RouteLeakCases` (lay/break/re-lay rounds leave nothing in the simulator or fluid world),
   `PipeCases` (`pipe_laying_all_or_nothing`, `pipe_kit_starts_anywhere_and_caps` with the start-spot refusal,
-  `pipe_kit_branches_pipe_to_pipe`, `kit_preview_says_what_the_click_does`), `HandbookFixCases` (a cable route can't
-  end where it started), `CableRouteLapseTest`.
+  `pipe_kit_branches_pipe_to_pipe`, `kit_preview_says_what_the_click_does`, `pipe_kit_refuses_a_taken_port`),
+  `HandbookFixCases` (a cable route can't end where it started), `CableRouteLapseTest`.
 
 ## Toolbag
 

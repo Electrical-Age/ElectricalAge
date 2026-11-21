@@ -40,6 +40,7 @@ public final class PipeCases {
         cases.add(new KitStartsAnywhereAndCaps());
         cases.add(new KitBranchesPipeToPipe());
         cases.add(new KitPreviewSaysWhatTheClickDoes());
+        cases.add(new KitRefusesATakenPort());
         cases.add(new KitCrafting());
         cases.add(new ThrottleAndControlValves());
         cases.add(new Burst());
@@ -1179,6 +1180,67 @@ public final class PipeCases {
                 cableStart != null && cableStart.startsWith("That's the start.") && pipeStart != null && pipeStart.startsWith("That's the start."),
                 cableStart + " / " + pipeStart);
             ctx.check("kit preview: a pipe route aimed at a pipe joins it", pipeJoin != null && pipeJoin.endsWith(" \u2014 joins"), pipeJoin);
+        }
+    }
+
+    /**
+     * A machine's port that already has a pipe is refused, in the preview and on the click, with the pipe sensor's words
+     * (AdventurAgent: a second route to a tank's piped port said "gave up: too far or too tangled"); while free, the same
+     * port takes a route.
+     */
+    static final class KitRefusesATakenPort implements TestCase {
+        String first, preview, second;
+        boolean laid, refused;
+
+        public String id() {
+            return "pipe_kit_refuses_a_taken_port";
+        }
+
+        public void build(TestContext ctx) {
+            var level = ctx.level();
+            BlockPos tp = ctx.at(4, 1, 1);
+            var tank = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, tp);
+            tank.front = mods.eln.misc.Direction.XP;   // (its back, with a low side port, to the west)
+            tank.reconnect();
+            var p = ctx.player();
+            p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            var up = net.minecraft.core.Direction.UP;
+            var west = net.minecraft.core.Direction.WEST;
+            var portHit = net.minecraft.world.phys.Vec3.atLowerCornerOf(tp).add(0, 0.3, 0.5);
+            double x = p.getX(), y = p.getY(), z = p.getZ();
+            p.snapTo(tp.getX() - 1.5, tp.getY(), tp.getZ() + 0.5, 0, 0);
+            try {
+                mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+                ItemStack kit = PipeKitItem.kit(0, 16 * 16);
+                var ks = mods.eln.node.voxel.KitSupply.of(kit);
+                // a route from the floor to the free port: laid
+                BlockPos s1 = ctx.at(1, 0, 0);
+                mods.eln.node.voxel.PipePlacer.use(p, level, s1, up, ks, net.minecraft.world.phys.Vec3.atLowerCornerOf(s1).add(0.5, 1, 0.5), false);
+                mods.eln.node.voxel.PipePlacer.use(p, level, tp, west, ks, portHit, false);
+                laid = !mods.eln.node.voxel.PipePlacer.active(p.getUUID()) && ctx.voxelByEntity(ctx.at(3, 1, 1)) != null;
+                first = "route laid " + laid;
+                // a second route to it: refused, the route still on, nothing laid
+                BlockPos s2 = ctx.at(1, 0, 2);
+                mods.eln.node.voxel.PipePlacer.use(p, level, s2, up, ks, net.minecraft.world.phys.Vec3.atLowerCornerOf(s2).add(0.5, 1, 0.5), false);
+                preview = mods.eln.node.voxel.KitPreview.previewForTests(p, ks, tp, west, portHit);
+                var v = ctx.voxelByEntity(ctx.at(3, 1, 1));
+                int before = v == null ? -1 : v.parts.size();
+                mods.eln.node.voxel.PipePlacer.use(p, level, tp, west, ks, portHit, false);
+                v = ctx.voxelByEntity(ctx.at(3, 1, 1));
+                int after = v == null ? -1 : v.parts.size();
+                refused = mods.eln.node.voxel.PipePlacer.active(p.getUUID()) && before == after;
+                second = "route on " + mods.eln.node.voxel.PipePlacer.active(p.getUUID()) + ", parts by the port " + before + " -> " + after;
+            } finally {
+                mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+                p.snapTo(x, y, z, 0, 0);
+                p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("pipe kit: a free tank port takes a route", laid, first);
+            ctx.check("pipe kit: the preview at the piped port says it's taken", preview != null && preview.startsWith("Its port already has a pipe"), "" + preview);
+            ctx.check("pipe kit: a second route to the piped port is refused", refused, second);
         }
     }
 
