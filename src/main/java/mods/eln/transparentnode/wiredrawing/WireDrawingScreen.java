@@ -145,7 +145,7 @@ public class WireDrawingScreen extends ElnScreen {
             default -> LABEL;
         });
         // one item a Start, no Stop (Baughn 2026-11-07: twice he made a second one he didn't mean to); greyed while drawing
-        var run = button("run", () -> r.running ? tr("Drawing...") : tr("Start"), () -> {
+        var run = button("run", () -> r.running ? tr("Busy") : tr("Start"), () -> {
             if (!r.running) r.clientRun(true);
         }, tr("Draws one item, then stops. Changing what to make scraps the wire drawn so far"));
         refreshers.add(() -> {

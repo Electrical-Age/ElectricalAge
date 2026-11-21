@@ -40,7 +40,7 @@
   },
   {
    "text": "heat",
-   "sample": "Set point: 1.00k°C  (Actual: 1.00k°C)"
+   "sample": "Set point: 1.00k°C  (needs a regulator)"
   },
   {
    "slider": "heat",
