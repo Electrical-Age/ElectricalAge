@@ -8,7 +8,7 @@ import net.minecraft.world.item.context.UseOnContext;
 
 /**
  * A cable kit (notes/cables/PLAN.md; Baughn: 1024 voxel cross-sections, 64 blocks, for every tier): a length of one
- * tier's cable, kept as the item's damage (KitItem). Right-click faces to route a cable (CablePlacer). Made from the
+ * tier's cable, kept as the item's damage (KitItem). Right-click faces to route a cable (RoutePlacer, CablePlacer's spec). Made from the
  * old cable items ("coils", 16 voxels each) and cut back into them (CableKitRecipes).
  */
 public class CableKitItem extends Item implements PipeTool, KitItem {

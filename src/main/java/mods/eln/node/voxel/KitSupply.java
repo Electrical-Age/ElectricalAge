@@ -4,8 +4,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * What a route is laid from: a cable or pipe kit, or a Toolbag's kits of its chosen kind taken as one (ToolbagItem). The placers
- * (CablePlacer, PipePlacer), their preview (KitPreview) and their lapse checks ask the item in the main hand for one.
+ * What a route is laid from: a cable or pipe kit, or a Toolbag's kits of its chosen kind taken as one (ToolbagItem). The placer
+ * (RoutePlacer), its preview (KitPreview) and its lapse check ask the item in the main hand for one.
  */
 public interface KitSupply {
     /** A pipe (else a cable). */

@@ -14,9 +14,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * A pipe kit (Baughn, notes/pipes/DESIGN.md 6a): a length of pipe of one tier, kept as the item's damage (stack size
- * is too low for pipes): length = MAX - damage voxels (16 voxels = one block). Right-click a port to route a pipe
- * (PipePlacer: waypoints, then a port to finish); right-clicking any other face lays one block of straight pipe,
- * centred, in the block in front of it, along the face's axis.
+ * is too low for pipes): length = MAX - damage voxels (16 voxels = one block). Right-click to route a pipe as a cable
+ * kit routes a cable (RoutePlacer with PipePlacer's spec: a start, waypoints, then a port, a pipe or the last waypoint
+ * again to finish).
  */
 public class PipeKitItem extends Item implements PipeTool, KitItem {
     public final int tier;
@@ -95,7 +95,7 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
         ItemStack stack = ctx.getItemInHand();
         Player player = ctx.getPlayer();
         var face = ctx.getClickedFace();
-        // a route, laid as a cable kit lays one (PipePlacer; Baughn 2026-11-11: the one-straight-block click is gone)
+        // a route, laid as a cable kit lays one (RoutePlacer; Baughn 2026-11-11: the one-straight-block click is gone)
         if (player instanceof net.minecraft.server.level.ServerPlayer sp && level instanceof net.minecraft.server.level.ServerLevel sl
             && PipePlacer.use(sp, sl, ctx.getClickedPos(), face, stack, tier, ctx.getClickLocation())) return InteractionResult.SUCCESS;
         return InteractionResult.PASS;

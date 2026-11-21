@@ -30,7 +30,8 @@ public final class CableRouter {
     }
 
     /** A routing end: a point on a face plane, the face its cable lies against (3D value), and, for a device or cable
-     *  end, the direction the cable must arrive along (or leave along, for a start); -1 for a free point. */
+     *  end, the direction the cable must arrive along (or leave along, for a start); -1 for a free point. RoutePlacer's
+     *  end for both kinds: a pipe's has attach -1 and its dir as a face too (PipePlacer.end adapts it). */
     public record End(long x, long y, long z, int attach, int dir) {
     }
 
