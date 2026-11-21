@@ -584,9 +584,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - One wrench turn (todo #556, Baughn 2026-11-21): every device turns by the shared helpers
   (`SixNodeElement.onBlockActivatedRotate`, `TransparentNodeElement.wrenchTurn`, `FluidPlacement.Turnable`), and a
   wrench click that turns or toggles something is used. Before, the wind turbine's and a cable's colour-care click went
-  on to the held item; an antenna's or a lamp socket's turn didn't show until something else published; a lamp socket
-  or Modbus RTU off centre in a voxel block turned without the fit check. A socket that only looks right one way up
-  (the sconce) still turns by half turns, and the Modbus RTU still turns only on a floor or ceiling, as in 1.12.
+  on to the held item. A socket that only looks right one way up (the sconce) still turns by half turns
+  (`SixNodeElement.wrenchStep`), and the Modbus RTU still turns only on a floor or ceiling, as in 1.12.
   `wrench_turn_*`, `wrench_cable_colour_care`.
 
 ### Multi-fluid pipes (2026-11-03)
