@@ -27,7 +27,7 @@ public class ElectricalAnvilDescriptor extends TransparentNodeDescriptor {
     /**
      * It starts a pulse at RESUME of 400 V, or, on a line that has levelled off (rising under PLATEAU_V_PER_S for
      * PLATEAU_S) above PLATEAU of 400 V, there; it pauses below SAG (config [anvil]). 98% was too high for a real bank
-     * on a weak plant: the bank's own leak held the line at ~780 V and the desk waited forever (AdventurAgent).
+     * on a weak plant: the bank's own leak held the line just under it and the desk waited forever (AdventurAgent).
      */
     public static double resume = 0.95, sag = 0.9, plateau = 0.93;
     public static final double PLATEAU_V_PER_S = 1, PLATEAU_S = 2;
