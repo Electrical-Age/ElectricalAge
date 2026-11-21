@@ -649,7 +649,7 @@ final class MixFluid implements NodeFluid {
         if (OLD_TOL) return Math.max(1, Math.abs(U)) * 1e-13 + 1e-9;
         double mt = 0;
         for (double x : m) mt += Math.abs(x);
-        return WaterAir.energyTol(mt, U) + FLASH_ABS;
+        return 1e-13 * Math.max(1e-6, Math.max(Math.abs(U), 1e5 * mt)) + FLASH_ABS;
     }
     /** Probe counters: flashes that fell back to the bracketed solve, and polish iterations. */
     public static long BRACKETS, POLISH_ITS, SAME, EVALS, BRACKET_EVALS;

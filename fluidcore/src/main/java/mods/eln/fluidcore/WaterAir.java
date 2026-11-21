@@ -377,15 +377,18 @@ public final class WaterAir {
     }
 
     /**
-     * The solve's energy tolerance: 1e-13 of the node's energy scale, its |U| or its masses at 1e5 J/kg (the scale
-     * Network judges a node's energy row on; MixFluid uses it too). It was 1e-13 max(1, |U|) + 1e-9 J: in a pocket of
+     * The solve's energy tolerance: 1e-13 max(1, |U|) plus 1e-9 J for a node over a gram; below that the 1e-9 J floor
+     * shrinks with the mass (and the 1 J one below 10 mg), with 1e-19 J left for an empty node. It was 1e-13 max(1, |U|) + 1e-9 J for every node: in a pocket of
      * 4 ug of air under vacuum (2.8 uJ/K) behind a wall of 3 W/K, 1e-9 J is 4e-4 K, and Newton's correction to the
      * node's energy (its wall heat's residual over the wall's slope, ~1e-9 J) fell inside it: the state never moved,
      * its energy row stalled, and the network hit the sub-step cap every tick (a player's turbine plant, 2026-11-21;
      * ReplayTest.vacuumPocketBehindAWallSteps).
      */
     static double energyTol(double mass, double U) {
-        return 1e-13 * Math.max(1e-6, Math.max(Math.abs(U), 1e5 * mass));
+        // (the old tolerance for any node over a gram: MixFluid's scaled one, tried first, was up to 40x tighter for a few
+        // grams of steam, sent Dysnomia's 114-node plant from 8 to 42 ms a step, sub-stepping every step, and took
+        // Incognito to 16 TPS; MixFluid keeps its own)
+        return 1e-13 * Math.max(Math.min(1, 1e5 * mass), Math.abs(U)) + Math.min(1e-9, 1e-6 * mass) + 1e-19;
     }
 
     /** Solve (water mw, air ma, internal energy U, volume V) for the split; tHint speeds the bracket. */
