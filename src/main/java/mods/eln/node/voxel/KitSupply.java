@@ -23,11 +23,6 @@ public interface KitSupply {
     /** Use up len voxels (no more than length()). */
     void take(int len);
 
-    /** What to sneak-click for to undo, in the placers' messages. */
-    default String undoHint() {
-        return "sneak-click";
-    }
-
     /** The undo, as a sentence after a refusal: "Sneak-click to undo." (the Toolbag: "Sneak-click for Undo."). */
     default String undoSentence() {
         return "Sneak-click to undo.";

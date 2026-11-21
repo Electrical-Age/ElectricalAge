@@ -193,10 +193,6 @@ public class ToolbagItem extends Item implements PipeTool {
                 return "sneak-click for Undo";
             }
 
-            @Override
-            public String undoHint() {
-                return "sneak-click for Undo";
-            }
         };
     }
 
