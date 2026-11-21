@@ -13,7 +13,7 @@ import static mods.eln.i18n.I18N.tr;
 /**
  * A wire-drawing machine (layout gui/wire_drawing.json): copper and rubber in, the kit or winding out; what to make
  * (kit or winding, cross-section, insulation and colour within the machine's limits, blocks or turns), what it takes,
- * the copper and rubber already in the machine, its state, and Start (one item a press).
+ * the copper and rubber it has (its slots plus what it already took from them), its state, and Start (one item a press).
  */
 public class WireDrawingScreen extends ElnScreen {
     final WireDrawingRender render;
@@ -130,7 +130,15 @@ public class WireDrawingScreen extends ElnScreen {
                 String.format("%.1f", l * WireDrawingDescriptor.rubberPerBlock(r.mode, r.tier, r.mm2)),
                 String.format("%.0f", l * WireDrawingDescriptor.energyPerBlock(r.mode, r.mm2) / 1000));
         });
-        text("buffer", () -> tr("Held: %1$ copper, %2$ rubber", String.format("%.2f", r.copper), String.format("%.2f", r.rubber)));
+        // what it has to draw from, comparable with "Takes" above: the slots plus what it already took from them (nero: a bare
+        // "Held" matched nothing; Baughn 1573703351592296449: count the slots too)
+        text("buffer", () -> {
+            var cu = menu.getSlot(WireDrawingElement.COPPER).getItem();   // (menu slots 0 and 1 are these, MenuSpecs' order)
+            var ru = menu.getSlot(WireDrawingElement.RUBBER).getItem();
+            double copper = r.copper + (WireDrawingElement.isCopper(cu) ? cu.getCount() : 0);
+            double rubber = r.rubber + (WireDrawingElement.isRubber(ru) ? ru.getCount() : 0);
+            return tr("Has %1$ copper, %2$ rubber", String.format("%.1f", copper), String.format("%.1f", rubber));
+        });
         text("status", () -> WireDrawingElement.statusText(r.status), () -> switch (r.status) {
             case WireDrawingElement.NO_COPPER, WireDrawingElement.NO_RUBBER, WireDrawingElement.NO_POWER, WireDrawingElement.NO_CORE -> 0xFFA02020;
             case WireDrawingElement.RUNNING -> 0xFF206020;
