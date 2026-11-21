@@ -128,20 +128,7 @@ public class ElectricalSourceElement extends SixNodeElement {
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
-        ItemStack currentItemStack = entityPlayer.getMainHandItem();
-        if (!Utils.isEmpty(currentItemStack)) {
-            Item item = currentItemStack.getItem();
-
-            GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);
-            if (gen != null && gen instanceof BrushDescriptor) {
-                BrushDescriptor brush = (BrushDescriptor) gen;
-                int brushColor = brush.getColor(currentItemStack);
-                if (brushColor != color && brush.use(currentItemStack, entityPlayer)) {
-                    color = brushColor;
-                    sixNode.reconnect();
-                }
-            }
-        }
+        color = brushPaint(entityPlayer, color);
         return false;
     }
 

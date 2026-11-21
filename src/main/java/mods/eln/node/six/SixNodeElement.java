@@ -109,6 +109,28 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return false;
     }
 
+    /**
+     * The wrench on a wire (which has no front to turn) toggles its colour care, whether it joins only wires of its own
+     * colour: the new flag (0 or 1), told to the player, the wire reconnected.
+     */
+    protected int toggleColorCare(Player player, int colorCare) {
+        colorCare ^= 1;
+        Utils.sendMessage(player, "Wire color care " + colorCare);
+        sixNode.reconnect();
+        return colorCare;
+    }
+
+    /** A brush in hand paints it: the brush's colour if that differs and the brush had paint (reconnected), else color. */
+    protected int brushPaint(Player player, int color) {
+        ItemStack held = player.getMainHandItem();
+        if (Utils.isEmpty(held) || !(mods.eln.item.BrushDescriptor.getDescriptor(held) instanceof mods.eln.item.BrushDescriptor brush))
+            return color;
+        int c = brush.getColor(held);
+        if (c == color || !brush.use(held, player)) return color;
+        sixNode.reconnect();
+        return c;
+    }
+
     /** Quarter turns per wrench click: 1, or 2 for a device that only looks right one way up (a lamp socket's). */
     protected int wrenchStep() {
         return 1;

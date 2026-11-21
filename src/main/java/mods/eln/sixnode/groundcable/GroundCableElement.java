@@ -125,24 +125,11 @@ public class GroundCableElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack currentItemStack = entityPlayer.getMainHandItem();
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            colorCare = colorCare ^ 1;
-            Utils.sendMessage(entityPlayer, "Wire color care " + colorCare);
-            sixNode.reconnect();
-        } else if (!Utils.isEmpty(currentItemStack)) {
-            Item item = currentItemStack.getItem();
-
-            GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);
-            if (gen != null && gen instanceof BrushDescriptor) {
-                BrushDescriptor brush = (BrushDescriptor) gen;
-                int brushColor = brush.getColor(currentItemStack);
-                if (brushColor != color && brush.use(currentItemStack, entityPlayer)) {
-                    color = brushColor;
-                    sixNode.reconnect();
-                }
-            }
+            colorCare = toggleColorCare(entityPlayer, colorCare);
+            return true;
         }
+        color = brushPaint(entityPlayer, color);
         return false;
     }
 

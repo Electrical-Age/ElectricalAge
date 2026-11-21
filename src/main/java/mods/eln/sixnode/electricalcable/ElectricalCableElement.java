@@ -168,25 +168,11 @@ public class ElectricalCableElement extends SixNodeElement {
 	/*	World w = sixNode.coordonate.world();
 		boolean exist = WorldCompat.blockExists(w, 10000, 0, 0);
 		int id = w.getBlockId(10000, 0, 0);*/
-        ItemStack currentItemStack = entityPlayer.getMainHandItem();
-        //int i;
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            colorCare = colorCare ^ 1;
-            Utils.sendMessage(entityPlayer, "Wire color care " + colorCare);
-            sixNode.reconnect();
-        } else if (!Utils.isEmpty(currentItemStack)) {
-            Item item = currentItemStack.getItem();
-
-            GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);
-            if (gen != null && gen instanceof BrushDescriptor) {
-                BrushDescriptor brush = (BrushDescriptor) gen;
-                int brushColor = brush.getColor(currentItemStack);
-                if (brushColor != color && brush.use(currentItemStack, entityPlayer)) {
-                    color = brushColor;
-                    sixNode.reconnect();
-                }
-            }
+            colorCare = toggleColorCare(entityPlayer, colorCare);
+            return true;
         }
+        color = brushPaint(entityPlayer, color);
         return false;
     }
 }
