@@ -222,6 +222,10 @@ public final class FluidViewCases {
             free = freeMb(t.vessel);
             took = takesAtOnce(ctx, t.node.coordonate.pos());
             ctx.check("tank layers: the capability takes no more than the free volume", took <= free + 1, took + " mB taken, " + free + " mB free");
+            // (the thermometer added the 20 °C reference to a temperature already in °C: water at 20 °C read 40 °C)
+            String thermo = t.thermoMeterString(Direction.XN).trim();
+            ctx.check("tank layers: the thermometer reads its contents' temperature in °C", Math.abs(t.vessel.T() - Water.T_AMBIENT) < 1
+                && thermo.equals("T: " + mods.eln.api.Meters.celsius(t.vessel.T() - Water.T0)), thermo + " at " + t.vessel.T() + " K");
         }
     }
 

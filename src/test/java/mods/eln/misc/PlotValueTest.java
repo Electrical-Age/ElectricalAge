@@ -27,4 +27,35 @@ public class PlotValueTest {
             Locale.setDefault(old);
         }
     }
+
+    /** Temperatures: the Tc scale is kelvin above 20 °C; the padded meter form is the bare one with its header. */
+    @Test
+    void celsiusFromTheTcScale() {
+        Locale old = Locale.getDefault();
+        Locale.setDefault(Locale.ROOT);
+        try {
+            assertEquals("20.0°C", Utils.plotCelsius(0));
+            assertEquals("85.0°C", Utils.plotCelsius(65));
+            assertEquals("1.00k°C", Utils.plotCelsius(980));
+            assertEquals("T: 85.0°C ", Utils.plotCelsius("T:", 65));
+        } finally {
+            Locale.setDefault(old);
+        }
+    }
+
+    /** Percent: whole numbers, 1 is 100 %; the padded form adds the header and the meter's spacing. */
+    @Test
+    void wholePercent() {
+        Locale old = Locale.getDefault();
+        Locale.setDefault(Locale.ROOT);
+        try {
+            assertEquals("50%", Utils.plotPercent(0.5));
+            assertEquals("0%", Utils.plotPercent(0.004));
+            assertEquals("100%", Utils.plotPercent(0.996));
+            assertEquals("120%", Utils.plotPercent(1.2));
+            assertEquals("Eff: 50%   ", Utils.plotPercent("Eff:", 0.5));
+        } finally {
+            Locale.setDefault(old);
+        }
+    }
 }
