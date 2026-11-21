@@ -47,9 +47,9 @@ import java.util.TreeMap;
  * Repair only: the material must be the tool's repair item or an unenchanted copy of the tool; books and enchanted
  * copies are refused, so it can't be used to combine enchantments. Renaming (engraving) is a small pulse.
  * <p>
- * Power: while it works it is a resistor drawing its rating at 800 V. It switches in only when the line is at RESUME
- * of 800 V and drops out below SAG, keeping its progress, so a weak supply with a capacitor bank charges up between
- * pulses (Baughn: max out the 800 V input to encourage capacitors and inductors).
+ * Power: while it works it is a resistor drawing its rating at 400 V. It switches in only when the line is at RESUME
+ * of 400 V and drops out below SAG, keeping its progress, so a weak supply with a capacitor bank charges up between
+ * pulses (Baughn: max out the high-voltage input to encourage capacitors and inductors).
  */
 public class ElectricalAnvilElement extends TransparentNodeElement {
     public static final int TOOL = 0, MATERIAL = 1;

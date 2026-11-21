@@ -13,20 +13,20 @@ import java.util.List;
 import static mods.eln.i18n.I18N.tr;
 
 /**
- * The electrical anvil (Baughn 2026-10-28): a workshop desk with an 800 V arc welder. It repairs a tool with its repair
+ * The electrical anvil (Baughn 2026-10-28): a workshop desk with a 400 V (Eln.HVU) arc welder. It repairs a tool with its repair
  * material for no XP, never raising the tool's anvil penalty and stepping an old one down; it engraves a new name for a
- * small pulse. While it works it draws its full rating off the 800 V line, more than a small plant gives: it waits for
+ * small pulse. While it works it draws its full rating off the 400 V line, more than a small plant gives: it waits for
  * the voltage to come up and pauses when it sags, so a capacitor bank (or an inductor) carries the pulses. Late-midgame
  * gear. Model: mods.eln.cad.models.ElectricalAnvil.
  */
 public class ElectricalAnvilDescriptor extends TransparentNodeDescriptor {
-    /** Its rating: 800 V at the HV cable's nominal power (config [anvil] power). */
+    /** Its rating: 400 V at the HV cable's nominal power (config [anvil] power). */
     public static double powerW = Eln.HVP();
     /** Energy for a unit of material's worth of repair (config [anvil] joulesPerUnit), and for engraving a name. */
     public static double joulesPerUnit = 40_000, joulesPerName = 2_000;
     /**
-     * It starts a pulse at RESUME of 800 V, or, on a line that has levelled off (rising under PLATEAU_V_PER_S for
-     * PLATEAU_S) above PLATEAU of 800 V, there; it pauses below SAG (config [anvil]). 98% was too high for a real bank
+     * It starts a pulse at RESUME of 400 V, or, on a line that has levelled off (rising under PLATEAU_V_PER_S for
+     * PLATEAU_S) above PLATEAU of 400 V, there; it pauses below SAG (config [anvil]). 98% was too high for a real bank
      * on a weak plant: the bank's own leak held the line at ~780 V and the desk waited forever (AdventurAgent).
      */
     public static double resume = 0.95, sag = 0.9, plateau = 0.93;
@@ -43,7 +43,7 @@ public class ElectricalAnvilDescriptor extends TransparentNodeDescriptor {
         super(name, ElectricalAnvilElement.class, ElectricalAnvilRender.class);
         obj = Eln.obj.getObj(model);
         voltageLevelColor = ElectricalCableDescriptor.voltageLevelColorOf(mods.eln.registry.ElnDeviceRegistry.highVoltageCableDescriptor);
-        cableTerminals = mods.eln.cable.CableTerminals.BACK;   // the 800 V plate low on the back
+        cableTerminals = mods.eln.cable.CableTerminals.BACK;   // the 400 V plate low on the back
     }
 
     /** Energy in one burst. */
@@ -51,7 +51,7 @@ public class ElectricalAnvilDescriptor extends TransparentNodeDescriptor {
         return joulesPerUnit / Math.max(1, bursts);
     }
 
-    /** The welder's resistance: its rating at 800 V. */
+    /** The welder's resistance: its rating at 400 V. */
     public static double resistance() {
         return Eln.HVU * Eln.HVU / Math.max(1, powerW);
     }
