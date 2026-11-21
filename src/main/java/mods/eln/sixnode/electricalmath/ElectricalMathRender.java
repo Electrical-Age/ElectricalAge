@@ -91,7 +91,16 @@ public class ElectricalMathRender extends SixNodeElementRender {
         // (no coloured pin stubs: the model's brass terminals meet the cables; Baughn 2026-10-30), but the bus pin beside
         // the output, in a voxel block (a plain block has no bus cable to meet)
         if (front != null && tileEntity instanceof mods.eln.node.voxel.VoxelNodeEntity)
-            drawBusPin(front, ElectricalMathElement.BUS_OFFSET, 5 / 16f);
+            drawBusPin(front, ElectricalMathElement.BUS_OFFSET, 6.7f / 16);   // (from the tray's wall out, as the terminals: from 5 it showed inside the tray)
+        // each input's terminal capped in the screen's colour (A right, B back, C left of the output; Baughn
+        // 1573669111920066631, the handbook names them by colour). The model's terminals: 1.3 voxels in from the edge,
+        // 3 wide, 1.6 high (mods.eln.cad.models.SignalProcessor)
+        if (front != null) {
+            float from = 6.7f / 16, to = 8f / 16, w = 3f / 16, top = 1.6f / 16;
+            drawPinMark(front.right(), from, to, w, top, rgb(mods.eln.client.gui.CodeEditor.COLOURS.get(mods.eln.gui.code.LanguageAdapter.Kind.INPUT_A)));
+            drawPinMark(front.inverse(), from, to, w, top, rgb(mods.eln.client.gui.CodeEditor.COLOURS.get(mods.eln.gui.code.LanguageAdapter.Kind.INPUT_B)));
+            drawPinMark(front.left(), from, to, w, top, rgb(mods.eln.client.gui.CodeEditor.COLOURS.get(mods.eln.gui.code.LanguageAdapter.Kind.INPUT_C)));
+        }
 
         if (side.isY()) {
             front.left().glRotateOnX();

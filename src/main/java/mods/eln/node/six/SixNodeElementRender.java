@@ -156,11 +156,47 @@ public abstract class SixNodeElementRender {
 
     /** The bus cable's violet, for a bus pin. */
     protected static void busColour() {
-        GL11.glColor3f(0.62f, 0.38f, 0.80f);
+        GL11.glColor3f(BUS_RGB[0], BUS_RGB[1], BUS_RGB[2]);
     }
 
-    /** A bus pin's width and height: wider and taller than the bus cable (3 x 1 voxels), so the cable's end goes into it. */
-    public static final float BUS_PIN_W = 3.4f / 16, BUS_PIN_H = 1.6f / 16;
+    static final float[] BUS_RGB = {0.62f, 0.38f, 0.80f}, COPPER_RGB = {0.96f, 0.64f, 0.36f};   // (bright: untextured, it shades dark)
+
+    /**
+     * A terminal as a low copper pad with a coloured cap, the cap a step narrower all round (a chamfer): the pad's colour
+     * is the cap's blended with copper (Baughn 1573669111920066631: chamfered, the texture blended with copper). Same
+     * frame and extent as drawPinBox.
+     */
+    protected static void drawChamferedPin(LRDU l, float from, float to, float w, float h, float[] rgb) {
+        float c = 0.6f / 16, k = 0.15f;   // (the pad copper; the cap a clear step in and a little above it)
+        GL11.glColor3f(rgb[0] * k + COPPER_RGB[0] * (1 - k), rgb[1] * k + COPPER_RGB[1] * (1 - k), rgb[2] * k + COPPER_RGB[2] * (1 - k));
+        drawPinBox(l, from, to, w, h * 0.75f);
+        GL11.glColor3f(rgb[0], rgb[1], rgb[2]);
+        drawPinBox(l, from + c, to - c, w - 2 * c, h);
+        GL11.glColor3f(1f, 1f, 1f);
+    }
+
+    /**
+     * A coloured cap on top of a model's terminal toward edge l (from..to off the centre, w wide, the terminal top high):
+     * a band a step narrower than the terminal standing just above it, so the pin reads as its colour from above (the
+     * Signal Processor: A, B, C in its screen's colours; the handbook names them so).
+     */
+    protected static void drawPinMark(LRDU l, float from, float to, float w, float top, float[] rgb) {
+        float c = 0.3f / 16, k = 0.6f;
+        GL11.glColor3f(rgb[0] * k + COPPER_RGB[0] * (1 - k), rgb[1] * k + COPPER_RGB[1] * (1 - k), rgb[2] * k + COPPER_RGB[2] * (1 - k));
+        drawPinBox(l, from + c, to - c, w - 2 * c, top + 0.15f / 16);
+        GL11.glColor3f(rgb[0], rgb[1], rgb[2]);
+        drawPinBox(l, from + 2 * c, to - 2 * c, w - 4 * c, top + 0.3f / 16);
+        GL11.glColor3f(1f, 1f, 1f);
+    }
+
+    /** An ARGB colour as rgb floats. */
+    protected static float[] rgb(int argb) {
+        return new float[]{(argb >> 16 & 255) / 255f, (argb >> 8 & 255) / 255f, (argb & 255) / 255f};
+    }
+
+    /** A bus pin's width and height: as wide as the bus cable's end (3 voxels) and a little taller, so the cable meets
+     *  it; low and chamfered rather than a block (Baughn 1573669111920066631: smaller, flatter, less artifact-looking). */
+    public static final float BUS_PIN_W = 3.2f / 16, BUS_PIN_H = 1.0f / 16;
     /** Where a bus pin ends: just past the block's edge, over the end of a bus cable there (as the models' terminals). */
     public static final float BUS_PIN_TO = 8.1f / 16;
 
@@ -173,8 +209,7 @@ public abstract class SixNodeElementRender {
         GL11.glPushMatrix();
         if (a == LRDU.Left || a == LRDU.Right) GL11.glTranslatef(0, 0, s);
         else GL11.glTranslatef(0, s, 0);
-        busColour();
-        drawPinBox(l, from, BUS_PIN_TO, BUS_PIN_W, BUS_PIN_H);
+        drawChamferedPin(l, from, BUS_PIN_TO, BUS_PIN_W, BUS_PIN_H, BUS_RGB);
         GL11.glPopMatrix();
         GL11.glColor3f(1f, 1f, 1f);
     }
