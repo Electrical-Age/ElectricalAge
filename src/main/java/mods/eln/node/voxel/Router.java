@@ -128,10 +128,12 @@ public final class Router {
                 int arrive = leg + 2 == stops.size() ? b.dir() : -1;
                 List<CableRouter.Step> p = surfaceLeg(space, kind, a, attach, lastDir, air, b, arrive, deadline);
                 if (p == null) {
-                    // (with an air allowance, say how far it reaches: AdventurAgent read "no way" at a 3-block gap as a fault)
-                    String why = kind.airLimit() > 0 ? "no way along faces or across gaps of up to " + blocks(kind.airLimit()) + " blocks"
-                        : "no way along faces";
-                    return new CableRouter.Result(null, stops.size() == 2 ? why : why + " on leg " + (leg + 1));
+                    // (with an air allowance, say how far it reaches: AdventurAgent read "no way" at a 3-block gap as a fault.
+                    // Short: the kit's note line is cut at the screen's edges past about 60 characters; wording Neon's)
+                    boolean one = stops.size() == 2;
+                    String why = (one ? "no path" : "no path on leg " + (leg + 1))
+                        + (kind.airLimit() > 0 ? "; max gap " + blocks(kind.airLimit()) + (one ? " blocks" : "") : "");
+                    return new CableRouter.Result(null, why);
                 }
                 if (!out.isEmpty()) p.remove(0);
                 out.addAll(p);
@@ -141,12 +143,13 @@ public final class Router {
                 }
             }
         } catch (PipeRouter.GaveUp e) {
-            return new CableRouter.Result(null, kind.airLimit() > 0
-                ? "gave up: too far, too tangled, or across a gap wider than " + blocks(kind.airLimit()) + " blocks (try waypoints)"
-                : "gave up: too far or too tangled to find a way (try waypoints)");
+            return new CableRouter.Result(null, kind.airLimit() > 0 ? GAVE_UP + "; max gap " + blocks(kind.airLimit()) : GAVE_UP);
         }
         return new CableRouter.Result(CableRouter.simplify(out), null);
     }
+
+    /** Why a search ran out of its budget (expansions or time), for the kit's note line (wording Neon's). */
+    static final String GAVE_UP = "too far or tangled";
 
     /** Voxels as blocks for a message, without rounding 20 voxels up to "1.3" (AdventurAgent): 1.25. */
     static String blocks(int voxels) {
@@ -364,7 +367,7 @@ public final class Router {
             if (tail != null) for (int i = tail.size() - 2; i >= 0; i--) pts.add(tail.get(i));
             return new PipeRouter.Result(PipeRouter.simplify(pts), null);
         } catch (PipeRouter.GaveUp e) {
-            return new PipeRouter.Result(null, "gave up: too far or too tangled to find a way (try waypoints)");
+            return new PipeRouter.Result(null, GAVE_UP);
         }
     }
 
@@ -440,7 +443,7 @@ public final class Router {
             int leaveDir = leg == 0 ? a.dir() : -1;
             int arrive = leg + 2 == stops.size() && b.dir() >= 0 ? b.dir() ^ 1 : -1;   // (arrive into a port: opposite its out-direction)
             List<long[]> p = freeLeg(space, kind, a, b, leaveDir, arriveDir, arrive, deadline);
-            if (p == null) return new PipeRouter.Result(null, leg == 0 && stops.size() == 2 ? "no free path" : "no free path on leg " + (leg + 1));
+            if (p == null) return new PipeRouter.Result(null, leg == 0 && stops.size() == 2 ? "no path" : "no path on leg " + (leg + 1));
             if (!pts.isEmpty()) p.remove(0);
             pts.addAll(p);
             arriveDir = p.size() >= 2 ? PipeRouter.dirOf(pts.get(pts.size() - 2), pts.get(pts.size() - 1)) : arriveDir;

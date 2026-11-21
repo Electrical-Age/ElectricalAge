@@ -16,7 +16,8 @@ import java.util.PriorityQueue;
  * penalty per bend + a little per block entered. Directions are net.minecraft.core.Direction 3D values (0 down, 1 up,
  * 2 north, 3 south, 4 west, 5 east). Pure Java: the world is behind Space.
  */
-/** Frozen copy of CableRouter at 79f42651 (routing phase 1: RouterDifferentialTest compares the new router with it). */
+/** Frozen copy of CableRouter at 79f42651 (routing phase 1: RouterDifferentialTest compares the new router with it).
+ * Its error messages follow the router's current wording, so the test still compares which failure. */
 public final class LegacyCableRouter {
     public static final int LATTICE = 2;
     static final int BEND = 4, BLOCK_ENTERED = 1;
@@ -88,7 +89,7 @@ public final class LegacyCableRouter {
                 int attach = out.isEmpty() ? a.attach() : out.get(out.size() - 1).attach();
                 int arrive = leg + 2 == stops.size() ? b.dir() : -1;
                 List<Step> p = leg(space, width, height, a, attach, lastDir, b, arrive, deadline);
-                if (p == null) return new Result(null, stops.size() == 2 ? "no way along faces" : "no way along faces on leg " + (leg + 1));
+                if (p == null) return new Result(null, stops.size() == 2 ? "no path" : "no path on leg " + (leg + 1));
                 if (!out.isEmpty()) p.remove(0);
                 out.addAll(p);
                 if (out.size() >= 2) {
@@ -97,7 +98,7 @@ public final class LegacyCableRouter {
                 }
             }
         } catch (LegacyPipeRouter.GaveUp e) {
-            return new Result(null, "gave up: too far or too tangled to find a way (try waypoints)");
+            return new Result(null, "too far or tangled");
         }
         return new Result(simplify(out), null);
     }

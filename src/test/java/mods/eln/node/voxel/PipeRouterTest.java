@@ -128,7 +128,7 @@ public class PipeRouterTest {
         var r = PipeRouter.route(slow, 4, face(0, 0, 0, 1), List.of(), face(60, 20, 40, 0), 100);
         long ms = (System.nanoTime() - t0) / 1_000_000;
         assertNotNull(r.error);
-        assertTrue(r.error.startsWith("gave up"), r.error);
+        assertEquals(Router.GAVE_UP, r.error);
         assertTrue(ms < 100 + 150, "took " + ms + " ms");
     }
 

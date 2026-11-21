@@ -12,7 +12,8 @@ import java.util.PriorityQueue;
  * A move is allowed if the pipe's bore swept along it hits nothing (Space). Waypoints split the search into legs; the
  * result is one polyline of world voxel points (corners only). Pure Java: the world is behind Space.
  */
-/** Frozen copy of PipeRouter at 79f42651 (routing phase 1: RouterDifferentialTest compares the new router with it). */
+/** Frozen copy of PipeRouter at 79f42651 (routing phase 1: RouterDifferentialTest compares the new router with it).
+ * Its error messages follow the router's current wording, so the test still compares which failure. */
 public final class LegacyPipeRouter {
     public static final int LATTICE = 4;
     static final int BEND = 6, BLOCK_ENTERED = 1;
@@ -71,7 +72,7 @@ public final class LegacyPipeRouter {
         try {
             return routeUntil(space, bore, start, waypoints, end, deadline);
         } catch (GaveUp e) {
-            return new Result(null, "gave up: too far or too tangled to find a way (try waypoints)");
+            return new Result(null, "too far or tangled");
         }
     }
 
@@ -165,7 +166,7 @@ public final class LegacyPipeRouter {
             int leaveDir = leg == 0 ? a.dir() : -1;
             int arrive = leg + 2 == stops.size() && b.dir() >= 0 ? b.dir() ^ 1 : -1;   // (arrive into a port: opposite its out-direction)
             List<long[]> p = leg(space, bore, a, b, leaveDir, arriveDir, arrive, deadline);
-            if (p == null) return new Result(null, leg == 0 && stops.size() == 2 ? "no free path" : "no free path on leg " + (leg + 1));
+            if (p == null) return new Result(null, leg == 0 && stops.size() == 2 ? "no path" : "no path on leg " + (leg + 1));
             if (!pts.isEmpty()) p.remove(0);
             pts.addAll(p);
             arriveDir = p.size() >= 2 ? dirOf(pts.get(pts.size() - 2), pts.get(pts.size() - 1)) : arriveDir;
