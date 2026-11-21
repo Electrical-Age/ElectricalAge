@@ -17,8 +17,7 @@ here.
 | Numbers with units in text | `api/Meters` (`volts`, `amps`, `watts`, `joules`, `ohms`, `celsius`, `kelvin`, `number`); `misc/Utils.plot*` | `String.format("%.2f kV", …)`, `(int) w + " W"`, a local `fmt()` |
 | Fluid amounts and contents | `sim/fluid/EaUnits` (`volume`, `contents`, `composition`, `steamGrams`) | `+ " mB"` by hand (EaUnits switches to buckets at 1000 mB) |
 | Voltage tiers | `Eln.LVU/MVU/HVU/VVU` (48, 230, 400, 11000 V) | a literal 50, 200, 800 or other old 1.12 voltage in code or comments |
-| Wrench turning | `SixNodeElement.onBlockActivatedRotate` / `wrenchTurn` (six-node, transparent, voxel); fluid devices: `fluid/FluidPlacement.Turnable` | a per-device rotate handler |
-| Dropping items from a node | `NodeBase.dropItem` (respects the `blockDrops` game rule) | `Utils.dropItem` for node contents |
+| Wrench turning | six-node: `SixNodeElement.onBlockActivatedRotate`; transparent: `TransparentNodeElement.wrenchTurn`; voxel: `VoxelNode.wrenchTurn`; fluid devices: `fluid/FluidPlacement.Turnable` | a per-device rotate handler |
 | Clamping | `misc/Utils.limit` | another local `clamp` |
 | Kit recipes | `node/voxel/KitRecipes` | a per-kit recipe skeleton |
 | GameTest ids | `gametest/cases/Ids` | a per-file `transparent(String)` / `six(String)` lookup |
