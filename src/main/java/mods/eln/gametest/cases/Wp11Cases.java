@@ -27,7 +27,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.BlockPos;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.util.List;
 
@@ -369,7 +368,7 @@ public final class Wp11Cases {
             EnergyConverterElnToOtherDescriptor d = Wp11Content.elnToOtherLvu;
             if (d == null) throw new IllegalStateException("energy converters disabled (ElnToOtherEnergyConverterEnable)");
             // front = player view inverse: yaw 90 (looking -X) -> front XP, towards the cable at x = 2
-            net.neoforged.neoforge.common.util.FakePlayer player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.world());
+            net.neoforged.neoforge.common.util.FakePlayer player = ctx.player();
             float yaw = player.getYRot(), pitch = player.getXRot();
             player.setYRot(90f);
             player.setXRot(0f);
@@ -589,7 +588,7 @@ public final class Wp11Cases {
         feed(ctx, ctx.at(2, 1, 1), ctx.at(3, 1, 1));
         EnergyConverterElnToOtherDescriptor d = Wp11Content.elnToOtherLvu;
         if (d == null) throw new IllegalStateException("energy converters disabled (ElnToOtherEnergyConverterEnable)");
-        net.neoforged.neoforge.common.util.FakePlayer player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.world());
+        net.neoforged.neoforge.common.util.FakePlayer player = ctx.player();
         float yaw = player.getYRot(), pitch = player.getXRot();
         player.setYRot(90f);
         player.setXRot(0f);

@@ -3901,7 +3901,7 @@ public final class OilCases {
                         out.writeByte(n.parts.indexOf(valve));
                         out.writeFloat(send[k]);
                         n.networkUnserialize(new java.io.DataInputStream(new java.io.ByteArrayInputStream(bos.toByteArray())),
-                            (net.minecraft.server.level.ServerPlayer) net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level()));
+                            (net.minecraft.server.level.ServerPlayer) ctx.player());
                         got[k] = valve.setPa;
                     } catch (java.io.IOException e) {
                         got[k] = -1;

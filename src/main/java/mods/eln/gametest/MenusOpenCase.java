@@ -14,7 +14,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -52,7 +51,7 @@ final class MenusOpenCase implements TestCase {
         "Addressable Button");   // (a click presses it; sneaking opens its screen)
 
     public void measure(TestContext ctx) {
-        FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());
+        FakePlayer fp = ctx.player();
         NodeMenus.openedHook = (pl, m) -> opened = m;
         try {
             run(ctx, fp);

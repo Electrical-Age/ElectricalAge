@@ -142,7 +142,7 @@ public final class KitDeviceCases {
             public void build(TestContext ctx) {
                 // (the Temperature Probe's optional slot; the breaker's went 2026-11-17)
                 b = (mods.eln.sixnode.thermalsensor.ThermalSensorElement) ctx.placeSix(Ids.six("Temperature Probe"), ctx.at(1, 1, 1));
-                var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+                var fp = ctx.player();
                 var menu = mods.eln.node.NodeMenus.menu(1, fp, b.sixNode, b.side);
                 if (menu == null) throw new IllegalStateException("no probe menu");
                 // a cursor click with a 10-block kit: one block goes in

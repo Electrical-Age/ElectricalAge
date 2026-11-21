@@ -23,7 +23,6 @@ import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.util.List;
 
@@ -269,7 +268,7 @@ public final class ServoCases {
             pc.listen(true);
             watch(dt -> {
                 ++tick;
-                var p = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+                var p = ctx.player();
                 var dr = s.drive(ctx);
                 if (tick == 5) {
                     var v = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(beside, ctx.level()));

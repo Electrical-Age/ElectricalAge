@@ -384,7 +384,7 @@ public final class PipeCases {
             var boiler = (mods.eln.oil.BoilerElement) l.device(8 + (82 << 6), 1, 1);
             boiler.fromTanks(2000, 0);
             boiler.showTanks();
-            var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            var fp = ctx.player();
             fp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
             fp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.WATER_BUCKET));
             before = boiler.tanks.water();
@@ -576,7 +576,7 @@ public final class PipeCases {
                 new net.minecraft.world.phys.Vec3(a.getX() + (db[0] + db[3]) / 32.0, a.getY() + (db[1] + db[4]) / 32.0, a.getZ() + (db[2] + db[5]) / 32.0), true, new long[1][]);
             ctx.check("a cable ends on the floor under a pipe sensor", end != null && end.y() == a.getY() * 16L && end.attach() == 0, "" + end);
             double before = ps.scale;
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            var player = ctx.player();
             int idx = ctx.voxelByEntity(a).parts.indexOf(ps);
             int[] bx = ps.boxes().get(0);
             ctx.voxelByEntity(a).onBlockActivated(player, mods.eln.misc.Direction.YP, (bx[0] + bx[3]) / 32f, (bx[1] + bx[4]) / 32f, (bx[2] + bx[5]) / 32f);

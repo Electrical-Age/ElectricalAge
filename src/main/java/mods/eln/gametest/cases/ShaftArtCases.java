@@ -103,7 +103,7 @@ public final class ShaftArtCases {
     static mods.eln.node.transparent.TransparentNodeElement placeLooking(TestContext ctx, int damage, BlockPos p, float yaw) {
         var d = mods.eln.Eln.transparentNodeItem.getDescriptor(damage);
         // (the fake player is shared by every test: its view is put back, or other tests' placements turn with it)
-        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+        var player = ctx.player();
         float y0 = player.getYRot(), x0 = player.getXRot();
         player.setYRot(yaw);
         player.setXRot(0);
@@ -183,7 +183,7 @@ public final class ShaftArtCases {
             // the whole path once: a player holding the wrench key clicks a lone tank; it turns instead of opening
             PipeCases.lay(ctx, ctx.at(1, 1, 9), 1, 0, 4, 8, 16, 4, 8);
             var tank = (mods.eln.oil.TankElement) placeLooking(ctx, PlumbingCases.ALLOY_TANK, ctx.at(0, 1, 9), WEST);
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            var player = ctx.player();
             Direction t0 = tank.front;
             mods.eln.server.PlayerKeys.set(player, mods.eln.server.PlayerKeys.WRENCH, true);
             boolean clicked;
@@ -651,7 +651,7 @@ public final class ShaftArtCases {
         }
 
         static boolean bucket(TestContext ctx, mods.eln.oil.TankElement t, net.minecraft.world.item.Item item) {
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            var player = ctx.player();
             var held = player.getMainHandItem().copy();
             player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(item));
             boolean used = mods.eln.fluid.FluidBuckets.use(player, t.getFluidHandler());

@@ -12,7 +12,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.util.List;
 
@@ -52,7 +51,7 @@ public final class ChargerWearCases {
         }
 
         public void measure(TestContext ctx) {
-            FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());
+            FakePlayer fp = ctx.player();
             fp.getInventory().clearContent();
 
             // without Curios: the player's four armour slots only (nero 2026-11-10: charge worn armour from the charger)

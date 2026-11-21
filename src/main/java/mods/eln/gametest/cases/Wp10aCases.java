@@ -643,7 +643,7 @@ public final class Wp10aCases {
             l.feed(ctx.at(2, 1, 1), macerator.front.left());
             macerator.getInventory().setItem(macerator.inSlotId, new ItemStack(Items.COPPER_INGOT));
             macerator.getInventory().setChanged();
-            var p = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            var p = ctx.player();
             p.setShiftKeyDown(true);
             try {
                 boolean a = macerator.onBlockActivated(p, Direction.YP, 0.5f, 0.5f, 0.5f);
@@ -659,7 +659,7 @@ public final class Wp10aCases {
             ctx.check("switch: a sneaking right-click switches it off", clicks.equals("true,false"), clicks);
             ctx.check("switch: off, it ground nothing", in.getCount() == 1 && out.isEmpty(), "in " + in + ", out " + out);
             ctx.check("switch: off, it draws next to nothing", macerator.machine.watts() < 1, macerator.machine.watts() + " W");
-            var p = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            var p = ctx.player();
             p.setShiftKeyDown(true);
             try {
                 macerator.onBlockActivated(p, Direction.YP, 0.5f, 0.5f, 0.5f);

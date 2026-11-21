@@ -91,7 +91,7 @@ public final class BreakToolCases {
             expect(ctx, "pipe", fromAbove(ctx, pipe, 0.5), false);
             expect(ctx, "voxel cable", fromAbove(ctx, cable, 0.02), true);
             // a very fast tool still takes two ticks (vanilla breaks a block at once, every tick, past one a tick)
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            var player = ctx.player();
             player.setOnGround(true);
             player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.HASTE, 100, 20));
             Vec3 t = new Vec3(pipe.getX() + 0.5, pipe.getY() + 0.5, pipe.getZ() + 0.5);

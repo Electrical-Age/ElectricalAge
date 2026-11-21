@@ -8,7 +8,6 @@ import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 /** A player puts ore into a macerator's input through its menu (P4b; AdventurAgent saw iron ore refused). */
 final class MachineMenuCase implements TestCase {
@@ -29,7 +28,7 @@ final class MachineMenuCase implements TestCase {
 
     public void build(TestContext ctx) {
         node = ctx.placeTransparent(LabCommands.transparentId("48V Macerator"), ctx.at(1, 1, 1)).node;
-        FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());
+        FakePlayer fp = ctx.player();
         menu = NodeMenus.menu(1, fp, node, Direction.YN);
         menu.setCarried(new ItemStack(Items.IRON_ORE, 8));
         menu.clicked(4, 0, ContainerInput.PICKUP, fp);

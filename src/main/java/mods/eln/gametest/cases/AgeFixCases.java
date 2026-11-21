@@ -30,7 +30,7 @@ public final class AgeFixCases {
         public void build(TestContext ctx) {
             ItemStack s = Eln.findItemStack("Small Flashlight", 1);
             var lamp = (ElectricalLampItem) GenericItemUsingDamageDescriptor.getDescriptor(s);
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            var player = ctx.player();
             lamp.setEnergy(s, 0);
             lamp.onItemRightClick(s, ctx.level(), player);   // try to switch it on, empty
             lamp.setEnergy(s, 1000);
@@ -65,7 +65,7 @@ public final class AgeFixCases {
         }
 
         public void build(TestContext ctx) {
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            var player = ctx.player();
             ItemStack main = Eln.findItemStack("Small Flashlight", 1), off = Eln.findItemStack("Small Flashlight", 1);
             var lamp = (ElectricalLampItem) GenericItemUsingDamageDescriptor.getDescriptor(main);
             lamp.setEnergy(main, 1000);

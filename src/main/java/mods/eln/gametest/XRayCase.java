@@ -7,7 +7,6 @@ import mods.eln.item.xray.XRayScannerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.util.List;
 
@@ -91,7 +90,7 @@ final class XRayCase implements TestCase {
         ctx.check("xray: the item exists", s.getItem() instanceof ElnItem i && i.descriptor instanceof XRayScannerDescriptor, s.toString());
         if (!(s.getItem() instanceof ElnItem i && i.descriptor instanceof XRayScannerDescriptor d)) return;
         s = d.newItemStack();
-        var fp = FakePlayerFactory.getMinecraft(ctx.level());
+        var fp = ctx.player();
         d.setEnergy(s, 5000);
         d.onItemRightClick(s, ctx.level(), fp);
         ctx.check("xray: use boots it", d.getState(s) == XRayScannerDescriptor.State.Boot, String.valueOf(d.getState(s)));

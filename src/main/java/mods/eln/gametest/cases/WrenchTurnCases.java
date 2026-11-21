@@ -70,7 +70,7 @@ public final class WrenchTurnCases {
 
         public void measure(TestContext ctx) {
             Object was = GuiPacketFuzzCases.get(element, field), expected = next.apply(was);
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(ctx.level());
+            var player = ctx.player();
             mods.eln.server.PlayerKeys.set(player, mods.eln.server.PlayerKeys.WRENCH, true);
             boolean used;
             try {

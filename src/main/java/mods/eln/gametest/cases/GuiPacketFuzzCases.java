@@ -19,7 +19,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -373,7 +372,7 @@ public final class GuiPacketFuzzCases {
         }
 
         void fuzz(TestContext ctx) {
-            FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());
+            FakePlayer fp = ctx.player();
             BlockPos at = node.coordonate.pos();
             fp.setPos(at.getX() + 0.5, at.getY() + 1, at.getZ() + 2.5);
             String name = element.getClass().getSimpleName();

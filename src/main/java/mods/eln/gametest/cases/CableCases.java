@@ -848,7 +848,7 @@ public final class CableCases {
         public void build(TestContext c) {
             for (int q = 0; q < TABLE.length; q++) {
                 int[] t = TABLE[q];
-                var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+                var fp = c.player();
                 var cm = new net.minecraft.world.inventory.CraftingMenu(7, fp.getInventory(),
                     net.minecraft.world.inventory.ContainerLevelAccess.create(c.level(), net.minecraft.core.BlockPos.ZERO));
                 cm.getSlot(1).set(new net.minecraft.world.item.ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
@@ -946,12 +946,12 @@ public final class CableCases {
             pbox.setItem(0, pkit);
             var pstack = plate.copyWithCount(7);
             pkit.getItem().overrideOtherStackedOnMe(pkit, pstack, pslot, net.minecraft.world.inventory.ClickAction.PRIMARY,
-                net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level()),
+                c.player(),
                 net.minecraft.world.entity.SlotAccess.of(() -> net.minecraft.world.item.ItemStack.EMPTY, x -> { }));
             c.check("pipe kit: 7 plates clicked on fill 3 blocks and leave 1", mods.eln.node.voxel.PipeKitItem.length(pkit) == 64 && pstack.getCount() == 1,
                 mods.eln.node.voxel.PipeKitItem.length(pkit) + " / " + pstack.getCount());
             // Baughn: topping a kit up with cables like a bundle (a stack clicked onto the kit, or the kit onto a stack)
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var player = c.player();
             var box = new net.minecraft.world.SimpleContainer(1);
             var slot = new net.minecraft.world.inventory.Slot(box, 0, 0, 0);
             var k1 = mods.eln.node.voxel.CableKitItem.kit(LV, 144);
@@ -1101,7 +1101,7 @@ public final class CableCases {
         }
 
         public void build(TestContext c) {
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var player = c.player();
             var yn = mods.eln.misc.Direction.YN;
             var xp = mods.eln.misc.Direction.XP;
             c.floor(c.at(1, 0, 1));
@@ -1144,7 +1144,7 @@ public final class CableCases {
         }
 
         public void build(TestContext c) {
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var player = c.player();
             var yn = mods.eln.misc.Direction.YN;
             var xp = mods.eln.misc.Direction.XP;
             var not = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.NOT);
@@ -1584,7 +1584,7 @@ public final class CableCases {
         }
 
         public void build(TestContext c) {
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var player = c.player();
             var yn = mods.eln.misc.Direction.YN;
             v = ChipsPackedCase.block(c, c.at(1, 1, 1));
             var d = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9aCases.SOURCE);

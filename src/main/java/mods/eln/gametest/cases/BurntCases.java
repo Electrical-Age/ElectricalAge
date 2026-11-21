@@ -19,7 +19,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.util.List;
 
@@ -159,10 +158,10 @@ public final class BurntCases {
             ctx.check("burnt macerator: the copper stays in", in.is(Items.COPPER_INGOT) && !processed(macerator),
                 "in " + in + ", out " + macerator.getInventory().getItem(macerator.outSlotId));
             ctx.check("burnt macerator: no screen, no server menu", !macerator.node.hasGui(Direction.XN)
-                && NodeMenus.menu(0, FakePlayerFactory.getMinecraft(ctx.level()), macerator.node, Direction.XN) == null, "");
+                && NodeMenus.menu(0, ctx.player(), macerator.node, Direction.XN) == null, "");
 
             // the player's use path (MenusOpenCase opens a working one this way)
-            FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());
+            FakePlayer fp = ctx.player();
             fp.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
             Object[] opened = {null};
             NodeMenus.openedHook = (pl, m) -> opened[0] = m;

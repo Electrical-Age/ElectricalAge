@@ -131,7 +131,7 @@ public final class PipeTransmitterCases {
             c.check("pipe transmitter: Jade gives mode, reading, full scale and volts", t.getWaila().containsKey("Pressure sensor")
                 && t.getWaila().containsKey("Full scale") && t.getWaila().containsKey("Output"), "" + t.getWaila());
             // an empty-hand right-click steps the full scale; it survives the element's NBT
-            var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var fp = c.player();
             fp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
             c.voxelByEntity(a).onSlotActivated(fp, t.slot, (8 + t.ox) / 16f, 1 / 16f, (8 + t.oz) / 16f);
             var tag = new net.minecraft.nbt.CompoundTag();
@@ -252,7 +252,7 @@ public final class PipeTransmitterCases {
             var t = device(c, a);
             c.check("pipe transmitter: it drops its pipe sensor item", t.getDropItemStack().is(mods.eln.registry.ElnRegistry.PIPE_PRESSURE_SENSOR.get()), "" + t.getDropItemStack());
             var v = c.voxelByEntity(a);
-            var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var fp = c.player();
             broke = v.playerAskToBreakSlot(fp, t.slot);
             var drops = c.level().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(a).inflate(1),
                 ie -> ie.getItem().is(mods.eln.registry.ElnRegistry.PIPE_PRESSURE_SENSOR.get()));
@@ -348,7 +348,7 @@ public final class PipeTransmitterCases {
             errRoute = PipeSensorItem.place(c.level(), a.below(), net.minecraft.core.Direction.UP, new Vec3(a.getX() + 0.5, a.getY(), a.getZ() + 0.5),
                 PipeSensorPart.PRESSURE, c.player());
             if (errRoute != null) return;
-            var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(c.level());
+            var fp = c.player();
             PipePlacer.forget(fp.getUUID());
             var kit = mods.eln.node.voxel.PipeKitItem.kit(0, 16 * 16);
             var t = device(c, a);

@@ -9,7 +9,6 @@ import mods.eln.node.six.SixNode;
 import mods.eln.node.transparent.TransparentNode;
 import net.minecraft.core.BlockPos;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -71,7 +70,7 @@ final class GuiPacketCase implements TestCase {
     }
 
     public void measure(TestContext ctx) {
-        FakePlayer fp = FakePlayerFactory.getMinecraft(ctx.level());
+        FakePlayer fp = ctx.player();
         try {
             var se = source.getElement(Direction.YN);
             short sid = (short) se.sixNodeElementDescriptor.parentItemDamage;
