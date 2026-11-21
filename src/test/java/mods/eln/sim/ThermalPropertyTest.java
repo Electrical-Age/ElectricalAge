@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static mods.eln.sim.mna.RandomNet.logUniform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,10 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * when dt * (sum of a load's conductances) / C is small, so the generator keeps every load at or under 0.5.
  */
 public class ThermalPropertyTest {
-
-    static double logUniform(Random rnd, double lo, double hi) {
-        return Math.exp(Math.log(lo) + rnd.nextDouble() * (Math.log(hi) - Math.log(lo)));
-    }
 
     record Net(List<ThermalLoad> loads, List<ThermalConnection> connections) {
         double heat() {
