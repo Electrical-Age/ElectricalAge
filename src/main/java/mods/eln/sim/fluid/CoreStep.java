@@ -15,7 +15,7 @@ import java.util.List;
  * legacy solve's is (rho k open / mu, or a valve's orifice law at the starting drop), and held for the step; the port
  * windows, the core's own thermodynamics for the nodes' reads and the legacy save values are not yet joined up.
  */
-final class CoreStep {
+public final class CoreStep {
     /** The core steps every network (the legacy solve is gone; Baughn 2026-11-10: straight to the end state). */
     static final boolean ON = true;
 
@@ -38,7 +38,17 @@ final class CoreStep {
         Network.CUT_SHORT = true;
     }
 
+    /**
+     * The most wall time one network's step may take in the game (ns; 0: no limit; Network.MAX_STEP_NANOS): a stiff
+     * network once took a 60 s tick and the watchdog killed Incognito, in a loop, since its chunks are kept loaded (a
+     * steam line with water in it, 2026-11-21). At 40 ms the server lived at 15 TPS; at 10 ms it held 20 TPS and the
+     * stiff network ran slow. GameTests set 0: their outcome mustn't hang on the machine's speed.
+     */
+    public static long budgetNanos = 10_000_000L;
+
     final Network net = new Network();
+    /** Its last step ran out of Network.MAX_STEP_NANOS (FluidWorld says where). */
+    boolean overBudget;
     final List<FluidNode> nodes;
     final List<FluidEdge> edges;
     final Network.Node[] cn;
@@ -379,7 +389,9 @@ final class CoreStep {
             h0[i] = cn[i].heat;
         }
         long sub0 = net.stats.substeps, cut0 = net.stats.cut, crawls0 = net.stats.crawls;
+        Network.MAX_STEP_NANOS = budgetNanos;
         net.step(dt);
+        overBudget = net.overBudget;
         // (solves accepted at the precision floor, counted to watch: a few thousand in the 28 steam GameTests)
         long crawled = CRAWLS.addAndGet(net.stats.crawls - crawls0);
         if (net.stats.crawls > crawls0 && Long.bitCount(crawled) == 1 && crawled >= 16) System.out.println("[fluidcore] solves accepted at the precision floor so far: " + crawled);

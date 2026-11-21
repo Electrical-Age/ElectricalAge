@@ -171,6 +171,27 @@ public final class FluidWorld implements IProcess {
         return out;
     }
 
+    /** When each network's running out of its step time was last logged (ms), so a stiff one says so once a minute. */
+    private final Map<FluidNetwork, Long> overBudgetLogged = new java.util.WeakHashMap<>();
+
+    /** A network's step ran out of its time (Network.MAX_STEP_NANOS): log where, once a minute. */
+    private void overBudget(FluidNetwork n) {
+        long now = System.currentTimeMillis();
+        Long last = overBudgetLogged.get(n);
+        if (last != null && now - last < 60_000) return;
+        overBudgetLogged.put(n, now);
+        String where = "?";
+        outer:
+        for (FluidDevice d : devices)
+            for (FluidDevice.FluidPort p : d.fluidPorts())
+                if (n.nodes.contains(nodeFor(p.node()))) {
+                    where = d.getClass().getSimpleName() + " " + BlockPos.of(p.pos()).toShortString();
+                    break outer;
+                }
+        mods.eln.Eln.LOG.warn("[fluidcore] a network of {} nodes ran out of its step time ({} ms) and runs slow, near {}",
+            n.nodes.size(), mods.eln.fluidcore.Network.MAX_STEP_NANOS / 1_000_000, where);
+    }
+
     /** A network's progress after a step (CoreStep), onto its nodes and their runs' pieces (FluidNode.stallNow). */
     public static void recordProgress(List<FluidNode> nodes, double stall, double dropped) {
         for (FluidNode n : nodes) {
@@ -229,7 +250,10 @@ public final class FluidWorld implements IProcess {
             l.edge.relief = l.relief;
         }
         for (FluidDevice.Flow f : flows) settings(f);
-        for (FluidNetwork n : networks) n.step(time);
+        for (FluidNetwork n : networks) {
+            n.step(time);
+            if (n.overBudget()) overBudget(n);
+        }
         // (what each flow moved, onto its device's Flow at once: a trace below may rebuild the networks and their edges)
         for (FluidDevice.Flow f : flows) {
             f.delivered = f.edge.flow;

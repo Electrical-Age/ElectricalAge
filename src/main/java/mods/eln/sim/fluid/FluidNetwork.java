@@ -37,6 +37,11 @@ public final class FluidNetwork {
 
     /** Time spent stepping (ns) and steps since built (/elnlab fluidstats). */
     public long nanos, steps;
+
+    /** Did its last step run out of its time (Network.MAX_STEP_NANOS)? */
+    public boolean overBudget() {
+        return core != null && core.overBudget;
+    }
     /** Times its core network was built: once, unless its nodes, edges or species keep changing. */
     public long builds;
 

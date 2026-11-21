@@ -156,6 +156,8 @@ public final class ElnGameTests {
         // the test world's biomes vary from test to test: 20 C everywhere, as the cases' numbers assume (AmbientCases
         // lift it for their own devices)
         mods.eln.sim.Ambient.fixedC = 20.0;
+        // (no wall-time budget for fluid steps: a test's outcome mustn't hang on the machine's speed)
+        mods.eln.sim.fluid.CoreStep.budgetNanos = 0;
         GameTestContext ctx = new GameTestContext(helper, c.id());
         // tests share one level: a node left by an earlier test here would join this test's circuits
         net.minecraft.world.phys.AABB bounds = helper.getBounds();

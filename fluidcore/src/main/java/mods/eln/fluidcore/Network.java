@@ -752,6 +752,8 @@ public final class Network {
         public long wakes;
         /** Steps ended early (CUT_SHORT): their remaining time dropped; and of those, steps that moved nothing at all. */
         public long cut, stuck;
+        /** Steps that ran out of MAX_STEP_NANOS. */
+        public long overBudget;
         /** Solves accepted out of iterations while crawling at the precision floor (under STALL_OK; Network.solve). */
         public long crawls;
         /** Solves given up early as crawling far from the answer (BAIL_ITS), and so sub-stepped. */
@@ -806,6 +808,8 @@ public final class Network {
         progressed = false;
         stepSubsteps = 0;
         stepDt = dt;
+        deadline = MAX_STEP_NANOS > 0 ? System.nanoTime() + MAX_STEP_NANOS : Long.MAX_VALUE;
+        overBudget = false;
         if (solve(free, y0, dt)) done = dt;
         else {
             // (no convergence: two half steps, each from where the last ended)
@@ -963,7 +967,7 @@ public final class Network {
         int run = 0;
         while (t < dt * (1 - 1e-12)) {
             stats.substeps++;
-            if (++stepSubsteps > MAX_SUBSTEPS) {
+            if (++stepSubsteps > MAX_SUBSTEPS || outOfTime()) {
                 stats.cut++;
                 return;
             }
@@ -1003,7 +1007,7 @@ public final class Network {
 
     private boolean substep(List<Node> free, double dt, int depth) {
         stats.substeps++;
-        if (CUT_SHORT && ++stepSubsteps > MAX_SUBSTEPS) {
+        if (CUT_SHORT && (++stepSubsteps > MAX_SUBSTEPS || outOfTime())) {
             // (a step that has taken MAX_SUBSTEPS sub-steps ends where it is: a network needing thousands of sub-steps
             // every tick stalled the server)
             stats.cut++;
@@ -1053,6 +1057,23 @@ public final class Network {
     /** With CUT_SHORT: at most this many sub-steps a step (then it ends where it is); and this step's count. */
     public static int MAX_SUBSTEPS = 256;
     private int stepSubsteps;
+    /**
+     * With CUT_SHORT: the most wall time (ns) one network's step may take (0: no limit); then it ends where it is, as
+     * after MAX_SUBSTEPS, and owes the rest. Its sub-step and iteration caps still let a large network that every
+     * sub-step makes stiff (flashing water) build thousands of Jacobians in one tick: Incognito's watchdog killed the
+     * server on a 60 s tick (2026-11-21, a steam line with water in it vented to near the air's pressure).
+     */
+    public static long MAX_STEP_NANOS = 0;
+    private long deadline = Long.MAX_VALUE;
+    /** This step ran out of MAX_STEP_NANOS. */
+    public boolean overBudget;
+
+    private boolean outOfTime() {
+        if (deadline == Long.MAX_VALUE || System.nanoTime() < deadline) return false;
+        if (!overBudget) stats.overBudget++;
+        overBudget = true;
+        return true;
+    }
 
     /** Components per node: the species masses, then the energy (one count for the whole network). */
     private int C() {
@@ -1677,6 +1698,7 @@ public final class Network {
         for (int it = 0; it < MAX_ITERS; it++) {
             double nrIt = nr;
             if (ns < TOL) { if (TRACE != null) TRACE.append(" OK\n"); return true; }
+            if (outOfTime()) return false;   // (the step is cut where it is: Network.MAX_STEP_NANOS)
             stats.iterations++;
             Sparse J = jacobian(free, idx, dt);
             J.scale = s;
