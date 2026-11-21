@@ -1,54 +1,40 @@
 package mods.eln.sixnode.powerinductorsix;
 
-import mods.eln.Eln;
-import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.powerprimitives.PowerInductorCore;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.mna.component.Inductor;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.Container;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.Container;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The Power Inductor: PowerInductorCore on a six-node, its + pin on the front's right and its - pin on the front's
+ * left (the transparent node's + is on its front's left).
+ */
 public class PowerInductorSixElement extends SixNodeElement {
 
-    PowerInductorSixDescriptor descriptor;
-    NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
-    NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
-
-    Inductor inductor = new Inductor("inductor", positiveLoad, negativeLoad);
-
-    boolean fromNbt = false;
-
-    SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
+    final SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
+    public final PowerInductorCore core;
 
     public PowerInductorSixElement(SixNode SixNode, Direction side, SixNodeDescriptor descriptor) {
         super(SixNode, side, descriptor);
-        this.descriptor = (PowerInductorSixDescriptor) descriptor;
-
-        electricalLoadList.add(positiveLoad);
-        electricalLoadList.add(negativeLoad);
-        electricalComponentList.add(inductor);
-        positiveLoad.setAsMustBeFarFromInterSystem();
+        core = new PowerInductorCore((PowerInductorSixDescriptor) descriptor, inventory);
+        core.addTo(electricalLoadList, electricalComponentList);
     }
 
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-        if (lrdu == front.right()) return positiveLoad;
-        if (lrdu == front.left()) return negativeLoad;
+        if (lrdu == front.right()) return core.positiveLoad;
+        if (lrdu == front.left()) return core.negativeLoad;
         return null;
     }
 
@@ -64,22 +50,16 @@ public class PowerInductorSixElement extends SixNodeElement {
         return 0;
     }
 
+    /** The voltage and the current (the transparent node shows the current alone). */
     @Override
     public String multiMeterString() {
-        return Utils.plotVolt("U", Math.abs(inductor.getU())) + Utils.plotAmpere("I", inductor.getCurrent());
+        return core.multiMeterString(true);
     }
 
     @Nullable
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Inductance"), Utils.plotValue(inductor.getL(), "H"));
-        info.put(I18N.tr("Charge"), Utils.plotEnergy("", inductor.getE()));
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Voltage drop"), Utils.plotVolt("", Math.abs(inductor.getU())));
-            info.put(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(inductor.getCurrent())));
-        }
-        return info;
+        return core.waila();
     }
 
     @Override
@@ -89,37 +69,19 @@ public class PowerInductorSixElement extends SixNodeElement {
 
     @Override
     public void initialize() {
-        setupPhysical();
+        core.setupPhysical();
     }
 
     @Override
     public void inventoryChanged() {
         super.inventoryChanged();
-        setupPhysical();
-    }
-
-    public void setupPhysical() {
-        double rs = descriptor.getRsValue(inventory);
-        inductor.setL(descriptor.getlValue(inventory));
-        positiveLoad.setRs(rs);
-        negativeLoad.setRs(rs);
-
-        if (fromNbt) {
-            fromNbt = false;
-        } else {
-            inductor.resetStates();
-        }
-    }
-
-    @Override
-    public void writeToNBT(CompoundTag nbt) {
-        super.writeToNBT(nbt);
+        core.setupPhysical();
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        fromNbt = true;
+        core.readFromNBT();
     }
 
     @Override

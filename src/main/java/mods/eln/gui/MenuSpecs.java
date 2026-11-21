@@ -107,9 +107,9 @@ public final class MenuSpecs {
             descriptor(mods.eln.powerprimitives.PowerCapacitorContainer.dielectricId, 132 + 20, 8, 20, DielectricItem.class,
                 MEDIUM, tr("Dielectric slot"), tr("(Increases maximum voltage)"))).panel(176, 112, 8, 30));
         put(mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor.class, d -> MenuSpec.of(
-            descriptor(mods.eln.sixnode.powerinductorsix.PowerInductorSixContainer.cableId, 132, 8, 19, CopperCableDescriptor.class,
+            descriptor(mods.eln.powerprimitives.PowerInductorContainer.cableId, 132, 8, 19, CopperCableDescriptor.class,
                 MEDIUM, tr("Copper cable slot"), tr("(Increases inductance)")),
-            descriptor(mods.eln.sixnode.powerinductorsix.PowerInductorSixContainer.coreId, 132 + 20, 8, 1,
+            descriptor(mods.eln.powerprimitives.PowerInductorContainer.coreId, 132 + 20, 8, 1,
                 FerromagneticCoreDescriptor.class, MEDIUM, tr("Ferromagnetic core slot"))).panel(176, 112, 8, 30));
         put(mods.eln.sixnode.powersocket.PowerSocketDescriptor.class, d -> MenuSpec.of().panel(176, 144, 8, 60));
         put(mods.eln.sixnode.resistor.ResistorDescriptor.class, d -> resistor());
@@ -232,9 +232,9 @@ public final class MenuSpecs {
             descriptor(mods.eln.powerprimitives.PowerCapacitorContainer.dielectricId, 132 + 20, 8, 20,
                 DielectricItem.class, MEDIUM, tr("Dielectric slot"), tr("(Increases maximal voltage)"))).panel(176, 112, 8, 30));
         put(mods.eln.transparentnode.powerinductor.PowerInductorDescriptor.class, d -> MenuSpec.of(
-            descriptor(mods.eln.transparentnode.powerinductor.PowerInductorContainer.cableId, 132, 8, 19, CopperCableDescriptor.class,
+            descriptor(mods.eln.powerprimitives.PowerInductorContainer.cableId, 132, 8, 19, CopperCableDescriptor.class,
                 MEDIUM, tr("Copper cable slot"), tr("(Increases inductance)")),
-            descriptor(mods.eln.transparentnode.powerinductor.PowerInductorContainer.coreId, 132 + 20, 8, 1,
+            descriptor(mods.eln.powerprimitives.PowerInductorContainer.coreId, 132 + 20, 8, 1,
                 FerromagneticCoreDescriptor.class, MEDIUM, tr("Ferromagnetic core slot"))).panel(176, 112, 8, 30));
         put(mods.eln.transparentnode.solarpanel.SolarPanelDescriptor.class, d -> !d.canRotate ? MenuSpec.SCREEN_ONLY : MenuSpec.of(
             descriptor(mods.eln.transparentnode.solarpanel.SolarPanelContainer.trackerSlotId, 176 / 2 - 20, 35, 1,

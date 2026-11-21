@@ -1,49 +1,40 @@
 package mods.eln.transparentnode.powerinductor;
 
-
-import mods.eln.registry.ElnDeviceRegistry;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.powerprimitives.PowerInductorCore;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.mna.component.Inductor;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.Container;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 
-import java.io.DataInputStream;
-
+/**
+ * The full-block Power Inductor: PowerInductorCore on a transparent node, its + pin on the front's left and its - pin
+ * on the front's right, both on the floor (the six-node's + is on its front's right). Jade shows the base class's
+ * line, the multimeter's (the six-node lists inductance and energy).
+ */
 public class PowerInductorElement extends TransparentNodeElement {
 
-    PowerInductorDescriptor descriptor;
-    NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
-    NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
-
-    Inductor inductor = new Inductor("inductor", positiveLoad, negativeLoad);
+    final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
+    public final PowerInductorCore core;
 
     public PowerInductorElement(TransparentNode transparentNode,
                                 TransparentNodeDescriptor descriptor) {
         super(transparentNode, descriptor);
-        this.descriptor = (PowerInductorDescriptor) descriptor;
-
-        electricalLoadList.add(positiveLoad);
-        electricalLoadList.add(negativeLoad);
-        electricalComponentList.add(inductor);
-        positiveLoad.setAsMustBeFarFromInterSystem();
+        core = new PowerInductorCore((PowerInductorDescriptor) descriptor, inventory);
+        core.addTo(electricalLoadList, electricalComponentList);
     }
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return null;
-        if (side == front.left()) return positiveLoad;
-        if (side == front.right()) return negativeLoad;
+        if (side == front.left()) return core.positiveLoad;
+        if (side == front.right()) return core.negativeLoad;
         return null;
     }
 
@@ -60,9 +51,10 @@ public class PowerInductorElement extends TransparentNodeElement {
         return 0;
     }
 
+    /** The current alone (the six-node shows the voltage too). */
     @Override
     public String multiMeterString(Direction side) {
-        return Utils.plotAmpere("I", inductor.getCurrent());
+        return core.multiMeterString(false);
     }
 
     @Override
@@ -72,87 +64,30 @@ public class PowerInductorElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
-        //ElnDeviceRegistry.applySmallRs(positiveLoad);
-        //ElnDeviceRegistry.applySmallRs(negativeLoad);
-
-        setupPhysical();
-
-        connect();
+        core.setupPhysical();
+        connect();   // (the six-node element doesn't: its node connects it)
     }
 
     @Override
     public void inventoryChange(Container inventory) {
         super.inventoryChange(inventory);
-        setupPhysical();
-    }
-
-
-    boolean fromNbt = false;
-
-    public void setupPhysical() {
-        double rs = descriptor.getRsValue(inventory);
-        inductor.setL(descriptor.getlValue(inventory));
-        positiveLoad.setRs(rs);
-        negativeLoad.setRs(rs);
-
-        if (fromNbt) {
-            fromNbt = false;
-        } else {
-            inductor.resetStates();
-        }
+        core.setupPhysical();
     }
 
     @Override
     public boolean onBlockActivated(Player entityPlayer, Direction side,
                                     float vx, float vy, float vz) {
-
         return false;
-    }
-
-    @Override
-    public void writeToNBT(CompoundTag nbt) {
-        super.writeToNBT(nbt);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        fromNbt = true;
+        core.readFromNBT();
     }
-
-    public void networkSerialize(java.io.DataOutputStream stream) {
-        super.networkSerialize(stream);
-        /*
-		 * try {
-		 * 
-		 * 
-		 * } catch (IOException e) {
-		 * 
-		 * e.printStackTrace(); }
-		 */
-    }
-
-    public static final byte unserializePannelAlpha = 0;
-
-    public byte networkUnserialize(DataInputStream stream) {
-
-        byte packetType = super.networkUnserialize(stream);
-		/*
-		 * try { switch(packetType) {
-		 * 
-		 * 
-		 * default: return packetType; } } catch (IOException e) {
-		 * 
-		 * e.printStackTrace(); }
-		 */
-        return unserializeNulldId;
-    }
-
-    TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
 
     @Override
     public Container getInventory() {
-
         return inventory;
     }
 

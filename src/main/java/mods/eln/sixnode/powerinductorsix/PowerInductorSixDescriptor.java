@@ -6,24 +6,18 @@ import mods.eln.misc.UtilsClient;
 
 
 
-import mods.eln.registry.ElnDeviceRegistry;
-import mods.eln.misc.Utils;
-import mods.eln.Eln;
-import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.series.ISerie;
+import mods.eln.powerprimitives.PowerInductorCore;
 import mods.eln.node.six.SixNodeDescriptor;
-import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.wiki.Data;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
 
-public class PowerInductorSixDescriptor extends SixNodeDescriptor {
+public class PowerInductorSixDescriptor extends SixNodeDescriptor implements PowerInductorCore.Spec {
 
     private Obj3D obj;
     Obj3DPart InductorBaseExtention, InductorCables, InductorCore, Base;
@@ -46,28 +40,9 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
-    public double getlValue(int cableCount) {
-        if (cableCount == 0) return 0;
-        return serie.getValue(cableCount - 1);
-    }
-
-    public double getlValue(Container inventory) {
-        ItemStack core = inventory.getItem(PowerInductorSixContainer.cableId);
-        if (Utils.isEmpty(core))
-            return getlValue(0);
-        else
-            return getlValue(core.getCount());
-    }
-
-    public double getRsValue(Container inventory) {
-        ItemStack core = inventory.getItem(PowerInductorSixContainer.coreId);
-
-        if (Utils.isEmpty(core)) return MnaConst.highImpedance;
-        FerromagneticCoreDescriptor coreDescriptor = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core);
-
-        double coreFactor = coreDescriptor.cableMultiplicator;
-
-        return ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs * coreFactor;
+    @Override
+    public ISerie inductanceSerie() {
+        return serie;
     }
 
     public void setParent(net.minecraft.world.item.Item item, int damage) {

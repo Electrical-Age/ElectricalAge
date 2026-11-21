@@ -1470,7 +1470,7 @@ public final class Wp10aCases {
                 ctx.check("wp10a power inductor placed", ind != null, "");
                 return;
             }
-            Inductor l = field(ind, "inductor");
+            Inductor l = ind.core.inductor;
             double rLamp = ((LampDescriptor) Eln.sharedItem.getDescriptor(LAMP_BULB)).getR();
             double i = U / (8 * rs() + rLamp);
             ctx.line(String.format("wp10a inductor model: L = 0.1 H, Rlamp = %.3f ohm, I = U/(8Rs+Rlamp) = %.5f A", rLamp, i));
