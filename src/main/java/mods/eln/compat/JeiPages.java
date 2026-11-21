@@ -239,7 +239,8 @@ public final class JeiPages {
      * Kept out of JEI's list: the pipe sensor devices' own items (the pipe sensor items place them, so each name shows
      * once); the fuses for the other tiers (one Lead Fuse is rated in its holder, Baughn 2026-11-06); the 50 V and 200 V
      * turbines (replaced by the steam turbines, Baughn 2026-10-14); and items nothing makes or uses: Ferrite Ingot (no
-     * recipe in 1.12 either), and cinnabar ore, its dust and mercury (cinnabar doesn't generate, as in 1.12).
+     * recipe in 1.12 either), cinnabar ore, its dust and mercury (cinnabar doesn't generate, as in 1.12), and the old six-node
+     * power cables (kits lay cable).
      */
     public static Set<Item> hidden() {
         Set<Item> h = new LinkedHashSet<>();
@@ -248,7 +249,10 @@ public final class JeiPages {
             if (d != null && d.parentItem != null) h.add(d.parentItem);
         }
         for (String p : new String[]{"lead_fuse_for_medium_voltage_cables", "lead_fuse_for_high_voltage_cables", "lead_fuse_for_very_high_voltage_cables",
-            "50v_turbine", "200v_turbine", "ferrite_ingot", "cinnabar_ore", "cinnabar_dust", "mercury"}) {
+            "50v_turbine", "200v_turbine", "ferrite_ingot", "cinnabar_ore", "cinnabar_dust", "mercury",
+            // the old six-node power cables: nothing makes or takes them, cable is laid from kits (AdventurAgent, the
+            // handbook play-through: "Low Voltage Cable" was a dead end in JEI)
+            "low_voltage_cable", "medium_voltage_cable", "high_voltage_cable", "very_high_voltage_cable"}) {
             ItemStack f = eln(p);
             if (!f.isEmpty()) h.add(f.getItem());
         }
