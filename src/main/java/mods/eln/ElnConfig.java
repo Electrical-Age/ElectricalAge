@@ -92,7 +92,7 @@ public final class ElnConfig {
         TERRAIN_MOTOR = b.comment("The terrain bike: its motor's draw at full speed, W (same top speed as the electric bike).")
             .defineInRange("terrainMotorWatts", 150.0, 0.0, 10000.0);
         b.pop();
-        // the electrical anvil (Baughn 2026-10-28: an 800 V pulse, maxed out, so players build capacitor banks)
+        // the electrical anvil (Baughn 2026-10-28: a pulse at its full rating (800 V then; HVU = 400 V since the tier rename), maxed out, so players build capacitor banks)
         b.push("anvil");
         ANVIL_POWER = b.comment("The electrical anvil's draw while it welds, W, at 400 V (the high-voltage cable's rating: 5000).")
             .defineInRange("power", 5000.0, 10.0, 1e6);

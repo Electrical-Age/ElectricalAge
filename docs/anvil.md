@@ -108,11 +108,11 @@ New in 26.x (`GoldenCase.NEW_IN_26`, `GoldenSlotsCase.NEW_SPECS`).
 ## Tests
 `AnvilRulesTest` (floor, annealing, units, credit), GameTests `anvil_repairs_without_xp_and_anneals` (steps, credit,
 refusals, plain copy, engraving), `anvil_800v_pulse` (name from the 800 V days: 5 kW on a stiff HVU line, one quarter in 8 s; waits on 87.5% of HVU),
-`anvil_pauses_on_a_sag` (no start at a level 740 V; a level 750 V starts it after 2 s; pause below 90% keeping progress,
+`anvil_pauses_on_a_sag` (no start at a level 92.5% of HVU; a level 93.75% starts it after 2 s; pause below 90% keeping progress,
 1 s hold-off; a 20 kJ burst, then a 3 s rest), `anvil_welds_from_a_bank_on_a_weak_plant` (HVU behind 100 ohm, a bank at
 97.5% of HVU: it welds),
 `capacitor_bank_inrush` (straight on HVU its cable burns; behind a resistance it charges slowly, nothing harmed),
 `capacitor_bank_holds_and_pops` (HVU kept), `capacitor_bank_explodes_over_voltage` (1.6 x its rating: it explodes; strength by
 energy), `capacitor_bank_overheats_and_explodes` (a source right on its plate switched HVU/0 V every 2 s: 105 K, boom),
 `anvil_welds_from_a_bank_on_a_weak_plant` also checks the bank stays under 15 K over ambient, `power_capacitor_leaks_like_the_bank`,
-`capacitor_bank_carries_an_anvil_burst` (a charged bank alone carries one 20 kJ burst, left at ~723 V).
+`capacitor_bank_carries_an_anvil_burst` (a charged bank alone carries one 20 kJ burst, left at ~364 V).

@@ -271,7 +271,7 @@ public final class AnvilCases {
         }
     }
 
-    /** The HVU pulse: on a stiff HVU line a unit (40 kJ) takes 8 s at 5 kW; below 98% of HVU it waits. */
+    /** The HVU pulse: on a stiff HVU line a unit (40 kJ) takes 8 s at 5 kW; on 87.5% of HVU it waits. */
     static final class Pulse implements TestCase {
         public String id() {
             return "anvil_800v_pulse";
