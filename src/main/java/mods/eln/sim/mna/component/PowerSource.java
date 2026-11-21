@@ -26,6 +26,10 @@ public class PowerSource extends VoltageSource implements IRootSystemPreStepProc
         this.Imax = Imax;
     }
 
+    public double getImax() {
+        return Imax;
+    }
+
     public void setImax(double imax) {
         Imax = imax;
     }

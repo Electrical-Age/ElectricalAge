@@ -78,6 +78,8 @@ public final class OilCases {
         cases.add(new StackedPlant());
         cases.add(new CompactTurbine("compact_turbine_full_power", 3000, 4000, true, 99, 1200));
         cases.add(new CompactTurbine("compact_turbine_short_of_heat", 1000, 4000, true, 99, 1200));
+        cases.add(new CompactTurbine("compact_turbine_shorted", 3000, 4000, false, 99, 1200).shortOhms(0.1));
+        cases.add(new CompactTurbine("compact_turbine_overloaded_not_shorted", 3000, 4000, false, 99, 1200).shortOhms(1.5));
         cases.add(new CompactTurbine("compact_turbine_no_load_bypass", 3000, 4000, false, 99, 1200));
         cases.add(new CompactTurbine("compact_turbine_vents_surplus", 6000, 4000, false, 99, 1200));
         cases.add(new CompactTurbine("compact_turbine_dry", 1000, 0, true, 99, 600));
@@ -3537,7 +3539,8 @@ public final class OilCases {
      * The compact steam turbine (Baughn 2026-10-27, the bootstrap option): heat put straight into its boiler, a 50 V
      * heater on its back as the load, or none. ETA 10%: 3 kW gives its 300 W, 1 kW a third of it; with no load the
      * bypass takes a stone heat furnace's 3 kW at a little over 150 C without venting; 6 kW vents; dry it stops and
-     * doesn't fail; from cold on 1 kW it makes power within 3 minutes.
+     * doesn't fail; from cold on 1 kW it makes power within 3 minutes. Shorted (0.1 ohm, a Ground Cable on its line) it says
+     * so rather than "short of heat"; 1.5 ohm, a heavy load at its current limit, isn't called shorted.
      */
     static final class CompactTurbine implements TestCase {
         final String id;
@@ -3546,6 +3549,8 @@ public final class OilCases {
         final int ticks;
         mods.eln.oil.CompactTurbineElement turbine;
         mods.eln.sim.IProcess fire;
+        mods.eln.sim.mna.component.Resistor shortR;
+        double shortOhms;
         double energy, heatGiven, peakC;
 
         CompactTurbine(String id, double heat, double water0, boolean loaded, double startC, int ticks) {
@@ -3555,6 +3560,11 @@ public final class OilCases {
             this.loaded = loaded;
             this.startC = startC;
             this.ticks = ticks;
+        }
+
+        CompactTurbine shortOhms(double r) {
+            shortOhms = r;
+            return this;
         }
 
         public String id() {
@@ -3579,6 +3589,10 @@ public final class OilCases {
                 load.front = mods.eln.misc.Direction.ZN;
                 load.reconnect();
             }
+            if (shortOhms > 0) {   // (0.1 ohm: a Ground Cable on its line; 1.5 ohm: a heavy load at its current limit)
+                shortR = new mods.eln.sim.mna.component.Resistor(turbine.load, null).setR(shortOhms);
+                mods.eln.Eln.simulator.addElectricalComponent(shortR);
+            }
             turbine.water = water0;
             turbine.boiler.Tc = startC - mods.eln.sim.PhysicalConstant.Tamb;
             mods.eln.Eln.simulator.addSlowProcess(fire = t -> {
@@ -3591,6 +3605,8 @@ public final class OilCases {
 
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(fire);
+            String state = turbine.state();
+            if (shortR != null) mods.eln.Eln.simulator.removeElectricalComponent(shortR);
             double p = turbine.powerOut, used = water0 - turbine.water, c = turbine.celsius();
             ctx.line(id + ": " + turbine.getWaila() + String.format("; %.0f J out of %.0f J heat, %.1f mB used, peak %.0f C", energy, heatGiven, used, peakC));
             ctx.check(id + ": not burnt", !turbine.isBurnt(), "");
@@ -3605,6 +3621,12 @@ public final class OilCases {
                     ctx.check(id + ": 1 kW of heat gives ~100 W", p > 80 && p < 110, String.format("%.0f W", p));
                     ctx.check(id + ": it says it is short of heat", turbine.state().contains("short of heat"), turbine.state());
                 }
+                case "compact_turbine_shorted" -> {
+                    ctx.check(id + ": shorted, it says so (not short of heat, which would send the player for chambers)",
+                        state.startsWith("shorted"), state);
+                }
+                case "compact_turbine_overloaded_not_shorted" -> ctx.check(id + ": 1.5 ohm at its current limit (~19 V) isn't called shorted",
+                    !state.startsWith("shorted"), state);
                 case "compact_turbine_no_load_bypass" -> {
                     ctx.check(id + ": no load, a stone furnace's 3 kW: it doesn't vent", turbine.ventW == 0 && peakC < 180, String.format("%.0f C peak", peakC));
                     ctx.check(id + ": the bypass takes it", turbine.bypassW > 2000, String.format("%.0f W", turbine.bypassW));
