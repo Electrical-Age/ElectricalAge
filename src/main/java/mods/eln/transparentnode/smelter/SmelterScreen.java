@@ -3,7 +3,6 @@ package mods.eln.transparentnode.smelter;
 import mods.eln.client.gui.ElnScreen;
 import mods.eln.gui.ElnNodeMenu;
 import mods.eln.misc.Utils;
-import mods.eln.sim.PhysicalConstant;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
@@ -22,7 +21,7 @@ public class SmelterScreen extends ElnScreen {
     protected void init() {
         super.init();
         progress("process", () -> render.progress);
-        text("temperature", () -> tr("Temperature %1$", Utils.plotValue(render.temperature + PhysicalConstant.Tamb) + "°C"));
+        text("temperature", () -> tr("Temperature %1$", Utils.plotCelsius(render.temperature)));
         text("power", () -> render.powered ? tr("Controls: powered") : tr("Controls: no power (48V on a side)"),
             () -> render.powered ? LABEL : 0xFFA02020);   // (ARGB: alpha 0 drew nothing)
     }

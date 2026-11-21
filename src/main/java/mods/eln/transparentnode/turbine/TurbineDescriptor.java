@@ -107,7 +107,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor {
 
         list.add(tr("Generates electricity using heat."));
         list.add(tr("Nominal usage:"));
-        list.add("  " + tr("Temperature difference: %1$°C", Utils.plotValue(nominalDeltaT)));
+        list.add("  " + tr("Temperature difference: %1$", mods.eln.api.Meters.kelvin(nominalDeltaT)));
         if (!Utils.nameShowsVoltage(name, nominalU))
             list.add("  " + tr("Voltage: %1$V", Utils.plotValue(nominalU)));
         list.add("  " + tr("Power: %1$W", Utils.plotValue(nominalP)));

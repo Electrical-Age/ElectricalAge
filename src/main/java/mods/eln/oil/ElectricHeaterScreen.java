@@ -4,7 +4,6 @@ import mods.eln.client.gui.EaSlider;
 import mods.eln.client.gui.ElnScreen;
 import mods.eln.gui.ElnNodeMenu;
 import mods.eln.misc.Utils;
-import mods.eln.sim.PhysicalConstant;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
@@ -20,17 +19,14 @@ public class ElectricHeaterScreen extends ElnScreen {
         this.render = (ElectricHeaterRender) render;
     }
 
-    static String celsius(double relative) {
-        return Utils.plotValue(relative + PhysicalConstant.Tamb) + "°C";
-    }
 
     @Override
     protected void init() {
         super.init();
         target = slider("target", 0, 780, 10, render.target,
             v -> Component.literal(deviceItem(ElectricHeaterElement.REGULATOR_SLOT).isEmpty()
-                ? tr("No regulator  (now %1$, %2$)", celsius(render.temperature), Utils.plotPower("", render.power).trim())
-                : tr("Set point %1$  (now %2$, %3$)", celsius(v), celsius(render.temperature), Utils.plotPower("", render.power).trim())),
+                ? tr("No regulator  (now %1$, %2$)", Utils.plotCelsius(render.temperature), mods.eln.api.Meters.watts(render.power))
+                : tr("Set point %1$  (now %2$, %3$)", Utils.plotCelsius(v), Utils.plotCelsius(render.temperature), mods.eln.api.Meters.watts(render.power))),
             v -> render.clientSendFloat(ElectricHeaterElement.SET_TARGET_EVENT, (float) v));
         update();
     }

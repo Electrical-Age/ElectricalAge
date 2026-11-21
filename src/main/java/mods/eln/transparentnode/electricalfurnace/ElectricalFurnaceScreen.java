@@ -5,7 +5,6 @@ import mods.eln.client.gui.ElnScreen;
 import mods.eln.gui.ElnNodeMenu;
 import mods.eln.item.HeatingCorpElement;
 import mods.eln.misc.Utils;
-import mods.eln.sim.PhysicalConstant;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -26,16 +25,13 @@ public class ElectricalFurnaceScreen extends ElnScreen {
         this.render = (ElectricalFurnaceRender) render;
     }
 
-    static String celsius(double relative) {
-        return Utils.plotValue(relative + PhysicalConstant.Tamb) + "°C";
-    }
 
     @Override
     protected void init() {
         super.init();
         progress("process", () -> render.processState);
         target = slider("target", 0, 800, 10, render.temperatureTargetSyncValue < -1000 ? 0 : render.temperatureTargetSyncValue,
-            v -> Component.literal(tr("Target %1$  (now %2$)", celsius(v), celsius(render.temperature))),
+            v -> Component.literal(tr("Target %1$  (now %2$)", Utils.plotCelsius(v), Utils.plotCelsius(render.temperature))),
             v -> render.clientSetTemperatureTarget((float) v));
         gauge("supply", this::supplyFraction, this::supplyText, 1.0, 1.2);
         var power = button("heater", () -> render.getPowerOn() ? tr("Heater: on") : tr("Heater: off"),

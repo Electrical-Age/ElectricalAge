@@ -474,7 +474,7 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
 
     @Override
     public String thermoMeterString(Direction side) {
-        return a == null ? "" : String.format("A %.0f °C, B %.0f °C", a.T() - Water.T0, b.T() - Water.T0);
+        return a == null ? "" : "A " + mods.eln.api.Meters.celsius(a.T() - Water.T0) + ", B " + mods.eln.api.Meters.celsius(b.T() - Water.T0);
     }
 
     @Override
@@ -542,9 +542,9 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
         HeatExchangerElement h = head();
         // (not stepped yet, as just loaded: no inlet reading, so its sides' own temperatures)
         boolean read = h.tAin > 0;
-        info.put(I18N.tr("Stream A"), String.format("%.0f -> %.0f °C, %.2f bar of %s", (read ? h.tAin : a.T()) - Water.T0, (read ? h.tAout : a.T()) - Water.T0, a.P() / 1e5,
+        info.put(I18N.tr("Stream A"), String.format("%s -> %s, %.2f bar of %s", mods.eln.api.Meters.celsius((read ? h.tAin : a.T()) - Water.T0), mods.eln.api.Meters.celsius((read ? h.tAout : a.T()) - Water.T0), a.P() / 1e5,
             mods.eln.sim.fluid.EaUnits.contents(a)));
-        info.put(I18N.tr("Stream B"), String.format("%.0f -> %.0f °C, %.2f bar of %s", (read ? h.tBin : b.T()) - Water.T0, (read ? h.tBout : b.T()) - Water.T0, b.P() / 1e5,
+        info.put(I18N.tr("Stream B"), String.format("%s -> %s, %.2f bar of %s", mods.eln.api.Meters.celsius((read ? h.tBin : b.T()) - Water.T0), mods.eln.api.Meters.celsius((read ? h.tBout : b.T()) - Water.T0), b.P() / 1e5,
             mods.eln.sim.fluid.EaUnits.contents(b)));
         info.put(I18N.tr("A holds"), mods.eln.sim.fluid.EaUnits.composition(a));
         info.put(I18N.tr("B holds"), mods.eln.sim.fluid.EaUnits.composition(b));

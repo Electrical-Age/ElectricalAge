@@ -15,8 +15,6 @@ import static mods.eln.i18n.I18N.tr;
  */
 public class HeatFurnaceScreen extends ElnScreen {
     final HeatFurnaceRender render;
-    /** The simulation's 0 in °C (PhysicalConstant.Tref, 20 °C). */
-    static final double C0 = mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius;
     EaSlider gain, heat;
     net.minecraft.client.gui.components.Button fuel;
 
@@ -41,8 +39,8 @@ public class HeatFurnaceScreen extends ElnScreen {
             // (in °C, as Jade shows them: the simulation's temperatures are above the 20 °C reference; Baughn saw the GUI
             // and Jade disagree by that much)
             // (AdventurAgent found it inactive under internal control: it needs a regulator in its slot; say so)
-            v -> Component.literal(tr("Set point: %1$°C", (int) Math.round(v + C0)) + "  (" + (!regulator() && !render.controleExternal
-                ? tr("needs a regulator in its slot") : tr("Actual: %1$°C", Utils.plotValue(render.temperature + C0))) + ")"),
+            v -> Component.literal(tr("Set point: %1$", Utils.plotCelsius(v)) + "  (" + (!regulator() && !render.controleExternal
+                ? tr("needs a regulator in its slot") : tr("Actual: %1$", Utils.plotCelsius(render.temperature))) + ")"),
             v -> render.clientSetTemperatureTarget((float) v));
         render.gainSyncNew = render.temperatureTargetSyncNew = false;
         update();

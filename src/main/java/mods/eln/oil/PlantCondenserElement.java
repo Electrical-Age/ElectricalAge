@@ -263,7 +263,7 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
             info.put(I18N.tr("Water level"), String.format(I18N.tr("%.0f%% of what drowns its tubes (%.0f mB)%s"), v.floodShare() / PlantCondenserDescriptor.FLOOD * 100,
                 n.mLiquid() / EaUnits.KG_PER_MB_WATER, v.floodShare() > PlantCondenserDescriptor.FLOOD ? I18N.tr(": FLOODING") : ""));
             info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", n.P() / 1e5, EaUnits.contents(n)));
-            info.put(I18N.tr("Temperature"), String.format("%.0f °C", n.T() - Water.T0));
+            info.put(I18N.tr("Temperature"), mods.eln.api.Meters.celsius(n.T() - Water.T0));
             info.put(I18N.tr("Contents"), EaUnits.composition(n));
         }
         info.put(I18N.tr("Heat rejected"), Utils.plotPower("", v.heatW) + I18N.tr(" by its shell, ") + Utils.plotPower("", tubesW) + I18N.tr(" to its cooling water"));

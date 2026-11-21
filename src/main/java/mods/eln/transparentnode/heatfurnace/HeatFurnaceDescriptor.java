@@ -120,6 +120,6 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
             Utils.plotValue(combustionChamberPower), combustionChamberMax, Utils.plotValue(maxPower())));
         list.add("  " + tr("Without a regulator its gauge sets the fire; a regulator item holds a set temperature,"));
         list.add("  " + tr("which it reaches only while its power beats the heat taken from it."));
-        list.add("  " + tr("Its sides take a control signal (External control). Max. temperature: %1$°C", Utils.plotValue(thermal.warmLimit)));
+        list.add("  " + tr("Its sides take a control signal (External control). Max. temperature: %1$", Utils.plotCelsius(thermal.warmLimit)));
     }
 }

@@ -271,7 +271,7 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
         info.put(I18N.tr("Power"), Utils.plotPower("", resistor.getP()));
         if (inlet != null) {
             var n = FluidWorld.nodeFor(inlet);
-            info.put(I18N.tr("Inlet"), String.format("%.2f bar of %s, %.0f °C", n.P() / 1e5, EaUnits.contents(n), n.T() - Water.T0));
+            info.put(I18N.tr("Inlet"), String.format("%.2f bar of %s, %s", n.P() / 1e5, EaUnits.contents(n), mods.eln.api.Meters.celsius(n.T() - Water.T0)));
         }
         return info;
     }

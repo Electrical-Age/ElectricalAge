@@ -2773,7 +2773,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
         out.put("Pipe", PipePart.TIER_NAME[pipe.tier] + (pipe.burst ? ", BURST" : ""));
         // (Baughn: say what the pressure is of; steam in grams)
-        out.put("Pressure", String.format("%.2f bar of %s, %.0f °C", n.P() / 1e5, EaUnits.contents(n), n.T() - 273.15));
+        out.put("Pressure", String.format("%.2f bar of %s, %s", n.P() / 1e5, EaUnits.contents(n), mods.eln.api.Meters.celsius(n.T() - 273.15)));
         out.put("Contents", EaUnits.composition(n));
         for (VoxelPart p : parts)
             if (p instanceof ValvePart v) out.put(switch (v.mode) {
@@ -2820,7 +2820,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         CableNet.Conductor k = conductorOf(part);
         if (k != null && k.thermal != null) return mods.eln.misc.Utils.plotCelsius("T", k.thermal.Tc);
         PipePart pipe = pipeOf(part);
-        return pipe == null ? "" : String.format("%.0f °C  ", mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid).T() - 273.15);
+        return pipe == null ? "" : mods.eln.api.Meters.celsius(mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid).T() - 273.15) + "  ";
     }
 
     /** By side (a face's hosted device; else the block's first cable, then its first pipe: callers without a hit). */

@@ -129,7 +129,7 @@ public class TurbineElement extends TransparentNodeElement {
             return Utils.plotCelsius("T+:", warmLoad.Tc) + Utils.plotPower("P+:", warmLoad.getPower());
         if (side == front.right())
             return Utils.plotCelsius("T-:", coolLoad.Tc) + Utils.plotPower("P-:", coolLoad.getPower());
-        return Utils.plotCelsius("dT:", warmLoad.Tc - coolLoad.Tc) + Utils.plotPercent("Eff:", turbineThermaltProcess.getEfficiency());
+        return "dT: " + mods.eln.api.Meters.kelvin(warmLoad.Tc - coolLoad.Tc) + " " + Utils.plotPercent("Eff:", turbineThermaltProcess.getEfficiency());
 
     }
 
@@ -170,7 +170,7 @@ public class TurbineElement extends TransparentNodeElement {
             (warmLoad.Tc - coolLoad.Tc == descriptor.nominalDeltaT ? I18N.tr("Yes") : I18N.tr("No")));
         info.put(I18N.tr("Generated power"), Utils.plotPower("", electricalPowerSourceProcess.getP()));
         if (Eln.wailaEasyMode) {
-            info.put("\u0394T", Utils.plotCelsius("", warmLoad.Tc - coolLoad.Tc));
+            info.put("\u0394T", mods.eln.api.Meters.kelvin(warmLoad.Tc - coolLoad.Tc));
             info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalPowerSourceProcess.getU()));
         }
         return info;

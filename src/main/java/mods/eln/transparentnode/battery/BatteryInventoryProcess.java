@@ -117,7 +117,7 @@ public class BatteryInventoryProcess implements IProcess {
     public String describe() {
         return switch (state) {
             case 1 -> String.format("limiting charge to %.1f A", chargeLimit);
-            case 2 -> String.format("cut: too hot (%.0f °C)", battery.thermalLoad.Tc + mods.eln.sim.PhysicalConstant.Tamb);
+            case 2 -> "cut: too hot (" + mods.eln.misc.Utils.plotCelsius(battery.thermalLoad.Tc) + ")";
             case 3 -> "cut: full (overvoltage)";
             case 4 -> "low-voltage disconnect: charging only";
             default -> null;

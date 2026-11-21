@@ -227,7 +227,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
             info.put(I18N.tr("Water level"), String.format(I18N.tr("%.0f%% of what floods the turbine (%.0f mB)"), floodShare() / CondenserDescriptor.FLOOD * 100,
                 vessel.mLiquid() / EaUnits.KG_PER_MB_WATER));
             info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", vessel.P() / 1e5, EaUnits.contents(vessel)));
-            info.put(I18N.tr("Temperature"), String.format("%.0f °C", vessel.T() - Water.T0));
+            info.put(I18N.tr("Temperature"), mods.eln.api.Meters.celsius(vessel.T() - Water.T0));
             info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
         }
         info.put(I18N.tr("Heat rejected"), Utils.plotPower("", Math.max(0, heatW)));   // (no -28 mW while idle: AdventurAgent)

@@ -303,7 +303,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
 
     @Override
     public String thermoMeterString(Direction side) {
-        return vessel == null ? "" : mods.eln.misc.Utils.plotCelsius("T:", vessel.T() - Water.T0);
+        return vessel == null ? "" : mods.eln.misc.Utils.plotCelsius("T:", vessel.T() - mods.eln.sim.PhysicalConstant.Tref);
     }
 
     @Override
@@ -370,7 +370,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     public Map<String, String> getWaila() {
         Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
         if (vessel == null) return info;
-        info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s, %.0f °C", vessel.P() / 1e5, EaUnits.contents(vessel), vessel.T() - Water.T0));
+        info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s, %s", vessel.P() / 1e5, EaUnits.contents(vessel), mods.eln.api.Meters.celsius(vessel.T() - Water.T0)));
         info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
         // (all its liquids: "Water" counted only water while the share counted latex too, LabAssistant)
         info.put(I18N.tr("Liquid"), String.format("%.0f mB, %.0f%% full", vessel.liquidVolume() * Water.RHO_L / EaUnits.KG_PER_MB_WATER, fill() * 100));

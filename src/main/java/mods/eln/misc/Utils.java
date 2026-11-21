@@ -241,11 +241,19 @@ public class Utils {
         return header + plotAmpere(value);
     }
 
+    /**
+     * A temperature on the simulation's Tc scale (kelvin above PhysicalConstant.Tamb) in degrees Celsius, as
+     * Meters.celsius shows it: "85.0°C". Screens use this; meter lines the padded form below. An absolute temperature
+     * in °C goes to Meters.celsius, a difference to Meters.kelvin.
+     */
+    public static String plotCelsius(double relative) {
+        return mods.eln.api.Meters.celsius(relative + mods.eln.sim.PhysicalConstant.Tamb);
+    }
+
     public static String plotCelsius(String header, double value) {
-        value += mods.eln.sim.PhysicalConstant.Tref - mods.eln.sim.PhysicalConstant.TCelsius;
         if (!header.equals(""))
             header += " ";
-        return header + mods.eln.api.Meters.celsius(value) + " ";
+        return header + plotCelsius(value) + " ";
     }
 
     public static String plotPercent(String header, double value) {

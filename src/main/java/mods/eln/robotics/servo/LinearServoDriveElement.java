@@ -704,7 +704,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
 
     @Override
     public String thermoMeterString(Direction side) {
-        return Utils.plotCelsius("T: ", machine.celsius());
+        return Utils.plotCelsius("T: ", machine.celsius() - mods.eln.sim.PhysicalConstant.Tamb);
     }
 
     @Override

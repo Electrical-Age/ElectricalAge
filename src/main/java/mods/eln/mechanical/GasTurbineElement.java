@@ -477,7 +477,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
                 FuelQuality.layerViscosity(fuelIn.vessel, fuelIn.feedId()) * 1000));
         }
         if (foul > 0.01) info.put(I18N.tr("Fouling"), String.format(I18N.tr("%.0f%% fouled: %.0f%% power (clean fuel clears it slowly; right-click with wool to clean)"), foul * 100, (1 - foul) * 100));
-        info.put(I18N.tr("Exhaust"), exhaustPiped ? String.format("%.0f °C, piped", exhaust == null ? 0 : exhaust.T() - Water.T0) : I18N.tr("to the air"));
+        info.put(I18N.tr("Exhaust"), exhaustPiped ? mods.eln.api.Meters.celsius(exhaust == null ? 0 : exhaust.T() - Water.T0) + ", piped" : I18N.tr("to the air"));
         info.put(I18N.tr("Fuel valve"), tripped ? I18N.tr("tripped by overspeed") : String.format("%.0f%%%s", gate * 100, manual() ? I18N.tr(", by hand: no governor, no trip") : ""));
         return info;
     }
