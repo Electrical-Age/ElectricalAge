@@ -1106,9 +1106,9 @@ public final class Network {
     private long deadline = Long.MAX_VALUE;
     /**
      * 1.5 x MAX_STEP_NANOS after the step began, per thread (FluidPool steps networks on several): checkClock, called
-     * from the EOS, the Jacobian and the linear solves, throws past it. The budget is checked only between iterations, and one iteration once ran past the server watchdog's 60 s
-     * (Incognito, 2026-11-21: MixFluid.drawSlope in a Jacobian of Dysnomia's 110-node plant). (The game steps networks
-     * on one thread.)
+     * from the EOS, the Jacobian and the linear solves, throws past it, and the step is dropped. The budget alone is
+     * checked only between iterations. It also stops a healthy network's single solve past 1.5 x the budget (such a
+     * network is too costly for the server anyway; CoreStep quarantines it).
      */
     private static final ThreadLocal<long[]> HARD = ThreadLocal.withInitial(() -> new long[]{Long.MAX_VALUE});
     private static int clockCalls;

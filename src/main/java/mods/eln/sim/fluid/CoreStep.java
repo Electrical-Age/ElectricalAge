@@ -330,7 +330,7 @@ public final class CoreStep {
             for (int j = 2; j < c.m.length; j++) c.m[j] = n.extra != null && ids[j] - 2 < n.extra.length ? n.extra[ids[j] - 2] : 0;
             c.U = n.energy;
             c.heat = n.fixed ? 0 : n.heat - n.lossWPerK * (n.T() - Water.T_AMBIENT);
-            n.heat = 0;
+            if (!idle) n.heat = 0;   // (an idle tick applies none: it waits for the next real step)
             c.wallUA = n.fixed ? 0 : n.wallUA;
             c.wallT = n.wallT;
             c.update();
@@ -425,7 +425,7 @@ public final class CoreStep {
         if (net.stats.crawls > crawls0 && Long.bitCount(crawled) == 1 && crawled >= 16) System.out.println("[fluidcore] solves accepted at the precision floor so far: " + crawled);
         // (a step cut short covered less than dt: the rest is owed, so heat put in over it isn't lost and the network
         // catches up; flows below are what moved this tick, per tick, so what devices book from them balances)
-        owed += Math.max(0, dt - net.done);
+        if (!idle) owed += Math.max(0, dt - net.done);   // (a quarantined tick drops its time on purpose: tries stay at one tick)
         // (the stall record lives on the nodes, so a network rebuilt mid-stall, as a burst rebuilds it, keeps it)
         double before = 0;
         for (FluidNode n : nodes) before = Math.max(before, n.stallNow);
