@@ -114,7 +114,7 @@
         (def rows (lay-out node (- cw 1)))
         (def page (- ch 3))
         (set top (max 0 (min top (- (length rows) page))))
-        (ui/text t 5 29 0 :yellow (string/slice (node :title) 0 (min (length (node :title)) (max 0 (- cw 40)))))
+        (ui/text t 5 29 0 :yellow (string/slice (node :title) 0 (min (length (node :title)) (max 0 (- cw 41)))))   # (clear of Up and Dn)
         (ui/button t 6 (- cw 11) 0 5 "Up" (fn [] (set top (- top (- page 1))) (show)))
         (ui/button t 7 (- cw 5) 0 5 "Dn" (fn [] (set top (+ top (- page 1))) (show)))
         (var id 10)

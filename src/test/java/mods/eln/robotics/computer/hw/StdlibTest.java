@@ -147,7 +147,7 @@ class StdlibTest {
         tick(40, "\n> ");
         type("help");
         tick(40, "The current directory: A:/");
-        assertFalse(screen.log().contains("RAM:/"), "Shell 1's log: " + screen.log());
+        assertTrue(screen.log().contains("(dyn :cwd)\n\"A:/\""), "Shell 1 keeps A:/: " + screen.log());
     }
 
     @Test

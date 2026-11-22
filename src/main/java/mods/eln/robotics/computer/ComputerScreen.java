@@ -281,7 +281,8 @@ public class ComputerScreen extends ElnScreen {
 
     /** The editor elements of the active window, when nothing covers them, as code editor widgets placed over them. */
     void syncEditors() {
-        Scene.Window t = render.lit() && dragMode == 0 ? activeWindow() : null;   // (off, or a drag: none)
+        // (off, a drag, or a menu open, which the widgets would draw over: none)
+        Scene.Window t = render.lit() && dragMode == 0 && !menuOpen ? activeWindow() : null;
         java.util.Set<String> want = new java.util.HashSet<>();
         if (t != null && t.ask == null)
             for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
@@ -294,8 +295,9 @@ public class ComputerScreen extends ElnScreen {
                 List<Object> m = e.msg;
                 EditorState st = editorState(active, en.getKey());
                 boolean replaced = false;
-                if (st.opened != m) {
-                    // a new editor message: the file opened again (a reused window number, AdventurAgent): start from it
+                if (!m.equals(st.opened)) {
+                    // a new editor message: the file opened again (a reused window number, AdventurAgent): start from it.
+                    // (by content: the same message replayed when the screen is opened again keeps the unsaved text)
                     st.opened = m;
                     st.baseRev = Form.str(m, 9, "");
                     st.baseText = st.text = Form.str(m, 10, "");
@@ -870,6 +872,12 @@ public class ComputerScreen extends ElnScreen {
             case "Save As..." -> {   // (its changes, kept aside by the program and written only under the new name)
                 render.screenEvent(new Form.Symbol("stash"), (long) active, (long) Integer.parseInt(key.split("/")[1]), ++seq,
                     st.baseRev == null ? "" : st.baseRev, hunks(st.baseText, st.text));
+                w.setFocused(false);   // (the keys go to the line that asks for the name)
+                setFocused(null);
+            }
+            case "New...", "Open..." -> {
+                w.setFocused(false);
+                setFocused(null);
             }
             case "Find..." -> {
                 setFocused(w);

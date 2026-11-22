@@ -28,7 +28,7 @@
     (ui/button t 31 15 7 13 (mark (= (p :clock) 12) "12 hours") (fn [] (choose :clock 12)))
     (ui/text t 4 1 9 :yellow "Station name")
     (ui/text t 5 1 10 :light-gray (string/format "%-20s" (or (p :name) "(none)")))
-    (ui/line t 6 22 10 20 "new: " (fn [text _]
+    (ui/line t 6 22 10 20 "new, Enter: " (fn [text _]
                                      (def n (string/trim text))
                                      (choose :name (if (empty? n) nil (string/slice n 0 (min 20 (length n)))))))
     (ui/text t 7 1 11 :gray "The name BBS signs posts with, and others see on the bus.")

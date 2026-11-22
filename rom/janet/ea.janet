@@ -938,7 +938,7 @@
     (set rev (revision txt))
     (heading :light-gray p)
     (ui/send 'window t 0 0 0 0 (name-of p) ui/standard)   # (open already: only its title changes)
-    (ui/send 'editor t 4 0 1 :fill :fill (if (string/has-suffix? ".janet" p) :janet :text) p rev txt))
+    (ui/send 'editor t 4 0 1 :fill :fill (if (string/has-suffix? ".janet" p) :janet :plain) p rev txt))
   (defn ask-path
     "A line over the path's row asking for a file name; (f path) when one is typed (an empty line cancels)."
     [prompt f]
@@ -1082,7 +1082,8 @@
                 (def [usage what] (get shell-commands k))
                 (print (string/format "  %-22s %s" usage what)))
               (print "The manual: the Guide icon on the desk, or (guide).")
-              (print "The current directory: " (or (env :cwd) "A:/")))]})
+              (print "The current directory: " (or (env :cwd) "A:/") " (the commands' paths start there; Janet's own file")
+              (print "functions, slurp and spit among them, take whole paths such as \"RAM:/notes.txt\")."))]})
 
 # ---- the inspector: processes, tasks, their stacks, locals and values, Smalltalk-style (Baughn)
 
