@@ -36,6 +36,9 @@ public final class FluidNode {
     public double stallNow, longestStall, droppedTime;
     /** Its network's count of heavy steps (CoreStep's background steps); on the node, so a rebuild keeps it. */
     public int slowSteps;
+    /** Wall heat (J) a step moved that its devices haven't booked yet, when its network's core was replaced (CoreStep
+     *  hands a long step's heat out over its ticks): the next core hands it on. */
+    public double wallCarry;
     final Flash state = new Flash();
 
     public FluidNode(double volume, double z, double height, boolean fixed) {

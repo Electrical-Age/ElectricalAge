@@ -33,7 +33,7 @@ public final class Flue {
     /** The hottest a chamber's smoke goes in (K): about a hydrocarbon's adiabatic flame with 20 % excess air. */
     public static final double FLAME_MAX_K = 2500;
     /** Steam a drowned burner flashes leaves into the chamber over about this long (s), not as one lump. */
-    public static final double STEAM_S = 1.0;
+    public static final double STEAM_S = 2.0;   // (longer than a background fluid step, CoreStep.MAX_SPAN ticks: a rate that holds for it)
 
     final String key;
     public FluidNode node;

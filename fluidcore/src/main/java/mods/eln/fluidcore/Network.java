@@ -988,11 +988,11 @@ public final class Network {
      * Backward Euler has a root past the transient for steps up to ~1e-2 s, so once through, the steps grow back.
      */
     private void adaptive(List<Node> free, double dt) {
-        double t = 0, h = dt / 2, hMin = dt / Math.pow(2, MAX_DEPTH + ADAPTIVE_EXTRA), hBad = Double.POSITIVE_INFINITY;
+        double t = 0, h = dt / 2, hMin = dt / span / Math.pow(2, MAX_DEPTH + ADAPTIVE_EXTRA), hBad = Double.POSITIVE_INFINITY;
         int run = 0;
         while (t < dt * (1 - 1e-12)) {
             stats.substeps++;
-            if (++stepSubsteps > MAX_SUBSTEPS || outOfTime()) {
+            if (++stepSubsteps > MAX_SUBSTEPS * span || outOfTime()) {
                 stats.cut++;
                 return;
             }
@@ -1032,7 +1032,7 @@ public final class Network {
 
     private boolean substep(List<Node> free, double dt, int depth) {
         stats.substeps++;
-        if (CUT_SHORT && (++stepSubsteps > MAX_SUBSTEPS || outOfTime())) {
+        if (CUT_SHORT && (++stepSubsteps > MAX_SUBSTEPS * span || outOfTime())) {
             // (a step that has taken MAX_SUBSTEPS sub-steps ends where it is: a network needing thousands of sub-steps
             // every tick stalled the server)
             stats.cut++;
@@ -1091,6 +1091,9 @@ public final class Network {
     public static long MAX_STEP_NANOS = 0;
     /** This network's own budget (ns) in place of MAX_STEP_NANOS; under 0: none of its own. */
     public long budget = -1;
+    /** How many of the game's ticks this step stands for (CoreStep's background steps): its sub-step count and smallest
+     *  sub-step are a tick's, times this. */
+    public int span = 1;
     /** Set from another thread: its step under way ends at its next iteration (nobody waits for its result any more). */
     public volatile boolean cancelled;
     private long deadline = Long.MAX_VALUE;

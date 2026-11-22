@@ -305,6 +305,7 @@ public final class PlumbingCases {
          * has moved water by the time it is back on the server thread; no water is made or lost.
          */
         final boolean background;
+        double booksMoved, booksOff;
         boolean sawBackground, sawWaiting, injected, back;
         String note;
         int maxSpan;
@@ -326,7 +327,7 @@ public final class PlumbingCases {
 
         @Override
         public boolean checkStalls() {
-            // (held 3 ticks a step, and restarted when a test beside it changes the networks, it does fall behind)
+            // (its steps are held 3 ticks: it falls behind by design)
             return !background;
         }
 
@@ -369,6 +370,11 @@ public final class PlumbingCases {
                     var net = mods.eln.fluid.FluidWorld.networkOf(a.vessel);
                     boolean bg = net != null && net.background();
                     sawBackground |= bg;
+                    if (net != null) {   // (every tick, whatever thread its steps run on; a rebuilt network starts its books anew)
+                        double[] books = net.books();
+                        booksMoved = Math.max(booksMoved, books[0]);
+                        booksOff = Math.max(booksOff, Math.abs(books[1]));
+                    }
                     if (bg) {
                         maxSpan = Math.max(maxSpan, net.span());
                         String n = mods.eln.fluid.FluidWorld.heavyAt(a.node.coordonate.pos().asLong());
@@ -413,6 +419,9 @@ public final class PlumbingCases {
                 ctx.check("background steps: light again, it is back on the server thread", back && net != null && !net.background(), "slow steps " + a.vessel.slowSteps);
                 // (each step as long as the ticks since the last began: fluid time keeps up with the devices')
                 ctx.check("background steps: held 3 ticks, its steps stand for 3 or more", maxSpan >= 3, "span " + maxSpan);
+                // (what its steps moved is handed out over their ticks: all of it, once)
+                ctx.check("background steps: at every tick, what its steps moved is handed to devices or waiting to be, once", booksMoved > 1e-3 && booksOff <= 1e-9 * booksMoved,
+                    String.format("moved %.6f kg, at most %.3g kg unaccounted", booksMoved, booksOff));
                 ctx.check("background steps: Jade says it is a heavy network", note != null && note.contains("Heavy fluid network"), "" + note);
                 ctx.check("background steps: the pump moved water while in the background", movedInBackground > 0.001, String.format("%.4f kg", movedInBackground));
                 ctx.check("background steps: water put in while a step ran is kept, none made or lost", injected && Math.abs(w - water0 - INJECTED) < 1e-9 * water0,

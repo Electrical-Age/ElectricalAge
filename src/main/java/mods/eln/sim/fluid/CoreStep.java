@@ -306,9 +306,9 @@ public final class CoreStep {
     /**
      * Background steps: a network whose steps took over a tenth of the budget (SYNC_SHARE; 25 ms in the game) HEAVY_AFTER
      * times more often than not (FluidNode.slowSteps, kept on the nodes over rebuilds) is stepped on a worker thread, one
-     * step at a time, each started on a tick and applied on the first tick after it finishes; the ticks between move
-     * nothing and give devices nothing to book. So it runs at what the worker manages, in slow motion if its steps take
-     * over a tick, and the server thread never waits for it. Dysnomia's plant (110 nodes, 2026-11-21) sat in a transient
+     * step at a time, each started on a tick and applied on the first tick after it finishes, and each as long as the
+     * ticks since the one before it began (MAX_SPAN), its result handed out over those ticks (handOut): it keeps real
+     * time at a coarser step, and the server thread never waits for it. Dysnomia's plant (110 nodes, 2026-11-21) sat in a transient
      * of ~500 steps at up to a second each: on the server thread it took Incognito to 4 TPS, and under any per-tick
      * limit it never got through. Steps back under half that time bring it back to the server thread. (Baughn
      * 1573800740550344846: a thread pool.)
@@ -338,6 +338,7 @@ public final class CoreStep {
         volatile long took;
         boolean background;
         int slow, span;
+        long slept0;
     }
 
     /** Tests: a background step's result is taken no sooner than this many ticks after its start (a test server ticks as
@@ -360,7 +361,19 @@ public final class CoreStep {
      */
     private double[][] remE, remS;
     private double[] remWall;
-    private int ticksLeft;
+    private int ticksLeft, behindTicks;
+    /** The length (s) of the last step the core really ran: asleep, it keeps that step's moves, for a step of that length. */
+    private double awakeDt;
+    /** Tests: all the mass its steps moved over edges (kg, absolute sum), and the signed sums moved and handed out to devices. */
+    public double movedKg;
+    private double movedSum, bookedSum;
+
+    /** Tests: mass moved that is neither handed out to devices nor waiting to be (kg, signed): 0 but for rounding, at any tick. */
+    public double unbooked() {
+        double owed = 0;
+        if (remE != null) for (double[] r : remE) owed += r[4];
+        return movedSum - bookedSum - owed;
+    }
     private static long failureLogged;
 
     boolean pending() {
@@ -369,12 +382,26 @@ public final class CoreStep {
 
     /** Its network is replaced or forgotten: a background step under way is cancelled, and the heat it took given back. */
     void abandon() {
+        flush();
         if (job == null) return;
         net.cancelled = true;
         job.cancel(false);
         for (int i = 0; i < cn.length; i++) nodes.get(i).heat += pending.heat0[i];
         job = null;
         pending = null;
+    }
+
+    /**
+     * Its core is replaced or forgotten: the wall heat still to be handed out stays with the nodes (FluidNode.wallCarry),
+     * for the next core; else a shell would never be debited for heat its water already took. What its edges still owed
+     * (flows, a turbine's work) is lost with it: devices book less than moved, never more.
+     */
+    private void flush() {
+        if (remWall == null) return;
+        for (int i = 0; i < remWall.length; i++) {
+            if (remWall[i] != 0 && !nodes.get(i).fixed) mods.eln.fluid.FluidWorld.carryWall(nodes.get(i), remWall[i]);
+            remWall[i] = 0;
+        }
     }
 
     void step(FluidNetwork fn, double dt) {
@@ -401,6 +428,7 @@ public final class CoreStep {
                     mods.eln.Eln.LOG.error("[fluidcore] a background step failed; its network starts over from its nodes", e);
                 }
                 for (int i = 0; i < cn.length; i++) nodes.get(i).heat += p.heat0[i];
+                flush();
                 fn.core = null;
                 waiting(dt);
                 return;
@@ -411,7 +439,8 @@ public final class CoreStep {
         int slow = 0;
         for (FluidNode n : nodes) slow = Math.max(slow, n.slowSteps);
         boolean bg = budgetNanos > 0 && slow >= HEAVY_AFTER;
-        if (applied && !bg) {   // (light again: back on this thread from the next tick)
+        if (applied && !bg) {   // (light again: back on this thread from the next tick, owing the ticks its last step took)
+            owed = Math.min(owed + ticksSince * dt, OWED_MAX);
             ticksSince = 0;
             return;
         }
@@ -422,7 +451,7 @@ public final class CoreStep {
         double[] heat0 = new double[cn.length];
         // (at most one tick's worth caught up per tick: devices step their own processes by the tick, and a second of
         // fluid landing in one tick would be a spike they all see)
-        // (a background step is one tick long: it runs behind anyway, and its time isn't owed)
+        // (a background step is span ticks long; its time isn't owed)
         double tick = dt, ask = bg ? span * dt : dt + Math.min(owed, dt);
         owed -= ask - dt;
         dt = ask;
@@ -516,6 +545,7 @@ public final class CoreStep {
         p.background = bg;
         p.heat0 = heat0;
         p.failures = net.stats.failures;
+        p.slept0 = net.stats.slept;
         p.m0 = new double[cn.length][];
         p.u0 = new double[cn.length];
         p.h0 = new double[cn.length];
@@ -529,12 +559,18 @@ public final class CoreStep {
         p.crawls0 = net.stats.crawls;
         if (bg) {
             net.budget = BACKGROUND_BUDGET;
+            net.span = span;
+            behindTicks = 0;
             pending = p;
             double stepDt = dt;
             background = true;
             waited = 0;
             p.span = span;
-            if (droppedNow > 0) mods.eln.fluid.FluidWorld.recordProgress(nodes, 0, droppedNow);
+            if (droppedNow > 0) {   // (over MAX_SPAN ticks behind: that time is lost, and counts towards Jade's alarm)
+                double before = 0;
+                for (FluidNode n : nodes) before = Math.max(before, n.stallNow);
+                mods.eln.fluid.FluidWorld.recordProgress(nodes, before + droppedNow, droppedNow);
+            }
             job = WORKER.submit(() -> {
                 long t0 = System.nanoTime();
                 net.step(stepDt);
@@ -544,6 +580,7 @@ public final class CoreStep {
             return;
         }
         p.span = 1;
+        net.span = 1;
         net.budget = -1;
         Network.MAX_STEP_NANOS = budgetNanos;
         long t0 = System.nanoTime();
@@ -552,15 +589,16 @@ public final class CoreStep {
         finish(p);
     }
 
-    /** A tick while a background step runs: nothing moved, for devices to book nothing; the core isn't touched. */
+    /** A tick while a background step runs: the devices get this tick's share of the last results; the core isn't touched. */
     private void waiting(double tick) {
         overBudget = true;
         // (its last result is still being handed out: on time. With nothing left, it is behind, and that time is lost)
         boolean behind = ticksLeft <= 0;
+        if (behind) behindTicks++;
         handOut(tick);
         double before = 0;
         for (FluidNode n : nodes) before = Math.max(before, n.stallNow);
-        mods.eln.fluid.FluidWorld.recordProgress(nodes, behind ? before + tick : 0, 0);
+        mods.eln.fluid.FluidWorld.recordProgress(nodes, behind ? before + tick : before, 0);
     }
 
     /** This tick's share of what the results still owe, onto the edges and nodes (rates per second; work and wall heat in J). */
@@ -586,6 +624,7 @@ public final class CoreStep {
             e.fAir = air / tick;
             e.fEnthalpy = enthalpy / tick;
             e.flow = all / tick;
+            bookedSum += all;
             e.work = work / tick;
             e.workJ = work;
             double[] s = remS[k];
@@ -627,6 +666,11 @@ public final class CoreStep {
         double[] xl = p.xl, u0 = p.u0, h0 = p.h0;
         double[][] m0 = p.m0;
         long failures = p.failures, sub0 = p.sub0, cut0 = p.cut0, crawls0 = p.crawls0;
+        // (a step the core slept through keeps the moves of its last real step, which may have been longer or shorter
+        // than this one: scaled to this one's length)
+        boolean slept = net.stats.slept > p.slept0;
+        if (!slept) awakeDt = dt;
+        double kept = slept && awakeDt > 0 ? dt / awakeDt : 1;
         boolean idle = p.background;   // (its time isn't owed)
         lastMs = p.took / 1e6;
         background = p.background;
@@ -644,7 +688,10 @@ public final class CoreStep {
         // (the stall record lives on the nodes, so a network rebuilt mid-stall, as a burst rebuilds it, keeps it)
         double before = 0;
         for (FluidNode n : nodes) before = Math.max(before, n.stallNow);
-        double stall = net.done < 0.5 * tick ? before + tick : 0, dropped = Math.max(0, owed - OWED_MAX);
+        // (a background step: by its own length; what it left undone is dropped, and one that fell behind its ticks keeps
+        // the stall its waiting ticks counted, so a network always behind reaches Jade's alarm)
+        double stall = idle ? (net.done < 0.5 * dt ? before + dt : behindTicks > 0 ? before : 0) : net.done < 0.5 * tick ? before + tick : 0;
+        double dropped = Math.max(0, owed - OWED_MAX) + (idle ? Math.max(0, dt - net.done) : 0);
         // (a network stalled for half a second is written out once more: its first failure is often a harmless one)
         if (net.done == 0 && owed > OWED_MAX && !stallDumped) {
             stallDumped = true;
@@ -657,7 +704,7 @@ public final class CoreStep {
         mods.eln.fluid.FluidWorld.recordProgress(nodes, stall, dropped);
         // (written out with the step length asked for: a replay at the tick's length isn't the step that failed)
         if (net.stats.failures > failures) failed(dt, m0, u0, h0);
-        else if (net.stats.cut > cut0 || net.stats.substeps - sub0 > 64) slow(dt, m0, u0, h0, net.stats.substeps - sub0);
+        else if (net.stats.cut > cut0 || net.stats.substeps - sub0 > 64L * p.span) slow(dt, m0, u0, h0, net.stats.substeps - sub0);
         dt = tick;
         // contents out
         for (int i = 0; i < cn.length; i++) {
@@ -678,7 +725,8 @@ public final class CoreStep {
             // (asleep, the core keeps the last step's heat, as it keeps its edges' moves: a network sleeps in a steady
             // state, and a condenser's cooling or a boiler's shell passes heat through it all the same; read as 0, a
             // condenser asleep booked no heat)
-            remWall[i] += c.wallJ;
+            remWall[i] += c.wallJ * kept + n.wallCarry;
+            n.wallCarry = 0;
             n.update();
         }
         // what each edge carried: added to what is still owed, and handed out over the ticks the step stood for
@@ -694,9 +742,13 @@ public final class CoreStep {
                 mv = both;
             }
             double[] r = remE[k];
-            if (c != null) r[5] += c.workJ;
+            if (c != null) r[5] += c.workJ * kept;
             if (mv == null) continue;
             int S = mv.length - 1;
+            if (kept != 1) {
+                mv = mv.clone();
+                for (int j = 0; j < mv.length; j++) mv[j] *= kept;
+            }
             r[0] += mv[0] * xl[k];
             r[1] += mv[0] * (1 - xl[k]);
             r[2] += mv[1];
@@ -704,10 +756,13 @@ public final class CoreStep {
             if (remS[k] == null || remS[k].length < size) remS[k] = remS[k] == null ? new double[size] : java.util.Arrays.copyOf(remS[k], size);
             for (int j = 0; j < S; j++) {
                 r[4] += mv[j];
+                movedKg += Math.abs(mv[j]);
+                movedSum += mv[j];
                 remS[k][ids == null ? j : ids[j]] += mv[j];
             }
         }
-        ticksLeft = p.span;
+        // (a remainder still being handed out keeps its ticks: a network just back on this thread doesn't get it at once)
+        ticksLeft = Math.max(ticksLeft, p.span);
         lastSpan = p.span;
         handOut(tick);
     }

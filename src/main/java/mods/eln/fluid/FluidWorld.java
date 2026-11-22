@@ -265,7 +265,8 @@ public final class FluidWorld implements IProcess {
                     heavyAt.values().removeIf(t -> now - t > 5_000);
                     heavyNote.keySet().retainAll(heavyAt.keySet());
                 }
-                String note = mods.eln.i18n.I18N.tr("Heavy fluid network: it updates every %1$ ticks", n.span());
+                String note = n.span() > 1 ? mods.eln.i18n.I18N.tr("Heavy fluid network: it updates every %1$ ticks", n.span())
+                    : mods.eln.i18n.I18N.tr("Heavy fluid network: stepped in the background");
                 java.util.Set<FluidNode> in = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
                 in.addAll(n.nodes);
                 for (FluidDevice d : devices)
@@ -291,6 +292,13 @@ public final class FluidWorld implements IProcess {
             if (pieces != null) for (FluidNode p : pieces) progress(p, stall, dropped);
             progress(n, stall, dropped);
         }
+    }
+
+    /** Wall heat a replaced core still owed a node's devices (CoreStep): kept on the node, a run's on its pieces. */
+    public static void carryWall(FluidNode n, double joules) {
+        List<FluidNode> pieces = INSTANCE.lumps.get(n);
+        if (pieces == null || pieces.isEmpty()) n.wallCarry += joules;
+        else for (FluidNode p : pieces) p.wallCarry += joules / pieces.size();
     }
 
     /** A network's count of heavy steps (CoreStep), onto its nodes and their runs' pieces. */
@@ -610,6 +618,8 @@ public final class FluidWorld implements IProcess {
             for (FluidNode m : ms) {
                 lump.slowSteps = Math.max(lump.slowSteps, m.slowSteps);
                 lump.stallNow = Math.max(lump.stallNow, m.stallNow);
+                lump.wallCarry += m.wallCarry;
+                m.wallCarry = 0;
             }
             lumps.put(lump, ms);
             for (FluidNode m : ms) lumpOf.put(m, lump);

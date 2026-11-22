@@ -48,6 +48,11 @@ public final class FluidNetwork {
         return core != null && core.background;
     }
 
+    /** Tests: the mass its core's steps moved over edges, and what of it is neither handed out to devices nor waiting to be ({moved, unbooked}, kg). */
+    public double[] books() {
+        return core == null ? new double[2] : new double[]{core.movedKg, core.unbooked()};
+    }
+
     /** How many ticks its last background step stood for (1 on the server thread). */
     public int span() {
         return core == null ? 1 : core.lastSpan;

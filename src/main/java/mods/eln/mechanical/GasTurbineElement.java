@@ -116,6 +116,9 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         fuelIn.settle(dt);
     }
 
+    /** The exhaust it owes its pipe goes out over this long (s): longer than a background fluid step (CoreStep.MAX_SPAN). */
+    static final double EXHAUST_S = 2.0;
+
     @Override
     public void afterFluidStep(double dt) {
         fuelIn.after();
@@ -273,7 +276,9 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
                 exhaustOwed = 0;
                 exhaust.fill(0, Water.P_ATM, Tamb);
             }
-            exhaustFlow.rate = Math.max(0, exhaustOwed) / time;
+            // (what it owes, over EXHAUST_S: a rate that holds for a step of many ticks; all of it asked in one tick, a
+            // background step of k ticks took k times what was owed, and the next few nothing)
+            exhaustFlow.rate = Math.max(0, exhaustOwed) / EXHAUST_S;
             totalFuelJ += fuelJ;
             totalWork += work;
             meterFuel += fuelJ;
