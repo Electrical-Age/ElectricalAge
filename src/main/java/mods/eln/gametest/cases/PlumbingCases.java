@@ -300,12 +300,14 @@ public final class PlumbingCases {
 
         /**
          * background: its network starts counted as heavy, so its first steps run on CoreStep's background worker
-         * (as a plant too heavy for the server thread does), until, each taking no time, they bring it back: the pump
-         * moves its water all the same, no water is made or lost, and it ends on the server thread.
+         * (as a plant too heavy for the server thread does), each held 3 ticks so that ticks pass while one runs, until,
+         * each taking no time of its own, they bring it back. Water put into a tank while a step runs is kept; the pump
+         * has moved water by the time it is back on the server thread; no water is made or lost.
          */
         final boolean background;
-        boolean sawBackground;
-        double water0;
+        boolean sawBackground, sawWaiting, injected, back;
+        double water0, movedInBackground;
+        static final double INJECTED = 0.01;
 
         PumpMovesWater(boolean boiling) {
             this(boiling, false);
@@ -355,13 +357,28 @@ public final class PlumbingCases {
             if (background) {
                 a.vessel.slowSteps = 2 * mods.eln.sim.fluid.CoreStep.HEAVY_AFTER;
                 water0 = water();
+                mods.eln.sim.fluid.CoreStep.testHoldTicks = 3;
             }
             // (a line in service: its iron at the water's temperature; cold, it subcooled the boiling water)
             for (BlockPos q : new BlockPos[]{pa.south(), pp.south()}) PipeCases.warm(ctx, q, T);
             Eln.simulator.addSlowProcess(watch = dt -> {
                 if (background) {
                     var net = mods.eln.fluid.FluidWorld.networkOf(a.vessel);
-                    sawBackground |= net != null && net.background();
+                    boolean bg = net != null && net.background();
+                    sawBackground |= bg;
+                    if (net != null && net.pending()) {
+                        sawWaiting = true;
+                        if (!injected) {   // (a device's write while a background step runs: a cup of cold water into B)
+                            injected = true;
+                            b.vessel.mWater += INJECTED;
+                            b.vessel.energy += INJECTED * Water.hLiquid(Water.T_AMBIENT);
+                            b.vessel.update();
+                        }
+                    }
+                    if (sawBackground && !bg && !back) {
+                        back = true;
+                        movedInBackground = b.vessel.mLiquid() - bWater0 - INJECTED;
+                    }
                 }
                 sawCavitate |= boiling ? p.cavitating : p.cavitating && !p.gasBound;
                 maxW = Math.max(maxW, p.wantW);
@@ -382,9 +399,13 @@ public final class PlumbingCases {
             if (background) {
                 var net = mods.eln.fluid.FluidWorld.networkOf(a.vessel);
                 double w = water();
-                ctx.check("background steps: its first steps ran in the background", sawBackground, "");
-                ctx.check("background steps: light again, it is back on the server thread", net != null && !net.background(), "slow steps " + a.vessel.slowSteps);
-                ctx.check("background steps: no water made or lost", Math.abs(w - water0) < 1e-9 * water0, String.format("%.9f -> %.9f kg", water0, w));
+                mods.eln.sim.fluid.CoreStep.testHoldTicks = 0;
+                moved -= INJECTED;
+                ctx.check("background steps: its first steps ran in the background, ticks passing while one ran", sawBackground && sawWaiting, sawBackground + " " + sawWaiting);
+                ctx.check("background steps: light again, it is back on the server thread", back && net != null && !net.background(), "slow steps " + a.vessel.slowSteps);
+                ctx.check("background steps: the pump moved water while in the background", movedInBackground > 0.001, String.format("%.4f kg", movedInBackground));
+                ctx.check("background steps: water put in while a step ran is kept, none made or lost", injected && Math.abs(w - water0 - INJECTED) < 1e-9 * water0,
+                    String.format("%.9f + %.3f -> %.9f kg", water0, INJECTED, w));
             }
             if (!boiling) {
                 // (both tanks are sealed: A's air thins and B's compresses until the pump's 0.5 bar head and the fall

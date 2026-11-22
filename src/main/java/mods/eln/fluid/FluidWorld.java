@@ -56,6 +56,7 @@ public final class FluidWorld implements IProcess {
     /** Server start and stop: forget everything (the simulator's process list is cleared too). */
     public static FluidWorld reset() {
         INSTANCE.devices.clear();
+        for (FluidNetwork n : INSTANCE.networks) n.abandon();
         INSTANCE.networks.clear();
         INSTANCE.vents.clear();
         INSTANCE.links.clear();
@@ -249,6 +250,15 @@ public final class FluidWorld implements IProcess {
             List<FluidNode> pieces = INSTANCE.lumps.get(n);
             if (pieces != null) for (FluidNode p : pieces) progress(p, stall, dropped);
             progress(n, stall, dropped);
+        }
+    }
+
+    /** A network's count of heavy steps (CoreStep), onto its nodes and their runs' pieces. */
+    public static void recordSlow(List<FluidNode> nodes, int count) {
+        for (FluidNode n : nodes) {
+            List<FluidNode> pieces = INSTANCE.lumps.get(n);
+            if (pieces != null) for (FluidNode p : pieces) p.slowSteps = count;
+            n.slowSteps = count;
         }
     }
 
@@ -482,6 +492,7 @@ public final class FluidWorld implements IProcess {
         // editing keeps its pieces' edits instead)
         writeBack(true);
         handedBack.clear();
+        for (FluidNetwork n : networks) n.abandon();   // (a background step under way: nobody will take its result)
         networks.clear();
         vents.clear();
         links.clear();
@@ -554,6 +565,12 @@ public final class FluidWorld implements IProcess {
             FluidNode lump = new FluidNode(V, zLo, Math.max(0.01, zHi - zLo), false);
             for (FluidNode m : ms) lump.addShareOf(m, 1);   // (every species: the run's contents summed)
             lump.update();
+            // (its pieces' record goes on: a rebuild makes a new lump, and a heavy network of pipe runs alone would count
+            // its heavy steps afresh, on the server thread, after every rebuild)
+            for (FluidNode m : ms) {
+                lump.slowSteps = Math.max(lump.slowSteps, m.slowSteps);
+                lump.stallNow = Math.max(lump.stallNow, m.stallNow);
+            }
             lumps.put(lump, ms);
             for (FluidNode m : ms) lumpOf.put(m, lump);
             runR.put(lump, R);

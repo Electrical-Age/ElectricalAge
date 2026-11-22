@@ -71,9 +71,20 @@ public final class FluidNetwork {
         return core == null ? null : core.net.stats;
     }
 
-    /** The core network as a replayable dump (NetworkDump) at step length dt, or null before its first step. */
+    /** The core network as a replayable dump (NetworkDump) at step length dt, or null before its first step or while a
+     *  background step is changing it. */
     public String dump(double dt) {
-        return core == null ? null : mods.eln.fluidcore.NetworkDump.write(core.net, dt);
+        return core == null || core.pending() ? null : mods.eln.fluidcore.NetworkDump.write(core.net, dt);
+    }
+
+    /** Is a background step under way (CoreStep)? */
+    public boolean pending() {
+        return core != null && core.pending();
+    }
+
+    /** It is being replaced or forgotten: a background step under way is cancelled and its heat given back. */
+    public void abandon() {
+        if (core != null) core.abandon();
     }
 
     /** Port band (fraction of a node's height) over which a port goes from drawing gas to drawing liquid. */

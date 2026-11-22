@@ -1091,6 +1091,8 @@ public final class Network {
     public static long MAX_STEP_NANOS = 0;
     /** This network's own budget (ns) in place of MAX_STEP_NANOS; under 0: none of its own. */
     public long budget = -1;
+    /** Set from another thread: its step under way ends at its next iteration (nobody waits for its result any more). */
+    public volatile boolean cancelled;
     private long deadline = Long.MAX_VALUE;
     /**
      * 1.5 x MAX_STEP_NANOS after the step began, per thread (FluidPool steps networks on several): checkClock, called
@@ -1098,8 +1100,7 @@ public final class Network {
      * checked only between iterations. It also stops a healthy network's single solve past 1.5 x the budget (such a
      * network is too costly for the server anyway; CoreStep quarantines it).
      */
-    private static final ThreadLocal<long[]> HARD = ThreadLocal.withInitial(() -> new long[]{Long.MAX_VALUE});
-    private static int clockCalls;
+    private static final ThreadLocal<long[]> HARD = ThreadLocal.withInitial(() -> new long[]{Long.MAX_VALUE, 0});   // (deadline, calls)
 
     /** Thrown by checkClock: the step is dropped (Network.step). */
     static final class OutOfTime extends RuntimeException {
@@ -1113,7 +1114,8 @@ public final class Network {
 
     /** From the inner loops (EOS evaluations, the Jacobian's columns): past the hard deadline, abandon the step. */
     static void checkClock() {
-        if ((++clockCalls & 255) == 0) checkClockNow();
+        long[] h = HARD.get();
+        if ((++h[1] & 255) == 0 && h[0] != Long.MAX_VALUE && System.nanoTime() > h[0]) throw OUT_OF_TIME;
     }
 
     /** ... at once, from loops whose every turn may be slow (a large LU's rows). */
@@ -1127,7 +1129,7 @@ public final class Network {
     private boolean outOfTime() {
         // (only a step that has had to sub-step, a stiff one: a big healthy network converging at once, 117 nodes at
         // 12-35 ms on Incognito, is left to finish)
-        if (stepSubsteps == 0 || deadline == Long.MAX_VALUE || System.nanoTime() < deadline) return false;
+        if (!cancelled && (stepSubsteps == 0 || deadline == Long.MAX_VALUE || System.nanoTime() < deadline)) return false;
         if (!overBudget) stats.overBudget++;
         overBudget = true;
         return true;

@@ -330,7 +330,7 @@ public final class CoreStep {
     /** A started step: what finish() needs once it has run. */
     private static final class Pending {
         double tick, dt;
-        double[] xl, u0, h0;
+        double[] xl, u0, h0, heat0;
         double[][] m0;
         long failures, sub0, cut0, crawls0;
         volatile long took;
@@ -338,9 +338,31 @@ public final class CoreStep {
         int slow;
     }
 
+    /** Tests: a background step's result is taken no sooner than this many ticks after its start (a test server ticks as
+     *  fast as it can, so a step that takes real time would span no ticks to speak of). */
+    public static int testHoldTicks;
+    private int waited;
+    private static long failureLogged;
+
+    boolean pending() {
+        return job != null;
+    }
+
+    /** Its network is replaced or forgotten: a background step under way is cancelled, and the heat it took given back. */
+    void abandon() {
+        if (job == null) return;
+        net.cancelled = true;
+        job.cancel(false);
+        for (int i = 0; i < cn.length; i++) nodes.get(i).heat += pending.heat0[i];
+        job = null;
+        pending = null;
+    }
+
     void step(FluidNetwork fn, double dt) {
+        boolean applied = false;
         if (job != null) {
-            if (!job.isDone()) {
+            if (!job.isDone() || waited < testHoldTicks) {
+                waited++;
                 waiting(dt);
                 return;
             }
@@ -351,18 +373,26 @@ public final class CoreStep {
             try {
                 j.get();
             } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
-                // (its core's state is unknown: a new one is built from the nodes, which still hold the step's start)
-                mods.eln.Eln.LOG.error("[fluidcore] a background step failed; its network starts over from its nodes", e);
+                // (its core's state is unknown: a new one is built from the nodes, which still hold the step's start; said
+                // once a minute: on the server thread this would have been a crash, here it would be a line a tick)
+                long now = System.currentTimeMillis();
+                if (now - failureLogged > 60_000) {
+                    failureLogged = now;
+                    mods.eln.Eln.LOG.error("[fluidcore] a background step failed; its network starts over from its nodes", e);
+                }
+                for (int i = 0; i < cn.length; i++) nodes.get(i).heat += p.heat0[i];
                 fn.core = null;
                 waiting(dt);
                 return;
             }
             finish(p);
-            return;
+            applied = true;   // (this tick has its results: the next step may start, but nothing more is applied or cleared)
         }
         int slow = 0;
         for (FluidNode n : nodes) slow = Math.max(slow, n.slowSteps);
         boolean bg = budgetNanos > 0 && slow >= HEAVY_AFTER;
+        if (applied && !bg) return;   // (light again: back on this thread from the next tick)
+        double[] heat0 = new double[cn.length];
         // (at most one tick's worth caught up per tick: devices step their own processes by the tick, and a second of
         // fluid landing in one tick would be a spike they all see)
         // (a background step is one tick long: it runs behind anyway, and its time isn't owed)
@@ -378,6 +408,7 @@ public final class CoreStep {
             for (int j = 2; j < c.m.length; j++) c.m[j] = n.extra != null && ids[j] - 2 < n.extra.length ? n.extra[ids[j] - 2] : 0;
             c.U = n.energy;
             c.heat = n.fixed ? 0 : n.heat - n.lossWPerK * (n.T() - Water.T_AMBIENT);
+            heat0[i] = n.heat;
             n.heat = 0;
             c.wallUA = n.fixed ? 0 : n.wallUA;
             c.wallT = n.wallT;
@@ -455,6 +486,7 @@ public final class CoreStep {
         p.xl = xl;
         p.slow = slow;
         p.background = bg;
+        p.heat0 = heat0;
         p.failures = net.stats.failures;
         p.m0 = new double[cn.length][];
         p.u0 = new double[cn.length];
@@ -471,12 +503,14 @@ public final class CoreStep {
             net.budget = BACKGROUND_BUDGET;
             pending = p;
             double stepDt = dt;
+            background = true;
+            waited = 0;
             job = WORKER.submit(() -> {
                 long t0 = System.nanoTime();
                 net.step(stepDt);
                 p.took = System.nanoTime() - t0;
             });
-            waiting(tick);
+            if (!applied) waiting(tick);
             return;
         }
         net.budget = -1;
@@ -518,7 +552,7 @@ public final class CoreStep {
         // (heavy: over a tenth of the budget; light: under half that. The count moves by one a step, HEAVY_AFTER * 2 at most)
         long heavy = budgetNanos / SYNC_SHARE;
         int next = budgetNanos <= 0 ? 0 : p.took > heavy ? Math.min(p.slow + 1, 2 * HEAVY_AFTER) : p.took < heavy / 2 ? Math.max(p.slow - 1, 0) : p.slow;
-        for (FluidNode n : nodes) n.slowSteps = next;
+        mods.eln.fluid.FluidWorld.recordSlow(nodes, next);
         // (solves accepted at the precision floor, counted to watch: a few thousand in the 28 steam GameTests)
         long crawled = CRAWLS.addAndGet(net.stats.crawls - crawls0);
         if (net.stats.crawls > crawls0 && Long.bitCount(crawled) == 1 && crawled >= 16) System.out.println("[fluidcore] solves accepted at the precision floor so far: " + crawled);
