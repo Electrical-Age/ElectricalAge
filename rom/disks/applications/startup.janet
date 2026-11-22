@@ -161,7 +161,14 @@
 # (the desk's window can't be closed: its close box is the desk's to ignore)
 (ui/on-close t (fn [] nil))
 
+(var laid-mode [ui/screen-width ui/screen-height])
 (forever
+  # (Prefs may change the text mode: the desk's window and its Screen menu follow)
+  (unless (deep= laid-mode [ui/screen-width ui/screen-height])
+    (set laid-mode [ui/screen-width ui/screen-height])
+    (ui/window t 0 1 ui/screen-width (- ui/screen-height 1) "Switchboard" [:backdrop])
+    (desk-menus)
+    (set shown nil))
   (def now-shown (survey))
   (unless (deep= now-shown shown)
     (set shown now-shown)

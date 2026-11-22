@@ -30,18 +30,18 @@ class SceneCellsTest {
         Scene s = scene("(window 1 2 3 10 4 \"Shell\" [:close :depth :size :drag])", "(text 1 1 0 0 :lime \"hi\")", "(title \"Dynamo 1.0\")");
         SceneCells c = SceneCells.of(s);
         assertEquals(" Dynamo   Dynamo 1.0", row(c, 0, 0, 20), "the menu bar: the system menu, then the screen's title");
-        assertEquals(SceneCells.BAR, c.paper[0]);
+        assertEquals(Pens.DEFAULT.bar(), c.paper[0]);
         assertEquals("■ Shell", row(c, 2, 1, 7), "the title row: the close box, then the title");
         assertEquals(SceneCells.DEPTH, c.at(12, 2), "the depth box at its right end");
-        assertEquals(SceneCells.TITLE_IDLE, c.paper[3 * 80 + 1], "the border: the title's colour all round");
+        assertEquals(Pens.DEFAULT.titleIdle(), c.paper[3 * 80 + 1], "the border: the title's colour all round");
         assertEquals(1, c.owner[3 * 80 + 1]);
         assertEquals(SceneCells.OWNER_BAR, c.owner[5]);
         assertEquals(SceneCells.OWNER_DESK, c.owner[20 * 80 + 40]);
         assertEquals("hi", row(c, 3, 2, 2), "content from (x, y)");
         assertEquals(SceneCells.SIZE, c.at(12, 7), "the size handle");
-        assertEquals(SceneCells.DESK, c.paper[20 * 80 + 40], "the desk");
-        assertEquals(SceneCells.TITLE_IDLE, c.paper[2 * 80 + 5], "not active");
-        assertEquals(SceneCells.TITLE_ACTIVE, SceneCells.of(s, SceneCells.NONE, 1).paper[2 * 80 + 5], "active");
+        assertEquals(Pens.DEFAULT.desk(), c.paper[20 * 80 + 40], "the desk");
+        assertEquals(Pens.DEFAULT.titleIdle(), c.paper[2 * 80 + 5], "not active");
+        assertEquals(Pens.DEFAULT.titleActive(), SceneCells.of(s, SceneCells.NONE, 1).paper[2 * 80 + 5], "active");
     }
 
     @Test
@@ -100,7 +100,7 @@ class SceneCellsTest {
         assertEquals(" Discard ", row(c, by, lay[2][0], lay[2][1]));
     }
 
-    /** Prefs' pen sets (Dynamo P2): the desk, bar and title in the set's colours; the contents keep theirs; replayed. */
+    /** Prefs' pen sets: the desk, bar and title in the set's colours; the contents keep theirs; replayed. */
     @Test
     void penSetsColourTheDeskBarAndFrames() {
         Scene s = scene("(window 1 2 3 10 4 \"Shell\" [:close :depth :size :drag])", "(text 1 1 0 0 :lime \"hi\")", "(pens \"Amber\")", "(clock 12)");

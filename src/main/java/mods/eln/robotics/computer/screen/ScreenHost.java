@@ -19,7 +19,7 @@ public final class ScreenHost {
     public static final int BATCH_MAX = 16 * 1024;
     /** The longest event a client may send: a save; the others are short. */
     public static final int MAX_SAVE = 40 * 1024, MAX_SUBMIT = 8192, MAX_EVENT = 256;
-    static final Set<String> EVENTS = Set.of("submit", "press", "select", "save", "key", "click", "doc?", "close", "break",
+    static final Set<String> EVENTS = Set.of("submit", "press", "select", "save", "stash", "key", "click", "doc?", "close", "break",
         "moved", "raised", "lowered", "active", "closed", "pick", "answer", "set", "open", "dropped", "minimized", "restored");
     /** The kernel's window (what the machine prints at the console device) and its log. */
     public static final int CONSOLE_TAB = Scene.KERNEL, CONSOLE_LOG = 1;
@@ -142,7 +142,7 @@ public final class ScreenHost {
         if (m == null) return null;
         String v = Form.verb(m);
         if (!EVENTS.contains(v)) return null;
-        if (line.length() > (v.equals("save") ? MAX_SAVE : v.equals("submit") ? MAX_SUBMIT : MAX_EVENT)) return null;
+        if (line.length() > (v.equals("save") || v.equals("stash") ? MAX_SAVE : v.equals("submit") ? MAX_SUBMIT : MAX_EVENT)) return null;
         boolean system = v.equals("pick") && m.size() > 1 && Long.valueOf(0).equals(m.get(1));   // (the system menu: window 0)
         if (!system && !(m.size() > 1 && m.get(1) instanceof Long t && scene.windows.containsKey((int) (long) t))) return null;
         if (!WINDOW_EVENTS.contains(v) && !(m.size() > 2 && m.get(2) instanceof Long)) return null;

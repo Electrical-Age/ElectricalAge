@@ -25,7 +25,7 @@ class StdlibTest {
     void boot() throws IOException {
         m = JanetRomTest.machine(3);
         m.bus.setState(200, true, null);
-        // (the stdlib compiles at boot: ~83 ticks of 1M instructions with Dynamo P2's tools, ~65 before)
+        // (the stdlib compiles at boot: ~83 ticks of 1M instructions with the System disk's tools, ~65 before)
         for (int t = 0; t < 150 && !screen.ready(); t++) {
             m.tick();
             m.run(1_000_000);
@@ -73,7 +73,7 @@ class StdlibTest {
         m.editor.give(screen.submit(s));
     }
 
-    /** The Shell's plain commands (os-design section 5): relative paths, cd, copy into a directory, errors said, Janet untouched. */
+    /** The Shell's plain commands: relative paths, cd, copy into a directory, errors said, Janet untouched. */
     @Test
     void shellCommandsRunAndJanetStillEvaluates() {
         type("(spit \"RAM:/a.txt\" \"hello there\")");
@@ -127,6 +127,21 @@ class StdlibTest {
             screen.feed(m);
         }
         assertTrue(screen.log(w).contains("RAM:/") && screen.log(w).contains("42"), "Shell 2's log: " + screen.log(w));
+        // Break on Shell 2 stops what it runs, and its line takes the next one (it hung before the joiners heard)
+        m.editor.give(screen.submit(w, "(sleep 100)"));
+        for (int t = 0; t < 5; t++) {
+            m.tick();
+            m.run(1_000_000);
+            screen.feed(m);
+        }
+        breakTab(w);
+        m.editor.give(screen.submit(w, "(+ 20 22 1000)"));
+        for (int t = 0; t < 40 && screen.log(w).indexOf("1042") < 0; t++) {
+            m.tick();
+            m.run(1_000_000);
+            screen.feed(m);
+        }
+        assertTrue(screen.log(w).contains("stopped by Break") && screen.log(w).contains("1042"), "Shell 2 after a Break: " + screen.log(w));
         // the first Shell keeps A:/ and its own definitions
         type("(dyn :cwd)");
         tick(40, "\n> ");
@@ -350,7 +365,10 @@ class StdlibTest {
         assertTrue(conflict);
     }
 
-    /** Ed's menus (Dynamo P2): Save As asks on the path's row, copies the saved file under the new name and goes on there. */
+    /**
+     * Ed's menus: Save As asks on the path's row; the picking display's changes (its stash) go under the new name only,
+     * the original stays as it was on the disk, and Ed goes on with the new file.
+     */
     @Test
     void edSaveAsCopiesAndFollowsTheNewFile() {
         m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), null, false));
@@ -358,14 +376,17 @@ class StdlibTest {
         tick(60, "\n2\n> ");
         var win = screen.scene.windows.get(2);
         assertTrue(win.menus.toString().contains("Save As..."), "Ed's menus: " + win.menus);
+        String rev = (String) win.elements.get(4).msg.get(9);
+        m.editor.give(("(stash 2 4 9 \"" + rev + "\" [[0 1 [\"(print 2)\"]]])\n").getBytes(StandardCharsets.UTF_8));
         m.editor.give("(pick 2 \"Project\" \"Save As...\")\n".getBytes(StandardCharsets.UTF_8));
         for (int t = 0; t < 20 && !screen.scene.windows.get(2).elements.containsKey(6); t++) tick(1, null);
         assertEquals("line", screen.scene.windows.get(2).elements.get(6).kind, "a line asks for the name");
         m.editor.give(screen.submit(2, 6, "u.janet"));
         for (int t = 0; t < 40 && !"a:/u.janet".equals(screen.scene.windows.get(2).elements.get(4).msg.get(8)); t++) tick(1, null);
         assertEquals("a:/u.janet", screen.scene.windows.get(2).elements.get(4).msg.get(8), "the editor follows the new file");
-        type("(slurp \"a:/u.janet\")");
-        tick(20, "@\"(print 1)\"\n> ");
+        type("[(string (slurp \"a:/u.janet\")) (string (slurp \"a:/t.janet\"))]");
+        tick(20, "(\"(print 2)\" \"(print 1)\")\n> ");
+        assertEquals("u.janet", screen.scene.windows.get(2).title, "the window's title follows the file");
     }
 
     @Test

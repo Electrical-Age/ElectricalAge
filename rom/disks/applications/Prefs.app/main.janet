@@ -1,4 +1,4 @@
-# Prefs (Dynamo P2): the text mode, the pen set, the clock's hours and the station name. A choice shows at once;
+# Prefs: the text mode, the pen set, the clock's hours and the station name. A choice shows at once;
 # Save keeps it on the System disk (System/prefs.jdn) for every start, Use keeps it until the power goes, Cancel puts
 # back what was there.
 

@@ -96,6 +96,9 @@
   (each f stop
     (drop-fiber f)
     (put tasks f nil)
+    # (a task waiting on it, a Shell's line among them, hears it stopped rather than waiting for good)
+    (when-let [j (get joiners f)]
+      (unless (index-of j stop) (array/push ready [j [:error "stopped by Break" f]])))
     (put joiners f nil))
   (def keep (filter |(not (index-of ($ 0) stop)) ready))
   (array/clear ready)
@@ -199,7 +202,7 @@
 (defn- proc-stop "Stop every task of the process in tab t." [t]
   (def p (get procs t))
   (when p
-    (def stop (filter |(env-of? $ (p :env)) (keys tasks)))
+    (def stop (filter |(and (env-of? $ (p :env)) (not (get system $))) (keys tasks)))   # (a Shell's own line stays)
     (stop-tasks stop)
     (def keep (filter |(not (env-in? ($ 2) (p :env))) handlers))   # its bus/on handlers go with it
     (array/clear handlers)
@@ -258,6 +261,8 @@
       'key (when (and (struct? f) (f :key) (string? (get m 3))) (spawn (f :key) (m 3) (get m 4 0)))
       'click (when (and (struct? f) (f :click) (number? (get m 3)) (number? (get m 4))) (spawn (f :click) (m 3) (m 4)))
       'save (when (and f (string? (get m 4)) (indexed? (get m 5))) (spawn f (get m 3 0) (m 4) (m 5)))
+      'stash (when-let [g (get ui-handlers [(m 1) (m 2) :stash])]
+               (when (and (string? (get m 4)) (indexed? (get m 5))) (spawn g (get m 3 0) (m 4) (m 5))))
       nil))
   (when (and (tuple? m) (> (length m) 1) (number? (m 1)))
     (def w (m 1))
@@ -598,26 +603,31 @@
 
 (defn- core-names [] (ea/names root-env))
 
-# ---- the Shell's plain commands (os-design section 5: for people who don't write Lisp yet). A line whose first word is
+# ---- the Shell's plain commands (for people who don't write Lisp yet). A line whose first word is
 # one of these, and which doesn't start with "(", runs it with the rest of the line's words; anything else is Janet.
 
-(defn- shell-path
-  "path made absolute against the Shell's current directory: \"x.janet\", \"../x\", \"/x\" and \"B:\" all work."
-  [env path]
-  (def cwd (or (env :cwd) "A:/"))
+(defn path/resolve
+  "path made absolute against directory dir (\"A:/\" by default): \"x.janet\", \"../x\", \"/x\", \"B:\" and
+  \"B:/x/../y\" all work; a path ending in / stays a directory."
+  [path &opt dir]
   (def p (string path))
-  (cond
-    (string/find ":" p) (if (string/has-suffix? ":" p) (string (string/ascii-upper p) "/")
-                          (let [[d rest] (string/split ":" p 0 2)] (string (string/ascii-upper d) ":" rest)))
-    (string/has-prefix? "/" p) (string (first (string/split "/" cwd)) p)
-    (do
-      (def parts (filter |(not (empty? $)) (string/split "/" cwd)))
-      (each w (string/split "/" p)
-        (cond (or (= w "") (= w ".")) nil
-              (= w "..") (when (> (length parts) 1) (array/pop parts))
-              (array/push parts w)))
-      (def out (string/join parts "/"))
-      (if (= 1 (length parts)) (string out "/") (string out (if (string/has-suffix? "/" p) "/" ""))))))
+  (def cwd (or dir "A:/"))
+  (def colon (string/find ":" p))
+  (def [drive rest]
+    (cond
+      colon [(string/ascii-upper (string/slice p 0 colon)) (string "/" (string/slice p (+ colon 1)))]
+      (string/has-prefix? "/" p) [(string/slice cwd 0 (string/find ":" cwd)) p]
+      [(string/slice cwd 0 (string/find ":" cwd)) (string (string/slice cwd (+ 1 (string/find ":" cwd))) "/" p)]))
+  (def parts @[])
+  (each w (string/split "/" rest)
+    (cond (or (= w "") (= w ".")) nil
+          (= w "..") (unless (empty? parts) (array/pop parts))
+          (array/push parts w)))
+  (def dir? (or (empty? parts) (string/has-suffix? "/" p) (= p "..") (string/has-suffix? "/.." p) (= p ".")))
+  (string drive ":/" (string/join parts "/") (if (and dir? (not (empty? parts))) "/" "")))
+
+(defn- shell-path "path made absolute against the Shell's current directory." [env path]
+  (path/resolve path (or (env :cwd) "A:/")))
 
 (defn- shell-need [args n usage] (when (< (length args) n) (error (string "usage: " usage))))
 
@@ -652,7 +662,9 @@
   (put repl-tabs t true)
   (def p (parser/new))
   (ui/output env t 1)
-  (ui/window t 1 2 ui/width ui/height (or name "Shell"))
+  (if (= t 1)
+    (ui/window t 1 2 ui/width ui/height (or name "Shell"))
+    (ui/window t (+ 3 (* 2 (% t 6))) (+ 2 (% t 6)) (- ui/width 12) (- ui/height 6) (or name "Shell")))   # (beside the first)
   (ui/log t 1 0 0 :fill [:fill 1])
   (var taken false)
   (defn on-submit [text seq]
@@ -764,7 +776,8 @@
 (defn shell/new
   "Another Shell window (the first is window 1): its own definitions, history and current directory. Returns its window."
   []
-  (def n (+ 1 (length (filter |(get repl-tabs $) (keys repl-tabs)))))
+  (var n 2)
+  (while (find |(= (string "Shell " n) (get-in procs [$ :name])) (keys procs)) (++ n))
   (def t (proc/new-tab (string "Shell " n)))
   (def env (make-env root-env-of-os))
   (put (get procs t) :env env)
@@ -773,7 +786,7 @@
   (ui/focus t)
   t)
 
-# ---- Prefs: saved on the System disk as System/prefs.jdn, put back by the desk at every start (Dynamo P2)
+# ---- Prefs: saved on the System disk as System/prefs.jdn, put back by the desk at every start
 
 (def prefs/defaults "Prefs as a computer starts without them." {:mode [80 25] :pens "Grid Blue" :clock 24 :name nil})
 
@@ -785,12 +798,18 @@
   (def saved (when dir (try (parse (slurp (string dir "prefs.jdn"))) ([_] nil))))
   (merge prefs/defaults (if (dictionary? saved) saved {})))
 
-(defn prefs/apply "Put prefs p into effect: the text mode, the pens, the clock, the station name." [p]
-  (def [w h] (get p :mode [80 25]))
-  (unless (and (= w ui/screen-width) (= h ui/screen-height)) (try (ui/mode w h) ([_] nil)))
+(defn prefs/apply
+  "Put prefs p into effect: the text mode, the pens, the clock, the station name. What doesn't read (a hand-edited
+  prefs.jdn) is left as it is."
+  [p]
+  (def mode (get p :mode))
+  (when (and (indexed? mode) (= 2 (length mode)))
+    (def [w h] mode)
+    (unless (and (= w ui/screen-width) (= h ui/screen-height)) (try (ui/mode w h) ([_] nil))))
   (try (ui/pens (get p :pens "Grid Blue")) ([_] nil))
   (try (ui/clock (get p :clock 24)) ([_] nil))
-  (bus/set-name (get p :name)))
+  (def n (get p :name))
+  (bus/set-name (if (bytes? n) n)))
 
 (defn prefs/save "Save prefs p on the System disk (an error says why it couldn't)." [p]
   (def dir (or (prefs/file) (error "no System disk in a drive")))
@@ -901,22 +920,27 @@
 (defn- ed-file
   "Ed in window t on path: an editor element over the window, its path above it, menus. The text lives on the players'
   clients (Ctrl+S, or the menu's Save, sends hunks against a revision; refused once if the file changed on the disk).
-  On the client that picks it, Save, Save As..., Run and Close save first, and Find..., Find next and Go to line... act
-  on its editor (Wire: an editor window's own items)."
+  On the client that picks them, Save, Run and Close save first, Save As... sends its changes to be kept aside (stash)
+  and writes them only under the new name, and Find..., Find next and Go to line... act on its editor (Wire: an editor
+  window's own items)."
   [t path]
   (var path path)
   (def text (if (disk/exists? path) (string (slurp path)) ""))
   (when (> (length text) 32768) (error (string path " is too big to edit (32 KB at most)")))
   (var rev (revision text))
+  (var base text)       # the text at rev, as last opened or saved
+  (var stashed nil)     # the picking display's text for Save As
   (defn name-of [p] (last (string/split "/" p)))
   (defn heading [colour s] (ui/text t 1 0 0 colour (string/format "%-60s" s)))
   (defn open-text [p txt]
     (set path p)
+    (set base txt)
     (set rev (revision txt))
     (heading :light-gray p)
+    (ui/send 'window t 0 0 0 0 (name-of p) ui/standard)   # (open already: only its title changes)
     (ui/send 'editor t 4 0 1 :fill :fill (if (string/has-suffix? ".janet" p) :janet :text) p rev txt))
   (defn ask-path
-    "A line over the path's row asking for a file name; (f name) when one is typed (an empty line cancels)."
+    "A line over the path's row asking for a file name; (f path) when one is typed (an empty line cancels)."
     [prompt f]
     (ui/remove t 1)
     (ui/line t 6 0 0 :fill (string prompt " ")
@@ -924,24 +948,29 @@
                (ui/remove t 6)
                (heading :light-gray path)
                (def a (string/trim answer))
-               (unless (empty? a) (f (if (string/find ":" a) a (string (string/slice path 0 (+ 1 (or (last (string/find-all "/" path)) -1))) a))))))
+               (unless (empty? a) (f (path/resolve a (string/slice path 0 (+ 1 (or (last (string/find-all "/" path)) 0))))))))
     (ui/focus t))
   (ui/remove t 2)
   (ui/remove t 3)
   (put ui-handlers [t 4]
-       (fn [seq base hunks]
+       (fn [seq b hunks]
          (try
            (do
              (def now (if (disk/exists? path) (string (slurp path)) ""))
-             (if (not= base (revision now))
+             (if (not= b (revision now))
                (ui/send 'conflict t 4 seq (revision now) now)
                (do
                  (def new (apply-hunks now hunks))
                  (spit path new)
+                 (set base new)
                  (set rev (revision new))
                  (heading :light-gray path)
                  (ui/send 'saved t 4 seq rev))))
            ([err] (heading :red (string path ": " err))))))
+  (put ui-handlers [t 4 :stash]
+       (fn [seq b hunks]
+         (set stashed (try (if (= b rev) (apply-hunks base hunks)) ([_] nil)))
+         (unless stashed (heading :red "The file changed on the disk meanwhile: save it, then Save As"))))
   (ui/menus t [["Project" ["New..." "n"] ["Open..." "o"] nil ["Save" "s"] ["Save As..." "a"] nil ["Run" "r"] nil ["Close" "q"]]
                ["Edit" ["Find..." "f"] ["Find next" "g"] ["Go to line..." "l"]]]
             (fn [menu item]
@@ -949,12 +978,12 @@
                 "New..." (ask-path "New file:" (fn [p] (ed-file (proc/new-tab (name-of p)) p)))
                 "Open..." (ask-path "Open:" (fn [p] (ed-file (proc/new-tab (name-of p)) p)))
                 "Save As..." (ask-path "Save as:" (fn [p]
-                                                    # (the picking display saved first: copy that under the new name)
-                                                    (sleep 0.2)
-                                                    (def now (if (disk/exists? path) (string (slurp path)) ""))
-                                                    (try (do (spit p now) (open-text p now) (ui/title (name-of p)))
+                                                    # (the picking display's text, kept aside; unchanged: the file's)
+                                                    (def txt (or stashed base))
+                                                    (set stashed nil)
+                                                    (try (do (spit p txt) (open-text p txt))
                                                       ([e] (heading :red (string p ": " e))))))
-                "Run" (do (sleep 0.2) (proc/start (name-of path) run-file path))
+                "Run" (proc/start (name-of path) run-file path)
                 "Close" (proc/close t)
                 nil)))
   (open-text path text)
@@ -1021,6 +1050,8 @@
               (shell-need args 2 "copy from to")
               (def from (shell-path env (args 0)))
               (var to (shell-path env (args 1)))
+              (when (and (not (string/has-suffix? "/" to)) (try (do (disk/list (string to "/")) true) ([_] false)))
+                (set to (string to "/")))   # (a directory named without its slash)
               (when (string/has-suffix? "/" to) (set to (string to (last (string/split "/" from)))))
               (spit to (slurp from))
               (print "copied " from " to " to))]
@@ -1050,7 +1081,7 @@
               (each k (sort (keys shell-commands))
                 (def [usage what] (get shell-commands k))
                 (print (string/format "  %-22s %s" usage what)))
-              (print "The manual: the desk's Help icon, or (guide).")
+              (print "The manual: the Guide icon on the desk, or (guide).")
               (print "The current directory: " (or (env :cwd) "A:/")))]})
 
 # ---- the inspector: processes, tasks, their stacks, locals and values, Smalltalk-style (Baughn)

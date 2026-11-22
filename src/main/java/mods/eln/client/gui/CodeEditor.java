@@ -103,7 +103,7 @@ public class CodeEditor extends AbstractWidget {
         return (height - 2 * PAD) / LINE - (bar != null ? 1 : 0);
     }
 
-    // ---- find and go to line (Ctrl+F, F3 or Ctrl+G here; Ed's Edit menu asks for the same)
+    // ---- find and go to line (Ctrl+F or Ctrl+G here, Enter in the bar for the next; Ed's Edit menu asks for the same)
 
     /** Open the find bar, holding the selection (one line of it) or the last search. */
     public void openFind() {
@@ -384,7 +384,6 @@ public class CodeEditor extends AbstractWidget {
                     if (e.isPaste()) barText.append(clip.getClipboard().replace("\n", " "));
                     else if (ctrl && e.key() == InputConstants.KEY_F) openFind();
                     else if (ctrl && e.key() == InputConstants.KEY_G) openGoTo();
-                    else if (e.key() == InputConstants.KEY_F3) findNext();
                     else return true;   // (other keys belong to the bar while it is open)
                 }
             }
@@ -393,7 +392,6 @@ public class CodeEditor extends AbstractWidget {
         }
         if (ctrl && e.key() == InputConstants.KEY_F) openFind();
         else if (ctrl && e.key() == InputConstants.KEY_G) openGoTo();
-        else if (e.key() == InputConstants.KEY_F3) findNext();
         else if (e.isSelectAll()) buffer.selectAll();
         else if (e.isCopy()) clip.setClipboard(buffer.selectedText());
         else if (e.isCut()) {

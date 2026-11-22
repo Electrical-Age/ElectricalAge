@@ -14,13 +14,10 @@ import java.util.Map;
  * depth box (▒) at its right; its bottom right corner is the size handle (╝).
  */
 public final class SceneCells {
-    // the pens (Dynamo's default scheme: slate desk, cream text, amber marks)
-    public static final int DESK = 0xFF3B5470, BAR = 0xFFE8E0C8, BAR_TEXT = 0xFF14161A, TITLE_ACTIVE = 0xFFE0A030,
-        TITLE_ACTIVE_TEXT = 0xFF14161A, TITLE_IDLE = 0xFF5A6070, TITLE_IDLE_TEXT = 0xFFD8D2C0, FRAME_ACTIVE = 0xFFE8E0C8,
-        FRAME_IDLE = 0xFF8A90A0, PAPER = 0xFF101418, INK = 0xFFE6E6E6, PROMPT = 0xFF8FB0FF, BUSY = 0xFFE0C060,
-        BUTTON = 0xFF5A5A66, LIST = 0xFF181C22, LIST_INK = 0xFFD0D0D0, RAW = 0xFF0C0E10, BOX = 0xFF404040, EDITOR = 0xFF1C1D22,
-        ASK = 0xFFD8D2C0, ASK_TEXT = 0xFF14161A, ASK_BUTTON = 0xFF8A90A0;
-    /** The pen set this scene draws with (Pens; the constants above are its default, Grid Blue). */
+    // a window's contents (the desk, bar, frames and buttons follow the scene's Pens)
+    public static final int PAPER = 0xFF101418, INK = 0xFFE6E6E6, PROMPT = 0xFF8FB0FF, BUSY = 0xFFE0C060,
+        LIST = 0xFF181C22, LIST_INK = 0xFFD0D0D0, RAW = 0xFF0C0E10, BOX = 0xFF404040, EDITOR = 0xFF1C1D22;
+    /** The pen set this scene draws with (Pens): desk, bar, titles, buttons, requesters; the colours above are contents'. */
     public Pens pens = Pens.DEFAULT;
     public static final int CLOSE = '■', DEPTH = '▒', SIZE = '╝', ICONIFY = '▄';
     /** The system menu's title, first on the menu bar (Baughn 1572655325104832613). */

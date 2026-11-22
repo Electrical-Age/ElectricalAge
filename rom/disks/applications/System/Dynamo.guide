@@ -57,7 +57,7 @@ Ed edits a file in a window. Start it from its icon for a new file on RAM:, with
 
   Ctrl+S        save
   Ctrl+F        find (Enter finds the next; Esc closes the bar)
-  F3            find the next
+  Alt+G         find the next (Enter does, while the bar is open)
   Ctrl+G        go to a line
 
 Its Project menu makes a new file, opens one, saves, saves under another name (Save As), runs the file as a program and closes the window. Run, Save As and Close save first. Its Edit menu finds and goes to a line.

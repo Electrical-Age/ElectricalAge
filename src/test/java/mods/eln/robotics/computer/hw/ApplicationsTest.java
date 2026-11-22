@@ -238,7 +238,7 @@ class ApplicationsTest extends StdlibTest {
         assertNull(screen.scene.windows.get(2), "the tab is gone; " + dump(screen));
     }
 
-    /** Guide (Dynamo P2): the System disk's manual opens on its contents; a link goes to its node, Retrace comes back. */
+    /** Guide: the System disk's manual opens on its contents; a link goes to its node, Retrace comes back. */
     @Test
     void guideOpensTheManualAndFollowsLinks() throws IOException {
         start("guide");
@@ -256,7 +256,7 @@ class ApplicationsTest extends StdlibTest {
         assertTrue(dump(screen).contains("Welcome to Dynamo"), "back on the contents: " + dump(screen));
     }
 
-    /** Prefs (Dynamo P2): a choice shows at once; Save keeps it on the System disk, and prefs/load brings it back. */
+    /** Prefs: a choice shows at once; Save keeps it on the System disk, and prefs/load brings it back. */
     @Test
     void prefsShowAtOnceAndSaveOnTheSystemDisk() throws IOException {
         start("prefs");
@@ -279,6 +279,8 @@ class ApplicationsTest extends StdlibTest {
         assertNull(screen.scene.windows.get(2), "Save closes it; " + dump(screen));
         type("(do (prefs/apply (merge prefs/defaults {})) [(get (prefs/load) :pens) (get (prefs/load) :name)])");
         tick(40, "(\"Amber\" \"Mill\")");
+        type("ui/pen-sets");
+        tick(40, "(\"" + String.join("\" \"", mods.eln.robotics.computer.screen.Pens.SETS.keySet()) + "\")");   // (the ROM names Java's sets)
         type("(do (prefs/apply (prefs/load)) (bus/name))");
         tick(40, "\"Mill\"");
         run(5);

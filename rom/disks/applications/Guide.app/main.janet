@@ -1,4 +1,4 @@
-# Guide, Dynamo's hypertext reader (Dynamo P2). A .guide file is plain text in nodes:
+# Guide, Dynamo's hypertext reader. A .guide file is plain text in nodes:
 #
 #   @node NAME "Title"
 #   Words wrap to the window. A link sits in the text as @{"its label" link OTHERNAME}.
@@ -135,7 +135,7 @@
   (set nodes (try (parse-guide (slurp path)) ([_] @[])))
   (array/clear trail)
   (set at 0)
-  (ui/title (string "Guide: " (last (string/split "/" path))))
+  (ui/send 'window t 0 0 0 0 (string "Guide: " (last (string/split "/" path))) ui/standard)   # (its title only)
   (show))
 
 (ui/place t 4 2 (min 76 (- ui/screen-width 6)) (min 22 (- ui/screen-height 4)))
@@ -152,7 +152,7 @@
                                  (fn [answer _]
                                    (ui/remove t 9)
                                    (def a (string/trim answer))
-                                   (unless (empty? a) (load-file a)))))))
+                                   (unless (empty? a) (load-file (path/resolve a (string/slice file 0 (+ 1 (or (last (string/find-all "/" file)) 0)))))))))))
 (ui/on-move t (fn [cw ch] (show)))
 (load-file file)
 (ui/focus t)

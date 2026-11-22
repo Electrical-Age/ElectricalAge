@@ -785,7 +785,7 @@ public class ComputerScreen extends ElnScreen {
             String[] it = items.get(i);
             int y = 1 + i;
             if (it == null) {
-                g.fill(cx(x) + 2, cy(y) + LINE / 2, cx(x + w) - 2, cy(y) + LINE / 2 + 1, 0xFF8A90A0);
+                g.fill(cx(x) + 2, cy(y) + LINE / 2, cx(x + w) - 2, cy(y) + LINE / 2 + 1, pens().titleIdle());
                 continue;
             }
             boolean off = menuAt > 0 && t != null && t.disabled.contains(title + "/" + it[0]), on = i == itemAt && !off;
@@ -853,8 +853,9 @@ public class ComputerScreen extends ElnScreen {
 
     /**
      * Wire: in a window holding an editor, its own menu items act on this display's editor before the pick goes to the
-     * program: Save, Save As..., Run and Close save first (only the display that picked them holds the text), Find...,
-     * Find next and Go to line... open its bar or find again (Ed's menus, Dynamo P2).
+     * program: Save, Run and Close save first (only the display that picked them holds the text), Save As... sends its
+     * changes as a stash for the program to write under the new name, Find..., Find next and Go to line... open its bar or
+     * find again (Ed's menus).
      */
     void editorItem(String item) {
         String key = null;
@@ -863,8 +864,12 @@ public class ComputerScreen extends ElnScreen {
         var w = editorWidgets.get(key);
         EditorState st = editorState(active, Integer.parseInt(key.split("/")[1]));
         switch (item) {
-            case "Save", "Save As...", "Run", "Close" -> {
+            case "Save", "Run", "Close" -> {
                 if (st.baseText == null || !st.text.equals(st.baseText)) save(key);
+            }
+            case "Save As..." -> {   // (its changes, kept aside by the program and written only under the new name)
+                render.screenEvent(new Form.Symbol("stash"), (long) active, (long) Integer.parseInt(key.split("/")[1]), ++seq,
+                    st.baseRev == null ? "" : st.baseRev, hunks(st.baseText, st.text));
             }
             case "Find..." -> {
                 setFocused(w);
