@@ -93,10 +93,10 @@ public interface RouteView {
     List<VoxelPart> parts(BlockPos p);
 
     /**
-     * The view with the voxels freed (block-local, VoxelNode.voxel) taken out of the used voxels of the voxel block at b:
-     * a route may pass through them (JoinRun: the old run near a join point, todo #516).
+     * The view with the voxels freed (by block: block-local, VoxelNode.voxel) taken out of the used voxels of those voxel
+     * blocks: a route may pass through them (JoinRun: the old run near a join point, todo #516).
      */
-    static RouteView freeing(RouteView v, BlockPos b, BitSet freed) {
+    static RouteView freeing(RouteView v, Map<BlockPos, BitSet> freed) {
         return new RouteView() {
             @Override
             public boolean loaded(BlockPos p) {
@@ -111,9 +111,10 @@ public interface RouteView {
             @Override
             public Voxels voxels(BlockPos p) {
                 Voxels x = v.voxels(p);
-                if (x == null || x.used() == null || !p.equals(b)) return x;
+                BitSet f = freed.get(p);
+                if (x == null || x.used() == null || f == null) return x;
                 BitSet used = (BitSet) x.used().clone();
-                used.andNot(freed);
+                used.andNot(f);
                 return new Voxels(used, x.partBoxes(), x.hostBoxes());
             }
 
