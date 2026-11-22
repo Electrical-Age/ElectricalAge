@@ -52,23 +52,30 @@ public final class JoinRouteCases {
         }
         // a Medium Voltage kit on the Low Voltage cable (another cable: it may join, but not run inside it)
         cases.add(new Join(false, "mv_near_end", 4, 5, true, 7, 3, false).kit(2));
+        for (boolean pipe : new boolean[]{false, true}) {
+            // another run of the kind 4 voxels beside the old one: the route goes round it, not through it
+            cases.add(new Join(pipe, "beside_another", 2, 8, true, 2, 7, true).beside(12));
+            // start and finish on the old run a few voxels apart: nothing to lay
+            cases.add(new Join(pipe, "inside", 3, 4, true, 0, 0, true).inside(8));
+            // the old run ends just past the block's face from the start
+            cases.add(new Join(pipe, "end_past_face", 4, pipe ? 12 : 14, true, 7, 3, true).oldEnd(5, 2));
+        }
+        // a pipe ending on a block's face, continued from just short of it: the ends meet across the face, no junction
+        cases.add(new Join(true, "end_on_face", 4, 12, true, 7, 3, true).oldEnd(4, 16));
     }
 
     static final int LV = 1;
     static final int Z = 3;
 
-    /** The old run along x at z = Z, block 1's middle to block 4's middle, on the floor (y 1). */
-    static void oldRun(TestContext c, boolean pipe) {
+    /** The old run along x at z = Z (block-local z lz), block 1's middle to local x endX of block endB, on the floor (y 1). */
+    static void oldRun(TestContext c, boolean pipe, int lz, int endB, int endX) {
         if (pipe) {
-            PipeCases.lay(c, c.at(1, 1, Z), 0, 8, 4, 8, 16, 4, 8);
-            PipeCases.lay(c, c.at(2, 1, Z), 0, 0, 4, 8, 16, 4, 8);
-            PipeCases.lay(c, c.at(3, 1, Z), 0, 0, 4, 8, 16, 4, 8);
-            PipeCases.lay(c, c.at(4, 1, Z), 0, 0, 4, 8, 8, 4, 8);
+            for (int b = 1; b <= endB; b++) PipeCases.lay(c, c.at(b, 1, Z), 0, b == 1 ? 8 : 0, 4, lz, b == endB ? endX : 16, 4, lz);
             return;
         }
-        BlockPos a = c.at(1, 1, Z), b = c.at(4, 1, Z);
-        var s = new CableRouter.End(a.getX() * 16L + 8, a.getY() * 16L, a.getZ() * 16L + 8, 0, -1);
-        var e = new CableRouter.End(b.getX() * 16L + 8, b.getY() * 16L, b.getZ() * 16L + 8, 0, -1);
+        BlockPos a = c.at(1, 1, Z), b = c.at(endB, 1, Z);
+        var s = new CableRouter.End(a.getX() * 16L + 8, a.getY() * 16L, a.getZ() * 16L + lz, 0, -1);
+        var e = new CableRouter.End(b.getX() * 16L + endX, b.getY() * 16L, b.getZ() * 16L + lz, 0, -1);
         String err = CablePlacer.routeAndLayForTests(c.level(), LV, s, e);
         if (err != null) throw new IllegalStateException("old cable: " + err);
     }
@@ -77,9 +84,9 @@ public final class JoinRouteCases {
         final boolean pipe, startOnRun, clean;
         final String what;
         final int runBlock, runX, floorX, floorZ;
-        int kitTier = LV;
+        int kitTier = LV, endB = 4, endX = 8, besideZ = -1, insideX = -1;
         boolean first, second;
-        int partsBefore, partsAfter, overlap, deadEnds;
+        int partsBefore, partsAfter, overlap, deadEnds, junctionCount;
         boolean connected;
         String pieces = "";
 
@@ -97,6 +104,25 @@ public final class JoinRouteCases {
 
         Join kit(int tier) {
             kitTier = tier;
+            return this;
+        }
+
+        /** The old run ends at local x of block b. */
+        Join oldEnd(int b, int x) {
+            endB = b;
+            endX = x;
+            return this;
+        }
+
+        /** A second run of the kind beside the old one, blocks 1 to 3 at local z. */
+        Join beside(int z) {
+            besideZ = z;
+            return this;
+        }
+
+        /** The route finishes on the old run at local x of the start's block (nothing to lay). */
+        Join inside(int x) {
+            insideX = x;
             return this;
         }
 
@@ -151,7 +177,8 @@ public final class JoinRouteCases {
         }
 
         public void build(TestContext c) {
-            oldRun(c, pipe);
+            oldRun(c, pipe, 8, endB, endX);
+            if (besideZ >= 0) oldRun(c, pipe, besideZ, 3, 8);
             partsBefore = runParts(c);
             var p = c.player();
             p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
@@ -161,7 +188,10 @@ public final class JoinRouteCases {
             BlockPos run = c.at(runBlock, 1, Z), floor = c.at(floorX, 0, floorZ);
             Vec3 onRun = Vec3.atLowerCornerOf(run).add(runX / 16.0, (pipe ? 5 : 1) / 16.0 + 0.001, 0.5);
             Vec3 onFloor = Vec3.atLowerCornerOf(floor).add(0.5, 1.0, 0.5);
-            if (startOnRun) {
+            if (insideX >= 0) {
+                first = click(c, p, kit, run, onRun);
+                second = click(c, p, kit, run, Vec3.atLowerCornerOf(run).add(insideX / 16.0, (pipe ? 5 : 1) / 16.0 + 0.001, 0.5));
+            } else if (startOnRun) {
                 first = click(c, p, kit, run, onRun);
                 // (a floor click is a waypoint; the same spot again ends the route there)
                 second = click(c, p, kit, floor, onFloor) && click(c, p, kit, floor, onFloor);
@@ -185,6 +215,7 @@ public final class JoinRouteCases {
                 sb.append(" [").append(bx).append(",").append(n.coordonate.z - z0).append("]");
                 List<int[]> junctions = new ArrayList<>();
                 for (VoxelPart q : n.parts) if (q instanceof JunctionPart j) junctions.add(new int[]{j.x, j.y, j.z});
+                junctionCount += junctions.size();
                 for (VoxelPart q : n.parts) {
                     if (q instanceof CablePart cp) sb.append(" c").append(java.util.Arrays.toString(cp.points));
                     else if (q instanceof PipePart pp) sb.append(" p").append(java.util.Arrays.toString(pp.points));
@@ -214,12 +245,18 @@ public final class JoinRouteCases {
             connected = pipe ? pipeConnected(c) : cableConnected(c, ns);
             String d = "overlap " + overlap + ", parts " + partsBefore + " -> " + partsAfter + ";" + pieces;
             c.check(id() + ": both clicks handled", first && second, first + " " + second);
+            if (insideX >= 0) {
+                c.check(id() + ": a route inside the old run lays nothing", partsAfter == partsBefore, d);
+                return;
+            }
             c.check(id() + ": a route was laid", partsAfter > partsBefore, d);
             c.check(id() + ": the old run and the new one are one network", connected, d);
             if (clean) {
                 // (a tee: an LV cable's end on the old one's line, 2 voxels; a pipe arm's bore past the junction, 2x2x2)
                 c.check(id() + ": no piece lies over the old run", overlap <= (pipe ? 8 : 2), d);
                 if (pipe) c.check(id() + ": no dead stub of pipe", deadEnds == 0, deadEnds + " dead end(s);" + pieces);
+                // (an old pipe ending on a face: the new one couples to it there as ports)
+                if (pipe && endX == 16) c.check(id() + ": no junction where the ends meet across a face", junctionCount == 0, d);
             } else c.line("route beside or over the old run (not checked): " + d);
         }
 
@@ -228,7 +265,8 @@ public final class JoinRouteCases {
             VoxelNode a = c.voxelByEntity(c.at(1, 1, Z)), b = c.voxelByEntity(c.at(floorX, 1, floorZ));
             if (a == null || b == null) return false;
             Object na = null, nb = null;
-            for (VoxelPart q : a.parts) if (q instanceof PipePart pp && pp.fluid != null) na = mods.eln.fluid.FluidWorld.networkOf(pp.fluid);
+            // (the old run's piece, at z 8: not the other run beside it)
+            for (VoxelPart q : a.parts) if (q instanceof PipePart pp && pp.fluid != null && pp.points[2] == 8) na = mods.eln.fluid.FluidWorld.networkOf(pp.fluid);
             for (VoxelPart q : b.parts) if (q instanceof PipePart pp && pp.fluid != null) nb = mods.eln.fluid.FluidWorld.networkOf(pp.fluid);
             return na != null && na == nb;
         }
@@ -247,7 +285,7 @@ public final class JoinRouteCases {
             int start = -1, goal = -1;
             for (int i = 0; i < all.size(); i++) {
                 long[] b = base.get(i);
-                if (b[0] == c.at(1, 1, Z).getX() && b[2] == c.at(1, 1, Z).getZ()) start = i;
+                if (b[0] == c.at(1, 1, Z).getX() && b[2] == c.at(1, 1, Z).getZ() && all.get(i).points[2] == 8) start = i;
                 if (b[0] == c.at(floorX, 1, floorZ).getX() && b[2] == c.at(floorX, 1, floorZ).getZ()) goal = i;
             }
             if (start < 0 || goal < 0) return false;

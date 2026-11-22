@@ -327,7 +327,7 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   (`PipePlacer.layJoined` with both joins).
 - Near a join (a route started or finished on an old run) the route may run inside the old run (`JoinRun`, todo #516;
   Baughn: "let the pathfinder pass through same-type voxels of the cable within 4-5 voxels of the waypoint"): within
-  `JoinRun.REACH` (6) voxels along it from the join point, in the join's block, the old run's voxels are taken out of the
+  `JoinRun.REACH` (6) voxels along it from the join point (across block faces too), the old run's voxels are taken out of the
   used voxels the router sees (`RouteView.freeing`; the view's `parts` give the old run, a snapshot's too), and the route
   is cut where it leaves the old run's centre line (`Spec.route`, so the preview's outline, the length and the kit's cost
   are of what is laid). The new run starts or ends there: a splice, or at the old run's end its continuation (a pipe's
@@ -335,7 +335,7 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   cable (same tier, spec and face) or any pipe (the join rule) is run through; a pipe's fittings and junctions are not.
   Before, a route from a point just short of a cable's end laid a piece over its last voxels, and a pipe hopped over a
   dead stub. Routes along the old run past its end from further away still run beside it (a parallel run, not
-  overlapping): `JoinRouteCases`' unchecked rows. A route wholly inside the old run lays nothing (`CablePlacer.INSIDE`).
+  overlapping): `JoinRouteCases`' unchecked rows. A route wholly inside the old run lays nothing: "That path is already laid" (`RoutePlacer.INSIDE`, wording Neon).
 - Per kind, in its spec (`RoutePlacer.Spec`): the ends (`endAt`: a cable's connectors and edge rule, a pipe's ports,
   with "Its port already has a pipe" for a machine's piped port or a pipe sensor's), routing (surface or free), laying (cables with their hang,
   pipes with their junctions), the join rule (cables: the same tier or two power cables; pipes: any pipe tier, the
