@@ -73,6 +73,10 @@ public final class JoinRouteCases {
         // within each other's reach). Not for pipes: a pipe route can't start and end in one pipe block, and joins in two
         // blocks are out of each other's reach
         cases.add(new Join(false, "short_loop", 3, 4, true, 3, 0, true).via(3, 8, 0, 8).inside(10));
+        // the pipe's: from one pipe block out to a waypoint two blocks off, and back onto the pipe a block on. It leaves
+        // the old pipe cleanly: the soft support drew the first leg along right beside it (AdventurAgent)
+        cases.add(new Join(true, "short_loop", 2, 8, true, 3, 5, true).via(3, 8, 5, 8).inside(4, 4));
+        cases.add(new ClickedAgain());
         // a pipe ending on a block's face, continued from just short of it: the ends meet across the face, no junction
         cases.add(new Join(true, "end_on_face", 4, 12, true, 7, 3, true).oldEnd(4, 16));
     }
@@ -102,11 +106,13 @@ public final class JoinRouteCases {
         final boolean pipe, startOnRun, clean;
         final String what;
         final int runBlock, runX, floorX, floorZ;
-        int kitTier = LV, oldTier = LV, endB = 4, endX = 8, besideZ = -1, insideX = -1;
+        int kitTier = LV, oldTier = LV, endB = 4, endX = 8, besideZ = -1, insideX = -1, insideB = -1;
         int[] via;
         boolean orRefused, endAtVia;
         boolean first, second;
-        int partsBefore, partsAfter, overlap, deadEnds, junctionCount;
+        int partsBefore, partsAfter, overlap, deadEnds, junctionCount, alongside;
+        String note;
+        java.util.Set<VoxelPart> before = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
         boolean connected;
         String pieces = "";
 
@@ -171,6 +177,12 @@ public final class JoinRouteCases {
 
         /** The route finishes on the old run at local x of the start's block (nothing to lay). */
         Join inside(int x) {
+            return inside(runBlock, x);
+        }
+
+        /** ... at local x of block b. */
+        Join inside(int b, int x) {
+            insideB = b;
             insideX = x;
             return this;
         }
@@ -229,7 +241,9 @@ public final class JoinRouteCases {
             oldRun(c, pipe, oldTier, 8, endB, endX);
             if (besideZ >= 0) oldRun(c, pipe, besideZ, 3, 8);
             partsBefore = runParts(c);
+            for (VoxelNode n : nodes(c)) before.addAll(n.parts);
             var p = c.player();
+            mods.eln.node.voxel.KitPreview.clearNoteForTests(p.getUUID());
             p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
             PipePlacer.forget(p.getUUID());
             CablePlacer.cancelForTests(p.getUUID());
@@ -246,7 +260,8 @@ public final class JoinRouteCases {
             if (insideX >= 0) {
                 first = click(c, p, kit, run, onRun);
                 if (via != null) first &= click(c, p, kit, w, onVia);
-                second = click(c, p, kit, run, Vec3.atLowerCornerOf(run).add(insideX / 16.0, (pipe ? 5 : 1) / 16.0 + 0.001, 0.5));
+                BlockPos fin = c.at(insideB, 1, Z);
+                second = click(c, p, kit, fin, Vec3.atLowerCornerOf(fin).add(insideX / 16.0, (pipe ? 5 : 1) / 16.0 + 0.001, 0.5));
             } else if (startOnRun) {
                 first = click(c, p, kit, run, onRun);
                 if (via != null) first &= click(c, p, kit, w, onVia);
@@ -256,6 +271,7 @@ public final class JoinRouteCases {
                 first = click(c, p, kit, floor, onFloor);
                 second = click(c, p, kit, run, onRun);
             }
+            note = mods.eln.node.voxel.KitPreview.lastNoteForTests(p.getUUID());
             p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
             PipePlacer.forget(p.getUUID());
             CablePlacer.cancelForTests(p.getUUID());
@@ -292,10 +308,19 @@ public final class JoinRouteCases {
                             boolean atJ = false;
                             for (int[] j : junctions) atJ |= j[0] == x && j[1] == y && j[2] == z;
                             if (atJ) at++;
-                            else if (x % 16 != 0 && y % 16 != 0 && z % 16 != 0) free++;
+                            // (the old run's own end is no stub)
+                            else if (x % 16 != 0 && y % 16 != 0 && z % 16 != 0 && !(bx == endB && x == endX && y == 4 && z == 8)) free++;
                         }
                         if (at == 1 && free == 1) deadEnds++;
                     }
+                    // a new pipe running along the old one's row right beside it (not on its line: the cut halves)
+                    if (q instanceof PipePart pp && !before.contains(q) && n.coordonate.z - z0 == Z)
+                        for (int i = 3; i < pp.points.length; i += 3) {
+                            int[] a = {pp.points[i - 3], pp.points[i - 2], pp.points[i - 1]}, b = {pp.points[i], pp.points[i + 1], pp.points[i + 2]};
+                            boolean alongX = a[1] == b[1] && a[2] == b[2] && Math.abs(a[0] - b[0]) >= 4;
+                            boolean onLine = a[1] == 4 && a[2] == 8;
+                            if (alongX && !onLine && Math.abs(a[2] - 8) <= 5 && Math.abs(a[1] - 4) <= 5) alongside++;
+                        }
                 }
             }
             pieces = sb.toString();
@@ -308,6 +333,9 @@ public final class JoinRouteCases {
             }
             if (orRefused && partsAfter == partsBefore) {
                 c.check(id() + ": refused, nothing laid over the old run", overlap == 0, d);
+                // (the same reason for both kinds; a pipe said "the route doesn't end in the pipe's block")
+                String want = "Can't reach: it crosses the " + (pipe ? "pipe" : "cable") + " it joins";
+                c.check(id() + ": the click says it crosses the old run", note != null && note.startsWith(want), String.valueOf(note));
                 return;
             }
             c.check(id() + ": a route was laid", partsAfter > partsBefore, d);
@@ -318,6 +346,7 @@ public final class JoinRouteCases {
                 int tees = insideX >= 0 ? 2 : 1;
                 c.check(id() + ": no piece lies over the old run", overlap <= tees * (pipe ? 8 : 2), d);
                 if (pipe) c.check(id() + ": no dead stub of pipe", deadEnds == 0, deadEnds + " dead end(s);" + pieces);
+                if (pipe && what.equals("short_loop")) c.check(id() + ": no new pipe runs right beside the old one", alongside == 0, alongside + ";" + pieces);
                 // (an old pipe ending on a face: the new one couples to it there as ports)
                 if (pipe && endX == 16) c.check(id() + ": no junction where the ends meet across a face", junctionCount == 0, d);
             } else c.line("route beside or over the old run (not checked): " + d);
@@ -376,6 +405,71 @@ public final class JoinRouteCases {
                 for (int[] f : b.ends())
                     if (ba[0] * 16 + e[0] == bb[0] * 16 + f[0] && ba[1] * 16 + e[1] == bb[1] * 16 + f[1] && ba[2] * 16 + e[2] == bb[2] * 16 + f[2]) return true;
             return false;
+        }
+    }
+
+    /**
+     * A second kit click right after laying a pipe tee (AdventurAgent saw "Its port already has a pipe" and suspected
+     * its tool clicked twice): on the tee's join point it starts a new route there, a branch; on a block's face where two
+     * pipe ends meet (a coupled port) it says "Its port already has a pipe", as a machine's piped port does.
+     */
+    static final class ClickedAgain implements TestCase {
+        String onTee = "", onPort = "";
+        boolean laid;
+
+        public String id() {
+            return "pipe_route_tee_clicked_again";
+        }
+
+        public int width() {
+            return 10;
+        }
+
+        public int height() {
+            return 5;
+        }
+
+        public int depth() {
+            return 10;
+        }
+
+        public int floorDepth() {
+            return 10;
+        }
+
+        public int ticks() {
+            return 10;
+        }
+
+        public void build(TestContext c) {
+            oldRun(c, true, 8, 4, 8);
+            var p = c.listener();
+            p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            ItemStack kit = PipeKitItem.kit(0, 16 * 16);
+            BlockPos run = c.at(3, 1, Z), floor = c.at(3, 0, 7);
+            Vec3 onRun = Vec3.atLowerCornerOf(run).add(0.5, 5 / 16.0 + 0.001, 0.5), onFloor = Vec3.atLowerCornerOf(floor).add(0.5, 1.0, 0.5);
+            laid = click(p, c, kit, floor, Direction.UP, onFloor) && click(p, c, kit, run, Direction.UP, onRun) && !PipePlacer.active(p.getUUID());
+            int n = p.actionBar.size();
+            click(p, c, kit, run, Direction.UP, onRun);
+            onTee = p.actionBar.size() > n ? p.lastActionBar() : "";
+            PipePlacer.forget(p.getUUID());
+            // block 2's east face where its pipe's end meets block 3's
+            BlockPos b2 = c.at(2, 1, Z);
+            n = p.actionBar.size();
+            click(p, c, kit, b2, Direction.EAST, Vec3.atLowerCornerOf(b2).add(1.0, 4 / 16.0, 0.5));
+            onPort = p.actionBar.size() > n ? p.lastActionBar() : "";
+            PipePlacer.forget(p.getUUID());
+        }
+
+        static boolean click(net.minecraft.server.level.ServerPlayer p, TestContext c, ItemStack kit, BlockPos pos, Direction face, Vec3 hit) {
+            p.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);
+            return PipePlacer.use(p, c.level(), pos, face, kit, hit);
+        }
+
+        public void measure(TestContext c) {
+            c.check("tee clicked again: the tee was laid", laid, "");
+            c.check("tee clicked again: on its join point, a new route starts there", onTee.startsWith("Pipe route started"), onTee);
+            c.check("tee clicked again: on a coupled pipe end, the port has a pipe", onPort.equals("Its port already has a pipe"), onPort);
         }
     }
 }

@@ -185,6 +185,7 @@ public final class KitPreview {
      * preview's next line, the route's length, replaced it on the action bar at once; client.RouteNoteHud).
      */
     public static void note(ServerPlayer p, String message) {
+        LAST_NOTE.put(p.getUUID(), message);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (DataOutputStream out = new DataOutputStream(bos)) {
             out.writeByte(Eln.packetRouteNote);
@@ -203,6 +204,17 @@ public final class KitPreview {
     static final long SLOW_MS = 30;
 
     /** What the preview shows for a route: ok or not, its boxes (or a marker at the end), and the action-bar line. */
+    /** The last note sent to each player (GameTests read what a click said). */
+    private static final Map<UUID, String> LAST_NOTE = new java.util.concurrent.ConcurrentHashMap<>();
+
+    public static String lastNoteForTests(UUID player) {
+        return LAST_NOTE.get(player);
+    }
+
+    public static void clearNoteForTests(UUID player) {
+        LAST_NOTE.remove(player);
+    }
+
     public record Answer(boolean ok, List<int[]> boxes, String message) {}
 
     /** A cable route to {@code at}, over a view of the world (GameTests: the snapshot gives the live route). */
