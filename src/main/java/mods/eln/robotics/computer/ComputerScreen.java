@@ -35,6 +35,8 @@ import static mods.eln.i18n.I18N.tr;
  * it greyed until the computer has taken it; Ctrl+C is Break for the active window (Baughn). Logs and lists scroll
  * here. Under it: Reset, power, its state and address, the chip slots and drives.
  */
+// Inventory Profiles Next (optional, client) must not sort here: its R fired on every r typed, and moved the ROM chip
+@org.anti_ad.mc.ipn.api.IPNIgnore
 public class ComputerScreen extends ElnScreen {
     public static final int WIDTH = 498, HEIGHT = 358, CELL = 6, LINE = 10;
     /** The screen's cells start at (AREA_X, AREA_Y), in panel pixels. */
@@ -281,8 +283,7 @@ public class ComputerScreen extends ElnScreen {
 
     /** The editor elements of the active window, when nothing covers them, as code editor widgets placed over them. */
     void syncEditors() {
-        // (off, a drag, or a menu open, which the widgets would draw over: none)
-        Scene.Window t = render.lit() && dragMode == 0 && !menuOpen ? activeWindow() : null;
+        Scene.Window t = render.lit() && dragMode == 0 ? activeWindow() : null;   // (off, or a drag: none)
         java.util.Set<String> want = new java.util.HashSet<>();
         if (t != null && t.ask == null)
             for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
@@ -319,6 +320,9 @@ public class ComputerScreen extends ElnScreen {
                     if (w.getWidth() != pw || w.getHeight() != ph) w.setSize(pw, ph);
                     if (replaced && !w.buffer.text().equals(st.text)) w.buffer.setText(st.text);
                 }
+                // (an open menu would be drawn under the widget: it hides, keeping its text, cursor and bar, so a pick
+                // from the menu still finds it)
+                w.visible = !menuOpen;
             }
         // states of editors whose window is gone are forgotten
         render.editorStates.keySet().removeIf(key -> !scene().windows.containsKey(Integer.parseInt(key.split("/")[1])));

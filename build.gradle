@@ -160,6 +160,9 @@ dependencies {
     compileOnly "maven.modrinth:jei:31.12.0.65"
     // Curios (the pack's version): the battery belt's belt slot. Optional at runtime.
     compileOnly "maven.modrinth:curios:17.0.0-beta.3+26.3"
+    // Inventory Profiles Next (the pack's version, optional and client-side): only its @IPNIgnore, on the computer's
+    // screen, where its R sort hotkey fired as players typed
+    compileOnly "maven.modrinth:O7RBXm3n:5gXp3J2W"
     // GuideME (the pack's version, also AE2's): the Electrical Engineer's Ledger is a GuideME guide. Optional at runtime.
     compileOnly "org.appliedenergistics:guideme:${guideme_version}:api"
     runtimeOnly "org.appliedenergistics:guideme:${guideme_version}"

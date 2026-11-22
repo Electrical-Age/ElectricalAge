@@ -379,9 +379,9 @@ class StdlibTest {
         String rev = (String) win.elements.get(4).msg.get(9);
         m.editor.give(("(stash 2 4 9 \"" + rev + "\" [[0 1 [\"(print 2)\"]]])\n").getBytes(StandardCharsets.UTF_8));
         m.editor.give("(pick 2 \"Project\" \"Save As...\")\n".getBytes(StandardCharsets.UTF_8));
-        for (int t = 0; t < 20 && !screen.scene.windows.get(2).elements.containsKey(6); t++) tick(1, null);
-        assertEquals("line", screen.scene.windows.get(2).elements.get(6).kind, "a line asks for the name");
-        m.editor.give(screen.submit(2, 6, "u.janet"));
+        for (int t = 0; t < 20 && !screen.scene.windows.get(2).elements.containsKey(101); t++) tick(1, null);
+        assertEquals("line", screen.scene.windows.get(2).elements.get(101).kind, "a line asks for the name");
+        m.editor.give(screen.submit(2, 101, "u.janet"));
         for (int t = 0; t < 40 && !"a:/u.janet".equals(screen.scene.windows.get(2).elements.get(4).msg.get(8)); t++) tick(1, null);
         assertEquals("a:/u.janet", screen.scene.windows.get(2).elements.get(4).msg.get(8), "the editor follows the new file");
         type("[(string (slurp \"a:/u.janet\")) (string (slurp \"a:/t.janet\"))]");

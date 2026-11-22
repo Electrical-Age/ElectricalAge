@@ -930,6 +930,7 @@
   (var rev (revision text))
   (var base text)       # the text at rev, as last opened or saved
   (var stashed nil)     # the picking display's text for Save As
+  (var asks 0)
   (defn name-of [p] (last (string/split "/" p)))
   (defn heading [colour s] (ui/text t 1 0 0 colour (string/format "%-60s" s)))
   (defn open-text [p txt]
@@ -943,9 +944,11 @@
     "A line over the path's row asking for a file name; (f path) when one is typed (an empty line cancels)."
     [prompt f]
     (ui/remove t 1)
-    (ui/line t 6 0 0 :fill (string prompt " ")
+    (++ asks)
+    (def id (+ 100 (% asks 100)))   # (a new line each time: a display keeps what was typed in a line it knew)
+    (ui/line t id 0 0 :fill (string prompt " ")
              (fn [answer _]
-               (ui/remove t 6)
+               (ui/remove t id)
                (heading :light-gray path)
                (def a (string/trim answer))
                (unless (empty? a) (f (path/resolve a (string/slice path 0 (+ 1 (or (last (string/find-all "/" path)) 0))))))))
