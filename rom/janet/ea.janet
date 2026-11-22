@@ -810,6 +810,12 @@
       (ui/focus t)
       t)))
 
+(defn guide
+  "Open the System disk's manual in Guide, the hypertext reader (its icon on the desk does the same)."
+  []
+  (def dir (find |(string/has-suffix? "Guide.app/" $) (array/concat (app/list :a) (app/list :b) (app/list :ram))))
+  (if dir (app/launch dir) (error "no Guide on the disks (it comes on the System disk)")))
+
 (defn proc/list "The processes: [tab name tasks] each." []
   (seq [[t p] :pairs procs] [t (p :name) (length (filter |(env-of? $ (p :env)) (keys tasks)))]))
 

@@ -1,0 +1,96 @@
+@database Dynamo
+@node Main "Dynamo 1.0: the manual"
+Welcome to Dynamo, the windowed system of the Grid Cooperative field computer. This manual is a guide: click a link to follow it, Retrace to go back the way you came, and < or > to page through it in order.
+
+@{"The desk" link Desk}
+@{"Windows and the menu bar" link Windows}
+@{"The Shell and its commands" link Shell}
+@{"Ed, the editor" link Ed}
+@{"The Filer and the disks" link Filer}
+@{"Prefs" link Prefs}
+@{"Writing an application" link Apps}
+@{"Where to read more" link More}
+@endnode
+
+@node Desk "The desk"
+The desk, Switchboard, is what you see when the System disk boots. Down its left side are the drives with a disk in them: A: and B:, the two floppy drives, and RAM:, a small disk held in memory that is empty again at every power-on. Below them is the Shell.
+
+To their right is every application found on the disks: a directory whose name ends in .app, at a disk's top or one directory down. Double-click an icon to start it. An application runs once: starting it again brings its window back.
+
+The desk looks at the drives every two seconds, so a disk put in or taken out shows up by itself. Its Desk menu opens a drive, the Shell, or a new Shell; its Screen menu picks the text mode.
+
+@{"Windows and the menu bar" link Windows}
+@endnode
+
+@node Windows "Windows and the menu bar"
+Every program has a window. Drag a window by its title to move it, and by the handle at its bottom right corner to size it. The boxes in its title row close it, minimise it to an icon on the desk, and send it behind the others. Double-click a minimised window's icon to bring it back.
+
+The top row of the screen is the menu bar. Its first menu, Dynamo, lists the windows: pick one to bring it forward. The menus after it belong to the window in front. Click a title to open its menu and click an item to pick it; Esc closes it. An item with a letter beside it also answers to Alt and that letter.
+
+Several people may sit at one computer. Every screen shows the same windows: the last move wins.
+@endnode
+
+@node Shell "The Shell and its commands"
+The Shell runs commands and Janet, the computer's language. Type a line and press Enter. A line that starts with a command runs it; anything else, and any line that starts with a bracket, is Janet:
+
+  dir [path]             list a directory
+  cd path                change the current directory (cd .. goes up, cd B: changes drive)
+  type file              print a file
+  copy from to           copy a file (to a directory: under the same name)
+  delete file            delete a file or an empty directory
+  rename from to         rename or move a file on its disk
+  makedir name           make a directory
+  ed file                edit a file in Ed
+  run file               run a Janet file in a window of its own
+  format drive [label]   erase a disk (it asks first)
+  help                   list the commands
+
+Paths start from the current directory, A:/ at first. Put a name with spaces in double quotes.
+
+For Janet, try (+ 1 2), or (print "hello"). Break, on the Shell's window, stops what the Shell is running. The Shell icon brings the Shell back from the desk, and opens another Shell when it is already up; each has its own definitions and current directory.
+
+@{"Ed, the editor" link Ed}
+@endnode
+
+@node Ed "Ed, the editor"
+Ed edits a file in a window. Start it from its icon for a new file on RAM:, with "ed file" at the Shell, or by clicking a file in the Filer.
+
+  Ctrl+S        save
+  Ctrl+F        find (Enter finds the next; Esc closes the bar)
+  F3            find the next
+  Ctrl+G        go to a line
+
+Its Project menu makes a new file, opens one, saves, saves under another name (Save As), runs the file as a program and closes the window. Run, Save As and Close save first. Its Edit menu finds and goes to a line.
+
+You edit on your own screen, and the computer gets the file when you save. If the file changed on the disk meanwhile, the first save is refused and says so; a second save overwrites it.
+@endnode
+
+@node Filer "The Filer and the disks"
+Double-click a drive on the desk to open it in the Filer. Click a name to choose it, and click it again to open it: a directory goes in, an application starts, a Janet or text file opens in Ed. Its menus copy a file to RAM: or the other drive, rename, delete, make a directory, and format or label the disk.
+
+A floppy holds about 1.4 megabytes. RAM: holds 192 kilobytes and is lost at power-off, so copy what you want to keep to a floppy.
+@endnode
+
+@node Prefs "Prefs"
+Prefs sets how this computer looks and what it calls itself: the text mode (80 by 25 or 120 by 40), the colours of the windows and the bar, the clock's hours, and the station name it gives on the bus. It keeps them on the System disk, in System/prefs.jdn, and the desk puts them back at every start.
+@endnode
+
+@node Apps "Writing an application"
+An application is a directory NAME.app holding main.janet, the program, and icon.pix, its picture on the desk (12 by 10 dots). The desk finds it on any disk, at the top or one directory down, and runs main.janet as a process with a window of its own.
+
+A short one, saved as A:/Hello.app/main.janet:
+
+  (def t (proc/tab))
+  (ui/text t 1 1 1 :yellow "Hello from Dynamo")
+  (ui/button t 2 1 3 8 "Close" (fn [] (proc/close t)))
+
+(proc/tab) is the program's window. ui/text, ui/button, ui/line, ui/list, ui/menus and the rest put things in it; (app/dir) is the application's own directory, for its files. A program may sleep, wait on the bus and run several tasks at once.
+
+@{"Where to read more" link More}
+@endnode
+
+@node More "Where to read more"
+The full reference is in the handbook, The Workbench Ledger: its pages on the Computer, on Janet on the Computer, and on the Screen Protocol (Wire) list every function, window element and message.
+
+At the Shell, (doc ui/button) shows any function's own description.
+@endnode

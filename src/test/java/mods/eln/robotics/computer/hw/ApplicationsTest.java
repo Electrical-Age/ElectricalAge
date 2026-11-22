@@ -238,6 +238,24 @@ class ApplicationsTest extends StdlibTest {
         assertNull(screen.scene.windows.get(2), "the tab is gone; " + dump(screen));
     }
 
+    /** Guide (Dynamo P2): the System disk's manual opens on its contents; a link goes to its node, Retrace comes back. */
+    @Test
+    void guideOpensTheManualAndFollowsLinks() throws IOException {
+        start("guide");
+        run(30);
+        var w = screen.scene.windows.get(2);
+        long shellLink = -1;
+        for (var en : w.elements.entrySet())
+            if (en.getValue().kind.equals("button") && "The Shell and its commands".equals(Form.str(en.getValue().msg, 6, ""))) shellLink = en.getKey();
+        assertTrue(shellLink > 0, "a link to the Shell's node on the contents page: " + dump(screen));
+        m.editor.give(event(new Form.Symbol("press"), 2L, shellLink));
+        run(20);
+        assertTrue(dump(screen).contains("The Shell and its commands") && dump(screen).contains("list a directory"), "the Shell's node: " + dump(screen));
+        m.editor.give(event(new Form.Symbol("press"), 2L, 2L));   // Retrace
+        run(20);
+        assertTrue(dump(screen).contains("Welcome to Dynamo"), "back on the contents: " + dump(screen));
+    }
+
     @Test
     void calculatorAddsAndKeepsATape() throws IOException {
         start("calculator");
