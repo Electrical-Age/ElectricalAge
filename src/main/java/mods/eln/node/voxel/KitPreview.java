@@ -36,6 +36,7 @@ public final class KitPreview {
         LAST.remove(player);
         GEN.remove(player);
         SNAPS.remove(player);
+        LAST_NOTE.remove(player);
     }
 
     public static void tick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post e) {
