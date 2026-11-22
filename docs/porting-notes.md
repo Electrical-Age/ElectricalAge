@@ -1058,3 +1058,7 @@ on 1.7.10) onto 26.x.
   connect, whether or not the program reads them (1.12 offered only the ones it read). GameTest `wp9c signal processor`.
 - **Wire colour care toggle removed** (Baughn 2026-11-21: obsolete). The wrench no longer toggles whether a six-node
   cable joins only wires of its own colour; a placed cable keeps the setting it saved, so existing networks are unchanged.
+- **Pole spans need a line of sight** (2026-11-21, AdventurAgent: a span went straight through a stone wall). 1.12's
+  `validLOS` was a stub that always said yes. `GridElement.lineOfSight` now walks the straight line between each pair
+  of cable points and refuses a span when a block that collides is in the way (the two poles and their ghosts don't
+  count; the sag isn't checked; unloaded chunks count as clear). Spans strung before stay. `wp11_pole_span_needs_line_of_sight`.

@@ -80,7 +80,7 @@ abstract public class GridElement extends TransparentNodeElement {
                 entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks"));
             } else if (!this.canConnect(other)) {
                 entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cannot connect these two objects"));
-            } else if (!this.validLOS(other)) {
+            } else if (!this.lineOfSight(other, side, p.getRight())) {
                 entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cannot connect, no line of sight"));
             } else {
                 ItemStack piece = OverheadCableItem.make(OverheadCableItem.mm2(stack), cableLength);
@@ -180,8 +180,46 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     // TODO: This should check if the wire isn't passing through blocks.
-    private boolean validLOS(GridElement other) {
+    /**
+     * Can a span be strung to other: does the straight line between each pair of cable points cross no block that
+     * collides, other than the two poles' own blocks and ghosts? 1.12 left this a stub that always said yes, so a span
+     * went straight through a stone wall (AdventurAgent 1573709864033845248). The sag isn't checked: the cable hangs
+     * below the line. Blocks in unloaded chunks count as clear. The cable points use each pole's current render angle; a
+     * free-turning pole re-aims after the link is added, so near a corner the drawn span may differ a little from the
+     * checked line (tolerated). A sampled walk rather than Level.clip, because the poles' own blocks and ghosts must be
+     * passed through.
+     */
+    public boolean lineOfSight(GridElement other, Direction mySide, Direction otherSide) {
+        net.minecraft.world.level.Level level = coordonate().world();
+        if (level == null) return true;
+        for (int i = 0; i < 2; i++) {
+            Vec3 a = centre(this).add(getCablePoint(mySide, i).yRot((float) Math.toRadians(idealRenderingAngle)));
+            Vec3 b = centre(other).add(other.getCablePoint(otherSide, i).yRot((float) Math.toRadians(other.idealRenderingAngle)));
+            int n = (int) Math.ceil(a.distanceTo(b) / 0.125);
+            for (int k = 1; k < n; k++) {
+                Vec3 q = a.lerp(b, k / (double) n);
+                net.minecraft.core.BlockPos bp = net.minecraft.core.BlockPos.containing(q);
+                if (!level.isLoaded(bp) || ownBlock(other, bp, level)) continue;
+                var state = level.getBlockState(bp);
+                if (state.isAir()) continue;
+                for (var box : state.getCollisionShape(level, bp).toAabbs())
+                    if (box.move(bp).contains(q)) return false;
+            }
+        }
         return true;
+    }
+
+    static Vec3 centre(GridElement e) {
+        Coordonate c = e.coordonate();
+        return new Vec3(c.x + 0.5, c.y + 0.5, c.z + 0.5);
+    }
+
+    /** Is bp one of the two poles, or a ghost block of either? */
+    private boolean ownBlock(GridElement other, net.minecraft.core.BlockPos bp, net.minecraft.world.level.Level level) {
+        Coordonate c = new Coordonate(bp, level);
+        if (c.equals(coordonate()) || c.equals(other.coordonate())) return true;
+        var g = mods.eln.Eln.ghostManager.getGhost(c);
+        return g != null && (g.getObservatorCoordonate().equals(coordonate()) || g.getObservatorCoordonate().equals(other.coordonate()));
     }
 
     // Return false if connecting grid elements that can't connect.

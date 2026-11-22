@@ -63,6 +63,7 @@ public final class Wp11Cases {
         cases.add(new TurbineIdleCase());
         cases.add(new PoleCase());
         cases.add(new PoleGearCase());
+        cases.add(new PoleLineOfSightCase());
         cases.add(new FrozenPoleCase());
         cases.add(new EnergyConverterCase());
         cases.add(new LegacyExporterCase());
@@ -718,4 +719,48 @@ public final class Wp11Cases {
             }
         }
     }
+    /**
+     * A span needs a clear line between the poles (AdventurAgent 1573709864033845248: one went straight through a stone
+     * wall; 1.12's check was a stub). Two poles 5 apart see each other; a stone wall between two others blocks it.
+     */
+    static final class PoleLineOfSightCase implements TestCase {
+        boolean clear, walled;
+
+        public String name() {
+            return "wp11 pole span needs line of sight";
+        }
+
+        public int width() {
+            return 11;
+        }
+
+        public int height() {
+            return 12;
+        }
+
+        public int depth() {
+            return 9;
+        }
+
+        public int floorDepth() {
+            return 9;   // (poles need a floor under both pairs)
+        }
+
+        public void build(TestContext ctx) {
+            var a = (mods.eln.gridnode.GridElement) ctx.placeTransparent(UTILITY_POLE, ctx.at(1, 1, 1));
+            var b = (mods.eln.gridnode.GridElement) ctx.placeTransparent(UTILITY_POLE, ctx.at(7, 1, 1));
+            clear = a.lineOfSight(b, Direction.XP, Direction.XN);
+            var c = (mods.eln.gridnode.GridElement) ctx.placeTransparent(UTILITY_POLE, ctx.at(1, 1, 4));
+            var d = (mods.eln.gridnode.GridElement) ctx.placeTransparent(UTILITY_POLE, ctx.at(7, 1, 4));
+            for (int y = 1; y <= 11; y++)
+                for (int z = 3; z <= 5; z++) ctx.level().setBlockAndUpdate(ctx.at(4, y, z), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            walled = c.lineOfSight(d, Direction.XP, Direction.XN);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("poles: two poles with nothing between see each other", clear, "");
+            ctx.check("poles: a stone wall between two poles blocks the span", !walled, "");
+        }
+    }
+
 }
