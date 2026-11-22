@@ -206,6 +206,9 @@ public interface RouteView {
                     if (be instanceof VoxelNodeEntity e && p.getX() >= x0 && p.getX() <= x1 && p.getY() >= y0 && p.getY() <= y1
                         && p.getZ() >= z0 && p.getZ() <= z1) {
                         voxels.put(p.asLong(), voxelsOf(e));
+                        // (the part objects themselves, shared with the live node: what the preview thread reads of them, a
+                        // cable's or pipe's tier, spec, face and points and a fitting's or junction's point, is final, and
+                        // an edit replaces a part rather than changing those; joints, which change, aren't read)
                         if (e.getNode() instanceof VoxelNode n) parts.put(p.asLong(), List.copyOf(n.parts));
                     }
                 }

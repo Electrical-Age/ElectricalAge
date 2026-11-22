@@ -76,18 +76,11 @@ final class JoinRun {
      */
     private static JoinRun of(RouteView view, long[] j, int face, Predicate<VoxelPart> same) {
         Map<BlockPos, List<VoxelPart>> runs = new HashMap<>();
-        Map<BlockPos, List<long[]>> stops = new HashMap<>();
+        Map<BlockPos, List<VoxelPart>> all = new HashMap<>();
         java.util.function.Function<BlockPos, List<VoxelPart>> runOf = b -> runs.computeIfAbsent(b, bb -> {
-            List<VoxelPart> run = new ArrayList<>();
-            List<long[]> st = new ArrayList<>();
-            long ox = bb.getX() * 16L, oy = bb.getY() * 16L, oz = bb.getZ() * 16L;
-            for (VoxelPart p : view.parts(bb)) {
-                if (same.test(p)) run.add(p);
-                int[] f = p instanceof ValvePart v ? new int[]{v.x, v.y, v.z} : p instanceof SafetyValvePart v ? new int[]{v.x, v.y, v.z}
-                    : p instanceof PipeSensorPart v ? new int[]{v.x, v.y, v.z} : p instanceof JunctionPart v ? new int[]{v.x, v.y, v.z} : null;
-                if (f != null && face < 0) st.add(new long[]{ox + f[0], oy + f[1], oz + f[2]});
-            }
-            stops.put(bb, st);
+            List<VoxelPart> parts = view.parts(bb), run = new ArrayList<>();
+            for (VoxelPart p : parts) if (same.test(p)) run.add(p);
+            all.put(bb, parts);
             return run;
         });
         // breadth first along the run's segments, a voxel at a time
@@ -101,7 +94,7 @@ final class JoinRun {
         while (!todo.isEmpty()) {
             long[] p = todo.poll();
             int d = dist.get(List.of(p[0], p[1], p[2]));
-            if (d >= REACH || d > 0 && stopped(stops.values(), p)) continue;
+            if (d >= REACH || d > 0 && face < 0 && stopped(all, p)) continue;
             for (int a = 0; a < 3; a++)
                 for (int s = -1; s <= 1; s += 2) {
                     long[] q = p.clone();
@@ -147,8 +140,15 @@ final class JoinRun {
         return new JoinRun(freed, edges, face);
     }
 
-    private static boolean stopped(java.util.Collection<List<long[]>> stops, long[] p) {
-        for (List<long[]> l : stops) for (long[] s : l) if (s[0] == p[0] && s[1] == p[1] && s[2] == p[2]) return true;
+    /** Is a pipe's fitting (VoxelNode.fittingAt) or a junction at p (world voxels), in a block looked at so far? */
+    private static boolean stopped(Map<BlockPos, List<VoxelPart>> all, long[] p) {
+        for (var e : all.entrySet()) {
+            BlockPos b = e.getKey();
+            long x = p[0] - b.getX() * 16L, y = p[1] - b.getY() * 16L, z = p[2] - b.getZ() * 16L;
+            if (x < 0 || y < 0 || z < 0 || x > 16 || y > 16 || z > 16) continue;
+            if (VoxelNode.fittingAt(e.getValue(), (int) x, (int) y, (int) z)) return true;
+            for (VoxelPart q : e.getValue()) if (q instanceof JunctionPart jp && jp.x == x && jp.y == y && jp.z == z) return true;
+        }
         return false;
     }
 
@@ -167,6 +167,53 @@ final class JoinRun {
             }
         }
         return -1;
+    }
+
+    /** How far along the route from its cut (voxels) it may share the old run's voxels: a splice's end, a junction's arm. */
+    private static final int AT_CUT = 4;
+
+    /**
+     * Does the route (its polyline pts, world voxels, from the start; attach: the face each point's run lies on, null for
+     * a pipe) come back onto or across the old run anywhere but by its cut end (its first point if fromStart, else its
+     * last)? Only the freed voxels, or the free cube round the join, let a route through the old run; the parts it lays
+     * there would lie over it (a duplicate, todo #516) or be refused when laid.
+     */
+    boolean crosses(List<long[]> pts, List<Integer> attach, boolean fromStart) {
+        int total = 0;
+        for (int i = 1; i < pts.size(); i++) total += dist(pts.get(i - 1), pts.get(i));
+        int at = 0;
+        for (int i = 1; i < pts.size(); i++) {
+            long[] a = pts.get(i - 1), b = pts.get(i);
+            int n = dist(a, b);
+            for (int k = 0; k <= n; k++) {
+                int along = at + k, fromCut = fromStart ? along : total - along;
+                if (fromCut <= AT_CUT) continue;
+                long[] p = {a[0] + Long.signum(b[0] - a[0]) * (long) k, a[1] + Long.signum(b[1] - a[1]) * (long) k, a[2] + Long.signum(b[2] - a[2]) * (long) k};
+                if (onRun(p, attach == null ? -1 : attach.get(i))) return true;
+            }
+            at += n;
+        }
+        return false;
+    }
+
+    private static int dist(long[] a, long[] b) {
+        return (int) (Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]));
+    }
+
+    /** Is any freed voxel of the old run next to p (a cable's on face side of p's plane, a pipe's all round)? */
+    private boolean onRun(long[] p, int face) {
+        int n = face < 0 ? -1 : CableRouter.axis(face);
+        for (int dx = -1; dx <= 0; dx++)
+            for (int dy = -1; dy <= 0; dy++)
+                for (int dz = -1; dz <= 0; dz++) {
+                    long[] v = {p[0] + dx, p[1] + dy, p[2] + dz};
+                    // (a cable lies on the side of its plane away from its support: face 0 (down) above it)
+                    if (n >= 0 && (face % 2 == 0 ? v[n] != p[n] : v[n] != p[n] - 1)) continue;
+                    BitSet f = freed.get(new BlockPos((int) Math.floorDiv(v[0], 16), (int) Math.floorDiv(v[1], 16), (int) Math.floorDiv(v[2], 16)));
+                    if (f != null && f.get(VoxelNode.voxel((int) Math.floorMod(v[0], 16), (int) Math.floorMod(v[1], 16), (int) Math.floorMod(v[2], 16))))
+                        return true;
+                }
+        return false;
     }
 
     /** The view with the run's voxels near the join free. */

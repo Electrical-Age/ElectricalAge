@@ -52,20 +52,22 @@ public final class PipePlacer {
             // and joins it there; todo #516)
             JoinRun sj = startJoin == null ? null : JoinRun.pipe(view, startJoin);
             JoinRun ej = endJoin == null ? null : JoinRun.pipe(view, endJoin);
-            RouteView v = view;
-            if (sj != null) v = sj.freeing(v);
-            if (ej != null) v = ej.freeing(v);
-            PipeRouter.Space sp = RouteView.obstacles(v);
-            if (startJoin != null) sp = RouteView.freeAround(sp, startJoin, PipePart.JOIN_CLEAR);
-            if (endJoin != null) sp = RouteView.freeAround(sp, endJoin, PipePart.JOIN_CLEAR);
-            PipeRouter.Result r = PipeRouter.route(sp, PipePart.GRID[tier], end(start), ends(wps), end(end), budgetMs);
-            if (r.error != null) return new RoutePlacer.Routed<>(r.error, 0, null);
-            List<long[]> pts = r.points;
-            if (sj != null && pts != null) pts = sj.trimHead(pts);
-            if (ej != null && pts != null) pts = ej.trimTail(pts);
-            if (pts == null) return new RoutePlacer.Routed<>(RoutePlacer.INSIDE, 0, null);
-            long[] from = startJoin == null ? null : joinAt(pts.get(0)), to = endJoin == null ? null : joinAt(pts.get(pts.size() - 1));
-            return new RoutePlacer.Routed<>(null, new PipeRouter.Result(pts, null).length(), pts, from, to);
+            RoutePlacer.Routed<List<long[]>> r = routeJoined(view, tier, start, startJoin, sj, wps, end, endJoin, ej, true, budgetMs);
+            // (back onto or across the old pipe away from its cut, as after a waypoint, which the freed voxels allowed:
+            // routed again without them, as before JoinRun; through the free cube round the join point it still can, and
+            // is refused, not laid through the old pipe)
+            if (crosses(r, sj, ej)) {
+                r = routeJoined(view, tier, start, startJoin, sj, wps, end, endJoin, ej, false, budgetMs);
+                if (crosses(r, sj, ej)) return new RoutePlacer.Routed<>("it crosses the pipe it joins", 0, null);
+            }
+            if (r.error() != null) return r;
+            // the junctions where the route meets the old pipes, checked now (the cut moves them off the click), so the
+            // preview and the click refuse alike, with the reason
+            for (long[] j : new long[][]{r.startJoin(), r.endJoin()}) {
+                String err = j == null ? null : joinError(view, tier, r.path(), j);
+                if (err != null) return new RoutePlacer.Routed<>("Can't join there: " + err, 0, null);
+            }
+            return r;
         }
 
         @Override
@@ -98,10 +100,51 @@ public final class PipePlacer {
         }
     };
 
+    /** One routing: free through the old pipe near the joins (free) or not, cut where it leaves them. */
+    static RoutePlacer.Routed<List<long[]>> routeJoined(RouteView view, int tier, CableRouter.End start, long[] startJoin, JoinRun sj,
+                                                         List<CableRouter.End> wps, CableRouter.End end, long[] endJoin, JoinRun ej, boolean free,
+                                                         long budgetMs) {
+        RouteView v = view;
+        if (free && sj != null) v = sj.freeing(v);
+        if (free && ej != null) v = ej.freeing(v);
+        // (the two cubes are freed in either order alike: obstacles are boxes, so a box is blocked by what it overlaps
+        // outside both)
+        PipeRouter.Space sp = RouteView.obstacles(v);
+        if (startJoin != null) sp = RouteView.freeAround(sp, startJoin, PipePart.JOIN_CLEAR);
+        if (endJoin != null) sp = RouteView.freeAround(sp, endJoin, PipePart.JOIN_CLEAR);
+        PipeRouter.Result r = PipeRouter.route(sp, PipePart.GRID[tier], end(start), ends(wps), end(end), budgetMs);
+        if (r.error != null) return new RoutePlacer.Routed<>(r.error, 0, null);
+        List<long[]> pts = r.points;
+        if (sj != null && pts != null) pts = sj.trimHead(pts);
+        if (ej != null && pts != null) pts = ej.trimTail(pts);
+        if (pts == null) return new RoutePlacer.Routed<>(RoutePlacer.INSIDE, 0, null);
+        long[] from = startJoin == null ? null : joinAt(pts.get(0)), to = endJoin == null ? null : joinAt(pts.get(pts.size() - 1));
+        return new RoutePlacer.Routed<>(null, new PipeRouter.Result(pts, null).length(), pts, from, to);
+    }
+
+    /** Does a route found pass through the old pipe at either join away from its cut (JoinRun.crosses)? */
+    static boolean crosses(RoutePlacer.Routed<List<long[]>> r, JoinRun sj, JoinRun ej) {
+        if (r.error() != null) return false;
+        return sj != null && sj.crosses(r.path(), null, true) || ej != null && ej.crosses(r.path(), null, false);
+    }
+
+    /** Why the route's piece in join j's block can't join the old pipe at j (VoxelNode.joinError, on the view), or null. */
+    static String joinError(RouteView view, int tier, List<long[]> pts, long[] j) {
+        BlockPos b = new BlockPos((int) Math.floorDiv(j[0], 16), (int) Math.floorDiv(j[1], 16), (int) Math.floorDiv(j[2], 16));
+        List<int[]> mine = PipeRouter.perBlock(pts).get(List.of((long) b.getX(), (long) b.getY(), (long) b.getZ()));
+        if (mine == null || mine.size() != 1) return "the route doesn't end in the pipe's block";
+        RouteView.Voxels vx = view.voxels(b);
+        return VoxelNode.joinError(view.parts(b), vx == null ? null : vx.used(), new PipePart(tier, mine.get(0)), (int) (j[0] - b.getX() * 16L),
+            (int) (j[1] - b.getY() * 16L), (int) (j[2] - b.getZ() * 16L));
+    }
+
     /**
      * A route end on an old pipe as a join: the point, or null on a block's face plane (the route cut there, at the old
      * pipe's end on the face: the two ends meet across the face as ports, no junction).
      */
+    // (a cut at the old pipe's end inside a block is a join at its end, as clicking that end was: a junction with two
+    // arms, not a plain straight continuation; that would mean lengthening the old piece, its fluid node and id, instead
+    // of adding one)
     static long[] joinAt(long[] p) {
         for (int a = 0; a < 3; a++) if (Math.floorMod(p[a], 16) == 0) return null;
         return p;

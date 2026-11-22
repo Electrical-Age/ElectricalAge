@@ -162,9 +162,36 @@ public final class CablePlacer {
                                                              List<CableRouter.End> wps, CableRouter.End end, long[] endJoin, long budgetMs) {
         JoinRun sj = startJoin == null ? null : JoinRun.cable(view, startJoin, start.attach(), tier, spec);
         JoinRun ej = endJoin == null ? null : JoinRun.cable(view, endJoin, end.attach(), tier, spec);
+        RoutePlacer.Routed<List<CableRouter.Step>> r = route(view, tier, spec, start, startJoin, sj, wps, end, endJoin, ej, true, budgetMs);
+        // (a route that came back onto or across the old cable away from its cut, as after a waypoint: the freed voxels
+        // let it. Routed again without them, as before JoinRun, it goes round; through the free cube round the join
+        // point it still can, and is refused rather than laid over the old cable or refused only by the click)
+        if (crosses(r, sj, ej)) {
+            r = route(view, tier, spec, start, startJoin, sj, wps, end, endJoin, ej, false, budgetMs);
+            if (crosses(r, sj, ej)) return new RoutePlacer.Routed<>("it crosses the cable it joins", 0, null);
+        }
+        return r;
+    }
+
+    /** Does a route found come back onto or across the old cable at either join away from its cut (JoinRun.crosses)? */
+    private static boolean crosses(RoutePlacer.Routed<List<CableRouter.Step>> r, JoinRun sj, JoinRun ej) {
+        if (r.error() != null || sj == null && ej == null) return false;
+        List<long[]> pts = new ArrayList<>();
+        List<Integer> attach = new ArrayList<>();
+        for (CableRouter.Step st : r.path()) {
+            pts.add(new long[]{st.x(), st.y(), st.z()});
+            attach.add(st.attach());
+        }
+        return sj != null && sj.crosses(pts, attach, true) || ej != null && ej.crosses(pts, attach, false);
+    }
+
+    /** One routing: free through the old cable near the joins (free) or not, cut where it leaves them. */
+    private static RoutePlacer.Routed<List<CableRouter.Step>> route(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin,
+                                                                     JoinRun sj, List<CableRouter.End> wps, CableRouter.End end, long[] endJoin,
+                                                                     JoinRun ej, boolean free, long budgetMs) {
         RouteView v = view;
-        if (sj != null) v = sj.freeing(v);
-        if (ej != null) v = ej.freeing(v);
+        if (free && sj != null) v = sj.freeing(v);
+        if (free && ej != null) v = ej.freeing(v);
         CableRouter.Space s = space(v);
         if (startJoin != null) s = around(s, startJoin);
         if (endJoin != null) s = around(s, endJoin);
