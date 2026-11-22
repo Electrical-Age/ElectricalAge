@@ -99,6 +99,7 @@ public final class Sparse {
         if (lu == null || lu.n != n || !fits(lu)) {
             int[][] pattern = new int[n][];
             for (int r = 0; r < n; r++) {
+                Network.checkClockNow();
                 java.util.TreeSet<Integer> cs = new java.util.TreeSet<>();
                 for (int k = 0; k < len[r]; k++) cs.add(cols[r][k]);
                 if (lu != null && lu.n == n) {
@@ -238,6 +239,7 @@ public final class Sparse {
     static double[] denseSolve(double[][] A, double[] b) {
         int n = b.length;
         for (int c = 0; c < n; c++) {
+            Network.checkClockNow();
             int p = c;
             for (int r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
             double[] t = A[c]; A[c] = A[p]; A[p] = t;

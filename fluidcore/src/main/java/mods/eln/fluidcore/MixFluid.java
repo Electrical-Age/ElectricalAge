@@ -166,6 +166,7 @@ final class MixFluid implements NodeFluid {
      */
     private Eval core(double Tv, double vgv, double[] mv) {
         if (COUNT) EVALS++;
+        Network.checkClock();
         Eval e = new Eval();
         int n = NG;
         D T = D.in(Tv, 0, n), Vg = D.in(vgv, 1, n);

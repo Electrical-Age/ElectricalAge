@@ -41,17 +41,18 @@ public final class CoreStep {
     /**
      * The most wall time one network's step may take in the game (ns; 0: no limit; Network.MAX_STEP_NANOS): a stiff
      * network once took a 60 s tick and the watchdog killed Incognito, in a loop, since its chunks are kept loaded (a
-     * steam line with water in it, 2026-11-21). At 40 ms the server lived at 15 TPS; at 10 ms it held 20 TPS and the
-     * stiff network ran slow. Off (0) until a server starts (Eln, GAME_BUDGET), and GameTests set 0: unit and GameTest
-     * outcomes mustn't hang on the machine's speed.
+     * steam line with water in it, 2026-11-21). Off (0) until a server starts (Eln, GAME_BUDGET); unit tests run without
+     * it, GameTests with it (ElnGameTests).
      */
     public static long budgetNanos = 0;
     /**
-     * 250 ms (Baughn 1573837175051522166: at 10 ms more or less every plant was broken): only a watchdog-sized stall is
-     * cut. 10 ms cut every network that sub-stepped for a moment, so it ran slow and kept owing time, and boilers sat at
-     * 0 g/s; the tests, run without the budget, couldn't see it.
+     * 250 ms (-Deln.fluidBudgetMs), with Network's hard stop at 1.5x inside a solve. 10 ms cut every network that
+     * sub-stepped for a moment (Baughn 1573837175051522166: more or less every plant was broken; a boiler at 0 g/s needed
+     * 10-25 ms a step), and 40 ms still cut 27 GameTests' start-up transients. A network that keeps running over it,
+     * covering under half the tick, is quarantined (QUARANTINE_AFTER): one heavy network taking 250 ms every tick put
+     * Incognito at 4 TPS, and the watchdog killed it.
      */
-    public static final long GAME_BUDGET = 250_000_000L;
+    public static final long GAME_BUDGET = Long.getLong("eln.fluidBudgetMs", 250L) * 1_000_000L;
 
     final Network net = new Network();
     /** Its last step ran out of Network.MAX_STEP_NANOS (FluidWorld says where). */
@@ -301,7 +302,21 @@ public final class CoreStep {
     static final java.util.concurrent.atomic.AtomicLong CRAWLS = new java.util.concurrent.atomic.AtomicLong();
     private boolean stallDumped;
 
+    /**
+     * Steps in a row that ran over the budget and covered under half the tick, and the ticks skipped since the last try.
+     * After QUARANTINE_AFTER of them the network is tried only every QUARANTINE_EVERY ticks: it moved little anyway, and
+     * one heavy network at the budget every tick took the server to 4 TPS (Dysnomia's plant, 2026-11-21); a step that
+     * covers over half its tick ends it. Jade calls it out meanwhile (its stall stands).
+     */
+    private int aborted, skipped;
+    static final int QUARANTINE_AFTER = 10, QUARANTINE_EVERY = 20;
+
     void step(FluidNetwork fn, double dt) {
+        if (aborted >= QUARANTINE_AFTER && ++skipped < QUARANTINE_EVERY) {
+            overBudget = true;
+            return;
+        }
+        skipped = 0;
         // (at most one tick's worth caught up per tick: devices step their own processes by the tick, and a second of
         // fluid landing in one tick would be a spike they all see)
         double tick = dt, ask = dt + Math.min(owed, dt);
@@ -399,6 +414,7 @@ public final class CoreStep {
         Network.MAX_STEP_NANOS = budgetNanos;
         net.step(dt);
         overBudget = net.overBudget;
+        aborted = net.overBudget && net.done < 0.5 * tick ? aborted + 1 : 0;
         // (solves accepted at the precision floor, counted to watch: a few thousand in the 28 steam GameTests)
         long crawled = CRAWLS.addAndGet(net.stats.crawls - crawls0);
         if (net.stats.crawls > crawls0 && Long.bitCount(crawled) == 1 && crawled >= 16) System.out.println("[fluidcore] solves accepted at the precision floor so far: " + crawled);

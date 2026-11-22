@@ -156,8 +156,11 @@ public final class ElnGameTests {
         // the test world's biomes vary from test to test: 20 C everywhere, as the cases' numbers assume (AmbientCases
         // lift it for their own devices)
         mods.eln.sim.Ambient.fixedC = 20.0;
-        // (no wall-time budget for fluid steps: a test's outcome mustn't hang on the machine's speed)
-        mods.eln.sim.fluid.CoreStep.budgetNanos = 0;
+        // (the game's own fluid step budget, so a budget that cuts healthy plants shows up in stalls(): the 10 ms one
+        // broke more or less every plant on Incognito and no test saw it, run without it; Baughn 1573837175051522166.
+        // At 4x it lets the test plants' start-up transients through (a fuel furnace's first steps took over 400 ms; at
+        // 40 ms 27 tests stalled), and fails them if the game's budget is ever as tight as 10 ms was)
+        mods.eln.sim.fluid.CoreStep.budgetNanos = 4 * mods.eln.sim.fluid.CoreStep.GAME_BUDGET;
         GameTestContext ctx = new GameTestContext(helper, c.id());
         // tests share one level: a node left by an earlier test here would join this test's circuits
         net.minecraft.world.phys.AABB bounds = helper.getBounds();

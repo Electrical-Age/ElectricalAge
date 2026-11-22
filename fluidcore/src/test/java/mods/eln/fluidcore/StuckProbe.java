@@ -38,6 +38,7 @@ class StuckProbe {
             var f = p[0].contains(".") ? Class.forName("mods.eln.fluidcore." + p[0].substring(0, p[0].indexOf('.'))).getDeclaredField(p[0].substring(p[0].indexOf('.') + 1)) : Network.class.getDeclaredField(p[0]);
             f.setAccessible(true);
             if (f.getType() == int.class) f.setInt(null, Integer.parseInt(p[1]));
+            else if (f.getType() == long.class) f.setLong(null, Long.parseLong(p[1]));
             else if (f.getType() == boolean.class) f.setBoolean(null, Boolean.parseBoolean(p[1]));
             else f.setDouble(null, Double.parseDouble(p[1]));
             System.out.println("set " + kv);

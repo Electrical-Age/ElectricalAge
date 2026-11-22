@@ -98,6 +98,8 @@ neoForge {
             if (project.findProperty('elnFluid') == 'core') systemProperty 'eln.fluidCore', 'true'
             // only some cases: -PelnGameTests=id1,id2
             if (project.hasProperty('elnGameTests')) systemProperty 'eln.gametests', project.property('elnGameTests')
+            // the fluid step budget in ms (CoreStep.GAME_BUDGET; checks that stalls() catches a budget that cuts plants)
+            if (project.hasProperty('elnFluidBudgetMs')) systemProperty 'eln.fluidBudgetMs', project.property('elnFluidBudgetMs')
             // the cable benchmark instead of the tests: -PelnBench=result.json [-PelnBenchLabel=name]
             if (project.hasProperty('elnBench')) {
                 systemProperty 'eln.bench', file(project.property('elnBench')).absolutePath

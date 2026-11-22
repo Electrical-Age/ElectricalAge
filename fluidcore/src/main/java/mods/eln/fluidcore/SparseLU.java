@@ -43,6 +43,7 @@ public final class SparseLU {
         List<TreeSet<Integer>> g = new ArrayList<>(n);
         for (int i = 0; i < n; i++) g.add(new TreeSet<>(adj.get(i)));
         for (int k = 0; k < n; k++) {
+            Network.checkClockNow();
             int p;
             while (true) {
                 long[] t = heap.poll();
@@ -98,6 +99,7 @@ public final class SparseLU {
     public double[] solve(Sparse a, double[] b) {
         // numeric factorisation, row by row (up-looking Doolittle in permuted order)
         for (int k = 0; k < n; k++) {
+            Network.checkClockNow();
             int r = perm[k];
             for (int t = 0; t < a.len[r]; t++) work[inv[a.cols[r][t]]] += a.vals[r][t];
             int[] lo = lower[k];

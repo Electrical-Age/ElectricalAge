@@ -808,14 +808,34 @@ public final class Network {
         progressed = false;
         stepSubsteps = 0;
         stepDt = dt;
-        deadline = MAX_STEP_NANOS > 0 ? System.nanoTime() + MAX_STEP_NANOS : Long.MAX_VALUE;
+        long started = System.nanoTime();
+        deadline = MAX_STEP_NANOS > 0 ? started + MAX_STEP_NANOS : Long.MAX_VALUE;
+        hardDeadline = MAX_STEP_NANOS > 0 ? started + MAX_STEP_NANOS * 3 / 2 : Long.MAX_VALUE;
         overBudget = false;
-        if (solve(free, y0, dt)) done = dt;
-        else {
-            // (no convergence: two half steps, each from where the last ended)
+        try {
+            if (solve(free, y0, dt)) done = dt;
+            else {
+                // (no convergence: two half steps, each from where the last ended)
+                restore(free, y0);
+                if (CUT_SHORT && ADAPTIVE) adaptive(free, dt);
+                else substep(free, dt, 1);
+            }
+        } catch (OutOfTime t) {
+            hardDeadline = Long.MAX_VALUE;   // (first: restoring the state evaluates the EOS, which checks the clock)
+            // (a solve ran past twice the budget inside one iteration: the step is dropped, from where it began)
             restore(free, y0);
-            if (CUT_SHORT && ADAPTIVE) adaptive(free, dt);
-            else substep(free, dt, 1);
+            for (Edge e : edges) {
+                if (e.moved != null) java.util.Arrays.fill(e.moved, 0);
+                if (e.pending != null) java.util.Arrays.fill(e.pending, 0);
+                e.workJ = e.pendingWork = 0;
+            }
+            for (Node n : free) n.wallJ = n.pendingWall = 0;
+            done = 0;
+            if (!overBudget) stats.overBudget++;
+            overBudget = true;
+            stats.cut++;
+        } finally {
+            hardDeadline = Long.MAX_VALUE;
         }
         for (Edge e : edges) {
             e.flow = flow(e);
@@ -1065,6 +1085,34 @@ public final class Network {
      */
     public static long MAX_STEP_NANOS = 0;
     private long deadline = Long.MAX_VALUE;
+    /**
+     * 1.5 x MAX_STEP_NANOS after the step began: checkClock, called from the EOS and the Jacobian's inner loops, throws
+     * past it. The budget is checked only between iterations, and one iteration once ran past the server watchdog's 60 s
+     * (Incognito, 2026-11-21: MixFluid.drawSlope in a Jacobian of Dysnomia's 110-node plant). (The game steps networks
+     * on one thread.)
+     */
+    private static long hardDeadline = Long.MAX_VALUE;
+    private static int clockCalls;
+
+    /** Thrown by checkClock: the step is dropped (Network.step). */
+    static final class OutOfTime extends RuntimeException {
+        OutOfTime() {
+            super("fluid step out of time", null, false, false);
+        }
+    }
+
+    private static final OutOfTime OUT_OF_TIME = new OutOfTime();
+
+
+    /** From the inner loops (EOS evaluations, the Jacobian's columns): past hardDeadline, abandon the step. */
+    static void checkClock() {
+        if ((++clockCalls & 255) == 0) checkClockNow();
+    }
+
+    /** ... at once, from loops whose every turn may be slow (a large LU's rows). */
+    static void checkClockNow() {
+        if (hardDeadline != Long.MAX_VALUE && System.nanoTime() > hardDeadline) throw OUT_OF_TIME;
+    }
     /** This step ran out of MAX_STEP_NANOS. */
     public boolean overBudget;
 
@@ -1301,6 +1349,7 @@ public final class Network {
         int C = C(), S = C - 1;
         int M = C * free.size();
         Sparse J = new Sparse(M);
+        checkClock();
         for (int i = 0; i < M; i++) J.add(i, i, 1);
         // a wall's heat: R_U -= dt UA (Tw - T), so dR_U = dt UA dT
         for (int i = 0; i < free.size(); i++) {
@@ -1375,6 +1424,7 @@ public final class Network {
         }
         // heat conduction: H = C wa wb (Ta - Tb), through each node's temperature slope and its contents
         for (Edge e : edges) {
+            checkClock();
             if (e.conductance <= 0) continue;
             Integer ia = idx.get(e.a), ib = idx.get(e.b);
             double wa = wetted(e.a), wb = wetted(e.b), dTab = e.a.T() - e.b.T();

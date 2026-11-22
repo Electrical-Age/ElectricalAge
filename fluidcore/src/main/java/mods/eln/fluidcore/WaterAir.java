@@ -350,6 +350,7 @@ public final class WaterAir {
         if (near == null) return solve(mw, ma, U, V, 300);
         double T = near.T(), x = Math.log(near.vg());
         for (int it = 0; it < 12; it++) {
+            Network.checkClock();
             double vg = Math.exp(x);
             double[] r = residuals(mw, ma, U, V, T, vg);
             if (Math.abs(r[0]) < energyTol(Math.abs(mw) + Math.abs(ma), U) && Math.abs(r[1]) < 1e-13) return split(mw, ma, V, T, vg);
@@ -415,6 +416,7 @@ public final class WaterAir {
         double t = 0.5 * (a + b), tol = energyTol(Math.abs(mw) + Math.abs(ma), U);
         int side = 0;
         for (int i = 0; i < 200 && b - a > 1e-11; i++) {
+            Network.checkClock();
             t = fb != fa ? b - fb * (b - a) / (fb - fa) : 0.5 * (a + b);
             if (!(t > a && t < b) || i % 8 == 7) t = 0.5 * (a + b);
             double f = energyAt(mw, ma, V, t) - U;
