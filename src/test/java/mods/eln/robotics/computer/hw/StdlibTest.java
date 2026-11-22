@@ -72,6 +72,68 @@ class StdlibTest {
         m.editor.give(screen.submit(s));
     }
 
+    /** The Shell's plain commands (os-design section 5): relative paths, cd, copy into a directory, errors said, Janet untouched. */
+    @Test
+    void shellCommandsRunAndJanetStillEvaluates() {
+        type("(spit \"RAM:/a.txt\" \"hello there\")");
+        tick(40, "\n> ");
+        type("cd RAM:");
+        tick(40, "RAM:/");
+        type("type a.txt");
+        tick(40, "hello there");
+        type("copy a.txt b.txt");
+        tick(40, "copied RAM:/a.txt to RAM:/b.txt");
+        type("makedir d");
+        tick(40, "made RAM:/d");
+        type("copy b.txt d/");
+        tick(40, "to RAM:/d/b.txt");
+        type("cd d");
+        tick(40, "RAM:/d/");
+        type("dir");
+        tick(40, "b.txt");
+        type("cd ..");
+        tick(40, "RAM:/\n");
+        type("type \"d/b.txt\"");
+        tick(40, "hello there");
+        type("delete nope.txt");
+        tick(40, "delete: ");
+        type("type");
+        tick(40, "usage: type file");
+        type("(+ 1 2)");
+        tick(40, "3");
+        type("help");
+        tick(40, "Shell commands");
+        assertTrue(out.indexOf("copy from to") >= 0, "help lists the commands: " + out);
+    }
+
+    /** A second Shell: its own window, line and current directory; what it prints goes to its own log. */
+    @Test
+    void aSecondShellHasItsOwnWindowAndDirectory() {
+        type("(shell/new)");
+        tick(40, "\n> ");
+        int w = screen.scene.windows.keySet().stream().filter(k -> k > 1 && k < 250).max(Integer::compare).orElse(-1);
+        assertTrue(w > 1, "a new window: " + screen.scene.windows.keySet());
+        for (int t = 0; t < 20 && !screen.scene.windows.get(w).elements.containsKey(2); t++) {
+            m.tick();
+            m.run(1_000_000);
+            screen.feed(m);
+        }
+        m.editor.give(screen.submit(w, "cd RAM:"));
+        m.editor.give(screen.submit(w, "(def here 42)"));
+        for (int t = 0; t < 40 && screen.log(w).indexOf("42") < 0; t++) {
+            m.tick();
+            m.run(1_000_000);
+            screen.feed(m);
+        }
+        assertTrue(screen.log(w).contains("RAM:/") && screen.log(w).contains("42"), "Shell 2's log: " + screen.log(w));
+        // the first Shell keeps A:/ and its own definitions
+        type("(dyn :cwd)");
+        tick(40, "\n> ");
+        type("help");
+        tick(40, "The current directory: A:/");
+        assertFalse(screen.log().contains("RAM:/"), "Shell 1's log: " + screen.log());
+    }
+
     @Test
     void sleepWaitsTheComputersTimeAndCostsNothing() {
         type("(do (sleep 1) :woke)");

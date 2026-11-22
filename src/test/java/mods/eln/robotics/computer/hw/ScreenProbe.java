@@ -69,4 +69,9 @@ final class ScreenProbe {
     byte[] submit(String text) {
         return (Form.print(new Form.Symbol("submit"), 1L, 2L, ++seq, text) + "\n").getBytes(StandardCharsets.UTF_8);
     }
+
+    /** The message submitting text to window w's Shell line (element 2). */
+    byte[] submit(int w, String text) {
+        return (Form.print(new Form.Symbol("submit"), (long) w, 2L, ++seq, text) + "\n").getBytes(StandardCharsets.UTF_8);
+    }
 }

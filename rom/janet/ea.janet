@@ -33,6 +33,7 @@
 (def- line-waiters @{}) # tab -> the task waiting in getline for a line typed there
 (def- repl-tabs @{})   # tabs with a REPL (their line is element 2)
 (def- line-taken @{})  # tab -> the last submission a getline took there
+(def- minimized @{})   # windows minimised to icons, as last reported or asked
 
 (defn ticks "The computer's clock: game ticks it has run (20 a second)." [] (ea/ticks))
 (defn now "The computer's clock in seconds." [] (/ (ea/ticks) 20))
@@ -209,6 +210,7 @@
   (proc-stop t)
   (def p (get procs t))
   (put procs t nil)
+  (put repl-tabs t nil)
   (def keep (filter |(not= t ($ 1)) outputs))
   (array/clear outputs)
   (array/concat outputs keep)
@@ -266,6 +268,8 @@
       # (Wire: the window's close box; a window that says nothing about it ends its process)
       'closed (cond (and wh (wh :close)) (spawn (wh :close))
                     (get procs w) (proc-close w))
+      'minimized (put minimized w true)
+      'restored (put minimized w nil)
       'moved (when (and (number? (get m 4)) (number? (get m 5)))
                (put win-sizes w [(m 4) (m 5)])
                (when (and wh (wh :move)) (spawn (wh :move) (m 4) (m 5))))
@@ -479,8 +483,9 @@
 (defn ui/back "Lower window w." [w] (ui/send 'back w))
 (defn ui/focus "Bring window w forward and give it the keyboard." [w] (ui/send 'activate w))
 (defn ui/title "The screen bar's title." [s] (ui/send 'title s))
-(defn ui/minimize "Minimise window w to an icon on the desk." [w] (ui/send 'minimize w))
-(defn ui/restore "Bring window w back from its icon." [w] (ui/send 'restore w))
+(defn ui/minimize "Minimise window w to an icon on the desk." [w] (put minimized w true) (ui/send 'minimize w))
+(defn ui/restore "Bring window w back from its icon." [w] (put minimized w nil) (ui/send 'restore w))
+(defn ui/minimized? "Is window w minimised to an icon?" [w] (truthy? (get minimized w)))
 (defn ui/pixmap
   "Make pixmap id (1-4095) from a picture: a struct {:w :h :palette [...] :data \"...\"} (pix/load reads one from a
   .pix file). Palette entries are dyes (:white ...) or \"#rrggbb\"; data has a character a dot, 0-9 then a-z into the
@@ -582,9 +587,55 @@
 
 (defn- core-names [] (ea/names root-env))
 
+# ---- the Shell's plain commands (os-design section 5: for people who don't write Lisp yet). A line whose first word is
+# one of these, and which doesn't start with "(", runs it with the rest of the line's words; anything else is Janet.
+
+(defn- shell-path
+  "path made absolute against the Shell's current directory: \"x.janet\", \"../x\", \"/x\" and \"B:\" all work."
+  [env path]
+  (def cwd (or (env :cwd) "A:/"))
+  (def p (string path))
+  (cond
+    (string/find ":" p) (if (string/has-suffix? ":" p) (string (string/ascii-upper p) "/")
+                          (let [[d rest] (string/split ":" p 0 2)] (string (string/ascii-upper d) ":" rest)))
+    (string/has-prefix? "/" p) (string (first (string/split "/" cwd)) p)
+    (do
+      (def parts (filter |(not (empty? $)) (string/split "/" cwd)))
+      (each w (string/split "/" p)
+        (cond (or (= w "") (= w ".")) nil
+              (= w "..") (when (> (length parts) 1) (array/pop parts))
+              (array/push parts w)))
+      (def out (string/join parts "/"))
+      (if (= 1 (length parts)) (string out "/") (string out (if (string/has-suffix? "/" p) "/" ""))))))
+
+(defn- shell-need [args n usage] (when (< (length args) n) (error (string "usage: " usage))))
+
+(def- shell-commands "The Shell's commands: name -> [usage help (fn [env args])] (filled in below, once edit and the rest exist)." @{})
+
+(defn- shell-words
+  "A line's words, with \"double quotes\" keeping spaces in one; nil when it is no command (or starts with \"(\")."
+  [text]
+  (def t (string/trim text))
+  (unless (or (empty? t) (string/has-prefix? "(" t))
+    (def words @[])
+    (var cur @"")
+    (var quoted false)
+    (each c t
+      (cond
+        (= c 34) (set quoted (not quoted))
+        (and (or (= c 32) (= c 9)) (not quoted)) (when (> (length cur) 0) (array/push words (string cur)) (set cur @""))
+        (buffer/push-byte cur c)))
+    (when (> (length cur) 0) (array/push words (string cur)))
+    (when (get shell-commands (first words)) words)))
+
+(defn- shell-run [env words]
+  (def [_ _ f] (get shell-commands (first words)))
+  (f env (array/slice words 1)))
+
 (defn- repl-tab
   "The REPL: tab 1, a log over an editable line. The line is edited on the player's client; Enter sends it, the OS
-  echoes it into the log, evaluates each form as a task, and prints the value."
+  echoes it into the log, evaluates each form as a task, and prints the value. A Shell command line (shell-commands)
+  runs that command instead."
   [env &opt t name]
   (default t 1)
   (put repl-tabs t true)
@@ -599,12 +650,24 @@
     (set taken true)
     (ui/busy t 2 seq true)
     (ui/append t 1 :gray (string (if (empty? (parser/state p :delimiters)) "> " "  ") text "\n"))
-    (parser/consume p (string text "\n"))
+    (def words (if (empty? (parser/state p :delimiters)) (shell-words text)))
+    (if words
+      (do   # a command: run as a task like a form, so Break stops it and it may wait for a line
+        (def task (spawn-in env shell-run env words))
+        (when (= t 1) (set repl-eval task))
+        (def res (yield [:join task]))
+        (when (= t 1) (set repl-eval nil))
+        (flush-outputs)
+        (match res
+          [:error e f] (buffer/push (env :err) (string (first words) ": " e "\n"))
+          _ nil))
+      (parser/consume p (string text "\n")))
     (while (parser/has-more p)
       (def form (parser/produce p))
-      (set repl-eval (spawn-in env eval-form form env))
-      (def res (yield [:join repl-eval]))
-      (set repl-eval nil)
+      (def task (spawn-in env eval-form form env))
+      (when (= t 1) (set repl-eval task))
+      (def res (yield [:join task]))
+      (when (= t 1) (set repl-eval nil))
       (flush-outputs)
       (match res
         [:ok v] (do (put env '_ @{:value v}) (buffer/push (env :out) (string/format "%q\n" v)))
@@ -686,6 +749,18 @@
   "As proc/start, in a window of the given geometry: [x y cw ch title flags] as for ui/window."
   [name geometry f & args]
   (proc-start name geometry f ;args))
+
+(defn shell/new
+  "Another Shell window (the first is window 1): its own definitions, history and current directory. Returns its window."
+  []
+  (def n (+ 1 (length (filter |(get repl-tabs $) (keys repl-tabs)))))
+  (def t (proc/new-tab (string "Shell " n)))
+  (def env (make-env root-env-of-os))
+  (put (get procs t) :env env)
+  (put env :cwd "A:/")
+  (repl-tab env t (string "Shell " n))
+  (ui/focus t)
+  t)
 
 # ---- applications: a directory NAME.app holding main.janet and icon.pix (Baughn 1572655325104832613)
 
@@ -828,6 +903,69 @@
   (ui/focus t)
   t)
 
+# ---- the Shell's commands
+
+(merge-into shell-commands
+  {"dir" ["dir [path]" "list a directory"
+           (fn [env args]
+             (def d (shell-path env (or (first args) ".")))
+             (def d (if (string/has-suffix? "/" d) d (string d "/")))
+             (def names (disk/list d))
+             (print d "  (" (length names) (if (= 1 (length names)) " entry)" " entries)"))
+             (def w (+ 2 (max 12 ;(map length names))))
+             (def per (max 1 (math/floor (/ (- ui/width 2) w))))
+             (var col 0)
+             (each n names
+               (prin (string/format (string "%-" w "s") n))
+               (++ col)
+               (when (= col per) (print) (set col 0)))
+             (when (> col 0) (print)))]
+    "cd" ["cd path" "change the current directory (cd .. goes up, cd B: changes drive)"
+          (fn [env args]
+            (def d (shell-path env (or (first args) "/")))
+            (def d (if (string/has-suffix? "/" d) d (string d "/")))
+            (disk/list d)   # (an error if there is no such directory)
+            (put env :cwd d)
+            (print d))]
+    "type" ["type file" "print a file"
+            (fn [env args] (shell-need args 1 "type file") (print (slurp (shell-path env (first args)))))]
+    "copy" ["copy from to" "copy a file (to a directory: under the same name)"
+            (fn [env args]
+              (shell-need args 2 "copy from to")
+              (def from (shell-path env (args 0)))
+              (var to (shell-path env (args 1)))
+              (when (string/has-suffix? "/" to) (set to (string to (last (string/split "/" from)))))
+              (spit to (slurp from))
+              (print "copied " from " to " to))]
+    "delete" ["delete file" "delete a file or an empty directory"
+              (fn [env args] (shell-need args 1 "delete file") (def p (shell-path env (args 0))) (disk/delete p) (print "deleted " p))]
+    "rename" ["rename from to" "rename or move a file on its disk"
+              (fn [env args] (shell-need args 2 "rename from to")
+                (disk/rename (shell-path env (args 0)) (shell-path env (args 1))) (print "renamed"))]
+    "makedir" ["makedir name" "make a directory"
+               (fn [env args] (shell-need args 1 "makedir name") (def p (shell-path env (args 0))) (disk/mkdir p) (print "made " p))]
+    "ed" ["ed file" "edit a file in Ed"
+          (fn [env args] (shell-need args 1 "ed file") (edit (shell-path env (args 0))))]
+    "run" ["run file" "run a Janet file as a process, in a window of its own"
+           (fn [env args] (shell-need args 1 "run file") (def p (shell-path env (args 0)))
+             (proc/start (last (string/split "/" p)) run-file p))]
+    "format" ["format drive [label]" "erase a disk (asks first)"
+              (fn [env args]
+                (shell-need args 1 "format drive [label]")
+                (def d (string/ascii-lower (string/trimr (args 0) ":")))
+                (def drive (case d "a" :a "b" :b "ram" :ram (error (string "no drive " (args 0)))))
+                (def answer (string/trim (getline (string "Erase everything on " (string/ascii-upper d) ":? Type yes: "))))
+                (if (= answer "yes") (do (disk/format drive (get args 1)) (print "formatted " (string/ascii-upper d) ":"))
+                  (print "not formatted")))]
+    "help" ["help" "list these commands"
+            (fn [env args]
+              (print "Shell commands (anything else, and any line starting with \"(\", is Janet):")
+              (each k (sort (keys shell-commands))
+                (def [usage what] (get shell-commands k))
+                (print (string/format "  %-22s %s" usage what)))
+              (print "The manual: the desk's Help icon, or (guide).")
+              (print "The current directory: " (or (env :cwd) "A:/")))]})
+
 # ---- the inspector: processes, tasks, their stacks, locals and values, Smalltalk-style (Baughn)
 
 (defn- short "A value in a few characters, never walking a big structure (Argon's review)." [v]
@@ -934,6 +1072,7 @@
   (set root-env-of-os (curenv))
   (def env (make-env (curenv)))
   (set repl-env env)
+  (put env :cwd "A:/")
   (ui/send 'screen ui/screen-width ui/screen-height)
   (ui/title "GCC Field Computer   Kernel ROM 1.4")
   (repl-tab env)

@@ -115,6 +115,11 @@
   (def present (filter |(disk/present? ($ 0)) drives))
   [present (mapcat |(app/list ($ 0)) present)])
 
+(defn open-shell
+  "The Shell icon: the first Shell back from its icon, or, when it is up already, another Shell."
+  []
+  (if (ui/minimized? 1) (do (ui/restore 1) (ui/focus 1)) (shell/new)))
+
 (defn layout [[present apps]]
   (ui/clear t)
   # drives down the left, top first; then the Shell
@@ -122,7 +127,7 @@
   (eachp [i [d root label]] present
     (ui/desk-icon t (+ 1 i) 1 y label (if (= d :ram) P-RAM P-FLOPPY) (fn [] (open-filer root)))
     (+= y 4))
-  (ui/desk-icon t 9 1 y "Shell" P-SHELL (fn [] (ui/restore 1) (ui/focus 1)))
+  (ui/desk-icon t 9 1 y "Shell" P-SHELL open-shell)
   # applications in a grid to the right of them, clear of the bottom row (minimised windows' icons)
   (eachp [i dir] apps
     (def col (% i 7))   # (9 cells apart: 8-letter labels keep a gap)
@@ -137,13 +142,14 @@
   (desk-menus))
 (set desk-menus
      (fn []
-       (ui/menus t [["Desk" ["Open Shell" "s"] ["Look at the drives" "r"] nil ["Open A:" ""] ["Open B:" ""] ["Open RAM:" ""]]
+       (ui/menus t [["Desk" ["Open Shell" "s"] ["New Shell" "n"] ["Look at the drives" "r"] nil ["Open A:" ""] ["Open B:" ""] ["Open RAM:" ""]]
                     ["Screen" [(mode-item 80 25) ""] [(mode-item 120 40) ""]]]
                  (fn [menu item]
                    (case (string/trim item "* ")
                      "80 x 25" (set-mode 80 25)
                      "120 x 40" (set-mode 120 40)
                      "Open Shell" (do (ui/restore 1) (ui/focus 1))
+                     "New Shell" (shell/new)
                      "Look at the drives" (do (set shown nil) (layout (survey)))
                      "Open A:" (open-filer "A:/")
                      "Open B:" (open-filer "B:/")
