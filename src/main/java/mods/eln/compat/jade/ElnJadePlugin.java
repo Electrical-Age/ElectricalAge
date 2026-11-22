@@ -148,6 +148,12 @@ public class ElnJadePlugin implements IWailaPlugin {
             if (mods.eln.fluid.FluidWorld.solverFailedAt(acc.getPosition().asLong())
                 || owner != null && mods.eln.fluid.FluidWorld.solverFailedAt(owner.node.coordonate.pos().asLong()))   // (a multiblock's ghost cells too)
                 tag.putString("elnAlarm", mods.eln.i18n.I18N.tr("SOLVER FAILED: CALL BAUGHN"));
+            else {
+                // (a network too heavy for the server thread, stepped in the background: said too, Baughn 1574029078598778991)
+                String heavy = mods.eln.fluid.FluidWorld.heavyAt(acc.getPosition().asLong());
+                if (heavy == null && owner != null) heavy = mods.eln.fluid.FluidWorld.heavyAt(owner.node.coordonate.pos().asLong());
+                if (heavy != null) tag.putString("elnNote", heavy);
+            }
             if (m == null || m.isEmpty()) return;
             if (owner != null ? !owner.thermalLoadList.isEmpty() : hasHeat(acc)) {   // (the ambient it cools towards: by biome, height, depth; Baughn 2026-10-26)
                 m = new java.util.LinkedHashMap<>(m);
@@ -173,6 +179,8 @@ public class ElnJadePlugin implements IWailaPlugin {
             if (!title.isEmpty()) tooltip.replace(snownee.jade.api.JadeIds.CORE_OBJECT_NAME, Component.literal(title));
             String alarm = acc.getServerData().getStringOr("elnAlarm", "");
             if (!alarm.isEmpty()) tooltip.add(Component.literal(alarm).withStyle(net.minecraft.ChatFormatting.RED, net.minecraft.ChatFormatting.BOLD));
+            String note = acc.getServerData().getStringOr("elnNote", "");
+            if (!note.isEmpty()) tooltip.add(Component.literal(note).withStyle(net.minecraft.ChatFormatting.YELLOW));
             var list = acc.getServerData().getListOrEmpty("elnProbe");
             boolean details = mods.eln.Eln.wailaEasyMode || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
             int n = details ? list.size() : Math.min(HEADLINE, list.size());

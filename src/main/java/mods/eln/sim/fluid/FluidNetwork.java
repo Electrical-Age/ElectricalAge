@@ -48,6 +48,11 @@ public final class FluidNetwork {
         return core != null && core.background;
     }
 
+    /** How many ticks its last background step stood for (1 on the server thread). */
+    public int span() {
+        return core == null ? 1 : core.lastSpan;
+    }
+
     public double lastStepMs() {
         return core == null ? 0 : core.lastMs;
     }

@@ -66,6 +66,8 @@ public final class FluidWorld implements IProcess {
         INSTANCE.handedBack.clear();
         INSTANCE.dirty = false;
         INSTANCE.slowAt.clear();
+        INSTANCE.heavyAt.clear();
+        INSTANCE.heavyNote.clear();
         INSTANCE.overBudgetLogged.clear();
         return INSTANCE;
     }
@@ -179,6 +181,23 @@ public final class FluidWorld implements IProcess {
 
     /** Blocks (BlockPos.asLong) of stuck networks whose step last ran out of its time, and when (ms): Jade calls it out. */
     private final Map<Long, Long> slowAt = new java.util.concurrent.ConcurrentHashMap<>();
+    /** Blocks of networks stepped in the background, and when they were last marked (ms) and how (heavyNote). */
+    private final Map<Long, Long> heavyAt = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<Long, String> heavyNote = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<FluidNetwork, Long> heavyMarked = new java.util.WeakHashMap<>();
+
+    /**
+     * Is the fluid network at this block stepped in the background (Baughn 1574029078598778991: called out in Jade too)?
+     * Its note, e.g. "it updates every 4 ticks", or null.
+     */
+    public static String heavyAt(long pos) {
+        Long t = INSTANCE.heavyAt.get(pos);
+        if (t == null) return null;
+        if (System.currentTimeMillis() - t < 5_000) return INSTANCE.heavyNote.get(pos);
+        INSTANCE.heavyAt.remove(pos);
+        INSTANCE.heavyNote.remove(pos);
+        return null;
+    }
 
     /**
      * Did the fluid network at this block run out of its step time in the last few seconds (Baughn 1573807986227544245:
@@ -236,6 +255,27 @@ public final class FluidWorld implements IProcess {
      * moment isn't (AdventurAgent saw Dysnomia's plant flagged after a restart).
      */
     private void markIfStuck(FluidNetwork n) {
+        if (n.background()) {
+            // (once a second: marking walks every device)
+            long now = System.currentTimeMillis();
+            Long last = heavyMarked.get(n);
+            if (last == null || now - last >= 1_000) {
+                heavyMarked.put(n, now);
+                if (heavyAt.size() > 4096) {
+                    heavyAt.values().removeIf(t -> now - t > 5_000);
+                    heavyNote.keySet().retainAll(heavyAt.keySet());
+                }
+                String note = mods.eln.i18n.I18N.tr("Heavy fluid network: it updates every %1$ ticks", n.span());
+                java.util.Set<FluidNode> in = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
+                in.addAll(n.nodes);
+                for (FluidDevice d : devices)
+                    for (FluidDevice.FluidPort p : d.fluidPorts())
+                        if (in.contains(nodeFor(p.node()))) {
+                            heavyAt.put(p.pos(), now);
+                            heavyNote.put(p.pos(), note);
+                        }
+            }
+        }
         double stall = 0;
         for (FluidNode x : n.nodes) stall = Math.max(stall, x.stallNow);
         if (stall < STUCK_SECONDS) return;

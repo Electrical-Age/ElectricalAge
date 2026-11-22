@@ -327,6 +327,7 @@ public final class CoreStep {
     /** How long the last finished step took (ms), and whether it ran in the background (FluidWorld's log, the stats). */
     public double lastMs;
     public boolean background;
+    public int lastSpan = 1;
 
     /** A started step: what finish() needs once it has run. */
     private static final class Pending {
@@ -336,13 +337,30 @@ public final class CoreStep {
         long failures, sub0, cut0, crawls0;
         volatile long took;
         boolean background;
-        int slow;
+        int slow, span;
     }
 
     /** Tests: a background step's result is taken no sooner than this many ticks after its start (a test server ticks as
      *  fast as it can, so a step that takes real time would span no ticks to speak of). */
     public static int testHoldTicks;
     private int waited;
+    /**
+     * A background step covers the real time since the one before it began (Baughn 1574029078598778991: fluid time must
+     * not fall behind the devices', whose furnaces, timers and watchdogs run every tick: a network at a fraction of real
+     * time had its boilers overheat, 2026-11-21): the ticks since the last one was started, MAX_SPAN at most (the rest is
+     * dropped, and Jade says the solver failed). The cost of a transient doesn't grow with the step: its sub-steps do
+     * the same work (Dysnomia's blow-down: 23-31 s of solving per 30 s simulated, at 0.05 s steps and at 0.8 s).
+     */
+    static final int MAX_SPAN = 20;
+    private int ticksSince;
+    /**
+     * What the results so far still owe the devices, handed out evenly over the ticks their step stood for (ticksLeft),
+     * so a device books each tick what moved in a tick, and all of it once: per edge {liquid, vapour, air, enthalpy, all,
+     * work} (kg and J) and its species (kg), per node its wall heat (J).
+     */
+    private double[][] remE, remS;
+    private double[] remWall;
+    private int ticksLeft;
     private static long failureLogged;
 
     boolean pending() {
@@ -361,6 +379,7 @@ public final class CoreStep {
 
     void step(FluidNetwork fn, double dt) {
         boolean applied = false;
+        ticksSince++;
         if (job != null) {
             if (!job.isDone() || waited < testHoldTicks) {
                 waited++;
@@ -392,12 +411,19 @@ public final class CoreStep {
         int slow = 0;
         for (FluidNode n : nodes) slow = Math.max(slow, n.slowSteps);
         boolean bg = budgetNanos > 0 && slow >= HEAVY_AFTER;
-        if (applied && !bg) return;   // (light again: back on this thread from the next tick)
+        if (applied && !bg) {   // (light again: back on this thread from the next tick)
+            ticksSince = 0;
+            return;
+        }
+        // (a background step: as long as the ticks since the last one began)
+        int span = bg ? Math.max(1, Math.min(ticksSince, MAX_SPAN)) : 1;
+        double droppedNow = bg ? (ticksSince - span) * dt : 0;
+        ticksSince = 0;
         double[] heat0 = new double[cn.length];
         // (at most one tick's worth caught up per tick: devices step their own processes by the tick, and a second of
         // fluid landing in one tick would be a spike they all see)
         // (a background step is one tick long: it runs behind anyway, and its time isn't owed)
-        double tick = dt, ask = bg ? dt : dt + Math.min(owed, dt);
+        double tick = dt, ask = bg ? span * dt : dt + Math.min(owed, dt);
         owed -= ask - dt;
         dt = ask;
         // contents in (the authority is the FluidNode; the core wakes by its own signature when they change)
@@ -408,7 +434,8 @@ public final class CoreStep {
             c.m[1] = n.mAir;
             for (int j = 2; j < c.m.length; j++) c.m[j] = n.extra != null && ids[j] - 2 < n.extra.length ? n.extra[ids[j] - 2] : 0;
             c.U = n.energy;
-            c.heat = n.fixed ? 0 : n.heat - n.lossWPerK * (n.T() - Water.T_AMBIENT);
+            // (devices add their heat (W) every tick: over a background step's ticks, their mean)
+            c.heat = n.fixed ? 0 : n.heat / span - n.lossWPerK * (n.T() - Water.T_AMBIENT);
             heat0[i] = n.heat;
             n.heat = 0;
             c.wallUA = n.fixed ? 0 : n.wallUA;
@@ -506,6 +533,8 @@ public final class CoreStep {
             double stepDt = dt;
             background = true;
             waited = 0;
+            p.span = span;
+            if (droppedNow > 0) mods.eln.fluid.FluidWorld.recordProgress(nodes, 0, droppedNow);
             job = WORKER.submit(() -> {
                 long t0 = System.nanoTime();
                 net.step(stepDt);
@@ -514,6 +543,7 @@ public final class CoreStep {
             if (!applied) waiting(tick);
             return;
         }
+        p.span = 1;
         net.budget = -1;
         Network.MAX_STEP_NANOS = budgetNanos;
         long t0 = System.nanoTime();
@@ -525,13 +555,59 @@ public final class CoreStep {
     /** A tick while a background step runs: nothing moved, for devices to book nothing; the core isn't touched. */
     private void waiting(double tick) {
         overBudget = true;
-        for (FluidEdge e : edges) clear(e);
+        // (its last result is still being handed out: on time. With nothing left, it is behind, and that time is lost)
+        boolean behind = ticksLeft <= 0;
+        handOut(tick);
         double before = 0;
-        for (FluidNode n : nodes) {
-            before = Math.max(before, n.stallNow);
-            if (!n.fixed) n.wallJ = 0;
+        for (FluidNode n : nodes) before = Math.max(before, n.stallNow);
+        mods.eln.fluid.FluidWorld.recordProgress(nodes, behind ? before + tick : 0, 0);
+    }
+
+    /** This tick's share of what the results still owe, onto the edges and nodes (rates per second; work and wall heat in J). */
+    private void handOut(double tick) {
+        if (remE == null) {
+            for (FluidEdge e : edges) clear(e);
+            for (FluidNode n : nodes) if (!n.fixed) n.wallJ = 0;
+            return;
         }
-        mods.eln.fluid.FluidWorld.recordProgress(nodes, before + tick, tick);
+        int parts = Math.max(1, ticksLeft);
+        for (int k = 0; k < remE.length; k++) {
+            FluidEdge e = edges.get(k);
+            double[] r = remE[k];
+            double liquid = r[0] / parts, vapour = r[1] / parts, air = r[2] / parts, enthalpy = r[3] / parts, all = r[4] / parts, work = r[5] / parts;
+            r[0] -= liquid;
+            r[1] -= vapour;
+            r[2] -= air;
+            r[3] -= enthalpy;
+            r[4] -= all;
+            r[5] -= work;
+            e.fLiquid = liquid / tick;
+            e.fVapour = vapour / tick;
+            e.fAir = air / tick;
+            e.fEnthalpy = enthalpy / tick;
+            e.flow = all / tick;
+            e.work = work / tick;
+            e.workJ = work;
+            double[] s = remS[k];
+            if (s == null) {
+                if (e.fSpecies != null) java.util.Arrays.fill(e.fSpecies, 0);
+                continue;
+            }
+            if (e.fSpecies == null || e.fSpecies.length < s.length) e.fSpecies = new double[s.length];
+            for (int j = 0; j < s.length; j++) {
+                double m = s[j] / parts;
+                s[j] -= m;
+                e.fSpecies[j] = m / tick;
+            }
+        }
+        for (int i = 0; i < remWall.length; i++) {
+            FluidNode n = nodes.get(i);
+            if (n.fixed) continue;
+            double q = remWall[i] / parts;
+            remWall[i] -= q;
+            n.wallJ = q;
+        }
+        if (ticksLeft > 0) ticksLeft--;
     }
 
     private static void clear(FluidEdge e) {
@@ -543,6 +619,11 @@ public final class CoreStep {
     /** After the core's step (on this thread, or a background one's first tick after it): its results onto nodes and edges. */
     private void finish(Pending p) {
         double tick = p.tick, dt = p.dt;
+        if (remE == null) {
+            remE = new double[ce.length][6];
+            remS = new double[ce.length][];
+            remWall = new double[cn.length];
+        }
         double[] xl = p.xl, u0 = p.u0, h0 = p.h0;
         double[][] m0 = p.m0;
         long failures = p.failures, sub0 = p.sub0, cut0 = p.cut0, crawls0 = p.crawls0;
@@ -597,13 +678,12 @@ public final class CoreStep {
             // (asleep, the core keeps the last step's heat, as it keeps its edges' moves: a network sleeps in a steady
             // state, and a condenser's cooling or a boiler's shell passes heat through it all the same; read as 0, a
             // condenser asleep booked no heat)
-            n.wallJ = c.wallJ;
+            remWall[i] += c.wallJ;
             n.update();
         }
-        // what each edge carried
+        // what each edge carried: added to what is still owed, and handed out over the ticks the step stood for
         int size = SpeciesRegistry.get().size();
         for (int k = 0; k < ce.length; k++) {
-            FluidEdge e = edges.get(k);
             Network.Edge c = ce[k];
             // (asleep, the core keeps the last step's moves: the state stands still, but a pump circulating round a loop
             // still circulates; reported as nothing, its loop flow read 0)
@@ -613,21 +693,22 @@ public final class CoreStep {
                 for (int j = 0; j < both.length; j++) both[j] += ceTop[k].moved[j];
                 mv = both;
             }
-            clear(e);
-            e.work = c == null ? 0 : c.workJ / dt;
-            e.workJ = c == null ? 0 : c.workJ;
+            double[] r = remE[k];
+            if (c != null) r[5] += c.workJ;
             if (mv == null) continue;
             int S = mv.length - 1;
-            double w = mv[0] / dt;
-            e.fLiquid = w * xl[k];
-            e.fVapour = w * (1 - xl[k]);
-            e.fAir = mv[1] / dt;
-            e.fEnthalpy = mv[S] / dt;
-            double total = 0;
-            for (int j = 0; j < S; j++) total += mv[j];
-            e.flow = total / dt;
-            if (e.fSpecies == null || e.fSpecies.length < size) e.fSpecies = new double[size];
-            for (int j = 0; j < S; j++) e.fSpecies[ids == null ? j : ids[j]] = mv[j] / dt;
+            r[0] += mv[0] * xl[k];
+            r[1] += mv[0] * (1 - xl[k]);
+            r[2] += mv[1];
+            r[3] += mv[S];
+            if (remS[k] == null || remS[k].length < size) remS[k] = remS[k] == null ? new double[size] : java.util.Arrays.copyOf(remS[k], size);
+            for (int j = 0; j < S; j++) {
+                r[4] += mv[j];
+                remS[k][ids == null ? j : ids[j]] += mv[j];
+            }
         }
+        ticksLeft = p.span;
+        lastSpan = p.span;
+        handOut(tick);
     }
 }
