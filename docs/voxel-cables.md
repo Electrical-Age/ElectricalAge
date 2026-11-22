@@ -325,6 +325,17 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   dimension or item, a minute idle, too far), checked each tick and on each click. A player has one route, of either
   kind. The pipe kit's old one-straight-block click is gone (Baughn). A pipe route may start and end on pipes
   (`PipePlacer.layJoined` with both joins).
+- Near a join (a route started or finished on an old run) the route may run inside the old run (`JoinRun`, todo #516;
+  Baughn: "let the pathfinder pass through same-type voxels of the cable within 4-5 voxels of the waypoint"): within
+  `JoinRun.REACH` (6) voxels along it from the join point, in the join's block, the old run's voxels are taken out of the
+  used voxels the router sees (`RouteView.freeing`; the view's `parts` give the old run, a snapshot's too), and the route
+  is cut where it leaves the old run's centre line (`Spec.route`, so the preview's outline, the length and the kit's cost
+  are of what is laid). The new run starts or ends there: a splice, or at the old run's end its continuation (a pipe's
+  join moves there, `Routed.startJoin/endJoin`; on a block's face it is a port coupling, no junction). Only the kit's own
+  cable (same tier, spec and face) or any pipe (the join rule) is run through; a pipe's fittings and junctions are not.
+  Before, a route from a point just short of a cable's end laid a piece over its last voxels, and a pipe hopped over a
+  dead stub. Routes along the old run past its end from further away still run beside it (a parallel run, not
+  overlapping): `JoinRouteCases`' unchecked rows. A route wholly inside the old run lays nothing (`CablePlacer.INSIDE`).
 - Per kind, in its spec (`RoutePlacer.Spec`): the ends (`endAt`: a cable's connectors and edge rule, a pipe's ports,
   with "Its port already has a pipe" for a machine's piped port or a pipe sensor's), routing (surface or free), laying (cables with their hang,
   pipes with their junctions), the join rule (cables: the same tier or two power cables; pipes: any pipe tier, the
@@ -343,7 +354,9 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
 - Tests: `RouteLeakCases` (lay/break/re-lay rounds leave nothing in the simulator or fluid world),
   `PipeCases` (`pipe_laying_all_or_nothing`, `pipe_kit_starts_anywhere_and_caps` with the start-spot refusal,
   `pipe_kit_branches_pipe_to_pipe`, `kit_preview_says_what_the_click_does`, `pipe_kit_refuses_a_taken_port`),
-  `HandbookFixCases` (a cable route can't end where it started), `CableRouteLapseTest`.
+  `HandbookFixCases` (a cable route can't end where it started), `CableRouteLapseTest`, `JoinRouteCases` (routes started
+  or finished on an old cable or pipe near its end, at its end, from the side: no piece over it, no dead stub, one
+  network; rows logged unchecked for routes along it past its end and an MV kit on an LV run).
 
 ## Toolbag
 
