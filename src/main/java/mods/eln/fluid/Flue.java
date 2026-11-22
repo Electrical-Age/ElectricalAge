@@ -169,8 +169,9 @@ public final class Flue {
         if (sink == null) return;
         airBurntKg += Math.max(0, sink.delivered) * dt;
         smokeKg += Math.max(0, flow.delivered) * dt;
-        steamOwed = Math.max(0, steamOwed - Math.max(0, steam.delivered) * dt);
-        if (steamOwed < 1e-9) steamOwed = 0;
+        // (a long step's take is booked over the ticks after it: owed may dip below zero meanwhile, and repays itself)
+        steamOwed -= Math.max(0, steam.delivered) * dt;
+        if (Math.abs(steamOwed) < 1e-9) steamOwed = 0;
     }
 
     /** Before a fluid step: the smoke of a fire of power fireW (W) into the pipe, as the source's rate; returns whether

@@ -349,7 +349,7 @@ public final class CoreStep {
      * A background step covers the real time since the one before it began (Baughn 1574029078598778991: fluid time must
      * not fall behind the devices', whose furnaces, timers and watchdogs run every tick: a network at a fraction of real
      * time had its boilers overheat, 2026-11-21): the ticks since the last one was started, MAX_SPAN at most (the rest is
-     * dropped, and Jade says the solver failed). The cost of a transient doesn't grow with the step: its sub-steps do
+     * dropped, and counts towards Jade's alarm). The cost of a transient doesn't grow with the step: its sub-steps do
      * the same work (Dysnomia's blow-down: 23-31 s of solving per 30 s simulated, at 0.05 s steps and at 0.8 s).
      */
     static final int MAX_SPAN = 20;
@@ -364,16 +364,8 @@ public final class CoreStep {
     private int ticksLeft, behindTicks;
     /** The length (s) of the last step the core really ran: asleep, it keeps that step's moves, for a step of that length. */
     private double awakeDt;
-    /** Tests: all the mass its steps moved over edges (kg, absolute sum), and the signed sums moved and handed out to devices. */
-    public double movedKg;
-    private double movedSum, bookedSum;
-
-    /** Tests: mass moved that is neither handed out to devices nor waiting to be (kg, signed): 0 but for rounding, at any tick. */
-    public double unbooked() {
-        double owed = 0;
-        if (remE != null) for (double[] r : remE) owed += r[4];
-        return movedSum - bookedSum - owed;
-    }
+    /** Tests: all the mass its steps moved over edges (kg, absolute sum), and the sum of what each tick handed out to devices as flows (kg, absolute). */
+    public double movedKg, bookedSum;
     private static long failureLogged;
 
     boolean pending() {
@@ -440,13 +432,12 @@ public final class CoreStep {
         for (FluidNode n : nodes) slow = Math.max(slow, n.slowSteps);
         boolean bg = budgetNanos > 0 && slow >= HEAVY_AFTER;
         if (applied && !bg) {   // (light again: back on this thread from the next tick, owing the ticks its last step took)
-            owed = Math.min(owed + ticksSince * dt, OWED_MAX);
-            ticksSince = 0;
             return;
         }
         // (a background step: as long as the ticks since the last one began)
-        int span = bg ? Math.max(1, Math.min(ticksSince, MAX_SPAN)) : 1;
-        double droppedNow = bg ? (ticksSince - span) * dt : 0;
+        int ticks = Math.max(1, ticksSince), span = bg ? Math.min(ticks, MAX_SPAN) : 1;
+        double droppedNow = bg ? (ticks - span) * dt : 0;
+        if (!bg) owed = Math.min(owed + (ticks - 1) * dt, OWED_MAX);
         ticksSince = 0;
         double[] heat0 = new double[cn.length];
         // (at most one tick's worth caught up per tick: devices step their own processes by the tick, and a second of
@@ -463,8 +454,8 @@ public final class CoreStep {
             c.m[1] = n.mAir;
             for (int j = 2; j < c.m.length; j++) c.m[j] = n.extra != null && ids[j] - 2 < n.extra.length ? n.extra[ids[j] - 2] : 0;
             c.U = n.energy;
-            // (devices add their heat (W) every tick: over a background step's ticks, their mean)
-            c.heat = n.fixed ? 0 : n.heat / span - n.lossWPerK * (n.T() - Water.T_AMBIENT);
+            // (devices add their heat (W) every tick: over the ticks since the last step began, their mean)
+            c.heat = n.fixed ? 0 : n.heat / ticks - n.lossWPerK * (n.T() - Water.T_AMBIENT);
             heat0[i] = n.heat;
             n.heat = 0;
             c.wallUA = n.fixed ? 0 : n.wallUA;
@@ -566,11 +557,8 @@ public final class CoreStep {
             background = true;
             waited = 0;
             p.span = span;
-            if (droppedNow > 0) {   // (over MAX_SPAN ticks behind: that time is lost, and counts towards Jade's alarm)
-                double before = 0;
-                for (FluidNode n : nodes) before = Math.max(before, n.stallNow);
-                mods.eln.fluid.FluidWorld.recordProgress(nodes, before + droppedNow, droppedNow);
-            }
+            // (over MAX_SPAN ticks behind: that time is lost; waiting() counted it towards Jade's alarm tick by tick)
+            if (droppedNow > 0) mods.eln.fluid.FluidWorld.recordProgress(nodes, stallNow(), droppedNow);
             job = WORKER.submit(() -> {
                 long t0 = System.nanoTime();
                 net.step(stepDt);
@@ -592,13 +580,20 @@ public final class CoreStep {
     /** A tick while a background step runs: the devices get this tick's share of the last results; the core isn't touched. */
     private void waiting(double tick) {
         overBudget = true;
-        // (its last result is still being handed out: on time. With nothing left, it is behind, and that time is lost)
+        // (its last result is still being handed out: on time. With nothing left it is behind; the next step covers
+        // that time, up to MAX_SPAN ticks)
         boolean behind = ticksLeft <= 0;
         if (behind) behindTicks++;
         handOut(tick);
-        double before = 0;
-        for (FluidNode n : nodes) before = Math.max(before, n.stallNow);
+        double before = stallNow();
         mods.eln.fluid.FluidWorld.recordProgress(nodes, behind ? before + tick : before, 0);
+    }
+
+    /** The longest time (s) any of its nodes has now been behind. */
+    private double stallNow() {
+        double s = 0;
+        for (FluidNode n : nodes) s = Math.max(s, n.stallNow);
+        return s;
     }
 
     /** This tick's share of what the results still owe, onto the edges and nodes (rates per second; work and wall heat in J). */
@@ -624,7 +619,7 @@ public final class CoreStep {
             e.fAir = air / tick;
             e.fEnthalpy = enthalpy / tick;
             e.flow = all / tick;
-            bookedSum += all;
+            bookedSum += Math.abs(all);
             e.work = work / tick;
             e.workJ = work;
             double[] s = remS[k];
@@ -725,8 +720,7 @@ public final class CoreStep {
             // (asleep, the core keeps the last step's heat, as it keeps its edges' moves: a network sleeps in a steady
             // state, and a condenser's cooling or a boiler's shell passes heat through it all the same; read as 0, a
             // condenser asleep booked no heat)
-            remWall[i] += c.wallJ * kept + n.wallCarry;
-            n.wallCarry = 0;
+            remWall[i] += c.wallJ * kept + mods.eln.fluid.FluidWorld.takeWallCarry(n);
             n.update();
         }
         // what each edge carried: added to what is still owed, and handed out over the ticks the step stood for
@@ -757,7 +751,6 @@ public final class CoreStep {
             for (int j = 0; j < S; j++) {
                 r[4] += mv[j];
                 movedKg += Math.abs(mv[j]);
-                movedSum += mv[j];
                 remS[k][ids == null ? j : ids[j]] += mv[j];
             }
         }

@@ -301,6 +301,18 @@ public final class FluidWorld implements IProcess {
         else for (FluidNode p : pieces) p.wallCarry += joules / pieces.size();
     }
 
+    /** The wall heat carried for a node and its run's pieces, taken (J). */
+    public static double takeWallCarry(FluidNode n) {
+        double j = n.wallCarry;
+        n.wallCarry = 0;
+        List<FluidNode> pieces = INSTANCE.lumps.get(n);
+        if (pieces != null) for (FluidNode p : pieces) {
+            j += p.wallCarry;
+            p.wallCarry = 0;
+        }
+        return j;
+    }
+
     /** A network's count of heavy steps (CoreStep), onto its nodes and their runs' pieces. */
     public static void recordSlow(List<FluidNode> nodes, int count) {
         for (FluidNode n : nodes) {
