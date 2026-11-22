@@ -322,8 +322,10 @@ public final class ElnGameTests {
     }
 
     /**
-     * The fluid networks around the test as built (FluidWorld.liveTopology, canonical; without a rebuild), recorded by
-     * their hash so two builds of the mod can be compared test by test.
+     * The fluid world's topology around the test: the pure plan (FluidWorld.Plan.dump) is the same with the devices in
+     * their order, reversed and shuffled; the networks as built (FluidWorld.liveTopology, without a rebuild) have the
+     * plan's runs and networks, unless a rebuild is pending; and their hash is recorded, so two builds of the mod can be
+     * compared test by test.
      */
     static void fluidTopology(GameTestHelper helper, GameTestContext ctx) {
         net.minecraft.world.phys.AABB bounds = helper.getBounds();
@@ -331,8 +333,24 @@ public final class ElnGameTests {
             var b = net.minecraft.core.BlockPos.of(p);
             return bounds.contains(b.getX() + .5, b.getY() + .5, b.getZ() + .5);
         };
+        var devices = mods.eln.fluid.FluidWorld.devices();
+        var plan = relative(mods.eln.fluid.FluidWorld.plan(devices).dump(in), bounds);
         var live = relative(mods.eln.fluid.FluidWorld.liveTopology(in), bounds);
-        if (live.isEmpty()) return;
+        if (plan.isEmpty() && live.isEmpty()) return;
+        var reversed = new java.util.ArrayList<>(devices);
+        java.util.Collections.reverse(reversed);
+        var shuffled = new java.util.ArrayList<>(devices);
+        java.util.Collections.shuffle(shuffled, new java.util.Random(devices.size()));
+        var r = relative(mods.eln.fluid.FluidWorld.plan(reversed).dump(in), bounds);
+        var sh = relative(mods.eln.fluid.FluidWorld.plan(shuffled).dump(in), bounds);
+        ctx.check("fluid: the topology is the same whatever order the devices join in", plan.equals(r) && plan.equals(sh),
+            plan.size() + " lines" + (plan.equals(r) ? "" : "; reversed: " + LinksDiff.difference(plan, r, 6))
+                + (plan.equals(sh) ? "" : "; shuffled: " + LinksDiff.difference(plan, sh, 6)));
+        if (!mods.eln.fluid.FluidWorld.dirty()) {
+            var want = plan.stream().filter(l -> l.startsWith("run ") || l.startsWith("net ")).toList();
+            var got = live.stream().filter(l -> l.startsWith("run ") || l.startsWith("net ")).toList();
+            ctx.check("fluid: the networks built have the plan's runs and networks", want.equals(got), LinksDiff.difference(want, got, 6));
+        }
         ctx.check("fluid: the networks as built", true, live.size() + " lines, " + (mods.eln.fluid.FluidWorld.dirty() ? "rebuild pending, " : "")
             + "hash " + Integer.toHexString(String.join("\n", live).hashCode()));
     }

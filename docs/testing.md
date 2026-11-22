@@ -95,6 +95,10 @@ there and replayed first), `eln.guiDir` (LayoutTest, HubSlotsTest), `-PfluidCase
       Stored links); `linksNeutral`: those blocks reconnected with `[cables] linksBuild` off and on have the same links
       and connection flags (`LinksDiff`). Cases: `LinksCases` (laid run, device cut, break, trim, burn/repair, a frozen
       block), and the lay/break/relay test verifies after every round;
+  3b. `fluidTopology`: the fluid world's pure plan (`FluidWorld.plan`, canonical `Plan.dump`) around the test is the
+      same with the devices in their order, reversed and shuffled; unless a rebuild is pending, the networks as built
+      (`FluidWorld.liveTopology`) have the plan's runs and networks; the built networks' hash is logged, to compare two
+      builds test by test (docs/simulation.md, fluids);
   4. `persistence`: `Reload.node` on every non-destructing, saved (`mustBeSaved`) node in the bounds (save -> unload -> fresh node from the
      tag -> save again; also compares `networkSerialize` bytes). Differences in keys ending `Uc` or `State`
      (`Reload.isTransient`) are allowed; anything else fails.

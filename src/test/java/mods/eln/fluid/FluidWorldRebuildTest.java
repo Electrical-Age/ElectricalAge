@@ -11,7 +11,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * A fluid-world rebuild (a device joins, leaves or changes anywhere) keeps what was put into a pipe run's lump since the
@@ -132,5 +134,34 @@ class FluidWorldRebuildTest {
         assertEquals(total * 3 / 8, a.node.mWater, 1e-12 * total, "a as edited");
         FluidWorld.changed(far);
         assertEquals(total * 7 / 8, FluidWorld.nodeFor(a.node).mWater, 1e-12 * total, "the run's water");
+    }
+
+    /** The topology plan is pure: planning leaves the built lumps, networks and contents as they were, and no rebuild pending. */
+    @Test
+    void aPlanTouchesNothing() {
+        FluidNode lump = FluidWorld.nodeFor(a.node);
+        var net = FluidWorld.networkOf(a.node);
+        lump.fill(0.4 * lump.volume * Water.RHO_L, 3 * Water.P_ATM, 320);
+        double[] want = contents(lump), wantA = contents(a.node);
+        FluidWorld.Plan plan = FluidWorld.plan(List.of(far, b, a));
+        assertEquals(1, plan.couplings.size(), "a and b couple");
+        assertEquals(2, plan.runs.size(), "two runs: a with b, and far");
+        assertEquals(2, plan.networkCount, "two networks");
+        assertEquals(false, FluidWorld.dirty(), "no rebuild pending");
+        assertSame(lump, FluidWorld.nodeFor(a.node), "the same lump");
+        assertSame(net, FluidWorld.networkOf(a.node), "the same network");
+        assertKept(want, lump, "the lump");
+        assertKept(wantA, a.node, "a piece");
+    }
+
+    /** The plan's canonical dump doesn't depend on the order the devices come in, and changes with the topology. */
+    @Test
+    void aPlansDumpIsCanonical() {
+        java.util.function.LongPredicate all = p -> true;
+        var one = FluidWorld.plan(List.of(a, b, far)).dump(all);
+        assertEquals(one, FluidWorld.plan(List.of(far, b, a)).dump(all), "reordered");
+        assertEquals(one, FluidWorld.plan(List.of(b, far, a)).dump(all), "reordered again");
+        var apart = FluidWorld.plan(List.of(a, new Piece(1, EAST), far)).dump(all);
+        assertNotEquals(one, apart, "b turned away from a: another topology");
     }
 }
