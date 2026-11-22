@@ -204,23 +204,15 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         ports = out;
     }
 
-    /** Which of its ports meet a port of whatever is beside it (a pipe's end, a device's flange): see `coupled`. */
+    /** Which of its ports couple to a port of whatever is beside it (a pipe's end, a device's flange; FluidPlacement.partners): see `coupled`. */
     int coupledPorts() {
         int mask = 0;
         var level = node.coordonate.world();
         for (FluidPort p : ports) {
-            var f = net.minecraft.core.Direction.from3DDataValue(p.face());
-            var there = net.minecraft.core.BlockPos.of(p.pos()).relative(f);
-            var other = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(there, level));
-            FluidDevice d = other instanceof FluidDevice fd ? fd
-                : other instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof FluidDevice fe ? fe : null;
-            if (d == null) continue;
-            for (FluidPort q : d.fluidPorts())
-                if (q.pos() == there.asLong() && q.face() == f.getOpposite().get3DDataValue() && q.at() == p.at()) {
-                    if (p.face() == 0) mask |= 1 << 13;   // (its underside port: counted, not drawn)
-                    else if (p.face() == 1) mask |= 1 << 12;
-                    else if (p.face() >= 2) mask |= 1 << (2 * p.face() + (p.at() == sideSpot(p.face(), HIGH) ? 1 : 0));
-                }
+            if (mods.eln.fluid.FluidPlacement.partners(level, p).isEmpty()) continue;
+            if (p.face() == 0) mask |= 1 << 13;   // (its underside port: counted, not drawn)
+            else if (p.face() == 1) mask |= 1 << 12;
+            else if (p.face() >= 2) mask |= 1 << (2 * p.face() + (p.at() == sideSpot(p.face(), HIGH) ? 1 : 0));
         }
         return mask;
     }

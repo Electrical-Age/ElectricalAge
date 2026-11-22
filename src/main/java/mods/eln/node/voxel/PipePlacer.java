@@ -30,7 +30,9 @@ public final class PipePlacer {
         @Override
         RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, net.minecraft.world.phys.Vec3 hit, int tier, boolean start, boolean click) {
             FluidDevice.FluidPort fp = portNear(level, pos, face, hit);
-            if (fp != null && coupled(level, fp)) return RoutePlacer.Click.none(PORT_TAKEN);
+            // (a port coupled already, to a pipe's end or another device's flange, is one a new pipe couldn't join:
+            // AdventurAgent saw a second route to a tank's piped port "give up" instead of saying so)
+            if (fp != null && !mods.eln.fluid.FluidPlacement.partners(level, fp).isEmpty()) return RoutePlacer.Click.none(PORT_TAKEN);
             PipeRouter.End port = fp == null ? null : endOf(pos, fp);
             boolean device = false;
             if (port == null) device = (port = devicePort(level, pos, hit)) != null;
@@ -245,21 +247,9 @@ public final class PipePlacer {
         return p == null ? null : endOf(pos, p);
     }
 
-    /** The fluid ports a block offers a pipe kit (a device's, a multiblock's ports on that block, a voxel block's pipe ends). */
-    static List<FluidDevice.FluidPort> portsAt(Level level, BlockPos pos) {
-        List<FluidDevice.FluidPort> ports = new ArrayList<>();
-        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
-        if (n instanceof VoxelNode v) ports.addAll(v.fluidPorts());
-        // (a multiblock's ports name their own blocks: the 2x2x2 Large Boiler's, at its node or on its ghost blocks)
-        else if (n instanceof TransparentNode t && t.element instanceof mods.eln.oil.LargeBoilerElement b) ports.addAll(b.portsAt(pos.asLong()));
-        else if (n instanceof TransparentNode t && t.element instanceof FluidDevice d) ports.addAll(d.fluidPorts());
-        else if (n instanceof mods.eln.oil.LargeBoilerElement.FaceNode g) ports.addAll(g.fluidPorts());
-        return ports;
-    }
-
     /** The port portAt picks on that face of the block (nearest hit), or null. */
     static FluidDevice.FluidPort portNear(Level level, BlockPos pos, Direction face, net.minecraft.world.phys.Vec3 hit) {
-        List<FluidDevice.FluidPort> ports = portsAt(level, pos);
+        List<FluidDevice.FluidPort> ports = mods.eln.fluid.FluidPlacement.portsAt(level, pos);
         boolean voxel = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level)) instanceof VoxelNode;
         // (none on the face clicked, the click on the model inside the block rather than on its face: the side port
         // nearest the click, of any side. Baughn 2026-11-09: a tank box's blocks are its round shell, so a corner
@@ -304,19 +294,6 @@ public final class PipePlacer {
             default -> { y = by + u; z = bz + w; x = bx + (pf == Direction.EAST ? 16 : 0); }
         }
         return new PipeRouter.End(x, y, z, dirOf(pf));
-    }
-
-    /**
-     * Is port p coupled already: a port of the block in front of its face facing back at the same spot (a pipe's end
-     * there, or another device's flange)? FluidWorld's rule for coupling two ports, so a port refused here is one a new
-     * pipe couldn't join (AdventurAgent: a second route to a tank's piped port "gave up" instead of saying so).
-     */
-    static boolean coupled(Level level, FluidDevice.FluidPort p) {
-        Direction f = Direction.from3DDataValue(p.face());
-        BlockPos other = BlockPos.of(p.pos()).relative(f);
-        for (FluidDevice.FluidPort q : portsAt(level, other))
-            if (q.pos() == other.asLong() && q.face() == f.getOpposite().get3DDataValue() && q.at() == p.at() && q.node() != p.node()) return true;
-        return false;
     }
 
     /**

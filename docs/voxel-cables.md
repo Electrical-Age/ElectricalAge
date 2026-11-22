@@ -189,7 +189,7 @@ the rules above; the joints are kept alongside:
   and clicks got the pipe. Breaking still picks by `VoxelNodeBlock`'s own rule.
 - A pipe kit route doesn't start or end at a device's port that already has a pipe (`PipePlacer.portTaken`; a lab test
   laid a second pipe beside the first). The same holds for every machine's fluid port, the Large Boiler's ghost ports
-  included (`PipePlacer.coupled`: a port in front of its face facing back at the same spot, FluidWorld's coupling rule;
+  included (`FluidPlacement.partners`: FluidWorld's one coupling rule, `FluidWorld.couples`, asked of the block in front of the port;
   AdventurAgent: a second route to a tank's piped port "gave up"), in the preview and on the click.
 - Its kind shows on the body's top: a coloured plate (pressure blue, temperature red, quality green) with a raised white
   letter P, T or Q for colourblind players. Jade's three headline lines: the reading, the output volts, the full scale.

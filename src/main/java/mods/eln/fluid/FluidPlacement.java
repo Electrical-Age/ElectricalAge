@@ -55,23 +55,33 @@ public final class FluidPlacement {
         }
     }
 
-    /** Its ports that meet a port of whatever is beside them (a pipe's end, a device's flange). */
+    /** Its ports that couple to a port of whatever is beside them (a pipe's end, a device's flange): partners. */
     public static int coupled(TransparentNodeElement e, FluidDevice d) {
         int n = 0;
         var level = e.node.coordonate.world();
-        for (FluidDevice.FluidPort p : d.fluidPorts()) {
-            var f = net.minecraft.core.Direction.from3DDataValue(p.face());
-            var there = net.minecraft.core.BlockPos.of(p.pos()).relative(f);
-            var other = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(there, level));
-            FluidDevice o = other instanceof FluidDevice fd ? fd
-                : other instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof FluidDevice fe ? fe : null;
-            if (o == null || o == d) continue;
-            for (FluidDevice.FluidPort q : o.fluidPorts())
-                if (q.pos() == there.asLong() && q.face() == f.getOpposite().get3DDataValue() && q.at() == p.at()) {
-                    n++;
-                    break;
-                }
-        }
+        for (FluidDevice.FluidPort p : d.fluidPorts()) if (!partners(level, p).isEmpty()) n++;
         return n;
+    }
+
+    /**
+     * The ports in the world that p couples to (FluidWorld.couples): of the block in front of its face, whatever node is
+     * there. Placement asks this, whether or not the nodes are in the fluid world now (a Stasis-frozen one isn't).
+     */
+    public static java.util.List<FluidDevice.FluidPort> partners(net.minecraft.world.level.Level level, FluidDevice.FluidPort p) {
+        java.util.List<FluidDevice.FluidPort> out = new java.util.ArrayList<>();
+        for (FluidDevice.FluidPort q : portsAt(level, net.minecraft.core.BlockPos.of(FluidWorld.facing(p)))) if (FluidWorld.couples(p, q)) out.add(q);
+        return out;
+    }
+
+    /** The fluid ports on a block: a voxel block's pipe ends, a device's ports, a multiblock's ports on that block. */
+    public static java.util.List<FluidDevice.FluidPort> portsAt(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+        java.util.List<FluidDevice.FluidPort> ports = new java.util.ArrayList<>();
+        var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
+        if (n instanceof mods.eln.node.voxel.VoxelNode v) ports.addAll(v.fluidPorts());
+        // (a multiblock's ports name their own blocks: the 2x2x2 Large Boiler's, at its node or on its ghost blocks)
+        else if (n instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof mods.eln.oil.LargeBoilerElement b) ports.addAll(b.portsAt(pos.asLong()));
+        else if (n instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof FluidDevice d) ports.addAll(d.fluidPorts());
+        else if (n instanceof mods.eln.oil.LargeBoilerElement.FaceNode g) ports.addAll(g.fluidPorts());
+        return ports;
     }
 }
