@@ -631,9 +631,10 @@ public final class FluidWorld implements IProcess {
      * The fluid topology of a set of devices (plan): which ports couple, which nodes lump into pipe runs, the links,
      * vents and flows, and which nodes make one network. Pure: built from the devices' fluidPorts, fluidJoins,
      * fluidLinks, fluidVents and fluidFlows alone, it touches no contents and makes no lumps or networks. Its lists are
-     * in the order apply() builds in (the devices' order; a run's pieces as its union-find yields them), so a rebuild
-     * gives the networks, edges and sums it gave before the plan was split out; dump() is its canonical form, the same
-     * whatever order the devices joined in.
+     * in the order apply() builds in, as the rebuild built in before the plan was split out: the devices' order for the
+     * nodes, couplings, links, vents and flows; the runs, and each run's pieces, in an identity-hash map's order, so the
+     * order of the runs and of the sums over their pieces (volume, resistance, contents) depends on identity hashes, as
+     * it did before. dump() is its canonical form, the same whatever order the devices joined in.
      */
     public static final class Plan {
         /** The devices it was made from, in their order. */
@@ -781,7 +782,10 @@ public final class FluidWorld implements IProcess {
         // editing keeps its pieces' edits instead)
         writeBack(true);
         handedBack.clear();
-        for (FluidNetwork n : networks) n.abandon();   // (a background step under way: nobody will take its result)
+        // (a background step under way: nobody will take its result. Its owed wall heat goes onto the nodes after plan()
+        // asked the devices, where the old rebuild asked them after; none of their getters reads it. Abandoning before
+        // the plan would leave no plan here to keep an unchanged network by, below)
+        for (FluidNetwork n : networks) n.abandon();
         // Every network is built anew below. Here is where a network whose part of the plan is unchanged (the same nodes,
         // couplings, links, vents and flows) could be kept instead, with its core and a background step under way, so
         // laying a pipe elsewhere doesn't restart a heavy network's step; it would then be neither abandoned above nor
@@ -792,7 +796,8 @@ public final class FluidWorld implements IProcess {
         flows.clear();
         lumps.clear();
         lumpOf.clear();
-        // (Baughn 2026-11-12, after the junction volume near-miss: a node too small to compute reliably is an error)
+        // (Baughn 2026-11-12, after the junction volume near-miss: a node too small to compute reliably is an error. By
+        // device, not plan.nodes: the message names the device, and the plan keeps no node's device)
         for (FluidDevice d : plan.devices)
             for (FluidNode n : nodesOf(d))
                 if (!n.fixed && n.volume < MIN_RELIABLE_VOLUME && TOO_SMALL.add(n))
@@ -946,7 +951,7 @@ public final class FluidWorld implements IProcess {
     /** Nodes already reported (once each). */
     private static final java.util.Set<FluidNode> TOO_SMALL = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
 
-    /** A device's nodes: its ports', vents', flows' and links' (as the rebuild gathers them). */
+    /** A device's nodes: its ports', vents', flows' and links', in that order, repeats kept (plan() takes each node once). */
     static List<FluidNode> nodesOf(FluidDevice d) {
         List<FluidNode> out = new ArrayList<>();
         for (FluidDevice.FluidPort p : d.fluidPorts()) out.add(p.node());
