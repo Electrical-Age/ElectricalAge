@@ -191,7 +191,7 @@ public final class ElnGameTests {
                 ctx.check(c.id() + " measure", false, e.toString());
             }
             mods.eln.introspect.DescribeCheck.run(helper.getLevel(), helper.getBounds(), ctx::check);
-            stalls(helper, ctx);
+            if (c.checkStalls()) stalls(helper, ctx);
             if (c.checkLimitCycles()) limitCycles(helper, ctx);   // (before the round trip: reloaded nodes start a fresh record)
             links(helper, ctx);
             linksNeutral(helper, ctx);

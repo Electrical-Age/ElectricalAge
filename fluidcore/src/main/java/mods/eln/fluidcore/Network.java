@@ -785,21 +785,6 @@ public final class Network {
         for (Node n : free) n.wallJ = n.pendingWall = 0;
     }
 
-    /**
-     * A step that moves nothing (a quarantined network's skipped tick, CoreStep): no flow, work or wall heat, done 0, so
-     * devices reading this step's results book nothing rather than the last step's again.
-     */
-    public void idleStep(double dt) {
-        List<Node> free = new ArrayList<>();
-        for (Node n : nodes) if (!n.fixed) free.add(n);
-        clearMoves(free);
-        done = 0;
-        for (Edge e : edges) {
-            e.flow = flow(e);
-            e.work = 0;
-        }
-    }
-
     /** One step of dt seconds. */
     public void step(double dt) {
         stats.steps++;
@@ -829,9 +814,10 @@ public final class Network {
         stepSubsteps = 0;
         stepDt = dt;
         long started = System.nanoTime();
-        deadline = MAX_STEP_NANOS > 0 ? started + MAX_STEP_NANOS : Long.MAX_VALUE;
+        long max = budget >= 0 ? budget : MAX_STEP_NANOS;
+        deadline = max > 0 ? started + max : Long.MAX_VALUE;
         long[] hard = HARD.get();
-        hard[0] = MAX_STEP_NANOS > 0 ? started + MAX_STEP_NANOS * 3 / 2 : Long.MAX_VALUE;
+        hard[0] = max > 0 ? started + max * 3 / 2 : Long.MAX_VALUE;
         overBudget = false;
         boolean aborted = false;
         try {
@@ -1103,6 +1089,8 @@ public final class Network {
      * server on a 60 s tick (2026-11-21, a steam line with water in it vented to near the air's pressure).
      */
     public static long MAX_STEP_NANOS = 0;
+    /** This network's own budget (ns) in place of MAX_STEP_NANOS; under 0: none of its own. */
+    public long budget = -1;
     private long deadline = Long.MAX_VALUE;
     /**
      * 1.5 x MAX_STEP_NANOS after the step began, per thread (FluidPool steps networks on several): checkClock, called

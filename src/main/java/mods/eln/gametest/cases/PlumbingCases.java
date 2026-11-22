@@ -29,6 +29,7 @@ public final class PlumbingCases {
         cases.add(new TankSeparates());
         cases.add(new PumpMovesWater(false));
         cases.add(new PumpMovesWater(true));
+        cases.add(new PumpMovesWater(false, true));
         cases.add(new PressureValve(ValvePart.REDUCING));
         cases.add(new PressureValve(ValvePart.RELIEF));
         cases.add(new QualitySensor());
@@ -297,12 +298,38 @@ public final class PlumbingCases {
         boolean sawCavitate, sawSteamBound, sawSteamCavitating;
         String steamJade = "", airJade = "";
 
+        /**
+         * background: its network starts counted as heavy, so its first steps run on CoreStep's background worker
+         * (as a plant too heavy for the server thread does), until, each taking no time, they bring it back: the pump
+         * moves its water all the same, no water is made or lost, and it ends on the server thread.
+         */
+        final boolean background;
+        boolean sawBackground;
+        double water0;
+
         PumpMovesWater(boolean boiling) {
+            this(boiling, false);
+        }
+
+        PumpMovesWater(boolean boiling, boolean background) {
             this.boiling = boiling;
+            this.background = background;
         }
 
         public String id() {
-            return boiling ? "inline_pump_cavitates_on_boiling_water" : "inline_pump_moves_water";
+            return background ? "inline_pump_moves_water_in_the_background" : boiling ? "inline_pump_cavitates_on_boiling_water" : "inline_pump_moves_water";
+        }
+
+        @Override
+        public boolean checkStalls() {
+            return !background;   // (its background steps' waiting ticks count as dropped time)
+        }
+
+        double water() {
+            double m = 0;
+            var net = mods.eln.fluid.FluidWorld.networkOf(a.vessel);
+            if (net != null) for (var n : net.nodes) if (!n.fixed) m += n.mWater;
+            return m;
         }
 
         public int ticks() {
@@ -325,9 +352,17 @@ public final class PlumbingCases {
             double T = boiling ? Water.TB : Water.T_AMBIENT;
             fill(a.vessel, 0.8 * a.vessel.volume * Water.RHO_L, Water.P_ATM, T);
             bWater0 = b.vessel.mLiquid();
+            if (background) {
+                a.vessel.slowSteps = 2 * mods.eln.sim.fluid.CoreStep.HEAVY_AFTER;
+                water0 = water();
+            }
             // (a line in service: its iron at the water's temperature; cold, it subcooled the boiling water)
             for (BlockPos q : new BlockPos[]{pa.south(), pp.south()}) PipeCases.warm(ctx, q, T);
             Eln.simulator.addSlowProcess(watch = dt -> {
+                if (background) {
+                    var net = mods.eln.fluid.FluidWorld.networkOf(a.vessel);
+                    sawBackground |= net != null && net.background();
+                }
                 sawCavitate |= boiling ? p.cavitating : p.cavitating && !p.gasBound;
                 maxW = Math.max(maxW, p.wantW);
                 // (Jade: gas at its inlet reads as what it moves, steam or air; Baughn 2026-11-15: the pump works on gas as on water)
@@ -344,6 +379,13 @@ public final class PlumbingCases {
             Eln.simulator.removeSlowProcess(watch);
             double moved = b.vessel.mLiquid() - bWater0;
             ctx.line("inline pump" + (boiling ? " (boiling feed)" : "") + ": " + p.getWaila() + "; A " + a.getWaila() + "; B " + b.getWaila());
+            if (background) {
+                var net = mods.eln.fluid.FluidWorld.networkOf(a.vessel);
+                double w = water();
+                ctx.check("background steps: its first steps ran in the background", sawBackground, "");
+                ctx.check("background steps: light again, it is back on the server thread", net != null && !net.background(), "slow steps " + a.vessel.slowSteps);
+                ctx.check("background steps: no water made or lost", Math.abs(w - water0) < 1e-9 * water0, String.format("%.9f -> %.9f kg", water0, w));
+            }
             if (!boiling) {
                 // (both tanks are sealed: A's air thins and B's compresses until the pump's 0.5 bar head and the fall
                 // balance them; with gas able to come back through a pipe's opening, ~0.04 kg reaches B, the rest fills

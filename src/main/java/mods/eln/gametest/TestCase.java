@@ -42,6 +42,11 @@ public interface TestCase {
         return true;
     }
 
+    /** Does the harness fail it on a fluid network that stalled (false: the test itself puts one in the background). */
+    default boolean checkStalls() {
+        return true;
+    }
+
     void build(TestContext ctx);
 
     void measure(TestContext ctx);

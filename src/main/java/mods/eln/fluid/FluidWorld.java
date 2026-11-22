@@ -203,8 +203,12 @@ public final class FluidWorld implements IProcess {
         if (last != null && now - last < 60_000) return;
         if (overBudgetLogged.size() > 256) overBudgetLogged.clear();
         overBudgetLogged.put(where, now);
-        mods.eln.Eln.LOG.warn("[fluidcore] a network of {} nodes ran out of its step time ({} ms) and runs slow, near {}",
-            n.nodes.size(), mods.eln.fluidcore.Network.MAX_STEP_NANOS / 1_000_000, where);
+        if (n.background())
+            mods.eln.Eln.LOG.warn("[fluidcore] a network of {} nodes is too heavy for the server thread ({} ms a step): it runs in the background, near {}",
+                n.nodes.size(), Math.round(n.lastStepMs()), where);
+        else
+            mods.eln.Eln.LOG.warn("[fluidcore] a network of {} nodes ran out of its step time ({} ms) and runs slow, near {}",
+                n.nodes.size(), mods.eln.fluidcore.Network.MAX_STEP_NANOS / 1_000_000, where);
     }
 
     /**
