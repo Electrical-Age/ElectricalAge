@@ -89,6 +89,46 @@ public interface RouteView {
     /** For block shapes (Mimic): the level, or nothing (a snapshot: decorative blocks' shapes follow their state). */
     BlockGetter shapes();
 
+    /** The parts of the voxel node block at p (a copy of the list; empty if p holds none): the run a route joins (JoinRun). */
+    List<VoxelPart> parts(BlockPos p);
+
+    /**
+     * The view with the voxels freed (block-local, VoxelNode.voxel) taken out of the used voxels of the voxel block at b:
+     * a route may pass through them (JoinRun: the old run near a join point, todo #516).
+     */
+    static RouteView freeing(RouteView v, BlockPos b, BitSet freed) {
+        return new RouteView() {
+            @Override
+            public boolean loaded(BlockPos p) {
+                return v.loaded(p);
+            }
+
+            @Override
+            public BlockState state(BlockPos p) {
+                return v.state(p);
+            }
+
+            @Override
+            public Voxels voxels(BlockPos p) {
+                Voxels x = v.voxels(p);
+                if (x == null || x.used() == null || !p.equals(b)) return x;
+                BitSet used = (BitSet) x.used().clone();
+                used.andNot(freed);
+                return new Voxels(used, x.partBoxes(), x.hostBoxes());
+            }
+
+            @Override
+            public BlockGetter shapes() {
+                return v.shapes();
+            }
+
+            @Override
+            public List<VoxelPart> parts(BlockPos p) {
+                return v.parts(p);
+            }
+        };
+    }
+
     /** A voxel node block: used voxels if it has a node (else null), its parts' boxes if not, the host block's boxes. */
     record Voxels(BitSet used, List<int[]> partBoxes, List<int[]> hostBoxes) {
         boolean usedIn(int x0, int y0, int z0, int x1, int y1, int z1) {
@@ -132,6 +172,11 @@ public interface RouteView {
             public BlockGetter shapes() {
                 return level;
             }
+
+            @Override
+            public List<VoxelPart> parts(BlockPos p) {
+                return level.getBlockEntity(p) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n ? List.copyOf(n.parts) : List.of();
+            }
         };
     }
 
@@ -144,6 +189,7 @@ public interface RouteView {
         int nx = x1 - x0 + 1, ny = y1 - y0 + 1, nz = z1 - z0 + 1;
         BlockState[] states = new BlockState[nx * ny * nz];
         Map<Long, Voxels> voxels = new HashMap<>();
+        Map<Long, List<VoxelPart>> parts = new HashMap<>();
         for (int cx = x0 >> 4; cx <= x1 >> 4; cx++)
             for (int cz = z0 >> 4; cz <= z1 >> 4; cz++) {
                 if (!(level.getChunkSource().getChunkNow(cx, cz) instanceof LevelChunk chunk)) continue;
@@ -157,7 +203,10 @@ public interface RouteView {
                 for (var be : chunk.getBlockEntities().values()) {
                     BlockPos p = be.getBlockPos();
                     if (be instanceof VoxelNodeEntity e && p.getX() >= x0 && p.getX() <= x1 && p.getY() >= y0 && p.getY() <= y1
-                        && p.getZ() >= z0 && p.getZ() <= z1) voxels.put(p.asLong(), voxelsOf(e));
+                        && p.getZ() >= z0 && p.getZ() <= z1) {
+                        voxels.put(p.asLong(), voxelsOf(e));
+                        if (e.getNode() instanceof VoxelNode n) parts.put(p.asLong(), List.copyOf(n.parts));
+                    }
                 }
             }
         return new RouteView() {
@@ -187,6 +236,11 @@ public interface RouteView {
             @Override
             public BlockGetter shapes() {
                 return EmptyBlockGetter.INSTANCE;
+            }
+
+            @Override
+            public List<VoxelPart> parts(BlockPos p) {
+                return parts.getOrDefault(p.asLong(), List.of());
             }
         };
     }
