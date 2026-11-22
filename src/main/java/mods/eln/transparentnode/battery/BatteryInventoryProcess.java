@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.battery;
 
+import mods.eln.sim.BatteryProcess;
 import mods.eln.sim.IProcess;
 
 /**
@@ -11,7 +12,7 @@ import mods.eln.sim.IProcess;
  * ({@code electricalStdI}), less as it warms from {@link #TAPER_K} under the cut down to none {@link #TAPER_END_K} under
  * it, by the cut switch's resistance; and still cuts at {@link #CUT_K} under ⅔ of the warm limit (60 C for the stock
  * batteries), reconnecting {@link #RECONNECT_K} under it.</li>
- * <li>Overvoltage protection: no charging over U·1.1 > Umax (as before), and a low-voltage disconnect: below
+ * <li>Overvoltage protection: no charging once full (BatteryProcess.ABSORPTION), and a low-voltage disconnect: below
  * {@link #LVD_OFF} of its energy (as its screen shows it) it stops discharging (charging still goes in) until it is
  * back over {@link #LVD_ON}.</li>
  * </ul>
@@ -83,7 +84,7 @@ public class BatteryInventoryProcess implements IProcess {
                 cut = true;
                 s = 2;
             } else if (battery.hasOverVoltageProtection()) {
-                if (charging && emf * 1.1 > battery.batterySlowProcess.getUMax()) {
+                if (charging && emf >= 0.999 * BatteryProcess.ABSORPTION * battery.batteryProcess.uNominal) {
                     cut = true;
                     s = 3;
                 } else if (!charging && (lowVoltage || emf < battery.batteryProcess.uNominal * 0.001)) {

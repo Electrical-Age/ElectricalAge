@@ -115,6 +115,15 @@ final class GoldenCase implements TestCase {
         tier(m, "Medium Power Receiver Antenna", "electricalNominalVoltage", "electricalMaximalVoltage");
         tier(m, "High Power Transmitter Antenna", "electricalNominalVoltage", "electricalMaximalVoltage", "electricalNominalInputR");
         tier(m, "High Power Receiver Antenna", "electricalNominalVoltage", "electricalMaximalVoltage");
+        // (Baughn 2026-11-22: the lead-acid curve rescales the charge that holds the same energy; the current limit, never
+        // applied since the heating logic came, is gone)
+        for (String b : new String[]{"Cost Oriented Battery", "Capacity Oriented Battery", "Voltage Oriented Battery",
+            "Current Oriented Battery", "Life Oriented Battery", "Single-use Battery"}) {
+            Map<String, String> f = new java.util.LinkedHashMap<>(m.getOrDefault(b, Map.of()));
+            if (!b.startsWith("Single")) f.put("electricalQ", "lead-acid curve: the charge that holds its rated energy (Baughn 2026-11-22)");
+            f.put("IMax", "removed: never applied, heat limits a battery (Baughn 2026-11-22)");
+            m.put(b, f);
+        }
         tier(m, "Cost Oriented Battery", "electricalU", "electricalStdI", "electricalQ", "electricalRs", "lifeNominalCurrent", "IMax", "currentDropVoltage");
         tier(m, "Capacity Oriented Battery", "electricalU", "electricalStdI", "electricalQ", "electricalRs", "lifeNominalCurrent", "IMax", "currentDropVoltage");
         tier(m, "Voltage Oriented Battery", "electricalU", "electricalStdI", "electricalQ", "electricalRs", "lifeNominalCurrent", "IMax", "currentDropVoltage");

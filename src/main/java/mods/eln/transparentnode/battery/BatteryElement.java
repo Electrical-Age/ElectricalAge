@@ -46,7 +46,7 @@ public class BatteryElement extends TransparentNodeElement {
     public ElectricalLoadHeatThermalLoad negativeETProcess = new ElectricalLoadHeatThermalLoad(negativeLoad, thermalLoad);
     public ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
 
-    public NbtBatteryProcess batteryProcess = new NbtBatteryProcess(positiveLoad, negativeLoad, null, 0, voltageSource);
+    public NbtBatteryProcess batteryProcess = new NbtBatteryProcess(positiveLoad, negativeLoad, null, voltageSource);
 
     public Resistor dischargeResistor = new Resistor(positiveLoad, negativeLoad);
     public ResistorSwitch cutSwitch = new ResistorSwitch("cutSwitch", cutLoad, positiveLoad);
@@ -99,7 +99,6 @@ public class BatteryElement extends TransparentNodeElement {
         slowProcessList.add(inventoryProcess);
 
         grounded = false;
-        batteryProcess.setIMax(this.descriptor.IMax);
 
         slowProcessList.add(thermalWatchdog);
 

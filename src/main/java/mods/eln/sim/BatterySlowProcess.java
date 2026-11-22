@@ -22,7 +22,7 @@ public abstract class BatterySlowProcess implements IProcess {
             destroy();
             return;
         }
-        if (U > getUMax()) {
+        if (batteryProcess.terminalU() > getUMax()) {
             destroy();
             return;
         }
@@ -42,8 +42,12 @@ public abstract class BatterySlowProcess implements IProcess {
         }
     }
 
+    /**
+     * Over this across its terminals it burns at once: a battery on the wrong line (a 12 V on 48 V). Short of that,
+     * overcharging only gasses, as heat (BatteryProcess), and it burns when that heat takes it past its limit.
+     */
     public double getUMax() {
-        return 1.3 * batteryProcess.uNominal;
+        return 1.5 * batteryProcess.uNominal;
     }
 
     public abstract void destroy();

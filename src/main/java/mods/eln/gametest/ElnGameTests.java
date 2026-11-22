@@ -79,6 +79,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.MinerCableCases.addTo(l);
         mods.eln.gametest.cases.HandbookFixCases.addTo(l);
         mods.eln.gametest.cases.FurnaceControlCases.addTo(l);
+        mods.eln.gametest.cases.BatteryCurveCases.addTo(l);
         mods.eln.gametest.cases.PoleCableCases.addTo(l);
         mods.eln.gametest.cases.BusCases.addTo(l);
         mods.eln.gametest.cases.BusModuleCases.addTo(l);

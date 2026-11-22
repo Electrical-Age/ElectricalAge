@@ -9,8 +9,8 @@ import net.minecraft.nbt.CompoundTag;
 
 public class NbtBatteryProcess extends BatteryProcess implements INBTTReady {
 
-    public NbtBatteryProcess(VoltageState positiveLoad, VoltageState negativeLoad, FunctionTable voltageFunction, double IMax, VoltageSource voltageSource) {
-        super(positiveLoad, negativeLoad, voltageFunction, IMax, voltageSource);
+    public NbtBatteryProcess(VoltageState positiveLoad, VoltageState negativeLoad, FunctionTable voltageFunction, VoltageSource voltageSource) {
+        super(positiveLoad, negativeLoad, voltageFunction, voltageSource);
     }
 
     @Override
@@ -25,9 +25,5 @@ public class NbtBatteryProcess extends BatteryProcess implements INBTTReady {
     public void writeToNBT(CompoundTag nbttagcompound, String str) {
         nbttagcompound.putDouble(str + "NBP" + "Q", Q);
         nbttagcompound.putDouble(str + "NBP" + "life", life);
-    }
-
-    public void setIMax(double iMax) {
-        this.IMax = iMax;
     }
 }

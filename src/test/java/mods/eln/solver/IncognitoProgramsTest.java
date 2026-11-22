@@ -69,7 +69,7 @@ class IncognitoProgramsTest {
             }
     }
 
-    /** 1.12's batteryCharge, uncapped: what the processor computed before. */
+    /** batteryCharge as 1.12 computed it, uncapped, on today's curve: what the processor computed before the cap. */
     static double oldBatteryCharge(double probeU) {
         var uFq = mods.eln.Eln.batteryVoltageFunctionTable;
         double dq = 0.001, q = 0, eMax = 0;
@@ -79,6 +79,7 @@ class IncognitoProgramsTest {
         }
         if (probeU > 1.5) return 1;
         q = 0;
+        if (probeU >= uFq.getValue(1.0)) return 1.0 + 1e-6;   // (the lead-acid curve is flat past full)
         double e = 0, u;
         while ((u = uFq.getValue(q)) < probeU) {
             e += u * dq;
@@ -103,10 +104,12 @@ class IncognitoProgramsTest {
                     assertEquals(1, now, 0, "past full it now reads 1 (it read " + old + ")");
                 } else assertEquals(old, now, 1e-9, "B " + b.v + " C " + c.v);
             }
-        // and its saved inputs (B 28.71 V, C 25.00 V): the gauge reads full, as its saved 50 V output
+        // and its saved inputs (B 28.71 V, C 25.00 V: 1.15 x nominal, a bank on charge): on the lead-acid curve
+        // (Baughn 2026-11-22) that is nearly full, where 1.12's curve read it as past full
         b.v = 28.709714889526367 / 50;
         c.v = 24.99593734741211 / 50;
-        assertEquals(1, p.getValue(0.05), 0);
+        double saved = p.getValue(0.05);
+        assertTrue(saved > 0.97 && saved <= 1, "saved inputs read nearly full: " + saved);
         System.out.println("batteryCharge: " + capped + " of 1071 sweep points were above 1 before and read 1 now");
     }
 }

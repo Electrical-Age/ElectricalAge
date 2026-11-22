@@ -16,15 +16,32 @@ public class BatteryProcess implements IProcess {
     public VoltageSource voltageSource;
 
     public boolean isRechargeable = true;
-    public double IMax = 20;
 
-    public BatteryProcess(VoltageState positiveLoad, VoltageState negativeLoad, FunctionTable voltageFunction, double IMax, VoltageSource voltageSource) {
+    /**
+     * A lead-acid cell's EMF per unit of its nominal 2 V, by charge (Baughn 2026-11-22: a more accurate lead-acid curve,
+     * float and absorption included). Resting it runs nearly straight from 1.95 V at 10 % to 2.12 V at 92 % (a 48 V
+     * battery reads 48 V near 30 %); over that it takes charge only at a rising voltage (absorption), to 2.40 V at full;
+     * held at the float voltage, 2.25 V, it settles near 97 % and takes almost nothing. Past full, charge no longer
+     * stores: it gasses, as heat. Under 10 % it falls away, to nothing at empty.
+     */
+    public static final double[][] LEAD_ACID = {{0, 0}, {0.05, 0.875}, {0.1, 0.975}, {0.92, 1.06}, {0.96, 1.10},
+        {0.975, 1.125}, {1.0, 1.20}, {1.2, 1.20}};
+    /**
+     * Per unit: the float voltage, and the absorption voltage, a full cell's EMF: over it charge only gasses (the
+     * overvoltage chip stops charging there).
+     */
+    public static final double FLOAT = 1.125, ABSORPTION = 1.20;
+
+    public BatteryProcess(VoltageState positiveLoad, VoltageState negativeLoad, FunctionTable voltageFunction, VoltageSource voltageSource) {
         this.positiveLoad = positiveLoad;
         this.negativeLoad = negativeLoad;
         this.voltageFunction = voltageFunction;
-
-        this.IMax = IMax;
         this.voltageSource = voltageSource;
+    }
+
+    /** The voltage across its terminals (V). */
+    public double terminalU() {
+        return positiveLoad.getU() - negativeLoad.getU();
     }
 
     /** Where charging a battery that can't be recharged puts the energy (its thermal load), or null. */
@@ -38,25 +55,20 @@ public class BatteryProcess implements IProcess {
             if (chargeHeat != null) chargeHeat.moveEnergyTo(-I * voltageSource.getU() * time);
             I = 0;
         }
-        Q = Math.max(Q - I * time / QNominal, 0);
+        if (isRechargeable && I < 0) {
+            // charge past full doesn't store: the cell gasses, and the energy goes into heat (Baughn 2026-11-22)
+            double dq = -I * time / QNominal, stored = Math.max(0, Math.min(dq, life - Q));
+            if (dq > stored && chargeHeat != null) chargeHeat.moveEnergyTo((dq - stored) / dq * -I * voltageSource.getU() * time);
+            Q += stored;
+        } else {
+            Q = Math.max(Q - I * time / QNominal, 0);
+        }
+        if (isRechargeable && Q > life) Q = life;   // (a battery saved overcharged loads full)
 
         double voltage = computeVoltage();
 
         voltageSource.setU(voltage);
 
-		/*double Cequ = (positiveLoad.getC() * negativeLoad.getC()) / (positiveLoad.getC() + negativeLoad.getC());
-		double QNeeded = (voltage - (positiveLoad.Uc - negativeLoad.Uc)) * Cequ;
-		//Q -= QNeeded > 0 ? QNeeded : QNeeded * efficiency;
-		if (isRechargeable == true || QNeeded > 0) {
-			double I = QNeeded / time;
-			if (I > IMax) I = IMax;
-			if (I < -IMax) I = -IMax;
-			ElectricalLoad.moveCurrent(I, negativeLoad, positiveLoad);
-			Q -= I * time;
-			dischargeCurrentMesure = I;
-		} else {
-			dischargeCurrentMesure = 0;
-		}*/
     }
 
     double computeVoltage() {

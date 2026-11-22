@@ -42,7 +42,6 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
     FunctionTable UfCharge;
     String modelName;
     Obj3DPart modelPart;
-    public double IMax;
     public boolean lifeEnable;
     private ElectricalCableDescriptor cable;
 
@@ -118,8 +117,6 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
         thermalPMax = electricalPMax / electricalU * electricalPMax / electricalU * electricalRs * 2;
         thermalC = Math.pow(electricalPMax / electricalU, 2) * electricalRs * thermalHeatTime / thermalWarmLimit;
         thermalRp = thermalWarmLimit / thermalPMax;
-
-        IMax = electricalStdI * 3;
 
         obj = Eln.obj.getObj(modelName);
 

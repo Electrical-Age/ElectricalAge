@@ -329,12 +329,10 @@ public final class ElnDeviceRegistry {
         int subId, completId;
         String name;
         double heatTIme = 30;
-        double[] voltageFunctionTable = {0.000, 0.9, 1.0, 1.025, 1.04, 1.05,
-            2.0};
-        FunctionTable voltageFunction = new FunctionTable(voltageFunctionTable,
-            6.0 / 5);
-
-        Utils.printFunction(voltageFunction, -0.2, 1.2, 0.1);
+        // (Baughn 2026-11-22: a more accurate lead-acid curve, float and absorption included; mods.eln.sim.BatteryProcess)
+        FunctionTable voltageFunction = FunctionTable.fromKnots(mods.eln.sim.BatteryProcess.LEAD_ACID, 6.0 / 5, 241);
+        // (the single-use battery is a primary cell: 1.12's curve, read at its 100 % start charge)
+        FunctionTable primaryFunction = new FunctionTable(new double[]{0.000, 0.9, 1.0, 1.025, 1.04, 1.05, 2.0}, 6.0 / 5);
 
         double stdDischargeTime = 4 * 60;
         double stdU = LVU;
@@ -449,7 +447,7 @@ public final class ElnDeviceRegistry {
             name = TR_NAME(Type.NONE, "Single-use Battery");
 
             BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 1.0, false, false, voltageFunction, stdU,
+                "BatteryBig", batteryCableDescriptor, 1.0, false, false, primaryFunction, stdU,
                 stdP * 1.2 * 2, 0.000, // electricalU,
                 // electricalPMax,electricalDischargeRate
                 stdP * 2, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,

@@ -1341,7 +1341,9 @@ public class Equation implements IValue, INBTTReady {
         public double getValue() {
             FunctionTable uFq = Eln.batteryVoltageFunctionTable;
             double probeU = probe.getValue();
-            if (probeU > 1.5) return 1;
+            // (at or over a full cell's voltage it reads full: the lead-acid curve is flat past full, and the walk below
+            // would never end)
+            if (probeU >= uFq.getValue(1.0)) return 1;
             double q = 0, dq = 0.001;
             double e = 0;
             double u;
