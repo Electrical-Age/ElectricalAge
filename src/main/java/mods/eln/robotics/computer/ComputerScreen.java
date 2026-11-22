@@ -446,6 +446,12 @@ public class ComputerScreen extends ElnScreen {
         }
 
         @Override
+        public String editorText(int win, int id) {
+            var w = editorWidgets.get(win + "/" + id);
+            return w != null && !w.visible ? w.buffer.text() : null;   // (hidden under a menu: drawn as cells, as it stands)
+        }
+
+        @Override
         public boolean selected(String key) {
             return key.equals(selected);
         }

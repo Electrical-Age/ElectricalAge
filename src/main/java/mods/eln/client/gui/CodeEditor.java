@@ -65,6 +65,8 @@ public class CodeEditor extends AbstractWidget {
     final StringBuilder barText = new StringBuilder();
     String lastFind = "";
     boolean notFound;
+    /** The bar's text is the one it opened with: typing replaces it (as a search field's selection would). */
+    boolean barFresh;
 
     public CodeEditor(int x, int y, int w, int h, String text, int maxChars, LanguageAdapter language, Consumer<String> changed) {
         super(x, y, w, h, Component.literal("code"));
@@ -111,6 +113,7 @@ public class CodeEditor extends AbstractWidget {
         barText.setLength(0);
         String sel = buffer.selectedText();
         barText.append(sel != null && !sel.isEmpty() && !sel.contains("\n") ? sel : lastFind);
+        barFresh = barText.length() > 0;
         notFound = false;
         setFocused(true);
     }
@@ -256,6 +259,7 @@ public class CodeEditor extends AbstractWidget {
             String label = bar + ": ";
             g.text(font, label, x0 + PAD, by, GUTTER_TEXT, false);
             int qx = x0 + PAD + font.width(label);
+            if (barFresh) g.fill(qx - 1, by - 1, qx + font.width(barText.toString()) + 1, by + LINE - 1, SELECTION);
             g.text(font, barText.toString(), qx, by, notFound ? ERROR : 0xFFE6E6E6, false);
             if ((Util.getMillis() - lastKey) / 500 % 2 == 0) {
                 int cx = qx + font.width(barText.toString());
@@ -352,6 +356,8 @@ public class CodeEditor extends AbstractWidget {
     public boolean charTyped(CharacterEvent event) {
         if (!isFocused() || !event.isAllowedChatCharacter()) return false;
         if (bar != null) {
+            if (barFresh) barText.setLength(0);
+            barFresh = false;
             if (barText.length() < 80) barText.append(event.codepointAsString());
             notFound = false;
             lastKey = Util.getMillis();
@@ -377,6 +383,8 @@ public class CodeEditor extends AbstractWidget {
                 case InputConstants.KEY_ESCAPE -> escape();
                 case InputConstants.KEY_RETURN, InputConstants.KEY_NUMPADENTER -> barEnter();
                 case InputConstants.KEY_BACKSPACE -> {
+                    if (barFresh) barText.setLength(0);
+                    barFresh = false;
                     if (barText.length() > 0) barText.setLength(barText.length() - 1);
                     notFound = false;
                 }

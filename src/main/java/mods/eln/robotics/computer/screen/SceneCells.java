@@ -40,6 +40,11 @@ public final class SceneCells {
             return false;
         }
 
+        /** The text of an editor this display holds but isn't drawing just now (under an open menu), or null. */
+        default String editorText(int win, int id) {
+            return null;
+        }
+
         /** Is this icon selected on this display ("w/id" for a desk icon, "min/w" for a minimised window's)? */
         default boolean selected(String key) {
             return false;
@@ -384,8 +389,9 @@ public final class SceneCells {
             case "editor" -> {
                 int ew = e.size(5, win, 1), eh = e.size(6, win, 1);
                 fill(x, y, ew, eh, EDITOR);
-                if (local.ownEditor(wid, id)) break;
-                String[] lines = Form.str(m, 10, "").split("\n", -1);
+                String own = local.editorText(wid, id);
+                if (own == null && local.ownEditor(wid, id)) break;
+                String[] lines = (own != null ? own : Form.str(m, 10, "")).split("\n", -1);
                 for (int r = 0; r < eh - 1 && r < lines.length; r++) text(lines[r].replace('\t', ' '), x, y + r, ew, INK);
             }
             case "raw" -> fill(x, y, e.size(5, win, 1), e.size(6, win, 1), RAW);
