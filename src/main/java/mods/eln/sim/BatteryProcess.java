@@ -39,9 +39,23 @@ public class BatteryProcess implements IProcess {
         this.voltageSource = voltageSource;
     }
 
+    /**
+     * Gassing past full: an overpotential that builds with the charge pushed in past full and decays as the gas leaves
+     * (GAS_TAU s), so a held voltage over absorption drives a current through GAS_R x Un / its rated current. Held at
+     * 60 V a full 48 V battery gasses ~0.13 A, ~8 W: it warms and wears; held over ~65 V it burns of the heat.
+     */
+    public static final double GAS_TAU = 5, GAS_R = 2;
+    /** The charge pushed in past full that hasn't gassed off yet (a share of QNominal; not saved). */
+    public double gas;
+    /** Its rated current (A); 0: no gassing overpotential. */
+    public double iRated;
+
+    /** Its own terminals (the element's, outside any cut switch), when it has them; else across its source. */
+    public java.util.function.DoubleSupplier terminal;
+
     /** The voltage across its terminals (V). */
     public double terminalU() {
-        return positiveLoad.getU() - negativeLoad.getU();
+        return terminal != null ? terminal.getAsDouble() : positiveLoad.getU() - negativeLoad.getU();
     }
 
     /** Where charging a battery that can't be recharged puts the energy (its thermal load), or null. */
@@ -60,10 +74,12 @@ public class BatteryProcess implements IProcess {
             double dq = -I * time / QNominal, stored = Math.max(0, Math.min(dq, life - Q));
             if (dq > stored && chargeHeat != null) chargeHeat.moveEnergyTo((dq - stored) / dq * -I * voltageSource.getU() * time);
             Q += stored;
+            gas += dq - stored;
         } else {
             Q = Math.max(Q - I * time / QNominal, 0);
         }
         if (isRechargeable && Q > life) Q = life;   // (a battery saved overcharged loads full)
+        gas -= gas * Math.min(1, time / GAS_TAU);
 
         double voltage = computeVoltage();
 
@@ -73,6 +89,7 @@ public class BatteryProcess implements IProcess {
 
     double computeVoltage() {
         double voltage = voltageFunction.getValue(Q / life);
+        if (gas > 0 && iRated > 0) voltage += gas * QNominal * GAS_R / (GAS_TAU * iRated);
         return Math.max(0, voltage * uNominal);
     }
 

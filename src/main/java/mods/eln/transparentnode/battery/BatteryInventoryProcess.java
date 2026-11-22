@@ -23,6 +23,9 @@ public class BatteryInventoryProcess implements IProcess {
     BatteryElement battery;
 
     boolean thermalCut = false, lowVoltage = false;
+    /** The overvoltage chip found it full: no charging until it has run down to RECHARGE_AT (no chatter at the top). */
+    boolean full;
+    static final double RECHARGE_AT = 0.98;
     /** What the protection does now, for Jade: 0 nothing, 1 limiting charge, 2 cut (too hot), 3 cut (overvoltage),
      *  4 low-voltage disconnect (charge only). */
     int state;
@@ -56,8 +59,10 @@ public class BatteryInventoryProcess implements IProcess {
             double q = battery.batteryProcess.getEnergy() / Math.max(1e-9, battery.batteryProcess.getEnergyMax());
             if (q < LVD_OFF) lowVoltage = true;
             if (q > LVD_ON) lowVoltage = false;
+            if (battery.batteryProcess.getCharge() < RECHARGE_AT) full = false;
         } else {
             lowVoltage = false;
+            full = false;
         }
 
         double U = battery.positiveLoad.getU() - battery.negativeLoad.getU();
@@ -84,7 +89,8 @@ public class BatteryInventoryProcess implements IProcess {
                 cut = true;
                 s = 2;
             } else if (battery.hasOverVoltageProtection()) {
-                if (charging && emf >= 0.999 * BatteryProcess.ABSORPTION * battery.batteryProcess.uNominal) {
+                if (charging && (full || emf >= 0.999 * BatteryProcess.ABSORPTION * battery.batteryProcess.uNominal)) {
+                    full = true;
                     cut = true;
                     s = 3;
                 } else if (!charging && (lowVoltage || emf < battery.batteryProcess.uNominal * 0.001)) {
@@ -98,8 +104,10 @@ public class BatteryInventoryProcess implements IProcess {
                 double taper = (cutT() - battery.thermalLoad.Tc - TAPER_END_K) / (TAPER_K - TAPER_END_K);
                 chargeLimit = d.electricalStdI * Math.max(0, Math.min(1, taper));
                 if (charging) {
-                    // the resistance that lets chargeLimit through from this terminal voltage (internal 2 Rs besides)
-                    double need = chargeLimit <= 1e-6 ? Double.POSITIVE_INFINITY : (uExt - emf) / chargeLimit - 2 * d.electricalRs;
+                    // the resistance that lets chargeLimit through: the cut switch is all that lies between its terminal and its EMF,
+                    // so each step scales it by the current over the limit (with "- 2 Rs" it left 13 A through on the steep knee of the
+                    // lead-acid curve, 2026-11-22)
+                    double need = chargeLimit <= 1e-6 ? Double.POSITIVE_INFINITY : (uExt - emf) / chargeLimit;
                     if (need > rOn) {
                         r = Math.min(need, 1e9);
                         s = 1;

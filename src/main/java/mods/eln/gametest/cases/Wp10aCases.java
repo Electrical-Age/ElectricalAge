@@ -717,7 +717,8 @@ public final class Wp10aCases {
         mods.eln.transparentnode.battery.BatteryElement battery;
         mods.eln.sim.IProcess watch;
         double peak = -999, peakCharge;
-        int cuts;
+        String peakAt = "";
+        int cuts, watchTicks;
         boolean wasCut, limited;
 
         public String name() {
@@ -744,7 +745,13 @@ public final class Wp10aCases {
             ctx.setVolts(minus[0], 0f);
             mods.eln.Eln.simulator.addSlowProcess(watch = t -> {
                 peak = Math.max(peak, battery.thermalLoad.Tc);
-                peakCharge = Math.max(peakCharge, -battery.batteryProcess.getDischargeCurrent());
+                double ic = -battery.batteryProcess.getDischargeCurrent();
+                if (ic > peakCharge) {
+                    peakCharge = ic;
+                    peakAt = String.format("tick %d: EMF %.2f V, terminal %.2f V, cut switch %.3f ohm, charge %.4f, state %s", ++watchTicks,
+                        battery.batteryProcess.getU(), battery.cutLoad.getU() - battery.negativeLoad.getU(), battery.cutSwitch.getBaseR(),
+                        battery.batteryProcess.getCharge(), battery.inventoryProcess.describe());
+                } else watchTicks++;
                 if ("limiting".equals(String.valueOf(battery.inventoryProcess.describe()).split(" ")[0])) limited = true;
                 boolean cut = !battery.cutSwitch.getState();
                 if (cut && !wasCut) cuts++;
@@ -756,6 +763,7 @@ public final class Wp10aCases {
             mods.eln.Eln.simulator.removeSlowProcess(watch);
             ctx.line(String.format("battery protection: peak Tc %.1f (warm limit %.0f), %d cuts, charge %.3f, burnt %s, current %.1f A",
                 peak, battery.descriptor.thermalWarmLimit, cuts, battery.batteryProcess.getCharge(), battery.isBurnt(), battery.batteryProcess.getDischargeCurrent()));
+            ctx.line("battery protection: peak charge current at " + peakAt);
             ctx.check("battery protection: an empty protected battery on LVU doesn't burn", !battery.isBurnt(), "");
             ctx.check("battery protection: it stays under its cut (no cut needed)", peak < battery.descriptor.thermalWarmLimit * 2 / 3, String.format("peak %.1f, %d cuts", peak, cuts));
             ctx.check("battery protection: the chip limits the charge current to about the rated current", limited
@@ -794,7 +802,7 @@ public final class Wp10aCases {
         mods.eln.transparentnode.battery.BatteryElement battery(TestContext ctx, Layout l, int z, boolean withChip, boolean onlyPlus) {
             int x = 3;
             var b = (mods.eln.transparentnode.battery.BatteryElement) l.device(0 + (16 << 6), x, z);
-            b.batteryProcess.setCharge(0.15);   // (over 10% charge, under 10% energy: the share its screen shows)
+            b.batteryProcess.setCharge(0.11);   // (over 10% charge, under 10% energy: the share its screen shows)
             if (withChip) b.getInventory().setItem(0, new ItemStack(mods.eln.Eln.itemsByName.get("Overvoltage Protection")));
             for (var side : onlyPlus ? new mods.eln.misc.Direction[]{b.front.left()} : new mods.eln.misc.Direction[]{b.front.left(), b.front.right()}) {
                 SixNodeElement[] f = l.feed(ctx.at(x, 1, z), side);
@@ -811,12 +819,13 @@ public final class Wp10aCases {
 
         public void measure(TestContext ctx) {
             double share = chip.batteryProcess.getEnergy() / chip.batteryProcess.getEnergyMax();
-            ctx.line(String.format("low-voltage disconnect: at 15%% charge the energy is %.1f%%; with chip %.4f (%s), without %.4f; Jade %s",
+            ctx.line(String.format("low-voltage disconnect: at 11%% charge the energy is %.1f%%; with chip %.4f (%s), without %.4f; Jade %s",
                 share * 100, chip.batteryProcess.getCharge(), chip.inventoryProcess.describe(), bare.batteryProcess.getCharge(), chip.getWaila()));
-            // (its own self-discharge, inside the cut, still runs)
+            // (its own self-discharge, inside the cut, still runs; and its first tick, before the chip's check, is a
+            // moment's dead short)
             ctx.check("battery protection: under 10% energy (as its screen shows), with the chip it gives (almost) nothing",
-                0.15 - chip.batteryProcess.getCharge() < 0.1 * (0.15 - bare.batteryProcess.getCharge()), String.format("%.4f", chip.batteryProcess.getCharge()));
-            ctx.check("battery protection: without it, it discharges", bare.batteryProcess.getCharge() < 0.149 || bare.isBurnt(),
+                0.11 - chip.batteryProcess.getCharge() < 0.15 * (0.11 - bare.batteryProcess.getCharge()), String.format("%.4f", chip.batteryProcess.getCharge()));
+            ctx.check("battery protection: without it, it discharges", bare.batteryProcess.getCharge() < 0.109 || bare.isBurnt(),
                 String.format("%.4f", bare.batteryProcess.getCharge()));
             ctx.check("Jade's charge is the energy's share, as the battery's screen", String.valueOf(chip.getWaila().get("Charge")).contains(
                 mods.eln.misc.Utils.plotPercent("", chip.batteryProcess.getEnergy() / chip.batteryProcess.getEnergyMax()).trim()), "" + chip.getWaila());

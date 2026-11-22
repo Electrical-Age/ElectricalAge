@@ -150,6 +150,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
     public void applyTo(BatteryProcess battery) {
         battery.uNominal = electricalU;
         battery.QNominal = electricalQ;
+        battery.iRated = electricalStdI;
         battery.voltageFunction = UfCharge;
         battery.isRechargeable = isRechargable;
         //battery.efficiency = electricalStdEfficiency;

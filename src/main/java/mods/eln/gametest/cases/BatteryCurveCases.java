@@ -23,8 +23,8 @@ public final class BatteryCurveCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new Held("battery_floats_at_54v", COST, BatteryProcess.FLOAT * 48, 0.95, 2400));
         cases.add(new Held("battery_fills_at_57v", COST, 1.2 * 48, 0.95, 2400));
-        cases.add(new Held("battery_gasses_past_full", COST, 60, 0.999, 20));
-        cases.add(new Held("battery_12v_on_48v_burns", CAPACITY, 48, 0.5, 40));
+        cases.add(new Held("battery_gasses_past_full", COST, 60, 0.999, 300));
+        cases.add(new Held("battery_12v_on_48v_burns", CAPACITY, 48, 0.5, 3));
     }
 
     static final class Held implements TestCase {
@@ -80,10 +80,12 @@ public final class BatteryCurveCases {
                 }
                 case "battery_gasses_past_full" -> {
                     ctx.check("gassing: charge past full doesn't store", q <= 1.0 + 1e-9, String.format("%.6f", q));
-                    ctx.check("gassing: it heats instead", dT > 0.5, String.format("+%.2f K", dT));
-                    ctx.check("gassing: a second in, it hasn't burnt (it burns of the heat, not the voltage)", !battery.isBurnt(), "");
+                    ctx.check("gassing: a small current, against the gas's overpotential", i > 0.005 * rated && i < 0.05 * rated, String.format("%.3f A", i));
+                    ctx.check("gassing: the overpotential holds the EMF over absorption", battery.batteryProcess.getU() > 1.2 * 48 + 0.5, String.format("%.2f V", battery.batteryProcess.getU()));
+                    ctx.check("gassing: it warms", dT > 0.5, String.format("+%.2f K", dT));
+                    ctx.check("gassing: 15 s in, it hasn't burnt", !battery.isBurnt(), "");
                 }
-                default -> ctx.check("a 12 V battery on a 48 V line burns at once", battery.isBurnt(), "");
+                default -> ctx.check("a 12 V battery on a 48 V line burns at once (3 ticks, before its heat could)", battery.isBurnt(), "");
             }
         }
     }
