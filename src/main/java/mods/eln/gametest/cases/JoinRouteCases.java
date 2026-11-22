@@ -67,6 +67,12 @@ public final class JoinRouteCases {
         }
         // a waypoint on the floor under the old cable's last voxels, near the start: taken (nothing laid yet), not refused
         cases.add(new Join(false, "waypoint_on_run", 4, 4, true, 7, 3, true).via(4, 6, 3));
+        // a Signal Cable route from the old signal cable that runs right beside it (1 wide: its own cells, not 2), laid
+        cases.add(new Join(false, "signal_beside", 3, 12, true, 3, 3, true).signal().via(3, 4, 3, 6).endAtVia());
+        // a short loop: start on the old cable, out to a waypoint, back onto the same cable a few voxels on (both joins
+        // within each other's reach). Not for pipes: a pipe route can't start and end in one pipe block, and joins in two
+        // blocks are out of each other's reach
+        cases.add(new Join(false, "short_loop", 3, 4, true, 3, 0, true).via(3, 8, 0, 8).inside(10));
         // a pipe ending on a block's face, continued from just short of it: the ends meet across the face, no junction
         cases.add(new Join(true, "end_on_face", 4, 12, true, 7, 3, true).oldEnd(4, 16));
     }
@@ -76,6 +82,11 @@ public final class JoinRouteCases {
 
     /** The old run along x at z = Z (block-local z lz), block 1's middle to local x endX of block endB, on the floor (y 1). */
     static void oldRun(TestContext c, boolean pipe, int lz, int endB, int endX) {
+        oldRun(c, pipe, LV, lz, endB, endX);
+    }
+
+    /** ... a cable of that tier. */
+    static void oldRun(TestContext c, boolean pipe, int tier, int lz, int endB, int endX) {
         if (pipe) {
             for (int b = 1; b <= endB; b++) PipeCases.lay(c, c.at(b, 1, Z), 0, b == 1 ? 8 : 0, 4, lz, b == endB ? endX : 16, 4, lz);
             return;
@@ -83,7 +94,7 @@ public final class JoinRouteCases {
         BlockPos a = c.at(1, 1, Z), b = c.at(endB, 1, Z);
         var s = new CableRouter.End(a.getX() * 16L + 8, a.getY() * 16L, a.getZ() * 16L + lz, 0, -1);
         var e = new CableRouter.End(b.getX() * 16L + endX, b.getY() * 16L, b.getZ() * 16L + lz, 0, -1);
-        String err = CablePlacer.routeAndLayForTests(c.level(), LV, s, e);
+        String err = CablePlacer.routeAndLayForTests(c.level(), tier, s, e);
         if (err != null) throw new IllegalStateException("old cable: " + err);
     }
 
@@ -91,9 +102,9 @@ public final class JoinRouteCases {
         final boolean pipe, startOnRun, clean;
         final String what;
         final int runBlock, runX, floorX, floorZ;
-        int kitTier = LV, endB = 4, endX = 8, besideZ = -1, insideX = -1;
+        int kitTier = LV, oldTier = LV, endB = 4, endX = 8, besideZ = -1, insideX = -1;
         int[] via;
-        boolean orRefused;
+        boolean orRefused, endAtVia;
         boolean first, second;
         int partsBefore, partsAfter, overlap, deadEnds, junctionCount;
         boolean connected;
@@ -137,7 +148,24 @@ public final class JoinRouteCases {
 
         /** A waypoint on the floor first: at local x (voxels) of block bx, z the middle of block bz. */
         Join via(int bx, int x, int bz) {
-            via = new int[]{bx, x, bz};
+            return via(bx, x, bz, 8);
+        }
+
+        /** ... at local x of block bx and local z of block bz. */
+        Join via(int bx, int x, int bz, int z) {
+            via = new int[]{bx, x, bz, z};
+            return this;
+        }
+
+        /** The route ends at the waypoint (clicked again), not on the floor further on. */
+        Join endAtVia() {
+            endAtVia = true;
+            return this;
+        }
+
+        /** A Signal Cable kit on an old Signal Cable. */
+        Join signal() {
+            kitTier = oldTier = CablePart.tierOf("Signal Cable");
             return this;
         }
 
@@ -198,7 +226,7 @@ public final class JoinRouteCases {
         }
 
         public void build(TestContext c) {
-            oldRun(c, pipe, 8, endB, endX);
+            oldRun(c, pipe, oldTier, 8, endB, endX);
             if (besideZ >= 0) oldRun(c, pipe, besideZ, 3, 8);
             partsBefore = runParts(c);
             var p = c.player();
@@ -209,17 +237,21 @@ public final class JoinRouteCases {
             BlockPos run = c.at(runBlock, 1, Z), floor = c.at(floorX, 0, floorZ);
             Vec3 onRun = Vec3.atLowerCornerOf(run).add(runX / 16.0, (pipe ? 5 : 1) / 16.0 + 0.001, 0.5);
             Vec3 onFloor = Vec3.atLowerCornerOf(floor).add(0.5, 1.0, 0.5);
+            Vec3 onVia = null;
+            BlockPos w = null;
+            if (via != null) {
+                w = c.at(via[0], 0, via[2]);
+                onVia = Vec3.atLowerCornerOf(w).add(via[1] / 16.0, 1.0, via[3] / 16.0);
+            }
             if (insideX >= 0) {
                 first = click(c, p, kit, run, onRun);
+                if (via != null) first &= click(c, p, kit, w, onVia);
                 second = click(c, p, kit, run, Vec3.atLowerCornerOf(run).add(insideX / 16.0, (pipe ? 5 : 1) / 16.0 + 0.001, 0.5));
             } else if (startOnRun) {
                 first = click(c, p, kit, run, onRun);
-                if (via != null) {
-                    BlockPos w = c.at(via[0], 0, via[2]);
-                    first &= click(c, p, kit, w, Vec3.atLowerCornerOf(w).add(via[1] / 16.0, 1.0, 0.5));
-                }
+                if (via != null) first &= click(c, p, kit, w, onVia);
                 // (a floor click is a waypoint; the same spot again ends the route there)
-                second = click(c, p, kit, floor, onFloor) && click(c, p, kit, floor, onFloor);
+                second = endAtVia ? click(c, p, kit, w, onVia) : click(c, p, kit, floor, onFloor) && click(c, p, kit, floor, onFloor);
             } else {
                 first = click(c, p, kit, floor, onFloor);
                 second = click(c, p, kit, run, onRun);
@@ -270,7 +302,7 @@ public final class JoinRouteCases {
             connected = pipe ? pipeConnected(c) : cableConnected(c, ns);
             String d = "overlap " + overlap + ", parts " + partsBefore + " -> " + partsAfter + ";" + pieces;
             c.check(id() + ": both clicks handled", first && second, first + " " + second);
-            if (insideX >= 0) {
+            if (insideX >= 0 && via == null) {
                 c.check(id() + ": a route inside the old run lays nothing", partsAfter == partsBefore, d);
                 return;
             }
@@ -282,7 +314,9 @@ public final class JoinRouteCases {
             c.check(id() + ": the old run and the new one are one network", connected, d);
             if (clean) {
                 // (a tee: an LV cable's end on the old one's line, 2 voxels; a pipe arm's bore past the junction, 2x2x2)
-                c.check(id() + ": no piece lies over the old run", overlap <= (pipe ? 8 : 2), d);
+                // (a loop back onto the old run: two tees)
+                int tees = insideX >= 0 ? 2 : 1;
+                c.check(id() + ": no piece lies over the old run", overlap <= tees * (pipe ? 8 : 2), d);
                 if (pipe) c.check(id() + ": no dead stub of pipe", deadEnds == 0, deadEnds + " dead end(s);" + pieces);
                 // (an old pipe ending on a face: the new one couples to it there as ports)
                 if (pipe && endX == 16) c.check(id() + ": no junction where the ends meet across a face", junctionCount == 0, d);
