@@ -529,7 +529,7 @@ public final class Router {
                     lo[side] = q[side] + h;
                     hi[side] = q[side] + h + rest;
                 }
-                if (space.blocked(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2])) return true;
+                if (space.rests(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2])) return true;
             }
         }
         return false;

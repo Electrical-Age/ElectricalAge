@@ -64,6 +64,9 @@ public final class PipePlacer {
             // the junctions where the route meets the old pipes, checked now (the cut moves them off the click), so the
             // preview and the click refuse alike, with the reason
             for (long[] j : new long[][]{r.startJoin(), r.endJoin()}) {
+                // (the route passes through the joined pipe's block again, over or under the old pipe: it crosses it,
+                // as a cable route coming back across its cable; AdventurAgent read "doesn't end in the pipe's block")
+                if (j != null && piecesIn(r.path(), j) > 1) return new RoutePlacer.Routed<>("it crosses the pipe it joins", 0, null);
                 String err = j == null ? null : joinError(view, tier, r.path(), j);
                 if (err != null) return RoutePlacer.Routed.said("Can't join there: " + err);
             }
@@ -112,6 +115,24 @@ public final class PipePlacer {
         PipeRouter.Space sp = RouteView.obstacles(v);
         if (startJoin != null) sp = RouteView.freeAround(sp, startJoin, PipePart.JOIN_CLEAR);
         if (endJoin != null) sp = RouteView.freeAround(sp, endJoin, PipePart.JOIN_CLEAR);
+        // (and it doesn't rest against the old pipe it joins, near the join: the soft support drew it along beside it)
+        if (sj != null || ej != null) {
+            RouteView rv = view;
+            if (sj != null) rv = sj.unresting(rv);
+            if (ej != null) rv = ej.unresting(rv);
+            PipeRouter.Space blocked = sp, rest = RouteView.obstacles(rv);
+            sp = new PipeRouter.Space() {
+                @Override
+                public boolean blocked(long x0, long y0, long z0, long x1, long y1, long z1) {
+                    return blocked.blocked(x0, y0, z0, x1, y1, z1);
+                }
+
+                @Override
+                public boolean rests(long x0, long y0, long z0, long x1, long y1, long z1) {
+                    return rest.blocked(x0, y0, z0, x1, y1, z1);
+                }
+            };
+        }
         PipeRouter.Result r = PipeRouter.route(sp, PipePart.GRID[tier], end(start), ends(wps), end(end), budgetMs);
         if (r.error != null) return new RoutePlacer.Routed<>(r.error, 0, null);
         List<long[]> pts = r.points;
@@ -130,11 +151,17 @@ public final class PipePlacer {
         return s && sj.crosses(r.path(), null, s, e, h, h, 0) || e && ej.crosses(r.path(), null, s, e, h, h, 0);
     }
 
+    /** How many pieces of the route lie in join j's block. */
+    static int piecesIn(List<long[]> pts, long[] j) {
+        List<int[]> mine = PipeRouter.perBlock(pts).get(List.of(Math.floorDiv(j[0], 16), Math.floorDiv(j[1], 16), Math.floorDiv(j[2], 16)));
+        return mine == null ? 0 : mine.size();
+    }
+
     /** Why the route's piece in join j's block can't join the old pipe at j (VoxelNode.joinError, on the view), or null. */
     static String joinError(RouteView view, int tier, List<long[]> pts, long[] j) {
         BlockPos b = new BlockPos((int) Math.floorDiv(j[0], 16), (int) Math.floorDiv(j[1], 16), (int) Math.floorDiv(j[2], 16));
         List<int[]> mine = PipeRouter.perBlock(pts).get(List.of((long) b.getX(), (long) b.getY(), (long) b.getZ()));
-        if (mine == null || mine.size() != 1) return "the route doesn't end in the pipe's block";
+        if (mine == null || mine.size() != 1) return "the route doesn't end in the pipe's block";   // (more than one: crosses, route())
         RouteView.Voxels vx = view.voxels(b);
         return VoxelNode.joinError(view.parts(b), vx == null ? null : vx.used(), new PipePart(tier, mine.get(0)), (int) (j[0] - b.getX() * 16L),
             (int) (j[1] - b.getY() * 16L), (int) (j[2] - b.getZ() * 16L));
@@ -432,7 +459,7 @@ public final class PipePlacer {
             BlockPos jb = new BlockPos((int) Math.floorDiv(join[0], 16), (int) Math.floorDiv(join[1], 16), (int) Math.floorDiv(join[2], 16));
             if (jbs.contains(jb)) return "it starts and ends on the same pipe block";
             List<int[]> mine = pieces.remove(List.of((long) jb.getX(), (long) jb.getY(), (long) jb.getZ()));
-            if (mine == null || mine.size() != 1) return "the route doesn't end in the pipe's block";
+            if (mine == null || mine.size() != 1) return "the route doesn't end in the pipe's block";   // (more than one: crosses, route())
             jbs.add(jb);
             js.add(new Laying.Join(jb, new PipePart(tier, mine.get(0)), (int) (join[0] - jb.getX() * 16L), (int) (join[1] - jb.getY() * 16L),
                 (int) (join[2] - jb.getZ() * 16L)));

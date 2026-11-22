@@ -338,7 +338,11 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   overlapping): `JoinRouteCases`' unchecked rows. A route wholly inside the old run lays nothing: "That path is already laid" (`RoutePlacer.INSIDE`, wording Neon); a
   waypoint whose route so far lies inside it is taken (nothing laid yet). A route that comes back onto or across the old
   run away from its cut (after a waypoint; `JoinRun.crosses`) is routed again without the freed voxels, and if it still
-  crosses (through the free cube round the join point) it is refused: "it crosses the cable it joins". A pipe's moved
+  crosses (through the free cube round the join point) it is refused: "it crosses the cable it joins" (a pipe route that
+  passes back through the joined pipe's block, over or under it, says the same for the pipe). A pipe route joining an
+  old pipe doesn't rest against it within `JoinRun.REST_REACH` (2 blocks) of the join (`PipeRouter.Space.rests`, which
+  is `blocked` elsewhere): the soft support drew a short loop's first leg along beside the old pipe for a block
+  (AdventurAgent). A pipe's moved
   junction is checked when routed (`VoxelNode.joinError` on the view's parts and used voxels), so the preview refuses as
   the click does. A cut at an old pipe's end inside a block makes a two-armed junction there, as a join at that end
   always did, not a plain straight pipe. `JoinRun` walks the old run voxel by voxel on the route's view (a preview

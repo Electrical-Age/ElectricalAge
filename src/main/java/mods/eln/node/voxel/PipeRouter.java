@@ -35,6 +35,12 @@ public final class PipeRouter {
     /** What's in the way. A box in world voxels [x0, x1) x [y0, y1) x [z0, z1). */
     public interface Space {
         boolean blocked(long x0, long y0, long z0, long x1, long y1, long z1);
+
+        /** Is there something in the box a FREE run rests against (its soft support)? What's in the way, unless a
+         *  space says otherwise (a route joining an old pipe doesn't rest against that pipe: JoinRun). */
+        default boolean rests(long x0, long y0, long z0, long x1, long y1, long z1) {
+            return blocked(x0, y0, z0, x1, y1, z1);
+        }
     }
 
     /** A routing end: a point (world voxels) and, if it's a port, the direction the pipe must leave or arrive along

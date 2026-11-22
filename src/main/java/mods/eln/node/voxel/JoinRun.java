@@ -29,6 +29,14 @@ final class JoinRun {
 
     /** The old run's voxels freed for the router, by block (block-local, VoxelNode.voxel). */
     final Map<BlockPos, BitSet> freed;
+    /**
+     * The old run's voxels within REST_REACH of the join (a pipe's; a cable's within REACH): a route joining it doesn't
+     * rest against them (PipeRouter.Space.rests). Else the pipe router's soft support drew it along the old pipe, a
+     * block or more right beside it, which looked doubled (AdventurAgent, a short loop).
+     */
+    final Map<BlockPos, BitSet> unrest;
+    /** How far along an old pipe from the join (voxels) a route joining it doesn't rest against it: two blocks. */
+    static final int REST_REACH = 32;
     /** The old run's centre line near the join: unit edges (world voxels) a route may run along unlaid. */
     private final Set<Edge> edges;
 
@@ -38,8 +46,9 @@ final class JoinRun {
     /** The face a cable route must lie on to run inside it (-1: a pipe). */
     private final int face;
 
-    private JoinRun(Map<BlockPos, BitSet> freed, Set<Edge> edges, int face) {
+    private JoinRun(Map<BlockPos, BitSet> freed, Map<BlockPos, BitSet> unrest, Set<Edge> edges, int face) {
         this.freed = freed;
+        this.unrest = unrest;
         this.edges = edges;
         this.face = face;
     }
@@ -48,12 +57,12 @@ final class JoinRun {
     static JoinRun cable(RouteView view, long[] j, int attach, int tier, CableSpec spec) {
         if (attach < 0) return null;
         return of(view, j, attach, p -> p instanceof CablePart cp && !cp.isKnuckle() && cp.face == attach && cp.tier == tier
-            && java.util.Objects.equals(cp.spec, spec));
+            && java.util.Objects.equals(cp.spec, spec), REACH);
     }
 
     /** The pipe (any tier: pipes of every tier join) at join j, or null. Fittings and junctions are not run through. */
     static JoinRun pipe(RouteView view, long[] j) {
-        return of(view, j, -1, p -> p instanceof PipePart);
+        return of(view, j, -1, p -> p instanceof PipePart, REST_REACH);
     }
 
     /** The block an edge from m one voxel along axis a lies in: a cable's on face's plane (CableRouter.cell), a pipe's. */
@@ -70,11 +79,12 @@ final class JoinRun {
     }
 
     /**
-     * The run's centre line from j (world voxels) along the run's pieces (same), REACH voxels either way at most, across
+     * The run's centre line from j (world voxels) along the run's pieces (same), far voxels either way at most (REACH of it
+     * run through and freed), across
      * block faces too, not past a pipe's fitting or junction; and the voxels of those pieces round it. Null if no piece
      * of the run passes j.
      */
-    private static JoinRun of(RouteView view, long[] j, int face, Predicate<VoxelPart> same) {
+    private static JoinRun of(RouteView view, long[] j, int face, Predicate<VoxelPart> same, int far) {
         Map<BlockPos, List<VoxelPart>> runs = new HashMap<>();
         Map<BlockPos, List<VoxelPart>> all = new HashMap<>();
         java.util.function.Function<BlockPos, List<VoxelPart>> runOf = b -> runs.computeIfAbsent(b, bb -> {
@@ -85,7 +95,7 @@ final class JoinRun {
         });
         // breadth first along the run's segments, a voxel at a time
         Map<List<Long>, Integer> dist = new HashMap<>();
-        Set<Edge> edges = new HashSet<>();
+        Set<Edge> edges = new HashSet<>(), seen = new HashSet<>();
         List<Owned> owners = new ArrayList<>();   // (the piece each edge lies on, in edges' order of finding)
         List<long[]> found = new ArrayList<>();   // {x, y, z, axis}: the edges, from their lower end
         ArrayDeque<long[]> todo = new ArrayDeque<>();
@@ -94,7 +104,7 @@ final class JoinRun {
         while (!todo.isEmpty()) {
             long[] p = todo.poll();
             int d = dist.get(List.of(p[0], p[1], p[2]));
-            if (d >= REACH || d > 0 && face < 0 && stopped(all, p)) continue;
+            if (d >= far || d > 0 && face < 0 && stopped(all, p)) continue;
             for (int a = 0; a < 3; a++)
                 for (int s = -1; s <= 1; s += 2) {
                     long[] q = p.clone();
@@ -105,8 +115,9 @@ final class JoinRun {
                     long ox = b.getX() * 16L, oy = b.getY() * 16L, oz = b.getZ() * 16L;
                     int owner = along(run, new long[]{p[0] - ox, p[1] - oy, p[2] - oz}, new long[]{q[0] - ox, q[1] - oy, q[2] - oz});
                     if (owner < 0) continue;
-                    if (edges.add(new Edge(m[0], m[1], m[2], a))) {
-                        found.add(new long[]{m[0], m[1], m[2], a});
+                    if (seen.add(new Edge(m[0], m[1], m[2], a))) {
+                        if (d < REACH) edges.add(new Edge(m[0], m[1], m[2], a));
+                        found.add(new long[]{m[0], m[1], m[2], a, d});
                         owners.add(new Owned(b, run.get(owner)));
                     }
                     if (dist.containsKey(List.of(q[0], q[1], q[2]))) continue;
@@ -117,15 +128,16 @@ final class JoinRun {
         if (edges.isEmpty()) return null;
         // the voxels of the piece each edge lies on, along the edge (a pipe's past it by its half bore: its box runs past
         // its end) and as far across as the piece reaches; not another run's beside it
-        Map<BlockPos, BitSet> freed = new HashMap<>();
+        Map<BlockPos, BitSet> freed = new HashMap<>(), unrest = new HashMap<>();
         for (int i = 0; i < found.size(); i++) {
             long[] e = found.get(i);
+            boolean near = e[4] < REACH;
             int a = (int) e[3];
             BlockPos b = owners.get(i).block();
             VoxelPart p = owners.get(i).part();
             long[] le = {e[0] - b.getX() * 16L, e[1] - b.getY() * 16L, e[2] - b.getZ() * 16L};
             int cap = p instanceof PipePart pp ? pp.bore() / 2 : 0;
-            BitSet f = freed.computeIfAbsent(b, bb -> new BitSet(4096));
+            BitSet f = freed.computeIfAbsent(b, bb -> new BitSet(4096)), u = unrest.computeIfAbsent(b, bb -> new BitSet(4096));
             for (int[] bx : p.boxes()) {
                 int[] lo = new int[3], hi = new int[3];
                 for (int k = 0; k < 3; k++) {
@@ -134,10 +146,13 @@ final class JoinRun {
                 }
                 for (int x = lo[0]; x < hi[0]; x++)
                     for (int y = lo[1]; y < hi[1]; y++)
-                        for (int z = lo[2]; z < hi[2]; z++) f.set(VoxelNode.voxel(x, y, z));
+                        for (int z = lo[2]; z < hi[2]; z++) {
+                            if (near) f.set(VoxelNode.voxel(x, y, z));
+                            u.set(VoxelNode.voxel(x, y, z));
+                        }
             }
         }
-        return new JoinRun(freed, edges, face);
+        return new JoinRun(freed, unrest, edges, face);
     }
 
     /** Is a pipe's fitting (VoxelNode.fittingAt) or a junction at p (world voxels), in a block looked at so far? */
@@ -224,6 +239,11 @@ final class JoinRun {
                         return true;
                 }
         return false;
+    }
+
+    /** The view with the old run's voxels that a route doesn't rest against free (a pipe route's support, rests). */
+    RouteView unresting(RouteView v) {
+        return RouteView.freeing(v, unrest);
     }
 
     /** The view with the run's voxels near the join free. */
