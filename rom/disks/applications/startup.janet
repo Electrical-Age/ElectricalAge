@@ -1,8 +1,8 @@
 # Switchboard, Dynamo's desk (Baughn 2026-11-18). The desk is made, never saved: the drives with a disk in them (A:,
 # B:, and RAM:, the ramdisk) top left, then every application found on them: a directory NAME.app holding main.janet
 # and icon.pix, at a disk's top or one directory down. Double-click an application to start it (one of each: a running
-# one comes back instead), a drive to open it in a Filer window, the Shell to bring it back. The desk looks at the
-# drives every two seconds and lays itself out again when what is in them changed.
+# one comes back instead), a drive to open it in a Filer window, the Shell to bring it back. Every two seconds the desk
+# checks the drives' stamps (no disk access) and reads them again only when a disk went in or out or was written to.
 
 (def t (proc/tab))
 (def sys (if (disk/exists? "a:/System/backdrop.pix") "a:/System/" "b:/System/"))
@@ -103,6 +103,7 @@
 
 (def drives [[:a "A:/" "A:"] [:b "B:/" "B:"] [:ram "RAM:/" "RAM:"]])
 (var shown nil)            # what the desk shows now, to notice a change
+(var stamps nil)           # the drives' stamps when it last looked (disk/stamp)
 (def app-pictures @{})     # application directory -> its pixmap id
 (var next-picture 100)
 
@@ -169,8 +170,12 @@
     (ui/window t 0 1 ui/screen-width (- ui/screen-height 1) "Switchboard" [:backdrop])
     (desk-menus)
     (set shown nil))
-  (def now-shown (survey))
-  (unless (deep= now-shown shown)
-    (set shown now-shown)
-    (layout now-shown))
+  # (the drives are read only when a disk went in or out or something was written: an idle desk is silent, Baughn)
+  (def now-stamps (map |(disk/stamp ($ 0)) drives))
+  (unless (and shown (deep= now-stamps stamps))
+    (set stamps now-stamps)
+    (def now-shown (survey))
+    (unless (deep= now-shown shown)
+      (set shown now-shown)
+      (layout now-shown)))
   (sleep 2))

@@ -421,6 +421,10 @@
   (ea/disk-list (case path nil "A:/" :a "A:/" :b "B:/" :ram "RAM:/" path)))
 (defn disk/present? "Is there a readable disk in drive (:a or :b; the ramdisk :ram always is)?" [drive]
   (try (do (ea/disk-list (case drive :a "A:/" :b "B:/" :ram "RAM:/")) true) ([_] false)))
+(defn disk/stamp
+  "A number that changes when the disk in drive (:a, :b or :ram) goes in or out, or this computer writes to it. It
+  reads nothing from the disk: a program can look again only when it moved on (the desk does)."
+  [drive] (ea/disk-stamp drive))
 (defn disk/label "The floppy's label, or nil." [drive] (ea/disk-label drive))
 (defn disk/free "Bytes free on the floppy." [drive] (ea/disk-free drive))
 (defn disk/delete "Delete a file (or an empty directory)." [path] (ea/disk-delete path))

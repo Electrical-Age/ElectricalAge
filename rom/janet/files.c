@@ -14,8 +14,21 @@ static FATFS fs[3];
 static int mounted[3];
 static FIL *files[MAX_FILES];      /* fd 3 + i */
 static FRESULT last;
-
+/* Per drive, counts up when its disk goes in or out (the controller's change line) and when this computer writes to it:
+   a program that lists a disk can tell it is unchanged without reading it (the desk polled the drive every 2 s). */
+static uint32_t gen[3];
 static const char *const vol[3] = {"A:", "B:", "RAM:"};
+
+/* The controller says drive d's disk changed: forget the mount, and count it. */
+static void changed(int d) {
+    if (d < 2 && (FD_CHANGED & (1u << d))) {
+        FD_CHANGED = 1u << d;
+        if (mounted[d]) f_mount(NULL, vol[d], 0);
+        mounted[d] = 0;
+        gen[d]++;
+    }
+}
+
 
 /* The drive a path is on: an "a:", "b:" or "ram:" prefix, else A. */
 static int drive_of(const char *path) {
@@ -42,11 +55,7 @@ static FRESULT ready(int d) {
         if (r == FR_OK) mounted[2] = 1;
         return r;
     }
-    if (FD_CHANGED & (1u << d)) {
-        FD_CHANGED = 1u << d;
-        if (mounted[d]) f_mount(NULL, vol[d], 0);
-        mounted[d] = 0;
-    }
+    changed(d);
     if (mounted[d]) return FR_OK;
     FRESULT r = f_mount(&fs[d], vol[d], 1);
     if (r == FR_OK) mounted[d] = 1;
@@ -90,6 +99,7 @@ int _open(const char *path, int flags, int mode) {
     else m |= FA_OPEN_EXISTING;
     FIL *f = malloc(sizeof(FIL));
     if (!f) { errno = ENOMEM; return -1; }
+    if (m & FA_WRITE) gen[drive_of(path)]++;
     r = f_open(f, path, m);
     if (r != FR_OK) { free(f); return fail(r); }
     files[i] = f;
@@ -119,6 +129,8 @@ int file_write(int fd, const char *buf, int n) {
 int _close(int fd) {
     FIL *f = file(fd);
     if (!f) return fd >= 0 && fd <= 2 ? 0 : (errno = EBADF, -1);
+    for (int d = 0; d < 3; d++)
+        if (f->obj.fs == &fs[d] && (f->flag & FA_WRITE)) gen[d]++;   /* (written: its stamp moves on again, closed) */
     FRESULT r = f_close(f);
     free(f);
     files[fd - 3] = NULL;
@@ -165,12 +177,14 @@ int _stat(const char *path, struct stat *st) {
 
 int _unlink(const char *path) {
     FRESULT r = prepare(path);
+    gen[drive_of(path)]++;
     if (r == FR_OK) r = f_unlink(path);
     return r == FR_OK ? 0 : fail(r);
 }
 
 int _rename(const char *a, const char *b) {
     FRESULT r = prepare(a);
+    gen[drive_of(a)]++;
     if (r == FR_OK) r = f_rename(a, b);
     return r == FR_OK ? 0 : fail(r);
 }
@@ -178,6 +192,7 @@ int _rename(const char *a, const char *b) {
 int mkdir(const char *path, mode_t mode) {
     (void) mode;
     FRESULT r = prepare(path);
+    gen[drive_of(path)]++;
     if (r == FR_OK) r = f_mkdir(path);
     return r == FR_OK ? 0 : fail(r);
 }
@@ -215,6 +230,7 @@ JANET_FN(cfun_disk_format, "(ea/disk-format drive &opt label)", "Format the disk
     int d = getdrive(argv, 0);
     if (mounted[d]) f_mount(NULL, vol[d], 0);
     mounted[d] = 0;
+    gen[d]++;
     static BYTE work[FF_MAX_SS];
     MKFS_PARM opt = {FM_FAT | FM_SFD, 0, 0, 0, 0};
     CHECK(f_mkfs(vol[d], &opt, work, sizeof work));
@@ -272,6 +288,7 @@ JANET_FN(cfun_disk_delete, "(ea/disk-delete path)", "Delete a file (or an empty 
     janet_fixarity(argc, 1);
     const char *path = janet_getcstring(argv, 0);
     CHECK(prepare(path));
+    gen[drive_of(path)]++;
     CHECK(f_unlink(path));
     return janet_wrap_nil();
 }
@@ -280,6 +297,7 @@ JANET_FN(cfun_disk_rename, "(ea/disk-rename from to)", "Rename or move a file on
     janet_fixarity(argc, 2);
     const char *a = janet_getcstring(argv, 0), *b = janet_getcstring(argv, 1);
     CHECK(prepare(a));
+    gen[drive_of(a)]++;
     CHECK(f_rename(a, b));
     return janet_wrap_nil();
 }
@@ -288,8 +306,17 @@ JANET_FN(cfun_disk_mkdir, "(ea/disk-mkdir path)", "Make a directory.") {
     janet_fixarity(argc, 1);
     const char *path = janet_getcstring(argv, 0);
     CHECK(prepare(path));
+    gen[drive_of(path)]++;
     CHECK(f_mkdir(path));
     return janet_wrap_nil();
+}
+
+JANET_FN(cfun_disk_stamp, "(ea/disk-stamp drive)",
+         "A number that changes when the disk in drive changes (in or out) or this computer writes to it; no disk access.") {
+    janet_fixarity(argc, 1);
+    int d = getdrive(argv, 0);
+    changed(d);
+    return janet_wrap_number((double) gen[d]);
 }
 
 JANET_FN(cfun_disk_why, "(ea/disk-why)", "What the last file call that failed ran into, in words.") {
@@ -303,6 +330,7 @@ void ea_register_disk(JanetTable *env) {
         JANET_REG("ea/disk-format", cfun_disk_format), JANET_REG("ea/disk-label", cfun_disk_label),
         JANET_REG("ea/disk-free", cfun_disk_free), JANET_REG("ea/disk-list", cfun_disk_list),
         JANET_REG("ea/disk-delete", cfun_disk_delete), JANET_REG("ea/disk-rename", cfun_disk_rename),
-        JANET_REG("ea/disk-mkdir", cfun_disk_mkdir), JANET_REG("ea/disk-why", cfun_disk_why), JANET_REG_END};
+        JANET_REG("ea/disk-mkdir", cfun_disk_mkdir), JANET_REG("ea/disk-why", cfun_disk_why),
+        JANET_REG("ea/disk-stamp", cfun_disk_stamp), JANET_REG_END};
     janet_cfuns_ext(env, "ea", fns);
 }

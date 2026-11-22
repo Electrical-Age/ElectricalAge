@@ -211,6 +211,28 @@ class ApplicationsTest extends StdlibTest {
         assertNull(screen.scene.windows.get(4), "one calculator");
     }
 
+    /**
+     * Baughn (2026-11-22, "a little noisy"): an idle desk doesn't read the floppy; it looks again when the disk is
+     * written to (an application copied on shows up) or changed.
+     */
+    @Test
+    void anIdleDeskLeavesTheFloppyAlone() throws IOException {
+        m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), applications(), false));
+        type("(proc/start \"desk\" run-file \"a:/startup.janet\")");
+        tick(40, "\n2\n> ");
+        run(80);
+        m.floppy.takeAccess(0);
+        run(200);   // (10 s: the desk's loop went round five times)
+        assertFalse(m.floppy.takeAccess(0), "no reads while nothing changed");
+        type("(do (disk/mkdir \"a:/Hello.app\") (spit \"a:/Hello.app/main.janet\" \"(print 1)\") :ok)");
+        tick(40, ":ok\n> ");
+        run(60);
+        boolean shown = false;
+        for (var en : screen.scene.windows.get(2).elements.entrySet())
+            shown |= en.getValue().kind.equals("icon") && "Hello".equals(Form.str(en.getValue().msg, 5, ""));
+        assertTrue(shown, "an application written to the disk shows up: " + dump(screen));
+    }
+
     /** Baughn (2026-11-18): two text modes, 80 x 25 (the start) and 120 x 40; windows are kept on the screen. */
     @Test
     void theScreenHasTwoModes() throws IOException {
