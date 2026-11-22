@@ -38,12 +38,7 @@ public final class CablePlacer {
         @Override
         RoutePlacer.Routed<List<CableRouter.Step>> route(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin,
                                                         List<CableRouter.End> wps, CableRouter.End end, long[] endJoin, long budgetMs) {
-            CableRouter.Space s = space(view);
-            if (startJoin != null) s = around(s, startJoin);
-            if (endJoin != null) s = around(s, endJoin);
-            CablePart.Tier t = tierOf(tier, spec);
-            CableRouter.Result r = CableRouter.route(s, t.width(), t.height(), start, wps, end, budgetMs);
-            return new RoutePlacer.Routed<>(r.error, r.error == null ? r.length() : 0, r.steps);
+            return CablePlacer.route(view, tier, spec, start, startJoin, wps, end, endJoin, budgetMs);
         }
 
         @Override
@@ -157,6 +152,37 @@ public final class CablePlacer {
                 }
         return true;
     }
+
+    /**
+     * A cable route from start over the waypoints to end, each end maybe on an old cable (join point or null): free round
+     * the joins (around), and through the old cable itself near them where it is the kit's own (JoinRun); a route that
+     * runs inside the old cable there is cut where it leaves it, so no piece is laid over it (todo #516).
+     */
+    static RoutePlacer.Routed<List<CableRouter.Step>> route(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin,
+                                                             List<CableRouter.End> wps, CableRouter.End end, long[] endJoin, long budgetMs) {
+        JoinRun sj = startJoin == null ? null : JoinRun.cable(view, startJoin, start.attach(), tier, spec);
+        JoinRun ej = endJoin == null ? null : JoinRun.cable(view, endJoin, end.attach(), tier, spec);
+        RouteView v = view;
+        if (sj != null) v = sj.freeing(v);
+        if (ej != null) v = ej.freeing(v);
+        CableRouter.Space s = space(v);
+        if (startJoin != null) s = around(s, startJoin);
+        if (endJoin != null) s = around(s, endJoin);
+        CablePart.Tier t = tierOf(tier, spec);
+        CableRouter.Result r = CableRouter.route(s, t.width(), t.height(), start, wps, end, budgetMs);
+        if (r.error != null) return new RoutePlacer.Routed<>(r.error, 0, null);
+        List<CableRouter.Step> steps = r.steps;
+        if (sj != null && steps != null) steps = sj.trimStepsHead(steps);
+        if (ej != null && steps != null) steps = ej.trimStepsTail(steps);
+        if (steps == null) return new RoutePlacer.Routed<>(INSIDE, 0, null);
+        long[] from = startJoin == null ? null : new long[]{steps.get(0).x(), steps.get(0).y(), steps.get(0).z()};
+        CableRouter.Step last = steps.get(steps.size() - 1);
+        long[] to = endJoin == null ? null : new long[]{last.x(), last.y(), last.z()};
+        return new RoutePlacer.Routed<>(null, new CableRouter.Result(steps, null).length(), steps, from, to);
+    }
+
+    /** Why a route that runs only inside the old cable or pipe it joins lays nothing. */
+    static final String INSIDE = "it runs inside the old one";
 
     /** Free round a junction point (the new cable meets the old one there): of what's in the way there, only the old
      *  cable; solid blocks stay solid (they were free too, and a route could pass through a floor beside a junction). */
@@ -664,13 +690,9 @@ public final class CablePlacer {
 
     /** Route between two ends, each maybe joining an old cable (join point or null), and lay it (GameTests). */
     public static String routeAndLayJoinedForTests(Level level, int tier, CableRouter.End start, long[] startJoin, CableRouter.End end, long[] endJoin) {
-        CablePart.Tier t = tierOf(tier, null);   // (the preset's cross-section, as lay() lays it)
-        CableRouter.Space s = space(level);
-        if (startJoin != null) s = around(s, startJoin);
-        if (endJoin != null) s = around(s, endJoin);
-        var r = CableRouter.route(s, t.width(), t.height(), start, List.of(), end);
-        if (r.error != null) return r.error;
-        return lay(level, tier, r.steps, null);
+        var r = route(RouteView.live(level), tier, null, start, startJoin, List.of(), end, endJoin, PipeRouter.TIME_BUDGET_MS);
+        if (r.error() != null) return r.error();
+        return lay(level, tier, r.path(), null);
     }
 
     /** Route between two ends and lay it (GameTests). Null if done, else why not. */

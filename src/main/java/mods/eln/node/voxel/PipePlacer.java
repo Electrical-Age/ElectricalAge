@@ -48,19 +48,33 @@ public final class PipePlacer {
                                                CableRouter.End end, long[] endJoin, long budgetMs) {
             // (the two cubes are freed in either order alike: obstacles are boxes, so a box is blocked by what it overlaps
             // outside both)
-            PipeRouter.Space sp = RouteView.obstacles(view);
+            // (and through the old pipe itself near a join, JoinRun: a route running inside it is cut where it leaves it,
+            // and joins it there; todo #516)
+            JoinRun sj = startJoin == null ? null : JoinRun.pipe(view, startJoin);
+            JoinRun ej = endJoin == null ? null : JoinRun.pipe(view, endJoin);
+            RouteView v = view;
+            if (sj != null) v = sj.freeing(v);
+            if (ej != null) v = ej.freeing(v);
+            PipeRouter.Space sp = RouteView.obstacles(v);
             if (startJoin != null) sp = RouteView.freeAround(sp, startJoin, PipePart.JOIN_CLEAR);
             if (endJoin != null) sp = RouteView.freeAround(sp, endJoin, PipePart.JOIN_CLEAR);
             PipeRouter.Result r = PipeRouter.route(sp, PipePart.GRID[tier], end(start), ends(wps), end(end), budgetMs);
-            return new RoutePlacer.Routed<>(r.error, r.error == null ? r.length() : 0, r.points);
+            if (r.error != null) return new RoutePlacer.Routed<>(r.error, 0, null);
+            List<long[]> pts = r.points;
+            if (sj != null && pts != null) pts = sj.trimHead(pts);
+            if (ej != null && pts != null) pts = ej.trimTail(pts);
+            if (pts == null) return new RoutePlacer.Routed<>(CablePlacer.INSIDE, 0, null);
+            long[] from = startJoin == null ? null : joinAt(pts.get(0)), to = endJoin == null ? null : joinAt(pts.get(pts.size() - 1));
+            return new RoutePlacer.Routed<>(null, new PipeRouter.Result(pts, null).length(), pts, from, to);
         }
 
         @Override
         String lay(Level level, int tier, CableSpec spec, RoutePlacer.Routed<List<long[]>> r, long[] startJoin, long[] endJoin,
                    net.minecraft.world.entity.player.Player player) {
+            // (the joins where the route meets the old pipes: route() moves one to where the route leaves the old pipe)
             List<long[]> joins = new ArrayList<>();
-            if (startJoin != null) joins.add(startJoin);
-            if (endJoin != null) joins.add(endJoin);
+            if (r.startJoin() != null) joins.add(r.startJoin());
+            if (r.endJoin() != null) joins.add(r.endJoin());
             return layJoined(level, tier, r.path(), joins, player);
         }
 
@@ -83,6 +97,15 @@ public final class PipePlacer {
             return out;
         }
     };
+
+    /**
+     * A route end on an old pipe as a join: the point, or null on a block's face plane (the route cut there, at the old
+     * pipe's end on the face: the two ends meet across the face as ports, no junction).
+     */
+    static long[] joinAt(long[] p) {
+        for (int a = 0; a < 3; a++) if (Math.floorMod(p[a], 16) == 0) return null;
+        return p;
+    }
 
     /** A face (3D value) by pipe direction (0..5 = -x +x -y +y -z +z, dirOf), and back: RoutePlacer's ends name faces. */
     private static final int[] FACE_OF_DIR = {4, 5, 0, 1, 2, 3}, DIR_OF_FACE = {2, 3, 4, 5, 0, 1};

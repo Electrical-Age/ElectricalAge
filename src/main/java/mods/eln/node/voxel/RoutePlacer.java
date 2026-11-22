@@ -40,8 +40,15 @@ public final class RoutePlacer {
         }
     }
 
-    /** A route found, or why not (error); its length (voxels) and its path in the kind's own form P (cable steps, pipe points). */
-    record Routed<P>(String error, int length, P path) {
+    /**
+     * A route found, or why not (error); its length (voxels) and its path in the kind's own form P (cable steps, pipe
+     * points); where it joins old runs at its start and end (world voxels, or null): the join clicked, or where the route
+     * leaves the old run it ran inside near it (JoinRun).
+     */
+    record Routed<P>(String error, int length, P path, long[] startJoin, long[] endJoin) {
+        Routed(String error, int length, P path) {
+            this(error, length, path, null, null);
+        }
     }
 
     /**
