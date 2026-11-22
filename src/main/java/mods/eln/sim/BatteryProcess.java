@@ -69,6 +69,7 @@ public class BatteryProcess implements IProcess {
             if (chargeHeat != null) chargeHeat.moveEnergyTo(-I * voltageSource.getU() * time);
             I = 0;
         }
+        if (I > 0) gas = 0;   // (discharging: the overpotential is gone at once, so it gives back nothing it didn't store)
         if (isRechargeable && I < 0) {
             // charge past full doesn't store: the cell gasses, and the energy goes into heat (Baughn 2026-11-22)
             double dq = -I * time / QNominal, stored = Math.max(0, Math.min(dq, life - Q));

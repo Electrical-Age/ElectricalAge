@@ -47,7 +47,7 @@ public abstract class BatterySlowProcess implements IProcess {
      * overcharging only gasses, as heat (BatteryProcess), and it burns when that heat takes it past its limit.
      */
     public double getUMax() {
-        return 1.5 * batteryProcess.uNominal;
+        return 1.4 * batteryProcess.uNominal;
     }
 
     public abstract void destroy();

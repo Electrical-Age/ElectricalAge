@@ -93,8 +93,9 @@ public class BatteryElement extends TransparentNodeElement {
         electricalProcessList.add(batteryProcess);
         electricalProcessList.add(inventoryProcess.new Step());   // (the protection chips, every step)
         batteryProcess.chargeHeat = thermalLoad;
-        // (its terminals are outside the cut switch; a cut battery sees only itself)
-        batteryProcess.terminal = () -> cutSwitch.getState() ? cutLoad.getU() - negativeLoad.getU() : batteryProcess.getU();
+        // (its terminals are outside the cut switch; a cut battery, or one its chip is holding back, sees only itself)
+        batteryProcess.terminal = () -> cutSwitch.getState() && cutSwitch.getBaseR() <= descriptor.electricalRs / 2 * 1.05
+            ? cutLoad.getU() - negativeLoad.getU() : batteryProcess.getU();
         thermalFastProcessList.add(negativeETProcess);
 
         slowProcessList.add(batterySlowProcess);
