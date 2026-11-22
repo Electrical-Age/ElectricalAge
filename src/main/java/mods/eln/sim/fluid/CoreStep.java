@@ -163,6 +163,7 @@ public final class CoreStep {
         int[] ids = speciesOf(fn);
         if (c == null || c.nodes.size() != fn.nodes.size() || c.edges.size() != fn.edges.size() || !java.util.Arrays.equals(c.ids, ids)
             || !same(c.nodes, fn.nodes) || !same(c.edges, fn.edges)) {
+            if (c != null) c.abandon();   // (a background step of the core it replaces)
             c = new CoreStep(fn, ids);
             fn.core = c;
             fn.builds++;

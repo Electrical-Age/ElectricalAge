@@ -375,7 +375,7 @@ public final class PlumbingCases {
                             b.vessel.update();
                         }
                     }
-                    if (sawBackground && !bg && !back) {
+                    if (sawBackground && !back && a.vessel.slowSteps < mods.eln.sim.fluid.CoreStep.HEAVY_AFTER) {
                         back = true;
                         movedInBackground = b.vessel.mLiquid() - bWater0 - INJECTED;
                     }
