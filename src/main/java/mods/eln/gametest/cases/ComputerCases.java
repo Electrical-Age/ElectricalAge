@@ -125,6 +125,14 @@ public final class ComputerCases {
                 if (upAt > 0 && tick == upAt + 5) {
                     asleep = e.status();
                     submit(ctx, e, 1, "(* 6 7)");
+                    // (three ticks' worth of real time for its own thread, which the typing woke: a test server ticks as
+                    // fast as it can, and "by the next tick" then hung on the tests beside it; it failed the merge
+                    // queue's gate twice running, todo #576)
+                    try {
+                        Thread.sleep(150);
+                    } catch (InterruptedException x) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
                 if (upAt > 0 && tick == upAt + 6) nextTick = terminal(e);
                 if (upAt > 0 && tick == upAt + 35) afterTyping = terminal(e);
