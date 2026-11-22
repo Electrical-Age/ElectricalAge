@@ -775,6 +775,31 @@ public final class Network {
     /** The current step's dt (the sub-steps' parent). */
     private double stepDt;
 
+    /** Zero this step's moves, work and wall heat (its edges' and free nodes' accumulators). */
+    private void clearMoves(List<Node> free) {
+        for (Edge e : edges) {
+            if (e.moved != null) java.util.Arrays.fill(e.moved, 0);
+            if (e.pending != null) java.util.Arrays.fill(e.pending, 0);
+            e.workJ = e.pendingWork = 0;
+        }
+        for (Node n : free) n.wallJ = n.pendingWall = 0;
+    }
+
+    /**
+     * A step that moves nothing (a quarantined network's skipped tick, CoreStep): no flow, work or wall heat, done 0, so
+     * devices reading this step's results book nothing rather than the last step's again.
+     */
+    public void idleStep(double dt) {
+        List<Node> free = new ArrayList<>();
+        for (Node n : nodes) if (!n.fixed) free.add(n);
+        clearMoves(free);
+        done = 0;
+        for (Edge e : edges) {
+            e.flow = flow(e);
+            e.work = 0;
+        }
+    }
+
     /** One step of dt seconds. */
     public void step(double dt) {
         stats.steps++;
@@ -791,14 +816,9 @@ public final class Network {
         }
         List<Node> free = new ArrayList<>();
         for (Node n : nodes) if (!n.fixed) free.add(n);
-        for (Edge e : edges) {
-            if (e.moved != null) java.util.Arrays.fill(e.moved, 0);
-            if (e.pending != null) java.util.Arrays.fill(e.pending, 0);
-            e.workJ = e.pendingWork = 0;
-        }
+        clearMoves(free);
         double[] y0 = pack(free);
         done = 0;
-        for (Node n : free) n.wallJ = n.pendingWall = 0;
         for (Edge e : edges) {
             boolean f = FREEZE_HEAD && (e.dz != 0 || e.kind == Kind.PUMP) || e.kind == Kind.TURBINE;
             e.rhoA = !f ? Double.NaN : e.kind == Kind.TURBINE ? e.a.fluid.rhoGas() : e.gas ? gasDraw(e) : rhoDraw(e.a, e.fa);
@@ -810,8 +830,10 @@ public final class Network {
         stepDt = dt;
         long started = System.nanoTime();
         deadline = MAX_STEP_NANOS > 0 ? started + MAX_STEP_NANOS : Long.MAX_VALUE;
-        hardDeadline = MAX_STEP_NANOS > 0 ? started + MAX_STEP_NANOS * 3 / 2 : Long.MAX_VALUE;
+        long[] hard = HARD.get();
+        hard[0] = MAX_STEP_NANOS > 0 ? started + MAX_STEP_NANOS * 3 / 2 : Long.MAX_VALUE;
         overBudget = false;
+        boolean aborted = false;
         try {
             if (solve(free, y0, dt)) done = dt;
             else {
@@ -821,27 +843,24 @@ public final class Network {
                 else substep(free, dt, 1);
             }
         } catch (OutOfTime t) {
-            hardDeadline = Long.MAX_VALUE;   // (first: restoring the state evaluates the EOS, which checks the clock)
-            // (a solve ran past twice the budget inside one iteration: the step is dropped, from where it began)
+            hard[0] = Long.MAX_VALUE;   // (first: restoring the state evaluates the EOS, which checks the clock)
+            // (a solve ran past 1.5 x the budget inside one iteration: the step is dropped, from where it began)
             restore(free, y0);
-            for (Edge e : edges) {
-                if (e.moved != null) java.util.Arrays.fill(e.moved, 0);
-                if (e.pending != null) java.util.Arrays.fill(e.pending, 0);
-                e.workJ = e.pendingWork = 0;
-            }
-            for (Node n : free) n.wallJ = n.pendingWall = 0;
+            clearMoves(free);
             done = 0;
+            aborted = true;
             if (!overBudget) stats.overBudget++;
             overBudget = true;
             stats.cut++;
         } finally {
-            hardDeadline = Long.MAX_VALUE;
+            hard[0] = Long.MAX_VALUE;
         }
         for (Edge e : edges) {
             e.flow = flow(e);
             e.work = e.workJ / dt;
         }
-        quiet = isQuiet(free, y0, pack(free)) ? quiet + 1 : 0;
+        // (an aborted step moved nothing, but isn't a settled one: counted as quiet, a network stuck aborting fell asleep)
+        quiet = !aborted && isQuiet(free, y0, pack(free)) ? quiet + 1 : 0;
         if (SLEEP_STEPS > 0 && quiet >= SLEEP_STEPS) {
             asleep = true;
             sleepInputs = inputs();
@@ -1086,12 +1105,12 @@ public final class Network {
     public static long MAX_STEP_NANOS = 0;
     private long deadline = Long.MAX_VALUE;
     /**
-     * 1.5 x MAX_STEP_NANOS after the step began: checkClock, called from the EOS and the Jacobian's inner loops, throws
-     * past it. The budget is checked only between iterations, and one iteration once ran past the server watchdog's 60 s
+     * 1.5 x MAX_STEP_NANOS after the step began, per thread (FluidPool steps networks on several): checkClock, called
+     * from the EOS, the Jacobian and the linear solves, throws past it. The budget is checked only between iterations, and one iteration once ran past the server watchdog's 60 s
      * (Incognito, 2026-11-21: MixFluid.drawSlope in a Jacobian of Dysnomia's 110-node plant). (The game steps networks
      * on one thread.)
      */
-    private static long hardDeadline = Long.MAX_VALUE;
+    private static final ThreadLocal<long[]> HARD = ThreadLocal.withInitial(() -> new long[]{Long.MAX_VALUE});
     private static int clockCalls;
 
     /** Thrown by checkClock: the step is dropped (Network.step). */
@@ -1104,14 +1123,15 @@ public final class Network {
     private static final OutOfTime OUT_OF_TIME = new OutOfTime();
 
 
-    /** From the inner loops (EOS evaluations, the Jacobian's columns): past hardDeadline, abandon the step. */
+    /** From the inner loops (EOS evaluations, the Jacobian's columns): past the hard deadline, abandon the step. */
     static void checkClock() {
         if ((++clockCalls & 255) == 0) checkClockNow();
     }
 
     /** ... at once, from loops whose every turn may be slow (a large LU's rows). */
     static void checkClockNow() {
-        if (hardDeadline != Long.MAX_VALUE && System.nanoTime() > hardDeadline) throw OUT_OF_TIME;
+        long d = HARD.get()[0];
+        if (d != Long.MAX_VALUE && System.nanoTime() > d) throw OUT_OF_TIME;
     }
     /** This step ran out of MAX_STEP_NANOS. */
     public boolean overBudget;
@@ -1360,6 +1380,7 @@ public final class Network {
         }
         java.util.Map<PortKey, double[]> rhoSlopes = new java.util.HashMap<>();
         for (Edge e : edges) {
+            checkClock();
             // (every entry an edge can touch is added, zeros too: skipping zeros let entries come and go, and each new
             // one rebuilt the sparse LU's symbolic factorisation, most steps at 2,000 nodes)
             if (e.kind == Kind.TURBINE || e.kind == Kind.REGULATOR) {

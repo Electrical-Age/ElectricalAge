@@ -34,6 +34,8 @@ public final class FluidNode {
      * time (s) the cap on owed time dropped. Kept on the node, so a network rebuilt mid-stall keeps the record; not saved.
      */
     public double stallNow, longestStall, droppedTime;
+    /** Steps in a row its network ran over its time budget (CoreStep's quarantine); on the node, so a rebuild keeps it. */
+    public int slowSteps;
     final Flash state = new Flash();
 
     public FluidNode(double volume, double z, double height, boolean fixed) {

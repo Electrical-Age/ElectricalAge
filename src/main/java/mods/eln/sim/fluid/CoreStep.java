@@ -303,20 +303,19 @@ public final class CoreStep {
     private boolean stallDumped;
 
     /**
-     * Steps in a row that ran over the budget and covered under half the tick, and the ticks skipped since the last try.
-     * After QUARANTINE_AFTER of them the network is tried only every QUARANTINE_EVERY ticks: it moved little anyway, and
-     * one heavy network at the budget every tick took the server to 4 TPS (Dysnomia's plant, 2026-11-21); a step that
-     * covers over half its tick ends it. Jade calls it out meanwhile (its stall stands).
+     * Quarantine: a network whose steps took longer than the budget QUARANTINE_AFTER times in a row (FluidNode.slowSteps,
+     * kept on the nodes over rebuilds) is stepped for real only every QUARANTINE_EVERY ticks; the ticks between are idle
+     * steps, which move nothing and give devices nothing to book. One heavy network at the budget every tick took the
+     * server to 4 TPS (Dysnomia's plant, 2026-11-21). A real step within the budget ends it. Jade calls it out meanwhile.
      */
-    private int aborted, skipped;
+    private int skipped;
     static final int QUARANTINE_AFTER = 10, QUARANTINE_EVERY = 20;
 
     void step(FluidNetwork fn, double dt) {
-        if (aborted >= QUARANTINE_AFTER && ++skipped < QUARANTINE_EVERY) {
-            overBudget = true;
-            return;
-        }
-        skipped = 0;
+        int slow = 0;
+        for (FluidNode n : nodes) slow = Math.max(slow, n.slowSteps);
+        boolean idle = budgetNanos > 0 && slow >= QUARANTINE_AFTER && ++skipped < QUARANTINE_EVERY;
+        if (!idle) skipped = 0;
         // (at most one tick's worth caught up per tick: devices step their own processes by the tick, and a second of
         // fluid landing in one tick would be a spike they all see)
         double tick = dt, ask = dt + Math.min(owed, dt);
@@ -412,9 +411,15 @@ public final class CoreStep {
         }
         long sub0 = net.stats.substeps, cut0 = net.stats.cut, crawls0 = net.stats.crawls;
         Network.MAX_STEP_NANOS = budgetNanos;
-        net.step(dt);
-        overBudget = net.overBudget;
-        aborted = net.overBudget && net.done < 0.5 * tick ? aborted + 1 : 0;
+        long t0 = System.nanoTime();
+        if (idle) net.idleStep(dt);
+        else net.step(dt);
+        boolean over = idle || budgetNanos > 0 && System.nanoTime() - t0 > budgetNanos;
+        overBudget = over;
+        if (!idle) {
+            int next = over ? slow + 1 : 0;
+            for (FluidNode n : nodes) n.slowSteps = next;
+        }
         // (solves accepted at the precision floor, counted to watch: a few thousand in the 28 steam GameTests)
         long crawled = CRAWLS.addAndGet(net.stats.crawls - crawls0);
         if (net.stats.crawls > crawls0 && Long.bitCount(crawled) == 1 && crawled >= 16) System.out.println("[fluidcore] solves accepted at the precision floor so far: " + crawled);
