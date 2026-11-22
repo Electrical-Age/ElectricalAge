@@ -122,6 +122,7 @@ public class CodeEditor extends AbstractWidget {
     public void openGoTo() {
         bar = "Go to line";
         barText.setLength(0);
+        barFresh = false;
         notFound = false;
         setFocused(true);
     }
@@ -389,7 +390,11 @@ public class CodeEditor extends AbstractWidget {
                     notFound = false;
                 }
                 default -> {
-                    if (e.isPaste()) barText.append(clip.getClipboard().replace("\n", " "));
+                    if (e.isPaste()) {
+                        if (barFresh) barText.setLength(0);
+                        barFresh = false;
+                        barText.append(clip.getClipboard().replace("\n", " "));
+                    }
                     else if (ctrl && e.key() == InputConstants.KEY_F) openFind();
                     else if (ctrl && e.key() == InputConstants.KEY_G) openGoTo();
                     else return true;   // (other keys belong to the bar while it is open)

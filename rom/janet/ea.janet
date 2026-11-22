@@ -931,6 +931,7 @@
   (var base text)       # the text at rev, as last opened or saved
   (var stashed nil)     # the picking display's text for Save As
   (var asks 0)
+  (var asking nil)      # the line asking for a name now, or nil
   (defn name-of [p] (last (string/split "/" p)))
   (defn heading [colour s] (ui/text t 1 0 0 colour (string/format "%-60s" s)))
   (defn open-text [p txt]
@@ -944,13 +945,18 @@
     "A line over the path's row asking for a file name; (f path) when one is typed (an empty line cancels)."
     [prompt f]
     (ui/remove t 1)
+    (when asking (ui/remove t asking) (put ui-handlers [t asking] nil))   # (one asked at a time: the last one goes)
     (++ asks)
     (def id (+ 100 (% asks 100)))   # (a new line each time: a display keeps what was typed in a line it knew)
+    (set asking id)
     (ui/line t id 0 0 :fill (string prompt " ")
              (fn [answer _]
                (ui/remove t id)
+               (put ui-handlers [t id] nil)
+               (set asking nil)
                (heading :light-gray path)
                (def a (string/trim answer))
+               (when (empty? a) (set stashed nil))   # (cancelled: a later Save As starts afresh)
                (unless (empty? a) (f (path/resolve a (string/slice path 0 (+ 1 (or (last (string/find-all "/" path)) 0))))))))
     (ui/focus t))
   (ui/remove t 2)

@@ -1196,7 +1196,7 @@ public class ComputerScreen extends ElnScreen {
     @Override
     public boolean charTyped(CharacterEvent event) {
         String ed = focusedEditor();
-        if (ed != null) return editorWidgets.get(ed).charTyped(event);
+        if (ed != null) return menuOpen || editorWidgets.get(ed).charTyped(event);   // (hidden under a menu: nothing)
         Scene.Window t = render.lit() ? activeWindow() : null;
         if (t == null || t.ask != null) return super.charTyped(event);
         if (!fieldHasKeys() && focusedRaw(t) != null) {
@@ -1239,6 +1239,7 @@ public class ComputerScreen extends ElnScreen {
                         return true;
                     }
         }
+        if (menuOpen) return true;   // (a hidden editor under the menu takes nothing)
         String ed = focusedEditor();
         if (ed != null && k == InputConstants.KEY_ESCAPE && editorWidgets.get(ed).escape()) return true;   // (the find bar closes first)
         if (ed != null && k != InputConstants.KEY_ESCAPE) {
