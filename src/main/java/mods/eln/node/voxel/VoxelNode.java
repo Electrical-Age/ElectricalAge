@@ -1343,26 +1343,45 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** Why part can't join the pipe at (x, y, z), or null: addJoined's checks, also run before any of a joining route
      *  is laid (so a refused join lays nothing). */
     public String joinError(PipePart part, int x, int y, int z) {
+        return joinError(parts, used, part, x, y, z);
+    }
+
+    /**
+     * The same for a block's parts and used voxels as a route view has them (PipePlacer.ROUTE: the junction a route
+     * moves to where it leaves the old pipe, checked when routed, so the preview and the click agree).
+     */
+    static String joinError(List<VoxelPart> parts, BitSet used, PipePart part, int x, int y, int z) {
         if (!part.valid()) return "not a straight-pieced pipe inside the block";
         boolean any = false;
         for (VoxelPart p : parts) any |= p instanceof PipePart pp && pp.passes(x, y, z);
         if (!any) return "no pipe there to join";
-        if (fittingAt(x, y, z)) return "a valve or sensor sits there";
+        if (fittingAt(parts, x, y, z)) return "a valve or sensor sits there";
         // (a tee takes a third arm, a cross a fourth; no more)
-        if (junctionAt(x, y, z) != null && armsAt(x, y, z).size() >= 4) return "a cross takes no more pipes";
+        boolean junction = false;
+        int arms = 0;
+        for (VoxelPart p : parts) {
+            junction |= p instanceof JunctionPart j && j.x == x && j.y == y && j.z == z;
+            if (p instanceof PipePart pipe && endsAt(pipe, x, y, z)) arms++;
+        }
+        if (junction && arms >= 4) return "a cross takes no more pipes";
         int h = PipePart.JOIN_CLEAR;
         BitSet want = new BitSet(4096);
         for (int[] b : part.boxes()) fill(want, b);
         BitSet around = new BitSet(4096);
         fill(around, new int[]{Math.max(0, x - h), Math.max(0, y - h), Math.max(0, z - h), Math.min(16, x + h), Math.min(16, y + h), Math.min(16, z + h)});
         want.andNot(around);
-        if (want.intersects(used)) return "something is in the way";
+        if (used != null && want.intersects(used)) return "something is in the way";
         return null;
     }
 
     /** Is a valve, safety valve or pipe sensor at that point of a pipe? (A third pipe there would end at the valve and
      *  uncouple all three: its link needs exactly two pipe ends.) */
     boolean fittingAt(int x, int y, int z) {
+        return fittingAt(parts, x, y, z);
+    }
+
+    /** The same among a block's parts (as a route view has them). */
+    static boolean fittingAt(List<VoxelPart> parts, int x, int y, int z) {
         for (VoxelPart p : parts)
             if (p instanceof ValvePart v && v.x == x && v.y == y && v.z == z || p instanceof SafetyValvePart s && s.x == x && s.y == y && s.z == z
                 || p instanceof PipeSensorPart s2 && s2.x == x && s2.y == y && s2.z == z) return true;
