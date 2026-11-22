@@ -349,6 +349,24 @@ class StdlibTest {
         assertTrue(conflict);
     }
 
+    /** Ed's menus (Dynamo P2): Save As asks on the path's row, copies the saved file under the new name and goes on there. */
+    @Test
+    void edSaveAsCopiesAndFollowsTheNewFile() {
+        m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), null, false));
+        type("(do (disk/format :a) (spit \"a:/t.janet\" \"(print 1)\") (edit \"a:/t.janet\"))");
+        tick(60, "\n2\n> ");
+        var win = screen.scene.windows.get(2);
+        assertTrue(win.menus.toString().contains("Save As..."), "Ed's menus: " + win.menus);
+        m.editor.give("(pick 2 \"Project\" \"Save As...\")\n".getBytes(StandardCharsets.UTF_8));
+        for (int t = 0; t < 20 && !screen.scene.windows.get(2).elements.containsKey(6); t++) tick(1, null);
+        assertEquals("line", screen.scene.windows.get(2).elements.get(6).kind, "a line asks for the name");
+        m.editor.give(screen.submit(2, 6, "u.janet"));
+        for (int t = 0; t < 40 && !"a:/u.janet".equals(screen.scene.windows.get(2).elements.get(4).msg.get(8)); t++) tick(1, null);
+        assertEquals("a:/u.janet", screen.scene.windows.get(2).elements.get(4).msg.get(8), "the editor follows the new file");
+        type("(slurp \"a:/u.janet\")");
+        tick(20, "@\"(print 1)\"\n> ");
+    }
+
     @Test
     void theInspectorShowsTasksStacksAndValues() {
         type("(proc/start \"sleeper\" (fn [] (var secret 42) (sleep 100) secret))");

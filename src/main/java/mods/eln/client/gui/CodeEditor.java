@@ -60,6 +60,11 @@ public class CodeEditor extends AbstractWidget {
     List<LanguageAdapter.Diagnostic> problems = List.of();
     Set<Integer> rules = Set.of();
     long lastKey;
+    /** The bar along its bottom, "Find" or "Go to line", or null when it is closed; what is typed in it; the last search. */
+    String bar;
+    final StringBuilder barText = new StringBuilder();
+    String lastFind = "";
+    boolean notFound;
 
     public CodeEditor(int x, int y, int w, int h, String text, int maxChars, LanguageAdapter language, Consumer<String> changed) {
         super(x, y, w, h, Component.literal("code"));
@@ -95,7 +100,62 @@ public class CodeEditor extends AbstractWidget {
     }
 
     int rows() {
-        return (height - 2 * PAD) / LINE;
+        return (height - 2 * PAD) / LINE - (bar != null ? 1 : 0);
+    }
+
+    // ---- find and go to line (Ctrl+F, F3 or Ctrl+G here; Ed's Edit menu asks for the same)
+
+    /** Open the find bar, holding the selection (one line of it) or the last search. */
+    public void openFind() {
+        bar = "Find";
+        barText.setLength(0);
+        String sel = buffer.selectedText();
+        barText.append(sel != null && !sel.isEmpty() && !sel.contains("\n") ? sel : lastFind);
+        notFound = false;
+        setFocused(true);
+    }
+
+    /** Open the go-to-line bar. */
+    public void openGoTo() {
+        bar = "Go to line";
+        barText.setLength(0);
+        notFound = false;
+        setFocused(true);
+    }
+
+    /** Find the last search again, after the cursor (the bar opens if there is none yet). */
+    public boolean findNext() {
+        if (lastFind.isEmpty()) {
+            openFind();
+            return false;
+        }
+        notFound = !buffer.find(lastFind);
+        follow();
+        return !notFound;
+    }
+
+    /** Esc: closes the bar if it is open (and says so), so the screen around it stays. */
+    public boolean escape() {
+        if (bar == null) return false;
+        bar = null;
+        return true;
+    }
+
+    /** Enter in the bar: find (it stays open, so Enter again finds the next) or go to the line (it closes). */
+    void barEnter() {
+        String q = barText.toString();
+        if (bar.equals("Find")) {
+            lastFind = q;
+            findNext();
+        } else {
+            try {
+                buffer.goToLine(Integer.parseInt(q.trim()));
+                bar = null;
+                follow();
+            } catch (NumberFormatException ex) {
+                notFound = true;
+            }
+        }
     }
 
     int cols() {
@@ -190,6 +250,20 @@ public class CodeEditor extends AbstractWidget {
                 Minecraft.getInstance().textInputManager().setTextInputArea(cx, ty + r * LINE, cx + 1, ty + r * LINE + LINE);
             }
         }
+        if (bar != null) {
+            int by = y0 + height - PAD - LINE;
+            g.fill(x0 + 1, by - 2, x0 + width - 1, y0 + height - 1, GUTTER);
+            String label = bar + ": ";
+            g.text(font, label, x0 + PAD, by, GUTTER_TEXT, false);
+            int qx = x0 + PAD + font.width(label);
+            g.text(font, barText.toString(), qx, by, notFound ? ERROR : 0xFFE6E6E6, false);
+            if ((Util.getMillis() - lastKey) / 500 % 2 == 0) {
+                int cx = qx + font.width(barText.toString());
+                g.fill(cx, by - 1, cx + 1, by + LINE - 1, CURSOR);
+            }
+            String hint = notFound ? (bar.equals("Find") ? "not found" : "a line number") : "Enter, Esc";
+            g.text(font, hint, x0 + width - PAD - font.width(hint), by, notFound ? ERROR : GUTTER_TEXT, false);
+        }
         if (isHovered()) g.requestCursor(com.mojang.blaze3d.platform.cursor.CursorTypes.IBEAM);
         g.disableScissor();
         // on hover: a problem's message (its underline or its line number), else what the language says of the word
@@ -277,6 +351,12 @@ public class CodeEditor extends AbstractWidget {
     @Override
     public boolean charTyped(CharacterEvent event) {
         if (!isFocused() || !event.isAllowedChatCharacter()) return false;
+        if (bar != null) {
+            if (barText.length() < 80) barText.append(event.codepointAsString());
+            notFound = false;
+            lastKey = Util.getMillis();
+            return true;
+        }
         buffer.insert(event.codepointAsString());
         edited();
         return true;
@@ -292,7 +372,29 @@ public class CodeEditor extends AbstractWidget {
         if (!isFocused()) return false;
         boolean shift = e.hasShiftDown(), ctrl = e.hasControlDownWithQuirk();
         var clip = Minecraft.getInstance().keyboardHandler;
-        if (e.isSelectAll()) buffer.selectAll();
+        if (bar != null) {
+            switch (e.key()) {
+                case InputConstants.KEY_ESCAPE -> escape();
+                case InputConstants.KEY_RETURN, InputConstants.KEY_NUMPADENTER -> barEnter();
+                case InputConstants.KEY_BACKSPACE -> {
+                    if (barText.length() > 0) barText.setLength(barText.length() - 1);
+                    notFound = false;
+                }
+                default -> {
+                    if (e.isPaste()) barText.append(clip.getClipboard().replace("\n", " "));
+                    else if (ctrl && e.key() == InputConstants.KEY_F) openFind();
+                    else if (ctrl && e.key() == InputConstants.KEY_G) openGoTo();
+                    else if (e.key() == InputConstants.KEY_F3) findNext();
+                    else return true;   // (other keys belong to the bar while it is open)
+                }
+            }
+            lastKey = Util.getMillis();
+            return true;
+        }
+        if (ctrl && e.key() == InputConstants.KEY_F) openFind();
+        else if (ctrl && e.key() == InputConstants.KEY_G) openGoTo();
+        else if (e.key() == InputConstants.KEY_F3) findNext();
+        else if (e.isSelectAll()) buffer.selectAll();
         else if (e.isCopy()) clip.setClipboard(buffer.selectedText());
         else if (e.isCut()) {
             clip.setClipboard(buffer.cut());

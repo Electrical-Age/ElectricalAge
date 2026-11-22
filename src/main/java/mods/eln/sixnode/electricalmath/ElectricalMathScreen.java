@@ -155,6 +155,7 @@ public class ElectricalMathScreen extends ElnScreen {
     /** Typing in the editor goes to the editor (the inventory key and the hotbar numbers don't act). */
     @Override
     public boolean keyPressed(KeyEvent event) {
+        if (editor != null && event.key() == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE && editor.escape()) return true;   // (the find bar closes first)
         if (editor != null && editor.isFocused() && event.key() != com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE) {
             editor.keyPressed(event);
             return true;

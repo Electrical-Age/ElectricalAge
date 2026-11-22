@@ -91,4 +91,24 @@ public class CodeBufferTest {
         assertFalse(b.insert("toolong"), "past the limit: refused");
         assertEquals(" world!\nok", b.text());
     }
+
+    @Test
+    public void findSelectsTheNextMatchAndWraps() {
+        CodeBuffer b = new CodeBuffer("(def x 1)\n(print X)\n(def y x)", 4096);
+        b.moveTo(0, 0, false);
+        org.junit.jupiter.api.Assertions.assertTrue(b.find("x"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[]{0, 5, 0, 6}, b.selection());
+        org.junit.jupiter.api.Assertions.assertTrue(b.find("x"));   // ignoring case: (print X)
+        org.junit.jupiter.api.Assertions.assertEquals(1, b.cursorLine());
+        org.junit.jupiter.api.Assertions.assertTrue(b.find("x"));
+        org.junit.jupiter.api.Assertions.assertEquals(2, b.cursorLine());
+        org.junit.jupiter.api.Assertions.assertTrue(b.find("x"));   // wrapped to the top
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[]{0, 5, 0, 6}, b.selection());
+        org.junit.jupiter.api.Assertions.assertFalse(b.find("zebra"));
+        org.junit.jupiter.api.Assertions.assertEquals(0, b.cursorLine(), "not found: the cursor stays");
+        b.goToLine(3);
+        org.junit.jupiter.api.Assertions.assertEquals(2, b.cursorLine());
+        b.goToLine(99);
+        org.junit.jupiter.api.Assertions.assertEquals(2, b.cursorLine());
+    }
 }

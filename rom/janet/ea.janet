@@ -858,17 +858,36 @@
   (array/concat out (array/slice lines at))
   (string/join out "\n"))
 
-(defn edit
-  "Open a file in an editor tab (a new file if there is none). The player edits it on their own client; Ctrl+S saves
-  (refused once if the file changed on the disk meanwhile), Run runs the saved file as a process, Close closes."
-  [path]
+(defn- ed-file
+  "Ed in window t on path: an editor element over the window, its path above it, menus. The text lives on the players'
+  clients (Ctrl+S, or the menu's Save, sends hunks against a revision; refused once if the file changed on the disk).
+  On the client that picks it, Save, Save As..., Run and Close save first, and Find..., Find next and Go to line... act
+  on its editor (Wire: an editor window's own items)."
+  [t path]
+  (var path path)
   (def text (if (disk/exists? path) (string (slurp path)) ""))
   (when (> (length text) 32768) (error (string path " is too big to edit (32 KB at most)")))
-  (def t (proc/new-tab (last (string/split "/" path))))
   (var rev (revision text))
-  (ui/text t 1 0 0 :light-gray (string path " (Ctrl+S saves)"))
-  (ui/button t 2 -13 0 6 "Run" (fn [] (proc/start (last (string/split "/" path)) run-file path)))
-  (ui/button t 3 -6 0 6 "Close" (fn [] (proc/close t)))
+  (defn name-of [p] (last (string/split "/" p)))
+  (defn heading [colour s] (ui/text t 1 0 0 colour (string/format "%-60s" s)))
+  (defn open-text [p txt]
+    (set path p)
+    (set rev (revision txt))
+    (heading :light-gray p)
+    (ui/send 'editor t 4 0 1 :fill :fill (if (string/has-suffix? ".janet" p) :janet :text) p rev txt))
+  (defn ask-path
+    "A line over the path's row asking for a file name; (f name) when one is typed (an empty line cancels)."
+    [prompt f]
+    (ui/remove t 1)
+    (ui/line t 6 0 0 :fill (string prompt " ")
+             (fn [answer _]
+               (ui/remove t 6)
+               (heading :light-gray path)
+               (def a (string/trim answer))
+               (unless (empty? a) (f (if (string/find ":" a) a (string (string/slice path 0 (+ 1 (or (last (string/find-all "/" path)) -1))) a))))))
+    (ui/focus t))
+  (ui/remove t 2)
+  (ui/remove t 3)
   (put ui-handlers [t 4]
        (fn [seq base hunks]
          (try
@@ -880,11 +899,39 @@
                  (def new (apply-hunks now hunks))
                  (spit path new)
                  (set rev (revision new))
+                 (heading :light-gray path)
                  (ui/send 'saved t 4 seq rev))))
-           ([err] (ui/text t 1 0 0 :red (string path ": " err))))))
-  (ui/send 'editor t 4 0 1 :fill :fill :janet path rev text)
+           ([err] (heading :red (string path ": " err))))))
+  (ui/menus t [["Project" ["New..." "n"] ["Open..." "o"] nil ["Save" "s"] ["Save As..." "a"] nil ["Run" "r"] nil ["Close" "q"]]
+               ["Edit" ["Find..." "f"] ["Find next" "g"] ["Go to line..." "l"]]]
+            (fn [menu item]
+              (case item
+                "New..." (ask-path "New file:" (fn [p] (ed-file (proc/new-tab (name-of p)) p)))
+                "Open..." (ask-path "Open:" (fn [p] (ed-file (proc/new-tab (name-of p)) p)))
+                "Save As..." (ask-path "Save as:" (fn [p]
+                                                    # (the picking display saved first: copy that under the new name)
+                                                    (sleep 0.2)
+                                                    (def now (if (disk/exists? path) (string (slurp path)) ""))
+                                                    (try (do (spit p now) (open-text p now) (ui/title (name-of p)))
+                                                      ([e] (heading :red (string p ": " e))))))
+                "Run" (do (sleep 0.2) (proc/start (name-of path) run-file path))
+                "Close" (proc/close t)
+                nil)))
+  (open-text path text)
   (ui/focus t)
   t)
+
+(defn edit
+  "Open a file in Ed, the editor, in a window of its own (a new file if there is none): menus Project (New, Open, Save,
+  Save As, Run, Close) and Edit (Find, Find next, Go to line); Ctrl+S saves, Ctrl+F finds, Ctrl+G goes to a line."
+  [path]
+  (def t (proc/new-tab (last (string/split "/" path))))
+  (ed-file t path))
+
+(defn ed/here
+  "Make this process's window Ed on path (Ed.app's main.janet)."
+  [path]
+  (ed-file (proc/tab) path))
 
 (defn files
   "A tab listing a floppy's files (default A:/): pick one to edit it, or a directory to go into it."

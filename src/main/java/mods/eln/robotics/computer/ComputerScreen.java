@@ -842,7 +842,40 @@ public class ComputerScreen extends ElnScreen {
 
     void pick(Scene.Window t, String menu, String item) {
         if (t.disabled.contains(menu + "/" + item)) return;
+        editorItem(item);
         render.screenEvent(new Form.Symbol("pick"), (long) active, menu, item);
+    }
+
+    /**
+     * Wire: in a window holding an editor, its own menu items act on this display's editor before the pick goes to the
+     * program: Save, Save As..., Run and Close save first (only the display that picked them holds the text), Find...,
+     * Find next and Go to line... open its bar or find again (Ed's menus, Dynamo P2).
+     */
+    void editorItem(String item) {
+        String key = null;
+        for (String k : editorWidgets.keySet()) if (k.startsWith(active + "/")) key = k;
+        if (key == null) return;
+        var w = editorWidgets.get(key);
+        EditorState st = editorState(active, Integer.parseInt(key.split("/")[1]));
+        switch (item) {
+            case "Save", "Save As...", "Run", "Close" -> {
+                if (st.baseText == null || !st.text.equals(st.baseText)) save(key);
+            }
+            case "Find..." -> {
+                setFocused(w);
+                w.openFind();
+            }
+            case "Find next" -> {
+                setFocused(w);
+                w.findNext();
+            }
+            case "Go to line..." -> {
+                setFocused(w);
+                w.openGoTo();
+            }
+            default -> {
+            }
+        }
     }
 
     /** A window brought back: restored if minimised (reported), raised and given the keyboard. */
@@ -1177,6 +1210,7 @@ public class ComputerScreen extends ElnScreen {
                     }
         }
         String ed = focusedEditor();
+        if (ed != null && k == InputConstants.KEY_ESCAPE && editorWidgets.get(ed).escape()) return true;   // (the find bar closes first)
         if (ed != null && k != InputConstants.KEY_ESCAPE) {
             if (k == InputConstants.KEY_S && ev.hasControlDownWithQuirk()) save(ed);
             else editorWidgets.get(ed).keyPressed(ev);

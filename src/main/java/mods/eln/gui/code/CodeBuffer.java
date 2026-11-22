@@ -118,6 +118,33 @@ public final class CodeBuffer {
         lastEdit = "";
     }
 
+    /**
+     * Find q (ignoring case, within a line) after the cursor, wrapping round to the top, and select it. Returns whether it
+     * was found; the cursor stays where it was if not.
+     */
+    public boolean find(String q) {
+        if (q == null || q.isEmpty()) return false;
+        String needle = q.toLowerCase(java.util.Locale.ROOT);
+        int n = lineCount(), l0 = cursorLine(), c0 = cursorCol();
+        for (int i = 0; i <= n; i++) {
+            int l = (l0 + i) % n;
+            String hay = line(l).toLowerCase(java.util.Locale.ROOT);
+            int at = hay.indexOf(needle, i == 0 ? Math.min(c0, hay.length()) : 0);
+            if (i == n && at >= c0) at = -1;   // (back on the cursor's line after wrapping: only what lies before it)
+            if (at >= 0) {
+                moveTo(l, at, false);
+                moveTo(l, at + needle.length(), true);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** The cursor to the start of line (1-based, clamped to the text). */
+    public void goToLine(int line) {
+        moveTo(Math.max(0, Math.min(lineCount() - 1, line - 1)), 0, false);
+    }
+
     public void left(boolean select, boolean word) {
         if (!select && hasSelection()) {
             int[] s = selection();
