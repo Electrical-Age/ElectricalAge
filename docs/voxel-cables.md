@@ -335,7 +335,16 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   cable (same tier, spec and face) or any pipe (the join rule) is run through; a pipe's fittings and junctions are not.
   Before, a route from a point just short of a cable's end laid a piece over its last voxels, and a pipe hopped over a
   dead stub. Routes along the old run past its end from further away still run beside it (a parallel run, not
-  overlapping): `JoinRouteCases`' unchecked rows. A route wholly inside the old run lays nothing: "That path is already laid" (`RoutePlacer.INSIDE`, wording Neon).
+  overlapping): `JoinRouteCases`' unchecked rows. A route wholly inside the old run lays nothing: "That path is already laid" (`RoutePlacer.INSIDE`, wording Neon); a
+  waypoint whose route so far lies inside it is taken (nothing laid yet). A route that comes back onto or across the old
+  run away from its cut (after a waypoint; `JoinRun.crosses`) is routed again without the freed voxels, and if it still
+  crosses (through the free cube round the join point) it is refused: "it crosses the cable it joins". A pipe's moved
+  junction is checked when routed (`VoxelNode.joinError` on the view's parts and used voxels), so the preview refuses as
+  the click does. A cut at an old pipe's end inside a block makes a two-armed junction there, as a join at that end
+  always did, not a plain straight pipe. `JoinRun` walks the old run voxel by voxel on the route's view (a preview
+  snapshot off the server thread too, through other branches' splices, at most `REACH` voxels); the toolbag shears'
+  walk (`ToolbagShears.run`) follows whole pieces by their CONT joints on the live level and stops at splices, so the two
+  stay separate. The snapshot shares the part objects; what JoinRun reads of them is final.
 - Per kind, in its spec (`RoutePlacer.Spec`): the ends (`endAt`: a cable's connectors and edge rule, a pipe's ports,
   with "Its port already has a pipe" for a machine's piped port or a pipe sensor's), routing (surface or free), laying (cables with their hang,
   pipes with their junctions), the join rule (cables: the same tier or two power cables; pipes: any pipe tier, the

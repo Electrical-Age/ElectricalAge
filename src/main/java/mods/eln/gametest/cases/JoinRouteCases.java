@@ -60,6 +60,13 @@ public final class JoinRouteCases {
             // the old run ends just past the block's face from the start
             cases.add(new Join(pipe, "end_past_face", 4, pipe ? 12 : 14, true, 7, 3, true).oldEnd(5, 2));
         }
+        for (boolean pipe : new boolean[]{false, true}) {
+            // start on the old run, a waypoint on one side of it, finish on the other: the way back crosses the old run at
+            // the join, through the free cube round it; refused (JoinRun.crosses), never laid over it or through it
+            cases.add(new Join(pipe, "back_across", 3, 8, true, 3, 6, true).via(3, 8, 0).orRefused());
+        }
+        // a waypoint on the floor under the old cable's last voxels, near the start: taken (nothing laid yet), not refused
+        cases.add(new Join(false, "waypoint_on_run", 4, 4, true, 7, 3, true).via(4, 6, 3));
         // a pipe ending on a block's face, continued from just short of it: the ends meet across the face, no junction
         cases.add(new Join(true, "end_on_face", 4, 12, true, 7, 3, true).oldEnd(4, 16));
     }
@@ -85,6 +92,8 @@ public final class JoinRouteCases {
         final String what;
         final int runBlock, runX, floorX, floorZ;
         int kitTier = LV, endB = 4, endX = 8, besideZ = -1, insideX = -1;
+        int[] via;
+        boolean orRefused;
         boolean first, second;
         int partsBefore, partsAfter, overlap, deadEnds, junctionCount;
         boolean connected;
@@ -117,6 +126,18 @@ public final class JoinRouteCases {
         /** A second run of the kind beside the old one, blocks 1 to 3 at local z. */
         Join beside(int z) {
             besideZ = z;
+            return this;
+        }
+
+        /** The route may be refused (then nothing may be laid); if laid, the usual checks. */
+        Join orRefused() {
+            orRefused = true;
+            return this;
+        }
+
+        /** A waypoint on the floor first: at local x (voxels) of block bx, z the middle of block bz. */
+        Join via(int bx, int x, int bz) {
+            via = new int[]{bx, x, bz};
             return this;
         }
 
@@ -193,6 +214,10 @@ public final class JoinRouteCases {
                 second = click(c, p, kit, run, Vec3.atLowerCornerOf(run).add(insideX / 16.0, (pipe ? 5 : 1) / 16.0 + 0.001, 0.5));
             } else if (startOnRun) {
                 first = click(c, p, kit, run, onRun);
+                if (via != null) {
+                    BlockPos w = c.at(via[0], 0, via[2]);
+                    first &= click(c, p, kit, w, Vec3.atLowerCornerOf(w).add(via[1] / 16.0, 1.0, 0.5));
+                }
                 // (a floor click is a waypoint; the same spot again ends the route there)
                 second = click(c, p, kit, floor, onFloor) && click(c, p, kit, floor, onFloor);
             } else {
@@ -247,6 +272,10 @@ public final class JoinRouteCases {
             c.check(id() + ": both clicks handled", first && second, first + " " + second);
             if (insideX >= 0) {
                 c.check(id() + ": a route inside the old run lays nothing", partsAfter == partsBefore, d);
+                return;
+            }
+            if (orRefused && partsAfter == partsBefore) {
+                c.check(id() + ": refused, nothing laid over the old run", overlap == 0, d);
                 return;
             }
             c.check(id() + ": a route was laid", partsAfter > partsBefore, d);
