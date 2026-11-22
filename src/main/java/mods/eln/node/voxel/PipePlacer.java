@@ -63,7 +63,7 @@ public final class PipePlacer {
             List<long[]> pts = r.points;
             if (sj != null && pts != null) pts = sj.trimHead(pts);
             if (ej != null && pts != null) pts = ej.trimTail(pts);
-            if (pts == null) return new RoutePlacer.Routed<>(CablePlacer.INSIDE, 0, null);
+            if (pts == null) return new RoutePlacer.Routed<>(RoutePlacer.INSIDE, 0, null);
             long[] from = startJoin == null ? null : joinAt(pts.get(0)), to = endJoin == null ? null : joinAt(pts.get(pts.size() - 1));
             return new RoutePlacer.Routed<>(null, new PipeRouter.Result(pts, null).length(), pts, from, to);
         }

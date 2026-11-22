@@ -174,15 +174,12 @@ public final class CablePlacer {
         List<CableRouter.Step> steps = r.steps;
         if (sj != null && steps != null) steps = sj.trimStepsHead(steps);
         if (ej != null && steps != null) steps = ej.trimStepsTail(steps);
-        if (steps == null) return new RoutePlacer.Routed<>(INSIDE, 0, null);
+        if (steps == null) return new RoutePlacer.Routed<>(RoutePlacer.INSIDE, 0, null);
         long[] from = startJoin == null ? null : new long[]{steps.get(0).x(), steps.get(0).y(), steps.get(0).z()};
         CableRouter.Step last = steps.get(steps.size() - 1);
         long[] to = endJoin == null ? null : new long[]{last.x(), last.y(), last.z()};
         return new RoutePlacer.Routed<>(null, new CableRouter.Result(steps, null).length(), steps, from, to);
     }
-
-    /** Why a route that runs only inside the old cable or pipe it joins lays nothing. */
-    static final String INSIDE = "it runs inside the old one";
 
     /** Free round a junction point (the new cable meets the old one there): of what's in the way there, only the old
      *  cable; solid blocks stay solid (they were free too, and a route could pass through a floor beside a junction). */

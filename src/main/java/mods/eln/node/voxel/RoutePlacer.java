@@ -297,7 +297,7 @@ public final class RoutePlacer {
             KitPreview.slow("waypoint route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
             if (r.error() != null) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
-                KitPreview.note(player, "Can't reach: " + r.error() + hint);
+                KitPreview.note(player, unrouted(r.error()) + hint);
             } else {
                 player.sendOverlayMessage(Component.literal(String.format("Waypoint %d: %.1f blocks so far", plan.waypoints.size(), r.length() / 16.0)
                     + ". Click it again to end there."));
@@ -312,7 +312,7 @@ public final class RoutePlacer {
         KitPreview.slow("click route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
         if (r.error() != null) {
             if (again) plan.waypoints.add(end);
-            KitPreview.note(player, "Can't reach: " + r.error() + hint);
+            KitPreview.note(player, unrouted(r.error()) + hint);
             return true;
         }
         int len = r.length();
@@ -373,6 +373,15 @@ public final class RoutePlacer {
         if (again || !plan.waypoints.isEmpty() || !sameSpot(plan.start, c.at())) return null;
         return c.finish() || c.join() != null ? "That's the start. Finish elsewhere, or " + kit.cancelClause() + "."
             : "That's the start. Click elsewhere, or " + kit.cancelClause() + ".";
+    }
+
+    /** Why a route lays nothing because it runs only inside the old cable or pipe it joins (wording: Neon, 2026-11-22). */
+    static final String INSIDE = "That path is already laid";
+
+    /** What the player reads for a route that failed with error: "Can't reach: ..." (or INSIDE as it is: its ends are
+     *  reachable). */
+    static String unrouted(String error) {
+        return INSIDE.equals(error) ? INSIDE : "Can't reach: " + error;
     }
 
     /** The plan's route to end (null: to its last waypoint), free round its start join and endJoin (or null), on the live world. */
