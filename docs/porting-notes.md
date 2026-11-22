@@ -453,6 +453,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   wins the crosshair over the pipe end at its port, a second route to a piped port is refused, each kind carries a
   coloured plate with a letter (P, T, Q), Jade's headline is reading, volts and full scale, and its own items are out of
   JEI. `pipe_transmitter_*`.
+- Lead-acid battery curve (Baughn 2026-11-22: "a more accurate lead-acid voltage curve ... float/absorption
+  included"; `BatteryProcess.LEAD_ACID`): per 2 V cell 1.95 V at 10 % to 2.12 V at 92 %, rising to 2.40 V at full (a
+  48 V battery: 48 V near 34 %, float 54 V settles at 97 %, absorption 57.6 V fills it). 1.12 kept storing charge past
+  full until the EMF reached 1.3 x nominal and the battery was destroyed; now charge past full gasses, as heat, and only
+  1.5 x nominal across the terminals burns it at once. The overvoltage chip stops charging at full; the single-use
+  battery keeps 1.12's curve; the never-applied IMax is gone. `BatteryCurveCases`.
 - Battery protection chips (Baughn 2026-10-27, after a protected, nearly empty battery burnt on a 50 V bus): the
   overheating chip is a charge limiter, run every electrical step (BatteryInventoryProcess.Step): charging held to the
   rated current (electricalStdI) by the cut switch's resistance, tapering to none as it nears the cut; the cut is at
