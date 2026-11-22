@@ -129,6 +129,9 @@ public final class KitPreview {
         Answer answer() {
             if (refused != null) return new Answer(false, new ArrayList<>(List.of(marker(to))), refused);
             Answer a = KitPreview.answer(k, view, tier, spec, start, startJoin, wps, to, endJoin, have);
+            // (a waypoint still on the old run the route starts on: nothing laid yet, but the click takes it)
+            if (!a.ok && RoutePlacer.INSIDE.equals(a.message) && !c.finish() && c.join() == null && !again)
+                return new Answer(true, new ArrayList<>(List.of(marker(to))), String.format("%s: 0.0 blocks", k.title()) + suffix(false, false, false));
             if (!a.ok) return a;
             List<int[]> bs = a.boxes;
             if (k.portCube && c.port()) {

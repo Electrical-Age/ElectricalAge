@@ -295,7 +295,8 @@ public final class RoutePlacer {
             long tRoute = System.nanoTime();
             Routed<P> r = route(k, level, plan, null, null);
             KitPreview.slow("waypoint route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
-            if (r.error() != null) {
+            // (a waypoint still on the old run the route starts on lays nothing yet: taken, not refused as INSIDE)
+            if (r.error() != null && !INSIDE.equals(r.error())) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
                 KitPreview.note(player, unrouted(r.error()) + hint);
             } else {
@@ -378,10 +379,10 @@ public final class RoutePlacer {
     /** Why a route lays nothing because it runs only inside the old cable or pipe it joins (wording: Neon, 2026-11-22). */
     static final String INSIDE = "That path is already laid";
 
-    /** What the player reads for a route that failed with error: "Can't reach: ..." (or INSIDE as it is: its ends are
-     *  reachable). */
+    /** What the player reads for a route that failed with error: "Can't reach: ...", or an error that is a sentence of
+     *  its own (capitalised: INSIDE, whose ends are plainly reachable; a junction refused) as it is. */
     static String unrouted(String error) {
-        return INSIDE.equals(error) ? INSIDE : "Can't reach: " + error;
+        return !error.isEmpty() && Character.isUpperCase(error.charAt(0)) ? error : "Can't reach: " + error;
     }
 
     /** The plan's route to end (null: to its last waypoint), free round its start join and endJoin (or null), on the live world. */
