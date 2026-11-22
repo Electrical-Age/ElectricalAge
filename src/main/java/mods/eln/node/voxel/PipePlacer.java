@@ -56,16 +56,16 @@ public final class PipePlacer {
             // (back onto or across the old pipe away from its cut, as after a waypoint, which the freed voxels allowed:
             // routed again without them, as before JoinRun; through the free cube round the join point it still can, and
             // is refused, not laid through the old pipe)
-            if (crosses(r, sj, ej)) {
+            if (crosses(r, sj, ej, tier)) {
                 r = routeJoined(view, tier, start, startJoin, sj, wps, end, endJoin, ej, false, budgetMs);
-                if (crosses(r, sj, ej)) return new RoutePlacer.Routed<>("it crosses the pipe it joins", 0, null);
+                if (crosses(r, sj, ej, tier)) return new RoutePlacer.Routed<>("it crosses the pipe it joins", 0, null);
             }
             if (r.error() != null) return r;
             // the junctions where the route meets the old pipes, checked now (the cut moves them off the click), so the
             // preview and the click refuse alike, with the reason
             for (long[] j : new long[][]{r.startJoin(), r.endJoin()}) {
                 String err = j == null ? null : joinError(view, tier, r.path(), j);
-                if (err != null) return new RoutePlacer.Routed<>("Can't join there: " + err, 0, null);
+                if (err != null) return RoutePlacer.Routed.said("Can't join there: " + err);
             }
             return r;
         }
@@ -117,15 +117,17 @@ public final class PipePlacer {
         List<long[]> pts = r.points;
         if (sj != null && pts != null) pts = sj.trimHead(pts);
         if (ej != null && pts != null) pts = ej.trimTail(pts);
-        if (pts == null) return new RoutePlacer.Routed<>(RoutePlacer.INSIDE, 0, null);
+        if (pts == null) return RoutePlacer.Routed.said(RoutePlacer.INSIDE);
         long[] from = startJoin == null ? null : joinAt(pts.get(0)), to = endJoin == null ? null : joinAt(pts.get(pts.size() - 1));
         return new RoutePlacer.Routed<>(null, new PipeRouter.Result(pts, null).length(), pts, from, to);
     }
 
     /** Does a route found pass through the old pipe at either join away from its cut (JoinRun.crosses)? */
-    static boolean crosses(RoutePlacer.Routed<List<long[]>> r, JoinRun sj, JoinRun ej) {
+    static boolean crosses(RoutePlacer.Routed<List<long[]>> r, JoinRun sj, JoinRun ej, int tier) {
         if (r.error() != null) return false;
-        return sj != null && sj.crosses(r.path(), null, true) || ej != null && ej.crosses(r.path(), null, false);
+        int h = PipePart.GRID[tier] / 2;   // (a pipe's box: its centre line grown by half its bore)
+        boolean s = sj != null, e = ej != null;
+        return s && sj.crosses(r.path(), null, s, e, h, h, 0) || e && ej.crosses(r.path(), null, s, e, h, h, 0);
     }
 
     /** Why the route's piece in join j's block can't join the old pipe at j (VoxelNode.joinError, on the view), or null. */

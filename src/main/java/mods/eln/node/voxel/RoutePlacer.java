@@ -45,9 +45,18 @@ public final class RoutePlacer {
      * points); where it joins old runs at its start and end (world voxels, or null): the join clicked, or where the route
      * leaves the old run it ran inside near it (JoinRun).
      */
-    record Routed<P>(String error, int length, P path, long[] startJoin, long[] endJoin) {
+    record Routed<P>(String error, int length, P path, long[] startJoin, long[] endJoin, boolean sentence) {
         Routed(String error, int length, P path) {
-            this(error, length, path, null, null);
+            this(error, length, path, null, null, false);
+        }
+
+        Routed(String error, int length, P path, long[] startJoin, long[] endJoin) {
+            this(error, length, path, startJoin, endJoin, false);
+        }
+
+        /** No route, for a reason the player reads as it is (sentence), not after "Can't reach:". */
+        static <P> Routed<P> said(String sentence) {
+            return new Routed<>(sentence, 0, null, null, null, true);
         }
     }
 
@@ -298,7 +307,7 @@ public final class RoutePlacer {
             // (a waypoint still on the old run the route starts on lays nothing yet: taken, not refused as INSIDE)
             if (r.error() != null && !INSIDE.equals(r.error())) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
-                KitPreview.note(player, unrouted(r.error()) + hint);
+                KitPreview.note(player, unrouted(r) + hint);
             } else {
                 player.sendOverlayMessage(Component.literal(String.format("Waypoint %d: %.1f blocks so far", plan.waypoints.size(), r.length() / 16.0)
                     + ". Click it again to end there."));
@@ -313,7 +322,7 @@ public final class RoutePlacer {
         KitPreview.slow("click route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
         if (r.error() != null) {
             if (again) plan.waypoints.add(end);
-            KitPreview.note(player, unrouted(r.error()) + hint);
+            KitPreview.note(player, unrouted(r) + hint);
             return true;
         }
         int len = r.length();
@@ -379,10 +388,10 @@ public final class RoutePlacer {
     /** Why a route lays nothing because it runs only inside the old cable or pipe it joins (wording: Neon, 2026-11-22). */
     static final String INSIDE = "That path is already laid";
 
-    /** What the player reads for a route that failed with error: "Can't reach: ...", or an error that is a sentence of
-     *  its own (capitalised: INSIDE, whose ends are plainly reachable; a junction refused) as it is. */
-    static String unrouted(String error) {
-        return !error.isEmpty() && Character.isUpperCase(error.charAt(0)) ? error : "Can't reach: " + error;
+    /** What the player reads for a route that failed: "Can't reach: ..." (the router's reasons), or a sentence of its
+     *  own as it is (Routed.said: INSIDE, whose ends are plainly reachable; a junction refused). */
+    static String unrouted(Routed<?> r) {
+        return r.sentence() ? r.error() : "Can't reach: " + r.error();
     }
 
     /** The plan's route to end (null: to its last waypoint), free round its start join and endJoin (or null), on the live world. */

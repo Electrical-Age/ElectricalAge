@@ -174,11 +174,13 @@ final class JoinRun {
 
     /**
      * Does the route (its polyline pts, world voxels, from the start; attach: the face each point's run lies on, null for
-     * a pipe) come back onto or across the old run anywhere but by its cut end (its first point if fromStart, else its
-     * last)? Only the freed voxels, or the free cube round the join, let a route through the old run; the parts it lays
+     * a pipe) come back onto or across the old run anywhere but by the joins' own ends (its first point if it starts on
+     * an old run, its last if it ends on one: AT_CUT voxels along it)? Its part there is taken as it is laid: lo and hi
+     * voxels either side of its centre line across it (a pipe's half bore both ways) and, for a cable, height off its
+     * face. Only the freed voxels, or the free cube round the join, let a route through the old run; the parts it lays
      * there would lie over it (a duplicate, todo #516) or be refused when laid.
      */
-    boolean crosses(List<long[]> pts, List<Integer> attach, boolean fromStart) {
+    boolean crosses(List<long[]> pts, List<Integer> attach, boolean startJoined, boolean endJoined, int lo, int hi, int height) {
         int total = 0;
         for (int i = 1; i < pts.size(); i++) total += dist(pts.get(i - 1), pts.get(i));
         int at = 0;
@@ -186,10 +188,10 @@ final class JoinRun {
             long[] a = pts.get(i - 1), b = pts.get(i);
             int n = dist(a, b);
             for (int k = 0; k <= n; k++) {
-                int along = at + k, fromCut = fromStart ? along : total - along;
-                if (fromCut <= AT_CUT) continue;
+                int along = at + k;
+                if (startJoined && along <= AT_CUT || endJoined && total - along <= AT_CUT) continue;
                 long[] p = {a[0] + Long.signum(b[0] - a[0]) * (long) k, a[1] + Long.signum(b[1] - a[1]) * (long) k, a[2] + Long.signum(b[2] - a[2]) * (long) k};
-                if (onRun(p, attach == null ? -1 : attach.get(i))) return true;
+                if (onRun(p, attach == null ? -1 : attach.get(i), lo, hi, height)) return true;
             }
             at += n;
         }
@@ -200,17 +202,25 @@ final class JoinRun {
         return (int) (Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]));
     }
 
-    /** Is any freed voxel of the old run next to p (a cable's on face side of p's plane, a pipe's all round)? */
-    private boolean onRun(long[] p, int face) {
+    /** Does the new part's cross-section at p (its own cells: [p - lo, p + hi) across, a cable's height off face's plane)
+     *  take a freed voxel of the old run? */
+    private boolean onRun(long[] p, int face, int lo, int hi, int height) {
         int n = face < 0 ? -1 : CableRouter.axis(face);
-        for (int dx = -1; dx <= 0; dx++)
-            for (int dy = -1; dy <= 0; dy++)
-                for (int dz = -1; dz <= 0; dz++) {
-                    long[] v = {p[0] + dx, p[1] + dy, p[2] + dz};
-                    // (a cable lies on the side of its plane away from its support: face 0 (down) above it)
-                    if (n >= 0 && (face % 2 == 0 ? v[n] != p[n] : v[n] != p[n] - 1)) continue;
-                    BitSet f = freed.get(new BlockPos((int) Math.floorDiv(v[0], 16), (int) Math.floorDiv(v[1], 16), (int) Math.floorDiv(v[2], 16)));
-                    if (f != null && f.get(VoxelNode.voxel((int) Math.floorMod(v[0], 16), (int) Math.floorMod(v[1], 16), (int) Math.floorMod(v[2], 16))))
+        long[] l = new long[3], h = new long[3];
+        for (int k = 0; k < 3; k++) {
+            if (k == n) {   // (a cable lies on the side of its plane away from its support: face 0 (down) above it)
+                l[k] = face % 2 == 0 ? p[k] : p[k] - height;
+                h[k] = face % 2 == 0 ? p[k] + height : p[k];
+            } else {
+                l[k] = p[k] - lo;
+                h[k] = p[k] + hi;
+            }
+        }
+        for (long x = l[0]; x < h[0]; x++)
+            for (long y = l[1]; y < h[1]; y++)
+                for (long z = l[2]; z < h[2]; z++) {
+                    BitSet f = freed.get(new BlockPos((int) Math.floorDiv(x, 16), (int) Math.floorDiv(y, 16), (int) Math.floorDiv(z, 16)));
+                    if (f != null && f.get(VoxelNode.voxel((int) Math.floorMod(x, 16), (int) Math.floorMod(y, 16), (int) Math.floorMod(z, 16))))
                         return true;
                 }
         return false;

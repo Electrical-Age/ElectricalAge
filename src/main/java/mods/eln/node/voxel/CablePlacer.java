@@ -166,15 +166,16 @@ public final class CablePlacer {
         // (a route that came back onto or across the old cable away from its cut, as after a waypoint: the freed voxels
         // let it. Routed again without them, as before JoinRun, it goes round; through the free cube round the join
         // point it still can, and is refused rather than laid over the old cable or refused only by the click)
-        if (crosses(r, sj, ej)) {
+        CablePart.Tier ti = tierOf(tier, spec);
+        if (crosses(r, sj, ej, ti)) {
             r = route(view, tier, spec, start, startJoin, sj, wps, end, endJoin, ej, false, budgetMs);
-            if (crosses(r, sj, ej)) return new RoutePlacer.Routed<>("it crosses the cable it joins", 0, null);
+            if (crosses(r, sj, ej, ti)) return new RoutePlacer.Routed<>("it crosses the cable it joins", 0, null);
         }
         return r;
     }
 
     /** Does a route found come back onto or across the old cable at either join away from its cut (JoinRun.crosses)? */
-    private static boolean crosses(RoutePlacer.Routed<List<CableRouter.Step>> r, JoinRun sj, JoinRun ej) {
+    private static boolean crosses(RoutePlacer.Routed<List<CableRouter.Step>> r, JoinRun sj, JoinRun ej, CablePart.Tier t) {
         if (r.error() != null || sj == null && ej == null) return false;
         List<long[]> pts = new ArrayList<>();
         List<Integer> attach = new ArrayList<>();
@@ -182,7 +183,9 @@ public final class CablePlacer {
             pts.add(new long[]{st.x(), st.y(), st.z()});
             attach.add(st.attach());
         }
-        return sj != null && sj.crosses(pts, attach, true) || ej != null && ej.crosses(pts, attach, false);
+        int lo = t.width() / 2, hi = t.width() - lo;
+        boolean s = sj != null, e = ej != null;
+        return s && sj.crosses(pts, attach, s, e, lo, hi, t.height()) || e && ej.crosses(pts, attach, s, e, lo, hi, t.height());
     }
 
     /** One routing: free through the old cable near the joins (free) or not, cut where it leaves them. */
@@ -201,7 +204,7 @@ public final class CablePlacer {
         List<CableRouter.Step> steps = r.steps;
         if (sj != null && steps != null) steps = sj.trimStepsHead(steps);
         if (ej != null && steps != null) steps = ej.trimStepsTail(steps);
-        if (steps == null) return new RoutePlacer.Routed<>(RoutePlacer.INSIDE, 0, null);
+        if (steps == null) return RoutePlacer.Routed.said(RoutePlacer.INSIDE);
         long[] from = startJoin == null ? null : new long[]{steps.get(0).x(), steps.get(0).y(), steps.get(0).z()};
         CableRouter.Step last = steps.get(steps.size() - 1);
         long[] to = endJoin == null ? null : new long[]{last.x(), last.y(), last.z()};

@@ -215,7 +215,7 @@ public final class KitPreview {
     static <P> Answer answer(RoutePlacer.Spec<P> k, RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin,
                              List<CableRouter.End> wps, CableRouter.End end, long[] endJoin, int have) {
         RoutePlacer.Routed<P> r = k.route(view, tier, spec, start, startJoin, wps, end, endJoin, PREVIEW_BUDGET_MS);
-        if (r.error() != null) return new Answer(false, new ArrayList<>(List.of(marker(end))), RoutePlacer.unrouted(r.error()));
+        if (r.error() != null) return new Answer(false, new ArrayList<>(List.of(marker(end))), RoutePlacer.unrouted(r));
         List<int[]> boxes = k.boxes(r, tier, spec);
         int len = r.length();
         if (have < len)
