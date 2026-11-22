@@ -27,6 +27,9 @@ public final class Scene {
     public int w = DEFAULT_W, h = DEFAULT_H;
     /** The screen bar's title. */
     public String title = "";
+    /** The pen set's name (Pens; Prefs), and the clock's hours on the menu bar (24 or 12). */
+    public String pens = "Grid Blue";
+    public int clockHours = 24;
     /** Windows by id, in the order they were first opened. */
     public final Map<Integer, Window> windows = new LinkedHashMap<>();
     /** The stacking order, back to front. */
@@ -206,7 +209,17 @@ public final class Scene {
                     title = "";
                     pixmaps.clear();
                     backdrop = 0;
+                    pens = "Grid Blue";
+                    clockHours = 24;
                 } else for (Window win : windows.values()) fit(win);
+                return true;
+            }
+            case "pens" -> {
+                pens = Pens.SETS.containsKey(Form.str(m, 1, "")) ? Form.str(m, 1, "") : "Grid Blue";
+                return true;
+            }
+            case "clock" -> {
+                clockHours = Form.num(m, 1, 24) == 12 ? 12 : 24;
                 return true;
             }
             case "title" -> {
@@ -553,6 +566,8 @@ public final class Scene {
         List<String> out = new ArrayList<>();
         out.add(Form.print(new Form.Symbol("reset"), (long) w, (long) h));
         if (!title.isEmpty()) out.add(Form.print(new Form.Symbol("title"), title));
+        if (!pens.equals("Grid Blue")) out.add(Form.print(new Form.Symbol("pens"), pens));
+        if (clockHours != 24) out.add(Form.print(new Form.Symbol("clock"), (long) clockHours));
         for (var pe : pixmaps.entrySet()) out.add(pixmapMessage(pe.getKey(), pe.getValue()));
         if (backdrop != 0) out.add(Form.print(new Form.Symbol("backdrop"), (long) backdrop));
         if (!baseDict.isEmpty()) out.add(Form.print(new Form.Symbol("dict"), 0L, baseDict));

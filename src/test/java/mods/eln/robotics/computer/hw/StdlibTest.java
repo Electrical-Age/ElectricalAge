@@ -25,7 +25,8 @@ class StdlibTest {
     void boot() throws IOException {
         m = JanetRomTest.machine(3);
         m.bus.setState(200, true, null);
-        for (int t = 0; t < 80 && !screen.ready(); t++) {
+        // (the stdlib compiles at boot: ~83 ticks of 1M instructions with Dynamo P2's tools, ~65 before)
+        for (int t = 0; t < 150 && !screen.ready(); t++) {
             m.tick();
             m.run(1_000_000);
             screen.feed(m);
@@ -269,7 +270,7 @@ class StdlibTest {
         tick(60, ":ok\n> ");
         m.reset(Machine.RESET_POWER);
         mark();
-        tick(80, "Running A:/main.janet");
+        tick(150, "Running A:/main.janet");
         for (int t = 0; t < 40 && !screen.log(2).contains("42"); t++) tick(1, null);
         assertTrue(screen.log(2).contains("42"), "it prints in its own tab: " + screen.log(2));
         assertEquals("main.janet", screen.scene.windows.get(2).title);

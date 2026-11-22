@@ -321,6 +321,10 @@
   (if (and n (<= 0 n 15)) n (error (string "no colour channel " c))))
 
 (defn bus/address "The computer's own address (set in its screen), and whether it is on a bus." [] (ea/address))
+(var- station-name nil)
+(defn bus/name "The name this computer gives on the bus (Prefs' station name), or nil." [] station-name)
+(defn bus/set-name "Set the name this computer gives on the bus (nil: none)." [name]
+  (set station-name (if (and name (not (empty? (string name)))) (string name))))
 
 (defn bus/send
   "Send a packet from this computer: target (0 everyone, 17-255 a device), type (:power, :write, ... or a number),
@@ -459,6 +463,13 @@
   (set ui/width (- w 2))
   (set ui/height (- h 3))
   (ui/send 'screen w h))
+(def ui/pen-sets "The pen sets for the desk, bar and frames (Prefs)." ["Grid Blue" "Amber" "Paper"])
+(defn ui/pens "Draw the desk, the bar and the window frames with pen set name (one of ui/pen-sets)." [name]
+  (unless (find |(= $ name) ui/pen-sets) (error (string "the pen sets are " (string/join ui/pen-sets ", "))))
+  (ui/send 'pens name))
+(defn ui/clock "The menu bar's clock: 24 or 12 hours." [hours]
+  (unless (or (= hours 12) (= hours 24)) (error "the clock has 12 or 24 hours"))
+  (ui/send 'clock hours))
 (def ui/standard "The usual window: close box, minimise and depth boxes, size handle, dragged by its title."
   [:close :iconify :depth :size :drag])
 
@@ -761,6 +772,29 @@
   (repl-tab env t (string "Shell " n))
   (ui/focus t)
   t)
+
+# ---- Prefs: saved on the System disk as System/prefs.jdn, put back by the desk at every start (Dynamo P2)
+
+(def prefs/defaults "Prefs as a computer starts without them." {:mode [80 25] :pens "Grid Blue" :clock 24 :name nil})
+
+(defn prefs/file "Where the prefs are kept: System/prefs.jdn on the disk holding the System directory, or nil." []
+  (find |(disk/exists? (string $ "backdrop.pix")) ["A:/System/" "B:/System/"]))
+
+(defn prefs/load "The saved prefs over the defaults (the defaults if none are saved or they don't read)." []
+  (def dir (prefs/file))
+  (def saved (when dir (try (parse (slurp (string dir "prefs.jdn"))) ([_] nil))))
+  (merge prefs/defaults (if (dictionary? saved) saved {})))
+
+(defn prefs/apply "Put prefs p into effect: the text mode, the pens, the clock, the station name." [p]
+  (def [w h] (get p :mode [80 25]))
+  (unless (and (= w ui/screen-width) (= h ui/screen-height)) (try (ui/mode w h) ([_] nil)))
+  (try (ui/pens (get p :pens "Grid Blue")) ([_] nil))
+  (try (ui/clock (get p :clock 24)) ([_] nil))
+  (bus/set-name (get p :name)))
+
+(defn prefs/save "Save prefs p on the System disk (an error says why it couldn't)." [p]
+  (def dir (or (prefs/file) (error "no System disk in a drive")))
+  (spit (string dir "prefs.jdn") (string/format "%j" (table/to-struct (merge prefs/defaults p)))))
 
 # ---- applications: a directory NAME.app holding main.janet and icon.pix (Baughn 1572655325104832613)
 

@@ -99,4 +99,22 @@ class SceneCellsTest {
         assertEquals(" Save ", row(c, by, lay[1][0], lay[1][1]));
         assertEquals(" Discard ", row(c, by, lay[2][0], lay[2][1]));
     }
+
+    /** Prefs' pen sets (Dynamo P2): the desk, bar and title in the set's colours; the contents keep theirs; replayed. */
+    @Test
+    void penSetsColourTheDeskBarAndFrames() {
+        Scene s = scene("(window 1 2 3 10 4 \"Shell\" [:close :depth :size :drag])", "(text 1 1 0 0 :lime \"hi\")", "(pens \"Amber\")", "(clock 12)");
+        SceneCells c = SceneCells.of(s, SceneCells.NONE, 1);
+        Pens amber = Pens.SETS.get("Amber");
+        assertEquals(amber.bar(), c.paper[0], "the bar");
+        assertEquals(amber.desk(), c.paper[20 * 80 + 40], "the desk");
+        assertEquals(amber.titleActive(), c.paper[2 * 80 + 5], "the active title");
+        Scene again = scene(s.replay().toArray(String[]::new));
+        assertEquals("Amber", again.pens, "replayed");
+        assertEquals(12, again.clockHours, "replayed");
+        assertTrue(s.apply(Form.parse("(pens \"Nonesuch\")")));
+        assertEquals("Grid Blue", s.pens, "an unknown set: the default");
+        assertTrue(s.apply(Form.parse("(reset 80 25)")));
+        assertEquals(24, s.clockHours, "a reset: the defaults");
+    }
 }

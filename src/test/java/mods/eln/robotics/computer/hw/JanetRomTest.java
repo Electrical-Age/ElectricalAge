@@ -55,7 +55,7 @@ class JanetRomTest {
     void bootsToTheReplAndEvaluates() throws IOException {
         Machine m = machine(3);
         ScreenProbe s = new ScreenProbe();
-        until(m, s, s::ready, 80, "the REPL's tab");
+        until(m, s, s::ready, 150, "the REPL's tab");
         assertTrue(s.console.indexOf("Janet 1.41.2 on Electrical Age") >= 0, s.console.toString());
         m.editor.give(s.submit("(print \"hi\") (+ 1 2)"));
         until(m, s, s::done, 40, "the submission done");
@@ -66,11 +66,14 @@ class JanetRomTest {
     void sleepsWhileWaitingForInput() throws IOException {
         Machine m = machine(2);
         ScreenProbe s = new ScreenProbe();
-        until(m, s, s::ready, 80, "the REPL's tab");
-        m.tick();
-        m.run(1_000_000);
-        m.tick();
-        assertEquals(0, m.run(1_000_000), "parked on WFI with no input");
+        until(m, s, s::ready, 150, "the REPL's tab");
+        // (after the line is up the stdlib still finishes its start, the completion names among it: a few ticks)
+        int used = -1;
+        for (int t = 0; t < 10 && used != 0; t++) {
+            m.tick();
+            used = m.run(1_000_000);
+        }
+        assertEquals(0, used, "parked on WFI with no input");
         assertTrue(m.cpu.waiting());
     }
 
@@ -85,7 +88,7 @@ class JanetRomTest {
     void aWildPointerTrapsAndHalts() throws IOException {
         Machine m = machine(2);
         ScreenProbe s = new ScreenProbe();
-        until(m, s, s::ready, 80, "the REPL's tab");
+        until(m, s, s::ready, 150, "the REPL's tab");
         StringBuilder out = new StringBuilder();
         // no FFI, so poke the CPU instead: wake it with a submission and jump to address 0 (the NULL guard)
         m.editor.give(s.submit("1"));

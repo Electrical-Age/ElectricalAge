@@ -198,7 +198,9 @@ public final class ComputerCases {
                 // (one bus: the computer, the drive and the button, linked as a cable would)
                 if (e.port.bus() == null || e.port.bus() != d.port.bus()) mods.eln.bus.BusNet.link(e.port, d.port);
                 if (button.bus() == null || button.bus() != d.port.bus()) mods.eln.bus.BusNet.link(button, d.port);
-                if (tick == 100) {
+                // (pressed once the program says where the car is: the stdlib's compile at boot takes ~4 s of ticks)
+                if (pressAt < 0 && terminal != null && terminal.contains("at floor")) pressAt = tick + 10;
+                if (tick == pressAt) {
                     floorAtPress = s.carFloor(ctx);
                     button.send(new mods.eln.bus.Packet(mods.eln.bus.Packet.BROADCAST, 51, mods.eln.bus.PacketType.PRESS, 0, 0));
                 }
@@ -210,6 +212,7 @@ public final class ComputerCases {
         }
 
         boolean spun;
+        int pressAt = -1;
 
         public void measure(TestContext ctx) {
             unwatch();

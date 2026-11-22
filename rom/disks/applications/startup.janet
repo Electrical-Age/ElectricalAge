@@ -16,6 +16,7 @@
 (def P-SHELL (picture 5 "shell.pix"))
 
 (ui/title "Dynamo 1.0")
+(prefs/apply (prefs/load))   # (the text mode, pens, clock and station name saved by Prefs)
 (ui/backdrop P-BACK)
 (ui/window t 0 1 ui/screen-width (- ui/screen-height 1) "Switchboard" [:backdrop])
 (ui/clear t)
@@ -138,6 +139,7 @@
 (defn mode-item [w h] (string (if (= w ui/screen-width) "* " "  ") w " x " h))
 (defn set-mode [w h]
   (ui/mode w h)
+  (try (prefs/save (merge (prefs/load) {:mode [w h]})) ([_] nil))   # (the desk's Screen menu is remembered as Prefs' is)
   (ui/window t 0 1 ui/screen-width (- ui/screen-height 1) "Switchboard" [:backdrop])
   (desk-menus))
 (set desk-menus

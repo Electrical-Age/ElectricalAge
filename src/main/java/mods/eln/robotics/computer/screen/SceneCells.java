@@ -20,6 +20,8 @@ public final class SceneCells {
         FRAME_IDLE = 0xFF8A90A0, PAPER = 0xFF101418, INK = 0xFFE6E6E6, PROMPT = 0xFF8FB0FF, BUSY = 0xFFE0C060,
         BUTTON = 0xFF5A5A66, LIST = 0xFF181C22, LIST_INK = 0xFFD0D0D0, RAW = 0xFF0C0E10, BOX = 0xFF404040, EDITOR = 0xFF1C1D22,
         ASK = 0xFFD8D2C0, ASK_TEXT = 0xFF14161A, ASK_BUTTON = 0xFF8A90A0;
+    /** The pen set this scene draws with (Pens; the constants above are its default, Grid Blue). */
+    public Pens pens = Pens.DEFAULT;
     public static final int CLOSE = '■', DEPTH = '▒', SIZE = '╝', ICONIFY = '▄';
     /** The system menu's title, first on the menu bar (Baughn 1572655325104832613). */
     public static final String SYSTEM_MENU = "Dynamo";
@@ -93,7 +95,7 @@ public final class SceneCells {
         paper = new int[w * h];
         owner = new int[w * h];
         java.util.Arrays.fill(owner, OWNER_DESK);
-        java.util.Arrays.fill(paper, DESK);
+        java.util.Arrays.fill(paper, pens.desk());
         java.util.Arrays.fill(glyph, ' ');
     }
 
@@ -105,6 +107,8 @@ public final class SceneCells {
     /** The screen with one display's own state, and its idea of the active window. */
     public static SceneCells of(Scene s, Local local, int active) {
         SceneCells c = new SceneCells(s.w, s.h);
+        c.pens = Pens.of(s.pens);
+        java.util.Arrays.fill(c.paper, c.pens.desk());   // (the constructor laid the default desk)
         c.pixmaps = s.pixmaps;
         Scene.Pixmap back = s.pixmaps.get(s.backdrop);
         if (back != null) c.images.add(new Image(OWNER_DESK, 0, 1, s.w, s.h - 1, back, 0, 1, s.w, s.h));
@@ -210,17 +214,17 @@ public final class SceneCells {
     void bar(Scene s, int active, Local local) {
         unclip();
         painting = OWNER_BAR;
-        fill(0, 0, w, 1, BAR);
+        fill(0, 0, w, 1, pens.bar());
         List<String> titles = menuTitles(s, active);
         int x = 1;
         for (String t : titles) {
-            text(t, x, 0, w - x, BAR_TEXT);
+            text(t, x, 0, w - x, pens.barText());
             x += t.length() + 2;
         }
         String clock = local.clock();
-        if (!s.title.isEmpty() && x + s.title.length() + clock.length() + 2 < w) text(s.title, x + 1, 0, w - x, TITLE_IDLE);
+        if (!s.title.isEmpty() && x + s.title.length() + clock.length() + 2 < w) text(s.title, x + 1, 0, w - x, pens.titleIdle());
         // (the clock stands clear of the corner, where inventory mods draw their buttons on the panel)
-        if (!clock.isEmpty()) text(clock, w - clock.length() - 9, 0, clock.length(), BAR_TEXT);
+        if (!clock.isEmpty()) text(clock, w - clock.length() - 9, 0, clock.length(), pens.barText());
     }
 
     /** The menu bar's titles: the system menu, then the active window's (each menu's first entry). */
@@ -247,11 +251,11 @@ public final class SceneCells {
         // (a framed window's border is its title's colour all round, as the period's desks had it; a display bevels it;
         // a backdrop is the desk itself: its picture shows through)
         if (win.has("backdrop")) deskOwners.add(id);
-        else fill(o[0], o[1], o[2], o[3], win.framed() ? (active ? TITLE_ACTIVE : TITLE_IDLE) : PAPER);
+        else fill(o[0], o[1], o[2], o[3], win.framed() ? (active ? pens.titleActive() : pens.titleIdle()) : PAPER);
         if (win.framed()) {
             int x0 = win.x - 1, x1 = win.x + win.cw, y0 = win.y - 1, y1 = win.y + win.ch;
             fill(win.x, win.y, win.cw, win.ch, PAPER);
-            int tink = active ? TITLE_ACTIVE_TEXT : TITLE_IDLE_TEXT;
+            int tink = active ? pens.titleActiveText() : pens.titleIdleText();
             put(x0, y0, win.has("close") ? CLOSE : ' ', tink);
             put(x1, y0, win.has("depth") ? DEPTH : ' ', tink);
             if (win.has("iconify")) put(x1 - 1, y0, ICONIFY, tink);
@@ -299,28 +303,28 @@ public final class SceneCells {
     void ask(Scene.Window win) {
         int[][] lay = askLayout(win);
         int x = lay[0][0], y = lay[0][1], bw = lay[0][2], bh = lay[0][3];
-        fill(x, y, bw, bh, ASK);
-        put(x, y, '╔', ASK_TEXT);
-        put(x + bw - 1, y, '╗', ASK_TEXT);
-        put(x, y + bh - 1, '╚', ASK_TEXT);
-        put(x + bw - 1, y + bh - 1, '╝', ASK_TEXT);
+        fill(x, y, bw, bh, pens.ask());
+        put(x, y, '╔', pens.askText());
+        put(x + bw - 1, y, '╗', pens.askText());
+        put(x, y + bh - 1, '╚', pens.askText());
+        put(x + bw - 1, y + bh - 1, '╝', pens.askText());
         for (int xx = x + 1; xx < x + bw - 1; xx++) {
-            put(xx, y, '═', ASK_TEXT);
-            put(xx, y + bh - 1, '═', ASK_TEXT);
+            put(xx, y, '═', pens.askText());
+            put(xx, y + bh - 1, '═', pens.askText());
         }
         for (int yy = y + 1; yy < y + bh - 1; yy++) {
-            put(x, yy, '║', ASK_TEXT);
-            put(x + bw - 1, yy, '║', ASK_TEXT);
+            put(x, yy, '║', pens.askText());
+            put(x + bw - 1, yy, '║', pens.askText());
         }
         String title = Form.str(win.ask, 3, "");
-        if (!title.isEmpty()) text(" " + title + " ", x + 1, y, bw - 2, ASK_TEXT);
+        if (!title.isEmpty()) text(" " + title + " ", x + 1, y, bw - 2, pens.askText());
         String[] lines = Form.str(win.ask, 4, "").split("\n", -1);
-        for (int i = 0; i < lines.length; i++) text(lines[i], x + 2, y + 1 + i, bw - 4, ASK_TEXT);
+        for (int i = 0; i < lines.length; i++) text(lines[i], x + 2, y + 1 + i, bw - 4, pens.askText());
         List<String> b = buttons(win.ask);
         for (int i = 0; i < b.size(); i++) {
             int[] at = lay[1 + i];
-            fill(at[0], y + bh - 2, at[1], 1, ASK_BUTTON);
-            text(" " + b.get(i) + " ", at[0], y + bh - 2, at[1], ASK_TEXT);
+            fill(at[0], y + bh - 2, at[1], 1, pens.askButton());
+            text(" " + b.get(i) + " ", at[0], y + bh - 2, at[1], pens.askText());
         }
     }
 
@@ -365,7 +369,7 @@ public final class SceneCells {
             case "button" -> {
                 int bw = e.size(5, win, 4);
                 String label = Form.str(m, 6, "");
-                fill(x, y, bw, 1, BUTTON);
+                fill(x, y, bw, 1, pens.button());
                 text(label, x + Math.max(0, (bw - label.length()) / 2), y, bw, 0xFFFFFFFF);
             }
             case "list" -> {

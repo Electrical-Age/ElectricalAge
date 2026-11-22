@@ -115,8 +115,11 @@ class RunnerTest {
         }
         assertTrue(s.ready(), "booted to the REPL through screenOut alone; console: " + s.console);
         r.awaitIdle();
-        r.tick(true);   // (a new tick's budget: the boot's last slice may have used up its own)
-        r.awaitIdle();
+        // (new ticks' budgets: the boot's last slices, finishing the stdlib's start, may have used up their own)
+        for (int t = 0; t < 4; t++) {
+            r.tick(true);
+            r.awaitIdle();
+        }
         // no tick() from here: the kick alone runs the computer, on what is left of this tick's budget
         r.toEditor(s.submit("(+ 40 2)"));
         r.kick();

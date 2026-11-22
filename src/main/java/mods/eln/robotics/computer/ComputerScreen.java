@@ -152,6 +152,11 @@ public class ComputerScreen extends ElnScreen {
 
     // ---- the scene and this display's view of it
 
+    /** The pens the computer's scene draws with (Prefs). */
+    mods.eln.robotics.computer.screen.Pens pens() {
+        return mods.eln.robotics.computer.screen.Pens.of(scene().pens);
+    }
+
     Scene scene() {
         return render.scene;
     }
@@ -441,7 +446,7 @@ public class ComputerScreen extends ElnScreen {
 
         @Override
         public String clock() {
-            return ComputerScreen.clock();
+            return ComputerScreen.clock(scene().clockHours);
         }
     };
 
@@ -508,7 +513,7 @@ public class ComputerScreen extends ElnScreen {
                 if (cp == ' ') continue;
                 int pp = c.paper[y * c.w + x];
                 if ((cp == SceneCells.DEPTH || cp == SceneCells.CLOSE || cp == SceneCells.SIZE || cp == SceneCells.ICONIFY)
-                    && (pp == SceneCells.TITLE_ACTIVE || pp == SceneCells.TITLE_IDLE)) continue;   // (a window's boxes: gadget())
+                    && (pp == pens().titleActive() || pp == pens().titleIdle())) continue;   // (a window's boxes: gadget())
                 if (cp >= 0x2500 && cp <= 0x257F) boxGlyph(g, cp, x, y, c.ink[y * c.w + x]);
                 else {
                     String ch = new String(Character.toChars(cp));
@@ -601,7 +606,7 @@ public class ComputerScreen extends ElnScreen {
     }
 
     void bevels(GuiGraphicsExtractor g, SceneCells c, Scene s) {
-        bevel(g, c, cx(0), cy(0), cx(c.w), cy(1), true, SceneCells.BAR, SceneCells.OWNER_BAR);   // the screen bar
+        bevel(g, c, cx(0), cy(0), cx(c.w), cy(1), true, pens().bar(), SceneCells.OWNER_BAR);   // the screen bar
         for (int wid : s.order) {
             Scene.Window w = s.windows.get(wid);
             if (w == null) continue;
@@ -763,12 +768,12 @@ public class ComputerScreen extends ElnScreen {
         if (menuAt >= titles.size()) return;
         int tx = SceneCells.menuX(titles, menuAt);
         String title = titles.get(menuAt);
-        g.fill(cx(tx - 1), cy(0), cx(tx + title.length() + 1), cy(1), SceneCells.BAR_TEXT);
-        g.text(font, title, cx(tx), cy(0) + 1, SceneCells.BAR, false);
+        g.fill(cx(tx - 1), cy(0), cx(tx + title.length() + 1), cy(1), pens().barText());
+        g.text(font, title, cx(tx), cy(0) + 1, pens().bar(), false);
         List<String[]> items = menuItems(menuAt);
         if (items.isEmpty()) return;
         int x = tx - 1, w = menuWidth(items);
-        g.fill(cx(x), cy(1), cx(x + w), cy(1 + items.size()), SceneCells.BAR);
+        g.fill(cx(x), cy(1), cx(x + w), cy(1 + items.size()), pens().bar());
         // (it stands up: lit along its top and left, shadowed along its bottom and right)
         int x0 = cx(x), y0 = cy(1), x1 = cx(x + w), y1 = cy(1 + items.size());
         g.fill(x0, y0, x1, y0 + 1, 0xFFFFFFFF);
@@ -784,8 +789,8 @@ public class ComputerScreen extends ElnScreen {
                 continue;
             }
             boolean off = menuAt > 0 && t != null && t.disabled.contains(title + "/" + it[0]), on = i == itemAt && !off;
-            if (on) g.fill(cx(x) + 1, cy(y), cx(x + w) - 1, cy(y + 1), SceneCells.BAR_TEXT);
-            int ink = off ? 0xFF9A9A9A : on ? SceneCells.BAR : SceneCells.BAR_TEXT;
+            if (on) g.fill(cx(x) + 1, cy(y), cx(x + w) - 1, cy(y + 1), pens().barText());
+            int ink = off ? 0xFF9A9A9A : on ? pens().bar() : pens().barText();
             g.text(font, it[0], cx(x + 1), cy(y) + 1, ink, false);
             if (!it[1].isEmpty()) g.text(font, "Alt-" + it[1].toUpperCase(), cx(x + w - 6), cy(y) + 1, ink, false);
         }
@@ -908,11 +913,13 @@ public class ComputerScreen extends ElnScreen {
     String selected;
 
     /** The world's time of day for the clock, as the display sees it. */
-    static String clock() {
+    static String clock(int hours) {
         var level = Minecraft.getInstance().level;
         if (level == null) return "";
         long t = Math.floorMod(level.getOverworldClockTime() + 6000, 24000);
-        return String.format("%02d:%02d", t / 1000, t % 1000 * 60 / 1000);
+        int h = (int) (t / 1000), mi = (int) (t % 1000 * 60 / 1000);
+        if (hours == 12) return String.format("%2d:%02d %s", h % 12 == 0 ? 12 : h % 12, mi, h < 12 ? "am" : "pm");
+        return String.format("%02d:%02d", h, mi);
     }
 
     // ---- input

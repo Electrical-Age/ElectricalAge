@@ -39,7 +39,7 @@
   (defn status []
     (def peers (length (filter |(< (- (now) $) 30) (values heard))))
     (ui/text t 1 0 0 (if trouble :red :yellow)
-             (string/format "%-52s" (or trouble (string "BBS  " (or name station "") "  " (length posts) " posts  "
+             (string/format "%-52s" (or trouble (string "BBS  " (or name (bus/name) station "") "  " (length posts) " posts  "
                                                         peers " other computer" (if (= 1 peers) "" "s"))))))
 
   # ---- the floppy
@@ -182,7 +182,7 @@
       (make-dir)
       (try (spit (string dir "station") station)
         ([e] (set trouble (string "Not saved: " e)))))
-    (def r {:s station :n (+ 1 (held station)) :l (+ 1 lamport) :b board :a (or name "") :t text})
+    (def r {:s station :n (+ 1 (held station)) :l (+ 1 lamport) :b board :a (or name (bus/name) "") :t text})
     (save-line (string/format "%j" r))
     (arrived r)
     (summary))

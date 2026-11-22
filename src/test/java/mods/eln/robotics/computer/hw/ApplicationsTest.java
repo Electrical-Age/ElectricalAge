@@ -256,6 +256,35 @@ class ApplicationsTest extends StdlibTest {
         assertTrue(dump(screen).contains("Welcome to Dynamo"), "back on the contents: " + dump(screen));
     }
 
+    /** Prefs (Dynamo P2): a choice shows at once; Save keeps it on the System disk, and prefs/load brings it back. */
+    @Test
+    void prefsShowAtOnceAndSaveOnTheSystemDisk() throws IOException {
+        start("prefs");
+        run(20);
+        long amber = -1, save = -1;
+        for (var en : screen.scene.windows.get(2).elements.entrySet())
+            if (en.getValue().kind.equals("button")) {
+                String label = Form.str(en.getValue().msg, 6, "").trim();
+                if (label.endsWith("Amber")) amber = en.getKey();
+                if (label.equals("Save")) save = en.getKey();
+            }
+        assertTrue(amber > 0 && save > 0, "Prefs' buttons: " + dump(screen));
+        m.editor.give(event(new Form.Symbol("press"), 2L, amber));
+        run(10);
+        assertEquals("Amber", screen.scene.pens, "shown at once");
+        m.editor.give(screen.submit(2, 6, "Mill"));
+        run(10);
+        m.editor.give(event(new Form.Symbol("press"), 2L, save));
+        run(20);
+        assertNull(screen.scene.windows.get(2), "Save closes it; " + dump(screen));
+        type("(do (prefs/apply (merge prefs/defaults {})) [(get (prefs/load) :pens) (get (prefs/load) :name)])");
+        tick(40, "(\"Amber\" \"Mill\")");
+        type("(do (prefs/apply (prefs/load)) (bus/name))");
+        tick(40, "\"Mill\"");
+        run(5);
+        assertEquals("Amber", screen.scene.pens);
+    }
+
     @Test
     void calculatorAddsAndKeepsATape() throws IOException {
         start("calculator");
@@ -299,7 +328,7 @@ class ApplicationsTest extends StdlibTest {
             this.address = address;
             m = JanetRomTest.machine(3);
             m.bus.setState(address, true, null);
-            for (int t = 0; t < 80 && !screen.ready(); t++) {
+            for (int t = 0; t < 150 && !screen.ready(); t++) {
                 m.tick();
                 m.run(1_000_000);
                 screen.feed(m);
