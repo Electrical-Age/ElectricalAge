@@ -351,7 +351,7 @@ public final class ComputerCases {
      * the ghost stands above it; Janet boots at 80 x 25 and says so; breaking the monitor breaks the computer.
      */
     static final class MonitorOnTop extends BootsJanet {
-        boolean ghostAbove, goneAfterBreak, shellMoved;
+        boolean ghostAbove, goneAfterBreak, shellMoved, read;
         String shellTitle = "";
         int sceneW, sceneH;
         String size = "";
@@ -386,7 +386,10 @@ public final class ComputerCases {
                         o.writeUTF("(moved 1 10 5 40 12)");
                     }), null);
                 }
-                if (tick == upAt + 30) {
+                // (once its answer is on the screen, 120 ticks at most: a test server ticks as fast as it can, and the
+                // answer, due "by tick 30", came later whenever the tests beside it made the ticks short)
+                if (!read && tick >= upAt + 30 && (terminal(e).contains("80 25") || tick >= upAt + 120)) {
+                    read = true;
                     size = terminal(e);
                     sceneW = e.screen.scene.w;
                     sceneH = e.screen.scene.h;
