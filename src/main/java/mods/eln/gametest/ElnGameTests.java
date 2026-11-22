@@ -197,6 +197,7 @@ public final class ElnGameTests {
             if (c.checkLimitCycles()) limitCycles(helper, ctx);   // (before the round trip: reloaded nodes start a fresh record)
             links(helper, ctx);
             linksNeutral(helper, ctx);
+            fluidTopology(helper, ctx);
             persistence(helper, ctx);
             cleanUp(helper, ctx);
             ctx.finish();
@@ -318,6 +319,43 @@ public final class ElnGameTests {
                 single = v.coordonate + ": " + LinksDiff.difference(off, all, 6);
         }
         ctx.check("links: each block reconnected alone keeps the rules' network", single.isEmpty(), single);
+    }
+
+    /**
+     * The fluid networks around the test as built (FluidWorld.liveTopology, canonical; without a rebuild), recorded by
+     * their hash so two builds of the mod can be compared test by test.
+     */
+    static void fluidTopology(GameTestHelper helper, GameTestContext ctx) {
+        net.minecraft.world.phys.AABB bounds = helper.getBounds();
+        java.util.function.LongPredicate in = p -> {
+            var b = net.minecraft.core.BlockPos.of(p);
+            return bounds.contains(b.getX() + .5, b.getY() + .5, b.getZ() + .5);
+        };
+        var live = relative(mods.eln.fluid.FluidWorld.liveTopology(in), bounds);
+        if (live.isEmpty()) return;
+        ctx.check("fluid: the networks as built", true, live.size() + " lines, " + (mods.eln.fluid.FluidWorld.dirty() ? "rebuild pending, " : "")
+            + "hash " + Integer.toHexString(String.join("\n", live).hashCode()));
+    }
+
+    /**
+     * Topology lines with their blocks ("x,y,z") relative to the test's corner, a run's or network's names sorted again,
+     * and sorted (the suite places tests anywhere).
+     */
+    static java.util.List<String> relative(java.util.List<String> lines, net.minecraft.world.phys.AABB bounds) {
+        var xyz = java.util.regex.Pattern.compile("(-?\\d+),(-?\\d+),(-?\\d+)");
+        int x0 = (int) Math.floor(bounds.minX), y0 = (int) Math.floor(bounds.minY), z0 = (int) Math.floor(bounds.minZ);
+        java.util.List<String> out = new java.util.ArrayList<>();
+        for (String l : lines) {
+            l = xyz.matcher(l).replaceAll(m -> (Integer.parseInt(m.group(1)) - x0) + "," + (Integer.parseInt(m.group(2)) - y0) + "," + (Integer.parseInt(m.group(3)) - z0));
+            if (l.startsWith("run ") || l.startsWith("net ")) {
+                var names = new java.util.ArrayList<>(java.util.List.of(l.substring(4).split(", ")));
+                java.util.Collections.sort(names);
+                l = l.substring(0, 4) + String.join(", ", names);
+            }
+            out.add(l);
+        }
+        java.util.Collections.sort(out);
+        return out;
     }
 
     /** The cable pieces' stored joints say what the live network has (CableVerify), over the voxel blocks in the test's bounds. */

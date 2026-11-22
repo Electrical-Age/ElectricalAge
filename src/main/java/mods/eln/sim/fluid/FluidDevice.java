@@ -13,6 +13,19 @@ public interface FluidDevice {
 
     List<FluidPort> fluidPorts();
 
+    /**
+     * Its block (BlockPos.asLong), naming its nodes in the world's topology plan (FluidWorld.Plan) whatever order the
+     * devices joined in; Long.MIN_VALUE: the world finds one (a machine's node block, else its lowest port's block).
+     */
+    default long fluidPos() {
+        return Long.MIN_VALUE;
+    }
+
+    /** A node's stable id inside the device for the plan's names (a voxel part's id); -1: its place among the device's nodes. */
+    default int fluidNodeId(FluidNode n) {
+        return -1;
+    }
+
     default List<Vent> fluidVents() {
         return List.of();
     }

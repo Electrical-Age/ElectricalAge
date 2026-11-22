@@ -427,6 +427,60 @@ public final class FluidWorld implements IProcess {
         return r == null ? 0 : Long.bitCount((long) r[2]);
     }
 
+    /** Is a rebuild pending (a device joined, left or changed since the networks were built)? */
+    public static boolean dirty() {
+        return INSTANCE.dirty;
+    }
+
+    /**
+     * The networks as built (without rebuilding), canonical: per run of lumped pieces its pieces; per network its nodes
+     * (a run as its pieces; its air node, of no device, left out) and its edges (ends, kind, conductance to 9 digits),
+     * by FluidNames; sorted. Only lines with a node on a block keep accepts (the harness: a test's own). For comparing
+     * builds, not for gameplay.
+     */
+    public static List<String> liveTopology(java.util.function.LongPredicate keep) {
+        FluidNames names = new FluidNames(INSTANCE.devices);
+        List<String> out = new ArrayList<>();
+        for (List<FluidNode> run : INSTANCE.lumps.values()) {
+            List<String> ms = new ArrayList<>();
+            boolean in = false;
+            for (FluidNode m : run) {
+                ms.add(names.of(m));
+                in |= names.in(m, keep);
+            }
+            if (in) out.add("run " + sortedJoin(ms));
+        }
+        for (FluidNetwork net : INSTANCE.networks) {
+            List<String> ns = new ArrayList<>();
+            boolean in = false;
+            for (FluidNode n : net.nodes)
+                for (FluidNode m : INSTANCE.lumps.getOrDefault(n, names.named(n) ? List.of(n) : List.of())) {
+                    ns.add(names.of(m));
+                    in |= names.in(m, keep);
+                }
+            if (!in) continue;
+            out.add("net " + sortedJoin(ns));
+            for (FluidEdge e : net.edges)
+                // (9 digits: a run's resistance is summed in no fixed order)
+                out.add("edge " + liveName(e.a, names) + " > " + liveName(e.b, names) + " " + e.kind + " k=" + String.format(java.util.Locale.ROOT, "%.9g", e.k));
+        }
+        java.util.Collections.sort(out);
+        return out;
+    }
+
+    /** A node in liveTopology: a run by its least piece, a network's air node "air". */
+    private static String liveName(FluidNode n, FluidNames names) {
+        List<FluidNode> run = INSTANCE.lumps.get(n);
+        if (run != null) return "run{" + names.least(run) + "}";
+        return names.named(n) ? names.of(n) : "air";
+    }
+
+    static String sortedJoin(List<String> xs) {
+        List<String> s = new ArrayList<>(xs);
+        java.util.Collections.sort(s);
+        return String.join(", ", s);
+    }
+
     /** The devices in the world now (a copy). */
     public static List<FluidDevice> devices() {
         return new ArrayList<>(INSTANCE.devices);
@@ -776,7 +830,7 @@ public final class FluidWorld implements IProcess {
     private static final java.util.Set<FluidNode> TOO_SMALL = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
 
     /** A device's nodes: its ports', vents', flows' and links' (as the rebuild gathers them). */
-    private static List<FluidNode> nodesOf(FluidDevice d) {
+    static List<FluidNode> nodesOf(FluidDevice d) {
         List<FluidNode> out = new ArrayList<>();
         for (FluidDevice.FluidPort p : d.fluidPorts()) out.add(p.node());
         for (FluidDevice.Vent v : d.fluidVents()) out.add(v.node);

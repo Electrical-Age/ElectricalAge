@@ -519,6 +519,19 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     @Override
+    public long fluidPos() {
+        return coordonate.pos().asLong();
+    }
+
+    /** A pipe's or junction's node: its part's id. */
+    @Override
+    public int fluidNodeId(mods.eln.sim.fluid.FluidNode n) {
+        for (VoxelPart p : parts)
+            if (p instanceof PipePart pipe && pipe.fluid == n || p instanceof JunctionPart j && j.fluid == n) return p.id;
+        return -1;
+    }
+
+    @Override
     public List<FluidPort> fluidPorts() {
         List<FluidPort> out = new ArrayList<>();
         long pos = coordonate.pos().asLong();
