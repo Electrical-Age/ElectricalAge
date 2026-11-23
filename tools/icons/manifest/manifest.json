@@ -6715,7 +6715,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": null
  },
  {
   "item_id": "large_boiler",
@@ -6732,7 +6735,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": null
  },
  {
   "item_id": "50v_steam_turbine",
@@ -6749,7 +6755,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon); schematic: none yet (steam mark + G ring collides with 50v/200v_turbine)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": "band"
  },
  {
   "item_id": "200v_steam_turbine",
@@ -6766,7 +6775,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon); schematic: none yet (steam mark + G ring collides with 50v/200v_turbine)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": "band"
  },
  {
   "item_id": "50v_compact_steam_turbine",
@@ -6783,7 +6795,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": "band"
  },
  {
   "item_id": "small_steam_condenser",
@@ -6800,7 +6815,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": null
  },
  {
   "item_id": "steam_condenser",
@@ -6817,7 +6835,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": null
  },
  {
   "item_id": "50v_oil_pump",
@@ -6835,7 +6856,9 @@
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
   "redraw": true,
-  "tier_cue": "body"
+  "tier_cue": "body",
+  "node_kind": "transparent_node",
+  "model_texture_notes": ""
  },
  {
   "item_id": "200v_oil_pump",
@@ -6853,7 +6876,9 @@
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
   "redraw": true,
-  "tier_cue": "body"
+  "tier_cue": "body",
+  "node_kind": "transparent_node",
+  "model_texture_notes": ""
  },
  {
   "item_id": "50v_tar_sand_separator",
@@ -6871,7 +6896,9 @@
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
   "redraw": true,
-  "tier_cue": "band"
+  "tier_cue": "band",
+  "node_kind": "transparent_node",
+  "model_texture_notes": ""
  },
  {
   "item_id": "200v_tar_sand_separator",
@@ -6889,7 +6916,9 @@
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
   "redraw": true,
-  "tier_cue": "band"
+  "tier_cue": "band",
+  "node_kind": "transparent_node",
+  "model_texture_notes": ""
  },
  {
   "item_id": "steam_injection_wellhead",
@@ -6906,7 +6935,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": null
  },
  {
   "item_id": "fractionating_column_base",
@@ -6923,7 +6955,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": null
  },
  {
   "item_id": "fractionating_column_segment",
@@ -6940,7 +6975,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": null
  },
  {
   "item_id": "flare_stack",
@@ -6957,7 +6995,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": null
  },
  {
   "item_id": "50v_electric_heater",
@@ -6975,7 +7016,9 @@
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
   "redraw": true,
-  "tier_cue": "body"
+  "tier_cue": "body",
+  "node_kind": "transparent_node",
+  "model_texture_notes": ""
  },
  {
   "item_id": "200v_electric_heater",
@@ -6993,7 +7036,9 @@
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
   "redraw": true,
-  "tier_cue": "body"
+  "tier_cue": "body",
+  "node_kind": "transparent_node",
+  "model_texture_notes": ""
  },
  {
   "item_id": "addressable_button",
@@ -7010,7 +7055,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "six_node",
+  "model_texture_notes": "",
+  "tier_cue": null
  },
  {
   "item_id": "addressable_light",
@@ -7027,7 +7075,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "six_node",
+  "model_texture_notes": "",
+  "tier_cue": null
  },
  {
   "item_id": "floor_sensor",
@@ -7044,7 +7095,10 @@
   "current_texture": "",
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
-  "redraw": true
+  "redraw": true,
+  "node_kind": "six_node",
+  "model_texture_notes": "",
+  "tier_cue": null
  },
  {
   "item_id": "230v_air_blower",
@@ -7062,6 +7116,8 @@
   "shares_texture_with": [],
   "notes": "added 2026-11-23 for todo #584 (own icon)",
   "redraw": true,
-  "tier_cue": "body"
+  "tier_cue": "body",
+  "node_kind": "transparent_node",
+  "model_texture_notes": ""
  }
 ]

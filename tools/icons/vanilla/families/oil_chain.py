@@ -25,7 +25,7 @@ from kit import (Canvas, box, cylinder, disc, outline_region, tier_ramp,
 from families.machines import zsolid, zpaint, zfaces, sub, MINER
 
 DARK = RUBBER_BLACK
-RED = (h('#3a0e0c'), h('#6a1a16'), h('#a8322c'), h('#d4483c'), h('#ee7a6a'), h('#f8b0a4'))
+from families.machines26 import RED
 #: steam (the wellhead's inlet)
 STEAM = h('#f2f2ee')
 

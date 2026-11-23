@@ -29,6 +29,7 @@ Family ramps (frozen here, reported for promotion):
 from kit import (Canvas, box, cylinder, outline_region, tier_ramp, h, CYL_BANDS,
                  STEEL, CAV, VCOPPER, LIT, WHITE, MARK_RED, RUBBER_BLACK)
 from families.machines import MINER, sub
+from families.generators import revolve
 
 IRON_D = (h('#242228'), h('#353236'), h('#47433f'), h('#5c5752'), h('#79736b'), h('#958e84'))
 PAD = (h('#3d190a'), h('#6b2a0e'), h('#a04416'), h('#c85e22'), h('#e08a48'), h('#f2b47c'))
@@ -42,20 +43,6 @@ def _pads(cv, y, xs, w=3, hgt=2):
         cv.hline(x, x + w - 1, y, PAD[4])
 
 
-def _drum(cv, x, cy2, diams, ramp):
-    """A round body lying along x: column x+i has diameter diams[i] about the doubled centre row
-    cy2, every column banded by CYL_BANDS, one vanilla outline round the whole."""
-    pts = {}
-    for i, d in enumerate(diams):
-        top = (cy2 - d + 1) // 2
-        for j, k in enumerate(CYL_BANDS[d]):
-            pts[(x + i, top + j)] = ramp[5] if k == 'H' else ramp[k]
-    for p, c in pts.items():
-        cv.set(*p, c)
-    outline_region(cv, set(pts), ramp[0], ramp[1])
-    return set(pts)
-
-
 # ------------------------------------------------------------------------------- boiler
 def boiler():
     """Boiler (cadmodels Boiler): the riveted drum on its side with the steam dome, the firebox
@@ -66,7 +53,7 @@ def boiler():
     # the saddles under the drum (red in the model): two dark-red stubs on the skid
     # -> left out (another hue; the skid already carries the drum)
     diams = [4, 6, 8, 8, 8, 8, 8, 8, 8, 8, 6, 4]               # capsule: rounded heads
-    _drum(cv, 1, 15, diams, DRUM)                                      # rows 4..11
+    revolve(cv, 1, 15, diams, DRUM)                                      # rows 4..11
     for sx in (4, 9):                                                  # rivet seams round the drum
         for yy in range(5, 11):
             c = cv.get(sx, yy)

@@ -11,6 +11,7 @@ from kit import RING_M, RING_M_SMALL, machine, mark
 
 
 def steam_generator(g, small=False):
+    """kit generator(g, 'steam') at the small ring when small (the compact turbine)."""
     mark(g, 'steam')
     machine(g, 'G', g.hue, ring=RING_M_SMALL if small else RING_M)
 

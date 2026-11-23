@@ -7,7 +7,7 @@ three pale signal pins each, as the module's nine terminals."""
 from kit import Canvas, STEEL, CAV, WOOD, SOLAR, MARK_GREEN
 from kit.color import h
 
-VIOLET = (h('#4a2a63'), h('#6b3d8c'), h('#8e62b0'))   # the bus cable's 0.42, 0.24, 0.55, shaded
+from families.bus_devices import VIOLET               # the bus cable's 0.42, 0.24, 0.55, shaded
 PIN = h('#e6e6dc')                                     # a signal pin (SixNodeElementRender.pinColour)
 
 

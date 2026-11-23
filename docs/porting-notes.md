@@ -298,8 +298,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   right flank; 1.8 bar shut-off, 0.04 m^3/s free flow, power = flow x rise / 0.9 + 20 W idling. One feeds two Big
   burners: at full speed ~1.5 bar, 20 g/s, 2.8 kW; at 55 % ~0.45 bar, 11 g/s, 0.47 kW. Measured on one Boiler, two Big
   burners and an HP turbine (2.71 kW electric by natural draught): 7.58 kW electric - 2.77 kW = 4.81 kW net, or
-  4.18 - 0.47 = 3.71 kW net slowed; the 16 kW plant with four blowers 15.77 - 5.05 = 10.72 kW net. Stand-in model,
-  render and icon (the Inline Pump's); placeholder recipe. GameTests `air_blower_blocked_outlet_stalls`,
+  4.18 - 0.47 = 3.71 kW net slowed; the 16 kW plant with four blowers 15.77 - 5.05 = 10.72 kW net. Its own CAD model
+  (AirBlower) and icon; placeholder recipe. GameTests `air_blower_blocked_outlet_stalls`,
   `hp_plant_furnace_fired_blowers`, `hp_plant_midgame_one_blower`, `_low`, `hp_plant_full_blowers_16kw`.
 - Fuel heat furnace as a combustion chamber (todo #504/#503; Baughn 2026-11-17: the burner must feel its exhaust's
   back-pressure for the Air Blower to be realistic; flanges on the sides or back, not the front). Its flue's node is
