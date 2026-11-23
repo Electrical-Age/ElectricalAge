@@ -174,7 +174,7 @@ type `data/eln/damage_type/scald.json` (steam jets) is tagged `bypasses_armor`.
   to vanilla. `compat/JeiPages` (no JEI classes) holds what the plugin `compat/jei/ElnJeiPlugin` shows beyond the
   game's recipes: the machine lists, resin, annealing and wire-drawing pages, information pages (ores, tar sand, oil
   and its cuts, the blown fuse, the data logger print, creative-only items; text `jei.eln.info.*`) and the items kept
-  out of the list (dead ends: old 50 V/200 V turbines, ferrite ingot, the cinnabar chain, the old six-node power cables;
+  out of the list (dead ends: ferrite ingot, the cinnabar chain, the old six-node power cables;
   other-tier fuses; pipe sensor devices). JEI lists what the creative tabs list, so the fuel buckets are in the tab (`ElnRegistry.TAB_EXTRAS`).
   `gametest/cases/JeiAuditCases` (`jei_every_item_reachable`) grows the obtainable set from vanilla over all of it
   and names any listed item left out. A new item needs a recipe, a page, or a place in `hidden()`.
@@ -232,3 +232,6 @@ parts ([rendering.md](rendering.md)); it applies as soon as the file changes.
 - Removed: copper tools and armour (a4e409f4, vanilla has them); EA copper ore (a08d3985); EA copper ingot (vanilla
   ingot used everywhere) and the 50V/200V Condensators (771ed3aa, already obsolete in 1.12). The golden tests list
   these as intended differences (testing.md).
+- Removed: the 48V/230V heat turbines (Baughn 2026-11-23; uncraftable since 2026-10-14, the small steam turbines
+  replaced them). Their ids and registry names stay reserved in `eln-ids.json`; old nodes are kept orphans
+  (persistence.md).
