@@ -9,9 +9,10 @@ Shared visual system
   so the family reads as one plant.
 * boiler: the riveted drum lying on its side (``revolve``-style CYL_BANDS shading per column), its
   steam dome on top, the dark firebox hatch, a pressure gauge and the feed pipe, on the skid.
-* large_boiler: the 2x2x2 alloy-plate block (charcoal, copper corner pads) with its ribbed half
-  barrel and two stacks breaking the top silhouette: the round top is what keeps it apart from the
-  electrical furnace (a dark box under a flat white slab).
+* large_boiler: the big drum (d 10, chamfered heads, seam bands) filling the slot, copper heat
+  plates along its flank, two domes and the dial on its stalk breaking the top silhouette, the
+  copper feed line up the front, on the skid: fuller and rounder than the boiler (d 8, one dome,
+  firebox hatch), and round where the electrical furnace is a dark box under a flat white slab.
 * condensers: the grey shell lying on its side, wound with copper cooling fins, the exhaust stack
   on top, the thin painted ring by its end (model paint PAINT_50V / PAINT_200V: the turbine it
   belongs to; the item is untiered: the ring is drawn in the lv/mv ramp colours as model paint only,
@@ -27,7 +28,7 @@ Family ramps (frozen here, reported for promotion):
     DRUM    the boilers' dark riveted steel (families.machines.MINER)
 """
 from kit import (Canvas, box, cylinder, outline_region, tier_ramp, h, CYL_BANDS,
-                 STEEL, CAV, VCOPPER, LIT, WHITE, MARK_RED, RUBBER_BLACK)
+                 STEEL, CAV, VCOPPER, LIT, WHITE, MARK_RED, GOLD)
 from families.machines import MINER, sub
 from families.generators import revolve
 
@@ -77,29 +78,33 @@ def boiler():
 
 # ------------------------------------------------------------------------------- large boiler
 def large_boiler():
-    """Large Boiler (cadmodels LargeBoiler, 2x2x2): the charcoal alloy-plate block with copper
-    corner pads, its ribbed half barrel lying on top and two stacks rising from it."""
+    """Large Boiler (cadmodels LargeBoiler, 2x2x2): the big riveted drum lying along the slot (front
+    head on the left, chamfered heads, seam bands), copper heat plates on bosses along its flank, the
+    safety-valve dome and the steam dome on its crest, the pressure dial on its stalk over the front
+    and the copper feed line up the front, on the low copper-padded skid. Taller and fuller than the
+    Boiler (whose drum is d 8 with one dome), and no firebox: it is heated from outside."""
     cv = Canvas(16)
-    B = RUBBER_BLACK
-    box(cv, 1, 7, 10, 8, 4, B, bevel=False)                            # rows 3..14
-    _pads(cv, 8, (2, 8), w=2)
-    _pads(cv, 12, (2, 8), w=2)
-    for k in (2, 3):                                                   # pads on the side face
-        cv.set(10 + k, 9 - k, PAD[3]); cv.set(10 + k, 13 - k, PAD[3])
-    # the half barrel on the top face, along x; its lower half hidden in the block
-    def barrel(c):
-        cylinder(c, 2, 2, 11, 6, DRUM, axis='x')
-        for sx in (5, 9):                                              # rib bands
-            for yy in range(3, 7):
-                cc = c.get(sx, yy)
-                c.set(sx, yy, DRUM[2] if cc in (DRUM[3], DRUM[4], DRUM[5]) else DRUM[1])
-    sub(cv, barrel)
-    for xx in range(1, 11):                                            # block front edge in front
-        cv.set(xx, 7, B[1])
-    cv.set(11, 6, B[1]); cv.set(12, 5, B[1])
-    # two stacks on the barrel
-    sub(cv, lambda c: cylinder(c, 3, 1, 3, 3, DRUM, axis='y'))
-    sub(cv, lambda c: cylinder(c, 10, 1, 3, 3, DRUM, axis='y'))
+    box(cv, 1, 13, 13, 2, 1, IRON_D, bevel=False)                     # the skid, rows 12..14
+    _pads(cv, 13, (4, 9), w=3)
+    diams = [6, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 8, 6]         # chamfered heads
+    revolve(cv, 2, 15, diams, DRUM)                                    # cols 2..14, rows 3..12
+    for sx in (4, 8, 12):                                              # seam bands round the drum
+        for yy in range(4, 12):
+            c = cv.get(sx, yy)
+            cv.set(sx, yy, DRUM[2] if c in (DRUM[3], DRUM[4], DRUM[5]) else DRUM[1])
+    for x in (5, 9):                                                   # the upper heat plates on their bosses
+        cv.rect(x, 8, 3, 2, PAD[3])
+        cv.hline(x, x + 2, 8, PAD[4])
+        cv.hline(x, x + 2, 10, DRUM[0])
+    # the safety-valve dome (its brass valve) and the steam dome with its flange
+    sub(cv, lambda c: cylinder(c, 5, 1, 3, 3, DRUM, axis='y'))
+    cv.set(6, 0, GOLD[3])
+    sub(cv, lambda c: cylinder(c, 10, 1, 3, 4, DRUM, axis='y'))
+    cv.hline(10, 13, 1, DRUM[4])
+    # the pressure dial on its stalk over the front head, the copper feed line up the front
+    cv.set(2, 2, WHITE); cv.set(3, 2, WHITE); cv.set(3, 3, GOLD[3])
+    cv.vline(1, 7, 12, VCOPPER[2]); cv.set(1, 6, VCOPPER[3]); cv.set(2, 6, VCOPPER[3])
+    cv.set(1, 10, MARK_RED)
     return cv
 
 
