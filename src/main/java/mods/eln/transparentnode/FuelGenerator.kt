@@ -98,7 +98,7 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
         list.add(tr("Produces electricity using gasoline."))
         list.add("  " + tr("Nominal power: %1$ W", Utils.plotValue(nominalPower)))
         list.add(tr("Fuel by pipe on its top, or by bucket. 2% less power per 1% of its fuel boiling outside 330-400 K."))
-        list.add(tr("Fuel that cokes fouls it slowly; clean fuel clears it, wool at once."))
+        list.add(tr("Coking fuels like heavy oil and residue foul it slowly and choke it at high levels. Clean fuel clears fouling, wool at once."))
     }
 }
 
@@ -107,7 +107,8 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
  * a pipe on its top flange or by a bucket: 2000 mB, the old two-bucket tank; it burns as much fuel per joule as the old
  * tank did. The fuel is rated (FuelQuality, window GENERATOR_LO..HI): it loses 2 % of its power per % outside the
  * window, and fuel over the engines' coking balance fouls it, ENGINE_SLOWER times slower than a burner; clean fuel
- * clears it, wool cleans it. An old save's tank (tankLevel of tankFluid) goes into the vessel as that much fuel
+ * clears it, wool cleans it. Fuel from FuelQuality.ENGINE_CHOKE chokes it: it takes none and stops, and won't start
+ * until the fuel is diluted (Baughn 2026-11-23). An old save's tank (tankLevel of tankFluid) goes into the vessel as that much fuel
  * (gasoline if the fluid is unknown, as the old tank burnt anything at the same rate).
  */
 class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: TransparentNodeDescriptor) :
@@ -140,6 +141,16 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
 
     /** The share of its power its fuel's quality and its fouling leave it. */
     fun quality() = fuel.power() * (1 - foul)
+
+    /**
+     * Is it choked (FuelQuality.ENGINE_CHOKE; Baughn 2026-11-23): the fuel in its vessel has so much heavy oil or residue
+     * in it that it takes none and won't run; live from the vessel, so it runs again once the fuel is diluted.
+     */
+    fun choked(): Boolean {
+        val v = inlet.vessel ?: return false
+        val id = inlet.feedId()
+        return id >= 0 && mods.eln.sim.fluid.FuelQuality.rate(v, id, mods.eln.sim.fluid.FuelQuality.GENERATOR_LO, mods.eln.sim.fluid.FuelQuality.GENERATOR_HI).choked()
+    }
 
     companion object {
         const val TANK_MB = FuelGeneratorDescriptor.TankCapacityInBuckets * 1000
@@ -226,7 +237,10 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
                     on = false
                 } else {
                     rate()   // (what is in the vessel now: a stop on bad fuel must not latch after it is diluted)
-                    if (inlet.feedMb() > 0 && quality() > 0) {
+                    if (inlet.feedMb() > 0 && fuel.choked())   // (why it won't start: it is not off-window fuel's silent no)
+                        player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(
+                            I18N.tr("Injectors choked by heavy oil or residue. Dilute with clean fuel, or break to empty.")))
+                    else if (inlet.feedMb() > 0 && quality() > 0) {
                         on = true
                         voltageGracePeriod = FuelGeneratorDescriptor.VoltageStabilizationGracePeriod
                     }
@@ -282,12 +296,16 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
         if (v != null) info[I18N.tr("Fuel")] = mods.eln.sim.fluid.EaUnits.tank(inlet.feedMb(), TANK_MB.toDouble()) + ", " + mods.eln.sim.fluid.EaUnits.composition(v)
         val wrong = inlet.blockedBy()
         if (wrong != null) info[I18N.tr("State")] = I18N.tr("blocked: it holds %1$, which it can't burn", wrong)
+        else if (choked()) info[I18N.tr("State")] = I18N.tr("choked: too much heavy oil or residue; dilute or break to empty")
         if (v != null && inlet.feedId() >= 0) {
             val q = mods.eln.sim.fluid.FuelQuality.rate(v, inlet.feedId(), mods.eln.sim.fluid.FuelQuality.GENERATOR_LO, mods.eln.sim.fluid.FuelQuality.GENERATOR_HI)
             val perHour = mods.eln.sim.fluid.FuelQuality.engineFoulPerHour(q.coking())
-            info[I18N.tr("Fuel quality")] = String.format("%s; %s; %s", mods.eln.sim.fluid.FuelQuality.describe(q),
+            val visc = mods.eln.sim.fluid.EaUnits.viscosityText(mods.eln.sim.fluid.FuelQuality.layerViscosity(v, inlet.feedId()))
+            // (choked: no fouling clause, it burns none)
+            info[I18N.tr("Fuel quality")] = if (q.choked()) mods.eln.sim.fluid.FuelQuality.describe(q) + "; " + visc
+            else String.format("%s; %s; %s", mods.eln.sim.fluid.FuelQuality.describe(q),
                 if (perHour > 0) String.format(I18N.tr("fouls it ~%.0f%% an hour at full power (coking %.3f, clean under %.2f)"), perHour * 100, q.coking(), mods.eln.sim.fluid.FuelQuality.ENGINE_BALANCE)
-                else I18N.tr("burns clean"), mods.eln.sim.fluid.EaUnits.viscosityText(mods.eln.sim.fluid.FuelQuality.layerViscosity(v, inlet.feedId())))
+                else I18N.tr("burns clean"), visc)
         }
         if (foul > 0.01) info[I18N.tr("Fouling")] = String.format(I18N.tr("%.0f%% fouled: %.0f%% power (clean fuel clears it slowly; right-click with wool to clean)"), foul * 100, (1 - foul) * 100)
         return info
@@ -349,7 +367,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
         val quality = Math.max(0.05, quality())
         val power = Math.max(powerSource.effectiveP / quality, d.nominalPower * FuelGeneratorDescriptor.MinimalLoadFractionOfNominalPower)
         val want = dt * FuelGeneratorDescriptor.EfficiencyFactorVsLoadFactor(power / d.nominalPower) * power / (d.tankEnergyCapacity / TANK_MB)
-        val got = if (id >= 0 && fuel.power() > 0) inlet.take(want) else 0.0
+        val got = if (id >= 0 && fuel.power() > 0 && !fuel.choked()) inlet.take(want) else 0.0   // (choked: it takes none, and stops)
         burntMb += got
         if (got > 0) foul = mods.eln.sim.fluid.FuelQuality.foulEngine(foul, fuel.coking(), power / d.nominalPower, dt * got / want)
         if (got < want * 0.999) {

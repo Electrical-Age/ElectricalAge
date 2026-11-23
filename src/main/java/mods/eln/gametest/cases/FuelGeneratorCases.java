@@ -26,7 +26,10 @@ import java.util.List;
  * mode 5, gasoline with 10 % diesel by mass: 80 % power (diesel, 530 K, is over its 400 K window; the gas turbine's
  * 720 K window would take it), and it burns clean;
  * mode 6, 40 % gasoline, 30 % diesel, 30 % heavy oil (60 % off its window: no power): it won't run; topped up with
- * gasoline (23 % off: 54 % power), a click starts it.
+ * gasoline (23 % off: 54 % power), a click starts it;
+ * mode 7, the choke (Baughn 2026-11-23): running on gasoline, a quarter of residue by mass put in its vessel (coking
+ * index 0.25, over FuelQuality.ENGINE_CHOKE; 50 % power by its window alone) stops it; Jade's State says it is choked
+ * and a click won't start it; diluted with gasoline (1/7 residue, index 0.14: 71 % power) a click starts it.
  */
 public final class FuelGeneratorCases {
     private FuelGeneratorCases() {
@@ -40,6 +43,7 @@ public final class FuelGeneratorCases {
         cases.add(new Quality("fuel_generator_piped", 4));
         cases.add(new Quality("fuel_generator_diesel_derates", 5));
         cases.add(new Quality("fuel_generator_restarts_after_dilution", 6));
+        cases.add(new Quality("fuel_generator_residue_chokes", 7));
     }
 
     static final class Quality implements TestCase {
@@ -52,6 +56,9 @@ public final class FuelGeneratorCases {
         mods.eln.sim.fluid.FluidDevice fx;
         mods.eln.sim.fluid.FluidNode main;
         boolean refused, restarted;
+        /** Mode 7: running on clean gasoline, stopped once choked, a click refused, Jade then. */
+        boolean ranClean, stoppedChoked, refusedChoked;
+        java.util.Map<String, String> jadeChoked = java.util.Map.of();
 
         Quality(String id, int mode) {
             this.id = id;
@@ -102,6 +109,30 @@ public final class FuelGeneratorCases {
                     refused = !gen.running() && gen.fuel.power() == 0;
                     // (4x as much gasoline again: 1.5 of 6.5 parts off its window, 23 %: 54 % power)
                     EaUnits.add(gen.inlet.vessel, reg.id("eln:gasoline"), 4 * k, 293.15, false);
+                    gen.inlet.vessel.update();
+                    Wp10bCases.click(ctx, gen, ItemStack.EMPTY);
+                    restarted = gen.running();
+                });
+                return;
+            }
+            if (mode == 7) {
+                // (600 mB of gasoline, running; then residue of a third of its mass: a quarter of the mix)
+                EaUnits.drainLiquid(v, reg.id("eln:gasoline"), v.liquid(reg.id("eln:gasoline")));
+                double k = 600 * mods.eln.fluid.FluidSpecies.kgPerMb(reg.id("eln:gasoline"), false);
+                EaUnits.add(v, reg.id("eln:gasoline"), k, 293.15, false);
+                v.update();
+                Wp10bCases.click(ctx, gen, ItemStack.EMPTY);
+                ctx.after(20, () -> {
+                    ranClean = gen.running();
+                    EaUnits.add(gen.inlet.vessel, reg.id("eln:residue"), k / 3, 293.15, false);
+                    gen.inlet.vessel.update();
+                });
+                ctx.after(40, () -> {
+                    stoppedChoked = !gen.running() && gen.choked();
+                    jadeChoked = gen.getWaila();
+                    Wp10bCases.click(ctx, gen, ItemStack.EMPTY);
+                    refusedChoked = !gen.running();
+                    EaUnits.add(gen.inlet.vessel, reg.id("eln:gasoline"), k, 293.15, false);
                     gen.inlet.vessel.update();
                     Wp10bCases.click(ctx, gen, ItemStack.EMPTY);
                     restarted = gen.running();
@@ -171,6 +202,19 @@ public final class FuelGeneratorCases {
                 ctx.check(id + ": 60 % off its window: no power, it won't run", refused, what);
                 ctx.check(id + ": topped up with gasoline, a click starts it and it runs at 54 %", restarted && gen.running()
                     && Math.abs(gen.fuel.power() - (1 - 2 * 1.5 / 6.5)) < 0.01, what);
+                return;
+            }
+            if (mode == 7) {
+                String state = jadeChoked.getOrDefault(mods.eln.i18n.I18N.tr("State"), ""), quality = jadeChoked.getOrDefault(mods.eln.i18n.I18N.tr("Fuel quality"), "");
+                String what = String.format("ran clean %b, stopped choked %b, refused %b, restarted %b, now on %b, rating %s, source %.1f W; choked Jade %s; now %s",
+                    ranClean, stoppedChoked, refusedChoked, restarted, gen.running(), gen.fuel, gen.sourceP(), jadeChoked, gen.getWaila());
+                ctx.line(id + ": " + what);
+                ctx.check(id + ": a quarter of residue (index 0.25, over " + FuelQuality.ENGINE_CHOKE + ") chokes it: it stops, a click won't start it",
+                    ranClean && stoppedChoked && refusedChoked && 0.25 >= FuelQuality.ENGINE_CHOKE, what);
+                ctx.check(id + ": Jade's State says it is choked and the fix; its fuel quality says it chokes", state.startsWith("choked: too much heavy oil or residue")
+                    && state.contains("dilute or break to empty") && quality.startsWith("chokes engine"), state + " / " + quality);
+                ctx.check(id + ": diluted with gasoline (index 0.14), a click starts it at 71 %", restarted && gen.running() && !gen.choked()
+                    && Math.abs(gen.fuel.power() - (1 - 2.0 / 7)) < 0.01, what);
                 return;
             }
             if (mode == 4) {

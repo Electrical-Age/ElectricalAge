@@ -92,16 +92,21 @@ window (a species without a boiling point, residue, is too heavy for any window)
 2 % of its power per 1 % outside the window (the fuel burns all the same: the heat goes out of the exhaust). Fuel whose
 coking index is over the device's balance fouls it, up to 90 %, at `FOUL_PER_INDEX` x (index - balance) per 2 h of full
 power; under the balance it clears at the same law; engines foul and clear 4 times slower (`ENGINE_SLOWER`, Baughn
-2026-11-15: time to consider a fix); wool cleans it at once; nothing is damaged. Balances: furnace burner 0.05, engines 0.02 (diesel with over 7 % heavy oil or 1 % residue fouls an engine). The Gas Turbine's window is
+2026-11-15: time to consider a fix); wool cleans it at once; nothing is damaged. Balances: furnace burner 0.05, engines 0.02 (diesel with over 7 % heavy oil or 1 % residue fouls an engine). From
+`ENGINE_CHOKE` (a placeholder, 0.18, to be calibrated from the pot-still tests; Baughn 2026-11-23) the fuel chokes an engine: it
+takes none and gives no power until the fuel in its vessel is diluted (piped full there is no room to: breaking it
+empties it); no damage, nothing saved (the rule reads the
+vessel). Crude (0.216) and diesel with over ~17 % residue choke; heavy oil (0.15) doesn't. The furnace burner never chokes. The Gas Turbine's window is
 330 to 720 K, so gasoline, diesel and heavy oil all give full power, and heavy oil fouls it by ~10 % an hour at full
-power (diesel clears 0.8 % an hour, gasoline 1.5 %). Jade on the turbine shows the rating, whether the fuel fouls, the
-fuel's viscosity (`EaUnits.viscosityText`), and the fouling. Saved as `foul`, `fuelLight`, `fuelHeavy`, `fuelCoking` (absent: clean). The Fuel
+power (diesel clears 0.8 % an hour, gasoline 1.5 %). Jade on the turbine shows the rating, whether the fuel fouls or chokes it, the
+fuel's viscosity (`EaUnits.viscosityText`), and the fouling; a choked turbine's Status says so. Saved as `foul`, `fuelLight`, `fuelHeavy`, `fuelCoking` (absent: clean). The Fuel
 Generator keeps its fuel in a 2000 mB vessel that breathes (a `DeviceInlet` as the turbine's; pipe on its top flange, or
 buckets as before) and burns as much per joule as its old two-bucket tank did; its window is 330 to 400 K (gasoline
-and naphtha), so diesel or residue in its gasoline derate it, and coking fuel fouls it by the engines' law. An old
+and naphtha), so diesel or residue in its gasoline derate it, coking fuel fouls it by the engines' law, and choking fuel stops it (its
+Jade State says "choked"; a start click is refused on the action bar). An old
 save's tank (`tankLevel` x 2000 mB of `tankFluid`) goes into the vessel; an unknown fluid name (1.7.10 saved "lava")
 becomes gasoline, as the old tank burnt every fuel alike. GameTests gas_turbine_off_spec_derates,
-gas_turbine_heavy_oil_fouls, gas_turbine_clean_fuel_clears, fuel_generator_gasoline, fuel_generator_piped, fuel_generator_off_spec_derates, fuel_generator_diesel_derates, fuel_generator_restarts_after_dilution,
+gas_turbine_heavy_oil_fouls, gas_turbine_crude_chokes, fuel_generator_residue_chokes, gas_turbine_clean_fuel_clears, fuel_generator_gasoline, fuel_generator_piped, fuel_generator_off_spec_derates, fuel_generator_diesel_derates, fuel_generator_restarts_after_dilution,
 fuel_generator_clean_fuel_clears, fuel_generator_old_save; unit test FuelQualityTest.
 
 ### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)

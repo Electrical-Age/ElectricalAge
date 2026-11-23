@@ -122,4 +122,21 @@ class FuelQualityTest {
         EaUnits.putViscosity(info, n);
         assertEquals(java.util.List.of("Pressure", "Contents", "Liquid", "Viscosity"), new java.util.ArrayList<>(info.keySet()));
     }
+
+    /**
+     * The choke (Baughn 2026-11-23): today's fuels and a sensible still's never choke an engine; crude and residue-laden
+     * fuel do. ENGINE_CHOKE is a placeholder: these say what it must keep doing when it is calibrated.
+     */
+    @Test
+    void theChoke() {
+        assertTrue(FuelQuality.ENGINE_CHOKE >= 3 * FuelQuality.ENGINE_BALANCE);
+        for (String f : new String[]{"gasoline", "diesel", "heavy_oil"}) assertTrue(!rate(LO, HI, f, 10.0).choked(), f);
+        // a pot still's one-pass diesel, with heavy oil and some residue carried over: fouls, doesn't choke
+        assertTrue(!rate(LO, HI, "diesel", 80.0, "heavy_oil", 15.0, "residue", 5.0).choked());
+        assertTrue(!rate(LO, HI, "diesel", 9.0, "residue", 1.0).choked());
+        // dead crude, and diesel with a fifth residue: choke
+        assertTrue(rate(LO, HI, "heavy_oil", 17.5, "diesel", 12.5, "gasoline", 10.0, "residue", 7.5).choked());
+        assertTrue(rate(LO, HI, "diesel", 8.0, "residue", 2.0).choked());
+        assertTrue(FuelQuality.describe(rate(LO, HI, "diesel", 8.0, "residue", 2.0)).startsWith("chokes engine"));
+    }
 }

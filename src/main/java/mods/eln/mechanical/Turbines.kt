@@ -106,6 +106,7 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
         list.add("Burns gasoline, natural gas or diesel, by any pipe or fluid capability.")
         list.add("Fuel quality: 2% less power per 1% of its fuel too heavy or too light for it (residue).")
         list.add("Heavy oil fouls it (~10% of its power an hour at full power); clean fuel clears it slowly, wool at once.")
+        list.add("Crude or high-residue fuel chokes it: no power until diluted with clean fuel, or broken to empty.")
         list.add(String.format("It can't start itself: a Shaft Motor spins it over %.0f rad/s, then it lights.",
             GasTurbineElement.CUTOFF * GasTurbineElement.RATED_RADS))
         list.add(String.format("Its %.0f C exhaust leaves its back: pipe it to a heat exchanger, or it vents.", GasTurbineElement.EXHAUST_T - 273.15))
