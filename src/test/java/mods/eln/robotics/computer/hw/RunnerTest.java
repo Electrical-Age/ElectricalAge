@@ -53,11 +53,12 @@ class RunnerTest {
         r.tick(true);
         r.awaitIdle();
         assertTrue(r.machine.editor.status() % 2 == 1, "input waiting in the channel");
-        r.hold(() -> {
-            r.dropScreenInput();
-            r.machine.reset(Machine.RESET_POWER);
-        });
-        assertEquals(0, r.machine.editor.status() & 1, "nothing waiting after the reset");
+        assertTrue(r.screenInputWaiting() > 0, "and in the runner");
+        r.hold(() -> r.machine.reset(Machine.RESET_POWER));   // (as the Reset button does)
+        r.tick(true);
+        r.awaitIdle();
+        assertEquals(0, r.screenInputWaiting(), "nothing waiting in the runner after the reset");
+        assertEquals(0, r.machine.editor.status() & 1, "nor in the channel");
         ScreenProbe again = new ScreenProbe();
         until(r, again, again::ready);
         r.toEditor(again.submit("(* 6 7)"));

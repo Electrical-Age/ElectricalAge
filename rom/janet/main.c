@@ -9,6 +9,7 @@ void ea_register(JanetTable *env);
 void ea_register_disk(JanetTable *env);
 void ea_irq(uint32_t cause);
 void ea_trap(uint32_t cause, uint32_t epc, uint32_t tval);
+uint32_t ea_heap_limit(void);
 
 /* Every trap comes here: interrupts go to ea_irq, an exception ends the program (ea_trap says where). mtvec's low two
    bits are its mode, so the handler must be 4-byte aligned: with compressed code it lands on 2 bytes as often as not,
@@ -38,8 +39,7 @@ int main(void) {
        heap, at least 128 KB. */
     {
         extern char _end[];
-        extern uint32_t __ram_top;
-        int32_t heap = (int32_t) (__ram_top - (uint32_t) (uintptr_t) _end) - 256 * 1024;
+        int32_t heap = (int32_t) (ea_heap_limit() - (uint32_t) (uintptr_t) _end);
         int32_t interval = heap / 8 < 128 * 1024 ? 128 * 1024 : heap / 8;
         char buf[48];
         snprintf(buf, sizeof buf, "(gcsetinterval %ld)", (long) interval);

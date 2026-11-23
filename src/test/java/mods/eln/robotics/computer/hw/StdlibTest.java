@@ -68,6 +68,21 @@ class StdlibTest {
         m.editor.give(("(break " + t + ")\n").getBytes(StandardCharsets.UTF_8));
     }
 
+    /** Ed's answer to save seq on window w: its new revision, or null if it said nothing (or "conflict"). */
+    String savedRev(int w, long seq, int ticks) {
+        String want = "(saved " + w + " 4 " + seq + " ";
+        for (int t = 0; t < ticks; t++) {
+            m.tick();
+            m.run(1_000_000);
+            byte[] d = m.editor.take();
+            String text = new String(d, StandardCharsets.UTF_8);
+            screen.feed(d, m.terminal.take());
+            int k = text.indexOf(want);
+            if (k >= 0) return text.substring(k + want.length(), text.indexOf(")", k)).replace("\"", "");
+        }
+        return null;
+    }
+
     void type(String s) {
         mark();
         m.editor.give(screen.submit(s));
@@ -341,17 +356,7 @@ class StdlibTest {
         String rev = (String) ed.msg.get(9);
         // the client replaced line 1 ("two") with two lines
         m.editor.give(("(save 2 4 7 \"" + rev + "\" [[1 1 [\"TWO\" \"2b\"]]])\n").getBytes(StandardCharsets.UTF_8));
-        String newRev = null;
-        for (int t = 0; t < 20 && newRev == null; t++) {
-            byte[] d = m.editor.take();
-            String text = new String(d, StandardCharsets.UTF_8);
-            screen.feed(d, m.terminal.take());
-            int k = text.indexOf("(saved 2 4 7 ");
-            if (k >= 0) newRev = text.substring(k + 13, text.indexOf(")", k));
-            m.tick();
-            m.run(1_000_000);
-        }
-        assertNotNull(newRev, "saved");
+        assertNotNull(savedRev(2, 7, 20), "saved");
         type("(slurp \"a:/t.janet\")");
         tick(10, "@\"one\\nTWO\\n2b\\nthree\"\n> ");
         // a save against the old revision is refused, with the file as it is now

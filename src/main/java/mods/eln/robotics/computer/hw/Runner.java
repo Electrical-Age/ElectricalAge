@@ -41,8 +41,8 @@ public final class Runner implements Runnable {
     private final java.io.ByteArrayOutputStream keys = new java.io.ByteArrayOutputStream();
     private final java.util.concurrent.ConcurrentLinkedQueue<byte[]> displayIn = new java.util.concurrent.ConcurrentLinkedQueue<>();
     private byte[] displayLeft;
-    /** The machine's reset count when displayLeft was cut: after a reset, the rest of that event is dropped. */
-    private int displayResets;
+    /** The machine's reset count at the last input taken: after a reset, what waits for the old program is dropped. */
+    private int inputResets;
     private final Floppy[] disks = new Floppy[2];
     private final boolean[] diskChanged = new boolean[2];
     private long hostTicks, machineTicks;
@@ -61,6 +61,7 @@ public final class Runner implements Runnable {
     public Runner(Machine machine) {
         this.machine = machine;
         machineTicks = hostTicks = machine.ticks();
+        inputResets = machine.resets();
     }
 
     // --- input ---
@@ -90,10 +91,22 @@ public final class Runner implements Runnable {
         this.levels = levels;
     }
 
-    /** The Reset button (the Machine held): screen events sent to the program before it are dropped. */
-    public void dropScreenInput() {
+    /**
+     * The machine was reset (the button, a program's own, a cold boot) since input was last taken: the screen events
+     * and keys sent to the old program are dropped with what Machine.reset emptied (lashtear's halted computer had
+     * three 33 KB saves waiting, and the rest of a cut-off one; the Machine held).
+     */
+    private void dropAfterReset() {
+        if (inputResets == machine.resets()) return;
+        inputResets = machine.resets();
         displayIn.clear();
         displayLeft = null;
+        keys.reset();
+    }
+
+    /** Screen input waiting in the runner for the program (tests). */
+    int screenInputWaiting() {
+        return displayIn.size() + (displayLeft != null ? 1 : 0);
     }
 
     /** Press Break (any thread): taken by the next kick, slice or exchange. */
@@ -193,13 +206,12 @@ public final class Runner implements Runnable {
             breakWanted = false;
             machine.pressBreak();
         }
-        if (displayLeft != null && displayResets != machine.resets()) displayLeft = null;   // (its start went with the reset)
+        dropAfterReset();
         while (true) {
             byte[] b = displayLeft != null ? displayLeft : displayIn.poll();
             if (b == null) return;
             int n = machine.editor.give(b);
             displayLeft = n < b.length ? java.util.Arrays.copyOfRange(b, n, b.length) : null;
-            displayResets = machine.resets();
             if (displayLeft != null) return;
         }
     }
@@ -225,6 +237,7 @@ public final class Runner implements Runnable {
             m.bus.give(packetsIn);
             packetsIn.clear();
         }
+        dropAfterReset();
         give(m.terminal, keys);
         takeScreenInput();
         for (int d = 0; d < 2; d++)

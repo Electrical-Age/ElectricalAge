@@ -245,21 +245,6 @@ class ApplicationsTest extends StdlibTest {
         tick(40, "the modes are");
     }
 
-    /** Ed's answer to save seq on window w: its new revision, or null if it said nothing (or "conflict"). */
-    String savedRev(int w, long seq, int ticks) {
-        String want = "(saved " + w + " 4 " + seq + " ";
-        for (int t = 0; t < ticks; t++) {
-            m.tick();
-            m.run(1_000_000);
-            byte[] d = m.editor.take();
-            String text = new String(d, StandardCharsets.UTF_8);
-            screen.feed(d, m.terminal.take());
-            int k = text.indexOf(want);
-            if (k >= 0) return text.substring(k + want.length(), text.indexOf(")", k)).replace("\"", "");
-        }
-        return null;
-    }
-
     /**
      * lashtear (2026-11-23): saving a file over 31 KB in Ed halted a two-chip computer (Janet ran out of memory), and
      * only a power cycle brought it back. Two chips, the desk, Ed on RAM:, the file typed in pieces to 33 KB: every

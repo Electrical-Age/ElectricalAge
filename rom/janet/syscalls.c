@@ -65,6 +65,11 @@ void *_sbrk(ptrdiff_t incr) {
 
 void _exit(int code);
 
+/* Where the heap must stop: the stack's room below the top of the RAM. */
+uint32_t ea_heap_limit(void) {
+    return __ram_top - STACK_BYTES;
+}
+
 /* The largest block malloc would give now (a probe: taken and given back). */
 size_t ea_largest_block(void) {
     size_t lo = 0, hi = 4u << 20;
@@ -84,6 +89,7 @@ size_t ea_largest_block(void) {
 void ea_out_of_memory(const char *file, int line) {
     printf("%s:%d - janet out of memory (the largest free piece is %lu bytes). Halted: Reset restarts it.\n", file,
            line, (unsigned long) ea_largest_block());
+    fflush(stdout);   /* (what a program printed without a newline goes first, as exit would) */
     _exit(1);
 }
 

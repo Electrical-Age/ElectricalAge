@@ -244,18 +244,18 @@ void ea_irq(uint32_t cause) {
 }
 
 size_t ea_largest_block(void);
+uint32_t ea_heap_limit(void);
 
 JANET_FN(cfun_heap, "(ea/heap)",
-         "The heap in bytes, as [in-use free total largest]: in use by Janet's values (garbage included until a collection), "
+         "The heap in bytes, as [in-use free total largest]: allocated (garbage included until a collection), "
          "free (possibly in pieces), the most it can ever be, and the largest piece free.") {
     janet_fixarity(argc, 0);
     (void) argv;
     extern char _end[];
-    extern uint32_t __ram_top;
     struct mallinfo mi = mallinfo();
     Janet t[4] = {janet_wrap_number((double) mi.uordblks),
-                  janet_wrap_number((double) mi.fordblks + (double) ((__ram_top - 256u * 1024u) - (uint32_t) (uintptr_t) sbrk(0))),
-                  janet_wrap_number((double) ((__ram_top - 256u * 1024u) - (uint32_t) (uintptr_t) _end)),
+                  janet_wrap_number((double) mi.fordblks + (double) (ea_heap_limit() - (uint32_t) (uintptr_t) sbrk(0))),
+                  janet_wrap_number((double) (ea_heap_limit() - (uint32_t) (uintptr_t) _end)),
                   janet_wrap_number((double) ea_largest_block())};
     return janet_wrap_tuple(janet_tuple_n(t, 4));
 }

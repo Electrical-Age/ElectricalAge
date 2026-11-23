@@ -51,12 +51,17 @@ public final class ComputerCases {
         return c.screenText();
     }
 
-    /** A player's line submitted to the REPL (tab 1, line 2), as the screen sends it. */
-    static void submit(TestContext ctx, ComputerElement e, long seq, String text) {
+    /** A screen event from a player, as the screen sends it: (verb tab id ...). */
+    static void event(TestContext ctx, ComputerElement e, Object... parts) {
         e.networkUnserialize(ctx.stream(o -> {
             o.writeByte(ComputerElement.SCREEN_EVENT_ID);
-            o.writeUTF(mods.eln.robotics.computer.screen.Form.print(new mods.eln.robotics.computer.screen.Form.Symbol("submit"), 1L, 2L, seq, text));
+            o.writeUTF(mods.eln.robotics.computer.screen.Form.print(parts));
         }), null);
+    }
+
+    /** A player's line submitted to the REPL (tab 1, line 2), as the screen sends it. */
+    static void submit(TestContext ctx, ComputerElement e, long seq, String text) {
+        event(ctx, e, new mods.eln.robotics.computer.screen.Form.Symbol("submit"), 1L, 2L, seq, text);
     }
 
     static boolean replUp(ComputerElement e) {
@@ -359,12 +364,12 @@ public final class ComputerCases {
     }
 
     /**
-     * lashtear (2026-11-23): saving a big file in Ed on a two-chip computer ran Janet out of memory and the computer
-     * halted; Reset didn't bring it back, only switching it off and on. Here memory is filled until Ed's save of a
-     * 32 KB file runs out, the player goes on clicking, and Reset must boot it to a REPL that answers.
+     * lashtear (2026-11-23): a two-chip computer ran out of memory saving a big file in Ed and halted; the player went
+     * on pressing Ctrl+S, and Reset didn't bring it back, only switching it off and on. Here a program takes memory
+     * until Janet runs out, 33 KB saves are sent while it is halted, and Reset must boot it to a REPL that answers.
      */
     static final class ResetsAfterRunningOutOfMemory extends BootsJanet {
-        int edWin = -1, phase;
+        int phase;
         byte halted = -1;
         String before = "", after = "";
 
@@ -376,13 +381,6 @@ public final class ComputerCases {
         @Override
         public int ticks() {
             return 480;
-        }
-
-        static void event(TestContext ctx, ComputerElement e, Object... parts) {
-            e.networkUnserialize(ctx.stream(o -> {
-                o.writeByte(ComputerElement.SCREEN_EVENT_ID);
-                o.writeUTF(mods.eln.robotics.computer.screen.Form.print(parts));
-            }), null);
         }
 
         @Override
@@ -400,45 +398,32 @@ public final class ComputerCases {
                 tick++;
                 ComputerElement e = at(ctx, p);
                 if (e == null) return;
-                if (phase == 0 && upAt < 0 && replUp(e)) {
-                    upAt = tick;
-                    // (memory taken until a 32 KB save can't fit, whatever the stdlib's size)
-                    submit(ctx, e, 1, "(do (def ballast @[]) (while (> ((ea/heap) 1) 300000) (array/push ballast (buffer/new-filled 20000))) (edit \"RAM:/big.txt\"))");
-                }
-                if (phase == 0 && upAt < 0) return;
-                if (edWin < 0 && tick > upAt + 10)
-                    for (var w : e.screen.scene.windows.entrySet())
-                        if (w.getKey() > 1 && w.getValue().elements.containsKey(4)) edWin = w.getKey();
-                if (edWin > 0 && phase == 0) {
+                if (phase == 0 && replUp(e)) {
                     phase = 1;
-                    String rev = e.screen.scene.windows.get(edWin).elements.get(4).msg.get(9).toString();
-                    for (int k = 1; k <= 3; k++)
-                        event(ctx, e, save, (long) edWin, 4L, (long) k, rev, java.util.List.of(java.util.List.of(0L, 1L, lines)));
-                    upAt = tick;
+                    submit(ctx, e, 1, "(do (def hog @[]) (forever (array/push hog (buffer/new-filled 20000))))");
                 }
-                if (phase == 1 && tick == upAt + 60) {
+                if (phase == 1 && e.status() == ComputerElement.HALTED) {
+                    phase = 2;
                     halted = e.status();
                     before = terminal(e);
-                    for (int k = 4; k <= 6; k++)   // (the player goes on: Ctrl+S again)
-                        event(ctx, e, save, (long) edWin, 4L, (long) k, "0", java.util.List.of(java.util.List.of(0L, 1L, lines)));
+                    for (long k = 1; k <= 3; k++)   // (the player goes on: Ctrl+S, again and again)
+                        event(ctx, e, save, 1L, 2L, k, "0", java.util.List.of(java.util.List.of(0L, 1L, lines)));
                     e.networkUnserialize(ctx.stream(o -> o.writeByte(ComputerElement.RESET_ID)), null);
-                    phase = 2;
-                    upAt = -1;
                 }
-                if (phase == 2 && upAt < 0 && replUp(e) && !terminal(e).contains("ballast")) {
+                if (phase == 2 && replUp(e) && !terminal(e).contains("hog")) {   // (the screen was emptied at the reset)
+                    phase = 3;
                     upAt = tick;
-                    submit(ctx, e, 1, "(* 6 7)");
+                    submit(ctx, e, 2, "(* 6 7)");
                 }
-                if (phase == 2 && upAt > 0 && tick == upAt + 30) after = terminal(e);
+                if (phase == 3 && tick == upAt + 30) after = terminal(e);
             });
         }
 
         @Override
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(watch);
-            ctx.line("computer oom: halted " + halted + " before " + before.replace("\n", "|") + " after " + after.replace("\n", "|"));
-            ctx.check("computer oom: Ed was opened", edWin > 0, before);
-            ctx.check("computer oom: the save ran it out of memory, and it halted saying so",
+            ctx.line("computer oom: before " + before.replace("\n", "|") + " after " + after.replace("\n", "|"));
+            ctx.check("computer oom: halted, saying it ran out of memory",
                 halted == ComputerElement.HALTED && before.contains("janet out of memory"), before);
             ctx.check("computer oom: Reset boots it to a REPL that answers", after.contains("> (* 6 7)\n42\n"), after);
         }

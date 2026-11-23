@@ -929,7 +929,9 @@
   window's own items)."
   [t path]
   (var path path)
-  (defn stamp-of [p] (try (disk/stamp (case (string/ascii-upper (first (string/split ":" p))) "A" :a "B" :b "RAM" :ram)) ([_] nil)))
+  (defn stamp-of [p]
+    (def r (path/resolve p))
+    (try (disk/stamp (case (string/slice r 0 (string/find ":" r)) "A" :a "B" :b "RAM" :ram)) ([_] nil)))
   (var stamp (stamp-of path))   # the drive's stamp when base was read or written: the same, and the file is still base
   (def text (if (disk/exists? path) (string (slurp path)) ""))
   (when (> (length text) 32768) (error (string path " is too big to edit (32 KB at most)")))
