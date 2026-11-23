@@ -17,4 +17,9 @@
 #define JANET_SINGLE_THREADED
 #define JANET_NO_RETURN
 #define JANET_REDUCED_OS
+/* On the computer (not in the host build that makes the boot image): running out of memory says more (syscalls.c) */
+#ifdef EA_ROM
+void ea_out_of_memory(const char *file, int line) __attribute__((noreturn));
+#define JANET_OUT_OF_MEMORY do { ea_out_of_memory(__FILE__, __LINE__); } while (0)
+#endif
 #endif

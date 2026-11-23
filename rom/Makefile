@@ -6,7 +6,7 @@ CROSS ?= riscv32-none-elf-
 CC_X = $(CROSS)gcc
 OBJCOPY = $(CROSS)objcopy
 JANET_SRC ?= $(error set JANET_SRC to a Janet 1.41.2 source tree)
-CFLAGS = -Os -ffunction-sections -fdata-sections -Wall -Wno-unused-function -Ibuild -Ijanet -Ifatfs
+CFLAGS = -DEA_ROM -Os -ffunction-sections -fdata-sections -Wall -Wno-unused-function -Ibuild -Ijanet -Ifatfs
 LDFLAGS = -nostartfiles --specs=nosys.specs -Wl,--gc-sections -Wl,-Map,build/janet.map
 
 all: build/janet.rom build/boot.rom build/elevator.img build/applications.img

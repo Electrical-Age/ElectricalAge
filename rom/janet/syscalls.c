@@ -1,6 +1,8 @@
 /* newlib's system calls over the computer's devices: the console for stdin/stdout/stderr, the RAM for the heap. */
 #include <errno.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/times.h>
@@ -59,6 +61,30 @@ void *_sbrk(ptrdiff_t incr) {
     char *old = brk;
     brk += incr;
     return old;
+}
+
+void _exit(int code);
+
+/* The largest block malloc would give now (a probe: taken and given back). */
+size_t ea_largest_block(void) {
+    size_t lo = 0, hi = 4u << 20;
+    while (hi - lo > 1024) {
+        size_t mid = lo + (hi - lo) / 2;
+        void *volatile p = malloc(mid);   /* (volatile: else the compiler drops a malloc that is only freed) */
+        if (p) {
+            free(p);
+            lo = mid;
+        } else hi = mid;
+    }
+    return lo;
+}
+
+/* Janet ran out of memory (janetconf.h's JANET_OUT_OF_MEMORY): it can't go on (its allocation sites don't expect to
+   come back), so the computer halts, saying why. The heap is often in pieces: the largest says more than the total. */
+void ea_out_of_memory(const char *file, int line) {
+    printf("%s:%d - janet out of memory (the largest free piece is %lu bytes). Halted: Reset restarts it.\n", file,
+           line, (unsigned long) ea_largest_block());
+    _exit(1);
 }
 
 void _exit(int code) {

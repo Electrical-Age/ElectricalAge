@@ -23,7 +23,7 @@ class StdlibTest {
 
     @BeforeEach
     void boot() throws IOException {
-        m = JanetRomTest.machine(3);
+        m = JanetRomTest.machine(2);   // (the fewest RAM chips Janet runs on, as many players build it: lashtear)
         m.bus.setState(200, true, null);
         // (the stdlib compiles at boot: ~83 ticks of 1M instructions with the System disk's tools, ~65 before)
         for (int t = 0; t < 150 && !screen.ready(); t++) {

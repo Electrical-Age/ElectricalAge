@@ -245,6 +245,66 @@ class ApplicationsTest extends StdlibTest {
         tick(40, "the modes are");
     }
 
+    /** Ed's answer to save seq on window w: its new revision, or null if it said nothing (or "conflict"). */
+    String savedRev(int w, long seq, int ticks) {
+        String want = "(saved " + w + " 4 " + seq + " ";
+        for (int t = 0; t < ticks; t++) {
+            m.tick();
+            m.run(1_000_000);
+            byte[] d = m.editor.take();
+            String text = new String(d, StandardCharsets.UTF_8);
+            screen.feed(d, m.terminal.take());
+            int k = text.indexOf(want);
+            if (k >= 0) return text.substring(k + want.length(), text.indexOf(")", k)).replace("\"", "");
+        }
+        return null;
+    }
+
+    /**
+     * lashtear (2026-11-23): saving a file over 31 KB in Ed halted a two-chip computer (Janet ran out of memory), and
+     * only a power cycle brought it back. Two chips, the desk, Ed on RAM:, the file typed in pieces to 33 KB: every
+     * save is written.
+     */
+    @Test
+    void edSavesABigFileOnTwoChips() throws IOException {
+        m.floppy.insert(0, new Floppy(java.util.UUID.randomUUID(), applications(), false));
+        type("(proc/start \"desk\" run-file \"a:/startup.janet\")");
+        tick(40, "\n2\n> ");
+        run(60);
+        String name = "RAM:/Untitled.janet";
+        type("(edit \"" + name + "\")");
+        run(20);
+        int w = screen.scene.windows.keySet().stream().filter(k -> k > 1 && k < 250).max(Integer::compare).orElse(-1);
+        Scene.Element ed = element(screen, w, 4);
+        assertNotNull(ed, "Ed's editor; " + dump(screen));
+        String rev = ed.msg.get(9).toString();
+        // (each save sends what changed: 40 lines of 64 bytes more, as a player types)
+        int have = 0;
+        for (long seq = 1; have < 520; seq++) {
+            List<Object> lines = new ArrayList<>();
+            for (int i = 0; i < 40; i++) lines.add(String.format("%-63d", have + i));
+            m.editor.give(event(new Form.Symbol("save"), (long) w, 4L, seq, rev, List.of(List.of((long) have, have == 0 ? 1L : 0L, lines))));
+            have += 40;
+            rev = savedRev(w, seq, 40);
+            assertFalse(m.halted(), "halted at " + have + " lines: " + screen.console);
+            assertNotNull(rev, "saved at " + have + " lines; " + dump(screen) + " " + screen.console);
+        }
+        type("(length (slurp \"" + name + "\"))");
+        tick(60, String.valueOf(520 * 64 - 1));
+    }
+
+    /** A program that runs out of memory halts the computer, saying so and what is free; Reset brings it back. */
+    @Test
+    void runningOutOfMemoryHaltsSayingWhy() {
+        type("(do (def hog @[]) (forever (array/push hog (buffer/new-filled 20000))))");
+        run(200);
+        assertTrue(m.halted());
+        assertTrue(screen.console.indexOf("janet out of memory (the largest free piece is ") >= 0, screen.console.toString());
+        m.reset(Machine.RESET_POWER);
+        type("(+ 1 2)");
+        tick(200, "3\n> ");
+    }
+
     @Test
     void theRamdiskKeepsFiles() throws IOException {
         type("(do (spit \"RAM:/note.txt\" \"hello\") [(string (slurp \"ram:/note.txt\")) (disk/list :ram) (disk/present? :ram)])");

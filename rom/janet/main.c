@@ -10,8 +10,10 @@ void ea_register_disk(JanetTable *env);
 void ea_irq(uint32_t cause);
 void ea_trap(uint32_t cause, uint32_t epc, uint32_t tval);
 
-/* Every trap comes here: interrupts go to ea_irq, an exception ends the program (ea_trap says where). */
-__attribute__((interrupt("machine"))) void ea_trap_entry(void) {
+/* Every trap comes here: interrupts go to ea_irq, an exception ends the program (ea_trap says where). mtvec's low two
+   bits are its mode, so the handler must be 4-byte aligned: with compressed code it lands on 2 bytes as often as not,
+   and every interrupt then went into the middle of the function before it. */
+__attribute__((interrupt("machine"), aligned(4))) void ea_trap_entry(void) {
     uint32_t cause, epc, tval;
     __asm__ volatile("csrr %0, mcause" : "=r"(cause));
     if ((int32_t) cause < 0) {

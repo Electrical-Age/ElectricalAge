@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <malloc.h>
+#include <unistd.h>
 #include "janet.h"
 #include "../common/devices.h"
 
@@ -241,12 +243,29 @@ void ea_irq(uint32_t cause) {
     }
 }
 
+size_t ea_largest_block(void);
+
+JANET_FN(cfun_heap, "(ea/heap)",
+         "The heap in bytes, as [in-use free total largest]: in use by Janet's values (garbage included until a collection), "
+         "free (possibly in pieces), the most it can ever be, and the largest piece free.") {
+    janet_fixarity(argc, 0);
+    (void) argv;
+    extern char _end[];
+    extern uint32_t __ram_top;
+    struct mallinfo mi = mallinfo();
+    Janet t[4] = {janet_wrap_number((double) mi.uordblks),
+                  janet_wrap_number((double) mi.fordblks + (double) ((__ram_top - 256u * 1024u) - (uint32_t) (uintptr_t) sbrk(0))),
+                  janet_wrap_number((double) ((__ram_top - 256u * 1024u) - (uint32_t) (uintptr_t) _end)),
+                  janet_wrap_number((double) ea_largest_block())};
+    return janet_wrap_tuple(janet_tuple_n(t, 4));
+}
+
 void ea_register(JanetTable *env) {
     JanetRegExt fns[] = {
         JANET_REG("ea/send", cfun_send), JANET_REG("ea/recv", cfun_recv), JANET_REG("ea/level", cfun_level),
         JANET_REG("ea/address", cfun_address), JANET_REG("ea/ticks", cfun_ticks), JANET_REG("ea/input", cfun_input),
         JANET_REG("ea/wait", cfun_wait), JANET_REG("ea/run", cfun_run), JANET_REG("ea/break?", cfun_break),
         JANET_REG("ea/display-input", cfun_editor_input), JANET_REG("ea/display-write", cfun_editor_write),
-        JANET_REG("ea/names", cfun_names), JANET_REG("ea/quote", cfun_quote), JANET_REG("ea/halt", cfun_halt), JANET_REG("ea/reset", cfun_reset), JANET_REG_END};
+        JANET_REG("ea/names", cfun_names), JANET_REG("ea/quote", cfun_quote), JANET_REG("ea/halt", cfun_halt), JANET_REG("ea/reset", cfun_reset), JANET_REG("ea/heap", cfun_heap), JANET_REG_END};
     janet_cfuns_ext(env, "ea", fns);
 }

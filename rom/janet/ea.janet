@@ -929,6 +929,8 @@
   window's own items)."
   [t path]
   (var path path)
+  (defn stamp-of [p] (try (disk/stamp (case (string/ascii-upper (first (string/split ":" p))) "A" :a "B" :b "RAM" :ram)) ([_] nil)))
+  (var stamp (stamp-of path))   # the drive's stamp when base was read or written: the same, and the file is still base
   (def text (if (disk/exists? path) (string (slurp path)) ""))
   (when (> (length text) 32768) (error (string path " is too big to edit (32 KB at most)")))
   (var rev (revision text))
@@ -940,6 +942,7 @@
   (defn heading [colour s] (ui/text t 1 0 0 colour (string/format "%-60s" s)))
   (defn open-text [p txt]
     (set path p)
+    (set stamp (stamp-of p))
     (set base txt)
     (set rev (revision txt))
     (heading :light-gray p)
@@ -969,12 +972,17 @@
        (fn [seq b hunks]
          (try
            (do
-             (def now (if (disk/exists? path) (string (slurp path)) ""))
-             (if (not= b (revision now))
-               (ui/send 'conflict t 4 seq (revision now) now)
+             # (nothing written to the drive since base: the file is base, and isn't read again; a 32 KB file read and
+             # hashed for each save ran a two-chip computer out of memory, lashtear)
+             (def same (and stamp (= stamp (stamp-of path))))
+             (def now (cond same base (disk/exists? path) (string (slurp path)) ""))
+             (def now-rev (if same rev (revision now)))
+             (if (not= b now-rev)
+               (ui/send 'conflict t 4 seq now-rev now)
                (do
                  (def new (apply-hunks now hunks))
                  (spit path new)
+                 (set stamp (stamp-of path))
                  (set base new)
                  (set rev (revision new))
                  (heading :light-gray path)
