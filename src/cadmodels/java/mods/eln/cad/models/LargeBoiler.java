@@ -1,6 +1,9 @@
 package mods.eln.cad.models;
 
+import org.erisia.cad.Frustum;
 import org.erisia.cad.Mesh;
+import org.erisia.cad.Solid;
+import org.erisia.cad.Sweep;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,68 +82,28 @@ public final class LargeBoiler {
     static final double[] CRADLE_X = {12.5, 19.5};
 
     /**
-     * A straight round piece from a to b (px), radius r, 10 sides, no end caps (its ends sit in other pieces): its sides
-     * squared to the plane normal bn, so the pieces of one bent pipe meet ring to ring.
+     * A heat pipe along the points (px): Sweep's copper pieces, run on past each bend by half the radius so their
+     * outsides meet, and a darksteel collar (a short Sweep piece along the bend's bisector) over each bend.
      */
-    static Mesh pipePiece(double[] a, double[] b, double r, double[] bn, String mat) {
-        double[] d = unit(new double[]{b[0] - a[0], b[1] - a[1], b[2] - a[2]});
-        double[] u = unit(cross(d, bn)), w = cross(u, d);
-        int n = 10;
-        double[][] lo = new double[n][], hi = new double[n][];
-        for (int k = 0; k < n; k++) {
-            double t = 2 * Math.PI * (k + 0.5) / n, c = r * Math.cos(t), s = r * Math.sin(t);
-            lo[k] = new double[3];
-            hi[k] = new double[3];
-            for (int i = 0; i < 3; i++) {
-                lo[k][i] = a[i] + c * u[i] + s * w[i];
-                hi[k][i] = b[i] + c * u[i] + s * w[i];
-            }
-        }
-        Mesh m = new Mesh(mat);
-        for (int k = 0; k < n; k++) {
-            int j = (k + 1) % n;
-            double t = 2 * Math.PI * (k + 1) / n;
-            double[] out = {Math.cos(t) * u[0] + Math.sin(t) * w[0], Math.cos(t) * u[1] + Math.sin(t) * w[1], Math.cos(t) * u[2] + Math.sin(t) * w[2]};
-            m.poly(Mc.oriented(new double[][]{lo[k], lo[j], hi[j], hi[k]}, out));
-        }
-        return m;
-    }
-
-    static double[] cross(double[] a, double[] b) {
-        return new double[]{a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
-    }
-
-    static double[] unit(double[] a) {
-        double l = Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
-        return new double[]{a[0] / l, a[1] / l, a[2] / l};
-    }
-
-    /**
-     * A heat pipe along the points (px, a bend in the plane normal to bn at each inner point): copper pieces run on past
-     * each bend by r tan(22.5 deg) so their outsides meet, a darksteel collar over each bend.
-     */
-    static List<Mesh> heatPipe(double[][] pts, double[] bn) {
-        List<Mesh> m = new ArrayList<>();
-        double r = HEAT_R, run = r * Math.tan(Math.PI / 8) + 0.1;
-        for (int i = 0; i + 1 < pts.length; i++) {
-            double[] a = pts[i].clone(), b = pts[i + 1].clone(), d = unit(new double[]{b[0] - a[0], b[1] - a[1], b[2] - a[2]});
+    static List<Solid> heatPipe(double[] pts) {
+        List<Solid> m = new ArrayList<>();
+        for (Frustum f : Sweep.along(pts, HEAT_R, 0.5)) m.add(f.material("copper"));
+        for (int i = 1; 3 * i + 3 < pts.length; i++) {
+            double[] t = new double[3];
+            double l0 = 0, l1 = 0;
             for (int k = 0; k < 3; k++) {
-                if (i > 0) a[k] -= run * d[k];
-                if (i + 2 < pts.length) b[k] += run * d[k];
+                l0 += Math.pow(pts[3 * i + k] - pts[3 * i - 3 + k], 2);
+                l1 += Math.pow(pts[3 * i + 3 + k] - pts[3 * i + k], 2);
             }
-            m.add(pipePiece(a, b, r, bn, "copper"));
-        }
-        for (int i = 1; i + 1 < pts.length; i++) {
-            double[] d0 = unit(new double[]{pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1], pts[i][2] - pts[i - 1][2]});
-            double[] d1 = unit(new double[]{pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1], pts[i + 1][2] - pts[i][2]});
-            double[] t = unit(new double[]{d0[0] + d1[0], d0[1] + d1[1], d0[2] + d1[2]});
-            double[] a = new double[3], b = new double[3];
+            for (int k = 0; k < 3; k++)
+                t[k] = (pts[3 * i + k] - pts[3 * i - 3 + k]) / Math.sqrt(l0) + (pts[3 * i + 3 + k] - pts[3 * i + k]) / Math.sqrt(l1);
+            double lt = Math.sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);
+            double[] c = new double[6];
             for (int k = 0; k < 3; k++) {
-                a[k] = pts[i][k] - 0.5 * t[k];
-                b[k] = pts[i][k] + 0.5 * t[k];
+                c[k] = pts[3 * i + k] - 0.5 * t[k] / lt;
+                c[3 + k] = pts[3 * i + k] + 0.5 * t[k] / lt;
             }
-            Mesh c = pipePiece(a, b, r + 0.3, bn, "darksteel");
-            m.add(c);
+            for (Frustum f : Sweep.along(c, HEAT_R + 0.3, 0)) m.add(f.material("darksteel"));
         }
         return m;
     }
@@ -150,8 +113,8 @@ public final class LargeBoiler {
         return box(x - 0.9, y - 0.9, z - 0.9, x + 0.9, y + 0.9, z + 0.9, "copper");
     }
 
-    static List<Mesh> main() {
-        List<Mesh> m = new ArrayList<>();
+    static List<Solid> main() {
+        List<Solid> m = new ArrayList<>();
         // the skid: a low cast-iron bed under a darksteel deck (the deck's edge stands 0.4 px out; the lower heat plates
         // reach into it)
         m.add(box(1.0, 0, 1.0, 31.0, DECK - 0.8, 31.0, "castiron", "nsew"));
@@ -189,12 +152,11 @@ public final class LargeBoiler {
             m.add(box(u - 2.4, DECK - 0.6, 0.4, u + 2.4, DECK + 1.2, hz + 1.9, "hotcopper"));
             m.add(box(u - 2.4, DECK - 0.6, 32 - hz - 1.9, u + 2.4, DECK + 1.2, 31.6, "hotcopper"));
             m.add(box(hb - 1.9, DECK - 0.6, u - 2.4, 31.6, DECK + 1.2, u + 2.4, "hotcopper"));
-            double[] bx = {1, 0, 0}, bz = {0, 0, 1};
-            m.addAll(heatPipe(new double[][]{{u, DECK, hz}, {u, fy - 1.5, hz}, {u, fy, hz + 1.5}, {u, fy, 7.0}}, bx));
-            m.addAll(heatPipe(new double[][]{{u, DECK, 32 - hz}, {u, fy - 1.5, 32 - hz}, {u, fy, 30.5 - hz}, {u, fy, 25.0}}, bx));
+            m.addAll(heatPipe(new double[]{u, DECK, hz, u, fy - 1.5, hz, u, fy, hz + 1.5, u, fy, 7.0}));
+            m.addAll(heatPipe(new double[]{u, DECK, 32 - hz, u, fy - 1.5, 32 - hz, u, fy, 30.5 - hz, u, fy, 25.0}));
             m.add(prism('z', u, fy, HEAT_R + 0.6, 4.6, 5.4, "darksteel", 10));
             m.add(prism('z', u, fy, HEAT_R + 0.6, 26.6, 27.4, "darksteel", 10));
-            m.addAll(heatPipe(new double[][]{{hb, DECK, u}, {hb, 7.6, u}, {hb - 2.0, 9.6, u}, {26.5, 9.6, u}}, bz));
+            m.addAll(heatPipe(new double[]{hb, DECK, u, hb, 7.6, u, hb - 2.0, 9.6, u, 26.5, 9.6, u}));
             m.add(prism('x', 9.6, u, HEAT_R + 0.6, 27.8, 28.6, "darksteel", 10));
         }
         double crest = CY + R * Math.cos(Math.PI / N);
