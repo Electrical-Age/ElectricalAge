@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
  * transformer next to the generator isolating it motors at ~400 W; with it ideal (one SubSystem) the generator
  * sits at ~16 x the turbine's no-load voltage and the shaft slows down.
  *
- * Topology and values as in game (Wp10bContent subId 8, Wp11Content subId 10, ElnDeviceRegistry cables, Rs =
+ * Topology and values as in game (the 230V heat turbine, Wp10bContent subId 8 until its removal on 2026-11-23; Wp11Content subId 10, ElnDeviceRegistry cables, Rs =
  * P*drop/I^2/2): turbine positiveLoad --0.15 ohm-- inputLoad (Rs 0.005) | MV cable | xfmr1 1:4 (MV/HV windings) |
  * HV cable | xfmr2 1:4 (HV/VHV windings) | VHV cable | generator inputLoad (HV Rs 0.1) --0.1 ohm-- positiveLoad.
  * Adjacent loads are joined by ElectricalConnection (R = Rs1 + Rs2), as NodeBase does.
@@ -42,7 +42,7 @@ public class XfmrDualSourceTest {
         h.sim.addElectricalComponent(new ElectricalConnection(a, b));
     }
 
-    /** TurbineElectricalProcess, verbatim (targetU fixed: the turbine's deltaT is steady). */
+    /** The removed heat turbine's TurbineElectricalProcess, verbatim (targetU fixed: the turbine's deltaT is steady). */
     class Turbine implements IRootSystemPreStepProcess {
         ElectricalLoad pos;
         VoltageSource src;

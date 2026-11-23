@@ -5,7 +5,7 @@
 
 
 What: models for the 50V and 200V Steam Turbine (`mods.eln.oil.SteamGenerator*`), replacing the heat turbine placeholders
-(`turbineb`, `turbinebblue`). Registered in `Wp10aContent.registerSteam` as `steamturbine50v` / `steamturbine200v`.
+(`turbineb`, `turbinebblue`, removed with the heat turbines 2026-11-23). Registered in `Wp10aContent.registerSteam` as `steamturbine50v` / `steamturbine200v`.
 
 Design: a compact turbine-generator set on a skid, shaft running front to back.
 - Front (node front, XN): the generator end. Ribbed steel stator with end bells, cooling fins (2 on 50V, 4 on 200V) and a
@@ -28,7 +28,6 @@ Design: a compact turbine-generator set on a skid, shaft running front to back.
   castiron, copper, brass, paint (tier colour), glass (gauge face), rubber). 1454 / 1614 triangles (main + rotor).
 
 ## Not done
-- Inventory icon: datagen (`ElnModels`, the `v_steam_turbine` line) reuses the heat turbines' flat item textures. That's
-  fine for now; a flat icon rendered from this model would be better.
+- Done: inventory icons of their own (`textures/item/50v_steam_turbine.png`, `200v_steam_turbine.png`; tools/icons).
 - Done: the shaft and coupling are a second part, `rotor` (origin on the shaft axis in `steamturbine*.txt`), which
   `SteamGeneratorRender` turns at 360 degrees/s times the shaft speed (synced, eased): a subtle sign it's running.

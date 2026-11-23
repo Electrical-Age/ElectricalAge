@@ -264,8 +264,8 @@ product only completes the story (it may be under the stack count). No motor cir
 ### 7.3 Sources, generators, turbines, motors
 
 - Generators and turbines: `generator(g, kind)`: 'G' ring at `RING_M` in the tier hue + the input pictogram
-  in the mark slot (`fuel` drop, `gas` flame, `steam`, `water`, `wind`). Electric `50v_turbine`/`200v_turbine`
-  (heat to electricity): kind `steam`. `generator` (shaft-driven): `machine(g, 'G', g.hue)` with no mark.
+  in the mark slot (`fuel` drop, `gas` flame, `steam`, `water`, `wind`). The 48V/230V Steam Turbines
+  (`50v_steam_turbine`/`200v_steam_turbine`): kind `steam`. `generator` (shaft-driven): `machine(g, 'G', g.hue)` with no mark.
 - Electrical motor: `machine(g, 'M', g.hue)`; `advanced_electrical_motor`: mark `advanced` ('+') + 'M' ring at `RING_M`.
 - Electrical source: `source(g, 'V', g.hue)`. Signal source: `source(g, 'V', g.hue)` in the signal tier.
 - Solar panels: `photodiode(g, g.hue)` (the cell in the tier hue); rotating panels and the tracker use

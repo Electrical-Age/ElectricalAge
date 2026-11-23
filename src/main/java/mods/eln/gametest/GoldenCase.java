@@ -107,8 +107,6 @@ final class GoldenCase implements TestCase {
         tier(m, "Signal Switch", "nominalVoltage", "nominalPower", "maximalVoltage", "maximalPower");
         tier(m, "Very High Voltage Switch", "electricalRs", "nominalVoltage", "maximalVoltage");
         tier(m, "Signal Switch with LED", "nominalVoltage", "nominalPower", "maximalVoltage", "maximalPower");
-        tier(m, "50V Turbine", "powerOutPerDeltaU", "nominalU", "electricalRs");
-        tier(m, "200V Turbine", "powerOutPerDeltaU", "nominalU", "electricalRs");
         tier(m, "Low Power Transmitter Antenna", "electricalNominalVoltage", "electricalMaximalVoltage", "electricalNominalInputR");
         tier(m, "Low Power Receiver Antenna", "electricalNominalVoltage", "electricalMaximalVoltage");
         tier(m, "Medium Power Transmitter Antenna", "electricalNominalVoltage", "electricalMaximalVoltage", "electricalNominalInputR");

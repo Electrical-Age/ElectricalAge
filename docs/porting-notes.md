@@ -493,7 +493,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Failure: one per network of connected nodes per tick, the worst; the rest are relieved
   (`sim/Simulator.java`, `sim/process/destruct/FaultNetwork.java`; `BurnChainCases`).
 - Removed: copper tools and armour, EA copper ore and copper ingot (vanilla copper), 50V/200V condensators, the
-  50V/200V heat turbines (replaced by steam turbines with built-in generators), the Modbus TCP server.
+  50V/200V heat turbines (replaced by steam turbines with built-in generators; uncraftable from 2026-10-14, then taken
+  out of the code on 2026-11-23, Baughn: none were left on the server), the Modbus TCP server.
 - New in 26.x: oil (lakes, tar sand, pumps, heaters, boiler, column, flare stack), pipes and the fluid core, steam
   turbines, voxel cables (see voxel-cables.md), cable kits, chisel, item capabilities on machines (`ItemCapabilityCases`).
 - Lamp sockets remove monsters that appear within 9 blocks only while lit (Baughn 2026-10-27; 1.12 did it for every
@@ -661,7 +662,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   | Stone Heat Furnace, Fuel Heat Furnace | Machine Block | Combustion Chamber (4 stone) |
   | 50V / 200V Electric Heater | Cheap Chip (overvoltage), Machine Block (overheat) | its 50V / 200V Copper Heating Corp |
   | Large Rheostat | Machine Block | Power Resistor |
-  | Other machines that overheat (thermal dissipators, smelter, boiler, column base, compact steam turbine, heat turbines) | Machine Block | Copper Thermal Cable |
+  | Other machines that overheat (thermal dissipators, smelter, boiler, column base, compact steam turbine) | Machine Block | Copper Thermal Cable |
   | Machines on overvoltage (macerator, compressor, magnetizer, plate machine, exporter, pumps, ...) | Cheap Chip | unchanged |
   | Electronics, transformers, capacitors, shaft machines, cables, batteries, HV gear | by kind | unchanged |
 - The FE exporter is a transparent node: it burns out in place and can be repaired instead of vanishing; old
@@ -1069,3 +1070,9 @@ on 1.7.10) onto 26.x.
   `validLOS` was a stub that always said yes. `GridElement.lineOfSight` now walks the straight line between each pair
   of cable points and refuses a span when a block that collides is in the way (the two poles and their ghosts don't
   count; the sag isn't checked; unloaded chunks count as clear). Spans strung before stay. `wp11_pole_span_needs_line_of_sight`.
+- **48V/230V heat turbines removed from the code** (Baughn 2026-11-23: uncraftable since 2026-10-14, none exist on the
+  server). Gone: `transparentnode/turbine`, its models (`turbineb`, `turbinebblue`), sounds, icons and the
+  `heatTurbinePowerFactor` static. Their ids `eln:transparent_node@257` / `@264` (group 4, sub-ids 1 and 8) and registry
+  names `50v_turbine` / `200v_turbine` stay in `eln-ids.json` and are never reused. A saved turbine node becomes a kept
+  orphan (persistence.md); a leftover block or item stack of them is dropped by vanilla as an unknown registry entry.
+  GameTests `wp10b removed heat turbine 50v_turbine` / `200v_turbine` (replace `wp10b turbine`).

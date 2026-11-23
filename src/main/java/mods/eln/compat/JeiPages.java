@@ -249,7 +249,7 @@ public final class JeiPages {
             if (d != null && d.parentItem != null) h.add(d.parentItem);
         }
         for (String p : new String[]{"lead_fuse_for_medium_voltage_cables", "lead_fuse_for_high_voltage_cables", "lead_fuse_for_very_high_voltage_cables",
-            "50v_turbine", "200v_turbine", "ferrite_ingot", "cinnabar_ore", "cinnabar_dust", "mercury",
+            "ferrite_ingot", "cinnabar_ore", "cinnabar_dust", "mercury",
             // the old six-node power cables: nothing makes or takes them, cable is laid from kits (AdventurAgent, the
             // handbook play-through: "Low Voltage Cable" was a dead end in JEI)
             "low_voltage_cable", "medium_voltage_cable", "high_voltage_cable", "very_high_voltage_cable"}) {

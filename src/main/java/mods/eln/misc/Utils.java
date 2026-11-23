@@ -909,7 +909,7 @@ public class Utils {
         }
     }
 
-    /** Does the device's name already say its voltage ("48V Turbine")? Then a "Voltage" tooltip line repeats it (Baughn:
+    /** Does the device's name already say its voltage ("48V Steam Turbine")? Then a "Voltage" tooltip line repeats it (Baughn:
      *  pointless). */
     public static boolean nameShowsVoltage(String name, double u) {
         return name != null && java.util.regex.Pattern.compile("(^|\\D)" + Math.round(u) + "V\\b").matcher(name).find();

@@ -59,3 +59,7 @@ fuses for the other tiers are no longer made (old ones still work).
 
 Batteries (Baughn 2026-11-22, `GoldenCase` changed list): `electricalQ` of the rechargeable batteries is the charge that
 holds their rated energy on the lead-acid curve, and `IMax` (never applied in the port) is gone.
+
+The 50V/200V Turbines (heat turbines, `transparent_node@257`, `@264`) are removed from the mod (Baughn 2026-11-23; their
+recipes were already in `GoldenRecipesCase.REMOVED` since 2026-10-14): `golden_descriptors` compares only registered
+descriptors, so their `inventory.json` rows go unchecked, and their `tier(...)` rows in `GoldenCase.changed()` are gone.

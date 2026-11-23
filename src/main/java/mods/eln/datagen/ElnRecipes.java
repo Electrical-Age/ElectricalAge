@@ -737,8 +737,8 @@ public final class ElnRecipes extends ElnRecipesBase {
     }
 
     public static void recipeTurbine() {
-        // 26.x (Baughn): the 50V/200V heat turbines are replaced by the small steam turbines (boiler + 50V/200V Steam
-        // Turbine); placed ones keep working, but they're no longer made
+        // 26.x (Baughn): the 48V/230V heat turbines gave way to the small steam turbines (boiler + 48V/230V Steam
+        // Turbine), and are removed (Baughn 2026-11-23)
         addRecipe(findItemStack("Generator"),
             "mmm",
             "ama",

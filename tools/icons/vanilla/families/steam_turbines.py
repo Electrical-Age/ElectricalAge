@@ -14,7 +14,7 @@ Shared visual system
 * The two Steam Turbines are seen side-on from their z+ flank (shaft along the picture, generator end left):
   a steel generator with dark cooling fins and a broad tier band, the copper coupling, the dark cast-iron scroll
   casing (taller than the generator) with its riser up to the steel top flange, all on the dark skid. This is
-  what tells them from the plain 50V/200V heat turbines (whole stepped housing in the tier colour): here the
+  what told them from the removed 48V/230V heat turbines (whole stepped housing in the tier colour): here the
   tier is only the generator band, the riser collar and the terminal stripe, the rest is iron and steel.
   The 230V twin is the bigger machine (generator 9 px, casing 11 px, three fins against two).
 * The Compact Steam Turbine is seen from its front end (x = 0), in cabinet oblique: two masses on one skid, the

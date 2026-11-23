@@ -148,8 +148,6 @@ transformator/transformatorcase.obj
 transporter/transporter.obj
 treeresincolector/treeresincolector.obj
 turbine50v/turbine50v.obj
-turbineb/turbineb.obj
-turbinebblue/turbinebblue.obj
 turbinesteam/flywheel.obj
 turbinesteam/gasturbine.obj
 turbinesteam/generator.obj

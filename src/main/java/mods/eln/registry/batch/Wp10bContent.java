@@ -20,7 +20,6 @@ import mods.eln.transparentnode.teleporter.TeleporterDescriptor;
 import mods.eln.transparentnode.teleporter.TeleporterElement;
 import mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveDescriptor;
 import mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor;
-import mods.eln.transparentnode.turbine.TurbineDescriptor;
 import mods.eln.transparentnode.turret.TurretDescriptor;
 import mods.eln.transparentnode.waterturbine.WaterTurbineDescriptor;
 import mods.eln.transparentnode.windturbine.WindTurbineDescriptor;
@@ -30,7 +29,7 @@ import static mods.eln.i18n.I18N.*;
 import static mods.eln.registry.ElnDeviceRegistry.*;
 
 /**
- * Device batch Wp10b (1.12 port): transparent-node generators and thermal: solar, wind, water, turbine, heat furnace, fuel generators, dissipators, large rheostat, antennas, teleporter, turret.
+ * Device batch Wp10b (1.12 port): transparent-node generators and thermal: solar, wind, water, heat furnace, fuel generators, dissipators, large rheostat, antennas, teleporter, turret.
  * Called from ElnContentImpl (one line), after the core slice, in every lifecycle phase.
  * Sources: m1-exclude-wp10b.txt (delete lines to build them). Not yet ported registrations:
  * registry/pending/Wp10bPending.java (excluded). To port a device: move its register method (and the fields it
@@ -41,7 +40,8 @@ public class Wp10bContent implements ElnContent {
     @Override
     public void preInit() {
         registerHeatFurnace(3);
-        registerTurbineElectrical(4); // the two TurbineDescriptor sub-UIDs
+        // id 4 sub-UIDs 1 and 8 were the 48V/230V heat turbines, removed (Baughn 2026-11-23): never reuse them, an old
+        // save's turbine (eln:transparent_node@257, @264) stays a kept orphan (docs/persistence.md)
         registerElectricalAntenna(7);
         // registerSolarPanel(48): 26.x port, registered with the core in ElnDeviceRegistry.registerBatch1 (P1 multiblock check)
         registerWindTurbine(49);
@@ -122,44 +122,6 @@ public class Wp10bContent implements ElnContent {
             FuelHeatFurnaceDescriptor desc = new FuelHeatFurnaceDescriptor(name,
                 obj.getObj("FuelHeater"), new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2));
             desc.repairPart = "Combustion Chamber";   // (its firebox)
-            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-        }
-
-    }
-
-    public static void registerTurbineElectrical(int id) {
-        int subId, completId;
-        String name;
-
-        FunctionTable TtoU = new FunctionTable(new double[]{0, 0.1, 0.85,
-            1.0, 1.1, 1.15, 1.18, 1.19, 1.25}, 8.0 / 5.0);
-        FunctionTable PoutToPin = new FunctionTable(new double[]{0.0, 0.2,
-            0.4, 0.6, 0.8, 1.0, 1.3, 1.8, 2.7}, 8.0 / 5.0);
-
-        {
-            subId = 1;
-            name = TR_NAME(Type.NONE, "48V Turbine");
-            double RsFactor = 0.1;
-            double nominalU = LVU;
-            double nominalP = 300 * heatTurbinePowerFactor;
-            double nominalDeltaT = 250;
-            TurbineDescriptor desc = new TurbineDescriptor(name, "turbineb", lowVoltageCableDescriptor.render,
-                TtoU.duplicate(nominalDeltaT, nominalU), PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
-                nominalU, nominalP, nominalP / 40, lowVoltageCableDescriptor.electricalRs * RsFactor, 25.0,
-                nominalDeltaT / 40, nominalP / (nominalU / 25), "eln:heat_turbine_50v");
-            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-        }
-        {
-            subId = 8;
-            name = TR_NAME(Type.NONE, "230V Turbine");
-            double RsFactor = 0.10;
-            double nominalU = MVU;
-            double nominalP = 500 * heatTurbinePowerFactor;
-            double nominalDeltaT = 350;
-            TurbineDescriptor desc = new TurbineDescriptor(name, "turbinebblue", meduimVoltageCableDescriptor.render,
-                TtoU.duplicate(nominalDeltaT, nominalU), PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
-                nominalU, nominalP, nominalP / 40, meduimVoltageCableDescriptor.electricalRs * RsFactor, 50.0,
-                nominalDeltaT / 40, nominalP / (nominalU / 25), "eln:heat_turbine_200v");
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
 

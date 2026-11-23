@@ -6,7 +6,7 @@ The family's shared visual system (STYLE.md sections 6, 7.3 and 5.4):
 - What drives the machine is the kit input pictogram in the mark slot (top right), with the ring
   moved down-left to RING_M (kit generator()):
       fuel drop   50v/200v_fuel_generator   (tier siblings: LV / MV, colour only)
-      steam       50v/200v_turbine          (heat-difference turbines, tier siblings: LV / MV)
+      steam       50v/200v_steam_turbine    (tier siblings: LV / MV; drawn by steam_turbines.steam_generator)
       steam       steam_turbine             (untiered: all INK)
       flame       gas_turbine               (untiered: all INK)
       water       water_turbine             (LV)

@@ -35,24 +35,6 @@
             }
         ]
     },
-    "heat_turbine_200v": {
-        "category": "block",
-        "sounds": [
-            {
-                "name": "eln:heat_turbine_200v",
-                "stream": false
-            }
-        ]
-    },
-    "heat_turbine_50v": {
-        "category": "block",
-        "sounds": [
-            {
-                "name": "eln:heat_turbine_50v",
-                "stream": false
-            }
-        ]
-    },
     "autominer": {
         "category": "block",
         "sounds": [

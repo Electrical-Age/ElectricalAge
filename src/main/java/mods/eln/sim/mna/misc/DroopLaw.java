@@ -3,7 +3,7 @@ package mods.eln.sim.mna.misc;
 import mods.eln.sim.mna.SubSystem;
 
 /**
- * Terminal voltage of a machine (shaft generator, heat turbine) modelled as a source to ground whose delivered power
+ * Terminal voltage of a machine (shaft generator; the removed heat turbines did the same) modelled as a source to ground whose delivered power
  * droops linearly with voltage: P = k * (E - U), E = no-load (EMF) voltage, k = W per V of droop. The source faces
  * the Thevenin equivalent th of the rest of its SubSystem, so P = U * (U - th.U) / th.R; equating gives
  * U^2 / R + (k - th.U / R) U - k E = 0, of which the positive root is taken.

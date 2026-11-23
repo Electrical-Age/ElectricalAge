@@ -131,7 +131,7 @@ public class Wp10aContent implements ElnContent {
         heater200.repairPart = "230V Copper Heating Corp";
         transparentNodeItem.addDescriptor(4 + (id << 6), heater200);
         transparentNodeItem.addDescriptor(8 + (id << 6), new mods.eln.oil.BoilerDescriptor(TR_NAME(Type.NONE, "Boiler"), "boiler"));
-        // Baughn: small steam turbines with the generator built in; they replace the heat turbines (now uncraftable)
+        // Baughn: small steam turbines with the generator built in; they replaced the heat turbines (removed 2026-11-23)
         transparentNodeItem.addDescriptor(12 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "48V Steam Turbine"),
             LVU, 1000, lowVoltageCableDescriptor, "steamturbine50v"));
         transparentNodeItem.addDescriptor(16 + (id << 6), new mods.eln.oil.SteamGeneratorDescriptor(TR_NAME(Type.NONE, "230V Steam Turbine"),

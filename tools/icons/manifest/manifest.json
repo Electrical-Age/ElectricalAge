@@ -396,28 +396,6 @@
   "redraw": true
  },
  {
-  "item_id": "200v_turbine",
-  "display_name": "200V Turbine",
-  "family": "generator",
-  "placeable": true,
-  "node_kind": "transparent_node",
-  "tier": "mv",
-  "vanilla_size": 16,
-  "schematic_scope": true,
-  "tier_cue": "band",
-  "model": "turbinebblue/turbinebblue.obj",
-  "parts": [
-   "main"
-  ],
-  "model_texture_notes": "turbinebblue = blue housing (200V); turbineb is the green 50V twin.",
-  "appearance": "A heptagonal-section blue turbine housing lying on its side, stepped/ribbed and tapering from a wide intake end to a narrower end, resting on grey square feet; two small square grey connection blocks at the bottom of the ends, framed in blue (one end) and red (other end) for the cold/hot thermal ports.",
-  "function": "Heat turbine: converts a thermal temperature difference into 200V electrical power; schematic: generator symbol with a turbine/heat mark.",
-  "current_texture": "eln:blocks/200vturbine",
-  "shares_texture_with": [],
-  "notes": "",
-  "redraw": true
- },
- {
   "item_id": "25a_diode",
   "display_name": "25A Diode",
   "family": "power_passive",
@@ -879,28 +857,6 @@
   "current_texture": "eln:items/50vtungstenheatingcorp",
   "shares_texture_with": [],
   "notes": "Only placed in furnace/heater slots, never in the world.",
-  "redraw": true
- },
- {
-  "item_id": "50v_turbine",
-  "display_name": "50V Turbine",
-  "family": "generator",
-  "placeable": true,
-  "node_kind": "transparent_node",
-  "tier": "lv",
-  "vanilla_size": 16,
-  "schematic_scope": true,
-  "tier_cue": "band",
-  "model": "turbineb/turbineb.obj",
-  "parts": [
-   "main"
-  ],
-  "model_texture_notes": "turbineb = sea-green housing (50V); turbinebblue is the blue 200V twin. turbine50v/ is staged but NOT used by the code.",
-  "appearance": "A heptagonal-section sea-green turbine housing lying on its side, stepped/ribbed and tapering from a wide intake end to a narrower end, resting on grey square feet; two small square grey connection blocks at the bottom of the ends, framed in blue (one end) and red (other end) for the cold/hot thermal ports.",
-  "function": "Heat turbine: converts a thermal temperature difference into 50V electrical power; schematic: generator symbol with a turbine/heat mark.",
-  "current_texture": "eln:blocks/50vturbine",
-  "shares_texture_with": [],
-  "notes": "",
   "redraw": true
  },
  {
@@ -5852,7 +5808,7 @@
   ],
   "model_texture_notes": "",
   "appearance": "A white base plate with leads and a tan/ochre ribbed cylindrical resistor body lying across it.",
-  "function": "A resistor with a negative temperature coefficient (ResistorDescriptor, -0.01/K); symbol: a resistor rectangle with a diagonal hockey-stick line and \"-t\u00b0\" (NTC thermistor).",
+  "function": "A resistor with a negative temperature coefficient (ResistorDescriptor, -0.01/K); symbol: a resistor rectangle with a diagonal hockey-stick line and \"-t°\" (NTC thermistor).",
   "current_texture": "eln:blocks/thermistor",
   "shares_texture_with": [],
   "notes": "Draws exactly the same parts as power_resistor (only the thermal coefficient differs), so the in-world model cannot tell them apart. The part name \"ResistorBaseExtention\" is misspelled in the OBJ. The code fetches \"CapacitorCables\" as the lead wires. VoltageLevelColor.Neutral, so tier none. Registered in both ElnDeviceRegistry.registerResistors and Wp9aContent with the same id 6182. Wave-1 finding: same rectangular ResistorCore as power_resistor, not ribbed.",
@@ -6754,7 +6710,7 @@
   "function": "",
   "current_texture": "",
   "shares_texture_with": [],
-  "notes": "added 2026-11-23 for todo #584 (own icon); schematic: none yet (steam mark + G ring collides with 50v/200v_turbine)",
+  "notes": "added 2026-11-23 for todo #584 (own icon); schematic: none yet",
   "redraw": true,
   "node_kind": "transparent_node",
   "model_texture_notes": "",
@@ -6774,7 +6730,7 @@
   "function": "",
   "current_texture": "",
   "shares_texture_with": [],
-  "notes": "added 2026-11-23 for todo #584 (own icon); schematic: none yet (steam mark + G ring collides with 50v/200v_turbine)",
+  "notes": "added 2026-11-23 for todo #584 (own icon); schematic: none yet",
   "redraw": true,
   "node_kind": "transparent_node",
   "model_texture_notes": "",

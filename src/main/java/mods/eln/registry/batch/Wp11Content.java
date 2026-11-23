@@ -73,7 +73,7 @@ public class Wp11Content implements ElnContent {
     }
 
 
-    /** Mechanical sub-UIDs of id 4 (the electrical turbines of id 4 are wp10b's registerTurbineElectrical). */
+    /** Mechanical sub-UIDs of id 4 (1 and 8, the removed heat turbines, are never reused: Baughn 2026-11-23). */
     public static void registerTurbine(int id) {
         int subId;
 

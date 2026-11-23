@@ -1,11 +1,11 @@
-"""Generators family (vanilla, 16 px): fuel generators, heat turbines, shaft machines, the
+"""Generators family (vanilla, 16 px): fuel generators, shaft machines, the
 water and wind turbines, and the creative electrical source.
 
 Shared visual system
 --------------------
 * Full-block machines (fuel generators) are cabinet-oblique blocks, front 10x10 + depth 4,
   their body in the tier ramp (cue 'body'), like the macerator.
-* Round bodies lying on their side (heat turbines, gas turbine, shaft generator) are seen
+* Round bodies lying on their side (gas turbine, shaft generator) are seen
   side-on, axis along x, drawn by ``revolve()`` from a per-column diameter profile: every
   column is shaded with the kit's CYL_BANDS table, so they share the light and banding of
   ``cylinder()`` while they taper or step.  The three turbinesteam machines share the COWL
@@ -168,34 +168,6 @@ def fuel_generator(tier, disp=1):
     cv.set(x0 + 6, y0 + 4, WHITE)                     # switch: lit toggle over its slot
     cv.set(x0 + 6, y0 + 5, CAV[1])
     cv.hline(x0 + 2, x0 + 6, y0 + 8, B[2])            # vent line under the panel
-    return cv
-
-
-# ---------------------------------------------------------------------------- heat turbine
-def heat_turbine(tier):
-    """turbineb / turbinebblue: a heptagonal housing lying on its side, stepped in ribs and
-    tapering from the wide intake (right) to the narrow end (left), on grey feet; the grey
-    thermal port blocks sit under both ends.  The housing is tier-coloured in-world, so the
-    whole housing is the tier ramp (MATCH; the manifest says cue 'band', reported)."""
-    B = tier_ramp(tier)
-    cv = Canvas(16)
-    # feet / port blocks first (the housing sits on them)
-    box(cv, 1, 11, 3, 3, 1, STEEL, bevel=False)
-    box(cv, 10, 11, 3, 3, 1, STEEL, bevel=False)
-    # stepped housing, centre row 6.5: ribs of growing diameter, narrow end left
-    diams = [6, 6, 8, 8, 8, 10, 10, 10, 10, 10, 10, 10, 10]
-    reg = revolve(cv, 1, 13, diams, B)
-    # rib seams: a shaded column at each step and one inside the wide section
-    for sx in (3, 6, 9):
-        top = (13 - diams[sx - 1] + 1) // 2
-        for yy in range(top + 1, top + diams[sx - 1] - 1):
-            c = cv.get(sx, yy)
-            cv.set(sx, yy, B[2] if c in (B[4], B[5], B[3]) else B[1])
-    # the thermal ports: a dark opening in each port block's front face.  The model frames
-    # them blue (cold) and red (hot); those hues are left out because the tier is the only
-    # hue on the device (STYLE section 7) and MARK_BLUE beside the MV body read as MV.
-    cv.set(2, 12, CAV[1])
-    cv.set(11, 12, CAV[1])
     return cv
 
 

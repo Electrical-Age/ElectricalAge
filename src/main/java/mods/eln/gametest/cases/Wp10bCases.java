@@ -24,8 +24,6 @@ import mods.eln.transparentnode.solarpanel.SolarPanelElement;
 import mods.eln.transparentnode.teleporter.TeleporterElement;
 import mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveElement;
 import mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveElement;
-import mods.eln.transparentnode.turbine.TurbineDescriptor;
-import mods.eln.transparentnode.turbine.TurbineElement;
 import mods.eln.transparentnode.turret.TurretElement;
 import mods.eln.transparentnode.waterturbine.WaterTurbineElement;
 import mods.eln.transparentnode.windturbine.WindTurbineElement;
@@ -70,7 +68,6 @@ public final class Wp10bCases {
     static final int GROUND = 0 + (2 << 6);
     static final int HEAT_FURNACE = 0 + (3 << 6);
     static final int FUEL_HEAT_FURNACE = 1 + (3 << 6);
-    static final int TURBINE_50V = 1 + (4 << 6);
     static final int ANTENNA_TX_LOW = 0 + (7 << 6);
     static final int ANTENNA_RX_LOW = 1 + (7 << 6);
     static final int SOLAR_SMALL = 1 + (48 << 6);
@@ -87,7 +84,8 @@ public final class Wp10bCases {
         cases.add(new DissipatorCase());
         cases.add(new FurnaceFlue());
         cases.add(new LargeRheostatCase());
-        cases.add(new TurbineCase());
+        cases.add(new RemovedHeatTurbine(1 + (4 << 6), "50v_turbine"));   // (eln-ids: transparent_node@257)
+        cases.add(new RemovedHeatTurbine(8 + (4 << 6), "200v_turbine"));  // (@264)
         cases.add(new FuelGeneratorCase());
         cases.add(new SolarCase());
         cases.add(new WindWaterCase());
@@ -262,32 +260,73 @@ public final class Wp10bCases {
     }
 
     /**
-     * 50V Turbine, warm side set to 150 K above the cool side, nothing connected (open circuit): the source voltage is
-     * the descriptor's TtoU(dT) (table scaled to nominal dT 250 K / LVU: dT 150 K -> LVU), evaluated at the measured
-     * dT; no current -> no heat drawn.
+     * The 48V/230V heat turbines are removed (Baughn 2026-11-23): an old save's turbine (eid 257 or 264) loads as a kept
+     * orphan (no node, its tag written back unchanged by the next save), no device or item takes its id or registry name,
+     * and the orphan is dropped at the end so it does not outlive the case.
      */
-    static final class TurbineCase implements TestCase {
-        TurbineElement turbine;
+    static final class RemovedHeatTurbine implements TestCase {
+        final int eid;
+        final String registryName;
+        BlockPos pos;
+        int dim;
+        net.minecraft.nbt.CompoundTag old;
+
+        RemovedHeatTurbine(int eid, String registryName) {
+            this.eid = eid;
+            this.registryName = registryName;
+        }
 
         public String name() {
-            return "wp10b turbine";
+            return "wp10b removed heat turbine " + registryName;
         }
 
         public int width() {
-            return 4;
+            return 3;
+        }
+
+        public int ticks() {
+            return 1;
         }
 
         public void build(TestContext ctx) {
-            turbine = (TurbineElement) ctx.placeTransparent(TURBINE_50V, ctx.at(2, 1, 1));
-            turbine.warmLoad.Tc = 150;
-            turbine.coolLoad.Tc = 0;
+            pos = ctx.at(1, 1, 1);
+            dim = mods.eln.misc.Dimensions.id(ctx.world());
+            net.minecraft.nbt.CompoundTag node = new net.minecraft.nbt.CompoundTag();
+            node.putInt("cx", pos.getX());
+            node.putInt("cy", pos.getY());
+            node.putInt("cz", pos.getZ());
+            node.putInt("cd", dim);
+            node.putByte("NBOpaque", (byte) 0);
+            node.putByte("NBWrap", (byte) 0);
+            net.minecraft.nbt.CompoundTag element = new net.minecraft.nbt.CompoundTag();
+            element.putByte("others", (byte) Direction.XN.getInt());
+            element.putDouble("warmLoadTc", 150);
+            old = new net.minecraft.nbt.CompoundTag();
+            old.putString("tag", "t");
+            old.put("node", node);
+            old.putShort("eid", (short) eid);
+            old.put("element", element);
+            net.minecraft.nbt.CompoundTag file = new net.minecraft.nbt.CompoundTag();
+            file.put("n0", old.copy());
+            NodeManager.instance.loadFromNbt(file, dim);
         }
 
         public void measure(TestContext ctx) {
-            TurbineDescriptor d = (TurbineDescriptor) turbine.getDescriptor();
-            double dT = turbine.warmLoad.Tc - turbine.coolLoad.Tc;
-            ctx.checkValue("wp10b turbine table TtoU(150 K) [V] (= nominal LVU)", d.TtoU.getValue(150), Eln.LVU);
-            ctx.checkValue(f("wp10b turbine open-circuit voltage [V] (TtoU(dT = %.2f K))", dT), turbine.positiveLoad.getU(), d.TtoU.getValue(dT));
+            mods.eln.misc.Coordonate at = new mods.eln.misc.Coordonate(pos, ctx.world());
+            ctx.check("removed heat turbine: no device registered under its id", !Eln.transparentNodeItem.all().containsKey(eid),
+                String.valueOf(Eln.transparentNodeItem.all().get(eid)));
+            ctx.check("removed heat turbine: no item or block named " + registryName,
+                !net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(net.minecraft.resources.Identifier.parse("eln:" + registryName))
+                    && !net.minecraft.core.registries.BuiltInRegistries.BLOCK.containsKey(net.minecraft.resources.Identifier.parse("eln:" + registryName)), registryName);
+            ctx.check("removed heat turbine: no node built from the old save", NodeManager.instance.getNodeFromCoordonate(at) == null,
+                String.valueOf(NodeManager.instance.getNodeFromCoordonate(at)));
+            ctx.check("removed heat turbine: kept as an orphan", NodeManager.instance.hasOrphanAt(at), at.toString());
+            net.minecraft.nbt.CompoundTag saved = new net.minecraft.nbt.CompoundTag();
+            NodeManager.instance.saveToNbt(saved, dim);
+            boolean kept = false;
+            for (String k : saved.keySet()) if (old.equals(saved.get(k))) kept = true;
+            ctx.check("removed heat turbine: the next save writes its tag back unchanged", kept, old.toString());
+            ctx.check("removed heat turbine: orphan dropped after the case", NodeManager.instance.dropOrphans(at, "test done") == 1, at.toString());
         }
     }
 

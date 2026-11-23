@@ -102,12 +102,6 @@
   "model_kind": "flat"
  },
  {
-  "item_id": "200v_turbine",
-  "current_texture": "eln:blocks/200vturbine",
-  "current_size": 32,
-  "model_kind": "flat+3d"
- },
- {
   "item_id": "25a_diode",
   "current_texture": "eln:blocks/25adiode",
   "current_size": 32,
@@ -226,12 +220,6 @@
   "current_texture": "eln:items/50vtungstenheatingcorp",
   "current_size": 32,
   "model_kind": "flat"
- },
- {
-  "item_id": "50v_turbine",
-  "current_texture": "eln:blocks/50vturbine",
-  "current_size": 32,
-  "model_kind": "flat+3d"
  },
  {
   "item_id": "800v_defence_turret",

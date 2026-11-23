@@ -21,8 +21,6 @@ public class Eln {
     /** Wireless signal transmitter range (1.12 config wireless.txRange, default 32). */
     public static int wirelessTxRange = 32;
 
-    /** 1.12 config balancing.heatTurbinePowerFactor (default 1). */
-    public static double heatTurbinePowerFactor = 1;
     public static double windTurbinePowerFactor = 1;
     public static double waterTurbinePowerFactor = 1;
     public static double fuelGeneratorPowerFactor = 1;

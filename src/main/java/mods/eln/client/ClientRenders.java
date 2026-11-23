@@ -105,7 +105,6 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveDescriptor.class, mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.transformer.TransformerDescriptor.class, mods.eln.transparentnode.transformer.TransformerRender::new);
-        ElnRenders.transparent(mods.eln.transparentnode.turbine.TurbineDescriptor.class, mods.eln.transparentnode.turbine.TurbineRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.turret.TurretDescriptor.class, mods.eln.transparentnode.turret.TurretRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.waterturbine.WaterTurbineDescriptor.class, mods.eln.transparentnode.waterturbine.WaterTurbineRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.windturbine.WindTurbineDescriptor.class, mods.eln.transparentnode.windturbine.WindTurbineRender::new);

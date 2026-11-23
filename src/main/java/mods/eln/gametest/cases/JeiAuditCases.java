@@ -51,7 +51,7 @@ public final class JeiAuditCases {
             public void measure(TestContext ctx) {
                 List<Way> ways = ways(ctx);
                 Set<Item> hidden = mods.eln.compat.JeiPages.hidden();
-                int expectHidden = 16 + (net.neoforged.fml.ModList.get().isLoaded("stasisdelvers") ? 0 : 1);   // (+ the pole anchor without Stasis)
+                int expectHidden = 14 + (net.neoforged.fml.ModList.get().isLoaded("stasisdelvers") ? 0 : 1);   // (+ the pole anchor without Stasis)
                 ctx.check("the hidden items are all found", hidden.size() == expectHidden, hidden.size() + " items");
                 // the oil route's pages (Baughn 2026-11-09: JEI had none): four machines, making raw rubber, sulfur and carbon black
                 Set<String> made = new java.util.TreeSet<>();

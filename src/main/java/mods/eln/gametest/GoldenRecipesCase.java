@@ -82,7 +82,7 @@ final class GoldenRecipesCase implements TestCase {
 
     /**
      * 1.12 outputs dropped on purpose: copper tools and armour, vanilla since 1.21.9 (Baughn, 2026-10-11); the heat
-     * turbines, replaced by the 50V/200V steam turbines (Baughn, 2026-10-14).
+     * turbines, replaced by the 48V/230V steam turbines (Baughn, 2026-10-14) and removed from the mod (Baughn, 2026-11-23).
      */
     static final Set<String> REMOVED = Set.of(
         // the insulated cable items are retired: hand recipes make cable kits instead (Baughn 2026-11-07)
@@ -238,6 +238,7 @@ final class GoldenRecipesCase implements TestCase {
         List<String> conditionalNames = new ArrayList<>(), deferred = new ArrayList<>();
         for (JsonElement e : golden.getAsJsonArray("crafting")) {
             JsonObject g = e.getAsJsonObject();
+            if (REMOVED.contains(g.get("id").getAsString())) continue;   // gone, or kept but no longer craftable
             JsonObject outJ = g.getAsJsonObject("output");
             Item out = map(outJ, unknown);
             int count = outJ.has("count") ? outJ.get("count").getAsInt() : 1;
@@ -245,7 +246,6 @@ final class GoldenRecipesCase implements TestCase {
                 deferred.add(g.get("id").getAsString());
                 continue;
             }
-            if (REMOVED.contains(g.get("id").getAsString())) continue;   // gone, or kept but no longer craftable
             if (out == null) {
                 failed.add(g.get("id").getAsString() + ": output not on 26.x");
                 continue;
