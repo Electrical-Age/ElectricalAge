@@ -116,7 +116,7 @@ public final class PipeTransmitterCases {
             Wp9cCases.within(c, "pipe transmitter: its signal cable carries reading / 25 bar x SVU", u, t.reading / 25 * mods.eln.Eln.SVU, 0.01 * mods.eln.Eln.SVU);
             c.check("pipe transmitter: Jade gives mode, reading, full scale and volts", t.getWaila().containsKey("Pressure sensor")
                 && t.getWaila().containsKey("Full scale") && t.getWaila().containsKey("Output"), "" + t.getWaila());
-            c.check("pipe transmitter: no viscosity on a run of steam (liquids only)", !t.getWaila().containsKey("Viscosity"), "" + t.getWaila());
+            c.check("pipe transmitter: no viscosity on a run of steam (liquids only)", !t.getWaila().containsKey(mods.eln.i18n.I18N.tr("Viscosity")), "" + t.getWaila());
             // an empty-hand right-click steps the full scale; it survives the element's NBT
             var fp = c.player();
             fp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);

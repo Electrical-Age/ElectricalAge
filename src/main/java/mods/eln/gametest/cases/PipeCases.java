@@ -1836,14 +1836,15 @@ public final class PipeCases {
         public void measure(TestContext ctx) {
             var t = tank.getWaila();
             var tk = new java.util.ArrayList<>(t.keySet());
-            ctx.check("tank viscosity: cold heavy oil is thick, third in its Jade, before its liquid line", tk.indexOf("Viscosity") == 2
-                && tk.indexOf("Liquid") == 3 && t.get("Viscosity").startsWith("thick heavy oil, "), "" + t);
+            String visc = mods.eln.i18n.I18N.tr("Viscosity");
+            ctx.check("tank viscosity: cold heavy oil is thick, third in its Jade, before its liquid line", tk.indexOf(visc) == 2
+                && tk.indexOf(mods.eln.i18n.I18N.tr("Liquid")) == 3 && t.get(visc).startsWith("thick heavy oil, "), "" + t);
             ctx.check("pipe sensor viscosity: placed, piped to a run", sensorErr == null, "" + sensorErr);
             if (sensorErr == null) {
                 var w = PipeTransmitterCases.device(ctx, sensorAt).getWaila();
                 var wk = new java.util.ArrayList<>(w.keySet());
-                ctx.check("pipe sensor viscosity: its run's diesel, under its three lines", wk.indexOf("Viscosity") == 3
-                    && w.get("Viscosity").startsWith("thin diesel, "), "" + w);
+                ctx.check("pipe sensor viscosity: its run's diesel, under its three lines", wk.indexOf(visc) == 3
+                    && w.get(visc).startsWith("thin diesel, "), "" + w);
             }
             var o = ctx.voxelByEntity(oil).getWaila(false, 0);
             var d = ctx.voxelByEntity(diesel).getWaila(false, 0);
@@ -1851,11 +1852,11 @@ public final class PipeCases {
             ctx.line("pipe viscosity: heavy oil " + o + "; diesel " + d + "; steam " + s);
             var ok = new java.util.ArrayList<>(o.keySet());
             var dk = new java.util.ArrayList<>(d.keySet());
-            ctx.check("pipe viscosity: cold heavy oil is thick, third in Jade (its headline), with the fix", ok.indexOf("Viscosity") == 2
-                && o.get("Viscosity").startsWith("thick heavy oil, ") && o.get("Viscosity").endsWith("heat or dilute"), "" + o);
-            ctx.check("pipe viscosity: diesel is thin, after the contents", dk.indexOf("Viscosity") == dk.indexOf("Contents") + 1
-                && d.get("Viscosity").startsWith("thin diesel, ") && d.get("Viscosity").contains(" mPa s, "), "" + d);
-            ctx.check("pipe viscosity: none for steam", !s.containsKey("Viscosity"), "" + s);
+            ctx.check("pipe viscosity: cold heavy oil is thick, third in Jade (its headline), with the fix", ok.indexOf(visc) == 2
+                && o.get(visc).startsWith("thick heavy oil, ") && o.get(visc).endsWith("heat or dilute"), "" + o);
+            ctx.check("pipe viscosity: diesel is thin, after the contents", dk.indexOf(visc) == dk.indexOf("Contents") + 1
+                && d.get(visc).startsWith("thin diesel, ") && d.get(visc).contains(" mPa s, "), "" + d);
+            ctx.check("pipe viscosity: none for steam", !s.containsKey(visc), "" + s);
         }
     }
 

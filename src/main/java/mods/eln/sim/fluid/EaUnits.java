@@ -93,17 +93,35 @@ public final class EaUnits {
     /** From this ratio to water a liquid is thick: the hint to heat or dilute it, and the line in Jade's headline. */
     public static final double THICK_RATIO = 200;
 
-    /** "2x water", "800x water", "200,000x water": two significant figures, so the big ones read at a glance. */
-    private static String timesWater(double ratio) {
-        if (ratio < 10) return String.format("%.1fx water", ratio);
-        double mag = Math.pow(10, Math.floor(Math.log10(ratio)) - 1);
-        return String.format(java.util.Locale.ROOT, "%,.0fx water", Math.round(ratio / mag) * mag);
+    /** The ratio to water as shown: to 0.1 under 10, else two significant figures (the bands go by it, so they agree). */
+    private static double shownRatio(double paS) {
+        double r = viscosityRatio(paS);
+        if (r < 9.95) return Math.round(r * 10) / 10.0;
+        double mag = Math.pow(10, Math.floor(Math.log10(r)) - 1);
+        return Math.round(r / mag) * mag;
     }
 
-    /** A viscosity's word (Neon's bands by its ratio to water): thin under 15x, syrupy under 200x, thick under 5000x, tarry. */
+    /** Is it thick (shown at THICK_RATIO x water or more): the fix, and Jade's headline. */
+    private static boolean thick(double paS) {
+        return shownRatio(paS) >= THICK_RATIO;
+    }
+
+    /** "2.0x water", "800x water", "200,000x water": two significant figures, so the big ones read at a glance. */
+    private static String timesWater(double paS) {
+        double r = shownRatio(paS);
+        return mods.eln.i18n.I18N.tr("%1$x water", String.format(java.util.Locale.ROOT, r < 10 ? "%.1f" : "%,.0f", r));
+    }
+
+    /** A viscosity's word (Neon's bands by its shown ratio to water): thin under 15x, syrupy under 200x, thick under 5000x, tarry. */
     private static String band(double paS) {
-        double r = viscosityRatio(paS);
-        return r < 15 ? "thin" : r < THICK_RATIO ? "syrupy" : r < 5000 ? "thick" : "tarry";
+        double r = shownRatio(paS);
+        return r < 15 ? mods.eln.i18n.I18N.tr("thin") : r < THICK_RATIO ? mods.eln.i18n.I18N.tr("syrupy")
+            : r < 5000 ? mods.eln.i18n.I18N.tr("thick") : mods.eln.i18n.I18N.tr("tarry");
+    }
+
+    /** The fix a thick liquid's line ends with. */
+    private static String fix() {
+        return "; " + mods.eln.i18n.I18N.tr("heat or dilute");
     }
 
     /**
@@ -111,7 +129,7 @@ public final class EaUnits {
      * fuel lines use it, and they don't mind viscosity (Neon: a fix there would read as a fault).
      */
     public static String viscosityText(double paS) {
-        return band(paS) + ", " + viscosity(paS) + ", " + timesWater(viscosityRatio(paS));
+        return band(paS) + ", " + viscosity(paS) + ", " + timesWater(paS);
     }
 
     /**
@@ -142,22 +160,25 @@ public final class EaUnits {
      * thick.
      */
     public static String viscosity(FluidNode n) {
-        var layers = layerViscosities(n);
+        return viscosityLine(layerViscosities(n));
+    }
+
+    /** viscosity(n) of its layerViscosities. */
+    private static String viscosityLine(java.util.List<double[]> layers) {
         if (layers.isEmpty()) return null;
         SpeciesRegistry reg = SpeciesRegistry.get();
         if (layers.size() == 1) {
             double mu = layers.get(0)[0];
-            return band(mu) + " " + reg.byId((int) layers.get(0)[1]).displayName() + ", " + viscosity(mu) + ", " + timesWater(viscosityRatio(mu))
-                + (viscosityRatio(mu) >= THICK_RATIO ? "; heat or dilute" : "");
+            return band(mu) + " " + reg.byId((int) layers.get(0)[1]).displayName() + ", " + viscosity(mu) + ", " + timesWater(mu) + (thick(mu) ? fix() : "");
         }
         StringBuilder b = new StringBuilder();
         boolean thick = false;
         for (double[] l : layers) {
             b.append(b.length() == 0 ? "" : "; ").append(reg.byId((int) l[1]).displayName()).append(' ').append(viscosity(l[0]))
-                .append(", ").append(timesWater(viscosityRatio(l[0])));
-            thick |= viscosityRatio(l[0]) >= THICK_RATIO;
+                .append(", ").append(timesWater(l[0]));
+            thick |= thick(l[0]);
         }
-        return thick ? b.append("; heat or dilute").toString() : b.toString();
+        return thick ? b.append(fix()).toString() : b.toString();
     }
 
     /**
@@ -165,11 +186,12 @@ public final class EaUnits {
      * if the liquid is thick, so cold residue that won't flow says why without sneaking (Jade shows three lines).
      */
     public static void putViscosity(java.util.Map<String, String> info, FluidNode n) {
-        String v = viscosity(n);
+        var layers = layerViscosities(n);
+        String v = viscosityLine(layers);
         if (v == null) return;
         String key = mods.eln.i18n.I18N.tr("Viscosity");
         boolean thick = false;
-        for (double[] l : layerViscosities(n)) thick |= viscosityRatio(l[0]) >= THICK_RATIO;
+        for (double[] l : layers) thick |= thick(l[0]);
         if (!thick || info.size() < 2) {
             info.put(key, v);
             return;
@@ -184,7 +206,7 @@ public final class EaUnits {
 
     /** Two significant figures or so: 0.012, 0.12, 1.2, 12, 120. */
     private static String compact(double v) {
-        return String.format(v >= 10 ? "%.0f" : v >= 1 ? "%.1f" : v >= 0.1 ? "%.2f" : "%.3f", v);
+        return String.format(java.util.Locale.ROOT, v >= 10 ? "%.0f" : v >= 1 ? "%.1f" : v >= 0.1 ? "%.2f" : "%.3f", v);
     }
 
     /** A liquid volume compactly (Baughn 2026-11-11: "18 g air, 14.6 B gasoline, 700 mB diesel"): buckets from 1000 mB. */

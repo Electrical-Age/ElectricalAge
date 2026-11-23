@@ -140,7 +140,7 @@ public class PipeTransmitterElement extends SixNodeElement {
         // (the run's viscosity, after the three: thick liquid crawling through the pipe it reads says why; design-398 6 A)
         PipePart pipe = pipe();
         String visc = pipe == null || pipe.fluid == null ? null : mods.eln.sim.fluid.EaUnits.viscosity(mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid));
-        if (visc != null) info.put("Viscosity", visc);
+        if (visc != null) info.put(mods.eln.i18n.I18N.tr("Viscosity"), visc);
         return info;
     }
 

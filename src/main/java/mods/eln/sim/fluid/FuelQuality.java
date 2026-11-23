@@ -137,7 +137,7 @@ public final class FuelQuality {
      * would mislead: it gives none).
      */
     public static String describe(Rating r) {
-        if (r.choked()) return String.format("chokes engine; coking %.3f, limit %.2f", r.coking, ENGINE_CHOKE);
+        if (r.choked()) return String.format(mods.eln.i18n.I18N.tr("chokes engine; coking %.3f, limit %.2f"), r.coking, ENGINE_CHOKE);
         StringBuilder s = new StringBuilder(String.format("%.0f%% in range", (1 - r.off()) * 100));
         if (r.light > 0.0005) s.append(String.format(", %.0f%% too light", r.light * 100));
         if (r.heavy > 0.0005) s.append(String.format(", %.0f%% too heavy", r.heavy * 100));

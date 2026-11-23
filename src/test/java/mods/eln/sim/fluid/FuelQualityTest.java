@@ -100,6 +100,9 @@ class FuelQualityTest {
         assertEquals("syrupy, 10 mPa s, 40x water", EaUnits.viscosityText(0.01));
         assertEquals("thick, 200 mPa s, 800x water", EaUnits.viscosityText(0.2));
         assertEquals("tarry, 50 Pa s, 200,000x water", EaUnits.viscosityText(50));
+        // the band goes by the ratio as shown: 199.5x reads 200x, so thick; 14.96x reads 15x, so syrupy
+        assertTrue(EaUnits.viscosityText(199.5 * Water.MU_L).startsWith("thick, "), EaUnits.viscosityText(199.5 * Water.MU_L));
+        assertTrue(EaUnits.viscosityText(14.96 * Water.MU_L).startsWith("syrupy, "), EaUnits.viscosityText(14.96 * Water.MU_L));
         // a node: its liquid but water; none for water only (water's is held constant: it reads as the reference)
         FluidNode n = TestSpecies.node(0.1, 0, 1, 293.15, 1e5, TestSpecies.id("diesel"), 10.0);
         String name = SpeciesRegistry.get().byId(TestSpecies.id("diesel")).displayName();

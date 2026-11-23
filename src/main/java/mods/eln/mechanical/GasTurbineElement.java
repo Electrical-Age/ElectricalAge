@@ -504,8 +504,8 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
             var q = FuelQuality.rate(fuelIn.vessel, fuelIn.feedId(), FuelQuality.TURBINE_LO, FuelQuality.TURBINE_HI);
             double rate = FuelQuality.foulRate(q.coking(), FuelQuality.ENGINE_BALANCE);
             String visc = EaUnits.viscosityText(FuelQuality.layerViscosity(fuelIn.vessel, fuelIn.feedId()));
-            // (choked: no fouling clause, it burns none)
-            info.put(I18N.tr("Fuel quality"), q.choked() ? FuelQuality.describe(q) + "; " + visc : String.format("%s; %s; %s", FuelQuality.describe(q),
+            // (choked: no fouling clause, it burns none; a choking liquid beside fuel gas: it burns the gas only)
+            info.put(I18N.tr("Fuel quality"), q.choked() ? FuelQuality.describe(q) + (choked() ? "" : " " + I18N.tr("(burning gas only)")) + "; " + visc : String.format("%s; %s; %s", FuelQuality.describe(q),
                 rate > 0 ? String.format(I18N.tr("fouls it ~%.0f%% an hour at full power (coking %.3f, clean under %.2f)"), FuelQuality.engineFoulPerHour(q.coking()) * 100, q.coking(), FuelQuality.ENGINE_BALANCE) : I18N.tr("burns clean"),
                 visc));
         }
