@@ -24,7 +24,7 @@ import static mods.eln.cad.models.OilKit.signalPlate;
  * spots are):
  * <ul>
  * <li>thermal: a copper heat plate on each of the twelve block faces of the back and both flanks, at each block's
- * floor: the lower ones (y 0) on the skid, the upper ones (y 16) on copper heat-collector bosses from the drum's flanks
+ * floor: the lower ones (y 0) on the skid, the upper ones (y 16) on cast-iron heat-collector bosses from the drum's flanks
  * and back head;</li>
  * <li>steam out: an iron pipe's steam flange on a riser at each end of the steam header, on top of each rear top block
  * (x 24, z 8 and z 24; top at y 32);</li>

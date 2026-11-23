@@ -16,7 +16,7 @@ dial, handwheel, bolt ring, composed preview); `Mc` is unchanged. Each script wr
 | model | parts | triangles | descriptor | replaces |
 |---|---|---|---|---|
 | electricheater50v / 200v | main | 708 / 814 | ElectricHeaterDescriptor (draws main/dissipator/body if present) | largerheostat |
-| boiler | main | 1236 | BoilerDescriptor (draws main/body/furnace if present) | electricfurnace |
+| boiler | main | 1332 | BoilerDescriptor (draws main/body/furnace if present) | electricfurnace |
 | largeboiler | main, level, needle (+ .txt origins) | ~3000 | BoilerDescriptor.twoByTwo (drawn full size, 0..32 px, from the origin block) | |
 | oilpump50v / 200v | main | 1426 / 1462 | OilPumpDescriptor (draws main) | compressora / compressorb |
 | tarsandseparator50v / 200v | main, rot1, rot2, oil (+ .txt origins) | ~1600 / ~1700 | OilSeparatorDescriptor (the oil, then MaceratorDescriptor's draw) | maceratora / maceratorb |
