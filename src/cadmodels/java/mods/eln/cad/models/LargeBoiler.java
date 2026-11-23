@@ -17,15 +17,16 @@ import static mods.eln.cad.models.OilKit.signalPlate;
 /**
  * The 2x2x2 Large Boiler (todo #472; its own model, todo #522; redrawn, todo #588, Baughn 2026-11-23: the drum is the
  * device, not a boiler in a shoe box, and no firebox: it is heated from outside): a big riveted steam drum along x with
- * dished heads, in two saddles on a low skid, a steam dome with its header to the two steam flanges and a safety-valve
- * dome on its crest. Drawn by BoilerRender from its origin block (the front bottom left), full size: 0..32 px on each
+ * dished heads, in two steel box-girder cradles on a low skid, six heat pipes up from its heat plates into its belly
+ * beside the cradles, a steam dome with its header to the two steam flanges and a safety-valve dome on its crest.
+ * Drawn by BoilerRender from its origin block (the front bottom left), full size: 0..32 px on each
  * axis, front XN (x = 0), right z+, as LargeBoilerElement's local frame (block x 0 front / 1 back, y 0 low / 1 high,
  * z 0 left / 1 right). Its connections, where the element has them (each at its block face's centre, as the ports'
  * spots are):
  * <ul>
- * <li>thermal: a copper heat plate on each of the twelve block faces of the back and both flanks, at each block's
- * floor: the lower ones (y 0) on the skid, the upper ones (y 16) on cast-iron heat-collector bosses from the drum's flanks
- * and back head;</li>
+ * <li>thermal: a copper heat plate on each of the six lower block faces of the back and both flanks, at the floor, on
+ * the skid; from each a heat pipe (r 1.75) rises and bends in to the drum's lower flank or back head (Baughn
+ * 2026-11-23: one row of plates, piped to the drum so they don't look disconnected);</li>
  * <li>steam out: an iron pipe's steam flange on a riser at each end of the steam header, on top of each rear top block
  * (x 24, z 8 and z 24; top at y 32);</li>
  * <li>feedwater in: a flange on the front of the bottom right block (y 8, z 24), its copper feed line up the front
@@ -72,6 +73,78 @@ public final class LargeBoiler {
         return m;
     }
 
+    /** HEAT_R: the heat pipes' radius; the flank pipes rise at z HEAT_Z (and 32 - HEAT_Z), the back pipes at x 32 - HEAT_Z. */
+    static final double HEAT_R = 1.75, HEAT_Z = 2.0;
+    /** The cradles' centres (x): inboard of the flank heat pipes (at x 8 and 24). */
+    static final double[] CRADLE_X = {12.5, 19.5};
+
+    /**
+     * A straight round piece from a to b (px), radius r, 10 sides, no end caps (its ends sit in other pieces): its sides
+     * squared to the plane normal bn, so the pieces of one bent pipe meet ring to ring.
+     */
+    static Mesh pipePiece(double[] a, double[] b, double r, double[] bn, String mat) {
+        double[] d = unit(new double[]{b[0] - a[0], b[1] - a[1], b[2] - a[2]});
+        double[] u = unit(cross(d, bn)), w = cross(u, d);
+        int n = 10;
+        double[][] lo = new double[n][], hi = new double[n][];
+        for (int k = 0; k < n; k++) {
+            double t = 2 * Math.PI * (k + 0.5) / n, c = r * Math.cos(t), s = r * Math.sin(t);
+            lo[k] = new double[3];
+            hi[k] = new double[3];
+            for (int i = 0; i < 3; i++) {
+                lo[k][i] = a[i] + c * u[i] + s * w[i];
+                hi[k][i] = b[i] + c * u[i] + s * w[i];
+            }
+        }
+        Mesh m = new Mesh(mat);
+        for (int k = 0; k < n; k++) {
+            int j = (k + 1) % n;
+            double t = 2 * Math.PI * (k + 1) / n;
+            double[] out = {Math.cos(t) * u[0] + Math.sin(t) * w[0], Math.cos(t) * u[1] + Math.sin(t) * w[1], Math.cos(t) * u[2] + Math.sin(t) * w[2]};
+            m.poly(Mc.oriented(new double[][]{lo[k], lo[j], hi[j], hi[k]}, out));
+        }
+        return m;
+    }
+
+    static double[] cross(double[] a, double[] b) {
+        return new double[]{a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
+    }
+
+    static double[] unit(double[] a) {
+        double l = Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+        return new double[]{a[0] / l, a[1] / l, a[2] / l};
+    }
+
+    /**
+     * A heat pipe along the points (px, a bend in the plane normal to bn at each inner point): copper pieces run on past
+     * each bend by r tan(22.5 deg) so their outsides meet, a darksteel collar over each bend.
+     */
+    static List<Mesh> heatPipe(double[][] pts, double[] bn) {
+        List<Mesh> m = new ArrayList<>();
+        double r = HEAT_R, run = r * Math.tan(Math.PI / 8) + 0.1;
+        for (int i = 0; i + 1 < pts.length; i++) {
+            double[] a = pts[i].clone(), b = pts[i + 1].clone(), d = unit(new double[]{b[0] - a[0], b[1] - a[1], b[2] - a[2]});
+            for (int k = 0; k < 3; k++) {
+                if (i > 0) a[k] -= run * d[k];
+                if (i + 2 < pts.length) b[k] += run * d[k];
+            }
+            m.add(pipePiece(a, b, r, bn, "copper"));
+        }
+        for (int i = 1; i + 1 < pts.length; i++) {
+            double[] d0 = unit(new double[]{pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1], pts[i][2] - pts[i - 1][2]});
+            double[] d1 = unit(new double[]{pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1], pts[i + 1][2] - pts[i][2]});
+            double[] t = unit(new double[]{d0[0] + d1[0], d0[1] + d1[1], d0[2] + d1[2]});
+            double[] a = new double[3], b = new double[3];
+            for (int k = 0; k < 3; k++) {
+                a[k] = pts[i][k] - 0.5 * t[k];
+                b[k] = pts[i][k] + 0.5 * t[k];
+            }
+            Mesh c = pipePiece(a, b, r + 0.3, bn, "darksteel");
+            m.add(c);
+        }
+        return m;
+    }
+
     /** A copper elbow (a cube) at the feed line's corner (x, y, z). */
     static Mesh elbow(double x, double y, double z) {
         return box(x - 0.9, y - 0.9, z - 0.9, x + 0.9, y + 0.9, z + 0.9, "copper");
@@ -83,27 +156,46 @@ public final class LargeBoiler {
         // reach into it)
         m.add(box(1.0, 0, 1.0, 31.0, DECK - 0.8, 31.0, "castiron", "nsew"));
         m.add(box(0.6, DECK - 0.8, 0.6, 31.4, DECK, 31.4, "darksteel", "nsewud"));
-        // the saddles under the drum, two steps each
-        for (double x : new double[]{8.0, 24.0}) {
-            m.add(box(x - 1.5, DECK, 5.0, x + 1.5, DECK + 1.4, 27.0, "paint"));
-            m.add(box(x - 1.0, DECK + 1.4, 7.5, x + 1.0, DECK + 4.3, 24.5, "paint"));
+        // the cradles under the drum: steel box girders right across the skid (bottom flange, the box, top flange,
+        // darksteel stiffeners on its faces and end plates), a stepped saddle box on each up to the drum and a knee web at
+        // each end; they stand inboard of the flank heat pipes
+        for (double x : CRADLE_X) {
+            m.add(box(x - 2.0, DECK, 1.6, x + 2.0, DECK + 0.5, 30.4, "darksteel"));
+            m.add(box(x - 1.6, DECK + 0.5, 1.8, x + 1.6, DECK + 2.6, 30.2, "steel"));
+            m.add(box(x - 2.0, DECK + 2.6, 1.6, x + 2.0, DECK + 3.1, 30.4, "darksteel"));
+            for (double z : new double[]{1.6, 30.2}) m.add(box(x - 1.8, DECK + 0.5, z, x + 1.8, DECK + 2.6, z + 0.2, "darksteel"));
+            m.add(box(x - 1.6, DECK + 3.1, 6.5, x + 1.6, 9.6, 25.5, "steel"));
+            m.add(box(x - 1.6, 9.6, 6.5, x + 1.6, 10.6, 9.0, "steel"));
+            m.add(box(x - 1.6, 9.6, 23.0, x + 1.6, 10.6, 25.5, "steel"));
+            m.add(box(x - 0.3, DECK + 3.1, 3.4, x + 0.3, 11.6, 6.5, "darksteel"));
+            m.add(box(x - 0.3, DECK + 3.1, 25.5, x + 0.3, 11.6, 28.6, "darksteel"));
+            for (double z : new double[]{4.5, 10.0, 16.0, 22.0, 27.5})
+                for (double s : new double[]{-1, 1})
+                    m.add(box(x + s * 1.6 - (s < 0 ? 0.3 : 0), DECK + 0.5, z - 0.25, x + s * 1.6 + (s > 0 ? 0.3 : 0), DECK + 2.6, z + 0.25, "darksteel"));
         }
         // the drum, its dished heads, a seam band at each head's joint and two between
         m.add(prism('x', CY, CZ, R, X0, X1, "rivet", N, false, false));
         m.add(prism('x', CY, CZ, R - HEAD, X0 - HEAD, X0, "rivet", N, R, true, false, Double.NaN));
         m.add(prism('x', CY, CZ, R, X1, X1 + HEAD, "rivet", N, R - HEAD, false, true, Double.NaN));
         for (double x : new double[]{X0, 12.0, 19.6, X1 - 0.4}) m.add(prism('x', CY, CZ, R + 0.15, x, x + 0.4, "darksteel", N, false, false));
-        // the heat plates: the lower ones on the skid's back and flanks, the upper ones on cast-iron heat-collector bosses
-        // out of the drum's flanks (centred on the plates, 1 px narrower all round) and its back head
+        // the heat plates on the skid's back and flanks, each with a heat-tinted shoe on its top, and from the shoe a heat
+        // pipe: on the flanks up beside the cradle's end and in to the drum's lower flank, at the back up and in to the
+        // back head; a darksteel flange where each meets the drum
+        double hz = HEAT_Z, hb = 32 - HEAT_Z, fy = 12.5;
         for (double u : new double[]{8, 24}) {
-            for (double y : new double[]{0, 16}) {
-                m.addAll(heatPlate('x', 32, u, y));
-                m.addAll(heatPlate('z', 0, u, y));
-                m.addAll(heatPlate('z', 32, u, y));
-            }
-            m.add(box(u - 3.5, 16.5, 1.0, u + 3.5, 19.5, 5.0, "castiron"));
-            m.add(box(u - 3.5, 16.5, 27.0, u + 3.5, 19.5, 31.0, "castiron"));
-            m.add(box(28.0, 16.5, u - 3.5, 31.0, 19.5, u + 3.5, "castiron"));
+            m.addAll(heatPlate('x', 32, u, 0));
+            m.addAll(heatPlate('z', 0, u, 0));
+            m.addAll(heatPlate('z', 32, u, 0));
+            m.add(box(u - 2.4, DECK - 0.6, 0.4, u + 2.4, DECK + 1.2, hz + 1.9, "hotcopper"));
+            m.add(box(u - 2.4, DECK - 0.6, 32 - hz - 1.9, u + 2.4, DECK + 1.2, 31.6, "hotcopper"));
+            m.add(box(hb - 1.9, DECK - 0.6, u - 2.4, 31.6, DECK + 1.2, u + 2.4, "hotcopper"));
+            double[] bx = {1, 0, 0}, bz = {0, 0, 1};
+            m.addAll(heatPipe(new double[][]{{u, DECK, hz}, {u, fy - 1.5, hz}, {u, fy, hz + 1.5}, {u, fy, 7.0}}, bx));
+            m.addAll(heatPipe(new double[][]{{u, DECK, 32 - hz}, {u, fy - 1.5, 32 - hz}, {u, fy, 30.5 - hz}, {u, fy, 25.0}}, bx));
+            m.add(prism('z', u, fy, HEAT_R + 0.6, 4.6, 5.4, "darksteel", 10));
+            m.add(prism('z', u, fy, HEAT_R + 0.6, 26.6, 27.4, "darksteel", 10));
+            m.addAll(heatPipe(new double[][]{{hb, DECK, u}, {hb, 7.6, u}, {hb - 2.0, 9.6, u}, {26.5, 9.6, u}}, bz));
+            m.add(prism('x', 9.6, u, HEAT_R + 0.6, 27.8, 28.6, "darksteel", 10));
         }
         double crest = CY + R * Math.cos(Math.PI / N);
         // the steam dome on the crest over the rear blocks, its header across to a riser at each steam flange (as the

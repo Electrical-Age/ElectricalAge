@@ -460,7 +460,7 @@ public final class HpPlantCases {
         BlockPos o, o2;
         boolean refused, ghostsOk, nodesOk, portsOk, lowerPlaced, stackPlaced, floatPlaced, ownersOk = true;
         String stackWhy;
-        int tick, thermalFaces, signalFaces;
+        int tick, thermalFaces, upperThermalFaces, signalFaces;
 
         public String id() {
             return "large_boiler_2x2_body";
@@ -483,13 +483,16 @@ public final class HpPlantCases {
                 ownersOk &= mods.eln.ghost.GhostBlock.owner(ctx.level(), c[i]) == a;   // (what Jade shows on each cell)
                 nodesOk &= mods.eln.node.NodeManager.instance.getNodeFromCoordonate(co) instanceof mods.eln.oil.LargeBoilerElement.FaceNode;
             }
-            // its faces as designed: 12 thermal (back and flanks), the signal on the origin's front, pipe ports where the pipe tool finds them
+            // its faces as designed: 6 thermal (the lower blocks' back and flanks; none on the upper blocks, Baughn
+            // 2026-11-23), the signal on the origin's front, pipe ports where the pipe tool finds them
             for (BlockPos q : c) {
                 var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(q, ctx.level()));
                 if (n == null) continue;
                 for (Direction side : Direction.values()) {
                     int m = n.getSideConnectionMask(side, mods.eln.misc.LRDU.Down);
                     if ((m & mods.eln.node.NodeBase.maskThermal) != 0 && n.getThermalLoad(side, mods.eln.misc.LRDU.Down) == a.thermal) thermalFaces++;
+                    if (q.getY() > o.getY() && ((m & mods.eln.node.NodeBase.maskThermal) != 0 || n.getThermalLoad(side, mods.eln.misc.LRDU.Down) != null))
+                        upperThermalFaces++;
                     if ((m & mods.eln.node.NodeBase.maskElectricalOutputGate) != 0 && n.getElectricalLoad(side, mods.eln.misc.LRDU.Down) == a.phaseOut) signalFaces++;
                 }
             }
@@ -500,7 +503,7 @@ public final class HpPlantCases {
                 && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o, net.minecraft.core.Direction.WEST) == null                         // the signal face: no pipe
                 && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(0, 1, 0), net.minecraft.core.Direction.UP) == null           // top front: plain
                 && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(1, 0, 0), net.minecraft.core.Direction.DOWN) == null;        // underneath: plain
-            // furnaces for its upper ring: on a furnace (left flank), and floating at its back (no floor)
+            // furnaces beside its upper blocks (no thermal faces there): on a furnace (left flank), and floating at its back (no floor)
             var fd = Eln.transparentNodeItem.getDescriptor(Wp10bCases.FUEL_HEAT_FURNACE);
             var fItem = (mods.eln.node.transparent.TransparentNodeItem) fd.parentItem;
             var fp = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(lv);
@@ -508,7 +511,7 @@ public final class HpPlantCases {
             stackWhy = fd.checkCanPlace(new mods.eln.misc.Coordonate(o.offset(0, 1, -1), lv), Direction.ZN);
             stackPlaced = fItem.placeAt(fd.newItemStack(), fp, lv, o.offset(0, 1, -1), Direction.YN) != null;
             floatPlaced = fItem.placeAt(fd.newItemStack(), fp, lv, o.offset(2, 1, 0), Direction.YN) != null;
-            ctx.line(String.format("large_boiler_2x2_body: a Fuel Heat Furnace beside it on the floor: %s; on that furnace (upper ring): %s (%s); floating at its back, upper: %s",
+            ctx.line(String.format("large_boiler_2x2_body: a Fuel Heat Furnace beside it on the floor: %s; on that furnace (beside an upper block): %s (%s); floating at its back, upper: %s",
                 lowerPlaced, stackPlaced, stackWhy, floatPlaced));
             // a stone where a second one's top back right block would go
             o2 = ctx.at(6, 1, 2);
@@ -522,7 +525,8 @@ public final class HpPlantCases {
             ctx.check("large boiler 2x2: placed facing west, its seven other blocks are ghosts", ghostsOk, "");
             ctx.check("large boiler 2x2: each of its seven other blocks names the boiler as its owner (Jade shows its lines there)", ownersOk, "");
             ctx.check("large boiler 2x2: each ghost block has its face node", nodesOk, "");
-            ctx.check("large boiler 2x2: twelve thermal faces, all its one shell (back and both flanks)", thermalFaces == 12, "" + thermalFaces);
+            ctx.check("large boiler 2x2: six thermal faces, all its one shell (the lower blocks' back and both flanks)", thermalFaces == 6, "" + thermalFaces);
+            ctx.check("large boiler 2x2: no thermal face on its upper blocks", upperThermalFaces == 0, "" + upperThermalFaces);
             ctx.check("large boiler 2x2: one level-signal face (the origin's front)", signalFaces == 1, "" + signalFaces);
             ctx.check("large boiler 2x2: the pipe tool finds the feed flange (front low right) and both steam outlets (top rear) on its ghost blocks, and nothing on plain faces", portsOk, "");
             ctx.check("large boiler 2x2: a block in its volume refuses it, and nothing is placed", refused, "");
@@ -541,15 +545,15 @@ public final class HpPlantCases {
 
     /**
      * A 16 kW HP plant on one 2x2x2 Large Boiler (todo #472): four Fuel Heat Furnaces with Big burners on a 1.6 bar air
-     * main, their backs against four of its twelve thermal faces (the origin's own left flank and three ghost faces);
+     * main, their backs against four of its six thermal faces (the origin's own left flank and three ghost faces);
      * steam out of its rear top right outlet (a ghost block's port) to the HP turbine; the condensate back into its
      * feed flange (front, low right: a ghost block's port). About 67 kW into the water at 20 bar, no fixture. Also its
      * level signal on the origin's front.
      */
     static final class LargeBoilerPlant extends PlumbingCases.Big {
         static final int WATCH = 3000, TICKS = 4800;
-        /** Natural draught: ten furnaces, six on its lower ring and four on furnaces in its upper ring, two of each on
-         *  its back; otherwise four on a 1.6 bar air main. */
+        /** Natural draught: six furnaces, one on each of its thermal faces (two on each flank, two on its back);
+         *  otherwise four on a 1.6 bar air main. */
         final boolean natural;
         final int n;
         BoilerElement boiler;
@@ -560,7 +564,7 @@ public final class HpPlantCases {
 
         LargeBoilerPlant(boolean natural) {
             this.natural = natural;
-            n = natural ? 10 : 4;
+            n = natural ? 6 : 4;
             f = new FuelHeatFurnaceElement[n];
             fT = new ThermalLoad[n];
             air = new FluidDevice[n];
@@ -578,7 +582,7 @@ public final class HpPlantCases {
         double steam0, work0, pumped0;
 
         public String id() {
-            return natural ? "large_boiler_2x2_natural_10_furnaces" : "large_boiler_2x2_hp_plant_20bar";
+            return natural ? "large_boiler_2x2_natural_6_furnaces" : "large_boiler_2x2_hp_plant_20bar";
         }
 
         public int ticks() {
@@ -606,10 +610,6 @@ public final class HpPlantCases {
             if (natural) {
                 f[4] = furnace(ctx, bp.offset(2, 0, 0), Direction.XP, 1900);     // back, lower: ghosts (1,0,0) and (1,0,1)
                 f[5] = furnace(ctx, bp.offset(2, 0, 1), Direction.XP, 1900);
-                f[6] = furnace(ctx, bp.offset(0, 1, -1), Direction.ZN, 1900);    // upper ring, each on a furnace: left flank
-                f[7] = furnace(ctx, bp.offset(1, 1, -1), Direction.ZN, 1900);
-                f[8] = furnace(ctx, bp.offset(2, 1, 0), Direction.XP, 1900);     // and back
-                f[9] = furnace(ctx, bp.offset(2, 1, 1), Direction.XP, 1900);
             }
             for (int i = 0; i < n; i++) {
                 fT[i] = TestContext.<ThermalLoad>field(f[i], "thermalLoad");
@@ -686,13 +686,17 @@ public final class HpPlantCases {
             ctx.check(id + ": the feed flange on a ghost block takes the condensate (one network with the condenser)", joined && mods.eln.fluid.FluidWorld.networkOf(boiler.feed) != null, "");
             ctx.check(id + ": the steam outlet on a ghost block feeds the turbine, and the condensate comes back (90 %+)", steam > 15e-3 && pumped > 0.9 * steam,
                 String.format("%.2f of %.2f g/s", pumped * 1000, steam * 1000));
-            ctx.check(id + ": " + n + " furnaces on " + n + " faces put 60 kW+ into the water", water > 60e3, String.format("%.1f kW", water / 1000));
+            // (natural draught: six furnaces of about 7 kW, one a face, since the upper row of faces went (Baughn 2026-11-23);
+            // forced: four of about 18 kW)
+            double minW = natural ? 36e3 : 60e3, minShaft = natural ? 10e3 : 16e3;
+            ctx.check(id + ": " + n + " furnaces on " + n + " faces put " + Math.round(minW / 1000) + " kW+ into the water", water > minW, String.format("%.1f kW", water / 1000));
             ctx.check(id + ": every furnace passes its heat on (none runs hot: under 450 K over ambient, all within 30 K of each other)",
                 hottest < 450 && hottest - coolest < 30, String.format("%.0f..%.0f K", coolest, hottest));
             ctx.check(id + ": it holds 20 bar (within 1.5 bar)", Math.abs(p / 1e5 - 20) < 1.5, String.format("%.2f bar", p / 1e5));
             ctx.check(id + ": its shell stays well under its limit (320 K of 400 over ambient)", shellMax < 320, String.format("%.0f K", shellMax));
             ctx.check(id + ": it neither boils dry nor overfills", fillLo > 0.3 && fillHi < 1.02, String.format("%.0f..%.0f %%", fillLo * 100, fillHi * 100));
-            ctx.check(id + ": one HP turbine at rated power (16 kW+ on the shaft)", shaftW > 16e3, String.format("%.2f kW", shaftW / 1000));
+            ctx.check(id + (natural ? ": one HP turbine at two thirds of its rating (10 kW+ on the shaft)" : ": one HP turbine at rated power (16 kW+ on the shaft)"),
+                shaftW > minShaft, String.format("%.2f kW", shaftW / 1000));
             ctx.check(id + ": its level signal (the origin's front) follows the gauge glass (within 0.1 V)", sigErr < 0.1 && boiler.phaseOut.getU() > 1, String.format("%.3f V off, %.2f V", sigErr, boiler.phaseOut.getU()));
         }
     }

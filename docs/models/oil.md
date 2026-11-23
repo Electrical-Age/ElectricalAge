@@ -37,9 +37,12 @@ face the boiler's front; when a heater is placed against that face they are hidd
 
 ## Large Boiler (`LargeBoiler`, 2x2x2)
 Baughn (2026-11-23, todo #588): the drum is the device, not a boiler in a box, and no firebox (heaters outside feed
-it through its heat plates). A riveted drum along x (r 12, 20 sides) with dished heads and four seam bands, in two red
-saddles on a low cast-iron skid. The twelve heat plates keep the element's spots: the lower ones on the skid, the
-upper ones on cast-iron heat-collector bosses out of the drum's flanks and back head. Crest: a steam dome over the
+it through its heat plates). A riveted drum along x (r 12, 20 sides) with dished heads and four seam bands, in two
+steel box-girder cradles (x 12.5 and 19.5: flanges, stiffeners, end plates, a stepped saddle and knee webs) across a
+low cast-iron skid. Six heat plates, one on each lower block face of the back and flanks (one row since Baughn
+2026-11-23: two rows looked bad and weren't useful), each with a heat-tinted shoe and a copper heat pipe (r 1.75,
+darksteel collars at the bends) up and in to the drum: the flank pipes beside the cradles' ends into its lower flank,
+the back ones into the back head, each through a darksteel flange. Crest: a steam dome over the
 rear blocks whose header runs across to a riser under each steam flange (stayed to the drum), and a safety-valve dome
 over the front (brass valve, lever and weight). Front head: manway with yoke, brass nameplate, gauge glass (part
 level, its column from y 16 so it takes the water cell's blue half) with the level transmitter's box and line down to

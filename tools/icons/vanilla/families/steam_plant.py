@@ -9,9 +9,9 @@ Shared visual system
   so the family reads as one plant.
 * boiler: the riveted drum lying on its side (``revolve``-style CYL_BANDS shading per column), its
   steam dome on top, the dark firebox hatch, a pressure gauge and the feed pipe, on the skid.
-* large_boiler: the big drum (d 10, chamfered heads, seam bands) filling the slot, copper heat
-  plates along its flank, two domes and the dial on its stalk breaking the top silhouette, the
-  copper feed line up the front, on the skid: fuller and rounder than the boiler (d 8, one dome,
+* large_boiler: the big drum (d 10, chamfered heads, seam bands) filling the slot on steel girder
+  feet, fat copper heat pipes up from the skid's pads into its belly, two domes and the dial on its
+  stalk breaking the top silhouette: fuller and rounder than the boiler (d 8, one dome,
   firebox hatch), and round where the electrical furnace is a dark box under a flat white slab.
 * condensers: the grey shell lying on its side, wound with copper cooling fins, the exhaust stack
   on top, the thin painted ring by its end (model paint PAINT_50V / PAINT_200V: the turbine it
@@ -79,32 +79,35 @@ def boiler():
 # ------------------------------------------------------------------------------- large boiler
 def large_boiler():
     """Large Boiler (cadmodels LargeBoiler, 2x2x2): the big riveted drum lying along the slot (front
-    head on the left, chamfered heads, seam bands), copper heat plates on bosses along its flank, the
-    safety-valve dome and the steam dome on its crest, the pressure dial on its stalk over the front
-    and the copper feed line up the front, on the low copper-padded skid. Taller and fuller than the
-    Boiler (whose drum is d 8 with one dome), and no firebox: it is heated from outside."""
+    head on the left, chamfered heads, seam bands) on two steel box-girder feet, a fat copper heat
+    pipe rising from each copper plate on the skid and bending in to the drum's belly beside the
+    feet, the safety-valve dome and the steam dome on its crest and the pressure dial on its stalk
+    over the front (the feed line is on the far side). Taller and fuller than the Boiler (whose drum is
+    d 8 with one dome), and no firebox: it is heated from outside."""
     cv = Canvas(16)
     box(cv, 1, 13, 13, 2, 1, IRON_D, bevel=False)                     # the skid, rows 12..14
-    _pads(cv, 13, (4, 9), w=3)
+    _pads(cv, 13, (2, 11), w=3)
     diams = [6, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 8, 6]         # chamfered heads
-    revolve(cv, 2, 15, diams, DRUM)                                    # cols 2..14, rows 3..12
+    revolve(cv, 2, 13, diams, DRUM)                                    # cols 2..14, rows 2..11
     for sx in (4, 8, 12):                                              # seam bands round the drum
-        for yy in range(4, 12):
+        for yy in range(3, 11):
             c = cv.get(sx, yy)
             cv.set(sx, yy, DRUM[2] if c in (DRUM[3], DRUM[4], DRUM[5]) else DRUM[1])
-    for x in (5, 9):                                                   # the upper heat plates on their bosses
-        cv.rect(x, 8, 3, 2, PAD[3])
-        cv.hline(x, x + 2, 8, PAD[4])
-        cv.hline(x, x + 2, 10, DRUM[0])
+    # the box-girder feet in front of the drum's belly, and the heat pipes beside them: up from the
+    # pads, a dark collar where each bends in to the drum
+    for x in (5, 9):
+        box(cv, x, 10, 3, 3, 0, STEEL, bevel=False)
+    for x in (2, 12):
+        for yy in range(9, 13):
+            cv.set(x, yy, PAD[4]); cv.set(x + 1, yy, PAD[2])
+        cv.set(x, 8, DRUM[1]); cv.set(x + 1, 8, DRUM[0])
     # the safety-valve dome (its brass valve) and the steam dome with its flange
-    sub(cv, lambda c: cylinder(c, 5, 1, 3, 3, DRUM, axis='y'))
+    sub(cv, lambda c: cylinder(c, 5, 0, 3, 3, DRUM, axis='y'))
+    sub(cv, lambda c: cylinder(c, 10, 0, 3, 4, DRUM, axis='y'))
+    cv.hline(10, 13, 0, DRUM[4])
     cv.set(6, 0, GOLD[3])
-    sub(cv, lambda c: cylinder(c, 10, 1, 3, 4, DRUM, axis='y'))
-    cv.hline(10, 13, 1, DRUM[4])
-    # the pressure dial on its stalk over the front head, the copper feed line up the front
-    cv.set(2, 2, WHITE); cv.set(3, 2, WHITE); cv.set(3, 3, GOLD[3])
-    cv.vline(1, 7, 12, VCOPPER[2]); cv.set(1, 6, VCOPPER[3]); cv.set(2, 6, VCOPPER[3])
-    cv.set(1, 10, MARK_RED)
+    # the pressure dial on its stalk over the front head
+    cv.set(2, 1, STEEL[3]); cv.set(3, 1, STEEL[3]); cv.set(3, 2, GOLD[3])
     return cv
 
 

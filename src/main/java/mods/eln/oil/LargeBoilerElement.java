@@ -21,7 +21,9 @@ import java.util.List;
  * (BoilerDescriptor.twoByTwo). Local frame as EA's (front = XN): x 0 front, 1 back; y 0 low, 1 high; z 0 left, 1
  * right (front.right()). Faces:
  * <ul>
- * <li>thermal (the one shell): the whole back (x 1, back) and both flanks (z 0 left, z 1 right): 12 faces;</li>
+ * <li>thermal (the one shell): the lower blocks' (y 0) back (x 1) and both flanks (z 0 left, z 1 right): 6 faces,
+ * each a heat plate with its heat pipe up into the drum (Baughn 2026-11-23: two rows of thermal connectors looked bad
+ * and weren't useful; the upper row went);</li>
  * <li>steam out: the top of the two rear top blocks (1,1,0) and (1,1,1), drawn at the top of the vessel;</li>
  * <li>feedwater in: the front of (0,0,1), through the Boiler's check valve and float valve;</li>
  * <li>the level signal (the Boiler's gauge-glass signal): the front of the origin (0,0,0);</li>
@@ -44,8 +46,9 @@ public class LargeBoilerElement extends BoilerElement {
         return c;
     }
 
-    /** Whether local block (x, y, z)'s face towards side (world) is a thermal face. */
+    /** Whether local block (x, y, z)'s face towards side (world) is a thermal face: a lower block's back or flank. */
     boolean thermalFace(int x, int y, int z, Direction side) {
+        if (y != 0) return false;
         return (x == 1 && side == front.getInverse()) || (z == 0 && side == front.left()) || (z == 1 && side == front.right());
     }
 

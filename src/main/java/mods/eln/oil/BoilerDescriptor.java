@@ -65,9 +65,9 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
     /**
      * The Large Boiler as Baughn asked for it (2026-11-15: "It needs at least one face free for a signal output. How
      * about making it 2x2x2, physically?"): large()'s ratings in a 2x2x2 body, one node at its front-bottom-left block
-     * and seven ghost blocks to the right, back and up (LargeBoilerElement: twelve thermal faces, two steam outlets on
-     * top, the feed flange and the level signal on the front). Its model (mods.eln.cad.models.LargeBoiler) is drawn
-     * full size from the origin block.
+     * and seven ghost blocks to the right, back and up (LargeBoilerElement: six thermal faces on its lower blocks, two
+     * steam outlets on top, the feed flange and the level signal on the front). Its model
+     * (mods.eln.cad.models.LargeBoiler) is drawn full size from the origin block.
      */
     public static BoilerDescriptor twoByTwo(String name, String model) {
         var d = new BoilerDescriptor(name, model, LargeBoilerElement.class).large();
@@ -122,7 +122,7 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
         super.addInformation(stack, player, list, adv);
         if (height > 1) {
             list.add("2 x 2 x 2 blocks, placed from its front bottom left; it grows right, back and up");
-            list.add("Heat in on all twelve faces of its back and flanks; steam out on the two rear top faces;");
+            list.add("Heat in on the six lower faces of its back and flanks; steam out on the two rear top faces;");
             list.add("water in at the front, low right; the level signal at the front, low left, 0 V empty to 5 V full");
         } else {
             list.add("Water in by pipe (right flank), heat in from a heater or furnace on the back or a flank, steam out by pipe");

@@ -725,6 +725,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   uncovers in proportion and passes only 5 % as much heat into steam as into water, so the shell runs hot and, boiled
   dry, burns out (`BoilerElement.heatingShare`). Heat goes in on the back and flanks only. The gauge glass shows the
   fill and the dial the water temperature (0..300 C) (`boiler_phase_signal`).
+- Large Boiler (2x2x2, new in 26.x): heat goes in on the six faces of its lower blocks' back and flanks only (Baughn
+  2026-11-23: two rows of thermal connectors looked bad and weren't useful; it had twelve, the upper blocks' too). On
+  natural draught its six Fuel Heat Furnaces put about 42 kW into the water, enough for an HP turbine at about two
+  thirds of its rating (`large_boiler_2x2_natural_6_furnaces`; ten furnaces on twelve faces reached 70 kW); four on a
+  1.6 bar air main still run one at full rating (`large_boiler_2x2_hp_plant_20bar`), and `large_boiler_2x2_body`
+  checks that no upper face connects.
 - Submersible pumps, 50V (100 W) and 200V (400 W) (Baughn 2026-10-25): placed in a water source (transparent-node
   blocks are waterloggable now, as six nodes were), they push the water they stand in up a pipe from the flange on
   top: 3.5 turbines' worth of feedwater (57 / 230 mB/s), falling to nothing at 3 bar against the pipe. Power on the
