@@ -13,10 +13,21 @@ import java.util.List;
 
 /**
  * Pictures of generated device models (build/generated/cad, src/cadmodels), textured, from four sides and above:
- * -PcadPreviews=DIR writes DIR/model-NAME.png for each model in MODELS.
+ * -PcadPreviews=DIR writes DIR/model-NAME.png for each model in MODELS, or in -PcadPreviewModels=a,b (all: every
+ * generated model).
  */
 public class DeviceModelPreviewTest {
     static final String[] MODELS = {"airblower200v", "largeboiler", "boiler", "fuelheater", "computer", "fieldlogger", "compactturbine50v"};
+
+    /** The names to draw: cad.preview.models (comma-separated, or "all": every model directory under root), else MODELS. */
+    static List<String> models(Path root) throws java.io.IOException {
+        String want = System.getProperty("cad.preview.models");
+        if (want == null || want.isBlank()) return List.of(MODELS);
+        if (!want.trim().equals("all")) return java.util.Arrays.stream(want.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
+        try (var dirs = Files.list(root)) {
+            return dirs.filter(Files::isDirectory).map(d -> d.getFileName().toString()).sorted().toList();
+        }
+    }
 
     @Test
     void devices() throws Exception {
@@ -25,7 +36,7 @@ public class DeviceModelPreviewTest {
         // (the project's root from eln.resources = ROOT/src/main/resources: the tests' working directory is elsewhere)
         Path root = Path.of(System.getProperty("eln.resources", "src/main/resources")).toAbsolutePath().getParent().getParent().getParent()
             .resolve("build/generated/cad/assets/eln/model");
-        for (String name : MODELS) {
+        for (String name : models(root)) {
             Path obj = root.resolve(name).resolve(name + ".obj"), png = root.resolve(name).resolve("tex.png");
             if (!Files.exists(obj)) continue;
             var faces = ObjReader.read(obj, true).faces();

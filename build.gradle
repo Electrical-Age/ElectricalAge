@@ -187,6 +187,8 @@ test {
     if (project.hasProperty('cadReport')) systemProperty 'cad.report', project.property('cadReport')
     if (project.hasProperty('cadDetail')) systemProperty 'cad.detail', project.property('cadDetail')
     if (project.hasProperty('cadPreviews')) systemProperty 'cad.previews', project.property('cadPreviews')
+    // which device models DeviceModelPreviewTest draws: -PcadPreviewModels=boiler,largeboiler or all (default: its own list)
+    if (project.hasProperty('cadPreviewModels')) systemProperty 'cad.preview.models', project.property('cadPreviewModels')
     systemProperty 'eln.resources', file('src/main/resources').absolutePath
     // machine API golden traces (BenchTest): -PapiTraces rewrites src/test/resources/mods/eln/api/*.trace instead of comparing
     if (project.hasProperty('apiTraces')) systemProperty 'eln.api.traces', file('src/test/resources/mods/eln/api').absolutePath

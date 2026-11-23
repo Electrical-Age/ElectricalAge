@@ -44,7 +44,8 @@ towergen) for geometry that is checked by tests.
 - **Textures**: `tex.Sheet` paints regions (base colour, seeded noise, vertical shade, patterns) and face-aware
   features such as `ring` (a stripe round an entity box's sides that meets itself at the edges).
 - **Previews**: `preview.Raster`, a small software renderer for before/after pictures (`-PcadPreviews=DIR` runs the
-  preview tests).
+  preview tests; `-PcadPreviewModels=boiler,largeboiler` or `all` picks the device models `DeviceModelPreviewTest`
+  draws, four sides and above, e.g. for handbook pictures).
 
 Users: `VoxelGeometry` (pipes, fittings, valves, cables; `VoxelGeometryCadTest` checks every tier x fitting x mode x
 orientation x route shape), `BikeShape`/`BikeModel`/`BikeTexture` (both bikes; `BikeModelCadTest`).
