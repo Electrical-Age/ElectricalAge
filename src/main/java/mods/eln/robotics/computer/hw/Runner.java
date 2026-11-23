@@ -38,6 +38,7 @@ public final class Runner implements Runnable {
 
     // input gathered for the next exchange; the screen's from any thread
     private final java.util.List<Packet> packetsIn = new java.util.ArrayList<>();
+    /** Typed keys for the next exchange (a reset may empty it from the slice's thread: dropAfterReset). */
     private final java.io.ByteArrayOutputStream keys = new java.io.ByteArrayOutputStream();
     private final java.util.concurrent.ConcurrentLinkedQueue<byte[]> displayIn = new java.util.concurrent.ConcurrentLinkedQueue<>();
     private byte[] displayLeft;

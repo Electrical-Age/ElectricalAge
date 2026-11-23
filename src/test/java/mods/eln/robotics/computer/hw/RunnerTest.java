@@ -58,6 +58,7 @@ class RunnerTest {
         r.tick(true);
         r.awaitIdle();
         assertEquals(0, r.screenInputWaiting(), "nothing waiting in the runner after the reset");
+        // (the check that guards the drop: kept, the runner's events would be in the channel by now)
         assertEquals(0, r.machine.editor.status() & 1, "nor in the channel");
         ScreenProbe again = new ScreenProbe();
         until(r, again, again::ready);
