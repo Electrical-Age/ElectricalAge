@@ -285,9 +285,9 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
         if (v != null && inlet.feedId() >= 0) {
             val q = mods.eln.sim.fluid.FuelQuality.rate(v, inlet.feedId(), mods.eln.sim.fluid.FuelQuality.GENERATOR_LO, mods.eln.sim.fluid.FuelQuality.GENERATOR_HI)
             val perHour = mods.eln.sim.fluid.FuelQuality.engineFoulPerHour(q.coking())
-            info[I18N.tr("Fuel quality")] = String.format("%s; %s", mods.eln.sim.fluid.FuelQuality.describe(q),
+            info[I18N.tr("Fuel quality")] = String.format("%s; %s; %s", mods.eln.sim.fluid.FuelQuality.describe(q),
                 if (perHour > 0) String.format(I18N.tr("fouls it ~%.0f%% an hour at full power (coking %.3f, clean under %.2f)"), perHour * 100, q.coking(), mods.eln.sim.fluid.FuelQuality.ENGINE_BALANCE)
-                else I18N.tr("burns clean"))
+                else I18N.tr("burns clean"), mods.eln.sim.fluid.EaUnits.viscosityText(mods.eln.sim.fluid.FuelQuality.layerViscosity(v, inlet.feedId())))
         }
         if (foul > 0.01) info[I18N.tr("Fouling")] = String.format(I18N.tr("%.0f%% fouled: %.0f%% power (clean fuel clears it slowly; right-click with wool to clean)"), foul * 100, (1 - foul) * 100)
         return info

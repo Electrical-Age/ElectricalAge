@@ -192,7 +192,9 @@ the rules above; the joints are kept alongside:
   included (`FluidPlacement.partners`: FluidWorld's one coupling rule, `FluidWorld.couples`, asked of the block in front of the port;
   AdventurAgent: a second route to a tank's piped port "gave up"), in the preview and on the click.
 - Its kind shows on the body's top: a coloured plate (pressure blue, temperature red, quality green) with a raised white
-  letter P, T or Q for colourblind players. Jade's three headline lines: the reading, the output volts, the full scale.
+  letter P, T or Q for colourblind players. Jade's three headline lines: the reading, the output volts, the full scale. Under them, when the run holds a liquid other than water, its viscosity
+  (`EaUnits.viscosity`, todo #590). A pipe's own Jade has the same line (`EaUnits.putViscosity`), third, in the headline,
+  when the liquid is thick (200x water or more), else after the contents.
 - Its own hidden items are out of the creative tab (`addWithoutRegistry`) and JEI (`compat/JeiPages.hidden`).
 - Its port is `PORT_HEIGHT` (4) voxels off the face over its centre (`PipeTransmitterElement.port`), clear of its
   2-voxel body. `PipePlacer.devicePort` makes it a routing end any way round (dir -1) when a pipe kit clicks the

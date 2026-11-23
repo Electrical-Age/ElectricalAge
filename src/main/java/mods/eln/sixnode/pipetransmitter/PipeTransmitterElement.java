@@ -137,6 +137,10 @@ public class PipeTransmitterElement extends SixNodeElement {
         info.put(PipeSensorPart.name(descriptor.sensing), connected ? readingText() : "not connected to a pipe");
         info.put("Output", Utils.plotVolt("", outputGate.getU()));
         info.put("Full scale", String.format("%.0f %s at %.0f V", scale, PipeSensorPart.unit(descriptor.sensing), Eln.SVU));
+        // (the run's viscosity, after the three: thick liquid crawling through the pipe it reads says why; design-398 6 A)
+        PipePart pipe = pipe();
+        String visc = pipe == null || pipe.fluid == null ? null : mods.eln.sim.fluid.EaUnits.viscosity(mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid));
+        if (visc != null) info.put("Viscosity", visc);
         return info;
     }
 

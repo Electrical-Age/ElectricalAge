@@ -477,9 +477,9 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         if (fuelIn.vessel != null && fuelIn.feedId() >= 0) {
             var q = FuelQuality.rate(fuelIn.vessel, fuelIn.feedId(), FuelQuality.TURBINE_LO, FuelQuality.TURBINE_HI);
             double rate = FuelQuality.foulRate(q.coking(), FuelQuality.ENGINE_BALANCE);
-            info.put(I18N.tr("Fuel quality"), String.format("%s; %s; %.1f mPa s", FuelQuality.describe(q),
+            info.put(I18N.tr("Fuel quality"), String.format("%s; %s; %s", FuelQuality.describe(q),
                 rate > 0 ? String.format(I18N.tr("fouls it ~%.0f%% an hour at full power (coking %.3f, clean under %.2f)"), FuelQuality.engineFoulPerHour(q.coking()) * 100, q.coking(), FuelQuality.ENGINE_BALANCE) : I18N.tr("burns clean"),
-                FuelQuality.layerViscosity(fuelIn.vessel, fuelIn.feedId()) * 1000));
+                EaUnits.viscosityText(FuelQuality.layerViscosity(fuelIn.vessel, fuelIn.feedId()))));
         }
         if (foul > 0.01) info.put(I18N.tr("Fouling"), String.format(I18N.tr("%.0f%% fouled: %.0f%% power (clean fuel clears it slowly; right-click with wool to clean)"), foul * 100, (1 - foul) * 100));
         info.put(I18N.tr("Exhaust"), exhaustPiped ? mods.eln.api.Meters.celsius(exhaust == null ? 0 : exhaust.T() - Water.T0) + ", piped" : I18N.tr("to the air"));

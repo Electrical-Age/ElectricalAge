@@ -89,4 +89,37 @@ class FuelQualityTest {
         FluidNode m = TestSpecies.node(0.1, 0, 1, 293.15, 1e5, TestSpecies.id("diesel"), 5.0, TestSpecies.id("heavy_oil"), 5.0);
         assertEquals(Math.sqrt(0.0035 * 0.2), FuelQuality.layerViscosity(m, TestSpecies.id("diesel")), 1e-3);
     }
+
+    /** The viscosity players read (design-398 6 A): mPa s under 1 Pa s, Neon's bands by the ratio to the game's water. */
+    @Test
+    void viscosityForPlayers() {
+        assertEquals("0.50 mPa s", EaUnits.viscosity(5e-4));
+        assertEquals("200 mPa s", EaUnits.viscosity(0.2));
+        assertEquals("50 Pa s", EaUnits.viscosity(50));
+        assertEquals("thin, 0.50 mPa s, 2.0x water", EaUnits.viscosityText(5e-4));
+        assertEquals("syrupy, 10 mPa s, 40x water", EaUnits.viscosityText(0.01));
+        assertEquals("thick, 200 mPa s, 800x water", EaUnits.viscosityText(0.2));
+        assertEquals("tarry, 50 Pa s, 200,000x water", EaUnits.viscosityText(50));
+        // a node: its liquid but water; none for water only (water's is held constant: it reads as the reference)
+        FluidNode n = TestSpecies.node(0.1, 0, 1, 293.15, 1e5, TestSpecies.id("diesel"), 10.0);
+        String name = SpeciesRegistry.get().byId(TestSpecies.id("diesel")).displayName();
+        assertTrue(EaUnits.viscosity(n).startsWith("thin " + name + ", 3.5 mPa s, 14x water"), EaUnits.viscosity(n));
+        FluidNode w = TestSpecies.node(0.1, 0, 1, 293.15, 1e5, SpeciesRegistry.WATER, 10.0);
+        assertEquals(null, EaUnits.viscosity(w));
+        // oil over water: the oil only
+        FluidNode ow = TestSpecies.node(0.1, 0, 1, 293.15, 1e5, SpeciesRegistry.WATER, 10.0, TestSpecies.id("diesel"), 10.0);
+        assertEquals(EaUnits.viscosity(n), EaUnits.viscosity(ow));
+        // thick: third in the Jade lines, so it shows without sneaking; else last
+        FluidNode cold = TestSpecies.node(0.1, 0, 1, 293.15, 1e5, TestSpecies.id("heavy_oil"), 10.0);
+        assertTrue(EaUnits.viscosity(cold).startsWith("thick ") && EaUnits.viscosity(cold).endsWith("; heat or dilute"), EaUnits.viscosity(cold));
+        var info = new java.util.LinkedHashMap<String, String>();
+        info.put("Pressure", "p");
+        info.put("Contents", "c");
+        info.put("Liquid", "l");
+        EaUnits.putViscosity(info, cold);
+        assertEquals(java.util.List.of("Pressure", "Contents", "Viscosity", "Liquid"), new java.util.ArrayList<>(info.keySet()));
+        info.remove("Viscosity");
+        EaUnits.putViscosity(info, n);
+        assertEquals(java.util.List.of("Pressure", "Contents", "Liquid", "Viscosity"), new java.util.ArrayList<>(info.keySet()));
+    }
 }

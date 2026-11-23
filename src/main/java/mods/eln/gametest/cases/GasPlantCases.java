@@ -282,6 +282,12 @@ public final class GasPlantCases {
             }
             ctx.check(id + ": Jade shows the fuel's quality",
                 gt.getWaila().containsKey(mods.eln.i18n.I18N.tr("Fuel quality")), "");
+            if (mode == 1) {
+                // (cold heavy oil, ~800x water: its viscosity in words, design-398 6 A)
+                String q = gt.getWaila().getOrDefault(mods.eln.i18n.I18N.tr("Fuel quality"), "");
+                ctx.check(id + ": its fuel quality gives cold heavy oil's viscosity: thick, without a fix (engines don't mind it)",
+                    q.contains("; thick, ") && q.endsWith("x water"), q);
+            }
         }
     }
 

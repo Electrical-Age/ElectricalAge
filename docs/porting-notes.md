@@ -610,6 +610,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   did; a cable kit on a pole says so on the route note line. Meter readings, the wireless analyser's report, the
   unloadable-device notices, the pole transformer's foot warning, the toolbag shears breaking and debug output stay
   in the chat. `burnt_heat_furnace_cools_and_burns_nothing`.
+- Viscosity shown (design item 6 A, todo #590): Jade on pipes, tanks and pipe sensors, and the engines' fuel quality,
+  give the liquid's viscosity in words, with mPa s under 1 Pa s and the ratio to the game's water (whose 0.25 mPa s
+  is what flow compares against): "thick heavy oil, 199 mPa s, 800x water; heat or dilute" (bands by Neon: thin
+  under 15x, syrupy, thick from 200x, tarry from 5000x; the engines' lines without the fix, as engines ignore it). A
+  thick liquid's line is third, in the headline, so cold residue that won't flow says why without sneaking. None for water or gas (`EaUnits.viscosity`, `putViscosity`).
+  The pipe sensors gained the line, not a viscosity signal. `pipe_jade_viscosity`, `FuelQualityTest.viscosityForPlayers`.
 
 ### Multi-fluid pipes (2026-11-03)
 - Baughn: EA pipes carry oil "the complex way": fluids are data (datapack species JSON), Raoult mixing within a

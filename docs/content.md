@@ -95,7 +95,7 @@ power; under the balance it clears at the same law; engines foul and clear 4 tim
 2026-11-15: time to consider a fix); wool cleans it at once; nothing is damaged. Balances: furnace burner 0.05, engines 0.02 (diesel with over 7 % heavy oil or 1 % residue fouls an engine). The Gas Turbine's window is
 330 to 720 K, so gasoline, diesel and heavy oil all give full power, and heavy oil fouls it by ~10 % an hour at full
 power (diesel clears 0.8 % an hour, gasoline 1.5 %). Jade on the turbine shows the rating, whether the fuel fouls, the
-fuel's viscosity, and the fouling. Saved as `foul`, `fuelLight`, `fuelHeavy`, `fuelCoking` (absent: clean). The Fuel
+fuel's viscosity (`EaUnits.viscosityText`), and the fouling. Saved as `foul`, `fuelLight`, `fuelHeavy`, `fuelCoking` (absent: clean). The Fuel
 Generator keeps its fuel in a 2000 mB vessel that breathes (a `DeviceInlet` as the turbine's; pipe on its top flange, or
 buckets as before) and burns as much per joule as its old two-bucket tank did; its window is 330 to 400 K (gasoline
 and naphtha), so diesel or residue in its gasoline derate it, and coking fuel fouls it by the engines' law. An old

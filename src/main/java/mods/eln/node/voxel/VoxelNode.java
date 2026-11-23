@@ -2807,6 +2807,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         // (Baughn: say what the pressure is of; steam in grams)
         out.put("Pressure", String.format("%.2f bar of %s, %s", n.P() / 1e5, EaUnits.contents(n), mods.eln.api.Meters.celsius(n.T() - 273.15)));
         out.put("Contents", EaUnits.composition(n));
+        EaUnits.putViscosity(out, n);
         for (VoxelPart p : parts)
             if (p instanceof ValvePart v) out.put(switch (v.mode) {
                 case ValvePart.CONTROL -> "Control valve";

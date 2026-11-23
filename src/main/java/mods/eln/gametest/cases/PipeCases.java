@@ -51,6 +51,7 @@ public final class PipeCases {
         cases.add(new LeakFire(0));
         cases.add(new LeakFire(1));
         cases.add(new LeakFire(2));
+        cases.add(new JadeViscosity());
         cases.add(new ValveByPlayer());
         cases.add(new KitPickupMerges());
         cases.add(new PipeRoutePreview());
@@ -1757,6 +1758,104 @@ public final class PipeCases {
             for (BlockPos p : BlockPos.betweenClosed(ctx.at(0, 0, 0), ctx.at(3, 3, 2)))
                 if (ctx.level().getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.BaseFireBlock)
                     ctx.level().setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+        }
+    }
+
+    /**
+     * Viscosity in Jade (design-398 6 A, thick liquid crawling through a pipe read as a bug): three separate runs, cold
+     * heavy oil (thick: the line third, in the headline, with the fix), diesel (thin: after the contents) and steam (no
+     * line: gas); an iron tank of cold heavy oil (third too, before its liquid line); a pipe sensor on a wall, piped to a
+     * run of diesel (under its three lines).
+     */
+    static final class JadeViscosity implements TestCase {
+        BlockPos oil, diesel, steam, tankAt, sensorAt, sensorRun;
+        mods.eln.oil.TankElement tank;
+        String sensorErr;
+
+        public String id() {
+            return "pipe_jade_viscosity";
+        }
+
+        public int width() {
+            return 6;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+            oil = ctx.at(1, 1, 1);
+            diesel = ctx.at(3, 1, 1);
+            steam = ctx.at(5, 1, 1);
+            var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+            for (BlockPos p : new BlockPos[]{oil, diesel, steam}) lay(ctx, p, 0, 0, 8, 8, 16, 8, 8);
+            for (BlockPos p : new BlockPos[]{oil, diesel}) {
+                VoxelNode n = ctx.voxelByEntity(p);
+                var f = ((PipePart) n.parts.get(0)).fluid;
+                int id = reg.id(p == oil ? "eln:heavy_oil" : "eln:diesel");
+                f.fill(0, 1e5, 293.15);
+                f.addMass(id, 0.6 * f.volume * reg.byId(id).rhoL);
+                f.energy = f.energyAt(293.15);
+                f.update();
+                mods.eln.fluid.FluidWorld.changed(n);
+            }
+            steam(ctx, steam);
+            tankAt = ctx.at(1, 1, 4);
+            tank = (mods.eln.oil.TankElement) ctx.placeTransparent(PlumbingCases.IRON_TANK, tankAt);
+            ctx.after(2, () -> {
+                var v = tank.vessel;
+                mods.eln.sim.fluid.EaUnits.add(v, reg.id("eln:heavy_oil"), 0.3 * v.volume * reg.byId(reg.id("eln:heavy_oil")).rhoL, 293.15, false);
+                v.update();
+            });
+            // (a pipe sensor on a wall, as pipe_transmitter_wall_temperature, its run full of diesel)
+            sensorAt = ctx.at(4, 1, 4);
+            sensorRun = ctx.at(5, 1, 4);
+            ctx.floor(sensorAt.north());
+            sensorErr = mods.eln.node.voxel.PipeSensorItem.place(ctx.level(), sensorAt.north(), net.minecraft.core.Direction.SOUTH,
+                new net.minecraft.world.phys.Vec3(sensorAt.getX() + 0.5, sensorAt.getY() + 0.5, sensorAt.getZ()), mods.eln.node.voxel.PipeSensorPart.TEMPERATURE, ctx.player());
+            if (sensorErr != null) return;
+            int[] port = PipeTransmitterCases.device(ctx, sensorAt).port();
+            sensorErr = ctx.voxelByEntity(sensorAt).addPart(new PipePart(0, new int[]{port[0], port[1], port[2], 16, port[1], port[2]}));
+            lay(ctx, sensorRun, 0, 0, port[1], port[2], 16, port[1], port[2]);
+            for (BlockPos p : new BlockPos[]{sensorAt, sensorRun}) {
+                VoxelNode n = ctx.voxelByEntity(p);
+                for (var part : n.parts)
+                    if (part instanceof PipePart pp) {
+                        var f = pp.fluid;
+                        int id = reg.id("eln:diesel");
+                        f.fill(0, 1e5, 293.15);
+                        f.addMass(id, 0.6 * f.volume * reg.byId(id).rhoL);
+                        f.energy = f.energyAt(293.15);
+                        f.update();
+                    }
+                mods.eln.fluid.FluidWorld.changed(n);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            var t = tank.getWaila();
+            var tk = new java.util.ArrayList<>(t.keySet());
+            ctx.check("tank viscosity: cold heavy oil is thick, third in its Jade, before its liquid line", tk.indexOf("Viscosity") == 2
+                && tk.indexOf("Liquid") == 3 && t.get("Viscosity").startsWith("thick heavy oil, "), "" + t);
+            ctx.check("pipe sensor viscosity: placed, piped to a run", sensorErr == null, "" + sensorErr);
+            if (sensorErr == null) {
+                var w = PipeTransmitterCases.device(ctx, sensorAt).getWaila();
+                var wk = new java.util.ArrayList<>(w.keySet());
+                ctx.check("pipe sensor viscosity: its run's diesel, under its three lines", wk.indexOf("Viscosity") == 3
+                    && w.get("Viscosity").startsWith("thin diesel, "), "" + w);
+            }
+            var o = ctx.voxelByEntity(oil).getWaila(false, 0);
+            var d = ctx.voxelByEntity(diesel).getWaila(false, 0);
+            var s = ctx.voxelByEntity(steam).getWaila(false, 0);
+            ctx.line("pipe viscosity: heavy oil " + o + "; diesel " + d + "; steam " + s);
+            var ok = new java.util.ArrayList<>(o.keySet());
+            var dk = new java.util.ArrayList<>(d.keySet());
+            ctx.check("pipe viscosity: cold heavy oil is thick, third in Jade (its headline), with the fix", ok.indexOf("Viscosity") == 2
+                && o.get("Viscosity").startsWith("thick heavy oil, ") && o.get("Viscosity").endsWith("heat or dilute"), "" + o);
+            ctx.check("pipe viscosity: diesel is thin, after the contents", dk.indexOf("Viscosity") == dk.indexOf("Contents") + 1
+                && d.get("Viscosity").startsWith("thin diesel, ") && d.get("Viscosity").contains(" mPa s, "), "" + d);
+            ctx.check("pipe viscosity: none for steam", !s.containsKey("Viscosity"), "" + s);
         }
     }
 

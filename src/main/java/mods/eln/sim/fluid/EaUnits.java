@@ -77,6 +77,111 @@ public final class EaUnits {
         return parts.isEmpty() ? "empty" : String.join(", ", parts.values());
     }
 
+    /**
+     * Viscosity for players (design-398 item 6 A: thick liquids crawl through pipes, flow being inversely proportional to
+     * it, and unseen that read as a bug): mPa s under 1 Pa s, Pa s from it: "0.50 mPa s", "200 mPa s", "50 Pa s".
+     */
+    public static String viscosity(double paS) {
+        return paS < 1 ? compact(paS * 1000) + " mPa s" : compact(paS) + " Pa s";
+    }
+
+    /** Its ratio to water's viscosity in the game (Water.MU_L, so it says how much slower it flows in the same pipe). */
+    public static double viscosityRatio(double paS) {
+        return paS / Water.MU_L;
+    }
+
+    /** From this ratio to water a liquid is thick: the hint to heat or dilute it, and the line in Jade's headline. */
+    public static final double THICK_RATIO = 200;
+
+    /** "2x water", "800x water", "200,000x water": two significant figures, so the big ones read at a glance. */
+    private static String timesWater(double ratio) {
+        if (ratio < 10) return String.format("%.1fx water", ratio);
+        double mag = Math.pow(10, Math.floor(Math.log10(ratio)) - 1);
+        return String.format(java.util.Locale.ROOT, "%,.0fx water", Math.round(ratio / mag) * mag);
+    }
+
+    /** A viscosity's word (Neon's bands by its ratio to water): thin under 15x, syrupy under 200x, thick under 5000x, tarry. */
+    private static String band(double paS) {
+        double r = viscosityRatio(paS);
+        return r < 15 ? "thin" : r < THICK_RATIO ? "syrupy" : r < 5000 ? "thick" : "tarry";
+    }
+
+    /**
+     * A liquid's viscosity in words: "thin, 0.50 mPa s, 2.0x water", "tarry, 50 Pa s, 200,000x water". No fix: the engines'
+     * fuel lines use it, and they don't mind viscosity (Neon: a fix there would read as a fault).
+     */
+    public static String viscosityText(double paS) {
+        return band(paS) + ", " + viscosity(paS) + ", " + timesWater(viscosityRatio(paS));
+    }
+
+    /**
+     * The viscosity of each liquid layer but water that fills over 1 % of a node (the floor of composition), {Pa s, main
+     * species id} each, bottom first; empty for a node of water or gas only.
+     */
+    static java.util.List<double[]> layerViscosities(FluidNode n) {
+        var out = new java.util.ArrayList<double[]>();
+        if (!holdsOthers(n)) return out;
+        SpeciesRegistry reg = SpeciesRegistry.get();
+        for (int l = 0; l < n.layers(); l++) {
+            int main = -1;
+            double m3 = 0;
+            for (int j = 2; j < n.speciesBound(); j++) {
+                if (n.liquid(j) <= 0 || n.layerOf(j) != l) continue;
+                m3 += n.liquid(j) / reg.byId(j).rhoL;
+                if (main < 0 || n.liquid(j) > n.liquid(main)) main = j;
+            }
+            if (main >= 0 && m3 > 0.01 * n.volume) out.add(new double[]{FuelQuality.layerViscosity(n, main), main});
+        }
+        return out;
+    }
+
+    /**
+     * The Viscosity line of a fluid container, or null for one of water or gas only: one liquid in words and by name,
+     * "thick heavy oil, 200 mPa s, 800x water; heat or dilute" (named: in Jade's headline it may stand above the
+     * contents), several by name, "heavy oil 200 mPa s, 800x water; gasoline 0.40 mPa s, 1.6x water"; the fix if one is
+     * thick.
+     */
+    public static String viscosity(FluidNode n) {
+        var layers = layerViscosities(n);
+        if (layers.isEmpty()) return null;
+        SpeciesRegistry reg = SpeciesRegistry.get();
+        if (layers.size() == 1) {
+            double mu = layers.get(0)[0];
+            return band(mu) + " " + reg.byId((int) layers.get(0)[1]).displayName() + ", " + viscosity(mu) + ", " + timesWater(viscosityRatio(mu))
+                + (viscosityRatio(mu) >= THICK_RATIO ? "; heat or dilute" : "");
+        }
+        StringBuilder b = new StringBuilder();
+        boolean thick = false;
+        for (double[] l : layers) {
+            b.append(b.length() == 0 ? "" : "; ").append(reg.byId((int) l[1]).displayName()).append(' ').append(viscosity(l[0]))
+                .append(", ").append(timesWater(viscosityRatio(l[0])));
+            thick |= viscosityRatio(l[0]) >= THICK_RATIO;
+        }
+        return thick ? b.append("; heat or dilute").toString() : b.toString();
+    }
+
+    /**
+     * Put a fluid container's Viscosity line (viscosity(n); none for water or gas only) into its Jade lines: last, or third
+     * if the liquid is thick, so cold residue that won't flow says why without sneaking (Jade shows three lines).
+     */
+    public static void putViscosity(java.util.Map<String, String> info, FluidNode n) {
+        String v = viscosity(n);
+        if (v == null) return;
+        String key = mods.eln.i18n.I18N.tr("Viscosity");
+        boolean thick = false;
+        for (double[] l : layerViscosities(n)) thick |= viscosityRatio(l[0]) >= THICK_RATIO;
+        if (!thick || info.size() < 2) {
+            info.put(key, v);
+            return;
+        }
+        var rest = new java.util.LinkedHashMap<String, String>();
+        int i = 0;
+        for (var e : info.entrySet()) if (i++ >= 2) rest.put(e.getKey(), e.getValue());
+        for (String k : rest.keySet()) info.remove(k);
+        info.put(key, v);
+        info.putAll(rest);
+    }
+
     /** Two significant figures or so: 0.012, 0.12, 1.2, 12, 120. */
     private static String compact(double v) {
         return String.format(v >= 10 ? "%.0f" : v >= 1 ? "%.1f" : v >= 0.1 ? "%.2f" : "%.3f", v);
