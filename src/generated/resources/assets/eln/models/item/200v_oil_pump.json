@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:item/200v_compressor"
+    "layer0": "eln:item/200v_oil_pump"
   }
 }

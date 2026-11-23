@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:item/large_rheostat"
+    "layer0": "eln:item/200v_electric_heater"
   }
 }

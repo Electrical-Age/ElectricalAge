@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:item/fuel_heat_furnace"
+    "layer0": "eln:item/fractionating_column_segment"
   }
 }

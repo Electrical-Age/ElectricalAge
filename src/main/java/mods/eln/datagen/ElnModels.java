@@ -52,21 +52,7 @@ public class ElnModels implements DataProvider {
     String itemTexture(String name, Item item) {
         // the redrawn icon set: textures/item/<registry id>.png (the schematic set overrides the same paths in a pack)
         if (textureExists("item/" + name)) return "item/" + name;
-        // 26.x oil machines: the macerator's icons until their own exist
-        if (name.endsWith("tar_sand_separator")) return itemTexture(name.replace("tar_sand_separator", "macerator"), item);
-        if (name.endsWith("oil_pump")) return itemTexture(name.replace("oil_pump", "compressor"), item);
-        if (name.equals("steam_injection_wellhead")) return itemTexture("50v_oil_pump", item);   // (until its own icon)
-        if (name.endsWith("electric_heater")) return itemTexture("large_rheostat", item);
         if (name.endsWith("_transmitter") && name.startsWith("pipe_")) return itemTexture(name.replace("_transmitter", "_sensor"), item);   // (the pipe sensor devices: their items' icons)
-        if (name.equals("boiler") || name.equals("large_boiler")) return itemTexture("electrical_furnace", item);   // (large_boiler: PROTOTYPE, the Boiler's icon)
-        if (name.equals("addressable_button")) return itemTexture("signal_button", item);   // (until their own icons)
-        if (name.equals("addressable_light")) return itemTexture("led_vumeter", item);
-        if (name.equals("floor_sensor")) return itemTexture("electrical_entity_sensor", item);
-        if (name.startsWith("fractionating_column")) return itemTexture("fuel_heat_furnace", item);
-        if (name.equals("flare_stack")) return itemTexture("fuel_heat_furnace", item);
-        if (name.endsWith("compact_steam_turbine")) return itemTexture("50v_turbine", item);   // (until its own icon)
-        if (name.endsWith("v_steam_turbine")) return itemTexture(name.replace("_steam_turbine", "_turbine"), item);
-        if (name.endsWith("steam_condenser")) return itemTexture("small_passive_thermal_dissipator", item);   // (until its own icon)
         if (name.endsWith("_tank") && !name.contains("battery")) return itemTexture("small_passive_thermal_dissipator", item);   // (until their own icons)
         if (item instanceof IDescriptorItem di) {
             Object d = di.getEaDescriptor();

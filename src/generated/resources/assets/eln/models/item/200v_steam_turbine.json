@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eln:item/200v_turbine"
+    "layer0": "eln:item/200v_steam_turbine"
   }
 }

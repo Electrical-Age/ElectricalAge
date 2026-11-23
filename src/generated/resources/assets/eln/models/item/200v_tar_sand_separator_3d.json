@@ -1,6 +1,6 @@
 {
   "parent": "eln:item/device_transparent",
   "textures": {
-    "particle": "eln:item/200v_macerator"
+    "particle": "eln:item/200v_tar_sand_separator"
   }
 }
