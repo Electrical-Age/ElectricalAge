@@ -409,8 +409,12 @@ public class LampSupplyElement extends SixNodeElement {
     }
 
     private int getRange(LampSupplyDescriptor desc, Container inventory2) {
-        ItemStack stack = getInventory().getItem(LampSupplyContainer.cableSlotId);
-        if (Utils.isEmpty(stack)) return desc.range;
-        return desc.range + Math.min(64, mods.eln.node.voxel.CableItems.blocks(stack));
+        return range(desc, getInventory().getItem(LampSupplyContainer.cableSlotId));
+    }
+
+    /** The supply's range with this in its cable slot: its own, plus the cable's blocks (a kit's length), up to 64 more. */
+    public static int range(LampSupplyDescriptor desc, ItemStack cable) {
+        if (Utils.isEmpty(cable)) return desc.range;
+        return desc.range + Math.min(64, mods.eln.node.voxel.CableItems.blocks(cable));
     }
 }

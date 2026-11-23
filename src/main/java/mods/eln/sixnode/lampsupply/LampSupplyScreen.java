@@ -48,7 +48,8 @@ public class LampSupplyScreen extends ElnScreen {
         super.init();
         enabling.clear();
         text("cols", () -> tr("power / wireless channel"));
-        text("range", () -> tr("Range: %1$ blocks", render.descriptor.range + deviceItem(0).getCount()));
+        // (the element's own sum: a kit counts its length in blocks; Baughn saw a 37-block kit read as 1)
+        text("range", () -> tr("Range: %1$ blocks", LampSupplyElement.range(render.descriptor, deviceItem(0))));
         for (int ch = 0; ch < render.descriptor.channelCount; ch++) {
             final int c = ch;
             field("p" + c, () -> render.entries.get(c).powerChannel, v -> send(LampSupplyElement.setPowerName, c, s -> s.writeUTF(v)),
