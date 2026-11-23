@@ -59,6 +59,13 @@ public final class Console implements Device {
         return n;
     }
 
+    /** A reset: what was waiting either way belongs to the program that was running, and the interrupt is off. */
+    void clear() {
+        in.clear();
+        out.reset();
+        irq = 0;
+    }
+
     /** Host: the output since the last take. */
     public byte[] take() {
         byte[] b = out.toByteArray();

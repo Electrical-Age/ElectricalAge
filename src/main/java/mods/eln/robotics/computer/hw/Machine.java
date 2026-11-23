@@ -98,9 +98,15 @@ public final class Machine implements Mmio {
         return resets;
     }
 
-    /** Start from the boot vector: registers cleared, RAM kept (a reset doesn't clear chips). */
+    /**
+     * Start from the boot vector: registers cleared, RAM kept (a reset doesn't clear chips). The screen channels are
+     * emptied: events the old program never read would reach the new one (lashtear's halted computer had three 33 KB
+     * saves waiting), and output it didn't finish would run into the new program's first line.
+     */
     public void reset(int cause) {
         resets++;
+        terminal.clear();
+        editor.clear();
         cpu.reset(Memory.BOOT_VECTOR);
         halted = false;
         resetCause = cause;

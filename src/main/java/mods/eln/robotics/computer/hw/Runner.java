@@ -41,6 +41,8 @@ public final class Runner implements Runnable {
     private final java.io.ByteArrayOutputStream keys = new java.io.ByteArrayOutputStream();
     private final java.util.concurrent.ConcurrentLinkedQueue<byte[]> displayIn = new java.util.concurrent.ConcurrentLinkedQueue<>();
     private byte[] displayLeft;
+    /** The machine's reset count when displayLeft was cut: after a reset, the rest of that event is dropped. */
+    private int displayResets;
     private final Floppy[] disks = new Floppy[2];
     private final boolean[] diskChanged = new boolean[2];
     private long hostTicks, machineTicks;
@@ -86,6 +88,12 @@ public final class Runner implements Runnable {
         this.address = address;
         this.onBus = onBus;
         this.levels = levels;
+    }
+
+    /** The Reset button (the Machine held): screen events sent to the program before it are dropped. */
+    public void dropScreenInput() {
+        displayIn.clear();
+        displayLeft = null;
     }
 
     /** Press Break (any thread): taken by the next kick, slice or exchange. */
@@ -185,11 +193,13 @@ public final class Runner implements Runnable {
             breakWanted = false;
             machine.pressBreak();
         }
+        if (displayLeft != null && displayResets != machine.resets()) displayLeft = null;   // (its start went with the reset)
         while (true) {
             byte[] b = displayLeft != null ? displayLeft : displayIn.poll();
             if (b == null) return;
             int n = machine.editor.give(b);
             displayLeft = n < b.length ? java.util.Arrays.copyOfRange(b, n, b.length) : null;
+            displayResets = machine.resets();
             if (displayLeft != null) return;
         }
     }

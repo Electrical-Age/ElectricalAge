@@ -463,7 +463,10 @@ public class ComputerElement extends TransparentNodeElement {
                 case RESET_ID -> {
                     if (runner != null) {
                         Runner r = runner;
-                        r.hold(() -> r.machine.reset(Machine.RESET_POWER));
+                        r.hold(() -> {
+                            r.dropScreenInput();
+                            r.machine.reset(Machine.RESET_POWER);
+                        });
                     }
                 }
                 case BREAK_ID -> {

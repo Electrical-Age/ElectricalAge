@@ -37,6 +37,33 @@ class RunnerTest {
         assertFalse(r.machine.runnable(), "asleep waiting for input");
     }
 
+    /**
+     * lashtear (2026-11-23): a halted computer kept the screen events sent to it (Ctrl+S on a 33 KB file, again and
+     * again), and Reset handed them, and half of one, to the program it started. Reset drops them.
+     */
+    @Test
+    void resetDropsWhatTheOldProgramNeverRead() throws IOException {
+        Runner r = new Runner(JanetRomTest.machine(2));
+        ScreenProbe s = new ScreenProbe();
+        until(r, s, s::ready);
+        r.awaitIdle();
+        r.hold(() -> r.machine.halted = true);
+        byte[] big = ("(save 9 4 1 \"0\" [[0 1 [\"" + "x".repeat(40_000) + "\"]]])\n").getBytes(StandardCharsets.UTF_8);
+        for (int k = 0; k < 3; k++) r.toEditor(big);   // (more than the channel holds: the rest waits in the runner)
+        r.tick(true);
+        r.awaitIdle();
+        assertTrue(r.machine.editor.status() % 2 == 1, "input waiting in the channel");
+        r.hold(() -> {
+            r.dropScreenInput();
+            r.machine.reset(Machine.RESET_POWER);
+        });
+        assertEquals(0, r.machine.editor.status() & 1, "nothing waiting after the reset");
+        ScreenProbe again = new ScreenProbe();
+        until(r, again, again::ready);
+        r.toEditor(again.submit("(* 6 7)"));
+        until(r, again, () -> again.done() && again.log().contains("\n42\n"));
+    }
+
     @Test
     void aSaveResumesMidSession() throws IOException {
         Runner r = new Runner(JanetRomTest.machine(2));
