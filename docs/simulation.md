@@ -120,7 +120,9 @@ and the FE exporter. Tests: `api/ElementHostTest`, `MachineApiCases`, `Wp11Cases
 ## Failures (`src/main/java/mods/eln/sim/process/destruct/`)
 
 - `ValueWatchdog` subclasses (`ThermalLoadWatchDog`, `VoltageStateWatchDog`, `BipoleVoltageWatchdog`,
-  `ResistorPowerWatchdog`, `ShaftSpeedWatchdog` in `Mechanical.kt`) burn a 2 s budget by overflow; one-tick "joker".
+  `ResistorPowerWatchdog`, `ShaftSpeedWatchdog` in `Mechanical.kt`) burn a budget by overflow x seconds (default 2;
+  `ThermalLoadWatchDog`'s is its limit's own number of K s, over the reference, ~550 K s at 850 K, and `setBudget(K s)` sets another, as
+  the Still Pot's shell does); one-tick "joker".
   All are put on `slowProcessList` in content code.
 - Trip -> `IDestructable.fail(cause, value, severity)` -> `Failure` keeps the worst per device and calls
   `Simulator.queueDestruct`. End of tick: failures grouped by `FaultNetwork.of(node)` (nodes reachable via

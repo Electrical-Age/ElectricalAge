@@ -90,12 +90,13 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     /** Under this the pot reads as under vacuum (Pa). */
     public static final double VACUUM_PA = 0.9e5;
 
-    /** (Neon's wording.) */
-    static final String[] TOOLTIP = {
-        "2x2x2, placed at front bottom left; extends right, back, up",
-        "Heat on back low right; vapour out at top back left",
-        "Front: temp low left 1 V/100 °C, drain low right; low flanks: fill left, steam right",
-        "Holds 32 B; fill with up to 24 B of crude"};
+    /** Its tooltip lines (Neon's wording). */
+    static List<String> tooltip() {
+        return List.of(I18N.tr("2x2x2, placed at front bottom left; extends right, back, up"),
+            I18N.tr("Heat on back low right; vapour out at top back left"),
+            I18N.tr("Front: temp low left 1 V/100 °C, drain low right; low flanks: fill left, steam right"),
+            I18N.tr("Holds 32 B; fill with up to 24 B of crude"));
+    }
 
     public final NbtThermalLoad thermal = new NbtThermalLoad("thermal");
     public final NbtElectricalGateOutput tempOut = new NbtElectricalGateOutput("tempOut");
@@ -239,7 +240,10 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         return f > ONSET_F ? Math.min(E_MAX, E_AT_2F0 * (f / ONSET_F - 1)) : 0;
     }
 
-    /** The fill's float (0..1): open under the 24 B charge, shut over the last FILL_BAND_B under it, as the view stops buckets. */
+    /**
+     * The fill's float (0..1): open under the 24 B charge, shut over the last FILL_BAND_B under it, as the view stops
+     * buckets.
+     */
     public double fillOpening() {
         double room = TankDescriptor.bucketsVolume(CHARGE_B) - vessel.liquidVolume();
         return Math.max(0, Math.min(1, room / TankDescriptor.bucketsVolume(FILL_BAND_B)));

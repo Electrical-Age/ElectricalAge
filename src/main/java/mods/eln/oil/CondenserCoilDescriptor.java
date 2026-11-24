@@ -38,6 +38,6 @@ public class CondenserCoilDescriptor extends TransparentNodeDescriptor implement
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        for (String l : CondenserCoilElement.TOOLTIP) list.add(l);
+        list.addAll(CondenserCoilElement.tooltip());
     }
 }

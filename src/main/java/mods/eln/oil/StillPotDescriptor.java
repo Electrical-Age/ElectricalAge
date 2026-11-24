@@ -34,6 +34,6 @@ public class StillPotDescriptor extends TransparentNodeDescriptor implements Fro
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        for (String l : StillPotElement.TOOLTIP) list.add(l);
+        list.addAll(StillPotElement.tooltip());
     }
 }

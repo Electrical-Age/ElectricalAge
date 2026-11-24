@@ -923,7 +923,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (player.getMainHandItem().isEmpty()) {
             int i = pi;
             if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv && sv.breather) {
-                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Fixed at outside pressure; nothing to set."));
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Fixed at outside pressure; nothing to set.")));
                 return true;
             }
             if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv) {
@@ -2869,8 +2869,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (p instanceof SafetyValvePart sv && sv.breather) {
                 // (Neon's wording)
                 double[] o = SafetyValvePart.breathe(n.P());
-                out.put(out.containsKey("Breather valve") ? "Breather valve " + out.size() : "Breather valve",
-                    n.level() >= Math.min(sv.draw(), 0.95) && n.liquidVolume() > 0 ? "Shut by liquid" : o[0] > 0 ? "Venting gas" : o[1] > 0 ? "Drawing air" : "Idle");
+                String name = mods.eln.i18n.I18N.tr("Breather valve");
+                out.put(out.containsKey(name) ? name + " " + out.size() : name,
+                    n.level() >= Math.min(sv.draw(), 0.95) && n.liquidVolume() > 0 ? mods.eln.i18n.I18N.tr("Shut by liquid") : o[0] > 0 ? mods.eln.i18n.I18N.tr("Venting gas")
+                        : o[1] > 0 ? mods.eln.i18n.I18N.tr("Drawing air") : mods.eln.i18n.I18N.tr("Idle"));
             } else if (p instanceof SafetyValvePart sv) {
                 String name = sv.purge ? "Purge valve" : "Safety valve";
                 out.put(out.containsKey(name) ? name + " " + (out.size()) : name,

@@ -57,11 +57,12 @@ public class CondenserCoilElement extends TransparentNodeElement implements Flui
     static final int LOW = TankElement.LOW, HIGH = TankElement.HIGH;
     public static final double LOW_DRAW = (LOW - TankElement.FLANGE_HALF) / 32.0, HIGH_DRAW = (16 + HIGH) / 32.0;
 
-    /** (Neon's wording.) */
-    static final String[] TOOLTIP = {
-        "1x1x2. Cools vapour from a still into liquid.",
-        "Vapour in at top. Gas out front high. Liquid out bottom or front low.",
-        "Cool the back and sides with thermal dissipators."};
+    /** Its tooltip lines (Neon's wording). */
+    static List<String> tooltip() {
+        return List.of(I18N.tr("1x1x2. Cools vapour from a still into liquid."),
+            I18N.tr("Vapour in at top. Gas out front high. Liquid out bottom or front low."),
+            I18N.tr("Cool the back and sides with thermal dissipators."));
+    }
 
     public final NbtThermalLoad thermal = new NbtThermalLoad("thermal");
     private final GhostCells cells = new GhostCells();

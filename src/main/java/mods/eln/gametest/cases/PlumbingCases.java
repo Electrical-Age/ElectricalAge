@@ -328,7 +328,7 @@ public final class PlumbingCases {
      * pressure. Tank A (2,2,1) drains by gravity from its low east port down into receiver B's high west port (B at
      * (4,1,1), lower); each has a breather on a stub on its top port.
      * <ul>
-     * <li>FILLS: B fills from A with neither tank building pressure or pulling a vacuum (within 2 kPa of the air's);</li>
+     * <li>FILLS: B fills from A with neither tank building pressure or pulling a vacuum (within 2.5 kPa of the air's);</li>
      * <li>KEEPS_LIQUID: B over-filled until the water stands in its stub under the breather: no liquid leaves;</li>
      * <li>PULLS_AIR: B alone, half full of water at 0.5 bar (a still pot pulled under): air comes in to ~1 atm;</li>
      * <li>SAVES: a breather's part saves as a breather; safety and purge valves save and load as before (old tags too);
