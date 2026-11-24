@@ -39,7 +39,7 @@ public final class GroundRadarCases {
 
     /**
      * Stone under the radar with a 2 x 2 x 2 hollow at its second layer of cells (2-3 blocks down), right under it: the
-     * picture shows the hollow dark against the stone, the scan takes at least its 3 s, and it drew 100 W meanwhile.
+     * picture shows the hollow dark against the stone, and it drew its cells' energy from the batteries.
      */
     static final class SeesAHollow implements TestCase {
         GroundRadarElement r;
@@ -92,7 +92,8 @@ public final class GroundRadarCases {
             c.check("ground radar: it looks down to the world's floor", p.layers[p.layers.length - 1].depth() + p.layers[p.layers.length - 1].cell()
                 >= p.cy - 1 - c.level().getMinY(), st);
             double used = before - energy(r.getInventory().getItem(0));
-            c.check("ground radar: a scan draws 100 W for about 3 s", used > 250 && used < 600, String.format("%.0f J", used));
+            double cost = mods.eln.transparentnode.groundradar.GroundRadarDescriptor.J_PER_CELL * p.cells();
+            c.check("ground radar: a scan costs its cells' energy", Math.abs(used - cost) < 0.05 * cost + 1, String.format("%.0f J for %.0f J of cells", used, cost));
         }
     }
 

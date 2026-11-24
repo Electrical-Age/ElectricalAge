@@ -38,7 +38,7 @@ class GroundScanTest {
 
     @Test
     void layersGrowWithDepthAndReachTheFloor() {
-        GroundScan.Layer[] l = GroundScan.layers(128);
+        GroundScan.Layer[] l = GroundScan.layers(128, GroundScan.GROWTH);
         assertEquals(2, l[0].cell());
         assertEquals(0, l[0].depth());
         for (int k = 1; k < l.length; k++) {

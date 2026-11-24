@@ -17,10 +17,30 @@ import static mods.eln.i18n.I18N.tr;
  * mods.eln.cad.models.GroundRadar.
  */
 public class GroundRadarDescriptor extends TransparentNodeDescriptor {
-    /** What a scan draws from the batteries, and for how long at least (the picture builds over it). */
-    public static final double SCAN_W = 100, SCAN_S = 3;
-    /** Samples read per tick: a whole scan (~300k samples to bedrock from sea level) in about 2-3 s. */
-    public static final int SAMPLES_PER_TICK = 8000;
+    /**
+     * What a scan costs: J_PER_CELL for each cell (Baughn: energy goes as resolution x range), drawn as fast as the
+     * batteries give it, at most SAMPLES_PER_TICK samples of work a tick (~1 ms), and at least MIN_S long. The smallest
+     * scan from sea level is ~11k cells (~350 J, 3 s on two portable batteries); the largest ~230k (~7 kJ, ~35 s).
+     */
+    public static final double J_PER_CELL = 0.03, MIN_S = 3;
+    public static final int SAMPLES_PER_TICK = 16000;
+    public static final int MAX_RANGE = 3, MAX_DETAIL = 4;
+
+    /** Cells across at a range setting. */
+    public static int cellsAcross(int range) {
+        return GroundScan.N * range;
+    }
+
+    /** The cells' growth with depth at a detail setting. */
+    public static int growth(int detail) {
+        return GroundScan.GROWTH * detail;
+    }
+
+    /** A scan's energy (J) depth blocks down to the floor at these settings. */
+    public static double energy(int depth, int range, int detail) {
+        int n = cellsAcross(range);
+        return J_PER_CELL * n * n * GroundScan.layers(Math.max(0, depth), growth(detail)).length;
+    }
     public static final int BATTERY_SLOTS = 2;
     final Obj3D obj;
 

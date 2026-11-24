@@ -8,13 +8,13 @@
    "row": [
     {
      "canvas": "top",
-     "width": 96,
-     "height": 96
+     "width": 144,
+     "height": 144
     },
     {
      "canvas": "side",
-     "width": 136,
-     "height": 96
+     "width": 144,
+     "height": 144
     }
    ],
    "fill": true
@@ -31,7 +31,26 @@
     },
     {
      "text": "depth",
-     "sample": "123 m down (Y -60), 456 m across"
+     "sample": "123 m down (Y -60), 456 m across, 12 m cells"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
+     "slider": "range",
+     "sample": [
+      "Range: 144 m across"
+     ],
+     "fill": true
+    },
+    {
+     "slider": "detail",
+     "sample": [
+      "Detail: 4x"
+     ],
+     "fill": true
     }
    ],
    "fill": true
@@ -50,7 +69,7 @@
     },
     {
      "text": "status",
-     "sample": "The batteries ran flat during the scan"
+     "sample": "Scan 7.0 kJ, ~35 s. Batteries 100%, scanned 59 min ago"
     }
    ],
    "fill": true

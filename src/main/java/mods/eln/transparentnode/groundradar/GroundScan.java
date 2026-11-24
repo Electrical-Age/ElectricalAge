@@ -15,10 +15,12 @@ package mods.eln.transparentnode.groundradar;
  * The work is done a few samples at a time ({@link #step}): the device spreads a scan over its seconds.
  */
 public final class GroundScan {
-    /** Cells across, at every depth. */
+    /** Cells across at the default range (Settings). */
     public static final int N = 24;
-    /** The top cells' side (blocks), and how fast it grows: side = TOP_CELL + depth / GROWTH, rounded. */
+    /** The top cells' side (blocks), and how fast it grows by default: side = TOP_CELL + depth / growth, rounded. */
     public static final int TOP_CELL = 2, GROWTH = 8;
+    /** The most cells across a scan may have. */
+    public static final int MAX_N = 96;
     /** Samples a cell reads at most (3 x 3 x 3 strata; a cell of 3 or fewer blocks a side is read whole). */
     public static final int MAX_SAMPLES = 27;
     /** Densities are kept as bytes over 0..MAX_DENSITY g/cm3. */
@@ -43,13 +45,16 @@ public final class GroundScan {
 
     /** One layer of cells: its top (blocks below the device's floor, 0 = the block under it) and its cells' side. */
     public record Layer(int depth, int cell) {
-        /** The world x (or z) of cell i's low edge, centred on c. */
-        public int edge(int c, int i) {
-            return c - N * cell / 2 + i * cell;
-        }
+    }
+
+    /** The world x (or z) of cell i's low edge in layer l, centred on c. */
+    public int edge(Layer l, int c, int i) {
+        return c - n * l.cell() / 2 + i * l.cell();
     }
 
     public final int cx, cy, cz;
+    /** Cells across at every depth, and the growth of the cells' side with depth (side = TOP_CELL + depth / growth). */
+    public final int n, growth;
     public final Layer[] layers;
     /** Per layer, N x N cells (index (k * N + i) * N + j, i along x, j along z): density bytes and flags. */
     public final byte[] density, flags, signal;
@@ -65,21 +70,30 @@ public final class GroundScan {
      * the world's floor (inclusive).
      */
     public GroundScan(World world, int cx, int cy, int cz, int minY) {
+        this(world, cx, cy, cz, minY, N, GROWTH);
+    }
+
+    /** As above, n cells across, cells growing by one block every growth blocks down. */
+    public GroundScan(World world, int cx, int cy, int cz, int minY, int n, int growth) {
         this.world = world;
+        this.n = n;
+        this.growth = growth;
         this.minY = minY;
         this.cx = cx;
         this.cy = cy;
         this.cz = cz;
-        layers = layers(cy - 1 - minY + 1);
-        density = new byte[layers.length * N * N];
-        flags = new byte[layers.length * N * N];
-        signal = new byte[layers.length * N * N];
-        strength = new float[layers.length * N * N];
+        layers = layers(cy - 1 - minY + 1, growth);
+        density = new byte[layers.length * n * n];
+        flags = new byte[layers.length * n * n];
+        signal = new byte[layers.length * n * n];
+        strength = new float[layers.length * n * n];
     }
 
     /** A finished scan read back (the client's copy). */
-    public GroundScan(int cx, int cy, int cz, Layer[] layers, byte[] density, byte[] flags, byte[] signal) {
+    public GroundScan(int cx, int cy, int cz, int n, int growth, Layer[] layers, byte[] density, byte[] flags, byte[] signal) {
         this.world = null;
+        this.n = n;
+        this.growth = growth;
         this.minY = Integer.MIN_VALUE;
         this.cx = cx;
         this.cy = cy;
@@ -89,14 +103,14 @@ public final class GroundScan {
         this.flags = flags;
         this.signal = signal;
         this.strength = null;
-        next = layers.length * N * N;
+        next = layers.length * n * n;
     }
 
     /** The layers that fill depth blocks under the device: each as thick as its cells are wide; the last one cut short. */
-    public static Layer[] layers(int depth) {
+    public static Layer[] layers(int depth, int growth) {
         java.util.List<Layer> l = new java.util.ArrayList<>();
         for (int d = 0; d < depth; ) {
-            int c = cellAt(d);
+            int c = cellAt(d, growth);
             l.add(new Layer(d, c));
             d += c;
         }
@@ -104,12 +118,12 @@ public final class GroundScan {
     }
 
     /** A cell's side at depth d (blocks under the device). */
-    public static int cellAt(int d) {
-        return (int) Math.round(TOP_CELL + d / (double) GROWTH);
+    public static int cellAt(int d, int growth) {
+        return (int) Math.round(TOP_CELL + d / (double) growth);
     }
 
     public int cells() {
-        return layers.length * N * N;
+        return layers.length * n * n;
     }
 
     public boolean done() {
@@ -121,6 +135,16 @@ public final class GroundScan {
         return next / (double) Math.max(1, cells());
     }
 
+    /** Read at most maxCells cells, stopping once maxSamples samples are spent; returns the cells read. */
+    public int stepCells(int maxCells, int maxSamples) {
+        int c = 0;
+        while (!done() && c < maxCells && maxSamples > 0) {
+            maxSamples -= cell(next++);
+            c++;
+        }
+        return c;
+    }
+
     /** Read cells, top layer first, until about budget samples are spent or the scan is done; true if it is done. */
     public boolean step(int budget) {
         while (!done() && budget > 0) budget -= cell(next++);
@@ -129,11 +153,11 @@ public final class GroundScan {
 
     /** Read one cell; returns the samples it took. */
     private int cell(int index) {
-        int k = index / (N * N), i = index / N % N, j = index % N;
+        int k = index / (n * n), i = index / n % n, j = index % n;
         Layer layer = layers[k];
         int side = layer.cell;
         int top = cy - 1 - layer.depth;
-        int x0 = layer.edge(cx, i), z0 = layer.edge(cz, j);
+        int x0 = edge(layer, cx, i), z0 = edge(layer, cz, j);
         int per = side <= 3 ? side : 3;   // samples per axis
         // (the last layer is cut off at the world's floor: only what is above it is read; under it is nothing)
         int tall = Math.max(1, Math.min(side, top - minY + 1)), perY = Math.min(per, tall);
@@ -178,7 +202,7 @@ public final class GroundScan {
         double s = 1;
         if (k > 0) {
             int pi = parent(k, i, cx), pj = parent(k, j, cz);
-            int p = ((k - 1) * N + pi) * N + pj;
+            int p = ((k - 1) * n + pi) * n + pj;
             s = strength[p];
         }
         double meanAtt = known > 0 ? att / known : 0.02;
@@ -194,9 +218,9 @@ public final class GroundScan {
     /** The index, along one axis, of the cell in layer k - 1 over the centre of cell i of layer k (clamped). */
     private int parent(int k, int i, int c) {
         Layer l = layers[k], up = layers[k - 1];
-        int centre = l.edge(c, i) + l.cell / 2;
-        int pi = Math.floorDiv(centre - up.edge(c, 0), up.cell);
-        return Math.max(0, Math.min(N - 1, pi));
+        int centre = edge(l, c, i) + l.cell / 2;
+        int pi = Math.floorDiv(centre - edge(up, c, 0), up.cell);
+        return Math.max(0, Math.min(n - 1, pi));
     }
 
     /** A jittered offset inside stratum a of n across a side. */
@@ -216,16 +240,16 @@ public final class GroundScan {
 
     /** Cell (k, i, j)'s density in g/cm3. */
     public double densityAt(int k, int i, int j) {
-        return (density[(k * N + i) * N + j] & 0xFF) * MAX_DENSITY / 255;
+        return (density[(k * n + i) * n + j] & 0xFF) * MAX_DENSITY / 255;
     }
 
     /** Cell (k, i, j)'s signal, 0..1: how much of the radar's pulse reached it (0: none, or unknown ground). */
     public double signalAt(int k, int i, int j) {
-        return (signal[(k * N + i) * N + j] & 0xFF) / 255.0;
+        return (signal[(k * n + i) * n + j] & 0xFF) / 255.0;
     }
 
     public int flagsAt(int k, int i, int j) {
-        return flags[(k * N + i) * N + j] & 0xFF;
+        return flags[(k * n + i) * n + j] & 0xFF;
     }
 
     /** The layer holding depth d (blocks under the device), or -1. */
@@ -236,13 +260,15 @@ public final class GroundScan {
 
     // ---- wire form (to the client, and to computers)
 
+    /** The picture as bytes (deflated: a wide, detailed scan is a few hundred thousand cells). */
     public byte[] encode() {
-        var bos = new java.io.ByteArrayOutputStream(16 + layers.length * (4 + 2 * N * N));
-        var o = new java.io.DataOutputStream(bos);
-        try {
+        var bos = new java.io.ByteArrayOutputStream(16 + layers.length * (4 + n * n));
+        try (var o = new java.io.DataOutputStream(new java.util.zip.DeflaterOutputStream(bos))) {
             o.writeInt(cx);
             o.writeInt(cy);
             o.writeInt(cz);
+            o.writeShort(n);
+            o.writeShort(growth);
             o.writeShort(layers.length);
             for (Layer l : layers) {
                 o.writeShort(l.depth);
@@ -259,18 +285,18 @@ public final class GroundScan {
 
     /** A scan from encode()'s bytes, or null if they don't make one. */
     public static GroundScan decode(byte[] b) {
-        try {
-            var in = new java.io.DataInputStream(new java.io.ByteArrayInputStream(b));
+        try (var in = new java.io.DataInputStream(new java.util.zip.InflaterInputStream(new java.io.ByteArrayInputStream(b)))) {
             int x = in.readInt(), y = in.readInt(), z = in.readInt();
-            int n = in.readShort();
-            if (n <= 0 || n > 512) return null;
-            Layer[] ls = new Layer[n];
-            for (int k = 0; k < n; k++) ls[k] = new Layer(in.readShort(), in.readShort());
-            byte[] d = new byte[n * N * N], f = new byte[n * N * N], g = new byte[n * N * N];
+            int n = in.readShort(), growth = in.readShort(), count = in.readShort();
+            if (n <= 0 || n > MAX_N || growth <= 0 || count <= 0 || count > 1024) return null;
+            Layer[] ls = new Layer[count];
+            for (int k = 0; k < count; k++) ls[k] = new Layer(in.readShort(), in.readShort());
+            int cells = count * n * n;
+            byte[] d = new byte[cells], f = new byte[cells], g = new byte[cells];
             in.readFully(d);
             in.readFully(f);
             in.readFully(g);
-            return new GroundScan(x, y, z, ls, d, f, g);
+            return new GroundScan(x, y, z, n, growth, ls, d, f, g);
         } catch (java.io.IOException | RuntimeException e) {
             return null;
         }
@@ -278,7 +304,7 @@ public final class GroundScan {
 
     // ---- the picture's palette (the screen, the lab's PNG)
 
-    /** A cell's colour: voids dark, earth brown, rock grey, dense bright; water blue, oil amber, lava red; structures hatched. */
+    /** A cell's colour: voids dark, earth brown, rock grey, dense bright; water blue, oil amber, lava red; structures tinted violet; faded cells grey. */
     public static int colour(GroundScan p, int k, int i, int j) {
         int f = p.flagsAt(k, i, j);
         double d = p.densityAt(k, i, j);
@@ -288,13 +314,13 @@ public final class GroundScan {
         else if ((f & OIL) != 0) rgb = 0xC88C1E;
         else if ((f & LIQUID) != 0) rgb = 0x2860C8;
         else rgb = ramp(d);
-        if ((f & BUILT) != 0 && ((i + j) & 1) == 0) rgb = mix(rgb, 0xA060D0, 0.6);
-        // static over a faded cell (and a little grain everywhere)
+        if ((f & BUILT) != 0) rgb = mix(rgb, 0xA060D0, 0.5);
+        // a faded cell turns flat grey (with a faint grain): weak signal reads as "can't tell", not as texture
         int h = hash(i * 31 + k * 977, j * 17 + k, k * 7919);
-        int grey = 50 + (h & 0xFF) * 90 / 255;
+        int grey = 0x6A + (h & 0x0F) - 8;
         double fade = 1 - p.signalAt(k, i, j);
         if ((f & OIL) != 0) fade *= 0.5;   // (oil answers the pulse strongly: it stands out through faded ground)
-        rgb = mix(rgb, grey << 16 | grey << 8 | grey, 0.05 + 0.9 * Math.pow(fade, 1.5));
+        rgb = mix(rgb, grey << 16 | grey << 8 | grey, 0.85 * Math.pow(fade, 1.5));
         return 0xFF000000 | rgb;
     }
 

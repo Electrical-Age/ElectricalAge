@@ -171,7 +171,11 @@ public final class LabCommands {
                 .then(Commands.literal("oilrubber").executes(c -> demo(c.getSource(), () -> oilRubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("latex").executes(c -> demo(c.getSource(), () -> latex(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("converters").executes(c -> demo(c.getSource(), () -> converters(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
-                .then(Commands.literal("radar").executes(c -> demo(c.getSource(), () -> radar(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("radar").executes(c -> demo(c.getSource(), () -> radar(c.getSource(), BlockPos.containing(c.getSource().getPosition()), 1, 1)))
+                    .then(Commands.argument("range", IntegerArgumentType.integer(1, mods.eln.transparentnode.groundradar.GroundRadarDescriptor.MAX_RANGE))
+                        .then(Commands.argument("detail", IntegerArgumentType.integer(1, mods.eln.transparentnode.groundradar.GroundRadarDescriptor.MAX_DETAIL))
+                            .executes(c -> demo(c.getSource(), () -> radar(c.getSource(), BlockPos.containing(c.getSource().getPosition()),
+                                IntegerArgumentType.getInteger(c, "range"), IntegerArgumentType.getInteger(c, "detail")))))))
                 .then(Commands.literal("computers").executes(c -> demo(c.getSource(), () -> computers(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("loggerdemo").executes(c -> demo(c.getSource(), () -> loggerDemo(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("spmodules").executes(c -> demo(c.getSource(), () -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -568,10 +572,11 @@ public final class LabCommands {
      * written as radar-X_Y_Z.png in the world's folder: every layer seen from above (top left first, by rows) and the
      * side view through the centre along x (lab look-dev and client checks).
      */
-    static int radar(CommandSourceStack src, BlockPos pos) {
+    static int radar(CommandSourceStack src, BlockPos pos, int range, int detail) {
         var level = src.getLevel();
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
         var r = (mods.eln.transparentnode.groundradar.GroundRadarElement) placeTransparent(level, player, "Ground Radar", pos);
+        r.setSettings(range, detail);
         for (int i = 0; i < 2; i++) {
             var b = mods.eln.Eln.findItemStack("Portable Battery");
             var e = (mods.eln.item.electricalinterface.IItemEnergyBattery) mods.eln.misc.Utils.getItemObject(b);
@@ -579,10 +584,10 @@ public final class LabCommands {
             r.getInventory().setItem(i, b);
         }
         long t0 = System.nanoTime();
-        var scan = mods.eln.transparentnode.groundradar.GroundRadarElement.scanNow(level, pos);
+        var scan = mods.eln.transparentnode.groundradar.GroundRadarElement.scanNow(level, pos, range, detail);
         r.keepPicture(scan);
         long ms = (System.nanoTime() - t0) / 1_000_000;
-        int n = mods.eln.transparentnode.groundradar.GroundScan.N, s = 4, cols = 8, L = scan.layers.length, rows = (L + cols - 1) / cols;
+        int n = scan.n, s = Math.max(1, 96 / n), cols = 8, L = scan.layers.length, rows = (L + cols - 1) / cols;
         int w = cols * (n * s + 4), h = rows * (n * s + 4) + L * 6 + 8;
         var img = new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_RGB);
         for (int k = 0; k < L; k++) {
@@ -597,6 +602,7 @@ public final class LabCommands {
             for (int i = 0; i < n; i++)
                 for (int a = 0; a < s * 2; a++)
                     for (int b = 0; b < 6; b++) if (i * s * 2 + a < w) img.setRGB(i * s * 2 + a, sy + k * 6 + b, mods.eln.transparentnode.groundradar.GroundScan.colour(scan, k, i, n / 2) & 0xFFFFFF);
+        double kj = mods.eln.transparentnode.groundradar.GroundRadarDescriptor.J_PER_CELL * scan.cells() / 1000;
         var file = level.getServer().getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
             .resolve("radar-" + pos.getX() + "_" + pos.getY() + "_" + pos.getZ() + ".png");
         try {
@@ -611,7 +617,8 @@ public final class LabCommands {
             if (c > 0) oil.append(" y").append(scan.cy - 1 - scan.layers[k].depth()).append(':').append(c);
         }
         String oilCells = oil.length() == 0 ? " none" : oil.toString();
-        src.sendSuccess(() -> Component.literal("ground radar at " + pos.toShortString() + ": " + L + " layers in " + ms + " ms, picture " + file.getFileName()
+        src.sendSuccess(() -> Component.literal("ground radar at " + pos.toShortString() + " range " + range + " detail " + detail + ": " + n + " across, " + L + " layers, "
+            + scan.cells() + " cells (" + String.format("%.1f", kj) + " kJ) in " + ms + " ms, picture " + file.getFileName()
             + "; oil cells by layer top:" + oilCells), false);
         return 1;
     }

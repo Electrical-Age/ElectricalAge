@@ -13,11 +13,14 @@ public class GroundRadarRender extends TransparentNodeElementRender {
     /** The batteries' charge (0..1; -1: none), the scan's progress (-1: not scanning), why the last scan stopped. */
     float battery = -1, progress = -1;
     String fault = "";
+    /** The scan settings, what a scan costs at them (J) and what the batteries can give (W). */
+    int range = 1, detail = 1;
+    float energy, rate;
     /** The last picture, and the game time it was taken. */
     GroundScan picture;
     long pictureAt;
     /** The screen's depth and cut, kept while the block is in view (reopening it comes back to them). */
-    int viewLayer, viewRow = GroundScan.N / 2;
+    int viewLayer, viewRow = -1;
 
     public GroundRadarRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
@@ -37,6 +40,10 @@ public class GroundRadarRender extends TransparentNodeElementRender {
             battery = stream.readFloat();
             progress = stream.readFloat();
             fault = stream.readUTF();
+            range = stream.readByte();
+            detail = stream.readByte();
+            energy = stream.readFloat();
+            rate = stream.readFloat();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -62,5 +69,15 @@ public class GroundRadarRender extends TransparentNodeElementRender {
 
     void scan() {
         clientSendId(GroundRadarElement.SCAN_ID);
+    }
+
+    void setRange(int r) {
+        range = r;
+        clientSendFloat(GroundRadarElement.RANGE_ID, r);
+    }
+
+    void setDetail(int d) {
+        detail = d;
+        clientSendFloat(GroundRadarElement.DETAIL_ID, d);
     }
 }

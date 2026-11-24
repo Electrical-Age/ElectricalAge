@@ -28,14 +28,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The Ground Radar: a scan, asked for from its screen, draws SCAN_W from its batteries while GroundScan reads the ground
- * under it (SAMPLES_PER_TICK a tick, for at least SCAN_S); the finished picture goes to every player with the screen
+ * The Ground Radar: a scan, asked for from its screen, reads the ground under it (GroundScan, at the screen's range and
+ * detail) as fast as its batteries pay for the cells (tick); the finished picture goes to every player with the screen
  * open, and to each player who opens it later. The batteries stay in it when it is broken (Baughn: they remain in the
  * item): its inventory goes into the dropped item's data and comes back when it is placed. The picture is kept in the
  * world's save; not in the item.
  */
 public class GroundRadarElement extends TransparentNodeElement {
-    public static final byte SCAN_ID = 1;
+    public static final byte SCAN_ID = 1, RANGE_ID = 2, DETAIL_ID = 3;
     /** Kinds of the packets to the screen. */
     public static final byte PICTURE_ID = 1;
 
@@ -45,6 +45,9 @@ public class GroundRadarElement extends TransparentNodeElement {
     GroundScan scanning;
     double scanTime;
     private int ticks;
+    /** The scan's settings (the screen's sliders): range 1..3 (24, 48, 72 cells across), detail 1..4 (cells grow 1, 2, 3,
+     *  4 times slower with depth). */
+    int range = 1, detail = 1;
     /** The last finished picture (GroundScan.encode), or null, and the game time it was finished at. */
     byte[] picture;
     long pictureAt;
@@ -133,37 +136,48 @@ public class GroundRadarElement extends TransparentNodeElement {
         needPublish();
     }
 
-    /** A whole scan of the ground under pos at once (the lab's /elnlab radar). */
-    public static GroundScan scanNow(ServerLevel level, net.minecraft.core.BlockPos pos) {
-        GroundScan s = newScan(level, pos);
+    /** A whole scan of the ground under pos at once, at this range and detail (the lab's /elnlab radar). */
+    public static GroundScan scanNow(ServerLevel level, net.minecraft.core.BlockPos pos, int range, int detail) {
+        GroundScan s = newScan(level, pos, range, detail);
         while (!s.step(1 << 20)) ;
         return s;
     }
 
-    static GroundScan newScan(ServerLevel level, net.minecraft.core.BlockPos p) {
-        int floor = level.getMinY();
+    static GroundScan newScan(ServerLevel level, net.minecraft.core.BlockPos p, int range, int detail) {
+        int floor = level.getMinY(), n = GroundRadarDescriptor.cellsAcross(range), growth = GroundRadarDescriptor.growth(detail);
         // (structures within the cone's widest half-width, but no farther than players' view: past that nothing is loaded)
         int view = level.getServer() == null ? 10 : level.getServer().getPlayerList().getViewDistance();
-        int deepest = Math.min(GroundScan.cellAt(p.getY() - floor) * GroundScan.N / 2 + 16, (view + 1) * 16);
+        int deepest = Math.min(GroundScan.cellAt(p.getY() - floor, growth) * n / 2 + 16, (view + 1) * 16);
         GroundRadarWorld world = new GroundRadarWorld(level, p.getX(), p.getZ(), deepest);
-        return new GroundScan(world, p.getX(), p.getY(), p.getZ(), floor);
+        return new GroundScan(world, p.getX(), p.getY(), p.getZ(), floor, n, growth);
+    }
+
+    /** Set the scan's range and detail (clamped). */
+    public void setSettings(int range, int detail) {
+        this.range = Math.max(1, Math.min(GroundRadarDescriptor.MAX_RANGE, range));
+        this.detail = Math.max(1, Math.min(GroundRadarDescriptor.MAX_DETAIL, detail));
+        needPublish();
+    }
+
+    /** What a scan from here at the current settings costs (J). */
+    double scanEnergy() {
+        var level = node.coordonate.world();
+        int depth = node.coordonate.pos().getY() - level.getMinY();
+        return GroundRadarDescriptor.energy(depth, range, detail);
     }
 
     /** Start a scan; false (with fault set) if it can't. */
     public boolean startScan() {
         if (scanning != null) return false;
         if (!(node.coordonate.world() instanceof ServerLevel level)) return false;
-        if (rate() < GroundRadarDescriptor.SCAN_W && capacity() > 0) {
-            fault = I18N.tr("The batteries can't give %1$W", (int) GroundRadarDescriptor.SCAN_W);
+        double need = scanEnergy();
+        if (charge() < need) {
+            fault = capacity() <= 0 ? I18N.tr("The batteries are flat")
+                : I18N.tr("This scan needs %1$J", mods.eln.misc.Utils.plotValue(need));
             needPublish();
             return false;
         }
-        if (charge() < GroundRadarDescriptor.SCAN_W * GroundRadarDescriptor.SCAN_S) {
-            fault = I18N.tr("The batteries are flat");
-            needPublish();
-            return false;
-        }
-        GroundScan s = newScan(level, node.coordonate.pos());
+        GroundScan s = newScan(level, node.coordonate.pos(), range, detail);
         if (s.cells() == 0) {
             fault = I18N.tr("No ground under it");
             needPublish();
@@ -176,20 +190,27 @@ public class GroundRadarElement extends TransparentNodeElement {
         return true;
     }
 
+    /**
+     * A tick of a scan: as many cells as the batteries' discharge rate pays for this tick (J_PER_CELL each; Baughn: energy
+     * goes as resolution x range, and the time as how fast the batteries can deliver it), at most SAMPLES_PER_TICK
+     * samples of work; done once every cell is read and MIN_S has passed.
+     */
     void tick(double dt) {
         if (scanning == null) {
             sendToNewViewers();
             return;
         }
-        if (!draw(GroundRadarDescriptor.SCAN_W, dt)) {
+        scanTime += dt;
+        double afford = rate() * dt;
+        int cells = (int) Math.floor(afford / GroundRadarDescriptor.J_PER_CELL);
+        int read = scanning.stepCells(cells, GroundRadarDescriptor.SAMPLES_PER_TICK);
+        if (read > 0 && !draw(read * GroundRadarDescriptor.J_PER_CELL / dt, dt) || afford <= 0) {
             scanning = null;
             fault = I18N.tr("The batteries ran flat during the scan");
             needPublish();
             return;
         }
-        scanTime += dt;
-        boolean done = scanning.step(GroundRadarDescriptor.SAMPLES_PER_TICK);
-        if (done && scanTime >= GroundRadarDescriptor.SCAN_S) {
+        if (scanning.done() && scanTime >= GroundRadarDescriptor.MIN_S) {
             picture = scanning.encode();
             pictureAt = node.coordonate.world().getGameTime();
             scanning = null;
@@ -207,7 +228,7 @@ public class GroundRadarElement extends TransparentNodeElement {
     /** The scan's progress, 0..1 (by time and by cells, whichever is behind), or -1 when not scanning. */
     double progress() {
         if (scanning == null) return -1;
-        return Math.min(scanning.progress(), Math.min(1, scanTime / GroundRadarDescriptor.SCAN_S));
+        return Math.min(scanning.progress(), Math.min(1, scanTime / GroundRadarDescriptor.MIN_S));
     }
 
     /** The picture to each player with the screen open who hasn't had it yet (opening the screen again resends it). */
@@ -236,7 +257,19 @@ public class GroundRadarElement extends TransparentNodeElement {
     @Override
     public byte networkUnserialize(DataInputStream stream) {
         byte id = super.networkUnserialize(stream);
-        if (id == SCAN_ID) startScan();
+        try {
+            switch (id) {
+                case SCAN_ID -> startScan();
+                case RANGE_ID -> range = Math.max(1, Math.min(GroundRadarDescriptor.MAX_RANGE, Math.round(stream.readFloat())));
+                case DETAIL_ID -> detail = Math.max(1, Math.min(GroundRadarDescriptor.MAX_DETAIL, Math.round(stream.readFloat())));
+                default -> {
+                    return id;
+                }
+            }
+        } catch (IOException e) {
+            return unserializeNulldId;
+        }
+        if (id != SCAN_ID) needPublish();
         return unserializeNulldId;
     }
 
@@ -248,6 +281,10 @@ public class GroundRadarElement extends TransparentNodeElement {
             stream.writeFloat(cap > 0 ? (float) (charge() / cap) : -1);
             stream.writeFloat((float) progress());
             stream.writeUTF(fault == null ? "" : fault);
+            stream.writeByte(range);
+            stream.writeByte(detail);
+            stream.writeFloat((float) scanEnergy());
+            stream.writeFloat((float) rate());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -290,6 +327,8 @@ public class GroundRadarElement extends TransparentNodeElement {
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
+        nbt.putByte("range", (byte) range);
+        nbt.putByte("detail", (byte) detail);
         if (picture != null) {
             nbt.putByteArray("picture", picture);
             nbt.putLong("pictureAt", pictureAt);
@@ -301,6 +340,9 @@ public class GroundRadarElement extends TransparentNodeElement {
         super.readFromNBT(nbt);
         picture = nbt.getByteArray("picture").orElse(null);
         pictureAt = nbt.getLongOr("pictureAt", 0);
+        range = Math.max(1, Math.min(GroundRadarDescriptor.MAX_RANGE, nbt.getByteOr("range", (byte) 1)));
+        detail = Math.max(1, Math.min(GroundRadarDescriptor.MAX_DETAIL, nbt.getByteOr("detail", (byte) 1)));
+        if (picture != null && GroundScan.decode(picture) == null) picture = null;   // (an older picture's format)
     }
 
     // ---- no wires

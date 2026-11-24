@@ -46,8 +46,13 @@ public class GroundRadarScreen extends ElnScreen {
         });
         button("up", () -> "▲", () -> layer = Math.max(0, layer - 1), tr("Shallower"));
         button("down", () -> "▼", () -> layer = Math.min(layers() - 1, layer + 1), tr("Deeper"));
-        button("scan", () -> tr("Scan"), render::scan, tr("Scan the ground under the radar (%1$W for at least %2$ s)",
-            (int) GroundRadarDescriptor.SCAN_W, (int) GroundRadarDescriptor.SCAN_S));
+        button("scan", () -> tr("Scan"), render::scan, tr("Scan the ground under the radar"),
+            tr("Wider and finer scans cost more energy, and take longer on the same batteries"));
+        slider("range", 1, GroundRadarDescriptor.MAX_RANGE, 1, render.range,
+            v -> Component.literal(tr("Range: %1$ m across", GroundRadarDescriptor.cellsAcross((int) Math.round(v)) * GroundScan.TOP_CELL)),
+            v -> render.setRange((int) Math.round(v)));
+        slider("detail", 1, GroundRadarDescriptor.MAX_DETAIL, 1, render.detail,
+            v -> Component.literal(tr("Detail: %1$x", (int) Math.round(v))), v -> render.setDetail((int) Math.round(v)));
         text("depth", this::depthText);
         text("status", this::statusText);
     }
@@ -74,14 +79,16 @@ public class GroundRadarScreen extends ElnScreen {
         layer = Math.max(0, Math.min(p.layers.length - 1, layer));
         GroundScan.Layer l = p.layers[layer];
         int y = p.cy - 1 - l.depth();
-        return tr("%1$ m down (Y %2$), %3$ m across", l.depth() + 1, y, l.cell() * GroundScan.N);
+        return tr("%1$ m down (Y %2$), %3$ m across, %4$ m cells", l.depth() + 1, y, l.cell() * p.n, l.cell());
     }
 
     String statusText() {
         if (render.progress >= 0) return tr("Scanning... %1$", mods.eln.misc.Utils.plotPercent(render.progress));
         if (!render.fault.isEmpty()) return render.fault;
         if (render.battery < 0) return tr("No batteries");
-        String b = tr("Batteries %1$", mods.eln.misc.Utils.plotPercent(render.battery));
+        String cost = tr("Scan %1$J, ~%2$ s.", mods.eln.misc.Utils.plotValue(render.energy),
+            (int) Math.ceil(Math.max(GroundRadarDescriptor.MIN_S, render.rate > 0 ? render.energy / render.rate : 0)));
+        String b = cost + " " + tr("Batteries %1$", mods.eln.misc.Utils.plotPercent(render.battery));
         var level = net.minecraft.client.Minecraft.getInstance().level;
         if (render.picture == null || level == null) return b;
         long ago = Math.max(0, level.getGameTime() - render.pictureAt) / 20;
@@ -95,16 +102,17 @@ public class GroundRadarScreen extends ElnScreen {
             g.fill(x, y, x + w, y + h, 0xFF101014);
             return;
         }
-        int k = Math.max(0, Math.min(p.layers.length - 1, layer));
-        int cs = Math.max(1, Math.min(w, h) / GroundScan.N);
-        for (int i = 0; i < GroundScan.N; i++)
-            for (int j = 0; j < GroundScan.N; j++)
-                g.fill(x + i * cs, y + j * cs, x + (i + 1) * cs, y + (j + 1) * cs, GroundScan.colour(p, k, i, j));
+        int k = Math.max(0, Math.min(p.layers.length - 1, layer)), n = p.n;
+        row = Math.max(0, Math.min(n - 1, row < 0 ? n / 2 : row));
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                g.fill(x + i * w / n, y + j * h / n, x + (i + 1) * w / n, y + (j + 1) * h / n, GroundScan.colour(p, k, i, j));
         // the side view's cut, and the radar over the centre
-        g.fill(x, y + row * cs + cs / 2, x + GroundScan.N * cs, y + row * cs + cs / 2 + 1, 0x80FFFFFF);
-        int c = GroundScan.N / 2 * cs;
-        g.fill(x + c - 1, y + c - 1, x + c + 1, y + c + 1, 0xFFFFFFFF);
-        g.text(font, "N", x + c - 2, y + 1, 0xFFFFFFFF, true);
+        int ry = y + row * h / n + h / n / 2;
+        g.fill(x, ry, x + w, ry + 1, 0x80FFFFFF);
+        int cx = x + w / 2, cy = y + h / 2;
+        g.fill(cx - 1, cy - 1, cx + 1, cy + 1, 0xFFFFFFFF);
+        g.text(font, "N", cx - 2, y + 1, 0xFFFFFFFF, true);
     }
 
     private void drawSide(GuiGraphicsExtractor g, int x, int y, int w, int h) {
@@ -114,16 +122,15 @@ public class GroundRadarScreen extends ElnScreen {
             g.fill(x, y, x + w, y + h, 0xFF101014);
             return;
         }
-        int n = p.layers.length;
-        for (int k = 0; k < n; k++) {
-            int y0 = y + k * h / n, y1 = y + (k + 1) * h / n;
-            for (int i = 0; i < GroundScan.N; i++)
-                g.fill(x + i * w / GroundScan.N, y0, x + (i + 1) * w / GroundScan.N, y1, GroundScan.colour(p, k, i, row));
+        int n = p.n, L = p.layers.length, r = Math.max(0, Math.min(n - 1, row < 0 ? n / 2 : row));
+        for (int k = 0; k < L; k++) {
+            int y0 = y + k * h / L, y1 = y + (k + 1) * h / L;
+            for (int i = 0; i < n; i++) g.fill(x + i * w / n, y0, x + (i + 1) * w / n, y1, GroundScan.colour(p, k, i, r));
         }
-        int k = Math.max(0, Math.min(n - 1, layer));
-        int ly = y + k * h / n;
-        g.fill(x - 3, ly, x, y + (k + 1) * h / n, 0xFFFFFFFF);
-        g.fill(x + w, ly, x + w + 3, y + (k + 1) * h / n, 0xFFFFFFFF);
+        int k = Math.max(0, Math.min(L - 1, layer));
+        int ly = y + k * h / L;
+        g.fill(x - 3, ly, x, y + (k + 1) * h / L, 0xFFFFFFFF);
+        g.fill(x + w, ly, x + w + 3, y + (k + 1) * h / L, 0xFFFFFFFF);
         g.text(font, "W", x + 1, y + 1, 0xFFFFFFFF, true);
         g.text(font, "E", x + w - 6, y + 1, 0xFFFFFFFF, true);
     }
@@ -132,8 +139,7 @@ public class GroundRadarScreen extends ElnScreen {
     public boolean mouseClicked(MouseButtonEvent e, boolean doubleClick) {
         GroundScan p = render.picture;
         if (p != null && top != null && top.has(e.x(), e.y())) {
-            int cs = Math.max(1, Math.min(top.w, top.h) / GroundScan.N);
-            row = Math.max(0, Math.min(GroundScan.N - 1, (int) ((e.y() - top.y) / cs)));
+            row = Math.max(0, Math.min(p.n - 1, (int) ((e.y() - top.y) * p.n / top.h)));
             return true;
         }
         if (p != null && side != null && side.has(e.x(), e.y())) {
