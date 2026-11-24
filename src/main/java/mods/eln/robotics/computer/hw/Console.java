@@ -10,6 +10,13 @@ public final class Console implements Device {
     private final java.util.ArrayDeque<Byte> in = new java.util.ArrayDeque<>();
     private final java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
     private final int outCap, inCap;
+    /**
+     * A byte was sent with no room for it: the rest of that message is dropped up to its newline, and the host is told
+     * (CANCEL after what it had) to drop the start it already has, rather than fuse the two halves into another,
+     * well-formed but wrong message (Wire review E16).
+     */
+    private boolean dropping, cancelPending;
+    public static final byte CANCEL = 0x18;
     int irq;
 
     public Console(int outCap, int inCap) {
@@ -31,7 +38,13 @@ public final class Console implements Device {
     public void write(int off, int v) {
         switch (off) {
             case TX -> {
-                if (out.size() < outCap) out.write(v);
+                if (dropping) {
+                    if ((v & 0xFF) == '\n') dropping = false;
+                } else if (out.size() < outCap) out.write(v);
+                else {
+                    dropping = (v & 0xFF) != '\n';
+                    cancelPending = true;
+                }
             }
             case IRQ -> irq = v & 3;
             default -> {
@@ -64,10 +77,15 @@ public final class Console implements Device {
         in.clear();
         out.reset();
         irq = 0;
+        dropping = cancelPending = false;
     }
 
     /** Host: the output since the last take. */
     public byte[] take() {
+        if (cancelPending) {
+            out.write(CANCEL);
+            cancelPending = false;
+        }
         byte[] b = out.toByteArray();
         out.reset();
         return b;

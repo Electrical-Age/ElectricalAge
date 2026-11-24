@@ -283,6 +283,9 @@ public final class Machine implements Mmio {
         }
         mem.restoreRam(saved.pages());
         cpu.time = ticks;
+        // (the channels' buffers aren't saved: a newline ends whatever half event the program was reading, so the next
+        // one isn't glued to it; an empty line is ignored)
+        editor.give(new byte[]{'\n'});
         lines();
         return true;
     }

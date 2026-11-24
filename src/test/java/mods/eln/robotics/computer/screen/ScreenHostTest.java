@@ -134,4 +134,15 @@ class ScreenHostTest {
         from(h, "(screen 40 20)");
         assertTrue(h.takeToComputer().stream().anyMatch(t -> t.startsWith("(moved 2 ")), "a smaller screen narrowed it");
     }
+
+    /** A message cut short by a full channel is dropped whole, not fused with the next one (CANCEL from the console). */
+    @Test
+    void aCutMessageIsDropped() {
+        ScreenHost h = new ScreenHost();
+        h.fromComputer("(window 2 1 1 20 5 \"Fir".getBytes(StandardCharsets.UTF_8));
+        h.fromComputer(new byte[]{mods.eln.robotics.computer.hw.Console.CANCEL});
+        h.fromComputer("(window 3 1 1 20 5 \"Second\")\n".getBytes(StandardCharsets.UTF_8));
+        assertNull(h.scene.windows.get(2));
+        assertEquals("Second", h.scene.windows.get(3).title);
+    }
 }

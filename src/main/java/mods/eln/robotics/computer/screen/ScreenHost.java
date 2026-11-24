@@ -46,6 +46,11 @@ public final class ScreenHost {
         // the buffer isn't shifted once a line)
         int from = 0;
         for (int k = 0; k < display.length; k++) {
+            if (display[k] == mods.eln.robotics.computer.hw.Console.CANCEL) {   // (the message so far was cut short: dropped)
+                partial.reset();
+                from = k + 1;
+                continue;
+            }
             if (display[k] != '\n') continue;
             byte[] line;
             if (partial.size() > 0) {
@@ -70,8 +75,11 @@ public final class ScreenHost {
             // (it waits as an icon on the desk: the boot banner shouldn't cover it; the system menu brings it back)
             take(List.of(new Form.Symbol("minimize"), (long) CONSOLE_TAB));
         }
-        // (up to the last whole UTF-8 character; the rest waits for the next slice)
+        // (up to the last whole UTF-8 character; the rest waits for the next slice; a dropped byte's CANCEL isn't text)
         byte[] all = consoleTail.length == 0 ? bytes : concat(consoleTail, bytes);
+        int kept = 0;
+        for (byte x : all) if (x != mods.eln.robotics.computer.hw.Console.CANCEL) all[kept++] = x;
+        if (kept < all.length) all = java.util.Arrays.copyOf(all, kept);
         int end = all.length, back = 0;
         while (back < 3 && end - back - 1 >= 0 && (all[end - back - 1] & 0xC0) == 0x80) back++;
         int lead = end - back - 1;
