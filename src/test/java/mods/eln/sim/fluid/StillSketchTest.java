@@ -87,7 +87,7 @@ class StillSketchTest {
         double charged[] = new double[5];
         double airIn, fMax, fMaxBoil, entrainedKg, msPerStep, endPotK, endShellK, maxShellK, maxCoilK, endS, minPotP = 1e9, maxPotP;
         long failures, cut, substeps;
-        double balanceErr;
+        double balanceErr, gasFed;
         double shellRiseKPerMin = Double.NaN, shellLimitAt = Double.NaN, residueOnlyAt = Double.NaN;
     }
 
@@ -281,6 +281,7 @@ class StillSketchTest {
                 r.entrainedKg += m;
                 winEnt += m;
             }
+            r.gasFed += feed.flow * DT;
             if (line.fSpecies != null) for (int j = 0; j < 5; j++) winOver[j] += at(line.fSpecies, IDX[j]) * DT;
             winHeat += heatJ;
             // boiled down to residue: what volatile liquid is left
@@ -320,7 +321,8 @@ class StillSketchTest {
         r.failures = st.failures;
         r.cut = st.cut;
         r.substeps = st.substeps;
-        // the books: every species charged is in a node or went out of a breather
+        // the books: every species charged is in a node or went out of a breather (the gas: what the feed brought before the end)
+        r.charged[4] = r.gasFed;
         double worst = 0;
         for (int j = 0; j < 5; j++) {
             double held = pot.mass(IDX[j]) + neck.mass(IDX[j]) + coil.mass(IDX[j]);
@@ -329,6 +331,9 @@ class StillSketchTest {
             worst = Math.max(worst, err);
         }
         r.balanceErr = worst;
+        assertTrue(worst < 1e-6, c.label + ": the books are off by " + worst);
+        assertEquals(0, r.failures, c.label + ": solver failures");
+        assertEquals(0, r.cut, c.label + ": steps cut short");
         return r;
     }
 
