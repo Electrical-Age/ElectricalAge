@@ -157,14 +157,13 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
 
     @Override
     public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-        return thermalFace(0, 0, 0, side) ? thermal : null;
+        return null;   // (its one heat face is on a ghost cell)
     }
 
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return 0;
-        if (side == front) return NodeBase.maskElectricalOutputGate;
-        return thermalFace(0, 0, 0, side) ? NodeBase.maskThermal : 0;
+        return side == front ? NodeBase.maskElectricalOutputGate : 0;   // (its one heat face is on a ghost cell)
     }
 
     @Override
@@ -269,8 +268,9 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         double kg = entrainment(factor) * uSmooth * rho[0] * (VOLUME / HEIGHT) * dt;
         FluidNode line = null;
         for (FluidEdge e : vapourEdges()) line = e.a == vessel ? e.b : e.a;
-        if (line != null && !line.fixed) kg = Math.min(kg, Math.max(0, LINE_FULL * line.volume - line.liquidVolume()) * rho[1]);
-        else kg = 0;
+        if (line == null || line.fixed) kg = 0;
+        // (a pipe run carries it on while it has room; a vessel on the flange (a tank, a condenser) takes it all)
+        else if (FluidWorld.isPipeRun(line)) kg = Math.min(kg, Math.max(0, LINE_FULL * line.volume - line.liquidVolume()) * rho[1]);
         entrained = kg > 0 ? EaUnits.carryLiquid(vessel, line, kg) : 0;
         meterEntrain += entrained;
     }

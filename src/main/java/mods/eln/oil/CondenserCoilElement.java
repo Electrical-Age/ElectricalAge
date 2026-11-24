@@ -50,9 +50,12 @@ public class CondenserCoilElement extends TransparentNodeElement implements Flui
     public static final double PORT_K = TankElement.PORT_K;
     /** Over this (K) while vapour comes in, gasoline (370 K) no longer condenses well: Jade warns. */
     public static final double WARM_K = 333;
-    /** The side flanges' heights (px in their block, as a tank's: LOW, HIGH) and where they draw on the 2-block node. */
+    /**
+     * The side flanges' heights (px in their block, as a tank's: LOW, HIGH) and where they draw on the 2-block node, by a
+     * tank's rule: the low flange at its bottom edge (liquid leaves a flange over its bottom), the high one at its centre.
+     */
     static final int LOW = TankElement.LOW, HIGH = TankElement.HIGH;
-    public static final double LOW_DRAW = LOW / 32.0, HIGH_DRAW = (16 + HIGH) / 32.0;
+    public static final double LOW_DRAW = (LOW - TankElement.FLANGE_HALF) / 32.0, HIGH_DRAW = (16 + HIGH) / 32.0;
 
     /** (Neon's wording.) */
     static final String[] TOOLTIP = {

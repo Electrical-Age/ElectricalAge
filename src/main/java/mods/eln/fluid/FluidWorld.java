@@ -82,6 +82,11 @@ public final class FluidWorld implements IProcess {
 
     private final java.util.Set<FluidNode> burstThisStep = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
 
+    /** Is n (a node of a network, as edgesOf gives them) a run of pipe: a lump of pieces, or a lone piece? */
+    public static boolean isPipeRun(FluidNode n) {
+        return n.lumpable || INSTANCE.lumps.containsKey(n);
+    }
+
     /** A run that burst less than this long ago (ticks) is venting through its crack: its other pieces hold. */
     public static final long BURST_QUIET = 20 * 30;
 
