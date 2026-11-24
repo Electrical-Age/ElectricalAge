@@ -78,8 +78,17 @@ public final class Runner implements Runnable {
 
     /** Screen input (any thread); kick() to have it taken at once. */
     public void toEditor(byte[] b) {
+        // (bounded: a halted or busy computer and a client sending big saves mustn't fill the server's memory)
+        if (displayQueued.addAndGet(b.length) > DISPLAY_QUEUE_MAX) {
+            displayQueued.addAndGet(-b.length);
+            return;
+        }
         displayIn.add(b);
     }
+
+    /** Screen input queued for the program, bytes at most (the rest is dropped). */
+    static final int DISPLAY_QUEUE_MAX = 256 * 1024;
+    private final java.util.concurrent.atomic.AtomicInteger displayQueued = new java.util.concurrent.atomic.AtomicInteger();
 
     public void insert(int drive, Floppy f) {
         disks[drive] = f;
@@ -101,6 +110,7 @@ public final class Runner implements Runnable {
         if (inputResets == machine.resets()) return;
         inputResets = machine.resets();
         displayIn.clear();
+        displayQueued.set(0);
         displayLeft = null;
         keys.reset();
     }
@@ -211,6 +221,7 @@ public final class Runner implements Runnable {
         while (true) {
             byte[] b = displayLeft != null ? displayLeft : displayIn.poll();
             if (b == null) return;
+            if (b != displayLeft) displayQueued.addAndGet(-b.length);
             int n = machine.editor.give(b);
             displayLeft = n < b.length ? java.util.Arrays.copyOfRange(b, n, b.length) : null;
             if (displayLeft != null) return;

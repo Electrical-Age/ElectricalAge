@@ -65,4 +65,59 @@ class ScreenHostTest {
         assertNotNull(b);
         assertEquals(1, b.size());
     }
+
+    /** Coalescing kept a changed element at its last place: clients made 6 before 5, the reverse of the computer. */
+    @Test
+    void aBatchKeepsTheOrderElementsWereMadeIn() {
+        ScreenHost h = new ScreenHost();
+        from(h, "(window 2 1 1 40 10 \"W\")");
+        h.takeBatch();
+        from(h, "(text 2 5 0 0 :white \"a\")", "(text 2 6 0 1 :white \"b\")", "(text 2 5 0 0 :white \"c\")");
+        assertEquals(List.of("(text 2 5 0 0 :white \"c\")", "(text 2 6 0 1 :white \"b\")"), h.takeBatch());
+        from(h, "(text 2 7 0 0 :white \"a\")", "(remove 2 7)", "(text 2 7 0 0 :white \"b\")");
+        assertEquals(3, h.takeBatch().size(), "never across a remove");
+    }
+
+    /** Clients are untrusted: what the screen doesn't show never reaches the program. */
+    @Test
+    void eventsMustNameWhatTheScreenShows() {
+        ScreenHost h = new ScreenHost();
+        from(h, "(window 2 1 1 40 10 \"W\")", "(menus 2 [[\"Project\" [\"Open\" \"o\"] nil [\"Quit\" \"q\"]]])",
+            "(enable 2 \"Project\" \"Quit\" false)", "(button 2 3 0 0 8 \"Go\")", "(list 2 4 0 1 10 3 [\"a\" \"b\"])");
+        assertNotNull(h.check("(pick 2 \"Project\" \"Open\")", null));
+        assertNull(h.check("(pick 2 \"Project\" \"Quit\")", null), "greyed out");
+        assertNull(h.check("(pick 2 \"Project\" \"Format A:\")", null), "not there");
+        assertNotNull(h.check("(press 2 3)", null));
+        assertNull(h.check("(press 2 4)", null), "a list isn't a button");
+        assertNotNull(h.check("(select 2 4 1)", null));
+        assertNull(h.check("(select 2 4 2)", null), "past the end");
+        assertNull(h.check("(answer 2 9 0)", null), "no requester open");
+        assertNull(h.check("(close 2)", null), "not an event clients send");
+        from(h, "(ask 2 9 \"T\" \"B\" [\"OK\"])");
+        assertNull(h.check("(press 2 3)", null), "under a requester");
+        assertNotNull(h.check("(answer 2 9 0)", null));
+        assertEquals("(moved 2 1 1 40 10)", h.check("(moved 2 1 1 9999 9999)", null).replaceAll("moved 2 \\d+ \\d+ \\d+ \\d+", "moved 2 1 1 40 10"));
+    }
+
+    /** A UTF-8 character split between two slices of the channel stays whole. */
+    @Test
+    void aCharacterSplitBetweenSlicesStaysWhole() {
+        ScreenHost h = new ScreenHost();
+        byte[] b = "(window 2 1 1 40 10 \"Café\")\n".getBytes(StandardCharsets.UTF_8);
+        int cut = new String(b, StandardCharsets.UTF_8).indexOf('é') + 1;   // (inside the é's two bytes)
+        h.fromComputer(java.util.Arrays.copyOfRange(b, 0, cut));
+        h.fromComputer(java.util.Arrays.copyOfRange(b, cut, b.length));
+        assertEquals("Café", h.scene.windows.get(2).title);
+    }
+
+    /** A log line that never ends wraps instead of growing for ever. */
+    @Test
+    void aLogLineHasALimit() {
+        ScreenHost h = new ScreenHost();
+        from(h, "(window 2 1 1 40 10 \"Log\")", "(log 2 1 0 0 :fill :fill)");
+        for (int k = 0; k < 50; k++) from(h, "(append 2 1 :white \"" + "z".repeat(100) + "\")");
+        var lines = h.scene.windows.get(2).elements.get(1).lines;
+        assertEquals(5, lines.size());
+        for (var l : lines) assertTrue(l.stream().mapToInt(r -> r.text().length()).sum() <= Scene.LINE_MAX);
+    }
 }

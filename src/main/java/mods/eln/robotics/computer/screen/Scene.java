@@ -186,10 +186,27 @@ public final class Scene {
                     lines.add(new ArrayList<>());
                     while (lines.size() > LOG_LINES) lines.poll();
                 }
-                if (!parts[k].isEmpty()) lines.peekLast().add(new Run(colour, parts[k]));
+                if (parts[k].isEmpty()) continue;
+                // (a line is at most LINE_MAX characters: one that never ends wraps, rather than growing for ever)
+                List<Run> last = lines.peekLast();
+                int have = 0;
+                for (Run r : last) have += r.text().length();
+                String rest = parts[k];
+                while (have + rest.length() > LINE_MAX) {
+                    int take = LINE_MAX - have;
+                    if (take > 0) last.add(new Run(colour, rest.substring(0, take)));
+                    rest = rest.substring(Math.max(0, take));
+                    lines.add(last = new ArrayList<>());
+                    while (lines.size() > LOG_LINES) lines.poll();
+                    have = 0;
+                }
+                if (!rest.isEmpty()) last.add(new Run(colour, rest));
             }
         }
     }
+
+    /** A log line's characters at most. */
+    public static final int LINE_MAX = 1000;
 
     static final java.util.Set<String> ELEMENTS = java.util.Set.of("box", "text", "log", "line", "button", "list", "editor", "raw",
         "image", "icon");
