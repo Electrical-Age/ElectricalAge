@@ -183,6 +183,11 @@ test {
     // jqwik keeps failing seeds (replayed first on the next run) under build/, not in the tests' working directory
     systemProperty 'jqwik.database', file('build/jqwik-database').absolutePath
     if (project.hasProperty('fluidCases')) systemProperty 'fluid.cases', project.property('fluidCases')
+    // the pot still sketch (refinery M2 step 0, StillSketchTest; minutes): -Psketch=still [-PsketchOnly=label prefix]
+    if (project.hasProperty('sketch')) systemProperty 'eln.sketch', project.property('sketch')
+    systemProperty 'eln.sketch.out', file('build/still-sketch.txt').absolutePath
+    if (project.hasProperty('sketchOnly')) systemProperty 'eln.sketch.only', project.property('sketchOnly')
+    for (k in ['t1', 't2', 't3', 'stop']) if (project.hasProperty('sketch.' + k)) systemProperty 'eln.sketch.' + k, project.property('sketch.' + k)
     // the checked model library's reports and before/after previews (board #44): -PcadReport=PREFIX -PcadPreviews=DIR
     if (project.hasProperty('cadReport')) systemProperty 'cad.report', project.property('cadReport')
     if (project.hasProperty('cadDetail')) systemProperty 'cad.detail', project.property('cadDetail')
