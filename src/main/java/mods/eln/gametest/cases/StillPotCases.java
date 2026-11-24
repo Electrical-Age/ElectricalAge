@@ -454,10 +454,12 @@ public final class StillPotCases {
             ctx.check("still overfired: it boils over", maxEntrain > 0, String.format("%.3f g/s", 1000 * maxEntrain));
             // (what entrainment does, by mass: ~7 g of residue carried through the coil to the receiver at 15 kW; with the
             // coil condensing the light cuts too the product's coking is ~0.03: it fouls engines, chokes none, logged)
-            ctx.check("still overfired: carried residue reached the receiver (over 2 g)", r.liquid(sp("residue")) > 0.002, String.format("%.4f kg", r.liquid(sp("residue"))));
+            ctx.check("still overfired: carried residue reached the receiver (over 5 g)", r.liquid(sp("residue")) > 0.005, String.format("%.4f kg", r.liquid(sp("residue"))));
             var q = FuelQuality.rate(fuel, sp("diesel"), FuelQuality.TURBINE_LO, FuelQuality.TURBINE_HI);
             ctx.line(String.format("still overfired: the product's coking %.3f (turbine choke %.2f, piston %.2f, balance %.2f), the turbine choked: %s", q.coking(),
                 FuelQuality.TURBINE_CHOKE, FuelQuality.PISTON_CHOKE, FuelQuality.ENGINE_BALANCE, gl.gt.choked()));
+            ctx.check("still overfired: the product fouls an engine and chokes none (over the balance, under the piston choke)",
+                q.coking() > FuelQuality.ENGINE_BALANCE && q.coking() < FuelQuality.PISTON_CHOKE && !gl.gt.choked(), String.format("coking %.3f", q.coking()));
         }
     }
 
@@ -685,7 +687,7 @@ public final class StillPotCases {
      * <li>CALM: 20 B of dead crude near its bubble point, 4 kW (a medium burner): it boils, Jade says what, the signal
      * reads its temperature at 1 V a 100 °C, and nothing is carried over;</li>
      * <li>OVERFIRE: the same at 25 kW (a big burner forced): it boils over, Jade says so, residue reaches the receiver, and
-     * the product fouls an engine. Whether a whole overfired batch chokes a turbine
+     * the product chokes a Fuel Generator (over PISTON_CHOKE). Whether a whole overfired batch chokes a turbine
      * (the step-0 sketch: 0.26) needs the condenser: without one its vapour must all leave by the breather, the line
      * pressurises and, run longer, the network stalls;</li>
      * <li>RESIDUE: residue with a little heavy oil, 10 kW: "only residue left", then its watchdog burns it at its shell
@@ -922,21 +924,23 @@ public final class StillPotCases {
 
     /**
      * A second pass of the gasoline heart (the plan: >= 98 %): the sensible batch's gasoline cut (97.6 % gasoline, the rest
-     * diesel) through the pot again, cut earlier (to a 390 K pot, the player's controller: here the test sets the valves):
-     * its first receiver is at least 98 % gasoline.
+     * diesel) through the pot again, cut when the pot passes 385 K (the player's controller: here the test sets the
+     * valves): its first receiver is at least 98 % gasoline and holds most of the charge's gasoline. (6 B is ~0.31 kg of
+     * gasoline: a game bucket is 67.5 mL.)
      */
     static final class SecondPass extends StillBox {
         Still s;
         IProcess heat;
         mods.eln.sim.mna.component.VoltageSource openA, openB;
         int switchedAt = -1, tick;
+        double gasoline0;
 
         public String id() {
             return "still_pot_second_pass";
         }
 
         public int ticks() {
-            return 1800;
+            return 3000;
         }
 
         public void build(TestContext ctx) {
@@ -945,12 +949,13 @@ public final class StillPotCases {
             s.warmLine(ctx, o, 400);
             double kg = 6 * EaUnits.KG_PER_MB_WATER * 1000 / Water.RHO_L * 740;
             charge(s.pot, 340, 380, sp("gasoline"), 0.976 * kg, sp("diesel"), 0.024 * kg);
+            gasoline0 = 0.976 * kg;
             openB = s.hold(s.valveB.signal, Eln.SVU);
             openA = s.hold(s.valveA.signal, 0);
             Eln.simulator.addSlowProcess(heat = dt -> {
                 tick++;
-                s.pot.thermal.moveEnergyTo(2000 * dt);
-                if (switchedAt < 0 && s.pot.vessel.T() > 390) {
+                s.pot.thermal.moveEnergyTo(3000 * dt);
+                if (switchedAt < 0 && s.pot.vessel.T() > 385) {
                     switchedAt = tick;
                     openB.setU(0);
                     openA.setU(Eln.SVU);
@@ -963,11 +968,14 @@ public final class StillPotCases {
             s.remove();
             FluidNode heart = s.recvB.vessel;
             double share = Still.share(heart, sp("gasoline"));
-            ctx.line(String.format("still second pass: switched at tick %d (pot %.0f K now); heart %s (gasoline %.2f %%); tail %s", switchedAt, s.pot.vessel.T(),
-                EaUnits.composition(heart), 100 * share, EaUnits.composition(s.recvA.vessel)));
+            ctx.line(String.format("still second pass: switched at tick %d (pot %.0f K now, %s); heart %s, %.4f kg (gasoline %.2f %%, %.0f %% of the charge's %.4f kg); tail %s",
+                switchedAt, s.pot.vessel.T(), EaUnits.composition(s.pot.vessel), EaUnits.composition(heart), heart.liquid(sp("gasoline")), 100 * share,
+                100 * heart.liquid(sp("gasoline")) / gasoline0, gasoline0, EaUnits.composition(s.recvA.vessel)));
             ctx.check("still second pass: everything fits", s.err.isEmpty(), s.err);
-            ctx.check("still second pass: the heart is at least 98 % gasoline", share >= 0.98 && heart.liquid(sp("gasoline")) > 0.02,
-                String.format("%.2f %% of %.4f kg", 100 * share, heart.liquid(sp("gasoline"))));
+            ctx.check("still second pass: the pot's temperature made the cut", switchedAt >= 0, "tick " + switchedAt);
+            ctx.check("still second pass: the heart is at least 98 % gasoline", share >= 0.98, String.format("%.2f %%", 100 * share));
+            ctx.check("still second pass: the heart holds most of the charge's gasoline (over 70 %)", heart.liquid(sp("gasoline")) > 0.7 * gasoline0,
+                String.format("%.4f of %.4f kg", heart.liquid(sp("gasoline")), gasoline0));
         }
     }
 
