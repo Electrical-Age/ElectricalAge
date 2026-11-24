@@ -28,7 +28,6 @@ public final class StillPotCases {
     private StillPotCases() {
     }
 
-    public static final int STILL_POT = 20 + (83 << 6);
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new Body());
@@ -40,24 +39,10 @@ public final class StillPotCases {
         cases.add(new SpargeLayers());
     }
 
-    public static final int CONDENSER_COIL = 24 + (83 << 6);
-    static final int ACTIVE_DISSIPATOR_230V = 34 + (64 << 6);
 
     /** A Condenser Coil placed at p (its lower block) by a player looking west (XN). */
     static mods.eln.oil.CondenserCoilElement coil(TestContext ctx, BlockPos p) {
-        var level = ctx.level();
-        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
-        player.setYRot(270f);
-        var d = Eln.transparentNodeItem.getDescriptor(CONDENSER_COIL);
-        var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, p, Direction.YN);
-        player.setYRot(0f);
-        return node == null ? null : (mods.eln.oil.CondenserCoilElement) node.element;
-    }
-
-    /** A breather on a stub up out of the tank top port under above; returns its refusal (null: fitted). */
-    static String topBreather(TestContext ctx, BlockPos above) {
-        PipeCases.lay(ctx, above, 0, 8, 0, 8, 8, 8, 8, 14, 8, 8);
-        return ctx.voxelByEntity(above).addSafetyValveNear(12 / 16.0, 8 / 16.0, 8 / 16.0, mods.eln.node.voxel.SafetyValvePart.BREATHER);
+        return (mods.eln.oil.CondenserCoilElement) ctx.placeByPlayer(Ids.transparent("Condenser Coil"), p, 270f);
     }
 
     /**
@@ -96,13 +81,13 @@ public final class StillPotCases {
             PipeCases.lay(ctx, o.offset(2, 2, 0), 1, 0, 8, 8, 16, 8, 8);
             PipeCases.lay(ctx, o.offset(3, 2, 0), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);
             recvA = PlumbingCases.tank(ctx, PlumbingCases.IRON_TANK, o.offset(3, -1, 1), Direction.XN);
-            note(topBreather(ctx, o.offset(3, 0, 1)));
+            note(PlumbingCases.Breather.stub(ctx, o.offset(3, 0, 1)));
             if (two) {
                 PipeCases.lay(ctx, o.offset(2, 0, 0), 1, 16, 4, 8, 8, 4, 8, 8, 0, 8);
                 PipeCases.lay(ctx, o.offset(2, -1, 0), 1, 8, 16, 8, 8, 4, 8, 8, 4, 0);
                 valveB = valve(ctx, o.offset(2, 0, 0), 12, 4, 8);
                 recvB = PlumbingCases.tank(ctx, PlumbingCases.IRON_TANK, o.offset(2, -1, -1), Direction.XN);
-                note(topBreather(ctx, o.offset(2, 0, -1)));
+                note(PlumbingCases.Breather.stub(ctx, o.offset(2, 0, -1)));
             } else recvB = null;
             // the gas offtake: out of the coil's upper front, down and along, a breather on top
             PipeCases.lay(ctx, o.offset(2, 1, 0), 1, 16, 12, 8, 12, 12, 8, 12, 4, 8, 2, 4, 8);
@@ -163,7 +148,7 @@ public final class StillPotCases {
 
         void dissipator(TestContext ctx, BlockPos p, Direction front) {
             ctx.level().setBlockAndUpdate(p.below(), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
-            var d = ctx.placeTransparent(ACTIVE_DISSIPATOR_230V, p);
+            var d = ctx.placeTransparent(Ids.transparent("230V Active Thermal Dissipator"), p);
             d.front = front;
             d.reconnect();
             dissipators.add(d);
@@ -594,13 +579,7 @@ public final class StillPotCases {
 
     /** A Still Pot placed at p by a player looking west (XN). */
     static StillPotElement pot(TestContext ctx, BlockPos p) {
-        var level = ctx.level();
-        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
-        player.setYRot(270f);
-        var d = Eln.transparentNodeItem.getDescriptor(STILL_POT);
-        var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, p, Direction.YN);
-        player.setYRot(0f);
-        return node == null ? null : (StillPotElement) node.element;
+        return (StillPotElement) ctx.placeByPlayer(Ids.transparent("Still Pot"), p, 270f);
     }
 
     /** Charge the pot: these species (id, kg pairs) as liquid at T (K), air at 1 atm over them; the shell at shellK. */

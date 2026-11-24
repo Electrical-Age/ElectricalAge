@@ -357,13 +357,7 @@ public final class HpPlantCases {
 
     /** A Large Boiler placed at p by a player looking along yaw (degrees: 270 places it facing west, XN). */
     static BoilerElement largeBoiler(TestContext ctx, BlockPos p, float yaw) {
-        var level = ctx.level();
-        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
-        player.setYRot(yaw);
-        var d = Eln.transparentNodeItem.getDescriptor(LARGE_BOILER);
-        var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, p, Direction.YN);
-        player.setYRot(0f);
-        return node == null ? null : (BoilerElement) node.element;
+        return (BoilerElement) ctx.placeByPlayer(LARGE_BOILER, p, yaw);
     }
 
     /**

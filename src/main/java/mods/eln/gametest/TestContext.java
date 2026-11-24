@@ -86,6 +86,23 @@ public interface TestContext {
      * Place a transparent-node device as a player clicking the top of the block below p (front from the fake player's
      * view, like 1.12). The node lands at p + the descriptor's spawn delta; use element.node.coordonate.
      */
+    /**
+     * A transparent node placed at p as a player looking along yaw places it (degrees: 270 faces it west, XN; a multiblock
+     * grows from there), or null if it doesn't fit.
+     */
+    default mods.eln.node.transparent.TransparentNodeElement placeByPlayer(int damage, BlockPos p, float yaw) {
+        mods.eln.node.transparent.TransparentNodeDescriptor d = mods.eln.Eln.transparentNodeItem.getDescriptor(damage);
+        net.minecraft.server.level.ServerLevel level = level();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        player.setYRot(yaw);
+        try {
+            var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(d.newItemStack(), player, level, p, mods.eln.misc.Direction.YN);
+            return node == null ? null : node.element;
+        } finally {
+            player.setYRot(0f);
+        }
+    }
+
     default mods.eln.node.transparent.TransparentNodeElement placeTransparent(int damage, BlockPos p) {
         mods.eln.node.transparent.TransparentNodeDescriptor d = mods.eln.Eln.transparentNodeItem.getDescriptor(damage);
         if (d == null) throw new IllegalStateException("no transparent node descriptor " + damage);
