@@ -6697,6 +6697,26 @@
   "tier_cue": null
  },
  {
+  "item_id": "pipe_breather_valve",
+  "display_name": "Pipe Breather Valve",
+  "family": "thermal",
+  "placeable": true,
+  "tier": null,
+  "vanilla_size": 16,
+  "schematic_scope": false,
+  "model": "VoxelGeometry.safetyValve (breather)",
+  "parts": [],
+  "appearance": "",
+  "function": "",
+  "current_texture": "",
+  "shares_texture_with": [],
+  "notes": "added 2026-11-24 for refinery M2 (todo #591)",
+  "redraw": true,
+  "node_kind": "voxel_part",
+  "model_texture_notes": "",
+  "tier_cue": null
+ },
+ {
   "item_id": "50v_steam_turbine",
   "display_name": "48V Steam Turbine",
   "family": "generator",

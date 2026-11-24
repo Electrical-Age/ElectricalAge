@@ -363,6 +363,14 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   run under it to the air above its set pressure (1.1 bar to start, the safety valve's slider), shuts as the liquid
   reaches its outlet, and lets nothing back in (a gas-only, one-way vent: `Network.Edge.gasOnly`).
   `pipe_purge_valve_bleeds_the_gas`, `pipe_purge_valve_keeps_the_liquid`.
+- Pipe Breather Valve (refinery M2, Baughn 2026-11-24: a third item on the safety valve's part): a purge valve's float
+  out and a vacuum breaker in, at the air's pressure +-300 Pa (FlareStackElement's tip pair), no setting, no whistle or
+  jet (shapeless: purge valve + iron bars; green cap). A still's receiver fills and drains at 1 atm behind it; a purge
+  valve there pulls the still under vacuum and holds the product in the condenser. Natural gas leaves through it too
+  (Baughn: "a good way to lose natural gas"; the tooltip says to pipe it to a flare or a gas tank). Fit it on top of a
+  pipe or a tank stub: on a side it draws half way up, and liquid there shuts it. Saves: the part's `"breather"` flag
+  (absent on safety and purge valves, which save as before). `pipe_breather_valve_fills`, `_keeps_liquid`,
+  `_pulls_air`, `_saves`.
 - Tanks need no floor (Baughn 2026-11-10): a tank, lone or a box, stays when the block under it goes, so a pipe can
   run to its underside port (it used to break). `tank_stands_without_a_floor`.
 - Tank sight glass (Baughn 2026-11-03: "a viewglass"): a 3 px window in brass on the tank's front (was a 1.5 px slit

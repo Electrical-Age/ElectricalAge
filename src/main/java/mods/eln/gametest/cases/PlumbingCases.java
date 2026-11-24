@@ -47,6 +47,7 @@ public final class PlumbingCases {
         cases.add(new TankStandsWithoutFloor());
         cases.add(new PurgeValve(false));
         cases.add(new PurgeValve(true));
+        for (Breather.Row r : Breather.Row.values()) cases.add(new Breather(r));
     }
 
     static final int IRON_TANK = 40 + (82 << 6), ALLOY_TANK = 44 + (82 << 6), PUMP = 48 + (82 << 6);
@@ -231,6 +232,154 @@ public final class PlumbingCases {
             ctx.check("purge valve: no liquid goes, only the vapour in the gas (under 0.1 g)", water > water0 - 1e-4, String.format("%.6f kg lost", water0 - water));
             if (!full) ctx.check("purge valve: it bleeds the air down to its set pressure (under 1.3 bar)", t.vessel.P() < 1.3e5,
                 String.format("%.3f bar", t.vessel.P() / 1e5));
+        }
+    }
+
+    /**
+     * The breather valve (refinery M2, Baughn 2026-11-24): a purge valve's float out and a vacuum breaker in, at the air's
+     * pressure. Tank A (2,2,1) drains by gravity from its low east port down into receiver B's high west port (B at
+     * (4,1,1), lower); each has a breather on a stub on its top port.
+     * <ul>
+     * <li>FILLS: B fills from A with neither tank building pressure or pulling a vacuum (within 2 kPa of the air's);</li>
+     * <li>KEEPS_LIQUID: B over-filled until the water stands in its stub under the breather: no liquid leaves;</li>
+     * <li>PULLS_AIR: B alone, half full of water at 0.5 bar (a still pot pulled under): air comes in to ~1 atm;</li>
+     * <li>SAVES: a breather's part saves as a breather; safety and purge valves save and load as before (old tags too);
+     * Jade names it by its item.</li>
+     * </ul>
+     */
+    static final class Breather extends Big {
+        enum Row { FILLS, KEEPS_LIQUID, PULLS_AIR, SAVES }
+
+        final Row row;
+        TankElement a, b;
+        BlockPos aStub, bStub;
+        String errA, errB;
+        IProcess watch;
+        int tick;
+        double aLo = Double.MAX_VALUE, aHi = -Double.MAX_VALUE, bLo = Double.MAX_VALUE, bHi = -Double.MAX_VALUE, liquidOut, airIn, aWater0, bWater0, bP0;
+
+        Breather(Row row) {
+            this.row = row;
+        }
+
+        public String id() {
+            return "pipe_breather_valve_" + row.name().toLowerCase(java.util.Locale.ROOT);
+        }
+
+        public int ticks() {
+            return row == Row.KEEPS_LIQUID ? 600 : row == Row.FILLS ? 300 : 100;
+        }
+
+        /** A stub up out of a tank's top port, turning across the block above, with a breather on its top. */
+        static String stub(TestContext ctx, BlockPos above) {
+            PipeCases.lay(ctx, above, 0, 8, 0, 8, 8, 8, 8, 14, 8, 8);
+            return ctx.voxelByEntity(above).addSafetyValveNear(12 / 16.0, 8 / 16.0, 8 / 16.0, mods.eln.node.voxel.SafetyValvePart.BREATHER);
+        }
+
+        public void build(TestContext ctx) {
+            b = tank(ctx, IRON_TANK, ctx.at(4, 1, 1), Direction.XP);
+            bStub = ctx.at(4, 2, 1);
+            errB = stub(ctx, bStub);
+            if (row == Row.PULLS_AIR || row == Row.SAVES) {
+                fill(b.vessel, 0.5 * b.vessel.volume * Water.RHO_L, row == Row.PULLS_AIR ? 0.5e5 : Water.P_ATM, 293.15);
+            } else {
+                a = tank(ctx, IRON_TANK, ctx.at(2, 2, 1), Direction.XN);
+                aStub = ctx.at(2, 3, 1);
+                errA = stub(ctx, aStub);
+                // (A's low east port, down a block, into B's high west port)
+                PipeCases.lay(ctx, ctx.at(3, 2, 1), 0, 0, 4, 8, 8, 4, 8, 8, 0, 8);
+                PipeCases.lay(ctx, ctx.at(3, 1, 1), 0, 8, 16, 8, 8, 12, 8, 16, 12, 8);
+                fill(a.vessel, 0.9 * a.vessel.volume * Water.RHO_L, Water.P_ATM, 293.15);
+                fill(b.vessel, row == Row.KEEPS_LIQUID ? 0.85 * b.vessel.volume * Water.RHO_L : 0, Water.P_ATM, 293.15);
+                aWater0 = a.vessel.mLiquid();
+            }
+            bWater0 = b.vessel.mLiquid();
+            VoxelNode an = aStub == null ? null : ctx.voxelByEntity(aStub), bn = ctx.voxelByEntity(bStub);
+            bP0 = b.vessel.P();
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                tick++;
+                for (VoxelNode n : an == null ? List.of(bn) : List.of(an, bn))
+                    for (var v : n.fluidVents()) {
+                        if (v.edge == null) continue;
+                        if (v.inward) airIn += v.edge.fAir * dt;
+                        else liquidOut += Math.max(0, v.edge.fLiquid) * dt;
+                    }
+                if (tick < 20) return;   // (pressures: past the first second, the empty line's first rush)
+                bLo = Math.min(bLo, b.vessel.P());
+                bHi = Math.max(bHi, b.vessel.P());
+                if (a != null) {
+                    aLo = Math.min(aLo, a.vessel.P());
+                    aHi = Math.max(aHi, a.vessel.P());
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            ctx.line(String.format("breather (%s): B from %.4f bar, %.4f..%.4f bar, %s; A %.4f..%.4f bar, %s; liquid out %.6f kg, air in %.6f kg; %s", row, bP0 / 1e5,
+                bLo / 1e5, bHi / 1e5, b.getWaila(), aLo / 1e5, aHi / 1e5, a == null ? "-" : a.getWaila(), liquidOut, airIn, ctx.voxelByEntity(bStub).getWaila(false)));
+            ctx.check("breather: it fits on top of the stub", errB == null && errA == null, errB + " / " + errA);
+            switch (row) {
+                case FILLS -> {
+                    ctx.check("breather: B fills from A by gravity (over a third of A's water)", b.vessel.mLiquid() > aWater0 / 3,
+                        String.format("%.3f of %.3f kg", b.vessel.mLiquid(), aWater0));
+                    ctx.check("breather: B neither builds pressure nor pulls a vacuum (within 2 kPa of the air's)",
+                        bLo > Water.P_ATM - 2000 && bHi < Water.P_ATM + 2000, String.format("%.0f..%.0f Pa", bLo, bHi));
+                    ctx.check("breather: nor does A as it drains", aLo > Water.P_ATM - 2000 && aHi < Water.P_ATM + 2000, String.format("%.0f..%.0f Pa", aLo, aHi));
+                }
+                case KEEPS_LIQUID -> {
+                    ctx.check("breather: B fills to the brim", b.vessel.liquidVolume() > 0.97 * b.vessel.volume,
+                        String.format("%.1f %%", 100 * b.vessel.liquidVolume() / b.vessel.volume));
+                    ctx.check("breather: no liquid leaves through it (under 1 g)", liquidOut < 1e-3, String.format("%.6f kg", liquidOut));
+                    ctx.check("breather: the water is all still there (A + B within 1 g, less what stands in the pipes)",
+                        a.vessel.mLiquid() + b.vessel.mLiquid() <= aWater0 + bWater0 + 1e-3, String.format("%.4f -> %.4f kg", aWater0 + bWater0,
+                            a.vessel.mLiquid() + b.vessel.mLiquid()));
+                }
+                case PULLS_AIR -> {
+                    ctx.check("breather: air comes in to the vessel at 0.5 bar", bP0 < 0.6e5 && airIn > 0, String.format("from %.0f Pa, %.6f kg", bP0, airIn));
+                    ctx.check("breather: the vessel comes up to the air's pressure (within 1 kPa)", b.vessel.P() > Water.P_ATM - 1000,
+                        String.format("%.0f Pa", b.vessel.P()));
+                    ctx.check("breather: no water leaves", liquidOut < 1e-4, String.format("%.6f kg", liquidOut));
+                }
+                case SAVES -> saves(ctx);
+            }
+        }
+
+        void saves(TestContext ctx) {
+            var vn = ctx.voxelByEntity(bStub);
+            mods.eln.node.voxel.SafetyValvePart sv = null;
+            for (var part : vn.parts) if (part instanceof mods.eln.node.voxel.SafetyValvePart s) sv = s;
+            ctx.check("breather: placed as a breather", sv != null && sv.breather && sv.mode == mods.eln.node.voxel.SafetyValvePart.BREATHER, "" + sv);
+            if (sv == null) return;
+            int[] box = sv.boxes().get(0);
+            String name = vn.nameAt((box[0] + box[3]) / 32.0, (box[1] + box[4]) / 32.0, (box[2] + box[5]) / 32.0);
+            ctx.check("breather: Jade names it", "Pipe Breather Valve".equals(name), name);
+            ctx.check("breather: it has two vents (gas out, air in)", vn.fluidVents().size() == 2, "" + vn.fluidVents().size());
+            var t = new net.minecraft.nbt.CompoundTag();
+            sv.write(t);
+            t.putString("kind", mods.eln.node.voxel.SafetyValvePart.KIND);
+            var back = (mods.eln.node.voxel.SafetyValvePart) mods.eln.node.voxel.VoxelPart.load(t);
+            ctx.check("breather: its part saves and loads as a breather", back.breather && back.x == sv.x && back.outlet == sv.outlet, t.toString());
+            // safety and purge valves write what they wrote before the breather, and old tags load as what they were
+            var safety = new mods.eln.node.voxel.SafetyValvePart(8, 8, 8, 1, 2, 10e5);
+            var purge = new mods.eln.node.voxel.SafetyValvePart(8, 8, 8, 1, 2, 1.1e5, true);
+            var ts = new net.minecraft.nbt.CompoundTag();
+            var tp = new net.minecraft.nbt.CompoundTag();
+            safety.write(ts);
+            purge.write(tp);
+            ctx.check("breather: a safety valve's keys are as before", ts.keySet().equals(java.util.Set.of("at", "g", "set")), ts.toString());
+            ctx.check("breather: a purge valve's keys are as before", tp.keySet().equals(java.util.Set.of("at", "g", "set", "purge")), tp.toString());
+            var oldSafety = new net.minecraft.nbt.CompoundTag();
+            oldSafety.putString("kind", mods.eln.node.voxel.SafetyValvePart.KIND);
+            oldSafety.putIntArray("at", new int[]{8, 8, 8, 1, 2});
+            oldSafety.putBoolean("g", true);
+            oldSafety.putDouble("set", 12e5);
+            var oldPurge = oldSafety.copy();
+            oldPurge.putBoolean("purge", true);
+            var ls = (mods.eln.node.voxel.SafetyValvePart) mods.eln.node.voxel.VoxelPart.load(oldSafety);
+            var lp = (mods.eln.node.voxel.SafetyValvePart) mods.eln.node.voxel.VoxelPart.load(oldPurge);
+            ctx.check("breather: an old safety valve loads as one", ls.mode == mods.eln.node.voxel.SafetyValvePart.SAFETY && ls.setPa == 12e5, ls.mode + " " + ls.setPa);
+            ctx.check("breather: an old purge valve loads as one", lp.purge && !lp.breather, lp.mode + "");
         }
     }
 

@@ -1,4 +1,4 @@
-// 26.3	2026-11-24T15:33:03.48856994	eln-global/EA models
+// 26.3	2026-11-24T18:20:05.744700614	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -367,6 +367,7 @@ ff6e2b28162f15aa2036f97affcfd80a1465b7d9 assets/eln/items/ore_scanner.json
 0f02a092e70e85b3657bef77f92fd664ad0f65fa assets/eln/items/pid_regulator.json
 fc7072eabfb82943749e3a2f64a672ea69f015d6 assets/eln/items/pink_brush.json
 876c6cd76e0b214eeae30fe23294840ee09fb077 assets/eln/items/pipe_adapter.json
+c40677d77db5821ac49a950028abef57c47e56ad assets/eln/items/pipe_breather_valve.json
 eabbe6806f655e756f9e1a5051cd7d097dade7af assets/eln/items/pipe_control_valve.json
 c37d42d320e747a50897587a392f8eac6ad1a86d assets/eln/items/pipe_kit_alloy.json
 0e52b8c4201a35ab6ea10911cbff7726f1dc6d51 assets/eln/items/pipe_kit_iron.json
@@ -883,6 +884,7 @@ b9cc5a91629389539f8d34138c7844fc8c015a86 assets/eln/models/item/pid_regulator.js
 5fc27be2ceebb3d231d5d90cc6567f3ea45fd67b assets/eln/models/item/pid_regulator_3d.json
 579902b074770a6931aff7e763a1cd7319c986d7 assets/eln/models/item/pink_brush.json
 ed17386abf1e7b55e0167a95e65e07395740cece assets/eln/models/item/pipe_adapter.json
+b63b51837ec93b574c300e0331dd28263a1eea4a assets/eln/models/item/pipe_breather_valve.json
 a2f6b25ea172857c6a5851ca0009d2f8ba6f7dc2 assets/eln/models/item/pipe_control_valve.json
 2ae6590e9e266b8fca106dc1fe2fd75e4e862731 assets/eln/models/item/pipe_kit_alloy.json
 cb6f096c14fa8c9e8b2459dee3fc41fed9f3a4f1 assets/eln/models/item/pipe_kit_iron.json

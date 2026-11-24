@@ -18,17 +18,28 @@ import java.util.List;
  * goes by phase, not species; it'll let out steam"): it vents only the gas of the run under it, shuts as the liquid
  * reaches its outlet, and lets nothing back in. Its set pressure starts at PURGE_PA, just over the air's, so it bleeds a
  * tank's gas (a crude tank's natural gas, the air of a filling run) by default.
+ *
+ * A breather (refinery M2, Baughn 2026-11-24: a third item on this part) is a purge valve's float and a vacuum breaker
+ * at the air's pressure: gas out over P_ATM + BREATHER_PA, air in under P_ATM - BREATHER_PA (FlareStackElement's tip),
+ * so a receiver under a still's condenser fills and drains at 1 atm. No setting, no whistle, no scalding jet. A purge
+ * valve there pulls the still under vacuum and holds the product in the condenser (its 1.1 bar deadband would stall
+ * gravity drainage too). Natural gas goes out of it as any gas does (Baughn: "a good way to lose natural gas").
  */
 public final class SafetyValvePart extends VoxelPart {
     public static final String KIND = "safety_valve";
     /** The screen's slider range (bar). */
     public static final double MIN_BAR = 1.1, MAX_BAR = 150, PURGE_PA = 1.1e5;
+    /** What it is: SAFETY (relief, any phase), PURGE (gas only, set pressure), BREATHER (gas out and air in at 1 atm). */
+    public static final int SAFETY = 0, PURGE = 1, BREATHER = 2;
+    /** A breather's deadband either side of the air's pressure (Pa): FlareStackElement.TIP_DEADBAND_PA's. */
+    public static final double BREATHER_PA = 300;
     /** Wide open, it passes this (m^3): about an iron pipe's bore. */
     static final double VENT_K = 2e-11;
     public final int x, y, z, outlet, bore;
     public double setPa;
-    /** A purge valve (gas only, never liquid). */
-    public final boolean purge;
+    public final int mode;
+    /** A purge valve (gas only, never liquid); a breather. */
+    public final boolean purge, breather;
     /**
      * Baughn 2026-10-27: it pulsed, popping open and shut every second or so. A boiler's pressure jitters by several
      * percent from tick to tick, more than the old 5% band, so the valve flapped between shut and wide open. It now acts
@@ -44,7 +55,13 @@ public final class SafetyValvePart extends VoxelPart {
     }
 
     public SafetyValvePart(int x, int y, int z, int outlet, int bore, double setPa, boolean purge) {
-        this.purge = purge;
+        this(x, y, z, outlet, bore, setPa, purge ? PURGE : SAFETY);
+    }
+
+    public SafetyValvePart(int x, int y, int z, int outlet, int bore, double setPa, int mode) {
+        this.mode = mode;
+        this.purge = mode == PURGE;
+        this.breather = mode == BREATHER;
         this.x = x;
         this.y = y;
         this.z = z;
@@ -81,6 +98,17 @@ public final class SafetyValvePart extends VoxelPart {
     /** A safety valve's conductance over its set point: the wide-open vent's flow BAND over it (m^3). */
     static final double RELIEF_K = VENT_K / BAND;
 
+    /** A breather's two openings (0..1) at pressure P: {gas out, air in}, each over BREATHER_PA past the deadband. */
+    public static double[] breathe(double P) {
+        double dp = P - mods.eln.sim.fluid.Water.P_ATM;
+        return new double[]{Math.max(0, Math.min(1, (dp - BREATHER_PA) / BREATHER_PA)), Math.max(0, Math.min(1, (-dp - BREATHER_PA) / BREATHER_PA))};
+    }
+
+    /** Where on the run under it it draws: a valve on top lets out what's at the top, one on a side what's half way up. */
+    public double draw() {
+        return outlet == 1 ? 1 : outlet == 0 ? 0 : 0.5;
+    }
+
     /** Opening (0..1) at pressure P. */
     public double opening(double P) {
         return Math.max(0, Math.min(1, (P / setPa - 1) / BAND));
@@ -107,12 +135,13 @@ public final class SafetyValvePart extends VoxelPart {
         t.putBoolean("g", true);   // (grid widths: PipePart.GRID)
         t.putDouble("set", setPa);
         if (purge) t.putBoolean("purge", true);
+        if (breather) t.putBoolean("breather", true);   // (safety and purge valves write what they always did)
     }
 
     static SafetyValvePart read(CompoundTag t) {
         int[] a = t.getIntArray("at").orElse(new int[]{8, 8, 8, 1, 4});
         return new SafetyValvePart(a[0], a[1], a[2], a[3], t.getBooleanOr("g", false) ? a[4] : PipePart.oldBore(a[4]), t.getDoubleOr("set", 10e5),
-            t.getBooleanOr("purge", false));
+            t.getBooleanOr("breather", false) ? BREATHER : t.getBooleanOr("purge", false) ? PURGE : SAFETY);
     }
 
     @Override
@@ -123,12 +152,12 @@ public final class SafetyValvePart extends VoxelPart {
         out.writeByte(outlet);
         out.writeByte(bore);
         out.writeFloat((float) setPa);
-        out.writeBoolean(purge);
+        out.writeByte(mode);
     }
 
     static SafetyValvePart deserialize(DataInputStream in) throws IOException {
         int x = in.readByte(), y = in.readByte(), z = in.readByte(), o = in.readByte(), b = in.readByte();
         float set = in.readFloat();
-        return new SafetyValvePart(x, y, z, o, b, set, in.readBoolean());
+        return new SafetyValvePart(x, y, z, o, b, set, (int) in.readByte());
     }
 }

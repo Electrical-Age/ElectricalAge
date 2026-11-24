@@ -222,7 +222,7 @@ others, including voxel nodes via `VoxelNode.slowProcesses()`) -> `Conductor.bur
   before a write or rebuild), `"hang"`/`"hang2"` (drawn hang), `"j"` (joints: a list of int arrays, sorted; see Stored links).
 - Each part `"id"` (in its `p<i>` compound), the node `"nextPartId"`.
 - `PipePart`: `"tier"`, `"pts"`, `"burst"`, `"burstDir"`, `"w"`, `"a"`, `"u"`. `ValvePart`: `"at"`, `"open"`.
-  `SafetyValvePart`: `"at"`, `"set"`. `PipeSensorPart`: `"at"` (x, y, z, outlet, bore, kind), `"scale"`, its output. `AdapterPart`: `"face"`. Unknown kinds load as nothing (dropped).
+  `SafetyValvePart`: `"at"`, `"set"`, `"purge"` (a purge valve), `"breather"` (a breather valve; absent on the others, so their saves are as before). `PipeSensorPart`: `"at"` (x, y, z, outlet, bore, kind), `"scale"`, its output. `AdapterPart`: `"face"`. Unknown kinds load as nothing (dropped).
 - Client publish: part count, then kind + length-prefixed bytes per part, then SixNode's elements
   (`publishBeforeElements`).
 

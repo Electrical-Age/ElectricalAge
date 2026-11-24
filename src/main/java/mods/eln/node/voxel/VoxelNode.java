@@ -280,7 +280,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (p instanceof CablePart c) return c.burnt != null ? ItemStack.EMPTY : CableKitItem.kit(c.tier, c.spec, c.dropLength());
         if (p instanceof ValvePart v) return valveItem(v);
         if (p instanceof AdapterPart) return new ItemStack(mods.eln.registry.ElnRegistry.PIPE_ADAPTER.get());
-        if (p instanceof SafetyValvePart sv) return new ItemStack(sv.purge ? mods.eln.registry.ElnRegistry.PIPE_PURGE_VALVE.get() : mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get());
+        if (p instanceof SafetyValvePart sv) return new ItemStack(switch (sv.mode) {
+            case SafetyValvePart.PURGE -> mods.eln.registry.ElnRegistry.PIPE_PURGE_VALVE.get();
+            case SafetyValvePart.BREATHER -> mods.eln.registry.ElnRegistry.PIPE_BREATHER_VALVE.get();
+            default -> mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE.get();
+        });
         if (p instanceof PipeSensorPart s) return sensorItem(s);
         return ItemStack.EMPTY;
     }
@@ -658,6 +662,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** ... or a purge valve (gas only), set just over the air's pressure. */
     public String addSafetyValveNear(double hx, double hy, double hz, boolean purge) {
+        return addSafetyValveNear(hx, hy, hz, purge ? SafetyValvePart.PURGE : SafetyValvePart.SAFETY);
+    }
+
+    /** ... of any mode (SafetyValvePart.SAFETY, PURGE, BREATHER; a breather has no set pressure: the air's). */
+    public String addSafetyValveNear(double hx, double hy, double hz, int mode) {
         int idx = partAt(hx, hy, hz);
         if (idx >= 0 && (parts.get(idx) instanceof SafetyValvePart || parts.get(idx) instanceof ValvePart)) return "there's a valve there already";
         for (VoxelPart q : parts) if (q instanceof SafetyValvePart) return "one safety valve per block (this one has one)";
@@ -695,8 +704,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             }
         }
         if (outlet < 0) return "no room around the pipe there";
-        var v = new SafetyValvePart(best[0], best[1], best[2], outlet, pipe.bore(),
-            purge ? SafetyValvePart.PURGE_PA : pipe.reliefPa(), purge);
+        var v = new SafetyValvePart(best[0], best[1], best[2], outlet, pipe.bore(), switch (mode) {
+            case SafetyValvePart.PURGE -> SafetyValvePart.PURGE_PA;
+            case SafetyValvePart.BREATHER -> mods.eln.sim.fluid.Water.P_ATM;
+            default -> pipe.reliefPa();
+        }, mode);
         parts.add(v);
         markUsed();
         changed();
@@ -899,6 +911,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (pi >= 0 && parts.get(pi) instanceof CablePart c && c.spec != null && recolour(player, pi, c)) return true;
         if (player.getMainHandItem().isEmpty()) {
             int i = pi;
+            if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv && sv.breather) {
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Fixed at outside pressure; nothing to set."));
+                return true;
+            }
             if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv) {
                 // (Baughn 2026-10-27: a screen with a slider, not stepping through presets)
                 if (player instanceof net.minecraft.server.level.ServerPlayer sp) openPartScreen(sp, i, SCREEN_SAFETY, sv.setPa / 1e5);
@@ -990,7 +1006,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     } else if (f >= 0) v.setPa = Math.max(ValvePart.MIN_BAR, Math.min(ValvePart.MAX_BAR, f)) * 1e5;
                     setNeedPublish(true);
                 }
-                if (i >= 0 && i < parts.size() && parts.get(i) instanceof SafetyValvePart sv && Float.isFinite(f)) {
+                if (i >= 0 && i < parts.size() && parts.get(i) instanceof SafetyValvePart sv && !sv.breather && Float.isFinite(f)) {
                     sv.setPa = Math.max(SafetyValvePart.MIN_BAR, Math.min(SafetyValvePart.MAX_BAR, f)) * 1e5;
                     setNeedPublish(true);
                 }
@@ -1413,7 +1429,18 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     vents.put(v, p);
                 } else if (p instanceof SafetyValvePart sv && pipeUnder(sv) != null) {
                     PipePart under = pipeUnder(sv);
-                    double draw = sv.outlet == 1 ? 1 : sv.outlet == 0 ? 0 : 0.5;   // (a valve on top lets out what's at the top)
+                    double draw = sv.draw();
+                    if (sv.breather) {
+                        // (a purge valve's float out and a vacuum breaker in, FlareStackElement's pair; opened by the pressure
+                        // under it, before each step)
+                        Vent out = new Vent(under.fluid, draw, SafetyValvePart.VENT_K);
+                        out.gasOnly = true;
+                        Vent in = new Vent(under.fluid, draw, SafetyValvePart.VENT_K);
+                        in.inward = true;
+                        vents.put(out, p);
+                        vents.put(in, p);
+                        continue;
+                    }
                     Vent vent = new Vent(under.fluid, draw, sv.purge ? SafetyValvePart.VENT_K : SafetyValvePart.RELIEF_K);
                     vent.gasOnly = sv.purge;
                     if (!sv.purge) {
@@ -1501,7 +1528,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             for (var e : vents.entrySet())
                 if (e.getValue() instanceof SafetyValvePart sv) {
                     double P = mods.eln.fluid.FluidWorld.nodeFor(e.getKey().node).P();
-                    if (sv.purge) e.getKey().open = sv.follow(P, dt);
+                    if (sv.breather) {
+                        double[] o = SafetyValvePart.breathe(P);
+                        e.getKey().open = e.getKey().inward ? o[1] : o[0];
+                        sv.pAvg = P;
+                        sv.lift = Math.max(o[0], o[1]);
+                    } else if (sv.purge) e.getKey().open = sv.follow(P, dt);
                     else e.getKey().setPa = sv.relieve(P);
                 }
     }
@@ -1556,7 +1588,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     var origin = new net.minecraft.world.phys.Vec3(coordonate.x + c[0] / 16.0, coordonate.y + c[1] / 16.0, coordonate.z + c[2] / 16.0)
                         .add(dir.getStepX() * pipe.drawn() / 32.0, dir.getStepY() * pipe.drawn() / 32.0, dir.getStepZ() * pipe.drawn() / 32.0);
                     SteamJet.tick(sl, origin, dir, e.getKey().edge, SteamJet.MAX_LENGTH);
-                } else if (e.getValue() instanceof SafetyValvePart sv && e.getKey().edge != null && sv.lift > 0) {
+                } else if (e.getValue() instanceof SafetyValvePart sv && !sv.breather && e.getKey().edge != null && sv.lift > 0) {
                     var dir = net.minecraft.core.Direction.from3DDataValue(sv.outlet);
                     int[] b = sv.boxes().get(0);
                     var origin = new net.minecraft.world.phys.Vec3(coordonate.x + (b[0] + b[3]) / 32.0, coordonate.y + (b[1] + b[4]) / 32.0,
@@ -2819,7 +2851,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     v.setPoint() / 1e5, v.signalled() ? " by signal" : "", v.opening() * 100)
                 : String.format("%.0f%% open", v.opening() * 100));
         for (VoxelPart p : parts)
-            if (p instanceof SafetyValvePart sv) {
+            if (p instanceof SafetyValvePart sv && sv.breather) {
+                // (Neon's wording)
+                double[] o = SafetyValvePart.breathe(n.P());
+                out.put(out.containsKey("Breather valve") ? "Breather valve " + out.size() : "Breather valve",
+                    n.level() >= Math.min(sv.draw(), 0.95) && n.liquidVolume() > 0 ? "Shut by liquid" : o[0] > 0 ? "Venting gas" : o[1] > 0 ? "Drawing air" : "Idle");
+            } else if (p instanceof SafetyValvePart sv) {
                 String name = sv.purge ? "Purge valve" : "Safety valve";
                 out.put(out.containsKey(name) ? name + " " + (out.size()) : name,
                     String.format(sv.purge ? "%.1f bar%s" : "%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) <= 0 ? ""
