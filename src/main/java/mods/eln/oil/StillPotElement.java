@@ -43,7 +43,8 @@ import java.util.Map;
  * <li>vapour out: the top of the rear upper left block (1,1,0), from the neck (draw 0: whatever the neck holds goes
  * on with the vapour);</li>
  * <li>bottoms drain: the front of the lower right block (0,0,1), at the floor (draw 0), to drain the residue hot;</li>
- * <li>fill: the front of the upper right block (0,1,1), into the pot over the top through a check valve;</li>
+ * <li>fill: the front of the upper right block (0,1,1), into the pot over the top through a check valve, its float
+ * shutting at the 24 B charge (fillOpening);</li>
  * <li>steam sparge: the front of the upper left block (0,1,0), down a dip pipe to the floor (draw 0.05) through a
  * check valve (Baughn: the still has a steam input; steam lowers the oils' partial pressures);</li>
  * <li>the pot's temperature as a signal: the front of the origin (0,0,0), 1 V per 100 °C of its liquid.</li>
@@ -69,6 +70,8 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     /** Uncovered, the wall passes DRY_SHARE as much: covered while the liquid stands over WET_LEVEL of the height. */
     public static final double WET_LEVEL = 0.1, DRY_SHARE = 0.05;
     /** The neck at the vapour port (B; its height, m), the link into it, the ports' conductance (a tank's). */
+    /** The neck's liquid share at which entrainment stops (its float of sorts: what is carried falls back). */
+    public static final double NECK_FULL = 0.3;
     public static final double NECK_B = 0.5, NECK_H = 0.25, VAPOUR_K = 1e-9, PORT_K = TankElement.PORT_K;
     /** The fill and sparge stubs (m^3; as the boiler's feed stub) and where the sparge's dip pipe ends. */
     public static final double STUB_VOLUME = 0.00002, SPARGE_DRAW = 0.05;
@@ -212,9 +215,21 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         return f > ONSET_F ? Math.min(E_MAX, E_AT_2F0 * (f / ONSET_F - 1)) : 0;
     }
 
+    /** The fill's float (0..1): open under the 24 B charge, shut over the last FILL_BAND_B under it, as the view stops buckets. */
+    public double fillOpening() {
+        double room = TankDescriptor.bucketsVolume(CHARGE_B) - vessel.liquidVolume();
+        return Math.max(0, Math.min(1, room / TankDescriptor.bucketsVolume(FILL_BAND_B)));
+    }
+
+    /** The band (B) under the charge over which the fill's float shuts. */
+    public static final double FILL_BAND_B = 0.5;
+
     @Override
     public void beforeFluidStep(double dt) {
         view.sync(vessel, mods.eln.sim.Ambient.kelvin(node.coordonate));
+        // (and no more than the room left in one step, whatever the line's pressure: FluidEdge.openingFor)
+        double room = Math.max(0, TankDescriptor.bucketsVolume(CHARGE_B) - vessel.liquidVolume());
+        feedCheck.open = feedCheck.edge == null ? fillOpening() : Math.min(fillOpening(), feedCheck.edge.openingFor(room, dt));
         // the shell heats the contents through a heat link inside the fluid core's step (as the boiler's)
         vessel.wallT = thermal.Tc + PhysicalConstant.Tref;
         vessel.wallUA = heatingShare() * WALL_UA;
@@ -224,11 +239,16 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         double u = rho[0] > 0 ? flow / rho[0] / (VOLUME / HEIGHT) : 0;
         uSmooth += (u - uSmooth) * Math.min(1, dt / F_TAU);
         factor = rho[0] > 0 ? uSmooth * Math.sqrt(rho[0] / Math.max(1, rho[1] - rho[0])) : 0;
-        double target = entrainment(factor) * flow;
+        // (by the smoothed vapour flow: the step's own flow swings, and an orifice opening that followed it made the
+        // network crawl)
+        double target = entrainment(factor) * uSmooth * rho[0] * (VOLUME / HEIGHT);
         double lift = (neck.z + neck.height) - (vessel.z + vessel.level() * vessel.height);
         entrain.boost = rho[1] * mods.eln.sim.fluid.FluidNetwork.G * lift + ENT_DP;
         double drive = Math.max(1000, vessel.P() - neck.P() + ENT_DP);
-        entrain.open = target <= 0 || vessel.liquidVolume() <= 0 ? 0 : Math.min(1, target / (FluidEdge.CD * ENT_AREA * Math.sqrt(2 * rho[1] * drive)));
+        // (only while the neck has room: what it carries over falls back while the neck stands full. Pushed on into a full
+        // neck the link's boost met no room, and the network crawled for seconds at a time)
+        double neckRoom = Math.max(0, Math.min(1, (NECK_FULL - neck.liquidVolume() / neck.volume) / NECK_FULL));
+        entrain.open = target <= 0 || vessel.liquidVolume() <= 0 ? 0 : neckRoom * Math.min(1, target / (FluidEdge.CD * ENT_AREA * Math.sqrt(2 * rho[1] * drive)));
     }
 
     @Override
