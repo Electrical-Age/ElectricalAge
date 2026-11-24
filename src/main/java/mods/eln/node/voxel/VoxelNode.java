@@ -2856,11 +2856,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         for (VoxelPart p : parts)
             if (p instanceof SafetyValvePart sv && sv.breather) {
                 // (Neon's wording)
-                double[] o = SafetyValvePart.breathe(n.P());
+                // (by what it let through in the last second, SafetyValvePart.HOLD_S, not this step's opening: it flickered)
                 String name = mods.eln.i18n.I18N.tr("Breather valve");
                 out.put(out.containsKey(name) ? name + " " + out.size() : name,
-                    n.level() >= Math.min(sv.draw(), 0.95) && n.liquidVolume() > 0 ? mods.eln.i18n.I18N.tr("Shut by liquid") : o[0] > 0 ? mods.eln.i18n.I18N.tr("Venting gas")
-                        : o[1] > 0 ? mods.eln.i18n.I18N.tr("Drawing air") : mods.eln.i18n.I18N.tr("Idle"));
+                    n.level() >= Math.min(sv.draw(), 0.95) && n.liquidVolume() > 0 ? mods.eln.i18n.I18N.tr("Shut by liquid") : sv.ventShown > 0 ? mods.eln.i18n.I18N.tr("Venting gas")
+                        : sv.airShown > 0 ? mods.eln.i18n.I18N.tr("Drawing air") : mods.eln.i18n.I18N.tr("Idle"));
             } else if (p instanceof SafetyValvePart sv) {
                 String name = sv.purge ? "Purge valve" : "Safety valve";
                 out.put(out.containsKey(name) ? name + " " + (out.size()) : name,

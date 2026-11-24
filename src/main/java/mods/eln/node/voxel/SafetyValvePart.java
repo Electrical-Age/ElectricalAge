@@ -53,13 +53,21 @@ public final class SafetyValvePart extends VoxelPart {
      */
     public double[] ventedKg;
     public double airInKg;
+    /**
+     * Seconds left showing that it vented or drew air (HOLD_S after the last step it did): a breather's flow comes and
+     * goes from step to step, and its Jade line flickered between "Venting gas" and "Idle" (AdventurAgent).
+     */
+    public double ventShown, airShown;
+    public static final double HOLD_S = 1;
 
     /** Book one step's vent edge (VoxelNode.afterFluidStep): what went out by species, or the air that came in. */
     public void book(mods.eln.sim.fluid.FluidEdge e, boolean inward, double dt) {
         if (inward) {
             airInKg += Math.max(0, e.flow) * dt;
+            airShown = e.flow > 0 ? HOLD_S : Math.max(0, airShown - dt);
             return;
         }
+        ventShown = e.flow > 0 ? HOLD_S : Math.max(0, ventShown - dt);
         if (e.fSpecies == null || e.flow <= 0) return;
         if (ventedKg == null || ventedKg.length < e.fSpecies.length) ventedKg = ventedKg == null ? new double[e.fSpecies.length] : java.util.Arrays.copyOf(ventedKg, e.fSpecies.length);
         for (int i = 0; i < e.fSpecies.length; i++) ventedKg[i] += Math.max(0, e.fSpecies[i]) * dt;
