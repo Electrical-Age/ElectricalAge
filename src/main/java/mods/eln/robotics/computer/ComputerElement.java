@@ -53,7 +53,7 @@ public class ComputerElement extends TransparentNodeElement {
     /** Screen packets: reset, its address, Break, a screen protocol event (one line). */
     public static final byte RESET_ID = 2, SET_ADDRESS_ID = 3, BREAK_ID = 4, SCREEN_EVENT_ID = 7, POWER_ID = 8;
     /** Server-to-screen packets: protocol lines to apply. */
-    public static final byte SCREEN_ID = 4;
+    public static final byte SCREEN_ID = 4, CELLS_ID = 5;
     /** Events a player may send a tick (Argon's review: clients are untrusted). */
     static final int EVENTS_PER_TICK = 20;
 
@@ -337,11 +337,7 @@ public class ComputerElement extends TransparentNodeElement {
         List<ServerPlayer> gui = viewers(), v = audience(gui);
         synchronized (screen) {
             List<String> batch = screen.takeBatch();
-            java.util.Set<ServerPlayer> before = new java.util.HashSet<>(watching), opened = new java.util.HashSet<>(typing);
-            for (ServerPlayer p : v)
-                if (!before.contains(p) || batch == null || gui.contains(p) && !opened.contains(p)) sendScreen(p, screen.replay());
-                else if (!batch.isEmpty()) sendScreen(p, batch);
-            watching = List.copyOf(v);
+            java.util.Set<ServerPlayer> opened = new java.util.HashSet<>(typing);
             ServerPlayer was = operator;
             ServerPlayer op = was != null && gui.contains(was) ? was : null;
             if (op == null) for (ServerPlayer p : gui) if (opened.contains(p)) {   // (who already had it open goes first)
@@ -351,10 +347,53 @@ public class ComputerElement extends TransparentNodeElement {
             if (op == null && !gui.isEmpty()) op = gui.get(0);
             if (op != was) seqHigh = Math.max(seqHigh, screen.highestSeq());
             operator = op;
+            // the operator gets the scene (whole when they become it or open the screen again), then its batches
+            if (op != null) {
+                if (op != was || !opened.contains(op) || batch == null) sendScreen(op, screen.replay());
+                else if (!batch.isEmpty()) sendScreen(op, batch);
+            }
             for (ServerPlayer p : gui)   // (who may type, told to each screen when it opens or the operator changes)
                 if (op != was || !opened.contains(p)) sendScreen(p, List.of(operatorLine(p, op)));
+            // everyone else watches: the composed cells, twice a second when something changed, at once for a newcomer
+            cellsSent.keySet().retainAll(v);
+            if (op != null) cellsSent.remove(op);
+            boolean due = tickCount++ % 10 == 0 && screen.version != cellsVersion;
+            boolean composed = false;
+            for (ServerPlayer p : v) {
+                if (p == op) continue;
+                boolean fresh = !cellsSent.containsKey(p);
+                if (!fresh && !due) continue;
+                if (!composed || cellsNow == null) {   // (once a tick for all of them)
+                    cellsNow = mods.eln.robotics.computer.screen.SceneCells.of(screen.scene);
+                    composed = true;
+                }
+                sendCells(p, mods.eln.robotics.computer.screen.CellsCodec.encode(cellsNow,
+                    cellsSent.computeIfAbsent(p, k -> new java.util.HashSet<>())));
+            }
+            if (due) cellsVersion = screen.version;
+            watching = List.copyOf(v);
             typing = List.copyOf(gui);
         }
+    }
+
+    /** Per watcher, the pixmaps (versions) their client has; the scene version their cells show; a tick count. */
+    private final java.util.Map<ServerPlayer, java.util.Set<Integer>> cellsSent = new java.util.HashMap<>();
+    private long cellsVersion = -1;
+    private int tickCount;
+    private mods.eln.robotics.computer.screen.SceneCells cellsNow;
+
+    void sendCells(ServerPlayer p, byte[] data) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length + 64);
+        DataOutputStream o = new DataOutputStream(bos);
+        preparePacketForClient(o);
+        try {
+            o.writeByte(CELLS_ID);
+            o.writeInt(data.length);
+            o.write(data);
+        } catch (IOException e) {
+            return;
+        }
+        node.sendPacketToClient(bos, p);
     }
 
     /** (operator true NEXT-SEQ) to the operator, (operator false "name") to the others. */
@@ -415,8 +454,7 @@ public class ComputerElement extends TransparentNodeElement {
         String ok;
         synchronized (screen) {
             ok = screen.check(line, echo);
-            // (a player moved, stacked or activated a window: the other displays are told, now; the last report wins)
-            if (!echo.isEmpty()) for (ServerPlayer p : watching) if (p != player) sendScreen(p, echo);
+            // (the operator moved, stacked or activated a window: watchers see it in their next cells)
         }
         if (ok == null) return;
         List<Object> parsed = mods.eln.robotics.computer.screen.Form.parse(ok);
@@ -444,7 +482,7 @@ public class ComputerElement extends TransparentNodeElement {
             ServerPlayer op = operator;
             if (!replies.isEmpty() && op != null) sendScreen(op, replies);
             if (batch != null && batch.isEmpty()) return;
-            for (ServerPlayer p : watching) sendScreen(p, batch == null ? screen.replay() : batch);
+            if (op != null) sendScreen(op, batch == null ? screen.replay() : batch);   // (watchers get cells: watch())
             if (tracedAt != 0 && LOG.isDebugEnabled()) {
                 LOG.debug("screen sent {} ms after the event", (System.nanoTime() - tracedAt) / 1e6);
                 tracedAt = 0;

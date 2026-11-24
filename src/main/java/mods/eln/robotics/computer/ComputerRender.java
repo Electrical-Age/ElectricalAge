@@ -33,6 +33,14 @@ public class ComputerRender extends TransparentNodeElementRender {
      * now; and this player's last submission or save number, counting on from where the computer has got to.
      */
     public volatile boolean operator = true;
+    /**
+     * A watcher's picture of the screen (the server sends watchers composed cells, not the scene), and whether the
+     * last thing the server sent was cells (draw them) or the scene (this player operates it).
+     */
+    public volatile mods.eln.robotics.computer.screen.SceneCells cells;
+    public volatile boolean usingCells;
+    public long cellsVersion;
+    final java.util.Map<Integer, mods.eln.robotics.computer.screen.Scene.Pixmap> cellPixmaps = new java.util.HashMap<>();
     public volatile String operatorName = "";
     public long seq;
     /** Bumped when the scene changes, so the screen can see it. */
@@ -81,7 +89,9 @@ public class ComputerRender extends TransparentNodeElementRender {
         if (picture == null) return;
         // (the picture keeps the screen's shape, 6 x 10 px cells, with black bars on the glass: Baughn)
         float aspect = scene.w * ComputerScreen.CELL / (float) (scene.h * ComputerScreen.LINE);
-        desc.drawPicture(picture.update(sceneVersion, () -> mods.eln.robotics.computer.screen.SceneCells.of(scene)), aspect);
+        var watched = usingCells ? cells : null;
+        if (watched != null) desc.drawPicture(picture.update(-1 - cellsVersion, () -> watched), aspect);
+        else desc.drawPicture(picture.update(sceneVersion, () -> mods.eln.robotics.computer.screen.SceneCells.of(scene)), aspect);
     }
 
     /** Each pixmap's texture on this client, made when first drawn and again when it changes (screen and monitor alike). */
@@ -159,7 +169,22 @@ public class ComputerRender extends TransparentNodeElementRender {
     public void serverPacketUnserialize(DataInputStream stream) {
         try {
             byte kind = stream.readByte();
+            if (kind == ComputerElement.CELLS_ID) {
+                int n = stream.readInt();
+                if (n < 0 || n > 4 << 20) return;
+                byte[] b = new byte[n];
+                stream.readFully(b);
+                var c = mods.eln.robotics.computer.screen.CellsCodec.decode(b, cellPixmaps);
+                if (c == null) return;
+                cells = c;
+                usingCells = true;
+                scene.w = c.w;   // (the screen's size, for a watcher's window; the scene itself is the operator's)
+                scene.h = c.h;
+                cellsVersion++;
+                return;
+            }
             if (kind != ComputerElement.SCREEN_ID) return;
+            usingCells = false;
             int n = stream.readInt();
             if (n < 0 || n > 4 << 20) return;
             byte[] b = new byte[n];

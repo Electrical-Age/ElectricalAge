@@ -30,6 +30,8 @@ public final class ScreenHost {
     /** The console's undecoded tail (a UTF-8 character split between slices). */
     private byte[] consoleTail = new byte[0];
     private final List<List<Object>> batch = new ArrayList<>();
+    /** Counts the scene's changes (the watchers' cells are composed again when it moved). */
+    public volatile long version;
     private int batchBytes;
     private boolean overflow;
     /** Saves on their way to the computer (window/id/seq -> hunks), oldest first. */
@@ -157,6 +159,7 @@ public final class ScreenHost {
             return;
         }
         if (m == null || !scene.apply(m)) return;
+        version++;
         batch.add(m);
         batchBytes += 32;   // (a rough size; the exact one is counted when the batch is printed)
         if (batchBytes > BATCH_MAX * 4) {
@@ -252,6 +255,7 @@ public final class ScreenHost {
         if (!WINDOW_EVENTS.contains(v) && !(m.size() > 2 && m.get(2) instanceof Long)) return null;
         if (!system && !fits(v, m)) return null;
         List<Object> told = scene.applyPlayer(m);
+        if (told != null) version++;
         if (told != null && echo != null) echo.add(Form.print(told));
         if (v.equals("moved") && told != null)   // (the computer hears the geometry the screen kept, not the client's)
             m = List.of(m.get(0), m.get(1), told.get(2), told.get(3), told.get(4), told.get(5));

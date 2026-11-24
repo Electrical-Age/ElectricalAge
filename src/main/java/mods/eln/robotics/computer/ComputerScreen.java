@@ -283,7 +283,7 @@ public class ComputerScreen extends ElnScreen {
     /** The editor elements of the active window, when nothing covers them, as code editor widgets placed over them. */
     @SuppressWarnings("unchecked")
     void syncEditors() {
-        Scene.Window t = render.lit() && dragMode == 0 ? activeWindow() : null;   // (off, or a drag: none)
+        Scene.Window t = render.lit() && dragMode == 0 && render.operator && !render.usingCells ? activeWindow() : null;   // (off, a drag, a watcher: none)
         java.util.Set<String> want = new java.util.HashSet<>();
         if (t != null && t.ask == null)
             for (Map.Entry<Integer, Scene.Element> en : t.elements.entrySet()) {
@@ -468,7 +468,8 @@ public class ComputerScreen extends ElnScreen {
         Scene s = scene();
         int x0 = leftPos + AREA_X - 4, y0 = topPos + AREA_Y - 3;
         g.fill(x0, y0, x0 + s.w * CELL + 8, y0 + s.h * LINE + 6, 0xFF101418);
-        if (render.lit()) {
+        if (render.lit() && render.usingCells && render.cells != null) cells(g, render.cells);   // (a watcher: the composed picture)
+        else if (render.lit()) {
             Scene.Window t = activeWindow();
             SceneCells c = SceneCells.of(s, local, active);
             cells(g, c);

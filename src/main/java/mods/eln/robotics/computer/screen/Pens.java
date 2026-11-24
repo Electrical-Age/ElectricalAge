@@ -21,6 +21,12 @@ public record Pens(int desk, int bar, int barText, int titleActive, int titleAct
 
     public static final Pens DEFAULT = SETS.get("Grid Blue");
 
+    /** This set's name (the default's if it isn't one of the sets). */
+    public String name() {
+        for (var e : SETS.entrySet()) if (e.getValue().equals(this)) return e.getKey();
+        return "Grid Blue";
+    }
+
     /** The set called name, or the default. */
     public static Pens of(String name) {
         return name == null ? DEFAULT : SETS.getOrDefault(name, DEFAULT);
