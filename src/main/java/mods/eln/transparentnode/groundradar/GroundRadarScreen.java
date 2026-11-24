@@ -17,7 +17,7 @@ import static mods.eln.i18n.I18N.tr;
  */
 public class GroundRadarScreen extends ElnScreen {
     final GroundRadarRender render;
-    int layer = 0, row = GroundScan.N / 2;
+    int layer, row;
     private Rect top, side;
 
     record Rect(int x, int y, int w, int h) {
@@ -29,6 +29,8 @@ public class GroundRadarScreen extends ElnScreen {
     public GroundRadarScreen(ElnNodeMenu menu, Inventory inventory, Component title, Object render) {
         super(menu, inventory, title);
         this.render = (GroundRadarRender) render;
+        layer = this.render.viewLayer;   // (where the player left it)
+        row = this.render.viewRow;
     }
 
     @Override
@@ -48,6 +50,13 @@ public class GroundRadarScreen extends ElnScreen {
             (int) GroundRadarDescriptor.SCAN_W, (int) GroundRadarDescriptor.SCAN_S));
         text("depth", this::depthText);
         text("status", this::statusText);
+    }
+
+    @Override
+    public void removed() {
+        render.viewLayer = layer;
+        render.viewRow = row;
+        super.removed();
     }
 
     @Override

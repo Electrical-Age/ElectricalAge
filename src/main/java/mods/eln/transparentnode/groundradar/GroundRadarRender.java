@@ -16,6 +16,8 @@ public class GroundRadarRender extends TransparentNodeElementRender {
     /** The last picture, and the game time it was taken. */
     GroundScan picture;
     long pictureAt;
+    /** The screen's depth and cut, kept while the block is in view (reopening it comes back to them). */
+    int viewLayer, viewRow = GroundScan.N / 2;
 
     public GroundRadarRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
         super(entity, d);
