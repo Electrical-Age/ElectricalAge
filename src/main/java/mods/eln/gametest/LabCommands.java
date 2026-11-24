@@ -618,7 +618,7 @@ public final class LabCommands {
         }
         String oilCells = oil.length() == 0 ? " none" : oil.toString();
         src.sendSuccess(() -> Component.literal("ground radar at " + pos.toShortString() + " range " + range + " detail " + detail + ": " + n + " across, " + L + " layers, "
-            + scan.cells() + " cells (" + String.format("%.1f", kj) + " kJ) in " + ms + " ms, picture " + file.getFileName()
+            + scan.cells() + " cells (" + String.format("%.1f", kj) + " kJ, " + scan.encode().length / 1024 + " KiB sent) in " + ms + " ms, picture " + file.getFileName()
             + "; oil cells by layer top:" + oilCells), false);
         return 1;
     }

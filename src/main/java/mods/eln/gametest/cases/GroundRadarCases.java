@@ -81,7 +81,7 @@ public final class GroundRadarCases {
 
         public void measure(TestContext c) {
             GroundScan p = r.lastPicture();
-            c.check("ground radar: the scan finished", p != null, "");
+            c.check("ground radar: the scan finished", p != null, String.valueOf(r.getWaila()));
             if (p == null) return;
             int mid = GroundScan.N / 2;
             double hollow = p.densityAt(1, mid, mid), stone = p.densityAt(1, mid - 2, mid - 2), top = p.densityAt(0, mid, mid);

@@ -69,6 +69,7 @@ public class GroundRadarScreen extends ElnScreen {
     // cell cost 177 ms a frame for a 72-cell picture (AdventurAgent)
 
     private final net.minecraft.resources.Identifier[] tex = new net.minecraft.resources.Identifier[2];
+    private final net.minecraft.client.renderer.texture.DynamicTexture[] texture = new net.minecraft.client.renderer.texture.DynamicTexture[2];
     private final Object[] texFor = new Object[2];
     private final int[] texKey = {-2, -2};
     private static int texNext;
@@ -77,20 +78,24 @@ public class GroundRadarScreen extends ElnScreen {
     private net.minecraft.resources.Identifier texture(int v, GroundScan p, int k, int r) {
         int key = v == 0 ? k : r;
         if (tex[v] != null && texFor[v] == p && texKey[v] == key) return tex[v];
-        release(v);
         int w = p.n, h = v == 0 ? p.n : p.layers.length;
         try {
-            var t = new net.minecraft.client.renderer.texture.DynamicTexture(() -> "eln ground radar", w, h, false);
+            var t = texture[v];
+            if (t == null || t.getPixels() == null || t.getPixels().getWidth() != w || t.getPixels().getHeight() != h) {
+                release(v);   // (the same size is filled again in place, as LogTexture does; another size is a new texture)
+                t = new net.minecraft.client.renderer.texture.DynamicTexture(() -> "eln ground radar", w, h, false);
+                var id = net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "dynamic/ground_radar_" + texNext++);
+                net.minecraft.client.Minecraft.getInstance().getTextureManager().register(id, t);
+                texture[v] = t;
+                tex[v] = id;
+            }
             var img = t.getPixels();
             for (int y = 0; y < h; y++)
                 for (int x = 0; x < w; x++) img.setPixel(x, y, v == 0 ? GroundScan.colour(p, k, x, y) : GroundScan.colour(p, y, x, r));
             t.upload();
-            var id = net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "dynamic/ground_radar_" + texNext++);
-            net.minecraft.client.Minecraft.getInstance().getTextureManager().register(id, t);
-            tex[v] = id;
             texFor[v] = p;
             texKey[v] = key;
-            return id;
+            return tex[v];
         } catch (IllegalStateException e) {
             return null;
         }
@@ -99,6 +104,7 @@ public class GroundRadarScreen extends ElnScreen {
     private void release(int v) {
         if (tex[v] != null) net.minecraft.client.Minecraft.getInstance().getTextureManager().release(tex[v]);
         tex[v] = null;
+        texture[v] = null;
         texFor[v] = null;
     }
 
@@ -124,7 +130,7 @@ public class GroundRadarScreen extends ElnScreen {
         if (render.progress >= 0) return tr("Scanning... %1$", mods.eln.misc.Utils.plotPercent(render.progress));
         if (!render.fault.isEmpty()) return render.fault;
         if (render.battery < 0) return tr("No batteries");
-        String cost = tr("Scan %1$J, ~%2$ s.", mods.eln.misc.Utils.plotValue(render.energy),
+        String cost = tr("Scan %1$, ~%2$ s.", mods.eln.api.Meters.joules(render.energy),
             (int) Math.ceil(Math.max(GroundRadarDescriptor.MIN_S, render.rate > 0 ? render.energy / render.rate : 0)));
         String b = cost + " " + tr("Batteries %1$", mods.eln.misc.Utils.plotPercent(render.battery));
         var level = net.minecraft.client.Minecraft.getInstance().level;

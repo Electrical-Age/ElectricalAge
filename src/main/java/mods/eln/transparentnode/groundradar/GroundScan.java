@@ -21,6 +21,8 @@ public final class GroundScan {
     public static final int TOP_CELL = 2, GROWTH = 8;
     /** The most cells across a scan may have. */
     public static final int MAX_N = 96;
+    /** The most layers a picture may have (a 4064-high world at the finest detail has ~140). */
+    public static final int MAX_LAYERS = 256;
     /** Samples a cell reads at most (3 x 3 x 3 strata; a cell of 3 or fewer blocks a side is read whole). */
     public static final int MAX_SAMPLES = 27;
     /** Densities are kept as bytes over 0..MAX_DENSITY g/cm3. */
@@ -288,9 +290,12 @@ public final class GroundScan {
         try (var in = new java.io.DataInputStream(new java.util.zip.InflaterInputStream(new java.io.ByteArrayInputStream(b)))) {
             int x = in.readInt(), y = in.readInt(), z = in.readInt();
             int n = in.readShort(), growth = in.readShort(), count = in.readShort();
-            if (n <= 0 || n > MAX_N || growth <= 0 || count <= 0 || count > 1024) return null;
+            if (n <= 0 || n > MAX_N || growth <= 0 || count <= 0 || count > MAX_LAYERS) return null;
             Layer[] ls = new Layer[count];
-            for (int k = 0; k < count; k++) ls[k] = new Layer(in.readShort(), in.readShort());
+            for (int k = 0; k < count; k++) {
+                ls[k] = new Layer(in.readShort(), in.readShort());
+                if (ls[k].depth() < 0 || ls[k].cell() <= 0) return null;
+            }
             int cells = count * n * n;
             byte[] d = new byte[cells], f = new byte[cells], g = new byte[cells];
             in.readFully(d);

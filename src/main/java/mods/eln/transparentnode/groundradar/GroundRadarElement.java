@@ -48,6 +48,8 @@ public class GroundRadarElement extends TransparentNodeElement {
     /** The scan's settings (the screen's sliders): range 1..3 (24, 48, 72 cells across), detail 1..4 (cells grow 1, 2, 3,
      *  4 times slower with depth). */
     int range = 1, detail = 1;
+    /** Energy paid for this scan's next cells (J). */
+    private double credit;
     /** The last finished picture (GroundScan.encode), or null, and the game time it was finished at. */
     byte[] picture;
     long pictureAt;
@@ -77,12 +79,17 @@ public class GroundRadarElement extends TransparentNodeElement {
         return e;
     }
 
-    /** What the batteries can give together (W). */
+    /** What the batteries can give together over a tick (W): each its discharge rate, or what it holds left. */
     double rate() {
+        return rate(0.05);
+    }
+
+    /** As rate(), over dt. */
+    double rate(double dt) {
         double w = 0;
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack s = inventory.getItem(i);
-            if (Utils.getItemObject(s) instanceof IItemEnergyBattery b) w += b.getDischagePower(s);
+            if (Utils.getItemObject(s) instanceof IItemEnergyBattery b) w += Math.min(b.getDischagePower(s), b.getEnergy(s) / dt);
         }
         return w;
     }
@@ -156,6 +163,7 @@ public class GroundRadarElement extends TransparentNodeElement {
     public void setSettings(int range, int detail) {
         this.range = Math.max(1, Math.min(GroundRadarDescriptor.MAX_RANGE, range));
         this.detail = Math.max(1, Math.min(GroundRadarDescriptor.MAX_DETAIL, detail));
+        if (scanning == null) fault = null;   // (another scan: the last complaint is stale)
         needPublish();
     }
 
@@ -173,7 +181,7 @@ public class GroundRadarElement extends TransparentNodeElement {
         double need = scanEnergy();
         if (charge() < need) {
             fault = capacity() <= 0 ? I18N.tr("The batteries are flat")
-                : I18N.tr("This scan needs %1$J", mods.eln.misc.Utils.plotValue(need));
+                : I18N.tr("This scan needs %1$", mods.eln.api.Meters.joules(need));
             needPublish();
             return false;
         }
@@ -185,6 +193,7 @@ public class GroundRadarElement extends TransparentNodeElement {
         }
         scanning = s;
         scanTime = 0;
+        credit = 0;
         fault = null;
         needPublish();
         return true;
@@ -201,10 +210,18 @@ public class GroundRadarElement extends TransparentNodeElement {
             return;
         }
         scanTime += dt;
-        double afford = rate() * dt;
-        int cells = (int) Math.floor(afford / GroundRadarDescriptor.J_PER_CELL);
-        int read = scanning.stepCells(cells, GroundRadarDescriptor.SAMPLES_PER_TICK);
-        if (read > 0 && !draw(read * GroundRadarDescriptor.J_PER_CELL / dt, dt) || afford <= 0) {
+        // (the batteries give all they can each tick, into a credit the cells are read against: what a tick pays for
+        // beyond whole cells carries over, so slow batteries still get there, slowly; while the work cap holds the reading
+        // back, no more is drawn)
+        boolean paid = true;
+        if (!scanning.done() && credit < 4 * rate(dt) * dt + GroundRadarDescriptor.J_PER_CELL) {
+            double w = rate(dt);
+            paid = w > 0 && draw(w, dt);
+            if (paid) credit += w * dt;
+        }
+        int cells = (int) Math.floor(credit / GroundRadarDescriptor.J_PER_CELL);
+        credit -= scanning.stepCells(cells, GroundRadarDescriptor.SAMPLES_PER_TICK) * GroundRadarDescriptor.J_PER_CELL;
+        if (!paid) {
             scanning = null;
             fault = I18N.tr("The batteries ran flat during the scan");
             needPublish();
@@ -260,8 +277,8 @@ public class GroundRadarElement extends TransparentNodeElement {
         try {
             switch (id) {
                 case SCAN_ID -> startScan();
-                case RANGE_ID -> range = Math.max(1, Math.min(GroundRadarDescriptor.MAX_RANGE, Math.round(stream.readFloat())));
-                case DETAIL_ID -> detail = Math.max(1, Math.min(GroundRadarDescriptor.MAX_DETAIL, Math.round(stream.readFloat())));
+                case RANGE_ID -> setSettings(Math.round(stream.readFloat()), detail);
+                case DETAIL_ID -> setSettings(range, Math.round(stream.readFloat()));
                 default -> {
                     return id;
                 }
