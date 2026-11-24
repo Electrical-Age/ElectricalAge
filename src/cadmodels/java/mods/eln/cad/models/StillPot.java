@@ -22,14 +22,14 @@ import static mods.eln.cad.models.OilKit.signalPlate;
  * axis, front XN (x = 0), right z+, as StillPotElement's local frame. Its connections, each at its block face's centre
  * (the ports' spots):
  * <ul>
- * <li>thermal: the Large Boiler's six copper heat plates on the lower back and flank faces, each with a hot copper shoe
+ * <li>thermal: one copper heat plate (the Large Boiler's) on the back of the lower right block, its hot copper shoe
  * in to the kettle's foot;</li>
  * <li>vapour out: a steam flange on top of the rear left top block (x 24, z 8; top at y 32), at the end of the swan
  * neck;</li>
  * <li>drain: a flange on the front of the bottom right block (y 8, z 24), its stub through a drain cock into the
  * kettle's foot;</li>
- * <li>fill and steam: flanges on the front of the top right (y 24, z 24) and top left (y 24, z 8) blocks, their stubs
- * into the dome;</li>
+ * <li>fill and steam: flanges low on the left and right flanks of the rear lower blocks (x 24, y 4), their stubs into
+ * the kettle;</li>
  * <li>the temperature signal: a signal plate at the floor of the front of the origin block (z 8).</li>
  * </ul>
  * No hitbox: its eight blocks are whole blocks (the node and its ghosts).
@@ -65,6 +65,18 @@ public final class StillPot {
         return m;
     }
 
+    /** A flange low on a flank (z 0, or z 32 for the right) of the rear lower block (x 24, y 4), its stub into the kettle. */
+    static List<Mesh> flankFlange(boolean right) {
+        List<Mesh> m = new ArrayList<>();
+        double x = 24, y = 4.0, skin = Math.sqrt(R * R - (x - CX) * (x - CX));
+        // (the checker: flush with the skid's bed at 1 and 31, the flange's inner face z-fought it; it stands 0.05 proud)
+        double f0 = right ? 30.95 : 0.0, f1 = right ? 32.0 : 1.05, r0 = right ? 30.55 : 1.05, r1 = right ? 30.95 : 1.45;
+        m.add(prism('z', x, y, 2.75, f0, f1, "steel", 12));
+        m.add(prism('z', x, y, 2.0, r0, r1, "steel", 12, !right, right));
+        m.add(prism('z', x, y, 1.2, right ? CZ + skin - 0.6 : r1, right ? r0 : CZ - skin + 0.6, "copper", 10, false, false));
+        return m;
+    }
+
     static List<Solid> main() {
         List<Solid> m = new ArrayList<>();
         // the skid: the Large Boiler's cast-iron bed under a darksteel deck
@@ -77,15 +89,11 @@ public final class StillPot {
         m.add(prism('y', CX, CZ, R, SEAM, TOP, "copper", N, R_TOP, false, false, Double.NaN));
         m.add(prism('y', CX, CZ, R_TOP, TOP, TOP + 0.6, "copper", N, R_TOP - 1.0, false, true, Double.NaN));
         // the heat plates on the skid's back and flanks, each with a hot copper shoe in to the kettle's foot
-        for (double u : new double[]{8, 24}) {
-            m.addAll(LargeBoiler.heatPlate('x', 32, u, 0));
-            m.addAll(LargeBoiler.heatPlate('z', 0, u, 0));
-            m.addAll(LargeBoiler.heatPlate('z', 32, u, 0));
-            double side = Math.sqrt(R * R - (u - CZ) * (u - CZ));
-            m.add(box(u - 2.4, DECK - 0.6, 0.4, u + 2.4, DECK + 1.2, CZ - side + 1.0, "hotcopper"));
-            m.add(box(u - 2.4, DECK - 0.6, CZ + side - 1.0, u + 2.4, DECK + 1.2, 31.6, "hotcopper"));
-            m.add(box(CX + side - 1.0, DECK - 0.6, u - 2.4, 31.6, DECK + 1.2, u + 2.4, "hotcopper"));
-        }
+        // its one heat plate (Baughn 2026-11-24: one is enough), on the back of the lower right block, its shoe in to the
+        // kettle's foot
+        double hu = 24, side = Math.sqrt(R * R - (hu - CZ) * (hu - CZ));
+        m.addAll(LargeBoiler.heatPlate('x', 32, hu, 0));
+        m.add(box(CX + side - 1.0, DECK - 0.6, hu - 2.4, 31.6, DECK + 1.2, hu + 2.4, "hotcopper"));
         // the swan neck: a collar on the crown, up and over to the vapour flange on top of the rear left block
         m.add(prism('y', CX, CZ, 2.6, TOP + 0.4, TOP + 1.4, "darksteel", 12));
         double ny = 29.6;
@@ -101,8 +109,9 @@ public final class StillPot {
         m.add(box(2.6, 6.8, 22.8, 4.4, 9.2, 25.2, "castiron"));
         m.add(prism('y', 3.5, 24.0, 0.25, 9.2, 9.9, "darksteel", 6, false, false));
         m.addAll(handwheel(3.5, 10.0, 24.0, 0.9, 'y'));
-        m.addAll(frontFlange(24.0, 24.0, 1.2));
-        m.addAll(frontFlange(24.0, 8.0, 1.2));
+        // the fill (left flank) and the steam inlet (right flank), low on the rear blocks, at a tank's low flange height
+        m.addAll(flankFlange(false));
+        m.addAll(flankFlange(true));
         // the temperature signal: the plate at the floor of the origin's front, its transmitter on the deck, its line up
         m.addAll(signalPlate());
         m.add(box(0.85, 0, 6.5, 1.2, 3.5, 9.5, "steel", "nsu"));

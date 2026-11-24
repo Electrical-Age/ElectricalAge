@@ -39,18 +39,17 @@ import java.util.Map;
  * limit over heavy oil's 700 K and cracking's ~720 K.
  * Local frame as GhostCells' (front = XN): x 0 front, 1 back; y 0 low, 1 high; z 0 left, 1 right. Faces:
  * <ul>
- * <li>thermal (the shell): the lower blocks' back and both flanks, six faces, as the Large Boiler's;</li>
+ * <li>thermal (the shell): one face, the back of the lower right block (1,0,1) (Baughn 2026-11-24: "one heat face
+ * should be sufficient"; a burner sets the heat, not the face);</li>
  * <li>vapour out: the top of the rear upper left block (1,1,0), an opening over the pot's top tenth (its charge never
  * reaches it): gas out, and liquid in the vapour line runs back in under it;</li>
  * <li>bottoms drain: the front of the lower right block (0,0,1), at the floor (draw 0), to drain the residue hot;</li>
- * <li>fill: the front of the upper right block (0,1,1), into the pot over the top through a check valve, its float
- * shutting at the 24 B charge (fillOpening);</li>
- * <li>steam sparge: the front of the upper left block (0,1,0), down a dip pipe to the floor (draw 0.05) through a
+ * <li>fill: low on the left flank, of the rear block (1,0,0), into the pot through a check valve, its float shutting
+ * at the 24 B charge (fillOpening);</li>
+ * <li>steam sparge: low on the right flank, of the rear block (1,0,1), into the pot at its flange's height through a
  * check valve (Baughn: the still has a steam input; steam lowers the oils' partial pressures);</li>
  * <li>the pot's temperature as a signal: the front of the origin (0,0,0), 1 V per 100 °C of its liquid.</li>
  * </ul>
- * The lower front holds the signal and the drain, so fill and sparge enter from the upper front (the sparge as a dip
- * pipe) and the six heat faces stay as the Large Boiler's.
  * Entrainment (Baughn 2026-11-24: yes): boiled too hard, a pot carries liquid over with its vapour. Outside the fluid
  * core's solve: before each step a share of the pot's liquid, by the smoothed Souders-Brown factor of the vapour leaving
  * the pot (zero while cold crude heats, zero when bottled up, worse under vacuum), moves into the node its vapour port
@@ -75,8 +74,11 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     public static final double LINE_FULL = 0.3;
     /** The ports' conductance (a tank's); the vapour port's opening (a share of the pot's height, at its top). */
     public static final double PORT_K = TankElement.PORT_K, VAPOUR_SPAN = 0.1;
-    /** The fill and sparge stubs (m^3; as the boiler's feed stub) and where the sparge's dip pipe ends. */
-    public static final double STUB_VOLUME = 0.00002, SPARGE_DRAW = 0.05;
+    /** The fill and sparge stubs (m^3; as the boiler's feed stub); their flanges' height (px in the lower block, a tank's
+     *  low flange) and where that is on the pot. */
+    public static final double STUB_VOLUME = 0.00002, INLET_DRAW = TankElement.LOW / 32.0;
+    /** The block whose back is its heat face (local x, y, z). */
+    static final int[] HEAT_CELL = {1, 0, 1};
     /**
      * Entrainment: the onset (Souders-Brown factor, m/s, on the node's own cross-section V/h; StillSketchTest: a medium
      * burner peaks at 0.079, a big one flat out 0.14, forced firing 0.26-0.43; Baughn to confirm), the liquid carried a
@@ -91,8 +93,8 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     /** (Neon's wording.) */
     static final String[] TOOLTIP = {
         "2x2x2, placed at front bottom left; extends right, back, up",
-        "Heat on lower back and flanks; vapour out at top back left",
-        "Front: temp low left 1 V/100 °C, drain low right, fill high right, steam high left",
+        "Heat on back low right; vapour out at top back left",
+        "Front: temp low left 1 V/100 °C, drain low right; low flanks: fill left, steam right",
         "Holds 32 B; fill with up to 24 B of crude"};
 
     public final NbtThermalLoad thermal = new NbtThermalLoad("thermal");
@@ -135,7 +137,7 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
 
     @Override
     public boolean thermalFace(int x, int y, int z, Direction side) {
-        return GhostCells.lowerBackOrFlank(front, x, y, z, side);
+        return x == HEAT_CELL[0] && y == HEAT_CELL[1] && z == HEAT_CELL[2] && side == front.getInverse();
     }
 
     @Override
@@ -394,20 +396,22 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         double amb = mods.eln.sim.Ambient.kelvin(c);
         vessel = restored(new FluidNode(VOLUME, c.y, HEIGHT, false), loaded, amb);
         // (the stubs centred on their flanges, half way up the upper blocks)
-        feed = restored(new FluidNode(STUB_VOLUME, c.y + 1.45, 0.1, false), loadedFeed, amb);
-        sparge = restored(new FluidNode(STUB_VOLUME, c.y + 1.45, 0.1, false), loadedSparge, amb);
+        double stubZ = c.y + INLET_DRAW * HEIGHT - 0.05;
+        feed = restored(new FluidNode(STUB_VOLUME, stubZ, 0.1, false), loadedFeed, amb);
+        sparge = restored(new FluidNode(STUB_VOLUME, stubZ, 0.1, false), loadedSparge, amb);
         loaded = loadedFeed = loadedSparge = null;
         for (FluidNode stub : new FluidNode[]{feed, sparge}) {
             stub.lumpable = true;   // (it merges into the pipe on its flange, as the boiler's feed stub)
             stub.resistance = 1 / PORT_K;
         }
-        feedCheck = new Link(feed, 0, vessel, 1.0, PORT_K).kind(FluidEdge.Kind.CHECK);
-        spargeCheck = new Link(sparge, 0, vessel, SPARGE_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);
+        feedCheck = new Link(feed, 0, vessel, INLET_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);
+        spargeCheck = new Link(sparge, 0, vessel, INLET_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);
+        int left = front.left().toEnumFacing().get3DDataValue(), right = front.right().toEnumFacing().get3DDataValue();
         int f = front.toEnumFacing().get3DDataValue();
         ports = List.of(new FluidPort(vessel, at(1, 1, 0), 1, 1.0, PORT_K, FluidPort.CENTRE, VAPOUR_SPAN),
             new FluidPort(vessel, at(0, 0, 1), f, 0, PORT_K),
-            new FluidPort(feed, at(0, 1, 1), f, 0.5, PORT_K),
-            new FluidPort(sparge, at(0, 1, 0), f, 0.5, PORT_K));
+            new FluidPort(feed, at(1, 0, 0), left, 0.5, PORT_K, TankElement.sideSpot(left, TankElement.LOW)),
+            new FluidPort(sparge, at(1, 0, 1), right, 0.5, PORT_K, TankElement.sideSpot(right, TankElement.LOW)));
         view.show(vessel);
         cells.make(this);
         connect();

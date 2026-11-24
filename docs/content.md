@@ -110,13 +110,14 @@ gas_turbine_heavy_oil_fouls, gas_turbine_crude_chokes, fuel_generator_residue_ch
 fuel_generator_clean_fuel_clears, fuel_generator_old_save; unit test FuelQualityTest.
 
 The Still Pot (refinery M2, todo #591; `oil/StillPotElement`, model `cadmodels/StillPot`): a 2x2x2 kettle of 32 B for a
-16-24 B batch, heated through its shell like the Large Boiler (the same six lower heat faces, `oil/GhostCells`), its
+16-24 B batch, heated through its shell from one heat face, the back of its lower right block (Baughn 2026-11-24: one
+is enough; its ghost cells `oil/GhostCells`, as the Large Boiler's), its
 vapour off the top of its rear left block to a condenser and receivers that breathe (the breather valve). Constants from
 the step-0 sketch (`sim/fluid/StillSketchTest`, gated: `-Psketch=still`): wall 60 W/K, shell 2800 J/K losing 2.5 W/K,
 shell limit 850 K (its watchdog trips from 840 K on a 20 K s budget, so a pot boiled down to residue under a big burner
 stops by 850 K). Front: the liquid's temperature as a signal on the origin (1 V a 100 °C), the bottoms drain low right
-(draw 0), the fill high right and the steam inlet high left (into the pot through check valves; the steam down a dip pipe
-to the floor). Boiled too hard it boils over: before each step, outside the core's solve, E = 2 (F / 0.10 - 1) kg of
+(draw 0); the fill low on its left flank and the steam inlet low on its right flank (into the pot at their flanges'
+height, through check valves). Boiled too hard it boils over: before each step, outside the core's solve, E = 2 (F / 0.10 - 1) kg of
 its liquid (to 5) per kg of vapour moves into the vapour line (the node its vapour port couples to, up to 30 % of it
 liquid), every species by its share with its enthalpy
 (mass and energy exact), F the Souders-Brown factor of the smoothed vapour velocity over the node's cross-section; a

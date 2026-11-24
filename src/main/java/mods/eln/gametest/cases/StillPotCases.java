@@ -278,7 +278,7 @@ public final class StillPotCases {
 
     /**
      * A sensible batch, end to end: 8 B of dead crude in the pot, heated by a real Fuel Heat Furnace (a Big burner, at a
-     * third of its setting, on natural draught) against its left flank; the coil cooled by two active dissipators; two
+     * third of its setting, on natural draught) against its one heat face (back, lower right); the coil cooled by two active dissipators; two
      * receivers switched by the pot's temperature signal through two OpAmp chips against a 1.82 V reference (182 °C, the
      * gasoline cut's end) driving the control valves: the gasoline receiver's open below it, the other's above. The
      * gasoline cut is at least 90 % gasoline, what comes over after the switch goes to the other receiver, nothing boils
@@ -313,8 +313,9 @@ public final class StillPotCases {
             double kg = 8 * EaUnits.KG_PER_MB_WATER * 1000 / Water.RHO_L * 850;
             charge(s.pot, 400, 450, sp("crude_oil"), kg);
             s.warmLine(ctx, o, 420);
-            ctx.level().setBlockAndUpdate(o.offset(0, -1, -1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
-            f = HpPlantCases.furnace(ctx, o.offset(0, 0, -1), Direction.ZN, 1500);
+            // (against its one heat face, the back of its lower right block)
+            ctx.level().setBlockAndUpdate(o.offset(2, -1, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            f = HpPlantCases.furnace(ctx, o.offset(2, 0, 1), Direction.XP, 1500);
             f.networkUnserialize(ctx.stream(q -> {
                 q.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getSetManualControlValueEvent());
                 q.writeFloat(0.35f);
@@ -483,10 +484,7 @@ public final class StillPotCases {
             s = new Still(ctx, o, false);
             double kg = 10 * EaUnits.KG_PER_MB_WATER * 1000 / Water.RHO_L * 950;
             charge(s.pot, 560, 580, sp("heavy_oil"), kg);
-            BlockPos b = o.offset(-1, 0, 0);
-            ctx.level().setBlockAndUpdate(b.below(), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
-            boiler = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), b);
-            PipeCases.lay(ctx, b.above(), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+            boiler = steam(ctx, o);
             double T = Water.tsat(3e5);
             boiler.vessel.fill(0.5 * mods.eln.oil.BoilerElement.RATED_KG, 3e5, T);
             boiler.thermal.Tc = T + 20 - PhysicalConstant.Tref;
@@ -509,6 +507,20 @@ public final class StillPotCases {
         }
     }
 
+    /**
+     * A Boiler beside the pot at o (two blocks to its right, at its rear), its top port up, over and down into the pot's
+     * steam inlet low on its right flank; on a stone if the pot stands raised.
+     */
+    static mods.eln.oil.BoilerElement steam(TestContext ctx, BlockPos o) {
+        BlockPos b = o.offset(1, 0, 3);
+        if (ctx.level().getBlockState(b.below()).isAir()) ctx.level().setBlockAndUpdate(b.below(), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+        var boiler = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), b);
+        PipeCases.lay(ctx, o.offset(1, 1, 3), 1, 8, 0, 8, 8, 8, 8, 8, 8, 0);
+        PipeCases.lay(ctx, o.offset(1, 1, 2), 1, 8, 8, 16, 8, 8, 8, 8, 0, 8);
+        PipeCases.lay(ctx, o.offset(1, 0, 2), 1, 8, 16, 8, 8, 4, 8, 8, 4, 0);
+        return boiler;
+    }
+
     /** The vapour line from a pot at o: up off its flange, back over a block, down into a receiver tank behind it; a
      *  breather on top of the line. Returns the receiver; err gets the breather's refusal (null: fitted). */
     static TankElement receiver(TestContext ctx, BlockPos o, String[] err) {
@@ -523,7 +535,7 @@ public final class StillPotCases {
 
     /**
      * Steam sparging (Baughn: the still has a steam input): two pots of heavy oil at 560 K, far under its 700 K boiling
-     * point, each with its receiver. A Boiler at 3 bar in front of one feeds its steam inlet (upper left front). The
+     * point, each with its receiver. A Boiler at 3 bar beside one feeds its steam inlet (low on its right flank). The
      * steam carries heavy oil over at that temperature, the other pot hardly any.
      */
     static final class Sparge extends PlumbingCases.Big {
@@ -553,10 +565,7 @@ public final class StillPotCases {
                 if (e[0] != null) err = e[0];
                 charge(pot[i], 560, 580, heavy, kg);
             }
-            // the Boiler in front of pot 1, its top port up and across into the pot's steam inlet
-            BlockPos b = ctx.at(1, 1, 5);
-            boiler = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), b);
-            PipeCases.lay(ctx, b.above(), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+            boiler = steam(ctx, ctx.at(2, 1, 5));
             double T = Water.tsat(3e5);
             boiler.vessel.fill(0.5 * mods.eln.oil.BoilerElement.RATED_KG, 3e5, T);
             boiler.thermal.Tc = T + 20 - PhysicalConstant.Tref;
@@ -648,13 +657,14 @@ public final class StillPotCases {
             var lv = ctx.level();
             portsOk = mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(1, 1, 0), net.minecraft.core.Direction.UP) != null      // vapour
                 && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(0, 0, 1), net.minecraft.core.Direction.WEST) != null         // drain
-                && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(0, 1, 1), net.minecraft.core.Direction.WEST) != null         // fill
-                && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(0, 1, 0), net.minecraft.core.Direction.WEST) != null         // steam
+                && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(1, 0, 0), net.minecraft.core.Direction.NORTH) != null        // fill, left flank
+                && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(1, 0, 1), net.minecraft.core.Direction.SOUTH) != null        // steam, right flank
+                && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(0, 1, 1), net.minecraft.core.Direction.WEST) == null         // upper front: plain
                 && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o, net.minecraft.core.Direction.WEST) == null                          // the signal face
                 && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(1, 1, 1), net.minecraft.core.Direction.UP) == null;           // top: plain
             // unpiped, its fill and steam stubs aren't linked into the pot (no node in its network); a pipe on the fill links it
             linksUnpiped = a.fluidLinks().size();
-            PipeCases.lay(ctx, o.offset(-1, 1, 1), 0, 16, 8, 8, 8, 8, 8);
+            PipeCases.lay(ctx, o.offset(1, 0, -1), 0, 8, 4, 16, 8, 4, 8);
             linksPiped = a.fluidLinks().size();
         }
 
@@ -665,9 +675,9 @@ public final class StillPotCases {
             var obj = Eln.obj.getObj("stillpot");
             ctx.line("still pot: " + a.getWaila());
             ctx.check("still pot: placed facing west, its seven other blocks are ghosts with face nodes, owned by it", a.front == Direction.XN && ghostsOk, "");
-            ctx.check("still pot: six thermal faces, all its shell", thermalFaces == 6, "" + thermalFaces);
+            ctx.check("still pot: one thermal face, its shell (Baughn: one is enough)", thermalFaces == 1, "" + thermalFaces);
             ctx.check("still pot: one temperature-signal face (the origin's front)", signalFaces == 1, "" + signalFaces);
-            ctx.check("still pot: the pipe tool finds vapour (top rear left), drain, fill and steam (front), nothing on plain faces", portsOk, "");
+            ctx.check("still pot: the pipe tool finds vapour (top rear left), drain (front), fill and steam (low flanks), nothing on plain faces", portsOk, "");
             ctx.check("still pot: its origin block has its fluid capability", cap == a.getFluidHandler(), "" + cap);
             ctx.check("still pot: unpiped inlets add nothing to its network; a pipe on the fill links its stub", linksUnpiped == 0 && linksPiped == 1,
                 linksUnpiped + " then " + linksPiped);

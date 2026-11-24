@@ -763,9 +763,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   1.6 bar air main still run one at full rating (`large_boiler_2x2_hp_plant_20bar`), and `large_boiler_2x2_body`
   checks that no upper face connects.
 - Still Pot (refinery M2, todo #591, new in 26.x; Baughn 2026-11-24: batch first, the pot is the refinery's first rung,
-  entrainment yes): a 2x2x2 kettle for batch distillation with the Large Boiler's heat faces (their ghost cells are
-  `oil/GhostCells` now, shared). Fill and steam inlets sit on its upper front: the lower front holds the temperature
-  signal and the bottoms drain, and the six heat faces stay as the Large Boiler's. See docs/content.md.
+  entrainment yes): a 2x2x2 kettle for batch distillation (its ghost cells `oil/GhostCells`, shared with the Large
+  Boiler). One heat face (Baughn 2026-11-24: "one heat face should be sufficient"), the back of its lower right block;
+  the fill low on its left flank, the steam inlet low on its right flank; the front holds the temperature signal and the
+  bottoms drain. A recharge into a hot pot boils over: intended (Baughn). See docs/content.md.
 - Submersible pumps, 50V (100 W) and 200V (400 W) (Baughn 2026-10-25): placed in a water source (transparent-node
   blocks are waterloggable now, as six nodes were), they push the water they stand in up a pipe from the flange on
   top: 3.5 turbines' worth of feedwater (57 / 230 mB/s), falling to nothing at 3 bar against the pipe. Power on the
