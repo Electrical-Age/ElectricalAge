@@ -50,7 +50,7 @@ public final class SteamJet {
     }
 
     /** The share of what flows out that is gas (whistle or sputter): other species count as liquid unless a gas. */
-    static double gasShare(FluidEdge e) {
+    public static double gasShare(FluidEdge e) {
         double m = Math.abs(e.fLiquid) + Math.abs(e.fVapour) + Math.abs(e.fAir), g = Math.abs(e.fVapour) + Math.abs(e.fAir);
         if (e.fSpecies != null) {
             var reg = mods.eln.sim.fluid.SpeciesRegistry.get();

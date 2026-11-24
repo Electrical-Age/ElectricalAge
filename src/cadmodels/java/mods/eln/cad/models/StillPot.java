@@ -29,7 +29,8 @@ import static mods.eln.cad.models.OilKit.signalPlate;
  * at its bottom edge), its stub into the kettle's foot under a drain cock on the deck;</li>
  * <li>fill and steam: flanges low on the left and right flanks of the rear lower blocks (x 24, y 4), their stubs into
  * the kettle;</li>
- * <li>the temperature signal: a signal plate at the floor of the front of the origin block (z 8).</li>
+ * <li>the temperature signal: a signal plate at the floor of the front of the origin block (z 8);</li>
+ * <li>its safety valve on the crown, front right of the swan neck's collar (StillPotElement.RELIEF_PA).</li>
  * </ul>
  * No hitbox: its eight blocks are whole blocks (the node and its ghosts).
  */
@@ -104,6 +105,11 @@ public final class StillPot {
         m.add(prism('y', VX, VZ, 2.0, 30.0, 31.0, "steel", 12, true, false));
         m.add(prism('y', VX, VZ, 2.75, 31.0, 32.0, "steel", 12));
         m.addAll(boltRing('y', VX, VZ, 2.35, 30.8, 31.0, 6, "brass", 0.2, 0));
+        // its safety valve on the crown, front right of the neck's collar: a brass body, a darksteel bonnet and lever
+        double sx = CX - 3.5, sz = CZ + 2.5;
+        m.add(prism('y', sx, sz, 0.9, TOP + 0.4, TOP + 1.6, "brass", 10));
+        m.add(prism('y', sx, sz, 0.55, TOP + 1.6, TOP + 2.5, "darksteel", 8));
+        m.add(box(sx - 0.2, TOP + 2.2, sz - 2.0, sx + 0.2, TOP + 2.5, sz - 0.55, "darksteel"));
         // the neck's stay down to the dome
         double stayX = (CX + VX) / 2, stayZ = (CZ + VZ) / 2;
         m.add(prism('y', stayX, stayZ, 0.4, TOP - 1.0, ny - 1.4, "darksteel", 8, false, false));

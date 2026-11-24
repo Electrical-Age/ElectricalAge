@@ -76,6 +76,12 @@ public class LargeBoilerElement extends BoilerElement implements GhostCells.Host
         cells.drop();
     }
 
+    /** (Burst or burnt away: its ghosts go too.) */
+    @Override
+    public void onSelfDestruction() {
+        cells.drop();
+    }
+
     // the origin block's own faces: the signal on its front, heat on its left flank
 
     @Override

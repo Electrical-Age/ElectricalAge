@@ -196,6 +196,12 @@ public class CondenserCoilElement extends TransparentNodeElement implements Flui
         cells.drop();
     }
 
+    /** (Burst or burnt away: its ghosts go too.) */
+    @Override
+    public void onSelfDestruction() {
+        cells.drop();
+    }
+
     @Override
     public boolean onBlockActivated(net.minecraft.world.entity.player.Player player, Direction side, float vx, float vy, float vz) {
         return false;

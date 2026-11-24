@@ -273,6 +273,13 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
     /**
+     * Destroyed by a failure (NodeBase.physicalSelfDestruction: no break, nothing dropped): let go of what it owns outside
+     * its block, as a multiblock's ghost cells (a burst Still Pot left its seven ghosts behind). Default: nothing.
+     */
+    public void onSelfDestruction() {
+    }
+
+    /**
      * Lost its support (or a ghost of its group): broken like a block, with the break effects, and dropped with its
      * contents by the block entity's removal (onBreakElement). Baughn: devices vanished instead of dropping, because
      * physicalSelfDestruction (the failure path) drops nothing.

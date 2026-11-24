@@ -131,8 +131,12 @@ an opening over the pot's top tenth (the charge never reaches it), so liquid in 
 while vapour leaves. Its fill and steam stubs lump into the pipe on their flanges, and are linked into the pot only
 while something is coupled there: unpiped they add no node to its network. Lay the vapour
 line no higher than the condenser's inlet: a line that rises above it is one lumped run whose lowest point is the pot's
-flange, liquid in it can't reach the condenser and the vapour bubbles through it. Jade: boiling over, only residue left, under vacuum (below 0.9 bar); pressure, temperature,
-shell, what boils off ("Boiling now", while vapour leaves), contents, liquid, viscosity, the signal. Its fluid
+flange, liquid in it can't reach the condenser and the vapour bubbles through it. A safety valve on its crown
+(Baughn 2026-11-24: a copper pot at 13 bar, seen in a client check with both receiver valves shut and the coil flooded
+over its gas breather, is unrealistic) relieves to the air at 0.5 bar gauge (`RELIEF_PA`, the fluid core's relief
+regulator, a pipe safety valve's jet and whistle; what it lets out is booked by species in `ventedKg`); past 2 bar gauge
+(`BURST_PA`) it bursts as a tank does. Jade: relieving (outlet blocked), boiling over, only residue left, under vacuum (below 0.9 bar); pressure, temperature, liquid (as a tank's),
+what boils off ("Boiling now", while vapour leaves), shell, contents, viscosity, the signal. Its fluid
 capability is on its origin block (ghost blocks expose none). A piped fill's float shuts it at the 24 B charge (as a
 bucket stops there).
 
@@ -146,7 +150,8 @@ receivers switched through OpAmps and control valves by the pot's signal: gasoli
 (15 kW: it boils over, residue reaches the receiver and fouls a turbine; every gram of residue accounted for),
 `still_pot_calm`, `still_pot_overfire` (25 kW: its product chokes a Fuel Generator), `still_pot_residue`,
 `still_pot_body`, `still_pot_sparge_layers` (water under the oil), `still_pot_steam_sparge`,
-`still_pot_valves_shut_mid_boil` (both receivers shut: pressure rises, no stall), `still_pot_hot_residue_drains` (6 B of hot
+`still_pot_valves_shut_mid_boil` (both receivers shut: pressure rises, no stall), `still_pot_shut_in_relieves` (shut in
+completely under 10 kW: it holds at its relief setting, venting, no burst, no stall), `still_pot_hot_residue_drains` (6 B of hot
 residue drains out completely through a large pipe, cold loses ~2 %), `still_pot_second_pass` (the gasoline heart redistilled: 98 % or better), and the
 breather's `pipe_breather_valve_*`. No vacuum-trap test: the receivers' breather valves let air in, so a cooling
 pot can't pull its receivers into a vacuum (the pot's Jade warns if one is left unvented). Cost: the sensible batch's network has 12 active nodes (pot, coil, the two receivers and eight pipe runs)

@@ -100,12 +100,22 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     public static final double SIGNAL_MAX_C = 500;
     /** Under this the pot reads as under vacuum (Pa). */
     public static final double VACUUM_PA = 0.9e5;
+    /**
+     * Its safety valve on the crown (Baughn 2026-11-24: a copper pot at 13 bar is unrealistic): a pot still is an
+     * atmospheric vessel of thin copper, its relief valve lifting at a fraction of a bar (0.5 bar gauge here), as the
+     * fluid core's relief regulator (a pipe safety valve's, wide open as one); RELIEF_K passes a big burner's whole
+     * boil-up a few hundred Pa over the setting. If the relief can't keep up (a fire under a blocked pot at the limits of
+     * the solve, or liquid at the valve), the pot bursts at BURST_PA (2 bar gauge).
+     */
+    public static final double RELIEF_PA = Water.P_ATM + 0.5e5, BURST_PA = Water.P_ATM + 2e5, RELIEF_K = 2e-10;
+    /** Venting through its safety valve over this (kg/s, a second's mean) shows "Relieving". */
+    public static final double RELIEVING_KG_S = 1e-5;
 
     /** Its tooltip lines (Neon's wording). */
     static List<String> tooltip() {
         return List.of(I18N.tr("2x2x2, placed at front bottom left; extends right, back, up"),
             I18N.tr("Heat on back low right; vapour out at top back left"),
-            I18N.tr("Front: temp low left 1 V/100 °C, drain low right; low flanks: fill left, steam right"),
+            I18N.tr("Front: temp low left 1 V/100 °C, drain low right; low rear sides: fill left, steam right"),
             I18N.tr("Holds 32 B; fill with up to 24 B of crude"));
     }
 
@@ -201,6 +211,21 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     }
 
     @Override
+    public List<Vent> fluidVents() {
+        return relief == null ? List.of() : List.of(relief);
+    }
+
+    /** Its safety valve: a relief regulator to the air at RELIEF_PA off its top. */
+    Vent relief;
+    /**
+     * What its safety valve has let out to the air since loaded (kg by species id), as a pipe safety valve books it
+     * (SafetyValvePart.ventedKg: a room-air model reads these); its rate, a second's mean (kg/s). Server only, not saved.
+     */
+    public double[] ventedKg = new double[0];
+    public double reliefRate;
+    double meterRelief;
+
+    @Override
     public List<Link> fluidLinks() {
         if (feedCheck == null) return List.of();
         List<Link> out = new ArrayList<>(2);
@@ -218,7 +243,8 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     /** The vapour port's edges this step (out of the pot through the opening at its top). */
     List<FluidEdge> vapourEdges() {
         List<FluidEdge> out = new ArrayList<>(2);
-        for (FluidEdge e : FluidWorld.edgesOf(vessel)) if ((e.a == vessel ? e.portA : e.portB) > 1 - VAPOUR_SPAN) out.add(e);
+        for (FluidEdge e : FluidWorld.edgesOf(vessel))
+            if ((e.a == vessel ? e.portA : e.portB) > 1 - VAPOUR_SPAN && (relief == null || e != relief.edge)) out.add(e);
         return out;
     }
 
@@ -306,8 +332,17 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
             if (meterSpecies.length < ve.fSpecies.length) meterSpecies = java.util.Arrays.copyOf(meterSpecies, ve.fSpecies.length);
             for (int i = 0; i < ve.fSpecies.length; i++) meterSpecies[i] += Math.max(0, sign * ve.fSpecies[i]) * dt;
         }
+        // the safety valve: what it lets out, by species (its edge runs from the pot to the air)
+        FluidEdge re = relief == null ? null : relief.edge;
+        if (re != null && re.flow > 0 && re.fSpecies != null) {
+            if (ventedKg.length < re.fSpecies.length) ventedKg = java.util.Arrays.copyOf(ventedKg, re.fSpecies.length);
+            for (int i = 0; i < re.fSpecies.length; i++) ventedKg[i] += Math.max(0, re.fSpecies[i]) * dt;
+            meterRelief += re.flow * dt;
+        }
         meterTime += dt;
         if (meterTime >= 1) {
+            reliefRate = meterRelief / meterTime;
+            meterRelief = 0;
             vapourRate = meterVapour / meterTime;
             entrainRate = meterEntrain / meterTime;
             vapourSpecies = new double[meterSpecies.length];
@@ -316,6 +351,26 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
             meterVapour = meterEntrain = meterTime = 0;
         }
         view.show(vessel);
+        relieving(re);
+        // past its rating it bursts, as a tank does: the contents' expansion energy (once its safety valve is in the network:
+        // a pot filled brimful before the network is built isn't relieving yet)
+        if (vessel.P() > BURST_PA && re != null) {
+            var v = vessel;
+            new Failure(this).pressureVessel(() -> v.P() * v.volume * Math.log(v.P() / Water.P_ATM)).fail(mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE, v.P());
+        }
+    }
+
+    /** While it relieves: the pipe safety valve's jet and whistle (SteamJet), straight up off its crown. */
+    void relieving(FluidEdge re) {
+        if (re == null || re.flow <= 0 || !(node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl)) return;
+        // (its crown: the middle of the pot's top, from the corner cells' centres)
+        long a = at(0, 1, 0), b = at(1, 1, 1);
+        var top = new net.minecraft.world.phys.Vec3((net.minecraft.core.BlockPos.getX(a) + net.minecraft.core.BlockPos.getX(b)) / 2.0 + 0.5, net.minecraft.core.BlockPos.getY(a) + 1.0,
+            (net.minecraft.core.BlockPos.getZ(a) + net.minecraft.core.BlockPos.getZ(b)) / 2.0 + 0.5);
+        double q = mods.eln.node.voxel.SteamJet.tick(sl, top, net.minecraft.core.Direction.UP, re, 1.0);
+        if (q > 200 && mods.eln.node.voxel.SteamJet.gasShare(re) > 0.5 && sl.getGameTime() % 4 == 0)
+            sl.playSound(null, net.minecraft.core.BlockPos.containing(top), net.minecraft.sounds.SoundEvents.NOTE_BLOCK_FLUTE.value(), net.minecraft.sounds.SoundSource.BLOCKS,
+                (float) Math.min(2, 0.4 + q / 10000), (float) Math.min(2, 1.4 + q / 40000));
     }
 
     /** Vapour leaving the pot that counts as boiling (kg/s): under it, no "Boiling now" (a cold pot's air breathing). */
@@ -390,6 +445,9 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         }
         feedCheck = new Link(feed, 0, vessel, INLET_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);
         spargeCheck = new Link(sparge, 0, vessel, INLET_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);
+        relief = new Vent(vessel, 1.0, RELIEF_K);
+        relief.setPa = RELIEF_PA;
+        relief.open = 1;
         int left = front.left().toEnumFacing().get3DDataValue(), right = front.right().toEnumFacing().get3DDataValue();
         int f = front.toEnumFacing().get3DDataValue();
         ports = List.of(new FluidPort(vessel, at(1, 1, 0), 1, 1.0, PORT_K, FluidPort.CENTRE, VAPOUR_SPAN),
@@ -404,6 +462,12 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     @Override
     public void onBreakElement() {
         super.onBreakElement();
+        cells.drop();
+    }
+
+    /** (Burst or burnt away: its ghosts go too.) */
+    @Override
+    public void onSelfDestruction() {
         cells.drop();
     }
 
@@ -444,15 +508,17 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         // (warnings first: Jade's headline is the first lines; values by Neon)
         if (entrainRate > 1e-6) info.put(I18N.tr("Boiling over"), String.format(I18N.tr("%s/s liquid in vapour; lower heat"), EaUnits.grams(entrainRate * 1000)));
         if (onlyResidue()) info.put(I18N.tr("Only residue left"), I18N.tr("shell overheating; cut heat and drain"));
+        if (reliefRate > RELIEVING_KG_S) info.put(I18N.tr("Relieving"), I18N.tr("outlet blocked"));
         if (vessel.P() < VACUUM_PA) info.put(I18N.tr("Under vacuum"), String.format(I18N.tr("%.2f bar; fit a breather on the receiver"), vessel.P() / 1e5));
+        // (the headline: pressure, temperature, how full, as a tank's liquid line)
         info.put(I18N.tr("Pressure"), String.format("%.2f bar", vessel.P() / 1e5));
         info.put(I18N.tr("Temperature"), mods.eln.api.Meters.celsius(vessel.T() - Water.T0));
-        info.put(I18N.tr("Shell"), mods.eln.api.Meters.celsius(thermal.Tc + PhysicalConstant.Tref - Water.T0));
+        info.put(I18N.tr("Liquid"), EaUnits.volume(vessel.liquidVolume() * Water.RHO_L / EaUnits.KG_PER_MB_WATER) + ", "
+            + Utils.plotPercent(vessel.liquidVolume() / VOLUME) + " full");
         Object[] b = boiling();
         if (b != null) info.put(I18N.tr("Boiling now"), String.format(I18N.tr("mostly %s, %s"), b[0], Utils.plotPercent((Double) b[1])));
+        info.put(I18N.tr("Shell"), mods.eln.api.Meters.celsius(thermal.Tc + PhysicalConstant.Tref - Water.T0));
         info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
-        double mb = vessel.liquidVolume() * Water.RHO_L / EaUnits.KG_PER_MB_WATER;
-        info.put(I18N.tr("Liquid"), EaUnits.tank(mb, POT_B * 1000));
         EaUnits.putViscosity(info, vessel);
         info.put(I18N.tr("Signal"), mods.eln.api.Meters.volts(tempOut.getU()));
         return info;

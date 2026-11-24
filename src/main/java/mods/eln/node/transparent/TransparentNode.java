@@ -71,6 +71,13 @@ public class TransparentNode extends Node implements mods.eln.bus.BusPeer, mods.
 
     }
 
+    /** A failure's destruction (no break, no drops): the element first lets go of what it owns elsewhere (its ghosts). */
+    @Override
+    public void physicalSelfDestruction(float explosionStrength) {
+        if (!isDestructing() && element != null) element.onSelfDestruction();
+        super.physicalSelfDestruction(explosionStrength);
+    }
+
     @Override
     public void onBreakBlock() {
 

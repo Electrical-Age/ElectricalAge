@@ -38,6 +38,8 @@ public final class StillPotCases {
         cases.add(new OverfiredBatch());
         cases.add(new SpargeLayers());
         cases.add(new ValvesShutMidBoil());
+        cases.add(new ShutInRelief());
+        cases.add(new BurstTakesGhosts());
         cases.add(new ResidueDrains());
         cases.add(new SecondPass());
     }
@@ -100,8 +102,11 @@ public final class StillPotCases {
             dissipator(ctx, o.offset(4, 0, 0), Direction.ZN);
             dissipator(ctx, o.offset(3, 0, -1), Direction.XN);
             ctx.level().setBlockAndUpdate(o.offset(4, -1, -1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
-            ctx.source(Wp11Cases.SOURCE, o.offset(4, 0, -1), Eln.MVU);
+            power = ctx.source(Wp11Cases.SOURCE, o.offset(4, 0, -1), Eln.MVU);
         }
+
+        /** The dissipators' supply. */
+        mods.eln.sixnode.electricalsource.ElectricalSourceElement power;
 
         /**
          * The vapour line's iron walls at kelvin, as a still some minutes into its batch has them: from cold, the bare line
@@ -856,6 +861,107 @@ public final class StillPotCases {
                 String.format("%.1f -> %.1f mL", coilLiquid0 * 1e6, s.coil.coil.liquidVolume() * 1e6));
             ctx.check("still shut in: no pressure builds (its gas offtake's breather vents the rest; under 1.3 bar)", maxPotPa < 1.3e5 && maxCoilPa < 1.3e5,
                 String.format("pot %.3f, coil %.3f bar", maxPotPa / 1e5, maxCoilPa / 1e5));
+        }
+    }
+
+    /**
+     * Shut in completely mid-boil (AdventurAgent's demo: both receiver valves shut and liquid over the gas offtake's
+     * breather held a copper pot at 13 bar): at tick 600 under 5 kW the gasoline receiver's valve shuts, the offtake's
+     * breather goes, the coil's dissipators lose power and the coil stands full of condensate (so what boils off has
+     * nowhere to go), and the burner goes up to 10 kW. The pot's own safety valve holds it near RELIEF_PA, venting to the air (counted by species), Jade
+     * says so, nothing bursts, the network doesn't stall.
+     */
+    static final class ShutInRelief extends StillBox {
+        Still s;
+        IProcess heat;
+        mods.eln.sim.mna.component.VoltageSource openB;
+        int tick;
+        double maxPotPa, minPotPaLate = Double.MAX_VALUE;
+        double[] vented0 = new double[0];
+        String jade = "";
+
+        public String id() {
+            return "still_pot_shut_in_relieves";
+        }
+
+        public int ticks() {
+            return 3000;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos o = ctx.at(3, 2, 2);
+            s = new Still(ctx, o, true);
+            s.warmLine(ctx, o, 420);
+            double kg = 8 * EaUnits.KG_PER_MB_WATER * 1000 / Water.RHO_L * 850;
+            charge(s.pot, 400, 450, sp("crude_oil"), kg);
+            openB = s.hold(s.valveB.signal, Eln.SVU);
+            s.hold(s.valveA.signal, 0);
+            Eln.simulator.addSlowProcess(heat = dt -> {
+                tick++;
+                s.pot.thermal.moveEnergyTo((tick > 600 ? 10000 : 5000) * dt);
+                if (tick == 600) {
+                    openB.setU(0);
+                    vented0 = s.pot.ventedKg.clone();   // (a hot charge flashes a little out of it at first)
+                    var off = ctx.voxelByEntity(o.offset(2, 1, 0));
+                    for (int i = off.parts.size() - 1; i >= 0; i--) if (off.parts.get(i) instanceof mods.eln.node.voxel.SafetyValvePart) off.removePart(i, false);
+                    ctx.setVolts(s.power, 0);
+                    // (as the demo's: the coil full of its condensate, nowhere for vapour to condense)
+                    var c = s.coil.coil;
+                    EaUnits.add(c, sp("gasoline"), Math.max(0, 0.97 * c.volume - c.liquidVolume()) * 740, c.T(), false, false);
+                    c.update();
+                    mods.eln.fluid.FluidWorld.changed(s.coil);
+                }
+                if (tick > 600) maxPotPa = Math.max(maxPotPa, s.pot.vessel.P());
+                if (tick > 2600) minPotPaLate = Math.min(minPotPaLate, s.pot.vessel.P());
+                if (tick > 600 && s.pot.reliefRate > StillPotElement.RELIEVING_KG_S && jade.isEmpty()) jade = "" + s.pot.getWaila();
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(heat);
+            s.remove();
+            double vented = 0;
+            for (int i = 2; i < s.pot.ventedKg.length; i++) vented += s.pot.ventedKg[i] - (i < vented0.length ? vented0[i] : 0);
+            ctx.line(String.format("still shut in: pot max %.3f bar, late min %.3f bar (relief %.2f, burst %.2f), vented %.1f g of oil vapour, relief %.3f g/s; jade relieving %s; pot %s",
+                maxPotPa / 1e5, minPotPaLate / 1e5, StillPotElement.RELIEF_PA / 1e5, StillPotElement.BURST_PA / 1e5, vented * 1000, s.pot.reliefRate * 1000, jade, s.pot.getWaila()));
+            ctx.check("still shut in: everything fits", s.err.isEmpty(), s.err);
+            ctx.check("still shut in: its safety valve holds it near the setting (never 10 % over it)", maxPotPa < 1.1 * StillPotElement.RELIEF_PA && maxPotPa > 0.97 * StillPotElement.RELIEF_PA,
+                String.format("%.3f bar", maxPotPa / 1e5));
+            ctx.check("still shut in: it vents oil vapour to the air, booked by species (after the shut-in)", vented > 0, String.format("%.4f kg", vented));
+            ctx.check("still shut in: Jade says it relieves", jade.contains(mods.eln.i18n.I18N.tr("Relieving")), jade);
+            ctx.check("still shut in: the pot is still there (no burst)", s.pot.node != null && !s.pot.node.isDestructing(), "");
+        }
+    }
+
+    /**
+     * A pot that bursts (past BURST_PA, its relief overwhelmed: here the failure itself, as the pot raises it) goes with
+     * its seven ghost blocks: no node left in any of its cells (a failure's destruction drops no block, so the ghosts
+     * stayed behind).
+     */
+    static final class BurstTakesGhosts extends PlumbingCases.Big {
+        StillPotElement pot;
+        final List<BlockPos> cells = new java.util.ArrayList<>();
+
+        public String id() {
+            return "still_pot_burst_takes_its_ghosts";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos o = ctx.at(3, 1, 3);
+            pot = pot(ctx, o);
+            if (pot == null) throw new IllegalStateException("the Still Pot could not be placed");
+            for (int x = 0; x <= 1; x++) for (int y = 0; y <= 1; y++) for (int z = 0; z <= 1; z++) cells.add(o.offset(x, y, z));
+            new mods.eln.sim.process.destruct.Failure(pot).pressureVessel(() -> 0).fail(mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE, StillPotElement.BURST_PA * 1.1);
+        }
+
+        public void measure(TestContext ctx) {
+            int left = 0;
+            for (BlockPos q : cells) if (mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(q, ctx.level())) != null) left++;
+            ctx.check("still pot burst: it and its ghosts are gone (no node in its eight cells)", left == 0 && pot.node.isDestructing(), left + " left");
         }
     }
 
