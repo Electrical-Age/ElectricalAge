@@ -315,15 +315,17 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         var c = node.coordonate;
         double amb = mods.eln.sim.Ambient.kelvin(c);
         vessel = restored(new FluidNode(VOLUME, c.y, HEIGHT, false), loaded, amb);
-        neck = restored(new FluidNode(TankDescriptor.bucketsVolume(NECK_B), c.y + HEIGHT - NECK_H, NECK_H, false), loadedNeck, amb);
-        feed = restored(new FluidNode(STUB_VOLUME, c.y + 1.5, 0.1, false), loadedFeed, amb);
-        sparge = restored(new FluidNode(STUB_VOLUME, c.y + 1.5, 0.1, false), loadedSparge, amb);
+        // (the neck's floor at the pot's top face, where its port draws: a coupling must be level with the pipe's end; the
+        // stubs centred on their flanges, half way up the upper blocks)
+        neck = restored(new FluidNode(TankDescriptor.bucketsVolume(NECK_B), c.y + HEIGHT, NECK_H, false), loadedNeck, amb);
+        feed = restored(new FluidNode(STUB_VOLUME, c.y + 1.45, 0.1, false), loadedFeed, amb);
+        sparge = restored(new FluidNode(STUB_VOLUME, c.y + 1.45, 0.1, false), loadedSparge, amb);
         loaded = loadedNeck = loadedFeed = loadedSparge = null;
         for (FluidNode stub : new FluidNode[]{feed, sparge}) {
             stub.lumpable = true;   // (it merges into the pipe on its flange, as the boiler's feed stub)
             stub.resistance = 1 / PORT_K;
         }
-        vapour = new Link(vessel, 1.0, neck, 1.0, VAPOUR_K);
+        vapour = new Link(vessel, 1.0, neck, 0, VAPOUR_K);
         entrain = new Link(vessel, 0, neck, 1.0, 0).kind(FluidEdge.Kind.CHECK).area(ENT_AREA);
         entrain.open = 0;
         feedCheck = new Link(feed, 0, vessel, 1.0, PORT_K).kind(FluidEdge.Kind.CHECK);

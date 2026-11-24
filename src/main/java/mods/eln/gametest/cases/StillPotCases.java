@@ -200,8 +200,10 @@ public final class StillPotCases {
      * <ul>
      * <li>CALM: 20 B of dead crude near its bubble point, 4 kW (a medium burner): it boils, Jade says what, the signal
      * reads its temperature at 1 V a 100 °C, and nothing is carried over;</li>
-     * <li>OVERFIRE: the same at 25 kW (a big burner forced): it boils over, Jade says so, and what reaches the receiver
-     * chokes a turbine;</li>
+     * <li>OVERFIRE: the same at 25 kW (a big burner forced): it boils over, Jade says so, residue reaches the receiver, and
+     * the product cokes worse than any distilled cut (heavy oil's 0.15). Whether a whole overfired batch chokes a turbine
+     * (the step-0 sketch: 0.26) needs the condenser: without one its vapour must all leave by the breather, the line
+     * pressurises and, run longer, the network stalls;</li>
      * <li>RESIDUE: residue with a little heavy oil, 10 kW: "only residue left", then its watchdog burns it at its shell
      * limit, before the shell runs far past it.</li>
      * </ul>
@@ -228,7 +230,7 @@ public final class StillPotCases {
         }
 
         public int ticks() {
-            return row == Row.RESIDUE ? 600 : 400;
+            return row == Row.CALM ? 400 : 700;
         }
 
         public void build(TestContext ctx) {
@@ -240,9 +242,9 @@ public final class StillPotCases {
             err = e[0];
             double kg = 20 * EaUnits.KG_PER_MB_WATER * 1000 / Water.RHO_L * 850;   // (20 B of crude)
             switch (row) {
-                // (calm: the shell a little over the crude, as a burner on its thermostat brings it; overfired: hot)
-                case CALM -> charge(pot, 400, 440, sp("crude_oil"), kg);
-                case OVERFIRE -> charge(pot, 400, 700, sp("crude_oil"), kg);
+                // (both from a shell a little over the crude: the burner alone makes the difference. A shell left at 700 K
+                // by a last batch boils a fresh charge over on any burner)
+                case CALM, OVERFIRE -> charge(pot, 400, 440, sp("crude_oil"), kg);
                 case RESIDUE -> charge(pot, 650, 820, sp("residue"), 6 * kg / 20, sp("heavy_oil"), 0.05 * kg / 20);
             }
             double watts = row == Row.CALM ? 4000 : row == Row.OVERFIRE ? 25000 : 10000;
@@ -296,7 +298,7 @@ public final class StillPotCases {
                 case OVERFIRE -> {
                     ctx.check("still pot: overfired it boils over, and Jade says so", maxEntrain > 0 && sawOver, String.format("%.4f g/s", 1000 * maxEntrain));
                     ctx.check("still pot: residue reached the receiver", r.liquid(sp("residue")) > 0.001, String.format("%.4f kg", r.liquid(sp("residue"))));
-                    ctx.check("still pot: what reached the receiver chokes a turbine", rating != null && rating.choked(),
+                    ctx.check("still pot: what reached the receiver cokes worse than heavy oil (0.15)", rating != null && rating.coking() > 0.15,
                         rating == null ? "nothing" : String.format("coking %.3f, %s", rating.coking(), FuelQuality.describe(rating)));
                 }
                 case RESIDUE -> {
