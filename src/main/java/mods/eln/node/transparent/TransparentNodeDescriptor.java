@@ -98,6 +98,14 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         return w.getBlockState(pos).isFaceSturdy(w, pos, to.getInverse().toEnumFacing(), SupportType.FULL);
     }
 
+    /**
+     * Another EA device or a pipe block (a voxel node) below: the floor rule for a device that may stand on one (its
+     * ports underneath feed what is below: the Boiler, the Condenser Coil); call it from isFloor.
+     */
+    public static boolean onDeviceOrPipe(Block below) {
+        return below instanceof TransparentNodeBlock || below instanceof mods.eln.node.voxel.VoxelNodeBlock;
+    }
+
     /** What else this device can stand on (mustHaveFloor), beside a full face: a hopper. */
     public boolean isFloor(Block below) {
         return below instanceof HopperBlock;

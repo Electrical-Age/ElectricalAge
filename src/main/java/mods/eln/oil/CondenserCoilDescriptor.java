@@ -31,7 +31,7 @@ public class CondenserCoilDescriptor extends TransparentNodeDescriptor implement
     /** It may stand on a pipe (its condensate drains down through its underside), or on another EA device. */
     @Override
     public boolean isFloor(net.minecraft.world.level.block.Block below) {
-        return super.isFloor(below) || BoilerDescriptor.onDeviceOrPipe(below);
+        return super.isFloor(below) || onDeviceOrPipe(below);
     }
 
     @Override
