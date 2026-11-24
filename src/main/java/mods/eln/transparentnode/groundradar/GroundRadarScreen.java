@@ -75,43 +75,24 @@ public class GroundRadarScreen extends ElnScreen {
     // ---- the views as textures (a cell a texel), remade when the picture, the depth or the cut changes: a fill() a
     // cell cost 177 ms a frame for a 72-cell picture (AdventurAgent)
 
-    private final net.minecraft.resources.Identifier[] tex = new net.minecraft.resources.Identifier[2];
-    private final net.minecraft.client.renderer.texture.DynamicTexture[] texture = new net.minecraft.client.renderer.texture.DynamicTexture[2];
+    private final mods.eln.client.gui.PixelTexture[] tex = {new mods.eln.client.gui.PixelTexture("ground_radar_top"),
+        new mods.eln.client.gui.PixelTexture("ground_radar_side")};
     private final Object[] texFor = new Object[2];
     private final int[] texKey = {-2, -2};
-    private static int texNext;
 
     /** View v's texture (0: from above at layer k; 1: the side view along row r), or null where there is no GPU. */
     private net.minecraft.resources.Identifier texture(int v, GroundScan p, int k, int r) {
         int key = v == 0 ? k : r;
-        if (tex[v] != null && texFor[v] == p && texKey[v] == key) return tex[v];
-        int w = p.n, h = v == 0 ? p.n : p.layers.length;
-        try {
-            var t = texture[v];
-            if (t == null || t.getPixels() == null || t.getPixels().getWidth() != w || t.getPixels().getHeight() != h) {
-                release(v);   // (the same size is filled again in place, as LogTexture does; another size is a new texture)
-                t = new net.minecraft.client.renderer.texture.DynamicTexture(() -> "eln ground radar", w, h, false);
-                var id = net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "dynamic/ground_radar_" + texNext++);
-                net.minecraft.client.Minecraft.getInstance().getTextureManager().register(id, t);
-                texture[v] = t;
-                tex[v] = id;
-            }
-            var img = t.getPixels();
-            for (int y = 0; y < h; y++)
-                for (int x = 0; x < w; x++) img.setPixel(x, y, v == 0 ? GroundScan.colour(p, k, x, y) : GroundScan.colour(p, y, x, r));
-            t.upload();
-            texFor[v] = p;
-            texKey[v] = key;
-            return tex[v];
-        } catch (IllegalStateException e) {
-            return null;
-        }
+        if (tex[v].id() != null && texFor[v] == p && texKey[v] == key) return tex[v].id();
+        var id = tex[v].paint(p.n, v == 0 ? p.n : p.layers.length,
+            (x, y) -> v == 0 ? GroundScan.colour(p, k, x, y) : GroundScan.colour(p, y, x, r));
+        texFor[v] = p;
+        texKey[v] = key;
+        return id;
     }
 
     private void release(int v) {
-        if (tex[v] != null) net.minecraft.client.Minecraft.getInstance().getTextureManager().release(tex[v]);
-        tex[v] = null;
-        texture[v] = null;
+        tex[v].release();
         texFor[v] = null;
     }
 

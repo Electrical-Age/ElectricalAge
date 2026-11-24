@@ -253,9 +253,12 @@ public final class GroundRadarCases {
         }
     }
 
-    /** The auto-miner's view: three layers around the drill head; a hollow at the head's level shows in the middle one. */
+    /**
+     * The auto-miner's views: the slice at its drill head shows a hollow at the head's level; the cross from the miner
+     * down to the floor has its two cuts read and the rest left unknown, at full signal.
+     */
     static final class MinerView implements TestCase {
-        GroundScan v;
+        GroundScan slice, cross;
 
         public String id() {
             return "ground_radar_miner_view";
@@ -277,20 +280,25 @@ public final class GroundRadarCases {
             for (int x = 0; x < 11; x++)
                 for (int z = 0; z < 9; z++)
                     for (int y = 1; y < 10; y++) c.level().setBlock(c.at(x, y, z), Blocks.STONE.defaultBlockState(), 3);
-            // (the head at (5, 6, 4): the middle layer is y 6..5; its centre cells start at x = 5, z = 4)
+            // (the head at (5, 6, 4): the slice is y 6..5; its centre cells start at x = 5, z = 4)
             for (int x = 5; x < 7; x++)
                 for (int z = 4; z < 6; z++)
                     for (int y = 5; y < 7; y++) c.level().setBlock(c.at(x, y, z), Blocks.AIR.defaultBlockState(), 3);
-            v = GroundRadarElement.minerView(c.level(), c.at(5, 6, 4));
+            slice = GroundRadarElement.minerSlice(c.level(), c.at(5, 6, 4));
+            cross = GroundRadarElement.minerCross(c.level(), c.at(5, 10, 4));
         }
 
         public void measure(TestContext c) {
-            int mid = v.n / 2;
-            String st = String.format("layers %d, above %.2f, head %.2f, below %.2f", v.layers.length, v.densityAt(0, mid, mid), v.densityAt(1, mid, mid), v.densityAt(2, mid, mid));
+            int mid = slice.n / 2, k = cross.layerAt(10 - 1 - 6);
+            String st = String.format("slice: head %.2f, beside %.2f; cross: %d layers, at the head %.2f (signal %.2f), off the cuts flags %d",
+                slice.densityAt(0, mid, mid), slice.densityAt(0, mid - 2, mid - 2), cross.layers.length, cross.densityAt(k, mid, mid),
+                cross.signalAt(k, mid, mid), cross.flagsAt(k, 1, 1));
             c.line("miner view: " + st);
-            c.check("miner view: three layers, the hollow in the head's", v.layers.length == 3 && v.densityAt(1, mid, mid) < 0.5
-                && v.densityAt(0, mid, mid) > 2.2 && v.densityAt(2, mid, mid) > 2.2, st);
-            c.check("miner view: at full signal", v.signalAt(2, mid, mid) > 0.99, "" + v.signalAt(2, mid, mid));
+            c.check("miner view: the slice shows the hollow at the head's level", slice.layers.length == 1 && slice.densityAt(0, mid, mid) < 0.5
+                && slice.densityAt(0, mid - 2, mid - 2) > 2.2, st);
+            c.check("miner view: the cross reads its cuts to the floor at full signal, and only them", cross.densityAt(k, mid, mid) < 1.4
+                && cross.signalAt(k, mid, mid) > 0.99 && (cross.flagsAt(k, 1, 1) & GroundScan.UNKNOWN) != 0
+                && (cross.flagsAt(k, 1, mid) & GroundScan.UNKNOWN) == 0, st);
         }
     }
 }

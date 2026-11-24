@@ -55,7 +55,7 @@ public class AutoMinerElement extends TransparentNodeElement {
     // Network IDs.
     public static final byte pushLogId = 1;
     public static final byte toggleSilkTouch = 2;
-    /** Packets to clients: the monitor's view (the drill head's Y, the pipes in stock, a GroundScan's bytes). */
+    /** Packets to clients: the monitor's views (the drill head's Y, the pipes in stock, the slice and the cross GroundScans' bytes). */
     public static final byte viewId = 3;
     /** How often the monitor's view is redone while it has power (s). */
     static final double VIEW_S = 5;
@@ -197,9 +197,9 @@ public class AutoMinerElement extends TransparentNodeElement {
     }
 
     /**
-     * The monitor's view (Baughn: the black part of its screen gets the drill head's Y, the pipes left and a density map of
-     * a few Y levels around the drill head; 1.12 showed an ore scanner's picture there): the ground around the head,
-     * scanned every VIEW_S while it has power, to the players near it.
+     * The monitor's views (Baughn: the black part of its screen, where 1.12 showed an ore scanner's picture, gets its
+     * stats, the slice at its mining height and two vertical cuts through the cone from the surface to bedrock with the
+     * drill marked): scanned every VIEW_S while it has power and a player is near, to the players near it.
      */
     void view(double dt) {
         if (!powerOk || !(node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)) return;
@@ -216,17 +216,20 @@ public class AutoMinerElement extends TransparentNodeElement {
         viewIn = VIEW_S;
         seen = near;
         var head = new net.minecraft.core.BlockPos(node.coordonate.x, node.coordonate.y - slowProcess.pipeLength, node.coordonate.z);
-        byte[] picture = mods.eln.transparentnode.groundradar.GroundRadarElement.minerView(level, head).encode();
+        byte[] slice = mods.eln.transparentnode.groundradar.GroundRadarElement.minerSlice(level, head).encode();
+        byte[] cross = mods.eln.transparentnode.groundradar.GroundRadarElement.minerCross(level, at).encode();
         var stock = getInventory().getItem(AutoMinerContainer.MiningPipeSlotId);
-        java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream(picture.length + 32);
+        java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream(slice.length + cross.length + 32);
         java.io.DataOutputStream o = new java.io.DataOutputStream(bos);
         preparePacketForClient(o);
         try {
             o.writeByte(viewId);
             o.writeInt(head.getY());
             o.writeInt(Utils.isEmpty(stock) ? 0 : stock.getCount());
-            o.writeInt(picture.length);
-            o.write(picture);
+            o.writeInt(slice.length);
+            o.write(slice);
+            o.writeInt(cross.length);
+            o.write(cross);
         } catch (IOException e) {
             return;
         }

@@ -106,6 +106,18 @@ public final class GroundScan {
         return new GroundScan(world, cx, cy, cz, minY, n, 1, layers, true);
     }
 
+    /**
+     * The cone under (cx, cy, cz) down to minY at full signal, but only its two cuts through the centre, along x and along
+     * z (cells (k, i, n/2) and (k, n/2, j)); the rest is left unknown (the auto-miner's side views: a few hundred cells).
+     */
+    public static GroundScan cross(World world, int cx, int cy, int cz, int minY, int n, int growth) {
+        GroundScan s = new GroundScan(world, cx, cy, cz, minY, n, growth, layers(cy - 1 - minY + 1, growth), true);
+        s.crossOnly = true;
+        return s;
+    }
+
+    private boolean crossOnly;
+
     /** A finished scan read back (the client's copy). */
     public GroundScan(int cx, int cy, int cz, int n, int growth, Layer[] layers, byte[] density, byte[] flags, byte[] signal) {
         this.world = null;
@@ -172,6 +184,10 @@ public final class GroundScan {
     /** Read one cell; returns the samples it took. */
     private int cell(int index) {
         int k = index / (n * n), i = index / n % n, j = index % n;
+        if (crossOnly && i != n / 2 && j != n / 2) {
+            flags[index] = (byte) UNKNOWN;
+            return 0;
+        }
         Layer layer = layers[k];
         int side = layer.cell;
         int top = cy - 1 - layer.depth;

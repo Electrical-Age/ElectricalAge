@@ -271,19 +271,23 @@ public class GroundRadarElement extends TransparentNodeElement {
         needPublish();
     }
 
-    /** Cells across the auto-miner's view, and the layers it shows (Baughn: a few Y levels around the drill head). */
-    public static final int MINER_CELLS = 24, MINER_LAYERS = 3;
+    /** Cells across the auto-miner's views (2-block cells at its mining height: its 48 m reach). */
+    public static final int MINER_CELLS = 24;
 
-    /**
-     * The auto-miner's view: MINER_LAYERS layers of 2-block cells, MINER_CELLS across, around a drill head at head (the
-     * middle layer holds its level and the one under it), at full signal.
-     */
-    public static GroundScan minerView(ServerLevel level, net.minecraft.core.BlockPos head) {
-        GroundScan.Layer[] ls = new GroundScan.Layer[MINER_LAYERS];
-        for (int k = 0; k < MINER_LAYERS; k++) ls[k] = new GroundScan.Layer(2 * k, 2);
-        int top = head.getY() + MINER_LAYERS;   // (layer 0's top is top - 1 = the head + 2: the middle layer is the head's)
+    /** The auto-miner's slice from above at its drill head: one layer of 2-block cells holding the head's level and the one under it. */
+    public static GroundScan minerSlice(ServerLevel level, net.minecraft.core.BlockPos head) {
         GroundRadarWorld world = new GroundRadarWorld(level, head.getX(), head.getZ(), MINER_CELLS + 16);
-        GroundScan s = GroundScan.slab(world, head.getX(), top, head.getZ(), level.getMinY(), MINER_CELLS, ls);
+        GroundScan s = GroundScan.slab(world, head.getX(), head.getY() + 1, head.getZ(), level.getMinY(), MINER_CELLS, new GroundScan.Layer(0, 2));
+        while (!s.step(1 << 20)) ;
+        return s;
+    }
+
+    /** The auto-miner's side views: the cone under top (the miner) to the world's floor, its cuts along x and z only. */
+    public static GroundScan minerCross(ServerLevel level, net.minecraft.core.BlockPos top) {
+        int view = level.getServer() == null ? 10 : level.getServer().getPlayerList().getViewDistance();
+        int half = Math.min(GroundScan.cellAt(top.getY() - level.getMinY(), GroundScan.GROWTH) * MINER_CELLS / 2 + 16, (view + 1) * 16);
+        GroundRadarWorld world = new GroundRadarWorld(level, top.getX(), top.getZ(), half);
+        GroundScan s = GroundScan.cross(world, top.getX(), top.getY(), top.getZ(), level.getMinY(), MINER_CELLS, GroundScan.GROWTH);
         while (!s.step(1 << 20)) ;
         return s;
     }

@@ -879,9 +879,9 @@ In the port:
   are skipped. A finished or waiting miner looks for work once a second (1.12: every tick, rescanning its whole layer).
   Test `autominer_refuses_unbreakable_blocks`.
 - The Auto Miner's monitor: 1.12 drew an ore scanner's picture in the left part of its screen (needing an Ore Scanner in a
-  hidden slot); 26.x shows the drill head's Y, the pipes left and the Ground Radar's density map of the layers 2 above,
-  at and 2 below the drill head, 48 m across, made every 5 s while a player is within 24 blocks (Baughn 2026-11-24).
-  Test `ground_radar_miner_view`.
+  hidden slot); 26.x shows four quarters (Baughn 2026-11-24): its stats in a frame (Y, pipes left, silk touch), XZ, the
+  Ground Radar's slice at its mining height (48 m), and XY and YZ, the cone's cuts from the miner to bedrock with the pipe
+  and the drill head marked; made every 5 s while a player is within 24 blocks. Test `ground_radar_miner_view`.
 - The Hub's screen was a fixed picture (slot 3 on top, 0 right, 2 bottom, 1 left), which is the hub as seen on a
   wall, or on a floor by a player facing east. For a player facing south over a floor hub it was a quarter turn off:
   the left and right slots were the north and south sides, the top and bottom ones east and west (AdventurAgent). The
