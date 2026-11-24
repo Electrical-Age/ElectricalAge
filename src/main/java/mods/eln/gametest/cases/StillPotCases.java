@@ -45,6 +45,11 @@ public final class StillPotCases {
     }
 
 
+    /** The lines a player sees in Jade without sneaking: the first ElnJadePlugin.HEADLINE. */
+    static String headline(java.util.Map<String, String> w) {
+        return w.entrySet().stream().limit(mods.eln.compat.jade.ElnJadePlugin.HEADLINE).toList().toString();
+    }
+
     /** A Condenser Coil placed at p (its lower block) by a player looking west (XN). */
     static mods.eln.oil.CondenserCoilElement coil(TestContext ctx, BlockPos p) {
         return (mods.eln.oil.CondenserCoilElement) ctx.placeByPlayer(Ids.transparent("Condenser Coil"), p, 270f);
@@ -292,6 +297,7 @@ public final class StillPotCases {
         int nets;
         String coilJade = "";
         BlockPos o0;
+        int boilingHeadlines;
 
         public String id() {
             return "still_pot_sensible_batch";
@@ -329,6 +335,7 @@ public final class StillPotCases {
             Eln.simulator.addSlowProcess(watch = dt -> {
                 tick++;
                 s.follow();
+                if (tick % 20 == 0 && headline(s.pot.getWaila()).contains("Boiling now")) boilingHeadlines++;
                 maxEntrain = Math.max(maxEntrain, s.pot.entrainRate);
                 maxCoilK = Math.max(maxCoilK, s.coil.coil.T());
                 if (switchedAt < 0 && s.valveA.opening() > 0.5 && s.valveB.opening() < 0.5) switchedAt = tick;
@@ -389,6 +396,7 @@ public final class StillPotCases {
             ctx.check("still batch: neither receiver's product chokes a Fuel Generator", !anyChoked, "");
             ctx.check("still batch: after the switch the distillate goes to the other receiver", after.liquidVolume() > aBefore + 2e-6,
                 String.format("%.1f mL before, %.1f mL now", aBefore * 1e6, after.liquidVolume() * 1e6));
+            ctx.check("still batch: while it distils, Jade's headline says what boils off (read each second)", boilingHeadlines > 30, boilingHeadlines + " s");
             ctx.check("still batch: a furnace at a third doesn't boil it over", maxEntrain == 0, String.format("%.4f g/s", 1000 * maxEntrain));
         }
     }
@@ -752,7 +760,7 @@ public final class StillPotCases {
                 var w = pot.getWaila();
                 if (pot.boiling() != null && !sawBoiling) {
                     sawBoiling = true;
-                    boilingJade = w.toString();
+                    boilingJade = headline(w);
                 }
                 sawOver |= w.keySet().stream().anyMatch(k -> k.equals("Boiling over"));
                 if (w.containsKey("Only residue left")) {
@@ -781,7 +789,8 @@ public final class StillPotCases {
             ctx.check("still pot: the breather fits on its vapour line", err == null, "" + err);
             switch (row) {
                 case CALM -> {
-                    ctx.check("still pot: a medium burner brings it to the boil, and Jade says what boils off", sawBoiling && boilingJade.contains("Boiling now"), boilingJade);
+                    ctx.check("still pot: a medium burner brings it to the boil, and Jade's headline (what a player sees without sneaking) says what boils off",
+                        sawBoiling && boilingJade.contains("Boiling now"), boilingJade);
                     ctx.check("still pot: heated sensibly it doesn't boil over", maxEntrain == 0 && !sawOver, String.format("%.4f g/s", 1000 * maxEntrain));
                     ctx.check("still pot: its signal reads its temperature, 1 V a 100 °C (within 0.05 V)", maxSignalErr < 0.05, String.format("%.3f V off", maxSignalErr));
                     double gas = r.liquid(sp("gasoline")) + r.vapour(sp("gasoline"));

@@ -116,7 +116,8 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         return List.of(I18N.tr("2x2x2, placed at front bottom left; extends right, back, up"),
             I18N.tr("Heat on back low right; vapour out at top back left"),
             I18N.tr("Front: temp low left 1 V/100 °C, drain low right; low rear sides: fill left, steam right"),
-            I18N.tr("Holds 32 B; fill with up to 24 B of crude"));
+            I18N.tr("Holds 32 B; fill with up to 24 B of crude"),
+            I18N.tr("Safety valve relieves to air at 0.5 bar gauge; bursts past 2 bar"));
     }
 
     public final NbtThermalLoad thermal = new NbtThermalLoad("thermal");
@@ -510,13 +511,14 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         if (onlyResidue()) info.put(I18N.tr("Only residue left"), I18N.tr("shell overheating; cut heat and drain"));
         if (reliefRate > RELIEVING_KG_S) info.put(I18N.tr("Relieving"), I18N.tr("outlet blocked"));
         if (vessel.P() < VACUUM_PA) info.put(I18N.tr("Under vacuum"), String.format(I18N.tr("%.2f bar; fit a breather on the receiver"), vessel.P() / 1e5));
-        // (the headline: pressure, temperature, how full, as a tank's liquid line)
-        info.put(I18N.tr("Pressure"), String.format("%.2f bar", vessel.P() / 1e5));
+        // (Jade's headline is the first three lines, all a player sees without sneaking: the temperature, what boils off
+        // while it does, how full (as a tank's liquid line); AdventurAgent never saw "Boiling now" in fourth place)
         info.put(I18N.tr("Temperature"), mods.eln.api.Meters.celsius(vessel.T() - Water.T0));
-        info.put(I18N.tr("Liquid"), EaUnits.volume(vessel.liquidVolume() * Water.RHO_L / EaUnits.KG_PER_MB_WATER) + ", "
-            + Utils.plotPercent(vessel.liquidVolume() / VOLUME) + " full");
         Object[] b = boiling();
         if (b != null) info.put(I18N.tr("Boiling now"), String.format(I18N.tr("mostly %s, %s"), b[0], Utils.plotPercent((Double) b[1])));
+        info.put(I18N.tr("Liquid"), EaUnits.volume(vessel.liquidVolume() * Water.RHO_L / EaUnits.KG_PER_MB_WATER) + ", "
+            + Utils.plotPercent(vessel.liquidVolume() / VOLUME) + " full");
+        info.put(I18N.tr("Pressure"), String.format("%.2f bar", vessel.P() / 1e5));
         info.put(I18N.tr("Shell"), mods.eln.api.Meters.celsius(thermal.Tc + PhysicalConstant.Tref - Water.T0));
         info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
         EaUnits.putViscosity(info, vessel);

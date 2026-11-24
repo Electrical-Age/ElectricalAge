@@ -31,7 +31,7 @@ import java.util.Map;
 public class ElnJadePlugin implements IWailaPlugin {
     static final Identifier UID = Identifier.fromNamespaceAndPath("eln", "node");
     /** Lines shown without details. */
-    static final int HEADLINE = 3;
+    public static final int HEADLINE = 3;
 
     /** The Machine API's machines at other mods' blocks. */
     static final Identifier MACHINE_UID = Identifier.fromNamespaceAndPath("eln", "machine");
