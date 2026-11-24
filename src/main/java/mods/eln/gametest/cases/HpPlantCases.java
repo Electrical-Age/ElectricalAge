@@ -481,7 +481,7 @@ public final class HpPlantCases {
                 var co = new mods.eln.misc.Coordonate(c[i], ctx.level());
                 ghostsOk &= Eln.ghostManager.getGhost(co) != null && ctx.level().getBlockState(c[i]).getBlock() instanceof mods.eln.ghost.GhostBlock;
                 ownersOk &= mods.eln.ghost.GhostBlock.owner(ctx.level(), c[i]) == a;   // (what Jade shows on each cell)
-                nodesOk &= mods.eln.node.NodeManager.instance.getNodeFromCoordonate(co) instanceof mods.eln.oil.LargeBoilerElement.FaceNode;
+                nodesOk &= mods.eln.node.NodeManager.instance.getNodeFromCoordonate(co) instanceof mods.eln.oil.GhostCells.FaceNode;
             }
             // its faces as designed: 6 thermal (the lower blocks' back and flanks; none on the upper blocks, Baughn
             // 2026-11-23), the signal on the origin's front, pipe ports where the pipe tool finds them
