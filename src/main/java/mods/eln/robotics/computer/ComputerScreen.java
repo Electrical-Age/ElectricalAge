@@ -759,7 +759,7 @@ public class ComputerScreen extends ElnScreen {
         for (int k = 1; k < l.size(); k++) {
             Object o = l.get(k);
             if (o instanceof List<?> it && !it.isEmpty())
-                out.add(new String[]{String.valueOf(it.get(0)), it.size() > 1 && it.get(1) instanceof String s ? s : ""});
+                out.add(item(it));
             else out.add(null);
         }
         return out;
@@ -771,9 +771,19 @@ public class ComputerScreen extends ElnScreen {
         for (int k = 1; k < l.size(); k++) {
             Object o = l.get(k);
             if (o instanceof List<?> it && !it.isEmpty())
-                out.add(new String[]{String.valueOf(it.get(0)), it.size() > 1 && it.get(1) instanceof String s ? s : ""});
+                out.add(item(it));
         }
         return out;
+    }
+
+    /**
+     * A menu item as the display needs it: label, Alt key, action and the editor it acts on (Wire 2:
+     * ["Save" "s" :save 4]; the action, not the label, says what the display does, in any language).
+     */
+    static String[] item(List<?> it) {
+        return new String[]{String.valueOf(it.get(0)), it.size() > 1 && it.get(1) instanceof String s ? s : "",
+            it.size() > 2 && it.get(2) instanceof Form.Keyword kw ? kw.name() : "",
+            it.size() > 3 && it.get(3) instanceof Long id ? String.valueOf(id) : ""};
     }
 
     static String menuTitle(Scene.Window t, int m) {
@@ -867,50 +877,53 @@ public class ComputerScreen extends ElnScreen {
             return;
         }
         Scene.Window t = activeWindow();
-        if (t != null) pick(t, menuTitle(t, m - 1), it[0]);
+        if (t != null) pick(t, menuTitle(t, m - 1), it);
     }
 
-    void pick(Scene.Window t, String menu, String item) {
-        if (t.disabled.contains(menu + "/" + item)) return;
-        editorItem(item);
-        render.screenEvent(new Form.Symbol("pick"), (long) active, menu, item);
+    void pick(Scene.Window t, String menu, String[] it) {
+        if (t.disabled.contains(menu + "/" + it[0])) return;
+        editorAction(it[2], it[3]);
+        render.screenEvent(new Form.Symbol("pick"), (long) active, menu, it[0]);
     }
 
     /**
-     * Wire: in a window holding an editor, its own menu items act on this display's editor before the pick goes to the
-     * program: Save, Run and Close save first (only the display that picked them holds the text), Save As... sends its
-     * changes as a stash for the program to write under the new name, Find..., Find next and Go to line... open its bar or
-     * find again (Ed's menus).
+     * Wire 2: a menu item's action acts on this display's editor before the pick goes to the program (Baughn
+     * 2026-11-24: actions are tags, never labels): :save saves first (only this display holds the text; Ed's Save, Run and
+     * Close carry it), :save-as sends the changes as a stash for the program to write under the new name, :find,
+     * :find-next and :go-to-line open the editor's bar or find again, :name gives the keys to the line asking a name.
+     * The item names the editor element; without one, the window's only editor.
      */
-    void editorItem(String item) {
+    void editorAction(String action, String element) {
+        if (action.isEmpty()) return;
         String key = null;
-        for (String k : editorWidgets.keySet()) if (k.startsWith(active + "/")) key = k;
-        if (key == null) return;
+        if (!element.isEmpty()) key = editorWidgets.containsKey(active + "/" + element) ? active + "/" + element : null;
+        else for (String k : editorWidgets.keySet()) if (k.startsWith(active + "/")) key = key == null ? k : "";
+        if (key == null || key.isEmpty()) return;   // (none drawn, or several and the item doesn't say which)
         var w = editorWidgets.get(key);
         EditorState st = editorState(active, Integer.parseInt(key.split("/")[1]));
-        switch (item) {
-            case "Save", "Run", "Close" -> {
+        switch (action) {
+            case "save" -> {
                 if (st.baseText == null || !st.text.equals(st.baseText)) save(key);
             }
-            case "Save As..." -> {   // (its changes, kept aside by the program and written only under the new name)
+            case "save-as" -> {   // (its changes, kept aside by the program and written only under the new name)
                 render.screenEvent(new Form.Symbol("stash"), (long) active, (long) Integer.parseInt(key.split("/")[1]), ++render.seq,
                     st.baseRev == null ? "" : st.baseRev, hunks(st.baseText, st.text));
                 w.setFocused(false);   // (the keys go to the line that asks for the name)
                 setFocused(null);
             }
-            case "New...", "Open..." -> {
+            case "name" -> {
                 w.setFocused(false);
                 setFocused(null);
             }
-            case "Find..." -> {
+            case "find" -> {
                 setFocused(w);
                 w.openFind();
             }
-            case "Find next" -> {
+            case "find-next" -> {
                 setFocused(w);
                 w.findNext();
             }
-            case "Go to line..." -> {
+            case "go-to-line" -> {
                 setFocused(w);
                 w.openGoTo();
             }
@@ -1237,6 +1250,20 @@ public class ComputerScreen extends ElnScreen {
     }
 
     @Override
+    public boolean keyReleased(KeyEvent ev) {
+        Scene.Window t = render.operator ? activeWindow() : null;
+        if (t != null && t.ask == null && !menuOpen && focusedRaw(t) != null) {   // (Wire 2: games hear keys let go)
+            int mods = (ev.hasShiftDown() ? 1 : 0) | (ev.hasControlDown() ? 2 : 0) | (ev.hasAltDown() ? 4 : 0);
+            String name = keyName(ev.key(), true);
+            if (name != null) {
+                render.screenEvent(new Form.Symbol("keyup"), (long) active, (long) focusId, name, (long) mods);
+                return true;
+            }
+        }
+        return super.keyReleased(ev);
+    }
+
+    @Override
     public boolean keyPressed(KeyEvent ev) {
         if (fieldHasKeys() || !render.operator) return super.keyPressed(ev);
         int k = ev.key();
@@ -1251,7 +1278,7 @@ public class ComputerScreen extends ElnScreen {
             for (int m = 0; m < t.menus.size(); m++)
                 for (String[] it : windowMenuItems(t, m))
                     if (it != null && it[1].equalsIgnoreCase(letter)) {
-                        pick(t, menuTitle(t, m), it[0]);
+                        pick(t, menuTitle(t, m), it);
                         return true;
                     }
         }

@@ -25,6 +25,8 @@ public final class Scene {
     public static final int KERNEL = 0;
 
     public int w = DEFAULT_W, h = DEFAULT_H;
+    /** Windows opened so far (each opening's generation). */
+    public int gens;
     /** The screen bar's title. */
     public String title = "";
     /** The pen set's name (Pens; Prefs), and the clock's hours on the menu bar (24 or 12). */
@@ -102,6 +104,8 @@ public final class Scene {
         /** Minimised to an icon on the desk (shared: the last report wins), and that icon's picture (0: the built-in). */
         public boolean minimized;
         public int icon;
+        /** Which opening of this window number it is (Wire 2: events name it). */
+        public int gen;
 
         Window(String title) {
             this.title = title;
@@ -264,8 +268,7 @@ public final class Scene {
                 if (win.minimized && active == win(m)) active = -1;
                 return true;
             }
-            case "icon" -> {
-                if (m.size() > 3) break;   // (an icon element: (icon w id x y "label" pixmap))
+            case "window-icon" -> {   // (Wire 2: was a three-word icon, told apart from the element by its length)
                 Window win = windows.get(win(m));
                 if (win == null) return false;
                 win.icon = (int) Math.max(0, Form.num(m, 2, 0));
@@ -280,6 +283,11 @@ public final class Scene {
                     if (windows.size() >= MAX_WINDOWS) return false;
                     win = new Window(Form.str(m, 6, ""));
                     win.flags = flags;
+                    // (its generation: the server counts the windows it opened; a display takes the server's number, which
+                    // comes as :gen n after the flags, and puts it on its events, so one for a window that has since been
+                    // closed and opened again never reaches the new one: Wire 2)
+                    win.gen = m.size() > 9 && m.get(8) instanceof Form.Keyword k && k.name().equals("gen") ? (int) Form.num(m, 9, 0) : ++gens;
+                    gens = Math.max(gens, win.gen);
                     win.x = (int) Form.num(m, 2, 1);
                     win.y = (int) Form.num(m, 3, 2);
                     win.cw = (int) Form.num(m, 4, 20);
@@ -399,7 +407,6 @@ public final class Scene {
                 return element(v, m);
             }
         }
-        return element(v, m);   // (an icon element)
     }
 
     /** An element message (box, text, ..., image, icon): made, or changed in place. */
@@ -619,9 +626,10 @@ public final class Scene {
             Window win = we.getValue();
             List<Object> fl = new ArrayList<>();
             for (String f : win.flags) fl.add(Form.kw(f));
-            out.add(Form.print(new Form.Symbol("window"), t, (long) win.x, (long) win.y, (long) win.cw, (long) win.ch, win.title, fl));
+            out.add(Form.print(new Form.Symbol("window"), t, (long) win.x, (long) win.y, (long) win.cw, (long) win.ch, win.title, fl,
+                Form.kw("gen"), (long) win.gen));
             if (!win.menus.isEmpty()) out.add(Form.print(new Form.Symbol("menus"), t, win.menus));
-            if (win.icon != 0) out.add(Form.print(new Form.Symbol("icon"), t, (long) win.icon));
+            if (win.icon != 0) out.add(Form.print(new Form.Symbol("window-icon"), t, (long) win.icon));
             if (win.minimized) out.add(Form.print(new Form.Symbol("minimize"), t));
             for (String d : win.disabled) {
                 String[] p = d.split("/", 2);

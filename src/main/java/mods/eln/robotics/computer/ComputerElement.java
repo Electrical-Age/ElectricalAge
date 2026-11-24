@@ -130,6 +130,7 @@ public class ComputerElement extends TransparentNodeElement {
         runner = null;
         builtFrom = now;
         Machine m = new Machine();
+        m.hello = HELLO;
         boolean any = false;
         for (int s = 0; s < CHIP_SLOTS; s++) {
             ItemStack st = inventory.getItem(s);
@@ -345,7 +346,13 @@ public class ComputerElement extends TransparentNodeElement {
                 break;
             }
             if (op == null && !gui.isEmpty()) op = gui.get(0);
-            if (op != was) seqHigh = Math.max(seqHigh, screen.highestSeq());
+            if (op != was) {
+                seqHigh = Math.max(seqHigh, screen.highestSeq());
+                // (Wire 2: the program hears who operates it, or that nobody does)
+                Runner r = runner;
+                if (r != null) r.toEditor((mods.eln.robotics.computer.screen.Form.print(new mods.eln.robotics.computer.screen.Form.Symbol("operator"),
+                    op != null, op == null ? "" : op.getName().getString()) + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
             operator = op;
             // the operator gets the scene (whole when they become it or open the screen again), then its batches
             if (op != null) {
@@ -495,7 +502,10 @@ public class ComputerElement extends TransparentNodeElement {
     }
 
     /** A new runner, its screen output going to screenOutput. */
+    static final byte[] HELLO = (mods.eln.robotics.computer.screen.ScreenHost.hello() + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
     Runner newRunner(Machine m) {
+        m.hello = HELLO;
         Runner r = new Runner(m);
         r.screenOut = this::screenOutput;
         return r;

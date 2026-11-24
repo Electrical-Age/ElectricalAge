@@ -20,7 +20,7 @@ public final class ScreenHost {
     /** The longest event a client may send: a save; the others are short. */
     public static final int MAX_SAVE = 40 * 1024, MAX_SUBMIT = 8192, MAX_EVENT = 256;
     static final Set<String> EVENTS = Set.of("submit", "press", "select", "save", "stash", "key", "click", "break",
-        "moved", "raised", "lowered", "active", "closed", "pick", "answer", "open", "minimized", "restored");
+        "moved", "raised", "lowered", "active", "closed", "pick", "answer", "open", "minimized", "restored", "keyup");
     /** The kernel's window (what the machine prints at the console device) and its log. */
     public static final int CONSOLE_TAB = Scene.KERNEL, CONSOLE_LOG = 1;
 
@@ -106,8 +106,24 @@ public final class ScreenHost {
         take(List.of(new Form.Symbol("reset"), (long) Scene.DEFAULT_W, (long) Scene.DEFAULT_H));
     }
 
-    /** Events the screen itself has for the computer (geometry it fitted), since last asked. */
+    /**
+     * Wire 2's hello, the first thing a program reads from the screen after every reset: the protocol's version, the
+     * text modes, the pen sets, the limits and the key names, so a program (Janet's library, or a system of your own
+     * from the Floppy Boot ROM) needn't guess them.
+     */
+    public static String hello() {
+        return Form.print(new Form.Symbol("wire"), 2L, Form.kw("modes"), List.of(List.of(80L, 25L), List.of(120L, 40L)),
+            Form.kw("pens"), List.copyOf(Pens.SETS.keySet()),
+            Form.kw("max-message"), (long) Form.MAX_LINE, Form.kw("max-event"), (long) MAX_EVENT, Form.kw("max-submit"), (long) MAX_SUBMIT,
+            Form.kw("max-save"), (long) MAX_SAVE, Form.kw("max-windows"), (long) Scene.MAX_WINDOWS, Form.kw("max-elements"), (long) Scene.MAX_ELEMENTS,
+            Form.kw("max-pixmaps"), (long) Scene.MAX_PIXMAPS, Form.kw("pixmap"), List.of((long) Scene.PIXMAP_W, (long) Scene.PIXMAP_H),
+            Form.kw("keys"), List.of("enter", "backspace", "tab", "delete", "insert", "left", "right", "up", "down", "home", "end",
+                "pageup", "pagedown", "f1", "f12"));
+    }
+
+    /** Events the screen itself has for the computer (geometry it fitted, refusals), since last asked. */
     public synchronized List<String> takeToComputer() {
+        refusals = 0;
         if (toComputer.isEmpty()) return List.of();
         List<String> r = List.copyOf(toComputer);
         toComputer.clear();
@@ -115,6 +131,7 @@ public final class ScreenHost {
     }
 
     private final List<String> toComputer = new ArrayList<>();
+    private int refusals;
 
     private Map<Integer, int[]> geometry() {
         Map<Integer, int[]> g = new HashMap<>();
@@ -159,7 +176,7 @@ public final class ScreenHost {
             case "select" -> e != null && e.kind.equals("list") && m.size() > 3 && m.get(3) instanceof Long row && row >= 0
                 && e.msg.size() > 7 && e.msg.get(7) instanceof List<?> rows && row < rows.size();
             case "save", "stash" -> e != null && e.kind.equals("editor") && m.size() > 5 && m.get(3) instanceof Long && m.get(5) instanceof List<?>;
-            case "key" -> e != null && e.kind.equals("raw") && m.size() > 3 && m.get(3) instanceof String;
+            case "key", "keyup" -> e != null && e.kind.equals("raw") && m.size() > 3 && m.get(3) instanceof String;
             case "click" -> e != null && e.kind.equals("raw") && m.size() > 4 && m.get(3) instanceof Long && m.get(4) instanceof Long;
             case "open" -> e != null && e.kind.equals("icon");
             case "answer" -> w.ask != null && m.size() > 3 && m.get(3) instanceof Long i && i >= 0
@@ -190,8 +207,14 @@ public final class ScreenHost {
         String verb = Form.verb(m);
         int wid = (int) Form.num(m, 1, -1);
         boolean opening = verb.equals("window") && !scene.windows.containsKey(wid);
+        if (opening && m.size() > 8) m = m.subList(0, 8);   // (a generation is the screen's to give)
         Map<Integer, int[]> before = verb.equals("screen") ? geometry() : null;
-        if (!scene.apply(m)) return;
+        if (!scene.apply(m)) {   // (Wire 2: the program hears what the screen refused, a few a batch at most)
+            if (refusals++ < 8)
+                toComputer.add(Form.print(new Form.Symbol("error"), new Form.Symbol(Form.verb(m)), Form.num(m, 1, -1), Form.num(m, 2, -1),
+                    "refused: unknown, malformed, or past a limit (windows, elements, pictures, sizes)"));
+            return;
+        }
         // (the program hears the geometry the screen fitted a window to, where it differs from what it asked for:
         // Wire review E24; it already takes moved events, which players' moves send)
         if (opening || verb.equals("place")) {
@@ -202,6 +225,13 @@ public final class ScreenHost {
             for (var e : geometry().entrySet())
                 if (!java.util.Arrays.equals(e.getValue(), before.get(e.getKey()))) toComputer.add(movedEvent(e.getKey(), scene.windows.get(e.getKey())));
         version++;
+        if (opening && scene.windows.get(wid) != null) {   // (the displays get its generation: Wire 2)
+            List<Object> withGen = new ArrayList<>(m);
+            while (withGen.size() < 8) withGen.add(withGen.size() == 6 ? "" : List.of());
+            withGen.add(Form.kw("gen"));
+            withGen.add((long) scene.windows.get(wid).gen);
+            m = withGen;
+        }
         batch.add(m);
         batchBytes += 32;   // (a rough size; the exact one is counted when the batch is printed)
         if (batchBytes > BATCH_MAX * 4) {
@@ -291,6 +321,13 @@ public final class ScreenHost {
         if (m == null) return null;
         String v = Form.verb(m);
         if (!EVENTS.contains(v)) return null;
+        // (Wire 2: an event names the window's generation last, :gen n; one for an earlier opening is refused, and the
+        // program never sees it)
+        if (m.size() > 3 && m.get(m.size() - 2) instanceof Form.Keyword k && k.name().equals("gen")) {
+            Scene.Window gw = scene.windows.get((int) Form.num(m, 1, -1));
+            if (gw == null || gw.gen != Form.num(m, m.size() - 1, -1)) return null;
+            m = m.subList(0, m.size() - 2);
+        }
         if (line.length() > (v.equals("save") || v.equals("stash") ? MAX_SAVE : v.equals("submit") ? MAX_SUBMIT : MAX_EVENT)) return null;
         boolean system = v.equals("pick") && m.size() > 1 && Long.valueOf(0).equals(m.get(1));   // (the system menu: window 0)
         if (!system && !(m.size() > 1 && m.get(1) instanceof Long t && scene.windows.containsKey((int) (long) t))) return null;

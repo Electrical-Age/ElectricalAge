@@ -98,6 +98,9 @@ public final class Machine implements Mmio {
         return resets;
     }
 
+    /** What the screen says first after every reset (Wire 2's hello, with its newline), or null. */
+    public byte[] hello;
+
     /**
      * Start from the boot vector: registers cleared, RAM kept (a reset doesn't clear chips). The screen channels are
      * emptied: events the old program never read would reach the new one, and output it didn't finish would run into
@@ -107,6 +110,7 @@ public final class Machine implements Mmio {
         resets++;
         terminal.clear();
         editor.clear();
+        if (hello != null) editor.give(hello);   // (the screen's hello waits for the program: Wire 2)
         cpu.reset(Memory.BOOT_VECTOR);
         halted = false;
         resetCause = cause;

@@ -145,4 +145,39 @@ class ScreenHostTest {
         assertNull(h.scene.windows.get(2));
         assertEquals("Second", h.scene.windows.get(3).title);
     }
+
+    /** Wire 2's hello parses, and says the version first. */
+    @Test
+    void theHelloIsAMessage() {
+        List<Object> m = Form.parse(ScreenHost.hello());
+        assertNotNull(m, ScreenHost.hello());
+        assertEquals("wire", Form.verb(m));
+        assertEquals(2L, m.get(1));
+        assertTrue(ScreenHost.hello().contains(":max-save 40960"), ScreenHost.hello());
+    }
+
+    /** What the screen refuses, the program hears (a few a batch). */
+    @Test
+    void aRefusedMessageIsAnswered() {
+        ScreenHost h = new ScreenHost();
+        from(h, "(text 9 1 0 0 :white \"no window 9\")");
+        List<String> told = h.takeToComputer();
+        assertEquals(1, told.size());
+        assertTrue(told.getFirst().startsWith("(error text 9 1 "), told.getFirst());
+        for (int k = 0; k < 20; k++) from(h, "(text 9 1 0 0 :white \"x\")");
+        assertEquals(8, h.takeToComputer().size(), "a few a batch at most");
+    }
+
+    /** An event for an earlier opening of a window number never reaches the window opened since. */
+    @Test
+    void anEventForAnEarlierWindowIsRefused() {
+        ScreenHost h = new ScreenHost();
+        from(h, "(window 2 1 1 20 5 \"First\")", "(button 2 3 0 0 8 \"Go\")");
+        List<String> b = h.takeBatch();
+        assertTrue(b.getFirst().contains(":gen 1"), "the displays get its generation: " + b.getFirst());
+        assertEquals("(press 2 3)", h.check("(press 2 3 :gen 1)", null), "the program never sees it");
+        from(h, "(unwindow 2)", "(window 2 1 1 20 5 \"Second\")", "(button 2 3 0 0 8 \"Go\")");
+        assertNull(h.check("(press 2 3 :gen 1)", null), "pressed in the first window, arriving at the second");
+        assertNotNull(h.check("(press 2 3 :gen 2)", null));
+    }
 }

@@ -246,7 +246,20 @@
   (put win-handlers w @{:close (fn [] (put win-handlers w nil) (ui/send 'unwindow w))})
   (ui/send 'activate w))
 
+(var- screen-hello nil)      # the screen's hello (Wire 2): version, modes, pens, limits, key names
+(var- screen-operator nil)   # the name of the player operating the computer, or nil
+(defn ui/wire "The screen's hello: a struct of :version, :modes, :pens, :max-message ... :keys (nil before it came)." []
+  screen-hello)
+(defn ui/operator "The name of the player operating the computer now (the first with its screen open), or nil." []
+  screen-operator)
+
 (defn- screen-event [m]
+  (when (tuple? m)
+    (case (m 0)
+      'wire (set screen-hello (merge {:version (get m 1)} (struct ;(tuple/slice m 2))))
+      'operator (set screen-operator (if (get m 1) (get m 2)))
+      'error (eprint "screen refused " (get m 1) " (window " (get m 2) ", element " (get m 3) "): " (get m 4))
+      nil))
   (when (and (tuple? m) (> (length m) 2) (number? (m 1)) (number? (m 2)))
     (def f (get ui-handlers [(m 1) (m 2)]))
     (case (m 0)
@@ -261,6 +274,7 @@
       'press (when f (spawn f))
       'select (when (and f (number? (get m 3))) (spawn f (m 3)))
       'key (when (and (struct? f) (f :key) (string? (get m 3))) (spawn (f :key) (m 3) (get m 4 0)))
+      'keyup (when (and (struct? f) (f :keyup) (string? (get m 3))) (spawn (f :keyup) (m 3) (get m 4 0)))
       'click (when (and (struct? f) (f :click) (number? (get m 3)) (number? (get m 4))) (spawn (f :click) (m 3) (m 4)))
       'save (when (and f (string? (get m 4)) (indexed? (get m 5))) (spawn f (get m 3 0) (m 4) (m 5)))
       'stash (when-let [g (get ui-handlers [(m 1) (m 2) :stash])]
@@ -524,7 +538,7 @@
     (error (string path ": not a picture")))
   p)
 (defn ui/backdrop "The desk's picture: pixmap id (0: none)." [id] (ui/send 'backdrop id))
-(defn ui/icon "Window w's icon when it is minimised: pixmap id." [w id] (ui/send 'icon w id))
+(defn ui/icon "Window w's icon when it is minimised: pixmap id." [w id] (ui/send 'window-icon w id))
 (defn ui/image "Pixmap pic stretched over cells (x, y, cw, ch) of window w." [w id x y cw ch pic]
   (ui/send 'image w id x y cw ch pic))
 (defn ui/desk-icon
@@ -579,9 +593,10 @@
   A key calls (on-key key mods) as a task: key is the character typed, or a name (\"enter\" \"backspace\" \"tab\"
   \"delete\" \"left\" \"right\" \"up\" \"down\" \"home\" \"end\" \"pageup\" \"pagedown\" \"insert\" \"f1\" .. \"f12\"), or a letter
   with Ctrl or Alt held; mods adds 1 for Shift, 2 for Ctrl, 4 for Alt (0 for a typed character). A click calls (on-click x y), in cells from
-  the area's corner. Draw on it with ui/text and ui/box made after it."
-  [t id x y w h on-key &opt on-click]
-  (put ui-handlers [t id] {:key (bound on-key) :click (bound on-click)})
+  the area's corner. (on-keyup key mods), if given, hears a named key or a letter let go (games: keys held down).
+  Draw on it with ui/text and ui/box made after it."
+  [t id x y w h on-key &opt on-click on-keyup]
+  (put ui-handlers [t id] {:key (bound on-key) :click (bound on-click) :keyup (bound on-keyup)})
   (ui/send 'raw t id x y w h))
 (defn ui/remove "Remove an element." [t id]
   (put ui-handlers [t id] nil)
@@ -1002,8 +1017,10 @@
        (fn [seq b hunks]
          (set stashed (try (if (= b rev) (apply-hunks base hunks)) ([_] nil)))
          (unless stashed (heading :red "The file changed on the disk meanwhile: save it, then Save As"))))
-  (ui/menus t [["Project" ["New..." "n"] ["Open..." "o"] nil ["Save" "s"] ["Save As..." "a"] nil ["Run" "r"] nil ["Close" "q"]]
-               ["Edit" ["Find..." "f"] ["Find next" "g"] ["Go to line..." "l"]]]
+  # (the third word of an item says what the screen does with the editor first: Wire 2's actions, not labels)
+  (ui/menus t [["Project" ["New..." "n" :name 4] ["Open..." "o" :name 4] nil ["Save" "s" :save 4] ["Save As..." "a" :save-as 4]
+                nil ["Run" "r" :save 4] nil ["Close" "q" :save 4]]
+               ["Edit" ["Find..." "f" :find 4] ["Find next" "g" :find-next 4] ["Go to line..." "l" :go-to-line 4]]]
             (fn [menu item]
               (case item
                 "New..." (ask-path "New file:" (fn [p] (ed-file (proc/new-tab (name-of p)) p)))

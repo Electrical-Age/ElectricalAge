@@ -173,6 +173,15 @@ public class ComputerRender extends TransparentNodeElementRender {
     /** Send a screen protocol event (one message) to the computer. */
     public void screenEvent(Object... parts) {
         if (!operator) return;   // (a watcher: the server would refuse it anyway)
+        // (the window's generation last: an event for one closed and opened again since never reaches the new one)
+        if (parts.length > 1 && parts[1] instanceof Long w && w != 0) {
+            var win = scene.windows.get((int) (long) w);
+            if (win != null && win.gen > 0) {
+                parts = java.util.Arrays.copyOf(parts, parts.length + 2);
+                parts[parts.length - 2] = Form.kw("gen");
+                parts[parts.length - 1] = (long) win.gen;
+            }
+        }
         net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(
             new ScreenEventPayload(tileEntity.getBlockPos(), Form.print(parts)));
     }
