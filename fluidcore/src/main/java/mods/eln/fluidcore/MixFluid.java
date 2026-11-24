@@ -645,6 +645,10 @@ final class MixFluid implements NodeFluid {
      * took 12-15 of them; a bracketed solve costs some 70 evaluations.
      */
     public static int POLISH_MAX = 25;
+    /** A shrinking bubble's step taken in 1/Vg (true; false: capped in ln Vg as before, probe knob). */
+    public static boolean SHRINK_STEP = true;
+    /** The polish accepts a state whose Newton step is below resolution (true; probe knob). */
+    public static boolean STEP_FLOOR = true;
 
     private double energyTol() {
         if (OLD_TOL) return Math.max(1, Math.abs(U)) * 1e-13 + 1e-9;
@@ -663,11 +667,17 @@ final class MixFluid implements NodeFluid {
     public static boolean PREDICT = true;
 
     private boolean newton() {
-        double t = T, x = Math.log(vg), tolE = energyTol();
+        double t = T, x = Math.log(vg), tolE = energyTol(), tPrev = t, xPrev = x;
         for (int it = 0; it < POLISH_MAX; it++) {
             if (COUNT) POLISH_ITS++;
             Eval e = core(t, Math.exp(x), m);
             double r0 = e.E.v - U, r1 = e.rv.v;
+            if (!(Double.isFinite(r0) && Double.isFinite(r1)) && it > 0) {
+                // (a step past where the liquid can be squeezed: back half way, as a line search would)
+                t = 0.5 * (t + tPrev);
+                x = 0.5 * (x + xPrev);
+                continue;
+            }
             if (Math.abs(r0) < tolE && Math.abs(r1) < (OLD_TOL ? 1e-13 : FLASH_RV)) {
                 T = t;
                 vg = Math.exp(x);
@@ -677,13 +687,40 @@ final class MixFluid implements NodeFluid {
             double vgv = Math.exp(x);
             double j11 = e.E.g[0], j12 = e.E.g[1] * vgv, j21 = e.rv.g[0], j22 = e.rv.g[1] * vgv;
             double det = j11 * j22 - j12 * j21;
-            if (!(Math.abs(det) > 0) || !Double.isFinite(det)) return false;
+            if (!(Math.abs(det) > 0) || !Double.isFinite(det)) {
+                if (BRACKET_LOG != null && BRACKET_LOG.length() < 40000) BRACKET_LOG.append(String.format("  det fail it %d r0 %.3g r1 %.3g det %.3g x %.3f t %.3f%n", it, r0, r1, det, x, t));
+                return false;
+            }
             double dT = -(j22 * r0 - j12 * r1) / det, dx = -(-j21 * r0 + j11 * r1) / det;
+            if (Math.abs(dT) < 1e-10 && Math.abs(dx) * vgv < 1e-15 * V && Math.abs(r1) < 1e-9 && STEP_FLOOR) {
+                // (Newton's step is below what T and Vg can resolve: the residuals left are the evaluation's own rounding.
+                // At a bubble squeezed to 1e-14 of its node the energy came out with noise of 1e-6 J against a tolerance
+                // of 1e-10, and the polish spent its iterations, then a bracket, on noise)
+                T = t;
+                vg = Math.exp(x);
+                st = complete(e);
+                return true;
+            }
+            tPrev = t;
+            xPrev = x;
             double kk = Math.min(1, Math.min(30 / Math.max(1e-30, Math.abs(dT)), 1 / Math.max(1e-30, Math.abs(dx))));
             if (BRACKET_LOG != null && BRACKET_LOG.length() < 40000) BRACKET_LOG.append(String.format("  it %d r0 %.3g r1 %.3g dT %.3g dx %.3g kk %.3g x %.3f%n", it, r0, r1, dT, dx, kk, x));
-            t += kk * dT;
-            x += kk * dx;
-            if (!(t > WaterAir.T_MIN && t < WaterAir.T_MAX) || x > Math.log(V) + 1e-9 || !Double.isFinite(x)) return false;
+            if (dx < -1 && SHRINK_STEP) {
+                // a bubble shrinking by decades (a line running full of liquid: the pressure that squeezes it follows 1/Vg):
+                // the same linear step taken in 1/Vg, Vg / (1 - dx), not capped at one e-fold in ln Vg, which crawled a decade
+                // a step towards a bubble 6 decades down while the capped steps scaled dT too and the energy ran away; the
+                // polish then fell to the bracket (a still's full condensate line, LabAgent's sensible batch: a third of
+                // the still's flash work)
+                t += Math.min(1, 30 / Math.max(1e-30, Math.abs(dT))) * dT;
+                x -= Math.log1p(-dx);
+            } else {
+                t += kk * dT;
+                x += kk * dx;
+            }
+            if (!(t > WaterAir.T_MIN && t < WaterAir.T_MAX) || x > Math.log(V) + 1e-9 || !Double.isFinite(x)) {
+                if (BRACKET_LOG != null && BRACKET_LOG.length() < 40000) BRACKET_LOG.append(String.format("  bound fail it %d x %.3f t %.3f%n", it, x, t));
+                return false;
+            }
         }
         return false;
     }

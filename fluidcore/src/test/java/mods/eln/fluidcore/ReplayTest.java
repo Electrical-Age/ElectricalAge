@@ -324,4 +324,42 @@ class ReplayTest {
         Network.MAX_DEPTH = depth;
         assertEquals(depth, Network.MAX_DEPTH);
     }
+
+    /**
+     * A still's condensate line (LabAgent's still, sensible batch, steady boiling; 2026-11-24): 17 mL running full of
+     * gasoline, its bubble squeezed to 1e-12 of the node. The flash's polish crawled one e-fold of the bubble a step
+     * towards it (dT scaled with it, until the energy ran away), fell to the bracket 0.8 times a network step, and then
+     * crawled on rounding; a third of the still's flash work. Now a shrinking bubble's step is taken in 1/Vg, an
+     * overshoot past what the liquid can be squeezed backs off, and a step below resolution is accepted.
+     */
+    @Test
+    void aStillsFullCondensateLineSolvesWithoutTheBracket() throws Exception {
+        int depth = Network.MAX_DEPTH;
+        boolean cut = Network.CUT_SHORT, count = MixFluid.COUNT;
+        try {
+            Network.MAX_DEPTH = 8;
+            Network.CUT_SHORT = true;
+            MixFluid.COUNT = true;
+            String text;
+            try (var in = ReplayTest.class.getResourceAsStream("/replay/still-sensible-1200.txt")) {
+                text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+            double[] dt = new double[1];
+            Network net = NetworkDump.read(text, dt);
+            long b0 = MixFluid.BRACKETS;
+            int steps = 20;
+            for (int i = 0; i < steps; i++) {
+                net.step(dt[0]);
+                assertEquals(dt[0], net.done, 1e-12, "step " + i + " covered");
+            }
+            double brackets = (MixFluid.BRACKETS - b0) / (double) steps;
+            System.out.printf("still condensate line: %.2f brackets a step, %.1f iterations a step%n", brackets, net.stats.iterations / (double) steps);
+            org.junit.jupiter.api.Assertions.assertTrue(brackets <= 0.3, "brackets a step: " + brackets + " (0.8 before)");
+            assertEquals(0, net.stats.failures);
+        } finally {
+            Network.MAX_DEPTH = depth;
+            Network.CUT_SHORT = cut;
+            MixFluid.COUNT = count;
+        }
+    }
 }
