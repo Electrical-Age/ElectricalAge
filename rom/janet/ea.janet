@@ -248,6 +248,8 @@
 
 (var- screen-hello nil)      # the screen's hello (Wire 2): version, modes, pens, limits, key names
 (var- screen-operator nil)   # the name of the player operating the computer, or nil
+(def- screen-errors @[])   # the screen's last refusals (Wire 2's error messages), not printed: printing made more
+(defn ui/errors "The screen's last refusals, newest last: [error verb w id why] each (16 at most)." [] screen-errors)
 (defn ui/wire "The screen's hello: a struct of :version, :modes, :pens, :max-message ... :keys (nil before it came)." []
   screen-hello)
 (defn ui/operator "The name of the player operating the computer now (the first with its screen open), or nil." []
@@ -258,7 +260,7 @@
     (case (m 0)
       'wire (set screen-hello (merge {:version (get m 1)} (struct ;(tuple/slice m 2))))
       'operator (set screen-operator (if (get m 1) (get m 2)))
-      'error (eprint "screen refused " (get m 1) " (window " (get m 2) ", element " (get m 3) "): " (get m 4))
+      'error (do (array/push screen-errors m) (when (> (length screen-errors) 16) (array/remove screen-errors 0)))
       nil))
   (when (and (tuple? m) (> (length m) 2) (number? (m 1)) (number? (m 2)))
     (def f (get ui-handlers [(m 1) (m 2)]))
@@ -944,7 +946,7 @@
 
 (defn- ed-file
   "Ed in window t on path: an editor element over the window, its path above it, menus. The text lives on the players'
-  clients (Ctrl+S, or the menu's Save, sends hunks against a revision; refused once if the file changed on the disk).
+  clients (Ctrl+S, or the menu's Save, sends hunks against a revision; refused if the file changed on the disk meanwhile).
   On the client that picks them, Save, Run and Close save first, Save As... sends its changes to be kept aside (stash)
   and writes them only under the new name, and Find..., Find next and Go to line... act on its editor (Wire: an editor
   window's own items)."
@@ -1029,7 +1031,7 @@
                                                     # (the picking display's text, kept aside; unchanged: the file's)
                                                     (def txt (or stashed base))
                                                     (set stashed nil)
-                                                    (try (do (spit p txt) (open-text p txt))
+                                                    (try (do (spit p txt) (open-text p txt) (set unsaved false))
                                                       ([e] (heading :red (string p ": " e))))))
                 "Run" (if unsaved
                         (ui/ask t 7 "Not saved" "Your changes aren't on the disk. Run the file as it is there?" ["Run" "Cancel"]

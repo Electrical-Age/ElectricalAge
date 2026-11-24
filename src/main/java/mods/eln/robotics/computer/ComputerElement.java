@@ -67,11 +67,8 @@ public class ComputerElement extends TransparentNodeElement {
     boolean loadPending = true;
     byte status = OFF;
     public final mods.eln.robotics.computer.screen.ScreenHost screen = new mods.eln.robotics.computer.screen.ScreenHost();
-    /**
-     * The players watching the screen, as watch() last saw them (read by the pool and network threads): those with it
-     * open, and those near enough to see the monitor (Baughn 2026-11-18). Only the first may type (typing).
-     */
-    volatile List<ServerPlayer> watching = List.of(), typing = List.of();
+    /** The players with the screen open, as watch() last saw them (the first of them operates it). */
+    volatile List<ServerPlayer> typing = List.of();
     /**
      * The one player whose events the computer takes (Baughn 2026-11-24: "Computers are single user in principle"):
      * the first of those with the screen open; everyone else only watches. Submission and save numbers belong to the
@@ -350,8 +347,11 @@ public class ComputerElement extends TransparentNodeElement {
                 seqHigh = Math.max(seqHigh, screen.highestSeq());
                 // (Wire 2: the program hears who operates it, or that nobody does)
                 Runner r = runner;
-                if (r != null) r.toEditor((mods.eln.robotics.computer.screen.Form.print(new mods.eln.robotics.computer.screen.Form.Symbol("operator"),
-                    op != null, op == null ? "" : op.getName().getString()) + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                byte[] line = programOperatorLine(op);
+                if (r != null) {
+                    r.toEditor(line);
+                    r.machine.hello = concat(HELLO, line);   // (after a reset the new program hears it too)
+                }
             }
             operator = op;
             // the operator gets the scene (whole when they become it or open the screen again), then its batches
@@ -360,7 +360,10 @@ public class ComputerElement extends TransparentNodeElement {
                 else if (!batch.isEmpty()) sendScreen(op, batch);
             }
             for (ServerPlayer p : gui)   // (who may type, told to each screen when it opens or the operator changes)
-                if (op != was || !opened.contains(p)) sendScreen(p, List.of(operatorLine(p, op)));
+                if (op != was || !opened.contains(p)) {
+                    sendScreen(p, List.of(operatorLine(p, op)));
+                    cellsSent.remove(p);   // (a watcher's screen draws cells: theirs come again below, now)
+                }
             // everyone else watches: the composed cells, twice a second when something changed, at once for a newcomer
             cellsSent.keySet().retainAll(v);
             if (op != null) cellsSent.remove(op);
@@ -375,10 +378,9 @@ public class ComputerElement extends TransparentNodeElement {
                     composed = true;
                 }
                 sendCells(p, mods.eln.robotics.computer.screen.CellsCodec.encode(cellsNow,
-                    cellsSent.computeIfAbsent(p, k -> new java.util.HashSet<>())));
+                    cellsSent.computeIfAbsent(p, k -> new java.util.LinkedHashSet<>())));
             }
             if (due) cellsVersion = screen.version;
-            watching = List.copyOf(v);
             typing = List.copyOf(gui);
         }
     }
@@ -390,17 +392,19 @@ public class ComputerElement extends TransparentNodeElement {
     private mods.eln.robotics.computer.screen.SceneCells cellsNow;
 
     void sendCells(ServerPlayer p, byte[] data) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length + 64);
-        DataOutputStream o = new DataOutputStream(bos);
-        preparePacketForClient(o);
-        try {
-            o.writeByte(CELLS_ID);
-            o.writeInt(data.length);
-            o.write(data);
-        } catch (IOException e) {
-            return;
-        }
-        node.sendPacketToClient(bos, p);
+        sendPacket(p, CELLS_ID, data);
+    }
+
+    /** What the program hears of the operator: (operator true "name") or (operator false ""), with its newline. */
+    static byte[] programOperatorLine(ServerPlayer op) {
+        return (mods.eln.robotics.computer.screen.Form.print(new mods.eln.robotics.computer.screen.Form.Symbol("operator"),
+            op != null, op == null ? "" : op.getName().getString()) + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    static byte[] concat(byte[] a, byte[] b) {
+        byte[] c = java.util.Arrays.copyOf(a, a.length + b.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        return c;
     }
 
     /** (operator true NEXT-SEQ) to the operator, (operator false "name") to the others. */
@@ -424,14 +428,18 @@ public class ComputerElement extends TransparentNodeElement {
     }
 
     private void sendScreenPacket(ServerPlayer p, List<String> lines) {
-        byte[] text = String.join("\n", lines).getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(text.length + 64);
+        sendPacket(p, SCREEN_ID, String.join("\n", lines).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+
+    /** A screen packet to one player: its kind, then the bytes with their length. */
+    private void sendPacket(ServerPlayer p, byte kind, byte[] data) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length + 64);
         DataOutputStream o = new DataOutputStream(bos);
         preparePacketForClient(o);
         try {
-            o.writeByte(SCREEN_ID);
-            o.writeInt(text.length);
-            o.write(text);
+            o.writeByte(kind);
+            o.writeInt(data.length);
+            o.write(data);
         } catch (IOException e) {
             return;
         }
@@ -457,11 +465,9 @@ public class ComputerElement extends TransparentNodeElement {
             if (player != operator) return;   // (watchers only watch)
             if (eventsThisTick.merge(player.getUUID(), 1, Integer::sum) > EVENTS_PER_TICK) return;
         }
-        List<String> echo = new ArrayList<>(1);
         String ok;
         synchronized (screen) {
-            ok = screen.check(line, echo);
-            // (the operator moved, stacked or activated a window: watchers see it in their next cells)
+            ok = screen.check(line);   // (the operator's own moves: watchers see them in their next cells)
         }
         if (ok == null) return;
         List<Object> parsed = mods.eln.robotics.computer.screen.Form.parse(ok);
@@ -484,9 +490,11 @@ public class ComputerElement extends TransparentNodeElement {
             }
             screen.console(console);
             screen.fromComputer(display);
-            for (String e : screen.takeToComputer()) {   // (it takes them at its next slice)
-                Runner r = runner;
-                if (r != null) r.toEditor((e + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            List<String> told = screen.takeToComputer();
+            Runner tr = runner;
+            if (!told.isEmpty() && tr != null) {
+                tr.dropIfReset();   // (what was waiting for the program before a reset goes first; these are the new one's)
+                for (String e : told) tr.toEditor((e + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
             }
             List<String> batch = screen.takeBatch();
             List<String> replies = screen.takeReplies();
@@ -505,7 +513,7 @@ public class ComputerElement extends TransparentNodeElement {
     static final byte[] HELLO = (mods.eln.robotics.computer.screen.ScreenHost.hello() + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
     Runner newRunner(Machine m) {
-        m.hello = HELLO;
+        m.hello = concat(HELLO, programOperatorLine(operator));
         Runner r = new Runner(m);
         r.screenOut = this::screenOutput;
         return r;
@@ -543,6 +551,9 @@ public class ComputerElement extends TransparentNodeElement {
     @Override
     public byte networkUnserialize(DataInputStream stream, ServerPlayer player) {
         byte id = super.networkUnserialize(stream, player);
+        // (a watcher's buttons do nothing while someone operates it: Baughn, one user at a time)
+        if (player != null && operator != null && player != operator
+            && (id == POWER_ID || id == RESET_ID || id == BREAK_ID || id == SET_ADDRESS_ID)) return id;
         try {
             switch (id) {
                 case SCREEN_EVENT_ID -> screenEvent(player, stream.readUTF());

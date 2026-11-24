@@ -38,4 +38,15 @@ class CellsCodecTest {
     void badDataIsNoCells() {
         assertNull(CellsCodec.decode(new byte[]{1, 2, 3}, new HashMap<>()));
     }
+
+    /** The C parser on the Applications floppy is the one in rom/common (two copies: they mustn't drift). */
+    @Test
+    void theFloppysParserIsRomCommons() throws java.io.IOException {
+        var root = java.nio.file.Path.of("").toAbsolutePath();   // (the tests may run in a directory under the repository)
+        while (root != null && !java.nio.file.Files.isDirectory(root.resolve("rom/common"))) root = root.getParent();
+        assertNotNull(root, "the repository's rom/common");
+        for (String f : new String[]{"wire.h", "wire.c"})
+            assertEquals(java.nio.file.Files.readString(root.resolve("rom/common").resolve(f)),
+                java.nio.file.Files.readString(root.resolve("rom/disks/applications/System").resolve(f)), f);
+    }
 }

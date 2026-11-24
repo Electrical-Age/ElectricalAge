@@ -53,7 +53,7 @@ public final class Scene {
      * 1572655325104832613: icons, Gorillas' gorillas, the desk's picture). version counts changes, for displays' textures.
      */
     public record Pixmap(int w, int h, int[] argb, int version) {
-        static int versions;
+        static final java.util.concurrent.atomic.AtomicInteger versions = new java.util.concurrent.atomic.AtomicInteger();
 
         static Pixmap of(List<Object> m) {
             int w = (int) Form.num(m, 2, 0), h = (int) Form.num(m, 3, 0);
@@ -72,7 +72,7 @@ public final class Scene {
                 int k = c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'z' ? c - 'a' + 10 : -1;
                 argb[i] = k >= 0 && k < colours.length ? colours[k] : 0;
             }
-            return new Pixmap(w, h, argb, ++versions);
+            return new Pixmap(w, h, argb, versions.incrementAndGet());
         }
     }
 
@@ -186,10 +186,7 @@ public final class Scene {
             if (lines.isEmpty()) lines.add(new ArrayList<>());
             String[] parts = text.split("\n", -1);
             for (int k = 0; k < parts.length; k++) {
-                if (k > 0) {
-                    lines.add(new ArrayList<>());
-                    while (lines.size() > LOG_LINES) lines.poll();
-                }
+                if (k > 0) newLine();
                 if (parts[k].isEmpty()) continue;
                 // (a line is at most LINE_MAX characters: one that never ends wraps, rather than growing for ever)
                 List<Run> last = lines.peekLast();
@@ -198,21 +195,33 @@ public final class Scene {
                 String rest = parts[k];
                 while (have + rest.length() > LINE_MAX) {
                     int take = LINE_MAX - have;
-                    if (take > 0) last.add(new Run(colour, rest.substring(0, take)));
+                    if (take > 0) run(last, colour, rest.substring(0, take));
                     rest = rest.substring(Math.max(0, take));
-                    lines.add(last = new ArrayList<>());
-                    while (lines.size() > LOG_LINES) lines.poll();
+                    newLine();
+                    last = lines.peekLast();
                     have = 0;
                 }
-                if (!rest.isEmpty()) last.add(new Run(colour, rest));
+                if (!rest.isEmpty()) run(last, colour, rest);
             }
-            chars += text.length();
-            while (chars > LOG_CHARS && lines.size() > 1) {   // (the oldest lines go: a log's share of the screen's budget)
-                for (Run r : lines.poll()) chars -= r.text().length();
-            }
+            // (the oldest lines go: a log's share of the screen's budget)
+            while (chars > LOG_CHARS && lines.size() > 1) dropOldest();
         }
 
-        /** Characters in this log (about: wrapped and dropped lines are counted as they go). */
+        private void run(List<Run> line, String colour, String text) {
+            line.add(new Run(colour, text));
+            chars += text.length();
+        }
+
+        private void newLine() {
+            lines.add(new ArrayList<>());
+            while (lines.size() > LOG_LINES) dropOldest();
+        }
+
+        private void dropOldest() {
+            for (Run r : lines.poll()) chars -= r.text().length();
+        }
+
+        /** The characters of the runs this log holds (kept exact as lines come and go). */
         int chars;
     }
 
@@ -298,7 +307,7 @@ public final class Scene {
                 Window win = windows.get(id);
                 java.util.Set<String> flags = flags(m.size() > 7 ? m.get(7) : null);
                 if (win == null) {
-                    if (windows.size() >= MAX_WINDOWS) return false;
+                    if (id != KERNEL && windows.size() - (windows.containsKey(KERNEL) ? 1 : 0) >= MAX_WINDOWS) return false;   // (the Kernel's is always room for)
                     win = new Window(Form.str(m, 6, ""));
                     win.flags = flags;
                     // (its generation: the server counts the windows it opened; a display takes the server's number, which
@@ -604,7 +613,6 @@ public final class Scene {
         return v.equals("text") || v.equals("box") || v.equals("busy") || v.equals("button");
     }
 
-    /** The messages that rebuild this scene on an empty one, after a (reset w h). */
     /**
      * A save landed ((saved w id seq rev), with the hunks the operator sent): the editor element keeps the text as saved
      * and its new revision, so whoever opens the screen next edits the file as it is, not as it was first opened. The
@@ -639,6 +647,7 @@ public final class Scene {
         e.msg = msg;
     }
 
+    /** The messages that rebuild this scene on an empty one, after a (reset w h). */
     public List<String> replay() {
         List<String> out = new ArrayList<>();
         out.add(Form.print(new Form.Symbol("reset"), (long) w, (long) h));

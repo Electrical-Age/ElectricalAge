@@ -53,7 +53,9 @@ static int value(struct p *p, int depth) {
             if (!ch) return -1;
             if (ch == '"') break;
             if (ch == '\\') {
-                char e = *p->c++;
+                char e = *p->c;
+                if (!e) return -1;
+                p->c++;
                 if (e == 'n') ch = '\n';
                 else if (e == 't') ch = '\t';
                 else if (e == 'r') ch = '\r';
@@ -61,7 +63,9 @@ static int value(struct p *p, int depth) {
                 else if (e == 'x') {
                     int h = 0;
                     for (int k = 0; k < 2; k++) {
-                        char d = *p->c++;
+                        char d = *p->c;
+                        if (!d) return -1;   /* (the line ended inside the escape) */
+                        p->c++;
                         h = h * 16 + (d >= '0' && d <= '9' ? d - '0' : d >= 'a' && d <= 'f' ? d - 'a' + 10 : d >= 'A' && d <= 'F' ? d - 'A' + 10 : -1000);
                     }
                     if (h < 0) return -1;

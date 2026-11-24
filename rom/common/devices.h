@@ -21,7 +21,7 @@
 #define CON_TX(p)         EA_IO(p, 0x00)   /* write a byte */
 #define CON_RX(p)         EA_IO(p, 0x04)   /* read a byte, or -1 */
 #define CON_STATUS(p)     EA_IO(p, 0x08)   /* bit 0: input waiting; bit 1: room to send */
-#define CON_IRQ(p)        EA_IO(p, 0x0C)
+#define CON_IRQ(p)        EA_IO(p, 0x0C)   /* bit 0: interrupt on input; bit 1: on room to send */
 /* block transfer (Wire 2): the host copies a buffer from or into RAM at once */
 #define CON_TX_ADDR(p)    EA_IO(p, 0x10)   /* where the bytes to send are */
 #define CON_TX_LEN(p)     EA_IO(p, 0x14)   /* how many; after TX_GO, how many went (fewer when the channel filled) */
@@ -29,7 +29,7 @@
 #define CON_RX_ADDR(p)    EA_IO(p, 0x20)   /* where waiting input goes */
 #define CON_RX_CAP(p)     EA_IO(p, 0x24)   /* room there */
 #define CON_RX_GO(p)      EA_IO(p, 0x28)   /* write: take what is waiting */
-#define CON_RX_LEN(p)     EA_IO(p, 0x2C)   /* after RX_GO, how many bytes it wrote */   /* bit 0: interrupt on input; bit 1: on room to send */
+#define CON_RX_LEN(p)     EA_IO(p, 0x2C)   /* after RX_GO, how many bytes it wrote */
 #define CONSOLE 2
 #define EDITOR 7
 

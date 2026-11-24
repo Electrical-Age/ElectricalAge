@@ -115,6 +115,11 @@ public final class Runner implements Runnable {
         keys.reset();
     }
 
+    /** Drop what waits for the program if the machine was reset since input was last taken (the Machine held). */
+    public void dropIfReset() {
+        dropAfterReset();
+    }
+
     /** Screen input waiting in the runner for the program (tests). */
     int screenInputWaiting() {
         return displayIn.size() + (displayLeft != null ? 1 : 0);

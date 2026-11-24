@@ -68,6 +68,15 @@ public final class ScreenHost {
     /** Bytes from the console (boot messages, traps, eprint): the Kernel window, opened when it first has something. */
     public synchronized void console(byte[] bytes) {
         if (bytes.length == 0) return;
+        hostMade = true;
+        try {
+            consoleText(bytes);
+        } finally {
+            hostMade = false;
+        }
+    }
+
+    private void consoleText(byte[] bytes) {
         if (!scene.windows.containsKey(CONSOLE_TAB)) {
             List<Object> flags = List.of(Form.kw("iconify"), Form.kw("depth"), Form.kw("size"), Form.kw("drag"));
             take(List.of(new Form.Symbol("window"), (long) CONSOLE_TAB, 2L, 3L, (long) Math.min(76, scene.w - 4), 12L, "Kernel", flags));
@@ -118,7 +127,7 @@ public final class ScreenHost {
             Form.kw("max-save"), (long) MAX_SAVE, Form.kw("max-windows"), (long) Scene.MAX_WINDOWS, Form.kw("max-elements"), (long) Scene.MAX_ELEMENTS,
             Form.kw("max-pixmaps"), (long) Scene.MAX_PIXMAPS, Form.kw("pixmap"), List.of((long) Scene.PIXMAP_W, (long) Scene.PIXMAP_H),
             Form.kw("keys"), List.of("enter", "backspace", "tab", "delete", "insert", "left", "right", "up", "down", "home", "end",
-                "pageup", "pagedown", "f1", "f12"));
+                "pageup", "pagedown", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12"));
     }
 
     /** Events the screen itself has for the computer (geometry it fitted, refusals), since last asked. */
@@ -131,6 +140,25 @@ public final class ScreenHost {
     }
 
     private final List<String> toComputer = new ArrayList<>();
+    /** Each event's parts (the verb counted), as Wire 2 documents them. */
+    static final java.util.Map<String, Integer> PARTS = java.util.Map.ofEntries(java.util.Map.entry("submit", 5),
+        java.util.Map.entry("press", 3), java.util.Map.entry("select", 4), java.util.Map.entry("save", 6), java.util.Map.entry("stash", 6),
+        java.util.Map.entry("key", 5), java.util.Map.entry("keyup", 5), java.util.Map.entry("click", 5), java.util.Map.entry("open", 3),
+        java.util.Map.entry("answer", 4), java.util.Map.entry("pick", 4), java.util.Map.entry("moved", 6), java.util.Map.entry("closed", 2),
+        java.util.Map.entry("break", 2), java.util.Map.entry("raised", 2), java.util.Map.entry("lowered", 2), java.util.Map.entry("active", 2),
+        java.util.Map.entry("minimized", 2), java.util.Map.entry("restored", 2));
+
+    static boolean int32(Object o) {
+        if (o instanceof Long n) return n >= Integer.MIN_VALUE && n <= Integer.MAX_VALUE;
+        if (o instanceof List<?> l) {
+            for (Object x : l) if (!int32(x)) return false;
+        }
+        return true;
+    }
+
+    /** Taking away what isn't there: nothing to say. */
+    static final Set<String> QUIET = Set.of("remove", "unask", "unpixmap", "unwindow", "clear");
+    private boolean hostMade;
     private int refusals;
 
     private Map<Integer, int[]> geometry() {
@@ -160,7 +188,7 @@ public final class ScreenHost {
     }
 
     /**
-     * An event names something the screen shows, as the client says it does (Wire review, E13): clients are untrusted,
+     * An event names something the screen shows, as the client says it does : clients are untrusted,
      * so a pick of a menu item that isn't there or is greyed out, an answer with no requester, a row past a list's
      * end, a press on what isn't a button, or anything under an open requester but its answer, never reaches the program.
      */
@@ -216,13 +244,14 @@ public final class ScreenHost {
         if (opening && m.size() > 8) m = m.subList(0, 8);   // (a generation is the screen's to give)
         Map<Integer, int[]> before = verb.equals("screen") ? geometry() : null;
         if (!scene.apply(m)) {   // (Wire 2: the program hears what the screen refused, a few a batch at most)
-            if (refusals++ < 8)
+            // (not what the screen made itself, the Kernel window; and taking away what isn't there is no error)
+            if (!hostMade && !QUIET.contains(verb) && refusals++ < 8)
                 toComputer.add(Form.print(new Form.Symbol("error"), new Form.Symbol(Form.verb(m)), Form.num(m, 1, -1), Form.num(m, 2, -1),
                     "refused: unknown, malformed, or past a limit (windows, elements, pictures, sizes)"));
             return;
         }
         // (the program hears the geometry the screen fitted a window to, where it differs from what it asked for:
-        // Wire review E24; it already takes moved events, which players' moves send)
+        // it already takes moved events, which players' moves send)
         if (opening || verb.equals("place")) {
             Scene.Window w = scene.windows.get(wid);
             if (w != null && (w.x != Form.num(m, 2, w.x) || w.y != Form.num(m, 3, w.y) || w.cw != Form.num(m, 4, w.cw) || w.ch != Form.num(m, 5, w.ch)))
@@ -259,7 +288,7 @@ public final class ScreenHost {
         }
         // (a message that replaces an element's state replaces it where that element first appeared in the batch, so
         // the order elements are made in, which is their drawing order, stays the computer's; a remove, a clear or a
-        // message of another kind for the same element starts afresh after it: Wire review, E9)
+        // message of another kind for the same element starts afresh after it)
         Map<String, Integer> at = new HashMap<>();   // window/id -> its place in out
         Map<String, String> verbAt = new HashMap<>();
         List<String> out = new ArrayList<>();
@@ -288,9 +317,6 @@ public final class ScreenHost {
         return out;   // (however big: the element sends it in pieces; a full replay for everyone was worse)
     }
 
-    static String key(List<Object> m) {
-        return Form.verb(m) + " " + Form.num(m, 1, -1) + " " + Form.num(m, 2, -1);
-    }
 
     /** The messages that rebuild the screen from nothing, for a player who just opened it. */
     public synchronized List<String> replay() {
@@ -339,12 +365,15 @@ public final class ScreenHost {
         if (!system && !(m.size() > 1 && m.get(1) instanceof Long t && scene.windows.containsKey((int) (long) t))) return null;
         if (!WINDOW_EVENTS.contains(v) && !(m.size() > 2 && m.get(2) instanceof Long)) return null;
         if (!system && !fits(v, m)) return null;
+        if (!int32(m)) return null;   // (the canonical subset's integers: a C program reads them as int32)
+        // (rebuilt to its documented parts: nothing extra a client adds reaches the program)
+        Integer parts = PARTS.get(v);
+        if (parts != null && m.size() > parts) m = m.subList(0, parts);
         List<Object> told = scene.applyPlayer(m);
         if (told != null) version++;
         if (told != null && echo != null) echo.add(Form.print(told));
         // (Wire 2's canonical form: a window's own events carry nothing but the window, so nothing unchecked reaches the
         // program; the others' parts were checked by fits)
-        if (WINDOW_EVENTS.contains(v) && !v.equals("moved") && m.size() > 2) m = m.subList(0, 2);
         if (v.equals("moved") && told != null)   // (the computer hears the geometry the screen kept, not the client's)
             m = List.of(m.get(0), m.get(1), told.get(2), told.get(3), told.get(4), told.get(5));
         if (v.equals("save") && m.size() > 5) {   // (kept until its answer: a saved one updates the scene's copy)

@@ -21,7 +21,14 @@ public final class CellsCodec {
     private CellsCodec() {
     }
 
-    /** Encodes c; pixmaps whose version is in sent are only named (sent gets the new ones). */
+    /**
+     * Pictures a watcher's client keeps, at most. Both ends forget the one received longest ago, in the order they were
+     * sent, so the server's set (insertion-ordered) and the client's map (insertion-ordered) always agree on what the
+     * client has: one forgotten is sent again when next shown.
+     */
+    public static final int CACHE = 300;
+
+    /** Encodes c; pixmaps whose version is in sent are only named (sent, insertion-ordered, gets the new ones). */
     public static byte[] encode(SceneCells c, Set<Integer> sent) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -39,6 +46,11 @@ public final class CellsCodec {
                     Scene.Pixmap p = im.pixmap();
                     o.writeInt(p.version());
                     boolean send = sent.add(p.version());
+                    if (send && sent.size() > CACHE) {   // (the watcher's client forgets in the same order: see decode)
+                        var it = sent.iterator();
+                        it.next();
+                        it.remove();
+                    }
                     o.writeBoolean(send);
                     if (send) {
                         o.writeShort(p.w());
@@ -53,7 +65,7 @@ public final class CellsCodec {
         }
     }
 
-    /** Decodes cells; pixmaps come from known (by version), new ones are added to it. Null if the data is bad. */
+    /** Decodes cells; pixmaps come from known (by version, insertion-ordered), new ones are added to it. Null if the data is bad. */
     public static SceneCells decode(byte[] data, Map<Integer, Scene.Pixmap> known) {
         try (DataInputStream in = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data)))) {
             int w = in.readShort(), h = in.readShort();
@@ -75,7 +87,7 @@ public final class CellsCodec {
                     int[] argb = new int[pw * ph];
                     for (int i = 0; i < argb.length; i++) argb[i] = in.readInt();
                     known.put(version, p = new Scene.Pixmap(pw, ph, argb, version));
-                    if (known.size() > 512) known.keySet().removeIf(x -> x != version && known.size() > 256);
+                    if (known.size() > CACHE) known.remove(known.keySet().iterator().next());
                 } else p = known.get(version);
                 if (p != null) c.images.add(new SceneCells.Image(owner, v[0], v[1], v[2], v[3], p, v[4], v[5], v[6], v[7]));
             }

@@ -23,7 +23,7 @@ public final class Console implements Device {
     /**
      * A byte was sent with no room for it: the rest of that message is dropped up to its newline, and the host is told
      * (CANCEL after what it had) to drop the start it already has, rather than fuse the two halves into another,
-     * well-formed but wrong message (Wire review E16).
+     * well-formed but wrong message.
      */
     private boolean dropping, cancelPending;
     public static final byte CANCEL = 0x18;
@@ -53,7 +53,7 @@ public final class Console implements Device {
     private void sendBlock() {
         int n = 0;
         try {
-            while (n < txLen && out.size() < outCap && !dropping) {
+            while (n < txLen && (dropping || out.size() < outCap)) {   // (dropping: the cut message's rest, through its newline)
                 write(TX, mem.load8(txAddr + n) & 0xFF);
                 n++;
             }

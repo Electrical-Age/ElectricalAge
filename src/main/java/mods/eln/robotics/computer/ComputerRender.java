@@ -42,7 +42,7 @@ public class ComputerRender extends TransparentNodeElementRender {
     public long cellsVersion;
     /** The last window a program placed on purpose, and how many places so far (a drag of it in progress stops). */
     public volatile int placedWin = -1, places;
-    final java.util.Map<Integer, mods.eln.robotics.computer.screen.Scene.Pixmap> cellPixmaps = new java.util.HashMap<>();
+    final java.util.Map<Integer, mods.eln.robotics.computer.screen.Scene.Pixmap> cellPixmaps = new java.util.LinkedHashMap<>();
     public volatile String operatorName = "";
     public long seq;
     /** Bumped when the scene changes, so the screen can see it. */
@@ -206,7 +206,6 @@ public class ComputerRender extends TransparentNodeElementRender {
                 return;
             }
             if (kind != ComputerElement.SCREEN_ID) return;
-            usingCells = false;
             int n = stream.readInt();
             if (n < 0 || n > 4 << 20) return;
             byte[] b = new byte[n];
@@ -215,11 +214,14 @@ public class ComputerRender extends TransparentNodeElementRender {
                 var m = Form.parse(line);
                 if (m != null && Form.verb(m).equals("operator")) {   // (this player's role, not part of the scene)
                     operator = Boolean.TRUE.equals(m.size() > 1 ? m.get(1) : null);
+                    if (operator) usingCells = false;   // (the scene follows; a watcher keeps drawing its cells)
                     if (operator) seq = Math.max(seq, Form.num(m, 2, 1) - 1);
                     else operatorName = Form.str(m, 2, "");
                     continue;
                 }
-                if (m == null || !scene.apply(m)) continue;
+                if (m == null) continue;
+                usingCells = false;   // (scene messages: this player operates it)
+                if (!scene.apply(m)) continue;
                 String v = Form.verb(m);
                 if (v.equals("place")) {
                     placedWin = (int) Form.num(m, 1, -1);

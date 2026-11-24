@@ -398,11 +398,16 @@ public class ComputerScreen extends ElnScreen {
         String[] tid = key.split("/");
         int t = Integer.parseInt(tid[0]), id = Integer.parseInt(tid[1]);
         EditorState st = editorState(t, id);
+        Object change = whole(t, id) ? st.text : hunks(st.baseText, st.text);
+        if (Form.print(new Form.Symbol("save"), (long) t, (long) id, render.seq + 1, st.baseRev == null ? "" : st.baseRev, change).length()
+            > mods.eln.robotics.computer.screen.ScreenHost.MAX_SAVE) {   // (the server would drop it, and "Saving..." would stay)
+            st.status = tr("Too big to save in one go: save in smaller steps, or split the file");
+            return;
+        }
         st.savingSeq = ++render.seq;
         st.savingText = st.text;
         st.status = tr("Saving...");
-        render.screenEvent(new Form.Symbol("save"), (long) t, (long) id, st.savingSeq, st.baseRev == null ? "" : st.baseRev,
-            whole(t, id) ? st.text : hunks(st.baseText, st.text));
+        render.screenEvent(new Form.Symbol("save"), (long) t, (long) id, st.savingSeq, st.baseRev == null ? "" : st.baseRev, change);
     }
 
     /** Does the editor's program want whole texts in its saves (Wire 2: :whole true after its text), not hunks? */
@@ -902,12 +907,21 @@ public class ComputerScreen extends ElnScreen {
      */
     void editorAction(String action, String element) {
         if (action.isEmpty()) return;
+        // (the editor the item names, or the window's only one; drawn or not: an editor covered by another window still
+        // has its text here, and Close must still save it)
         String key = null;
-        if (!element.isEmpty()) key = editorWidgets.containsKey(active + "/" + element) ? active + "/" + element : null;
-        else for (String k : editorWidgets.keySet()) if (k.startsWith(active + "/")) key = key == null ? k : "";
-        if (key == null || key.isEmpty()) return;   // (none drawn, or several and the item doesn't say which)
+        Scene.Window win = activeWindow();
+        if (win == null) return;
+        if (!element.isEmpty()) {
+            Scene.Element e = win.elements.get(Integer.parseInt(element));
+            key = e != null && e.kind.equals("editor") ? active + "/" + element : null;
+        } else
+            for (var en : win.elements.entrySet())
+                if (en.getValue().kind.equals("editor")) key = key == null ? active + "/" + en.getKey() : "";
+        if (key == null || key.isEmpty()) return;   // (none, or several and the item doesn't say which)
         var w = editorWidgets.get(key);
         EditorState st = editorState(active, Integer.parseInt(key.split("/")[1]));
+        if (w == null && !action.equals("save") && !action.equals("save-as")) return;   // (find and the like need it drawn)
         switch (action) {
             case "save" -> {
                 if (st.baseText == null || !st.text.equals(st.baseText)) save(key);
@@ -916,11 +930,11 @@ public class ComputerScreen extends ElnScreen {
                 int eid = Integer.parseInt(key.split("/")[1]);
                 render.screenEvent(new Form.Symbol("stash"), (long) active, (long) eid, ++render.seq,
                     st.baseRev == null ? "" : st.baseRev, whole(active, eid) ? st.text : hunks(st.baseText, st.text));
-                w.setFocused(false);   // (the keys go to the line that asks for the name)
+                if (w != null) w.setFocused(false);   // (the keys go to the line that asks for the name)
                 setFocused(null);
             }
             case "name" -> {
-                w.setFocused(false);
+                if (w != null) w.setFocused(false);
                 setFocused(null);
             }
             case "find" -> {
@@ -1259,7 +1273,7 @@ public class ComputerScreen extends ElnScreen {
 
     @Override
     public boolean keyReleased(KeyEvent ev) {
-        Scene.Window t = render.operator ? activeWindow() : null;
+        Scene.Window t = render.operator && !fieldHasKeys() ? activeWindow() : null;
         if (t != null && t.ask == null && !menuOpen && focusedRaw(t) != null) {   // (Wire 2: games hear keys let go)
             int mods = (ev.hasShiftDown() ? 1 : 0) | (ev.hasControlDown() ? 2 : 0) | (ev.hasAltDown() ? 4 : 0);
             String name = keyName(ev.key(), true);

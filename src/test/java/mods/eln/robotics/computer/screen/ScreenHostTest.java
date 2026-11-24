@@ -195,4 +195,13 @@ class ScreenHostTest {
         for (var line : h.scene.windows.get(2).elements.get(1).lines) for (var r : line) chars += r.text().length();
         assertTrue(chars <= Scene.LOG_CHARS, "a log keeps at most its share: " + chars);
     }
+
+    /** Many short lines: a log keeps its last LOG_LINES, not one (the budget once counted only what came in). */
+    @Test
+    void aLongSessionKeepsItsLines() {
+        ScreenHost h = new ScreenHost();
+        from(h, "(window 2 1 1 70 20 \"Log\")", "(log 2 1 0 0 :fill :fill)");
+        for (int k = 0; k < 20_000; k++) from(h, "(append 2 1 :white \"line " + k + "\\n\")");
+        assertTrue(h.scene.windows.get(2).elements.get(1).lines.size() >= Scene.LOG_LINES - 1);
+    }
 }

@@ -22,6 +22,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 ## Baughn's decisions
 
 - Keep the 1.12 OBJ models; a remodel is a separate later project.
+- The computer's screen protocol is Wire 2 (2026-11-24, after a review; the handbook's Wire page): compatibility with
+  Wire 1 broken on purpose; a computer has one operator (the first player with its screen open), everyone else
+  watches composed cells; refused saves stay refused (no overwrite); block-transfer registers on the screen channel;
+  a canonical text subset with a C parser (rom/common/wire.c, also on the Applications floppy); menu actions as tags.
 - Macerator: vanilla ore blocks (and EA lead/tungsten ore) -> raw chunks about like Fortune II (iron/gold 1-3,
   copper 3-8); a raw chunk -> one dust, 20% chance of two. 1.12 gave two dust per ore. EA lead and tungsten ores drop
   raw pieces like iron ore (`OreDropCases`).

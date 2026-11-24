@@ -88,7 +88,7 @@ public final class ComputerStore {
 
     /** The screen's scene as replay lines (the host keeps it; the computer doesn't redraw after a load). */
     public static void saveScreen(MinecraftServer s, UUID id, java.util.List<String> lines) {
-        // (gzipped, a header line first; Wire review: a screen's pictures and logs as text were the file's bulk)
+        // (gzipped, a header line first: a screen's pictures and logs as text were the file's bulk)
         byte[] text = (SCREEN_HEADER + "\n" + String.join("\n", lines)).getBytes(java.nio.charset.StandardCharsets.UTF_8);
         writeAsync(screenFile(s, id), o -> {
             try (var z = new java.util.zip.GZIPOutputStream(o)) {

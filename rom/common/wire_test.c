@@ -46,6 +46,10 @@ int main(void) {
     CHECK(wire_parse(h, v, 2) == -1);    /* no room */
     char i[] = "(keyup 2 9 \"left\" 1)";
     CHECK(wire_parse(i, v, 64) == 5 && eq(&v[3], "left") && v[4].i == 1);
+    char j[] = "(a \"x\\x";   /* (ends inside an escape: refused, nothing read past it) */
+    CHECK(wire_parse(j, v, 64) == -1);
+    char l[] = "(a \"x\\";
+    CHECK(wire_parse(l, v, 64) == -1);
     printf(fails ? "%d failed\n" : "wire: all passed\n", fails);
     return fails != 0;
 }
