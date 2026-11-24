@@ -51,6 +51,7 @@ public class Wp10aContent implements ElnContent {
         registerResinCollector(92);
         registerCarbonBlackBurner(93);
         registerDesulfuriser(94);
+        registerGroundRadar(97);
         registerSteamCracker(95);
         registerPolymeriser(96);
     }
@@ -71,6 +72,13 @@ public class Wp10aContent implements ElnContent {
 
     /** The Desulfuriser (the rubber chain's oil route, 2026-11-07): in line on a cut's pipe, 230 V, 1 kW. Model
      *  mods.eln.cad.models.Desulfuriser. */
+    /** The Ground Radar (Baughn 2026-11-24): scans the ground under it on two portable batteries. Model
+     *  mods.eln.cad.models.GroundRadar. */
+    public static void registerGroundRadar(int id) {
+        transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.transparentnode.groundradar.GroundRadarDescriptor(
+            TR_NAME(Type.NONE, "Ground Radar"), "ground_radar"));
+    }
+
     public static void registerDesulfuriser(int id) {
         transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.transparentnode.desulfuriser.DesulfuriserDescriptor(
             TR_NAME(Type.NONE, "Desulfuriser"), "desulfuriser", MVU, 1000, meduimVoltageCableDescriptor));

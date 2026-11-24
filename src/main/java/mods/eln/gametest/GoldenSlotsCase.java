@@ -307,6 +307,7 @@ final class GoldenSlotsCase implements TestCase {
         mods.eln.anvil.ElectricalAnvilDescriptor.class,   // (the electrical anvil: Baughn 2026-10-28)
         mods.eln.mechanical.SteamTurbineDescriptor.class,   // (the shaft steam turbine's controls: Baughn 2026-10-29)
         mods.eln.robotics.computer.ComputerDescriptor.class,
+        mods.eln.transparentnode.groundradar.GroundRadarDescriptor.class,   // (the Ground Radar's batteries: Baughn 2026-11-24)
         mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor.class,   // (the utility pole's equipment: Baughn 2026-11-08)
         mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor.class);   // (the wire-drawing machines: Wires stage 4)   // (the computer's chips and drives: Baughn 2026-11-05)
 

@@ -41,6 +41,7 @@ final class ClientScreens {
         layout("transparentnode.solarpanel.SolarPanelDescriptor", "solar_panel");
         layout("transparentnode.turret.TurretDescriptor", "turret");
         layout("transparentnode.eggincubator.EggIncubatorDescriptor", "egg_incubator");
+        layout("transparentnode.groundradar.GroundRadarDescriptor", "ground_radar");
         layout("transparentnode.electricalmachine.ElectricalMachineDescriptor", "electrical_machine");
         layout("sixnode.resistor.ResistorDescriptor", "resistor");
         layout("transparentnode.LargeRheostatDescriptor", "resistor");
@@ -103,6 +104,7 @@ final class ClientScreens {
         reg(mods.eln.transparentnode.solarpanel.SolarPanelDescriptor.class, mods.eln.transparentnode.solarpanel.SolarPanelScreen::new);
         reg(mods.eln.transparentnode.turret.TurretDescriptor.class, mods.eln.transparentnode.turret.TurretScreen::new);
         reg(mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor.class, mods.eln.transparentnode.eggincubator.EggIncubatorScreen::new);
+        reg(mods.eln.transparentnode.groundradar.GroundRadarDescriptor.class, mods.eln.transparentnode.groundradar.GroundRadarScreen::new);
         reg(mods.eln.transparentnode.electricalmachine.ElectricalMachineDescriptor.class, mods.eln.transparentnode.electricalmachine.ElectricalMachineScreen::new);
         // S1d
         reg(mods.eln.sixnode.lampsocket.LampSocketDescriptor.class, mods.eln.sixnode.lampsocket.LampSocketScreen::new);

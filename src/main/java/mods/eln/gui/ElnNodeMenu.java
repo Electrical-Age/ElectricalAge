@@ -205,6 +205,17 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
         for (String k : wearKeys) buf.writeUtf(k, 256);
     }
 
+    /** The players with this node's screen open (on the server). */
+    public static java.util.List<net.minecraft.server.level.ServerPlayer> viewers(NodeBase node) {
+        java.util.List<net.minecraft.server.level.ServerPlayer> l = new java.util.ArrayList<>();
+        var level = node.coordonate.world();
+        var s = level == null ? null : level.getServer();
+        if (s == null) return l;
+        for (var p : s.getPlayerList().getPlayers())
+            if (p.containerMenu instanceof ElnNodeMenu m && m.getNode() == node) l.add(p);
+        return l;
+    }
+
     @Override
     public NodeBase getNode() {
         return node;

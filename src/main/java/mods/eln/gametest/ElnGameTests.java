@@ -106,6 +106,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.AutoMinerCases.addTo(l);
         mods.eln.gametest.cases.OreDropCases.addTo(l);
         mods.eln.gametest.cases.RubberCases.addTo(l);
+        mods.eln.gametest.cases.GroundRadarCases.addTo(l);
         mods.eln.gametest.cases.ItemCapabilityCases.addTo(l);
         mods.eln.gametest.cases.LampMonsterCases.addTo(l);
         mods.eln.gametest.cases.BeltCases.addTo(l);

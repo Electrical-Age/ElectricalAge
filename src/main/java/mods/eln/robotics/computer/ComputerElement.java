@@ -307,12 +307,7 @@ public class ComputerElement extends TransparentNodeElement {
     // ---- the terminal and its viewers
 
     List<ServerPlayer> viewers() {
-        List<ServerPlayer> l = new ArrayList<>();
-        MinecraftServer s = server();
-        if (s == null) return l;
-        for (ServerPlayer p : s.getPlayerList().getPlayers())
-            if (p.containerMenu instanceof ElnNodeMenu m && m.getNode() == node) l.add(p);
-        return l;
+        return ElnNodeMenu.viewers(node);
     }
 
     /** The viewers, and the players in the same level within MONITOR_RANGE of it (they see the monitor). */

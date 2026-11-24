@@ -1,4 +1,4 @@
-// 26.3	2026-11-23T12:03:32.034381075	eln-global/EA models
+// 26.3	2026-11-24T15:33:03.48856994	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -58,6 +58,7 @@ f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.jso
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/gas_turbine.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/generator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/ghost_block.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/ground_radar.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/high_power_receiver_antenna.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/high_power_transmitter_antenna.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/industrial_resin_collector.json
@@ -284,6 +285,7 @@ c5bec09b544a1b17e38e0199fc64d913404e29b6 assets/eln/items/gold_plate.json
 12d8fcfd796a694035bd05fdd7dce7da9163aa76 assets/eln/items/gray_brush.json
 69b0f5a9932f8a27ea63cded262a9a9976c7c64c assets/eln/items/green_brush.json
 68db4992640bbf3df85227400237375dfe6c8c0a assets/eln/items/ground_cable.json
+41e6028f57fb9ed410d3febd88e02e7d077822fc assets/eln/items/ground_radar.json
 6c06cb30635979c30b010d037a6c41d65432bd3d assets/eln/items/handbook.json
 969cbb494560f0f130da42a5c8f6c3126bc99754 assets/eln/items/headlamp.json
 50461a5034c917cad11b6e411503a3efed7e6b9c assets/eln/items/high_power_receiver_antenna.json
@@ -761,6 +763,8 @@ a2c5bd268f992cc8110ae2d483799a2772b7ef3a assets/eln/models/item/gold_dust.json
 a226cf403dbdfeeb44c3bf58de0c6cf852269566 assets/eln/models/item/gray_brush.json
 f7d7b0915063be54ce1e56e3bbebdf8d27e71cae assets/eln/models/item/green_brush.json
 201074a4b4e260eea17fddafbfd0f08a956cf1e8 assets/eln/models/item/ground_cable.json
+a0e6960f2918d98c9b1da2063338ad1ac5d76860 assets/eln/models/item/ground_radar.json
+c65a7d817e8877dcb45f754c010190559979e769 assets/eln/models/item/ground_radar_3d.json
 aa44c20d680f6244c69507baaafa048cb1faa5e7 assets/eln/models/item/handbook.json
 41bda0ea22ab2fb464f1bdf14fe5f9214f02582a assets/eln/models/item/high_power_receiver_antenna.json
 fabbeb42459aab19fee4bfe63949f87ae03fe494 assets/eln/models/item/high_power_receiver_antenna_3d.json

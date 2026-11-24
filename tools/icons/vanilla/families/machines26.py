@@ -215,3 +215,22 @@ def polymeriser():
         cv.set(x, 12, h('#d6c496'))                                                # rubber crumb
     leds(cv, 6, 5)
     return cv
+
+
+# ------------------------------------------------------------------------------- ground radar
+ORANGE = (h('#4a2208'), h('#7a3a0e'), h('#b85a16'), h('#e07a22'), h('#f49a44'), h('#fcc07a'))
+
+
+def ground_radar():
+    """The orange antenna sled on its dark skid, the console behind it with a dark screen and LEDs, a whip antenna."""
+    cv = Canvas(16)
+    box(cv, 1, 14, 12, 1, 3, DARK, bevel=False)                                    # skid
+    box(cv, 1, 10, 12, 4, 3, ORANGE)                                               # the sled
+    sub(cv, lambda c: box(c, 6, 4, 7, 6, 3, ORANGE))                               # the console
+    for y in range(5, 8):
+        for x in range(7, 11):
+            cv.set(x, y, h('#16261c') if (x + y) % 3 else h('#2e6a3e'))           # its screen
+    leds(cv, 11, 8)
+    for y in range(0, 4):
+        cv.set(14, y, STEEL[3])                                                    # whip antenna
+    return cv

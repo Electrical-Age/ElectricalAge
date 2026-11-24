@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "eln:signal_antenna",
+    "E": "eln:electrical_probe_chip",
+    "M": "eln:machine_block",
+    "P": "eln:iron_plate"
+  },
+  "pattern": [
+    " A ",
+    "PEP",
+    "PMP"
+  ],
+  "result": {
+    "id": "eln:ground_radar"
+  }
+}

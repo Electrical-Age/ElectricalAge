@@ -1232,6 +1232,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             'C', stack(Items.CAULDRON),
             'M', findItemStack("Machine Block"),
             'H', findItemStack("230V Copper Heating Corp"));
+        // the Ground Radar: a signal antenna over an iron sled, a probe chip to read the echoes, a machine block
+        addRecipe(findItemStack("Ground Radar", 1),
+            " A ",
+            "PEP",
+            "PMP",
+            'A', findItemStack("Signal Antenna"),
+            'P', findItemStack("Iron Plate"),
+            'E', findItemStack("Electrical Probe Chip"),
+            'M', findItemStack("Machine Block"));
         // the Steam Cracker: a firebox (an advanced machine block, alloy) with tungsten heaters (it runs hot), the drum an
         // iron tank
         addRecipe(findItemStack("Steam Cracker", 1),

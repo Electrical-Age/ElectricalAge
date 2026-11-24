@@ -1943,6 +1943,12 @@
   "kind": "transparent_node",
   "name": "large_rheostat"
  },
+ "eln:transparent_node@6208": {
+  "descriptor": "GroundRadarDescriptor",
+  "display": "Ground Radar",
+  "kind": "transparent_node",
+  "name": "ground_radar"
+ },
  "eln:transparent_node@7876": {
   "descriptor": "ElectricalPoleDescriptor",
   "display": "Utility Pole",

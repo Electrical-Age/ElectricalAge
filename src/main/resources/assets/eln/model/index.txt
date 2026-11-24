@@ -50,6 +50,7 @@ fluorescentlamp/fluorescentlamp.obj
 fuelgenerator200v/fuelgenerator200v.obj
 fuelgenerator50v/fuelgenerator50v.obj
 fuelheater/fuelheater.obj
+ground_radar/ground_radar.obj
 groundcable/groundcable.obj
 handdrill/handdrill.obj
 heatexchanger/heatexchanger.obj
