@@ -92,8 +92,13 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
     /** A boiler may also stand on another EA device (a steam turbine: its dome port feeds the turbine's inlet below). */
     @Override
     public boolean isFloor(net.minecraft.world.level.block.Block below) {
-        return super.isFloor(below) || below instanceof mods.eln.node.transparent.TransparentNodeBlock
-            || below instanceof mods.eln.node.voxel.VoxelNodeBlock;   // (or on a pipe: its dome port feeds the pipe below)
+        return super.isFloor(below) || onDeviceOrPipe(below);   // (or on a pipe: its dome port feeds the pipe below)
+    }
+
+    /** Another EA device or a pipe block (a voxel node) below: a floor for a device that may stand on one (the Boiler, the
+     *  Condenser Coil, whose ports underneath feed what is below). */
+    public static boolean onDeviceOrPipe(net.minecraft.world.level.block.Block below) {
+        return below instanceof mods.eln.node.transparent.TransparentNodeBlock || below instanceof mods.eln.node.voxel.VoxelNodeBlock;
     }
 
     /** The dial's span: DIAL_MAX_C at the end of its 270 degree sweep. */

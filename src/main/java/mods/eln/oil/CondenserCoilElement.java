@@ -88,12 +88,6 @@ public class CondenserCoilElement extends TransparentNodeElement implements Flui
         return thermal;
     }
 
-    @Override
-    public List<FluidPort> portsAt(long pos) {
-        List<FluidPort> out = new ArrayList<>();
-        for (FluidPort p : ports) if (p.pos() == pos) out.add(p);
-        return out;
-    }
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {

@@ -10,6 +10,10 @@ import java.util.List;
  * for its ports, and a multiblock's other blocks have none of their own).
  */
 public interface GhostPortHost {
-    /** Its ports on block pos (BlockPos.asLong). */
-    List<FluidDevice.FluidPort> portsAt(long pos);
+    /** Its ports on block pos (BlockPos.asLong): a fluid device's own ports there (a ghost node overrides it). */
+    default List<FluidDevice.FluidPort> portsAt(long pos) {
+        List<FluidDevice.FluidPort> out = new java.util.ArrayList<>();
+        if (this instanceof FluidDevice d) for (FluidDevice.FluidPort p : d.fluidPorts()) if (p.pos() == pos) out.add(p);
+        return out;
+    }
 }

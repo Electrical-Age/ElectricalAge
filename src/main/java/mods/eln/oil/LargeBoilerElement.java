@@ -63,13 +63,6 @@ public class LargeBoilerElement extends BoilerElement implements GhostCells.Host
             new FluidPort(vessel, at(1, 1, 1).pos().asLong(), 1, 1.0, PORT_K));
     }
 
-    /** The ports on one of its blocks (for the pipe tool, which asks the node at a block for its ports). */
-    @Override
-    public List<FluidPort> portsAt(long pos) {
-        List<FluidPort> out = new ArrayList<>();
-        for (FluidPort p : fluidPorts()) if (p.pos() == pos) out.add(p);
-        return out;
-    }
 
     @Override
     public void initialize() {

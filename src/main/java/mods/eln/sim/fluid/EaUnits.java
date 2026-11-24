@@ -392,6 +392,34 @@ public final class EaUnits {
         return m;
     }
 
+    /**
+     * Move up to kg of from's liquid (at most half of it) into to, every liquid in it by its share (all its layers, as
+     * the Still Pot's entrainment carries them into its vapour line), each with its liquid enthalpy at from's temperature,
+     * out of from and into to, so energy is conserved exactly. Returns what it moved (kg).
+     */
+    public static double carryLiquid(FluidNode from, FluidNode to, double kg) {
+        SpeciesRegistry reg = SpeciesRegistry.get();
+        int n = from.speciesBound();
+        double all = 0;
+        for (int i = 0; i < n; i++) if (i != SpeciesRegistry.AIR) all += from.liquid(i);
+        if (all <= 0) return 0;
+        kg = Math.min(kg, 0.5 * all);
+        double T = from.T(), moved = 0;
+        for (int i = 0; i < n; i++) {
+            double l = i == SpeciesRegistry.AIR ? 0 : from.liquid(i);
+            if (l <= 0) continue;
+            double m = kg * l / all, h = i == SpeciesRegistry.WATER ? Water.hLiquid(T) : reg.byId(i).hLiquid(T);
+            from.addMass(i, -m);
+            from.energy -= m * h;
+            to.addMass(i, m);
+            to.energy += m * h;
+            moved += m;
+        }
+        from.update();
+        to.update();
+        return moved;
+    }
+
     /** The heating value (J/kg) of the layer species id is in: its species' by their shares. */
     public static double layerHeatingValue(FluidNode n, int id) {
         double total = layerLiquid(n, id);

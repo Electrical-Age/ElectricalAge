@@ -149,12 +149,6 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         return GhostCells.at(this, x, y, z).pos().asLong();
     }
 
-    @Override
-    public List<FluidPort> portsAt(long pos) {
-        List<FluidPort> out = new ArrayList<>();
-        for (FluidPort p : fluidPorts()) if (p.pos() == pos) out.add(p);
-        return out;
-    }
 
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
@@ -277,39 +271,13 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         for (FluidEdge e : vapourEdges()) line = e.a == vessel ? e.b : e.a;
         if (line != null && !line.fixed) kg = Math.min(kg, Math.max(0, LINE_FULL * line.volume - line.liquidVolume()) * rho[1]);
         else kg = 0;
-        entrained = kg > 0 ? carry(vessel, line, kg) : 0;
+        entrained = kg > 0 ? EaUnits.carryLiquid(vessel, line, kg) : 0;
         meterEntrain += entrained;
     }
 
     /** Liquid carried into the vapour line before the last step (kg). */
     double entrained;
 
-    /**
-     * Move up to kg of from's liquid (at most half of it) into to (the vapour line's node: in the world, its run's lump), every species by its share of the liquid, each with its
-     * liquid enthalpy at from's temperature (out of from, into to: energy conserved exactly). Returns what it moved (kg).
-     */
-    public static double carry(FluidNode from, FluidNode to, double kg) {
-        SpeciesRegistry reg = SpeciesRegistry.get();
-        int n = from.speciesBound();
-        double all = 0;
-        for (int i = 0; i < n; i++) if (i != SpeciesRegistry.AIR) all += from.liquid(i);
-        if (all <= 0) return 0;
-        kg = Math.min(kg, 0.5 * all);
-        double T = from.T(), moved = 0;
-        for (int i = 0; i < n; i++) {
-            double l = i == SpeciesRegistry.AIR ? 0 : from.liquid(i);
-            if (l <= 0) continue;
-            double m = kg * l / all, h = i == SpeciesRegistry.WATER ? Water.hLiquid(T) : reg.byId(i).hLiquid(T);
-            from.addMass(i, -m);
-            from.energy -= m * h;
-            to.addMass(i, m);
-            to.energy += m * h;
-            moved += m;
-        }
-        from.update();
-        to.update();
-        return moved;
-    }
 
     @Override
     public void afterFluidStep(double dt) {
