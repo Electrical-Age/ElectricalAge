@@ -48,6 +48,24 @@ public final class SafetyValvePart extends VoxelPart {
      * is a relief regulator in the solve now (relieve, below).
      */
     public double lift, pAvg = Double.NaN;
+    /**
+     * What it has let out to the air since loaded (kg by species id; null until it has), and the air it took in (kg; a
+     * breather). Baughn 2026-11-24: a breather vents into the room it stands in; a later room-air model reads these.
+     * Server only, not saved.
+     */
+    public double[] ventedKg;
+    public double airInKg;
+
+    /** Book one step's vent edge (VoxelNode.afterFluidStep): what went out by species, or the air that came in. */
+    public void book(mods.eln.sim.fluid.FluidEdge e, boolean inward, double dt) {
+        if (inward) {
+            airInKg += Math.max(0, e.flow) * dt;
+            return;
+        }
+        if (e.fSpecies == null || e.flow <= 0) return;
+        if (ventedKg == null || ventedKg.length < e.fSpecies.length) ventedKg = ventedKg == null ? new double[e.fSpecies.length] : java.util.Arrays.copyOf(ventedKg, e.fSpecies.length);
+        for (int i = 0; i < e.fSpecies.length; i++) ventedKg[i] += Math.max(0, e.fSpecies[i]) * dt;
+    }
     public static final double AVG_TAU = 2.0, BAND = 0.10;
 
     public SafetyValvePart(int x, int y, int z, int outlet, int bore, double setPa) {

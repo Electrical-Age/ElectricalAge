@@ -1579,6 +1579,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         }
         if (changed) changed();
         showAdapters();
+        // what its safety, purge and breather valves let out (and a breather took in), for whoever reads the room's air
+        if (vents != null)
+            for (var e : vents.entrySet())
+                if (e.getValue() instanceof SafetyValvePart sv && e.getKey().edge != null) sv.book(e.getKey().edge, e.getKey().inward, dt);
         // jets out of burst pipes
         if (vents != null && level instanceof net.minecraft.server.level.ServerLevel sl)
             for (var e : vents.entrySet())

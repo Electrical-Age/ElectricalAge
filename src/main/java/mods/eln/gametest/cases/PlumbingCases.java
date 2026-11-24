@@ -321,6 +321,11 @@ public final class PlumbingCases {
             ctx.check("breather: it fits on top of the stub", errB == null && errA == null, errB + " / " + errA);
             switch (row) {
                 case FILLS -> {
+                    mods.eln.node.voxel.SafetyValvePart sv = null;
+                    for (var part : ctx.voxelByEntity(bStub).parts) if (part instanceof mods.eln.node.voxel.SafetyValvePart s) sv = s;
+                    double airOut = sv == null || sv.ventedKg == null ? 0 : sv.ventedKg[mods.eln.sim.fluid.SpeciesRegistry.AIR];
+                    ctx.check("breather: it keeps count of what it let out by species (B's displaced air, for a room's air)", airOut > 0.1 * aWater0 / Water.RHO_L * 1.2,
+                        String.format("%.6f kg of air", airOut));
                     ctx.check("breather: B fills from A by gravity (over a third of A's water)", b.vessel.mLiquid() > aWater0 / 3,
                         String.format("%.3f of %.3f kg", b.vessel.mLiquid(), aWater0));
                     ctx.check("breather: B neither builds pressure nor pulls a vacuum (within 2 kPa of the air's)",
@@ -347,6 +352,10 @@ public final class PlumbingCases {
                     ctx.check("breather: the vessel comes up to the air's pressure (within 1 kPa)", b.vessel.P() > Water.P_ATM - 1000,
                         String.format("%.0f Pa", b.vessel.P()));
                     ctx.check("breather: no water leaves", liquidOut < 1e-4, String.format("%.6f kg", liquidOut));
+                    mods.eln.node.voxel.SafetyValvePart sv = null;
+                    for (var part : ctx.voxelByEntity(bStub).parts) if (part instanceof mods.eln.node.voxel.SafetyValvePart s) sv = s;
+                    ctx.check("breather: it keeps count of the air it took in (for a room's air)", sv != null && Math.abs(sv.airInKg - airIn) <= 0.05 * airIn + 1e-7,
+                        sv == null ? "no valve" : String.format("%.6f kg counted, %.6f kg seen", sv.airInKg, airIn));
                 }
                 case SAVES -> saves(ctx);
             }
