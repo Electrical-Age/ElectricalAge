@@ -32,8 +32,8 @@ import java.util.List;
  */
 public final class DeviceOutlet {
     public static final double PORT_K = PortBridge.PORT_K, OUTLET_VOLUME = PortBridge.STUB_VOLUME, VENT_K = 1e-11;
-    /** The vent's dead band (Pa) and its float's shut level (liquid share), as the furnace's breather. */
-    static final double VENT_DEADBAND_PA = 300.0, FLOAT_SHUT = 0.97;
+    /** The vent's float's shut level (liquid share), as the furnace's breather (its dead band: FluidDevice.Vent.BREATHE_PA). */
+    static final double FLOAT_SHUT = 0.97;
 
     final String outletKey;
     private String vesselKey = "vessel", oldTankKey = "tank";
@@ -247,8 +247,8 @@ public final class DeviceOutlet {
         if (tip != null) {
             double dp = vessel.P() - Water.P_ATM;
             double fl = Math.max(0, Math.min(1, (FLOAT_SHUT - vessel.liquidVolume() / vessel.volume) / 0.02));
-            tip.open = (open || !piped ? 1 : 0) * fl * Math.max(0, Math.min(1, (dp - VENT_DEADBAND_PA) / VENT_DEADBAND_PA));
-            if (airIn != null) airIn.open = Math.max(0, Math.min(1, (-dp - VENT_DEADBAND_PA) / VENT_DEADBAND_PA));
+            tip.open = (open || !piped ? 1 : 0) * fl * FluidDevice.Vent.breatheOut(dp);
+            if (airIn != null) airIn.open = FluidDevice.Vent.breatheIn(dp);
         }
         view.show(vessel);
     }

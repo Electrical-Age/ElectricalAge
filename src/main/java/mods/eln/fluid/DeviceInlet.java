@@ -167,8 +167,8 @@ public final class DeviceInlet {
         if (tip != null) {
             double dp = vessel.P() - Water.P_ATM;
             double fl = Math.max(0, Math.min(1, (DeviceOutlet.FLOAT_SHUT - vessel.liquidVolume() / vessel.volume) / 0.02));
-            tip.open = fl * Math.max(0, Math.min(1, (dp - DeviceOutlet.VENT_DEADBAND_PA) / DeviceOutlet.VENT_DEADBAND_PA));
-            airIn.open = Math.max(0, Math.min(1, (-dp - DeviceOutlet.VENT_DEADBAND_PA) / DeviceOutlet.VENT_DEADBAND_PA));
+            tip.open = fl * FluidDevice.Vent.breatheOut(dp);
+            airIn.open = FluidDevice.Vent.breatheIn(dp);
         }
         view.show(vessel);
     }

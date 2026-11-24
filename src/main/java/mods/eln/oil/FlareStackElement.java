@@ -38,11 +38,6 @@ public class FlareStackElement extends TransparentNodeElement implements FluidDe
     static final double VESSEL_M3 = VESSEL_MB * EaUnits.KG_PER_MB_WATER / Water.RHO_L, VESSEL_H = 1.0, FLANGE_Y = 0.5;
     /** Its flange's conductance (as the oil devices' ports) and the tip's vents' (small: a vent, not an opening). */
     static final double PORT_K = 6e-11, TIP_K = 1e-11;
-    /**
-     * The pressure difference (Pa) over which each tip vent starts to open, fully open at twice it: the gas over the air's
-     * pressure leaves by the tip between steps (burn), so the gas vent only relieves a step's surge.
-     */
-    static final double TIP_DEADBAND_PA = 300.0;
     /** The liquid share of the vessel at which the gas vent's float has shut (it closes over the 2 % under it). */
     static final double FLOAT_SHUT = 0.97;
 
@@ -96,12 +91,15 @@ public class FlareStackElement extends TransparentNodeElement implements FluidDe
         return List.of(tip, airIn);
     }
 
-    /** Set the tip's two vents by the vessel's pressure against the air's, each opening over TIP_DEADBAND_PA. */
+    /**
+     * Set the tip's two vents by the vessel's pressure against the air's, each opening over FluidDevice.Vent.BREATHE_PA:
+     * the gas over the air's pressure leaves by the tip between steps (burn), so the gas vent only relieves a step's surge.
+     */
     private void setTip(FluidNode v) {
         double dp = v.P() - Water.P_ATM;
         double fl = Math.max(0, Math.min(1, (FLOAT_SHUT - v.liquidVolume() / v.volume) / 0.02));
-        tip.open = fl * Math.max(0, Math.min(1, (dp - TIP_DEADBAND_PA) / TIP_DEADBAND_PA));
-        airIn.open = Math.max(0, Math.min(1, (-dp - TIP_DEADBAND_PA) / TIP_DEADBAND_PA));
+        tip.open = fl * FluidDevice.Vent.breatheOut(dp);
+        airIn.open = FluidDevice.Vent.breatheIn(dp);
     }
 
     @Override

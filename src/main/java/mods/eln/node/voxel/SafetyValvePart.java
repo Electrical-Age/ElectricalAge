@@ -20,7 +20,7 @@ import java.util.List;
  * tank's gas (a crude tank's natural gas, the air of a filling run) by default.
  *
  * A breather (refinery M2, Baughn 2026-11-24: a third item on this part) is a purge valve's float and a vacuum breaker
- * at the air's pressure: gas out over P_ATM + BREATHER_PA, air in under P_ATM - BREATHER_PA (FlareStackElement's tip),
+ * at the air's pressure: gas out and air in past FluidDevice.Vent.BREATHE_PA either side of it (as FlareStackElement's tip),
  * so a receiver under a still's condenser fills and drains at 1 atm. No setting, no whistle, no scalding jet. A purge
  * valve there pulls the still under vacuum and holds the product in the condenser (its 1.1 bar deadband would stall
  * gravity drainage too). Natural gas goes out of it as any gas does (Baughn: "a good way to lose natural gas").
@@ -31,8 +31,6 @@ public final class SafetyValvePart extends VoxelPart {
     public static final double MIN_BAR = 1.1, MAX_BAR = 150, PURGE_PA = 1.1e5;
     /** What it is: SAFETY (relief, any phase), PURGE (gas only, set pressure), BREATHER (gas out and air in at 1 atm). */
     public static final int SAFETY = 0, PURGE = 1, BREATHER = 2;
-    /** A breather's deadband either side of the air's pressure (Pa): FlareStackElement.TIP_DEADBAND_PA's. */
-    public static final double BREATHER_PA = 300;
     /** Wide open, it passes this (m^3): about an iron pipe's bore. */
     static final double VENT_K = 2e-11;
     public final int x, y, z, outlet, bore;
@@ -116,10 +114,10 @@ public final class SafetyValvePart extends VoxelPart {
     /** A safety valve's conductance over its set point: the wide-open vent's flow BAND over it (m^3). */
     static final double RELIEF_K = VENT_K / BAND;
 
-    /** A breather's two openings (0..1) at pressure P: {gas out, air in}, each over BREATHER_PA past the deadband. */
+    /** A breather's two openings (0..1) at pressure P: {gas out, air in} (FluidDevice.Vent.breatheOut/In). */
     public static double[] breathe(double P) {
         double dp = P - mods.eln.sim.fluid.Water.P_ATM;
-        return new double[]{Math.max(0, Math.min(1, (dp - BREATHER_PA) / BREATHER_PA)), Math.max(0, Math.min(1, (-dp - BREATHER_PA) / BREATHER_PA))};
+        return new double[]{mods.eln.sim.fluid.FluidDevice.Vent.breatheOut(dp), mods.eln.sim.fluid.FluidDevice.Vent.breatheIn(dp)};
     }
 
     /** Where on the run under it it draws: a valve on top lets out what's at the top, one on a side what's half way up. */

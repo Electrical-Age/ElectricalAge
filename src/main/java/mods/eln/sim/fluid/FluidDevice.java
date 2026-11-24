@@ -236,6 +236,22 @@ public interface FluidDevice {
         /** This step's edge (set by the world when it builds the network). */
         public FluidEdge edge;
 
+        /**
+         * A breather's deadband either side of the air's pressure (Pa): the gas-out and air-in vents of a breathing vessel
+         * (a device's tip, a flare stack, the breather valve) each start to open this far past it, wide open at twice it.
+         */
+        public static final double BREATHE_PA = 300;
+
+        /** A breather's gas-out opening (0..1) at dp over the air's pressure (Pa). */
+        public static double breatheOut(double dp) {
+            return Math.max(0, Math.min(1, (dp - BREATHE_PA) / BREATHE_PA));
+        }
+
+        /** A breather's air-in opening (0..1) at dp over the air's pressure (Pa). */
+        public static double breatheIn(double dp) {
+            return breatheOut(-dp);
+        }
+
         public Vent(FluidNode node, double draw, double k) {
             this.node = node;
             this.draw = draw;
