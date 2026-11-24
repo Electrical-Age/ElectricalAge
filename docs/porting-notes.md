@@ -1124,3 +1124,8 @@ on 1.7.10) onto 26.x.
   with a riser before the valve had to fill half full before a drop passed. Existing builds: a valve on a level line
   now passes condensate lying in the line (a steam line's valve passes its condensate first, as a real one would).
   `pipe_valve_passes_liquid_at_its_place`.
+- A tank's high side flange draws at its own height, its centre (Baughn 2026-11-24: "unrealistic plumbing"); it drew at
+  its top edge (1dd694ee9, 2026-11-10: "gas rises to its top"), so liquid piped into it stood in the pipe. It still gives
+  gas until the liquid reaches it. Existing builds: a tank's high flange now gives liquid once the tank is 75 % full (was
+  81 %), and liquid piped into it runs in down to its centre. The low flange keeps its bottom edge.
+  `tank_high_flange_takes_liquid`.

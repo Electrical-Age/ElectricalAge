@@ -49,6 +49,42 @@ public final class PlumbingCases {
         cases.add(new PurgeValve(true));
         for (Breather.Row r : Breather.Row.values()) cases.add(new Breather(r));
         cases.add(new ValveDrawsAtItsPlace());
+        cases.add(new HighFlangeTakesLiquid());
+    }
+
+    /**
+     * Baughn 2026-11-24 ("unrealistic plumbing"): a tank's high side flange draws at its own height. A short iron pipe
+     * nine tenths full of water, level on the flange's height, runs into an empty tank's high flange: what stands over the
+     * flange's centre runs in (about half; drawn at the flange's top edge, none did), and the tank's air comes back out
+     * over it.
+     */
+    static final class HighFlangeTakesLiquid extends Big {
+        TankElement t;
+        double water0;
+
+        public String id() {
+            return "tank_high_flange_takes_liquid";
+        }
+
+        public int ticks() {
+            return 100;
+        }
+
+        public void build(TestContext ctx) {
+            t = tank(ctx, IRON_TANK, ctx.at(4, 1, 1), Direction.XP);   // (its back, west, faces the pipe)
+            PipeCases.lay(ctx, ctx.at(3, 1, 1), 0, 4, 12, 8, 16, 12, 8);
+            for (var part : ctx.voxelByEntity(ctx.at(3, 1, 1)).parts)
+                if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null) {
+                    fill(pp.fluid, 0.9 * pp.fluid.volume * Water.RHO_L, Water.P_ATM, 293.15);
+                    water0 += pp.fluid.mWater;
+                }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line(String.format("high flange: %.4f kg of water in the pipe, %.4f kg in the tank now; %s", water0, t.vessel.mLiquid(), t.getWaila()));
+            ctx.check("tank: water piped into its high flange runs in, down to the flange's centre (over 40 %)", t.vessel.mLiquid() > 0.4 * water0,
+                String.format("%.4f of %.4f kg", t.vessel.mLiquid(), water0));
+        }
     }
 
     /**
@@ -380,9 +416,10 @@ public final class PlumbingCases {
                         String.format("%.6f kg of air", airOut));
                     ctx.check("breather: B fills from A by gravity (over a third of A's water)", b.vessel.mLiquid() > aWater0 / 3,
                         String.format("%.3f of %.3f kg", b.vessel.mLiquid(), aWater0));
-                    ctx.check("breather: B neither builds pressure nor pulls a vacuum (within 2 kPa of the air's)",
-                        bLo > Water.P_ATM - 2000 && bHi < Water.P_ATM + 2000, String.format("%.0f..%.0f Pa", bLo, bHi));
-                    ctx.check("breather: nor does A as it drains", aLo > Water.P_ATM - 2000 && aHi < Water.P_ATM + 2000, String.format("%.0f..%.0f Pa", aLo, aHi));
+                    // (within 2.5 kPa: B's high flange takes the water at its centre since 2026-11-24, and the fill runs faster)
+                    ctx.check("breather: B neither builds pressure nor pulls a vacuum (within 2.5 kPa of the air's)",
+                        bLo > Water.P_ATM - 2500 && bHi < Water.P_ATM + 2500, String.format("%.0f..%.0f Pa", bLo, bHi));
+                    ctx.check("breather: nor does A as it drains", aLo > Water.P_ATM - 2500 && aHi < Water.P_ATM + 2500, String.format("%.0f..%.0f Pa", aLo, aHi));
                 }
                 case KEEPS_LIQUID -> {
                     ctx.check("breather: B fills to the brim", b.vessel.liquidVolume() > 0.97 * b.vessel.volume,

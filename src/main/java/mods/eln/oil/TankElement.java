@@ -178,13 +178,14 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         if (group == null) {
             out.add(new FluidPort(vessel, at, 1, 1.0, PORT_K));   // top: vapour
             out.add(new FluidPort(vessel, at, 0, 0.0, PORT_K));   // bottom: liquid
-            // (side ports draw at their true height, Baughn 2026-11-10: the low flange's bottom edge, the high flange's top
-            // edge, as liquid leaves a flange over its bottom and gas rises to its top; below the low flange is dead space,
-            // as in a real tank: drain it from the underside port, now that a tank needs no floor)
+            // (side ports draw at their true height, Baughn 2026-11-10: the low flange at its bottom edge, as liquid leaves a
+            // flange over its bottom; the high flange at its own height, its centre (Baughn 2026-11-24: at its top edge,
+            // liquid piped into it stood in the pipe); below the low flange is dead space, as in a real tank: drain it from
+            // the underside port, now that a tank needs no floor)
             for (Direction d : new Direction[]{front.left(), front.right(), front.back()}) {
                 int f = d.toEnumFacing().get3DDataValue();
                 out.add(new FluidPort(vessel, at, f, (LOW - FLANGE_HALF) / 16.0, PORT_K, sideSpot(f, LOW)));    // low: liquid
-                out.add(new FluidPort(vessel, at, f, (HIGH + FLANGE_HALF) / 16.0, PORT_K, sideSpot(f, HIGH)));  // high: vapour
+                out.add(new FluidPort(vessel, at, f, HIGH / 16.0, PORT_K, sideSpot(f, HIGH)));  // high: vapour
             }
         } else {
             // in a box: the ports on its outer faces, each drawing at its height in the whole vessel
@@ -198,7 +199,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
                 // (at their true height, Baughn 2026-11-10; the bottom row's low ports used to dip to the floor, since a
                 // box tank 9 % full gave nothing at its low flange and nothing could be piped under a tank: now one can)
                 out.add(new FluidPort(vessel, at, f, (j * 16 + LOW - FLANGE_HALF) / (16.0 * h), PORT_K, sideSpot(f, LOW)));
-                out.add(new FluidPort(vessel, at, f, (j * 16 + HIGH + FLANGE_HALF) / (16.0 * h), PORT_K, sideSpot(f, HIGH)));
+                out.add(new FluidPort(vessel, at, f, (j * 16 + HIGH) / (16.0 * h), PORT_K, sideSpot(f, HIGH)));
             }
         }
         ports = out;
