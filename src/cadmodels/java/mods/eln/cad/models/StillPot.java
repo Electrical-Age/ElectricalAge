@@ -19,15 +19,14 @@ import static mods.eln.cad.models.OilKit.signalPlate;
  * The 2x2x2 Still Pot (refinery M2, todo #591): a riveted copper kettle standing on the Large Boiler's skid, a domed
  * head, a swan neck off the dome to the vapour flange, a thermometer and a sight glass on its front. No firebox: it is
  * heated from outside, as the Large Boiler. Drawn from its origin block (front bottom left), full size: 0..32 px on each
- * axis, front XN (x = 0), right z+, as StillPotElement's local frame. Its connections, each at its block face's centre
- * (the ports' spots):
+ * axis, front XN (x = 0), right z+, as StillPotElement's local frame. Its connections, each at its port's spot:
  * <ul>
  * <li>thermal: one copper heat plate (the Large Boiler's) on the back of the lower right block, its hot copper shoe
  * in to the kettle's foot;</li>
  * <li>vapour out: a steam flange on top of the rear left top block (x 24, z 8; top at y 32), at the end of the swan
  * neck;</li>
- * <li>drain: a flange on the front of the bottom right block (y 8, z 24), its stub through a drain cock into the
- * kettle's foot;</li>
+ * <li>drain: a flange low on the front of the bottom right block (y 4, z 24: a tank's low flange, the kettle's floor
+ * at its bottom edge), its stub into the kettle's foot under a drain cock on the deck;</li>
  * <li>fill and steam: flanges low on the left and right flanks of the rear lower blocks (x 24, y 4), their stubs into
  * the kettle;</li>
  * <li>the temperature signal: a signal plate at the floor of the front of the origin block (z 8).</li>
@@ -55,13 +54,17 @@ public final class StillPot {
         return CX - Math.sqrt(r * r - (z - CZ) * (z - CZ));
     }
 
-    /** A front flange at (y, z) with its reducer and a stub of radius rs into the kettle's skin. */
+    /**
+     * A front flange at (y, z) with its reducer and a stub of radius rs into the kettle's skin (0.05 proud of the skid's
+     * bed at x 1, as the flank flanges: flush, its inner face z-fought it).
+     */
     static List<Mesh> frontFlange(double y, double z, double rs) {
         List<Mesh> m = new ArrayList<>();
-        m.add(prism('x', y, z, 2.75, 0.0, 1.0, "steel", 12));
-        m.add(prism('x', y, z, 2.0, 1.0, 1.4, "steel", 12, false, true));
-        m.addAll(boltRing('x', y, z, 2.35, 1.0, 1.2, 6, "brass", 0.2, 0));
-        m.add(prism('x', y, z, rs, 1.4, frontSkin(y, z) + 0.6, "copper", 10, false, false));
+        m.add(prism('x', y, z, 2.75, 0.0, 1.05, "steel", 12));
+        m.add(prism('x', y, z, 2.0, 1.05, 1.45, "steel", 12, false, true));
+        // (turned a twelfth of a half turn: no bolt head level with the deck's top)
+        m.addAll(boltRing('x', y, z, 2.35, 1.05, 1.25, 6, "brass", 0.2, Math.PI / 12));
+        m.add(prism('x', y, z, rs, 1.45, frontSkin(y, z) + 0.6, "copper", 10, false, false));
         return m;
     }
 
@@ -104,11 +107,11 @@ public final class StillPot {
         // the neck's stay down to the dome
         double stayX = (CX + VX) / 2, stayZ = (CZ + VZ) / 2;
         m.add(prism('y', stayX, stayZ, 0.4, TOP - 1.0, ny - 1.4, "darksteel", 8, false, false));
-        // the front: drain (low right, through a cock), fill (high right) and steam (high left)
-        m.addAll(frontFlange(8.0, 24.0, 1.2));
-        m.add(box(2.6, 6.8, 22.8, 4.4, 9.2, 25.2, "castiron"));
-        m.add(prism('y', 3.5, 24.0, 0.25, 9.2, 9.9, "darksteel", 6, false, false));
-        m.addAll(handwheel(3.5, 10.0, 24.0, 0.9, 'y'));
+        // the front: the bottoms drain, low right at the kettle's floor, its cock on the deck over the stub
+        m.addAll(frontFlange(4.0, 24.0, 1.2));
+        m.add(box(2.4, DECK, 22.8, 4.2, DECK + 1.6, 25.2, "castiron"));
+        m.add(prism('y', 3.3, 24.0, 0.25, DECK + 1.6, DECK + 2.3, "darksteel", 6, false, false));
+        m.addAll(handwheel(3.3, DECK + 2.4, 24.0, 0.9, 'y'));
         // the fill (left flank) and the steam inlet (right flank), low on the rear blocks, at a tank's low flange height
         m.addAll(flankFlange(false));
         m.addAll(flankFlange(true));

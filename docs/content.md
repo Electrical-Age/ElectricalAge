@@ -118,8 +118,10 @@ is enough; its ghost cells `oil/GhostCells`, as the Large Boiler's), its
 vapour off the top of its rear left block to a condenser and receivers that breathe (the breather valve). Constants from
 the step-0 sketch (`sim/fluid/StillSketchTest`, gated: `-Psketch=still`): wall 60 W/K, shell 2800 J/K losing 2.5 W/K,
 shell limit 850 K (its watchdog trips from 840 K on a 20 K s budget, so a pot boiled down to residue under a big burner
-stops by 850 K). Front: the liquid's temperature as a signal on the origin (1 V a 100 °C), the bottoms drain low right
-(draw 0); the fill low on its left flank and the steam inlet low on its right flank (into the pot at their flanges'
+stops by 850 K). Front: the liquid's temperature as a signal on the origin (1 V a 100 °C), the bottoms drain low right,
+at a tank's low flange height with the pot's floor at its bottom edge (the vessel stands 3 px up, on its skid), so
+it drains out completely; a hot drain into a closed receiver pushes back with the receiver's own air, so the
+receiver needs a breather; the fill low on its left flank and the steam inlet low on its right flank (into the pot at their flanges'
 height, through check valves). Boiled too hard it boils over: before each step, outside the core's solve, E = 2 (F / 0.10 - 1) kg of
 its liquid (to 5) per kg of vapour moves into the vapour line (the node its vapour port couples to; a pipe run up to 30 % of it
 liquid), every species by its share with its enthalpy
@@ -144,8 +146,8 @@ receivers switched through OpAmps and control valves by the pot's signal: gasoli
 (15 kW: it boils over, residue reaches the receiver and fouls a turbine; every gram of residue accounted for),
 `still_pot_calm`, `still_pot_overfire` (25 kW: its product chokes a Fuel Generator), `still_pot_residue`,
 `still_pot_body`, `still_pot_sparge_layers` (water under the oil), `still_pot_steam_sparge`,
-`still_pot_valves_shut_mid_boil` (both receivers shut: pressure rises, no stall), `still_pot_hot_residue_drains` (hot
-residue drains, cold barely moves), `still_pot_second_pass` (the gasoline heart redistilled: 98 % or better), and the
+`still_pot_valves_shut_mid_boil` (both receivers shut: pressure rises, no stall), `still_pot_hot_residue_drains` (6 B of hot
+residue drains out completely through a large pipe, cold loses ~2 %), `still_pot_second_pass` (the gasoline heart redistilled: 98 % or better), and the
 breather's `pipe_breather_valve_*`. No vacuum-trap test: the receivers' breather valves let air in, so a cooling
 pot can't pull its receivers into a vacuum (the pot's Jade warns if one is left unvented). Cost: the sensible batch's network has 12 active nodes (pot, coil, the two receivers and eight pipe runs)
 and takes ~3.2 ms a step (4.8 iterations, 9.6 solves), flash-bound at ~0.3 ms a node.

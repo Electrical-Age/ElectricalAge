@@ -43,7 +43,8 @@ import java.util.Map;
  * should be sufficient"; a burner sets the heat, not the face);</li>
  * <li>vapour out: the top of the rear upper left block (1,1,0), an opening over the pot's top tenth (its charge never
  * reaches it): gas out, and liquid in the vapour line runs back in under it;</li>
- * <li>bottoms drain: the front of the lower right block (0,0,1), at the floor (draw 0), to drain the residue hot;</li>
+ * <li>bottoms drain: the front of the lower right block (0,0,1), its flange low (a tank's low flange) and the pot's floor
+ * at the flange's bottom edge (FLOOR), so the residue drains out completely, hot;</li>
  * <li>fill: low on the left flank, of the rear block (1,0,0), into the pot through a check valve, its float shutting
  * at the 24 B charge (fillOpening);</li>
  * <li>steam sparge: low on the right flank, of the rear block (1,0,1), into the pot at its flange's height through a
@@ -61,6 +62,13 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     /** The pot: 32 B, two blocks high; its working charge (the view's fill limit) 24 B. */
     public static final double POT_B = 32, CHARGE_B = 24, HEIGHT = 2;
     public static final double VOLUME = TankDescriptor.bucketsVolume(POT_B);
+    /**
+     * Its floor over the blocks' bottom (m): the drain flange's bottom edge (a bottoms drain is at the floor: it drains
+     * the pot completely; the kettle stands on its skid), so its inside is HEIGHT - FLOOR tall, its top at the blocks' top.
+     */
+    public static final double FLOOR = (TankElement.LOW - TankElement.FLANGE_HALF) / 16.0;
+    /** The cross-section its vapour rises through (m^2; entrainment's Souders-Brown velocity, calibrated on it). */
+    static final double AREA = VOLUME / HEIGHT;
     /** The wall (W/K, shell to contents) and the shell (as the Large Boiler's: J/K, K/W to the air, K/W a face). */
     public static final double WALL_UA = 60, SHELL_C = 2800, LOSS_RP = 0.4, FACE_RS = 0.0025;
     /** The shell's limit (K, absolute; its watchdog): over heavy oil's 700 K and cracking's ~720 K, with the wall's lead. */
@@ -76,7 +84,7 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     public static final double PORT_K = TankElement.PORT_K, VAPOUR_SPAN = 0.1;
     /** The fill and sparge stubs (m^3; as the boiler's feed stub); their flanges' height (px in the lower block, a tank's
      *  low flange) and where that is on the pot. */
-    public static final double STUB_VOLUME = 0.00002, INLET_DRAW = TankElement.LOW / 32.0;
+    public static final double STUB_VOLUME = 0.00002, INLET_DRAW = (TankElement.LOW / 16.0 - FLOOR) / (HEIGHT - FLOOR);
     /** The block whose back is its heat face (local x, y, z). */
     static final int[] HEAT_CELL = {1, 0, 1};
     /**
@@ -264,12 +272,12 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         // entrainment: the vapour's smoothed velocity out of the pot (last step's flow over the node's cross-section)
         double[] rho = densities(vessel);
         double flow = vapourOut();
-        double u = rho[0] > 0 ? flow / rho[0] / (VOLUME / HEIGHT) : 0;
+        double u = rho[0] > 0 ? flow / rho[0] / AREA : 0;
         uSmooth += (u - uSmooth) * Math.min(1, dt / F_TAU);
         factor = rho[0] > 0 ? uSmooth * Math.sqrt(rho[0] / Math.max(1, rho[1] - rho[0])) : 0;
         // (by the smoothed vapour flow, the step's own swings; into the node the vapour port leads to, up to its room under
         // LINE_FULL, and half the pot's liquid)
-        double kg = entrainment(factor) * uSmooth * rho[0] * (VOLUME / HEIGHT) * dt;
+        double kg = entrainment(factor) * uSmooth * rho[0] * AREA * dt;
         FluidNode line = null;
         for (FluidEdge e : vapourEdges()) line = e.a == vessel ? e.b : e.a;
         if (line == null || line.fixed) kg = 0;
@@ -366,9 +374,9 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         thermal.set(FACE_RS, LOSS_RP, SHELL_C);
         var c = node.coordonate;
         double amb = mods.eln.sim.Ambient.kelvin(c);
-        vessel = restored(new FluidNode(VOLUME, c.y, HEIGHT, false), loaded, amb);
+        vessel = restored(new FluidNode(VOLUME, c.y + FLOOR, HEIGHT - FLOOR, false), loaded, amb);
         // (the stubs centred on their flanges, half way up the upper blocks)
-        double stubZ = c.y + INLET_DRAW * HEIGHT - 0.05;
+        double stubZ = c.y + TankElement.LOW / 16.0 - 0.05;
         feed = restored(new FluidNode(STUB_VOLUME, stubZ, 0.1, false), loadedFeed, amb);
         sparge = restored(new FluidNode(STUB_VOLUME, stubZ, 0.1, false), loadedSparge, amb);
         loaded = loadedFeed = loadedSparge = null;
@@ -381,7 +389,7 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         int left = front.left().toEnumFacing().get3DDataValue(), right = front.right().toEnumFacing().get3DDataValue();
         int f = front.toEnumFacing().get3DDataValue();
         ports = List.of(new FluidPort(vessel, at(1, 1, 0), 1, 1.0, PORT_K, FluidPort.CENTRE, VAPOUR_SPAN),
-            new FluidPort(vessel, at(0, 0, 1), f, 0, PORT_K),
+            new FluidPort(vessel, at(0, 0, 1), f, 0, PORT_K, TankElement.sideSpot(f, TankElement.LOW)),
             new FluidPort(feed, at(1, 0, 0), left, 0.5, PORT_K, TankElement.sideSpot(left, TankElement.LOW)),
             new FluidPort(sparge, at(1, 0, 1), right, 0.5, PORT_K, TankElement.sideSpot(right, TankElement.LOW)));
         view.show(vessel);

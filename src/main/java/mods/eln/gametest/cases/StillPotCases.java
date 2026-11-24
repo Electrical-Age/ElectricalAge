@@ -858,16 +858,20 @@ public final class StillPotCases {
     }
 
     /**
-     * Hot residue drains, cold barely moves (its viscosity, refinery M1b): two pots of residue on stones, each drained from
-     * its bottoms flange down into a tank under it, one at 520 K, one at 300 K (its drain line at that too); each breathes
-     * through a breather on its vapour flange, its drain line through one on the line. 12 B each: the drain's pipe leaves
-     * at its flange, half way up the block, and liquid under that height can't climb into it (a pot drains down to ~8 B).
+     * Hot residue drains, cold barely moves (its viscosity, refinery M1b): two pots of 6 B of residue on stones, one at
+     * 520 K, one at 300 K, each breathing through a breather on its vapour flange and drained from its bottoms flange,
+     * down a large line at its temperature towards a tank's high side flange; the tank breathes (a hot drain into a closed
+     * tank pushes back with its own air). The drain is at the pot's floor, so the hot one empties (into the line, in
+     * ~100 ticks), while the cold one loses ~2 %.
      */
     static final class ResidueDrains extends PlumbingCases.Big {
         final StillPotElement[] pot = new StillPotElement[2];
         final TankElement[] tank = new TankElement[2];
         final double[] kelvin = {520, 300};
+        final double[][] left = new double[2][6];
         double kg;
+        int tick;
+        IProcess watch;
         String err;
 
         public String id() {
@@ -875,37 +879,44 @@ public final class StillPotCases {
         }
 
         public int ticks() {
-            return 300;
+            return 600;
         }
 
         public void build(TestContext ctx) {
             for (int i = 0; i < 2; i++) {
-                BlockPos o = ctx.at(3, 2, 1 + 4 * i);
+                BlockPos o = ctx.at(4, 2, 1 + 4 * i);
                 for (int x = 0; x <= 1; x++)
                     for (int z = 0; z <= 1; z++) ctx.level().setBlockAndUpdate(o.offset(x, -1, z), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
                 pot[i] = pot(ctx, o);
                 if (pot[i] == null) throw new IllegalStateException("the Still Pot could not be placed");
                 String e = PlumbingCases.Breather.stub(ctx, o.offset(1, 2, 0));
                 if (e != null) err = e;
-                PipeCases.lay(ctx, o.offset(-1, 0, 1), 1, 16, 8, 8, 8, 8, 8, 8, 0, 8);
-                tank[i] = PlumbingCases.tank(ctx, PlumbingCases.IRON_TANK, o.offset(-1, -1, 1), Direction.XN);
-                // (the drain line breathes, as a hot drain into a closed tank pushes back with its own air)
-                String b = ctx.voxelByEntity(o.offset(-1, 0, 1)).addSafetyValveNear(12 / 16.0, 8 / 16.0, 8 / 16.0, mods.eln.node.voxel.SafetyValvePart.BREATHER);
-                if (b != null) err = b;
-                PipeCases.warm(ctx, o.offset(-1, 0, 1), kelvin[i]);   // (a drain line in service: cold walls set it in the pipe)
-                kg = 12 * EaUnits.KG_PER_MB_WATER * 1000 / Water.RHO_L * 1050;
+                // the drain line (a large pipe, as for thick liquid): out of the low flange, down a block, into the tank's high east flange
+                PipeCases.lay(ctx, o.offset(-1, 0, 1), 2, 16, 4, 8, 8, 4, 8, 8, 0, 8);
+                PipeCases.lay(ctx, o.offset(-1, -1, 1), 2, 8, 16, 8, 8, 12, 8, 0, 12, 8);
+                tank[i] = PlumbingCases.tank(ctx, PlumbingCases.IRON_TANK, o.offset(-2, -1, 1), Direction.XN);
+                e = PlumbingCases.Breather.stub(ctx, o.offset(-2, 0, 1));
+                if (e != null) err = e;
+                for (BlockPos q : new BlockPos[]{o.offset(-1, 0, 1), o.offset(-1, -1, 1)}) PipeCases.warm(ctx, q, kelvin[i]);   // (a line in service)
+                kg = 6 * EaUnits.KG_PER_MB_WATER * 1000 / Water.RHO_L * 1050;
                 charge(pot[i], kelvin[i], kelvin[i], sp("residue"), kg);
             }
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                if (tick % 100 == 0 && tick / 100 < 6)
+                    for (int i = 0; i < 2; i++) left[i][tick / 100] = pot[i].vessel.liquid(sp("residue")) / kg;
+                tick++;
+            });
         }
 
         public void measure(TestContext ctx) {
-            // (what left each pot: in the drain line or the tank under it)
-            double hot = kg - pot[0].vessel.liquid(sp("residue")), cold = kg - pot[1].vessel.liquid(sp("residue"));
-            ctx.line(String.format("still residue drains: hot (%.0f K) %.4f kg, cold (%.0f K) %.5f kg out of the pots; viscosity hot %s, cold %s", kelvin[0], hot, kelvin[1], cold,
-                EaUnits.viscosity(pot[0].vessel), EaUnits.viscosity(pot[1].vessel)));
+            Eln.simulator.removeSlowProcess(watch);
+            double hot = pot[0].vessel.liquid(sp("residue")) / kg, cold = pot[1].vessel.liquid(sp("residue")) / kg;
+            ctx.line(String.format("still residue drains: left in the pots (share of 6 B) every 100 ticks: hot (%.0f K) %s, cold (%.0f K) %s; now %.4f, %.5f; "
+                + "viscosity hot %s, cold %s; tanks %s, %s", kelvin[0], java.util.Arrays.toString(left[0]), kelvin[1], java.util.Arrays.toString(left[1]), hot, cold,
+                EaUnits.viscosity(pot[0].vessel), EaUnits.viscosity(pot[1].vessel), tank[0].getWaila(), tank[1].getWaila()));
             ctx.check("still residue: the breathers fit", err == null, "" + err);
-            ctx.check("still residue: hot residue drains (over 20 g)", hot > 0.02, String.format("%.4f kg", hot));
-            ctx.check("still residue: cold residue barely moves (under a tenth of the hot)", cold < 0.1 * hot, String.format("%.5f kg against %.4f", cold, hot));
+            ctx.check("still residue: the hot pot drains out (under 3 % left)", hot < 0.03, String.format("%.4f left", hot));
+            ctx.check("still residue: cold residue barely moves (under a tenth of what the hot lost)", 1 - cold < 0.1 * (1 - hot), String.format("%.5f against %.4f", 1 - cold, 1 - hot));
         }
     }
 
