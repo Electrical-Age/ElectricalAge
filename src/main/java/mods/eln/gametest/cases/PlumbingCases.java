@@ -330,13 +330,20 @@ public final class PlumbingCases {
                 case KEEPS_LIQUID -> {
                     ctx.check("breather: B fills to the brim", b.vessel.liquidVolume() > 0.97 * b.vessel.volume,
                         String.format("%.1f %%", 100 * b.vessel.liquidVolume() / b.vessel.volume));
-                    ctx.check("breather: no liquid leaves through it (under 1 g)", liquidOut < 1e-3, String.format("%.6f kg", liquidOut));
-                    ctx.check("breather: the water is all still there (A + B within 1 g, less what stands in the pipes)",
-                        a.vessel.mLiquid() + b.vessel.mLiquid() <= aWater0 + bWater0 + 1e-3, String.format("%.4f -> %.4f kg", aWater0 + bWater0,
-                            a.vessel.mLiquid() + b.vessel.mLiquid()));
+                    // (all the water: the tanks' and the pipe runs', each run once)
+                    double water = a.vessel.mWater + b.vessel.mWater;
+                    var runs = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<FluidNode, Boolean>());
+                    for (BlockPos q : List.of(aStub, bStub, ctx.at(3, 2, 1), ctx.at(3, 1, 1)))
+                        for (var part : ctx.voxelByEntity(q).parts)
+                            if (part instanceof mods.eln.node.voxel.PipePart pipe && pipe.fluid != null) runs.add(mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid));
+                    for (FluidNode r : runs) water += r.mWater;
+                    ctx.check("breather: no water leaves through it (all of it still in the tanks and pipes, to 0.1 g)", water > aWater0 + bWater0 - 1e-4,
+                        String.format("%.5f -> %.5f kg", aWater0 + bWater0, water));
+                    Object shown = ctx.voxelByEntity(bStub).getWaila(false).get("Breather valve");
+                    ctx.check("breather: the water reached it, and Jade says so", "Shut by liquid".equals(shown), "" + shown);
                 }
                 case PULLS_AIR -> {
-                    ctx.check("breather: air comes in to the vessel at 0.5 bar", bP0 < 0.6e5 && airIn > 0, String.format("from %.0f Pa, %.6f kg", bP0, airIn));
+                    ctx.check("breather: air comes in to the vessel at 0.5 bar (over 0.1 g)", bP0 < 0.6e5 && airIn > 1e-4, String.format("from %.0f Pa, %.6f kg", bP0, airIn));
                     ctx.check("breather: the vessel comes up to the air's pressure (within 1 kPa)", b.vessel.P() > Water.P_ATM - 1000,
                         String.format("%.0f Pa", b.vessel.P()));
                     ctx.check("breather: no water leaves", liquidOut < 1e-4, String.format("%.6f kg", liquidOut));
