@@ -132,4 +132,30 @@ class DevicesTest {
         assertEquals(0, m.floppy.takeSteps(0), "the other drive never moved");
         assertFalse(m.floppy.takeAccess(0));
     }
+
+    /** Wire 2's block transfer: a buffer goes from RAM in one write, as much as there is room for; input lands in RAM. */
+    @Test
+    void consoleBlockTransfers() {
+        var mem = new mods.eln.robotics.computer.cpu.Memory();
+        mem.setRam(1, 1 << 20);
+        Console c = new Console(8, 16);
+        c.mem = mem;
+        mem.loadRam(0x100000, "hello world\n".getBytes());
+        c.write(Console.TX_ADDR, 0x100000);
+        c.write(Console.TX_LEN, 12);
+        c.write(Console.TX_GO, 1);
+        assertEquals(8, c.read(Console.TX_LEN), "as much as there was room for: nothing dropped");
+        assertEquals("hello wo", new String(c.take()));
+        c.write(Console.TX_ADDR, 0x100008);
+        c.write(Console.TX_LEN, 4);
+        c.write(Console.TX_GO, 1);
+        assertEquals("rld\n", new String(c.take()), "the rest, later");
+        c.give("(press 2 3)\n".getBytes());
+        c.write(Console.RX_ADDR, 0x100200);
+        c.write(Console.RX_CAP, 64);
+        c.write(Console.RX_GO, 1);
+        assertEquals(12, c.read(Console.RX_LEN));
+        assertEquals("(press 2 3)\n", new String(mem.read(0x100200, 12)));
+        assertEquals(0, c.status() & 1, "nothing left waiting");
+    }
 }

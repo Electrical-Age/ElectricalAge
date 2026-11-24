@@ -11,7 +11,10 @@ A slot image starts at the slot's first byte; the boot vector is offset 0x1000 (
   a1 = the info page, for players' own systems.
 - `disks/NAME/`: canned floppies (FAT12 images made with mtools), e.g. the Elevator floppy.
 - `fatfs/`: FatFs R0.16 by ChaN (1-clause BSD, `fatfs/LICENSE.txt`), configured for two FAT12 floppies, A: and B:.
-- `common/devices.h`: the device pages, as `hw.Machine` implements them.
+- `common/devices.h`: the device pages, as `hw.Machine` implements them (the screen channel's block-transfer
+  registers too).
+- `common/wire.h`, `wire.c`: a parser in C for Wire 2's canonical messages (what the screen sends), for systems of
+  your own; 1.1 KB on RV32. Host test: `cc -o /tmp/wire_test common/wire.c common/wire_test.c && /tmp/wire_test`.
 
 Build with `nix build .#roms` and copy `result/*.rom` to `src/main/resources/eln/computer/rom/` and `result/*.img` to
 `src/main/resources/eln/computer/disks/`. The committed images

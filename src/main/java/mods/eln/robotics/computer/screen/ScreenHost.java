@@ -175,7 +175,8 @@ public final class ScreenHost {
             case "press" -> e != null && e.kind.equals("button");
             case "select" -> e != null && e.kind.equals("list") && m.size() > 3 && m.get(3) instanceof Long row && row >= 0
                 && e.msg.size() > 7 && e.msg.get(7) instanceof List<?> rows && row < rows.size();
-            case "save", "stash" -> e != null && e.kind.equals("editor") && m.size() > 5 && m.get(3) instanceof Long && m.get(5) instanceof List<?>;
+            case "save", "stash" -> e != null && e.kind.equals("editor") && m.size() > 5 && m.get(3) instanceof Long && m.get(4) instanceof String
+                && (m.get(5) instanceof List<?> || m.get(5) instanceof String && whole(e));
             case "key", "keyup" -> e != null && e.kind.equals("raw") && m.size() > 3 && m.get(3) instanceof String;
             case "click" -> e != null && e.kind.equals("raw") && m.size() > 4 && m.get(3) instanceof Long && m.get(4) instanceof Long;
             case "open" -> e != null && e.kind.equals("icon");
@@ -186,6 +187,11 @@ public final class ScreenHost {
             case "moved" -> m.size() > 5 && m.get(2) instanceof Long && m.get(3) instanceof Long && m.get(4) instanceof Long && m.get(5) instanceof Long;
             default -> true;   // (closed, break, raised, lowered, active, minimized, restored: the window is enough)
         };
+    }
+
+    /** An editor whose program asked for whole texts in saves (Wire 2: :whole after its text), not hunks. */
+    public static boolean whole(Scene.Element e) {
+        return e.msg.size() > 12 && e.msg.get(11) instanceof Form.Keyword k && k.name().equals("whole") && Boolean.TRUE.equals(e.msg.get(12));
     }
 
     static boolean hasItem(List<Object> menus, String menu, String item) {
@@ -200,7 +206,7 @@ public final class ScreenHost {
         if (m != null && (Form.verb(m).equals("saved") || Form.verb(m).equals("conflict"))) {
             if (scene.apply(m) && replies.size() < 64) replies.add(Form.print(m));
             Object hunks = saves.remove(Form.num(m, 1, -1) + "/" + Form.num(m, 2, -1) + "/" + Form.num(m, 3, -1));
-            if (Form.verb(m).equals("saved") && hunks instanceof List<?> h) scene.saved(m, h);
+            if (Form.verb(m).equals("saved") && hunks != null) scene.saved(m, hunks);
             return;
         }
         if (m == null) return;
@@ -336,6 +342,9 @@ public final class ScreenHost {
         List<Object> told = scene.applyPlayer(m);
         if (told != null) version++;
         if (told != null && echo != null) echo.add(Form.print(told));
+        // (Wire 2's canonical form: a window's own events carry nothing but the window, so nothing unchecked reaches the
+        // program; the others' parts were checked by fits)
+        if (WINDOW_EVENTS.contains(v) && !v.equals("moved") && m.size() > 2) m = m.subList(0, 2);
         if (v.equals("moved") && told != null)   // (the computer hears the geometry the screen kept, not the client's)
             m = List.of(m.get(0), m.get(1), told.get(2), told.get(3), told.get(4), told.get(5));
         if (v.equals("save") && m.size() > 5) {   // (kept until its answer: a saved one updates the scene's copy)

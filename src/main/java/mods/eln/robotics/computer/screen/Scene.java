@@ -591,10 +591,18 @@ public final class Scene {
      * and its new revision, so whoever opens the screen next edits the file as it is, not as it was first opened. The
      * computer needn't send the whole text again (a 32 KB message on a two-chip computer). Hunks that don't apply leave it.
      */
-    public void saved(List<Object> m, List<?> hunks) {
+    public void saved(List<Object> m, Object change) {
         Window w = windows.get((int) Form.num(m, 1, -1));
         Element e = w == null ? null : w.elements.get((int) Form.num(m, 2, -1));
         if (e == null || !e.kind.equals("editor") || e.msg.size() < 11) return;
+        if (change instanceof String whole) {   // (a whole-text save)
+            List<Object> msg = new ArrayList<>(e.msg);
+            msg.set(9, Form.str(m, 4, ""));
+            msg.set(10, whole);
+            e.msg = msg;
+            return;
+        }
+        if (!(change instanceof List<?> hunks)) return;
         String[] lines = Form.str(e.msg, 10, "").split("\n", -1);
         List<String> out = new ArrayList<>();
         int at = 0;

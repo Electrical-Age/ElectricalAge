@@ -100,14 +100,11 @@ JANET_FN(cfun_input, "(ea/input)", "The terminal's typed bytes waiting, as a str
 JANET_FN(cfun_editor_input, "(ea/display-input)", "Bytes from the screen (the display channel) waiting, as a string.") {
     janet_fixarity(argc, 0);
     (void) argv;
-    static uint8_t buf[4096];   /* (a 40 KB save took 80 scheduler passes at 512 a pass) */
-    int32_t n = 0;
-    while (n < (int32_t) sizeof buf && (CON_STATUS(EDITOR) & 1)) {
-        int32_t c = (int32_t) CON_RX(EDITOR);
-        if (c < 0) break;
-        buf[n++] = (uint8_t) c;
-    }
-    return janet_stringv(buf, n);
+    static uint8_t buf[4096];   /* (one block transfer: the host writes what is waiting straight into it) */
+    CON_RX_ADDR(EDITOR) = (uint32_t) (uintptr_t) buf;
+    CON_RX_CAP(EDITOR) = sizeof buf;
+    CON_RX_GO(EDITOR) = 1;
+    return janet_stringv(buf, (int32_t) CON_RX_LEN(EDITOR));
 }
 
 JANET_FN(cfun_editor_write, "(ea/display-write bytes &opt start)",
@@ -115,9 +112,12 @@ JANET_FN(cfun_editor_write, "(ea/display-write bytes &opt start)",
     janet_arity(argc, 1, 2);
     JanetByteView b = janet_getbytes(argv, 0);
     int32_t i = argc > 1 ? janet_getinteger(argv, 1) : 0;
-    int32_t from = i;
-    while (i < b.len && (CON_STATUS(EDITOR) & 2)) CON_TX(EDITOR) = b.bytes[i++];
-    return janet_wrap_integer(i - from);
+    if (i < 0 || i >= b.len) return janet_wrap_integer(0);
+    /* one block transfer, not a store a byte */
+    CON_TX_ADDR(EDITOR) = (uint32_t) (uintptr_t) (b.bytes + i);
+    CON_TX_LEN(EDITOR) = (uint32_t) (b.len - i);
+    CON_TX_GO(EDITOR) = 1;
+    return janet_wrap_integer((int32_t) CON_TX_LEN(EDITOR));
 }
 
 JANET_FN(cfun_wait, "(ea/wait &opt until)",

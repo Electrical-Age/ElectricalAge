@@ -402,7 +402,14 @@ public class ComputerScreen extends ElnScreen {
         st.savingText = st.text;
         st.status = tr("Saving...");
         render.screenEvent(new Form.Symbol("save"), (long) t, (long) id, st.savingSeq, st.baseRev == null ? "" : st.baseRev,
-            hunks(st.baseText, st.text));
+            whole(t, id) ? st.text : hunks(st.baseText, st.text));
+    }
+
+    /** Does the editor's program want whole texts in its saves (Wire 2: :whole true after its text), not hunks? */
+    boolean whole(int t, int id) {
+        Scene.Window w = scene().windows.get(t);
+        Scene.Element e = w == null ? null : w.elements.get(id);
+        return e != null && mods.eln.robotics.computer.screen.ScreenHost.whole(e);
     }
 
     /** One hunk covering what changed between the common first and last lines (none if nothing did). */
@@ -906,8 +913,9 @@ public class ComputerScreen extends ElnScreen {
                 if (st.baseText == null || !st.text.equals(st.baseText)) save(key);
             }
             case "save-as" -> {   // (its changes, kept aside by the program and written only under the new name)
-                render.screenEvent(new Form.Symbol("stash"), (long) active, (long) Integer.parseInt(key.split("/")[1]), ++render.seq,
-                    st.baseRev == null ? "" : st.baseRev, hunks(st.baseText, st.text));
+                int eid = Integer.parseInt(key.split("/")[1]);
+                render.screenEvent(new Form.Symbol("stash"), (long) active, (long) eid, ++render.seq,
+                    st.baseRev == null ? "" : st.baseRev, whole(active, eid) ? st.text : hunks(st.baseText, st.text));
                 w.setFocused(false);   // (the keys go to the line that asks for the name)
                 setFocused(null);
             }

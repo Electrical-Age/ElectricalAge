@@ -65,6 +65,7 @@ public final class Machine implements Mmio {
         devices[BUS] = bus;
         devices[FLOPPY] = floppy;
         devices[EDITOR] = editor;
+        editor.mem = terminal.mem = mem;   // (block transfers)
         devices[POWER] = new Device() {
             @Override
             public int read(int off) {
