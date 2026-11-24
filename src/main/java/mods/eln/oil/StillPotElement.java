@@ -40,8 +40,8 @@ import java.util.Map;
  * Local frame as GhostCells' (front = XN): x 0 front, 1 back; y 0 low, 1 high; z 0 left, 1 right. Faces:
  * <ul>
  * <li>thermal (the shell): the lower blocks' back and both flanks, six faces, as the Large Boiler's;</li>
- * <li>vapour out: the top of the rear upper left block (1,1,0), from the neck (draw 0: whatever the neck holds goes
- * on with the vapour);</li>
+ * <li>vapour out: the top of the rear upper left block (1,1,0), an opening over the pot's top tenth (its charge never
+ * reaches it): gas out, and liquid in the vapour line runs back in under it;</li>
  * <li>bottoms drain: the front of the lower right block (0,0,1), at the floor (draw 0), to drain the residue hot;</li>
  * <li>fill: the front of the upper right block (0,1,1), into the pot over the top through a check valve, its float
  * shutting at the 24 B charge (fillOpening);</li>
@@ -53,9 +53,9 @@ import java.util.Map;
  * pipe) and the six heat faces stay as the Large Boiler's.
  * Entrainment (Baughn 2026-11-24: yes): boiled too hard, a pot carries liquid over with its vapour. Outside the fluid
  * core's solve: before each step a share of the pot's liquid, by the smoothed Souders-Brown factor of the vapour leaving
- * the pot (zero while cold crude heats, zero when bottled up, worse under vacuum), moves into the neck, every species by
- * its share and with its liquid enthalpy at the pot's temperature, so mass and energy are conserved exactly; the neck's
- * floor port carries it on with the vapour. (A check link from the pot's floor into the neck, solved in the core, made
+ * the pot (zero while cold crude heats, zero when bottled up, worse under vacuum), moves into the node its vapour port
+ * leads to (the vapour line), every species by its share and with its liquid enthalpy at the pot's temperature, so mass
+ * and energy are conserved exactly. (A check link from the pot's floor into a neck node, solved in the core, made
  * the network stiff: overfired, it crawled for a second at a time.) It is how a badly run still fouls engines.
  */
 public class StillPotElement extends TransparentNodeElement implements FluidDevice, GhostCells.Host {
@@ -71,10 +71,10 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     public static final double WATCH_MARGIN_K = 10, WATCH_BUDGET = 20;
     /** Uncovered, the wall passes DRY_SHARE as much: covered while the liquid stands over WET_LEVEL of the height. */
     public static final double WET_LEVEL = 0.1, DRY_SHARE = 0.05;
-    /** The neck at the vapour port (B; its height, m), the link into it, the ports' conductance (a tank's). */
-    /** The neck's liquid share at which entrainment stops (what is carried falls back while the neck stands full). */
-    public static final double NECK_FULL = 0.3;
-    public static final double NECK_B = 0.5, NECK_H = 0.25, VAPOUR_K = 1e-9, PORT_K = TankElement.PORT_K;
+    /** The liquid share of the vapour line at which entrainment stops (what is carried falls back while it stands full). */
+    public static final double LINE_FULL = 0.3;
+    /** The ports' conductance (a tank's); the vapour port's opening (a share of the pot's height, at its top). */
+    public static final double PORT_K = TankElement.PORT_K, VAPOUR_SPAN = 0.1;
     /** The fill and sparge stubs (m^3; as the boiler's feed stub) and where the sparge's dip pipe ends. */
     public static final double STUB_VOLUME = 0.00002, SPARGE_DRAW = 0.05;
     /**
@@ -99,11 +99,14 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     public final NbtElectricalGateOutput tempOut = new NbtElectricalGateOutput("tempOut");
     public final NbtElectricalGateOutputProcess tempOutProcess = new NbtElectricalGateOutputProcess("tempOutProcess", tempOut);
     private final GhostCells cells = new GhostCells();
-    /** The pot, the neck at its vapour port, the fill and sparge stubs. */
-    public FluidNode vessel, neck, feed, sparge;
-    private FluidDevice.Link vapour, feedCheck, spargeCheck;
+    /**
+     * The pot, and the fill and sparge stubs: lumped into the pipe on their flange, and linked to the pot only while one
+     * is (unpiped, a stub is a still volume of its own that sleeps: no node in the pot's network).
+     */
+    public FluidNode vessel, feed, sparge;
+    private FluidDevice.Link feedCheck, spargeCheck;
     private List<FluidPort> ports = List.of();
-    private double[] loaded, loadedNeck, loadedFeed, loadedSparge;
+    private double[] loaded, loadedFeed, loadedSparge;
     private final mods.eln.fluid.NodeFluidView view = new mods.eln.fluid.NodeFluidView(new mods.eln.fluid.NodeFluidView.Spec().intake().liquidShare(CHARGE_B / POT_B));
     /** The smoothed vapour velocity out of the pot (m/s) and its Souders-Brown factor (m/s); not saved. */
     double uSmooth;
@@ -192,7 +195,31 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
 
     @Override
     public List<Link> fluidLinks() {
-        return vapour == null ? List.of() : List.of(vapour, feedCheck, spargeCheck);
+        if (feedCheck == null) return List.of();
+        List<Link> out = new ArrayList<>(2);
+        if (piped(ports.get(2))) out.add(feedCheck);
+        if (piped(ports.get(3))) out.add(spargeCheck);
+        return out;
+    }
+
+    /** Is something coupled to this port (a pipe, a device)? */
+    boolean piped(FluidPort p) {
+        var level = node.coordonate.world();
+        return level != null && !mods.eln.fluid.FluidPlacement.partners(level, p).isEmpty();
+    }
+
+    /** The vapour port's edges this step (out of the pot through the opening at its top). */
+    List<FluidEdge> vapourEdges() {
+        List<FluidEdge> out = new ArrayList<>(2);
+        for (FluidEdge e : FluidWorld.edgesOf(vessel)) if ((e.a == vessel ? e.portA : e.portB) > 1 - VAPOUR_SPAN) out.add(e);
+        return out;
+    }
+
+    /** The vapour leaving the pot by its vapour port this step (kg/s; 0 while it comes in). */
+    double vapourOut() {
+        double f = 0;
+        for (FluidEdge e : vapourEdges()) f += e.a == vessel ? e.flow : -e.flow;
+        return Math.max(0, f);
     }
 
     /** The share of its heating surface under liquid, as heat passes (DRY_SHARE..1): residue covers it too. */
@@ -237,22 +264,26 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         vessel.wallUA = heatingShare() * WALL_UA;
         // entrainment: the vapour's smoothed velocity out of the pot (last step's flow over the node's cross-section)
         double[] rho = densities(vessel);
-        double flow = vapour.edge == null ? 0 : Math.max(0, vapour.edge.flow);
+        double flow = vapourOut();
         double u = rho[0] > 0 ? flow / rho[0] / (VOLUME / HEIGHT) : 0;
         uSmooth += (u - uSmooth) * Math.min(1, dt / F_TAU);
         factor = rho[0] > 0 ? uSmooth * Math.sqrt(rho[0] / Math.max(1, rho[1] - rho[0])) : 0;
-        // (by the smoothed vapour flow, the step's own swings; up to the neck's room under NECK_FULL and half the pot's liquid)
+        // (by the smoothed vapour flow, the step's own swings; into the node the vapour port leads to, up to its room under
+        // LINE_FULL, and half the pot's liquid)
         double kg = entrainment(factor) * uSmooth * rho[0] * (VOLUME / HEIGHT) * dt;
-        kg = Math.min(kg, Math.max(0, NECK_FULL * neck.volume - neck.liquidVolume()) * rho[1]);
-        entrained = kg > 0 ? carry(vessel, neck, kg) : 0;
+        FluidNode line = null;
+        for (FluidEdge e : vapourEdges()) line = e.a == vessel ? e.b : e.a;
+        if (line != null && !line.fixed) kg = Math.min(kg, Math.max(0, LINE_FULL * line.volume - line.liquidVolume()) * rho[1]);
+        else kg = 0;
+        entrained = kg > 0 ? carry(vessel, line, kg) : 0;
         meterEntrain += entrained;
     }
 
-    /** Liquid moved into the neck before the last step (kg). */
+    /** Liquid carried into the vapour line before the last step (kg). */
     double entrained;
 
     /**
-     * Move up to kg of from's liquid (at most half of it) into to, every species by its share of the liquid, each with its
+     * Move up to kg of from's liquid (at most half of it) into to (the vapour line's node: in the world, its run's lump), every species by its share of the liquid, each with its
      * liquid enthalpy at from's temperature (out of from, into to: energy conserved exactly). Returns what it moved (kg).
      */
     public static double carry(FluidNode from, FluidNode to, double kg) {
@@ -282,11 +313,12 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     public void afterFluidStep(double dt) {
         thermal.moveEnergyTo(-vessel.wallJ);
         // the meters: vapour off the pot by species, liquid carried over (each a second's mean)
-        FluidEdge ve = vapour.edge;
-        if (ve != null && ve.flow > 0 && ve.fSpecies != null) {
-            meterVapour += ve.flow * dt;
+        for (FluidEdge ve : vapourEdges()) {
+            double sign = ve.a == vessel ? 1 : -1;
+            if (sign * ve.flow <= 0 || ve.fSpecies == null) continue;
+            meterVapour += sign * ve.flow * dt;
             if (meterSpecies.length < ve.fSpecies.length) meterSpecies = java.util.Arrays.copyOf(meterSpecies, ve.fSpecies.length);
-            for (int i = 0; i < ve.fSpecies.length; i++) meterSpecies[i] += Math.max(0, ve.fSpecies[i]) * dt;
+            for (int i = 0; i < ve.fSpecies.length; i++) meterSpecies[i] += Math.max(0, sign * ve.fSpecies[i]) * dt;
         }
         meterTime += dt;
         if (meterTime >= 1) {
@@ -361,21 +393,18 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         var c = node.coordonate;
         double amb = mods.eln.sim.Ambient.kelvin(c);
         vessel = restored(new FluidNode(VOLUME, c.y, HEIGHT, false), loaded, amb);
-        // (the neck's floor at the pot's top face, where its port draws: a coupling must be level with the pipe's end; the
-        // stubs centred on their flanges, half way up the upper blocks)
-        neck = restored(new FluidNode(TankDescriptor.bucketsVolume(NECK_B), c.y + HEIGHT, NECK_H, false), loadedNeck, amb);
+        // (the stubs centred on their flanges, half way up the upper blocks)
         feed = restored(new FluidNode(STUB_VOLUME, c.y + 1.45, 0.1, false), loadedFeed, amb);
         sparge = restored(new FluidNode(STUB_VOLUME, c.y + 1.45, 0.1, false), loadedSparge, amb);
-        loaded = loadedNeck = loadedFeed = loadedSparge = null;
+        loaded = loadedFeed = loadedSparge = null;
         for (FluidNode stub : new FluidNode[]{feed, sparge}) {
             stub.lumpable = true;   // (it merges into the pipe on its flange, as the boiler's feed stub)
             stub.resistance = 1 / PORT_K;
         }
-        vapour = new Link(vessel, 1.0, neck, 0, VAPOUR_K);
         feedCheck = new Link(feed, 0, vessel, 1.0, PORT_K).kind(FluidEdge.Kind.CHECK);
         spargeCheck = new Link(sparge, 0, vessel, SPARGE_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);
         int f = front.toEnumFacing().get3DDataValue();
-        ports = List.of(new FluidPort(neck, at(1, 1, 0), 1, 0.5, PORT_K, FluidPort.CENTRE, 1.0),
+        ports = List.of(new FluidPort(vessel, at(1, 1, 0), 1, 1.0, PORT_K, FluidPort.CENTRE, VAPOUR_SPAN),
             new FluidPort(vessel, at(0, 0, 1), f, 0, PORT_K),
             new FluidPort(feed, at(0, 1, 1), f, 0.5, PORT_K),
             new FluidPort(sparge, at(0, 1, 0), f, 0.5, PORT_K));
@@ -406,7 +435,6 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         super.writeToNBT(nbt);
         if (vessel == null) return;
         mods.eln.fluid.FluidSaves.put(nbt, "vessel", vessel);
-        mods.eln.fluid.FluidSaves.put(nbt, "neck", neck);
         mods.eln.fluid.FluidSaves.put(nbt, "feed", feed);
         mods.eln.fluid.FluidSaves.put(nbt, "sparge", sparge);
     }
@@ -415,7 +443,6 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         if (nbt.contains("vesselW")) loaded = mods.eln.fluid.FluidSaves.array(nbt, "vessel");
-        if (nbt.contains("neckW")) loadedNeck = mods.eln.fluid.FluidSaves.array(nbt, "neck");
         if (nbt.contains("feedW")) loadedFeed = mods.eln.fluid.FluidSaves.array(nbt, "feed");
         if (nbt.contains("spargeW")) loadedSparge = mods.eln.fluid.FluidSaves.array(nbt, "sparge");
     }

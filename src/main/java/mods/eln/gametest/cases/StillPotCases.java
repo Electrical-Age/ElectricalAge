@@ -125,6 +125,32 @@ public final class StillPotCases {
                 for (var part : ctx.voxelByEntity(q).parts) if (part instanceof mods.eln.node.voxel.PipePart pp) pp.wallTemp = kelvin;
         }
 
+        /** Every node of the pot's network, by owner (GameTests: what a running still costs). */
+        String nodes(TestContext ctx, BlockPos o) {
+            var net = mods.eln.fluid.FluidWorld.networkOf(pot.vessel);
+            if (net == null) return "none";
+            java.util.Map<FluidNode, String> names = new java.util.IdentityHashMap<>();
+            names.put(pot.vessel, "pot");
+            names.put(mods.eln.fluid.FluidWorld.nodeFor(pot.feed), "pot fill stub (lumped)");
+            names.put(mods.eln.fluid.FluidWorld.nodeFor(pot.sparge), "pot steam stub (lumped)");
+            names.put(coil.coil, "coil");
+            names.put(recvA.vessel, "receiver tank A");
+            if (recvB != null) names.put(recvB.vessel, "receiver tank B");
+            String[][] blocks = {{"1,2,0", "vapour line"}, {"3,-1,0", "coil drain to A (pipe, valve)"}, {"2,0,0", "coil front outlet to B (pipe, valve)"},
+                {"2,-1,0", "pipe to B"}, {"2,1,0", "gas offtake leg (pipe, breather)"}, {"3,0,1", "A's breather stub (pipe)"}, {"2,0,-1", "B's breather stub (pipe)"}};
+            for (String[] b : blocks) {
+                String[] xyz = b[0].split(",");
+                var vn = ctx.voxelByEntity(o.offset(Integer.parseInt(xyz[0]), Integer.parseInt(xyz[1]), Integer.parseInt(xyz[2])));
+                if (vn == null) continue;
+                int k = 0;
+                for (var part : vn.parts)
+                    if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null) names.putIfAbsent(mods.eln.fluid.FluidWorld.nodeFor(pp.fluid), b[1] + " #" + (k++));
+            }
+            StringBuilder out = new StringBuilder(net.nodes.size() + " nodes:");
+            for (FluidNode n : net.nodes) out.append(" [").append(n.fixed ? "atmosphere (fixed)" : names.getOrDefault(n, "? " + String.format("%.2e m3 z %.2f", n.volume, n.z))).append("]");
+            return out.toString();
+        }
+
         void note(String e) {
             if (e != null) err += e + "; ";
         }
@@ -265,7 +291,10 @@ public final class StillPotCases {
         IProcess watch;
         int tick, switchedAt = -1;
         double maxEntrain, maxCoilK, aBefore;
-        final double[][] window = new double[2][];
+        final double[] win = new double[5];
+        double[] lastCounts;
+        mods.eln.sim.fluid.FluidNetwork lastNet;
+        int nets;
         String coilJade = "";
         BlockPos o0;
 
@@ -308,9 +337,21 @@ public final class StillPotCases {
                 if (switchedAt < 0 && s.valveA.opening() > 0.5 && s.valveB.opening() < 0.5) switchedAt = tick;
                 if (switchedAt < 0) aBefore = s.recvA.vessel.liquidVolume();
                 var nw = mods.eln.fluid.FluidWorld.networkOf(s.pot.vessel);
-                if (nw != null && (tick == 600 || tick == 1800)) {
+                // (the steady cost, ticks 600-1800: each step's own time and counts, whatever rebuilds the network meanwhile)
+                if (nw != null && tick > 600 && tick <= 1800 && nw.coreStats() != null) {
                     var st = nw.coreStats();
-                    window[tick == 600 ? 0 : 1] = new double[]{nw.nanos, nw.steps, st.iterations, st.solves, st.substeps};
+                    if (nw != lastNet) {
+                        lastNet = nw;
+                        lastCounts = null;
+                        nets++;
+                    }
+                    double[] now = {st.iterations, st.solves, st.substeps};
+                    if (lastCounts != null) {
+                        win[0] += nw.lastStepMs();
+                        for (int k = 0; k < 3; k++) win[k + 1] += now[k] - lastCounts[k];
+                        win[4]++;
+                    }
+                    lastCounts = now;
                 }
                 if (tick % 600 == 0) {
                     var net = mods.eln.fluid.FluidWorld.networkOf(s.pot.vessel);
@@ -328,12 +369,10 @@ public final class StillPotCases {
             // the drain's dead leg under the coil fills with the first condensate while A's valve is shut, and goes on to A)
             FluidNode cut = s.recvB.vessel, after = s.recvA.vessel;
             double gas = Still.share(cut, sp("gasoline"));
-            if (window[0] != null && window[1] != null) {
-                double n = window[1][1] - window[0][1];
-                ctx.line(String.format("still sensible batch: ticks 600-1800: %.2f ms a step, %.1f iterations, %.1f solves, %.2f sub-steps a step (%.2f ms a solve)",
-                    (window[1][0] - window[0][0]) / 1e6 / n, (window[1][2] - window[0][2]) / n, (window[1][3] - window[0][3]) / n, (window[1][4] - window[0][4]) / n,
-                    (window[1][0] - window[0][0]) / 1e6 / (window[1][3] - window[0][3])));
-            }
+            ctx.line("still sensible batch: " + s.nodes(ctx, o0));
+            if (win[4] > 0)
+                ctx.line(String.format("still sensible batch: ticks 600-1800 (%d networks, rebuilt between): %.2f ms a step, %.1f iterations, %.1f solves, %.2f sub-steps a step",
+                    nets, win[0] / win[4], win[1] / win[4], win[2] / win[4], win[3] / win[4]));
             ctx.line(String.format("still sensible batch: pot %.0f K, switched at tick %d; gasoline cut %s (gasoline %.1f %%); after the switch %s; coil max %.0f K, holdup %s; entrained max %.3f g/s; furnace %s; coil:%s",
                 s.pot.vessel.T(), switchedAt, EaUnits.composition(cut), 100 * gas, EaUnits.composition(after), maxCoilK, EaUnits.composition(s.coil.coil),
                 1000 * maxEntrain, f.getWaila(), coilJade));
@@ -613,7 +652,13 @@ public final class StillPotCases {
                 && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(0, 1, 0), net.minecraft.core.Direction.WEST) != null         // steam
                 && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o, net.minecraft.core.Direction.WEST) == null                          // the signal face
                 && mods.eln.node.voxel.PipePlacer.portAtForTests(lv, o.offset(1, 1, 1), net.minecraft.core.Direction.UP) == null;           // top: plain
+            // unpiped, its fill and steam stubs aren't linked into the pot (no node in its network); a pipe on the fill links it
+            linksUnpiped = a.fluidLinks().size();
+            PipeCases.lay(ctx, o.offset(-1, 1, 1), 0, 16, 8, 8, 8, 8, 8);
+            linksPiped = a.fluidLinks().size();
         }
+
+        int linksUnpiped, linksPiped;
 
         public void measure(TestContext ctx) {
             var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, o, null);
@@ -624,6 +669,8 @@ public final class StillPotCases {
             ctx.check("still pot: one temperature-signal face (the origin's front)", signalFaces == 1, "" + signalFaces);
             ctx.check("still pot: the pipe tool finds vapour (top rear left), drain, fill and steam (front), nothing on plain faces", portsOk, "");
             ctx.check("still pot: its origin block has its fluid capability", cap == a.getFluidHandler(), "" + cap);
+            ctx.check("still pot: unpiped inlets add nothing to its network; a pipe on the fill links its stub", linksUnpiped == 0 && linksPiped == 1,
+                linksUnpiped + " then " + linksPiped);
             ctx.check("still pot: its model loads", obj != null && obj.getPart("main") != null, "" + obj);
             ctx.check("still pot: cold, it boils nothing and doesn't entrain", a.boiling() == null && a.entrainRate == 0, a.getWaila().toString());
         }
@@ -635,7 +682,7 @@ public final class StillPotCases {
      * <li>CALM: 20 B of dead crude near its bubble point, 4 kW (a medium burner): it boils, Jade says what, the signal
      * reads its temperature at 1 V a 100 °C, and nothing is carried over;</li>
      * <li>OVERFIRE: the same at 25 kW (a big burner forced): it boils over, Jade says so, residue reaches the receiver, and
-     * the product cokes worse than any distilled cut (heavy oil's 0.15). Whether a whole overfired batch chokes a turbine
+     * the product fouls an engine. Whether a whole overfired batch chokes a turbine
      * (the step-0 sketch: 0.26) needs the condenser: without one its vapour must all leave by the breather, the line
      * pressurises and, run longer, the network stalls;</li>
      * <li>RESIDUE: residue with a little heavy oil, 10 kW: "only residue left", then its watchdog burns it at its shell
@@ -732,7 +779,7 @@ public final class StillPotCases {
                 case OVERFIRE -> {
                     ctx.check("still pot: overfired it boils over, and Jade says so", maxEntrain > 0 && sawOver, String.format("%.4f g/s", 1000 * maxEntrain));
                     ctx.check("still pot: residue reached the receiver", r.liquid(sp("residue")) > 0.001, String.format("%.4f kg", r.liquid(sp("residue"))));
-                    ctx.check("still pot: what reached the receiver cokes worse than heavy oil (0.15)", rating != null && rating.coking() > 0.15,
+                    ctx.check("still pot: what reached the receiver fouls an engine (over the engines' balance)", rating != null && rating.coking() > FuelQuality.ENGINE_BALANCE,
                         rating == null ? "nothing" : String.format("coking %.3f, %s", rating.coking(), FuelQuality.describe(rating)));
                 }
                 case RESIDUE -> {
