@@ -43,10 +43,13 @@ public class GroundRadarDescriptor extends TransparentNodeDescriptor {
     }
     public static final int BATTERY_SLOTS = 2;
     final Obj3D obj;
+    /** The Ground Radar w/Goggles (Baughn: the goggles are a crafting item): its screen can enter the fly-through view. */
+    public final boolean goggles;
 
-    public GroundRadarDescriptor(String name, String model) {
+    public GroundRadarDescriptor(String name, String model, boolean goggles) {
         super(name, GroundRadarElement.class, GroundRadarRender.class);
         obj = Eln.obj.getObj(model);
+        this.goggles = goggles;
     }
 
     /** How long ago, for a player: "12 s", "5 min", "3 h". */
@@ -62,6 +65,10 @@ public class GroundRadarDescriptor extends TransparentNodeDescriptor {
         if (m != null) m.draw();
         mods.eln.anim.Led.draw(obj.getPart("ledpower"), powered);
         mods.eln.anim.Led.draw(obj.getPart("ledrun"), scanning);
+        if (goggles) {
+            var g = obj.getPart("goggles");
+            if (g != null) g.draw();
+        }
     }
 
     @Override

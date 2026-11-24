@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "eln:advanced_chip",
+    "C": "eln:electrical_probe_chip",
+    "G": "minecraft:glass_pane",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "GLG",
+    "ACA"
+  ],
+  "result": {
+    "id": "eln:radar_goggles"
+  }
+}

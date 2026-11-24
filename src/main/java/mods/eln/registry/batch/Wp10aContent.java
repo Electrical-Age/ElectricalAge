@@ -76,7 +76,10 @@ public class Wp10aContent implements ElnContent {
      *  mods.eln.cad.models.GroundRadar. */
     public static void registerGroundRadar(int id) {
         transparentNodeItem.addDescriptor(0 + (id << 6), new mods.eln.transparentnode.groundradar.GroundRadarDescriptor(
-            TR_NAME(Type.NONE, "Ground Radar"), "ground_radar"));
+            TR_NAME(Type.NONE, "Ground Radar"), "ground_radar", false));
+        // (with goggles, a crafting item, it can fly through its picture: Baughn 2026-11-24)
+        transparentNodeItem.addDescriptor(1 + (id << 6), new mods.eln.transparentnode.groundradar.GroundRadarDescriptor(
+            TR_NAME(Type.NONE, "Ground Radar w/Goggles"), "ground_radar", true));
     }
 
     public static void registerDesulfuriser(int id) {

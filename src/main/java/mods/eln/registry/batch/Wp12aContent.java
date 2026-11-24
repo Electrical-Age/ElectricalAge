@@ -786,6 +786,14 @@ public class Wp12aContent implements ElnContent {
     public static void registerMiscItem(int id) {
         int subId, completId;
         String name;
+        // Radar Goggles (Baughn 2026-11-24: a crafting item only): a Ground Radar with them can fly through its picture
+        sharedItem.addElement(60 + (id << 6), new mods.eln.generic.GenericItemUsingDamageDescriptor(TR_NAME(Type.NONE, "Radar Goggles")) {
+            @Override
+            public void addInformation(net.minecraft.world.item.ItemStack s, net.minecraft.world.entity.player.Player p, java.util.List list, boolean b) {
+                super.addInformation(s, p, list, b);
+                java.util.Collections.addAll(list, mods.eln.i18n.I18N.tr("Craft with a Ground Radar to fly\nthrough what it sees.").split("\n"));
+            }
+        });
         {
             subId = 0;
             name = TR_NAME(Type.NONE, "Cheap Chip");

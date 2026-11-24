@@ -41,10 +41,10 @@ public class GroundRadarElement extends TransparentNodeElement {
      * Its RS485 registers (Baughn: a bus port; players get creative). READ answers with a REPLY; WRITE sets. 0 state (0
      * idle, 1 scanning, 2 a fault), 1 progress (0..1, -1 idle), 2 range, 3 detail (writable), 4 the picture's layers, 5
      * its cells across, 6..8 the cursor's layer, x and z cell (writable), 9 density at the cursor (g/cm3), 10 its flags
-     * (GroundScan: 1 liquid, 2 oil, 4 lava, 8 a structure, 16 unknown), 11 its signal (0..1), 12 the cursor layer's
+     * (GroundScan: 1 liquid, 2 oil, 4 lava, 8 a structure, 16 unknown, 32 sky), 11 its signal (0..1), 12 the cursor layer's
      * depth under the radar and 13 its cell size (blocks), 14 the depth of the first oil under the centre and 15 of the
      * first void (-1: none), 16 the batteries' charge (0..1), 17 the last picture's age (s, -1: none); write 20 to scan,
-     * 21 k to have layer k's densities sent back as data packets (a byte a cell, 0..255 for 0..4.5 g/cm3), 22 k its
+     * 21 k to have layer k's densities sent back as data packets (a byte a cell, 0..255 for 0..8.5 g/cm3), 22 k its
      * flags (index = the 64-byte piece, row by row, i along x; a new request replaces one still going out).
      */
     public static final int REG_STATE = 0, REG_PROGRESS = 1, REG_RANGE = 2, REG_DETAIL = 3, REG_LAYERS = 4, REG_CELLS = 5,
@@ -145,7 +145,7 @@ public class GroundRadarElement extends TransparentNodeElement {
             case REG_SEND_DENSITY, REG_SEND_FLAGS -> {
                 GroundScan p = picture();
                 if (p == null || iv < 0 || iv >= p.layers.length) return;
-                byte[] src = r == REG_SEND_DENSITY ? p.density : p.flags;
+                byte[] src = r == REG_SEND_DENSITY ? p.densityBytes() : p.flags;
                 int off = iv * p.n * p.n, len = p.n * p.n;
                 outbox.clear();   // (a new request replaces one still going out)
                 for (int piece = 0; piece * mods.eln.bus.Packet.MAX_DATA < len; piece++) {
@@ -192,7 +192,7 @@ public class GroundRadarElement extends TransparentNodeElement {
         for (int k = 0; k < p.layers.length; k++) {
             int f = p.flagsAt(k, c, c);
             if ((f & GroundScan.UNKNOWN) != 0) continue;
-            if (oil ? (f & GroundScan.OIL) != 0 : (f & GroundScan.LIQUID) == 0 && p.densityAt(k, c, c) < 0.5) return p.layers[k].depth();
+            if (oil ? (f & GroundScan.OIL) != 0 : (f & (GroundScan.LIQUID | GroundScan.SKY)) == 0 && p.densityAt(k, c, c) < 0.5) return p.layers[k].depth();
         }
         return -1;
     }

@@ -1,4 +1,4 @@
-// 26.3	2026-11-24T18:21:20.673457821	eln-global/EA models
+// 26.3	2026-11-24T22:16:06.079797284	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -60,6 +60,7 @@ f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.jso
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/generator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/ghost_block.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/ground_radar.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/ground_radar_with_goggles.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/high_power_receiver_antenna.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/high_power_transmitter_antenna.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/industrial_resin_collector.json
@@ -289,6 +290,7 @@ c5bec09b544a1b17e38e0199fc64d913404e29b6 assets/eln/items/gold_plate.json
 69b0f5a9932f8a27ea63cded262a9a9976c7c64c assets/eln/items/green_brush.json
 68db4992640bbf3df85227400237375dfe6c8c0a assets/eln/items/ground_cable.json
 41e6028f57fb9ed410d3febd88e02e7d077822fc assets/eln/items/ground_radar.json
+483a333c37843157650878d295a7659df6ce2a0e assets/eln/items/ground_radar_with_goggles.json
 6c06cb30635979c30b010d037a6c41d65432bd3d assets/eln/items/handbook.json
 969cbb494560f0f130da42a5c8f6c3126bc99754 assets/eln/items/headlamp.json
 50461a5034c917cad11b6e411503a3efed7e6b9c assets/eln/items/high_power_receiver_antenna.json
@@ -405,6 +407,7 @@ bb572d18678811390e465d1b9223a2c06e17e29f assets/eln/items/power_inductor.json
 9a7bd0ce4042310543d384df8d2700dd4cd536d0 assets/eln/items/power_inductor_block.json
 bf068de505375f5f9ec04a78ee5c2a83a7a011cf assets/eln/items/power_resistor.json
 3a1476cc2dba50c9b42511ef68a4cf4aaecd7df6 assets/eln/items/purple_brush.json
+59fe60395a8c73cbcc8079f53f2d7df56df1bf72 assets/eln/items/radar_goggles.json
 3fd274036114b0913031bb0ec940b2bf225da10b assets/eln/items/ram_chip.json
 b55edeb01df76c93f21f29619f8d26165b99d00c assets/eln/items/raw_lead.json
 833104cbf12eadc39f4b3b369128ecd77419aa53 assets/eln/items/raw_rubber.json
@@ -771,6 +774,8 @@ f7d7b0915063be54ce1e56e3bbebdf8d27e71cae assets/eln/models/item/green_brush.json
 201074a4b4e260eea17fddafbfd0f08a956cf1e8 assets/eln/models/item/ground_cable.json
 a0e6960f2918d98c9b1da2063338ad1ac5d76860 assets/eln/models/item/ground_radar.json
 c65a7d817e8877dcb45f754c010190559979e769 assets/eln/models/item/ground_radar_3d.json
+d62c4b28f7b097fca41022b1427d9e661e8d7793 assets/eln/models/item/ground_radar_with_goggles.json
+c9c363909ff548376233200ed67900c6380f37f6 assets/eln/models/item/ground_radar_with_goggles_3d.json
 aa44c20d680f6244c69507baaafa048cb1faa5e7 assets/eln/models/item/handbook.json
 41bda0ea22ab2fb464f1bdf14fe5f9214f02582a assets/eln/models/item/high_power_receiver_antenna.json
 fabbeb42459aab19fee4bfe63949f87ae03fe494 assets/eln/models/item/high_power_receiver_antenna_3d.json
@@ -929,6 +934,7 @@ c584a778d4d7dd7e8ab18175e81630ed884060c3 assets/eln/models/item/portable_electri
 4fafcb0c1d0860c264fd81adea6645e0f828f815 assets/eln/models/item/power_resistor.json
 ab73c04b31e34c1972906b95e3757e8d30d947d1 assets/eln/models/item/power_resistor_3d.json
 abf755dac3070db29b726f36643ea6abf1b54a77 assets/eln/models/item/purple_brush.json
+5e82048625ebc087cd9dc0ce84fde3e1fd214052 assets/eln/models/item/radar_goggles.json
 5c08a990f48ce47bd5e661b77c4e56a3bed0a6dc assets/eln/models/item/ram_chip.json
 9ff7a48979d0ffbb4cf0c12db3760518b492c528 assets/eln/models/item/raw_lead.json
 490451b068175c40c8905e17ea9f06a2709855bf assets/eln/models/item/raw_rubber.json

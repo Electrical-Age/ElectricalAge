@@ -234,3 +234,28 @@ def ground_radar():
     for y in range(0, 4):
         cv.set(14, y, STEEL[3])                                                    # whip antenna
     return cv
+
+
+def ground_radar_goggles():
+    """The Ground Radar with its goggles on the console's top: two pale lenses on a dark frame."""
+    cv = ground_radar()
+    for x in range(8, 13):
+        cv.set(x, 3, DARK[2])
+    for x, c in ((9, h('#bfe6f2')), (11, h('#bfe6f2'))):
+        cv.set(x, 2, c)
+    return cv
+
+
+def radar_goggles():
+    """Radar goggles: two round lenses in a dark frame on a brown strap."""
+    cv = Canvas(16)
+    for x in range(1, 15):
+        cv.set(x, 11, h('#6b4a2b'))
+        cv.set(x, 12, h('#4a321d'))
+    for cx in (5, 10):
+        for dy in range(-3, 4):
+            for dx in range(-3, 4):
+                d = dx * dx + dy * dy
+                if d <= 10:
+                    cv.set(cx + dx, 11 + dy, DARK[1] if d >= 5 else (h('#bfe6f2') if dx + dy < 0 else h('#6aa8c0')))
+    return cv

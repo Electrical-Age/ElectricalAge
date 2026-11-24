@@ -111,6 +111,9 @@ public final class ElnRegistry {
         RECIPE_SERIALIZERS.register("cable_kit_to_coil", () -> mods.eln.node.voxel.CableKitRecipes.ToCoil.SERIALIZER);
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.item.electricalitem.BatteryPackRecipe>> BATTERY_PACK =
         RECIPE_SERIALIZERS.register("portable_battery_pack", () -> mods.eln.item.electricalitem.BatteryPackRecipe.SERIALIZER);
+    /** A Ground Radar and Radar Goggles make a Ground Radar w/Goggles, keeping its batteries. */
+    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.transparentnode.groundradar.GogglesUpgradeRecipe>> RADAR_GOGGLES =
+        RECIPE_SERIALIZERS.register("ground_radar_goggles", () -> mods.eln.transparentnode.groundradar.GogglesUpgradeRecipe.SERIALIZER);
     /** Windings wound by hand (Baughn 2026-11-08): Copper Cable and rubber or leather; windings combined. */
     public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<mods.eln.node.voxel.HandWindingRecipe>> HAND_WINDING =
         RECIPE_SERIALIZERS.register("hand_winding", () -> mods.eln.node.voxel.HandWindingRecipe.SERIALIZER);

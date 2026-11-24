@@ -569,14 +569,14 @@ public final class LabCommands {
      * face opposite ways 4 blocks apart, so their bus pins face each other, and a bus cable joins the pins.
      */
     /**
-     * A Ground Radar at pos with two full portable batteries, and its picture of the ground under pos scanned at once and
+     * A Ground Radar w/Goggles at pos with two full portable batteries, and its picture of the ground under pos scanned at once and
      * written as radar-X_Y_Z.png in the world's folder: every layer seen from above (top left first, by rows) and the
      * side view through the centre along x (lab look-dev and client checks).
      */
     static int radar(CommandSourceStack src, BlockPos pos, int range, int detail) {
         var level = src.getLevel();
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
-        var r = (mods.eln.transparentnode.groundradar.GroundRadarElement) placeTransparent(level, player, "Ground Radar", pos);
+        var r = (mods.eln.transparentnode.groundradar.GroundRadarElement) placeTransparent(level, player, "Ground Radar w/Goggles", pos);   // (the goggles: its view can be tried too)
         r.setSettings(range, detail);
         for (int i = 0; i < 2; i++) {
             var b = mods.eln.Eln.findItemStack("Portable Battery");
@@ -585,7 +585,12 @@ public final class LabCommands {
             r.getInventory().setItem(i, b);
         }
         long t0 = System.nanoTime();
+        var dense = new java.util.HashMap<String, Integer>();
+        mods.eln.transparentnode.groundradar.GroundRadarWorld.dense = dense;
         var scan = mods.eln.transparentnode.groundradar.GroundRadarElement.scanNow(level, pos, range, detail);
+        mods.eln.transparentnode.groundradar.GroundRadarWorld.dense = null;
+        String top = dense.entrySet().stream().sorted((a, b) -> b.getValue() - a.getValue()).limit(6).map(e -> e.getKey() + " " + e.getValue())
+            .collect(java.util.stream.Collectors.joining(", "));
         r.keepPicture(scan);
         long ms = (System.nanoTime() - t0) / 1_000_000;
         int n = scan.n, s = Math.max(1, 96 / n), cols = 8, L = scan.layers.length, rows = (L + cols - 1) / cols;
@@ -611,6 +616,22 @@ public final class LabCommands {
         } catch (java.io.IOException e) {
             throw new IllegalStateException(e);
         }
+        // the goggles' view in a few bands, from over the radar looking down into the cone (radar-...-view-BAND.png)
+        var rv = new mods.eln.transparentnode.groundradar.RadarView(scan);
+        double[][] bands = {{-0.3, 0.6}, {2.2, 3.2}, {4.0, 8.5}, {4.0, 4.6}, {4.6, 6.0}};
+        String[] names = {"air", "rock", "ores", "copper", "iron"};
+        for (int bi = 0; bi < bands.length; bi++) {
+            int vw = 384, vh = 216;
+            int[] px = new int[vw * vh];
+            rv.render(px, vw, vh, pos.getX() + 0.5, pos.getY() + 16, pos.getZ() + 0.5 - 12, 0, 50, 70, bands[bi][0], bands[bi][1], 0, 1);
+            var vimg = new java.awt.image.BufferedImage(vw, vh, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            vimg.setRGB(0, 0, vw, vh, px, 0, vw);
+            try {
+                javax.imageio.ImageIO.write(vimg, "png", file.resolveSibling("radar-" + pos.getX() + "_" + pos.getY() + "_" + pos.getZ() + "-view-" + names[bi] + ".png").toFile());
+            } catch (java.io.IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
         StringBuilder oil = new StringBuilder();
         for (int k = 0; k < L; k++) {
             int c = 0;
@@ -620,7 +641,7 @@ public final class LabCommands {
         String oilCells = oil.length() == 0 ? " none" : oil.toString();
         src.sendSuccess(() -> Component.literal("ground radar at " + pos.toShortString() + " range " + range + " detail " + detail + ": " + n + " across, " + L + " layers, "
             + scan.cells() + " cells (" + String.format("%.1f", kj) + " kJ, " + scan.encode().length / 1024 + " KiB sent) in " + ms + " ms, picture " + file.getFileName()
-            + "; oil cells by layer top:" + oilCells), false);
+            + "; oil cells by layer top:" + oilCells + "; dense samples: " + top), false);
         return 1;
     }
 

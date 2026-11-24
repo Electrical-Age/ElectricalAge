@@ -18,7 +18,7 @@ import java.io.IOException;
  * in the main hand it opens the chisel's brush menu instead (ChiselRadial), and the server is not told the key is down.
  * A press with a device in hand turns its placement preview (DevicePreview.wrenchPressed, on the server).
  */
-final class ClientKeys {
+public final class ClientKeys {
     private ClientKeys() {
     }
 
@@ -26,12 +26,21 @@ final class ClientKeys {
     static final KeyMapping WRENCH = new KeyMapping("key.eln.wrench", InputConstants.KEY_C, CATEGORY);
     /** Lights on/off: the worn headlamp and the flashlights in hand (Baughn 2026-10-30; K: free in the pack, L is advancements). */
     static final KeyMapping HEADLAMP = new KeyMapping("key.eln.headlamp", InputConstants.KEY_K, CATEGORY);
+    /** The Ground Radar w/Goggles' band-pass edges, in its view (Baughn 2026-11-24: four keys): low down/up, high down/up. */
+    public static final KeyMapping RADAR_LOW_DOWN = new KeyMapping("key.eln.radar_low_down", InputConstants.KEY_LBRACKET, CATEGORY),
+        RADAR_LOW_UP = new KeyMapping("key.eln.radar_low_up", InputConstants.KEY_RBRACKET, CATEGORY),
+        RADAR_HIGH_DOWN = new KeyMapping("key.eln.radar_high_down", InputConstants.KEY_SEMICOLON, CATEGORY),
+        RADAR_HIGH_UP = new KeyMapping("key.eln.radar_high_up", InputConstants.KEY_APOSTROPHE, CATEGORY);
     static boolean wrenchDown;
 
     static void register(RegisterKeyMappingsEvent e) {
         e.registerCategory(CATEGORY);
         e.register(WRENCH);
         e.register(HEADLAMP);
+        e.register(RADAR_LOW_DOWN);
+        e.register(RADAR_LOW_UP);
+        e.register(RADAR_HIGH_DOWN);
+        e.register(RADAR_HIGH_UP);
     }
 
     static void send(int key, boolean down) {

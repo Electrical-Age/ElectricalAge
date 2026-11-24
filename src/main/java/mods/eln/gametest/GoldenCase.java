@@ -202,7 +202,8 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@6016",   // the Desulfuriser (the rubber chain's oil route)
         "eln:transparent_node@6080",   // the Steam Cracker (the rubber chain's oil route)
         "eln:transparent_node@6144",   // the Polymeriser (the rubber chain's oil route)
-        "eln:transparent_node@6208",   // the Ground Radar (Baughn 2026-11-24)
+        "eln:transparent_node@6208", "eln:transparent_node@6209",   // the Ground Radar, and w/Goggles (Baughn 2026-11-24)
+        "eln:shared_item@7740",   // Radar Goggles
         "eln:six_node@5955", "eln:six_node@5956",   // the three-channel data logger, the tilted terminal (Baughn 2026-10-30, board #45)
         "eln:six_node@7489",   // the Bus I/O Module (the field bus)
         "eln:six_node@7490", "eln:six_node@7491", "eln:six_node@7494",   // the Addressable Button and Light, the Floor Sensor (RS485, Baughn 2026-11-05)
@@ -241,7 +242,7 @@ final class GoldenCase implements TestCase {
         "Electrical Anvil",   // (their screen: Baughn 2026-10-26)
         "Three-Channel Data Logger", "Tilted Terminal Logger",   // (Baughn 2026-10-30, board #45)
         "Bus I/O Module",   // (the field bus)
-        "Ground Radar",   // (its batteries, Baughn 2026-11-24)
+        "Ground Radar", "Ground Radar w/Goggles",   // (its batteries, Baughn 2026-11-24)
         "Addressable Button", "Addressable Light", "Floor Sensor", "Linear Servo Drive",   // (their address screen)
         "Computer",   // (its terminal, chips and drives)
         "48V Wire Drawing Machine", "230V Wire Drawing Machine",   // (what to make: Wires stage 4)

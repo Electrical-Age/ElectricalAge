@@ -134,6 +134,8 @@ class GroundScanTest {
         assertEquals(a.layers.length, b.layers.length);
         assertArrayEquals(a.density, b.density);
         assertArrayEquals(a.flags, b.flags);
+        assertArrayEquals(a.peak, b.peak);
+        assertArrayEquals(a.peakShare, b.peakShare);
         assertNull(GroundScan.decode(new byte[5]));
     }
 
@@ -155,5 +157,60 @@ class GroundScanTest {
         }, 0, 120, 0, -64);
         while (!s.step(1000)) ;
         assertTrue(reads[0] < 500_000, "reads " + reads[0]);
+    }
+
+    @Test
+    void aPictureFromBeforeReadsBackOnItsScale() throws Exception {
+        // (the old format: n positive, no scale, no peaks; densities over 0..4.5)
+        var bos = new java.io.ByteArrayOutputStream();
+        try (var o = new java.io.DataOutputStream(new java.util.zip.DeflaterOutputStream(bos))) {
+            o.writeInt(0);
+            o.writeInt(64);
+            o.writeInt(0);
+            o.writeShort(2);
+            o.writeShort(8);
+            o.writeShort(1);
+            o.writeShort(0);
+            o.writeShort(2);
+            o.write(new byte[]{(byte) 255, (byte) 153, 0, 0});   // densities: 4.5, 2.7, 0, 0
+            o.write(new byte[4]);
+            o.write(new byte[]{(byte) 255, (byte) 255, (byte) 255, (byte) 255});
+        }
+        GroundScan s = GroundScan.decode(bos.toByteArray());
+        assertNotNull(s);
+        assertEquals(4.5, s.densityAt(0, 0, 0), 1e-9);
+        assertEquals(2.7, s.densityAt(0, 0, 1), 1e-9);
+        assertEquals(s.densityAt(0, 0, 1), s.peakAt(0, 0, 1), 1e-9);
+        assertEquals(1, s.peakShareAt(0, 0, 1), 1e-9);
+        // (on the bus, rescaled to today's 0..8.5)
+        assertEquals(Math.round(255 * 4.5 / GroundScan.MAX_DENSITY), s.densityBytes()[0] & 0xFF);
+    }
+
+    @Test
+    void openAirOverTheGroundIsSkyNotACave() {
+        GroundScan s = new GroundScan(new GroundScan.World() {
+            @Override
+            public GroundScan.Material material(int x, int y, int z) {
+                if (y >= 70) return GroundScan.Material.SKY_;   // (the radar on a pillar 10 over the ground)
+                int dy = y - 40;
+                if (x * x + dy * dy + z * z <= 64) return GroundScan.Material.AIR_;
+                return STONE;
+            }
+
+            @Override
+            public boolean built(int x, int y, int z) {
+                return false;
+            }
+        }, 0, 80, 0, -64);
+        while (!s.step(1 << 20)) ;
+        int mid = GroundScan.N / 2;
+        assertTrue((s.flagsAt(0, mid, mid) & GroundScan.SKY) != 0, "over the ground: sky");
+        int k = s.layerAt(80 - 1 - 40);
+        assertEquals(0, s.flagsAt(k, mid, mid) & GroundScan.SKY, "the cave isn't sky");
+        RadarView v = new RadarView(s);
+        // (looking level through the sky band in the air band: nothing; down into the cave: something)
+        int sky = v.trace(-200, 75, 0.5, 1, 0, 0, -1, 0.4), cave = v.trace(0.5, 79, 0.5, 0, -1, 0, -1, 0.4);
+        assertTrue(RadarViewTest.brightness(sky) < 30, "the sky band draws nothing: " + Integer.toHexString(sky));
+        assertTrue(RadarViewTest.brightness(cave) > 60, "the cave does: " + Integer.toHexString(cave));
     }
 }

@@ -40,6 +40,10 @@ public class ElnLang extends LanguageProvider {
         add("message.eln.electric_bike.flat_battery", "The battery is flat: pedalling only");
         add("key.eln.wrench", "Wrench (hold: a switch's screen on click; the chisel's brush menu)");
         add("key.eln.headlamp", "Lights on/off (headlamp, flashlights in hand)");
+        add("key.eln.radar_low_down", "Radar goggles: band's low edge down");
+        add("key.eln.radar_low_up", "Radar goggles: band's low edge up");
+        add("key.eln.radar_high_down", "Radar goggles: band's high edge down");
+        add("key.eln.radar_high_up", "Radar goggles: band's high edge up");
         add("eln.headlamp.none", "No headlamp worn, no flashlight in hand");
         add("eln.headlamp.tip.wear", "Worn on the head: the helmet slot or the head slot");
         add("eln.headlamp.tip.key", "%s switches it on and off");

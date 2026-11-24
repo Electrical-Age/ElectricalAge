@@ -1,4 +1,4 @@
-// 26.3	2026-11-24T18:21:20.677369381	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-24T22:16:06.084012456	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 98be7e719755f1d65131e906daa7a98b081c8ce8 data/eln/advancement/recipes/misc/230v_air_blower.json
@@ -259,6 +259,7 @@ d4b677a6e4eba2fcadf4ddb0ebcc9ee382faa54a data/eln/advancement/recipes/misc/porta
 4b397520f61b222a82fd5d5c4466ad24c55042e3 data/eln/advancement/recipes/misc/power_inductor.json
 77301a064d64747de5ec7404b25d3f1d6217b501 data/eln/advancement/recipes/misc/power_resistor.json
 5eda5d07f297d694c57d5ce56807a80dc7db2c40 data/eln/advancement/recipes/misc/purple_brush.json
+bd593a811674a933454779485b28b9b3fceab43c data/eln/advancement/recipes/misc/radar_goggles.json
 3a4ec1d735289170894036c83561afcdf87d5299 data/eln/advancement/recipes/misc/ram_chip.json
 1e879bd3da5eabb33eb0f2ee6f2b3c1d9d9e9588 data/eln/advancement/recipes/misc/red_brush.json
 f7528c010eae2ecb1d9b8df30858589d7a331a88 data/eln/advancement/recipes/misc/redstone_to_voltage_converter.json
@@ -651,6 +652,7 @@ d00c0eea142c635ad3d3fa74e52dd5a28784225b data/eln/recipe/power_capacitor.json
 cf88d05d7133f38948590b14e13e56b8bedc883e data/eln/recipe/power_inductor.json
 1b6a55970cff2e670b8b720abc7a6bde617fa47a data/eln/recipe/power_resistor.json
 52a0411cfab0a219bd72692e72568b43848930e3 data/eln/recipe/purple_brush.json
+36f4328b596057612f2bf8b1ab7396031cfefa76 data/eln/recipe/radar_goggles.json
 0f527fcc3ebc53347b6ac75ab52a0128716933f8 data/eln/recipe/ram_chip.json
 00d438d0450731bc201193aef8acef83c879d8d9 data/eln/recipe/red_brush.json
 9c5c6e47e7f3d04b13fc71c6b5ddfc3182ee73e2 data/eln/recipe/redstone_to_voltage_converter.json

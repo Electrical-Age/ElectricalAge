@@ -20,12 +20,14 @@ import java.util.Map;
  * loaded chunks only, and the pieces of the structures (any mod's: the structure registry's starts) over the scan's
  * footprint. Server thread only.
  */
-final class GroundRadarWorld implements GroundScan.World {
+public final class GroundRadarWorld implements GroundScan.World {
     private static final Map<BlockState, GroundScan.Material> MATERIALS = new IdentityHashMap<>();
     /** Structure pieces wider than this (blocks) aren't buildings. */
     static final int MAX_PIECE = 48;
 
     private final ServerLevel level;
+    /** Lab: the blocks of the samples at 4 g/cm3 or more, counted (null: not counted). */
+    public static Map<String, Integer> dense;
     private final BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
     private LevelChunk chunk;
     private int chunkX = Integer.MIN_VALUE, chunkZ = Integer.MIN_VALUE;
@@ -48,7 +50,13 @@ final class GroundRadarWorld implements GroundScan.World {
             chunk = level.getChunkSource().getChunkNow(qx, qz);
         }
         if (chunk == null) return null;
-        return of(chunk.getBlockState(at.set(x, y, z)));
+        BlockState bs = chunk.getBlockState(at.set(x, y, z));
+        GroundScan.Material m = of(bs);
+        if (dense != null && m.density() >= 4) dense.merge(bs.getBlock().getDescriptionId(), 1, Integer::sum);
+        // (air over the ground's surface is sky, not a cave: around a radar on a hill the open air filled the cone)
+        if (m == GroundScan.Material.AIR_ && y >= chunk.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x & 15, z & 15))
+            return GroundScan.Material.SKY_;
+        return m;
     }
 
     @Override
@@ -103,6 +111,26 @@ final class GroundRadarWorld implements GroundScan.World {
         return m;
     }
 
+    /**
+     * An ore block's density (g/cm3), its ore's rough real one (Baughn: the goggles' band-pass can pick out the dense ones,
+     * copper and so on): coal light, lapis and emerald as their host rock, copper, iron, gold, tin, lead, cinnabar-red
+     * redstone and uranium heavier and heavier; any other ore 4.0.
+     */
+    static double oreDensity(BlockState s) {
+        for (var e : ORE_DENSITIES) if (s.is(e.getKey())) return e.getValue();
+        return 4.0;
+    }
+
+    private static net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> ore(String name) {
+        return net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BLOCK, net.minecraft.resources.Identifier.fromNamespaceAndPath("c", "ores/" + name));
+    }
+
+    private static final List<Map.Entry<net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block>, Double>> ORE_DENSITIES = List.of(
+        Map.entry(ore("coal"), 1.5), Map.entry(ore("lapis"), 2.9), Map.entry(ore("emerald"), 2.9), Map.entry(ore("quartz"), 2.7),
+        Map.entry(ore("diamond"), 3.4), Map.entry(ore("copper"), 4.2), Map.entry(ore("iron"), 5.0), Map.entry(ore("netherite_scrap"), 5.5),
+        Map.entry(ore("tin"), 6.5), Map.entry(ore("silver"), 6.8), Map.entry(ore("gold"), 7.0), Map.entry(ore("tungsten"), 7.2),
+        Map.entry(ore("lead"), 7.5), Map.entry(ore("redstone"), 7.8), Map.entry(ore("uranium"), 8.2));
+
     private static GroundScan.Material classify(BlockState s) {
         if (s.isAir()) return GroundScan.Material.AIR_;
         if (s.getBlock() instanceof mods.eln.oil.ReservoirOilBlock) return new GroundScan.Material(0.85, 0.002, GroundScan.Material.OIL);
@@ -114,7 +142,7 @@ final class GroundRadarWorld implements GroundScan.World {
             return new GroundScan.Material(0.9, 0.01, GroundScan.Material.OIL);   // (other mods' fluids: oils, fuels)
         }
         if (open) return GroundScan.Material.AIR_;   // (plants, torches, rails, snow layers)
-        if (s.is(net.neoforged.neoforge.common.Tags.Blocks.ORES)) return new GroundScan.Material(4.0, 0.006, GroundScan.Material.SOLID);
+        if (s.is(net.neoforged.neoforge.common.Tags.Blocks.ORES)) return new GroundScan.Material(oreDensity(s), 0.006, GroundScan.Material.SOLID);
         if (s.is(Blocks.BEDROCK)) return new GroundScan.Material(3.3, 0.01, GroundScan.Material.SOLID);
         if (s.is(Blocks.CLAY) || s.is(Blocks.MUD) || s.is(Blocks.PACKED_MUD) || s.is(Blocks.MUDDY_MANGROVE_ROOTS))
             return new GroundScan.Material(1.8, 0.05, GroundScan.Material.SOLID);
@@ -125,7 +153,7 @@ final class GroundRadarWorld implements GroundScan.World {
         if (s.is(BlockTags.ICE)) return new GroundScan.Material(0.9, 0.001, GroundScan.Material.SOLID);
         if (s.is(BlockTags.LOGS) || s.is(BlockTags.PLANKS)) return new GroundScan.Material(0.6, 0.01, GroundScan.Material.SOLID);
         if (s.is(Blocks.OBSIDIAN) || s.is(Blocks.CRYING_OBSIDIAN)) return new GroundScan.Material(2.6, 0.0025, GroundScan.Material.SOLID);
-        if (s.is(net.neoforged.neoforge.common.Tags.Blocks.STORAGE_BLOCKS)) return new GroundScan.Material(4.5, 0.02, GroundScan.Material.SOLID);
+        if (s.is(net.neoforged.neoforge.common.Tags.Blocks.STORAGE_BLOCKS)) return new GroundScan.Material(7.0, 0.02, GroundScan.Material.SOLID);
         return new GroundScan.Material(2.5, 0.004, GroundScan.Material.SOLID);
     }
 }

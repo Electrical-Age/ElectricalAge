@@ -25,16 +25,19 @@ public final class GroundScan {
     public static final int MAX_LAYERS = 256;
     /** Samples a cell reads at most (3 x 3 x 3 strata; a cell of 3 or fewer blocks a side is read whole). */
     public static final int MAX_SAMPLES = 27;
-    /** Densities are kept as bytes over 0..MAX_DENSITY g/cm3. */
-    public static final double MAX_DENSITY = 4.5;
+    /** Densities are kept as bytes over 0..MAX_DENSITY g/cm3 (8.5: ores apart, galena and uraninite near the top; pictures
+     *  from before were over 0..4.5, LEGACY_MAX, and read back so). */
+    public static final double MAX_DENSITY = 8.5, LEGACY_MAX = 4.5;
 
     /** Cell flags: most of it liquid (water), an eighth of it oil, most of it lava; an eighth of it in a structure; most of it unknown (unloaded). */
-    public static final int LIQUID = 1, OIL = 2, LAVA = 4, BUILT = 8, UNKNOWN = 16;
+    public static final int LIQUID = 1, OIL = 2, LAVA = 4, BUILT = 8, UNKNOWN = 16, SKY = 32;
 
     /** What a block is to the radar: its density (g/cm3), its attenuation (per block) and its kind. */
     public record Material(double density, double attenuation, int kind) {
-        public static final int SOLID = 0, AIR = 1, WATER = 2, OIL = 3, LAVA = 4;
+        public static final int SOLID = 0, AIR = 1, WATER = 2, OIL = 3, LAVA = 4, SKY = 5;
         public static final Material AIR_ = new Material(0, 0, AIR);
+        /** Air open to the sky (over the ground's surface): not a cave. */
+        public static final Material SKY_ = new Material(0, 0, SKY);
     }
 
     /** The world as the scan reads it. material: null where it can't be read (an unloaded chunk). */
@@ -55,11 +58,18 @@ public final class GroundScan {
     }
 
     public final int cx, cy, cz;
+    /** The densities' scale (g/cm3 at byte 255). */
+    private double max = MAX_DENSITY;
     /** Cells across at every depth, and the growth of the cells' side with depth (side = TOP_CELL + depth / growth). */
     public final int n, growth;
     public final Layer[] layers;
     /** Per layer, N x N cells (index (k * N + i) * N + j, i along x, j along z): density bytes and flags. */
     public final byte[] density, flags, signal;
+    /** Per cell: its densest sample (the goggles' band can find an ore a cell's mean hides; legacy pictures: the mean). */
+    public final byte[] peak;
+    /** Per cell: the share of its samples at (within 0.3 g/cm3 of) its peak: one ore block in a big cell is a small share. */
+    public final byte[] peakShare;
+    private final double[] sampled = new double[MAX_SAMPLES];
 
     private final World world;
     /** The world's floor (the lowest y read; the last layer is cut off there). */
@@ -95,6 +105,8 @@ public final class GroundScan {
         density = new byte[layers.length * n * n];
         flags = new byte[layers.length * n * n];
         signal = new byte[layers.length * n * n];
+        peak = new byte[layers.length * n * n];
+        peakShare = new byte[layers.length * n * n];
         strength = new float[layers.length * n * n];
     }
 
@@ -119,7 +131,7 @@ public final class GroundScan {
     private boolean crossOnly;
 
     /** A finished scan read back (the client's copy). */
-    public GroundScan(int cx, int cy, int cz, int n, int growth, Layer[] layers, byte[] density, byte[] flags, byte[] signal) {
+    public GroundScan(int cx, int cy, int cz, int n, int growth, Layer[] layers, byte[] density, byte[] flags, byte[] signal, byte[] peak, byte[] peakShare) {
         this.world = null;
         this.n = n;
         this.growth = growth;
@@ -131,6 +143,8 @@ public final class GroundScan {
         this.density = density;
         this.flags = flags;
         this.signal = signal;
+        this.peak = peak;
+        this.peakShare = peakShare;
         this.strength = null;
         this.flat = false;
         next = layers.length * n * n;
@@ -195,8 +209,8 @@ public final class GroundScan {
         int per = side <= 3 ? side : 3;   // samples per axis
         // (the last layer is cut off at the world's floor: only what is above it is read; under it is nothing)
         int tall = Math.max(1, Math.min(side, top - minY + 1)), perY = Math.min(per, tall);
-        int samples = 0, known = 0, liquid = 0, oil = 0, lava = 0, built = 0;
-        double sum = 0, att = 0;
+        int samples = 0, known = 0, liquid = 0, oil = 0, lava = 0, built = 0, sky = 0;
+        double sum = 0, att = 0, most = 0;
         for (int a = 0; a < per; a++)
             for (int b = 0; b < perY; b++)
                 for (int c = 0; c < per; c++) {
@@ -216,11 +230,14 @@ public final class GroundScan {
                     if (m == null) continue;
                     known++;
                     sum += m.density();
+                    most = Math.max(most, m.density());
+                    if (known <= MAX_SAMPLES) sampled[known - 1] = m.density();
                     att += m.attenuation();
                     switch (m.kind()) {
                         case Material.WATER -> liquid++;
                         case Material.OIL -> oil++;
                         case Material.LAVA -> lava++;
+                        case Material.SKY -> sky++;
                         default -> {
                         }
                     }
@@ -231,6 +248,7 @@ public final class GroundScan {
         if (liquid * 2 > known && known > 0) f |= LIQUID;
         if (oil * 8 >= known && oil > 0) f |= OIL;   // (an eighth: oil is what a prospector is after)
         if (lava * 2 > known && known > 0) f |= LAVA;
+        if (sky * 2 > known && known > 0) f |= SKY;
         if (built * 8 >= known && built > 0) f |= BUILT;
         // (the signal reaching this cell: its parent's, faded through the parent's thickness)
         double s = 1;
@@ -243,8 +261,12 @@ public final class GroundScan {
         strength[index] = (float) (s * Math.exp(-meanAtt * side));
         double mean = known > 0 ? sum / known : 0;
         // grain: some at every depth, more as the signal fades; unknown cells are all grain
-        density[index] = (byte) Math.max(0, Math.min(255, Math.round(mean / MAX_DENSITY * 255)));
+        density[index] = (byte) Math.max(0, Math.min(255, Math.round(mean / max * 255)));
         flags[index] = (byte) f;
+        peak[index] = (byte) Math.max(0, Math.min(255, Math.round(most / max * 255)));
+        int near = 0;
+        for (int q = 0; q < Math.min(known, MAX_SAMPLES); q++) if (sampled[q] >= most - 0.3) near++;
+        peakShare[index] = (byte) (known == 0 ? 0 : Math.round(255.0 * near / Math.min(known, MAX_SAMPLES)));
         signal[index] = (byte) ((f & UNKNOWN) != 0 ? 0 : Math.round(Math.max(0, Math.min(1, s)) * 255));
         return samples;
     }
@@ -274,10 +296,28 @@ public final class GroundScan {
 
     /** Cell (k, i, j)'s density in g/cm3. */
     public double densityAt(int k, int i, int j) {
-        return (density[(k * n + i) * n + j] & 0xFF) * MAX_DENSITY / 255;
+        return (density[(k * n + i) * n + j] & 0xFF) * max / 255;
     }
 
     /** Cell (k, i, j)'s signal, 0..1: how much of the radar's pulse reached it (0: none, or unknown ground). */
+    /** The density bytes on the MAX_DENSITY scale (a picture from before, on LEGACY_MAX, rescaled): the bus sends these. */
+    public byte[] densityBytes() {
+        if (max == MAX_DENSITY) return density;
+        byte[] b = new byte[density.length];
+        for (int q = 0; q < b.length; q++) b[q] = (byte) Math.min(255, Math.round((density[q] & 0xFF) * max / MAX_DENSITY));
+        return b;
+    }
+
+    /** Cell (k, i, j)'s densest sample (g/cm3). */
+    public double peakAt(int k, int i, int j) {
+        return (peak[(k * n + i) * n + j] & 0xFF) * max / 255;
+    }
+
+    /** The share of cell (k, i, j)'s samples at its peak, 0..1. */
+    public double peakShareAt(int k, int i, int j) {
+        return (peakShare[(k * n + i) * n + j] & 0xFF) / 255.0;
+    }
+
     public double signalAt(int k, int i, int j) {
         return (signal[(k * n + i) * n + j] & 0xFF) / 255.0;
     }
@@ -301,7 +341,8 @@ public final class GroundScan {
             o.writeInt(cx);
             o.writeInt(cy);
             o.writeInt(cz);
-            o.writeShort(n);
+            o.writeShort(-n);   // (negative: the densities' scale follows)
+            o.writeShort((int) Math.round(max * 100));
             o.writeShort(growth);
             o.writeShort(layers.length);
             for (Layer l : layers) {
@@ -311,6 +352,8 @@ public final class GroundScan {
             o.write(density);
             o.write(flags);
             o.write(signal);
+            o.write(peak);
+            o.write(peakShare);
         } catch (java.io.IOException e) {
             throw new IllegalStateException(e);
         }
@@ -321,7 +364,15 @@ public final class GroundScan {
     public static GroundScan decode(byte[] b) {
         try (var in = new java.io.DataInputStream(new java.util.zip.InflaterInputStream(new java.io.ByteArrayInputStream(b)))) {
             int x = in.readInt(), y = in.readInt(), z = in.readInt();
-            int n = in.readShort(), growth = in.readShort(), count = in.readShort();
+            int n = in.readShort();
+            double scale = LEGACY_MAX;
+            boolean scaled = n < 0;
+            if (scaled) {
+                n = -n;
+                scale = in.readShort() / 100.0;
+                if (!(scale > 0)) return null;
+            }
+            int growth = in.readShort(), count = in.readShort();
             if (n <= 0 || n > MAX_N || growth <= 0 || count <= 0 || count > MAX_LAYERS) return null;
             Layer[] ls = new Layer[count];
             for (int k = 0; k < count; k++) {
@@ -329,11 +380,19 @@ public final class GroundScan {
                 if (ls[k].depth() < 0 || ls[k].cell() <= 0) return null;
             }
             int cells = count * n * n;
-            byte[] d = new byte[cells], f = new byte[cells], g = new byte[cells];
+            byte[] d = new byte[cells], f = new byte[cells], g = new byte[cells], pk = d, ps = new byte[cells];
             in.readFully(d);
             in.readFully(f);
             in.readFully(g);
-            return new GroundScan(x, y, z, n, growth, ls, d, f, g);
+            if (scaled) {   // (the scaled format carries the peaks too)
+                pk = new byte[cells];
+                in.readFully(pk);
+                in.readFully(ps);
+            }
+            if (!scaled) java.util.Arrays.fill(ps, (byte) 255);   // (legacy: the peak is the mean, all of it)
+            GroundScan s = new GroundScan(x, y, z, n, growth, ls, d, f, g, pk, ps);
+            s.max = scale;
+            return s;
         } catch (java.io.IOException | RuntimeException e) {
             return null;
         }
@@ -347,6 +406,7 @@ public final class GroundScan {
         double d = p.densityAt(k, i, j);
         int rgb;
         if ((f & UNKNOWN) != 0) rgb = 0x505050;
+        else if ((f & SKY) != 0) return 0xFF000000;   // (open air over the ground: nothing to see)
         else if ((f & LAVA) != 0) rgb = 0xE05018;
         else if ((f & OIL) != 0) rgb = 0xC88C1E;
         else if ((f & LIQUID) != 0) rgb = 0x2860C8;
@@ -361,8 +421,8 @@ public final class GroundScan {
         return 0xFF000000 | rgb;
     }
 
-    private static final double[] STOPS = {0, 0.9, 1.7, 2.7, 3.4, 4.5};
-    private static final int[] COLOURS = {0x0A0A10, 0x463224, 0x7A5A3C, 0xA8A090, 0xE8E0C0, 0xFFFFF0};
+    private static final double[] STOPS = {0, 0.9, 1.7, 2.7, 3.4, 5.0, 8.5};
+    private static final int[] COLOURS = {0x0A0A10, 0x463224, 0x7A5A3C, 0xA8A090, 0xE8E0C0, 0xF0C060, 0xFFFFF0};
 
     static int ramp(double d) {
         for (int s = 1; s < STOPS.length; s++)

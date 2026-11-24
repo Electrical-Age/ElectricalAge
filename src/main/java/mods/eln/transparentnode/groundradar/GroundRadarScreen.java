@@ -57,15 +57,84 @@ public class GroundRadarScreen extends ElnScreen {
         field("addr", () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
             float f = mods.eln.client.gui.EaField.parse(v);
             render.clientSendFloat(GroundRadarElement.ADDRESS_ID, Float.isNaN(f) ? 0 : Math.round(f));
-        }, tr("Its RS485 address, 17 to 255, on its back. Registers: 0 state, 1 progress, 2 range, 3 detail, 4 layers, 5 cells across, 6-8 a cell (layer, x, z), 9 its density, 10 flags, 11 signal, 12 its layer's depth, 13 cell size, 14 first oil, 15 first void, 16 charge, 17 age. Write 20 to scan, 21 or 22 with a layer for its densities (a byte a cell, 255 = 4.5 g/cm3) or flags as data packets."));
+        }, tr("Its RS485 address, 17 to 255, on its back. Registers: 0 state, 1 progress, 2 range, 3 detail, 4 layers, 5 cells across, 6-8 a cell (layer, x, z), 9 its density, 10 flags (1 liquid, 2 oil, 4 lava, 8 structure, 16 unknown, 32 sky), 11 signal, 12 its layer's depth, 13 cell size, 14 first oil, 15 first void, 16 charge, 17 age. Write 20 to scan, 21 or 22 with a layer for its densities (a byte a cell, 255 = 8.5 g/cm3) or flags as data packets."));
         text("busstate", () -> render.address == 0 ? tr("No address (17 to 255)") : render.onBus ? tr("On a bus") : tr("No bus"),
             () -> render.address != 0 && render.onBus ? OK_TEXT : LABEL);
+        if (render.desc.goggles) button("view", () -> tr("Enter view"), this::enterView,
+            tr("Fly through the picture (the goggles): move as in creative flight, the mouse looks, Esc comes back."));
         text("depth", this::depthText);
         text("status", this::statusText);
     }
 
+    // ---- the goggles' view (GogglesView): a mode of this screen, so the server's menu stays open
+
+    private GogglesView goggles;
+
+    void enterView() {
+        if (goggles != null) return;
+        var player = net.minecraft.client.Minecraft.getInstance().player;
+        if (render.picture == null || render.progress >= 0) {
+            if (player != null) player.sendOverlayMessage(Component.literal(render.progress >= 0 ? tr("Wait for the scan to finish") : tr("Scan first: there is nothing to see yet")));
+            return;
+        }
+        goggles = new GogglesView(render, render.picture);
+    }
+
+    void leaveView() {
+        if (goggles == null) return;
+        goggles.close();
+        goggles = null;
+        setFocused(null);   // (else Space or Enter on the console's focused Enter view opens it again)
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
+        if (goggles != null && goggles.hurt()) leaveView();
+        if (goggles != null) {
+            goggles.frame(g, width, height);
+            return;
+        }
+        super.extractRenderState(g, mouseX, mouseY, a);
+    }
+
+    @Override
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent e) {
+        if (goggles != null) {
+            if (e.key() == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE) leaveView();
+            else goggles.key(e, true);
+            return true;   // (nothing else in the view: no hotbar swaps, no closing on the inventory key)
+        }
+        return super.keyPressed(e);
+    }
+
+    @Override
+    public boolean keyReleased(net.minecraft.client.input.KeyEvent e) {
+        if (goggles != null) {
+            goggles.key(e, false);
+            return true;
+        }
+        return super.keyReleased(e);
+    }
+
+    @Override
+    public void mouseMoved(double mx, double my) {
+        if (goggles != null) goggles.mouseMoved(mx, my);
+        else super.mouseMoved(mx, my);
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent e) {
+        return goggles != null || super.mouseReleased(e);
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent e, double dx, double dy) {
+        return goggles != null || super.mouseDragged(e, dx, dy);
+    }
+
     @Override
     public void removed() {
+        leaveView();
         render.viewLayer = layer;
         render.viewRow = row;
         for (int v = 0; v < 2; v++) release(v);
@@ -166,6 +235,7 @@ public class GroundRadarScreen extends ElnScreen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent e, boolean doubleClick) {
+        if (goggles != null) return true;
         GroundScan p = render.picture;
         if (p != null && top != null && top.has(e.x(), e.y())) {
             row = Math.max(0, Math.min(p.n - 1, (int) ((e.y() - top.y) * p.n / top.h)));
@@ -180,6 +250,10 @@ public class GroundRadarScreen extends ElnScreen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double dx, double dy) {
+        if (goggles != null) {
+            goggles.scroll(dy);
+            return true;
+        }
         if (render.picture != null && (top != null && top.has(mx, my) || side != null && side.has(mx, my))) {
             layer = Math.max(0, Math.min(layers() - 1, layer - (int) Math.signum(dy)));
             return true;

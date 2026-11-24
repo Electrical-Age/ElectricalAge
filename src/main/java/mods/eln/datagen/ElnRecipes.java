@@ -1232,6 +1232,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             'C', stack(Items.CAULDRON),
             'M', findItemStack("Machine Block"),
             'H', findItemStack("230V Copper Heating Corp"));
+        // Radar Goggles (Baughn: glass panes, leather, a probe chip and two Advanced Chips)
+        addRecipe(findItemStack("Radar Goggles", 1),
+            "GLG",
+            "ACA",
+            'G', stack(net.minecraft.world.item.Items.GLASS_PANE),
+            'L', stack(net.minecraft.world.item.Items.LEATHER),
+            'A', findItemStack("Advanced Chip"),
+            'C', findItemStack("Electrical Probe Chip"));
+        // (the Ground Radar w/Goggles: GogglesUpgradeRecipe, which keeps the radar's batteries; its JSON is in main resources)
         // the Ground Radar: a signal antenna over an iron sled, a probe chip to read the echoes, a machine block
         addRecipe(findItemStack("Ground Radar", 1),
             " A ",

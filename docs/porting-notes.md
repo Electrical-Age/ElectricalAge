@@ -882,6 +882,11 @@ In the port:
   hidden slot); 26.x shows four quarters (Baughn 2026-11-24): its stats in a frame (Y, pipes left, silk touch), XZ, the
   Ground Radar's slice at its mining height (48 m), and XY and YZ, the cone's cuts from the miner to bedrock with the pipe
   and the drill head marked; made every 5 s while a player is within 24 blocks. Test `ground_radar_miner_view`.
+- The Ground Radar (new in 26.x, Baughn 2026-11-24; wiki mod/ea/ground-radar) reads ores at their own densities (coal 1.5,
+  copper 4.2, iron 5.0, gold 7.0, lead 7.5, uranium 8.2; other ores 4.0) over 0..8.5 g/cm3. Pictures from before were
+  over 0..4.5 and read back so; the bus's density data packets (register 21) are bytes for 0..8.5 now (were 0..4.5), a
+  change for computer programs that read them. Open air over the ground is flagged sky (32), not a cave. With Radar
+  Goggles it becomes the Ground Radar w/Goggles, whose screen flies through its picture with a density band-pass.
 - The Hub's screen was a fixed picture (slot 3 on top, 0 right, 2 bottom, 1 left), which is the hub as seen on a
   wall, or on a floor by a player facing east. For a player facing south over a floor hub it was a quarter turn off:
   the left and right slots were the north and south sides, the top and bottom ones east and west (AdventurAgent). The

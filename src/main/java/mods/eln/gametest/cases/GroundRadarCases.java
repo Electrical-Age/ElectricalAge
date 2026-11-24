@@ -27,6 +27,7 @@ public final class GroundRadarCases {
         cases.add(new KeepsItsBatteries());
         cases.add(new OverTheBus());
         cases.add(new MinerView());
+        cases.add(new GogglesUpgrade());
     }
 
     static ItemStack battery(double joules) {
@@ -300,6 +301,47 @@ public final class GroundRadarCases {
             c.check("miner view: the cross reads its cuts to the floor at full signal, and only them", cross.densityAt(k, mid, mid) < 0.5
                 && cross.signalAt(k, mid, mid) > 0.99 && (cross.flagsAt(k, 1, 1) & GroundScan.UNKNOWN) != 0
                 && (cross.flagsAt(k, 1, mid) & GroundScan.UNKNOWN) == 0, st);
+        }
+    }
+
+    /** A Ground Radar holding a battery and Radar Goggles craft a Ground Radar w/Goggles with that battery inside. */
+    static final class GogglesUpgrade implements TestCase {
+        public String id() {
+            return "ground_radar_goggles_upgrade";
+        }
+
+        public void build(TestContext c) {
+        }
+
+        public void measure(TestContext c) {
+            BlockPos at = c.at(3, 1, 1);
+            var r = (GroundRadarElement) c.placeTransparent(RADAR, at);
+            r.getInventory().setItem(0, battery(23456));
+            r.getInventory().setItem(1, battery(5000));
+            ItemStack radar = r.getDropItemStack();
+            ItemStack goggles = Eln.findItemStack("Radar Goggles");
+            var recipe = mods.eln.transparentnode.groundradar.GogglesUpgradeRecipe.INSTANCE;
+            var in = net.minecraft.world.item.crafting.CraftingInput.of(2, 1, List.of(radar, goggles));
+            ItemStack out = recipe.assemble(in);
+            c.check("radar goggles: a radar and goggles make a Ground Radar w/Goggles", recipe.matches(in, c.level())
+                && out.getItem() == Eln.findItemStack("Ground Radar w/Goggles").getItem()
+                && Utils.getItemObject(out) instanceof mods.eln.transparentnode.groundradar.GroundRadarDescriptor d && d.goggles, "" + out);
+            c.check("radar goggles: two radars don't", !recipe.matches(net.minecraft.world.item.crafting.CraftingInput.of(2, 1, List.of(radar, radar.copy())), c.level()), "");
+            c.check("radar goggles: a radar already with goggles doesn't take a second pair",
+                !recipe.matches(net.minecraft.world.item.crafting.CraftingInput.of(2, 1, List.of(out, goggles.copy())), c.level()), "");
+            c.check("radar goggles: two pairs of goggles don't",
+                !recipe.matches(net.minecraft.world.item.crafting.CraftingInput.of(3, 1, List.of(radar, goggles, goggles.copy())), c.level()), "");
+            ItemStack empty = Eln.findItemStack("Ground Radar");
+            c.check("radar goggles: a radar with no batteries upgrades too", !recipe.assemble(net.minecraft.world.item.crafting.CraftingInput.of(2, 1, List.of(empty, goggles))).isEmpty(), "");
+            var found = c.level().recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, in, c.level());
+            c.check("radar goggles: the server's recipe for the grid is this one", found.isPresent()
+                && found.get().value() instanceof mods.eln.transparentnode.groundradar.GogglesUpgradeRecipe, found.map(h -> h.id().toString()).orElse("none"));
+            c.level().removeBlock(at, false);
+            var d = (mods.eln.node.transparent.TransparentNodeDescriptor) Utils.getItemObject(out);
+            var node = ((mods.eln.node.transparent.TransparentNodeItem) d.parentItem).placeAt(out, c.player(), c.level(), at, mods.eln.misc.Direction.YN);
+            double e = node != null && node.element instanceof GroundRadarElement g ? energy(g.getInventory().getItem(0)) : -1;
+            double e2 = node != null && node.element instanceof GroundRadarElement g ? energy(g.getInventory().getItem(1)) : -1;
+            c.check("radar goggles: placed, it holds both the radar's batteries", Math.abs(e - 23456) < 1 && Math.abs(e2 - 5000) < 1, e + " " + e2);
         }
     }
 }

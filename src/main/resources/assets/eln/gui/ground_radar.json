@@ -85,6 +85,10 @@
      "sample": "Scan"
     },
     {
+     "button": "view",
+     "sample": "Enter view"
+    },
+    {
      "text": "status",
      "sample": "Scan 7.0 kJ, ~35 s. Batteries 100%, scanned 59 min ago"
     }

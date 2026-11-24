@@ -40,12 +40,23 @@ public final class GroundRadar {
         return m;
     }
 
+    /** The goggles lying on the console's top beside the handle (the w/Goggles radar): two lenses in a frame, a strap. */
+    static List<Mesh> goggles() {
+        List<Mesh> m = new ArrayList<>();
+        m.add(box(11.3, 11.0, 6.0, 13.7, 11.8, 10.0, "darksteel"));                                     // the frame
+        m.add(prism('y', 12.5, 7.0, 0.8, 11.8, 12.1, "glass", 10));                                      // the lenses
+        m.add(prism('y', 12.5, 9.0, 0.8, 11.8, 12.1, "glass", 10));
+        m.add(box(12.2, 11.2, 5.0, 12.8, 11.5, 11.0, "rubber"));                                         // the strap
+        return m;
+    }
+
     public static List<NodeModel> models() {
         NodeModel n = new NodeModel("ground_radar", "paint_orange");
         List<List<Mesh>> l = new ArrayList<>();
         n.part("main", body(l));
         n.part("ledpower", l.get(0));
         n.part("ledrun", l.get(1));
+        n.part("goggles", goggles());
         return List.of(n);
     }
 }

@@ -44,6 +44,11 @@ public final class PixelTexture {
         }
     }
 
+    /** Upload a whole w x h ARGB picture (row by row) at once; its id, or null where there is no GPU. */
+    public Identifier upload(int w, int h, int[] argb) {
+        return paint(w, h, (x, y) -> argb[y * w + x]);
+    }
+
     /** Its id as last painted, or null. */
     public Identifier id() {
         return id;

@@ -773,6 +773,12 @@
   "kind": "shared_item",
   "name": "casing"
  },
+ "eln:shared_item@7740": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Radar Goggles",
+  "kind": "shared_item",
+  "name": "radar_goggles"
+ },
  "eln:shared_item@8": {
   "descriptor": "GenericItemUsingDamageDescriptorWithComment",
   "display": "Coal Dust",
@@ -1948,6 +1954,12 @@
   "display": "Ground Radar",
   "kind": "transparent_node",
   "name": "ground_radar"
+ },
+ "eln:transparent_node@6209": {
+  "descriptor": "GroundRadarDescriptor",
+  "display": "Ground Radar w/Goggles",
+  "kind": "transparent_node",
+  "name": "ground_radar_with_goggles"
  },
  "eln:transparent_node@7876": {
   "descriptor": "ElectricalPoleDescriptor",
