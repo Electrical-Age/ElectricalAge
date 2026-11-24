@@ -380,7 +380,7 @@ public final class ComputerCases {
 
         @Override
         public int ticks() {
-            return 480;
+            return 900;
         }
 
         @Override
@@ -415,14 +415,16 @@ public final class ComputerCases {
                     upAt = tick;
                     submit(ctx, e, 2, "(* 6 7)");
                 }
-                if (phase == 3 && tick == upAt + 30) after = terminal(e);
+                // (until it answers, not a fixed number of ticks later: on a loaded test server the reboot and the
+                // answer take longer, and a fixed look failed every queue run once the machine was busy)
+                if (phase == 3 && !after.contains("> (* 6 7)\n42\n")) after = terminal(e);
             });
         }
 
         @Override
         public void measure(TestContext ctx) {
             mods.eln.Eln.simulator.removeSlowProcess(watch);
-            ctx.line("computer oom: before " + before.replace("\n", "|") + " after " + after.replace("\n", "|"));
+            ctx.line("computer oom: before " + before.replace("\n", "|") + " after " + after.replace("\n", "|") + " phase " + phase);
             ctx.check("computer oom: halted, saying it ran out of memory",
                 halted == ComputerElement.HALTED && before.contains("janet out of memory"), before);
             ctx.check("computer oom: Reset boots it to a REPL that answers", after.contains("> (* 6 7)\n42\n"), after);
