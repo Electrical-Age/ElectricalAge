@@ -97,7 +97,8 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
 
         list.add(tr("Produces electricity using gasoline."))
         list.add("  " + tr("Nominal power: %1$ W", Utils.plotValue(nominalPower)))
-        list.add(tr("Fuel by pipe on its top, or by bucket. 2% less power per 1% of its fuel boiling outside 330-400 K."))
+        list.add(tr("Fuel by bucket or top pipe."))
+        list.add(tr("Full power on 330-400 K fuel; each 1% outside costs 2%."))
         list.add(tr("Traces of heavy oil or residue foul it; more chokes the injectors. Clean fuel clears fouling, wool at once."))
     }
 }
