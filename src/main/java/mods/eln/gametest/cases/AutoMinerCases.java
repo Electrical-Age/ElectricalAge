@@ -42,7 +42,7 @@ public final class AutoMinerCases {
     }
 
     /** The fastest electrical drill. */
-    static ItemStack drill() {
+    public static ItemStack drill() {
         ElectricalDrillDescriptor best = null;
         for (int i = 0; i < 64 * 128; i++)
             if (Eln.sharedItem.getDescriptor(i) instanceof ElectricalDrillDescriptor d && (best == null || d.nominalPower > best.nominalPower)) best = d;

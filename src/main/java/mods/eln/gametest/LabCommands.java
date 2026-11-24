@@ -176,6 +176,7 @@ public final class LabCommands {
                         .then(Commands.argument("detail", IntegerArgumentType.integer(1, mods.eln.transparentnode.groundradar.GroundRadarDescriptor.MAX_DETAIL))
                             .executes(c -> demo(c.getSource(), () -> radar(c.getSource(), BlockPos.containing(c.getSource().getPosition()),
                                 IntegerArgumentType.getInteger(c, "range"), IntegerArgumentType.getInteger(c, "detail")))))))
+                .then(Commands.literal("autominer").executes(c -> demo(c.getSource(), () -> autominer(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("computers").executes(c -> demo(c.getSource(), () -> computers(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("loggerdemo").executes(c -> demo(c.getSource(), () -> loggerDemo(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("spmodules").executes(c -> demo(c.getSource(), () -> spModules(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -620,6 +621,25 @@ public final class LabCommands {
         src.sendSuccess(() -> Component.literal("ground radar at " + pos.toShortString() + " range " + range + " detail " + detail + ": " + n + " across, " + L + " layers, "
             + scan.cells() + " cells (" + String.format("%.1f", kj) + " kJ, " + scan.encode().length / 1024 + " KiB sent) in " + ms + " ms, picture " + file.getFileName()
             + "; oil cells by layer top:" + oilCells), false);
+        return 1;
+    }
+
+    /**
+     * An Auto Miner at pos with the best drill and 64 pipes, fed its voltage by a source in the simulation (no cables):
+     * its monitor's view, its digging (lab look-dev). The source goes with the next restart.
+     */
+    static int autominer(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        var m = (mods.eln.transparentnode.autominer.AutoMinerElement) placeTransparent(level, player, "Auto Miner", pos);
+        m.getInventory().setItem(mods.eln.transparentnode.autominer.AutoMinerContainer.electricalDrillSlotId, mods.eln.gametest.cases.AutoMinerCases.drill());
+        m.getInventory().setItem(mods.eln.transparentnode.autominer.AutoMinerContainer.MiningPipeSlotId,
+            mods.eln.registry.ElnDeviceRegistry.miningPipeDescriptor.newItemStack(64));
+        m.getInventory().setChanged();
+        mods.eln.sim.ElectricalLoad load = mods.eln.gametest.TestContext.field(m, "inPowerLoad");
+        double u = mods.eln.gametest.TestContext.<Double>field(m.getDescriptor(), "nominalVoltage");
+        mods.eln.Eln.simulator.addElectricalComponent(new mods.eln.sim.mna.component.VoltageSource("lab auto miner", load, null).setU(u));
+        src.sendSuccess(() -> Component.literal("auto miner at " + pos.toShortString() + ", powered at " + u + " V"), false);
         return 1;
     }
 

@@ -65,6 +65,8 @@ public final class GroundScan {
     /** The world's floor (the lowest y read; the last layer is cut off there). */
     private final int minY;
     private final float[] strength;
+    /** Every cell at full signal (slab). */
+    private final boolean flat;
     private int next;
 
     /**
@@ -77,6 +79,10 @@ public final class GroundScan {
 
     /** As above, n cells across, cells growing by one block every growth blocks down. */
     public GroundScan(World world, int cx, int cy, int cz, int minY, int n, int growth) {
+        this(world, cx, cy, cz, minY, n, growth, layers(cy - 1 - minY + 1, growth), false);
+    }
+
+    private GroundScan(World world, int cx, int cy, int cz, int minY, int n, int growth, Layer[] layers, boolean flat) {
         this.world = world;
         this.n = n;
         this.growth = growth;
@@ -84,11 +90,20 @@ public final class GroundScan {
         this.cx = cx;
         this.cy = cy;
         this.cz = cz;
-        layers = layers(cy - 1 - minY + 1, growth);
+        this.layers = layers;
+        this.flat = flat;
         density = new byte[layers.length * n * n];
         flags = new byte[layers.length * n * n];
         signal = new byte[layers.length * n * n];
         strength = new float[layers.length * n * n];
+    }
+
+    /**
+     * A few chosen layers under (cx, cy, cz) at full signal (no fading: the auto-miner's own view around its drill head,
+     * where it already is), n cells across; minY the world's floor.
+     */
+    public static GroundScan slab(World world, int cx, int cy, int cz, int minY, int n, Layer... layers) {
+        return new GroundScan(world, cx, cy, cz, minY, n, 1, layers, true);
     }
 
     /** A finished scan read back (the client's copy). */
@@ -105,6 +120,7 @@ public final class GroundScan {
         this.flags = flags;
         this.signal = signal;
         this.strength = null;
+        this.flat = false;
         next = layers.length * n * n;
     }
 
@@ -202,7 +218,7 @@ public final class GroundScan {
         if (built * 8 >= known && built > 0) f |= BUILT;
         // (the signal reaching this cell: its parent's, faded through the parent's thickness)
         double s = 1;
-        if (k > 0) {
+        if (k > 0 && !flat) {
             int pi = parent(k, i, cx), pj = parent(k, j, cz);
             int p = ((k - 1) * n + pi) * n + pj;
             s = strength[p];

@@ -58,6 +58,23 @@
   {
    "row": [
     {
+     "text": "addrl",
+     "sample": "Bus address"
+    },
+    {
+     "field": "addr",
+     "chars": 4
+    },
+    {
+     "text": "busstate",
+     "sample": "No address (17 to 255)"
+    }
+   ],
+   "fill": true
+  },
+  {
+   "row": [
+    {
      "slot": "0"
     },
     {

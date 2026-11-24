@@ -35,7 +35,31 @@ import java.util.Map;
  * world's save; not in the item.
  */
 public class GroundRadarElement extends TransparentNodeElement {
-    public static final byte SCAN_ID = 1, RANGE_ID = 2, DETAIL_ID = 3;
+    public static final byte SCAN_ID = 1, RANGE_ID = 2, DETAIL_ID = 3, ADDRESS_ID = 4;
+
+    /**
+     * Its RS485 registers (Baughn: a bus port; players get creative). READ answers with a REPLY; WRITE sets. 0 state (0
+     * idle, 1 scanning, 2 a fault), 1 progress (0..1, -1 idle), 2 range, 3 detail (writable), 4 the picture's layers, 5
+     * its cells across, 6..8 the cursor's layer, x and z cell (writable), 9 density at the cursor (g/cm3), 10 its flags
+     * (GroundScan: 1 liquid, 2 oil, 4 lava, 8 a structure, 16 unknown), 11 its signal (0..1), 12 the cursor layer's
+     * depth under the radar and 13 its cell size (blocks), 14 the depth of the first oil under the centre and 15 of the
+     * first void (-1: none), 16 the batteries' charge (0..1), 17 the last picture's age (s, -1: none); write 20 to scan,
+     * 21 k to have layer k's densities sent back as data packets (a byte a cell, 0..255 for 0..4.5 g/cm3), 22 k its
+     * flags (index = the 64-byte piece, row by row, i along x; a new request replaces one still going out).
+     */
+    public static final int REG_STATE = 0, REG_PROGRESS = 1, REG_RANGE = 2, REG_DETAIL = 3, REG_LAYERS = 4, REG_CELLS = 5,
+        REG_CUR_LAYER = 6, REG_CUR_X = 7, REG_CUR_Z = 8, REG_DENSITY = 9, REG_FLAGS = 10, REG_SIGNAL = 11,
+        REG_LAYER_DEPTH = 12, REG_LAYER_CELL = 13, REG_OIL_DEPTH = 14, REG_VOID_DEPTH = 15, REG_CHARGE = 16, REG_AGE = 17,
+        REG_SCAN = 20, REG_SEND_DENSITY = 21, REG_SEND_FLAGS = 22;
+    /** Data packets it sends a tick at most (the bus carries 64 a tick in all). */
+    static final int DATA_PER_TICK = 16;
+
+    public final mods.eln.bus.BusPort port = new mods.eln.bus.BusPort();
+    private final java.util.ArrayDeque<mods.eln.bus.Packet> outbox = new java.util.ArrayDeque<>();
+    private int curLayer, curX, curZ;
+    /** The last picture decoded (for the bus), and the bytes it came from. */
+    private GroundScan decoded;
+    private byte[] decodedFrom;
     /** Kinds of the packets to the screen. */
     public static final byte PICTURE_ID = 1;
 
@@ -67,6 +91,110 @@ public class GroundRadarElement extends TransparentNodeElement {
             }
         };
         slowProcessList.add(this::tick);
+        port.listen(true);
+    }
+
+    // ---- the bus
+
+    /** Its port is on its back. */
+    @Override
+    public mods.eln.bus.BusPort busPortOn(Direction side) {
+        return front != null && side == front.getInverse() ? port : null;
+    }
+
+    public void setAddress(int a) {
+        port.setAddress(mods.eln.bus.Packet.deviceAddress(a) ? a : 0);
+        needPublish();
+    }
+
+    GroundScan picture() {
+        if (picture != decodedFrom) {
+            decoded = picture == null ? null : GroundScan.decode(picture);
+            decodedFrom = picture;
+        }
+        return decoded;
+    }
+
+    /** The packets for it, then up to DATA_PER_TICK of the data it owes. */
+    void serveBus() {
+        for (mods.eln.bus.Packet k; (k = port.poll()) != null; ) {
+            // (answers go to the asker: only a device address, not a broadcast or a colour channel a forged source names)
+            if (k.target() != port.address() || port.address() == 0 || !mods.eln.bus.Packet.deviceAddress(k.source())) continue;
+            switch (k.type()) {
+                case WRITE -> write(k.source(), k.index(), k.value());
+                case READ -> {
+                    double v = register(k.index());
+                    if (!Double.isNaN(v)) port.send(new mods.eln.bus.Packet(k.source(), port.address(), mods.eln.bus.PacketType.REPLY, k.index(), (float) v));
+                }
+                default -> {
+                }
+            }
+        }
+        for (int i = 0; i < DATA_PER_TICK && !outbox.isEmpty(); i++) port.send(outbox.poll());
+    }
+
+    void write(int from, int r, float v) {
+        int iv = Math.round(v);
+        switch (r) {
+            case REG_RANGE -> setSettings(iv, detail);
+            case REG_DETAIL -> setSettings(range, iv);
+            case REG_CUR_LAYER -> curLayer = iv;
+            case REG_CUR_X -> curX = iv;
+            case REG_CUR_Z -> curZ = iv;
+            case REG_SCAN -> startScan();
+            case REG_SEND_DENSITY, REG_SEND_FLAGS -> {
+                GroundScan p = picture();
+                if (p == null || iv < 0 || iv >= p.layers.length) return;
+                byte[] src = r == REG_SEND_DENSITY ? p.density : p.flags;
+                int off = iv * p.n * p.n, len = p.n * p.n;
+                outbox.clear();   // (a new request replaces one still going out)
+                for (int piece = 0; piece * mods.eln.bus.Packet.MAX_DATA < len; piece++) {
+                    int a = piece * mods.eln.bus.Packet.MAX_DATA, b = Math.min(len, a + mods.eln.bus.Packet.MAX_DATA);
+                    outbox.add(mods.eln.bus.Packet.data(from, port.address(), piece, java.util.Arrays.copyOfRange(src, off + a, off + b)));
+                }
+            }
+            default -> {
+            }
+        }
+    }
+
+    /** Register r's value, or NaN: no such register (or nothing there). */
+    public double register(int r) {
+        GroundScan p = picture();
+        boolean cur = p != null && curLayer >= 0 && curLayer < p.layers.length && curX >= 0 && curX < p.n && curZ >= 0 && curZ < p.n;
+        return switch (r) {
+            case REG_STATE -> scanning != null ? 1 : fault != null ? 2 : 0;
+            case REG_PROGRESS -> progress();
+            case REG_RANGE -> range;
+            case REG_DETAIL -> detail;
+            case REG_LAYERS -> p == null ? 0 : p.layers.length;
+            case REG_CELLS -> p == null ? 0 : p.n;
+            case REG_CUR_LAYER -> curLayer;
+            case REG_CUR_X -> curX;
+            case REG_CUR_Z -> curZ;
+            case REG_DENSITY -> cur ? p.densityAt(curLayer, curX, curZ) : -1;
+            case REG_FLAGS -> cur ? p.flagsAt(curLayer, curX, curZ) : -1;
+            case REG_SIGNAL -> cur ? p.signalAt(curLayer, curX, curZ) : -1;
+            case REG_LAYER_DEPTH -> p != null && curLayer >= 0 && curLayer < p.layers.length ? p.layers[curLayer].depth() : -1;
+            case REG_LAYER_CELL -> p != null && curLayer >= 0 && curLayer < p.layers.length ? p.layers[curLayer].cell() : -1;
+            case REG_OIL_DEPTH -> firstUnderCentre(p, true);
+            case REG_VOID_DEPTH -> firstUnderCentre(p, false);
+            case REG_CHARGE -> capacity() > 0 ? charge() / capacity() : 0;
+            case REG_AGE -> p == null ? -1 : (node.coordonate.world().getGameTime() - pictureAt) / 20.0;
+            default -> Double.NaN;
+        };
+    }
+
+    /** The depth (blocks under the radar) of the first oil cell, or of the first cell under 0.5 g/cm3, in the centre column; -1: none. */
+    static double firstUnderCentre(GroundScan p, boolean oil) {
+        if (p == null) return -1;
+        int c = p.n / 2;
+        for (int k = 0; k < p.layers.length; k++) {
+            int f = p.flagsAt(k, c, c);
+            if ((f & GroundScan.UNKNOWN) != 0) continue;
+            if (oil ? (f & GroundScan.OIL) != 0 : (f & GroundScan.LIQUID) == 0 && p.densityAt(k, c, c) < 0.5) return p.layers[k].depth();
+        }
+        return -1;
     }
 
     /** The energy in the batteries (J), and what they hold full. */
@@ -143,6 +271,23 @@ public class GroundRadarElement extends TransparentNodeElement {
         needPublish();
     }
 
+    /** Cells across the auto-miner's view, and the layers it shows (Baughn: a few Y levels around the drill head). */
+    public static final int MINER_CELLS = 24, MINER_LAYERS = 3;
+
+    /**
+     * The auto-miner's view: MINER_LAYERS layers of 2-block cells, MINER_CELLS across, around a drill head at head (the
+     * middle layer holds its level and the one under it), at full signal.
+     */
+    public static GroundScan minerView(ServerLevel level, net.minecraft.core.BlockPos head) {
+        GroundScan.Layer[] ls = new GroundScan.Layer[MINER_LAYERS];
+        for (int k = 0; k < MINER_LAYERS; k++) ls[k] = new GroundScan.Layer(2 * k, 2);
+        int top = head.getY() + MINER_LAYERS;   // (layer 0's top is top - 1 = the head + 2: the middle layer is the head's)
+        GroundRadarWorld world = new GroundRadarWorld(level, head.getX(), head.getZ(), MINER_CELLS + 16);
+        GroundScan s = GroundScan.slab(world, head.getX(), top, head.getZ(), level.getMinY(), MINER_CELLS, ls);
+        while (!s.step(1 << 20)) ;
+        return s;
+    }
+
     /** A whole scan of the ground under pos at once, at this range and detail (the lab's /elnlab radar). */
     public static GroundScan scanNow(ServerLevel level, net.minecraft.core.BlockPos pos, int range, int detail) {
         GroundScan s = newScan(level, pos, range, detail);
@@ -205,6 +350,7 @@ public class GroundRadarElement extends TransparentNodeElement {
      * samples of work; done once every cell is read and MIN_S has passed.
      */
     void tick(double dt) {
+        serveBus();
         if (scanning == null) {
             sendToNewViewers();
             return;
@@ -279,6 +425,7 @@ public class GroundRadarElement extends TransparentNodeElement {
                 case SCAN_ID -> startScan();
                 case RANGE_ID -> setSettings(Math.round(stream.readFloat()), detail);
                 case DETAIL_ID -> setSettings(range, Math.round(stream.readFloat()));
+                case ADDRESS_ID -> setAddress(Math.round(stream.readFloat()));
                 default -> {
                     return id;
                 }
@@ -302,6 +449,8 @@ public class GroundRadarElement extends TransparentNodeElement {
             stream.writeByte(detail);
             stream.writeFloat((float) scanEnergy());
             stream.writeFloat((float) rate());
+            stream.writeShort(port.address());
+            stream.writeBoolean(port.bus() != null);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -344,6 +493,7 @@ public class GroundRadarElement extends TransparentNodeElement {
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
+        if (port.address() != 0) nbt.putInt("addr", port.address());
         nbt.putByte("range", (byte) range);
         nbt.putByte("detail", (byte) detail);
         if (picture != null) {
@@ -357,6 +507,7 @@ public class GroundRadarElement extends TransparentNodeElement {
         super.readFromNBT(nbt);
         picture = nbt.getByteArray("picture").orElse(null);
         pictureAt = nbt.getLongOr("pictureAt", 0);
+        port.setAddress(nbt.getIntOr("addr", 0));
         range = Math.max(1, Math.min(GroundRadarDescriptor.MAX_RANGE, nbt.getByteOr("range", (byte) 1)));
         detail = Math.max(1, Math.min(GroundRadarDescriptor.MAX_DETAIL, nbt.getByteOr("detail", (byte) 1)));
         if (picture != null && GroundScan.decode(picture) == null) picture = null;   // (an older picture's format)

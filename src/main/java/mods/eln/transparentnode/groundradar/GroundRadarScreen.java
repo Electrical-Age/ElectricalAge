@@ -53,6 +53,13 @@ public class GroundRadarScreen extends ElnScreen {
             v -> render.setRange((int) Math.round(v)));
         slider("detail", 1, GroundRadarDescriptor.MAX_DETAIL, 1, render.detail,
             v -> Component.literal(tr("Detail: %1$x", (int) Math.round(v))), v -> render.setDetail((int) Math.round(v)));
+        text("addrl", () -> tr("Bus address"));
+        field("addr", () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
+            float f = mods.eln.client.gui.EaField.parse(v);
+            render.clientSendFloat(GroundRadarElement.ADDRESS_ID, Float.isNaN(f) ? 0 : Math.round(f));
+        }, tr("Its RS485 address, 17 to 255, on its back. Registers: 0 state, 1 progress, 2 range, 3 detail, 4 layers, 5 cells across, 6-8 a cell (layer, x, z), 9 its density, 10 flags, 11 signal, 12 its layer's depth, 13 cell size, 14 first oil, 15 first void, 16 charge, 17 age. Write 20 to scan, 21 or 22 with a layer for its densities (a byte a cell, 255 = 4.5 g/cm3) or flags as data packets."));
+        text("busstate", () -> render.address == 0 ? tr("No address (17 to 255)") : render.onBus ? tr("On a bus") : tr("No bus"),
+            () -> render.address != 0 && render.onBus ? OK_TEXT : LABEL);
         text("depth", this::depthText);
         text("status", this::statusText);
     }

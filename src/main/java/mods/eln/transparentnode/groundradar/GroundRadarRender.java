@@ -16,6 +16,9 @@ public class GroundRadarRender extends TransparentNodeElementRender {
     /** The scan settings, what a scan costs at them (J) and what the batteries can give (W). */
     int range = 1, detail = 1;
     float energy, rate;
+    /** Its bus address (0: none) and whether a bus cable reaches it. */
+    int address;
+    boolean onBus;
     /** The last picture, and the game time it was taken. */
     GroundScan picture;
     long pictureAt;
@@ -44,6 +47,8 @@ public class GroundRadarRender extends TransparentNodeElementRender {
             detail = stream.readByte();
             energy = stream.readFloat();
             rate = stream.readFloat();
+            address = stream.readShort();
+            onBus = stream.readBoolean();
         } catch (IOException e) {
             e.printStackTrace();
         }

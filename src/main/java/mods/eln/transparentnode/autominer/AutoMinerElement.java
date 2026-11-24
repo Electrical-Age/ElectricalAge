@@ -55,6 +55,14 @@ public class AutoMinerElement extends TransparentNodeElement {
     // Network IDs.
     public static final byte pushLogId = 1;
     public static final byte toggleSilkTouch = 2;
+    /** Packets to clients: the monitor's view (the drill head's Y, the pipes in stock, a GroundScan's bytes). */
+    public static final byte viewId = 3;
+    /** How often the monitor's view is redone while it has power (s). */
+    static final double VIEW_S = 5;
+    private double viewIn;
+    private int seen;
+    /** How near a player must be for the view to be made (blocks; the screen draws within 20). */
+    static final double VIEW_RANGE = 24;
 
     public AutoMinerElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
         super(transparentNode, descriptor);
@@ -62,6 +70,7 @@ public class AutoMinerElement extends TransparentNodeElement {
         electricalLoadList.add(inPowerLoad);
         electricalComponentList.add(powerResistor);
         slowProcessList.add(slowProcess);
+        slowProcessList.add(this::view);
 
         Failure exp = new Failure(this).machine();
         slowProcessList.add(voltageWatchdog.set(inPowerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
@@ -185,6 +194,43 @@ public class AutoMinerElement extends TransparentNodeElement {
         super.readFromNBT(nbt);
         powerOk = nbt.getBooleanOr("powerOk", false);
         slowProcess.silkTouch = nbt.getBooleanOr("silkTouch", false);
+    }
+
+    /**
+     * The monitor's view (Baughn: the black part of its screen gets the drill head's Y, the pipes left and a density map of
+     * a few Y levels around the drill head; 1.12 showed an ore scanner's picture there): the ground around the head,
+     * scanned every VIEW_S while it has power, to the players near it.
+     */
+    void view(double dt) {
+        if (!powerOk || !(node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel level)) return;
+        // (only for someone near enough to see the screen; one who comes near gets it at once)
+        var at = node.coordonate.pos();
+        int near = 0;
+        for (var p : level.players()) if (p.blockPosition().closerThan(at, VIEW_RANGE)) near++;
+        if (near == 0) {
+            viewIn = 0;
+            seen = 0;
+            return;
+        }
+        if ((viewIn -= dt) > 0 && near <= seen) return;
+        viewIn = VIEW_S;
+        seen = near;
+        var head = new net.minecraft.core.BlockPos(node.coordonate.x, node.coordonate.y - slowProcess.pipeLength, node.coordonate.z);
+        byte[] picture = mods.eln.transparentnode.groundradar.GroundRadarElement.minerView(level, head).encode();
+        var stock = getInventory().getItem(AutoMinerContainer.MiningPipeSlotId);
+        java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream(picture.length + 32);
+        java.io.DataOutputStream o = new java.io.DataOutputStream(bos);
+        preparePacketForClient(o);
+        try {
+            o.writeByte(viewId);
+            o.writeInt(head.getY());
+            o.writeInt(Utils.isEmpty(stock) ? 0 : stock.getCount());
+            o.writeInt(picture.length);
+            o.write(picture);
+        } catch (IOException e) {
+            return;
+        }
+        node.sendPacketToAllClient(bos, VIEW_RANGE);
     }
 
     void pushLog(String log) {

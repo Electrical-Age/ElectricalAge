@@ -39,7 +39,8 @@ final class GroundRadarWorld implements GroundScan.World {
 
     @Override
     public GroundScan.Material material(int x, int y, int z) {
-        if (y < level.getMinY() || y >= level.getMaxY()) return GroundScan.Material.AIR_;
+        if (y < level.getMinY()) return null;   // (under the world's floor: nothing to see, not a void)
+        if (y >= level.getMaxY()) return GroundScan.Material.AIR_;
         int qx = x >> 4, qz = z >> 4;
         if (qx != chunkX || qz != chunkZ) {
             chunkX = qx;

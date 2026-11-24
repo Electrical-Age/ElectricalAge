@@ -32,8 +32,6 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
     private boolean powerOk;
 
-    private float recalcTimeout = 0;
-
 
     private short pipeLength = 0;
     AutoMinerSlowProcess.jobType job;
@@ -106,7 +104,6 @@ public class AutoMinerRender extends TransparentNodeElementRender {
         front.glRotateXnRef();
 
         boolean drawScreen = UtilsClient.clientDistanceTo(tileEntity) < 20 && powerOk;
-        boolean drawRay = drawScreen && job != null;
 
         UtilsClient.disableCulling();
 
@@ -129,7 +126,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
             UtilsClient.enableLight();
         }
 
-        // drawRay: the ore-scanner view on the screen comes with the X-ray scanner (R5)
+        if (drawScreen && view != null) drawView();
 
         GL11.glPopMatrix();
         UtilsClient.enableCulling();
@@ -156,30 +153,6 @@ public class AutoMinerRender extends TransparentNodeElementRender {
             }
         }
 
-        if (powerOk) {
-            recalcTimeout -= deltaT;
-            if (recalcTimeout < 0) {
-                recalcTimeout += 0.5;
-                float camAlpha;
-                switch (front) {
-                    default:
-                    case XN:
-                        camAlpha = (float) Math.PI;
-                        break;
-                    case XP:
-                        camAlpha = 0;
-                        break;
-                    case ZN:
-                        camAlpha = (float) (-Math.PI / 2);
-                        break;
-                    case ZP:
-                        camAlpha = (float) (Math.PI / 2);
-                        break;
-                }
-                // R5: ore-scanner view (PortableOreScannerItem.RenderStorage.generate)
-            }
-        }
-
         pipeLengthInterpol.step(deltaT);
         if (pipeLengthInterpol.get() < 0) pipeLengthInterpol.setPos(0);
         pipe.step(deltaT);
@@ -189,9 +162,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
     public void networkUnserialize(DataInputStream stream) {
         super.networkUnserialize(stream);
         try {
-            if (pipeLength != (pipeLength = stream.readShort())) {
-                recalcTimeout = 0;
-            }
+            pipeLength = stream.readShort();
             if (job != (job = AutoMinerSlowProcess.jobType.values()[stream.readByte()])) {
                 switch (job) {
                     case ore:
@@ -228,12 +199,100 @@ public class AutoMinerRender extends TransparentNodeElementRender {
                 case AutoMinerElement.pushLogId:
                     pushLog(stream.readUTF());
                     break;
+                case AutoMinerElement.viewId: {
+                    int y = stream.readInt(), stock = stream.readInt(), n = stream.readInt();
+                    if (n < 0 || n > 1 << 20) break;
+                    byte[] b = new byte[n];
+                    stream.readFully(b);
+                    var scan = mods.eln.transparentnode.groundradar.GroundScan.decode(b);
+                    if (scan == null) break;
+                    headY = y;
+                    pipesLeft = stock;
+                    view = scan;
+                    viewDirty = true;
+                    break;
+                }
                 default:
                     break;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // ---- the monitor's view (AutoMinerElement.view): the drill head's Y, the pipes left, and the ground around the head,
+    // its three layers side by side (above it, its own, under it), in the screen's left part (the 1.12 ore view's place)
+
+    private mods.eln.transparentnode.groundradar.GroundScan view;
+    private int headY, pipesLeft;
+    private boolean viewDirty;
+    private net.minecraft.client.renderer.texture.DynamicTexture viewTexture;
+    private net.minecraft.resources.Identifier viewTex;
+    private static int viewNext;
+    /** The view's tiles: cells across, the gap between them (texels). */
+    static final int TILE_GAP = 2;
+
+    private void drawView() {
+        var v = view;
+        int n = v.n, L = v.layers.length, w = L * n + (L - 1) * TILE_GAP;
+        if (viewDirty || viewTexture == null) {
+            viewDirty = false;
+            try {
+                if (viewTexture == null || viewTexture.getPixels() == null || viewTexture.getPixels().getWidth() != w || viewTexture.getPixels().getHeight() != n) {
+                    releaseView();
+                    viewTexture = new net.minecraft.client.renderer.texture.DynamicTexture(() -> "eln auto miner view", w, n, false);
+                    viewTex = net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "dynamic/auto_miner_view_" + viewNext++);
+                    net.minecraft.client.Minecraft.getInstance().getTextureManager().register(viewTex, viewTexture);
+                }
+                var img = viewTexture.getPixels();
+                for (int y = 0; y < n; y++)
+                    for (int x = 0; x < w; x++) {
+                        int k = x / (n + TILE_GAP), i = x % (n + TILE_GAP);
+                        img.setPixel(x, y, i < n ? mods.eln.transparentnode.groundradar.GroundScan.colour(v, k, i, y) : 0xFF000000);
+                    }
+                viewTexture.upload();
+            } catch (IllegalStateException e) {
+                return;
+            }
+        }
+        UtilsClient.disableLight();
+        GL11.glPushMatrix();
+        GL11.glRotatef(180, 0, 1, 0);
+        GL11.glScalef(1 / 128f, -1 / 128f, 1);
+        UtilsClient.drawString(mods.eln.i18n.I18N.tr("Y %1$", headY), 2, 1, 0xFF55FF55);
+        UtilsClient.drawString(mods.eln.i18n.I18N.tr("Pipes %1$", pipesLeft), 2, 9, pipesLeft > 0 ? 0xFF55FF55 : 0xFFFF5555);
+        float x0 = 2, y0 = 19, x1 = 78, y1 = y0 + (x1 - x0) * n / w;
+        GL11.bindTexture(viewTex);
+        GL11.setFullBright(true);
+        GL11.glColor4f(1, 1, 1, 1);
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glTexCoord2f(0, 0);
+        GL11.glVertex2f(x0, y0);
+        GL11.glTexCoord2f(0, 1);
+        GL11.glVertex2f(x0, y1);
+        GL11.glTexCoord2f(1, 1);
+        GL11.glVertex2f(x1, y1);
+        GL11.glTexCoord2f(1, 0);
+        GL11.glVertex2f(x1, y0);
+        GL11.glEnd();
+        GL11.setFullBright(false);
+        UtilsClient.drawString("+2", 8, (int) y1 + 2, 0xFF00AA00);
+        UtilsClient.drawString("Y", 37, (int) y1 + 2, 0xFF00AA00);
+        UtilsClient.drawString("-2", 62, (int) y1 + 2, 0xFF00AA00);
+        GL11.glPopMatrix();
+        UtilsClient.enableLight();
+    }
+
+    private void releaseView() {
+        if (viewTex != null) net.minecraft.client.Minecraft.getInstance().getTextureManager().release(viewTex);
+        viewTex = null;
+        viewTexture = null;
+    }
+
+    @Override
+    public void destructor() {
+        super.destructor();
+        releaseView();
     }
 
     @Override

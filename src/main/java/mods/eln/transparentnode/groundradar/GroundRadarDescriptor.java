@@ -78,6 +78,6 @@ public class GroundRadarDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Shows what is under it, down to bedrock:\ncaves, buried structures, oil, water.\nCoarser the deeper it looks; wet ground\nfades its signal.\nRuns on two portable batteries.").split("\n"));
+        Collections.addAll(list, tr("Shows what is under it, down to bedrock:\ncaves, buried structures, oil, water.\nCoarser the deeper it looks; wet ground\nfades its signal.\nRuns on two portable batteries.\nRS485 bus port on its back.").split("\n"));
     }
 }
