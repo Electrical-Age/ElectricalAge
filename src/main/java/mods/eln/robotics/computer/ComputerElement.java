@@ -127,7 +127,7 @@ public class ComputerElement extends TransparentNodeElement {
         runner = null;
         builtFrom = now;
         Machine m = new Machine();
-        m.hello = HELLO;
+        m.hello = concat(HELLO, programOperatorLine(operator));
         boolean any = false;
         for (int s = 0; s < CHIP_SLOTS; s++) {
             ItemStack st = inventory.getItem(s);

@@ -252,7 +252,8 @@ public final class ScreenHost {
         }
         // (the program hears the geometry the screen fitted a window to, where it differs from what it asked for:
         // it already takes moved events, which players' moves send)
-        if (opening || verb.equals("place")) {
+        if (hostMade) {   // (the Kernel window is the screen's own: the program never asked for it)
+        } else if (opening || verb.equals("place")) {
             Scene.Window w = scene.windows.get(wid);
             if (w != null && (w.x != Form.num(m, 2, w.x) || w.y != Form.num(m, 3, w.y) || w.cw != Form.num(m, 4, w.cw) || w.ch != Form.num(m, 5, w.ch)))
                 toComputer.add(movedEvent(wid, w));

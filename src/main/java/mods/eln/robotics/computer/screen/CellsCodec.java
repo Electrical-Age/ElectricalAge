@@ -33,6 +33,7 @@ public final class CellsCodec {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             try (DataOutputStream o = new DataOutputStream(new DeflaterOutputStream(bos))) {
+                o.writeBoolean(sent.isEmpty());   // (a fresh start: the client forgets its pictures too, so both agree)
                 o.writeShort(c.w);
                 o.writeShort(c.h);
                 o.writeUTF(c.pens.name());
@@ -68,6 +69,7 @@ public final class CellsCodec {
     /** Decodes cells; pixmaps come from known (by version, insertion-ordered), new ones are added to it. Null if the data is bad. */
     public static SceneCells decode(byte[] data, Map<Integer, Scene.Pixmap> known) {
         try (DataInputStream in = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data)))) {
+            if (in.readBoolean()) known.clear();
             int w = in.readShort(), h = in.readShort();
             if (w < 1 || h < 1 || w > 200 || h > 100) return null;
             SceneCells c = new SceneCells(w, h);

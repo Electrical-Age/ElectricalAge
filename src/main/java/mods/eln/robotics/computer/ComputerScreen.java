@@ -400,7 +400,7 @@ public class ComputerScreen extends ElnScreen {
         EditorState st = editorState(t, id);
         Object change = whole(t, id) ? st.text : hunks(st.baseText, st.text);
         if (Form.print(new Form.Symbol("save"), (long) t, (long) id, render.seq + 1, st.baseRev == null ? "" : st.baseRev, change).length()
-            > mods.eln.robotics.computer.screen.ScreenHost.MAX_SAVE) {   // (the server would drop it, and "Saving..." would stay)
+            > mods.eln.robotics.computer.screen.ScreenHost.MAX_SAVE - 16) {   // (the server would drop it, and "Saving..." would stay; 16: the :gen added on sending)
             st.status = tr("Too big to save in one go: save in smaller steps, or split the file");
             return;
         }
@@ -894,7 +894,7 @@ public class ComputerScreen extends ElnScreen {
 
     void pick(Scene.Window t, String menu, String[] it) {
         if (t.disabled.contains(menu + "/" + it[0])) return;
-        editorAction(it[2], it[3]);
+        if (!editorAction(it[2], it[3])) return;   // (a Save As too big to send: no pick, or Ed would write the old text)
         render.screenEvent(new Form.Symbol("pick"), (long) active, menu, it[0]);
     }
 
@@ -905,31 +905,37 @@ public class ComputerScreen extends ElnScreen {
      * :find-next and :go-to-line open the editor's bar or find again, :name gives the keys to the line asking a name.
      * The item names the editor element; without one, the window's only editor.
      */
-    void editorAction(String action, String element) {
-        if (action.isEmpty()) return;
+    boolean editorAction(String action, String element) {
+        if (action.isEmpty()) return true;
         // (the editor the item names, or the window's only one; drawn or not: an editor covered by another window still
         // has its text here, and Close must still save it)
         String key = null;
         Scene.Window win = activeWindow();
-        if (win == null) return;
+        if (win == null) return true;
         if (!element.isEmpty()) {
             Scene.Element e = win.elements.get(Integer.parseInt(element));
             key = e != null && e.kind.equals("editor") ? active + "/" + element : null;
         } else
             for (var en : win.elements.entrySet())
                 if (en.getValue().kind.equals("editor")) key = key == null ? active + "/" + en.getKey() : "";
-        if (key == null || key.isEmpty()) return;   // (none, or several and the item doesn't say which)
+        if (key == null || key.isEmpty()) return true;   // (none, or several and the item doesn't say which)
         var w = editorWidgets.get(key);
         EditorState st = editorState(active, Integer.parseInt(key.split("/")[1]));
-        if (w == null && !action.equals("save") && !action.equals("save-as")) return;   // (find and the like need it drawn)
+        if (w == null && !action.equals("save") && !action.equals("save-as")) return true;   // (find and the like need it drawn)
         switch (action) {
             case "save" -> {
                 if (st.baseText == null || !st.text.equals(st.baseText)) save(key);
             }
             case "save-as" -> {   // (its changes, kept aside by the program and written only under the new name)
                 int eid = Integer.parseInt(key.split("/")[1]);
+                Object change = whole(active, eid) ? st.text : hunks(st.baseText, st.text);
+                if (Form.print(new Form.Symbol("stash"), (long) active, (long) eid, render.seq + 1, st.baseRev == null ? "" : st.baseRev, change).length()
+                    > mods.eln.robotics.computer.screen.ScreenHost.MAX_SAVE - 16) {   // (dropped, Save As would write the old text)
+                    st.status = tr("Too big to save in one go: save in smaller steps, or split the file");
+                    return false;
+                }
                 render.screenEvent(new Form.Symbol("stash"), (long) active, (long) eid, ++render.seq,
-                    st.baseRev == null ? "" : st.baseRev, whole(active, eid) ? st.text : hunks(st.baseText, st.text));
+                    st.baseRev == null ? "" : st.baseRev, change);
                 if (w != null) w.setFocused(false);   // (the keys go to the line that asks for the name)
                 setFocused(null);
             }
@@ -952,6 +958,7 @@ public class ComputerScreen extends ElnScreen {
             default -> {
             }
         }
+        return true;
     }
 
     /** A window brought back: restored if minimised (reported), raised and given the keyboard. */

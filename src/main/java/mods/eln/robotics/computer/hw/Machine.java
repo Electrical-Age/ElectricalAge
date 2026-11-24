@@ -100,7 +100,7 @@ public final class Machine implements Mmio {
     }
 
     /** What the screen says first after every reset (Wire 2's hello, with its newline), or null. */
-    public byte[] hello;
+    public volatile byte[] hello;
 
     /**
      * Start from the boot vector: registers cleared, RAM kept (a reset doesn't clear chips). The screen channels are

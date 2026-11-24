@@ -49,4 +49,17 @@ class CellsCodecTest {
             assertEquals(java.nio.file.Files.readString(root.resolve("rom/common").resolve(f)),
                 java.nio.file.Files.readString(root.resolve("rom/disks/applications/System").resolve(f)), f);
     }
+
+    /** The server starts a watcher afresh (they opened the screen, came back in range): the client forgets too. */
+    @Test
+    void aFreshStartForgetsOnBothEnds() {
+        ScreenHost h = new ScreenHost();
+        h.fromComputer("(pixmap 7 2 1 [:red] \"00\")\n(backdrop 7)\n".getBytes(StandardCharsets.UTF_8));
+        SceneCells c = SceneCells.of(h.scene);
+        var known = new HashMap<Integer, Scene.Pixmap>();
+        known.put(-5, new Scene.Pixmap(1, 1, new int[1], -5));   // (something the server no longer remembers sending)
+        assertNotNull(CellsCodec.decode(CellsCodec.encode(c, new java.util.LinkedHashSet<>()), known));
+        assertFalse(known.containsKey(-5), "a fresh start clears the client's pictures");
+        assertEquals(1, known.size());
+    }
 }
