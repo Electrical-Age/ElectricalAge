@@ -100,7 +100,7 @@ JANET_FN(cfun_input, "(ea/input)", "The terminal's typed bytes waiting, as a str
 JANET_FN(cfun_editor_input, "(ea/display-input)", "Bytes from the screen (the display channel) waiting, as a string.") {
     janet_fixarity(argc, 0);
     (void) argv;
-    uint8_t buf[512];
+    static uint8_t buf[4096];   /* (a 40 KB save took 80 scheduler passes at 512 a pass) */
     int32_t n = 0;
     while (n < (int32_t) sizeof buf && (CON_STATUS(EDITOR) & 1)) {
         int32_t c = (int32_t) CON_RX(EDITOR);

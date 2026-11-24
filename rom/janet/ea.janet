@@ -151,12 +151,14 @@
 # ---- the screen's channel (the display protocol: one Janet form per line, both ways; the handbook's "The Screen
 # Protocol"). Defined before the scheduler, which drains it.
 
+(defn- drop-front "Remove the first n bytes of buffer b, in place (no copy: a full channel made sends quadratic)." [b n]
+  (when (> n 0)
+    (buffer/blit b b 0 n)
+    (buffer/popn b n)))
+
 (defn- display-drain "Send what is waiting for the screen, as far as its channel has room." []
   (unless (empty? display-out)
-    (def n (ea/display-write display-out))
-    (def rest (buffer/slice display-out n))
-    (buffer/clear display-out)
-    (buffer/push display-out rest)))
+    (drop-front display-out (ea/display-write display-out))))
 
 (def- quote-str ea/quote)
 
@@ -290,18 +292,22 @@
   (when (and (tuple? m) (= 'pick (m 0)) (= 0 (get m 1)) (= "About Dynamo" (get m 3)))
     (about)))
 
+(var- display-scan 0)   # how far display-in is known to hold no newline (a long event isn't searched again each pass)
 (defn- screen-events "Read the screen's events and run their handlers as tasks." []
   (buffer/push display-in (ea/display-input))
+  (var start 0)
+  (var from display-scan)
   (forever
-    (def nl (string/find "\n" display-in))
+    (def nl (string/find "\n" display-in from))
     (unless nl (break))
-    (def line (string/slice display-in 0 nl))
-    (def rest (string/slice display-in (+ nl 1)))
-    (buffer/clear display-in)
-    (buffer/push display-in rest)
+    (def line (string/slice display-in start nl))
+    (set start (+ nl 1))
+    (set from start)
     (def [ok m] (protect (parse line)))
     (when ok   # (a bad event must not stop the scheduler: it says so on the console)
-      (try (screen-event m) ([e] (eprint "screen event " line ": " e))))))
+      (try (screen-event m) ([e] (eprint "screen event " line ": " e)))))
+  (drop-front display-in start)
+  (set display-scan (length display-in)))
 
 (defn- run []
   (forever

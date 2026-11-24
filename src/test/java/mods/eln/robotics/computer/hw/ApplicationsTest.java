@@ -274,7 +274,8 @@ class ApplicationsTest extends StdlibTest {
             assertFalse(m.halted(), "halted at " + have + " lines: " + screen.console);
             assertNotNull(rev, "saved at " + have + " lines; " + dump(screen) + " " + screen.console);
         }
-        type("(length (slurp \"" + name + "\"))");
+        // (its size without reading it: a slurp of 33 KB wants a 64 KB piece, which a two-chip computer may not have)
+        type("(with [f (file/open \"" + name + "\")] (file/seek f :end 0) (file/tell f))");
         tick(60, String.valueOf(520 * 64 - 1));
     }
 
