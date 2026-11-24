@@ -78,10 +78,11 @@ public final class FluidPlacement {
         java.util.List<FluidDevice.FluidPort> ports = new java.util.ArrayList<>();
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         if (n instanceof mods.eln.node.voxel.VoxelNode v) ports.addAll(v.fluidPorts());
-        // (a multiblock's ports name their own blocks: the 2x2x2 Large Boiler's, at its node or on its ghost blocks)
-        else if (n instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof mods.eln.oil.LargeBoilerElement b) ports.addAll(b.portsAt(pos.asLong()));
+        // (a multiblock's ports name their own blocks, at its node or on its ghost blocks: asked before FluidDevice, which
+        // it is too and would hand out all its ports at its node)
+        else if (n instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof GhostPortHost h) ports.addAll(h.portsAt(pos.asLong()));
         else if (n instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof FluidDevice d) ports.addAll(d.fluidPorts());
-        else if (n instanceof mods.eln.oil.LargeBoilerElement.FaceNode g) ports.addAll(g.fluidPorts());
+        else if (n instanceof GhostPortHost g) ports.addAll(g.portsAt(pos.asLong()));
         return ports;
     }
 }

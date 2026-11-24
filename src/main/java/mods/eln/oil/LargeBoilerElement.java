@@ -32,7 +32,7 @@ import java.util.List;
  * The faces on ghost blocks are FaceNodes, ghost nodes (never saved) made in initialize and dropped with the boiler,
  * as the Auto Miner's power nodes are. Its ghost group doesn't turn, so neither does it (no wrenchTurn).
  */
-public class LargeBoilerElement extends BoilerElement {
+public class LargeBoilerElement extends BoilerElement implements mods.eln.fluid.GhostPortHost {
     private final List<FaceNode> faces = new ArrayList<>();
 
     public LargeBoilerElement(TransparentNode node, TransparentNodeDescriptor d) {
@@ -64,6 +64,7 @@ public class LargeBoilerElement extends BoilerElement {
     }
 
     /** The ports on one of its blocks (for the pipe tool, which asks the node at a block for its ports). */
+    @Override
     public List<FluidPort> portsAt(long pos) {
         List<FluidPort> out = new ArrayList<>();
         for (FluidPort p : fluidPorts()) if (p.pos() == pos) out.add(p);
@@ -117,7 +118,7 @@ public class LargeBoilerElement extends BoilerElement {
     }
 
     /** The faces of one ghost block: its thermal faces hand out the boiler's shell; nothing else connects. */
-    public static final class FaceNode extends GhostNode {
+    public static final class FaceNode extends GhostNode implements mods.eln.fluid.GhostPortHost {
         final LargeBoilerElement boiler;
         final int x, y, z;
 
@@ -128,8 +129,9 @@ public class LargeBoilerElement extends BoilerElement {
             this.z = z;
         }
 
-        public List<FluidPort> fluidPorts() {
-            return boiler.portsAt(coordonate.pos().asLong());
+        @Override
+        public List<FluidPort> portsAt(long pos) {
+            return boiler.portsAt(pos);
         }
 
         @Override
