@@ -131,6 +131,7 @@ steamcracker/steamcracker.obj
 steamoven/steamoven.obj
 steamturbine200v/steamturbine200v.obj
 steamturbine50v/steamturbine50v.obj
+stillpot/stillpot.obj
 stonecache/stonecache.obj
 stonefurnace/stonefurnace.obj
 streetlight/streetlight.obj

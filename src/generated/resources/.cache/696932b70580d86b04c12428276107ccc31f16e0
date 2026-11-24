@@ -1,4 +1,4 @@
-// 26.3	2026-11-24T18:20:05.744700614	eln-global/EA models
+// 26.3	2026-11-24T18:20:56.30232028	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -97,6 +97,7 @@ d1ded4e12a77c8c2a0166508f6ac2db69ab99c80 assets/eln/blockstates/servo_rail.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/steam_injection_wellhead.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/steam_oven.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/steam_turbine.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/still_pot.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/stone_heat_furnace.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/tachometer.json
 b33b278bbc3903861507ad0512c9ffa4ba8866b8 assets/eln/blockstates/tungsten_ore.json
@@ -464,6 +465,7 @@ d24ffb983231782ab81f445b6600749d145b89a6 assets/eln/items/station_marker.json
 9419d74e29c682a6d664170f063dd973a0898acd assets/eln/items/steam_injection_wellhead.json
 0a5420dad554eca037ba807beb9837751b42e535 assets/eln/items/steam_oven.json
 f5be8cbae972b0a222f2b97523926ae36187a761 assets/eln/items/steam_turbine.json
+741d61494f9a1237357f2220950bab08558b865c assets/eln/items/still_pot.json
 7673b321165d9e22db59d2bf13173c3dfa78066e assets/eln/items/stone_heat_furnace.json
 4f821cb69637a405c1e173be16701f19b1b9fdca assets/eln/items/streetlight.json
 47b93477bd2460641c05babd1e2606afbae6209b assets/eln/items/sulfur_dust.json
@@ -1013,6 +1015,7 @@ e71b9d2de98ff0b2c7973a222308685b11ae6690 assets/eln/models/item/steam_cracker.js
 5e84f459a170388d992107a67a11427a8505a577 assets/eln/models/item/steam_oven_3d.json
 1ad10bb23f5a1ed79129d5cedc9760acd3a70ab7 assets/eln/models/item/steam_turbine.json
 8e835b5350ed3fe674a792114b186e8fb3906a03 assets/eln/models/item/steam_turbine_3d.json
+48d55dac32ee646e984d9149d19bf563a665bcdc assets/eln/models/item/still_pot.json
 215449c06675518ad1f5a2b5af777d6ae2514cc3 assets/eln/models/item/stone_heat_furnace.json
 0adeb700d126d3b2a069b69bcbb150612ee445c6 assets/eln/models/item/stone_heat_furnace_3d.json
 c3db5090a9ade1cbc25c765f6bfe986e9a7f383e assets/eln/models/item/streetlight.json

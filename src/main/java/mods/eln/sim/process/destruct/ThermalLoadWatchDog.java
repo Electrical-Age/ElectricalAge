@@ -25,6 +25,15 @@ public class ThermalLoadWatchDog extends ValueWatchdog {
         return this;
     }
 
+    /**
+     * Its budget (K s of overflow, after the one-tick joker) instead of the default (the limit's own number of K s, ~550
+     * at 850 K: a shell climbing 2.5 K/s ran 50 K past it first). The Still Pot's: its limit is what its shell takes.
+     */
+    public ThermalLoadWatchDog setBudget(double kelvinSeconds) {
+        this.timeoutReset = kelvinSeconds;
+        return this;
+    }
+
     public ThermalLoadWatchDog set(ThermalLoadInitializer t) {
         this.max = t.warmLimit;
         this.min = t.coolLimit;

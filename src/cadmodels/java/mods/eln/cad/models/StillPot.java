@@ -1,0 +1,128 @@
+package mods.eln.cad.models;
+
+import org.erisia.cad.Frustum;
+import org.erisia.cad.Mesh;
+import org.erisia.cad.Solid;
+import org.erisia.cad.Sweep;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static mods.eln.cad.models.Mc.box;
+import static mods.eln.cad.models.Mc.prism;
+import static mods.eln.cad.models.OilKit.boltRing;
+import static mods.eln.cad.models.OilKit.dial;
+import static mods.eln.cad.models.OilKit.handwheel;
+import static mods.eln.cad.models.OilKit.signalPlate;
+
+/**
+ * The 2x2x2 Still Pot (refinery M2, todo #591): a riveted copper kettle standing on the Large Boiler's skid, a domed
+ * head, a swan neck off the dome to the vapour flange, a thermometer and a sight glass on its front. No firebox: it is
+ * heated from outside, as the Large Boiler. Drawn from its origin block (front bottom left), full size: 0..32 px on each
+ * axis, front XN (x = 0), right z+, as StillPotElement's local frame. Its connections, each at its block face's centre
+ * (the ports' spots):
+ * <ul>
+ * <li>thermal: the Large Boiler's six copper heat plates on the lower back and flank faces, each with a hot copper shoe
+ * in to the kettle's foot;</li>
+ * <li>vapour out: a steam flange on top of the rear left top block (x 24, z 8; top at y 32), at the end of the swan
+ * neck;</li>
+ * <li>drain: a flange on the front of the bottom right block (y 8, z 24), its stub through a drain cock into the
+ * kettle's foot;</li>
+ * <li>fill and steam: flanges on the front of the top right (y 24, z 24) and top left (y 24, z 8) blocks, their stubs
+ * into the dome;</li>
+ * <li>the temperature signal: a signal plate at the floor of the front of the origin block (z 8).</li>
+ * </ul>
+ * No hitbox: its eight blocks are whole blocks (the node and its ghosts).
+ */
+public final class StillPot {
+    private StillPot() {
+    }
+
+    /** The kettle's axis (x, z), radius, its foot (the skid's deck top), the dome's seam and top, the dome's top radius. */
+    static final double CX = 16, CZ = 16, R = 11.5, DECK = 4.2, SEAM = 21.0, TOP = 26.5, R_TOP = 5.5;
+    static final int N = 20;
+    /** The vapour flange (x, z) and the front flanges (y, z). */
+    static final double VX = 24, VZ = 8;
+
+    /** The dome's radius at height y. */
+    static double domeR(double y) {
+        return R + (R_TOP - R) * (y - SEAM) / (TOP - SEAM);
+    }
+
+    /** Where the kettle's (or the dome's) skin is at height y, seen from the front, at z (x px). */
+    static double frontSkin(double y, double z) {
+        double r = y <= SEAM ? R : domeR(y);
+        return CX - Math.sqrt(r * r - (z - CZ) * (z - CZ));
+    }
+
+    /** A front flange at (y, z) with its reducer and a stub of radius rs into the kettle's skin. */
+    static List<Mesh> frontFlange(double y, double z, double rs) {
+        List<Mesh> m = new ArrayList<>();
+        m.add(prism('x', y, z, 2.75, 0.0, 1.0, "steel", 12));
+        m.add(prism('x', y, z, 2.0, 1.0, 1.4, "steel", 12, false, true));
+        m.addAll(boltRing('x', y, z, 2.35, 1.0, 1.2, 6, "brass", 0.2, 0));
+        m.add(prism('x', y, z, rs, 1.4, frontSkin(y, z) + 0.6, "copper", 10, false, false));
+        return m;
+    }
+
+    static List<Solid> main() {
+        List<Solid> m = new ArrayList<>();
+        // the skid: the Large Boiler's cast-iron bed under a darksteel deck
+        m.add(box(1.0, 0, 1.0, 31.0, DECK - 0.8, 31.0, "castiron", "nsew"));
+        m.add(box(0.6, DECK - 0.8, 0.6, 31.4, DECK, 31.4, "darksteel", "nsewud"));
+        // the kettle: a darksteel foot ring, the copper body, riveted seam bands, the dome and its crown
+        m.add(prism('y', CX, CZ, R + 0.4, DECK, DECK + 1.7, "darksteel", N));
+        m.add(prism('y', CX, CZ, R, DECK, SEAM, "copper", N, false, false));
+        for (double y : new double[]{DECK + 5.0, DECK + 10.5, SEAM - 0.4}) m.add(prism('y', CX, CZ, R + 0.15, y, y + 0.4, "darksteel", N, false, false));
+        m.add(prism('y', CX, CZ, R, SEAM, TOP, "copper", N, R_TOP, false, false, Double.NaN));
+        m.add(prism('y', CX, CZ, R_TOP, TOP, TOP + 0.6, "copper", N, R_TOP - 1.0, false, true, Double.NaN));
+        // the heat plates on the skid's back and flanks, each with a hot copper shoe in to the kettle's foot
+        for (double u : new double[]{8, 24}) {
+            m.addAll(LargeBoiler.heatPlate('x', 32, u, 0));
+            m.addAll(LargeBoiler.heatPlate('z', 0, u, 0));
+            m.addAll(LargeBoiler.heatPlate('z', 32, u, 0));
+            double side = Math.sqrt(R * R - (u - CZ) * (u - CZ));
+            m.add(box(u - 2.4, DECK - 0.6, 0.4, u + 2.4, DECK + 1.2, CZ - side + 1.0, "hotcopper"));
+            m.add(box(u - 2.4, DECK - 0.6, CZ + side - 1.0, u + 2.4, DECK + 1.2, 31.6, "hotcopper"));
+            m.add(box(CX + side - 1.0, DECK - 0.6, u - 2.4, 31.6, DECK + 1.2, u + 2.4, "hotcopper"));
+        }
+        // the swan neck: a collar on the crown, up and over to the vapour flange on top of the rear left block
+        m.add(prism('y', CX, CZ, 2.6, TOP + 0.4, TOP + 1.4, "darksteel", 12));
+        double ny = 29.6;
+        for (Frustum f : Sweep.along(new double[]{CX, TOP + 0.6, CZ, CX, ny, CZ, VX, ny, VZ, VX, 30.6, VZ}, 1.6, 0.5)) m.add(f.material("copper"));
+        m.add(prism('y', VX, VZ, 2.0, 30.0, 31.0, "steel", 12, true, false));
+        m.add(prism('y', VX, VZ, 2.75, 31.0, 32.0, "steel", 12));
+        m.addAll(boltRing('y', VX, VZ, 2.35, 30.8, 31.0, 6, "brass", 0.2, 0));
+        // the neck's stay down to the dome
+        double stayX = (CX + VX) / 2, stayZ = (CZ + VZ) / 2;
+        m.add(prism('y', stayX, stayZ, 0.4, TOP - 1.0, ny - 1.4, "darksteel", 8, false, false));
+        // the front: drain (low right, through a cock), fill (high right) and steam (high left)
+        m.addAll(frontFlange(8.0, 24.0, 1.2));
+        m.add(box(2.6, 6.8, 22.8, 4.4, 9.2, 25.2, "castiron"));
+        m.add(prism('y', 3.5, 24.0, 0.25, 9.2, 9.9, "darksteel", 6, false, false));
+        m.addAll(handwheel(3.5, 10.0, 24.0, 0.9, 'y'));
+        m.addAll(frontFlange(24.0, 24.0, 1.2));
+        m.addAll(frontFlange(24.0, 8.0, 1.2));
+        // the temperature signal: the plate at the floor of the origin's front, its transmitter on the deck, its line up
+        m.addAll(signalPlate());
+        m.add(box(0.85, 0, 6.5, 1.2, 3.5, 9.5, "steel", "nsu"));
+        m.add(box(1.0, DECK, 7.0, 2.8, DECK + 1.6, 10.2, "darksteel"));
+        // the thermometer: a dial on a stalk out of the kettle's front, its sensor line down to the transmitter
+        double ty = 15.0, tz = 13.0, skin = frontSkin(ty, tz);
+        m.add(prism('x', ty, tz, 0.4, skin - 1.6, skin + 0.5, "brass", 8, false, false));
+        m.addAll(dial(skin - 2.0, ty, tz, 2.0, "xn", 0.4).subList(0, 2));
+        m.add(prism('y', 2.3, 8.6, 0.25, DECK + 1.6, ty - 2.2, "darksteel", 6, false, false));
+        m.add(box(2.05, ty - 2.45, 8.35, 2.55, ty - 1.95, tz - 0.6, "darksteel"));
+        // the sight glass: a glass tube between two brass cocks on the kettle's front right
+        double gz = 19.5, g0 = 8.0, g1 = 18.0, gx = frontSkin(g0, gz) - 1.2;
+        for (double y : new double[]{g0 - 0.8, g1}) m.add(box(gx - 0.8, y, gz - 0.8, frontSkin(y, gz) + 0.6, y + 0.8, gz + 0.8, "brass"));
+        m.add(prism('y', gx, gz, 0.5, g0, g1, "sightglass", 8, false, false));
+        return m;
+    }
+
+    public static List<NodeModel> models() {
+        NodeModel n = new NodeModel("stillpot", OilKit.PAINT_BOILER);
+        n.part("main", main());
+        return List.of(n);
+    }
+}

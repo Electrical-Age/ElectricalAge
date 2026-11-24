@@ -125,6 +125,8 @@ public class Wp10aContent implements ElnContent {
         // Baughn 2026-11-15: a Large Boiler of alloy plate, about four Boilers, 2x2x2 blocks (here: the steam group 82 is
         // full). Sub-id 12 was its one-block prototype, never shipped: left unused. Its own model (largeboiler, todo #522).
         transparentNodeItem.addDescriptor(16 + (id << 6), mods.eln.oil.BoilerDescriptor.twoByTwo(TR_NAME(Type.NONE, "Large Boiler"), "largeboiler"));
+        // refinery M2 (todo #591, Baughn: batch first): the Still Pot, a 2x2x2 kettle heated as the Large Boiler is
+        transparentNodeItem.addDescriptor(20 + (id << 6), new mods.eln.oil.StillPotDescriptor(TR_NAME(Type.NONE, "Still Pot"), "stillpot"));
     }
 
     /** 26.x oil & steam: electric heaters and the boiler (placeholder models). */

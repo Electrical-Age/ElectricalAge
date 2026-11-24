@@ -234,7 +234,8 @@ public final class EaUnits {
         return fill + " / " + volume(capacityMb);
     }
 
-    private static String grams(double g) {
+    /** Grams for players: "12 g", "1.2 kg" (two figures). */
+    public static String grams(double g) {
         return g >= 1000 ? compact(g / 1000) + " kg" : compact(g) + " g";
     }
 

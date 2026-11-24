@@ -2352,6 +2352,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             't', findItemStack("Copper Thermal Cable"),
             'P', findItemStack("Alloy Plate"));
 
+        // the Still Pot (refinery M2): a copper kettle, its shell's thermal cable, a bucket for a sight glass
+        addRecipe(findItemStack("Still Pot", 1),
+            "PBP",
+            "PtP",
+            "PPP",
+            'B', stack(Items.BUCKET),
+            't', findItemStack("Copper Thermal Cable"),
+            'P', findItemStack("Copper Plate"));
+
         addRecipe(findItemStack("48V Compressor", 1),
             "IRI",
             "FMF",

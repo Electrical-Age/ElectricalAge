@@ -55,6 +55,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.PlumbingCases.addTo(l);
         mods.eln.gametest.cases.ShaftPlantCases.addTo(l);
         mods.eln.gametest.cases.HpPlantCases.addTo(l);
+        mods.eln.gametest.cases.StillPotCases.addTo(l);
         mods.eln.gametest.cases.PipeSizeCases.addTo(l);
         mods.eln.gametest.cases.GasPlantCases.addTo(l);
         mods.eln.gametest.cases.HeatExchangerCases.addTo(l);

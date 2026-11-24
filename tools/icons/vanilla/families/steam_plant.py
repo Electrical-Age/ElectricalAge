@@ -183,3 +183,30 @@ def electric_heater(tier):
     cv.hline(gx, gx + gw, gy + gh, STEEL[4])
     cv.vline(gx + gw, gy, gy + gh, STEEL[4])
     return cv
+
+
+# ------------------------------------------------------------------------------- still pot
+def still_pot():
+    """Still Pot (cadmodels StillPot, 2x2x2): the riveted copper kettle standing on the Large Boiler's
+    copper-padded skid, its domed head and crown, the swan neck over to the vapour flange on the right,
+    the thermometer's white face on its front. Upright and copper where the Large Boiler is a dark drum on
+    its side."""
+    cv = Canvas(16)
+    box(cv, 1, 13, 13, 2, 1, IRON_D, bevel=False)                     # the skid, rows 12..14
+    _pads(cv, 13, (2, 11), w=3)
+    cylinder(cv, 3, 5, 8, 10, VCOPPER, axis='y')                       # the kettle, cols 3..12, rows 5..12
+    for yy in (7, 10):                                                 # riveted seam bands
+        for xx in range(3, 13):
+            c = cv.get(xx, yy)
+            cv.set(xx, yy, VCOPPER[1] if c in (VCOPPER[2], VCOPPER[3]) else VCOPPER[2])
+    sub(cv, lambda c: cylinder(c, 4, 3, 3, 8, VCOPPER, axis='y'))      # the dome
+    sub(cv, lambda c: cylinder(c, 6, 1, 3, 4, VCOPPER, axis='y'))      # its crown
+    # the swan neck off the crown, over to the flange on the right
+    cv.hline(9, 12, 1, VCOPPER[4])
+    cv.hline(9, 12, 2, VCOPPER[2])
+    cv.vline(13, 1, 3, STEEL[3])
+    cv.vline(14, 1, 3, STEEL[1])
+    # the thermometer: a white face with a dark needle on the kettle's front
+    cv.set(5, 8, WHITE); cv.set(6, 8, WHITE)
+    cv.set(6, 9, VCOPPER[0])
+    return cv

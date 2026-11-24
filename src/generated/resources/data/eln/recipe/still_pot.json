@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:bucket",
+    "P": "eln:copper_plate",
+    "t": "eln:copper_thermal_cable"
+  },
+  "pattern": [
+    "PBP",
+    "PtP",
+    "PPP"
+  ],
+  "result": {
+    "id": "eln:still_pot"
+  }
+}

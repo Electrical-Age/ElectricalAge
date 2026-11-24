@@ -109,6 +109,20 @@ becomes gasoline, as the old tank burnt every fuel alike. GameTests gas_turbine_
 gas_turbine_heavy_oil_fouls, gas_turbine_crude_chokes, fuel_generator_residue_chokes, gas_turbine_clean_fuel_clears, fuel_generator_gasoline, fuel_generator_piped, fuel_generator_off_spec_derates, fuel_generator_diesel_derates, fuel_generator_restarts_after_dilution,
 fuel_generator_clean_fuel_clears, fuel_generator_old_save; unit test FuelQualityTest.
 
+The Still Pot (refinery M2, todo #591; `oil/StillPotElement`, model `cadmodels/StillPot`): a 2x2x2 kettle of 32 B for a
+16-24 B batch, heated through its shell like the Large Boiler (the same six lower heat faces, `oil/GhostCells`), its
+vapour off the top of its rear left block to a condenser and receivers that breathe (the breather valve). Constants from
+the step-0 sketch (`sim/fluid/StillSketchTest`, gated: `-Psketch=still`): wall 60 W/K, shell 2800 J/K losing 2.5 W/K,
+shell limit 850 K (its watchdog trips from 840 K on a 20 K s budget, so a pot boiled down to residue under a big burner
+stops by 850 K). Front: the liquid's temperature as a signal on the origin (1 V a 100 °C), the bottoms drain low right
+(draw 0), the fill high right and the steam inlet high left (into the pot through check valves; the steam down a dip pipe
+to the floor). Boiled too hard it boils over: a check link from its floor to the neck at its vapour port, metered by an
+orifice, carries E = 2 (F / 0.10 - 1) kg of liquid (to 5) per kg of vapour, F the Souders-Brown factor of the smoothed
+vapour velocity over the node's cross-section; a medium burner stays under it, a big one forced puts residue in the
+product and chokes engines. Jade: boiling over, only residue left, under vacuum (below 0.9 bar); pressure, temperature,
+shell, what boils off ("Boiling now", while vapour leaves), contents, liquid, viscosity, the signal. Its fluid
+capability is on its origin block (ghost blocks expose none). GameTests `still_pot_*`.
+
 ### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)
 - Datapack JSON `data/<ns>/eln/fluid_species/<name>.json` defines species `<ns>:<name>` for the fluid core (fields in
   the loader's javadoc: kind curve/none/gas, group, density, heat capacities, molar mass, boiling point, latent heat,

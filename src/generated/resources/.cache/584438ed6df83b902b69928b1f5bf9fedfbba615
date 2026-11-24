@@ -1,4 +1,4 @@
-// 26.3	2026-11-24T15:33:03.492047136	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-24T18:20:56.30610016	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 98be7e719755f1d65131e906daa7a98b081c8ce8 data/eln/advancement/recipes/misc/230v_air_blower.json
@@ -328,6 +328,7 @@ ca2f8a0f26291613f84a226e9e99d0312ac72383 data/eln/advancement/recipes/misc/steam
 80d2514f5559c045fad856c766d9b349f59b0d1a data/eln/advancement/recipes/misc/steam_turbine_2.json
 7db10e9d7d6d8e99f8c777e97e56e3c62c8c6938 data/eln/advancement/recipes/misc/steam_turbine_3.json
 0590face2856286a25dda602fcc505727821f789 data/eln/advancement/recipes/misc/steam_turbine_4.json
+58ed4cec16eb783daddce30bb01edf1e32a58708 data/eln/advancement/recipes/misc/still_pot.json
 64db41bd58f33e20ba7b082b4a155fa8b5980d4a data/eln/advancement/recipes/misc/stone_heat_furnace.json
 6eb149d68fe73de4c46fa56fc4ad01e8303f8d49 data/eln/advancement/recipes/misc/street_light.json
 8c7779a14aa260ae9e6e6fd490c679ba77c96e9f data/eln/advancement/recipes/misc/suspended_lamp_socket.json
@@ -718,6 +719,7 @@ d73dbee890e5b032106e12119ea9857489e8714d data/eln/recipe/steam_turbine.json
 90cc99ddc75685fa0dab1231a0fdc71e1ab0fd62 data/eln/recipe/steam_turbine_2.json
 25cb56c03da5f16893a1f4e8d1aed69997ce7d22 data/eln/recipe/steam_turbine_3.json
 6a5c4ea8dd1a012cdf9c341e34853e3dcd152e29 data/eln/recipe/steam_turbine_4.json
+c71851d4cc0ce5f27eace47575664cb1f3ac2650 data/eln/recipe/still_pot.json
 3f4a24c3fb4412d21f208ff458e45f74a002f7ed data/eln/recipe/stone_heat_furnace.json
 f4f9406ede6ea92137dd5caf98a20da982804e2e data/eln/recipe/street_light.json
 2dd44bbf82dca6fe077678b44dfae6276ea32cf7 data/eln/recipe/suspended_lamp_socket.json
