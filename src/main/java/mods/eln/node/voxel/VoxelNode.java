@@ -617,7 +617,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             double k = PipePart.K_PER_BLOCK[Math.min(a.tier, b.tier)] * (v.mode == ValvePart.PRESSURE ? 1 : 4);   // (a quarter block of pipe; a
             // pressure valve's seat is narrower, a block's worth, so it can hold its set point without overshooting)
             // (a valve meters by the orifice law, its seat the smaller pipe's bore area: VOLUME_PER_BLOCK is m^3 a metre)
-            Link l = new Link(a.fluid, 0.5, b.fluid, 0.5, k).area(PipePart.VOLUME_PER_BLOCK[Math.min(a.tier, b.tier)]);
+            // (it passes what stands at its own place in the run: on a level run the bottom of the bore, so liquid along
+            // the bottom goes through; on an upright one its own height. It drew half way up each piece before it, so a run
+            // with a riser before it had to fill half full before a drop passed: Baughn 2026-11-24, "unrealistic")
+            Link l = new Link(a.fluid, valveDraw(a, v), b.fluid, valveDraw(b, v), k).area(PipePart.VOLUME_PER_BLOCK[Math.min(a.tier, b.tier)]);
             if (v.mode == ValvePart.PRESSURE) l.kind(mods.eln.sim.fluid.FluidEdge.Kind.REGULATOR);
             l.open = v.opening();
             valveLinks.put(l, v);
@@ -626,6 +629,14 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     private java.util.Map<Link, ValvePart> valveLinks;
+
+    /** Where on pipe's node a valve at v draws (0..1): the bottom of the bore at the valve on a level run, the valve's
+     *  own height on an upright one. */
+    double valveDraw(PipePart pipe, ValvePart v) {
+        mods.eln.sim.fluid.FluidNode n = pipe.fluid;
+        double at = coordonate.y + (v.y - (v.axis == 1 ? 0 : pipe.bore() / 2.0)) / 16.0;
+        return n.height > 0 ? Math.max(0, Math.min(1, (at - n.z) / n.height)) : 0.5;
+    }
 
     /** Which side of a valve, along its axis, a pipe ending at it lies on (+1 or -1). */
     static int side(PipePart pipe, ValvePart v) {

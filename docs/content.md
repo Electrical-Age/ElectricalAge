@@ -137,8 +137,7 @@ and at the lower front (low); its coil passes 120 W/K from its contents to its s
 dissipators on its back and flanks (both blocks) and ~2 W/K to the air. It may stand on a pipe. Jade: vapour in,
 outlet, condensing and gas out (g/s, a second's mean), shell; "Vapour escaping, add cooling" over 60 °C while vapour
 comes in. A tank's high side flanges draw at their top edge (for gas): pipe condensate into a receiver's low flange or
-top. A pipe valve draws half way up the run before it, so a long run there fills half full before anything passes: fit
-a receiver's valve close to the coil. GameTests `condenser_coil_body`, `still_pot_sensible_batch` (a furnace, two
+top. GameTests `condenser_coil_body`, `still_pot_sensible_batch` (a furnace, two
 receivers switched through OpAmps and control valves by the pot's signal: gasoline cut 98 %), `still_pot_overfired_batch`
 (15 kW: it boils over and fouls a turbine; every gram of residue accounted for), `still_pot_sparge_layers` (water under
 the oil). Cost: the sensible batch's network has 12 active nodes (pot, coil, the two receivers and eight pipe runs)

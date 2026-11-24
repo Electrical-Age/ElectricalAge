@@ -1118,3 +1118,9 @@ on 1.7.10) onto 26.x.
   names `50v_turbine` / `200v_turbine` stay in `eln-ids.json` and are never reused. A saved turbine node becomes a kept
   orphan (persistence.md); a leftover block or item stack of them is dropped by vanilla as an unknown registry entry.
   GameTests `wp10b removed heat turbine 50v_turbine` / `200v_turbine` (replace `wp10b turbine`).
+- Pipe valves pass what stands at their own place in the run (Baughn 2026-11-24: "unrealistic plumbing"): on a level
+  run the bottom of the bore at the valve, so liquid along the bottom goes through; on an upright run the valve's own
+  height. They drew half way up each piece of pipe before and after them (since valves came in, 2026-10-18), so a run
+  with a riser before the valve had to fill half full before a drop passed. Existing builds: a valve on a level line
+  now passes condensate lying in the line (a steam line's valve passes its condensate first, as a real one would).
+  `pipe_valve_passes_liquid_at_its_place`.

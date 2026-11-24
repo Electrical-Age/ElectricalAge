@@ -48,6 +48,58 @@ public final class PlumbingCases {
         cases.add(new PurgeValve(false));
         cases.add(new PurgeValve(true));
         for (Breather.Row r : Breather.Row.values()) cases.add(new Breather(r));
+        cases.add(new ValveDrawsAtItsPlace());
+    }
+
+    /**
+     * Baughn 2026-11-24 ("unrealistic plumbing"): a valve passes what stands at its own place in the run. An empty tank C
+     * above (air) feeds an iron run down a block and along to a valve, then on into tank B's low flange; the run before
+     * the valve holds a fifth of its volume of water. It drains through the open valve into B (a valve drew half way up
+     * each piece before it, so this water stood in the run). Shut, the valve holds it.
+     */
+    static final class ValveDrawsAtItsPlace extends Big {
+        final boolean[] open = {true, false};
+        final TankElement[] b = new TankElement[2];
+        final double[] water0 = new double[2];
+        String err = "";
+
+        public String id() {
+            return "pipe_valve_passes_liquid_at_its_place";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            for (int i = 0; i < 2; i++) {
+                int z = 1 + 4 * i;
+                tank(ctx, IRON_TANK, ctx.at(3, 3, z), Direction.XN);
+                PipeCases.lay(ctx, ctx.at(3, 2, z), 0, 8, 16, 8, 8, 0, 8);
+                PipeCases.lay(ctx, ctx.at(3, 1, z), 0, 8, 16, 8, 8, 4, 8, 16, 4, 8);
+                String e = ctx.voxelByEntity(ctx.at(3, 1, z)).addValve(12, 4, 8, ValvePart.ON_OFF);
+                if (e != null) err += e;
+                b[i] = tank(ctx, IRON_TANK, ctx.at(4, 1, z), Direction.XP);
+                for (var q : ctx.voxelByEntity(ctx.at(3, 1, z)).parts)
+                    if (q instanceof ValvePart v) v.open = open[i];
+                // a fifth of the run before the valve full of water (each of its pieces)
+                for (BlockPos q : new BlockPos[]{ctx.at(3, 2, z), ctx.at(3, 1, z)})
+                    for (var part : ctx.voxelByEntity(q).parts)
+                        if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null && pp.passes(8, 10, 8)) {   // (not the piece after the valve)
+                            fill(pp.fluid, 0.2 * pp.fluid.volume * Water.RHO_L, Water.P_ATM, 293.15);
+                            water0[i] += pp.fluid.mWater;
+                        }
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line(String.format("valve at its place: water put in the runs %.4f / %.4f kg; tank B behind the open valve %.4f kg, behind the shut one %.4f kg",
+                water0[0], water0[1], b[0].vessel.mLiquid(), b[1].vessel.mLiquid()));
+            ctx.check("valve: it fits", err.isEmpty(), err);
+            ctx.check("valve: open, the water along the bottom of the run goes through it (over 80 %)", b[0].vessel.mLiquid() > 0.8 * water0[0],
+                String.format("%.4f of %.4f kg", b[0].vessel.mLiquid(), water0[0]));
+            ctx.check("valve: shut, none does", b[1].vessel.mLiquid() < 0.02 * water0[1] + 1e-6, String.format("%.5f kg", b[1].vessel.mLiquid()));
+        }
     }
 
     static final int IRON_TANK = 40 + (82 << 6), ALLOY_TANK = 44 + (82 << 6), PUMP = 48 + (82 << 6);
