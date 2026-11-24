@@ -118,13 +118,13 @@ final class GroundRadarWorld implements GroundScan.World {
         if (s.is(Blocks.CLAY) || s.is(Blocks.MUD) || s.is(Blocks.PACKED_MUD) || s.is(Blocks.MUDDY_MANGROVE_ROOTS))
             return new GroundScan.Material(1.8, 0.05, GroundScan.Material.SOLID);
         if (s.is(Blocks.DEEPSLATE) || s.is(Blocks.COBBLED_DEEPSLATE) || s.is(Blocks.REINFORCED_DEEPSLATE))
-            return new GroundScan.Material(2.9, 0.004, GroundScan.Material.SOLID);
-        if (s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.BASE_STONE_NETHER)) return new GroundScan.Material(2.7, 0.004, GroundScan.Material.SOLID);
-        if (s.is(BlockTags.SAND) || s.is(Blocks.GRAVEL) || s.is(BlockTags.DIRT)) return new GroundScan.Material(1.7, 0.008, GroundScan.Material.SOLID);
+            return new GroundScan.Material(2.9, 0.0025, GroundScan.Material.SOLID);
+        if (s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.BASE_STONE_NETHER)) return new GroundScan.Material(2.7, 0.0025, GroundScan.Material.SOLID);
+        if (s.is(BlockTags.SAND) || s.is(Blocks.GRAVEL) || s.is(BlockTags.DIRT)) return new GroundScan.Material(1.7, 0.006, GroundScan.Material.SOLID);
         if (s.is(BlockTags.ICE)) return new GroundScan.Material(0.9, 0.001, GroundScan.Material.SOLID);
         if (s.is(BlockTags.LOGS) || s.is(BlockTags.PLANKS)) return new GroundScan.Material(0.6, 0.01, GroundScan.Material.SOLID);
-        if (s.is(Blocks.OBSIDIAN) || s.is(Blocks.CRYING_OBSIDIAN)) return new GroundScan.Material(2.6, 0.004, GroundScan.Material.SOLID);
+        if (s.is(Blocks.OBSIDIAN) || s.is(Blocks.CRYING_OBSIDIAN)) return new GroundScan.Material(2.6, 0.0025, GroundScan.Material.SOLID);
         if (s.is(net.neoforged.neoforge.common.Tags.Blocks.STORAGE_BLOCKS)) return new GroundScan.Material(4.5, 0.02, GroundScan.Material.SOLID);
-        return new GroundScan.Material(2.5, 0.006, GroundScan.Material.SOLID);
+        return new GroundScan.Material(2.5, 0.004, GroundScan.Material.SOLID);
     }
 }
