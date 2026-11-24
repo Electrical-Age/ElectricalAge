@@ -206,11 +206,26 @@ public final class Scene {
                 }
                 if (!rest.isEmpty()) last.add(new Run(colour, rest));
             }
+            chars += text.length();
+            while (chars > LOG_CHARS && lines.size() > 1) {   // (the oldest lines go: a log's share of the screen's budget)
+                for (Run r : lines.poll()) chars -= r.text().length();
+            }
         }
+
+        /** Characters in this log (about: wrapped and dropped lines are counted as they go). */
+        int chars;
     }
 
-    /** A log line's characters at most. */
-    public static final int LINE_MAX = 1000;
+    /** A log line's characters at most; a log's characters at most (its oldest lines go); logs a screen. */
+    public static final int LINE_MAX = 1000, LOG_CHARS = 128 * 1024, MAX_LOGS = 32;
+    /** A screen's pictures' dots in all (32 of the largest). */
+    public static final long PIXMAP_DOTS = 32L * PIXMAP_W * PIXMAP_H;
+
+    int logs() {
+        int n = 0;
+        for (Window w : windows.values()) for (Element e : w.elements.values()) if (e.kind.equals("log")) n++;
+        return n;
+    }
 
     static final java.util.Set<String> ELEMENTS = java.util.Set.of("box", "text", "log", "line", "button", "list", "editor", "raw",
         "image", "icon");
@@ -251,6 +266,9 @@ public final class Scene {
                 int id = (int) Form.num(m, 1, -1);
                 Pixmap p = id >= 1 && id <= 4095 ? Pixmap.of(m) : null;
                 if (p == null || (!pixmaps.containsKey(id) && pixmaps.size() >= MAX_PIXMAPS)) return false;
+                long dots = (long) p.w() * p.h();
+                for (var e : pixmaps.entrySet()) if (e.getKey() != id) dots += (long) e.getValue().w() * e.getValue().h();
+                if (dots > PIXMAP_DOTS) return false;   // (a screen's pictures in all: the save file and a newcomer's copy)
                 pixmaps.put(id, p);
                 return true;
             }
@@ -421,6 +439,7 @@ public final class Scene {
             return true;
         }
         if (old == null && win.elements.size() >= MAX_ELEMENTS) return false;
+        if (v.equals("log") && logs() >= MAX_LOGS) return false;   // (each keeps up to LOG_CHARS: a screen's budget)
         win.elements.remove(id);
         win.elements.put(id, new Element(v, m));
         return true;

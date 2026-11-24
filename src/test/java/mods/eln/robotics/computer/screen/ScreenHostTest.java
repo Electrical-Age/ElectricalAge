@@ -180,4 +180,19 @@ class ScreenHostTest {
         assertNull(h.check("(press 2 3 :gen 1)", null), "pressed in the first window, arriving at the second");
         assertNotNull(h.check("(press 2 3 :gen 2)", null));
     }
+
+    /** A screen's budget: pictures' dots in all, a log's characters (its oldest lines go). */
+    @Test
+    void aScreenHasABudget() {
+        ScreenHost h = new ScreenHost();
+        String dots = "0".repeat(Scene.PIXMAP_W * Scene.PIXMAP_H);
+        for (int k = 1; k <= 33; k++) from(h, "(pixmap " + k + " 256 128 [:red] \"" + dots + "\")");
+        assertEquals(32, h.scene.pixmaps.size(), "the 33rd big picture is refused");
+        assertTrue(h.takeToComputer().stream().anyMatch(t -> t.startsWith("(error pixmap 33")), "and the program hears so");
+        from(h, "(window 2 1 1 70 20 \"Log\")", "(log 2 1 0 0 :fill :fill)");
+        for (int k = 0; k < 300; k++) from(h, "(append 2 1 :white \"" + "q".repeat(900) + "\\n\")");
+        int chars = 0;
+        for (var line : h.scene.windows.get(2).elements.get(1).lines) for (var r : line) chars += r.text().length();
+        assertTrue(chars <= Scene.LOG_CHARS, "a log keeps at most its share: " + chars);
+    }
 }

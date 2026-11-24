@@ -88,15 +88,30 @@ public final class ComputerStore {
 
     /** The screen's scene as replay lines (the host keeps it; the computer doesn't redraw after a load). */
     public static void saveScreen(MinecraftServer s, UUID id, java.util.List<String> lines) {
-        byte[] text = String.join("\n", lines).getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        writeAsync(screenFile(s, id), o -> o.write(text));
+        // (gzipped, a header line first; Wire review: a screen's pictures and logs as text were the file's bulk)
+        byte[] text = (SCREEN_HEADER + "\n" + String.join("\n", lines)).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        writeAsync(screenFile(s, id), o -> {
+            try (var z = new java.util.zip.GZIPOutputStream(o)) {
+                z.write(text);
+            }
+        });
     }
+
+    static final String SCREEN_HEADER = "(wire 2)";
 
     public static java.util.List<String> loadScreen(MinecraftServer s, UUID id) {
         flush();
         Path f = screenFile(s, id);
         try {
-            return Files.exists(f) ? Files.readAllLines(f, java.nio.charset.StandardCharsets.UTF_8) : java.util.List.of();
+            if (!Files.exists(f)) return java.util.List.of();
+            byte[] b = Files.readAllBytes(f);
+            if (b.length > 1 && (b[0] & 0xFF) == 0x1F && (b[1] & 0xFF) == 0x8B)   // (gzipped; older files are plain text)
+                try (var z = new java.util.zip.GZIPInputStream(new java.io.ByteArrayInputStream(b))) {
+                    b = z.readAllBytes();
+                }
+            java.util.List<String> lines = new java.util.ArrayList<>(java.util.List.of(new String(b, java.nio.charset.StandardCharsets.UTF_8).split("\n")));
+            if (!lines.isEmpty() && lines.getFirst().equals(SCREEN_HEADER)) lines.removeFirst();
+            return lines;
         } catch (IOException e) {
             LOG.error("could not read {}", f, e);
             return java.util.List.of();
