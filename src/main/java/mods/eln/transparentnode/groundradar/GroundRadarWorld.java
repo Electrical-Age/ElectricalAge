@@ -22,6 +22,8 @@ import java.util.Map;
  */
 final class GroundRadarWorld implements GroundScan.World {
     private static final Map<BlockState, GroundScan.Material> MATERIALS = new IdentityHashMap<>();
+    /** Structure pieces wider than this (blocks) aren't buildings. */
+    static final int MAX_PIECE = 48;
 
     private final ServerLevel level;
     private final BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
@@ -78,6 +80,9 @@ final class GroundRadarWorld implements GroundScan.World {
                         if (start == null || !start.isValid() || !seen.add(start)) continue;
                         for (var piece : start.getPieces()) {
                             BoundingBox b = piece.getBoundingBox();
+                            // (a piece as wide as terrain is terrain, not a building: an oil lake's (its oil shows as oil),
+                            // a lake's; its box hatched the whole picture over one)
+                            if (b.getXSpan() > MAX_PIECE || b.getZSpan() > MAX_PIECE) continue;
                             for (int px = b.minX() >> 4; px <= b.maxX() >> 4; px++)
                                 for (int pz = b.minZ() >> 4; pz <= b.maxZ() >> 4; pz++)
                                     pieces.computeIfAbsent(key(px, pz), k -> new ArrayList<>()).add(b);

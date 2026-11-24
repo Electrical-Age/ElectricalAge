@@ -604,7 +604,15 @@ public final class LabCommands {
         } catch (java.io.IOException e) {
             throw new IllegalStateException(e);
         }
-        src.sendSuccess(() -> Component.literal("ground radar at " + pos.toShortString() + ": " + L + " layers in " + ms + " ms, picture " + file.getFileName()), false);
+        StringBuilder oil = new StringBuilder();
+        for (int k = 0; k < L; k++) {
+            int c = 0;
+            for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) if ((scan.flagsAt(k, i, j) & mods.eln.transparentnode.groundradar.GroundScan.OIL) != 0) c++;
+            if (c > 0) oil.append(" y").append(scan.cy - 1 - scan.layers[k].depth()).append(':').append(c);
+        }
+        String oilCells = oil.length() == 0 ? " none" : oil.toString();
+        src.sendSuccess(() -> Component.literal("ground radar at " + pos.toShortString() + ": " + L + " layers in " + ms + " ms, picture " + file.getFileName()
+            + "; oil cells by layer top:" + oilCells), false);
         return 1;
     }
 

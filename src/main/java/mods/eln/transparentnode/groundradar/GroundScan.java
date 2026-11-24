@@ -24,7 +24,7 @@ public final class GroundScan {
     /** Densities are kept as bytes over 0..MAX_DENSITY g/cm3. */
     public static final double MAX_DENSITY = 4.5;
 
-    /** Cell flags: most of it liquid (water), oil, lava; a quarter of it in a structure; most of it unknown (unloaded). */
+    /** Cell flags: most of it liquid (water), an eighth of it oil, most of it lava; a quarter of it in a structure; most of it unknown (unloaded). */
     public static final int LIQUID = 1, OIL = 2, LAVA = 4, BUILT = 8, UNKNOWN = 16;
 
     /** What a block is to the radar: its density (g/cm3), its attenuation (per block) and its kind. */
@@ -171,7 +171,7 @@ public final class GroundScan {
         int f = 0;
         if (known * 2 < samples) f |= UNKNOWN;
         if (liquid * 2 > known && known > 0) f |= LIQUID;
-        if (oil * 10 > known * 3 && known > 0) f |= OIL;
+        if (oil * 8 >= known && oil > 0) f |= OIL;   // (an eighth: oil is what a prospector is after)
         if (lava * 2 > known && known > 0) f |= LAVA;
         if (built * 4 > known && known > 0) f |= BUILT;
         // (the signal reaching this cell: its parent's, faded through the parent's thickness)
@@ -293,6 +293,7 @@ public final class GroundScan {
         int h = hash(i * 31 + k * 977, j * 17 + k, k * 7919);
         int grey = 50 + (h & 0xFF) * 90 / 255;
         double fade = 1 - p.signalAt(k, i, j);
+        if ((f & OIL) != 0) fade *= 0.5;   // (oil answers the pulse strongly: it stands out through faded ground)
         rgb = mix(rgb, grey << 16 | grey << 8 | grey, 0.06 + 0.94 * fade * fade * (3 - 2 * fade));
         return 0xFF000000 | rgb;
     }
