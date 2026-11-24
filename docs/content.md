@@ -124,7 +124,7 @@ it drains out completely; a hot drain into a closed receiver pushes back with th
 receiver needs a breather; the fill low on its left flank and the steam inlet low on its right flank (into the pot at their flanges'
 height, through check valves). Boiled too hard it boils over: before each step, outside the core's solve, E = 2 (F / 0.10 - 1) kg of
 its liquid (to 5) per kg of vapour moves into the vapour line (the node its vapour port couples to; a pipe run up to 30 % of it
-liquid), every species by its share with its enthalpy
+liquid, a vessel up to its free volume), every species by its share with its enthalpy
 (mass and energy exact), F the Souders-Brown factor of the smoothed vapour velocity over the node's cross-section; a
 medium burner stays under it, a pushed one puts residue in the product, which then fouls engines. The vapour port is
 an opening over the pot's top tenth (the charge never reaches it), so liquid in the vapour line runs back into the pot

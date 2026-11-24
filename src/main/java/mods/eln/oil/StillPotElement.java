@@ -67,7 +67,10 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
      * the pot completely; the kettle stands on its skid), so its inside is HEIGHT - FLOOR tall, its top at the blocks' top.
      */
     public static final double FLOOR = (TankElement.LOW - TankElement.FLANGE_HALF) / 16.0;
-    /** The cross-section its vapour rises through (m^2; entrainment's Souders-Brown velocity, calibrated on it). */
+    /**
+     * Entrainment's calibration area (m^2): VOLUME / HEIGHT, the nominal cross-section its Souders-Brown velocity was
+     * calibrated on (not the inside's, HEIGHT - FLOOR tall).
+     */
     static final double AREA = VOLUME / HEIGHT;
     /** The wall (W/K, shell to contents) and the shell (as the Large Boiler's: J/K, K/W to the air, K/W a face). */
     public static final double WALL_UA = 60, SHELL_C = 2800, LOSS_RP = 0.4, FACE_RS = 0.0025;
@@ -281,8 +284,9 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         FluidNode line = null;
         for (FluidEdge e : vapourEdges()) line = e.a == vessel ? e.b : e.a;
         if (line == null || line.fixed) kg = 0;
-        // (a pipe run carries it on while it has room; a vessel on the flange (a tank, a condenser) takes it all)
-        else if (FluidWorld.isPipeRun(line)) kg = Math.min(kg, Math.max(0, LINE_FULL * line.volume - line.liquidVolume()) * rho[1]);
+        // (a pipe run carries it on while it has room under LINE_FULL; a vessel on the flange (a tank, a condenser) up to
+        // its free volume)
+        else kg = Math.min(kg, Math.max(0, (FluidWorld.isPipeRun(line) ? LINE_FULL : 1) * line.volume - line.liquidVolume()) * rho[1]);
         entrained = kg > 0 ? EaUnits.carryLiquid(vessel, line, kg) : 0;
         meterEntrain += entrained;
     }
@@ -375,7 +379,7 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         var c = node.coordonate;
         double amb = mods.eln.sim.Ambient.kelvin(c);
         vessel = restored(new FluidNode(VOLUME, c.y + FLOOR, HEIGHT - FLOOR, false), loaded, amb);
-        // (the stubs centred on their flanges, half way up the upper blocks)
+        // (the stubs centred on their flanges, 4 px up the lower blocks)
         double stubZ = c.y + TankElement.LOW / 16.0 - 0.05;
         feed = restored(new FluidNode(STUB_VOLUME, stubZ, 0.1, false), loadedFeed, amb);
         sparge = restored(new FluidNode(STUB_VOLUME, stubZ, 0.1, false), loadedSparge, amb);
