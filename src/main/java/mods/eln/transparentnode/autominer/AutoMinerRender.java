@@ -221,7 +221,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
     // ---- the monitor's views (AutoMinerElement.view; Baughn 2026-11-24), in the screen's left part (where 1.12 drew an
     // ore scanner's picture), four quarters: its stats in a frame; XZ, the slice at its mining height; XY and YZ, the
-    // cone's cuts from the surface to bedrock along x and along z with the pipe and the drill head marked
+    // cone's cuts from the miner down to bedrock along x and along z with the pipe and the drill head marked
 
     private mods.eln.transparentnode.groundradar.GroundScan viewSlice, viewCross;
     private int headY, pipesLeft;

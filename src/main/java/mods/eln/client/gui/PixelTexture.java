@@ -6,8 +6,8 @@ import net.minecraft.resources.Identifier;
 
 /**
  * A texture drawn pixel by pixel on the client (a picture a texel a cell: the Ground Radar's views, the Auto Miner's
- * monitor): filled in place while its size holds, made anew when it changes, released with release(). Nearest
- * filtering, so cells stay square.
+ * monitor): filled in place while its size holds, made anew when it changes, released with release(). A dynamic
+ * texture samples nearest by default, so cells stay square.
  */
 public final class PixelTexture {
     /** A pixel's colour (ARGB) at (x, y). */

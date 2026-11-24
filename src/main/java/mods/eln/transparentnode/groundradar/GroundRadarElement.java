@@ -285,7 +285,8 @@ public class GroundRadarElement extends TransparentNodeElement {
     /** The auto-miner's side views: the cone under top (the miner) to the world's floor, its cuts along x and z only. */
     public static GroundScan minerCross(ServerLevel level, net.minecraft.core.BlockPos top) {
         int view = level.getServer() == null ? 10 : level.getServer().getPlayerList().getViewDistance();
-        int half = Math.min(GroundScan.cellAt(top.getY() - level.getMinY(), GroundScan.GROWTH) * MINER_CELLS / 2 + 16, (view + 1) * 16);
+        // (structures within 96 blocks: it is redone every 5 s, and a wide structure lookup each time cost more than the cuts)
+        int half = Math.min(GroundScan.cellAt(top.getY() - level.getMinY(), GroundScan.GROWTH) * MINER_CELLS / 2 + 16, Math.min(96, (view + 1) * 16));
         GroundRadarWorld world = new GroundRadarWorld(level, top.getX(), top.getZ(), half);
         GroundScan s = GroundScan.cross(world, top.getX(), top.getY(), top.getZ(), level.getMinY(), MINER_CELLS, GroundScan.GROWTH);
         while (!s.step(1 << 20)) ;

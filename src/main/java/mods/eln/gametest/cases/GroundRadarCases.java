@@ -280,10 +280,11 @@ public final class GroundRadarCases {
             for (int x = 0; x < 11; x++)
                 for (int z = 0; z < 9; z++)
                     for (int y = 1; y < 10; y++) c.level().setBlock(c.at(x, y, z), Blocks.STONE.defaultBlockState(), 3);
-            // (the head at (5, 6, 4): the slice is y 6..5; its centre cells start at x = 5, z = 4)
+            // (the head at (5, 6, 4): the slice is y 6..5; its centre cells start at x = 5, z = 4; up to y 7 the cross's
+            // layer over the head (y 7..6) is hollow too)
             for (int x = 5; x < 7; x++)
                 for (int z = 4; z < 6; z++)
-                    for (int y = 5; y < 7; y++) c.level().setBlock(c.at(x, y, z), Blocks.AIR.defaultBlockState(), 3);
+                    for (int y = 5; y < 8; y++) c.level().setBlock(c.at(x, y, z), Blocks.AIR.defaultBlockState(), 3);
             slice = GroundRadarElement.minerSlice(c.level(), c.at(5, 6, 4));
             cross = GroundRadarElement.minerCross(c.level(), c.at(5, 10, 4));
         }
@@ -296,7 +297,7 @@ public final class GroundRadarCases {
             c.line("miner view: " + st);
             c.check("miner view: the slice shows the hollow at the head's level", slice.layers.length == 1 && slice.densityAt(0, mid, mid) < 0.5
                 && slice.densityAt(0, mid - 2, mid - 2) > 2.2, st);
-            c.check("miner view: the cross reads its cuts to the floor at full signal, and only them", cross.densityAt(k, mid, mid) < 1.4
+            c.check("miner view: the cross reads its cuts to the floor at full signal, and only them", cross.densityAt(k, mid, mid) < 0.5
                 && cross.signalAt(k, mid, mid) > 0.99 && (cross.flagsAt(k, 1, 1) & GroundScan.UNKNOWN) != 0
                 && (cross.flagsAt(k, 1, mid) & GroundScan.UNKNOWN) == 0, st);
         }

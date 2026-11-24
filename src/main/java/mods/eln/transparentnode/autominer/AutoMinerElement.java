@@ -198,7 +198,7 @@ public class AutoMinerElement extends TransparentNodeElement {
 
     /**
      * The monitor's views (Baughn: the black part of its screen, where 1.12 showed an ore scanner's picture, gets its
-     * stats, the slice at its mining height and two vertical cuts through the cone from the surface to bedrock with the
+     * stats, the slice at its mining height and two vertical cuts through the cone from the miner down to bedrock with the
      * drill marked): scanned every VIEW_S while it has power and a player is near, to the players near it.
      */
     void view(double dt) {
