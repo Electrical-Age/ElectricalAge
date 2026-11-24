@@ -82,6 +82,30 @@ class FuelQualityTest {
         assertEquals(0.2, FuelQuality.foul(0.2, 0.15, FuelQuality.ENGINE_BALANCE, 0, 3600), 1e-12);   // (not running: no change)
     }
 
+    /**
+     * A piston engine's choke (Baughn 2026-11-24: no heavy oil at all; PISTON_CHOKE), on the Fuel Generator's window, by
+     * the Still Pot's products (StillPotCases, StillSketchTest): a sensible still's cuts don't choke one, a badly run
+     * one's (overfired at 25 kW) do; a 15 kW batch's product only fouls one.
+     */
+    @Test
+    void thePistonChoke() {
+        double lo = FuelQuality.GENERATOR_LO, hi = FuelQuality.GENERATOR_HI, c = FuelQuality.PISTON_CHOKE;
+        assertTrue(c > FuelQuality.ENGINE_BALANCE && c < FuelQuality.TURBINE_CHOKE);
+        // a sensible still: its gasoline cut (98 %), its diesel cut (90 % diesel, 9 % heavy oil, 1 % gasoline)
+        assertTrue(!rate(lo, hi, "gasoline", 98.0, "diesel", 2.0).choked(c));
+        assertTrue(!rate(lo, hi, "diesel", 90.0, "heavy_oil", 9.0, "gasoline", 1.0).choked(c));
+        // a 15 kW batch's product (still_pot_overfired_batch): fouls, doesn't choke
+        var mild = rate(lo, hi, "gasoline", 60.0, "diesel", 30.0, "heavy_oil", 8.5, "residue", 1.5);
+        assertTrue(!mild.choked(c) && mild.coking() > FuelQuality.ENGINE_BALANCE, "" + mild);
+        // overfired at 25 kW (still_pot_overfire, StillSketchTest), straight heavy oil and a heavy cut: choke
+        assertTrue(rate(lo, hi, "diesel", 33.0, "heavy_oil", 48.0, "residue", 19.0).choked(c));
+        assertTrue(rate(lo, hi, "gasoline", 60.0, "diesel", 20.0, "heavy_oil", 14.0, "residue", 6.0).choked(c));
+        assertTrue(rate(lo, hi, "heavy_oil", 10.0).choked(c));
+        assertTrue(rate(lo, hi, "diesel", 44.0, "heavy_oil", 56.0).choked(c));
+        // and the turbine keeps heavy oil
+        assertTrue(!rate(FuelQuality.TURBINE_LO, FuelQuality.TURBINE_HI, "heavy_oil", 10.0).choked(FuelQuality.TURBINE_CHOKE));
+    }
+
     @Test
     void viscosityOfAMix() {
         FluidNode n = TestSpecies.node(0.1, 0, 1, 293.15, 1e5, TestSpecies.id("diesel"), 10.0);
@@ -128,18 +152,18 @@ class FuelQualityTest {
 
     /**
      * The choke (Baughn 2026-11-23): today's fuels and a sensible still's never choke an engine; crude and residue-laden
-     * fuel do. ENGINE_CHOKE is a placeholder: these say what it must keep doing when it is calibrated.
+     * fuel do (the gas turbine's limit, TURBINE_CHOKE).
      */
     @Test
     void theChoke() {
-        assertTrue(FuelQuality.ENGINE_CHOKE >= 3 * FuelQuality.ENGINE_BALANCE);
-        for (String f : new String[]{"gasoline", "diesel", "heavy_oil"}) assertTrue(!rate(LO, HI, f, 10.0).choked(), f);
+        assertTrue(FuelQuality.TURBINE_CHOKE >= 3 * FuelQuality.ENGINE_BALANCE);
+        for (String f : new String[]{"gasoline", "diesel", "heavy_oil"}) assertTrue(!rate(LO, HI, f, 10.0).choked(FuelQuality.TURBINE_CHOKE), f);
         // a pot still's one-pass diesel, with heavy oil and some residue carried over: fouls, doesn't choke
-        assertTrue(!rate(LO, HI, "diesel", 80.0, "heavy_oil", 15.0, "residue", 5.0).choked());
-        assertTrue(!rate(LO, HI, "diesel", 9.0, "residue", 1.0).choked());
+        assertTrue(!rate(LO, HI, "diesel", 80.0, "heavy_oil", 15.0, "residue", 5.0).choked(FuelQuality.TURBINE_CHOKE));
+        assertTrue(!rate(LO, HI, "diesel", 9.0, "residue", 1.0).choked(FuelQuality.TURBINE_CHOKE));
         // dead crude, and diesel with a fifth residue: choke
-        assertTrue(rate(LO, HI, "heavy_oil", 17.5, "diesel", 12.5, "gasoline", 10.0, "residue", 7.5).choked());
-        assertTrue(rate(LO, HI, "diesel", 8.0, "residue", 2.0).choked());
-        assertTrue(FuelQuality.describe(rate(LO, HI, "diesel", 8.0, "residue", 2.0)).startsWith("chokes engine"));
+        assertTrue(rate(LO, HI, "heavy_oil", 17.5, "diesel", 12.5, "gasoline", 10.0, "residue", 7.5).choked(FuelQuality.TURBINE_CHOKE));
+        assertTrue(rate(LO, HI, "diesel", 8.0, "residue", 2.0).choked(FuelQuality.TURBINE_CHOKE));
+        assertTrue(FuelQuality.describe(rate(LO, HI, "diesel", 8.0, "residue", 2.0), FuelQuality.TURBINE_CHOKE).startsWith("chokes engine"));
     }
 }

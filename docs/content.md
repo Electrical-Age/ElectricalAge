@@ -93,10 +93,13 @@ window (a species without a boiling point, residue, is too heavy for any window)
 coking index is over the device's balance fouls it, up to 90 %, at `FOUL_PER_INDEX` x (index - balance) per 2 h of full
 power; under the balance it clears at the same law; engines foul and clear 4 times slower (`ENGINE_SLOWER`, Baughn
 2026-11-15: time to consider a fix); wool cleans it at once; nothing is damaged. Balances: furnace burner 0.05, engines 0.02 (diesel with over 7 % heavy oil or 1 % residue fouls an engine). From
-`ENGINE_CHOKE` (a placeholder, 0.18, to be calibrated from the pot-still tests; Baughn 2026-11-23) the fuel chokes an engine: it
+a class's choke index (Baughn 2026-11-23; per class 2026-11-24: piston engines can't run heavy oil) the fuel chokes an engine: it
 takes none and gives no power until the fuel in its vessel is diluted (piped full there is no room to: breaking it
 empties it); no damage, nothing saved (the rule reads the
-vessel). Crude (0.216) and diesel with over ~17 % residue choke; heavy oil (0.15) doesn't. The furnace burner never chokes. The Gas Turbine's window is
+vessel). `TURBINE_CHOKE` 0.18, the Gas Turbine's: crude (0.216) and diesel with over ~17 % residue choke it; heavy oil
+(0.15) doesn't. `PISTON_CHOKE` 0.05, the Fuel Generator's, from the Still Pot's tests: a sensibly run still's cuts
+(gasoline 0.000, diesel 0.022) don't choke it, a pot overfired at 25 kW (0.10-0.17), heavy oil and a heavy cut do; a
+15 kW overfired batch (0.03) only fouls it. The furnace burner never chokes. The Gas Turbine's window is
 330 to 720 K, so gasoline, diesel and heavy oil all give full power, and heavy oil fouls it by ~10 % an hour at full
 power (diesel clears 0.8 % an hour, gasoline 1.5 %). Jade on the turbine shows the rating, whether the fuel fouls or chokes it, the
 fuel's viscosity (`EaUnits.viscosityText`), and the fouling; a choked turbine's Status says so. Saved as `foul`, `fuelLight`, `fuelHeavy`, `fuelCoking` (absent: clean). The Fuel
@@ -118,7 +121,7 @@ shell limit 850 K (its watchdog trips from 840 K on a 20 K s budget, so a pot bo
 stops by 850 K). Front: the liquid's temperature as a signal on the origin (1 V a 100 °C), the bottoms drain low right
 (draw 0); the fill low on its left flank and the steam inlet low on its right flank (into the pot at their flanges'
 height, through check valves). Boiled too hard it boils over: before each step, outside the core's solve, E = 2 (F / 0.10 - 1) kg of
-its liquid (to 5) per kg of vapour moves into the vapour line (the node its vapour port couples to, up to 30 % of it
+its liquid (to 5) per kg of vapour moves into the vapour line (the node its vapour port couples to; a pipe run up to 30 % of it
 liquid), every species by its share with its enthalpy
 (mass and energy exact), F the Souders-Brown factor of the smoothed vapour velocity over the node's cross-section; a
 medium burner stays under it, a pushed one puts residue in the product, which then fouls engines. The vapour port is
@@ -137,10 +140,15 @@ and at the lower front (low); its coil passes 120 W/K from its contents to its s
 dissipators on its back and flanks (both blocks) and ~2 W/K to the air. It may stand on a pipe. Jade: vapour in,
 outlet, condensing and gas out (g/s, a second's mean), shell; "Vapour escaping, add cooling" over 60 °C while vapour
 comes in. GameTests `condenser_coil_body`, `still_pot_sensible_batch` (a furnace, two
-receivers switched through OpAmps and control valves by the pot's signal: gasoline cut 98 %), `still_pot_overfired_batch`
-(15 kW: it boils over and fouls a turbine; every gram of residue accounted for), `still_pot_sparge_layers` (water under
-the oil). Cost: the sensible batch's network has 12 active nodes (pot, coil, the two receivers and eight pipe runs)
-and takes ~3.7 ms a step (4.8 iterations, 9.6 solves), flash-bound at ~0.3 ms a node.
+receivers switched through OpAmps and control valves by the pot's signal: gasoline cut 97.5 %; neither cut chokes a Fuel Generator), `still_pot_overfired_batch`
+(15 kW: it boils over, residue reaches the receiver and fouls a turbine; every gram of residue accounted for),
+`still_pot_calm`, `still_pot_overfire` (25 kW: its product chokes a Fuel Generator), `still_pot_residue`,
+`still_pot_body`, `still_pot_sparge_layers` (water under the oil), `still_pot_steam_sparge`,
+`still_pot_valves_shut_mid_boil` (both receivers shut: pressure rises, no stall), `still_pot_hot_residue_drains` (hot
+residue drains, cold barely moves), `still_pot_second_pass` (the gasoline heart redistilled: 98 % or better), and the
+breather's `pipe_breather_valve_*`. No vacuum-trap test: the receivers' breather valves let air in, so a cooling
+pot can't pull its receivers into a vacuum (the pot's Jade warns if one is left unvented). Cost: the sensible batch's network has 12 active nodes (pot, coil, the two receivers and eight pipe runs)
+and takes ~3.2 ms a step (4.8 iterations, 9.6 solves), flash-bound at ~0.3 ms a node.
 
 ### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)
 - Datapack JSON `data/<ns>/eln/fluid_species/<name>.json` defines species `<ns>:<name>` for the fluid core (fields in

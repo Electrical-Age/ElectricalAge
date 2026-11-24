@@ -196,7 +196,7 @@ public final class GasPlantCases {
      * mode 1, heavy oil: full power for its fuel at first, fouling at the furnace burner's law over the engines' balance, 4x slower;
      * mode 2, a half-fouled turbine on gasoline: half the work for its fuel, and it clears; wool cleans it;
      * mode 3, dead crude (it counts as its main cut, heavy oil; coking index 0.216): it chokes the turbine (Baughn
-     * 2026-11-23, over FuelQuality.ENGINE_CHOKE): spun by its motor, it takes no fuel and doesn't light, and its Jade
+     * 2026-11-23, over FuelQuality.TURBINE_CHOKE): spun by its motor, it takes no fuel and doesn't light, and its Jade
      * says why; diluted half and half with diesel (index 0.113, 7.9 % residue) it lights, carries its load at 84 % of
      * the work for its fuel, and fouls.
      */
@@ -281,8 +281,8 @@ public final class GasPlantCases {
             if (mode == 0) ctx.check(id + ": rated 10 % too heavy", Math.abs(gt.fuel.heavy() - 0.1) < 0.005 && gt.fuel.light() == 0, gt.fuel.toString());
             if (mode == 3) {
                 ctx.line(String.format("%s: before the diesel, at %.0f rad/s: choked %b, burning %b, fuel heat %.0f J, crude %.4f of %.4f kg; %s", id, radsChoked, choked, burntChoked, fuelJChoked, crudeLeft, crudeKg, jadeChoked));
-                ctx.check(id + ": crude chokes it (index " + String.format("%.3f", crude) + " over " + mods.eln.sim.fluid.FuelQuality.ENGINE_CHOKE + "): spun past its light-off speed, it takes no fuel and doesn't light",
-                    crude >= mods.eln.sim.fluid.FuelQuality.ENGINE_CHOKE && radsChoked > GasTurbineElement.CUTOFF * GasTurbineElement.RATED_RADS
+                ctx.check(id + ": crude chokes it (index " + String.format("%.3f", crude) + " over " + mods.eln.sim.fluid.FuelQuality.TURBINE_CHOKE + "): spun past its light-off speed, it takes no fuel and doesn't light",
+                    crude >= mods.eln.sim.fluid.FuelQuality.TURBINE_CHOKE && radsChoked > GasTurbineElement.CUTOFF * GasTurbineElement.RATED_RADS
                         && choked && !burntChoked && fuelJChoked == 0 && Math.abs(crudeLeft - crudeKg) < 1e-6 * crudeKg + 1e-9,
                     String.format("%.0f rad/s, %b %b %.0f J, %.6f of %.6f kg", radsChoked, choked, burntChoked, fuelJChoked, crudeLeft, crudeKg));
                 String status = jadeChoked == null ? "" : jadeChoked.getOrDefault(mods.eln.i18n.I18N.tr("Status"), "");
@@ -290,7 +290,7 @@ public final class GasPlantCases {
                 ctx.check(id + ": Jade's first line says it is choked and why; its fuel quality says it chokes, with its viscosity",
                     status.startsWith("Choked: too much heavy oil or residue") && status.contains("break to empty") && jadeChoked.keySet().iterator().next().equals(mods.eln.i18n.I18N.tr("Status"))
                         && quality.startsWith("chokes engine") && quality.contains(" mPa s, "), status + " / " + quality);
-                ctx.check(id + ": diluted with diesel, it isn't choked, rated 7.9 % too heavy", !gt.choked() && !gt.fuel.choked()
+                ctx.check(id + ": diluted with diesel, it isn't choked, rated 7.9 % too heavy", !gt.choked() && !gt.fuel.choked(mods.eln.sim.fluid.FuelQuality.TURBINE_CHOKE)
                     && Math.abs(gt.fuel.heavy() - 0.15 / 0.95 / 2) < 0.005 && gt.fuel.light() == 0, gt.fuel.toString());
             }
             if (mode == 2) ctx.check(id + ": clean fuel clears it, by the law", dFoul < 0 && Math.abs(dFoul / expect - 1) < 0.02 && gt.foul < foulStart, String.format("%.6f against %.6f", dFoul, expect));

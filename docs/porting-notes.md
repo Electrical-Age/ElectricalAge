@@ -625,16 +625,17 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 - Engines choke on crude and residue (refinery M1b, todo #590, Baughn 2026-11-23: off-spec fuel loses power at once,
   fouls over a threshold and chokes the engine past a further one, "set such that any halfway sensible distillery does
   not trigger it, but it can be triggered if the distillery is built badly and/or run completely uncontrolled"). Fuel
-  whose coking index reaches `FuelQuality.ENGINE_CHOKE` chokes the Gas Turbine and the Fuel Generator: no fuel taken,
+  whose coking index reaches its class's choke chokes it: no fuel taken,
   no power, no damage, until the fuel in the vessel is diluted; piped full (the filling valve shuts at 90 %) or with
   under a bucket free there is no room to, and breaking the engine empties it (a drain or purge is the owner's call). The rule is
-  live on the vessel, so nothing new is saved. The furnace burner never chokes. ENGINE_CHOKE is a placeholder, 0.18 (9x
-  the engines' fouling balance), to be calibrated from the pot-still tests: it sits between heavy oil (0.15), which the
-  turbine burns and fouls on since M1, and dead crude (0.216), so crude and diesel with over ~17 % residue choke and
-  no fuel that worked before does. As residue doesn't boil, no distillate reaches it today; only crude or residue
-  carried over does. A 3-5x value (0.06-0.10) would also choke the turbine on heavy oil. Jade: the turbine's Status and
+  live on the vessel, so nothing new is saved. The furnace burner never chokes. By class (Baughn 2026-11-24: piston
+  engines can't run heavy oil at all): `TURBINE_CHOKE` 0.18 for the Gas Turbine, between heavy oil (0.15), which it
+  burns and fouls on since M1, and dead crude (0.216), so crude and diesel with over ~17 % residue choke it and no fuel
+  that worked before does; `PISTON_CHOKE` 0.05 for the Fuel Generator, calibrated from the Still Pot's GameTests: a
+  sensible still's cuts (gasoline 0.000, diesel 0.022) pass, a pot overfired at 25 kW (0.10-0.17), heavy oil and a
+  heavy cut choke it, a 15 kW overfired batch (0.03) only fouls it. Jade: the turbine's Status and
   the generator's State say "choked" and the fix; a refused start click says why on the action bar.
-  `gas_turbine_crude_chokes` (was `gas_turbine_crude_derated`), `fuel_generator_residue_chokes`, `FuelQualityTest.theChoke`.
+  `gas_turbine_crude_chokes` (was `gas_turbine_crude_derated`), `fuel_generator_residue_chokes`, `still_pot_overfire`, `still_pot_sensible_batch`, `FuelQualityTest.theChoke`, `thePistonChoke`.
 - Viscosity shown (design item 6 A, todo #590): Jade on pipes, tanks and pipe sensors, and the engines' fuel quality,
   give the liquid's viscosity in words, with mPa s under 1 Pa s and the ratio to the game's water (whose 0.25 mPa s
   is what flow compares against): "thick heavy oil, 199 mPa s, 800x water; heat or dilute" (bands by Neon: thin

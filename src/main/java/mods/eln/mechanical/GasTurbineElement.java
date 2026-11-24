@@ -87,7 +87,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
      * window (it loses 2 % of its power per % outside it), and how fouled it is (0..FOUL_MAX, that share of its power
      * gone): fuel over the engines' coking balance fouls it (heavy oil: ~10 % an hour at full power), cleaner fuel
      * clears it again, wool cleans it at once. No damage. An old save loads clean. Liquid fuel that chokes it
-     * (FuelQuality.ENGINE_CHOKE) it doesn't take: choked(), live from its vessel, so no state is saved for it.
+     * (FuelQuality.TURBINE_CHOKE) it doesn't take: choked(), live from its vessel, so no state is saved for it.
      */
     public FuelQuality.Rating fuel = FuelQuality.Rating.CLEAN;
     public double foul;
@@ -185,7 +185,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         double hv = EaUnits.layerHeatingValue(v, id);
         if (hv <= 0) return got;
         FuelQuality.Rating q = FuelQuality.rate(v, id, FuelQuality.TURBINE_LO, FuelQuality.TURBINE_HI);
-        if (q.choked()) return got;   // (it chokes the injectors: none taken)
+        if (q.choked(FuelQuality.TURBINE_CHOKE)) return got;   // (it chokes the injectors: none taken)
         double liquid = EaUnits.drainLayer(v, id, (need - got) / hv) * hv, w = liquid / Math.max(1e-9, got + liquid);
         // (what it burns next: the liquid's rating by its share of the heat drawn; fuel gas is clean)
         if (liquid > 0) fuel = new FuelQuality.Rating(q.light() * w, q.heavy() * w, q.coking() * w);
@@ -201,18 +201,18 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
     /** Is there liquid fuel it can burn: some, and not so heavy it chokes it. */
     private boolean liquidReady(FluidNode v) {
         var q = liquidRating(v);
-        return q != null && !q.choked();
+        return q != null && !q.choked(FuelQuality.TURBINE_CHOKE);
     }
 
     /**
-     * Is it choked (FuelQuality.ENGINE_CHOKE; Baughn 2026-11-23): its liquid fuel has so much heavy oil or residue in it
+     * Is it choked (FuelQuality.TURBINE_CHOKE; Baughn 2026-11-23): its liquid fuel has so much heavy oil or residue in it
      * that it takes none, and it has no fuel gas to burn instead. It runs again once the fuel is diluted; piped full
      * (its filling valve shuts at Vessels.FILL_LEVEL) there is no room to, and breaking it empties it.
      */
     public boolean choked() {
         FluidNode v = fuelIn.vessel;
         var q = liquidRating(v);
-        return q != null && q.choked() && gasHeat(v) <= 0;
+        return q != null && q.choked(FuelQuality.TURBINE_CHOKE) && gasHeat(v) <= 0;
     }
 
     /** Its liquid fuel (mB), and its fuel gas (kg). */
@@ -505,7 +505,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
             double rate = FuelQuality.foulRate(q.coking(), FuelQuality.ENGINE_BALANCE);
             String visc = EaUnits.viscosityText(FuelQuality.layerViscosity(fuelIn.vessel, fuelIn.feedId()));
             // (choked: no fouling clause, it burns none; a choking liquid beside fuel gas: it burns the gas only)
-            info.put(I18N.tr("Fuel quality"), q.choked() ? FuelQuality.describe(q) + (choked() ? "" : " " + I18N.tr("(burning gas only)")) + "; " + visc : String.format("%s; %s; %s", FuelQuality.describe(q),
+            info.put(I18N.tr("Fuel quality"), q.choked(FuelQuality.TURBINE_CHOKE) ? FuelQuality.describe(q, FuelQuality.TURBINE_CHOKE) + (choked() ? "" : " " + I18N.tr("(burning gas only)")) + "; " + visc : String.format("%s; %s; %s", FuelQuality.describe(q, FuelQuality.TURBINE_CHOKE),
                 rate > 0 ? String.format(I18N.tr("fouls it ~%.0f%% an hour at full power (coking %.3f, clean under %.2f)"), FuelQuality.engineFoulPerHour(q.coking()) * 100, q.coking(), FuelQuality.ENGINE_BALANCE) : I18N.tr("burns clean"),
                 visc));
         }

@@ -16,8 +16,8 @@ import java.util.List;
  * The Fuel Generator on a fuel vessel, with fuel quality (refinery M1, Baughn 2026-11-15). A 50 V generator on open
  * circuit (its minimum load, 0.1 P_nom at efficiency factor 1.375):
  * mode 0, gasoline: full power, the old tank's fuel use (1.375 x 0.1 P_nom / tank energy x 2000 mB a second), clean;
- * mode 1, gasoline with 10 % residue by mass: 80 % power (10 % too heavy for its 330-400 K window), and it fouls by
- * the engines' law (4x slower than a burner);
+ * mode 1, gasoline with 3 % residue and 7 % heavy oil by mass (coking index 0.0405, under PISTON_CHOKE): 80 % power
+ * (10 % too heavy for its 330-400 K window), and it fouls by the engines' law (4x slower than a burner);
  * mode 2, a half-fouled one on gasoline: half power, it clears by the law; wool cleans it, one used;
  * mode 3, an old save (a tank of 0.75 of gasoline, and one of 0.5 of "lava", 1.7.10's default name): its fuel is in
  * the vessel, 1500 mB and 1000 mB of gasoline;
@@ -27,9 +27,10 @@ import java.util.List;
  * 720 K window would take it), and it burns clean;
  * mode 6, 40 % gasoline, 30 % diesel, 30 % heavy oil (60 % off its window: no power): it won't run; topped up with
  * gasoline (23 % off: 54 % power), a click starts it;
- * mode 7, the choke (Baughn 2026-11-23): running on gasoline, a quarter of residue by mass put in its vessel (coking
- * index 0.25, over FuelQuality.ENGINE_CHOKE; 50 % power by its window alone) stops it; Jade's State says it is choked
- * and a click won't start it; diluted with gasoline (1/7 residue, index 0.14: 71 % power) a click starts it.
+ * mode 7, the choke (Baughn 2026-11-23; a piston engine's, 2026-11-24): running on gasoline, residue of a twelfth of
+ * its mass put in its vessel (coking index 0.077, over FuelQuality.PISTON_CHOKE) stops it; Jade's State says it is
+ * choked and a click won't start it; diluted with as much gasoline again (1/25 residue, index 0.04: 92 % power) a click
+ * starts it.
  */
 public final class FuelGeneratorCases {
     private FuelGeneratorCases() {
@@ -91,10 +92,13 @@ public final class FuelGeneratorCases {
                 });
                 return;
             }
-            // (1500 mB of gasoline; mode 1 with residue of a ninth of its mass: 10 % of the mix)
+            // (1500 mB of gasoline; mode 1 with residue and heavy oil, 3 % and 7 % of the mix: off its window, not choking)
             double kg = 1500 * mods.eln.fluid.FluidSpecies.kgPerMb(reg.id("eln:gasoline"), false);
             EaUnits.add(v, reg.id("eln:gasoline"), kg, 293.15, false);
-            if (mode == 1) EaUnits.add(v, reg.id("eln:residue"), kg / 9, 293.15, false);
+            if (mode == 1) {
+                EaUnits.add(v, reg.id("eln:residue"), kg / 30, 293.15, false);
+                EaUnits.add(v, reg.id("eln:heavy_oil"), kg * 7 / 90, 293.15, false);
+            }
             if (mode == 5) EaUnits.add(v, reg.id("eln:diesel"), kg / 9, 293.15, false);
             if (mode == 6) {
                 // (200 mB of gasoline, by mass 40 %, diesel and heavy oil 30 % each)
@@ -116,7 +120,7 @@ public final class FuelGeneratorCases {
                 return;
             }
             if (mode == 7) {
-                // (600 mB of gasoline, running; then residue of a third of its mass: a quarter of the mix)
+                // (600 mB of gasoline, running; then residue of a twelfth of its mass: 1/13 of the mix)
                 EaUnits.drainLiquid(v, reg.id("eln:gasoline"), v.liquid(reg.id("eln:gasoline")));
                 double k = 600 * mods.eln.fluid.FluidSpecies.kgPerMb(reg.id("eln:gasoline"), false);
                 EaUnits.add(v, reg.id("eln:gasoline"), k, 293.15, false);
@@ -124,7 +128,7 @@ public final class FuelGeneratorCases {
                 Wp10bCases.click(ctx, gen, ItemStack.EMPTY);
                 ctx.after(20, () -> {
                     ranClean = gen.running();
-                    EaUnits.add(gen.inlet.vessel, reg.id("eln:residue"), k / 3, 293.15, false);
+                    EaUnits.add(gen.inlet.vessel, reg.id("eln:residue"), k / 12, 293.15, false);
                     gen.inlet.vessel.update();
                 });
                 ctx.after(40, () -> {
@@ -209,12 +213,12 @@ public final class FuelGeneratorCases {
                 String what = String.format("ran clean %b, stopped choked %b, refused %b, restarted %b, now on %b, rating %s, source %.1f W; choked Jade %s; now %s",
                     ranClean, stoppedChoked, refusedChoked, restarted, gen.running(), gen.fuel, gen.sourceP(), jadeChoked, gen.getWaila());
                 ctx.line(id + ": " + what);
-                ctx.check(id + ": a quarter of residue (index 0.25, over " + FuelQuality.ENGINE_CHOKE + ") chokes it: it stops, a click won't start it",
-                    ranClean && stoppedChoked && refusedChoked && 0.25 >= FuelQuality.ENGINE_CHOKE, what);
+                ctx.check(id + ": a thirteenth of residue (index 0.077, over " + FuelQuality.PISTON_CHOKE + ") chokes it: it stops, a click won't start it",
+                    ranClean && stoppedChoked && refusedChoked && 1.0 / 13 >= FuelQuality.PISTON_CHOKE, what);
                 ctx.check(id + ": Jade's State says it is choked and the fix; its fuel quality says it chokes", state.startsWith("choked: too much heavy oil or residue")
                     && state.contains("dilute or break to empty") && quality.startsWith("chokes engine"), state + " / " + quality);
-                ctx.check(id + ": diluted with gasoline (index 0.14), a click starts it at 71 %", restarted && gen.running() && !gen.choked()
-                    && Math.abs(gen.fuel.power() - (1 - 2.0 / 7)) < 0.01, what);
+                ctx.check(id + ": diluted with gasoline (index 0.04), a click starts it at 92 %", restarted && gen.running() && !gen.choked()
+                    && Math.abs(gen.fuel.power() - (1 - 2.0 / 25)) < 0.01, what);
                 return;
             }
             if (mode == 4) {
@@ -229,7 +233,7 @@ public final class FuelGeneratorCases {
             double pNom = 300 * Eln.fuelGeneratorPowerFactor;
             double rate = 1.375 * 0.1 * pNom / (Eln.fuelGeneratorTankCapacity * pNom) * FuelGeneratorElement.TANK_MB;   // (mB/s)
             double power = mode == 1 || mode == 5 ? 0.8 : 1;
-            double index = mode == 1 ? 0.1 : 0;
+            double index = mode == 1 ? 0.03 + 0.07 * 0.15 : 0;
             double dFoul = gen.foul - foul0;
             // (load 0.1 of nominal: the minimum load)
             double expect = FuelQuality.foulRate(index, FuelQuality.ENGINE_BALANCE) * 0.1 * t / (FuelQuality.FOUL_SECONDS * FuelQuality.ENGINE_SLOWER);
