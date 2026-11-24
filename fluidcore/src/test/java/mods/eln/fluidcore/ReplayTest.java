@@ -354,12 +354,32 @@ class ReplayTest {
             }
             double brackets = (MixFluid.BRACKETS - b0) / (double) steps;
             System.out.printf("still condensate line: %.2f brackets a step, %.1f iterations a step%n", brackets, net.stats.iterations / (double) steps);
-            org.junit.jupiter.api.Assertions.assertTrue(brackets <= 0.3, "brackets a step: " + brackets + " (0.8 before)");
+            org.junit.jupiter.api.Assertions.assertTrue(brackets <= 0.3, "brackets a step: " + brackets);
             assertEquals(0, net.stats.failures);
+            // (the old polish on the same steps: it does fall to the bracket here, and the new one ends where it does)
+            MixFluid.SHRINK_STEP = false;
+            MixFluid.STEP_FLOOR = false;
+            Network old = NetworkDump.read(text, dt);
+            long b1 = MixFluid.BRACKETS;
+            for (int i = 0; i < steps; i++) old.step(dt[0]);
+            double oldBrackets = (MixFluid.BRACKETS - b1) / (double) steps;
+            double worstT = 0, worstP = 0;
+            for (int i = 0; i < net.nodes.size(); i++) {
+                Network.Node a = net.nodes.get(i), b = old.nodes.get(i);
+                if (a.fixed || a.mass() < 1e-6) continue;
+                worstT = Math.max(worstT, Math.abs(a.T() - b.T()));
+                if (a.level() <= 0.999) worstP = Math.max(worstP, Math.abs(a.P() - b.P()));
+            }
+            System.out.printf("  old polish: %.2f brackets a step; worst %.3g K, %.3g Pa apart%n", oldBrackets, worstT, worstP);
+            org.junit.jupiter.api.Assertions.assertTrue(oldBrackets >= 0.5, "the old polish's brackets a step: " + oldBrackets);
+            org.junit.jupiter.api.Assertions.assertTrue(worstT < 1e-3, "temperature off the old polish by " + worstT);
+            org.junit.jupiter.api.Assertions.assertTrue(worstP < 1, "pressure off the old polish by " + worstP);
         } finally {
             Network.MAX_DEPTH = depth;
             Network.CUT_SHORT = cut;
             MixFluid.COUNT = count;
+            MixFluid.SHRINK_STEP = true;
+            MixFluid.STEP_FLOOR = true;
         }
     }
 }

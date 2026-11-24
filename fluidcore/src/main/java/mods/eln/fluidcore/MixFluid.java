@@ -640,9 +640,8 @@ final class MixFluid implements NodeFluid {
     public static double FLASH_ABS = 0, FLASH_RV = 1e-14;
     public static boolean OLD_TOL = false;
     /**
-     * The polish's iterations before the bracketed solve takes over (probe knob). 25: its steps in ln Vg are held to 1,
-     * and a bubble that shrinks by decades in one network iterate (a liquid-full node's, 1e-3 to 1e-6 of its volume)
-     * took 12-15 of them; a bracketed solve costs some 70 evaluations.
+     * The polish's iterations before the bracketed solve takes over (probe knob). 25: a bracketed solve costs some 70
+     * evaluations, so a slow polish is still the cheaper way.
      */
     public static int POLISH_MAX = 25;
     /** A shrinking bubble's step taken in 1/Vg (true; false: capped in ln Vg as before, probe knob). */
@@ -692,8 +691,8 @@ final class MixFluid implements NodeFluid {
                 return false;
             }
             double dT = -(j22 * r0 - j12 * r1) / det, dx = -(-j21 * r0 + j11 * r1) / det;
-            if (Math.abs(dT) < 1e-10 && Math.abs(dx) * vgv < 1e-15 * V && Math.abs(r1) < 1e-9 && STEP_FLOOR) {
-                // (Newton's step is below what T and Vg can resolve: the residuals left are the evaluation's own rounding.
+            if (Math.abs(dT) < 1e-10 && Math.abs(dx) * vgv < 1e-15 * V && Math.abs(r1) < 1e-9 && Math.abs(r0) < 1e5 * tolE && STEP_FLOOR) {
+                // (Newton's step is below what matters for T and Vg, and the energy within 1e5 of its tolerance: the residuals left are the evaluation's own rounding.
                 // At a bubble squeezed to 1e-14 of its node the energy came out with noise of 1e-6 J against a tolerance
                 // of 1e-10, and the polish spent its iterations, then a bracket, on noise)
                 T = t;
@@ -709,8 +708,8 @@ final class MixFluid implements NodeFluid {
                 // a bubble shrinking by decades (a line running full of liquid: the pressure that squeezes it follows 1/Vg):
                 // the same linear step taken in 1/Vg, Vg / (1 - dx), not capped at one e-fold in ln Vg, which crawled a decade
                 // a step towards a bubble 6 decades down while the capped steps scaled dT too and the energy ran away; the
-                // polish then fell to the bracket (a still's full condensate line, LabAgent's sensible batch: a third of
-                // the still's flash work)
+                // polish then fell to the bracket (a still's condensate line running full: a third of the still's flash
+                // work)
                 t += Math.min(1, 30 / Math.max(1e-30, Math.abs(dT))) * dT;
                 x -= Math.log1p(-dx);
             } else {
