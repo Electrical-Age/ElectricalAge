@@ -1,4 +1,4 @@
-// 26.3	2026-11-24T18:20:56.30610016	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-24T18:21:20.677369381	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 98be7e719755f1d65131e906daa7a98b081c8ce8 data/eln/advancement/recipes/misc/230v_air_blower.json
@@ -118,6 +118,7 @@ f996e81fb80e515548a6e7a7c20e6807ff52a339 data/eln/advancement/recipes/misc/cheap
 20786f52964ac84ab2f8e645c40b6af3e0d499dd data/eln/advancement/recipes/misc/cheap_ferromagnetic_core.json
 495dad7ca040158c03dae28e27b0da45f191dc33 data/eln/advancement/recipes/misc/combustion_chamber.json
 d4c81ae7f5e3497a7a7df59ab504d6bf97689420 data/eln/advancement/recipes/misc/computer.json
+f3d550ab21bc57e43c5e943ceec6d7aff7f10e52 data/eln/advancement/recipes/misc/condenser_coil.json
 a7d17767a5dbba27b8cc1a46625e6e20c8a94f1d data/eln/advancement/recipes/misc/configurable_summing_unit.json
 bdec91984c6084d4e7819043b06effcf89f1b20c data/eln/advancement/recipes/misc/copper_cable.json
 a4bc5c8521cddcafc66204673564d0f12cd4a473 data/eln/advancement/recipes/misc/copper_coil.json
@@ -509,6 +510,7 @@ afa583372447fddaf5707f783a659b8429a6b5d5 data/eln/recipe/cheap_electrical_drill.
 ab676e2387186148a3df59b088cf2d1f4c3a15f4 data/eln/recipe/cheap_ferromagnetic_core.json
 10859b043b2f46648ba82294d9dd0461b0bd7cc2 data/eln/recipe/combustion_chamber.json
 81d16accfbdaa70b2add90905cf05acadc836c9d data/eln/recipe/computer.json
+02d72ce08660eccaad8a0ef8f6cb772b25f12925 data/eln/recipe/condenser_coil.json
 e6d592a04e3a3543405fc3038e0c4d99be342217 data/eln/recipe/configurable_summing_unit.json
 59b6b7cda71498662dc4759287863f6959474cf3 data/eln/recipe/copper_cable.json
 b99487bebe5fb5db55128da9327d630d8b0b2ade data/eln/recipe/copper_coil.json

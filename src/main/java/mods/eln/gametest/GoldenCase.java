@@ -226,6 +226,7 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5396",   // the Air Blower (todo #471, Baughn 2026-11-15)
         "eln:transparent_node@5328",   // the Large Boiler, 2x2x2 (todo #472, Baughn 2026-11-15)
         "eln:transparent_node@5332",   // the Still Pot, 2x2x2 (refinery M2, todo #591, Baughn 2026-11-24)
+        "eln:transparent_node@5336",   // the Condenser Coil, 1x1x2 (refinery M2, Baughn 2026-11-24)
         "eln:transparent_node@5200",   // the steam injection wellhead (oil lakes, todo #138; Baughn 2026-10-30)
         "eln:transparent_node@5504",   // the Linear Servo Drive (the servo layer, Baughn 2026-11-02)
         "eln:transparent_node@5568",   // the computer (robotics phase 3, Baughn 2026-11-05)

@@ -1,4 +1,4 @@
-// 26.3	2026-11-24T18:20:56.30232028	eln-global/EA models
+// 26.3	2026-11-24T18:21:20.673457821	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -38,6 +38,7 @@
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/carbon_black_burner.json
 f129897addd25f967e19a97a4f915b341261ab7a assets/eln/blockstates/cinnabar_ore.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/computer.json
+6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/condenser_coil.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/cost_oriented_battery.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/counterflow_heat_exchanger.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/current_oriented_battery.json
@@ -222,6 +223,7 @@ f560f5eda8ce5d031e9132c276204bb60b71dcd0 assets/eln/items/cinnabar_dust.json
 95e1215b35afc42a351197cc27f48657dc179d4e assets/eln/items/coal_plate.json
 dcec7d729a81b7afd3021b053bf6d59a56a9f13e assets/eln/items/combustion_chamber.json
 aa353fc25d3f2e30e18685e3e57fdd60416b244d assets/eln/items/computer.json
+5fe08d9b2288ebbf3f3342c9b0402c4d4c587b65 assets/eln/items/condenser_coil.json
 1d2ea77488a8b50b8a4ac1993103676e162f29e0 assets/eln/items/configurable_summing_unit.json
 9ca40de6a4baa7074c6045668bff98ef9dfc205d assets/eln/items/copper_cable.json
 b01ecca3f3ec4b91a29e92cd48c43a2203625944 assets/eln/items/copper_coil.json
@@ -676,6 +678,7 @@ a9953e6a49c74c057dac9d99d58d72189660a69d assets/eln/models/item/coal_dust.json
 f16f7b5d2c22adfcaf93131b9f4f2f6466a8a3c1 assets/eln/models/item/combustion_chamber.json
 b9a42005abd3ac5a90258ca99f67ebc5840a9d89 assets/eln/models/item/computer.json
 847887cd8d7c38b0d2b70999427a784a2b180b74 assets/eln/models/item/computer_3d.json
+6ab1743894029c0c791fa85563e865b7f90d1743 assets/eln/models/item/condenser_coil.json
 72abba8490493d1217c47c09117189166e059315 assets/eln/models/item/configurable_summing_unit.json
 6f64b32d806b6b88065d6a746cebd3f504de1c8c assets/eln/models/item/configurable_summing_unit_3d.json
 fb40085ecb61dbf766b2e1c018e194c092a403d2 assets/eln/models/item/copper_cable.json

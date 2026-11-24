@@ -6717,6 +6717,26 @@
   "tier_cue": null
  },
  {
+  "item_id": "condenser_coil",
+  "display_name": "Condenser Coil",
+  "family": "thermal",
+  "placeable": true,
+  "tier": null,
+  "vanilla_size": 16,
+  "schematic_scope": false,
+  "model": "cad condensercoil",
+  "parts": [],
+  "appearance": "",
+  "function": "",
+  "current_texture": "",
+  "shares_texture_with": [],
+  "notes": "added 2026-11-24 for refinery M2",
+  "redraw": true,
+  "node_kind": "transparent_node",
+  "model_texture_notes": "",
+  "tier_cue": null
+ },
+ {
   "item_id": "pipe_breather_valve",
   "display_name": "Pipe Breather Valve",
   "family": "thermal",

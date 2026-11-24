@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:bucket",
+    "P": "eln:iron_plate",
+    "c": "eln:copper_thermal_cable"
+  },
+  "pattern": [
+    "PcP",
+    "PcP",
+    "PBP"
+  ],
+  "result": {
+    "id": "eln:condenser_coil"
+  }
+}

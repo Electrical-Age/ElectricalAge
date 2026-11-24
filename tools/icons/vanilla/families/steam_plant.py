@@ -210,3 +210,22 @@ def still_pot():
     cv.set(5, 8, WHITE); cv.set(6, 8, WHITE)
     cv.set(6, 9, VCOPPER[0])
     return cv
+
+
+# ------------------------------------------------------------------------------- condenser coil
+def condenser_coil():
+    """Condenser Coil (cadmodels CondenserCoil, 1x1x2): the tall grey drum on its legs, the copper cooling
+    coil wound round it in diagonal bands, a copper heat plate on its flank and the vapour flange on top.
+    Upright and tall where the turbines' condensers lie on their sides."""
+    cv = Canvas(16)
+    cylinder(cv, 4, 2, 11, 8, STEEL, axis='y')                         # the drum, cols 4..11, rows 2..12
+    for x in (5, 10):                                                  # its legs
+        cv.vline(x, 13, 14, IRON_D[1])
+    sub(cv, lambda c: cylinder(c, 6, 0, 2, 4, STEEL, axis='y'))         # the vapour neck and flange
+    for y0 in (3, 6, 9):                                               # the coil's turns, rising to the left
+        for i in range(8):
+            x, y = 4 + i, y0 + 2 - i // 3
+            cv.set(x, y, PAD[4] if i < 4 else PAD[2])
+    cv.rect(12, 5, 2, 4, PAD[3])                                       # the heat plate on its flank
+    cv.vline(13, 5, 8, PAD[1])
+    return cv

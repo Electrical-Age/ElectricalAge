@@ -22,6 +22,7 @@ compressorb/compressorb.obj
 computer/computer.obj
 condenser200v/condenser200v.obj
 condenser50v/condenser50v.obj
+condensercoil/condensercoil.obj
 dataloggercrtfloor/dataloggercrtfloor.obj
 daylightsensor/daylightsensor.obj
 desulfuriser/desulfuriser.obj

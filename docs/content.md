@@ -121,7 +121,19 @@ orifice, carries E = 2 (F / 0.10 - 1) kg of liquid (to 5) per kg of vapour, F th
 vapour velocity over the node's cross-section; a medium burner stays under it, a big one forced puts residue in the
 product and chokes engines. Jade: boiling over, only residue left, under vacuum (below 0.9 bar); pressure, temperature,
 shell, what boils off ("Boiling now", while vapour leaves), contents, liquid, viscosity, the signal. Its fluid
-capability is on its origin block (ghost blocks expose none). GameTests `still_pot_*`.
+capability is on its origin block (ghost blocks expose none). A piped fill's float shuts it at the 24 B charge (as a
+bucket stops there). Entrainment stops while the neck stands 30 % full, and goes by the smoothed vapour flow.
+
+The Condenser Coil (`oil/CondenserCoilElement`, model `cadmodels/CondenserCoil`): a 1x1x2 drum of 2 B (node the lower
+block, a ghost cell above), vapour in at the top, gas out at the upper front (high), condensate out underneath (draw 0)
+and at the lower front (low); its coil passes 120 W/K from its contents to its shell, which gives it to thermal
+dissipators on its back and flanks (both blocks) and ~2 W/K to the air. It may stand on a pipe. Jade: vapour in,
+outlet, condensing and gas out (g/s, a second's mean), shell; "Vapour escaping, add cooling" over 60 °C while vapour
+comes in. A tank's high side flanges draw at their top edge (for gas): pipe condensate into a receiver's low flange or
+top. A pipe valve draws half way up the run before it, so a long run there fills half full before anything passes: fit
+a receiver's valve close to the coil. GameTests `condenser_coil_body`, `still_pot_sensible_batch` (a furnace, two
+receivers switched through OpAmps and control valves by the pot's signal: gasoline cut 98 %), `still_pot_overfired_batch`
+(its product's coking ~0.11: fouls a turbine, doesn't choke it), `still_pot_sparge_layers` (water under the oil).
 
 ### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)
 - Datapack JSON `data/<ns>/eln/fluid_species/<name>.json` defines species `<ns>:<name>` for the fluid core (fields in

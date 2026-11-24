@@ -2361,6 +2361,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             't', findItemStack("Copper Thermal Cable"),
             'P', findItemStack("Copper Plate"));
 
+        // the Condenser Coil: a copper coil (copper cable) in an iron drum, a bucket for its sump
+        addRecipe(findItemStack("Condenser Coil", 1),
+            "PcP",
+            "PcP",
+            "PBP",
+            'B', stack(Items.BUCKET),
+            'c', findItemStack("Copper Thermal Cable"),
+            'P', findItemStack("Iron Plate"));
+
         addRecipe(findItemStack("48V Compressor", 1),
             "IRI",
             "FMF",

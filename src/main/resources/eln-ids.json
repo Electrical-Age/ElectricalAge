@@ -2141,6 +2141,12 @@
   "kind": "transparent_node",
   "name": "still_pot"
  },
+ "eln:transparent_node@5336": {
+  "descriptor": "CondenserCoilDescriptor",
+  "display": "Condenser Coil",
+  "kind": "transparent_node",
+  "name": "condenser_coil"
+ },
  "eln:transparent_node@5376": {
   "descriptor": "EnergyConverterElnToOtherDescriptor",
   "display": "48V Electrical Age to other energy exporter",

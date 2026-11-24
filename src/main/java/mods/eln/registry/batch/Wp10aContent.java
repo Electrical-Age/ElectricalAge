@@ -127,6 +127,8 @@ public class Wp10aContent implements ElnContent {
         transparentNodeItem.addDescriptor(16 + (id << 6), mods.eln.oil.BoilerDescriptor.twoByTwo(TR_NAME(Type.NONE, "Large Boiler"), "largeboiler"));
         // refinery M2 (todo #591, Baughn: batch first): the Still Pot, a 2x2x2 kettle heated as the Large Boiler is
         transparentNodeItem.addDescriptor(20 + (id << 6), new mods.eln.oil.StillPotDescriptor(TR_NAME(Type.NONE, "Still Pot"), "stillpot"));
+        // its condenser (Baughn 2026-11-24: "Condenser Coil"): a 1x1x2 drum cooled through thermal faces
+        transparentNodeItem.addDescriptor(24 + (id << 6), new mods.eln.oil.CondenserCoilDescriptor(TR_NAME(Type.NONE, "Condenser Coil"), "condensercoil"));
     }
 
     /** 26.x oil & steam: electric heaters and the boiler (placeholder models). */
