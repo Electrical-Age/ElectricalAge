@@ -61,7 +61,6 @@ public class ComputerScreen extends ElnScreen {
     /** What only this player has: each line's edit, each log's and list's scroll. */
     final Map<String, LineEdit> edits;
     final Map<String, Integer> scrolls = new HashMap<>();
-    static long seq;
     String hint = "";
 
     /** A window being dragged (MOVE) or sized (SIZE) by this player: its new geometry so far. */
@@ -282,6 +281,7 @@ public class ComputerScreen extends ElnScreen {
     }
 
     /** The editor elements of the active window, when nothing covers them, as code editor widgets placed over them. */
+    @SuppressWarnings("unchecked")
     void syncEditors() {
         Scene.Window t = render.lit() && dragMode == 0 ? activeWindow() : null;   // (off, or a drag: none)
         java.util.Set<String> want = new java.util.HashSet<>();
@@ -296,6 +296,9 @@ public class ComputerScreen extends ElnScreen {
                 List<Object> m = e.msg;
                 EditorState st = editorState(active, en.getKey());
                 boolean replaced = false;
+                if (!m.equals(st.opened) && st.opened instanceof List<?> om && Form.str((List<Object>) om, 8, "").equals(Form.str(m, 8, ""))
+                    && st.savingText != null && st.savingText.equals(Form.str(m, 10, "")))
+                    st.opened = m;   // (this player's own save, as the scene now keeps it: what they typed since stays)
                 if (!m.equals(st.opened)) {
                     // a new editor message: the file opened again (a reused window number, AdventurAgent): start from it.
                     // (by content: the same message replayed when the screen is opened again keeps the unsaved text)
@@ -366,10 +369,8 @@ public class ComputerScreen extends ElnScreen {
                 st.baseRev = Form.str(m, 4, "");
                 st.baseText = st.savingText;
                 st.status = tr("Saved");
-            } else {   // conflict: keep the player's text; a second save overwrites (Argon's review)
-                st.baseRev = Form.str(m, 4, "");
-                st.baseText = Form.str(m, 5, "");
-                st.status = tr("Changed on the disk meanwhile: Ctrl+S again overwrites it");
+            } else {   // conflict: refused, and refused again (Baughn 2026-11-24): the player's text stays, the file too
+                st.status = tr("Not saved: the file changed on the disk. Save As keeps your text");
             }
         }
         // lines the computer took are in its log now; ones it never took (off, stuck, refused) come back after 10 s
@@ -393,7 +394,7 @@ public class ComputerScreen extends ElnScreen {
         String[] tid = key.split("/");
         int t = Integer.parseInt(tid[0]), id = Integer.parseInt(tid[1]);
         EditorState st = editorState(t, id);
-        st.savingSeq = ++seq;
+        st.savingSeq = ++render.seq;
         st.savingText = st.text;
         st.status = tr("Saving...");
         render.screenEvent(new Form.Symbol("save"), (long) t, (long) id, st.savingSeq, st.baseRev == null ? "" : st.baseRev,
@@ -475,6 +476,13 @@ public class ComputerScreen extends ElnScreen {
             if (t != null) overlays(g, t);
             if (dragMode != 0) dragOutline(g);
             if (menuOpen) menus(g);
+        }
+        if (!render.operator) {   // (a watcher: Baughn 2026-11-24, one user at a time)
+            String who = render.operatorName.isEmpty() ? tr("someone else") : render.operatorName;
+            String msg = tr("Watching: in use by %1$", who);
+            int by = y0 + s.h * LINE + 6 - LINE;
+            g.fill(x0, by, x0 + s.w * CELL + 8, by + LINE, 0xE0303848);
+            g.text(font, msg, x0 + (s.w * CELL + 8 - font.width(msg)) / 2, by + 1, 0xFFFFE070, false);
         }
         // (off, or no chips: a dark screen, no text: Baughn 2026-11-18; the state shows under it)
         label(g, 9, slotsY - 11, tr("Expansion modules"));
@@ -880,7 +888,7 @@ public class ComputerScreen extends ElnScreen {
                 if (st.baseText == null || !st.text.equals(st.baseText)) save(key);
             }
             case "Save As..." -> {   // (its changes, kept aside by the program and written only under the new name)
-                render.screenEvent(new Form.Symbol("stash"), (long) active, (long) Integer.parseInt(key.split("/")[1]), ++seq,
+                render.screenEvent(new Form.Symbol("stash"), (long) active, (long) Integer.parseInt(key.split("/")[1]), ++render.seq,
                     st.baseRev == null ? "" : st.baseRev, hunks(st.baseText, st.text));
                 w.setFocused(false);   // (the keys go to the line that asks for the name)
                 setFocused(null);
@@ -964,6 +972,8 @@ public class ComputerScreen extends ElnScreen {
     public boolean mouseClicked(MouseButtonEvent ev, boolean doubleClick) {
         Scene s = scene();
         double mx = ev.x(), my = ev.y();
+        if (!render.operator && mx >= leftPos + AREA_X && my >= topPos + AREA_Y && mx < leftPos + AREA_X + s.w * CELL
+            && my < topPos + AREA_Y + s.h * LINE) return true;   // (a watcher's clicks on the screen go nowhere)
         if (!render.lit() || !onScreen(mx, my)) {
             closeMenu();
             return super.mouseClicked(ev, doubleClick);
@@ -1195,6 +1205,7 @@ public class ComputerScreen extends ElnScreen {
 
     @Override
     public boolean charTyped(CharacterEvent event) {
+        if (!render.operator) return false;
         String ed = focusedEditor();
         if (ed != null) return menuOpen || editorWidgets.get(ed).charTyped(event);   // (hidden under a menu: nothing)
         Scene.Window t = render.lit() ? activeWindow() : null;
@@ -1222,7 +1233,7 @@ public class ComputerScreen extends ElnScreen {
 
     @Override
     public boolean keyPressed(KeyEvent ev) {
-        if (fieldHasKeys()) return super.keyPressed(ev);
+        if (fieldHasKeys() || !render.operator) return super.keyPressed(ev);
         int k = ev.key();
         if (menuOpen && k == InputConstants.KEY_ESCAPE) {
             closeMenu();
@@ -1314,7 +1325,7 @@ public class ComputerScreen extends ElnScreen {
     void submit(LineEdit le) {
         if (le.pending != null) return;   // (the last one isn't taken yet)
         String text = le.text.toString();
-        le.pendingSeq = ++seq;
+        le.pendingSeq = ++render.seq;
         le.pending = text;
         le.pendingAt = System.currentTimeMillis();
         if (!text.isBlank() && (le.history.isEmpty() || !le.history.getLast().equals(text))) le.history.add(text);

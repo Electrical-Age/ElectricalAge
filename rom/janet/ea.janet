@@ -938,6 +938,7 @@
   (var rev (revision text))
   (var base text)       # the text at rev, as last opened or saved
   (var stashed nil)     # the picking display's text for Save As
+  (var unsaved false)   # the last save was refused or failed: Close and Run ask first
   (var asks 0)
   (var asking nil)      # the line asking for a name now, or nil
   (defn name-of [p] (last (string/split "/" p)))
@@ -980,16 +981,17 @@
              (def now (cond same base (disk/exists? path) (string (slurp path)) ""))
              (def now-rev (if same rev (revision now)))
              (if (not= b now-rev)
-               (ui/send 'conflict t 4 seq now-rev now)
+               (do (set unsaved true) (ui/send 'conflict t 4 seq now-rev now))
                (do
                  (def new (apply-hunks now hunks))
                  (spit path new)
                  (set stamp (stamp-of path))
                  (set base new)
                  (set rev (revision new))
+                 (set unsaved false)
                  (heading :light-gray path)
                  (ui/send 'saved t 4 seq rev))))
-           ([err] (heading :red (string path ": " err))))))
+           ([err] (set unsaved true) (heading :red (string path ": " err))))))
   (put ui-handlers [t 4 :stash]
        (fn [seq b hunks]
          (set stashed (try (if (= b rev) (apply-hunks base hunks)) ([_] nil)))
@@ -1006,8 +1008,14 @@
                                                     (set stashed nil)
                                                     (try (do (spit p txt) (open-text p txt))
                                                       ([e] (heading :red (string p ": " e))))))
-                "Run" (proc/start (name-of path) run-file path)
-                "Close" (proc/close t)
+                "Run" (if unsaved
+                        (ui/ask t 7 "Not saved" "Your changes aren't on the disk. Run the file as it is there?" ["Run" "Cancel"]
+                                (fn [i] (when (= i 0) (proc/start (name-of path) run-file path))))
+                        (proc/start (name-of path) run-file path))
+                "Close" (if unsaved
+                          (ui/ask t 7 "Not saved" "Your changes aren't on the disk. Close and lose them?" ["Close" "Keep editing"]
+                                  (fn [i] (when (= i 0) (proc/close t))))
+                          (proc/close t))
                 nil)))
   (open-text path text)
   (ui/focus t)

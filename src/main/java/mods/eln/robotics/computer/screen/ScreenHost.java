@@ -29,6 +29,10 @@ public final class ScreenHost {
     private final List<List<Object>> batch = new ArrayList<>();
     private int batchBytes;
     private boolean overflow;
+    /** Saves on their way to the computer (window/id/seq -> hunks), oldest first. */
+    private final java.util.LinkedHashMap<String, Object> saves = new java.util.LinkedHashMap<>();
+    /** Answers to the operator's saves (saved, conflict): theirs alone, never kept in the scene. */
+    private final List<String> replies = new ArrayList<>();
 
     /** Bytes from the computer's display channel: whole lines become messages. */
     public synchronized void fromComputer(byte[] display) {
@@ -63,7 +67,29 @@ public final class ScreenHost {
         take(List.of(new Form.Symbol("reset"), (long) Scene.DEFAULT_W, (long) Scene.DEFAULT_H));
     }
 
+    /** The answers to saves since last asked (for the operator only). */
+    public synchronized List<String> takeReplies() {
+        if (replies.isEmpty()) return List.of();
+        List<String> r = List.copyOf(replies);
+        replies.clear();
+        return r;
+    }
+
+    /** The highest submission or save number the scene shows (a line's busy mark): where the next operator starts. */
+    public synchronized long highestSeq() {
+        long h = 0;
+        for (Scene.Window w : scene.windows.values())
+            for (Scene.Element e : w.elements.values()) h = Math.max(h, e.busySeq);
+        return h;
+    }
+
     private void take(List<Object> m) {
+        if (m != null && (Form.verb(m).equals("saved") || Form.verb(m).equals("conflict"))) {
+            if (scene.apply(m) && replies.size() < 64) replies.add(Form.print(m));
+            Object hunks = saves.remove(Form.num(m, 1, -1) + "/" + Form.num(m, 2, -1) + "/" + Form.num(m, 3, -1));
+            if (Form.verb(m).equals("saved") && hunks instanceof List<?> h) scene.saved(m, h);
+            return;
+        }
         if (m == null || !scene.apply(m)) return;
         batch.add(m);
         batchBytes += 32;   // (a rough size; the exact one is counted when the batch is printed)
@@ -100,7 +126,7 @@ public final class ScreenHost {
         }
         batch.clear();
         batchBytes = 0;
-        return bytes > BATCH_MAX ? null : out;
+        return out;   // (however big: the element sends it in pieces; a full replay for everyone was worse)
     }
 
     static String key(List<Object> m) {
@@ -148,6 +174,10 @@ public final class ScreenHost {
         if (!WINDOW_EVENTS.contains(v) && !(m.size() > 2 && m.get(2) instanceof Long)) return null;
         List<Object> told = scene.applyPlayer(m);
         if (told != null && echo != null) echo.add(Form.print(told));
+        if (v.equals("save") && m.size() > 5) {   // (kept until its answer: a saved one updates the scene's copy)
+            saves.put(m.get(1) + "/" + m.get(2) + "/" + m.get(3), m.get(5));
+            while (saves.size() > 8) saves.remove(saves.keySet().iterator().next());
+        }
         return Form.print(m);
     }
 }

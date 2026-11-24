@@ -28,6 +28,13 @@ public class ComputerRender extends TransparentNodeElementRender {
     public final java.util.Map<String, Object> editorStates = new java.util.HashMap<>();
     /** Replies to editors' saves, for the screen to take. */
     public final java.util.ArrayDeque<java.util.List<Object>> replies = new java.util.ArrayDeque<>();
+    /**
+     * Whether this player operates the computer (the server says: the first with the screen open), else whose it is
+     * now; and this player's last submission or save number, counting on from where the computer has got to.
+     */
+    public volatile boolean operator = true;
+    public volatile String operatorName = "";
+    public long seq;
     /** Bumped when the scene changes, so the screen can see it. */
     public int sceneVersion;
 
@@ -142,6 +149,7 @@ public class ComputerRender extends TransparentNodeElementRender {
 
     /** Send a screen protocol event (one message) to the computer. */
     public void screenEvent(Object... parts) {
+        if (!operator) return;   // (a watcher: the server would refuse it anyway)
         net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(
             new ScreenEventPayload(tileEntity.getBlockPos(), Form.print(parts)));
     }
@@ -153,11 +161,17 @@ public class ComputerRender extends TransparentNodeElementRender {
             byte kind = stream.readByte();
             if (kind != ComputerElement.SCREEN_ID) return;
             int n = stream.readInt();
-            if (n < 0 || n > 1 << 20) return;
+            if (n < 0 || n > 4 << 20) return;
             byte[] b = new byte[n];
             stream.readFully(b);
             for (String line : new String(b, StandardCharsets.UTF_8).split("\n")) {
                 var m = Form.parse(line);
+                if (m != null && Form.verb(m).equals("operator")) {   // (this player's role, not part of the scene)
+                    operator = Boolean.TRUE.equals(m.size() > 1 ? m.get(1) : null);
+                    if (operator) seq = Math.max(seq, Form.num(m, 2, 1) - 1);
+                    else operatorName = Form.str(m, 2, "");
+                    continue;
+                }
                 if (m == null || !scene.apply(m)) continue;
                 String v = Form.verb(m);
                 if (v.equals("saved") || v.equals("conflict")) {   // (for the screen's editors)

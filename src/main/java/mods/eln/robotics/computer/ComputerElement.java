@@ -72,6 +72,14 @@ public class ComputerElement extends TransparentNodeElement {
      * open, and those near enough to see the monitor (Baughn 2026-11-18). Only the first may type (typing).
      */
     volatile List<ServerPlayer> watching = List.of(), typing = List.of();
+    /**
+     * The one player whose events the computer takes (Baughn 2026-11-24: "Computers are single user in principle"):
+     * the first of those with the screen open; everyone else only watches. Submission and save numbers belong to the
+     * computer: each new operator starts after the highest one it has seen (seqHigh), so a line's busy mark and a
+     * save's answer can't be taken for another player's.
+     */
+    volatile ServerPlayer operator;
+    volatile long seqHigh;
     /** How near a player must be to get the monitor's picture, blocks. */
     public static final double MONITOR_RANGE = 24;
     final Map<UUID, Integer> eventsThisTick = new java.util.concurrent.ConcurrentHashMap<>();
@@ -334,11 +342,42 @@ public class ComputerElement extends TransparentNodeElement {
                 if (!before.contains(p) || batch == null || gui.contains(p) && !opened.contains(p)) sendScreen(p, screen.replay());
                 else if (!batch.isEmpty()) sendScreen(p, batch);
             watching = List.copyOf(v);
+            ServerPlayer was = operator;
+            ServerPlayer op = was != null && gui.contains(was) ? was : null;
+            if (op == null) for (ServerPlayer p : gui) if (opened.contains(p)) {   // (who already had it open goes first)
+                op = p;
+                break;
+            }
+            if (op == null && !gui.isEmpty()) op = gui.get(0);
+            if (op != was) seqHigh = Math.max(seqHigh, screen.highestSeq());
+            operator = op;
+            for (ServerPlayer p : gui)   // (who may type, told to each screen when it opens or the operator changes)
+                if (op != was || !opened.contains(p)) sendScreen(p, List.of(operatorLine(p, op)));
             typing = List.copyOf(gui);
         }
     }
 
+    /** (operator true NEXT-SEQ) to the operator, (operator false "name") to the others. */
+    String operatorLine(ServerPlayer p, ServerPlayer op) {
+        if (p == op) return mods.eln.robotics.computer.screen.Form.print(new mods.eln.robotics.computer.screen.Form.Symbol("operator"), true, seqHigh + 1);
+        return mods.eln.robotics.computer.screen.Form.print(new mods.eln.robotics.computer.screen.Form.Symbol("operator"), false, op == null ? "" : op.getName().getString());
+    }
+
     void sendScreen(ServerPlayer p, List<String> lines) {
+        // (in packets of about 256 KB: one big picture or file mustn't make one huge packet)
+        int from = 0, bytes = 0;
+        for (int k = 0; k < lines.size(); k++) {
+            bytes += lines.get(k).length() + 1;
+            if (bytes > 256 * 1024 && k > from) {
+                sendScreenPacket(p, lines.subList(from, k));
+                from = k;
+                bytes = lines.get(k).length() + 1;
+            }
+        }
+        if (from < lines.size()) sendScreenPacket(p, lines.subList(from, lines.size()));
+    }
+
+    private void sendScreenPacket(ServerPlayer p, List<String> lines) {
         byte[] text = String.join("\n", lines).getBytes(java.nio.charset.StandardCharsets.UTF_8);
         ByteArrayOutputStream bos = new ByteArrayOutputStream(text.length + 64);
         DataOutputStream o = new DataOutputStream(bos);
@@ -369,7 +408,7 @@ public class ComputerElement extends TransparentNodeElement {
         Runner r = runner;
         if (r == null) return;
         if (player != null) {
-            if (!typing.contains(player)) return;
+            if (player != operator) return;   // (watchers only watch)
             if (eventsThisTick.merge(player.getUUID(), 1, Integer::sum) > EVENTS_PER_TICK) return;
         }
         List<String> echo = new ArrayList<>(1);
@@ -380,6 +419,9 @@ public class ComputerElement extends TransparentNodeElement {
             if (!echo.isEmpty()) for (ServerPlayer p : watching) if (p != player) sendScreen(p, echo);
         }
         if (ok == null) return;
+        List<Object> parsed = mods.eln.robotics.computer.screen.Form.parse(ok);
+        String verb = parsed == null ? "" : mods.eln.robotics.computer.screen.Form.verb(parsed);
+        if (verb.equals("submit") || verb.equals("save") || verb.equals("stash")) seqHigh = Math.max(seqHigh, mods.eln.robotics.computer.screen.Form.num(parsed, 3, 0));
         if (ok.startsWith("(break ")) r.pressBreak();   // (the interrupt stops a running task; the event says whose tab)
         r.toEditor((ok + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
         r.kick();
@@ -398,6 +440,9 @@ public class ComputerElement extends TransparentNodeElement {
             screen.console(console);
             screen.fromComputer(display);
             List<String> batch = screen.takeBatch();
+            List<String> replies = screen.takeReplies();
+            ServerPlayer op = operator;
+            if (!replies.isEmpty() && op != null) sendScreen(op, replies);
             if (batch != null && batch.isEmpty()) return;
             for (ServerPlayer p : watching) sendScreen(p, batch == null ? screen.replay() : batch);
             if (tracedAt != 0 && LOG.isDebugEnabled()) {

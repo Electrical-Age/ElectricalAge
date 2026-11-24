@@ -562,6 +562,32 @@ public final class Scene {
     }
 
     /** The messages that rebuild this scene on an empty one, after a (reset w h). */
+    /**
+     * A save landed ((saved w id seq rev), with the hunks the operator sent): the editor element keeps the text as saved
+     * and its new revision, so whoever opens the screen next edits the file as it is, not as it was first opened. The
+     * computer needn't send the whole text again (a 32 KB message on a two-chip computer). Hunks that don't apply leave it.
+     */
+    public void saved(List<Object> m, List<?> hunks) {
+        Window w = windows.get((int) Form.num(m, 1, -1));
+        Element e = w == null ? null : w.elements.get((int) Form.num(m, 2, -1));
+        if (e == null || !e.kind.equals("editor") || e.msg.size() < 11) return;
+        String[] lines = Form.str(e.msg, 10, "").split("\n", -1);
+        List<String> out = new ArrayList<>();
+        int at = 0;
+        for (Object o : hunks) {
+            if (!(o instanceof List<?> hk) || hk.size() < 3 || !(hk.get(0) instanceof Long start) || !(hk.get(1) instanceof Long del)
+                || !(hk.get(2) instanceof List<?> ins) || start < at || del < 0 || start + del > lines.length) return;
+            for (int k = at; k < start; k++) out.add(lines[k]);
+            for (Object l : ins) out.add(String.valueOf(l));
+            at = (int) (start + del);
+        }
+        for (int k = at; k < lines.length; k++) out.add(lines[k]);
+        List<Object> msg = new ArrayList<>(e.msg);
+        msg.set(9, Form.str(m, 4, ""));
+        msg.set(10, String.join("\n", out));
+        e.msg = msg;
+    }
+
     public List<String> replay() {
         List<String> out = new ArrayList<>();
         out.add(Form.print(new Form.Symbol("reset"), (long) w, (long) h));
@@ -590,7 +616,7 @@ public final class Scene {
                 out.add(Form.print(e.msg));
                 long id = ee.getKey();
                 if (e.kind.equals("log")) {
-                    // the lines, one append per run of a colour
+                    // the lines, one append per run of a colour (and per 8 K)
                     StringBuilder b = new StringBuilder();
                     String colour = null;
                     boolean first = true;
@@ -604,6 +630,10 @@ public final class Scene {
                             }
                             colour = r.colour();
                             b.append(r.text());
+                            if (b.length() > 8192) {   // (in pieces: a full log as one message passed the line limit)
+                                out.add(Form.print(new Form.Symbol("append"), t, id, Form.kw(colour), b.toString()));
+                                b.setLength(0);
+                            }
                         }
                     }
                     if (b.length() > 0 || colour != null)
