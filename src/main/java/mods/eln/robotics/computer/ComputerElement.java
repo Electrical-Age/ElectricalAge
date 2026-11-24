@@ -477,6 +477,10 @@ public class ComputerElement extends TransparentNodeElement {
             }
             screen.console(console);
             screen.fromComputer(display);
+            for (String e : screen.takeToComputer()) {   // (it takes them at its next slice)
+                Runner r = runner;
+                if (r != null) r.toEditor((e + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
             List<String> batch = screen.takeBatch();
             List<String> replies = screen.takeReplies();
             ServerPlayer op = operator;

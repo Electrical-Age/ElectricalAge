@@ -98,6 +98,26 @@ public final class ScreenHost {
         take(List.of(new Form.Symbol("reset"), (long) Scene.DEFAULT_W, (long) Scene.DEFAULT_H));
     }
 
+    /** Events the screen itself has for the computer (geometry it fitted), since last asked. */
+    public synchronized List<String> takeToComputer() {
+        if (toComputer.isEmpty()) return List.of();
+        List<String> r = List.copyOf(toComputer);
+        toComputer.clear();
+        return r;
+    }
+
+    private final List<String> toComputer = new ArrayList<>();
+
+    private Map<Integer, int[]> geometry() {
+        Map<Integer, int[]> g = new HashMap<>();
+        for (var e : scene.windows.entrySet()) g.put(e.getKey(), new int[]{e.getValue().x, e.getValue().y, e.getValue().cw, e.getValue().ch});
+        return g;
+    }
+
+    private static String movedEvent(int id, Scene.Window w) {
+        return Form.print(new Form.Symbol("moved"), (long) id, (long) w.x, (long) w.y, (long) w.cw, (long) w.ch);
+    }
+
     /** The answers to saves since last asked (for the operator only). */
     public synchronized List<String> takeReplies() {
         if (replies.isEmpty()) return List.of();
@@ -158,7 +178,21 @@ public final class ScreenHost {
             if (Form.verb(m).equals("saved") && hunks instanceof List<?> h) scene.saved(m, h);
             return;
         }
-        if (m == null || !scene.apply(m)) return;
+        if (m == null) return;
+        String verb = Form.verb(m);
+        int wid = (int) Form.num(m, 1, -1);
+        boolean opening = verb.equals("window") && !scene.windows.containsKey(wid);
+        Map<Integer, int[]> before = verb.equals("screen") ? geometry() : null;
+        if (!scene.apply(m)) return;
+        // (the program hears the geometry the screen fitted a window to, where it differs from what it asked for:
+        // Wire review E24; it already takes moved events, which players' moves send)
+        if (opening || verb.equals("place")) {
+            Scene.Window w = scene.windows.get(wid);
+            if (w != null && (w.x != Form.num(m, 2, w.x) || w.y != Form.num(m, 3, w.y) || w.cw != Form.num(m, 4, w.cw) || w.ch != Form.num(m, 5, w.ch)))
+                toComputer.add(movedEvent(wid, w));
+        } else if (before != null)
+            for (var e : geometry().entrySet())
+                if (!java.util.Arrays.equals(e.getValue(), before.get(e.getKey()))) toComputer.add(movedEvent(e.getKey(), scene.windows.get(e.getKey())));
         version++;
         batch.add(m);
         batchBytes += 32;   // (a rough size; the exact one is counted when the batch is printed)

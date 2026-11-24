@@ -65,7 +65,7 @@ public class ComputerScreen extends ElnScreen {
 
     /** A window being dragged (MOVE) or sized (SIZE) by this player: its new geometry so far. */
     static final int MOVE = 1, SIZE = 2;
-    int dragMode, dragWin, dragX, dragY, dragW, dragH;
+    int dragMode, dragWin, dragX, dragY, dragW, dragH, placesSeen;
     double dragFromX, dragFromY;
 
     /** An editor element's state on this client: the revision and text it was opened at, the text now, a save. */
@@ -359,6 +359,10 @@ public class ComputerScreen extends ElnScreen {
         if (render.scene.w != laidW || render.scene.h != laidH) {   // (the text mode changed: a screen of the new size)
             minecraft.gui.setScreen(new ComputerScreen(menu, minecraft.player.getInventory(), title, render));
             return;
+        }
+        if (render.places != placesSeen) {   // (the spec: a program's place wins over a drag in progress)
+            placesSeen = render.places;
+            if (dragMode != 0 && dragWin == render.placedWin) dragMode = 0;
         }
         syncEditors();
         for (List<Object> m; (m = render.replies.poll()) != null; ) {

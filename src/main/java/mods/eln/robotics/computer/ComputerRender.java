@@ -40,6 +40,8 @@ public class ComputerRender extends TransparentNodeElementRender {
     public volatile mods.eln.robotics.computer.screen.SceneCells cells;
     public volatile boolean usingCells;
     public long cellsVersion;
+    /** The last window a program placed on purpose, and how many places so far (a drag of it in progress stops). */
+    public volatile int placedWin = -1, places;
     final java.util.Map<Integer, mods.eln.robotics.computer.screen.Scene.Pixmap> cellPixmaps = new java.util.HashMap<>();
     public volatile String operatorName = "";
     public long seq;
@@ -95,7 +97,10 @@ public class ComputerRender extends TransparentNodeElementRender {
     }
 
     /** Each pixmap's texture on this client, made when first drawn and again when it changes (screen and monitor alike). */
-    final java.util.Map<Integer, Object[]> pixmapTextures = new java.util.HashMap<>();
+    // (least recently drawn first; past PIXMAP_TEXTURES the oldest goes. It was capped at 64 against 256 pictures a
+    // screen, and released all of them each time: past 64 drawn, every frame uploaded them all again)
+    final java.util.LinkedHashMap<Integer, Object[]> pixmapTextures = new java.util.LinkedHashMap<>(64, 0.75f, true);
+    static final int PIXMAP_TEXTURES = 320;
     static int pixmapNext;
 
     /** The texture of a pixmap (nearest filtering: dots stay square), or null where there is no GPU. */
@@ -104,7 +109,15 @@ public class ComputerRender extends TransparentNodeElementRender {
         Object[] have = pixmapTextures.get(key);
         if (have != null && have[1] == p) return (net.minecraft.resources.Identifier) have[0];
         try {
-            if (pixmapTextures.size() > 64) releasePixmaps();
+            if (pixmapTextures.size() >= PIXMAP_TEXTURES) {
+                var eldest = pixmapTextures.entrySet().iterator().next();
+                net.minecraft.client.Minecraft.getInstance().getTextureManager().release((net.minecraft.resources.Identifier) eldest.getValue()[0]);
+                pixmapTextures.remove(eldest.getKey());
+            }
+            if (have != null) {   // (the same key, another picture: its old texture goes)
+                net.minecraft.client.Minecraft.getInstance().getTextureManager().release((net.minecraft.resources.Identifier) have[0]);
+                pixmapTextures.remove(key);
+            }
             var id = net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "dynamic/computer_pixmap_" + pixmapNext++);
             var tex = new net.minecraft.client.renderer.texture.DynamicTexture(() -> "eln computer pixmap", p.w(), p.h(), true);
             var img = tex.getPixels();
@@ -199,6 +212,10 @@ public class ComputerRender extends TransparentNodeElementRender {
                 }
                 if (m == null || !scene.apply(m)) continue;
                 String v = Form.verb(m);
+                if (v.equals("place")) {
+                    placedWin = (int) Form.num(m, 1, -1);
+                    places++;
+                }
                 if (v.equals("saved") || v.equals("conflict")) {   // (for the screen's editors)
                     replies.add(m);
                     while (replies.size() > 16) replies.poll();

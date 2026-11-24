@@ -120,4 +120,18 @@ class ScreenHostTest {
         assertEquals(5, lines.size());
         for (var l : lines) assertTrue(l.stream().mapToInt(r -> r.text().length()).sum() <= Scene.LINE_MAX);
     }
+
+    /** The program hears the geometry the screen fitted its window to (it asked for more than the screen has). */
+    @Test
+    void theProgramHearsAFittedWindow() {
+        ScreenHost h = new ScreenHost();
+        from(h, "(window 2 1 2 300 10 \"Wide\")");
+        List<String> told = h.takeToComputer();
+        assertEquals(1, told.size(), String.valueOf(told));
+        assertTrue(told.getFirst().startsWith("(moved 2 "), told.getFirst());
+        from(h, "(window 3 1 2 20 5 \"Small\")");
+        assertTrue(h.takeToComputer().isEmpty(), "one that fits: nothing to say");
+        from(h, "(screen 40 20)");
+        assertTrue(h.takeToComputer().stream().anyMatch(t -> t.startsWith("(moved 2 ")), "a smaller screen narrowed it");
+    }
 }
