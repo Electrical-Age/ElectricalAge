@@ -2851,20 +2851,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         }
         var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
         out.put("Pipe", PipePart.TIER_NAME[pipe.tier] + (pipe.burst ? ", BURST" : ""));
-        // (Baughn: say what the pressure is of; steam in grams)
-        out.put("Pressure", String.format("%.2f bar of %s, %s", n.P() / 1e5, EaUnits.contents(n), mods.eln.api.Meters.celsius(n.T() - 273.15)));
-        out.put("Contents", EaUnits.composition(n));
-        EaUnits.putViscosity(out, n);
-        for (VoxelPart p : parts)
-            if (p instanceof ValvePart v) out.put(switch (v.mode) {
-                case ValvePart.CONTROL -> "Control valve";
-                case ValvePart.THROTTLE -> "Throttle valve";
-                case ValvePart.PRESSURE -> "Pressure valve";
-                default -> "Valve";
-            }, v.mode == ValvePart.ON_OFF ? (v.open ? "open" : "shut")
-                : v.mode == ValvePart.PRESSURE ? String.format("%s %.1f bar%s, %.0f%% open", v.pmode == ValvePart.RELIEF ? "holds before it at" : "holds after it at",
-                    v.setPoint() / 1e5, v.signalled() ? " by signal" : "", v.opening() * 100)
-                : String.format("%.0f%% open", v.opening() * 100));
+        // (its breather or safety valves next, in Jade's headline whichever part of the block is looked at: AdventurAgent
+        // saw a breather's state only past the headline)
         for (VoxelPart p : parts)
             if (p instanceof SafetyValvePart sv && sv.breather) {
                 // (Neon's wording)
@@ -2879,6 +2867,20 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     String.format(sv.purge ? "%.1f bar%s" : "%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) <= 0 ? ""
                         : sv.purge && n.level() >= 0.999 ? ", shut: liquid at it" : sv.purge ? ", venting gas" : ", blowing"));
             }
+        // (Baughn: say what the pressure is of; steam in grams)
+        out.put("Pressure", String.format("%.2f bar of %s, %s", n.P() / 1e5, EaUnits.contents(n), mods.eln.api.Meters.celsius(n.T() - 273.15)));
+        out.put("Contents", EaUnits.composition(n));
+        EaUnits.putViscosity(out, n);
+        for (VoxelPart p : parts)
+            if (p instanceof ValvePart v) out.put(switch (v.mode) {
+                case ValvePart.CONTROL -> "Control valve";
+                case ValvePart.THROTTLE -> "Throttle valve";
+                case ValvePart.PRESSURE -> "Pressure valve";
+                default -> "Valve";
+            }, v.mode == ValvePart.ON_OFF ? (v.open ? "open" : "shut")
+                : v.mode == ValvePart.PRESSURE ? String.format("%s %.1f bar%s, %.0f%% open", v.pmode == ValvePart.RELIEF ? "holds before it at" : "holds after it at",
+                    v.setPoint() / 1e5, v.signalled() ? " by signal" : "", v.opening() * 100)
+                : String.format("%.0f%% open", v.opening() * 100));
         for (VoxelPart p : parts)
             if (p instanceof PipeSensorPart s) out.put(s.name(), String.format(s.sensing == PipeSensorPart.PRESSURE ? "%.2f %s (absolute) of %.0f: %.1f V" : "%.0f %s of %.0f: %.1f V",
                 s.reading, s.unit(), s.scale, s.share() * mods.eln.Eln.SVU));
