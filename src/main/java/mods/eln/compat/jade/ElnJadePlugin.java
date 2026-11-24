@@ -120,6 +120,22 @@ public class ElnJadePlugin implements IWailaPlugin {
         return mods.eln.ghost.GhostBlock.owner(w, acc.getPosition());
     }
 
+    /**
+     * The blocks whose fluid warnings this block shows (FluidWorld records them at port blocks): itself, a multiblock's
+     * origin, and every port block of the device (a ghost cell or the origin of the Still Pot, whose ports are all on
+     * other cells, showed none).
+     */
+    static java.util.List<Long> alarmBlocks(BlockAccessor acc, mods.eln.node.transparent.TransparentNodeElement owner) {
+        java.util.List<Long> out = new java.util.ArrayList<>();
+        out.add(acc.getPosition().asLong());
+        var e = owner;
+        if (e == null && acc.getBlockEntity() instanceof NodeBlockEntity be && be.getNode() instanceof mods.eln.node.transparent.TransparentNode t) e = t.element;
+        if (owner != null) out.add(owner.node.coordonate.pos().asLong());
+        if (e instanceof mods.eln.sim.fluid.FluidDevice d)
+            for (var p : d.fluidPorts()) if (!out.contains(p.pos())) out.add(p.pos());
+        return out;
+    }
+
     enum Server implements IServerDataProvider<BlockAccessor> {
         INSTANCE;
 
@@ -145,13 +161,13 @@ public class ElnJadePlugin implements IWailaPlugin {
                 m = lines;
             }
             // (first of all, in red: Baughn 1573807986227544245; AdventurAgent read past it in grey)
-            if (mods.eln.fluid.FluidWorld.solverFailedAt(acc.getPosition().asLong())
-                || owner != null && mods.eln.fluid.FluidWorld.solverFailedAt(owner.node.coordonate.pos().asLong()))   // (a multiblock's ghost cells too)
+            var at = alarmBlocks(acc, owner);
+            if (at.stream().anyMatch(mods.eln.fluid.FluidWorld::solverFailedAt))
                 tag.putString("elnAlarm", mods.eln.i18n.I18N.tr("SOLVER FAILED: CALL BAUGHN"));
             else {
                 // (a network too heavy for the server thread, stepped in the background: said too, Baughn 1574029078598778991)
-                String heavy = mods.eln.fluid.FluidWorld.heavyAt(acc.getPosition().asLong());
-                if (heavy == null && owner != null) heavy = mods.eln.fluid.FluidWorld.heavyAt(owner.node.coordonate.pos().asLong());
+                String heavy = null;
+                for (long q : at) if (heavy == null) heavy = mods.eln.fluid.FluidWorld.heavyAt(q);
                 if (heavy != null) tag.putString("elnNote", heavy);
             }
             if (m == null || m.isEmpty()) return;
