@@ -52,9 +52,11 @@ import java.util.Map;
  * The lower front holds the signal and the drain, so fill and sparge enter from the upper front (the sparge as a dip
  * pipe) and the six heat faces stay as the Large Boiler's.
  * Entrainment (Baughn 2026-11-24: yes): boiled too hard, a pot carries liquid over with its vapour. Outside the fluid
- * core: a check link from the pot's floor to the neck, metered by an orifice, opened before each step from the smoothed
- * Souders-Brown factor of the vapour leaving the pot (zero while cold crude heats, zero when bottled up, worse under
- * vacuum). It is how a badly run still makes fuel that chokes an engine.
+ * core's solve: before each step a share of the pot's liquid, by the smoothed Souders-Brown factor of the vapour leaving
+ * the pot (zero while cold crude heats, zero when bottled up, worse under vacuum), moves into the neck, every species by
+ * its share and with its liquid enthalpy at the pot's temperature, so mass and energy are conserved exactly; the neck's
+ * floor port carries it on with the vapour. (A check link from the pot's floor into the neck, solved in the core, made
+ * the network stiff: overfired, it crawled for a second at a time.) It is how a badly run still fouls engines.
  */
 public class StillPotElement extends TransparentNodeElement implements FluidDevice, GhostCells.Host {
     /** The pot: 32 B, two blocks high; its working charge (the view's fill limit) 24 B. */
@@ -70,7 +72,7 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     /** Uncovered, the wall passes DRY_SHARE as much: covered while the liquid stands over WET_LEVEL of the height. */
     public static final double WET_LEVEL = 0.1, DRY_SHARE = 0.05;
     /** The neck at the vapour port (B; its height, m), the link into it, the ports' conductance (a tank's). */
-    /** The neck's liquid share at which entrainment stops (its float of sorts: what is carried falls back). */
+    /** The neck's liquid share at which entrainment stops (what is carried falls back while the neck stands full). */
     public static final double NECK_FULL = 0.3;
     public static final double NECK_B = 0.5, NECK_H = 0.25, VAPOUR_K = 1e-9, PORT_K = TankElement.PORT_K;
     /** The fill and sparge stubs (m^3; as the boiler's feed stub) and where the sparge's dip pipe ends. */
@@ -78,9 +80,9 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     /**
      * Entrainment: the onset (Souders-Brown factor, m/s, on the node's own cross-section V/h; StillSketchTest: a medium
      * burner peaks at 0.079, a big one flat out 0.14, forced firing 0.26-0.43; Baughn to confirm), the liquid carried a
-     * kg of vapour at twice it and at most, the smoothing (s), and the orifice (m^2) with the drive (Pa) its boost leaves.
+     * kg of vapour at twice it and at most, and the smoothing (s).
      */
-    public static final double ONSET_F = 0.10, E_AT_2F0 = 2, E_MAX = 5, F_TAU = 2, ENT_AREA = 2e-5, ENT_DP = 5000;
+    public static final double ONSET_F = 0.10, E_AT_2F0 = 2, E_MAX = 5, F_TAU = 2;
     /** The temperature signal: 5 V at SIGNAL_MAX_C (1 V a 100 °C). */
     public static final double SIGNAL_MAX_C = 500;
     /** Under this the pot reads as under vacuum (Pa). */
@@ -99,7 +101,7 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     private final GhostCells cells = new GhostCells();
     /** The pot, the neck at its vapour port, the fill and sparge stubs. */
     public FluidNode vessel, neck, feed, sparge;
-    private FluidDevice.Link vapour, entrain, feedCheck, spargeCheck;
+    private FluidDevice.Link vapour, feedCheck, spargeCheck;
     private List<FluidPort> ports = List.of();
     private double[] loaded, loadedNeck, loadedFeed, loadedSparge;
     private final mods.eln.fluid.NodeFluidView view = new mods.eln.fluid.NodeFluidView(new mods.eln.fluid.NodeFluidView.Spec().intake().liquidShare(CHARGE_B / POT_B));
@@ -190,7 +192,7 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
 
     @Override
     public List<Link> fluidLinks() {
-        return vapour == null ? List.of() : List.of(vapour, entrain, feedCheck, spargeCheck);
+        return vapour == null ? List.of() : List.of(vapour, feedCheck, spargeCheck);
     }
 
     /** The share of its heating surface under liquid, as heat passes (DRY_SHARE..1): residue covers it too. */
@@ -239,29 +241,53 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
         double u = rho[0] > 0 ? flow / rho[0] / (VOLUME / HEIGHT) : 0;
         uSmooth += (u - uSmooth) * Math.min(1, dt / F_TAU);
         factor = rho[0] > 0 ? uSmooth * Math.sqrt(rho[0] / Math.max(1, rho[1] - rho[0])) : 0;
-        // (by the smoothed vapour flow: the step's own flow swings, and an orifice opening that followed it made the
-        // network crawl)
-        double target = entrainment(factor) * uSmooth * rho[0] * (VOLUME / HEIGHT);
-        double lift = (neck.z + neck.height) - (vessel.z + vessel.level() * vessel.height);
-        entrain.boost = rho[1] * mods.eln.sim.fluid.FluidNetwork.G * lift + ENT_DP;
-        double drive = Math.max(1000, vessel.P() - neck.P() + ENT_DP);
-        // (only while the neck has room: what it carries over falls back while the neck stands full. Pushed on into a full
-        // neck the link's boost met no room, and the network crawled for seconds at a time)
-        double neckRoom = Math.max(0, Math.min(1, (NECK_FULL - neck.liquidVolume() / neck.volume) / NECK_FULL));
-        entrain.open = target <= 0 || vessel.liquidVolume() <= 0 ? 0 : neckRoom * Math.min(1, target / (FluidEdge.CD * ENT_AREA * Math.sqrt(2 * rho[1] * drive)));
+        // (by the smoothed vapour flow, the step's own swings; up to the neck's room under NECK_FULL and half the pot's liquid)
+        double kg = entrainment(factor) * uSmooth * rho[0] * (VOLUME / HEIGHT) * dt;
+        kg = Math.min(kg, Math.max(0, NECK_FULL * neck.volume - neck.liquidVolume()) * rho[1]);
+        entrained = kg > 0 ? carry(vessel, neck, kg) : 0;
+        meterEntrain += entrained;
+    }
+
+    /** Liquid moved into the neck before the last step (kg). */
+    double entrained;
+
+    /**
+     * Move up to kg of from's liquid (at most half of it) into to, every species by its share of the liquid, each with its
+     * liquid enthalpy at from's temperature (out of from, into to: energy conserved exactly). Returns what it moved (kg).
+     */
+    public static double carry(FluidNode from, FluidNode to, double kg) {
+        SpeciesRegistry reg = SpeciesRegistry.get();
+        int n = from.speciesBound();
+        double all = 0;
+        for (int i = 0; i < n; i++) if (i != SpeciesRegistry.AIR) all += from.liquid(i);
+        if (all <= 0) return 0;
+        kg = Math.min(kg, 0.5 * all);
+        double T = from.T(), moved = 0;
+        for (int i = 0; i < n; i++) {
+            double l = i == SpeciesRegistry.AIR ? 0 : from.liquid(i);
+            if (l <= 0) continue;
+            double m = kg * l / all, h = i == SpeciesRegistry.WATER ? Water.hLiquid(T) : reg.byId(i).hLiquid(T);
+            from.addMass(i, -m);
+            from.energy -= m * h;
+            to.addMass(i, m);
+            to.energy += m * h;
+            moved += m;
+        }
+        from.update();
+        to.update();
+        return moved;
     }
 
     @Override
     public void afterFluidStep(double dt) {
         thermal.moveEnergyTo(-vessel.wallJ);
         // the meters: vapour off the pot by species, liquid carried over (each a second's mean)
-        FluidEdge ve = vapour.edge, ee = entrain.edge;
+        FluidEdge ve = vapour.edge;
         if (ve != null && ve.flow > 0 && ve.fSpecies != null) {
             meterVapour += ve.flow * dt;
             if (meterSpecies.length < ve.fSpecies.length) meterSpecies = java.util.Arrays.copyOf(meterSpecies, ve.fSpecies.length);
             for (int i = 0; i < ve.fSpecies.length; i++) meterSpecies[i] += Math.max(0, ve.fSpecies[i]) * dt;
         }
-        if (ee != null) meterEntrain += Math.max(0, ee.flow) * dt;
         meterTime += dt;
         if (meterTime >= 1) {
             vapourRate = meterVapour / meterTime;
@@ -346,12 +372,10 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
             stub.resistance = 1 / PORT_K;
         }
         vapour = new Link(vessel, 1.0, neck, 0, VAPOUR_K);
-        entrain = new Link(vessel, 0, neck, 1.0, 0).kind(FluidEdge.Kind.CHECK).area(ENT_AREA);
-        entrain.open = 0;
         feedCheck = new Link(feed, 0, vessel, 1.0, PORT_K).kind(FluidEdge.Kind.CHECK);
         spargeCheck = new Link(sparge, 0, vessel, SPARGE_DRAW, PORT_K).kind(FluidEdge.Kind.CHECK);
         int f = front.toEnumFacing().get3DDataValue();
-        ports = List.of(new FluidPort(neck, at(1, 1, 0), 1, 0, PORT_K),
+        ports = List.of(new FluidPort(neck, at(1, 1, 0), 1, 0.5, PORT_K, FluidPort.CENTRE, 1.0),
             new FluidPort(vessel, at(0, 0, 1), f, 0, PORT_K),
             new FluidPort(feed, at(0, 1, 1), f, 0.5, PORT_K),
             new FluidPort(sparge, at(0, 1, 0), f, 0.5, PORT_K));

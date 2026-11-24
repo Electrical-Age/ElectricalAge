@@ -76,39 +76,43 @@ public final class StillPotCases {
         String err = "";
 
         Still(TestContext ctx, BlockPos o, boolean two) {
+            // the pot stands a block up, on stone, so its vapour flange (y +2) is level with the coil's top: the vapour
+            // line never rises above the coil's inlet (a line that does is one lumped run whose lowest point is the pot's
+            // flange: liquid in it can't reach the coil, the vapour bubbles through it, and the network crawls)
+            for (int x = 0; x <= 1; x++)
+                for (int z = 0; z <= 1; z++) ctx.level().setBlockAndUpdate(o.offset(x, -1, z), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
             pot = pot(ctx, o);
             if (pot == null) throw new IllegalStateException("the Still Pot could not be placed");
             // the coil's floor drain, under it, to receiver A's low north flange (a tank's high flanges draw at their top
             // edge, for gas: liquid piped in there stands in the pipe)
-            PipeCases.lay(ctx, o.offset(3, 0, 0), 1, 8, 16, 8, 8, 4, 8, 8, 4, 16);
+            PipeCases.lay(ctx, o.offset(3, -1, 0), 1, 8, 16, 8, 8, 4, 8, 8, 4, 16);
             // (each control valve close to the coil: a valve draws half way up the pipe run before it, so a long run there
             // fills half full of condensate before anything passes)
-            if (two) valveA = valve(ctx, o.offset(3, 0, 0), 8, 12, 8);
-            coil = coil(ctx, o.offset(3, 1, 0));
+            if (two) valveA = valve(ctx, o.offset(3, -1, 0), 8, 12, 8);
+            coil = coil(ctx, o.offset(3, 0, 0));
             if (coil == null) throw new IllegalStateException("the Condenser Coil could not be placed");
-            // the vapour line: up off the pot's flange, over and down into the coil's top
-            PipeCases.lay(ctx, o.offset(1, 2, 0), 1, 8, 0, 8, 8, 16, 8);
-            PipeCases.lay(ctx, o.offset(1, 3, 0), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);
-            PipeCases.lay(ctx, o.offset(2, 3, 0), 1, 0, 8, 8, 16, 8, 8);
-            PipeCases.lay(ctx, o.offset(3, 3, 0), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);
-            recvA = PlumbingCases.tank(ctx, PlumbingCases.IRON_TANK, o.offset(3, 0, 1), Direction.XN);
-            note(topBreather(ctx, o.offset(3, 1, 1)));
+            // the vapour line: up off the pot's flange, along and down into the coil's top, level with the flange
+            PipeCases.lay(ctx, o.offset(1, 2, 0), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, o.offset(2, 2, 0), 1, 0, 8, 8, 16, 8, 8);
+            PipeCases.lay(ctx, o.offset(3, 2, 0), 1, 0, 8, 8, 8, 8, 8, 8, 0, 8);
+            recvA = PlumbingCases.tank(ctx, PlumbingCases.IRON_TANK, o.offset(3, -1, 1), Direction.XN);
+            note(topBreather(ctx, o.offset(3, 0, 1)));
             if (two) {
-                PipeCases.lay(ctx, o.offset(2, 1, 0), 1, 16, 4, 8, 8, 4, 8, 8, 0, 8);
-                PipeCases.lay(ctx, o.offset(2, 0, 0), 1, 8, 16, 8, 8, 4, 8, 8, 4, 0);
-                valveB = valve(ctx, o.offset(2, 1, 0), 12, 4, 8);
-                recvB = PlumbingCases.tank(ctx, PlumbingCases.IRON_TANK, o.offset(2, 0, -1), Direction.XN);
-                note(topBreather(ctx, o.offset(2, 1, -1)));
+                PipeCases.lay(ctx, o.offset(2, 0, 0), 1, 16, 4, 8, 8, 4, 8, 8, 0, 8);
+                PipeCases.lay(ctx, o.offset(2, -1, 0), 1, 8, 16, 8, 8, 4, 8, 8, 4, 0);
+                valveB = valve(ctx, o.offset(2, 0, 0), 12, 4, 8);
+                recvB = PlumbingCases.tank(ctx, PlumbingCases.IRON_TANK, o.offset(2, -1, -1), Direction.XN);
+                note(topBreather(ctx, o.offset(2, 0, -1)));
             } else recvB = null;
             // the gas offtake: out of the coil's upper front, down and along, a breather on top
-            PipeCases.lay(ctx, o.offset(2, 2, 0), 1, 16, 12, 8, 12, 12, 8, 12, 4, 8, 2, 4, 8);
-            note(ctx.voxelByEntity(o.offset(2, 2, 0)).addSafetyValveNear(8 / 16.0, 4 / 16.0, 8 / 16.0, mods.eln.node.voxel.SafetyValvePart.BREATHER));
+            PipeCases.lay(ctx, o.offset(2, 1, 0), 1, 16, 12, 8, 12, 12, 8, 12, 4, 8, 2, 4, 8);
+            note(ctx.voxelByEntity(o.offset(2, 1, 0)).addSafetyValveNear(8 / 16.0, 4 / 16.0, 8 / 16.0, mods.eln.node.voxel.SafetyValvePart.BREATHER));
             // dissipators on the coil's back and left flank, each on a stone, powered at 230 V by one Electrical Source
             // between their supply faces
-            dissipator(ctx, o.offset(4, 1, 0), Direction.ZN);
-            dissipator(ctx, o.offset(3, 1, -1), Direction.XN);
-            ctx.level().setBlockAndUpdate(o.offset(4, 0, -1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
-            ctx.source(Wp11Cases.SOURCE, o.offset(4, 1, -1), Eln.MVU);
+            dissipator(ctx, o.offset(4, 0, 0), Direction.ZN);
+            dissipator(ctx, o.offset(3, 0, -1), Direction.XN);
+            ctx.level().setBlockAndUpdate(o.offset(4, -1, -1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            ctx.source(Wp11Cases.SOURCE, o.offset(4, 0, -1), Eln.MVU);
         }
 
         /**
@@ -117,7 +121,7 @@ public final class StillPotCases {
          * coil sees next to nothing until the walls are hot.
          */
         void warmLine(TestContext ctx, BlockPos o, double kelvin) {
-            for (BlockPos q : new BlockPos[]{o.offset(1, 2, 0), o.offset(1, 3, 0), o.offset(2, 3, 0), o.offset(3, 3, 0)})
+            for (BlockPos q : new BlockPos[]{o.offset(1, 2, 0), o.offset(2, 2, 0), o.offset(3, 2, 0)})
                 for (var part : ctx.voxelByEntity(q).parts) if (part instanceof mods.eln.node.voxel.PipePart pp) pp.wallTemp = kelvin;
         }
 
@@ -261,6 +265,7 @@ public final class StillPotCases {
         IProcess watch;
         int tick, switchedAt = -1;
         double maxEntrain, maxCoilK, aBefore;
+        final double[][] window = new double[2][];
         String coilJade = "";
         BlockPos o0;
 
@@ -273,12 +278,13 @@ public final class StillPotCases {
         }
 
         public void build(TestContext ctx) {
-            BlockPos o = ctx.at(3, 1, 2);
+            BlockPos o = ctx.at(3, 2, 2);
             o0 = o;
             s = new Still(ctx, o, true);
             double kg = 8 * EaUnits.KG_PER_MB_WATER * 1000 / Water.RHO_L * 850;
             charge(s.pot, 400, 450, sp("crude_oil"), kg);
             s.warmLine(ctx, o, 420);
+            ctx.level().setBlockAndUpdate(o.offset(0, -1, -1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
             f = HpPlantCases.furnace(ctx, o.offset(0, 0, -1), Direction.ZN, 1500);
             f.networkUnserialize(ctx.stream(q -> {
                 q.writeByte(mods.eln.transparentnode.FuelHeatFurnaceElement.Companion.getSetManualControlValueEvent());
@@ -301,6 +307,11 @@ public final class StillPotCases {
                 maxCoilK = Math.max(maxCoilK, s.coil.coil.T());
                 if (switchedAt < 0 && s.valveA.opening() > 0.5 && s.valveB.opening() < 0.5) switchedAt = tick;
                 if (switchedAt < 0) aBefore = s.recvA.vessel.liquidVolume();
+                var nw = mods.eln.fluid.FluidWorld.networkOf(s.pot.vessel);
+                if (nw != null && (tick == 600 || tick == 1800)) {
+                    var st = nw.coreStats();
+                    window[tick == 600 ? 0 : 1] = new double[]{nw.nanos, nw.steps, st.iterations, st.solves, st.substeps};
+                }
                 if (tick % 600 == 0) {
                     var net = mods.eln.fluid.FluidWorld.networkOf(s.pot.vessel);
                     coilJade += " | t" + tick + " pot " + Math.round(s.pot.vessel.T()) + " K shell " + Math.round(s.pot.thermal.Tc + PhysicalConstant.Tref) + " K, valves "
@@ -317,6 +328,12 @@ public final class StillPotCases {
             // the drain's dead leg under the coil fills with the first condensate while A's valve is shut, and goes on to A)
             FluidNode cut = s.recvB.vessel, after = s.recvA.vessel;
             double gas = Still.share(cut, sp("gasoline"));
+            if (window[0] != null && window[1] != null) {
+                double n = window[1][1] - window[0][1];
+                ctx.line(String.format("still sensible batch: ticks 600-1800: %.2f ms a step, %.1f iterations, %.1f solves, %.2f sub-steps a step (%.2f ms a solve)",
+                    (window[1][0] - window[0][0]) / 1e6 / n, (window[1][2] - window[0][2]) / n, (window[1][3] - window[0][3]) / n, (window[1][4] - window[0][4]) / n,
+                    (window[1][0] - window[0][0]) / 1e6 / (window[1][3] - window[0][3])));
+            }
             ctx.line(String.format("still sensible batch: pot %.0f K, switched at tick %d; gasoline cut %s (gasoline %.1f %%); after the switch %s; coil max %.0f K, holdup %s; entrained max %.3f g/s; furnace %s; coil:%s",
                 s.pot.vessel.T(), switchedAt, EaUnits.composition(cut), 100 * gas, EaUnits.composition(after), maxCoilK, EaUnits.composition(s.coil.coil),
                 1000 * maxEntrain, f.getWaila(), coilJade));
@@ -331,24 +348,23 @@ public final class StillPotCases {
     }
 
     /**
-     * An overfired batch through the coil: 20 B of dead crude, 25 kW into the shell (a big burner forced) until the shell
-     * nears its limit, one receiver. It boils over, residue reaches the receiver, and its product, fed to a Gas Turbine,
+     * An overfired batch through the coil: 20 B of dead crude, OVERFIRE_W into the shell (over the onset: a big burner
+     * pushed) until the shell nears its limit, one receiver. It boils over, residue reaches the receiver, and its product, fed to a Gas Turbine,
      * fouls it. (It doesn't choke it: the coil condenses the light cuts too.)
      */
     static final class OverfiredBatch extends StillBox {
         /**
-         * Known, reported, not yet fixed: while the pot entrains at 25 kW its network (11 nodes) crawls for ~1 s at a time
-         * and moves to the background (~150 ms a step). Without entrainment the same batch runs clean, so the stall is
-         * the entrainment link's; limiting it to while the neck has room and to the smoothed vapour flow cut it from
-         * 1.35 s to ~1 s.
+         * 15 kW: at 25 kW (a big burner forced) the coil, cooled by two dissipators, is overwhelmed (its outlet ~190 °C,
+         * ~7.5 g/s of vapour out of its breather) and the network crawls for seconds at a time; reported with a replayable
+         * dump. 15 kW boils over and runs clean.
          */
-        public boolean checkStalls() {
-            return false;
-        }
+        static final double OVERFIRE_W = 15000;
 
         Still s;
         GasPlantCases.GasLine gl;
         IProcess heat;
+        int tick;
+        double residue0;
         double maxEntrain, maxShellK;
 
         public String id() {
@@ -360,14 +376,16 @@ public final class StillPotCases {
         }
 
         public void build(TestContext ctx) {
-            s = new Still(ctx, ctx.at(3, 1, 1), false);
+            s = new Still(ctx, ctx.at(3, 2, 1), false);
             gl = new GasPlantCases.GasLine(ctx, false, 4000, false);
             double kg = 20 * EaUnits.KG_PER_MB_WATER * 1000 / Water.RHO_L * 850;
             charge(s.pot, 400, 440, sp("crude_oil"), kg);
+            residue0 = s.pot.vessel.mass(sp("residue"));
             Eln.simulator.addSlowProcess(heat = dt -> {
+                tick++;
                 double shellK = s.pot.thermal.Tc + PhysicalConstant.Tref;
                 maxShellK = Math.max(maxShellK, shellK);
-                if (shellK < StillPotElement.SHELL_MAX_K - 30) s.pot.thermal.moveEnergyTo(25000 * dt);
+                if (shellK < StillPotElement.SHELL_MAX_K - 30) s.pot.thermal.moveEnergyTo(OVERFIRE_W * dt);
                 maxEntrain = Math.max(maxEntrain, s.pot.entrainRate);
             });
         }
@@ -377,9 +395,18 @@ public final class StillPotCases {
             s.remove();
             Eln.simulator.removeElectricalComponent(gl.load);
             FluidNode r = s.recvA.vessel, fuel = gl.gt.fuelIn.vessel;
+            // (residue never boils and can't pass a breather: it is all still somewhere in the still's network, carried
+            // over before each step outside the core's solve, through background steps too)
+            double residue = 0;
+            var still = mods.eln.fluid.FluidWorld.networkOf(s.pot.vessel);
+            if (still != null) for (FluidNode n : still.nodes) residue += n.mass(sp("residue"));
+            ctx.check("still overfired: every gram of residue is still in the still (entrainment keeps the books)", Math.abs(residue - residue0) < 1e-6 * residue0 + 1e-9,
+                String.format("%.6f -> %.6f kg", residue0, residue));
             // (the product into the turbine's fuel vessel, as a pipe or buckets would take it)
             for (int i = 2; i < r.speciesBound(); i++) if (r.liquid(i) > 0) EaUnits.add(fuel, i, r.liquid(i), 293.15, false);
             fuel.update();
+            var net = mods.eln.fluid.FluidWorld.networkOf(s.pot.vessel);
+            ctx.line("still overfired batch: network " + (net == null ? "none" : net.stats()));
             ctx.line(String.format("still overfired batch: pot %.0f K, shell max %.0f K, entrained max %.2f g/s; receiver %s; coil %s; turbine fuel %s, choked %s",
                 s.pot.vessel.T(), maxShellK, 1000 * maxEntrain, EaUnits.composition(r), s.coil.getWaila(), EaUnits.composition(fuel), gl.gt.choked()));
             ctx.check("still overfired: everything fits", s.err.isEmpty(), s.err);
@@ -413,11 +440,12 @@ public final class StillPotCases {
         }
 
         public void build(TestContext ctx) {
-            BlockPos o = ctx.at(3, 1, 2);
+            BlockPos o = ctx.at(3, 2, 2);
             s = new Still(ctx, o, false);
             double kg = 10 * EaUnits.KG_PER_MB_WATER * 1000 / Water.RHO_L * 950;
             charge(s.pot, 560, 580, sp("heavy_oil"), kg);
             BlockPos b = o.offset(-1, 0, 0);
+            ctx.level().setBlockAndUpdate(b.below(), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
             boiler = (mods.eln.oil.BoilerElement) ctx.placeTransparent(8 + (82 << 6), b);
             PipeCases.lay(ctx, b.above(), 1, 8, 0, 8, 8, 8, 8, 16, 8, 8);
             double T = Water.tsat(3e5);

@@ -116,13 +116,16 @@ the step-0 sketch (`sim/fluid/StillSketchTest`, gated: `-Psketch=still`): wall 6
 shell limit 850 K (its watchdog trips from 840 K on a 20 K s budget, so a pot boiled down to residue under a big burner
 stops by 850 K). Front: the liquid's temperature as a signal on the origin (1 V a 100 °C), the bottoms drain low right
 (draw 0), the fill high right and the steam inlet high left (into the pot through check valves; the steam down a dip pipe
-to the floor). Boiled too hard it boils over: a check link from its floor to the neck at its vapour port, metered by an
-orifice, carries E = 2 (F / 0.10 - 1) kg of liquid (to 5) per kg of vapour, F the Souders-Brown factor of the smoothed
-vapour velocity over the node's cross-section; a medium burner stays under it, a big one forced puts residue in the
-product and chokes engines. Jade: boiling over, only residue left, under vacuum (below 0.9 bar); pressure, temperature,
+to the floor). Boiled too hard it boils over: before each step, outside the core's solve, E = 2 (F / 0.10 - 1) kg of
+its liquid (to 5) per kg of vapour moves into the neck at its vapour port, every species by its share with its enthalpy
+(mass and energy exact), F the Souders-Brown factor of the smoothed vapour velocity over the node's cross-section; a
+medium burner stays under it, a pushed one puts residue in the product, which then fouls engines. The neck's port is
+an opening as tall as the neck, so liquid in the vapour line can run back into it while vapour leaves. Lay the vapour
+line no higher than the condenser's inlet: a line that rises above it is one lumped run whose lowest point is the pot's
+flange, liquid in it can't reach the condenser and the vapour bubbles through it. Jade: boiling over, only residue left, under vacuum (below 0.9 bar); pressure, temperature,
 shell, what boils off ("Boiling now", while vapour leaves), contents, liquid, viscosity, the signal. Its fluid
 capability is on its origin block (ghost blocks expose none). A piped fill's float shuts it at the 24 B charge (as a
-bucket stops there). Entrainment stops while the neck stands 30 % full, and goes by the smoothed vapour flow.
+bucket stops there). Entrainment stops while the neck stands 30 % full.
 
 The Condenser Coil (`oil/CondenserCoilElement`, model `cadmodels/CondenserCoil`): a 1x1x2 drum of 2 B (node the lower
 block, a ghost cell above), vapour in at the top, gas out at the upper front (high), condensate out underneath (draw 0)
@@ -133,7 +136,8 @@ comes in. A tank's high side flanges draw at their top edge (for gas): pipe cond
 top. A pipe valve draws half way up the run before it, so a long run there fills half full before anything passes: fit
 a receiver's valve close to the coil. GameTests `condenser_coil_body`, `still_pot_sensible_batch` (a furnace, two
 receivers switched through OpAmps and control valves by the pot's signal: gasoline cut 98 %), `still_pot_overfired_batch`
-(its product's coking ~0.11: fouls a turbine, doesn't choke it), `still_pot_sparge_layers` (water under the oil).
+(15 kW: it boils over and fouls a turbine; every gram of residue accounted for), `still_pot_sparge_layers` (water under
+the oil). Cost: a running still of 16 nodes takes ~6 ms a step (13 linear solves of ~0.45 ms).
 
 ### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)
 - Datapack JSON `data/<ns>/eln/fluid_species/<name>.json` defines species `<ns>:<name>` for the fluid core (fields in
