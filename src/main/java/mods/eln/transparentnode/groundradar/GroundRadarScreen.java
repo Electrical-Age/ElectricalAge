@@ -61,7 +61,45 @@ public class GroundRadarScreen extends ElnScreen {
     public void removed() {
         render.viewLayer = layer;
         render.viewRow = row;
+        for (int v = 0; v < 2; v++) release(v);
         super.removed();
+    }
+
+    // ---- the views as textures (a cell a texel), remade when the picture, the depth or the cut changes: a fill() a
+    // cell cost 177 ms a frame for a 72-cell picture (AdventurAgent)
+
+    private final net.minecraft.resources.Identifier[] tex = new net.minecraft.resources.Identifier[2];
+    private final Object[] texFor = new Object[2];
+    private final int[] texKey = {-2, -2};
+    private static int texNext;
+
+    /** View v's texture (0: from above at layer k; 1: the side view along row r), or null where there is no GPU. */
+    private net.minecraft.resources.Identifier texture(int v, GroundScan p, int k, int r) {
+        int key = v == 0 ? k : r;
+        if (tex[v] != null && texFor[v] == p && texKey[v] == key) return tex[v];
+        release(v);
+        int w = p.n, h = v == 0 ? p.n : p.layers.length;
+        try {
+            var t = new net.minecraft.client.renderer.texture.DynamicTexture(() -> "eln ground radar", w, h, false);
+            var img = t.getPixels();
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++) img.setPixel(x, y, v == 0 ? GroundScan.colour(p, k, x, y) : GroundScan.colour(p, y, x, r));
+            t.upload();
+            var id = net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "dynamic/ground_radar_" + texNext++);
+            net.minecraft.client.Minecraft.getInstance().getTextureManager().register(id, t);
+            tex[v] = id;
+            texFor[v] = p;
+            texKey[v] = key;
+            return id;
+        } catch (IllegalStateException e) {
+            return null;
+        }
+    }
+
+    private void release(int v) {
+        if (tex[v] != null) net.minecraft.client.Minecraft.getInstance().getTextureManager().release(tex[v]);
+        tex[v] = null;
+        texFor[v] = null;
     }
 
     @Override
@@ -104,9 +142,8 @@ public class GroundRadarScreen extends ElnScreen {
         }
         int k = Math.max(0, Math.min(p.layers.length - 1, layer)), n = p.n;
         row = Math.max(0, Math.min(n - 1, row < 0 ? n / 2 : row));
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++)
-                g.fill(x + i * w / n, y + j * h / n, x + (i + 1) * w / n, y + (j + 1) * h / n, GroundScan.colour(p, k, i, j));
+        var tex = texture(0, p, k, -1);
+        if (tex != null) g.blit(tex, x, y, x + w, y + h, 0, 1, 0, 1);
         // the side view's cut, and the radar over the centre
         int ry = y + row * h / n + h / n / 2;
         g.fill(x, ry, x + w, ry + 1, 0x80FFFFFF);
@@ -123,10 +160,8 @@ public class GroundRadarScreen extends ElnScreen {
             return;
         }
         int n = p.n, L = p.layers.length, r = Math.max(0, Math.min(n - 1, row < 0 ? n / 2 : row));
-        for (int k = 0; k < L; k++) {
-            int y0 = y + k * h / L, y1 = y + (k + 1) * h / L;
-            for (int i = 0; i < n; i++) g.fill(x + i * w / n, y0, x + (i + 1) * w / n, y1, GroundScan.colour(p, k, i, r));
-        }
+        var tex = texture(1, p, -1, r);
+        if (tex != null) g.blit(tex, x, y, x + w, y + h, 0, 1, 0, 1);
         int k = Math.max(0, Math.min(L - 1, layer));
         int ly = y + k * h / L;
         g.fill(x - 3, ly, x, y + (k + 1) * h / L, 0xFFFFFFFF);
