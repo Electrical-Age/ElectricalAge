@@ -367,26 +367,11 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
      */
     @Override
     public net.minecraft.world.item.ItemStack getDropItemStack() {
-        net.minecraft.world.item.ItemStack stack = desc.newItemStack();
-        TankContents c = takeContents();
-        if (c != null) {
-            stack.set(mods.eln.registry.ElnRegistry.TANK_CONTENTS.get(), c);
-            stack.set(net.minecraft.core.component.DataComponents.MAX_STACK_SIZE, 1);   // (filled tanks don't stack)
-        }
-        return stack;
-    }
-
-    /** Its contents (its share of a box), or null if it holds what a fresh tank does. */
-    TankContents takeContents() {
-        if (own == null) return null;
+        if (own == null) return desc.newItemStack();
         // (what buckets and other mods' pipes put in or took out since the last step first: a box's go through its master's view)
         for (TankElement m : group == null ? List.of(this) : group.members) m.syncWater();
         if (group != null) group.writeBack();
-        own.update();
-        // (over its burst pressure it vents as it breaks: a box's burst blasts its neighbours apart, and their shares, still
-        // over it, burst again where placed)
-        if (own.P() > desc.burstPa) return null;
-        return TankContents.empty(own) ? null : TankContents.of(own);
+        return desc.dropStack(own);
     }
 
     /** Middle-click gives a plain tank: a copy of its contents is not a pick. */
@@ -406,11 +391,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     public Map<String, String> getWaila() {
         Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
         if (vessel == null) return info;
-        info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s, %s", vessel.P() / 1e5, EaUnits.contents(vessel), mods.eln.api.Meters.celsius(vessel.T() - Water.T0)));
-        info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
-        // (all its liquids: "Water" counted only water while the share counted latex too, LabAssistant)
-        info.put(I18N.tr("Liquid"), EaUnits.volume(vessel.liquidVolume() * Water.RHO_L / EaUnits.KG_PER_MB_WATER) + ", " + mods.eln.misc.Utils.plotPercent(fill()) + " full");
-        EaUnits.putViscosity(info, vessel);
+        TankDescriptor.putContents(info, vessel);
         info.put(I18N.tr("Vessel"), group == null ? I18N.tr("one block") : String.format("%d x %d x %d blocks, %.0f buckets", group.sx, group.sy, group.sz,
             vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER / 1000));
         // (its ports are drawn only where a pipe meets them: say where they are)
@@ -420,7 +401,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         int piped = 0;
         for (TankElement t : group == null ? List.of(this) : group.members) piped += Integer.bitCount(t.coupled);
         info.put(I18N.tr("Pipes"), piped == 0 ? I18N.tr("none connected") : String.format(I18N.tr("%d connected"), piped));
-        if (vessel.P() > desc.workingPa) info.put(I18N.tr("Warning"), String.format("over its %.0f bar working pressure", desc.workingPa / 1e5));
+        desc.putWarning(info, vessel);
         return info;
     }
 }

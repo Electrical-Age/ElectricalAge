@@ -15,6 +15,8 @@ import java.util.List;
  * Model: mods.eln.cad.models.Tank.
  */
 public class TankDescriptor extends TransparentNodeDescriptor {
+    /** The Iron and Alloy Tanks' descriptor keys (Wp10aContent, group 82). */
+    public static final int IRON_ID = 40 + (82 << 6), ALLOY_ID = 44 + (82 << 6);
     final double volume, workingPa, burstPa;
     final Obj3D obj;
 
@@ -38,6 +40,43 @@ public class TankDescriptor extends TransparentNodeDescriptor {
     /** Volume (m^3) of so many buckets of water (EA units). */
     public static double bucketsVolume(double buckets) {
         return buckets * 1000 * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / mods.eln.sim.fluid.Water.RHO_L;
+    }
+
+    /**
+     * What a tank of this tier holding n drops as (Baughn 2026-11-25): a tank item carrying n's contents; a plain,
+     * stackable tank if n holds what a fresh tank does (TankContents.empty) or is over its burst pressure (it vents as
+     * it breaks). The Tank Minecart's tank drops by the same rule.
+     */
+    public ItemStack dropStack(mods.eln.sim.fluid.FluidNode n) {
+        ItemStack stack = newItemStack();
+        n.update();
+        if (n.P() > burstPa || TankContents.empty(n)) return stack;
+        stack.set(mods.eln.registry.ElnRegistry.TANK_CONTENTS.get(), TankContents.of(n));
+        stack.set(net.minecraft.core.component.DataComponents.MAX_STACK_SIZE, 1);   // (filled tanks don't stack)
+        return stack;
+    }
+
+    /** Its size and pressure rating, a tooltip line (the tank's and its minecart's). */
+    public String ratingLine() {
+        return String.format("Holds %.0f buckets of water. Works at up to %.0f bar; bursts over %.0f.",
+            volume * mods.eln.sim.fluid.Water.RHO_L / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / 1000, workingPa / 1e5, burstPa / 1e5);
+    }
+
+    /** A vessel's Jade headline as a tank shows it (pressure, what it is and its temperature; contents; liquid; viscosity). */
+    public static void putContents(java.util.Map<String, String> info, mods.eln.sim.fluid.FluidNode v) {
+        double fill = Math.min(1, v.liquidVolume() / v.volume);
+        info.put(mods.eln.i18n.I18N.tr("Pressure"), String.format("%.2f bar of %s, %s", v.P() / 1e5, mods.eln.sim.fluid.EaUnits.contents(v),
+            mods.eln.api.Meters.celsius(v.T() - mods.eln.sim.fluid.Water.T0)));
+        info.put(mods.eln.i18n.I18N.tr("Contents"), mods.eln.sim.fluid.EaUnits.composition(v));
+        // (all its liquids: "Water" counted only water while the share counted latex too, LabAssistant)
+        info.put(mods.eln.i18n.I18N.tr("Liquid"), mods.eln.sim.fluid.EaUnits.volume(v.liquidVolume() * mods.eln.sim.fluid.Water.RHO_L
+            / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER) + ", " + mods.eln.misc.Utils.plotPercent(fill) + " full");
+        mods.eln.sim.fluid.EaUnits.putViscosity(info, v);
+    }
+
+    /** Jade's warning when v is over this tier's working pressure. */
+    public void putWarning(java.util.Map<String, String> info, mods.eln.sim.fluid.FluidNode v) {
+        if (v.P() > workingPa) info.put(mods.eln.i18n.I18N.tr("Warning"), String.format("over its %.0f bar working pressure", workingPa / 1e5));
     }
 
     /** The vessel's shell (a box's render scales it to the box). */
@@ -197,8 +236,7 @@ public class TankDescriptor extends TransparentNodeDescriptor {
             return;
         }
         super.addInformation(stack, player, list, adv);
-        list.add(String.format("Holds %.0f buckets of water. Works at up to %.0f bar; bursts over %.0f.",
-            volume * mods.eln.sim.fluid.Water.RHO_L / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / 1000, workingPa / 1e5, burstPa / 1e5));
+        list.add(ratingLine());
         list.add("Steam off the top and the high side ports; water off the bottom and the low ones.");
         list.add("A steam drum, a separator for wet steam, or a hotwell for a pump to draw from.");
     }
