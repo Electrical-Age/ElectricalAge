@@ -92,41 +92,76 @@ public final class TankGroup {
 
     /**
      * writeBack's split: node's contents into the blocks' shares owns (rows[i]: own i's layer, 0 the bottom, of sy).
+     * <p>
      * Over-full (more liquid at its nominal density than FULL of every layer holds, as in a box pumped full, its liquid
-     * compressed against the walls) every block takes its volume's share of both phases: the layered split took the liquid
-     * share as vL / V, over 1 once vL passed V, and the gas share (1 - that) / (V - vL, floored at 1e-12) came out hugely
-     * negative: negative air, the shares' energy NaN, and the box reloaded from them fell 1 K per update to 120 K
-     * (Incognito 2026-11-25).
+     * compressed against the walls) every block takes its volume's share of everything, energy too: the layered split
+     * took the liquid share as vL / V, over 1 once vL passed V, and the gas share (1 - that) / (V - vL, floored at 1e-12)
+     * came out hugely negative: negative air, the shares' energy NaN, and the box reloaded from them fell 1 K per update
+     * to 120 K (Incognito 2026-11-25).
+     * <p>
+     * Else the liquid fills the rows from the bottom, FULL of each at most, its layers in order (the densest lowest: oil
+     * over water stays over it when the box splits), and the gas fills what is left. Each block is at the vessel's
+     * temperature, and what that misses of the vessel's energy is shared by heat capacity, added, never scaled: liquid
+     * under 0 C has negative energy and vapour positive, and a scale by node.energy / (their sum near 0) sent shares to
+     * 4000 K and 120 K.
      */
-    static void share(FluidNode node, int sy, List<FluidNode> owns, int[] rows) {
+    public static void share(FluidNode node, int sy, List<FluidNode> owns, int[] rows) {
         node.update();
-        // (each layer at most FULL liquid, so no block is left without gas: a one-block tank of only liquid is stiff, and
-        // burst when it next stepped; past that, the same fill everywhere)
-        double vL = node.liquidVolume(), vG = Math.max(1e-12, node.volume - vL), level = vL / (FULL * node.volume) * sy;
-        boolean overFull = level > sy;
-        double T = node.T(), sum = 0;
+        double V = node.volume, vL = node.liquidVolume(), level = vL / (FULL * V) * sy;
         int n = node.speciesBound();
+        if (level > sy) {
+            for (FluidNode own : owns) {
+                own.setShareOf(node, own.volume / V);
+                own.update();
+            }
+            return;
+        }
+        double vG = Math.max(1e-12, V - vL), rowV = V / sy;
+        // the rows' spans of the liquid column (liquid volume from the bottom), and its layers'
+        double[] rowLo = new double[sy], rowHi = new double[sy];
+        double cum = 0;
+        for (int j = 0; j < sy; j++) {
+            rowLo[j] = cum;
+            cum += FULL * Math.max(0, Math.min(1, level - j)) * rowV;
+            rowHi[j] = cum;
+        }
+        int layers = node.layers();
+        double top = layers > 0 ? node.layerTop(layers - 1) : 0;
+        double[] layLo = new double[layers], layHi = new double[layers];
+        for (int l = 0; l < layers; l++) {
+            layLo[l] = l == 0 ? 0 : layHi[l - 1];
+            layHi[l] = top > 0 ? node.layerTop(l) / top * vL : 0;
+        }
+        double T = node.T(), sum = 0, capSum = 0;
+        double[] cap = new double[owns.size()];
         for (int i = 0; i < owns.size(); i++) {
             FluidNode own = owns.get(i);
-            double sL, sG;
-            if (overFull) sL = sG = own.volume / node.volume;
-            else {
-                double lf = FULL * Math.max(0, Math.min(1, level - rows[i]));   // (the share of this block the liquid fills)
-                sL = vL > 0 ? lf * own.volume / vL : 0;
-                sG = Math.max(0, (1 - lf) * own.volume / vG);
-            }
-            own.mWater = Math.max(0, node.mLiquid() * sL + node.mVapour() * sG);
-            own.mAir = Math.max(0, node.mAir * sG);
+            int j = Math.max(0, Math.min(sy - 1, rows[i]));
+            double lf = FULL * Math.max(0, Math.min(1, level - j)), inRow = own.volume / rowV;
+            double sG = Math.max(0, (1 - lf) * own.volume / vG);
             double[] ex = n > 2 ? new double[n - 2] : null;
-            for (int s = 2; s < n; s++) ex[s - 2] = Math.max(0, node.liquid(s) * sL + node.vapour(s) * sG);
+            for (int id = 0; id < n; id++) {
+                if (id == mods.eln.sim.fluid.SpeciesRegistry.AIR) continue;
+                int l = node.layerOf(id);
+                double sL = 0;
+                if (l >= 0 && layHi[l] > layLo[l])
+                    sL = Math.max(0, Math.min(rowHi[j], layHi[l]) - Math.max(rowLo[j], layLo[l])) / (layHi[l] - layLo[l]) * inRow;
+                double m = Math.max(0, node.liquid(id) * sL + node.vapour(id) * sG);
+                if (id == mods.eln.sim.fluid.SpeciesRegistry.WATER) own.mWater = m;
+                else ex[id - 2] = m;
+            }
+            own.mAir = Math.max(0, node.mAir * sG);
             own.extra = ex;
             own.energy = own.energyAt(T);
+            cap[i] = Math.max(0, own.energyAt(T + 1) - own.energy);
             sum += own.energy;
+            capSum += cap[i];
         }
-        // (each at the vessel's temperature, scaled so the shares sum to its energy exactly)
-        double k = Math.abs(sum) > 1e-12 ? node.energy / sum : 1;
-        for (FluidNode own : owns) {
-            own.energy *= k;
+        // (what the shares at T miss of the vessel's energy, by heat capacity; by volume if they have none)
+        double rest = node.energy - sum;
+        for (int i = 0; i < owns.size(); i++) {
+            FluidNode own = owns.get(i);
+            own.energy += rest * (capSum > 0 ? cap[i] / capSum : own.volume / V);
             own.update();
         }
     }

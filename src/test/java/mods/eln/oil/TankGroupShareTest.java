@@ -84,4 +84,43 @@ public class TankGroupShareTest {
         assertSane(box, owns, 2);
         assertTrue(owns.get(0).mLiquid() > 30 * owns.get(2).mLiquid(), owns.get(0).mLiquid() + " under " + owns.get(2).mLiquid());
     }
+
+    /**
+     * Gemini's review, 2026-11-25: near 0 C a half-full box's liquid shares have negative energy and its gas shares
+     * positive, and the old scale node.energy / (their sum, crossing 0) threw shares to 4000 K and 120 K. Swept across
+     * 272.5..273.5 K: every share stays at the box's temperature, and the saved (float) shares sum to its energy.
+     */
+    @Test
+    void halfFullBoxNearZeroCelsius() {
+        String worst = "";
+        double worstDt = 0;
+        for (int k = 0; k <= 200; k++) {
+            double T = 272.5 + k * 0.005;
+            FluidNode box = new FluidNode(4 * V1, 0, 2, false).fill(0.5 * 4 * V1 * Water.RHO_L, Water.P_ATM, T);
+            List<FluidNode> owns = owns(4);
+            TankGroup.share(box, 2, owns, new int[]{0, 0, 1, 1});
+            assertSane(box, owns, 2);
+            double floatSum = 0;
+            for (FluidNode o : owns) {
+                double dt = Math.abs(o.T() - box.T());
+                if (dt > worstDt) {
+                    worstDt = dt;
+                    worst = String.format("box %.4f K: a share at %.4f K", box.T(), o.T());
+                }
+                floatSum += (float) o.energy;
+            }
+            assertEquals(box.energy, floatSum, 1e-6 * Math.abs(box.energy) + 0.05, "float round trip at " + T);
+        }
+        assertTrue(worstDt < 0.01, worst);
+    }
+
+    /** A box of air alone: shared by volume, nothing lost. */
+    @Test
+    void gasOnlyBox() {
+        FluidNode box = new FluidNode(4 * V1, 0, 2, false).fill(0, 3e5, 350);
+        List<FluidNode> owns = owns(4);
+        TankGroup.share(box, 2, owns, new int[]{0, 0, 1, 1});
+        assertSane(box, owns, 2);
+        assertEquals(box.mAir / 4, owns.get(3).mAir, 1e-9 * box.mAir);
+    }
 }
