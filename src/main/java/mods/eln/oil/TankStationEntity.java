@@ -33,6 +33,8 @@ public class TankStationEntity extends BlockEntity implements FluidDevice, mods.
     private List<FluidPort> ports = List.of();
     private RailShape portsFor;
     private int shownSignal;
+    /** Carts docked since it was loaded (each one rebuilds the fluid world): how a test sees a dock flicker. */
+    public int dockings;
 
     public TankStationEntity(BlockPos pos, BlockState state) {
         super(ElnRegistry.TANK_STATION_ENTITY.get(), pos, state);
@@ -54,6 +56,7 @@ public class TankStationEntity extends BlockEntity implements FluidDevice, mods.
         if (level == null || level.isClientSide() || isRemoved()) return false;
         if (docked() != null && docked != cart) return false;
         docked = cart;
+        dockings++;
         // (the cart's node at the height it stands at here: its tank's bottom above the station's floor)
         cart.rebase(worldPosition.getY() + TankCart.TANK_Z);
         remakePorts();
@@ -134,6 +137,16 @@ public class TankStationEntity extends BlockEntity implements FluidDevice, mods.
     public void beforeFluidStep(double dt) {
         TankCart c = docked();
         if (c != null) c.exchangeHeat(dt);
+    }
+
+    /**
+     * A docked cart over its burst pressure bursts (TankCart.queueBurst: run at the end of the simulator's tick), checked
+     * here too, as a cart that is loaded but not ticking would never check it; it leaves the station when it bursts.
+     */
+    @Override
+    public void afterFluidStep(double dt) {
+        TankCart c = docked();
+        if (c != null && !c.bursting() && c.node().P() > c.desc().burstPa) c.queueBurst();
     }
 
     /**

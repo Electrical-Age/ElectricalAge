@@ -165,16 +165,21 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   whole life, saved as the tank item saves them (persistence.md). It trades heat with the ambient where it stands
   (Ambient, read again when it moves to another block) through the tank's 1 W/K, docked or not (a placed tank loses
   its heat in the fluid core towards a fixed 20 C instead). Over its burst pressure it bursts through the tank's
-  failure (`Failure.pressureVessel`): the explosion, the cart destroyed, only the minecart dropped. Jade shows its
+  failure (`Failure.pressureVessel`; checked in its tick and, docked, after each fluid step): the explosion, the cart
+  destroyed, only the minecart dropped (explosions off: it burns out). Removed for good any other way (broken, killed by
+  a command, discarded) it drops its tank, as a chest minecart drops its contents. Jade shows its
   tank's lines; the item's tooltip is the tank item's (with contents, which only a command gives a cart item: only
   those and the pressure; else the tank's rating). The Tank Loading Station (`oil/TankStationBlock`, a rail, and
   `TankStationEntity`) has a flange on each side across the track, 4 px up and centred (a tank's low side port), drawing
-  at the cart tank's bottom. A cart standing on it (under 0.05 blocks a tick) docks: the station puts its flanges on the
+  at the cart tank's bottom. A cart that has stood on it 5 ticks (under 0.05 blocks a tick) docks, and stays docked until it is off the station
+  (no flicker while it is jostled: each dock and undock rebuilds the fluid world); one cart per station: the station puts its flanges on the
   cart's own node and joins the fluid world; nothing is copied, so leaving (rolling off, broken, unloaded with its
   chunk, the station broken or unloaded) can neither make nor lose fluid. A docked cart in an unloaded chunk is
-  frozen with it (an entity; the station's ports go with it). Our choices: the station is a powered rail (vanilla's
+  frozen with it (an entity; the station's ports go with it). The station is no node, so Stasis doesn't freeze a docked
+  cart (accepted). Our choices: the station is a powered rail (vanilla's
   convention, not the brief's "when on, hold"): unpowered it brakes and holds the cart, so a bare station holds, and
-  redstone releases it, pushing a stopped cart off the way it came in (vanilla would only launch it off a solid block);
+  redstone releases it, pushing a stopped cart off the way it came in, or one placed there towards a rail beyond the
+  station (vanilla would only launch it off a solid block);
   it powers along with powered rails beside it, and brakes any cart. Its output is a comparator's: 0 no cart, 1 a cart
   with no liquid, 2..14 by its liquid share, 15 at 90 % liquid or more (gas alone reads 1); no EA signal pins (it is a
   vanilla block; the Machine API's low level could add them). It is a vanilla block, not a node (a rail must be a

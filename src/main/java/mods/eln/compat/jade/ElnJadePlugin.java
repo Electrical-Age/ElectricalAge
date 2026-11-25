@@ -202,7 +202,7 @@ public class ElnJadePlugin implements IWailaPlugin {
             String note = acc.getServerData().getStringOr("elnNote", "");
             if (!note.isEmpty()) tooltip.add(Component.literal(note).withStyle(net.minecraft.ChatFormatting.YELLOW));
             var list = acc.getServerData().getListOrEmpty("elnProbe");
-            boolean details = mods.eln.Eln.wailaEasyMode || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
+            boolean details = details(acc);
             int n = details ? list.size() : Math.min(HEADLINE, list.size());
             addLines(tooltip, list, n);
         }
@@ -255,6 +255,11 @@ public class ElnJadePlugin implements IWailaPlugin {
         }
     }
 
+    /** All the lines, not only the headline: sneaking, Jade's details key, or the config probe.details. */
+    static boolean details(snownee.jade.api.Accessor<?> acc) {
+        return mods.eln.Eln.wailaEasyMode || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
+    }
+
     /** Lines as sent: key TAB value. */
     static ListTag list(Map<String, String> m) {
         ListTag list = new ListTag();
@@ -298,7 +303,7 @@ public class ElnJadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, snownee.jade.api.EntityAccessor acc, IPluginConfig config) {
             var list = acc.getServerData().getListOrEmpty("elnProbe");
-            boolean details = mods.eln.Eln.wailaEasyMode || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
+            boolean details = details(acc);
             addLines(tooltip, list, details ? list.size() : Math.min(HEADLINE, list.size()));
         }
 

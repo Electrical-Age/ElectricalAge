@@ -54,7 +54,10 @@ public final class TankCartCases {
         for (RoundTrip.Row r : RoundTrip.Row.values()) cases.add(new RoundTrip(r));
         for (boolean filled : new boolean[]{true, false}) cases.add(new Breaks(filled));
         cases.add(new HotAmbient());
-        cases.add(new Bursts());
+        for (boolean explosions : new boolean[]{true, false}) cases.add(new Bursts(explosions));
+        cases.add(new Jostled());
+        cases.add(new Killed());
+        cases.add(new TwoCarts());
         cases.add(new Inert());
     }
 
@@ -424,7 +427,7 @@ public final class TankCartCases {
             PlumbingCases.fill(n, 0.3 * n.volume * Water.RHO_L, 3e5, 320);
             mods.eln.sim.fluid.EaUnits.add(n, SpeciesRegistry.get().id("eln:crude_oil"), 0.2 * n.volume * 850, 320, false);
             n.update();
-            ctx.after(5, () -> {
+            ctx.after(15, () -> {
                 double[] was = snap(c.node());
                 if (row != Row.UNDOCKED && s.docked() != c) bad.append("not docked; ");
                 if (row == Row.STATION_BROKEN) {
@@ -433,6 +436,8 @@ public final class TankCartCases {
                     String d = differs(was, snap(c.node()), 0);
                     if (!d.isEmpty()) bad.append("the cart lost contents with the station: ").append(d);
                     copy = c;
+                    line = String.format("station broken under it: %.2f kg water kept, %s, station in the fluid world %s", c.node().mWater,
+                        c.isRemoved() ? "removed" : "standing", FluidWorld.devices().contains(s));
                     return;
                 }
                 var out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, ctx.level().registryAccess());
@@ -563,13 +568,22 @@ public final class TankCartCases {
         }
     }
 
-    /** An iron cart of air at 50 bar (it bursts over 40) on a rail bursts as a tank does: the cart goes, no tank item drops. */
+    /**
+     * An iron cart of air at 50 bar (it bursts over 40) on a rail bursts as a tank does: the cart goes, no tank item drops.
+     * With explosions off (Eln.explosionEnable, only while its failure runs, here in build) it burns out: burnt by
+     * overpressure, removed, the minecart dropped.
+     */
     static final class Bursts extends PlumbingCases.Big {
+        final boolean explosions;
         TankCart c;
         BlockPos p;
 
+        Bursts(boolean explosions) {
+            this.explosions = explosions;
+        }
+
         public String id() {
-            return "tank_cart_bursts_over_burst_pressure";
+            return explosions ? "tank_cart_bursts_over_burst_pressure" : "tank_cart_bursts_over_burst_pressure_explosions_off";
         }
 
         public int ticks() {
@@ -581,6 +595,14 @@ public final class TankCartCases {
             ctx.level().setBlock(p, Blocks.RAIL.defaultBlockState(), 3);
             c = cart(ctx, p, false);
             PlumbingCases.fill(c.node(), 0, 50e5, 293.15);
+            if (explosions) return;
+            // (the failure run at once with explosions off: the flag is global, so not across a tick other tests share)
+            mods.eln.Eln.explosionEnable = false;
+            try {
+                c.queueBurst().destructImpl();
+            } finally {
+                mods.eln.Eln.explosionEnable = true;
+            }
         }
 
         public void measure(TestContext ctx) {
@@ -593,7 +615,125 @@ public final class TankCartCases {
             ctx.line("tank cart burst: removed " + c.isRemoved() + ", burnt " + c.getBurnt() + ", dropped " + got);
             ctx.check("tank cart: bursts over its burst pressure, the cart destroyed", c.isRemoved(), "");
             ctx.check("tank cart: a burst cart drops no tank", !tank, got.toString());
+            if (!explosions) {
+                ctx.check("tank cart: with explosions off it burns out by overpressure", c.getBurnt() == mods.eln.sim.process.destruct.FailureCause.OVERPRESSURE,
+                    String.valueOf(c.getBurnt()));
+                ctx.check("tank cart: with explosions off the minecart drops", got.stream().anyMatch(s -> s.is(Items.MINECART)), got.toString());
+            }
             if (!c.isRemoved()) c.discard();
+        }
+    }
+
+    /**
+     * A cart docked on a station, pushed back and forth on it every tick (faster than it counts as standing), stays
+     * docked: one docking, no flicker (each dock and undock would rebuild the fluid world).
+     */
+    static final class Jostled implements TestCase {
+        TankStationEntity s;
+        TankCart c;
+        int docks0 = -1, away;
+
+        public String id() {
+            return "tank_cart_jostled_on_station_stays_docked";
+        }
+
+        public int ticks() {
+            return 60;
+        }
+
+        public void build(TestContext ctx) {
+            s = station(ctx, ctx.at(3, 1, 1), RailShape.NORTH_SOUTH);
+            c = cart(ctx, ctx.at(3, 1, 1), false);
+            for (int t = 15; t < 55; t++) {
+                int k = t;
+                ctx.after(t, () -> {
+                    if (docks0 < 0) docks0 = s.dockings;
+                    if (s.docked() != c) away++;
+                    c.setDeltaMovement(0, 0, k % 2 == 0 ? 0.2 : -0.2);
+                });
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line(String.format("tank cart jostled: dockings %d (first %d), ticks not docked %d, at z %.2f", s.dockings, docks0, away,
+                c.getZ() - ctx.at(0, 0, 0).getZ()));
+            ctx.check("tank cart: jostled on the station, docked once and never left", s.dockings == 1 && away == 0 && s.docked() == c,
+                s.dockings + " dockings, " + away + " ticks away");
+            c.discard();
+        }
+    }
+
+    /** A docked cart of water killed by a command drops its tank with its contents; the station leaves the fluid world. */
+    static final class Killed implements TestCase {
+        final StringBuilder bad = new StringBuilder();
+        String line = "";
+
+        public String id() {
+            return "tank_cart_killed_drops_its_tank";
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(3, 1, 1);
+            TankStationEntity s = station(ctx, p, RailShape.NORTH_SOUTH);
+            TankCart c = cart(ctx, p, false);
+            PlumbingCases.fill(c.node(), 0.5 * c.node().volume * Water.RHO_L, 2e5, 300);
+            ctx.after(12, () -> {
+                if (s.docked() != c) bad.append("not docked; ");
+                double[] was = snap(c.node());
+                c.kill(ctx.level());   // (as /kill does)
+                if (FluidWorld.devices().contains(s) || s.docked() != null) bad.append("the station kept it; ");
+                List<ItemStack> got = new ArrayList<>();
+                for (ItemEntity e : ctx.level().getEntitiesOfClass(ItemEntity.class, new AABB(p).inflate(2))) {
+                    got.add(e.getItem().copy());
+                    e.discard();
+                }
+                ItemStack tank = got.stream().filter(x -> x.getItem() instanceof mods.eln.node.transparent.TransparentNodeItem).findFirst().orElse(ItemStack.EMPTY);
+                TankContents tc = tank.isEmpty() ? null : TankItemCases.contents(tank);
+                if (tc == null) {
+                    bad.append("no tank with contents in ").append(got).append("; ");
+                    return;
+                }
+                FluidNode i = new FluidNode(tc.volume(), 0, 1, false);
+                mods.eln.fluid.FluidSaves.restore(i, tc.saved());
+                bad.append(differs(was, snap(i), 0));
+                line = "dropped " + got + ": " + tc.composition();
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line("tank cart killed: " + line);
+            ctx.check("tank cart: killed, its tank drops with its contents and the station lets go", bad.isEmpty(), bad.toString());
+        }
+    }
+
+    /** Two carts on one station: the first docked stays docked, the second is never docked. */
+    static final class TwoCarts implements TestCase {
+        TankStationEntity s;
+        TankCart a, b;
+
+        public String id() {
+            return "tank_cart_one_cart_per_station";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext ctx) {
+            s = station(ctx, ctx.at(3, 1, 1), RailShape.NORTH_SOUTH);
+            a = cart(ctx, ctx.at(3, 1, 1), false);
+            ctx.after(10, () -> b = cart(ctx, ctx.at(3, 1, 1), true));
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line(String.format("tank cart two on a station: docked %s, dockings %d", s.docked() == a ? "the first" : s.docked() == b ? "the second" : "none", s.dockings));
+            ctx.check("tank cart: one cart per station, the first", s.docked() == a && s.dockings == 1, s.dockings + " dockings");
+            a.discard();
+            if (b != null) b.discard();
         }
     }
 

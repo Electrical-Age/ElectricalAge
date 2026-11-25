@@ -21,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -41,8 +40,9 @@ import java.util.Map;
 public class TankCart extends AbstractMinecart implements IBurnable {
     /** The tank's bottom above the rail block's floor and its inside height (m): where it sits on the cart. */
     public static final double TANK_Z = 6 / 16.0, TANK_H = 9 / 16.0;
-    /** The cart counts as standing (and docks at a station) under this speed (blocks a tick). */
+    /** The cart counts as standing under this speed (blocks a tick); it docks at a station after DOCK_TICKS standing there. */
     static final double DOCK_SPEED = 0.05;
+    static final int DOCK_TICKS = 5;
     /** Released by its station, a cart standing on it is sent off the way it came in at this speed (blocks a tick). */
     static final double RELEASE_SPEED = 0.1;
 
@@ -59,6 +59,8 @@ public class TankCart extends AbstractMinecart implements IBurnable {
     /** Which way it last travelled (horizontal, unit), to leave a station the way it came in. */
     private Vec3 travel = Vec3.ZERO;
     private int heatTicks;
+    /** Ticks it has stood on a station without being docked (DOCK_TICKS). */
+    private int standing;
     /** A burst queued (Failure, run at the end of the next simulator tick), and done. */
     private boolean bursting;
     private FailureCause burnt;
@@ -146,26 +148,51 @@ public class TankCart extends AbstractMinecart implements IBurnable {
             return;
         }
         if (n.P() > desc().burstPa) {
-            burst();
+            queueBurst();
+            undock();
             return;
         }
         dock(speed);
         if (dockedAt != null) {
             dockedAt.whileDocked();
             if (!dockedAt.released()) setDeltaMovement(Vec3.ZERO);   // (held)
-            else if (speed < 0.01 && travel.lengthSqr() > 0) setDeltaMovement(travel.scale(RELEASE_SPEED));
+            else if (speed < 0.01) setDeltaMovement(leaving().scale(RELEASE_SPEED));
         } else if (++heatTicks >= 20) {
             heatTicks = 0;
             exchangeHeat(1.0);
         }
     }
 
-    /** Docks at the station under it while standing there, and leaves it otherwise. */
+    /**
+     * Docks at the station under it once it has stood there DOCK_TICKS, and leaves it only when it is no longer on it:
+     * a docked cart jostled about on the station stays docked (each dock and undock rebuilds the fluid world).
+     */
     private void dock(double speed) {
         BlockPos rail = getCurrentBlockPosOrRailBelow();
-        TankStationEntity s = speed < DOCK_SPEED && level().getBlockEntity(rail) instanceof TankStationEntity t ? t : null;
+        TankStationEntity s = level().getBlockEntity(rail) instanceof TankStationEntity t ? t : null;
         if (dockedAt != null && dockedAt != s) undock();
-        if (s != null && dockedAt == null && s.dock(this)) dockedAt = s;
+        if (dockedAt != null || s == null) {
+            standing = 0;
+            return;
+        }
+        standing = speed < DOCK_SPEED ? standing + 1 : 0;
+        if (standing >= DOCK_TICKS && s.dock(this)) dockedAt = s;
+    }
+
+    /**
+     * Which way a released cart leaves its station: the way it came in; one never moved (placed there) along the rail
+     * towards a rail beyond the station, else the other way.
+     */
+    private Vec3 leaving() {
+        if (travel.lengthSqr() > 0) return travel;
+        BlockPos p = dockedAt.getBlockPos();
+        var shape = dockedAt.getBlockState().getValue(net.minecraft.world.level.block.PoweredRailBlock.SHAPE);
+        boolean alongX = shape == net.minecraft.world.level.block.state.properties.RailShape.EAST_WEST
+            || shape == net.minecraft.world.level.block.state.properties.RailShape.ASCENDING_EAST || shape == net.minecraft.world.level.block.state.properties.RailShape.ASCENDING_WEST;
+        Vec3 d = alongX ? new Vec3(1, 0, 0) : new Vec3(0, 0, 1);
+        BlockPos ahead = p.offset((int) d.x, 0, (int) d.z);
+        boolean rail = net.minecraft.world.level.block.BaseRailBlock.isRail(level(), ahead) || net.minecraft.world.level.block.BaseRailBlock.isRail(level(), ahead.below());
+        return rail ? d : d.scale(-1);
     }
 
     /** Leaves its station: the station drops its port; the contents stay in the cart's node, as they always were. */
@@ -187,14 +214,24 @@ public class TankCart extends AbstractMinecart implements IBurnable {
         super.onRemoval(reason);
     }
 
-    /** Over its burst pressure: the tank's failure (a pressure vessel's burst, scaled by what would flash), once. */
-    private void burst() {
+    /** Whether its burst is queued or done. */
+    public boolean bursting() {
+        return bursting;
+    }
+
+    /**
+     * Over its burst pressure: the tank's failure (a pressure vessel's burst, scaled by what would flash), once; it runs
+     * at the end of the simulator's tick (the cart's tick or its station's fluid step queue it). Returns the failure, or
+     * null if one is queued already.
+     */
+    public Failure queueBurst() {
+        if (bursting) return null;
         bursting = true;
-        undock();
         FluidNode n = node();
-        new Failure(this, null, new Coordonate(blockPosition(), level()), "Tank Minecart at " + blockPosition().toShortString())
-            .pressureVessel(() -> n.energy - n.mWater * Water.uLiquid(Water.TB))
-            .fail(FailureCause.OVERPRESSURE, n.P());
+        Failure f = new Failure(this, null, new Coordonate(blockPosition(), level()), "Tank Minecart at " + blockPosition().toShortString())
+            .pressureVessel(() -> n.energy - n.mWater * Water.uLiquid(Water.TB));
+        f.fail(FailureCause.OVERPRESSURE, n.P());
+        return f;
     }
 
     @Override
@@ -232,18 +269,21 @@ public class TankCart extends AbstractMinecart implements IBurnable {
         return desc().dropStack(node());
     }
 
-    /** Broken: a minecart and the tank with its contents (as a tank breaks); burst: the minecart only. */
+    /**
+     * Removed for good (broken, killed by a command, discarded): its tank drops with its contents, as a chest minecart's
+     * contents do (vanilla's destroy drops the minecart); a burst cart's tank is gone. Then it leaves its station.
+     */
     @Override
-    protected void destroy(ServerLevel level, DamageSource source) {
-        ItemStack tank = bursting ? ItemStack.EMPTY : getDropItemStack();
-        undock();
-        kill(level);
-        if (!level.getGameRules().get(GameRules.ENTITY_DROPS)) return;
-        ItemStack cart = new ItemStack(Items.MINECART);
-        cart.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, getCustomName());
-        spawnAtLocation(level, cart);
-        if (!tank.isEmpty()) spawnAtLocation(level, tank);
+    public void remove(RemovalReason reason) {
+        if (!level().isClientSide() && reason.shouldDestroy() && !bursting && !tankDropped && level() instanceof ServerLevel sl) {
+            tankDropped = true;
+            ItemStack tank = getDropItemStack();
+            if (!tank.isEmpty()) spawnAtLocation(sl, tank);
+        }
+        super.remove(reason);
     }
+
+    private boolean tankDropped;
 
     @Override
     protected Item getDropItem() {
