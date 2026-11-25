@@ -215,8 +215,12 @@ public final class TankItemCases {
             }
             if (s.getMaxStackSize() != 1) bad.append("a filled tank stacks to ").append(s.getMaxStackSize()).append("; ");
             List<String> tip = TooltipCases.TooltipCase.lines(s);
-            if (tip.stream().noneMatch(l -> l.startsWith("Pressure: ") && l.contains(" bar of ")) || tip.stream().noneMatch(l -> l.startsWith("Contents: ")))
-                bad.append("tooltip lacks its contents: ").append(tip).append("; ");
+            // (Baughn 2026-11-25: a filled tank's tooltip is its contents and pressure only)
+            if (tip.size() != 2 || !tip.get(0).startsWith("Contents: ") || !tip.get(1).startsWith("Pressure: ") || !tip.get(1).contains(" bar of ")
+                || tip.get(1).contains("°C"))
+                bad.append("tooltip not contents and pressure only: ").append(tip).append("; ");
+            List<String> plainTip = TooltipCases.TooltipCase.lines(tier.newItemStack());
+            if (plainTip.stream().noneMatch(l -> l.startsWith("Holds "))) bad.append("an empty tank lost its usual tooltip: ").append(plainTip).append("; ");
             ItemStack back = throughCodecs(ctx, s, bad);
             TankElement t2 = place(ctx, back, p);
             if (t2 == null) {
@@ -229,7 +233,7 @@ public final class TankItemCases {
             bad.append(differs(before, snap(m), 1e-12));
             if (Math.abs(m.T() - T0) > 1e-6 || Math.abs(m.P() - P0) > 1e-6 * P0)
                 bad.append(String.format("placed back at %.4f K, %.2f Pa, was %.4f K, %.2f Pa; ", m.T(), m.P(), T0, P0));
-            line = String.format("%.2f C, %.3f bar: %s; tooltip %s", T0 - Water.T0, P0 / 1e5, c.composition(), tip.subList(0, 3));
+            line = String.format("%.2f C, %.3f bar: %s; tooltip %s", T0 - Water.T0, P0 / 1e5, c.composition(), tip);
             // (the placed tank through a save and reload: floats, 1e-6)
             try {
                 ShaftArtCases.reloadAll(ctx, List.of(p));

@@ -105,10 +105,10 @@ public record TankContents(double water, double air, double energy, Map<String, 
         return FluidSaves.array(t, "v");
     }
 
-    /** Its tooltip lines, as Jade reads a placed tank's (Pressure, Contents). */
+    /** Its tooltip lines (Baughn 2026-11-25: contents and pressure, no temperature), worded as Jade's. */
     public java.util.List<String> lines() {
         return java.util.List.of(
-            String.format("%s: %.2f bar of %s, %s", mods.eln.i18n.I18N.tr("Pressure"), pascal / 1e5, contents, mods.eln.api.Meters.celsius(kelvin - Water.T0)),
-            mods.eln.i18n.I18N.tr("Contents") + ": " + composition);
+            mods.eln.i18n.I18N.tr("Contents") + ": " + composition,
+            String.format("%s: %.2f bar of %s", mods.eln.i18n.I18N.tr("Pressure"), pascal / 1e5, contents));
     }
 }

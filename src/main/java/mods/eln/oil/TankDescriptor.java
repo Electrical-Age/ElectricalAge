@@ -189,13 +189,14 @@ public class TankDescriptor extends TransparentNodeDescriptor {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
-        super.addInformation(stack, player, list, adv);
-        // (a broken tank's contents, as Jade read them when it was taken: frozen while carried)
+        // (a broken tank's contents, as Jade read them when it was taken, frozen while carried: its name, contents and
+        // pressure only, Baughn 2026-11-25; an empty tank has the usual lines)
         TankContents c = stack == null ? null : stack.get(mods.eln.registry.ElnRegistry.TANK_CONTENTS.get());
         if (c != null) {
             list.addAll(c.lines());
-            list.add("Keeps its contents until placed.");
+            return;
         }
+        super.addInformation(stack, player, list, adv);
         list.add(String.format("Holds %.0f buckets of water. Works at up to %.0f bar; bursts over %.0f.",
             volume * mods.eln.sim.fluid.Water.RHO_L / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / 1000, workingPa / 1e5, burstPa / 1e5));
         list.add("Steam off the top and the high side ports; water off the bottom and the low ones.");

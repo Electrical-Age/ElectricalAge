@@ -22,8 +22,9 @@ architecture.md.
 - `src/main/java/mods/eln/generic/ItemNbt.java`: 1.12 item NBT lives in `DataComponents.CUSTOM_DATA`, content unchanged
   (e.g. `"energy"` in `item/electricalitem/BatteryItem.kt` and `ElectricalLampItem.kt`).
 - Item components (`ElnRegistry.DATA_COMPONENTS`): `eln:tank_contents`, a broken tank's contents (`oil/TankContents`;
-  Baughn 2026-11-25): an Iron or Alloy Tank broken drops with what it held, its tooltip reads it as Jade does
-  (Pressure, Contents), and it places back with it; filled ones stack to 1, empty ones are plain (persistence.md).
+  Baughn 2026-11-25): an Iron or Alloy Tank broken drops with what it held, its tooltip is only its contents and
+  pressure, worded as Jade's (Baughn 2026-11-25: no temperature, none of the tank's usual lines, which an empty tank
+  keeps), and it places back with it; filled ones stack to 1, empty ones are plain (persistence.md).
   Recipes name a tank through NeoForge's component ingredient with `"components": {"!eln:tank_contents": {}}` (must not
   have it; `ElnRecipesBase.itemIngredient`): a filled tank is no ingredient, so crafting can't delete its contents.
 - `src/main/java/mods/eln/client/ItemTooltips.java` (client): the descriptor's 1.12 `addInformation` lines on

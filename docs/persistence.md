@@ -130,8 +130,8 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - A broken tank's item (Baughn 2026-11-25): the item component `eln:tank_contents` (`oil/TankContents`, codec keys
   `W`, `A`, `U` (water and air kg, energy J, full doubles), `S` (other species by key, kg; absent if none), `Fv` (the
   FluidSaves format the energy was taken in), `V` (the vessel's volume, m^3; informational: placed, the contents go into
-  the tank's own volume), and what it read when taken for its
-  tooltip: `kelvin`, `pascal`, `contents`, `composition`). Saved with the stack wherever stacks are (inventories, item
+  the tank's own volume), and what it read when taken: `kelvin`
+  (informational), `pascal`, `contents`, `composition` (the tooltip's)). Saved with the stack wherever stacks are (inventories, item
   entities, chests) and synced to clients. Placed, it goes through `FluidSaves.array`/`restore` as a saved node does
   (a missing `Fv` is a legacy energy, an unknown species key is kept, corrupt contents heal at the ambient). A tank item
   without it is a fresh tank. Placed tanks save as before (`vessel*`).

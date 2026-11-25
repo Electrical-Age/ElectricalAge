@@ -143,7 +143,7 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   `tank_flanges_where_piped`.
 - Tanks keep their contents when broken (Baughn 2026-11-25; also todo #592, the portable tank for mixed fluids: one
   item, not two): a broken tank drops as its item carrying what it held (any mix, a partial fill, a gas; component
-  `eln:tank_contents`, `oil/TankContents`), frozen while carried, and places back with it exactly (so the same
+  `eln:tank_contents`, `oil/TankContents`; its tooltip only the contents and pressure, Baughn 2026-11-25), frozen while carried, and places back with it exactly (so the same
   temperature and pressure); placed against a box of its tier it joins it, the contents summed. A block of a box drops
   its share by layer (`TankGroup.share`) and the rest keeps the rest. Filled tanks don't stack; one holding nothing but
   air and water vapour (Baughn) drops plain and stacks, its air and vapour gone. Our thresholds for that: no liquid and
