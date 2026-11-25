@@ -1,4 +1,4 @@
-// 26.3	2026-11-24T22:16:06.084012456	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-25T00:39:25.583230384	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 98be7e719755f1d65131e906daa7a98b081c8ce8 data/eln/advancement/recipes/misc/230v_air_blower.json
@@ -64,8 +64,7 @@ cd85e26e6ce215d3f6f5aec06d88bd2588db5e0b data/eln/advancement/recipes/misc/48v_s
 7f44fedd86d8829d718efa2261f8843f5ebf30a9 data/eln/advancement/recipes/misc/48v_tar_sand_separator.json
 4ca808710b883138c6810514d9de5c0f96d63f15 data/eln/advancement/recipes/misc/48v_tungsten_heating_corp.json
 40fbffb9611bf7bdee850f10bce7493d1d8b57de data/eln/advancement/recipes/misc/48v_wire_drawing_machine.json
-5efa0377fe291ce95e997e762d12ae33a202dd39 data/eln/advancement/recipes/misc/8kw_generator.json
-2129118260babb35c71c3abaa9e0cf9a0c2f3c90 data/eln/advancement/recipes/misc/8kw_generator_2.json
+d582de1e4e4ab8529edb3389d99cb96100b24d52 data/eln/advancement/recipes/misc/8kw_generator.json
 2007c62000752cff5aaf2af4386805307f313111 data/eln/advancement/recipes/misc/addressable_button.json
 68861d8d427d3c6ce1c815773d54fd6347312c7a data/eln/advancement/recipes/misc/addressable_light.json
 79496b983ba9ed522455a9d984138a4452a98a45 data/eln/advancement/recipes/misc/advanced_chip.json
@@ -167,12 +166,8 @@ ca4d643e29c91eb32315322716da87399e4a29fa data/eln/advancement/recipes/misc/flopp
 dd4b74f6687c3c994c00c5e3dc28203c9904cc82 data/eln/advancement/recipes/misc/fractionating_column_base.json
 dd1fb2604117c1c07ac4fae2710fffaafb40d578 data/eln/advancement/recipes/misc/fractionating_column_segment.json
 e0b7af77e174173ac10a27c0d70aa5aca270d224 data/eln/advancement/recipes/misc/fuel_heat_furnace.json
-a39938c4e0204b6626d2678f78657d83d72f3732 data/eln/advancement/recipes/misc/gas_turbine.json
-428deb152fa68644cde3947102b66fe5f3ded300 data/eln/advancement/recipes/misc/gas_turbine_2.json
-1ffc9850ec9e9f653b953bc61abea7e0bccca979 data/eln/advancement/recipes/misc/gas_turbine_3.json
-27456a349bab7b30e872eccc1f4f893dd699891c data/eln/advancement/recipes/misc/gas_turbine_4.json
-93a622d8232a17351f68b80011d097f36a0eb9eb data/eln/advancement/recipes/misc/generator.json
-0752c106ad070920febd9b14cf22646733f4bae4 data/eln/advancement/recipes/misc/generator_2.json
+aebc38428a769525a1551812de4ca6b3c7e09e67 data/eln/advancement/recipes/misc/gas_turbine.json
+1b4e298f50a1faed2dafdaab7bb35038761ba28b data/eln/advancement/recipes/misc/generator.json
 3206c8a83c23437655d503a29cdf6acb090766cf data/eln/advancement/recipes/misc/gray_brush.json
 a0d612bd4f26061b5e9c15aa0f3000b426037fd0 data/eln/advancement/recipes/misc/green_brush.json
 c14117c6913e1bb9562e34acda9dbe02383521d8 data/eln/advancement/recipes/misc/ground_cable.json
@@ -182,6 +177,7 @@ ca934f46f64dec6fbd4c555a9257f3af2dfa465f data/eln/advancement/recipes/misc/high_
 3db2f7e8d0d048e8b8a35415ac6c3b8a3b9b4276 data/eln/advancement/recipes/misc/high_power_transmitter_antenna.json
 adff65b0e3b516752580628470a82e029fef2c0c data/eln/advancement/recipes/misc/high_voltage_relay.json
 8f00d7507ab7a4ea43fc11b9334e3e9bfa687dab data/eln/advancement/recipes/misc/high_voltage_switch.json
+d198aa5f080fdcdca5072523cf2e55fe56c2d598 data/eln/advancement/recipes/misc/hot_blade_set.json
 389625a0b3068699697a055e47fdab9352df0ec2 data/eln/advancement/recipes/misc/hub.json
 66103a82763e2f5be503d9a4251d7ff65b7a29d8 data/eln/advancement/recipes/misc/improved_flashlight.json
 26baca3846cf3c09885134d3b1f92feb7bf65a5a data/eln/advancement/recipes/misc/industrial_data_logger.json
@@ -212,10 +208,7 @@ d82e19fb36ddaee5cd8a7f910027a98e9f222af8 data/eln/advancement/recipes/misc/low_p
 28e73e1e292dff45f7f769ee4de6945b14270513 data/eln/advancement/recipes/misc/low_voltage_relay.json
 4fa354f1b1fe390f469fe3ff6d3dca47dee62ef4 data/eln/advancement/recipes/misc/low_voltage_switch.json
 786377cab6bd0e3caab67b59d126e78859e98a4e data/eln/advancement/recipes/misc/lowpass_filter.json
-4b9b416e24744d3c7fdc6c6323c7619d435af010 data/eln/advancement/recipes/misc/lp_steam_turbine.json
-a01fe1411f1268ed72bebb19efec4a862ce51ff0 data/eln/advancement/recipes/misc/lp_steam_turbine_2.json
-ee79ec9d6859f3bb8df7d0eee6692fec11ecce01 data/eln/advancement/recipes/misc/lp_steam_turbine_3.json
-ab4a82c69f420dae28984c5d5a63affa0b65de68 data/eln/advancement/recipes/misc/lp_steam_turbine_4.json
+34038a93603395de61f77c6bd796684f4aebe494 data/eln/advancement/recipes/misc/lp_steam_turbine.json
 78963af925d293a3a9e1333e02a59d52b11f763d data/eln/advancement/recipes/misc/machine_block.json
 06f47239a3574d3c0cd2dc069583599180624ea4 data/eln/advancement/recipes/misc/machine_booster.json
 8906d98097cb2c61c6f6b604bd2d2ec70c0f04f1 data/eln/advancement/recipes/misc/magenta_brush.json
@@ -326,10 +319,7 @@ d745c0a06786c255ec7cf4ebac2a0bd8da10121b data/eln/advancement/recipes/misc/solar
 d802b3c38c25ca1e6ec2abe10377f3666a47b3a1 data/eln/advancement/recipes/misc/steam_cracker.json
 febda46518aac7a1a3b44f912d4bf97add471642 data/eln/advancement/recipes/misc/steam_injection_wellhead.json
 3b3894bb499e10bccea06d0524264277edaa9371 data/eln/advancement/recipes/misc/steam_oven.json
-ca2f8a0f26291613f84a226e9e99d0312ac72383 data/eln/advancement/recipes/misc/steam_turbine.json
-80d2514f5559c045fad856c766d9b349f59b0d1a data/eln/advancement/recipes/misc/steam_turbine_2.json
-7db10e9d7d6d8e99f8c777e97e56e3c62c8c6938 data/eln/advancement/recipes/misc/steam_turbine_3.json
-0590face2856286a25dda602fcc505727821f789 data/eln/advancement/recipes/misc/steam_turbine_4.json
+c5c815d08e22c56a0a0353a3aedab713b0056406 data/eln/advancement/recipes/misc/steam_turbine.json
 58ed4cec16eb783daddce30bb01edf1e32a58708 data/eln/advancement/recipes/misc/still_pot.json
 64db41bd58f33e20ba7b082b4a155fa8b5980d4a data/eln/advancement/recipes/misc/stone_heat_furnace.json
 6eb149d68fe73de4c46fa56fc4ad01e8303f8d49 data/eln/advancement/recipes/misc/street_light.json
@@ -347,7 +337,7 @@ d430822798a5f441a1dd42061276cb0ab4a09a5b data/eln/advancement/recipes/misc/tilte
 ebd30793fac1b2c233ac5b6cdc2a993fbeb67027 data/eln/advancement/recipes/misc/tree_resin_collector.json
 f10a9eefb44cbdb04d4d1f0ca0507bbb07418460 data/eln/advancement/recipes/misc/tree_resin_collector_2.json
 36537e9727f2e9657a1580b66d45dac30567da2f data/eln/advancement/recipes/misc/tungsten_cable.json
-06f7d6a9098a138ce5181dc3148a749c93e4233e data/eln/advancement/recipes/misc/turbine_blade_set.json
+11bc6f4054b0ec61ee178717537337c8dd5b9f17 data/eln/advancement/recipes/misc/turbine_blade_set.json
 61ab3d5995c6865bb5ee2c140f3156fd26e60b8d data/eln/advancement/recipes/misc/utility_pole.json
 45da0cd5f829bf7dcb0e5bfecc984c9067178cc3 data/eln/advancement/recipes/misc/utility_pole_2.json
 7a646f4adae5fd648e14140f0326f06be82a026b data/eln/advancement/recipes/misc/utility_pole_3.json
@@ -457,8 +447,7 @@ a2699653d83e94fba3176fed07eb9bc947098d52 data/eln/recipe/48v_submersible_pump.js
 597e59b2cb40ff96580947c9d42e4806e4aba461 data/eln/recipe/48v_tar_sand_separator.json
 26dd0e5b78d384e75a61dd3a288c91e7a056aed6 data/eln/recipe/48v_tungsten_heating_corp.json
 c1acb5341e8a0c417df53b3e3c259b93545986f2 data/eln/recipe/48v_wire_drawing_machine.json
-1f174b69c4cff923ccb29a51e0b57dd86da0cdbc data/eln/recipe/8kw_generator.json
-8437810980fe8fa28d1aff6579e31992402d239b data/eln/recipe/8kw_generator_2.json
+c70846e59758fce000ab9194a9ffaa3a769c3fad data/eln/recipe/8kw_generator.json
 891330455503b65f892eed662eff4ed1cd487ed0 data/eln/recipe/addressable_button.json
 75ab5fb23b7b97569b3c3319e4272def18855c7f data/eln/recipe/addressable_light.json
 7ea06e3dd79c15911fb0a5e5b0dee923286aabfc data/eln/recipe/advanced_chip.json
@@ -560,12 +549,8 @@ d6f7bffa2f89a8f70b83ca846b9e79c8d9de798b data/eln/recipe/flywheel.json
 f40d83e7a9b182e47c01049007e072cf2b632b8d data/eln/recipe/fractionating_column_base.json
 400c134f2f0ab8df3af2081c578f9949cac8b435 data/eln/recipe/fractionating_column_segment.json
 ac0567a3cf2f8b131a6719973f7964e08126dcf6 data/eln/recipe/fuel_heat_furnace.json
-847b5455275368faefb966a7680a8f6c3b199200 data/eln/recipe/gas_turbine.json
-734b6b28b43594815e9946d1af179448e3be7f22 data/eln/recipe/gas_turbine_2.json
-92f9512b82f679e2cc5fe90240ae1c0a712ab632 data/eln/recipe/gas_turbine_3.json
-50b00513e836e116b02abf07f92ef12aaefc2b57 data/eln/recipe/gas_turbine_4.json
-2cbeb6b96f2e284a73c03a5950feb1b5738410ed data/eln/recipe/generator.json
-813c8fa4af542a9f7b8f8cf139857fad0b398931 data/eln/recipe/generator_2.json
+db942fc20e45986c0e909b891e1737c302b2d6c0 data/eln/recipe/gas_turbine.json
+ac1ae024c86436ad452f568e13cf7ab5c93d9d04 data/eln/recipe/generator.json
 6807bca5810c43c53a541f3192a05744bb3b73f2 data/eln/recipe/gray_brush.json
 1fd7392f8f3c4443adbf0499d84396c5da56090d data/eln/recipe/green_brush.json
 15ba4c1dcda12e30a0ba2f80409862bb6d81569f data/eln/recipe/ground_cable.json
@@ -575,6 +560,7 @@ ac0567a3cf2f8b131a6719973f7964e08126dcf6 data/eln/recipe/fuel_heat_furnace.json
 72d99145ed8ef404b149ba6b07a7011236f1e36d data/eln/recipe/high_power_transmitter_antenna.json
 9ed2b4a5cc75be49dd6d16e4f7b21dcabfa40784 data/eln/recipe/high_voltage_relay.json
 4ba9f342687a09e3b1cda8d7f260c1ddd6d35f06 data/eln/recipe/high_voltage_switch.json
+fc7b1fb088d8d750d7894a0839c9fc67388dd91f data/eln/recipe/hot_blade_set.json
 7100a4afa0e935888c7e32607d2c279f16d69cdf data/eln/recipe/hub.json
 820d044aff444868e33966e505a7ee17af71055b data/eln/recipe/improved_flashlight.json
 4a6c0ad115aeb7f8a62cb0fab925aac8786d0226 data/eln/recipe/industrial_data_logger.json
@@ -605,10 +591,7 @@ fa6d8a2528ad6bccbbf91180b3bbf7978c3cafe1 data/eln/recipe/linear_servo_drive.json
 41448f1671e4e1abeb618476b2e0b133eb8acc76 data/eln/recipe/low_voltage_relay.json
 9f9e78f200b499ab9c22abb00392ff8403c48e11 data/eln/recipe/low_voltage_switch.json
 754c879b73a1199773b8434f47fd10b7cc682f89 data/eln/recipe/lowpass_filter.json
-487c4bdca6946c84ff692ef960f123100e990a6b data/eln/recipe/lp_steam_turbine.json
-abd836c18a265c25b32709be9e1819100baf28f0 data/eln/recipe/lp_steam_turbine_2.json
-513721a4735cd84f2580b2e07b800254ba8f488e data/eln/recipe/lp_steam_turbine_3.json
-e44eec5ce607faee65bb7c914419718b2dd4636a data/eln/recipe/lp_steam_turbine_4.json
+70065d0cbb980f69ff4a5a4f329976b6c7feb5ad data/eln/recipe/lp_steam_turbine.json
 789b4cedd5840c52844b2ddc92a42e0ff82d40e1 data/eln/recipe/machine_block.json
 d5f805910e688c02cc8ec7887d09bdb0385185cb data/eln/recipe/machine_booster.json
 e5563e26e89b0f375d849f941cbd8e2827d35aaa data/eln/recipe/magenta_brush.json
@@ -719,10 +702,7 @@ c4a92d71ecc73f59ecdd4e92dba9ace4eaf4260b data/eln/recipe/steam_condenser.json
 9d4f9aad2634e27f24bbf845e98c830f88ff5871 data/eln/recipe/steam_cracker.json
 de6b0d86f1b6a83a630f6f99c80a28f8adcf17e5 data/eln/recipe/steam_injection_wellhead.json
 ad38d8978faeb5e64094fb9e2d5f61f950b2a9c1 data/eln/recipe/steam_oven.json
-d73dbee890e5b032106e12119ea9857489e8714d data/eln/recipe/steam_turbine.json
-90cc99ddc75685fa0dab1231a0fdc71e1ab0fd62 data/eln/recipe/steam_turbine_2.json
-25cb56c03da5f16893a1f4e8d1aed69997ce7d22 data/eln/recipe/steam_turbine_3.json
-6a5c4ea8dd1a012cdf9c341e34853e3dcd152e29 data/eln/recipe/steam_turbine_4.json
+2e43d89d4fff9dc76c813d8a5e154c5d0957e033 data/eln/recipe/steam_turbine.json
 c71851d4cc0ce5f27eace47575664cb1f3ac2650 data/eln/recipe/still_pot.json
 3f4a24c3fb4412d21f208ff458e45f74a002f7ed data/eln/recipe/stone_heat_furnace.json
 f4f9406ede6ea92137dd5caf98a20da982804e2e data/eln/recipe/street_light.json
@@ -740,7 +720,7 @@ ba6171c46cdef5e54d351d3d002ee195daae0359 data/eln/recipe/tilted_terminal_logger.
 242851f63c4f602d3b0dc0b84582ae9e087dc1a1 data/eln/recipe/tree_resin_collector.json
 3755444f7d89f99a651710b209e8c730e6576173 data/eln/recipe/tree_resin_collector_2.json
 a704b9c15054e9a198a998bb306bf5ce8407501a data/eln/recipe/tungsten_cable.json
-a0578d3014c4046035c4bb4b86acfcd0233f31ac data/eln/recipe/turbine_blade_set.json
+0549323fb85c52772019e6b6386ecca0eae9a83a data/eln/recipe/turbine_blade_set.json
 651d22f75e6b8295b7992f229776b4292dffcc6b data/eln/recipe/utility_pole.json
 b204e479cbae894349308593acaaac469f4941ab data/eln/recipe/utility_pole_2.json
 b51dbf13805b13d93e2d92c2163e13fd1f22a241 data/eln/recipe/utility_pole_3.json

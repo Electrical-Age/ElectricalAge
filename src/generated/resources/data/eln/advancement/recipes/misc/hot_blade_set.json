@@ -1,24 +1,11 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "neoforge:tag_empty",
-      "tag": "c:ingots/aluminum"
-    },
-    {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:tag_empty",
-        "tag": "c:ingots/iron"
-      }
-    }
-  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_ingredient": {
       "conditions": {
         "items": [
           {
-            "items": "eln:advanced_electrical_motor"
+            "items": "eln:tungsten_ingot"
           }
         ]
       },
@@ -26,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "eln:8kw_generator_2"
+        "recipes": "eln:hot_blade_set"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -39,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "eln:8kw_generator_2"
+      "eln:hot_blade_set"
     ]
   }
 }

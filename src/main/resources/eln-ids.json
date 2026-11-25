@@ -305,6 +305,12 @@
   "kind": "shared_item",
   "name": "turbine_blade_set"
  },
+ "eln:shared_item@4165": {
+  "descriptor": "GenericItemUsingDamageDescriptor",
+  "display": "Hot Blade Set",
+  "kind": "shared_item",
+  "name": "hot_blade_set"
+ },
  "eln:shared_item@451": {
   "descriptor": "GenericItemUsingDamageDescriptor",
   "display": "Silicon Steel Laminations",

@@ -1,32 +1,16 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:tag_empty",
-        "tag": "c:ingots/aluminum"
-      }
-    },
-    {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:tag_empty",
-        "tag": "c:ingots/aluminum"
-      }
-    }
-  ],
   "type": "minecraft:crafting_shaped",
   "key": {
-    "E": "eln:copper_cable",
     "G": "eln:generator",
+    "J": "eln:joint",
     "M": "eln:advanced_machine_block",
-    "a": "#c:ingots/aluminum",
-    "m": "eln:advanced_electrical_motor"
+    "O": "eln:optimal_ferromagnetic_core",
+    "c": "eln:copper_coil"
   },
   "pattern": [
-    "mmm",
-    "GaG",
-    " ME"
+    "cOc",
+    "GJG",
+    " M "
   ],
   "result": {
     "id": "eln:8kw_generator"

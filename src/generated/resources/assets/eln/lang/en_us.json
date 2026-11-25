@@ -392,6 +392,7 @@
   "item.eln.high_voltage_cable": "High Voltage Cable",
   "item.eln.high_voltage_relay": "High Voltage Relay",
   "item.eln.high_voltage_switch": "High Voltage Switch",
+  "item.eln.hot_blade_set": "Hot Blade Set",
   "item.eln.hub": "Hub",
   "item.eln.improved_flashlight": "Improved Flashlight",
   "item.eln.industrial_data_logger": "Industrial Data Logger",
@@ -663,6 +664,10 @@
   "jei.eln.wire_drawing.how": "Any spec: set on its screen",
   "key.category.eln.keys": "Electrical Age",
   "key.eln.headlamp": "Lights on/off (headlamp, flashlights in hand)",
+  "key.eln.radar_high_down": "Radar goggles: band's high edge down",
+  "key.eln.radar_high_up": "Radar goggles: band's high edge up",
+  "key.eln.radar_low_down": "Radar goggles: band's low edge down",
+  "key.eln.radar_low_up": "Radar goggles: band's low edge up",
   "key.eln.wrench": "Wrench (hold: a switch's screen on click; the chisel's brush menu)",
   "message.eln.electric_bike.flat_battery": "The battery is flat: pedalling only",
   "message.eln.electric_bike.no_battery": "No battery: pedalling only"

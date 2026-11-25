@@ -1,46 +1,18 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:tag_empty",
-        "tag": "c:ingots/steel"
-      }
-    },
-    {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:tag_empty",
-        "tag": "c:storage_blocks/steel"
-      }
-    },
-    {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:tag_empty",
-        "tag": "c:ingots/steel"
-      }
-    },
-    {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:tag_empty",
-        "tag": "c:storage_blocks/steel"
-      }
-    }
-  ],
   "type": "minecraft:crafting_shaped",
   "key": {
-    "H": "eln:copper_thermal_cable",
+    "B": "eln:turbine_blade_set",
+    "C": "eln:combustion_chamber",
+    "H": "eln:hot_blade_set",
+    "J": "eln:joint",
     "M": "eln:advanced_machine_block",
-    "S": "#c:storage_blocks/steel",
-    "m": "eln:advanced_electrical_motor",
-    "s": "#c:ingots/steel"
+    "P": "eln:alloy_plate",
+    "e": "eln:electrical_motor"
   },
   "pattern": [
-    "msH",
-    "sSs",
-    " M "
+    "BCH",
+    "PJP",
+    "eM "
   ],
   "result": {
     "id": "eln:gas_turbine"

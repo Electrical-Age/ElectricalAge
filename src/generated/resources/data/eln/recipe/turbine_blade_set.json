@@ -1,13 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "I": "minecraft:iron_ingot",
+    "P": "eln:iron_plate",
     "S": "minecraft:stick"
   },
   "pattern": [
-    "I I",
+    "P  ",
     " S ",
-    "I I"
+    "  P"
   ],
   "result": {
     "id": "eln:turbine_blade_set"

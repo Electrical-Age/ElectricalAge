@@ -748,6 +748,12 @@ public class Wp12aContent implements ElnContent {
             descriptor = new GenericItemUsingDamageDescriptor(name);
             sharedItem.addElement(completId, descriptor);
         }
+        {
+            // Baughn 2026-11-25: a gas turbine's hot section, where steel won't do (tungsten on an alloy plate)
+            subId = 5;
+            completId = subId + (id << 6);
+            sharedItem.addElement(completId, new GenericItemUsingDamageDescriptor(TR_NAME(Type.NONE, "Hot Blade Set")));
+        }
     }
 
     public static void registerBrush(int id) {

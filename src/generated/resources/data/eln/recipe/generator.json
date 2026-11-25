@@ -1,31 +1,17 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:tag_empty",
-        "tag": "c:ingots/aluminum"
-      }
-    },
-    {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:tag_empty",
-        "tag": "c:ingots/aluminum"
-      }
-    }
-  ],
   "type": "minecraft:crafting_shaped",
   "key": {
     "E": "eln:copper_cable",
+    "F": "eln:average_ferromagnetic_core",
+    "I": "eln:iron_plate",
+    "J": "eln:joint",
     "M": "eln:advanced_machine_block",
-    "a": "#c:ingots/aluminum",
-    "m": "eln:advanced_electrical_motor"
+    "c": "eln:copper_coil"
   },
   "pattern": [
-    "mmm",
-    "ama",
-    " ME"
+    "cFc",
+    "cJc",
+    "IME"
   ],
   "result": {
     "id": "eln:generator"

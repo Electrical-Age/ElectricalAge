@@ -1,4 +1,4 @@
-// 26.3	2026-11-24T22:16:06.079797284	eln-global/EA models
+// 26.3	2026-11-25T00:39:25.57916052	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -298,6 +298,7 @@ c5bec09b544a1b17e38e0199fc64d913404e29b6 assets/eln/items/gold_plate.json
 a85c47bd1ce8e932ded9ef01dd78e0ccb9f5d970 assets/eln/items/high_voltage_cable.json
 dbadde2aaf16a92fc3972d7e6b3f4254c6eddab9 assets/eln/items/high_voltage_relay.json
 708ff0dd266dc1a3551cf58ca59388a08b0b704c assets/eln/items/high_voltage_switch.json
+fe6861234b6ada4846124c96dd42c3f49fafea13 assets/eln/items/hot_blade_set.json
 f32af3c050c7673d1f5e3d48b17f8a898a0f68db assets/eln/items/hub.json
 abc3744929bb16ef9d942ab9d03c8e70fb6134bb assets/eln/items/improved_flashlight.json
 fd0aa72d3eb5d1bf7b04f632242dd9119a2253ff assets/eln/items/industrial_data_logger.json
@@ -786,6 +787,7 @@ df8c41e2efd55b09fb2eddf78a4b7e44a400a327 assets/eln/models/item/high_voltage_cab
 89a4c7a65e7c446bc18690c5d7de32cb3c3a31e6 assets/eln/models/item/high_voltage_relay_3d.json
 92e9432bed00e0d27d4aa772fb5959bde6527418 assets/eln/models/item/high_voltage_switch.json
 963df94f4392406c16274a50d911f23d746d9929 assets/eln/models/item/high_voltage_switch_3d.json
+236d08a251463f97c43a7951f317e6c51f7fda75 assets/eln/models/item/hot_blade_set.json
 9363bc6ab7f8c1b3e671fbd083cbd7a2dc4d2c9d assets/eln/models/item/hub.json
 c77440ac82c6ecea9f0c1bcf51a96abee9bd2396 assets/eln/models/item/improved_flashlight.json
 52300738a7ab3e65d1ef9644f3df17e3d9c0f729 assets/eln/models/item/improved_flashlight_on.json
