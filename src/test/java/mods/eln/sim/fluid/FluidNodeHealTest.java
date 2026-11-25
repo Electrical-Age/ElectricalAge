@@ -52,4 +52,24 @@ public class FluidNodeHealTest {
         assertFalse(n.heal(280));
         assertEquals(u, n.energy, 0);
     }
+
+    /** At runtime a hot node heals at its last temperature, not at 20 C (Gemini's review: a 550 K boiler reset to 20 C). */
+    @Test
+    void runtimeGuardKeepsTheLastTemperature() {
+        FluidNode n = new FluidNode(V1, 0, 1, false).fill(0.3, 20e5, 480);
+        n.energy = Double.NaN;
+        assertTrue(n.guardFinite());
+        n.update();
+        assertEquals(480, n.T(), 0.5);
+    }
+
+    /** The guard takes a negative mass as heal does. */
+    @Test
+    void runtimeGuardCatchesNegativeMass() {
+        FluidNode n = new FluidNode(V1, 0, 1, false).fill(0.3, Water.P_ATM, 300);
+        n.mAir = -0.05;
+        n.update();
+        assertEquals(0, n.mAir, 0);
+        assertEquals(300, n.T(), 0.5);
+    }
 }

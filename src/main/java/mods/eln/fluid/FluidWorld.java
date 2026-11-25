@@ -216,6 +216,14 @@ public final class FluidWorld implements IProcess {
         return false;
     }
 
+    /** The device whose port uses network node n, and where (for a warning about n), or null. */
+    public static String whereIs(FluidNode n) {
+        for (FluidDevice d : INSTANCE.devices)
+            for (FluidDevice.FluidPort p : d.fluidPorts())
+                if (nodeFor(p.node()) == n || p.node() == n) return d.getClass().getSimpleName() + " " + BlockPos.of(p.pos()).toShortString();
+        return null;
+    }
+
     /** When running out of step time was last logged near each place (ms), so a stiff network says so once a minute
      *  (by place: a stiff network is often rebuilt every few seconds). */
     private final Map<String, Long> overBudgetLogged = new HashMap<>();

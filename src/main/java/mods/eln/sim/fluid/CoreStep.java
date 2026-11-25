@@ -450,7 +450,7 @@ public final class CoreStep {
         for (int i = 0; i < cn.length; i++) {
             FluidNode n = nodes.get(i);
             Network.Node c = cn[i];
-            if (!n.fixed && n.guardFinite()) n.update();   // (a NaN put in by anything since the last step: healed, not stepped)
+            if (!n.fixed && n.guardFinite(() -> mods.eln.fluid.FluidWorld.whereIs(n))) n.update();   // (a NaN put in by anything since the last step: healed, not stepped)
             c.m[0] = n.mWater;
             c.m[1] = n.mAir;
             for (int j = 2; j < c.m.length; j++) c.m[j] = n.extra != null && ids[j] - 2 < n.extra.length ? n.extra[ids[j] - 2] : 0;
@@ -699,7 +699,14 @@ public final class CoreStep {
         owed = Math.min(owed, OWED_MAX);
         mods.eln.fluid.FluidWorld.recordProgress(nodes, stall, dropped);
         // (written out with the step length asked for: a replay at the tick's length isn't the step that failed)
-        if (net.stats.failures > failures) failed(dt, m0, u0, h0);
+        // (a result that isn't finite is a failed step, written out and put back, never healed into the nodes)
+        boolean finite = true;
+        for (Network.Node c : cn) {
+            if (c.fixed) continue;
+            finite &= Double.isFinite(c.U);
+            for (double x : c.m) finite &= Double.isFinite(x);
+        }
+        if (net.stats.failures > failures || !finite) failed(dt, m0, u0, h0);
         else if (net.stats.cut > cut0 || net.stats.substeps - sub0 > 64L * p.span) slow(dt, m0, u0, h0, net.stats.substeps - sub0);
         dt = tick;
         // contents out
@@ -722,6 +729,7 @@ public final class CoreStep {
             // state, and a condenser's cooling or a boiler's shell passes heat through it all the same; read as 0, a
             // condenser asleep booked no heat)
             remWall[i] += c.wallJ * kept + mods.eln.fluid.FluidWorld.takeWallCarry(n);
+            n.guardFinite(() -> mods.eln.fluid.FluidWorld.whereIs(n));   // (what a device put in during a background step)
             n.update();
         }
         // what each edge carried: added to what is still owed, and handed out over the ticks the step stood for

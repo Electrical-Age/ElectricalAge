@@ -177,29 +177,39 @@ public final class FluidNode {
     private static long lastHealWarn = Long.MIN_VALUE / 2;
 
     /**
-     * A guard, not a model: a non-finite energy or mass, however it got there, healed at 20 C (heal; a node doesn't know
-     * its place) with a warning at most once a minute. Unguarded, WaterAir.solve answers a NaN energy with its last
-     * temperature less 1 K, so the node cooled 1 K per update to the EOS floor (120 K) and every step of its network
-     * failed. True if it healed the node (no update: the caller does it; update() itself runs this first).
+     * A guard, not a model: contents heal() would put right (a non-finite energy or mass, or a mass under
+     * NEGATIVE_MASS), however they got there, healed at its last temperature (20 C if that isn't a sound one), with a
+     * warning at most once a minute naming where (asked for only then; null: its height). Unguarded, WaterAir.solve
+     * answers a NaN energy with its last temperature less 1 K, so the node cooled 1 K per update to the EOS floor
+     * (120 K) and every step of its network failed. CoreStep checks the core's own results first and writes a failing
+     * step out (CoreStep.failed) rather than heal it. True if it healed the node (no update: the caller does it;
+     * update() itself runs this first).
      */
-    public boolean guardFinite() {
-        if (Double.isFinite(energy) && Double.isFinite(mWater) && Double.isFinite(mAir) && (extra == null || allFinite(extra))) return false;
-        double u = energy;
-        heal(Water.T_AMBIENT);
+    public boolean guardFinite(java.util.function.Supplier<Object> where) {
+        if (Double.isFinite(energy) && mWater >= NEGATIVE_MASS && mAir >= NEGATIVE_MASS && Double.isFinite(mWater) && Double.isFinite(mAir)
+            && (extra == null || allSound(extra))) return false;
+        double u = energy, last = state.T, t = last > mods.eln.fluidcore.WaterAir.T_MIN && last < mods.eln.fluidcore.WaterAir.T_MAX ? last : Water.T_AMBIENT;
+        heal(t);
         long now = System.nanoTime();
         synchronized (FluidNode.class) {
             unwarnedHeals++;
             if (now - lastHealWarn < 60_000_000_000L) return true;
-            LOG.warn("Electrical Age: a fluid node at height {} held {} J (a non-finite energy or mass): reset to its contents at 20 C ({} so healed since the last warning)",
-                z, u, unwarnedHeals);
+            Object at = where == null ? null : where.get();
+            LOG.warn("Electrical Age: a fluid node {} held {} J (a non-finite energy or mass, or a negative mass): reset to its contents at {} K ({} so healed since the last warning)",
+                at != null ? "at " + at : "at height " + z, u, String.format(java.util.Locale.ROOT, "%.1f", t), unwarnedHeals);
             unwarnedHeals = 0;
             lastHealWarn = now;
         }
         return true;
     }
 
-    private static boolean allFinite(double[] a) {
-        for (double x : a) if (!Double.isFinite(x)) return false;
+    /** guardFinite(null): where unknown. */
+    public boolean guardFinite() {
+        return guardFinite(null);
+    }
+
+    private static boolean allSound(double[] a) {
+        for (double x : a) if (!Double.isFinite(x) || x < NEGATIVE_MASS) return false;
         return true;
     }
 
