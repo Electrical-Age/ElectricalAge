@@ -5,7 +5,10 @@
     "H": "eln:200v_tungsten_heating_corp",
     "M": "eln:advanced_machine_block",
     "P": "eln:iron_plate",
-    "T": "eln:iron_tank"
+    "T": {
+      "neoforge:ingredient_type": "eln:empty_tank",
+      "items": "eln:iron_tank"
+    }
   },
   "pattern": [
     "PTP",

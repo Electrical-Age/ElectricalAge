@@ -24,6 +24,8 @@ architecture.md.
 - Item components (`ElnRegistry.DATA_COMPONENTS`): `eln:tank_contents`, a broken tank's contents (`oil/TankContents`;
   Baughn 2026-11-25): an Iron or Alloy Tank broken drops with what it held, its tooltip reads it as Jade does
   (Pressure, Contents), and it places back with it; filled ones stack to 1, empty ones are plain (persistence.md).
+  Recipes name a tank through the ingredient `eln:empty_tank` (`oil/EmptyTankIngredient`, from `ElnRecipesBase.itemIngredient`):
+  a filled tank is no ingredient, so crafting can't delete its contents.
 - `src/main/java/mods/eln/client/ItemTooltips.java` (client): the descriptor's 1.12 `addInformation` lines on
   `ItemTooltipEvent`. A descriptor that throws is logged once, then skipped. Test: `gametest/cases/TooltipCases`.
 - Packages: `item/` (lamps, fuses, cores, upgrades, scanners...), `item/electricalitem/` (batteries, tools, E-Coal

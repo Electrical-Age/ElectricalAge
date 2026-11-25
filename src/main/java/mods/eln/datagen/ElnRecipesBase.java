@@ -204,9 +204,16 @@ public abstract class ElnRecipesBase {
     static Ingredient ingredient(Object o) {
         if (o instanceof String ore) return Ingredient.of(items.getOrThrow(OreDictTags.recipeTag(ore)));
         if (o instanceof TagKey<?> t) return Ingredient.of(items.getOrThrow(itemTag(t)));
-        if (o instanceof RStack s) return Ingredient.of(s.item());
-        if (o instanceof ItemLike l) return Ingredient.of(l);
+        if (o instanceof RStack s) return itemIngredient(s.item());
+        if (o instanceof ItemLike l) return itemIngredient(l.asItem());
         throw new IllegalArgumentException("ingredient " + o);
+    }
+
+    /** An item as an ingredient; a tank only while it carries no contents (a filled one would lose them). */
+    static Ingredient itemIngredient(Item item) {
+        if (item instanceof mods.eln.generic.IDescriptorItem d && d.getEaDescriptor() instanceof mods.eln.oil.TankDescriptor)
+            return mods.eln.oil.EmptyTankIngredient.of(item);
+        return Ingredient.of(item);
     }
 
     /** A vanilla item tag as an ingredient (a 26.x choice, not 1.12's: e.g. any wool). */

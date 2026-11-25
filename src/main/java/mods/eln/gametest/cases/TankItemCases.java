@@ -40,6 +40,7 @@ public final class TankItemCases {
         cases.add(new UnknownSpecies());
         cases.add(new BurstBox());
         cases.add(new BuildLimit());
+        cases.add(new NotAnIngredientFilled());
     }
 
     /** Water, air, energy, then the other species, of n. */
@@ -664,6 +665,49 @@ public final class TankItemCases {
             if (!ItemStack.matches(s, copy)) bad.append("the item changed: ").append(s).append("; ");
             if (ctx.nodeAt(high) != null) bad.append("a node stands past the build height; ");
             line = "use: " + node + ", item " + s.getCount() + " with contents " + (contents(s) != null);
+        }
+    }
+
+    /**
+     * A filled tank is no recipe ingredient (crafted into an Alloy Tank it lost its contents): the Alloy Tank's recipe takes
+     * a plain Iron Tank, and the same with contents not.
+     */
+    static final class NotAnIngredientFilled extends Small {
+        public String id() {
+            return "tank_item_filled_is_no_ingredient";
+        }
+
+        String what() {
+            return "tank item: a recipe takes a plain tank, not a filled one";
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(1, 1, 1);
+            TankElement t = (TankElement) ctx.placeTransparent(IRON_TANK, p);
+            PlumbingCases.fill(t.own, 0.5 * t.own.volume * Water.RHO_L, Water.P_ATM, 300);
+            List<ItemStack> got = breakAt(ctx, p);
+            if (got.size() != 1 || contents(got.get(0)) == null) {
+                bad.append("dropped ").append(got).append("; ");
+                return;
+            }
+            var rm = ctx.level().getServer().getRecipeManager();
+            var key = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,
+                net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "alloy_tank"));
+            var r = rm.byKey(key).map(h -> h.value()).orElse(null);
+            if (!(r instanceof net.minecraft.world.item.crafting.CraftingRecipe cr)) {
+                bad.append("no alloy tank recipe: ").append(r).append("; ");
+                return;
+            }
+            ItemStack plain = mods.eln.Eln.transparentNodeItem.getDescriptor(IRON_TANK).newItemStack();
+            boolean withPlain = cr.matches(grid(plain), ctx.level()), withFilled = cr.matches(grid(got.get(0)), ctx.level());
+            if (!withPlain || withFilled) bad.append("plain ").append(withPlain).append(", filled ").append(withFilled).append("; ");
+            line = "plain " + withPlain + ", filled " + withFilled;
+        }
+
+        /** The Alloy Tank's grid (alloy ingots, glass panes) around tank. */
+        static net.minecraft.world.item.crafting.CraftingInput grid(ItemStack tank) {
+            ItemStack a = mods.eln.Eln.findItemStack("Alloy Ingot", 1), pane = new ItemStack(net.minecraft.world.item.Items.GLASS_PANE);
+            return net.minecraft.world.item.crafting.CraftingInput.of(3, 3, List.of(a.copy(), pane.copy(), a.copy(), a.copy(), tank.copy(), a.copy(), a.copy(), pane.copy(), a.copy()));
         }
     }
 }

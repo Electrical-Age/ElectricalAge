@@ -1,7 +1,10 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "I": "eln:iron_tank",
+    "I": {
+      "neoforge:ingredient_type": "eln:empty_tank",
+      "items": "eln:iron_tank"
+    },
     "c": "eln:copper_thermal_cable"
   },
   "pattern": [
