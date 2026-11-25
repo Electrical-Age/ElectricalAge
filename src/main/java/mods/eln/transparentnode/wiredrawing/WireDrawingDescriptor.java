@@ -58,7 +58,7 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
     }
 
     public boolean allows(int mm2, int tier) {
-        return mm2 >= 0 && mm2 <= maxMm2 && tier >= 1 && tier <= maxTier;
+        return mm2 >= 0 && mm2 <= maxMm2 && CableSpec.power(tier) && CableSpec.rank(tier) <= CableSpec.rank(maxTier);   // (voltage order)
     }
 
     // ---- costs (per block of wire; a winding's turn is WindingItem.BLOCKS_PER_TURN of a block)
@@ -78,6 +78,7 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
             case 1 -> 1;
             case 2 -> 1.5;
             case 3 -> 2;
+            case mods.eln.node.voxel.CablePart.KV -> 3;   // (1 kV: between 400 V's and 11 kV's)
             default -> 4;
         };
         return 2.0 / 3 * layers * girth(mm2);

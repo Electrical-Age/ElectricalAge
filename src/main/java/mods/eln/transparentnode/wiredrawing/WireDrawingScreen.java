@@ -37,7 +37,7 @@ public class WireDrawingScreen extends ElnScreen {
         boolean pole = mode == WireDrawingElement.POLE && d.maxTier >= 4;
         mode = mode == WireDrawingElement.WINDING || mode == WireDrawingElement.BARE || mode == WireDrawingElement.OVERHEAD || pole ? mode : WireDrawingElement.KIT;
         int max = WireDrawingDescriptor.maxAmount(mode);
-        render.clientSet(mode, Math.max(0, Math.min(d.maxMm2, mm2)), Math.max(1, Math.min(pole ? 3 : d.maxTier, tier)), (colour + 16) % 16,
+        render.clientSet(mode, Math.max(0, Math.min(d.maxMm2, mm2)), CableSpec.clampTier(tier, pole ? 3 : d.maxTier), (colour + 16) % 16,
             Math.max(1, Math.min(max, amount)));
     }
 
@@ -52,7 +52,8 @@ public class WireDrawingScreen extends ElnScreen {
     }
 
     boolean usesColour() {
-        return render.mode == WireDrawingElement.KIT || render.mode == WireDrawingElement.WINDING;
+        // (not for a twisted jacket: the 1 kV cable's colours are its own)
+        return (render.mode == WireDrawingElement.KIT || render.mode == WireDrawingElement.WINDING) && !CableSpec.twisted(render.tier);
     }
 
     boolean usesAmount() {
@@ -102,9 +103,9 @@ public class WireDrawingScreen extends ElnScreen {
         when(wire, locked(button("mm2up", () -> ">", () -> set(r.mode, r.mm2 + 1, r.tier, r.colour, r.amount),
             tr("Up to %1$ mm² on this machine", CableSpec.mm2Number(CableSpec.MM2[r.desc.maxMm2])))));
         text("insl", shown(ins, () -> poleMode.getAsBoolean() ? tr("Low side") : tr("Insulation")));
-        when(ins, locked(button("insdn", () -> "<", () -> set(r.mode, r.mm2, r.tier - 1, r.colour, r.amount))));
+        when(ins, locked(button("insdn", () -> "<", () -> set(r.mode, r.mm2, CableSpec.stepTier(r.tier, -1, 4), r.colour, r.amount))));
         text("ins", shown(ins, () -> CableSpec.voltsLabel(r.tier)));
-        when(ins, locked(button("insup", () -> ">", () -> set(r.mode, r.mm2, r.tier + 1, r.colour, r.amount),
+        when(ins, locked(button("insup", () -> ">", () -> set(r.mode, r.mm2, CableSpec.stepTier(r.tier, 1, 4), r.colour, r.amount),
             tr("Up to %1$ on this machine (pole transformers: 48, 230 or 400 V on the low side)", CableSpec.voltsLabel(r.desc.maxTier)))));
         text("coll", shown(colour, () -> tr("Colour")));
         when(colour, locked(button("coldn", () -> "<", () -> set(r.mode, r.mm2, r.tier, r.colour - 1, r.amount))));

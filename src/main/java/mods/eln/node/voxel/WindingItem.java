@@ -21,8 +21,9 @@ public class WindingItem extends Item {
         super(p.stacksTo(1));
     }
 
-    /** A winding of turns of a wire of this insulation tier (1..4) and spec. */
-    public static ItemStack make(int tier, CableSpec spec, int turns) {
+    /** A winding of turns of a wire of this insulation tier (a power tier: CableSpec.power) and spec. */
+    public static ItemStack make(int tier, CableSpec spec0, int turns) {
+        CableSpec spec = spec0.forTier(tier);
         ItemStack s = new ItemStack(mods.eln.registry.ElnRegistry.WINDING.get());
         net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, s, t -> {
             t.putInt(TURNS, Math.max(1, Math.min(MAX_TURNS, turns)));
@@ -46,7 +47,7 @@ public class WindingItem extends Item {
         return Math.max(1, Math.min(MAX_TURNS, tag(s).getIntOr(TURNS, 1)));
     }
 
-    /** Its insulation tier, 1..4 (48 V, 230 V, 400 V, 11 kV). */
+    /** Its insulation tier, a power tier (48 V, 230 V, 400 V, 11 kV, 1 kV). */
     public static int tier(ItemStack s) {
         int t = tag(s).getIntOr(TIER, 1);
         return CableSpec.power(t) ? t : 1;
@@ -78,7 +79,8 @@ public class WindingItem extends Item {
         CableSpec spec = spec(stack);
         // its wire's colour, as a cable kit's tooltip names it (todo #486)
         out.accept(Component.translatable("item.eln.winding.wire", turns(stack), spec.label(tier(stack)), String.format("%.0f", spec.amps()),
-            Component.translatable("color.minecraft." + net.minecraft.world.item.DyeColor.byId(spec.colour()).getName()))
+            CableSpec.twisted(tier(stack)) ? Component.literal(CableSpec.jacketName(tier(stack), spec.colour()))
+                : Component.translatable("color.minecraft." + net.minecraft.world.item.DyeColor.byId(spec.colour()).getName()))
             .withStyle(net.minecraft.ChatFormatting.GRAY));
         out.accept(Component.literal("For a Transformer (DC-DC)'s winding slot").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
         // (Baughn 2026-11-13: say that they merge; HandWindingRecipe's rule)

@@ -38,6 +38,13 @@ final class ToolbagRadial {
         mc.gui.setScreen(create(routing, new Kind(sel[0] == 1, sel[1], sel[2], sel[3]), kinds));
     }
 
+    /** A first-ring key's place: pipes and non-power cables by tier, power tiers by voltage (between 48 V's index 1 and
+     *  11 kV's 4: 1 kV, index 7, sorts as 3.25). */
+    static double order(Kind k) {
+        if (k.pipe() || !mods.eln.node.voxel.CableSpec.power(k.tier())) return k.tier();
+        return 1 + mods.eln.node.voxel.CableSpec.rank(k.tier()) * 0.75;
+    }
+
     static RadialMenu create(boolean routing, Kind sel, Map<Kind, Integer> kinds) {
         // the first ring's keys: pipes, then cables, each by tier
         List<Kind> firsts = new ArrayList<>();
@@ -45,7 +52,8 @@ final class ToolbagRadial {
             Kind f = new Kind(k.pipe(), k.tier(), -1, -1);
             if (!firsts.contains(f)) firsts.add(f);
         }
-        firsts.sort((a, b) -> a.pipe() != b.pipe() ? (a.pipe() ? -1 : 1) : Integer.compare(a.tier(), b.tier()));
+        // (cables by tier, power tiers in voltage order: the 1 kV tier is index 7)
+        firsts.sort((a, b) -> a.pipe() != b.pipe() ? (a.pipe() ? -1 : 1) : Double.compare(order(a), order(b)));
         Kind[] cur = {kinds.containsKey(sel) ? sel : kinds.isEmpty() ? null : kinds.keySet().iterator().next()};
         boolean[] act = {false};   // (Undo or Cancel sent: nothing to commit)
         RadialMenu[] menu = new RadialMenu[1];

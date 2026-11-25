@@ -722,6 +722,34 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 
 ## Behaviour changes vs 1.12
 
+- Solar panels (Baughn 2026-11-25, option B+): a single-diode curve (`sim/PvCurve`, `PvSourceBipole`) instead of
+  1.12's constant-power source (full power anywhere from 2/3 Umax to Umax, none above). The old Umax is now the
+  open-circuit voltage of a 10 C panel in full sun (Baughn: strings built for 114 V must not burn their cables, "we've
+  got some plants in the cold"), and the old Pmax the best power on a hot noon (45 C panel): 2x3 520 W at ~88 V, small
+  65 W at ~11 V. The
+  panel has a slow thermal load (sunlight heats it, the power taken out and the air cool it; wind and rain cool it
+  faster; ~25 K over the air at full sun, tau 60 s): Voc -0.35 %/K, Isc +0.05 %/K. Below 0 V a bypass diode. Wired
+  straight to a battery it works as a current source below its peak; MPPT controllers get the rest. Jade shows the
+  delivered power and the curve's best point; the tooltip its best point and open-circuit voltage. Driven backwards (a
+  reversed battery through its bypass) it heats with what it takes in and its terminals' I^2 R, and burns at 150 C
+  (a small panel on a reversed 48 V battery does; a 2x3 panel's terminals limit the current below that).
+- A 1 kV cable tier (Baughn 2026-11-25, for solar strings): tier 7 (`CablePart.KV`), appended (tiers are stored by
+  index in places), between 400 V and 11 kV in voltage order (`CableSpec.POWER_TIERS`, `rank`, `stepTier`). Preset 1.5 mm²
+  (13 A, as the 400 V hand kit), trips at 1.3 kV, three insulation layers on the 230 V wire machine (not the 48 V one); by hand a fourth rubber
+  round the 400 V kit's recipe. Its jacket is a red and black twist (`textures/block/cable/cable1kv.png`, drawn in its own
+  colours: its spec's colour is fixed and a brush refuses it), and its splice sleeves are brass, so a joint is told from a cable merely lying past (Baughn:
+  a try-out for cables lying on each other). Its voxel tier finds its mask and render through a hidden six-node "1kV
+  Cable" descriptor (six_node@2068), as the other power tiers do.
+- MPPT charge controllers (new, Baughn 2026-11-25, board #79): a wall-mounted six-node buck converter between panels
+  and a battery, four terminals (panel + top, panel - left, battery + bottom, battery - right of its front), as EA's
+  panels and batteries float. `BuckConverterProcess` couples the two ports each pre-step iteration (output = ratio x
+  input voltage, output power = efficiency x input power, no backward flow), `MpptTracker` sets the ratio each step;
+  the battery's charge voltage (screen slider, 57.6 V to start) is its output limit. MPPT Charge Controller: perturb and
+  observe, 350 V, 2 kW, 94 %; Advanced: incremental conductance, 700 V, 8 kW, 97 %. The input ratings are open-circuit
+  volts (two and five 2x3 panels in series at -20 C, with margin), watched with the usual budget (`DifferentialVoltageWatchDog`).
+  Over its rated power the converter puts the panels up their curve within its own solve (as the output limit). A charging
+  current limit (screen field, 5 A to start: a small bank takes far less than panels give) works the same way. It says
+  why nothing flows (battery above the charge voltage, panels below the battery, no battery). No heat (its losses are not simulated).
 - Meters, probes and power sockets no longer burn at their (former slot) cable's voltage: those watchdogs are off.
 - Fires lag their setting (oil ~20 s; an oil flame goes out below 15%), take time to relight (`sim/Fire.java`, `FireTest`). A coal fire
   (the stone heat furnace, Baughn 1573753560456499223) has an air valve, 5 s, and a hot bed that spreads towards it over

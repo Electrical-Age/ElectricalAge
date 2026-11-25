@@ -28,7 +28,8 @@ public class CableKitItem extends Item implements PipeTool, KitItem {
      * A kit of len voxels of a tier's cable of this spec (null: the tier's preset). A preset kit carries no spec, so it
      * stacks and merges with crafted ones; another spec is kept in its custom data (mm2, col).
      */
-    public static ItemStack kit(int tier, CableSpec spec, int len) {
+    public static ItemStack kit(int tier, CableSpec spec0, int len) {
+        CableSpec spec = spec0 == null ? null : spec0.forTier(tier);
         if (len <= 0) return ItemStack.EMPTY;
         ItemStack s = new ItemStack(mods.eln.registry.ElnRegistry.CABLE_KITS.get(tier).get());
         KitItem.setLength(s, len);
@@ -73,7 +74,7 @@ public class CableKitItem extends Item implements PipeTool, KitItem {
                                 java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
         CableSpec spec = specOf(stack);
         if (spec != null) out.accept(Component.literal(spec.label(tier) + String.format(", %.0f A, ", spec.amps())
-            + net.minecraft.world.item.DyeColor.byId(spec.colour()).getName().replace('_', ' ')).withStyle(net.minecraft.ChatFormatting.GRAY));
+            + CableSpec.jacketName(tier, spec.colour())).withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 
     @Override

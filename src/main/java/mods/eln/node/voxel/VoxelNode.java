@@ -454,6 +454,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         ItemStack held = player.getMainHandItem();
         if (!(mods.eln.item.BrushDescriptor.getDescriptor(held) instanceof mods.eln.item.BrushDescriptor brush)) return false;
         int colour = 15 - brush.getColor(held);
+        if (CableSpec.twisted(c.tier)) {   // (its red and black twist takes no paint)
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("A 1 kV cable's twist takes no paint")));
+            return true;
+        }
         if (colour == c.spec.colour() || !brush.use(held, player)) return true;
         CablePart n = new CablePart(c.tier, new CableSpec(c.spec.mm2(), colour), c.face, c.points);
         n.copyStateFrom(c);   // (only the colour changes: its id, links, hang, state stay)

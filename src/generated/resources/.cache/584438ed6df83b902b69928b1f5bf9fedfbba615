@@ -1,4 +1,4 @@
-// 26.3	2026-11-25T19:01:49.631273106	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-25T21:17:08.22510177	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 98be7e719755f1d65131e906daa7a98b081c8ce8 data/eln/advancement/recipes/misc/230v_air_blower.json
@@ -71,6 +71,7 @@ d582de1e4e4ab8529edb3389d99cb96100b24d52 data/eln/advancement/recipes/misc/8kw_g
 77337270d3bcb51cd04bcfbbe92d2b91205082b0 data/eln/advancement/recipes/misc/advanced_electrical_motor.json
 3a619981495eb6f8bd59182f26cbc226b1dd4a70 data/eln/advancement/recipes/misc/advanced_energy_meter.json
 fa365aabe999e77b03e64373107eb501cad2b094 data/eln/advancement/recipes/misc/advanced_machine_block.json
+b675ba6d892208147a703b0863ba3e5fb2522643 data/eln/advancement/recipes/misc/advanced_mppt_charge_controller.json
 f70b299049c176c75a99881d9bb884024c4a16e1 data/eln/advancement/recipes/misc/allmeter.json
 44d9994058ce6f90ef2b7f32ea0381792d6ad2ec data/eln/advancement/recipes/misc/alloy_dust.json
 46a1bc5bf44016039d5a7b278377fac0d516c730 data/eln/advancement/recipes/misc/alloy_tank.json
@@ -99,6 +100,7 @@ b85823dd74834547255b7d60faa1cc1280c8c423 data/eln/advancement/recipes/misc/boile
 6d0037aa2ea261dda2553b2391cd33c35592d0fe data/eln/advancement/recipes/misc/boot_rom_chip.json
 7d99ddf6a770f2d9a3e99f992901d073c6e2cebf data/eln/advancement/recipes/misc/brown_brush.json
 730b64258aa7daeaa776dc6c257d90b8799ceaf8 data/eln/advancement/recipes/misc/bus_i_o_module.json
+e632c9044ec958d3fffa26dfb20675265e3ecf6e data/eln/advancement/recipes/misc/cable_kit_1kv.json
 9385f32bfd3aaf89dd4d13b8dd4375fcb0b1dd2c data/eln/advancement/recipes/misc/cable_kit_hv.json
 f563b5713b684dad4d03a5ac1209d7541bda83f9 data/eln/advancement/recipes/misc/cable_kit_lv.json
 de31a6e035c77509cf4b3518e791722dd591a9b1 data/eln/advancement/recipes/misc/cable_kit_lv_2.json
@@ -222,6 +224,7 @@ a27e31349b09577ad4c188f22d768cc06e79fa07 data/eln/advancement/recipes/misc/mediu
 98da9648d64bf589e3ce99d343283e22da74bb47 data/eln/advancement/recipes/misc/mining_pipe.json
 506b211d1956b2734af347c65b3fe0b6f4fa0490 data/eln/advancement/recipes/misc/modern_data_logger.json
 610c33e376abf2f1d751476431a162f19c57bd8b data/eln/advancement/recipes/misc/monster_filter.json
+dae056696c52b7e094ea8c8fa6ba7e9dcbaca62c data/eln/advancement/recipes/misc/mppt_charge_controller.json
 c212ab04301e827265d0e3361f91fb4211732103 data/eln/advancement/recipes/misc/multimeter.json
 1196464f2fb1ff0e8a9e7e0f8db5ef00bb7f2040 data/eln/advancement/recipes/misc/nand_chip.json
 1d236df7f23f5be7583b96db41bc9e826337c466 data/eln/advancement/recipes/misc/nanocrystalline_core_blank.json
@@ -457,6 +460,7 @@ c70846e59758fce000ab9194a9ffaa3a769c3fad data/eln/recipe/8kw_generator.json
 b29e40b134ba723e2994352a9e9c57db075ebebb data/eln/recipe/advanced_electrical_motor.json
 ebc391934a2473c53d31289ac62a39b93aca573f data/eln/recipe/advanced_energy_meter.json
 a423457ff31535b559770376ebc14b04c271f5e8 data/eln/recipe/advanced_machine_block.json
+8b81e0a0bd813fb26ce7be0f62bb86cc774f977f data/eln/recipe/advanced_mppt_charge_controller.json
 23dc3a28332b359aee832565c162e5f1e53db807 data/eln/recipe/allmeter.json
 3195eb3d865c65466172a7fbd6ac9ed00fbc5c40 data/eln/recipe/alloy_dust.json
 46e58385304e0c25757994edeaed6661cd245524 data/eln/recipe/alloy_tank.json
@@ -485,6 +489,7 @@ bd83f8e28296e360fafeb22cf8cab8536161a42c data/eln/recipe/blasting_raw_tungsten_2
 0d0e0b950dc93a99158171a5d2814bea63346253 data/eln/recipe/boot_rom_chip.json
 9bf14159b70a5eb86642c34c15c2aca5cd1233c6 data/eln/recipe/brown_brush.json
 7847343d5a748f096ece13561b48c9c3e772a286 data/eln/recipe/bus_i_o_module.json
+2b93f075b343ce6abc763de10699bede268e6670 data/eln/recipe/cable_kit_1kv.json
 947ba3e4720da17455914a08814cdad083fad6ae data/eln/recipe/cable_kit_hv.json
 07f2a607d4089921bf6adf5c07d5736d743b4295 data/eln/recipe/cable_kit_lv.json
 2caf62be97bd698679047e873aa4f4dde417b2f8 data/eln/recipe/cable_kit_lv_2.json
@@ -608,6 +613,7 @@ b8ca16ce32bdd821edd85027bb7a110e2d18c201 data/eln/recipe/medium_voltage_switch.j
 558880aced4411806541403ba6354fbfa72e78e7 data/eln/recipe/mining_pipe.json
 ebd63e9a5f900366c5a0004356905112cd008098 data/eln/recipe/modern_data_logger.json
 b937a3eff0a8f08a2d43f6bc97d126a15a5689fa data/eln/recipe/monster_filter.json
+f8075c3493331fa1551aea0807c1078a45b8f4d1 data/eln/recipe/mppt_charge_controller.json
 8d83f9c1dee7864768cf6ca50fb939e1a46589e2 data/eln/recipe/multimeter.json
 98d357e0e3bb9c3b4f91a0301d5901f9a928265c data/eln/recipe/nand_chip.json
 b1089dca5ccb0c94aa3d42d1cc0b0d7f2e14a134 data/eln/recipe/nanocrystalline_core_blank.json

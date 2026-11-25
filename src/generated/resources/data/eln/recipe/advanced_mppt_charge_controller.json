@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:copper_coil",
+    "I": "eln:iron_plate",
+    "O": "eln:optimal_ferromagnetic_core",
+    "a": "#c:circuits/advanced",
+    "p": "eln:electrical_probe_chip"
+  },
+  "pattern": [
+    "IpI",
+    "COC",
+    "IaI"
+  ],
+  "result": {
+    "id": "eln:advanced_mppt_charge_controller"
+  }
+}

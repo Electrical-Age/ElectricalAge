@@ -83,6 +83,7 @@ public final class ElnRecipes extends ElnRecipesBase {
         run("recipeDust", ElnRecipes::recipeDust);
         run("recipeElectricalMotor", ElnRecipes::recipeElectricalMotor);
         run("recipeSolarTracker", ElnRecipes::recipeSolarTracker);
+        run("recipeMpptController", ElnRecipes::recipeMpptController);
         run("recipeDynamo", ElnRecipes::recipeDynamo);
         run("recipeWindRotor", ElnRecipes::recipeWindRotor);
         run("recipeMeter", ElnRecipes::recipeMeter);
@@ -164,6 +165,14 @@ public final class ElnRecipes extends ElnRecipesBase {
         addRecipe(kit(3, 1),
             " R ",
             "RCR",
+            'C', findItemStack("Copper Cable"),
+            'R', "itemRubber");
+
+        // the 1 kV kit (Baughn 2026-11-25, solar strings): a fourth layer round the 400 V kit's three
+        addRecipe(kit(mods.eln.node.voxel.CablePart.KV, 1),
+            " R ",
+            "RCR",
+            " R ",
             'C', findItemStack("Copper Cable"),
             'R', "itemRubber");
 
@@ -714,6 +723,31 @@ public final class ElnRecipes extends ElnRecipesBase {
         // Baughn 2026-11-06: a dearer converter whose tap a signal sets
         addShapelessRecipe(findItemStack("Variable DC-DC Converter", 1),
             findItemStack("DC-DC Converter"), dictAdvancedChip, findItemStack("Signal Cable"));
+    }
+
+    /**
+     * MPPT charge controllers (board #79): a converter's coils on an average core, an electrical probe to watch the
+     * panels, a cheap chip to track, in an iron case; the advanced one on an optimal core with an advanced chip.
+     */
+    public static void recipeMpptController() {
+        addRecipe(findItemStack("MPPT Charge Controller"),
+            "IpI",
+            "CFC",
+            "IsI",
+            'I', findItemStack("Iron Plate"),
+            'p', findItemStack("Electrical Probe Chip"),
+            'C', findItemStack("Copper Coil"),
+            'F', findItemStack("Average Ferromagnetic Core"),
+            's', dictCheapChip);
+        addRecipe(findItemStack("Advanced MPPT Charge Controller"),
+            "IpI",
+            "COC",
+            "IaI",
+            'I', findItemStack("Iron Plate"),
+            'p', findItemStack("Electrical Probe Chip"),
+            'C', findItemStack("Copper Coil"),
+            'O', findItemStack("Optimal Ferromagnetic Core"),
+            'a', dictAdvancedChip);
     }
 
     public static void recipeHeatFurnace() {

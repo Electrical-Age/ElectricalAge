@@ -66,6 +66,7 @@ public class Wp9cContent implements ElnContent {
         registerSixNodeMisc(117); // modbus rtu, bus i/o module, tutorial sign
         registerLogicalGates(118);
         registerAnalogChips(124);
+        registerMpptControllers(125);   // solar MPPT charge controllers (Baughn 2026-11-25, board #79)
         registerWirelessAnalyser(14); // shared item
         registerMiscItemDataLogsPrint(120); // shared item
     }
@@ -140,6 +141,18 @@ public class Wp9cContent implements ElnContent {
 
 
     
+    }
+
+    /**
+     * MPPT charge controllers (Baughn 2026-11-25, board #79: a dedicated, wall-mounted, buck-only block, tiers as
+     * proposed): perturb and observe, 2 kW, 94 %; incremental conductance, 8 kW, 97 %. Input ratings are open-circuit
+     * volts: two 2x3 panels in series (249 V at -20 C, Voc ~125 V a panel there) and five (623 V), with margin.
+     */
+    public static void registerMpptControllers(int id) {
+        sixNodeItem.addDescriptor(0 + (id << 6), new mods.eln.sixnode.mppt.MpptDescriptor(TR_NAME(Type.NONE, "MPPT Charge Controller"),
+            obj.getObj("mpptcontroller"), 350, 2000, 0.94, false));
+        sixNodeItem.addDescriptor(1 + (id << 6), new mods.eln.sixnode.mppt.MpptDescriptor(TR_NAME(Type.NONE, "Advanced MPPT Charge Controller"),
+            obj.getObj("mpptcontroller"), 700, 8000, 0.97, true));
     }
 
     public static void registerElectricalManagerEnergyMeter(int id) {

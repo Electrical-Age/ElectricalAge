@@ -1,4 +1,4 @@
-// 26.3	2026-11-25T19:30:13.776216789	eln-global/EA models
+// 26.3	2026-11-25T21:17:08.220757134	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -118,6 +118,7 @@ b33b278bbc3903861507ad0512c9ffa4ba8866b8 assets/eln/blockstates/tungsten_ore.jso
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/wire_drawing_machine_230v.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/wire_drawing_machine_48v.json
 61d873cbec0fa1e9200f30544172a2cabc47c78e assets/eln/items/10a_diode.json
+492dce96db42828a4f47ad357e9e7fafce653230 assets/eln/items/1kv_cable.json
 8f003523235d6a8229af3ba746e8b6b497350f5b assets/eln/items/200v_active_thermal_dissipator.json
 e612b1447501d6e9aa26cc34a7dc3a01a39066c7 assets/eln/items/200v_battery_charger.json
 f598b63ab1b2d0ac62718d46fce94888035f2675 assets/eln/items/200v_compressor.json
@@ -177,6 +178,7 @@ c4e228fc0a55e7e20a2be28757a7a9b278f15af3 assets/eln/items/advanced_electrical_mo
 166cdd600a982afbb966c7e731c062dce3219ddf assets/eln/items/advanced_energy_meter.json
 43f85cbff54aadfe3b13a6f8c87a1a07e3cbcb81 assets/eln/items/advanced_machine_block.json
 1970fed76864f4ffcbcb3b0f38f86f88179cc098 assets/eln/items/advanced_magnet.json
+8b42931c8c4b4a34a056b9fd2e3c30530647d770 assets/eln/items/advanced_mppt_charge_controller.json
 6cf0ee2b5787377c6a2e8d2c6a6f079901ac7f47 assets/eln/items/alloy_dust.json
 2767f479c038a4fd107c9f09d7cb742e703d971a assets/eln/items/alloy_ingot.json
 0e2607a8bf3a312a1ca275a8f17682d8028bbc3d assets/eln/items/alloy_plate.json
@@ -202,6 +204,7 @@ ee011fe699481f3e2f4f72b8ef1dce937f3dff6d assets/eln/items/black_brush.json
 8da720730443b154c9f0150d9a82a6abf862012b assets/eln/items/boot_rom_chip.json
 4e6ec02f2a448b5dc61acd4cb001db2bf89175ab assets/eln/items/brown_brush.json
 1590ef9c11774d7b50f1bdd1b9e3c57b16951db8 assets/eln/items/bus_io_module.json
+428fd7f68626aad51e46092583e772a65491f935 assets/eln/items/cable_kit_1kv.json
 1786006f63a9cf200ed3022efa13a5e450652fa1 assets/eln/items/cable_kit_bus.json
 8b28d204138e8b3a19be00bec948932a9e853819 assets/eln/items/cable_kit_hv.json
 5e9c5666a93b581fa46fc9a7d72f0018e5a23bae assets/eln/items/cable_kit_lv.json
@@ -356,6 +359,7 @@ c3aa1ef0d33634a7a91e591e2dd6c88a44d3c883 assets/eln/items/medium_voltage_switch.
 bbb446e6ac07c8300f67392f59722958bf5eb17e assets/eln/items/modbus_rtu.json
 8ab96c27785b00a83e110934295e7e7d3db01dab assets/eln/items/modern_data_logger.json
 920b57df350e64c59a1e8ef80334d9759a80395a assets/eln/items/monster_filter.json
+9ec3162527012dc973d90ad6b66cbfec2994dcdc assets/eln/items/mppt_charge_controller.json
 5f25bc2b1c10b44a0eb5e667c54dbf97c3c2cbcb assets/eln/items/multimeter.json
 10d80d181c61ba9bb744ff3172c96ea5fc8f6156 assets/eln/items/nand_chip.json
 4ce04ac62ded981f23a244172bfdbe521cbf5fc1 assets/eln/items/nanocrystalline_core_blank.json
@@ -541,6 +545,7 @@ a7eed2c81e04065f87305b8d7c30df425fc18349 assets/eln/models/block/deepslate_lead_
 ae1b63308ff5ddd85c8a6f4ba47625eca651d176 assets/eln/models/block/tungsten_ore.json
 aa8b88dcb41aeb313a0f3f281ecdfdd5a22b78cc assets/eln/models/item/10a_diode.json
 bd23e2fc9f0a19326493f87f6a9c69ee2ae90984 assets/eln/models/item/10a_diode_3d.json
+cee2f8726180729a5ee2a441eb7d9bd953a45803 assets/eln/models/item/1kv_cable.json
 7ffc968454aecac3f5206cf6f88e492424016c64 assets/eln/models/item/200v_active_thermal_dissipator.json
 3128adad58945c5e4ad5db534225e76d1ff3d21d assets/eln/models/item/200v_active_thermal_dissipator_3d.json
 5af2e42712791002866763e862f7d0ca0e922798 assets/eln/models/item/200v_battery_charger.json
@@ -629,6 +634,8 @@ af735f3de534b39a0ff0f69bec96cd3787b8de50 assets/eln/models/item/advanced_energy_
 2ad111fb5923e9a15744089a995240023e6558b3 assets/eln/models/item/advanced_energy_meter_3d.json
 e7302203eb2906a6f1805720b52f08e88f92495d assets/eln/models/item/advanced_machine_block.json
 58f16075d01ee9b836630181045bd78a5f9ee7bb assets/eln/models/item/advanced_magnet.json
+a607f8d3f5ae687cae9d56e6ef63888840748e9f assets/eln/models/item/advanced_mppt_charge_controller.json
+835c401d6fc496dad9c4e11e8fd5eb27bff9caeb assets/eln/models/item/advanced_mppt_charge_controller_3d.json
 5b9deed4c12ef976b6f71cfdfdcfd023c02804d5 assets/eln/models/item/alloy_dust.json
 f4c0ea441d39fa54a6fe791408e87931889a37cb assets/eln/models/item/alloy_ingot.json
 41c8d9c6ff804b8ca8397cfb3aed87e7a451bc5a assets/eln/models/item/alloy_plate.json
@@ -660,6 +667,7 @@ f6a7b3158fb7d2cd9519bbb3505b0ce2b8abdf82 assets/eln/models/item/boot_rom_chip.js
 3692a38ccb89b9e11066bb03b638e63ed63d39c3 assets/eln/models/item/brown_brush.json
 6a6bc5f4771d1508f439772f0bb5221a95b9f699 assets/eln/models/item/bus_io_module.json
 2455775bc80773a47711382cd52ea8514840bac1 assets/eln/models/item/bus_io_module_3d.json
+bff6d3fb740f97278e09ead16aade16441dd160b assets/eln/models/item/cable_kit_1kv.json
 00a907d2286048d055c501dd50e7f55581fbceb7 assets/eln/models/item/cable_kit_bus.json
 cac6a0113223ca972d0fb558559968f3bedfb59a assets/eln/models/item/cable_kit_hv.json
 0ebb4e07b328e5edfdb89eddd9f667839b2fe653 assets/eln/models/item/cable_kit_lv.json
@@ -873,6 +881,8 @@ f990c016453c78f1643c2dfc32729e63c1cc19fa assets/eln/models/item/medium_voltage_s
 622254bfdc7e5c660962bf406cf47791fe72cfbc assets/eln/models/item/modern_data_logger.json
 09edd44f5c01ff0450e57c7a10bedd55eda44fce assets/eln/models/item/modern_data_logger_3d.json
 a3fd926cee4d09c0778c737c9d9fda3bbabf566d assets/eln/models/item/monster_filter.json
+a1bddc50a15af0b0544e9d4fc0e925b41c0c3913 assets/eln/models/item/mppt_charge_controller.json
+1f4ad3960d8b06d484f2f136c960cd8b808b671c assets/eln/models/item/mppt_charge_controller_3d.json
 f500cdb7712b1e3a349d4f535227bf835549c032 assets/eln/models/item/multimeter.json
 a6e994e7a725f435fa8a13475f0b6189ff4c295e assets/eln/models/item/nand_chip.json
 1f9390714830412dfbea06ac8e42077a89d80765 assets/eln/models/item/nand_chip_3d.json

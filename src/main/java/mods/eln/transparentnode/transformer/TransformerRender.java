@@ -69,6 +69,7 @@ public class TransformerRender extends TransparentNodeElementRender {
             case 2 -> mods.eln.registry.ElnDeviceRegistry.meduimVoltageCableDescriptor;
             case 3 -> mods.eln.registry.ElnDeviceRegistry.highVoltageCableDescriptor;
             case 4 -> mods.eln.registry.ElnDeviceRegistry.veryHighVoltageCableDescriptor;
+            case mods.eln.node.voxel.CablePart.KV -> mods.eln.node.voxel.CablePart.TIERS[tier].descriptor();
             default -> null;
         };
         return d == null ? null : d.render;

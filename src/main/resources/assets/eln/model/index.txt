@@ -81,6 +81,7 @@ maceratorb/maceratorb.obj
 magnetizera/magnetizera.obj
 magnetizerb/magnetizerb.obj
 mediumvoltageswitch/mediumvoltageswitch.obj
+mpptcontroller/mpptcontroller.obj
 oilpump200v/oilpump200v.obj
 oilpump50v/oilpump50v.obj
 passivethermaldissipatora/passivethermaldissipatora.obj

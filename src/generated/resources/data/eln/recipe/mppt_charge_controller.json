@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "eln:copper_coil",
+    "F": "eln:average_ferromagnetic_core",
+    "I": "eln:iron_plate",
+    "p": "eln:electrical_probe_chip",
+    "s": "#c:circuits/basic"
+  },
+  "pattern": [
+    "IpI",
+    "CFC",
+    "IsI"
+  ],
+  "result": {
+    "id": "eln:mppt_charge_controller"
+  }
+}

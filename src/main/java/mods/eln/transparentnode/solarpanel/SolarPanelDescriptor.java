@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.solarpanel;
 
+import mods.eln.api.Meters;
+import mods.eln.sim.PvCurve;
 import mods.eln.gl.GL11;
 
 import mods.eln.cable.CableRenderDescriptor;
@@ -83,6 +85,26 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
 
     public boolean canRotate;
 
+    /** Panel efficiency: the share of absorbed sunlight that comes out as electricity at the rating. */
+    static final double EFFICIENCY = 0.18;
+    /** Panel over air (K) at full sun, delivering its rating (NOCT-like), and the thermal time constant (s). */
+    static final double RISE_AT_FULL_SUN = 25, THERMAL_TAU = 60;
+
+    /** The panel's diode curve: its open-circuit voltage at 10 C is Umax, its best power on a hot noon Pmax. */
+    public PvCurve newCurve() {
+        return new PvCurve(electricalUmax, electricalPmax);
+    }
+
+    /** Sunlight the panel absorbs at full light (W). */
+    public double absorbedAtFullSun() {
+        return electricalPmax / EFFICIENCY;
+    }
+
+    /** Still-air thermal resistance to the air (K/W): RISE_AT_FULL_SUN while delivering the rating. */
+    public double panelRp() {
+        return RISE_AT_FULL_SUN / (absorbedAtFullSun() - electricalPmax);
+    }
+
     public void applyTo(ElectricalLoad load) {
         load.setRs(electricalRs);
     }
@@ -134,8 +156,12 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Produces power from solar radiation."));
-        list.add("  " + tr("Max. voltage: %1$V", Utils.plotValue(electricalUmax)));
-        list.add("  " + tr("Max. power: %1$W", Utils.plotValue(electricalPmax)));
+        // the rating is its open-circuit voltage at 10 C and its best power on a hot noon (Baughn)
+        PvCurve c = newCurve();
+        double[] best = c.maxPowerPoint();   // (a new curve is at a hot noon, full sun)
+        list.add("  " + tr("Best: %1$ at %2$ (hot noon)", Meters.watts(best[1]), Meters.volts(best[0])));
+        list.add("  " + tr("Open circuit: %1$ (panel %2$), %3$ (panel %4$)", Meters.volts(c.at(1, 20).voc()), Meters.celsius(20),
+            Meters.volts(c.at(1, -20).voc()), Meters.celsius(-20)));
         if (canRotate) list.add(tr("Can be geared towards the sun."));
     }
 

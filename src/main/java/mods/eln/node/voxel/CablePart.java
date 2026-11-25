@@ -81,10 +81,14 @@ public final class CablePart extends VoxelPart {
         new Tier("Very High Voltage Cable", 4, 2),
         new Tier("Copper Thermal Cable", 4, 4, Tier.Kind.THERMAL),
         new Tier("Field Bus Cable", 3, 1, Tier.Kind.BUS),
+        new Tier("1kV Cable", 3, 1),
     };
 
     /** The field bus cable's tier. */
     public static final int BUS = 6;
+    /** The 1 kV power tier (Baughn 2026-11-25, for solar strings): appended, as tiers are stored by index in places;
+     *  in voltage order it sits between 400 V and 11 kV (CableSpec.POWER_TIERS). */
+    public static final int KV = 7;
 
     public static int tierOf(String name) {
         for (int i = 0; i < TIERS.length; i++) if (TIERS[i].name.equals(name)) return i;
@@ -223,7 +227,7 @@ public final class CablePart extends VoxelPart {
 
     public CablePart(int tier, CableSpec spec, int face, int[] points) {
         this.tier = tier;
-        this.spec = CableSpec.power(tier) ? (spec != null ? spec : CableSpec.preset(tier)) : null;
+        this.spec = CableSpec.power(tier) ? (spec != null ? spec.forTier(tier) : CableSpec.preset(tier)) : null;
         this.face = face;
         this.points = points;
     }

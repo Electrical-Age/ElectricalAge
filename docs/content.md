@@ -195,7 +195,7 @@ The wire-drawing machines (`transparentnode/wiredrawing`, `eln:transparent_node@
 `@5636` `wire_drawing_machine_230v`; Baughn 2026-11-06, Wires stage 4) draw copper (ingots or dust) and rubber into
 cable kits of any `CableSpec` and into Windings (`eln:winding`, `node/voxel/WindingItem`: turns, tier, mm2, col in
 custom data). The 48 V machine makes up to 6 mm² and 230 V insulation, the 230 V machine everything. Costs per block of
-wire (a turn is 1/8 block): copper 1/3 ingot x mm²/2.5, rubber 2/3 x insulation layers (1, 1.5, 2, 4) x
+wire (a turn is 1/8 block): copper 1/3 ingot x mm²/2.5, rubber 2/3 x insulation layers (48 V 1, 230 V 1.5, 400 V 2, 1 kV 3, 11 kV 4) x
 sqrt(mm²/2.5), energy 1 kJ x sqrt(mm²/2.5). Whole items go into buffers (saved `copper`, `rubber`) that keep the
 fractions; progress is `done` (blocks). A DC-DC converter slot takes cables (one a turn) or one Winding. Every converter
 must fit its core's window (turns x mm² over both sides, a cable counting its tier's preset cross-section: 150 cheap,

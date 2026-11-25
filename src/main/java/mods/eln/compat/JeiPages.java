@@ -163,14 +163,14 @@ public final class JeiPages {
         int ru = (int) Math.ceil(len * WireDrawingDescriptor.rubberPerBlock(tier, spec.mm2()) - 1e-9);
         ItemStack out = turns > 0 ? WindingItem.make(tier, spec, turns) : CableKitItem.kit(tier, spec, blocks * 16);
         return new Draw(new ItemStack(Items.COPPER_INGOT, Math.max(1, cu)), new ItemStack(Eln.itemsByName.get("Rubber"), Math.max(1, ru)), out,
-            len * WireDrawingDescriptor.energyPerBlock(spec.mm2()) / 1000, tier <= 2 && spec.mm2() <= 6);
+            len * WireDrawingDescriptor.energyPerBlock(spec.mm2()) / 1000, CableSpec.rank(tier) <= 1 && spec.mm2() <= 6);
     }
 
     /** Each machine's presets, a 48 -> 230 V converter's winding, an 11 kV one, bare wire. */
     public static List<Draw> draws() {
         if (drawers().isEmpty()) return List.of();
         List<Draw> l = new ArrayList<>();
-        for (int tier = 1; tier <= 4; tier++) l.add(draw(tier, CableSpec.preset(tier), 16, 0));
+        for (int tier : CableSpec.POWER_TIERS) l.add(draw(tier, CableSpec.preset(tier), 16, 0));   // (the 1 kV kit too: only the 230 V machine makes it)
         l.add(draw(1, new CableSpec(6, CableSpec.BROWN), 16, 0));
         l.add(draw(2, CableSpec.preset(2), 0, 58));    // a 48 -> 230 V converter's secondary on a cheap core
         l.add(draw(4, CableSpec.preset(4), 0, 688));   // 400 V -> 11 kV on an optimal core
@@ -251,7 +251,7 @@ public final class JeiPages {
             "ferrite_ingot", "cinnabar_ore", "cinnabar_dust", "mercury",
             // the old six-node power cables: nothing makes or takes them, cable is laid from kits (AdventurAgent, the
             // handbook play-through: "Low Voltage Cable" was a dead end in JEI)
-            "low_voltage_cable", "medium_voltage_cable", "high_voltage_cable", "very_high_voltage_cable"}) {
+            "low_voltage_cable", "medium_voltage_cable", "high_voltage_cable", "very_high_voltage_cable", "1kv_cable"}) {
             ItemStack f = eln(p);
             if (!f.isEmpty()) h.add(f.getItem());
         }

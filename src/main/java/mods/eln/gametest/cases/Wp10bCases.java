@@ -13,7 +13,6 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.PowerSource;
 import mods.eln.sim.mna.component.Resistor;
-import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sixnode.electricalsource.ElectricalSourceElement;
 import mods.eln.transparentnode.LargeRheostatDescriptor;
 import mods.eln.transparentnode.LargeRheostatElement;
@@ -399,9 +398,9 @@ public final class Wp10bCases {
 
 
     /**
-     * Small Solar Panel: the power source is set to Pmax * light, light = cos(panel angle - sun angle), halved by rain
-     * and by thunder, attenuated by blocks on the ray to the sun (SolarPannelSlowProcess.getSolarLight, refreshed every
-     * 0.1..0.2 s). Checked at measure time against the same function: P = Pmax * light (0 at night).
+     * Small Solar Panel: its diode curve follows light = cos(panel angle - sun angle), halved by rain and by thunder,
+     * attenuated by blocks on the ray to the sun (SolarPannelSlowProcess.getSolarLight, refreshed every 0.1..0.2 s);
+     * checked by SolarCases.checkCurve (1.12 checked P = Pmax * light of its constant-power source).
      */
     static final class SolarCase implements TestCase {
         SolarPanelElement panel;
@@ -419,13 +418,7 @@ public final class Wp10bCases {
         }
 
         public void measure(TestContext ctx) {
-            Object process = field(panel, "slowProcess");
-            double light = (double) Wp9cCases.call(process, "getSolarLight");
-            double pmax = field(field(panel, "descriptor"), "electricalPmax");
-            PowerSourceBipole src = field(panel, "powerSource");
-            // + 0.5% of Pmax: the light is sampled every 0.1..0.2 s, and at dawn/dusk it moves that much in between
-            within(ctx, f("wp10b solar panel power [W] (Pmax %.1f * light %.4f)", pmax, light), src.getP(), pmax * light,
-                0.01 * pmax * light + 0.005 * pmax);
+            SolarCases.checkCurve(ctx, panel, "wp10b solar panel");
         }
     }
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Cable kit icons (16x16): a coil of cable (grey insulation, two turns) with a coloured tag for the tier.
-Usage: cablekit.py RESOURCES_DIR -> assets/eln/textures/item/cable_kit_{signal,lv,mv,hv,vhv}.png"""
+Usage: cablekit.py RESOURCES_DIR -> assets/eln/textures/item/cable_kit_{signal,lv,mv,hv,vhv,thermal,1kv}.png"""
 import math, os, sys
 from PIL import Image
 
-TAGS = {"signal": (230, 230, 230), "lv": (200, 60, 50), "mv": (230, 190, 40), "hv": (60, 110, 210), "vhv": (130, 60, 170), "thermal": (205, 120, 60)}
-THICK = {"signal": 1, "lv": 1.4, "mv": 1.7, "hv": 2.1, "vhv": 2.4, "thermal": 2.4}
+TAGS = {"signal": (230, 230, 230), "lv": (200, 60, 50), "mv": (230, 190, 40), "hv": (60, 110, 210), "vhv": (130, 60, 170), "thermal": (205, 120, 60),
+        "1kv": ((178, 34, 30), (30, 28, 30))}   # (the 1 kV tier: its jacket's red and black twist, as the tag's stripes)
+THICK = {"signal": 1, "lv": 1.4, "mv": 1.7, "hv": 2.1, "vhv": 2.4, "thermal": 2.4, "1kv": 1.9}
 
 def icon(tag, thick):
     im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
@@ -24,7 +25,8 @@ def icon(tag, thick):
     # the tier's tag: a square on the right
     for y in range(9, 14):
         for x in range(11, 15):
-            px[x, y] = tag + (255,) if (x, y) not in ((11, 9), (14, 13)) else (40, 40, 40, 255)
+            c = tag if not isinstance(tag[0], tuple) else tag[(x + y) // 2 % 2]
+            px[x, y] = c + (255,) if (x, y) not in ((11, 9), (14, 13)) else (40, 40, 40, 255)
     return im
 
 if __name__ == "__main__":

@@ -87,7 +87,10 @@ and the FE exporter. Tests: `api/ElementHostTest`, `MachineApiCases`, `Wp11Cases
 - Components (`mna/component/`): `Resistor`, `ResistorSwitch`, `VoltageSource` (adds a `CurrentState`), `Capacitor`,
   `Inductor` (backward Euler), `Delay`, `PowerSource`, `Transformer` (ideal, one SubSystem), `Monopole` (abstract,
   one pin), `InterSystem` (a `Resistor` that may be split), `Line`, `DelayInterSystem2`, `InterSystemAbstraction`.
-  `mna/process/`: `PowerSourceBipole` (solar panel), `TransformerInterSystemProcess` (isolating transformers).
+  `mna/process/`: `PvSourceBipole` (solar panel: `sim/PvCurve`'s single-diode curve met with the Thevenin load line
+  each pre-step iteration, safeguarded Newton), `PowerSourceBipole` (constant power within Umax/Imax; the solar panel's
+  source until 2026-11-25), `BuckConverterProcess` (the MPPT controller: two ports coupled from both Thevenin
+  equivalents, a lossy buck with an output limit; its ratio set each step by `sim/MpptTracker`), `TransformerInterSystemProcess` (isolating transformers).
 - States (`mna/state/`): `VoltageState`, `CurrentState`, `VoltageStateLineReady` (`ElectricalLoad` extends it).
   Flags: `setCanBeSimplifiedByLine(true)` (cables, poles, downlinks, CableNet), `setAsMustBeFarFromInterSystem()`
   (capacitors/inductors: their SubSystem is seeded first), `setAsPrivate()` (never merged with public states).

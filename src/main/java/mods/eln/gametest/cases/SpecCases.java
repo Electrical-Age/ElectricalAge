@@ -21,6 +21,7 @@ public final class SpecCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new Rules());
         cases.add(new Extremes());
+        cases.add(new KiloVolt());
     }
 
     static final int LV = CablePart.tierOf("Low Voltage Cable"), VHV = CablePart.tierOf("Very High Voltage Cable");
@@ -173,6 +174,53 @@ public final class SpecCases {
                 c.check("specs: row " + row + " carries about 3 A", Math.abs(amps) > 2.5, String.format("%.3f A", amps));
                 c.check("specs: row " + row + " settles without ringing", worst < 0.01, String.format("%.4f%%", worst * 100));
             }
+        }
+    }
+
+    /**
+     * The 1 kV tier (Baughn 2026-11-25, for solar strings): appended as tier 7 but between 400 V and 11 kV in voltage
+     * order; a power cable (joins power pins and cables, a render for devices), 1 kV, trips at 1.3 kV; its kit made by
+     * hand and by the 230 V wire machine, not the 48 V one; it survives a save; drawn in its own red and black twist.
+     */
+    static final class KiloVolt implements TestCase {
+        public String name() {
+            return "cable specs: the 1 kV tier";
+        }
+
+        public void build(TestContext ctx) {
+        }
+
+        public void measure(TestContext ctx) {
+            int kv = CablePart.KV;
+            ctx.check("1 kV: tier 7, named, a power tier", kv == CablePart.TIERS.length - 1 && CablePart.tierOf("1kV Cable") == kv
+                && CableSpec.power(kv), "");
+            StringBuilder order = new StringBuilder();
+            for (int t : CableSpec.POWER_TIERS) order.append(CableSpec.voltsLabel(t)).append(' ');
+            ctx.check("1 kV: voltage order 48V 230V 400V 1kV 11kV", order.toString().equals("48V 230V 400V 1kV 11kV ")
+                && CableSpec.rank(kv) == 3 && CableSpec.stepTier(3, 1, 4) == kv && CableSpec.stepTier(kv, 1, 4) == 4, order.toString());
+            var d = CableSpec.preset(kv).descriptor(kv);
+            ctx.check("1 kV: its preset cable is 1 kV, trips at 1.3 kV, has a render", d.electricalNominalVoltage == 1000
+                && Math.abs(d.dielectricVoltage - 1300) < 1e-6 && d.render != null, d.electricalNominalVoltage + " V, " + d.dielectricVoltage + " V");
+            ctx.check("1 kV: a power cable's mask (not the thermal wire's)", CablePart.TIERS[kv].mask() == CablePart.TIERS[1].mask(), "");
+            ctx.check("1 kV: label", CableSpec.preset(kv).label(kv).equals("1.5 mm², 1kV"), CableSpec.preset(kv).label(kv));
+            var machines = new ArrayList<mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor>();
+            for (var e : mods.eln.Eln.transparentNodeItem.all().values())
+                if (e instanceof mods.eln.transparentnode.wiredrawing.WireDrawingDescriptor w) machines.add(w);
+            boolean big = false, small = false;
+            for (var w : machines) {
+                if (w.maxTier == 4) big = w.allows(5, kv);
+                else small = w.allows(5, kv);
+            }
+            ctx.check("1 kV: the 230 V wire machine makes it, the 48 V one doesn't", big && !small && machines.size() == 2, machines.size() + " machines");
+            CablePart a = new CablePart(kv, CableSpec.preset(kv), 0, new int[]{0, 0, 8, 16, 0, 8});
+            CompoundTag t = new CompoundTag();
+            a.write(t);
+            CablePart b = Rules.read(t);
+            ctx.check("1 kV: survives a save", b != null && b.tier == kv && b.sameCable(a), String.valueOf(t));
+            ctx.check("1 kV: its colour is the twist's, whatever was asked (kits differing by an unseen dye would not stack)",
+                new CablePart(kv, new CableSpec(5, CableSpec.BLACK), 0, new int[]{0, 0, 8, 16, 0, 8}).spec.colour() == CableSpec.preset(kv).colour()
+                    && CableKitItem.specOf(CableKitItem.kit(kv, new CableSpec(3, CableSpec.BLACK), 16)).equals(CableSpec.preset(kv)), "");
+            ctx.check("1 kV: its own twist sprite", mods.eln.node.voxel.VoxelGeometry.cableSprite(kv).getPath().equals("block/cable/cable1kv"), "");
         }
     }
 }

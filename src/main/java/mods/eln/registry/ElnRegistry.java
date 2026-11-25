@@ -133,7 +133,8 @@ public final class ElnRegistry {
         ITEMS.registerItem("cable_kit_hv", p -> new mods.eln.node.voxel.CableKitItem(3, p)),
         ITEMS.registerItem("cable_kit_vhv", p -> new mods.eln.node.voxel.CableKitItem(4, p)),
         ITEMS.registerItem("cable_kit_thermal", p -> new mods.eln.node.voxel.CableKitItem(5, p)),
-        ITEMS.registerItem("cable_kit_bus", p -> new mods.eln.node.voxel.CableKitItem(6, p)));
+        ITEMS.registerItem("cable_kit_bus", p -> new mods.eln.node.voxel.CableKitItem(6, p)),
+        ITEMS.registerItem("cable_kit_1kv", p -> new mods.eln.node.voxel.CableKitItem(mods.eln.node.voxel.CablePart.KV, p)));   // (the 1 kV tier, index 7: list order is the tier)
     /** A transformer winding (Wires stage 4, Baughn 2026-11-06): N turns of a wire, made by a wire-drawing machine. */
     public static final DeferredItem<mods.eln.node.voxel.WindingItem> WINDING = ITEMS.registerItem("winding", mods.eln.node.voxel.WindingItem::new);
     /** Overhead cable (Baughn 2026-11-09): bare copper for utility pole spans, no rubber, from a wire-drawing machine. */

@@ -248,6 +248,20 @@ public final class ElnDeviceRegistry {
             sixNodeItem.addWithoutRegistry(subId + (id << 6), desc); // retired from the tab: recipes take Copper Cable, hands make kits (Baughn 2026-11-07)
 
         }
+        {
+            // the 1 kV tier (Baughn 2026-11-25, for solar strings): never a six-node cable, only the voxel tier's
+            // descriptor (CablePart.TIERS[KV] finds its mask and render by this name)
+            subId = 20;
+            name = TR_NAME(Type.NONE, "1kV Cable");
+            desc = new ElectricalCableDescriptor(name, new CableRenderDescriptor("eln", "sprites/cable.png", 2.95f, 0.95f),
+                "miaou2", false);
+            desc.setPhysicalConstantLikeNormalCable(KVU, KVP(), 0.025 * 5 / 4 / 20 / 2,
+                KVU * 1.3, KVP() * 1.2,
+                40,
+                cableWarmLimit, -100,
+                cableHeatingTime, cableThermalConductionTao);
+            sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
+        }
     }
 
     public static void registerGround(int id) {

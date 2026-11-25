@@ -1,0 +1,44 @@
+{
+ "column": [
+  {
+   "text": "title",
+   "sample": "Advanced MPPT Charge Controller"
+  },
+  {
+   "text": "panels",
+   "sample": "Panels: 7.95 kW at 598 V, 13.3 A"
+  },
+  {
+   "text": "battery",
+   "sample": "Battery: 7.71 kW at 276 V, 27.9 A"
+  },
+  {
+   "text": "state",
+   "sample": "State: At charge voltage"
+  },
+  {
+   "text": "charge",
+   "sample": "Charge voltage: 57.6 V"
+  },
+  {
+   "field": "chargeField",
+   "sample": "    57.6"
+  },
+  {
+   "slider": "charge",
+   "sample": [
+    "    "
+   ],
+   "fill": true
+  },
+  {
+   "text": "amps",
+   "sample": "Charge current: up to 400 A"
+  },
+  {
+   "field": "ampsField",
+   "sample": "    400.0"
+  }
+ ],
+ "gap": 4
+}

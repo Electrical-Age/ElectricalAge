@@ -107,7 +107,7 @@ public class WireDrawingElement extends TransparentNodeElement {
     }
 
     public CableSpec spec() {
-        return new CableSpec(mm2, colour);
+        return new CableSpec(mm2, colour).forTier(tier);
     }
 
     /** Copper and rubber for the whole item. */
@@ -149,7 +149,7 @@ public class WireDrawingElement extends TransparentNodeElement {
         mode = mode == WINDING || mode == BARE || mode == OVERHEAD || mode == POLE && makesPoleTransformers() ? mode : KIT;
         mm2 = Math.max(0, Math.min(descriptor.maxMm2, mm2));
         // (a pole transformer's tier is its low side's: 48, 230 or 400 V)
-        tier = Math.max(1, Math.min(mode == POLE ? 3 : descriptor.maxTier, tier));
+        tier = CableSpec.clampTier(tier, mode == POLE ? 3 : descriptor.maxTier);   // (voltage order: 1 kV is tier 7)
         colour = Math.max(0, Math.min(15, colour));
         amount = Math.max(1, Math.min(WireDrawingDescriptor.maxAmount(mode), amount));
         if (mode != this.mode || mm2 != this.mm2 || tier != this.tier || colour != this.colour || amount != this.amount) done = 0;
@@ -343,7 +343,7 @@ public class WireDrawingElement extends TransparentNodeElement {
         if (mode == BARE) return I18N.tr("Bare wire: %1$ Copper Cable", amount);
         if (mode == OVERHEAD) return I18N.tr("Overhead cable: %1$ blocks of %2$ mm²", amount, CableSpec.mm2Number(CableSpec.MM2[mm2]));
         if (mode == POLE) return I18N.tr("Pole transformer: line to %1$, %2$ mm²", CableSpec.voltsLabel(tier), CableSpec.mm2Number(CableSpec.MM2[mm2]));
-        String what = new CableSpec(mm2, colour).label(tier) + ", " + net.minecraft.world.item.DyeColor.byId(colour).getName().replace('_', ' ');
+        String what = new CableSpec(mm2, colour).label(tier) + ", " + CableSpec.jacketName(tier, colour);
         return mode == KIT ? I18N.tr("Cable kit: %1$ blocks of %2$", amount, what) : I18N.tr("Winding: %1$ turns of %2$", amount, what);
     }
 

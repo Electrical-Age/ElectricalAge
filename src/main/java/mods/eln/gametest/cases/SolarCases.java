@@ -7,7 +7,9 @@ import mods.eln.misc.Coordonate;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.registry.ElnRegistry;
-import mods.eln.sim.mna.process.PowerSourceBipole;
+import mods.eln.sim.PvCurve;
+import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.process.PvSourceBipole;
 import mods.eln.transparentnode.solarpanel.SolarPanelElement;
 import mods.eln.transparentnode.solarpanel.SolarPannelSlowProcess;
 import net.minecraft.core.BlockPos;
@@ -28,11 +30,27 @@ public final class SolarCases {
     }
 
     public static List<TestCase> cases() {
-        return List.of(new SmallSolarCase(), new SolarGhostCase());
+        return List.of(new SmallSolarCase(), new LoadedSolarCase(), new SolarGhostCase());
     }
 
     /**
-     * Small Solar Panel: P = Pmax * light, light from the panel's own sun/sky/obstruction function (1.12 SolarCase).
+     * The panel's diode curve follows its light and temperature (Baughn's option B+, board #79): the photocurrent is
+     * the curve's short-circuit current at the panel's temperature x the light the panel's own sun/sky/obstruction
+     * function gives (1.12 SolarCase's light). Also used by Wp10bCases.SolarCase.
+     */
+    static void checkCurve(TestContext ctx, SolarPanelElement panel, String label) {
+        SolarPannelSlowProcess process = TestContext.field(panel, "slowProcess");
+        PvSourceBipole pv = TestContext.field(panel, "pv");
+        PvCurve c = pv.curve();
+        double light = process.getSolarLight();
+        double iph = c.iscRef * light * (1 + PvCurve.ISC_PER_K * (panel.panelCelsius() - PvCurve.REF_C));
+        // + 1% of Isc: the light is sampled every 0.1..0.2 s, and at dawn/dusk it moves that much in between
+        ctx.check(String.format("%s: photocurrent = Isc(T) x light %.4f", label, light),
+            Math.abs(c.iph() - iph) <= 0.01 * c.iscRef, String.format("Iph %.4f A, expected %.4f A (panel %.1f C)", c.iph(), iph, panel.panelCelsius()));
+    }
+
+    /**
+     * Small Solar Panel, open: the curve follows the light, the terminals sit at the open-circuit voltage, no power.
      * Plus an independent sanity check: at noon in clear weather the light is high (the 26.x sun angle source).
      */
     static final class SmallSolarCase implements TestCase {
@@ -56,11 +74,10 @@ public final class SolarCases {
         public void measure(TestContext ctx) {
             SolarPannelSlowProcess process = TestContext.field(panel, "slowProcess");
             double light = process.getSolarLight();
-            double pmax = TestContext.<Double>field(TestContext.field(panel, "descriptor"), "electricalPmax");
-            PowerSourceBipole src = TestContext.field(panel, "powerSource");
-            double tol = 0.01 * pmax * light + 0.005 * pmax;
-            ctx.check(String.format("solar power [W] (Pmax %.1f * light %.4f)", pmax, light),
-                Math.abs(src.getP() - pmax * light) <= tol, String.format("measured %.4f, expected %.4f +- %.3f", src.getP(), pmax * light, tol));
+            checkCurve(ctx, panel, "solar small");
+            PvSourceBipole pv = TestContext.field(panel, "pv");
+            ctx.check("solar small, open: at Voc, no current", Math.abs(pv.getU() - pv.curve().voc()) <= 0.01 * pv.curve().voc()
+                && Math.abs(pv.getI()) < 1e-6, String.format("U %.3f V (Voc %.3f), I %.2e A", pv.getU(), pv.curve().voc(), pv.getI()));
             ctx.check("solar: noon, clear sky: light > 0.5 (sun angle source on 26.x)", light > 0.5, String.format("light %.4f", light));
             // local weather (Watershed's showers, by IMC): asked at the panel; rain halves the light, thunder halves it
             // again; where the source has none (null), the world's weather (clear here)
@@ -80,6 +97,53 @@ public final class SolarCases {
             } finally {
                 mods.eln.misc.Utils.weatherSource = saved;
             }
+        }
+    }
+
+    /**
+     * Small Solar Panel on a resistor of its hot-noon Vmp^2/Pmp: the panel sits where its curve meets the load line, and
+     * the sunlight warms it above the air (25 K at full sun in a minute; a little after 2 s).
+     */
+    static final class LoadedSolarCase implements TestCase {
+        SolarPanelElement panel;
+        Resistor load;
+        double r;
+
+        public String id() {
+            return "solar_small_loaded";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public void build(TestContext ctx) {
+            var server = ctx.level().getServer();
+            server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), "time set noon");
+            server.setWeatherParameters(100000, 0, false, false);
+            panel = (SolarPanelElement) ctx.placeTransparent(transparent("Small Solar Panel"), ctx.at(1, 1, 1));
+            PvSourceBipole pv = TestContext.field(panel, "pv");
+            double[] best = new mods.eln.sim.PvCurve(pv.curve().ratedU, pv.curve().ratedP).maxPowerPoint();   // (at a hot noon)
+            r = best[0] * best[0] / best[1];
+            load = new Resistor(TestContext.field(panel, "positiveLoad"), TestContext.field(panel, "negativeLoad")).setR(r);
+            Eln.simulator.addElectricalComponent(load);
+        }
+
+        public void measure(TestContext ctx) {
+            PvSourceBipole pv = TestContext.field(panel, "pv");
+            PvCurve c = pv.curve();
+            checkCurve(ctx, panel, "solar small loaded");
+            double lo = 0, hi = c.voc();   // where the curve meets U/R
+            double rt = r;
+            for (int k = 0; k < 100; k++) { double m = (lo + hi) / 2; if (m / rt > c.current(m)) hi = m; else lo = m; }
+            double u = (lo + hi) / 2;
+            ctx.check("solar small loaded: on the curve", Math.abs(pv.getU() - u) <= 0.01 * u + 0.01,
+                String.format("U %.3f V, expected %.3f V (R %.2f ohm)", pv.getU(), u, r));
+            ctx.check("solar small loaded: delivers", load.getP() > 0.5 * c.ratedP * Math.min(1, c.iph() / c.iscRef),
+                String.format("load %.2f W of a %.1f W panel", load.getP(), c.ratedP));
+            ctx.check("solar small loaded: the sun warms the panel", panel.panelCelsius() > 20.2 && panel.panelCelsius() < 30,
+                String.format("%.2f C", panel.panelCelsius()));
+            Eln.simulator.removeElectricalComponent(load);
         }
     }
 

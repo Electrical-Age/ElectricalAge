@@ -7195,5 +7195,53 @@
   "node_kind": "block",
   "model_texture_notes": "",
   "tier_cue": null
+ },
+ {
+  "item_id": "advanced_mppt_charge_controller",
+  "display_name": "Advanced MPPT Charge Controller",
+  "family": "mppt",
+  "placeable": true,
+  "node_kind": "six_node",
+  "tier": null,
+  "vanilla_size": 16,
+  "schematic_scope": true,
+  "tier_cue": null,
+  "model": "mpptcontroller/mpptcontroller.obj",
+  "parts": [
+   "main",
+   "terminals",
+   "lcd"
+  ],
+  "model_texture_notes": "Code-CAD model (mods.eln.cad.models.MpptController); both tiers share it.",
+  "appearance": "A blue wall unit, taller than wide, black rubber bumpers on its corners, a dark finned heat sink across the bottom, an orange stripe, a backlit blue display; brass terminals on all four edges.",
+  "function": "Solar MPPT charge controller: buck converter holding panels at their maximum power point and charging a battery at a set voltage.",
+  "current_texture": null,
+  "shares_texture_with": [],
+  "notes": "Advanced tier: quality level 2 (gold trim).",
+  "redraw": true
+ },
+ {
+  "item_id": "mppt_charge_controller",
+  "display_name": "MPPT Charge Controller",
+  "family": "mppt",
+  "placeable": true,
+  "node_kind": "six_node",
+  "tier": null,
+  "vanilla_size": 16,
+  "schematic_scope": true,
+  "tier_cue": null,
+  "model": "mpptcontroller/mpptcontroller.obj",
+  "parts": [
+   "main",
+   "terminals",
+   "lcd"
+  ],
+  "model_texture_notes": "Code-CAD model (mods.eln.cad.models.MpptController); both tiers share it.",
+  "appearance": "A blue wall unit, taller than wide, black rubber bumpers on its corners, a dark finned heat sink across the bottom, an orange stripe, a backlit blue display; brass terminals on all four edges.",
+  "function": "Solar MPPT charge controller: buck converter holding panels at their maximum power point and charging a battery at a set voltage.",
+  "current_texture": null,
+  "shares_texture_with": [],
+  "notes": "Plain tier.",
+  "redraw": true
  }
 ]

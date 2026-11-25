@@ -144,6 +144,8 @@ public class Eln {
     public static final double gateOutputCurrent = 0.100;
     public static final double SVU = 5, SVII = gateOutputCurrent / SVU, SVUinv = 1.0 / SVU;
     public static final double LVU = 48, MVU = 230, HVU = 400, VVU = 11000;
+    /** The 1 kV cable tier (Baughn 2026-11-25, for solar strings: real string cable is rated 1 kV). */
+    public static final double KVU = 1000;
     public static final double SVP = gateOutputCurrent * SVU;
     /** config balancing.cablePowerFactor (1.12 default 1.0; config arrives with the ModConfigSpec) */
     public static double cablePowerFactor = 1.0;
@@ -159,6 +161,12 @@ public class Eln {
 
     public static double HVP() {
         return 5000 * cablePowerFactor;
+    }
+
+    /** The 1 kV tier's nominal power (as the Advanced MPPT Charge Controller's rating; a voxel cable's comes from its
+     *  spec: volts x its cross-section's amps). */
+    public static double KVP() {
+        return 8000 * cablePowerFactor;
     }
 
     public static double VVP() {

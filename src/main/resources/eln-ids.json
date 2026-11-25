@@ -965,6 +965,12 @@
   "kind": "six_node",
   "name": "very_high_voltage_cable"
  },
+ "eln:six_node@2068": {
+  "descriptor": "ElectricalCableDescriptor",
+  "display": "1kV Cable",
+  "kind": "six_node",
+  "name": "1kv_cable"
+ },
  "eln:six_node@3072": {
   "descriptor": "ThermalCableDescriptor",
   "display": "Removed_from_mod_Copper_Thermal_Cable.name",
@@ -1624,6 +1630,18 @@
   "display": "Lowpass filter",
   "kind": "six_node",
   "name": "lowpass_filter"
+ },
+ "eln:six_node@8000": {
+  "descriptor": "MpptDescriptor",
+  "display": "MPPT Charge Controller",
+  "kind": "six_node",
+  "name": "mppt_charge_controller"
+ },
+ "eln:six_node@8001": {
+  "descriptor": "MpptDescriptor",
+  "display": "Advanced MPPT Charge Controller",
+  "kind": "six_node",
+  "name": "advanced_mppt_charge_controller"
  },
  "eln:transparent_node@1024": {
   "descriptor": "BatteryDescriptor",

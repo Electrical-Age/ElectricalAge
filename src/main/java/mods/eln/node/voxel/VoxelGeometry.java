@@ -47,6 +47,8 @@ public final class VoxelGeometry {
     /** The cable texture of a tier (the six-node cable's, copied onto the block atlas: textures/block/cable/). */
     public static Identifier cableSprite(int tier) {
         if (CablePart.TIERS[tier].thermal()) return Identifier.fromNamespaceAndPath("eln", "block/cable/thermal");
+        // the 1 kV tier: a red and black twist, in its own colours (Baughn 2026-11-25)
+        if (CableSpec.twisted(tier)) return Identifier.fromNamespaceAndPath("eln", "block/cable/cable1kv");
         return Identifier.fromNamespaceAndPath("eln", CablePart.TIERS[tier].height() > 1 && CablePart.TIERS[tier].name().startsWith("Very")
             ? "block/cable/cablevhv" : "block/cable/cable");
     }
@@ -133,7 +135,7 @@ public final class VoxelGeometry {
     /**
      * A splice round cable b at point e of its centre line: a slim band half a voxel proud of the cable, 3 voxels long,
      * in the cable's own colour (Baughn 2026-11-12: the brass sleeves, a voxel over the cable and overlapping where
-     * branches met, looked ugly). One per point.
+     * branches met, looked ugly); on the 1 kV cable's twist, brass (its own pattern hid it). One per point.
      */
     static void sleeve(Model m, CablePart b, int[] e) {
         int n = CablePart.normalAxis(b.face);
@@ -167,7 +169,14 @@ public final class VoxelGeometry {
             hi[n] = bx[n + 3] - 0.05;
         }
         int argb = b.burnt != null ? 0xFFFFFFFF : b.tierInfo().bus() ? rgb(0.62f, 0.38f, 0.80f) : insulation(b);
-        boxD(m, lo, hi, b.burnt != null ? BURNT : cableSprite(b.tier)).named("cable splice").argb(argb);
+        Identifier sprite = b.burnt != null ? BURNT : cableSprite(b.tier);
+        if (b.burnt == null && CableSpec.twisted(b.tier)) {
+            // on a twisted jacket a sleeve of its own pattern hardly shows: a brass band, so a joint is told from a cable
+            // merely lying past at a glance (Baughn: a test of the look for cables lying on each other)
+            sprite = cableSprite(1);
+            argb = rgb(0.86f, 0.66f, 0.26f);
+        }
+        boxD(m, lo, hi, sprite).named("cable splice").argb(argb);
     }
 
     static void draw(Model m, VoxelPart part, List<VoxelPart> parts, float[] lugs, boolean[] adapters, List<int[]> cableBoxes) {
@@ -686,8 +695,10 @@ public final class VoxelGeometry {
         return axis == 0 ? new int[]{1, 2} : axis == 1 ? new int[]{0, 2} : new int[]{0, 1};
     }
 
-    /** A cable's insulation colour: its spec's dye (black stays the 1.12 dark grey), else that dark grey. */
+    /** A cable's insulation colour: its spec's dye (black stays the 1.12 dark grey), else that dark grey; white (no tint)
+     *  for a twisted jacket. */
     static int insulation(CablePart c) {
+        if (CableSpec.twisted(c.tier)) return 0xFFFFFFFF;   // (its own colours: the twist sprite)
         if (c.spec == null || c.spec.colour() == CableSpec.BLACK) return rgb(0.22f, 0.22f, 0.24f);
         return 0xFF000000 | net.minecraft.world.item.DyeColor.byId(c.spec.colour()).getTextureDiffuseColor();
     }

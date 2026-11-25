@@ -10,7 +10,7 @@ unless a path says otherwise. Fluid physics and the MNA itself: see simulation.m
 |---|---|---|
 | `VoxelNode` | server | `extends SixNode implements FluidDevice`; uuid `"v"` (registered in `Eln.java` via `NodeManager.registerUuid`). Holds `parts`, a `used` voxel BitSet, `legacy` (six-node NBT for revert), `host` (imitated BlockState), `carved` |
 | `VoxelPart` | both | Base of the parts; `read`/`deserialize` dispatch on `kind` |
-| `CablePart` (`"cable"`) | both | Polyline on one face (`face` 0..5, 3D value) or a knuckle (`face == -1`, a point on an edge); `TIERS[]` maps tiers to the six-node cable descriptors by name (Signal, LV, MV, HV, VHV, Copper Thermal) |
+| `CablePart` (`"cable"`) | both | Polyline on one face (`face` 0..5, 3D value) or a knuckle (`face == -1`, a point on an edge); `TIERS[]` maps tiers to the six-node cable descriptors by name (Signal, LV, MV, HV, VHV, Copper Thermal, Field Bus, then 1 kV at index 7, appended: tiers are stored by index in kits, windings and packets; compare power tiers by `CableSpec.rank`, voltage order `CableSpec.POWER_TIERS`) |
 | `PipePart` / `ValvePart` / `SafetyValvePart` / `PipeSensorPart` / `AdapterPart` | both | Pipes and fittings (`PipeSensorPart`: a signal output joined to the block's signal cables, as a control valve's input; no longer made since 2026-11-02, loaded and working where fitted); `AdapterPart.tanks` is the fluid capability (capabilities.md) |
 | `CableNet` | server | Groups a node's cable pieces into `Conductor`s and builds their loads |
 | `CableRouter`, `PipeRouter` | server | A* routers, pure Java (world behind a `Space` interface) |

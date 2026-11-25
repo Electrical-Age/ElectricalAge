@@ -17,23 +17,29 @@ public class SolarPannelSlowProcess implements IProcess {
 
     double timeCounter = 0;
     final double timeCounterRefreshMax = 0.2;
+    /** Light at the last refresh (0..1), for the heat balance between refreshes. */
+    double light = 0;
 
+    /**
+     * Every 0.1-0.2 s: the light, and the panel's curve at that light and the panel's temperature. Every tick: the
+     * panel's heat balance (sunlight absorbed, minus what the panel delivers, cooled by the air; wind and rain cool
+     * it faster). Baughn's option B+ (board #79).
+     */
     @Override
     public void process(double time) {
         timeCounter -= time;
+        SolarPanelElement p = solarPannel;
         if (timeCounter < 0) {
-            //Utils.println("Solar Light : " + getSolarLight());
-            /*if(solarPannel.descriptor.basicModel == false)
-			{
-				solarPannel.currentSource.setI(solarPannel.descriptor.solarIfS.getValue(getSolarLight()));
-			}
-			else*/
-            {
-                solarPannel.powerSource.setP(solarPannel.descriptor.electricalPmax * getSolarLight());
-            }
+            light = getSolarLight();
+            p.pv.curve().at(light, p.panelCelsius());
+            p.coolPanel(light);
             timeCounter += Math.random() * timeCounterRefreshMax / 2 + timeCounterRefreshMax / 2;
         }
-
+        // what it delivers leaves; what it takes in when driven backwards (through its bypass, by a reversed battery or a
+        // string) and its terminals' I^2 R stay as heat
+        double i = p.pv.getI();
+        double absorbed = light * p.descriptor.absorbedAtFullSun() - p.pv.getP() + i * i * 2 * p.descriptor.electricalRs;
+        p.panelHeat.moveEnergyTo(absorbed * time);
     }
 
     public double getSolarLight() {

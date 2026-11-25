@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.solarpanel;
 
 import mods.eln.Eln;
+import mods.eln.api.Meters;
 import mods.eln.i18n.I18N;
 import mods.eln.item.SolarTrackerDescriptor;
 import mods.eln.misc.Direction;
@@ -14,12 +15,14 @@ import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
-import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
-import mods.eln.sim.mna.process.PowerSourceBipole;
+import mods.eln.sim.mna.process.PvSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
+import mods.eln.sim.process.destruct.Failure;
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.Container;
@@ -27,7 +30,7 @@ import net.minecraft.nbt.CompoundTag;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SolarPanelElement extends TransparentNodeElement {
@@ -41,9 +44,10 @@ public class SolarPanelElement extends TransparentNodeElement {
     VoltageSource positiveSrc = new VoltageSource("posSrc", positiveLoad, null);
     VoltageSource negativeSrc = new VoltageSource("negSrc", negativeLoad, null);
 
-    //ElectricalCurrentSource currentSource;
-    DiodeProcess diode;
-    PowerSourceBipole powerSource;
+    /** The panel's diode curve driving its two terminals (Baughn's option B+, board #79). */
+    final PvSourceBipole pv;
+    /** The panel's own temperature: sunlight heats it, the power taken out and the air cool it. */
+    final NbtThermalLoad panelHeat = new NbtThermalLoad("panel");
 
     SolarPannelSlowProcess slowProcess = new SolarPannelSlowProcess(this);
 
@@ -57,19 +61,13 @@ public class SolarPanelElement extends TransparentNodeElement {
 
         grounded = false;
 
-		/*if(this.descriptor.basicModel == false)
-		{
-			currentSource = new ElectricalCurrentSource(positiveLoad,negativeLoad);
-			diode = new DiodeProcess(positiveLoad, negativeLoad);
-			electricalProcessList.add(currentSource);
-			electricalProcessList.add(diode);
-		}
-		else*/
-        {
-            powerSource = new PowerSourceBipole(positiveLoad, negativeLoad, positiveSrc, negativeSrc);
-
-
-        }
+        pv = new PvSourceBipole(positiveLoad, negativeLoad, positiveSrc, negativeSrc, this.descriptor.newCurve());
+        double rp = this.descriptor.panelRp();
+        panelHeat.set(1e9, rp, SolarPanelDescriptor.THERMAL_TAU / rp);
+        panelHeat.setAsSlow();
+        thermalLoadList.add(panelHeat);
+        // driven backwards hard (a reversed battery through its bypass) it overheats and burns: 150 C
+        slowProcessList.add(new ThermalLoadWatchDog().set(panelHeat).setTMax(130).set(new Failure(this).electronics()));
 
         electricalLoadList.add(positiveLoad);
         electricalLoadList.add(negativeLoad);
@@ -83,14 +81,14 @@ public class SolarPanelElement extends TransparentNodeElement {
 
     @Override
     public void connectJob() {
-        Eln.simulator.mna.addProcess(powerSource);
+        Eln.simulator.mna.addProcess(pv);
         super.connectJob();
     }
 
     @Override
     public void disconnectJob() {
         super.disconnectJob();
-        Eln.simulator.mna.removeProcess(powerSource);
+        Eln.simulator.mna.removeProcess(pv);
     }
 
     @Override
@@ -131,14 +129,27 @@ public class SolarPanelElement extends TransparentNodeElement {
 
     @Override
     public String thermoMeterString(Direction side) {
-        return "";
+        return Utils.plotCelsius("T", panelHeat.Tc);
+    }
+
+    /** The panel's temperature, absolute C (thermal loads keep K above 20 C). */
+    public double panelCelsius() {
+        return 20 + panelHeat.Tc;
+    }
+
+    /** Air cooling at this light: still air, faster in wind and rain (from the slow process's refresh). */
+    void coolPanel(double light) {
+        double rain = 0, wind = 0;
+        if (node != null && node.coordonate.getWorldExist()) {
+            double[] w = Utils.weatherAt(node.coordonate.world(), node.coordonate.pos());
+            rain = Math.max(w[0], w[1]);
+            wind = Math.min(Utils.getWind(node.coordonate, 0) / 10.0, 1.0);
+        }
+        panelHeat.Rp = descriptor.panelRp() / (1 + 0.6 * rain + 0.5 * wind);
     }
 
     @Override
     public void initialize() {
-        powerSource.setUmax(this.descriptor.electricalUmax);
-        powerSource.setImax(this.descriptor.electricalPmax / this.descriptor.electricalUmax * 1.5);
-
         descriptor.applyTo(positiveLoad);
         descriptor.applyTo(negativeLoad);
 
@@ -166,14 +177,14 @@ public class SolarPanelElement extends TransparentNodeElement {
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
-        powerSource.writeToNBT(nbt, "powerSource");
+        pv.writeToNBT(nbt, "pv");
         nbt.putDouble("panelAlpha", panelAlpha);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
-        powerSource.readFromNBT(nbt, "powerSource");
+        pv.readFromNBT(nbt, "pv");   // (saves before B+ carry powerSourceP/Umax/Imax: re-derived, ignored)
         panelAlpha = ClientValues.load(nbt.getDoubleOr("panelAlpha", 0.0), descriptor.alphaMin, descriptor.alphaMax, descriptor.alphaTrunk(Math.PI / 2));
     }
 
@@ -228,13 +239,13 @@ public class SolarPanelElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
+        Map<String, String> info = new LinkedHashMap<String, String>();
+        info.put(I18N.tr("Power"), Meters.watts(Math.max(0, pv.getP())) + " @ " + Meters.volts(pv.getU()));
+        double[] mpp = pv.curve().maxPowerPoint();
+        info.put(I18N.tr("Best"), mpp[1] > 0 ? Meters.watts(mpp[1]) + " @ " + Meters.volts(mpp[0]) : I18N.tr("no light"));
+        info.put(I18N.tr("Panel temperature"), Meters.celsius(panelCelsius()));
         info.put(I18N.tr("Sun angle"), Utils.plotValue(((slowProcess.getSolarAlpha()) * (180 / Math.PI)) - 90, "\u00B0"));
         info.put(I18N.tr("Panel angle"), Utils.plotValue((panelAlpha * (180 / Math.PI)) - 90, "\u00B0"));
-        info.put(I18N.tr("Producing energy"), (slowProcess.getSolarLight() != 0 ? "Yes" : "No"));
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Produced power"), Utils.plotPower("", powerSource.getP()));
-        }
         return info;
     }
 
