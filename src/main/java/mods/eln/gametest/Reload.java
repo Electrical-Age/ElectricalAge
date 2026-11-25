@@ -53,10 +53,15 @@ public final class Reload {
         NodeManager.instance.removeNode(old);
 
         NodeBase fresh = old.getClass().getConstructor().newInstance();
-        fresh.readFromNBT(before.copy());
-        NodeManager.instance.addNode(fresh);
-        fresh.initializeFromNBT();
-        fresh.globalBoot();
+        mods.eln.fluid.FluidSaves.loading(() -> fresh.coordonate);   // (as NodeManager.loadFromNbt: a healed save names its block)
+        try {
+            fresh.readFromNBT(before.copy());
+            NodeManager.instance.addNode(fresh);
+            fresh.initializeFromNBT();
+            fresh.globalBoot();
+        } finally {
+            mods.eln.fluid.FluidSaves.loading(null);
+        }
         BlockEntity te = w.getBlockEntity(p);
         if (te instanceof NodeBlockEntity) ((NodeBlockEntity) te).forgetNode();
         return new Reload(before, save(fresh), pb, publish(fresh), fresh);

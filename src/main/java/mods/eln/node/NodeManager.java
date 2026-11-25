@@ -195,11 +195,14 @@ public class NodeManager {
             try {
                 CompoundTag loadedFrom = tag.copy();
                 node = (NodeBase) nodeClass.getConstructor().newInstance();
+                NodeBase loading = node;
+                mods.eln.fluid.FluidSaves.loading(() -> loading.coordonate);   // (a healed fluid save names its block)
                 node.readFromNBT(tag);
                 node.lastSaved = loadedFrom;
             } catch (VirtualMachineError e) {
                 throw e;
             } catch (Throwable e) {   // (LinkageError too: one node's missing class must not stop the rest of the file)
+                mods.eln.fluid.FluidSaves.loading(null);
                 keepOrphan(dim, tag, "loading a node of type '" + type + "' failed", e);
                 continue;
             }
@@ -211,16 +214,21 @@ public class NodeManager {
                 throw e;
             } catch (Throwable e) {
                 LOG.error("Electrical Age: initializing node {} at {}", type, node.coordonate, e);
+            } finally {
+                mods.eln.fluid.FluidSaves.loading(null);
             }
         }
 
         for (NodeBase n : addedNode) {
             try {
+                mods.eln.fluid.FluidSaves.loading(() -> n.coordonate);
                 n.globalBoot();
             } catch (VirtualMachineError e) {
                 throw e;
             } catch (Throwable e) {   // (one node must not stop the others booting)
                 LOG.error("Electrical Age: booting node {} at {}", n.getClass().getSimpleName(), n.coordonate, e);
+            } finally {
+                mods.eln.fluid.FluidSaves.loading(null);
             }
         }
     }

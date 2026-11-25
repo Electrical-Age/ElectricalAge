@@ -281,13 +281,13 @@ public class BoilerElement extends TransparentNodeElement implements FluidDevice
         var c = node.coordonate;
         vessel = new FluidNode(desc.volume, c.y, desc.height, false);
         if (loaded != null) {
-            mods.eln.fluid.FluidSaves.restore(vessel, loaded);
+            mods.eln.fluid.FluidSaves.restore(vessel, loaded, mods.eln.sim.Ambient.kelvin(c), c);
             vessel.update();
         } else fromTanks(tanks.water(), tanks.steam());
         showTanks();
         feed = new FluidNode(FEED_VOLUME, c.y + FEED_DRAW, 0.1, false);
         if (loadedFeed != null) {
-            mods.eln.fluid.FluidSaves.restore(feed, loadedFeed);
+            mods.eln.fluid.FluidSaves.restore(feed, loadedFeed, mods.eln.sim.Ambient.kelvin(c), c);
             feed.update();
         } else feed.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         feed.lumpable = true;   // (it merges into the pipe on its flange: no stub to fill first)

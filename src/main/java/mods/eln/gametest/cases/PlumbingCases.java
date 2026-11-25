@@ -37,6 +37,8 @@ public final class PlumbingCases {
         cases.add(new TankBoxSplits());
         cases.add(new TankBoxOverFullReloads());
         cases.add(new TankHealsOnLoad());
+        cases.add(new PipeHealsOnLoad(false));
+        cases.add(new PipeHealsOnLoad(true));
         cases.add(new TankBoxSettlesAfterBreak());
         cases.add(new TankBoxHitbox());
         cases.add(new TankBoxCornerPipeClick());
@@ -1120,6 +1122,77 @@ public final class PlumbingCases {
         public void measure(TestContext ctx) {
             ctx.line("tank heals on load: " + line);
             ctx.check("tank heals on load: NaN energy and negative air load as its water at the ambient", bad.isEmpty(), bad);
+        }
+    }
+
+    /**
+     * A pipe piece saved with heavy oil and water heals on load with its oil counted (Gemini's review, 2026-11-25: the
+     * pipe healed its water and air, then took its other species on, so their energy was missing): saved with a NaN
+     * energy, it loads with its oil, at 20 C; saved with a sound energy but a negative mass of oil, it loads with none,
+     * at 20 C.
+     */
+    static final class PipeHealsOnLoad implements TestCase {
+        final boolean negativeOil;
+        String bad = "", line = "";
+
+        PipeHealsOnLoad(boolean negativeOil) {
+            this.negativeOil = negativeOil;
+        }
+
+        public String id() {
+            return negativeOil ? "pipe_heals_negative_oil_on_load" : "pipe_heals_nan_energy_with_oil_on_load";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 10;
+        }
+
+        static net.minecraft.nbt.CompoundTag holding(net.minecraft.nbt.CompoundTag t, String key) {
+            return OilCases.FuelBySpecies.holding(t, key);
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(1, 1, 1);
+            PipeCases.lay(ctx, p, 0, 0, 8, 8, 16, 8, 8);
+            ctx.after(2, () -> reload(ctx, p));
+        }
+
+        void reload(TestContext ctx, BlockPos p) {
+            try {
+                var r = mods.eln.gametest.Reload.node(ctx.level(), p, tag -> {
+                    var pt = holding(tag, "pts");
+                    pt.putDouble("w", 0.01);
+                    pt.putDouble("a", 1e-6);
+                    pt.putDouble("u", negativeOil ? 800 : Double.NaN);
+                    pt.putInt("fv", mods.eln.fluid.FluidSaves.FORMAT);
+                    var sp = new net.minecraft.nbt.CompoundTag();
+                    sp.putDouble("eln:heavy_oil", negativeOil ? -0.002 : 0.005);
+                    pt.put("s", sp);
+                    return tag;
+                });
+                var vn = (VoxelNode) r.fresh;
+                int oil = mods.eln.sim.fluid.SpeciesRegistry.get().id("eln:heavy_oil");
+                for (var part : vn.parts)
+                    if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null) {
+                        FluidNode f = pp.fluid;
+                        line = String.format("loaded: %.4f kg water, %.4f kg heavy oil, %.3g kg air, %.2f J, %.2f C", f.mWater, f.mass(oil), f.mAir, f.energy, f.T() - Water.T0);
+                        double wantOil = negativeOil ? 0 : 0.005;
+                        if (!Double.isFinite(f.energy) || Math.abs(f.mass(oil) - wantOil) > 1e-9 || Math.abs(f.mWater - 0.01) > 1e-9 || Math.abs(f.T() - Water.T_AMBIENT) > 0.5)
+                            bad = line;
+                    }
+                if (line.isEmpty()) bad = "no pipe piece loaded";
+            } catch (ReflectiveOperationException e) {
+                bad = e.toString();
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line("pipe heals on load: " + line);
+            ctx.check(negativeOil ? "pipe heals on load: negative oil goes, at 20 C" : "pipe heals on load: NaN energy, its oil kept and counted, at 20 C", bad.isEmpty(), bad);
         }
     }
 

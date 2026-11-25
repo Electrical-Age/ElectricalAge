@@ -195,16 +195,19 @@ public final class PipePart extends VoxelPart {
         wallTemp += (-fluid.wallJ - WALL_UA_PER_BLOCK[tier] * blocks * (wallTemp - ambientK) * dt) / c;
     }
 
-    void makeNode(int blockY, double T, double[] saved) {
+    /** Its node, empty air at T or holding saved ({w, a, u, extra...}, healed if corrupt: FluidSaves.restore); true if healed. */
+    boolean makeNode(int blockY, double T, double[] saved) {
         double volume = Math.max(1e-7, length() / 16.0 * VOLUME_PER_BLOCK[tier]);
         double z = blockY + (minY() - (heightVoxels() == bore() ? bore() / 2.0 : 0)) / 16.0;
         fluid = new FluidNode(volume, z, heightVoxels() / 16.0, false);
         fluid.lumpable = true;
         fluid.resistance = 1 / (K_PER_BLOCK[tier] * 16.0 / Math.max(1, length()));
+        boolean healed = false;
         if (saved != null) {
-            mods.eln.fluid.FluidSaves.restore(fluid, saved, T, null);
+            healed = mods.eln.fluid.FluidSaves.restore(fluid, saved, T, null);
             fluid.update();
         } else fluid.fill(0, Water.P_ATM, T);
+        return healed;
     }
 
     /** The ends on the block's boundary, as ports (face and spot), for the block at pos. */
@@ -264,18 +267,29 @@ public final class PipePart extends VoxelPart {
         }
     }
 
+    /** A piece's saved contents as FluidSaves.restore takes them: {w, a, u} and its other species (key "s"), or null. */
+    static double[] savedContents(CompoundTag t) {
+        if (!t.contains("w")) return null;
+        double[] extra = mods.eln.fluid.FluidSaves.extra(t, "s");
+        double[] out = new double[3 + (extra == null ? 0 : extra.length)];
+        out[0] = t.getDoubleOr("w", 0);
+        out[1] = t.getDoubleOr("a", 0);
+        out[2] = t.getDoubleOr("u", 0);
+        if (extra != null) System.arraycopy(extra, 0, out, 3, extra.length);
+        return out;
+    }
+
     static PipePart read(CompoundTag t, int blockY) {
         PipePart p = new PipePart(Math.max(0, Math.min(GRID.length - 1, t.getIntOr("tier", 0))), t.getIntArray("pts").orElse(new int[0]));
         p.burst = t.getBooleanOr("burst", false);
         p.burstDir = t.getIntOr("burstDir", -1);
-        double[] saved = t.contains("w") ? new double[]{t.getDoubleOr("w", 0), t.getDoubleOr("a", 0), t.getDoubleOr("u", 0)} : null;
-        p.makeNode(blockY, saved);
+        double[] saved = savedContents(t);
+        boolean healed = p.makeNode(blockY, Water.T_AMBIENT, saved);
         double v0 = saved == null ? 0 : t.getDoubleOr("v", Math.max(1e-7, p.length() / 16.0 * OLD_VOLUME_PER_BLOCK[p.tier]));
         // (a legacy solver's save: the temperature its Flash found for these contents, in the volume they were saved in)
         double tLegacy = Double.NaN;
         if (saved != null) {
-            p.fluid.extra = mods.eln.fluid.FluidSaves.extra(t, "s");
-            if (t.getIntOr("fv", 0) < mods.eln.fluid.FluidSaves.FORMAT && p.fluid.mass() > 0)
+            if (!healed && t.getIntOr("fv", 0) < mods.eln.fluid.FluidSaves.FORMAT && p.fluid.mass() > 0)
                 tLegacy = new mods.eln.sim.fluid.Flash().solve(p.fluid.mWater, p.fluid.mAir, p.fluid.extra, p.fluid.energy, v0 > 0 ? v0 : p.fluid.volume, 300).T;
             p.fluid.update();
         }

@@ -92,12 +92,7 @@ public final class JunctionPart extends VoxelPart {
         int[] a = t.getIntArray("at").orElse(new int[]{8, 8, 8, 0});
         if (a.length < 4) return null;
         JunctionPart j = new JunctionPart(a[0], a[1], a[2], Math.max(0, Math.min(PipePart.GRID.length - 1, a[3])));
-        double[] saved = t.contains("w") ? new double[]{t.getDoubleOr("w", 0), t.getDoubleOr("a", 0), t.getDoubleOr("u", 0)} : null;
-        j.makeNode(blockY, Water.T_AMBIENT, saved);
-        if (saved != null) {
-            j.fluid.extra = mods.eln.fluid.FluidSaves.extra(t, "s");
-            j.fluid.update();
-        }
+        j.makeNode(blockY, Water.T_AMBIENT, PipePart.savedContents(t));
         return j;
     }
 

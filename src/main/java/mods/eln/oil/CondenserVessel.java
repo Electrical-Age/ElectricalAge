@@ -138,13 +138,17 @@ public final class CondenserVessel {
                 // (a vessel saved bigger, before Baughn's smaller tanks: its water over the float valve's shut level of the
                 // new one goes, and its air over 1 atm's worth, at the temperature it had; else it was over FLOOD at once
                 // and the turbine took water damage, or its air stood at many bar against the turbine's exhaust)
-                double T = new mods.eln.sim.fluid.Flash().solve(saved[0], saved[1], saved[2], savedVolume, 300).T;
+                // (a corrupt save, NaN or negative: its temperature the ambient, its masses healed below)
+                boolean sound = saved[0] >= 0 && saved[1] >= 0 && Double.isFinite(saved[0]) && Double.isFinite(saved[1]) && Double.isFinite(saved[2]);
+                double T = sound ? new mods.eln.sim.fluid.Flash().solve(saved[0], saved[1], saved[2], savedVolume, 300).T : ambientK;
+                if (!(T > 120 && T < 4000)) T = ambientK;
                 n.mWater = Math.min(saved[0], MAKEUP_SHUT * volume * Water.RHO_L);
                 n.mAir = Math.min(saved[1], Water.P_ATM * (volume - n.mWater / Water.RHO_L) / (Water.R_AIR * T));
                 n.extra = null;
                 n.energy = n.energyAt(T);
+                mods.eln.fluid.FluidSaves.heal(n, ambientK, null);
             } else {
-                mods.eln.fluid.FluidSaves.restore(n, saved);
+                mods.eln.fluid.FluidSaves.restore(n, saved, ambientK, null);
             }
             n.update();
         } else n.fill(0, Water.P_ATM, ambientK);

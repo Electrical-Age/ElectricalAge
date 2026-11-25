@@ -85,18 +85,31 @@ public final class FluidSaves {
     }
 
     /** Set n's contents to what array() gave (no update: the caller does it); corrupt contents healed at 20 C (heal). */
-    public static void restore(FluidNode n, double[] saved) {
-        restore(n, saved, mods.eln.sim.fluid.Water.T_AMBIENT, null);
+    public static boolean restore(FluidNode n, double[] saved) {
+        return restore(n, saved, mods.eln.sim.fluid.Water.T_AMBIENT, null);
     }
 
-    /** As restore(n, saved), corrupt contents healed at ambientK (K), the warning naming where (a position; null: its height). */
-    public static void restore(FluidNode n, double[] saved, double ambientK, Object where) {
+    /**
+     * As restore(n, saved), corrupt contents healed at ambientK (K), the warning naming where (a position; null: the
+     * node being loaded, see loading()). True if it healed them.
+     */
+    public static boolean restore(FluidNode n, double[] saved, double ambientK, Object where) {
         n.mWater = saved[0];
         n.mAir = saved[1];
         n.energy = saved[2];
         n.extra = saved.length > 3 ? java.util.Arrays.copyOfRange(saved, 3, saved.length) : null;
-        if (heal(n, ambientK, where)) return;
+        if (heal(n, ambientK, where)) return true;
         if (LEGACY.contains(saved)) fromLegacy(n);
+        return false;
+    }
+
+    /** Where the node being loaded on this thread is (NodeManager sets it around a node's load), for heal's warning. */
+    private static final ThreadLocal<java.util.function.Supplier<Object>> LOADING = new ThreadLocal<>();
+
+    /** The node loading on this thread from now (its position, asked for only if a warning names it); null: none. */
+    public static void loading(java.util.function.Supplier<Object> where) {
+        if (where == null) LOADING.remove();
+        else LOADING.set(where);
     }
 
     /**
@@ -108,6 +121,7 @@ public final class FluidSaves {
     public static boolean heal(FluidNode n, double ambientK, Object where) {
         double w = n.mWater, a = n.mAir, u = n.energy;
         if (!n.heal(ambientK)) return false;
+        if (where == null && LOADING.get() != null) where = LOADING.get().get();
         mods.eln.Eln.LOG.warn("Electrical Age: a saved fluid node {} held {} J, {} kg water, {} kg air: reset to its contents at {} K",
             where != null ? "at " + where : "at height " + n.z, u, w, a, String.format(java.util.Locale.ROOT, "%.1f", ambientK));
         return true;
