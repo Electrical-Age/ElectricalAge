@@ -60,8 +60,8 @@ public final class TankGroup {
      * Write the vessel's contents back into its blocks' shares: the liquid by layer, from the bottom up to the vessel's
      * level, the gas over it (Baughn 2026-11-09: a box split by a broken corner shared its oil by volume, the upper blocks
      * as full as the lower, and one-block tanks can't pass liquid down and gas up through one coupling, so it stayed up
-     * there). Each block at the vessel's temperature, scaled to its energy exactly, so a save and reload (which sums the
-     * shares) changes nothing.
+     * there). Each block at the vessel's temperature, what that misses of the vessel's energy added by heat capacity (share()),
+     * so the shares sum to its energy exactly and a save and reload (which sums them) changes nothing.
      */
     static final double FULL = 0.98;
 

@@ -186,10 +186,8 @@ public final class FluidNode {
      * update() itself runs this first).
      */
     public boolean guardFinite(java.util.function.Supplier<Object> where) {
-        if (Double.isFinite(energy) && mWater >= NEGATIVE_MASS && mAir >= NEGATIVE_MASS && Double.isFinite(mWater) && Double.isFinite(mAir)
-            && (extra == null || allSound(extra))) return false;
         double u = energy, last = state.T, t = last > mods.eln.fluidcore.WaterAir.T_MIN && last < mods.eln.fluidcore.WaterAir.T_MAX ? last : Water.T_AMBIENT;
-        heal(t);
+        if (!heal(t)) return false;
         long now = System.nanoTime();
         synchronized (FluidNode.class) {
             unwarnedHeals++;
@@ -206,11 +204,6 @@ public final class FluidNode {
     /** guardFinite(null): where unknown. */
     public boolean guardFinite() {
         return guardFinite(null);
-    }
-
-    private static boolean allSound(double[] a) {
-        for (double x : a) if (!Double.isFinite(x) || x < NEGATIVE_MASS) return false;
-        return true;
     }
 
     /** Mass of species id (kg), both phases. */

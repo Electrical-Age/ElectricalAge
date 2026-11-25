@@ -29,6 +29,8 @@ public final class CoreStep {
     static int dumps;
     /** This network has been written out already (one dump each, so the 30 cover 30 networks). */
     private boolean dumped;
+    /** Its steps in a row whose result wasn't finite (each put back): from the second on, a stall (Jade's alarm). */
+    int nonFiniteRun;
 
     static {
         // (a sub-step failing at 1/256 of the tick ends the network's step at its last converged sub-step, the rest of the
@@ -220,8 +222,7 @@ public final class CoreStep {
             if (c.fixed) continue;
             double T = c.T();
             // (a burst pipe's air venting from 50 bar cools towards 100 K as it expands: a physical state)
-            if (!Double.isFinite(c.U) || !Double.isFinite(c.P()) || !(T > 50 && T < 6000)) sane = false;
-            for (double x : c.m) if (!Double.isFinite(x)) sane = false;
+            if (!finite(c) || !Double.isFinite(c.P()) || !(T > 50 && T < 6000)) sane = false;
         }
         if (!sane) discardedSteps++;
         if (failedSteps == 1 || Long.bitCount(failedSteps) == 1)
@@ -253,6 +254,13 @@ public final class CoreStep {
         } catch (java.io.IOException e) {
             System.out.println("[fluidcore] a step failed; could not write it out: " + e);
         }
+    }
+
+    /** Are a core node's energy and masses finite? */
+    static boolean finite(Network.Node c) {
+        if (!Double.isFinite(c.U)) return false;
+        for (double x : c.m) if (!Double.isFinite(x)) return false;
+        return true;
     }
 
     private void restore(double[][] m0, double[] u0) {
@@ -652,7 +660,11 @@ public final class CoreStep {
     }
 
     /** After the core's step (on this thread, or a background one's first tick after it): its results onto nodes and edges. */
+    /** Tests only: run on the core's network as a step's result is taken (to make that result what a solver bug would). */
+    static java.util.function.Consumer<Network> testAfterStep;
+
     private void finish(Pending p) {
+        if (testAfterStep != null) testAfterStep.accept(net);
         double tick = p.tick, dt = p.dt;
         if (remE == null) {
             remE = new double[ce.length][6];
@@ -678,18 +690,25 @@ public final class CoreStep {
         // (solves accepted at the precision floor, counted to watch: a few thousand in the 28 steam GameTests)
         long crawled = CRAWLS.addAndGet(net.stats.crawls - crawls0);
         if (net.stats.crawls > crawls0 && Long.bitCount(crawled) == 1 && crawled >= 16) System.out.println("[fluidcore] solves accepted at the precision floor so far: " + crawled);
+        // (a result that isn't finite is a failed step, written out and put back below, never healed into the nodes: it
+        // did none of its time, which is owed; in a row, from the second on, its network is stalled)
+        boolean finite = true;
+        for (Network.Node c : cn) if (!c.fixed && !finite(c)) finite = false;
+        nonFiniteRun = finite ? 0 : nonFiniteRun + 1;
+        double done = finite ? net.done : 0;
         // (a step cut short covered less than dt: the rest is owed, so heat put in over it isn't lost and the network
         // catches up; flows below are what moved this tick, per tick, so what devices book from them balances)
-        if (!idle) owed += Math.max(0, dt - net.done);
+        if (!idle) owed += Math.max(0, dt - done);
         // (the stall record lives on the nodes, so a network rebuilt mid-stall, as a burst rebuilds it, keeps it)
         double before = 0;
         for (FluidNode n : nodes) before = Math.max(before, n.stallNow);
         // (a background step: by its own length; what it left undone is dropped, and one that fell behind its ticks keeps
         // the stall its waiting ticks counted, so a network always behind reaches Jade's alarm)
-        double stall = idle ? (net.done < 0.5 * dt ? before + dt : behindTicks > 0 ? before : 0) : net.done < 0.5 * tick ? before + tick : 0;
-        double dropped = Math.max(0, owed - OWED_MAX) + (idle ? Math.max(0, dt - net.done) : 0);
+        double stall = idle ? (done < 0.5 * dt ? before + dt : behindTicks > 0 ? before : 0) : done < 0.5 * tick ? before + tick : 0;
+        if (nonFiniteRun == 1) stall = before;   // (one put back may be a fluke: the alarm from the second in a row)
+        double dropped = Math.max(0, owed - OWED_MAX) + (idle ? Math.max(0, dt - done) : 0);
         // (a network stalled for half a second is written out once more: its first failure is often a harmless one)
-        if (net.done == 0 && owed > OWED_MAX && !stallDumped) {
+        if (done == 0 && owed > OWED_MAX && !stallDumped) {
             stallDumped = true;
             dumped = false;
         }
@@ -699,14 +718,16 @@ public final class CoreStep {
         owed = Math.min(owed, OWED_MAX);
         mods.eln.fluid.FluidWorld.recordProgress(nodes, stall, dropped);
         // (written out with the step length asked for: a replay at the tick's length isn't the step that failed)
-        // (a result that isn't finite is a failed step, written out and put back, never healed into the nodes)
-        boolean finite = true;
-        for (Network.Node c : cn) {
-            if (c.fixed) continue;
-            finite &= Double.isFinite(c.U);
-            for (double x : c.m) finite &= Double.isFinite(x);
-        }
         if (net.stats.failures > failures || !finite) failed(dt, m0, u0, h0);
+        if (!finite) {
+            // (put back: its devices' heat goes to the next step, and its wall heat and work, maybe NaN, to nobody)
+            for (int i = 0; i < cn.length; i++) {
+                nodes.get(i).heat += p.heat0[i];
+                cn[i].wallJ = 0;
+            }
+            for (Network.Edge c : ce) if (c != null) c.workJ = 0;
+            for (Network.Edge c : ceTop) if (c != null) c.workJ = 0;
+        }
         else if (net.stats.cut > cut0 || net.stats.substeps - sub0 > 64L * p.span) slow(dt, m0, u0, h0, net.stats.substeps - sub0);
         dt = tick;
         // contents out
