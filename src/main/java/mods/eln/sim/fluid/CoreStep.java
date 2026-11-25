@@ -450,6 +450,7 @@ public final class CoreStep {
         for (int i = 0; i < cn.length; i++) {
             FluidNode n = nodes.get(i);
             Network.Node c = cn[i];
+            if (!n.fixed && n.guardFinite()) n.update();   // (a NaN put in by anything since the last step: healed, not stepped)
             c.m[0] = n.mWater;
             c.m[1] = n.mAir;
             for (int j = 2; j < c.m.length; j++) c.m[j] = n.extra != null && ids[j] - 2 < n.extra.length ? n.extra[ids[j] - 2] : 0;

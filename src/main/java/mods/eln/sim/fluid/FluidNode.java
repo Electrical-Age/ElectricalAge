@@ -99,6 +99,7 @@ public final class FluidNode {
     }
 
     public void update() {
+        guardFinite();
         if (CoreStep.ON) {
             coreUpdate();
             return;
@@ -166,6 +167,39 @@ public final class FluidNode {
         mAir = Double.isFinite(mAir) ? Math.max(0, mAir) : 0;
         if (extra != null) for (int i = 0; i < extra.length; i++) extra[i] = Double.isFinite(extra[i]) ? Math.max(0, extra[i]) : 0;
         energy = energyAt(T);
+        return true;
+    }
+
+    /** The mod's log ("eln"), without loading Eln (unit tests run this class bare). */
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("eln");
+    /** Nodes guardFinite healed since its last warning, and when that was (System.nanoTime). */
+    private static int unwarnedHeals;
+    private static long lastHealWarn = Long.MIN_VALUE / 2;
+
+    /**
+     * A guard, not a model: a non-finite energy or mass, however it got there, healed at 20 C (heal; a node doesn't know
+     * its place) with a warning at most once a minute. Unguarded, WaterAir.solve answers a NaN energy with its last
+     * temperature less 1 K, so the node cooled 1 K per update to the EOS floor (120 K) and every step of its network
+     * failed. True if it healed the node (no update: the caller does it; update() itself runs this first).
+     */
+    public boolean guardFinite() {
+        if (Double.isFinite(energy) && Double.isFinite(mWater) && Double.isFinite(mAir) && (extra == null || allFinite(extra))) return false;
+        double u = energy;
+        heal(Water.T_AMBIENT);
+        long now = System.nanoTime();
+        synchronized (FluidNode.class) {
+            unwarnedHeals++;
+            if (now - lastHealWarn < 60_000_000_000L) return true;
+            LOG.warn("Electrical Age: a fluid node at height {} held {} J (a non-finite energy or mass): reset to its contents at 20 C ({} so healed since the last warning)",
+                z, u, unwarnedHeals);
+            unwarnedHeals = 0;
+            lastHealWarn = now;
+        }
+        return true;
+    }
+
+    private static boolean allFinite(double[] a) {
+        for (double x : a) if (!Double.isFinite(x)) return false;
         return true;
     }
 
