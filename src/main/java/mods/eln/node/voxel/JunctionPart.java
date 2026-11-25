@@ -58,9 +58,7 @@ public final class JunctionPart extends VoxelPart {
         fluid = new FluidNode(BLOCKS * PipePart.VOLUME_PER_BLOCK[tier], blockY + (y - bore() / 2.0) / 16.0, h, false);
         fluid.lumpable = false;
         if (saved != null) {
-            fluid.mWater = saved[0];
-            fluid.mAir = saved[1];
-            fluid.energy = saved[2];
+            mods.eln.fluid.FluidSaves.restore(fluid, saved, T, null);
             fluid.update();
         } else fluid.fill(0, Water.P_ATM, T);
     }

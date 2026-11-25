@@ -84,13 +84,33 @@ public final class FluidSaves {
         return out;
     }
 
-    /** Set n's contents to what array() gave (no update: the caller does it). */
+    /** Set n's contents to what array() gave (no update: the caller does it); corrupt contents healed at 20 C (heal). */
     public static void restore(FluidNode n, double[] saved) {
+        restore(n, saved, mods.eln.sim.fluid.Water.T_AMBIENT, null);
+    }
+
+    /** As restore(n, saved), corrupt contents healed at ambientK (K), the warning naming where (a position; null: its height). */
+    public static void restore(FluidNode n, double[] saved, double ambientK, Object where) {
         n.mWater = saved[0];
         n.mAir = saved[1];
         n.energy = saved[2];
         n.extra = saved.length > 3 ? java.util.Arrays.copyOfRange(saved, 3, saved.length) : null;
+        if (heal(n, ambientK, where)) return;
         if (LEGACY.contains(saved)) fromLegacy(n);
+    }
+
+    /**
+     * Contents a save can't have held honestly (FluidNode.heal: a non-finite energy or mass, or a negative mass) put
+     * right: the masses at least 0, the energy theirs at ambientK; one warning naming where. True if it healed them. Saves
+     * of a tank box pumped full had NaN energy and negative air (TankGroup.share, before 2026-11-25), and such a node fell
+     * 1 K per update to the EOS floor and failed every step of its network.
+     */
+    public static boolean heal(FluidNode n, double ambientK, Object where) {
+        double w = n.mWater, a = n.mAir, u = n.energy;
+        if (!n.heal(ambientK)) return false;
+        mods.eln.Eln.LOG.warn("Electrical Age: a saved fluid node {} held {} J, {} kg water, {} kg air: reset to its contents at {} K",
+            where != null ? "at " + where : "at height " + n.z, u, w, a, String.format(java.util.Locale.ROOT, "%.1f", ambientK));
+        return true;
     }
 
     /**

@@ -266,7 +266,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         own = new FluidNode(desc.volume, node.coordonate.y, 1.0, false);
         own.lossWPerK = LOSS_W_PER_K;
         if (loaded != null) {
-            mods.eln.fluid.FluidSaves.restore(own, loaded);
+            mods.eln.fluid.FluidSaves.restore(own, loaded, mods.eln.sim.Ambient.kelvin(node.coordonate), node.coordonate);
             own.update();
         } else own.fill(0, Water.P_ATM, mods.eln.sim.Ambient.kelvin(node.coordonate));
         vessel = own;

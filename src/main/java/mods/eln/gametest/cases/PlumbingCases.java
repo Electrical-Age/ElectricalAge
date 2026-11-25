@@ -36,6 +36,7 @@ public final class PlumbingCases {
         cases.add(new TankBox());
         cases.add(new TankBoxSplits());
         cases.add(new TankBoxOverFullReloads());
+        cases.add(new TankHealsOnLoad());
         cases.add(new TankBoxSettlesAfterBreak());
         cases.add(new TankBoxHitbox());
         cases.add(new TankBoxCornerPipeClick());
@@ -1068,6 +1069,57 @@ public final class PlumbingCases {
             if (!Double.isFinite(r.energy) || Math.abs(r.energy - u0) > 1e-5 * Math.abs(u0) || Math.abs(r.mWater - w0) > 1e-6 * w0 || r.mAir < 0
                 || Math.abs(r.T() - t0) > 0.05)
                 bad += "the reloaded box differs; ";
+        }
+    }
+
+    /**
+     * A tank saved with NaN energy and negative air (as the over-full boxes of 2026-11-25 were) loads healed: its water
+     * kept, no air below 0, its energy finite, at the local ambient temperature (it fell 1 K per update to -153 C).
+     */
+    static final class TankHealsOnLoad implements TestCase {
+        String bad = "", line = "";
+
+        public String id() {
+            return "tank_heals_corrupt_save_on_load";
+        }
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 10;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(1, 1, 1);
+            TankElement t = tank(ctx, IRON_TANK, p, Direction.XN);
+            fill(t.own, 0.5 * t.own.volume * Water.RHO_L, Water.P_ATM, 330);
+            double w = t.own.mWater;
+            ctx.after(2, () -> reload(ctx, p, w));
+        }
+
+        void reload(TestContext ctx, BlockPos p, double w) {
+            try {
+                var r = mods.eln.gametest.Reload.node(ctx.level(), p, tag -> {
+                    var el = OilCases.FuelBySpecies.holding(tag, "vesselW");
+                    el.putDouble("vesselU", Double.NaN);
+                    el.putDouble("vesselA", -0.16);
+                    return tag;
+                });
+                var f = (TankElement) ((mods.eln.node.transparent.TransparentNode) r.fresh).element;
+                double amb = mods.eln.sim.Ambient.kelvin(f.node.coordonate);
+                line = String.format("loaded: %.4f kg water (saved %.4f), %.3g kg air, %.1f J, %.2f C (ambient %.2f C)", f.own.mWater, w, f.own.mAir, f.own.energy,
+                    f.own.T() - Water.T0, amb - Water.T0);
+                if (!Double.isFinite(f.own.energy) || f.own.mAir < 0 || Math.abs(f.own.mWater - w) > 1e-6 * w || Math.abs(f.own.T() - amb) > 1) bad = line;
+            } catch (ReflectiveOperationException e) {
+                bad = e.toString();
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line("tank heals on load: " + line);
+            ctx.check("tank heals on load: NaN energy and negative air load as its water at the ambient", bad.isEmpty(), bad);
         }
     }
 

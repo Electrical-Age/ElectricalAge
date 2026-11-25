@@ -150,6 +150,25 @@ public final class FluidNode {
         state.fromCore(core, coreIds, volume);
     }
 
+    /** Below this (kg) a negative mass is corrupt, not a rounding trace. */
+    static final double NEGATIVE_MASS = -1e-9;
+
+    /**
+     * Contents no honest step leaves (a non-finite energy or mass, or a mass under NEGATIVE_MASS) put right: every mass
+     * at least 0 (non-finite: 0), the energy theirs in equilibrium at T (K). Nothing changes otherwise. No update: the
+     * caller does it. True if it healed them.
+     */
+    public boolean heal(double T) {
+        boolean bad = !Double.isFinite(energy) || !(mWater >= NEGATIVE_MASS) || !(mAir >= NEGATIVE_MASS) || !Double.isFinite(mWater) || !Double.isFinite(mAir);
+        if (extra != null) for (double e : extra) bad |= !(e >= NEGATIVE_MASS) || !Double.isFinite(e);
+        if (!bad) return false;
+        mWater = Double.isFinite(mWater) ? Math.max(0, mWater) : 0;
+        mAir = Double.isFinite(mAir) ? Math.max(0, mAir) : 0;
+        if (extra != null) for (int i = 0; i < extra.length; i++) extra[i] = Double.isFinite(extra[i]) ? Math.max(0, extra[i]) : 0;
+        energy = energyAt(T);
+        return true;
+    }
+
     /** Mass of species id (kg), both phases. */
     public double mass(int id) {
         if (id == SpeciesRegistry.WATER) return mWater;

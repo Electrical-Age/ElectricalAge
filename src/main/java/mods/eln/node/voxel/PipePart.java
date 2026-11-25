@@ -202,9 +202,7 @@ public final class PipePart extends VoxelPart {
         fluid.lumpable = true;
         fluid.resistance = 1 / (K_PER_BLOCK[tier] * 16.0 / Math.max(1, length()));
         if (saved != null) {
-            fluid.mWater = saved[0];
-            fluid.mAir = saved[1];
-            fluid.energy = saved[2];
+            mods.eln.fluid.FluidSaves.restore(fluid, saved, T, null);
             fluid.update();
         } else fluid.fill(0, Water.P_ATM, T);
     }
