@@ -126,6 +126,27 @@ public class ElnModels implements DataProvider {
                 }
                 out.add(DataProvider.saveStable(cache, obj("variants", variants), assets.resolve("blockstates/" + name + ".json")));
                 continue;
+            } else if (b instanceof mods.eln.oil.TankStationBlock) {
+                // the checked library's model (src/cadmodels TankCartParts), along north-south; its lamp lit while powered
+                // (the cart released); slopes take the flat model
+                JsonObject variants = new JsonObject();
+                for (var shape : net.minecraft.world.level.block.PoweredRailBlock.SHAPE.getPossibleValues())
+                    for (boolean on : new boolean[]{false, true}) {
+                        JsonObject v = obj("model", "eln:block/" + name + (on ? "_on" : ""));
+                        boolean alongX = shape == net.minecraft.world.level.block.state.properties.RailShape.EAST_WEST
+                            || shape == net.minecraft.world.level.block.state.properties.RailShape.ASCENDING_EAST
+                            || shape == net.minecraft.world.level.block.state.properties.RailShape.ASCENDING_WEST;
+                        if (alongX) v.addProperty("y", 90);
+                        variants.add("powered=" + on + ",shape=" + shape.getSerializedName(), v);
+                    }
+                out.add(DataProvider.saveStable(cache, obj("variants", variants), assets.resolve("blockstates/" + name + ".json")));
+                continue;
+            } else if (b instanceof mods.eln.oil.TankCartLoadBlock) {
+                // a Tank Minecart's tank (its display block), the checked library's model per tier; modelled along x, turned
+                // along z, since the minecart renderer turns its display block a quarter (the cart's length is its x)
+                out.add(DataProvider.saveStable(cache, obj("variants", obj("alloy=false", obj("model", "eln:block/tank_cart_load_iron", "y", new com.google.gson.JsonPrimitive(90)),
+                    "alloy=true", obj("model", "eln:block/tank_cart_load_alloy", "y", new com.google.gson.JsonPrimitive(90)))), assets.resolve("blockstates/" + name + ".json")));
+                continue;
             } else if (b instanceof mods.eln.apitest.ApiTestMachineBlock) {
                 // the GameTests' hidden fixture: a furnace's look (it is furnace-like: FACING and LIT), turned to FACING
                 for (boolean lit : new boolean[]{false, true})

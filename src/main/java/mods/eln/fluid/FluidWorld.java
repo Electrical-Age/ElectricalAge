@@ -19,7 +19,7 @@ import java.util.Set;
 /**
  * The fluid devices in the simulation (notes/pipes/DESIGN.md phase 2), stepped once per tick as one of the simulator's
  * slow processes. Two ports couple when they sit on neighbouring blocks, open on the faces that touch, at the same
- * spot on that face, in the same level: a boiler set on a turbine feeds it. Devices join and leave with their EA node (connectJob / disconnectJob), so
+ * spot on that face, in the same level: a boiler set on a turbine feeds it. Devices join and leave with their EA node (connectJob / disconnectJob; the Tank Loading Station with its docked cart), so
  * a node Stasis keeps frozen is out of its network; the networks are rebuilt when that set changes.
  */
 public final class FluidWorld implements IProcess {

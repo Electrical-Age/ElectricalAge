@@ -158,7 +158,7 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
 
 - Fluids: `src/main/java/mods/eln/sim/fluid/` (`FluidNetwork` implicit pressure solve, `Flash`, `Water`, `EaUnits`,
   `Species`, `SpeciesRegistry`), stepped by `src/main/java/mods/eln/fluid/FluidWorld.java` as a slow process; devices
-  join with their node's connectJob. Tests: `FluidCoreTest`, `FluidPropertyTest`, `MultiFluidTest`,
+  join with their node's connectJob (the Tank Loading Station, a block entity, while a cart is docked). Tests: `FluidCoreTest`, `FluidPropertyTest`, `MultiFluidTest`,
   `MultiFluidPropertyTest`. See content.md for pipes/oil.
   A device joining, leaving or changing marks the world dirty; the next step (or query) rebuilds it in two parts.
   `FluidWorld.plan(devices)` is pure topology from the devices' `fluidPorts/fluidJoins/fluidLinks/fluidVents/fluidFlows`:

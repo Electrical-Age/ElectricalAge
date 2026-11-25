@@ -25,6 +25,8 @@ public class ElnLang extends LanguageProvider {
         Map.entry("cable_kit_signal", "Signal Cable Kit"), Map.entry("cable_kit_lv", "Low Voltage Cable Kit"), Map.entry("cable_kit_mv", "Medium Voltage Cable Kit"),
         Map.entry("cable_kit_hv", "High Voltage Cable Kit"), Map.entry("cable_kit_vhv", "Very High Voltage Cable Kit"), Map.entry("cable_kit_thermal", "Copper Thermal Cable Kit"), Map.entry("cable_kit_bus", "Field Bus Cable Kit"), Map.entry("field_bus_cable", "Field Bus Cable"), Map.entry("winding", "Winding"), Map.entry("overhead_cable", "Overhead Cable"), Map.entry("pole_transformer", "Pole Transformer"), Map.entry("pole_streetlight", "Pole Streetlight"), Map.entry("pole_stasis_anchor", "Pole Stasis Anchor"), Map.entry("chisel", "Chisel"), Map.entry("handbook", "Electrical Engineer's Ledger"), Map.entry("raw_lead", "Raw Lead"), Map.entry("raw_tungsten", "Raw Tungsten"), Map.entry("capacitor_cell", "Capacitor Cell"), Map.entry("sulfur_dust", "Sulfur Dust"), Map.entry("soul_dust", "Soul Dust"), Map.entry("raw_rubber", "Raw Rubber"), Map.entry("rubber_compound", "Rubber Compound"), Map.entry("carbon_black", "Carbon Black"), Map.entry("carbon_black_rubber_compound", "Carbon Black Rubber Compound"), Map.entry("charcoal_nugget", "Charcoal Nugget"),
         Map.entry("servo_rail", "Servo Rail"), Map.entry("ram_chip", "RAM Chip (1 MB)"), Map.entry("janet_rom_chip", "ROM Chip: Janet"), Map.entry("boot_rom_chip", "ROM Chip: Floppy Boot"), Map.entry("floppy_disk", "Floppy Disk"), Map.entry("elevator_disk", "Floppy Disk: Elevator"), Map.entry("applications_disk", "Floppy Disk: Applications"), Map.entry("station_marker", "Station Marker"),
+        Map.entry("iron_tank_minecart", "Iron Tank Minecart"), Map.entry("alloy_tank_minecart", "Alloy Tank Minecart"),
+        Map.entry("tank_loading_station", "Tank Loading Station"),
         Map.entry("item_creative_tab", "Electrical Age"));
 
     public ElnLang(PackOutput output) {
@@ -34,6 +36,10 @@ public class ElnLang extends LanguageProvider {
     @Override
     protected void addTranslations() {
         add("item.eln.electric_bike.tooltip", "Not a motorcycle");   // (Baughn)
+        // the Tank Loading Station (Baughn 2026-11-25, todo #611)
+        add("item.eln.tank_loading_station.tip1", "A rail. A Tank Minecart that stops on it joins the pipes on its two side flanges.");
+        add("item.eln.tank_loading_station.tip2", "Unpowered, it holds the cart; powered, it sends it off the way it came.");
+        add("item.eln.tank_loading_station.tip3", "Comparator: 0 no cart, 1 empty, up to 15 at 90 % liquid.");
         add("item.eln.terrain_bike.tooltip", "Still not a motorcycle");
         add("container.eln.electric_bike", "Bike Trunk");
         add("message.eln.electric_bike.no_battery", "No battery: pedalling only");
@@ -157,6 +163,9 @@ public class ElnLang extends LanguageProvider {
         add(ElnRegistry.REPLICATOR.get(), "Replicator");
         add(ElnRegistry.ELECTRIC_BIKE_ENTITY.get(), "Electric Bike");
         add(ElnRegistry.TERRAIN_BIKE_ENTITY.get(), "Terrain Bike");
+        add(ElnRegistry.IRON_TANK_MINECART_ENTITY.get(), "Iron Tank Minecart");
+        add(ElnRegistry.ALLOY_TANK_MINECART_ENTITY.get(), "Alloy Tank Minecart");
+        add(ElnRegistry.TANK_CART_LOAD.get(), "Tank Minecart's Tank");
         add(mods.eln.robotics.Robotics.ELEVATOR_CAR.get(), "Elevator Car");
         add(ElnRegistry.SIX_NODE_BLOCK.get(), "Electrical Age Device");
         add(ElnRegistry.VOXEL_NODE_BLOCK.get(), "Pipes and Cables");

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:minecart",
+    {
+      "neoforge:ingredient_type": "neoforge:components",
+      "components": {
+        "!eln:tank_contents": {}
+      },
+      "items": "eln:iron_tank"
+    }
+  ],
+  "result": {
+    "id": "eln:iron_tank_minecart"
+  }
+}

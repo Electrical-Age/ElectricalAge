@@ -1,4 +1,4 @@
-// 26.3	2026-11-25T00:39:25.57916052	eln-global/EA models
+// 26.3	2026-11-25T19:30:13.776216789	eln-global/EA models
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_active_thermal_dissipator.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_compressor.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/200v_electric_heater.json
@@ -102,6 +102,8 @@ d1ded4e12a77c8c2a0166508f6ac2db69ab99c80 assets/eln/blockstates/servo_rail.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/still_pot.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/stone_heat_furnace.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/tachometer.json
+e72909348830cc48a11f7ccc55bdb9eb287a498d assets/eln/blockstates/tank_cart_load.json
+ed125f16ab3cfb5924924717072ccedb3c4e2100 assets/eln/blockstates/tank_loading_station.json
 b33b278bbc3903861507ad0512c9ffa4ba8866b8 assets/eln/blockstates/tungsten_ore.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/utility_pole.json
 6719e14649cd80daf80c1cbbe11a89ab2dc4f395 assets/eln/blockstates/utility_pole_w_dc_dc_converter.json
@@ -179,6 +181,7 @@ c4e228fc0a55e7e20a2be28757a7a9b278f15af3 assets/eln/items/advanced_electrical_mo
 2767f479c038a4fd107c9f09d7cb742e703d971a assets/eln/items/alloy_ingot.json
 0e2607a8bf3a312a1ca275a8f17682d8028bbc3d assets/eln/items/alloy_plate.json
 10eb431cf619d210cc17d5c8a1b80a54fcecfbc1 assets/eln/items/alloy_tank.json
+7b999ecc6ca775a2dd166a13a263ad07a54efcdf assets/eln/items/alloy_tank_minecart.json
 02bff00958a795bf43d297d9388afa54bdfcb3e7 assets/eln/items/amplifier.json
 d220e455ade1e4531735554c5d302efc4604128e assets/eln/items/analog_gauge.json
 191e90e7136aa7ec19be580f3178c37e878f0c6c assets/eln/items/analog_watch.json
@@ -307,6 +310,7 @@ d491dc4e5a279feb5baedfd1b5fa810f990db605 assets/eln/items/industrial_resin_colle
 8a896c86af04321b4a515bb68f6d530e12b03df5 assets/eln/items/iron_dust.json
 b7ccc528e7b56155ebfa04c3b65da5f3c2f55163 assets/eln/items/iron_plate.json
 2d91d6dcaea0a879b84c660b6f8470e065211712 assets/eln/items/iron_tank.json
+ef93fa453b1a684cf878201cc1f447ae7f899b4b assets/eln/items/iron_tank_minecart.json
 6355860b214ca3c0facb911d90b1c0cb53b124aa assets/eln/items/item_creative_tab.json
 10a959873574968476c1d9717293091725d73d22 assets/eln/items/janet_rom_chip.json
 22ac598464e4198151e2bdfb0fd34766e3d90ee3 assets/eln/items/jk_flip_flop_chip.json
@@ -477,6 +481,7 @@ f5be8cbae972b0a222f2b97523926ae36187a761 assets/eln/items/steam_turbine.json
 47b93477bd2460641c05babd1e2606afbae6209b assets/eln/items/sulfur_dust.json
 c8f42f74b6a1f46e80159e6fd2ca36368778bbf7 assets/eln/items/suspended_lamp_socket.json
 0ece019eb573e7823e9291de82823b65de6e9bab assets/eln/items/tachometer.json
+b6fae14a356abf7cfb2ae7b357383d868f0fd0ee assets/eln/items/tank_loading_station.json
 1bf70c62c91067ceee759276f1a4bedb9e7e8129 assets/eln/items/temperature_probe.json
 b292e3ad6284dc0949c5f85db800cd543536cb3a assets/eln/items/terrain_bike.json
 502e5782092cd0d55a104d7273809ad50bcd254a assets/eln/items/thermal_insulation.json
@@ -628,6 +633,7 @@ e7302203eb2906a6f1805720b52f08e88f92495d assets/eln/models/item/advanced_machine
 f4c0ea441d39fa54a6fe791408e87931889a37cb assets/eln/models/item/alloy_ingot.json
 41c8d9c6ff804b8ca8397cfb3aed87e7a451bc5a assets/eln/models/item/alloy_plate.json
 fd323d20f1be3c4899d7e30d66c47b5941609713 assets/eln/models/item/alloy_tank.json
+2d0f8bbd0fdcd82366df1bd7917ed363ff43de6b assets/eln/models/item/alloy_tank_minecart.json
 787f4d35cfe11e2af6678238d90309b79282f56a assets/eln/models/item/amplifier.json
 3ea096a3d6bcf952b5362fc0cbe66eadeb380f29 assets/eln/models/item/amplifier_3d.json
 d7a070eecca4ab4eaba76d17551d7c0844df9737 assets/eln/models/item/analog_gauge.json
@@ -799,6 +805,7 @@ a90a41cfb3c84aebaec96c6deb742722896a839f assets/eln/models/item/industrial_resin
 b5949fe001bb7915d5c219a56ec8a8aa59abd64a assets/eln/models/item/iron_dust.json
 6ee852843c5ce8c9b8ee81b3593e09311b85c931 assets/eln/models/item/iron_plate.json
 dd1f8509979e613f461e441306a3dd80acfd43d3 assets/eln/models/item/iron_tank.json
+f6185edd3db1bcbd6cad80b8ec8a367c45aacaf6 assets/eln/models/item/iron_tank_minecart.json
 8c73426f3430842b5c382fd4e2b88340bfb87d28 assets/eln/models/item/item_creative_tab.json
 a0b94066fa0caf1f4d06dc9ee4537af59c4b7a5d assets/eln/models/item/janet_rom_chip.json
 cbea44e4b7bd2d1574780c49e7921f3b9dcfa444 assets/eln/models/item/jk_flip_flop_chip.json
@@ -1036,6 +1043,7 @@ fd7950c5f1f5119d95e33f7d5a0de3b1515130c9 assets/eln/models/item/suspended_lamp_s
 d09d66966d38c7d8b9aba52800800cb443f20692 assets/eln/models/item/suspended_lamp_socket_3d.json
 335903a70d1b489f7a84b769812d7bbaca4f6761 assets/eln/models/item/tachometer.json
 22abfcf9f8400170ba63e5adc5d25208730066be assets/eln/models/item/tachometer_3d.json
+d15b6d8068b73c686f4741b62cfbacee54f5f3d0 assets/eln/models/item/tank_loading_station.json
 96b2f9c7c5944bbae61b7464eaa0be666cbcd126 assets/eln/models/item/temperature_probe.json
 16651a5d4d24d00cff8f9af2775aa5439683b63e assets/eln/models/item/terrain_bike.json
 9f9a1bd7c1c2283619e182ca539bd3cacf4f5de1 assets/eln/models/item/thermal_insulation.json

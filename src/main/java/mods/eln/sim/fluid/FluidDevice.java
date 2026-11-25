@@ -5,7 +5,8 @@ import java.util.List;
 /**
  * Something with fluid volumes in the world (a boiler, a turbine, later pipes and tanks): its nodes, the ports where
  * they meet a neighbour, and vents to the air. The world (mods.eln.fluid.FluidWorld) joins devices whose ports face
- * each other into networks and steps them; a device is in the world while its EA node is in the simulation.
+ * each other into networks and steps them; a device is in the world while its EA node is in the simulation (the Tank
+ * Loading Station, a block entity and no node: while a cart is docked).
  */
 public interface FluidDevice {
     /** Devices couple only within one level (any key that tells levels apart). */

@@ -27,6 +27,14 @@ architecture.md.
   keeps), and it places back with it; filled ones stack to 1, empty ones are plain (persistence.md).
   Recipes name a tank through NeoForge's component ingredient with `"components": {"!eln:tank_contents": {}}` (must not
   have it; `ElnRecipesBase.itemIngredient`): a filled tank is no ingredient, so crafting can't delete its contents.
+- Tank Minecarts (`ElnRegistry.IRON_TANK_MINECART`, `ALLOY_TANK_MINECART`, entity `oil/TankCart`; Baughn 2026-11-25,
+  todo #611): a minecart and an empty tank (shapeless); broken, a minecart and the tank with its contents. The Tank
+  Loading Station (`TANK_STATION`, `oil/TankStationBlock`; iron, a hopper over a powered rail): a rail (block tags
+  `minecraft:rails`, item tag too, `mineable/pickaxe`; loot table in `src/main/resources`) with a flange on each side
+  across the track; a cart standing on it is a vessel on those flanges until it leaves; unpowered it holds the cart,
+  powered it lets it go; a comparator reads 0 no cart, 1 no liquid, 2..14 by liquid, 15 at 90 %. The hidden
+  `tank_cart_load` block is the cart's display block (its tank). Icons `tools/icons/vanilla/families/tank_carts.py`.
+  Details: porting-notes.md.
 - `src/main/java/mods/eln/client/ItemTooltips.java` (client): the descriptor's 1.12 `addInformation` lines on
   `ItemTooltipEvent`. A descriptor that throws is logged once, then skipped. Test: `gametest/cases/TooltipCases`.
 - Packages: `item/` (lamps, fuses, cores, upgrades, scanners...), `item/electricalitem/` (batteries, tools, E-Coal

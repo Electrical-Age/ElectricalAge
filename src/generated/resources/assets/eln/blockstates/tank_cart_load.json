@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "alloy=false": {
+      "model": "eln:block/tank_cart_load_iron",
+      "y": 90
+    },
+    "alloy=true": {
+      "model": "eln:block/tank_cart_load_alloy",
+      "y": 90
+    }
+  }
+}

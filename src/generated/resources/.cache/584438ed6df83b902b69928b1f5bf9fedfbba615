@@ -1,4 +1,4 @@
-// 26.3	2026-11-25T16:34:55.081640014	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-25T19:01:49.631273106	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 98be7e719755f1d65131e906daa7a98b081c8ce8 data/eln/advancement/recipes/misc/230v_air_blower.json
@@ -74,6 +74,7 @@ fa365aabe999e77b03e64373107eb501cad2b094 data/eln/advancement/recipes/misc/advan
 f70b299049c176c75a99881d9bb884024c4a16e1 data/eln/advancement/recipes/misc/allmeter.json
 44d9994058ce6f90ef2b7f32ea0381792d6ad2ec data/eln/advancement/recipes/misc/alloy_dust.json
 46a1bc5bf44016039d5a7b278377fac0d516c730 data/eln/advancement/recipes/misc/alloy_tank.json
+a1cf82595d006f75f0f822cd2b753d3b0749e75d data/eln/advancement/recipes/misc/alloy_tank_minecart.json
 d5fb6b8e7356d15e8befa93dd2868cd5e615f99c data/eln/advancement/recipes/misc/amplifier.json
 680024760755705f28db20f9c14229ef76a77158 data/eln/advancement/recipes/misc/analog_vumeter.json
 8aa35baf293072557ea622599e4320ce44c2f2fd data/eln/advancement/recipes/misc/analog_vumeter_2.json
@@ -184,6 +185,7 @@ d198aa5f080fdcdca5072523cf2e55fe56c2d598 data/eln/advancement/recipes/misc/hot_b
 9b8601e87485588a1d3f04b45278c4988b733e06 data/eln/advancement/recipes/misc/industrial_resin_collector.json
 23e7e1a3c03fa30b6de61225a6f5a79bb8c48b5e data/eln/advancement/recipes/misc/iron_cable.json
 caa773201e3270ec7194fa6ad69acb7e3b4f7c13 data/eln/advancement/recipes/misc/iron_tank.json
+07738cf2223caefefdafdcd9b48dfdddcb85a1c2 data/eln/advancement/recipes/misc/iron_tank_minecart.json
 594b66a9bcba4caa1404e3f5a46caea38718bd95 data/eln/advancement/recipes/misc/janet_rom_chip.json
 74456d14bc1de3c51ca612ecc6e5b67ec8d20996 data/eln/advancement/recipes/misc/jk_flip_flop_chip.json
 898d97ed54ccf9a038e21587c74511817611f4ce data/eln/advancement/recipes/misc/joint.json
@@ -325,6 +327,7 @@ febda46518aac7a1a3b44f912d4bf97add471642 data/eln/advancement/recipes/misc/steam
 6eb149d68fe73de4c46fa56fc4ad01e8303f8d49 data/eln/advancement/recipes/misc/street_light.json
 8c7779a14aa260ae9e6e6fd490c679ba77c96e9f data/eln/advancement/recipes/misc/suspended_lamp_socket.json
 cd249cd9cc2d5f0682bd91cba7bbc7732797f160 data/eln/advancement/recipes/misc/tachometer.json
+ad5b3fddf48414439ada82e4e6b7873ea2fcf5bb data/eln/advancement/recipes/misc/tank_loading_station.json
 95fdaa08550153fb31f584f8fdcd9049735ac618 data/eln/advancement/recipes/misc/temperature_probe.json
 f0253581b66ab9981d592b8d55f9b07f10edd060 data/eln/advancement/recipes/misc/terrain_bike.json
 ee029a2dfa893a338f3cd2f42471b733e9d1d11b data/eln/advancement/recipes/misc/thermal_insulation.json
@@ -457,6 +460,7 @@ a423457ff31535b559770376ebc14b04c271f5e8 data/eln/recipe/advanced_machine_block.
 23dc3a28332b359aee832565c162e5f1e53db807 data/eln/recipe/allmeter.json
 3195eb3d865c65466172a7fbd6ac9ed00fbc5c40 data/eln/recipe/alloy_dust.json
 46e58385304e0c25757994edeaed6661cd245524 data/eln/recipe/alloy_tank.json
+35ac8078937c474f67bb787d9614d145f9d3130c data/eln/recipe/alloy_tank_minecart.json
 df6fff4b10786a0a7c9cec342b128d16cceeb85d data/eln/recipe/amplifier.json
 ef281e1729ad0a2753e9bc34241a5dd3e55b2492 data/eln/recipe/analog_vumeter.json
 e174baf2191aceb8d51d7d0f30c0d4b2a17c0d9f data/eln/recipe/analog_vumeter_2.json
@@ -567,6 +571,7 @@ c03c6b5a7cb7b8e05dcfb00e52be4720905f56d3 data/eln/recipe/generator.json
 7477e2b0fcc3a058e82c51f76fcf597019a42361 data/eln/recipe/industrial_resin_collector.json
 441236a83e9903671ee085ecd8705c19a822f2ac data/eln/recipe/iron_cable.json
 4b9f9ef5fa11f713b714c8dd328c65558f315235 data/eln/recipe/iron_tank.json
+c2f4a337fc63ea0c6ee4feafff3f2e0b55dafa9d data/eln/recipe/iron_tank_minecart.json
 ea42d036d4911bc6d7b3539c2c241dae7182251f data/eln/recipe/janet_rom_chip.json
 06a223dc3fee3d2f1bc82751b232279336ff98fb data/eln/recipe/jk_flip_flop_chip.json
 e6776792e8a688b133e4ee88f8ec981d5c41d46e data/eln/recipe/joint.json
@@ -708,6 +713,7 @@ c71851d4cc0ce5f27eace47575664cb1f3ac2650 data/eln/recipe/still_pot.json
 f4f9406ede6ea92137dd5caf98a20da982804e2e data/eln/recipe/street_light.json
 2dd44bbf82dca6fe077678b44dfae6276ea32cf7 data/eln/recipe/suspended_lamp_socket.json
 bc6f705dcd98d0320791535c98937a868e5c2998 data/eln/recipe/tachometer.json
+c5ce51228e50dcfd3ab98f7d4bfcec8241104603 data/eln/recipe/tank_loading_station.json
 d3c9be2a659332bf91a00ce7d8970f72a6fbd853 data/eln/recipe/temperature_probe.json
 cc117cbb2a25ed6e3bfaafad358dcf90f9253c06 data/eln/recipe/terrain_bike.json
 ad1c5258b30328edec6333acc45bcc1cba8d78e1 data/eln/recipe/thermal_insulation.json

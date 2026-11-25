@@ -73,7 +73,15 @@ public final class FluidPlacement {
         return out;
     }
 
-    /** The fluid ports on a block: a voxel block's pipe ends, a device's ports, a multiblock's ports on that block. */
+    /**
+     * A block entity with fluid ports that is not an EA node (the Tank Loading Station: a rail, so a vanilla block): its
+     * ports as pipes are placed against them, whether or not it is in the fluid world now.
+     */
+    public interface PortBlockEntity {
+        java.util.List<FluidDevice.FluidPort> placementPorts();
+    }
+
+    /** The fluid ports on a block: a voxel block's pipe ends, a device's ports, a multiblock's ports on that block, a PortBlockEntity's. */
     public static java.util.List<FluidDevice.FluidPort> portsAt(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
         java.util.List<FluidDevice.FluidPort> ports = new java.util.ArrayList<>();
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
@@ -83,6 +91,9 @@ public final class FluidPlacement {
         else if (n instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof GhostPortHost h) ports.addAll(h.portsAt(pos.asLong()));
         else if (n instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof FluidDevice d) ports.addAll(d.fluidPorts());
         else if (n instanceof GhostPortHost g) ports.addAll(g.portsAt(pos.asLong()));
+        // (a block that is no EA node: a block entity with flanges, the Tank Loading Station, which must be a rail; only
+        // in a loaded chunk, which getBlockEntity would load)
+        else if (n == null && level.isLoaded(pos) && level.getBlockEntity(pos) instanceof PortBlockEntity b) ports.addAll(b.placementPorts());
         return ports;
     }
 }

@@ -42,6 +42,9 @@ public class ElnJadePlugin implements IWailaPlugin {
         // (a multiblock's other cells: its owner's lines, as on the owner's own block)
         registration.registerBlockDataProvider(Server.INSTANCE, mods.eln.ghost.GhostBlock.class);
         registration.registerBlockDataProvider(MachineServer.INSTANCE, BlockEntity.class);
+        // (the Tank Loading Station, a rail and no node: its docked cart's lines; the Tank Minecart itself)
+        registration.registerBlockDataProvider(Server.INSTANCE, mods.eln.oil.TankStationEntity.class);
+        registration.registerEntityDataProvider(CartServer.INSTANCE, mods.eln.oil.TankCart.class);
     }
 
     @Override
@@ -49,10 +52,13 @@ public class ElnJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(Client.INSTANCE, NodeBlock.class);
         registration.registerBlockComponent(Client.INSTANCE, mods.eln.ghost.GhostBlock.class);
         registration.registerBlockComponent(MachineClient.INSTANCE, Block.class);
+        registration.registerBlockComponent(Client.INSTANCE, mods.eln.oil.TankStationBlock.class);
+        registration.registerEntityComponent(CartClient.INSTANCE, mods.eln.oil.TankCart.class);
     }
 
     /** The device's lines, ordered: key TAB value. */
     static Map<String, String> lines(BlockAccessor acc, boolean details) {
+        if (acc.getBlockEntity() instanceof mods.eln.oil.TankStationEntity station) return station.waila();
         if (!(acc.getBlockEntity() instanceof NodeBlockEntity be) || !(be.getNode() instanceof mods.eln.node.NodeBase node)) return Map.of();
         if (node instanceof mods.eln.node.voxel.VoxelNode v) {
             // an element hosted there under the crosshair, else the parts
@@ -175,9 +181,7 @@ public class ElnJadePlugin implements IWailaPlugin {
                 m = new java.util.LinkedHashMap<>(m);
                 m.put(mods.eln.i18n.I18N.tr("Ambient"), mods.eln.misc.Utils.plotCelsius("", mods.eln.sim.Ambient.relative(acc.getLevel(), acc.getPosition())));
             }
-            ListTag list = new ListTag();
-            for (var e : m.entrySet()) list.add(StringTag.valueOf(e.getKey() + "\t" + e.getValue()));
-            tag.put("elnProbe", list);
+            tag.put("elnProbe", list(m));
         }
 
         @Override
@@ -200,11 +204,7 @@ public class ElnJadePlugin implements IWailaPlugin {
             var list = acc.getServerData().getListOrEmpty("elnProbe");
             boolean details = mods.eln.Eln.wailaEasyMode || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
             int n = details ? list.size() : Math.min(HEADLINE, list.size());
-            for (int i = 0; i < n; i++) {
-                String s = list.getStringOr(i, "");
-                int t = s.indexOf('\t');
-                tooltip.add(t < 0 ? Component.literal(s) : Component.literal(s.substring(0, t) + ": ").append(Component.literal(s.substring(t + 1).trim())));
-            }
+            addLines(tooltip, list, n);
         }
 
         @Override
@@ -230,9 +230,7 @@ public class ElnJadePlugin implements IWailaPlugin {
                 return;   // (a block mid-change: no lines this time)
             }
             if (m.isEmpty()) return;
-            ListTag list = new ListTag();
-            for (var e : m.entrySet()) list.add(StringTag.valueOf(e.getKey() + "\t" + e.getValue()));
-            tag.put("elnMachine", list);
+            tag.put("elnMachine", list(m));
         }
 
         @Override
@@ -248,11 +246,7 @@ public class ElnJadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor acc, IPluginConfig config) {
             var list = acc.getServerData().getListOrEmpty("elnMachine");
-            for (int i = 0; i < list.size(); i++) {
-                String s = list.getStringOr(i, "");
-                int t = s.indexOf('\t');
-                tooltip.add(t < 0 ? Component.literal(s) : Component.literal(s.substring(0, t) + ": ").append(Component.literal(s.substring(t + 1).trim())));
-            }
+            addLines(tooltip, list, list.size());
         }
 
         @Override
@@ -260,4 +254,59 @@ public class ElnJadePlugin implements IWailaPlugin {
             return MACHINE_UID;
         }
     }
+
+    /** Lines as sent: key TAB value. */
+    static ListTag list(Map<String, String> m) {
+        ListTag list = new ListTag();
+        for (var e : m.entrySet()) list.add(StringTag.valueOf(e.getKey() + "\t" + e.getValue()));
+        return list;
+    }
+
+    /** The first n lines sent (key TAB value) as "key: value". */
+    static void addLines(ITooltip tooltip, ListTag list, int n) {
+        for (int i = 0; i < n; i++) {
+            String s = list.getStringOr(i, "");
+            int t = s.indexOf('\t');
+            tooltip.add(t < 0 ? Component.literal(s) : Component.literal(s.substring(0, t) + ": ").append(Component.literal(s.substring(t + 1).trim())));
+        }
+    }
+
+    /** A Tank Minecart: its tank's lines (TankCart.waila), from the server. */
+    enum CartServer implements IServerDataProvider<snownee.jade.api.EntityAccessor> {
+        INSTANCE;
+
+        @Override
+        public void appendServerData(CompoundTag tag, snownee.jade.api.EntityAccessor acc) {
+            if (!(acc.getEntity() instanceof mods.eln.oil.TankCart c)) return;
+            try {
+                tag.put("elnProbe", list(c.waila()));
+            } catch (RuntimeException e) {
+                // (a cart mid-change: no lines this time)
+            }
+        }
+
+        @Override
+        public Identifier getUid() {
+            return CART_UID;
+        }
+    }
+
+    /** The cart's lines: a headline, all of them while sneaking or with probe.details, as on a node. */
+    enum CartClient implements snownee.jade.api.IEntityComponentProvider {
+        INSTANCE;
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, snownee.jade.api.EntityAccessor acc, IPluginConfig config) {
+            var list = acc.getServerData().getListOrEmpty("elnProbe");
+            boolean details = mods.eln.Eln.wailaEasyMode || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
+            addLines(tooltip, list, details ? list.size() : Math.min(HEADLINE, list.size()));
+        }
+
+        @Override
+        public Identifier getUid() {
+            return CART_UID;
+        }
+    }
+
+    static final Identifier CART_UID = Identifier.fromNamespaceAndPath("eln", "tank_minecart");
 }

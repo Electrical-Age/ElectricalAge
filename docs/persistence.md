@@ -16,6 +16,7 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 | Oil ponds done | vanilla SavedData `eln:oil_ponds` (codec key `lakes`: the oil lakes whose pond was placed or skipped) | `oil/OilPonds` |
 | Tutorial sign texts | `<world>/EA/tutorialSign.txt`, read only (the `.xml` reader is commented out) | `sixnode/tutorialsign/TutorialSignElement` via `Utils.readMapFile` |
 | Block entities | nothing persistent | `node/NodeBlockEntity` |
+| Tank Minecart contents | the entity's own data, key `tank` (in the chunk) | `oil/TankCart` |
 | Machines at other mods' block entities (Machine API) | that block entity's NeoForge data attachment `eln:machine`, in the chunk | `api/impl/MachineData` |
 
 - `<dim>` = `misc/Dimensions.id(level)`: overworld 0, nether -1, end 1, others the hash of the dimension id.
@@ -135,6 +136,11 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   entities, chests) and synced to clients. Placed, it goes through `FluidSaves.array`/`restore` as a saved node does
   (a missing `Fv` is a legacy energy, an unknown species key is kept, corrupt contents heal at the ambient). A tank item
   without it is a fresh tank. Placed tanks save as before (`vessel*`).
+- A Tank Minecart (entity `eln:iron_tank_minecart` / `eln:alloy_tank_minecart`, `oil/TankCart`; Baughn 2026-11-25):
+  vanilla's minecart data plus `tank`, its contents as the tank item's component (`TankContents.CODEC`: `W`, `A`, `U`,
+  `S`, `Fv`, `V`, and what it read), restored through `FluidSaves` as a tank item is. Absent: a fresh cart (air at
+  1 atm). Saved with the entity in the chunk. Docked or not makes no difference: the cart always holds its own node;
+  the Tank Loading Station's block entity saves nothing and docks the cart again when both are loaded.
 - Oil pump and tar sand separator (2026-11-11): each one's tank is a fluid node saved as `vessel*` (with `vesselFv`),
   and its outlet node behind the flange keeps the old PortBridge stub's key (`discharge*`, `outlet*`), so a stub's
   contents load as the outlet's. An older save's `tank*` (an 8- or 4-bucket fluid tank) is read only when `vesselW` is

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "H": "minecraft:hopper",
+    "R": "minecraft:powered_rail",
+    "i": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "iHi",
+    " R "
+  ],
+  "result": {
+    "id": "eln:tank_loading_station"
+  }
+}

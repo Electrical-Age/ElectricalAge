@@ -72,6 +72,11 @@ public final class ElnClient {
             e.registerEntityRenderer(ElnRegistry.REPLICATOR.get(), mods.eln.client.entity.ReplicatorRenderer::new);
             e.registerEntityRenderer(ElnRegistry.ELECTRIC_BIKE_ENTITY.get(), mods.eln.client.entity.BikeRenderer::new);
             e.registerEntityRenderer(ElnRegistry.TERRAIN_BIKE_ENTITY.get(), ctx -> new mods.eln.client.entity.BikeRenderer(ctx, true));
+            // the Tank Minecarts: vanilla's minecart, their tank as its display block (TankCartLoadBlock), as a chest minecart's chest
+            e.registerEntityRenderer(ElnRegistry.IRON_TANK_MINECART_ENTITY.get(),
+                ctx -> new net.minecraft.client.renderer.entity.MinecartRenderer(ctx, net.minecraft.client.model.geom.ModelLayers.CHEST_MINECART));
+            e.registerEntityRenderer(ElnRegistry.ALLOY_TANK_MINECART_ENTITY.get(),
+                ctx -> new net.minecraft.client.renderer.entity.MinecartRenderer(ctx, net.minecraft.client.model.geom.ModelLayers.CHEST_MINECART));
         });
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent.class,
             e -> e.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("eln", "device"),

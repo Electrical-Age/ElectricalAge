@@ -260,6 +260,36 @@ public final class ElnRegistry {
     public static final DeferredItem<mods.eln.bike.ElectricBikeItem> TERRAIN_BIKE =
         registerListed("terrain_bike", p -> new mods.eln.bike.ElectricBikeItem(p, mods.eln.bike.BikeType.TERRAIN), p -> p.stacksTo(1));
 
+    /**
+     * The Tank Minecarts (Baughn 2026-11-25, todo #611): one entity class (TankCart), a type per tank tier, a minecart's
+     * size; their items are placed on rails as minecarts are.
+     */
+    public static final DeferredHolder<net.minecraft.world.entity.EntityType<?>, net.minecraft.world.entity.EntityType<mods.eln.oil.TankCart>> IRON_TANK_MINECART_ENTITY =
+        tankCartType("iron_tank_minecart");
+    public static final DeferredHolder<net.minecraft.world.entity.EntityType<?>, net.minecraft.world.entity.EntityType<mods.eln.oil.TankCart>> ALLOY_TANK_MINECART_ENTITY =
+        tankCartType("alloy_tank_minecart");
+    public static final DeferredItem<mods.eln.oil.TankCartItem> IRON_TANK_MINECART =
+        registerListed("iron_tank_minecart", p -> new mods.eln.oil.TankCartItem(IRON_TANK_MINECART_ENTITY.get(), false, p), p -> p.stacksTo(1));
+    public static final DeferredItem<mods.eln.oil.TankCartItem> ALLOY_TANK_MINECART =
+        registerListed("alloy_tank_minecart", p -> new mods.eln.oil.TankCartItem(ALLOY_TANK_MINECART_ENTITY.get(), true, p), p -> p.stacksTo(1));
+    /** What a Tank Minecart carries, as its display block (TankCartLoadBlock): no item, never placed. */
+    public static final DeferredBlock<mods.eln.oil.TankCartLoadBlock> TANK_CART_LOAD = BLOCKS.registerBlock("tank_cart_load",
+        mods.eln.oil.TankCartLoadBlock::new, p -> p.mapColor(MapColor.METAL).noOcclusion().noLootTable());
+    /** The Tank Loading Station (TankStationBlock): a rail; its block entity couples a docked cart to its flanges. */
+    public static final DeferredBlock<mods.eln.oil.TankStationBlock> TANK_STATION = BLOCKS.registerBlock("tank_loading_station",
+        mods.eln.oil.TankStationBlock::new, p -> p.mapColor(MapColor.METAL).noCollision().strength(0.7f).sound(SoundType.METAL));
+    public static final DeferredItem<mods.eln.oil.TankStationItem> TANK_STATION_ITEM = registerListed("tank_loading_station",
+        p -> new mods.eln.oil.TankStationItem(TANK_STATION.get(), p), p -> p.useBlockDescriptionPrefix());
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<mods.eln.oil.TankStationEntity>> TANK_STATION_ENTITY =
+        BLOCK_ENTITIES.register("tank_loading_station", () -> new BlockEntityType<>(mods.eln.oil.TankStationEntity::new, TANK_STATION.get()));
+
+    private static DeferredHolder<net.minecraft.world.entity.EntityType<?>, net.minecraft.world.entity.EntityType<mods.eln.oil.TankCart>> tankCartType(String name) {
+        return ENTITY_TYPES.register(name, () -> net.minecraft.world.entity.EntityType.Builder
+            .<mods.eln.oil.TankCart>of(mods.eln.oil.TankCart::new, net.minecraft.world.entity.MobCategory.MISC)
+            .noLootTable().sized(0.98f, 0.7f).passengerAttachments(0.1875f).clientTrackingRange(8)
+            .build(net.minecraft.resources.ResourceKey.create(Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath(Eln.MODID, name))));
+    }
+
     /** 1.12 dropped a vanilla spawn egg tagged eln:replicator; 26.x eggs are per entity type. */
     public static final DeferredItem<net.minecraft.world.item.SpawnEggItem> REPLICATOR_SPAWN_EGG =
         registerListed("replicator_spawn_egg", net.minecraft.world.item.SpawnEggItem::new, p -> p.spawnEgg(REPLICATOR.get()));

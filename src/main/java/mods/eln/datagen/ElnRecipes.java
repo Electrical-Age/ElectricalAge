@@ -791,6 +791,17 @@ public final class ElnRecipes extends ElnRecipesBase {
             'i', stack(Items.IRON_INGOT),
             'P', stack(Items.GLASS_PANE)
         );
+        // the Tank Minecarts (Baughn 2026-11-25, todo #611): a minecart and an empty tank (a filled one is no ingredient,
+        // itemIngredient), and the Tank Loading Station that fills and empties them: a powered rail under a hopper
+        addShapelessRecipe(stack(mods.eln.registry.ElnRegistry.IRON_TANK_MINECART.get()), stack(Items.MINECART), findItemStack("Iron Tank"));
+        addShapelessRecipe(stack(mods.eln.registry.ElnRegistry.ALLOY_TANK_MINECART.get()), stack(Items.MINECART), findItemStack("Alloy Tank"));
+        addRecipe(stack(mods.eln.registry.ElnRegistry.TANK_STATION_ITEM.get()),
+            "iHi",
+            " R ",
+            'i', stack(Items.IRON_INGOT),
+            'H', stack(Items.HOPPER),
+            'R', stack(Items.POWERED_RAIL)
+        );
         addRecipe(findItemStack("Alloy Tank"),
             "aPa",
             "aTa",
