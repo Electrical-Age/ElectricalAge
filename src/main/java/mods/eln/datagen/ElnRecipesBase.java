@@ -209,10 +209,14 @@ public abstract class ElnRecipesBase {
         throw new IllegalArgumentException("ingredient " + o);
     }
 
-    /** An item as an ingredient; a tank only while it carries no contents (a filled one would lose them). */
+    /**
+     * An item as an ingredient; a tank only while it carries no contents (a filled one would lose them): NeoForge's
+     * component ingredient with eln:tank_contents removed, which means it must not have it ("!eln:tank_contents").
+     */
     static Ingredient itemIngredient(Item item) {
         if (item instanceof mods.eln.generic.IDescriptorItem d && d.getEaDescriptor() instanceof mods.eln.oil.TankDescriptor)
-            return mods.eln.oil.EmptyTankIngredient.of(item);
+            return net.neoforged.neoforge.common.crafting.DataComponentIngredient.of(false,
+                net.minecraft.core.component.DataComponentPatch.builder().remove(mods.eln.registry.ElnRegistry.TANK_CONTENTS.get()).build(), item);
         return Ingredient.of(item);
     }
 

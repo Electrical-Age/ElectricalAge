@@ -150,9 +150,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   no species but water and air, each under half a mB, and not over 1.1 atm (a hot pressurised gas stays, as Baughn
   asked). A tank over its burst pressure as it breaks (the neighbours a box's burst blasts apart) vents and drops plain.
   Placing refuses past the build height, outside the world border and where the player may not build, before the node
-  exists (it used to make a node with no block there and use up the item). A filled tank is no recipe ingredient (ingredient
-  `eln:empty_tank` in the Alloy Tank, steam cracker, heat exchanger and plant condenser recipes; the recipes are
-  otherwise unchanged). Every way the block goes drops it (a player, an explosion, other mods'
+  exists (it used to make a node with no block there and use up the item). A filled tank is no recipe ingredient (a component
+  ingredient without `eln:tank_contents` in the Alloy Tank, steam cracker, heat exchanger and plant condenser recipes;
+  the recipes are otherwise unchanged); the recipe book or JEI's "+" may still move a filled tank into the grid, which
+  then gives no result (nothing is lost). Every way the block goes drops it (a player, an explosion, other mods'
   breakers: the node drops it as the block goes, the device blocks have no loot table data, so a breaker that collects
   `getDrops` finds it on the ground), but not a burst; pistons can't move it. Middle-click gives a plain tank. Tanks in worlds are unchanged
   until broken. `tank_item_*`.

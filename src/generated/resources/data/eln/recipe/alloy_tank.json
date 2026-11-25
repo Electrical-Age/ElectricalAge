@@ -3,7 +3,10 @@
   "key": {
     "P": "minecraft:glass_pane",
     "T": {
-      "neoforge:ingredient_type": "eln:empty_tank",
+      "neoforge:ingredient_type": "neoforge:components",
+      "components": {
+        "!eln:tank_contents": {}
+      },
       "items": "eln:iron_tank"
     },
     "a": "eln:alloy_ingot"

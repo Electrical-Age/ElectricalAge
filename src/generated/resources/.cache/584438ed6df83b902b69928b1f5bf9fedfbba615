@@ -1,4 +1,4 @@
-// 26.3	2026-11-25T16:07:39.971144012	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-25T16:34:55.081640014	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 98be7e719755f1d65131e906daa7a98b081c8ce8 data/eln/advancement/recipes/misc/230v_air_blower.json
@@ -456,7 +456,7 @@ ebc391934a2473c53d31289ac62a39b93aca573f data/eln/recipe/advanced_energy_meter.j
 a423457ff31535b559770376ebc14b04c271f5e8 data/eln/recipe/advanced_machine_block.json
 23dc3a28332b359aee832565c162e5f1e53db807 data/eln/recipe/allmeter.json
 3195eb3d865c65466172a7fbd6ac9ed00fbc5c40 data/eln/recipe/alloy_dust.json
-7fb016ff38bbc00be0a6eb3bed34e8a9a46db94b data/eln/recipe/alloy_tank.json
+46e58385304e0c25757994edeaed6661cd245524 data/eln/recipe/alloy_tank.json
 df6fff4b10786a0a7c9cec342b128d16cceeb85d data/eln/recipe/amplifier.json
 ef281e1729ad0a2753e9bc34241a5dd3e55b2492 data/eln/recipe/analog_vumeter.json
 e174baf2191aceb8d51d7d0f30c0d4b2a17c0d9f data/eln/recipe/analog_vumeter_2.json
@@ -507,7 +507,7 @@ b99487bebe5fb5db55128da9327d630d8b0b2ade data/eln/recipe/copper_coil.json
 8c328672129b25913e931b652ce23f22576e63d7 data/eln/recipe/copper_thermal_cable.json
 836168ec2234349f8e92493da4fb6e2578ce81bc data/eln/recipe/copper_thermal_cable_2.json
 9643182e16d3d956fe122b811abe678bbfdec6ad data/eln/recipe/cost_oriented_battery.json
-a04e30b5406f920501d385ff61975bcdbbe01199 data/eln/recipe/counterflow_heat_exchanger.json
+4f07008ca57b004849083e5ade1cd314bbc0afd5 data/eln/recipe/counterflow_heat_exchanger.json
 ce6d0ac0cea12579d72058660fd90558a03db127 data/eln/recipe/current_oriented_battery.json
 e70d02238ffa719c088ac138dab88c1d69bfd4d5 data/eln/recipe/cyan_brush.json
 c40890deab3ed13bca080d4d8684932603c57add data/eln/recipe/d_flip_flop_chip.json
@@ -622,7 +622,7 @@ bf528ceabda211c42878a565139d3114c1da1119 data/eln/recipe/oscillator_chip.json
 c5b8082a0f4371b3a9d0d19015a5cb184cc23fcd data/eln/recipe/pid_regulator.json
 c31f1c59279d00c829341217db7ecf75091cf6fa data/eln/recipe/pink_brush.json
 c2b22523c777815fbe197d62d158005a661e04c7 data/eln/recipe/pipe_mixer.json
-1e36c9aee8dee728efbb2dfc02e6018adfde26bf data/eln/recipe/plant_steam_condenser.json
+aaa96b72700221435ddbc07bca93ac301d1f87a1 data/eln/recipe/plant_steam_condenser.json
 31bea419e6ecfe9febfd542ffead3424dfd77c2b data/eln/recipe/player_filter.json
 3c80941bae44b472e0d93d5fe5ef7a80ec3ed3a5 data/eln/recipe/pole_streetlight.json
 7c239492123b6ff4e3c8f7fd285f7b5ecf6a7c03 data/eln/recipe/polymeriser.json
@@ -699,7 +699,7 @@ f8d98570968cecc459a14f0cd820a44af3560cf9 data/eln/recipe/smelting_tungsten_dust.
 5bfee752b7a7f8c89009a59ae6e95f13ce11aacc data/eln/recipe/solar_tracker.json
 4ab93d287ce3eeee14c2bf3bb7c860f4ebacbd27 data/eln/recipe/standard_alarm.json
 c4a92d71ecc73f59ecdd4e92dba9ace4eaf4260b data/eln/recipe/steam_condenser.json
-97cee71e7998a266ef78f4844f128454699d3efd data/eln/recipe/steam_cracker.json
+08bc9298de05c03918e54252562b90c161e39c9e data/eln/recipe/steam_cracker.json
 de6b0d86f1b6a83a630f6f99c80a28f8adcf17e5 data/eln/recipe/steam_injection_wellhead.json
 ad38d8978faeb5e64094fb9e2d5f61f950b2a9c1 data/eln/recipe/steam_oven.json
 df4376d994f9e3513bbc771e3a99de8fe92cb599 data/eln/recipe/steam_turbine.json

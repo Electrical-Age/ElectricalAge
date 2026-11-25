@@ -60,11 +60,6 @@ public final class ElnRegistry {
     public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.core.component.DataComponentType<?>, net.minecraft.core.component.DataComponentType<mods.eln.oil.TankContents>> TANK_CONTENTS =
         DATA_COMPONENTS.register("tank_contents", () -> net.minecraft.core.component.DataComponentType.<mods.eln.oil.TankContents>builder()
             .persistent(mods.eln.oil.TankContents.CODEC).networkSynchronized(mods.eln.oil.TankContents.STREAM_CODEC).build());
-    public static final DeferredRegister<net.neoforged.neoforge.common.crafting.IngredientType<?>> INGREDIENT_TYPES =
-        DeferredRegister.create(net.neoforged.neoforge.registries.NeoForgeRegistries.Keys.INGREDIENT_TYPES, Eln.MODID);
-    /** A tank as a recipe ingredient only while it carries no contents (oil/EmptyTankIngredient). */
-    public static final net.neoforged.neoforge.registries.DeferredHolder<net.neoforged.neoforge.common.crafting.IngredientType<?>, net.neoforged.neoforge.common.crafting.IngredientType<mods.eln.oil.EmptyTankIngredient>> EMPTY_TANK_INGREDIENT =
-        INGREDIENT_TYPES.register("empty_tank", () -> new net.neoforged.neoforge.common.crafting.IngredientType<>(mods.eln.oil.EmptyTankIngredient.CODEC));
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Eln.MODID);
 
     /** Every EA item, in 1.12 id order (creative tab, tests). */
@@ -424,7 +419,6 @@ public final class ElnRegistry {
             })
             .build());
         DATA_COMPONENTS.register(modBus);
-        INGREDIENT_TYPES.register(modBus);
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
