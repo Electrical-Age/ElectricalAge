@@ -21,6 +21,9 @@ architecture.md.
   1.12's `drawEnergyBare`) or `descriptor.itemBar(stack)` when that is >= 0.
 - `src/main/java/mods/eln/generic/ItemNbt.java`: 1.12 item NBT lives in `DataComponents.CUSTOM_DATA`, content unchanged
   (e.g. `"energy"` in `item/electricalitem/BatteryItem.kt` and `ElectricalLampItem.kt`).
+- Item components (`ElnRegistry.DATA_COMPONENTS`): `eln:tank_contents`, a broken tank's contents (`oil/TankContents`;
+  Baughn 2026-11-25): an Iron or Alloy Tank broken drops with what it held, its tooltip reads it as Jade does
+  (Pressure, Contents), and it places back with it; filled ones stack to 1, empty ones are plain (persistence.md).
 - `src/main/java/mods/eln/client/ItemTooltips.java` (client): the descriptor's 1.12 `addInformation` lines on
   `ItemTooltipEvent`. A descriptor that throws is logged once, then skipped. Test: `gametest/cases/TooltipCases`.
 - Packages: `item/` (lamps, fuses, cores, upgrades, scanners...), `item/electricalitem/` (batteries, tools, E-Coal

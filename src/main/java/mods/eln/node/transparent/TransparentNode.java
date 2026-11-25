@@ -28,7 +28,7 @@ public class TransparentNode extends Node implements mods.eln.bus.BusPeer, mods.
     /** Middle-click: the machine, as its item (#161). */
     @Override
     public net.minecraft.world.item.ItemStack pickItem(net.minecraft.world.phys.BlockHitResult hit, net.minecraft.world.level.LevelReader level) {
-        return element == null ? net.minecraft.world.item.ItemStack.EMPTY : element.getDropItemStack();
+        return element == null ? net.minecraft.world.item.ItemStack.EMPTY : element.getPickItemStack();
     }
     public int elementId;
     public ServerPlayer removedByPlayer;
@@ -165,6 +165,7 @@ public class TransparentNode extends Node implements mods.eln.bus.BusPeer, mods.
 
             elementId = descriptor.parentItemDamage; // the 1.12 id, as in node NBT and client packets
             element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class, TransparentNodeDescriptor.class).newInstance(this, descriptor);
+            element.readItemStack(itemStack);
             element.initializeFromThat(side, entityLiving, mods.eln.generic.ItemNbt.get(itemStack));
             invalidateCapabilities();
         } catch (InstantiationException e) {

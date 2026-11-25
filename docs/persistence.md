@@ -127,6 +127,13 @@ ids that old worlds depend on. All of it is server side; clients get state only 
   is the legacy solver's: on load it is taken at the temperature the legacy Flash finds for it and recomputed by the
   core there (its vapour energies differ by up to ~40 kJ/kg), so nothing jumps. One-way: an older build reads the core's
   energies as its own.
+- A broken tank's item (Baughn 2026-11-25): the item component `eln:tank_contents` (`oil/TankContents`, codec keys
+  `W`, `A`, `U` (water and air kg, energy J, full doubles), `S` (other species by key, kg; absent if none), `Fv` (the
+  FluidSaves format the energy was taken in), `V` (the vessel's volume, m^3), and what it read when taken for its
+  tooltip: `kelvin`, `pascal`, `contents`, `composition`). Saved with the stack wherever stacks are (inventories, item
+  entities, chests) and synced to clients. Placed, it goes through `FluidSaves.array`/`restore` as a saved node does
+  (a missing `Fv` is a legacy energy, an unknown species key is kept, corrupt contents heal at the ambient). A tank item
+  without it is a fresh tank. Placed tanks save as before (`vessel*`).
 - Oil pump and tar sand separator (2026-11-11): each one's tank is a fluid node saved as `vessel*` (with `vesselFv`),
   and its outlet node behind the flange keeps the old PortBridge stub's key (`discharge*`, `outlet*`), so a stub's
   contents load as the outlet's. An older save's `tank*` (an 8- or 4-bucket fluid tank) is read only when `vesselW` is

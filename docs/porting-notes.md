@@ -141,6 +141,16 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   how many are piped. Each flange's nozzle runs in past the shell all round its bore and is closed at its end (it was
   cut at the shell's centre line, so the curving shell left gaps at its sides one could look into).
   `tank_flanges_where_piped`.
+- Tanks keep their contents when broken (Baughn 2026-11-25; also todo #592, the portable tank for mixed fluids: one
+  item, not two): a broken tank drops as its item carrying what it held (any mix, a partial fill, a gas; component
+  `eln:tank_contents`, `oil/TankContents`), frozen while carried, and places back with it exactly (so the same
+  temperature and pressure); placed against a box of its tier it joins it, the contents summed. A block of a box drops
+  its share by layer (`TankGroup.share`) and the rest keeps the rest. Filled tanks don't stack; one holding what a fresh
+  tank does (no liquid and no species but water and air, each under half a mB, and not over 1.1 atm) drops plain and
+  stacks, its air, vapour and traces gone. Every way the block goes drops it (a player, an explosion, other mods'
+  breakers: the node drops it as the block goes, the device blocks have no loot table data, so a breaker that collects
+  `getDrops` finds it on the ground), but not a burst; pistons can't move it. Middle-click gives a plain tank. Tanks in worlds are unchanged
+  until broken. `tank_item_*`.
 - Crude is a mixture (Baughn 2026-11-10): `eln:crude_oil` stays a fluid (buckets, the pump's tank, other mods), but in a
   node it is heavy oil 35 / diesel 25 / gasoline 20 / residue 15 / natural gas 5 % by mass (the species JSON's "mixture";
   sulphur counts in the residue). Live, with its gas, only from the oil pump's sealed line; from a bucket or any

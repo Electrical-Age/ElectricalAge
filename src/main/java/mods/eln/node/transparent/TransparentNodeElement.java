@@ -334,6 +334,15 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return null;
     }
 
+    /** Middle-click's item (TransparentNode.pickItem): the drop, unless the drop carries what a copy must not (a tank's contents). */
+    public ItemStack getPickItemStack() {
+        return getDropItemStack();
+    }
+
+    /** The placing stack, before initializeFromThat: for what an item carries outside its custom data (an item component). */
+    public void readItemStack(ItemStack stack) {
+    }
+
 
     public abstract ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu);
 

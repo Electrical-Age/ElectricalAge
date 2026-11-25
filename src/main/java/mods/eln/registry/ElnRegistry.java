@@ -54,6 +54,12 @@ public final class ElnRegistry {
     /** The electric bike's trunk (Baughn 2026-10-28). */
     public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.inventory.MenuType<?>, net.minecraft.world.inventory.MenuType<mods.eln.bike.BikeTrunkMenu>> BIKE_TRUNK_MENU =
         MENUS.register("electric_bike", () -> new net.minecraft.world.inventory.MenuType<>(mods.eln.bike.BikeTrunkMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
+    public static final DeferredRegister<net.minecraft.core.component.DataComponentType<?>> DATA_COMPONENTS =
+        DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, Eln.MODID);
+    /** A broken tank's contents (oil/TankContents; Baughn 2026-11-25): saved with the stack and synced to clients. */
+    public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.core.component.DataComponentType<?>, net.minecraft.core.component.DataComponentType<mods.eln.oil.TankContents>> TANK_CONTENTS =
+        DATA_COMPONENTS.register("tank_contents", () -> net.minecraft.core.component.DataComponentType.<mods.eln.oil.TankContents>builder()
+            .persistent(mods.eln.oil.TankContents.CODEC).networkSynchronized(mods.eln.oil.TankContents.STREAM_CODEC).build());
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Eln.MODID);
 
     /** Every EA item, in 1.12 id order (creative tab, tests). */
@@ -412,6 +418,7 @@ public final class ElnRegistry {
                 TAB_EXTRAS.forEach(i -> out.accept(i.get()));
             })
             .build());
+        DATA_COMPONENTS.register(modBus);
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);

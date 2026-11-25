@@ -359,6 +359,46 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
             loaded = mods.eln.fluid.FluidSaves.array(nbt, "vessel");
     }
 
+    /**
+     * Baughn 2026-11-25: a broken tank drops as an item that keeps its contents (any mix, a partial fill, a gas), frozen
+     * until placed back; a block of a box takes its share, by layer (TankGroup.share), and the rest keeps the rest. One
+     * that holds what a fresh tank does (TankContents.empty) drops plain, so it stacks. Called as the block breaks, before
+     * the node leaves the box (disconnectJob), which then re-forms the rest from their shares without this one's.
+     */
+    @Override
+    public net.minecraft.world.item.ItemStack getDropItemStack() {
+        net.minecraft.world.item.ItemStack stack = desc.newItemStack();
+        TankContents c = takeContents();
+        if (c != null) {
+            stack.set(mods.eln.registry.ElnRegistry.TANK_CONTENTS.get(), c);
+            stack.set(net.minecraft.core.component.DataComponents.MAX_STACK_SIZE, 1);   // (filled tanks don't stack)
+        }
+        return stack;
+    }
+
+    /** Its contents (its share of a box), or null if it holds what a fresh tank does. */
+    TankContents takeContents() {
+        if (own == null) return null;
+        // (what buckets and other mods' pipes put in or took out since the last step first: a box's go through its master's view)
+        for (TankElement m : group == null ? List.of(this) : group.members) m.syncWater();
+        if (group != null) group.writeBack();
+        own.update();
+        return TankContents.empty(own) ? null : TankContents.of(own);
+    }
+
+    /** Middle-click gives a plain tank: a copy of its contents is not a pick. */
+    @Override
+    public net.minecraft.world.item.ItemStack getPickItemStack() {
+        return desc.newItemStack();
+    }
+
+    /** A tank item's contents (TankContents) go into the placed tank as they were taken: initialize restores them. */
+    @Override
+    public void readItemStack(net.minecraft.world.item.ItemStack stack) {
+        TankContents c = stack.get(mods.eln.registry.ElnRegistry.TANK_CONTENTS.get());
+        if (c != null) loaded = c.saved();
+    }
+
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
