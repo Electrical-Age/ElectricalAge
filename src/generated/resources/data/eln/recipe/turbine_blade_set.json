@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "P": "eln:iron_plate",
+    "P": "#eln:high_quality_plates/iron",
     "S": "minecraft:stick"
   },
   "pattern": [

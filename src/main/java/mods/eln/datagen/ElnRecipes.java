@@ -748,7 +748,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'c', findItemStack("Copper Coil"),
             'F', findItemStack("Average Ferromagnetic Core"),
             'J', findItemStack("Joint"),
-            'I', findItemStack("Iron Plate"),
+            'I', "plateIron",
             'M', findItemStack("Advanced Machine Block"),
             'E', findItemStack("Copper Cable")
         );
@@ -757,7 +757,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "PBP",
             "BJB",
             "PMP",
-            'P', findItemStack("Alloy Plate"),
+            'P', "plateAlloy",
             'B', findItemStack("Turbine Blade Set"),
             'J', findItemStack("Joint"),
             'M', findItemStack("Advanced Machine Block")
@@ -837,7 +837,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             "BJB",
             "BMB",
             'B', findItemStack("Turbine Blade Set"),
-            'I', findItemStack("Iron Plate"),
+            'I', "plateIron",
             'J', findItemStack("Joint"),
             'M', findItemStack("Advanced Machine Block")
         );
@@ -863,15 +863,15 @@ public final class ElnRecipes extends ElnRecipesBase {
             "P  ",
             " S ",
             "  P",
-            'P', findItemStack("Iron Plate"),
+            'P', "plateIron",
             'S', stack(Items.STICK)
         );
         addRecipe(findItemStack("Hot Blade Set"),
-            "T T",
+            "T  ",
             " A ",
-            "T T",
+            "  T",
             'T', findItemStack("Tungsten Ingot"),
-            'A', findItemStack("Alloy Plate")
+            'A', "plateAlloy"
         );
         // the gas turbine: a compressor (cold blades), a combustor, the hot section, and a starter motor
         addRecipe(findItemStack("Gas Turbine"),
@@ -881,7 +881,7 @@ public final class ElnRecipes extends ElnRecipesBase {
             'B', findItemStack("Turbine Blade Set"),
             'C', findItemStack("Combustion Chamber"),
             'H', findItemStack("Hot Blade Set"),
-            'P', findItemStack("Alloy Plate"),
+            'P', "plateAlloy",
             'J', findItemStack("Joint"),
             'e', findItemStack("Electrical Motor"),
             'M', findItemStack("Advanced Machine Block")

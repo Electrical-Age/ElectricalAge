@@ -4,7 +4,7 @@
     "B": "eln:turbine_blade_set",
     "J": "eln:joint",
     "M": "eln:advanced_machine_block",
-    "P": "eln:alloy_plate"
+    "P": "#eln:high_quality_plates/alloy"
   },
   "pattern": [
     "PBP",

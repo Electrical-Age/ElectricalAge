@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "B": "eln:turbine_blade_set",
-    "I": "eln:iron_plate",
+    "I": "#eln:high_quality_plates/iron",
     "J": "eln:joint",
     "M": "eln:advanced_machine_block"
   },

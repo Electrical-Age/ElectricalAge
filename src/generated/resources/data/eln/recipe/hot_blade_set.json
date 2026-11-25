@@ -1,13 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "A": "eln:alloy_plate",
+    "A": "#eln:high_quality_plates/alloy",
     "T": "eln:tungsten_ingot"
   },
   "pattern": [
-    "T T",
+    "T  ",
     " A ",
-    "T T"
+    "  T"
   ],
   "result": {
     "id": "eln:hot_blade_set"
