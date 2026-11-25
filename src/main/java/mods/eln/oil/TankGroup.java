@@ -80,31 +80,55 @@ public final class TankGroup {
 
     void writeBack() {
         if (java.util.Arrays.equals(written, stamp())) return;
+        List<FluidNode> owns = new ArrayList<>(members.size());
+        int[] rows = new int[members.size()];
+        for (int i = 0; i < members.size(); i++) {
+            owns.add(members.get(i).own);
+            rows[i] = members.get(i).node.coordonate.y - y0;
+        }
+        share(node, sy, owns, rows);
+        written = stamp();
+    }
+
+    /**
+     * writeBack's split: node's contents into the blocks' shares owns (rows[i]: own i's layer, 0 the bottom, of sy).
+     * Over-full (more liquid at its nominal density than FULL of every layer holds, as in a box pumped full, its liquid
+     * compressed against the walls) every block takes its volume's share of both phases: the layered split took the liquid
+     * share as vL / V, over 1 once vL passed V, and the gas share (1 - that) / (V - vL, floored at 1e-12) came out hugely
+     * negative: negative air, the shares' energy NaN, and the box reloaded from them fell 1 K per update to 120 K
+     * (Incognito 2026-11-25).
+     */
+    static void share(FluidNode node, int sy, List<FluidNode> owns, int[] rows) {
         node.update();
         // (each layer at most FULL liquid, so no block is left without gas: a one-block tank of only liquid is stiff, and
         // burst when it next stepped; past that, the same fill everywhere)
         double vL = node.liquidVolume(), vG = Math.max(1e-12, node.volume - vL), level = vL / (FULL * node.volume) * sy;
+        boolean overFull = level > sy;
         double T = node.T(), sum = 0;
         int n = node.speciesBound();
-        for (TankElement m : members) {
-            int j = m.node.coordonate.y - y0;
-            double lf = level > sy ? vL / node.volume : FULL * Math.max(0, Math.min(1, level - j));   // (the share of this block the liquid fills)
-            double sL = vL > 0 ? lf * m.own.volume / vL : 0, sG = (1 - lf) * m.own.volume / vG;
-            var own = m.own;
-            own.mWater = node.mLiquid() * sL + node.mVapour() * sG;
-            own.mAir = node.mAir * sG;
+        for (int i = 0; i < owns.size(); i++) {
+            FluidNode own = owns.get(i);
+            double sL, sG;
+            if (overFull) sL = sG = own.volume / node.volume;
+            else {
+                double lf = FULL * Math.max(0, Math.min(1, level - rows[i]));   // (the share of this block the liquid fills)
+                sL = vL > 0 ? lf * own.volume / vL : 0;
+                sG = Math.max(0, (1 - lf) * own.volume / vG);
+            }
+            own.mWater = Math.max(0, node.mLiquid() * sL + node.mVapour() * sG);
+            own.mAir = Math.max(0, node.mAir * sG);
             double[] ex = n > 2 ? new double[n - 2] : null;
-            for (int i = 2; i < n; i++) ex[i - 2] = node.liquid(i) * sL + node.vapour(i) * sG;
+            for (int s = 2; s < n; s++) ex[s - 2] = Math.max(0, node.liquid(s) * sL + node.vapour(s) * sG);
             own.extra = ex;
             own.energy = own.energyAt(T);
             sum += own.energy;
         }
+        // (each at the vessel's temperature, scaled so the shares sum to its energy exactly)
         double k = Math.abs(sum) > 1e-12 ? node.energy / sum : 1;
-        for (TankElement m : members) {
-            m.own.energy *= k;
-            m.own.update();
+        for (FluidNode own : owns) {
+            own.energy *= k;
+            own.update();
         }
-        written = stamp();
     }
 
     static final Direction[] DIRS = {Direction.XN, Direction.XP, Direction.YN, Direction.YP, Direction.ZN, Direction.ZP};

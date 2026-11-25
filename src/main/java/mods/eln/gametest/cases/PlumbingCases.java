@@ -35,6 +35,7 @@ public final class PlumbingCases {
         cases.add(new QualitySensor());
         cases.add(new TankBox());
         cases.add(new TankBoxSplits());
+        cases.add(new TankBoxOverFullReloads());
         cases.add(new TankBoxSettlesAfterBreak());
         cases.add(new TankBoxHitbox());
         cases.add(new TankBoxCornerPipeClick());
@@ -973,6 +974,100 @@ public final class PlumbingCases {
             ctx.check("sight glass: a box of two shows its level once, from its lowest block, two blocks high",
                 low.group != null && rl.draws && !ru.draws && rl.sy == 2 && Math.abs(rl.fill - 0.75) < 0.03,
                 String.format("group %s, draws %b/%b, sy %d, %.3f", low.group != null, rl.draws, ru.draws, rl.sy, rl.fill));
+        }
+    }
+
+    /**
+     * Incognito 2026-11-25: a 2 x 1 x 2 iron tank box pumped full (its liquid 1.000047 of its volume at nominal density,
+     * compressed against the walls at about 6 bar) saved its blocks' shares with negative air and NaN energy; reloaded, the
+     * box fell 1 K per update to -153 C. Filled as that box was and reloaded like a world load: its shares are finite and
+     * not negative, and the box comes back with its water, air, energy and temperature.
+     */
+    static final class TankBoxOverFullReloads extends Big {
+        final java.util.List<BlockPos> at = new java.util.ArrayList<>();
+        String bad = "", line = "";
+
+        public String id() {
+            return "tank_box_over_full_reloads";
+        }
+
+        public int ticks() {
+            return 4;
+        }
+
+        public void build(TestContext ctx) {
+            for (int x = 2; x <= 3; x++)
+                for (int z = 2; z <= 3; z++) {
+                    ctx.placeTransparent(IRON_TANK, ctx.at(x, 1, z));
+                    at.add(ctx.at(x, 1, z));
+                }
+            var g = ShaftArtCases.TankBoxReloads.at(ctx, at.get(0)).group;
+            if (g == null || g.members.size() != 4) {
+                bad = "not a box when built";
+                return;
+            }
+            FluidNode n = g.node;
+            n.mWater = 1.000047 * n.volume * Water.RHO_L;
+            n.extra = null;
+            n.mAir = 1.63e-3 * n.volume;   // (the live box's 5.5 mg)
+            n.energy = n.energyAt(291.47);
+            n.update();
+        }
+
+        public void measure(TestContext ctx) {
+            if (bad.isEmpty()) check(ctx);
+            ctx.line("tank box over full: " + line);
+            ctx.check("tank box over full: its shares are sane and it reloads unchanged", bad.isEmpty(), bad);
+        }
+
+        void check(TestContext ctx) {
+            var g = ShaftArtCases.TankBoxReloads.at(ctx, at.get(0)).group;
+            if (g == null) {
+                bad = "not a box before the reload";
+                return;
+            }
+            FluidNode n = g.node;
+            n.update();
+            double w0 = n.mWater, a0 = n.mAir, u0 = n.energy, t0 = n.T();
+            line = String.format("before: %.6f kg water, %.3g kg air, %.1f J, %.2f C, %.2f bar, liquid %.6f of its volume", w0, a0, u0, t0 - Water.T0, n.P() / 1e5,
+                n.liquidVolume() / n.volume);
+            if (n.liquidVolume() <= n.volume) bad += "not over full; ";
+            try {
+                var wb = mods.eln.oil.TankGroup.class.getDeclaredMethod("writeBack");
+                wb.setAccessible(true);
+                wb.invoke(g);
+            } catch (ReflectiveOperationException e) {
+                bad += e + "; ";
+                return;
+            }
+            double su = 0, sw = 0, sa = 0;
+            for (TankElement m : g.members) {
+                if (!Double.isFinite(m.own.energy) || m.own.mWater < 0 || m.own.mAir < 0)
+                    bad += String.format("share %.6f kg water, %.3g kg air, %s J; ", m.own.mWater, m.own.mAir, m.own.energy);
+                su += m.own.energy;
+                sw += m.own.mWater;
+                sa += m.own.mAir;
+            }
+            if (Math.abs(su - u0) > 1e-6 * Math.abs(u0) || Math.abs(sw - w0) > 1e-9 * w0 || Math.abs(sa - a0) > 1e-9 * a0 + 1e-15)
+                bad += String.format("shares sum to %.6f kg, %.3g kg, %.1f J; ", sw, sa, su);
+            try {
+                ShaftArtCases.reloadAll(ctx, at);
+            } catch (ReflectiveOperationException e) {
+                bad += e + "; ";
+                return;
+            }
+            var g2 = ShaftArtCases.TankBoxReloads.at(ctx, at.get(0)).group;
+            if (g2 == null) {
+                bad += "not a box after the reload; ";
+                return;
+            }
+            FluidNode r = g2.node;
+            r.update();
+            line += String.format("; after: %.6f kg water, %.3g kg air, %.1f J, %.2f C, %.2f bar", r.mWater, r.mAir, r.energy, r.T() - Water.T0, r.P() / 1e5);
+            // (the saves are floats: 1e-6 relative)
+            if (!Double.isFinite(r.energy) || Math.abs(r.energy - u0) > 1e-5 * Math.abs(u0) || Math.abs(r.mWater - w0) > 1e-6 * w0 || r.mAir < 0
+                || Math.abs(r.T() - t0) > 0.05)
+                bad += "the reloaded box differs; ";
         }
     }
 
