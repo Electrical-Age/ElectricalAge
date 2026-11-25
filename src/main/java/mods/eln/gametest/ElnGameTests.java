@@ -95,6 +95,7 @@ public final class ElnGameTests {
         mods.eln.gametest.cases.CableAirCases.addTo(l);
         mods.eln.gametest.cases.ToolbagCases.addTo(l);
         mods.eln.gametest.cases.JunctionCases.addTo(l);
+        mods.eln.gametest.cases.PipeBreakCases.addTo(l);
         mods.eln.gametest.cases.SpecCases.addTo(l);
         mods.eln.gametest.cases.VoxelDeviceCases.addTo(l);
         mods.eln.gametest.cases.Wp12Cases.addTo(l);

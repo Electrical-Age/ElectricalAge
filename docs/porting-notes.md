@@ -642,6 +642,16 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   under 15x, syrupy, thick from 200x, tarry from 5000x; the engines' lines without the fix, as engines ignore it). A
   thick liquid's line is third, in the headline, so cold residue that won't flow says why without sneaking. None for water or gas (`EaUnits.viscosity`, `putViscosity`).
   The pipe sensors gained the line, not a viscosity signal. `pipe_jade_viscosity`, `FuelQualityTest.viscosityForPlayers`.
+- A broken pipe's contents are deleted (Baughn 2026-11-25: the extreme pressures players see are most likely the pipe
+  deletion behaviour squeezing a piece's fluid into its neighbours). Breaking a piece (mining it, the shears, an
+  explosion, a junction going with its arms) deletes its share of its run, by volume, every species and its energy;
+  the pieces left keep theirs at the same pressure and temperature. A straight run already did so (a rebuild writes
+  the old run's lump into every piece it had, then sums the new runs from the pieces left), but a junction left with
+  one arm gave that arm all its contents: a run of water at 10 bar went to 4600 bar and burst on the next step, steam
+  at 7.7 bar to 10 bar. The commonest case was a pipe extended from another's end inside a block (a two-armed junction)
+  with either arm broken. Now the junction's contents go with it (`VoxelNode.pruneJunctions`). A burst pipe vents and
+  stays; breaking it afterwards deletes only what is left in it. Tanks are unchanged (they will drop as items).
+  `pipe_break_deletes_*`, `pipe_junction_goes_with_its_arms`, `pipe_junction_prune_keeps_run_water`.
 
 ### Multi-fluid pipes (2026-11-03)
 - Baughn: EA pipes carry oil "the complex way": fluids are data (datapack species JSON), Raoult mixing within a

@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Pipe junctions (routing phase 2; Baughn 2026-11-11, LabAgent's review): a tee has its own fluid node linked to each
  * arm, so each branch is its own run; a sealed riser over it drains through it; it goes when fewer than two arms are
- * left, and gives its contents to the last.
+ * left, and its contents with it (Baughn 2026-11-25: as a broken pipe's; given to the last arm, they squeezed its run).
  */
 public final class JunctionCases {
     private JunctionCases() {
@@ -108,7 +108,7 @@ public final class JunctionCases {
 
     /**
      * Arms taken away one by one: with two left it stays (a node in a straight run), with one it goes and its water
-     * goes into that arm; nothing made or lost.
+     * with it; the last arm keeps its own.
      */
     static final class GoesWithItsArms implements TestCase {
         BlockPos at;
@@ -138,6 +138,9 @@ public final class JunctionCases {
                 return;
             }
             j.fluid.fill(0.5 * j.fluid.volume * Water.RHO_L, Water.P_ATM, 293);
+            // (the level arms too, so the last one has water of its own to keep)
+            for (VoxelPart p : n.parts)
+                if (p instanceof PipePart pp && pp.points[1] == pp.points[4]) pp.fluid.fill(0.3 * pp.fluid.volume * Water.RHO_L, Water.P_ATM, 293);
             before = water(n);
             // the riser first (the vertical piece here), then one level arm
             for (int i = 0; i < n.parts.size(); i++)
@@ -153,6 +156,7 @@ public final class JunctionCases {
                     n.removePart(i, false);
                     break;
                 }
+            before -= j.fluid.mWater;
             goneAtOne = n.parts.stream().noneMatch(q -> q instanceof JunctionPart);
             after = water(n);
         }
@@ -161,7 +165,7 @@ public final class JunctionCases {
             c.check("pipe junction: built", err == null, "" + err);
             c.check("pipe junction: with two arms left it stays", stayedAtTwo, "");
             c.check("pipe junction: with one left it goes", goneAtOne, "");
-            c.check("pipe junction: its water goes into the last arm", Math.abs(after - before) < 1e-9 + 1e-6 * Math.abs(before),
+            c.check("pipe junction: its water goes with it, the last arm keeps its own", before > 0 && Math.abs(after - before) < 1e-9 + 1e-6 * Math.abs(before),
                 String.format("%.6f expected, %.6f there", before, after));
         }
     }
@@ -220,7 +224,7 @@ public final class JunctionCases {
 
     /**
      * A junction left with one arm whose run's lump holds water written since the last step: the junction's water goes
-     * into that arm, and the arm's run keeps its fill as well (VoxelNode.pruneJunctions hands the run back first).
+     * with the junction, and the arm's run keeps its fill (the rebuild writes the lump back into its pieces first).
      */
     static final class PruneKeepsRunWater implements TestCase {
         BlockPos at;
@@ -261,7 +265,7 @@ public final class JunctionCases {
             j.fluid.fill(0.5 * j.fluid.volume * Water.RHO_L, Water.P_ATM, 293);
             var run = mods.eln.fluid.FluidWorld.nodeFor(arms.get(1).fluid);
             run.fill(0.5 * run.volume * Water.RHO_L, Water.P_ATM, 293);
-            before = j.fluid.mWater + run.mWater + mods.eln.fluid.FluidWorld.nodeFor(arms.get(0).fluid).mWater;
+            before = run.mWater + mods.eln.fluid.FluidWorld.nodeFor(arms.get(0).fluid).mWater;
             double removed = mods.eln.fluid.FluidWorld.nodeFor(arms.get(0).fluid).mWater;
             n.removePart(n.parts.indexOf(arms.get(0)), false);
             before -= removed;
@@ -270,10 +274,10 @@ public final class JunctionCases {
         }
 
         public void measure(TestContext c) {
-            c.line(String.format("prune: %.6f kg in the junction and the last arm's run before, %.6f in the run after", before, after));
+            c.line(String.format("prune: %.6f kg in the last arm's run before, %.6f after", before, after));
             c.check("pipe junction prune: built", err == null, "" + err);
             c.check("pipe junction prune: with one arm left it goes", gone, "");
-            c.check("pipe junction prune: the last arm's run keeps its fill and gains the junction's water", Math.abs(after - before) < 1e-9 * before,
+            c.check("pipe junction prune: the last arm's run keeps its fill, and gains nothing from the junction", Math.abs(after - before) < 1e-9 * before,
                 String.format("%.9f expected, %.9f there", before, after));
         }
     }

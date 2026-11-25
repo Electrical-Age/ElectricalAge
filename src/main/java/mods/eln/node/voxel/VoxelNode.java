@@ -436,20 +436,14 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return out;
     }
 
-    /** Junctions left with fewer than two arms go; their contents go into the arm that is left (if any). */
+    /**
+     * Junctions left with fewer than two arms go, and their contents with them, as a broken pipe's do (Baughn
+     * 2026-11-25): given to the arm left, a junction full of water pressed into a short arm took its run to thousands of
+     * bar, and it burst.
+     */
     private void pruneJunctions() {
         for (int i = parts.size() - 1; i >= 0; i--)
-            if (parts.get(i) instanceof JunctionPart j) {
-                List<PipePart> arms = armsAt(j.x, j.y, j.z);
-                if (arms.size() >= 2) continue;
-                if (!arms.isEmpty() && arms.get(0).fluid != null && j.fluid != null) {
-                    // (the arm's piece holds its run's contents only after a write-back, and is edited here)
-                    mods.eln.fluid.FluidWorld.handBack(arms.get(0).fluid);
-                    arms.get(0).fluid.addShareOf(j.fluid, 1);
-                    arms.get(0).fluid.update();
-                }
-                parts.remove(i);
-            }
+            if (parts.get(i) instanceof JunctionPart j && armsAt(j.x, j.y, j.z).size() < 2) parts.remove(i);
     }
 
     /**

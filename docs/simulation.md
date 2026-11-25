@@ -169,7 +169,8 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   `fluidLinks`). Its lists keep the devices' order, which `apply` builds in, so the networks and their sums come out
   as before the split; `Plan.dump` is its canonical form, nodes named by `FluidNames` (level, block, voxel part id or
   the node's place in its device), the same whatever order the devices joined in. `apply(plan)` has the side effects,
-  in this order: each run's lump written back into its pieces (not a run handed back for editing), `abandon()` on
+  in this order: each run's lump written back into its pieces (not a run handed back for editing; a piece taken out
+  gets its share too and is in no new run, so a broken pipe's contents are deleted: Baughn 2026-11-25), `abandon()` on
   every old network (its core's owed wall heat onto the nodes, `carryWall`; also in `reset`), new lumps summed from
   their pieces and seeded with the max of their `slowSteps` and `stallNow` and the sum of their `wallCarry`, then the
   networks, edges, vents and flows. Every network is rebuilt; `apply` marks where one whose part of the plan didn't

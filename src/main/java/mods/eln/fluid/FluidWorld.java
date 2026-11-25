@@ -123,9 +123,9 @@ public final class FluidWorld implements IProcess {
     }
 
     /**
-     * Write a run's lump back into its pieces before editing them between steps (a pipe cut for a junction, a junction's
-     * contents given to its last arm): a rebuild before the next step then keeps the pieces as edited, where it would
-     * otherwise write the run's lump over them (a later write into that lump before the step is lost at a rebuild).
+     * Write a run's lump back into its pieces before editing them between steps (a pipe cut for a junction): a rebuild
+     * before the next step then keeps the pieces as edited, where it would otherwise write the run's lump over them (a
+     * later write into that lump before the step is lost at a rebuild).
      */
     public static void handBack(FluidNode piece) {
         writeBackOf(piece);
@@ -793,6 +793,9 @@ public final class FluidWorld implements IProcess {
         // write-back was lost when the new lumps were summed from the pieces, as a test's feed fill was when another
         // test's device joined (batch-flake, 2026-11-16); written back first, a rebuild keeps it. A run handed back for
         // editing keeps its pieces' edits instead)
+        // (this is also what deletes a broken piece's contents, Baughn 2026-11-25: the old run's lump goes into every
+        // piece it had, the one taken out too, and the new lumps are summed from the pieces still in the world, so the
+        // rest keep their shares at the same state; squeezed into what is left, a run of water reached thousands of bar)
         writeBack(true);
         handedBack.clear();
         // (a background step under way: nobody will take its result. Its owed wall heat goes onto the nodes after plan()

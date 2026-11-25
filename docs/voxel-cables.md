@@ -308,8 +308,9 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   `fluidLinks` links each arm's end to it (the end's own conductance and height; a level end an opening as tall as the
   bore, the junction an opening as tall as its body, so a vertical arm gets the counter-flow pair: a sealed riser drains,
   `FluidDevice.Link.spanA/spanB`). So each branch is its own run. It takes up to four arms, isn't aimed at on its own
-  (`partAt` gives the nearest arm), and goes when fewer than two arms are left, its contents into the last. Over its
-  arms' rating an arm at it bursts. Old saves' coinciding ends (no part) stay lumped until the phase 3 converter.
+  (`partAt` gives the nearest arm), and goes when fewer than two arms are left, its contents with it (Baughn
+  2026-11-25: given to the last arm, they squeezed its run to thousands of bar). Over its arms' rating an arm at it
+  bursts. Old saves' coinciding ends (no part) stay lumped until the phase 3 converter.
   `FluidWorld` reports any node under `MIN_RELIABLE_VOLUME` (1e-6 m^3) once (Baughn). Tests: `JunctionCases`.
 
 ## Laying and the kit UX
@@ -366,6 +367,11 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   spot (`RoutePlacer.startRefusal`), a pipe sensor's port that has a pipe. Slow steps go to the log (`KitPreview.slow`) and the
   route debug kit (`RouteDebug`, `/elnlab debugkit` on a cable or pipe kit; a pipe's replay token starts `p_`) reports
   each preview, for both kinds.
+- Breaking a pipe deletes what was in it (Baughn 2026-11-25), whichever way it goes (mined, the shears, `removePart`, the
+  block destroyed): the rebuild writes the old run's lump into all its pieces and sums the new runs from those left, so
+  the rest keep their shares at the same state and the piece's share is gone. Tests: `PipeBreakCases`
+  (`pipe_break_deletes_<water|steam>_<player|nobody|shears|end_join|tee>`, `pipe_break_deletes_water_burst`: the runs left
+  hold exactly their shares, at the same pressure and temperature, also after a reload).
 - Tests: `RouteLeakCases` (lay/break/re-lay rounds leave nothing in the simulator or fluid world),
   `PipeCases` (`pipe_laying_all_or_nothing`, `pipe_kit_starts_anywhere_and_caps` with the start-spot refusal,
   `pipe_kit_branches_pipe_to_pipe`, `kit_preview_says_what_the_click_does`, `pipe_kit_refuses_a_taken_port`),
