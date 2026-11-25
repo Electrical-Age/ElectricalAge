@@ -73,6 +73,13 @@ public class GhostGroup {
         return true;
     }
 
+    /** The world positions its ghosts take for a device at c. */
+    public java.util.List<net.minecraft.core.BlockPos> positions(Coordonate c) {
+        java.util.List<net.minecraft.core.BlockPos> out = new ArrayList<>();
+        for (GhostGroupElement e : elementList) out.add(new net.minecraft.core.BlockPos(c.x + e.x, c.y + e.y, c.z + e.z));
+        return out;
+    }
+
     public boolean plot(Coordonate coordonate, Coordonate observerCoordonate, int UUID) {
         if (canBePloted(coordonate.world(), coordonate.x, coordonate.y, coordonate.z) == false) return false;
 

@@ -46,6 +46,12 @@ public class TransparentNodeItem extends Item implements IDescriptorItem {
         return ok ? InteractionResult.SUCCESS : InteractionResult.FAIL;
     }
 
+    /** Whether the device may take pos: in the build height and the world border, and the player may build there. */
+    static boolean mayBuild(Player player, Level world, BlockPos pos, Direction direction, ItemStack stack) {
+        if (world.isOutsideBuildHeight(pos) || !world.getWorldBorder().isWithinBounds(pos)) return false;
+        return player == null || world.mayInteract(player, pos) && player.mayUseItemAt(pos, direction.toEnumFacing(), stack);
+    }
+
     /** 1.12 placeBlockAt; returns the node, or null if it can't be placed. */
     public TransparentNode placeAt(ItemStack stack, Player player, Level world, BlockPos pos, Direction direction) {
         Direction front = descriptor.getFrontFromPlace(direction, player);
@@ -59,9 +65,11 @@ public class TransparentNodeItem extends Item implements IDescriptorItem {
             if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("build.tooHigh", world.getMaxY()));
             return null;
         }
-        if (!world.getWorldBorder().isWithinBounds(at)) return null;
-        if (player != null && (!world.mayInteract(player, at) || !player.mayUseItemAt(at, direction.toEnumFacing(), stack))) return null;
+        if (!mayBuild(player, world, at, direction, stack)) return null;
         Coordonate coord = new Coordonate(at, world);
+        // (and its ghosts' cells: checkCanPlace sees their room and the build height, not the player's rights)
+        GhostGroup ghostgroup = descriptor.getGhostGroup(front);
+        if (ghostgroup != null) for (BlockPos g : ghostgroup.positions(coord)) if (!mayBuild(player, world, g, direction, stack)) return null;
 
         String error;
         if ((error = descriptor.checkCanPlace(coord, front)) != null) {
@@ -69,17 +77,25 @@ public class TransparentNodeItem extends Item implements IDescriptorItem {
             return null;
         }
 
-        GhostGroup ghostgroup = descriptor.getGhostGroup(front);
         if (ghostgroup != null) ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
 
         TransparentNode node = new TransparentNode();
         node.onBlockPlacedBy(coord, front, player, stack);
         Block b = block.get();
         if (!world.setBlock(at, b instanceof TransparentNodeBlock tb ? tb.placedState(front, world, at) : b.defaultBlockState(), 3)) {
-            // (the block didn't go in after all: the device breaks as if mined, dropping its item with what it holds, so
-            // nothing is lost or made; the stack placed is used up, as the drop replaces it)
-            node.onBreakBlock();
-            if (player == null || !player.isCreative()) stack.shrink(1);
+            // (the block didn't go in after all: the node goes without drops, and the player gets back its item as it would
+            // drop now, with what it holds (a tank that joined a box takes its share back out), so nothing is lost or made,
+            // with block drops off too)
+            ItemStack back = node.element == null ? ItemStack.EMPTY : node.element.getDropItemStack();
+            if (ghostgroup != null) ghostgroup.erase(coord);
+            node.removeUnplaced();
+            if (player == null || !player.isCreative()) {
+                stack.shrink(1);
+                if (player != null) {
+                    if (!back.isEmpty() && !player.getInventory().add(back)) net.minecraft.world.Containers.dropItemStack(world, player.getX(), player.getY(), player.getZ(), back);
+                }
+                else if (!back.isEmpty()) world.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(world, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, back));
+            }
             return null;
         }
         node.checkCanStay(true);

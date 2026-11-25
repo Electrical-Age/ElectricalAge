@@ -154,6 +154,8 @@ public class GhostManager {
     public boolean canCreateGhostAt(Level world, int x, int y, int z) {
         if (!WorldCompat.blockExists(world, x, y, z)) { // 1.7.10 chunkExists = chunk loaded
             return false;
+        } else if (world.isOutsideBuildHeight(y) || !world.getWorldBorder().isWithinBounds(new BlockPos(x, y, z))) {
+            return false;   // (past the build height the void reads as air: a multiblock stood there without its ghosts)
         } else if (!world.getBlockState(new BlockPos(x, y, z)).canBeReplaced()) {
             return false;
         } else return true;

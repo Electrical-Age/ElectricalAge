@@ -212,6 +212,13 @@ public abstract class NodeBase {
         return NodeManager.instance.getNodeFromCoordonate(nodeCoordonate);
     }
 
+    /** A node whose block never went in (placing failed): out of the simulation and the manager, as broken, without drops. */
+    public void removeUnplaced() {
+        destructed = true;
+        disconnect();
+        NodeManager.instance.removeNode(this);
+    }
+
     // leaf
     public void onBreakBlock() {
         destructed = true;
