@@ -145,9 +145,12 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   item, not two): a broken tank drops as its item carrying what it held (any mix, a partial fill, a gas; component
   `eln:tank_contents`, `oil/TankContents`), frozen while carried, and places back with it exactly (so the same
   temperature and pressure); placed against a box of its tier it joins it, the contents summed. A block of a box drops
-  its share by layer (`TankGroup.share`) and the rest keeps the rest. Filled tanks don't stack; one holding what a fresh
-  tank does (no liquid and no species but water and air, each under half a mB, and not over 1.1 atm) drops plain and
-  stacks, its air, vapour and traces gone. Every way the block goes drops it (a player, an explosion, other mods'
+  its share by layer (`TankGroup.share`) and the rest keeps the rest. Filled tanks don't stack; one holding nothing but
+  air and water vapour (Baughn) drops plain and stacks, its air and vapour gone. Our thresholds for that: no liquid and
+  no species but water and air, each under half a mB, and not over 1.1 atm (a hot pressurised gas stays, as Baughn
+  asked). A tank over its burst pressure as it breaks (the neighbours a box's burst blasts apart) vents and drops plain.
+  Placing refuses past the build height, outside the world border and where the player may not build, before the node
+  exists (it used to make a node with no block there and use up the item). Every way the block goes drops it (a player, an explosion, other mods'
   breakers: the node drops it as the block goes, the device blocks have no loot table data, so a breaker that collects
   `getDrops` finds it on the ground), but not a burst; pistons can't move it. Middle-click gives a plain tank. Tanks in worlds are unchanged
   until broken. `tank_item_*`.

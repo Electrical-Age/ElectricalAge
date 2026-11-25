@@ -21,7 +21,8 @@ import java.util.TreeMap;
  * water, air (kg), energy (J), the other species by key (kg; keys, not ids, which are per session), the format they
  * were taken in, and the vessel's volume (m^3). Placing restores them through FluidSaves (so a corrupt item heals and a
  * species no datapack defines is kept). Also what it read when taken (temperature, pressure, the Jade contents and
- * composition), for its tooltip: species data lives on the server, and the contents don't change while carried.
+ * composition), for its tooltip: species data lives on the server, and the contents don't change while carried. The
+ * volume is informational: placed, the contents go into the tank's own volume.
  */
 public record TankContents(double water, double air, double energy, Map<String, Double> species, int format, double volume,
                            double kelvin, double pascal, String contents, String composition) {
@@ -65,9 +66,9 @@ public record TankContents(double water, double air, double energy, Map<String, 
     static final double NOT_PRESSURISED_PA = 1.1 * Water.P_ATM;
 
     /**
-     * Whether n holds what a fresh tank does (Baughn 2026-11-25: a tank of nothing but air and water vapour drops as a plain,
-     * stackable empty tank): no liquid and no other species (under half a mB each), and its gas not pressurised. A hot
-     * pressurised gas, steam included, is contents.
+     * Whether n holds what a fresh tank does, so it drops as a plain, stackable tank (Baughn 2026-11-25: a tank holding
+     * nothing but air and water vapour). Our reading of that: no liquid and no species but water and air, each under half
+     * a mB, and its gas not over 1.1 atm, so a hot pressurised gas, steam included, is kept.
      */
     public static boolean empty(FluidNode n) {
         // (a species under half a mB, as liquid, counts as none either: a tank drained of oil keeps a trace, and Jade lists none)

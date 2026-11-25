@@ -53,6 +53,14 @@ public class TransparentNodeItem extends Item implements IDescriptorItem {
         front.rotateFromXN(v);
         BlockPos at = pos.offset(v[0], v[1], v[2]);
         if (!world.getBlockState(at).canBeReplaced()) return null;
+        // (where the block can't go, refused before the node exists: past the build height a node was made, holding what
+        // the item carried, with no block, and the item was used up)
+        if (world.isOutsideBuildHeight(at)) {
+            if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("build.tooHigh", world.getMaxY()));
+            return null;
+        }
+        if (!world.getWorldBorder().isWithinBounds(at)) return null;
+        if (player != null && (!world.mayInteract(player, at) || !player.mayUseItemAt(at, direction.toEnumFacing(), stack))) return null;
         Coordonate coord = new Coordonate(at, world);
 
         String error;
@@ -67,7 +75,13 @@ public class TransparentNodeItem extends Item implements IDescriptorItem {
         TransparentNode node = new TransparentNode();
         node.onBlockPlacedBy(coord, front, player, stack);
         Block b = block.get();
-        world.setBlock(at, b instanceof TransparentNodeBlock tb ? tb.placedState(front, world, at) : b.defaultBlockState(), 3);
+        if (!world.setBlock(at, b instanceof TransparentNodeBlock tb ? tb.placedState(front, world, at) : b.defaultBlockState(), 3)) {
+            // (the block didn't go in after all: the device breaks as if mined, dropping its item with what it holds, so
+            // nothing is lost or made; the stack placed is used up, as the drop replaces it)
+            node.onBreakBlock();
+            if (player == null || !player.isCreative()) stack.shrink(1);
+            return null;
+        }
         node.checkCanStay(true);
         return node;
     }

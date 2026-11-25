@@ -35,6 +35,11 @@ public final class TankItemCases {
         for (BoxBreak.Row r : BoxBreak.Row.values()) cases.add(new BoxBreak(r));
         cases.add(new JoinsBox());
         cases.add(new NoDupeLoop());
+        cases.add(new PendingBucket());
+        cases.add(new PickIsPlain());
+        cases.add(new UnknownSpecies());
+        cases.add(new BurstBox());
+        cases.add(new BuildLimit());
     }
 
     /** Water, air, energy, then the other species, of n. */
@@ -116,7 +121,7 @@ public final class TankItemCases {
     static final class RoundTrip implements TestCase {
         enum Row {
             WATER(IRON_TANK, false), WATER_EXPLODED(IRON_TANK, true), OIL_AND_WATER(ALLOY_TANK, false), HOT_STEAM(ALLOY_TANK, false),
-            AIR_ONLY(IRON_TANK, false), AIR_AND_TRACE_OF_OIL(IRON_TANK, false);
+            AIR_ONLY(IRON_TANK, false), AIR_AND_TRACE_OF_OIL(IRON_TANK, false), AIR_AND_TRACE_OF_GAS(IRON_TANK, false);
             final int tank;
             /** Broken by an explosion over it, not removed. */
             final boolean exploded;
@@ -172,6 +177,11 @@ public final class TankItemCases {
                     mods.eln.sim.fluid.EaUnits.add(n, SpeciesRegistry.get().id("eln:heavy_oil"), 1e-9, 293.15, false);
                     n.update();
                 }
+                case AIR_AND_TRACE_OF_GAS -> {   // (a gas species: natural gas, a trace)
+                    PlumbingCases.fill(n, 0, Water.P_ATM, 293.15);
+                    mods.eln.sim.fluid.EaUnits.add(n, SpeciesRegistry.get().id("eln:natural_gas"), 1e-9, 293.15, true);
+                    n.update();
+                }
             }
             double[] before = snap(n);
             double T0 = n.T(), P0 = n.P();
@@ -192,7 +202,7 @@ public final class TankItemCases {
             var tier = mods.eln.Eln.transparentNodeItem.getDescriptor(row.tank);
             if (s.getItem() != tier.newItemStack().getItem()) bad.append("dropped ").append(s.getItem()).append(", not its own tier; ");
             TankContents c = contents(s);
-            if (row == Row.AIR_ONLY || row == Row.AIR_AND_TRACE_OF_OIL) {
+            if (row == Row.AIR_ONLY || row == Row.AIR_AND_TRACE_OF_OIL || row == Row.AIR_AND_TRACE_OF_GAS) {
                 if (c != null || !ItemStack.isSameItemSameComponents(s, tier.newItemStack()) || s.getMaxStackSize() != 64)
                     bad.append("an air-only tank dropped ").append(s.getComponentsPatch()).append(", not a plain stackable tank; ");
                 line = "dropped a plain tank, stacks to " + s.getMaxStackSize();
@@ -463,6 +473,197 @@ public final class TankItemCases {
         public void measure(TestContext ctx) {
             ctx.line("tank item loops: " + line);
             ctx.check("tank item: 20 breaks and placings make and lose no fluid", bad.isEmpty(), bad.toString());
+        }
+    }
+
+    /** Small cases: one tank at (1, 1, 1) in a 3-block space, the result checked in measure. */
+    abstract static class Small implements TestCase {
+        final StringBuilder bad = new StringBuilder();
+        String line = "";
+
+        public int width() {
+            return 3;
+        }
+
+        public int ticks() {
+            return 4;
+        }
+
+        abstract String what();
+
+        public void measure(TestContext ctx) {
+            ctx.line(id() + ": " + line);
+            ctx.check(what(), bad.isEmpty(), bad.toString());
+        }
+    }
+
+    /** A bucket's worth put in through the fluid capability and the tank broken before the next fluid step: the item has it. */
+    static final class PendingBucket extends Small {
+        public String id() {
+            return "tank_item_takes_pending_bucket";
+        }
+
+        String what() {
+            return "tank item: water put in since the last step goes with it";
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(1, 1, 1);
+            TankElement t = (TankElement) ctx.placeTransparent(IRON_TANK, p);
+            PlumbingCases.fill(t.own, 0.2 * t.own.volume * Water.RHO_L, Water.P_ATM, 293.15);
+            t.showWater();
+            double w0 = t.own.mWater;
+            var cap = ctx.level().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK, p, net.minecraft.core.Direction.UP);
+            int put;
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                put = cap.insert(net.neoforged.neoforge.transfer.fluid.FluidResource.of(net.minecraft.world.level.material.Fluids.WATER), 1000, tx);
+                tx.commit();
+            }
+            List<ItemStack> got = breakAt(ctx, p);
+            TankContents c = got.size() == 1 ? contents(got.get(0)) : null;
+            if (put != 1000 || c == null) {
+                bad.append("put ").append(put).append(" mB, dropped ").append(got).append("; ");
+                return;
+            }
+            double want = w0 + 1000 * mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER;
+            if (Math.abs(c.water() - want) > 1e-9 * want) bad.append(String.format("item %.9f kg water, want %.9f; ", c.water(), want));
+            line = String.format("%.6f kg before, %.6f kg on the item", w0, c.water());
+        }
+    }
+
+    /** Middle-click on a filled tank gives a plain tank (a copy of the contents is no pick), and leaves the tank as it was. */
+    static final class PickIsPlain extends Small {
+        public String id() {
+            return "tank_item_pick_is_plain";
+        }
+
+        String what() {
+            return "tank item: pick-block gives a plain tank";
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(1, 1, 1);
+            TankElement t = (TankElement) ctx.placeTransparent(IRON_TANK, p);
+            PlumbingCases.fill(t.own, 0.5 * t.own.volume * Water.RHO_L, Water.P_ATM, 300);
+            double[] before = snap(t.own);
+            ItemStack pick = ((mods.eln.node.transparent.TransparentNode) t.node).pickItem(null, ctx.level());
+            ItemStack plain = mods.eln.Eln.transparentNodeItem.getDescriptor(IRON_TANK).newItemStack();
+            if (!ItemStack.isSameItemSameComponents(pick, plain)) bad.append("picked ").append(pick.getComponentsPatch()).append("; ");
+            bad.append(differs(before, snap(t.own), 0));
+            line = String.valueOf(pick);
+        }
+    }
+
+    /** An item holding a species no datapack defines places with it kept (a placeholder) and breaks again with it. */
+    static final class UnknownSpecies extends Small {
+        public String id() {
+            return "tank_item_keeps_unknown_species";
+        }
+
+        String what() {
+            return "tank item: a species no datapack defines survives placing and breaking";
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(1, 1, 1);
+            ItemStack s = mods.eln.Eln.transparentNodeItem.getDescriptor(IRON_TANK).newItemStack();
+            FluidNode n = new FluidNode(mods.eln.oil.TankDescriptor.bucketsVolume(12), 0, 1, false);
+            PlumbingCases.fill(n, 0.3 * n.volume * Water.RHO_L, Water.P_ATM, 300);
+            TankContents c = TankContents.of(n);
+            var sp = new java.util.HashMap<>(c.species());
+            sp.put("eln_test:unobtainium", 0.25);
+            c = new TankContents(c.water(), c.air(), c.energy(), sp, c.format(), c.volume(), c.kelvin(), c.pascal(), c.contents(), c.composition());
+            s.set(ElnRegistry.TANK_CONTENTS.get(), c);
+            s.set(net.minecraft.core.component.DataComponents.MAX_STACK_SIZE, 1);
+            TankElement t = place(ctx, s, p);
+            if (t == null) {
+                bad.append("not placed; ");
+                return;
+            }
+            List<ItemStack> got = breakAt(ctx, p);
+            TankContents back = got.size() == 1 ? contents(got.get(0)) : null;
+            Double kg = back == null ? null : back.species().get("eln_test:unobtainium");
+            if (kg == null || Math.abs(kg - 0.25) > 1e-12) bad.append("broken again it holds ").append(back == null ? got : back.species()).append("; ");
+            if (back != null && Math.abs(back.water() - c.water()) > 1e-12 * c.water()) bad.append("its water changed; ");
+            line = back == null ? "" : back.species().toString();
+        }
+    }
+
+    /**
+     * A 2 x 2 x 1 iron box over its burst pressure (air at 50 bar; it bursts over 40): a block broken then drops a plain
+     * tank (it vents: its share would burst again where placed); the rest left to burst drops nothing over its burst.
+     */
+    static final class BurstBox extends PlumbingCases.Big {
+        final StringBuilder bad = new StringBuilder();
+        String line = "";
+
+        public String id() {
+            return "tank_item_burst_box_drops_nothing_over_burst";
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        public void build(TestContext ctx) {
+            for (int x = 2; x <= 3; x++)
+                for (int z = 2; z <= 3; z++) ctx.placeTransparent(IRON_TANK, ctx.at(x, 1, z));
+            var g = at(ctx, ctx.at(2, 1, 2)).group;
+            if (g == null) {
+                bad.append("no box; ");
+                return;
+            }
+            PlumbingCases.fill(g.node, 0, 50e5, 293.15);
+            List<ItemStack> got = breakAt(ctx, ctx.at(3, 1, 3));
+            if (got.size() != 1 || contents(got.get(0)) != null || got.get(0).getMaxStackSize() != 64)
+                bad.append("a block broken over its burst dropped ").append(got).append("; ");
+            line = String.format("box at %.1f bar; broken block dropped %s", g.node.P() / 1e5, got);
+        }
+
+        public void measure(TestContext ctx) {
+            BlockPos lo = ctx.at(0, 0, 0), hi = ctx.at(9, 4, 9);
+            var burst = 40e5;
+            int n = 0;
+            for (ItemEntity e : ctx.level().getEntitiesOfClass(ItemEntity.class, new AABB(net.minecraft.world.phys.Vec3.atCenterOf(lo), net.minecraft.world.phys.Vec3.atCenterOf(hi)).inflate(4))) {
+                TankContents c = contents(e.getItem());
+                if (e.getItem().getItem() instanceof TransparentNodeItem) n++;
+                if (c != null && c.pascal() > burst) bad.append(String.format("a tank dropped at %.1f bar; ", c.pascal() / 1e5));
+                e.discard();
+            }
+            line += "; " + n + " tank items lay about after the bursts";
+            ctx.line("tank item burst box: " + line);
+            ctx.check("tank item: no tank item is over its burst pressure", bad.isEmpty(), bad.toString());
+        }
+    }
+
+    /** A filled tank placed past the build height is refused: the item kept as it was, no node there. */
+    static final class BuildLimit extends Small {
+        public String id() {
+            return "tank_item_refused_past_build_height";
+        }
+
+        String what() {
+            return "tank item: placing past the build height keeps the item and makes no node";
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos p = ctx.at(1, 1, 1);
+            TankElement t = (TankElement) ctx.placeTransparent(IRON_TANK, p);
+            PlumbingCases.fill(t.own, 0.5 * t.own.volume * Water.RHO_L, Water.P_ATM, 300);
+            List<ItemStack> got = breakAt(ctx, p);
+            if (got.size() != 1 || contents(got.get(0)) == null) {
+                bad.append("dropped ").append(got).append("; ");
+                return;
+            }
+            ItemStack s = got.get(0), copy = s.copy();
+            BlockPos high = new BlockPos(p.getX(), ctx.level().getMaxY() + 1, p.getZ());
+            var item = (TransparentNodeItem) s.getItem();
+            var node = ctx.holding(s, pl -> item.useOn(new net.minecraft.world.item.context.UseOnContext(pl, net.minecraft.world.InteractionHand.MAIN_HAND,
+                new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(high), net.minecraft.core.Direction.UP, high.below(), false))));
+            if (node.consumesAction()) bad.append("the use was taken: ").append(node).append("; ");
+            if (!ItemStack.matches(s, copy)) bad.append("the item changed: ").append(s).append("; ");
+            if (ctx.nodeAt(high) != null) bad.append("a node stands past the build height; ");
+            line = "use: " + node + ", item " + s.getCount() + " with contents " + (contents(s) != null);
         }
     }
 }

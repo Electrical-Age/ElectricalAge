@@ -362,7 +362,7 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
     /**
      * Baughn 2026-11-25: a broken tank drops as an item that keeps its contents (any mix, a partial fill, a gas), frozen
      * until placed back; a block of a box takes its share, by layer (TankGroup.share), and the rest keeps the rest. One
-     * that holds what a fresh tank does (TankContents.empty) drops plain, so it stacks. Called as the block breaks, before
+     * that holds what a fresh tank does (TankContents.empty), or is over its burst pressure, drops plain, so it stacks. Called as the block breaks, before
      * the node leaves the box (disconnectJob), which then re-forms the rest from their shares without this one's.
      */
     @Override
@@ -383,6 +383,9 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
         for (TankElement m : group == null ? List.of(this) : group.members) m.syncWater();
         if (group != null) group.writeBack();
         own.update();
+        // (over its burst pressure it vents as it breaks: a box's burst blasts its neighbours apart, and their shares, still
+        // over it, burst again where placed)
+        if (own.P() > desc.burstPa) return null;
         return TankContents.empty(own) ? null : TankContents.of(own);
     }
 
