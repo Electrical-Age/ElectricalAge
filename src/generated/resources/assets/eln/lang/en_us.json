@@ -679,6 +679,7 @@
   "jei.eln.wire_drawing.how": "Any spec: set on its screen",
   "key.category.eln.keys": "Electrical Age",
   "key.eln.headlamp": "Lights on/off (headlamp, flashlights in hand)",
+  "key.eln.radar_band": "Radar goggles: next band",
   "key.eln.radar_high_down": "Radar goggles: band's high edge down",
   "key.eln.radar_high_up": "Radar goggles: band's high edge up",
   "key.eln.radar_low_down": "Radar goggles: band's low edge down",

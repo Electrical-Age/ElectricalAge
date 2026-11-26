@@ -22,6 +22,8 @@ public class GroundRadarRender extends TransparentNodeElementRender {
     /** The last picture, and the game time it was taken. */
     GroundScan picture;
     long pictureAt;
+    /** What the goggles show (the radar keeps it). */
+    RadarBand band = RadarBand.DEFAULT;
     /** The screen's depth and cut, kept while the block is in view (reopening it comes back to them). */
     int viewLayer, viewRow = -1;
 
@@ -49,6 +51,7 @@ public class GroundRadarRender extends TransparentNodeElementRender {
             rate = stream.readFloat();
             address = stream.readShort();
             onBus = stream.readBoolean();
+            band = RadarBand.read(stream.readByte(), stream.readFloat(), stream.readFloat());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -79,6 +82,22 @@ public class GroundRadarRender extends TransparentNodeElementRender {
     void setRange(int r) {
         range = r;
         clientSendFloat(GroundRadarElement.RANGE_ID, r);
+    }
+
+    void setBand(RadarBand b) {
+        band = b;
+        try {
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            java.io.DataOutputStream o = new java.io.DataOutputStream(bos);
+            preparePacketForServer(o);
+            o.writeByte(GroundRadarElement.BAND_ID);
+            o.writeByte(b.kind());
+            o.writeFloat((float) b.lo());
+            o.writeFloat((float) b.hi());
+            sendPacketToServer(bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     void setDetail(int d) {

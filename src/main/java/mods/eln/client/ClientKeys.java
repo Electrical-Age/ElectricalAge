@@ -31,6 +31,8 @@ public final class ClientKeys {
         RADAR_LOW_UP = new KeyMapping("key.eln.radar_low_up", InputConstants.KEY_RBRACKET, CATEGORY),
         RADAR_HIGH_DOWN = new KeyMapping("key.eln.radar_high_down", InputConstants.KEY_SEMICOLON, CATEGORY),
         RADAR_HIGH_UP = new KeyMapping("key.eln.radar_high_up", InputConstants.KEY_APOSTROPHE, CATEGORY);
+    /** The goggles' next named band (Baughn 1575645294446518445), beside the edge keys. */
+    public static final KeyMapping RADAR_BAND = new KeyMapping("key.eln.radar_band", InputConstants.KEY_BACKSLASH, CATEGORY);
     static boolean wrenchDown;
 
     static void register(RegisterKeyMappingsEvent e) {
@@ -41,6 +43,7 @@ public final class ClientKeys {
         e.register(RADAR_LOW_UP);
         e.register(RADAR_HIGH_DOWN);
         e.register(RADAR_HIGH_UP);
+        e.register(RADAR_BAND);
     }
 
     static void send(int key, boolean down) {

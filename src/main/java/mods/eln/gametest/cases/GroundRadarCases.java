@@ -30,6 +30,14 @@ public final class GroundRadarCases {
         cases.add(new GogglesUpgrade());
     }
 
+    /** A full Portable Condensator Pack (15 kJ, drawn at 4.5 kW): a scan at 0.9 J a cell done in seconds. */
+    static ItemStack fastPack() {
+        ItemStack b = Eln.findItemStack("Portable Condensator Pack");
+        var e = (IItemEnergyBattery) Utils.getItemObject(b);
+        e.setEnergy(b, e.getEnergyMax(b));
+        return b;
+    }
+
     static ItemStack battery(double joules) {
         ItemStack b = Eln.findItemStack("Portable Battery");   // (40 kJ)
         ((IItemEnergyBattery) Utils.getItemObject(b)).setEnergy(b, joules);
@@ -77,7 +85,7 @@ public final class GroundRadarCases {
                 for (int z = 4; z < 6; z++)
                     for (int y = 6; y < 8; y++) c.level().setBlock(c.at(x, y, z), Blocks.AIR.defaultBlockState(), 3);
             r = (GroundRadarElement) c.placeTransparent(RADAR, c.at(5, 10, 4));
-            r.getInventory().setItem(0, battery(20000));
+            r.getInventory().setItem(0, fastPack());
             before = energy(r.getInventory().getItem(0));
             c.check("ground radar: a scan starts with charged batteries", r.startScan(), "");
         }
@@ -123,11 +131,16 @@ public final class GroundRadarCases {
         }
     }
 
-    /** Broken, it drops one item, with its battery (and the battery's charge) inside; placed again, the battery is back. */
+    /**
+     * Broken, it drops one item, with its battery (and the battery's charge) inside; placed again, the battery is back, and
+     * so is the goggles' band a player picked (Baughn 1575643239036223550); a new radar starts on Everything.
+     */
     static final class KeepsItsBatteries implements TestCase {
         String detail = "", placed = "";
         int loose = -1;
         double charge = -1;
+        mods.eln.transparentnode.groundradar.RadarBand fresh, picked = new mods.eln.transparentnode.groundradar.RadarBand(
+            mods.eln.transparentnode.groundradar.RadarBand.CUSTOM, 4.6, 6.0), back;
 
         public String id() {
             return "ground_radar_keeps_its_batteries";
@@ -137,6 +150,13 @@ public final class GroundRadarCases {
             BlockPos at = c.at(3, 1, 1);
             GroundRadarElement r = (GroundRadarElement) c.placeTransparent(RADAR, at);
             r.getInventory().setItem(1, battery(12345));
+            fresh = r.band();
+            r.networkUnserialize(c.stream(o -> {   // (the goggles' packet, as GroundRadarRender.setBand sends it)
+                o.writeByte(GroundRadarElement.BAND_ID);
+                o.writeByte(picked.kind());
+                o.writeFloat((float) picked.lo());
+                o.writeFloat((float) picked.hi());
+            }));
             c.level().destroyBlock(at, true);
             var items = c.level().getEntitiesOfClass(ItemEntity.class, new net.minecraft.world.phys.AABB(at).inflate(2));
             loose = 0;
@@ -153,12 +173,15 @@ public final class GroundRadarCases {
             if (node != null && node.element instanceof GroundRadarElement again) {
                 charge = energy(again.getInventory().getItem(1));
                 placed = "" + again.getInventory().getItem(1);
+                back = again.band();
             }
         }
 
         public void measure(TestContext c) {
             c.check("ground radar: broken, it spills no battery", loose == 0, detail);
             c.check("ground radar: placed again, its battery is back with its charge", Math.abs(charge - 12345) < 1, placed + " " + charge);
+            c.check("ground radar: a new one's goggles show everything", mods.eln.transparentnode.groundradar.RadarBand.DEFAULT.equals(fresh), String.valueOf(fresh));
+            c.check("ground radar: placed again, its goggles' band is the one picked", picked.equals(back), picked + " vs " + back);
         }
     }
 
@@ -186,7 +209,7 @@ public final class GroundRadarCases {
 
         public void build(TestContext c) {
             r = (GroundRadarElement) c.placeTransparent(RADAR, c.at(3, 1, 1));
-            r.getInventory().setItem(0, battery(20000));
+            r.getInventory().setItem(0, fastPack());
             r.networkUnserialize(c.stream(o -> {   // (its screen's packet: a colour channel's number isn't a device address)
                 o.writeByte(GroundRadarElement.ADDRESS_ID);
                 o.writeFloat(5);

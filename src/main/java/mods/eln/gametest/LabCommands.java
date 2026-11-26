@@ -618,12 +618,16 @@ public final class LabCommands {
         }
         // the goggles' view in a few bands, from over the radar looking down into the cone (radar-...-view-BAND.png)
         var rv = new mods.eln.transparentnode.groundradar.RadarView(scan);
-        double[][] bands = {{-0.3, 0.6}, {2.2, 3.2}, {4.0, 8.5}, {4.0, 4.6}, {4.6, 6.0}};
-        String[] names = {"air", "rock", "ores", "copper", "iron"};
-        for (int bi = 0; bi < bands.length; bi++) {
+        // (every named band, then two custom ones: copper and iron)
+        java.util.List<mods.eln.transparentnode.groundradar.RadarBand> bands = new java.util.ArrayList<>();
+        for (int k = 0; k <= mods.eln.transparentnode.groundradar.RadarBand.ORES; k++) bands.add(mods.eln.transparentnode.groundradar.RadarBand.of(k));
+        bands.add(new mods.eln.transparentnode.groundradar.RadarBand(mods.eln.transparentnode.groundradar.RadarBand.CUSTOM, 4.0, 4.6));
+        bands.add(new mods.eln.transparentnode.groundradar.RadarBand(mods.eln.transparentnode.groundradar.RadarBand.CUSTOM, 4.6, 6.0));
+        String[] names = {"everything", "caves", "water", "oil", "soil", "rock", "ores", "copper", "iron"};
+        for (int bi = 0; bi < bands.size(); bi++) {
             int vw = 384, vh = 216;
             int[] px = new int[vw * vh];
-            rv.render(px, vw, vh, pos.getX() + 0.5, pos.getY() + 16, pos.getZ() + 0.5 - 12, 0, 50, 70, bands[bi][0], bands[bi][1], 0, 1);
+            rv.render(px, vw, vh, pos.getX() + 0.5, pos.getY() + 16, pos.getZ() + 0.5 - 12, 0, 50, 70, bands.get(bi), 0, 1);
             var vimg = new java.awt.image.BufferedImage(vw, vh, java.awt.image.BufferedImage.TYPE_INT_RGB);
             vimg.setRGB(0, 0, vw, vh, px, 0, vw);
             try {

@@ -15,22 +15,22 @@ import static mods.eln.i18n.I18N.tr;
  * The Ground Radar w/Goggles' fly-through view (Baughn 2026-11-24), a mode of its screen: the server's menu stays open,
  * so walking off or the radar breaking ends it, and Esc goes back to the console. A free camera flies through the
  * picture with the player's movement keys (forward, back, left, right, jump up, sneak down, sprint faster; the wheel sets
- * the speed) and the mouse, which is captured while the view is open; the player doesn't move. Four keys move the
- * band-pass's edges (ClientKeys.RADAR_*). RadarView draws on a worker thread into a fixed-size buffer, blurred (the view
+ * the speed) and the mouse, which is captured while the view is open; the player doesn't move. A key cycles the
+ * named bands (RadarBand) and four keys move the band-pass's edges (ClientKeys.RADAR_*); the radar keeps the band,
+ * read once when the view opens. RadarView draws on a worker thread into a fixed-size buffer, blurred (the view
  * is meant to be blurry), shown full-screen under a goggle frame and a green dot-matrix HUD.
  */
 final class GogglesView {
     /** The picture's width (texels); its height follows the window. */
     static final int W = 192;
-    /** The band's step per key press (g/cm3), its range. */
-    static final double BAND_STEP = 0.1, BAND_MIN = -0.5, BAND_MAX = GroundScan.MAX_DENSITY + 0.5;
     static final double FOV = 70, SPEED_MIN = 2, SPEED_MAX = 64;
     static final int GREEN = 0xFF55FF66, GREEN_DIM = 0x8033CC44;
 
     private final RadarView view;
     private final GroundScan picture;
+    private final GroundRadarRender render;
     double x, y, z, yaw, pitch, speed = 8;
-    double lo = -0.3, hi = 0.6;
+    RadarBand band;
     private boolean fwd, back, left, right, up, down, fast;
     private long last;
     private double mouseX = Double.NaN, mouseY;
@@ -39,7 +39,7 @@ final class GogglesView {
     private int maskW, maskH;
 
     /** The camera and band a frame is drawn from, and the frame drawn. */
-    private record Shot(double x, double y, double z, double yaw, double pitch, double lo, double hi, int w, int h) {
+    private record Shot(double x, double y, double z, double yaw, double pitch, RadarBand band, int w, int h) {
     }
 
     private final AtomicReference<Shot> wanted = new AtomicReference<>();
@@ -49,6 +49,8 @@ final class GogglesView {
 
     GogglesView(GroundRadarRender render, GroundScan picture) {
         this.picture = picture;
+        this.render = render;
+        band = render.band;
         view = new RadarView(picture);
         // (start just behind and above the radar, looking down into the cone)
         x = picture.cx + 0.5;
@@ -83,7 +85,7 @@ final class GogglesView {
                 a = new int[s.w() * s.h()];
                 b = new int[s.w() * s.h()];
             }
-            view.render(a, s.w(), s.h(), s.x(), s.y(), s.z(), s.yaw(), s.pitch(), FOV, s.lo(), s.hi(), 0, 1);
+            view.render(a, s.w(), s.h(), s.x(), s.y(), s.z(), s.yaw(), s.pitch(), FOV, s.band(), 0, 1);
             blur(a, b, s.w(), s.h());
             done.set(b.clone());
             drawn = s;
@@ -130,12 +132,20 @@ final class GogglesView {
         else if (o.keyJump.matches(e)) up = down;
         else if (o.keyShift.matches(e)) this.down = down;
         else if (o.keySprint.matches(e)) fast = down;
-        else if (down && ClientKeys.RADAR_LOW_DOWN.matches(e)) lo = Math.max(BAND_MIN, lo - BAND_STEP);
-        else if (down && ClientKeys.RADAR_LOW_UP.matches(e)) lo = Math.min(hi - BAND_STEP, lo + BAND_STEP);
-        else if (down && ClientKeys.RADAR_HIGH_DOWN.matches(e)) hi = Math.max(lo + BAND_STEP, hi - BAND_STEP);
-        else if (down && ClientKeys.RADAR_HIGH_UP.matches(e)) hi = Math.min(BAND_MAX, hi + BAND_STEP);
+        else if (down && ClientKeys.RADAR_BAND.matches(e)) setBand(band.next());
+        else if (down && ClientKeys.RADAR_LOW_DOWN.matches(e)) setBand(band.edges(-1, 0));
+        else if (down && ClientKeys.RADAR_LOW_UP.matches(e)) setBand(band.edges(1, 0));
+        else if (down && ClientKeys.RADAR_HIGH_DOWN.matches(e)) setBand(band.edges(0, -1));
+        else if (down && ClientKeys.RADAR_HIGH_UP.matches(e)) setBand(band.edges(0, 1));
         else return false;
         return true;
+    }
+
+    /** Show b, and have the radar keep it. */
+    private void setBand(RadarBand b) {
+        if (b.equals(band)) return;
+        band = b;
+        render.setBand(b);
     }
 
     /** The mouse moved to (mx, my) (the cursor is captured, so it runs on unbounded): look around. */
@@ -183,7 +193,7 @@ final class GogglesView {
         y = Math.max(view.bottom() - 16, y + fy * f * v + u * v);   // (not far under the world's floor)
         z += (fz * f + rz * s) * v;
         h = Math.max(36, (int) Math.round(W * (double) sh / sw));
-        wanted.set(new Shot(x, y, z, yaw, pitch, lo, hi, W, h));
+        wanted.set(new Shot(x, y, z, yaw, pitch, band, W, h));
         int[] img = done.getAndSet(null);
         if (img != null && img.length == W * h) tex.upload(W, h, img);
         g.fill(0, 0, sw, sh, 0xFF000000);
@@ -224,7 +234,7 @@ final class GogglesView {
         String where = tr("%1$ m %2$, %3$ m %4$", (int) Math.round(Math.abs(ex)), ex >= 0 ? tr("E") : tr("W"),
             (int) Math.round(Math.abs(ez)), ez >= 0 ? tr("S") : tr("N"));
         String down = depth >= 0 ? tr("%1$ m down, Y %2$", (int) Math.round(depth), (int) Math.floor(y)) : tr("%1$ m up, Y %2$", (int) Math.round(-depth), (int) Math.floor(y));
-        String band = tr("Band %1$ to %2$ g/cm3: %3$ to %4$", fmt(lo), fmt(hi), material(lo), material(hi));
+        String band = bandLine(this.band);
         String here = tr("Here: %1$", at());
         String[] lines = {where, down, here, band, tr("Speed %1$ m/s", (int) Math.round(speed))};
         int ly = sh - 12 * lines.length - 10, wmax = 0;
@@ -236,8 +246,8 @@ final class GogglesView {
             g.text(font, l, lx, ly, GREEN, false);
             ly += 12;
         }
-        String keys = tr("Esc: back   Wheel: speed   %1$ %2$ / %3$ %4$: band",
-            ClientKeys.RADAR_LOW_DOWN.getTranslatedKeyMessage().getString(), ClientKeys.RADAR_LOW_UP.getTranslatedKeyMessage().getString(),
+        String keys = tr("Esc: back   Wheel: speed   %1$: next band   %2$ %3$ / %4$ %5$: edges",
+            ClientKeys.RADAR_BAND.getTranslatedKeyMessage().getString(), ClientKeys.RADAR_LOW_DOWN.getTranslatedKeyMessage().getString(), ClientKeys.RADAR_LOW_UP.getTranslatedKeyMessage().getString(),
             ClientKeys.RADAR_HIGH_DOWN.getTranslatedKeyMessage().getString(), ClientKeys.RADAR_HIGH_UP.getTranslatedKeyMessage().getString());
         g.text(font, keys, sw / 2 - font.width(keys) / 2, 8, GREEN_DIM | 0xFF000000, false);
         // the radar's heading: N at the top of a small compass, turning with the view
@@ -245,6 +255,20 @@ final class GogglesView {
         int cxp = sw - 40, cyp = 40;
         g.text(font, "N", (int) (cxp + Math.sin(a) * 18) - 2, (int) (cyp - Math.cos(a) * 18) - 4, GREEN, false);
         g.fill(cxp - 1, cyp - 1, cxp + 1, cyp + 1, GREEN);
+    }
+
+    /** The band's readout: a named band's name (with its densities, where it goes by them), or a custom band's. */
+    static String bandLine(RadarBand b) {
+        return switch (b.kind()) {
+            case RadarBand.EVERYTHING -> tr("Band: everything");
+            case RadarBand.CAVES -> tr("Band: caves (%1$ to %2$ g/cm3)", fmt(b.lo()), fmt(b.hi()));
+            case RadarBand.WATER -> tr("Band: water");
+            case RadarBand.OIL -> tr("Band: oil");
+            case RadarBand.SOIL -> tr("Band: soil (%1$ to %2$ g/cm3)", fmt(b.lo()), fmt(b.hi()));
+            case RadarBand.ROCK -> tr("Band: rock (%1$ to %2$ g/cm3)", fmt(b.lo()), fmt(b.hi()));
+            case RadarBand.ORES -> tr("Band: ores (%1$ to %2$ g/cm3)", fmt(b.lo()), fmt(b.hi()));
+            default -> tr("Band %1$ to %2$ g/cm3: %3$ to %4$", fmt(b.lo()), fmt(b.hi()), material(b.lo()), material(b.hi()));
+        };
     }
 
     /** A density for the band's readout, one decimal (Meters.number puts SI prefixes on small values: "-300m"). */

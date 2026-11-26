@@ -19,7 +19,7 @@ public final class RadarView {
     /** Per cell: its colour (RGB, no fade) and its density, signal and whether it shows at all. */
     private final int[] rgb;
     private final float[] dens, sig, peak, share;
-    private final int[] peakRgb;
+    private final int[] peakRgb, flags;
     private final boolean[] shows;
 
     /** A soft band edge's width (g/cm3), the opacity of a fully-in cell per block, the distance of the fog's e-fold. */
@@ -48,12 +48,14 @@ public final class RadarView {
         peak = new float[cells];
         share = new float[cells];
         peakRgb = new int[cells];
+        flags = new int[cells];
         sig = new float[cells];
         shows = new boolean[cells];
         for (int k = 0; k < p.layers.length; k++)
             for (int i = 0; i < p.n; i++)
                 for (int j = 0; j < p.n; j++) {
                     int c = (k * p.n + i) * p.n + j, f = p.flagsAt(k, i, j);
+                    flags[c] = f;
                     shows[c] = (f & (GroundScan.UNKNOWN | GroundScan.SKY)) == 0;
                     dens[c] = (float) p.densityAt(k, i, j);
                     sig[c] = (float) p.signalAt(k, i, j);
@@ -103,6 +105,12 @@ public final class RadarView {
      */
     public void render(int[] out, int w, int h, double ex, double ey, double ez, double yaw, double pitch, double fov,
                        double lo, double hi, int row0, int rowStep) {
+        render(out, w, h, ex, ey, ez, yaw, pitch, fov, new RadarBand(RadarBand.CUSTOM, lo, hi), row0, rowStep);
+    }
+
+    /** As render above, showing what band shows (a named band, or a custom one's densities). */
+    public void render(int[] out, int w, int h, double ex, double ey, double ez, double yaw, double pitch, double fov,
+                       RadarBand band, int row0, int rowStep) {
         double ya = Math.toRadians(yaw), pa = Math.toRadians(pitch);
         // the camera's axes: forward f, right r, up u (Minecraft: yaw 0 looks +z; pitch positive looks down)
         double fx = -Math.sin(ya) * Math.cos(pa), fy = -Math.sin(pa), fz = Math.cos(ya) * Math.cos(pa);
@@ -114,12 +122,17 @@ public final class RadarView {
                 double sx = (2 * (px + 0.5) / w - 1) * tanX, sy = (1 - 2 * (py + 0.5) / h) * tanY;
                 double dx = fx + sx * rx + sy * ux, dy = fy + sy * uy, dz = fz + sx * rz + sy * uz;
                 double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                out[py * w + px] = trace(ex, ey, ez, dx / len, dy / len, dz / len, lo, hi);
+                out[py * w + px] = trace(ex, ey, ez, dx / len, dy / len, dz / len, band);
             }
     }
 
     /** One ray's colour (ARGB, opaque: the background is black). */
     int trace(double ex, double ey, double ez, double dx, double dy, double dz, double lo, double hi) {
+        return trace(ex, ey, ez, dx, dy, dz, new RadarBand(RadarBand.CUSTOM, lo, hi));
+    }
+
+    /** One ray's colour through what band shows. */
+    int trace(double ex, double ey, double ez, double dx, double dy, double dz, RadarBand band) {
         // (the ray's span inside the cone's box, by slabs; no arrays: this runs for every pixel)
         double t0 = 0, t1 = 4 * (half + total + 64);
         for (int a = 0; a < 3; a++) {
@@ -159,12 +172,12 @@ public final class RadarView {
                     if (shows[c]) {
                         // (the band on the cell's mean, or on its densest sample, drawn a little fainter: an ore vein a
                         // cell's mean hides still shows in a dense band)
-                        double wm = band(dens[c], lo, hi), wp = band(peak[c], lo, hi) * smooth(SHARE_MIN, SHARE_FULL, share[c]);
-                        double wgt = Math.max(wm, wp) * sig[c];
+                        double ps = smooth(SHARE_MIN, SHARE_FULL, share[c]);
+                        double wgt = band.weight(flags[c], dens[c], peak[c], ps) * sig[c];
                         if (wgt > 0.002) {
                             double a = (1 - Math.exp(-OPACITY * wgt * step)) * Math.min(1, t / NEAR);
                             double fog = Math.exp(-t / FOG);
-                            int col = wp > wm ? peakRgb[c] : rgb[c];
+                            int col = band.byPeak(flags[c], dens[c], peak[c], ps) ? peakRgb[c] : rgb[c];
                             r += (1 - alpha) * a * ((col >> 16) & 255) / 255.0 * fog;
                             g += (1 - alpha) * a * ((col >> 8) & 255) / 255.0 * fog;
                             b += (1 - alpha) * a * (col & 255) / 255.0 * fog;

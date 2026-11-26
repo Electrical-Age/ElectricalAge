@@ -19,10 +19,12 @@ import static mods.eln.i18n.I18N.tr;
 public class GroundRadarDescriptor extends TransparentNodeDescriptor {
     /**
      * What a scan costs: J_PER_CELL for each cell (Baughn: energy goes as resolution x range), drawn as fast as the
-     * batteries give it, at most SAMPLES_PER_TICK samples of work a tick (~1 ms), and at least MIN_S long. The smallest
-     * scan from sea level is ~11k cells (~350 J, 3 s on two portable batteries); the largest ~230k (~7 kJ, ~35 s).
+     * batteries give it, at most SAMPLES_PER_TICK samples of work a tick (~1 ms), and at least MIN_S long. Batteries are
+     * drawn at DRAIN times their own discharge rate (Baughn 1575643239036223550: 30x the energy, drained 3x as fast).
+     * From sea level the smallest scan is ~10k cells (~9 kJ, ~16 s on two portable batteries' 600 W); range 3 there
+     * needs 89-173 kJ, more than two portable batteries hold (80 kJ): two battery packs (240 kJ, 1.8 kW) do.
      */
-    public static final double J_PER_CELL = 0.03, MIN_S = 3;
+    public static final double J_PER_CELL = 0.9, MIN_S = 3, DRAIN = 3;
     public static final int SAMPLES_PER_TICK = 16000;
     public static final int MAX_RANGE = 3, MAX_DETAIL = 4;
 

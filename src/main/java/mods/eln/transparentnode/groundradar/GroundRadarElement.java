@@ -31,11 +31,11 @@ import java.util.Map;
  * The Ground Radar: a scan, asked for from its screen, reads the ground under it (GroundScan, at the screen's range and
  * detail) as fast as its batteries pay for the cells (tick); the finished picture goes to every player with the screen
  * open, and to each player who opens it later. The batteries stay in it when it is broken (Baughn: they remain in the
- * item): its inventory goes into the dropped item's data and comes back when it is placed. The picture is kept in the
- * world's save; not in the item.
+ * item): its inventory and the goggles' band go into the dropped item's data and come back when it is placed. The
+ * picture is kept in the world's save; not in the item.
  */
 public class GroundRadarElement extends TransparentNodeElement {
-    public static final byte SCAN_ID = 1, RANGE_ID = 2, DETAIL_ID = 3, ADDRESS_ID = 4;
+    public static final byte SCAN_ID = 1, RANGE_ID = 2, DETAIL_ID = 3, ADDRESS_ID = 4, BAND_ID = 5;
 
     /**
      * Its RS485 registers (Baughn: a bus port; players get creative). READ answers with a REPLY; WRITE sets. 0 state (0
@@ -207,7 +207,7 @@ public class GroundRadarElement extends TransparentNodeElement {
         return e;
     }
 
-    /** What the batteries can give together over a tick (W): each its discharge rate, or what it holds left. */
+    /** What the batteries can give together over a tick (W): each DRAIN times its discharge rate, or what it holds left. */
     double rate() {
         return rate(0.05);
     }
@@ -217,7 +217,7 @@ public class GroundRadarElement extends TransparentNodeElement {
         double w = 0;
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack s = inventory.getItem(i);
-            if (Utils.getItemObject(s) instanceof IItemEnergyBattery b) w += Math.min(b.getDischagePower(s), b.getEnergy(s) / dt);
+            if (Utils.getItemObject(s) instanceof IItemEnergyBattery b) w += Math.min(GroundRadarDescriptor.DRAIN * b.getDischagePower(s), b.getEnergy(s) / dt);
         }
         return w;
     }
@@ -232,7 +232,7 @@ public class GroundRadarElement extends TransparentNodeElement {
     }
 
     /**
-     * Draw w watts for dt from the batteries, each giving at most its own discharge rate, shared in proportion to the
+     * Draw w watts for dt from the batteries, each giving at most DRAIN times its own discharge rate, shared in proportion to the
      * energy they hold; false (and nothing taken) if together they can't.
      */
     boolean draw(double w, double dt) {
@@ -241,7 +241,7 @@ public class GroundRadarElement extends TransparentNodeElement {
         double total = 0;
         for (int i = 0; i < n; i++) {
             ItemStack s = inventory.getItem(i);
-            if (Utils.getItemObject(s) instanceof IItemEnergyBattery b) total += can[i] = Math.min(b.getEnergy(s), b.getDischagePower(s) * dt);
+            if (Utils.getItemObject(s) instanceof IItemEnergyBattery b) total += can[i] = Math.min(b.getEnergy(s), GroundRadarDescriptor.DRAIN * b.getDischagePower(s) * dt);
         }
         double j = w * dt;
         if (total < j || total <= 0) return false;
@@ -350,8 +350,8 @@ public class GroundRadarElement extends TransparentNodeElement {
     }
 
     /**
-     * A tick of a scan: as many cells as the batteries' discharge rate pays for this tick (J_PER_CELL each; Baughn: energy
-     * goes as resolution x range, and the time as how fast the batteries can deliver it), at most SAMPLES_PER_TICK
+     * A tick of a scan: as many cells as DRAIN times the batteries' discharge rate pays for this tick (J_PER_CELL each;
+     * Baughn: energy goes as resolution x range, and the time as how fast the batteries can deliver it), at most SAMPLES_PER_TICK
      * samples of work; done once every cell is read and MIN_S has passed.
      */
     void tick(double dt) {
@@ -431,6 +431,7 @@ public class GroundRadarElement extends TransparentNodeElement {
                 case RANGE_ID -> setSettings(Math.round(stream.readFloat()), detail);
                 case DETAIL_ID -> setSettings(range, Math.round(stream.readFloat()));
                 case ADDRESS_ID -> setAddress(Math.round(stream.readFloat()));
+                case BAND_ID -> band = RadarBand.read(stream.readByte(), stream.readFloat(), stream.readFloat());
                 default -> {
                     return id;
                 }
@@ -456,24 +457,50 @@ public class GroundRadarElement extends TransparentNodeElement {
             stream.writeFloat((float) rate());
             stream.writeShort(port.address());
             stream.writeBoolean(port.bus() != null);
+            stream.writeByte(band.kind());
+            stream.writeFloat((float) band.lo());
+            stream.writeFloat((float) band.hi());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // ---- the batteries ride in the item
+    // ---- the batteries and the goggles' band ride in the item (Baughn: the band is there when it is next placed)
+
+    /** What the goggles show (RadarBand; Everything until a player picks another). */
+    RadarBand band = RadarBand.DEFAULT;
+
+    public RadarBand band() {
+        return band;
+    }
+
+    static void writeBand(CompoundTag nbt, RadarBand b) {
+        nbt.putByte("band", (byte) b.kind());
+        if (b.kind() == RadarBand.CUSTOM) {
+            nbt.putFloat("bandLo", (float) b.lo());
+            nbt.putFloat("bandHi", (float) b.hi());
+        }
+    }
+
+    static RadarBand readBand(CompoundTag nbt) {
+        return RadarBand.read(nbt.getByteOr("band", (byte) RadarBand.EVERYTHING), nbt.getFloatOr("bandLo", 0), nbt.getFloatOr("bandHi", 0));
+    }
 
     @Override
     public CompoundTag getItemStackNBT() {
         CompoundTag nbt = new CompoundTag();
         Utils.writeToNBT(nbt, "inv", inventory);
+        writeBand(nbt, band);
         return nbt;
     }
 
     @Override
     public void readItemStackNBT(CompoundTag nbt) {
         super.readItemStackNBT(nbt);
-        if (nbt != null) Utils.readFromNBT(nbt, "inv", inventory);
+        if (nbt != null) {
+            Utils.readFromNBT(nbt, "inv", inventory);
+            band = readBand(nbt);
+        }
     }
 
     /** Set while it is being broken: the inventory is then not spilled (it rides in the dropped item instead). */
@@ -501,6 +528,7 @@ public class GroundRadarElement extends TransparentNodeElement {
         if (port.address() != 0) nbt.putInt("addr", port.address());
         nbt.putByte("range", (byte) range);
         nbt.putByte("detail", (byte) detail);
+        writeBand(nbt, band);
         if (picture != null) {
             nbt.putByteArray("picture", picture);
             nbt.putLong("pictureAt", pictureAt);
@@ -515,6 +543,7 @@ public class GroundRadarElement extends TransparentNodeElement {
         port.setAddress(nbt.getIntOr("addr", 0));
         range = Math.max(1, Math.min(GroundRadarDescriptor.MAX_RANGE, nbt.getByteOr("range", (byte) 1)));
         detail = Math.max(1, Math.min(GroundRadarDescriptor.MAX_DETAIL, nbt.getByteOr("detail", (byte) 1)));
+        band = readBand(nbt);
         if (picture != null && GroundScan.decode(picture) == null) picture = null;   // (an older picture's format)
     }
 
