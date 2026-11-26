@@ -2207,6 +2207,12 @@
   "kind": "transparent_node",
   "name": "230v_air_blower"
  },
+ "eln:transparent_node@5400": {
+  "descriptor": "PipeHeaterDescriptor",
+  "display": "230V Pipe Heater",
+  "kind": "transparent_node",
+  "name": "230v_pipe_heater"
+ },
  "eln:transparent_node@5440": {
   "descriptor": "ElectricalAnvilDescriptor",
   "display": "Electrical Anvil",

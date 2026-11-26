@@ -231,6 +231,7 @@ final class GoldenCase implements TestCase {
         "eln:transparent_node@5328",   // the Large Boiler, 2x2x2 (todo #472, Baughn 2026-11-15)
         "eln:transparent_node@5332",   // the Still Pot, 2x2x2 (refinery M2, todo #591, Baughn 2026-11-24)
         "eln:transparent_node@5336",   // the Condenser Coil, 1x1x2 (refinery M2, Baughn 2026-11-24)
+        "eln:transparent_node@5400",   // the Pipe Heater (todo #623, Baughn 2026-11-26)
         "eln:transparent_node@5200",   // the steam injection wellhead (oil lakes, todo #138; Baughn 2026-10-30)
         "eln:transparent_node@5504",   // the Linear Servo Drive (the servo layer, Baughn 2026-11-02)
         "eln:transparent_node@5568",   // the computer (robotics phase 3, Baughn 2026-11-05)
@@ -239,7 +240,7 @@ final class GoldenCase implements TestCase {
         "eln:shared_item@451", "eln:shared_item@452",   // the better cores' intermediates (Baughn 2026-11-06)
         "eln:ore@7");   // Deepslate Lead Ore: lead in deepslate's middle (Baughn 2026-10-20)
     /** Devices new in 26.x by display name (no 1.12 container to compare slots with). */
-    static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("48V Tar Sand Separator", "230V Tar Sand Separator", "Variable DC-DC Converter",
+    static final java.util.Set<String> NEW_IN_26_NAMES = java.util.Set.of("230V Pipe Heater", "48V Tar Sand Separator", "230V Tar Sand Separator", "Variable DC-DC Converter",
         "48V Electric Heater", "230V Electric Heater", "Smelter", "Steam Oven", "Small Steam Condenser", "Steam Condenser",
         "48V Steam Turbine", "230V Steam Turbine", "48V Compact Steam Turbine",
         "Electrical Anvil",   // (their screen: Baughn 2026-10-26)

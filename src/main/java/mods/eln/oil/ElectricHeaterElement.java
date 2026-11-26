@@ -94,14 +94,24 @@ public class ElectricHeaterElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
+        initHeater();
+        connect();
+    }
+
+    /** Its coils, cable and regulator, before it connects. */
+    protected void initHeater() {
         desc.cable.applyTo(load);
         resistor.setR(desc.resistorR);
         regulator.setRmin(desc.resistorR);
         inventoryChange(inventory);
         // insulated except its back: Rs lets ~P through to a boiler at a few tens of degrees' difference; with nothing
-        // to heat and no regulator it passes 800 degrees and burns
+        // to heat and no regulator it passes 800 degrees (Tc: 820 C) and burns
         thermal.set(0.01, 2000.0 / desc.nominalP, 250.0 * desc.nominalP / 1000.0);   // ~5% lost to the air at 100 K
-        connect();
+    }
+
+    /** What its regulator holds (Tc scale), for its screen: its coils' temperature. */
+    protected double heldTc() {
+        return thermal.Tc;
     }
 
     @Override
@@ -138,6 +148,7 @@ public class ElectricHeaterElement extends TransparentNodeElement {
             stream.writeFloat((float) regulator.getTarget());
             stream.writeFloat((float) thermal.Tc);
             stream.writeFloat((float) resistor.getP());
+            stream.writeFloat((float) heldTc());
         } catch (IOException e) {
             e.printStackTrace();
         }

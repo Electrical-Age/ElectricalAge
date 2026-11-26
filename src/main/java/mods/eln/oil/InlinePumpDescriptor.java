@@ -24,6 +24,11 @@ public class InlinePumpDescriptor extends TransparentNodeDescriptor {
      */
     @Override
     public mods.eln.misc.Direction getFrontFromPlace(mods.eln.misc.Direction side, net.minecraft.world.entity.LivingEntity entityLiving) {
+        return alongView(entityLiving);
+    }
+
+    /** The front that puts a line through its flanks along the player's view (the Pipe Heater's too). */
+    static mods.eln.misc.Direction alongView(net.minecraft.world.entity.LivingEntity entityLiving) {
         return entityLiving == null ? mods.eln.misc.Direction.XN : mods.eln.misc.Utils.entityLivingHorizontalViewDirection(entityLiving).left();
     }
 

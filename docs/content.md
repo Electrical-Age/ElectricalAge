@@ -171,6 +171,20 @@ breather's `pipe_breather_valve_*`. No vacuum-trap test: the receivers' breather
 pot can't pull its receivers into a vacuum (the pot's Jade warns if one is left unvented). Cost: the sensible batch's network has 12 active nodes (pot, coil, the two receivers and eight pipe runs)
 and takes ~3.2 ms a step (4.8 iterations, 9.6 solves), flash-bound at ~0.3 ms a node.
 
+The 230V Pipe Heater (`oil/PipeHeaterElement`, Baughn 2026-11-26, model `cadmodels/PipeHeater`): an Electric Heater whose
+coils heat a pipe line, for oil too viscous to flow cold. Laid out as the Inline Pump: the line through its flanks at the
+pump's height (4 px), placed along the player's view, power on its front; 4 kW. One node of ~2 B (two alloy pipe blocks'
+worth, 2 to 6 px up) between the pipes on its flanks, not lumped into them: a lumped run hands its wall heat back to its
+pieces by wall conductance alone, so the pipes' iron would pay part of the coils' heat. Its coils (1 kJ/K, ~2 W/K to the
+air) heat it through the core's wall link at 50 W/K. The regulator slot and screen are the Electric Heater's, but the
+regulator holds the contents' temperature (the screen shows that, `heldTc`); with none it heats at full power. Dry or
+stagnant its coils pass 800 (Tc; 820 °C) and it burns out (repair: 230V Copper Heating Corp). Jade: power, contents and
+their temperature, coils, viscosity. Sub-id 24 of the blower's group (transparent_node@5400, 230v_pipe_heater). It thins
+what flows on from it: an edge's viscosity is its ends' by their shares of its resistance (porting-notes, option A').
+GameTests `pipe_heater_thins_heavy_oil` (two lines of heavy oil from tanks at 8 bar: the heated one moves ~1.6x as
+much by 500 ticks), `pipe_heater_holds_its_set_point` (the oil just over its 60 °C), `pipe_heater_burns_dry` (coils preset
+past the limit with nothing to heat).
+
 ### Fluid species (`src/main/java/mods/eln/fluid/SpeciesLoader.java`)
 - Datapack JSON `data/<ns>/eln/fluid_species/<name>.json` defines species `<ns>:<name>` for the fluid core (fields in
   the loader's javadoc: kind curve/none/gas, group, density, heat capacities, molar mass, boiling point, latent heat,

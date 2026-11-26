@@ -7137,6 +7137,26 @@
   "model_texture_notes": ""
  },
  {
+  "item_id": "230v_pipe_heater",
+  "display_name": "230V Pipe Heater",
+  "family": "machine",
+  "placeable": true,
+  "tier": "mv",
+  "vanilla_size": 16,
+  "schematic_scope": true,
+  "model": "cad pipeheater200v",
+  "parts": [],
+  "appearance": "",
+  "function": "",
+  "current_texture": "",
+  "shares_texture_with": [],
+  "notes": "added 2026-11-26 (todo #623)",
+  "redraw": true,
+  "tier_cue": "band",
+  "node_kind": "transparent_node",
+  "model_texture_notes": ""
+ },
+ {
   "item_id": "iron_tank_minecart",
   "display_name": "Iron Tank Minecart",
   "family": "tank_carts",

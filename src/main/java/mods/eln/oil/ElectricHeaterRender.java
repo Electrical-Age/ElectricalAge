@@ -11,6 +11,8 @@ public class ElectricHeaterRender extends TransparentNodeElementRender {
     final ElectricHeaterDescriptor desc;
     /** From the server: the regulator's set point and the temperature (relative to ambient, like Tc), the power. */
     public float target, temperature, power;
+    /** What its regulator holds now (relative to ambient, like Tc): the coils', or a Pipe Heater's oil. */
+    public float held;
     public boolean targetNew;
 
     public ElectricHeaterRender(TransparentNodeEntity entity, TransparentNodeDescriptor d) {
@@ -26,7 +28,7 @@ public class ElectricHeaterRender extends TransparentNodeElementRender {
         double c = mods.eln.misc.Incandescence.celsius(temperature);
         mods.eln.misc.Incandescence.drawGlow(c, desc::drawElement);
         mods.eln.gl.GL11.glPushMatrix();
-        mods.eln.gl.GL11.glTranslatef(-0.36f, -0.1f, 0f);
+        mods.eln.gl.GL11.glTranslatef(desc.haloX, desc.haloY, 0f);
         mods.eln.misc.Incandescence.drawHalo(c, 0.4f, tileEntity);
         mods.eln.gl.GL11.glPopMatrix();
     }
@@ -40,6 +42,7 @@ public class ElectricHeaterRender extends TransparentNodeElementRender {
             target = t;
             temperature = stream.readFloat();
             power = stream.readFloat();
+            held = stream.readFloat();
         } catch (IOException e) {
             e.printStackTrace();
         }

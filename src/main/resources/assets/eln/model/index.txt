@@ -85,6 +85,7 @@ mpptcontroller/mpptcontroller.obj
 oilpump200v/oilpump200v.obj
 oilpump50v/oilpump50v.obj
 passivethermaldissipatora/passivethermaldissipatora.obj
+pipeheater200v/pipeheater200v.obj
 pipemixer/pipemixer.obj
 plantcondenser/plantcondenser.obj
 platemachinea/platemachinea.obj

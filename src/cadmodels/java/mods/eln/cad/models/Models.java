@@ -9,7 +9,7 @@ final class Models {
     }
 
     static final List<Supplier<List<NodeModel>>> NODES = List.of(Boiler::models, LargeBoiler::models, StillPot::models, CondenserCoil::models, PoleGear::models, CompactTurbine::models, Condenser::models, ElectricHeater::models,
-        InlinePump::models, AirBlower::models, PipeMixer::models, OilPump::models, SubmersiblePump::models, Tank::models, TarSandSeparator::models, ShaftGas::models, ShaftMotor::models,
+        InlinePump::models, PipeHeater::models, AirBlower::models, PipeMixer::models, OilPump::models, SubmersiblePump::models, Tank::models, TarSandSeparator::models, ShaftGas::models, ShaftMotor::models,
         ShaftParts::models, ShaftTurbines::models, PlantCondenser::models, HeatExchanger::models, SteamOven::models, SteamTurbine::models,
         Smelter::models, HeatFurnace::models, FuelHeater::models, ElectricalAnvil::models, CapacitorBank::models, Column::models, HandDrill::models, SignalProcessor::models, FieldLogger::models, TiltedTerminal::models,
         ServoParts::models, ComputerParts::models, WireDrawer::models, Macerator::models, Compressor::models, Magnetizer::models, PlateMachine::models, ResinCollector::models, CarbonBlackBurner::models, Desulfuriser::models, GroundRadar::models, SteamCracker::models, Polymeriser::models, MpptController::models);

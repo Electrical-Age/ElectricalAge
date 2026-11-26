@@ -172,6 +172,12 @@ public class Wp10aContent implements ElnContent {
         // flank and the outlet flange on its right (todo #519)
         transparentNodeItem.addDescriptor(20 + (84 << 6), new mods.eln.oil.AirBlowerDescriptor(TR_NAME(Type.NONE, "230V Air Blower"),
             MVU, meduimVoltageCableDescriptor, "airblower200v"));
+        // the pipe heater (Baughn 2026-11-26, todo #623): the 230V Electric Heater's coils round a pipe line, for viscous
+        // oil; laid out as the inline pump. Sub-id 24 of the blower's group (the steam group is full)
+        var pipeHeater = new mods.eln.oil.PipeHeaterDescriptor(TR_NAME(Type.NONE, "230V Pipe Heater"),
+            MVU, 4000, meduimVoltageCableDescriptor, "pipeheater200v");
+        pipeHeater.repairPart = "230V Copper Heating Corp";
+        transparentNodeItem.addDescriptor(24 + (84 << 6), pipeHeater);
         // the pipe mixer: a T of two check valves steered by a signal (Baughn 2026-11-11)
         transparentNodeItem.addDescriptor(60 + (id << 6), new mods.eln.oil.PipeMixerDescriptor(TR_NAME(Type.NONE, "Pipe Mixer"), "pipemixer"));
         // ... and the plant condenser for the shaft turbines (the add-on condensers above stay as they are)

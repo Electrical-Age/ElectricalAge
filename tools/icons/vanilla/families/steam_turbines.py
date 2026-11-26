@@ -1,9 +1,10 @@
 """Steam turbines family (vanilla, 16 px): the CAD-era 48V/230V Steam Turbines, the 48V Compact Steam Turbine and the
-230V Air Blower (src/cadmodels SteamTurbine, CompactTurbine, AirBlower).
+230V Air Blower and the 230V Pipe Heater (src/cadmodels SteamTurbine, CompactTurbine, AirBlower, PipeHeater).
 
     steam_turbine_set(tier) -> Canvas     steamturbine50v / steamturbine200v, tier 'lv' / 'mv'
     compact_turbine()       -> Canvas     compactturbine50v (LV)
     air_blower()            -> Canvas     airblower200v (MV)
+    pipe_heater()           -> Canvas     pipeheater200v (MV)
 
 Shared visual system
 --------------------
@@ -26,10 +27,14 @@ Shared visual system
   intake grille standing out of it towards us (dark louvres, two bars), the finned steel motor on its saddle
   to the left, on the skid. The Inline Pump's icon shows the same drum end-on with the pipe through; here the
   grille is the one large feature.
+* The Pipe Heater is seen from its front (x = 0) so its line runs across the picture: steel flanges at both
+  edges, the heated section wound with copper turns (COPPER, the highlight row LIT: it glows) in two halves with
+  the bare pipe in the gap, broad blue MV collars (the band cue) at its ends, the small steel terminal box in
+  front with the brass conduit up into the gap, on the skid. Rarest shades are folded to stay at 16 colours.
 
 Family ramps: CAST (above), reported earlier by the shaft pass; nothing new.
 """
-from kit import Canvas, box, cylinder, disc, outline_region, tier_ramp, h, STEEL, COPPER
+from kit import Canvas, box, cylinder, disc, outline_region, tier_ramp, h, STEEL, COPPER, LIT, GOLD
 from families.machines import sub
 
 #: cast iron (castiron) of the shaft machines; [5] = [4] so the cylinders' highlight adds no colour.  It also
@@ -151,4 +156,46 @@ def air_blower():
     hole = _disc_mask(6, 7, 4)
     for (x, y) in hole:
         cv.set(x, y, STEEL[3] if y == 8 else (STEEL[2] if y == 10 else CAST[0]))
+    return cv
+
+
+# ------------------------------------------------------------------------------- pipe heater
+def _col(cv, x, y, cols):
+    for j, c in enumerate(cols):
+        if c is not None:
+            cv.set(x, y + j, c)
+
+
+def pipe_heater():
+    """230V Pipe Heater (cadmodels PipeHeater, pipeheater200v, MV): from its front, the pipe line running across the
+    picture between its steel flanges, the heated section wound with glowing copper turns in two halves (the bare
+    pipe in the gap between them) between the broad blue end collars, the small steel terminal box in front with its
+    brass conduit up into the gap, on the skid.  Long, low and banded across the slot where the Inline Pump is a blue
+    drum end-on and the Air Blower a drum with a big round grille."""
+    B = tier_ramp('mv')
+    cv = Canvas(16)
+    _skid(cv, 1, 13)
+    # the steel flanges at both edges (the line's ends), and the bare pipe in the gap between the coil's halves
+    S = STEEL
+    _col(cv, 0, 5, [S[1], S[3], S[3], S[1], S[0]])                     # (hand-shaded: a 2-px cylinder is all outline)
+    _col(cv, 1, 4, [S[1], S[4], S[3], S[3], S[3], S[1], S[0]])
+    _col(cv, 14, 4, [S[1], S[3], S[3], S[3], S[1], S[1], S[0]])
+    _col(cv, 15, 5, [S[1], S[3], S[1], S[0], S[0]])
+    sub(cv, lambda c: cylinder(c, 6, 5, 4, 5, STEEL6, round_ends=False))
+    # the coil: two turns per half, each a full ring (CYL_BANDS 9, the highlight glowing), a dark notch between
+    turn = [COPPER[1], COPPER[4], LIT[4], COPPER[4], COPPER[3], COPPER[3], COPPER[2], COPPER[2], COPPER[1]]
+    gap = [None, COPPER[2], COPPER[1], COPPER[1], COPPER[1], COPPER[1], COPPER[1], COPPER[1], None]
+    for x0 in (4, 9):
+        for x in range(x0, x0 + 3):
+            _col(cv, x, 3, turn if x != x0 + 1 else gap)
+    # the broad blue MV collars closing the heated section (two columns: lit, shaded)
+    for x in (2, 12):
+        _col(cv, x, 2, [B[1], B[4], B[4], B[4], B[3], B[3], B[3], B[3], B[3], B[2], B[0]])
+        _col(cv, x + 1, 2, [B[1], B[3], B[3], B[3], B[3], B[2], B[2], B[2], B[2], B[2], B[0]])
+    # the terminal box in front (its dark lid), the brass conduit up into the gap
+    sub(cv, lambda c: box(c, 6, 11, 4, 3, 1, STEEL6))
+    cv.hline(7, 10, 10, CAST[3])
+    cv.vline(8, 7, 9, GOLD[3])
+    # keep to 16 colours: fold the rarest shades into their neighbours
+    cv.recolor({STEEL[2]: STEEL[1], STEEL[4]: STEEL[3], CAST[1]: CAST[0], CAST[4]: CAST[3]})
     return cv

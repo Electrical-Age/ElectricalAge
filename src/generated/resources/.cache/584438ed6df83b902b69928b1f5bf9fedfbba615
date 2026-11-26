@@ -1,4 +1,4 @@
-// 26.3	2026-11-25T21:17:08.22510177	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-26T09:59:47.239861022	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 98be7e719755f1d65131e906daa7a98b081c8ce8 data/eln/advancement/recipes/misc/230v_air_blower.json
@@ -18,6 +18,7 @@ b31beb201cd017bf7b45f084369e032c673f41f7 data/eln/advancement/recipes/misc/230v_
 4f34ede9703f66eab8c091731dedfb757fb3a9d5 data/eln/advancement/recipes/misc/230v_macerator.json
 10cc285538d3583d8dd852de266a5a318f82af5e data/eln/advancement/recipes/misc/230v_magnetizer.json
 f810edac8015fce58fc8b20b8273733cb0b5dae8 data/eln/advancement/recipes/misc/230v_oil_pump.json
+891053b6af46f273a216521088a96068199552a2 data/eln/advancement/recipes/misc/230v_pipe_heater.json
 d8315d77168d0070acade95b6932c508f28b99e6 data/eln/advancement/recipes/misc/230v_plate_machine.json
 ecd902b2213a1761325442b159c85dc633b6c9de data/eln/advancement/recipes/misc/230v_power_socket.json
 0ac1ada0f3d769d8c6efe84a3f662303660ef345 data/eln/advancement/recipes/misc/230v_shaft_motor.json
@@ -407,6 +408,7 @@ bb52ea119c34f3e68042bb58e800a272744be9d6 data/eln/recipe/230v_iron_heating_corp.
 b2bc41b4629f2c46260114fcfdff7291a52c17f2 data/eln/recipe/230v_macerator.json
 85b337d8c2972bad481b20f081d80f73afa315c8 data/eln/recipe/230v_magnetizer.json
 f52b8037748b5855a326b573fe52f465705d9bea data/eln/recipe/230v_oil_pump.json
+d3e5e039ddcecaa1aeb1b5ba1550b8cc514fac0f data/eln/recipe/230v_pipe_heater.json
 145d0d1fc7f4a0631ef21e5b2768de5439aa100c data/eln/recipe/230v_plate_machine.json
 d65b891d3b5433a63e5220932399f63f82936541 data/eln/recipe/230v_power_socket.json
 0211123725a846fc6c4c5057398badec8f7e53a3 data/eln/recipe/230v_shaft_motor.json

@@ -8,6 +8,13 @@ public class RegulatorThermalLoadToElectricalResistor extends RegulatorProcess {
     Resistor electricalResistor;
 
     double Rmin;
+    /** What it holds, if not its thermal load's temperature (the Pipe Heater: its oil's, in the same units as Tc). */
+    java.util.function.DoubleSupplier sensed;
+
+    /** Hold this instead of the thermal load's temperature (relative to Tref, as Tc). */
+    public void sense(java.util.function.DoubleSupplier sensed) {
+        this.sensed = sensed;
+    }
 
     public void setRmin(double Rmin) {
         this.Rmin = Rmin;
@@ -21,7 +28,7 @@ public class RegulatorThermalLoadToElectricalResistor extends RegulatorProcess {
 
     @Override
     protected double getHit() {
-        return thermalLoad.Tc;
+        return sensed != null ? sensed.getAsDouble() : thermalLoad.Tc;
     }
 
     @Override

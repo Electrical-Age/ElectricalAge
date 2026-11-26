@@ -19,8 +19,17 @@ public class ElectricHeaterDescriptor extends TransparentNodeDescriptor {
     final ElectricalCableDescriptor cable;
     final Obj3D obj;
 
+    /** Where its render draws the hot coils' halo (blocks from the centre, in the model's frame before its turn). */
+    float haloX = -0.36f, haloY = -0.1f;
+
     public ElectricHeaterDescriptor(String name, double nominalU, double nominalP, ElectricalCableDescriptor cable, String model) {
-        super(name, ElectricHeaterElement.class, ElectricHeaterRender.class);
+        this(name, ElectricHeaterElement.class, nominalU, nominalP, cable, model);
+    }
+
+    /** For a heater with its own element (the Pipe Heater), sharing the regulator, screen and render. */
+    @SuppressWarnings("rawtypes")
+    protected ElectricHeaterDescriptor(String name, Class element, double nominalU, double nominalP, ElectricalCableDescriptor cable, String model) {
+        super(name, element, ElectricHeaterRender.class);
         this.nominalU = nominalU;
         this.nominalP = nominalP;
         this.resistorR = nominalU * nominalU / nominalP;
@@ -47,6 +56,11 @@ public class ElectricHeaterDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
+        addLines(list);
+    }
+
+    /** Its own tooltip lines, after the common ones. */
+    protected void addLines(List<String> list) {
         list.add(String.format("%.0f V, %.0f W of heat out of its back (thermal)", nominalU, nominalP));
     }
 }

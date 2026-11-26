@@ -864,6 +864,16 @@ public final class ElnRecipes extends ElnRecipesBase {
             'B', stack(Items.BUCKET),
             'E', findItemStack("Copper Cable")
         );
+        // the Pipe Heater (todo #623): a heating corp wound round a line through a machine block
+        addRecipe(findItemStack("230V Pipe Heater"),
+            " H ",
+            "IMI",
+            " E ",
+            'H', findItemStack("230V Copper Heating Corp"),
+            'I', stack(Items.IRON_INGOT),
+            'M', findItemStack("Machine Block"),
+            'E', findItemStack("Copper Cable")
+        );
         // PLACEHOLDER (todo #471, prototype): the Inline Pump's with iron bars (an intake grille) for its bucket
         addRecipe(findItemStack("230V Air Blower"),
             "Bm ",
