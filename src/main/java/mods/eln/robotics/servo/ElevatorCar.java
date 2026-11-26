@@ -27,7 +27,6 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
 /**
@@ -49,7 +48,13 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     /** Client: the ids of the cabin's walls (negative: the server's are positive). */
     static final java.util.concurrent.atomic.AtomicInteger CLIENT_PART_IDS = new java.util.concurrent.atomic.AtomicInteger();
     /** Client: the cars in the client's level (the carry ticks them). */
-    public static final Set<ElevatorCar> CLIENT = Collections.newSetFromMap(new WeakHashMap<>());
+    /**
+     * The cars a client has (CarCarry steps them). By identity: Entity's equals and hashCode are its id, and a car left
+     * here from before a relog (a disconnect removes no entities) had the same id as the car the new session spawned, so
+     * the new one was never added and froze on that client (AdventurAgent 2026-11-26). CarCarry drops cars of a level
+     * gone.
+     */
+    public static final Set<ElevatorCar> CLIENT = Collections.newSetFromMap(new java.util.IdentityHashMap<>());
 
     /** Where position 0 is (the plate's bottom centre), the axis it moves along, the side its rail is on. */
     public Vec3 origin;

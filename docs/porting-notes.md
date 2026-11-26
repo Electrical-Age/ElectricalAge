@@ -598,6 +598,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     meets only the middles; voxel cables meet each pin (Machine API 1.1: `CablePosition.FLOOR_LEFT`/`FLOOR_RIGHT`,
     `bus(face, position)`, `FacePins`, `VoxelNode.connectPeerPins`). GameTests `servo_elevator_driven_over_the_bus`,
     `servo_elevator_follows_its_setpoint_wire`.
+  - Each client steps its cars from its own set (`ElevatorCar.CLIENT`), kept by identity: Entity's equals is its id,
+    and a car left over from before a relog in the same client process (a disconnect removes no entities) hid the new
+    session's car with the same id, which then never moved on that client (AdventurAgent 2026-11-26, live since the
+    servo layer). Cars of a level gone are dropped as the client steps them.
   - Level runs (Baughn 2026-11-26: one path system for servo cars, straight paths in any direction first, curved tracks
     later): the car moves along a `motion/Path` (`StraightPath`: origin + axis x s). A rail placed on the drive's top
     stands up, or lies along the flank the player looks along (not 60 degrees or more down); laid on that way, beside

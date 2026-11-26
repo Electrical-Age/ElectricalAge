@@ -30,7 +30,11 @@ public final class CarCarry {
         if (mc.level == null || mc.isPaused()) return;
         LocalPlayer player = mc.player;
         for (ElevatorCar c : new ArrayList<>(ElevatorCar.CLIENT)) {
-            if (c.level() != mc.level || c.isRemoved() || c.segment == null || c.origin == null) continue;
+            if (c.level() != mc.level || c.isRemoved()) {   // (from before a relog, or gone: not ours to step)
+                ElevatorCar.CLIENT.remove(c);
+                continue;
+            }
+            if (c.segment == null || c.origin == null) continue;
             AABB b0 = c.boxAt(c.clientPos(c.clientT));
             c.clientT++;
             double s1 = c.clientPos(c.clientT);
