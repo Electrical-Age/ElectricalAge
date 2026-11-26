@@ -235,6 +235,8 @@ public class AutoMinerRender extends TransparentNodeElementRender {
     static final int GREEN = 0xFF55FF55, DIM = 0xFF00AA00;
     /** Text scale in the views, and a label's backing (screen units). */
     static final float TEXT = 0.6f, LABEL_W = 9, LABEL_H = 6;
+    /** How far the labels' backing stands off the views (blocks; the screen's z is unscaled). */
+    static final float LIFT = 1 / 512f;
 
     private static void label(String s, float x, float y) {
         GL11.glPushMatrix();
@@ -288,7 +290,11 @@ public class AutoMinerRender extends TransparentNodeElementRender {
         quad(texXZ.id(), X1, Y0, Q, Q);
         quad(texXY.id(), X0, Y1, Q, Q);
         quad(texYZ.id(), X1, Y1, Q, Q);
-        for (float[] at : new float[][]{{X1, Y0}, {X0, Y1}, {X1, Y1}}) rect(at[0], at[1], LABEL_W, LABEL_H, 0xFF000000);   // (the labels' backing)
+        // the labels' backing, lifted off the views toward the viewer (+z here faces out of the screen), or it z-fights them
+        GL11.glPushMatrix();
+        GL11.glTranslatef(0, 0, LIFT);
+        for (float[] at : new float[][]{{X1, Y0}, {X0, Y1}, {X1, Y1}}) rect(at[0], at[1], LABEL_W, LABEL_H, 0xFF000000);
+        GL11.glPopMatrix();
         GL11.setFullBright(false);
         // (the stats and labels at TEXT of the log's size: "Pipes 64" fits the frame)
         GL11.glPushMatrix();
@@ -298,9 +304,12 @@ public class AutoMinerRender extends TransparentNodeElementRender {
         UtilsClient.drawString(mods.eln.i18n.I18N.tr("Pipes %1$", pipesLeft), 0, 15, pipesLeft > 0 ? GREEN : 0xFFFF5555);
         UtilsClient.drawString(silkTouch ? mods.eln.i18n.I18N.tr("Silk on") : mods.eln.i18n.I18N.tr("Silk off"), 0, 30, GREEN);
         GL11.glPopMatrix();
+        GL11.glPushMatrix();
+        GL11.glTranslatef(0, 0, 2 * LIFT);   // (and the labels off their backing)
         label("XZ", X1, Y0);
         label("XY", X0, Y1);
         label("YZ", X1, Y1);
+        GL11.glPopMatrix();
         GL11.glPopMatrix();
         UtilsClient.enableLight();
     }
