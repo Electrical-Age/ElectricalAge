@@ -284,6 +284,8 @@ public class ElnNodeMenu extends AbstractContainerMenu implements INodeContainer
             }
         }
         if (!moved) return ItemStack.EMPTY;
+        int taken = before.getCount() - stack.getCount();
+        if (taken > 0) slot.onTake(player, before.copyWithCount(taken));
         // set, not setChanged: a worn slot's getItem is a copy (NeoForge's StackCopySlot)
         if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
         else slot.set(stack);

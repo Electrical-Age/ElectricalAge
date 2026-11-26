@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ElectricalFurnaceElement extends TransparentNodeElement {
+public class ElectricalFurnaceElement extends TransparentNodeElement implements mods.eln.gui.SmeltXpSource {
 
     TransparentNodeElementInventory inventory = new ElectricalFurnaceInventory(5, 64, this);
 
@@ -61,6 +61,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 
     boolean powerOn = false;
     boolean autoShutDown = true;
+    double smeltXp = 0;
     ElectricalFurnaceDescriptor descriptor;
 
     VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
@@ -220,10 +221,18 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
     }
 
     @Override
+    public double takeSmeltXp() {
+        double xp = smeltXp;
+        smeltXp = 0;
+        return xp;
+    }
+
+    @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putBoolean("powerOn", powerOn);
         nbt.putBoolean("autoShutDown", autoShutDown);
+        nbt.putDouble("smeltXp", smeltXp);
     }
 
     @Override
@@ -231,6 +240,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
         super.readFromNBT(nbt);
         powerOn = nbt.getBooleanOr("powerOn", false);
         autoShutDown = nbt.getBooleanOr("autoShutDown", false);
+        smeltXp = nbt.getDoubleOr("smeltXp", 0);
     }
 
     public void setPowerOn(boolean value) {

@@ -39,7 +39,7 @@ import java.util.Map;
  * something to smelt and its controls have power, the work takes heat out of it at the electrical oven's rate for that
  * temperature (smeltResistor, R = T / PfT(T)), 1000 J an item. Its controls: a 20 W load on a side (LV cable).
  */
-public class SmelterElement extends TransparentNodeElement {
+public class SmelterElement extends TransparentNodeElement implements mods.eln.gui.SmeltXpSource {
     /** The input, then OUT_SLOTS output slots from outSlotId: a small chest, so no hopper is needed under it (Baughn). */
     public static final int inSlotId = 0, outSlotId = 1, OUT_SLOTS = 4;
     final TransparentNodeElementInventory inventory = new SmelterInventory(outSlotId + OUT_SLOTS, 64, this);
@@ -52,7 +52,7 @@ public class SmelterElement extends TransparentNodeElement {
     final Resistor control = new Resistor(electricalLoad, null);
     SmelterDescriptor descriptor;
 
-    double energyCounter;
+    double energyCounter, smeltXp;
     boolean smelting;
     ItemStack lastIn = ItemStack.EMPTY;
 
@@ -142,11 +142,15 @@ public class SmelterElement extends TransparentNodeElement {
 
     /** What stack in would make now. */
     ItemStack result(ItemStack in) {
-        if (Utils.isEmpty(in)) return ItemStack.EMPTY;
+        return outcome(in).result();
+    }
+
+    Utils.SmeltOutcome outcome(ItemStack in) {
+        if (Utils.isEmpty(in)) return Utils.SmeltOutcome.EMPTY;
         if (mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.chars(thermalLoad.Tc)
             && mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.charrable(in))
-            return new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get());
-        return Utils.smeltResult(node.coordonate.world(), in);
+            return new Utils.SmeltOutcome(new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get()), 0f);
+        return Utils.smelt(node.coordonate.world(), in);
     }
 
     boolean canSmelt() {
@@ -168,13 +172,15 @@ public class SmelterElement extends TransparentNodeElement {
     }
 
     void smeltOne() {
-        ItemStack r = result();
+        Utils.SmeltOutcome o = outcome(inventory.getItem(inSlotId));
+        ItemStack r = o.result();
         if (r.isEmpty()) return;
         int slot = outFor(r);
         if (slot < 0) return;
         ItemStack out = inventory.getItem(slot);
         if (out.isEmpty()) inventory.setItem(slot, r.copy());
         else out.grow(r.getCount());
+        smeltXp += o.experience();
         inventory.removeItem(inSlotId, 1);
         inventory.setChanged();
         needPublish();
@@ -264,15 +270,24 @@ public class SmelterElement extends TransparentNodeElement {
     }
 
     @Override
+    public double takeSmeltXp() {
+        double xp = smeltXp;
+        smeltXp = 0;
+        return xp;
+    }
+
+    @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         nbt.putDouble("energyCounter", energyCounter);
+        nbt.putDouble("smeltXp", smeltXp);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
         energyCounter = nbt.getDoubleOr("energyCounter", 0);
+        smeltXp = nbt.getDoubleOr("smeltXp", 0);
         lastIn = inventory.getItem(inSlotId).copy();
     }
 

@@ -1,6 +1,7 @@
 package mods.eln.gui;
 
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
@@ -41,6 +42,16 @@ public class ElnSlot extends Slot {
             return stack;
         }
         return super.safeInsert(stack, increment);
+    }
+
+    @Override
+    public void onTake(Player player, ItemStack stack) {
+        super.onTake(player, stack);
+        if (!stack.isEmpty() && SlotSpec.OUTPUT.equals(spec.kind())
+            && container instanceof mods.eln.node.transparent.TransparentNodeElementInventory inv
+            && inv.element() instanceof SmeltXpSource xp) {
+            xp.awardSmeltXp(player);
+        }
     }
 
     /** 1.12 getSlotStackLimit (the slot's own limit; 26.x also caps by the item's max stack size). */

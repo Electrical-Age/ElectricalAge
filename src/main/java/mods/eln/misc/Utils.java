@@ -551,13 +551,22 @@ public class Utils {
         return new String(java.nio.file.Files.readAllBytes(getMapFile(name).toPath()), java.nio.charset.StandardCharsets.UTF_8);
     }
 
-    /** Smelting result of a single input item (1.12 FurnaceRecipes.getSmeltingResult); EMPTY without a server/recipe. */
-    public static net.minecraft.world.item.ItemStack smeltResult(net.minecraft.world.level.Level level, net.minecraft.world.item.ItemStack input) {
-        if (isEmpty(input) || !(level instanceof net.minecraft.server.level.ServerLevel sl)) return net.minecraft.world.item.ItemStack.EMPTY;
+    public record SmeltOutcome(net.minecraft.world.item.ItemStack result, float experience) {
+        public static final SmeltOutcome EMPTY = new SmeltOutcome(net.minecraft.world.item.ItemStack.EMPTY, 0f);
+    }
+
+    /** Smelting result and recipe XP of a single input item (1.12 FurnaceRecipes); EMPTY without a server/recipe. */
+    public static SmeltOutcome smelt(net.minecraft.world.level.Level level, net.minecraft.world.item.ItemStack input) {
+        if (isEmpty(input) || !(level instanceof net.minecraft.server.level.ServerLevel sl)) return SmeltOutcome.EMPTY;
         net.minecraft.world.item.crafting.SingleRecipeInput in = new net.minecraft.world.item.crafting.SingleRecipeInput(input);
         return sl.recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.SMELTING, in, sl)
-            .map(r -> r.value().assemble(in))
-            .orElse(net.minecraft.world.item.ItemStack.EMPTY);
+            .map(r -> new SmeltOutcome(r.value().assemble(in), r.value().experience()))
+            .orElse(SmeltOutcome.EMPTY);
+    }
+
+    /** Smelting result of a single input item (1.12 FurnaceRecipes.getSmeltingResult); EMPTY without a server/recipe. */
+    public static net.minecraft.world.item.ItemStack smeltResult(net.minecraft.world.level.Level level, net.minecraft.world.item.ItemStack input) {
+        return smelt(level, input).result();
     }
 
     /** Per-slot limit: the container's, capped by the item's own max stack size (1.12 used the container's only). */
