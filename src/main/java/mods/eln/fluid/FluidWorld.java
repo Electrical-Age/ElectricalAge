@@ -874,18 +874,27 @@ public final class FluidWorld implements IProcess {
                 // as liquid goes out and gas comes back. Vents and links stay single edges.
                 FluidNode o = sA > 0 ? a : b, d = sA > 0 ? b : a;
                 double dO = sA > 0 ? dA : dB, dD = sA > 0 ? dB : dA, span = Math.max(sA, sB);
-                net.connect(o, dO, d, dD, k).kind(FluidEdge.Kind.CHECK).spanA = span;
-                net.connect(d, dD, o, dO, k).kind(FluidEdge.Kind.CHECK).entrySpan = span;
+                double shareO = (sA > 0 ? rA : rB) / (rA + rB);   // (its ends' shares of the resistance: option A')
+                var out = net.connect(o, dO, d, dD, k).kind(FluidEdge.Kind.CHECK);
+                out.spanA = span;
+                out.shareA = shareO;
+                out.shareB = 1 - shareO;
+                var in = net.connect(d, dD, o, dO, k).kind(FluidEdge.Kind.CHECK);
+                in.entrySpan = span;
+                in.shareA = 1 - shareO;
+                in.shareB = shareO;
             } else {
                 var edge = net.connect(a, dA, b, dB, k);
                 edge.spanA = sA;
                 edge.spanB = sB;
+                edge.shareA = rA / (rA + rB);   // (each end's share of its viscosity: option A')
+                edge.shareB = rB / (rA + rB);
             }
         }
         for (FluidDevice.Link l : plan.links) {
             FluidNode a = repr.apply(l.a), b = repr.apply(l.b);
             if (a == b) continue;   // (both sides in one run: the valve can't hold anything back)
-            double r = 1 / l.k + (a != l.a ? runR.get(a) / 2 : 0) + (b != l.b ? runR.get(b) / 2 : 0);
+            double rA = a != l.a ? runR.get(a) / 2 : 0, rB = b != l.b ? runR.get(b) / 2 : 0, r = 1 / l.k + rA + rB;
             double lsA = spanOn(a, l.a, l.spanA), lsB = spanOn(b, l.b, l.spanB);
             if ((lsA > 0) != (lsB > 0)) {
                 // an opening on a point (a pipe arm's end into a junction): the couplings' counter-flow pair, above
@@ -893,15 +902,24 @@ public final class FluidWorld implements IProcess {
                 double dO = drawOn(o, lsA > 0 ? l.a : l.b, lsA > 0 ? l.drawA : l.drawB), dD = drawOn(d, lsA > 0 ? l.b : l.a, lsA > 0 ? l.drawB : l.drawA);
                 double span = Math.max(lsA, lsB);
                 var net = netOf.get(a);
+                // (its runs' halves each at their own end's viscosity, its own at the upstream's: option A')
+                double rO = lsA > 0 ? rA : rB, rD = lsA > 0 ? rB : rA;
                 l.edge = net.connect(o, dO, d, dD, 1 / r).kind(FluidEdge.Kind.CHECK);
                 l.edge.spanA = span;
-                net.connect(d, dD, o, dO, 1 / r).kind(FluidEdge.Kind.CHECK).entrySpan = span;
+                l.edge.shareA = rO / r;
+                l.edge.shareB = rD / r;
+                var back = net.connect(d, dD, o, dO, 1 / r).kind(FluidEdge.Kind.CHECK);
+                back.entrySpan = span;
+                back.shareA = rD / r;
+                back.shareB = rO / r;
                 links.add(l);
                 continue;
             }
             l.edge = netOf.get(a).connect(a, drawOn(a, l.a, l.drawA), b, drawOn(b, l.b, l.drawB), 1 / r).kind(l.kind);
             l.edge.spanA = lsA;   // (two openings, as two pipes' side ends: the mix over their spans; valves 0)
             l.edge.spanB = lsB;
+            l.edge.shareA = rA / r;   // (its runs' halves at their own ends' viscosity, its own at the upstream's: option A')
+            l.edge.shareB = rB / r;
             l.edge.area = l.area;
             l.edge.open = l.open;
             l.edge.boost = l.boost;

@@ -687,6 +687,14 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   under 15x, syrupy, thick from 200x, tarry from 5000x; the engines' lines without the fix, as engines ignore it). A
   thick liquid's line is third, in the headline, so cold residue that won't flow says why without sneaking. None for water or gas (`EaUnits.viscosity`, `putViscosity`).
   The pipe sensors gained the line, not a viscosity signal. `pipe_jade_viscosity`, `FuelQualityTest.viscosityForPlayers`.
+- An edge's liquid viscosity is its two ends' by their shares of its resistance (Baughn 2026-11-26, option A'): an edge
+  between two nodes is the two halves of a resistance in series (FluidWorld's couplings: `k = 1 / (rA + rB)`), and each
+  half now goes at its own end's temperature, the same liquid (`FluidEdge.shareA`, `CoreStep.mu`). It was all at the
+  upstream end's, so a cold tank's oil out through a heated pipe crawled at the tank's viscosity although the pipe holds
+  nearly all the resistance (a tank's large flange next to none): the Pipe Heater sped such a line up only 1.3x (now ~1.6x in `pipe_heater_thins_heavy_oil`).
+  A device link (a valve) is its own resistance between its two runs' halves: the halves go at their own ends', its own
+  at the upstream end's. A downstream end with no liquid gives none of its temperature. Water's viscosity
+  is a constant, so water is unchanged, bit for bit. `pipe_heater_thins_heavy_oil`.
 - A broken pipe's contents are deleted (Baughn 2026-11-25: the extreme pressures players see are most likely the pipe
   deletion behaviour squeezing a piece's fluid into its neighbours). Breaking a piece (mining it, the shears, an
   explosion, a junction going with its arms) deletes its share of its run, by volume, every species and its energy;

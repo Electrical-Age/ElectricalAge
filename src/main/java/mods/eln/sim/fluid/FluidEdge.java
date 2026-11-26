@@ -22,6 +22,14 @@ public final class FluidEdge {
     public double entrySpan;
     /** Geometric conductance (m^3; Q = k / mu x dP). */
     public double k;
+    /**
+     * a's and b's shares of k's resistance (1/k in series: FluidWorld's couplings, rA + rB; a device link's, its own 1/k
+     * between its two runs' halves), or NaN: the liquid's viscosity is taken share by share, a's share at a's temperature,
+     * b's at b's, the rest (a link's own) at the upstream end's, all the same liquid (Baughn 2026-11-26, option A': a tank's
+     * cold oil out through a heated pipe goes at the pipe's viscosity, the resistance being the pipe's). NaN: all at the
+     * upstream end's.
+     */
+    public double shareA = Double.NaN, shareB = Double.NaN;
     /** 0 closed .. 1 open (a valve). */
     public double open = 1;
     /**

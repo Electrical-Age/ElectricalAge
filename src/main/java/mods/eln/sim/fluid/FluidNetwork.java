@@ -109,6 +109,18 @@ public final class FluidNetwork {
         double xl, h, rho, mu, rhoHead, rhoLiq, T;
         double[] layerShare, gas;
         FluidNode node;
+        /** The liquid's part of mu (each layer's window share x its viscosity), and the window shares (layers). */
+        double liqMu;
+        double[] window;
+
+        /** The liquid's part of mu were the same liquid at T (K): its layers' viscosities there (option A'). */
+        double liqMuAt(double T) {
+            if (liqMu <= 0 || window == null) return liqMu;
+            Flash st = node.state;
+            double m = 0;
+            for (int l = 0; l < window.length && l < st.layers; l++) if (window[l] != 0) m += window[l] * layerMu(st, l, T);
+            return m;
+        }
 
         /** Water vapour's share of the packet (by mass). */
         double xv() {
@@ -213,6 +225,8 @@ public final class FluidNetwork {
             liqRho = st.layerRho[0];
             liqMu = layerMu(st, 0, T);
         }
+        pk.liqMu = liqMu;
+        pk.window = L == 1 && mg <= 0 ? new double[]{1} : wk;
         double rho = liqRho + (1 - w) * rhoG;
         double muG = mg > 0 ? muNum / mg : Water.MU_AIR;
         double mu = liqMu + (1 - w) * muG;

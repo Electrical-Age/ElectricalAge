@@ -156,7 +156,24 @@ public final class CoreStep {
     static double conductance(FluidEdge e, FluidNetwork.Packet pk, double dp, double open) {
         return e.area > 0
             ? FluidEdge.CD * e.area * open * Math.sqrt(2 * Math.max(pk.rho, 1e-6) / Math.max(Math.abs(dp), FluidEdge.DP_LINEAR))
-            : pk.rho * e.k * open / pk.mu;
+            : pk.rho * e.k * open / mu(e, pk);
+    }
+
+    /**
+     * The viscosity a stream from pk's node meets along e: pk's, its liquid part taken share by share when e knows its ends'
+     * shares of its resistance (FluidEdge.shareA, shareB; option A'): the downstream end's share for the same liquid at
+     * the downstream temperature, the rest at the upstream's. A downstream end with no liquid of its own gives none of its
+     * temperature (what flows in is the upstream liquid as it comes). Water's viscosity is a constant: unchanged, bit for bit.
+     */
+    static double mu(FluidEdge e, FluidNetwork.Packet pk) {
+        if (Double.isNaN(e.shareA) || pk.liqMu <= 0 || pk.node == null) return pk.mu;
+        boolean fromA = pk.node == e.a;
+        FluidNode down = fromA ? e.b : e.a;
+        double share = fromA ? e.shareB : e.shareA;
+        if (!(share > 0) || down.mLiquid() <= 0) return pk.mu;
+        double there = pk.liqMuAt(down.T());
+        if (there == pk.liqMu || !(there > 0) || !Double.isFinite(there)) return pk.mu;
+        return pk.mu + share * (there - pk.liqMu);
     }
 
     /** The network's core, built or rebuilt as needed. */
