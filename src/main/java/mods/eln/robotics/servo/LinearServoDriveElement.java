@@ -63,7 +63,7 @@ import java.util.UUID;
  * or overvolted it holds (the last two are faults; it never burns).
  * <p>
  * Commands: its setpoint wire (a share of the travel) while connected (Baughn: wires override), else its registers
- * on the RS485 bus (Baughn 2026-11-05: a plain actuator, an addressed device): 0 target (blocks above its foot), 1
+ * on the RS485 bus (Baughn 2026-11-05: a plain actuator, an addressed device): 0 target (blocks along its path from the start), 1
  * position, 2 speed limit (m/s; 0: none), 3 state (STATUS_NAMES' order), 4 load (kg). It takes `write` (0 and 2),
  * answers `read` with `reply` to the asker, and sends `fault` (its code, FAULT_NAMES' order) to everyone when a fault
  * starts.
@@ -84,7 +84,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
     /** The drive's clock (ticks it has run with its chunks loaded); segments start on it. */
     public long clock;
     public Segment seg = Segment.rest(0, 0);
-    /** Where the car is to go (whole blocks from the bottom). */
+    /** Where the car is to go (whole blocks along its path from the start). */
     public double target;
     public byte fault = NO_FAULT;
     /** The speed limit written to register 2 (m/s; 0: none). */
@@ -141,9 +141,21 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
 
     // ---- geometry
 
-    /** The rail's direction from the drive (up: an elevator). */
+    /**
+     * The rail's direction (Baughn 2026-11-26, straight paths in any direction): up for an elevator; along either flank
+     * for a level run, its rail lying on the drive's top and on beside the car at that height (a guide rail on the
+     * car's back wall), so the drive's faces stay free for its cables. Set by scan() from the rail on its top; saved
+     * (NBT axis, absent: up), so a reload with the top rail gone doesn't put the car on another path.
+     */
     net.minecraft.core.Direction axis() {
-        return net.minecraft.core.Direction.UP;
+        return axis;
+    }
+
+    public net.minecraft.core.Direction axis = net.minecraft.core.Direction.UP;
+
+    /** Can a rail run this way from the drive: up, or along either flank? */
+    public boolean railAxis(net.minecraft.core.Direction d) {
+        return d == net.minecraft.core.Direction.UP || d == front.left().toEnumFacing() || d == front.right().toEnumFacing();
     }
 
     /** The car's side of the drive (its front). */
@@ -162,17 +174,63 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         return new mods.eln.robotics.motion.StraightPath(origin(), axis(), Math.max(0, travel));
     }
 
-    /** Blocks of rail from the drive along its axis (0..MAX_TRAVEL). */
+    /**
+     * The rail from the drive: its direction (the rail on its top: up, or lying along a flank) and the car's travel, in
+     * blocks: an elevator's rail blocks (the car's floor rises to the top one's height); a level run's rail blocks past
+     * the one on the drive (the car goes as far as the rail beside it). A level run is read only as far as its chunks
+     * are loaded (reading on would load them); cut short there, the travel stays as it was. The rail turned another
+     * way: the car is put back at the start.
+     */
     void scan(Level level) {
-        var ax = axis();
-        BlockPos p = node.coordonate.pos();
+        BlockPos top = node.coordonate.pos().above();
+        var s0 = level.getBlockState(top);
+        var ax = s0.getBlock() instanceof ServoRailBlock && railAxis(s0.getValue(ServoRailBlock.FACING)) ? s0.getValue(ServoRailBlock.FACING) : axis;
         int n = 0;
-        while (n < LinearServoDriveDescriptor.MAX_TRAVEL) {
-            var s = level.getBlockState(p.relative(ax, n + 1));
+        boolean cut = false;
+        while (n <= LinearServoDriveDescriptor.MAX_TRAVEL) {
+            BlockPos b = top.relative(ax, n);
+            if (ax != net.minecraft.core.Direction.UP && !level.isLoaded(b)) {   // (an elevator's mast stays in its own column)
+                cut = true;
+                break;
+            }
+            var s = level.getBlockState(b);
             if (!(s.getBlock() instanceof ServoRailBlock) || s.getValue(ServoRailBlock.FACING) != ax) break;
             n++;
         }
-        travel = n;
+        int t = Math.min(LinearServoDriveDescriptor.MAX_TRAVEL, ax == net.minecraft.core.Direction.UP ? n : Math.max(0, n - 1));
+        if (ax != axis) {
+            axis = ax;
+            removeGhost();
+            seg = Segment.rest(clock, 0);
+            target = 0;
+            wired = Double.NaN;
+            if (car != null) {   // (riders other than players stay where they were: the car is put back, not driven)
+                setup(car);
+                car.placeAt(0);
+                car.drive(seg, clock);
+                car.broadcast();
+            }
+            needPublish();
+        } else if (cut) {   // (the run's far end is in an unloaded chunk: as it was; first read after a load: as far as it goes to)
+            // (cut short, it can only undercount: the travel may grow, never shrink)
+            int known = travel < 0 ? (int) Math.ceil(Math.max(target, posAt(clock)) - 1e-9) : travel;
+            travel = Math.min(LinearServoDriveDescriptor.MAX_TRAVEL, Math.max(t, known));
+            return;
+        }
+        travel = t;
+    }
+
+    /** Is the ground the car stands on and moves into next (its cabin's reach and 2 blocks more, along a level run) loaded? */
+    boolean carGround(Level level) {
+        double p = posAt(clock);
+        var path = path();
+        // (the cabin reaches 1.5 m either side of its centre: from 1 block behind the start to 1 past the end)
+        for (double s : new double[]{p - 3, (travel < 0 ? p : Math.min(p, travel)) + 3}) {
+            BlockPos b = BlockPos.containing(path.at(s));
+            for (int out = -2; out <= 2; out += 4)   // (the rail line to past the car's far side)
+                if (!level.isLoaded(b.relative(carSide(), out))) return false;
+        }
+        return true;
     }
 
     /** Position (blocks along the axis) and velocity (m/tick) at clock tick t. */
@@ -357,6 +415,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         BlockPos hp = node.coordonate.pos();
         BlockPos col = hp.relative(carSide());
         if (!level.isLoaded(hp) || !level.isLoaded(col)) return;   // (unloaded: the clock stops, the car with it; it asks for nothing)
+        if (axis != net.minecraft.core.Direction.UP && !carGround(level)) return;   // (a level run reaching an unloaded chunk: the same)
         long t0 = clock;
         clock++;
         if (travel < 0 || clock % 20 == 0) scan(level);
@@ -738,6 +797,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         nbt.putDouble("segAccel", seg.accel());
         nbt.putDouble("target", target);
         nbt.putByte("fault", fault);
+        if (axis != net.minecraft.core.Direction.UP) nbt.putByte("axis", (byte) axis.get3DDataValue());   // (absent: up, an elevator)
         if (speedLimit > 0) nbt.putDouble("speedLimit", speedLimit);
         if (port.address() != 0) nbt.putInt("addr", port.address());
         if (panelBase != 0) nbt.putInt("panelBase", panelBase);
@@ -758,6 +818,8 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             nbt.getDoubleOr("segTo", 0), vmax > 0 ? vmax : 1, accel > 0 ? accel : 1);
         target = nbt.getDoubleOr("target", 0);
         fault = nbt.getByteOr("fault", NO_FAULT);
+        var ax = net.minecraft.core.Direction.from3DDataValue(nbt.getByteOr("axis", (byte) net.minecraft.core.Direction.UP.get3DDataValue()));
+        axis = ax.getAxis() == net.minecraft.core.Direction.Axis.Y ? net.minecraft.core.Direction.UP : ax;
         speedLimit = Math.max(0, nbt.getDoubleOr("speedLimit", 0));   // ("proportional" of before 2026-11-05 is ignored: always)
         port.setAddress(nbt.getIntOr("addr", 0));
         panelBase = nbt.getIntOr("panelBase", 0);
@@ -793,7 +855,8 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             case OBSTRUCTED -> I18N.tr("Fault: something is in the way");
             case OVERHEAT -> I18N.tr("Fault: the motor is too hot");
             case OVERVOLTAGE -> I18N.tr("Fault: the line voltage is too high");
-            case NO_RAIL -> travel < LinearServoDriveDescriptor.MIN_TRAVEL ? I18N.tr("Fault: needs a rail of %1$ to %2$ blocks on top",
+            case NO_RAIL -> travel < LinearServoDriveDescriptor.MIN_TRAVEL ? axis == net.minecraft.core.Direction.UP ? I18N.tr("Fault: needs a rail of %1$ to %2$ blocks on top",
+                LinearServoDriveDescriptor.MIN_TRAVEL, LinearServoDriveDescriptor.MAX_TRAVEL) : I18N.tr("Fault: needs %1$ to %2$ blocks of rail past the one on top",
                 LinearServoDriveDescriptor.MIN_TRAVEL, LinearServoDriveDescriptor.MAX_TRAVEL) : I18N.tr("Fault: the rail is broken");
             default -> stalled && machine.state() == MachineState.RUNNING ? I18N.tr("The line is too weak")
                 : machine.state() != MachineState.RUNNING ? I18N.tr("No power")
@@ -809,6 +872,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
     public void describe(mods.eln.introspect.Report r) {
         var st = r.state();
         st.choice(mods.eln.introspect.Keys.STATUS, STATUS_NAMES.get(status()), STATUS_NAMES);
+        st.choice("axis", axis);
         st.num(mods.eln.introspect.Keys.POSITION, posAt(clock), mods.eln.introspect.Unit.M).range(0, Math.max(0, travel));
         st.num(mods.eln.introspect.Keys.TARGET, target, mods.eln.introspect.Unit.M);
         st.num(mods.eln.introspect.Keys.SPEED, speed, mods.eln.introspect.Unit.M_PER_S);

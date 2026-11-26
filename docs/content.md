@@ -224,7 +224,7 @@ The servo layer (`robotics`, Baughn 2026-11-02: the servo layer first, 200 V onl
 node `eln:transparent_node@5504`, `linear_servo_drive`), `eln:servo_rail` and `eln:station_marker` (plain blocks with
 checked models, `ServoParts`), and the elevator car entity `eln:elevator_car` (not saved, not summonable). Recipes: the
 drive is an Electrical Motor in a Machine Block with a Medium Voltage Cable, two Signal Cables and four iron plates; 8
-rails from 6 iron ingots and 3 iron plates; a marker from an iron plate, a stone button and a Signal Cable. Behaviour:
+rails from 6 iron ingots and 3 iron plates (standing up the drive's top for an elevator, or lying along a flank for a level run); a marker from an iron plate, a stone button and a Signal Cable. Behaviour:
 porting-notes.md ("New in 26.x: the servo layer").
 
 `entity/ReplicatorEntity` (`ElnRegistry.REPLICATOR`, spawn egg `REPLICATOR_SPAWN_EGG`), plus its AI classes in

@@ -86,4 +86,17 @@ class RidersTest {
         assertEquals(0.5, s.maxX, 1e-9, "the overhang is the landing's business");
         assertEquals(0.3, s.minX, 1e-9);
     }
+
+    @Test
+    void aLevelRunCarriesAStandingPlayerSideways() {
+        // (a level run: the car moves 0.1 m east in a tick; a player standing on it goes by the same step and stays standing)
+        AABB c0 = car(1), c1 = c0.move(0.1, 0, 0);
+        var k = Riders.carry(player(0.2, 1), true, c0, c1);
+        assertTrue(k.carried());
+        assertEquals(0.1, k.delta().x, 1e-12);
+        assertEquals(0, k.delta().y, 1e-12);
+        assertTrue(k.keepOnGround());
+        // (jumping clear of the plate on a level run it isn't carried: the known limit, as on an elevator)
+        assertFalse(Riders.carry(player(0.2, 1.4), false, c0, c1).carried());
+    }
 }

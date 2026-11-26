@@ -9,6 +9,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.robotics.Robotics;
 import mods.eln.robotics.servo.ElevatorCar;
+import mods.eln.robotics.servo.ServoRailBlock;
 import mods.eln.robotics.servo.LinearServoDriveDescriptor;
 import mods.eln.robotics.servo.LinearServoDriveElement;
 import mods.eln.sim.IProcess;
@@ -49,6 +50,12 @@ public final class ServoCases {
         cases.add(new PanelId());
         cases.add(new Starved());
         cases.add(new EnergyBooks());
+        cases.add(new LevelRun());
+        cases.add(new LevelRunObstruction());
+        cases.add(new LevelRunReload(false));
+        cases.add(new LevelRunReload(true));
+        cases.add(new LevelRunTurned());
+        cases.add(new RailPlacement());
     }
 
     static final int TRAVEL = 6;
@@ -59,12 +66,28 @@ public final class ServoCases {
         BlockPos head;
         Direction front;
 
+        /** The level run's direction (east), or null: an elevator's mast. */
+        net.minecraft.core.@org.jspecify.annotations.Nullable Direction run;
+
         Shaft(TestContext ctx, BlockPos p, int coal) {
+            this(ctx, p, coal, null, TRAVEL);
+        }
+
+        /**
+         * A drive at p, its rail standing up its top (run null, travel blocks) or, run along a flank, lying on its top and
+         * on travel blocks that way beside the car (a level run).
+         */
+        Shaft(TestContext ctx, BlockPos p, int coal, net.minecraft.core.@org.jspecify.annotations.Nullable Direction run, int travel) {
             d = (LinearServoDriveElement) ShaftArtCases.placeLooking(ctx, Robotics.DRIVE_ID, p, ShaftArtCases.SOUTH);
             if (d == null) throw new IllegalStateException("no drive at " + p);
             head = d.node.coordonate.pos();
             front = d.front;
-            for (int i = 1; i <= TRAVEL; i++) ctx.level().setBlockAndUpdate(head.above(i), Robotics.SERVO_RAIL.get().defaultBlockState());
+            this.run = run;
+            if (run == null)
+                for (int i = 1; i <= travel; i++) ctx.level().setBlockAndUpdate(head.above(i), Robotics.SERVO_RAIL.get().defaultBlockState());
+            else
+                for (int i = 0; i <= travel; i++)
+                    ctx.level().setBlockAndUpdate(head.above().relative(run, i), Robotics.SERVO_RAIL.get().defaultBlockState().setValue(ServoRailBlock.FACING, run));
             var back = front.back().toEnumFacing();
             BlockPos at = head.relative(back);
             ctx.placeSix(Ids.six("Medium Voltage Cable"), at);
@@ -121,7 +144,16 @@ public final class ServoCases {
         }
 
         List<ElevatorCar> cars(TestContext ctx) {
-            return ctx.level().getEntitiesOfClass(ElevatorCar.class, new AABB(head).inflate(2, TRAVEL + 3, 2));
+            // (its own car only: two shafts side by side each see theirs)
+            AABB box = run == null ? new AABB(head).inflate(2, TRAVEL + 3, 2)
+                : new AABB(head).inflate(2, 3, 2).expandTowards(run.getStepX() * (TRAVEL + 3), 0, run.getStepZ() * (TRAVEL + 3));
+            return ctx.level().getEntitiesOfClass(ElevatorCar.class, box);
+        }
+
+        /** How far along its path the car's plate is from where it starts (m). */
+        double carAlong(TestContext ctx) {
+            ElevatorCar c = car(ctx);
+            return c == null ? Double.NaN : drive(ctx).path().along(c.position(), 0);
         }
 
         /** The car's floor (its top) above the drive's foot (m). */
@@ -946,6 +978,269 @@ public final class ServoCases {
             ctx.check("servo books: delivered = taken + idle + what's left in the buffer (+-3% of the work)",
                 Math.abs(delivered - taken - lost - (buf1 - buf0)) < 1e-6 * delivered + 1e-9 && Math.abs(lost - idle) < 0.03 * work,
                 delivered + " = " + taken + " + " + lost + " + " + (buf1 - buf0) + "; idle " + idle);
+        }
+    }
+
+    /** A level run east from a drive at x 2 (the room's west side), 5 blocks, power behind it. */
+    abstract static class LevelRoom extends Room {
+        Shaft s;
+
+        Shaft level(TestContext ctx) {
+            return s = new Shaft(ctx, ctx.at(2, 1, 3), 0, net.minecraft.core.Direction.EAST, 5);
+        }
+
+        /** The car's plate centre's block at s along the run. */
+        BlockPos plateAt(double along) {
+            return s.head.relative(s.front.toEnumFacing(), 2).relative(net.minecraft.core.Direction.EAST, (int) Math.round(along));
+        }
+    }
+
+    /**
+     * Straight paths in any direction (Baughn 2026-11-26): a rail lying on the drive's top and on east beside the car
+     * (a level run). The drive takes the run's direction; called to 4 m the car goes 4 m east, a pig on it riding along,
+     * in position on a whole block with a floor ghost under it, the in-position wire high; level, its load costs no
+     * force; called back to 0 it returns.
+     */
+    static final class LevelRun extends LevelRoom {
+        double along4 = Double.NaN, force4 = Double.NaN, pigMoved = Double.NaN, x0;
+        boolean ghost4, there4;
+        String axis4 = "";
+        Pig pig;
+
+        public String id() {
+            return "servo_level_run_moves";
+        }
+
+        public int ticks() {
+            return 240;
+        }
+
+        public void build(TestContext ctx) {
+            level(ctx);
+            watch(dt -> {
+                tick++;
+                if (tick == 5) {
+                    pig = net.minecraft.world.entity.EntityTypes.PIG.create(ctx.level(), EntitySpawnReason.TRIGGERED);
+                    BlockPos c = plateAt(0);
+                    pig.setNoAi(true);
+                    pig.snapTo(c.getX() + 0.5, c.getY() + ElevatorCar.THICK, c.getZ() + 0.5, 0, 0);
+                    ctx.level().addFreshEntity(pig);
+                    x0 = pig.getX();
+                }
+                if (tick == 10) s.call(ctx, 4);
+                if (tick == 120) {
+                    var d = s.drive(ctx);
+                    along4 = s.carAlong(ctx);
+                    force4 = d.forceN;
+                    ghost4 = d.ghostAt(4);
+                    there4 = s.inPositionVolts(ctx) > 0.5 * mods.eln.Eln.SVU;
+                    axis4 = String.valueOf(d.axis);
+                    pigMoved = pig.getX() - x0;
+                    pig.discard();
+                }
+                if (tick == 130) s.call(ctx, 0);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            ctx.line("servo level run: at 4: along " + along4 + ", force " + force4 + " N, ghost " + ghost4 + ", axis " + axis4
+                + ", pig moved " + pigMoved + "; back: " + s.carAlong(ctx));
+            ctx.check("servo level run: the drive runs along the rail lying on its top", "east".equals(axis4), axis4);
+            ctx.check("servo level run: called to 4 m the car goes 4 m east", Math.abs(along4 - 4) < 1e-6, "" + along4);
+            ctx.check("servo level run: a pig on the car rides it there", Math.abs(pigMoved - 4) < 0.05, "" + pigMoved);
+            ctx.check("servo level run: in position there, a floor ghost under it", there4 && ghost4, there4 + " " + ghost4);
+            ctx.check("servo level run: level, it holds no weight (an elevator holds -G x counterweight empty)", Math.abs(force4) < 1e-9, force4 + " N");
+            ctx.check("servo level run: called back, it returns", Math.abs(s.carAlong(ctx)) < 1e-6, "" + s.carAlong(ctx));
+        }
+    }
+
+    /**
+     * A stone block in a level run's way, a block above the floor 4 blocks east of the car's start: the cabin (1.5 m
+     * either side of its centre) meets its face when its centre is 2 m along, and stops there, obstructed.
+     */
+    static final class LevelRunObstruction extends LevelRoom {
+        public String id() {
+            return "servo_level_run_obstruction";
+        }
+
+        public int ticks() {
+            return 160;
+        }
+
+        public void build(TestContext ctx) {
+            level(ctx);
+            ctx.level().setBlockAndUpdate(plateAt(4).above(), Blocks.STONE.defaultBlockState());
+            watch(dt -> {
+                if (++tick == 10) s.call(ctx, 5);
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            var d = s.drive(ctx);
+            double a = s.carAlong(ctx);
+            ctx.line("servo level run obstruction: car " + a + ", fault " + d.fault);
+            ctx.check("servo level run: a block in the way stops it short of the block, obstructed",
+                d.fault == LinearServoDriveElement.OBSTRUCTED && a > 1.5 && a <= 2 + 1e-6, "along " + a + ", fault " + d.fault);
+        }
+    }
+
+    /**
+     * Saved and loaded mid level run, the drive keeps its direction (NBT axis) and motion and the car arrives; with the
+     * rail on its top broken first (the car stops: no rail), the reload keeps it on its run, not floating up an elevator
+     * path, and with the rail back it goes on.
+     */
+    static final class LevelRunReload extends LevelRoom {
+        final boolean railGone;
+        double before = Double.NaN, after = Double.NaN, carY = Double.NaN;
+        String axisAfter = "", err = "";
+
+        LevelRunReload(boolean railGone) {
+            this.railGone = railGone;
+        }
+
+        public String id() {
+            return railGone ? "servo_level_run_reloads_without_its_top_rail" : "servo_level_run_reloads_mid_move";
+        }
+
+        public int ticks() {
+            return 260;
+        }
+
+        public void build(TestContext ctx) {
+            level(ctx);
+            watch(dt -> {
+                tick++;
+                if (tick == 10) s.call(ctx, 5);
+                if (railGone && tick == 50) ctx.level().removeBlock(s.head.above(), false);
+                if (tick == 80) {
+                    var d = s.drive(ctx);
+                    before = d.seg.position(d.clock - d.seg.startTick());
+                    try {
+                        Reload.node(ctx.level(), s.head);
+                    } catch (ReflectiveOperationException | RuntimeException e) {
+                        err = e.toString();
+                    }
+                    var f = s.drive(ctx);
+                    after = f.seg.position(f.clock - f.seg.startTick());
+                    axisAfter = String.valueOf(f.axis);
+                }
+                if (tick == 120) {
+                    ElevatorCar c = s.car(ctx);
+                    carY = c == null ? Double.NaN : c.getY() - s.head.getY();
+                    if (railGone) ctx.level().setBlockAndUpdate(s.head.above(),
+                        Robotics.SERVO_RAIL.get().defaultBlockState().setValue(ServoRailBlock.FACING, net.minecraft.core.Direction.EAST));
+                }
+                if (railGone && tick == 150) s.call(ctx, 5);   // (the rail back: called again it goes on)
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            ctx.line("servo level run reload" + (railGone ? " (top rail gone)" : "") + ": " + before + " -> " + after + ", axis " + axisAfter
+                + ", car y " + carY + ", now " + s.carAlong(ctx) + " " + err);
+            ctx.check("servo level run: reloaded, it keeps its direction and motion", "east".equals(axisAfter) && before > 0.2
+                && Math.abs(after - before) < 1e-9, axisAfter + " " + before + " -> " + after + " " + err);
+            ctx.check("servo level run: ... its car stays on the run (not up a mast)", Math.abs(carY) < 1e-6, "" + carY);
+            ctx.check("servo level run: ... and gets to the end", s.cars(ctx).size() == 1 && Math.abs(s.carAlong(ctx) - 5) < 1e-6,
+                s.cars(ctx).size() + " cars, " + s.carAlong(ctx));
+        }
+    }
+
+    /**
+     * The rail on a level run's drive turned to stand up (an elevator's mast): the drive takes the new direction, the car
+     * is put back at the start of it, and the floor ghost it left out on the run goes.
+     */
+    static final class LevelRunTurned extends LevelRoom {
+        boolean ghostBefore, ghostAfter;
+        String axisAfter = "";
+
+        public String id() {
+            return "servo_level_run_turned_to_an_elevator";
+        }
+
+        public int ticks() {
+            return 200;
+        }
+
+        public void build(TestContext ctx) {
+            level(ctx);
+            watch(dt -> {
+                tick++;
+                if (tick == 10) s.call(ctx, 4);
+                if (tick == 120) {
+                    ghostBefore = mods.eln.Eln.ghostManager.getGhost(new mods.eln.misc.Coordonate(plateAt(4), ctx.level())) != null;
+                    for (int i = 1; i <= 3; i++) ctx.level().setBlockAndUpdate(s.head.above(i), Robotics.SERVO_RAIL.get().defaultBlockState());
+                }
+                if (tick == 160) {
+                    ghostAfter = mods.eln.Eln.ghostManager.getGhost(new mods.eln.misc.Coordonate(plateAt(4), ctx.level())) != null;
+                    axisAfter = String.valueOf(s.drive(ctx).axis);
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            ctx.line("servo level run turned: axis " + axisAfter + ", car " + s.carAlong(ctx) + ", ghost out there " + ghostBefore + " -> " + ghostAfter);
+            ctx.check("servo level run turned: the drive takes the mast", "up".equals(axisAfter), axisAfter);
+            ElevatorCar c = s.car(ctx);
+            double off = c == null ? Double.NaN : c.position().distanceTo(s.drive(ctx).path().at(0));   // (along() alone can't see a car left out east)
+            ctx.check("servo level run turned: the car is back at its start", off < 1e-6, "" + off);
+            ctx.check("servo level run turned: its floor ghost out on the run is gone", ghostBefore && !ghostAfter, ghostBefore + " -> " + ghostAfter);
+        }
+    }
+
+    /**
+     * Placing a Servo Rail on a drive's top (Baughn 2026-11-26): looking along a flank it lies that way (a level run);
+     * looking along the front, or steeply down, it stands up; placed against a lying rail it continues it.
+     */
+    static final class RailPlacement extends Room {
+        String got = "";
+        boolean ok;
+
+        public String id() {
+            return "servo_rail_placement";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext ctx) {
+            Shaft s = new Shaft(ctx, ctx.at(2, 1, 3), 0, null, 0);
+            var d = s.drive(ctx);
+            net.minecraft.core.Direction east = net.minecraft.core.Direction.EAST, front = d.front.toEnumFacing();
+            var lying = place(ctx, s.head, east, 20);
+            var steep = place(ctx, s.head, east, 75);
+            var along = place(ctx, s.head, front, 20);
+            BlockPos lyingAt = s.head.above();
+            ctx.level().setBlockAndUpdate(lyingAt, Robotics.SERVO_RAIL.get().defaultBlockState().setValue(ServoRailBlock.FACING, east));
+            var cont = placeAgainst(ctx, lyingAt, east, front, 20);
+            got = "flank " + lying + ", steep " + steep + ", front " + along + ", continued " + cont;
+            ok = lying == east && steep == net.minecraft.core.Direction.UP && along == net.minecraft.core.Direction.UP && cont == east;
+        }
+
+        /** The rail's facing placed on top of the block at on by a player looking look-ward at pitch (degrees down). */
+        static net.minecraft.core.Direction place(TestContext ctx, BlockPos on, net.minecraft.core.Direction look, float pitch) {
+            return placeAgainst(ctx, on, net.minecraft.core.Direction.UP, look, pitch);
+        }
+
+        static net.minecraft.core.Direction placeAgainst(TestContext ctx, BlockPos on, net.minecraft.core.Direction face, net.minecraft.core.Direction look, float pitch) {
+            var p = ctx.player();
+            p.setYRot(look.toYRot());
+            p.setXRot(pitch);
+            var stack = new net.minecraft.world.item.ItemStack(Robotics.SERVO_RAIL.get());
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
+            var hit = new net.minecraft.world.phys.BlockHitResult(Vec3.atCenterOf(on).relative(face, 0.5), face, on, false);
+            var bpc = new net.minecraft.world.item.context.BlockPlaceContext(p, net.minecraft.world.InteractionHand.MAIN_HAND, stack, hit);
+            var st = Robotics.SERVO_RAIL.get().getStateForPlacement(bpc);
+            return st == null ? null : st.getValue(ServoRailBlock.FACING);
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.line("servo rail placement: " + got);
+            ctx.check("servo rail placement: on a drive it lies along the flank looked along, else stands; it continues a lying rail", ok, got);
         }
     }
 }

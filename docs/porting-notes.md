@@ -598,6 +598,21 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     meets only the middles; voxel cables meet each pin (Machine API 1.1: `CablePosition.FLOOR_LEFT`/`FLOOR_RIGHT`,
     `bus(face, position)`, `FacePins`, `VoxelNode.connectPeerPins`). GameTests `servo_elevator_driven_over_the_bus`,
     `servo_elevator_follows_its_setpoint_wire`.
+  - Level runs (Baughn 2026-11-26: one path system for servo cars, straight paths in any direction first, curved tracks
+    later): the car moves along a `motion/Path` (`StraightPath`: origin + axis x s). A rail placed on the drive's top
+    stands up, or lies along the flank the player looks along (not 60 degrees or more down); laid on that way, beside
+    the car at its height (a guide rail on the cabin's back wall, so the drive's faces stay free for its cables), it
+    makes a level run: the car goes as far as the rail beside it (2 to 32 rail blocks past the one on the drive; the
+    registers count blocks along the path). The drive takes its direction from the rail on its top (`scan`) and saves it
+    (NBT `axis`, absent: up), so a reload with the top rail gone keeps the car on its run; the rail turned another way
+    puts the car back at the start of the new path (riders other than players stay where they were) and removes its old
+    floor ghost. A level run is read only as far as its chunks are loaded (reading on would load them), and its clock
+    stops while the ground the car stands on or moves into next isn't loaded. The load's force is its weight times the
+    path's grade where the car is, so a level run costs only its idle draw. Floor ghosts, obstruction and riders as on
+    an elevator; a creature jumping clear of the plate on a level run isn't carried (the trailing wall can pass through
+    it). A Floor Sensor beside a level run reads a stopped car level with its floor, as it does an elevator's. GameTests
+    `servo_level_run_moves`, `servo_level_run_obstruction`, `servo_level_run_reloads_mid_move`,
+    `servo_level_run_reloads_without_its_top_rail`, `servo_level_run_turned_to_an_elevator`, `servo_rail_placement`.
   - Electrics: a Machine API consumer (`Machines.forElement`, the API's first new device): 200 V, rated ~3 kW (40 W
     idle plus lifting 120 kg net, two riders over the counterweight, at full speed; tsugumi-lab's choice),
     `Brownout.SLOW`. Each tick it asks for its step's work against the net weight over 80 % (a counterweight balances
@@ -993,7 +1008,7 @@ In the port:
 - Other languages: only the generated `en_us`; 1.12's 40+ `.lang` files to convert.
 - Config: the rest of the 1.12 balancing values.
 - In-game wiki guide (`wiki/Data.java` only collects descriptor groups), ore regeneration.
-- Servo layer: horizontal rails (the car and its payload carry an axis; the drive only scans up), larger platforms, bus
+- Servo layer: curved tracks with round cabins (Baughn 2026-11-26, after the straight paths), larger platforms, bus
   I/O on the drive, the drive's own screen. Other players and mobs riding a car are drawn by vanilla's interpolation,
   so they may trail the car by a tick or two; only the local player is carried in step with it.
 

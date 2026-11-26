@@ -34,11 +34,21 @@ public class ServoRailBlock extends RodBlock {
         b.add(FACING);
     }
 
-    /** Continues the rail it's placed against; else it points away from the face clicked. */
+    /**
+     * Continues the rail it's placed against. On a Linear Servo Drive's top it stands up (an elevator), or lies along
+     * the flank the player looks along, not steeply down (a level run: Baughn 2026-11-26). Else it points away from the
+     * face clicked.
+     */
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        BlockState against = ctx.getLevel().getBlockState(ctx.getClickedPos().relative(ctx.getClickedFace().getOpposite()));
+        BlockPos on = ctx.getClickedPos().relative(ctx.getClickedFace().getOpposite());
+        BlockState against = ctx.getLevel().getBlockState(on);
         Direction f = against.getBlock() instanceof ServoRailBlock ? against.getValue(FACING) : ctx.getClickedFace();
+        if (ctx.getClickedFace() == Direction.UP && ctx.getPlayer() != null && ctx.getPlayer().getXRot() < 60) {
+            var drive = LinearServoDriveElement.at(ctx.getLevel(), on);
+            Direction look = ctx.getHorizontalDirection();
+            if (drive != null && drive.railAxis(look)) f = look;
+        }
         return defaultBlockState().setValue(FACING, f);
     }
 

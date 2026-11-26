@@ -19,8 +19,8 @@ import static mods.eln.i18n.I18N.tr;
 
 /**
  * The Linear Servo Drive (Baughn: the servo layer first, 200 V only): a motor and a drum at the foot of a Servo Rail
- * mast, which moves an elevator car up and down the mast beside it. Its front faces the car's shaft; the rail stands on
- * its top. Power on the back (200 V). Signals on the flanks: floor cables are inputs, ceiling cables outputs; seen from
+ * mast, which moves an elevator car up and down the mast beside it, or along a rail lying on its top and on along a
+ * flank (a level run, Baughn 2026-11-26). Its front faces the car's shaft or run. Power on the back (200 V). Signals on the flanks: floor cables are inputs, ceiling cables outputs; seen from
  * the car's side (front.left()), the left flank has the setpoint (in) and in-position (out), the right flank enable (in)
  * and fault (out). Its electrics are a Machine API spec (spec()). Model: mods.eln.cad.models.ServoParts.
  */
@@ -119,7 +119,7 @@ public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implem
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Moves an elevator car along a Servo Rail\nset on its top, %1$ to %2$ blocks long.\nThe car rides on its front side.\n230V power on the back.\nThree pins on each flank's floor edge\n(left to right, facing the flank):\nleft flank (seen from the car): in position,\nsetpoint, position; right flank: fault,\nenable, RS485 bus. Plain cables reach the middles.\nDriven over the bus by its registers:\n0 target, 1 position, 2 speed limit, 3 state, 4 load.",
+        Collections.addAll(list, tr("Moves a car along a Servo Rail set on its top:\nstanding up (an elevator), or lying along a flank\n(a level run: look along the flank as you place it),\n%1$ to %2$ blocks of travel\n(a level run's rail starts on the drive).\nThe car rides on its front side.\n230V power on the back.\nThree pins on each flank's floor edge\n(left to right, facing the flank):\nleft flank (seen from the car): in position,\nsetpoint, position; right flank: fault,\nenable, RS485 bus. Plain cables reach the middles.\nDriven over the bus by its registers:\n0 target, 1 position, 2 speed limit, 3 state, 4 load.",
             MIN_TRAVEL, MAX_TRAVEL).split("\n"));
     }
 
