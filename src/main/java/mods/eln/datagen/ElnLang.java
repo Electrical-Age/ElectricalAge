@@ -215,8 +215,15 @@ public class ElnLang extends LanguageProvider {
 
     /** The name a player sees, where it differs from the descriptor's (which stays: it keys saves and recipes).
      *  Baughn 2026-11-13: the DC-DC converters are called "Transformer (DC-DC)". */
+    /** Names players see where they differ from the descriptor's (which keys saves and recipes, so it stays). */
+    static final java.util.Map<String, String> SHOWN = java.util.Map.of(
+        // the 400 V plant's shaft machines were anonymous beside the 48 V and 230 V ones (Baughn 2026-11-26)
+        "Steam Turbine", "400V Steam Turbine",
+        "Gas Turbine", "400V Gas Turbine",
+        "Generator", "400V Generator");
+
     static String shown(String name) {
-        return name.replace("DC-DC Converter", "Transformer (DC-DC)");
+        return SHOWN.getOrDefault(name, name).replace("DC-DC Converter", "Transformer (DC-DC)");
     }
 
     static String descriptorName(Object d) {
