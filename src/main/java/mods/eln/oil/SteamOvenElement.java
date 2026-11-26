@@ -40,7 +40,7 @@ import java.util.Map;
  * has food to cook and its fan has power, it condenses what it needs for MAX_COOK_W of cooking at EFFICIENCY (or what
  * the inlet holds above 1 atm, cooking slower), 1000 J an item as the electrical oven. The condensate is drained away.
  */
-public class SteamOvenElement extends TransparentNodeElement implements FluidDevice {
+public class SteamOvenElement extends TransparentNodeElement implements FluidDevice, mods.eln.gui.SmeltXpSource {
     public static final int inSlotId = 0, outSlotId = 1;
     static final double ENERGY_PER_ITEM = mods.eln.misc.RecipesList.electricalFurnaceEnergyPerSmelt;
     /** The inlet holds 2 s of full-speed steam at ~5 bar (kg/m^3). */
@@ -58,7 +58,7 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
     private double[] loaded;
     private List<FluidPort> ports = List.of();
 
-    double energyCounter, cookW, steamRate, meterSteam, meterTime;
+    double energyCounter, cookW, steamRate, meterSteam, meterTime, smeltXp;
     boolean cooking, powered;
     ItemStack lastIn = ItemStack.EMPTY;
 
@@ -73,9 +73,13 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
 
     /** What the input cooks to (food only: it never gets hot enough to char). */
     public ItemStack result() {
+        return outcome().result();
+    }
+
+    Utils.SmeltOutcome outcome() {
         ItemStack in = inventory.getItem(inSlotId);
-        if (!mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.charrable(in)) return ItemStack.EMPTY;
-        return Utils.smeltResult(node.coordonate.world(), in);
+        if (!mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.charrable(in)) return Utils.SmeltOutcome.EMPTY;
+        return Utils.smelt(node.coordonate.world(), in);
     }
 
     boolean canCook() {
@@ -121,11 +125,13 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
     };
 
     void cookOne() {
-        ItemStack r = result();
+        Utils.SmeltOutcome o = outcome();
+        ItemStack r = o.result();
         if (r.isEmpty() || !canCook()) return;
         ItemStack out = inventory.getItem(outSlotId);
         if (out.isEmpty()) inventory.setItem(outSlotId, r.copy());
         else out.grow(r.getCount());
+        smeltXp += o.experience();
         inventory.removeItem(inSlotId, 1);
         inventory.setChanged();
         needPublish();
@@ -262,6 +268,13 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
     }
 
     @Override
+    public double takeSmeltXp() {
+        double xp = smeltXp;
+        smeltXp = 0;
+        return xp;
+    }
+
+    @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
         if (inlet != null) {
@@ -270,6 +283,7 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
             mods.eln.fluid.FluidSaves.put(nbt, "inlet", inlet);
         }
         nbt.putDouble("energyCounter", energyCounter);
+        nbt.putDouble("smeltXp", smeltXp);
     }
 
     @Override
@@ -277,6 +291,7 @@ public class SteamOvenElement extends TransparentNodeElement implements FluidDev
         super.readFromNBT(nbt);
         // (its old "tank" key was a view of the inlet, saved again as the inlet's own contents: ignored)
         energyCounter = nbt.getDoubleOr("energyCounter", 0);
+        smeltXp = nbt.getDoubleOr("smeltXp", 0);
         lastIn = inventory.getItem(inSlotId).copy();
         if (nbt.contains("inletW"))
             loaded = mods.eln.fluid.FluidSaves.array(nbt, "inlet");

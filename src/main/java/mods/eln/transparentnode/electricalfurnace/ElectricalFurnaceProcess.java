@@ -175,11 +175,16 @@ public class ElectricalFurnaceProcess implements IProcess {
     public static final double CHAR_T = 280;   // (Baughn: 280, so an iron heating element, which tops out at 300, can char)
 
     public ItemStack getSmeltResult() {
+        return smeltOutcome().result();
+    }
+
+    private Utils.SmeltOutcome smeltOutcome() {
         ItemStack in = inventory.getItem(ElectricalFurnaceElement.inSlotId);
-        if (chars(furnace.thermalLoad.Tc) && charrable(in)) return new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get());
+        if (chars(furnace.thermalLoad.Tc) && charrable(in))
+            return new Utils.SmeltOutcome(new ItemStack(mods.eln.registry.ElnRegistry.CHARCOAL_NUGGET.get()), 0f);
         HeatTreatment h = treatmentFor(in);
-        if (h != null) return celsius() > h.spoilC() ? h.spoiled().get() : h.out().get();
-        return Utils.smeltResult(furnace.node.coordonate.world(), in);
+        if (h != null) return new Utils.SmeltOutcome(celsius() > h.spoilC() ? h.spoiled().get() : h.out().get(), 0f);
+        return Utils.smelt(furnace.node.coordonate.world(), in);
     }
 
     /** Hot enough to char food? (Tc is above the room's temperature, as the GUI shows it plus Tamb.) */
@@ -197,7 +202,8 @@ public class ElectricalFurnaceProcess implements IProcess {
      */
     public void smeltItem() {
         if (this.smeltCan()) {
-            ItemStack var1 = getSmeltResult();
+            Utils.SmeltOutcome outcome = smeltOutcome();
+            ItemStack var1 = outcome.result();
 
             if (Utils.isEmpty(inventory.getItem(ElectricalFurnaceElement.outSlotId))) {
                 inventory.setItem(1, var1.copy());
@@ -205,6 +211,7 @@ public class ElectricalFurnaceProcess implements IProcess {
                 inventory.getItem(ElectricalFurnaceElement.outSlotId).grow(var1.getCount()); // 1.12: decrStackSize(out, -n)
                 inventory.setChanged();
             }
+            furnace.smeltXp += outcome.experience();
 
             /*--this.furnaceItemStacks[0].getCount();
 

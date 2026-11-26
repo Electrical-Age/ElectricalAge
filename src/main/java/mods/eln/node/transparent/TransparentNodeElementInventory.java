@@ -16,6 +16,11 @@ public class TransparentNodeElementInventory extends ElementInventory implements
         this.transparentNodeElement = transparentNodeElement;
     }
 
+    /** The element owning this inventory, or null in tests. */
+    public TransparentNodeElement element() {
+        return transparentNodeElement;
+    }
+
     @Override
     public String getInventoryName() {
         return "tco.TransparentNodeInventory";
