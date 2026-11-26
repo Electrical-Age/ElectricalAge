@@ -45,6 +45,7 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
         this.nominalP = nominalP;
         this.nominalLight = nominalLight;
         this.nominalLife = nominalLife;
+        this.serverNominalLife = nominalLife / 3600.0;
         this.vegetableGrowRate = vegetableGrowRate;
 
         switch (type) {
@@ -117,7 +118,10 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
         list.add(tr("Range: %1$ blocks", (int) (nominalLight * 15)));
         list.add(tr("Power: %1$W", Utils.plotValue(nominalP)));
         list.add(tr("Resistance: %1$\u2126", Utils.plotValue(getR())));
-        list.add(tr("Nominal lifetime: %1$h", serverNominalLife));
+        Object lifeDisplay = serverNominalLife == Math.rint(serverNominalLife)
+            ? (long) serverNominalLife
+            : String.format(java.util.Locale.ROOT, "%.1f", serverNominalLife);
+        list.add(tr("Nominal lifetime: %1$h", lifeDisplay));
         if (!Utils.isEmpty(itemStack)) {
             if (!mods.eln.generic.ItemNbt.has(itemStack) || !mods.eln.generic.ItemNbt.get(itemStack).contains("life"))
                 list.add(tr("Condition:") + " " + tr("New"));
@@ -139,6 +143,6 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 
     @Override
     public void deserialize(DataInputStream stream) throws IOException {
-        serverNominalLife = stream.readDouble();
+        serverNominalLife = stream.readDouble() / 3600.0;
     }
 }
