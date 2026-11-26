@@ -157,6 +157,11 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         return new Vec3(c.getX() + 0.5, c.getY(), c.getZ() + 0.5);
     }
 
+    /** The car's path: from origin() along its rail, travel blocks long. */
+    public mods.eln.robotics.motion.Path path() {
+        return new mods.eln.robotics.motion.StraightPath(origin(), axis(), Math.max(0, travel));
+    }
+
     /** Blocks of rail from the drive along its axis (0..MAX_TRAVEL). */
     void scan(Level level) {
         var ax = axis();
@@ -432,7 +437,8 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             riders = riders(level, c, c.boxAt(p), Riders.tolerance(p1 - p));
             for (Entity e : riders) loadKg += massOf(e);
         }
-        forceN = Drive.G * (loadKg - LinearServoDriveDescriptor.counterweightKg) * axis().getStepY();
+        // (the weight along the path where it is: all of it going straight up, none on the level)
+        forceN = Drive.G * (loadKg - LinearServoDriveDescriptor.counterweightKg) * path().grade(p);
         double need = drive.joules(p1 - p, forceN);
         double got = need > 0 ? machine.takeJoules(Math.min(need, machine.ratedJoulesPerTick())) : 0;
         double sustain = Math.max(0, machine.watts() - drive.idleWatts()) / 20;   // (J a tick)

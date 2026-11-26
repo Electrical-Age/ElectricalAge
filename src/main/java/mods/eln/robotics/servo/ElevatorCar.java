@@ -86,9 +86,19 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
 
     // ---- where it is
 
-    /** The plate's bottom centre at position s along the axis. */
+    /** Its path (a straight one from origin along axis, as its payload gives), or null before it has one. */
+    public mods.eln.robotics.motion.@Nullable Path path() {
+        if (origin == null) return null;
+        if (path == null || !path.origin().equals(origin) || path.axis() != axis)
+            path = new mods.eln.robotics.motion.StraightPath(origin, axis, Double.POSITIVE_INFINITY);
+        return path;
+    }
+
+    private mods.eln.robotics.motion.StraightPath path;
+
+    /** The plate's bottom centre at position s along its path. */
     public Vec3 at(double s) {
-        return origin.add(axis.getStepX() * s, axis.getStepY() * s, axis.getStepZ() * s);
+        return path().at(s);
     }
 
     /** The plate's box at position s. */
@@ -333,9 +343,8 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         motion(r, clientT);
         if (segment != null && origin != null) {
             // where the entity really stands against where its segment says (the carry and interpolation must not drift)
-            Vec3 d = position().subtract(origin);
-            double along = d.x * axis.getStepX() + d.y * axis.getStepY() + d.z * axis.getStepZ();
-            r.client().num("entity_offset", along - segment.position(clientT), mods.eln.introspect.Unit.M);
+            double s0 = segment.position(clientT);
+            r.client().num("entity_offset", path().along(position(), s0) - s0, mods.eln.introspect.Unit.M);
         }
     }
 
