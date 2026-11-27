@@ -252,7 +252,7 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
 
     /** Under manual control: a signal on its front sets the fuel valve. */
     public boolean manual() {
-        return !control.getConnectedComponents().isEmpty();
+        return control.isConnected();
     }
 
     /** The share of its power its fuel's quality and its fouling leave it. */

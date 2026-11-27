@@ -765,6 +765,10 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
 
 ## Behaviour changes vs 1.12
 
+- Rheostats (the six-node Rheostat and the Large Rheostat) are at full resistance with nothing connected to their
+  control pin (Baughn 2026-11-27); 1.12 read the free pin as 0 V, nearly a short. A connected signal at 0 V still
+  gives the minimum. `NbtElectricalGateInput.normalizedOr(unconnected)` is the helper for such defaults. GameTests
+  "wp9a rheostat unconnected", "wp10b large rheostat unconnected".
 - Solar panels (Baughn 2026-11-25, option B+): a single-diode curve (`sim/PvCurve`, `PvSourceBipole`) instead of
   1.12's constant-power source (full power anywhere from 2/3 Umax to Umax, none above). The old Umax is now the
   open-circuit voltage of a 10 C panel in full sun (Baughn: strings built for 114 V must not burn their cables, "we've

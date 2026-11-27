@@ -106,6 +106,10 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
         })
     }
 
+    /** The control signal (0..1); full resistance with nothing on the control pin (Baughn 2026-11-27). */
+    val controlNormalized: Double
+        get() = control.normalizedOr(1.0)
+
     val glow = Incandescence.Light()
 
     inner class ControlProcess() : IProcess {
@@ -113,7 +117,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
         var lastH = -1000.0
 
         override fun process(time: Double) {
-            val desiredRs = (control.normalized + 0.01) / 1.01 * nominalRs
+            val desiredRs = (controlNormalized + 0.01) / 1.01 * nominalRs
             if (desiredRs > lastC * 1.01 || desiredRs < lastC * 0.99) {
                 resistor.r = desiredRs
                 lastC = desiredRs
@@ -167,7 +171,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     override fun multiMeterString(side: Direction): String {
         val u = -Math.abs(aLoad.u - bLoad.u)
         val i = Math.abs(resistor.i)
-        return Utils.plotOhm(Utils.plotUIP(u, i), resistor.r) + Utils.plotPercent("C", control.normalized)
+        return Utils.plotOhm(Utils.plotUIP(u, i), resistor.r) + Utils.plotPercent("C", controlNormalized)
     }
 
     override fun thermoMeterString(side: Direction) =
@@ -184,7 +188,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
         stream.writeFloat(thermalLoad.Tc.toFloat())
-        stream.writeFloat(control.normalized.toFloat())
+        stream.writeFloat(controlNormalized.toFloat())
     }
 
     override fun hasGui() = true

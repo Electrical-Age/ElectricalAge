@@ -97,6 +97,11 @@ public class ResistorElement extends SixNodeElement {
         }
     }
 
+    /** The control signal (0..1); full resistance with nothing on the control pin (Baughn 2026-11-27). */
+    public double controlNormalized() {
+        return control.normalizedOr(1);
+    }
+
     final mods.eln.misc.Incandescence.Light glow = new mods.eln.misc.Incandescence.Light();
     int glowStep;
 
@@ -115,7 +120,7 @@ public class ResistorElement extends SixNodeElement {
         super.networkSerialize(stream);
         try {
             if (descriptor.isRheostat)
-                stream.writeFloat((float) control.getNormalized());
+                stream.writeFloat((float) controlNormalized());
             stream.writeFloat((float) glowCelsius());
         } catch (IOException e) {
             e.printStackTrace();
@@ -147,7 +152,7 @@ public class ResistorElement extends SixNodeElement {
         double u = -Math.abs(aLoad.getU() - bLoad.getU());
         double i = Math.abs(r.getI());
         return Utils.plotOhm(Utils.plotUIP(u, i), r.getR()) +
-            (control != null ? Utils.plotPercent("C", control.getNormalized()) : "");
+            (control != null ? Utils.plotPercent("C", controlNormalized()) : "");
     }
 
     @Nullable

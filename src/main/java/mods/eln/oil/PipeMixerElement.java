@@ -51,7 +51,7 @@ public class PipeMixerElement extends TransparentNodeElement implements FluidDev
     /** A's opening (0..1): the signal, or half with none. */
     double shareNow() {
         if (testSignal >= 0) return Math.min(1, testSignal);
-        return signal.getConnectedComponents().isEmpty() ? 0.5 : Math.max(0, Math.min(1, signal.getNormalized()));
+        return signal.normalizedOr(0.5);
     }
 
     @Override

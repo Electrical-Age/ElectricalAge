@@ -31,6 +31,16 @@ public class NbtElectricalGateInput extends NbtElectricalLoad {
         return norm;
     }
 
+    /** Is anything (a signal cable, a chip's pin) connected to this input? */
+    public boolean isConnected() {
+        return !getConnectedComponents().isEmpty();
+    }
+
+    /** getNormalized(), or unconnected when nothing is connected to this input (a device's default with no signal). */
+    public double normalizedOr(double unconnected) {
+        return isConnected() ? getNormalized() : unconnected;
+    }
+
     public double getBornedU() {
         double U = this.getU();
         if (U < 0.0) U = 0.0;

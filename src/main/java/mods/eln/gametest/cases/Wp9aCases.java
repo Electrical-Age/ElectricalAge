@@ -72,7 +72,8 @@ public final class Wp9aCases {
 
     public static void addTo(List<TestCase> cases) {
         cases.add(new ResistorCase());
-        cases.add(new RheostatCase());
+        cases.add(new RheostatCase(0.5));
+        cases.add(new RheostatCase(null));
         cases.add(new DiodeCase());
         cases.add(new SwitchCase());
         cases.add(new RelayCase());
@@ -194,14 +195,22 @@ public final class Wp9aCases {
         }
     }
 
-    /** Rheostat 100 ohm nominal, control gate at half of SVU (Signal Source): R = Rnom * (0.5 + 0.01) / 1.01. */
+    /**
+     * Rheostat 100 ohm nominal, control gate at half of SVU (Signal Source): R = Rnom * (0.5 + 0.01) / 1.01. With
+     * nothing on the control gate (signal null) it is at full resistance, Rnom (Baughn 2026-11-27).
+     */
     static final class RheostatCase implements TestCase {
+        final Double signal;
         ElectricalSourceElement src;
         ResistorElement r;
         SixNodeElement gnd;
 
+        RheostatCase(Double signal) {
+            this.signal = signal;
+        }
+
         public String name() {
-            return "wp9a rheostat";
+            return signal == null ? "wp9a rheostat unconnected" : "wp9a rheostat";
         }
 
         public int width() {
@@ -210,21 +219,24 @@ public final class Wp9aCases {
 
         public void build(TestContext ctx) {
             src = source(ctx, SOURCE, 0, 1, U);
-            source(ctx, SIGNAL_SOURCE, 1, 0, 0.5 * Eln.SVU);
+            if (signal != null) source(ctx, SIGNAL_SOURCE, 1, 0, signal * Eln.SVU);
             r = resistor(ctx, RHEOSTAT, 1, 1, 48);
             orient(r, f -> f, Direction.ZN); // control gate (front) toward the signal source; terminals stay on X
             gnd = ctx.placeSix(GROUND, ctx.at(2, 1, 1));
         }
 
         public void measure(TestContext ctx) {
-            double rEff = r.nominalRs * (0.5 + 0.01) / 1.01;
+            double c = signal == null ? 1 : signal;
+            double rEff = r.nominalRs * (c + 0.01) / 1.01;
             double rt = link(src, r) + rEff + link(r, gnd);
             double i = U / rt;
             double drop = load(r, Direction.XN).getU() - load(r, Direction.XP).getU();
-            ctx.line(f("wp9a rheostat model: control SVU / 2 -> 0.5, R = 100 * 0.51 / 1.01 = %.4f ohm, I = %.5f A", rEff, i));
-            ctx.checkValue("wp9a rheostat control [normalized]", r.control.getNormalized(), 0.5);
-            ctx.checkValue("wp9a rheostat voltage drop [V]", drop, i * rEff);
-            ctx.checkValue("wp9a rheostat resistance U/I [ohm]", drop / (U - drop) * (rt - rEff), rEff);
+            String n = name();
+            ctx.line(f("%s model: control %.2f, R = 100 * %.2f / 1.01 = %.4f ohm, I = %.5f A", n, c, c + 0.01, rEff, i));
+            ctx.check(n + ": control connected iff a signal source is", r.control.isConnected() == (signal != null), "");
+            ctx.checkValue(n + " control [normalized]", r.controlNormalized(), c);
+            ctx.checkValue(n + " voltage drop [V]", drop, i * rEff);
+            ctx.checkValue(n + " resistance U/I [ohm]", drop / (U - drop) * (rt - rEff), rEff);
         }
     }
 

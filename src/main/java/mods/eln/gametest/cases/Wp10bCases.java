@@ -82,7 +82,8 @@ public final class Wp10bCases {
     public static void addTo(List<TestCase> cases) {
         cases.add(new DissipatorCase());
         cases.add(new FurnaceFlue());
-        cases.add(new LargeRheostatCase());
+        cases.add(new LargeRheostatCase(true));
+        cases.add(new LargeRheostatCase(false));
         cases.add(new RemovedHeatTurbine(1 + (4 << 6), "50v_turbine"));   // (eln-ids: transparent_node@257)
         cases.add(new RemovedHeatTurbine(8 + (4 << 6), "200v_turbine"));  // (@264)
         cases.add(new FuelGeneratorCase());
@@ -212,15 +213,21 @@ public final class Wp10bCases {
     /**
      * Large Rheostat (core: 24 coal dust -> E12 from 1 ohm, index 24 = 100 ohm), control pin at SVU (normalized 1 ->
      * R = (1 + 0.01) / 1.01 * 100 = 100 ohm), between an LVU source (LV cable) and a ground cable.
-     * I = LVU / (Rs(src) + 2 Rs(cable) + Rs(a) + R + Rs(b) + Rs(ground)); heat = I^2 R into its thermal load.
+     * I = LVU / (Rs(src) + 2 Rs(cable) + Rs(a) + R + Rs(b) + Rs(ground)); heat = I^2 R into its thermal load. With
+     * nothing on the control pin it is at full resistance too (Baughn 2026-11-27).
      */
     static final class LargeRheostatCase implements TestCase {
+        final boolean signalled;
         LargeRheostatElement rh;
         TransparentNodeElement e;
         mods.eln.node.six.SixNodeElement src, cable, gnd;
 
         public String name() {
-            return "wp10b large rheostat";
+            return signalled ? "wp10b large rheostat" : "wp10b large rheostat unconnected";
+        }
+
+        LargeRheostatCase(boolean signalled) {
+            this.signalled = signalled;
         }
 
         public int width() {
@@ -240,6 +247,7 @@ public final class Wp10bCases {
             src = fed[0];
             cable = fed[1];
             gnd = l.six(GROUND, off(p, rh.front.left()));
+            if (!signalled) return;
             BlockPos cp = off(p, rh.front);
             ElectricalSourceElement s = (ElectricalSourceElement) l.six(SIGNAL_SOURCE, cp);
             ctx.setVolts(s, Eln.SVU);
@@ -247,13 +255,14 @@ public final class Wp10bCases {
 
         public void measure(TestContext ctx) {
             LargeRheostatDescriptor d = (LargeRheostatDescriptor) rh.getDescriptor();
-            ctx.checkValue("wp10b large rheostat nominal R [ohm] (E12 index 24 = 100)", rh.getNominalRs(), 100);
+            ctx.checkValue(name() + " nominal R [ohm] (E12 index 24 = 100)", rh.getNominalRs(), 100);
+            ctx.check(name() + ": control connected iff a signal source is", rh.getControl().isConnected() == signalled, "");
             Resistor r = rh.getResistor();
-            ctx.checkValue("wp10b large rheostat R at control SVU [ohm] ((1 + 0.01) / 1.01 * nominal)", r.getR(), rh.getNominalRs());
+            ctx.checkValue(name() + (signalled ? " R at control SVU" : " R, control unconnected") + " [ohm] ((1 + 0.01) / 1.01 * nominal)", r.getR(), rh.getNominalRs());
             double rt = src.getElectricalLoad(LRDU.Up).getRs() + 2 * cable.getElectricalLoad(LRDU.Up).getRs()
                 + tload(rh, rh.front.right()).getRs() + r.getR() + tload(rh, rh.front.left()).getRs() + gnd.getElectricalLoad(LRDU.Up).getRs();
-            ctx.checkValue("wp10b large rheostat current [A] (LVU / R_total)", Math.abs(r.getI()), Eln.LVU / rt);
-            ctx.check("wp10b large rheostat heats (I^2 R > 0 into its thermal load)", rh.getThermalLoad().Tc > 0,
+            ctx.checkValue(name() + " current [A] (LVU / R_total)", Math.abs(r.getI()), Eln.LVU / rt);
+            ctx.check(name() + " heats (I^2 R > 0 into its thermal load)", rh.getThermalLoad().Tc > 0,
                 f("T %.4f K above ambient, %s", rh.getThermalLoad().Tc, d.name));
         }
     }

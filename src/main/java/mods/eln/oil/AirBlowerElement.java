@@ -57,7 +57,7 @@ public class AirBlowerElement extends TransparentNodeElement implements FluidDev
     @Override
     public void beforeFluidStep(double dt) {
         if (blower == null) return;
-        double signal = speed.getConnectedComponents().isEmpty() ? 1 : speed.getNormalized();
+        double signal = speed.normalizedOr(1);
         share = Math.max(0, Math.min(1, signal)) * Math.max(0, Math.min(1, load.getU() / desc.nominalU));
         // (the fan laws: flow with the speed, pressure with its square)
         blower.speed = share;

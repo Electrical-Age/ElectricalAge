@@ -62,7 +62,7 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
 
     /** Its speed now (0..1): the signal (or full, with none) as far as the supply allows. */
     double speedNow() {
-        double signal = speed.getConnectedComponents().isEmpty() ? 1 : speed.getNormalized();
+        double signal = speed.normalizedOr(1);
         return Math.max(0, Math.min(1, signal)) * Math.max(0, Math.min(1, load.getU() / desc.nominalU));
     }
 

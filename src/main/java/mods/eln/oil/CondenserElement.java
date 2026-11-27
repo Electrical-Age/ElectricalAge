@@ -131,7 +131,7 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
 
     /** Is a signal wired to its makeup input? */
     public boolean signalled() {
-        return !makeupSignal.getConnectedComponents().isEmpty();
+        return makeupSignal.isConnected();
     }
 
     /** The makeup signal on its left flank. */
