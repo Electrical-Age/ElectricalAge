@@ -57,11 +57,9 @@ public class CondenserCoilElement extends TransparentNodeElement implements Flui
     static final int LOW = TankElement.LOW, HIGH = TankElement.HIGH;
     public static final double LOW_DRAW = (LOW - TankElement.FLANGE_HALF) / 32.0, HIGH_DRAW = (16 + HIGH) / 32.0;
 
-    /** Its tooltip lines (Neon's wording). */
+    /** Its tooltip lines. */
     static List<String> tooltip() {
-        return List.of(I18N.tr("1x1x2. Cools vapour from a still into liquid."),
-            I18N.tr("Vapour in at top. Gas out front high. Liquid out bottom or front low."),
-            I18N.tr("Cool the back and sides with thermal dissipators."));
+        return List.of(I18N.tr("Condenses still vapour into liquid (1×1×2 multiblock)."));
     }
 
     public final NbtThermalLoad thermal = new NbtThermalLoad("thermal");
@@ -223,17 +221,16 @@ public class CondenserCoilElement extends TransparentNodeElement implements Flui
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new java.util.LinkedHashMap<>();
+        var info = mods.eln.compat.jade.ProbeLines.of();
         if (coil == null) return info;
-        // (Neon's wording; the warning first, Jade's headline)
-        if (inRate > 1e-5 && coil.T() > WARM_K) info.put(I18N.tr("Warning"), I18N.tr("Vapour escaping, add cooling"));
-        info.put(I18N.tr("Vapour in"), Double.isNaN(inK) || inRate <= 0 ? I18N.tr("none") : mods.eln.api.Meters.celsius(inK - Water.T0));
-        info.put(I18N.tr("Outlet"), mods.eln.api.Meters.celsius(coil.T() - Water.T0));
-        info.put(I18N.tr("Condensing"), EaUnits.grams(liquidRate * 1000) + "/s");
-        info.put(I18N.tr("Gas out"), EaUnits.grams(gasRate * 1000) + "/s");
-        info.put(I18N.tr("Shell"), mods.eln.api.Meters.celsius(thermal.Tc + PhysicalConstant.Tref - Water.T0));
-        info.put(I18N.tr("Pressure"), String.format("%.2f bar", coil.P() / 1e5));
-        info.put(I18N.tr("Contents"), EaUnits.composition(coil));
+        if (inRate > 1e-5 && coil.T() > WARM_K) info.headline(I18N.tr("Warning"), I18N.tr("Vapour escaping"));
+        String inT = Double.isNaN(inK) || inRate <= 0 ? I18N.tr("None") : mods.eln.api.Meters.celsius(inK - Water.T0);
+        info.headline(I18N.tr("Temperature"), inT + " → " + mods.eln.api.Meters.celsius(coil.T() - Water.T0));
+        info.headline(I18N.tr("Condensing"), EaUnits.grams(liquidRate * 1000) + "/s");
+        info.detail(I18N.tr("Gas out"), EaUnits.grams(gasRate * 1000) + "/s");
+        info.detail(I18N.tr("Shell"), mods.eln.api.Meters.celsius(thermal.Tc + PhysicalConstant.Tref - Water.T0));
+        info.detail(I18N.tr("Pressure"), String.format("%.2f bar", coil.P() / 1e5));
+        info.detail(I18N.tr("Contents"), EaUnits.composition(coil));
         return info;
     }
 }

@@ -233,41 +233,29 @@ public class TurretElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Charge power"), Utils.plotPower("", chargePower));
-
+        String target;
         ItemStack filterStack = acceptingInventory.getInventory().getItem(TurretContainer.filterId);
         if (!Utils.isEmpty(filterStack)) {
             GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
-            if (gen != null && gen instanceof EntitySensorFilterDescriptor) {
-                EntitySensorFilterDescriptor filter = (EntitySensorFilterDescriptor) gen;
-                String target = I18N.tr("Shoot ");
-                if (filterIsSpare) {
-                    target += "not ";
-                }
+            if (gen instanceof EntitySensorFilterDescriptor filter) {
                 if (filter.entityClass == Player.class) {
-                    target += I18N.tr("players");
+                    target = filterIsSpare ? I18N.tr("All except players") : I18N.tr("Players");
                 } else if (filter.entityClass == Enemy.class) {
-                    target += I18N.tr("monsters");
+                    target = filterIsSpare ? I18N.tr("All except monsters") : I18N.tr("Monsters");
                 } else if (filter.entityClass == Animal.class) {
-                    target += I18N.tr("animals");
+                    target = filterIsSpare ? I18N.tr("All except animals") : I18N.tr("Animals");
                 } else {
-                    target += I18N.tr("??");
+                    target = filterIsSpare ? I18N.tr("All except filtered") : I18N.tr("Filtered");
                 }
-                info.put(I18N.tr("Target"), target);
+            } else {
+                target = filterIsSpare ? I18N.tr("Everything") : I18N.tr("Nothing");
             }
         } else {
-            if (filterIsSpare) {
-                info.put(I18N.tr("Target"), I18N.tr("Shoot everything"));
-            } else {
-                info.put(I18N.tr("Target"), I18N.tr("Shoot nothing"));
-            }
+            target = filterIsSpare ? I18N.tr("Everything") : I18N.tr("Nothing");
         }
-
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Charge level"),
-                Utils.plotPercent("", energyBuffer / descriptor.getProperties().impulseEnergy));
-        }
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Target"), target)
+            .headline(I18N.tr("Charge level"), Utils.plotPercent("", energyBuffer / descriptor.getProperties().impulseEnergy))
+            .headline(I18N.tr("Charge power"), Utils.plotPower("", chargePower));
     }
 }

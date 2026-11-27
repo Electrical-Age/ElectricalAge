@@ -105,13 +105,10 @@ public final class PowerInductorCore {
 
     /** The Jade lines: inductance and stored energy, and the voltage and current in easy mode. */
     public Map<String, String> waila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Inductance"), Utils.plotValue(inductor.getL(), "H"));
-        info.put(I18N.tr("Charge"), Utils.plotEnergy("", inductor.getE()));
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Voltage drop"), Utils.plotVolt("", Math.abs(inductor.getU())));
-            info.put(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(inductor.getCurrent())));
-        }
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Inductance"), Utils.plotValue(inductor.getL(), "H"))
+            .headline(I18N.tr("Charge"), Utils.plotEnergy("", inductor.getE()))
+            .detail(I18N.tr("Voltage drop"), Utils.plotVolt("", Math.abs(inductor.getU())))
+            .detail(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(inductor.getCurrent())));
     }
 }

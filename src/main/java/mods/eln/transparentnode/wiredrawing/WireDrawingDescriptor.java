@@ -154,7 +154,8 @@ public class WireDrawingDescriptor extends TransparentNodeDescriptor {
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         String volts = CableSpec.voltsLabel(maxTier);
-        Collections.addAll(list, tr("Draws copper and rubber into cable kits\nand transformer windings to any spec:\nup to %1$ mm², %2$ insulation;\nand bare Copper Cable.\nNominal power: %3$",
-            CableSpec.mm2Number(CableSpec.MM2[maxMm2]), volts, mods.eln.api.Meters.watts(nominalP)).split("\n"));
+        list.add(tr("Draws cable kits, windings and bare Copper Cable (up to %1$ mm², %2$).",
+            CableSpec.mm2Number(CableSpec.MM2[maxMm2]), volts));
+        list.add(tr("Nominal power: %1$", mods.eln.api.Meters.watts(nominalP)));
     }
 }

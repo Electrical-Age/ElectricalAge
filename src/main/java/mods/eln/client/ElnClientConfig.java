@@ -13,8 +13,8 @@ public final class ElnClientConfig {
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("rendering");
-        STATIC_PARTS_IN_CHUNKS = b.comment("Draw the parts of devices that hold still as part of the chunk, like blocks, and only the moving parts",
-                "every frame. Much cheaper where many devices stand. Off = every device is drawn whole every frame, as before.")
+        STATIC_PARTS_IN_CHUNKS = b.comment("Bake stationary device parts into chunk geometry and render only moving parts each frame.",
+                "Improves frame rate in dense bases; disable to render entire devices dynamically every frame.")
             .define("staticPartsInChunks", true);
         b.pop();
         SPEC = b.build();

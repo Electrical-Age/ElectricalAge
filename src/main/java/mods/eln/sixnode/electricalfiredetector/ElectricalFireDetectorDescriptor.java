@@ -66,12 +66,9 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        if (batteryPowered) {
-            Collections.addAll(list, tr("Battery powered buzzer \nactivated in presence of fire.").split("\n"));
-        } else {
-            Collections.addAll(list, tr("Output voltage increases\nif a fire has been detected.").split("\n"));
-        }
-        list.add(tr("Range: %1$ blocks", (int) maxRange));
+        list.add(batteryPowered
+            ? tr("Battery-powered fire alarm buzzer (range: %1$ blocks).", (int) maxRange)
+            : tr("Outputs a signal when fire is detected (range: %1$ blocks).", (int) maxRange));
     }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)

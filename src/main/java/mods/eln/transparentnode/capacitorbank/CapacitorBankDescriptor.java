@@ -60,7 +60,9 @@ public class CapacitorBankDescriptor extends TransparentNodeDescriptor implement
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("%1$F, rated %2$V: %3$ at 400V.\n+ on the left of its front, - on the right.\nEmpty, it draws a huge inrush: charge it\nthrough a resistor or from a soft plant.\nFor bursts, not for keeping: it leaks\nmost of its charge within the hour.",
-            String.format("%.2f", farads), String.format("%.0f", ratedVolts), Utils.plotEnergy(energyAt(mods.eln.Eln.HVU))).split("\n"));
+        list.add(tr("High-power burst storage: %1$F, rated %2$V (%3$ at 400V).",
+            String.format("%.2f", farads), String.format("%.0f", ratedVolts), Utils.plotEnergy(energyAt(mods.eln.Eln.HVU)).trim()));
+        mods.eln.client.ItemTooltips.detail(list,
+            tr("High inrush when empty; leaks most of its charge within an hour."));
     }
 }

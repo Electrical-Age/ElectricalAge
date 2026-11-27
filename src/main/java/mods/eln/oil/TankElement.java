@@ -389,19 +389,14 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
+        var info = mods.eln.compat.jade.ProbeLines.of();
         if (vessel == null) return info;
-        TankDescriptor.putContents(info, vessel);
-        info.put(I18N.tr("Vessel"), group == null ? I18N.tr("one block") : String.format("%d x %d x %d blocks, %.0f buckets", group.sx, group.sy, group.sz,
+        desc.putProbe(info, vessel);
+        info.detail(I18N.tr("Vessel"), group == null ? I18N.tr("1 block") : String.format("%d×%d×%d (%.0f B)", group.sx, group.sy, group.sz,
             vessel.volume * Water.RHO_L / EaUnits.KG_PER_MB_WATER / 1000));
-        // (its ports are drawn only where a pipe meets them: say where they are)
-        info.put(I18N.tr("Ports"), group == null ? I18N.tr("steam: top, and 12 px up on the sides; water: bottom, and 4 px up on the sides (not the glass's)")
-            : I18N.tr("on its outer faces: steam: top, and 12 px up a side; water: bottom, and 4 px up a side"));
-        // (the whole box's: "0 of 2 ports here" on one block of a box piped elsewhere read as a fault, Baughn 2026-11-11)
         int piped = 0;
         for (TankElement t : group == null ? List.of(this) : group.members) piped += Integer.bitCount(t.coupled);
-        info.put(I18N.tr("Pipes"), piped == 0 ? I18N.tr("none connected") : String.format(I18N.tr("%d connected"), piped));
-        desc.putWarning(info, vessel);
+        info.detail(I18N.tr("Pipes"), piped == 0 ? I18N.tr("None connected") : String.format(I18N.tr("%d connected"), piped));
         return info;
     }
 }

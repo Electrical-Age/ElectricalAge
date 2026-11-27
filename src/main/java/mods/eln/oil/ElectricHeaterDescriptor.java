@@ -61,6 +61,7 @@ public class ElectricHeaterDescriptor extends TransparentNodeDescriptor {
 
     /** Its own tooltip lines, after the common ones. */
     protected void addLines(List<String> list) {
-        list.add(String.format("%.0f V, %.0f W of heat out of its back (thermal)", nominalU, nominalP));
+        list.add(String.format("Converts electricity into heat (%.0f W).", nominalP));
+        mods.eln.client.ItemTooltips.detail(list, "Accepts a Regulator for temperature control.");
     }
 }

@@ -106,6 +106,14 @@ public class GridTransformerElement extends GridElement {
     }
 
     @Override
+    public java.util.Map<String, String> getWaila() {
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(mods.eln.i18n.I18N.tr("Primary"), Utils.plotVolt("", primaryLoad.getU()) + "  " + Utils.plotAmpere("", primaryLoad.getCurrent()));
+        info.headline(mods.eln.i18n.I18N.tr("Secondary"), Utils.plotVolt("", secondaryLoad.getU()) + "  " + Utils.plotAmpere("", secondaryLoad.getCurrent()));
+        return info;
+    }
+
+    @Override
     public String multiMeterString(Direction side) {
         if (side == front.up())
             return Utils.plotVolt("UP+:", primaryLoad.getU()) + Utils.plotAmpere("IP+:", primaryLoad.getCurrent());

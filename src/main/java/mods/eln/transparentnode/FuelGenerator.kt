@@ -95,11 +95,9 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
                                 list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
 
-        list.add(tr("Produces electricity using gasoline."))
-        list.add("  " + tr("Nominal power: %1$ W", Utils.plotValue(nominalPower)))
-        list.add(tr("Fuel by bucket or top pipe."))
-        list.add(tr("Full power on 330-400 K fuel; each 1% outside costs 2%."))
-        list.add(tr("Traces of heavy oil or residue foul it; more chokes the injectors. Clean fuel clears fouling, wool at once."))
+        list.add(tr("Gasoline generator (%1$).", Utils.plotPower("", nominalPower).trim()))
+        list.add(tr("Fuel via bucket or top pipe."))
+        mods.eln.client.ItemTooltips.detail(list, tr("Heavy fuels foul or choke the injectors."))
     }
 }
 
@@ -240,7 +238,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
                     rate()   // (what is in the vessel now: a stop on bad fuel must not latch after it is diluted)
                     if (inlet.feedMb() > 0 && fuel.choked(mods.eln.sim.fluid.FuelQuality.PISTON_CHOKE))   // (why it won't start: it is not off-window fuel's silent no)
                         player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(
-                            I18N.tr("Injectors choked by heavy oil or residue. Dilute with clean fuel, or break to empty.")))
+                            I18N.tr("Injectors choked (heavy fuel)")))
                     else if (inlet.feedMb() > 0 && quality() > 0) {
                         on = true
                         voltageGracePeriod = FuelGeneratorDescriptor.VoltageStabilizationGracePeriod
@@ -287,28 +285,32 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
     }
 
     override fun getWaila(): Map<String, String> {
-        val info = mutableMapOf(
-            Pair(I18N.tr("State"), if (on) I18N.tr("ON") else I18N.tr("OFF")),
-            Pair(I18N.tr("Fuel level"), Utils.plotPercent(tankLevel)),
-            Pair(I18N.tr("Generated power"), Utils.plotPower("", powerSource.effectiveP)),
-            Pair(I18N.tr("Voltage"), Utils.plotVolt("", powerSource.u))
-        )
-        val v = inlet.vessel
-        if (v != null) info[I18N.tr("Fuel")] = mods.eln.sim.fluid.EaUnits.tank(inlet.feedMb(), TANK_MB.toDouble()) + ", " + mods.eln.sim.fluid.EaUnits.composition(v)
+        val info = mods.eln.compat.jade.ProbeLines.of()
         val wrong = inlet.blockedBy()
-        if (wrong != null) info[I18N.tr("State")] = I18N.tr("blocked: it holds %1$, which it can't burn", wrong)
-        else if (choked()) info[I18N.tr("State")] = I18N.tr("choked: too much heavy oil or residue; dilute or break to empty")
+        val state = when {
+            wrong != null -> I18N.tr("Wrong fuel (%1$)", wrong)
+            choked() -> I18N.tr("Choked (heavy fuel)")
+            on -> I18N.tr("On")
+            else -> I18N.tr("Off")
+        }
+        info.headline(I18N.tr("State"), state)
+        if (foul > 0.25) info.headline(I18N.tr("Fouling"), String.format(I18N.tr("%.0f%% fouled (%.0f%% power)"), foul * 100, (1 - foul) * 100))
+        val v = inlet.vessel
+        info.headline(I18N.tr("Fuel"), if (v != null) mods.eln.sim.fluid.EaUnits.tank(inlet.feedMb(), TANK_MB.toDouble()) else Utils.plotPercent(tankLevel))
+        info.headline(I18N.tr("Power"), Utils.plotPower("", powerSource.effectiveP))
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", powerSource.u))
+        if (v != null) info.detail(I18N.tr("Contents"), mods.eln.sim.fluid.EaUnits.composition(v))
         if (v != null && inlet.feedId() >= 0) {
             val q = mods.eln.sim.fluid.FuelQuality.rate(v, inlet.feedId(), mods.eln.sim.fluid.FuelQuality.GENERATOR_LO, mods.eln.sim.fluid.FuelQuality.GENERATOR_HI)
             val perHour = mods.eln.sim.fluid.FuelQuality.engineFoulPerHour(q.coking())
             val visc = mods.eln.sim.fluid.EaUnits.viscosityText(mods.eln.sim.fluid.FuelQuality.layerViscosity(v, inlet.feedId()))
             // (choked: no fouling clause, it burns none)
-            info[I18N.tr("Fuel quality")] = if (q.choked(mods.eln.sim.fluid.FuelQuality.PISTON_CHOKE)) mods.eln.sim.fluid.FuelQuality.describe(q, mods.eln.sim.fluid.FuelQuality.PISTON_CHOKE) + "; " + visc
+            info.detail(I18N.tr("Fuel quality"), if (q.choked(mods.eln.sim.fluid.FuelQuality.PISTON_CHOKE)) mods.eln.sim.fluid.FuelQuality.describe(q, mods.eln.sim.fluid.FuelQuality.PISTON_CHOKE) + "; " + visc
             else String.format("%s; %s; %s", mods.eln.sim.fluid.FuelQuality.describe(q, mods.eln.sim.fluid.FuelQuality.PISTON_CHOKE),
-                if (perHour > 0) String.format(I18N.tr("fouls it ~%.0f%% an hour at full power (coking %.3f, clean under %.2f)"), perHour * 100, q.coking(), mods.eln.sim.fluid.FuelQuality.ENGINE_BALANCE)
-                else I18N.tr("burns clean"), visc)
+                if (perHour > 0) String.format(I18N.tr("fouls ~%.0f%%/h"), perHour * 100)
+                else I18N.tr("burns clean"), visc))
         }
-        if (foul > 0.01) info[I18N.tr("Fouling")] = String.format(I18N.tr("%.0f%% fouled: %.0f%% power (clean fuel clears it slowly; right-click with wool to clean)"), foul * 100, (1 - foul) * 100)
+        if (foul > 0.01 && foul <= 0.25) info.detail(I18N.tr("Fouling"), String.format(I18N.tr("%.0f%% fouled (%.0f%% power)"), foul * 100, (1 - foul) * 100))
         return info
     }
 

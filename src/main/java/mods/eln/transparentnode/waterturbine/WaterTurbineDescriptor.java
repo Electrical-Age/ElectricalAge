@@ -107,10 +107,8 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 
         super.addInformation(itemStack, entityPlayer, list, par4);
 
-        list.add(tr("Generates energy using water stream."));
-        if (!Utils.nameShowsVoltage(name, cable.electricalNominalVoltage))
-            list.add(tr("Voltage: %1$V", Utils.plotValue(cable.electricalNominalVoltage)));
-        list.add(tr("Power: %1$W", Utils.plotValue(nominalPower)));
+        list.add(tr("Generates electricity from flowing water (%1$V, %2$W).",
+            Utils.plotValue(cable.electricalNominalVoltage), Utils.plotValue(nominalPower)));
     }
 
 
@@ -126,7 +124,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 
         String str = super.checkCanPlace(coord, front);
         if (str != null) return str;
-        if (checkCanPlaceWater(coord, front) == false) return tr("No place for water turbine!");
+        if (checkCanPlaceWater(coord, front) == false) return tr("No room for the water wheel.");
         return str;
     }
 

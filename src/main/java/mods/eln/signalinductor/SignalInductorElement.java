@@ -53,6 +53,14 @@ public class SignalInductorElement extends SixNodeElement {
     }
 
     @Override
+    public java.util.Map<String, String> getWaila() {
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(mods.eln.i18n.I18N.tr("Inductance"), Utils.plotValue(inductor.getL(), "H"))
+            .headline(mods.eln.i18n.I18N.tr("Current"), Utils.plotAmpere("", Math.abs(inductor.getCurrent())))
+            .detail(mods.eln.i18n.I18N.tr("Voltage drop"), Utils.plotVolt("", Math.abs(inductor.getU())));
+    }
+
+    @Override
     public String thermoMeterString() {
         return "";
     }

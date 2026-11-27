@@ -152,17 +152,21 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
-        list.add(tr("Produces power from solar radiation."));
-        // the rating is its open-circuit voltage at 10 C and its best power on a hot noon (Baughn)
         PvCurve c = newCurve();
         double[] best = c.maxPowerPoint();   // (a new curve is at a hot noon, full sun)
-        list.add("  " + tr("Best: %1$ at %2$ (hot noon)", Meters.watts(best[1]), Meters.volts(best[0])));
-        list.add("  " + tr("Open circuit: %1$ (panel %2$), %3$ (panel %4$)", Meters.volts(c.at(1, 20).voc()), Meters.celsius(20),
-            Meters.volts(c.at(1, -20).voc()), Meters.celsius(-20)));
-        if (canRotate) list.add(tr("Can be geared towards the sun."));
+        list.add(tr("Generates electricity from sunlight (peak: %1$ at %2$).", Meters.watts(best[1]), Meters.volts(best[0])));
+        String voc = tr("Open circuit: %1$ (%2$), %3$ (%4$).",
+            Meters.volts(c.at(1, 20).voc()), Meters.celsius(20),
+            Meters.volts(c.at(1, -20).voc()), Meters.celsius(-20));
+        if (canRotate) {
+            mods.eln.client.ItemTooltips.detail(list, voc, tr("Accepts a Solar Tracker upgrade."));
+        } else {
+            mods.eln.client.ItemTooltips.detail(list, voc);
+        }
     }
 
     /**

@@ -112,6 +112,12 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
+    public void addInformation(ItemStack itemStack, net.minecraft.world.entity.player.Player entityPlayer, List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(mods.eln.i18n.I18N.tr("Incubates chicken eggs (%1$W).", mods.eln.misc.Utils.plotValue(nominalPower)));
+    }
+
+    @Override
     public void addCollisionBoxesToList(AABB par5AxisAlignedBB, List list, Level world, int x, int y, int z) {
         // 1.7.10: stone.getCollisionBoundingBoxFromPool (absolute), then maxY -= 0.5 (AABB is immutable now)
         AABB bb = new AABB(x, y, z, x + 1, y + 1, z + 1);

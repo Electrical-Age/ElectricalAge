@@ -284,13 +284,19 @@ public class DesulfuriserElement extends TransparentNodeElement implements mods.
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>(machine.wailaLines());
-        if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
+        var info = mods.eln.compat.jade.ProbeLines.of();
         String wrong = inlet.blockedBy();
-        if (onOff.on && wrong != null) info.put(I18N.tr("State"), I18N.tr("blocked: it holds %1$, which it can't treat", wrong));
-        info.put(I18N.tr("In (blue)"), mods.eln.sim.fluid.EaUnits.tank(inMb(), DesulfuriserDescriptor.TANK_MB));
-        info.put(I18N.tr("Out (red)"), mods.eln.sim.fluid.EaUnits.tank(outMb(), DesulfuriserDescriptor.TANK_MB));
-        info.put(I18N.tr("Sulfur Dust"), String.valueOf(sulfur));
+        String state;
+        if (!onOff.on) state = I18N.tr("Off");
+        else if (wrong != null) state = I18N.tr("Wrong fluid (%1$)", wrong);
+        else if (machine.state() != mods.eln.api.MachineState.RUNNING) state = machine.wailaLines().getOrDefault(I18N.tr("State"), I18N.tr("No power"));
+        else state = I18N.tr("Running");
+        info.headline(I18N.tr("State"), state);
+        info.headline(I18N.tr("In"), mods.eln.sim.fluid.EaUnits.tank(inMb(), DesulfuriserDescriptor.TANK_MB));
+        info.headline(I18N.tr("Out"), mods.eln.sim.fluid.EaUnits.tank(outMb(), DesulfuriserDescriptor.TANK_MB));
+        info.detail(I18N.tr("Sulfur Dust"), String.valueOf(sulfur));
+        info.detail(I18N.tr("Power"), Utils.plotPower("", machine.watts()));
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", machine.volts()));
         return info;
     }
 }

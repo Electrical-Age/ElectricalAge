@@ -19,9 +19,9 @@ public class ChipItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display,
                                 java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
         String s = switch (kind) {
-            case RAM -> "1 MB of RAM for a computer's chip slot. Janet needs two, in slots 2 and 3";
-            case JANET -> "Janet, a Lisp, with a REPL on the terminal. Goes in slot 1, where the computer starts";
-            case BOOT -> "Loads drive A's first sector into slot 2's RAM and runs it: for your own system. Goes in slot 1";
+            case RAM -> "1 MB computer RAM (Janet requires 2 MB: slots 2–3).";
+            case JANET -> "Janet Lisp ROM with terminal REPL (slot 1).";
+            case BOOT -> "Floppy bootloader ROM: boots drive A sector 0 into slot 2 RAM (slot 1).";
         };
         out.accept(Component.literal(s).withStyle(net.minecraft.ChatFormatting.GRAY));
     }

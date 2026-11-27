@@ -227,10 +227,10 @@ abstract class AnalogFunction : INBTTReady {
 
     abstract fun process(inputs: Array<Double?>, deltaTime: Double): Double
 
-    open fun getWaila(inputs: Array<Double?>, output: Double) = mutableMapOf(
-        Pair("Inputs", (1..inputCount).map { "${inputColors[it - 1]}${Utils.plotVolt("", inputs[it - 1] ?: 0.0)}" }.joinToString(" ")),
-        Pair("Output", Utils.plotVolt("", output))
-    )
+    open fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> =
+        mods.eln.compat.jade.ProbeLines.of()
+            .headline("Inputs", (1..inputCount).map { "${inputColors[it - 1]}${Utils.plotVolt("", inputs[it - 1] ?: 0.0)}" }.joinToString(" "))
+            .headline("Output", Utils.plotVolt("", output))
 
     override fun readFromNBT(nbt: CompoundTag?, str: String?) {}
     override fun writeToNBT(nbt: CompoundTag?, str: String?) {}
@@ -238,7 +238,7 @@ abstract class AnalogFunction : INBTTReady {
 
 class OpAmp : AnalogFunction() {
     override val inputCount = 2
-    override val infos: String = I18N.tr("Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or as configurable amplifier.")
+    override val infos: String = I18N.tr("High-gain differential amplifier and comparator.")
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double =
         10000 * ((inputs[0] ?: 0.0) - (inputs[1] ?: 0.0))
@@ -247,7 +247,7 @@ class OpAmp : AnalogFunction() {
 class PIDRegulator : AnalogFunction() {
     override val hasState = true
     override val inputCount = 2
-    override val infos: String = I18N.tr("Proportional–integral–derivative controller. A PID\ncontroller continuously calculates an error value as\nthe difference between a desired setpoint and a measured\nprocess variable and applies a correction based on\nproportional, integral, and derivative terms.")
+    override val infos: String = I18N.tr("Configurable PID feedback controller (Kp, Ki, Kd).")
 
     internal var Kp = 1.0
     internal var Ki = 0.0
@@ -279,11 +279,9 @@ class PIDRegulator : AnalogFunction() {
     }
 
     override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
-        val info = super.getWaila(inputs, output)
-        info[I18N.tr("Params")] = "Kp = $Kp, Ki = $Ki, Kd = $Kd"
-        if (Eln.wailaEasyMode) {
-            info[I18N.tr("State")] = "Si = ${pid.iStack}"
-        }
+        val info = mods.eln.compat.jade.ProbeLines.of().addAll(super.getWaila(inputs, output))
+        info.detail(I18N.tr("Params"), "Kp = $Kp, Ki = $Ki, Kd = $Kd")
+        info.detail(I18N.tr("State"), "Si = ${pid.iStack}")
         return info
     }
 }
@@ -352,7 +350,7 @@ class PIDRegulatorRender(entity: SixNodeEntity, side: Direction, descriptor: Six
 open class VoltageControlledSawtoothOscillator : AnalogFunction() {
     override val hasState = true
     override val inputCount = 1
-    override val infos = I18N.tr("A voltage-controlled oscillator or VCO is\nan electronic oscillator whose oscillation\nfrequency is controlled by a voltage input.")
+    override val infos = I18N.tr("Voltage-controlled sawtooth oscillator (0.04–2 Hz).")
 
     private var out = 0.0
 
@@ -375,6 +373,8 @@ open class VoltageControlledSawtoothOscillator : AnalogFunction() {
 }
 
 class VoltageControlledSineOscillator : VoltageControlledSawtoothOscillator() {
+    override val infos = I18N.tr("Voltage-controlled sine oscillator (0.04–2 Hz).")
+
     override fun process(inputs: Array<Double?>, deltaTime: Double) =
         Eln.SVU / 2 + Eln.SVU / 2 * Math.sin(2 * Math.PI * super.process(inputs, deltaTime) / Eln.SVU)
 }
@@ -382,7 +382,7 @@ class VoltageControlledSineOscillator : VoltageControlledSawtoothOscillator() {
 class Amplifier : AnalogFunction() {
     override val hasState = true
     override val inputCount = 1
-    override val infos = I18N.tr("An amplifier increases the voltage\nof an input signal by a configurable\ngain and outputs that voltage.")
+    override val infos = I18N.tr("Multiplies a signal by a configurable gain.")
 
     internal var gain = 1.0
 
@@ -459,7 +459,7 @@ class AmplifierRender(entity: SixNodeEntity, side: Direction, descriptor: SixNod
 
 class VoltageControlledAmplifier : AnalogFunction() {
     override val inputCount = 2
-    override val infos = I18N.tr("A voltage-controlled amplifier (VCA)\nis an electronic amplifier that varies\nits gain depending on the control voltage.")
+    override val infos = I18N.tr("Amplifies a signal with gain set by a control voltage.")
 
     // gain 0 to 10 over the control's range (1 at a tenth of SVU, the default when unconnected)
     override fun process(inputs: Array<Double?>, deltaTime: Double) = gain(inputs) * (inputs[0] ?: 0.0)
@@ -476,7 +476,7 @@ class VoltageControlledAmplifier : AnalogFunction() {
 class SummingUnit : AnalogFunction() {
     override val hasState = true
     override val inputCount = 3
-    override val infos = I18N.tr("The summing unit outputs the sum of\nthe three weighted inputs.The\ngain for each input can be configured.")
+    override val infos = I18N.tr("Outputs the weighted sum of three signal inputs.")
 
     internal val gains = arrayOf(1.0, 1.0, 1.0)
 
@@ -565,7 +565,7 @@ class SummingUnitRender(entity: SixNodeEntity, side: Direction, descriptor: SixN
 class SampleAndHold : AnalogFunction() {
     override val hasState = true
     override val inputCount = 2
-    override val infos = I18N.tr("Samples the voltage of a varying analog signal when\nthe clock input changes from 0 to 1 and holds its\noutput voltage at a constant level until next clock pulse.\nYou can see it as an analog D-Flipflop.")
+    override val infos = I18N.tr("Samples input voltage on a rising clock edge and holds it.")
     private var clock = false
     private var value = 0.0
 
@@ -590,7 +590,7 @@ class SampleAndHold : AnalogFunction() {
 class Filter: AnalogFunction() {
     override val hasState = true
     override val inputCount = 1
-    override val infos = I18N.tr("Lowpass filter - Passes signals with a\nfrequency lower than a certain cutoff frequency\nand attenuates signals with frequencies higher\nthan the cutoff frequency.")
+    override val infos = I18N.tr("Low-pass filter with configurable cutoff frequency.")
 
     internal var feedback = 2.0 * Math.PI * 5.0
     private var output = 0.0

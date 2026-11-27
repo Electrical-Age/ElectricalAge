@@ -239,14 +239,13 @@ public class SolarPanelElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new LinkedHashMap<String, String>();
-        info.put(I18N.tr("Power"), Meters.watts(Math.max(0, pv.getP())) + " @ " + Meters.volts(pv.getU()));
         double[] mpp = pv.curve().maxPowerPoint();
-        info.put(I18N.tr("Best"), mpp[1] > 0 ? Meters.watts(mpp[1]) + " @ " + Meters.volts(mpp[0]) : I18N.tr("no light"));
-        info.put(I18N.tr("Panel temperature"), Meters.celsius(panelCelsius()));
-        info.put(I18N.tr("Sun angle"), Utils.plotValue(((slowProcess.getSolarAlpha()) * (180 / Math.PI)) - 90, "\u00B0"));
-        info.put(I18N.tr("Panel angle"), Utils.plotValue((panelAlpha * (180 / Math.PI)) - 90, "\u00B0"));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Power"), Meters.watts(Math.max(0, pv.getP())) + " @ " + Meters.volts(pv.getU()))
+            .headline(I18N.tr("Best"), mpp[1] > 0 ? Meters.watts(mpp[1]) + " @ " + Meters.volts(mpp[0]) : I18N.tr("No light"))
+            .headline(I18N.tr("Panel temperature"), Meters.celsius(panelCelsius()))
+            .detail(I18N.tr("Sun angle"), Utils.plotValue(((slowProcess.getSolarAlpha()) * (180 / Math.PI)) - 90, "\u00B0"))
+            .detail(I18N.tr("Panel angle"), Utils.plotValue((panelAlpha * (180 / Math.PI)) - 90, "\u00B0"));
     }
 
 }

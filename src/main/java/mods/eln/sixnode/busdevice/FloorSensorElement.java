@@ -70,8 +70,8 @@ public class FloorSensorElement extends BusDeviceElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = super.getWaila();
-        info.put(I18N.tr("Car"), level ? I18N.tr("level with this floor") : I18N.tr("not here"));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .addAll(super.getWaila())
+            .headline(I18N.tr("Car"), level ? I18N.tr("At floor") : I18N.tr("Not present"));
     }
 }

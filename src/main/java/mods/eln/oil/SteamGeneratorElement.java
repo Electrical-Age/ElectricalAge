@@ -504,21 +504,21 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        // (Baughn: steam in grams, and the pressure of what)
-        info.put(I18N.tr("Steam used"), EaUnits.steamGrams(steamRate) + "/s");
-        if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar of %s", inlet.P() / 1e5, EaUnits.contents(inlet)));
-        // (Baughn: so players see what pressure buys; 100% = its rating, 10 bar venting to air)
-        if (condenser != null) info.put(I18N.tr("Exhaust"), String.format("condenser, %.2f bar", condenser.vessel.P() / 1e5));
-        if (inlet != null) info.put(I18N.tr("Pressure efficiency"), String.format("%.0f%% of its %.0f bar rating", pressureEfficiency() * 100,
-            SteamGeneratorDescriptor.NOMINAL_PA / 1e5));
-        if (waterShare() > 0.01) info.put(I18N.tr("Water in inlet"), Utils.plotPercent(waterShare()));
-        info.put(I18N.tr("Speed"), Utils.plotPercent(omega));
-        info.put(I18N.tr("Steam valve"), Utils.plotPercent(Math.min(gate, limit)));
-        info.put(I18N.tr("Control"), controls.controlExternal ? String.format("external, %.0f%%", limit * 100)
-            : controls.hasRegulator() ? String.format("holds %.1f bar at the inlet", controls.targetBar) : String.format("throttle %.0f%%", controls.throttle * 100));
-        info.put(I18N.tr("Generated power"), Utils.plotPower("", source.getEffectiveP()));
-        info.put(I18N.tr("Voltage"), Utils.plotVolt("", load.getU()));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        if (waterShare() > 0.01) info.headline(I18N.tr("Water in inlet"), Utils.plotPercent(waterShare()));
+        info.headline(I18N.tr("Power"), Utils.plotPower("", source.getEffectiveP()));
+        info.headline(I18N.tr("Speed"), Utils.plotPercent(omega));
+        if (inlet != null) {
+            String warn = inlet.P() > 0.85 * SteamGeneratorDescriptor.BURST_PA ? " (" + I18N.tr("near bursting") + ")" : "";
+            info.headline(I18N.tr("Inlet pressure"), String.format("%.2f bar of %s%s", inlet.P() / 1e5, EaUnits.contents(inlet), warn));
+        }
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", load.getU()));
+        info.detail(I18N.tr("Steam used"), EaUnits.steamGrams(steamRate) + "/s");
+        if (condenser != null) info.detail(I18N.tr("Exhaust"), String.format(I18N.tr("Condenser (%.2f bar)"), condenser.vessel.P() / 1e5));
+        if (inlet != null) info.detail(I18N.tr("Pressure efficiency"), String.format("%.0f%%", pressureEfficiency() * 100));
+        info.detail(I18N.tr("Steam valve"), Utils.plotPercent(Math.min(gate, limit)));
+        info.detail(I18N.tr("Control"), controls.controlExternal ? String.format(I18N.tr("External (%.0f%%)"), limit * 100)
+            : controls.hasRegulator() ? String.format(I18N.tr("Regulator (%.1f bar)"), controls.targetBar) : String.format(I18N.tr("Throttle (%.0f%%)"), controls.throttle * 100));
         return info;
     }
 }

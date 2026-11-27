@@ -79,10 +79,8 @@ public class CompactTurbineDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add("Heat in on its left side: put a heat furnace against it");
-        list.add(String.format("Water: a bucket, or a pipe on top (%d mB tank)", WATER_MB));
-        list.add(String.format("%.0f V out, front and back; nothing to set", nominalU));
-        list.add(String.format("Up to %.0f W from %.0f W of heat (%.0f%%)", nominalP, nominalHeat(), ETA * 100));
-        list.add("A stone heat furnace with 4 combustion chambers gives ~270 W");   // (it keeps ~2.7 kW going: AdventurAgent)
+        list.add(String.format("Self-contained steam turbine: up to %.0f W (%.0f%% efficiency).", nominalP, ETA * 100));
+        list.add(String.format("Internal water tank: %d mB (bucket or top pipe).", WATER_MB));
+        mods.eln.client.ItemTooltips.detail(list, String.format("Full output requires %.0f W of heat input.", nominalHeat()));
     }
 }

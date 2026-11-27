@@ -59,6 +59,11 @@ public class PowerCapacitorElement extends TransparentNodeElement {
     }
 
     @Override
+    public java.util.Map<String, String> getWaila() {
+        return core.waila();
+    }
+
+    @Override
     public String thermoMeterString(Direction side) {
         return null;
     }

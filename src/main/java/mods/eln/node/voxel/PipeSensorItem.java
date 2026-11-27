@@ -40,7 +40,6 @@ public class PipeSensorItem extends Item implements PipeTool {
             if (player != null) player.sendOverlayMessage(Component.literal(err));
             return InteractionResult.FAIL;
         }
-        if (player != null) player.sendOverlayMessage(Component.literal("Now lay pipe from its port to the pipe to measure"));
         if (player == null || !player.isCreative()) ctx.getItemInHand().shrink(1);
         return InteractionResult.SUCCESS;
     }
@@ -58,7 +57,7 @@ public class PipeSensorItem extends Item implements PipeTool {
      */
     public static String place(Level level, BlockPos at, net.minecraft.core.Direction clicked, Vec3 hit, int sensing, Player player) {
         mods.eln.node.six.SixNodeDescriptor d = device(sensing);
-        if (d == null) return "Can't place that";
+        if (d == null) return mods.eln.i18n.I18N.tr("Can't place that");
         BlockPos pos = at.relative(clicked);
         mods.eln.misc.Direction face = mods.eln.misc.Direction.fromIntMinecraftSide(clicked.get3DDataValue()).getInverse();
         VoxelNode v = null;
@@ -66,16 +65,16 @@ public class PipeSensorItem extends Item implements PipeTool {
             double hx = hit.x - at.getX(), hy = hit.y - at.getY(), hz = hit.z - at.getZ();
             int part = n.aimed(hx, hy, hz).part();
             if (part >= 0 && !(n.parts.get(part) instanceof CablePart))
-                return "It goes on a floor, wall or ceiling: place it there and lay pipe to it";
+                return mods.eln.i18n.I18N.tr("Must be placed on a solid face");
             pos = at;
             face = n.placeFace(clicked, hx, hy, hz);
             v = n;
         } else if (level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n) v = n;
-        if (!mods.eln.node.six.SixNodeBlock.get().getIfOtherBlockIsSolid(level, pos, face)) return "It needs a solid floor, wall or ceiling behind it";
+        if (!mods.eln.node.six.SixNodeBlock.get().getIfOtherBlockIsSolid(level, pos, face)) return mods.eln.i18n.I18N.tr("Needs a solid face behind it");
         boolean fresh = v == null;
         if (fresh) {
             var old = level.getBlockState(pos);
-            if (!(old.isAir() || old.canBeReplaced())) return "Something is in the way there";
+            if (!(old.isAir() || old.canBeReplaced())) return mods.eln.i18n.I18N.tr("Something is in the way");
             v = new VoxelNode();
             v.onBlockPlacedBy(new Coordonate(pos, level), face, player, ItemStack.EMPTY);
         }
@@ -117,7 +116,7 @@ public class PipeSensorItem extends Item implements PipeTool {
         return err;
     }
 
-    static final String NEAR_PIPE = "Too close to a pipe: put it on a free spot of the face and lay pipe to it";
+    static final String NEAR_PIPE = mods.eln.i18n.I18N.tr("Too close to a pipe");
 
     /**
      * Would the device there, with its port, touch a pipe or fitting? Its body and the column up to just past its port,
@@ -138,9 +137,10 @@ public class PipeSensorItem extends Item implements PipeTool {
 
     /** Its tooltip lines (client ItemTooltips). */
     public java.util.List<String> tooltip() {
-        return java.util.List.of(sensing == PipeSensorPart.PRESSURE ? "Reads a pipe's pressure"
-                : sensing == PipeSensorPart.TEMPERATURE ? "Reads a pipe's temperature" : "Reads how wet a pipe's steam is",
-            "Goes on a floor, wall or ceiling: lay pipe from its port to the pipe to measure",
-            "0-5 V out on its signal pin", "Right-click it with an empty hand to step its full scale");
+        var list = new java.util.ArrayList<String>();
+        list.add(mods.eln.i18n.I18N.tr(sensing == PipeSensorPart.PRESSURE ? "Reads pipe pressure (0–5 V signal)."
+            : sensing == PipeSensorPart.TEMPERATURE ? "Reads pipe temperature (0–5 V signal)." : "Reads steam quality (0–5 V signal)."));
+        mods.eln.client.ItemTooltips.detail(list, mods.eln.i18n.I18N.tr("Right-click with empty hand to cycle full scale."));
+        return list;
     }
 }

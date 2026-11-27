@@ -19,8 +19,11 @@ public class VariableTransformerDescriptor extends TransformerDescriptor {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("A signal on its front taps the secondary:\n0 V one turn, 5 V every turn.\nAlways isolated.").split("\n"));
+        list.add(tr("Variable DC-DC transformer controlled by a 0–5 V signal (always isolated)."));
+        mods.eln.client.ItemTooltips.detail(list,
+            tr("0 V selects 1 secondary turn; 5 V selects all turns."),
+            tr("Exceeding the core's V/turn rating saturates and burns it."));
     }
 }

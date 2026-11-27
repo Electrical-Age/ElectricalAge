@@ -57,7 +57,6 @@ public class FloppyItem extends Item {
                                 java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
         out.accept(Component.literal(disk(stack) == null ? "Blank" : writeProtected(stack) ? "Write-protected" : "Writable")
             .withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.literal("Right-click to flip the write-protect tab; rename it on an anvil to label it")
-            .withStyle(net.minecraft.ChatFormatting.GRAY));
+        out.accept(mods.eln.client.ItemTooltips.hintLine("Right-click: toggle write-protect | Anvil: label."));
     }
 }

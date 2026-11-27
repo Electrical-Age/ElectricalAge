@@ -193,7 +193,12 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Can break an electrical circuit\ninterrupting the current.").split("\n"));
+        if (signalSwitch) {
+            list.add(tr("Opens or closes a signal circuit."));
+        } else {
+            list.add(tr("Switches a power circuit on or off (%1$V, %2$W).",
+                Utils.plotValue(nominalVoltage), Utils.plotValue(nominalPower)));
+        }
     }
 
     @Override

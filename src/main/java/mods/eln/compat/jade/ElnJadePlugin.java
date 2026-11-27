@@ -147,7 +147,7 @@ public class ElnJadePlugin implements IWailaPlugin {
 
         @Override
         public void appendServerData(CompoundTag tag, BlockAccessor acc) {
-            // (all of it: the client cuts it to the headline unless the player sneaks or the config asks for details)
+            // (all of it: the client cuts to elnHead unless the player sneaks or probe.details is enabled)
             var owner = ghostOwner(acc);
             Map<String, String> m;
             try {
@@ -157,31 +157,31 @@ public class ElnJadePlugin implements IWailaPlugin {
             }
             String title = owner != null ? owner.node.pickItem(null, acc.getLevel()).getHoverName().getString() : title(acc);
             if (title != null) tag.putString("elnTitle", title);
+            ProbeLines p = ProbeLines.from(m, HEADLINE);
             var b = owner != null ? owner : burnable(acc);
-            if (b != null && b.isBurnt()) {   // (first, in the headline: what happened and what repairs it)
-                var lines = new java.util.LinkedHashMap<String, String>();
-                lines.put(mods.eln.i18n.I18N.tr("Burnt out"), b.getBurnt().text);
-                lines.put(mods.eln.i18n.I18N.tr("Repair with"), b.getBurntKind() == mods.eln.sim.process.destruct.Failure.Kind.CABLE
-                    ? mods.eln.i18n.I18N.tr("a matching cable kit (right-click the cable)") : "1 " + mods.eln.sim.process.destruct.Repair.partName(b));
-                if (m != null) lines.putAll(m);
-                m = lines;
+            if (b != null && b.isBurnt()) {   // (burnt: only cause + repair in headline; dead-device lines in details)
+                ProbeLines burnt = ProbeLines.of();
+                burnt.headline(mods.eln.i18n.I18N.tr("Burnt out"), b.getBurnt().text);
+                burnt.headline(mods.eln.i18n.I18N.tr("Repair with"), b.getBurntKind() == mods.eln.sim.process.destruct.Failure.Kind.CABLE
+                    ? mods.eln.i18n.I18N.tr("matching cable kit") : "1 " + mods.eln.sim.process.destruct.Repair.partName(b));
+                burnt.addAllDetail(p);
+                p = burnt;
             }
-            // (first of all, in red: Baughn 1573807986227544245; AdventurAgent read past it in grey)
+            // (first of all, in red: keep exact callout as requested)
             var at = alarmBlocks(acc, owner);
             if (at.stream().anyMatch(mods.eln.fluid.FluidWorld::solverFailedAt))
                 tag.putString("elnAlarm", mods.eln.i18n.I18N.tr("SOLVER FAILED: CALL BAUGHN"));
             else {
-                // (a network too heavy for the server thread, stepped in the background: said too, Baughn 1574029078598778991)
                 String heavy = null;
                 for (long q : at) if (heavy == null) heavy = mods.eln.fluid.FluidWorld.heavyAt(q);
                 if (heavy != null) tag.putString("elnNote", heavy);
             }
-            if (m == null || m.isEmpty()) return;
-            if (owner != null ? !owner.thermalLoadList.isEmpty() : hasHeat(acc)) {   // (the ambient it cools towards: by biome, height, depth; Baughn 2026-10-26)
-                m = new java.util.LinkedHashMap<>(m);
-                m.put(mods.eln.i18n.I18N.tr("Ambient"), mods.eln.misc.Utils.plotCelsius("", mods.eln.sim.Ambient.relative(acc.getLevel(), acc.getPosition())));
+            if (p.isEmpty()) return;
+            if (owner != null ? !owner.thermalLoadList.isEmpty() : hasHeat(acc)) {
+                p.detail(mods.eln.i18n.I18N.tr("Ambient"), mods.eln.misc.Utils.plotCelsius("", mods.eln.sim.Ambient.relative(acc.getLevel(), acc.getPosition())));
             }
-            tag.put("elnProbe", list(m));
+            tag.put("elnProbe", list(p));
+            tag.putInt("elnHead", p.headlineCount());
         }
 
         @Override
@@ -202,8 +202,9 @@ public class ElnJadePlugin implements IWailaPlugin {
             String note = acc.getServerData().getStringOr("elnNote", "");
             if (!note.isEmpty()) tooltip.add(Component.literal(note).withStyle(net.minecraft.ChatFormatting.YELLOW));
             var list = acc.getServerData().getListOrEmpty("elnProbe");
+            int head = acc.getServerData().getIntOr("elnHead", HEADLINE);
             boolean details = details(acc);
-            int n = details ? list.size() : Math.min(HEADLINE, list.size());
+            int n = details ? list.size() : Math.min(head, list.size());
             addLines(tooltip, list, n);
         }
 
@@ -230,7 +231,9 @@ public class ElnJadePlugin implements IWailaPlugin {
                 return;   // (a block mid-change: no lines this time)
             }
             if (m.isEmpty()) return;
-            tag.put("elnMachine", list(m));
+            ProbeLines p = ProbeLines.from(m, HEADLINE);
+            tag.put("elnMachine", list(p));
+            tag.putInt("elnMachineHead", p.headlineCount());
         }
 
         @Override
@@ -239,14 +242,16 @@ public class ElnJadePlugin implements IWailaPlugin {
         }
     }
 
-    /** The lines MachineServer sent, all of them (a machine's are few). */
+    /** The lines MachineServer sent: headline always, buffer & temperature while sneaking or with probe.details. */
     enum MachineClient implements IBlockComponentProvider {
         INSTANCE;
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor acc, IPluginConfig config) {
             var list = acc.getServerData().getListOrEmpty("elnMachine");
-            addLines(tooltip, list, list.size());
+            int head = acc.getServerData().getIntOr("elnMachineHead", HEADLINE);
+            boolean details = details(acc);
+            addLines(tooltip, list, details ? list.size() : Math.min(head, list.size()));
         }
 
         @Override
@@ -257,7 +262,7 @@ public class ElnJadePlugin implements IWailaPlugin {
 
     /** All the lines, not only the headline: sneaking, Jade's details key, or the config probe.details. */
     static boolean details(snownee.jade.api.Accessor<?> acc) {
-        return mods.eln.Eln.wailaEasyMode || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
+        return mods.eln.ElnConfig.probeDetails || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
     }
 
     /** Lines as sent: key TAB value. */
@@ -284,7 +289,9 @@ public class ElnJadePlugin implements IWailaPlugin {
         public void appendServerData(CompoundTag tag, snownee.jade.api.EntityAccessor acc) {
             if (!(acc.getEntity() instanceof mods.eln.oil.TankCart c)) return;
             try {
-                tag.put("elnProbe", list(c.waila()));
+                ProbeLines p = ProbeLines.from(c.waila(), HEADLINE);
+                tag.put("elnProbe", list(p));
+                tag.putInt("elnHead", p.headlineCount());
             } catch (RuntimeException e) {
                 // (a cart mid-change: no lines this time)
             }
@@ -303,8 +310,9 @@ public class ElnJadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, snownee.jade.api.EntityAccessor acc, IPluginConfig config) {
             var list = acc.getServerData().getListOrEmpty("elnProbe");
+            int head = acc.getServerData().getIntOr("elnHead", HEADLINE);
             boolean details = details(acc);
-            addLines(tooltip, list, details ? list.size() : Math.min(HEADLINE, list.size()));
+            addLines(tooltip, list, details ? list.size() : Math.min(head, list.size()));
         }
 
         @Override

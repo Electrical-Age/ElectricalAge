@@ -732,9 +732,9 @@ public final class Wp10bCases {
         public void measure(TestContext ctx) {
             var w = f.getWaila();
             ctx.line("steam explained: furnace " + w + "; boiler " + b.getWaila());
-            ctx.check("furnace Jade: power with its combustion chambers counted", String.valueOf(w.get("Power")).contains("(2 of 4 combustion chambers)"), "" + w.get("Power"));
-            ctx.check("furnace Jade: without a regulator, its gauge controls it", String.valueOf(w.get("Control")).startsWith("its gauge"), "" + w.get("Control"));
-            ctx.check("boiler Jade: where its water boils at its pressure", String.valueOf(b.getWaila().get("Boils at")).contains("°C at its"), "" + b.getWaila().get("Boils at"));
+            ctx.check("furnace Jade: power with its combustion chambers counted", w.containsKey("Thermal power") && "2 / 4".equals(w.get("Chambers")), "" + w);
+            ctx.check("furnace Jade: without a regulator, its gauge controls it", String.valueOf(w.get("Control")).startsWith("Manual ("), "" + w.get("Control"));
+            ctx.check("boiler Jade: where its water boils at its pressure", String.valueOf(b.getWaila().get("Boils at")).endsWith("°C"), "" + b.getWaila().get("Boils at"));
         }
     }
 

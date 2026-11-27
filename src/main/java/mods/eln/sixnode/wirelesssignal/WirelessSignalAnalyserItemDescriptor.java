@@ -12,7 +12,10 @@ import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
+
+import static mods.eln.i18n.I18N.tr;
 
 public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamageDescriptor {
 
@@ -21,9 +24,14 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
     }
 
     @Override
+    public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(tr("Scans nearby wireless signal channels on right-click."));
+    }
+
+    @Override
     public boolean onItemUse(ItemStack stack, Player player, Level world, int x, int y, int z, int side, float vx, float vy, float vz) {
         if (world.isClientSide()) return true;
-        Utils.sendMessage(player, "-------------------");
         Direction dir = Direction.fromIntMinecraftSide(side);
         Coordonate c = new Coordonate(x, y, z, world);
         c.move(dir);
@@ -35,6 +43,11 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
 
         BiggerAggregator aggregator = new BiggerAggregator();
 
+        if (txSet.isEmpty()) {
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("No wireless signals in range.")));
+            return true;
+        }
+
         for (Entry<String, HashSet<IWirelessSignalTx>> entrySet : txSet.entrySet()) {
             HashSet<IWirelessSignalTx> set = entrySet.getValue();
             double strength = 100000;
@@ -42,21 +55,11 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
                 double temp = txStrength.get(oneTx);
                 if (temp < strength) strength = temp;
             }
-            Utils.sendMessage(player, entrySet.getKey() + " Strength=" + String.format("%2.1f", strength) + " Value=" + String.format("%3.0f", aggregator.aggregate(set) * 100) + "%");
+            Utils.sendMessage(player, tr("%1$: %2$% (strength %3$)",
+                entrySet.getKey(),
+                String.format("%.0f", aggregator.aggregate(set) * 100),
+                String.format("%.1f", strength)));
         }
-
-        if (txSet.isEmpty()) {
-            Utils.sendMessage(player, "No wireless signal in area!");
-        }
-        /*ArrayList<WirelessSignalInfo> list = WirelessSignalRxProcess.getTxList(c);
-		int idx = 0;
-		for (WirelessSignalInfo e : list) {
-			Utils.sendMessage(player, e.tx.getChannel() + " Strength=" + String.format("%2.1f", e.power) + " Value=" + String.format("%2.1fV", e.tx.getValue() * Eln.SVU));
-			idx++;
-		}
-		if (list.size() == 0) {
-			Utils.sendMessage(player, "No wireless signal in area!");
-		}*/
         return true;
     }
 }

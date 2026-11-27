@@ -264,13 +264,13 @@ public class ColumnBaseElement extends TransparentNodeElement implements mods.el
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Status"), status);
-        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
-        info.put(I18N.tr("Crude"), mods.eln.sim.fluid.EaUnits.tank(tanks.crude(), ColumnDescriptor.CRUDE_MB));
-        info.put(I18N.tr("Residue"), mods.eln.sim.fluid.EaUnits.tank(tanks.residue(), ColumnDescriptor.RESIDUE_MB));
-        info.put(I18N.tr("Segments"), String.valueOf(segments.size()));
-        info.put(I18N.tr("Crude distilled"), String.format("%.1f mB/s", crudeRate));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("State"), I18N.tr(status));
+        info.headline(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
+        info.headline(I18N.tr("Crude"), mods.eln.sim.fluid.EaUnits.tank(tanks.crude(), ColumnDescriptor.CRUDE_MB));
+        info.detail(I18N.tr("Crude distilled"), String.format("%.1f mB/s", crudeRate));
+        info.detail(I18N.tr("Residue"), mods.eln.sim.fluid.EaUnits.tank(tanks.residue(), ColumnDescriptor.RESIDUE_MB));
+        info.detail(I18N.tr("Segments"), String.valueOf(segments.size()));
         return info;
     }
 }

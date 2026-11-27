@@ -256,12 +256,19 @@ public class AutoMinerElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new java.util.LinkedHashMap<String, String>();
-        // where to connect: its ports are two of its ghost blocks, which Jade can't name (Baughn: a hint)
-        info.put(I18N.tr("Power"), I18N.tr("at the two lower corner blocks on its console side, from their side faces, now %1$",
-            Utils.plotVolt("", inPowerLoad.getU()).trim()));
-        info.put(I18N.tr("Silk touch"), slowProcess.silkTouch ? I18N.tr("Yes") : I18N.tr("No"));
-        info.put(I18N.tr("Depth"), Utils.plotValue(slowProcess.pipeLength, "m "));
-        return info;
+        String state = switch (slowProcess.job) {
+            case ore -> I18N.tr("Mining ore");
+            case pipeAdd -> I18N.tr("Drilling down");
+            case pipeRemove -> I18N.tr("Retracting pipe");
+            case done -> I18N.tr("Done");
+            case full -> I18N.tr("Buffer full");
+            case chestFull -> I18N.tr("Output chest missing or full");
+            default -> I18N.tr("Idle");
+        };
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("State"), state)
+            .headline(I18N.tr("Depth"), Utils.plotValue(slowProcess.pipeLength, "m"))
+            .headline(I18N.tr("Power"), Utils.plotVolt("", inPowerLoad.getU()).trim())
+            .detail(I18N.tr("Silk touch"), slowProcess.silkTouch ? I18N.tr("Yes") : I18N.tr("No"));
     }
 }

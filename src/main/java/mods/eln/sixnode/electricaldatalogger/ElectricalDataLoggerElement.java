@@ -288,19 +288,19 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        if (inputs.length == 1) info.put(I18N.tr("Input"), Utils.plotVolt("", inputGate.getU()));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        if (inputs.length == 1) info.headline(I18N.tr("Input"), Utils.plotVolt("", inputGate.getU()));
         else {
             // (A red, B blue, C green)
             String[] col = {"\u00A7c", "\u00A79", "\u00A7a"};
             StringBuilder b = new StringBuilder();
             for (int c = 0; c < inputs.length; c++) b.append(Utils.plotVolt(col[c % 3], inputs[c].getU()));
-            info.put(I18N.tr("Inputs"), b.toString());
+            info.headline(I18N.tr("Inputs"), b.toString());
         }
         if (inVoxelBlock())
             for (int c = 0; c < busChannels.length; c++)
                 if (busChannels[c] != mods.eln.bus.BusChannel.UNUSED)
-                    info.put(I18N.tr("Bus") + (busChannels.length > 1 ? " " + (char) ('A' + c) : ""),
+                    info.headline(I18N.tr("Bus") + (busChannels.length > 1 ? " " + (char) ('A' + c) : ""),
                         mods.eln.bus.BusChannel.label(busChannels[c]) + " " + Utils.plotVolt("", port.read(busChannels[c]) * mods.eln.Eln.SVU));
         return info;
     }

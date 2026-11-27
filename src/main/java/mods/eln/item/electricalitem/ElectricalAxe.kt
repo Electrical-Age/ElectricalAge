@@ -57,7 +57,8 @@ class ElectricalAxe(name: String, strengthOn: Float, strengthOff: Float,
     private fun setCapitation(p: Player?, stack: ItemStack, capitation: Boolean) {
         editNbt(stack) { it.putBoolean("capitation", capitation) }
         if (p != null) {
-            p.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Set treecapitation to $capitation"))
+            p.sendOverlayMessage(net.minecraft.network.chat.Component.literal(
+                if (capitation) tr("Tree felling: on") else tr("Tree felling: off")))
         }
     }
 

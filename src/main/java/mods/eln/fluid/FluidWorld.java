@@ -313,8 +313,8 @@ public final class FluidWorld implements IProcess {
                     heavyAt.values().removeIf(t -> now - t > 5_000);
                     heavyNote.keySet().retainAll(heavyAt.keySet());
                 }
-                String note = n.span() > 1 ? mods.eln.i18n.I18N.tr("Heavy fluid network: it updates every %1$ ticks", n.span())
-                    : mods.eln.i18n.I18N.tr("Heavy fluid network: stepped in the background");
+                String note = n.span() > 1 ? mods.eln.i18n.I18N.tr("Heavy pipe network (updates every %1$ ticks)", n.span())
+                    : mods.eln.i18n.I18N.tr("Heavy pipe network (background)");
                 java.util.Set<FluidNode> in = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
                 in.addAll(n.nodes);
                 for (FluidDevice d : devices)

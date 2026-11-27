@@ -26,15 +26,15 @@ public class SteamGeneratorScreen extends ElnScreen {
     @Override
     protected void init() {
         super.init();
-        button("external", () -> render.controlExternal ? tr("External control (signal, left side)") : tr("Internal control"),
-            render::clientToggleControl);
+        button("external", () -> render.controlExternal ? tr("External control") : tr("Internal control"),
+            render::clientToggleControl, tr("Left-side signal"));
         throttle = slider("throttle", 0, 1, 0.01, Math.max(0, render.throttle),
             v -> Component.literal(tr("Throttle: %1$", mods.eln.misc.Utils.plotPercent(v))),
             v -> render.clientSetThrottle((float) v));
         target = slider("target", SteamValveControl.TARGET_MIN_BAR, render.targetMaxBar, 0.5, Math.max(1, render.targetBar),
-            v -> Component.literal(tr("Hold the inlet at: %1$ bar", String.format("%.1f", v)) + "  (" + tr("now %1$ bar", String.format("%.1f", render.inletBar)) + ")"),
+            v -> Component.literal(tr("Target pressure: %1$ bar (now %2$)", String.format("%.1f", v), String.format("%.1f", render.inletBar))),
             v -> render.clientSetTarget((float) v));
-        text("valve", () -> tr("Steam valve may open: %1$", mods.eln.misc.Utils.plotPercent(render.limit)));
+        text("valve", () -> tr("Valve limit: %1$", mods.eln.misc.Utils.plotPercent(render.limit)));
         render.throttleNew = render.targetNew = false;
         update();
     }

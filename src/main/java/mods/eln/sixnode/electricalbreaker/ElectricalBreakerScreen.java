@@ -22,25 +22,25 @@ public class ElectricalBreakerScreen extends ElnScreen {
     @Override
     protected void init() {
         super.init();
-        text("maxl", () -> "max");
-        text("minl", () -> "min");
+        text("maxl", () -> tr("Max"));
+        text("minl", () -> tr("Min"));
         text("maxu", () -> "V");
         text("minu", () -> "V");
         field("max", () -> num(render.uMax), v -> {
             float f = EaField.parse(v);
             if (!Float.isNaN(f)) render.clientSetVoltageMax(f);
-        }, tr("Maximum voltage before cutting off"));
+        }, tr("Max cut-off voltage"));
         field("min", () -> num(render.uMin), v -> {
             float f = EaField.parse(v);
             if (!Float.isNaN(f)) render.clientSetVoltageMin(f);
-        }, tr("Minimum voltage before cutting off"));
-        text("tripl", () -> tr("trip"));
+        }, tr("Min cut-off voltage"));
+        text("tripl", () -> tr("Trip"));
         text("tripu", () -> "A");
         field("trip", () -> num(render.tripAmps), v -> {
             float f = EaField.parse(v);
             if (!Float.isNaN(f)) render.clientSetTripAmps(f);
-        }, tr("Current it trips at (0: as a Medium Voltage Cable)"));
+        }, tr("Trip current (0 = default)"));
         button("switch", () -> render.switchState ? tr("On") : tr("Off"), render::clientToogleSwitch,
-            tr("Toggle switch (it cuts off again while the voltage is outside min..max)"));
+            tr("Toggle breaker"));
     }
 }

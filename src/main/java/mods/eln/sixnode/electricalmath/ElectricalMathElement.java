@@ -277,21 +277,21 @@ public class ElectricalMathElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        // the output's expression only (Baughn 2026-10-31: the whole program filled the tooltip)
-        info.put(I18N.tr("Output"), Program.outputLine(expression));
-        // (A red, B blue, C green: Baughn 2026-10-30)
-        info.put(I18N.tr("Input voltages"),
-            Utils.plotVolt("\u00A7c", gateInput[0].getU()) +
-                Utils.plotVolt("\u00A79", gateInput[1].getU()) +
-                Utils.plotVolt("\u00A7a", gateInput[2].getU()));
-        info.put(I18N.tr("Output voltage"), Utils.plotVolt("", gateOutput.getU()));
+        var info = mods.eln.compat.jade.ProbeLines.of()
+            // the output's expression only (Baughn 2026-10-31: the whole program filled the tooltip)
+            .headline(I18N.tr("Output"), Program.outputLine(expression))
+            // (A red, B blue, C green: Baughn 2026-10-30)
+            .headline(I18N.tr("Input voltages"),
+                Utils.plotVolt("\u00A7c", gateInput[0].getU()) +
+                    Utils.plotVolt("\u00A79", gateInput[1].getU()) +
+                    Utils.plotVolt("\u00A7a", gateInput[2].getU()))
+            .headline(I18N.tr("Output voltage"), Utils.plotVolt("", gateOutput.getU()));
         if (port.claims() != 0) {
             // the channels its program uses, by number and name; whether its pin is on a bus
             StringBuilder b = new StringBuilder();
             for (int c = 0; c < mods.eln.bus.BusChannel.COUNT; c++)
                 if ((port.claims() >> c & 1) != 0) b.append(b.isEmpty() ? "" : ", ").append(mods.eln.bus.BusChannel.label(c));
-            info.put(I18N.tr("Bus channels"), b + (port.bus() == null ? ", " + I18N.tr("no bus") : ""));
+            info.detail(I18N.tr("Bus channels"), b + (port.bus() == null ? " (" + I18N.tr("not connected") + ")" : ""));
         }
         return info;
     }

@@ -42,7 +42,7 @@ public class SteamInjectionElement extends TransparentNodeElement implements Flu
     /** The lake under its well (0: none), its depth (blocks); steam injected now (kg/s), totals since loaded (kg). */
     int source, depth;
     double kgPerS, totalKg;
-    String lake = "no well casing down to an oil lake", why = "";
+    String lake = "No well casing", why = "";
     int look;
 
     public SteamInjectionElement(TransparentNode node, TransparentNodeDescriptor d) {
@@ -67,7 +67,7 @@ public class SteamInjectionElement extends TransparentNodeElement implements Flu
         Reservoir r = source > 0 ? ReservoirData.get(level).byId(source) : null;
         kgPerS = 0;
         if (!OilRecovery.recovers(level, r)) {
-            lake = OilRecovery.oil(r) ? "a surface pond: it doesn't take steam" : "no well casing down to an oil lake";
+            lake = OilRecovery.oil(r) ? "Surface pond (cannot inject)" : "No well casing";
             why = "";
             return;
         }
@@ -75,9 +75,9 @@ public class SteamInjectionElement extends TransparentNodeElement implements Flu
         lake = OilRecovery.describe(level, r);
         double over = inlet.P() - neededPa(depth);
         // (steam raises the seepage, which is lerped by the lake's fill: of no use only in a full lake; Baughn 2026-11-11)
-        if (r.amount() >= r.capacity()) why = "the lake is full: no steam needed";
-        else if (rec.boost(r) >= OilRecovery.BOOST_CAP_MB - 1) why = "the lake has all the steam it can take";
-        else if (over <= 0) why = String.format("needs %.1f bar to push down %d blocks", neededPa(depth) / 1e5, depth);
+        if (r.amount() >= r.capacity()) why = "Lake full";
+        else if (rec.boost(r) >= OilRecovery.BOOST_CAP_MB - 1) why = "At max steam boost";
+        else if (over <= 0) why = String.format("Needs %.1f bar (%d blocks deep)", neededPa(depth) / 1e5, depth);
         else {
             double kg = Math.min(Math.min(MAX_KG_S, INJECT_KG_PER_S_PA * over) * dt, EaUnits.steamAvailable(inlet));
             kg = rec.inject(level, r, kg);
@@ -167,10 +167,10 @@ public class SteamInjectionElement extends TransparentNodeElement implements Flu
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new LinkedHashMap<>();
-        info.put(I18N.tr("Lake"), lake);
-        info.put(I18N.tr("Steam in"), why.isEmpty() ? String.format("%.1f g/s", kgPerS * 1000) : why);
-        if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar of %s", inlet.P() / 1e5, EaUnits.contents(inlet)));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("Lake"), I18N.tr(lake));
+        info.headline(I18N.tr("Steam in"), why.isEmpty() ? String.format("%.1f g/s", kgPerS * 1000) : I18N.tr(why));
+        if (inlet != null) info.headline(I18N.tr("Inlet pressure"), String.format("%.2f bar of %s", inlet.P() / 1e5, EaUnits.contents(inlet)));
         return info;
     }
 }

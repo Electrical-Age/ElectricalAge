@@ -46,8 +46,7 @@ public class GroundRadarScreen extends ElnScreen {
         });
         button("up", () -> "▲", () -> layer = Math.max(0, layer - 1), tr("Shallower"));
         button("down", () -> "▼", () -> layer = Math.min(layers() - 1, layer + 1), tr("Deeper"));
-        button("scan", () -> tr("Scan"), render::scan, tr("Scan the ground under the radar"),
-            tr("Wider and finer scans cost more energy, and take longer on the same batteries"));
+        button("scan", () -> tr("Scan"), render::scan, tr("Start ground scan (cost shown below)"));
         slider("range", 1, GroundRadarDescriptor.MAX_RANGE, 1, render.range,
             v -> Component.literal(tr("Range: %1$ m across", GroundRadarDescriptor.cellsAcross((int) Math.round(v)) * GroundScan.TOP_CELL)),
             v -> render.setRange((int) Math.round(v)));
@@ -57,11 +56,11 @@ public class GroundRadarScreen extends ElnScreen {
         field("addr", () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
             float f = mods.eln.client.gui.EaField.parse(v);
             render.clientSendFloat(GroundRadarElement.ADDRESS_ID, Float.isNaN(f) ? 0 : Math.round(f));
-        }, tr("Its RS485 address, 17 to 255, on its back. Registers: 0 state, 1 progress, 2 range, 3 detail, 4 layers, 5 cells across, 6-8 a cell (layer, x, z), 9 its density, 10 flags (1 liquid, 2 oil, 4 lava, 8 structure, 16 unknown, 32 sky), 11 signal, 12 its layer's depth, 13 cell size, 14 first oil, 15 first void, 16 charge, 17 age. Write 20 to scan, 21 or 22 with a layer for its densities (a byte a cell, 255 = 8.5 g/cm3) or flags as data packets."));
-        text("busstate", () -> render.address == 0 ? tr("No address (17 to 255)") : render.onBus ? tr("On a bus") : tr("No bus"),
+        }, tr("RS485 address (17–255)"));
+        text("busstate", () -> render.address == 0 ? tr("No address (17–255)") : render.onBus ? tr("On a bus") : tr("No bus"),
             () -> render.address != 0 && render.onBus ? OK_TEXT : LABEL);
         if (render.desc.goggles) button("view", () -> tr("Enter view"), this::enterView,
-            tr("Fly through the picture (the goggles): move as in creative flight, the mouse looks, Esc comes back."));
+            tr("3D radar view (Esc to exit)"));
         text("depth", this::depthText);
         text("status", this::statusText);
     }
@@ -74,7 +73,7 @@ public class GroundRadarScreen extends ElnScreen {
         if (goggles != null) return;
         var player = net.minecraft.client.Minecraft.getInstance().player;
         if (render.picture == null || render.progress >= 0) {
-            if (player != null) player.sendOverlayMessage(Component.literal(render.progress >= 0 ? tr("Wait for the scan to finish") : tr("Scan first: there is nothing to see yet")));
+            if (player != null) player.sendOverlayMessage(Component.literal(render.progress >= 0 ? tr("Wait for the scan to finish") : tr("No scan data yet")));
             return;
         }
         goggles = new GogglesView(render, render.picture);

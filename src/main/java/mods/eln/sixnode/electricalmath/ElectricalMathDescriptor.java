@@ -159,7 +159,7 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Calculates an output signal from\n3 inputs (A, B, C) using an equation.").split("\n"));
+        list.add(tr("Computes an output signal from inputs A, B and C using a formula."));
     }
 
     // 26.x port: top() removed (client rendering; redone in P3)

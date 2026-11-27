@@ -165,6 +165,15 @@ public class PowerSocketElement extends SixNodeElement {
     }
 
     @Override
+    public java.util.Map<String, String> getWaila() {
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(mods.eln.i18n.I18N.tr("Channel"), (supply != null ? "\u00A7a" : "\u00A7c") + channel)
+            .headline(mods.eln.i18n.I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()))
+            .headline(mods.eln.i18n.I18N.tr("Power"), Utils.plotPower("", powerLoad.getU() * powerLoad.getCurrent()))
+            .detail(mods.eln.i18n.I18N.tr("Current"), Utils.plotAmpere("", powerLoad.getCurrent()));
+    }
+
+    @Override
     public String thermoMeterString() {
         return null;
     }

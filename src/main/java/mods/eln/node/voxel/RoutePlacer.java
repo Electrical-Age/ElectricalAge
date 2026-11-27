@@ -215,12 +215,12 @@ public final class RoutePlacer {
      * click, the player further from its last point than a full kit reaches, another dimension.
      */
     static String lapse(Plan plan, long now, boolean holdingItsKit, boolean sameDim, Vec3 at) {
-        if (!sameDim) return "another dimension";
-        if (!holdingItsKit) return "another item in hand";
-        if (now - plan.touched > IDLE_TICKS) return "a minute without a click";
+        if (!sameDim) return mods.eln.i18n.I18N.tr("changed dimension");
+        if (!holdingItsKit) return mods.eln.i18n.I18N.tr("kit unequipped");
+        if (now - plan.touched > IDLE_TICKS) return mods.eln.i18n.I18N.tr("timed out");
         CableRouter.End last = plan.last();
         double dx = at.x * 16 - last.x(), dy = at.y * 16 - last.y(), dz = at.z * 16 - last.z();
-        if (dx * dx + dy * dy + dz * dz > (double) KitItem.MAX * KitItem.MAX) return "too far from it";
+        if (dx * dx + dy * dy + dz * dz > (double) KitItem.MAX * KitItem.MAX) return mods.eln.i18n.I18N.tr("too far");
         return null;
     }
 
@@ -231,7 +231,7 @@ public final class RoutePlacer {
         String why = lapse(plan, now, plan.laidBy(KitSupply.held(p)), plan.dim == p.level().dimension(), p.position());
         if (why == null) return;
         PLANS.remove(p.getUUID());
-        p.sendOverlayMessage(Component.literal(plan.kind.title() + " route dropped (" + why + ")"));
+        p.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("%1$ route cancelled (%2$)", plan.kind.title(), why)));
     }
 
     static boolean sameSpot(CableRouter.End a, CableRouter.End b) {
@@ -268,13 +268,13 @@ public final class RoutePlacer {
         boolean lapsed = plan != null && lapse(plan, now, true, plan.dim == level.dimension(), player.position()) != null;
         if (plan != null && (other || lapsed)) {
             PLANS.remove(id);
-            if (other) player.sendOverlayMessage(Component.literal(k.title() + " route cancelled (another kind of " + k.noun + " in hand)"));
+            if (other) player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("%1$ route cancelled", k.title())));
             plan = null;
         }
         if (plan != null) plan.touched = now;
         if (sneak) return undo(player, level);
         if (!CablePlacer.reachable(player, pos, hit)) {
-            KitPreview.note(player, "Out of reach");
+            KitPreview.note(player, mods.eln.i18n.I18N.tr("Out of reach"));
             return true;
         }
         if (plan == null && k.repair(player, level, pos, hit, kit)) return true;
@@ -288,10 +288,10 @@ public final class RoutePlacer {
             Plan p = new Plan(k, tier, spec, at, c.join(), level.dimension());
             p.touched = now;
             PLANS.put(id, p);
-            player.sendOverlayMessage(Component.literal(k.title() + " route started. Click waypoints, then " + k.finishAt + "."));
+            player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("%1$ route started", k.title())));
             return true;
         }
-        String hint = ". " + kit.undoSentence();   // (wording: Neon, 2026-11-21)
+        String hint = ". " + kit.undoSentence();
         String from = plan.startJoin != null ? "from a " + k.noun + ", " : "";
         boolean again = again(plan, c);
         String refused = startRefusal(plan, c, again, kit);
@@ -304,13 +304,11 @@ public final class RoutePlacer {
             long tRoute = System.nanoTime();
             Routed<P> r = route(k, level, plan, null, null);
             KitPreview.slow("waypoint route (server thread)", tRoute, from + Router.LAST_EXPANSIONS.get() + " expansions");
-            // (a waypoint still on the old run the route starts on lays nothing yet: taken, not refused as INSIDE)
             if (r.error() != null && !INSIDE.equals(r.error())) {
                 plan.waypoints.remove(plan.waypoints.size() - 1);
                 KitPreview.note(player, unrouted(r) + hint);
             } else {
-                player.sendOverlayMessage(Component.literal(String.format("Waypoint %d: %.1f blocks so far", plan.waypoints.size(), r.length() / 16.0)
-                    + ". Click it again to end there."));
+                player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Waypoint %1$ (%2$ blocks)", plan.waypoints.size(), String.format("%.1f", r.length() / 16.0))));
                 show(player, level, k, r);
             }
             return true;
@@ -329,20 +327,19 @@ public final class RoutePlacer {
         boolean creative = player.isCreative();
         if (!creative && kit.length() < len) {
             if (again) plan.waypoints.add(end);
-            player.sendOverlayMessage(Component.literal(String.format("This route takes %.1f blocks of %s; the kit holds %.1f", len / 16.0, k.noun,
-                kit.length() / 16.0)));
+            player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Need %1$ blocks (kit has %2$)", String.format("%.1f", len / 16.0), String.format("%.1f", kit.length() / 16.0))));
             show(player, level, k, r);
             return true;
         }
         String err = k.lay(level, plan.tier, plan.spec, r, plan.startJoin, c.join(), player);
         if (err != null) {
             if (again) plan.waypoints.add(end);
-            KitPreview.note(player, "Can't lay it: " + err);
+            KitPreview.note(player, mods.eln.i18n.I18N.tr("Can't lay: %1$", err));
             return true;
         }
         PLANS.remove(id);
         if (!creative) kit.take(len);
-        player.sendOverlayMessage(Component.literal(String.format("Laid %.1f blocks of %s", len / 16.0, k.noun)));
+        player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Laid %1$ blocks of %2$", String.format("%.1f", len / 16.0), k.noun)));
         return true;
     }
 
@@ -352,13 +349,11 @@ public final class RoutePlacer {
         if (plan == null) return false;
         if (plan.waypoints.isEmpty()) {
             PLANS.remove(player.getUUID());
-            KitPreview.note(player, plan.kind.title() + " route cancelled");
+            KitPreview.note(player, mods.eln.i18n.I18N.tr("%1$ route cancelled", plan.kind.title()));
         } else {
             plan.waypoints.remove(plan.waypoints.size() - 1);
-            // (on the note line: the preview's next line takes the action bar at once, and a waypoint on the way to the
-            // aim changes neither the route drawn nor its length; AdventurAgent read an Undo as doing nothing)
-            KitPreview.note(player, "Waypoint taken back (" + plan.waypoints.size() + " left)");
-            redraw(plan.kind, player, level, plan);   // (and the route left drawn again)
+            KitPreview.note(player, mods.eln.i18n.I18N.tr("Waypoint undone (%1$ left)", plan.waypoints.size()));
+            redraw(plan.kind, player, level, plan);
         }
         return true;
     }

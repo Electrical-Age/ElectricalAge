@@ -27,7 +27,7 @@ public class EnergyMeterScreen extends ElnScreen {
         this.render = (EnergyMeterRender) render;
     }
 
-    static final String[] ENERGY_UNITS = {"J", "KJ", "MJ", "GJ"}, TIME_UNITS = {"H", "D"};
+    static final String[] ENERGY_UNITS = {"J", "kJ", "MJ", "GJ"}, TIME_UNITS = {"h", "d"};
 
     boolean hasWheels() {
         return render.descriptor.timeNumberWheel != null && render.descriptor.timeNumberWheel.length != 0;
@@ -40,30 +40,30 @@ public class EnergyMeterScreen extends ElnScreen {
         shownMode = null;
         isLogged = render.password == null || render.password.isEmpty();
         password = field("password", () -> "", v -> {
-        }, tr("Enter password"));
-        button("password", () -> isLogged ? tr("Change password") : tr("Try password"), () -> {
+        }, tr("Password"));
+        button("password", () -> isLogged ? tr("Change password") : tr("Unlock"), () -> {
             if (isLogged) render.clientSetString(EnergyMeterElement.clientPasswordId, password.getValue());
             else if (password.getValue().equals(render.password)) isLogged = true;
         });
-        locked.add(button("state", () -> render.switchState ? tr("is on") : tr("is off"),
+        locked.add(button("state", () -> render.switchState ? tr("Output: On") : tr("Output: Off"),
             () -> render.clientSend(EnergyMeterElement.clientToggleStateId)));
         mode = button("mode", () -> render.mod == EnergyMeterElement.Mod.ModPrepay ? tr("Prepay Mode") : tr("Counter Mode"),
             () -> render.clientSetString(EnergyMeterElement.clientModId, (render.mod == EnergyMeterElement.Mod.ModPrepay
                 ? EnergyMeterElement.Mod.ModCounter : EnergyMeterElement.Mod.ModPrepay).name()));
         locked.add(mode);
         energy = field("energy", () -> "0", v -> {
-        }, tr("Enter new energy"), tr("value in kJ"));
-        locked.add(button("setenergy", () -> tr("Set energy counter"), () -> {
+        }, tr("Energy (kJ)"));
+        locked.add(button("setenergy", () -> tr("Set energy"), () -> {
             float kj = EaField.parse(energy.getValue());
             if (!Float.isNaN(kj)) render.clientSetDouble(EnergyMeterElement.clientEnergyStackId, kj * 1000.0);
         }));
         eunit = button("eunit", () -> render.energyUnit >= 0 && render.energyUnit < 4 ? ENERGY_UNITS[render.energyUnit] : "??",
-            () -> render.clientSend(EnergyMeterElement.clientEnergyUnitId), tr("Unit of the energy wheels"));
+            () -> render.clientSend(EnergyMeterElement.clientEnergyUnitId), tr("Energy wheel unit"));
         tunit = button("tunit", () -> render.timeUnit >= 0 && render.timeUnit < 2 ? TIME_UNITS[render.timeUnit] : "??",
-            () -> render.clientSend(EnergyMeterElement.clientTimeUnitId), tr("Unit of the time wheels"));
-        locked.add(button("resettime", () -> tr("Reset time counter"), () -> render.clientSend(EnergyMeterElement.clientTimeCounterId)));
-        text("energy", () -> tr("Energy counter: %1$J", (long) render.energyStack));
-        text("time", () -> tr("Time counter: %1$", Utils.plotTime(render.timerCouter)));
+            () -> render.clientSend(EnergyMeterElement.clientTimeUnitId), tr("Time wheel unit"));
+        locked.add(button("resettime", () -> tr("Reset time"), () -> render.clientSend(EnergyMeterElement.clientTimeCounterId)));
+        text("energy", () -> tr("Energy: %1$ J", (long) render.energyStack));
+        text("time", () -> tr("Time: %1$", Utils.plotTime(render.timerCouter)));
         text("power", () -> Utils.plotPower(tr("Power:"), render.power).trim());
         update();
     }
@@ -76,9 +76,9 @@ public class EnergyMeterScreen extends ElnScreen {
         eunit.active = tunit.active = isLogged && hasWheels();
         if (render.mod != shownMode) {
             shownMode = render.mod;
-            String help = tr("Counts the energy conducted from\n§4red§f to §1blue§f.");
+            String help = tr("Measures energy from §4red§f to §1blue§f.");
             if (shownMode == EnergyMeterElement.Mod.ModPrepay)
-                help += "\n\n" + tr("You can set an initial\namount of available energy.\nWhen the counter arrives at 0\nthe contact will be opened.");
+                help += "\n" + tr("Prepay: cuts power when energy reaches 0.");
             mode.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(help)));
         }
     }

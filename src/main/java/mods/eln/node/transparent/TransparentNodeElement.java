@@ -589,8 +589,9 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
     public Map<String, String> getWaila() {
-        Map<String, String> wailaList = new HashMap<String, String>();
-        wailaList.put("Info", multiMeterString(this.front));
+        var wailaList = mods.eln.compat.jade.ProbeLines.of();
+        String info = multiMeterString(this.front);
+        if (info != null && !info.isEmpty()) wailaList.headline("Info", info);
         return wailaList;
     }
 }

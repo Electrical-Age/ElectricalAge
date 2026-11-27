@@ -7,6 +7,6 @@ import net.minecraft.world.item.ItemStack
 class CaseItemDescriptor(name: String) : GenericItemUsingDamageDescriptorUpgrade(name) {
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(I18N.tr("Can be used to encase EA items that support it"))
+        list.add(I18N.tr("Encases compatible Electrical Age devices."))
     }
 }

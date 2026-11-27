@@ -127,7 +127,7 @@ public class SixNode extends Node {
     public boolean createSubBlockAt(ItemStack itemStack, int slot, Direction direction, int ox, int oy, int oz, Player player) {
         if (slot < 0 || slot >= SLOTS || slot < 6 && slot != direction.getInt()) return false;
         if (keptSides[slot] != null) {
-            if (player != null) Utils.sendMessage(player, "This side holds a device this version of Electrical Age cannot load; its data is kept. Break the block to discard it.");
+            if (player != null) Utils.sendMessage(player, mods.eln.i18n.I18N.tr("This side holds a device this version of Electrical Age cannot load; its data is kept. Break the block to discard it."));
             return false;
         }
         SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(itemStack);

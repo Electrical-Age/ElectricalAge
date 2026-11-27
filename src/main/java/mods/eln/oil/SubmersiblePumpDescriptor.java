@@ -81,7 +81,7 @@ public class SubmersiblePumpDescriptor extends TransparentNodeDescriptor impleme
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add(String.format("%.0f V, %.0f W: up to %.0f mB/s of water, against up to %.0f bar", nominalU, nominalP, nominalMbPerS, shutoffPa / 1e5));
-        Collections.addAll(list, tr("Place it in water; the pipe goes on top.\nPower on its sides, a signal on its front sets its speed.").split("\n"));
+        list.add(String.format("Submerged water pump: up to %.0f mB/s, %.0f bar head (%.0f W).", nominalMbPerS, shutoffPa / 1e5, nominalP));
+        mods.eln.client.ItemTooltips.detail(list, tr("Submerge in water. 0–5 V front signal sets speed."));
     }
 }

@@ -81,7 +81,7 @@ public final class Repair {
             b.repair();
             BlockPos pos = new BlockPos(b.getBurnableCoordonate().x, b.getBurnableCoordonate().y, b.getBurnableCoordonate().z);
             player.level().playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.5f, 1.4f);
-            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Repaired."));
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Repaired.")));
             return true;
         }
         player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(describe(b)));
@@ -89,7 +89,7 @@ public final class Repair {
     }
 
     public static String describe(IBurnable b) {
-        return "Burnt out (" + b.getBurnt().text + "). Repair: right-click with 1 " + partName(b) + ".";
+        return mods.eln.i18n.I18N.tr("Burnt out (%1$) — repair with 1 %2$", b.getBurnt().text, partName(b));
     }
 
     /** The repair part's name, "?" if there is none (the action-bar message and Jade). */

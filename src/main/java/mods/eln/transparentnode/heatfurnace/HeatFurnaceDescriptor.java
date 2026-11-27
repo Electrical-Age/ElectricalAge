@@ -112,14 +112,13 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        // (Erisi's chat review: players didn't know how its temperature, a regulator and combustion chambers relate)
-        list.add(tr("Burns fuel into heat, out of its back into a thermal cable or a boiler."));
-        list.add("  " + tr("Power: %1$W, +%2$W per Combustion Chamber in its slot (up to %3$: %4$W)", Utils.plotValue(nominalPower),
-            Utils.plotValue(combustionChamberPower), combustionChamberMax, Utils.plotValue(maxPower())));
-        list.add("  " + tr("Without a regulator its gauge sets the fire; a regulator item holds a set temperature,"));
-        list.add("  " + tr("which it reaches only while its power beats the heat taken from it."));
-        list.add("  " + tr("Its sides take a control signal (External control). Max. temperature: %1$", Utils.plotCelsius(thermal.warmLimit)));
+        list.add(tr("Burns solid fuel into heat (%1$–%2$; max %3$).",
+            Utils.plotPower("", nominalPower).trim(), Utils.plotPower("", maxPower()).trim(), Utils.plotCelsius(thermal.warmLimit)));
+        mods.eln.client.ItemTooltips.detail(list,
+            tr("Up to %1$ Combustion Chambers (+%2$ each).", combustionChamberMax, Utils.plotPower("", combustionChamberPower).trim()),
+            tr("Accepts a Regulator for temperature control, or a 0–5 V external signal."));
     }
 }

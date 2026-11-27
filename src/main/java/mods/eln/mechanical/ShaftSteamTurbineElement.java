@@ -521,33 +521,39 @@ public class ShaftSteamTurbineElement extends SimpleShaftElement implements Flui
     public String status() {
         double rads = getShaft().getRads();
         if (tripped) return I18N.tr("Tripped: overspeed");
-        if (brakeW > 0) return I18N.tr("Braking: wet steam");
+        if (brakeW > 0) return I18N.tr("Braking (wet steam)");
         if (spec.wetBraking && exhaustPiped && exhaustPa() > 3 * spec.ratedExhaustPa)
-            return String.format(I18N.tr("Low vacuum: %.2f bar behind it"), exhaustPa() / 1e5);
+            return String.format(I18N.tr("Low vacuum (%.2f bar)"), exhaustPa() / 1e5);
         if (spec.wetBraking && !exhaustPiped)
-            return String.format(I18N.tr("Venting to air: put a condenser at its %s side"), compass(exhaustSide()));
-        if (inlet == null || steamKgPerS < 1e-4) return controls.limit <= 0.001 ? I18N.tr("Shut: its valve is closed") : I18N.tr("No steam at its inlet");
-        if (controls.isManual()) return I18N.tr("Manual control: no governor or trip");
-        if (rads > RATED_RADS) return I18N.tr("Governing: speed held, valve easing");
+            return I18N.tr("Venting to air");
+        if (inlet == null || steamKgPerS < 1e-4) return controls.limit <= 0.001 ? I18N.tr("Valve shut") : I18N.tr("No steam");
+        if (controls.isManual()) return I18N.tr("Manual control (no governor)");
+        if (rads > RATED_RADS) return I18N.tr("Governing");
         return I18N.tr("Running");
     }
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new java.util.LinkedHashMap<>();
-        info.put(I18N.tr("Status"), status());
-        info.put(I18N.tr("Speed"), Utils.plotRads("", getShaft().getRads()));
-        info.put(I18N.tr("Shaft power"), Utils.plotPower("", shaftW));
-        info.put(I18N.tr("Steam used"), String.format("%.1f g/s", steamKgPerS * 1000));
-        if (inlet != null) info.put(I18N.tr("Inlet pressure"), String.format("%.2f bar of %s", inlet.P() / 1e5, EaUnits.contents(inlet)));
-        info.put(I18N.tr("Exhaust"), exhaustPiped ? String.format("%.2f bar, piped", exhaustPa() / 1e5) : I18N.tr("to the air"));
-        if (inlet != null) info.put(I18N.tr("Work per kg"), String.format("%.0f kJ/kg", jPerKg() / 1000));
-        if (wetShare() > 0.01) info.put(I18N.tr("Water in its way"), String.format("%.0f%%%s", wetShare() * 100,
-            brakeW > 0 ? ", braking " + mods.eln.api.Meters.watts(brakeW) : ""));
-        info.put(I18N.tr("Steam valve"), tripped ? I18N.tr("tripped by overspeed") : Utils.plotPercent(Math.min(gate, controls.limit)));
-        info.put(I18N.tr("Governor"), controls.isManual() ? I18N.tr("off: manual control, no overspeed trip") : I18N.tr("automatic, trips over 880 rad/s"));
-        info.put(I18N.tr("Control"), controls.controlExternal ? String.format("external, %.0f%%", controls.limit * 100)
-            : controls.hasRegulator() ? String.format("holds %.1f bar at the inlet", controls.targetBar) : String.format("throttle %.0f%%", controls.throttle * 100));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("State"), status());
+        info.headline(I18N.tr("Speed"), Utils.plotRads("", getShaft().getRads()));
+        info.headline(I18N.tr("Shaft power"), Utils.plotPower("", shaftW));
+        if (inlet != null) {
+            boolean highP = inlet.P() > 0.85 * spec.burstPa;
+            String pStr = String.format("%.2f bar of %s%s", inlet.P() / 1e5, EaUnits.contents(inlet),
+                highP ? " (" + I18N.tr("near bursting") + ")" : "");
+            if (highP) info.headline(I18N.tr("Inlet pressure"), pStr);
+            else info.detail(I18N.tr("Inlet pressure"), pStr);
+        }
+        info.detail(I18N.tr("Steam used"), String.format("%.1f g/s", steamKgPerS * 1000));
+        info.detail(I18N.tr("Exhaust"), exhaustPiped ? String.format("%.2f bar, %s", exhaustPa() / 1e5, I18N.tr("piped")) : I18N.tr("Venting"));
+        if (inlet != null) info.detail(I18N.tr("Work per kg"), String.format("%.0f kJ/kg", jPerKg() / 1000));
+        if (wetShare() > 0.01) info.detail(I18N.tr("Wet steam"), String.format("%.0f%%%s", wetShare() * 100,
+            brakeW > 0 ? ", " + I18N.tr("braking") + " " + mods.eln.api.Meters.watts(brakeW) : ""));
+        info.detail(I18N.tr("Steam valve"), tripped ? I18N.tr("Tripped (overspeed)") : Utils.plotPercent(Math.min(gate, controls.limit)));
+        info.detail(I18N.tr("Governor"), controls.isManual() ? I18N.tr("Off (manual)") : I18N.tr("Auto (trips >880 rad/s)"));
+        info.detail(I18N.tr("Control"), controls.controlExternal ? String.format(I18N.tr("External (%.0f%%)"), controls.limit * 100)
+            : controls.hasRegulator() ? String.format(I18N.tr("Regulator (%.1f bar)"), controls.targetBar) : String.format(I18N.tr("Throttle (%.0f%%)"), controls.throttle * 100));
         return info;
     }
 }

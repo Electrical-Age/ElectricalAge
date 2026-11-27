@@ -209,7 +209,7 @@ public class BusModuleElement extends SixNodeElement {
         if (!(mods.eln.item.BrushDescriptor.getDescriptor(stack) instanceof mods.eln.item.BrushDescriptor brush))
             return super.onBlockActivated(player, side, vx, vy, vz);
         int i = terminalAt(vx, vy, vz);
-        if (i == BUS_PIN) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("That is the bus pin: brush a terminal to tune it")));
+        if (i == BUS_PIN) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("Bus pin — brush a terminal instead.")));
         if (i < 0) return true;
         int c = BusChannel.fromBrush(brush.getColor(stack));
         if (c != channels[i] && brush.use(stack, player)) setChannel(i, c);
@@ -313,13 +313,13 @@ public class BusModuleElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new LinkedHashMap<>();
+        var info = mods.eln.compat.jade.ProbeLines.of();
         Bus b = port.bus();
-        info.put(I18N.tr("Bus"), b == null ? I18N.tr("no bus") : I18N.tr("on a bus"));
+        info.headline(I18N.tr("Bus"), b == null ? I18N.tr("Not connected") : I18N.tr("Connected"));
         // terminals by their number, 1 to 9; channels by number and name, 0 to 15
         for (int i = 0; i < TERMINALS; i++) {
             if (channels[i] == BusChannel.UNUSED) continue;
-            info.put(I18N.tr("Terminal %1$", i + 1), BusChannel.label(channels[i]) + ", " + (out[i] ? I18N.tr("out") : I18N.tr("in")) + " "
+            info.detail(I18N.tr("Terminal %1$", i + 1), BusChannel.label(channels[i]) + ", " + (out[i] ? I18N.tr("out") : I18N.tr("in")) + " "
                 + Utils.plotVolt("", gates[i].getU()));
         }
         return info;

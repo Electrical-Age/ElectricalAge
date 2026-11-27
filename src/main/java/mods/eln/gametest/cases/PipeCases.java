@@ -464,8 +464,10 @@ public final class PipeCases {
             var w1 = cn.getWaila(false, 1);
             ctx.line("jade aimed cable: part 0 " + w0 + "; part 1 " + w1 + "; none " + cn.getWaila(false, -1));
             ctx.check("the multimeter on each cable reads that cable", !cn.multiMeterString(0).equals(cn.multiMeterString(1)), cn.multiMeterString(0) + " / " + cn.multiMeterString(1));
-            ctx.check("Jade on each of two cables in a block shows only that cable", w0.size() == 1 && w1.size() == 1
-                && !String.valueOf(w0.get("Cable")).equals(String.valueOf(w1.get("Cable"))) && cn.getWaila(false, -1).size() == 2, w0 + " / " + w1);
+            ctx.check("Jade on each of two cables in a block shows only that cable", w0.size() == 2 && w1.size() == 2
+                && w0.containsKey("Voltage") && w0.containsKey("Current") && !w0.containsKey("Cable")
+                && w1.containsKey("Voltage") && w1.containsKey("Current") && !w1.containsKey("Cable")
+                && cn.getWaila(false, -1).size() == 2, w0 + " / " + w1);
         }
     }
 
@@ -1837,8 +1839,8 @@ public final class PipeCases {
             var t = tank.getWaila();
             var tk = new java.util.ArrayList<>(t.keySet());
             String visc = mods.eln.i18n.I18N.tr("Viscosity");
-            ctx.check("tank viscosity: cold heavy oil is thick, third in its Jade, before its liquid line", tk.indexOf(visc) == 2
-                && tk.indexOf(mods.eln.i18n.I18N.tr("Liquid")) == 3 && t.get(visc).startsWith("thick heavy oil, "), "" + t);
+            ctx.check("tank viscosity: cold heavy oil is thick, fourth in its Jade headline after Liquid", tk.indexOf(mods.eln.i18n.I18N.tr("Liquid")) == 2
+                && tk.indexOf(visc) == 3 && t.get(visc).startsWith("thick heavy oil, "), "" + t);
             ctx.check("pipe sensor viscosity: placed, piped to a run", sensorErr == null, "" + sensorErr);
             if (sensorErr == null) {
                 var w = PipeTransmitterCases.device(ctx, sensorAt).getWaila();
@@ -1847,14 +1849,14 @@ public final class PipeCases {
                     && w.get(visc).startsWith("thin diesel, "), "" + w);
             }
             var o = ctx.voxelByEntity(oil).getWaila(false, 0);
-            var d = ctx.voxelByEntity(diesel).getWaila(false, 0);
+            var d = ctx.voxelByEntity(diesel).getWaila(true, 0);
             var s = ctx.voxelByEntity(steam).getWaila(false, 0);
             ctx.line("pipe viscosity: heavy oil " + o + "; diesel " + d + "; steam " + s);
             var ok = new java.util.ArrayList<>(o.keySet());
             var dk = new java.util.ArrayList<>(d.keySet());
             ctx.check("pipe viscosity: cold heavy oil is thick, third in Jade (its headline), with the fix", ok.indexOf(visc) == 2
                 && o.get(visc).startsWith("thick heavy oil, ") && o.get(visc).endsWith("heat or dilute"), "" + o);
-            ctx.check("pipe viscosity: diesel is thin, after the contents", dk.indexOf(visc) == dk.indexOf("Contents") + 1
+            ctx.check("pipe viscosity: diesel is thin, in details after the contents", dk.indexOf(visc) == dk.indexOf("Contents") + 1
                 && d.get(visc).startsWith("thin diesel, ") && d.get(visc).contains(" mPa s, "), "" + d);
             ctx.check("pipe viscosity: none for steam", !s.containsKey(visc), "" + s);
         }

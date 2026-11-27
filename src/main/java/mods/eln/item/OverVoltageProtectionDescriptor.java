@@ -17,8 +17,6 @@ public class OverVoltageProtectionDescriptor extends GenericItemUsingDamageDescr
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Useful to prevent over-voltage\nof Batteries").split("\\\n"));
-        list.add(tr("Below 10% (as its screen shows) it stops discharging"));
-        list.add(tr("(charging still goes in) until back over 15%"));
+        list.add(tr("Battery upgrade: protects against over-voltage and stops discharge below 10% (resumes above 15%)."));
     }
 }

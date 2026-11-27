@@ -24,7 +24,7 @@ public class BusAddressScreen extends ElnScreen {
         field("address", () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
             float f = EaField.parse(v);
             render.sendAddress(Float.isNaN(f) ? 0 : Math.round(f));
-        }, tr("Its bus address, 17 to 255 (1 to 16 are the colour channels). Two devices on a bus shouldn't share one."));
+        }, tr("RS485 address (17\u2013255)"));
         text("status", () -> render.address == 0 ? tr("No address") : render.onBus ? tr("On a bus") : tr("No bus"),
             () -> render.address != 0 && render.onBus ? 0xFF207020 : LABEL);
     }

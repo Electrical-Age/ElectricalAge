@@ -61,6 +61,11 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
     override fun hasItemDraw() = true
 
     override fun drawItem(entity: Boolean) = draw()
+
+    override fun addInformation(itemStack: ItemStack, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
+        super.addInformation(itemStack, entityPlayer, list, par4)
+        list.add(tr("High-power variable resistor controlled by a 0–5 V signal."))
+    }
 }
 
 class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
@@ -186,11 +191,10 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     override fun getInventory() = inventory
     override fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
 
-    override fun getWaila(): Map<String, String> = mutableMapOf(
-        Pair(I18N.tr("Resistance"), Utils.plotOhm("", resistor.r)),
-        Pair(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.t)),
-        Pair(I18N.tr("Power loss"), Utils.plotPower("", resistor.p))
-    )
+    override fun getWaila(): Map<String, String> = mods.eln.compat.jade.ProbeLines.of()
+        .headline(I18N.tr("Resistance"), Utils.plotOhm("", resistor.r))
+        .headline(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.t))
+        .headline(I18N.tr("Power loss"), Utils.plotPower("", resistor.p))
 }
 
 class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) :

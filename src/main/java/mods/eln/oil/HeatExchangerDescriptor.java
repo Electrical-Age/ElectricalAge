@@ -46,11 +46,10 @@ public class HeatExchangerDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add(String.format("Moves heat between two pipe streams kept apart: %.0f W per 1 K for each 2 x 2 slice.", 4 * ua));
-        list.add("Stack 2 x 2 across and up to 8 long into one exchanger; a lone block is a quarter slice.");
-        list.add("Ports on its two ends: stream A at their centres, B up high. For counterflow,");
-        list.add("A in at the back end and out at the front; B in at the front and out at the back.");
-        list.add(String.format("Each side holds %.0f B a block: a pass-through, not a tank or a drum.", sideVolume * mods.eln.sim.fluid.Water.RHO_L / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / 1000));
-        list.add("Both streams must flow. Either may condense steam or boil water: an economizer, a feed heater, a reheater.");
+        list.add(String.format("Transfers heat between two isolated pipe streams (%.0f W/K per 2×2 slice).", 4 * ua));
+        list.add(String.format("Multiblock: up to 2×2×8 (%.0f B per side per block).",
+            sideVolume * mods.eln.sim.fluid.Water.RHO_L / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / 1000));
+        mods.eln.client.ItemTooltips.detail(list,
+            "Both streams must flow; either side may boil or condense.");
     }
 }

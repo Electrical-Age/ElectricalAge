@@ -64,4 +64,12 @@ public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
     public void drawPlaced(mods.eln.misc.Direction side, mods.eln.misc.LRDU front) {
         draw(0, 0, null);
     }
+
+    @Override
+    public void addInformation(ItemStack itemStack, net.minecraft.world.entity.player.Player entityPlayer, java.util.List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(autoReset
+            ? mods.eln.i18n.I18N.tr("Momentary wireless signal button (range: %1$ blocks).", range)
+            : mods.eln.i18n.I18N.tr("Toggle wireless signal switch (range: %1$ blocks).", range));
+    }
 }

@@ -342,15 +342,14 @@ public class TankCart extends AbstractMinecart implements IBurnable {
         });
     }
 
-    /** Its Jade lines: a tank's (TankDescriptor.putContents), and whether it is docked. */
+    /** Its Jade lines: a tank's (TankDescriptor.putProbe), and whether it is docked. */
     public Map<String, String> waila() {
-        Map<String, String> info = new LinkedHashMap<>();
+        var info = mods.eln.compat.jade.ProbeLines.of();
         FluidNode n = node();
         n.update();
-        TankDescriptor.putContents(info, n);
-        desc().putWarning(info, n);
-        if (dockedAt != null) info.put(mods.eln.i18n.I18N.tr("Station"), dockedAt.released() ? mods.eln.i18n.I18N.tr("docked, released")
-            : mods.eln.i18n.I18N.tr("docked, held"));
+        desc().putProbe(info, n);
+        if (dockedAt != null) info.headline(mods.eln.i18n.I18N.tr("Station"), dockedAt.released() ? mods.eln.i18n.I18N.tr("Docked (released)")
+            : mods.eln.i18n.I18N.tr("Docked (held)"));
         return info;
     }
 }

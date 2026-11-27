@@ -717,9 +717,11 @@ public class ComputerElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new LinkedHashMap<>(machine.wailaLines());
-        info.put(I18N.tr("State"), stateText());
-        info.put(I18N.tr("Address"), port.address() == 0 ? I18N.tr("none (set it in its screen)") : String.valueOf(port.address()));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("State"), stateText());
+        info.headline(I18N.tr("Power"), Utils.plotPower("", machine.watts()));
+        info.headline(I18N.tr("Address"), port.address() == 0 ? I18N.tr("None") : String.valueOf(port.address()));
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", machine.volts()));
         return info;
     }
 

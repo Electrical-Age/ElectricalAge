@@ -50,10 +50,9 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         if (dayLightOnly) {
-            Collections.addAll(list, tr("Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.").split("\n"));
-            list.add(tr("0V at night, %1$V at noon.", Utils.plotValue(Eln.SVU)));
+            list.add(tr("Outputs a daylight signal (0V at night, %1$V at noon).", Utils.plotValue(Eln.SVU)));
         } else {
-            Collections.addAll(list, tr("Provides an electrical voltage\nin the presence of light.").split("\n"));
+            list.add(tr("Outputs a 0–5 V signal proportional to light level."));
         }
     }
 

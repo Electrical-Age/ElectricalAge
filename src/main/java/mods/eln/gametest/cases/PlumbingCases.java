@@ -888,7 +888,7 @@ public final class PlumbingCases {
             ctx.check("tank flanges: a lone tank with no pipe draws none", a.coupled == 0 && ra.coupled == 0, Integer.toHexString(ra.coupled));
             ctx.check("tank flanges: B draws one, its east low port (the pipe's)", rb.coupled == 1 << 10, Integer.toHexString(rb.coupled));
             ctx.check("tank flanges: C draws one, its west low port (the pipe's)", rc.coupled == 1 << 8, Integer.toHexString(rc.coupled));
-            ctx.check("tank flanges: the ports still work (kits end at them): seven on a lone tank", b.fluidPorts().size() == 8 && a.getWaila().containsKey(mods.eln.i18n.I18N.tr("Ports")),
+            ctx.check("tank flanges: the ports still work (kits end at them): seven on a lone tank", b.fluidPorts().size() == 8 && a.getWaila().containsKey(mods.eln.i18n.I18N.tr("Pipes")),
                 b.fluidPorts().size() + " ports");
             // every side nozzle of a box up to 3 x 3 x 3, on every outer face of its blocks: its bore's end inside the shell
             var r = rb;

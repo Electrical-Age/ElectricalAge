@@ -36,8 +36,8 @@ public class SteamInjectionDescriptor extends TransparentNodeDescriptor implemen
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add("On well casing down to a depleted oil lake: steam from a pipe on its top goes down the well.");
-        list.add(String.format("Each %.2f kg of steam brings up a bucket of crude: the lake seeps up to a pump's full rate.", OilRecovery.steamKgPerBucket));
-        list.add("The steam must push against the well's depth: about 0.08 bar a block.");
+        list.add("Injects steam down well casing to boost depleted oil lakes.");
+        mods.eln.client.ItemTooltips.detail(list,
+            String.format("%.2f kg steam per bucket of crude; requires ~0.08 bar per block of depth.", OilRecovery.steamKgPerBucket));
     }
 }

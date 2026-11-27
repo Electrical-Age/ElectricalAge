@@ -90,7 +90,7 @@ public class PowerSocketDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Supplies any device\nplugged in with energy.").split("\n"));
+        list.add(tr("Wall outlet for powering compatible devices."));
     }
 
     @Override

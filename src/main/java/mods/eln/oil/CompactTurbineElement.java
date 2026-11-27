@@ -280,29 +280,25 @@ public class CompactTurbineElement extends TransparentNodeElement implements Flu
     /** What it is doing, in a line (Jade). */
     public String state() {
         double t = celsius();
-        if (water <= 0) return I18N.tr("out of water: a bucket, or a pipe on top");
-        if (t < 100) return I18N.tr("heating up: it boils at 100 °C");
-        // at its current limit with the voltage gone: a short (a Ground Cable on its line), not a weak fire, which would
-        // send the player for more chambers (AdventurAgent's handbook replay, 2026-11-21); before venting, which a
-        // short causes on a big fire (it takes almost nothing)
-        if (shorted()) return I18N.tr("shorted or badly overloaded: its output is near 0 V. A Ground Cable on its line? Remove it: the turbine needs none");
-        if (ventW > 0) return I18N.tr("venting: more heat than it can use or shed");
-        // (it can't see the furnace: it may already have all its chambers. AdventurAgent saw this at 4/4)
-        if (governor < 0.9) return I18N.tr("short of heat: a hotter fire (more combustion chambers, if the furnace has room) or less load");
-        if (bypassW > 0) return I18N.tr("running; the heat the load doesn't take goes to its condenser");
-        return I18N.tr("running");
+        if (water <= 0) return I18N.tr("Out of water");
+        if (t < 100) return I18N.tr("Heating up");
+        if (shorted()) return I18N.tr("Shorted / overloaded");
+        if (ventW > 0) return I18N.tr("Venting excess heat");
+        if (governor < 0.9) return I18N.tr("Low heat");
+        if (bypassW > 0) return I18N.tr("Running (bypassing excess heat)");
+        return I18N.tr("Running");
     }
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("State"), state());
-        info.put(I18N.tr("Generated power"), Utils.plotPower("", powerOut) + " / " + Utils.plotPower("", desc.nominalP));
-        // (Erisi's chat review: nobody knew they needed more combustion chambers)
-        info.put(I18N.tr("Heat in"), Utils.plotPower("", heatIn) + " / " + Utils.plotPower("", desc.nominalHeat()) + " " + I18N.tr("for full power"));
-        info.put(I18N.tr("Boiler"), mods.eln.api.Meters.celsius(celsius()));
-        info.put(I18N.tr("Water"), mods.eln.sim.fluid.EaUnits.tank(water, CompactTurbineDescriptor.WATER_MB) + String.format(" (%.2f mB/s)", waterRate));
-        info.put(I18N.tr("Voltage"), Utils.plotVolt("", load.getU()));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("State"), state());
+        info.headline(I18N.tr("Power"), Utils.plotPower("", powerOut).trim() + " / " + Utils.plotPower("", desc.nominalP).trim());
+        if (water < 500) info.headline(I18N.tr("Water"), mods.eln.sim.fluid.EaUnits.tank(water, CompactTurbineDescriptor.WATER_MB) + String.format(" (%.2f mB/s)", waterRate));
+        info.headline(I18N.tr("Boiler"), mods.eln.api.Meters.celsius(celsius()));
+        info.detail(I18N.tr("Thermal power"), Utils.plotPower("", heatIn).trim() + " / " + Utils.plotPower("", desc.nominalHeat()).trim());
+        if (water >= 500) info.detail(I18N.tr("Water"), mods.eln.sim.fluid.EaUnits.tank(water, CompactTurbineDescriptor.WATER_MB) + String.format(" (%.2f mB/s)", waterRate));
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", load.getU()));
         return info;
     }
 }

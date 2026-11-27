@@ -87,7 +87,7 @@ public final class ToolbagShears {
         Piece at = pieceAt(level, pos, hit);
         if (at == null) return;   // (not a cable or pipe: nothing to cut, and no block broken)
         if (shears(bag).isEmpty()) {
-            KitPreview.note(p, "No shears in the toolbag: put shears in its shears slot to cut");
+            KitPreview.note(p, mods.eln.i18n.I18N.tr("No shears in toolbag"));
             return;
         }
         List<Piece> run = run(level, at);
@@ -102,7 +102,7 @@ public final class ToolbagShears {
         Cut c = CUTS.get(p.getUUID());
         if (c == null) return false;
         if (!(p.getMainHandItem().getItem() instanceof ToolbagItem) || c.dim != level.dimension()) {
-            cancel(p, "Cut cancelled (the toolbag left your hand)");
+            cancel(p, mods.eln.i18n.I18N.tr("Cut cancelled"));
             return false;
         }
         if (p.pick(p.blockInteractionRange(), 1f, false) instanceof BlockHitResult bh && bh.getType() == HitResult.Type.BLOCK)
@@ -141,7 +141,7 @@ public final class ToolbagShears {
             len += length(pc.part());
         }
         KitPreview.send(p, false, boxes);
-        p.sendOverlayMessage(Component.literal(String.format("Shears: %.1f blocks; move along it, left-click to cut, right-click to cancel", len / 16.0)));
+        p.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Cut: %1$ blocks", String.format("%.1f", len / 16.0))));
     }
 
     static int length(VoxelPart part) {
@@ -161,7 +161,7 @@ public final class ToolbagShears {
         KitPreview.send(p, true, List.of());
         KitPreview.forget(p.getUUID());
         if (shears(bag).isEmpty()) {
-            KitPreview.note(p, "No shears in the toolbag");
+            KitPreview.note(p, mods.eln.i18n.I18N.tr("No shears in toolbag"));
             return;
         }
         List<ItemStack> back = new ArrayList<>();
@@ -185,14 +185,15 @@ public final class ToolbagShears {
             sh.setDamageValue(sh.getDamageValue() + 1);
             if (sh.getDamageValue() >= sh.getMaxDamage()) {
                 c0.set(ToolbagItem.SHEARS_SLOT, ItemStack.EMPTY);
-                p.sendSystemMessage(Component.literal("The toolbag's shears broke"));
+                p.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Toolbag shears broke")));
             }
         }
         ToolbagItem.setContents(bag, c0);
         int dropped = 0;
         for (ItemStack k : back) dropped += give(p, bag, k);
-        p.sendOverlayMessage(Component.literal(String.format("Cut %.1f blocks%s", len / 16.0,
-            dropped > 0 ? String.format(" (%.1f blocks didn't fit in the bag: dropped)", dropped / 16.0) : ", back in the bag")));
+        p.sendOverlayMessage(Component.literal(dropped > 0
+            ? mods.eln.i18n.I18N.tr("Cut %1$ blocks (%2$ dropped — bag full)", String.format("%.1f", len / 16.0), String.format("%.1f", dropped / 16.0))
+            : mods.eln.i18n.I18N.tr("Cut %1$ blocks", String.format("%.1f", len / 16.0))));
     }
 
     /** Kit k into the bag: its kits of that kind topped up, then empty kit slots; the rest dropped at p. Voxels dropped. */

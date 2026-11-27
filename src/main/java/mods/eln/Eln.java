@@ -181,9 +181,6 @@ public class Eln {
     public static final mods.eln.sim.ThermalLoadInitializer sixNodeThermalLoadInitializer = new mods.eln.sim.ThermalLoadInitializer(
         cableWarmLimit, -100, cableHeatingTime, 1000);
 
-    /** config balancing.wailaEasyMode: more detailed probe info on some machines */
-    public static boolean wailaEasyMode = false;
-
     /** EA's OBJ models (assets/eln/model), loaded at mod construction like 1.12 preInit: descriptors take parts. */
     public static mods.eln.misc.Obj3DFolder obj = new mods.eln.misc.Obj3DFolder();
 

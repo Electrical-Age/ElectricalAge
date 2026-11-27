@@ -121,14 +121,11 @@ public class ElectricalRelayElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Position"), switchState ? I18N.tr("Closed") : I18N.tr("Open"));
-        info.put(I18N.tr("Current"), Utils.plotAmpere("", aLoad.getCurrent()));
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Default position"), defaultOutput ? I18N.tr("Closed") : I18N.tr("Open"));
-            info.put(I18N.tr("Voltages"), Utils.plotVolt("", aLoad.getU()) + Utils.plotVolt(" ", bLoad.getU()));
-        }
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Position"), switchState ? I18N.tr("Closed") : I18N.tr("Open"))
+            .headline(I18N.tr("Current"), Utils.plotAmpere("", aLoad.getCurrent()))
+            .detail(I18N.tr("Default position"), defaultOutput ? I18N.tr("Closed") : I18N.tr("Open"))
+            .detail(I18N.tr("Voltages"), Utils.plotVolt("", aLoad.getU()) + Utils.plotVolt(" ", bLoad.getU()));
     }
 
     @Override

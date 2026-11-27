@@ -97,13 +97,13 @@ final class ToolbagRadial {
                 if (ringB.size() <= 1 && ringC.size() <= 1) menu[0].commitAndClose();
             }));
         if (routing) {
-            ringA.add(new RadialMenu.Segment(Component.literal("Undo"), () -> false, () -> send(ToolbagItem.UNDO, null, act, menu)));
-            ringA.add(new RadialMenu.Segment(Component.literal("Cancel"), () -> false, () -> send(ToolbagItem.CANCEL, null, act, menu)));
+            ringA.add(new RadialMenu.Segment(Component.literal(mods.eln.i18n.I18N.tr("Undo")), () -> false, () -> send(ToolbagItem.UNDO, null, act, menu)));
+            ringA.add(new RadialMenu.Segment(Component.literal(mods.eln.i18n.I18N.tr("Cancel")), () -> false, () -> send(ToolbagItem.CANCEL, null, act, menu)));
         }
         refill[0].run();
         menu[0] = new RadialMenu(Component.translatable("gui.eln.toolbag.radial"), List.of(ringA, ringB, ringC),
-            () -> cur[0] == null ? Component.literal("-") : Component.literal(String.format("%s %.0f bl", cur[0].pipe() || cur[0].mm2() < 0 ? cur[0].first()
-                : cur[0].size(), kinds.getOrDefault(cur[0], 0) / 16.0)),
+            () -> cur[0] == null ? Component.literal("-") : Component.literal(String.format("%s %.0f %s", cur[0].pipe() || cur[0].mm2() < 0 ? cur[0].first()
+                : cur[0].size(), kinds.getOrDefault(cur[0], 0) / 16.0, mods.eln.i18n.I18N.tr("bl"))),
             ClientKeys.WRENCH, () -> {
                 if (act[0] || cur[0] == null) return;
                 ElnNet.sendToServer(ToolbagItem.choicePacket(ToolbagItem.CHOOSE, new int[]{cur[0].pipe() ? 1 : 0, cur[0].tier(), cur[0].mm2(), cur[0].colour()}));

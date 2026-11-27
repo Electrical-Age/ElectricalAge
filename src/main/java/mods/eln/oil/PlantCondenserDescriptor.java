@@ -47,11 +47,9 @@ public class PlantCondenserDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add("Exhaust steam in on top, its back or its right; set an LP turbine against it.");
-        list.add("Condensate out low on its front; makeup water in high on its left.");
-        list.add("Its pump and air ejector run on a Shaft Motor against its side: no motor, no vacuum.");
-        list.add(String.format("Rejects %.0f kW at a 20 K rise of its shell; more with thermal cables on its sides.", nominalHeat / 1000));
-        list.add(String.format("Its pump feeds a %.0f bar boiler (an HP turbine's rating); shut off at %.0f bar: above, fit an Inline Pump after it.",
+        list.add(String.format("Large vacuum condenser for LP turbines (rejects %.0f kW).", nominalHeat / 1000));
+        list.add(String.format("Requires adjacent Shaft Motor. Pump: %.0f bar rated (%.0f bar shut-off).",
             pump.ratedPa / 1e5, pump.shutoffPa / 1e5));
+        mods.eln.client.ItemTooltips.detail(list, "Thermal cables or cooling water increase heat rejection.");
     }
 }

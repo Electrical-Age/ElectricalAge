@@ -176,9 +176,9 @@ public class CompressorPortsElement extends ElectricalMachineElement implements 
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = super.getWaila();
-        info.put(I18N.tr("Latex in (blue)"), mods.eln.sim.fluid.EaUnits.tank(latexIn(), CompressorPortsDescriptor.TANK_MB));
-        info.put(I18N.tr("Latex out (red)"), mods.eln.sim.fluid.EaUnits.tank(latexOut(), CompressorPortsDescriptor.TANK_MB));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .addAll(super.getWaila())
+            .headline(I18N.tr("Latex in (blue)"), mods.eln.sim.fluid.EaUnits.tank(latexIn(), CompressorPortsDescriptor.TANK_MB))
+            .headline(I18N.tr("Latex out (red)"), mods.eln.sim.fluid.EaUnits.tank(latexOut(), CompressorPortsDescriptor.TANK_MB));
     }
 }

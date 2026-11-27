@@ -84,4 +84,10 @@ public class WirelessSignalRxDescriptor extends SixNodeDescriptor {
     protected float[] bodyBounds() {
         return boundsOf(main);
     }
+
+    @Override
+    public void addInformation(ItemStack itemStack, Player entityPlayer, java.util.List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(mods.eln.i18n.I18N.tr("Receives a 0–5 V wireless signal on a named channel."));
+    }
 }

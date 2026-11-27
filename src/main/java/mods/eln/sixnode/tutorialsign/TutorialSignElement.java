@@ -156,6 +156,11 @@ public class TutorialSignElement extends SixNodeElement {
     }
 
     @Override
+    public java.util.Map<String, String> getWaila() {
+        return mods.eln.compat.jade.ProbeLines.of();
+    }
+
+    @Override
     public String thermoMeterString() {
         return "";
     }

@@ -309,15 +309,20 @@ public class SteamCrackerElement extends TransparentNodeElement implements mods.
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>(machine.wailaLines());
-        if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
-        info.put(I18N.tr("Status"), I18N.tr(status));
+        var info = mods.eln.compat.jade.ProbeLines.of();
         String wrong = gasolineIn.blockedBy();
-        if (wrong != null) info.put(I18N.tr("Blocked"), I18N.tr("it holds %1$, which it can't crack", wrong));
-        info.put(I18N.tr("Gasoline (blue C8)"), mods.eln.sim.fluid.EaUnits.tank(gasolineMb(), GASOLINE_TANK_MB));
-        info.put(I18N.tr("Steam (blue H2O)"), mods.eln.sim.fluid.EaUnits.steamGrams(steamMb()) + String.format(", %.1f bar", steamIn.vessel == null ? 0 : steamIn.vessel.P() / 1e5));
-        info.put(I18N.tr("Butadiene (red C4H6)"), mods.eln.sim.fluid.EaUnits.tank(butadieneMb(), BUTADIENE_TANK_MB));
-        info.put(I18N.tr("Natural gas (red CH4)"), mods.eln.sim.fluid.EaUnits.volume(gasMb()) + String.format(", %.1f bar", gasOut.vessel == null ? 0 : gasOut.vessel.P() / 1e5));
+        String state;
+        if (!onOff.on) state = I18N.tr("Off");
+        else if (wrong != null) state = I18N.tr("Wrong fluid (%1$)", wrong);
+        else if (machine.state() != mods.eln.api.MachineState.RUNNING) state = machine.wailaLines().getOrDefault(I18N.tr("State"), I18N.tr("No power"));
+        else state = I18N.tr(status);
+        info.headline(I18N.tr("State"), state);
+        info.headline(I18N.tr("Gasoline"), mods.eln.sim.fluid.EaUnits.tank(gasolineMb(), GASOLINE_TANK_MB));
+        info.headline(I18N.tr("Steam"), mods.eln.sim.fluid.EaUnits.steamGrams(steamMb()) + String.format(", %.1f bar", steamIn.vessel == null ? 0 : steamIn.vessel.P() / 1e5));
+        info.detail(I18N.tr("Butadiene"), mods.eln.sim.fluid.EaUnits.tank(butadieneMb(), BUTADIENE_TANK_MB));
+        info.detail(I18N.tr("Natural gas"), mods.eln.sim.fluid.EaUnits.volume(gasMb()) + String.format(", %.1f bar", gasOut.vessel == null ? 0 : gasOut.vessel.P() / 1e5));
+        info.detail(I18N.tr("Power"), Utils.plotPower("", machine.watts()));
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", machine.volts()));
         return info;
     }
 }

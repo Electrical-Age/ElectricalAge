@@ -225,7 +225,7 @@ public class ToolbagItem extends Item implements PipeTool {
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (!level.isClientSide() && player instanceof ServerPlayer sp && ToolbagShears.active(sp.getUUID())) {
-            ToolbagShears.cancel(sp, "Cut cancelled");
+            ToolbagShears.cancel(sp, mods.eln.i18n.I18N.tr("Cut cancelled"));
             return InteractionResult.SUCCESS;
         }
         if (!level.isClientSide() && player instanceof ServerPlayer sp) {
@@ -247,17 +247,17 @@ public class ToolbagItem extends Item implements PipeTool {
     /** A right-click on a block with the bag (sneak: the radial). */
     public static void click(ServerPlayer p, ServerLevel level, ItemStack bag, BlockPos pos, net.minecraft.core.Direction face, Vec3 hit, boolean sneak) {
         if (ToolbagShears.active(p.getUUID())) {   // (a right-click cancels a cut)
-            ToolbagShears.cancel(p, "Cut cancelled");
+            ToolbagShears.cancel(p, mods.eln.i18n.I18N.tr("Cut cancelled"));
             return;
         }
         Click c = new Click(level.dimension(), pos, face, hit, level.getGameTime());
         boolean routing = routing(p), reach = CablePlacer.reachable(p, pos, hit);
-        if (sneak) {   // (always the radial, a route on or not: AdventurAgent saw a sneak-click on a pipe try to lay)
+        if (sneak) {   // (always the radial, a route on or not)
             openRadial(p, bag, routing || !reach ? null : c);
             return;
         }
         if (!reach) {
-            KitPreview.note(p, "Out of reach");
+            KitPreview.note(p, mods.eln.i18n.I18N.tr("Out of reach"));
             return;
         }
         if (!routing) {
@@ -267,7 +267,7 @@ public class ToolbagItem extends Item implements PipeTool {
                 return;
             }
             if (!kinds(bag).containsKey(k)) {
-                KitPreview.note(p, "No " + k.label() + " kit in the toolbag");
+                KitPreview.note(p, mods.eln.i18n.I18N.tr("No %1$ kit in toolbag", k.label()));
                 return;
             }
             select(bag, k);
@@ -277,7 +277,7 @@ public class ToolbagItem extends Item implements PipeTool {
         }
         KitSupply s = supply(bag);
         if (s == null) {
-            KitPreview.note(p, "The toolbag has no kit of this route's kind left");
+            KitPreview.note(p, mods.eln.i18n.I18N.tr("Out of this kit in toolbag"));
             return;
         }
         lay(p, level, s, c);
@@ -305,7 +305,7 @@ public class ToolbagItem extends Item implements PipeTool {
         var kinds = kinds(bag);
         boolean routing = routing(p);
         if (kinds.isEmpty() && !routing) {
-            KitPreview.note(p, "The toolbag holds no kits: right-click the air to open it");
+            KitPreview.note(p, mods.eln.i18n.I18N.tr("Toolbag is empty"));
             return;
         }
         RoutePlacer.touch(p.getUUID(), p.level().getGameTime());   // (the radial open isn't idleness)
@@ -346,45 +346,40 @@ public class ToolbagItem extends Item implements PipeTool {
             if (action == CANCEL) {
                 boolean had = RoutePlacer.drop(p.getUUID()) != null;
                 STARTED.remove(p.getUUID());
-                if (had) KitPreview.note(p, "Route cancelled");
+                if (had) KitPreview.note(p, mods.eln.i18n.I18N.tr("Route cancelled"));
             } else RoutePlacer.undo(p, level);
             return;
         }
         if (kind == null || !kinds(bag).containsKey(kind)) {
-            KitPreview.note(p, "The toolbag holds no such kit");
+            KitPreview.note(p, mods.eln.i18n.I18N.tr("Kit not in toolbag"));
             return;
         }
         Kind was = selected(bag);
         select(bag, kind);
         KitSupply s = supply(bag, kind);
         if (routing(p)) {
-            // a route on: the new kind from the same start, its waypoints kept where they fit: a cable's for a cable, a
-            // pipe's for a pipe (points on a face, points in a block's middle: they don't carry over between the two)
             if (kind.equals(was)) return;
             Click start = STARTED.get(p.getUUID());
-            RoutePlacer.Plan old = RoutePlacer.drop(p.getUUID());   // (not null: a route is on)
+            RoutePlacer.Plan old = RoutePlacer.drop(p.getUUID());
             if (start == null || start.dim() != level.dimension()) {
-                KitPreview.note(p, "Route dropped: start it again with the new kind");
+                KitPreview.note(p, mods.eln.i18n.I18N.tr("Route reset (%1$)", kind.label()));
                 return;
             }
             lay(p, level, s, start);
             if (old.kind == RoutePlacer.of(s)) {
-                // (over the start message: the route goes on, as a new kind; AdventurAgent read "route started" as a restart.
-                // A start refused at the new kind keeps its own reason)
                 if (!RoutePlacer.active(p.getUUID())) return;
                 RoutePlacer.addWaypoints(p.getUUID(), old.waypoints);
-                p.sendOverlayMessage(Component.literal("Now " + kind.label() + (old.waypoints.isEmpty() ? "." : "; waypoints kept.")));
-            } else p.sendOverlayMessage(Component.literal("Restarted as " + kind.label() + " \u2014 waypoints cleared"));
+                p.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr(old.waypoints.isEmpty() ? "Switched to %1$" : "Switched to %1$ (waypoints kept)", kind.label())));
+            } else p.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Restarted as %1$", kind.label())));
             return;
         }
         if (pending == null) {
-            p.sendOverlayMessage(Component.literal("Toolbag: " + kind.label()));
+            p.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Toolbag: %1$", kind.label())));
             return;
         }
-        // the click the radial was opened from: the route starts there now, if it's still fresh and in reach
         if (pending.dim() != level.dimension() || level.getGameTime() - pending.time() > PENDING_TICKS
             || p.position().distanceToSqr(pending.hit()) > 10 * 10) {
-            p.sendOverlayMessage(Component.literal("Toolbag: " + kind.label() + " (click again to start)"));
+            p.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Toolbag: %1$", kind.label())));
             return;
         }
         STARTED.put(p.getUUID(), pending);
@@ -412,10 +407,12 @@ public class ToolbagItem extends Item implements PipeTool {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display,
                                 java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
+        out.accept(Component.literal(mods.eln.i18n.I18N.tr("Can place or remove cables")).withStyle(net.minecraft.ChatFormatting.GRAY));
         var kinds = kinds(stack);
-        for (var e : kinds.entrySet())
-            out.accept(Component.literal(String.format("%s: %.1f blocks", e.getKey().label(), e.getValue() / 16.0)).withStyle(net.minecraft.ChatFormatting.GRAY));
-        if (kinds.isEmpty()) out.accept(Component.literal("No kits").withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.literal("Right-click the air to open; a cable: lay its kind; elsewhere or sneaking: choose").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        for (var e : kinds.entrySet()) {
+            int v = e.getValue();
+            String blocks = v % 16 == 0 ? (v / 16) + (v == 16 ? " block" : " blocks") : String.format("%.1f blocks", v / 16.0);
+            out.accept(Component.literal(e.getKey().label() + ": " + blocks).withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
     }
 }

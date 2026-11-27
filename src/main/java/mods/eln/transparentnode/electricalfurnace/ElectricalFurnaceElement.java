@@ -268,13 +268,10 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
-        if (!Utils.isEmpty(inventory.getItem(heatingCorpSlotId))) {
-            info.put(I18N.tr("Heating element"), inventory.getItem(heatingCorpSlotId).getHoverName().getString());
-        } else {
-            info.put(I18N.tr("Heating element"), I18N.tr("None"));
-        }
-        return info;
+        ItemStack elem = inventory.getItem(heatingCorpSlotId);
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))
+            .headline(I18N.tr("Power"), powerOn ? Utils.plotPower("", heatingCorpResistor.getP()) : I18N.tr("Off"))
+            .detail(I18N.tr("Heating element"), !Utils.isEmpty(elem) ? elem.getHoverName().getString() : I18N.tr("None"));
     }
 }

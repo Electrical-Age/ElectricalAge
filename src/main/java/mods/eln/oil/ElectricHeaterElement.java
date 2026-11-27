@@ -183,9 +183,9 @@ public class ElectricHeaterElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Power"), Utils.plotPower("", resistor.getP()));
-        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("Power"), Utils.plotPower("", resistor.getP()));
+        info.headline(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
         return info;
     }
 }

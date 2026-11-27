@@ -130,26 +130,13 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         if (signalWire) {
-            Collections.addAll(list, tr("Cable is adapted to conduct\nelectrical signals.").split("\n"));
-            Collections.addAll(list, tr("A signal is electrical information\nwhich must be between 0V and %1$", Utils.plotVolt(Eln.SVU)).split("\n"));
-            list.add(tr("Not adapted to transport power."));
-
-			/*String lol = "";
-			for (int idx = 0; idx < 15; idx++) {
-				if (idx < 10) {
-					lol += "\u00a7" + idx + "" +  idx;
-				} else {
-					lol += "\u00a7" + "abcdef".charAt(idx - 10) + "abcdef".charAt(idx - 10);
-				}
-			}
-			list.add(lol);*/
+            list.add(tr("Carries 0–%1$ control signals (not power).", Utils.plotVolt(Eln.SVU).trim()));
         } else {
-            //list.add("Low resistor => low power lost");
-            list.add(tr("Safe usage:"));
-            list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalVoltage)));
-            list.add("  " + tr("Current: %1$A", Utils.plotValue(electricalNominalPower / electricalNominalVoltage)));
-            list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalPower)));
-            list.add("  " + tr("Serial resistance: %1$\u2126", Utils.plotValue(electricalNominalRs * 2)));
+            list.add(tr("%1$V, %2$A (%3$W), %4$\u2126/block",
+                Utils.plotValue(electricalNominalVoltage),
+                Utils.plotValue(electricalNominalPower / electricalNominalVoltage),
+                Utils.plotValue(electricalNominalPower),
+                Utils.plotValue(electricalNominalRs * 2)));
         }
     }
 

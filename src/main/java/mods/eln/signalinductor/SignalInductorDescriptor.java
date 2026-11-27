@@ -31,4 +31,10 @@ public class SignalInductorDescriptor extends SixNodeDescriptor {
     public void applyTo(Inductor inductor) {
         inductor.setL(henri);
     }
+
+    @Override
+    public void addInformation(net.minecraft.world.item.ItemStack itemStack, net.minecraft.world.entity.player.Player entityPlayer, java.util.List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(mods.eln.i18n.I18N.tr("Inline signal inductor (%1$ H).", mods.eln.misc.Utils.plotValue(henri)));
+    }
 }

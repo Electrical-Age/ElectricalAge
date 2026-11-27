@@ -81,14 +81,12 @@ public class MpptDescriptor extends SixNodeDescriptor {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Holds solar panels at their best power\nand charges a battery at a set voltage.").split("\n"));
-        list.add(tr("Panels: up to %1$ open circuit", Meters.volts(maxInputVolts)));
-        list.add(tr("Power: %1$, efficiency %2$", Meters.watts(maxPower), Utils.plotPercent(efficiency)));
-        list.add(incremental ? tr("Tracker: incremental conductance") : tr("Tracker: perturb and observe"));
-        list.add(tr("Facing it: top panel +, left panel -"));
-        list.add(tr("bottom battery +, right battery -"));
-        list.add(tr("Steps the voltage down only."));
+        list.add(tr("Solar MPPT battery charger (step-down only): up to %1$ in, %2$, %3$ eff.",
+            Meters.volts(maxInputVolts), Meters.watts(maxPower), Utils.plotPercent(efficiency)));
+        mods.eln.client.ItemTooltips.detail(list,
+            incremental ? tr("Tracker: incremental conductance.") : tr("Tracker: perturb and observe."));
     }
 }

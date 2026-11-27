@@ -15,6 +15,12 @@ public class EntitySensorFilterDescriptor extends GenericItemUsingDamageDescript
         this.b = b;
     }
 
+    @Override
+    public void addInformation(net.minecraft.world.item.ItemStack itemStack, net.minecraft.world.entity.player.Player entityPlayer, java.util.List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(mods.eln.i18n.I18N.tr("Filter card for an Electrical Entity Sensor."));
+    }
+
     public void glColor() {
         mods.eln.gl.GL11.glColor3f(r, g, b);
     }

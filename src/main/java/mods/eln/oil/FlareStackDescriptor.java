@@ -31,6 +31,6 @@ public class FlareStackDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add(String.format("Burns any gas piped in, and liquids up to %.0f mB/s, for nothing", BURN_RATE));
+        list.add(String.format("Vents and burns piped gas, and liquids up to %.0f mB/s.", BURN_RATE));
     }
 }

@@ -66,8 +66,11 @@ public class SmelterDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Smelts with heat from a thermal cable\non its back, as hot as the cable brings.\nHoppers feed the top and empty the bottom.\nNeeds a little 48V for its controls.").split("\n"));
+        list.add(tr("Smelts using external heat and 48V control power."));
+        mods.eln.client.ItemTooltips.detail(list,
+            tr("Hoppers feed the top and empty the bottom."));
     }
 }

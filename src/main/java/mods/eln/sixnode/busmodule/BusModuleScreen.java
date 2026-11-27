@@ -27,9 +27,9 @@ public class BusModuleScreen extends ElnScreen {
             final int i = t;
             text("l" + i, () -> "T" + (i + 1));   // (AdventurAgent: "1" beside channel "14" read as one number)
             busChannel("s" + i, "c" + i, () -> render.channels[i], c -> render.sendChannel(i, c),
-                tr("The bus channel of terminal %1$. A brush used on the module tunes the terminal nearest the click.", i + 1));
+                tr("Terminal %1$ bus channel", i + 1));
             button("d" + i, () -> render.out[i] ? tr("Out") : tr("In"), () -> render.sendOut(i, !render.out[i]),
-                tr("In: the wire's level goes onto the bus."), tr("Out: the bus drives the wire."));
+                tr("In: wire -> bus"), tr("Out: bus -> wire"));
         }
         text("status", () -> render.onBus ? tr("On a bus") : tr("No bus"), () -> render.onBus ? 0xFF207020 : LABEL);
     }

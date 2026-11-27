@@ -117,13 +117,13 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
             temp.move(Direction.YN);
             Block block = temp.getBlock();
             if (block == null || !isFloor(block))
-                return tr("You can't place this block at this side");
+                return tr("Can't place on this side");
         }
-        if (mustHaveCeiling() && !holds(coord, Direction.YP)) return tr("You can't place this block at this side");
-        if (mustHaveWallFrontInverse() && !holds(coord, front.getInverse())) return tr("You can't place this block at this side");
+        if (mustHaveCeiling() && !holds(coord, Direction.YP)) return tr("Can't place on this side");
+        if (mustHaveWallFrontInverse() && !holds(coord, front.getInverse())) return tr("Can't place on this side");
         if (mustHaveWall() && !holds(coord, Direction.XN) && !holds(coord, Direction.XP) && !holds(coord, Direction.ZN)
             && !holds(coord, Direction.ZP))
-            return tr("You can't place this block at this side");
+            return tr("Can't place on this side");
 
         GhostGroup ghostGroup = getGhostGroup(front);
         if (ghostGroup != null && ghostGroup.canBePloted(coord) == false) return tr("Not enough space for this block");

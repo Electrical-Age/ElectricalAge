@@ -10,10 +10,9 @@ public enum FailureCause {
      *  Appended: causes are saved by ordinal. */
     REVERSE_VOLTAGE("reverse voltage"),
     /** A turning steam turbine flooded with water (Baughn: a significant quantity of water damages it). Appended. */
-    WATER("water damage: water came in with its steam"),
-    /** A turning steam turbine whose condenser filled with water to its exhaust (Baughn 2026-11-14: not the same as
-     *  water pumped in through the steam line; say which). Appended. */
-    FLOODED("water damage: its condenser flooded, its water isn't leaving");
+    WATER("water in steam"),
+    /** A turning steam turbine whose condenser filled with water to its exhaust. Appended. */
+    FLOODED("condenser flooded");
 
     public final String text;
 

@@ -216,18 +216,16 @@ public class LampSupplyElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("Total power"), Utils.plotPower("", powerLoad.getU() * powerLoad.getI()));
         for (int i = 0; i < 3; ++i) {
             Entry e = entries.get(i);
             if (!e.powerChannel.isEmpty()) {
-                info.put(I18N.tr("Channel") + " " + (i + 1), e.powerChannel + " = " +
+                info.headline(I18N.tr("Channel") + " " + (i + 1), e.powerChannel + " = " +
                     (channelStates[i] ? "\u00A7aON" : "\u00A7cOFF"));
             }
         }
-        info.put(I18N.tr("Total power"), Utils.plotPower("", powerLoad.getU() * powerLoad.getI()));
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()));
-        }
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()));
         return info;
     }
 

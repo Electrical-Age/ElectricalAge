@@ -384,25 +384,25 @@ public class ElectricalAnvilElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("State"), statusText(status, load.getU()));
-        if (welding) info.put(I18N.tr("Power"), Utils.plotPower("", powerNow()));
-        if (!credit.isEmpty()) info.put(I18N.tr("Credit"), creditText(credit));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("State"), statusText(status, load.getU()));
+        if (welding) info.headline(I18N.tr("Power"), Utils.plotPower("", powerNow()));
+        if (!credit.isEmpty()) info.headline(I18N.tr("Credit"), creditText(credit));
         return info;
     }
 
     /** The state in words (shared with the screen). */
     public static String statusText(byte status, double u) {
         return switch (status) {
-            case EMPTY -> I18N.tr("Put a tool on the bench");
-            case CANT -> I18N.tr("This can't be mended here");
+            case EMPTY -> I18N.tr("Idle");
+            case CANT -> I18N.tr("Cannot repair");
             case DONE -> I18N.tr("Repaired");
-            case NO_MATERIAL -> I18N.tr("Needs its repair material");
-            case WAITING -> I18N.tr("Waiting for %1$V (now %2$V)", String.format("%.0f", ElectricalAnvilDescriptor.resume * Eln.HVU), String.format("%.0f", u));
-            case SAGGING -> I18N.tr("Supply too weak (%1$V): paused", String.format("%.0f", u));
+            case NO_MATERIAL -> I18N.tr("Needs repair material");
+            case WAITING -> I18N.tr("Waiting for %1$ V (now %2$ V)", String.format("%.0f", ElectricalAnvilDescriptor.resume * Eln.HVU), String.format("%.0f", u));
+            case SAGGING -> I18N.tr("Supply sagging (%1$ V): paused", String.format("%.0f", u));
             case WELDING -> I18N.tr("Welding");
             case ENGRAVING -> I18N.tr("Engraving");
-            case RECOVERING -> I18N.tr("Between bursts: waiting for %1$V (now %2$V)", String.format("%.0f", ElectricalAnvilDescriptor.resume * Eln.HVU), String.format("%.0f", u));
+            case RECOVERING -> I18N.tr("Between bursts: waiting for %1$ V (now %2$ V)", String.format("%.0f", ElectricalAnvilDescriptor.resume * Eln.HVU), String.format("%.0f", u));
             default -> "";
         };
     }

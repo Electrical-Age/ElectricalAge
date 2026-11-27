@@ -114,13 +114,14 @@ public class BatteryChargerElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Charge Current"), Utils.plotAmpere("", powerLoad.getCurrent()));
-        if (powerLoad.getU() < 1) info.put(I18N.tr("Power in"), I18N.tr("none: run a cable to any edge"));
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()));
-            info.put(I18N.tr("Power"), Utils.plotPower("", powerLoad.getI() * powerLoad.getU()));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        if (powerLoad.getU() < 1) {
+            info.headline(I18N.tr("State"), I18N.tr("No power"));
+        } else {
+            info.headline(I18N.tr("Power"), Utils.plotPower("", powerLoad.getI() * powerLoad.getU()));
         }
+        info.headline(I18N.tr("Charge current"), Utils.plotAmpere("", powerLoad.getCurrent()));
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()));
         return info;
     }
 

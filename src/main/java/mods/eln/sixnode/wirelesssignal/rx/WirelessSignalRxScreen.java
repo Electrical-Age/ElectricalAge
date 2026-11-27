@@ -23,11 +23,11 @@ public class WirelessSignalRxScreen extends ElnScreen {
     protected void init() {
         super.init();
         field("channel", () -> render.channel, v -> render.clientSetString(WirelessSignalRxElement.setChannelId, v),
-            tr("Specify the channel"));
+            tr("Channel name"));
         text("connection", () -> render.connection ? tr("Connected") : tr("Not connected"), () -> render.connection ? 0xFF207020 : ERROR_TEXT);
         String[] names = {tr("Biggest"), tr("Smallest"), tr("Toggle")};
-        String[] tips = {tr("Uses the biggest value on the channel."), tr("Uses the smallest value on the channel."),
-            tr("Toggles the output each time an emitter's value rises. Useful to allow multiple buttons to control the same light.")};
+        String[] tips = {tr("Uses the highest value on the channel."), tr("Uses the lowest value on the channel."),
+            tr("Toggles output on rising signal.")};
         for (int i = 0; i < 3; i++) {
             final byte id = (byte) i;
             button(String.valueOf(i), () -> (render.selectedAggregator == id ? "> " : "") + names[id],

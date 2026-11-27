@@ -238,11 +238,17 @@ public class IndustrialResinCollectorElement extends TransparentNodeElement impl
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>(machine.wailaLines());
-        if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
-        info.put(I18N.tr("Latex"), mods.eln.sim.fluid.EaUnits.tank(latex(), IndustrialResinCollectorDescriptor.TANK_MB));
-        info.put(I18N.tr("Tapping"), handRate <= 0 ? I18N.tr("no tree behind it (a trunk with leaves)")
-            : String.format("%.0f mB/h", handRate * IndustrialResinCollectorDescriptor.SPEED_UP * Latex.MB_PER_RUBBER * 3600) + (running ? "" : " " + I18N.tr("(stopped)")));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        String state;
+        if (!onOff.on) state = I18N.tr("Off");
+        else if (handRate <= 0) state = I18N.tr("No tree behind it");
+        else if (machine.state() != mods.eln.api.MachineState.RUNNING) state = machine.wailaLines().getOrDefault(I18N.tr("State"), I18N.tr("No power"));
+        else state = String.format("%.0f mB/h", handRate * IndustrialResinCollectorDescriptor.SPEED_UP * Latex.MB_PER_RUBBER * 3600)
+            + (running ? "" : " (" + I18N.tr("stopped") + ")");
+        info.headline(I18N.tr("State"), state);
+        info.headline(I18N.tr("Latex"), mods.eln.sim.fluid.EaUnits.tank(latex(), IndustrialResinCollectorDescriptor.TANK_MB));
+        info.headline(I18N.tr("Power"), Utils.plotPower("", machine.watts()));
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", machine.volts()));
         return info;
     }
 }

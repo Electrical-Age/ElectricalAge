@@ -439,7 +439,7 @@ public final class ElnRegistry {
         ALL_ITEMS.add(CARBON_BLACK);
         ALL_ITEMS.add(CARBON_BLACK_COMPOUND);
         TABS.register("eln", () -> CreativeModeTab.builder()
-            .title(Component.literal("Electrical Age"))
+            .title(Component.translatable("itemGroup.eln"))
             .icon(() -> new ItemStack(tabIcon.get()))
             .displayItems((params, out) -> {
                 ALL_ITEMS.forEach(i -> {

@@ -596,14 +596,14 @@ public class GroundRadarElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
+        mods.eln.compat.jade.ProbeLines info = mods.eln.compat.jade.ProbeLines.of();
         double cap = capacity();
-        info.put(I18N.tr("Batteries"), cap > 0 ? Utils.plotPercent(charge() / cap) : I18N.tr("None"));
-        if (scanning != null) info.put(I18N.tr("Scanning"), Utils.plotPercent(Math.max(0, progress())));
-        else if (fault != null) info.put(I18N.tr("Fault"), fault);
+        info.headline(I18N.tr("Batteries"), cap > 0 ? Utils.plotPercent(charge() / cap) : I18N.tr("None"));
+        if (scanning != null) info.headline(I18N.tr("Scanning"), Utils.plotPercent(Math.max(0, progress())));
+        else if (fault != null) info.headlineFirst(I18N.tr("Fault"), fault);
         else if (picture != null) {
             long ago = (node.coordonate.world().getGameTime() - pictureAt) / 20;
-            info.put(I18N.tr("Last scan"), I18N.tr("%1$ ago", GroundRadarDescriptor.ago(ago)));
+            info.headline(I18N.tr("Last scan"), I18N.tr("%1$ ago", GroundRadarDescriptor.ago(ago)));
         }
         return info;
     }

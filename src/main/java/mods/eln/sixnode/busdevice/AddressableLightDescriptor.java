@@ -46,10 +46,11 @@ public class AddressableLightDescriptor extends SixNodeDescriptor {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("A lamp on the RS485 bus: as bright as the power sent to its address."));
-        list.add("  " + tr("Set its address in its screen."));
+        list.add(tr("RS485 bus indicator lamp (brightness controlled over the bus)."));
+        mods.eln.client.ItemTooltips.hint(list, tr("Right-click to set address."));
     }
 
     @Override

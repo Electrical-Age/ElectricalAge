@@ -110,7 +110,11 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
     }
 
     override fun getWaila(): Map<String, String> {
-        return mapOf()
+        val info = mods.eln.compat.jade.ProbeLines.of()
+        info.headline(I18N.tr("Speed"), mods.eln.misc.Utils.plotRads("", shaft.rads))
+        info.headline(I18N.tr("Output voltage"), mods.eln.misc.Utils.plotVolt("", outputGate.u))
+        info.detail(I18N.tr("Range"), mods.eln.misc.Utils.plotRads("", minRads.toDouble()).trim() + " – " + mods.eln.misc.Utils.plotRads("", maxRads.toDouble()).trim())
+        return info
     }
 }
 

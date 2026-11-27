@@ -70,7 +70,8 @@ public class OverheadCableItem extends Item {
 
     @Override
     public Component getName(ItemStack stack) {
-        return Component.translatable(getDescriptionId()).append(" (" + blocks(stack) + " blocks)");
+        int b = blocks(stack);
+        return Component.translatable(getDescriptionId()).append(" (" + b + (b == 1 ? " block)" : " blocks)"));
     }
 
     @Override
@@ -79,8 +80,8 @@ public class OverheadCableItem extends Item {
         CableSpec spec = new CableSpec(mm2(stack), 0);
         out.accept(Component.literal(CableSpec.mm2Number(CableSpec.MM2[spec.mm2()])
             + String.format(" mm² bare copper, %.0f A", spec.amps())).withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.literal("For the spans between utility poles: right-click one pole, then the next")
-            .withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        mods.eln.client.ItemTooltips.addDetails(out,
+            mods.eln.client.ItemTooltips.hintLine(mods.eln.i18n.I18N.tr("Right-click two utility poles to span between them")));
     }
 
     @Override

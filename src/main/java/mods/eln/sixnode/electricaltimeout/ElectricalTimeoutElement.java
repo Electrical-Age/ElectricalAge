@@ -98,13 +98,10 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Input"), inputGate.stateHigh() ? I18N.tr("ON") : I18N.tr("OFF"));
-        info.put(I18N.tr("Output"), timeOutCounter > 0 ? I18N.tr("ON") : I18N.tr("OFF"));
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Remaining"), Utils.plotValue(timeOutCounter, "s"));
-        }
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Output"), timeOutCounter > 0 ? I18N.tr("ON") : I18N.tr("OFF"))
+            .headline(I18N.tr("Remaining"), Utils.plotValue(timeOutCounter, "s"))
+            .headline(I18N.tr("Input"), inputGate.stateHigh() ? I18N.tr("ON") : I18N.tr("OFF"));
     }
 
     @Override

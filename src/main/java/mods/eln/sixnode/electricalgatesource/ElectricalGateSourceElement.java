@@ -113,9 +113,8 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
     }
 
     @Override

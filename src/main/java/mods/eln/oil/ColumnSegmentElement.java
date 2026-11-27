@@ -120,10 +120,10 @@ public class ColumnSegmentElement extends TransparentNodeElement implements mods
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Cut"), cut == null ? I18N.tr("not on a column base") : cut.display);
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("Cut"), cut == null ? I18N.tr("No column base") : cut.display);
         var f = tank.getFluid();
-        info.put(I18N.tr("Tank"), mods.eln.sim.fluid.EaUnits.tank(tank.getFluidAmount(), tank.getCapacity()) + (f.isEmpty() ? "" : " " + f.getHoverName().getString()));
+        info.headline(I18N.tr("Tank"), mods.eln.sim.fluid.EaUnits.tank(tank.getFluidAmount(), tank.getCapacity()) + (f.isEmpty() ? "" : " " + f.getHoverName().getString()));
         return info;
     }
 }

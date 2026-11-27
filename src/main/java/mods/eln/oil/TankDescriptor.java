@@ -58,8 +58,25 @@ public class TankDescriptor extends TransparentNodeDescriptor {
 
     /** Its size and pressure rating, a tooltip line (the tank's and its minecart's). */
     public String ratingLine() {
-        return String.format("Holds %.0f buckets of water. Works at up to %.0f bar; bursts over %.0f.",
+        return String.format("Capacity: %.0f B | Rated: %.0f bar (bursts over %.0f bar).",
             volume * mods.eln.sim.fluid.Water.RHO_L / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER / 1000, workingPa / 1e5, burstPa / 1e5);
+    }
+
+    /** A vessel's Jade headline as a tank shows it (pressure with inline rating/burst warning, contents, liquid, viscosity). */
+    public void putProbe(mods.eln.compat.jade.ProbeLines info, mods.eln.sim.fluid.FluidNode v) {
+        double fill = Math.min(1, v.liquidVolume() / v.volume);
+        String warn = v.P() > 0.85 * burstPa ? " — " + mods.eln.i18n.I18N.tr("near bursting")
+            : v.P() > workingPa ? " (" + String.format(mods.eln.i18n.I18N.tr("over %.0f bar rating"), workingPa / 1e5) + ")" : "";
+        info.headline(mods.eln.i18n.I18N.tr("Pressure"), String.format("%.2f bar of %s, %s%s", v.P() / 1e5, mods.eln.sim.fluid.EaUnits.contents(v),
+            mods.eln.api.Meters.celsius(v.T() - mods.eln.sim.fluid.Water.T0), warn));
+        info.headline(mods.eln.i18n.I18N.tr("Contents"), mods.eln.sim.fluid.EaUnits.composition(v));
+        info.headline(mods.eln.i18n.I18N.tr("Liquid"), mods.eln.sim.fluid.EaUnits.volume(v.liquidVolume() * mods.eln.sim.fluid.Water.RHO_L
+            / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER) + ", " + mods.eln.misc.Utils.plotPercent(fill));
+        String visc = mods.eln.sim.fluid.EaUnits.viscosity(v);
+        if (visc != null) {
+            if (visc.contains(mods.eln.i18n.I18N.tr("heat or dilute"))) info.headline(mods.eln.i18n.I18N.tr("Viscosity"), visc);
+            else info.detail(mods.eln.i18n.I18N.tr("Viscosity"), visc);
+        }
     }
 
     /** A vessel's Jade headline as a tank shows it (pressure, what it is and its temperature; contents; liquid; viscosity). */
@@ -237,7 +254,7 @@ public class TankDescriptor extends TransparentNodeDescriptor {
         }
         super.addInformation(stack, player, list, adv);
         list.add(ratingLine());
-        list.add("Steam off the top and the high side ports; water off the bottom and the low ones.");
-        list.add("A steam drum, a separator for wet steam, or a hotwell for a pump to draw from.");
+        mods.eln.client.ItemTooltips.detail(list,
+            "Gas ports: top & high sides. Liquid ports: bottom & low sides.");
     }
 }

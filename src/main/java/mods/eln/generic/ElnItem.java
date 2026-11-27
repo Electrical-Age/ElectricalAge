@@ -53,7 +53,15 @@ public class ElnItem extends Item implements IDescriptorItem {
 
     @Override
     public Component getName(ItemStack stack) {
-        return Component.literal(descriptor.getName(stack));
+        String custom = descriptor.getName(stack);
+        if (custom != null && !custom.equals(descriptor.name)) {
+            if (descriptor.name != null && custom.endsWith(descriptor.name)) {
+                String prefix = custom.substring(0, custom.length() - descriptor.name.length());
+                return Component.literal(prefix).append(super.getName(stack));
+            }
+            return Component.literal(custom);
+        }
+        return super.getName(stack);
     }
 
     /**

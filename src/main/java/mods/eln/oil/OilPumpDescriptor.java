@@ -65,8 +65,8 @@ public class OilPumpDescriptor extends TransparentNodeDescriptor implements mods
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add(String.format("%.0f V, %.0f W: about %.0f buckets of crude an hour", nominalU, nominalP,
-            nominalP / energyPerMb(false, 40) * 3.6));
-        list.add("Place on well casing that reaches an oil lake or water");
+        list.add(String.format("Pumps crude oil or water up well casing (~%.0f B/h at %.0f W).",
+            nominalP / energyPerMb(false, 40) * 3.6, nominalP));
+        list.add("Place on well casing reaching an oil lake or water.");
     }
 }

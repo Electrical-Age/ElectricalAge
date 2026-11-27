@@ -131,13 +131,10 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
                                List<String> list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
-        list.add(tr("Generates energy from wind."));
-        if (!Utils.nameShowsVoltage(name, maxVoltage))
-            list.add(tr("Voltage: %1$V", Utils.plotValue(maxVoltage)));
-        list.add(tr("Power: %1$W", Utils.plotValue(nominalPower)));
-        list.add(tr("Wind area:"));
-        list.add("  " + tr("Front: %1$", rayX));
-        list.add("  " + tr("Up/Down: %1$", rayY));
-        list.add("  " + tr("Left/Right: %1$", rayZ));
+        list.add(Utils.nameShowsVoltage(name, maxVoltage)
+            ? tr("Generates electricity from wind (%1$W).", Utils.plotValue(nominalPower))
+            : tr("Generates electricity from wind (%1$V, %2$W).", Utils.plotValue(maxVoltage), Utils.plotValue(nominalPower)));
+        mods.eln.client.ItemTooltips.detail(list,
+            tr("Clearance needed: %1$ front, %2$ up/down, %3$ sides (blocks).", rayX, rayY, rayZ));
     }
 }

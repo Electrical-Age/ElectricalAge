@@ -57,10 +57,11 @@ public class AddressableButtonDescriptor extends SixNodeDescriptor {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("A button on the RS485 bus: a press is sent to every device, from its address."));
-        list.add("  " + tr("Its lamp lights when it is sent power (a call taken). Sneak and click it to set its address."));
+        list.add(tr("RS485 bus button with controllable indicator lamp."));
+        mods.eln.client.ItemTooltips.hint(list, tr("Sneak + right-click to set address."));
     }
 
     @Override

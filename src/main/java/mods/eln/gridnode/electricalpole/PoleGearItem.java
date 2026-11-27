@@ -27,11 +27,13 @@ public class PoleGearItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display,
                                 java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
         String line = switch (kind) {
-            case STREETLIGHT -> String.format("Lights when dark, from the line (%.0f W). Never wears out", ElectricalPoleElement.LAMP_WATTS);
-            case ANCHOR -> "Keeps the pole, its lights and transformer running in stopped time";
+            case STREETLIGHT -> String.format("Pole lamp (%.0f W), lights at dusk", ElectricalPoleElement.LAMP_WATTS);
+            case ANCHOR -> "Keeps a utility pole running in stopped time";
         };
         out.accept(Component.literal(line).withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.literal(kind == Kind.STREETLIGHT ? "Right-click a utility pole from the side it should face"
-            : "Right-click a utility pole to fit it").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        mods.eln.client.ItemTooltips.addDetails(out,
+            mods.eln.client.ItemTooltips.hintLine(mods.eln.i18n.I18N.tr(kind == Kind.STREETLIGHT
+                ? "Right-click a utility pole from the side it should face"
+                : "Right-click a utility pole to fit")));
     }
 }

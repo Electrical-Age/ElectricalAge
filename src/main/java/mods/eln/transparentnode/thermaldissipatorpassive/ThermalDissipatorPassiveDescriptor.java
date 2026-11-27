@@ -59,11 +59,9 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
                                List list, boolean par4) {
 
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Used to cool down turbines."));
-        list.add(tr("Max. temperature: %1$", Utils.plotCelsius(warmLimit)));
-        list.add(tr("Nominal usage:"));
-        list.add("  " + tr("Temperature: %1$", Utils.plotCelsius(nominalT)));
-        list.add("  " + tr("Cooling power: %1$W", Utils.plotValue(nominalP)));
+        list.add(tr("Radiates heat from thermal connections."));
+        list.add(tr("Cooling: %1$W at %2$ (max %3$).",
+            Utils.plotValue(nominalP), Utils.plotCelsius(nominalT), Utils.plotCelsius(warmLimit)));
     }
 
 

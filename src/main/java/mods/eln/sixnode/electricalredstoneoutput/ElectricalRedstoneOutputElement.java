@@ -97,10 +97,9 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Redstone value"), Utils.plotValue(redstoneValue));
-        info.put(I18N.tr("Input voltage"), Utils.plotVolt("", inputGate.getU()));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Redstone value"), Utils.plotValue(redstoneValue))
+            .headline(I18N.tr("Input voltage"), Utils.plotVolt("", inputGate.getU()));
     }
 
     @Override

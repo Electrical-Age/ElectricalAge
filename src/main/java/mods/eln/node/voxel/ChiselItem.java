@@ -78,6 +78,14 @@ public class ChiselItem extends Item implements PipeTool {
         return Component.translatable(getDescriptionId()).append(" (" + size(stack) + ", ").append(shapeName(shape(stack))).append(")");
     }
 
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display,
+                                java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
+        out.accept(Component.literal(mods.eln.i18n.I18N.tr("Carves blocks for cables and pipes")).withStyle(net.minecraft.ChatFormatting.GRAY));
+        mods.eln.client.ItemTooltips.addDetails(out,
+            mods.eln.client.ItemTooltips.hintLine(mods.eln.i18n.I18N.tr("Left-click: carve · Right-click: restore")));
+    }
+
     /**
      * At most one stroke per {@link #STROKE_TICKS} per player (Baughn: holding the button down lagged the game; a
      * cancelled left-click is sent again every tick while held, and each stroke re-publishes and re-meshes the block).
@@ -158,7 +166,7 @@ public class ChiselItem extends Item implements PipeTool {
         BlockState st = level.getBlockState(at);
         VoxelNode node = st.getBlock() instanceof VoxelNodeBlock && level.getBlockEntity(at) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n ? n : null;
         if (node == null) {
-            if (!remove) return st.isAir() ? "nothing carved here to put back" : "put back only into a carved block";
+            if (!remove) return st.isAir() ? mods.eln.i18n.I18N.tr("Nothing carved here") : mods.eln.i18n.I18N.tr("Not a carved block");
             if (!Mimic.carvable(st)) return Mimic.whyNotCarvable(st);
             // a plain block becomes a voxel block imitating it
             node = new VoxelNode();
@@ -167,19 +175,19 @@ public class ChiselItem extends Item implements PipeTool {
             node.carved = new BitSet(4096);
             level.setBlock(at, VoxelNodeBlock.forHost(st), 3);
         }
-        if (node.host == null) return remove ? "nothing to carve here: no block around these parts" : "nothing carved here to put back";
+        if (node.host == null) return mods.eln.i18n.I18N.tr(remove ? "Nothing to carve here" : "Nothing carved here");
         if (node.carved == null) node.carved = new BitSet(4096);
         BitSet all = Mimic.voxels(Mimic.boxes(node.host, level, at));
         BitSet region = Mimic.voxels(java.util.List.of(brush));
         region.and(all);
         if (remove) {
             region.andNot(node.carved);
-            if (region.isEmpty()) return "already carved";
+            if (region.isEmpty()) return mods.eln.i18n.I18N.tr("Already carved");
             node.carved.or(region);
         } else {
             region.and(node.carved);
             region.andNot(node.partsVoxels());   // (not into cables or devices)
-            if (region.isEmpty()) return "nothing to put back there";
+            if (region.isEmpty()) return mods.eln.i18n.I18N.tr("Nothing to restore there");
             node.carved.andNot(region);
         }
         node.elementsChanged();

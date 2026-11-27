@@ -112,7 +112,7 @@ public class ElnScreen extends net.minecraft.client.gui.screens.inventory.Abstra
             else g.fill(q.x() + 1, q.y() + 1, q.x() + q.w() - 1, q.y() + q.h() - 1, 0xFFC6C6C6);
         });
         String[] tips = java.util.Arrays.copyOf(tooltip, tooltip.length + 1);
-        tips[tooltip.length] = mods.eln.i18n.I18N.tr("Click for the next colour, shift-click for the one before.");
+        tips[tooltip.length] = mods.eln.i18n.I18N.tr("Click: next, Shift-click: previous");
         return button(buttonId, () -> {
             int c = get.getAsInt();
             return mods.eln.bus.BusChannel.valid(c) ? mods.eln.bus.BusChannel.label(c) : mods.eln.i18n.I18N.tr("Unused");

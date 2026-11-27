@@ -94,13 +94,12 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Fire present"), firePresent ? I18N.tr("Yes") : I18N.tr("No"));
-        if (Eln.wailaEasyMode && !descriptor.batteryPowered) {
-            info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
-        }
+        var info = mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Fire present"), firePresent ? I18N.tr("Yes") : I18N.tr("No"));
         if (descriptor.batteryPowered) {
-            info.put(I18N.tr("Battery level"), Utils.plotPercent(slowProcess.getBatteryLevel()));
+            info.headline(I18N.tr("Battery level"), Utils.plotPercent(slowProcess.getBatteryLevel()));
+        } else {
+            info.detail(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
         }
         return info;
     }

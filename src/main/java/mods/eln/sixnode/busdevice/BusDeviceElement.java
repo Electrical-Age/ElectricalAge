@@ -130,10 +130,9 @@ public abstract class BusDeviceElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new LinkedHashMap<>();
-        info.put(I18N.tr("Address"), port.address() == 0 ? I18N.tr("none (set it in its screen)") : String.valueOf(port.address()));
-        info.put(I18N.tr("Bus"), port.bus() == null ? I18N.tr("no bus") : I18N.tr("on a bus"));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Address"), port.address() == 0 ? I18N.tr("Unset") : String.valueOf(port.address()))
+            .headline(I18N.tr("Bus"), port.bus() == null ? I18N.tr("Not connected") : I18N.tr("Connected"));
     }
 
     @Override

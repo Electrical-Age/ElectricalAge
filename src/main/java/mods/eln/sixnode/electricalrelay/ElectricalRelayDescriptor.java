@@ -76,7 +76,7 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("A relay is an electrical\ncontact that conducts electric\ncurrent or not, depending\nthe actual input signal voltage.").split("\n"));
+        list.add(tr("Signal-controlled electrical switch."));
     }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)

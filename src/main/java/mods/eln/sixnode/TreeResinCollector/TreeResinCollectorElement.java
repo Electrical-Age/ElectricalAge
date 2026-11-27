@@ -63,11 +63,10 @@ public class TreeResinCollectorElement extends SixNodeElement {
     /** For the probe (Jade): what's in the pot, and how fast it fills (or that it isn't on a tree). */
     @Override
     public java.util.Map<String, String> getWaila() {
-        var out = new java.util.LinkedHashMap<String, String>();
         double rate = getProductPerSecond();
-        out.put("Resin in pot", String.format("%.2f / %d", Math.min(occupancyMax, getProduct(rate)), (int) occupancyMax));
-        out.put("Rate", rate < 1e-6 ? "none: not on a tree (needs leaves round its logs)" : String.format("%.1f per hour", rate * 3600));
-        return out;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(mods.eln.i18n.I18N.tr("Resin"), String.format("%.2f / %d", Math.min(occupancyMax, getProduct(rate)), (int) occupancyMax))
+            .headline(mods.eln.i18n.I18N.tr("Rate"), rate < 1e-6 ? mods.eln.i18n.I18N.tr("No living tree") : String.format("%.1f/h", rate * 3600));
     }
 
     @Override
@@ -198,7 +197,8 @@ public class TreeResinCollectorElement extends SixNodeElement {
             if (ElnDeviceRegistry.treeResin != null) sixNode.dropItem(ElnDeviceRegistry.treeResin.newItemStack(1));
         }
 
-        entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Tree Resin in pot : " + String.format("%1.2f", productPerSeconde * timeFromLastActivated)));
+        entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(
+            mods.eln.i18n.I18N.tr("Resin: %1$", String.format("%.2f", productPerSeconde * timeFromLastActivated))));
         needPublish();
         return true;
     }

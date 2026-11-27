@@ -200,13 +200,12 @@ public class MpptElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new LinkedHashMap<>();
-        info.put(I18N.tr("Panels"), Meters.watts(conv.getInputP()) + " @ " + Meters.volts(conv.getInputU()));
-        info.put(I18N.tr("Battery"), Meters.watts(conv.getOutputP()) + " @ " + Meters.volts(conv.getOutputU()));
-        info.put(I18N.tr("State"), stateText(state.ordinal()));
-        info.put(I18N.tr("Charge voltage"), Meters.volts(chargeVolts));
-        info.put(I18N.tr("Charge current"), Meters.amps(chargeAmps));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Panels"), Meters.watts(conv.getInputP()) + " @ " + Meters.volts(conv.getInputU()))
+            .headline(I18N.tr("Battery"), Meters.watts(conv.getOutputP()) + " @ " + Meters.volts(conv.getOutputU()))
+            .headline(I18N.tr("State"), stateText(state.ordinal()))
+            .detail(I18N.tr("Charge voltage"), Meters.volts(chargeVolts))
+            .detail(I18N.tr("Charge current"), Meters.amps(chargeAmps));
     }
 
     @Override

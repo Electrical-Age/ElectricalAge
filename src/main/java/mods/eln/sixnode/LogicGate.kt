@@ -232,10 +232,10 @@ abstract class LogicFunction : INBTTReady {
     open fun process(inputs: Array<Double?>): Boolean = process(inputs.toDigital())
     open fun process(inputs: List<Boolean?>): Boolean = false
 
-    open fun getWaila(inputs: Array<Double?>, output: Double) = mutableMapOf(
-        Pair("Inputs", (1..inputCount).map { "${AnalogFunction.inputColors[it - 1]}${inputs[it - 1].toDigitalString()}" }.joinToString(" ")),
-        Pair("Output", output.toDigitalString())
-    )
+    open fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> =
+        mods.eln.compat.jade.ProbeLines.of()
+            .headline("Inputs", (1..inputCount).map { "${AnalogFunction.inputColors[it - 1]}${inputs[it - 1].toDigitalString()}" }.joinToString(" "))
+            .headline("Output", output.toDigitalString())
 
     override fun readFromNBT(nbt: CompoundTag?, str: String?) {}
     override fun writeToNBT(nbt: CompoundTag?, str: String?) {}
@@ -243,55 +243,49 @@ abstract class LogicFunction : INBTTReady {
 
 class Not : LogicFunction() {
     override val inputCount = 1
-    override val infos =
-        tr("Inverts the input signal.\nOutputs a voltage representing the\nopposite logic-level to its input.")
+    override val infos = tr("Inverts a digital signal.")
 
     override fun process(inputs: List<Boolean?>): Boolean = !(inputs[0] ?: false)
 }
 
 open class And : LogicFunction() {
     override val inputCount = 3
-    override val infos =
-        tr("Implements logical conjunction.\nA 1 (high) output results only if all of\nthe three inputs to the AND gate are 1 (high).")
+    override val infos = tr("Outputs high when all connected inputs are high.")
 
     override fun process(inputs: List<Boolean?>): Boolean =
         (inputs[0] ?: true) && (inputs[1] ?: true) && (inputs[2] ?: true)
 }
 
 class Nand : And() {
-    override val infos =
-        tr("Its output is complement (inverted)\nto that of the AND gate.")
+    override val infos = tr("Inverted AND gate.")
 
     override fun process(inputs: List<Boolean?>): Boolean = !super.process(inputs);
 }
 
 open class Or : LogicFunction() {
     override val inputCount = 3
-    override val infos =
-        tr("Implements logical disjunction.\nA 1 (high) output results if at least\none input to the gate is 1 (high).")
+    override val infos = tr("Outputs high when any input is high.")
 
     override fun process(inputs: List<Boolean?>): Boolean =
         (inputs[0] ?: false) || (inputs[1] ?: false) || (inputs[2] ?: false)
 }
 
 class Nor : Or() {
-    override val infos =
-        tr("Its output is complement (inverted)\nto that of the OR gate.")
+    override val infos = tr("Inverted OR gate.")
 
     override fun process(inputs: List<Boolean?>): Boolean = !super.process(inputs)
 }
 
 open class Xor : LogicFunction() {
     override val inputCount = 3
-    override val infos =
-        tr("Implements an exclusive or.\nAn output of 1 (high) results if one or\nall three inputs to the gate are 1 (high).")
+    override val infos = tr("Outputs high when an odd number of inputs are high.")
 
     override fun process(inputs: List<Boolean?>): Boolean =
         (inputs[0] ?: false) xor (inputs[1] ?: false) xor (inputs[2] ?: false)
 }
 
 class XNor : Xor() {
-    override val infos = tr("Its output is complement (inverted)\nto that of the XOR gate.")
+    override val infos = tr("Inverted XOR gate.")
 
     override fun process(inputs: List<Boolean?>): Boolean = !super.process(inputs)
 }
@@ -299,8 +293,7 @@ class XNor : Xor() {
 class SchmittTrigger : LogicFunction() {
     override val hasState = true
     override val inputCount = 1
-    override val infos =
-        tr("If the input voltage is lower than 10V, the\noutput is 0 (low), if the output is bigger or\nequal to 30V, the output will be 1 (high). For\nall voltages in between, the output does not change.")
+    override val infos = tr("Hysteresis comparator: low \u2264 1 V, high \u2265 3 V.")
     private var state = false
 
     override fun process(inputs: Array<Double?>): Boolean {
@@ -328,8 +321,7 @@ class SchmittTrigger : LogicFunction() {
 class Oscillator : LogicFunction() {
     override val hasState = true
     override val inputCount = 1
-    override val infos =
-        tr("Outputs a rectangular signal which's frequency\ndepends to the input voltage. The higher the\ninput voltage - the higher the frequency.")
+    override val infos = tr("Square-wave oscillator; input voltage sets frequency.")
     private var ramp = 0.0
     private var state = false
 
@@ -342,10 +334,10 @@ class Oscillator : LogicFunction() {
         return state
     }
 
-    override fun getWaila(inputs: Array<Double?>, output: Double) = mutableMapOf(
-        Pair("Inputs", "${AnalogFunction.inputColors[0]} ${Utils.plotVolt("", inputs[0] ?: 0.0)}"),
-        Pair("Output", output.toDigitalString())
-    )
+    override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> =
+        mods.eln.compat.jade.ProbeLines.of()
+            .headline("Inputs", "${AnalogFunction.inputColors[0]} ${Utils.plotVolt("", inputs[0] ?: 0.0)}")
+            .headline("Output", output.toDigitalString())
 
     override fun readFromNBT(nbt: CompoundTag?, str: String?) {
         ramp = nbt?.getDoubleOr(str + "ramp", 0.0) ?: 0.0
@@ -394,16 +386,14 @@ abstract class TriggeredLogicFunction(private val triggerIndex: Int) : LogicFunc
 
 class DFlipFlop : TriggeredLogicFunction(1) {
     override val inputCount = 2
-    override val infos =
-        tr("The D flip-flop captures the value\nof the D-input at a rising edge\nportion of the clock cycle.")
+    override val infos = tr("Latches input D on a rising clock edge.")
 
     override fun onRisingEdge(inputs: List<Boolean?>, state: Boolean): Boolean = inputs[0] ?: false
 }
 
 class JKFlipFlop : TriggeredLogicFunction(0) {
     override val inputCount = 3
-    override val infos =
-        tr("If the input J is 1 (high) and K is 0 (low)\nduring a clock pulse, the output becomes 1 (high).\nIf J is 0 (low) and K is 1 (high) during the pulse,\nthe output becomes 0 (low). If both inputs are 0 (low)\nduring the clock pulse, the state is maintained. If both\ninputs are 1 (high) the input is toggled if a rising edge\nwas detected at the clock input.")
+    override val infos = tr("JK flip-flop on rising clock edge: J sets, K resets, both toggle.")
 
     override fun onRisingEdge(inputs: List<Boolean?>, state: Boolean): Boolean =
         when (Pair(inputs[1] ?: true, inputs[2] ?: true)) {
@@ -478,8 +468,7 @@ class Pal : LogicFunction() {
     // the world had the same table (toggling one toggled all; on load the last chip read won). Found by the port26 selftest.
     override val hasState = true
     override val inputCount = 3
-    override val infos =
-        tr("A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.")
+    override val infos = tr("Configurable 3-input combinational logic truth table.")
     val truthTable = Array(8, { false })
 
     private operator fun Boolean.times(factor: Int): Int = if (this) factor else 0

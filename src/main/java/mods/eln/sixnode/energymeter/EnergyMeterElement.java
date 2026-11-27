@@ -131,20 +131,19 @@ public class EnergyMeterElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Power"), Utils.plotPower("", aLoad.getU() * aLoad.getI()));
+        var info = mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Power"), Utils.plotPower("", aLoad.getU() * aLoad.getI()));
         switch (mod) {
             case ModCounter:
-                info.put(I18N.tr("Mode"), I18N.tr("Counter"));
-                info.put(I18N.tr("Energy"), Utils.plotEnergy("", energyStack));
+                info.headline(I18N.tr("Energy"), Utils.plotEnergy("", energyStack));
+                info.detail(I18N.tr("Mode"), I18N.tr("Counter"));
                 break;
 
             case ModPrepay:
-                info.put(I18N.tr("Mode"), I18N.tr("Prepay"));
-                info.put(I18N.tr("Energy left"), Utils.plotEnergy("", energyStack));
+                info.headline(I18N.tr("Energy left"), Utils.plotEnergy("", energyStack));
+                info.detail(I18N.tr("Mode"), I18N.tr("Prepay"));
                 break;
         }
-
         return info;
     }
 

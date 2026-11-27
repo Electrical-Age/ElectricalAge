@@ -70,4 +70,10 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor implemen
     public void drawItem(boolean entity) {
         draw();
     }
+
+    @Override
+    public void addInformation(net.minecraft.world.item.ItemStack itemStack, net.minecraft.world.entity.player.Player entityPlayer, java.util.List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(mods.eln.i18n.I18N.tr("Configurable power capacitor block (fit dielectrics to set capacitance)."));
+    }
 }

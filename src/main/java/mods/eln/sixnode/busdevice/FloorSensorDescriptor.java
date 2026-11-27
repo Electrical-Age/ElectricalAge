@@ -40,10 +40,11 @@ public class FloorSensorDescriptor extends SixNodeDescriptor {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Sees an elevator car stop level with the floor of its block, up to %1$ blocks away.", (int) REACH));
-        list.add("  " + tr("On the RS485 bus: register 0 is 1 while it's there; sends arrive when it stops. Set its address in its screen."));
+        list.add(tr("Detects an Elevator Car aligned with this floor (range: %1$ blocks).", (int) REACH));
+        mods.eln.client.ItemTooltips.hint(list, tr("RS485 bus device. Right-click to set address."));
     }
 
     @Override

@@ -269,12 +269,12 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         int kind = kindOf(hand);
         if (panel[i] == ElevatorCar.PANEL_NONE) {
             if (kind == ElevatorCar.PANEL_NONE) {
-                say(player, I18N.tr("Put an Addressable Button or Light here"));
+                say(player, I18N.tr("Needs an Addressable Button or Light"));
                 return;
             }
             panel[i] = kind;
             if (!player.getAbilities().instabuild) hand.shrink(1);
-            if (panelBase == 0) say(player, I18N.tr("Set the panel's first address in the drive's screen"));
+            if (panelBase == 0) say(player, I18N.tr("Panel address unset"));
         } else if (player.isShiftKeyDown() && hand.isEmpty()) {
             player.getInventory().add(stackOf(panel[i]));
             panel[i] = ElevatorCar.PANEL_NONE;
@@ -831,34 +831,35 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
     }
 
     @Override
-    /** The machine's lines (volts, power drawn, its state when not running), then the drive's. */
+    /** State/faults first, then position/target and power; secondary telemetry in details. */
     public Map<String, String> getWaila() {
-        Map<String, String> info = new LinkedHashMap<>(machine.wailaLines());
+        var info = mods.eln.compat.jade.ProbeLines.of();
         double p = posAt(clock);
-        info.put(I18N.tr("Position"), String.format("%.1f m", p));
-        info.put(I18N.tr("Target"), String.format("%.0f m", target));
-        info.put(I18N.tr("Speed"), String.format("%.2f m/s", Math.abs(speed)));
-        info.put(I18N.tr("Address"), port.address() == 0 ? I18N.tr("none (set it in its screen)") : String.valueOf(port.address()));
+        info.headline(I18N.tr("State"), stateText());
+        info.headline(I18N.tr("Position"), String.format("%.1f / %.0f m", p, target));
+        info.headline(I18N.tr("Power"), Utils.plotPower("", machine.watts()));
+        info.detail(I18N.tr("Speed"), String.format("%.2f m/s", Math.abs(speed)));
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", machine.volts()));
+        info.detail(I18N.tr("Address"), port.address() == 0 ? I18N.tr("None") : String.valueOf(port.address()));
         int buttons = 0, lights = 0;
         for (int k : panel) if (k == ElevatorCar.PANEL_BUTTON) buttons++; else if (k == ElevatorCar.PANEL_LIGHT) lights++;
         if (buttons + lights > 0)
-            info.put(I18N.tr("Car panel"), (buttons == 1 ? I18N.tr("1 button") : I18N.tr("%1$ buttons", buttons)) + ", "
+            info.detail(I18N.tr("Car panel"), (buttons == 1 ? I18N.tr("1 button") : I18N.tr("%1$ buttons", buttons)) + ", "
                 + (lights == 1 ? I18N.tr("1 light") : I18N.tr("%1$ lights", lights)) + ", " + (panelBase == 0 ? I18N.tr("no address")
-                : I18N.tr("addresses %1$ to %2$", panelBase, Math.min(255, panelBase + ElevatorPanel.SLOTS - 1))));
-        info.put(I18N.tr("State"), stateText());
+                : I18N.tr("addresses %1$–%2$", panelBase, Math.min(255, panelBase + ElevatorPanel.SLOTS - 1))));
         return info;
     }
 
     /** The state in words (Jade). */
     public String stateText() {
         return switch (fault) {
-            case OBSTRUCTED -> I18N.tr("Fault: something is in the way");
-            case OVERHEAT -> I18N.tr("Fault: the motor is too hot");
-            case OVERVOLTAGE -> I18N.tr("Fault: the line voltage is too high");
-            case NO_RAIL -> travel < LinearServoDriveDescriptor.MIN_TRAVEL ? axis == net.minecraft.core.Direction.UP ? I18N.tr("Fault: needs a rail of %1$ to %2$ blocks on top",
-                LinearServoDriveDescriptor.MIN_TRAVEL, LinearServoDriveDescriptor.MAX_TRAVEL) : I18N.tr("Fault: needs %1$ to %2$ blocks of rail past the one on top",
-                LinearServoDriveDescriptor.MIN_TRAVEL, LinearServoDriveDescriptor.MAX_TRAVEL) : I18N.tr("Fault: the rail is broken");
-            default -> stalled && machine.state() == MachineState.RUNNING ? I18N.tr("The line is too weak")
+            case OBSTRUCTED -> I18N.tr("Fault: obstructed");
+            case OVERHEAT -> I18N.tr("Fault: overheated");
+            case OVERVOLTAGE -> I18N.tr("Fault: overvoltage");
+            case NO_RAIL -> travel < LinearServoDriveDescriptor.MIN_TRAVEL
+                ? I18N.tr("Fault: needs %1$–%2$ blocks of rail", LinearServoDriveDescriptor.MIN_TRAVEL, LinearServoDriveDescriptor.MAX_TRAVEL)
+                : I18N.tr("Fault: rail broken");
+            default -> stalled && machine.state() == MachineState.RUNNING ? I18N.tr("Line too weak")
                 : machine.state() != MachineState.RUNNING ? I18N.tr("No power")
                 : !enabled() ? I18N.tr("Disabled") : movingAt(clock) ? I18N.tr("Moving") : I18N.tr("In position");
         };

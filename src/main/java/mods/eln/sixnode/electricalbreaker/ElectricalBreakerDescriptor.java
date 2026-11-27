@@ -80,7 +80,7 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, (tr("Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds its trip current").split("\n")));
+        list.add(tr("Trips open on over-voltage or over-current."));
     }
 
     /** Small: placed anywhere on a face of a voxel block, and in line on a cable (Baughn 2026-11-17). In the face slot

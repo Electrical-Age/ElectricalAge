@@ -29,14 +29,14 @@ public class PoleScreen extends ElnScreen {
         text("lampsl", () -> tr("Lights: N E S W"));
         text("line", () -> tr("Line: %1$ kits, %2$, %3$", CableSpec.voltsLabel(r.lineTier), mods.eln.api.Meters.volts(Math.abs(r.lineU)),
             mods.eln.api.Meters.watts(Math.abs(r.lineP))));
-        text("xfmr", () -> r.transformerTier == 0 ? tr("No transformer: the foot's socket is dead")
+        text("xfmr", () -> r.transformerTier == 0 ? tr("Transformer: None")
             : tr("Transformer: line to %1$", CableSpec.voltsLabel(r.transformerTier)));
         text("lights", () -> {
             int n = Integer.bitCount(r.lampMask);
-            if (n == 0) return tr("No streetlights");
-            return r.lit ? tr("Streetlights: %1$, lit (%2$)", n, mods.eln.api.Meters.watts(n * ElectricalPoleElement.LAMP_WATTS))
-                : tr("Streetlights: %1$, off (daylight or no power)", n);
+            if (n == 0) return tr("Streetlights: None");
+            return r.lit ? tr("Streetlights: %1$ (lit, %2$)", n, mods.eln.api.Meters.watts(n * ElectricalPoleElement.LAMP_WATTS))
+                : tr("Streetlights: %1$ (off)", n);
         });
-        text("anchor", () -> r.anchor ? tr("Stasis anchor: keeps running in stopped time") : tr("No stasis anchor"));
+        text("anchor", () -> r.anchor ? tr("Stasis anchor: Installed") : tr("Stasis anchor: None"));
     }
 }

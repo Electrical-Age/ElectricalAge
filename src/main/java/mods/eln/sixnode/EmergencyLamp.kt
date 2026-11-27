@@ -75,12 +75,7 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>,
                                 par4: Boolean) {
-        with(list) {
-            add("As long as power is provided, the internal battery")
-            add("is charged and the lamp is off. On a power failure,")
-            add("the lamp turns on and runs on batteries.")
-            add(Utils.plotEnergy("Battery capacity:", batteryCapacity))
-        }
+        list.add(mods.eln.i18n.I18N.tr("Charges while powered; lights on power loss (%1$).", Utils.plotEnergy(batteryCapacity).trim()))
     }
 
     /** The glow quads span the whole face: not part of the box (Baughn 2026-10-29: hitboxes larger than the model). */
@@ -181,15 +176,14 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         append(Utils.plotPercent("Charge:", charge / (sixNodeElementDescriptor as EmergencyLampDescriptor).batteryCapacity))
     }
     override fun thermoMeterString() = ""
-    override fun getWaila() = mapOf(
-        "State" to when {
-            on -> "On"
-            chargingResistor.state -> "Charging..."
-            charge <= 0.0 -> "Batteries empty"
-            else -> "Fully charged"
-        },
-        "Charge" to Utils.plotPercent(charge / (sixNodeElementDescriptor as EmergencyLampDescriptor).batteryCapacity)
-    )
+    override fun getWaila(): Map<String, String> = mods.eln.compat.jade.ProbeLines.of()
+        .headline(mods.eln.i18n.I18N.tr("State"), when {
+            on -> mods.eln.i18n.I18N.tr("On")
+            chargingResistor.state -> mods.eln.i18n.I18N.tr("Charging")
+            charge <= 0.0 -> mods.eln.i18n.I18N.tr("Empty")
+            else -> mods.eln.i18n.I18N.tr("Charged")
+        })
+        .headline(mods.eln.i18n.I18N.tr("Charge"), Utils.plotPercent(charge / (sixNodeElementDescriptor as EmergencyLampDescriptor).batteryCapacity))
 
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)

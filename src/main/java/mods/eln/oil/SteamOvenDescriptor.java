@@ -54,8 +54,11 @@ public class SteamOvenDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Cooks food with steam from a pipe on top:\nup to twice as fast as the electrical oven,\nbut it vents three quarters of the heat.\nNeeds a little 48V for its fan.").split("\n"));
+        list.add(tr("Steam-powered food oven (up to 2× Electrical Furnace speed)."));
+        list.add(tr("Requires 48 V for its fan."));
+        mods.eln.client.ItemTooltips.detail(list, tr("Vents three quarters of its steam heat."));
     }
 }

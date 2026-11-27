@@ -39,8 +39,8 @@ public class FerromagneticCoreDescriptor extends GenericItemUsingDamageDescripto
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Cable loss factor: %1$", cableMultiplicator));
-        list.add(tr("Up to %1$ V per turn", mods.eln.misc.Utils.plotValue(voltsPerTurn)));
-        list.add(tr("Holds %1$ mm² turns of winding", (int) window));
+        list.add(tr("Transformer core: up to %1$ V/turn, %2$ mm²·turns window.",
+            mods.eln.misc.Utils.plotValue(voltsPerTurn), (int) window));
+        list.add(tr("Loss factor: %1$", cableMultiplicator));
     }
 }

@@ -58,7 +58,7 @@ public class ElectricalMathScreen extends ElnScreen {
         // Save (Baughn 2026-10-31: was Apply), red while the text differs from what the processor holds
         button(LEFT_X, 224, LEFT_W, () -> (saved() ? "" : "\u00A7c") + tr("Save"),
             () -> render.clientSetString(ElectricalMathElement.setExpressionId, editor.buffer.text()),
-            tr("Saves the program to the processor"), tr("red: changed, not saved yet"));
+            tr("Save program to processor"));
         setInitialFocus(editor);
     }
 
@@ -66,25 +66,25 @@ public class ElectricalMathScreen extends ElnScreen {
     void logControls() {
         var lc = render.logClient;
         button(LEFT_X, 111, LEFT_W, () -> tr("Graph: %1$", tr(mods.eln.sixnode.electricaldatalogger.LogGraph.MODE_NAMES.get(Math.floorMod(render.log.mode, 3)))),
-            () -> lc.mode((render.log.mode + 1) % 3), tr("Lines, stacked areas, or a lane each"));
+            () -> lc.mode((render.log.mode + 1) % 3), tr("Lines, stacked, or separate lanes"));
         field(44, 134, LEFT_W - 38, () -> num(render.log.samplingPeriod), v -> {
             float p = mods.eln.client.gui.EaField.parse(v);
             if (!Float.isNaN(p)) lc.period(Math.max(0.05f, p));
-        }, tr("Sampling period"), tr("in seconds, at least 0.05; changing it keeps the history"));
+        }, tr("Sampling period (s, min 0.05)"));
         for (int i = 0; i < 4; i++) {
             int c = i;
             // (Baughn 2026-10-31: they pick the channel the fields below edit, not what the graph shows)
-            button(LEFT_X + 22 + i * 15, 155, c == 3 ? 22 : 14, () -> (selected == c ? "\u00A7n" : "") + TABS[c], () -> selected = c, tr("Edit this channel's scale and unit below"));
+            button(LEFT_X + 22 + i * 15, 155, c == 3 ? 22 : 14, () -> (selected == c ? "\u00A7n" : "") + TABS[c], () -> selected = c, tr("Edit channel scale and unit"));
         }
         field(LEFT_X, 177, 28, () -> num(channel().min), v -> {
             float p = mods.eln.client.gui.EaField.parse(v);
             if (!Float.isNaN(p)) lc.min(selected, p);
-        }, tr("Min"), tr("what a zero signal reads as"));
+        }, tr("Min (zero signal)"));
         field(LEFT_X + 30, 177, 28, () -> num(channel().max), v -> {
             float p = mods.eln.client.gui.EaField.parse(v);
             if (!Float.isNaN(p)) lc.max(selected, p);
-        }, tr("Max"), tr("what a full signal (5 V) reads as"));
-        field(LEFT_X + 60, 177, LEFT_W - 60, () -> channel().unit, v -> lc.unit(selected, v), tr("Unit"), tr("any text, up to 10 characters"));
+        }, tr("Max (full 5 V signal)"));
+        field(LEFT_X + 60, 177, LEFT_W - 60, () -> channel().unit, v -> lc.unit(selected, v), tr("Unit (max 10 chars)"));
     }
 
     mods.eln.sixnode.electricaldatalogger.LogChannel channel() {

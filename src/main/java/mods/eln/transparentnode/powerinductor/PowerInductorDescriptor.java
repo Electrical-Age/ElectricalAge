@@ -57,4 +57,10 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor implement
     public void drawItem(boolean entity) {
         draw();
     }
+
+    @Override
+    public void addInformation(net.minecraft.world.item.ItemStack itemStack, net.minecraft.world.entity.player.Player entityPlayer, java.util.List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(mods.eln.i18n.I18N.tr("Configurable power inductor block (fit windings to set inductance)."));
+    }
 }

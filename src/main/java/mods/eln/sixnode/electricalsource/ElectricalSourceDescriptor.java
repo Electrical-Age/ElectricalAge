@@ -62,11 +62,7 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Provides an ideal voltage source\nwithout energy or power limitation.").split("\\\n"));
-        list.add("");
-        list.add(tr("Internal resistance: %1$\u2126", Utils.plotValue(ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs)));
-        list.add("");
-        list.add(tr("Creative block."));
+        list.add(tr("Creative unlimited voltage source (%1$\u2126).", Utils.plotValue(ElnDeviceRegistry.lowVoltageCableDescriptor.electricalRs)));
     }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)

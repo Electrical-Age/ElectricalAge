@@ -124,11 +124,7 @@ public class ThermalCableDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
-        list.add(tr("Max. temperature: %1$", Utils.plotCelsius(thermalWarmLimit)));
-        list.add(tr("Serial resistance: %1$K/W", Utils.plotValue(thermalRs * 2)));
-        list.add(tr("Parallel resistance: %1$K/W", Utils.plotValue(thermalRp)));
-        list.add("");
-        Collections.addAll(list, tr("Low serialized resistance\n => High conductivity.").split("\n"));
-        Collections.addAll(list, tr("High parallel resistance\n => Low power dissipation.").split("\n"));
+        list.add(tr("Max temp: %1$", Utils.plotCelsius(thermalWarmLimit)));
+        list.add(tr("Conduction: %1$K/W | Loss: %2$K/W", Utils.plotValue(thermalRs * 2), Utils.plotValue(thermalRp)));
     }
 }

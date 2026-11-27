@@ -300,14 +300,20 @@ public class PolymeriserElement extends TransparentNodeElement implements mods.e
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>(machine.wailaLines());
-        if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
-        info.put(I18N.tr("Status"), I18N.tr(status));
+        var info = mods.eln.compat.jade.ProbeLines.of();
         String wrong = inlet.blockedBy();
-        if (wrong != null) info.put(I18N.tr("Blocked"), I18N.tr("it holds %1$, which it can't use", wrong));
-        info.put(I18N.tr("Butadiene (blue)"), mods.eln.sim.fluid.EaUnits.tank(butadieneMb(), TANK_MB));
-        info.put(I18N.tr("Soul Dust"), inventory.getItem(SOUL_SLOT).getCount() + (initiator > 0 ? " (+" + initiator + " rubber left)" : ""));
-        info.put(I18N.tr("Raw Rubber"), String.valueOf(inventory.getItem(RUBBER_SLOT).getCount()));
+        String state;
+        if (!onOff.on) state = I18N.tr("Off");
+        else if (wrong != null) state = I18N.tr("Wrong fluid (%1$)", wrong);
+        else if (machine.state() != mods.eln.api.MachineState.RUNNING) state = machine.wailaLines().getOrDefault(I18N.tr("State"), I18N.tr("No power"));
+        else if ("its Raw Rubber is full".equals(status)) state = I18N.tr("Output full");
+        else state = I18N.tr(status);
+        info.headline(I18N.tr("State"), state);
+        info.headline(I18N.tr("Butadiene"), mods.eln.sim.fluid.EaUnits.tank(butadieneMb(), TANK_MB));
+        info.headline(I18N.tr("Raw Rubber"), String.valueOf(inventory.getItem(RUBBER_SLOT).getCount()));
+        info.detail(I18N.tr("Soul Dust"), inventory.getItem(SOUL_SLOT).getCount() + (initiator > 0 ? " (+" + initiator + " " + I18N.tr("left") + ")" : ""));
+        info.detail(I18N.tr("Power"), Utils.plotPower("", machine.watts()));
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", machine.volts()));
         return info;
     }
 }

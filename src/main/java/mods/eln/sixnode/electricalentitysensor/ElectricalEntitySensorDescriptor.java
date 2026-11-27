@@ -59,8 +59,7 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Output voltage increases\nif entities are moving around.").split("\n"));
-        list.add(tr("Range: %1$ blocks", (int) maxRange));
+        list.add(tr("Outputs a signal when nearby entities move (range: %1$ blocks).", (int) maxRange));
     }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)

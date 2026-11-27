@@ -116,11 +116,9 @@ public class ThermalCableElement extends SixNodeElement {
     @Nullable
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-
-        info.put(I18N.tr("Thermic power"), Utils.plotPower("", thermalLoad.getPower()));
-        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()))
+            .headline(I18N.tr("Thermal power"), Utils.plotPower("", thermalLoad.getPower()));
     }
 
     @Override

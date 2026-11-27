@@ -27,10 +27,10 @@ public class ElectricalSensorScreen extends ElnScreen {
         text("hl", () -> "100%");
         text("ll", () -> "0%");
         high = field("high", () -> num(render.highValue), s -> validate(),
-            (v ? tr("Measured voltage\ncorresponding\nto 100% output") : tr("Measured value\ncorresponding\nto 100% output")).split("\n"));
+            v ? tr("Voltage at 100% (5 V) output") : tr("Value at 100% (5 V) output"));
         low = field("low", () -> num(render.lowValue), s -> validate(),
-            (v ? tr("Measured voltage\ncorresponding\nto 0% output") : tr("Measured value\ncorresponding\nto 0% output")).split("\n"));
-        button("validate", () -> tr("Validate"), this::validate);
+            v ? tr("Voltage at 0% output") : tr("Value at 0% output"));
+        button("validate", () -> tr("Apply"), this::validate);
         if (!v) {
             type("voltage", tr("Voltage"), ElectricalSensorElement.voltageType);
             type("current", tr("Current"), ElectricalSensorElement.currantType);

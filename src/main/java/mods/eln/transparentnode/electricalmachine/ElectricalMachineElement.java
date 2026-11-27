@@ -223,12 +223,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.putAll(machine.wailaLines());   // volts, the power drawn, and the machine's state when it isn't running
-        if (!onOff.on) info.put(I18N.tr("State"), I18N.tr("Switched off"));
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Power provided"), Utils.plotPower("", machine.watts()));
-        }
+        var info = mods.eln.compat.jade.ProbeLines.of().addAll(machine.wailaLines());
+        if (!onOff.on) info.headlineFirst(I18N.tr("State"), I18N.tr("Switched off"));
         return info;
     }
 }

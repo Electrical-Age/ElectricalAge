@@ -28,10 +28,16 @@ public class AdapterItem extends Item implements PipeTool {
             if (err != null) n.removePart(n.parts.size() - 1, false);
         }
         if (err != null) {
-            if (player != null) player.sendOverlayMessage(Component.literal("Can't fit an adapter here: " + err));
+            if (player != null) player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Can't fit adapter: %1$", err)));
             return InteractionResult.FAIL;
         }
         if (player == null || !player.isCreative()) ctx.getItemInHand().shrink(1);
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void appendHoverText(net.minecraft.world.item.ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display,
+                                java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
+        out.accept(Component.literal(mods.eln.i18n.I18N.tr("Connects pipes to other mods' tanks and pipes")).withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 }

@@ -682,9 +682,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** ... of any mode (SafetyValvePart.SAFETY, PURGE, BREATHER; a breather has no set pressure: the air's). */
     public String addSafetyValveNear(double hx, double hy, double hz, int mode) {
         int idx = partAt(hx, hy, hz);
-        if (idx >= 0 && (parts.get(idx) instanceof SafetyValvePart || parts.get(idx) instanceof ValvePart)) return "there's a valve there already";
-        for (VoxelPart q : parts) if (q instanceof SafetyValvePart) return "one safety valve per block (this one has one)";
-        if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return "fit it on a pipe";
+        if (idx >= 0 && (parts.get(idx) instanceof SafetyValvePart || parts.get(idx) instanceof ValvePart)) return mods.eln.i18n.I18N.tr("a valve is already there");
+        for (VoxelPart q : parts) if (q instanceof SafetyValvePart) return mods.eln.i18n.I18N.tr("block already has a safety valve");
+        if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return mods.eln.i18n.I18N.tr("must fit on a pipe");
         int[] best = null;
         double bd = Double.MAX_VALUE;
         for (int x = 4; x <= 12; x += 4)
@@ -737,8 +737,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** A valve of a kind (ValvePart.ON_OFF, CONTROL, THROTTLE) at the lattice point on the pipe nearest the click. */
     public String addValveNear(double hx, double hy, double hz, int mode) {
         int idx = partAt(hx, hy, hz);
-        if (idx >= 0 && parts.get(idx) instanceof ValvePart) return "there is a valve here already";
-        if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return "fit it on a pipe";
+        if (idx >= 0 && parts.get(idx) instanceof ValvePart) return mods.eln.i18n.I18N.tr("a valve is already here");
+        if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return mods.eln.i18n.I18N.tr("must fit on a pipe");
         int[] best = null;
         double bd = Double.MAX_VALUE;
         for (int x = 4; x <= 12; x += 4)
@@ -769,13 +769,13 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 hi[a] += 2;
                 if (pipe.passes(lo[0], lo[1], lo[2]) && pipe.passes(hi[0], hi[1], hi[2])) axis = a;
             }
-            if (axis < 0) return "the pipe turns here: fit a valve on a straight piece";
+            if (axis < 0) return mods.eln.i18n.I18N.tr("must fit on a straight pipe");
             BitSet others = new BitSet(4096), want = new BitSet(4096);
             for (int j = 0; j < parts.size(); j++) if (j != i) for (int[] b : parts.get(j).boxes()) fill(others, b);
             for (int[] b : new ValvePart(x, y, z, axis, pipe.bore(), mode).boxes()) fill(want, b);
-            if (want.intersects(others)) return "something is in the way";
+            if (want.intersects(others)) return mods.eln.i18n.I18N.tr("something is in the way");
             PipePart[] halves = pipe.splitAt(x, y, z);
-            if (halves == null) return "the pipe ends here";
+            if (halves == null) return mods.eln.i18n.I18N.tr("the pipe ends here");
             mods.eln.sim.fluid.FluidNode saved = pipe.fluid;
             if (saved != null) mods.eln.fluid.FluidWorld.writeBackOf(saved);   // (the halves take their shares of the run's contents)
             parts.remove(i);
@@ -817,9 +817,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      */
     public String addSensorNear(double hx, double hy, double hz, int sensing) {
         for (VoxelPart q : parts)
-            if (q instanceof PipeSensorPart) return "one sensor per block (its signal goes on every signal cable in the block)";
+            if (q instanceof PipeSensorPart) return mods.eln.i18n.I18N.tr("block already has a sensor");
         int idx = partAt(hx, hy, hz);
-        if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return "fit it on a pipe";
+        if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return mods.eln.i18n.I18N.tr("must fit on a pipe");
         int[] best = null;
         double bd = Double.MAX_VALUE;
         for (int x = 4; x <= 12; x += 4)
@@ -926,7 +926,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (player.getMainHandItem().isEmpty()) {
             int i = pi;
             if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv && sv.breather) {
-                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Fixed at outside pressure; nothing to set.")));
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Fixed at atmospheric pressure")));
                 return true;
             }
             if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv) {
@@ -936,19 +936,20 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             }
             if (i >= 0 && parts.get(i) instanceof PipeSensorPart s) {
                 s.scale = s.nextScale();
-                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("%s: full scale (5 V) %.0f %s", s.name(), s.scale, s.unit())));
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(
+                    mods.eln.i18n.I18N.tr("%1$: full scale %.0f %2$ (5 V)", s.name(), s.unit()).replace("%.0f", String.format("%.0f", s.scale))));
                 setNeedPublish(true);
                 return true;
             }
             if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.ON_OFF) {
                 v.open = !v.open;
-                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(v.open ? "Valve open" : "Valve shut"));
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr(v.open ? "Valve open" : "Valve shut")));
                 changed();
                 return true;
             }
             if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.CONTROL) {
-                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(String.format("Control valve %.0f%% open: a signal cable laid into its block sets it",
-                    v.opening() * 100)));
+                player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(
+                    mods.eln.i18n.I18N.tr("Control valve: %1$ open", String.format("%.0f%%", v.opening() * 100))));
                 return true;
             }
             if (i >= 0 && parts.get(i) instanceof ValvePart v && v.mode == ValvePart.PRESSURE && player instanceof net.minecraft.server.level.ServerPlayer sp) {
@@ -1100,7 +1101,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (no == null) return f;
             if (why == null) why = no;   // (the first refusal, the quarter turn's when that one is a candidate)
         }
-        err[0] = why != null ? "No other way round fits here: " + why : "It can't turn here without taking its pins off the cables";
+        err[0] = why != null ? mods.eln.i18n.I18N.tr("No other orientation fits: %1$", why)
+            : mods.eln.i18n.I18N.tr("Can't turn without disconnecting pins");
         return null;
     }
 
@@ -1205,7 +1207,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     private static String tooClose(mods.eln.node.six.SixNodeElement o) {
-        return "Too close to the " + o.sixNodeElementDescriptor.name + ": leave a voxel of air, or put their pins together";
+        return mods.eln.i18n.I18N.tr("Too close to %1$", o.sixNodeElementDescriptor.name);
     }
 
     /** Could an element go on face f (EA Direction int): free face, and its plate clear of the parts? */
@@ -2800,98 +2802,128 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      * with none, a burst pipe, else the first pipe, else the cables.
      */
     public java.util.LinkedHashMap<String, String> getWaila(boolean details, int hit) {
-        var out = new java.util.LinkedHashMap<String, String>();
+        var out = mods.eln.compat.jade.ProbeLines.of();
         VoxelPart aimed = hit >= 0 && hit < parts.size() ? parts.get(hit) : null;
         PipePart pipe = pipeOf(hit);
         if (pipe == null && !(aimed instanceof CablePart))
             for (VoxelPart p : parts) if (p instanceof PipePart pp && pp.fluid != null && (pipe == null || pp.burst)) pipe = pp;
         if (pipe == null) {
-            // cables: each conductor's tier, voltage and current (temperature with details)
             int n = 0;
-            // (looking at a cable: only its own conductor, Baughn 2026-10-28; else all of the block's)
             CableNet.Conductor only = conductorOf(hit);
             for (CableNet.Conductor k : cables.conductors) {
                 if (!k.valid() || (only != null ? k != only : k.face < 0)) continue;
                 String key = n++ == 0 ? "Cable" : "Cable " + n;
                 if (k.isBurntNow()) {
-                    out.put(key, k.name() + ", BURNT");
+                    out.headline(only != null ? mods.eln.i18n.I18N.tr("State") : key, only != null ? mods.eln.i18n.I18N.tr("BURNT") : k.name() + ", BURNT");
                     continue;
                 }
-                if (k.port != null) {   // the field bus: its channels in use, by number and name (Baughn: colourblind)
+                if (k.port != null) {   // the field bus: its channels in use, by number and name
                     var b = k.port.bus();
                     if (b == null) {
-                        out.put("Bus", "no devices");   // (Jade's title already says Field Bus Cable, Baughn)
+                        out.headline(mods.eln.i18n.I18N.tr("Bus"), mods.eln.i18n.I18N.tr("No devices"));
                         continue;
                     }
                     int used = 0;
                     for (int c = 0; c < mods.eln.bus.BusChannel.COUNT; c++) if (b.inUse(c)) used++;
-                    out.put("Bus", used + (used == 1 ? " channel in use, " : " channels in use, ") + b.portCount() + " ports");
+                    out.headline(mods.eln.i18n.I18N.tr("Bus"), used + (used == 1 ? " channel, " : " channels, ") + b.portCount() + " ports");
+                    var addresses = b.addresses();
+                    boolean dup = false;
+                    if (!addresses.isEmpty()) {
+                        StringBuilder sb = new StringBuilder();
+                        for (var e : addresses.entrySet()) {
+                            if (e.getValue() > 1) dup = true;
+                            sb.append(sb.length() == 0 ? "" : ", ").append(e.getKey()).append(e.getValue() > 1 ? " (" + e.getValue() + "x, DUPLICATE)" : "");
+                        }
+                        if (dup) out.headlineFirst(mods.eln.i18n.I18N.tr("Devices"), sb.toString());
+                        else if (used == 0) out.headline(mods.eln.i18n.I18N.tr("Devices"), sb.toString());
+                        else if (details) out.detail(mods.eln.i18n.I18N.tr("Devices"), sb.toString());
+                    }
+                    if (b.droppedTotal() > 0) {
+                        out.headlineFirst(mods.eln.i18n.I18N.tr("Packets"), b.delivered() + " this tick, " + b.droppedTotal() + " dropped");
+                    } else if (b.delivered() > 0 && details) {
+                        out.detail(mods.eln.i18n.I18N.tr("Packets"), b.delivered() + " this tick");
+                    }
+                    int shownCh = 0;
                     for (int c = 0; c < mods.eln.bus.BusChannel.COUNT; c++) {
                         if (!b.inUse(c)) continue;
                         int w = b.writers(c);
-                        out.put("  " + mods.eln.bus.BusChannel.label(c), mods.eln.misc.Utils.plotVolt("", b.value(c) * mods.eln.Eln.SVU)
-                            + (w > 1 ? " from " + w + " writers" : w == 0 ? " unwritten" : ""));
+                        String chKey = "  " + mods.eln.bus.BusChannel.label(c);
+                        String chVal = mods.eln.misc.Utils.plotVolt("", b.value(c) * mods.eln.Eln.SVU)
+                            + (w > 1 ? " from " + w + " writers" : w == 0 ? " unwritten" : "");
+                        if (shownCh++ < 2) out.headline(chKey, chVal);
+                        else if (details) out.detail(chKey, chVal);
                     }
-                    var addresses = b.addresses();   // devices by address, duplicates flagged
-                    if (!addresses.isEmpty()) {
-                        StringBuilder sb = new StringBuilder();
-                        addresses.forEach((a, many) -> sb.append(sb.length() == 0 ? "" : ", ").append(a).append(many > 1 ? " (" + many + "x, DUPLICATE)" : ""));
-                        out.put("Devices", sb.toString());
-                    }
-                    if (b.delivered() > 0 || b.droppedTotal() > 0)   // packets (Baughn: an RS485 bus)
-                        out.put("Packets", b.delivered() + " this tick" + (b.droppedTotal() > 0
-                            ? ", " + b.droppedTotal() + " dropped (over " + mods.eln.bus.Bus.CAP + " a tick)" : ""));
                     continue;
                 }
-                if (k.load == null) {   // (the thermal cable)
-                    out.put(key, k.name() + ": " + mods.eln.misc.Utils.plotCelsius("", k.thermal.Tc) + " " + mods.eln.misc.Utils.plotPower("", k.thermal.getPower()));
+                if (k.load == null) {   // thermal cable
+                    if (only != null) {
+                        out.headline(mods.eln.i18n.I18N.tr("Temperature"), mods.eln.misc.Utils.plotCelsius("", k.thermal.Tc));
+                        out.headline(mods.eln.i18n.I18N.tr("Thermal power"), mods.eln.misc.Utils.plotPower("", k.thermal.getPower()));
+                    } else {
+                        out.headline(key, k.name() + ": " + mods.eln.misc.Utils.plotCelsius("", k.thermal.Tc) + " " + mods.eln.misc.Utils.plotPower("", k.thermal.getPower()));
+                    }
                     continue;
                 }
-                out.put(key, k.name() + ": " + mods.eln.misc.Utils.plotVolt("", k.load.getU()) + " " + mods.eln.misc.Utils.plotAmpere("", k.load.getI()));
-                if (details && k.thermal != null) out.put(key + " temperature", mods.eln.misc.Utils.plotCelsius("", k.thermal.Tc));
+                if (only != null) {
+                    out.headline(mods.eln.i18n.I18N.tr("Voltage"), mods.eln.misc.Utils.plotVolt("", k.load.getU()));
+                    out.headline(mods.eln.i18n.I18N.tr("Current"), mods.eln.misc.Utils.plotAmpere("", k.load.getI()));
+                } else {
+                    out.headline(key, k.name() + ": " + mods.eln.misc.Utils.plotVolt("", k.load.getU()) + " " + mods.eln.misc.Utils.plotAmpere("", k.load.getI()));
+                }
+                if (k.thermal != null) {
+                    String tKey = only != null ? mods.eln.i18n.I18N.tr("Temperature") : key + " temperature";
+                    String tVal = mods.eln.misc.Utils.plotCelsius("", k.thermal.Tc);
+                    if (k.thermal.Tc >= 70.0) out.headline(tKey, tVal);
+                    else if (details) out.detail(tKey, tVal);
+                }
             }
             return out;
         }
         var n = mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid);
-        out.put("Pipe", PipePart.TIER_NAME[pipe.tier] + (pipe.burst ? ", BURST" : ""));
-        // (its breather or safety valves next, in Jade's headline whichever part of the block is looked at: AdventurAgent
-        // saw a breather's state only past the headline)
+        double workPa = pipe.workingPa(n.T()), burstPa = pipe.burstPa(n.T());
+        String pWarn = pipe.burst ? ", " + mods.eln.i18n.I18N.tr("BURST")
+            : n.P() >= 0.85 * burstPa ? ", " + mods.eln.i18n.I18N.tr("near bursting")
+            : n.P() > workPa ? ", " + mods.eln.i18n.I18N.tr("over working pressure") : "";
+        out.headline(mods.eln.i18n.I18N.tr("Pressure"), String.format("%.2f bar of %s, %s%s", n.P() / 1e5, EaUnits.contents(n),
+            mods.eln.api.Meters.celsius(n.T() - 273.15), pWarn));
+        out.headline(mods.eln.i18n.I18N.tr("Contents"), EaUnits.composition(n));
         for (VoxelPart p : parts)
             if (p instanceof SafetyValvePart sv && sv.breather) {
-                // (Neon's wording)
-                // (by what it let through in the last second, SafetyValvePart.HOLD_S, not this step's opening: it flickered)
                 String name = mods.eln.i18n.I18N.tr("Breather valve");
-                out.put(out.containsKey(name) ? name + " " + out.size() : name,
+                out.headline(out.containsKey(name) ? name + " " + out.size() : name,
                     n.level() >= Math.min(sv.draw(), 0.95) && n.liquidVolume() > 0 ? mods.eln.i18n.I18N.tr("Shut by liquid") : sv.ventShown > 0 ? mods.eln.i18n.I18N.tr("Venting gas")
                         : sv.airShown > 0 ? mods.eln.i18n.I18N.tr("Drawing air") : mods.eln.i18n.I18N.tr("Idle"));
             } else if (p instanceof SafetyValvePart sv) {
-                String name = sv.purge ? "Purge valve" : "Safety valve";
-                out.put(out.containsKey(name) ? name + " " + (out.size()) : name,
+                String name = sv.purge ? mods.eln.i18n.I18N.tr("Purge valve") : mods.eln.i18n.I18N.tr("Safety valve");
+                out.headline(out.containsKey(name) ? name + " " + out.size() : name,
                     String.format(sv.purge ? "%.1f bar%s" : "%.0f bar%s", sv.setPa / 1e5, sv.opening(n.P()) <= 0 ? ""
-                        : sv.purge && n.level() >= 0.999 ? ", shut: liquid at it" : sv.purge ? ", venting gas" : ", blowing"));
+                        : sv.purge && n.level() >= 0.999 ? ", " + mods.eln.i18n.I18N.tr("shut by liquid") : sv.purge ? ", " + mods.eln.i18n.I18N.tr("venting gas") : ", " + mods.eln.i18n.I18N.tr("blowing")));
             }
-        // (Baughn: say what the pressure is of; steam in grams)
-        out.put("Pressure", String.format("%.2f bar of %s, %s", n.P() / 1e5, EaUnits.contents(n), mods.eln.api.Meters.celsius(n.T() - 273.15)));
-        out.put("Contents", EaUnits.composition(n));
-        EaUnits.putViscosity(out, n);
         for (VoxelPart p : parts)
-            if (p instanceof ValvePart v) out.put(switch (v.mode) {
-                case ValvePart.CONTROL -> "Control valve";
-                case ValvePart.THROTTLE -> "Throttle valve";
-                case ValvePart.PRESSURE -> "Pressure valve";
-                default -> "Valve";
-            }, v.mode == ValvePart.ON_OFF ? (v.open ? "open" : "shut")
-                : v.mode == ValvePart.PRESSURE ? String.format("%s %.1f bar%s, %.0f%% open", v.pmode == ValvePart.RELIEF ? "holds before it at" : "holds after it at",
-                    v.setPoint() / 1e5, v.signalled() ? " by signal" : "", v.opening() * 100)
+            if (p instanceof ValvePart v) out.headline(switch (v.mode) {
+                case ValvePart.CONTROL -> mods.eln.i18n.I18N.tr("Control valve");
+                case ValvePart.THROTTLE -> mods.eln.i18n.I18N.tr("Throttle valve");
+                case ValvePart.PRESSURE -> mods.eln.i18n.I18N.tr("Pressure valve");
+                default -> mods.eln.i18n.I18N.tr("Valve");
+            }, v.mode == ValvePart.ON_OFF ? (v.open ? mods.eln.i18n.I18N.tr("Open") : mods.eln.i18n.I18N.tr("Shut"))
+                : v.mode == ValvePart.PRESSURE ? String.format("%s %.1f bar%s, %.0f%% open",
+                    v.pmode == ValvePart.RELIEF ? mods.eln.i18n.I18N.tr("Relief") : mods.eln.i18n.I18N.tr("Reducing"),
+                    v.setPoint() / 1e5, v.signalled() ? " (" + mods.eln.i18n.I18N.tr("signal") + ")" : "", v.opening() * 100)
                 : String.format("%.0f%% open", v.opening() * 100));
         for (VoxelPart p : parts)
-            if (p instanceof PipeSensorPart s) out.put(s.name(), String.format(s.sensing == PipeSensorPart.PRESSURE ? "%.2f %s (absolute) of %.0f: %.1f V" : "%.0f %s of %.0f: %.1f V",
+            if (p instanceof PipeSensorPart s) out.headline(s.name(), String.format(s.sensing == PipeSensorPart.PRESSURE ? "%.2f %s of %.0f: %.1f V" : "%.0f %s of %.0f: %.1f V",
                 s.reading, s.unit(), s.scale, s.share() * mods.eln.Eln.SVU));
+        String visc = EaUnits.viscosity(n);
+        if (visc != null) {
+            if (visc.contains(";") || visc.startsWith(mods.eln.i18n.I18N.tr("thick")) || visc.startsWith(mods.eln.i18n.I18N.tr("tarry")))
+                out.headline(mods.eln.i18n.I18N.tr("Viscosity"), visc);
+            else if (details) out.detail(mods.eln.i18n.I18N.tr("Viscosity"), visc);
+        }
         if (!details) return out;
-        out.put("Liquid", EaUnits.volume(n.liquidVolume() * mods.eln.sim.fluid.Water.RHO_L / EaUnits.KG_PER_MB_WATER));
-        out.put("Run volume", String.format("%.2f L", n.volume * 1000));
-        out.put("Rating", String.format("works to %.0f bar, bursts at %.0f", pipe.workingPa(n.T()) / 1e5, pipe.burstPa(n.T()) / 1e5));
-        for (VoxelPart p : parts) if (p instanceof AdapterPart a) out.put("Adapter", net.minecraft.core.Direction.from3DDataValue(a.face).getName());
+        out.detail(mods.eln.i18n.I18N.tr("Liquid"), EaUnits.volume(n.liquidVolume() * mods.eln.sim.fluid.Water.RHO_L / EaUnits.KG_PER_MB_WATER));
+        out.detail(mods.eln.i18n.I18N.tr("Run volume"), String.format("%.2f L", n.volume * 1000));
+        out.detail(mods.eln.i18n.I18N.tr("Rating"), String.format("%.0f bar working, %.0f bar burst", workPa / 1e5, burstPa / 1e5));
+        for (VoxelPart p : parts) if (p instanceof AdapterPart a) out.detail(mods.eln.i18n.I18N.tr("Adapter"), net.minecraft.core.Direction.from3DDataValue(a.face).getName());
         return out;
     }
 

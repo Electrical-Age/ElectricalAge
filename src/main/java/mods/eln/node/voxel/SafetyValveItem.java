@@ -32,12 +32,12 @@ public class SafetyValveItem extends Item implements PipeTool {
         String err;
         if (level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n)
             err = n.addSafetyValveNear(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ(), mode);
-        else err = "fit it on a pipe";
+        else err = mods.eln.i18n.I18N.tr("must fit on a pipe");
         if (err != null) {
             if (player != null) player.sendOverlayMessage(Component.literal(switch (mode) {
-                case SafetyValvePart.PURGE -> mods.eln.i18n.I18N.tr("Can't fit a purge valve: %1$", err);
-                case SafetyValvePart.BREATHER -> mods.eln.i18n.I18N.tr("Can't fit a breather valve: %1$", err);
-                default -> mods.eln.i18n.I18N.tr("Can't fit a safety valve: %1$", err);
+                case SafetyValvePart.PURGE -> mods.eln.i18n.I18N.tr("Can't fit purge valve: %1$", err);
+                case SafetyValvePart.BREATHER -> mods.eln.i18n.I18N.tr("Can't fit breather valve: %1$", err);
+                default -> mods.eln.i18n.I18N.tr("Can't fit safety valve: %1$", err);
             }));
             return InteractionResult.FAIL;
         }
@@ -47,17 +47,19 @@ public class SafetyValveItem extends Item implements PipeTool {
 
     /** Its tooltip lines (client ItemTooltips). */
     public java.util.List<String> tooltip() {
-        if (mode == SafetyValvePart.BREATHER)
-            // (Neon's wording; Baughn 2026-11-24: "also a good way to lose natural gas", a flare or gas tank the fix)
-            return java.util.List.of(mods.eln.i18n.I18N.tr("Lets gas out and air in to hold outside pressure, never liquid."),
-                mods.eln.i18n.I18N.tr("Vents a receiver tank so it neither pressurizes nor pulls a vacuum."),
-                mods.eln.i18n.I18N.tr("Natural gas escapes too; pipe it to a flare or a gas tank instead."),
-                mods.eln.i18n.I18N.tr("Fits on top of a pipe or tank stub; on a pipe's side, liquid shuts it."));
-        return mode == SafetyValvePart.PURGE
-            ? java.util.List.of("Lets gas out of a pipe above its set pressure, never liquid.",
-                "Bleeds a crude tank's gas or the air of a filling run (set to 1.1 bar at first).",
-                "Fits on a straight stretch of pipe; right-click it with an empty hand to set it.")
-            : java.util.List.of("Lets out whatever is in a pipe above its set pressure.",
-                "Fits on a straight stretch of pipe; right-click it with an empty hand to set it.");
+        var list = new java.util.ArrayList<String>();
+        if (mode == SafetyValvePart.BREATHER) {
+            list.add(mods.eln.i18n.I18N.tr("Vents gas and admits air to hold atmospheric pressure (blocks liquid)."));
+            mods.eln.client.ItemTooltips.detail(list, mods.eln.i18n.I18N.tr("Prevents a receiver tank from pressurising or pulling a vacuum."));
+            return list;
+        }
+        if (mode == SafetyValvePart.PURGE) {
+            list.add(mods.eln.i18n.I18N.tr("Vents gas above its set pressure (blocks liquid)."));
+            mods.eln.client.ItemTooltips.detail(list, mods.eln.i18n.I18N.tr("Right-click with empty hand to set pressure."));
+            return list;
+        }
+        list.add(mods.eln.i18n.I18N.tr("Relieves pipe pressure above its set point."));
+        mods.eln.client.ItemTooltips.detail(list, mods.eln.i18n.I18N.tr("Right-click with empty hand to set pressure."));
+        return list;
     }
 }

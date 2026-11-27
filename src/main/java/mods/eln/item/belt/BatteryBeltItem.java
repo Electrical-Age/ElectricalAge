@@ -174,10 +174,10 @@ public class BatteryBeltItem extends Item implements IItemEnergyBattery {
         int n = 0;
         for (ItemStack s : contents(stack)) if (!s.isEmpty()) n++;
         double share = batteryShare(stack);
-        out.accept(Component.literal(String.format("%d of %d pockets used%s", n, SLOTS,
-            Double.isNaN(share) ? "" : String.format("; batteries %.0f%%", share * 100))).withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.literal("Worn as a belt, its batteries power your tools (and a Stasis suit)").withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.literal("Right-click to open, sneak-right-click to put on; an EA charger charges what's inside").withStyle(net.minecraft.ChatFormatting.GRAY));
+        out.accept(Component.literal(String.format("Pockets: %d/%d%s", n, SLOTS,
+            Double.isNaN(share) ? "" : String.format(" | Batteries: %.0f%%", share * 100))).withStyle(net.minecraft.ChatFormatting.GRAY));
+        out.accept(Component.literal("Powers equipped tools from your belt; recharges in a Battery Charger.").withStyle(net.minecraft.ChatFormatting.GRAY));
+        out.accept(mods.eln.client.ItemTooltips.hintLine("Right-click: open | Sneak + right-click: equip"));
     }
 
     @Override

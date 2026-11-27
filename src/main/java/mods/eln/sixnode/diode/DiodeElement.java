@@ -97,13 +97,10 @@ public class DiodeElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Current"), Utils.plotAmpere("", anodeLoad.getCurrent()));
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Forward Voltage"), Utils.plotVolt("", anodeLoad.getU() - catodeLoad.getU()));
-            info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
-        }
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Current"), Utils.plotAmpere("", anodeLoad.getCurrent()))
+            .detail(I18N.tr("Forward voltage"), Utils.plotVolt("", anodeLoad.getU() - catodeLoad.getU()))
+            .detail(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
     }
 
     @Override

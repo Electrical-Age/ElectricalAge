@@ -26,120 +26,109 @@ public final class ElnConfig {
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("balancing");
-        BATTERY_LIFE_FACTOR = b.comment("Battery lifespan multiplier: wear is divided by it (1 = 1.12's wear; Baughn: 25). Wear also",
-                "doubles every 10 C above 30 C and rises up to 4x as the charge runs low.")
+        BATTERY_LIFE_FACTOR = b.comment("Battery lifespan multiplier: wear is divided by this value. Wear also doubles",
+                "every 10 °C above 30 °C and rises up to 4x as charge runs low.")
             .defineInRange("batteryLifeFactor", 25.0, 0.01, 10000.0);
-        HEAT_FURNACE_FUEL = b.comment("Heat a fuel gives in the heat furnaces (stone and fuel), times its 1.12 value. Baughn 2026-10-26: with",
-                "steam turbines working by the expansion, coal to electricity straddles the old 33%: ~24% venting, ~44% with a condenser.")
+        HEAT_FURNACE_FUEL = b.comment("Fuel heat output multiplier in the Stone and Fuel Heat Furnaces.")
             .defineInRange("heatFurnaceFuelFactor", 2.5, 0.01, 100.0);
-        AUTOMINER_RANGE = b.comment("The Auto Miner's ore radius, blocks round its shaft, once it is that deep (1.12: 10; Baughn 2026-11-02: 24).")
+        AUTOMINER_RANGE = b.comment("Auto Miner ore search radius in blocks around its shaft once at depth.")
             .defineInRange("autominerRange", 24, 1, 64);
         b.pop();
         b.push("fire");
-        COAL_LAG = b.comment("Seconds a coal fire (the stone heat furnace) takes to spread through its bed towards its air setting",
-                "(Baughn: coal plants change burn rate slowly). Its air valve (5 s) and a hot bed's cooling with the air shut (300 s)",
-                "are fixed: sim/Fire.java.").defineInRange("coalLagSeconds", 180.0, 0.0, 3600.0);
-        // (no oil lag: the fuel heat furnace's inertia is its burner's mass, Baughn 2026-11-11)
-        MIN_FIRE = b.comment("Below this share of full power an oil flame asked to burn lower goes out, and a fire is lit at it. A coal",
-            "fire with its air shut smoulders until its bed is down to embers (sim/Fire.java EMBERS).").defineInRange("minFire", 0.15, 0.0, 1.0);
-        COAL_KINDLE = b.comment("Seconds to relight a coal fire that went out.").defineInRange("coalKindleSeconds", 30.0, 0.0, 3600.0);
-        OIL_LIGHT = b.comment("Seconds to light an oil burner.").defineInRange("oilLightSeconds", 3.0, 0.0, 3600.0);
+        COAL_LAG = b.comment("Seconds a coal fire in a Stone Heat Furnace takes to spread through its fuel bed towards the air setting.")
+            .defineInRange("coalLagSeconds", 180.0, 0.0, 3600.0);
+        MIN_FIRE = b.comment("Minimum fraction of full power for an oil burner flame; asking for less extinguishes it.",
+                "A coal fire with its air shut instead smoulders down to embers.")
+            .defineInRange("minFire", 0.15, 0.0, 1.0);
+        COAL_KINDLE = b.comment("Seconds to relight a cold coal fire in a Stone Heat Furnace.").defineInRange("coalKindleSeconds", 30.0, 0.0, 3600.0);
+        OIL_LIGHT = b.comment("Seconds to light an oil burner in a Fuel Heat Furnace.").defineInRange("oilLightSeconds", 3.0, 0.0, 3600.0);
         b.pop();
         b.push("ambient");
-        DEPTH_C = b.comment("Ambient temperature (C) deep underground, before the gradient: surface temperatures (25 C per unit of",
-                "the biome's temperature) blend into it from 4 to 32 blocks under the surface (Baughn 2026-10-26).")
+        DEPTH_C = b.comment("Base underground ambient temperature (°C) before geothermal gradient.",
+                "Surface biome temperatures blend into this between 4 and 32 blocks below the surface.")
             .defineInRange("depthC", 15.0, -50.0, 200.0);
-        DEPTH_PER_BLOCK = b.comment("Geothermal gradient: C warmer per block of depth under the surface.")
+        DEPTH_PER_BLOCK = b.comment("Geothermal gradient: ambient temperature increase (°C) per block below the surface.")
             .defineInRange("depthPerBlock", 0.1, 0.0, 10.0);
-        NETHER_C = b.comment("Ambient temperature (C) where water evaporates (the Nether).").defineInRange("netherC", 90.0, -50.0, 1000.0);
+        NETHER_C = b.comment("Ambient temperature (°C) in ultra-warm dimensions where water evaporates (e.g. the Nether).")
+            .defineInRange("netherC", 90.0, -50.0, 1000.0);
         b.pop();
         b.push("cables");
-        CONVERT_CABLES = b.comment("Convert six-node cables to voxel cables as their chunks load (blocks holding only cables; the",
-                "six-node block is kept inside for /elnlab voxelcables revert). Off until the conversion is approved.")
+        CONVERT_CABLES = b.comment("Convert legacy cable blocks to voxel cables as chunks load.")
             .define("convertOnLoad", false);
-        LINKS_BUILD = b.comment("Build voxel cables' connections from their stored joints (routing phase 3b); false: from the",
-                "connection rules directly, as before (the joints are still recorded). A quick revert without a jar swap.")
+        LINKS_BUILD = b.comment("Build voxel cable electrical connections from stored joints instead of recomputing adjacency rules.")
             .define("linksBuild", true);
         b.pop();
-        // the electric bike (Baughn 2026-10-28: "might adjust values in playtesting"): synced, as the rider's client moves it
         b.push("bike");
-        BIKE_POWERED = b.comment("The electric bike's top speed on battery, blocks per second (an average horse: 9.5).")
+        BIKE_POWERED = b.comment("Electric Bike top speed under battery power, in blocks per second (an average horse is ~9.5).")
             .defineInRange("poweredSpeed", 9.5, 0.5, 40.0);
-        BIKE_PEDALLING = b.comment("Its top speed without charge, pedalling, blocks per second (sprinting is 5.6).")
+        BIKE_PEDALLING = b.comment("Electric Bike top speed without battery charge (pedalling), in blocks per second (sprinting is 5.6).")
             .defineInRange("pedallingSpeed", 6.6, 0.5, 40.0);
-        BIKE_WINDOW = b.comment("Seconds of the rider's input averaged into its speed (Baughn: 2-3, so it feels like a bicycle).")
+        BIKE_WINDOW = b.comment("Electric Bike input smoothing window in seconds (higher values feel heavier and more bicycle-like).")
             .defineInRange("inputAverageSeconds", 2.5, 0.05, 10.0);
-        BIKE_MOTOR = b.comment("Its motor's draw at full speed, W (falls with the square of speed; capped by the battery's discharge power).")
+        BIKE_MOTOR = b.comment("Electric Bike motor power draw at full speed, in watts (scales with speed squared, capped by battery rating).")
             .defineInRange("motorWatts", 100.0, 0.0, 10000.0);
-        BIKE_TIP_DELAY = b.comment("Seconds it stays up when stopped with a rider, before it may fall over.")
+        BIKE_TIP_DELAY = b.comment("Seconds a stationary Electric Bike stays upright with a rider before it may tip over.")
             .defineInRange("tipOverDelaySeconds", 5.0, 0.0, 3600.0);
-        BIKE_TIP_CHANCE = b.comment("Chance per second, after that, that it falls over with its rider (0 never).")
+        BIKE_TIP_CHANCE = b.comment("Probability per second that a stationary Electric Bike tips over after tipOverDelaySeconds (0 disables).")
             .defineInRange("tipOverChancePerSecond", 0.1, 0.0, 1.0);
-        BIKE_CRASH = b.comment("Losing more than this much speed (blocks per second) against a block or wall while on the ground throws the rider off; brushing past or bumping in the air doesn't.")
+        BIKE_CRASH = b.comment("Speed loss (blocks per second) against a wall on the ground that throws the rider off an Electric Bike.")
             .defineInRange("crashSpeed", 3.0, 0.0, 100.0);
-        BIKE_JUMP = b.comment("Height of a full-charge jump, blocks (1.31: one block with room, never 1.5).")
+        BIKE_JUMP = b.comment("Electric Bike full-charge jump height, in blocks (1.31 clears one full block).")
             .defineInRange("jumpHeight", 1.31, 0.0, 5.0);
-        BIKE_STEP = b.comment("Height it rides up without jumping, blocks (0.63: slabs and stairs, also from a dirt path or mud, which sit up to 1/8 low; 1 or more climbs full blocks).")
+        BIKE_STEP = b.comment("Electric Bike step-up height without jumping, in blocks (0.63 climbs slabs and stairs; 1.0+ climbs full blocks).")
             .defineInRange("stepHeight", 0.63, 0.0, 2.0);
-        BIKE_TURN = b.comment("How fast it swings round to where the rider looks when slow, degrees per tick.")
+        BIKE_TURN = b.comment("Electric Bike steering turn rate at low speed, in degrees per tick.")
             .defineInRange("turnRate", 12.0, 0.5, 180.0);
-        BIKE_TURN_TOP = b.comment("...and at its powered top speed and above (Baughn: steering slows with speed); linear between.")
+        BIKE_TURN_TOP = b.comment("Electric Bike steering turn rate at powered top speed and above, in degrees per tick (interpolated from turnRate).")
             .defineInRange("turnRateAtTopSpeed", 5.0, 0.5, 180.0);
-        BIKE_LAMP = b.comment("The front lamp's draw from the trunk battery, W (both bikes; a flashlight's is 20-50).")
+        BIKE_LAMP = b.comment("Front headlamp power draw from the trunk battery on Electric and Terrain Bikes, in watts.")
             .defineInRange("lampWatts", 20.0, 0.0, 1000.0);
-        TERRAIN_STEP = b.comment("The terrain bike: height it rides up without jumping, blocks (1.13: a whole block, also from a dirt path or mud, which sit up to 1/8 low; 1.5 stops it).")
+        TERRAIN_STEP = b.comment("Terrain Bike step-up height without jumping, in blocks (1.13 climbs full blocks).")
             .defineInRange("terrainStepHeight", 1.13, 0.0, 2.0);
-        TERRAIN_JUMP = b.comment("The terrain bike: height of a full-charge jump, blocks.")
+        TERRAIN_JUMP = b.comment("Terrain Bike full-charge jump height, in blocks.")
             .defineInRange("terrainJumpHeight", 2.5, 0.0, 6.0);
-        TERRAIN_MOTOR = b.comment("The terrain bike: its motor's draw at full speed, W (same top speed as the electric bike).")
+        TERRAIN_MOTOR = b.comment("Terrain Bike motor power draw at full speed, in watts.")
             .defineInRange("terrainMotorWatts", 150.0, 0.0, 10000.0);
         b.pop();
-        // the electrical anvil (Baughn 2026-10-28: a pulse at its full rating (800 V then; HVU = 400 V since the tier rename), maxed out, so players build capacitor banks)
         b.push("anvil");
-        ANVIL_POWER = b.comment("The electrical anvil's draw while it welds, W, at 400 V (the high-voltage cable's rating: 5000).")
+        ANVIL_POWER = b.comment("Electrical Anvil power draw while welding at 400 V, in watts.")
             .defineInRange("power", 5000.0, 10.0, 1e6);
-        ANVIL_UNIT = b.comment("Energy for a unit of repair material's worth of repair (a quarter of the tool), J (40000: 8 s at 5 kW).")
+        ANVIL_UNIT = b.comment("Electrical Anvil energy required per unit of repair material (one quarter of tool durability), in joules.")
             .defineInRange("joulesPerUnit", 40000.0, 0.0, 1e9);
-        ANVIL_NAME = b.comment("Energy to engrave a new name, J.").defineInRange("joulesPerName", 2000.0, 0.0, 1e9);
-        ANVIL_RESUME = b.comment("It starts a pulse when the line is at this share of 400 V...").defineInRange("resumeFraction", 0.95, 0.0, 2.0);
-        ANVIL_PLATEAU = b.comment("...or, when the line has stopped rising for 2 s, at this share or more (a bank on a weak plant levels off",
-                "below resumeFraction: its leak).").defineInRange("plateauFraction", 0.93, 0.0, 2.0);
-        ANVIL_SAG = b.comment("...and pauses (keeping its progress) when it sags below this share.").defineInRange("sagFraction", 0.9, 0.0, 2.0);
-        ANVIL_BURSTS = b.comment("A unit's weld comes in this many bursts (Baughn: two, so a capacitor bank can recover between them).")
+        ANVIL_NAME = b.comment("Electrical Anvil energy required to engrave a new tool name, in joules.").defineInRange("joulesPerName", 2000.0, 0.0, 1e9);
+        ANVIL_RESUME = b.comment("Electrical Anvil start voltage threshold as a fraction of 400 V to begin a welding pulse.").defineInRange("resumeFraction", 0.95, 0.0, 2.0);
+        ANVIL_PLATEAU = b.comment("Electrical Anvil fallback start voltage threshold (fraction of 400 V) if supply voltage levels off for 2 s below resumeFraction.")
+            .defineInRange("plateauFraction", 0.93, 0.0, 2.0);
+        ANVIL_SAG = b.comment("Electrical Anvil voltage sag threshold (fraction of 400 V) below which a welding pulse pauses while keeping progress.").defineInRange("sagFraction", 0.9, 0.0, 2.0);
+        ANVIL_BURSTS = b.comment("Number of welding bursts the Electrical Anvil splits each unit of repair material into.")
             .defineInRange("burstsPerUnit", 2, 1, 100);
-        ANVIL_GAP = b.comment("Seconds of rest between bursts, at least; it also waits for the line to be back at resumeFraction.")
+        ANVIL_GAP = b.comment("Minimum recovery pause between Electrical Anvil welding bursts, in seconds.")
             .defineInRange("burstGapSeconds", 3.0, 0.0, 600.0);
         b.pop();
-        // the capacitor bank (Baughn 2026-10-28): one carries one anvil burst (20 kJ from 400 V down to 360 V)
         b.push("capacitorBank");
-        BANK_FARADS = b.comment("The capacitor bank's capacitance, F (1.44: one anvil burst from 400 V to 360 V needs 1.32).")
-            .defineInRange("capacitanceFarads", 1.44, 0.001, 100.0);   // (renamed from 1.12-era "farads" = 0.36 at 800 V, so old configs don't keep it)
-        BANK_VOLTS = b.comment("Its rating, V: it pops above 1.3 times it, as the Power Capacitor does.").defineInRange("ratingVolts", 500.0, 1.0, 100000.0);   // (renamed from "ratedVolts" = 1000)
-        BANK_LEAK = b.comment("Its leakage time constant R C, s (1800: at 400 V it leaks ~130 W, and keeps 2% of its charge after an hour).",
-                "Batteries are for keeping energy (Baughn); this is for bursts.").defineInRange("leakTauSeconds", 1800.0, 1.0, 1e9);
-        POWER_CAP_LEAK = b.comment("The six-node Power Capacitor's leakage time constant R C, s (1800, as the bank; 1.12 had 120000). With four",
-                "Dielectrics a sand a row of them was a cheap bulk store (Baughn 2026-10-28: batteries stay the only sensible one).")
+        BANK_FARADS = b.comment("Capacitor Bank capacitance, in farads.")
+            .defineInRange("capacitanceFarads", 1.44, 0.001, 100.0);
+        BANK_VOLTS = b.comment("Capacitor Bank rated voltage, in volts (bursts above 1.3x this rating).").defineInRange("ratingVolts", 500.0, 1.0, 100000.0);
+        BANK_LEAK = b.comment("Capacitor Bank self-discharge time constant (RC), in seconds.")
+            .defineInRange("leakTauSeconds", 1800.0, 1.0, 1e9);
+        POWER_CAP_LEAK = b.comment("Power Capacitor self-discharge time constant (RC), in seconds.")
             .defineInRange("powerCapacitorLeakTauSeconds", 1800.0, 1.0, 1e9);
         b.pop();
-        // oil lakes (todo #138; Baughn 2026-10-30, after Argon's a3)
         b.push("oilLakes");
-        LAKE_SIZE = b.comment("Generated oil lakes hold this many times the old volume, by going deeper (their footprint is the same).",
-                "New lakes only: a lake keeps the multiplier it was generated with.").defineInRange("sizeMultiplier", 2.0, 0.25, 5.0);
-        // (new keys 2026-11-11: seepage lerped by fill, Baughn; the old tailShare/seepShare defaults would stay in configs)
-        FULL_AT = b.comment("An oil lake seeps most at and below this share of its capacity; above it the seepage falls linearly to none when full.").defineInRange("seepFullAt", 0.25, 0.0, 1.0);
-        SEEP_SHARE = b.comment("A lake's most seepage, as a share of one 230 V pump's nominal rate, for ever, shared by all the pumps on it.").defineInRange("seepMaxShare", 0.25, 0.0, 1.0);
-        STEAM_SHARE = b.comment("With steam injected, a lake's most seepage rises to this share of one 230 V pump's nominal rate.").defineInRange("seepSteamShare", 1.0, 0.0, 10.0);
-        STEAM_PER_BUCKET = b.comment("Steam (kg) injected down a well that brings up a bucket of crude from a seeping lake at the pumps' full rate.")
+        LAKE_SIZE = b.comment("Volume multiplier for newly generated underground oil lakes (increases depth while keeping the same footprint).")
+            .defineInRange("sizeMultiplier", 2.0, 0.25, 5.0);
+        FULL_AT = b.comment("Oil lake fill fraction at or below which natural seepage reaches maximum; above this it falls linearly to zero when full.").defineInRange("seepFullAt", 0.25, 0.0, 1.0);
+        SEEP_SHARE = b.comment("Maximum natural oil lake seepage rate, as a fraction of one 230 V Oil Pump's nominal rate (shared by all pumps on the lake).").defineInRange("seepMaxShare", 0.25, 0.0, 1.0);
+        STEAM_SHARE = b.comment("Maximum steam-boosted oil lake seepage rate, as a fraction of one 230 V Oil Pump's nominal rate.").defineInRange("seepSteamShare", 1.0, 0.0, 10.0);
+        STEAM_PER_BUCKET = b.comment("Mass of injected steam (kg) required to boost oil lake seepage by one bucket of crude.")
             .defineInRange("steamKgPerBucket", 0.2, 0.001, 100.0);
         b.pop();
         b.push("probe");
-        PROBE_DETAILS = b.comment("Jade (WAILA) shows every device's full details, not only its headline (sneak to see them anyway).",
-                "Also 1.12's wailaEasyMode: more detail on some machines.")
+        PROBE_DETAILS = b.comment("Show full Jade probe details by default without needing to sneak or hold Jade's details key.")
             .define("details", false);
         b.pop();
         b.push("introspect");
-        INTROSPECT_REMOTE = b.comment("Answer an op's client asking for device reports (eln:describe), for test tools on lab servers.",
-                "/eln describe works for ops either way.")
+        INTROSPECT_REMOTE = b.comment("Allow operator clients to query live device introspection reports over the network (/eln describe works for ops either way).")
             .define("remote", false);
         b.pop();
         SPEC = b.build();
@@ -148,13 +137,15 @@ public final class ElnConfig {
     /** Cached (the battery processes read it every second). */
     public static volatile double batteryLifeFactor = 25.0;
     public static volatile double heatFurnaceFuelFactor = 2.5;
+    /** Whether Jade shows detail lines without sneaking (config probe.details). */
+    public static volatile boolean probeDetails = false;
     /** The six-node Power Capacitor's leak, RC (s): config capacitorBank.powerCapacitorLeakTauSeconds. */
     public static volatile double powerCapacitorLeakTauS = 1800;
 
     static void refresh() {
         batteryLifeFactor = BATTERY_LIFE_FACTOR.get();
         heatFurnaceFuelFactor = HEAT_FURNACE_FUEL.get();
-        Eln.wailaEasyMode = PROBE_DETAILS.get();
+        probeDetails = PROBE_DETAILS.get();
         mods.eln.introspect.Introspect.remote = INTROSPECT_REMOTE.get();
         mods.eln.node.voxel.CableConverter.convertOnLoad = CONVERT_CABLES.get();
         mods.eln.node.voxel.VoxelNode.linksBuild = LINKS_BUILD.get();

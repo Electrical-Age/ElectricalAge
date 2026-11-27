@@ -43,7 +43,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
         // device parts, not placed (Baughn 2026-10-18); a cable kit lays cable
         if (mods.eln.node.voxel.CableConverter.convertOnLoad && (descriptor instanceof mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
             || descriptor instanceof mods.eln.sixnode.thermalcable.ThermalCableDescriptor) && mods.eln.node.voxel.CablePart.tierOf(descriptor.name) >= 0) {
-            if (ctx.getPlayer() != null) ctx.getPlayer().sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cables are laid with a cable kit (craft one from these)"));
+            if (ctx.getPlayer() != null) ctx.getPlayer().sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Craft into a Cable Kit to lay")));
             return InteractionResult.FAIL;
         }
         // holding the use key repeats the click every few ticks: a repeat on the block just placed in places nothing and
@@ -136,7 +136,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             }
             if (v.isSideKept(direction.getInt())) return v.createSubBlock(stack, direction, player);   // (refuses, and says why)
             if (!v.canPlaceElement(direction.getInt())) {
-                if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("No room for it on that face"));
+                if (player != null) player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("No room on that face")));
                 return false;
             }
             if (!block.getIfOtherBlockIsSolid(world, pos, direction)) return refuse(player, NO_SUPPORT);
@@ -152,23 +152,23 @@ public class SixNodeItem extends Item implements IDescriptorItem {
             if (sixNode == null) {
                 // a block whose node this version could not load (kept as saved data): leave it, as for a kept face
                 if (NodeManager.instance.hasOrphanAt(new Coordonate(pos, world))) {
-                    if (player != null) Utils.sendMessage(player, "This block holds devices this version of Electrical Age cannot load; their data is kept. Break the block to discard them.");
+                    if (player != null) Utils.sendMessage(player, mods.eln.i18n.I18N.tr("This block holds devices this version of Electrical Age cannot load; their data is kept. Break the block to discard them."));
                     return false;
                 }
                 world.removeBlock(pos, false);
-                return refuse(player, "That block had nothing in it and is gone: try again");
+                return refuse(player, mods.eln.i18n.I18N.tr("Cleared empty block; try again"));
             }
             if (!sixNode.getSideEnable(direction) && block.getIfOtherBlockIsSolid(world, pos, direction)) {
                 sixNode.createSubBlock(stack, direction, player);
                 return true;
             }
             if (sixNode.isSideKept(direction.getInt())) return sixNode.createSubBlock(stack, direction, player);   // (refuses, and says why)
-            return refuse(player, sixNode.getSideEnable(direction) ? "That face already holds a device" : NO_SUPPORT);
+            return refuse(player, sixNode.getSideEnable(direction) ? mods.eln.i18n.I18N.tr("Face already occupied") : NO_SUPPORT);
         }
-        return refuse(player, "Something is in the way there");
+        return refuse(player, mods.eln.i18n.I18N.tr("Something is in the way"));
     }
 
-    static final String NO_SUPPORT = "Nothing solid behind that face to put it on";
+    static final String NO_SUPPORT = mods.eln.i18n.I18N.tr("Needs a solid block behind that face");
 
     /** Every refusal says why, on the action bar (AdventurAgent: a click that did nothing and said nothing). */
     static boolean refuse(Player player, String why) {

@@ -187,16 +187,16 @@ public final class OilRecovery extends SavedData {
 
     /** For Jade: the lake's state in a few words. */
     public static String describe(ServerLevel level, Reservoir r) {
-        if (!recovers(level, r)) return String.format("pond #%d, %d%% full (ponds don't refill)", r.id(), (int) Math.round(100.0 * r.amount() / Math.max(1, r.capacity())));
+        if (!recovers(level, r)) return String.format("Pond #%d (%d%%)", r.id(), (int) Math.round(100.0 * r.amount() / Math.max(1, r.capacity())));
         get(level).seep(level, r);
         long cap = Math.max(1, r.capacity());
         int pct = (int) Math.round(100.0 * r.amount() / cap);
         return switch (get(level).regime(r)) {
-            case PRIMARY -> r.amount() >= cap ? String.format("lake #%d, full", r.id())
-                : String.format("lake #%d, %d%% full, seeping %.1f mB/s", r.id(), pct, seepRate(r));
-            case SEEPAGE -> String.format("lake #%d seeping %.1f mB/s, %d%% full", r.id(), seepRate(r), pct);
-            case BOOSTED -> String.format("lake #%d seeping %.1f mB/s, boosted by steam (%.1f buckets paid), %d%% full", r.id(),
-                steamShare * pumpRate() * fillFactor(r), get(level).boost(r) / 1000, pct);
+            case PRIMARY -> r.amount() >= cap ? String.format("Lake #%d (full)", r.id())
+                : String.format("Lake #%d (%d%%, seeping %.1f mB/s)", r.id(), pct, seepRate(r));
+            case SEEPAGE -> String.format("Lake #%d (%d%%, seeping %.1f mB/s)", r.id(), pct, seepRate(r));
+            case BOOSTED -> String.format("Lake #%d (%d%%, seeping %.1f mB/s, steam-boosted %.1f B)", r.id(),
+                pct, steamShare * pumpRate() * fillFactor(r), get(level).boost(r) / 1000);
         };
     }
 }

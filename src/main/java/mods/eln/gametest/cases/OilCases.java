@@ -1518,7 +1518,7 @@ public final class OilCases {
                 case "mixed_fuel" -> {
                     // (by its flame's heat: what the burner's mass gives on lags it, Baughn 2026-11-11)
                     double drawn = a.getFuelBurntKg(), given = a.getFlameJ();
-                    String jade = a.getWaila().get(mods.eln.i18n.I18N.tr("Power")), want = mods.eln.misc.Utils.plotPower("", a.heatPower());
+                    String jade = a.getWaila().get(mods.eln.i18n.I18N.tr("Thermal power")), want = mods.eln.misc.Utils.plotPower("", a.heatPower());
                     ctx.check("fuel furnace: Jade shows the power it fires at", want.equals(jade), jade + " against " + want);
                     ctx.check("fuel furnace: a gasoline and diesel mix burns", given > 0 && drawn > 0, given + " J from " + drawn + " kg");
                     ctx.check("fuel furnace: the mix's heating value lies between gasoline's and diesel's",
@@ -2058,7 +2058,7 @@ public final class OilCases {
             // Jade says whether the pump runs, and why not (Baughn: a cold start gave no hint)
             String running = c.getWaila().get(mods.eln.i18n.I18N.tr("Condensate pump")), idle = alone.getWaila().get(mods.eln.i18n.I18N.tr("Condensate pump"));
             ctx.check("oil: Jade: the running condenser's pump shows its share and flow", running != null && running.endsWith("mB/s"), "" + running);
-            ctx.check("oil: Jade: a condenser without a turning turbine says its pump is stopped", idle != null && idle.startsWith("stopped"), "" + idle);
+            ctx.check("oil: Jade: a condenser without a turning turbine says its pump is stopped", idle != null && idle.startsWith("Stopped"), "" + idle);
             ctx.check("oil: Jade: its water level, in the headline", new java.util.ArrayList<>(c.getWaila().keySet()).indexOf(mods.eln.i18n.I18N.tr("Water level")) == 1,
                 "" + c.getWaila());
         }
@@ -2207,7 +2207,7 @@ public final class OilCases {
             mods.eln.Eln.simulator.removeSlowProcess(feed);
             ctx.check("oil: makeup at 10 bar: a condenser 30 % full takes none (float valve shut)", full != null
                 && full.vessel.mWater <= full0 + 1e-6, full == null ? "none" : String.format("%.4f -> %.4f kg; %s", full0, full.vessel.mWater, full.getWaila()));
-            ctx.check("oil: Jade: no signal, its float valve alone", low != null && ("" + low.getWaila().get(mods.eln.i18n.I18N.tr("Makeup valve"))).endsWith("no signal: its float valve alone"),
+            ctx.check("oil: Jade: no signal, its float valve alone", low != null && ("" + low.getWaila().get(mods.eln.i18n.I18N.tr("Makeup valve"))).endsWith(" (float)"),
                 low == null ? "none" : "" + low.getWaila());
             ctx.check("oil: makeup at 10 bar: one 5 % full takes it in", low != null
                 && low.vessel.mWater > low0 + 0.001, low == null ? "none" : String.format("%.4f -> %.4f kg; %s", low0, low.vessel.mWater, low.getWaila()));
@@ -3116,8 +3116,8 @@ public final class OilCases {
             ctx.check("condenser: its left flank takes the signal", off.signalled() && on.signalled(), "");
             ctx.check("condenser: makeup signal at 0 V: none comes in", off.vessel.mWater <= off0 + 1e-6, String.format("%.4f -> %.4f kg", off0, off.vessel.mWater));
             ctx.check("condenser: at SVU the float valve lets it in", on.vessel.mWater > on0 + 0.001, String.format("%.4f -> %.4f kg", on0, on.vessel.mWater));
-            ctx.check("condenser: Jade: shut by its signal", jOff.startsWith("shut by its signal") && jOff.contains("signal 0%"), jOff);
-            ctx.check("condenser: Jade: the signal lets it", jOn.contains("signal 100%") && !jOn.startsWith("shut by"), jOn);
+            ctx.check("condenser: Jade: shut by its signal", jOff.startsWith("Shut") && jOff.contains("signal 0%"), jOff);
+            ctx.check("condenser: Jade: the signal lets it", jOn.contains("signal 100%") && !jOn.startsWith("Shut"), jOn);
         }
     }
 
@@ -4504,7 +4504,7 @@ public final class OilCases {
                     double gone = ng0 - ngIn(ctx);
                     ctx.check("flare stack: the flue gas piped in goes up it", gone > 0.3 * ng0, String.format("%.6f kg gone from the rig (of %.6f)", gone, ng0));
                     ctx.check("flare stack: flue gas goes up as smoke, not a flame", plume && told.equals("flue_gas"), told);
-                    ctx.check("flare stack: Jade says it lets the smoke off", jade.containsKey("Letting off") && !jade.containsKey("Burning"), "" + jade);
+                    ctx.check("flare stack: Jade says it lets the smoke off", jade.containsKey("Venting") && !jade.containsKey("Burning"), "" + jade);
                 }
                 case "legacy_tank" -> ctx.check("flare stack: an old save's tank of residue loads into its vessel", legacy.isEmpty(), legacy);
             }

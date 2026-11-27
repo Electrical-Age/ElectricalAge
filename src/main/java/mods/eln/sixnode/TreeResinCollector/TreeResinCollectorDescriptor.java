@@ -75,7 +75,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Produces Tree Resin over\ntime when put on a tree.").split("\n"));
+        list.add(tr("Collects Tree Resin when mounted on a living tree trunk."));
     }
 
     // 1.12: ore dictionary treeWood/logWood and treeLeaves; 26.x: the block tags
@@ -91,7 +91,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
     public boolean canBePlacedOnSide(Player player, Coordonate c, Direction side) {
         Block b = c.getBlock();
         if (!isWood(b) || side.isY()) {
-            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("This block can only be placed on the side of a tree!")));
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("Must be placed on the side of a log.")));
             return false;
         }
         return true;

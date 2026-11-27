@@ -245,31 +245,30 @@ public class PlantCondenserElement extends TransparentNodeElement implements Flu
     /** What holds its vacuum back, first (Baughn 2026-10-29: Jade says why). */
     public String status() {
         var n = v.vessel;
-        if (motor == null) return I18N.tr("No motor: no pump, no air ejector, no vacuum");
-        if (v.floodShare() > PlantCondenserDescriptor.FLOOD) return I18N.tr("Flooding: pump its condensate out");
-        if (motorShare < 0.5) return I18N.tr("Motor slow: its pumps lag");
+        if (motor == null) return I18N.tr("No motor");
+        if (v.floodShare() > PlantCondenserDescriptor.FLOOD) return I18N.tr("Flooding");
+        if (motorShare < 0.5) return I18N.tr("Motor slow");
         if (n != null && n.P() > 0.3e5)
-            return tubesW < 1000 ? I18N.tr("Low vacuum: no cooling water") : I18N.tr("Low vacuum: condenser hot");
+            return tubesW < 1000 ? I18N.tr("Low vacuum (no cooling water)") : I18N.tr("Low vacuum (hot)");
         return I18N.tr("Holding vacuum");
     }
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new java.util.LinkedHashMap<>();
-        info.put(I18N.tr("Status"), status());
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("State"), status());
         var n = v.vessel;
         if (n != null) {
-            // (Baughn 2026-11-14: the level in the headline, 100 % where its tubes drown; the contents are details)
-            info.put(I18N.tr("Water level"), String.format(I18N.tr("%.0f%% of what drowns its tubes (%s)%s"), v.floodShare() / PlantCondenserDescriptor.FLOOD * 100,
-                EaUnits.volume(n.mLiquid() / EaUnits.KG_PER_MB_WATER), v.floodShare() > PlantCondenserDescriptor.FLOOD ? I18N.tr(": FLOODING") : ""));
-            info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", n.P() / 1e5, EaUnits.contents(n)));
-            info.put(I18N.tr("Temperature"), mods.eln.api.Meters.celsius(n.T() - Water.T0));
-            info.put(I18N.tr("Contents"), EaUnits.composition(n));
+            info.headline(I18N.tr("Water level"), String.format("%.0f%% (%s)%s", v.floodShare() / PlantCondenserDescriptor.FLOOD * 100,
+                EaUnits.volume(n.mLiquid() / EaUnits.KG_PER_MB_WATER), v.floodShare() > PlantCondenserDescriptor.FLOOD ? " — " + I18N.tr("FLOODING") : ""));
+            info.headline(I18N.tr("Pressure"), String.format("%.2f bar of %s, %s", n.P() / 1e5, EaUnits.contents(n),
+                mods.eln.api.Meters.celsius(n.T() - Water.T0)));
+            info.detail(I18N.tr("Contents"), EaUnits.composition(n));
         }
-        info.put(I18N.tr("Heat rejected"), Utils.plotPower("", v.heatW) + I18N.tr(" by its shell, ") + Utils.plotPower("", tubesW) + I18N.tr(" to its cooling water"));
-        info.put(I18N.tr("Motor"), motor == null ? I18N.tr("none: put a Shaft Motor against its side")
-            : String.format("%.0f%% speed, pumping %.0f mB/s, %s off its shaft", motorShare * 100, v.pumped, mods.eln.api.Meters.watts(pumpW)));
-        if (v.pump != null) info.put(I18N.tr("Pump outlet"), v.outletStatus());
+        info.detail(I18N.tr("Thermal power"), Utils.plotPower("", v.heatW).trim() + " " + I18N.tr("shell") + ", " + Utils.plotPower("", tubesW).trim() + " " + I18N.tr("cooling"));
+        info.detail(I18N.tr("Motor"), motor == null ? I18N.tr("None")
+            : String.format("%.0f%%, %.0f mB/s, %s", motorShare * 100, v.pumped, mods.eln.api.Meters.watts(pumpW)));
+        if (v.pump != null) info.detail(I18N.tr("Pump outlet"), v.outletStatus());
         return info;
     }
 }
