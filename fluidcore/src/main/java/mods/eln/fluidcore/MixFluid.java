@@ -149,6 +149,9 @@ final class MixFluid implements NodeFluid {
         /** Per group: mole fractions in its liquid (x), its liquid volume, reference density (for the head), actual density, per-kg shares and enthalpy. */
         D[][] x = new D[groups.length][], y = new D[groups.length][];
         D[] layerVol = new D[groups.length], rhoRef = new D[groups.length], rhoAct = new D[groups.length], hL = new D[groups.length];
+        /** The liquid of every volatile in a group that holds nothing (emptyGroup): zero, no slopes. One object, so
+         *  that core can tell it from a liquid that only happens to be none. */
+        final D none = D.c(0, NG);
         /** Groups from the bottom up (by reference density), and the levels of their tops (shares of the height). */
         int[] order = new int[groups.length];
         D[] top = new D[groups.length];
@@ -189,11 +192,15 @@ final class MixFluid implements NodeFluid {
         D p = pGas;
         for (int pass = 0; pass < 3; pass++) {
             D pNext = pGas;
+            boolean allEmpty = true;
             for (int g = 0; g < groups.length; g++) {
-                split(e, g, T, Vg, p, mm);
+                allEmpty &= split(e, g, T, Vg, p, mm);
                 for (int i : groups[g]) pNext = pNext.add(e.pv[i]);
             }
             p = pNext;
+            // (no group holds anything: no split read the pressure, so the next pass would come out the same to the bit.
+            // A flue duct's node is this every time, and its three passes were most of its flash)
+            if (allEmpty) break;
         }
         e.p = p;
         // the liquid's volumes, the energy, the volume residual
@@ -202,8 +209,11 @@ final class MixFluid implements NodeFluid {
             Species s = sp[i];
             if (s.liquidCapable()) {
                 e.v[i] = vLiquid(s, p);
-                vl = vl.add(e.ml[i].mul(e.v[i]));
-                E = E.add(e.ml[i].mul(uLiquid(s, T).add(eElastic(s, e.v[i]))));
+                // (no liquid of it, as a constant: its terms are zero times a finite number, value and slopes)
+                if (e.ml[i] != e.none) {
+                    vl = vl.add(e.ml[i].mul(e.v[i]));
+                    E = E.add(e.ml[i].mul(uLiquid(s, T).add(eElastic(s, e.v[i]))));
+                }
             }
             if (s.kind != Species.Kind.NONE) E = E.add(e.mv[i].mul(uVapour(s, T, e.pv[i])));
         }
@@ -282,19 +292,31 @@ final class MixFluid implements NodeFluid {
      * sum n_i / (N + c_i) <= 1 and lam exists): x_i = n_i / (N + lam c_i) are the liquid's mole fractions and
      * n_l,i = x_i N.
      */
-    private void split(Eval e, int g, D T, D Vg, D p, D[] mm) {
+    private boolean split(Eval e, int g, D T, D Vg, D p, D[] mm) {
         int[] mem = groups[g];
         int k = mem.length, n = NG;
         D[] nn = new D[k], c = new D[k];
         boolean[] inf = new boolean[k];
         double ntot = 0;
         boolean anyFinite = false;
+        double nAll = 0;
         for (int a = 0; a < k; a++) {
             Species s = sp[mem[a]];
             // (a mass that rounding left below zero counts as none, slopes kept: as an amount it gave negative
             // shares, and a negative width where it outweighed the rest)
             D ma = mm[mem[a]];
             nn[a] = (ma.v < 0 ? ma.add(-ma.v) : ma).mul(1 / s.molarMass);
+            nAll += nn[a].v;
+        }
+        // (a group holding nothing ends in the empty case below whatever its saturation pressures are, the moles that
+        // count there being no more than these: decided before they are worked out, and without the pressure)
+        if (nAll <= 1e-30) {
+            e.x[g] = new D[k];
+            emptyGroup(e, g, T, Vg, mm);
+            return true;
+        }
+        for (int a = 0; a < k; a++) {
+            Species s = sp[mem[a]];
             if (s.kind == Species.Kind.NONE) {
                 c[a] = D.c(0, n);
                 anyFinite = true;
@@ -319,15 +341,8 @@ final class MixFluid implements NodeFluid {
         // an empty group (or one whose present species are all past their no-root point): a first trace of a volatile
         // is vapour, of a non-volatile liquid (right-hand slopes)
         if (ntot <= 1e-30 || !anyFinite || pick(c, nn, inf) < 0) {   // (1e-30 mol: below it the solve's squares underflow)
-            for (int a = 0; a < k; a++) {
-                int i = mem[a];
-                boolean liquid = sp[i].kind == Species.Kind.NONE;
-                e.ml[i] = liquid ? mm[i] : D.c(0, n);
-                e.mv[i] = liquid ? D.c(0, n) : mm[i];
-                e.x[g][a] = D.c(1.0 / k, n);
-            }
-            finishVapour(e, g, T, Vg);
-            return;
+            emptyGroup(e, g, T, Vg, mm);
+            return false;
         }
         D ntotD = D.c(0, n);
         for (int a = 0; a < k; a++) if (!inf[a]) ntotD = ntotD.add(nn[a]);   // (those past their no-root point are all vapour)
@@ -476,6 +491,7 @@ final class MixFluid implements NodeFluid {
             }
         }
         finishVapour(e, g, T, Vg);
+        return false;
     }
 
     /** softplus(t) = ln(1 + e^t), cut as D.softplus cuts it. */
@@ -512,6 +528,21 @@ final class MixFluid implements NodeFluid {
     }
 
     /** The group's vapours' partial pressures (water with its virial). */
+    /** split() of a group with nothing to split: a first trace of a volatile is vapour, of a non-volatile liquid
+     *  (right-hand slopes). It reads no pressure. */
+    private void emptyGroup(Eval e, int g, D T, D Vg, D[] mm) {
+        int[] mem = groups[g];
+        int k = mem.length, n = NG;
+        for (int a = 0; a < k; a++) {
+            int i = mem[a];
+            boolean liquid = sp[i].kind == Species.Kind.NONE;
+            e.ml[i] = liquid ? mm[i] : e.none;
+            e.mv[i] = liquid ? D.c(0, n) : mm[i];
+            e.x[g][a] = D.c(1.0 / k, n);
+        }
+        finishVapour(e, g, T, Vg);
+    }
+
     private void finishVapour(Eval e, int g, D T, D Vg) {
         for (int i : groups[g]) {
             Species s = sp[i];
