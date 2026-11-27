@@ -664,7 +664,8 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     (`CabinWall` POST) against outsiders and reach, a door of posts within 40 degrees of away-from-the-rail, open only
     standing at a stop; drawn with a beam for the rail 2 m beside the car (no rail blocks). Walled cabins keep to
     straight axis runs. GameTests `servo_track_kit_lays`, `servo_track_runs`, `servo_track_round_cabin`,
-    `servo_track_corner_speed`. Not yet: the Toolbag (its sneak-click opens the radial), the car's panel stays at the
+    `servo_track_corner_speed`. Track Kits stay out of the Toolbag (Baughn: "hard to fit a railway in a bag that size"; its
+    sneak-click opens the radial, which a stop needs). Not yet: the car's panel stays at the
     walled cabin's back wall.
 - Tools (Baughn 2026-11-03): a pickaxe breaks machines, devices and pipes as fast as stone, shears break cables as fast
   as wool; in a block holding both, the part under the crosshair decides. No part breaks in under two ticks, so with
