@@ -143,7 +143,7 @@ public class ComputerScreen extends ElnScreen {
         field(addressX(), slotsY, 36, () -> render.address == 0 ? "" : String.valueOf(render.address), v -> {
             float f = EaField.parse(v);
             render.clientSendFloat(ComputerElement.SET_ADDRESS_ID, Float.isNaN(f) ? 0 : Math.round(f));
-        }, tr("Its RS485 address, 17 to 255: the source of the packets it sends."));
+        }, tr("RS485 address (17\u2013255)"));
         Minecraft.getInstance().onTextInputFocusChange(this, true);
     }
 
@@ -374,7 +374,7 @@ public class ComputerScreen extends ElnScreen {
                 st.baseText = st.savingText;
                 st.status = tr("Saved");
             } else {   // conflict: refused, and refused again (Baughn 2026-11-24): the player's text stays, the file too
-                st.status = tr("Not saved: the file changed on the disk. Save As keeps your text");
+                st.status = tr("Not saved: file changed on disk (use Save As)");
             }
         }
         // lines the computer took are in its log now; ones it never took (off, stuck, refused) come back after 10 s
@@ -401,7 +401,7 @@ public class ComputerScreen extends ElnScreen {
         Object change = whole(t, id) ? st.text : hunks(st.baseText, st.text);
         if (Form.print(new Form.Symbol("save"), (long) t, (long) id, render.seq + 1, st.baseRev == null ? "" : st.baseRev, change).length()
             > mods.eln.robotics.computer.screen.ScreenHost.MAX_SAVE - 16) {   // (the server would drop it, and "Saving..." would stay; 16: the :gen added on sending)
-            st.status = tr("Too big to save in one go: save in smaller steps, or split the file");
+            st.status = tr("Too large to save at once \u2014 split the file");
             return;
         }
         st.savingSeq = ++render.seq;
@@ -931,7 +931,7 @@ public class ComputerScreen extends ElnScreen {
                 Object change = whole(active, eid) ? st.text : hunks(st.baseText, st.text);
                 if (Form.print(new Form.Symbol("stash"), (long) active, (long) eid, render.seq + 1, st.baseRev == null ? "" : st.baseRev, change).length()
                     > mods.eln.robotics.computer.screen.ScreenHost.MAX_SAVE - 16) {   // (dropped, Save As would write the old text)
-                    st.status = tr("Too big to save in one go: save in smaller steps, or split the file");
+                    st.status = tr("Too large to save at once \u2014 split the file");
                     return false;
                 }
                 render.screenEvent(new Form.Symbol("stash"), (long) active, (long) eid, ++render.seq,

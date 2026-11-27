@@ -158,7 +158,7 @@ class PalScreen(menu: ElnNodeMenu, inventory: Inventory, title: Component, r: An
         text("legend0") { "§4A: " + tr("back (red)") }
         text("legend1") { "§2B: " + tr("left (green)") }
         text("legend2") { "§1C: " + tr("right (blue)") }
-        text("header") { tr("Inputs A B C, then the output for each:") }
+        text("header") { tr("Truth table (A B C -> Out)") }
         for (i in 0..7) {
             val a = (i shr 2) and 1
             val c = (i shr 1) and 1
@@ -185,9 +185,9 @@ class TachometerScreen(menu: ElnNodeMenu, inventory: Inventory, title: Component
         super.init()
         text("hl") { "100%" }
         text("ll") { "0%" }
-        high = field("high", { num(render.maxRads.toDouble()) }, { validate() }, *tr("Rads/s corresponding\nto 100% output").split("\n").toTypedArray())
-        low = field("low", { num(render.minRads.toDouble()) }, { validate() }, *tr("Rads/s corresponding\nto 0% output").split("\n").toTypedArray())
-        button("validate", { tr("Validate") }, { validate() })
+        high = field("high", { num(render.maxRads.toDouble()) }, { validate() }, tr("Speed at 100% output"))
+        low = field("low", { num(render.minRads.toDouble()) }, { validate() }, tr("Speed at 0% output"))
+        button("validate", { tr("Apply") }, { validate() })
     }
 
     fun validate() {

@@ -46,7 +46,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
                 if (d == side)
                     return true;
             }
-            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("You can't place this block at this side")));
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(tr("Can't place on this side")));
             return false;
         }
         return true;
@@ -98,7 +98,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
                 }
             }
             if (!ok)
-                return tr("You can't place this block at this side");
+                return tr("Can't place on this side");
         }
         GhostGroup ghostGroup = getGhostGroup(direction, front);
         if (ghostGroup != null && !ghostGroup.canBePloted(coord))

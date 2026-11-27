@@ -27,6 +27,7 @@ public class ElnLang extends LanguageProvider {
         Map.entry("servo_rail", "Servo Rail"), Map.entry("ram_chip", "RAM Chip (1 MB)"), Map.entry("janet_rom_chip", "ROM Chip: Janet"), Map.entry("boot_rom_chip", "ROM Chip: Floppy Boot"), Map.entry("floppy_disk", "Floppy Disk"), Map.entry("elevator_disk", "Floppy Disk: Elevator"), Map.entry("applications_disk", "Floppy Disk: Applications"), Map.entry("station_marker", "Station Marker"),
         Map.entry("iron_tank_minecart", "Iron Tank Minecart"), Map.entry("alloy_tank_minecart", "Alloy Tank Minecart"),
         Map.entry("tank_loading_station", "Tank Loading Station"),
+        Map.entry("signal_cable_switch", "Signal Cable Switch"), Map.entry("signal_switch", "Signal Toggle Switch"),
         Map.entry("item_creative_tab", "Electrical Age"));
 
     public ElnLang(PackOutput output) {
@@ -37,71 +38,71 @@ public class ElnLang extends LanguageProvider {
     protected void addTranslations() {
         add("item.eln.electric_bike.tooltip", "Not a motorcycle");   // (Baughn)
         // the Tank Loading Station (Baughn 2026-11-25, todo #611)
-        add("item.eln.tank_loading_station.tip1", "A rail. A Tank Minecart that stops on it joins the pipes on its two side flanges.");
-        add("item.eln.tank_loading_station.tip2", "Unpowered, it holds the cart; powered, it sends it off the way it came.");
-        add("item.eln.tank_loading_station.tip3", "Comparator: 0 no cart, 1 empty, up to 15 at 90 % liquid.");
+        add("item.eln.tank_loading_station.tip1", "Rail station that couples stopped Tank Minecarts to side pipes.");
+        add("item.eln.tank_loading_station.tip2", "Unpowered holds the cart; redstone releases it.");
+        add("item.eln.tank_loading_station.tip3", "Comparator: 0 no cart, 1 empty, up to 15 at 90% liquid.");
         add("item.eln.terrain_bike.tooltip", "Still not a motorcycle");
         add("container.eln.electric_bike", "Bike Trunk");
         add("message.eln.electric_bike.no_battery", "No battery: pedalling only");
-        add("message.eln.electric_bike.flat_battery", "The battery is flat: pedalling only");
-        add("key.eln.wrench", "Wrench (hold: a switch's screen on click; the chisel's brush menu)");
-        add("key.eln.headlamp", "Lights on/off (headlamp, flashlights in hand)");
-        add("key.eln.radar_band", "Radar goggles: next band");
-        add("key.eln.radar_low_down", "Radar goggles: band's low edge down");
-        add("key.eln.radar_low_up", "Radar goggles: band's low edge up");
-        add("key.eln.radar_high_down", "Radar goggles: band's high edge down");
-        add("key.eln.radar_high_up", "Radar goggles: band's high edge up");
-        add("eln.headlamp.none", "No headlamp worn, no flashlight in hand");
-        add("eln.headlamp.tip.wear", "Worn on the head: the helmet slot or the head slot");
-        add("eln.headlamp.tip.key", "%s switches it on and off");
-        add("eln.headlamp.tip.power", "Discharge power: %s W");
+        add("message.eln.electric_bike.flat_battery", "Battery flat: pedalling only");
+        add("key.eln.wrench", "Wrench / Tool Menu");
+        add("key.eln.headlamp", "Toggle Headlamp / Flashlight");
+        add("key.eln.radar_band", "Radar Goggles: Next Band");
+        add("key.eln.radar_low_down", "Radar Goggles: Min Depth -");
+        add("key.eln.radar_low_up", "Radar Goggles: Min Depth +");
+        add("key.eln.radar_high_down", "Radar Goggles: Max Depth -");
+        add("key.eln.radar_high_up", "Radar Goggles: Max Depth +");
+        add("eln.headlamp.none", "No headlamp or flashlight");
+        add("eln.headlamp.tip.wear", "Wear in helmet or head slot");
+        add("eln.headlamp.tip.key", "Press %s to toggle");
+        add("eln.headlamp.tip.power", "Power: %s W");
         add("eln.headlamp.tip.energy", "Stored energy: %s J (%s%%)");
-        add("eln.headlamp.state.on", "State: on");
-        add("eln.headlamp.state.off", "State: off");
+        add("eln.headlamp.state.on", "State: On");
+        add("eln.headlamp.state.off", "State: Off");
         add("item.eln.chisel.shape.cube", "cube");
         add("item.eln.chisel.shape.flat", "flat");
         add("item.eln.chisel.shape.tunnel", "tunnel");
         add("gui.eln.chisel.brush", "Chisel brush");
         add("gui.eln.toolbag.shears", "Shears");
-        add("gui.eln.toolbag.radial", "Toolbag: what to lay");
+        add("gui.eln.toolbag.radial", "Toolbag");
         add("item.eln.handbook.no_guideme", "The Ledger's pages are blank: it needs the GuideME mod.");
         // JEI (compat/jei/ResinCategory)
         add("jei.eln.tree_resin_collector", "Tree Resin Collector");
-        add("jei.eln.anneal", "Heat treatment");
+        add("jei.eln.anneal", "Heat Treatment");
         add("item.eln.oil_survey_map", "Oil Survey Map");
         add("item.eln.oil_survey_map.lore", "Oil under X %s, Z %s");
         add("item.eln.winding.wire", "%s turns of %s, %s A, %s");   // (the last: the wire's colour, a vanilla color.minecraft.* name)
-        add("jei.eln.oil_rubber", "Oil to rubber");
-        add("jei.eln.oil.energy", "%s kJ.");
-        add("jei.eln.oil.desulfuriser", "Any cut piped through it comes out unchanged, leaving a Sulfur Dust every 2000 mB. 230 V, 1 kW.");
-        add("jei.eln.oil.steam_cracker", "Gasoline and steam piped in at the back; butadiene and natural gas out at the front, each on its own pipe. 400 V, 4 kW.");
-        add("jei.eln.oil.polymeriser", "Butadiene piped in at the back (liquid or vapour); Soul Dust by hopper or hand. Raw Rubber into a hopper below. 230 V, 1 kW.");
-        add("jei.eln.oil.carbon_black_burner", "Fuel piped in at the back, burnt starved of air; Carbon Black into a hopper below. No power needed.");
-        add("jei.eln.anneal.how", "Between %s and %s °C (%s kJ)");
+        add("jei.eln.oil_rubber", "Oil to Rubber");
+        add("jei.eln.oil.energy", "%s kJ —");
+        add("jei.eln.oil.desulfuriser", "230 V, 1 kW. Cut passes through unchanged.");
+        add("jei.eln.oil.steam_cracker", "400 V, 4 kW. In: back; out: front (separate pipes).");
+        add("jei.eln.oil.polymeriser", "230 V, 1 kW. Butadiene: back; Soul Dust: top/sides; output: below.");
+        add("jei.eln.oil.carbon_black_burner", "No power. Fuel: back; output: below or right-click.");
+        add("jei.eln.anneal.how", "%s–%s °C (%s kJ)");
         // information pages (compat.JeiPages.infos): what no recipe makes
         add("jei.eln.info.lead_ore", "Lead ore lies deep, mostly in deepslate: from y -64 to 0, most of it around -32. Mine it for raw lead.");
         add("jei.eln.info.tungsten_ore", "Tungsten ore lies in stone from y 0 to 31. Mine it for raw tungsten.");
-        add("jei.eln.info.sulfur_dust", "Macerate vanilla sulfur from the Sulfur Caves: a sulfur block gives 4 to 5 dust, a spike 1. Mixed into Rubber Compound, it vulcanises raw rubber.");
-        add("jei.eln.info.soul_dust", "Macerate soul sand or soul soil. The activator in Rubber Compound.");
-        add("jei.eln.info.rubber", "Smelt Tree Resin to Raw Rubber. Raw Rubber smelts to 1 Rubber; mixed with Sulfur Dust and Soul Dust into Rubber Compound, it vulcanises to twice as much in an Electrical Furnace held at 130-200 °C (above 230 °C it chars).");
-        add("jei.eln.info.rubber_sapling", "Rubber figs grow wild in small groves in jungles: tall trees with buttressed trunks, broad crowns and aerial roots. Craft a sapling from a jungle, an oak, a birch and an acacia sapling. A Tree Resin Collector on a rubber tree collects three times what it gets from any other tree.");
-        add("jei.eln.info.tar_sand", "Rims the small oil ponds dug over some oil lakes. A Tar Sand Separator gets crude oil out of it.");
-        add("jei.eln.info.crude_oil", "From oil lakes underground, through an Oil Pump, or from the small ponds over some of them. An empty bucket takes it from a pond, or 1000 mB from a pump or tank that holds that much.");
-        add("jei.eln.info.fraction", "Drawn off a Fractionating Column fed with hot crude oil: each segment draws off its own cut, the base the residue. An empty bucket takes 1000 mB from any EA device holding that much.");
-        add("jei.eln.info.blown_fuse", "What is left of a Lead Fuse after it blows. Take it out of the holder and put in a new fuse.");
-        add("jei.eln.info.data_logger_print", "A Data Logger prints its graph when you press Print on its screen, on paper in its paper slot.");
+        add("jei.eln.info.sulfur_dust", "Macerate sulfur blocks or spikes from the Sulfur Caves, or extract from oil in a Desulfuriser. Vulcanises raw rubber.");
+        add("jei.eln.info.soul_dust", "Macerate soul sand or soul soil. Activator in Rubber Compound.");
+        add("jei.eln.info.rubber", "Smelt Tree Resin to Raw Rubber. Vulcanising Rubber Compound in an Electrical Furnace (130–200 °C) doubles yield; above 230 °C it chars.");
+        add("jei.eln.info.rubber_sapling", "Grows wild in small jungle groves. Yields three times as much resin or latex when tapped.");
+        add("jei.eln.info.tar_sand", "Rims the small oil ponds above some oil lakes. A Tar Sand Separator extracts crude oil from it.");
+        add("jei.eln.info.crude_oil", "Found in underground oil lakes (via Oil Pump) or surface ponds. An empty bucket draws 1000 mB from a pond, pump, or tank.");
+        add("jei.eln.info.fraction", "Drawn off a Fractionating Column fed with hot crude oil (residue stays in the base). An empty bucket draws 1000 mB from any tank or machine.");
+        add("jei.eln.info.blown_fuse", "What is left of a Lead Fuse after it blows. Remove it from the holder and fit a new fuse.");
+        add("jei.eln.info.data_logger_print", "Printed from a Data Logger GUI when paper is inserted.");
         add("jei.eln.info.creative", "Creative only: no recipe makes it.");
         add("jei.eln.wire_drawing", "Wire Drawing");
         add("jei.eln.wire_drawing.either", "48V or 230V machine, %s kJ");
         add("jei.eln.wire_drawing.big", "230V machine only, %s kJ");
-        add("jei.eln.wire_drawing.how", "Any spec: set on its screen");
+        add("jei.eln.wire_drawing.how", "Set gauge, voltage and colour in the machine GUI.");
         add("jei.eln.machine.macerator", "Macerator");
         add("jei.eln.machine.compressor", "Compressor");
         add("jei.eln.machine.plate_machine", "Plate Machine");
-        add("jei.eln.machine.magnetiser", "Magnetizer");
+        add("jei.eln.machine.magnetiser", "Magnetiser");
         add("jei.eln.machine.separator", "Separator");
         add("jei.eln.machine.extra", "(sometimes more)");
-        add("jei.eln.tree_resin_collector.how", "On the side of a log under leaves. Right-click it to empty it. A rubber tree gives three times as much.");
+        add("jei.eln.tree_resin_collector.how", "Mount on a living tree trunk; right-click to collect (3× on a Rubber Fig).");
         // the guide advancements' hints (Baughn's words, 2026-10-20; data/eln/advancement/guide, tools/advancements/make_guide.py)
         add("advancements.eln.guide.root.title", "Electrical Age");
         add("advancements.eln.guide.root.description", "Every tree gives a little resin; rubber trees give the most.");
@@ -116,7 +117,7 @@ public class ElnLang extends LanguageProvider {
         add("advancements.eln.guide.steam_turbine.title", "Full Steam Ahead");
         // (Baughn 2026-10-26: an anti-achievement with the cure; SteamGeneratorElement.awardLowPressure)
         add("advancements.eln.guide.low_pressure.title", "Under Pressure");
-        add("advancements.eln.guide.low_pressure.description", "Your steam turbine asks for more steam than its boiler makes: the pressure falls, and it gets little from each kg. Add heat, lighten its load, or give it a regulator to hold a target pressure.");
+        add("advancements.eln.guide.low_pressure.description", "Your turbine is outrunning its boiler.");
         add("advancements.eln.guide.steam_turbine.description", "Set it under the boiler. Or don't.");
         add("advancements.eln.guide.big_iron.title", "Big Iron");
         add("advancements.eln.guide.big_iron.description", "Mind the rads.");
@@ -137,7 +138,7 @@ public class ElnLang extends LanguageProvider {
         add("advancements.eln.guide.solar.title", "Sunbather");
         add("advancements.eln.guide.solar.description", "Free power, then no power.");
         add("advancements.eln.guide.chisel.title", "Chip Off the Old Block");
-        add("advancements.eln.guide.chisel.description", "It's not a wrench. Press C anyway.");
+        add("advancements.eln.guide.chisel.description", "It's not a wrench. Hold the wrench key anyway.");
         add("advancements.eln.guide.multimeter.title", "Measure Twice");
         add("advancements.eln.guide.multimeter.description", "Can you imagine needing one of these?");
         add("advancements.eln.guide.converter.title", "Step Up");
@@ -202,11 +203,11 @@ public class ElnLang extends LanguageProvider {
         add("fluid_type.eln.butadiene", "Butadiene");
         add("fluid.eln.butadiene_gas", "Butadiene Vapour");
         add("fluid_type.eln.butadiene_gas", "Butadiene Vapour");
-        add("jei.eln.info.polymeriser", "Makes butadiene from a Steam Cracker into Raw Rubber, on 230 V at its sides (1 kW). Butadiene (liquid or vapour) into the blue flange on its back, 20 mB a Raw Rubber; Soul Dust is the initiator, one for every 8 Raw Rubber, from a hopper above or beside it or by hand. The Raw Rubber goes into a hopper under it, or a right-click takes it.");
-        add("jei.eln.info.steam_cracker", "Cracks gasoline with steam on 400 V (4 kW). Gasoline into the blue C8 flange and steam into the blue H2O flange, both on its back; out of its front, butadiene from the red C4H6 flange (a Polymeriser makes it into Raw Rubber) and natural gas from the red CH4 flange (a gas turbine burns it). Per 100 mB of gasoline: 40 mB of butadiene and 30 mB of natural gas. Both outlets need pipes, and it stops when either product has nowhere to go.");
-        add("jei.eln.info.industrial_resin_collector", "Set it against a tree trunk by its back, on 230 V at its sides. It taps latex ten times as fast as a Tree Resin Collector (a rubber tree gives three times what any other does) and pushes it out of the red flange on top.");
-        add("jei.eln.info.carbon_black", "Soot: a Carbon Black Burner makes one from 500 mB of heavy oil, residue or crude burnt starved of air, into a hopper under it. A black dye, and a filler: a Rubber Compound with one vulcanises to 11 Rubber.");
-        add("jei.eln.info.latex", "Rubber trees' milky sap. An Industrial Resin Collector taps it from a trunk, and a 230V Compressor presses it from dandelions; the 230V Compressor presses 250 mB of it, fed into its blue IN flange, to a Raw Rubber.");
+        add("jei.eln.info.polymeriser", "Converts butadiene and Soul Dust into Raw Rubber (230 V, 1 kW). Outputs to a hopper below or on right-click.");
+        add("jei.eln.info.steam_cracker", "Cracks gasoline with steam into butadiene and natural gas (400 V, 4 kW). Both outlets must be piped; stalls if either backs up.");
+        add("jei.eln.info.industrial_resin_collector", "Powered latex tap (230 V): ten times faster than a Tree Resin Collector, and three times faster on a Rubber Fig.");
+        add("jei.eln.info.carbon_black", "Made in a Carbon Black Burner from heavy oil, residue, or crude. Black dye and rubber filler (vulcanises Rubber Compound to 11 Rubber).");
+        add("jei.eln.info.latex", "Tapped by an Industrial Resin Collector or pressed from dandelions in a 230V Compressor. Press 250 mB into Raw Rubber in a 230V Compressor.");
         for (var c : mods.eln.oil.Oil.Cut.values()) {
             add("fluid.eln." + c.id, c.display);
             add("fluid_type.eln." + c.id, c.display);
@@ -214,18 +215,49 @@ public class ElnLang extends LanguageProvider {
         }
     }
 
-    /** The name a player sees, where it differs from the descriptor's (which stays: it keys saves and recipes).
-     *  Baughn 2026-11-13: the DC-DC converters are called "Transformer (DC-DC)". */
     /** Names players see where they differ from the descriptor's (which keys saves and recipes, so it stays). */
-    static final java.util.Map<String, String> SHOWN = java.util.Map.of(
+    static final java.util.Map<String, String> SHOWN = java.util.Map.ofEntries(
         // the 400 V plant's shaft machines were anonymous beside the 48 V and 230 V ones; HP and LP turbines (Baughn 2026-11-26)
-        "Steam Turbine", "400V HP Steam Turbine",
-        "LP Steam Turbine", "400V LP Steam Turbine",
-        "Gas Turbine", "400V Gas Turbine",
-        "Generator", "400V Generator");
+        Map.entry("Steam Turbine", "400V HP Steam Turbine"),
+        Map.entry("LP Steam Turbine", "400V LP Steam Turbine"),
+        Map.entry("Gas Turbine", "400V Gas Turbine"),
+        Map.entry("Generator", "400V Generator"),
+        Map.entry("Analogic Regulator", "Analogue Regulator"),
+        Map.entry("Analog Watch", "Analogue Watch"),
+        Map.entry("On/OFF Regulator 1 Percent", "On/Off Regulator (1%)"),
+        Map.entry("On/OFF Regulator 10 Percent", "On/Off Regulator (10%)"),
+        Map.entry("Portable Condensator", "Portable Capacitor"),
+        Map.entry("Portable Condensator Pack", "Portable Capacitor Pack"),
+        Map.entry("48V Electrical Age to other energy exporter", "48V Energy Exporter"),
+        Map.entry("230V Electrical Age to other energy exporter", "230V Energy Exporter"),
+        Map.entry("400V Electrical Age to other energy exporter", "400V Energy Exporter"),
+        Map.entry("Analog vuMeter", "Analogue VU Meter"),
+        Map.entry("LED vuMeter", "LED VU Meter"),
+        Map.entry("MultiMeter", "Multimeter"),
+        Map.entry("Power capacitor", "Power Capacitor Block"),
+        Map.entry("Power inductor", "Power Inductor Block"),
+        Map.entry("Ground Radar w/Goggles", "Ground Radar (with Goggles)"),
+        Map.entry("Utility Pole w/DC-DC Converter", "Utility Pole (with Transformer)"),
+        Map.entry("Street Light", "Streetlight"),
+        Map.entry("Joint hub", "Joint Hub"),
+        Map.entry("Configurable summing unit", "Configurable Summing Unit"),
+        Map.entry("Lowpass filter", "Low-Pass Filter"),
+        Map.entry("Sample and hold", "Sample and Hold"),
+        Map.entry("Signal 20H inductor", "Signal 20H Inductor"),
+        Map.entry("Voltage controlled amplifier", "Voltage-Controlled Amplifier"),
+        Map.entry("Voltage controlled sawtooth oscillator", "Voltage-Controlled Sawtooth Oscillator"),
+        Map.entry("Voltage controlled sine oscillator", "Voltage-Controlled Sine Oscillator"),
+        Map.entry("Lead Fuse for medium voltage cables", "Lead Fuse for Medium Voltage Cables"),
+        Map.entry("Lead Fuse for high voltage cables", "Lead Fuse for High Voltage Cables"),
+        Map.entry("Lead Fuse for very high voltage cables", "Lead Fuse for Very High Voltage Cables"),
+        Map.entry("Gray Brush", "Grey Brush"),
+        Map.entry("Single-use Battery", "Single-Use Battery"));
 
     static String shown(String name) {
-        return SHOWN.getOrDefault(name, name).replace("DC-DC Converter", "Transformer (DC-DC)");
+        return SHOWN.getOrDefault(name, name)
+            .replace("DC-DC Converter", "Transformer (DC-DC)")
+            .replace("Heating Corp", "Heating Element")
+            .replace("Magnetizer", "Magnetiser");
     }
 
     static String descriptorName(Object d) {

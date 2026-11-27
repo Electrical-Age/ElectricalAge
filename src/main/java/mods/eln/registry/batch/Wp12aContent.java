@@ -58,7 +58,7 @@ public class Wp12aContent implements ElnContent {
     }
 
     /** On EA's plates (Erisi's chat review: players' hammered plates didn't fit, and nothing said why; Baughn 2026-10-27). */
-    static final String[] PLATE_NOTE = {"A high-quality plate: EA's recipes need these,", "a hammered plate won't do"};
+    static final String[] PLATE_NOTE = {"Machine-rolled plate (required by Electrical Age recipes)."};
 
     public static void registerHeatingCorp(int id) {
         int subId, completId;
@@ -311,10 +311,10 @@ public class Wp12aContent implements ElnContent {
                 @Override
                 public void addInformation(net.minecraft.world.item.ItemStack s, net.minecraft.world.entity.player.Player p, java.util.List list, boolean b) {
                     super.addInformation(s, p, list, b);
-                    java.util.Collections.addAll(list, mods.eln.i18n.I18N.tr("Anneal in an Electrical Furnace between\n%1$ and %2$ °C to make an Average\nFerromagnetic Core. Above %3$ °C they spoil.",
+                    list.add(mods.eln.i18n.I18N.tr("Anneal in an Electrical Furnace (%1$–%2$ °C; spoils above %3$ °C).",
                         (int) mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.ANNEAL_MIN_C,
                         (int) mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.ANNEAL_MAX_C,
-                        (int) mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.ANNEAL_SPOIL_C).split("\n"));
+                        (int) mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess.ANNEAL_SPOIL_C));
                 }
             });
         }
@@ -326,7 +326,7 @@ public class Wp12aContent implements ElnContent {
                 @Override
                 public void addInformation(net.minecraft.world.item.ItemStack s, net.minecraft.world.entity.player.Player p, java.util.List list, boolean b) {
                     super.addInformation(s, p, list, b);
-                    java.util.Collections.addAll(list, mods.eln.i18n.I18N.tr("Anneal it in a magnetic field: a long\npass through a Magnetizer makes an\nOptimal Ferromagnetic Core.").split("\n"));
+                    list.add(mods.eln.i18n.I18N.tr("Process in a Magnetiser to make an Optimal Ferromagnetic Core."));
                 }
             });
         }
@@ -984,7 +984,7 @@ public class Wp12aContent implements ElnContent {
             subId = 48;
             name = TR_NAME(Type.NONE, "Wrench");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-                name, TR("Electrical age wrench,\nCan be used to turn\nsmall wall blocks").split("\n"));
+                name, new String[]{"Rotates small wall-mounted devices."});
             sharedItem.addElement(subId + (id << 6), desc);
 
             // 1.12 Eln.wrenchItemStack + Utils.isWrench: this item, or any item named "...wrench..."

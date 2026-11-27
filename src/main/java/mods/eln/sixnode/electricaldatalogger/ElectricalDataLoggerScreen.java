@@ -56,38 +56,37 @@ public class ElectricalDataLoggerScreen extends ElnScreen {
         button("pause", () -> render.pause ? "§6" + tr("Paused") : "§a" + tr("Running"),
             () -> render.clientSend(ElectricalDataLoggerElement.tooglePauseId));
         print = button("print", () -> tr("Print"), () -> render.clientSend(ElectricalDataLoggerElement.printId),
-            tr("Prints the graph on the paper"));
+            tr("Print graph to paper"));
         text("periodl", () -> tr("Period"));
         text("maxl", () -> tr("Max"));
         text("minl", () -> tr("Min"));
         field("period", () -> num(render.log.samplingPeriod), v -> {
             float p = EaField.parse(v);
             if (!Float.isNaN(p)) render.logClient.period(Math.max(0.05f, p));
-        }, tr("Sampling period"), tr("in seconds, at least 0.05; changing it keeps the history"));
+        }, tr("Sampling period (s, min 0.05)"));
         field("max", () -> num(channel().max), v -> {
             float p = EaField.parse(v);
             if (!Float.isNaN(p)) render.logClient.max(selected, p);
-        }, tr("Y-axis max"), tr("what a full signal reads as"));
+        }, tr("Y-axis max (full signal)"));
         field("min", () -> num(channel().min), v -> {
             float p = EaField.parse(v);
             if (!Float.isNaN(p)) render.logClient.min(selected, p);
-        }, tr("Y-axis min"), tr("what a zero signal reads as"));
+        }, tr("Y-axis min (zero signal)"));
         text("unitl", () -> tr("Unit"));
-        field("unit", () -> channel().unit, v -> render.logClient.unit(selected, v), tr("Unit"), tr("any text, up to 10 characters"));
+        field("unit", () -> channel().unit, v -> render.logClient.unit(selected, v), tr("Unit (max 10 chars)"));
         // the bus channel this channel records, only in a voxel block: a plain block has no bus pin
         if (render.inVoxelBlock()) {
             busChannel("busswatch", "bus", () -> render.busChannels[Math.min(selected, render.busChannels.length - 1)],
                 b -> render.sendBus(Math.min(selected, render.busChannels.length - 1), b),
-                tr("The field bus channel this channel records instead of its wire. Unused: its wire."),
-                tr("The bus meets the logger's violet pin."));
+                tr("Field bus channel (overrides wire)"));
             text("busl", () -> tr("Bus channel"));
         }
         text("editl", () -> render.descriptor.channels > 1 ? tr("Edit") : "");
         button("mode", () -> tr("Graph: %1$", tr(LogGraph.MODE_NAMES.get(Math.floorMod(render.log.mode, 3)))),
-            () -> render.logClient.mode((render.log.mode + 1) % 3), tr("Lines, stacked areas, or a lane each"));
+            () -> render.logClient.mode((render.log.mode + 1) % 3), tr("Lines, stacked, or separate lanes"));
         for (int i = 0; i < TABS.length; i++) {
             int c = i;
-            var b = button("tab" + i, () -> (selected == c ? "\u00A7n" : "") + TABS[c], () -> selected = c, render.inVoxelBlock() ? tr("Edit this channel's scale, unit and bus channel") : tr("Edit this channel's scale and unit"));
+            var b = button("tab" + i, () -> (selected == c ? "\u00A7n" : "") + TABS[c], () -> selected = c, tr("Edit channel scale and unit"));
             b.visible = render.descriptor.channels > c && render.descriptor.channels > 1;
         }
         update();

@@ -108,11 +108,11 @@ public class HeadlampItem extends Item implements IItemEnergyBattery {
     @Override
     public void appendHoverText(ItemStack s, Item.TooltipContext ctx, net.minecraft.world.item.component.TooltipDisplay display, Consumer<Component> out,
                                 net.minecraft.world.item.TooltipFlag flag) {
-        out.accept(Component.translatable("eln.headlamp.tip.wear").withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.translatable("eln.headlamp.tip.key", Component.keybind("key.eln.headlamp")).withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.translatable("eln.headlamp.tip.power", (int) POWER));
-        out.accept(Component.translatable("eln.headlamp.tip.energy", (int) Math.round(getEnergy(s)), (int) Math.round(100 * getEnergy(s) / STORAGE)));
-        out.accept(Component.translatable(isOn(s) ? "eln.headlamp.state.on" : "eln.headlamp.state.off"));
+        out.accept(Component.translatable(isOn(s) ? "eln.headlamp.state.on" : "eln.headlamp.state.off").withStyle(net.minecraft.ChatFormatting.GRAY));
+        out.accept(Component.translatable("eln.headlamp.tip.energy", (int) Math.round(getEnergy(s)), (int) Math.round(100 * getEnergy(s) / STORAGE)).withStyle(net.minecraft.ChatFormatting.GRAY));
+        out.accept(Component.translatable("eln.headlamp.tip.power", (int) POWER).withStyle(net.minecraft.ChatFormatting.GRAY));
+        out.accept(Component.translatable("eln.headlamp.tip.wear").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        out.accept(Component.translatable("eln.headlamp.tip.key", Component.keybind("key.eln.headlamp")).withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
     }
 
     // ---- an EA item battery (chargers fill it)

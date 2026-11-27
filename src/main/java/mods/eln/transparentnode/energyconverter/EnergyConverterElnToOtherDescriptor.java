@@ -65,6 +65,12 @@ public class EnergyConverterElnToOtherDescriptor extends TransparentNodeDescript
         return new EnergyConverterElnToOtherBlock(p, this);
     }
 
+    @Override
+    public void addInformation(net.minecraft.world.item.ItemStack itemStack, net.minecraft.world.entity.player.Player entityPlayer, java.util.List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(mods.eln.i18n.I18N.tr("Exports Electrical Age power as FE (up to %1$W).", mods.eln.misc.Utils.plotValue(eln.maxP)));
+    }
+
     public static class ElnDescriptor {
         public double nominalU;
         public double maxP;

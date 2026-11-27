@@ -78,7 +78,7 @@ public class PolymeriserDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Makes butadiene into Raw Rubber.\nButadiene into the blue flange on its back;\nSoul Dust from above or the sides\n(one for every 8 Raw Rubber).\nRaw Rubber into a hopper under it.\nNominal power: %1$W",
-            mods.eln.misc.Utils.plotValue(nominalP)).split("\n"));
+        list.add(tr("Polymerises butadiene and Soul Dust into Raw Rubber."));
+        list.add(tr("Power: %1$.", mods.eln.misc.Utils.plotPower("", nominalP).trim()));
     }
 }

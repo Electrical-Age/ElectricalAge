@@ -67,10 +67,10 @@ public class InlinePumpDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add("Placed along your view: water in behind you, out ahead.");
-        list.add(String.format("Water in on its left, out on its right: up to %.0f bar of head, %.0f mB/s free-flowing.",
-            HEAD_PA / 1e5, RATED_KG_PER_S / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER));
-        list.add(String.format("%.0f V on its front, up to %.0f W; a speed signal on its back.", nominalU, NOMINAL_P));
-        list.add("Fed steam, or water at its boiling point, it cavitates and moves next to nothing.");
+        list.add(String.format("Inline booster pump: up to %.0f mB/s, %.0f bar head (%.0f W).",
+            RATED_KG_PER_S / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER, HEAD_PA / 1e5, NOMINAL_P));
+        list.add("Liquid only — cavitates on steam or boiling water.");
+        mods.eln.client.ItemTooltips.detail(list,
+            "Places along your view (inlet behind you, outlet ahead). 0–5 V speed signal.");
     }
 }

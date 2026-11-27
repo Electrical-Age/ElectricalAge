@@ -30,8 +30,8 @@ public class ThrottleValveScreen extends Screen {
     boolean reducing, backwards;
 
     ThrottleValveScreen(BlockPos pos, int index, int kind, double value) {
-        super(Component.literal(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? "Safety Valve"
-            : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? "Pressure Valve" : "Throttle Valve"));
+        super(Component.literal(mods.eln.i18n.I18N.tr(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? "Safety Valve"
+            : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? "Pressure Valve" : "Throttle Valve")));
         this.pos = pos;
         this.index = index;
         this.kind = kind;
@@ -97,7 +97,7 @@ public class ThrottleValveScreen extends Screen {
                 send(mods.eln.node.voxel.VoxelNode.TOGGLE_PRESSURE_MODE);
                 b.setMessage(modeLabel());
             }).bounds(width / 2 - w / 2, height / 2 + 30, w, 20).build());
-            addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.literal("Turn its arrow round"), b -> {
+            addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.literal(mods.eln.i18n.I18N.tr("Flip direction")), b -> {
                 backwards = !backwards;
                 send(mods.eln.node.voxel.VoxelNode.FLIP_PRESSURE_ARROW);
             }).bounds(width / 2 - w / 2, height / 2 + 54, w, 20).build());
@@ -105,13 +105,13 @@ public class ThrottleValveScreen extends Screen {
     }
 
     Component modeLabel() {
-        return Component.literal(reducing ? "Reducing: holds the pressure after it" : "Relief: holds the pressure before it");
+        return Component.literal(mods.eln.i18n.I18N.tr(reducing ? "Reducing (downstream)" : "Relief (upstream)"));
     }
 
     Component label(double v) {
-        if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY) return Component.literal(String.format("Lifts at: %.1f bar", toBar(v)));
-        if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE) return Component.literal(String.format("Set point: %.2f bar", toBarP(v)));
-        return Component.literal("Open: " + mods.eln.misc.Utils.plotPercent(v));
+        if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY) return Component.literal(mods.eln.i18n.I18N.tr("Lifts at: %1$ bar", String.format("%.1f", toBar(v))));
+        if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE) return Component.literal(mods.eln.i18n.I18N.tr("Set point: %1$ bar", String.format("%.2f", toBarP(v))));
+        return Component.literal(mods.eln.i18n.I18N.tr("Open: %1$", mods.eln.misc.Utils.plotPercent(v)));
     }
 
     void send(double v) {
@@ -134,10 +134,11 @@ public class ThrottleValveScreen extends Screen {
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partial) {
         super.extractRenderState(g, mouseX, mouseY, partial);
         g.centeredText(font, title, width / 2, height / 2 - 30, 0xFFFFFFFF);
-        g.centeredText(font, Component.literal(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY
-            ? "Opens over this; wide open at +10%"
-            : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? "One way, along its arrow"
-            : "Shut at 0%, fully open at 100%"), width / 2, height / 2 + 16, 0xFFA0A0A0);
+        if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY) {
+            g.centeredText(font, Component.literal(mods.eln.i18n.I18N.tr("Opens above set point (+10% full)")), width / 2, height / 2 + 16, 0xFFA0A0A0);
+        } else if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE) {
+            g.centeredText(font, Component.literal(mods.eln.i18n.I18N.tr("One way, along its arrow")), width / 2, height / 2 + 16, 0xFFA0A0A0);
+        }
     }
 
     @Override

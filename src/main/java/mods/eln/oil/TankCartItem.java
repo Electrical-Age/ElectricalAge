@@ -28,11 +28,11 @@ public class TankCartItem extends MinecartItem {
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> out, TooltipFlag flag) {
         TankContents c = stack.get(mods.eln.registry.ElnRegistry.TANK_CONTENTS.get());
         if (c != null) {
-            for (String l : c.lines()) out.accept(Component.literal(l));
+            for (String l : c.lines()) out.accept(Component.literal(l).withStyle(net.minecraft.ChatFormatting.GRAY));
             return;
         }
         var d = mods.eln.Eln.transparentNodeItem.getDescriptor(alloy ? TankDescriptor.ALLOY_ID : TankDescriptor.IRON_ID);
-        if (d instanceof TankDescriptor t) out.accept(Component.literal(t.ratingLine()));
-        out.accept(Component.literal(mods.eln.i18n.I18N.tr("Fill and empty it at a Tank Loading Station.")));
+        if (d instanceof TankDescriptor t) out.accept(Component.literal(t.ratingLine()).withStyle(net.minecraft.ChatFormatting.GRAY));
+        out.accept(mods.eln.client.ItemTooltips.hintLine(mods.eln.i18n.I18N.tr("Fill and empty at a Tank Loading Station.")));
     }
 }

@@ -165,6 +165,7 @@ public final class ElnClient {
                 e.register(ElnRegistry.BIKE_TRUNK_MENU.get(), mods.eln.client.gui.BikeTrunkScreen::new);
             });
         XRayScan.install();
+        ItemTooltips.isShiftDown = () -> net.minecraft.client.Minecraft.getInstance().hasShiftDown();
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.ItemTooltipEvent.class, ItemTooltips::onTooltip);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, e -> XRayScan.tick());
         // the hand drill's bit spin and sound

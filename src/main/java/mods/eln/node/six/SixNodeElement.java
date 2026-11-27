@@ -484,10 +484,10 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     @Nullable
     public Map<String, String> getWaila() {
-        Map<String, String> wailaList = new HashMap<String, String>();
+        var out = mods.eln.compat.jade.ProbeLines.of();
         String info = multiMeterString();
-        if (info != null) wailaList.put("Info", info);   // (Baughn: Jade showed "null" for a resin collector)
-        return wailaList;
+        if (info != null && !info.isEmpty()) out.headline("Info", info);   // (Baughn: Jade showed "null" for a resin collector)
+        return out;
     }
 
     /**

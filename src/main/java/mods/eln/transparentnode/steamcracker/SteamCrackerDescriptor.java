@@ -84,7 +84,8 @@ public class SteamCrackerDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Cracks gasoline with steam.\nOn its back: gasoline into the blue C8\nflange, steam into the blue H2O one.\nOn its front: butadiene out of the red\nC4H6 flange, natural gas out of CH4.\nBoth outlets need pipes.\nNominal power: %1$W",
-            mods.eln.misc.Utils.plotValue(nominalP)).split("\n"));
+        list.add(tr("Cracks gasoline with steam into butadiene and natural gas."));
+        list.add(tr("Power: %1$.", mods.eln.misc.Utils.plotPower("", nominalP).trim()));
+        mods.eln.client.ItemTooltips.detail(list, tr("Both product outlets must be piped."));
     }
 }

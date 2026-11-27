@@ -125,10 +125,9 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
     @Nullable
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Channel"), channel);
-        info.put(I18N.tr("Input voltage"), Utils.plotVolt("", inputGate.getU()));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Channel"), channel)
+            .headline(I18N.tr("Input voltage"), Utils.plotVolt("", inputGate.getU()));
     }
 
     @Override

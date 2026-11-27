@@ -175,13 +175,13 @@ public class TankStationEntity extends BlockEntity implements FluidDevice, mods.
     public Map<String, String> waila() {
         TankCart c = docked();
         if (c != null) {
-            Map<String, String> info = c.waila();
-            info.put(mods.eln.i18n.I18N.tr("Comparator"), Integer.toString(signal()));
+            var info = mods.eln.compat.jade.ProbeLines.of();
+            info.addAll(c.waila());
+            info.detail(mods.eln.i18n.I18N.tr("Comparator"), Integer.toString(signal()));
             return info;
         }
-        Map<String, String> info = new LinkedHashMap<>();
-        info.put(mods.eln.i18n.I18N.tr("Cart"), mods.eln.i18n.I18N.tr("none docked"));
-        info.put(mods.eln.i18n.I18N.tr("Flanges"), mods.eln.i18n.I18N.tr("both sides, across the track"));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(mods.eln.i18n.I18N.tr("Cart"), mods.eln.i18n.I18N.tr("None docked"));
         return info;
     }
 }

@@ -78,7 +78,8 @@ public class IndustrialResinCollectorDescriptor extends TransparentNodeDescripto
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Set it against a tree trunk by its back.\nTaps latex ten times as fast as a\nTree Resin Collector; a rubber tree\ngives three times as much.\nLatex out of the flange on top.\nNominal power: %1$W",
-            mods.eln.misc.Utils.plotValue(nominalP)).split("\n"));
+        list.add(tr("Powered latex tap (10× faster than a Tree Resin Collector)."));
+        list.add(tr("Power: %1$.", mods.eln.misc.Utils.plotPower("", nominalP).trim()));
+        mods.eln.client.ItemTooltips.detail(list, tr("Mount against a living tree trunk; rubber trees yield 3×."));
     }
 }

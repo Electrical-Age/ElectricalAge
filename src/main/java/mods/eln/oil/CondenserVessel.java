@@ -239,11 +239,11 @@ public final class CondenserVessel {
      * of its rated (free) flow at its speed now, or that it is shut off and needs a pipe pump after it.
      */
     public String outletStatus() {
-        String against = String.format(mods.eln.i18n.I18N.tr("against %.1f bar"), outletPa / 1e5);
-        if (curve.share(backPa) < 0.05) return against + mods.eln.i18n.I18N.tr(": shut off, needs a pipe pump");
-        if (speed < 0.01) return against + mods.eln.i18n.I18N.tr(": not turning");
-        if (flowShare() < 0.05 * speed) return against + mods.eln.i18n.I18N.tr(": holding back, its hotwell is low");
-        return against + String.format(mods.eln.i18n.I18N.tr(": %.0f%% of its rated flow"), flowShare() * 100);
+        double bar = outletPa / 1e5;
+        if (curve.share(backPa) < 0.05) return String.format(mods.eln.i18n.I18N.tr("%.1f bar (stalled — head too high)"), bar);
+        if (speed < 0.01) return String.format(mods.eln.i18n.I18N.tr("%.1f bar (idle)"), bar);
+        if (flowShare() < 0.05 * speed) return String.format(mods.eln.i18n.I18N.tr("%.1f bar (low hotwell)"), bar);
+        return String.format(mods.eln.i18n.I18N.tr("%.1f bar (%.0f%% flow)"), bar, flowShare() * 100);
     }
 
     /** After a fluid step: the meters; returns the condensate pumped this step (kg). */

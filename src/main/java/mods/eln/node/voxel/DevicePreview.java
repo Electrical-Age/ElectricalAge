@@ -184,7 +184,7 @@ public final class DevicePreview {
             }
             if (!found && now.ok()) {
                 to = was;   // (it stays as it fits, as a placed device does)
-                p.sendOverlayMessage(net.minecraft.network.chat.Component.literal("No other way round fits here"));
+                p.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("No other orientation fits")));
             }
         }
         TURN.put(p.getUUID(), new int[]{item.descriptor.parentItemDamage, Math.floorMod(to, 4)});

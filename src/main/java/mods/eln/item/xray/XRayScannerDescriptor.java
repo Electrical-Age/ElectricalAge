@@ -101,11 +101,11 @@ public class XRayScannerDescriptor extends GenericItemUsingDamageDescriptor impl
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, Player player, List list, boolean par4) {
         super.addInformation(stack, player, list, par4);
-        list.add(tr("Shows the ores you choose through rock, %1$ blocks ahead.", (int) range));
-        list.add(tr("Use: on/off. Sneak + use: choose the ores (4 slots: ore blocks or raw chunks)."));
-        list.add(tr("Power: %1$", mods.eln.api.Meters.watts(dischargePower)));
+        list.add(tr("Highlights filtered ores through rock (range: %1$ blocks; %2$).", (int) range, mods.eln.api.Meters.watts(dischargePower)));
+        mods.eln.client.ItemTooltips.hint(list, tr("Use: toggle | Sneak + use: set ore filters"));
     }
 
     @Override

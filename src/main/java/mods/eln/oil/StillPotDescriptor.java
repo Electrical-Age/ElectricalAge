@@ -35,5 +35,8 @@ public class StillPotDescriptor extends TransparentNodeDescriptor implements Fro
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
         list.addAll(StillPotElement.tooltip());
+        mods.eln.client.ItemTooltips.detail(list,
+            mods.eln.i18n.I18N.tr("Expands right, back, and up from placement. Working charge: up to 24 B."),
+            mods.eln.i18n.I18N.tr("Front temperature signal: 1 V per 100 °C."));
     }
 }

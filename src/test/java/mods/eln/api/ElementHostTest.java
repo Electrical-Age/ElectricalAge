@@ -184,15 +184,15 @@ public class ElementHostTest {
         assertThrows(IllegalArgumentException.class, () -> m.signalConnected("there"));
     }
 
-    /** Jade lines a device places among its own: volts, power, and the machine's state when not running; never "State". */
+    /** Jade lines a device places among its own: volts, power, and the machine's state when not running. */
     @Test
     void wailaLinesLeaveStateToTheDevice() {
         ElementHost m = new Element().machine(MACERATOR);
         var lines = m.wailaLines();
-        assertEquals(List.of("Voltage", "Power consumption", "Machine"), List.copyOf(lines.keySet()), "unpowered: " + lines);
-        assertEquals("unpowered", lines.get("Machine"));
+        assertEquals(List.of("Voltage", "Power", "State"), List.copyOf(lines.keySet()), "unpowered: " + lines);
+        assertEquals("unpowered", lines.get("State"));
         for (int i = 0; i < 12; i++) m.core().afterStep(50, 0);
-        assertEquals(List.of("Voltage", "Power consumption"), List.copyOf(m.wailaLines().keySet()), "running");
+        assertEquals(List.of("Voltage", "Power"), List.copyOf(m.wailaLines().keySet()), "running");
     }
 
     @Test
@@ -291,9 +291,9 @@ public class ElementHostTest {
     void hostedJadeLines() {
         Element e = new Element();
         ElementHost m = e.machine(MachineSpec.consumer(50).ratedWatts(100).build());
-        assertEquals(List.of("Voltage", "Power consumption", "Machine", "Buffer"),
+        assertEquals(List.of("Voltage", "Power", "State", "Buffer"),
             List.copyOf(mods.eln.api.impl.MachineLines.hosted(m.view()).keySet()));
-        assertEquals("unpowered", mods.eln.api.impl.MachineLines.hosted(m.view()).get("Machine"));
+        assertEquals("unpowered", mods.eln.api.impl.MachineLines.hosted(m.view()).get("State"));
         assertEquals("0J / 10.0J", mods.eln.api.impl.MachineLines.hosted(m.view()).get("Buffer"));
         Element h = new Element();
         ElementHost hot = h.machine(MachineSpec.consumer(50).ratedWatts(100).heatCapacityJPerK(10).heatLossWPerK(1).overheatRiseKelvin(40).build());

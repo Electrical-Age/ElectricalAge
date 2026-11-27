@@ -257,21 +257,17 @@ public class InlinePumpElement extends TransparentNodeElement implements FluidDe
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        // (gas at its inlet it moves as water, air or steam; water at boiling at its inlet is cavitation)
-        info.put(I18N.tr("Speed"), String.format("%.0f%%%s", share * 100, gasBound ? (steamBound ? I18N.tr(", moving steam") : I18N.tr(", moving air"))
-            : cavitating ? I18N.tr(", CAVITATING: its water is at boiling") : ""));
-        // (the pressure it lifts by now, outlet over inlet, and the most it can make at this speed: a PUMP link's head is
-        // its curve (h0), never its boost, which stays 0, and Jade read 0 bar against a line 20 bar over its inlet;
-        // Baughn 2026-11-15)
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("Pumping"), String.format("%.0f mB/s", kgPerS / EaUnits.KG_PER_MB_WATER));
+        info.headline(I18N.tr("Speed"), String.format("%.0f%%%s", share * 100, gasBound ? (steamBound ? " (" + I18N.tr("steam") + ")" : " (" + I18N.tr("air") + ")")
+            : cavitating ? " — " + I18N.tr("CAVITATING") : ""));
         if (pump != null && inlet != null && outlet != null)
-            info.put(I18N.tr("Head"), String.format(I18N.tr("outlet %.1f bar over its inlet (it makes up to %.1f bar)"),
+            info.headline(I18N.tr("Head"), String.format("+%.1f bar (max %.1f bar)",
                 (FluidWorld.nodeFor(outlet).P() - FluidWorld.nodeFor(inlet).P()) / 1e5, pump.h0 / 1e5));
-        info.put(I18N.tr("Pumping"), String.format("%.0f mB/s", kgPerS / EaUnits.KG_PER_MB_WATER));
-        info.put(I18N.tr("Power"), Utils.plotPower("", resistor.getP()));
+        info.detail(I18N.tr("Power"), Utils.plotPower("", resistor.getP()));
         if (inlet != null) {
             var n = FluidWorld.nodeFor(inlet);
-            info.put(I18N.tr("Inlet"), String.format("%.2f bar of %s, %s", n.P() / 1e5, EaUnits.contents(n), mods.eln.api.Meters.celsius(n.T() - Water.T0)));
+            info.detail(I18N.tr("Inlet"), String.format("%.2f bar of %s, %s", n.P() / 1e5, EaUnits.contents(n), mods.eln.api.Meters.celsius(n.T() - Water.T0)));
         }
         return info;
     }

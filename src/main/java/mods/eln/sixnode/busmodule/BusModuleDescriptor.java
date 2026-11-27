@@ -74,7 +74,6 @@ public class BusModuleDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Joins signal wires to a field bus.\nIts front edge takes the bus cable,\nthe other three edges hold 9 terminals.").split("\n"));
-        list.add(tr("Each terminal puts its wire on a channel, or drives its wire from one."));
+        list.add(tr("Bridges 9 signal terminals to a Field Bus."));
     }
 }

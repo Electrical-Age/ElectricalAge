@@ -634,25 +634,25 @@ public class TransformerElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade shows the first lines unsneaked)
-        info.put(I18N.tr("Ratio"), Utils.plotValue(transformer.getRatio()));
+        var info = mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Voltages"), "\u00A7a" + Utils.plotVolt("", primaryLoad.getU()) + " "
+                + "\u00A7e" + Utils.plotVolt("", secondaryLoad.getU()))
+            .headline(I18N.tr("Ratio"), Utils.plotValue(transformer.getRatio()))
+            .headline(I18N.tr("Temperature"), Utils.plotCelsius("", heat.Tc));
+        if (saturated) info.headlineFirst(I18N.tr("Warning"), I18N.tr("Core saturated"));
         if (window() > 0 && primaryWire() != null && secondaryWire() != null)
-            info.put(I18N.tr("Window"), Math.round(windowUsed()) + " / " + Math.round(window()) + " mm² turns" + (windowFull() ? " " + I18N.tr("FULL: no room") : ""));
+            info.detail(I18N.tr("Window"), Math.round(windowUsed()) + " / " + Math.round(window()) + " mm² turns"
+                + (windowFull() ? " (" + I18N.tr("full") + ")" : ""));
         double limit = coreLimit();
         if (limit > 0 && complete())
-            info.put(I18N.tr("Volts per turn"), Utils.plotValue(voltsPerTurn()) + " / " + Utils.plotValue(limit)
-                + (saturated ? " " + I18N.tr("SATURATED") : legacy ? " " + I18N.tr("(as built before 48 V)") : ""));
-        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", heat.Tc));
-        info.put(I18N.tr("Isolated"), isIsolator ? I18N.tr("Yes") : I18N.tr("No"));
-        if (Eln.wailaEasyMode) {
-            FerromagneticCoreDescriptor core =
-                (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(
-                    inventory.getItem(TransformerContainer.ferromagneticSlotId));
-            if (core != null) {
-                info.put(I18N.tr("Core factor"), Utils.plotValue(core.cableMultiplicator));
-            }
-            info.put("Voltages", "\u00A7a" + Utils.plotVolt("", primaryLoad.getU()) + " " +
-                "\u00A7e" + Utils.plotVolt("", secondaryLoad.getU()));
+            info.detail(I18N.tr("Volts per turn"), Utils.plotValue(voltsPerTurn()) + " / " + Utils.plotValue(limit)
+                + (saturated ? " " + I18N.tr("SATURATED") : legacy ? " " + I18N.tr("(legacy)") : ""));
+        info.detail(I18N.tr("Isolated"), isIsolator ? I18N.tr("Yes") : I18N.tr("No"));
+        FerromagneticCoreDescriptor core =
+            (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(
+                inventory.getItem(TransformerContainer.ferromagneticSlotId));
+        if (core != null) {
+            info.detail(I18N.tr("Core factor"), Utils.plotValue(core.cableMultiplicator));
         }
         return info;
     }

@@ -68,11 +68,8 @@ public class CondenserDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add(String.format("Place it against a %.0f W steam turbine's exhaust side", turbineP));
-        list.add("Nearly twice the work per kg of steam, if kept cool");
-        list.add(String.format("Rejects %.1f kW of heat at full power; more with a thermal cable", nominalHeat / 1000));
-        list.add("Condensate out of its front (to the boiler's feed), makeup water in on top");
-        list.add(String.format("Its pump feeds a %.0f bar boiler; shut off at %.0f bar: above the rating, fit an Inline Pump after it",
-            pump.ratedPa / 1e5, pump.shutoffPa / 1e5));
+        list.add(String.format("Condenses %.0f W turbine exhaust into water and pulls vacuum (rejects %.1f kW).", turbineP, nominalHeat / 1000));
+        list.add(String.format("Condensate pump: %.0f bar rated (%.0f bar shut-off).", pump.ratedPa / 1e5, pump.shutoffPa / 1e5));
+        mods.eln.client.ItemTooltips.detail(list, "Place against a turbine's exhaust side. Thermal cables increase cooling.");
     }
 }

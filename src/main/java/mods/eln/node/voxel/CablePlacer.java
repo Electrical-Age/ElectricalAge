@@ -277,7 +277,7 @@ public final class CablePlacer {
 
     /** The same, for a click at hit: a Lamp Socket still in Lamp Supply mode (as every socket ships) has no cable pin;
      *  it says how to give it one (AdventurAgent, the handbook play-through: "Not a place for a cable" told nothing). */
-    static final String LAMP_SUPPLY = "This socket takes wireless Lamp Supply power: switch it to Cable in its screen first";
+    static final String LAMP_SUPPLY = mods.eln.i18n.I18N.tr("Socket is set to wireless Lamp Supply");
 
     static String noEnd(Level level, BlockPos pos, Vec3 hit) {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
@@ -293,11 +293,10 @@ public final class CablePlacer {
 
     static String noEnd(Level level, BlockPos pos) {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
-        // a utility pole's foot is a socket only with a pole transformer fitted (its low side)
         if (n instanceof mods.eln.node.transparent.TransparentNode t && t.element instanceof mods.eln.gridnode.electricalpole.ElectricalPoleElement pole
             && !pole.hasTransformer())
-            return "This pole has no transformer: fit a Pole Transformer (right-click the pole with it), then its foot takes a cable";
-        return n != null && !(n instanceof VoxelNode) ? "No connector there: try another face or edge of the machine" : "Not a place for a cable";
+            return mods.eln.i18n.I18N.tr("Pole needs a Pole Transformer");
+        return n != null && !(n instanceof VoxelNode) ? mods.eln.i18n.I18N.tr("No cable port on that face") : mods.eln.i18n.I18N.tr("Not a place for a cable");
     }
 
     /** A click as a routing end: on a device, its face's nearest edge; on a cable, a point of it; else a point on the
@@ -650,7 +649,7 @@ public final class CablePlacer {
         int idx = n.partAt(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ());
         if (idx < 0 || !(n.parts.get(idx) instanceof CablePart c) || c.burnt == null) return false;
         if (c.tier != tier || spec != null && c.spec != null && spec.mm2() != c.spec.mm2()) {
-            player.sendOverlayMessage(Component.literal("This kit doesn't match the burnt cable"));
+            player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Kit doesn't match burnt cable")));
             return true;
         }
         List<Object[]> run = burntRun(level, pos, n, c);
@@ -658,14 +657,14 @@ public final class CablePlacer {
         for (Object[] r : run) len += ((CablePart) r[1]).isKnuckle() ? 0 : ((CablePart) r[1]).length();
         boolean creative = player.isCreative();
         if (!creative && kit.length() < len) {
-            player.sendOverlayMessage(Component.literal(String.format("Mending it takes %.1f blocks of cable; the kit holds %.1f", len / 16.0, kit.length() / 16.0)));
+            player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Need %1$ blocks to mend (kit has %2$)", String.format("%.1f", len / 16.0), String.format("%.1f", kit.length() / 16.0))));
             return true;
         }
         for (Object[] r : run) ((VoxelNode) r[0]).repairCable((CablePart) r[1]);
         if (!creative) {
             kit.take(len);
         }
-        player.sendOverlayMessage(Component.literal(String.format("Mended %.1f blocks of burnt cable", len / 16.0)));
+        player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Mended %1$ blocks of cable", String.format("%.1f", len / 16.0))));
         return true;
     }
 

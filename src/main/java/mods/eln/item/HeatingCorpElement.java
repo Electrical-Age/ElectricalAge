@@ -56,11 +56,7 @@ public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade 
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-
-        list.add(tr("Nominal:"));
-        if (!Utils.nameShowsVoltage(name, electricalNominalU))
-            list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalU)));
-        list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalP)));
-        list.add("  " + tr("Resistance: %1$\u2126", Utils.plotValue(electricalR)));
+        list.add(tr("Electrical Furnace heating element: %1$W (%2$\u2126).",
+            Utils.plotValue(electricalNominalP), Utils.plotValue(electricalR)));
     }
 }

@@ -46,7 +46,7 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
     double rate;   // mB/s, for WAILA
     /** Jade: the oil lake's state (OilRecovery.describe), or null. */
     String lake;
-    String status = "idle";
+    String status = "Idle";
     int look;
     /** What it pumped last: water, or crude. */
     public boolean lastWater;
@@ -164,7 +164,7 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
             if (source == 0 || !room) {
                 resistor.setR(MnaConst.highImpedance);
                 rate = 0;
-                status = source == 0 ? "no well casing down to oil or water" : "tank full, or its line at the head";
+                status = source == 0 ? "No well casing" : "Outlet full / max head";
                 return;
             }
             // an oil lake in its seepage tail gives its pumps only a trickle between them: a pump runs slowly, drawing a share
@@ -185,7 +185,7 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
                     got = rec.take(level, res, whole)[0];
                 } else {
                     if (res != null) got = mods.eln.reservoir.Reservoirs.take(level, res, whole, false);
-                    if (got == 0) status = "the lake is empty";
+                    if (got == 0) status = "Depleted";
                 }
                 if (got > 0) {
                     discharge.made(water ? Fluids.WATER : Oil.CRUDE.get(), got);
@@ -194,7 +194,7 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
                 }
             }
             rate = 0.9 * rate + 0.1 * (got / Math.max(time, 1e-6));
-            if (got > 0) status = source < 0 ? "pumping water" : water ? "pumping water from lake #" + source : "pumping crude";
+            if (got > 0) status = source < 0 ? "Pumping water" : water ? "Pumping water (lake #" + source + ")" : "Pumping crude";
             lake = OilRecovery.oil(res) ? OilRecovery.describe(level, res) : null;
         }
     }
@@ -300,16 +300,14 @@ public class OilPumpElement extends TransparentNodeElement implements mods.eln.s
 
     @Override
     public Map<String, String> getWaila() {
-        // (in order: Jade's headline is the first lines; the pumping rate first, as its tank is usually empty: Baughn 2026-11-11)
-        Map<String, String> info = new java.util.LinkedHashMap<>();
-        info.put(I18N.tr("Pumping"), String.format("%.1f mB/s", rate));
-        info.put(I18N.tr("Status"), status);
-        if (lake != null) info.put(I18N.tr("Lake"), lake);
-        info.put(I18N.tr("Power consumption"), Utils.plotPower("", resistor.getP()));
-        info.put(I18N.tr("Discharge"), discharge.piped() ? I18N.tr("the flange on its right, into the pipe") : I18N.tr("the flange on its right"));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("Pumping"), String.format("%.1f mB/s", rate));
+        info.headline(I18N.tr("State"), I18N.tr(status));
+        if (lake != null) info.headline(I18N.tr("Lake"), lake);
+        info.detail(I18N.tr("Power"), Utils.plotPower("", resistor.getP()));
         if (discharge.vessel != null) {
-            info.put(I18N.tr("Tank"), mods.eln.sim.fluid.EaUnits.tank(discharge.liquidMb(), discharge.capacityMb()) + String.format(", %.2f bar", discharge.vessel.P() / 1e5));
-            info.put(I18N.tr("Contents"), mods.eln.sim.fluid.EaUnits.composition(discharge.vessel));
+            info.detail(I18N.tr("Tank"), mods.eln.sim.fluid.EaUnits.tank(discharge.liquidMb(), discharge.capacityMb()) + String.format(", %.2f bar", discharge.vessel.P() / 1e5));
+            info.detail(I18N.tr("Contents"), mods.eln.sim.fluid.EaUnits.composition(discharge.vessel));
         }
         return info;
     }

@@ -28,10 +28,10 @@ public class ThermalSensorScreen extends ElnScreen {
         text("hl", () -> "100%");
         text("ll", () -> "0%");
         high = field("high", () -> num(render.highValue), s -> validate(),
-            (t ? tr("Measured temperature\ncorresponding\nto 100% output") : tr("Measured value\ncorresponding\nto 100% output")).split("\n"));
+            t ? tr("Temperature at 100% (5 V) output") : tr("Value at 100% (5 V) output"));
         low = field("low", () -> num(render.lowValue), s -> validate(),
-            (t ? tr("Measured temperature\ncorresponding\nto 0% output") : tr("Measured value\ncorresponding\nto 0% output")).split("\n"));
-        button("validate", () -> tr("Validate"), this::validate);
+            t ? tr("Temperature at 0% output") : tr("Value at 0% output"));
+        button("validate", () -> tr("Apply"), this::validate);
         if (!t) {
             type("power", tr("Power"), ThermalSensorElement.powerType);
             type("temperature", tr("Temperature"), ThermalSensorElement.temperatureType);

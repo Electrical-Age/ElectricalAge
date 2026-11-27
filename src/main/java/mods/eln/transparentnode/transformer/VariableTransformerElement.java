@@ -89,9 +89,9 @@ public class VariableTransformerElement extends TransformerElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = super.getWaila();
-        info.put(I18N.tr("Tap"), secondaryTurns() + " / " + super.secondaryTurns() + " " + I18N.tr("turns"));
-        info.put(I18N.tr("Signal"), Utils.plotVolt("", tap.getU()));
+        var info = mods.eln.compat.jade.ProbeLines.of().addAll(super.getWaila());
+        info.headline(I18N.tr("Tap"), secondaryTurns() + " / " + super.secondaryTurns() + " " + I18N.tr("turns"));
+        info.detail(I18N.tr("Signal"), Utils.plotVolt("", tap.getU()));
         return info;
     }
 }

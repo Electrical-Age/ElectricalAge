@@ -58,11 +58,12 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
     private Obj3DPart casingDoorL;
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Transforms an input voltage to\nan output voltage.").split("\n"));
-        Collections.addAll(list, tr("The voltage ratio is proportional\nto the cable stacks count ratio.").split("\n"));
-        Collections.addAll(list, tr("Each cable is a turn, up to 64 a side.\nThe core takes so many volts a turn:\npast that it saturates, heats and burns.").split("\n"));
+        list.add(tr("Steps DC voltage up or down by winding turns ratio."));
+        mods.eln.client.ItemTooltips.detail(list,
+            tr("Exceeding the core's V/turn rating saturates and burns it."));
     }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)

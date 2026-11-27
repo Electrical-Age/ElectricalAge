@@ -52,10 +52,8 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Provides an electrical signal\ndepending the actual weather.").split("\n"));
-        list.add(tr("Clear: %1$V", 0));
-        list.add(tr("Rain: %1$V", Utils.plotValue(Eln.SVU / 2)));
-        list.add(tr("Storm: %1$V", Utils.plotValue(Eln.SVU)));
+        list.add(tr("Outputs a signal for weather: Clear 0V, Rain %1$V, Storm %2$V.",
+            Utils.plotValue(Eln.SVU / 2), Utils.plotValue(Eln.SVU)));
     }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)

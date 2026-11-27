@@ -191,7 +191,7 @@ public class ElectricalPoleElement extends GridElement {
         if (slot < 0) return super.onBlockActivated(player, side, vx, vy, vz);
         if (coordonate().world().isClientSide()) return true;
         if (!inventory.getItem(slot).isEmpty()) {
-            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("This pole already has " + what));
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("This pole already has %1$", what)));
             return true;
         }
         ItemStack fitted = s.copyWithCount(1);
@@ -199,11 +199,10 @@ public class ElectricalPoleElement extends GridElement {
         if (!player.isCreative()) s.shrink(1);
         inventory.setChanged();   // (setItem alone doesn't tell the element)
         if (slot == TRANSFORMER) {
-            // say what its foot gives: a lower tier's cable there burns at once (AdventurAgent, nero's grid)
             int tier = PoleTransformerItem.tier(fitted);
-            Utils.sendMessage(player, "Fitted a " + mods.eln.node.voxel.CableSpec.voltsLabel(PoleTransformerItem.tier(fitted)) + " pole transformer: its foot takes "
-                + mods.eln.node.voxel.CablePart.TIERS[tier].name() + " or higher (lower ones burn)");
-        } else player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Fitted " + what));
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(
+                mods.eln.i18n.I18N.tr("Fitted %1$ pole transformer", mods.eln.node.voxel.CableSpec.voltsLabel(tier))));
+        } else player.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Fitted %1$", what)));
         return true;
     }
 
@@ -357,6 +356,21 @@ public class ElectricalPoleElement extends GridElement {
     }
 
     // ---- simulation glue
+
+    @Override
+    public java.util.Map<String, String> getWaila() {
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(mods.eln.i18n.I18N.tr("Line"), Utils.plotVolt("", electricalLoad.getU()) + "  " + Utils.plotAmpere("", electricalLoad.getCurrent()));
+        if (hasTransformer()) {
+            info.headline(mods.eln.i18n.I18N.tr("Low side"), Utils.plotVolt("", secondaryLoad.getU()) + "  " + Utils.plotAmpere("", secondaryLoad.getCurrent()));
+            info.detail(mods.eln.i18n.I18N.tr("Transformer"), mods.eln.node.voxel.CableSpec.voltsLabel(PoleTransformerItem.tier(transformer())));
+        }
+        int lamps = 0;
+        for (int k = 0; k < 4; k++) if (!inventory.getItem(LAMP0 + k).isEmpty()) lamps++;
+        if (lamps > 0) info.detail(mods.eln.i18n.I18N.tr("Streetlights"), lamps + (lit ? " (" + mods.eln.i18n.I18N.tr("lit") + ")" : " (" + mods.eln.i18n.I18N.tr("off") + ")"));
+        if (!inventory.getItem(ANCHOR).isEmpty()) info.detail(mods.eln.i18n.I18N.tr("Stasis anchor"), mods.eln.i18n.I18N.tr("Installed"));
+        return info;
+    }
 
     @Override
     public String multiMeterString(Direction side) {

@@ -43,9 +43,7 @@ public class GroundCableDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Provides a zero volt reference."));
-        Collections.addAll(list, tr("Can be used to set a point of an\nelectrical network to 0V potential.\nFor example to ground negative battery contacts.").split("\n"));
-        list.add(tr("Internal resistance: %1$\u2126", Utils.plotValue(ElnDeviceRegistry.getSmallRs())));
+        list.add(tr("Ties a circuit node to 0 V ground (%1$\u2126).", Utils.plotValue(ElnDeviceRegistry.getSmallRs())));
     }
 
     @Override

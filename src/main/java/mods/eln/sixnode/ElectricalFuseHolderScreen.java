@@ -23,15 +23,14 @@ public class ElectricalFuseHolderScreen extends ElnScreen {
     @Override
     protected void init() {
         super.init();
-        text("ratingl", () -> tr("rating"));
+        text("ratingl", () -> tr("Rating"));
         text("ratingu", () -> "A");
         field("rating", () -> num(render.getRating()), v -> {
             float f = EaField.parse(v);
             if (!Float.isNaN(f)) render.clientSetFloat(ElectricalFuseHolderElement.SET_RATING, f);
-        }, tr("It blows at about 1.08 times this"));
-        text("state", () -> render.getInstalledFuse() == null ? tr("No fuse: right-click the holder with one")
-            : render.getInstalledFuse().getCableDescriptor() == null ? tr("The fuse has blown") : tr("Fuse in"));
-        button("out", () -> tr("Take the fuse out"), () -> render.clientSend(ElectricalFuseHolderElement.TAKE_OUT),
-            tr("Drops the fuse (a blown one too)"));
+        }, tr("Blows at ~1.08x rating"));
+        text("state", () -> render.getInstalledFuse() == null ? tr("No fuse")
+            : render.getInstalledFuse().getCableDescriptor() == null ? tr("Fuse blown") : tr("Fuse installed"));
+        button("out", () -> tr("Eject fuse"), () -> render.clientSend(ElectricalFuseHolderElement.TAKE_OUT));
     }
 }

@@ -24,10 +24,7 @@ public class ElectricalDrillDescriptor extends GenericItemUsingDamageDescriptorU
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-
-        list.add(tr("Nominal:"));
-        list.add("  " + tr("Power: %1$W", Utils.plotValue(nominalPower)));
-        list.add("  " + tr("Time per operation: %1$h", operationTime));
-        list.add("  " + tr("Energy per operation: %1$J", Utils.plotValue(OperationEnergy)));
+        list.add(tr("Auto Miner drill head: %1$W (%2$s, %3$J per block).",
+            Utils.plotValue(nominalPower), Utils.plotValue(operationTime), Utils.plotValue(OperationEnergy)));
     }
 }

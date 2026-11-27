@@ -232,4 +232,10 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
     public void placedInLine(mods.eln.node.six.SixNodeElement e) {
         if (e instanceof EnergyMeterElement m) m.setSwitchState(true);
     }
+
+    @Override
+    public void addInformation(ItemStack itemStack, net.minecraft.world.entity.player.Player entityPlayer, java.util.List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(mods.eln.i18n.I18N.tr("Measures cumulative energy passed through a line, with an optional shut-off limit."));
+    }
 }

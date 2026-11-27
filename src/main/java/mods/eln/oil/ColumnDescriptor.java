@@ -45,11 +45,12 @@ public class ColumnDescriptor extends TransparentNodeDescriptor implements mods.
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
         if (base) {
-            list.add("Crude in, heat in on a side; distils above 350 °C");
-            list.add("Stack 1-4 column segments on top for the cuts; residue stays here");
+            list.add("Distils crude oil above 350 °C (residue remains in the base).");
+            list.add("Stack 1–4 column segments on top to collect cuts.");
         } else {
-            list.add("Stack on a fractionating column base. 4 segments, top to bottom:");
-            list.add("natural gas, gasoline, diesel, heavy oil (fewer: the lighter cuts fold down)");
+            list.add("Fractionating column stage (stack 1–4 on a base).");
+            mods.eln.client.ItemTooltips.detail(list,
+                "4 stages, top to bottom: natural gas, gasoline, diesel, heavy oil (fewer stages fold lighter cuts down).");
         }
     }
 }

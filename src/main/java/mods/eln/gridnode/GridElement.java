@@ -68,29 +68,29 @@ abstract public class GridElement extends TransparentNodeElement {
             other = GridLink.getElementFromCoordinate(p.getLeft());
         }
         if (other == null || other == this) {
-            entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Setting starting point"));
+            entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Start point set")));
             pending.put(uuid, Pair.of(this.coordonate(), side));
         } else {
             final double distance = other.coordonate().trueDistanceTo(this.coordonate());
             final int cableLength = (int) Math.ceil(distance);
             final int range = Math.min(connectRange, other.connectRange);
             if (OverheadCableItem.blocks(stack) < cableLength) {
-                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("You need " + cableLength + " blocks of cable"));
+                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Need %1$ blocks of cable", cableLength)));
             } else if (distance > range) {
-                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks"));
+                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Too far (%1$ / %2$ blocks)", cableLength, range)));
             } else if (!this.canConnect(other)) {
-                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cannot connect these two objects"));
+                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Can't connect these poles")));
             } else if (!this.lineOfSight(other, side, p.getRight())) {
-                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Cannot connect, no line of sight"));
+                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("No line of sight")));
             } else {
                 ItemStack piece = OverheadCableItem.make(OverheadCableItem.mm2(stack), cableLength);
                 if (GridLink.addLink(this, other, side, p.getRight(), piece, OverheadCableItem.rsPerBlock(stack) * cableLength)) {
-                    entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Added connection"));
+                    entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Connected")));
                     onLinksChanged();
                     other.onLinksChanged();
                     OverheadCableItem.take(stack, cableLength);
                 } else {
-                    entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Already connected"));
+                    entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Already connected")));
                 }
             }
             pending.remove(uuid);
@@ -340,6 +340,18 @@ abstract public class GridElement extends TransparentNodeElement {
         stream.writeFloat((float) sp.x);
         stream.writeFloat((float) sp.y);
         stream.writeFloat((float) sp.z);
+    }
+
+    @Override
+    public java.util.Map<String, String> getWaila() {
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        ElectricalLoad load = getGridElectricalLoad(this.front);
+        if (load != null) {
+            info.headline(mods.eln.i18n.I18N.tr("Voltage"), Utils.plotVolt("", load.getU()));
+            info.headline(mods.eln.i18n.I18N.tr("Current"), Utils.plotAmpere("", load.getI()));
+            info.detail(mods.eln.i18n.I18N.tr("Power"), Utils.plotPower("", load.getU() * load.getI()));
+        }
+        return info;
     }
 
     @Override

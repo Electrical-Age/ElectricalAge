@@ -35,11 +35,9 @@ public class PipeHeaterDescriptor extends ElectricHeaterDescriptor {
 
     @Override
     protected void addLines(List<String> list) {
-        list.add(mods.eln.i18n.I18N.tr("Placed along your view, in a pipe line."));
-        list.add(mods.eln.i18n.I18N.tr("%1$ on its front, %2$ into what flows through it.", mods.eln.api.Meters.volts(nominalU),
-            mods.eln.api.Meters.watts(nominalP)));
-        list.add(mods.eln.i18n.I18N.tr("Hot oil flows much faster than cold."));
-        list.add(mods.eln.i18n.I18N.tr("A regulator holds the oil's temperature; without one it heats at full power."));
-        list.add(mods.eln.i18n.I18N.tr("Dry or with nothing flowing, its coils burn out."));
+        list.add(mods.eln.i18n.I18N.tr("Inline electric pipe heater (%1$).", mods.eln.api.Meters.watts(nominalP)));
+        list.add(mods.eln.i18n.I18N.tr("Burns out if run dry or stagnant."));
+        mods.eln.client.ItemTooltips.detail(list,
+            mods.eln.i18n.I18N.tr("Places along your view. Accepts a Regulator to hold fluid temperature."));
     }
 }

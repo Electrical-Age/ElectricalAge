@@ -28,12 +28,12 @@ public class HeatFurnaceScreen extends ElnScreen {
         super.init();
         button("external", () -> render.controleExternal ? tr("External control") : tr("Internal control"), render::clientToogleControl);
         // (states, as the other toggles: Baughn read "Decline fuel" as the button's action)
-        fuel = button("fuel", () -> render.takeFuel ? tr("Taking fuel") : tr("Declining fuel"), render::clientToogleTakeFuel);
+        fuel = button("fuel", () -> render.takeFuel ? tr("Fuel intake: On") : tr("Fuel intake: Off"), render::clientToogleTakeFuel);
         gain = slider("gain", 0.1, 1.0, 0.01, render.gainSyncValue,
-            v -> Component.literal(tr("Control gauge at %1$", Utils.plotPercent(v)) + "  (" + (regulator() && !render.controleExternal
-                ? tr("the regulator sets it") : tr("Power: %1$", mods.eln.api.Meters.watts(render.power))) + ")"),
+            v -> Component.literal(tr("Throttle: %1$", Utils.plotPercent(v)) + "  (" + (regulator() && !render.controleExternal
+                ? tr("regulator") : tr("Power: %1$", mods.eln.api.Meters.watts(render.power))) + ")"),
             v -> render.clientSetGain((float) v));
-        text("fire", () -> !render.takeFuel && render.fire <= 0 ? tr("Fire: out (declining fuel)")
+        text("fire", () -> !render.takeFuel && render.fire <= 0 ? tr("Fire: out (intake off)")
             : fireLine(render.fire, render.gainSyncValue, render.lighting, mods.eln.sim.Fire.COAL, refuels()));
         // (Baughn 1573753560456499223: the air answers at once, a cold bed only as it catches)
         text("bed", () -> render.fire > 0 ? tr("Bed %1$ hot, air %2$ open", Utils.plotPercent(render.bed), Utils.plotPercent(render.air)) : "");

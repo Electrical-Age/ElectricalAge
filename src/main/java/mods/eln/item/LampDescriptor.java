@@ -110,26 +110,28 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
-        list.add(tr("Technology: %1$", type));
-        list.add(tr("Range: %1$ blocks", (int) (nominalLight * 15)));
-        list.add(tr("Power: %1$W", Utils.plotValue(nominalP)));
-        list.add(tr("Resistance: %1$\u2126", Utils.plotValue(getR())));
-        list.add(tr("Nominal lifetime: %1$h", serverNominalLife));
         if (!Utils.isEmpty(itemStack)) {
+            String cond;
             if (!mods.eln.generic.ItemNbt.has(itemStack) || !mods.eln.generic.ItemNbt.get(itemStack).contains("life"))
-                list.add(tr("Condition:") + " " + tr("New"));
+                cond = tr("New");
             else if (getLifeInTag(itemStack) > 0.5)
-                list.add(tr("Condition:") + " " + tr("Good"));
+                cond = tr("Good");
             else if (getLifeInTag(itemStack) > 0.2)
-                list.add(tr("Condition:") + " " + tr("Used"));
+                cond = tr("Used");
             else if (getLifeInTag(itemStack) > 0.1)
-                list.add(tr("Condition:") + " " + tr("End of life"));
+                cond = tr("End of life");
             else
-                list.add(tr("Condition:") + " " + tr("Bad"));
+                cond = tr("Bad");
+            list.add(tr("Condition: %1$", cond));
         }
+        list.add(tr("Range: %1$ blocks | Power: %2$W | Life: %3$h", (int) (nominalLight * 15), Utils.plotValue(nominalP), serverNominalLife));
+        String tech = type == Type.eco ? tr("Eco") : type.toString();
+        mods.eln.client.ItemTooltips.detail(list,
+            tr("Type: %1$ | Resistance: %2$\u2126", tech, Utils.plotValue(getR())));
     }
 
     @Override

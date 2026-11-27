@@ -81,10 +81,11 @@ public class SteamGeneratorDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        list.add(String.format("Steam in (any side), %.0f V out (front and back)", nominalU));
-        list.add("Its screen: throttle, or a regulator holding a target inlet pressure; a signal on its left side for external control");
-        list.add(String.format("Up to %.0f W from %s/s of steam at %.0f bar", nominalP, mods.eln.sim.fluid.EaUnits.steamGrams(nominalSteam()), NOMINAL_PA / 1e5));
-        list.add(String.format("Its casing bursts over %.0f bar", BURST_PA / 1e5));
+        list.add(String.format("Steam turbine: up to %.0f W at %.0f bar (%s/s).", nominalP, NOMINAL_PA / 1e5,
+            mods.eln.sim.fluid.EaUnits.steamGrams(nominalSteam())));
+        list.add(String.format("Casing bursts over %.0f bar.", BURST_PA / 1e5));
         list.add("Might want a boiler with that.");   // (Baughn: the heat turbine gave way to steam, with no hint)
+        mods.eln.client.ItemTooltips.detail(list,
+            "Screen: throttle or inlet pressure regulator. Left signal: external control.");
     }
 }

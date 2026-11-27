@@ -86,7 +86,8 @@ public class PoleTransformerItem extends Item {
         double v = volts(stack), a = amps(stack);
         out.accept(Component.literal(String.format("Line to %s, %.0f A (%s)", CableSpec.voltsLabel(tier(stack)), a, mods.eln.api.Meters.watts(v * a)))
             .withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.literal("On a " + CORE_NAMES[core(stack)] + " core").withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.literal("Right-click a utility pole to fit it").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        out.accept(Component.literal(mods.eln.i18n.I18N.tr("Core: %1$", CORE_NAMES[core(stack)])).withStyle(net.minecraft.ChatFormatting.GRAY));
+        mods.eln.client.ItemTooltips.addDetails(out,
+            mods.eln.client.ItemTooltips.hintLine(mods.eln.i18n.I18N.tr("Right-click a utility pole to fit")));
     }
 }

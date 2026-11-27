@@ -119,11 +119,10 @@ public class CapacitorBankElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Voltage"), Utils.plotVolt("", voltage()));
-        info.put(I18N.tr("Stored"), Utils.plotEnergy("", energy()));
-        info.put(I18N.tr("Capacitance"), String.format("%.2f F", CapacitorBankDescriptor.farads));
-        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Voltage"), Utils.plotVolt("", voltage()))
+            .headline(I18N.tr("Stored"), Utils.plotEnergy("", energy()))
+            .headline(I18N.tr("Temperature"), Utils.plotCelsius("", thermal.Tc))
+            .detail(I18N.tr("Capacitance"), String.format("%.2f F", CapacitorBankDescriptor.farads));
     }
 }

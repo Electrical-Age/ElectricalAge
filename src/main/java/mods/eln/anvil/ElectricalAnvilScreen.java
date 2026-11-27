@@ -47,8 +47,8 @@ public class ElectricalAnvilScreen extends ElnScreen {
             render.credit.forEach((k, v) -> m.put(k, (double) v));
             return render.credit.isEmpty() ? tr("No material credit") : tr("Credit: %1$", ElectricalAnvilElement.creditText(new java.util.TreeMap<>(m)));
         });
-        text("penalty", () -> render.tool.isEmpty() ? tr("No XP needed") : tr("Anvil cost %1$ (lowest %2$), no XP needed",
+        text("penalty", () -> render.tool.isEmpty() ? "" : tr("Anvil cost: %1$ (min %2$)",
             String.format("%.0f", render.penalty), String.format("%.0f", render.floor)));
-        field("name", this::toolName, render::clientSetName, tr("The tool's name: Enter engraves it (a small pulse)"));
+        field("name", this::toolName, render::clientSetName, tr("Rename tool (Enter to engrave)"));
     }
 }

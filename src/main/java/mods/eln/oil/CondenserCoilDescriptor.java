@@ -39,5 +39,6 @@ public class CondenserCoilDescriptor extends TransparentNodeDescriptor implement
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
         list.addAll(CondenserCoilElement.tooltip());
+        mods.eln.client.ItemTooltips.detail(list, mods.eln.i18n.I18N.tr("Requires external cooling on its back or sides."));
     }
 }

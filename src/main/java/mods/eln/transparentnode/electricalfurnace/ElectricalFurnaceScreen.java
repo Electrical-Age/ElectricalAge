@@ -38,7 +38,7 @@ public class ElectricalFurnaceScreen extends ElnScreen {
             () -> render.clientSetPowerOn(!render.getPowerOn()));
         button("autostop", () -> render.autoShutDown ? tr("Auto stop: on") : tr("Auto stop: off"),
             () -> render.clientSendId(ElectricalFurnaceElement.unserializeAutoShutDownId),
-            tr("Auto: the heater stops when nothing is left to smelt"));
+            tr("Stops heater when idle"));
         this.power = power;
     }
 

@@ -122,18 +122,14 @@ public class ElectricalCableElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-
+        var info = mods.eln.compat.jade.ProbeLines.of();
         if (descriptor.signalWire) {
-            info.put(I18N.tr("Signal Voltage"), Utils.plotVolt("", electricalLoad.getU()));
+            info.headline(I18N.tr("Signal voltage"), Utils.plotVolt("", electricalLoad.getU()));
         } else {
-            info.put(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getI()));
-            info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
-            if (Eln.wailaEasyMode) {
-                info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalLoad.getU()));
-            }
+            info.headline(I18N.tr("Voltage"), Utils.plotVolt("", electricalLoad.getU()));
+            info.headline(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getI()));
+            info.headline(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
         }
-
         return info;
     }
 

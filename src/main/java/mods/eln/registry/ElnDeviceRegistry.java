@@ -10,6 +10,7 @@ import mods.eln.transparentnode.battery.BatteryDescriptor;
 import mods.eln.transparentnode.solarpanel.SolarPanelDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment;
 import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.sixnode.lampsocket.LampSocketDescriptor;
@@ -913,7 +914,8 @@ public final class ElnDeviceRegistry {
         {
             subId = 0;
             completId = subId + (id << 6);
-            element = new GenericItemUsingDamageDescriptor(TR_NAME(Type.NONE, "MultiMeter"));
+            element = new GenericItemUsingDamageDescriptorWithComment(TR_NAME(Type.NONE, "MultiMeter"),
+                new String[]{"Reads electrical values on cables and devices."});
             sharedItem.addElement(completId, element);
             final GenericItemUsingDamageDescriptor multi = element;
             mods.eln.node.MeterItems.multiMeter = st -> Utils.getItemObject(st) == multi;
@@ -921,7 +923,8 @@ public final class ElnDeviceRegistry {
         {
             subId = 1;
             completId = subId + (id << 6);
-            element = new GenericItemUsingDamageDescriptor(TR_NAME(Type.NONE, "Thermometer"));
+            element = new GenericItemUsingDamageDescriptorWithComment(TR_NAME(Type.NONE, "Thermometer"),
+                new String[]{"Reads temperature and heat flow on thermal devices."});
             sharedItem.addElement(completId, element);
             final GenericItemUsingDamageDescriptor thermo = element;
             mods.eln.node.MeterItems.thermometer = st -> Utils.getItemObject(st) == thermo;
@@ -929,7 +932,8 @@ public final class ElnDeviceRegistry {
         {
             subId = 2;
             completId = subId + (id << 6);
-            element = new GenericItemUsingDamageDescriptor(TR_NAME(Type.NONE, "AllMeter"));
+            element = new GenericItemUsingDamageDescriptorWithComment(TR_NAME(Type.NONE, "AllMeter"),
+                new String[]{"Reads electrical and thermal values on cables and devices."});
             sharedItem.addElement(completId, element);
             final GenericItemUsingDamageDescriptor all = element;
             mods.eln.node.MeterItems.allMeter = st -> Utils.getItemObject(st) == all;

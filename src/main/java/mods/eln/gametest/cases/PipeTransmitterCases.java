@@ -177,7 +177,7 @@ public final class PipeTransmitterCases {
                 && device(c, ceil).port()[1] == 12, errCeil + " " + (device(c, ceil) == null ? "" : java.util.Arrays.toString(device(c, ceil).port())));
             if (device(c, ceil) != null)
                 c.check("pipe transmitter: without a pipe it says so and gives 0 V", !device(c, ceil).connected
-                    && "not connected to a pipe".equals(device(c, ceil).getWaila().get("Steam quality sensor")) && Math.abs(device(c, ceil).outputGate.getU()) < 0.1, "" + device(c, ceil).getWaila());
+                    && "Not connected".equals(device(c, ceil).getWaila().get("Steam quality sensor")) && Math.abs(device(c, ceil).outputGate.getU()) < 0.1, "" + device(c, ceil).getWaila());
             if (err != null) return;
             var t = device(c, p);
             var run = mods.eln.fluid.FluidWorld.nodeFor(((PipePart) c.voxelByEntity(q).parts.get(0)).fluid);

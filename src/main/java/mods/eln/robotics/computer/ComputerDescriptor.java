@@ -113,6 +113,8 @@ public class ComputerDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("A programmable computer: 8 chip slots\n(a ROM in slot 1, RAM after it)\nand two floppy drives.\n48V power on the back.\nRS485 bus pin on the right flank's\nfloor edge, at its right end.").split("\n"));
+        list.add(tr("Programmable computer with 8 chip slots and 2 floppy drives."));
+        list.add(tr("48 V power and RS485 bus."));
+        mods.eln.client.ItemTooltips.detail(list, tr("Slot 1: boot ROM; slots 2–8: RAM."));
     }
 }

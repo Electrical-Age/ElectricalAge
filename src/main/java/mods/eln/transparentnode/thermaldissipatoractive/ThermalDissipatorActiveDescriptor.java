@@ -106,18 +106,18 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer,
                                List list, boolean par4) {
 
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Used to cool down turbines."));
-        list.add(tr("Max. temperature: %1$", Utils.plotCelsius(warmLimit)));
-        list.add(tr("Nominal usage:"));
-        list.add("  " + tr("Temperature: %1$", Utils.plotCelsius(nominalT)));
-        list.add("  " + tr("Cooling power: %1$W", Utils.plotValue(nominalP)));
-        list.add("  " + tr("Fan voltage: %1$V", Utils.plotValue(nominalElectricalU)));
-        list.add("  " + tr("Fan power consumption: %1$W", Utils.plotValue(electricalNominalP)));
-        list.add("  " + tr("Fan cooling power: %1$W", Utils.plotValue(nominalElectricalCoolingPower)));
-
+        list.add(tr("Fan-assisted thermal radiator."));
+        list.add(tr("Cooling: %1$W passive + %2$W fan at %3$ (max %4$).",
+            Utils.plotValue(nominalP), Utils.plotValue(nominalElectricalCoolingPower),
+            Utils.plotCelsius(nominalT), Utils.plotCelsius(warmLimit)));
+        mods.eln.client.ItemTooltips.detail(list,
+            Utils.nameShowsVoltage(name, nominalElectricalU)
+                ? tr("Fan draw: %1$W.", Utils.plotValue(electricalNominalP))
+                : tr("Fan: %1$V, %2$W.", Utils.plotValue(nominalElectricalU), Utils.plotValue(electricalNominalP)));
     }
 }

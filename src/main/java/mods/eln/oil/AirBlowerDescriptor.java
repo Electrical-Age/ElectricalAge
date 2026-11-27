@@ -34,10 +34,8 @@ public class AirBlowerDescriptor extends InlinePumpDescriptor {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
-        list.add("Blows air from around it into the pipe on its right:");
-        list.add(String.format("up to %.1f bar gauge (blocked, it stalls there), less the more it moves.", SHUTOFF_PA / 1e5));
-        list.add("For forced draught: piped to a Fuel Heat Furnace's air port, ~1.4 bar fires it 2.5x its setting.");
-        list.add("Feeds two Big burners at ~1.5 bar for ~2.8 kW; slowed down, less air for less power.");
-        list.add(String.format("%.0f V on its front; it draws power with the air it moves. A speed signal on its back sets its pressure.", nominalU));
+        list.add(String.format("Pumps ambient air into a pipe (up to %.1f bar gauge).", SHUTOFF_PA / 1e5));
+        list.add("Provides forced draught for fuel burners.");
+        mods.eln.client.ItemTooltips.detail(list, "0–5 V speed signal sets outlet pressure; power draw scales with flow.");
     }
 }

@@ -63,4 +63,10 @@ public class PowerInductorSixDescriptor extends PowerPrimitiveSixDescriptor impl
         if (null != InductorBaseExtention) InductorBaseExtention.draw();
         if (null != InductorCore) InductorCore.draw();
     }
+
+    @Override
+    public void addInformation(net.minecraft.world.item.ItemStack itemStack, net.minecraft.world.entity.player.Player entityPlayer, java.util.List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(mods.eln.i18n.I18N.tr("Configurable inline inductor (fit windings to set inductance)."));
+    }
 }

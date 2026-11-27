@@ -18,7 +18,7 @@ public class ShaftSteamTurbineScreen extends SteamGeneratorScreen {
     @Override
     protected void init() {
         super.init();
-        button("manual", () -> render.manual ? tr("Manual: no governor, no overspeed trip!") : tr("Automatic: governor and overspeed trip"),
-            render::clientToggleManual);
+        button("manual", () -> render.manual ? tr("Governor: Off (Manual)") : tr("Governor: Auto"),
+            render::clientToggleManual, tr("Manual disables governor and overspeed trip"));
     }
 }

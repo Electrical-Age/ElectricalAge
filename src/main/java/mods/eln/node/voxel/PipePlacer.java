@@ -32,16 +32,16 @@ public final class PipePlacer {
             FluidDevice.FluidPort fp = portNear(level, pos, face, hit);
             // (a port coupled already, to a pipe's end or another device's flange, is one a new pipe couldn't join:
             // AdventurAgent saw a second route to a tank's piped port "give up" instead of saying so)
-            if (fp != null && !mods.eln.fluid.FluidPlacement.partners(level, fp).isEmpty()) return RoutePlacer.Click.none(PORT_TAKEN);
+            if (fp != null && !mods.eln.fluid.FluidPlacement.partners(level, fp).isEmpty()) return RoutePlacer.Click.none(mods.eln.i18n.I18N.tr(PORT_TAKEN));
             PipeRouter.End port = fp == null ? null : endOf(pos, fp);
             boolean device = false;
             if (port == null) device = (port = devicePort(level, pos, hit)) != null;
-            if (device && portTaken(level, pos, hit)) return RoutePlacer.Click.none(PORT_TAKEN);
+            if (device && portTaken(level, pos, hit)) return RoutePlacer.Click.none(mods.eln.i18n.I18N.tr(PORT_TAKEN));
             long[] join = port == null ? joinPoint(level, pos, hit) : null;
             PipeRouter.End surface = port == null && join == null ? surfacePoint(RouteView.obstacles(level), pos, face, hit, PipePart.GRID[tier]) : null;
             PipeRouter.End at = port != null ? port : join != null ? new PipeRouter.End(join[0], join[1], join[2], -1) : surface;
             // (the preview says nothing before a start: its outline is enough)
-            if (at == null) return RoutePlacer.Click.none(click || !start ? "No room for a pipe there" : null);
+            if (at == null) return RoutePlacer.Click.none(click || !start ? mods.eln.i18n.I18N.tr("No room for a pipe there") : null);
             return new RoutePlacer.Click(end(at), join, port != null, port != null, null);
         }
 
@@ -317,7 +317,7 @@ public final class PipePlacer {
 
     /** A port that already has a pipe (a machine's flange coupled to a pipe end, a pipe sensor's port with its pipe): no
      *  second route starts or ends there (a lab test: clicking the device twice laid a second pipe beside the first). */
-    static final String PORT_TAKEN = "Its port already has a pipe";
+    static final String PORT_TAKEN = "Port already connected";
 
     static boolean portTaken(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
         var t = deviceAt(level, pos, hit);

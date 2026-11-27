@@ -32,24 +32,20 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D, val spec: SteamTurbin
     override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
         val p = spec.nominalPa / 1e5
         if (spec.wetBraking) {
-            list.add("The low-pressure stage: an HP Steam Turbine's exhaust in by pipe on top, out of its back")
-            list.add("into a Plant Steam Condenser: useless venting to air.")
-            list.add(Utils.plotPower("Up to ", spec.nominalP) + String.format(" onto the shaft from %.0f g/s of %.1f bar steam into a %.1f bar vacuum.",
-                spec.nominalKgPerS * 1000, p, spec.ratedExhaustPa / 1e5))
-            list.add("Wet steam brakes it and knocks; if it lasts at speed, it strips its blades.")
+            list.add(Utils.plotPower("Low-pressure shaft steam turbine: up to ", spec.nominalP).trim() + String.format(" at %.1f bar.", p))
+            list.add(String.format("Casing bursts over %.0f bar. Dry steam only.", spec.burstPa / 1e5))
+            mods.eln.client.ItemTooltips.detail(list,
+                "Requires vacuum exhaust (Plant Steam Condenser); wet steam brakes and damages blades.",
+                Utils.plotRads("Governor: rated ", ShaftSteamTurbineElement.RATED_RADS).trim() + " (shuts at +5%, trips over +10%).",
+                "Screen: throttle or inlet pressure regulator. Front signal overrides governor & trip.")
         } else {
-            list.add("Steam in by pipe on top, out of its back to an LP turbine, a heater or the air.")
-            list.add(Utils.plotPower("Up to ", spec.nominalP) + String.format(" onto the shaft from %.0f g/s of %.0f bar steam venting to air;",
-                spec.nominalKgPerS * 1000, p))
-            list.add("more with a vacuum behind it. Generators on the shaft take the power.")
-            list.add("Water in the steam strips its blades.")
+            list.add(Utils.plotPower("High-pressure shaft steam turbine: up to ", spec.nominalP).trim() + String.format(" at %.0f bar.", p))
+            list.add(String.format("Casing bursts over %.0f bar. Dry steam only.", spec.burstPa / 1e5))
+            list.add("Might want a boiler with that.")   // (Baughn)
+            mods.eln.client.ItemTooltips.detail(list,
+                Utils.plotRads("Governor: rated ", ShaftSteamTurbineElement.RATED_RADS).trim() + " (shuts at +5%, trips over +10%).",
+                "Screen: throttle or inlet pressure regulator. Front signal overrides governor & trip.")
         }
-        list.add(Utils.plotRads("Automatic: governor full open to ", ShaftSteamTurbineElement.RATED_RADS) + ", shut at +5%; trips over +10%.")
-        list.add("Manual or external control turns the governor and the overspeed trip off: your own safeties then.")
-        list.add("Its screen: throttle, or a regulator holding the inlet pressure; a signal on its front for external control.")
-        list.add(String.format("Its casing bursts over %.0f bar.", spec.burstPa / 1e5))
-        list.add("Placed with its shaft along your view; it turns its exhaust toward a condenser or pipe beside it.")
-        if (!spec.wetBraking) list.add("Might want a boiler with that.")   // (Baughn)
     }
 }
 
@@ -101,18 +97,14 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     override val rotating = arrayOf(obj.getPart("rotor"))
 
     override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
-        list.add(Utils.plotPower("A fast peaker: up to ", GasTurbineElement.NOMINAL_P) + String.format(" onto the shaft at %.0f%% of its fuel's heat.",
-            GasTurbineElement.ETA * 100))
-        list.add("Burns gasoline, natural gas or diesel, by any pipe or fluid capability.")
-        list.add("Fuel quality: 2% less power per 1% of its fuel too heavy or too light for it (residue).")
-        list.add("Heavy oil fouls it (~10% of its power an hour at full power); clean fuel clears it slowly, wool at once.")
-        list.add(mods.eln.i18n.I18N.tr("Crude or high-residue fuel chokes it: no power until diluted with clean fuel, or broken to empty."))
-        list.add(String.format("It can't start itself: a Shaft Motor spins it over %.0f rad/s, then it lights.",
+        list.add(Utils.plotPower("Fast-response shaft turbine: up to ", GasTurbineElement.NOMINAL_P).trim() + String.format(" (%.0f%% efficiency).", GasTurbineElement.ETA * 100))
+        list.add(String.format("Burns gasoline, natural gas, or diesel. Needs spin-up over %.0f rad/s to ignite.",
             GasTurbineElement.CUTOFF * GasTurbineElement.RATED_RADS))
-        list.add(String.format("Its %.0f C exhaust leaves its back: pipe it to a heat exchanger, or it vents.", GasTurbineElement.EXHAUST_T - 273.15))
-        list.add(Utils.plotRads("Automatic: governor full open to ", GasTurbineElement.RATED_RADS) + ", shut at +5%; trips over +10%.")
-        list.add("A signal on its front sets the fuel valve by hand: no governor, no trip: your safeties then.")
-        list.add("Placed with its shaft along your view; it turns its exhaust toward an exchanger or pipe beside it.")
+        list.add(String.format("Exhaust: %.0f °C.", GasTurbineElement.EXHAUST_T - 273.15))
+        mods.eln.client.ItemTooltips.detail(list,
+            Utils.plotRads("Governor: rated ", GasTurbineElement.RATED_RADS).trim() + " (shuts at +5%, trips over +10%).",
+            "Front signal: manual fuel valve (disables governor & trip).",
+            "Heavy or crude fuels foul or choke it.")
     }
 }
 

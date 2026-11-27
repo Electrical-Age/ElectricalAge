@@ -119,19 +119,13 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack stack, net.minecraft.world.entity.player.Player player, List list, boolean adv) {
         super.addInformation(stack, player, list, adv);
-        if (height > 1) {
-            list.add("2 x 2 x 2 blocks, placed from its front bottom left; it grows right, back and up");
-            list.add("Heat in on the six lower faces of its back and flanks; steam out on the two rear top faces;");
-            list.add("water in at the front, low right; the level signal at the front, low left, 0 V empty to 5 V full");
-        } else {
-            list.add("Water in by pipe (right flank), heat in from a heater or furnace on the back or a flank, steam out by pipe");
-            list.add("Front: the gauge glass's level as a signal, 0 V empty to 5 V full");
-        }
-        // (Erisi's chat review: how heater temperature and boiler pressure relate)
-        list.add("Its pressure follows its water's temperature: 1 bar boils at 100 °C, 10 bar at 180 °C;");
-        list.add("the heater must be hotter than that to keep it boiling");
-        list.add("1 bucket of water + 175 kJ: 67.5 buckets of steam");
-        list.add(String.format("Takes up to %.0f kW at 20 bar, %.0f kW at 10 bar; holds %d buckets of water", heatLimitW(20e5) / 1000, heatLimitW(10e5) / 1000, waterMb / 1000));
-        if (large) list.add("Of alloy plate: bursts at 500 bar, and harder than a Boiler");
+        list.add(height > 1 ? "Large steam boiler (2×2×2 multiblock)." : "Boils water into steam using external heat.");
+        list.add(String.format("Capacity: %d B | Max heat: %.0f kW at 20 bar (%.0f kW at 10 bar).",
+            waterMb / 1000, heatLimitW(20e5) / 1000, heatLimitW(10e5) / 1000));
+        list.add(String.format("Bursts over %.0f bar.", burstPa / 1e5));
+        mods.eln.client.ItemTooltips.detail(list,
+            height > 1 ? "Expands right, back, and up from placement. Gauge-glass level output: 0–5 V."
+                : "Gauge-glass level signal: 0–5 V.",
+            "Boiling temperature rises with pressure.");
     }
 }

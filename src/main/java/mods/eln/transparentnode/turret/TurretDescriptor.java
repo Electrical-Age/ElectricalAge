@@ -95,10 +95,8 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Scans for entities and shoots if the\nentity matches the configurable filter criteria.").split("\n"));
-        list.add(tr("Standby power: %1$W", Utils.plotValue(getProperties().basePower)));
-        list.add(tr("Laser charge power: %1$W...%2$kW", 100, 10));
-        list.add(tr("CAUTION: Cables can get quite hot!"));
+        list.add(tr("Automated defence laser with configurable target filters."));
+        list.add(tr("Standby: %1$W | Charge: %2$W–%3$kW", Utils.plotValue(getProperties().basePower), 100, 10));
     }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)

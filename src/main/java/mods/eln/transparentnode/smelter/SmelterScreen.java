@@ -22,7 +22,7 @@ public class SmelterScreen extends ElnScreen {
         super.init();
         progress("process", () -> render.progress);
         text("temperature", () -> tr("Temperature %1$", Utils.plotCelsius(render.temperature)));
-        text("power", () -> render.powered ? tr("Controls: powered") : tr("Controls: no power (48V on a side)"),
+        text("power", () -> render.powered ? tr("Controls: powered") : tr("Controls: no power (48 V)"),
             () -> render.powered ? LABEL : ERROR_TEXT);   // (ARGB: alpha 0 drew nothing)
     }
 }

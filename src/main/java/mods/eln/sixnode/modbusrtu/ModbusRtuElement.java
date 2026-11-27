@@ -144,10 +144,9 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
     @Nullable
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
         // 1.12 port: the Modbus TCP server is dropped (rule 8), so modbus is always disabled.
-        info.put("X_X", I18N.tr("Modbus is disabled, enable it in Eln.cfg"));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("State"), I18N.tr("Unsupported; will be re-enabled on request"));
     }
 
     @Override

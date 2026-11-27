@@ -134,9 +134,9 @@ public class EnergyConverterElnToOtherElement extends TransparentNodeElement {
 
     @Override
     public java.util.Map<String, String> getWaila() {
-        java.util.Map<String, String> info = super.getWaila();
-        info.putAll(machine.wailaLines());
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .addAll(super.getWaila())
+            .addAll(machine.wailaLines());
     }
 
     public double getOtherModEnergyBuffer(double conversionRatio) {

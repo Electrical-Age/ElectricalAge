@@ -178,8 +178,8 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
             if (!powerOk) {
                 logs.clear();
-                pushLog("[i] Boot... Done.");
-                pushLog("* Waiting opcode.");
+                pushLog(mods.eln.i18n.I18N.tr("Ready."));
+                pushLog(mods.eln.i18n.I18N.tr("Idle"));
             }
 
             if (boot) {

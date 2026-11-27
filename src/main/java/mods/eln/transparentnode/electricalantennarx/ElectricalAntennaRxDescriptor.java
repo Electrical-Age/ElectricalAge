@@ -90,10 +90,8 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Wireless energy receiver."));
-        list.add(tr("Nominal usage:"));
-        if (!Utils.nameShowsVoltage(name, electricalNominalVoltage))
-            list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalVoltage)));
-        list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalPower)));
+        String rating = (Utils.nameShowsVoltage(name, electricalNominalVoltage) ? "" : Utils.plotValue(electricalNominalVoltage) + "V, ")
+            + Utils.plotValue(electricalNominalPower) + "W";
+        list.add(tr("Wireless power receiver (%1$).", rating));
     }
 }

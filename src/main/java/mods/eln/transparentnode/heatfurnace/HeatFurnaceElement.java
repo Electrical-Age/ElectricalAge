@@ -348,28 +348,24 @@ public class HeatFurnaceElement extends TransparentNodeElement implements mods.e
 
     @Override
     public Map<String, String> getWaila() {
-        // (in order: Jade's headline is the first lines. Erisi's chat review: what its temperature, the regulator and
-        // combustion chambers have to do with each other)
-        Map<String, String> info = new java.util.LinkedHashMap<>();
-        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
+        var info = mods.eln.compat.jade.ProbeLines.of();
         ItemStack chambers = inventory.getItem(HeatFurnaceContainer.combustrionChamberId);
         int n = Utils.isEmpty(chambers) ? 0 : chambers.getCount();
-        info.put(I18N.tr("Power"), I18N.tr("%1$W now, %2$W at full fire (%3$ of %4$ combustion chambers)",
-            Utils.plotValue(isBurnt() ? 0 : furnaceProcess.getP()), Utils.plotValue(furnaceProcess.nominalPower), n, descriptor.combustionChamberMax));
-        // (why opening the air doesn't give full heat at once: the bed is still catching, Baughn 1573753560456499223)
+        boolean regulated = !Utils.isEmpty(inventory.getItem(HeatFurnaceContainer.regulatorId)) && !controlExternal;
+        if (regulated && thermalLoad.Tc < regulator.getTarget() - 5 && furnaceProcess.fire.level > 0.95)
+            info.headline(I18N.tr("Short of heat"), I18N.tr("At max fire, below setpoint"));
+        info.headline(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
+        info.headline(I18N.tr("Thermal power"), Utils.plotPower("", isBurnt() ? 0 : furnaceProcess.getP()).trim() + " / " + Utils.plotPower("", furnaceProcess.nominalPower).trim());
         var fire = furnaceProcess.fire;
         if (!isBurnt() && fire.level > 0)
-            info.put(I18N.tr("Fire"), I18N.tr("bed %1$ hot, air %2$ open", Utils.plotPercent(fire.bed), Utils.plotPercent(fire.air)));
-        boolean regulated = !Utils.isEmpty(inventory.getItem(HeatFurnaceContainer.regulatorId)) && !controlExternal;
-        info.put(I18N.tr("Control"), controlExternal ? I18N.tr("by the signal on its sides")
-            : regulated ? I18N.tr("its regulator holds %1$", Utils.plotCelsius("", regulator.getTarget()))
-            : I18N.tr("its gauge, at %1$", Utils.plotPercent(furnaceProcess.getGain())));
-        // (Erisi: "the set point is never reached")
-        if (regulated && thermalLoad.Tc < regulator.getTarget() - 5 && furnaceProcess.fire.level > 0.95)
-            info.put(I18N.tr("Short of heat"), n < descriptor.combustionChamberMax
-                ? I18N.tr("at full fire and still under its set point: add combustion chambers or take less heat")
-                : I18N.tr("at full fire and still under its set point: take less heat from it"));
-        if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade());
+            info.headline(I18N.tr("Fire"), I18N.tr("bed %1$, air %2$", Utils.plotPercent(fire.bed), Utils.plotPercent(fire.air)));
+        info.detail(I18N.tr("Chambers"), n + " / " + descriptor.combustionChamberMax);
+        info.detail(I18N.tr("Control"), controlExternal ? I18N.tr("External signal")
+            : regulated ? I18N.tr("Regulator (%1$)", Utils.plotCelsius(regulator.getTarget()))
+            : I18N.tr("Manual (%1$)", Utils.plotPercent(furnaceProcess.getGain())));
+        if (flue.node != null) info.detail(I18N.tr("Flue"),
+            flue.piped() ? String.format(I18N.tr("Piped, %.2f bar"), mods.eln.fluid.FluidWorld.nodeFor(flue.node).P() / 1e5)
+            : I18N.tr("Open stack"));
         return info;
     }
 }

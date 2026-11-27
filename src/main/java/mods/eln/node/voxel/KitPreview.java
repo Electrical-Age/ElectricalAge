@@ -132,7 +132,7 @@ public final class KitPreview {
             Answer a = KitPreview.answer(k, view, tier, spec, start, startJoin, wps, to, endJoin, have);
             // (a waypoint still on the old run the route starts on: nothing laid yet, but the click takes it)
             if (!a.ok && RoutePlacer.INSIDE.equals(a.message) && !c.finish() && c.join() == null && !again)
-                return new Answer(true, new ArrayList<>(List.of(marker(to))), String.format("%s: 0.0 blocks", k.title()) + suffix(false, false, false));
+                return new Answer(true, new ArrayList<>(List.of(marker(to))), mods.eln.i18n.I18N.tr("%1$: 0.0 blocks", k.title()) + suffix(false, false, false));
             if (!a.ok) return a;
             List<int[]> bs = a.boxes;
             if (k.portCube && c.port()) {
@@ -165,7 +165,10 @@ public final class KitPreview {
 
     /** What the click would do, after the preview's length: " \u2014 open end", " \u2014 joins", " \u2014 connects" or " \u2014 waypoint". */
     static String suffix(boolean again, boolean join, boolean finish) {
-        return again ? " \u2014 open end" : join ? " \u2014 joins" : finish ? " \u2014 connects" : " \u2014 waypoint";
+        return again ? " \u2014 " + mods.eln.i18n.I18N.tr("open end")
+            : join ? " \u2014 " + mods.eln.i18n.I18N.tr("joins")
+            : finish ? " \u2014 " + mods.eln.i18n.I18N.tr("connects")
+            : " \u2014 " + mods.eln.i18n.I18N.tr("waypoint");
     }
 
     /**
@@ -232,8 +235,9 @@ public final class KitPreview {
         List<int[]> boxes = k.boxes(r, tier, spec);
         int len = r.length();
         if (have < len)
-            return new Answer(false, boxes, String.format("Too long: %.1f blocks of %s, the kit holds %.1f", len / 16.0, k.noun, have / 16.0));
-        return new Answer(true, boxes, String.format("%s: %.1f blocks", k.title(), len / 16.0));
+            return new Answer(false, boxes, mods.eln.i18n.I18N.tr("Need %1$ blocks of %2$ (kit has %3$)",
+                String.format("%.1f", len / 16.0), k.noun, String.format("%.1f", have / 16.0)));
+        return new Answer(true, boxes, mods.eln.i18n.I18N.tr("%1$: %2$ blocks", k.title(), String.format("%.1f", len / 16.0)));
     }
 
     /** The preview thread's time for one route (more than the click's: it doesn't hold up the server). */

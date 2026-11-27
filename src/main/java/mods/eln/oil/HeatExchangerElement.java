@@ -537,27 +537,26 @@ public class HeatExchangerElement extends TransparentNodeElement implements Flui
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
+        var info = mods.eln.compat.jade.ProbeLines.of();
         if (a == null) return info;
         HeatExchangerElement h = head();
-        // (not stepped yet, as just loaded: no inlet reading, so its sides' own temperatures)
         boolean read = h.tAin > 0;
-        info.put(I18N.tr("Stream A"), String.format("%s -> %s, %.2f bar of %s", mods.eln.api.Meters.celsius((read ? h.tAin : a.T()) - Water.T0), mods.eln.api.Meters.celsius((read ? h.tAout : a.T()) - Water.T0), a.P() / 1e5,
+        info.headline(I18N.tr("Stream A"), String.format("%s → %s, %.2f bar of %s", mods.eln.api.Meters.celsius((read ? h.tAin : a.T()) - Water.T0), mods.eln.api.Meters.celsius((read ? h.tAout : a.T()) - Water.T0), a.P() / 1e5,
             mods.eln.sim.fluid.EaUnits.contents(a)));
-        info.put(I18N.tr("Stream B"), String.format("%s -> %s, %.2f bar of %s", mods.eln.api.Meters.celsius((read ? h.tBin : b.T()) - Water.T0), mods.eln.api.Meters.celsius((read ? h.tBout : b.T()) - Water.T0), b.P() / 1e5,
+        info.headline(I18N.tr("Stream B"), String.format("%s → %s, %.2f bar of %s", mods.eln.api.Meters.celsius((read ? h.tBin : b.T()) - Water.T0), mods.eln.api.Meters.celsius((read ? h.tBout : b.T()) - Water.T0), b.P() / 1e5,
             mods.eln.sim.fluid.EaUnits.contents(b)));
-        info.put(I18N.tr("A holds"), mods.eln.sim.fluid.EaUnits.composition(a));
-        info.put(I18N.tr("B holds"), mods.eln.sim.fluid.EaUnits.composition(b));
-        info.put(I18N.tr("Heat A to B"), Utils.plotPower("", h.qShown));
+        info.headline(I18N.tr("Heat A → B"), Utils.plotPower("", h.qShown));
+        info.detail(I18N.tr("A holds"), mods.eln.sim.fluid.EaUnits.composition(a));
+        info.detail(I18N.tr("B holds"), mods.eln.sim.fluid.EaUnits.composition(b));
         double vw = 0, vm = 0;
         for (HeatExchangerElement m : group == null ? List.of(this) : group.members) {
             vw += m.ventedA[0] + m.ventedB[0];
             vm += m.ventedA[1] + m.ventedB[1];
         }
-        if (vm > 1e-6) info.put(I18N.tr("Resized"), String.format(I18N.tr("1 B a side a block now; it vented %s over that, both sides"),
-            vw > 0.01 * vm ? mods.eln.sim.fluid.EaUnits.volume(vw / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER) + " water" : String.format("%.1f g of gas", vm * 1000)));
-        info.put(I18N.tr("Exchanger"), group == null ? String.format(I18N.tr("one block, a quarter slice: %.1f W/K"), ua())
-            : String.format(I18N.tr("2 x 2 x %d blocks: %.0f W/K"), group.length(), ua()));
+        if (vm > 1e-6) info.detail(I18N.tr("Resized"), String.format(I18N.tr("Vented %s on resize"),
+            vw > 0.01 * vm ? mods.eln.sim.fluid.EaUnits.volume(vw / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER) + " water" : String.format("%.1f g gas", vm * 1000)));
+        info.detail(I18N.tr("Exchanger"), group == null ? String.format(I18N.tr("1 block (%.1f W/K)"), ua())
+            : String.format(I18N.tr("2×2×%d (%.0f W/K)"), group.length(), ua()));
         return info;
     }
 }

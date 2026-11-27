@@ -100,9 +100,8 @@ public class GroundCableElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getI()));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getI()));
     }
 
     @Override

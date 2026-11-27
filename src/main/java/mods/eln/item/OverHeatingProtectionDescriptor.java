@@ -17,9 +17,6 @@ public class OverHeatingProtectionDescriptor extends GenericItemUsingDamageDescr
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Useful to prevent overheating\nof Batteries").split("\\\n"));
-        // (Baughn 2026-10-27: a charge limiter now, BatteryInventoryProcess)
-        list.add(tr("Limits charging to the battery's rated current,"));
-        list.add(tr("less as it warms; cuts at 56 °C, back at 45 °C"));
+        list.add(tr("Battery upgrade: limits charge current by temperature (cuts at 56 °C, resumes at 45 °C)."));
     }
 }

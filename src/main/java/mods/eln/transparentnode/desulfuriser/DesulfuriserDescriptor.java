@@ -74,7 +74,7 @@ public class DesulfuriserDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("In line on a refinery cut's pipe:\nin at the blue flange on its back,\nout at the red one on its front.\nA Sulfur Dust every 2000 mB treated,\ninto a hopper under it.\nNominal power: %1$W",
-            mods.eln.misc.Utils.plotValue(nominalP)).split("\n"));
+        list.add(tr("Extracts Sulfur Dust from piped refinery cuts."));
+        list.add(tr("Power: %1$.", mods.eln.misc.Utils.plotPower("", nominalP).trim()));
     }
 }

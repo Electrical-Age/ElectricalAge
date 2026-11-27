@@ -264,18 +264,16 @@ public class BatteryElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> wailaList = new HashMap<String, String>();
+        mods.eln.compat.jade.ProbeLines info = mods.eln.compat.jade.ProbeLines.of();
         // (the energy's share, as the battery's screen shows it: Jade showed the charge, 10% while the screen said 2.5%;
         // the voltage falls as it empties, so the last tenth of the charge holds a fortieth of the energy: Baughn)
-        wailaList.put(I18N.tr("Charge"), Utils.plotPercent(batteryProcess.getEnergy() / Math.max(1e-9, batteryProcess.getEnergyMax())));
-        wailaList.put(I18N.tr("Energy"), Utils.plotEnergy("", batteryProcess.getEnergy()));
-        wailaList.put(I18N.tr("Life"), Utils.plotPercent(batteryProcess.life));
+        info.headline(I18N.tr("Charge"), Utils.plotPercent(batteryProcess.getEnergy() / Math.max(1e-9, batteryProcess.getEnergyMax())));
+        info.headline(I18N.tr("Energy"), Utils.plotEnergy("", batteryProcess.getEnergy()));
+        info.headline(I18N.tr("Life"), Utils.plotPercent(batteryProcess.life));
         String p = inventoryProcess.describe();
-        if (p != null) wailaList.put(I18N.tr("Protection"), p);
-        if (Eln.wailaEasyMode) {
-            wailaList.put(I18N.tr("Voltage"), Utils.plotVolt("", batteryProcess.getU()));
-            wailaList.put(I18N.tr("Current"), Utils.plotAmpere("", batteryProcess.getDischargeCurrent()));
-        }
-        return wailaList;
+        if (p != null) info.headline(I18N.tr("Protection"), p);
+        info.detail(I18N.tr("Voltage"), Utils.plotVolt("", batteryProcess.getU()));
+        info.detail(I18N.tr("Current"), Utils.plotAmpere("", batteryProcess.getDischargeCurrent()));
+        return info;
     }
 }

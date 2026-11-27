@@ -663,8 +663,8 @@ public final class Wp9aCases {
             // (Baughn: its LEDs go dark without power; the client reads this from the publish)
             ctx.check("wp9a battery charger: on and fed counts as powered; the unfed one doesn't", charger.powered() && !unfed.powered(),
                 f("%.3f V", uC));
-            ctx.check("wp9a battery charger: Jade says an unfed one has no power in, and a fed one doesn't",
-                unfed.getWaila().containsKey("Power in") && !charger.getWaila().containsKey("Power in"), "" + unfed.getWaila());
+            ctx.check("wp9a battery charger: Jade says an unfed one has no power, and a fed one shows power",
+                "No power".equals(unfed.getWaila().get("State")) && charger.getWaila().containsKey("Power"), "" + unfed.getWaila());
             ctx.check("wp9a battery charger took energy", e > 0.01 * pNom && e <= 2 * pNom * 1.01,
                 f("buffer %.1f J (expected 0 < E <= 2 s * %.0f W, no batteries to give it to)", e, pNom));
         }

@@ -150,14 +150,16 @@ public class PipeHeaterElement extends ElectricHeaterElement implements FluidDev
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new LinkedHashMap<>();
+        var info = mods.eln.compat.jade.ProbeLines.of();
         double w = resistor.getP();
-        info.put(I18N.tr("Power"), mods.eln.api.Meters.watts(w < 0.5 ? 0 : w));   // (a regulator's off is a high resistance: µW)
+        info.headline(I18N.tr("Power"), mods.eln.api.Meters.watts(w < 0.5 ? 0 : w));
         if (fluid != null) {
-            // (what is in it by name and amount, as a tank's: a run part full of oil read "air"; AdventurAgent 2026-11-26)
-            info.put(I18N.tr("Contents"), String.format("%s, %s", EaUnits.composition(fluid), mods.eln.api.Meters.celsius(fluid.T() - Water.T0)));
-            EaUnits.putViscosity(info, fluid);   // (before the coils: Jade's headline is three lines)
-            info.put(I18N.tr("Coils"), mods.eln.api.Meters.celsius(thermal.Tc + PhysicalConstant.Tref - Water.T0));
+            info.headline(I18N.tr("Contents"), String.format("%s, %s", EaUnits.composition(fluid), mods.eln.api.Meters.celsius(fluid.T() - Water.T0)));
+            String visc = EaUnits.viscosity(fluid);
+            boolean thick = visc != null && visc.contains(I18N.tr("heat or dilute"));
+            if (thick) info.headline(I18N.tr("Viscosity"), visc);
+            info.headline(I18N.tr("Coils"), mods.eln.api.Meters.celsius(thermal.Tc + PhysicalConstant.Tref - Water.T0));
+            if (visc != null && !thick) info.detail(I18N.tr("Viscosity"), visc);
         }
         return info;
     }

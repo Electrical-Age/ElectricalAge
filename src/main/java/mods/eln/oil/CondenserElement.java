@@ -220,32 +220,30 @@ public class CondenserElement extends TransparentNodeElement implements FluidDev
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new java.util.LinkedHashMap<>();   // (in order: Jade's headline is the first lines)
-        info.put(I18N.tr("Turbine"), turbine == null ? I18N.tr("none: place it against a turbine's exhaust side") : I18N.tr("connected"));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        if (turbine == null) info.headline(I18N.tr("Turbine"), I18N.tr("Not connected"));
         if (vessel != null) {
-            // (Baughn 2026-11-14: the level in the headline, 100 % where it floods the turbine; the contents are details)
-            info.put(I18N.tr("Water level"), String.format(I18N.tr("%.0f%% of what floods the turbine (%s)"), floodShare() / CondenserDescriptor.FLOOD * 100,
+            info.headline(I18N.tr("Pressure"), String.format("%.2f bar of %s, %s", vessel.P() / 1e5, EaUnits.contents(vessel),
+                mods.eln.api.Meters.celsius(vessel.T() - Water.T0)));
+            info.headline(I18N.tr("Water level"), String.format("%.0f%% (%s)", floodShare() / CondenserDescriptor.FLOOD * 100,
                 EaUnits.volume(vessel.mLiquid() / EaUnits.KG_PER_MB_WATER)));
-            info.put(I18N.tr("Pressure"), String.format("%.2f bar of %s", vessel.P() / 1e5, EaUnits.contents(vessel)));
-            info.put(I18N.tr("Temperature"), mods.eln.api.Meters.celsius(vessel.T() - Water.T0));
-            info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
         }
-        info.put(I18N.tr("Heat rejected"), Utils.plotPower("", Math.max(0, heatW)));   // (no -28 mW while idle: AdventurAgent)
+        if (turbine != null) info.headline(I18N.tr("Thermal power"), Utils.plotPower("", Math.max(0, heatW)));
+        else info.detail(I18N.tr("Thermal power"), Utils.plotPower("", Math.max(0, heatW)));
+        if (vessel != null) info.detail(I18N.tr("Contents"), EaUnits.composition(vessel));
         var makeup = v.makeup;
         if (makeup != null) {
-            // (Baughn 2026-11-03: whether its signal holds it)
-            String state = makeup.open >= 0.99 ? I18N.tr("open") : v.floatOpen <= 1e-6 ? I18N.tr("shut (full enough)")
-                : v.makeupGate <= 0.01 ? I18N.tr("shut by its signal") : String.format(makeup.open < 0.01 ? "%.2f%% open" : "%.0f%% open", makeup.open * 100);
-            String held = !signalled() ? I18N.tr("; no signal: its float valve alone")
-                : String.format(I18N.tr("; signal %.0f%%"), Math.max(0, Math.min(1, v.makeupGate)) * 100);
-            info.put(I18N.tr("Makeup valve"), state + held);
+            String state = makeup.open >= 0.99 ? I18N.tr("Open") : v.floatOpen <= 1e-6 ? I18N.tr("Shut (full)")
+                : v.makeupGate <= 0.01 ? I18N.tr("Shut") : String.format(makeup.open < 0.01 ? "%.2f%% open" : "%.0f%% open", makeup.open * 100);
+            String held = !signalled() ? " (" + I18N.tr("float") + ")"
+                : String.format(" (" + I18N.tr("signal %.0f%%") + ")", Math.max(0, Math.min(1, v.makeupGate)) * 100);
+            info.detail(I18N.tr("Makeup valve"), state + held);
         }
-        // (Baughn: on a cold start nothing said why no water reached the boiler: the pump turns with the turbine)
-        double open = v.speed;   // (pump.open also carries its curve's line)
-        info.put(I18N.tr("Condensate pump"), turbine == null ? I18N.tr("stopped: no turbine")
-            : open <= 0.01 ? I18N.tr("stopped: it turns with the turbine; feed the boiler directly to start")
+        double open = v.speed;
+        info.detail(I18N.tr("Condensate pump"), turbine == null ? I18N.tr("Stopped (no turbine)")
+            : open <= 0.01 ? I18N.tr("Stopped (turbine idle)")
             : String.format("%.0f%%, %.0f mB/s", Math.min(1, open) * 100, pumped));
-        if (v.pump != null) info.put(I18N.tr("Pump outlet"), v.outletStatus());
+        if (v.pump != null) info.detail(I18N.tr("Pump outlet"), v.outletStatus());
         return info;
     }
 }

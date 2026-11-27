@@ -151,12 +151,9 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement {
     }
 
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Receiving"), powerSrc.getP() != 0 ? "Yes" : "No");
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Power received"), Utils.plotPower("", powerSrc.getP()));
-            info.put(I18N.tr("Effective power"), Utils.plotPower("", powerSrc.getEffectiveP()));
-        }
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Receiving"), powerSrc.getP() != 0 ? I18N.tr("Yes") : I18N.tr("No"))
+            .headline(I18N.tr("Effective power"), Utils.plotPower("", powerSrc.getEffectiveP()))
+            .detail(I18N.tr("Power received"), Utils.plotPower("", powerSrc.getP()));
     }
 }

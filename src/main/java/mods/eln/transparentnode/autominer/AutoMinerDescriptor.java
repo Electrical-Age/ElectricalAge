@@ -120,7 +120,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Excavates on a small radius.\nExtracts ore on a bigger radius:\n%1$ blocks radius after %1$ blocks depth.", mods.eln.Eln.autominerRange).split("\n"));
+        list.add(tr("Automated shaft miner: extracts ores in a %1$-block radius below %1$ blocks depth.", mods.eln.Eln.autominerRange));
         if (!Utils.nameShowsVoltage(name, nominalVoltage))
             list.add(tr("Nominal voltage: %1$V", Utils.plotValue(nominalVoltage)));
     }

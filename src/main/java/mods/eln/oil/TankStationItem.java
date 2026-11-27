@@ -18,6 +18,9 @@ public class TankStationItem extends BlockItem {
 
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> out, TooltipFlag flag) {
-        for (int i = 1; i <= 3; i++) out.accept(Component.translatable("item.eln.tank_loading_station.tip" + i).withStyle(net.minecraft.ChatFormatting.GRAY));
+        out.accept(Component.translatable("item.eln.tank_loading_station.tip1").withStyle(net.minecraft.ChatFormatting.GRAY));
+        mods.eln.client.ItemTooltips.addDetails(out,
+            Component.translatable("item.eln.tank_loading_station.tip2").withStyle(net.minecraft.ChatFormatting.GRAY),
+            Component.translatable("item.eln.tank_loading_station.tip3").withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 }

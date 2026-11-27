@@ -79,4 +79,10 @@ public class PowerCapacitorSixDescriptor extends PowerPrimitiveSixDescriptor imp
         drawStretched(2, SHORT_LEADS, Base, CapacitorCables);
         if (null != CapacitorCore) CapacitorCore.draw();
     }
+
+    @Override
+    public void addInformation(net.minecraft.world.item.ItemStack itemStack, net.minecraft.world.entity.player.Player entityPlayer, java.util.List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(mods.eln.i18n.I18N.tr("Configurable inline capacitor (fit dielectrics to set capacitance)."));
+    }
 }

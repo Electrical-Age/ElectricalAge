@@ -55,7 +55,7 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Converts Redstone signal\nto an electrical voltage.").split("\n"));
+        list.add(tr("Converts Redstone strength to a 0–5 V signal."));
     }
 
     // 26.x port: shouldUseRenderHelper() removed (client rendering; redone in P3)

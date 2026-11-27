@@ -40,9 +40,9 @@ public class BatteryScreen extends ElnScreen {
 
     String state() {
         double p = render.power, miss = full() - render.energy;
-        if (Math.abs(p) < 5) return tr("No charge");
+        if (Math.abs(p) < 5) return miss <= 0 ? tr("Full") : tr("Idle");
         if (p > 0) return tr("Discharge") + " " + Utils.plotTime("", render.energy / p);
         if (miss > 0) return tr("Charge") + " " + Utils.plotTime("", -miss / p);
-        return tr("Charged");
+        return tr("Full");
     }
 }

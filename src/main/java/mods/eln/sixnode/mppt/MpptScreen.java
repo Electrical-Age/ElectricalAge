@@ -35,12 +35,12 @@ public class MpptScreen extends ElnScreen {
         field("chargeField", () -> num(render.chargeVolts), s -> {
             float f = EaField.parse(s);
             if (!Float.isNaN(f)) render.clientSetFloat(MpptElement.setChargeVoltsId, f);
-        }, tr("Charge voltage, volts"));
+        }, tr("Charge voltage (V)"));
         text("amps", () -> tr("Charge current: up to %1$", Meters.amps(render.chargeAmps)));
         field("ampsField", () -> num(render.chargeAmps), s -> {
             float f = EaField.parse(s);
             if (!Float.isNaN(f)) render.clientSetFloat(MpptElement.setChargeAmpsId, f);
-        }, tr("The most charging current, amps (a small battery takes little)"));
+        }, tr("Max charge current (A)"));
     }
 
     @Override

@@ -773,7 +773,7 @@ public final class RubberCases {
             c.check("the polymeriser makes 100 mB of butadiene" + (vapour ? " (as vapour)" : "") + " into 4 Raw Rubber, down to the gas its vessel holds at 1 atm", d.made() == 4
                 && inv.getItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.RUBBER_SLOT).is(ElnRegistry.RAW_RUBBER.get()), st);
             c.check("... using one Soul Dust (good for 8)", inv.getItem(mods.eln.transparentnode.polymeriser.PolymeriserElement.SOUL_SLOT).isEmpty()
-                && st.contains("+4 rubber left"), st);
+                && st.contains("+4 left"), st);
             c.check("... and then waits for butadiene", d.status().equals("no butadiene") && d.butadieneMb() < 20, st);
         }
     }

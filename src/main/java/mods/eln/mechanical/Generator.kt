@@ -80,12 +80,12 @@ class GeneratorDescriptor(
     override val rotating = arrayOf(obj.getPart("rotor")).requireNoNulls()
 
     override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
-        list.add("Converts mechanical energy into electricity, or (badly) vice versa.")
-        list.add("Nominal usage ->")
-        list.add(Utils.plotVolt("  Voltage out: ", nominalU.toDouble()))
-        list.add(Utils.plotPower("  Power out: ", nominalP.toDouble()))
-        list.add(Utils.plotRads("  Rads: ", nominalRads.toDouble()))
-        list.add(Utils.plotRads("Max rads:  ", absoluteMaximumShaftSpeed))
+        list.add("Shaft-driven electrical generator.")
+        val showV = !Utils.nameShowsVoltage(getName(stack), nominalU.toDouble())
+        val rating = (if (showV) Utils.plotVolt("", nominalU.toDouble()).trim() + ", " else "") +
+            Utils.plotPower("", nominalP.toDouble()).trim() + " at " + Utils.plotRads("", nominalRads.toDouble()).trim()
+        list.add("Output: " + rating + ".")
+        mods.eln.client.ItemTooltips.detail(list, Utils.plotRads("Max speed: ", absoluteMaximumShaftSpeed).trim() + ".")
     }
 }
 
@@ -264,15 +264,13 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
     }
 
     override fun getWaila(): Map<String, String> {
-        var info = mutableMapOf<String, String>()
-        info.put("Energy", Utils.plotEnergy("", shaft.energy))
-        info.put("Speed", Utils.plotRads("", shaft.rads))
-        info.put("Terminals", "power on its " + ShaftSteamTurbineElement.compass(front) + " and " + ShaftSteamTurbineElement.compass(front.back()) + " faces")
-        if (Eln.wailaEasyMode) {
-            info.put("Voltage", Utils.plotVolt("", electricalPowerSource.getU()))
-            info.put("Current", Utils.plotAmpere("", electricalPowerSource.getI()))
-            info.put("Temperature", Utils.plotCelsius("", thermal.t))
-        }
+        val info = mods.eln.compat.jade.ProbeLines.of()
+        info.headline(mods.eln.i18n.I18N.tr("Speed"), Utils.plotRads("", shaft.rads))
+        info.headline(mods.eln.i18n.I18N.tr("Power"), Utils.plotPower("", electricalPowerSource.p))
+        info.headline(mods.eln.i18n.I18N.tr("Voltage"), Utils.plotVolt("", electricalPowerSource.getU()))
+        info.detail(mods.eln.i18n.I18N.tr("Current"), Utils.plotAmpere("", electricalPowerSource.getI()))
+        info.detail(mods.eln.i18n.I18N.tr("Temperature"), Utils.plotCelsius("", thermal.t))
+        info.detail(mods.eln.i18n.I18N.tr("Shaft energy"), Utils.plotEnergy("", shaft.energy))
         return info
     }
 }

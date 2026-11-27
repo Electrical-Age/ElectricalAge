@@ -40,8 +40,8 @@ public class LampSupplyScreen extends ElnScreen {
     }
 
     static final String[] AGGREGATORS = {"Biggest", "Smallest", "Toggle"};
-    static final String[] AGGREGATOR_HELP = {"Uses the biggest\nvalue on the channel.", "Uses the smallest\nvalue on the channel.",
-        "Toggles the output each time\nan emitter's value rises.\nUseful to allow multiple buttons\nto control the same light."};
+    static final String[] AGGREGATOR_HELP = {"Uses the highest value on the channel.", "Uses the lowest value on the channel.",
+        "Toggles output on rising signal."};
 
     @Override
     protected void init() {
@@ -64,7 +64,7 @@ public class LampSupplyScreen extends ElnScreen {
                 if (a != shown[0]) {
                     shown[0] = a;
                     b.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
-                        tr("Click to change.") + "\n" + tr(AGGREGATOR_HELP[a]))));
+                        tr(AGGREGATOR_HELP[a]))));
                 }
             });
         }

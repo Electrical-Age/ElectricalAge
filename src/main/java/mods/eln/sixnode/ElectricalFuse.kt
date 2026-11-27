@@ -91,9 +91,7 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>?, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
-        if (list != null) {
-            I18N.tr("Protects electrical components.\nFuse melts if current exceeds the\nfuse limit").split("\n").forEach { list.add(it) }
-        }
+        list?.add(I18N.tr("Holds a Lead Fuse; blows when current exceeds the set limit."))
     }
 
     override fun getFrontFromPlace(side: Direction, player: Player) =
@@ -206,11 +204,10 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
 
     override fun multiMeterString() = Utils.plotAmpere("I:", Math.abs(aLoad.current))
 
-    override fun getWaila(): MutableMap<String, String> {
-        val infos = mutableMapOf(Pair(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(aLoad.current))))
-        infos[I18N.tr("Rating")] = Utils.plotAmpere("", ratingNow())
-        return infos
-    }
+    override fun getWaila(): MutableMap<String, String> =
+        mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(aLoad.current)))
+            .headline(I18N.tr("Rating"), Utils.plotAmpere("", ratingNow()))
 
     override fun thermoMeterString(): String? = null
 

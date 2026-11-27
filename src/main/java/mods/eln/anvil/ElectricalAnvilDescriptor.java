@@ -82,7 +82,9 @@ public class ElectricalAnvilDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Repairs a tool with its repair material, for no XP.\nIt never raises the tool's anvil cost,\nand lowers an old one a step each repair.\nTakes 400V at %1$ while it welds: feed it\nfrom a capacitor bank.",
-            mods.eln.misc.Utils.plotPower(powerW)).split("\n"));
+        list.add(tr("Repairs tools with their repair material instead of XP."));
+        list.add(tr("400 V, %1$ welding pulses.", mods.eln.misc.Utils.plotPower(powerW).trim()));
+        mods.eln.client.ItemTooltips.detail(list,
+            tr("Never raises prior anvil penalty, and reduces existing penalty by one step per repair."));
     }
 }

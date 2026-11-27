@@ -43,10 +43,10 @@ class ShaftMotorDescriptor(
     }
 
     override fun addInformation(stack: ItemStack, player: Player?, list: MutableList<String>, par4: Boolean) {
-        list.add("Spins a shaft up: power on its front, under its terminal box;")
-        list.add("a speed signal on its back sets its speed, full without one.")
-        list.add(Utils.plotVolt("Nominal voltage: ", nominalU) + Utils.plotPower("  Power: ", nominalP))
-        list.add("Drives a plant condenser's pumps beside it.")
+        list.add(Utils.plotPower("Electric shaft motor: ", nominalP).trim() + ".")
+        mods.eln.client.ItemTooltips.detail(list,
+            "0–5 V speed signal sets target speed (full speed without signal).",
+            "Also drives adjacent Plant Steam Condenser pumps.")
     }
 }
 
@@ -171,14 +171,11 @@ class ShaftMotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor)
     }
 
     override fun getWaila(): Map<String, String> {
-        val info = mutableMapOf<String, String>()
-        info["Speed"] = Utils.plotRads("", shaft.rads)
-        info["Drives to"] = Utils.plotRads("", targetRads())
-        info["Power"] = Utils.plotPower("", drawnW)
-        // AdventurAgent took the speed signal's small plate on its back for the power terminal: say which face is which
-        info["Terminals"] = "230 V on its " + ShaftSteamTurbineElement.compass(front) + " face, speed signal on its " +
-            ShaftSteamTurbineElement.compass(front.back())
-        if (Eln.wailaEasyMode) info["Voltage"] = Utils.plotVolt("", load.u)
+        val info = mods.eln.compat.jade.ProbeLines.of()
+        info.headline(mods.eln.i18n.I18N.tr("Speed"), Utils.plotRads("", shaft.rads))
+        info.headline(mods.eln.i18n.I18N.tr("Target"), Utils.plotRads("", targetRads()))
+        info.headline(mods.eln.i18n.I18N.tr("Power"), Utils.plotPower("", drawnW))
+        info.detail(mods.eln.i18n.I18N.tr("Voltage"), Utils.plotVolt("", load.u))
         return info
     }
 }

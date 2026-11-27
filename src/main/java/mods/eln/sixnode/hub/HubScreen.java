@@ -37,8 +37,8 @@ public class HubScreen extends ElnScreen {
             var r = layout.get("slot", String.valueOf(HubSlots.layoutId(place)));
             if (r == null) continue;
             menu.moveDeviceSlot(HubSlots.slot(side, facing, place), r.x() + 1, r.y() + 1,
-                tr("Electrical cable slot: a cable kit (takes a block of it)"),
-                tr("This slot's cable goes %1$", tr(HubSlots.worldName(HubSlots.world(side, facing, place)))));
+                tr("Cable kit (1 block)"),
+                tr("Connects %1$", tr(HubSlots.worldName(HubSlots.world(side, facing, place)))));
         }
     }
 

@@ -22,8 +22,8 @@ public class TurretScreen extends ElnScreen {
     @Override
     protected void init() {
         super.init();
-        button("meaning", () -> render.filterIsSpare ? tr("Spares the filtered") : tr("Attacks the filtered"),
-            render::clientToggleFilterMeaning, tr("What happens to the entities the filter in the slot matches"));
+        button("meaning", () -> render.filterIsSpare ? tr("Mode: Ignore filtered") : tr("Mode: Target filtered"),
+            render::clientToggleFilterMeaning, tr("Invert filter target"));
         charge = slider("charge", 100, 5000, 100, render.chargePower,
             v -> Component.literal(tr("Recharge power: %1$", mods.eln.api.Meters.watts(v))), v -> render.clientSetChargePower((float) v));
     }

@@ -350,20 +350,20 @@ public class WireDrawingElement extends TransparentNodeElement {
     public static String statusText(byte status) {
         return switch (status) {
             case RUNNING -> I18N.tr("Drawing wire");
-            case NO_COPPER -> I18N.tr("Needs copper (ingots or dust)");
+            case NO_COPPER -> I18N.tr("Needs copper");
             case NO_RUBBER -> I18N.tr("Needs rubber");
-            case OUTPUT_FULL -> I18N.tr("Take the finished item out");
+            case OUTPUT_FULL -> I18N.tr("Output full");
             case NO_POWER -> I18N.tr("No power");
-            case NO_CORE -> I18N.tr("Needs a ferromagnetic core");
+            case NO_CORE -> I18N.tr("Needs ferromagnetic core");
             default -> I18N.tr("Stopped");
         };
     }
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>(machine.wailaLines());
-        info.put(I18N.tr("Making"), jobText(mode, mm2, tier, colour, amount));
-        info.put(I18N.tr("State"), statusText(status) + (running && done > 0 ? String.format(" (%.0f%%)", progress() * 100) : ""));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .addAll(machine.wailaLines())
+            .headline(I18N.tr("Making"), jobText(mode, mm2, tier, colour, amount))
+            .headline(I18N.tr("State"), statusText(status) + (running && done > 0 ? String.format(" (%.0f%%)", progress() * 100) : ""));
     }
 }

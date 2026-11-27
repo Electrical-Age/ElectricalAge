@@ -132,15 +132,13 @@ public class PipeTransmitterElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new LinkedHashMap<>();
-        // (three lines, all in Jade's headline: a lab test lost the volts below it)
-        info.put(PipeSensorPart.name(descriptor.sensing), connected ? readingText() : "not connected to a pipe");
-        info.put("Output", Utils.plotVolt("", outputGate.getU()));
-        info.put("Full scale", String.format("%.0f %s at %.0f V", scale, PipeSensorPart.unit(descriptor.sensing), Eln.SVU));
-        // (the run's viscosity, after the three: thick liquid crawling through the pipe it reads says why; design-398 6 A)
+        var info = mods.eln.compat.jade.ProbeLines.of()
+            .headline(PipeSensorPart.name(descriptor.sensing), connected ? readingText() : mods.eln.i18n.I18N.tr("Not connected"))
+            .headline(mods.eln.i18n.I18N.tr("Output"), Utils.plotVolt("", outputGate.getU()))
+            .headline(mods.eln.i18n.I18N.tr("Full scale"), String.format("%.0f %s at %.0f V", scale, PipeSensorPart.unit(descriptor.sensing), Eln.SVU));
         PipePart pipe = pipe();
         String visc = pipe == null || pipe.fluid == null ? null : mods.eln.sim.fluid.EaUnits.viscosity(mods.eln.fluid.FluidWorld.nodeFor(pipe.fluid));
-        if (visc != null) info.put(mods.eln.i18n.I18N.tr("Viscosity"), visc);
+        if (visc != null) info.detail(mods.eln.i18n.I18N.tr("Viscosity"), visc);
         return info;
     }
 

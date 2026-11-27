@@ -1091,10 +1091,10 @@ public final class Wp9cCases {
             double expected = 3f / 5f / (60f * 24f) * 3 * mods.eln.sixnode.TreeResinCollector.TreeResinCollectorElement.OTHER_TREE_FACTOR;
             ctx.checkValue("wp9c resin collector production [1/s] (3-log trunk, leaves on the other sides)", (double) call(collector, "getProductPerSecond"), expected);
             var waila = collector.getWaila();
-            ctx.check("wp9c resin collector probe: pot and rate, no null (Baughn)", waila.containsKey("Resin in pot")
-                && waila.get("Rate").endsWith("per hour") && !waila.containsValue(null), String.valueOf(waila));
+            ctx.check("wp9c resin collector probe: pot and rate, no null (Baughn)", waila.containsKey("Resin")
+                && waila.get("Rate").endsWith("/h") && !waila.containsValue(null), String.valueOf(waila));
             ctx.world().removeBlock(crown.get(0), false);
-            ctx.check("wp9c resin collector probe off a tree", collector.getWaila().get("Rate").startsWith("none"), String.valueOf(collector.getWaila()));
+            ctx.check("wp9c resin collector probe off a tree", "No living tree".equals(collector.getWaila().get("Rate")), String.valueOf(collector.getWaila()));
             ctx.checkValue("wp9c resin collector production with too few leaves [1/s] (* 1e-9: not a tree)", (double) call(collector, "getProductPerSecond"), expected * 1e-9);
         }
     }
@@ -1119,7 +1119,7 @@ public final class Wp9cCases {
         public void measure(TestContext ctx) {
             ctx.check("wp9c tutorial sign placed", sign instanceof TutorialSignElement, String.valueOf(sign));
             ctx.check("wp9c modbus RTU placed (disabled: no TCP server)", rtu instanceof ModbusRtuElement
-                && rtu.getWaila().containsKey("X_X"), String.valueOf(rtu));
+                && "Unsupported; will be re-enabled on request".equals(rtu.getWaila().get("State")), String.valueOf(rtu));
             ctx.check("wp9c wireless analyser + data logger print registered",
                 Eln.sharedItem.getDescriptor(WIRELESS_ANALYSER) instanceof WirelessSignalAnalyserItemDescriptor
                     && Eln.sharedItem.getDescriptor(DATA_LOGS_PRINT) instanceof DataLogsPrintDescriptor,

@@ -165,13 +165,10 @@ public final class PowerCapacitorCore {
 
     /** The Jade lines: capacity and charge, and the voltage and current in easy mode. */
     public Map<String, String> waila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Capacity"), Utils.plotValue(capacitor.getC(), "F"));
-        info.put(I18N.tr("Charge"), Utils.plotEnergy("", capacitor.getE()));
-        if (Eln.wailaEasyMode) {
-            info.put(I18N.tr("Voltage drop"), Utils.plotVolt("", Math.abs(capacitor.getU())));
-            info.put(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(capacitor.getCurrent())));
-        }
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Capacity"), Utils.plotValue(capacitor.getC(), "F"))
+            .headline(I18N.tr("Charge"), Utils.plotEnergy("", capacitor.getE()))
+            .detail(I18N.tr("Voltage drop"), Utils.plotVolt("", Math.abs(capacitor.getU())))
+            .detail(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(capacitor.getCurrent())));
     }
 }

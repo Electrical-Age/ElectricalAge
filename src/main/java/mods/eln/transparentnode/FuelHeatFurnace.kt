@@ -97,12 +97,11 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(I18N.tr("Generates heat when supplied with fuel."))
-        list.add(I18N.tr("Burns gasoline, diesel, heavy oil, residue, crude oil and piped fuel gas."))
-        list.add(I18N.tr("Crude, residue and heavy oil coke its burner; clean fuel clears it. Wool cleans it."))
-        list.add(I18N.tr("Fuel flange on top; air port on its back: forced air fires it up to 2.5x."))
-        list.add(I18N.tr("Natural draught can't push its smoke far: a backed-up flue starves its fire."))
-        list.add(Utils.plotCelsius(I18N.tr("  Max. temperature: "), thermal.warmLimit))
+        list.add(I18N.tr("Burns liquid and gas fuels into heat (max %1$).", Utils.plotCelsius(thermal.warmLimit)))
+        list.add(I18N.tr("Forced air boosts output up to 2.5×."))
+        mods.eln.client.ItemTooltips.detail(list,
+            I18N.tr("Accepts gasoline, diesel, heavy oil, residue, crude oil, and fuel gas."),
+            I18N.tr("Heavy fuels coke the burner; backed-up flue gas starves the fire."))
     }
 }
 
@@ -938,21 +937,27 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     }
 
     override fun getWaila(): MutableMap<String, String> {
-        val info = HashMap<String, String>()
-        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))
-        info.put(I18N.tr("Power"), Utils.plotPower("", if (isBurnt()) 0.0 else actualHeatPower))
-        // (what's in its tank: Baughn 2026-11-03, Jade said nothing of it)
+        val info = mods.eln.compat.jade.ProbeLines.of()
         val v = vessel
+        val waterAtBurner = v != null && atBurner == mods.eln.sim.fluid.SpeciesRegistry.WATER
+        if (gasEscapingKgS > GAS_FIRE_KG_S) info.headline(I18N.tr("Relief"), I18N.tr("Venting fuel gas!"))
+        if (waterAtBurner) info.headline(I18N.tr("Burner"), I18N.tr("Water at burner (fire out)"))
+        else if (coke > 0.25) info.headline(I18N.tr("Burner"), String.format(I18N.tr("%.0f%% coked (%.0f%% output)"), coke * 100, (1 - coke) * 100))
+        val air = airJade()
+        val airStarved = airAskKgS > 0 && airRatio < 0.9
+        if (air != null && airStarved) info.headline(I18N.tr("Air"), air)
+        info.headline(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))
+        info.headline(I18N.tr("Thermal power"), Utils.plotPower("", if (isBurnt()) 0.0 else actualHeatPower))
         if (v != null) {
             val mb = fuelMb()
-            info.put(I18N.tr("Fuel tank"), if (mb < 0.5) I18N.tr("empty") else mods.eln.sim.fluid.EaUnits.tank(mb, TANK_MB) + ": " + mods.eln.sim.fluid.EaUnits.composition(v))
-            if (atBurner == mods.eln.sim.fluid.SpeciesRegistry.WATER) info.put(I18N.tr("Burner"), I18N.tr("water at the burner: the fire is out; drain it to relight"))
+            info.headline(I18N.tr("Fuel"), if (mb < 0.5) I18N.tr("Empty") else mods.eln.sim.fluid.EaUnits.tank(mb, TANK_MB))
+            if (mb >= 0.5) info.detail(I18N.tr("Contents"), mods.eln.sim.fluid.EaUnits.composition(v))
         }
-        if (coke > 0.01 && atBurner != mods.eln.sim.fluid.SpeciesRegistry.WATER) info.put(I18N.tr("Burner"), String.format(I18N.tr("%.0f%% coked: fires %.0f%% (right-click with wool to clean)"), coke * 100, (1 - coke) * 100))
-        airJade()?.let { info.put(I18N.tr("Air"), it) }
-        if (gasEscapingKgS > GAS_FIRE_KG_S) info.put(I18N.tr("Relief"), I18N.tr("venting fuel gas!"))
-        if (flue.node != null) info.put(I18N.tr("Flue"), flue.jade())
-        if (v != null && mods.eln.fluid.FluidWorld.edgesOf(v).any { it !== breather?.edge && it !== airIn?.edge && it !== relief?.edge }) info.put(I18N.tr("Fuel"), I18N.tr("from the pipe on its top flange"))
+        if (coke > 0.01 && coke <= 0.25 && !waterAtBurner) info.detail(I18N.tr("Burner"), String.format(I18N.tr("%.0f%% coked (%.0f%% output)"), coke * 100, (1 - coke) * 100))
+        if (air != null && !airStarved) info.detail(I18N.tr("Air"), air)
+        if (flue.node != null) info.detail(I18N.tr("Flue"),
+            if (flue.piped()) String.format(I18N.tr("Piped, %.2f bar"), mods.eln.fluid.FluidWorld.nodeFor(flue.node).P() / 1e5)
+            else I18N.tr("Open stack"))
         return info
     }
 
@@ -962,11 +967,11 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         val fn = flue.node
         val back = if (fn == null) 0.0 else mods.eln.fluid.FluidWorld.nodeFor(fn).P() - mods.eln.sim.fluid.Water.P_ATM
         return when {
-            airRatio < 0.9 && back > 0.5 * draughtPa -> String.format(I18N.tr("starved (%.0f%%): flue backed up %s"), airRatio * 100,
+            airRatio < 0.9 && back > 0.5 * draughtPa -> String.format(I18N.tr("Starved (%.0f%%; flue %s)"), airRatio * 100,
                 if (back < 1e4) String.format("%.0f Pa", back) else String.format("%.2f bar", back / 1e5))
-            airRatio < 0.9 -> String.format(I18N.tr("starved (%.0f%%)"), airRatio * 100)
-            forcedKgS > 0.05 * airAskKgS -> String.format(I18N.tr("forced %.1f g/s + draught %.1f g/s, fires %.1fx its setting"), forcedKgS * 1000, draughtKgS * 1000, airFactor())
-            else -> String.format(I18N.tr("natural draught %.1f g/s"), draughtKgS * 1000)
+            airRatio < 0.9 -> String.format(I18N.tr("Starved (%.0f%%)"), airRatio * 100)
+            forcedKgS > 0.05 * airAskKgS -> String.format(I18N.tr("Forced %.1f + draught %.1f g/s (%.1f×)"), forcedKgS * 1000, draughtKgS * 1000, airFactor())
+            else -> String.format(I18N.tr("Natural draught %.1f g/s"), draughtKgS * 1000)
         }
     }
 

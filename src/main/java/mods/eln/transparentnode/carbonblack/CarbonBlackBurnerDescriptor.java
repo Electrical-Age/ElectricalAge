@@ -56,6 +56,7 @@ public class CarbonBlackBurnerDescriptor extends TransparentNodeDescriptor {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Burns heavy oil, residue or crude\nstarved of air, fed into the blue IN\nflange on its back: Carbon Black,\none a 500 mB. Pushes it into a\nhopper under it; right-click takes it.").split("\n"));
+        list.add(tr("Burns heavy oil, residue, or crude starved of air into Carbon Black."));
+        list.add(tr("Requires no electrical power."));
     }
 }

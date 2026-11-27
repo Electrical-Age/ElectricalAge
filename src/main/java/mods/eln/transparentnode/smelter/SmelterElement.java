@@ -278,9 +278,8 @@ public class SmelterElement extends TransparentNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
-        info.put(I18N.tr("Smelting"), smelting ? Utils.plotPower("", smeltResistor.getP()) : I18N.tr("No"));
-        return info;
+        return mods.eln.compat.jade.ProbeLines.of()
+            .headline(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))
+            .headline(I18N.tr("Smelting"), smelting ? Utils.plotPower("", smeltResistor.getP()) : I18N.tr("No"));
     }
 }

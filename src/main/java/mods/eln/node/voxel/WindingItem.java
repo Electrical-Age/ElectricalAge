@@ -77,14 +77,12 @@ public class WindingItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display,
                                 java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
         CableSpec spec = spec(stack);
-        // its wire's colour, as a cable kit's tooltip names it (todo #486)
         out.accept(Component.translatable("item.eln.winding.wire", turns(stack), spec.label(tier(stack)), String.format("%.0f", spec.amps()),
             CableSpec.twisted(tier(stack)) ? Component.literal(CableSpec.jacketName(tier(stack), spec.colour()))
                 : Component.translatable("color.minecraft." + net.minecraft.world.item.DyeColor.byId(spec.colour()).getName()))
             .withStyle(net.minecraft.ChatFormatting.GRAY));
-        out.accept(Component.literal("For a Transformer (DC-DC)'s winding slot").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
-        // (Baughn 2026-11-13: say that they merge; HandWindingRecipe's rule)
-        out.accept(Component.literal("Windings of the same wire merge in a crafting grid, up to " + HandWindingRecipe.MAX_TURNS + " turns")
-            .withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        mods.eln.client.ItemTooltips.addDetails(out,
+            Component.literal(mods.eln.i18n.I18N.tr("Fits a Transformer (DC-DC) winding slot")).withStyle(net.minecraft.ChatFormatting.GRAY),
+            Component.literal(mods.eln.i18n.I18N.tr("Matching windings merge in a crafting grid (up to %1$ turns)", HandWindingRecipe.MAX_TURNS)).withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 }

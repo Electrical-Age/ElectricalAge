@@ -92,25 +92,23 @@ public class WireDrawingScreen extends ElnScreen {
                 int m = modeOf[Math.max(0, Math.min(modeOf.length - 1, i))];
                 set(m, r.mm2, r.tier, r.colour, m == WireDrawingElement.KIT ? Math.max(r.amount, 20)
                     : m == WireDrawingElement.OVERHEAD ? Math.max(r.amount, 100) : Math.min(r.amount, WireDrawingDescriptor.MAX_BLOCKS));
-            },
-            pole ? tr("A cable kit (blocks of cable), a winding for a Transformer (DC-DC) (turns), bare Copper Cable for crafting,\na transformer for a utility pole (it takes a ferromagnetic core), or overhead cable for the spans between poles (no rubber)")
-                : tr("A cable kit (blocks of cable), a winding for a Transformer (DC-DC) (turns), bare Copper Cable for crafting,\nor overhead cable for the spans between utility poles (no rubber)")));
+            }, tr("Output item type")));
         java.util.function.BooleanSupplier wire = this::usesWire, ins = this::usesInsulation, colour = this::usesColour, amount = this::usesAmount;
         java.util.function.BooleanSupplier poleMode = () -> r.mode == WireDrawingElement.POLE;
         text("mm2l", shown(wire, () -> poleMode.getAsBoolean() ? tr("Low-side wire") : tr("Wire")));
         when(wire, locked(button("mm2dn", () -> "<", () -> set(r.mode, r.mm2 - 1, r.tier, r.colour, r.amount))));
         text("mm2", shown(wire, () -> CableSpec.mm2Number(CableSpec.MM2[r.mm2]) + " mm², " + String.format("%.0f A", CableSpec.AMPS[r.mm2])));
         when(wire, locked(button("mm2up", () -> ">", () -> set(r.mode, r.mm2 + 1, r.tier, r.colour, r.amount),
-            tr("Up to %1$ mm² on this machine", CableSpec.mm2Number(CableSpec.MM2[r.desc.maxMm2])))));
+            tr("Max %1$ mm²", CableSpec.mm2Number(CableSpec.MM2[r.desc.maxMm2])))));
         text("insl", shown(ins, () -> poleMode.getAsBoolean() ? tr("Low side") : tr("Insulation")));
         when(ins, locked(button("insdn", () -> "<", () -> set(r.mode, r.mm2, CableSpec.stepTier(r.tier, -1, 4), r.colour, r.amount))));
         text("ins", shown(ins, () -> CableSpec.voltsLabel(r.tier)));
         when(ins, locked(button("insup", () -> ">", () -> set(r.mode, r.mm2, CableSpec.stepTier(r.tier, 1, 4), r.colour, r.amount),
-            tr("Up to %1$ on this machine (pole transformers: 48, 230 or 400 V on the low side)", CableSpec.voltsLabel(r.desc.maxTier)))));
+            tr("Max %1$", CableSpec.voltsLabel(r.desc.maxTier)))));
         text("coll", shown(colour, () -> tr("Colour")));
         when(colour, locked(button("coldn", () -> "<", () -> set(r.mode, r.mm2, r.tier, r.colour - 1, r.amount))));
         text("col", shown(colour, () -> DyeColor.byId(r.colour).getName().replace('_', ' ')));
-        when(colour, locked(button("colup", () -> ">", () -> set(r.mode, r.mm2, r.tier, r.colour + 1, r.amount), tr("Only the look"))));
+        when(colour, locked(button("colup", () -> ">", () -> set(r.mode, r.mm2, r.tier, r.colour + 1, r.amount), tr("Cosmetic only"))));
         text("amountl", shown(amount, () -> switch (r.mode) {
             case WireDrawingElement.KIT, WireDrawingElement.OVERHEAD -> tr("Length");
             case WireDrawingElement.WINDING -> tr("Turns");
@@ -119,7 +117,7 @@ public class WireDrawingScreen extends ElnScreen {
         when(amount, locked(field("amount", () -> String.valueOf(r.amount), v -> {
             float f = EaField.parse(v);
             if (!Float.isNaN(f)) set(r.mode, r.mm2, r.tier, r.colour, Math.round(f));
-        }, tr("Kits: 1 to 64 blocks. Windings: 1 to 1000 turns. Bare wire: 1 to 64 Copper Cable. Overhead cable: 1 to 500 blocks"))));
+        }, tr("Quantity / length"))));
         text("amountu", shown(amount, () -> switch (r.mode) {
             case WireDrawingElement.KIT, WireDrawingElement.OVERHEAD -> tr("blocks");
             case WireDrawingElement.WINDING -> tr("turns");
@@ -131,24 +129,21 @@ public class WireDrawingScreen extends ElnScreen {
                 String.format("%.1f", l * WireDrawingDescriptor.rubberPerBlock(r.mode, r.tier, r.mm2)),
                 String.format("%.0f", l * WireDrawingDescriptor.energyPerBlock(r.mode, r.mm2) / 1000));
         });
-        // what it has to draw from, comparable with "Takes" above: the slots plus what it already took from them (nero: a bare
-        // "Held" matched nothing; Baughn 1573703351592296449: count the slots too)
         text("buffer", () -> {
-            var cu = menu.getSlot(WireDrawingElement.COPPER).getItem();   // (menu slots 0 and 1 are these, MenuSpecs' order)
+            var cu = menu.getSlot(WireDrawingElement.COPPER).getItem();
             var ru = menu.getSlot(WireDrawingElement.RUBBER).getItem();
             double copper = r.copper + (WireDrawingElement.isCopper(cu) ? cu.getCount() : 0);
             double rubber = r.rubber + (WireDrawingElement.isRubber(ru) ? ru.getCount() : 0);
-            return tr("Has %1$ copper, %2$ rubber", String.format("%.1f", Math.floor(copper * 10 + 1e-9) / 10), String.format("%.1f", Math.floor(rubber * 10 + 1e-9) / 10));   // (rounded down)
+            return tr("Has %1$ copper, %2$ rubber", String.format("%.1f", Math.floor(copper * 10 + 1e-9) / 10), String.format("%.1f", Math.floor(rubber * 10 + 1e-9) / 10));
         });
         text("status", () -> WireDrawingElement.statusText(r.status), () -> switch (r.status) {
             case WireDrawingElement.NO_COPPER, WireDrawingElement.NO_RUBBER, WireDrawingElement.NO_POWER, WireDrawingElement.NO_CORE -> ERROR_TEXT;
             case WireDrawingElement.RUNNING -> OK_TEXT;
             default -> LABEL;
         });
-        // one item a Start, no Stop (Baughn 2026-11-07: twice he made a second one he didn't mean to); greyed while drawing
         var run = button("run", () -> r.running ? tr("Busy") : tr("Start"), () -> {
             if (!r.running) r.clientRun(true);
-        }, tr("Draws one item, then stops. Changing what to make scraps the wire drawn so far"));
+        }, tr("Changing settings discards progress"));
         refreshers.add(() -> {
             run.active = !r.running;
             for (var w : lockedWhileDrawing) w.active = !r.running;

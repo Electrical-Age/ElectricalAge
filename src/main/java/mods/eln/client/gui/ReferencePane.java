@@ -85,7 +85,7 @@ public class ReferencePane extends AbstractWidget {
         g.fill(x0 + 1, y0 + 1, x0 + width - 1, y0 + height - 1, PAPER);
         for (int r = 0; r <= visibleRows(); r++) g.fill(x0 + 1, y0 + TOP + r * ROW - 1, x0 + width - 1, y0 + TOP + r * ROW, RULE);
         g.fill(x0 + 9, y0 + 1, x0 + 10, y0 + height - 1, MARGIN);
-        g.text(font, "Quick reference", textX(), y0 + 3, HEAD, false);
+        g.text(font, mods.eln.i18n.I18N.tr("Quick reference"), textX(), y0 + 3, HEAD, false);
         int hover = isMouseOver(mouseX, mouseY) ? rowAt(mouseY) : -1;
         Row hovered = hover >= 0 && hover < rows.size() ? rows.get(hover) : null;
         for (int r = 0; r < visibleRows() && r + scroll < rows.size(); r++) {
@@ -103,7 +103,7 @@ public class ReferencePane extends AbstractWidget {
             g.fill(x0 + width - 3, by, x0 + width - 1, by + bar, 0x60806040);
         }
         if (hovered != null && hovered.entry() != null)
-            g.setTooltipForNextFrame(Component.literal("Click to insert " + hovered.entry().insert().trim()), mouseX, mouseY);
+            g.setTooltipForNextFrame(Component.literal(mods.eln.i18n.I18N.tr("Click to insert %1$", hovered.entry().insert().trim())), mouseX, mouseY);
     }
 
     @Override

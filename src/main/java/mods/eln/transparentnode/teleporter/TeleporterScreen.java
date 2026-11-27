@@ -26,9 +26,9 @@ public class TeleporterScreen extends ElnScreen {
         text("namel", () -> tr("Name"));
         text("targetl", () -> tr("Destination"));
         field("name", () -> render.name == null ? "" : render.name, v -> render.clientSendString(TeleporterElement.setNameId, v),
-            tr("Transporter name"));
+            tr("Teleporter name"));
         field("target", () -> render.targetName == null ? "" : render.targetName,
-            v -> render.clientSendString(TeleporterElement.setTargetNameId, v), tr("Destination transporter"));
+            v -> render.clientSendString(TeleporterElement.setTargetNameId, v), tr("Destination teleporter"));
         charge = slider("charge", 2000, 20000, 200, render.chargePower, v -> Component.literal(tr("Power consumption: %1$", mods.eln.api.Meters.watts(v))),
             v -> render.clientSendFloat(TeleporterElement.setChargePowerId, (float) v));
         render.chargePowerNew = false;

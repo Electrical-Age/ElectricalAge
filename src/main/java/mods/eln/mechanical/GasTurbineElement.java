@@ -477,41 +477,40 @@ public class GasTurbineElement extends SimpleShaftElement implements FluidDevice
         if (tripped) return I18N.tr("Tripped: overspeed");
         if (!hasFuel()) {
             String wrong = fuelIn.blockedBy();
-            return wrong == null ? I18N.tr("No fuel") : String.format(I18N.tr("No fuel: %s in its fuel vessel"), wrong);
+            return wrong == null ? I18N.tr("No fuel") : String.format(I18N.tr("Wrong fuel (%s)"), wrong);
         }
-        if (choked()) return I18N.tr("Choked: too much heavy oil or residue; dilute or break to empty");
-        if (bank <= 0 && !fuelReady) return I18N.tr("Fuel gas under 1 atm: it needs pressure");
-        if (!burning && rads < CUTOFF * RATED_RADS) return String.format(I18N.tr("Needs a starter: a Shaft Motor to spin it over %.0f rad/s"), CUTOFF * RATED_RADS);
+        if (choked()) return I18N.tr("Choked (heavy fuel)");
+        if (bank <= 0 && !fuelReady) return I18N.tr("Fuel gas under 1 atm");
+        if (!burning && rads < CUTOFF * RATED_RADS) return String.format(I18N.tr("Needs starter (>%.0f rad/s)"), CUTOFF * RATED_RADS);
         if (!burning) return I18N.tr("Fuel valve shut");
-        if (fuel.power() <= 0) return I18N.tr("Burning, but no power: half its fuel or more boils outside its range");
-        if (quality() < 0.995) return String.format(I18N.tr("Running at %.0f%% of its power: fuel quality %.0f%%, fouling %.0f%%"), quality() * 100, fuel.power() * 100, foul * 100);
-        if (manual()) return I18N.tr("Manual control: no governor or trip");
-        return exhaustPiped ? I18N.tr("Running") : I18N.tr("Running, its exhaust heat wasted");
+        if (fuel.power() <= 0) return I18N.tr("Off-spec fuel (no power)");
+        if (quality() < 0.995) return String.format(I18N.tr("Running (%.0f%% power)"), quality() * 100);
+        if (manual()) return I18N.tr("Manual control (no governor)");
+        return I18N.tr("Running");
     }
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new java.util.LinkedHashMap<>();
+        var info = mods.eln.compat.jade.ProbeLines.of();
         double rads = getShaft().getRads();
-        info.put(I18N.tr("Status"), status());
-        info.put(I18N.tr("Speed"), Utils.plotRads("", rads));
-        info.put(I18N.tr("State"), burning ? I18N.tr("burning") : rads < CUTOFF * RATED_RADS ? String.format(I18N.tr("cold: spin it over %.0f rad/s to light"), CUTOFF * RATED_RADS)
-            : !hasFuel() ? I18N.tr("out of fuel") : I18N.tr("idle"));
-        info.put(I18N.tr("Shaft power"), Utils.plotPower("", shaftW));
-        info.put(I18N.tr("Fuel"), fuelIn.vessel == null ? I18N.tr("empty") : String.format("%s, %.2f bar, %s", EaUnits.composition(fuelIn.vessel),
+        info.headline(I18N.tr("State"), status());
+        if (foul > 0.25) info.headline(I18N.tr("Fouling"), String.format(I18N.tr("%.0f%% fouled (%.0f%% power)"), foul * 100, (1 - foul) * 100));
+        info.headline(I18N.tr("Speed"), Utils.plotRads("", rads));
+        info.headline(I18N.tr("Shaft power"), Utils.plotPower("", shaftW));
+        info.detail(I18N.tr("Fuel"), fuelIn.vessel == null ? I18N.tr("Empty") : String.format("%s, %.2f bar, %s", EaUnits.composition(fuelIn.vessel),
             fuelIn.vessel.P() / 1e5, Utils.plotPower("", fuelW)));
         if (fuelIn.vessel != null && fuelIn.feedId() >= 0) {
             var q = FuelQuality.rate(fuelIn.vessel, fuelIn.feedId(), FuelQuality.TURBINE_LO, FuelQuality.TURBINE_HI);
             double rate = FuelQuality.foulRate(q.coking(), FuelQuality.ENGINE_BALANCE);
             String visc = EaUnits.viscosityText(FuelQuality.layerViscosity(fuelIn.vessel, fuelIn.feedId()));
             // (choked: no fouling clause, it burns none; a choking liquid beside fuel gas: it burns the gas only)
-            info.put(I18N.tr("Fuel quality"), q.choked(FuelQuality.TURBINE_CHOKE) ? FuelQuality.describe(q, FuelQuality.TURBINE_CHOKE) + (choked() ? "" : " " + I18N.tr("(burning gas only)")) + "; " + visc : String.format("%s; %s; %s", FuelQuality.describe(q, FuelQuality.TURBINE_CHOKE),
-                rate > 0 ? String.format(I18N.tr("fouls it ~%.0f%% an hour at full power (coking %.3f, clean under %.2f)"), FuelQuality.engineFoulPerHour(q.coking()) * 100, q.coking(), FuelQuality.ENGINE_BALANCE) : I18N.tr("burns clean"),
+            info.detail(I18N.tr("Fuel quality"), q.choked(FuelQuality.TURBINE_CHOKE) ? FuelQuality.describe(q, FuelQuality.TURBINE_CHOKE) + (choked() ? "" : " " + I18N.tr("(burning gas only)")) + "; " + visc : String.format("%s; %s; %s", FuelQuality.describe(q, FuelQuality.TURBINE_CHOKE),
+                rate > 0 ? String.format(I18N.tr("fouls ~%.0f%%/h"), FuelQuality.engineFoulPerHour(q.coking()) * 100) : I18N.tr("burns clean"),
                 visc));
         }
-        if (foul > 0.01) info.put(I18N.tr("Fouling"), String.format(I18N.tr("%.0f%% fouled: %.0f%% power (clean fuel clears it slowly; right-click with wool to clean)"), foul * 100, (1 - foul) * 100));
-        info.put(I18N.tr("Exhaust"), exhaustPiped ? mods.eln.api.Meters.celsius(exhaust == null ? 0 : exhaust.T() - Water.T0) + ", piped" : I18N.tr("to the air"));
-        info.put(I18N.tr("Fuel valve"), tripped ? I18N.tr("tripped by overspeed") : String.format("%.0f%%%s", gate * 100, manual() ? I18N.tr(", by hand: no governor, no trip") : ""));
+        if (foul > 0.01 && foul <= 0.25) info.detail(I18N.tr("Fouling"), String.format(I18N.tr("%.0f%% fouled (%.0f%% power)"), foul * 100, (1 - foul) * 100));
+        info.detail(I18N.tr("Exhaust"), exhaustPiped ? mods.eln.api.Meters.celsius(exhaust == null ? 0 : exhaust.T() - Water.T0) + ", " + I18N.tr("piped") : I18N.tr("Venting"));
+        info.detail(I18N.tr("Fuel valve"), tripped ? I18N.tr("Tripped (overspeed)") : String.format("%.0f%%%s", gate * 100, manual() ? " (" + I18N.tr("manual") + ")" : ""));
         return info;
     }
 }

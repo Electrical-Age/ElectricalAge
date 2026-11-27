@@ -193,18 +193,18 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        if (!Utils.nameShowsVoltage(name, electricalU))
-            list.add(Utils.plotVolt(tr("Nominal voltage: "), electricalU));
-        list.add(Utils.plotPower(tr("Nominal power: "), electricalStdP));
-        list.add(Utils.plotEnergy(tr("Energy capacity: "), electricalStdDischargeTime * electricalStdP));
-        list.add(Utils.plotOhm(tr("Internal resistance: "), electricalRs * 2));
-        list.add("");
-        list.add(Utils.plotPercent(tr("Actual charge: "), getChargeInTag(itemStack)));
-
-        if (lifeEnable)
-            list.add(Utils.plotPercent(tr("Life : "), getLifeInTag(itemStack)));
+        String state = tr("Charge: %1$", Utils.plotPercent(getChargeInTag(itemStack)));
+        if (lifeEnable) state += " | " + tr("Life: %1$", Utils.plotPercent(getLifeInTag(itemStack)));
+        list.add(state);
+        String specs = (Utils.nameShowsVoltage(name, electricalU) ? "" : Utils.plotVolt(electricalU).trim() + ", ")
+            + Utils.plotPower(electricalStdP).trim() + ", "
+            + Utils.plotEnergy(electricalStdDischargeTime * electricalStdP).trim();
+        list.add(tr("Nominal: %1$", specs));
+        mods.eln.client.ItemTooltips.detail(list,
+            tr("Internal resistance: %1$\u2126", Utils.plotValue(electricalRs * 2)));
     }
 
     @Override

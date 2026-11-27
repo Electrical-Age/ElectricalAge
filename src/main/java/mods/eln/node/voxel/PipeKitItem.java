@@ -67,7 +67,18 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
 
     @Override
     public Component getName(ItemStack stack) {
-        return Component.translatable(getDescriptionId()).append(String.format(" (%.2f blocks)", length(stack) / 16.0));
+        int v = length(stack);
+        String blocks = v % 16 == 0 ? (v / 16) + (v == 16 ? " block" : " blocks")
+            : v % 8 == 0 ? String.format("%.1f blocks", v / 16.0) : String.format("%.2f blocks", v / 16.0);
+        return Component.translatable(getDescriptionId()).append(" (" + blocks + ")");
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display,
+                                java.util.function.Consumer<Component> out, net.minecraft.world.item.TooltipFlag flag) {
+        String flow = tier == 0 ? "1x" : tier == 1 ? "2.25x" : "72x";
+        out.accept(Component.literal(String.format("Rated %.0f bar (bursts %.0f bar), %s flow",
+            PipePart.WORKING_PA[tier] / 1e5, PipePart.BURST_PA[tier] / 1e5, flow)).withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 
     /**

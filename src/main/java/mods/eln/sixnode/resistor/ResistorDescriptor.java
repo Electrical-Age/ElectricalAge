@@ -153,4 +153,16 @@ public class ResistorDescriptor extends SixNodeDescriptor {
             ResistorWiper.draw();
         }
     }
+
+    @Override
+    public void addInformation(ItemStack itemStack, Player entityPlayer, java.util.List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        if (isRheostat) {
+            list.add(mods.eln.i18n.I18N.tr("Variable power resistor controlled by a 0–5 V signal."));
+        } else if (tempCoef != 0) {
+            list.add(mods.eln.i18n.I18N.tr("Temperature-dependent resistor (resistance changes with heat)."));
+        } else {
+            list.add(mods.eln.i18n.I18N.tr("Configurable power resistor (fit coal dust to set resistance)."));
+        }
+    }
 }

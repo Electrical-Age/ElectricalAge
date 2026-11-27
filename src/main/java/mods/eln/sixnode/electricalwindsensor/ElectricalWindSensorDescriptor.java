@@ -63,8 +63,7 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, Player entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Provides an electrical signal\ndependant on wind speed.").split("\n"));
-        list.add(tr("Maximum wind speed is %1$m/s", Utils.plotValue(windMax)));
+        list.add(tr("Outputs a 0–5 V signal proportional to wind speed (max %1$ m/s).", Utils.plotValue(windMax)));
     }
 
     // 26.x port: handleRenderType() removed (client rendering; redone in P3)

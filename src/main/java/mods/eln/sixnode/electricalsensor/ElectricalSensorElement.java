@@ -160,23 +160,21 @@ public class ElectricalSensorElement extends SixNodeElement {
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
-        if (Eln.wailaEasyMode) {
-            switch (typeOfSensor) {
-                case voltageType:
-                    info.put(I18N.tr("Measured voltage"), Utils.plotVolt("", aLoad.getU()));
-                    break;
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        switch (typeOfSensor) {
+            case voltageType:
+                info.headline(I18N.tr("Measured voltage"), Utils.plotVolt("", aLoad.getU()));
+                break;
 
-                case currantType:
-                    info.put(I18N.tr("Measured current"), Utils.plotAmpere("", aLoad.getI()));
-                    break;
+            case currantType:
+                info.headline(I18N.tr("Measured current"), Utils.plotAmpere("", aLoad.getI()));
+                break;
 
-                case powerType:
-                    info.put(I18N.tr("Measured power"), Utils.plotPower("", aLoad.getU() * aLoad.getI()));
-                    break;
-            }
+            case powerType:
+                info.headline(I18N.tr("Measured power"), Utils.plotPower("", aLoad.getU() * aLoad.getI()));
+                break;
         }
+        info.headline(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
         return info;
     }
 

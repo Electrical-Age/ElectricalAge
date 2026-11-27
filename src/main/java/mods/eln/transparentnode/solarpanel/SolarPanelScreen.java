@@ -28,9 +28,9 @@ public class SolarPanelScreen extends ElnScreen {
             v -> Component.literal(tr("Panel angle: %1$°", deg(v))), v -> render.clientSetPannelAlpha((float) v));
         text("sun", () -> {
             int sun = deg(SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.getLevel()));
-            return Math.abs(sun) > 90 ? tr("It is night") : tr("Sun angle: %1$°", sun);
+            return Math.abs(sun) > 90 ? tr("Night") : tr("Sun angle: %1$°", sun);
         });
-        text("tracker", () -> render.hasTracker ? tr("The tracker steers the panel") : "");
+        text("tracker", () -> render.hasTracker ? tr("Auto-tracking") : "");
     }
 
     EaSlider angle;

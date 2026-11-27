@@ -192,12 +192,12 @@ public class PipeMixerElement extends TransparentNodeElement implements FluidDev
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        info.put(I18N.tr("Opening"), String.format("A %.0f%%, B %.0f%%", share * 100, (1 - share) * 100));
-        info.put(I18N.tr("In"), String.format("A %.1f g/s, B %.1f g/s", kgA * 1000, kgB * 1000));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        info.headline(I18N.tr("Opening"), String.format("A %.0f%%, B %.0f%%", share * 100, (1 - share) * 100));
+        info.headline(I18N.tr("In"), String.format("A %.1f g/s, B %.1f g/s", kgA * 1000, kgB * 1000));
         if (out != null) {
             var n = FluidWorld.nodeFor(out);
-            info.put(I18N.tr("Out"), String.format("%.2f bar: %s", n.P() / 1e5, EaUnits.composition(n)));
+            info.headline(I18N.tr("Out"), String.format("%.2f bar: %s", n.P() / 1e5, EaUnits.composition(n)));
         }
         return info;
     }

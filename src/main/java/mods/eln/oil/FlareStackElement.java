@@ -350,15 +350,15 @@ public class FlareStackElement extends TransparentNodeElement implements FluidDe
 
     @Override
     public Map<String, String> getWaila() {
-        Map<String, String> info = new HashMap<>();
-        if (vessel != null) {
-            info.put(I18N.tr("Contents"), EaUnits.composition(vessel));
-            info.put(I18N.tr("Tank"), mods.eln.sim.fluid.EaUnits.tank(liquidMb(), VESSEL_MB) + " of liquid");
-        }
-        if (!plume()) info.put(I18N.tr("Burning"), String.format("%.0f mB/s", burnRate));
+        var info = mods.eln.compat.jade.ProbeLines.of();
+        if (!plume()) info.headline(I18N.tr("Burning"), String.format("%.0f mB/s", burnRate));
         else if (mods.eln.anim.Plume.burnt(burning) == mods.eln.anim.Plume.STEAM)
-            info.put(I18N.tr("Boiling off"), String.format(I18N.tr("%.0f mB/s of water, no flame"), burnRate));
-        else info.put(I18N.tr("Letting off"), String.format(I18N.tr("%.0f mB/s of smoke, no flame"), burnRate));
+            info.headline(I18N.tr("Boiling off"), String.format(I18N.tr("%.0f mB/s water"), burnRate));
+        else info.headline(I18N.tr("Venting"), String.format(I18N.tr("%.0f mB/s smoke"), burnRate));
+        if (vessel != null) {
+            info.headline(I18N.tr("Contents"), EaUnits.composition(vessel));
+            info.headline(I18N.tr("Tank"), mods.eln.sim.fluid.EaUnits.tank(liquidMb(), VESSEL_MB));
+        }
         return info;
     }
 }

@@ -31,13 +31,13 @@ public class FuelHeatFurnaceScreen extends ElnScreen {
         super.init();
         button("external", () -> render.getExternalControlled() ? tr("External control") : tr("Internal control"),
             () -> render.clientSendId(E.getExternalControlledToggleEvent()));
-        main = button("main", () -> render.getMainSwitch() ? tr("Furnace is on") : tr("Furnace is off"),
+        main = button("main", () -> render.getMainSwitch() ? tr("Furnace: On") : tr("Furnace: Off"),
             () -> render.clientSendId(E.getMainSwitchToggleEvent()));
         text("fire", () -> mods.eln.transparentnode.heatfurnace.HeatFurnaceScreen.fireLine(render.getFire(), render.getManualControl().getValue(),
             render.getLighting(), mods.eln.sim.Fire.OIL));
         manual = slider("manual", 0, 1, 0.01, render.getManualControl().getValue(),
-            v -> Component.literal(tr("Control value at %1$", Utils.plotPercent(v)) + "  ("
-                + tr("Heat Power: %1$", mods.eln.api.Meters.watts(render.getHeatPower())) + ")"),
+            v -> Component.literal(tr("Throttle: %1$", Utils.plotPercent(v)) + "  ("
+                + tr("Power: %1$", mods.eln.api.Meters.watts(render.getHeatPower())) + ")"),
             v -> render.clientSendFloat(E.getSetManualControlValueEvent(), (float) v));
         temp = slider("temp", 0, 900, 10, render.getSetTemperature().getValue(),
             v -> Component.literal(tr("Set point: %1$", Utils.plotCelsius(v)) + "  ("
