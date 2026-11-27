@@ -83,7 +83,7 @@ class TrackPlacerTest {
     @Test
     void refusesASharpKinkAtAStop() {
         var ex = assertThrows(IllegalArgumentException.class,
-            () -> TrackPlacer.lay(List.of(O, O.add(5, 0, 9), O.add(5, 0, 10)), new boolean[]{true, true, true}));
+            () -> TrackPlacer.lay(List.of(O, O.add(5, 0, 9), O.add(7, 0, 9)), new boolean[]{true, true, true}));
         assertTrue(ex.getMessage().contains("straight through the stop"), ex.getMessage());
     }
 }
