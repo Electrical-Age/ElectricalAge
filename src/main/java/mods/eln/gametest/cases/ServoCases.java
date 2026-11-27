@@ -1391,12 +1391,12 @@ public final class ServoCases {
         }
 
         public int ticks() {
-            return 700;
+            return 720;
         }
 
         Shaft s;
         double[] stops;
-        double offStop = Double.NaN, offEnd = Double.NaN, maxV;
+        double offStop = Double.NaN, offEnd = Double.NaN, offPast = Double.NaN, maxV;
         boolean ghostStop, ghostEnd;
 
         public void build(TestContext ctx) {
@@ -1424,6 +1424,11 @@ public final class ServoCases {
                     if (c != null) offEnd = c.position().distanceTo(t.path().at(t.path().length()));
                     ghostEnd = d.ghostAt(t.path().length());
                 }
+                if (tick == 610) d.command(t.path().length() + 0.8);   // (past the end: AdventurAgent saw it park short)
+                if (tick == 680) {
+                    var c = d.carId == null ? null : (ElevatorCar) ctx.level().getEntity(d.carId);
+                    if (c != null) offPast = c.position().distanceTo(t.path().at(t.path().length()));
+                }
             });
         }
 
@@ -1436,6 +1441,7 @@ public final class ServoCases {
             ctx.check("track runs: a floor ghost under it at the stop", ghostStop, "");
             ctx.check("track runs: on to the end", offEnd < 1e-6, "" + offEnd);
             ctx.check("track runs: a floor ghost at the end", ghostEnd, "");
+            ctx.check("track runs: called past the end, it stays at the end", offPast < 1e-6, "" + offPast);
             ctx.check("track runs: never over its top speed", maxV <= 2.0 + 1e-6, "" + maxV);
         }
     }

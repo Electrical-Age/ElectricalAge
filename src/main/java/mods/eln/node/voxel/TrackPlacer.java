@@ -28,6 +28,9 @@ public final class TrackPlacer {
     public static final double MIN_RADIUS = 3;
     /** Straight track kept either side of a stop and at both ends (m): half the cabin, so a stopped car is on a straight. */
     public static final double STOP_STRAIGHT = 1.5;
+    /** A click this close to the point before it (blocks) is that point again (AdventurAgent: a click on the stop just
+     *  marked, landing on the neighbouring block, ran on past it and was refused as a kink). */
+    static final double SAME_POINT = 1.5;
     /** The most a stop (or end) put on a block centre may bend the track at the stop before it (degrees). */
     static final double KINK_DEG = 5;
     /** The longest track a drive owns (m). */
@@ -62,7 +65,7 @@ public final class TrackPlacer {
         List<Vec3> p = new ArrayList<>();
         List<Boolean> st = new ArrayList<>();
         for (int i = 0; i < points.size(); i++) {
-            if (!p.isEmpty() && points.get(i).distanceToSqr(p.get(p.size() - 1)) < 1e-9) {
+            if (!p.isEmpty() && points.get(i).distanceToSqr(p.get(p.size() - 1)) <= SAME_POINT * SAME_POINT + 1e-9) {
                 st.set(st.size() - 1, st.get(st.size() - 1) || stops[i]);
                 continue;
             }
@@ -159,7 +162,7 @@ public final class TrackPlacer {
         /** A stop just marked, clicked again, ends the track there (review: its attach differed, so it ran on a block). */
         @Override
         boolean sameEnd(CableRouter.End a, CableRouter.End b) {
-            return RoutePlacer.sameSpot(a, b);
+            return a != null && b != null && vec(a).distanceToSqr(vec(b)) <= SAME_POINT * SAME_POINT + 1e-9;
         }
 
         /** "Track: 12.0 blocks \u2014 corner" (sneak-click: a stop; clicked again: the end). */
