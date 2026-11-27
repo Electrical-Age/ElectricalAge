@@ -63,7 +63,23 @@ public final class Sparse {
         return 0;
     }
 
+    /** Row r's columns and values, copied (newton's holds ahead: the row as it was, to test the hold and to undo it). */
+    public int[] rowCols(int r) {
+        return Arrays.copyOf(cols[r], len[r]);
+    }
+
+    public double[] rowVals(int r) {
+        return Arrays.copyOf(vals[r], len[r]);
+    }
+
+    /** Row r becomes these entries again (rowCols, rowVals). */
+    public void setRow(int r, int[] c, double[] v) {
+        len[r] = 0;
+        for (int k = 0; k < c.length; k++) add(r, c[k], v[k]);
+    }
+
     /** Row r becomes the unit row (A[r][r] = 1, nothing else). */
+
     public void unitRow(int r) {
         len[r] = 0;
         add(r, r, 1);

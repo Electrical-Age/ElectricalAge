@@ -748,6 +748,8 @@ public final class Network {
     /** Counters for tests and measurements. */
     public static final class Stats {
         public long steps, iterations, substeps, failures, solves, stalls, slept;
+        /** Iterations whose holds ahead (newton) failed their sign test and were solved again without. */
+        public long holdsWrong;
         /** Times a changed input woke it from sleep. */
         public long wakes;
         /** Steps ended early (CUT_SHORT): their remaining time dropped; and of those, steps that moved nothing at all. */
@@ -1498,6 +1500,10 @@ public final class Network {
     }
 
     private final java.util.Map<Long, SparseLU> luCache = new java.util.HashMap<>();
+    /** The rows held at zero in the last iteration (newton), kept over steps: the next iteration's holds ahead. */
+    private boolean[] heldLast;
+    /** Hold last iteration's held rows before the first solve (true; false: found by a solve each time, probe knob). */
+    public static boolean HOLD_AHEAD = true;
 
     /** Row scales: a node's masses by its contents, its energy by its contents times a typical specific energy. */
     private double[] scales(List<Node> free, double[] y0) {
@@ -1770,8 +1776,58 @@ public final class Network {
             J.scale = s;
             double[] minus = new double[r.length];
             for (int i = 0; i < r.length; i++) minus[i] = -r[i];
+            // (the holds of the last iteration first, HOLD_AHEAD: a component at zero whose balance doesn't ask it up was held
+            // then and almost always is again, air in a pipe run full or steam in a cold feed line, and finding that out
+            // by solving, holding and solving again made every iteration of such a network two solves. Held ahead, the
+            // one solve is the second of those; afterwards each such row is asked what it would have stepped by with the
+            // others as solved, (-r - sum of its off-diagonal terms) / J_kk: down or nowhere, the hold stands (the
+            // active set's sign test); up, it was wrong, and the iteration starts over without holds ahead)
+            int rows = r.length;
+            if (heldLast == null || heldLast.length != rows) heldLast = new boolean[rows];
+            int[][] keptCols = null;
+            double[][] keptVals = null;
+            if (HOLD_AHEAD)
+                for (int i = 0; i < free.size(); i++)
+                    for (int k = 0; k < S; k++) {
+                        int row = C * i + k;
+                        if (!heldLast[row]) continue;
+                        double tiny = 1e-12 * Math.max(1e-3, massOf(y, C * i, S));
+                        if (!(y[row] <= tiny && r[row] >= 0)) continue;
+                        if (keptCols == null) {
+                            keptCols = new int[rows][];
+                            keptVals = new double[rows][];
+                        }
+                        keptCols[row] = J.rowCols(row);
+                        keptVals[row] = J.rowVals(row);
+                        J.unitRow(row);
+                        minus[row] = 0;
+                    }
             stats.solves++;
             double[] d = J.solve(minus, luCache);
+            if (keptCols != null) {
+                boolean wrong = false;
+                for (int row = 0; row < rows && !wrong; row++) {
+                    if (keptCols[row] == null) continue;
+                    double off = 0, diag = 0;
+                    for (int k = 0; k < keptCols[row].length; k++) {
+                        if (keptCols[row][k] == row) diag = keptVals[row][k];
+                        else off += keptVals[row][k] * d[keptCols[row][k]];
+                    }
+                    // (up by less than what counts as none in its node is still none: the sign of rounding isn't a verdict)
+                    double tiny = 1e-12 * Math.max(1e-3, massOf(y, row - row % C, S));
+                    if (!(diag > 0) || !((-r[row] - off) / diag <= tiny)) wrong = true;
+                }
+                if (wrong) {
+                    stats.holdsWrong++;
+                    for (int row = 0; row < rows; row++) if (keptCols[row] != null) J.setRow(row, keptCols[row], keptVals[row]);
+                    keptCols = null;
+                    for (int i = 0; i < rows; i++) minus[i] = -r[i];
+                    stats.solves++;
+                    d = J.solve(minus, luCache);
+                }
+            }
+            boolean[] heldNow = new boolean[rows];
+            if (keptCols != null) for (int row = 0; row < rows; row++) heldNow[row] = keptCols[row] != null;
             if (DEBUG != null) {
                 double[][] Jd = jacobian(free, idx, dt).dense();
                 double worst = 0;
@@ -1821,6 +1877,7 @@ public final class Network {
                             }
                             J.unitRow(C * i + k);
                             minus[C * i + k] = 0;
+                            heldNow[C * i + k] = true;
                             held = true;
                             if (DEBUG != null) DEBUG.append("  held row ").append(C * i + k).append('\n');
                         }
@@ -1829,6 +1886,7 @@ public final class Network {
                 stats.solves++;
                 d = J.solve(minus, luCache);
             }
+            heldLast = heldNow;
             // fraction to the boundary with a floor: a component holding more than 1e-4 of its node's contents
             // limits the whole step to 99 % of the way to zero (keeping Newton's direction); one with less is damped on
             // its own (shrinking the whole step for 3 mg of water in a tank stalled a pump's first step into an empty
