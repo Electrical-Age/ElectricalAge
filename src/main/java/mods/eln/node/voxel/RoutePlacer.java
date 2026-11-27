@@ -107,6 +107,11 @@ public final class RoutePlacer {
         /** The route's polyline for its particles: {x, y, z} in world voxels, then the offset (blocks) of the leg ending there. */
         abstract List<double[]> trace(Routed<P> r);
 
+        /** What a click there would do, after the preview's length (KitPreview.suffix; the Track Kit says it its way). */
+        String suffix(boolean again, boolean join, boolean finish) {
+            return KitPreview.suffix(again, join, finish);
+        }
+
         /** Does a sneak-click put a stop (the Track Kit), not take back a waypoint? A sneak-click on the last point still does. */
         boolean sneakMarksStops() {
             return false;

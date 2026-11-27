@@ -58,8 +58,9 @@ public final class TrackPlacer {
             if (stops[i]) {   // the next point goes on in line
                 Vec3 u = p.get(i).subtract(p.get(i - 1)).normalize();
                 double t = p.get(i + 1).subtract(p.get(i)).dot(u);
-                if (t < 1) throw new IllegalArgumentException("the track goes on straight through a stop");
-                p.set(i + 1, p.get(i).add(u.scale(t)));
+                // (aimed beside or behind the stop: the track still goes on straight, a block past it at least; AdventurAgent
+                // read the old refusal as a hint that hid the length)
+                p.set(i + 1, p.get(i).add(u.scale(Math.max(1, t))));
             }
         double[] lens = new double[n - 1];
         for (int i = 0; i + 1 < n; i++) {
@@ -111,6 +112,12 @@ public final class TrackPlacer {
         @Override
         boolean sneakMarksStops() {
             return true;
+        }
+
+        /** "Track: 12.0 blocks \u2014 corner" (sneak-click: a stop; clicked again: the end). */
+        @Override
+        String suffix(boolean again, boolean join, boolean finish) {
+            return " \u2014 " + (again ? mods.eln.i18n.I18N.tr("end here") : mods.eln.i18n.I18N.tr("corner (sneak: stop)"));
         }
 
         @Override

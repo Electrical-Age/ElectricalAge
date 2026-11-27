@@ -231,6 +231,19 @@ public class ElevatorCarRenderer extends EntityRenderer<ElevatorCar, ElevatorCar
                 GlFrame.close();
             }
             GlSubmit.submit(frame, pose, out, s.lightCoords);
+            pose.pushPose();   // (its panel, where the walled cabin's back wall was: the panel part is there)
+            pose.rotateDegrees(Axis.YP, s.yaw);
+            pose.translate(0, 0.5, 0);
+            GlFrame pf = GlSubmit.open(pose);
+            try {
+                drawPanel(s);
+            } catch (RuntimeException e) {
+                ElnRenderErrors.report("elevator car", e);
+            } finally {
+                GlFrame.close();
+            }
+            GlSubmit.submit(pf, pose, out, s.lightCoords);
+            pose.popPose();
             super.submit(s, pose, out, camera);
             return;
         }

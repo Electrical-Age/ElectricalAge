@@ -139,7 +139,7 @@ public final class KitPreview {
                 bs = new ArrayList<>(bs);
                 bs.add(port(to));
             }
-            return new Answer(true, bs, a.message + suffix(again, c.join() != null, c.finish()));
+            return new Answer(true, bs, a.message + k.suffix(again, c.join() != null, c.finish()));
         }
     }
 
