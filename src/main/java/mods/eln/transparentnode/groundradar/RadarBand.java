@@ -18,6 +18,9 @@ public record RadarBand(int kind, double lo, double hi) {
     public static final double FAINT = 0.05;
     /** In Everything, the densest sample from which a cell's peak counts as ore. */
     public static final double ORE = 4.0;
+    /** In Everything, how much stronger an ore vein shows than in a density band (through faint ground it was a pale
+     *  speck, AdventurAgent 1575661910995763301). */
+    public static final double ORE_GAIN = 2;
 
     public static final RadarBand DEFAULT = of(EVERYTHING);
 
@@ -64,7 +67,7 @@ public record RadarBand(int kind, double lo, double hi) {
         if (flag() != 0) return (f & flag()) != 0 ? 1 : 0;
         if (kind == EVERYTHING) {
             if ((f & (GroundScan.LIQUID | GroundScan.OIL | GroundScan.LAVA | GroundScan.BUILT)) != 0 || mean < 0.5) return 1;
-            return Math.max(FAINT, peak >= ORE ? peakShare : 0);
+            return Math.max(FAINT, peak >= ORE ? Math.min(1, ORE_GAIN * peakShare) : 0);
         }
         return Math.max(RadarView.band(mean, lo, hi), RadarView.band(peak, lo, hi) * peakShare);
     }

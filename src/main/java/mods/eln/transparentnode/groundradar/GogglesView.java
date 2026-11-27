@@ -237,11 +237,13 @@ final class GogglesView {
         String band = bandLine(this.band);
         String here = tr("Here: %1$", at());
         String[] lines = {where, down, here, band, tr("Speed %1$ m/s", (int) Math.round(speed))};
+        // (in the bottom left corner, outside the lenses: centred, it hid what lies straight under the radar from the
+        // start, AdventurAgent 1575661910995763301)
         int ly = sh - 12 * lines.length - 10, wmax = 0;
         for (String l : lines) wmax = Math.max(wmax, font.width(l));
-        g.fill(sw / 2 - wmax / 2 - 6, ly - 4, sw / 2 + wmax / 2 + 6, ly + 12 * lines.length, 0xA0000000);   // (a dark backing: legible over a bright band)
+        g.fill(4, ly - 4, 16 + wmax, ly + 12 * lines.length, 0xA0000000);   // (a dark backing: legible over a bright band)
         for (String l : lines) {
-            int lx = sw / 2 - font.width(l) / 2;
+            int lx = 10;
             g.text(font, l, lx + 1, ly + 1, GREEN_DIM, false);   // (the glow)
             g.text(font, l, lx, ly, GREEN, false);
             ly += 12;

@@ -46,7 +46,8 @@ class RadarBandTest {
         assertEquals(1, e.weight(GroundScan.OIL, 0.85, 0.85, 0), 1e-9);
         assertEquals(1, e.weight(GroundScan.BUILT, 2.0, 2.7, 0), 1e-9, "a structure");
         assertEquals(RadarBand.FAINT, e.weight(0, 2.7, 2.7, 0), 1e-9, "plain rock is faint");
-        assertEquals(0.8, e.weight(0, 2.8, 5.0, 0.8), 1e-9, "an iron vein shows by its share of the cell");
+        assertEquals(0.6, e.weight(0, 2.8, 5.0, 0.3), 1e-9, "an iron vein shows by its share of the cell, ORE_GAIN times");
+        assertEquals(1, e.weight(0, 2.8, 5.0, 0.8), 1e-9, "at most fully");
         assertTrue(e.byPeak(0, 2.8, 5.0, 0.8));
         assertFalse(e.byPeak(0, 2.7, 2.7, 0));
     }
