@@ -45,14 +45,33 @@ class TrackPathTest {
         assertEquals(3, t.minRadius(0, t.length()), 1e-12);
         assertEquals(Double.POSITIVE_INFINITY, t.minRadius(0, 2.9));
         assertFalse(t.axisAligned());
-        // stops: 0..3 on the first leg, then the second leg's whole blocks after the arc (3..5 south of the corner)
-        double a = 3 * Math.PI / 2;
-        assertArrayEquals(new double[]{0, 1, 2, 3, 3 + a, 4 + a, 5 + a}, t.stops(), 1e-9);
+        // stops: the two ends only (a corner that turns is no stop)
+        assertArrayEquals(new double[]{0, t.length()}, t.stops(), 1e-9);
     }
 
+    /** Corners at any angle (a base not on the block grid): the arc is tangent to both legs, of the given radius. */
+    @Test
+    void obliqueCornersAndSlopes() {
+        Vec3 c1 = o.add(8, 0, 0), c2 = c1.add(6, 1.5, 6);   // (a 45-degree turn that also starts a gentle climb)
+        var t = new TrackPath(List.of(o, c1, c2), new double[]{4});
+        double th = Math.acos(new Vec3(1, 0, 0).dot(c2.subtract(c1).normalize()));
+        double cut = 4 * Math.tan(th / 2);
+        assertEquals(8 - cut + 4 * th + c2.distanceTo(c1) - cut, t.length(), 1e-9);
+        assertEquals(0, t.at(t.length()).distanceTo(c2), 1e-9, "ends at the last corner");
+        assertEquals(0, t.tangent(8 - cut + 4 * th).subtract(c2.subtract(c1).normalize()).length(), 1e-9, "leaves the arc along the next leg");
+        assertEquals(4, t.minRadius(0, t.length()), 1e-12);
+        assertFalse(t.axisAligned());
+        assertTrue(t.grade(t.length() - 0.5) > 0, "climbs on the second leg");
+    }
+
+    /** Stops are the ends and the points it runs straight through: clicked on block centres, at any heading. */
     @Test
     void stopsSitOnWholeBlocks() {
-        var t = new TrackPath(o, List.of(leg(Direction.UP, 4), leg(Direction.NORTH, 9), leg(Direction.WEST, 7)), new double[]{3, 4});
+        Vec3 a = o.add(5, 0, 0), b = a.add(10, 0, 4), end = b.add(3, 0, -7);   // (corners at a and b turn)
+        Vec3 mid = a.add(5, 0, 2);   // (a station half way along a-b: straight through)
+        var t = new TrackPath(List.of(o, a, mid, b, end), new double[]{2, 0, 3});
+        assertEquals(3, t.stops().length, "both ends and the station");
+        assertEquals(0, t.at(t.stops()[1]).distanceTo(mid), 1e-9, "the station is where it was clicked");
         for (double s : t.stops()) {
             Vec3 p = t.at(s).subtract(o);
             for (double c : new double[]{p.x, p.y, p.z}) assertEquals(Math.rint(c), c, 1e-9, "stop at " + s + ": " + p);
