@@ -374,9 +374,14 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return null;
     }
 
-    /** Mend the burnt conductor holding part (a burnt cable repaired with a kit: Baughn 2026-11-11). */
+    /**
+     * Mend the burnt conductor holding part (a burnt cable repaired with a kit: Baughn 2026-11-11). Found first, then
+     * mended: the mend reconnects the node, which rebuilds the conductor list (a block with a second conductor threw).
+     */
     void repairCable(CablePart part) {
-        for (CableNet.Conductor k : cables.conductors) if (k.parts.contains(part)) k.repair();
+        CableNet.Conductor found = null;
+        for (CableNet.Conductor k : cables.conductors) if (k.parts.contains(part)) found = k;
+        if (found != null) found.repair();
     }
 
     /** Nothing left: no parts, no elements (the block goes). */
