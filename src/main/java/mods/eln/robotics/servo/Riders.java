@@ -62,6 +62,23 @@ public final class Riders {
         return new Carry(true, d, onGround);
     }
 
+    /**
+     * Track B0 spike: a round cabin's radial limit. A rider inside the cylinder (centre cx, cz; inside radius rin; floor y0
+     * to roof y1) whose box reaches past rin is put back along the radius, unless it is in the open door: within
+     * doorHalf (rad) of the door's direction (doorX, doorZ, a unit vector) while the door is open. Inside means the box's
+     * centre is within rin + 0.25 (so a wall stops it only from inside: one-sided). Returns the horizontal shift, or null.
+     */
+    public static Vec3 clampInside(AABB e, double cx, double cz, double rin, double y0, double y1, double doorX, double doorZ,
+                                   double doorHalf, boolean doorOpen) {
+        if (e.minY < y0 - 0.5 || e.minY > y1) return null;
+        double ex = (e.minX + e.maxX) / 2 - cx, ez = (e.minZ + e.maxZ) / 2 - cz, d = Math.sqrt(ex * ex + ez * ez);
+        double w = Math.max(e.maxX - e.minX, e.maxZ - e.minZ) / 2, lim = rin - w;
+        if (d <= lim || d > rin + 0.25 || d < 1e-9) return null;
+        if (doorOpen && Math.acos(Math.max(-1, Math.min(1, (ex * doorX + ez * doorZ) / d))) < doorHalf) return null;
+        double k = lim / d - 1;
+        return new Vec3(ex * k, 0, ez * k);
+    }
+
     /** A box of the rider's size standing on the carriage top, clipped across to the carriage (the server's sweep). */
     public static AABB standing(AABB e, AABB car) {
         double h = e.maxY - e.minY;

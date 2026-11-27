@@ -41,6 +41,7 @@ public final class CarCarry {
             AABB b1 = c.boxAt(s1);
             c.placeAt(s1);
             if (player != null) carry(player, b0, b1);
+            if (player != null && c.cabinMode() == ElevatorCar.CABIN_CLAMP) clamp(player, c);
         }
     }
 
@@ -51,6 +52,15 @@ public final class CarCarry {
         AABB b0 = c.segment != null && c.origin != null ? c.boxAt(c.clientPos(c.clientT)) : null;
         c.apply(p);
         if (b0 != null && mc.player != null) carry(mc.player, b0, c.getBoundingBox());
+    }
+
+    /** Track B0 spike: keep the player inside a round cabin (the radial limit; the door opens at a stop). */
+    static void clamp(LocalPlayer player, ElevatorCar c) {
+        if (player.isSpectator() || player.isPassenger()) return;
+        var out = c.railSide.getOpposite();
+        var k = Riders.clampInside(player.getBoundingBox(), c.getX(), c.getZ(), ElevatorCar.ROUND_IN, c.getY(), c.getY() + ElevatorCar.CABIN,
+            out.getStepX(), out.getStepZ(), Math.toRadians(40), c.stopped());
+        if (k != null) player.setPos(player.position().add(k));
     }
 
     static void carry(LocalPlayer player, AABB b0, AABB b1) {

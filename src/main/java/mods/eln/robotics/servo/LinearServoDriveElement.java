@@ -529,6 +529,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
                     }
                 }
             } else if (c.position().distanceToSqr(c.at(p1)) > 1e-8) c.placeAt(p1);   // (snapped back where it belongs)
+            if (c.cabinMode() == ElevatorCar.CABIN_CLAMP) clampMobs(level, c);
             c.drive(seg, clock);
             if (changed) c.broadcast();
             if (!movingAt(clock) && Math.abs(p1 - Math.rint(p1)) < 1e-6) floorGhost(level, c, p1);
@@ -614,6 +615,17 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             && !b0.contains(e.getBoundingBox().getCenter())))
             for (AABB s : swept) if (e.getBoundingBox().intersects(s)) return true;
         return false;
+    }
+
+    /** Track B0 spike: the radial limit for creatures in a round cabin (players: their clients do it). */
+    static void clampMobs(ServerLevel level, ElevatorCar c) {
+        var out = c.railSide.getOpposite();
+        for (Entity e : level.getEntities(c, c.getBoundingBox().setMaxY(c.getY() + ElevatorCar.CABIN).inflate(0.5, 0, 0.5),
+            e -> e instanceof LivingEntity && !(e instanceof Player) && e.isAlive())) {
+            var k = Riders.clampInside(e.getBoundingBox(), c.getX(), c.getZ(), ElevatorCar.ROUND_IN, c.getY(), c.getY() + ElevatorCar.CABIN,
+                out.getStepX(), out.getStepZ(), Math.toRadians(40), c.stopped());
+            if (k != null) e.setPos(e.position().add(k));
+        }
     }
 
     /** A rider's weight on the car (kg): players a set weight, other creatures by their size, anything else a little. */

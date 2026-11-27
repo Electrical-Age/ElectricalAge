@@ -99,4 +99,19 @@ class RidersTest {
         // (jumping clear of the plate on a level run it isn't carried: the known limit, as on an elevator)
         assertFalse(Riders.carry(player(0.2, 1.4), false, c0, c1).carried());
     }
+
+    /** Track B0 spike: the round cabin's radial limit (inside radius 1.44, door towards +x, 40 degrees each side). */
+    @Test
+    void clampKeepsRidersInsideTheRing() {
+        double rin = 1.44, half = Math.toRadians(40);
+        assertNull(Riders.clampInside(player(0.5, 1), 0, 0, rin, 1, 4, 1, 0, half, false), "well inside");
+        var k = Riders.clampInside(new AABB(-1.3 - 0.3, 1, -0.3, -1.3 + 0.3, 2.8, 0.3), 0, 0, rin, 1, 4, 1, 0, half, false);
+        assertNotNull(k, "past the wall on the far side");
+        assertEquals(-(rin - 0.3) - (-1.3), k.x, 1e-9, "put back to the inside radius less its half width");
+        assertEquals(0, k.z, 1e-12);
+        assertNull(Riders.clampInside(new AABB(1.0, 1, -0.3, 1.6, 2.8, 0.3), 0, 0, rin, 1, 4, 1, 0, half, true), "through the open door");
+        assertNotNull(Riders.clampInside(new AABB(1.0, 1, -0.3, 1.6, 2.8, 0.3), 0, 0, rin, 1, 4, 1, 0, half, false), "the door shut while moving");
+        assertNull(Riders.clampInside(new AABB(2.0, 1, -0.3, 2.6, 2.8, 0.3), 0, 0, rin, 1, 4, 1, 0, half, false), "outside: not held");
+        assertNull(Riders.clampInside(new AABB(-1.6, 6, -0.3, -1.0, 7.8, 0.3), 0, 0, rin, 1, 4, 1, 0, half, false), "above the roof");
+    }
 }

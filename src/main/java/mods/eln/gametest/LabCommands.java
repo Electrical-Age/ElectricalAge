@@ -83,6 +83,13 @@ public final class LabCommands {
                         .then(Commands.argument("r", IntegerArgumentType.integer(0, 512))
                             .executes(c -> netdump(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "r"))))))
                 // (Baughn 2026-11-12: the route debug kit and its replay; RouteDebug)
+                // (Track B0 spike: a round cabin's wall as posts or a radial limit, lab only)
+                .then(Commands.literal("servocabin").then(Commands.argument("mode", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 2)).executes(c -> {
+                    mods.eln.robotics.servo.ElevatorCar.labCabin = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "mode");
+                    c.getSource().sendSuccess(() -> Component.literal("servo cabin mode " + mods.eln.robotics.servo.ElevatorCar.labCabin
+                        + " (0 walled, 1 ring of posts, 2 radial limit)"), false);
+                    return 1;
+                })))
                 .then(Commands.literal("debugkit").executes(c -> {
                     String res = mods.eln.node.voxel.RouteDebug.give(c.getSource().getPlayerOrException());
                     c.getSource().sendSuccess(() -> Component.literal(res), false);

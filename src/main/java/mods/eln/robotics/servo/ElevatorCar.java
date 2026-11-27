@@ -68,8 +68,24 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     public @Nullable BlockPos head;
     int checkIn = 40;
     public final ElevatorPanel panel;
-    /** The cabin's back wall (on the rail side), its left and right walls, and its roof; the front is open. */
+    /** The cabin's back wall (on the rail side), its left and right walls, and its roof; the front is open. Then (Track B0
+     *  spike, lab only) a ring of posts for a round cabin; which are solid depends on cabinMode(). */
     public final CabinWall[] walls;
+
+    /** Track B0 spike (lab only): which cabin wall (CABIN_WALLED, CABIN_RING: posts, CABIN_CLAMP: a radial limit). Server-wide,
+     *  set by /elnlab servocabin; each car syncs it to its clients. */
+    public static volatile int labCabin = 0;
+    public static final int CABIN_WALLED = 0, CABIN_RING = 1, CABIN_CLAMP = 2;
+    /** Ring posts: how many, on what radius (m, to their centres), half their width (m); the door: posts within this angle of
+     *  "out" (away from the rail) open while the car is stopped. */
+    static final int POSTS = 16;
+    static final double POST_R = 1.3, POST_HALF = 0.18, DOOR_HALF_ANGLE = Math.toRadians(40);
+    /** A round cabin's inside radius (m) for the radial limit: the plate's half width less a wall. */
+    public static final double ROUND_IN = HALF - WALL;
+
+    public int cabinMode() {
+        return entityData.get(CABIN_MODE);
+    }
 
     public ElevatorCar(EntityType<? extends ElevatorCar> type, Level level) {
         super(type, level);
@@ -80,13 +96,23 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
             new CabinWall(this, -HALF, HALF, THICK, CABIN - WALL, -HALF, -HALF + WALL),
             new CabinWall(this, -HALF, -HALF + WALL, THICK, CABIN - WALL, -HALF + WALL, HALF),
             new CabinWall(this, HALF - WALL, HALF, THICK, CABIN - WALL, -HALF + WALL, HALF),
-            new CabinWall(this, -HALF, HALF, CABIN - WALL, CABIN, -HALF, HALF)};
+            new CabinWall(this, -HALF, HALF, CABIN - WALL, CABIN, -HALF, HALF),
+            post(0), post(1), post(2), post(3), post(4), post(5), post(6), post(7),
+            post(8), post(9), post(10), post(11), post(12), post(13), post(14), post(15)};
         // (a client level gives no entity ids, and its part list compares parts by id: without one, the car leaving
         // the client threw and disconnected it, AdventurAgent 2026-11-05. Nothing is sent to a wall, so a client-only
         // id, below every id a server gives, will do.)
         if (level.isClientSide()) for (CabinWall w : walls) w.setId(CLIENT_PART_IDS.decrementAndGet());
         setNoGravity(true);
         blocksBuilding = true;
+    }
+
+    /** Ring post k, at angle k/POSTS of a turn from "out" (away from the rail), anticlockwise seen from above. */
+    private CabinWall post(int k) {
+        double th = 2 * Math.PI * k / POSTS, a = POST_R * Math.sin(th), o = POST_R * Math.cos(th);
+        boolean door = Math.abs(Math.atan2(Math.sin(th), Math.cos(th))) < DOOR_HALF_ANGLE;
+        return new CabinWall(this, a - POST_HALF, a + POST_HALF, THICK, CABIN - WALL, o - POST_HALF, o + POST_HALF,
+            door ? CabinWall.Kind.DOOR_POST : CabinWall.Kind.POST);
     }
 
     // ---- where it is
@@ -181,6 +207,8 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     @Override
     public void tick() {
         // no physics, no vanilla motion: the drive places it (server), the client's carry does (client)
+        if (!level().isClientSide() && entityData.get(CABIN_MODE) != labCabin) entityData.set(CABIN_MODE, labCabin);
+        for (CabinWall w : walls) w.follow();   // (B0 spike: door posts open and close as it stops and starts)
         if (!level().isClientSide() && --checkIn <= 0) {
             checkIn = 40;
             if (owner() == null) discard();   // (its drive is gone, or has another car)
@@ -213,6 +241,8 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         SynchedEntityData.defineId(ElevatorCar.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
     static final net.minecraft.network.syncher.EntityDataAccessor<Integer> PANEL_LIT =
         SynchedEntityData.defineId(ElevatorCar.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+    static final net.minecraft.network.syncher.EntityDataAccessor<Integer> CABIN_MODE =
+        SynchedEntityData.defineId(ElevatorCar.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
     public static final int PANEL_NONE = 0, PANEL_BUTTON = 1, PANEL_LIGHT = 2;
 
     /** Server: show the panel's slots (kinds) and lamps (a lit bit each). */
@@ -238,6 +268,7 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     protected void defineSynchedData(SynchedEntityData.Builder data) {
         data.define(PANEL_KINDS, 0);
         data.define(PANEL_LIT, 0);
+        data.define(CABIN_MODE, 0);
     }
 
     @Override
@@ -286,7 +317,10 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
 
     @Override
     public net.neoforged.neoforge.entity.PartEntity<?>[] getParts() {
-        return new net.neoforged.neoforge.entity.PartEntity<?>[]{panel, walls[0], walls[1], walls[2], walls[3]};
+        var parts = new net.neoforged.neoforge.entity.PartEntity<?>[walls.length + 1];
+        parts[0] = panel;
+        System.arraycopy(walls, 0, parts, 1, walls.length);
+        return parts;
     }
 
     /**

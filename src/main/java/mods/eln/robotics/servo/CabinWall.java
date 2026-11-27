@@ -22,9 +22,19 @@ import org.jspecify.annotations.Nullable;
 public class CabinWall extends PartEntity<ElevatorCar> {
     /** Its box in the car's frame (m): across (toward railSide's clockwise), up from the plate's bottom, out from the rail. */
     final double a0, a1, y0, y1, o0, o1;
+    /** What it is (Track B0 spike): a side of the walled cabin, the roof (always), or a round cabin's post (a door post
+     *  opens while the car is stopped). */
+    enum Kind { WALL, ROOF, POST, DOOR_POST }
+
+    final Kind kind;
 
     public CabinWall(ElevatorCar car, double a0, double a1, double y0, double y1, double o0, double o1) {
+        this(car, a0, a1, y0, y1, o0, o1, y0 >= ElevatorCar.CABIN - ElevatorCar.WALL - 1e-9 ? Kind.ROOF : Kind.WALL);
+    }
+
+    public CabinWall(ElevatorCar car, double a0, double a1, double y0, double y1, double o0, double o1, Kind kind) {
         super(car);
+        this.kind = kind;
         this.a0 = a0;
         this.a1 = a1;
         this.y0 = y0;
@@ -51,20 +61,32 @@ public class CabinWall extends PartEntity<ElevatorCar> {
         return new AABB(at.x + ax0, at.y + y0, at.z + az0, at.x + ax1, at.y + y1, at.z + az1);
     }
 
+    /** Is it there in the car's cabin mode (and a door post: only while the car moves)? */
+    boolean active() {
+        ElevatorCar c = getParent();
+        if (c == null) return false;
+        return switch (kind) {
+            case ROOF -> true;
+            case WALL -> c.cabinMode() == ElevatorCar.CABIN_WALLED;
+            case POST -> c.cabinMode() == ElevatorCar.CABIN_RING;
+            case DOOR_POST -> c.cabinMode() == ElevatorCar.CABIN_RING && !c.stopped();
+        };
+    }
+
     @Override
     protected AABB makeBoundingBox(Vec3 position) {
-        return getParent() == null || getParent().railSide == null ? new AABB(position, position) : boxAt(position);
+        return getParent() == null || getParent().railSide == null || !active() ? new AABB(position, position) : boxAt(position);
     }
 
     @Override
     public boolean canBeCollidedWith(@Nullable Entity other) {
-        return getParent().canBeCollidedWith(other);
+        return active() && getParent().canBeCollidedWith(other);
     }
 
     /** Picked (a click or the crosshair stops at it), so nobody inside reaches blocks behind the walls. */
     @Override
     public boolean isPickable() {
-        return !getParent().isRemoved();
+        return !getParent().isRemoved() && active();
     }
 
     @Override
