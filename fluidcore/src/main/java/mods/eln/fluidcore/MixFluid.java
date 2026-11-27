@@ -156,6 +156,12 @@ final class MixFluid implements NodeFluid {
         /** Per group: mole fractions in its liquid (x), its liquid volume, reference density (for the head), actual density, per-kg shares and enthalpy. */
         D[][] x = new D[groups.length][], y = new D[groups.length][];
         D[] layerVol = new D[groups.length], rhoRef = new D[groups.length], rhoAct = new D[groups.length], hL = new D[groups.length];
+        /**
+         * No liquid at all, as a constant (every volatile's liquid is none: core): every layer is empty, so each port sees
+         * the gas alone at the gas's pressure. The layers' own fields (below) are then worked out only if someone reads
+         * them (layers(): a flue duct's node, most of a furnace plant's, never needs them).
+         */
+        boolean dry, layered;
         /** Groups from the bottom up (by reference density), and the levels of their tops (shares of the height). */
         int[] order = new int[groups.length];
         D[] top = new D[groups.length];
@@ -209,9 +215,11 @@ final class MixFluid implements NodeFluid {
         e.p = p;
         // the liquid's volumes, the energy, the volume residual
         D E = T.add(-T0).mul(cush * WaterAir.CV_A), vl = D.c(0, n);
+        e.dry = true;
         for (int i = 0; i < S; i++) {
             Species s = sp[i];
             if (s.liquidCapable()) {
+                e.dry &= e.ml[i] == none;
                 e.v[i] = vLiquid(s, p);
                 // (no liquid of it, as a constant: its terms are zero times a finite number, value and slopes; finite short
                 // of 1e12 Pa, where the liquid's volume underflows and the terms were NaN: the polish then fails either way)
@@ -246,6 +254,15 @@ final class MixFluid implements NodeFluid {
             hG = hG.add(e.yG[i].mul(hVapour(sp[i], T, e.pv[i])));
         }
         e.hG = hG;
+        if (!e.dry) layers(e);
+        return e;
+    }
+
+    /** complete()'s second half: the layers' volumes, densities, shares and enthalpies, their order and tops. */
+    private void layers(Eval e) {
+        int n = NG;
+        D T = e.T, p = e.p;
+        e.layered = true;
         // the layers: composition from the mole fractions (finite for an empty layer too)
         for (int g = 0; g < groups.length; g++) {
             D massX = D.c(0, n), volRef = D.c(0, n), volAct = D.c(0, n), lv = D.c(0, n);
@@ -280,7 +297,13 @@ final class MixFluid implements NodeFluid {
             cum = cum.add(e.layerVol[ord[k]].mul(1 / V));
             e.top[k] = cum;
         }
-        return e;
+    }
+
+    /** The state with its layers worked out (a dry one's on first use: an empty layer still has a composition, the
+     *  one a first trace would have, which liquidDraw and rhoLiquid answer with). */
+    private Eval layered() {
+        if (!st.layered) layers(st);
+        return st;
     }
 
     /**
@@ -834,7 +857,7 @@ final class MixFluid implements NodeFluid {
     }
 
     public double level() {
-        return groups.length == 0 ? 0 : st.top[groups.length - 1].v;
+        return groups.length == 0 || st.dry ? 0 : st.top[groups.length - 1].v;
     }
 
     /**
@@ -845,6 +868,8 @@ final class MixFluid implements NodeFluid {
     private D portPD(double f) {
         int c = slot(f);
         if (c >= 0 && cPort[c] != null) return cPort[c];
+        // (no liquid: every layer's top is the floor, its head here less the head below nothing: the gas's pressure)
+        if (st.dry) return st.p;
         D p = st.p;
         D w = D.c(0.25 * BAND, NG);
         D below = D.softplus(D.c(-f, NG), w);
@@ -891,6 +916,10 @@ final class MixFluid implements NodeFluid {
     private D[] windows(double f) {
         int L = groups.length;
         D[] xs = new D[L];
+        if (st.dry) {   // (every top at the floor: under no surface)
+            for (int k = 0; k < L; k++) xs[k] = none;
+            return xs;
+        }
         for (int k = 0; k < L; k++) {
             D arg = st.top[k].add(-Math.min(f, 1 - BAND)).mul(2 / BAND).add(-1);
             xs[k] = arg.map(smoothStep(arg.v), stepSlope(arg.v));
@@ -902,6 +931,13 @@ final class MixFluid implements NodeFluid {
     private D[] drawD(double f) {
         int c = slot(f);
         if (c >= 0 && cDraw[c] != null) return cDraw[c];
+        if (st.dry) {   // (under no surface: the gas's shares and enthalpy, whole)
+            D[] gasOnly = new D[S + 1];
+            for (int i = 0; i < S; i++) gasOnly[i] = st.yG[i];
+            gasOnly[S] = st.hG;
+            if (c >= 0) cDraw[c] = gasOnly;
+            return gasOnly;
+        }
         D[] xs = windows(f);
         int L = groups.length;
         D[] out = new D[S + 1];
@@ -966,6 +1002,7 @@ final class MixFluid implements NodeFluid {
     public double rhoLiquid(double f) {
         double[] w = layerWeights(f);
         double v = 0;
+        Eval st = layered();
         for (int k = 0; k < w.length; k++) v += w[k] / st.rhoAct[st.order[k]].v;
         return v > 0 ? 1 / v : 0;
     }
@@ -977,6 +1014,7 @@ final class MixFluid implements NodeFluid {
     public double[] liquidDraw(double f) {
         double[] w = layerWeights(f);
         double[] o = new double[S + 1];
+        Eval st = layered();
         for (int k = 0; k < w.length; k++) {
             int g = st.order[k];
             for (int a = 0; a < groups[g].length; a++) o[groups[g][a]] += w[k] * st.y[g][a].v;
