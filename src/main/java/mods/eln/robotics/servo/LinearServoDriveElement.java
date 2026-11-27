@@ -699,6 +699,16 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         c.origin = origin();
         c.axis = axis();
         c.railSide = carSide().getOpposite();
+        var tr = track();
+        if (tr != null) {   // (a laid track: its rail beside the car, on the drive's side where it can be; walls and panel face it)
+            Vec3 t = tr.path().tangent(0);
+            double h = Math.sqrt(t.x * t.x + t.z * t.z);
+            if (h > 1e-6) {
+                Vec3 left = new Vec3(t.z / h, 0, -t.x / h);
+                double sign = left.x * c.railSide.getStepX() + left.z * c.railSide.getStepZ() < -1e-6 ? -1 : 1;
+                c.railSide = net.minecraft.core.Direction.getApproximateNearest(left.x * sign, 0, left.z * sign);
+            }
+        }
         c.head = node.coordonate.pos();
     }
 

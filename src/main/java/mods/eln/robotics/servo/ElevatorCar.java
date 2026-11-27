@@ -75,8 +75,7 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
 
     /**
      * A round cabin's posts (track B, Baughn 2026-11-27: round cabins on curved tracks; posts and a radial limit tried on a
-     * client, AdventurAgent 2026-11-27): how many,
-     * on what radius (m, to their centres: the plate's rim), half their width; the door: posts within this angle of
+     * client, AdventurAgent 2026-11-27): how many, on what radius (m, to their centres: the plate's rim), half their width; the door: posts within this angle of
      * "out" (away from the rail) open while the car stands at a stop. Inside, riders meet the radial limit (ROUND_IN), not
      * the posts (whose inner edge is there): the posts keep others out and stop reaching through the wall.
      */

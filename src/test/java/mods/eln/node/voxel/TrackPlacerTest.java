@@ -78,4 +78,12 @@ class TrackPlacerTest {
     void refusesTooShortTracks() {
         assertThrows(IllegalArgumentException.class, () -> TrackPlacer.lay(List.of(O, O.add(1, 0, 0)), new boolean[]{true, true}));
     }
+
+    /** A stop or end snapped to a block centre may bend the track only slightly at the stop before it (review). */
+    @Test
+    void refusesASharpKinkAtAStop() {
+        var ex = assertThrows(IllegalArgumentException.class,
+            () -> TrackPlacer.lay(List.of(O, O.add(5, 0, 9), O.add(5, 0, 10)), new boolean[]{true, true, true}));
+        assertTrue(ex.getMessage().contains("straight through the stop"), ex.getMessage());
+    }
 }

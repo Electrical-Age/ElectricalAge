@@ -28,6 +28,8 @@ public final class TrackPlacer {
     public static final double MIN_RADIUS = 3;
     /** Straight track kept either side of a stop and at both ends (m): half the cabin, so a stopped car is on a straight. */
     public static final double STOP_STRAIGHT = 1.5;
+    /** The most a stop (or end) put on a block centre may bend the track at the stop before it (degrees). */
+    static final double KINK_DEG = 5;
     /** The longest track a drive owns (m). */
     public static final double MAX_LENGTH = 64;
     /** A route end's attach: a corner, or a stop. */
@@ -80,6 +82,11 @@ public final class TrackPlacer {
                 q = stp[i + 1] ? new Vec3(Math.floor(q.x) + 0.5, Math.rint(q.y), Math.floor(q.z) + 0.5)
                     : new Vec3(Math.rint(q.x * 16) / 16, Math.rint(q.y * 16) / 16, Math.rint(q.z * 16) / 16);
                 p.set(i + 1, q);
+                // (a stop or end put on a block centre bends the track a little at this stop, where nothing slows the car:
+                // more than a few degrees, and the player is asked to click further on; review)
+                Vec3 a = p.get(i).subtract(p.get(i - 1)).normalize(), b = q.subtract(p.get(i)).normalize();
+                if (a.dot(b) < Math.cos(Math.toRadians(KINK_DEG)))
+                    throw new IllegalArgumentException(tr("the track must go on straight through the stop: click further along"));
             }
         return build(p, stp);
     }

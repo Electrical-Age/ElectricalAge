@@ -1,7 +1,6 @@
 package mods.eln.node.voxel;
 
 import net.minecraft.network.chat.Component;
-
 import net.minecraft.world.item.ItemStack;
 
 /**

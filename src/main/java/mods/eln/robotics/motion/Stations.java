@@ -1,8 +1,8 @@
 package mods.eln.robotics.motion;
 
 /**
- * The stops of a servo axis: on a rail, whole blocks from its start (0..travel); on a laid track (track B), its list of
- * stops in metres along it. The setpoint wire's share of the travel, and where a stop asked for while moving ends. Pure numbers. (The station markers, their eight setpoint bands and the
+ * The stops of a servo axis: on a rail, whole blocks from its start (0..travel); on a laid track (track B), its list
+ * of stops in metres along it. The setpoint wire's share of the travel, and where a stop asked for while moving ends. Pure numbers. (The station markers, their eight setpoint bands and the
  * panel's up/down stepping went 2026-11-05: Baughn, the drive is a plain actuator.)
  */
 public final class Stations {
