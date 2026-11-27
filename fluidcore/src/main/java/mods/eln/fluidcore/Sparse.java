@@ -68,6 +68,7 @@ public final class Sparse {
         return Arrays.copyOf(cols[r], len[r]);
     }
 
+    /** ... and its values, in the same order. */
     public double[] rowVals(int r) {
         return Arrays.copyOf(vals[r], len[r]);
     }

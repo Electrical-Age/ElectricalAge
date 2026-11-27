@@ -1500,10 +1500,15 @@ public final class Network {
     }
 
     private final java.util.Map<Long, SparseLU> luCache = new java.util.HashMap<>();
-    /** The rows held at zero in the last iteration (newton), kept over steps: the next iteration's holds ahead. */
+    /** The rows held at zero in the last iteration (newton), kept over steps: the next iteration's holds ahead. A hint
+     *  only (each use is tested again), and not in a dump: a replay starts without it, and may differ in the last digits. */
     private boolean[] heldLast;
     /** Hold last iteration's held rows before the first solve (true; false: found by a solve each time, probe knob). */
     public static boolean HOLD_AHEAD = true;
+    /** Per row: the iterations left in which it isn't held ahead, after its hold ahead failed its sign test (a row
+     *  that the solve holds and the test releases, every time, would cost three solves an iteration, not one). */
+    private int[] distrust;
+    static final int DISTRUST = 16;
 
     /** Row scales: a node's masses by its contents, its energy by its contents times a typical specific energy. */
     private double[] scales(List<Node> free, double[] y0) {
@@ -1783,13 +1788,20 @@ public final class Network {
             // others as solved, (-r - sum of its off-diagonal terms) / J_kk: down or nowhere, the hold stands (the
             // active set's sign test); up, it was wrong, and the iteration starts over without holds ahead)
             int rows = r.length;
-            if (heldLast == null || heldLast.length != rows) heldLast = new boolean[rows];
+            if (heldLast == null || heldLast.length != rows) {
+                heldLast = new boolean[rows];
+                distrust = new int[rows];
+            }
             int[][] keptCols = null;
             double[][] keptVals = null;
             if (HOLD_AHEAD)
                 for (int i = 0; i < free.size(); i++)
                     for (int k = 0; k < S; k++) {
                         int row = C * i + k;
+                        if (distrust[row] > 0) {   // (its hold ahead failed lately: found by the solve for a while)
+                            distrust[row]--;
+                            continue;
+                        }
                         if (!heldLast[row]) continue;
                         double tiny = 1e-12 * Math.max(1e-3, massOf(y, C * i, S));
                         if (!(y[row] <= tiny && r[row] >= 0)) continue;
@@ -1806,7 +1818,7 @@ public final class Network {
             double[] d = J.solve(minus, luCache);
             if (keptCols != null) {
                 boolean wrong = false;
-                for (int row = 0; row < rows && !wrong; row++) {
+                for (int row = 0; row < rows; row++) {
                     if (keptCols[row] == null) continue;
                     double off = 0, diag = 0;
                     for (int k = 0; k < keptCols[row].length; k++) {
@@ -1815,7 +1827,10 @@ public final class Network {
                     }
                     // (up by less than what counts as none in its node is still none: the sign of rounding isn't a verdict)
                     double tiny = 1e-12 * Math.max(1e-3, massOf(y, row - row % C, S));
-                    if (!(diag > 0) || !((-r[row] - off) / diag <= tiny)) wrong = true;
+                    if (!(diag > 0) || !((-r[row] - off) / diag <= tiny)) {
+                        wrong = true;
+                        distrust[row] = DISTRUST;
+                    }
                 }
                 if (wrong) {
                     stats.holdsWrong++;
