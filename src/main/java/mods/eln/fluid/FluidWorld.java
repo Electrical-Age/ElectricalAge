@@ -161,12 +161,18 @@ public final class FluidWorld implements IProcess {
         List<FluidNetwork> ns = new ArrayList<>(INSTANCE.networks);
         ns.sort((x, y) -> Long.compare(y.nanos, x.nanos));
         long total = 0, steps = 0;
+        double workers = 0;
+        int bg = 0;
         for (FluidNetwork n : ns) {
             total += n.nanos;
             steps = Math.max(steps, n.steps);
+            workers += n.backgroundNanosPerTick();
+            if (n.background()) bg++;
         }
         List<String> out = new ArrayList<>();
-        out.add(String.format("%d networks, %.3f ms/tick in all", ns.size(), steps == 0 ? 0 : total / 1e6 / steps));
+        // (the workers' share too: a heavy network off the server thread still costs, Baughn 1575818571764858992)
+        out.add(String.format("%d networks, %.3f ms/tick in all on the server thread; %.3f ms/tick on the fluid workers (%d networks there now)",
+            ns.size(), steps == 0 ? 0 : total / 1e6 / steps, workers / 1e6, bg));
         for (FluidNetwork n : ns) {
             String where = "?";
             outer:

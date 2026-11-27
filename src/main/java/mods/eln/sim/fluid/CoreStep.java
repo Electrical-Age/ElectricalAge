@@ -339,6 +339,12 @@ public final class CoreStep {
      * 1573800740550344846: a thread pool.)
      */
     public static final int HEAVY_AFTER = 10, SYNC_SHARE = 10;
+    /**
+     * In the game, a step over this (ns) counts as heavy instead of a tenth of the budget (0: that tenth). 5 ms
+     * (-Deln.fluidHeavyMs, Eln): a big running plant's 9-14 ms steps (Incognito 2026-11-27, 193 and 69 nodes, a quarter
+     * of every tick between them) leave the server thread for the workers (Baughn 1575818571764858992: a stopgap).
+     */
+    public static long heavyNanos = 0;
     /** A background step's own budget (ns): generous, since nothing waits for it; a runaway one still ends. */
     static final long BACKGROUND_BUDGET = 20_000_000_000L;
     private static final java.util.concurrent.ExecutorService WORKER = java.util.concurrent.Executors.newFixedThreadPool(2, r -> {
@@ -351,6 +357,9 @@ public final class CoreStep {
     private Pending pending;
     /** How long the last finished step took (ms), and whether it ran in the background (FluidWorld's log, the stats). */
     public double lastMs;
+    /** Time its background steps took on the workers (ns) and how many there were (fluidstats: off the server thread,
+     *  but not free). */
+    public long backgroundNanos, backgroundSteps;
     public boolean background;
     public int lastSpan = 1;
 
@@ -699,9 +708,13 @@ public final class CoreStep {
         boolean idle = p.background;   // (its time isn't owed)
         lastMs = p.took / 1e6;
         background = p.background;
+        if (p.background) {
+            backgroundNanos += p.took;
+            backgroundSteps++;
+        }
         overBudget = net.overBudget || p.background;
         // (heavy: over a tenth of the budget; light: under half that. The count moves by one a step, HEAVY_AFTER * 2 at most)
-        long heavy = budgetNanos / SYNC_SHARE;
+        long heavy = heavyNanos > 0 ? heavyNanos : budgetNanos / SYNC_SHARE;
         int next = budgetNanos <= 0 ? 0 : p.took > heavy ? Math.min(p.slow + 1, 2 * HEAVY_AFTER) : p.took < heavy / 2 ? Math.max(p.slow - 1, 0) : p.slow;
         mods.eln.fluid.FluidWorld.recordSlow(nodes, next);
         // (solves accepted at the precision floor, counted to watch: a few thousand in the 28 steam GameTests)

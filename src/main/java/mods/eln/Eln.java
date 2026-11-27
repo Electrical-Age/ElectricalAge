@@ -283,6 +283,7 @@ public class Eln {
             mods.eln.registry.ElnMachineRecipes.registerAll();
             simulator.init();
             mods.eln.sim.fluid.CoreStep.budgetNanos = mods.eln.sim.fluid.CoreStep.GAME_BUDGET;   // (a stiff fluid network runs slow, not the server)
+            mods.eln.sim.fluid.CoreStep.heavyNanos = Long.getLong("eln.fluidHeavyMs", 5L) * 1_000_000L;   // (heavy plants off the server thread)
             simulator.addSlowProcess(wind = new mods.eln.misc.WindProcess());
             simulator.addSlowProcess(mods.eln.fluid.FluidWorld.reset());   // (before the devices' own: they see this tick's state)
             for (ElnContent c : CONTENT) c.serverAboutToStart();

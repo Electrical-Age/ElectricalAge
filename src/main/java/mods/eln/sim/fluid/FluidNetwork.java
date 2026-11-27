@@ -70,10 +70,18 @@ public final class FluidNetwork {
         var n = c == null ? null : c.net;
         double st = n == null || n.stats.steps == 0 ? 1 : n.stats.steps;
         return String.format("%d nodes, %.3f ms/step, %s, restless %.2g at row %d, %.1f iterations %.1f sub-steps %.1f solves a step, slept %.0f%%, "
-                + "woken %d times (last by %s), core built %d times",
+                + "woken %d times (last by %s), core built %d times%s",
             nodes.size(), steps == 0 ? 0 : nanos / 1e6 / steps, n == null ? "?" : n.asleep() ? "asleep" : "awake", n == null ? 0 : n.restless,
             n == null ? -1 : n.restlessAt, n == null ? 0 : n.stats.iterations / st, n == null ? 0 : n.stats.substeps / st, n == null ? 0 : n.stats.solves / st,
-            n == null ? 0 : 100 * n.stats.slept / st, n == null ? 0 : n.stats.wakes, n == null ? "?" : n.wokenByName(), builds);
+            n == null ? 0 : 100 * n.stats.slept / st, n == null ? 0 : n.stats.wakes, n == null ? "?" : n.wokenByName(), builds,
+            c == null || c.backgroundSteps == 0 ? "" : String.format(", on the fluid workers %.3f ms/tick (%d steps of %.1f ms)%s",
+                backgroundNanosPerTick() / 1e6, c.backgroundSteps, c.backgroundNanos / 1e6 / c.backgroundSteps, c.background ? ", there now" : ""));
+    }
+
+    /** Its background steps' time on the fluid workers per tick stepped (ns; FluidWorld.stats). */
+    public double backgroundNanosPerTick() {
+        CoreStep c = core;
+        return c == null || steps == 0 ? 0 : c.backgroundNanos / (double) steps;
     }
 
     /** Its core network's counters (iterations, sub-steps, ...; GameTests), or null before its first step. */
