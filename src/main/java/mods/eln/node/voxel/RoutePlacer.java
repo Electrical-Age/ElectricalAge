@@ -107,6 +107,11 @@ public final class RoutePlacer {
         /** The route's polyline for its particles: {x, y, z} in world voxels, then the offset (blocks) of the leg ending there. */
         abstract List<double[]> trace(Routed<P> r);
 
+        /** Does a sneak-click put a stop (the Track Kit), not take back a waypoint? A sneak-click on the last point still does. */
+        boolean sneakMarksStops() {
+            return false;
+        }
+
         /** A click with no route yet that this kind handles itself (cables: mending a burnt run); true if handled. */
         boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, KitSupply kit) {
             return false;
@@ -115,7 +120,7 @@ public final class RoutePlacer {
 
     /** The spec for what a supply lays. */
     static Spec<?> of(KitSupply kit) {
-        return kit.pipe() ? PipePlacer.ROUTE : CablePlacer.ROUTE;
+        return kit.track() ? TrackPlacer.ROUTE : kit.pipe() ? PipePlacer.ROUTE : CablePlacer.ROUTE;
     }
 
     /** A route being laid by a player. */
@@ -272,6 +277,25 @@ public final class RoutePlacer {
             plan = null;
         }
         if (plan != null) plan.touched = now;
+        if (sneak && k.sneakMarksStops() && plan != null) {   // (the Track Kit: a stop there, unless it is the last point)
+            Click c = k.endAt(level, pos, face, hit, tier, false, true);
+            if (c.at() != null && !sameSpot(plan.last(), c.at())) {
+                if (!CablePlacer.reachable(player, pos, hit)) {
+                    KitPreview.note(player, mods.eln.i18n.I18N.tr("Out of reach"));
+                    return true;
+                }
+                plan.waypoints.add(new CableRouter.End(c.at().x(), c.at().y(), c.at().z(), TrackPlacer.STOP, c.at().dir()));
+                Routed<P> r = route(k, level, plan, null, null);
+                if (r.error() != null) {
+                    plan.waypoints.remove(plan.waypoints.size() - 1);
+                    KitPreview.note(player, unrouted(r));
+                } else {
+                    player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Stop %1$ (%2$ blocks)", plan.waypoints.size(), String.format("%.1f", r.length() / 16.0))));
+                    show(player, level, k, r);
+                }
+                return true;
+            }
+        }
         if (sneak) return undo(player, level);
         if (!CablePlacer.reachable(player, pos, hit)) {
             KitPreview.note(player, mods.eln.i18n.I18N.tr("Out of reach"));

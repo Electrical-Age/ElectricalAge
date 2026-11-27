@@ -56,6 +56,7 @@ public final class ServoCases {
         cases.add(new LevelRunReload(true));
         cases.add(new LevelRunTurned());
         cases.add(new RailPlacement());
+        cases.add(new TrackKitLays());
     }
 
     static final int TRAVEL = 6;
@@ -1250,6 +1251,104 @@ public final class ServoCases {
         public void measure(TestContext ctx) {
             ctx.line("servo rail placement: " + got);
             ctx.check("servo rail placement: on a drive it lies along the flank looked along, else stands; it continues a lying rail", ok, got);
+        }
+    }
+
+    /**
+     * The Track Kit (track B, Baughn 2026-11-27): from a drive with no rail, a corner 12 blocks out, a stop 6 blocks along
+     * the next leg (sneak-click), the end 6 further, clicked again to finish. The drive keeps the track (points, the stop,
+     * the corner's radius as wide as fits: 4.5), the kit gives its length, and it survives a save; a drive with a rail on
+     * its top refuses a track.
+     */
+    static final class TrackKitLays extends Room {
+        public String id() {
+            return "servo_track_kit_lays";
+        }
+
+        @Override
+        public int width() {
+            return 24;   // (floor_24x8x24)
+        }
+
+        @Override
+        public int height() {
+            return 8;
+        }
+
+        @Override
+        public int depth() {
+            return 24;
+        }
+
+        @Override
+        public int floorDepth() {
+            return 24;
+        }
+
+        public int ticks() {
+            return 20;
+        }
+
+        Shaft s, railed;
+        String refusal;
+        int kitBefore, kitAfter;
+        mods.eln.node.voxel.TrackPlacer.Track laid, reloaded;
+
+        static boolean click(TestContext ctx, net.minecraft.server.level.ServerPlayer p, mods.eln.node.voxel.KitSupply kit, BlockPos on, boolean sneak) {
+            Vec3 hit = Vec3.atLowerCornerOf(on).add(0.5, 1, 0.5);
+            double x = p.getX(), y = p.getY(), z = p.getZ();
+            p.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);
+            try {
+                return mods.eln.node.voxel.RoutePlacer.use(p, ctx.level(), on, net.minecraft.core.Direction.UP, kit, hit, sneak);
+            } finally {
+                p.snapTo(x, y, z, 0, 0);
+            }
+        }
+
+        public void build(TestContext ctx) {
+            s = new Shaft(ctx, ctx.at(2, 1, 21), 0, null, 0);   // (no rail: a track can start here)
+            railed = new Shaft(ctx, ctx.at(12, 1, 21), 0, null, 2);
+            var p = ctx.player();
+            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+            net.minecraft.world.item.ItemStack kit = mods.eln.node.voxel.TrackKitItem.kit(64 * 16);
+            var supply = mods.eln.node.voxel.KitSupply.of(kit);
+            kitBefore = supply.length();
+            BlockPos o = BlockPos.containing(s.drive(ctx).trackStart().add(0, 0.01, 0)).below();   // (the floor block under the car)
+            var north = s.front.toEnumFacing();
+            BlockPos corner = o.relative(north, 12), stop = corner.relative(north.getClockWise(), 6), end = stop.relative(north.getClockWise(), 6);
+            click(ctx, p, supply, s.head, false);
+            click(ctx, p, supply, corner, false);
+            click(ctx, p, supply, stop, true);
+            click(ctx, p, supply, end, false);
+            click(ctx, p, supply, end, false);
+            kitAfter = supply.length();
+            laid = s.drive(ctx).track();
+            if (laid != null) {
+                var nbt = new net.minecraft.nbt.CompoundTag();
+                s.drive(ctx).writeToNBT(nbt);
+                s.drive(ctx).readFromNBT(nbt);
+                reloaded = s.drive(ctx).track();
+            }
+            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+            var rk = mods.eln.node.voxel.KitSupply.of(mods.eln.node.voxel.TrackKitItem.kit(64 * 16));
+            click(ctx, p, rk, railed.head, false);
+            refusal = mods.eln.node.voxel.RoutePlacer.active(p.getUUID()) ? "started" : "refused";
+            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+        }
+
+        public void measure(TestContext ctx) {
+            ctx.check("track kit: the drive keeps the track laid", laid != null, "none");
+            if (laid == null) return;
+            ctx.line("track kit: points " + laid.points() + ", stops " + java.util.Arrays.toString(laid.stops()) + ", length " + laid.path().length());
+            ctx.check("track kit: start, corner, stop, end", laid.points().size() == 4
+                && java.util.Arrays.equals(laid.stops(), new boolean[]{true, false, true, true}), java.util.Arrays.toString(laid.stops()));
+            ctx.check("track kit: the corner as wide as the legs allow (6 m to the stop, less 1.5 kept there)", Math.abs(laid.path().radius(0) - 4.5) < 1e-9,
+                "" + laid.path().radius(0));
+            ctx.check("track kit: the kit gives the track's length", kitBefore - kitAfter == (int) Math.round(laid.path().length() * 16),
+                kitBefore + " -> " + kitAfter + " for " + laid.path().length() + " m");
+            ctx.check("track kit: saved and loaded, the same track", reloaded != null && reloaded.points().equals(laid.points())
+                && java.util.Arrays.equals(reloaded.stops(), laid.stops()), "" + (reloaded == null ? null : reloaded.points()));
+            ctx.check("track kit: a drive with a rail on its top refuses a track", "refused".equals(refusal), refusal);
         }
     }
 }

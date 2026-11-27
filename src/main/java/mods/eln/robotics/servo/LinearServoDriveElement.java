@@ -169,6 +169,64 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         return new Vec3(c.getX() + 0.5, c.getY(), c.getZ() + 0.5);
     }
 
+    // ---- a laid track (track B: TrackPlacer, the Track Kit); null: it runs on its rail as before
+
+    /** Its track's points (blocks; the first is origin()) and which are stops; null without one. Saved ("track"). */
+    @org.jspecify.annotations.Nullable List<Vec3> trackPoints;
+    @org.jspecify.annotations.Nullable boolean[] trackStops;
+    private mods.eln.node.voxel.TrackPlacer.@org.jspecify.annotations.Nullable Track trackCache;
+
+    /** Is there a Servo Rail on its top (it is a mast or a level run: no track can be laid from it)? */
+    public boolean hasRail() {
+        return node.coordonate.world().getBlockState(node.coordonate.pos().above()).getBlock() instanceof ServoRailBlock;
+    }
+
+    /** Where a track laid from it starts: its car's place at position 0. */
+    public Vec3 trackStart() {
+        return origin();
+    }
+
+    /** The drive whose track starts at s (its car's start), or null. */
+    public static @org.jspecify.annotations.Nullable LinearServoDriveElement atTrackStart(Level level, Vec3 s) {
+        BlockPos c = BlockPos.containing(s.x, s.y + 0.01, s.z);
+        for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+            LinearServoDriveElement e = at(level, c.relative(d, 2));
+            if (e != null && e.origin().distanceToSqr(s) < 1e-6) return e;
+        }
+        return null;
+    }
+
+    /** Its laid track (points, stops, path), or null. */
+    public mods.eln.node.voxel.TrackPlacer.@org.jspecify.annotations.Nullable Track track() {
+        if (trackPoints == null || trackStops == null) return null;
+        if (trackCache == null) {
+            try {
+                trackCache = mods.eln.node.voxel.TrackPlacer.track(trackPoints, trackStops);
+            } catch (IllegalArgumentException ex) {   // (a saved track the rules no longer allow: dropped, said in the log)
+                mods.eln.Eln.LOG.warn("Linear Servo Drive at {}: its track no longer fits ({}); dropped", node.coordonate.pos(), ex.getMessage());
+                trackPoints = null;
+                trackStops = null;
+                return null;
+            }
+        }
+        return trackCache;
+    }
+
+    /** Lay a track from it (TrackPlacer): replaces any track it had; the car goes back to the start. Null if laid, else why not. */
+    public @org.jspecify.annotations.Nullable String setTrack(List<Vec3> points, boolean[] stops) {
+        if (hasRail()) return "it runs on its rail";
+        if (points.isEmpty() || points.get(0).distanceToSqr(origin()) > 1e-6) return "the track doesn't start at its car";
+        trackPoints = List.copyOf(points);
+        trackStops = stops.clone();
+        trackCache = null;
+        if (track() == null) return "that track doesn't fit";
+        removeGhost();
+        seg = Segment.rest(clock, 0);
+        target = 0;
+        needPublish();
+        return null;
+    }
+
     /** The car's path: from origin() along its rail, travel blocks long. */
     public mods.eln.robotics.motion.Path path() {
         return new mods.eln.robotics.motion.StraightPath(origin(), axis(), Math.max(0, travel));
@@ -815,6 +873,17 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         if (panelBase != 0) nbt.putInt("panelBase", panelBase);
         nbt.putIntArray("panel", panel);
         if (panelLit != 0) nbt.putInt("panelLit", panelLit);
+        if (trackPoints != null && trackStops != null) {   // (voxels: x, y, z, stop per point)
+            int[] t = new int[trackPoints.size() * 4];
+            for (int i = 0; i < trackPoints.size(); i++) {
+                Vec3 q = trackPoints.get(i);
+                t[4 * i] = (int) Math.round(q.x * 16);
+                t[4 * i + 1] = (int) Math.round(q.y * 16);
+                t[4 * i + 2] = (int) Math.round(q.z * 16);
+                t[4 * i + 3] = trackStops[i] ? 1 : 0;
+            }
+            nbt.putIntArray("track", t);
+        }
         if (carId != null) {
             nbt.putLong("carMost", carId.getMostSignificantBits());
             nbt.putLong("carLeast", carId.getLeastSignificantBits());
@@ -839,6 +908,21 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         for (int i = 0; i < panel.length; i++) panel[i] = i < p.length && p[i] >= 0 && p[i] <= 2 ? p[i] : ElevatorCar.PANEL_NONE;
         panelLit = nbt.getIntOr("panelLit", 0);
         panelPorts();
+        int[] t = nbt.getIntArray("track").orElse(new int[0]);
+        if (t.length >= 8 && t.length % 4 == 0) {
+            List<Vec3> pts = new ArrayList<>();
+            boolean[] st = new boolean[t.length / 4];
+            for (int i = 0; i < st.length; i++) {
+                pts.add(new Vec3(t[4 * i] / 16.0, t[4 * i + 1] / 16.0, t[4 * i + 2] / 16.0));
+                st[i] = t[4 * i + 3] != 0;
+            }
+            trackPoints = pts;
+            trackStops = st;
+        } else {
+            trackPoints = null;
+            trackStops = null;
+        }
+        trackCache = null;
         carId = nbt.contains("carMost") ? new UUID(nbt.getLongOr("carMost", 0), nbt.getLongOr("carLeast", 0)) : null;
     }
 

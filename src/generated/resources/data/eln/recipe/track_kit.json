@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "eln:servo_rail"
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_data": {
+        "kitLen": 16
+      }
+    },
+    "id": "eln:track_kit"
+  }
+}

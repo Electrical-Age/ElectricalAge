@@ -11,6 +11,11 @@ public interface KitSupply {
     /** A pipe (else a cable). */
     boolean pipe();
 
+    /** A servo track (TrackKitItem; then pipe() is false). */
+    default boolean track() {
+        return false;
+    }
+
     /** CablePart.TIERS or PipePart tier. */
     int tier();
 
@@ -35,12 +40,16 @@ public interface KitSupply {
 
     /** One kit. */
     static KitSupply of(ItemStack kit) {
-        boolean pipe = kit.getItem() instanceof PipeKitItem;
+        boolean pipe = kit.getItem() instanceof PipeKitItem, track = kit.getItem() instanceof TrackKitItem;
         int tier = kit.getItem() instanceof PipeKitItem p ? p.tier : kit.getItem() instanceof CableKitItem c ? c.tier : -1;
         CableSpec spec = CableKitItem.specOf(kit);
         return new KitSupply() {
             public boolean pipe() {
                 return pipe;
+            }
+
+            public boolean track() {
+                return track;
             }
 
             public int tier() {
@@ -67,7 +76,7 @@ public interface KitSupply {
     static KitSupply held(Player p) {
         if (p == null) return null;
         ItemStack s = p.getMainHandItem();
-        if (s.getItem() instanceof CableKitItem || s.getItem() instanceof PipeKitItem) return of(s);
+        if (s.getItem() instanceof CableKitItem || s.getItem() instanceof PipeKitItem || s.getItem() instanceof TrackKitItem) return of(s);
         if (s.getItem() instanceof ToolbagItem) return ToolbagItem.supply(s);
         return null;
     }

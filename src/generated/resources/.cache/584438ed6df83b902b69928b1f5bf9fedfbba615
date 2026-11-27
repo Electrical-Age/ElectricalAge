@@ -1,4 +1,4 @@
-// 26.3	2026-11-26T09:59:47.239861022	Registries for Reloadable (eln[0]): [eln]
+// 26.3	2026-11-27T19:26:25.300634336	Registries for Reloadable (eln[0]): [eln]
 e9b18790f61c5e60d17f49af5cad947638ed8e2b data/eln/advancement/recipes/misc/10a_diode.json
 2d9176447f6556d82b425fe16aa57d5a5daf42e7 data/eln/advancement/recipes/misc/230v_active_thermal_dissipator.json
 98be7e719755f1d65131e906daa7a98b081c8ce8 data/eln/advancement/recipes/misc/230v_air_blower.json
@@ -341,6 +341,7 @@ ee029a2dfa893a338f3cd2f42471b733e9d1d11b data/eln/advancement/recipes/misc/therm
 d19389368c43bb77c6fbd3cb02485516845d6b1e data/eln/advancement/recipes/misc/thermometer.json
 45485041f6af7df52acd56f7ab421e0763fee00f data/eln/advancement/recipes/misc/three_channel_data_logger.json
 d430822798a5f441a1dd42061276cb0ab4a09a5b data/eln/advancement/recipes/misc/tilted_terminal_logger.json
+50b5580561e5527f8601d5f64071bd5392856655 data/eln/advancement/recipes/misc/track_kit.json
 ebd30793fac1b2c233ac5b6cdc2a993fbeb67027 data/eln/advancement/recipes/misc/tree_resin_collector.json
 f10a9eefb44cbdb04d4d1f0ca0507bbb07418460 data/eln/advancement/recipes/misc/tree_resin_collector_2.json
 36537e9727f2e9657a1580b66d45dac30567da2f data/eln/advancement/recipes/misc/tungsten_cable.json
@@ -731,6 +732,7 @@ ad1c5258b30328edec6333acc45bcc1cba8d78e1 data/eln/recipe/thermal_insulation.json
 6f76069fd12e628d25a69a7dd6acac1d8fae8d10 data/eln/recipe/thermometer.json
 de70d839e225ac2f84d93ae79ffb8f732b9b7950 data/eln/recipe/three_channel_data_logger.json
 ba6171c46cdef5e54d351d3d002ee195daae0359 data/eln/recipe/tilted_terminal_logger.json
+1350a2fad0840bcc38edab25927f2d15393a4750 data/eln/recipe/track_kit.json
 242851f63c4f602d3b0dc0b84582ae9e087dc1a1 data/eln/recipe/tree_resin_collector.json
 3755444f7d89f99a651710b209e8c730e6576173 data/eln/recipe/tree_resin_collector_2.json
 a704b9c15054e9a198a998bb306bf5ce8407501a data/eln/recipe/tungsten_cable.json

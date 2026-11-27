@@ -2348,6 +2348,12 @@ public final class ElnRecipes extends ElnRecipesBase {
             "IpI",
             'I', stack(Items.IRON_INGOT),
             'p', "plateIron");
+        // a Track Kit (track B, Baughn 2026-11-27): one block of track per Servo Rail; more rails go in by clicking them onto it
+        {
+            net.minecraft.nbt.CompoundTag t = new net.minecraft.nbt.CompoundTag();
+            t.putInt(mods.eln.node.voxel.KitItem.LEN_KEY, 16);
+            addShapelessRecipe(new RStack(mods.eln.robotics.Robotics.TRACK_KIT.get(), 1, t), stack(mods.eln.robotics.Robotics.SERVO_RAIL_ITEM.get()));
+        }
         // the terrain bike (Baughn 2026-10-29: much dearer): an electric bike rebuilt round a 200 V motor in an advanced
         // machine block, alloy plates for its frame, more rubber for its tyres
         addRecipe(stack(mods.eln.registry.ElnRegistry.TERRAIN_BIKE.get()),

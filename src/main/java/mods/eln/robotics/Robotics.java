@@ -49,6 +49,8 @@ public final class Robotics implements ElnContent {
         p -> p.mapColor(MapColor.METAL).strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> SERVO_RAIL_ITEM = ITEMS.registerSimpleBlockItem(SERVO_RAIL);
     public static final DeferredItem<BlockItem> STATION_MARKER_ITEM = ITEMS.registerSimpleBlockItem(STATION_MARKER);
+    /** A Track Kit (track B, Baughn 2026-11-27): servo track laid from a drive by clicking its corners; filled with Servo Rails. */
+    public static final DeferredItem<mods.eln.node.voxel.TrackKitItem> TRACK_KIT = ITEMS.registerItem("track_kit", mods.eln.node.voxel.TrackKitItem::new);
     /** The computer's chips and floppies. */
     public static final DeferredItem<ChipItem> RAM_CHIP = ITEMS.registerItem("ram_chip", p -> new ChipItem(ChipItem.Kind.RAM, p));
     public static final DeferredItem<ChipItem> JANET_ROM = ITEMS.registerItem("janet_rom_chip", p -> new ChipItem(ChipItem.Kind.JANET, p));
@@ -87,6 +89,7 @@ public final class Robotics implements ElnContent {
         ENTITY_TYPES.register(modBus);
         ElnRegistry.ALL_ITEMS.add(SERVO_RAIL_ITEM);
         ElnRegistry.ALL_ITEMS.add(STATION_MARKER_ITEM);
+        ElnRegistry.ALL_ITEMS.add(TRACK_KIT);
         ElnRegistry.ALL_ITEMS.add(RAM_CHIP);
         ElnRegistry.ALL_ITEMS.add(JANET_ROM);
         ElnRegistry.ALL_ITEMS.add(BOOT_ROM);
