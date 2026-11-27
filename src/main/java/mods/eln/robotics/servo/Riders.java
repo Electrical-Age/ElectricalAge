@@ -63,14 +63,14 @@ public final class Riders {
     }
 
     /**
-     * A round cabin's radial limit (track B; AdventurAgent's B0 spike chose it with rim posts). A rider inside the cylinder (centre cx, cz; inside radius rin; floor y0
+     * A round cabin's radial limit (track B; with the rim posts, which keep others out: AdventurAgent tried both on a client). A rider inside the cylinder (centre cx, cz; inside radius rin; floor y0
      * to roof y1) whose box reaches past rin is put back along the radius, unless it is in the open door: within
      * doorHalf (rad) of the door's direction (doorX, doorZ, a unit vector) while the door is open. Inside means the box's
      * centre is within rin + 0.25 (so a wall stops it only from inside: one-sided). Returns the horizontal shift, or null.
      */
-    public static Vec3 clampInside(AABB e, double cx, double cz, double rin, double y0, double y1, double doorX, double doorZ,
+    public static @org.jspecify.annotations.Nullable Vec3 clampInside(AABB e, double cx, double cz, double rin, double y0, double y1, double doorX, double doorZ,
                                    double doorHalf, boolean doorOpen) {
-        if (e.minY < y0 - 0.5 || e.minY > y1) return null;
+        if (e.minY < y0 - 0.5 || e.minY > y1 - 0.1) return null;   // (on the roof: not inside; review)
         double ex = (e.minX + e.maxX) / 2 - cx, ez = (e.minZ + e.maxZ) / 2 - cz, d = Math.sqrt(ex * ex + ez * ez);
         double w = Math.max(e.maxX - e.minX, e.maxZ - e.minZ) / 2, lim = rin - w;
         if (d <= lim || d > rin + 0.25 || d < 1e-9) return null;

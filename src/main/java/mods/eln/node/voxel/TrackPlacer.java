@@ -45,45 +45,79 @@ public final class TrackPlacer {
         return new CableRouter.End(Math.round(p.x * 16), Math.round(p.y * 16), Math.round(p.z * 16), attach, 0);
     }
 
+    static String tr(String text, Object... args) {
+        return mods.eln.i18n.I18N.tr(text, args);
+    }
+
     /**
-     * The track through points (blocks; points[0] the car's start), stops[i] marking stops: a point after a stop is put on
-     * the stop's line (kept in line), and each corner's radius is as wide as its legs allow (each leg shared between the
-     * corners at its ends; STOP_STRAIGHT kept at stops and ends). Throws IllegalArgumentException with the player's reason.
+     * The track from the points clicked (blocks; points[0] the car's start), stops[i] marking stops: a point repeating the
+     * one before it is dropped (clicking a stop again ends the track there: review); a point after a stop is put on the
+     * stop's line (kept in line), on the voxel grid if it is a corner, on a block centre if it is a stop or the end (so the
+     * car stops on whole blocks; the stop then has a slight kink). The result's points are exactly what build() needs:
+     * the drive keeps them, and reloads them unchanged. Throws IllegalArgumentException with the player's reason.
      */
-    public static Track track(List<Vec3> points, boolean[] stops) {
-        int n = points.size();
-        if (n < 2) throw new IllegalArgumentException("no track yet");
-        List<Vec3> p = new ArrayList<>(points);
+    public static Track lay(List<Vec3> points, boolean[] stops) {
+        List<Vec3> p = new ArrayList<>();
+        List<Boolean> st = new ArrayList<>();
+        for (int i = 0; i < points.size(); i++) {
+            if (!p.isEmpty() && points.get(i).distanceToSqr(p.get(p.size() - 1)) < 1e-9) {
+                st.set(st.size() - 1, st.get(st.size() - 1) || stops[i]);
+                continue;
+            }
+            p.add(points.get(i));
+            st.add(stops[i]);
+        }
+        int n = p.size();
+        boolean[] stp = new boolean[n];
+        for (int i = 0; i < n; i++) stp[i] = st.get(i) || i == 0 || i == n - 1;
         for (int i = 1; i + 1 < n; i++)
-            if (stops[i]) {   // the next point goes on in line
+            if (stp[i]) {   // the next point goes on in line
                 Vec3 u = p.get(i).subtract(p.get(i - 1)).normalize();
                 double t = p.get(i + 1).subtract(p.get(i)).dot(u);
-                // (aimed beside or behind the stop: the track still goes on straight, a block past it at least; AdventurAgent
-                // read the old refusal as a hint that hid the length)
-                p.set(i + 1, p.get(i).add(u.scale(Math.max(1, t))));
+                // (aimed beside or behind the stop: still straight on, a block past it at least; AdventurAgent read the old
+                // refusal as a hint that hid the length)
+                Vec3 q = p.get(i).add(u.scale(Math.max(1, t)));
+                q = stp[i + 1] ? new Vec3(Math.floor(q.x) + 0.5, Math.rint(q.y), Math.floor(q.z) + 0.5)
+                    : new Vec3(Math.rint(q.x * 16) / 16, Math.rint(q.y * 16) / 16, Math.rint(q.z * 16) / 16);
+                p.set(i + 1, q);
             }
+        return build(p, stp);
+    }
+
+    /**
+     * The track through exactly these points (a laid track's, as lay() made them), stops[i] marking stops: each corner's
+     * radius as wide as its legs allow (each leg shared between the corners at its ends; STOP_STRAIGHT kept at stops and
+     * ends); a stop is never rounded. Throws IllegalArgumentException with the player's reason.
+     */
+    public static Track build(List<Vec3> p, boolean[] stops) {
+        int n = p.size();
+        if (n < 2) throw new IllegalArgumentException(tr("no track yet"));
         double[] lens = new double[n - 1];
         for (int i = 0; i + 1 < n; i++) {
             lens[i] = p.get(i + 1).distanceTo(p.get(i));
-            if (lens[i] < 1e-6) throw new IllegalArgumentException("two points in one place");
+            if (lens[i] < 1e-6) throw new IllegalArgumentException(tr("two points in one place"));
         }
         double[] radii = new double[n - 2];
         for (int c = 0; c + 2 < n; c++) {   // corner c sits at point c+1, between leg c and leg c+1
             int at = c + 1;
             Vec3 u = p.get(at).subtract(p.get(at - 1)).normalize(), v = p.get(at + 1).subtract(p.get(at)).normalize();
             double th = Math.acos(Math.max(-1, Math.min(1, u.dot(v))));
-            if (stops[at] || th < 1e-6) continue;   // (straight through: no arc)
-            if (th > Math.PI - 1e-3) throw new IllegalArgumentException("the track can't turn back on itself");
+            if (stops[at] || th < 1e-6) continue;   // (a stop, or straight through: no arc)
+            if (th > Math.PI - 1e-3) throw new IllegalArgumentException(tr("the track can't turn back on itself"));
             double cut = Math.min(share(p, stops, lens, c, false), share(p, stops, lens, c + 1, true));
             double r = cut / Math.tan(th / 2);
             if (r < MIN_RADIUS - 1e-9)
-                throw new IllegalArgumentException(String.format("corner %d is too tight (radius %.1f; at least %.0f)", at, r, MIN_RADIUS));
+                throw new IllegalArgumentException(tr("corner %1$ is too tight (radius %2$; at least %3$)", at, String.format("%.1f", r),
+                    String.format("%.0f", MIN_RADIUS)));
             radii[c] = r;
         }
         TrackPath path = new TrackPath(p, radii);
         if (path.length() > MAX_LENGTH + 1e-9)
-            throw new IllegalArgumentException(String.format("too long (%.1f blocks; a drive owns at most %.0f)", path.length(), MAX_LENGTH));
-        return new Track(p, stops.clone(), path);
+            throw new IllegalArgumentException(tr("too long (%1$ blocks; a drive owns at most %2$)", String.format("%.1f", path.length()),
+                String.format("%.0f", MAX_LENGTH)));
+        if (path.length() < mods.eln.robotics.servo.LinearServoDriveDescriptor.MIN_TRAVEL - 1e-9)
+            throw new IllegalArgumentException(tr("too short (at least %1$ blocks)", mods.eln.robotics.servo.LinearServoDriveDescriptor.MIN_TRAVEL));
+        return new Track(List.copyOf(p), stops.clone(), path);
     }
 
     /** How much of leg `leg` the corner at its start (atStart) or end may take: its free length, halved if both ends turn. */
@@ -101,7 +135,8 @@ public final class TrackPlacer {
         RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, int tier, boolean start, boolean click) {
             if (start) {
                 LinearServoDriveElement d = LinearServoDriveElement.at(level, pos);
-                if (d == null) return RoutePlacer.Click.none(mods.eln.i18n.I18N.tr("Start a track at a Linear Servo Drive"));
+                // (the preview says nothing off a drive: it overwrote "Laid ... of track"; a click says where to start)
+                if (d == null) return RoutePlacer.Click.none(click ? tr("Start a track at a Linear Servo Drive") : null);
                 if (d.hasRail()) return RoutePlacer.Click.none(mods.eln.i18n.I18N.tr("This drive runs on its rail: take the rail off its top to lay track"));
                 return new RoutePlacer.Click(end(d.trackStart(), CORNER), null, false, false, null);
             }
@@ -112,6 +147,12 @@ public final class TrackPlacer {
         @Override
         boolean sneakMarksStops() {
             return true;
+        }
+
+        /** A stop just marked, clicked again, ends the track there (review: its attach differed, so it ran on a block). */
+        @Override
+        boolean sameEnd(CableRouter.End a, CableRouter.End b) {
+            return RoutePlacer.sameSpot(a, b);
         }
 
         /** "Track: 12.0 blocks \u2014 corner" (sneak-click: a stop; clicked again: the end). */
@@ -136,7 +177,7 @@ public final class TrackPlacer {
             boolean[] stops = new boolean[st.size()];
             for (int i = 0; i < stops.length; i++) stops[i] = st.get(i);
             try {
-                Track t = track(pts, stops);
+                Track t = TrackPlacer.lay(pts, stops);
                 return new RoutePlacer.Routed<>(null, (int) Math.round(t.path().length() * 16), t);
             } catch (IllegalArgumentException ex) {
                 return RoutePlacer.Routed.said(mods.eln.i18n.I18N.tr("Track: %1$", ex.getMessage()));
@@ -147,7 +188,7 @@ public final class TrackPlacer {
         String lay(Level level, int tier, CableSpec spec, RoutePlacer.Routed<Track> r, long[] startJoin, long[] endJoin, Player player) {
             Vec3 s = r.path().points().get(0);
             LinearServoDriveElement d = LinearServoDriveElement.atTrackStart(level, s);
-            if (d == null) return mods.eln.i18n.I18N.tr("its drive is gone");
+            if (d == null) return tr("its drive is gone");
             return d.setTrack(r.path().points(), r.path().stops());
         }
 

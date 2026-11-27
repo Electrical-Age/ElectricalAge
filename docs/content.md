@@ -226,6 +226,9 @@ checked models, `ServoParts`), and the elevator car entity `eln:elevator_car` (n
 drive is an Electrical Motor in a Machine Block with a Medium Voltage Cable, two Signal Cables and four iron plates; 8
 rails from 6 iron ingots and 3 iron plates (standing up the drive's top for an elevator, or lying along a flank for a level run); a marker from an iron plate, a stone button and a Signal Cable. Behaviour:
 porting-notes.md ("New in 26.x: the servo layer").
+The Track Kit (`eln:track_kit`, `node/voxel/TrackKitItem`, track B 2026-11-27): a length of servo track, 1 block per
+Servo Rail (a shapeless recipe makes a 1-block kit from one rail; more rails click into it like plates into a pipe kit).
+Laid on the shared placer (`TrackPlacer`) from a Linear Servo Drive with no rail on its top; saved on the drive.
 
 `entity/ReplicatorEntity` (`ElnRegistry.REPLICATOR`, spawn egg `REPLICATOR_SPAWN_EGG`), plus its AI classes in
 `entity/`. `entity/ReplicatorPopProcess`: during thunderstorms it spawns replicators near players in the overworld

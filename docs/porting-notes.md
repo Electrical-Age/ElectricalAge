@@ -651,6 +651,21 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
     (which runs after the spawn bundle); on the server, riders' sweep is clipped to the car's column (a rider's
     overhang meets the landing, it doesn't fault the car) and a player up to 1 m off the top (a round trip late) still counts as a rider.
   - Tests: `ServoCases`, `DriveTest`, `SegmentPropertyTest`, `StationsTest`, `RidersTest`, `SegmentPayloadTest`.
+  - Curved tracks (track B, Baughn 2026-11-27): a Track Kit (`TrackKitItem`) on the shared placer (`TrackPlacer`, a
+    `RoutePlacer.Spec`) lays a track from a drive with no rail: corners clicked at any heading (block centres), a
+    sneak-click a stop the track runs straight through (the next leg kept in line; the last point sneak-clicked undoes),
+    the last point clicked again finishes. Corners round into arcs as wide as their legs allow (each leg shared between
+    its corners, 1.5 m kept straight at stops and ends), at least 3 m; 2 to 64 m. The drive keeps it (NBT `track`) and
+    its car follows `motion/TrackPath` (s = arc length: Baughn, integer distances not needed on a curved track): its
+    stops are the ends and the straight-through points, register 0 and the setpoint go to the nearest, a disabled car
+    brakes to the next, floor ghosts at stops; corners at most sqrt(LATERAL_ACCEL r). Clients get it by `TrackPayload`.
+    On a track that isn't one straight axis run the cabin is round (`ElevatorCar.round`): riders kept within 1.44 m of
+    its centre (client for its player, server for creatures: `Riders.clampInside`), 24 thin world-aligned rim posts
+    (`CabinWall` POST) against outsiders and reach, a door of posts within 40 degrees of away-from-the-rail, open only
+    standing at a stop; drawn with a beam for the rail 2 m beside the car (no rail blocks). Walled cabins keep to
+    straight axis runs. GameTests `servo_track_kit_lays`, `servo_track_runs`, `servo_track_round_cabin`,
+    `servo_track_corner_speed`. Not yet: the Toolbag (its sneak-click opens the radial), the car's panel stays at the
+    walled cabin's back wall.
 - Tools (Baughn 2026-11-03): a pickaxe breaks machines, devices and pipes as fast as stone, shears break cables as fast
   as wool; in a block holding both, the part under the crosshair decides. No part breaks in under two ticks, so with
   vanilla's pause after each block it is at best one part per 7 ticks (`node/BreakTool`, `BreakToolCases`).

@@ -74,9 +74,10 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     public final CabinWall[] walls;
 
     /**
-     * A round cabin's posts (track B, Baughn 2026-11-27: round cabins on curved tracks; AdventurAgent's B0 spike): how many,
+     * A round cabin's posts (track B, Baughn 2026-11-27: round cabins on curved tracks; posts and a radial limit tried on a
+     * client, AdventurAgent 2026-11-27): how many,
      * on what radius (m, to their centres: the plate's rim), half their width; the door: posts within this angle of
-     * "out" (away from the rail) open while the car stands still. Inside, riders meet the radial limit (ROUND_IN), not
+     * "out" (away from the rail) open while the car stands at a stop. Inside, riders meet the radial limit (ROUND_IN), not
      * the posts (whose inner edge is there): the posts keep others out and stop reaching through the wall.
      */
     public static final int POSTS = 24;
@@ -89,13 +90,15 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         // (on the server the panel, an Entity, takes its own id from the level's entity counter, so no other entity
         // ever has it; a client learns it from the spawn packet: recreateFromPacket)
         panel = new ElevatorPanel(this);
-        walls = new CabinWall[]{
+        walls = new CabinWall[4 + POSTS];
+        CabinWall[] sides = {
             new CabinWall(this, -HALF, HALF, THICK, CABIN - WALL, -HALF, -HALF + WALL),
             new CabinWall(this, -HALF, -HALF + WALL, THICK, CABIN - WALL, -HALF + WALL, HALF),
             new CabinWall(this, HALF - WALL, HALF, THICK, CABIN - WALL, -HALF + WALL, HALF),
             new CabinWall(this, -HALF, HALF, CABIN - WALL, CABIN, -HALF, HALF),
-            post(0), post(1), post(2), post(3), post(4), post(5), post(6), post(7), post(8), post(9), post(10), post(11),
-            post(12), post(13), post(14), post(15), post(16), post(17), post(18), post(19), post(20), post(21), post(22), post(23)};
+        };
+        System.arraycopy(sides, 0, walls, 0, 4);
+        for (int k = 0; k < POSTS; k++) walls[4 + k] = post(k);
         // (a client level gives no entity ids, and its part list compares parts by id: without one, the car leaving
         // the client threw and disconnected it, AdventurAgent 2026-11-05. Nothing is sent to a wall, so a client-only
         // id, below every id a server gives, will do.)
@@ -110,10 +113,9 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         return CabinWall.post(this, x, z, th);
     }
 
-    /** A round cabin: on a curved track (Baughn: walled cabins keep to straight, axis-aligned paths). */
+    /** A round cabin: on a laid track that isn't one straight run along a block axis (Baughn: walled cabins keep to those). */
     public boolean round() {
-        var p = path();
-        return p != null && !p.axisAligned();
+        return track != null && !track.axisAligned();
     }
 
     /** Where it is along its path now (by the drive's clock on the server, its own on a client); NaN without a segment. */
@@ -142,9 +144,17 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         return left(s).scale(railSign());
     }
 
-    /** Is the round cabin's door open (it stands still)? */
+    /** Is the round cabin's door open: it stands still at one of its track's stops (not where a fault or a stall left it)? */
     public boolean doorOpen() {
-        return stopped();
+        if (!stopped()) return false;
+        if (!(path() instanceof mods.eln.robotics.motion.TrackPath t)) return true;
+        double s = posNow();
+        return !Double.isNaN(s) && mods.eln.robotics.motion.Stations.atStop(s, t.stops());
+    }
+
+    /** Does it run on a laid track (whose rail it draws)? */
+    public boolean onTrack() {
+        return track != null;
     }
 
     // ---- where it is
@@ -153,15 +163,21 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     private mods.eln.robotics.motion.@Nullable TrackPath track;
     private @Nullable List<Vec3> trackPoints;
     private boolean @Nullable [] trackStops;
+    /** The lists it was last given (setTrack: unchanged, nothing to build). */
+    private @Nullable List<Vec3> trackSource;
+    private boolean @Nullable [] trackStopsSource;
 
     /** Run on this track (points in blocks, stops), or on the rail again (null). */
     public void setTrack(@Nullable List<Vec3> points, boolean @Nullable [] stops) {
+        if (points == trackSource && stops == trackStopsSource) return;   // (the drive hands it the same lists every tick)
+        trackSource = points;
+        trackStopsSource = stops;
         trackPoints = points == null ? null : List.copyOf(points);
         trackStops = stops == null ? null : stops.clone();
         track = null;
         if (points != null && stops != null) {
             try {
-                track = mods.eln.node.voxel.TrackPlacer.track(points, stops).path();
+                track = mods.eln.node.voxel.TrackPlacer.build(points, stops).path();
             } catch (IllegalArgumentException ex) {
                 trackPoints = null;
                 trackStops = null;
@@ -325,7 +341,6 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     protected void defineSynchedData(SynchedEntityData.Builder data) {
         data.define(PANEL_KINDS, 0);
         data.define(PANEL_LIT, 0);
-
     }
 
     @Override

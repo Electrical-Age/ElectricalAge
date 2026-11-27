@@ -201,7 +201,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         if (trackPoints == null || trackStops == null) return null;
         if (trackCache == null) {
             try {
-                trackCache = mods.eln.node.voxel.TrackPlacer.track(trackPoints, trackStops);
+                trackCache = mods.eln.node.voxel.TrackPlacer.build(trackPoints, trackStops);
             } catch (IllegalArgumentException ex) {   // (a saved track the rules no longer allow: dropped, said in the log)
                 mods.eln.Eln.LOG.warn("Linear Servo Drive at {}: its track no longer fits ({}); dropped", node.coordonate.pos(), ex.getMessage());
                 trackPoints = null;
@@ -214,16 +214,17 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
 
     /** Lay a track from it (TrackPlacer): replaces any track it had; the car goes back to the start. Null if laid, else why not. */
     public @org.jspecify.annotations.Nullable String setTrack(List<Vec3> points, boolean[] stops) {
-        if (hasRail()) return "it runs on its rail";
-        if (points.isEmpty() || points.get(0).distanceToSqr(origin()) > 1e-6) return "the track doesn't start at its car";
+        if (hasRail()) return mods.eln.i18n.I18N.tr("it runs on its rail");
+        if (points.isEmpty() || points.get(0).distanceToSqr(origin()) > 1e-6) return mods.eln.i18n.I18N.tr("the track doesn't start at its car");
         trackPoints = List.copyOf(points);
         trackStops = stops.clone();
         trackCache = null;
-        if (track() == null) return "that track doesn't fit";
+        if (track() == null) return mods.eln.i18n.I18N.tr("that track doesn't fit");
         removeGhost();
         seg = Segment.rest(clock, 0);
         target = 0;
         travel = -1;   // (read again from the track)
+        wired = Double.NaN;   // (the setpoint wire is read afresh on the new track)
         if (car != null) {   // (riders other than players stay where they were: the car is put back, not driven)
             setup(car);
             car.placeAt(0);
@@ -315,6 +316,16 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
     boolean carGround(Level level) {
         double p = posAt(clock);
         var path = path();
+        if (track() != null) {   // (a laid track: the ground either side of the car where it is and 3 m either way)
+            for (double s : new double[]{p - 3, p, p + 3}) {
+                double q = Math.max(0, Math.min(path.length(), s));
+                Vec3 at = path.at(q), t = path.tangent(q);
+                double h = Math.max(1e-6, Math.sqrt(t.x * t.x + t.z * t.z));
+                for (int side = -2; side <= 2; side += 4)
+                    if (!level.isLoaded(BlockPos.containing(at.x + t.z / h * side, at.y, at.z - t.x / h * side))) return false;
+            }
+            return true;
+        }
         // (the cabin reaches 1.5 m either side of its centre: from 1 block behind the start to 1 past the end)
         for (double s : new double[]{p - 3, (travel < 0 ? p : Math.min(p, travel)) + 3}) {
             BlockPos b = BlockPos.containing(path.at(s));

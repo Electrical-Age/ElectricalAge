@@ -226,7 +226,9 @@ ids that old worlds depend on. All of it is server side; clients get state only 
 - Linear Servo Drive (`robotics/servo/LinearServoDriveElement`): `clock` (long, the drive's own tick count; segments
   start on it, and it stops while its chunks are unloaded), the current segment `segStart` (long), `segFrom`, `segV0`,
   `segTo`, `segVmax`, `segAccel` (blocks and ticks), `target`, `fault` (byte: 0 none, 1 obstructed, 2 overheat, 3 no
-  rail, 4 overvoltage), `proportional`, `carMost`/`carLeast` (the car's UUID); its power, heat and signals are a
+  rail, 4 overvoltage), `proportional`, `carMost`/`carLeast` (the car's UUID), `track` (int array, absent without
+  one: a laid track's points in voxels, x y z and a stop flag (0/1) per point, exactly as TrackPlacer.lay made them, so
+  TrackPlacer.build rebuilds the same path; track B 2026-11-27); its power, heat and signals are a
   Machine API machine (the `api.machine.*` keys above: buffer, temperature, a trip, running; parts `powerUc`,
   `in0Uc` setpoint, `in1Uc` enable, `out0Uc`/`drive0*` in-position, `out1Uc`/`drive1*` fault). Before the API (never
   shipped, no upgrade path) it wrote `powerUc`, `setpointUc`, `enableUc`, `inPositionUc`, `faultOutUc`, `thermalTc`

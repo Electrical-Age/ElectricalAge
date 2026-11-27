@@ -112,6 +112,11 @@ public final class RoutePlacer {
             return KitPreview.suffix(again, join, finish);
         }
 
+        /** Is end b the same place as a (a click there again finishes): the same point and face; the Track Kit, any face. */
+        boolean sameEnd(CableRouter.End a, CableRouter.End b) {
+            return same(a, b);
+        }
+
         /** Does a sneak-click put a stop (the Track Kit), not take back a waypoint? A sneak-click on the last point still does. */
         boolean sneakMarksStops() {
             return false;
@@ -295,7 +300,8 @@ public final class RoutePlacer {
                     plan.waypoints.remove(plan.waypoints.size() - 1);
                     KitPreview.note(player, unrouted(r));
                 } else {
-                    player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Stop %1$ (%2$ blocks)", plan.waypoints.size(), String.format("%.1f", r.length() / 16.0))));
+                    long n = plan.waypoints.stream().filter(w -> w.attach() == TrackPlacer.STOP).count();
+                    player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Stop %1$ (%2$ blocks)", n, String.format("%.1f", r.length() / 16.0))));
                     show(player, level, k, r);
                 }
                 return true;
@@ -395,7 +401,7 @@ public final class RoutePlacer {
 
     /** Is the aim c at the plan's last waypoint again (a plain surface click there: the route ends there)? */
     static boolean again(Plan plan, Click c) {
-        return !c.finish() && c.join() == null && !plan.waypoints.isEmpty() && same(plan.waypoints.get(plan.waypoints.size() - 1), c.at());
+        return !c.finish() && c.join() == null && !plan.waypoints.isEmpty() && plan.kind.sameEnd(plan.waypoints.get(plan.waypoints.size() - 1), c.at());
     }
 
     /**

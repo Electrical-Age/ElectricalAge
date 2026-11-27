@@ -99,10 +99,7 @@ public class CableKitItem extends Item implements PipeTool, KitItem {
 
     @Override
     public Component getName(ItemStack stack) {
-        int v = KitItem.length(stack);
-        String blocks = v % 16 == 0 ? (v / 16) + (v == 16 ? " block" : " blocks")
-            : v % 8 == 0 ? String.format("%.1f blocks", v / 16.0) : String.format("%.2f blocks", v / 16.0);
-        return Component.translatable(getDescriptionId()).append(" (" + blocks + ")");
+        return KitItem.nameWithLength(getDescriptionId(), stack);
     }
 
     /**

@@ -59,6 +59,7 @@ public final class ServoCases {
         cases.add(new TrackKitLays());
         cases.add(new TrackRuns());
         cases.add(new TrackRoundCabin());
+        cases.add(new TrackCornerSpeed());
     }
 
     static final int TRAVEL = 6;
@@ -1528,6 +1529,96 @@ public final class ServoCases {
             ctx.check("round cabin: all posts solid while it moves", postsMoving == ElevatorCar.POSTS, "" + postsMoving);
             ctx.check("round cabin: the door's posts open at a stop", postsStopped > 0 && postsStopped < ElevatorCar.POSTS - 2, "" + postsStopped);
             ctx.check("round cabin: a pig past the inside radius is put back", pigR <= ElevatorCar.ROUND_IN - 0.3 + 1e-6, "" + pigR);
+        }
+    }
+
+    /**
+     * Track B: round a tight corner the car goes no faster than sqrt(LATERAL_ACCEL r): 5 blocks out, 5 across, so the
+     * corner's radius is 3.5 (each leg keeps 1.5 at its end) and the limit 1.87 m/s, under the motor's 2. And a stop
+     * clicked again ends the track there (review: it ran a block past it).
+     */
+    static final class TrackCornerSpeed extends Room {
+        public String id() {
+            return "servo_track_corner_speed";
+        }
+
+        @Override
+        public int width() {
+            return 24;
+        }
+
+        @Override
+        public int height() {
+            return 8;
+        }
+
+        @Override
+        public int depth() {
+            return 24;
+        }
+
+        @Override
+        public int floorDepth() {
+            return 24;
+        }
+
+        public int ticks() {
+            return 300;
+        }
+
+        Shaft s, s2;
+        double radius = Double.NaN, maxV, along = Double.NaN;
+        int endPoints = -1;
+        Vec3 endAt, stopAt;
+
+        public void build(TestContext ctx) {
+            s = new Shaft(ctx, ctx.at(2, 1, 21), 0, null, 0);
+            s2 = new Shaft(ctx, ctx.at(18, 1, 21), 0, null, 0);
+            var p = ctx.player();
+            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+            var kit = mods.eln.node.voxel.KitSupply.of(mods.eln.node.voxel.TrackKitItem.kit(64 * 16));
+            BlockPos o = BlockPos.containing(s.drive(ctx).trackStart().add(0, 0.01, 0)).below();
+            var north = s.front.toEnumFacing();
+            BlockPos corner = o.relative(north, 5), end = corner.relative(north.getClockWise(), 5);
+            TrackKitLays.click(ctx, p, kit, s.head, false);
+            TrackKitLays.click(ctx, p, kit, corner, false);
+            TrackKitLays.click(ctx, p, kit, end, false);
+            TrackKitLays.click(ctx, p, kit, end, false);
+            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+            // the second drive: out 8, a stop 6 across, the stop clicked again: the track ends at the stop
+            BlockPos o2 = BlockPos.containing(s2.drive(ctx).trackStart().add(0, 0.01, 0)).below();
+            BlockPos c2 = o2.relative(north, 8), st2 = c2.relative(north.getCounterClockWise(), 6);
+            TrackKitLays.click(ctx, p, kit, s2.head, false);
+            TrackKitLays.click(ctx, p, kit, c2, false);
+            TrackKitLays.click(ctx, p, kit, st2, true);
+            TrackKitLays.click(ctx, p, kit, st2, false);
+            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+            var t2 = s2.drive(ctx).track();
+            if (t2 != null) {
+                endPoints = t2.points().size();
+                endAt = t2.points().get(t2.points().size() - 1);
+                stopAt = Vec3.atBottomCenterOf(st2.above());
+            }
+            var t = s.drive(ctx).track();
+            if (t == null) return;
+            radius = t.path().radius(0);
+            watch(dt -> {
+                tick++;
+                var d = s.drive(ctx);
+                maxV = Math.max(maxV, Math.abs(d.speed));
+                if (tick == 5) d.command(t.path().length());
+                if (tick == 250) along = d.target;
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            ctx.line("corner speed: radius " + radius + ", top speed " + maxV + " m/s; stop-again track: " + endPoints + " points, end " + endAt + " vs stop " + stopAt);
+            ctx.check("corner speed: the corner is 3.5 m", Math.abs(radius - 3.5) < 1e-9, "" + radius);
+            ctx.check("corner speed: no faster than sqrt(a r) round it", maxV <= Math.sqrt(LinearServoDriveDescriptor.LATERAL_ACCEL * 3.5) + 1e-6, "" + maxV);
+            ctx.check("corner speed: but near that (the limit, not a stall)", maxV > 1.8, "" + maxV);
+            ctx.check("track kit: a stop clicked again ends the track there", endPoints == 3 && endAt != null && endAt.distanceTo(stopAt) < 1e-9,
+                endPoints + " " + endAt + " vs " + stopAt);
         }
     }
 }

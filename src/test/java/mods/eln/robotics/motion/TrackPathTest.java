@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** TrackPath: straight legs with quarter-arc corners; arc-length s, smooth, stops on whole blocks of the straights. */
+/** TrackPath: straight legs at any heading with arc corners; arc-length s, smooth; stops at the ends and straight-through points. */
 class TrackPathTest {
     final Vec3 o = new Vec3(10.5, 64, -3.5);
 

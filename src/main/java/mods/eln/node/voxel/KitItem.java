@@ -1,5 +1,7 @@
 package mods.eln.node.voxel;
 
+import net.minecraft.network.chat.Component;
+
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -45,6 +47,14 @@ public interface KitItem {
         int v = Math.max(0, Math.min(MAX, len));
         net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, s, t -> t.putInt(LEN_KEY, v));
         s.remove(net.minecraft.core.component.DataComponents.DAMAGE);
+    }
+
+    /** A kit's name with its length: "Iron Pipe Kit (7.5 blocks)" (cable, pipe and track kits alike). */
+    static Component nameWithLength(String descriptionId, ItemStack s) {
+        int v = length(s);
+        String blocks = v % 16 == 0 ? (v / 16) + (v == 16 ? " block" : " blocks")
+            : v % 8 == 0 ? String.format("%.1f blocks", v / 16.0) : String.format("%.2f blocks", v / 16.0);
+        return Component.translatable(descriptionId).append(" (" + blocks + ")");
     }
 
     /** The bar: how full the kit is. */

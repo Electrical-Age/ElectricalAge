@@ -52,6 +52,16 @@ public interface KitSupply {
                 return track;
             }
 
+            @Override
+            public String undoSentence() {   // (the Track Kit: a sneak-click elsewhere puts a stop)
+                return track ? "Sneak-click the last point to undo." : KitSupply.super.undoSentence();
+            }
+
+            @Override
+            public String cancelClause() {
+                return track ? "sneak-click the start to cancel" : KitSupply.super.cancelClause();
+            }
+
             public int tier() {
                 return tier;
             }

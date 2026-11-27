@@ -163,12 +163,17 @@ public final class TrackPath implements Path {
         return stops.clone();
     }
 
-    /** One leg along a block axis: a walled cabin may ride it. */
+    /** One straight run along a block axis (stops on it included): a walled cabin may ride it. */
     @Override
     public boolean axisAligned() {
-        if (corners.size() != 2) return false;
-        Vec3 d = corners.get(1).subtract(corners.get(0));
+        Vec3 d = corners.get(corners.size() - 1).subtract(corners.get(0));
         int axes = (Math.abs(d.x) > 1e-9 ? 1 : 0) + (Math.abs(d.y) > 1e-9 ? 1 : 0) + (Math.abs(d.z) > 1e-9 ? 1 : 0);
-        return axes == 1;
+        if (axes != 1) return false;
+        Vec3 u = d.normalize();
+        for (Vec3 c : corners) {
+            Vec3 off = c.subtract(corners.get(0));
+            if (off.subtract(u.scale(off.dot(u))).lengthSqr() > 1e-12) return false;
+        }
+        return true;
     }
 }

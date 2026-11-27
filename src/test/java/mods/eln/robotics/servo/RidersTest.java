@@ -100,7 +100,7 @@ class RidersTest {
         assertFalse(Riders.carry(player(0.2, 1.4), false, c0, c1).carried());
     }
 
-    /** Track B0 spike: the round cabin's radial limit (inside radius 1.44, door towards +x, 40 degrees each side). */
+    /** The round cabin's radial limit (inside radius 1.44, door towards +x, 40 degrees each side). */
     @Test
     void clampKeepsRidersInsideTheRing() {
         double rin = 1.44, half = Math.toRadians(40);
@@ -113,5 +113,6 @@ class RidersTest {
         assertNotNull(Riders.clampInside(new AABB(1.0, 1, -0.3, 1.6, 2.8, 0.3), 0, 0, rin, 1, 4, 1, 0, half, false), "the door shut while moving");
         assertNull(Riders.clampInside(new AABB(2.0, 1, -0.3, 2.6, 2.8, 0.3), 0, 0, rin, 1, 4, 1, 0, half, false), "outside: not held");
         assertNull(Riders.clampInside(new AABB(-1.6, 6, -0.3, -1.0, 7.8, 0.3), 0, 0, rin, 1, 4, 1, 0, half, false), "above the roof");
+        assertNull(Riders.clampInside(new AABB(-1.6, 4, -0.3, -1.0, 5.8, 0.3), 0, 0, rin, 1, 4, 1, 0, half, false), "standing on the roof");
     }
 }

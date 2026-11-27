@@ -69,7 +69,7 @@ public class ElevatorCarRenderer extends EntityRenderer<ElevatorCar, ElevatorCar
         }
         s.round = car.round();
         s.rail = new float[0];
-        if (s.round && !Double.isNaN(p)) {
+        if (car.onTrack() && !Double.isNaN(p)) {   // (any laid track: its rail is drawn with the car; there are no rail blocks)
             Vec3 out = car.towardRail(p).scale(-1);
             s.outX = (float) out.x;
             s.outZ = (float) out.z;
@@ -98,7 +98,7 @@ public class ElevatorCarRenderer extends EntityRenderer<ElevatorCar, ElevatorCar
     protected AABB getBoundingBoxForCulling(ElevatorCar car, float partial) {
         AABB b = car.getBoundingBox().inflate(0.2, 0, 0.2).expandTowards(0, ElevatorCar.CABIN, 0);
         var path = car.path();
-        if (car.round() && path != null)   // (its track's rail too: drawn with the car)
+        if (car.onTrack() && path != null)   // (its track's rail too: drawn with the car)
             for (double q = 0; q <= path.length(); q += 2) b = b.minmax(new AABB(car.at(q), car.at(q)).inflate(RAIL_OFF + 0.5, RAIL_UP + 0.5, RAIL_OFF + 0.5));
         return b;
     }
@@ -246,6 +246,17 @@ public class ElevatorCarRenderer extends EntityRenderer<ElevatorCar, ElevatorCar
             pose.popPose();
             super.submit(s, pose, out, camera);
             return;
+        }
+        if (s.rail.length >= 6) {   // (a straight laid track: the walled cabin, and the rail beside it)
+            GlFrame rf = GlSubmit.open(pose);
+            try {
+                drawRail(s);
+            } catch (RuntimeException e) {
+                ElnRenderErrors.report("elevator car", e);
+            } finally {
+                GlFrame.close();
+            }
+            GlSubmit.submit(rf, pose, out, s.lightCoords);
         }
         if (obj == null) obj = Eln.obj.getObj("elevatorcar");
         if (obj == null) return;
