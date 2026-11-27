@@ -170,8 +170,8 @@ public final class ElnGameTests {
         // At 4x it lets the test plants' start-up transients through (a fuel furnace's first steps took over 400 ms; at
         // 40 ms 27 tests stalled), and fails them if the game's budget is ever as tight as 10 ms was)
         mods.eln.sim.fluid.CoreStep.budgetNanos = 4 * mods.eln.sim.fluid.CoreStep.GAME_BUDGET;
-        // (heavy by that budget's tenth, as before the game's 5 ms: the cases' plants stay on the server thread, where
-        // their results land in the tick they're measured; PlumbingCases puts one in the background on purpose)
+        // (the old threshold, a tenth of the test budget, not the game's 5 ms: the cases' plants stay on the server thread,
+        // where their results land in the tick they're measured; PlumbingCases and HpPlantCases put one in the background)
         mods.eln.sim.fluid.CoreStep.heavyNanos = 0;
         GameTestContext ctx = new GameTestContext(helper, c.id());
         // tests share one level: a node left by an earlier test here would join this test's circuits

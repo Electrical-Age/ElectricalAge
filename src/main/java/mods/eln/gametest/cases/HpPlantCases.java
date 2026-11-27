@@ -72,6 +72,7 @@ public final class HpPlantCases {
         cases.add(new LargeBoilerPortSpots());
         cases.add(new LargeBoilerPlant(false));
         cases.add(new LargeBoilerPlant(true));
+        cases.add(new LargeBoilerPlant(false, true));
         cases.add(new LargeBoilerBurst());
     }
 
@@ -556,7 +557,17 @@ public final class HpPlantCases {
         final FluidDevice[] air;
         final FluidNode[] mains;
 
+        /** Its steam network kept in the background all along (CoreStep: the game's 5 ms puts running plants there; Baughn
+         *  1575818571764858992): it must make the same plant, a tick late. */
+        final boolean background;
+        int bgTicks;
+
         LargeBoilerPlant(boolean natural) {
+            this(natural, false);
+        }
+
+        LargeBoilerPlant(boolean natural, boolean background) {
+            this.background = background;
             this.natural = natural;
             n = natural ? 6 : 4;
             f = new FuelHeatFurnaceElement[n];
@@ -576,7 +587,7 @@ public final class HpPlantCases {
         double steam0, work0, pumped0;
 
         public String id() {
-            return natural ? "large_boiler_2x2_natural_6_furnaces" : "large_boiler_2x2_hp_plant_20bar";
+            return natural ? "large_boiler_2x2_natural_6_furnaces" : background ? "large_boiler_2x2_hp_plant_20bar_in_the_background" : "large_boiler_2x2_hp_plant_20bar";
         }
 
         public int ticks() {
@@ -632,6 +643,11 @@ public final class HpPlantCases {
                     run.update();
                 }
                 tick++;
+                if (background && boiler.vessel != null) {   // (counted heavy every tick: it stays in the background)
+                    boiler.vessel.slowSteps = 2 * mods.eln.sim.fluid.CoreStep.HEAVY_AFTER;
+                    var net = mods.eln.fluid.FluidWorld.networkOf(boiler.vessel);
+                    if (tick > WATCH && net != null && net.background()) bgTicks++;
+                }
                 for (FluidNode m : mains) if (m != null) m.fill(0, Water.P_ATM + 1.6e5, 293.15);
                 if (tick == WATCH) {
                     meter.counting = true;
@@ -677,6 +693,8 @@ public final class HpPlantCases {
             boolean burnt = boiler.isBurnt() || hp.isBurnt();
             for (var x : f) burnt |= x.isBurnt();
             ctx.check(id + ": nothing burnt out", !burnt, "");
+            if (background) ctx.check(id + ": its steam network ran in the background (90 %+ of the watched ticks)", bgTicks > 0.9 * (TICKS - WATCH - 20),
+                bgTicks + " of " + (TICKS - WATCH) + " ticks");
             ctx.check(id + ": the feed flange on a ghost block takes the condensate (one network with the condenser)", joined && mods.eln.fluid.FluidWorld.networkOf(boiler.feed) != null, "");
             ctx.check(id + ": the steam outlet on a ghost block feeds the turbine, and the condensate comes back (90 %+)", steam > 15e-3 && pumped > 0.9 * steam,
                 String.format("%.2f of %.2f g/s", pumped * 1000, steam * 1000));

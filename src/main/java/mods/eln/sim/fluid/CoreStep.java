@@ -329,8 +329,8 @@ public final class CoreStep {
     private boolean stallDumped;
 
     /**
-     * Background steps: a network whose steps took over a tenth of the budget (SYNC_SHARE; 25 ms in the game) HEAVY_AFTER
-     * times more often than not (FluidNode.slowSteps, kept on the nodes over rebuilds) is stepped on a worker thread, one
+     * Background steps: a network whose steps took over heavyNanos (5 ms in the game; else a tenth of the budget,
+     * SYNC_SHARE) per tick of step HEAVY_AFTER times more often than not (FluidNode.slowSteps, kept on the nodes over rebuilds) is stepped on a worker thread, one
      * step at a time, each started on a tick and applied on the first tick after it finishes, and each as long as the
      * ticks since the one before it began (MAX_SPAN), its result handed out over those ticks (handOut): it keeps real
      * time at a coarser step, and the server thread never waits for it. Dysnomia's plant (110 nodes, 2026-11-21) sat in a transient
@@ -357,9 +357,7 @@ public final class CoreStep {
     private Pending pending;
     /** How long the last finished step took (ms), and whether it ran in the background (FluidWorld's log, the stats). */
     public double lastMs;
-    /** Time its background steps took on the workers (ns) and how many there were (fluidstats: off the server thread,
-     *  but not free). */
-    public long backgroundNanos, backgroundSteps;
+
     public boolean background;
     public int lastSpan = 1;
 
@@ -460,11 +458,17 @@ public final class CoreStep {
                 return;
             }
             finish(p);
+            if (p.background) {   // (on the network: a rebuilt core starts its counters over)
+                fn.backgroundNanos += p.took;
+                fn.backgroundSteps++;
+            }
             applied = true;   // (this tick has its results: the next step may start, but nothing more is applied or cleared)
         }
         int slow = 0;
         for (FluidNode n : nodes) slow = Math.max(slow, n.slowSteps);
-        boolean bg = budgetNanos > 0 && slow >= HEAVY_AFTER;
+        // (back on this thread only once the count is down to half: a plant whose steps straddle the band flipped at the
+        // threshold, each flip a tick with no flow and one with two ticks' worth)
+        boolean bg = budgetNanos > 0 && (slow >= HEAVY_AFTER || background && slow > HEAVY_AFTER / 2);
         if (applied && !bg) {   // (light again: back on this thread from the next tick, owing the ticks its last step took)
             return;
         }
@@ -708,14 +712,12 @@ public final class CoreStep {
         boolean idle = p.background;   // (its time isn't owed)
         lastMs = p.took / 1e6;
         background = p.background;
-        if (p.background) {
-            backgroundNanos += p.took;
-            backgroundSteps++;
-        }
+
         overBudget = net.overBudget || p.background;
-        // (heavy: over a tenth of the budget; light: under half that. The count moves by one a step, HEAVY_AFTER * 2 at most)
-        long heavy = heavyNanos > 0 ? heavyNanos : budgetNanos / SYNC_SHARE;
-        int next = budgetNanos <= 0 ? 0 : p.took > heavy ? Math.min(p.slow + 1, 2 * HEAVY_AFTER) : p.took < heavy / 2 ? Math.max(p.slow - 1, 0) : p.slow;
+        // (heavy: over heavyNanos, or a tenth of the budget, per tick of step (a background step stands for span ticks,
+        // and its cost grows with them); light: under half that. The count moves by one a step, HEAVY_AFTER * 2 at most)
+        long heavy = heavyNanos > 0 ? heavyNanos : budgetNanos / SYNC_SHARE, took = p.took / Math.max(1, p.span);
+        int next = budgetNanos <= 0 ? 0 : took > heavy ? Math.min(p.slow + 1, 2 * HEAVY_AFTER) : took < heavy / 2 ? Math.max(p.slow - 1, 0) : p.slow;
         mods.eln.fluid.FluidWorld.recordSlow(nodes, next);
         // (solves accepted at the precision floor, counted to watch: a few thousand in the 28 steam GameTests)
         long crawled = CRAWLS.addAndGet(net.stats.crawls - crawls0);
