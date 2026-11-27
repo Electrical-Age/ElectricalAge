@@ -38,7 +38,8 @@ public final class FluidPool implements AutoCloseable {
     /**
      * Run every task once, on this thread and the helpers, and return when all have ended. Tasks are taken in list
      * order (the long ones first spreads them best). A task's exception doesn't stop the others; the first is rethrown
-     * here once all have ended.
+     * here once all have ended, the rest suppressed in it. Not from inside a task: the helpers it would wait for may
+     * all be waiting too.
      */
     public void runAll(List<? extends Runnable> tasks) {
         int n = tasks.size();
@@ -50,7 +51,9 @@ public final class FluidPool implements AutoCloseable {
                 try {
                     tasks.get(i).run();
                 } catch (Throwable t) {
-                    failed.compareAndSet(null, t);
+                    if (!failed.compareAndSet(null, t)) synchronized (failed) {
+                        failed.get().addSuppressed(t);
+                    }
                 }
             }
         };

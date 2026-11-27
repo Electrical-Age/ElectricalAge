@@ -168,9 +168,11 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   into its core, `CoreStep.load`, and the core's solve), `finish` on the server thread (results onto nodes and
   edges), in the list's order. `CoreStep.solveAll` runs a tick's solves on `fluidcore.FluidPool`, the server thread
   among its threads (`-Deln.fluidThreads`, 4 at most by default; under 0.3 ms of expected work, on the server thread
-  alone): the tick costs the largest network, not their sum. Networks share no node or edge, and the core's shared
-  state is per thread (`WaterAir.VAP_CACHE`, `Network.HARD`) or read-only tunables, so the result is the serial
-  one. A network over `CoreStep.heavyNanos` a step (5 ms, `-Deln.fluidHeavyMs`) is stepped across ticks on two
+  alone): the solves cost the server thread the largest network or their sum over the threads, whichever is more.
+  Networks share no node or edge, and what the core shares feeds no result: per-thread caches and deadlines
+  (`WaterAir.VAP_CACHE`, `Network.HARD`), tunables nobody writes in the game, and diagnostic counters (`Sparse.REBUILDS`,
+  `Limiter.WORST`). So the result is the serial one (`FluidPoolStepTest`). `load` and the solve read nothing of
+  `FluidWorld`: a node's NaN guard, whose warning asks where it is, runs in `begin`. A network over `CoreStep.heavyNanos` a step (5 ms, `-Deln.fluidHeavyMs`) is stepped across ticks on two
   background workers instead (its results a tick late). `/elnlab fluidstats` gives the server thread's wall time
   per tick (preparing, solving, applying), the networks' own time on whichever thread, and the background workers'.
   A device joining, leaving or changing marks the world dirty; the next step (or query) rebuilds it in two parts.

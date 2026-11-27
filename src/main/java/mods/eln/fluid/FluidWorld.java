@@ -183,9 +183,10 @@ public final class FluidWorld implements IProcess {
             counted++;
         }
         double wt = Math.max(1, INSTANCE.wallTicks) * 1e6;
-        out.add(String.format("%d networks; the server thread spends %.3f ms/tick on them (preparing %.3f, solving %.3f, applying %.3f; last %d ticks: %.3f, "
+        // (preparing: also applying and loading the background networks' steps; applying: also the stall and budget marks)
+        out.add(String.format("%d networks; the server thread spends %.3f ms/tick on them since the server started (preparing %.3f, solving %.3f, applying %.3f; last %d ticks: %.3f, "
                 + "worst %.3f), solving on %d threads "
-                + "(%.0f%% of ticks; else alone); their own time %.3f ms/tick in all; %.3f ms/tick on the background workers (%d networks there now)",
+                + "(%.0f%% of ticks; else alone); their own time since they were built %.3f ms/tick in all; %.3f ms/tick on the background workers (%d networks there now)",
             ns.size(), INSTANCE.wallNanos / wt, INSTANCE.beginNanos / wt, INSTANCE.solveNanos / wt,
             (INSTANCE.wallNanos - INSTANCE.beginNanos - INSTANCE.solveNanos) / wt, counted, counted == 0 ? 0 : sum / 1e6 / counted, max / 1e6,
             mods.eln.sim.fluid.CoreStep.threads(), INSTANCE.wallTicks == 0 ? 0 : 100.0 * INSTANCE.pooledTicks / INSTANCE.wallTicks,

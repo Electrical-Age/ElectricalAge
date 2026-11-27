@@ -365,8 +365,7 @@ public final class CoreStep {
     static final class Pending {
         /** What the solve threw, on whatever thread it ran (complete rethrows it on the server thread). */
         Throwable error;
-        /** The nodes' state is in the core (load), which took loadNanos; ticks: those since the last step began. */
-        volatile boolean loaded;
+        /** How long load took (ns); ticks: those since the last step began. */
         volatile long loadNanos;
         int ticks;
         double tick, dt;
@@ -454,9 +453,19 @@ public final class CoreStep {
      * the pool ran them. What a solve throws is kept for its network's finish.
      */
     public static boolean solveAll(List<FluidNetwork> begun) {
+        return solveAll(begun, POOL, POOL_FROM_NANOS);
+    }
+
+    /** What a node of a network never solved is expected to cost (ns). */
+    static final long COLD_NANOS = 20_000;
+
+    /** solveAll on a pool, from an expected cost (tests: a pool of their own, from 0). */
+    static boolean solveAll(List<FluidNetwork> begun, mods.eln.fluidcore.FluidPool pool, long from) {
+        // (a network not solved yet, as all are after a rebuild, is taken for COLD_NANOS a node: that tick, with
+        // every network awake and cold, is the one to share out)
         long expect = 0;
-        for (FluidNetwork n : begun) expect += n.lastSolveNanos();
-        if (begun.size() < 2 || POOL.threads() < 2 || expect < POOL_FROM_NANOS) {
+        for (FluidNetwork n : begun) expect += n.lastSolveNanos() > 0 ? n.lastSolveNanos() : COLD_NANOS * n.nodes.size();
+        if (begun.size() < 2 || pool.threads() < 2 || expect < from) {
             for (FluidNetwork n : begun) n.run();
             return false;
         }
@@ -464,17 +473,8 @@ public final class CoreStep {
         order.sort((a, b) -> Long.compare(b.lastSolveNanos(), a.lastSolveNanos()));
         List<Runnable> tasks = new ArrayList<>(order.size());
         for (FluidNetwork n : order) tasks.add(n::run);
-        POOL.runAll(tasks);
+        pool.runAll(tasks);
         return true;
-    }
-
-    /** A whole step on this thread (begin, run, complete). */
-    void step(FluidNetwork fn, double dt) {
-        Pending p = begin(fn, dt);
-        if (p != null) {
-            run(p);
-            complete(p);
-        }
     }
 
     /**
@@ -484,7 +484,7 @@ public final class CoreStep {
      */
     void run(Pending p) {
         try {
-            if (!p.loaded) load(p);
+            load(p);
             long t0 = System.nanoTime();
             net.step(p.dt);
             p.took = System.nanoTime() - t0;
@@ -501,13 +501,13 @@ public final class CoreStep {
         finish(p);
     }
 
-    /** How long its last solve on the tick's pool took (ns): FluidWorld hands the long ones out first. */
+    /** How long its last tick's own load and solve took (ns): solveAll hands the long ones out first. */
     long lastSolveNanos;
 
     /**
-     * On the server thread: a tick of this network up to its solve. The nodes' and edges' state goes into the core; a
-     * background step is started, waited for or applied. Returns the step to run and complete, or null when this tick
-     * has no solve of its own (a background step runs, or its result was just applied).
+     * On the server thread: a tick of this network up to its solve. A background step is started (its state loaded
+     * here), waited for or applied. Returns the step to run and complete, or null when this tick has no solve of its own
+     * (a background step runs, or its result was just applied).
      */
     Pending begin(FluidNetwork fn, double dt) {
         boolean applied = false;
@@ -564,6 +564,9 @@ public final class CoreStep {
         double tick = dt, ask = bg ? span * dt : dt + Math.min(owed, dt);
         owed -= ask - dt;
         dt = ask;
+        // (a NaN put in by anything since the last step: healed, not stepped. Here, not in load: its warning asks
+        // FluidWorld where the node is, which is the server thread's to read)
+        for (FluidNode n : nodes) if (!n.fixed && n.guardFinite(() -> mods.eln.fluid.FluidWorld.whereIs(n))) n.update();
         Pending p = new Pending();
         p.tick = tick;
         p.dt = dt;
@@ -611,7 +614,6 @@ public final class CoreStep {
         for (int i = 0; i < cn.length; i++) {
             FluidNode n = nodes.get(i);
             Network.Node c = cn[i];
-            if (!n.fixed && n.guardFinite(() -> mods.eln.fluid.FluidWorld.whereIs(n))) n.update();   // (a NaN put in by anything since the last step: healed, not stepped)
             c.m[0] = n.mWater;
             c.m[1] = n.mAir;
             for (int j = 2; j < c.m.length; j++) c.m[j] = n.extra != null && ids[j] - 2 < n.extra.length ? n.extra[ids[j] - 2] : 0;
@@ -705,7 +707,6 @@ public final class CoreStep {
         p.sub0 = net.stats.substeps;
         p.cut0 = net.stats.cut;
         p.crawls0 = net.stats.crawls;
-        p.loaded = true;
         p.loadNanos = System.nanoTime() - t0;
     }
 

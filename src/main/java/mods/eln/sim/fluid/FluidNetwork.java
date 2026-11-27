@@ -51,7 +51,8 @@ public final class FluidNetwork {
         return prepared != null;
     }
 
-    /** The solve begin prepared, on any thread: the core alone. */
+    /** The step begin prepared, on any thread: this network's nodes and edges into its core, and the core's solve.
+     *  Nothing another network or the server thread touches meanwhile. */
     public void run() {
         stepping.run(prepared);
     }

@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** FluidPool.runAll: every task once, the caller working too, a failure rethrown only after the rest have run. */
+/** FluidPool.runAll: every task once, on the caller alone in a pool of one, a failure rethrown only after the rest have run. */
 class FluidPoolTest {
     @Test
-    void everyTaskRunsOnceOnSeveralThreadsTheCallerAmongThem() {
+    void everyTaskRunsOnceOnThePoolsThreads() {
         try (FluidPool pool = new FluidPool(4)) {
             for (int round = 0; round < 200; round++) {
                 int n = 1 + round % 37;
