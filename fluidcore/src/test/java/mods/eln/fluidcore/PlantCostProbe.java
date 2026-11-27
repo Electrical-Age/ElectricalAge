@@ -5,8 +5,9 @@ import org.junit.jupiter.api.Test;
 /**
  * Probe (with PLANT_PROBE set; not a test): what a step of a big running steam plant costs and what it is made of.
  * The dumps are Incognito's 193- and 69-node plants of 2026-11-27 (/elnlab fluiddump: boilers, furnaces with their
- * flue ducting, steam generators, condensers). Prints per round the time a step, the solver's counts, and a
- * checksum of the state (hex: a change that should cost nothing but time leaves it as it was).
+ * flue ducting, steam generators, condensers). Prints per round the time a step, the solver's counts, and a hash of
+ * every node's energy and masses, bit for bit (a change that should cost nothing but time leaves it as it was).
+ * StuckProbe is the tool for looking into one dump; this one weighs a change.
  */
 class PlantCostProbe {
     @Test
@@ -33,13 +34,16 @@ class PlantCostProbe {
                     for (int k = 0; k < n; k++) net.step(dt[0]);
                     long t = System.nanoTime() - t0;
                     long[] s1 = snapshot(net);
-                    double sum = 0;
-                    for (Network.Node x : net.nodes) if (!x.fixed) sum += x.U;
+                    long hash = 1;
+                    for (Network.Node x : net.nodes) {
+                        hash = 31 * hash + Double.doubleToRawLongBits(x.U);
+                        for (double mk : x.m) hash = 31 * hash + Double.doubleToRawLongBits(mk);
+                    }
                     System.out.printf("PROBE %s round %d: %.3f ms/step; per step: iterations %.1f solves %.1f substeps %.2f crawls %.2f stalls %.2f failures %.2f; "
                             + "flash evaluations %.1f brackets %.2f; state %s%n",
                         name, round, t / 1e6 / n, (s1[0] - s0[0]) / (double) n, (s1[1] - s0[1]) / (double) n, (s1[2] - s0[2]) / (double) n,
                         (s1[3] - s0[3]) / (double) n, (s1[4] - s0[4]) / (double) n, (s1[5] - s0[5]) / (double) n,
-                        (MixFluid.EVALS - e0) / (double) n, (MixFluid.BRACKETS - b0) / (double) n, Double.toHexString(sum));
+                        (MixFluid.EVALS - e0) / (double) n, (MixFluid.BRACKETS - b0) / (double) n, Long.toHexString(hash));
                 }
             } finally {
                 MixFluid.COUNT = false;
