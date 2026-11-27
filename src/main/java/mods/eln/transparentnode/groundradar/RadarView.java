@@ -177,7 +177,8 @@ public final class RadarView {
                         if (wgt > 0.002) {
                             double a = (1 - Math.exp(-OPACITY * wgt * step)) * Math.min(1, t / NEAR);
                             double fog = Math.exp(-t / FOG);
-                            int col = band.byPeak(flags[c], dens[c], peak[c], ps) ? peakRgb[c] : rgb[c];
+                            boolean bp = band.byPeak(flags[c], dens[c], peak[c], ps);
+                            int col = band.colour(bp ? peakRgb[c] : rgb[c], bp);
                             r += (1 - alpha) * a * ((col >> 16) & 255) / 255.0 * fog;
                             g += (1 - alpha) * a * ((col >> 8) & 255) / 255.0 * fog;
                             b += (1 - alpha) * a * (col & 255) / 255.0 * fog;

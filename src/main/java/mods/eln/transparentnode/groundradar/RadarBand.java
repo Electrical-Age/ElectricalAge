@@ -20,7 +20,10 @@ public record RadarBand(int kind, double lo, double hi) {
     public static final double ORE = 4.0;
     /** In Everything, how much stronger an ore vein shows than in a density band (through faint ground it was a pale
      *  speck, AdventurAgent 1575661910995763301). */
-    public static final double ORE_GAIN = 2;
+    public static final double ORE_GAIN = 3;
+    /** In Everything, an ore vein's colour: saturated yellow, apart from oil's orange (the density ramp's pale ores
+     *  were the ground's beige). */
+    public static final int ORE_RGB = 0xFFF040;
 
     public static final RadarBand DEFAULT = of(EVERYTHING);
 
@@ -70,6 +73,11 @@ public record RadarBand(int kind, double lo, double hi) {
             return Math.max(FAINT, peak >= ORE ? Math.min(1, ORE_GAIN * peakShare) : 0);
         }
         return Math.max(RadarView.band(mean, lo, hi), RadarView.band(peak, lo, hi) * peakShare);
+    }
+
+    /** The colour a cell is drawn in: rgb from the palette, or for an ore vein in Everything, ORE_RGB. */
+    public int colour(int rgb, boolean byPeak) {
+        return kind == EVERYTHING && byPeak ? ORE_RGB : rgb;
     }
 
     /** True if a cell's densest sample, not its mean, is what shows (it is drawn in the peak's colour). */

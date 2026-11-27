@@ -46,10 +46,13 @@ class RadarBandTest {
         assertEquals(1, e.weight(GroundScan.OIL, 0.85, 0.85, 0), 1e-9);
         assertEquals(1, e.weight(GroundScan.BUILT, 2.0, 2.7, 0), 1e-9, "a structure");
         assertEquals(RadarBand.FAINT, e.weight(0, 2.7, 2.7, 0), 1e-9, "plain rock is faint");
-        assertEquals(0.6, e.weight(0, 2.8, 5.0, 0.3), 1e-9, "an iron vein shows by its share of the cell, ORE_GAIN times");
+        assertEquals(0.6, e.weight(0, 2.8, 5.0, 0.2), 1e-9, "an iron vein shows by its share of the cell, ORE_GAIN times");
         assertEquals(1, e.weight(0, 2.8, 5.0, 0.8), 1e-9, "at most fully");
         assertTrue(e.byPeak(0, 2.8, 5.0, 0.8));
         assertFalse(e.byPeak(0, 2.7, 2.7, 0));
+        assertEquals(RadarBand.ORE_RGB, e.colour(0x123456, true), "a vein in its own colour");
+        assertEquals(0x123456, e.colour(0x123456, false));
+        assertEquals(0x123456, RadarBand.of(RadarBand.ORES).colour(0x123456, true), "in the Ores band, the density ramp's");
     }
 
     @Test
