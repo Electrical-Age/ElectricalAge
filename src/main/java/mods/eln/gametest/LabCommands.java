@@ -83,7 +83,7 @@ public final class LabCommands {
                         .then(Commands.argument("r", IntegerArgumentType.integer(0, 512))
                             .executes(c -> netdump(c.getSource(), BlockPosArgument.getLoadedBlockPos(c, "pos"), IntegerArgumentType.getInteger(c, "r"))))))
                 // (Baughn 2026-11-12: the route debug kit and its replay; RouteDebug)
-                // (Track B0 spike: a level-run rig and driving it by command, so one client can ride and test alone)
+                // (a level-run rig and driving a drive by command, so one client can ride and test alone: track B checks)
                 .then(Commands.literal("servorig").then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .then(Commands.argument("travel", IntegerArgumentType.integer(2, 32)).executes(c -> {
                         BlockPos head = mods.eln.gametest.cases.ServoCases.labRig(c.getSource().getLevel(),
@@ -102,13 +102,6 @@ public final class LabCommands {
                         c.getSource().sendSuccess(() -> Component.literal("drive called to " + IntegerArgumentType.getInteger(c, "target")), false);
                         return 1;
                     }))))
-                // (Track B0 spike: a round cabin's wall as posts or a radial limit, lab only)
-                .then(Commands.literal("servocabin").then(Commands.argument("mode", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 2)).executes(c -> {
-                    mods.eln.robotics.servo.ElevatorCar.labCabin = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "mode");
-                    c.getSource().sendSuccess(() -> Component.literal("servo cabin mode " + mods.eln.robotics.servo.ElevatorCar.labCabin
-                        + " (0 walled, 1 ring of posts, 2 radial limit)"), false);
-                    return 1;
-                })))
                 .then(Commands.literal("debugkit").executes(c -> {
                     String res = mods.eln.node.voxel.RouteDebug.give(c.getSource().getPlayerOrException());
                     c.getSource().sendSuccess(() -> Component.literal(res), false);

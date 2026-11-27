@@ -31,7 +31,15 @@ public class ElevatorCarRenderer extends EntityRenderer<ElevatorCar, ElevatorCar
         /** The panel's slots (ElevatorCar.PANEL_*) and lamps. */
         final int[] kinds = new int[ElevatorPanel.SLOTS];
         final boolean[] lit = new boolean[ElevatorPanel.SLOTS];
+        /** A round cabin (track B): its door open, "out" (away from the rail) as an angle; the posts' angles. */
+        boolean round, doorOpen;
+        float outX, outZ;
+        /** Its drive's laid track as the rail beside the car (track B): points (m, from the car's drawn place), or empty. */
+        float[] rail = new float[0];
     }
+
+    /** The rail beside a laid track: how far from the car's centre (m), how high above its floor (the drive's top), how thick. */
+    static final float RAIL_OFF = 2f, RAIL_UP = 1.5f, RAIL_W = 0.25f;
 
     Obj3D obj;
 
@@ -59,6 +67,24 @@ public class ElevatorCarRenderer extends EntityRenderer<ElevatorCar, ElevatorCar
             s.kinds[i] = car.panelKind(i);
             s.lit[i] = car.panelLit(i);
         }
+        s.round = car.round();
+        s.rail = new float[0];
+        if (s.round && !Double.isNaN(p)) {
+            Vec3 out = car.towardRail(p).scale(-1);
+            s.outX = (float) out.x;
+            s.outZ = (float) out.z;
+            s.doorOpen = car.doorOpen();
+            var path = car.path();
+            int n = (int) Math.ceil(path.length() / 0.5) + 1;
+            s.rail = new float[3 * n];
+            for (int i = 0; i < n; i++) {
+                double q = Math.min(path.length(), i * 0.5);
+                Vec3 r = car.at(q).add(car.towardRail(q).scale(RAIL_OFF)).add(0, RAIL_UP, 0);
+                s.rail[3 * i] = (float) (r.x - s.x);
+                s.rail[3 * i + 1] = (float) (r.y - s.y);
+                s.rail[3 * i + 2] = (float) (r.z - s.z);
+            }
+        }
         s.yaw = switch (car.railSide) {
             case NORTH -> 90;
             case WEST -> 180;
@@ -70,7 +96,11 @@ public class ElevatorCarRenderer extends EntityRenderer<ElevatorCar, ElevatorCar
     /** The cabin reaches 3 m up, its guide shoes into the rail's column: cull by that, not by the 1 px plate. */
     @Override
     protected AABB getBoundingBoxForCulling(ElevatorCar car, float partial) {
-        return car.getBoundingBox().inflate(0.2, 0, 0.2).expandTowards(0, ElevatorCar.CABIN, 0);
+        AABB b = car.getBoundingBox().inflate(0.2, 0, 0.2).expandTowards(0, ElevatorCar.CABIN, 0);
+        var path = car.path();
+        if (car.round() && path != null)   // (its track's rail too: drawn with the car)
+            for (double q = 0; q <= path.length(); q += 2) b = b.minmax(new AABB(car.at(q), car.at(q)).inflate(RAIL_OFF + 0.5, RAIL_UP + 0.5, RAIL_OFF + 0.5));
+        return b;
     }
 
     /**
@@ -125,8 +155,85 @@ public class ElevatorCarRenderer extends EntityRenderer<ElevatorCar, ElevatorCar
         for (int i = 0; i < 12; i += 3) GL11.glVertex3f(v[i], v[i + 1], v[i + 2]);
     }
 
+    /**
+     * A round cabin (track B), world frame from the plate's bottom centre: a floor disc, ElevatorCar.POSTS thin posts on
+     * the rim (none in the open door, away from the rail), a ring at their tops and a roof disc.
+     */
+    static void drawRound(State s) {
+        UtilsClient.disableTexture();
+        float r = (float) ElevatorCar.HALF, top = (float) (ElevatorCar.CABIN - ElevatorCar.WALL), h = (float) ElevatorCar.POST_HALF;
+        GL11.glColor3f(0.42f, 0.43f, 0.45f);
+        disc(r, (float) ElevatorCar.THICK, true);
+        GL11.glColor3f(0.30f, 0.31f, 0.33f);
+        for (int k = 0; k < ElevatorCar.POSTS; k++) {
+            double th = 2 * Math.PI * k / ElevatorCar.POSTS;
+            float x = (float) (ElevatorCar.POST_R * Math.cos(th)), z = (float) (ElevatorCar.POST_R * Math.sin(th));
+            if (s.doorOpen && Math.cos(th) * s.outX + Math.sin(th) * s.outZ > Math.cos(ElevatorCar.DOOR_HALF_ANGLE)) continue;
+            box(x - h, x + h, (float) ElevatorCar.THICK, top, z - h, z + h);
+        }
+        GL11.glColor3f(0.36f, 0.37f, 0.40f);
+        disc(r, top, false);
+        disc(r, (float) ElevatorCar.CABIN, true);
+        GL11.glColor3f(1f, 1f, 1f);
+        UtilsClient.enableTexture();
+    }
+
+    /** A flat disc of radius r at height y, facing up (or down). */
+    static void disc(float r, float y, boolean up) {
+        int n = 32;
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glNormal3f(0, up ? 1 : -1, 0);
+        for (int i = 0; i < n; i++) {
+            double a0 = 2 * Math.PI * i / n, a1 = 2 * Math.PI * (i + 1) / n;
+            float x0 = (float) (r * Math.cos(a0)), z0 = (float) (r * Math.sin(a0)), x1 = (float) (r * Math.cos(a1)), z1 = (float) (r * Math.sin(a1));
+            if (up) quad(0, y, 0, x1, y, z1, x0, y, z0, 0, y, 0);
+            else quad(0, y, 0, x0, y, z0, x1, y, z1, 0, y, 0);
+        }
+        GL11.glEnd();
+    }
+
+    /** The laid track's rail: a square beam along s.rail's points. */
+    static void drawRail(State s) {
+        if (s.rail.length < 6) return;
+        UtilsClient.disableTexture();
+        GL11.glColor3f(0.55f, 0.56f, 0.58f);
+        float w = RAIL_W / 2;
+        GL11.glBegin(GL11.GL_QUADS);
+        for (int i = 0; i + 5 < s.rail.length; i += 3) {
+            float ax = s.rail[i], ay = s.rail[i + 1], az = s.rail[i + 2], bx = s.rail[i + 3], by = s.rail[i + 4], bz = s.rail[i + 5];
+            float dx = bx - ax, dz = bz - az, len = (float) Math.sqrt(dx * dx + dz * dz);
+            float sx = len < 1e-6f ? w : -dz / len * w, sz = len < 1e-6f ? 0 : dx / len * w;   // (sideways, horizontal)
+            GL11.glNormal3f(0, 1, 0);
+            quad(ax - sx, ay + w, az - sz, ax + sx, ay + w, az + sz, bx + sx, by + w, bz + sz, bx - sx, by + w, bz - sz);
+            GL11.glNormal3f(0, -1, 0);
+            quad(ax - sx, ay - w, az - sz, bx - sx, by - w, bz - sz, bx + sx, by - w, bz + sz, ax + sx, ay - w, az + sz);
+            GL11.glNormal3f(sx / w, 0, sz / w);
+            quad(ax + sx, ay - w, az + sz, bx + sx, by - w, bz + sz, bx + sx, by + w, bz + sz, ax + sx, ay + w, az + sz);
+            GL11.glNormal3f(-sx / w, 0, -sz / w);
+            quad(ax - sx, ay - w, az - sz, ax - sx, ay + w, az - sz, bx - sx, by + w, bz - sz, bx - sx, by - w, bz - sz);
+        }
+        GL11.glEnd();
+        GL11.glColor3f(1f, 1f, 1f);
+        UtilsClient.enableTexture();
+    }
+
     @Override
     public void submit(State s, PoseStack pose, SubmitNodeCollector out, CameraRenderState camera) {
+        if (s.round) {   // (track B: the round cabin and its rail, in the world's frame)
+            GlFrame frame = GlSubmit.open(pose);
+            try {
+                UtilsClient.glDefaultColor();
+                drawRound(s);
+                drawRail(s);
+            } catch (RuntimeException e) {
+                ElnRenderErrors.report("elevator car", e);
+            } finally {
+                GlFrame.close();
+            }
+            GlSubmit.submit(frame, pose, out, s.lightCoords);
+            super.submit(s, pose, out, camera);
+            return;
+        }
         if (obj == null) obj = Eln.obj.getObj("elevatorcar");
         if (obj == null) return;
         pose.pushPose();

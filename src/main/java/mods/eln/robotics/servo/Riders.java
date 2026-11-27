@@ -63,7 +63,7 @@ public final class Riders {
     }
 
     /**
-     * Track B0 spike: a round cabin's radial limit. A rider inside the cylinder (centre cx, cz; inside radius rin; floor y0
+     * A round cabin's radial limit (track B; AdventurAgent's B0 spike chose it with rim posts). A rider inside the cylinder (centre cx, cz; inside radius rin; floor y0
      * to roof y1) whose box reaches past rin is put back along the radius, unless it is in the open door: within
      * doorHalf (rad) of the door's direction (doorX, doorZ, a unit vector) while the door is open. Inside means the box's
      * centre is within rin + 0.25 (so a wall stops it only from inside: one-sided). Returns the horizontal shift, or null.

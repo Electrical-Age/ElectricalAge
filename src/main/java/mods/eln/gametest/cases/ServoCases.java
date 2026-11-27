@@ -58,6 +58,7 @@ public final class ServoCases {
         cases.add(new RailPlacement());
         cases.add(new TrackKitLays());
         cases.add(new TrackRuns());
+        cases.add(new TrackRoundCabin());
     }
 
     static final int TRAVEL = 6;
@@ -1435,6 +1436,98 @@ public final class ServoCases {
             ctx.check("track runs: on to the end", offEnd < 1e-6, "" + offEnd);
             ctx.check("track runs: a floor ghost at the end", ghostEnd, "");
             ctx.check("track runs: never over its top speed", maxV <= 2.0 + 1e-6, "" + maxV);
+        }
+    }
+
+    /**
+     * Track B: on a curved track the cabin is round (Baughn): its rim posts are solid while it moves, the door's (away
+     * from the rail) open at a stop, the walled cabin's sides gone; a pig pushed out past the inside radius while it
+     * moves is put back inside (the radial limit, which the server keeps for creatures).
+     */
+    static final class TrackRoundCabin extends Room {
+        public String id() {
+            return "servo_track_round_cabin";
+        }
+
+        @Override
+        public int width() {
+            return 24;
+        }
+
+        @Override
+        public int height() {
+            return 8;
+        }
+
+        @Override
+        public int depth() {
+            return 24;
+        }
+
+        @Override
+        public int floorDepth() {
+            return 24;
+        }
+
+        public int ticks() {
+            return 120;
+        }
+
+        Shaft s;
+        boolean round;
+        int postsStopped = -1, postsMoving = -1, walls = -1;
+        double pigR = Double.NaN;
+        Pig pig;
+
+        static int solidPosts(ElevatorCar c) {
+            int n = 0;
+            for (var w : c.walls) if (w.postForTest() && w.solidForTest()) n++;
+            return n;
+        }
+
+        public void build(TestContext ctx) {
+            s = new Shaft(ctx, ctx.at(2, 1, 21), 0, null, 0);
+            var p = ctx.player();
+            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+            TrackKitLays.layDemo(ctx, p, s, mods.eln.node.voxel.KitSupply.of(mods.eln.node.voxel.TrackKitItem.kit(64 * 16)));
+            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+            watch(dt -> {
+                tick++;
+                var d = s.drive(ctx);
+                var c = d.carId == null ? null : (ElevatorCar) ctx.level().getEntity(d.carId);
+                if (c == null) return;
+                if (tick == 10) {
+                    round = c.round();
+                    postsStopped = solidPosts(c);
+                    int w = 0;
+                    for (var x : c.walls) if (!x.postForTest() && x.solidForTest()) w++;
+                    walls = w;   // (the roof only)
+                    var t = d.track();
+                    if (t != null) d.command(t.path().stops()[1]);
+                }
+                if (tick == 30) {
+                    postsMoving = solidPosts(c);
+                    pig = net.minecraft.world.entity.EntityTypes.PIG.create(ctx.level(), EntitySpawnReason.TRIGGERED);
+                    pig.setNoAi(true);
+                    Vec3 side = c.towardRail(c.posNow()).scale(-1.3);   // (out towards the door, past the inside radius)
+                    pig.snapTo(c.getX() + side.x, c.getY() + ElevatorCar.THICK, c.getZ() + side.z, 0, 0);
+                    ctx.level().addFreshEntity(pig);
+                }
+                if (tick == 40 && pig != null) {
+                    pigR = Math.hypot(pig.getX() - c.getX(), pig.getZ() - c.getZ());
+                    pig.discard();
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            ctx.line("round cabin: round " + round + ", posts stopped " + postsStopped + ", moving " + postsMoving + ", other walls " + walls + ", pig at r " + pigR);
+            ctx.check("round cabin: on a curved track the cabin is round", round, "");
+            ctx.check("round cabin: the walled sides gone, the roof kept", walls == 1, "" + walls);
+            ctx.check("round cabin: all posts solid while it moves", postsMoving == ElevatorCar.POSTS, "" + postsMoving);
+            ctx.check("round cabin: the door's posts open at a stop", postsStopped > 0 && postsStopped < ElevatorCar.POSTS - 2, "" + postsStopped);
+            ctx.check("round cabin: a pig past the inside radius is put back", pigR <= ElevatorCar.ROUND_IN - 0.3 + 1e-6, "" + pigR);
         }
     }
 }

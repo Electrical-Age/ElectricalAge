@@ -69,24 +69,20 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     public @Nullable BlockPos head;
     int checkIn = 40;
     public final ElevatorPanel panel;
-    /** The cabin's back wall (on the rail side), its left and right walls, and its roof; the front is open. Then (Track B0
-     *  spike, lab only) a ring of posts for a round cabin; which are solid depends on cabinMode(). */
+    /** The cabin's back wall (on the rail side), its left and right walls, and its roof; the front is open. Then a ring
+     *  of thin posts on the plate's rim for a round cabin (round()): which are solid depends on the cabin. */
     public final CabinWall[] walls;
 
-    /** Track B0 spike (lab only): which cabin wall (CABIN_WALLED, CABIN_RING: posts, CABIN_CLAMP: a radial limit). Server-wide,
-     *  set by /elnlab servocabin; each car syncs it to its clients. */
-    public static volatile int labCabin = 0;
-    public static final int CABIN_WALLED = 0, CABIN_RING = 1, CABIN_CLAMP = 2;
-    /** Ring posts: how many, on what radius (m, to their centres), half their width (m); the door: posts within this angle of
-     *  "out" (away from the rail) open while the car is stopped. */
-    static final int POSTS = 16;
-    static final double POST_R = 1.3, POST_HALF = 0.18, DOOR_HALF_ANGLE = Math.toRadians(40);
+    /**
+     * A round cabin's posts (track B, Baughn 2026-11-27: round cabins on curved tracks; AdventurAgent's B0 spike): how many,
+     * on what radius (m, to their centres: the plate's rim), half their width; the door: posts within this angle of
+     * "out" (away from the rail) open while the car stands still. Inside, riders meet the radial limit (ROUND_IN), not
+     * the posts (whose inner edge is there): the posts keep others out and stop reaching through the wall.
+     */
+    public static final int POSTS = 24;
+    public static final double POST_R = HALF - 0.03, POST_HALF = 0.03, DOOR_HALF_ANGLE = Math.toRadians(40);
     /** A round cabin's inside radius (m) for the radial limit: the plate's half width less a wall. */
     public static final double ROUND_IN = HALF - WALL;
-
-    public int cabinMode() {
-        return entityData.get(CABIN_MODE);
-    }
 
     public ElevatorCar(EntityType<? extends ElevatorCar> type, Level level) {
         super(type, level);
@@ -98,8 +94,8 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
             new CabinWall(this, -HALF, -HALF + WALL, THICK, CABIN - WALL, -HALF + WALL, HALF),
             new CabinWall(this, HALF - WALL, HALF, THICK, CABIN - WALL, -HALF + WALL, HALF),
             new CabinWall(this, -HALF, HALF, CABIN - WALL, CABIN, -HALF, HALF),
-            post(0), post(1), post(2), post(3), post(4), post(5), post(6), post(7),
-            post(8), post(9), post(10), post(11), post(12), post(13), post(14), post(15)};
+            post(0), post(1), post(2), post(3), post(4), post(5), post(6), post(7), post(8), post(9), post(10), post(11),
+            post(12), post(13), post(14), post(15), post(16), post(17), post(18), post(19), post(20), post(21), post(22), post(23)};
         // (a client level gives no entity ids, and its part list compares parts by id: without one, the car leaving
         // the client threw and disconnected it, AdventurAgent 2026-11-05. Nothing is sent to a wall, so a client-only
         // id, below every id a server gives, will do.)
@@ -108,12 +104,47 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         blocksBuilding = true;
     }
 
-    /** Ring post k, at angle k/POSTS of a turn from "out" (away from the rail), anticlockwise seen from above. */
+    /** Ring post k, at world angle k/POSTS of a turn from +x (a cylinder looks the same at any heading: the posts never turn). */
     private CabinWall post(int k) {
-        double th = 2 * Math.PI * k / POSTS, a = POST_R * Math.sin(th), o = POST_R * Math.cos(th);
-        boolean door = Math.abs(Math.atan2(Math.sin(th), Math.cos(th))) < DOOR_HALF_ANGLE;
-        return new CabinWall(this, a - POST_HALF, a + POST_HALF, THICK, CABIN - WALL, o - POST_HALF, o + POST_HALF,
-            door ? CabinWall.Kind.DOOR_POST : CabinWall.Kind.POST);
+        double th = 2 * Math.PI * k / POSTS, x = POST_R * Math.cos(th), z = POST_R * Math.sin(th);
+        return CabinWall.post(this, x, z, th);
+    }
+
+    /** A round cabin: on a curved track (Baughn: walled cabins keep to straight, axis-aligned paths). */
+    public boolean round() {
+        var p = path();
+        return p != null && !p.axisAligned();
+    }
+
+    /** Where it is along its path now (by the drive's clock on the server, its own on a client); NaN without a segment. */
+    public double posNow() {
+        if (segment == null) return Double.NaN;
+        return segment.position(level().isClientSide() ? clientT : serverNow - segment.startTick());
+    }
+
+    /** The horizontal unit to the left of travel at s (railSide's side when the path runs straight up or down). */
+    Vec3 left(double s) {
+        var p = path();
+        Vec3 t = p == null ? Vec3.ZERO : p.tangent(s);
+        double h = Math.sqrt(t.x * t.x + t.z * t.z);
+        if (h < 1e-6) return new Vec3(railSide.getStepX(), 0, railSide.getStepZ());
+        return new Vec3(t.z / h, 0, -t.x / h);
+    }
+
+    /** +1 if the rail is to the left of travel, -1 if to the right: the side of the drive at the start. */
+    double railSign() {
+        Vec3 l = left(0);
+        return l.x * railSide.getStepX() + l.z * railSide.getStepZ() < -1e-6 ? -1 : 1;
+    }
+
+    /** The horizontal unit from the car's centre towards its rail at s. */
+    public Vec3 towardRail(double s) {
+        return left(s).scale(railSign());
+    }
+
+    /** Is the round cabin's door open (it stands still)? */
+    public boolean doorOpen() {
+        return stopped();
     }
 
     // ---- where it is
@@ -235,8 +266,7 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     @Override
     public void tick() {
         // no physics, no vanilla motion: the drive places it (server), the client's carry does (client)
-        if (!level().isClientSide() && entityData.get(CABIN_MODE) != labCabin) entityData.set(CABIN_MODE, labCabin);
-        for (CabinWall w : walls) w.follow();   // (B0 spike: door posts open and close as it stops and starts)
+        for (CabinWall w : walls) w.follow();   // (a round cabin's door posts open and close as it stops and starts)
         if (!level().isClientSide() && --checkIn <= 0) {
             checkIn = 40;
             if (owner() == null) discard();   // (its drive is gone, or has another car)
@@ -269,8 +299,7 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         SynchedEntityData.defineId(ElevatorCar.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
     static final net.minecraft.network.syncher.EntityDataAccessor<Integer> PANEL_LIT =
         SynchedEntityData.defineId(ElevatorCar.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
-    static final net.minecraft.network.syncher.EntityDataAccessor<Integer> CABIN_MODE =
-        SynchedEntityData.defineId(ElevatorCar.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+
     public static final int PANEL_NONE = 0, PANEL_BUTTON = 1, PANEL_LIGHT = 2;
 
     /** Server: show the panel's slots (kinds) and lamps (a lit bit each). */
@@ -296,7 +325,7 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     protected void defineSynchedData(SynchedEntityData.Builder data) {
         data.define(PANEL_KINDS, 0);
         data.define(PANEL_LIT, 0);
-        data.define(CABIN_MODE, 0);
+
     }
 
     @Override

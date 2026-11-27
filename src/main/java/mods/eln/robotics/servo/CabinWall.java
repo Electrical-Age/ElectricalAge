@@ -22,11 +22,20 @@ import org.jspecify.annotations.Nullable;
 public class CabinWall extends PartEntity<ElevatorCar> {
     /** Its box in the car's frame (m): across (toward railSide's clockwise), up from the plate's bottom, out from the rail. */
     final double a0, a1, y0, y1, o0, o1;
-    /** What it is (Track B0 spike): a side of the walled cabin, the roof (always), or a round cabin's post (a door post
-     *  opens while the car is stopped). */
-    enum Kind { WALL, ROOF, POST, DOOR_POST }
+    /** What it is: a side of the walled cabin, the roof (both cabins), or a round cabin's post (track B). */
+    enum Kind { WALL, ROOF, POST }
 
     final Kind kind;
+    /** A post's world angle (rad from +x towards +z): the door posts are those near "out" as the car moves on. */
+    double angle;
+
+    /** A round cabin's post at (x, z) from the car's centre (world frame: a cylinder needn't turn), at angle th. */
+    static CabinWall post(ElevatorCar car, double x, double z, double th) {
+        double h = ElevatorCar.POST_HALF;
+        CabinWall w = new CabinWall(car, x - h, x + h, ElevatorCar.THICK, ElevatorCar.CABIN - ElevatorCar.WALL, z - h, z + h, Kind.POST);
+        w.angle = th;
+        return w;
+    }
 
     public CabinWall(ElevatorCar car, double a0, double a1, double y0, double y1, double o0, double o1) {
         this(car, a0, a1, y0, y1, o0, o1, y0 >= ElevatorCar.CABIN - ElevatorCar.WALL - 1e-9 ? Kind.ROOF : Kind.WALL);
@@ -55,21 +64,38 @@ public class CabinWall extends PartEntity<ElevatorCar> {
 
     /** Its box with the car's plate at `at` (bottom centre). */
     AABB boxAt(Vec3 at) {
+        if (kind == Kind.POST) return new AABB(at.x + a0, at.y + y0, at.z + o0, at.x + a1, at.y + y1, at.z + o1);   // (world frame)
         Direction rail = getParent().railSide, out = rail.getOpposite(), across = rail.getClockWise();
         double ax0 = across.getStepX() * a0 + out.getStepX() * o0, ax1 = across.getStepX() * a1 + out.getStepX() * o1;
         double az0 = across.getStepZ() * a0 + out.getStepZ() * o0, az1 = across.getStepZ() * a1 + out.getStepZ() * o1;
         return new AABB(at.x + ax0, at.y + y0, at.z + az0, at.x + ax1, at.y + y1, at.z + az1);
     }
 
-    /** Is it there in the car's cabin mode (and a door post: only while the car moves)? */
+    /** GameTests: is it there now (round cabin posts, walled sides)? A post (else a side or the roof)? */
+    public boolean solidForTest() {
+        return active();
+    }
+
+    public boolean postForTest() {
+        return kind == Kind.POST;
+    }
+
+    /** A post within the door's angle of "out" (away from the rail, where the car is now). */
+    boolean inDoor(ElevatorCar c) {
+        double s = c.posNow();
+        Vec3 out = c.towardRail(Double.isNaN(s) ? 0 : s).scale(-1);
+        double d = Math.cos(angle) * out.x + Math.sin(angle) * out.z;
+        return d > Math.cos(ElevatorCar.DOOR_HALF_ANGLE);
+    }
+
+    /** Is it there in the car's cabin (a walled side, or a round cabin's post, not in its open door)? */
     boolean active() {
         ElevatorCar c = getParent();
         if (c == null) return false;
         return switch (kind) {
             case ROOF -> true;
-            case WALL -> c.cabinMode() == ElevatorCar.CABIN_WALLED;
-            case POST -> c.cabinMode() == ElevatorCar.CABIN_RING;
-            case DOOR_POST -> c.cabinMode() == ElevatorCar.CABIN_RING && !c.stopped();
+            case WALL -> !c.round();
+            case POST -> c.round() && !(c.doorOpen() && inDoor(c));
         };
     }
 
