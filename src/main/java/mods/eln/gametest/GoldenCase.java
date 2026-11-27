@@ -78,6 +78,12 @@ final class GoldenCase implements TestCase {
         // the 230V compressor gained latex ports and the dandelion recipe (the rubber chain, 2026-11-07): its own class
         "200V Compressor", java.util.Set.of("nominalP", "outStackCount", "boosterEfficiency", "boosterSpeedUp"));
 
+    /**
+     * Plain 1.12 items that gained a tooltip (Baughn 2026-11-27, the wording pass): now the WithComment subclass of
+     * their 1.12 class; their numbers are compared as before.
+     */
+    static final java.util.Set<String> COMMENTED = java.util.Set.of("Multimeter", "Thermometer", "Universal-Meter");
+
     /** Fields changed on purpose (golden/README.md): name -> field -> why. */
     static final Map<String, Map<String, String>> CHANGED = changed();
 
@@ -271,7 +277,10 @@ final class GoldenCase implements TestCase {
             ctx.check("golden " + name + ": recreated, kept numbers as in 1.12", diff.length() == 0, diff.toString());
             return 1;
         }
-        if (!g.has("descriptorClass") || !g.get("descriptorClass").getAsString().endsWith("." + descriptor.getClass().getSimpleName())) {
+        String nowClass = descriptor.getClass().getSimpleName();
+        if (COMMENTED.contains(name) && descriptor instanceof mods.eln.generic.GenericItemUsingDamageDescriptorWithComment)
+            nowClass = descriptor.getClass().getSuperclass().getSimpleName();
+        if (!g.has("descriptorClass") || !g.get("descriptorClass").getAsString().endsWith("." + nowClass)) {
             ctx.check("golden " + name + ": same descriptor class", false,
                 (g.has("descriptorClass") ? g.get("descriptorClass").getAsString() : "none") + " vs " + descriptor.getClass().getName());
             return 1;

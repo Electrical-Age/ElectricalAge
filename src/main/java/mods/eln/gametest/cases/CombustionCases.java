@@ -326,18 +326,18 @@ public final class CombustionCases {
                         ctx.check(id + ": its firebox stays within 5 Pa of the air", Math.abs(r.gaugeS / t) < 5 && r.gaugeMax < 10, String.format("%.1f Pa (max %.1f)", r.gaugeS / t, r.gaugeMax));
                         ctx.check(id + ": its smoke carries SMOKE_SHARE of the flame over the ambient (within 10 %)",
                             Math.abs(share / mods.eln.fluid.Flue.SMOKE_SHARE - 1) < 0.10, String.format("%.3f", share));
-                        ctx.check(id + ": Jade says natural draught", r.jade.contains("natural draught"), r.jade);
+                        ctx.check(id + ": Jade says natural draught", r.jade.contains("Air=Natural draught"), r.jade);
                     }
                     case "piped to the open air" -> ctx.check(id + ": piped, its air doesn't hunt (the ratio within 0.1 over the window)", r.ratioMax - r.ratioMin < 0.1,
                         String.format("%.2f..%.2f", r.ratioMin, r.ratioMax));
                     case "flue held at +75 Pa" -> ctx.check(id + ": a flue backed up half the draught fires it less, but it burns (0.5-0.85 x)", fire > 0.5 && fire < 0.85, String.format("%.3f", fire));
                     case "flue held at +300 Pa" -> {
                         ctx.check(id + ": a flue backed up past the draught starves it (under 0.1 x)", fire < 0.1, String.format("%.3f", fire));
-                        ctx.check(id + ": Jade says starved", r.jade.contains("starved"), r.jade);
+                        ctx.check(id + ": Jade says starved", r.jade.contains("Air=Starved"), r.jade);
                     }
                     case "forced, unpiped" -> {
                         ctx.check(id + ": forced air at DAMPER_DP fires FORCED_MAX x (within 4 %)", Math.abs(fire / FuelHeatFurnaceElement.FORCED_MAX - 1) < 0.04, String.format("%.3f", fire));
-                        ctx.check(id + ": Jade says forced", r.jade.contains("forced"), r.jade);
+                        ctx.check(id + ": Jade says forced", r.jade.contains("Air=Forced"), r.jade);
                     }
                     case "forced, piped to the open air" -> {
                         ctx.check(id + ": air and fuel in = flue gas out of the firebox (within 1 %)", air > 0 && Math.abs(out / (air + fuel) - 1) < 0.01,
@@ -764,7 +764,12 @@ public final class CombustionCases {
                 var v = f[i].getVessel();
                 var w = f[i].getWindbox();
                 long fuelEdges = mods.eln.fluid.FluidWorld.edgesOf(v).stream().filter(e -> e.kind != FluidEdge.Kind.CHECK || e.gasOnly == false).count();
-                boolean fuel = String.valueOf(f[i].getWaila()).contains("top flange");
+                // (the pipe on its top flange is in its tank's network: Jade no longer says where its fuel comes from)
+                var topPipe = ctx.voxelByEntity(f[i].node.coordonate.pos().above());
+                boolean fuel = false;
+                if (topPipe != null) for (var part : topPipe.parts)
+                    if (part instanceof mods.eln.node.voxel.PipePart pp && pp.fluid != null)
+                        fuel |= mods.eln.fluid.FluidWorld.networkOf(pp.fluid) == mods.eln.fluid.FluidWorld.networkOf(v) && mods.eln.fluid.FluidWorld.networkOf(v) != null;
                 var dam = f[i].getDamper();
                 boolean air = mods.eln.fluid.FluidWorld.edgesOf(w).stream().anyMatch(e -> dam == null || e != dam.edge);
                 var frontPipe = ctx.voxelByEntity(f[i].node.coordonate.pos().relative(FRONTS[i].toEnumFacing()));

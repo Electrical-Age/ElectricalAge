@@ -51,7 +51,7 @@ public final class ArmourEnchantCases {
                     net.minecraft.world.item.component.TooltipDisplay.DEFAULT, c -> lines.add(c.getString()),
                     net.minecraft.world.item.TooltipFlag.NORMAL);
                 String all = String.join(" | ", lines);
-                ctx.check("E-Coal tooltip: charge 50 % and protection 30 % max", all.contains("(50%)") && all.contains("up to 30%"), all);
+                ctx.check("E-Coal tooltip: charge 50 % and protection 30 % max", all.contains("(50%)") && all.contains("max 30%"), all);
             }
         });
     }

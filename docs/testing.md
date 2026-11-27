@@ -183,7 +183,7 @@ machine, floor ghost, a mob carried, the cabin's walls; structure `floor_11x12x9
 ### Golden data (`golden/1.12/*.json`, see `golden/README.md`)
 
 - `GoldenCase` (`golden_descriptors`): every descriptor's primitive fields vs `inventory.json`. Lists: `IGNORED`
-  (render/1.12-only fields), `RECREATED` (X-Ray Scanner: only listed fields compared), `CHANGED` (per item and field, with
+  (render/1.12-only fields), `RECREATED` (X-Ray Scanner: only listed fields compared), `COMMENTED` (plain items now with a tooltip: their 1.12 class's WithComment subclass), `CHANGED` (per item and field, with
   reason), `NEW_IN_26` (registry keys with no 1.12 twin), `NEW_IN_26_NAMES`.
 - `GoldenRecipesCase` (`golden_recipes`): datagen recipes vs `recipes.json` (minecraft:/eln: ingredients only). Lists:
   `DEFERRED`, `CHANGED`, `REMOVED`, `ORES_TO_CHUNKS`, `NOW_VANILLA`.

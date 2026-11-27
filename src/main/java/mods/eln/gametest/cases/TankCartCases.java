@@ -147,7 +147,7 @@ public final class TankCartCases {
                 line += name + ": plain " + withPlain + ", filled " + withFilled + "; ";
                 // (its tooltip: the tank's rating and where it fills; with contents only those and the pressure, as the tank item's)
                 List<String> tip = tooltip(ctx, out);
-                if (tip.stream().noneMatch(l -> l.startsWith("Holds "))) bad.append(name).append(" tooltip ").append(tip).append("; ");
+                if (tip.stream().noneMatch(l -> l.startsWith("Capacity: "))) bad.append(name).append(" tooltip ").append(tip).append("; ");
                 ItemStack withContents = out.copy();
                 withContents.set(ElnRegistry.TANK_CONTENTS.get(), TankItemCases.contents(filled));
                 List<String> tip2 = tooltip(ctx, withContents);
@@ -767,7 +767,7 @@ public final class TankCartCases {
                 masses(after) + " vs " + masses(before));
             ctx.check("tank cart: a station with no cart is out of the fluid world", !FluidWorld.devices().contains(l.station) && l.station.signal() == 0, "");
             ctx.check("tank cart: its two flanges are there for the pipe kit", ports == 2, ports + "");
-            ctx.check("tank cart: Jade on a station with no cart says so", "none docked".equals(l.station.waila().get("Cart")), l.station.waila().toString());
+            ctx.check("tank cart: Jade on a station with no cart says so", "None docked".equals(l.station.waila().get("Cart")), l.station.waila().toString());
         }
     }
 }

@@ -399,10 +399,10 @@ public final class ShaftPlantCases {
             String jade = "" + c.getWaila().get(mods.eln.i18n.I18N.tr("Pump outlet"));
             if (boilerPa <= mods.eln.oil.CondensatePump.RATED_OVER_NOMINAL * mods.eln.mechanical.SteamTurbineSpec.HP.nominalPa) {
                 ctx.check(id + ": it returns more than a full HP's condensate", rate > hp, String.format("%.1f g/s", rate * 1000));
-                ctx.check(id + ": Jade: the pump's back-pressure and its share of rated flow", jade.startsWith("against") && jade.endsWith("of its rated flow"), jade);
+                ctx.check(id + ": Jade: the pump's back-pressure and its share of rated flow", jade.matches("\\d+\\.\\d bar \\(\\d+% flow\\)"), jade);
             } else {
                 ctx.check(id + ": past its shut-off it returns nothing (under 1 g/s)", rate < 0.001, String.format("%.2f g/s", rate * 1000));
-                ctx.check(id + ": Jade: shut off, needs a pipe pump", jade.startsWith("against 41") && jade.endsWith("shut off, needs a pipe pump"), jade);
+                ctx.check(id + ": Jade: shut off, needs a pipe pump", jade.startsWith("41") && jade.endsWith("(stalled — head too high)"), jade);
             }
         }
     }

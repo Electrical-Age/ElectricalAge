@@ -348,8 +348,8 @@ public final class RubberCases {
                     c.check("carbon burner: ... while it burnt the residue over it at 20 mB/s, and no more than it took", Math.abs(d.burnt() - 300) < 30 && Math.abs(d.inlet.feedMb() + d.burnt() - 2000) < 1, st);
                 }
                 case "wrong_oil" -> {
-                    c.check("carbon burner: diesel in its vessel isn't burnt, and it says what blocks it", burntBlocked == 0 && blocked.contains("blocked") && blocked.contains("diesel"), burntBlocked + " mB burnt, " + blocked);
-                    c.check("carbon burner: ... residue on top makes the layer residue, and it burns", d.burnt() > 40 && String.valueOf(d.getWaila()).contains("burning"), st);
+                    c.check("carbon burner: diesel in its vessel isn't burnt, and it says what blocks it", burntBlocked == 0 && blocked.contains("Wrong fluid") && blocked.contains("diesel"), burntBlocked + " mB burnt, " + blocked);
+                    c.check("carbon burner: ... residue on top makes the layer residue, and it burns", d.burnt() > 40 && String.valueOf(d.getWaila()).contains("State=Burning"), st);
                 }
                 default -> {
                     c.check("carbon burner: an old save loads", legacy.isEmpty(), legacy);

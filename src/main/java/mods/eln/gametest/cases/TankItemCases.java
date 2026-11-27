@@ -220,7 +220,7 @@ public final class TankItemCases {
                 || tip.get(1).contains("°C"))
                 bad.append("tooltip not contents and pressure only: ").append(tip).append("; ");
             List<String> plainTip = TooltipCases.TooltipCase.lines(tier.newItemStack());
-            if (plainTip.stream().noneMatch(l -> l.startsWith("Holds "))) bad.append("an empty tank lost its usual tooltip: ").append(plainTip).append("; ");
+            if (plainTip.stream().noneMatch(l -> l.startsWith("Capacity: "))) bad.append("an empty tank lost its usual tooltip: ").append(plainTip).append("; ");
             ItemStack back = throughCodecs(ctx, s, bad);
             TankElement t2 = place(ctx, back, p);
             if (t2 == null) {

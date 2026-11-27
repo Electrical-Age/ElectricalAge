@@ -215,8 +215,8 @@ public final class FuelGeneratorCases {
                 ctx.line(id + ": " + what);
                 ctx.check(id + ": a thirteenth of residue (index 0.077, over " + FuelQuality.PISTON_CHOKE + ") chokes it: it stops, a click won't start it",
                     ranClean && stoppedChoked && refusedChoked && 1.0 / 13 >= FuelQuality.PISTON_CHOKE, what);
-                ctx.check(id + ": Jade's State says it is choked and the fix; its fuel quality says it chokes", state.startsWith("choked: too much heavy oil or residue")
-                    && state.contains("dilute or break to empty") && quality.startsWith("chokes engine"), state + " / " + quality);
+                ctx.check(id + ": Jade's State says it is choked and the fix; its fuel quality says it chokes", state.startsWith("Choked (heavy fuel)")
+                    && quality.startsWith("chokes engine"), state + " / " + quality);
                 ctx.check(id + ": diluted with gasoline (index 0.04), a click starts it at 92 %", restarted && gen.running() && !gen.choked()
                     && Math.abs(gen.fuel.power() - (1 - 2.0 / 25)) < 0.01, what);
                 return;

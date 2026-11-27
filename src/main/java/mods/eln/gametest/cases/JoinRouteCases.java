@@ -411,7 +411,7 @@ public final class JoinRouteCases {
     /**
      * A second kit click right after laying a pipe tee (AdventurAgent saw "Its port already has a pipe" and suspected
      * its tool clicked twice): on the tee's join point it starts a new route there, a branch; on a block's face where two
-     * pipe ends meet (a coupled port) it says "Its port already has a pipe", as a machine's piped port does.
+     * pipe ends meet (a coupled port) it says "Port already connected", as a machine's piped port does.
      */
     static final class ClickedAgain implements TestCase {
         String onTee = "", onPort = "";
@@ -469,7 +469,7 @@ public final class JoinRouteCases {
         public void measure(TestContext c) {
             c.check("tee clicked again: the tee was laid", laid, "");
             c.check("tee clicked again: on its join point, a new route starts there", onTee.startsWith("Pipe route started"), onTee);
-            c.check("tee clicked again: on a coupled pipe end, the port has a pipe", onPort.equals("Its port already has a pipe"), onPort);
+            c.check("tee clicked again: on a coupled pipe end, the port has a pipe", onPort.equals("Port already connected"), onPort);
         }
     }
 }

@@ -2328,12 +2328,12 @@ public final class OilCases {
                     String.format("%.1f of %.1f g", pumped * 1000, steam * 1000));
                 ctx.check(id + ": the level holds (no rise, within the pump's level band)", fill <= fill0 + 0.01 && fill < mods.eln.oil.CondenserVessel.LEVEL_FULL,
                     String.format("%.1f%% -> %.1f%%", fill0 * 100, fill * 100));
-                ctx.check(id + ": Jade: the pump's back-pressure and its share of rated flow", jade.startsWith("against") && jade.endsWith("of its rated flow"), jade);
+                ctx.check(id + ": Jade: the pump's back-pressure and its share of rated flow", jade.matches("\\d+\\.\\d bar \\(\\d+% flow\\)"), jade);
             } else {
                 ctx.check(id + ": past its shut-off the pump returns next to nothing (under 10 %)", pumped < 0.1 * steam,
                     String.format("%.1f of %.1f g", pumped * 1000, steam * 1000));
                 ctx.check(id + ": and the vessel fills", fill > fill0 + 0.005, String.format("%.1f%% -> %.1f%%", fill0 * 100, fill * 100));
-                ctx.check(id + ": Jade: shut off, needs a pipe pump", jade.startsWith("against 21") && jade.endsWith("shut off, needs a pipe pump"), jade);
+                ctx.check(id + ": Jade: shut off, needs a pipe pump", jade.startsWith("21") && jade.endsWith("(stalled — head too high)"), jade);
             }
         }
     }
@@ -3116,8 +3116,8 @@ public final class OilCases {
             ctx.check("condenser: its left flank takes the signal", off.signalled() && on.signalled(), "");
             ctx.check("condenser: makeup signal at 0 V: none comes in", off.vessel.mWater <= off0 + 1e-6, String.format("%.4f -> %.4f kg", off0, off.vessel.mWater));
             ctx.check("condenser: at SVU the float valve lets it in", on.vessel.mWater > on0 + 0.001, String.format("%.4f -> %.4f kg", on0, on.vessel.mWater));
-            ctx.check("condenser: Jade: shut by its signal", jOff.startsWith("Shut") && jOff.contains("signal 0%"), jOff);
-            ctx.check("condenser: Jade: the signal lets it", jOn.contains("signal 100%") && !jOn.startsWith("Shut"), jOn);
+            ctx.check("condenser: Jade: shut by its signal", jOff.startsWith("Shut (signal") && jOff.contains("signal 0%"), jOff);
+            ctx.check("condenser: Jade: the signal lets it", jOn.contains("signal 100%") && !jOn.startsWith("Shut (signal"), jOn);
         }
     }
 
@@ -3619,14 +3619,14 @@ public final class OilCases {
                 }
                 case "compact_turbine_short_of_heat" -> {
                     ctx.check(id + ": 1 kW of heat gives ~100 W", p > 80 && p < 110, String.format("%.0f W", p));
-                    ctx.check(id + ": it says it is short of heat", turbine.state().contains("short of heat"), turbine.state());
+                    ctx.check(id + ": it says it is short of heat", turbine.state().equals("Low heat"), turbine.state());
                 }
                 case "compact_turbine_shorted" -> {
                     ctx.check(id + ": shorted, it says so (not short of heat, which would send the player for chambers)",
-                        state.startsWith("shorted"), state);
+                        state.startsWith("Shorted"), state);
                 }
                 case "compact_turbine_overloaded_not_shorted" -> ctx.check(id + ": 1.5 ohm at its current limit (~19 V) isn't called shorted",
-                    !state.startsWith("shorted"), state);
+                    !state.startsWith("Shorted"), state);
                 case "compact_turbine_no_load_bypass" -> {
                     ctx.check(id + ": no load, a stone furnace's 3 kW: it doesn't vent", turbine.ventW == 0 && peakC < 180, String.format("%.0f C peak", peakC));
                     ctx.check(id + ": the bypass takes it", turbine.bypassW > 2000, String.format("%.0f W", turbine.bypassW));
@@ -3638,7 +3638,7 @@ public final class OilCases {
                 }
                 case "compact_turbine_dry" -> {
                     ctx.check(id + ": dry, no power", p == 0 && turbine.source.getEffectiveP() < 1, String.format("%.1f W", p));
-                    ctx.check(id + ": it says it is out of water", turbine.state().contains("out of water"), turbine.state());
+                    ctx.check(id + ": it says it is out of water", turbine.state().equals("Out of water"), turbine.state());
                 }
                 case "compact_turbine_cold_start" ->
                     ctx.check(id + ": from cold on 1 kW, ~100 W within 3 minutes", p > 70, String.format("%.0f W at %.0f C", p, c));

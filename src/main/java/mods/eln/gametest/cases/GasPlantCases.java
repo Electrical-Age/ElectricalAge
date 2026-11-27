@@ -285,10 +285,10 @@ public final class GasPlantCases {
                     crude >= mods.eln.sim.fluid.FuelQuality.TURBINE_CHOKE && radsChoked > GasTurbineElement.CUTOFF * GasTurbineElement.RATED_RADS
                         && choked && !burntChoked && fuelJChoked == 0 && Math.abs(crudeLeft - crudeKg) < 1e-6 * crudeKg + 1e-9,
                     String.format("%.0f rad/s, %b %b %.0f J, %.6f of %.6f kg", radsChoked, choked, burntChoked, fuelJChoked, crudeLeft, crudeKg));
-                String status = jadeChoked == null ? "" : jadeChoked.getOrDefault(mods.eln.i18n.I18N.tr("Status"), "");
+                String status = jadeChoked == null ? "" : jadeChoked.getOrDefault(mods.eln.i18n.I18N.tr("State"), "");
                 String quality = jadeChoked == null ? "" : jadeChoked.getOrDefault(mods.eln.i18n.I18N.tr("Fuel quality"), "");
                 ctx.check(id + ": Jade's first line says it is choked and why; its fuel quality says it chokes, with its viscosity",
-                    status.startsWith("Choked: too much heavy oil or residue") && status.contains("break to empty") && jadeChoked.keySet().iterator().next().equals(mods.eln.i18n.I18N.tr("Status"))
+                    status.startsWith("Choked (heavy fuel)") && jadeChoked.keySet().iterator().next().equals(mods.eln.i18n.I18N.tr("State"))
                         && quality.startsWith("chokes engine") && quality.contains(" mPa s, "), status + " / " + quality);
                 ctx.check(id + ": diluted with diesel, it isn't choked, rated 7.9 % too heavy", !gt.choked() && !gt.fuel.choked(mods.eln.sim.fluid.FuelQuality.TURBINE_CHOKE)
                     && Math.abs(gt.fuel.heavy() - 0.15 / 0.95 / 2) < 0.005 && gt.fuel.light() == 0, gt.fuel.toString());
@@ -408,7 +408,7 @@ public final class GasPlantCases {
             Eln.simulator.removeElectricalComponent(l.load);
             ctx.check("gas turbine without a starter: still, no fuel used", l.gt.getShaft().getRads() < 1 && Math.abs(l.gt.fuelMb() - fuel0) < 0.01 * fuel0 && fuel0 > 0 && l.gt.totalFuelJ == 0,
                 String.format("%.1f rad/s, %.0f of %.0f mB", l.gt.getShaft().getRads(), l.gt.fuelMb(), fuel0));
-            ctx.check("gas turbine without a starter: Jade says it needs one", l.gt.status().startsWith("Needs a starter"), l.gt.status());
+            ctx.check("gas turbine without a starter: Jade says it needs one", l.gt.status().startsWith("Needs starter"), l.gt.status());
         }
     }
 

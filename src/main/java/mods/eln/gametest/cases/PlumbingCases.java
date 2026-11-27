@@ -686,7 +686,7 @@ public final class PlumbingCases {
                 // (what its steps moved is handed out over their ticks: all of it, once)
                 ctx.check("background steps: the flows its edges show, tick by tick, add up to what the core handed out", booksMoved > 1e-3 && flowPeak > 0.98 * booksMoved && flowPeak <= booksMoved * (1 + 1e-6) && booksOff <= 1e-6 * booksMoved,
                     String.format("moved %.6f kg, flows sum to %.9f kg, at most %.3g kg from the core's", booksMoved, flowPeak, booksOff) + ", core built " + buildsSeen + " times");
-                ctx.check("background steps: Jade says it is a heavy network", note != null && note.contains("Heavy fluid network"), "" + note);
+                ctx.check("background steps: Jade says it is a heavy network", note != null && note.contains("Heavy pipe network"), "" + note);
                 ctx.check("background steps: the pump moved water while in the background", movedInBackground > 0.001, String.format("%.4f kg", movedInBackground));
                 ctx.check("background steps: water put in while a step ran is kept, none made or lost", injected && Math.abs(w - water0 - INJECTED) < 1e-9 * water0,
                     String.format("%.9f + %.3f -> %.9f kg", water0, INJECTED, w));
@@ -700,11 +700,11 @@ public final class PlumbingCases {
                 // against these low heads; the old law charged the full shut-off head on whatever moved)
                 ctx.check("pump: it draws power doing it", maxW > mods.eln.oil.InlinePumpDescriptor.IDLE_W + 1, String.format("%.0f W", maxW));
                 ctx.check("pump: it primed itself (passed the line's air on) and then pumped water", p.totalKg > 0.05, String.format("%.3f kg", p.totalKg));
-                ctx.check("pump: Jade says it is moving the air at its inlet", airJade.contains("moving air"), airJade);
+                ctx.check("pump: Jade says it is moving the air at its inlet", airJade.contains("(air)"), airJade);
             } else {
                 ctx.check("pump: boiling feed doesn't vapour-lock it: it keeps moving it (over 0.05 kg reach B)", moved > 0.05, String.format("%.3f kg", moved));
                 ctx.check("pump: steam at its inlet is not cavitation (no rattle)", !sawSteamCavitating, "");
-                ctx.check("pump: Jade says it is moving the steam at its inlet, not cavitating", !sawSteamBound || steamJade.contains("moving steam") && !steamJade.contains("CAVITATING"),
+                ctx.check("pump: Jade says it is moving the steam at its inlet, not cavitating", !sawSteamBound || steamJade.contains("(steam)") && !steamJade.contains("CAVITATING"),
                     sawSteamBound + ": " + steamJade);
             }
         }

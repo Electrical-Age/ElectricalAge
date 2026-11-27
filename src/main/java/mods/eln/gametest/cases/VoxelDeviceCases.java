@@ -1335,7 +1335,7 @@ public final class VoxelDeviceCases {
             stuck = "turn " + to + ", said: " + err[0];
             LRDU was = s.front;
             WrenchInLineCase.wrench(c, s);
-            stuckOk = to == null && err[0] != null && err[0].startsWith("No other way round fits here") && s.front == was;
+            stuckOk = to == null && err[0] != null && err[0].startsWith("No other orientation fits") && s.front == was;
         }
 
         public void measure(TestContext c) {

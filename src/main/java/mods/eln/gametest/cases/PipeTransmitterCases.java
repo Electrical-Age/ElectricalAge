@@ -363,7 +363,7 @@ public final class PipeTransmitterCases {
             c.check("pipe transmitter: refused in a cell full of pipes", errCrowded != null && errCrowded.startsWith("Too close to a pipe") && device(c, crowded) == null, "" + errCrowded);
             c.check("pipe transmitter: a route laid to its port by a pipe kit", errRoute == null && piecesBefore >= 1, errRoute + " " + piecesBefore);
             c.check("pipe transmitter: a second route to a port that has a pipe is refused", piecesAfter == piecesBefore, piecesBefore + " -> " + piecesAfter);
-            c.check("pipe transmitter: the kit's preview at that port says it's taken", previewTaken != null && previewTaken.startsWith("Its port already has a pipe"),
+            c.check("pipe transmitter: the kit's preview at that port says it's taken", previewTaken != null && previewTaken.startsWith("Port already connected"),
                 "" + previewTaken);
             if (errRoute != null) return;
             var t = device(c, a);

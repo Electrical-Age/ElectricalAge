@@ -1242,7 +1242,7 @@ public final class PipeCases {
 
         public void measure(TestContext ctx) {
             ctx.check("pipe kit: a free tank port takes a route", laid, first);
-            ctx.check("pipe kit: the preview at the piped port says it's taken", preview != null && preview.startsWith("Its port already has a pipe"), "" + preview);
+            ctx.check("pipe kit: the preview at the piped port says it's taken", preview != null && preview.startsWith("Port already connected"), "" + preview);
             ctx.check("pipe kit: a second route to the piped port is refused", refused, second);
         }
     }

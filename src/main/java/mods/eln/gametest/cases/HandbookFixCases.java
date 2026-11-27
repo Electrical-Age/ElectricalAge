@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Fixes from the handbook play-through (AdventurAgent, Baughn 1573669111920066631): a new heat furnace takes fuel at
  * once; a cable kit ends only on a connector of its kind (not on a heater's thermal back); a cable kit on a Lamp Socket
- * still in Lamp Supply mode says to switch it to Cable; a kit route can't end where it started.
+ * still in Lamp Supply mode says it is set to Lamp Supply; a kit route can't end where it started.
  */
 public final class HandbookFixCases {
     private HandbookFixCases() {
@@ -79,7 +79,7 @@ public final class HandbookFixCases {
             c.check("cable kit: no LV end on the heater's thermal back, one on its flank, a thermal one on its back",
                 atBack == null && atFlank != null && thermalBack != null, atBack + " / " + atFlank + " / " + thermalBack);
             String said = mods.eln.node.voxel.CablePlacer.noEndForTests(c.level(), lampAt, Vec3.atLowerCornerOf(lampAt).add(0.5, 0.1, 0.5));
-            c.check("lamp socket in Lamp Supply mode: the kit says to switch it to Cable", said.contains("switch it to Cable"), said);
+            c.check("lamp socket in Lamp Supply mode: the kit says it is set to Lamp Supply", said.contains("Lamp Supply"), said);
             var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(floor, c.level()));
             c.check("a kit route can't end where it started: nothing laid, nothing taken", handled1 && handled2 && kitBefore == kitAfter
                 && !(n instanceof mods.eln.node.voxel.VoxelNode v && !v.parts.isEmpty()), kitBefore + " -> " + kitAfter + ", " + n);

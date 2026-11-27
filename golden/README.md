@@ -34,6 +34,10 @@ stay the only sensible one). Config `capacitorBank.powerCapacitorLeakTauSeconds`
 `golden_descriptors` (`GoldenCase.CHANGED`): the shaft Generator has no `sound` (1.12 `eln:generator`); its render plays
 the three `MachineSounds` layers instead (fixed hum by current, rotor tones and air by speed; Baughn 2026-10-28).
 
+`golden_descriptors` (`GoldenCase.COMMENTED`): the Multimeter, Thermometer and Universal-Meter got a tooltip (Baughn
+2026-11-27, the wording pass), so their descriptor is `GenericItemUsingDamageDescriptorWithComment`, a subclass of 1.12's
+`GenericItemUsingDamageDescriptor`; their fields are compared as before.
+
 `golden_recipes` (`GoldenRecipesCase.MACHINE_CHANGED`): the compressor makes four Dielectrics from a sand, not one (Baughn
 2026-10-28: a capacitor bank takes 36).
 
