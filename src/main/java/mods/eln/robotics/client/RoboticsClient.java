@@ -16,6 +16,7 @@ public final class RoboticsClient {
         modBus.addListener(EntityRenderersEvent.RegisterRenderers.class,
             e -> e.registerEntityRenderer(Robotics.ELEVATOR_CAR.get(), ElevatorCarRenderer::new));
         SegmentPayload.clientHandler = CarCarry::onSegment;
+        mods.eln.robotics.servo.TrackPayload.clientHandler = CarCarry::onTrack;
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, e -> CarCarry.tick());
     }
 }

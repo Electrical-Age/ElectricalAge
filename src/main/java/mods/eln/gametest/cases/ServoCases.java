@@ -57,6 +57,7 @@ public final class ServoCases {
         cases.add(new LevelRunTurned());
         cases.add(new RailPlacement());
         cases.add(new TrackKitLays());
+        cases.add(new TrackRuns());
     }
 
     static final int TRAVEL = 6;
@@ -1305,14 +1306,8 @@ public final class ServoCases {
             }
         }
 
-        public void build(TestContext ctx) {
-            s = new Shaft(ctx, ctx.at(2, 1, 21), 0, null, 0);   // (no rail: a track can start here)
-            railed = new Shaft(ctx, ctx.at(12, 1, 21), 0, null, 2);
-            var p = ctx.player();
-            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
-            net.minecraft.world.item.ItemStack kit = mods.eln.node.voxel.TrackKitItem.kit(64 * 16);
-            var supply = mods.eln.node.voxel.KitSupply.of(kit);
-            kitBefore = supply.length();
+        /** From the drive: out 12 to a corner, right 6 to a stop (sneak-click), 6 more to the end, clicked again. */
+        static void layDemo(TestContext ctx, net.minecraft.server.level.ServerPlayer p, Shaft s, mods.eln.node.voxel.KitSupply supply) {
             BlockPos o = BlockPos.containing(s.drive(ctx).trackStart().add(0, 0.01, 0)).below();   // (the floor block under the car)
             var north = s.front.toEnumFacing();
             BlockPos corner = o.relative(north, 12), stop = corner.relative(north.getClockWise(), 6), end = stop.relative(north.getClockWise(), 6);
@@ -1321,6 +1316,17 @@ public final class ServoCases {
             click(ctx, p, supply, stop, true);
             click(ctx, p, supply, end, false);
             click(ctx, p, supply, end, false);
+        }
+
+        public void build(TestContext ctx) {
+            s = new Shaft(ctx, ctx.at(2, 1, 21), 0, null, 0);   // (no rail: a track can start here)
+            railed = new Shaft(ctx, ctx.at(12, 1, 21), 0, null, 2);
+            var p = ctx.player();
+            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+            net.minecraft.world.item.ItemStack kit = mods.eln.node.voxel.TrackKitItem.kit(64 * 16);
+            var supply = mods.eln.node.voxel.KitSupply.of(kit);
+            kitBefore = supply.length();
+            layDemo(ctx, p, s, supply);
             kitAfter = supply.length();
             laid = s.drive(ctx).track();
             if (laid != null) {
@@ -1349,6 +1355,86 @@ public final class ServoCases {
             ctx.check("track kit: saved and loaded, the same track", reloaded != null && reloaded.points().equals(laid.points())
                 && java.util.Arrays.equals(reloaded.stops(), laid.stops()), "" + (reloaded == null ? null : reloaded.points()));
             ctx.check("track kit: a drive with a rail on its top refuses a track", "refused".equals(refusal), refusal);
+        }
+    }
+
+    /**
+     * Track B: a car on a laid track (TrackKitLays' layout). Called to the stop it goes round the corner, no faster there
+     * than the corner allows (radius 4.5: 2.1 m/s, so full speed), and stands on the stop where it was clicked with a
+     * floor ghost under it; called on, it reaches the end; register 0 asks for a stop in metres along the track.
+     */
+    static final class TrackRuns extends Room {
+        public String id() {
+            return "servo_track_runs";
+        }
+
+        @Override
+        public int width() {
+            return 24;
+        }
+
+        @Override
+        public int height() {
+            return 8;
+        }
+
+        @Override
+        public int depth() {
+            return 24;
+        }
+
+        @Override
+        public int floorDepth() {
+            return 24;
+        }
+
+        public int ticks() {
+            return 700;
+        }
+
+        Shaft s;
+        double[] stops;
+        double offStop = Double.NaN, offEnd = Double.NaN, maxV;
+        boolean ghostStop, ghostEnd;
+
+        public void build(TestContext ctx) {
+            s = new Shaft(ctx, ctx.at(2, 1, 21), 0, null, 0);
+            var p = ctx.player();
+            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+            TrackKitLays.layDemo(ctx, p, s, mods.eln.node.voxel.KitSupply.of(mods.eln.node.voxel.TrackKitItem.kit(64 * 16)));
+            mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
+            var t = s.drive(ctx).track();
+            if (t == null) return;
+            stops = t.path().stops();
+            watch(dt -> {
+                tick++;
+                var d = s.drive(ctx);
+                maxV = Math.max(maxV, Math.abs(d.speed));
+                if (tick == 5) d.command(stops[1] + 0.3);   // (a little off: the nearest stop)
+                if (tick == 300) {
+                    var c = d.carId == null ? null : (ElevatorCar) ctx.level().getEntity(d.carId);
+                    if (c != null) offStop = c.position().distanceTo(t.path().at(stops[1]));
+                    ghostStop = d.ghostAt(stops[1]);
+                    d.command(t.path().length());
+                }
+                if (tick == 600) {
+                    var c = d.carId == null ? null : (ElevatorCar) ctx.level().getEntity(d.carId);
+                    if (c != null) offEnd = c.position().distanceTo(t.path().at(t.path().length()));
+                    ghostEnd = d.ghostAt(t.path().length());
+                }
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            unwatch();
+            ctx.check("track runs: laid", stops != null && stops.length == 3, "" + java.util.Arrays.toString(stops));
+            if (stops == null) return;
+            ctx.line("track runs: off the stop " + offStop + " (ghost " + ghostStop + "), off the end " + offEnd + " (ghost " + ghostEnd + "), top speed " + maxV + " m/s");
+            ctx.check("track runs: round the corner to the stop, where it was clicked", offStop < 1e-6, "" + offStop);
+            ctx.check("track runs: a floor ghost under it at the stop", ghostStop, "");
+            ctx.check("track runs: on to the end", offEnd < 1e-6, "" + offEnd);
+            ctx.check("track runs: a floor ghost at the end", ghostEnd, "");
+            ctx.check("track runs: never over its top speed", maxV <= 2.0 + 1e-6, "" + maxV);
         }
     }
 }

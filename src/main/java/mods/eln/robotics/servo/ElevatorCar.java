@@ -26,6 +26,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -117,8 +118,29 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
 
     // ---- where it is
 
-    /** Its path (a straight one from origin along axis, as its payload gives), or null before it has one. */
+    /** Its drive's laid track (track B: TrackPayload on clients), or null: it runs on the rail's straight path. */
+    private mods.eln.robotics.motion.@Nullable TrackPath track;
+    private @Nullable List<Vec3> trackPoints;
+    private boolean @Nullable [] trackStops;
+
+    /** Run on this track (points in blocks, stops), or on the rail again (null). */
+    public void setTrack(@Nullable List<Vec3> points, boolean @Nullable [] stops) {
+        trackPoints = points == null ? null : List.copyOf(points);
+        trackStops = stops == null ? null : stops.clone();
+        track = null;
+        if (points != null && stops != null) {
+            try {
+                track = mods.eln.node.voxel.TrackPlacer.track(points, stops).path();
+            } catch (IllegalArgumentException ex) {
+                trackPoints = null;
+                trackStops = null;
+            }
+        }
+    }
+
+    /** Its path (its track, else a straight one from origin along axis, as its payload gives), or null before it has one. */
     public mods.eln.robotics.motion.@Nullable Path path() {
+        if (track != null) return track;
         if (origin == null) return null;
         if (path == null || !path.origin().equals(origin) || path.axis() != axis)
             path = new mods.eln.robotics.motion.StraightPath(origin, axis, Double.POSITIVE_INFINITY);
@@ -182,6 +204,11 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
         return segment == null || origin == null ? null : SegmentPayload.of(getId(), origin, axis, railSide, segment, serverNow);
     }
 
+    /** Server: send its track to everyone who sees it (it changed). */
+    void broadcastTrack() {
+        if (level() instanceof ServerLevel) PacketDistributor.sendToPlayersTrackingEntity(this, TrackPayload.of(getId(), trackPoints, trackStops));
+    }
+
     /** Server: send its motion to everyone who sees it. */
     void broadcast() {
         SegmentPayload p = payload();
@@ -191,6 +218,7 @@ public class ElevatorCar extends Entity implements mods.eln.introspect.Describab
     @Override
     public void sendPairingData(ServerPlayer player, Consumer<CustomPacketPayload> bundle) {
         super.sendPairingData(player, bundle);
+        if (trackPoints != null) bundle.accept(TrackPayload.of(getId(), trackPoints, trackStops));   // (the track before the motion on it)
         SegmentPayload p = payload();
         if (p != null) bundle.accept(p);   // (after the spawn packet, in the same bundle: joiners see the move)
     }

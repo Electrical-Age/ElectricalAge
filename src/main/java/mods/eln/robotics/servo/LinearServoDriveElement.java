@@ -223,12 +223,40 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         removeGhost();
         seg = Segment.rest(clock, 0);
         target = 0;
+        travel = -1;   // (read again from the track)
+        if (car != null) {   // (riders other than players stay where they were: the car is put back, not driven)
+            setup(car);
+            car.placeAt(0);
+            car.drive(seg, clock);
+            car.broadcastTrack();
+            car.broadcast();
+        }
         needPublish();
         return null;
     }
 
-    /** The car's path: from origin() along its rail, travel blocks long. */
+    /** How far the car can go (m): its track's length, or its rail's travel (blocks). */
+    double reach() {
+        var t = track();
+        return t != null ? t.path().length() : travel;
+    }
+
+    /** Its track's stops (m along it), or null on a rail (every whole block a stop). */
+    double @org.jspecify.annotations.Nullable [] stops() {
+        var t = track();
+        return t != null ? t.path().stops() : null;
+    }
+
+    /** Is p a stop (a whole block on a rail; one of the track's stops)? */
+    boolean atStop(double p) {
+        double[] st = stops();
+        return st != null ? Stations.atStop(p, st) : Math.abs(p - Math.rint(p)) < 1e-6;
+    }
+
+    /** The car's path: its laid track, or from origin() along its rail, travel blocks long. */
     public mods.eln.robotics.motion.Path path() {
+        var t = track();
+        if (t != null) return t.path();
         return new mods.eln.robotics.motion.StraightPath(origin(), axis(), Math.max(0, travel));
     }
 
@@ -240,6 +268,11 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
      * way: the car is put back at the start.
      */
     void scan(Level level) {
+        var tr = track();
+        if (tr != null) {   // (a laid track: no rail to read; the travel shown is its length in whole metres)
+            travel = (int) Math.floor(tr.path().length() + 1e-9);
+            return;
+        }
         BlockPos top = node.coordonate.pos().above();
         var s0 = level.getBlockState(top);
         var ax = s0.getBlock() instanceof ServoRailBlock && railAxis(s0.getValue(ServoRailBlock.FACING)) ? s0.getValue(ServoRailBlock.FACING) : axis;
@@ -309,7 +342,8 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
 
     /** Go to stop t (a new command also clears an obstruction). */
     public void command(double t) {
-        target = Math.max(0, Math.min(Math.max(0, travel), Math.round(t)));
+        double[] st = stops();
+        target = st != null ? Stations.nearest(t, st) : Math.max(0, Math.min(Math.max(0, travel), Math.round(t)));
         if (fault == OBSTRUCTED) fault = NO_FAULT;
         needPublish();
     }
@@ -473,7 +507,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         BlockPos hp = node.coordonate.pos();
         BlockPos col = hp.relative(carSide());
         if (!level.isLoaded(hp) || !level.isLoaded(col)) return;   // (unloaded: the clock stops, the car with it; it asks for nothing)
-        if (axis != net.minecraft.core.Direction.UP && !carGround(level)) return;   // (a level run reaching an unloaded chunk: the same)
+        if ((axis != net.minecraft.core.Direction.UP || track() != null) && !carGround(level)) return;   // (a level run reaching an unloaded chunk: the same)
         long t0 = clock;
         clock++;
         if (travel < 0 || clock % 20 == 0) scan(level);
@@ -500,14 +534,16 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         byte trip = ms == MachineState.OVERHEAT_TRIPPED ? OVERHEAT : ms == MachineState.OVERVOLTAGE_TRIPPED ? OVERVOLTAGE : NO_FAULT;
         if ((fault == OVERHEAT || fault == OVERVOLTAGE) && fault != trip) fault = NO_FAULT;
         if (trip != NO_FAULT && fault != OBSTRUCTED) fault = trip;
-        boolean railOk = travel >= LinearServoDriveDescriptor.MIN_TRAVEL && p <= travel + 1e-9;
+        double reach = reach();
+        boolean railOk = reach >= LinearServoDriveDescriptor.MIN_TRAVEL && p <= reach + 1e-9;
         if (!railOk && fault != OBSTRUCTED) fault = NO_RAIL;
         else if (railOk && fault == NO_RAIL) fault = NO_FAULT;
 
         // commands from the wires
         if (wiredUp() && travel >= 0) {
             double in = machine.signal(LinearServoDriveDescriptor.SETPOINT);
-            double want = Stations.proportional(in, travel);
+            double[] st = stops();
+            double want = st != null ? Stations.nearest(Math.max(0, Math.min(1, in)) * reach, st) : Stations.proportional(in, travel);
             if (want != wired) {
                 wired = want;
                 command(want);
@@ -516,7 +552,12 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         boolean en = enabled();
         if (en && !wasEnabled && fault == OBSTRUCTED) fault = NO_FAULT;   // (enable toggled: try again)
         wasEnabled = en;
-        if (railOk) target = Math.max(0, Math.min(travel, target));
+        if (railOk) target = Math.max(0, Math.min(reach, target));
+        // round a corner no faster than its lateral acceleration allows (track B: v <= sqrt(a r)); one limit per move
+        if (track() != null) {
+            double r = track().path().minRadius(p, target);
+            if (Double.isFinite(r)) vlim = Math.min(vlim, Math.sqrt(LinearServoDriveDescriptor.LATERAL_ACCEL * r) / 20);
+        }
 
         // the motion: the voltage's speed limit (the energy's comes with the step below)
         Segment next = seg;
@@ -529,7 +570,8 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             }
         } else if (!en) {
             if (moving) {   // disabled: stop at the next whole block it can
-                int stop = Stations.stopAhead(p, v, a, travel);
+                double[] st = stops();
+                double stop = st != null ? Stations.stopAhead(p, v, a, st) : Stations.stopAhead(p, v, a, travel);
                 if (seg.to() != stop) next = seg.retarget(t0, stop, Math.max(seg.vmax(), Math.abs(v)), a);
             }
         } else if (seg.to() != target) {
@@ -590,7 +632,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
             if (c.cabinMode() == ElevatorCar.CABIN_CLAMP) clampMobs(level, c);
             c.drive(seg, clock);
             if (changed) c.broadcast();
-            if (!movingAt(clock) && Math.abs(p1 - Math.rint(p1)) < 1e-6) floorGhost(level, c, p1);
+            if (!movingAt(clock) && atStop(p1)) floorGhost(level, c, p1);
         }
         sinceRetarget = changed ? 0 : sinceRetarget + 1;
         speed = (p1 - p) * 20;
@@ -602,7 +644,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
         boolean there = stopped && fault == NO_FAULT && Math.abs(p1 - target) < 1e-6 && railOk;
         machine.setSignal(LinearServoDriveDescriptor.IN_POSITION, there ? 1 : 0);
         machine.setSignal(LinearServoDriveDescriptor.FAULT, fault != NO_FAULT ? 1 : 0);
-        machine.setSignal(LinearServoDriveDescriptor.POSITION, travel > 0 ? Math.max(0, Math.min(1, p1 / travel)) : 0);
+        machine.setSignal(LinearServoDriveDescriptor.POSITION, reach > 0 ? Math.max(0, Math.min(1, p1 / reach)) : 0);
         if (fault != faultSent) {   // (a fault starting: everyone hears it)
             if (fault != NO_FAULT) port.send(new Packet(Packet.BROADCAST, port.address(), PacketType.FAULT, fault, 0));
             faultSent = fault;
@@ -642,6 +684,7 @@ public class LinearServoDriveElement extends TransparentNodeElement implements m
     }
 
     void setup(ElevatorCar c) {
+        c.setTrack(trackPoints, trackStops);
         c.origin = origin();
         c.axis = axis();
         c.railSide = carSide().getOpposite();

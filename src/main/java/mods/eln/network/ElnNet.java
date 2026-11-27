@@ -56,7 +56,10 @@ public final class ElnNet {
                 (mods.eln.bike.BikeLamp l, IPayloadContext ctx) -> mods.eln.bike.ElectricBike.onLampToggle((ServerPlayer) ctx.player()))
             // an elevator car's motion (robotics.servo): the client places the car by it
             .playToClient(mods.eln.robotics.servo.SegmentPayload.TYPE, mods.eln.robotics.servo.SegmentPayload.CODEC,
-                (mods.eln.robotics.servo.SegmentPayload p, IPayloadContext ctx) -> mods.eln.robotics.servo.SegmentPayload.clientHandler.accept(p)));
+                (mods.eln.robotics.servo.SegmentPayload p, IPayloadContext ctx) -> mods.eln.robotics.servo.SegmentPayload.clientHandler.accept(p))
+            // the track a car runs on (track B), once with its spawn and when it changes
+            .playToClient(mods.eln.robotics.servo.TrackPayload.TYPE, mods.eln.robotics.servo.TrackPayload.CODEC,
+                (mods.eln.robotics.servo.TrackPayload p, IPayloadContext ctx) -> mods.eln.robotics.servo.TrackPayload.clientHandler.accept(p)));
         // a computer screen's events, on the network thread (only this one: the others stay on the server thread)
         modBus.addListener(RegisterPayloadHandlersEvent.class, e -> e.registrar(BuildInfo.channelVersion("1"))
             .executesOn(net.neoforged.neoforge.network.registration.HandlerThread.NETWORK)

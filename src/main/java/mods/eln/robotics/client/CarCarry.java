@@ -63,6 +63,14 @@ public final class CarCarry {
         if (k != null) player.setPos(player.position().add(k));
     }
 
+    /** A car's track (TrackPayload's client handler): it runs on it from now on (none: its rail's straight path). */
+    public static void onTrack(mods.eln.robotics.servo.TrackPayload p) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || !(mc.level.getEntity(p.entityId()) instanceof ElevatorCar c)) return;
+        c.setTrack(p.points(), p.stops());
+        if (c.segment != null && c.origin != null) c.placeAt(c.clientPos(c.clientT));
+    }
+
     static void carry(LocalPlayer player, AABB b0, AABB b1) {
         if (player.isSpectator() || player.isPassenger()) return;
         Riders.Carry k = Riders.carry(player.getBoundingBox(), player.onGround(), b0, b1);

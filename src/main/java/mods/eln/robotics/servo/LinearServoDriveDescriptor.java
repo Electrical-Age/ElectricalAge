@@ -27,6 +27,9 @@ import static mods.eln.i18n.I18N.tr;
 public class LinearServoDriveDescriptor extends TransparentNodeDescriptor implements mods.eln.introspect.DescribableSpec {
     /** Rail length it drives, in blocks (the car's travel). */
     public static final int MIN_TRAVEL = 2, MAX_TRAVEL = 32;
+    /** The sideways acceleration a car may take round a laid track's corner (m/s^2; track B): v <= sqrt(a r), so 1.7 m/s
+     *  round the tightest (3 m) corner, full speed from 4 m. */
+    public static final double LATERAL_ACCEL = 1.0;
     /**
      * The motor: 2 m/s at 200 V (slower on a sagging line, holding below 30 %), 1 m/s^2, 40 W idle, 80 % efficient,
      * rated for 120 kg net at full speed (about 3 kW). A counterweight balances the car and counterweightKg of load,
