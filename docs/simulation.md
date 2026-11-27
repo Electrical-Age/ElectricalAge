@@ -163,6 +163,16 @@ prefix `""`, so keys are `name + suffix` and names must be unique within one ele
   `Species`, `SpeciesRegistry`), stepped by `src/main/java/mods/eln/fluid/FluidWorld.java` as a slow process; devices
   join with their node's connectJob (the Tank Loading Station, a block entity, while a cart is docked). Tests: `FluidCoreTest`, `FluidPropertyTest`, `MultiFluidTest`,
   `MultiFluidPropertyTest`. See content.md for pipes/oil.
+  A tick of the networks (`FluidWorld.process`) has three parts: `FluidNetwork.begin` on the server thread (which
+  step this tick: its own, or a background one started, awaited or applied), `run` on any thread (the network's state
+  into its core, `CoreStep.load`, and the core's solve), `finish` on the server thread (results onto nodes and
+  edges), in the list's order. `CoreStep.solveAll` runs a tick's solves on `fluidcore.FluidPool`, the server thread
+  among its threads (`-Deln.fluidThreads`, 4 at most by default; under 0.3 ms of expected work, on the server thread
+  alone): the tick costs the largest network, not their sum. Networks share no node or edge, and the core's shared
+  state is per thread (`WaterAir.VAP_CACHE`, `Network.HARD`) or read-only tunables, so the result is the serial
+  one. A network over `CoreStep.heavyNanos` a step (5 ms, `-Deln.fluidHeavyMs`) is stepped across ticks on two
+  background workers instead (its results a tick late). `/elnlab fluidstats` gives the server thread's wall time
+  per tick (preparing, solving, applying), the networks' own time on whichever thread, and the background workers'.
   A device joining, leaving or changing marks the world dirty; the next step (or query) rebuilds it in two parts.
   `FluidWorld.plan(devices)` is pure topology from the devices' `fluidPorts/fluidJoins/fluidLinks/fluidVents/fluidFlows`:
   the couplings (`FluidWorld.couples`, the one coupling rule: a port on the block in front of the other's face,

@@ -28,14 +28,51 @@ public final class FluidNetwork {
     /** The fluid core's mirror of this network. */
     CoreStep core;
 
+    /** A whole step on this thread. */
     public void step(double dt) {
-        long t0 = System.nanoTime();
-        CoreStep.of(this).step(this, dt);
-        nanos += System.nanoTime() - t0;
-        steps++;
+        if (begin(dt)) run();
+        finish();
     }
 
-    /** Time spent stepping (ns) and steps since built (/elnlab fluidstats). */
+    /** The step between begin and finish: its core and what begin prepared (null: no solve this tick). */
+    private CoreStep stepping;
+    private CoreStep.Pending prepared;
+
+    /**
+     * A tick in three parts, so that FluidWorld can run every network's solve at once (Baughn 1575818571764858992): begin
+     * and finish on the server thread, run on any. True if there is a solve to run.
+     */
+    public boolean begin(double dt) {
+        long t0 = System.nanoTime();
+        stepping = CoreStep.of(this);
+        prepared = stepping.begin(this, dt);
+        nanos += System.nanoTime() - t0;
+        steps++;
+        return prepared != null;
+    }
+
+    /** The solve begin prepared, on any thread: the core alone. */
+    public void run() {
+        stepping.run(prepared);
+    }
+
+    /** After run (or straight after a begin with no solve), on the server thread: the results onto the nodes. */
+    public void finish() {
+        CoreStep.Pending p = prepared;
+        if (p == null) return;
+        prepared = null;
+        long t0 = System.nanoTime();
+        stepping.complete(p);
+        nanos += p.loadNanos + p.took + System.nanoTime() - t0;
+    }
+
+    /** What its last solve on this tick's pool cost (ns; 0 before its first): the long ones are handed out first. */
+    public long lastSolveNanos() {
+        return core == null ? 0 : core.lastSolveNanos;
+    }
+
+    /** Its own time (ns: preparing, solving and applying, on whichever thread; a background step's solve is counted
+     *  apart, backgroundNanos) and steps since built (/elnlab fluidstats). */
     public long nanos, steps;
 
     /** Did its last step run out of its time (Network.MAX_STEP_NANOS), or is it stepped in the background? */

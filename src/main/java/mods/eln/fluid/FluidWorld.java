@@ -69,6 +69,8 @@ public final class FluidWorld implements IProcess {
         INSTANCE.heavyAt.clear();
         INSTANCE.heavyNote.clear();
         INSTANCE.overBudgetLogged.clear();
+        INSTANCE.wallNanos = INSTANCE.wallTicks = INSTANCE.pooledTicks = INSTANCE.beginNanos = INSTANCE.solveNanos = 0;
+        java.util.Arrays.fill(INSTANCE.recent, 0);
         return INSTANCE;
     }
 
@@ -170,9 +172,24 @@ public final class FluidWorld implements IProcess {
             if (n.background()) bg++;
         }
         List<String> out = new ArrayList<>();
-        // (the workers' share too: a heavy network off the server thread still costs, Baughn 1575818571764858992)
-        out.add(String.format("%d networks, %.3f ms/tick in all on the server thread; %.3f ms/tick on the fluid workers (%d networks there now)",
-            ns.size(), steps == 0 ? 0 : total / 1e6 / steps, workers / 1e6, bg));
+        // (what the server thread waits for, the networks' own time on whichever thread, and the background workers'
+        // share: off the server thread still costs, Baughn 1575818571764858992)
+        long sum = 0, max = 0;
+        int counted = 0;
+        for (long r : INSTANCE.recent) {
+            if (r == 0) continue;
+            sum += r;
+            max = Math.max(max, r);
+            counted++;
+        }
+        double wt = Math.max(1, INSTANCE.wallTicks) * 1e6;
+        out.add(String.format("%d networks; the server thread spends %.3f ms/tick on them (preparing %.3f, solving %.3f, applying %.3f; last %d ticks: %.3f, "
+                + "worst %.3f), solving on %d threads "
+                + "(%.0f%% of ticks; else alone); their own time %.3f ms/tick in all; %.3f ms/tick on the background workers (%d networks there now)",
+            ns.size(), INSTANCE.wallNanos / wt, INSTANCE.beginNanos / wt, INSTANCE.solveNanos / wt,
+            (INSTANCE.wallNanos - INSTANCE.beginNanos - INSTANCE.solveNanos) / wt, counted, counted == 0 ? 0 : sum / 1e6 / counted, max / 1e6,
+            mods.eln.sim.fluid.CoreStep.threads(), INSTANCE.wallTicks == 0 ? 0 : 100.0 * INSTANCE.pooledTicks / INSTANCE.wallTicks,
+            steps == 0 ? 0 : total / 1e6 / steps, workers / 1e6, bg));
         for (FluidNetwork n : ns) {
             String where = "?";
             outer:
@@ -186,6 +203,16 @@ public final class FluidWorld implements IProcess {
         }
         return out;
     }
+
+    /**
+     * What the networks' ticks cost the server thread (ns of wall time, prepare to apply, since the server started), over
+     * how many ticks, how many of those were solved on several threads, and the last ticks' wall times (stats: the
+     * threads hide the networks' own time from the server thread's profile; Baughn 1575818571764858992).
+     */
+    private long wallNanos, wallTicks, pooledTicks;
+    /** Of wallNanos: preparing the networks (one by one) and waiting for their solves (together); the rest applies them. */
+    private long beginNanos, solveNanos;
+    private final long[] recent = new long[200];
 
     /** A network stalled this long (s: its steps covering under half the tick) is called out in Jade. */
     static final double STUCK_SECONDS = 2;
@@ -391,11 +418,26 @@ public final class FluidWorld implements IProcess {
             l.edge.relief = l.relief;
         }
         for (FluidDevice.Flow f : flows) settings(f);
+        // every network's tick: prepared here, solved all at once (CoreStep.solveAll: on the fluid threads, this one among
+        // them), applied here in the list's order. Networks share no node or edge, so the result is as one by one.
+        long wall0 = System.nanoTime();
+        List<FluidNetwork> solving = new ArrayList<>();
+        for (FluidNetwork n : networks) if (n.begin(time)) solving.add(n);
+        long wall1 = System.nanoTime();
+        boolean pooled = mods.eln.sim.fluid.CoreStep.solveAll(solving);
+        long wall2 = System.nanoTime();
+        beginNanos += wall1 - wall0;
+        solveNanos += wall2 - wall1;
         for (FluidNetwork n : networks) {
-            n.step(time);
+            n.finish();
             if (n.overBudget()) overBudget(n);
             markIfStuck(n);
         }
+        long wall = System.nanoTime() - wall0;
+        wallNanos += wall;
+        wallTicks++;
+        if (pooled) pooledTicks++;
+        recent[(int) (wallTicks % recent.length)] = wall;
         // (what each flow moved, onto its device's Flow at once: a trace below may rebuild the networks and their edges)
         for (FluidDevice.Flow f : flows) {
             f.delivered = f.edge.flow;

@@ -362,7 +362,13 @@ public final class CoreStep {
     public int lastSpan = 1;
 
     /** A started step: what finish() needs once it has run. */
-    private static final class Pending {
+    static final class Pending {
+        /** What the solve threw, on whatever thread it ran (complete rethrows it on the server thread). */
+        Throwable error;
+        /** The nodes' state is in the core (load), which took loadNanos; ticks: those since the last step began. */
+        volatile boolean loaded;
+        volatile long loadNanos;
+        int ticks;
         double tick, dt;
         double[] xl, u0, h0, heat0;
         double[][] m0;
@@ -428,14 +434,89 @@ public final class CoreStep {
         }
     }
 
+    /**
+     * The threads a tick's solves run on, the server thread among them (-Deln.fluidThreads; 1: the server thread alone).
+     * Apart from the background workers, whose steps run for many ticks and would hold a tick's solves up.
+     */
+    private static final mods.eln.fluidcore.FluidPool POOL = new mods.eln.fluidcore.FluidPool(
+        Integer.getInteger("eln.fluidThreads", Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors() / 2))));
+    /** Solves expected to take less than this in all (ns, by their last) run on the server thread alone: waking the
+     *  helpers costs about as much. */
+    static final long POOL_FROM_NANOS = 300_000;
+
+    public static int threads() {
+        return POOL.threads();
+    }
+
+    /**
+     * Run the solves of networks begun this tick (FluidNetwork.begin was true), and return when all are done: on the
+     * pool's threads, the longest (by their last solve) first, or one by one here when there is little to do. True if
+     * the pool ran them. What a solve throws is kept for its network's finish.
+     */
+    public static boolean solveAll(List<FluidNetwork> begun) {
+        long expect = 0;
+        for (FluidNetwork n : begun) expect += n.lastSolveNanos();
+        if (begun.size() < 2 || POOL.threads() < 2 || expect < POOL_FROM_NANOS) {
+            for (FluidNetwork n : begun) n.run();
+            return false;
+        }
+        List<FluidNetwork> order = new ArrayList<>(begun);
+        order.sort((a, b) -> Long.compare(b.lastSolveNanos(), a.lastSolveNanos()));
+        List<Runnable> tasks = new ArrayList<>(order.size());
+        for (FluidNetwork n : order) tasks.add(n::run);
+        POOL.runAll(tasks);
+        return true;
+    }
+
+    /** A whole step on this thread (begin, run, complete). */
     void step(FluidNetwork fn, double dt) {
+        Pending p = begin(fn, dt);
+        if (p != null) {
+            run(p);
+            complete(p);
+        }
+    }
+
+    /**
+     * The solve of a step begun on the server thread, on any thread (FluidWorld runs a tick's on the pool): this
+     * network's state into the core (load), then the core's step. It touches nothing another network or the server
+     * thread uses meanwhile; complete takes the results out.
+     */
+    void run(Pending p) {
+        try {
+            if (!p.loaded) load(p);
+            long t0 = System.nanoTime();
+            net.step(p.dt);
+            p.took = System.nanoTime() - t0;
+        } catch (Throwable t) {
+            p.error = t;
+        }
+    }
+
+    /** On the server thread, after run: the step's results onto the nodes and edges; what the solve threw is thrown here. */
+    void complete(Pending p) {
+        if (p.error instanceof RuntimeException r) throw r;
+        if (p.error instanceof Error e) throw e;
+        if (p.error != null) throw new IllegalStateException(p.error);
+        finish(p);
+    }
+
+    /** How long its last solve on the tick's pool took (ns): FluidWorld hands the long ones out first. */
+    long lastSolveNanos;
+
+    /**
+     * On the server thread: a tick of this network up to its solve. The nodes' and edges' state goes into the core; a
+     * background step is started, waited for or applied. Returns the step to run and complete, or null when this tick
+     * has no solve of its own (a background step runs, or its result was just applied).
+     */
+    Pending begin(FluidNetwork fn, double dt) {
         boolean applied = false;
         ticksSince++;
         if (job != null) {
             if (!job.isDone() || waited < testHoldTicks) {
                 waited++;
                 waiting(dt);
-                return;
+                return null;
             }
             Pending p = pending;
             java.util.concurrent.Future<?> j = job;
@@ -455,7 +536,7 @@ public final class CoreStep {
                 flush();
                 fn.core = null;
                 waiting(dt);
-                return;
+                return null;
             }
             finish(p);
             if (p.background) {   // (on the network: a rebuilt core starts its counters over)
@@ -470,20 +551,62 @@ public final class CoreStep {
         // threshold, each flip a tick with no flow and one with two ticks' worth)
         boolean bg = budgetNanos > 0 && (slow >= HEAVY_AFTER || background && slow > HEAVY_AFTER / 2);
         if (applied && !bg) {   // (light again: back on this thread from the next tick, owing the ticks its last step took)
-            return;
+            return null;
         }
         // (a background step: as long as the ticks since the last one began)
         int ticks = Math.max(1, ticksSince), span = bg ? Math.min(ticks, MAX_SPAN) : 1;
         double droppedNow = bg ? (ticks - span) * dt : 0;
         if (!bg) owed = Math.min(owed + (ticks - 1) * dt, OWED_MAX);
         ticksSince = 0;
-        double[] heat0 = new double[cn.length];
         // (at most one tick's worth caught up per tick: devices step their own processes by the tick, and a second of
         // fluid landing in one tick would be a spike they all see)
         // (a background step is span ticks long; its time isn't owed)
         double tick = dt, ask = bg ? span * dt : dt + Math.min(owed, dt);
         owed -= ask - dt;
         dt = ask;
+        Pending p = new Pending();
+        p.tick = tick;
+        p.dt = dt;
+        p.slow = slow;
+        p.background = bg;
+        p.ticks = ticks;
+        // (a background step's state goes in now, before devices touch the nodes again; a tick's own in run, on its thread)
+        if (bg) load(p);
+        if (bg) {
+            net.budget = BACKGROUND_BUDGET;
+            net.span = span;
+            behindTicks = 0;
+            pending = p;
+            double stepDt = dt;
+            background = true;
+            waited = 0;
+            p.span = span;
+            // (over MAX_SPAN ticks behind: that time is lost; waiting() counted it towards Jade's alarm tick by tick)
+            if (droppedNow > 0) mods.eln.fluid.FluidWorld.recordProgress(nodes, stallNow(), droppedNow);
+            job = WORKER.submit(() -> {
+                long t0 = System.nanoTime();
+                net.step(stepDt);
+                p.took = System.nanoTime() - t0;
+            });
+            if (!applied) waiting(tick);
+            return null;
+        }
+        p.span = 1;
+        net.span = 1;
+        net.budget = -1;
+        Network.MAX_STEP_NANOS = budgetNanos;   // (the same for every network: set here, read by the solves)
+        return p;
+    }
+
+    /**
+     * The nodes' and edges' state into the core, for the step p (begin's second half, the costly one: every port's
+     * packet). It reads and writes this network's own nodes, edges and core, nothing shared: for a tick's own step it
+     * runs on the solve's thread (run).
+     */
+    private void load(Pending p) {
+        long t0 = System.nanoTime();
+        int ticks = p.ticks;
+        double[] heat0 = new double[cn.length];
         // contents in (the authority is the FluidNode; the core wakes by its own signature when they change)
         for (int i = 0; i < cn.length; i++) {
             FluidNode n = nodes.get(i);
@@ -567,12 +690,7 @@ public final class CoreStep {
             c.setPa = e.setPa;
             c.relief = e.relief;
         }
-        Pending p = new Pending();
-        p.tick = tick;
-        p.dt = dt;
         p.xl = xl;
-        p.slow = slow;
-        p.background = bg;
         p.heat0 = heat0;
         p.failures = net.stats.failures;
         p.slept0 = net.stats.slept;
@@ -587,33 +705,8 @@ public final class CoreStep {
         p.sub0 = net.stats.substeps;
         p.cut0 = net.stats.cut;
         p.crawls0 = net.stats.crawls;
-        if (bg) {
-            net.budget = BACKGROUND_BUDGET;
-            net.span = span;
-            behindTicks = 0;
-            pending = p;
-            double stepDt = dt;
-            background = true;
-            waited = 0;
-            p.span = span;
-            // (over MAX_SPAN ticks behind: that time is lost; waiting() counted it towards Jade's alarm tick by tick)
-            if (droppedNow > 0) mods.eln.fluid.FluidWorld.recordProgress(nodes, stallNow(), droppedNow);
-            job = WORKER.submit(() -> {
-                long t0 = System.nanoTime();
-                net.step(stepDt);
-                p.took = System.nanoTime() - t0;
-            });
-            if (!applied) waiting(tick);
-            return;
-        }
-        p.span = 1;
-        net.span = 1;
-        net.budget = -1;
-        Network.MAX_STEP_NANOS = budgetNanos;
-        long t0 = System.nanoTime();
-        net.step(dt);
-        p.took = System.nanoTime() - t0;
-        finish(p);
+        p.loaded = true;
+        p.loadNanos = System.nanoTime() - t0;
     }
 
     /** A tick while a background step runs: the devices get this tick's share of the last results; the core isn't touched. */
@@ -711,6 +804,7 @@ public final class CoreStep {
         double kept = slept && awakeDt > 0 ? dt / awakeDt : 1;
         boolean idle = p.background;   // (its time isn't owed)
         lastMs = p.took / 1e6;
+        if (!p.background) lastSolveNanos = p.loadNanos + p.took;
         background = p.background;
 
         overBudget = net.overBudget || p.background;
