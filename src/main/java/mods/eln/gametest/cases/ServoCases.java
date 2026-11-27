@@ -60,6 +60,15 @@ public final class ServoCases {
 
     static final int TRAVEL = 6;
 
+    /**
+     * Lab: a level-run rig on a live world (/elnlab servorig): a drive at p facing south, its rail lying east for travel
+     * blocks, 230 V behind it. Returns the drive's position, for /elnlab servogo.
+     */
+    public static BlockPos labRig(net.minecraft.server.level.ServerLevel level, BlockPos p, int travel) {
+        var ctx = new mods.eln.gametest.WorldTestContext(level, p);
+        return new Shaft(ctx, p, 0, net.minecraft.core.Direction.EAST, travel).head;
+    }
+
     /** A drive at p with its mast, MVU through a Power Resistor of `coal` core items (0: none). */
     static final class Shaft {
         LinearServoDriveElement d;
