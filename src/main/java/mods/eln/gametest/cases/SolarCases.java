@@ -94,6 +94,19 @@ public final class SolarCases {
                 mods.eln.misc.Utils.weatherSource = (lvl, pos) -> null;
                 double l = process.getSolarLight();
                 ctx.check("solar: no local weather there: the world's (clear)", Math.abs(l - light) < 1e-9, String.format("light %.4f", l));
+                // (the source is asked once per 16-block column for a second: every panel asks twice a slow tick)
+                int[] asked = {0};
+                mods.eln.misc.Utils.weatherSource = (lvl, pos) -> {
+                    asked[0]++;
+                    return new double[]{1, 0};
+                };
+                var lvl = panel.node.coordonate.world();
+                mods.eln.misc.Utils.weatherAt(lvl, at);
+                mods.eln.misc.Utils.weatherAt(lvl, at);
+                int same = asked[0];
+                mods.eln.misc.Utils.weatherAt(lvl, at.east(40));
+                ctx.check("solar: the weather source is asked once per column, again for another column", same == 1 && asked[0] == 2,
+                    same + " then " + asked[0]);
             } finally {
                 mods.eln.misc.Utils.weatherSource = saved;
             }

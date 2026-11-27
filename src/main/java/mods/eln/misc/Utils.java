@@ -682,19 +682,49 @@ public class Utils {
     /**
      * Where the rain comes from, if another mod models it locally (Watershed's showers, by IMC "eln"/"weather": a supplier
      * of this function): {rain, thunder}, each 0..1, at a place now; null where it doesn't. Null: the world's weather.
+     * weatherAt asks it once per 16-block column and WEATHER_TICKS.
      */
     public static volatile java.util.function.BiFunction<net.minecraft.world.level.Level, net.minecraft.core.BlockPos, double[]> weatherSource;
 
-    /** {rain, thunder} 0..1 over pos (Baughn: EA's solar panels see Watershed's showers): the weather source's there,
-     *  else the world's rain and thunder levels. */
+    /** {rain, thunder} 0..1 over pos's 16-block column (Baughn: EA's solar panels see Watershed's showers): the weather
+     *  source's there, at most WEATHER_TICKS old, else the world's rain and thunder levels. */
     public static double[] weatherAt(net.minecraft.world.level.Level world, net.minecraft.core.BlockPos pos) {
         var src = weatherSource;
         if (src != null) {
-            double[] w = src.apply(world, pos);
-            if (w != null) return w;
+            // (every panel asks twice a slow tick, and the source's lookup is not cheap: a column's answer is kept
+            // WEATHER_TICKS, showers move slower than that)
+            long now = world.getGameTime(), key = net.minecraft.world.level.ChunkPos.pack(pos.getX() >> 4, pos.getZ() >> 4);
+            double[] w;
+            synchronized (WEATHER_CACHE) {
+                if (src != weatherCachedFor) {   // (a new source: its answers, not the last one's)
+                    WEATHER_CACHE.clear();
+                    weatherCachedFor = src;
+                }
+                var cache = WEATHER_CACHE.computeIfAbsent(world, l -> new java.util.HashMap<>());
+                WeatherEntry e = cache.get(key);
+                if (e != null && now - e.at() >= 0 && now - e.at() < WEATHER_TICKS) w = e.w();
+                else {
+                    w = src.apply(world, pos);
+                    if (cache.size() > 8192) cache.clear();
+                    cache.put(key, new WeatherEntry(now, w));
+                }
+            }
+            if (w != null) return w.clone();
         }
         return new double[]{world.getRainLevel(1), world.getThunderLevel(1)};
     }
+
+    /** How long weatherAt keeps a column's answer from the weather source (ticks). */
+    private static final int WEATHER_TICKS = 20;
+
+    private record WeatherEntry(long at, double[] w) {
+    }
+
+    /** The weather source WEATHER_CACHE holds answers from. */
+    private static Object weatherCachedFor;
+
+    /** weatherAt's answers per level and 16-block column (synchronized on itself; null w: the source had none there). */
+    private static final java.util.Map<net.minecraft.world.level.Level, java.util.Map<Long, WeatherEntry>> WEATHER_CACHE = new java.util.WeakHashMap<>();
 
     /** The weather at c, 0 clear, 0.5 rain, 1 thunder (graded in between), as getWeatherNoLoad; 0 if c's world isn't loaded. */
     public static double getWeatherNoLoad(Coordonate c) {
