@@ -102,7 +102,7 @@ class ShaftMotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor)
     }
 
     /** The speed it drives to (rad/s). */
-    fun targetRads() = if (speed.connectedComponents.count() > 0) speed.normalized * nominalShaftRads else nominalShaftRads
+    fun targetRads() = speed.normalizedOr(1.0) * nominalShaftRads
 
     /** How hard it drives now (0..1): what a pump against its side runs at. */
     fun driveShare() = if (desc.nominalP > 0) Math.min(1.0, shaftW / desc.nominalP) else 0.0

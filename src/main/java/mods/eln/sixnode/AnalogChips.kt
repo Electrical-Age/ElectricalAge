@@ -133,7 +133,7 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
             val inputs = arrayOfNulls<Double?>(3)
             for (i in 0..2) {
                 val inputPin = inputPins[i]
-                if (inputPin != null && inputPin.connectedComponents.count() > 0) {
+                if (inputPin?.isConnected == true) {
                     inputs[i] = inputPin.u
                 }
             }
@@ -162,7 +162,7 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
         val builder = StringBuilder()
         for (i in 1..3) {
             val pin = inputPins[i - 1]
-            if (pin != null && pin.connectedComponents.count() > 0) {
+            if (pin?.isConnected == true) {
                 builder.append("I$i: ").append(if (pin.stateLow()) "0"
                 else if (pin.stateHigh()) "1" else "?").append(", ")
             }
@@ -172,7 +172,7 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
     }
 
     override fun getWaila(): MutableMap<String, String> = function.getWaila(
-        inputPins.map { if (it != null && it.connectedComponents.count() > 0) it.u else null }.toTypedArray(),
+        inputPins.map { if (it?.isConnected == true) it.u else null }.toTypedArray(),
         outputPin.u)
 
     override fun readFromNBT(nbt: CompoundTag?) {

@@ -73,7 +73,7 @@ public final class ValvePart extends VoxelPart {
 
     /** PRESSURE: is a signal cable connected (it then sets the set point)? */
     public boolean signalled() {
-        return signal != null && !signal.getConnectedComponents().isEmpty();
+        return signal != null && signal.isConnected();
     }
 
     /** PRESSURE: its set point now (Pa): the screen's, or the signal's (0-5 V: 0 to MAX_BAR). */
