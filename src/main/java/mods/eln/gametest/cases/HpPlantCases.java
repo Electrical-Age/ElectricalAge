@@ -598,6 +598,12 @@ public final class HpPlantCases {
             return false;
         }
 
+        /** In the background its steps take real time while the test server ticks as fast as it can: a step some ticks
+         *  long is no stall there (on a busy machine one took six). */
+        public boolean checkStalls() {
+            return !background;
+        }
+
         public void build(TestContext ctx) {
             furnaceMax = new double[n];
             int dx = natural ? 1 : 0;   // (natural: the turbine one block further east, clear of the back furnaces' flanges)
