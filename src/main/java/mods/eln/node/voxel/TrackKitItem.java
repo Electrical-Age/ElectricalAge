@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
  * by clicking the corners (TrackPlacer). Filled with Servo Rails, one block of track each, like a pipe kit with plates;
  * holds up to KitItem.MAX voxels (64 blocks, a drive's longest track).
  */
-public class TrackKitItem extends Item implements KitItem {
+public class TrackKitItem extends Item implements PipeTool, KitItem {
     /** Servo Rails per block of track. */
     public static final int PER_BLOCK = 1;
 
