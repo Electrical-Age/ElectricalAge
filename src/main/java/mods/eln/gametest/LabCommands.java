@@ -185,6 +185,7 @@ public final class LabCommands {
                 .then(Commands.literal("wiredrawing").executes(c -> demo(c.getSource(), () -> wiredrawing(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cores").executes(c -> demo(c.getSource(), () -> cores(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("rubber").executes(c -> demo(c.getSource(), () -> rubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
+                .then(Commands.literal("glasses").executes(c -> demo(c.getSource(), () -> glasses(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("itemanim").executes(c -> demo(c.getSource(), () -> itemAnim(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("cracker").executes(c -> demo(c.getSource(), () -> cracker(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
                 .then(Commands.literal("oilrubber").executes(c -> demo(c.getSource(), () -> oilRubber(c.getSource(), BlockPos.containing(c.getSource().getPosition())))))
@@ -951,6 +952,52 @@ public final class LabCommands {
      * The four electrical machines at work, 230V in a row along +x and 48V in a row 5 blocks along +z, each powered and
      * with a stack in its input (iron ore, coal dust, iron ingots, copper ingots): their items in process (todo #278).
      */
+    /**
+     * Gauge glasses at set levels, for a client check (the levels are drawn from the contents, so they have to be seen
+     * at several): a row to the east, 4 blocks apart. Still Pots empty, 16 B and 24 B of crude, and 8 B of heavy oil on
+     * 8 B of water; a Fractionating Column Base with 1 B of residue under 5 B of crude; Boilers empty, half and full;
+     * Large Boilers half and full; the Tar Sand Separators with a film (5 %) and a full basin.
+     */
+    static int glasses(CommandSourceStack src, BlockPos pos) {
+        var level = src.getLevel();
+        var player = src.getPlayer();
+        if (player == null) throw new IllegalStateException("a player's command");
+        double bucket = mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER * 1000, rho = mods.eln.sim.fluid.Water.RHO_L;
+        int crude = mods.eln.gametest.cases.StillPotCases.sp("crude_oil"), heavy = mods.eln.gametest.cases.StillPotCases.sp("heavy_oil");
+        double[][] pots = {{}, {crude, 16 * bucket / rho * 850}, {crude, 24 * bucket / rho * 850},
+            {mods.eln.sim.fluid.SpeciesRegistry.WATER, 8 * bucket, heavy, 8 * bucket / rho * 950}};
+        int x = 0;
+        for (double[] charge : pots) {
+            var pot = (mods.eln.oil.StillPotElement) placeTransparent(level, player, "Still Pot", pos.offset(x, 0, 0));
+            mods.eln.gametest.cases.StillPotCases.charge(pot, 300, 300, charge);
+            x += 4;
+        }
+        var col = (mods.eln.oil.ColumnBaseElement) placeTransparent(level, player, "Fractionating Column Base", pos.offset(x, 0, 0));
+        col.tanks.setResidue(1000);
+        col.tanks.setCrude(5000);
+        x += 4;
+        for (double share : new double[]{0, 0.5, 0.95}) {
+            var b = (mods.eln.oil.BoilerElement) placeTransparent(level, player, "Boiler", pos.offset(x, 0, 0));
+            b.fromTanks((int) (share * b.vessel.volume * rho / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER), 0);
+            x += 4;
+        }
+        for (double share : new double[]{0.5, 0.95}) {
+            var b = (mods.eln.oil.BoilerElement) placeTransparent(level, player, "Large Boiler", pos.offset(x, 0, 0));
+            b.fromTanks((int) (share * b.vessel.volume * rho / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER), 0);
+            x += 4;
+        }
+        for (String name : new String[]{"48V Tar Sand Separator", "230V Tar Sand Separator"})
+            for (double share : new double[]{0.05, 1}) {
+                var s = (mods.eln.transparentnode.electricalmachine.OilSeparatorElement) placeTransparent(level, player, name, pos.offset(x, 0, 0));
+                s.putFluid(mods.eln.oil.Oil.CRUDE.get(), (int) (share * mods.eln.transparentnode.electricalmachine.OilSeparatorDescriptor.TANK_MB));
+                x += 4;
+            }
+        int n = x / 4;
+        src.sendSuccess(() -> Component.literal("glasses: " + n + " devices east from " + pos.toShortString()
+            + ": still pots (empty, 16 B, 24 B, oil on water), column base, boilers (0, half, full), large boilers (half, full), separators 48V/230V (film, full)"), false);
+        return 1;
+    }
+
     static int itemAnim(CommandSourceStack src, BlockPos pos) {
         String[] kinds = {"Macerator", "Compressor", "Magnetizer", "Plate Machine"};
         net.minecraft.world.item.ItemStack[] inputs = {new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_ORE, 64),

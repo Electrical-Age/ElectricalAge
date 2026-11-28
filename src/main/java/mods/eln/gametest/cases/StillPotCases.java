@@ -753,7 +753,7 @@ public final class StillPotCases {
     }
 
     /** Charge the pot: these species (id, kg pairs) as liquid at T (K), air at 1 atm over them; the shell at shellK. */
-    static void charge(StillPotElement pot, double T, double shellK, double... idKg) {
+    public static void charge(StillPotElement pot, double T, double shellK, double... idKg) {
         FluidNode v = pot.vessel;
         v.fill(0, Water.P_ATM, T);
         v.mAir = 0;
@@ -764,7 +764,7 @@ public final class StillPotCases {
         pot.thermal.Tc = shellK - PhysicalConstant.Tref;
     }
 
-    static int sp(String name) {
+    public static int sp(String name) {
         return SpeciesRegistry.get().id("eln:" + name);
     }
 
