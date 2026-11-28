@@ -374,6 +374,20 @@ public final class PipeTransmitterCases {
             var onBody = v.aimed((p[0] + 1.5) / 16.0, 2.2 / 16.0, (p[2] - 1.5) / 16.0);
             c.check("pipe transmitter: the crosshair on the pipe end over it means the device", onPipe.element() == t.slot && onBody.element() == t.slot,
                 onPipe + " " + onBody + " slot " + t.slot);
+            // and by the line of sight (VoxelPick): straight down the pipe end over it, and low from the side through
+            // the pipe's last voxels at the port
+            var o = net.minecraft.world.phys.Vec3.atLowerCornerOf(a);
+            String rays = "";
+            boolean raysOk = true;
+            for (double[][] r : new double[][][]{{{p[0] + 0.5, 40, p[2] + 0.5}, {p[0] + 0.5, 0, p[2] + 0.5}}, {{p[0] - 40, p[1] + 4, p[2] + 0.5}, {p[0], p[1], p[2] + 0.5}},
+                {{p[0] + 0.5, p[1] + 4, p[2] - 40}, {p[0] + 0.5, p[1], p[2]}}}) {
+                var hit = VoxelPickCases.hit(c, a, r[0], r[1]);
+                var got = hit == null ? null
+                    : mods.eln.node.voxel.VoxelPick.pick(v.scene(), VoxelPickCases.world(a, r[0]).subtract(o), null, hit.subtract(o));
+                rays += got + " ";
+                raysOk &= got != null && got.element() == t.slot;
+            }
+            c.check("pipe transmitter: a line of sight onto the pipe end at its port means the device", raysOk, rays + "slot " + t.slot);
             var keys = new java.util.ArrayList<>(t.getWaila().keySet());
             c.check("pipe transmitter: Jade's first three lines are reading, volts and full scale", keys.size() == 3 && keys.get(0).equals("Pressure sensor")
                 && keys.get(1).equals("Output") && keys.get(2).equals("Full scale"), "" + t.getWaila());

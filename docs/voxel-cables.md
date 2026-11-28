@@ -184,9 +184,9 @@ the rules above; the joints are kept alongside:
   nearest the click where it fits, its front from the player's (as the Voltage Probe's) then turned clockwise. Refused
   in mid-air, on a pipe or fitting, and where its body or the column up past its port would come within a voxel of a
   pipe or fitting (`PipeSensorItem.nearPipe`: a lab test put one under a floor pipe, its port inside it).
-- `VoxelNode.aimed` gives the device, not the pipe, for a point in its body grown by a voxel or within 3 voxels of its
-  port (`PipeTransmitterElement.aimBoxes`): the end of the pipe laid to it covered the body from most angles, so Jade
-  and clicks got the pipe. Breaking still picks by `VoxelNodeBlock`'s own rule.
+- The pick (`VoxelPick`, below) gives the device, not the pipe, for a line of sight into its body grown by a voxel or
+  within 3 voxels of its port (`PipeTransmitterDescriptor.aimBoxes`): the end of the pipe laid to it covered the body
+  from most angles, so Jade and clicks got the pipe. Breaking picks the same way.
 - A pipe kit route doesn't start or end at a device's port that already has a pipe (`PipePlacer.portTaken`; a lab test
   laid a second pipe beside the first). The same holds for every machine's fluid port, the Large Boiler's ghost ports
   included (`FluidPlacement.partners`: FluidWorld's one coupling rule, `FluidWorld.couples`, asked of the block in front of the port;
@@ -308,7 +308,7 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   `fluidLinks` links each arm's end to it (the end's own conductance and height; a level end an opening as tall as the
   bore, the junction an opening as tall as its body, so a vertical arm gets the counter-flow pair: a sealed riser drains,
   `FluidDevice.Link.spanA/spanB`). So each branch is its own run. It takes up to four arms, isn't aimed at on its own
-  (`partAt` gives the nearest arm), and goes when fewer than two arms are left, its contents with it (Baughn
+  (the pick gives the arm nearest the place looked at: `VoxelPick.armNear`), and goes when fewer than two arms are left, its contents with it (Baughn
   2026-11-25: given to the last arm, they squeezed its run to thousands of bar). Over its arms' rating an arm at it
   bursts. Old saves' coinciding ends (no part) stay lumped until the phase 3 converter.
   `FluidWorld` reports any node under `MIN_RELIABLE_VOLUME` (1e-6 m^3) once (Baughn). Tests: `JunctionCases`.
@@ -436,6 +436,43 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   wrench key to the server. Release the key over a segment (or click; clicks while held pick without closing; a click
   on the centre commits), Esc cancels. A changed brush is sent as `Eln.packetChiselBrush`; `ChiselItem.applyBrush` sets
   it on the server's main-hand stack only if that is a chisel and the size and shape are valid.
+
+## The pick: what the crosshair is on
+
+One function, `VoxelPick.pick(Scene, eye, look, hit)` (pure, both sides; Baughn 2026-11-28), answers it for Jade, the
+outline (`client/render/VoxelOutline`), breaking and its tool (`VoxelNodeBlock.aimedBy`), right-click
+(`VoxelNode.onBlockActivated`) and middle-click. It returns `VoxelNode.Aimed(element slot, part index)`, one of them
+set, or neither. Before, there were four copies: Jade named the last cable laid within 2 voxels of the hit point, the
+outline the first.
+
+- The `Scene` is the block's boxes: the parts, each slot's device boxes, a pipe sensor device's aim boxes, what's left
+  of the imitated block. `VoxelNode.scene()` on the server, `VoxelNodeEntity.scene()` on the client (from the last
+  publish). Callers use `VoxelNodeEntity.aimed(viewer, hit)` / `VoxelNode.aimed(viewer, hit)`.
+- It follows the line of sight, not the hit point. The hit is on the block's outline, which stands 2 voxels proud of
+  every part (`VoxelNodeBlock.outlineOf`), so seen at an angle the ray stops on one cable's outline while the crosshair
+  is drawn over the next. The line runs from the hit point on (nothing of the block is in front of it), from the eye
+  through the hit (the server's idea of the look lags; the hit is the client's own), to where it leaves the block or
+  meets the imitated block.
+- Rule: the box it enters first (true boxes, grown 0.05); if it enters none, the part or device whose own box is
+  nearest the line, among those whose outline (2.05 voxels) it passes through. Entered together or equally near: a
+  pipe sensor device's aim box, a fitting (a valve's box takes in its pipe), a pipe or cable, a junction, a device;
+  then the lower first box or slot. Never the order in the parts list: the client isn't sent part ids, and both sides
+  must agree.
+- A junction is never the answer: its arm nearest the place the line met it (`armNear`).
+- The point form (`VoxelNode.aimed(x, y, z)`, `partAt(x, y, z)`: no viewer) is the same rule for a point: the box
+  holding it, else the nearest of those within 2.05 voxels. Placement code that works a point out keeps it: where a
+  fitting goes (`addValveNear`, `addSafetyValveNear`, `addSensorNear`), where a kit's click ends or joins
+  (`CablePlacer`, `PipePlacer`), the face a device goes on (`placeFace`), the Toolbag's shears.
+- Jade (`compat/jade/VoxelProbe`): the server sends an entry for every device and part of the block (`elnParts`: the
+  device's `slot`, or the part's `id` and first `box`; title, lines, headline count), the asker's own first, 24 at
+  most, and last a keyless entry for the block as a whole. The client chooses the entry each time the tooltip is
+  built, with the call the outline makes, so the tooltip follows the crosshair within a block without waiting for
+  the server and names what is outlined. It matches a part by its first box (parts don't overlap). Past 24 a part
+  has no entry until the server's next answer, which puts the aimed one first.
+- The outline is still off while a kit, the Toolbag or the chisel is held.
+- GameTests `gametest/cases/VoxelPickCases.java`: `voxel_pick_parallel_cables`, `_fittings`, `_junction`,
+  `_device_beside_cable` (rows of lines of sight), `voxel_pick_outline_jade_and_break_agree`,
+  `voxel_pick_jade_entry_per_part`; the sensor device's rays in `pipe_transmitter_lab_fixes`.
 
 ## Rendering pointers
 

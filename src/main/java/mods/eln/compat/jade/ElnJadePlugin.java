@@ -4,7 +4,6 @@ import mods.eln.node.NodeBlock;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -56,19 +55,10 @@ public class ElnJadePlugin implements IWailaPlugin {
         registration.registerEntityComponent(CartClient.INSTANCE, mods.eln.oil.TankCart.class);
     }
 
-    /** The device's lines, ordered: key TAB value. */
+    /** The device's lines, ordered: key TAB value (a voxel block's are VoxelProbe's, one set per thing in it). */
     static Map<String, String> lines(BlockAccessor acc, boolean details) {
         if (acc.getBlockEntity() instanceof mods.eln.oil.TankStationEntity station) return station.waila();
         if (!(acc.getBlockEntity() instanceof NodeBlockEntity be) || !(be.getNode() instanceof mods.eln.node.NodeBase node)) return Map.of();
-        if (node instanceof mods.eln.node.voxel.VoxelNode v) {
-            // an element hosted there under the crosshair, else the parts
-            var h = acc.getHitResult().getLocation();
-            var p = acc.getPosition();
-            double x = h.x - p.getX(), y = h.y - p.getY(), z = h.z - p.getZ();
-            var a = v.aimed(x, y, z);   // (the device, pipe or cable under the crosshair: Baughn)
-            if (a.element() >= 0 && v.sideElementList[a.element()] != null) return v.sideElementList[a.element()].getWaila();
-            return v.getWaila(details, a.part());
-        }
         if (node instanceof mods.eln.node.transparent.TransparentNode t && t.element != null) return t.element.getWaila();
         if (node instanceof mods.eln.node.six.SixNode s && be instanceof mods.eln.node.six.SixNodeEntity se) {
             var side = mods.eln.node.six.SixNodeBlock.sideAt(se, acc.getPosition(), acc.getHitResult());
@@ -77,17 +67,11 @@ public class ElnJadePlugin implements IWailaPlugin {
         return Map.of();
     }
 
-    /** The device under the crosshair, if it can burn out (a transparent node's element, a six-node's in the aimed slot). */
+    /** The device under the crosshair, if it can burn out (a transparent node's element, a six-node's in the aimed slot;
+     *  not a voxel block's: VoxelProbe). */
     static mods.eln.sim.process.destruct.IBurnable burnable(BlockAccessor acc) {
         if (!(acc.getBlockEntity() instanceof NodeBlockEntity be)) return null;
         var node = be.getNode();
-        if (node instanceof mods.eln.node.voxel.VoxelNode v) {
-            var h = acc.getHitResult().getLocation();
-            var p = acc.getPosition();
-            var a = v.aimed(h.x - p.getX(), h.y - p.getY(), h.z - p.getZ());
-            if (a.element() >= 0) return v.sideElementList[a.element()];
-            return a.part() >= 0 && v.parts.get(a.part()) instanceof mods.eln.node.voxel.CablePart c ? v.burnableOf(c) : null;
-        }
         if (node instanceof mods.eln.node.transparent.TransparentNode t) return t.element;
         if (node instanceof mods.eln.node.six.SixNode s && be instanceof mods.eln.node.six.SixNodeEntity se) {
             var side = mods.eln.node.six.SixNodeBlock.sideAt(se, acc.getPosition(), acc.getHitResult());
@@ -100,21 +84,11 @@ public class ElnJadePlugin implements IWailaPlugin {
     static boolean hasHeat(BlockAccessor acc) {
         if (!(acc.getBlockEntity() instanceof NodeBlockEntity be)) return false;
         var node = be.getNode();
-        if (node instanceof mods.eln.node.voxel.VoxelNode) return true;   // (cables and pipes)
         if (node instanceof mods.eln.node.transparent.TransparentNode t) return t.element != null && !t.element.thermalLoadList.isEmpty();
         if (node instanceof mods.eln.node.six.SixNode s) {
             for (var e : s.sideElementList) if (e != null && !e.thermalLoadList.isEmpty()) return true;
         }
         return false;
-    }
-
-    /** A voxel block's header: the device, pipe or cable under the crosshair (the block is "Pipes and Cables"). */
-    static String title(BlockAccessor acc) {
-        if (!(acc.getBlockEntity() instanceof NodeBlockEntity be) || !(be.getNode() instanceof mods.eln.node.voxel.VoxelNode v)) return null;
-        var h = acc.getHitResult().getLocation();
-        var p = acc.getPosition();
-        double x = h.x - p.getX(), y = h.y - p.getY(), z = h.z - p.getZ();
-        return v.nameAt(x, y, z);
     }
 
     /**
@@ -149,24 +123,6 @@ public class ElnJadePlugin implements IWailaPlugin {
         public void appendServerData(CompoundTag tag, BlockAccessor acc) {
             // (all of it: the client cuts to elnHead unless the player sneaks or probe.details is enabled)
             var owner = ghostOwner(acc);
-            Map<String, String> m;
-            try {
-                m = owner != null ? owner.getWaila() : lines(acc, true);
-            } catch (RuntimeException e) {
-                return;   // (a device mid-change: no lines this time)
-            }
-            String title = owner != null ? owner.node.pickItem(null, acc.getLevel()).getHoverName().getString() : title(acc);
-            if (title != null) tag.putString("elnTitle", title);
-            ProbeLines p = ProbeLines.from(m, HEADLINE);
-            var b = owner != null ? owner : burnable(acc);
-            if (b != null && b.isBurnt()) {   // (burnt: only cause + repair in headline; dead-device lines in details)
-                ProbeLines burnt = ProbeLines.of();
-                burnt.headline(mods.eln.i18n.I18N.tr("Burnt out"), b.getBurnt().text);
-                burnt.headline(mods.eln.i18n.I18N.tr("Repair with"), b.getBurntKind() == mods.eln.sim.process.destruct.Failure.Kind.CABLE
-                    ? mods.eln.i18n.I18N.tr("matching cable kit") : "1 " + mods.eln.sim.process.destruct.Repair.partName(b));
-                burnt.addAllDetail(p);
-                p = burnt;
-            }
             // (first of all, in red: keep exact callout as requested)
             var at = alarmBlocks(acc, owner);
             if (at.stream().anyMatch(mods.eln.fluid.FluidWorld::solverFailedAt))
@@ -176,12 +132,22 @@ public class ElnJadePlugin implements IWailaPlugin {
                 for (long q : at) if (heavy == null) heavy = mods.eln.fluid.FluidWorld.heavyAt(q);
                 if (heavy != null) tag.putString("elnNote", heavy);
             }
-            if (p.isEmpty()) return;
-            if (owner != null ? !owner.thermalLoadList.isEmpty() : hasHeat(acc)) {
-                p.detail(mods.eln.i18n.I18N.tr("Ambient"), mods.eln.misc.Utils.plotCelsius("", mods.eln.sim.Ambient.relative(acc.getLevel(), acc.getPosition())));
+            String ambient = mods.eln.misc.Utils.plotCelsius("", mods.eln.sim.Ambient.relative(acc.getLevel(), acc.getPosition()));
+            // a voxel block: everything in it, the one under the asker's crosshair first; the client chooses (VoxelProbe)
+            if (owner == null && acc.getBlockEntity() instanceof NodeBlockEntity be && be.getNode() instanceof mods.eln.node.voxel.VoxelNode v) {
+                tag.put(VoxelProbe.KEY, VoxelProbe.entries(v, v.aimed(acc.getPlayer(), acc.getHitResult().getLocation()), HEADLINE, ambient));
+                return;
             }
-            tag.put("elnProbe", list(p));
-            tag.putInt("elnHead", p.headlineCount());
+            Map<String, String> m;
+            try {
+                m = owner != null ? owner.getWaila() : lines(acc, true);
+            } catch (RuntimeException e) {
+                return;   // (a device mid-change: no lines this time)
+            }
+            String title = owner != null ? owner.node.pickItem(null, acc.getLevel()).getHoverName().getString() : null;
+            // (burnt: only cause + repair in headline; dead-device lines in details)
+            ProbeLines p = VoxelProbe.lines(m, owner != null ? owner : burnable(acc), HEADLINE);
+            VoxelProbe.put(tag, title, p, (owner != null ? !owner.thermalLoadList.isEmpty() : hasHeat(acc)) ? ambient : null);
         }
 
         @Override
@@ -195,14 +161,20 @@ public class ElnJadePlugin implements IWailaPlugin {
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor acc, IPluginConfig config) {
-            String title = acc.getServerData().getStringOr("elnTitle", "");
+            // a voxel block: of the entries sent, the one for what the crosshair is on now, picked as the outline picks it
+            CompoundTag data = acc.getServerData();
+            if (data.contains(VoxelProbe.KEY) && acc.getBlockEntity() instanceof mods.eln.node.voxel.VoxelNodeEntity v) {
+                data = VoxelProbe.choose(data.getListOrEmpty(VoxelProbe.KEY), v.aimed(acc.getPlayer(), acc.getHitResult().getLocation()), v.parts());
+                if (data == null) data = new CompoundTag();
+            }
+            String title = data.getStringOr("elnTitle", "");
             if (!title.isEmpty()) tooltip.replace(snownee.jade.api.JadeIds.CORE_OBJECT_NAME, Component.literal(title));
             String alarm = acc.getServerData().getStringOr("elnAlarm", "");
             if (!alarm.isEmpty()) tooltip.add(Component.literal(alarm).withStyle(net.minecraft.ChatFormatting.RED, net.minecraft.ChatFormatting.BOLD));
             String note = acc.getServerData().getStringOr("elnNote", "");
             if (!note.isEmpty()) tooltip.add(Component.literal(note).withStyle(net.minecraft.ChatFormatting.YELLOW));
-            var list = acc.getServerData().getListOrEmpty("elnProbe");
-            int head = acc.getServerData().getIntOr("elnHead", HEADLINE);
+            var list = data.getListOrEmpty("elnProbe");
+            int head = data.getIntOr("elnHead", HEADLINE);
             boolean details = details(acc);
             int n = details ? list.size() : Math.min(head, list.size());
             addLines(tooltip, list, n);
@@ -232,7 +204,7 @@ public class ElnJadePlugin implements IWailaPlugin {
             }
             if (m.isEmpty()) return;
             ProbeLines p = ProbeLines.from(m, HEADLINE);
-            tag.put("elnMachine", list(p));
+            tag.put("elnMachine", VoxelProbe.list(p));
             tag.putInt("elnMachineHead", p.headlineCount());
         }
 
@@ -265,13 +237,6 @@ public class ElnJadePlugin implements IWailaPlugin {
         return mods.eln.ElnConfig.probeDetails || acc.showDetails() || acc.getPlayer() != null && acc.getPlayer().isShiftKeyDown();
     }
 
-    /** Lines as sent: key TAB value. */
-    static ListTag list(Map<String, String> m) {
-        ListTag list = new ListTag();
-        for (var e : m.entrySet()) list.add(StringTag.valueOf(e.getKey() + "\t" + e.getValue()));
-        return list;
-    }
-
     /** The first n lines sent (key TAB value) as "key: value". */
     static void addLines(ITooltip tooltip, ListTag list, int n) {
         for (int i = 0; i < n; i++) {
@@ -290,7 +255,7 @@ public class ElnJadePlugin implements IWailaPlugin {
             if (!(acc.getEntity() instanceof mods.eln.oil.TankCart c)) return;
             try {
                 ProbeLines p = ProbeLines.from(c.waila(), HEADLINE);
-                tag.put("elnProbe", list(p));
+                tag.put("elnProbe", VoxelProbe.list(p));
                 tag.putInt("elnHead", p.headlineCount());
             } catch (RuntimeException e) {
                 // (a cart mid-change: no lines this time)

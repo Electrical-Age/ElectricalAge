@@ -346,15 +346,16 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** Middle-click: the device, cable, pipe or fitting under the crosshair, else the imitated block. */
     @Override
     public ItemStack pickItem(net.minecraft.world.phys.BlockHitResult hit, net.minecraft.world.level.LevelReader level) {
-        if (hit != null) {
-            var l = hit.getLocation();
-            Aimed a = aimed(l.x - coordonate.x, l.y - coordonate.y, l.z - coordonate.z);
-            if (a.element() >= 0 && getElement(a.element()) != null) return getElement(a.element()).getDropItemStack();
-            if (a.part() >= 0 && !pickPart(parts.get(a.part())).isEmpty()) return pickPart(parts.get(a.part()));
-        }
+        return pickItem(hit == null ? VoxelPick.NONE : aimed(null, hit.getLocation()), level);
+    }
+
+    /** pickItem for what is aimed at (VoxelNodeBlock: by the player's line of sight). */
+    ItemStack pickItem(Aimed a, net.minecraft.world.level.LevelReader level) {
+        if (a.element() >= 0 && getElement(a.element()) != null) return getElement(a.element()).getDropItemStack();
+        if (a.part() >= 0 && !pickPart(parts.get(a.part())).isEmpty()) return pickPart(parts.get(a.part()));
         if (host != null) return host.getCloneItemStack(level, coordonate.pos(), false);
         for (VoxelPart p : parts) if (!pickPart(p).isEmpty()) return pickPart(p);
-        return super.pickItem(hit, level);
+        return super.pickItem(null, level);
     }
 
     /** A part's item for a middle-click: a cable or pipe as a one-block kit of its tier (burnt or burst too). */
@@ -443,37 +444,13 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return parts.isEmpty() && !getIfSideRemain();
     }
 
-    /** The part whose boxes hold the block-local point (0..1), or -1. */
+    /**
+     * The part at the block-local point (0..1), or -1: VoxelPick among the parts alone, for a point worked out by code
+     * (where a fitting goes, where a kit's click ends). The part holding it, else the nearest of those whose outline
+     * (2 voxels fatter) holds it; a junction's nearest arm.
+     */
     public int partAt(double x, double y, double z) {
-        // (a junction is never aimed at on its own: the arm under it is; it goes when its arms do)
-        for (int i = parts.size() - 1; i >= 0; i--)
-            if (!(parts.get(i) instanceof JunctionPart)) for (int[] b : parts.get(i).boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return i;
-        for (int i = parts.size() - 1; i >= 0; i--)   // (the outline is 2 voxels fatter than the parts)
-            if (!(parts.get(i) instanceof JunctionPart)) for (int[] b : parts.get(i).boxes()) if (VoxelPart.contains(b, x, y, z, 2.05)) return i;
-        for (int i = parts.size() - 1; i >= 0; i--)
-            if (parts.get(i) instanceof JunctionPart j) for (int[] b : j.boxes()) if (VoxelPart.contains(b, x, y, z, 2.05)) return armNear(j, x, y, z);
-        return -1;
-    }
-
-    /** The index of the pipe ending at junction j nearest the point (block-local voxels), or -1. */
-    int armNear(JunctionPart j, double x, double y, double z) {
-        int best = -1;
-        double bd = Double.MAX_VALUE;
-        for (int i = 0; i < parts.size(); i++)
-            if (parts.get(i) instanceof PipePart pipe && endsAt(pipe, j.x, j.y, j.z)) {
-                int[] pts = pipe.points;
-                int k = pts[0] == j.x && pts[1] == j.y && pts[2] == j.z ? 3 : pts.length - 6;   // (the point next to its end)
-                double d = sq(pts[k] - x) + sq(pts[k + 1] - y) + sq(pts[k + 2] - z);
-                if (d < bd) {
-                    bd = d;
-                    best = i;
-                }
-            }
-        return best;
-    }
-
-    private static double sq(double v) {
-        return v * v;
+        return VoxelPick.at(VoxelPick.Scene.of(parts), x, y, z).part();
     }
 
     /** Does a pipe have an inner end at (x, y, z)? */
@@ -935,22 +912,33 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     /**
-     * What the crosshair (or a click) is on, at block-relative hit (x, y, z): a hosted device's slot (a device's own face
-     * first, then within reach of a face), else a part's index; -1 for none. One rule for clicks, meters and Jade
-     * (Baughn 2026-10-28: each worked it out alone, and the meters read the block's first cable or pipe).
+     * What the crosshair (or a click) is on: a hosted device's slot, else a part's index; -1 for none. One rule for
+     * clicks, meters, breaking, the outline and Jade (VoxelPick; Baughn 2026-10-28 and 2026-11-28: each worked it out
+     * alone).
      */
     public record Aimed(int element, int part) {
     }
 
+    /** What the pick sees here (VoxelPick.Scene): the client's is VoxelNodeEntity.scene. */
+    public VoxelPick.Scene scene() {
+        List<List<int[]>> devices = new ArrayList<>(SLOTS), sensors = new ArrayList<>(SLOTS);
+        for (int i = 0; i < SLOTS; i++) {
+            var e = sideElementList[i];
+            devices.add(e == null ? List.of() : elementBoxes(i));
+            sensors.add(e instanceof mods.eln.sixnode.pipetransmitter.PipeTransmitterElement t
+                ? mods.eln.sixnode.pipetransmitter.PipeTransmitterDescriptor.aimBoxes(t.side, t.ox, t.oy, t.oz, elementBoxes(i).get(0)) : List.of());
+        }
+        return new VoxelPick.Scene(parts, devices, sensors, hostBoxes());
+    }
+
+    /** What is at the block-local point (0..1): for a point with no line of sight (a test, a command). */
     public Aimed aimed(double x, double y, double z) {
-        // a pipe sensor device wins over the end of the pipe laid to its port, which covers its body from most angles
-        // (a lab test: Jade showed "Iron Pipe")
-        for (int i = 6; i < SLOTS; i++)
-            if (sideElementList[i] instanceof mods.eln.sixnode.pipetransmitter.PipeTransmitterElement t)
-                for (int[] b : t.aimBoxes(elementBoxes(i).get(0))) if (VoxelPart.contains(b, x, y, z, 0.05)) return new Aimed(i, -1);
-        int el = elementAt(x, y, z, 0), pi = partAt(x, y, z);
-        if (el < 0 && pi < 0) el = elementAt(x, y, z, 2);
-        return new Aimed(el, pi);
+        return VoxelPick.at(scene(), x, y, z);
+    }
+
+    /** What viewer's crosshair is on, its ray having stopped at hit (in the world); viewer null: the point alone. */
+    public Aimed aimed(net.minecraft.world.entity.Entity viewer, net.minecraft.world.phys.Vec3 hit) {
+        return VoxelPick.pick(scene(), coordonate.pos(), viewer, hit);
     }
 
     /**
@@ -959,7 +947,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      * null for nothing there.
      */
     public String nameAt(double x, double y, double z) {
-        Aimed a = aimed(x, y, z);
+        return nameOf(aimed(x, y, z));
+    }
+
+    /** nameAt for what is aimed at. */
+    public String nameOf(Aimed a) {
         int el = a.element(), pi = a.part();
         if (el >= 0 && sideElementList[el] != null) return sideElementList[el].sixNodeElementDescriptor.name;
         if (pi < 0) return null;
@@ -992,7 +984,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     @Override
     public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
         // a six-node element hosted here: as in a six-node block (its own use, GUI, repair, meters)
-        Aimed a = aimed(vx, vy, vz);
+        Aimed a = aimed(player, new net.minecraft.world.phys.Vec3(coordonate.x + (double) vx, coordonate.y + (double) vy, coordonate.z + (double) vz));
         int el = a.element(), pi = a.part();
         if (el >= 0) return onSlotActivated(player, el, vx, vy, vz);
         if (pi >= 0 && parts.get(pi) instanceof CablePart c && c.spec != null && recolour(player, pi, c)) return true;

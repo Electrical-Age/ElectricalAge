@@ -1033,6 +1033,17 @@ In the port:
   nothing saved. `anim.Fill.draw` scaled a part about the block's middle instead of its origin (it read the origin
   from the .txt floats, where it never is), right only at scale 1: fixed with it, which also puts the Boiler's and
   Large Boiler's gauge columns on their feet at every level. GameTests `still_pot_sight_glass_*`.
+- **In a block of several cables or pipes, Jade, the outline and breaking are on the one the crosshair is drawn over**
+  (Lashtear, Baughn 2026-11-28: "Jade readings on multiple cables in one block sometimes seem to pick the wrong cable.
+  Or pipe."). The pick was a test of the point where the crosshair's ray stopped, which is on the block's outline, 2
+  voxels proud of every part: where two outlines overlapped the part laid last won, and seen at an angle the point
+  was on the near cable's outline while the crosshair was over the far one. There were four copies of it (Jade and
+  clicks, the outline, breaking, the breaking tool) that disagreed, and Jade's lines came for the part aimed at when
+  the server was last asked. Now one pick by the line of sight (`VoxelPick`, docs/voxel-cables.md) for all of them;
+  the server sends Jade every part's and device's lines and the client chooses (Baughn: option c, the network load
+  is minimal), so the tooltip changes with the crosshair and matches the outline. Also fixed: a junction gave the
+  arm nearest the block's corner, not the one looked at (`armNear` compared voxels with blocks). The point form used
+  by placement (`partAt`) gives the nearest part, not the newest. GameTests `voxel_pick_*`.
 
 ## Deferred
 

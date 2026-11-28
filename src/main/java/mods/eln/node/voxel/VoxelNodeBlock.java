@@ -181,46 +181,47 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         return host != null ? host.getSoundType(level, pos, entity) : super.getSoundType(state, level, pos, entity);
     }
 
-    /** What the player aims at in this block: 0 nothing, 1 a part or device, 2 the imitated block. */
-    static int aimed(VoxelNodeEntity e, BlockPos pos, net.minecraft.world.entity.player.Player player) {
+    /**
+     * What the player's crosshair is on in this block (VoxelNodeEntity.aimed, from the player's own line of sight: the
+     * server is not sent the ray a player mines along); null if it is on another block or nothing.
+     */
+    static VoxelNode.Aimed aimedBy(VoxelNodeEntity e, BlockPos pos, net.minecraft.world.entity.player.Player player) {
         var pick = player.pick(player.blockInteractionRange() + 1, 1f, false);
-        if (!(pick instanceof net.minecraft.world.phys.BlockHitResult bh) || !bh.getBlockPos().equals(pos)) return 0;
-        var h = bh.getLocation();
-        double x = h.x - pos.getX(), y = h.y - pos.getY(), z = h.z - pos.getZ();
-        for (VoxelPart p : e.parts()) for (int[] b : p.boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return 1;
-        for (int[] b : e.deviceBoxes()) if (b != null && VoxelPart.contains(b, x, y, z, 0.05)) return 1;
-        BlockState host = e.host();
-        if (host != null) for (int[] b : e.hostBoxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return 2;
-        return 1;
+        if (!(pick instanceof net.minecraft.world.phys.BlockHitResult bh) || !bh.getBlockPos().equals(pos)) return null;
+        return e.aimed(player, bh.getLocation());
+    }
+
+    /** Is the player's crosshair on the imitated block: in this block and on none of its parts or devices? */
+    static boolean aimedAtHost(VoxelNodeEntity e, BlockPos pos, net.minecraft.world.entity.player.Player player) {
+        VoxelNode.Aimed a = aimedBy(e, pos, player);
+        return e.host() != null && a != null && a.element() < 0 && a.part() < 0;
     }
 
     @Override
     protected float getDestroyProgress(BlockState state, net.minecraft.world.entity.player.Player player, BlockGetter level, BlockPos pos) {
         VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
-        BlockState host = e == null ? null : e.host();
-        if (host != null && aimed(e, pos, player) == 2) return host.getDestroyProgress(player, level, pos);
+        if (e != null && aimedAtHost(e, pos, player)) return e.host().getDestroyProgress(player, level, pos);
         return mods.eln.node.BreakTool.progress(state, player, level, pos, e == null ? mods.eln.node.BreakTool.Kind.PICKAXE : toolFor(e, pos, player));
     }
 
     /** The tool for what the player aims at (BreakTool): shears for a cable, a pickaxe for a pipe, its fittings and
-     *  devices. In the order breaking picks them (onDestroyedByPlayer, VoxelNode.partAt): a device, then a part, then
-     *  a part within the outline's 2 extra voxels. */
+     *  devices. */
     static mods.eln.node.BreakTool.Kind toolFor(VoxelNodeEntity e, BlockPos pos, net.minecraft.world.entity.player.Player player) {
-        var pick = player.pick(player.blockInteractionRange() + 1, 1f, false);
-        if (pick instanceof net.minecraft.world.phys.BlockHitResult bh && bh.getBlockPos().equals(pos)) {
-            var h = bh.getLocation();
-            double x = h.x - pos.getX(), y = h.y - pos.getY(), z = h.z - pos.getZ();
-            for (int[] b : e.deviceBoxes()) if (b != null && VoxelPart.contains(b, x, y, z, 0.05)) return mods.eln.node.BreakTool.Kind.PICKAXE;
-            var parts = e.parts();
-            for (double eps : new double[]{0.05, 2.05})
-                for (int i = parts.size() - 1; i >= 0; i--)
-                    for (int[] b : parts.get(i).boxes())
-                        if (VoxelPart.contains(b, x, y, z, eps))
-                            return parts.get(i) instanceof CablePart ? mods.eln.node.BreakTool.Kind.SHEARS : mods.eln.node.BreakTool.Kind.PICKAXE;
-        }
-        return mods.eln.node.BreakTool.Kind.PICKAXE;
+        VoxelNode.Aimed a = aimedBy(e, pos, player);
+        var parts = e.parts();
+        return a != null && a.part() >= 0 && a.part() < parts.size() && parts.get(a.part()) instanceof CablePart
+            ? mods.eln.node.BreakTool.Kind.SHEARS : mods.eln.node.BreakTool.Kind.PICKAXE;
     }
 
+    /** Middle-click: what the crosshair is on, as breaking and Jade pick it. */
+    @Override
+    public net.minecraft.world.item.ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state, boolean includeData,
+                                                                net.minecraft.world.entity.player.Player player) {
+        VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
+        if (e == null || player == null || !(e.getNode() instanceof VoxelNode node)) return super.getCloneItemStack(level, pos, state, includeData, player);
+        VoxelNode.Aimed a = aimedBy(e, pos, player);
+        return node.pickItem(a == null ? VoxelPick.NONE : a, level);
+    }
 
     /** Breaking takes the part under the crosshair; the block stays while others remain. */
     @Override
@@ -231,21 +232,14 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
         if (level.isClientSide())
             return e.parts().size() + e.deviceCount() <= 1 && super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
         if (!(e.getNode() instanceof VoxelNode node)) return super.onDestroyedByPlayer(state, level, pos, player, tool, willHarvest, fluid);
-        int index = -1, el = -1;
-        var pick = player.pick(player.blockInteractionRange() + 1, 1f, false);
-        if (pick instanceof net.minecraft.world.phys.BlockHitResult bh && bh.getBlockPos().equals(pos)) {
-            var h = bh.getLocation();
-            double x = h.x - pos.getX(), y = h.y - pos.getY(), z = h.z - pos.getZ();
-            el = node.elementAt(x, y, z, 0);
-            if (el < 0) index = node.partAt(x, y, z);
-            if (el < 0 && index < 0) el = node.elementAt(x, y, z, 2);
-        }
+        VoxelNode.Aimed a = aimedBy(e, pos, player);
+        int index = a == null ? -1 : a.part(), el = a == null ? -1 : a.element();
         // nothing of this block under the crosshair (mining went on after what was aimed at went): nothing goes
         // (AdventurAgent: a fallback took the cable left in the block, and with it the block)
         if (el < 0 && index < 0) {
             // the imitated block itself: it drops; the parts stay
             if (node.host != null) {
-                if (aimed(e, pos, player) == 2) node.clearHost(player);
+                if (a != null) node.clearHost(player);
                 return false;
             }
             // only faces this version could not load are left (no part, plate or host to aim at): the block goes, as a

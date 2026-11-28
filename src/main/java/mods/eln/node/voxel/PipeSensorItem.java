@@ -63,7 +63,7 @@ public class PipeSensorItem extends Item implements PipeTool {
         VoxelNode v = null;
         if (level.getBlockEntity(at) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n) {
             double hx = hit.x - at.getX(), hy = hit.y - at.getY(), hz = hit.z - at.getZ();
-            int part = n.aimed(hx, hy, hz).part();
+            int part = n.partAt(hx, hy, hz);
             if (part >= 0 && !(n.parts.get(part) instanceof CablePart))
                 return mods.eln.i18n.I18N.tr("Must be placed on a solid face");
             pos = at;

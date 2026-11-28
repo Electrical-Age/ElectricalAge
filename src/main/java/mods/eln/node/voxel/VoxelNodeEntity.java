@@ -158,6 +158,40 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         return out;
     }
 
+    /** What the pick sees here (VoxelPick.Scene): server from the node, client from the last publish. */
+    public VoxelPick.Scene scene() {
+        if (level != null && !level.isClientSide()) return getNode() instanceof VoxelNode v ? v.scene() : VoxelPick.Scene.of(List.of());
+        int slots = mods.eln.node.six.SixNode.SLOTS;
+        List<List<int[]>> devices = new ArrayList<>(slots), sensors = new ArrayList<>(slots);
+        for (int f = 0; f < slots; f++) {
+            List<int[]> bs = slotBoxes(f);
+            devices.add(bs);
+            var er = elementRenderList[f];
+            sensors.add(!bs.isEmpty() && er != null
+                && mods.eln.Eln.sixNodeItem.getDescriptor(elementRenderIdList[f]) instanceof mods.eln.sixnode.pipetransmitter.PipeTransmitterDescriptor
+                ? mods.eln.sixnode.pipetransmitter.PipeTransmitterDescriptor.aimBoxes(er.side, er.ox, er.oy, er.oz, bs.get(0)) : List.of());
+        }
+        return new VoxelPick.Scene(clientParts, devices, sensors, hostBoxes());
+    }
+
+    /**
+     * What viewer's crosshair is on, its ray having stopped at hit (in the world): the one call for the outline, Jade's
+     * tooltip, breaking and middle-click, so they name the same thing (Baughn 2026-11-28).
+     */
+    public VoxelNode.Aimed aimed(net.minecraft.world.entity.Entity viewer, net.minecraft.world.phys.Vec3 hit) {
+        return VoxelPick.pick(scene(), worldPosition, viewer, hit);
+    }
+
+    /** The boxes outlined for what is aimed at: a part's, fattened as the block's outline is; a device's own. None: null. */
+    public List<int[]> outline(VoxelNode.Aimed a) {
+        if (a.element() >= 0) return slotBoxes(a.element());
+        List<VoxelPart> ps = parts();
+        if (a.part() < 0 || a.part() >= ps.size()) return null;
+        List<int[]> out = new ArrayList<>();
+        for (int[] b : ps.get(a.part()).boxes()) out.add(grown(b, 2));
+        return out;
+    }
+
     /** Client: what the devices' boxes depend on (ids and, past the faces, place), for the shape cache. */
     private int deviceKey() {
         int h = java.util.Arrays.hashCode(elementRenderIdList);

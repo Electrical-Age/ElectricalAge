@@ -34,6 +34,33 @@ public class PipeTransmitterDescriptor extends SixNodeDescriptor {
         if (main != null) main.draw();
     }
 
+    /** The port of one on face side with its centre offset (ox, oy, oz) (block-local voxels): PORT_HEIGHT off the face,
+     *  over the device's centre. */
+    public static int[] port(mods.eln.misc.Direction side, int ox, int oy, int oz) {
+        int face = side.toEnumFacing().get3DDataValue(), n = mods.eln.node.voxel.CablePart.normalAxis(face);
+        int[] c = {8 + ox, 8 + oy, 8 + oz};
+        c[n] = mods.eln.node.voxel.CablePart.plane(face) == 0 ? PORT_HEIGHT : 16 - PORT_HEIGHT;
+        return c;
+    }
+
+    /**
+     * Where the crosshair means the device rather than the pipe at its port (VoxelPick; block voxels): its body grown
+     * by a voxel, and the last 3 voxels of pipe round the port, from the face to past the pipe's outline. From its
+     * place alone, so the client works it out as the server does.
+     */
+    public static java.util.List<int[]> aimBoxes(mods.eln.misc.Direction side, int ox, int oy, int oz, int[] body) {
+        int face = side.toEnumFacing().get3DDataValue(), n = mods.eln.node.voxel.CablePart.normalAxis(face);
+        int[] p = port(side, ox, oy, oz), b = new int[6];
+        for (int a = 0; a < 3; a++) {
+            b[a] = p[a] - 3;
+            b[a + 3] = p[a] + 3;
+        }
+        int reach = PORT_HEIGHT + 4;
+        b[n] = mods.eln.node.voxel.CablePart.plane(face) == 0 ? 0 : 16 - reach;
+        b[n + 3] = mods.eln.node.voxel.CablePart.plane(face) == 0 ? reach : 16;
+        return java.util.List.of(new int[]{body[0] - 1, body[1] - 1, body[2] - 1, body[3] + 1, body[4] + 1, body[5] + 1}, b);
+    }
+
     /** The full scale a new one starts at. */
     public double defaultScale() {
         return PipeSensorPart.defaultScale(sensing);
