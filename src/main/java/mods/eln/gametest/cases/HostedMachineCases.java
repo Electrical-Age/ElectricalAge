@@ -74,11 +74,6 @@ public final class HostedMachineCases {
         return c.placeSix(Wp10aCases.LV_CABLE, c.at(x, 1, 1));
     }
 
-    /** A 50 V source at x on the floor. */
-    static void source(TestContext c, int x) {
-        c.source(Wp10aCases.SOURCE, c.at(x, 1, 1), 50);
-    }
-
     /** The NodeConnections between a and b (each sits in both nodes' lists). */
     static int links(NodeBase a, NodeBase b) {
         if (a == null || b == null) return 0;
@@ -97,7 +92,7 @@ public final class HostedMachineCases {
         SixNodeElement cable;
 
         public void build(TestContext c) {
-            source(c, 1);
+            c.source(Wp10aCases.SOURCE, c.at(1, 1, 1), 50);
             cable = cable(c, 2);
             pos = machine(c, 3, Direction.EAST);
         }
@@ -413,7 +408,7 @@ public final class HostedMachineCases {
         }
 
         public void build(TestContext c) {
-            source(c, 0);
+            c.source(Wp10aCases.SOURCE, c.at(0, 1, 1), 50);
             cable(c, 1);
             m1 = machine(c, 2, Direction.EAST);
             b = cable(c, 3);

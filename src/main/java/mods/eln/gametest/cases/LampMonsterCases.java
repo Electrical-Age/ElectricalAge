@@ -13,7 +13,6 @@ import net.minecraft.world.entity.monster.Monster;
 import java.util.List;
 
 import static mods.eln.gametest.cases.Wp9aCases.orient;
-import static mods.eln.gametest.cases.Wp9aCases.source;
 
 /**
  * A lamp socket removes monsters that appear near it only while it is lit (Baughn 2026-10-27: an unlit socket doing it
@@ -50,7 +49,7 @@ public final class LampMonsterCases {
 
         public void build(TestContext ctx) {
             String ch = "eln lamp monsters " + id() + " " + System.nanoTime();
-            if (powered) source(ctx, Wp9aCases.SOURCE, 0, 1, 50);
+            if (powered) ctx.source(Wp9aCases.SOURCE, ctx.at(0, 1, 1), 50);
             ctx.placeSix(Wp9aCases.LV_CABLE, ctx.at(1, 1, 1));
             LampSupplyElement supply = (LampSupplyElement) ctx.placeSix(Ids.six("Lamp Supply"), ctx.at(2, 1, 1));
             orient(supply, f -> f, Direction.XN);

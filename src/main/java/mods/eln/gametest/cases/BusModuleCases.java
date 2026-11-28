@@ -9,7 +9,6 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.voxel.CablePart;
-import mods.eln.node.voxel.VoxelNode;
 import mods.eln.sixnode.busmodule.BusModuleElement;
 import net.minecraft.core.BlockPos;
 
@@ -108,7 +107,7 @@ public final class BusModuleCases {
             Wp9cCases.within(c, "bus module: A's in terminal sees the source [V]", a.volts(BACK_MIDDLE), 0.6 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
             Wp9cCases.within(c, "bus module: the channel carries it [0..1]", a.port.read(LIGHT_BLUE), 0.6, 0.01);
             Wp9cCases.within(c, "bus module: B's out terminal drives it [V]", b.volts(BACK_MIDDLE), 0.6 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
-            Object[] k = ((VoxelNode) BusCases.node(c, 6, 1, 1)).cableAt(8, 0, 8);
+            Object[] k = c.voxelAt(c.at(6, 1, 1)).cableAt(8, 0, 8);
             double u = k == null || k[0] == null ? Double.NaN : ((mods.eln.sim.ElectricalLoad) k[0]).getU();
             Wp9cCases.within(c, "bus module: the signal wire past B reads it [V]", u, 0.6 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
             var w = a.getWaila();

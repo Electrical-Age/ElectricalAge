@@ -37,10 +37,6 @@ public final class Batch1Cases {
 
     // ---- helpers (1.12 Wp9aCases; orient, load, link and current are Wp9aCases') ----
 
-    static ElectricalSourceElement source(TestContext ctx, int x, int z, double u) {
-        return Wp9aCases.source(ctx, SOURCE, x, z, u);
-    }
-
     /** Power Resistor with n items in the core slot, terminals along X. */
     static ResistorElement resistor(TestContext ctx, int x, int z, int n) {
         return Wp9aCases.resistor(ctx, POWER_RESISTOR, x, z, n);
@@ -62,7 +58,7 @@ public final class Batch1Cases {
         }
 
         public void build(TestContext ctx) {
-            src = source(ctx, 0, 1, U);
+            src = ctx.source(SOURCE, ctx.at(0, 1, 1), U);
             r = resistor(ctx, 1, 1, 48);
             gnd = ctx.placeSix(GROUND, ctx.at(2, 1, 1));
             t0 = ctx.level().getGameTime();
@@ -104,7 +100,7 @@ public final class Batch1Cases {
         }
 
         public void build(TestContext ctx) {
-            src = source(ctx, 0, 1, U);
+            src = ctx.source(SOURCE, ctx.at(0, 1, 1), U);
             c1 = ctx.placeSix(LV_CABLE, ctx.at(1, 1, 1));
             c2 = ctx.placeSix(LV_CABLE, ctx.at(2, 1, 1));
             r = resistor(ctx, 3, 1, 48);

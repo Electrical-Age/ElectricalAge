@@ -10,7 +10,6 @@ import java.util.List;
 import static mods.eln.gametest.cases.Wp9aCases.GROUND;
 import static mods.eln.gametest.cases.Wp9aCases.LV_CABLE;
 import static mods.eln.gametest.cases.Wp9aCases.SOURCE;
-import static mods.eln.gametest.cases.Wp9aCases.source;
 
 /**
  * Failure of a cable run (26.x, Baughn's playtest): a fault through a chain of identical cables burns one of them, the
@@ -55,7 +54,7 @@ public final class BurnChainCases {
         }
 
         public void build(TestContext ctx) {
-            source(ctx, SOURCE, 0, 1, u);
+            ctx.source(SOURCE, ctx.at(0, 1, 1), u);
             for (int i = 1; i <= N; i++) cables.add(ctx.placeSix(LV_CABLE, ctx.at(i, 1, 1)));
             ctx.placeSix(GROUND, ctx.at(N + 1, 1, 1));
         }

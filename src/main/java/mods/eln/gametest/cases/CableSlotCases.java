@@ -55,7 +55,7 @@ public final class CableSlotCases {
         }
 
         public void build(TestContext ctx) {
-            Wp9aCases.source(ctx, Wp9aCases.SOURCE, 0, 1, 50);
+            ctx.source(Wp9aCases.SOURCE, ctx.at(0, 1, 1), 50);
             probe = (ElectricalSensorElement) ctx.placeSix(Ids.six("Electrical Probe"), ctx.at(1, 1, 1));
             orient(probe, LRDU::left, Direction.XN);
             probe.networkUnserialize(ctx.stream(o -> {

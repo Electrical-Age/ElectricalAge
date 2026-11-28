@@ -11,7 +11,6 @@ import mods.eln.sixnode.lampsupply.LampSupplyElement;
 import java.util.List;
 
 import static mods.eln.gametest.cases.Wp9aCases.orient;
-import static mods.eln.gametest.cases.Wp9aCases.source;
 
 /**
  * Lamp supply powering lamp sockets by channel (no cable between them). Port step T3 (notes/port26/PLAN.md).
@@ -55,7 +54,7 @@ public final class LampSupplyCases {
 
         public void build(TestContext ctx) {
             ch = "eln selftest lamps " + System.nanoTime();
-            source(ctx, Wp9aCases.SOURCE, 0, 1, 50);
+            ctx.source(Wp9aCases.SOURCE, ctx.at(0, 1, 1), 50);
             ctx.placeSix(Wp9aCases.LV_CABLE, ctx.at(1, 1, 1));
             supply = (LampSupplyElement) ctx.placeSix(Ids.six("Lamp Supply"), ctx.at(2, 1, 1));
             orient(supply, f -> f, Direction.XN); // its power pin is the front
@@ -114,7 +113,7 @@ public final class LampSupplyCases {
 
         public void build(TestContext ctx) {
             ch = "eln selftest sockets " + System.nanoTime();
-            source(ctx, Wp9aCases.SOURCE, 0, 1, 50);
+            ctx.source(Wp9aCases.SOURCE, ctx.at(0, 1, 1), 50);
             ctx.placeSix(Wp9aCases.LV_CABLE, ctx.at(1, 1, 1));
             supply = (LampSupplyElement) ctx.placeSix(Ids.six("Lamp Supply"), ctx.at(2, 1, 1));
             orient(supply, f -> f, Direction.XN);

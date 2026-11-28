@@ -58,7 +58,7 @@ public final class LowLevelCases {
         HostedNode node;
 
         public void build(TestContext c) {
-            HostedMachineCases.source(c, 1);
+            c.source(Wp10aCases.SOURCE, c.at(1, 1, 1), 50);
             HostedMachineCases.cable(c, 2);
             be = barrel(c, 3, Direction.EAST);
             circuit = Circuit.create("barrel heater");
@@ -152,7 +152,7 @@ public final class LowLevelCases {
 
         @Override
         public void build(TestContext c) {
-            HostedMachineCases.source(c, 1);
+            c.source(Wp10aCases.SOURCE, c.at(1, 1, 1), 50);
             HostedMachineCases.cable(c, 2);
             BlockPos cable = c.at(2, 1, 1);
             BlockEntity be = barrel(c, 5, Direction.UP);   // (not beside anything of EA's: no faces at all)

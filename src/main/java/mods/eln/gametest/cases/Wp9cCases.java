@@ -470,7 +470,7 @@ public final class Wp9cCases {
         }
 
         public void build(TestContext ctx) {
-            src = Wp9aCases.source(ctx, SOURCE, 0, 1, Eln.LVU);
+            src = ctx.source(SOURCE, ctx.at(0, 1, 1), Eln.LVU);
             cable = ctx.placeSix(LV_CABLE, ctx.at(1, 1, 1));
             hub = (HubElement) ctx.placeSix(HUB, ctx.at(2, 1, 1));
             for (Direction d : new Direction[]{Direction.XN, Direction.XP}) {
@@ -511,7 +511,7 @@ public final class Wp9cCases {
         }
 
         public void build(TestContext ctx) {
-            src = Wp9aCases.source(ctx, SOURCE, 0, 1, Eln.LVU);
+            src = ctx.source(SOURCE, ctx.at(0, 1, 1), Eln.LVU);
             meter = (EnergyMeterElement) ctx.placeSix(ENERGY_METER, ctx.at(1, 1, 1));
             orient(meter, l -> l, Direction.XN);
             // no cable in a slot: built-in LV cable (Baughn 2026-10-17)
@@ -1030,7 +1030,7 @@ public final class Wp9cCases {
                 o.writeByte(2); // Event.SET_CHANNEL
                 o.writeUTF(channel);
             }));
-            Wp9aCases.source(ctx, SOURCE, 4, 1, Eln.LVU);
+            ctx.source(SOURCE, ctx.at(4, 1, 1), Eln.LVU);
             b = (EmergencyLampElement) ctx.placeSix(EMERGENCY_LAMP_50V, ctx.at(5, 1, 1));
             orient(b, LRDU::left, Direction.XN);
             b.networkUnserialize(ctx.stream(o -> o.writeByte(1))); // Event.TOGGLE_POWERED_BY_CABLE

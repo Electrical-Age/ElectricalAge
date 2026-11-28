@@ -1179,10 +1179,6 @@ public final class Wp10aCases {
      * The Variable DC-DC Converter (Baughn 2026-11-06): 14 LV turns in, 28 MV turns out, cheap core; the signal on its front
      * taps the secondary: half of SVU -> 14 turns, 48 V out; all of SVU -> 28 turns, 96 V.
      */
-    static ElectricalSourceElement source(TestContext ctx, BlockPos at, double volts) {
-        return ctx.source(SOURCE, at, volts);
-    }
-
     static class VariableTransformerCase implements TestCase {
         mods.eln.transparentnode.transformer.VariableTransformerElement tr;
         SixNodeElement secondary;
@@ -1221,7 +1217,7 @@ public final class Wp10aCases {
             tr = (mods.eln.transparentnode.transformer.VariableTransformerElement) ctx.placeTransparent(TRANSFORMER + 1, p);
             // (placed by hand: Layout's platform is 3 deep, and the signal comes in on the front)
             ctx.placeSix(LV_CABLE, off(p, tr.front.left()));
-            source(ctx, off(off(p, tr.front.left()), tr.front.left()), U);
+            ctx.source(SOURCE, off(off(p, tr.front.left()), tr.front.left()), U);
             secondary = ctx.placeSix(8 + (32 << 6), off(p, tr.front.right()));   // a Medium Voltage Cable
             // the signal: a source straight on its gate load (the harness's own wiring, as PipeCases drives a pin)
             signal = new mods.eln.sim.mna.component.VoltageSource("tap signal", tr.tap, null);

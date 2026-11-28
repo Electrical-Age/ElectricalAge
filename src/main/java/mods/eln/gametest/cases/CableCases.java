@@ -16,7 +16,6 @@ import static mods.eln.gametest.cases.Wp9aCases.POWER_RESISTOR;
 import static mods.eln.gametest.cases.Wp9aCases.SOURCE;
 import static mods.eln.gametest.cases.Wp9aCases.current;
 import static mods.eln.gametest.cases.Wp9aCases.resistor;
-import static mods.eln.gametest.cases.Wp9aCases.source;
 
 /**
  * Voxel cables against six-node cables (notes/cables/PLAN.md step 1): each case builds a circuit twice, once with
@@ -61,7 +60,7 @@ public final class CableCases {
         Layout mixed = (c, six, z) -> {
             // source -> 2 cables -> resistor -> a block with a floor cable and a Ground Cable on its wall (inner corner)
             c.floor(c.at(4, 1, z + 1));
-            source(c, SOURCE, 0, z, 50);
+            c.source(SOURCE, c.at(0, 1, z), 50);
             for (int x = 1; x <= 2; x++) c.placeSix(LV_CABLE, c.at(x, 1, z));
             ResistorElement r = resistor(c, POWER_RESISTOR, 3, z, CORE);
             c.placeSix(LV_CABLE, c.at(4, 1, z));
@@ -73,7 +72,7 @@ public final class CableCases {
         Layout deviceCorner = (c, six, z) -> {
             // ... -> resistor -> floor cable up the side of a bump -> round its top edge -> a Ground Cable on top
             c.floor(c.at(5, 1, z));
-            source(c, SOURCE, 0, z, 50);
+            c.source(SOURCE, c.at(0, 1, z), 50);
             for (int x = 1; x <= 2; x++) c.placeSix(LV_CABLE, c.at(x, 1, z));
             ResistorElement r = resistor(c, POWER_RESISTOR, 3, z, CORE);
             c.placeSix(LV_CABLE, c.at(4, 1, z));
@@ -107,7 +106,7 @@ public final class CableCases {
         for (int[] pm : perms) cases.add(new ConvertCase("converted wall device round two corners, order " + pm[0] + pm[1] + pm[2], wallCorners, false, false, pm));
         Layout wet = (c, six, z) -> {
             // a cable and the resistor under water (waterlogged six-node blocks): they convert and stay wet
-            source(c, SOURCE, 0, z, 50);
+            c.source(SOURCE, c.at(0, 1, z), 50);
             for (int x = 1; x <= 6; x++) {
                 if (x >= 3) c.level().setBlock(c.at(x, 1, z), net.minecraft.world.level.block.Blocks.WATER.defaultBlockState(), 3);
                 if (x <= 5) c.placeSix(LV_CABLE, c.at(x, 1, z));
@@ -118,7 +117,7 @@ public final class CableCases {
         cases.add(new Case("hosted device between voxel cables", (c, six, z) -> {
             // source -> 3 cables -> resistor -> a cable -> ground: six-node row, and a voxel row where the resistor
             // sits in a voxel block (its edges meet voxel cable ports across the faces)
-            source(c, SOURCE, 0, z, 50);
+            c.source(SOURCE, c.at(0, 1, z), 50);
             for (int x = 1; x <= 3; x++) {
                 if (six) c.placeSix(LV_CABLE, c.at(x, 1, z));
                 else voxel(c, c.at(x, 1, z), CablePart.arms(LV, DOWN, WEST, EAST));
@@ -151,7 +150,7 @@ public final class CableCases {
 
     static void addLayouts(List<TestCase> cases) {
         cases.add(new Case("voxel cable straight", (c, six, z) -> {
-            source(c, SOURCE, 0, z, 50);
+            c.source(SOURCE, c.at(0, 1, z), 50);
             for (int x = 1; x <= 6; x++) {
                 if (six) c.placeSix(LV_CABLE, c.at(x, 1, z));
                 else voxel(c, c.at(x, 1, z), CablePart.arms(LV, DOWN, WEST, EAST));
@@ -171,7 +170,7 @@ public final class CableCases {
         cases.add(new Case("voxel cable inner corners", (c, six, z) -> {
             // floor, up onto a wall to the south, along it, back down to the floor
             for (int x = 2; x <= 5; x++) c.floor(c.at(x, 1, z + 1));
-            source(c, SOURCE, 0, z, 50);
+            c.source(SOURCE, c.at(0, 1, z), 50);
             if (six) {
                 for (int x : new int[]{1, 2, 5, 6}) c.placeSix(LV_CABLE, c.at(x, 1, z));
                 for (int x = 2; x <= 5; x++) c.placeSix(LV_CABLE, c.at(x, 1, z), mods.eln.misc.Direction.ZP);
@@ -188,7 +187,7 @@ public final class CableCases {
         cases.add(new Case("voxel cable outer corners", (c, six, z) -> {
             // over a one-block bump at x = 3
             c.floor(c.at(3, 1, z));
-            source(c, SOURCE, 0, z, 50);
+            c.source(SOURCE, c.at(0, 1, z), 50);
             if (six) {
                 for (int x : new int[]{1, 2, 4, 5}) c.placeSix(LV_CABLE, c.at(x, 1, z));
                 c.placeSix(LV_CABLE, c.at(2, 1, z), mods.eln.misc.Direction.XP);
@@ -207,7 +206,7 @@ public final class CableCases {
         }));
         cases.add(new Case("voxel cable tee", (c, six, z) -> {
             // a T at x = 3: on to a load at x = 5, and round by z + 2 to a second load
-            source(c, SOURCE, 0, z, 50);
+            c.source(SOURCE, c.at(0, 1, z), 50);
             if (six) {
                 for (int x = 1; x <= 4; x++) c.placeSix(LV_CABLE, c.at(x, 1, z));
                 c.placeSix(LV_CABLE, c.at(3, 1, z + 1));
@@ -241,7 +240,7 @@ public final class CableCases {
         }
 
         public void build(TestContext c) {
-            source(c, SOURCE, 0, 1, 60);
+            c.source(SOURCE, c.at(0, 1, 1), 60);
             for (int x = 1; x <= 6; x++) voxel(c, c.at(x, 1, 1), CablePart.arms(LV, DOWN, WEST, EAST));
             c.placeSix(GROUND, c.at(7, 1, 1));
         }
@@ -414,7 +413,7 @@ public final class CableCases {
         }
 
         public void build(TestContext c) {
-            source(c, SOURCE, 0, 1, 50);
+            c.source(SOURCE, c.at(0, 1, 1), 50);
             r = end(c, 7, 1);
             c.floor(c.at(4, 1, 1));
             c.floor(c.at(4, 2, 1));
@@ -485,7 +484,7 @@ public final class CableCases {
         }
 
         public void build(TestContext c) {
-            source(c, SOURCE, 0, 1, 50);
+            c.source(SOURCE, c.at(0, 1, 1), 50);
             r = end(c, 7, 1);
             var hitS = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(0, 1, 1)).add(1.0, 0.05, 0.5);
             var hitR = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(7, 1, 1)).add(0.0, 0.05, 0.2);   // (off-centre)
@@ -506,7 +505,7 @@ public final class CableCases {
             c.floor(c.at(1, 0, 6));
             mods.eln.node.voxel.CableConverter.convertOnLoad = true;
             try {
-                source(c, SOURCE, 0, 6, 50);
+                c.source(SOURCE, c.at(0, 1, 6), 50);
             } finally {
                 mods.eln.node.voxel.CableConverter.convertOnLoad = conv;
             }
@@ -765,7 +764,7 @@ public final class CableCases {
         }
 
         public void build(TestContext c) {
-            source(c, SOURCE, 0, 1, 50);
+            c.source(SOURCE, c.at(0, 1, 1), 50);
             r = end(c, 7, 1);
             var level = c.level();
             var hitS = net.minecraft.world.phys.Vec3.atLowerCornerOf(c.at(0, 1, 1)).add(1.0, 0.05, 0.5);
@@ -1424,7 +1423,7 @@ public final class CableCases {
 
         public void build(TestContext c) {
             for (int z : new int[]{1, 6}) {
-                source(c, SOURCE, 0, z, 50);
+                c.source(SOURCE, c.at(0, 1, z), 50);
                 for (int x = 1; x <= 3; x++) c.placeSix(LV_CABLE, c.at(x, 1, z));
             }
             six = resistor(c, POWER_RESISTOR, 4, 1, CORE);
@@ -1661,7 +1660,7 @@ public final class CableCases {
 
         public void build(TestContext c) {
             var level = c.level();
-            source(c, SOURCE, 0, 1, 50);
+            c.source(SOURCE, c.at(0, 1, 1), 50);
             r = end(c, 7, 1);
             for (int x = 2; x <= 5; x++) {
                 c.floor(c.at(x, 1, 0));

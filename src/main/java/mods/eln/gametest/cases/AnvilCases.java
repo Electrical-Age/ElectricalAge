@@ -77,7 +77,7 @@ public final class AnvilCases {
             BlockPos line = ctx.at(3 + sx, 1, 3);
             ctx.placeSix(HV_CABLE, line);
             Batch1Cases.resistor(ctx, 3 + 2 * sx, 3, 48);   // 100 ohm
-            Batch1Cases.source(ctx, 3 + 3 * sx, 3, mods.eln.Eln.HVU);
+            ctx.source(Batch1Cases.SOURCE, ctx.at(3 + 3 * sx, 1, 3), mods.eln.Eln.HVU);
             a = (ElectricalAnvilElement) ctx.placeTransparent(ANVIL, Wp10aCases.off(line, bank.front));
             put(a, pick(ctx, 1500, 0, false), new ItemStack(Items.DIAMOND, 4));
             bank.positiveLoad.setU(0.975 * mods.eln.Eln.HVU);

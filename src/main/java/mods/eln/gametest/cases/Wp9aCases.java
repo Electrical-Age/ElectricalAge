@@ -111,10 +111,6 @@ public final class Wp9aCases {
         return load(a, Direction.XP).getRs() + load(b, Direction.XN).getRs();
     }
 
-    static ElectricalSourceElement source(TestContext ctx, int damage, int x, int z, double u) {
-        return ctx.source(damage, ctx.at(x, 1, z), u);
-    }
-
     static ItemStack coal(int n) {
         // the resistor only reads the stack size (1.12 used coal dust when the pack had it)
         return new ItemStack(Items.COAL, n);
@@ -169,7 +165,7 @@ public final class Wp9aCases {
         }
 
         public void build(TestContext ctx) {
-            src = source(ctx, SOURCE, 0, 1, U);
+            src = ctx.source(SOURCE, ctx.at(0, 1, 1), U);
             r = resistor(ctx, POWER_RESISTOR, 1, 1, 48);
             gnd = ctx.placeSix(GROUND, ctx.at(2, 1, 1));
             t0 = ctx.world().getGameTime();
@@ -218,8 +214,8 @@ public final class Wp9aCases {
         }
 
         public void build(TestContext ctx) {
-            src = source(ctx, SOURCE, 0, 1, U);
-            if (signal != null) source(ctx, SIGNAL_SOURCE, 1, 0, signal * Eln.SVU);
+            src = ctx.source(SOURCE, ctx.at(0, 1, 1), U);
+            if (signal != null) ctx.source(SIGNAL_SOURCE, ctx.at(1, 1, 0), signal * Eln.SVU);
             r = resistor(ctx, RHEOSTAT, 1, 1, 48);
             orient(r, f -> f, Direction.ZN); // control gate (front) toward the signal source; terminals stay on X
             gnd = ctx.placeSix(GROUND, ctx.at(2, 1, 1));
@@ -256,13 +252,13 @@ public final class Wp9aCases {
         }
 
         public void build(TestContext ctx) {
-            srcF = source(ctx, SOURCE, 0, 0, U);
+            srcF = ctx.source(SOURCE, ctx.at(0, 1, 0), U);
             dF = (DiodeElement) ctx.placeSix(DIODE_10A, ctx.at(1, 1, 0));
             orient(dF, f -> f, Direction.XN); // anode (front) toward the source
             rF = resistor(ctx, POWER_RESISTOR, 2, 0, 48);
             gF = ctx.placeSix(GROUND, ctx.at(3, 1, 0));
 
-            srcR = source(ctx, SOURCE, 0, 2, U);
+            srcR = ctx.source(SOURCE, ctx.at(0, 1, 2), U);
             dR = (DiodeElement) ctx.placeSix(DIODE_10A, ctx.at(1, 1, 2));
             orient(dR, f -> f, Direction.XP); // anode toward the load: reverse biased
             rR = resistor(ctx, POWER_RESISTOR, 2, 2, 48);
@@ -302,14 +298,14 @@ public final class Wp9aCases {
         }
 
         public void build(TestContext ctx) {
-            srcA = source(ctx, SOURCE, 0, 0, U);
+            srcA = ctx.source(SOURCE, ctx.at(0, 1, 0), U);
             on = (ElectricalSwitchElement) ctx.placeSix(SWITCH_LV, ctx.at(1, 1, 0));
             orient(on, f -> f, Direction.XN);
             rA = resistor(ctx, POWER_RESISTOR, 2, 0, 48);
             gA = ctx.placeSix(GROUND, ctx.at(3, 1, 0));
             use(ctx, on, ItemStack.EMPTY); // 1.12: empty hand is ItemStack.EMPTY
 
-            source(ctx, SOURCE, 0, 2, U);
+            ctx.source(SOURCE, ctx.at(0, 1, 2), U);
             off = (ElectricalSwitchElement) ctx.placeSix(SWITCH_LV, ctx.at(1, 1, 2));
             orient(off, f -> f, Direction.XN);
             rB = resistor(ctx, POWER_RESISTOR, 2, 2, 48);
@@ -343,8 +339,8 @@ public final class Wp9aCases {
         }
 
         public void build(TestContext ctx) {
-            src = source(ctx, SOURCE, 0, 1, U);
-            source(ctx, SIGNAL_SOURCE, 1, 0, Eln.SVU);
+            src = ctx.source(SOURCE, ctx.at(0, 1, 1), U);
+            ctx.source(SIGNAL_SOURCE, ctx.at(1, 1, 0), Eln.SVU);
             relay = (ElectricalRelayElement) ctx.placeSix(RELAY_LV, ctx.at(1, 1, 1));
             orient(relay, f -> f, Direction.ZN);
             r = resistor(ctx, POWER_RESISTOR, 2, 1, 48);
@@ -387,12 +383,12 @@ public final class Wp9aCases {
         }
 
         public void build(TestContext ctx) {
-            srcA = source(ctx, SOURCE, 0, 0, U);
+            srcA = ctx.source(SOURCE, ctx.at(0, 1, 0), U);
             bA = breaker(ctx, 0, 100F);
             rA = resistor(ctx, POWER_RESISTOR, 2, 0, 48);
             gA = ctx.placeSix(GROUND, ctx.at(3, 1, 0));
 
-            source(ctx, SOURCE, 0, 2, U);
+            ctx.source(SOURCE, ctx.at(0, 1, 2), U);
             bB = breaker(ctx, 2, 40F);
             rB = resistor(ctx, POWER_RESISTOR, 2, 2, 48);
             ctx.placeSix(GROUND, ctx.at(3, 1, 2));
@@ -434,7 +430,7 @@ public final class Wp9aCases {
         }
 
         ElectricalBreakerElement breaker(TestContext ctx, int z, float amps) {
-            source(ctx, SOURCE, 0, z, U);
+            ctx.source(SOURCE, ctx.at(0, 1, z), U);
             ElectricalBreakerElement b = (ElectricalBreakerElement) ctx.placeSix(BREAKER, ctx.at(1, 1, z));
             orient(b, f -> f, Direction.XN);
             b.networkUnserialize(ctx.stream(out -> {
@@ -453,7 +449,7 @@ public final class Wp9aCases {
 
         public void build(TestContext ctx) {
             low = breaker(ctx, 0, 2F);
-            source(ctx, SOURCE, 0, 2, U);
+            ctx.source(SOURCE, ctx.at(0, 1, 2), U);
             fuse = (ElectricalFuseHolderElement) ctx.placeSix(FUSE_HOLDER, ctx.at(1, 1, 2));
             orient(fuse, f -> f, Direction.XN);
             use(ctx, fuse, Eln.sharedItem.getDescriptor(FUSE_LV).newItemStack());
@@ -509,7 +505,7 @@ public final class Wp9aCases {
         }
 
         public void build(TestContext ctx) {
-            srcA = source(ctx, SOURCE, 0, 0, U);
+            srcA = ctx.source(SOURCE, ctx.at(0, 1, 0), U);
             hA = (ElectricalFuseHolderElement) ctx.placeSix(FUSE_HOLDER, ctx.at(1, 1, 0));
             orient(hA, f -> f, Direction.XN);
             rA = resistor(ctx, POWER_RESISTOR, 2, 0, 48);
@@ -518,7 +514,7 @@ public final class Wp9aCases {
             use(ctx, hA, fuse);
             leftInHand = fuse.getCount();
 
-            source(ctx, SOURCE, 0, 2, U);
+            ctx.source(SOURCE, ctx.at(0, 1, 2), U);
             hB = (ElectricalFuseHolderElement) ctx.placeSix(FUSE_HOLDER, ctx.at(1, 1, 2));
             orient(hB, f -> f, Direction.XN);
             rB = resistor(ctx, POWER_RESISTOR, 2, 2, 48);
@@ -560,12 +556,12 @@ public final class Wp9aCases {
         }
 
         public void build(TestContext ctx) {
-            source(ctx, SOURCE, 0, 0, U);
+            ctx.source(SOURCE, ctx.at(0, 1, 0), U);
             cap = ctx.placeSix(POWER_CAPACITOR, ctx.at(1, 1, 0));
             orient(cap, LRDU::right, Direction.XN); // positive load = front.right()
             gC = ctx.placeSix(GROUND, ctx.at(2, 1, 0));
 
-            srcI = source(ctx, SOURCE, 0, 2, U);
+            srcI = ctx.source(SOURCE, ctx.at(0, 1, 2), U);
             ind = (SignalInductorElement) ctx.placeSix(SIGNAL_INDUCTOR, ctx.at(1, 1, 2));
             orient(ind, f -> f, Direction.XN);
             rI = resistor(ctx, POWER_RESISTOR, 2, 2, 48);
@@ -642,7 +638,7 @@ public final class Wp9aCases {
             orient(socket, f -> f, Direction.XN);
             // no cable in its (1.12, hidden) slot: built-in LV cable (Baughn 2026-10-17)
 
-            srcC = source(ctx, SOURCE, 0, 2, U);
+            srcC = ctx.source(SOURCE, ctx.at(0, 1, 2), U);
             charger = (BatteryChargerElement) ctx.placeSix(CHARGER_WEAK, ctx.at(1, 1, 2));
             orient(charger, f -> f, Direction.XN);
             charger.networkUnserialize(ctx.stream(out -> out.writeByte(BatteryChargerElement.toogleCharge)));

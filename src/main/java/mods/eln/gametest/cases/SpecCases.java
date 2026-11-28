@@ -125,7 +125,7 @@ public final class SpecCases {
 
         public void build(TestContext c) {
             int z = 2;
-            Batch1Cases.source(c, 0, z, mods.eln.Eln.LVU);
+            c.source(Batch1Cases.SOURCE, c.at(0, 1, z), mods.eln.Eln.LVU);
             CableCases.voxel(c, c.at(1, 1, z), CablePart.arms(LV, new CableSpec(0, CableSpec.BROWN), CableCases.DOWN, CableCases.WEST, CableCases.EAST));
             for (int x = 2; x <= 5; x++)
                 CableCases.voxel(c, c.at(x, 1, z), CablePart.arms(LV, new CableSpec(13, CableSpec.BROWN), CableCases.DOWN, CableCases.WEST, CableCases.EAST));
@@ -136,7 +136,7 @@ public final class SpecCases {
             z = 6;
             // (the 11 kV preset's 0.5 mm² carrying its 3 A: the heat model doesn't care what the voltage is, and no resistor
             // here takes 33 kW)
-            Batch1Cases.source(c, 0, z, mods.eln.Eln.LVU);
+            c.source(Batch1Cases.SOURCE, c.at(0, 1, z), mods.eln.Eln.LVU);
             for (int x = 1; x <= 5; x++)
                 CableCases.voxel(c, c.at(x, 1, z), CablePart.arms(VHV, null, CableCases.DOWN, CableCases.WEST, CableCases.EAST));
             Batch1Cases.resistor(c, 6, z, 38);

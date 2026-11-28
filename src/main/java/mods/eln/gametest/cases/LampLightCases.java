@@ -13,7 +13,6 @@ import net.minecraft.world.level.LightLayer;
 import java.util.List;
 
 import static mods.eln.gametest.cases.Wp9aCases.orient;
-import static mods.eln.gametest.cases.Wp9aCases.source;
 
 /**
  * Lamps light the world (Baughn 2026-10-14: "EA lights don't work"). The other lamp cases check LampSocketProcess's
@@ -68,7 +67,7 @@ public final class LampLightCases {
             boolean mv = MV_BULBS.contains(bulbSub);
             int cable = mv ? MV_CABLE : Wp9aCases.LV_CABLE;
             String ch = "eln lamp light " + id() + " " + System.nanoTime();
-            source(ctx, Wp9aCases.SOURCE, 0, 1, mv ? 200 : 50);
+            ctx.source(Wp9aCases.SOURCE, ctx.at(0, 1, 1), mv ? 200 : 50);
             ctx.placeSix(cable, ctx.at(1, 1, 1));
             supply = (LampSupplyElement) ctx.placeSix(Ids.six("Lamp Supply"), ctx.at(2, 1, 1));
             orient(supply, f -> f, Direction.XN);

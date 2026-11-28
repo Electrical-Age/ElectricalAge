@@ -24,11 +24,6 @@ public final class SolarCases {
     private SolarCases() {
     }
 
-    static int transparent(String name) {
-        for (var e : Eln.transparentNodeItem.all().entrySet()) if (name.equals(e.getValue().name)) return e.getKey();
-        throw new IllegalStateException("no transparent device " + name);
-    }
-
     public static List<TestCase> cases() {
         return List.of(new SmallSolarCase(), new LoadedSolarCase(), new SolarGhostCase());
     }
@@ -68,7 +63,7 @@ public final class SolarCases {
             var server = ctx.level().getServer();
             server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), "time set noon");
             server.setWeatherParameters(100000, 0, false, false);
-            panel = (SolarPanelElement) ctx.placeTransparent(transparent("Small Solar Panel"), ctx.at(1, 1, 1));
+            panel = (SolarPanelElement) ctx.placeTransparent(Ids.transparent("Small Solar Panel"), ctx.at(1, 1, 1));
         }
 
         public void measure(TestContext ctx) {
@@ -134,7 +129,7 @@ public final class SolarCases {
             var server = ctx.level().getServer();
             server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), "time set noon");
             server.setWeatherParameters(100000, 0, false, false);
-            panel = (SolarPanelElement) ctx.placeTransparent(transparent("Small Solar Panel"), ctx.at(1, 1, 1));
+            panel = (SolarPanelElement) ctx.placeTransparent(Ids.transparent("Small Solar Panel"), ctx.at(1, 1, 1));
             PvSourceBipole pv = TestContext.field(panel, "pv");
             double[] best = new mods.eln.sim.PvCurve(pv.curve().ratedU, pv.curve().ratedP).maxPowerPoint();   // (at a hot noon)
             r = best[0] * best[0] / best[1];
@@ -179,8 +174,8 @@ public final class SolarCases {
         }
 
         public void build(TestContext ctx) {
-            TransparentNodeDescriptor d = Eln.transparentNodeItem.getDescriptor(transparent("2x3 Solar Panel"));
-            panel = ctx.placeTransparent(transparent("2x3 Solar Panel"), ctx.at(3, 1, 1));
+            TransparentNodeDescriptor d = Eln.transparentNodeItem.getDescriptor(Ids.transparent("2x3 Solar Panel"));
+            panel = ctx.placeTransparent(Ids.transparent("2x3 Solar Panel"), ctx.at(3, 1, 1));
             node = panel.node.coordonate.pos();
             expected = d.getGhostGroup(panel.front).size();
         }

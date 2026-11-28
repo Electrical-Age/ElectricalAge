@@ -95,10 +95,6 @@ public final class CapacitorBankCases {
         }
     }
 
-    static SixNodeElement source(TestContext ctx, BlockPos p, double volts) {   // (an Electrical Source at volts)
-        return ctx.source(Wp10aCases.SOURCE, p, volts);
-    }
-
     /**
      * Inrush (Baughn 2026-10-28: "inrush current is supposed to be a problem"): an empty bank straight on a stiff HVU
      * source draws hundreds of amps and burns its HV cable; the same bank behind a 270 ohm Power Resistor (53 Coal Dust)
@@ -122,7 +118,7 @@ public final class CapacitorBankCases {
             stiff = (CapacitorBankElement) ctx.placeTransparent(BANK, c);
             Direction f = stiff.front, l = f.left(), r = f.right();
             stiffCable = ctx.placeSix(HV_CABLE, Wp10aCases.off(c, l));
-            source(ctx, Wp10aCases.off(Wp10aCases.off(c, l), l), mods.eln.Eln.HVU);
+            ctx.source(Wp10aCases.SOURCE, Wp10aCases.off(Wp10aCases.off(c, l), l), mods.eln.Eln.HVU);
             ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(c, r));
             // three blocks along its front: cable, resistor, source (the resistor helper lays its terminals east-west,
             // along a bank's flanks for this placer)
@@ -135,7 +131,7 @@ public final class CapacitorBankCases {
             w = Wp10aCases.off(w, l);
             resistor = Batch1Cases.resistor(ctx, w.getX() - ctx.at(0, 0, 0).getX(), w.getZ() - ctx.at(0, 0, 0).getZ(), 53);   // 270 ohm (E12)
             w = Wp10aCases.off(w, l);
-            source(ctx, w, mods.eln.Eln.HVU);
+            ctx.source(Wp10aCases.SOURCE, w, mods.eln.Eln.HVU);
         }
 
         public void measure(TestContext ctx) {
@@ -239,7 +235,7 @@ public final class CapacitorBankCases {
         public void build(TestContext ctx) {
             at = ctx.at(4, 1, 3);
             bank = (CapacitorBankElement) ctx.placeTransparent(BANK, at);
-            src = source(ctx, Wp10aCases.off(at, bank.front.left()), mods.eln.Eln.HVU);
+            src = ctx.source(Wp10aCases.SOURCE, Wp10aCases.off(at, bank.front.left()), mods.eln.Eln.HVU);
             ctx.placeSix(Wp10aCases.GROUND, Wp10aCases.off(at, bank.front.right()));
             mods.eln.Eln.simulator.addSlowProcess(toggle = t -> {
                 clock += t;

@@ -8,7 +8,6 @@ import mods.eln.gametest.TestContext;
 import mods.eln.misc.Direction;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.voxel.CablePart;
-import mods.eln.node.voxel.VoxelNode;
 import mods.eln.sixnode.busmodule.BusModuleElement;
 import mods.eln.sixnode.electricalmath.ElectricalMathElement;
 import net.minecraft.core.BlockPos;
@@ -135,14 +134,14 @@ public final class BusSpCases {
             c.check("bus sp: one writer on its channel", sp.port.bus() != null && sp.port.bus().writers(ORANGE) == 1,
                 sp.port.bus() == null ? "no bus" : "" + sp.port.bus().writers(ORANGE));
             Wp9cCases.within(c, "bus sp: module B's out terminal drives it [V]", b.volts(BACK_MIDDLE), 0.3 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
-            Object[] k = ((VoxelNode) BusCases.node(c, 3, 1, 1)).cableAt(14, 0, 8);
+            Object[] k = c.voxelAt(c.at(3, 1, 1)).cableAt(14, 0, 8);
             double u = k == null || k[0] == null ? Double.NaN : ((mods.eln.sim.ElectricalLoad) k[0]).getU();
             Wp9cCases.within(c, "bus sp: its output wire beside the bus pin still gives the output [V]", u, 0.6 * mods.eln.Eln.SVU, 0.02 * mods.eln.Eln.SVU);
             c.check("bus sp: its output edge has no circuit link to the bus", sp.edgePins().get(1).load() == null, "");
             // a bus kit aimed at the bus pin ends there, a signal kit at the output beside it (AdventurAgent: a bus kit
             // found no place on the processor)
             BlockPos at = c.at(4, 1, 1);
-            var node = (VoxelNode) BusCases.node(c, 4, 1, 1);
+            var node = c.voxelAt(c.at(4, 1, 1));
             var busEnd = mods.eln.node.voxel.CablePlacer.deviceEnd(node, at, sp.side.getInt(), new double[]{0.05, 0, pz / 16.0}, false, BUS);
             c.check("bus sp: a bus kit ends at the bus pin", busEnd != null && busEnd.x() == at.getX() * 16L && busEnd.z() == at.getZ() * 16L + pz,
                 String.valueOf(busEnd));
