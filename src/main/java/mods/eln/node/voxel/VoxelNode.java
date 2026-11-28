@@ -733,10 +733,21 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return addSafetyValveNear(hx, hy, hz, purge ? SafetyValvePart.PURGE : SafetyValvePart.SAFETY);
     }
 
+    /** Why nothing fits where a fitting is clicked, naming it (AdventurAgent 2026-11-28: a control valve clicked on a
+     *  purge valve said "must fit on a pipe"); null for a part that is no fitting. */
+    static String fittingThere(VoxelPart p) {
+        if (p instanceof SafetyValvePart sv)
+            return sv.breather ? mods.eln.i18n.I18N.tr("a breather valve is already there")
+                : sv.purge ? mods.eln.i18n.I18N.tr("a purge valve is already there") : mods.eln.i18n.I18N.tr("a safety valve is already there");
+        if (p instanceof ValvePart) return mods.eln.i18n.I18N.tr("a valve is already there");
+        if (p instanceof PipeSensorPart) return mods.eln.i18n.I18N.tr("a sensor is already there");
+        return null;
+    }
+
     /** ... of any mode (SafetyValvePart.SAFETY, PURGE, BREATHER; a breather has no set pressure: the air's). */
     public String addSafetyValveNear(double hx, double hy, double hz, int mode) {
         int idx = partAt(hx, hy, hz);
-        if (idx >= 0 && (parts.get(idx) instanceof SafetyValvePart || parts.get(idx) instanceof ValvePart)) return mods.eln.i18n.I18N.tr("a valve is already there");
+        if (idx >= 0 && fittingThere(parts.get(idx)) != null) return fittingThere(parts.get(idx));
         for (VoxelPart q : parts)
             if (q instanceof SafetyValvePart sv)
                 return sv.breather ? mods.eln.i18n.I18N.tr("block already has a breather valve")
@@ -794,7 +805,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** A valve of a kind (ValvePart.ON_OFF, CONTROL, THROTTLE) at the lattice point on the pipe nearest the click. */
     public String addValveNear(double hx, double hy, double hz, int mode) {
         int idx = partAt(hx, hy, hz);
-        if (idx >= 0 && parts.get(idx) instanceof ValvePart) return mods.eln.i18n.I18N.tr("a valve is already here");
+        if (idx >= 0 && fittingThere(parts.get(idx)) != null) return fittingThere(parts.get(idx));
         if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return mods.eln.i18n.I18N.tr("must fit on a pipe");
         int[] best = null;
         double bd = Double.MAX_VALUE;
