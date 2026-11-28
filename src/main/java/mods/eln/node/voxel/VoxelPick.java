@@ -50,12 +50,30 @@ public final class VoxelPick {
     public static final VoxelNode.Aimed NONE = new VoxelNode.Aimed(-1, -1);
 
     /**
+     * A pick and where the line of sight met what it picked (block-local, blocks): where it entered its box, or came
+     * nearest it; with no line (or nothing picked), the point hit. Placement takes the place on the part from this, not
+     * from the hit: the hit is on the outline of the first thing the ray touched, which may be another part's, far along
+     * (a pipe crossing over a floor cable seen low: the pick is the cable, the hit on the pipe's outline).
+     */
+    public record Met(VoxelNode.Aimed what, double x, double y, double z) {
+    }
+
+    /** How far an eye may be from the hit and still be believed (blocks): well past any reach. */
+    static final double EYE_REACH = 8;
+
+    /**
      * pick in the world: eye, the viewer's eye as it was when its crosshair's ray was traced (a client's: at that
      * frame's partial tick, or the line swings while the player moves), null for none; hit, where the ray stopped.
      */
     public static VoxelNode.Aimed pick(Scene s, BlockPos pos, Vec3 eye, Vec3 hit) {
+        return meet(s, pos, eye, hit).what();
+    }
+
+    /** pick in the world, with where the line met what it picked (Met; block-local). */
+    public static Met meet(Scene s, BlockPos pos, Vec3 eye, Vec3 hit) {
         Vec3 o = Vec3.atLowerCornerOf(pos);
-        return pick(s, eye == null ? null : eye.subtract(o), null, hit == null ? null : hit.subtract(o));
+        double[][] l = line(s, eye == null ? null : eye.subtract(o), null, hit == null ? null : hit.subtract(o));
+        return l == null ? new Met(NONE, 0, 0, 0) : pick(s, l[0], l[1], true, true);
     }
 
     /** pick for a block-local point (0..1) alone: a point worked out by code, with no line of sight. */
@@ -67,7 +85,7 @@ public final class VoxelPick {
      *  nearby counts. */
     public static VoxelNode.Aimed holding(Scene s, double x, double y, double z) {
         double[] a = {x * 16, y * 16, z * 16};
-        return pick(s, a, a, true, false);
+        return pick(s, a, a, true, false).what();
     }
 
     /**
@@ -78,7 +96,7 @@ public final class VoxelPick {
      */
     public static VoxelNode.Aimed pick(Scene s, Vec3 eye, Vec3 look, Vec3 hit) {
         double[][] l = line(s, eye, look, hit);
-        return l == null ? NONE : pick(s, l[0], l[1], true, true);
+        return l == null ? NONE : pick(s, l[0], l[1], true, true).what();
     }
 
     /**
@@ -89,7 +107,7 @@ public final class VoxelPick {
     public static List<VoxelNode.Aimed> ranked(Scene s, BlockPos pos, Vec3 eye, Vec3 hit) {
         Vec3 o = Vec3.atLowerCornerOf(pos);
         double[][] l = line(s, eye == null ? null : eye.subtract(o), null, hit == null ? null : hit.subtract(o));
-        VoxelNode.Aimed first = l == null ? NONE : pick(s, l[0], l[1], true, true);
+        VoxelNode.Aimed first = l == null ? NONE : pick(s, l[0], l[1], true, true).what();
         record Far(VoxelNode.Aimed what, double d, int[] key) {
         }
         List<Far> rest = new java.util.ArrayList<>();
@@ -119,8 +137,9 @@ public final class VoxelPick {
         Vec3 from = hit != null ? hit : eye;
         if (from == null) return null;
         Vec3 dir = null;
-        if (eye != null && hit != null && eye.distanceToSqr(hit) > 1e-8) dir = hit.subtract(eye).normalize();
-        else if (look != null && look.lengthSqr() > 1e-12) dir = look.normalize();
+        if (eye != null && hit != null && eye.distanceToSqr(hit) > 1e-8) {
+            if (believable(s, eye, hit)) dir = hit.subtract(eye).normalize();
+        } else if (look != null && look.lengthSqr() > 1e-12) dir = look.normalize();
         double[] a = {from.x * 16, from.y * 16, from.z * 16}, b = a.clone();
         if (dir == null) return new double[][]{a, b};
         // (to where it leaves the block: at most its diagonal away, or from an eye outside as far as its far side)
@@ -146,6 +165,26 @@ public final class VoxelPick {
         return new double[][]{a, b};
     }
 
+    /**
+     * Could a ray from eye have stopped at hit? Not from farther than EYE_REACH, and not through one of the block's own
+     * boxes on the way (the hit is where the ray first touched the outline, and every box is inside the outline: an eye
+     * behind or inside what was hit is not where the crosshair was traced from). Else the eye is not believed and the
+     * pick is by the point (another mod's fake player, a stale eye, a rider whose place on the server lags).
+     */
+    private static boolean believable(Scene s, Vec3 eye, Vec3 hit) {
+        double d = eye.distanceTo(hit);
+        if (d > EYE_REACH) return false;
+        double[] a = {eye.x * 16, eye.y * 16, eye.z * 16}, b = new double[3];
+        Vec3 before = hit.subtract(hit.subtract(eye).scale(Math.min(1, 0.2 / 16 / d)));   // (0.2 voxels short of the hit)
+        b[0] = before.x * 16;
+        b[1] = before.y * 16;
+        b[2] = before.z * 16;
+        for (VoxelPart p : s.parts()) for (int[] box : p.boxes()) if (span(a, b, box, 0) != null) return false;
+        for (List<int[]> boxes : s.devices()) for (int[] box : boxes) if (span(a, b, box, 0) != null) return false;
+        for (int[] box : s.host()) if (span(a, b, box, 0) != null) return false;
+        return true;
+    }
+
     private static final int DEVICE = 4;
 
     /** A part's rank where two are entered together or are equally near: a fitting (a valve, a sensor: its box takes
@@ -155,7 +194,7 @@ public final class VoxelPick {
     }
 
     /** near: with the second pass (the nearest of those whose outline the line passes through). */
-    private static VoxelNode.Aimed pick(Scene s, double[] a, double[] b, boolean junctions, boolean near) {
+    private static Met pick(Scene s, double[] a, double[] b, boolean junctions, boolean near) {
         List<VoxelPart> parts = s.parts();
         Best best = new Best();
         for (int f = 0; f < s.sensors().size(); f++)
@@ -176,14 +215,14 @@ public final class VoxelPick {
             for (int f = 0; f < s.devices().size(); f++)
                 for (int[] box : s.devices().get(f)) best.near(a, b, box, DEVICE, new int[]{f}, f, -1);
         }
-        if (!best.found()) return NONE;
+        if (!best.found()) return new Met(NONE, a[0] / 16, a[1] / 16, a[2] / 16);
+        double[] p = along(a, b, best.at);
         if (best.part >= 0 && parts.get(best.part) instanceof JunctionPart j) {
             // (a junction is never aimed at on its own: its arm is; it goes when its arms do)
-            double[] p = along(a, b, best.at);
             int arm = armNear(parts, j, p[0], p[1], p[2]);
-            return arm >= 0 ? new VoxelNode.Aimed(-1, arm) : pick(s, a, b, false, near);
+            return arm >= 0 ? new Met(new VoxelNode.Aimed(-1, arm), p[0] / 16, p[1] / 16, p[2] / 16) : pick(s, a, b, false, near);
         }
-        return new VoxelNode.Aimed(best.element, best.part);
+        return new Met(new VoxelNode.Aimed(best.element, best.part), p[0] / 16, p[1] / 16, p[2] / 16);
     }
 
     /** The best candidate so far: the least value (where the line enters it, or how far it is), then rank, then key. */

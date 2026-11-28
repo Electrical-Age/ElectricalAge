@@ -40,7 +40,7 @@ public final class VoxelGallery implements TestCase {
             put(ctx, legend, errors, x += 2, z, t + " pipe, safety valve", List.of(new PipePart(tier, straight)), n -> n.addSafetyValveNear(0.5, 0.5, 0.5));
             for (int s : new int[]{PipeSensorPart.PRESSURE, PipeSensorPart.TEMPERATURE, PipeSensorPart.QUALITY}) {
                 String kind = s == PipeSensorPart.PRESSURE ? "pressure" : s == PipeSensorPart.TEMPERATURE ? "temperature" : "steam quality";
-                put(ctx, legend, errors, x += 2, z, t + " pipe, " + kind + " sensor", List.of(new PipePart(tier, straight)), n -> n.addSensorNear(0.5, 0.5, 0.5, s));
+                put(ctx, legend, errors, x += 2, z, t + " pipe, " + kind + " sensor", List.of(new PipePart(tier, straight)), n -> n.addSensorNearForTests(0.5, 0.5, 0.5, s));
             }
             for (int mode : new int[]{ValvePart.ON_OFF, ValvePart.CONTROL, ValvePart.THROTTLE, ValvePart.PRESSURE}) {
                 String kind = mode == ValvePart.ON_OFF ? "on/off" : mode == ValvePart.CONTROL ? "control" : mode == ValvePart.THROTTLE ? "throttle" : "pressure";

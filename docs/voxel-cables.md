@@ -461,6 +461,16 @@ first.
   real player's eye (its idea of the look lags, the hit is the client's own, so eye to hit); `VoxelNodeBlock.aimedBy`
   traces its own ray for breaking and middle-click, which send none. Anything but a real player (a fake player, a
   deployer; GameTests' clicks): no eye, the point form.
+- An eye that could not have traced the hit is not believed, and the pick is by the point (`VoxelPick.believable`,
+  the one guard: another mod's fake `ServerPlayer`, a stale eye, a rider whose place on the server lags): farther
+  than 8 blocks from the hit, or with one of the block's own boxes (a part's, a device's, the imitated block's)
+  between it and the hit. The hit is where the ray first touched the outline and every box lies inside the outline,
+  so an eye behind or inside what was hit fails that; it is the "does the clicked face look at the eye" test without
+  needing the face. There is no "the picked part's outline must hold the hit" rule: nearly every angled pick breaks it.
+- A click kept and replayed keeps its eye: the Toolbag's `Click` (the radial's choice, another kind chosen
+  mid-route) holds the eye of the click and `RoutePlacer.use(…, eye, …)` takes it, so the route starts again from
+  the same cable or pin wherever the player stands by then. The kit preview's cache key holds what is aimed at
+  (`KitPreview.tick`), since that changes with the eye while the crosshair stays in one cell.
 - Rule: the box it enters first (true boxes, grown 0.05); if it enters none, the part or device whose own box is
   nearest the line, among those whose outline (2.05 voxels) it passes through. Entered together or equally near: a
   pipe sensor device's aim box, a fitting (a valve's box takes in its pipe), a pipe or cable, a junction, a device;
@@ -477,14 +487,22 @@ first.
   click, a click the code works out (`CablePlacer.endAt` beside a machine), GameTests. Item clicks pick WHAT is
   clicked by the line (`CablePlacer.endAt`/`isDevice`/`noEnd`/`repair`, `PipePlacer.joinPoint`/`deviceAt`,
   `ToolbagShears.pieceAt`, `ToolbagItem.kindAt`, `ValveItem`, `SafetyValveItem`, `PipeSensorItem`, `placeFace`,
-  `DevicePreview`) and keep the hit point only for WHERE on it (the lattice point on a pipe, the nearest pin). So
-  with a kit or the Toolbag in hand the shears cut, and the kit joins, the cable Jade names. A point 0.3 voxels off a
+  `DevicePreview`). WHERE on it (the branch point on a cable, the lattice point on a pipe for a join or a valve, the
+  nearest pin) is nearest the place the line met the picked thing (`VoxelPick.Met`, `VoxelNode.met`: where it
+  entered its box or came nearest), not the hit: the hit is on the outline of the first thing the ray touched, which
+  may be another part's (a pipe crossing over a floor cable seen low: the pick is the cable, the hit on the pipe's
+  outline at the other end). With no eye, and for a device being placed (its own spot on the face), it is the hit.
+  For one cable or pipe alone in a block the place is the same or nearer what the crosshair covers (the hit stands 2
+  voxels proud, so at an angle it was up to a few voxels short). So with a kit or the Toolbag in hand the shears
+  cut, and the kit joins, the cable Jade names. A point 0.3 voxels off a
   device's pin and 1.7 from a cable is the device (the outline is fattened round pins for kit clicks, `PIN_AIM`).
-  `VoxelNode.holding` (the exact pass alone) is for GameTests of a model box's extent.
+  `VoxelNode.holdingForTests` (the exact pass alone) is for GameTests of a model box's extent; `placeFaceForTests`
+  and `addSensorNearForTests` are the point forms GameTests use.
 - Jade (`compat/jade/VoxelProbe`): the server sends an entry for every device and part of the block (`elnParts`: the
   device's `slot`, or the part's `id` and first `box`; title, lines, headline count), 64 at most, in the order of the
   asker's line of sight (`VoxelPick.ranked`: the one aimed at, then the nearest), and last a keyless entry for the
-  block as a whole. The client chooses the entry each time the tooltip is built, with the call the outline makes, so
+  block as a whole. The client chooses the entry each time the tooltip is built, with the call the outline makes
+  (through the hook `VoxelProbe.clientAimed`, set by `client/ElnClient`: the plugin names no client class), so
   the tooltip follows the crosshair within a block without waiting for the server and names what is outlined. It
   matches a part by its first box (parts don't overlap). One with no entry (past 64, or laid since the answer) shows
   the block's lines as a whole until the next answer.
@@ -492,7 +510,8 @@ first.
 - GameTests `gametest/cases/VoxelPickCases.java`: `voxel_pick_parallel_cables`, `_fittings`, `_junction`,
   `_behind_imitated_block`, `_device_beside_cable` (rows of lines of sight and points; each also checks the client's
   view: parts read back from their publish bytes, devices from their published place),
-  `voxel_pick_outline_jade_and_break_agree`, `voxel_pick_jade_entry_per_part`; the sensor device's rays in
+  `voxel_pick_outline_jade_and_break_agree`, `voxel_pick_item_clicks_follow_the_line` (clicks with an eye: kit,
+  shears, Toolbag replay, valve), `voxel_pick_jade_entry_per_part`; the sensor device's rays in
   `pipe_transmitter_lab_fixes`.
 
 ## Rendering pointers

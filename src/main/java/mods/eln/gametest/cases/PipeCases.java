@@ -560,9 +560,9 @@ public final class PipeCases {
             b = ctx.at(2, 1, 1);
             c = ctx.at(3, 1, 1);
             for (BlockPos p : new BlockPos[]{a, b, c}) lay(ctx, p, 0, 0, 8, 8, 16, 8, 8);
-            errP = ctx.voxelByEntity(a).addSensorNear(0.5, 0.5, 0.5, mods.eln.node.voxel.PipeSensorPart.PRESSURE);
-            errT = ctx.voxelByEntity(c).addSensorNear(0.5, 0.5, 0.5, mods.eln.node.voxel.PipeSensorPart.TEMPERATURE);
-            second = ctx.voxelByEntity(a).addSensorNear(0.25, 0.5, 0.5, mods.eln.node.voxel.PipeSensorPart.TEMPERATURE);
+            errP = ctx.voxelByEntity(a).addSensorNearForTests(0.5, 0.5, 0.5, mods.eln.node.voxel.PipeSensorPart.PRESSURE);
+            errT = ctx.voxelByEntity(c).addSensorNearForTests(0.5, 0.5, 0.5, mods.eln.node.voxel.PipeSensorPart.TEMPERATURE);
+            second = ctx.voxelByEntity(a).addSensorNearForTests(0.25, 0.5, 0.5, mods.eln.node.voxel.PipeSensorPart.TEMPERATURE);
             // a signal cable along the floor of each block: the sensor's output joins it
             for (BlockPos p : new BlockPos[]{a, c}) {
                 String ce = PipeKitItem.place(ctx.level(), p, new mods.eln.node.voxel.CablePart(0, 0, new int[]{0, 0, 3, 16, 0, 3}), null);
@@ -1704,7 +1704,7 @@ public final class PipeCases {
             if (e != null) err += "refit: " + e + "; ";
             // a fitting clicked onto the valve is told what is there (AdventurAgent: "must fit on a pipe")
             onValve = n.addSafetyValveNear(0.5, 0.5, 0.5, mods.eln.node.voxel.SafetyValvePart.PURGE) + " / " + n.addValveNear(0.5, 0.5, 0.5, mods.eln.node.voxel.ValvePart.CONTROL)
-                + " / " + n.addSensorNear(0.5, 0.5, 0.5, 0);
+                + " / " + n.addSensorNearForTests(0.5, 0.5, 0.5, 0);
 
             for (int r = 0; r < 2; r++) {
                 b = ctx.at(1, 1, 3 + 2 * r);

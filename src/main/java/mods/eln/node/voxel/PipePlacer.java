@@ -360,6 +360,11 @@ public final class PipePlacer {
         return joinPoint(level, pos, hit, null);
     }
 
+    /** ... as a real player's click, traced from eye. */
+    public static long[] joinPointForTests(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit, net.minecraft.world.phys.Vec3 eye) {
+        return joinPoint(level, pos, hit, eye);
+    }
+
     public static PipeRouter.End portAtForTests(Level level, BlockPos pos, Direction face) {
         return portAt(level, pos, face);
     }
@@ -401,8 +406,9 @@ public final class PipePlacer {
      *  centre line, inside the block), or null. */
     static long[] joinPoint(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit, net.minecraft.world.phys.Vec3 eye) {
         if (hit == null || !(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return null;
-        double hx = (hit.x - pos.getX()) * 16, hy = (hit.y - pos.getY()) * 16, hz = (hit.z - pos.getZ()) * 16;
-        int idx = n.aimed(eye, hit).part();   // (the pipe by the line of sight; where on it by the point hit)
+        VoxelPick.Met met = n.met(eye, hit);   // (the pipe by the line of sight, and where that line met it)
+        double hx = met.x() * 16, hy = met.y() * 16, hz = met.z() * 16;
+        int idx = met.what().part();
         if (idx < 0 || !(n.parts.get(idx) instanceof PipePart pipe)) return null;
         long[] best = null;
         double bd = Double.MAX_VALUE;

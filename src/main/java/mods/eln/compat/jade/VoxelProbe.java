@@ -22,6 +22,14 @@ public final class VoxelProbe {
     private VoxelProbe() {
     }
 
+    /**
+     * The client's pick for the tooltip: set by client/ElnClient to VoxelOutline.aimed (the outline's own call, from
+     * the eye at the frame's partial tick). A hook, so nothing under compat/jade names a client class: the plugin is
+     * loaded on a dedicated server too. Unset: by the point hit.
+     */
+    public static java.util.function.BiFunction<mods.eln.node.voxel.VoxelNodeEntity, net.minecraft.world.phys.Vec3, VoxelNode.Aimed> clientAimed =
+        (v, hit) -> v.aimed(null, hit);
+
     /** The entries, under this key of the server data: a list of compounds. */
     public static final String KEY = "elnParts";
     /**

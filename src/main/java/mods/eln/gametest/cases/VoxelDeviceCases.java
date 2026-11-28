@@ -1002,7 +1002,7 @@ public final class VoxelDeviceCases {
             c.floor(q.below());
             var w = block(c, q);
             CableCases.voxel(c, q, List.of(new CablePart(LV, FLOOR, new int[]{0, 0, 8, 8, 0, 8})));
-            face = String.valueOf(w.placeFace(net.minecraft.core.Direction.EAST, 8.0 / 16, 0.5 / 16, 8.2 / 16));
+            face = String.valueOf(w.placeFaceForTests(net.minecraft.core.Direction.EAST, 8.0 / 16, 0.5 / 16, 8.2 / 16));
         }
 
         public void measure(TestContext c) {

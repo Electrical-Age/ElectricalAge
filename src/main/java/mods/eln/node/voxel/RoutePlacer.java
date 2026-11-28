@@ -124,7 +124,7 @@ public final class RoutePlacer {
         }
 
         /** A click with no route yet that this kind handles itself (cables: mending a burnt run); true if handled. */
-        boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, KitSupply kit) {
+        boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, Vec3 eye, KitSupply kit) {
             return false;
         }
     }
@@ -174,6 +174,12 @@ public final class RoutePlacer {
 
     static Plan plan(UUID player) {
         return PLANS.get(player);
+    }
+
+    /** Where a player's route starts on an old cable or pipe (world voxels), or null: no route, or no branch (GameTests). */
+    public static long[] startJoinForTests(UUID player) {
+        Plan p = PLANS.get(player);
+        return p == null ? null : p.startJoin;
     }
 
     /** Forget a player's route (logout, death). */
@@ -264,11 +270,17 @@ public final class RoutePlacer {
      * only for a sneak-click with no route (nothing to do).
      */
     public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, KitSupply kit, Vec3 hit, boolean sneak) {
-        return use(of(kit), player, level, pos, face, kit, hit, sneak);
+        return use(player, level, pos, face, kit, hit, VoxelNode.eyeOf(player), sneak);
+    }
+
+    /** ... with the eye the click was traced from (the Toolbag replays a kept click later, when the player has moved:
+     *  with the eye of now it started from another part of the block). */
+    public static boolean use(ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, KitSupply kit, Vec3 hit, Vec3 eye, boolean sneak) {
+        return use(of(kit), player, level, pos, face, kit, hit, eye, sneak);
     }
 
     private static <P> boolean use(Spec<P> k, ServerPlayer player, ServerLevel level, BlockPos pos, Direction face, KitSupply kit, Vec3 hit,
-                                   boolean sneak) {
+                                   Vec3 eye, boolean sneak) {
         int tier = kit.tier();
         CableSpec spec = kit.spec();
         UUID id = player.getUUID();
@@ -289,7 +301,7 @@ public final class RoutePlacer {
         }
         if (plan != null) plan.touched = now;
         if (sneak && k.sneakMarksStops() && plan != null) {   // (the Track Kit: a stop there, unless it is the last point)
-            Click c = k.endAt(level, pos, face, hit, VoxelNode.eyeOf(player), tier, false, true);
+            Click c = k.endAt(level, pos, face, hit, eye, tier, false, true);
             if (c.at() != null && !sameSpot(plan.last(), c.at())) {
                 if (!CablePlacer.reachable(player, pos, hit)) {
                     KitPreview.note(player, mods.eln.i18n.I18N.tr("Out of reach"));
@@ -313,8 +325,8 @@ public final class RoutePlacer {
             KitPreview.note(player, mods.eln.i18n.I18N.tr("Out of reach"));
             return true;
         }
-        if (plan == null && k.repair(player, level, pos, hit, kit)) return true;
-        Click c = k.endAt(level, pos, face, hit, VoxelNode.eyeOf(player), tier, plan == null, true);
+        if (plan == null && k.repair(player, level, pos, hit, eye, kit)) return true;
+        Click c = k.endAt(level, pos, face, hit, eye, tier, plan == null, true);
         if (c.at() == null) {
             if (c.refusal() != null) player.sendOverlayMessage(Component.literal(c.refusal()));
             return true;

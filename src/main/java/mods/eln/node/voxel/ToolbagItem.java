@@ -198,8 +198,9 @@ public class ToolbagItem extends Item implements PipeTool {
 
     // ---- using it
 
-    /** A click kept to start a route at once its kind is chosen (the radial): where, and when. */
-    record Click(net.minecraft.resources.ResourceKey<Level> dim, BlockPos pos, net.minecraft.core.Direction face, Vec3 hit, long time) {
+    /** A click kept to start a route at once its kind is chosen (the radial): where, when, and the eye it was traced
+     *  from (VoxelNode.eyeOf: replayed later it must mean the same cable or pin, wherever the player then stands). */
+    record Click(net.minecraft.resources.ResourceKey<Level> dim, BlockPos pos, net.minecraft.core.Direction face, Vec3 hit, Vec3 eye, long time) {
     }
 
     /** Per player: the click waiting for the radial's choice; the click the bag's current route started at. */
@@ -240,17 +241,22 @@ public class ToolbagItem extends Item implements PipeTool {
         if (ctx.getHand() != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (ctx.getLevel().isClientSide()) return InteractionResult.SUCCESS;   // (consumed: no inventory opens on a block click)
         if (ctx.getPlayer() instanceof ServerPlayer sp && ctx.getLevel() instanceof ServerLevel sl)
-            click(sp, sl, ctx.getItemInHand(), ctx.getClickedPos(), ctx.getClickedFace(), ctx.getClickLocation(), sp.isSecondaryUseActive());
+            click(sp, sl, ctx.getItemInHand(), ctx.getClickedPos(), ctx.getClickedFace(), ctx.getClickLocation(), VoxelNode.eyeOf(sp), sp.isSecondaryUseActive());
         return InteractionResult.SUCCESS;
     }
 
     /** A right-click on a block with the bag (sneak: the radial). */
     public static void click(ServerPlayer p, ServerLevel level, ItemStack bag, BlockPos pos, net.minecraft.core.Direction face, Vec3 hit, boolean sneak) {
+        click(p, level, bag, pos, face, hit, VoxelNode.eyeOf(p), sneak);
+    }
+
+    /** ... traced from eye (VoxelNode.eyeOf; null: the point hit alone). */
+    public static void click(ServerPlayer p, ServerLevel level, ItemStack bag, BlockPos pos, net.minecraft.core.Direction face, Vec3 hit, Vec3 eye, boolean sneak) {
         if (ToolbagShears.active(p.getUUID())) {   // (a right-click cancels a cut)
             ToolbagShears.cancel(p, mods.eln.i18n.I18N.tr("Cut cancelled"));
             return;
         }
-        Click c = new Click(level.dimension(), pos, face, hit, level.getGameTime());
+        Click c = new Click(level.dimension(), pos, face, hit, eye, level.getGameTime());
         boolean routing = routing(p), reach = CablePlacer.reachable(p, pos, hit);
         if (sneak) {   // (always the radial, a route on or not)
             openRadial(p, bag, routing || !reach ? null : c);
@@ -261,7 +267,7 @@ public class ToolbagItem extends Item implements PipeTool {
             return;
         }
         if (!routing) {
-            Kind k = kindAt(p, level, pos, hit);
+            Kind k = kindAt(level, pos, hit, eye);
             if (k == null) {   // (no cable or pipe there: which kind to lay from here?)
                 openRadial(p, bag, c);
                 return;
@@ -284,13 +290,13 @@ public class ToolbagItem extends Item implements PipeTool {
     }
 
     static void lay(ServerPlayer p, ServerLevel level, KitSupply s, Click c) {
-        RoutePlacer.use(p, level, c.pos(), c.face(), s, c.hit(), false);
+        RoutePlacer.use(p, level, c.pos(), c.face(), s, c.hit(), c.eye(), false);
     }
 
     /** The kind of the cable or pipe under the click (a knuckle's cable too), or null. */
-    static Kind kindAt(ServerPlayer p, Level level, BlockPos pos, Vec3 hit) {
+    static Kind kindAt(Level level, BlockPos pos, Vec3 hit, Vec3 eye) {
         if (hit == null || !(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return null;
-        int idx = n.aimed(VoxelNode.eyeOf(p), hit).part();   // (by p's line of sight: VoxelPick)
+        int idx = n.aimed(eye, hit).part();   // (by the line of sight: VoxelPick)
         if (idx < 0) return null;
         VoxelPart part = n.parts.get(idx);
         if (part instanceof CablePart cp) return Kind.cable(cp.tier, cp.spec);

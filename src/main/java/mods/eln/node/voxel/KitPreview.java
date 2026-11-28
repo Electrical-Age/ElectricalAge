@@ -59,7 +59,9 @@ public final class KitPreview {
         if (plan != null && (plan.kind != k || plan.tier != kit.tier() || plan.dim != level.dimension())) plan = null;
         String key = h instanceof BlockHitResult bh && h.getType() == HitResult.Type.BLOCK
             ? bh.getBlockPos().toShortString() + bh.getDirection() + (int) Math.floor(bh.getLocation().x * 8) + "," + (int) Math.floor(bh.getLocation().y * 8)
-            + "," + (int) Math.floor(bh.getLocation().z * 8) : "none";
+            + "," + (int) Math.floor(bh.getLocation().z * 8)
+            // (and what the line of sight is on there: it changes with the eye while the crosshair stays in one cell)
+            + (level.getBlockEntity(bh.getBlockPos()) instanceof VoxelNodeEntity ve ? ve.aimed(VoxelNode.eyeOf(p), bh.getLocation()).toString() : "") : "none";
         key = k.noun + "|" + key + "|" + kit.tier() + "|" + kit.spec() + "|" + kit.length() + "|"
             + (plan == null ? "-" : plan.start + "" + plan.waypoints.size() + plan.touched) + "|" + p.isSecondaryUseActive();
         if (last != null && last.key.equals(key)) return;

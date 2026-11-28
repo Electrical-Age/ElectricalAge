@@ -6,6 +6,8 @@ import mods.eln.gametest.TestContext;
 import mods.eln.misc.Direction;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.voxel.CablePart;
+import mods.eln.node.voxel.CablePlacer;
+import mods.eln.node.voxel.PipePlacer;
 import mods.eln.node.voxel.JunctionPart;
 import mods.eln.node.voxel.PipePart;
 import mods.eln.node.voxel.PipeSensorPart;
@@ -15,6 +17,7 @@ import mods.eln.node.voxel.VoxelNodeEntity;
 import mods.eln.node.voxel.VoxelPart;
 import mods.eln.node.voxel.VoxelPick;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
@@ -40,6 +43,7 @@ public final class VoxelPickCases {
         cases.add(new Rays("voxel_pick_behind_imitated_block", VoxelPickCases::underSlab));
         cases.add(new Rays("voxel_pick_device_beside_cable", VoxelPickCases::device));
         cases.add(new Agree());
+        cases.add(new ItemClicks());
         cases.add(new JadeEntries());
     }
 
@@ -177,7 +181,12 @@ public final class VoxelPickCases {
      * MV cable laid second (z 8..11).
      */
     static CablePart[] twoCables(TestContext c, BlockPos at) {
-        CablePart older = new CablePart(LV, 0, new int[]{0, 0, 6, 16, 0, 6}), newer = new CablePart(MV, 0, new int[]{0, 0, 9, 16, 0, 9});
+        return twoCables(c, at, 9);
+    }
+
+    /** ... the second with its centre line at z (10: on the lattice a kit branches from; z 9..12, 2 voxels apart). */
+    static CablePart[] twoCables(TestContext c, BlockPos at, int z) {
+        CablePart older = new CablePart(LV, 0, new int[]{0, 0, 6, 16, 0, 6}), newer = new CablePart(MV, 0, new int[]{0, 0, z, 16, 0, z});
         CableCases.voxel(c, at, List.of(older, newer));
         return new CablePart[]{older, newer};
     }
@@ -230,7 +239,7 @@ public final class VoxelPickCases {
         BlockPos s = at.east(2);
         PipeCases.lay(c, s, 0, 0, 8, 8, 16, 8, 8);
         VoxelNode n = c.voxelByEntity(s);
-        err = n.addSensorNear(0.5, 0.5, 0.5, PipeSensorPart.PRESSURE);
+        err = n.addSensorNearForTests(0.5, 0.5, 0.5, PipeSensorPart.PRESSURE);
         if (err != null) throw new IllegalStateException("sensor: " + err);
         PipeSensorPart sensor = null;
         for (VoxelPart p : n.parts) if (p instanceof PipeSensorPart x) sensor = x;
@@ -418,6 +427,114 @@ public final class VoxelPickCases {
                 player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
                 player.snapTo(x0, y0, z0, 0, 0);
             }
+        }
+    }
+
+    /**
+     * Item clicks as a real player's, traced from an eye (GameTests' fake player has none: every other case clicks by
+     * the point): the part is the one the line of sight is on, and the place on it is where that line met it, not the
+     * hit on another part's outline.
+     */
+    static final class ItemClicks implements TestCase {
+        BlockPos two, crossed, piped;
+        CablePart[] k;
+        CablePart under;
+
+        public String id() {
+            return "voxel_pick_item_clicks_follow_the_line";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext c) {
+            two = c.at(1, 1, 1);
+            k = twoCables(c, two, 10);
+            // a pipe crossing 3 voxels over a floor cable
+            crossed = c.at(3, 1, 1);
+            under = new CablePart(LV, 0, new int[]{0, 0, 8, 16, 0, 8});
+            CableCases.voxel(c, crossed, List.of(under));
+            PipeCases.lay(c, crossed, 0, 4, 4, 0, 4, 4, 16);
+            // a pipe behind a thick (thermal) cable
+            piped = c.at(5, 1, 1);
+            CableCases.voxel(c, piped, List.of(new CablePart(CablePart.tierOf("Copper Thermal Cable"), 0, new int[]{0, 0, 3, 16, 0, 3})));
+            PipeCases.lay(c, piped, 0, 0, 4, 8, 16, 4, 8);
+        }
+
+        public void measure(TestContext c) {
+            var level = c.level();
+            // 1. two parallel cables seen low across the first: the ray stops on the first one's outline, the line comes
+            // down on the second. A kit branches off the second, under the line; by the point alone, off the first.
+            double[][] p = parallax(k[0], k[1]);
+            Vec3 eye = world(two, p[0]), hit = hit(c, two, p[0], p[1]);
+            long[][] join = new long[1][], joinPoint = new long[1][];
+            var end = CablePlacer.endAtForTests(level, two, net.minecraft.core.Direction.UP, hit, eye, true, join, MV);
+            CablePlacer.endAtForTests(level, two, net.minecraft.core.Direction.UP, hit, true, joinPoint, MV);
+            long x0 = two.getX() * 16L, z0 = two.getZ() * 16L;
+            c.check("item clicks: a kit seen low across one cable onto the next branches off the next, under the line", end != null && join[0] != null
+                && join[0][2] == z0 + 10 && join[0][0] == x0 + 8, Arrays.toString(join[0]) + " (block at " + x0 + ", " + z0 + ")");
+            c.check("item clicks: the same click by its point alone (no eye) is on the first cable", joinPoint[0] != null && joinPoint[0][2] == z0 + 6,
+                Arrays.toString(joinPoint[0]));
+            VoxelPart cut = mods.eln.node.voxel.ToolbagShears.pieceAtForTests(level, two, hit, eye);
+            c.check("item clicks: the Toolbag's shears are on the cable the line is on", cut == k[1], cut == null ? "none" : Arrays.toString(cut.boxes().get(0)));
+
+            // 2. the Toolbag keeps the click a route started at, with its eye, and starts again from it when another kind
+            // is chosen: from the same cable, though the player (here: with no eye at all) stands elsewhere by then
+            var pl = c.player();
+            double px = pl.getX(), py = pl.getY(), pz = pl.getZ();
+            var mvKind = mods.eln.node.voxel.CableSpec.preset(MV);
+            var lvKind = mods.eln.node.voxel.CableSpec.preset(LV);
+            ItemStack bag = ToolbagCases.bag(mods.eln.node.voxel.CableKitItem.kit(MV, 300), mods.eln.node.voxel.CableKitItem.kit(LV, 300));
+            pl.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, bag);
+            pl.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);
+            try {
+                mods.eln.node.voxel.ToolbagItem.click(pl, level, bag, two, net.minecraft.core.Direction.UP, hit, eye, false);
+                long[] started = mods.eln.node.voxel.RoutePlacer.startJoinForTests(pl.getUUID());
+                ToolbagCases.radial(pl, mods.eln.node.voxel.ToolbagItem.CHOOSE, new int[]{0, LV, lvKind.mm2(), lvKind.colour()});
+                long[] again = mods.eln.node.voxel.RoutePlacer.startJoinForTests(pl.getUUID());
+                c.check("item clicks: a Toolbag route starts on the cable the line is on", started != null && started[2] == z0 + 10
+                    && mods.eln.node.voxel.ToolbagItem.selected(bag) != null, Arrays.toString(started) + " then " + mods.eln.node.voxel.ToolbagItem.selected(bag));
+                c.check("item clicks: another kind chosen mid-route starts again from the same cable (the kept click's own eye)", again != null
+                    && Arrays.equals(again, started) && mods.eln.node.voxel.ToolbagItem.selected(bag).tier() == LV, Arrays.toString(again));
+            } finally {
+                ToolbagCases.clean(pl);
+                pl.snapTo(px, py, pz, 0, 0);
+            }
+
+            // 3. a pipe crossing over a floor cable, seen at 30 degrees along the cable: the ray stops on the pipe's
+            // outline, the line passes over the pipe and comes down on the cable 6 voxels on. The kit branches off the
+            // cable there, not at the cable's lattice point nearest the hit (under the pipe).
+            double[] over = {6.9, 4.6, 8}, into = {13.5, 4.6 - 6.6 * Math.tan(Math.toRadians(30)), 8}, from = new double[3];
+            for (int a = 0; a < 3; a++) from[a] = into[a] + 5 * (over[a] - into[a]);
+            Vec3 hit2 = hit(c, crossed, from, into), eye2 = world(crossed, from);
+            VoxelNode v2 = c.voxelByEntity(crossed);
+            var onOutline = v2.aimed(null, hit2);
+            long[][] join2 = new long[1][];
+            CablePlacer.endAtForTests(level, crossed, net.minecraft.core.Direction.UP, hit2, eye2, true, join2, LV);
+            long cx = crossed.getX() * 16L;
+            c.check("item clicks: a kit seen low over a crossing pipe onto the cable branches off the cable where the line meets it",
+                onOutline.part() >= 0 && v2.parts.get(onOutline.part()) instanceof PipePart && join2[0] != null && join2[0][0] >= cx + 12
+                    && join2[0][2] == crossed.getZ() * 16L + 8,
+                "outline hit on " + say(v2, onOutline) + " at " + hit2.subtract(Vec3.atLowerCornerOf(crossed)).scale(16) + ", join " + Arrays.toString(join2[0]) + " (block at " + cx + ")");
+            long[] pipeJoin = PipePlacer.joinPointForTests(level, crossed, hit2, eye2);
+            c.check("item clicks: a pipe kit on that line doesn't join the pipe (the line is on the cable)", pipeJoin == null, Arrays.toString(pipeJoin));
+
+            // 4. a valve onto a pipe seen over a thick cable: the ray stops on the cable's outline, the line goes on into
+            // the pipe. By the line the valve fits on the pipe; by the point it is refused (a cable)
+            double[] in3 = {8, 4.8, 8}, from3 = {8, 4.8 + 0.1 * 38, -30};
+            Vec3 hit3 = hit(c, piped, from3, in3), eye3 = world(piped, from3);
+            VoxelNode v3 = c.voxelByEntity(piped);
+            var on3 = v3.aimed(null, hit3);
+            int before = v3.parts.size();
+            String byPoint = v3.addValveAimed(null, hit3, ValvePart.ON_OFF);
+            boolean refused = byPoint != null && v3.parts.size() == before;
+            String byLine = v3.addValveAimed(eye3, hit3, ValvePart.ON_OFF);
+            ValvePart valve = null;
+            for (VoxelPart q : v3.parts) if (q instanceof ValvePart x) valve = x;
+            c.check("item clicks: a valve seen over a cable onto the pipe behind it fits on the pipe, where the line meets it",
+                v3.parts.get(on3.part()) instanceof CablePart && refused && byLine == null && valve != null && valve.x == 8 && valve.y == 4 && valve.z == 8,
+                "outline hit on " + say(v3, on3) + "; by the point: " + byPoint + "; by the line: " + byLine + (valve == null ? "" : " at " + valve.x + "," + valve.y + "," + valve.z));
         }
     }
 

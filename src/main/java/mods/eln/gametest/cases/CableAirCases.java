@@ -83,7 +83,7 @@ public final class CableAirCases {
                 var e = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), c.at(4, 3, 1), net.minecraft.core.Direction.UP,
                     Vec3.atLowerCornerOf(c.at(4, 3, 1)).add(0.5, 0.05, 0.5), true, jb);
                 branch = e == null ? "refused" : jb[0] == null ? "not a join" : "join";
-                place = String.valueOf(gap.placeFace(net.minecraft.core.Direction.NORTH, 0.5, 0.05, 0.5));
+                place = String.valueOf(gap.placeFaceForTests(net.minecraft.core.Direction.NORTH, 0.5, 0.05, 0.5));
             }
             for (int y = 0; y < 2; y++)
                 for (int z = 0; z < 3; z++) if (voxel(c, c.at(4, y, z)) instanceof VoxelNode v) lowPieces += v.parts.size();

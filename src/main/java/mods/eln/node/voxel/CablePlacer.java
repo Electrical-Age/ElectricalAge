@@ -70,8 +70,8 @@ public final class CablePlacer {
         }
 
         @Override
-        boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, KitSupply kit) {
-            return CablePlacer.repair(player, level, pos, hit, kit, kit.tier(), kit.spec());
+        boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, Vec3 eye, KitSupply kit) {
+            return CablePlacer.repair(player, level, pos, hit, eye, kit, kit.tier(), kit.spec());
         }
     };
 
@@ -303,7 +303,8 @@ public final class CablePlacer {
     }
 
     /** The same for a kit of that tier (-1: any): a device off centre ends at its nearest pin of the kit's kind. What
-     *  is clicked: VoxelPick, by the line of sight from eye (null: the point hit alone); where on it: the point hit. */
+     *  is clicked: VoxelPick, by the line of sight from eye (null: the point hit alone); where on it (the pin, the
+     *  branch point): nearest where that line met it (VoxelPick.Met), not the hit, which may be on another part's outline. */
     static CableRouter.End endAt(Level level, BlockPos pos, Direction face, Vec3 hit, Vec3 eye, boolean start, long[][] join, int tier) {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         double hx = hit.x - pos.getX(), hy = hit.y - pos.getY(), hz = hit.z - pos.getZ();
@@ -311,9 +312,9 @@ public final class CablePlacer {
             // a device hosted here: the edge of its face nearest the click that has a connector (a trimmer has one, on
             // its front); the cable comes from the next block, on the same face plane, and ends at that edge's midpoint
             // (its port)
-            VoxelNode.Aimed aimed = v.aimed(eye, hit);
-            int el = aimed.element(), idx = aimed.part();
-            if (el >= 0) return deviceEnd(v, pos, el, new double[]{hx, hy, hz}, start, tier);
+            VoxelPick.Met met = v.met(eye, hit);
+            int el = met.what().element(), idx = met.what().part();
+            if (el >= 0) return deviceEnd(v, pos, el, new double[]{met.x(), met.y(), met.z()}, start, tier);
             // a control valve: its signal comes from a signal cable laid into its block: the floor under it (Baughn
             // 2026-10-26; AdventurAgent: clicking its actuator was "not a place for a cable")
             if (idx >= 0 && v.parts.get(idx) instanceof ValvePart cv && (cv.mode == ValvePart.CONTROL || cv.mode == ValvePart.PRESSURE))
@@ -347,7 +348,7 @@ public final class CablePlacer {
                         q[o[0]] = a;
                         q[o[1]] = b;
                         if (!c.passes(q[0], q[1], q[2])) continue;
-                        double d = sq(q[0] - hx * 16) + sq(q[1] - hy * 16) + sq(q[2] - hz * 16);
+                        double d = sq(q[0] - met.x() * 16) + sq(q[1] - met.y() * 16) + sq(q[2] - met.z() * 16);
                         if (d < bd) {
                             bd = d;
                             best = new long[]{pos.getX() * 16L + q[0], pos.getY() * 16L + q[1], pos.getZ() * 16L + q[2]};
@@ -585,6 +586,11 @@ public final class CablePlacer {
         return endAt(level, pos, face, hit, null, start, join, tier);
     }
 
+    /** ... as a real player's click, traced from eye. */
+    public static CableRouter.End endAtForTests(Level level, BlockPos pos, Direction face, Vec3 hit, Vec3 eye, boolean start, long[][] join, int tier) {
+        return endAt(level, pos, face, hit, eye, start, join, tier);
+    }
+
     /** A lattice coordinate inside the block (not on its edge). */
     static int snap(double v) {
         int s = (int) Math.round(v / CableRouter.LATTICE) * CableRouter.LATTICE;
@@ -641,9 +647,9 @@ public final class CablePlacer {
      * 2026-11-11): every burnt piece joined to the clicked one through the blocks' faces, for the kit length they
      * hold. False if the click isn't on a burnt cable (the kit then routes as usual).
      */
-    static boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, KitSupply kit, int tier, CableSpec spec) {
+    static boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, Vec3 eye, KitSupply kit, int tier, CableSpec spec) {
         if (!(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return false;
-        int idx = n.aimed(VoxelNode.eyeOf(player), hit).part();
+        int idx = n.aimed(eye, hit).part();
         if (idx < 0 || !(n.parts.get(idx) instanceof CablePart c) || c.burnt == null) return false;
         if (c.tier != tier || spec != null && c.spec != null && spec.mm2() != c.spec.mm2()) {
             player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Kit doesn't match burnt cable")));

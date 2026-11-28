@@ -165,7 +165,7 @@ public class ElnJadePlugin implements IWailaPlugin {
             CompoundTag data = acc.getServerData();
             if (data.contains(VoxelProbe.KEY) && acc.getBlockEntity() instanceof mods.eln.node.voxel.VoxelNodeEntity v) {
                 data = VoxelProbe.choose(data.getListOrEmpty(VoxelProbe.KEY),
-                    mods.eln.client.render.VoxelOutline.aimed(v, acc.getHitResult().getLocation(), true), v.parts());
+                    VoxelProbe.clientAimed.apply(v, acc.getHitResult().getLocation()), v.parts());
                 if (data == null) data = new CompoundTag();
             }
             String title = data.getStringOr("elnTitle", "");

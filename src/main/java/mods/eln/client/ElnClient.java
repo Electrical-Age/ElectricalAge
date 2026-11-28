@@ -152,6 +152,8 @@ public final class ElnClient {
         ClientScreens.registerAll();
         mods.eln.client.render.WornCurios.register(modBus);
         mods.eln.gui.ElnNodeMenu.clientLayout = mods.eln.client.gui.ElnLayouts::apply;
+        // (Jade's tooltip picks as the outline does: the plugin itself names no client class)
+        mods.eln.compat.jade.VoxelProbe.clientAimed = (v, hit) -> mods.eln.client.render.VoxelOutline.aimed(v, hit, true);
         modBus.addListener(net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent.class, ClientKeys::register);
         modBus.addListener(net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent.class, DrillSpin::registerExtensions);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.client.event.ClientTickEvent.Post.class, ClientKeys::tick);

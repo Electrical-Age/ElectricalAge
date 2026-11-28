@@ -129,10 +129,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public List<int[]> elementBoxes(int slot) {
         var e = sideElementList[slot];
         if (slot < 6 || e == null || e.sixNodeElementDescriptor == null) return List.of(elementBox(slot));
-        List<int[]> out = new ArrayList<>();
-        out.add(bodyBox(e.sixNodeElementDescriptor, e.side, e.front, e.ox, e.oy, e.oz));
-        for (Pin p : pins(e)) out.add(p.box());
-        return out;
+        int pinMask = 0;   // (the edges it connects on, as pins(e) and SixNode's publish have them)
+        for (LRDU l : LRDU.values()) if (e.getConnectionMask(l) != 0) pinMask |= 1 << l.toInt();
+        return deviceBoxes(e.sixNodeElementDescriptor, e.side, e.front, e.ox, e.oy, e.oz, pinMask);
     }
 
     /** The body of a device off centre (its model without the pins: SixNodeDescriptor.bodyExtents), clipped to the block. */
@@ -160,8 +159,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /**
      * The boxes of a device off centre as the client works them out from what is published (its place, front and pin
-     * mask: SixNode's publish, a bit per edge it connects on): its body, then its pins. The same as elementBoxes
-     * (GameTest voxel_pick_client_view).
+     * mask: SixNode's publish, a bit per edge it connects on): its body, then its pins. elementBoxes is this with the
+     * element's own mask.
      */
     public static List<int[]> deviceBoxes(mods.eln.node.six.SixNodeDescriptor d, Direction side, LRDU front, int ox, int oy, int oz, int pinMask) {
         List<int[]> out = new ArrayList<>();
@@ -738,8 +737,13 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return addSafetyValveNear(partAt(hx, hy, hz), hx, hy, hz, mode);
     }
 
-    /** ... on the part the player aims at (idx, by the line of sight: VoxelPick), nearest the click on it. */
-    public String addSafetyValveNear(int idx, double hx, double hy, double hz, int mode) {
+    /** A safety valve fitted by a click: as addValveAimed. */
+    public String addSafetyValveAimed(net.minecraft.world.phys.Vec3 eye, net.minecraft.world.phys.Vec3 hit, int mode) {
+        VoxelPick.Met m = met(eye, hit);
+        return addSafetyValveNear(m.what().part(), m.x(), m.y(), m.z(), mode);
+    }
+
+    private String addSafetyValveNear(int idx, double hx, double hy, double hz, int mode) {
         if (idx >= 0 && fittingThere(parts.get(idx)) != null) return fittingThere(parts.get(idx));
         for (VoxelPart q : parts)
             if (q instanceof SafetyValvePart sv)
@@ -800,8 +804,14 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return addValveNear(partAt(hx, hy, hz), hx, hy, hz, mode);
     }
 
-    /** ... on the part the player aims at (idx, by the line of sight: VoxelPick), nearest the click on it. */
-    public String addValveNear(int idx, double hx, double hy, double hz, int mode) {
+    /** A valve fitted by a click: on the pipe the line of sight from eye through hit (in the world) is on, at the
+     *  lattice point nearest where it met the pipe (VoxelPick.Met; eye null: by the point hit). */
+    public String addValveAimed(net.minecraft.world.phys.Vec3 eye, net.minecraft.world.phys.Vec3 hit, int mode) {
+        VoxelPick.Met m = met(eye, hit);
+        return addValveNear(m.what().part(), m.x(), m.y(), m.z(), mode);
+    }
+
+    private String addValveNear(int idx, double hx, double hy, double hz, int mode) {
         if (idx >= 0 && fittingThere(parts.get(idx)) != null) return fittingThere(parts.get(idx));
         if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return mods.eln.i18n.I18N.tr("must fit on a pipe");
         int[] best = null;
@@ -884,7 +894,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
      * the click on a straight stretch, its dial out of the pipe's most open side (up first). One per block: its output
      * joins the signal cable nearest it in the block (fittingCable), so two could drive the same wire.
      */
-    public String addSensorNear(double hx, double hy, double hz, int sensing) {
+    public String addSensorNearForTests(double hx, double hy, double hz, int sensing) {
         for (VoxelPart q : parts)
             if (q instanceof PipeSensorPart) return mods.eln.i18n.I18N.tr("block already has a sensor");
         int idx = partAt(hx, hy, hz);
@@ -963,12 +973,19 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** What a crosshair is on: its ray traced from eye and stopped at hit (in the world); eye null: the point alone. */
     public Aimed aimed(net.minecraft.world.phys.Vec3 eye, net.minecraft.world.phys.Vec3 hit) {
-        return VoxelPick.pick(scene(), coordonate.pos(), eye, hit);
+        return met(eye, hit).what();
+    }
+
+    /** aimed, with where the line of sight met it (block-local; the point hit with no eye): what a click that fits or
+     *  joins something there takes its place on the part from (VoxelPick.Met). */
+    public VoxelPick.Met met(net.minecraft.world.phys.Vec3 eye, net.minecraft.world.phys.Vec3 hit) {
+        return VoxelPick.meet(scene(), coordonate.pos(), eye, hit);
     }
 
     /**
      * The eye to pick by for a click of player's (aimed): a real player's own; null, so the point clicked alone, for
-     * anything else (a fake player, a deployer: where its eye is says nothing of what it clicks).
+     * anything else (a fake player, a deployer: where its eye is says nothing of what it clicks). An eye that could
+     * not have traced the hit is dropped by the pick itself (VoxelPick.believable).
      */
     public static net.minecraft.world.phys.Vec3 eyeOf(Player player) {
         return player instanceof net.minecraft.server.level.ServerPlayer sp && !(sp instanceof net.neoforged.neoforge.common.util.FakePlayer)
@@ -977,7 +994,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** The device whose own box holds the block-local point, or the part whose does (a part first); nothing nearby
      *  counts (GameTests: how far a model box reaches). */
-    public Aimed holding(double x, double y, double z) {
+    public Aimed holdingForTests(double x, double y, double z) {
         return VoxelPick.holding(scene(), x, y, z);
     }
 
@@ -1395,8 +1412,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return Direction.fromIntMinecraftSide(clicked.get3DDataValue()).getInverse();
     }
 
-    /** placeFace for a block-local point alone (no player's line of sight). */
-    public Direction placeFace(net.minecraft.core.Direction clicked, double hx, double hy, double hz) {
+    /** placeFace for a block-local point alone, no player's line of sight (GameTests). */
+    public Direction placeFaceForTests(net.minecraft.core.Direction clicked, double hx, double hy, double hz) {
         return placeFace(clicked, aimed(hx, hy, hz));
     }
 

@@ -84,7 +84,7 @@ public final class ToolbagShears {
             return;
         }
         if (hit == null) return;
-        Piece at = pieceAt(p, level, pos, hit);
+        Piece at = pieceAt(level, pos, hit, VoxelNode.eyeOf(p));
         if (at == null) return;   // (not a cable or pipe: nothing to cut, and no block broken)
         if (shears(bag).isEmpty()) {
             KitPreview.note(p, mods.eln.i18n.I18N.tr("No shears in toolbag"));
@@ -114,7 +114,7 @@ public final class ToolbagShears {
     static void aim(ServerPlayer p, ServerLevel level, BlockPos pos, Vec3 hit) {
         Cut c = CUTS.get(p.getUUID());
         if (c == null) return;
-        Piece at = pieceAt(p, level, pos, hit);
+        Piece at = pieceAt(level, pos, hit, VoxelNode.eyeOf(p));
         if (at == null) return;
         int i = indexOf(c.run, at.part());
         if (i < 0) return;
@@ -123,6 +123,12 @@ public final class ToolbagShears {
         c.from = from;
         c.to = to;
         show(p, c);
+    }
+
+    /** The part pieceAt gives for a click traced from eye (GameTests), or null. */
+    public static VoxelPart pieceAtForTests(Level level, BlockPos pos, Vec3 hit, Vec3 eye) {
+        Piece at = pieceAt(level, pos, hit, eye);
+        return at == null ? null : at.part();
     }
 
     /** aim, for GameTests. */
@@ -229,10 +235,11 @@ public final class ToolbagShears {
 
     // ---- the run
 
-    /** The cable or pipe piece p's crosshair is on (VoxelPick, by its line of sight: the one Jade names), or null. */
-    static Piece pieceAt(ServerPlayer p, Level level, BlockPos pos, Vec3 hit) {
+    /** The cable or pipe piece a crosshair traced from eye is on (VoxelPick, by the line of sight: the one Jade names),
+     *  or null. */
+    static Piece pieceAt(Level level, BlockPos pos, Vec3 hit, Vec3 eye) {
         if (!(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return null;
-        int idx = n.aimed(VoxelNode.eyeOf(p), hit).part();
+        int idx = n.aimed(eye, hit).part();
         if (idx < 0) return null;
         VoxelPart part = n.parts.get(idx);
         return part instanceof CablePart || part instanceof PipePart ? new Piece(pos, part) : null;
