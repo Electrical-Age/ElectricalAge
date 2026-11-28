@@ -9,9 +9,9 @@ public final class Fill {
     }
 
     /**
-     * The part drawn at scale share (of its modelled height) in y, about its origin's height. (It read the origin with
-     * getFloat, which is always 0, so a column stretched about the block's middle and not its foot: right only at scale
-     * 1, the boilers' glasses at half; found with the Still Pot's glass, 2026-11-28.)
+     * The part drawn at scale share (of its modelled height) in y, about its origin's height. (Until 2026-11-28 a part's
+     * origin read 0 whatever its .txt said, so a column stretched about the block's middle and not its foot: right only
+     * at scale 1, the boilers' glasses at half; found with the Still Pot's glass.)
      */
     public static void draw(Obj3D.Obj3DPart part, float share) {
         if (part == null || share <= 0) return;

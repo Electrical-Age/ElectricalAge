@@ -182,8 +182,8 @@ public class Obj3D {
         }
 
         /**
-         * The part's origin (its .txt originX, originY, originZ; block units, the model's frame). These three are kept
-         * here, not among the floats: getFloat("originY") is 0 whatever the .txt says.
+         * The part's origin (its .txt originX, originY, originZ; block units, the model's frame); getFloat("originY")
+         * gives the same.
          */
         public float[] origin() {
             return new float[]{ox, oy, oz};
@@ -573,6 +573,9 @@ public class Obj3D {
                     } else if (words[0].equals("o")) {
                         part = nameToPartHash.get(words[1]);
                     } else if (words[0].equals("f")) {
+                        // (the origins are floats like any other too: getFloat("originY") read 0 whatever the .txt
+                        // said, and four animations placed themselves by it; Baughn 2026-11-28: fix it for all)
+                        if (words[1].startsWith("origin")) part.nameToFloatHash.put(words[1], Float.valueOf(words[2]));
                         if (words[1].equals("originX")) {
                             part.ox = Float.valueOf(words[2]);
                         } else if (words[1].equals("originY")) {

@@ -1293,3 +1293,7 @@ on 1.7.10) onto 26.x.
   recipe matches). `KitItem.owned`; GameTest `pipe_kit_crafting`.
   Overhead cable merges the same way (Baughn 2026-11-28): `OverheadCableItem` is a `Pourable`, as kits are, and its
   own pickup and click merges are gone. GameTest `overhead_cable_merges_on_pickup`.
+- **A model part's origin reads as its .txt says** (2026-11-28, Baughn: fix it for all). `Obj3DPart.getFloat("originX/Y/Z")`
+  gave 0 for every part (the parser kept the origins apart from the other floats), so what placed itself by it was
+  off: the boilers' gauge columns (right only at half), the oil separator's basin level, the macerator's sinking
+  piece, the plate machine's roll line, the simple shaft's turning axis. All read the real origin now.

@@ -27,7 +27,7 @@ referenced from CLAUDE.md).
 | `Plume` | What a device lets out into the air, one look per kind (Baughn 2026-11-13: the same output looks the same on every device): `STEAM` (white wisps), `SMOKE` (a clean fire's flue gas), `SOOT` (a fouled fire, carbon black), `FLAME_GAS`, `FLAME_LIGHT`, `FLAME_HEAVY`. `Plume.vented(fluid)` / `burnt(fluid)` pick the kind by the fluid's name; `puff(level, x, y, z, halfWidth[, pushX, pushZ])` draws one (the device gives the place and, with an `Emitter`, the rate); `jet()` is the particle of a jet under pressure, sent by the server (`SteamJet`) | every stack, vent and flare; a new outlet picks a kind, a new kind of output gets a kind here |
 | `Led` | A status LED part: full-bright on, dimmed off | ledpower / ledrun parts |
 | `Glow` | A part self-lit in a colour from a per-device `Ramp` of a 0..1 level | fire windows, peepholes (temperature-true colour: `misc.Incandescence`) |
-| `Fill` | A part scaled in y about its origin's height (`Obj3DPart.origin()`: the .txt origin is not among `getFloat`'s values, which give 0 for it) | gauge glasses, tank levels |
+| `Fill` | A part scaled in y about its origin's height (`Obj3DPart.origin()`, the same as `getFloat("originY")` since 2026-11-28; before, `getFloat` gave 0 for the origins) | gauge glasses, tank levels |
 | `Progress` | A machine's job progress run on between publishes at the published rate; `shown()` eases forward and restarts with the next piece | items in process |
 | `Belt`, `BeltPath` | A belt of links wrapped round two pulleys (open belt), running with the drive (`Belt.Run`) | the 230V macerator |
 
