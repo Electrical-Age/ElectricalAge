@@ -79,11 +79,6 @@ public class TankDescriptor extends TransparentNodeDescriptor {
         }
     }
 
-    /** Jade's warning when v is over this tier's working pressure. */
-    public void putWarning(java.util.Map<String, String> info, mods.eln.sim.fluid.FluidNode v) {
-        if (v.P() > workingPa) info.put(mods.eln.i18n.I18N.tr("Warning"), String.format("over its %.0f bar working pressure", workingPa / 1e5));
-    }
-
     /** The vessel's shell (a box's render scales it to the box). */
     void drawShell() {
         drawPart("shell");

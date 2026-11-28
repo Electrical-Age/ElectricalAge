@@ -70,7 +70,7 @@ there and replayed first), `eln.guiDir` (LayoutTest, HubSlotsTest), `-PfluidCase
   `placeTransparent(id, p)` (as a FakePlayer click; `placeByPlayer(id, p, yaw)` facing it, null if it doesn't fit), `stream(writer)` (GUI packet bytes), `listener()` (a fake player
   that records its chat and action-bar messages apart), `player()` (the level's shared fake player) and
   `holding(stack, p -> ...)` (with the stack in its hand, emptied after), `nodeAt(p)` / `voxelAt(p)` (the node
-  manager's node) and `voxelByEntity(p)` (through the block entity's cached node), `kitClick(player, kit, on, face, hit[, sneak])`
+  manager's node) and `voxelByEntity(p)` (through the block entity's cached node), `kitClick(player, kit, on, face, hit[, sneak])` (or `kitClick(player, kit, on, sneak)` on the top face's middle)
   (a cable, pipe or track kit's click as that player, standing over the point and put back after), `source(id, p, u)` /
   `setVolts(source, u)` (an Electrical or Signal Source at u volts), static `TestContext.field(o, name)`
   (reflection read up the class chain), `check`, `checkValue` (1%).
