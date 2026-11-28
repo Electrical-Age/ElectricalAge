@@ -61,6 +61,7 @@ public final class Boiler {
         for (double y : new double[]{5.9, 11.6}) m.add(box(0.35, y, gz - 0.55, hx + 1.3, y + 0.6, gz + 0.55, "brass"));
         m.add(box(0.3, 6.5, gz - 0.65, 0.45, 11.5, gz - 0.5, "darksteel"));
         m.add(box(0.3, 6.5, gz + 0.5, 0.45, 11.5, gz + 0.65, "darksteel"));
+        m.add(prism('y', GAUGE[0], gz, 0.3, GAUGE[1], GAUGE[1] + GLASS, "sightglass", 6, false, false));
         m.add(prism('y', 0.9, gz, 0.2, 5.1, 5.9, "brass", 6));
         m.add(box(0.35, 4.5, gz - 0.25, 0.85, 5.1, gz + 0.25, "darksteel"));
         // pressure gauge on a siphon above the head (its needle: part needle)
@@ -94,9 +95,16 @@ public final class Boiler {
         return m;
     }
 
+    /** The gauge glass's height (px), between its cocks. */
+    static final double GLASS = 5.15;
+
+    /**
+     * The water in the gauge glass: a blue column round the empty glass tube, the glass's whole height; the render
+     * scales it to the level about its foot. (It was a half-high cell of water under glass stretched as one: the glass
+     * grew with the water, and a full boiler's water stood at 60 %: AdventurAgent 2026-11-28.)
+     */
     static List<Mesh> level() {
-        // half the glass's height, so it maps onto the water cell's blue half; the render stretches it (x 0..2)
-        return List.of(prism('y', GAUGE[0], GAUGE[2], 0.4, GAUGE[1], GAUGE[1] + 2.575, "water", 6));
+        return List.of(prism('y', GAUGE[0], GAUGE[2], 0.4, GAUGE[1], GAUGE[1] + GLASS, "gaugewater", 6, false, true));
     }
 
     static List<Mesh> needle() {

@@ -978,12 +978,12 @@ public final class LabCommands {
         x += 4;
         for (double share : new double[]{0, 0.5, 0.95}) {
             var b = (mods.eln.oil.BoilerElement) placeTransparent(level, player, "Boiler", pos.offset(x, 0, 0));
-            b.fromTanks((int) (share * b.vessel.volume * rho / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER), 0);
+            b.fromTanks((int) (share * ((mods.eln.oil.BoilerDescriptor) b.getDescriptor()).waterMb), 0);
             x += 4;
         }
         for (double share : new double[]{0.5, 0.95}) {
             var b = (mods.eln.oil.BoilerElement) placeTransparent(level, player, "Large Boiler", pos.offset(x, 0, 0));
-            b.fromTanks((int) (share * b.vessel.volume * rho / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER), 0);
+            b.fromTanks((int) (share * ((mods.eln.oil.BoilerDescriptor) b.getDescriptor()).waterMb), 0);
             x += 4;
         }
         for (String name : new String[]{"48V Tar Sand Separator", "230V Tar Sand Separator"})

@@ -110,7 +110,7 @@ public class BoilerDescriptor extends TransparentNodeDescriptor {
             if (p != null) p.draw();
         }
         var level = obj.getPart("level");
-        if (level != null && fill > 0.01f) mods.eln.anim.Fill.draw(level, 2 * Math.min(1, fill));   // (the column is modelled half the glass high, about its foot)
+        if (level != null && fill > 0.01f) mods.eln.anim.Fill.draw(level, Math.min(1, fill));   // (the column is modelled the glass's whole height, about its foot)
         var needle = obj.getPart("needle");
         if (needle != null) needle.draw(-135 + 270 * Math.max(0, Math.min(1, celsius / DIAL_MAX_C)), 1, 0, 0);
     }

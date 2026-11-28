@@ -201,6 +201,7 @@ public final class LargeBoiler {
         for (double y : new double[]{g0 - 0.6, g1}) m.add(box(0.5, y, gz - 0.85, X0 - HEAD + 0.1, y + 0.6, gz + 0.85, "brass"));
         m.add(box(0.55, g0 - 0.3, gz - 0.75, 0.7, g1 + 0.3, gz - 0.6, "darksteel"));
         m.add(box(0.55, g0 - 0.3, gz + 0.6, 0.7, g1 + 0.3, gz + 0.75, "darksteel"));
+        m.add(prism('y', GAUGE[0], gz, 0.3, g0, g1, "sightglass", 6, false, false));
         m.addAll(signalPlate());
         m.add(box(0.85, 0, 6.5, 1.2, 3.5, 9.5, "steel", "nsu"));
         m.add(box(1.0, DECK, 7.0, 2.8, DECK + 1.6, 10.2, "darksteel"));
@@ -234,8 +235,8 @@ public final class LargeBoiler {
     }
 
     static List<Mesh> level() {
-        // half the glass's height (the render stretches it, x 0..2)
-        return List.of(prism('y', GAUGE[0], GAUGE[2], 0.4, GAUGE[1], GAUGE[1] + GLASS / 2, "water", 6));
+        // the water round the empty glass tube, the glass's whole height (the render scales it to the level: Boiler.level)
+        return List.of(prism('y', GAUGE[0], GAUGE[2], 0.4, GAUGE[1], GAUGE[1] + GLASS, "gaugewater", 6, false, true));
     }
 
     static List<Mesh> needle() {
