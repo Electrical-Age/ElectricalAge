@@ -275,7 +275,7 @@
   "item.eln.alloy_tank_minecart": "Alloy Tank Minecart",
   "item.eln.amplifier": "Amplifier",
   "item.eln.analog_gauge": "Analogue VU Meter",
-  "item.eln.analog_watch": "Analogue Watch",
+  "item.eln.analog_watch": "Analog Clock",
   "item.eln.analogic_regulator": "Analogue Regulator",
   "item.eln.and_chip": "AND Chip",
   "item.eln.animal_filter": "Animal Filter",
@@ -342,7 +342,7 @@
   "item.eln.desulfuriser": "Desulfuriser",
   "item.eln.dielectric": "Dielectric",
   "item.eln.diesel_bucket": "Diesel Bucket",
-  "item.eln.digital_watch": "Digital Watch",
+  "item.eln.digital_watch": "Digital Clock",
   "item.eln.e_coal_boots": "E-Coal Boots",
   "item.eln.e_coal_chestplate": "E-Coal Chestplate",
   "item.eln.e_coal_helmet": "E-Coal Helmet",
@@ -687,5 +687,8 @@
   "key.eln.radar_low_up": "Radar Goggles: Min Depth +",
   "key.eln.wrench": "Wrench / Tool Menu",
   "message.eln.electric_bike.flat_battery": "Battery flat: pedalling only",
-  "message.eln.electric_bike.no_battery": "No battery: pedalling only"
+  "message.eln.electric_bike.no_battery": "No battery: pedalling only",
+  "subtitles.eln.pipe_burst": "Pipe bursts",
+  "subtitles.eln.turbine_overspeed": "Turbine over speed",
+  "subtitles.eln.valve_whistle": "Safety valve blows"
 }

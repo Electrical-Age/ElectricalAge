@@ -31,7 +31,7 @@ public class ThrottleValveScreen extends Screen {
 
     ThrottleValveScreen(BlockPos pos, int index, int kind, double value) {
         super(Component.literal(mods.eln.i18n.I18N.tr(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? "Safety Valve"
-            : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? "Pressure Valve" : "Throttle Valve")));
+            : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PURGE ? "Purge Valve" : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? "Pressure Valve" : "Throttle Valve")));
         this.pos = pos;
         this.index = index;
         this.kind = kind;
@@ -41,7 +41,7 @@ public class ThrottleValveScreen extends Screen {
             reducing = value >= 1000;
             if (reducing) value -= 1000;
             this.setting = toSliderP(value);
-        } else this.setting = kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? toSlider(value) : value;
+        } else this.setting = relief() ? toSlider(value) : value;
     }
 
     static final double LO = mods.eln.node.voxel.SafetyValvePart.MIN_BAR, HI = mods.eln.node.voxel.SafetyValvePart.MAX_BAR;
@@ -88,7 +88,7 @@ public class ThrottleValveScreen extends Screen {
             @Override
             protected void applyValue() {
                 setting = value;
-                send(kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY ? toBar(value) : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? toBarP(value) : value);
+                send(relief() ? toBar(value) : kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE ? toBarP(value) : value);
             }
         });
         if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE) {
@@ -108,7 +108,13 @@ public class ThrottleValveScreen extends Screen {
         return Component.literal(mods.eln.i18n.I18N.tr(reducing ? "Reducing (downstream)" : "Relief (upstream)"));
     }
 
+    /** A safety or purge valve's screen: one set pressure on SafetyValvePart's scale. */
+    boolean relief() {
+        return kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY || kind == mods.eln.node.voxel.VoxelNode.SCREEN_PURGE;
+    }
+
     Component label(double v) {
+        if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PURGE) return Component.literal(mods.eln.i18n.I18N.tr("Vents gas above: %1$ bar", String.format("%.1f", toBar(v))));
         if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY) return Component.literal(mods.eln.i18n.I18N.tr("Lifts at: %1$ bar", String.format("%.1f", toBar(v))));
         if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE) return Component.literal(mods.eln.i18n.I18N.tr("Set point: %1$ bar", String.format("%.2f", toBarP(v))));
         return Component.literal(mods.eln.i18n.I18N.tr("Open: %1$", mods.eln.misc.Utils.plotPercent(v)));
@@ -136,6 +142,8 @@ public class ThrottleValveScreen extends Screen {
         g.centeredText(font, title, width / 2, height / 2 - 30, 0xFFFFFFFF);
         if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_SAFETY) {
             g.centeredText(font, Component.literal(mods.eln.i18n.I18N.tr("Opens above set point (+10% full)")), width / 2, height / 2 + 16, 0xFFA0A0A0);
+        } else if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PURGE) {
+            g.centeredText(font, Component.literal(mods.eln.i18n.I18N.tr("Liquid shuts it")), width / 2, height / 2 + 16, 0xFFA0A0A0);
         } else if (kind == mods.eln.node.voxel.VoxelNode.SCREEN_PRESSURE) {
             g.centeredText(font, Component.literal(mods.eln.i18n.I18N.tr("One way, along its arrow")), width / 2, height / 2 + 16, 0xFFA0A0A0);
         }

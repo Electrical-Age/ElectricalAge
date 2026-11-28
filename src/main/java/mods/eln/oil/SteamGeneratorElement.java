@@ -267,7 +267,7 @@ public class SteamGeneratorElement extends TransparentNodeElement implements Flu
                 new mods.eln.sim.process.destruct.Failure(SteamGeneratorElement.this)
                     .fail(mods.eln.sim.process.destruct.FailureCause.FLOODED, condenser.floodShare());
             else if (omega > 1.1 && node.coordonate.world() instanceof net.minecraft.server.level.ServerLevel sl && sl.getGameTime() % 10 == 0)
-                sl.playSound(null, node.coordonate.pos(), net.minecraft.sounds.SoundEvents.MINECART_RIDING, net.minecraft.sounds.SoundSource.BLOCKS,
+                sl.playSound(null, node.coordonate.pos(), mods.eln.sound.ElnSounds.event("eln:turbine_overspeed"), net.minecraft.sounds.SoundSource.BLOCKS,
                     0.8f, (float) Math.min(2, omega * 1.4));   // (the whine of a shaft over speed)
             // (Baughn: a tip for players) loaded on under LOW_PA for LOW_SECONDS: an advancement telling its placer it asks
             // for more steam than the boiler makes (add heat or lighten the load; a valve before it would only lose more)

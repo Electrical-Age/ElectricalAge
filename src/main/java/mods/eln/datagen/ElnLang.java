@@ -45,6 +45,9 @@ public class ElnLang extends LanguageProvider {
         add("container.eln.electric_bike", "Bike Trunk");
         add("message.eln.electric_bike.no_battery", "No battery: pedalling only");
         add("message.eln.electric_bike.flat_battery", "Battery flat: pedalling only");
+        add("subtitles.eln.turbine_overspeed", "Turbine over speed");
+        add("subtitles.eln.pipe_burst", "Pipe bursts");
+        add("subtitles.eln.valve_whistle", "Safety valve blows");
         add("key.eln.wrench", "Wrench / Tool Menu");
         add("key.eln.headlamp", "Toggle Headlamp / Flashlight");
         add("key.eln.radar_band", "Radar Goggles: Next Band");
@@ -223,7 +226,8 @@ public class ElnLang extends LanguageProvider {
         Map.entry("Gas Turbine", "400V Gas Turbine"),
         Map.entry("Generator", "400V Generator"),
         Map.entry("Analogic Regulator", "Analogue Regulator"),
-        Map.entry("Analog Watch", "Analogue Watch"),
+        Map.entry("Analog Watch", "Analog Clock"),   // (wall devices, and en_US: Lashtear 2026-11-28)
+        Map.entry("Digital Watch", "Digital Clock"),
         Map.entry("On/OFF Regulator 1 Percent", "On/Off Regulator (1%)"),
         Map.entry("On/OFF Regulator 10 Percent", "On/Off Regulator (10%)"),
         Map.entry("Portable Condensator", "Portable Capacitor"),

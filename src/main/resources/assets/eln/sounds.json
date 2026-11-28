@@ -403,5 +403,35 @@
                 "stream": false
             }
         ]
+    },
+    "turbine_overspeed": {
+        "category": "block",
+        "subtitle": "subtitles.eln.turbine_overspeed",
+        "sounds": [
+            {
+                "name": "minecraft:entity.minecart.riding",
+                "type": "event"
+            }
+        ]
+    },
+    "pipe_burst": {
+        "category": "block",
+        "subtitle": "subtitles.eln.pipe_burst",
+        "sounds": [
+            {
+                "name": "minecraft:entity.generic.explode",
+                "type": "event"
+            }
+        ]
+    },
+    "valve_whistle": {
+        "category": "block",
+        "subtitle": "subtitles.eln.valve_whistle",
+        "sounds": [
+            {
+                "name": "minecraft:block.note_block.flute",
+                "type": "event"
+            }
+        ]
     }
 }

@@ -27,11 +27,10 @@ public class ValveItem extends Item implements PipeTool {
         var player = ctx.getPlayer();
         // (thin pipes are easy to miss: if the click went past, the pipe the player looks at)
         var hit = ctx.getClickLocation();
-        if (!(level.getBlockEntity(pos) instanceof VoxelNodeEntity) && player != null
-            && player.pick(player.blockInteractionRange(), 1f, false) instanceof net.minecraft.world.phys.BlockHitResult bh
-            && level.getBlockEntity(bh.getBlockPos()) instanceof VoxelNodeEntity) {
-            pos = bh.getBlockPos();
-            hit = bh.getLocation();   // (AdventurAgent: with the other block's click spot, no part was found there)
+        var look = lookedAt(level, pos, player);
+        if (look != null) {
+            pos = look.getBlockPos();
+            hit = look.getLocation();   // (AdventurAgent: with the other block's click spot, no part was found there)
         }
         String err;
         if (level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n)
@@ -46,6 +45,15 @@ public class ValveItem extends Item implements PipeTool {
         }
         if (player == null || !player.isCreative()) ctx.getItemInHand().shrink(1);
         return InteractionResult.SUCCESS;
+    }
+
+    /** Where the player looks, if the click at pos went past a thin pipe onto another block and the look ray meets a
+     *  voxel block; null if pos is one, or the ray meets none. Shared with SafetyValveItem. */
+    static net.minecraft.world.phys.BlockHitResult lookedAt(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos,
+                                                           net.minecraft.world.entity.player.Player player) {
+        if (level.getBlockEntity(pos) instanceof VoxelNodeEntity || player == null) return null;
+        return player.pick(player.blockInteractionRange(), 1f, false) instanceof net.minecraft.world.phys.BlockHitResult bh
+            && level.getBlockEntity(bh.getBlockPos()) instanceof VoxelNodeEntity ? bh : null;
     }
 
     /** Its tooltip lines (client ItemTooltips). */

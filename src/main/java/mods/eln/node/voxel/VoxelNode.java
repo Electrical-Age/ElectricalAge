@@ -683,7 +683,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public String addSafetyValveNear(double hx, double hy, double hz, int mode) {
         int idx = partAt(hx, hy, hz);
         if (idx >= 0 && (parts.get(idx) instanceof SafetyValvePart || parts.get(idx) instanceof ValvePart)) return mods.eln.i18n.I18N.tr("a valve is already there");
-        for (VoxelPart q : parts) if (q instanceof SafetyValvePart) return mods.eln.i18n.I18N.tr("block already has a safety valve");
+        for (VoxelPart q : parts)
+            if (q instanceof SafetyValvePart sv)
+                return sv.breather ? mods.eln.i18n.I18N.tr("block already has a breather valve")
+                    : sv.purge ? mods.eln.i18n.I18N.tr("block already has a purge valve") : mods.eln.i18n.I18N.tr("block already has a safety valve");
         if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return mods.eln.i18n.I18N.tr("must fit on a pipe");
         int[] best = null;
         double bd = Double.MAX_VALUE;
@@ -931,7 +934,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             }
             if (i >= 0 && parts.get(i) instanceof SafetyValvePart sv) {
                 // (Baughn 2026-10-27: a screen with a slider, not stepping through presets)
-                if (player instanceof net.minecraft.server.level.ServerPlayer sp) openPartScreen(sp, i, SCREEN_SAFETY, sv.setPa / 1e5);
+                if (player instanceof net.minecraft.server.level.ServerPlayer sp) openPartScreen(sp, i, sv.purge ? SCREEN_PURGE : SCREEN_SAFETY, sv.setPa / 1e5);
                 return true;
             }
             if (i >= 0 && parts.get(i) instanceof PipeSensorPart s) {
@@ -969,8 +972,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** A GUI packet's slot byte for a part of this block (ValvePart.THROTTLE's slider), not an element. */
     public static final byte PART_PACKET = -2;
 
-    /** The part screens (client ThrottleValveScreen): a throttle valve's opening, a safety valve's set pressure. */
-    public static final byte SCREEN_THROTTLE = 0, SCREEN_SAFETY = 1, SCREEN_PRESSURE = 2;
+    /** The part screens (client ThrottleValveScreen): a throttle valve's opening, a safety valve's set pressure (a purge valve's:
+     *  SCREEN_PURGE, the same slider under its own words). */
+    public static final byte SCREEN_THROTTLE = 0, SCREEN_SAFETY = 1, SCREEN_PRESSURE = 2, SCREEN_PURGE = 3;
     /** The pressure valve's screen packets (PART_PACKET floats): a set point (bar, >= 0), or these to toggle its mode or
      *  turn its arrow round. */
     public static final float TOGGLE_PRESSURE_MODE = -1, FLIP_PRESSURE_ARROW = -2;
@@ -1583,7 +1587,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 }
                 if (level instanceof net.minecraft.server.level.ServerLevel sl) {
                     var c = net.minecraft.world.phys.Vec3.atCenterOf(coordonate.pos());
-                    sl.playSound(null, coordonate.pos(), net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(),
+                    sl.playSound(null, coordonate.pos(), mods.eln.sound.ElnSounds.event("eln:pipe_burst"),
                         net.minecraft.sounds.SoundSource.BLOCKS, 0.6f, 1.6f);
                     sl.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, c.x, c.y, c.z, 30, 0.3, 0.3, 0.3, 0.1);
                 }
@@ -1616,7 +1620,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     double q = SteamJet.tick(sl, origin, dir, e.getKey().edge, 1.0);
                     // the whistle: steam only, pitch and loudness with the flow
                     if (q > 200 && SteamJet.gasShare(e.getKey().edge) > 0.5 && sl.getGameTime() % 4 == 0)
-                        sl.playSound(null, coordonate.pos(), net.minecraft.sounds.SoundEvents.NOTE_BLOCK_FLUTE.value(), net.minecraft.sounds.SoundSource.BLOCKS,
+                        sl.playSound(null, coordonate.pos(), mods.eln.sound.ElnSounds.event("eln:valve_whistle"), net.minecraft.sounds.SoundSource.BLOCKS,
                             (float) Math.min(2, 0.4 + q / 10000), (float) Math.min(2, 1.4 + q / 40000));
                 }
     }

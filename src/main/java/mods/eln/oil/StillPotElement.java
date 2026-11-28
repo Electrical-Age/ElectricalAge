@@ -367,7 +367,7 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
             (net.minecraft.core.BlockPos.getZ(a) + net.minecraft.core.BlockPos.getZ(b)) / 2.0 + 0.5);
         double q = mods.eln.node.voxel.SteamJet.tick(sl, top, net.minecraft.core.Direction.UP, re, 1.0);
         if (q > 200 && mods.eln.node.voxel.SteamJet.gasShare(re) > 0.5 && sl.getGameTime() % 4 == 0)
-            sl.playSound(null, net.minecraft.core.BlockPos.containing(top), net.minecraft.sounds.SoundEvents.NOTE_BLOCK_FLUTE.value(), net.minecraft.sounds.SoundSource.BLOCKS,
+            sl.playSound(null, net.minecraft.core.BlockPos.containing(top), mods.eln.sound.ElnSounds.event("eln:valve_whistle"), net.minecraft.sounds.SoundSource.BLOCKS,
                 (float) Math.min(2, 0.4 + q / 10000), (float) Math.min(2, 1.4 + q / 40000));
     }
 

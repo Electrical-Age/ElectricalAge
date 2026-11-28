@@ -29,6 +29,11 @@ public class SafetyValveItem extends Item implements PipeTool {
         var pos = ctx.getClickedPos();
         var player = ctx.getPlayer();
         var hit = ctx.getClickLocation();
+        var look = ValveItem.lookedAt(level, pos, player);
+        if (look != null) {
+            pos = look.getBlockPos();
+            hit = look.getLocation();
+        }
         String err;
         if (level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n)
             err = n.addSafetyValveNear(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ(), mode);

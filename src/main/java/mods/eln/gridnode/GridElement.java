@@ -77,7 +77,7 @@ abstract public class GridElement extends TransparentNodeElement {
             if (OverheadCableItem.blocks(stack) < cableLength) {
                 entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Need %1$ blocks of cable", cableLength)));
             } else if (distance > range) {
-                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Too far (%1$ / %2$ blocks)", cableLength, range)));
+                entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Too far: %1$ blocks, a span reaches %2$. Add a pole between.", cableLength, range)));
             } else if (!this.canConnect(other)) {
                 entityPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.literal(mods.eln.i18n.I18N.tr("Can't connect these poles")));
             } else if (!this.lineOfSight(other, side, p.getRight())) {
