@@ -770,7 +770,7 @@ public final class PlumbingCases {
                     // a tank over its pipe's working pressure now (an Iron Tank bursts at 40 bar, iron pipe works to 20)
                     fill(hot.vessel, 0.5 * hot.vessel.volume * Water.RHO_L, 22e5, 300);
                     err = top(ctx, p, d, SAFETY);
-                    check("a tank over the pipe's working pressure is refused, saying so", err != null && err.contains("the tank is at 22 bar, over the iron pipe's 20 bar")
+                    check("a tank over the pipe's working pressure is refused, saying so", err != null && err.contains("the tank is at 22.0 bar, over the iron pipe's 20 bar")
                         && bare(ctx, d) && carried(p, 0) == 100, "" + err);
                     fill(hot.vessel, 0, Water.P_ATM, 300);
                 }
@@ -829,6 +829,13 @@ public final class PlumbingCases {
                     tank(ctx, IRON_TANK, g, Direction.XN);
                     err = top(ctx, p, g, mode);
                     check("a tank at the build limit", err != null && err.contains("no room over the tank") && ctx.nodeAt(g.above()) == null && topFree(ctx, g), "" + err);
+                    // a part put over the build limit by any item (an adapter clicked on a block there) is refused
+                    // before a node is made: nothing is left there, and nothing drops (a node breaking drops its parts)
+                    var box = new net.minecraft.world.phys.AABB(g).inflate(3);
+                    int itemsBefore = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, box).size();
+                    String over = mods.eln.node.voxel.PipeKitItem.place(level, g.above(), new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 8, 8}), null);
+                    check("a pipe put over the build limit is refused, leaving no node and dropping nothing", over != null && ctx.nodeAt(g.above()) == null
+                        && level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, box).size() == itemsBefore, "" + over);
                     if (ctx.nodeAt(g) != null) ctx.nodeAt(g).onBreakBlock();
                     level.removeBlock(g, false);
                     check("the refusals took no pipe and no valve", carried(p, 0) == 100 && p.getMainHandItem().getCount() == 1,

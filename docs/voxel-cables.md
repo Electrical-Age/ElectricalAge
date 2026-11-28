@@ -241,10 +241,10 @@ One part, `SafetyValvePart` (modes SAFETY, PURGE, BREATHER), one item class, `Sa
   checked together (`Laying.check`) before either is placed, and the stub is taken back if the valve still fails.
   Refused, in the valve's "Can't fit …" frame on the action bar: "port already connected" (`PipePlacer.PORT_TAKEN`'s
   words: a pipe or a device's flange there), "the <block> over the tank is in the way", "no room over the tank" (the
-  build limit), "block already has a … valve", "something is in the way at x, y, z", "the tank is at 22 bar, over the
+  build limit), "block already has a … valve", "something is in the way at x, y, z", "the tank is at 22.0 bar, over the
   iron pipe's 20 bar" (its pressure now over the stub's working pressure). On a block that is neither: "must fit on a
   pipe, or on a tank's top". Broken, the valve drops as its item and the stub as a kit of 8 voxels, as any fitting and
-  pipe. `PipeKitItem.place` takes its node back out when the world refuses the block (the build limit, another mod):
+  pipe. `PipeKitItem.place` refuses a position outside the world's height before it makes a node, and takes its node back out, the part first and without drops, when the world refuses the block (another mod):
   before, the node stayed without a block and kept the port beside it coupled.
 - GameTests (`PlumbingCases`): `valve_on_tank_<breather|purge|safety>` (through the item, `TestContext.useOn`: a side
   click, no kit, built with one, one valve of three and 8 voxels taken, the drawn valve against its box, Jade on its

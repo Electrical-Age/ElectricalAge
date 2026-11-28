@@ -92,7 +92,7 @@ public class SafetyValveItem extends Item implements PipeTool {
         PipePart stub = new PipePart(tier, new int[]{x, 0, z, x, STUB, z});
         var vessel = tank.vessel;
         if (vessel != null && vessel.P() > stub.workingPa(vessel.T()))
-            return mods.eln.i18n.I18N.tr("the tank is at %1$ bar, over the %2$ pipe's %3$ bar", String.format("%.0f", vessel.P() / 1e5), PipePart.TIER_NAME[tier],
+            return mods.eln.i18n.I18N.tr("the tank is at %1$ bar, over the %2$ pipe's %3$ bar", String.format("%.1f", vessel.P() / 1e5), PipePart.TIER_NAME[tier],
                 String.format("%.0f", stub.workingPa(vessel.T()) / 1e5));
         boolean free = player != null && player.isCreative();
         KitSupply kit = free ? null : KitSupply.pipeCarried(player, tier, STUB);

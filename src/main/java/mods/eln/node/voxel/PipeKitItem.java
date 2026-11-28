@@ -111,6 +111,7 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
 
     /** Put a part into the block at pos: a new voxel node in air (or anything replaceable), or into one already there. */
     public static String place(Level level, BlockPos pos, VoxelPart part, Player player) {
+        if (level.isOutsideBuildHeight(pos)) return "outside the world's height";
         BlockState old = level.getBlockState(pos);
         VoxelNodeBlock block = ElnRegistry.VOXEL_NODE_BLOCK.get();
         if (old.getBlock() instanceof VoxelNodeBlock) {
@@ -131,9 +132,11 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
             node.onBreakBlock();
             return err;
         }
-        // (refused by the world: over the build limit, or another mod's. The node must not stay without its block: it
-        // kept its pipe's port coupled to the tank or pipe beside it for good)
+        // (refused by the world, by another mod say. The node must not stay without its block, its pipe's port coupled
+        // to the tank or pipe beside it. The part comes out first, without drops: nobody has paid for it yet, and a
+        // node breaking drops its parts)
         if (!level.setBlock(pos, mimic ? VoxelNodeBlock.forHost(old) : block.stateFor(level, pos), 3)) {
+            node.removePart(node.parts.indexOf(part), false);
             node.host = null;
             node.onBreakBlock();
             return "the block can't be placed here";
