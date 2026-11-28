@@ -69,7 +69,7 @@ public class ValveItem extends Item implements PipeTool {
                 list.add(mods.eln.i18n.I18N.tr("One-way pressure valve (relief or reducing)."));
                 mods.eln.client.ItemTooltips.detail(list,
                     mods.eln.i18n.I18N.tr("Relief holds upstream pressure; reducing holds downstream pressure."),
-                    mods.eln.i18n.I18N.tr("Optionally controlled by a signal cable in its block."));
+                    mods.eln.i18n.I18N.tr("Optionally controlled by the nearest signal cable in its block."));
             }
             default -> list.add(mods.eln.i18n.I18N.tr("Manual shut-off valve for pipes."));
         }

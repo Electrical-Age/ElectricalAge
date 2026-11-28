@@ -76,9 +76,7 @@ public final class LoopedSoundPlayer {
                 stop();
                 return;
             }
-            // (a loop fading out keeps its pitch: a machine whose pitch follows its power slid down the scale as it
-            // stopped, and the plate machine "sang": Lashtear 2026-11-28)
-            if (target > 0 || volume < AUDIBLE) pitch = Math.max(0.01f, loop.getPitch());
+            pitch = Math.max(0.01f, loop.getPitch());
             silent = volume < AUDIBLE ? silent + 1 : 0;
             if (silent > SILENT_TICKS) stop();
         }

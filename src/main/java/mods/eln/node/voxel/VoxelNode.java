@@ -278,13 +278,13 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /**
      * The two pipes a valve stood between become one pipe again, holding what both held (Lashtear 2026-11-28: the cut
      * stayed after the valve was taken out, and no valve fitted there again: neither half passed the point). Not where
-     * a junction or a third pipe is, nor pipes of two sizes or one burst.
+     * a junction or a third pipe is, nor pipes of two sizes or one burst. True if it joined them (the caller then calls changed()).
      */
-    private void mergePipesAt(int x, int y, int z) {
+    private boolean mergePipesAt(int x, int y, int z) {
         List<PipePart> arms = armsAt(x, y, z);
-        if (arms.size() != 2 || junctionAt(x, y, z) != null) return;
+        if (arms.size() != 2 || junctionAt(x, y, z) != null) return false;
         PipePart a = arms.get(0), b = arms.get(1);
-        if (a.tier != b.tier || a.burst != b.burst) return;
+        if (a.tier != b.tier || a.burst != b.burst) return false;
         int[] pa = endingAt(a.points, x, y, z, true), pb = endingAt(b.points, x, y, z, false);
         int[] all = new int[pa.length + pb.length - 3];
         System.arraycopy(pa, 0, all, 0, pa.length);
@@ -300,10 +300,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             all = cut;
         }
         PipePart whole = new PipePart(a.tier, all);
-        if (!whole.valid()) return;
+        if (!whole.valid()) return false;
         if (a.fluid != null) mods.eln.fluid.FluidWorld.writeBackOf(a.fluid);
         if (b.fluid != null) mods.eln.fluid.FluidWorld.writeBackOf(b.fluid);
         whole.burst = a.burst;
+        whole.burstDir = a.burstDir >= 0 ? a.burstDir : b.burstDir;
         whole.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), null);
         if (a.fluid != null && b.fluid != null) {
             whole.fluid.setShareOf(a.fluid, 1);
@@ -314,6 +315,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             whole.wallTemp = (a.wallTemp * a.length() + b.wallTemp * b.length()) / Math.max(1, a.length() + b.length());
         parts.set(parts.indexOf(a), whole);
         parts.remove(b);
+        return true;
     }
 
     /** A pipe's points turned so that (x, y, z) is its last point (or its first). */
@@ -815,7 +817,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     public String addValve(int x, int y, int z, int mode) {
         for (VoxelPart p : parts) if (p instanceof ValvePart) return "there is a valve here already";
-        mergePipesAt(x, y, z);   // (a cut an earlier valve left, from before removal mended it)
+        if (mergePipesAt(x, y, z)) {   // (a cut an earlier valve left, from before removal mended it)
+            markUsed();
+            changed();
+        }
         for (int i = 0; i < parts.size(); i++) {
             if (!(parts.get(i) instanceof PipePart pipe) || !pipe.passes(x, y, z)) continue;
             int axis = -1;
@@ -869,7 +874,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /**
      * Fit a pipe sensor (Baughn 2026-10-27) on the pipe under the click, as a safety valve: at the lattice point nearest
      * the click on a straight stretch, its dial out of the pipe's most open side (up first). One per block: its output
-     * joins every signal cable in the block, so two would drive the same wire.
+     * joins the signal cable nearest it in the block (fittingCable), so two could drive the same wire.
      */
     public String addSensorNear(double hx, double hy, double hz, int sensing) {
         for (VoxelPart q : parts)
@@ -961,12 +966,6 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (p instanceof SafetyValvePart sv) return pipeAt(sv.x, sv.y, sv.z);
         if (p instanceof PipeSensorPart ps) return pipeAt(ps.x, ps.y, ps.z);
         return null;
-    }
-
-    /** The electrical load of the conductor a cable part belongs to, or null (tests). */
-    public ElectricalLoad cableLoadOf(int part) {
-        CableNet.Conductor k = conductorOf(part);
-        return k == null ? null : k.load;
     }
 
     /** The cable conductor a part belongs to, or null. */
@@ -2172,7 +2171,9 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             if (k.load == null || k.d == null || !k.d.signalWire) continue;
             for (CablePart c : k.parts)
                 for (int[] b : c.boxes()) {
-                    double dx = Math.max(0, Math.max(b[0] - x, x - b[3])), dz = Math.max(0, Math.max(b[2] - z, z - b[5]));
+                    // (a box takes voxels b[0]..b[3]-1: the cable laid to the fitting starts at its point, one beside it
+                    // ends there, and doesn't tie with it)
+                    double dx = Math.max(0, Math.max(b[0] - x, x - (b[3] - 1))), dz = Math.max(0, Math.max(b[2] - z, z - (b[5] - 1)));
                     double dy = Math.max(0, b[1] - y);   // (the line runs from the floor, 0, up to y)
                     double d = dx * dx + dy * dy + dz * dz;
                     if (d < bd) {

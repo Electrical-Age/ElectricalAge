@@ -1710,15 +1710,15 @@ public final class PipeCases {
                 e = m.addValve(8, 8, 8, mods.eln.node.voxel.ValvePart.CONTROL);
                 if (e != null) err += "control: " + e + "; ";
                 var under = new mods.eln.node.voxel.CablePart(0, 0, new int[]{0, 0, 8, 16, 0, 8});
-                var far = new mods.eln.node.voxel.CablePart(0, 0, new int[]{0, 0, 2, 16, 0, 2});
+                var far = new mods.eln.node.voxel.CablePart(0, 0, new int[]{0, 0, 6, 16, 0, 6});   // (older, a voxel of air between)
                 for (var c : List.of(far, under)) {
                     e = PipeKitItem.place(ctx.level(), b, c, null);
                     if (e != null) err += "cable: " + e + "; ";
                 }
                 if (!err.isEmpty()) return;
                 control[r] = ThrottleAndControlValves.valve(ctx, b);
-                near[r] = m.cableLoadOf(m.parts.indexOf(under));
-                var farLoad = m.cableLoadOf(m.parts.indexOf(far));
+                near[r] = (mods.eln.sim.ElectricalLoad) m.cableAt(8, 0, 8)[0];
+                var farLoad = (mods.eln.sim.ElectricalLoad) m.cableAt(8, 0, 6)[0];
                 if (near[r] == null || farLoad == null || near[r] == farLoad) {
                     err += "the two cables are not two conductors; ";
                     return;

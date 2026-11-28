@@ -47,7 +47,7 @@ public class ElnLang extends LanguageProvider {
         add("message.eln.electric_bike.flat_battery", "Battery flat: pedalling only");
         add("subtitles.eln.turbine_overspeed", "Turbine over speed");
         add("subtitles.eln.pipe_burst", "Pipe bursts");
-        add("subtitles.eln.valve_whistle", "Safety valve blows");
+        add("subtitles.eln.valve_whistle", "Relief valve whistles");
         add("key.eln.wrench", "Wrench / Tool Menu");
         add("key.eln.headlamp", "Toggle Headlamp / Flashlight");
         add("key.eln.radar_band", "Radar Goggles: Next Band");
