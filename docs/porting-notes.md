@@ -416,6 +416,16 @@ deferred or still open. Subsystem detail lives in the other pages; this is the "
   pipe or a tank stub: on a side it draws half way up, and liquid there shuts it. Saves: the part's `"breather"` flag
   (absent on safety and purge valves, which save as before). `pipe_breather_valve_fills`, `_keeps_liquid`,
   `_pulls_air`, `_saves`.
+- A valve clicked on a tank builds its stub (Baughn 2026-11-28, "C4: A"; Lashtear 2026-11-28: "Breathers don't fit on
+  tanks, only pipes", and the stub to hold one "is very hard to place": it took scaffolding, a pipe route having no
+  face to end on over a tank). A safety, purge or breather valve clicked anywhere on a tank stands half a block of pipe
+  on its free top port, in the block above, with the valve on the pipe's end, outlet up. The pipe is taken from a pipe
+  kit in the inventory or in a Toolbag there (iron before alloy; not free: without one it says "needs half a block of
+  pipe from a pipe kit in your inventory") and drops as a kit when the stub is broken. The same valves now also fit
+  on the upper end of any pipe that ends inside its block pointing up (clicked at its end); before, an end said "the
+  pipe turns there". On an end the valve draws at the top of the run, as a top outlet does. No tank-native breather,
+  no new part and no new save key: it is the safety valve's part at the pipe's last point (`SafetyValvePart.onEnd`).
+  `valve_on_tank_*`, `pipe_breather_valve_on_tank_*`, `pipe_purge_valve_on_tank_*`.
 - Tanks need no floor (Baughn 2026-11-10): a tank, lone or a box, stays when the block under it goes, so a pipe can
   run to its underside port (it used to break). `tank_stands_without_a_floor`.
 - Tank sight glass (Baughn 2026-11-03: "a viewglass"): a 3 px window in brass on the tank's front (was a 1.5 px slit

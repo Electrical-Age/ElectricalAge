@@ -203,6 +203,42 @@ the rules above; the joints are kept alongside:
 - The element reads `VoxelNode.pipeAt(port)` (any pipe through or ending at the port) via `FluidWorld.nodeFor` each
   slow step, no fluid of its own; `PipeSensorPart.reading/nextScale/name/unit` are shared with the fitted sensor.
 
+## Safety, purge and breather valves: on a pipe, on its end, on a tank
+
+One part, `SafetyValvePart` (modes SAFETY, PURGE, BREATHER), one item class, `SafetyValveItem`; one to a block.
+
+- On a pipe's side (`VoxelNode.addSafetyValveNear`/`Aimed`): at the lattice point nearest where the line of sight met
+  the pipe, on a straight stretch (the pipe 2 voxels either way), its outlet out of the most open side, up first; on
+  an upright pipe a side only. A top outlet draws at the top of the run, a side outlet half way up
+  (`SafetyValvePart.draw`), where liquid shuts a purge valve or breather.
+- On a pipe's end (`VoxelNode.addSafetyValveOnEnd`; Baughn 2026-11-28): when that nearest lattice point is the pipe's
+  own end inside the block, the end points up (its last piece comes up from below) and nothing is on it (no junction,
+  second pipe, valve, sensor or pipe sensor device's port), the valve stands on the end in place of the cap, outlet
+  up, and draws at the top of the run. Needs 4 voxels over the end's half-bore inside the block (an end at 12 is
+  refused: "no room over the pipe's end"); an end pointing sideways or down is refused ("only an end pointing up takes
+  one"). It is the same part with nothing more saved: the valve at the pipe's last point with outlet 1, and
+  `SafetyValvePart.onEnd(parts)` tells it from one on a side by the pipe (one on a side is never at an end). Its box is
+  the side form's (4 across, from the end's half-bore up 4: the pipe's own box takes in the half-bore), its model the
+  same stack in line with the pipe (`VoxelGeometry.safetyValve`; the pipe's end face and the body's foot face opposite
+  ways, so nothing z-fights). No route joins at a capped end (`fittingAt`).
+- On a tank (`SafetyValveItem.onTank`; Baughn 2026-11-28 "C4: A", after Lashtear 2026-11-28: a breather fitted only
+  on a pipe, and a stub over a tank's top port could not be laid without scaffolding, a pipe route ending only at a
+  port, on a pipe or at a face clicked): the item clicked anywhere on a tank (`oil/TankElement`, so a Still Pot's
+  receivers and a box's top row; a tank lower in a box says it has no top port) stands a pipe `STUB` (8 voxels, half a
+  block) on the tank's top port in the block above, and the valve on its end. The pipe comes from a pipe kit the
+  player carries (`KitSupply.pipeCarried`: a kit in the inventory or a Toolbag's kits there, the lowest tier holding 8
+  voxels, so iron before alloy; none: "needs half a block of pipe from a pipe kit in your inventory"; creative: iron,
+  free). Stub and valve are checked together (`Laying.check`) before either is placed. Refused, in the valve's
+  "Can't fit …" frame on the action bar: "its top port is already connected" (a pipe or a device's flange there),
+  "the <block> over the tank is in the way", "block already has a … valve", "something is in the way at x, y, z".
+  Broken, the valve drops as its item and the stub as a kit of 8 voxels, as any fitting and pipe.
+- GameTests (`PlumbingCases`): `valve_on_tank_<breather|purge|safety>` (through the item: refused without a kit, built
+  with one, the kit 8 shorter, Jade, a second refused, broken and returned), `_toolbag`, `_refused`, `_pipe_end`,
+  `_relieves`; the breather's and purge valve's fluid cases run again on the stub the click builds
+  (`pipe_breather_valve_on_tank_<fills|keeps_liquid|pulls_air>`, `pipe_purge_valve_on_tank_*`);
+  `pipe_breather_valve_saves` checks an old valve's tag loads and writes back unchanged. The model:
+  `VoxelCases.fittings` ("safety valve on a stub's end").
+
 ## Burn chain
 
 Conductor watchdogs (`ThermalLoadWatchDog`, `VoltageStateWatchDog`, both in one slow process) -> `Failure(...).cable()`
@@ -222,7 +258,7 @@ others, including voxel nodes via `VoxelNode.slowProcesses()`) -> `Conductor.bur
   before a write or rebuild), `"hang"`/`"hang2"` (drawn hang), `"j"` (joints: a list of int arrays, sorted; see Stored links).
 - Each part `"id"` (in its `p<i>` compound), the node `"nextPartId"`.
 - `PipePart`: `"tier"`, `"pts"`, `"burst"`, `"burstDir"`, `"w"`, `"a"`, `"u"`. `ValvePart`: `"at"`, `"open"`.
-  `SafetyValvePart`: `"at"`, `"set"`, `"purge"` (a purge valve), `"breather"` (a breather valve; absent on the others, so their saves are as before). `PipeSensorPart`: `"at"` (x, y, z, outlet, bore, kind), `"scale"`, its output. `AdapterPart`: `"face"`. Unknown kinds load as nothing (dropped).
+  `SafetyValvePart`: `"at"`, `"set"`, `"purge"` (a purge valve), `"breather"` (a breather valve; absent on the others, so their saves are as before); one on a pipe's end saves the same keys (outlet 1 at the pipe's last point). `PipeSensorPart`: `"at"` (x, y, z, outlet, bore, kind), `"scale"`, its output. `AdapterPart`: `"face"`. Unknown kinds load as nothing (dropped).
 - Client publish: part count, then kind + length-prefixed bytes per part, then SixNode's elements
   (`publishBeforeElements`).
 

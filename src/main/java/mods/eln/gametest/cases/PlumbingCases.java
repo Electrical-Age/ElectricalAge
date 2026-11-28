@@ -54,6 +54,11 @@ public final class PlumbingCases {
         cases.add(new PurgeValve(false));
         cases.add(new PurgeValve(true));
         for (Breather.Row r : Breather.Row.values()) cases.add(new Breather(r));
+        // (the same on the stub a valve clicked on the tank builds: Baughn 2026-11-28)
+        cases.add(new PurgeValve(false, true));
+        cases.add(new PurgeValve(true, true));
+        for (Breather.Row r : List.of(Breather.Row.FILLS, Breather.Row.KEEPS_LIQUID, Breather.Row.PULLS_AIR)) cases.add(new Breather(r, true));
+        for (ValveOnTank.Row r : ValveOnTank.Row.values()) cases.add(new ValveOnTank(r));
         cases.add(new ValveDrawsAtItsPlace());
         cases.add(new HighFlangeTakesLiquid());
     }
@@ -279,18 +284,24 @@ public final class PlumbingCases {
      * with it). Brim full of water, it vents the pipe's air, then shuts as the water reaches it.
      */
     static final class PurgeValve extends Big {
-        final boolean full;
+        final boolean full, onTank;
         TankElement t;
         BlockPos pipeAt;
         String err;
         double water0;
 
         PurgeValve(boolean full) {
+            this(full, false);
+        }
+
+        /** onTank: the valve clicked on the tank, on the stub that builds (ValveOnTank.click), not on a pipe laid by hand. */
+        PurgeValve(boolean full, boolean onTank) {
             this.full = full;
+            this.onTank = onTank;
         }
 
         public String id() {
-            return full ? "pipe_purge_valve_keeps_the_liquid" : "pipe_purge_valve_bleeds_the_gas";
+            return (onTank ? "pipe_purge_valve_on_tank_" : "pipe_purge_valve_") + (full ? "keeps_the_liquid" : "bleeds_the_gas");
         }
 
         public int ticks() {
@@ -300,9 +311,11 @@ public final class PlumbingCases {
         public void build(TestContext ctx) {
             t = tank(ctx, IRON_TANK, ctx.at(2, 1, 1), Direction.XN);
             pipeAt = ctx.at(2, 2, 1);
-            PipeCases.lay(ctx, pipeAt, 0, 8, 0, 8, 8, 12, 8);
-            var n = ctx.voxelByEntity(pipeAt);
-            err = n.addSafetyValveNear(0.5, 8 / 16.0, 0.5, true);
+            if (onTank) err = ValveOnTank.click(ctx, ctx.at(2, 1, 1), mods.eln.node.voxel.SafetyValvePart.PURGE);
+            else {
+                PipeCases.lay(ctx, pipeAt, 0, 8, 0, 8, 8, 12, 8);
+                err = ctx.voxelByEntity(pipeAt).addSafetyValveNear(0.5, 8 / 16.0, 0.5, true);
+            }
             fill(t.vessel, (full ? 0.995 : 0.5) * t.vessel.volume * Water.RHO_L, 3e5, 300);
             water0 = t.vessel.mWater;
         }
@@ -345,6 +358,8 @@ public final class PlumbingCases {
         enum Row { FILLS, KEEPS_LIQUID, PULLS_AIR, SAVES }
 
         final Row row;
+        /** The breathers clicked on the tanks, on the stubs that builds (ValveOnTank.click), not on stubs laid by hand. */
+        final boolean onTank;
         TankElement a, b;
         BlockPos aStub, bStub;
         String errA, errB;
@@ -353,11 +368,16 @@ public final class PlumbingCases {
         double aLo = Double.MAX_VALUE, aHi = -Double.MAX_VALUE, bLo = Double.MAX_VALUE, bHi = -Double.MAX_VALUE, liquidOut, airIn, aWater0, bWater0, bP0;
 
         Breather(Row row) {
+            this(row, false);
+        }
+
+        Breather(Row row, boolean onTank) {
             this.row = row;
+            this.onTank = onTank;
         }
 
         public String id() {
-            return "pipe_breather_valve_" + row.name().toLowerCase(java.util.Locale.ROOT);
+            return (onTank ? "pipe_breather_valve_on_tank_" : "pipe_breather_valve_") + row.name().toLowerCase(java.util.Locale.ROOT);
         }
 
         public int ticks() {
@@ -373,13 +393,13 @@ public final class PlumbingCases {
         public void build(TestContext ctx) {
             b = tank(ctx, IRON_TANK, ctx.at(4, 1, 1), Direction.XP);
             bStub = ctx.at(4, 2, 1);
-            errB = stub(ctx, bStub);
+            errB = onTank ? ValveOnTank.click(ctx, bStub.below(), mods.eln.node.voxel.SafetyValvePart.BREATHER) : stub(ctx, bStub);
             if (row == Row.PULLS_AIR || row == Row.SAVES) {
                 fill(b.vessel, 0.5 * b.vessel.volume * Water.RHO_L, row == Row.PULLS_AIR ? 0.5e5 : Water.P_ATM, 293.15);
             } else {
                 a = tank(ctx, IRON_TANK, ctx.at(2, 2, 1), Direction.XN);
                 aStub = ctx.at(2, 3, 1);
-                errA = stub(ctx, aStub);
+                errA = onTank ? ValveOnTank.click(ctx, aStub.below(), mods.eln.node.voxel.SafetyValvePart.BREATHER) : stub(ctx, aStub);
                 // (A's low east port, down a block, into B's high west port)
                 PipeCases.lay(ctx, ctx.at(3, 2, 1), 0, 0, 4, 8, 8, 4, 8, 8, 0, 8);
                 PipeCases.lay(ctx, ctx.at(3, 1, 1), 0, 8, 16, 8, 8, 12, 8, 16, 12, 8);
@@ -490,7 +510,303 @@ public final class PlumbingCases {
             var ls = (mods.eln.node.voxel.SafetyValvePart) mods.eln.node.voxel.VoxelPart.load(oldSafety);
             var lp = (mods.eln.node.voxel.SafetyValvePart) mods.eln.node.voxel.VoxelPart.load(oldPurge);
             ctx.check("breather: an old safety valve loads as one", ls.mode == mods.eln.node.voxel.SafetyValvePart.SAFETY && ls.setPa == 12e5, ls.mode + " " + ls.setPa);
+            // (valves on a pipe's end, 2026-11-28, added no key: an old valve on a level pipe loads where and as it was,
+            // writes the tag it was read from, and is no end valve; one on an end writes the same keys)
+            var level = new mods.eln.node.voxel.PipePart(0, new int[]{0, 8, 8, 16, 8, 8});
+            var again = new net.minecraft.nbt.CompoundTag();
+            ls.write(again);
+            again.putString("kind", mods.eln.node.voxel.SafetyValvePart.KIND);
+            ctx.check("breather: an old valve on a level pipe loads unchanged (place, outlet, bore, the same tag back; on the pipe's side, drawing at its top)",
+                ls.x == 8 && ls.y == 8 && ls.z == 8 && ls.outlet == 1 && ls.bore == 2 && again.equals(oldSafety) && !ls.onEnd(List.of(level)) && ls.draw() == 1,
+                again + " from " + oldSafety);
+            var onEnd = new mods.eln.node.voxel.SafetyValvePart(8, 8, 8, 1, 2, 10e5);
+            var te = new net.minecraft.nbt.CompoundTag();
+            onEnd.write(te);
+            ctx.check("breather: a valve on a pipe's end has the same keys (what it stands on is read from the pipe)",
+                te.keySet().equals(java.util.Set.of("at", "g", "set")) && onEnd.onEnd(List.of(new mods.eln.node.voxel.PipePart(0, new int[]{8, 0, 8, 8, 8, 8}))), te.toString());
             ctx.check("breather: an old purge valve loads as one", lp.purge && !lp.breather, lp.mode + "");
+        }
+    }
+
+    /**
+     * A safety, purge or breather valve clicked on a tank builds its own stub (Baughn 2026-11-28; Lashtear 2026-11-28:
+     * a breather fitted only on a pipe, and the stub over a tank took scaffolding to lay): half a block of pipe up out
+     * of the tank's free top port, from a kit the player carries, and the valve on its end, outlet up. Through the
+     * item, as a player holding it.
+     * <ul>
+     * <li>BREATHER, PURGE, SAFETY: without a kit it is refused and nothing is placed; with one, the block above holds
+     * the stub and the valve on its end, the kit is 8 voxels shorter, Jade names valve and pipe, a second valve is
+     * refused (the port has its pipe); broken, valve then stub, both come back and the port is free;</li>
+     * <li>TOOLBAG: the pipe from a Toolbag's kits, the lowest tier that has enough (alloy when the iron is too short);</li>
+     * <li>REFUSED: the top port piped already, a block over the tank, a valve in the block above already, something
+     * where the valve would stand, a box's lower tank: each says why, and takes neither valve nor pipe;</li>
+     * <li>PIPE_END: a stub laid by hand capped by clicking its upper end (no kit needed); a click lower down fits one on
+     * its side as before; an end pointing sideways and one too near the block's top are refused;</li>
+     * <li>RELIEVES: a safety valve on the stub of a tank at 3 bar, set to 2 bar, lets it down to its setting.</li>
+     * </ul>
+     */
+    static final class ValveOnTank extends Big {
+        enum Row { BREATHER, PURGE, SAFETY, TOOLBAG, REFUSED, PIPE_END, RELIEVES }
+
+        final Row row;
+        final List<String[]> checks = new java.util.ArrayList<>();
+        TankElement t;
+        double water0;
+
+        ValveOnTank(Row row) {
+            this.row = row;
+        }
+
+        public String id() {
+            return "valve_on_tank_" + row.name().toLowerCase(java.util.Locale.ROOT);
+        }
+
+        public int ticks() {
+            return row == Row.RELIEVES ? 300 : 20;
+        }
+
+        static net.minecraft.world.item.Item item(int mode) {
+            return (mode == mods.eln.node.voxel.SafetyValvePart.PURGE ? mods.eln.registry.ElnRegistry.PIPE_PURGE_VALVE
+                : mode == mods.eln.node.voxel.SafetyValvePart.BREATHER ? mods.eln.registry.ElnRegistry.PIPE_BREATHER_VALVE
+                : mods.eln.registry.ElnRegistry.PIPE_SAFETY_VALVE).get();
+        }
+
+        /** p, holding a valve of mode, clicks the block at on at hit (null: the middle of its west face), through the
+         *  item. Null if it was fitted, else the action bar's refusal. */
+        static String click(mods.eln.gametest.ListeningPlayer p, net.minecraft.server.level.ServerLevel level, BlockPos on, net.minecraft.world.phys.Vec3 hit, int mode) {
+            if (p.getMainHandItem().isEmpty()) p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(item(mode)));
+            var stack = p.getMainHandItem();
+            if (hit == null) hit = net.minecraft.world.phys.Vec3.atLowerCornerOf(on).add(0, 0.5, 0.5);
+            p.actionBar.clear();
+            var r = stack.useOn(new net.minecraft.world.item.context.UseOnContext(p, net.minecraft.world.InteractionHand.MAIN_HAND,
+                new net.minecraft.world.phys.BlockHitResult(hit, net.minecraft.core.Direction.WEST, on, false)));
+            return r.consumesAction() ? null : r + ": " + p.lastActionBar();
+        }
+
+        /** A player carrying a kit of iron pipe clicks the tank at on with a valve of mode (the other cases' stubs). */
+        static String click(TestContext ctx, BlockPos on, int mode) {
+            var p = ctx.listener();
+            p.getInventory().setItem(9, mods.eln.node.voxel.PipeKitItem.kit(0, 64));
+            return click(p, ctx.level(), on, null, mode);
+        }
+
+        /** Voxels of pipe of a tier p carries: its kits and its Toolbags' kits. */
+        static int carried(net.minecraft.world.entity.player.Player p, int tier) {
+            int n = 0;
+            var inv = p.getInventory();
+            for (int i = 0; i < inv.getContainerSize(); i++) {
+                var s = inv.getItem(i);
+                if (s.getItem() instanceof mods.eln.node.voxel.PipeKitItem k && k.tier == tier) n += mods.eln.node.voxel.PipeKitItem.length(s);
+                if (s.getItem() instanceof mods.eln.node.voxel.ToolbagItem)
+                    for (var e : mods.eln.node.voxel.ToolbagItem.kinds(s).entrySet()) if (e.getKey().pipe() && e.getKey().tier() == tier) n += e.getValue();
+            }
+            return n;
+        }
+
+        static mods.eln.node.voxel.SafetyValvePart valve(VoxelNode n) {
+            if (n != null) for (var part : n.parts) if (part instanceof mods.eln.node.voxel.SafetyValvePart s) return s;
+            return null;
+        }
+
+        static mods.eln.node.voxel.PipePart pipe(VoxelNode n) {
+            if (n != null) for (var part : n.parts) if (part instanceof mods.eln.node.voxel.PipePart s) return s;
+            return null;
+        }
+
+        static boolean topFree(TestContext ctx, BlockPos tank) {
+            for (var q : mods.eln.fluid.FluidPlacement.portsAt(ctx.level(), tank))
+                if (q.face() == 1) return mods.eln.fluid.FluidPlacement.partners(ctx.level(), q).isEmpty();
+            return false;
+        }
+
+        void check(String what, boolean ok, String detail) {
+            checks.add(new String[]{what, ok ? "y" : "", detail});
+        }
+
+        /** The stub and valve the click built over the tank at tp: one pipe from the port's spot up STUB, the valve on its end. */
+        boolean built(TestContext ctx, BlockPos tp, int tier, int mode) {
+            VoxelNode n = ctx.voxelByEntity(tp.above());
+            var sv = valve(n);
+            var pp = pipe(n);
+            return n != null && n.parts.size() == 2 && sv != null && pp != null && pp.tier == tier
+                && java.util.Arrays.equals(pp.points, new int[]{8, 0, 8, 8, 8, 8}) && sv.mode == mode && sv.x == 8 && sv.y == 8 && sv.z == 8 && sv.outlet == 1
+                && sv.onEnd(n.parts) && sv.draw() == 1 && !topFree(ctx, tp);
+        }
+
+        public void build(TestContext ctx) {
+            var level = ctx.level();
+            var stone = net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
+            BlockPos tp = ctx.at(2, 1, 1), above = tp.above();
+            switch (row) {
+                case BREATHER, PURGE, SAFETY -> {
+                    int mode = row == Row.BREATHER ? mods.eln.node.voxel.SafetyValvePart.BREATHER : row == Row.PURGE ? mods.eln.node.voxel.SafetyValvePart.PURGE
+                        : mods.eln.node.voxel.SafetyValvePart.SAFETY;
+                    t = tank(ctx, IRON_TANK, tp, Direction.XN);
+                    var p = ctx.listener();
+                    String none = click(p, level, tp, null, mode);
+                    check("without a pipe kit it is refused, saying what it needs, and nothing is placed",
+                        none != null && none.contains("needs half a block of pipe from a pipe kit in your inventory") && level.getBlockState(above).isAir()
+                            && p.getMainHandItem().getCount() == 1 && topFree(ctx, tp), "" + none);
+                    p.getInventory().setItem(9, mods.eln.node.voxel.PipeKitItem.kit(0, 100));   // (not the hand's slot)
+                    // (on its top face this time: anywhere on the tank)
+                    String err = click(p, level, tp, net.minecraft.world.phys.Vec3.atLowerCornerOf(tp).add(0.3, 1, 0.6), mode);
+                    VoxelNode n = ctx.voxelByEntity(above);
+                    var sv = valve(n);
+                    check("with one, the block above holds one pipe up out of the port and the valve on its end, outlet up",
+                        err == null && built(ctx, tp, 0, mode), err + "; " + (n == null ? "no block" : n.parts.size() + " parts, " + n.getWaila(false)));
+                    check("the kit lost the stub's 8 voxels, the hand its valve", carried(p, 0) == 92 && p.getMainHandItem().isEmpty(),
+                        carried(p, 0) + " voxels, " + p.getMainHandItem());
+                    if (n == null || sv == null) return;
+                    double set = mode == mods.eln.node.voxel.SafetyValvePart.PURGE ? mods.eln.node.voxel.SafetyValvePart.PURGE_PA
+                        : mode == mods.eln.node.voxel.SafetyValvePart.BREATHER ? Water.P_ATM : 10e5;
+                    boolean top = true;
+                    for (var v : n.fluidVents()) top &= v.draw == 1;
+                    check("it is set as one fitted on a pipe, and vents from the top of the stub", sv.setPa == set
+                        && n.fluidVents().size() == (mode == mods.eln.node.voxel.SafetyValvePart.BREATHER ? 2 : 1) && top, sv.setPa + " Pa, " + n.fluidVents().size() + " vents");
+                    int[] b = sv.boxes().get(0);
+                    String onValve = n.nameOf(n.aimed((b[0] + b[3]) / 32.0, (b[1] + b[4]) / 32.0, (b[2] + b[5]) / 32.0)), onPipe = n.nameOf(n.aimed(0.5, 3 / 16.0, 0.5));
+                    check("Jade names the valve, and the pipe under it", new net.minecraft.world.item.ItemStack(item(mode)).getHoverName().getString().equals(onValve)
+                        && "Iron Pipe".equals(onPipe), onValve + " / " + onPipe);
+                    check("its box stands on the pipe's end, inside the block (9 to 13 up, 4 across)", java.util.Arrays.equals(b, new int[]{6, 9, 6, 10, 13, 10}),
+                        java.util.Arrays.toString(b));
+                    String second = click(p, level, tp, null, mode);
+                    check("a second one is refused: the port has its pipe", second != null && second.contains("its top port is already connected") && n.parts.size() == 2
+                        && carried(p, 0) == 92, "" + second);
+                    p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+                    // broken: the valve, then the stub
+                    boolean emptied = n.removePart(n.parts.indexOf(sv), true);
+                    check("the valve broken, the stub stays", !emptied && n.parts.size() == 1 && pipe(n) != null, n.parts.size() + " parts");
+                    if (n.removePart(0, true)) n.removeEmptyBlock();   // (as the block does when its last part is mined)
+                    check("the stub broken, the block is air again and the tank's top port free", level.getBlockState(above).isAir() && topFree(ctx, tp),
+                        "" + level.getBlockState(above));
+                }
+                case TOOLBAG -> {
+                    t = tank(ctx, IRON_TANK, tp, Direction.XN);
+                    BlockPos tp2 = ctx.at(4, 1, 1);
+                    tank(ctx, IRON_TANK, tp2, Direction.XN);
+                    var p = ctx.listener();
+                    p.getInventory().setItem(9, ToolbagCases.bag(mods.eln.node.voxel.PipeKitItem.kit(1, 50), mods.eln.node.voxel.PipeKitItem.kit(0, 5)));
+                    String err = click(p, level, tp, null, mods.eln.node.voxel.SafetyValvePart.BREATHER);
+                    check("from a Toolbag in the inventory: its alloy kit, the iron one being too short", err == null && built(ctx, tp, 1, mods.eln.node.voxel.SafetyValvePart.BREATHER)
+                        && carried(p, 1) == 42 && carried(p, 0) == 5, err + "; alloy " + carried(p, 1) + ", iron " + carried(p, 0));
+                    p.getInventory().setItem(10, mods.eln.node.voxel.PipeKitItem.kit(0, 20));
+                    err = click(p, level, tp2, null, mods.eln.node.voxel.SafetyValvePart.BREATHER);
+                    check("iron before alloy when there is enough of it", err == null && built(ctx, tp2, 0, mods.eln.node.voxel.SafetyValvePart.BREATHER)
+                        && carried(p, 1) == 42 && carried(p, 0) == 17, err + "; alloy " + carried(p, 1) + ", iron " + carried(p, 0));
+                }
+                case REFUSED -> {
+                    int mode = mods.eln.node.voxel.SafetyValvePart.BREATHER;
+                    var p = ctx.listener();
+                    p.getInventory().setItem(9, mods.eln.node.voxel.PipeKitItem.kit(0, 100));   // (not the hand's slot)
+                    // the top port piped
+                    tank(ctx, IRON_TANK, tp, Direction.XN);
+                    PipeCases.lay(ctx, above, 0, 8, 0, 8, 8, 16, 8);
+                    String err = click(p, level, tp, null, mode);
+                    check("a top port that has a pipe", err != null && err.contains("Can't fit breather valve: its top port is already connected")
+                        && ctx.voxelByEntity(above).parts.size() == 1, "" + err);
+                    // a block over the tank
+                    BlockPos b = ctx.at(4, 1, 1);
+                    tank(ctx, IRON_TANK, b, Direction.XN);
+                    level.setBlock(b.above(), stone, 3);
+                    err = click(p, level, b, null, mode);
+                    check("a block over the tank, named", err != null && err.contains("the Stone over the tank is in the way") && level.getBlockState(b.above()) == stone, "" + err);
+                    // a valve in the block above already (a purge valve on a pipe along x, clear of the port)
+                    BlockPos c = ctx.at(6, 1, 1);
+                    tank(ctx, IRON_TANK, c, Direction.XN);
+                    PipeCases.lay(ctx, c.above(), 0, 0, 12, 4, 16, 12, 4);
+                    String fitted = ctx.voxelByEntity(c.above()).addSafetyValveNear(4 / 16.0, 12 / 16.0, 4 / 16.0, true);
+                    err = click(p, level, c, null, mode);
+                    check("a block above that has a valve already: one to a block", fitted == null && err != null && err.contains("block already has a purge valve")
+                        && ctx.voxelByEntity(c.above()).parts.size() == 2, fitted + " / " + err);
+                    // a pipe where the valve would stand: neither stub nor valve is placed
+                    BlockPos d = ctx.at(2, 1, 4);
+                    tank(ctx, IRON_TANK, d, Direction.XN);
+                    PipeCases.lay(ctx, d.above(), 0, 0, 12, 8, 16, 12, 8);
+                    err = click(p, level, d, null, mode);
+                    check("something where the valve would stand: no stub is left either", err != null && err.contains("something is in the way")
+                        && ctx.voxelByEntity(d.above()).parts.size() == 1 && topFree(ctx, d), "" + err);
+                    // a box's lower tank has no top port (or it is the upper tank's)
+                    BlockPos e = ctx.at(4, 1, 4);
+                    tank(ctx, IRON_TANK, e, Direction.XN);
+                    tank(ctx, IRON_TANK, e.above(), Direction.XN);
+                    err = click(p, level, e, null, mode);
+                    check("a tank under another of its box", err != null && err.contains("this tank has no top port"), "" + err);
+                    err = click(p, level, e.above(), null, mode);
+                    check("the box's top tank takes it", err == null && built(ctx, e.above(), 0, mode), "" + err);
+                    check("the refusals took no pipe and no valve (one stub's 8 voxels gone, for the box)", carried(p, 0) == 92 && p.getMainHandItem().isEmpty(),
+                        carried(p, 0) + " voxels, " + p.getMainHandItem());
+                }
+                case PIPE_END -> {
+                    int mode = mods.eln.node.voxel.SafetyValvePart.BREATHER;
+                    var p = ctx.listener();   // (no kit: capping a stub needs no pipe)
+                    // a stub standing in the block, its upper end clicked
+                    PipeCases.lay(ctx, tp, 0, 8, 0, 8, 8, 8, 8);
+                    String err = click(p, level, tp, net.minecraft.world.phys.Vec3.atLowerCornerOf(tp).add(0.5, 9 / 16.0, 0.5), mode);
+                    var sv = valve(ctx.voxelByEntity(tp));
+                    check("a stub's upper end clicked: the valve stands on the end", err == null && sv != null && sv.y == 8 && sv.outlet == 1
+                        && sv.onEnd(ctx.voxelByEntity(tp).parts) && p.getMainHandItem().isEmpty(), err + " " + (sv == null ? "" : sv.y + " outlet " + sv.outlet));
+                    // lower down: on its side, as before
+                    BlockPos b = ctx.at(4, 1, 1);
+                    PipeCases.lay(ctx, b, 0, 8, 0, 8, 8, 8, 8);
+                    err = click(p, level, b, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 3 / 16.0, 0.5), mode);
+                    sv = valve(ctx.voxelByEntity(b));
+                    check("clicked lower down: on its side, as before", err == null && sv != null && sv.y == 4 && sv.outlet >= 2 && !sv.onEnd(ctx.voxelByEntity(b).parts)
+                        && sv.draw() == 0.5, err + " " + (sv == null ? "" : sv.y + " outlet " + sv.outlet));
+                    // an end pointing sideways
+                    BlockPos c = ctx.at(6, 1, 1);
+                    PipeCases.lay(ctx, c, 0, 0, 8, 8, 8, 8, 8);
+                    err = click(p, level, c, net.minecraft.world.phys.Vec3.atLowerCornerOf(c).add(0.5, 0.5, 0.5), mode);
+                    check("an end pointing sideways is refused", err != null && err.contains("only an end pointing up takes one") && ctx.voxelByEntity(c).parts.size() == 1, "" + err);
+                    // an end too near the block's top
+                    BlockPos d = ctx.at(2, 1, 4);
+                    PipeCases.lay(ctx, d, 0, 8, 0, 8, 8, 12, 8);
+                    err = click(p, level, d, net.minecraft.world.phys.Vec3.atLowerCornerOf(d).add(0.5, 12.5 / 16.0, 0.5), mode);
+                    check("an end too near the block's top is refused", err != null && err.contains("no room over the pipe's end") && ctx.voxelByEntity(d).parts.size() == 1, "" + err);
+                    // the upper end of a pipe with a corner
+                    BlockPos e = ctx.at(4, 1, 4);
+                    PipeCases.lay(ctx, e, 0, 0, 4, 8, 8, 4, 8, 8, 8, 8);
+                    err = click(p, level, e, net.minecraft.world.phys.Vec3.atLowerCornerOf(e).add(0.5, 8.5 / 16.0, 0.5), mode);
+                    sv = valve(ctx.voxelByEntity(e));
+                    check("the upper end of a pipe that turns up", err == null && sv != null && sv.y == 8 && sv.outlet == 1 && sv.onEnd(ctx.voxelByEntity(e).parts), "" + err);
+                    // a second valve on the capped end's pipe
+                    err = click(p, level, tp, net.minecraft.world.phys.Vec3.atLowerCornerOf(tp).add(0.5, 3 / 16.0, 0.5), mode);
+                    check("a second valve in the block is refused", err != null && err.contains("block already has a breather valve"), "" + err);
+                }
+                case RELIEVES -> {
+                    t = tank(ctx, IRON_TANK, tp, Direction.XN);
+                    String err = click(ctx, tp, mods.eln.node.voxel.SafetyValvePart.SAFETY);
+                    var sv = valve(ctx.voxelByEntity(above));
+                    check("it fits", err == null && sv != null, "" + err);
+                    if (sv != null) sv.setPa = 2e5;
+                    fill(t.vessel, 0.5 * t.vessel.volume * Water.RHO_L, 3e5, 300);
+                    water0 = t.vessel.mLiquid();
+                }
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            String name = "valve on tank (" + row + "): ";
+            for (String[] c : checks) ctx.check(name + c[0], !c[1].isEmpty(), c[2]);
+            var drops = ctx.level().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(ctx.at(2, 2, 1)).inflate(3));
+            if (row == Row.BREATHER || row == Row.PURGE || row == Row.SAFETY) {
+                int mode = row == Row.BREATHER ? mods.eln.node.voxel.SafetyValvePart.BREATHER : row == Row.PURGE ? mods.eln.node.voxel.SafetyValvePart.PURGE
+                    : mods.eln.node.voxel.SafetyValvePart.SAFETY;
+                int valves = 0, voxels = 0;
+                for (var d : drops) {
+                    if (d.getItem().is(item(mode))) valves += d.getItem().getCount();
+                    voxels += mods.eln.node.voxel.PipeKitItem.length(d.getItem());
+                }
+                ctx.check(name + "broken, the valve and the stub's 8 voxels of pipe come back", valves == 1 && voxels == 8, valves + " valves, " + voxels + " voxels");
+            }
+            for (var d : drops) d.discard();
+            if (row == Row.RELIEVES) {
+                var n = ctx.voxelByEntity(ctx.at(2, 2, 1));
+                ctx.line(String.format("valve on tank (RELIEVES): tank %.3f bar, %.4f -> %.4f kg of liquid; %s", t.vessel.P() / 1e5, water0, t.vessel.mLiquid(),
+                    n == null ? "-" : n.getWaila(false)));
+                ctx.check(name + "the tank at 3 bar comes down to the valve's 2 bar and stays there (1.9 to 2.2 bar)", t.vessel.P() > 1.9e5 && t.vessel.P() < 2.2e5,
+                    String.format("%.3f bar", t.vessel.P() / 1e5));
+                ctx.check(name + "only gas went: the water stays (to 1 g)", t.vessel.mLiquid() > water0 - 1e-3, String.format("%.4f -> %.4f kg", water0, t.vessel.mLiquid()));
+            }
         }
     }
 

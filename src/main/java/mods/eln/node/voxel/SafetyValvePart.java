@@ -128,7 +128,27 @@ public final class SafetyValvePart extends VoxelPart {
         return new double[]{mods.eln.sim.fluid.FluidDevice.Vent.breatheOut(dp), mods.eln.sim.fluid.FluidDevice.Vent.breatheIn(dp)};
     }
 
-    /** Where on the run under it it draws: a valve on top lets out what's at the top, one on a side what's half way up. */
+    /** Does pipe end inside its block at (x, y, z) coming up from below (its last piece vertical, the end on top)? */
+    static boolean endsUp(PipePart pipe, int x, int y, int z) {
+        int[] p = pipe.points;
+        int n = p.length;
+        if (n < 6 || PipePart.faceOf(x, y, z) >= 0) return false;
+        return p[0] == x && p[1] == y && p[2] == z && p[4] < y || p[n - 3] == x && p[n - 2] == y && p[n - 1] == z && p[n - 5] < y;
+    }
+
+    /**
+     * Is it on the end of a pipe rather than on its side (Baughn 2026-11-28; VoxelNode.addSafetyValveOnEnd): outlet up,
+     * at the point where a pipe among parts ends coming up from below. Nothing saved says so: a valve on a pipe's side
+     * needs the pipe 2 voxels either way, so it is never at an end, and saves from before read as what they were.
+     */
+    public boolean onEnd(List<? extends VoxelPart> parts) {
+        if (outlet != 1) return false;
+        for (VoxelPart p : parts) if (p instanceof PipePart pipe && endsUp(pipe, x, y, z)) return true;
+        return false;
+    }
+
+    /** Where on the run under it it draws: a valve on top (or on the pipe's upper end) lets out what's at the top, one
+     *  on a side what's half way up. */
     public double draw() {
         return outlet == 1 ? 1 : outlet == 0 ? 0 : 0.5;
     }
@@ -138,7 +158,8 @@ public final class SafetyValvePart extends VoxelPart {
         return Math.max(0, Math.min(1, (P / setPa - 1) / BAND));
     }
 
-    /** The body: a short stack 4 voxels across standing on the pipe, towards the outlet. */
+    /** The body: a short stack 4 voxels across standing on the pipe, towards the outlet (on a pipe's end: over the
+     *  end's own half-bore, which the pipe's box takes in, so the same box). */
     @Override
     public List<int[]> boxes() {
         int h = bore / 2;

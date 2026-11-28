@@ -340,7 +340,7 @@ public final class VoxelGeometry {
     /**
      * The safety valve: a brass body standing on the pipe (from its axis, so it meets the round surface), a red cap
      * stacked on the body (Argon/Baughn 2026-10-30: the old cap ended in the body's top plane and z-fought), sized to the
-     * pipe as drawn.
+     * pipe as drawn. On a pipe's upper end (SafetyValvePart.onEnd) the same stack stands on the end, in line with the pipe.
      */
     static void safetyValve(Model m, SafetyValvePart sv, List<VoxelPart> parts) {
         double rp = pipeRadius(parts, sv.x, sv.y, sv.z, sv.bore), s = fittingScale(rp);
@@ -353,8 +353,16 @@ public final class VoxelGeometry {
         Solid cap = tube(m, ax, c[o[0]], c[o[1]], 2 * s, Math.min(top, end), Math.max(top, end), PIPE[0]).named("safety valve cap");
         if (sv.breather) cap.rgb(0.2f, 0.6f, 0.25f);
         else cap.rgb(sv.purge ? 0.2f : 0.75f, sv.purge ? 0.4f : 0.15f, sv.purge ? 0.8f : 0.12f);
-        Solid pipe = pipeUnder(m, pipeAxis(parts, sv.x, sv.y, sv.z, ax), c, rp);
         Solid hit = box(m, sv.boxes().get(0), null).named("safety valve hitbox").ghost();
+        if (sv.onEnd(parts)) {
+            // (on a pipe's upper end: the body stands on the end, the pipe coming up under it; the narrower of the two
+            // butts onto the other)
+            Solid pipe = m.add(Frustum.cylinder(ax, c[o[0]], c[o[1]], rp, 0, base)).named("pipe under").ghost();
+            m.abut(1.4 * s <= rp ? body : pipe, 1.4 * s <= rp ? pipe : body).abut(body, cap).within(cap, hit).disjoint(cap, pipe)
+                .ratio("safety valve cap radius / pipe radius", 2 * s / rp, 0.5, 2).ratio("safety valve body radius / pipe radius", 1.4 * s / rp, 0.4, 1.5);
+            return;
+        }
+        Solid pipe = pipeUnder(m, pipeAxis(parts, sv.x, sv.y, sv.z, ax), c, rp);
         m.attach(body, pipe, rp).abut(body, cap).within(cap, hit).disjoint(cap, pipe)
             .ratio("safety valve cap radius / pipe radius", 2 * s / rp, 0.5, 2).ratio("safety valve body radius / pipe radius", 1.4 * s / rp, 0.4, 1.5);
     }

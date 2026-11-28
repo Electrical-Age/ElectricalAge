@@ -743,12 +743,55 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return addSafetyValveNear(m.what().part(), m.x(), m.y(), m.z(), mode);
     }
 
-    private String addSafetyValveNear(int idx, double hx, double hy, double hz, int mode) {
-        if (idx >= 0 && fittingThere(parts.get(idx)) != null) return fittingThere(parts.get(idx));
+    /** Why the block takes no (other) safety, purge or breather valve, or null: one to a block. */
+    String safetyValveTaken() {
         for (VoxelPart q : parts)
             if (q instanceof SafetyValvePart sv)
                 return sv.breather ? mods.eln.i18n.I18N.tr("block already has a breather valve")
                     : sv.purge ? mods.eln.i18n.I18N.tr("block already has a purge valve") : mods.eln.i18n.I18N.tr("block already has a safety valve");
+        return null;
+    }
+
+    /** A new valve's set pressure by its mode: a purge valve's just over the air's, a breather's the air's, a safety
+     *  valve's its pipe's. */
+    private static double firstSetPa(PipePart pipe, int mode) {
+        return switch (mode) {
+            case SafetyValvePart.PURGE -> SafetyValvePart.PURGE_PA;
+            case SafetyValvePart.BREATHER -> mods.eln.sim.fluid.Water.P_ATM;
+            default -> pipe.reliefPa();
+        };
+    }
+
+    /**
+     * A safety, purge or breather valve on the end of a pipe (Baughn 2026-11-28, after Lashtear's report that a
+     * breather for a tank needed an elbow laid from scaffolding): the pipe ends inside the block at (x, y, z) pointing
+     * up with nothing on its end, and the valve stands on the end, its outlet up, in place of the cap. It is the same
+     * part as one on a pipe's side (the valve at the pipe's last point, outlet up: SafetyValvePart.onEnd), so it
+     * draws at the top of the run and saves as any other. Null if fitted, else why not.
+     */
+    String addSafetyValveOnEnd(PipePart pipe, int x, int y, int z, int mode) {
+        String taken = safetyValveTaken();
+        if (taken != null) return taken;
+        if (!endsAt(pipe, x, y, z)) return mods.eln.i18n.I18N.tr("must fit on a pipe");
+        if (fittingAt(x, y, z)) return mods.eln.i18n.I18N.tr("a valve or sensor sits there");
+        if (junctionAt(x, y, z) != null || armsAt(x, y, z).size() != 1) return mods.eln.i18n.I18N.tr("the pipe turns there");
+        if (!SafetyValvePart.endsUp(pipe, x, y, z)) return mods.eln.i18n.I18N.tr("the pipe ends there (only an end pointing up takes one)");
+        for (var e : sideElementList)
+            if (e instanceof mods.eln.sixnode.pipetransmitter.PipeTransmitterElement t && java.util.Arrays.equals(t.port(), new int[]{x, y, z}))
+                return mods.eln.i18n.I18N.tr("a sensor is on the pipe's end");
+        var v = new SafetyValvePart(x, y, z, 1, pipe.bore(), firstSetPa(pipe, mode), mode);
+        int[] b = v.boxes().get(0);
+        if (b[4] - b[1] < 4 || !fits(v)) return mods.eln.i18n.I18N.tr("no room over the pipe's end");   // (cut off by the block's top, or something there)
+        parts.add(v);
+        markUsed();
+        changed();
+        return null;
+    }
+
+    private String addSafetyValveNear(int idx, double hx, double hy, double hz, int mode) {
+        if (idx >= 0 && fittingThere(parts.get(idx)) != null) return fittingThere(parts.get(idx));
+        String taken = safetyValveTaken();
+        if (taken != null) return taken;
         if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return mods.eln.i18n.I18N.tr("must fit on a pipe");
         int[] best = null;
         double bd = Double.MAX_VALUE;
@@ -763,6 +806,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                     }
                 }
         if (best == null) return "the pipe has no room for it here";
+        // (the click is nearest the pipe's own end inside the block: the valve goes on the end)
+        if (endsAt(pipe, best[0], best[1], best[2])) return addSafetyValveOnEnd(pipe, best[0], best[1], best[2], mode);
         int axis = -1;
         for (int a = 0; a < 3; a++) {
             int[] lo = best.clone(), hi = best.clone();
@@ -783,11 +828,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             }
         }
         if (outlet < 0) return "no room around the pipe there";
-        var v = new SafetyValvePart(best[0], best[1], best[2], outlet, pipe.bore(), switch (mode) {
-            case SafetyValvePart.PURGE -> SafetyValvePart.PURGE_PA;
-            case SafetyValvePart.BREATHER -> mods.eln.sim.fluid.Water.P_ATM;
-            default -> pipe.reliefPa();
-        }, mode);
+        var v = new SafetyValvePart(best[0], best[1], best[2], outlet, pipe.bore(), firstSetPa(pipe, mode), mode);
         parts.add(v);
         markUsed();
         changed();

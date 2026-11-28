@@ -82,6 +82,26 @@ public interface KitSupply {
         };
     }
 
+    /**
+     * Pipe for something another item builds (a valve clicked on a tank builds its stub: SafetyValveItem), from what p
+     * carries: a pipe kit in the inventory, or the pipe kits of a Toolbag there, holding at least need voxels; the lowest
+     * tier that does (iron before alloy). Null if nothing carried has that much.
+     */
+    static KitSupply pipeCarried(Player p, int need) {
+        if (p == null) return null;
+        KitSupply best = null;
+        var inv = p.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack s = inv.getItem(i);
+            java.util.List<KitSupply> here = new java.util.ArrayList<>();
+            if (s.getItem() instanceof PipeKitItem) here.add(of(s));
+            else if (s.getItem() instanceof ToolbagItem)
+                for (ToolbagItem.Kind k : ToolbagItem.kinds(s).keySet()) if (k.pipe()) here.add(ToolbagItem.supply(s, k));
+            for (KitSupply k : here) if (k.length() >= need && (best == null || k.tier() < best.tier())) best = k;
+        }
+        return best;
+    }
+
     /** The supply in p's main hand: a kit, or a Toolbag with a kind chosen that it holds; else null. */
     static KitSupply held(Player p) {
         if (p == null) return null;
