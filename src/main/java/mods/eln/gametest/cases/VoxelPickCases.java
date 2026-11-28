@@ -44,6 +44,8 @@ public final class VoxelPickCases {
         cases.add(new Rays("voxel_pick_device_beside_cable", VoxelPickCases::device));
         cases.add(new Agree());
         cases.add(new ItemClicks());
+        cases.add(new NeverNothing());
+        cases.add(new EndOfReach());
         cases.add(new JadeEntries());
     }
 
@@ -425,6 +427,191 @@ public final class VoxelPickCases {
                 c.check("agree: breaking takes the second cable and leaves the first", v.parts.size() == 1 && v.parts.get(0) == k[0], "" + v.parts.size());
             } finally {
                 player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+                player.snapTo(x0, y0, z0, 0, 0);
+            }
+        }
+    }
+
+    /**
+     * A ray that stops on a voxel block's outline is on something of it (none of these blocks imitates another): the
+     * hit lies on some part's or device's outline, so the pick may not come back empty, from any eye, at any angle,
+     * with the eye or by the hit point alone. A client tester stood 5 blocks from two floor cables and aimed at the
+     * floor just past the far one: no outline, an empty Jade, and nothing broke.
+     */
+    static final class NeverNothing implements TestCase {
+        BlockPos two, mixed, tee;
+
+        public String id() {
+            return "voxel_pick_never_nothing";
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext c) {
+            two = c.at(1, 1, 1);
+            twoCables(c, two);
+            mixed = c.at(3, 1, 1);
+            relayBesideCable(c, mixed);
+            PipeCases.lay(c, mixed, 0, 0, 12, 4, 16, 12, 4);
+            tee = c.at(5, 1, 1);
+            JunctionCases.tee(c, tee);
+        }
+
+        public void measure(TestContext c) {
+            // the tester's line, had it been in reach: low over both cables' tops and into the floor past the far one. It
+            // enters neither: the far cable, which it passes nearest (just over its far edge), not the near one whose
+            // outline the ray stopped on
+            VoxelNode v = c.voxelByEntity(two);
+            int[] far = v.parts.get(1).boxes().get(0);
+            double[] eye = {8, 26, -64}, at = {8, 0, far[5] + 4.5};
+            Vec3 h = hit(c, two, eye, at);
+            Vec3 o = Vec3.atLowerCornerOf(two);
+            var got = h == null ? VoxelPick.NONE : v.aimed(world(two, eye), h);
+            var point = h == null ? VoxelPick.NONE : v.aimed(null, h);
+            c.check("never nothing: low over both cables into the floor past the far one, the pick is the far cable (the line passes nearest over it)",
+                h != null && got.part() == 1 && point.part() == 0, (h == null ? "no hit" : "outline hit at " + h.subtract(o).scale(16)) + ", on " + say(v, got)
+                    + "; by the hit point " + say(v, point));
+            // the edges of the rule, each a ray that stops on the outline: {block, eye, toward}
+            VoxelNode m = c.voxelByEntity(mixed);
+            SixNodeElement relay = null;
+            for (int i = 6; i < mods.eln.node.six.SixNode.SLOTS; i++) if (m.getElement(i) != null) relay = m.getElement(i);
+            int[] pin = m.elementBoxes(relay.slot).get(3);   // (its west pin: fattened by a voxel in the outline)
+            Object[][] edges = {
+                {"a device's pin, on the voxel its outline is fattened by", mixed, new double[]{pin[0] - 0.5, 40, (pin[2] + pin[5]) / 2.0}, new double[]{pin[0] - 0.5, 0, (pin[2] + pin[5]) / 2.0}},
+                {"a device's body from the side", mixed, new double[]{-40, 3, 10}, new double[]{8, 3, 10}},
+                {"a cable's end on the block's face, where its outline is cut off", two, new double[]{-40, 0.5, 6}, new double[]{8, 0.5, 6}},
+                {"the outline's top on the block's face, grazing: in at the face and out through the top at once", two, new double[]{-10, 0.5, 6}, new double[]{2, 3.1, 6}},
+                {"the corner of a cable's outline, cut across (2 voxels off in two directions)", two, new double[]{8, 8.9, -3}, new double[]{8, 0, 5.9}},
+                {"the corner of a pipe's outline in the air, cut across", mixed, new double[]{8, 20.5, -3.5}, new double[]{8, 8, 9}},
+            };
+            for (Object[] row : edges) {
+                BlockPos pos = (BlockPos) row[1];
+                VoxelNode n = c.voxelByEntity(pos);
+                Vec3 hh = hit(c, pos, (double[]) row[2], (double[]) row[3]);
+                var byLine = hh == null ? VoxelPick.NONE : n.aimed(world(pos, (double[]) row[2]), hh);
+                var byPoint = hh == null ? VoxelPick.NONE : n.aimed(null, hh);
+                c.check("never nothing: " + row[0], hh != null && !byLine.equals(VoxelPick.NONE) && !byPoint.equals(VoxelPick.NONE),
+                    (hh == null ? "the ray misses the outline" : "outline hit at " + hh.subtract(Vec3.atLowerCornerOf(pos)).scale(16)) + ": by the line " + say(n, byLine)
+                        + ", by the point " + say(n, byPoint));
+            }
+            // the far corner of a fattened box is 2 voxels off along each axis, 3.46 in a straight line: within reach, which
+            // is counted per axis as the outline is (a box grown by 2.05), not in a straight line
+            int[] b0 = v.parts.get(0).boxes().get(0);
+            var onEdge = v.aimed((b0[0] + 8) / 16.0, (b0[4] + 2) / 16.0, (b0[2] - 2) / 16.0);
+            var beyond = v.aimed((b0[0] + 8) / 16.0, (b0[4] + 2.2) / 16.0, (b0[2] - 2.2) / 16.0);
+            c.check("never nothing: a point on the very edge of a cable's outline (2 up and 2 out) is the cable's, one 0.2 voxels outside it is nothing's",
+                onEdge.part() == 0 && beyond.equals(VoxelPick.NONE), say(v, onEdge) + " / " + say(v, beyond));
+            // every ray that stops on the outline, from a grid of eyes all round and a sweep of directions
+            for (BlockPos pos : new BlockPos[]{two, mixed, tee}) {
+                VoxelNode n = c.voxelByEntity(pos);
+                var shape = c.level().getBlockState(pos).getShape(c.level(), pos);
+                Vec3 corner = Vec3.atLowerCornerOf(pos);
+                int rays = 0, hits = 0, empty = 0, emptyPoint = 0;
+                String first = "";
+                for (double ex = -72; ex <= 88; ex += 20)
+                    for (double ey = -40; ey <= 72; ey += 14)
+                        for (double ez = -72; ez <= 88; ez += 20) {
+                            if (ex > -8 && ex < 24 && ey > -8 && ey < 24 && ez > -8 && ez < 24) continue;   // (not in or at the block)
+                            double[] e = {ex, ey, ez};
+                            for (double tx = -1; tx <= 17; tx += 1.5)
+                                for (double ty = -1; ty <= 17; ty += 1.5)
+                                    for (double tz = -1; tz <= 17; tz += 4.5) {
+                                        rays++;
+                                        Vec3 from = world(pos, e), to = world(pos, new double[]{tx, ty, tz});
+                                        var r = shape.clip(from, from.add(to.subtract(from).normalize().scale(12)), pos);
+                                        if (r == null) continue;
+                                        hits++;
+                                        var a = n.aimed(from, r.getLocation());
+                                        var p = n.aimed(null, r.getLocation());
+                                        if (a.equals(VoxelPick.NONE)) empty++;
+                                        if (p.equals(VoxelPick.NONE)) emptyPoint++;
+                                        if ((a.equals(VoxelPick.NONE) || p.equals(VoxelPick.NONE)) && first.isEmpty())
+                                            first = "eye " + Arrays.toString(e) + " hit " + r.getLocation().subtract(corner).scale(16) + " line " + a + " point " + p;
+                                    }
+                        }
+                c.check("never nothing: every ray that stops on the outline of the block at " + pos.toShortString() + " is on something, by its line and by its hit point",
+                    hits > 1000 && empty == 0 && emptyPoint == 0, rays + " rays, " + hits + " on the outline, " + empty + " empty by the line, " + emptyPoint + " by the point; " + first);
+            }
+        }
+    }
+
+    /**
+     * The client tester's "dead zone" (two floor cables seen from 5 blocks, aimed at the floor just past the far one: no
+     * outline, an empty Jade, nothing breaks, "vanilla's hit is the voxel block at y .20"): that reading is the END of
+     * a ray that ran out of reach in the air of the block's cell, a little over the outline's top edge. It is
+     * a MISS whose position is the voxel block, not a hit (the stone beyond is out of reach too), and vanilla draws no
+     * outline, asks Jade nothing and mines nothing on a miss, for any block. Every ray that does stop on the block
+     * (type BLOCK) from there picks a cable; the first past the far cable's top is the far one, which it passes nearest.
+     */
+    static final class EndOfReach implements TestCase {
+        BlockPos at;
+
+        public String id() {
+            return "voxel_pick_at_the_end_of_reach";
+        }
+
+        public int width() {
+            return 9;   // (floor_9x7x7: the player stands 4.75 blocks along x from the block's far side, its reach 4.5)
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        public int floorDepth() {
+            return 7;
+        }
+
+        public int ticks() {
+            return 5;
+        }
+
+        public void build(TestContext c) {
+            at = c.at(1, 1, 3);
+            // (along z: the far one, LV, x 5..7; the near one, MV, x 8..11)
+            CableCases.voxel(c, at, List.of(new CablePart(LV, 0, new int[]{6, 0, 0, 6, 0, 16}), new CablePart(MV, 0, new int[]{9, 0, 0, 9, 0, 16})));
+        }
+
+        public void measure(TestContext c) {
+            VoxelNode v = c.voxelByEntity(at);
+            var e = (VoxelNodeEntity) c.level().getBlockEntity(at);
+            var player = c.player();
+            double x0 = player.getX(), y0 = player.getY(), z0 = player.getZ();
+            Vec3 o = Vec3.atLowerCornerOf(at);
+            try {
+                player.snapTo(at.getX() + 4.75, at.getY(), at.getZ() + 0.5, 0, 0);
+                int hits = 0, hitsNone = 0, ends = 0, endsOverOutline = 0, far = 0, near = 0;
+                String firstEnd = "", lastHit = "";
+                // the crosshair swept down the block and on over the floor past it, a hundredth of a block at a time
+                for (double tx = 1.0; tx >= -1.0; tx -= 0.01) {
+                    player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, new Vec3(at.getX() + tx, at.getY(), at.getZ() + 0.5));
+                    var ray = player.pick(player.blockInteractionRange(), 1f, false);   // (the client's reach)
+                    if (!(ray instanceof net.minecraft.world.phys.BlockHitResult bh) || !bh.getBlockPos().equals(at)) continue;
+                    Vec3 h = bh.getLocation().subtract(o).scale(16);
+                    if (bh.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK) {
+                        ends++;
+                        if (h.y > 3 && h.y < 6) endsOverOutline++;
+                        if (firstEnd.isEmpty()) firstEnd = bh.getType() + " at " + h;
+                        continue;
+                    }
+                    hits++;
+                    var a = e.aimed(player.getEyePosition(1f), bh.getLocation());
+                    if (a.equals(VoxelPick.NONE)) hitsNone++;
+                    if (a.part() == 0) far++;
+                    if (a.part() == 1) near++;
+                    lastHit = "the last at " + h + " on " + say(v, a);
+                }
+                c.check("end of reach: every ray that stops on the block picks a cable, the far one too", hits > 20 && hitsNone == 0 && far > 0 && near > 0,
+                    hits + " hits, " + hitsNone + " on nothing, " + near + " on the near cable, " + far + " on the far one; " + lastHit);
+                c.check("end of reach: past them the ray ends in the air of the block's cell, just over the outline: a miss, not a hit (what the tester read)",
+                    ends > 0 && endsOverOutline > 0, ends + " rays end in the cell, " + endsOverOutline + " of them less than 3 voxels over the outline; the first " + firstEnd);
+            } finally {
                 player.snapTo(x0, y0, z0, 0, 0);
             }
         }

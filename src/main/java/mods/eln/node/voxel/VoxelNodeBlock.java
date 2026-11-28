@@ -184,6 +184,11 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
     /**
      * What the player's crosshair is on in this block (VoxelNodeEntity.aimed, from the player's own line of sight,
      * traced here: the server is not sent the ray a player mines along); null if it is on another block or nothing.
+     * A ray that ran out of reach inside this block's cell (a miss whose position is this block: the server's eye
+     * lagging a player at the end of its reach) counts: the line goes on from where it ended. A ray that stopped on
+     * the outline always gives a part or device, or with an imitated block maybe neither (GameTest
+     * voxel_pick_never_nothing); only a ray that ended in the cell's air with nothing ahead gives neither without one,
+     * and then breaking takes nothing (onDestroyedByPlayer: not the cable that happens to be left in the block).
      */
     static VoxelNode.Aimed aimedBy(VoxelNodeEntity e, BlockPos pos, net.minecraft.world.entity.player.Player player) {
         var pick = player.pick(player.blockInteractionRange() + 1, 1f, false);

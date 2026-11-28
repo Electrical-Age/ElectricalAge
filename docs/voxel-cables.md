@@ -476,6 +476,15 @@ first.
   pipe sensor device's aim box, a fitting (a valve's box takes in its pipe), a pipe or cable, a junction, a device;
   then the lower first box or slot. Never the order in the parts list: the client isn't sent part ids, and both sides
   must agree.
+- Never nothing: a ray that stopped on the block's outline is on some part's or device's outline (the outline is
+  the union of their boxes grown 2 voxels, and reach is counted the same way, per axis: a box grown 2.05, so the far
+  corner of an outline, 3.46 voxels off in a straight line, is in), so the pick gives one, by the line and by the
+  point alone; only with an imitated block can it give neither. GameTest `voxel_pick_never_nothing` (the edges, and
+  every ray of a grid of eyes and directions on three blocks). What reads as a dead zone at the end of reach is not
+  the pick: a ray that runs out of reach in the air of the block's cell is a MISS whose position is the voxel block
+  (seen from 4 to 5 blocks, aimed at the floor just past the far cable: it ends a little over the outline), and on a
+  miss vanilla draws no outline, asks Jade nothing and mines nothing, as for any block
+  (`voxel_pick_at_the_end_of_reach`).
 - A junction is never the answer: its arm whose first piece (from the junction to the pipe's next corner) is nearest
   the place the line met it (`armNear`).
 - The imitated block hides what is behind it: a line that meets it first is on nothing of ours (its own outline and
@@ -510,6 +519,7 @@ first.
 - GameTests `gametest/cases/VoxelPickCases.java`: `voxel_pick_parallel_cables`, `_fittings`, `_junction`,
   `_behind_imitated_block`, `_device_beside_cable` (rows of lines of sight and points; each also checks the client's
   view: parts read back from their publish bytes, devices from their published place),
+  `voxel_pick_never_nothing`, `voxel_pick_at_the_end_of_reach`,
   `voxel_pick_outline_jade_and_break_agree`, `voxel_pick_item_clicks_follow_the_line` (clicks with an eye: kit,
   shears, Toolbag replay, valve), `voxel_pick_jade_entry_per_part`; the sensor device's rays in
   `pipe_transmitter_lab_fixes`.
