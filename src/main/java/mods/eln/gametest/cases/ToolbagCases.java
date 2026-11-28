@@ -378,11 +378,15 @@ public final class ToolbagCases {
      * those two pieces go, 32 voxels back into the bag's LV kit, a point off the shears; aimed at x 4 (the junction) the
      * span doesn't reach it; x 1 and x 4 stay. (b) The bag full of full LV kits: the cut drops its length at the player.
      * (c) No shears: no cut starts. (d) A right-click cancels: the run stays whole. (e) An iron pipe run of two blocks
-     * cut whole: its length back as an iron pipe kit.
+     * cut whole: its length back as an iron pipe kit. (f) As a real player's clicks, traced from an eye (the fake
+     * player has none: (a) to (e) click by the point, as on develop): an LV and an MV cable side by side through three
+     * blocks, seen low across the LV one. The cut starts on the MV piece the line of sight is on, its span (the red
+     * outline) follows the aim along the MV run, and the cut takes the MV pieces of the span (32 voxels back into the bag)
+     * and leaves the LV run whole.
      */
     static final class ShearsCase implements TestCase {
-        String err = "", a = "", b = "", cc = "", d = "", e = "";
-        boolean aOk, bOk, cOk, dOk, eOk;
+        String err = "", a = "", b = "", cc = "", d = "", e = "", f = "";
+        boolean aOk, bOk, cOk, dOk, eOk, fOk;
 
         public String id() {
             return "toolbag_shears_cut_runs";
@@ -435,6 +439,9 @@ public final class ToolbagCases {
             run(c, 4);
             for (int x = 6; x <= 7; x++)
                 mods.eln.node.voxel.PipeKitItem.place(c.level(), c.at(x, 1, 6), new PipePart(0, new int[]{0, 4, 8, 16, 4, 8}), null);
+            for (int x = 1; x <= 3; x++)
+                CableCases.voxel(c, c.at(x, 1, 6), List.of(new CablePart(LV, CableCases.DOWN, new int[]{0, 0, 6, 16, 0, 6}),
+                    new CablePart(MV, CableCases.DOWN, new int[]{0, 0, 10, 16, 0, 10})));
             // (cut once the blocks have connected and recorded their joints)
             c.after(5, () -> cut(c));
         }
@@ -512,6 +519,44 @@ public final class ToolbagCases {
                 for (ItemStack s : ToolbagItem.contents(pb)) if (s.getItem() instanceof PipeKitItem) pipeLen += KitItem.lengthForTests(s);
                 e = String.format("pipes left %d %d; iron pipe in the bag %d voxels", pieces(c, p6), pieces(c, p7), pipeLen);
                 eOk = pieces(c, p6) == 0 && pieces(c, p7) == 0 && pipeLen == 32;
+                clean(pl);
+
+                // (f) with an eye, low across the LV cable onto the MV one
+                ItemStack eb = withShears(bag(CableKitItem.kit(MV, 100)));
+                pl.setItemInHand(InteractionHand.MAIN_HAND, eb);
+                BlockPos[] at = {c.at(1, 1, 6), c.at(2, 1, 6), c.at(3, 1, 6)};
+                Vec3[] eye = new Vec3[3], hit = new Vec3[3];
+                boolean onLvOutline = true;
+                for (int i = 0; i < 3; i++) {
+                    var v = c.voxelAt(at[i]);
+                    double[][] line = VoxelPickCases.parallax((CablePart) v.parts.get(0), (CablePart) v.parts.get(1));
+                    eye[i] = VoxelPickCases.world(at[i], line[0]);
+                    hit[i] = VoxelPickCases.hit(c, at[i], line[0], line[1]);
+                    onLvOutline &= mods.eln.node.voxel.ToolbagShears.pieceAtForTests(level, at[i], hit[i], null) == v.parts.get(0);
+                }
+                var uid = pl.getUUID();
+                mods.eln.node.voxel.ToolbagShears.leftClick(pl, level, eb, at[1], hit[1], eye[1]);
+                var first = mods.eln.node.voxel.ToolbagShears.spanForTests(uid);
+                boolean armed = first.size() == 1 && first.get(0) == c.voxelAt(at[1]).parts.get(1);
+                mods.eln.node.voxel.ToolbagShears.aimForTests(pl, level, at[2], hit[2], eye[2]);
+                var second = mods.eln.node.voxel.ToolbagShears.spanForTests(uid);
+                boolean followed = second.size() == 2 && second.contains(c.voxelAt(at[2].immutable()).parts.get(1)) && second.contains(first.get(0));
+                int lvBefore = 0;
+                for (BlockPos q : at) lvBefore += pieces(c, q);
+                mods.eln.node.voxel.ToolbagShears.leftClick(pl, level, eb, at[0], hit[0], eye[0]);
+                // (the last click, aimed at the first block: the span is from the piece the cut started on to the one aimed
+                // at, so blocks 1 and 2 of the MV run; the third block's MV piece, aimed at before, is no longer in it)
+                String left = "";
+                boolean lvWhole = true;
+                for (int i = 0; i < 3; i++) {
+                    var v = c.voxelAt(at[i]);
+                    left += (v == null ? "none" : tiers(c, at[i])) + "; ";
+                    lvWhole &= v != null && v.parts.size() == (i < 2 ? 1 : 2) && ((CablePart) v.parts.get(0)).tier == LV;
+                }
+                f = String.format("each ray stops on the LV outline %b; first click: span %d piece(s), the MV piece %b; aimed on: %d, along the MV run %b; "
+                    + "parts before %d; tiers left per block: %s MV in the bag %d; cut over %b", onLvOutline, first.size(), armed, second.size(), followed, lvBefore, left,
+                    held(eb, MV)[0], !mods.eln.node.voxel.ToolbagShears.active(uid));
+                fOk = onLvOutline && armed && followed && lvBefore == 6 && lvWhole && held(eb, MV)[0] == 132 && !mods.eln.node.voxel.ToolbagShears.active(uid);
             } catch (Exception ex) {
                 err = String.valueOf(ex);
             } finally {
@@ -528,6 +573,8 @@ public final class ToolbagCases {
             c.check("shears: no shears, no cut", cOk, cc);
             c.check("shears: a right-click cancels, the run stays", dOk, d);
             c.check("shears: a pipe run cut whole goes back as a pipe kit", eOk, e);
+            c.check("shears: traced from an eye low across one cable onto the next, the cut starts on, follows and takes the next cable's run and leaves the first whole",
+                fOk, f);
         }
     }
 }

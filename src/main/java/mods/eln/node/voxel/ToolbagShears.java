@@ -72,19 +72,25 @@ public final class ToolbagShears {
         if (!(e.getEntity() instanceof ServerPlayer sp) || !(e.getLevel() instanceof ServerLevel sl)) return;
         var pick = sp.pick(sp.blockInteractionRange(), 1f, false);
         Vec3 hit = pick instanceof BlockHitResult bh && bh.getType() == HitResult.Type.BLOCK && bh.getBlockPos().equals(e.getPos()) ? bh.getLocation() : null;
-        leftClick(sp, sl, bag, e.getPos(), hit);
+        leftClick(sp, sl, bag, e.getPos(), hit, VoxelNode.eyeOf(sp));
     }
 
-    /** A left-click with the bag at hit in the block at pos (null hit: not on it). */
+    /** A left-click with the bag at hit in the block at pos (null hit: not on it). The first starts a cut at the piece
+     *  aimed at and outlines it (show: "Cut: n blocks"); the next takes the outlined span ("Cut n blocks"). */
     public static void leftClick(ServerPlayer p, ServerLevel level, ItemStack bag, BlockPos pos, Vec3 hit) {
+        leftClick(p, level, bag, pos, hit, VoxelNode.eyeOf(p));
+    }
+
+    /** ... traced from eye (VoxelNode.eyeOf; null: the point hit alone). */
+    public static void leftClick(ServerPlayer p, ServerLevel level, ItemStack bag, BlockPos pos, Vec3 hit, Vec3 eye) {
         Cut c = CUTS.get(p.getUUID());
         if (c != null) {
-            if (hit != null) aim(p, level, pos, hit);
+            if (hit != null) aim(p, level, pos, hit, eye);
             cut(p, level, bag, c);
             return;
         }
         if (hit == null) return;
-        Piece at = pieceAt(level, pos, hit, VoxelNode.eyeOf(p));
+        Piece at = pieceAt(level, pos, hit, eye);
         if (at == null) return;   // (not a cable or pipe: nothing to cut, and no block broken)
         if (shears(bag).isEmpty()) {
             KitPreview.note(p, mods.eln.i18n.I18N.tr("No shears in toolbag"));
@@ -106,15 +112,15 @@ public final class ToolbagShears {
             return false;
         }
         if (p.pick(p.blockInteractionRange(), 1f, false) instanceof BlockHitResult bh && bh.getType() == HitResult.Type.BLOCK)
-            aim(p, level, bh.getBlockPos(), bh.getLocation());
+            aim(p, level, bh.getBlockPos(), bh.getLocation(), VoxelNode.eyeOf(p));
         return true;
     }
 
     /** Aimed at hit in pos: if it is a piece of the run, the span reaches from the first piece to it. */
-    static void aim(ServerPlayer p, ServerLevel level, BlockPos pos, Vec3 hit) {
+    static void aim(ServerPlayer p, ServerLevel level, BlockPos pos, Vec3 hit, Vec3 eye) {
         Cut c = CUTS.get(p.getUUID());
         if (c == null) return;
-        Piece at = pieceAt(level, pos, hit, VoxelNode.eyeOf(p));
+        Piece at = pieceAt(level, pos, hit, eye);
         if (at == null) return;
         int i = indexOf(c.run, at.part());
         if (i < 0) return;
@@ -133,7 +139,20 @@ public final class ToolbagShears {
 
     /** aim, for GameTests. */
     public static void aimForTests(ServerPlayer p, ServerLevel level, BlockPos pos, Vec3 hit) {
-        aim(p, level, pos, hit);
+        aim(p, level, pos, hit, VoxelNode.eyeOf(p));
+    }
+
+    /** aim as a real player's, traced from eye (GameTests). */
+    public static void aimForTests(ServerPlayer p, ServerLevel level, BlockPos pos, Vec3 hit, Vec3 eye) {
+        aim(p, level, pos, hit, eye);
+    }
+
+    /** The parts of the span outlined for p's cut, in order (GameTests); empty with no cut under way. */
+    public static List<VoxelPart> spanForTests(UUID p) {
+        Cut c = CUTS.get(p);
+        List<VoxelPart> out = new ArrayList<>();
+        if (c != null) for (Piece pc : c.span()) out.add(pc.part());
+        return out;
     }
 
     /** The span outlined (red), and on the action bar how much it is and what to do. */

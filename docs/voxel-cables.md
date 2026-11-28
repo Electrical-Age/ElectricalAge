@@ -404,7 +404,8 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
   clicks past reach made waypoints. With the bag in hand
   the client sends its sneak state before a click (`ClientKeys.beforeClick`), so a sneak-click opens the radial even
   when shift goes down in the same tick. Its tooltip lists the kits by kind only (the container's own list hidden).
-- Shears (`ToolbagShears`, #517): with shears in the bag, a left-click on a cable or pipe (no block is broken with the
+- Shears (`ToolbagShears`, #517; the piece clicked or aimed at is the one the line of sight is on, the pick above: with
+  two cables side by side, the one Jade names): with shears in the bag, a left-click on a cable or pipe (no block is broken with the
   bag) starts a cut; the run through that piece is found once (a cable by its CONT joints, stopping at a device
   joint, at an end where several pieces or a splice meet, and before a piece another's end splices onto; a pipe by its
   ends, in the block or across a face, stopping at fittings and where several pipes meet), and the span from the first
