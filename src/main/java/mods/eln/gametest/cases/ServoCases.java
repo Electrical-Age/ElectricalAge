@@ -1297,27 +1297,16 @@ public final class ServoCases {
         int kitBefore, kitAfter;
         mods.eln.node.voxel.TrackPlacer.Track laid, reloaded;
 
-        static boolean click(TestContext ctx, net.minecraft.server.level.ServerPlayer p, mods.eln.node.voxel.KitSupply kit, BlockPos on, boolean sneak) {
-            Vec3 hit = Vec3.atLowerCornerOf(on).add(0.5, 1, 0.5);
-            double x = p.getX(), y = p.getY(), z = p.getZ();
-            p.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);
-            try {
-                return mods.eln.node.voxel.RoutePlacer.use(p, ctx.level(), on, net.minecraft.core.Direction.UP, kit, hit, sneak);
-            } finally {
-                p.snapTo(x, y, z, 0, 0);
-            }
-        }
-
         /** From the drive: out 12 to a corner, right 6 to a stop (sneak-click), 6 more to the end, clicked again. */
         static void layDemo(TestContext ctx, net.minecraft.server.level.ServerPlayer p, Shaft s, mods.eln.node.voxel.KitSupply supply) {
             BlockPos o = BlockPos.containing(s.drive(ctx).trackStart().add(0, 0.01, 0)).below();   // (the floor block under the car)
             var north = s.front.toEnumFacing();
             BlockPos corner = o.relative(north, 12), stop = corner.relative(north.getClockWise(), 6), end = stop.relative(north.getClockWise(), 6);
-            click(ctx, p, supply, s.head, false);
-            click(ctx, p, supply, corner, false);
-            click(ctx, p, supply, stop, true);
-            click(ctx, p, supply, end, false);
-            click(ctx, p, supply, end, false);
+            ctx.kitClick(p, supply, s.head, false);
+            ctx.kitClick(p, supply, corner, false);
+            ctx.kitClick(p, supply, stop, true);
+            ctx.kitClick(p, supply, end, false);
+            ctx.kitClick(p, supply, end, false);
         }
 
         public void build(TestContext ctx) {
@@ -1339,7 +1328,7 @@ public final class ServoCases {
             }
             mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
             var rk = mods.eln.node.voxel.KitSupply.of(mods.eln.node.voxel.TrackKitItem.kit(64 * 16));
-            click(ctx, p, rk, railed.head, false);
+            ctx.kitClick(p, rk, railed.head, false);
             refusal = mods.eln.node.voxel.RoutePlacer.active(p.getUUID()) ? "started" : "refused";
             mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
         }
@@ -1586,18 +1575,18 @@ public final class ServoCases {
             BlockPos o = BlockPos.containing(s.drive(ctx).trackStart().add(0, 0.01, 0)).below();
             var north = s.front.toEnumFacing();
             BlockPos corner = o.relative(north, 5), end = corner.relative(north.getClockWise(), 5);
-            TrackKitLays.click(ctx, p, kit, s.head, false);
-            TrackKitLays.click(ctx, p, kit, corner, false);
-            TrackKitLays.click(ctx, p, kit, end, false);
-            TrackKitLays.click(ctx, p, kit, end, false);
+            ctx.kitClick(p, kit, s.head, false);
+            ctx.kitClick(p, kit, corner, false);
+            ctx.kitClick(p, kit, end, false);
+            ctx.kitClick(p, kit, end, false);
             mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
             // the second drive: out 8, a stop 6 across, the stop clicked again: the track ends at the stop
             BlockPos o2 = BlockPos.containing(s2.drive(ctx).trackStart().add(0, 0.01, 0)).below();
             BlockPos c2 = o2.relative(north, 8), st2 = c2.relative(north.getCounterClockWise(), 6);
-            TrackKitLays.click(ctx, p, kit, s2.head, false);
-            TrackKitLays.click(ctx, p, kit, c2, false);
-            TrackKitLays.click(ctx, p, kit, st2, true);
-            TrackKitLays.click(ctx, p, kit, st2, false);
+            ctx.kitClick(p, kit, s2.head, false);
+            ctx.kitClick(p, kit, c2, false);
+            ctx.kitClick(p, kit, st2, true);
+            ctx.kitClick(p, kit, st2, false);
             mods.eln.node.voxel.RoutePlacer.forget(p.getUUID());
             var t2 = s2.drive(ctx).track();
             if (t2 != null) {

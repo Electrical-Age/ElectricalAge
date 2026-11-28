@@ -49,18 +49,15 @@ public final class HandbookFixCases {
             var player = c.player();
             player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
             Vec3 hit = Vec3.atLowerCornerOf(floor).add(0.5, 0, 0.5);
-            double px = player.getX(), py = player.getY(), pz = player.getZ();
-            player.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);
             int lv = CablePart.tierOf("Low Voltage Cable");
             var kit = mods.eln.node.voxel.CableKitItem.kit(lv, 16 * 20);
             kitBefore = mods.eln.node.voxel.KitItem.lengthForTests(kit);
-            handled1 = mods.eln.node.voxel.CablePlacer.use(player, c.level(), floor.below(), net.minecraft.core.Direction.UP, kit, hit);
-            handled2 = mods.eln.node.voxel.CablePlacer.use(player, c.level(), floor.below(), net.minecraft.core.Direction.UP, kit, hit);
+            handled1 = c.kitClick(player, kit, floor.below(), net.minecraft.core.Direction.UP, hit);
+            handled2 = c.kitClick(player, kit, floor.below(), net.minecraft.core.Direction.UP, hit);
             // (a third click: before, the second was a waypoint at the start and this one finished a loop there)
-            mods.eln.node.voxel.CablePlacer.use(player, c.level(), floor.below(), net.minecraft.core.Direction.UP, kit, hit);
+            c.kitClick(player, kit, floor.below(), net.minecraft.core.Direction.UP, hit);
             kitAfter = mods.eln.node.voxel.KitItem.lengthForTests(kit);
             mods.eln.node.voxel.CablePlacer.cancelForTests(player.getUUID());
-            player.snapTo(px, py, pz, 0, 0);
         }
 
         public void measure(TestContext c) {

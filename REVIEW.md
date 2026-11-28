@@ -36,7 +36,7 @@ here.
 | Kit recipes | `node/voxel/KitRecipes` | a per-kit recipe skeleton |
 | A device that may stand on another EA device or a pipe | `TransparentNodeDescriptor.onDeviceOrPipe(below)` from its `isFloor` (the Boiler, the Condenser Coil) | its own `instanceof TransparentNodeBlock \|\| VoxelNodeBlock` check |
 | GameTest ids | `gametest/cases/Ids` | a per-file `transparent(String)` / `six(String)` lookup |
-| GameTest world access | `TestContext` (`at`, `floor`, `placeSix`, `player()`, `holding`, `nodeAt`/`voxelAt`/`voxelByEntity`, `source`/`setVolts`, static `field`; docs/testing.md); six-node electrical fixtures `Wp9aCases` (`orient`, `load`, `resistor`, `current`); `Wp10aCases.rs()`/`off()`; shaft lines `ShaftSteamCases.turbineLine`; HP plants `HpPlantCases.hpTurbine`/`condensateOut`/`WallMeter`; steam in pipes `PipeCases.steam` | per-file `node(ctx,pos)`, `player(ctx)`, `source(u)`, `resistor()` or reflective `field()` copies; a hand-written `setVoltageId` packet |
+| GameTest world access | `TestContext` (`at`, `floor`, `placeSix`, `player()`, `holding`, `nodeAt`/`voxelAt`/`voxelByEntity`, `kitClick` (a kit's click as a player, snapped over the point), `source`/`setVolts`, static `field`; docs/testing.md); six-node electrical fixtures `Wp9aCases` (`orient`, `load`, `resistor`, `current`); `Wp10aCases.rs()`/`off()`; shaft lines `ShaftSteamCases.turbineLine`; HP plants `HpPlantCases.hpTurbine`/`condensateOut`/`WallMeter`; steam in pipes `PipeCases.steam` | per-file `node(ctx,pos)`, `player(ctx)`, `click`/`kitClick` (snapTo, XPlacer.use, snap back), `source(u)`, `resistor()` or reflective `field()` copies; a hand-written `setVoltageId` packet |
 
 ## Invariants
 

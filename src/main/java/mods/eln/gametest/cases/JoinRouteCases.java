@@ -211,16 +211,6 @@ public final class JoinRouteCases {
             return 10;
         }
 
-        boolean click(TestContext c, net.minecraft.server.level.ServerPlayer p, ItemStack kit, BlockPos pos, Vec3 hit) {
-            double x = p.getX(), y = p.getY(), z = p.getZ();
-            p.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);   // (over the click: it must be within reach)
-            try {
-                return pipe ? PipePlacer.use(p, c.level(), pos, Direction.UP, kit, hit) : CablePlacer.use(p, c.level(), pos, Direction.UP, kit, hit);
-            } finally {
-                p.snapTo(x, y, z, 0, 0);
-            }
-        }
-
         List<VoxelNode> nodes(TestContext c) {
             List<VoxelNode> out = new ArrayList<>();
             for (int x = 0; x < width(); x++)
@@ -258,18 +248,18 @@ public final class JoinRouteCases {
                 onVia = Vec3.atLowerCornerOf(w).add(via[1] / 16.0, 1.0, via[3] / 16.0);
             }
             if (insideX >= 0) {
-                first = click(c, p, kit, run, onRun);
-                if (via != null) first &= click(c, p, kit, w, onVia);
+                first = c.kitClick(p, kit, run, Direction.UP, onRun);
+                if (via != null) first &= c.kitClick(p, kit, w, Direction.UP, onVia);
                 BlockPos fin = c.at(insideB, 1, Z);
-                second = click(c, p, kit, fin, Vec3.atLowerCornerOf(fin).add(insideX / 16.0, (pipe ? 5 : 1) / 16.0 + 0.001, 0.5));
+                second = c.kitClick(p, kit, fin, Direction.UP, Vec3.atLowerCornerOf(fin).add(insideX / 16.0, (pipe ? 5 : 1) / 16.0 + 0.001, 0.5));
             } else if (startOnRun) {
-                first = click(c, p, kit, run, onRun);
-                if (via != null) first &= click(c, p, kit, w, onVia);
+                first = c.kitClick(p, kit, run, Direction.UP, onRun);
+                if (via != null) first &= c.kitClick(p, kit, w, Direction.UP, onVia);
                 // (a floor click is a waypoint; the same spot again ends the route there)
-                second = endAtVia ? click(c, p, kit, w, onVia) : click(c, p, kit, floor, onFloor) && click(c, p, kit, floor, onFloor);
+                second = endAtVia ? c.kitClick(p, kit, w, Direction.UP, onVia) : c.kitClick(p, kit, floor, Direction.UP, onFloor) && c.kitClick(p, kit, floor, Direction.UP, onFloor);
             } else {
-                first = click(c, p, kit, floor, onFloor);
-                second = click(c, p, kit, run, onRun);
+                first = c.kitClick(p, kit, floor, Direction.UP, onFloor);
+                second = c.kitClick(p, kit, run, Direction.UP, onRun);
             }
             note = mods.eln.node.voxel.KitPreview.lastNoteForTests(p.getUUID());
             p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
@@ -448,22 +438,17 @@ public final class JoinRouteCases {
             ItemStack kit = PipeKitItem.kit(0, 16 * 16);
             BlockPos run = c.at(3, 1, Z), floor = c.at(3, 0, 7);
             Vec3 onRun = Vec3.atLowerCornerOf(run).add(0.5, 5 / 16.0 + 0.001, 0.5), onFloor = Vec3.atLowerCornerOf(floor).add(0.5, 1.0, 0.5);
-            laid = click(p, c, kit, floor, Direction.UP, onFloor) && click(p, c, kit, run, Direction.UP, onRun) && !PipePlacer.active(p.getUUID());
+            laid = c.kitClick(p, kit, floor, Direction.UP, onFloor) && c.kitClick(p, kit, run, Direction.UP, onRun) && !PipePlacer.active(p.getUUID());
             int n = p.actionBar.size();
-            click(p, c, kit, run, Direction.UP, onRun);
+            c.kitClick(p, kit, run, Direction.UP, onRun);
             onTee = p.actionBar.size() > n ? p.lastActionBar() : "";
             PipePlacer.forget(p.getUUID());
             // block 2's east face where its pipe's end meets block 3's
             BlockPos b2 = c.at(2, 1, Z);
             n = p.actionBar.size();
-            click(p, c, kit, b2, Direction.EAST, Vec3.atLowerCornerOf(b2).add(1.0, 4 / 16.0, 0.5));
+            c.kitClick(p, kit, b2, Direction.EAST, Vec3.atLowerCornerOf(b2).add(1.0, 4 / 16.0, 0.5));
             onPort = p.actionBar.size() > n ? p.lastActionBar() : "";
             PipePlacer.forget(p.getUUID());
-        }
-
-        static boolean click(net.minecraft.server.level.ServerPlayer p, TestContext c, ItemStack kit, BlockPos pos, Direction face, Vec3 hit) {
-            p.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);
-            return PipePlacer.use(p, c.level(), pos, face, kit, hit);
         }
 
         public void measure(TestContext c) {

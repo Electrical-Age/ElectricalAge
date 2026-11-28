@@ -969,19 +969,6 @@ public final class PipeCases {
         }
     }
 
-    /** A click with a pipe kit, as a player (the cable kit's UX for pipes, routing phase 1), standing over the point
-     *  clicked (a click must be within reach: CablePlacer.reachable); the FakePlayer is put back after. */
-    static boolean kitClick(TestContext ctx, net.minecraft.server.level.ServerPlayer p, ItemStack kit, int tier, BlockPos pos,
-                            net.minecraft.core.Direction face, net.minecraft.world.phys.Vec3 hit) {
-        double x = p.getX(), y = p.getY(), z = p.getZ();
-        p.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);
-        try {
-            return mods.eln.node.voxel.PipePlacer.use(p, ctx.level(), pos, face, kit, hit);
-        } finally {
-            p.snapTo(x, y, z, 0, 0);
-        }
-    }
-
     /** The pipe kit as the cable kit (Baughn 2026-11-11): a route starts on a plain floor; the start spot clicked again
      *  is refused as a waypoint (the cable kit's rule); a waypoint further along, the same spot clicked again ends it
      *  capped there; it lies low along the floor, and the kit pays its length. */
@@ -1012,14 +999,14 @@ public final class PipeCases {
             kitBefore = PipeKitItem.length(kit);
             BlockPos a = ctx.at(1, 0, 1), b = ctx.at(5, 0, 1);
             var up = net.minecraft.core.Direction.UP;
-            started = kitClick(ctx, p, kit, 0, a, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(a).add(0.5, 1, 0.5));
-            boolean handled = kitClick(ctx, p, kit, 0, a, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(a).add(0.5, 1, 0.5));
+            started = ctx.kitClick(p, kit, a, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(a).add(0.5, 1, 0.5));
+            boolean handled = ctx.kitClick(p, kit, a, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(a).add(0.5, 1, 0.5));
             int wps = mods.eln.node.voxel.RoutePlacer.waypoints(p.getUUID());
             boolean on = mods.eln.node.voxel.PipePlacer.active(p.getUUID());
             startRefused = handled && wps == 0 && on;
             startSpot = "handled " + handled + ", waypoints " + wps + ", route on " + on;
-            waypoint = kitClick(ctx, p, kit, 0, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 1, 0.5));
-            finished = kitClick(ctx, p, kit, 0, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 1, 0.5));
+            waypoint = ctx.kitClick(p, kit, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 1, 0.5));
+            finished = ctx.kitClick(p, kit, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 1, 0.5));
             kitAfter = PipeKitItem.length(kit);
             for (int x = 0; x < width(); x++) {
                 VoxelNode n = ctx.voxelByEntity(ctx.at(x, 1, 1));
@@ -1084,8 +1071,8 @@ public final class PipeCases {
             ItemStack kit = PipeKitItem.kit(0, 16 * 16);
             BlockPos a = ctx.at(3, 1, 0), b = ctx.at(3, 1, 2);
             var up = net.minecraft.core.Direction.UP;
-            started = kitClick(ctx, p, kit, 0, a, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(a).add(0.5, 9.0 / 16, 0.5));
-            finished = kitClick(ctx, p, kit, 0, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 9.0 / 16, 0.5));
+            started = ctx.kitClick(p, kit, a, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(a).add(0.5, 9.0 / 16, 0.5));
+            finished = ctx.kitClick(p, kit, b, up, net.minecraft.world.phys.Vec3.atLowerCornerOf(b).add(0.5, 9.0 / 16, 0.5));
             VoxelNode na = ctx.voxelByEntity(a), nb = ctx.voxelByEntity(b);
             partsA = na == null ? 0 : (int) na.parts.stream().filter(q -> q instanceof mods.eln.node.voxel.PipePart).count();
             partsB = nb == null ? 0 : (int) nb.parts.stream().filter(q -> q instanceof mods.eln.node.voxel.PipePart).count();

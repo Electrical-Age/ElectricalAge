@@ -59,6 +59,33 @@ public interface TestContext {
             && e.getNode() instanceof mods.eln.node.voxel.VoxelNode v ? v : null;
     }
 
+    /**
+     * A click with a kit (cable, pipe or track: RoutePlacer picks the kind's spec from the kit) as player p, standing
+     * over the point clicked (a click must be within reach: CablePlacer.reachable), then put back where it was. Sneak:
+     * the click takes back a waypoint or cancels. Returns whether the click was taken.
+     */
+    default boolean kitClick(net.minecraft.server.level.ServerPlayer p, mods.eln.node.voxel.KitSupply kit, BlockPos on,
+                             net.minecraft.core.Direction face, net.minecraft.world.phys.Vec3 hit, boolean sneak) {
+        double x = p.getX(), y = p.getY(), z = p.getZ();
+        p.snapTo(hit.x, hit.y + 0.5, hit.z, 0, 90);
+        try {
+            return mods.eln.node.voxel.RoutePlacer.use(p, level(), on, face, kit, hit, sneak);
+        } finally {
+            p.snapTo(x, y, z, 0, 0);
+        }
+    }
+
+    /** {@link #kitClick} with one kit, sneaking as the player is (the kit item's own click). */
+    default boolean kitClick(net.minecraft.server.level.ServerPlayer p, net.minecraft.world.item.ItemStack kit, BlockPos on,
+                             net.minecraft.core.Direction face, net.minecraft.world.phys.Vec3 hit) {
+        return kitClick(p, mods.eln.node.voxel.KitSupply.of(kit), on, face, hit, p.isSecondaryUseActive());
+    }
+
+    /** {@link #kitClick} on the middle of on's top face. */
+    default boolean kitClick(net.minecraft.server.level.ServerPlayer p, mods.eln.node.voxel.KitSupply kit, BlockPos on, boolean sneak) {
+        return kitClick(p, kit, on, net.minecraft.core.Direction.UP, net.minecraft.world.phys.Vec3.atLowerCornerOf(on).add(0.5, 1, 0.5), sneak);
+    }
+
     /** Put a stone block at the absolute position p (support for a device outside the floor). */
     void floor(BlockPos p);
 
