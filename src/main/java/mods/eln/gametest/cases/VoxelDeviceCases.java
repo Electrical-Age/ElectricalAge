@@ -1488,7 +1488,7 @@ public final class VoxelDeviceCases {
                     inNear |= mods.eln.node.voxel.VoxelPart.contains(bx, cx, near, cz, 0);
                     inFar |= mods.eln.node.voxel.VoxelPart.contains(bx, cx, far, cz, 0);
                 }
-                for (int[] bx : ve.deviceBoxes()) inDrawn |= mods.eln.node.voxel.VoxelPart.contains(bx, cx, near, cz, 0);
+                for (int f = 0; f < mods.eln.node.six.SixNode.SLOTS; f++) for (int[] bx : ve.slotBoxes(f)) inDrawn |= mods.eln.node.voxel.VoxelPart.contains(bx, cx, near, cz, 0);
                 var atPin = mods.eln.node.voxel.CablePlacer.deviceEnd(v, p, placed.slot, new double[]{cx, pin[1] / 16.0, cz}, true, -1);
                 var kit = mods.eln.node.voxel.CablePlacer.endAtForTests(c.level(), p, net.minecraft.core.Direction.UP,
                     net.minecraft.world.phys.Vec3.atLowerCornerOf(p).add(cx, near, cz), true, new long[1][]);

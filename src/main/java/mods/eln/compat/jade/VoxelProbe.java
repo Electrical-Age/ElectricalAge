@@ -25,11 +25,11 @@ public final class VoxelProbe {
     /** The entries, under this key of the server data: a list of compounds. */
     public static final String KEY = "elnParts";
     /**
-     * The most entries sent. A block rarely holds more (a 16-wire ribbon and a few devices); past it the others have
-     * none, and the tooltip shows only the header for one of those until the server's next answer, whose first entry
-     * is the one then under the crosshair.
+     * The most entries sent: two 16-wire ribbons and their devices fit. Past it, the ones nearest the asker's line of
+     * sight are sent; one without an entry shows the block's lines as a whole until the server's next answer, whose
+     * first entry is the one then under the crosshair.
      */
-    public static final int MAX = 24;
+    public static final int MAX = 64;
 
     /** A device's or part's lines as they are sent: burnt out, only the cause and the repair in the headline. */
     public static ProbeLines lines(Map<String, String> m, IBurnable b, int headline) {
@@ -61,20 +61,18 @@ public final class VoxelProbe {
 
     /**
      * Every device and part of v as an entry (put, and its key: "slot" for a device; "id" (VoxelPart.id) and "box" (its
-     * first box, by which the client knows it: it is not sent ids) for a part). first's entry first, then the devices
-     * by slot, then the parts in order; MAX at most. No entry for a junction (never aimed at) or for one whose lines
-     * can't be had this time (mid-change). Last, beyond MAX and with no key, the block's lines as a whole: for a
-     * crosshair on none of them (the imitated block).
+     * first box, by which the client knows it: it is not sent ids) for a part), in the order the asker's line of sight
+     * favours them (VoxelPick.ranked from eye through hit, in the world: the one aimed at, then the nearest), max at
+     * most: so the neighbours of the one aimed at are there when the crosshair moves on. No entry for a junction (never
+     * aimed at) or for one whose lines can't be had this time (mid-change). Last, beyond max and with no key, the
+     * block's lines as a whole: for a crosshair on none of them (the imitated block).
      */
-    public static ListTag entries(VoxelNode v, VoxelNode.Aimed first, int headline, String ambient) {
+    public static ListTag entries(VoxelNode v, net.minecraft.world.phys.Vec3 eye, net.minecraft.world.phys.Vec3 hit, int headline, String ambient, int max) {
         ListTag out = new ListTag();
-        if (first != null && first.element() >= 0) add(out, v, first.element(), -1, headline, ambient);
-        else if (first != null && first.part() >= 0) add(out, v, -1, first.part(), headline, ambient);
-        for (int i = 0; i < v.sideElementList.length; i++)
-            if (first == null || i != first.element()) add(out, v, i, -1, headline, ambient);
-        for (int i = 0; i < v.parts.size(); i++)
-            if (first == null || first.element() >= 0 || i != first.part()) add(out, v, -1, i, headline, ambient);
-        // (the crosshair on none of them, the imitated block: the block's lines as a whole, as before)
+        for (VoxelNode.Aimed a : mods.eln.node.voxel.VoxelPick.ranked(v.scene(), v.coordonate.pos(), eye, hit)) {
+            if (out.size() >= max) break;
+            add(out, v, a.element(), a.part(), headline, ambient);
+        }
         try {
             CompoundTag t = new CompoundTag();
             put(t, null, lines(v.getWaila(true, -1), null, headline), ambient);
@@ -85,8 +83,11 @@ public final class VoxelProbe {
         return out;
     }
 
+    public static ListTag entries(VoxelNode v, net.minecraft.world.phys.Vec3 eye, net.minecraft.world.phys.Vec3 hit, int headline, String ambient) {
+        return entries(v, eye, hit, headline, ambient, MAX);
+    }
+
     private static void add(ListTag out, VoxelNode v, int slot, int part, int headline, String ambient) {
-        if (out.size() >= MAX) return;
         CompoundTag t = new CompoundTag();
         try {
             if (slot >= 0) {
@@ -109,20 +110,21 @@ public final class VoxelProbe {
     }
 
     /**
-     * The entry for what is aimed at among parts (the client's own, or the node's), or null: the device's by its slot;
-     * the part's by its id where the parts have ids (the server), else by its first box; aimed at nothing, the keyless
-     * one.
+     * The entry for what is aimed at among parts (the client's own, or the node's): the device's by its slot; the
+     * part's by its id where the parts have ids (the server), else by its first box. Aimed at nothing, or at one with
+     * no entry (past the cap, or laid since the server answered): the keyless one, the block as a whole. Null only if
+     * that is missing too.
      */
     public static CompoundTag choose(ListTag entries, VoxelNode.Aimed a, List<VoxelPart> parts) {
-        boolean none = a.element() < 0 && a.part() < 0;
         VoxelPart p = a.element() < 0 && a.part() >= 0 && a.part() < parts.size() ? parts.get(a.part()) : null;
+        CompoundTag whole = null;
         for (int i = 0; i < entries.size(); i++) {
             CompoundTag t = entries.getCompoundOrEmpty(i);
-            if (none ? !t.contains("slot") && !t.contains("id")
-                : a.element() >= 0 ? t.getIntOr("slot", -1) == a.element()
+            if (!t.contains("slot") && !t.contains("id")) whole = t;
+            else if (a.element() >= 0 ? t.getIntOr("slot", -1) == a.element()
                 : p != null && (p.id >= 0 ? t.getIntOr("id", -1) == p.id : java.util.Arrays.equals(t.getIntArray("box").orElse(null), p.boxes().get(0))))
                 return t;
         }
-        return null;
+        return whole;
     }
 }

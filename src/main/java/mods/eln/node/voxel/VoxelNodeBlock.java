@@ -144,7 +144,7 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
     }
 
     /** The parts' outline (grown) and the model boxes of six-node elements hosted here (as they are clicked; they don't
-     *  collide). deviceBoxes: every device's boxes (VoxelNodeEntity.deviceBoxes). */
+     *  collide). deviceBoxes: every device's boxes as they are aimed at (VoxelNodeEntity.aimBoxes). */
     static VoxelShape outlineOf(java.util.List<VoxelPart> parts, java.util.List<int[]> deviceBoxes) {
         java.util.List<int[]> boxes = new java.util.ArrayList<>();
         for (VoxelPart p : parts)
@@ -182,32 +182,28 @@ public class VoxelNodeBlock extends NodeBlock implements net.minecraft.world.lev
     }
 
     /**
-     * What the player's crosshair is on in this block (VoxelNodeEntity.aimed, from the player's own line of sight: the
-     * server is not sent the ray a player mines along); null if it is on another block or nothing.
+     * What the player's crosshair is on in this block (VoxelNodeEntity.aimed, from the player's own line of sight,
+     * traced here: the server is not sent the ray a player mines along); null if it is on another block or nothing.
      */
     static VoxelNode.Aimed aimedBy(VoxelNodeEntity e, BlockPos pos, net.minecraft.world.entity.player.Player player) {
         var pick = player.pick(player.blockInteractionRange() + 1, 1f, false);
         if (!(pick instanceof net.minecraft.world.phys.BlockHitResult bh) || !bh.getBlockPos().equals(pos)) return null;
-        return e.aimed(player, bh.getLocation());
+        return e.aimed(player.getEyePosition(1f), bh.getLocation());   // (the eye pick traced from)
     }
 
-    /** Is the player's crosshair on the imitated block: in this block and on none of its parts or devices? */
-    static boolean aimedAtHost(VoxelNodeEntity e, BlockPos pos, net.minecraft.world.entity.player.Player player) {
-        VoxelNode.Aimed a = aimedBy(e, pos, player);
-        return e.host() != null && a != null && a.element() < 0 && a.part() < 0;
-    }
 
     @Override
     protected float getDestroyProgress(BlockState state, net.minecraft.world.entity.player.Player player, BlockGetter level, BlockPos pos) {
         VoxelNodeEntity e = tileAt(level, pos, VoxelNodeEntity.class);
-        if (e != null && aimedAtHost(e, pos, player)) return e.host().getDestroyProgress(player, level, pos);
-        return mods.eln.node.BreakTool.progress(state, player, level, pos, e == null ? mods.eln.node.BreakTool.Kind.PICKAXE : toolFor(e, pos, player));
+        VoxelNode.Aimed a = e == null ? null : aimedBy(e, pos, player);   // (once: every tick of mining asks)
+        // the imitated block itself (in this block, on none of its parts or devices): its own speed
+        if (a != null && e.host() != null && a.element() < 0 && a.part() < 0) return e.host().getDestroyProgress(player, level, pos);
+        return mods.eln.node.BreakTool.progress(state, player, level, pos, e == null ? mods.eln.node.BreakTool.Kind.PICKAXE : toolFor(e, a));
     }
 
-    /** The tool for what the player aims at (BreakTool): shears for a cable, a pickaxe for a pipe, its fittings and
-     *  devices. */
-    static mods.eln.node.BreakTool.Kind toolFor(VoxelNodeEntity e, BlockPos pos, net.minecraft.world.entity.player.Player player) {
-        VoxelNode.Aimed a = aimedBy(e, pos, player);
+    /** The tool for what the player aims at (a: aimedBy, or null) (BreakTool): shears for a cable, a pickaxe for a pipe,
+     *  its fittings and devices. */
+    static mods.eln.node.BreakTool.Kind toolFor(VoxelNodeEntity e, VoxelNode.Aimed a) {
         var parts = e.parts();
         return a != null && a.part() >= 0 && a.part() < parts.size() && parts.get(a.part()) instanceof CablePart
             ? mods.eln.node.BreakTool.Kind.SHEARS : mods.eln.node.BreakTool.Kind.PICKAXE;

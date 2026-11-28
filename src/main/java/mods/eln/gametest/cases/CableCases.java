@@ -1293,8 +1293,8 @@ public final class CableCases {
                 & v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.AND).newItemStack(), 7, yn, 4, 0, -4, player)
                 & v.createSubBlockAt(mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.SIGNAL_TRIMMER).newItemStack(), 9, yn, -4, 0, 4, player);
             // the model of slot 6 is round (4, 4) voxels, slot 7's round (12, 4), slot 9's round (4, 12)
-            int a = v.elementAt(4 / 16.0, 1 / 16.0, 4 / 16.0, 0), b = v.elementAt(12 / 16.0, 1 / 16.0, 4 / 16.0, 0),
-                t = v.elementAt(4 / 16.0, 1 / 16.0, 12 / 16.0, 0), none = v.elementAt(12 / 16.0, 1 / 16.0, 12 / 16.0, 0);
+            int a = v.holding(4 / 16.0, 1 / 16.0, 4 / 16.0).element(), b = v.holding(12 / 16.0, 1 / 16.0, 4 / 16.0).element(),
+                t = v.holding(4 / 16.0, 1 / 16.0, 12 / 16.0).element(), none = v.holding(12 / 16.0, 1 / 16.0, 12 / 16.0).element();
             found = "made " + made + "; at (4,4) " + a + ", (12,4) " + b + ", (4,12) " + t + ", (12,12) " + none + "; face slot " + v.getElement(yn);
             foundOk = made && a == 6 && b == 7 && t == 9 && none < 0 && v.getElement(yn) == null && v.getElement(9).side == yn;
             // saved and loaded: the same devices in the same slots and places
@@ -1354,10 +1354,10 @@ public final class CableCases {
             var v = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(tp, c.level()));
             int yn = mods.eln.misc.Direction.YN.getInt();
             int[] fp = mods.eln.Eln.sixNodeItem.getDescriptor(Wp9cCases.SIGNAL_TRIMMER).footprint();
-            floor = "footprint " + fp[0] + "," + fp[1] + "; on the model " + v.elementAt(0.6, 0.08, 0.6, 0) + ", beside it " + v.elementAt(0.8, 0.08, 0.5, 0)
-                + ", above it " + v.elementAt(0.5, 0.3, 0.5, 0);
-            floorOk = fp[0] == 3 && fp[1] >= 2 && fp[1] <= 3 && v.elementAt(0.6, 0.08, 0.6, 0) == yn && v.elementAt(0.8, 0.08, 0.5, 0) < 0
-                && v.elementAt(0.5, 0.3, 0.5, 0) < 0;
+            floor = "footprint " + fp[0] + "," + fp[1] + "; on the model " + v.holding(0.6, 0.08, 0.6).element() + ", beside it " + v.holding(0.8, 0.08, 0.5).element()
+                + ", above it " + v.holding(0.5, 0.3, 0.5).element();
+            floorOk = fp[0] == 3 && fp[1] >= 2 && fp[1] <= 3 && v.holding(0.6, 0.08, 0.6).element() == yn && v.holding(0.8, 0.08, 0.5).element() < 0
+                && v.holding(0.5, 0.3, 0.5).element() < 0;
             if (c.level().getBlockEntity(tp) instanceof mods.eln.node.voxel.VoxelNodeEntity e) {
                 var b = e.shapes().outline().bounds();
                 outline = String.format("%.3f..%.3f, %.3f..%.3f, %.3f..%.3f", b.minX, b.maxX, b.minY, b.maxY, b.minZ, b.maxZ);
@@ -1370,8 +1370,8 @@ public final class CableCases {
             host(c, Wp9cCases.SIGNAL_TRIMMER, wp, mods.eln.misc.Direction.XN);
             var w = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(wp, c.level()));
             int xn = mods.eln.misc.Direction.XN.getInt();
-            wall = "on the model " + w.elementAt(0.08, 0.6, 0.4, 0) + ", beside it " + w.elementAt(0.08, 0.5, 0.8, 0) + " / " + w.elementAt(0.08, 0.2, 0.5, 0);
-            wallOk = w.elementAt(0.08, 0.6, 0.4, 0) == xn && w.elementAt(0.08, 0.5, 0.8, 0) < 0 && w.elementAt(0.08, 0.2, 0.5, 0) < 0;
+            wall = "on the model " + w.holding(0.08, 0.6, 0.4).element() + ", beside it " + w.holding(0.08, 0.5, 0.8).element() + " / " + w.holding(0.08, 0.2, 0.5).element();
+            wallOk = w.holding(0.08, 0.6, 0.4).element() == xn && w.holding(0.08, 0.5, 0.8).element() < 0 && w.holding(0.08, 0.2, 0.5).element() < 0;
             StringBuilder all = new StringBuilder("footprints (half width, height; voxels):");
             for (var d : new java.util.TreeMap<>(mods.eln.Eln.sixNodeItem.all()).values()) {
                 int[] f = d.footprint();
@@ -1521,7 +1521,7 @@ public final class CableCases {
         boolean resistorOk;
 
         /** A Power Resistor's model box (16 x 16, 7 high) reaches over a cable down the north wall: a point on the
-         *  cable is the cable's, not the resistor's (elementAt yields to a part's own box). */
+         *  cable is the cable's, not the resistor's (VoxelPick: a part's own box before a device's). */
         void cableOverResistor(TestContext c) {
             BlockPos p = c.at(5, 1, 1);
             c.floor(p.north());
@@ -1530,9 +1530,9 @@ public final class CableCases {
             var vn = (mods.eln.node.voxel.VoxelNode) mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(p, c.level()));
             int yn = mods.eln.misc.Direction.YN.getInt();
             double cy = 3 / 16.0, cz = 0.5 / 16;
-            resistor = "on the cable: element " + vn.elementAt(0.5, cy, cz, 0) + " part " + vn.partAt(0.5, cy, cz)
-                + "; beside it: element " + vn.elementAt(0.5, cy, 0.5, 0);
-            resistorOk = vn.elementAt(0.5, cy, cz, 0) < 0 && vn.partAt(0.5, cy, cz) >= 0 && vn.elementAt(0.5, cy, 0.5, 0) == yn;
+            resistor = "on the cable: element " + vn.holding(0.5, cy, cz).element() + " part " + vn.partAt(0.5, cy, cz)
+                + "; beside it: element " + vn.holding(0.5, cy, 0.5).element();
+            resistorOk = vn.holding(0.5, cy, cz).element() < 0 && vn.partAt(0.5, cy, cz) >= 0 && vn.holding(0.5, cy, 0.5).element() == yn;
         }
     }
 

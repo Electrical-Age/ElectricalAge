@@ -49,16 +49,25 @@ public final class VoxelPick {
 
     public static final VoxelNode.Aimed NONE = new VoxelNode.Aimed(-1, -1);
 
-    /** pick for a viewer (a player, the camera's entity) and the place its crosshair's ray stopped, in the world. */
-    public static VoxelNode.Aimed pick(Scene s, BlockPos pos, net.minecraft.world.entity.Entity viewer, Vec3 hit) {
+    /**
+     * pick in the world: eye, the viewer's eye as it was when its crosshair's ray was traced (a client's: at that
+     * frame's partial tick, or the line swings while the player moves), null for none; hit, where the ray stopped.
+     */
+    public static VoxelNode.Aimed pick(Scene s, BlockPos pos, Vec3 eye, Vec3 hit) {
         Vec3 o = Vec3.atLowerCornerOf(pos);
-        return pick(s, viewer == null ? null : viewer.getEyePosition().subtract(o), viewer == null ? null : viewer.getLookAngle(),
-            hit == null ? null : hit.subtract(o));
+        return pick(s, eye == null ? null : eye.subtract(o), null, hit == null ? null : hit.subtract(o));
     }
 
     /** pick for a block-local point (0..1) alone: a point worked out by code, with no line of sight. */
     public static VoxelNode.Aimed at(Scene s, double x, double y, double z) {
         return pick(s, (Vec3) null, null, new Vec3(x, y, z));
+    }
+
+    /** The part or device whose own box holds the block-local point (0..1): at without its second pass, so nothing
+     *  nearby counts. */
+    public static VoxelNode.Aimed holding(Scene s, double x, double y, double z) {
+        double[] a = {x * 16, y * 16, z * 16};
+        return pick(s, a, a, true, false);
     }
 
     /**
@@ -68,35 +77,73 @@ public final class VoxelPick {
      * or without one where it enters the block. With no line: the point hit. Nothing there: both -1.
      */
     public static VoxelNode.Aimed pick(Scene s, Vec3 eye, Vec3 look, Vec3 hit) {
+        double[][] l = line(s, eye, look, hit);
+        return l == null ? NONE : pick(s, l[0], l[1], true, true);
+    }
+
+    /**
+     * Everything in the block that can be aimed at, in the order the line of sight favours them: what pick gives, then
+     * the other parts and devices by how far their own boxes are from the line (Jade sends the nearest when a block
+     * holds more than it sends). World coordinates, as pick's.
+     */
+    public static List<VoxelNode.Aimed> ranked(Scene s, BlockPos pos, Vec3 eye, Vec3 hit) {
+        Vec3 o = Vec3.atLowerCornerOf(pos);
+        double[][] l = line(s, eye == null ? null : eye.subtract(o), null, hit == null ? null : hit.subtract(o));
+        VoxelNode.Aimed first = l == null ? NONE : pick(s, l[0], l[1], true, true);
+        record Far(VoxelNode.Aimed what, double d, int[] key) {
+        }
+        List<Far> rest = new java.util.ArrayList<>();
+        for (int i = 0; i < s.parts().size(); i++) {
+            if (s.parts().get(i) instanceof JunctionPart || i == first.part()) continue;
+            List<int[]> boxes = s.parts().get(i).boxes();
+            rest.add(new Far(new VoxelNode.Aimed(-1, i), far(l, boxes), boxes.get(0)));
+        }
+        for (int f = 0; f < s.devices().size(); f++)
+            if (!s.devices().get(f).isEmpty() && f != first.element()) rest.add(new Far(new VoxelNode.Aimed(f, -1), far(l, s.devices().get(f)), new int[]{f}));
+        rest.sort(java.util.Comparator.comparingDouble(Far::d).thenComparing(Far::key, java.util.Arrays::compare));
+        List<VoxelNode.Aimed> out = new java.util.ArrayList<>();
+        if (first.element() >= 0 || first.part() >= 0) out.add(first);
+        for (Far f : rest) out.add(f.what());
+        return out;
+    }
+
+    private static double far(double[][] l, List<int[]> boxes) {
+        double d = l == null ? 0 : Double.MAX_VALUE;
+        if (l != null) for (int[] box : boxes) d = Math.min(d, distance(l[0], l[1], box)[0]);
+        return d;
+    }
+
+    /** The line of sight through the block as {from, to} (voxels; one point twice with no line), or null with neither
+     *  an eye nor a hit, or for an eye whose look misses the block. */
+    private static double[][] line(Scene s, Vec3 eye, Vec3 look, Vec3 hit) {
         Vec3 from = hit != null ? hit : eye;
-        if (from == null) return NONE;
+        if (from == null) return null;
         Vec3 dir = null;
         if (eye != null && hit != null && eye.distanceToSqr(hit) > 1e-8) dir = hit.subtract(eye).normalize();
         else if (look != null && look.lengthSqr() > 1e-12) dir = look.normalize();
         double[] a = {from.x * 16, from.y * 16, from.z * 16}, b = a.clone();
-        if (dir != null) {
-            // (to where it leaves the block: at most its diagonal away, or from an eye outside as far as its far side)
-            double far = hit != null ? 28 : Math.sqrt(sq(a[0] - 8) + sq(a[1] - 8) + sq(a[2] - 8)) + 14;
-            b = new double[]{a[0] + dir.x * far, a[1] + dir.y * far, a[2] + dir.z * far};
-            int[] block = {0, 0, 0, 16, 16, 16};
-            double[] in = span(a, b, block, ON);
-            if (in == null) {
-                if (hit == null) return NONE;
-                b = a.clone();   // (a hit outside the block: the point)
-            } else {
-                double[] a0 = a, b0 = b;
-                a = along(a0, b0, in[0]);
-                b = along(a0, b0, in[1]);
-            }
-            // the imitated block hides what is behind it
-            double cut = 1;
-            for (int[] h : s.host()) {
-                double[] t = span(a, b, h, 0);
-                if (t != null) cut = Math.min(cut, t[0]);
-            }
-            if (cut < 1) b = along(a, b, cut);
+        if (dir == null) return new double[][]{a, b};
+        // (to where it leaves the block: at most its diagonal away, or from an eye outside as far as its far side)
+        double far = hit != null ? 28 : Math.sqrt(sq(a[0] - 8) + sq(a[1] - 8) + sq(a[2] - 8)) + 14;
+        b = new double[]{a[0] + dir.x * far, a[1] + dir.y * far, a[2] + dir.z * far};
+        int[] block = {0, 0, 0, 16, 16, 16};
+        double[] in = span(a, b, block, ON);
+        if (in == null) {
+            if (hit == null) return null;
+            b = a.clone();   // (a hit outside the block: the point)
+        } else {
+            double[] a0 = a, b0 = b;
+            a = along(a0, b0, in[0]);
+            b = along(a0, b0, in[1]);
         }
-        return pick(s, a, b, true);
+        // the imitated block hides what is behind it
+        double cut = 1;
+        for (int[] h : s.host()) {
+            double[] t = span(a, b, h, 0);
+            if (t != null) cut = Math.min(cut, t[0]);
+        }
+        if (cut < 1) b = along(a, b, cut);
+        return new double[][]{a, b};
     }
 
     private static final int DEVICE = 4;
@@ -107,7 +154,8 @@ public final class VoxelPick {
         return p instanceof JunctionPart ? 3 : p instanceof PipePart || p instanceof CablePart ? 2 : 1;
     }
 
-    private static VoxelNode.Aimed pick(Scene s, double[] a, double[] b, boolean junctions) {
+    /** near: with the second pass (the nearest of those whose outline the line passes through). */
+    private static VoxelNode.Aimed pick(Scene s, double[] a, double[] b, boolean junctions, boolean near) {
         List<VoxelPart> parts = s.parts();
         Best best = new Best();
         for (int f = 0; f < s.sensors().size(); f++)
@@ -119,7 +167,7 @@ public final class VoxelPick {
         }
         for (int f = 0; f < s.devices().size(); f++)
             for (int[] box : s.devices().get(f)) best.enter(a, b, box, DEVICE, new int[]{f}, f, -1);
-        if (!best.found()) {
+        if (!best.found() && near) {
             for (int i = 0; i < parts.size(); i++) {
                 if (!junctions && parts.get(i) instanceof JunctionPart) continue;
                 List<int[]> boxes = parts.get(i).boxes();
@@ -133,7 +181,7 @@ public final class VoxelPick {
             // (a junction is never aimed at on its own: its arm is; it goes when its arms do)
             double[] p = along(a, b, best.at);
             int arm = armNear(parts, j, p[0], p[1], p[2]);
-            return arm >= 0 ? new VoxelNode.Aimed(-1, arm) : pick(s, a, b, false);
+            return arm >= 0 ? new VoxelNode.Aimed(-1, arm) : pick(s, a, b, false, near);
         }
         return new VoxelNode.Aimed(best.element, best.part);
     }
@@ -177,17 +225,26 @@ public final class VoxelPick {
     }
 
     /**
-     * The pipe ending at junction j whose run leaves nearest the point (block-local voxels: nearest by the pipe's point
-     * next to that end), or -1. Equally near: the lower first box.
+     * The pipe ending at junction j that leaves it nearest the point (block-local voxels): by its first piece, from the
+     * junction to the pipe's next point (not by that point alone: a long straight arm lost to a riser that bends just
+     * over the junction), or -1. Equally near: the lower first box.
      */
     static int armNear(List<VoxelPart> parts, JunctionPart j, double x, double y, double z) {
         int best = -1;
         double bd = Double.MAX_VALUE;
+        double[] p = {x, y, z}, c = {j.x, j.y, j.z};
         for (int i = 0; i < parts.size(); i++)
             if (parts.get(i) instanceof PipePart pipe && VoxelNode.endsAt(pipe, j.x, j.y, j.z)) {
                 int[] pts = pipe.points;
                 int k = pts[0] == j.x && pts[1] == j.y && pts[2] == j.z ? 3 : pts.length - 6;   // (the point next to its end)
-                double d = sq(pts[k] - x) + sq(pts[k + 1] - y) + sq(pts[k + 2] - z);
+                double[] v = {pts[k], pts[k + 1], pts[k + 2]};
+                double len = 0, dot = 0;
+                for (int n = 0; n < 3; n++) {
+                    len += sq(v[n] - c[n]);
+                    dot += (p[n] - c[n]) * (v[n] - c[n]);
+                }
+                double t = len < 1e-12 ? 0 : Math.max(0, Math.min(1, dot / len)), d = 0;
+                for (int n = 0; n < 3; n++) d += sq(c[n] + (v[n] - c[n]) * t - p[n]);
                 if (d < bd - TIE || d <= bd + TIE && best >= 0
                     && java.util.Arrays.compare(pipe.boxes().get(0), parts.get(best).boxes().get(0)) < 0) {
                     bd = Math.min(d, bd);

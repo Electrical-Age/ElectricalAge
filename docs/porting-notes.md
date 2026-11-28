@@ -1043,7 +1043,9 @@ In the port:
   the server sends Jade every part's and device's lines and the client chooses (Baughn: option c, the network load
   is minimal), so the tooltip changes with the crosshair and matches the outline. Also fixed: a junction gave the
   arm nearest the block's corner, not the one looked at (`armNear` compared voxels with blocks). The point form used
-  by placement (`partAt`) gives the nearest part, not the newest. GameTests `voxel_pick_*`.
+  by code with no viewer (`partAt`) gives the nearest part, not the newest. Kits, the Toolbag's shears, valves and
+  device placing pick what is clicked the same way (Jade shows while they are held), keeping the hit point for where
+  on it; the client picks from the eye at the frame's partial tick. GameTests `voxel_pick_*`.
 
 ## Deferred
 

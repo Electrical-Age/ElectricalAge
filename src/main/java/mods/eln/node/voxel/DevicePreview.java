@@ -71,7 +71,7 @@ public final class DevicePreview {
             if (level.getBlockState(bh.getBlockPos()).getBlock() instanceof VoxelNodeBlock) {
                 pos = bh.getBlockPos();
                 if (level.getBlockEntity(pos) instanceof VoxelNodeEntity ve && ve.getNode() instanceof VoxelNode v)
-                    side = v.placeFace(face, h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ());
+                    side = v.placeFace(face, v.aimed(VoxelNode.eyeOf(p), h));
             }
             var front = turned(item.descriptor.getFrontFromPlace(side, p), turn);
             int[] o = VoxelNode.snap(item.descriptor, side, front, h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ());
@@ -166,8 +166,7 @@ public final class DevicePreview {
             BlockPos pos = bh.getBlockPos();
             var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, p.level()));
             if (n instanceof VoxelNode v) {
-                var h = bh.getLocation();
-                if (v.elementAt(h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ(), 0) >= 0) return;
+                if (v.aimed(VoxelNode.eyeOf(p), bh.getLocation()).element() >= 0) return;   // (a device there: the click is on it)
             } else if (n != null) return;   // (a machine or six-node block: C + click turns it)
         }
         int was = turn(p, p.getMainHandItem());

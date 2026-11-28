@@ -64,7 +64,7 @@ public class SixNodeItem extends Item implements IDescriptorItem {
         if (world.getBlockState(ctx.getClickedPos()).getBlock() instanceof mods.eln.node.voxel.VoxelNodeBlock) {
             pos = ctx.getClickedPos();
             if (world.getBlockEntity(pos) instanceof mods.eln.node.voxel.VoxelNodeEntity ve && ve.getNode() instanceof mods.eln.node.voxel.VoxelNode v)
-                direction = v.placeFace(ctx.getClickedFace(), h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ());
+                direction = v.placeFace(ctx.getClickedFace(), v.aimed(mods.eln.node.voxel.VoxelNode.eyeOf(ctx.getPlayer()), h));
         }
         boolean ok = placeAt(ctx.getItemInHand(), ctx.getPlayer(), world, pos, direction,
             new double[]{h.x - pos.getX(), h.y - pos.getY(), h.z - pos.getZ()});

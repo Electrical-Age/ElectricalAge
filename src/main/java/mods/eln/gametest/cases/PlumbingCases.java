@@ -315,11 +315,11 @@ public final class PlumbingCases {
             ctx.check("purge valve: it fits on the pipe", err == null, "" + err);
             // (a client check: Jade's header read "Pipes and Cables" with the crosshair on the valve)
             var vn = ctx.voxelByEntity(pipeAt);
-            String onValve = null, onPipe = vn.nameAt(0.5, 1 / 16.0, 0.5);
+            String onValve = null, onPipe = vn.nameOf(vn.aimed(0.5, 1 / 16.0, 0.5));
             for (var part : vn.parts)
                 if (part instanceof mods.eln.node.voxel.SafetyValvePart sv) {
                     int[] b = sv.boxes().get(0);   // (its body, beside the pipe)
-                    onValve = vn.nameAt((b[0] + b[3]) / 32.0, (b[1] + b[4]) / 32.0, (b[2] + b[5]) / 32.0);
+                    onValve = vn.nameOf(vn.aimed((b[0] + b[3]) / 32.0, (b[1] + b[4]) / 32.0, (b[2] + b[5]) / 32.0));
                 }
             ctx.check("purge valve: Jade names it, and the pipe under it", "Pipe Purge Valve".equals(onValve) && "Iron Pipe".equals(onPipe), onValve + " / " + onPipe);
             // (the vapour in the gas it lets out goes too, a few hundredths of a gram: "it'll let out steam")
@@ -463,7 +463,7 @@ public final class PlumbingCases {
             ctx.check("breather: placed as a breather", sv != null && sv.breather && sv.mode == mods.eln.node.voxel.SafetyValvePart.BREATHER, "" + sv);
             if (sv == null) return;
             int[] box = sv.boxes().get(0);
-            String name = vn.nameAt((box[0] + box[3]) / 32.0, (box[1] + box[4]) / 32.0, (box[2] + box[5]) / 32.0);
+            String name = vn.nameOf(vn.aimed((box[0] + box[3]) / 32.0, (box[1] + box[4]) / 32.0, (box[2] + box[5]) / 32.0));
             ctx.check("breather: Jade names it", "Pipe Breather Valve".equals(name), name);
             ctx.check("breather: it has two vents (gas out, air in)", vn.fluidVents().size() == 2, "" + vn.fluidVents().size());
             var t = new net.minecraft.nbt.CompoundTag();

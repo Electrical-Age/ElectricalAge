@@ -27,12 +27,12 @@ public final class CablePlacer {
     /** The cable kit in RoutePlacer's one flow (a route's path: the router's steps). */
     static final RoutePlacer.Spec<List<CableRouter.Step>> ROUTE = new RoutePlacer.Spec<>("cable", "a device or cable", 0xFFB040, 0.7f, false, true) {
         @Override
-        RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, int tier, boolean start, boolean click) {
+        RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, Vec3 eye, int tier, boolean start, boolean click) {
             long[][] join = new long[1][];
-            CableRouter.End at = CablePlacer.endAt(level, pos, face, hit, start, join, tier);
-            if (at == null) return RoutePlacer.Click.none(noEnd(level, pos, hit));
+            CableRouter.End at = CablePlacer.endAt(level, pos, face, hit, eye, start, join, tier);
+            if (at == null) return RoutePlacer.Click.none(noEnd(level, pos, hit, eye));
             // a machine's port: snapped to it and in its own colour (Baughn: it wasn't obvious that cables connect to machines)
-            return new RoutePlacer.Click(at, join[0], at.dir() >= 0, isDevice(level, pos, hit), null);
+            return new RoutePlacer.Click(at, join[0], at.dir() >= 0, isDevice(level, pos, hit, eye), null);
         }
 
         @Override
@@ -246,14 +246,11 @@ public final class CablePlacer {
     }
 
     /** Is the clicked thing a device (a machine's face, hosted in a voxel block or a block of its own)? */
-    static boolean isDevice(Level level, BlockPos pos, Vec3 hit) {
+    static boolean isDevice(Level level, BlockPos pos, Vec3 hit, Vec3 eye) {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         if (n == null) return false;
         if (!(n instanceof VoxelNode v)) return true;
-        double hx = hit.x - pos.getX(), hy = hit.y - pos.getY(), hz = hit.z - pos.getZ();
-        int el = v.elementAt(hx, hy, hz, 0);
-        if (el < 0 && v.partAt(hx, hy, hz) < 0) el = v.elementAt(hx, hy, hz, 2);
-        return el >= 0;
+        return v.aimed(eye, hit).element() >= 0;
     }
 
     /** Why a click is no end: on a machine, no connector on that edge (AdventurAgent: say so); else no place for one. */
@@ -272,17 +269,17 @@ public final class CablePlacer {
     }
 
     public static String noEndForTests(Level level, BlockPos pos, Vec3 hit) {
-        return noEnd(level, pos, hit);
+        return noEnd(level, pos, hit, null);
     }
 
     /** The same, for a click at hit: a Lamp Socket still in Lamp Supply mode (as every socket ships) has no cable pin;
      *  it says how to give it one (AdventurAgent, the handbook play-through: "Not a place for a cable" told nothing). */
     static final String LAMP_SUPPLY = mods.eln.i18n.I18N.tr("Socket is set to wireless Lamp Supply");
 
-    static String noEnd(Level level, BlockPos pos, Vec3 hit) {
+    static String noEnd(Level level, BlockPos pos, Vec3 hit, Vec3 eye) {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         if (n instanceof VoxelNode v && hit != null) {
-            int el = v.elementAt(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ(), 2);
+            int el = v.aimed(eye, hit).element();
             if (el >= 0 && v.sideElementList[el] instanceof mods.eln.sixnode.lampsocket.LampSocketElement ls && ls.poweredByLampSupply())
                 return LAMP_SUPPLY;
         } else if (n instanceof mods.eln.node.six.SixNode six)   // (a socket in an old six-node block)
@@ -302,21 +299,21 @@ public final class CablePlacer {
     /** A click as a routing end: on a device, its face's nearest edge; on a cable, a point of it; else a point on the
      *  face clicked. join (out) gets the junction point for a cable. */
     static CableRouter.End endAt(Level level, BlockPos pos, Direction face, Vec3 hit, boolean start, long[][] join) {
-        return endAt(level, pos, face, hit, start, join, -1);
+        return endAt(level, pos, face, hit, null, start, join, -1);
     }
 
-    /** The same for a kit of that tier (-1: any): a device off centre ends at its nearest pin of the kit's kind. */
-    static CableRouter.End endAt(Level level, BlockPos pos, Direction face, Vec3 hit, boolean start, long[][] join, int tier) {
+    /** The same for a kit of that tier (-1: any): a device off centre ends at its nearest pin of the kit's kind. What
+     *  is clicked: VoxelPick, by the line of sight from eye (null: the point hit alone); where on it: the point hit. */
+    static CableRouter.End endAt(Level level, BlockPos pos, Direction face, Vec3 hit, Vec3 eye, boolean start, long[][] join, int tier) {
         var n = mods.eln.node.NodeManager.instance.getNodeFromCoordonate(new mods.eln.misc.Coordonate(pos, level));
         double hx = hit.x - pos.getX(), hy = hit.y - pos.getY(), hz = hit.z - pos.getZ();
         if (n instanceof VoxelNode v) {
             // a device hosted here: the edge of its face nearest the click that has a connector (a trimmer has one, on
             // its front); the cable comes from the next block, on the same face plane, and ends at that edge's midpoint
             // (its port)
-            int el = v.elementAt(hx, hy, hz, 0);
-            if (el < 0 && v.partAt(hx, hy, hz) < 0) el = v.elementAt(hx, hy, hz, 2);
+            VoxelNode.Aimed aimed = v.aimed(eye, hit);
+            int el = aimed.element(), idx = aimed.part();
             if (el >= 0) return deviceEnd(v, pos, el, new double[]{hx, hy, hz}, start, tier);
-            int idx = v.partAt(hx, hy, hz);
             // a control valve: its signal comes from a signal cable laid into its block: the floor under it (Baughn
             // 2026-10-26; AdventurAgent: clicking its actuator was "not a place for a cable")
             if (idx >= 0 && v.parts.get(idx) instanceof ValvePart cv && (cv.mode == ValvePart.CONTROL || cv.mode == ValvePart.PRESSURE))
@@ -559,7 +556,7 @@ public final class CablePlacer {
                 // the machine's face toward the cable, low on the edge the cable lies along
                 Vec3 hit = Vec3.atCenterOf(nb).add(-d.getStepX() * 0.5, -d.getStepY() * 0.5, -d.getStepZ() * 0.5)
                     .add(-face.getStepX() * 0.45, -face.getStepY() * 0.45, -face.getStepZ() * 0.45);
-                e = endAt(level, nb, d.getOpposite(), hit, start, join, tier);
+                e = endAt(level, nb, d.getOpposite(), hit, null, start, join, tier);
                 if (e == null) continue;   // (no connector on that edge)
             }
             best = e;
@@ -585,7 +582,7 @@ public final class CablePlacer {
     }
 
     public static CableRouter.End endAtForTests(Level level, BlockPos pos, Direction face, Vec3 hit, boolean start, long[][] join, int tier) {
-        return endAt(level, pos, face, hit, start, join, tier);
+        return endAt(level, pos, face, hit, null, start, join, tier);
     }
 
     /** A lattice coordinate inside the block (not on its edge). */
@@ -646,7 +643,7 @@ public final class CablePlacer {
      */
     static boolean repair(ServerPlayer player, ServerLevel level, BlockPos pos, Vec3 hit, KitSupply kit, int tier, CableSpec spec) {
         if (!(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return false;
-        int idx = n.partAt(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ());
+        int idx = n.aimed(VoxelNode.eyeOf(player), hit).part();
         if (idx < 0 || !(n.parts.get(idx) instanceof CablePart c) || c.burnt == null) return false;
         if (c.tier != tier || spec != null && c.spec != null && spec.mm2() != c.spec.mm2()) {
             player.sendOverlayMessage(Component.literal(mods.eln.i18n.I18N.tr("Kit doesn't match burnt cable")));

@@ -28,16 +28,17 @@ public final class PipePlacer {
     /** The pipe kit in RoutePlacer's one flow (a route's path: the router's points). */
     static final RoutePlacer.Spec<List<long[]>> ROUTE = new RoutePlacer.Spec<>("pipe", "a port or pipe", 0x55C8FF, 0.8f, true, false) {
         @Override
-        RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, net.minecraft.world.phys.Vec3 hit, int tier, boolean start, boolean click) {
+        RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, net.minecraft.world.phys.Vec3 hit, net.minecraft.world.phys.Vec3 eye, int tier, boolean start,
+                                boolean click) {
             FluidDevice.FluidPort fp = portNear(level, pos, face, hit);
             // (a port coupled already, to a pipe's end or another device's flange, is one a new pipe couldn't join:
             // AdventurAgent saw a second route to a tank's piped port "give up" instead of saying so)
             if (fp != null && !mods.eln.fluid.FluidPlacement.partners(level, fp).isEmpty()) return RoutePlacer.Click.none(mods.eln.i18n.I18N.tr(PORT_TAKEN));
             PipeRouter.End port = fp == null ? null : endOf(pos, fp);
             boolean device = false;
-            if (port == null) device = (port = devicePort(level, pos, hit)) != null;
-            if (device && portTaken(level, pos, hit)) return RoutePlacer.Click.none(mods.eln.i18n.I18N.tr(PORT_TAKEN));
-            long[] join = port == null ? joinPoint(level, pos, hit) : null;
+            if (port == null) device = (port = devicePort(level, pos, hit, eye)) != null;
+            if (device && portTaken(level, pos, hit, eye)) return RoutePlacer.Click.none(mods.eln.i18n.I18N.tr(PORT_TAKEN));
+            long[] join = port == null ? joinPoint(level, pos, hit, eye) : null;
             PipeRouter.End surface = port == null && join == null ? surfacePoint(RouteView.obstacles(level), pos, face, hit, PipePart.GRID[tier]) : null;
             PipeRouter.End at = port != null ? port : join != null ? new PipeRouter.End(join[0], join[1], join[2], -1) : surface;
             // (the preview says nothing before a start: its outline is enough)
@@ -301,17 +302,17 @@ public final class PipePlacer {
      * device), as a routing end any way round (Baughn 2026-11-02: pipe is laid from the sensor to the pipe to measure),
      * or null. A route ends there capped, as at any inner end.
      */
-    static PipeRouter.End devicePort(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
-        var t = deviceAt(level, pos, hit);
+    static PipeRouter.End devicePort(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit, net.minecraft.world.phys.Vec3 eye) {
+        var t = deviceAt(level, pos, hit, eye);
         if (t == null) return null;
         int[] p = t.port();
         return new PipeRouter.End(pos.getX() * 16L + p[0], pos.getY() * 16L + p[1], pos.getZ() * 16L + p[2], -1);
     }
 
-    /** The pipe sensor device under the crosshair, or null. */
-    static mods.eln.sixnode.pipetransmitter.PipeTransmitterElement deviceAt(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
+    /** The pipe sensor device under the crosshair (VoxelPick, by the line of sight from eye; null: the point hit), or null. */
+    static mods.eln.sixnode.pipetransmitter.PipeTransmitterElement deviceAt(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit, net.minecraft.world.phys.Vec3 eye) {
         if (hit == null || !(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return null;
-        int el = n.aimed(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ()).element();
+        int el = n.aimed(eye, hit).element();
         return el >= 0 && n.getElement(el) instanceof mods.eln.sixnode.pipetransmitter.PipeTransmitterElement t ? t : null;
     }
 
@@ -319,8 +320,8 @@ public final class PipePlacer {
      *  second route starts or ends there (a lab test: clicking the device twice laid a second pipe beside the first). */
     static final String PORT_TAKEN = "Port already connected";
 
-    static boolean portTaken(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
-        var t = deviceAt(level, pos, hit);
+    static boolean portTaken(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit, net.minecraft.world.phys.Vec3 eye) {
+        var t = deviceAt(level, pos, hit, eye);
         return t != null && t.pipe() != null;
     }
 
@@ -331,7 +332,7 @@ public final class PipePlacer {
     }
 
     public static PipeRouter.End devicePortForTests(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
-        return devicePort(level, pos, hit);
+        return devicePort(level, pos, hit, null);
     }
 
     /** Route from a port to join a pipe at join (world voxels) and lay it (GameTests). Null if done, else why not. */
@@ -356,7 +357,7 @@ public final class PipePlacer {
     }
 
     public static long[] joinPointForTests(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
-        return joinPoint(level, pos, hit);
+        return joinPoint(level, pos, hit, null);
     }
 
     public static PipeRouter.End portAtForTests(Level level, BlockPos pos, Direction face) {
@@ -398,10 +399,10 @@ public final class PipePlacer {
 
     /** The point on the pipe under the crosshair where a route could join it (world voxels: a lattice point on its
      *  centre line, inside the block), or null. */
-    static long[] joinPoint(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit) {
+    static long[] joinPoint(Level level, BlockPos pos, net.minecraft.world.phys.Vec3 hit, net.minecraft.world.phys.Vec3 eye) {
         if (hit == null || !(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return null;
         double hx = (hit.x - pos.getX()) * 16, hy = (hit.y - pos.getY()) * 16, hz = (hit.z - pos.getZ()) * 16;
-        int idx = n.partAt(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ());
+        int idx = n.aimed(eye, hit).part();   // (the pipe by the line of sight; where on it by the point hit)
         if (idx < 0 || !(n.parts.get(idx) instanceof PipePart pipe)) return null;
         long[] best = null;
         double bd = Double.MAX_VALUE;

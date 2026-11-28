@@ -261,7 +261,7 @@ public class ToolbagItem extends Item implements PipeTool {
             return;
         }
         if (!routing) {
-            Kind k = kindAt(level, pos, hit);
+            Kind k = kindAt(p, level, pos, hit);
             if (k == null) {   // (no cable or pipe there: which kind to lay from here?)
                 openRadial(p, bag, c);
                 return;
@@ -288,9 +288,9 @@ public class ToolbagItem extends Item implements PipeTool {
     }
 
     /** The kind of the cable or pipe under the click (a knuckle's cable too), or null. */
-    static Kind kindAt(Level level, BlockPos pos, Vec3 hit) {
+    static Kind kindAt(ServerPlayer p, Level level, BlockPos pos, Vec3 hit) {
         if (hit == null || !(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return null;
-        int idx = n.partAt(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ());
+        int idx = n.aimed(VoxelNode.eyeOf(p), hit).part();   // (by p's line of sight: VoxelPick)
         if (idx < 0) return null;
         VoxelPart part = n.parts.get(idx);
         if (part instanceof CablePart cp) return Kind.cable(cp.tier, cp.spec);

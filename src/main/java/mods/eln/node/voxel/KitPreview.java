@@ -72,7 +72,7 @@ public final class KitPreview {
             send(p, true, boxes);
             return;
         }
-        RoutePlacer.Click c = k.endAt(level, bh.getBlockPos(), bh.getDirection(), bh.getLocation(), kit.tier(), plan == null, false);
+        RoutePlacer.Click c = k.endAt(level, bh.getBlockPos(), bh.getDirection(), bh.getLocation(), VoxelNode.eyeOf(p), kit.tier(), plan == null, false);
         if (c.at() == null) {
             send(p, false, boxes);
             if (c.refusal() != null) p.sendOverlayMessage(net.minecraft.network.chat.Component.literal(c.refusal()));
@@ -179,7 +179,7 @@ public final class KitPreview {
         ServerLevel level = (ServerLevel) p.level();
         RoutePlacer.Plan plan = RoutePlacer.plan(p.getUUID());
         if (plan != null && plan.kind != RoutePlacer.of(kit)) plan = null;
-        RoutePlacer.Click c = RoutePlacer.of(kit).endAt(level, pos, face, hit, kit.tier(), plan == null, false);
+        RoutePlacer.Click c = RoutePlacer.of(kit).endAt(level, pos, face, hit, VoxelNode.eyeOf(p), kit.tier(), plan == null, false);
         if (c.at() == null) return c.refusal();
         return plan == null ? null : job(p, level, kit, plan, c).answer().message;
     }

@@ -142,7 +142,7 @@ public final class TrackPlacer {
     /** The spec on the shared placer. */
     static final RoutePlacer.Spec<Track> ROUTE = new RoutePlacer.Spec<>("track", "the last point again", 0x8090A0, 1.2f, true, false) {
         @Override
-        RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, int tier, boolean start, boolean click) {
+        RoutePlacer.Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, Vec3 eye, int tier, boolean start, boolean click) {
             if (start) {
                 LinearServoDriveElement d = LinearServoDriveElement.at(level, pos);
                 // (the preview says nothing off a drive: it overwrote "Laid ... of track"; a click says where to start)

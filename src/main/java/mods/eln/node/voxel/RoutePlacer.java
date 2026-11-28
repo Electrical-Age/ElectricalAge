@@ -91,8 +91,9 @@ public final class RoutePlacer {
             return Character.toUpperCase(noun.charAt(0)) + noun.substring(1);
         }
 
-        /** A click (click) or the preview's aim at hit on face of pos, for a kit of tier; start: no route yet. */
-        abstract Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, int tier, boolean start, boolean click);
+        /** A click (click) or the preview's aim at hit on face of pos, for a kit of tier; start: no route yet. eye: the
+         *  player's (VoxelNode.eyeOf), by which the part or device meant is picked; null: by the point hit alone. */
+        abstract Click endAt(Level level, BlockPos pos, Direction face, Vec3 hit, Vec3 eye, int tier, boolean start, boolean click);
 
         /** The route from start over the waypoints to end, free round the joins (or null), over view, within budgetMs. */
         abstract Routed<P> route(RouteView view, int tier, CableSpec spec, CableRouter.End start, long[] startJoin, List<CableRouter.End> wps,
@@ -288,7 +289,7 @@ public final class RoutePlacer {
         }
         if (plan != null) plan.touched = now;
         if (sneak && k.sneakMarksStops() && plan != null) {   // (the Track Kit: a stop there, unless it is the last point)
-            Click c = k.endAt(level, pos, face, hit, tier, false, true);
+            Click c = k.endAt(level, pos, face, hit, VoxelNode.eyeOf(player), tier, false, true);
             if (c.at() != null && !sameSpot(plan.last(), c.at())) {
                 if (!CablePlacer.reachable(player, pos, hit)) {
                     KitPreview.note(player, mods.eln.i18n.I18N.tr("Out of reach"));
@@ -313,7 +314,7 @@ public final class RoutePlacer {
             return true;
         }
         if (plan == null && k.repair(player, level, pos, hit, kit)) return true;
-        Click c = k.endAt(level, pos, face, hit, tier, plan == null, true);
+        Click c = k.endAt(level, pos, face, hit, VoxelNode.eyeOf(player), tier, plan == null, true);
         if (c.at() == null) {
             if (c.refusal() != null) player.sendOverlayMessage(Component.literal(c.refusal()));
             return true;

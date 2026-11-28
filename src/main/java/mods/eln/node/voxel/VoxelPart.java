@@ -55,8 +55,8 @@ public abstract class VoxelPart {
         };
     }
 
-    /** Read a part's client data; null for an unknown kind. */
-    static VoxelPart deserialize(String kind, DataInputStream in) throws IOException {
+    /** Read a part's client data (what serialize wrote); null for an unknown kind. */
+    public static VoxelPart deserialize(String kind, DataInputStream in) throws IOException {
         return switch (kind) {
             case PipePart.KIND -> PipePart.deserialize(in);
             case JunctionPart.KIND -> JunctionPart.deserialize(in);

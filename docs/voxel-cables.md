@@ -441,38 +441,59 @@ holds them to frozen copies of the routers before the merge (`LegacyCableRouter`
 
 One function, `VoxelPick.pick(Scene, eye, look, hit)` (pure, both sides; Baughn 2026-11-28), answers it for Jade, the
 outline (`client/render/VoxelOutline`), breaking and its tool (`VoxelNodeBlock.aimedBy`), right-click
-(`VoxelNode.onBlockActivated`) and middle-click. It returns `VoxelNode.Aimed(element slot, part index)`, one of them
-set, or neither. Before, there were four copies: Jade named the last cable laid within 2 voxels of the hit point, the
-outline the first.
+(`VoxelNode.onBlockActivated`), middle-click, and every item clicked on the block: kits and their preview, the
+Toolbag and its shears, valves, pipe sensors, devices. It returns `VoxelNode.Aimed(element slot, part index)`, one of
+them set, or neither. Before, there were five copies (Jade and clicks, the outline, breaking, the breaking tool, the
+kits' `elementAt`/`partAt` order): Jade named the last cable laid within 2 voxels of the hit point, the outline the
+first.
 
 - The `Scene` is the block's boxes: the parts, each slot's device boxes, a pipe sensor device's aim boxes, what's left
-  of the imitated block. `VoxelNode.scene()` on the server, `VoxelNodeEntity.scene()` on the client (from the last
-  publish). Callers use `VoxelNodeEntity.aimed(viewer, hit)` / `VoxelNode.aimed(viewer, hit)`.
+  of the imitated block (from the block entity's kept shapes on both sides). `VoxelNode.scene()` on the server,
+  `VoxelNodeEntity.scene()` on the client (from the last publish; a device's boxes by `VoxelNode.deviceBoxes`).
+  Callers use `VoxelNode.aimed(eye, hit)` / `VoxelNodeEntity.aimed(eye, hit)`, world coordinates.
 - It follows the line of sight, not the hit point. The hit is on the block's outline, which stands 2 voxels proud of
   every part (`VoxelNodeBlock.outlineOf`), so seen at an angle the ray stops on one cable's outline while the crosshair
   is drawn over the next. The line runs from the hit point on (nothing of the block is in front of it), from the eye
-  through the hit (the server's idea of the look lags; the hit is the client's own), to where it leaves the block or
-  meets the imitated block.
+  through the hit, to where it leaves the block or meets the imitated block.
+- The eye is the one the ray was traced from. Client: the camera entity's at the frame's partial tick
+  (`VoxelOutline.aimed`, for the outline and Jade's tooltip alike; the eye at the tick's end is up to a tick's walk
+  away, and the line swung between neighbouring cables while the player moved). Server: `VoxelNode.eyeOf(player)`, a
+  real player's eye (its idea of the look lags, the hit is the client's own, so eye to hit); `VoxelNodeBlock.aimedBy`
+  traces its own ray for breaking and middle-click, which send none. Anything but a real player (a fake player, a
+  deployer; GameTests' clicks): no eye, the point form.
 - Rule: the box it enters first (true boxes, grown 0.05); if it enters none, the part or device whose own box is
   nearest the line, among those whose outline (2.05 voxels) it passes through. Entered together or equally near: a
   pipe sensor device's aim box, a fitting (a valve's box takes in its pipe), a pipe or cable, a junction, a device;
   then the lower first box or slot. Never the order in the parts list: the client isn't sent part ids, and both sides
   must agree.
-- A junction is never the answer: its arm nearest the place the line met it (`armNear`).
-- The point form (`VoxelNode.aimed(x, y, z)`, `partAt(x, y, z)`: no viewer) is the same rule for a point: the box
-  holding it, else the nearest of those within 2.05 voxels. Placement code that works a point out keeps it: where a
-  fitting goes (`addValveNear`, `addSafetyValveNear`, `addSensorNear`), where a kit's click ends or joins
-  (`CablePlacer`, `PipePlacer`), the face a device goes on (`placeFace`), the Toolbag's shears.
+- A junction is never the answer: its arm whose first piece (from the junction to the pipe's next corner) is nearest
+  the place the line met it (`armNear`).
+- The imitated block hides what is behind it: a line that meets it first is on nothing of ours (its own outline and
+  breaking). When the hit is on the imitated block's own face the line is that point alone, and the nearest-within-
+  2.05 pass can still give a part: a cable in a channel carved into the block is named and mined from the block's
+  face within 2 voxels of it, as before.
+- The point form (`VoxelNode.aimed(x, y, z)`, `partAt(x, y, z)`; `aimed(null, hit)`) is the same rule for a point: the
+  box holding it, else the nearest of those within 2.05 voxels. It is for a point with no viewer: a fake player's
+  click, a click the code works out (`CablePlacer.endAt` beside a machine), GameTests. Item clicks pick WHAT is
+  clicked by the line (`CablePlacer.endAt`/`isDevice`/`noEnd`/`repair`, `PipePlacer.joinPoint`/`deviceAt`,
+  `ToolbagShears.pieceAt`, `ToolbagItem.kindAt`, `ValveItem`, `SafetyValveItem`, `PipeSensorItem`, `placeFace`,
+  `DevicePreview`) and keep the hit point only for WHERE on it (the lattice point on a pipe, the nearest pin). So
+  with a kit or the Toolbag in hand the shears cut, and the kit joins, the cable Jade names. A point 0.3 voxels off a
+  device's pin and 1.7 from a cable is the device (the outline is fattened round pins for kit clicks, `PIN_AIM`).
+  `VoxelNode.holding` (the exact pass alone) is for GameTests of a model box's extent.
 - Jade (`compat/jade/VoxelProbe`): the server sends an entry for every device and part of the block (`elnParts`: the
-  device's `slot`, or the part's `id` and first `box`; title, lines, headline count), the asker's own first, 24 at
-  most, and last a keyless entry for the block as a whole. The client chooses the entry each time the tooltip is
-  built, with the call the outline makes, so the tooltip follows the crosshair within a block without waiting for
-  the server and names what is outlined. It matches a part by its first box (parts don't overlap). Past 24 a part
-  has no entry until the server's next answer, which puts the aimed one first.
+  device's `slot`, or the part's `id` and first `box`; title, lines, headline count), 64 at most, in the order of the
+  asker's line of sight (`VoxelPick.ranked`: the one aimed at, then the nearest), and last a keyless entry for the
+  block as a whole. The client chooses the entry each time the tooltip is built, with the call the outline makes, so
+  the tooltip follows the crosshair within a block without waiting for the server and names what is outlined. It
+  matches a part by its first box (parts don't overlap). One with no entry (past 64, or laid since the answer) shows
+  the block's lines as a whole until the next answer.
 - The outline is still off while a kit, the Toolbag or the chisel is held.
 - GameTests `gametest/cases/VoxelPickCases.java`: `voxel_pick_parallel_cables`, `_fittings`, `_junction`,
-  `_device_beside_cable` (rows of lines of sight), `voxel_pick_outline_jade_and_break_agree`,
-  `voxel_pick_jade_entry_per_part`; the sensor device's rays in `pipe_transmitter_lab_fixes`.
+  `_behind_imitated_block`, `_device_beside_cable` (rows of lines of sight and points; each also checks the client's
+  view: parts read back from their publish bytes, devices from their published place),
+  `voxel_pick_outline_jade_and_break_agree`, `voxel_pick_jade_entry_per_part`; the sensor device's rays in
+  `pipe_transmitter_lab_fixes`.
 
 ## Rendering pointers
 

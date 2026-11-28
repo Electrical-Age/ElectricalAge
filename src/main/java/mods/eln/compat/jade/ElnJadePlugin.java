@@ -135,7 +135,7 @@ public class ElnJadePlugin implements IWailaPlugin {
             String ambient = mods.eln.misc.Utils.plotCelsius("", mods.eln.sim.Ambient.relative(acc.getLevel(), acc.getPosition()));
             // a voxel block: everything in it, the one under the asker's crosshair first; the client chooses (VoxelProbe)
             if (owner == null && acc.getBlockEntity() instanceof NodeBlockEntity be && be.getNode() instanceof mods.eln.node.voxel.VoxelNode v) {
-                tag.put(VoxelProbe.KEY, VoxelProbe.entries(v, v.aimed(acc.getPlayer(), acc.getHitResult().getLocation()), HEADLINE, ambient));
+                tag.put(VoxelProbe.KEY, VoxelProbe.entries(v, mods.eln.node.voxel.VoxelNode.eyeOf(acc.getPlayer()), acc.getHitResult().getLocation(), HEADLINE, ambient));
                 return;
             }
             Map<String, String> m;
@@ -164,7 +164,8 @@ public class ElnJadePlugin implements IWailaPlugin {
             // a voxel block: of the entries sent, the one for what the crosshair is on now, picked as the outline picks it
             CompoundTag data = acc.getServerData();
             if (data.contains(VoxelProbe.KEY) && acc.getBlockEntity() instanceof mods.eln.node.voxel.VoxelNodeEntity v) {
-                data = VoxelProbe.choose(data.getListOrEmpty(VoxelProbe.KEY), v.aimed(acc.getPlayer(), acc.getHitResult().getLocation()), v.parts());
+                data = VoxelProbe.choose(data.getListOrEmpty(VoxelProbe.KEY),
+                    mods.eln.client.render.VoxelOutline.aimed(v, acc.getHitResult().getLocation(), true), v.parts());
                 if (data == null) data = new CompoundTag();
             }
             String title = data.getStringOr("elnTitle", "");

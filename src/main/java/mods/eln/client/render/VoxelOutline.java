@@ -27,8 +27,7 @@ public final class VoxelOutline {
             || player.getMainHandItem().getItem() instanceof mods.eln.node.voxel.ChiselItem) return;
         BlockPos at = e.getBlockPos();
         if (!(e.getLevel().getBlockEntity(at) instanceof VoxelNodeEntity v)) return;
-        var viewer = Minecraft.getInstance().getCameraEntity();
-        List<int[]> boxes = v.outline(v.aimed(viewer == null ? player : viewer, e.getHitResult().getLocation()));
+        List<int[]> boxes = v.outline(aimed(v, e.getHitResult().getLocation(), false));
         if (boxes == null || boxes.isEmpty()) return;
         VoxelShape s = Shapes.empty();
         for (int[] b : boxes)
@@ -42,6 +41,18 @@ public final class VoxelOutline {
             pose.popPose();
             return true;
         });
+    }
+
+    /**
+     * What the crosshair is on in v, its ray stopped at hit: VoxelNodeEntity.aimed from the camera entity's eye at this
+     * frame's partial tick, as the game traced the ray (Minecraft.pick), not the eye at the tick's end: while the
+     * player moves that is up to a tick's walk away, and the line swung between neighbouring cables. runsNormally: as
+     * the tracer asked the frame's time (the game's own pick false, Jade's true; they differ only while ticks are frozen).
+     */
+    public static mods.eln.node.voxel.VoxelNode.Aimed aimed(VoxelNodeEntity v, Vec3 hit, boolean runsNormally) {
+        Minecraft mc = Minecraft.getInstance();
+        var viewer = mc.getCameraEntity() != null ? mc.getCameraEntity() : mc.player;
+        return v.aimed(viewer == null ? null : viewer.getEyePosition(mc.getDeltaTracker().getGameTimeDeltaPartialTick(runsNormally)), hit);
     }
 
     /**

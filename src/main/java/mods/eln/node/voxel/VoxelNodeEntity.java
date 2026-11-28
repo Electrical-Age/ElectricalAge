@@ -115,19 +115,11 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         return c;
     }
 
-    /** Every device's boxes (its model box on a face; off centre, its body and pins): server from the node, client from
-     *  the last publish. */
-    public List<int[]> deviceBoxes() {
-        List<int[]> out = new ArrayList<>();
-        for (int f = 0; f < mods.eln.node.six.SixNode.SLOTS; f++) out.addAll(slotBoxes(f));
-        return out;
-    }
-
     /** How far a pin's box is grown in the block's outline (voxels): the target for a cable kit's click (Baughn
      *  2026-11-18, #515: slightly larger than the pin is drawn). */
     public static final int PIN_AIM = 1;
 
-    /** The devices' boxes as they are aimed at (the block's outline): deviceBoxes, each pin of a device off centre grown
+    /** The devices' boxes as they are aimed at (the block's outline): every slot's boxes, each pin of a device off centre grown
      *  by PIN_AIM (not past the block). Server and client alike, so the kit's preview and its click agree. */
     public List<int[]> aimBoxes() {
         List<int[]> out = new ArrayList<>();
@@ -152,10 +144,7 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
         var er = elementRenderList[f];
         if (f < 6) return List.of(d == null ? VoxelNode.plate(f) : d.footprintBox(f));
         if (d == null || er == null) return List.of();
-        List<int[]> out = new ArrayList<>();
-        out.add(VoxelNode.bodyBox(d, er.side, er.front, er.ox, er.oy, er.oz));
-        out.addAll(VoxelNode.pinBoxes(d, er.side, er.front, er.ox, er.oy, er.oz, l -> (er.pinMask & (1 << l.toInt())) != 0));
-        return out;
+        return VoxelNode.deviceBoxes(d, er.side, er.front, er.ox, er.oy, er.oz, er.pinMask);
     }
 
     /** What the pick sees here (VoxelPick.Scene): server from the node, client from the last publish. */
@@ -175,11 +164,12 @@ public class VoxelNodeEntity extends mods.eln.node.six.SixNodeEntity {
     }
 
     /**
-     * What viewer's crosshair is on, its ray having stopped at hit (in the world): the one call for the outline, Jade's
-     * tooltip, breaking and middle-click, so they name the same thing (Baughn 2026-11-28).
+     * What a crosshair is on, its ray traced from eye and stopped at hit (in the world): the one call for the outline,
+     * Jade's tooltip, breaking and middle-click, so they name the same thing (Baughn 2026-11-28). eye: as it was when
+     * the ray was traced (VoxelPick.pick).
      */
-    public VoxelNode.Aimed aimed(net.minecraft.world.entity.Entity viewer, net.minecraft.world.phys.Vec3 hit) {
-        return VoxelPick.pick(scene(), worldPosition, viewer, hit);
+    public VoxelNode.Aimed aimed(net.minecraft.world.phys.Vec3 eye, net.minecraft.world.phys.Vec3 hit) {
+        return VoxelPick.pick(scene(), worldPosition, eye, hit);
     }
 
     /** The boxes outlined for what is aimed at: a part's, fattened as the block's outline is; a device's own. None: null. */

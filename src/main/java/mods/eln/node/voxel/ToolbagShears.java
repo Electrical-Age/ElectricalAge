@@ -84,7 +84,7 @@ public final class ToolbagShears {
             return;
         }
         if (hit == null) return;
-        Piece at = pieceAt(level, pos, hit);
+        Piece at = pieceAt(p, level, pos, hit);
         if (at == null) return;   // (not a cable or pipe: nothing to cut, and no block broken)
         if (shears(bag).isEmpty()) {
             KitPreview.note(p, mods.eln.i18n.I18N.tr("No shears in toolbag"));
@@ -114,7 +114,7 @@ public final class ToolbagShears {
     static void aim(ServerPlayer p, ServerLevel level, BlockPos pos, Vec3 hit) {
         Cut c = CUTS.get(p.getUUID());
         if (c == null) return;
-        Piece at = pieceAt(level, pos, hit);
+        Piece at = pieceAt(p, level, pos, hit);
         if (at == null) return;
         int i = indexOf(c.run, at.part());
         if (i < 0) return;
@@ -229,9 +229,10 @@ public final class ToolbagShears {
 
     // ---- the run
 
-    static Piece pieceAt(Level level, BlockPos pos, Vec3 hit) {
+    /** The cable or pipe piece p's crosshair is on (VoxelPick, by its line of sight: the one Jade names), or null. */
+    static Piece pieceAt(ServerPlayer p, Level level, BlockPos pos, Vec3 hit) {
         if (!(level.getBlockEntity(pos) instanceof VoxelNodeEntity e) || !(e.getNode() instanceof VoxelNode n)) return null;
-        int idx = n.partAt(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ());
+        int idx = n.aimed(VoxelNode.eyeOf(p), hit).part();
         if (idx < 0) return null;
         VoxelPart part = n.parts.get(idx);
         return part instanceof CablePart || part instanceof PipePart ? new Piece(pos, part) : null;

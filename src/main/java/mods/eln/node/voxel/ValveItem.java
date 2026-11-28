@@ -34,7 +34,7 @@ public class ValveItem extends Item implements PipeTool {
         }
         String err;
         if (level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n)
-            err = n.addValveNear(hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ(), mode);
+            err = n.addValveNear(n.aimed(VoxelNode.eyeOf(player), hit).part(), hit.x - pos.getX(), hit.y - pos.getY(), hit.z - pos.getZ(), mode);
         else {
             err = mods.eln.i18n.I18N.tr("must fit on a pipe");
             mods.eln.misc.Utils.println("Valve: no pipe at " + pos.toShortString() + ": " + level.getBlockState(pos));

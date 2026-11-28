@@ -62,12 +62,12 @@ public class PipeSensorItem extends Item implements PipeTool {
         mods.eln.misc.Direction face = mods.eln.misc.Direction.fromIntMinecraftSide(clicked.get3DDataValue()).getInverse();
         VoxelNode v = null;
         if (level.getBlockEntity(at) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n) {
-            double hx = hit.x - at.getX(), hy = hit.y - at.getY(), hz = hit.z - at.getZ();
-            int part = n.partAt(hx, hy, hz);
+            VoxelNode.Aimed aimed = n.aimed(VoxelNode.eyeOf(player), hit);   // (by the player's line of sight: VoxelPick)
+            int part = aimed.part();
             if (part >= 0 && !(n.parts.get(part) instanceof CablePart))
                 return mods.eln.i18n.I18N.tr("Must be placed on a solid face");
             pos = at;
-            face = n.placeFace(clicked, hx, hy, hz);
+            face = n.placeFace(clicked, aimed);
             v = n;
         } else if (level.getBlockEntity(pos) instanceof VoxelNodeEntity e && e.getNode() instanceof VoxelNode n) v = n;
         if (!mods.eln.node.six.SixNodeBlock.get().getIfOtherBlockIsSolid(level, pos, face)) return mods.eln.i18n.I18N.tr("Needs a solid face behind it");

@@ -158,6 +158,18 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         return r;
     }
 
+    /**
+     * The boxes of a device off centre as the client works them out from what is published (its place, front and pin
+     * mask: SixNode's publish, a bit per edge it connects on): its body, then its pins. The same as elementBoxes
+     * (GameTest voxel_pick_client_view).
+     */
+    public static List<int[]> deviceBoxes(mods.eln.node.six.SixNodeDescriptor d, Direction side, LRDU front, int ox, int oy, int oz, int pinMask) {
+        List<int[]> out = new ArrayList<>();
+        out.add(bodyBox(d, side, front, ox, oy, oz));
+        out.addAll(pinBoxes(d, side, front, ox, oy, oz, l -> (pinMask & (1 << l.toInt())) != 0));
+        return out;
+    }
+
     /** The pin boxes of a device off centre on face f: one per edge `has` (client: the published pin mask). */
     public static List<int[]> pinBoxes(mods.eln.node.six.SixNodeDescriptor d, Direction side, LRDU front, int ox, int oy, int oz, java.util.function.Predicate<LRDU> has) {
         List<int[]> out = new ArrayList<>();
@@ -346,7 +358,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     /** Middle-click: the device, cable, pipe or fitting under the crosshair, else the imitated block. */
     @Override
     public ItemStack pickItem(net.minecraft.world.phys.BlockHitResult hit, net.minecraft.world.level.LevelReader level) {
-        return pickItem(hit == null ? VoxelPick.NONE : aimed(null, hit.getLocation()), level);
+        return pickItem(hit == null ? VoxelPick.NONE : aimed((net.minecraft.world.phys.Vec3) null, hit.getLocation()), level);
     }
 
     /** pickItem for what is aimed at (VoxelNodeBlock: by the player's line of sight). */
@@ -445,8 +457,8 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     /**
-     * The part at the block-local point (0..1), or -1: VoxelPick among the parts alone, for a point worked out by code
-     * (where a fitting goes, where a kit's click ends). The part holding it, else the nearest of those whose outline
+     * The part at the block-local point (0..1), or -1: VoxelPick among the parts alone, for a point with no viewer (a
+     * fitting put on by code or a fake player, GameTests). The part holding it, else the nearest of those whose outline
      * (2 voxels fatter) holds it; a junction's nearest arm.
      */
     public int partAt(double x, double y, double z) {
@@ -723,7 +735,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** ... of any mode (SafetyValvePart.SAFETY, PURGE, BREATHER; a breather has no set pressure: the air's). */
     public String addSafetyValveNear(double hx, double hy, double hz, int mode) {
-        int idx = partAt(hx, hy, hz);
+        return addSafetyValveNear(partAt(hx, hy, hz), hx, hy, hz, mode);
+    }
+
+    /** ... on the part the player aims at (idx, by the line of sight: VoxelPick), nearest the click on it. */
+    public String addSafetyValveNear(int idx, double hx, double hy, double hz, int mode) {
         if (idx >= 0 && fittingThere(parts.get(idx)) != null) return fittingThere(parts.get(idx));
         for (VoxelPart q : parts)
             if (q instanceof SafetyValvePart sv)
@@ -781,7 +797,11 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /** A valve of a kind (ValvePart.ON_OFF, CONTROL, THROTTLE) at the lattice point on the pipe nearest the click. */
     public String addValveNear(double hx, double hy, double hz, int mode) {
-        int idx = partAt(hx, hy, hz);
+        return addValveNear(partAt(hx, hy, hz), hx, hy, hz, mode);
+    }
+
+    /** ... on the part the player aims at (idx, by the line of sight: VoxelPick), nearest the click on it. */
+    public String addValveNear(int idx, double hx, double hy, double hz, int mode) {
         if (idx >= 0 && fittingThere(parts.get(idx)) != null) return fittingThere(parts.get(idx));
         if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return mods.eln.i18n.I18N.tr("must fit on a pipe");
         int[] best = null;
@@ -919,8 +939,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     public record Aimed(int element, int part) {
     }
 
-    /** What the pick sees here (VoxelPick.Scene): the client's is VoxelNodeEntity.scene. */
+    /** What the pick sees here (VoxelPick.Scene): the client's is VoxelNodeEntity.scene. What's left of the imitated
+     *  block from the block entity's kept shapes (working it out anew for every pick lagged: VoxelNodeEntity.Shapes). */
     public VoxelPick.Scene scene() {
+        List<int[]> hb = host == null ? List.of()
+            : coordonate.world() != null && coordonate.world().getBlockEntity(coordonate.pos()) instanceof VoxelNodeEntity e && e.getNode() == this
+            ? e.hostBoxes() : hostBoxes();
         List<List<int[]>> devices = new ArrayList<>(SLOTS), sensors = new ArrayList<>(SLOTS);
         for (int i = 0; i < SLOTS; i++) {
             var e = sideElementList[i];
@@ -928,29 +952,40 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             sensors.add(e instanceof mods.eln.sixnode.pipetransmitter.PipeTransmitterElement t
                 ? mods.eln.sixnode.pipetransmitter.PipeTransmitterDescriptor.aimBoxes(t.side, t.ox, t.oy, t.oz, elementBoxes(i).get(0)) : List.of());
         }
-        return new VoxelPick.Scene(parts, devices, sensors, hostBoxes());
+        return new VoxelPick.Scene(parts, devices, sensors, hb);
     }
 
-    /** What is at the block-local point (0..1): for a point with no line of sight (a test, a command). */
+    /** What is at the block-local point (0..1), with no line of sight: a point worked out by code, a click by no real
+     *  player. */
     public Aimed aimed(double x, double y, double z) {
         return VoxelPick.at(scene(), x, y, z);
     }
 
-    /** What viewer's crosshair is on, its ray having stopped at hit (in the world); viewer null: the point alone. */
-    public Aimed aimed(net.minecraft.world.entity.Entity viewer, net.minecraft.world.phys.Vec3 hit) {
-        return VoxelPick.pick(scene(), coordonate.pos(), viewer, hit);
+    /** What a crosshair is on: its ray traced from eye and stopped at hit (in the world); eye null: the point alone. */
+    public Aimed aimed(net.minecraft.world.phys.Vec3 eye, net.minecraft.world.phys.Vec3 hit) {
+        return VoxelPick.pick(scene(), coordonate.pos(), eye, hit);
     }
 
     /**
-     * The name of what is at the point (block-local, blocks), for Jade's header: the device's, a cable's tier and spec
+     * The eye to pick by for a click of player's (aimed): a real player's own; null, so the point clicked alone, for
+     * anything else (a fake player, a deployer: where its eye is says nothing of what it clicks).
+     */
+    public static net.minecraft.world.phys.Vec3 eyeOf(Player player) {
+        return player instanceof net.minecraft.server.level.ServerPlayer sp && !(sp instanceof net.neoforged.neoforge.common.util.FakePlayer)
+            ? sp.getEyePosition() : null;
+    }
+
+    /** The device whose own box holds the block-local point, or the part whose does (a part first); nothing nearby
+     *  counts (GameTests: how far a model box reaches). */
+    public Aimed holding(double x, double y, double z) {
+        return VoxelPick.holding(scene(), x, y, z);
+    }
+
+    /**
+     * The name of what is aimed at, for Jade's header: the device's, a cable's tier and spec
      * (Baughn 2026-11-06), a pipe's tier, a fitting's item name (a client check: a purge valve read "Pipes and Cables");
      * null for nothing there.
      */
-    public String nameAt(double x, double y, double z) {
-        return nameOf(aimed(x, y, z));
-    }
-
-    /** nameAt for what is aimed at. */
     public String nameOf(Aimed a) {
         int el = a.element(), pi = a.part();
         if (el >= 0 && sideElementList[el] != null) return sideElementList[el].sixNodeElementDescriptor.name;
@@ -984,7 +1019,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     @Override
     public boolean onBlockActivated(Player player, Direction side, float vx, float vy, float vz) {
         // a six-node element hosted here: as in a six-node block (its own use, GUI, repair, meters)
-        Aimed a = aimed(player, new net.minecraft.world.phys.Vec3(coordonate.x + (double) vx, coordonate.y + (double) vy, coordonate.z + (double) vz));
+        Aimed a = aimed(eyeOf(player), new net.minecraft.world.phys.Vec3(coordonate.x + (double) vx, coordonate.y + (double) vy, coordonate.z + (double) vz));
         int el = a.element(), pi = a.part();
         if (el >= 0) return onSlotActivated(player, el, vx, vy, vz);
         if (pi >= 0 && parts.get(pi) instanceof CablePart c && c.spec != null && recolour(player, pi, c)) return true;
@@ -1098,21 +1133,6 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
             return;
         }
         super.networkUnserialize(stream, player);
-    }
-
-    /** The element (its slot: 0..5 centred on that face) whose model box, grown by grow voxels, holds the block-local point (0..1); -1, also
-     *  where a part is. */
-    public int elementAt(double x, double y, double z, int grow) {
-        for (VoxelPart p : parts)   // (a part's own box wins: a model box can reach past the plate, over a cable)
-            for (int[] b : p.boxes()) if (VoxelPart.contains(b, x, y, z, 0.05)) return -1;
-        for (int f = 0; f < SLOTS; f++) {
-            if (sideElementList[f] == null) continue;
-            for (int[] b : elementBoxes(f)) {
-                int[] g = {b[0] - grow, b[1] - grow, b[2] - grow, b[3] + grow, b[4] + grow, b[5] + grow};
-                if (VoxelPart.contains(g, x, y, z, 0.05)) return f;
-            }
-        }
-        return -1;
     }
 
     /** placeError for a device of this stack at that place and front (a probe element, not added). */
@@ -1361,18 +1381,23 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     /**
      * The face a device placed by a click into this block goes on: the face behind the clicked face, or, if the click is
-     * on a device here, that device's face (AdventurAgent: clicking a chip's side aimed at the wall beside it).
+     * aimed at a device here (a: VoxelPick), that device's face (AdventurAgent: clicking a chip's side aimed at the wall
+     * beside it).
      */
-    public Direction placeFace(net.minecraft.core.Direction clicked, double hx, double hy, double hz) {
-        int el = elementAt(hx, hy, hz, 0);
-        if (el >= 0) return sideElementList[el].side;
+    public Direction placeFace(net.minecraft.core.Direction clicked, Aimed a) {
+        if (a.element() >= 0 && sideElementList[a.element()] != null) return sideElementList[a.element()].side;
         // on a cable: the face it lies on (AdventurAgent: a click on the end of a floor cable aimed at the open side
         // and did nothing); not a cable crossing the air, whose face is no surface (a device there would hang on nothing)
-        int part = partAt(hx, hy, hz);
+        int part = a.part();
         if (part >= 0 && parts.get(part) instanceof CablePart c && !c.isKnuckle()
             && (coordonate.world() == null || CablePlacer.supported(coordonate.world(), coordonate.pos(), c)))
             return Direction.fromIntMinecraftSide(c.face);
         return Direction.fromIntMinecraftSide(clicked.get3DDataValue()).getInverse();
+    }
+
+    /** placeFace for a block-local point alone (no player's line of sight). */
+    public Direction placeFace(net.minecraft.core.Direction clicked, double hx, double hy, double hz) {
+        return placeFace(clicked, aimed(hx, hy, hz));
     }
 
     /** Where a device placed anywhere goes for a click at the block-local point: its centre's offset (world voxels), snapped
