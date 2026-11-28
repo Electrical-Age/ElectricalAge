@@ -544,7 +544,7 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
             + Utils.plotPercent(vessel.liquidVolume() / VOLUME));
         if (!highP) info.detail(I18N.tr("Pressure"), pStr);
         info.detail(I18N.tr("Shell"), mods.eln.api.Meters.celsius(thermal.Tc + PhysicalConstant.Tref - Water.T0));
-        info.detail(I18N.tr("Contents"), EaUnits.composition(vessel));
+        info.detail(I18N.tr("Contents"), EaUnits.composition(vessel, EaUnits.TRACE_MB));
         String visc = EaUnits.viscosity(vessel);
         if (visc != null) {
             if (visc.contains(I18N.tr("heat or dilute"))) info.headline(I18N.tr("Viscosity"), visc);

@@ -64,6 +64,13 @@ public final class EaUnits {
     }
 
     /**
+     * The least liquid (mB) a container with a Liquid line names in its Contents (composition(n, TRACE_MB)): tanks, the
+     * Still Pot, a tank's item. Under it the Liquid line still counts it (it shows to 0.001 mB).
+     */
+    public static final double TRACE_MB = 0.1;
+
+
+    /**
      * As composition(n), and also every liquid of at least minLiquidMb (mB) however small its share: a tank's Contents
      * then names what its Liquid line counts (Baughn 2026-11-28: a tank read "Liquid: 24 mB" over "Contents: 1.0 g air",
      * 1% of a 12 B tank being 120 mB).
@@ -78,7 +85,7 @@ public final class EaUnits {
             Species sp = reg.byId(id);
             double liq = s.liquid(id), vap = s.vapour(id);
             double mb = liq / sp.rhoL * Water.RHO_L / KG_PER_MB_WATER;
-            if (liq > 0 && (liq / sp.rhoL > 0.01 * n.volume || mb >= minLiquidMb)) parts.put(sp.displayName(), volume(liq / sp.rhoL * Water.RHO_L / KG_PER_MB_WATER) + " " + sp.displayName());
+            if (liq > 0 && (liq / sp.rhoL > 0.01 * n.volume || mb >= minLiquidMb)) parts.put(sp.displayName(), volume(mb) + " " + sp.displayName());
             if (vap > 0 && pSum > 0 && vap * sp.r / pSum * vGas > 0.01 * n.volume) {
                 String name = id == SpeciesRegistry.WATER ? "steam" : sp.gas() || liq <= 0 ? sp.displayName() : sp.displayName() + " vapour";
                 parts.put(name, grams(vap * 1000) + " " + name);

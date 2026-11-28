@@ -780,7 +780,7 @@ public final class PlumbingCases {
                 // (what its steps moved is handed out over their ticks: all of it, once)
                 ctx.check("background steps: the flows its edges show, tick by tick, add up to what the core handed out", booksMoved > 1e-3 && flowPeak > 0.98 * booksMoved && flowPeak <= booksMoved * (1 + 1e-6) && booksOff <= 1e-6 * booksMoved,
                     String.format("moved %.6f kg, flows sum to %.9f kg, at most %.3g kg from the core's", booksMoved, flowPeak, booksOff) + ", core built " + buildsSeen + " times");
-                ctx.check("background steps: a dump asked for mid-step is written when the step lands", dumped != null && !dumped.isBlank(),
+                ctx.check("background steps: a dump asked for mid-step is written as the next step starts", dumped != null && !dumped.isBlank(),
                     dumped == null ? "none" : dumped.length() + " chars");
                 ctx.check("background steps: Jade says it is a heavy network", note != null && note.contains("Heavy pipe network"), "" + note);
                 ctx.check("background steps: the pump moved water while in the background", movedInBackground > 0.001, String.format("%.4f kg", movedInBackground));

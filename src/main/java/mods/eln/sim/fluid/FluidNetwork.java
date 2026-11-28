@@ -138,8 +138,8 @@ public final class FluidNetwork {
 
     /**
      * A dump asked for while a background step runs (dump gives null then, and a heavy network nearly always has one
-     * running): taken on the server thread when that step's results are applied, before the next one starts (CoreStep.begin).
-     * Lost if the network is rebuilt first.
+     * running): taken on the server thread as the next background step starts, its loaded state at that step's dt,
+     * so it replays as it ran (CoreStep.begin). Lost if the network is rebuilt or turns light first.
      */
     public java.util.function.Consumer<String> dumpWanted;
 

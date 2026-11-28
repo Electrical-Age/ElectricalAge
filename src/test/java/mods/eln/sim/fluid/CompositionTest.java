@@ -36,7 +36,18 @@ public class CompositionTest {
         double V = 12000 * EaUnits.KG_PER_MB_WATER / Water.RHO_L;
         FluidNode n = new FluidNode(V, 0, 1, false).fill(25 * EaUnits.KG_PER_MB_WATER, Water.P_ATM, 300);
         assertTrue(EaUnits.composition(n).matches("[0-9.]+ g air(, [0-9.]+ g steam)?"), EaUnits.composition(n));
-        assertTrue(EaUnits.composition(n, 0.1).matches("[0-9.]+ g air, ([0-9.]+ g steam, )?2[0-9](\\.[0-9]+)? mB water"), EaUnits.composition(n, 0.1));
+        assertTrue(EaUnits.composition(n, EaUnits.TRACE_MB).matches("[0-9.]+ g air, ([0-9.]+ g steam, )?2[0-9](\\.[0-9]+)? mB water"), EaUnits.composition(n, EaUnits.TRACE_MB));
+    }
+
+    @Test
+    void aTankNamesAnOilTrace() {
+        // the reported case: a little oil left in an iron tank of air (diesel standing in for heavy oil)
+        TestSpecies.defineAll();
+        int oil = TestSpecies.id("diesel");
+        double V = 12000 * EaUnits.KG_PER_MB_WATER / Water.RHO_L, mb = 24;
+        FluidNode n = TestSpecies.node(V, 0, 1, 300, Water.P_ATM, oil, mb * EaUnits.KG_PER_MB_WATER / Water.RHO_L * 840);
+        assertTrue(EaUnits.composition(n).matches("[0-9.]+ g air"), EaUnits.composition(n));
+        assertTrue(EaUnits.composition(n, EaUnits.TRACE_MB).matches("[0-9.]+ g air, 2[34](\\.[0-9]+)? mB diesel"), EaUnits.composition(n, EaUnits.TRACE_MB));
     }
 
     @Test

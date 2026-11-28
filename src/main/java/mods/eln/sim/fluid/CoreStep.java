@@ -543,11 +543,6 @@ public final class CoreStep {
                 fn.backgroundNanos += p.took;
                 fn.backgroundSteps++;
             }
-            if (fn.dumpWanted != null) {   // (the applied state, between background steps: /elnlab fluiddump)
-                var to = fn.dumpWanted;
-                fn.dumpWanted = null;
-                to.accept(mods.eln.fluidcore.NetworkDump.write(net, 0.05));
-            }
             applied = true;   // (this tick has its results: the next step may start, but nothing more is applied or cleared)
         }
         int slow = 0;
@@ -591,6 +586,15 @@ public final class CoreStep {
             p.span = span;
             // (over MAX_SPAN ticks behind: that time is lost; waiting() counted it towards Jade's alarm tick by tick)
             if (droppedNow > 0) mods.eln.fluid.FluidWorld.recordProgress(nodes, stallNow(), droppedNow);
+            if (fn.dumpWanted != null) {   // (/elnlab fluiddump on a heavy network: the step about to run, as it will run)
+                var to = fn.dumpWanted;
+                fn.dumpWanted = null;
+                try {
+                    to.accept(mods.eln.fluidcore.NetworkDump.write(net, stepDt));
+                } catch (RuntimeException e) {
+                    mods.eln.Eln.LOG.error("[fluidcore] a requested dump failed", e);
+                }
+            }
             job = WORKER.submit(() -> {
                 long t0 = System.nanoTime();
                 net.step(stepDt);

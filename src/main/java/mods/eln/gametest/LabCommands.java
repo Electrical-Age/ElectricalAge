@@ -227,7 +227,7 @@ public final class LabCommands {
                     if (text == null && net != null && net.pending()) {
                         // (a heavy network steps in the background, nearly always mid-step: dump it as its step lands)
                         net.dumpWanted = write;
-                        src.sendSuccess(() -> Component.literal("a background step is running: the dump is written when it lands"), false);
+                        src.sendSuccess(() -> Component.literal("a background step is running: the next one is dumped as it starts (lost if the network is rebuilt meanwhile)"), false);
                         return 1;
                     }
                     if (text == null) {

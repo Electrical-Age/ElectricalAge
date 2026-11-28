@@ -87,7 +87,7 @@ public record TankContents(double water, double air, double energy, Map<String, 
             SpeciesRegistry reg = SpeciesRegistry.get();
             for (int i = 0; i < n.extra.length; i++) if (n.extra[i] != 0) s.put(reg.byId(i + 2).key, n.extra[i]);
         }
-        return new TankContents(n.mWater, n.mAir, n.energy, s, FluidSaves.FORMAT, n.volume, n.T(), n.P(), EaUnits.contents(n), EaUnits.composition(n));
+        return new TankContents(n.mWater, n.mAir, n.energy, s, FluidSaves.FORMAT, n.volume, n.T(), n.P(), EaUnits.contents(n), EaUnits.composition(n, EaUnits.TRACE_MB));
     }
 
     /** The contents as FluidSaves.array gives them (water, air, energy, then the other species by id), to restore. */
