@@ -23,7 +23,7 @@ import static mods.eln.i18n.I18N.tr;
  * sulfur comes from hydrodesulfurisation), which it pushes into a hopper under it or a right-click takes. 230 V on its
  * side faces. Model mods.eln.cad.models.Desulfuriser.
  */
-public class DesulfuriserDescriptor extends TransparentNodeDescriptor {
+public class DesulfuriserDescriptor extends TransparentNodeDescriptor implements mods.eln.node.transparent.LeverMachineRender.Drawn {
     public final double nominalU, nominalP;
     final Obj3D obj;
     public static final int TANK_MB = 1000;
@@ -33,7 +33,7 @@ public class DesulfuriserDescriptor extends TransparentNodeDescriptor {
     public static final int FLANGE_Y = 4, FLANGE_Z = 8;
 
     public DesulfuriserDescriptor(String name, String model, double nominalU, double nominalP, ElectricalCableDescriptor cable) {
-        super(name, DesulfuriserElement.class, DesulfuriserRender.class);
+        super(name, DesulfuriserElement.class, mods.eln.node.transparent.LeverMachineRender.class);
         this.nominalU = nominalU;
         this.nominalP = nominalP;
         obj = Eln.obj.getObj(model);
@@ -46,7 +46,8 @@ public class DesulfuriserDescriptor extends TransparentNodeDescriptor {
             .burnsOnOvervoltage(Machines.BURNS_OUT).power(RelativeFace.LEFT, RelativeFace.RIGHT).build();
     }
 
-    void draw(boolean powered, boolean running, float lever) {
+    @Override
+    public void draw(boolean powered, boolean running, float lever) {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();

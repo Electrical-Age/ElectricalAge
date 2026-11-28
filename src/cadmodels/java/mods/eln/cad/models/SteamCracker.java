@@ -17,7 +17,7 @@ import static mods.eln.cad.models.OilKit.turned;
  * peepholes that glow while it cracks (part glow); on top the transfer-line exchanger, a vertical drum the coil's outlet
  * crosses into. Two blue IN flanges on the back (gasoline "C8" at z 4, steam "H2O" at z 12) and two red OUT flanges on the
  * front (butadiene "C4H6" at z 4, natural gas "CH4" at z 12), all 4 px up, their pipes into the firebox, labelled in
- * miniature (IN/OUT over the fluid). Status LEDs in a box between the peepholes. Drawn by SteamCrackerRender. Front XN.
+ * miniature (IN/OUT over the fluid). Status LEDs in a box between the peepholes. Drawn by LeverMachineRender. Front XN.
  */
 public final class SteamCracker {
     private SteamCracker() {

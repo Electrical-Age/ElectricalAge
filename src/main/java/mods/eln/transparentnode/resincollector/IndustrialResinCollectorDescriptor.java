@@ -22,7 +22,7 @@ import static mods.eln.i18n.I18N.tr;
  * a rubber tree three times any other), as latex, into its tank; its OUT flange on top pushes the latex into an EA
  * pipe, or into whatever takes fluid above it. 230 V on its two side faces. Model mods.eln.cad.models.ResinCollector.
  */
-public class IndustrialResinCollectorDescriptor extends TransparentNodeDescriptor {
+public class IndustrialResinCollectorDescriptor extends TransparentNodeDescriptor implements mods.eln.node.transparent.LeverMachineRender.Drawn {
     public final double nominalU, nominalP;
     final Obj3D obj;
     /** Its tank (mB), and its outlet's rate and head, as the oil devices'. */
@@ -36,7 +36,7 @@ public class IndustrialResinCollectorDescriptor extends TransparentNodeDescripto
     public static final int FLANGE_Y = 16;
 
     public IndustrialResinCollectorDescriptor(String name, String model, double nominalU, double nominalP, ElectricalCableDescriptor cable) {
-        super(name, IndustrialResinCollectorElement.class, IndustrialResinCollectorRender.class);
+        super(name, IndustrialResinCollectorElement.class, mods.eln.node.transparent.LeverMachineRender.class);
         this.nominalU = nominalU;
         this.nominalP = nominalP;
         obj = Eln.obj.getObj(model);
@@ -50,7 +50,8 @@ public class IndustrialResinCollectorDescriptor extends TransparentNodeDescripto
             .burnsOnOvervoltage(Machines.BURNS_OUT).power(RelativeFace.LEFT, RelativeFace.RIGHT).build();
     }
 
-    void draw(boolean powered, boolean running, float lever) {
+    @Override
+    public void draw(boolean powered, boolean running, float lever) {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();

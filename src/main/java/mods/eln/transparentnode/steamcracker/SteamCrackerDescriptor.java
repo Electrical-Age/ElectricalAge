@@ -25,7 +25,7 @@ import static mods.eln.i18n.I18N.tr;
  * gasoline: 1250 mB of steam, 40 kJ, 40 mB of butadiene and 30 mB of natural gas (the gas's fuel value about half the
  * gasoline's, so a gas turbine on it gives back less than the cracker draws). Model mods.eln.cad.models.SteamCracker.
  */
-public class SteamCrackerDescriptor extends TransparentNodeDescriptor {
+public class SteamCrackerDescriptor extends TransparentNodeDescriptor implements mods.eln.node.transparent.LeverMachineRender.Drawn {
     public final double nominalU, nominalP;
     final Obj3D obj;
     public static final int GASOLINE_TANK_MB = 1000, STEAM_TANK_MB = 4000, BUTADIENE_TANK_MB = 1000, GAS_TANK_MB = 1000;
@@ -39,7 +39,7 @@ public class SteamCrackerDescriptor extends TransparentNodeDescriptor {
     public static final double STEAM_VESSEL_M3 = 1.26e-3, GAS_VESSEL_M3 = 2.7e-4, STEAM_CHARGE_MB = 125;
 
     public SteamCrackerDescriptor(String name, String model, double nominalU, double nominalP, ElectricalCableDescriptor cable) {
-        super(name, SteamCrackerElement.class, SteamCrackerRender.class);
+        super(name, SteamCrackerElement.class, mods.eln.node.transparent.LeverMachineRender.class);
         this.nominalU = nominalU;
         this.nominalP = nominalP;
         obj = Eln.obj.getObj(model);
@@ -54,7 +54,8 @@ public class SteamCrackerDescriptor extends TransparentNodeDescriptor {
 
     static final mods.eln.anim.Glow.Ramp PEEPHOLE = k -> k > 0.5f ? new float[]{1f, 0.55f, 0.15f} : new float[]{0.15f, 0.12f, 0.1f};
 
-    void draw(boolean powered, boolean running, float lever) {
+    @Override
+    public void draw(boolean powered, boolean running, float lever) {
         if (obj == null) return;
         var m = obj.getPart("main");
         if (m != null) m.draw();

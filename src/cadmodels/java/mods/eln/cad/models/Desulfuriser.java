@@ -14,7 +14,7 @@ import static mods.eln.cad.models.OilKit.turned;
  * The Desulfuriser (the rubber chain's oil route, 2026-11-07): a vertical pressure vessel on legs, its heater jacket
  * painted, lagging above it, a domed head with a relief valve; the cut comes in at the blue IN flange on the back and
  * leaves by the red OUT flange on the front (both 4 px up, centred, labelled in miniature); a sulfur drawer at its foot;
- * status LEDs in a box above the OUT flange; power on the two side faces. Drawn by DesulfuriserRender. Front XN (x = 0).
+ * status LEDs in a box above the OUT flange; power on the two side faces. Drawn by LeverMachineRender. Front XN (x = 0).
  */
 public final class Desulfuriser {
     private Desulfuriser() {

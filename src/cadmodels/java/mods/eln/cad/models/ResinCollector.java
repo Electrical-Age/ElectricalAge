@@ -15,7 +15,7 @@ import static mods.eln.cad.models.OilKit.turned;
  * against a tree trunk: two struts end in rubber clamp pads on the bark, a tapping head (a small motor and its knife)
  * cuts the bark between them, and a gutter under the cut leads the latex into the blue cabinet, whose sight glass
  * shows it. A pump on the lid lifts it to the red OUT flange on top (the port, top face centre), its label in miniature.
- * Power on the two side faces; status LEDs on the front. Drawn by IndustrialResinCollectorRender. Front XN (x = 0).
+ * Power on the two side faces; status LEDs on the front. Drawn by LeverMachineRender. Front XN (x = 0).
  */
 public final class ResinCollector {
     private ResinCollector() {
