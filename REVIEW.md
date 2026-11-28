@@ -71,6 +71,10 @@ here.
 
 ## Known duplication not yet folded (don't add to it)
 
+The Tank draws and publishes its layered glass itself (`TankDescriptor.drawGlass`, `TankElement.layerSignature` and
+its wire code): the same layers as `oil/SightGlass`, which the Still Pot and Column base use. Fold the tank onto
+`SightGlass` (write/read/differs/draw) rather than adding a third.
+
 `EaUnits.compact` (two significant figures, no prefix) stays beside `Meters.number`: fluid units switch unit
 themselves (mB to B, g to kg), and Meters.number would print "120m mB". Descriptor tooltips that state ratings in
 prose (`"%.0f V, %.0f W"`), amps in cable and winding names (`"%.0f A"`) and mB/s rates are not yet on the formatters.

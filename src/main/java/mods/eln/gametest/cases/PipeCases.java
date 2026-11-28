@@ -1650,7 +1650,7 @@ public final class PipeCases {
      */
     static final class ValveRefitAndOneCable implements TestCase {
         BlockPos a, b;
-        String err = "";
+        String err = "", onValve;
         double before, after;
         int pipesAfter;
         int[] pointsAfter;
@@ -1702,6 +1702,9 @@ public final class PipeCases {
                 }
             e = n.addValve(8, 8, 8, mods.eln.node.voxel.ValvePart.ON_OFF);
             if (e != null) err += "refit: " + e + "; ";
+            // a fitting clicked onto the valve is told what is there (AdventurAgent: "must fit on a pipe")
+            onValve = n.addSafetyValveNear(0.5, 0.5, 0.5, mods.eln.node.voxel.SafetyValvePart.PURGE) + " / " + n.addValveNear(0.5, 0.5, 0.5, mods.eln.node.voxel.ValvePart.CONTROL)
+                + " / " + n.addSensorNear(0.5, 0.5, 0.5, 0);
 
             for (int r = 0; r < 2; r++) {
                 b = ctx.at(1, 1, 3 + 2 * r);
@@ -1736,6 +1739,8 @@ public final class PipeCases {
                 pipesAfter, java.util.Arrays.toString(pointsAfter), before, after, control[0].opening() * 100, near[0].getU()));
             ctx.check("valve refit: a removed valve leaves one straight pipe", pipesAfter == 1 && java.util.Arrays.equals(pointsAfter, new int[]{0, 8, 8, 16, 8, 8}),
                 pipesAfter + " " + java.util.Arrays.toString(pointsAfter));
+            ctx.check("valve refit: a safety valve, a valve or a sensor clicked onto the valve is told a valve is there",
+                onValve.equals("a valve is already there / a valve is already there / a valve is already there"), onValve);
             ctx.check("valve refit: the pipe holds what the halves held", before > 0 && Math.abs(after - before) < 1e-9 * before, before + " " + after);
             ctx.check("valve signal: a cable elsewhere in the block doesn't drive the valve or the cable under it",
                 control[0].opening() < 0.05 && Math.abs(near[0].getU()) < 0.25, control[0].opening() + " " + near[0].getU());

@@ -20,7 +20,8 @@ public final class SightGlass {
     public static final float STEP = 0.02f;
     /** Under this share a layer isn't drawn. */
     static final float MIN = 0.005f;
-    /** Water on the white column: the tank's blue (the palette's gaugewater), not its species' colour. */
+    /** Water on the column: the tank's gauge blue, a little lighter to come out as it under the column's off-white
+     *  texture; not its species' colour. */
     static final int WATER = 0x3870BE;
     public static final SightGlass EMPTY = new SightGlass(new float[0], new int[0]);
 
@@ -60,7 +61,20 @@ public final class SightGlass {
 
     /** What v's glass shows (null: empty). */
     public static SightGlass of(FluidNode v) {
-        return v == null ? EMPTY : new SightGlass(tops(v), colours(v));
+        if (v == null) return EMPTY;
+        // (only the layers a glass would draw: a film coming and going while the pot boils is no change to publish)
+        float[] t = tops(v);
+        int[] c = colours(v);
+        int n = 0;
+        float below = 0;
+        for (int l = 0; l < t.length; l++) {
+            if (t[l] - below > MIN) {
+                t[n] = t[l];
+                c[n++] = c[l];
+            }
+            below = Math.max(below, t[l]);
+        }
+        return n == t.length ? new SightGlass(t, c) : new SightGlass(java.util.Arrays.copyOf(t, n), java.util.Arrays.copyOf(c, n));
     }
 
     /** The top of all the liquid (0..1 of the glass). */

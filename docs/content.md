@@ -218,7 +218,7 @@ Both machines also draw Overhead Cable (`eln:overhead_cable`, `gridnode/Overhead
 data, up to 500 blocks; Baughn 2026-11-09): bare copper at a kit's copper cost, no rubber, the only thing utility poles,
 downlinks and grid transformers are strung with (they refuse cable kits). A span's Rs is its cross-section's cable
 resistance x its length; the poles' line is 11 kV, set by their insulators. Spans strung with kits before then load and
-keep their kits' tier. Pieces of one cross-section combine by clicking one onto the other.
+keep their kits' tier. Pieces of one cross-section merge wherever they meet, as kits do.
 
 The servo layer (`robotics`, Baughn 2026-11-02: the servo layer first, 200 V only): the Linear Servo Drive (transparent
 node `eln:transparent_node@5504`, `linear_servo_drive`), `eln:servo_rail` and `eln:station_marker` (plain blocks with

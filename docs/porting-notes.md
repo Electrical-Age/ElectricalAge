@@ -1294,6 +1294,9 @@ on 1.7.10) onto 26.x.
   Overhead cable merges the same way (Baughn 2026-11-28): `OverheadCableItem` is a `Pourable`, as kits are, and its
   own pickup and click merges are gone. GameTest `overhead_cable_merges_on_pickup`.
 - **A model part's origin reads as its .txt says** (2026-11-28, Baughn: fix it for all). `Obj3DPart.getFloat("originX/Y/Z")`
-  gave 0 for every part (the parser kept the origins apart from the other floats), so what placed itself by it was
-  off: the boilers' gauge columns (right only at half), the oil separator's basin level, the macerator's sinking
-  piece, the plate machine's roll line, the simple shaft's turning axis. All read the real origin now.
+  gave 0 for every part (the parser kept the origins apart from the other floats). What placed itself by a non-zero
+  origin was off and is right now: the boilers' gauge columns (right only at half; the Large Boiler's stood above
+  its glass when full), the oil separator's basin level (a near-empty basin's film floated over its floor), and the
+  macerator's sinking piece (it sank through the rolls; it now starts higher on the 48V, whose rolls stand higher,
+  and ends just over the axis on both). The plate machine's rolls and the shaft rotors have their origins at 0 and
+  are unchanged.

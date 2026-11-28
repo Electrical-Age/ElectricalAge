@@ -291,9 +291,21 @@ public final class KitDeviceCases {
                         && Math.abs(l.rs() - 5 * thick().descriptor(VHV).electricalRs) < 1e-9, l.cableStack() + ", rs " + l.rs());
                 // two pieces of the same cross-section combine, up to 500 blocks
                 ItemStack x = mods.eln.gridnode.OverheadCableItem.make(thick().mm2(), 450), y = mods.eln.gridnode.OverheadCableItem.make(thick().mm2(), 80);
-                x.getItem().overrideOtherStackedOnMe(x, y, null, net.minecraft.world.inventory.ClickAction.PRIMARY, null, null);
+                var box = new net.minecraft.world.SimpleContainer(1);
+                var slot = new net.minecraft.world.inventory.Slot(box, 0, 0, 0);
+                box.setItem(0, x);
+                x.getItem().overrideOtherStackedOnMe(x, y, slot, net.minecraft.world.inventory.ClickAction.PRIMARY, ctx.player(), null);
                 ctx.check("overhead cable: pieces combine up to 500 blocks", mods.eln.gridnode.OverheadCableItem.blocks(x) == 500
                     && mods.eln.gridnode.OverheadCableItem.blocks(y) == 30, mods.eln.gridnode.OverheadCableItem.blocks(x) + " + " + mods.eln.gridnode.OverheadCableItem.blocks(y));
+                // the other way round (the carried piece onto the one in the slot), and never across cross-sections
+                ItemStack a = mods.eln.gridnode.OverheadCableItem.make(thick().mm2(), 100), b = mods.eln.gridnode.OverheadCableItem.make(thick().mm2(), 20),
+                    c = mods.eln.gridnode.OverheadCableItem.make(thick().mm2() == 0 ? 1 : thick().mm2() - 1, 20);
+                box.setItem(0, a);
+                boolean ok = b.getItem().overrideStackedOnOther(b, slot, net.minecraft.world.inventory.ClickAction.PRIMARY, ctx.player());
+                boolean other = c.getItem().overrideStackedOnOther(c, slot, net.minecraft.world.inventory.ClickAction.PRIMARY, ctx.player());
+                ctx.check("overhead cable: a carried piece pours into the one in the slot; another cross-section doesn't",
+                    ok && b.isEmpty() && !other && mods.eln.gridnode.OverheadCableItem.blocks(a) == 120 && mods.eln.gridnode.OverheadCableItem.blocks(c) == 20,
+                    ok + " " + other + " " + mods.eln.gridnode.OverheadCableItem.blocks(a) + " " + mods.eln.gridnode.OverheadCableItem.blocks(c));
             }
         });
     }

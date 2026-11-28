@@ -574,7 +574,8 @@ public class Obj3D {
                         part = nameToPartHash.get(words[1]);
                     } else if (words[0].equals("f")) {
                         // (the origins are floats like any other too: getFloat("originY") read 0 whatever the .txt
-                        // said, and four animations placed themselves by it; Baughn 2026-11-28: fix it for all)
+                        // said: the boilers' gauges, the oil separator's basin and the macerator's piece placed
+                        // themselves by it; Baughn 2026-11-28: fix it for all)
                         if (words[1].startsWith("origin")) part.nameToFloatHash.put(words[1], Float.valueOf(words[2]));
                         if (words[1].equals("originX")) {
                             part.ox = Float.valueOf(words[2]);

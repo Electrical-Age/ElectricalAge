@@ -891,6 +891,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         for (VoxelPart q : parts)
             if (q instanceof PipeSensorPart) return mods.eln.i18n.I18N.tr("block already has a sensor");
         int idx = partAt(hx, hy, hz);
+        if (idx >= 0 && fittingThere(parts.get(idx)) != null) return fittingThere(parts.get(idx));
         if (idx < 0 || !(parts.get(idx) instanceof PipePart pipe)) return mods.eln.i18n.I18N.tr("must fit on a pipe");
         int[] best = null;
         double bd = Double.MAX_VALUE;

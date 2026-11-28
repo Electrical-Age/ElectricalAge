@@ -32,13 +32,17 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
             if (belt != null) belt.mark = obj.getPart("beltmark");
         }
         initLeds(obj);
-        if (rot1 != null) sinkY = Math.min(IN_Y, (rot1.getFloat("originY") + 0.06f) / 0.7f);
+        if (rot1 != null) {
+            sinkY = (rot1.getFloat("originY") + 0.06f) / 0.7f;
+            inY = Math.max(IN_Y, sinkY + SINK);
+        }
     }
 
-    /** Where the piece being ground is drawn (in the 0.7-scaled item frame): its start in the hopper, and how far it
-     *  sinks, to just over the rollers' axis (rot1's .txt origin). */
-    static final float IN_Y = 0.4f;
-    float sinkY = 0.05f;
+    /** Where the piece being ground is drawn (in the 0.7-scaled item frame): its start in the hopper (inY: IN_Y, or
+     *  SINK over where it ends if the rollers stand higher, as the 48V's do), and how far it sinks, to just over the
+     *  rollers' axis (rot1's .txt origin). */
+    static final float IN_Y = 0.4f, SINK = 0.2f;
+    float sinkY = 0.05f, inY = IN_Y;
     /** How long a new piece takes to drop in (s). */
     static final float ENTRY_S = 0.35f;
 
@@ -72,7 +76,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
         float p = render == null ? 0 : render.progress.shown();
         // (a new piece drops in from the hopper's mouth: AdventurAgent saw it pop in at full size)
         float drop = 0.3f * (1 - mods.eln.anim.ItemMotion.ease(handle.entered, 0, ENTRY_S));
-        float y = mods.eln.anim.ItemMotion.lerp(IN_Y, sinkY, mods.eln.anim.ItemMotion.ease(p, 0, 0.8f)) + drop;
+        float y = mods.eln.anim.ItemMotion.lerp(inY, sinkY, mods.eln.anim.ItemMotion.ease(p, 0, 0.8f)) + drop;
         float size = mods.eln.anim.ItemMotion.lerp(1, 0.3f, mods.eln.anim.ItemMotion.ease(p, 0.25f, 1));
         float amp = 0.035f * Math.min(1, handle.rollers.speedNow() * 2) * (p > 0 ? 1 : 0);
         mods.eln.anim.ItemMotion.draw(inEntity, mods.eln.anim.ItemMotion.shake(handle.rollers.deg(), amp, 0), y,
