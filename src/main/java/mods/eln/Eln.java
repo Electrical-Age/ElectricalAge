@@ -304,7 +304,6 @@ public class Eln {
         // (after Open Parties and Claims' cancel, and seeing it: a bike's owner may pick it up in any claim)
         NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.LOWEST, true,
             net.neoforged.neoforge.event.entity.player.AttackEntityEvent.class, mods.eln.bike.ElectricBike::ownerMayAttack);
-        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre.class, mods.eln.gridnode.OverheadCableItem::onPickup);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.class, mods.eln.node.voxel.ChiselItem::onLeftClick);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.class, mods.eln.node.voxel.ToolbagShears::onLeftClick);
         NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent.class, mods.eln.node.voxel.ChiselItem::forget);

@@ -86,7 +86,7 @@ public final class PoleCableCases {
 
     /** Picked-up overhead cable tops up the player's piece of the same cross-section (nero 1573459054402084968). */
     static final class Pickup implements TestCase {
-        String said;
+        String said, merged;
 
         public String id() {
             return "overhead_cable_merges_on_pickup";
@@ -103,16 +103,25 @@ public final class PoleCableCases {
                 mods.eln.gridnode.OverheadCableItem.make(4, 30));
             drop.setNoPickUpDelay();
             c.level().addFreshEntity(drop);
-            mods.eln.gridnode.OverheadCableItem.onPickup(new net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre(player, drop));
+            mods.eln.node.voxel.KitItem.onPickup(new net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre(player, drop));
             said = mods.eln.gridnode.OverheadCableItem.blocks(mine) + "," + mods.eln.gridnode.OverheadCableItem.blocks(other) + ","
                 + mods.eln.gridnode.OverheadCableItem.blocks(drop.getItem()) + "," + drop.isRemoved();
             drop.discard();
+            // pieces of a cross-section merge wherever they meet, as kits do (Baughn 2026-11-28)
+            var box = new net.minecraft.world.SimpleContainer(3);
+            box.setItem(0, mods.eln.gridnode.OverheadCableItem.make(4, 100));
+            box.setItem(1, mods.eln.gridnode.OverheadCableItem.make(3, 10));
+            box.setItem(2, mods.eln.gridnode.OverheadCableItem.make(4, 450));
+            mods.eln.node.voxel.KitItem.tidy(box, 3, -1);
+            merged = mods.eln.gridnode.OverheadCableItem.blocks(box.getItem(0)) + "," + mods.eln.gridnode.OverheadCableItem.blocks(box.getItem(1)) + ","
+                + mods.eln.gridnode.OverheadCableItem.blocks(box.getItem(2));
             inv.clearContent();
         }
 
         public void measure(TestContext c) {
             c.check("overhead cable: a picked-up piece tops up the same cross-section to 500, the rest stays on the ground",
                 said.equals("500,10,10,false"), said);
+            c.check("overhead cable: pieces of a cross-section in a container merge to 500, the rest and other sizes stay", merged.equals("500,10,50"), merged);
         }
     }
 }

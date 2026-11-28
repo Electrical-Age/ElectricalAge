@@ -1282,3 +1282,5 @@ on 1.7.10) onto 26.x.
   it): until 2026-11-28 a kit one block short beside a stack of cable, topped up in the grid by a click, left the old
   result standing, and taking it doubled the stack (`ResultSlot.onTake` falls back to the live grid stacks when no
   recipe matches). `KitItem.owned`; GameTest `pipe_kit_crafting`.
+  Overhead cable merges the same way (Baughn 2026-11-28): `OverheadCableItem` is a `Pourable`, as kits are, and its
+  own pickup and click merges are gone. GameTest `overhead_cable_merges_on_pickup`.

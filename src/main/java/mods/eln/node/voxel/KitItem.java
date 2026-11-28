@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
  * a player's report via Baughn). Kits from before keep their damage until they next change: length = MAX - damage.
  * The bar shows how full it is. Pipe kits and cable kits merge, split and top each other up alike (KitRecipes, onPickup).
  */
-public interface KitItem {
+public interface KitItem extends Pourable {
     int MAX = 1024;
 
     /** A kit of this item holding len voxels (empty if none). */
@@ -18,6 +18,26 @@ public interface KitItem {
     /** A kit like this one (a cable kit: of its spec) holding len voxels. */
     default ItemStack make(ItemStack like, int len) {
         return make(len);
+    }
+
+    @Override
+    default int held(ItemStack s) {
+        return length(s);
+    }
+
+    @Override
+    default int capacity() {
+        return MAX;
+    }
+
+    @Override
+    default void setHeld(ItemStack s, int n) {
+        setLength(s, n);
+    }
+
+    @Override
+    default boolean sameKind(ItemStack a, ItemStack b) {
+        return same(a, b);
     }
 
     /** One kind of kit: the same item, and a cable kit the same spec (so they merge and top each other up). */
@@ -72,12 +92,13 @@ public interface KitItem {
      */
     static int pour(ItemStack from, ItemStack into) {
         if (from == into || from.isEmpty() || into.isEmpty() || from.getCount() != 1 || into.getCount() != 1
-            || !(from.getItem() instanceof KitItem) || !same(from, into)) return 0;
-        int n = Math.min(length(from), MAX - length(into));
+            || !(from.getItem() instanceof Pourable) || !Pourable.same(from, into)) return 0;
+        Pourable p = (Pourable) from.getItem();
+        int n = Math.min(p.held(from), p.capacity() - p.held(into));
         if (n <= 0) return 0;
-        setLength(into, length(into) + n);
-        setLength(from, length(from) - n);
-        if (length(from) <= 0) from.setCount(0);
+        p.setHeld(into, p.held(into) + n);
+        p.setHeld(from, p.held(from) - n);
+        if (p.held(from) <= 0) from.setCount(0);
         return n;
     }
 
@@ -93,8 +114,8 @@ public interface KitItem {
         boolean moved = false;
         for (int a = 0; a < n; a++) {
             ItemStack into = c.getItem(order[a]);
-            if (!(into.getItem() instanceof KitItem) || into.getCount() != 1) continue;
-            for (int b = a + 1; b < n && length(into) < MAX; b++) {
+            if (!(into.getItem() instanceof Pourable) || into.getCount() != 1) continue;
+            for (int b = a + 1; b < n && Pourable.room(into) > 0; b++) {
                 ItemStack from = c.getItem(order[b]);
                 if (pour(from, into) <= 0) continue;
                 moved = true;
@@ -110,7 +131,7 @@ public interface KitItem {
         var p = e.getEntity();
         if (p.level().isClientSide() || (p.tickCount + p.getId()) % 20 != 0) return;
         var inv = p.getInventory();
-        tidy(inv, inv.getContainerSize(), inv.getSelectedItem().getItem() instanceof KitItem ? inv.getSelectedSlot() : -1);
+        tidy(inv, inv.getContainerSize(), inv.getSelectedItem().getItem() instanceof Pourable ? inv.getSelectedSlot() : -1);
     }
 
     /** Other mods' slots over real storage that isn't a Container (by class name: no dependency). The kits in them merge
@@ -142,18 +163,18 @@ public interface KitItem {
      * whose container owns the stack ({@link #owned}).
      */
     static boolean pourIntoSlots(ItemStack kit, java.util.List<net.minecraft.world.inventory.Slot> slots, int start, int end, boolean reverse) {
-        if (!(kit.getItem() instanceof KitItem) || kit.getCount() != 1 || start < 0 || end > slots.size()) return false;
+        if (!(kit.getItem() instanceof Pourable) || kit.getCount() != 1 || start < 0 || end > slots.size()) return false;
         int room = 0;
         for (int i = start; i < end; i++) {
             var slot = slots.get(i);
             ItemStack o = slot.getItem();
-            if (o != kit && o.getCount() == 1 && same(o, kit) && owned(slot) && slot.mayPlace(kit)) room += MAX - length(o);
+            if (o != kit && o.getCount() == 1 && Pourable.same(o, kit) && owned(slot) && slot.mayPlace(kit)) room += Pourable.room(o);
         }
-        if (room < length(kit)) return false;
+        if (room < Pourable.amount(kit)) return false;
         for (int k = 0; k < end - start && !kit.isEmpty(); k++) {
             var slot = slots.get(reverse ? end - 1 - k : start + k);
             ItemStack o = slot.getItem();
-            if (o == kit || o.getCount() != 1 || !same(o, kit) || !owned(slot) || !slot.mayPlace(kit)) continue;
+            if (o == kit || o.getCount() != 1 || !Pourable.same(o, kit) || !owned(slot) || !slot.mayPlace(kit)) continue;
             if (pour(kit, o) > 0) slot.setChanged();
         }
         return kit.isEmpty();
@@ -180,11 +201,11 @@ public interface KitItem {
     public static void closing(net.minecraft.world.entity.player.Player p, java.util.List<net.minecraft.world.inventory.Slot> slots) {
         for (int a = 0; a < slots.size(); a++) {
             var sa = slots.get(a);
-            if (sa.container == p.getInventory() || !(sa.getItem().getItem() instanceof KitItem)) continue;
+            if (sa.container == p.getInventory() || !(sa.getItem().getItem() instanceof Pourable)) continue;
             for (int b = a + 1; b < slots.size(); b++) {
                 var sb = slots.get(b);
                 ItemStack into = sa.getItem(), from = sb.getItem();
-                if (sb.container == p.getInventory() || from == into || into.getCount() != 1 || !(from.getItem() instanceof KitItem) || !same(from, into)
+                if (sb.container == p.getInventory() || from == into || into.getCount() != 1 || !(from.getItem() instanceof Pourable) || !Pourable.same(from, into)
                     || !sa.mayPlace(into) || !sb.mayPlace(from) || !sa.mayPickup(p) || !sb.mayPickup(p)) continue;
                 if (owned(sa) && owned(sb)) {
                     if (pour(from, into) <= 0) continue;
@@ -199,12 +220,12 @@ public interface KitItem {
                 // (the giving slot first: if it doesn't take the set, nothing has been added anywhere)
                 ItemStack gave = from.copy();
                 sb.set(rest.isEmpty() ? ItemStack.EMPTY : rest);
-                if (rest.isEmpty() ? !sb.getItem().isEmpty() : length(sb.getItem()) != length(rest)) {
+                if (rest.isEmpty() ? !sb.getItem().isEmpty() : Pourable.amount(sb.getItem()) != Pourable.amount(rest)) {
                     sb.set(gave);
                     return;
                 }
                 sa.set(grown);
-                if (sa.getItem().getCount() != 1 || length(sa.getItem()) != length(grown)) {
+                if (sa.getItem().getCount() != 1 || Pourable.amount(sa.getItem()) != Pourable.amount(grown)) {
                     sa.set(was);
                     sb.set(gave);
                     return;
@@ -225,14 +246,14 @@ public interface KitItem {
 
     /**
      * Picking up a kit tops up the player's other kits of the same item first (a kit is a one-item stack holding up to
-     * MAX voxels). What's left is picked up as usual.
+     * its capacity). What's left is picked up as usual.
      */
     static void onPickup(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre e) {
         var ent = e.getItemEntity();
         ItemStack s = ent.getItem();
-        if (!(s.getItem() instanceof KitItem) || e.getPlayer().level().isClientSide() || ent.hasPickUpDelay()) return;
+        if (!(s.getItem() instanceof Pourable) || e.getPlayer().level().isClientSide() || ent.hasPickUpDelay()) return;
         if (ent.getTarget() != null && !ent.getTarget().equals(e.getPlayer().getUUID())) return;   // (meant for someone else)
-        int before = length(s);
+        int before = Pourable.amount(s);
         ItemStack rest = s.copy();
         var inv = e.getPlayer().getInventory();
         for (int i = 0; i < inv.getContainerSize() && !rest.isEmpty(); i++) pour(rest, inv.getItem(i));
@@ -240,6 +261,6 @@ public interface KitItem {
             e.getPlayer().take(ent, 1);
             ent.discard();
             e.setCanPickup(net.minecraft.util.TriState.FALSE);
-        } else if (length(rest) != before) setLength(s, length(rest));
+        } else if (Pourable.amount(rest) != before) ((Pourable) s.getItem()).setHeld(s, Pourable.amount(rest));
     }
 }

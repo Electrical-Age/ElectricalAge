@@ -9,10 +9,10 @@ import net.minecraft.world.item.ItemStack;
  * Overhead cable (Baughn 2026-11-09): bare copper for the spans between utility poles, made on a wire-drawing machine.
  * Air insulates a line in the open, so it takes no rubber; the pole's insulators set the line's voltage, and the
  * cable's cross-section only its resistance. It is good for nothing else, and poles take nothing else (cable kits are
- * refused there). One holds up to MAX_BLOCKS blocks of one cross-section; two of the same cross-section combine by
- * clicking one onto the other.
+ * refused there). One holds up to MAX_BLOCKS blocks of one cross-section; two of the same cross-section combine
+ * wherever they meet, as kits do (Pourable).
  */
-public class OverheadCableItem extends Item {
+public class OverheadCableItem extends Item implements mods.eln.node.voxel.Pourable {
     /** Most blocks one holds (Baughn: up to 500 block lengths, for convenience). */
     public static final int MAX_BLOCKS = 500;
 
@@ -99,49 +99,39 @@ public class OverheadCableItem extends Item {
         return 0xd07040;
     }
 
-    /** Another overhead cable of the same cross-section clicked onto this one: as much goes in as fits. */
+    @Override
+    public int held(ItemStack s) {
+        return blocks(s);
+    }
+
+    @Override
+    public int capacity() {
+        return MAX_BLOCKS;
+    }
+
+    @Override
+    public void setHeld(ItemStack s, int n) {
+        int now = Math.max(0, Math.min(MAX_BLOCKS, n));
+        net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, s, t -> t.putInt(BLOCKS, now));
+    }
+
+    @Override
+    public boolean sameKind(ItemStack a, ItemStack b) {
+        return mm2(a) == mm2(b);
+    }
+
+    /** Another overhead cable of the same cross-section clicked onto this one, or this onto it: as much goes in as
+     *  fits. They also merge wherever they meet, as kits do (Baughn 2026-11-28; mods.eln.node.voxel.Pourable). */
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack self, ItemStack other, net.minecraft.world.inventory.Slot slot,
                                             net.minecraft.world.inventory.ClickAction action, net.minecraft.world.entity.player.Player player,
                                             net.minecraft.world.entity.SlotAccess carried) {
-        if (action != net.minecraft.world.inventory.ClickAction.PRIMARY || !is(other) || mm2(other) != mm2(self)) return false;
-        int room = MAX_BLOCKS - blocks(self);
-        if (room <= 0) return false;
-        int n = Math.min(room, blocks(other));
-        int now = blocks(self) + n;
-        net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, self, t -> t.putInt(BLOCKS, now));
-        take(other, n);
-        return true;
+        return mods.eln.node.voxel.KitItem.clickedKit(other, self, slot, action, player);
     }
 
-    /**
-     * Picking up a piece tops up the player's pieces of the same cross-section first, up to MAX_BLOCKS each (nero
-     * 1573459054402084968: they stayed apart, to be clicked together by hand), as kits do. What's left is picked up as
-     * usual.
-     */
-    public static void onPickup(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre e) {
-        var ent = e.getItemEntity();
-        ItemStack s = ent.getItem();
-        if (!is(s) || e.getPlayer().level().isClientSide() || ent.hasPickUpDelay()) return;
-        int len = blocks(s), mm2 = mm2(s);
-        var inv = e.getPlayer().getInventory();
-        for (int i = 0; i < inv.getContainerSize() && len > 0; i++) {
-            ItemStack o = inv.getItem(i);
-            if (o == s || !is(o) || mm2(o) != mm2) continue;
-            int room = MAX_BLOCKS - blocks(o);
-            if (room <= 0) continue;
-            int n = Math.min(room, len), now = blocks(o) + n;
-            net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, o, t -> t.putInt(BLOCKS, now));
-            len -= n;
-        }
-        if (len == blocks(s)) return;
-        if (len <= 0) {
-            e.getPlayer().take(ent, 1);
-            ent.discard();
-            e.setCanPickup(net.minecraft.util.TriState.FALSE);
-        } else {
-            int left = len;
-            net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, s, t -> t.putInt(BLOCKS, left));
-        }
+    @Override
+    public boolean overrideStackedOnOther(ItemStack self, net.minecraft.world.inventory.Slot slot, net.minecraft.world.inventory.ClickAction action,
+                                          net.minecraft.world.entity.player.Player player) {
+        return mods.eln.node.voxel.KitItem.clickedKit(self, slot.getItem(), slot, action, player);
     }
 }
