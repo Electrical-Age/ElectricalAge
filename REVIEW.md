@@ -34,6 +34,7 @@ here.
 | A saved or computed value that may be NaN/infinite | `misc/Utils.finiteOr(v, fallback)` | `if (isNaN(x)) x = 0; if (x == POSITIVE_INFINITY) …` |
 | A client packet to the server | `ElnNet.sendToServer(byte[])` (or the stream form) | a ByteArrayOutputStream filled only to be sent |
 | Kit recipes | `node/voxel/KitRecipes` | a per-kit recipe skeleton |
+| Merging kits (any place two kits of a kind meet) | `KitItem.pour`, `tidy`, `pourIntoSlots`, `closing`, `clickedKit` | a top-up loop with `setLength` |
 | A device that may stand on another EA device or a pipe | `TransparentNodeDescriptor.onDeviceOrPipe(below)` from its `isFloor` (the Boiler, the Condenser Coil) | its own `instanceof TransparentNodeBlock \|\| VoxelNodeBlock` check |
 | GameTest ids | `gametest/cases/Ids` | a per-file `transparent(String)` / `six(String)` lookup |
 | GameTest world access | `TestContext` (`at`, `floor`, `placeSix`, `player()`, `holding`, `nodeAt`/`voxelAt`/`voxelByEntity`, `kitClick` (a kit's click as a player, snapped over the point), `source`/`setVolts`, static `field`; docs/testing.md); six-node electrical fixtures `Wp9aCases` (`orient`, `load`, `resistor`, `current`); `Wp10aCases.rs()`/`off()`; shaft lines `ShaftSteamCases.turbineLine`; HP plants `HpPlantCases.hpTurbine`/`condensateOut`/`WallMeter`; steam in pipes `PipeCases.steam` | per-file `node(ctx,pos)`, `player(ctx)`, `click`/`kitClick` (snapTo, XPlacer.use, snap back), `source(u)`, `resistor()` or reflective `field()` copies; a hand-written `setVoltageId` packet |
@@ -45,6 +46,11 @@ here.
   the change says why it's different and Baughn agreed.
 - **Text the player reads uses the canonical formatters,** so the same quantity reads the same everywhere (same
   unit, prefix and precision). Check the GUI JSON `sample` of a fixed-width line when its text changes.
+- **A crafting recipe's result is exactly what one unit from each slot makes, and a stack lying in a crafting grid is
+  never changed in place.** A result that counts more than the grid takes is a dup in every container that isn't
+  vanilla's (AE2's terminal, the Crafter); a grid stack changed without `slotsChanged` leaves a stale result, and
+  taking a result no recipe gives hands the grid's stacks back doubled (`ResultSlot.onTake`). Merging and filling
+  kits goes through `KitItem.pour` / `KitItem.owned`, which keep out of grids, result slots and other mods' ghost slots.
 - **GameTest outcomes don't depend on neighbours** (21-block padding; Baughn). Cases that differ only in parameters
   are rows of one parameterised case (see `HpPlantCases.addTo`), not copies.
 - **The simulation runs in unloaded chunks too:** nodes stay. A test or feature that assumes otherwise is wrong.

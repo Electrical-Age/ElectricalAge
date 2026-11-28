@@ -117,12 +117,17 @@ public interface KitItem {
      *  when their menu closes; their filter and ghost slots, the same classes' siblings, are not listed. */
     java.util.Set<String> STORAGE_SLOTS = java.util.Set.of("net.p3pp3rf1y.sophisticatedcore.common.gui.StorageInventorySlot");
 
-    /** The slot's container holds this very stack: plain storage, where a set stays (a chest, an inventory; not a
-     *  result, ghost or handler slot, which answer with copies or with nothing behind them). */
+    /**
+     * The slot's container holds this very stack: plain storage, where a set stays (a chest, an inventory; not a
+     * result, ghost or handler slot, which answer with copies or with nothing behind them). Not a crafting grid: a kit
+     * grown in place there leaves the result shown as it was, and taking a result no recipe gives any more hands the
+     * grid's stacks back doubled (ResultSlot.onTake's fallback; a kit one block short beside 64 cables, topped up in
+     * the grid, gave 126 cables).
+     */
     static boolean owned(net.minecraft.world.inventory.Slot slot) {
         ItemStack s = slot.getItem();
         int k = slot.getContainerSlot();
-        return !s.isEmpty() && k >= 0 && k < slot.container.getContainerSize() && slot.container.getItem(k) == s && slot.getItem() == s;
+        return !(slot.container instanceof net.minecraft.world.inventory.CraftingContainer) && !s.isEmpty() && k >= 0 && k < slot.container.getContainerSize() && slot.container.getItem(k) == s && slot.getItem() == s;
     }
 
     static boolean storage(net.minecraft.world.inventory.Slot slot) {
@@ -191,14 +196,17 @@ public interface KitItem {
                 if (!storage(sa) || !storage(sb)) continue;
                 ItemStack was = into.copy(), grown = into.copy(), rest = from.copy();
                 if (pour(rest, grown) <= 0) continue;
+                // (the giving slot first: if it doesn't take the set, nothing has been added anywhere)
+                ItemStack gave = from.copy();
+                sb.set(rest.isEmpty() ? ItemStack.EMPTY : rest);
+                if (rest.isEmpty() ? !sb.getItem().isEmpty() : length(sb.getItem()) != length(rest)) {
+                    sb.set(gave);
+                    return;
+                }
                 sa.set(grown);
                 if (sa.getItem().getCount() != 1 || length(sa.getItem()) != length(grown)) {
                     sa.set(was);
-                    return;
-                }
-                sb.set(rest.isEmpty() ? ItemStack.EMPTY : rest);
-                if (rest.isEmpty() ? !sb.getItem().isEmpty() : length(sb.getItem()) != length(rest)) {
-                    sa.set(was);
+                    sb.set(gave);
                     return;
                 }
             }

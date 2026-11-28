@@ -1278,3 +1278,7 @@ on 1.7.10) onto 26.x.
   once a second (the held kit takes the others), in the Toolbag as it changes, on shift-click toward slots holding a
   kit (`KitMoveMixin` on `AbstractContainerMenu.moveItemStackTo`, all or nothing), in other containers' slots as they
   close (plain containers, and Sophisticated storage slots by class name), kit clicked on kit, and on pickup. To split a kit for someone, throw the crafted one. GameTests `cable_kits`, `pipe_kit_crafting`.
+  A kit lying in a crafting grid is never filled in place (by a stack or kit clicked on it, or a shift-click toward
+  it): until 2026-11-28 a kit one block short beside a stack of cable, topped up in the grid by a click, left the old
+  result standing, and taking it doubled the stack (`ResultSlot.onTake` falls back to the live grid stacks when no
+  recipe matches). `KitItem.owned`; GameTest `pipe_kit_crafting`.

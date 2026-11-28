@@ -74,6 +74,8 @@ public final class KitRecipes {
                            net.minecraft.world.inventory.Slot slot, net.minecraft.world.inventory.ClickAction action,
                            net.minecraft.world.entity.player.Player player) {
         if (action != net.minecraft.world.inventory.ClickAction.PRIMARY || !slot.allowModification(player)) return false;
+        // (not in a crafting grid: the result shown would no longer be the grid's, KitItem.owned)
+        if (slot.container instanceof net.minecraft.world.inventory.CraftingContainer) return false;
         // (kit onto kit: whichever is carried pours into the one in the slot)
         if (units.getItem() instanceof KitItem) return KitItem.clickedKit(slot.getItem() == kit ? units : kit, slot.getItem(), slot, action, player);
         if (absorb(kit, kitTier, units, unitTier, per, take) == 0) return false;

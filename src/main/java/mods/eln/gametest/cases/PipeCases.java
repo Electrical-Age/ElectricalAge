@@ -2046,9 +2046,36 @@ public final class PipeCases {
             table.getSlot(2).set(PipeKitItem.kit(0, 16));
             table.slotsChanged(table.getSlot(1).container);
             mods.eln.node.voxel.KitItem.closing(ctx.player(), table.slots);
-            ctx.check("kits merge: a crafting result is not poured from (it would be a free kit)",
-                PipeKitItem.length(table.getSlot(1).getItem()) + PipeKitItem.length(table.getSlot(2).getItem()) == 32,
+            ctx.check("kits merge: a crafting table's result and grid are left alone",
+                PipeKitItem.length(table.getSlot(0).getItem()) == 32 && PipeKitItem.length(table.getSlot(1).getItem()) == 16 && PipeKitItem.length(table.getSlot(2).getItem()) == 16,
                 PipeKitItem.length(table.getSlot(0).getItem()) + " " + PipeKitItem.length(table.getSlot(1).getItem()) + " " + PipeKitItem.length(table.getSlot(2).getItem()));
+            // a kit in a crafting grid isn't topped up in place: by a stack clicked on it, a kit clicked on it, or a kit
+            // shift-clicked toward it. The result shown would stay, and taking it doubled the stacks beside it
+            var fp2 = net.neoforged.neoforge.common.util.FakePlayerFactory.get(ctx.level(),
+                new com.mojang.authlib.GameProfile(java.util.UUID.fromString("e1a0c0de-0000-4000-8000-00000000c0df"), "eln_kit_grid"));
+            fp2.getInventory().clearContent();
+            var grid = new net.minecraft.world.inventory.CraftingMenu(10, fp2.getInventory(),
+                net.minecraft.world.inventory.ContainerLevelAccess.create(ctx.level(), BlockPos.ZERO));
+            grid.getSlot(1).set(PipeKitItem.kit(1, 1008));
+            grid.getSlot(2).set(alloy.copyWithCount(64));
+            grid.slotsChanged(grid.getSlot(1).container);
+            ItemStack inGrid = grid.getSlot(1).getItem(), loose = alloy.copyWithCount(5), other = PipeKitItem.kit(1, 16);
+            var noCarry = net.minecraft.world.entity.SlotAccess.of(() -> ItemStack.EMPTY, x -> { });
+            boolean c1 = inGrid.getItem().overrideOtherStackedOnMe(inGrid, loose, grid.getSlot(1), net.minecraft.world.inventory.ClickAction.PRIMARY, fp2, noCarry);
+            boolean c2 = inGrid.getItem().overrideOtherStackedOnMe(inGrid, other, grid.getSlot(1), net.minecraft.world.inventory.ClickAction.PRIMARY, fp2, noCarry);
+            boolean c3 = mods.eln.node.voxel.KitItem.pourIntoSlotsOf(grid, other, 1, 10, false);
+            grid.clicked(0, 0, net.minecraft.world.inventory.ContainerInput.PICKUP, fp2);
+            ctx.check("kits merge: a kit in a crafting grid is not topped up in place, and taking the result leaves 63 plates",
+                !c1 && !c2 && !c3 && PipeKitItem.length(other) == 16 && loose.getCount() == 5 && PipeKitItem.length(grid.getCarried()) == 1024
+                    && grid.getSlot(2).getItem().getCount() == 63,
+                c1 + " " + c2 + " " + c3 + " carried " + PipeKitItem.length(grid.getCarried()) + " plates " + grid.getSlot(2).getItem().getCount());
+            grid.setCarried(ItemStack.EMPTY);
+            fp2.getInventory().clearContent();
+            // kit clicked on kit in a chest pours
+            ItemStack held = PipeKitItem.kit(0, 20);
+            boolean c4 = held.getItem().overrideStackedOnOther(held, chest.getSlot(7), net.minecraft.world.inventory.ClickAction.PRIMARY, ctx.player());
+            ctx.check("kits merge: a kit clicked onto a kit in a chest pours into it", c4 && held.isEmpty() && PipeKitItem.length(chest.getSlot(7).getItem()) == 96,
+                c4 + " " + held + " " + PipeKitItem.length(chest.getSlot(7).getItem()));
             // the Toolbag holds one kit of a kind
             ItemStack bag = new ItemStack(mods.eln.registry.ElnRegistry.TOOLBAG.get());
             var bm = mods.eln.node.voxel.ToolbagMenu.forTests(ctx.player().getInventory(), bag, 0);
