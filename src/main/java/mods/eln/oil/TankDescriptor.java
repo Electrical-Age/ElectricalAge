@@ -79,18 +79,6 @@ public class TankDescriptor extends TransparentNodeDescriptor {
         }
     }
 
-    /** A vessel's Jade headline as a tank shows it (pressure, what it is and its temperature; contents; liquid; viscosity). */
-    public static void putContents(java.util.Map<String, String> info, mods.eln.sim.fluid.FluidNode v) {
-        double fill = Math.min(1, v.liquidVolume() / v.volume);
-        info.put(mods.eln.i18n.I18N.tr("Pressure"), String.format("%.2f bar of %s, %s", v.P() / 1e5, mods.eln.sim.fluid.EaUnits.contents(v),
-            mods.eln.api.Meters.celsius(v.T() - mods.eln.sim.fluid.Water.T0)));
-        info.put(mods.eln.i18n.I18N.tr("Contents"), mods.eln.sim.fluid.EaUnits.composition(v));
-        // (all its liquids: "Water" counted only water while the share counted latex too, LabAssistant)
-        info.put(mods.eln.i18n.I18N.tr("Liquid"), mods.eln.sim.fluid.EaUnits.volume(v.liquidVolume() * mods.eln.sim.fluid.Water.RHO_L
-            / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER) + ", " + mods.eln.misc.Utils.plotPercent(fill) + " full");
-        mods.eln.sim.fluid.EaUnits.putViscosity(info, v);
-    }
-
     /** Jade's warning when v is over this tier's working pressure. */
     public void putWarning(java.util.Map<String, String> info, mods.eln.sim.fluid.FluidNode v) {
         if (v.P() > workingPa) info.put(mods.eln.i18n.I18N.tr("Warning"), String.format("over its %.0f bar working pressure", workingPa / 1e5));
