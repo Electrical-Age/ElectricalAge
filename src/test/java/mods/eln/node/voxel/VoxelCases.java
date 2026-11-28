@@ -86,9 +86,10 @@ final class VoxelCases {
                     }
                 }
         // on the upper end of a stub standing in the block (VoxelNode.addSafetyValveOnEnd: the tank shortcut's stub, and one cut short)
-        for (int end : new int[]{4, 8})
+        for (int end : new int[]{4, 8, 12})
+            if (end + bore / 2 + SafetyValvePart.endHeight(bore) <= 16)
             out.add(new Case(t + " safety valve on a stub's end at " + end,
-                List.of(new PipePart(tier, new int[]{8, 0, 8, 8, end, 8}), new SafetyValvePart(8, end, 8, 1, bore, 10e5))));
+                List.of(new PipePart(tier, new int[]{8, 0, 8, 8, end, 8}), new SafetyValvePart(8, end, 8, 1, bore, 10e5, SafetyValvePart.SAFETY, true))));
         int[] c = {8, 8, 8};
         for (int a = 0; a < 3; a++)
             for (int mode : new int[]{ValvePart.ON_OFF, ValvePart.CONTROL, ValvePart.THROTTLE, ValvePart.PRESSURE})

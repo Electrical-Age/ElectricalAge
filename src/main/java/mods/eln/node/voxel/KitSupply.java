@@ -83,23 +83,24 @@ public interface KitSupply {
     }
 
     /**
-     * Pipe for something another item builds (a valve clicked on a tank builds its stub: SafetyValveItem), from what p
-     * carries: a pipe kit in the inventory, or the pipe kits of a Toolbag there, holding at least need voxels; the lowest
-     * tier that does (iron before alloy). Null if nothing carried has that much.
+     * Pipe of a tier for something another item builds (a valve clicked on a tank builds its stub: SafetyValveItem),
+     * from what p carries: a pipe kit of the tier in the inventory, or a Toolbag's kits of it there, holding at least
+     * need voxels. Loose kits are not added up (they merge by themselves within a second: KitItem.tick). Not from a
+     * Toolbag whose menu is open: the menu holds its own copy of the bag's slots and writes it back over the bag at any
+     * change, which would give the pipe back. Null if nothing carried has that much.
      */
-    static KitSupply pipeCarried(Player p, int need) {
+    static KitSupply pipeCarried(Player p, int tier, int need) {
         if (p == null) return null;
-        KitSupply best = null;
         var inv = p.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
-            java.util.List<KitSupply> here = new java.util.ArrayList<>();
-            if (s.getItem() instanceof PipeKitItem) here.add(of(s));
-            else if (s.getItem() instanceof ToolbagItem)
-                for (ToolbagItem.Kind k : ToolbagItem.kinds(s).keySet()) if (k.pipe()) here.add(ToolbagItem.supply(s, k));
-            for (KitSupply k : here) if (k.length() >= need && (best == null || k.tier() < best.tier())) best = k;
+            KitSupply k = null;
+            if (s.getItem() instanceof PipeKitItem kit && kit.tier == tier) k = of(s);
+            else if (s.getItem() instanceof ToolbagItem && !(p.containerMenu instanceof ToolbagMenu m && m.bag == s))
+                k = ToolbagItem.supply(s, new ToolbagItem.Kind(true, tier, -1, -1));
+            if (k != null && k.length() >= need) return k;
         }
-        return best;
+        return null;
     }
 
     /** The supply in p's main hand: a kit, or a Toolbag with a kind chosen that it holds; else null. */

@@ -340,13 +340,17 @@ public final class VoxelGeometry {
     /**
      * The safety valve: a brass body standing on the pipe (from its axis, so it meets the round surface), a red cap
      * stacked on the body (Argon/Baughn 2026-10-30: the old cap ended in the body's top plane and z-fought), sized to the
-     * pipe as drawn. On a pipe's upper end (SafetyValvePart.onEnd) the same stack stands on the end, in line with the pipe.
+     * pipe as drawn. On a pipe's upper end: endValve.
      */
     static void safetyValve(Model m, SafetyValvePart sv, List<VoxelPart> parts) {
         double rp = pipeRadius(parts, sv.x, sv.y, sv.z, sv.bore), s = fittingScale(rp);
         int ax = outletAxis(sv.outlet), dir = sv.outlet % 2 == 1 ? 1 : -1;
         double[] c = {sv.x, sv.y, sv.z};
         int[] o = others(ax);
+        if (sv.end) {
+            endValve(m, sv, parts, rp, s);
+            return;
+        }
         double base = c[ax], top = base + dir * (rp + 3 * s), end = top + dir * s;
         Solid body = tube(m, ax, c[o[0]], c[o[1]], 1.4 * s, Math.min(base, top), Math.max(base, top), PIPE[0]).named("safety valve body").rgb(0.8f, 0.6f, 0.3f);
         // (a purge valve's cap is blue: Baughn 2026-11-10; a breather's green, as its icon's hood)
@@ -354,16 +358,30 @@ public final class VoxelGeometry {
         if (sv.breather) cap.rgb(0.2f, 0.6f, 0.25f);
         else cap.rgb(sv.purge ? 0.2f : 0.75f, sv.purge ? 0.4f : 0.15f, sv.purge ? 0.8f : 0.12f);
         Solid hit = box(m, sv.boxes().get(0), null).named("safety valve hitbox").ghost();
-        if (sv.onEnd(parts)) {
-            // (on a pipe's upper end: the body stands on the end, the pipe coming up under it; the narrower of the two
-            // butts onto the other)
-            Solid pipe = m.add(Frustum.cylinder(ax, c[o[0]], c[o[1]], rp, 0, base)).named("pipe under").ghost();
-            m.abut(1.4 * s <= rp ? body : pipe, 1.4 * s <= rp ? pipe : body).abut(body, cap).within(cap, hit).disjoint(cap, pipe)
-                .ratio("safety valve cap radius / pipe radius", 2 * s / rp, 0.5, 2).ratio("safety valve body radius / pipe radius", 1.4 * s / rp, 0.4, 1.5);
-            return;
-        }
         Solid pipe = pipeUnder(m, pipeAxis(parts, sv.x, sv.y, sv.z, ax), c, rp);
         m.attach(body, pipe, rp).abut(body, cap).within(cap, hit).disjoint(cap, pipe)
+            .ratio("safety valve cap radius / pipe radius", 2 * s / rp, 0.5, 2).ratio("safety valve body radius / pipe radius", 1.4 * s / rp, 0.4, 1.5);
+    }
+
+    /**
+     * The safety valve on a pipe's upper end (SafetyValvePart.end; Baughn 2026-11-28): the same body and cap in line with
+     * the pipe, standing where the valve's box starts, half the pipe's grid width over its last point, and exactly as
+     * tall as the box (SafetyValvePart.endHeight), so what is seen of the valve is what is picked as the valve. The
+     * pipe is drawn only to its last point: a collar of its own look carries it up to the body's foot, inside the
+     * pipe's box, where the crosshair reads the pipe.
+     */
+    static void endValve(Model m, SafetyValvePart sv, List<VoxelPart> parts, double rp, double s) {
+        int tier = 0;
+        for (VoxelPart p : parts) if (p instanceof PipePart pipe && pipe.passes(sv.x, sv.y, sv.z)) tier = pipe.tier;
+        double foot = sv.y + sv.bore / 2.0, top = foot + SafetyValvePart.endHeight(sv.bore), neck = top - s;
+        Solid collar = tube(m, 1, sv.x, sv.z, rp, sv.y, foot, PIPE[tier]).named("pipe end");
+        Solid body = tube(m, 1, sv.x, sv.z, 1.4 * s, foot, neck, PIPE[0]).named("safety valve body").rgb(0.8f, 0.6f, 0.3f);
+        Solid cap = tube(m, 1, sv.x, sv.z, 2 * s, neck, top, PIPE[0]).named("safety valve cap");
+        if (sv.breather) cap.rgb(0.2f, 0.6f, 0.25f);
+        else cap.rgb(sv.purge ? 0.2f : 0.75f, sv.purge ? 0.4f : 0.15f, sv.purge ? 0.8f : 0.12f);
+        Solid hit = box(m, sv.boxes().get(0), null).named("safety valve hitbox").ghost();
+        boolean bodyNarrower = 1.4 * s <= rp;
+        m.abut(bodyNarrower ? body : collar, bodyNarrower ? collar : body).abut(body, cap).within(cap, hit).within(body, hit).disjoint(cap, collar)
             .ratio("safety valve cap radius / pipe radius", 2 * s / rp, 0.5, 2).ratio("safety valve body radius / pipe radius", 1.4 * s / rp, 0.4, 1.5);
     }
 

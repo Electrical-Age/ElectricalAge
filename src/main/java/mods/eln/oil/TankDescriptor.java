@@ -28,6 +28,20 @@ public class TankDescriptor extends TransparentNodeDescriptor {
         this.obj = Eln.obj.getObj(model);
     }
 
+    /** The pressure it is rated for (Pa). */
+    public double workingPa() {
+        return workingPa;
+    }
+
+    /**
+     * The pipe that suits it (PipePart tier): the lowest of iron and alloy whose working pressure covers the tank's, so
+     * iron for the Iron Tank and alloy for the Alloy Tank. What a valve clicked on the tank builds its stub of
+     * (SafetyValveItem.onTank): iron pipe on an Alloy Tank at its pressure would burst.
+     */
+    public int pipeTier() {
+        return workingPa <= mods.eln.node.voxel.PipePart.WORKING_PA[0] ? 0 : 1;
+    }
+
     /**
      * No floor needed (Baughn 2026-11-10): a tank stands on its frame, so a pipe can run to its underside port; it used
      * to break when the block under it went.

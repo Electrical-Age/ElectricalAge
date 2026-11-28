@@ -135,7 +135,7 @@ shell limit 850 K (its watchdog trips from 840 K on a 20 K s budget, so a pot bo
 stops by 850 K). Front: a sight glass showing its liquid's level and layers live (`oil/SightGlass`), the liquid's temperature as a signal on the origin (1 V a 100 °C), the bottoms drain low right,
 at a tank's low flange height with the pot's floor at its bottom edge (the vessel stands 3 px up, on its skid), so
 it drains out completely; a hot drain into a closed receiver pushes back with the receiver's own air, so the
-receiver needs a breather (the breather valve clicked on the receiver tank stands on a stub over its top port); the fill low on its left flank and the steam inlet low on its right flank (into the pot at their flanges'
+receiver needs a breather (the breather valve clicked on the receiver tank's top stands on a stub over its top port); the fill low on its left flank and the steam inlet low on its right flank (into the pot at their flanges'
 height, through check valves). Boiled too hard it boils over: before each step, outside the core's solve, E = 2 (F / 0.10 - 1) kg of
 its liquid (to 5) per kg of vapour moves into the vapour line (the node its vapour port couples to; a pipe run up to 30 % of it
 liquid, a vessel up to its free volume), every species by its share with its enthalpy

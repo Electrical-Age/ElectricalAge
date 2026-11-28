@@ -86,6 +86,17 @@ public interface TestContext {
         return kitClick(p, kit, on, net.minecraft.core.Direction.UP, net.minecraft.world.phys.Vec3.atLowerCornerOf(on).add(0.5, 1, 0.5), sneak);
     }
 
+    /**
+     * The item in p's main hand used on a block, through the item's own click (ItemStack.useOn: what a right-click
+     * runs once the block has passed it on): the block at on, its face, the point hit (world coordinates). p is not
+     * moved, and a fake player has no eye (the pick is by the point: VoxelNode.eyeOf).
+     */
+    default net.minecraft.world.InteractionResult useOn(net.minecraft.world.entity.player.Player p, BlockPos on, net.minecraft.core.Direction face,
+                                                        net.minecraft.world.phys.Vec3 hit) {
+        return p.getMainHandItem().useOn(new net.minecraft.world.item.context.UseOnContext(p, net.minecraft.world.InteractionHand.MAIN_HAND,
+            new net.minecraft.world.phys.BlockHitResult(hit, face, on, false)));
+    }
+
     /** Put a stone block at the absolute position p (support for a device outside the floor). */
     void floor(BlockPos p);
 

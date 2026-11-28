@@ -27,6 +27,11 @@ import java.util.Map;
  */
 public class TankElement extends TransparentNodeElement implements FluidDevice, mods.eln.fluid.FluidPlacement.Turnable {
     final TankDescriptor desc;
+
+    /** Its tier's descriptor (ratings, the pipe that suits it). */
+    public TankDescriptor descriptor() {
+        return desc;
+    }
     /** Its ports' conductance (m^3): made for a large alloy pipe (they take any; the pipe's own end limits a smaller one). */
     public static final double PORT_K = mods.eln.node.voxel.PipePart.LARGE_END_K;
     /** Heat it loses to the air (W/K): a bare steel vessel's. */

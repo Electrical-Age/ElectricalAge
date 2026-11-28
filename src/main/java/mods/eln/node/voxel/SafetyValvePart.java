@@ -39,6 +39,14 @@ public final class SafetyValvePart extends VoxelPart {
     /** A purge valve (gas only, never liquid); a breather. */
     public final boolean purge, breather;
     /**
+     * On the end of a pipe, not on its side (Baughn 2026-11-28; VoxelNode.addSafetyValveOnEnd): (x, y, z) is the point
+     * where a pipe ended coming up from below when it was fitted, and the outlet is up. It says where the valve stands
+     * and how it is drawn and picked (boxes, VoxelGeometry.safetyValve), and holds as fitted: if the pipe under it is
+     * later broken or cut the valve stays where it stood, as any fitting does. The fluid does not read it: the vent
+     * is on whatever pipe passes its point, at draw(), by the outlet alone.
+     */
+    public final boolean end;
+    /**
      * Baughn 2026-10-27: it pulsed, popping open and shut every second or so. A boiler's pressure jitters by several
      * percent from tick to tick, more than the old 5% band, so the valve flapped between shut and wide open. It now acts
      * on the pressure averaged over AVG_TAU seconds (pAvg), and opens over a wider band, BAND above its set pressure.
@@ -83,6 +91,12 @@ public final class SafetyValvePart extends VoxelPart {
     }
 
     public SafetyValvePart(int x, int y, int z, int outlet, int bore, double setPa, int mode) {
+        this(x, y, z, outlet, bore, setPa, mode, false);
+    }
+
+    /** ... standing on a pipe's end (end; then the outlet is up). */
+    public SafetyValvePart(int x, int y, int z, int outlet, int bore, double setPa, int mode, boolean end) {
+        this.end = end && outlet == 1;
         this.mode = mode;
         this.purge = mode == PURGE;
         this.breather = mode == BREATHER;
@@ -136,15 +150,9 @@ public final class SafetyValvePart extends VoxelPart {
         return p[0] == x && p[1] == y && p[2] == z && p[4] < y || p[n - 3] == x && p[n - 2] == y && p[n - 1] == z && p[n - 5] < y;
     }
 
-    /**
-     * Is it on the end of a pipe rather than on its side (Baughn 2026-11-28; VoxelNode.addSafetyValveOnEnd): outlet up,
-     * at the point where a pipe among parts ends coming up from below. Nothing saved says so: a valve on a pipe's side
-     * needs the pipe 2 voxels either way, so it is never at an end, and saves from before read as what they were.
-     */
-    public boolean onEnd(List<? extends VoxelPart> parts) {
-        if (outlet != 1) return false;
-        for (VoxelPart p : parts) if (p instanceof PipePart pipe && endsUp(pipe, x, y, z)) return true;
-        return false;
+    /** How tall the valve stands over a pipe's end (voxels, by the pipe's grid width): exactly what is drawn there. */
+    static int endHeight(int bore) {
+        return bore >= 6 ? 4 : 3;
     }
 
     /** Where on the run under it it draws: a valve on top (or on the pipe's upper end) lets out what's at the top, one
@@ -158,11 +166,15 @@ public final class SafetyValvePart extends VoxelPart {
         return Math.max(0, Math.min(1, (P / setPa - 1) / BAND));
     }
 
-    /** The body: a short stack 4 voxels across standing on the pipe, towards the outlet (on a pipe's end: over the
-     *  end's own half-bore, which the pipe's box takes in, so the same box). */
+    /**
+     * The body: a short stack 4 voxels across standing on the pipe, towards the outlet. On a pipe's end: from the top
+     * of the pipe's own box (which runs half its width past its last point) up endHeight, which is all that is drawn
+     * of the valve there, so the crosshair on any of it is on the valve and nothing over its cap is.
+     */
     @Override
     public List<int[]> boxes() {
         int h = bore / 2;
+        if (end) return List.of(ValvePart.clamp(new int[]{x - 2, y + h, z - 2, x + 2, y + h + endHeight(bore), z + 2}));
         int[] b = switch (outlet) {
             case 0 -> new int[]{x - 2, y - h - 4, z - 2, x + 2, y - h, z + 2};
             case 1 -> new int[]{x - 2, y + h, z - 2, x + 2, y + h + 4, z + 2};
@@ -181,12 +193,13 @@ public final class SafetyValvePart extends VoxelPart {
         t.putDouble("set", setPa);
         if (purge) t.putBoolean("purge", true);
         if (breather) t.putBoolean("breather", true);   // (safety and purge valves write what they always did)
+        if (end) t.putBoolean("end", true);   // (absent on a valve on a pipe's side, so those save as before)
     }
 
     static SafetyValvePart read(CompoundTag t) {
         int[] a = t.getIntArray("at").orElse(new int[]{8, 8, 8, 1, 4});
         return new SafetyValvePart(a[0], a[1], a[2], a[3], t.getBooleanOr("g", false) ? a[4] : PipePart.oldBore(a[4]), t.getDoubleOr("set", 10e5),
-            t.getBooleanOr("breather", false) ? BREATHER : t.getBooleanOr("purge", false) ? PURGE : SAFETY);
+            t.getBooleanOr("breather", false) ? BREATHER : t.getBooleanOr("purge", false) ? PURGE : SAFETY, t.getBooleanOr("end", false));
     }
 
     @Override
@@ -197,12 +210,13 @@ public final class SafetyValvePart extends VoxelPart {
         out.writeByte(outlet);
         out.writeByte(bore);
         out.writeFloat((float) setPa);
-        out.writeByte(mode);
+        out.writeByte(mode | (end ? 0x10 : 0));
     }
 
     static SafetyValvePart deserialize(DataInputStream in) throws IOException {
         int x = in.readByte(), y = in.readByte(), z = in.readByte(), o = in.readByte(), b = in.readByte();
         float set = in.readFloat();
-        return new SafetyValvePart(x, y, z, o, b, set, (int) in.readByte());
+        int m = in.readByte();
+        return new SafetyValvePart(x, y, z, o, b, set, m & 0x0F, (m & 0x10) != 0);
     }
 }

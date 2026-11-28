@@ -214,27 +214,44 @@ One part, `SafetyValvePart` (modes SAFETY, PURGE, BREATHER), one item class, `Sa
 - On a pipe's end (`VoxelNode.addSafetyValveOnEnd`; Baughn 2026-11-28): when that nearest lattice point is the pipe's
   own end inside the block, the end points up (its last piece comes up from below) and nothing is on it (no junction,
   second pipe, valve, sensor or pipe sensor device's port), the valve stands on the end in place of the cap, outlet
-  up, and draws at the top of the run. Needs 4 voxels over the end's half-bore inside the block (an end at 12 is
-  refused: "no room over the pipe's end"); an end pointing sideways or down is refused ("only an end pointing up takes
-  one"). It is the same part with nothing more saved: the valve at the pipe's last point with outlet 1, and
-  `SafetyValvePart.onEnd(parts)` tells it from one on a side by the pipe (one on a side is never at an end). Its box is
-  the side form's (4 across, from the end's half-bore up 4: the pipe's own box takes in the half-bore), its model the
-  same stack in line with the pipe (`VoxelGeometry.safetyValve`; the pipe's end face and the body's foot face opposite
-  ways, so nothing z-fights). No route joins at a capped end (`fittingAt`).
+  up, and draws at the top of the run. An end pointing sideways or down is refused ("only an end pointing up takes
+  one"). The part's `end` flag says so (saved as `"end"`, absent on the others); it is set when fitted and stays if
+  the pipe is later cut or broken (the valve stands where it stood, as any fitting); the fluid reads only the outlet.
+  Its box starts on top of the pipe's own box (which runs half the grid width past the pipe's last point) and is
+  exactly as tall as the valve is drawn there (`SafetyValvePart.endHeight`: 3 voxels on iron and alloy, 4 on the large
+  pipe; 4 across), so an iron end at 8 has the valve at 9..12 and needs it inside the block ("no room over the pipe's
+  end": a large pipe's end at 12; an iron one's at 12 just fits). The model (`VoxelGeometry.endValve`) is the body and
+  cap in line with the pipe from the box's foot to its top, with a collar of the pipe's own look from the pipe's last
+  point up to the foot: the collar is inside the pipe's box, so the crosshair on it reads the pipe and on anything
+  brass or capped the valve. (On a pipe's side the box is still 4 tall for every tier, sized for the large pipe: on
+  iron it reaches 2.5 voxels over the cap, and the half voxel of body between the drawn pipe's skin and the pipe's box
+  picks as the pipe. Left as it is: shrinking it by tier changes the placing rule, the saved valves' used voxels and
+  the pick cases.) No route joins at a capped end (`fittingAt`).
 - On a tank (`SafetyValveItem.onTank`; Baughn 2026-11-28 "C4: A", after Lashtear 2026-11-28: a breather fitted only
   on a pipe, and a stub over a tank's top port could not be laid without scaffolding, a pipe route ending only at a
-  port, on a pipe or at a face clicked): the item clicked anywhere on a tank (`oil/TankElement`, so a Still Pot's
+  port, on a pipe or at a face clicked): the item clicked on the TOP of a tank (`oil/TankElement`, so a Still Pot's
   receivers and a box's top row; a tank lower in a box says it has no top port) stands a pipe `STUB` (8 voxels, half a
-  block) on the tank's top port in the block above, and the valve on its end. The pipe comes from a pipe kit the
-  player carries (`KitSupply.pipeCarried`: a kit in the inventory or a Toolbag's kits there, the lowest tier holding 8
-  voxels, so iron before alloy; none: "needs half a block of pipe from a pipe kit in your inventory"; creative: iron,
-  free). Stub and valve are checked together (`Laying.check`) before either is placed. Refused, in the valve's
-  "Can't fit …" frame on the action bar: "its top port is already connected" (a pipe or a device's flange there),
-  "the <block> over the tank is in the way", "block already has a … valve", "something is in the way at x, y, z".
-  Broken, the valve drops as its item and the stub as a kit of 8 voxels, as any fitting and pipe.
-- GameTests (`PlumbingCases`): `valve_on_tank_<breather|purge|safety>` (through the item: refused without a kit, built
-  with one, the kit 8 shorter, Jade, a second refused, broken and returned), `_toolbag`, `_refused`, `_pipe_end`,
-  `_relieves`; the breather's and purge valve's fluid cases run again on the stub the click builds
+  block) on the tank's top port in the block above, and the valve on its end. On another face of a tank it builds
+  nothing ("click the tank's top to fit it on a stub": a click meant for a thin pipe running past the tank lands
+  there). The pipe is the tank's kind (`TankDescriptor.pipeTier`: iron for the Iron Tank, alloy for the Alloy Tank, in
+  creative too; an iron stub on an Alloy Tank at its pressure would burst) and comes from a kit of it the player
+  carries (`KitSupply.pipeCarried`: a kit in the inventory or a Toolbag's kits there holding 8 voxels, not a Toolbag
+  whose menu is open; none: "needs half a block of alloy pipe from a pipe kit in your inventory"; creative: free). A
+  safety valve is set to the lower of the pipe's default and the tank's rating (10 bar, 100 bar). Stub and valve are
+  checked together (`Laying.check`) before either is placed, and the stub is taken back if the valve still fails.
+  Refused, in the valve's "Can't fit …" frame on the action bar: "port already connected" (`PipePlacer.PORT_TAKEN`'s
+  words: a pipe or a device's flange there), "the <block> over the tank is in the way", "no room over the tank" (the
+  build limit), "block already has a … valve", "something is in the way at x, y, z", "the tank is at 22 bar, over the
+  iron pipe's 20 bar" (its pressure now over the stub's working pressure). On a block that is neither: "must fit on a
+  pipe, or on a tank's top". Broken, the valve drops as its item and the stub as a kit of 8 voxels, as any fitting and
+  pipe. `PipeKitItem.place` takes its node back out when the world refuses the block (the build limit, another mod):
+  before, the node stayed without a block and kept the port beside it coupled.
+- GameTests (`PlumbingCases`): `valve_on_tank_<breather|purge|safety>` (through the item, `TestContext.useOn`: a side
+  click, no kit, built with one, one valve of three and 8 voxels taken, the drawn valve against its box, Jade on its
+  lowest and highest voxel and on the collar, a second refused, broken and returned), `_toolbag` (a kit of exactly 8
+  used up, an open menu's bag left alone), `_tiers` (alloy for the Alloy Tank, creative, the pressure refusal),
+  `_refused` (with the take-back and the build limit), `_pipe_end`, `_relieves`, `_boiling`, `_reopens`; the
+  breather's and purge valve's fluid cases run again on the stub the click builds
   (`pipe_breather_valve_on_tank_<fills|keeps_liquid|pulls_air>`, `pipe_purge_valve_on_tank_*`);
   `pipe_breather_valve_saves` checks an old valve's tag loads and writes back unchanged. The model:
   `VoxelCases.fittings` ("safety valve on a stub's end").
@@ -258,7 +275,7 @@ others, including voxel nodes via `VoxelNode.slowProcesses()`) -> `Conductor.bur
   before a write or rebuild), `"hang"`/`"hang2"` (drawn hang), `"j"` (joints: a list of int arrays, sorted; see Stored links).
 - Each part `"id"` (in its `p<i>` compound), the node `"nextPartId"`.
 - `PipePart`: `"tier"`, `"pts"`, `"burst"`, `"burstDir"`, `"w"`, `"a"`, `"u"`. `ValvePart`: `"at"`, `"open"`.
-  `SafetyValvePart`: `"at"`, `"set"`, `"purge"` (a purge valve), `"breather"` (a breather valve; absent on the others, so their saves are as before); one on a pipe's end saves the same keys (outlet 1 at the pipe's last point). `PipeSensorPart`: `"at"` (x, y, z, outlet, bore, kind), `"scale"`, its output. `AdapterPart`: `"face"`. Unknown kinds load as nothing (dropped).
+  `SafetyValvePart`: `"at"`, `"set"`, `"purge"` (a purge valve), `"breather"` (a breather valve; absent on the others, so their saves are as before), `"end"` (on a pipe's end, 2026-11-28; absent on a valve on a pipe's side, so those save as before). `PipeSensorPart`: `"at"` (x, y, z, outlet, bore, kind), `"scale"`, its output. `AdapterPart`: `"face"`. Unknown kinds load as nothing (dropped).
 - Client publish: part count, then kind + length-prefixed bytes per part, then SixNode's elements
   (`publishBeforeElements`).
 

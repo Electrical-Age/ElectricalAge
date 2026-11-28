@@ -131,7 +131,13 @@ public class PipeKitItem extends Item implements PipeTool, KitItem {
             node.onBreakBlock();
             return err;
         }
-        level.setBlock(pos, mimic ? VoxelNodeBlock.forHost(old) : block.stateFor(level, pos), 3);
+        // (refused by the world: over the build limit, or another mod's. The node must not stay without its block: it
+        // kept its pipe's port coupled to the tank or pipe beside it for good)
+        if (!level.setBlock(pos, mimic ? VoxelNodeBlock.forHost(old) : block.stateFor(level, pos), 3)) {
+            node.host = null;
+            node.onBreakBlock();
+            return "the block can't be placed here";
+        }
         return null;
     }
 }
