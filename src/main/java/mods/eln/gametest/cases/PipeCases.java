@@ -44,6 +44,7 @@ public final class PipeCases {
         cases.add(new KitCrafting());
         cases.add(new ThrottleAndControlValves());
         cases.add(new Burst());
+        cases.add(new ValveRefitAndOneCable());
         cases.add(new Valve());
         cases.add(new Adapter());
         cases.add(new AdapterOil());
@@ -1639,6 +1640,106 @@ public final class PipeCases {
             var e = mods.eln.node.voxel.CablePlacer.endAtForTests(ctx.level(), pos, net.minecraft.core.Direction.UP,
                 new net.minecraft.world.phys.Vec3(pos.getX() + 0.5, pos.getY() + 14.5 / 16, pos.getZ() + 0.5), true, new long[1][]);
             ctx.check("pipe: a cable ends on the floor under a control valve", e != null && e.y() == pos.getY() * 16L && e.attach() == 0, "" + e);
+        }
+    }
+
+    /**
+     * Lashtear's two valve reports (2026-11-28). A valve taken out leaves one pipe holding what the halves held, and a
+     * valve fits there again. A control valve reads the signal cable under it, not every signal cable in its block: of
+     * two cables through the block, the far one at 5 V leaves the valve shut and the near one at 0 V.
+     */
+    static final class ValveRefitAndOneCable implements TestCase {
+        BlockPos a, b;
+        String err = "";
+        double before, after;
+        int pipesAfter;
+        int[] pointsAfter;
+        /** Per signal block (0: the far cable driven, 1: the one under the valve): source, the cable under, the valve. */
+        mods.eln.sim.mna.component.VoltageSource[] source = new mods.eln.sim.mna.component.VoltageSource[2];
+        mods.eln.sim.ElectricalLoad[] near = new mods.eln.sim.ElectricalLoad[2];
+        mods.eln.node.voxel.ValvePart[] control = new mods.eln.node.voxel.ValvePart[2];
+
+        public String id() {
+            return "pipe_valve_refit_and_one_cable";
+        }
+
+        public int width() {
+            return 9;
+        }
+
+        public int height() {
+            return 7;
+        }
+
+        public int depth() {
+            return 7;
+        }
+
+        static double mass(VoxelNode n) {
+            double m = 0;
+            for (VoxelPart q : n.parts) if (q instanceof PipePart pipe) m += pipe.fluid.mass();
+            return m;
+        }
+
+        public void build(TestContext ctx) {
+            a = ctx.at(1, 1, 1);
+            lay(ctx, a, 0, 0, 8, 8, 16, 8, 8);
+            VoxelNode n = ctx.voxelByEntity(a);
+            ((PipePart) n.parts.get(0)).fluid.fill(0, 5e5, 293.15);
+            String e = n.addValve(8, 8, 8, mods.eln.node.voxel.ValvePart.ON_OFF);
+            if (e != null) err += "first fit: " + e + "; ";
+            before = mass(n);
+            for (int i = 0; i < n.parts.size(); i++)
+                if (n.parts.get(i) instanceof mods.eln.node.voxel.ValvePart) {
+                    n.removePart(i, false);
+                    break;
+                }
+            after = mass(n);
+            for (VoxelPart q : n.parts)
+                if (q instanceof PipePart pipe) {
+                    pipesAfter++;
+                    pointsAfter = pipe.points;
+                }
+            e = n.addValve(8, 8, 8, mods.eln.node.voxel.ValvePart.ON_OFF);
+            if (e != null) err += "refit: " + e + "; ";
+
+            for (int r = 0; r < 2; r++) {
+                b = ctx.at(1, 1, 3 + 2 * r);
+                lay(ctx, b, 0, 0, 8, 8, 16, 8, 8);
+                VoxelNode m = ctx.voxelByEntity(b);
+                e = m.addValve(8, 8, 8, mods.eln.node.voxel.ValvePart.CONTROL);
+                if (e != null) err += "control: " + e + "; ";
+                var under = new mods.eln.node.voxel.CablePart(0, 0, new int[]{0, 0, 8, 16, 0, 8});
+                var far = new mods.eln.node.voxel.CablePart(0, 0, new int[]{0, 0, 2, 16, 0, 2});
+                for (var c : List.of(far, under)) {
+                    e = PipeKitItem.place(ctx.level(), b, c, null);
+                    if (e != null) err += "cable: " + e + "; ";
+                }
+                if (!err.isEmpty()) return;
+                control[r] = ThrottleAndControlValves.valve(ctx, b);
+                near[r] = m.cableLoadOf(m.parts.indexOf(under));
+                var farLoad = m.cableLoadOf(m.parts.indexOf(far));
+                if (near[r] == null || farLoad == null || near[r] == farLoad) {
+                    err += "the two cables are not two conductors; ";
+                    return;
+                }
+                source[r] = new mods.eln.sim.mna.component.VoltageSource("test", r == 0 ? farLoad : near[r], null).setU(mods.eln.Eln.SVU);
+                mods.eln.Eln.simulator.addElectricalComponent(source[r]);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            for (var src : source) if (src != null) mods.eln.Eln.simulator.removeElectricalComponent(src);
+            ctx.check("valve refit: valves and cables fit", err.isEmpty(), err);
+            if (!err.isEmpty()) return;
+            ctx.line(String.format("valve refit: %d pipe after removal, points %s, mass %.6f -> %.6f kg; far cable at SVU: valve %.0f%% open, near cable %.2f V",
+                pipesAfter, java.util.Arrays.toString(pointsAfter), before, after, control[0].opening() * 100, near[0].getU()));
+            ctx.check("valve refit: a removed valve leaves one straight pipe", pipesAfter == 1 && java.util.Arrays.equals(pointsAfter, new int[]{0, 8, 8, 16, 8, 8}),
+                pipesAfter + " " + java.util.Arrays.toString(pointsAfter));
+            ctx.check("valve refit: the pipe holds what the halves held", before > 0 && Math.abs(after - before) < 1e-9 * before, before + " " + after);
+            ctx.check("valve signal: a cable elsewhere in the block doesn't drive the valve or the cable under it",
+                control[0].opening() < 0.05 && Math.abs(near[0].getU()) < 0.25, control[0].opening() + " " + near[0].getU());
+            ctx.check("valve signal: the cable under the valve drives it", control[1].opening() > 0.95, "" + control[1].opening());
         }
     }
 

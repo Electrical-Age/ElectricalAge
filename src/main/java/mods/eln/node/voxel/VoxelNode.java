@@ -268,10 +268,62 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         VoxelPart p = parts.remove(index);
         if (p instanceof CablePart) CableLinks.forgetPiece(this, p.id);
         if (p instanceof PipePart) pruneJunctions();
+        if (p instanceof ValvePart v) mergePipesAt(v.x, v.y, v.z);
         markUsed();
         if (drop && !partItem(p).isEmpty()) dropItem(partItem(p));
         changed();
         return isEmptyNode();
+    }
+
+    /**
+     * The two pipes a valve stood between become one pipe again, holding what both held (Lashtear 2026-11-28: the cut
+     * stayed after the valve was taken out, and no valve fitted there again: neither half passed the point). Not where
+     * a junction or a third pipe is, nor pipes of two sizes or one burst.
+     */
+    private void mergePipesAt(int x, int y, int z) {
+        List<PipePart> arms = armsAt(x, y, z);
+        if (arms.size() != 2 || junctionAt(x, y, z) != null) return;
+        PipePart a = arms.get(0), b = arms.get(1);
+        if (a.tier != b.tier || a.burst != b.burst) return;
+        int[] pa = endingAt(a.points, x, y, z, true), pb = endingAt(b.points, x, y, z, false);
+        int[] all = new int[pa.length + pb.length - 3];
+        System.arraycopy(pa, 0, all, 0, pa.length);
+        System.arraycopy(pb, 3, all, pa.length, pb.length - 3);
+        // (the seam is no corner on a straight pipe: drop the point)
+        int i = pa.length - 3;
+        int same = 0;
+        for (int k = 0; k < 3; k++) if (all[i - 3 + k] == all[i + k] && all[i + k] == all[i + 3 + k]) same++;
+        if (same == 2) {
+            int[] cut = new int[all.length - 3];
+            System.arraycopy(all, 0, cut, 0, i);
+            System.arraycopy(all, i + 3, cut, i, all.length - i - 3);
+            all = cut;
+        }
+        PipePart whole = new PipePart(a.tier, all);
+        if (!whole.valid()) return;
+        if (a.fluid != null) mods.eln.fluid.FluidWorld.writeBackOf(a.fluid);
+        if (b.fluid != null) mods.eln.fluid.FluidWorld.writeBackOf(b.fluid);
+        whole.burst = a.burst;
+        whole.makeNode(coordonate.y, mods.eln.sim.Ambient.kelvin(coordonate), null);
+        if (a.fluid != null && b.fluid != null) {
+            whole.fluid.setShareOf(a.fluid, 1);
+            whole.fluid.addShareOf(b.fluid, 1);
+            whole.fluid.update();
+        }
+        if (!Double.isNaN(a.wallTemp) && !Double.isNaN(b.wallTemp))
+            whole.wallTemp = (a.wallTemp * a.length() + b.wallTemp * b.length()) / Math.max(1, a.length() + b.length());
+        parts.set(parts.indexOf(a), whole);
+        parts.remove(b);
+    }
+
+    /** A pipe's points turned so that (x, y, z) is its last point (or its first). */
+    private static int[] endingAt(int[] points, int x, int y, int z, boolean last) {
+        int n = points.length;
+        boolean atEnd = points[n - 3] == x && points[n - 2] == y && points[n - 1] == z;
+        if (atEnd == last) return points;
+        int[] out = new int[n];
+        for (int i = 0; i < n; i += 3) System.arraycopy(points, n - 3 - i, out, i, 3);
+        return out;
     }
 
     /** The item a part was made from (what it drops), or empty: a burst pipe, a burnt cable. */
@@ -763,6 +815,7 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
 
     public String addValve(int x, int y, int z, int mode) {
         for (VoxelPart p : parts) if (p instanceof ValvePart) return "there is a valve here already";
+        mergePipesAt(x, y, z);   // (a cut an earlier valve left, from before removal mended it)
         for (int i = 0; i < parts.size(); i++) {
             if (!(parts.get(i) instanceof PipePart pipe) || !pipe.passes(x, y, z)) continue;
             int axis = -1;
@@ -908,6 +961,12 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
         if (p instanceof SafetyValvePart sv) return pipeAt(sv.x, sv.y, sv.z);
         if (p instanceof PipeSensorPart ps) return pipeAt(ps.x, ps.y, ps.z);
         return null;
+    }
+
+    /** The electrical load of the conductor a cable part belongs to, or null (tests). */
+    public ElectricalLoad cableLoadOf(int part) {
+        CableNet.Conductor k = conductorOf(part);
+        return k == null ? null : k.load;
     }
 
     /** The cable conductor a part belongs to, or null. */
@@ -2101,23 +2160,46 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
     }
 
     /**
-     * Control valves (Baughn 2026-10-26): the signal input in the simulation, joined to the signal cables laid in this
-     * block (cables never run in mid-air, so not to the actuator itself: AdventurAgent; a cable kit clicked on the valve
-     * lays to the floor under it, CablePlacer).
+     * The signal cable a fitting at (x, y, z) reads or drives: of the block's live signal conductors, the one nearest
+     * the line from the fitting down to the floor under it (where a cable kit clicked on it lays to, CablePlacer); null
+     * if the block has none. One, not all of them (Lashtear 2026-11-28: signal cables running side by side under three
+     * valves were all tied to each valve's input, so to each other: one at 5 V and two at 0 gave 33% on all three).
+     */
+    CableNet.Conductor fittingCable(int x, int y, int z) {
+        CableNet.Conductor best = null;
+        double bd = Double.MAX_VALUE;
+        for (CableNet.Conductor k : cables.live()) {
+            if (k.load == null || k.d == null || !k.d.signalWire) continue;
+            for (CablePart c : k.parts)
+                for (int[] b : c.boxes()) {
+                    double dx = Math.max(0, Math.max(b[0] - x, x - b[3])), dz = Math.max(0, Math.max(b[2] - z, z - b[5]));
+                    double dy = Math.max(0, b[1] - y);   // (the line runs from the floor, 0, up to y)
+                    double d = dx * dx + dy * dy + dz * dz;
+                    if (d < bd) {
+                        bd = d;
+                        best = k;
+                    }
+                }
+        }
+        return best;
+    }
+
+    /**
+     * Control valves (Baughn 2026-10-26): the signal input in the simulation, joined to the signal cable laid to it
+     * in this block (fittingCable).
      */
     private void connectValves() {
         for (VoxelPart p : parts) {
             if (!(p instanceof ValvePart v) || v.signal == null) continue;
             if (!recordOnly) Eln.simulator.addElectricalLoad(v.signal);
-            for (CableNet.Conductor k : cables.live())
-                if (k.load != null && k.d != null && k.d.signalWire) {
-                    CableLinks.add(k.parts.get(0), CableLinks.implied(CableLinks.TERM_FITTING, -1, v.x, v.y, v.z));
-                    if (!recordOnly) link(v.signal, k.load, null, null);
-                }
+            CableNet.Conductor k = fittingCable(v.x, v.y, v.z);
+            if (k == null) continue;
+            CableLinks.add(k.parts.get(0), CableLinks.implied(CableLinks.TERM_FITTING, -1, v.x, v.y, v.z));
+            if (!recordOnly) link(v.signal, k.load, null, null);
         }
     }
 
-    /** Pipe sensors: their signal outputs in the simulation, joined to the signal cables laid in this block (as valves). */
+    /** Pipe sensors: their signal outputs in the simulation, joined to the signal cable laid to them (as valves). */
     private void connectSensors() {
         for (VoxelPart p : parts) {
             if (!(p instanceof PipeSensorPart s) || s.out == null) continue;
@@ -2125,11 +2207,10 @@ public class VoxelNode extends mods.eln.node.six.SixNode implements FluidDevice 
                 Eln.simulator.addElectricalLoad(s.out);
                 Eln.simulator.addElectricalComponent(s.outProcess);
             }
-            for (CableNet.Conductor k : cables.live())
-                if (k.load != null && k.d != null && k.d.signalWire) {
-                    CableLinks.add(k.parts.get(0), CableLinks.implied(CableLinks.TERM_FITTING, -1, s.x, s.y, s.z));
-                    if (!recordOnly) link(s.out, k.load, null, null);
-                }
+            CableNet.Conductor k = fittingCable(s.x, s.y, s.z);
+            if (k == null) continue;
+            CableLinks.add(k.parts.get(0), CableLinks.implied(CableLinks.TERM_FITTING, -1, s.x, s.y, s.z));
+            if (!recordOnly) link(s.out, k.load, null, null);
         }
     }
 

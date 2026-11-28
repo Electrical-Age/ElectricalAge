@@ -62,7 +62,7 @@ public class ValveItem extends Item implements PipeTool {
         switch (mode) {
             case ValvePart.CONTROL -> {
                 list.add(mods.eln.i18n.I18N.tr("Signal-controlled pipe valve (0–5 V)."));
-                mods.eln.client.ItemTooltips.detail(list, mods.eln.i18n.I18N.tr("Driven by a signal cable in the same block."));
+                mods.eln.client.ItemTooltips.detail(list, mods.eln.i18n.I18N.tr("Driven by the nearest signal cable in its block."));
             }
             case ValvePart.THROTTLE -> list.add(mods.eln.i18n.I18N.tr("Manually adjustable pipe throttle valve."));
             case ValvePart.PRESSURE -> {

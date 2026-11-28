@@ -1264,3 +1264,8 @@ on 1.7.10) onto 26.x.
   gas until the liquid reaches it. Existing builds: a tank's high flange now gives liquid once the tank is 75 % full (was
   81 %), and liquid piped into it runs in down to its centre. The low flange keeps its bottom edge.
   `tank_high_flange_takes_liquid`.
+- **Valves and their pipes, valves and their cables (Lashtear 2026-11-28).** Taking a valve out joins the two pipes it
+  stood between into one again (`VoxelNode.mergePipesAt`; fitting a valve on a cut an older world still has mends it
+  first). A control valve or fitted sensor links to one signal cable, the nearest to the line from it to the floor
+  (`VoxelNode.fittingCable`), not to every signal cable in the block, which shorted cables passing through together.
+  GameTest `pipe_valve_refit_and_one_cable`.
