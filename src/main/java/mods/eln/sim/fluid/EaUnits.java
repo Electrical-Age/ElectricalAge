@@ -69,7 +69,6 @@ public final class EaUnits {
      */
     public static final double TRACE_MB = 0.1;
 
-
     /**
      * As composition(n), and also every liquid of at least minLiquidMb (mB) however small its share: a tank's Contents
      * then names what its Liquid line counts (Baughn 2026-11-28: a tank read "Liquid: 24 mB" over "Contents: 1.0 g air",

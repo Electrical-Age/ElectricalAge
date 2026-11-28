@@ -45,7 +45,7 @@ public class CompositionTest {
         TestSpecies.defineAll();
         int oil = TestSpecies.id("diesel");
         double V = 12000 * EaUnits.KG_PER_MB_WATER / Water.RHO_L, mb = 24;
-        FluidNode n = TestSpecies.node(V, 0, 1, 300, Water.P_ATM, oil, mb * EaUnits.KG_PER_MB_WATER / Water.RHO_L * 840);
+        FluidNode n = TestSpecies.node(V, 0, 1, 300, Water.P_ATM, oil, mb * EaUnits.KG_PER_MB_WATER / Water.RHO_L * SpeciesRegistry.get().byId(oil).rhoL);
         assertTrue(EaUnits.composition(n).matches("[0-9.]+ g air"), EaUnits.composition(n));
         assertTrue(EaUnits.composition(n, EaUnits.TRACE_MB).matches("[0-9.]+ g air, 2[34](\\.[0-9]+)? mB diesel"), EaUnits.composition(n, EaUnits.TRACE_MB));
     }
