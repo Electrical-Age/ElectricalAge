@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "mods.eln.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "KitMoveMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

@@ -60,6 +60,10 @@ config="${mod_id}.client.mixins.json"
 [[mixins]]
 config="${mod_id}.robotics.mixins.json"
 
+# Convenience only (not required): a kit shift-clicked toward kits of its kind pours into them.
+[[mixins]]
+config="${mod_id}.common.mixins.json"
+
 # The [[accessTransformers]] block allows you to declare where your AT file is.
 # If this block is omitted, a fallback attempt will be made to load an AT from META-INF/accesstransformer.cfg
 #[[accessTransformers]]

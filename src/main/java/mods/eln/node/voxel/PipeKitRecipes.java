@@ -118,7 +118,7 @@ public final class PipeKitRecipes {
             return SERIALIZER;
         }
 
-        /** In the recipe book: PER_BLOCK plates to a one-block kit, per tier (the grid takes whole stacks all the same). */
+        /** In the recipe book: PER_BLOCK plates to a one-block kit, per tier. */
         @Override
         public boolean isSpecial() {
             return tier < 0;
@@ -143,8 +143,8 @@ public final class PipeKitRecipes {
     }
 
     /**
-     * Does another crafting recipe take this grid (server; the client can't tell)? Kits made from whole stacks match
-     * any grid of their items, so they step aside for those: EA's casing is 8 iron plates in a ring.
+     * Does another crafting recipe take this grid (server; the client can't tell)? Kits match any grid of their
+     * items, so they step aside for those: EA's casing is 8 iron plates in a ring.
      */
     static boolean otherRecipe(CraftingInput input, Level level) {
         if (!(level instanceof net.minecraft.server.level.ServerLevel sl)) return false;
@@ -154,23 +154,6 @@ public final class PipeKitRecipes {
             if (r.matches(input, level)) return true;
         }
         return false;
-    }
-
-    /**
-     * Was this craft one of cls's recipes? Asked of the grid on the server (AdventurAgent: a shift-click craft passes
-     * the moved, often empty, stack as the crafted item, so checking that let the kit take one plate per slot: a free
-     * kit's worth of plates). The client leaves it to the server's sync.
-     */
-    static boolean ours(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent e, Class<?> cls) {
-        if (!(e.getEntity().level() instanceof net.minecraft.server.level.ServerLevel sl) || !(e.getInventory() instanceof net.minecraft.world.inventory.CraftingContainer cc))
-            return false;
-        var in = cc.asCraftInput();
-        return sl.recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, in, sl).map(h -> cls.isInstance(h.value())).orElse(false);
-    }
-
-    /** A kit crafted from plates takes the plates it counted (the grid takes one from each slot after this). */
-    public static void crafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent e) {
-        KitRecipes.crafted(e, FromPlates.class, FromPlates::use);
     }
 
     /** JEI examples: per tier, 9 slots of plates to a kit (kit to plates JEI lists itself, from display(): AdventurAgent saw it twice). */

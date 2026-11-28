@@ -856,7 +856,8 @@ public final class CableCases {
             return "cable kits";
         }
 
-        /** Real crafts in a crafting table: {tier, plates in one slot} (AdventurAgent: 4 alloy plates left 2, not 1). */
+        /** Real crafts in a crafting table: {tier, plates in one slot}: a craft takes one plate a slot (Lashtear
+         *  2026-11-28: whole stacks went by a crafted event that AE2's terminal didn't raise the same way). */
         static final int[][] TABLE = {{1, 4}, {1, 7}, {0, 5}};
         net.minecraft.world.inventory.CraftingMenu[] menus = new net.minecraft.world.inventory.CraftingMenu[TABLE.length];
         net.minecraft.world.item.ItemStack[] results = new net.minecraft.world.item.ItemStack[TABLE.length];
@@ -910,21 +911,16 @@ public final class CableCases {
                 && ((mods.eln.node.voxel.CableKitRecipes.FromCoils) mv).matches(mvIn, c.level()) && mv.display().size() == 1, String.valueOf(mv));
             c.check("cable kit: JEI examples per tier still made", mods.eln.node.voxel.CableKitRecipes.examples().size() == 2 * nonPower,
                 mods.eln.node.voxel.CableKitRecipes.examples().size() + " examples");
-            // whole stacks (Baughn: a grid of cable stacks gave one cable's worth per slot, and shift-click a heap of kits)
+            // one cable a slot, whatever the stacks hold: what any crafting container takes (Lashtear 2026-11-28)
             var four = new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
             for (int q = 0; q < 4; q++) four.add(coil.copyWithCount(10));
-            var k40 = mods.eln.node.voxel.CableKitRecipes.FromCoils.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(2, 2, four));
+            var k4 = mods.eln.node.voxel.CableKitRecipes.FromCoils.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(2, 2, four));
             int[] use4 = mods.eln.node.voxel.CableKitRecipes.FromCoils.useForTests(four);
-            c.check("cable kit: 2x2 stacks of 10 make one 40-cable kit and use them all", mods.eln.node.voxel.KitItem.length(k40) == 640
-                && use4 != null && use4[0] + use4[1] + use4[2] + use4[3] == 40, mods.eln.node.voxel.KitItem.length(k40) + " " + java.util.Arrays.toString(use4));
-            var nine = new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
-            for (int q = 0; q < 9; q++) nine.add(coil.copyWithCount(64));
-            var kFull = mods.eln.node.voxel.CableKitRecipes.FromCoils.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(3, 3, nine));
-            int[] use9 = mods.eln.node.voxel.CableKitRecipes.FromCoils.useForTests(nine);
-            int sum9 = 0, min9 = 99;
-            for (int q = 0; use9 != null && q < 9; q++) { sum9 += use9[q]; min9 = Math.min(min9, use9[q]); }
-            c.check("cable kit: 3x3 stacks of 64 make a full kit, at least one from each slot, the rest left", mods.eln.node.voxel.KitItem.length(kFull) == 1024
-                && sum9 == 64 && min9 >= 1, mods.eln.node.voxel.KitItem.length(kFull) + " " + java.util.Arrays.toString(use9));
+            c.check("cable kit: 2x2 stacks of 10 make a 4-cable kit, one cable from each slot", mods.eln.node.voxel.KitItem.length(k4) == 64
+                && use4 != null && use4[0] == 1 && use4[1] == 1 && use4[2] == 1 && use4[3] == 1, mods.eln.node.voxel.KitItem.length(k4) + " " + java.util.Arrays.toString(use4));
+            var topUp = new java.util.ArrayList<net.minecraft.world.item.ItemStack>(four);
+            topUp.set(0, mods.eln.node.voxel.CableKitItem.kit(LV, 1000));
+            c.check("cable kit: a kit with room for one cable takes no three", mods.eln.node.voxel.CableKitRecipes.FromCoils.useForTests(topUp) == null, "");
             var in2 = net.minecraft.world.item.crafting.CraftingInput.of(1, 1, List.of(kit.copy()));
             var back = mods.eln.node.voxel.CableKitRecipes.ToCoil.INSTANCE.assemble(in2);
             var rest = mods.eln.node.voxel.CableKitRecipes.ToCoil.INSTANCE.getRemainingItems(in2);
@@ -935,15 +931,17 @@ public final class CableCases {
             var m = mods.eln.node.voxel.PipeKitRecipes.Merge.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(2, 1,
                 List.of(mods.eln.node.voxel.CableKitItem.kit(LV, 100), mods.eln.node.voxel.CableKitItem.kit(LV, 28))));
             c.check("cable kit: two kits merge", mods.eln.node.voxel.KitItem.length(m) == 128 && m.getItem() instanceof mods.eln.node.voxel.CableKitItem, m.toString());
-            // pipe kits as cable kits (Baughn: they didn't stack up or craft many at a time): whole stacks of plates
+            // pipe kits as cable kits (Baughn: they didn't stack up or craft many at a time)
             var plate = new net.minecraft.world.item.ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
                 net.minecraft.resources.Identifier.parse("eln:iron_plate")));
             var plates = new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
             for (int q = 0; q < 4; q++) plates.add(plate.copyWithCount(10));
             var pk = mods.eln.node.voxel.PipeKitRecipes.FromPlates.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(2, 2, plates));
             int[] pu = mods.eln.node.voxel.PipeKitRecipes.FromPlates.use(plates);
-            c.check("pipe kit: 2x2 stacks of 10 iron plates make one 20-block kit and use them all", mods.eln.node.voxel.PipeKitItem.length(pk) == 320
-                && pu != null && pu[0] + pu[1] + pu[2] + pu[3] == 40, mods.eln.node.voxel.PipeKitItem.length(pk) + " " + java.util.Arrays.toString(pu));
+            c.check("pipe kit: 2x2 stacks of 10 iron plates make a 2-block kit, one plate from each slot", mods.eln.node.voxel.PipeKitItem.length(pk) == 32
+                && pu != null && pu[0] + pu[1] + pu[2] + pu[3] == 4, mods.eln.node.voxel.PipeKitItem.length(pk) + " " + java.util.Arrays.toString(pu));
+            var odd = mods.eln.node.voxel.PipeKitRecipes.FromPlates.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(3, 1, plates.subList(0, 3)));
+            c.check("pipe kit: three slots of iron plates make nothing (two to a block, none left over)", odd.isEmpty(), odd.toString());
             var one = mods.eln.node.voxel.PipeKitRecipes.FromPlates.INSTANCE.assemble(net.minecraft.world.item.crafting.CraftingInput.of(1, 1, List.of(plate.copy())));
             c.check("pipe kit: a single plate makes nothing (two to a block)", one.isEmpty(), one.toString());
             // EA's casing (8 iron plates in a ring) still crafts: the kit recipe steps aside for another recipe
@@ -957,11 +955,39 @@ public final class CableCases {
             // the table crafts from build()
             for (int q = 0; q < TABLE.length; q++) {
                 int[] t = TABLE[q];
-                int per = t[0] == 0 ? 2 : 1, blocks = t[1] / per, left = menus[q].getSlot(1).getItem().getCount();
-                c.check("pipe kit: a table craft of " + t[1] + (t[0] == 0 ? " iron" : " alloy") + " plates makes " + blocks + " blocks and leaves " + (t[1] - blocks * per),
-                    mods.eln.node.voxel.PipeKitItem.length(results[q]) == 16 * blocks && left == t[1] - blocks * per,
+                int blocks = t[0] == 0 ? 0 : 1, left = menus[q].getSlot(1).getItem().getCount();   // (iron: two slots to a block)
+                c.check("pipe kit: a table craft of a slot of " + t[1] + (t[0] == 0 ? " iron" : " alloy") + " plates makes " + blocks + " blocks and leaves " + (t[1] - blocks),
+                    mods.eln.node.voxel.PipeKitItem.length(results[q]) == 16 * blocks && left == t[1] - blocks,
                     "result " + mods.eln.node.voxel.PipeKitItem.length(results[q]) / 16 + " blocks, " + left + " left");
             }
+            // kits merge wherever they meet (Baughn 2026-11-28): in an inventory (the held one takes the others), and a
+            // shift-clicked kit pours into the kits among its target slots, all of it or none
+            var bag = new net.minecraft.world.SimpleContainer(5);
+            bag.setItem(0, mods.eln.node.voxel.CableKitItem.kit(LV, 100));
+            bag.setItem(1, mods.eln.node.voxel.CableKitItem.kit(LV + 1, 50));
+            bag.setItem(3, mods.eln.node.voxel.CableKitItem.kit(LV, 1000));
+            bag.setItem(4, mods.eln.node.voxel.CableKitItem.kit(LV, 30));
+            mods.eln.node.voxel.KitItem.tidy(bag, 5, 3);
+            c.check("kits merge: the held kit fills first, the rest gather in the first slot, other tiers stay",
+                mods.eln.node.voxel.KitItem.length(bag.getItem(3)) == 1024 && mods.eln.node.voxel.KitItem.length(bag.getItem(0)) == 106
+                    && bag.getItem(4).isEmpty() && mods.eln.node.voxel.KitItem.length(bag.getItem(1)) == 50,
+                mods.eln.node.voxel.KitItem.length(bag.getItem(3)) + " " + mods.eln.node.voxel.KitItem.length(bag.getItem(0)) + " " + bag.getItem(4) + " " + mods.eln.node.voxel.KitItem.length(bag.getItem(1)));
+            var chest = new net.minecraft.world.inventory.ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x1, 8, c.player().getInventory(),
+                new net.minecraft.world.SimpleContainer(9), 1);
+            chest.getSlot(2).set(mods.eln.node.voxel.CableKitItem.kit(LV, 1000));
+            net.minecraft.world.item.ItemStack small = mods.eln.node.voxel.CableKitItem.kit(LV, 20), big = mods.eln.node.voxel.CableKitItem.kit(LV, 40);
+            boolean all = mods.eln.node.voxel.KitItem.pourIntoSlotsOf(chest, small, 0, 9, false);
+            boolean none = mods.eln.node.voxel.KitItem.pourIntoSlotsOf(chest, big, 0, 9, false);
+            c.check("kits merge: a shift-clicked kit that fits pours into the kit there; one that doesn't fit whole is left to the empty slots",
+                all && small.isEmpty() && !none && mods.eln.node.voxel.KitItem.length(big) == 40 && mods.eln.node.voxel.KitItem.length(chest.getSlot(2).getItem()) == 1020,
+                all + " " + small + " " + none + " " + mods.eln.node.voxel.KitItem.length(chest.getSlot(2).getItem()));
+            chest.getSlot(9).set(mods.eln.node.voxel.CableKitItem.kit(LV, 4));
+            chest.quickMoveStack(c.player(), 9);
+            boolean poured = chest.getSlot(0).getItem().isEmpty() && chest.getSlot(9).getItem().isEmpty()
+                && mods.eln.node.voxel.KitItem.length(chest.getSlot(2).getItem()) == 1024;
+            chest.getSlot(9).set(net.minecraft.world.item.ItemStack.EMPTY);
+            c.check("kits merge: a real shift-click into a chest pours into the kit there (the menu hook is in)", poured,
+                chest.getSlot(0).getItem() + " " + mods.eln.node.voxel.KitItem.length(chest.getSlot(2).getItem()));
             var pkit = mods.eln.node.voxel.PipeKitItem.kit(0, 16);
             var pbox = new net.minecraft.world.SimpleContainer(1);
             var pslot = new net.minecraft.world.inventory.Slot(pbox, 0, 0, 0);

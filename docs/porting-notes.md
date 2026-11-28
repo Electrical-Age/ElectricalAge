@@ -1269,3 +1269,12 @@ on 1.7.10) onto 26.x.
   first). A control valve or fitted sensor links to one signal cable, the nearest to the line from it to the floor
   (`VoxelNode.fittingCable`), not to every signal cable in the block, which shorted cables passing through together.
   GameTest `pipe_valve_refit_and_one_cable`.
+- **Kits are crafted one unit a slot, and merge wherever they meet (Lashtear, Baughn 2026-11-28).** The kit recipes
+  (`KitRecipes.use`) counted whole stacks and took all but the grid's one-per-slot in an `ItemCraftedEvent` listener that
+  only ran for a vanilla `CraftingContainer`: AE2's crafting terminal (and anything else that crafts) made the full kit
+  from one unit a slot. Now a craft takes one unit from every slot and makes that much (iron pipe: two slots a block;
+  nothing if the slots don't make whole blocks or the kit has no room), in every container; the listener is gone.
+  Whole stacks go in by clicking them onto a kit. Kits of a kind merge through `KitItem.pour`: in a player's inventory
+  once a second (the held kit takes the others), in the Toolbag as it changes, on shift-click toward slots holding a
+  kit (`KitMoveMixin` on `AbstractContainerMenu.moveItemStackTo`, all or nothing), in other containers' slots as they
+  close, and on pickup. To split a kit for someone, throw the crafted one. GameTests `cable_kits`, `pipe_kit_crafting`.

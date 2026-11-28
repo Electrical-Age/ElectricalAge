@@ -58,9 +58,8 @@ public final class CableKitRecipes {
         }
 
         /**
-         * {tier, length, cables used}: coils of one tier and at most one kit of it; the kit takes whole stacks of cable,
-         * as many as fit (Baughn: a grid of cable stacks gave one cable's worth per slot, and shift-click a heap of small
-         * kits). At least one cable from every slot (the crafting grid takes one from each), or null.
+         * {tier, length, cables used}: coils of one tier and at most one kit of it; one cable from every slot
+         * (KitRecipes.use), or null.
          */
         static int[] total(CraftingInput in) {
             List<ItemStack> items = new java.util.ArrayList<>();
@@ -72,8 +71,7 @@ public final class CableKitRecipes {
         }
 
         /**
-         * How many cables each slot gives (the slots in order, first come first served), then tier, length and the
-         * cables used; or null. Shared by the recipe and the crafted event (CableKitRecipes.crafted), which takes them.
+         * How many cables each slot gives (one), then tier, length and the cables used; or null.
          */
         public static int[] useForTests(List<ItemStack> items) {
             return use(items);
@@ -103,7 +101,7 @@ public final class CableKitRecipes {
         /**
          * In the recipe book (Baughn: it wasn't in the recipe browser or JEI): learnable, unlocked by holding cable
          * (data/eln/advancement/recipes/misc/cable_kit_from_coils.json), shown as one cable to a one-cable kit per tier.
-         * The grid takes whole stacks all the same. (The any-tier instance stays out of the book.)
+         * (The any-tier instance stays out of the book.)
          */
         @Override
         public boolean isSpecial() {
@@ -156,14 +154,6 @@ public final class CableKitRecipes {
         public RecipeSerializer<ToCoil> getSerializer() {
             return SERIALIZER;
         }
-    }
-
-    /**
-     * A kit crafted from cables takes the cables it counted: the grid takes one from each slot after this, so the rest
-     * goes here (both sides, as the grid's own taking).
-     */
-    public static void crafted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent e) {
-        KitRecipes.crafted(e, FromCoils.class, FromCoils::use);
     }
 
     /** Codecs for a recipe with a tier ({"tier": n}; absent: any tier). */

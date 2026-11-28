@@ -31,8 +31,19 @@ public class ToolbagMenu extends AbstractContainerMenu {
         this.bag = bag;
         this.bagSlot = bagSlot;
         bagSlots = new SimpleContainer(ToolbagItem.SLOTS) {
+            boolean tidying;
+
+            /** Kits of a kind in the bag are one kit (Baughn 2026-11-28: it was easy to get duplicates in the Toolbag). */
             @Override
             public void setChanged() {
+                if (!tidying && ToolbagMenu.this.bag != null) {
+                    tidying = true;
+                    try {
+                        KitItem.tidy(this, ToolbagItem.KITS, -1);
+                    } finally {
+                        tidying = false;
+                    }
+                }
                 super.setChanged();
                 save();
             }
