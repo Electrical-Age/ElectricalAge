@@ -132,7 +132,7 @@ is enough; its ghost cells `oil/GhostCells`, as the Large Boiler's), its
 vapour off the top of its rear left block to a condenser and receivers that breathe (the breather valve). Constants from
 the step-0 sketch (`sim/fluid/StillSketchTest`, gated: `-Psketch=still`): wall 60 W/K, shell 2800 J/K losing 2.5 W/K,
 shell limit 850 K (its watchdog trips from 840 K on a 20 K s budget, so a pot boiled down to residue under a big burner
-stops by 850 K). Front: the liquid's temperature as a signal on the origin (1 V a 100 °C), the bottoms drain low right,
+stops by 850 K). Front: a sight glass showing its liquid's level and layers live (`oil/SightGlass`), the liquid's temperature as a signal on the origin (1 V a 100 °C), the bottoms drain low right,
 at a tank's low flange height with the pot's floor at its bottom edge (the vessel stands 3 px up, on its skid), so
 it drains out completely; a hot drain into a closed receiver pushes back with the receiver's own air, so the
 receiver needs a breather; the fill low on its left flank and the steam inlet low on its right flank (into the pot at their flanges'

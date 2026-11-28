@@ -17,8 +17,8 @@ import static mods.eln.cad.models.OilKit.signalPlate;
 
 /**
  * The 2x2x2 Still Pot (refinery M2, todo #591): a riveted copper kettle standing on the Large Boiler's skid, a domed
- * head, a swan neck off the dome to the vapour flange, a thermometer and a sight glass on its front. No firebox: it is
- * heated from outside, as the Large Boiler. Drawn from its origin block (front bottom left), full size: 0..32 px on each
+ * head, a swan neck off the dome to the vapour flange, a thermometer and a sight glass (part level: its liquid, scaled
+ * by the render) on its front. No firebox: it is heated from outside, as the Large Boiler. Drawn from its origin block (front bottom left), full size: 0..32 px on each
  * axis, front XN (x = 0), right z+, as StillPotElement's local frame. Its connections, each at its port's spot:
  * <ul>
  * <li>thermal: one copper heat plate (the Large Boiler's) on the back of the lower right block, its hot copper shoe
@@ -131,16 +131,35 @@ public final class StillPot {
         m.addAll(dial(skin - 2.0, ty, tz, 2.0, "xn", 0.4).subList(0, 2));
         m.add(prism('y', 2.3, 8.6, 0.25, DECK + 1.6, ty - 2.2, "darksteel", 6, false, false));
         m.add(box(2.05, ty - 2.45, 8.35, 2.55, ty - 1.95, tz - 0.6, "darksteel"));
-        // the sight glass: a glass tube between two brass cocks on the kettle's front right
-        double gz = 19.5, g0 = 8.0, g1 = 18.0, gx = frontSkin(g0, gz) - 1.2;
+        // the sight glass: an empty glass tube between two brass cocks on the kettle's front right (its liquid: part level)
+        double gz = GLASS_Z, g0 = GLASS_Y0, g1 = GLASS_Y1, gx = glassX();
         for (double y : new double[]{g0 - 0.8, g1}) m.add(box(gx - 0.8, y, gz - 0.8, frontSkin(y, gz) + 0.6, y + 0.8, gz + 0.8, "brass"));
-        m.add(prism('y', gx, gz, 0.5, g0, g1, "sightglass", 8, false, false));
+        m.add(prism('y', gx, gz, 0.4, g0, g1, "sightglass", 8, false, false));
         return m;
+    }
+
+    /** The sight glass's tube: its z, its foot and its top (px). */
+    static final double GLASS_Z = 19.5, GLASS_Y0 = 8.0, GLASS_Y1 = 18.0;
+
+    static double glassX() {
+        return frontSkin(GLASS_Y0, GLASS_Z) - 1.2;
+    }
+
+    /**
+     * The liquid in the sight glass (Lashtear 2026-11-28: the glass showed a level in an empty pot, painted into its
+     * texture; Baughn: do it properly): a white column round the whole tube, about its foot. The render scales it to the
+     * pot's level and tints it in the liquid's colour (mods.eln.oil.SightGlass).
+     */
+    static List<Mesh> level() {
+        return List.of(prism('y', glassX(), GLASS_Z, 0.5, GLASS_Y0, GLASS_Y1, "gaugeliquid", 8, false, true));
     }
 
     public static List<NodeModel> models() {
         NodeModel n = new NodeModel("stillpot", OilKit.PAINT_BOILER);
         n.part("main", main());
+        n.part("level", level());
+        n.origin("level", glassX(), GLASS_Y0, GLASS_Z);
+        n.txt.addAll(List.of("o level", "f height " + Catalog.fmt((GLASS_Y1 - GLASS_Y0) / 16)));
         return List.of(n);
     }
 }

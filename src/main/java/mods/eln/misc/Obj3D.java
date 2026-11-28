@@ -181,6 +181,14 @@ public class Obj3D {
             return nameToFloatHash.getOrDefault(name, 0f);
         }
 
+        /**
+         * The part's origin (its .txt originX, originY, originZ; block units, the model's frame). These three are kept
+         * here, not among the floats: getFloat("originY") is 0 whatever the .txt says.
+         */
+        public float[] origin() {
+            return new float[]{ox, oy, oz};
+        }
+
         public void draw(float angle, float x, float y, float z) {
             if (locked) return;
 

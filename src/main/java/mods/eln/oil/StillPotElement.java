@@ -58,7 +58,7 @@ import java.util.Map;
  * and energy are conserved exactly. (A check link from the pot's floor into a neck node, solved in the core, made
  * the network stiff: overfired, it crawled for a second at a time.) It is how a badly run still fouls engines.
  */
-public class StillPotElement extends TransparentNodeElement implements FluidDevice, GhostCells.Host {
+public class StillPotElement extends TransparentNodeElement implements FluidDevice, GhostCells.Host, SightGlass.Host {
     /** The pot: 32 B, two blocks high; its working charge (the view's fill limit) 24 B. */
     public static final double POT_B = 32, CHARGE_B = 24, HEIGHT = 2;
     public static final double VOLUME = TankDescriptor.bucketsVolume(POT_B);
@@ -148,6 +148,9 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
             if (vessel != null) tempOutProcess.setOutputNormalized(Math.max(0, Math.min(1, (vessel.T() - Water.T0) / SIGNAL_MAX_C)));
         });
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
+        slowProcessList.add((mods.eln.sim.IProcess) t -> {
+            if (glass().differs(shownGlass)) needPublish();
+        });
         // (boiled down to residue, the shell climbs as fast as the burner heats it: it fails at its limit)
         slowProcessList.add(new ThermalLoadWatchDog().set(thermal).setTMax(SHELL_MAX_K - WATCH_MARGIN_K - PhysicalConstant.Tref).setBudget(WATCH_BUDGET)
             .set(new Failure(this).machine()));
@@ -498,6 +501,30 @@ public class StillPotElement extends TransparentNodeElement implements FluidDevi
     }
 
     // ---- what the player reads
+
+    /** Its sight glass as last published (network only). */
+    SightGlass shownGlass;
+
+    /**
+     * What its sight glass shows (Lashtear 2026-11-28: the glass was painted part full, in an empty pot too; Baughn: do
+     * it properly): the pot's liquid layers, their tops as shares of the pot's 32 B (Jade's percent), each in its main
+     * species' colour.
+     */
+    @Override
+    public SightGlass glass() {
+        return SightGlass.of(vessel);
+    }
+
+    @Override
+    public void networkSerialize(java.io.DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            shownGlass = glass();
+            shownGlass.write(stream);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public Map<String, String> getWaila() {

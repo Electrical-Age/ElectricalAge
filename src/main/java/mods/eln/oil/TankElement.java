@@ -47,22 +47,11 @@ public class TankElement extends TransparentNodeElement implements FluidDevice, 
 
     /** Its liquid layers for the sight glass, from the bottom: each one's top (share of the volume) and colour. */
     float[] layerTops() {
-        float[] t = new float[vessel.layers()];
-        for (int l = 0; l < t.length; l++) t[l] = (float) vessel.layerTop(l);
-        return t;
+        return SightGlass.tops(vessel);
     }
 
     int[] layerColours() {
-        var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
-        int[] c = new int[vessel.layers()];
-        for (int l = 0; l < c.length; l++) {
-            int best = -1;
-            double most = 0;
-            for (int id = 0; id < vessel.speciesBound(); id++)
-                if (vessel.layerOf(id) == l && vessel.liquid(id) > most) { best = id; most = vessel.liquid(id); }
-            c[l] = best < 0 ? 0 : reg.byId(best).colour;
-        }
-        return c;
+        return SightGlass.colours(vessel);
     }
 
     /** What the sight glass's layers look like, to publish when it changes: their count and colours, tops to 2 %. */

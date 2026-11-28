@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 /** ColumnDescriptor (base): distils crude into the segments stacked on it, by the heat on its sides. */
-public class ColumnBaseElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice {
+public class ColumnBaseElement extends TransparentNodeElement implements mods.eln.sim.fluid.FluidDevice, SightGlass.Host {
     /** Cuts per segment count, top to bottom (MACHINES-PLAN); the residue always stays in the base. */
     static final Oil.Cut[][] CUTS = {
         {},
@@ -92,6 +92,9 @@ public class ColumnBaseElement extends TransparentNodeElement implements mods.el
         thermalFastProcessList.add(new Distil());
         slowProcessList.add(new NodePeriodicPublishProcess(node, 2, 1));
         slowProcessList.add(new Scan());
+        slowProcessList.add((IProcess) t -> {
+            if (glass().differs(shownGlass)) needPublish();
+        });
         slowProcessList.add(new ThermalLoadWatchDog().set(thermal).setTMax(700).set(new Failure(this).machine()));
     }
 
@@ -260,6 +263,34 @@ public class ColumnBaseElement extends TransparentNodeElement implements mods.el
         tanks.readFromNBT(nbt, "column");
         crudeIn.read(nbt);
         residueOut.read(nbt);
+    }
+
+    /** Its level gauge as last published (network only). */
+    SightGlass shownGlass;
+
+    /**
+     * What its level gauge shows (Lashtear 2026-11-28: the glass was painted part full; Baughn: do it properly): its two
+     * tanks as one sump, the residue under the crude, each in its own colour.
+     */
+    @Override
+    public SightGlass glass() {
+        float all = ColumnDescriptor.CRUDE_MB + ColumnDescriptor.RESIDUE_MB;
+        if (tanks.crude() + tanks.residue() <= 0) return SightGlass.EMPTY;
+        var reg = mods.eln.sim.fluid.SpeciesRegistry.get();
+        int residue = Oil.Cut.RESIDUE.color & 0xFFFFFF, crude = reg.id("eln:crude_oil");
+        return new SightGlass(new float[]{tanks.residue() / all, (tanks.residue() + tanks.crude()) / all},
+            new int[]{residue, crude < 0 ? residue : reg.byId(crude).colour});
+    }
+
+    @Override
+    public void networkSerialize(java.io.DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            shownGlass = glass();
+            shownGlass.write(stream);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

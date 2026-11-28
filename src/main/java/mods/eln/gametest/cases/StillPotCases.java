@@ -42,6 +42,7 @@ public final class StillPotCases {
         cases.add(new BurstTakesGhosts());
         cases.add(new ResidueDrains());
         cases.add(new SecondPass());
+        for (Glass.Row r : Glass.Row.values()) cases.add(new Glass(r));
     }
 
 
@@ -603,6 +604,146 @@ public final class StillPotCases {
             // (the steam itself goes on through the warm receiver and out of its breather: condensing it, and the water
             // layer under the oil, need the condenser)
             ctx.check("still pot: the boiler's steam went through the pot", boiler.steamRate > 0, String.format("%.1f mB/s", boiler.steamRate));
+        }
+    }
+
+    /**
+     * Lashtear 2026-11-28: the Still Pot's sight glass showed a level in an empty pot (it was painted into the texture);
+     * Baughn: do it properly, the real level, live. What a render reads for the glass (SightGlassRender, from the
+     * element's packet) follows the contents: an empty pot shows nothing; 16 B of crude half a glass in one colour; heavy
+     * oil over water two layers, the water under; the column base's gauge (the same painted glass) its residue under its
+     * crude. A change under 2 % of the glass doesn't ask for a publish, a bigger one does and the glass shows it, and a
+     * reloaded device publishes the same.
+     */
+    static final class Glass extends PlumbingCases.Big {
+        enum Row { EMPTY, CRUDE, OIL_ON_WATER, COLUMN }
+
+        final Row row;
+        mods.eln.node.transparent.TransparentNodeElement el;
+        BlockPos o;
+
+        Glass(Row row) {
+            this.row = row;
+        }
+
+        public String id() {
+            return "still_pot_sight_glass_" + row.name().toLowerCase(java.util.Locale.ROOT);
+        }
+
+        public int ticks() {
+            return 40;
+        }
+
+        /** What a client's render holds for e's glass: its packet, read back. */
+        static mods.eln.oil.SightGlass shown(mods.eln.node.transparent.TransparentNodeElement e) {
+            var bos = new java.io.ByteArrayOutputStream();
+            e.networkSerialize(new java.io.DataOutputStream(bos));
+            var r = new mods.eln.oil.SightGlassRender(null, e.getDescriptor());
+            r.networkUnserialize(new java.io.DataInputStream(new java.io.ByteArrayInputStream(bos.toByteArray())));
+            return r.glass;
+        }
+
+        /** The device holds share of its volume: the pot as dead crude at 300 K, the column 1 B of residue and crude over it. */
+        void set(double share) {
+            if (el instanceof StillPotElement pot)
+                charge(pot, 300, 300, sp("crude_oil"), share * StillPotElement.POT_B * EaUnits.KG_PER_MB_WATER * 1000 / Water.RHO_L * 850);
+            else {
+                var tanks = ((mods.eln.oil.ColumnBaseElement) el).tanks;
+                tanks.setResidue(1000);
+                tanks.setCrude((int) Math.round(share * ALL_MB) - 1000);
+            }
+        }
+
+        static final int ALL_MB = mods.eln.oil.ColumnDescriptor.CRUDE_MB + mods.eln.oil.ColumnDescriptor.RESIDUE_MB;
+
+        /** The liquid's share of the device's volume, from its contents. */
+        double truth() {
+            if (el instanceof StillPotElement pot) return pot.vessel.liquidVolume() / StillPotElement.VOLUME;
+            var tanks = ((mods.eln.oil.ColumnBaseElement) el).tanks;
+            return (tanks.crude() + tanks.residue()) / (double) ALL_MB;
+        }
+
+        mods.eln.oil.SightGlass glass() {
+            return ((mods.eln.oil.SightGlass.Host) el).glass();
+        }
+
+        /** The liquid column the descriptor draws for glass s: {vertices, its lowest y, its highest y} (px, the model's frame). */
+        double[] drawn(mods.eln.oil.SightGlass s) {
+            mods.eln.gl.GlFrame.beginRenderFrame();
+            var f = mods.eln.gl.GlFrame.open();
+            try {
+                ((mods.eln.oil.SightGlassRender.Glazed) el.getDescriptor()).drawLevel(s);
+            } finally {
+                mods.eln.gl.GlFrame.close();
+            }
+            double n = 0, lo = Double.MAX_VALUE, hi = -Double.MAX_VALUE;
+            for (var b : f.batches().values())
+                for (int i = 0; i < b.floats; i += mods.eln.gl.GlFrame.STRIDE) {
+                    n++;
+                    lo = Math.min(lo, (b.data[i + 1] + 0.5) * 16);
+                    hi = Math.max(hi, (b.data[i + 1] + 0.5) * 16);
+                }
+            return new double[]{n, lo, hi};
+        }
+
+        public void build(TestContext ctx) {
+            o = ctx.at(2, 1, 2);
+            el = row == Row.COLUMN ? ctx.placeTransparent(Ids.transparent("Fractionating Column Base"), o) : pot(ctx, o);
+            if (el == null) throw new IllegalStateException("the device could not be placed");
+            double bucket = EaUnits.KG_PER_MB_WATER * 1000;
+            switch (row) {
+                case EMPTY -> {
+                }
+                case CRUDE, COLUMN -> set(0.5);
+                case OIL_ON_WATER -> charge((StillPotElement) el, 300, 300, SpeciesRegistry.WATER, 8 * bucket, sp("heavy_oil"), 8 * bucket / Water.RHO_L * 950);
+            }
+        }
+
+        public void measure(TestContext ctx) {
+            String name = "sight glass " + row.name().toLowerCase(java.util.Locale.ROOT) + ": ";
+            var s0 = shown(el);
+            double t0 = truth();
+            int water = SpeciesRegistry.get().byId(SpeciesRegistry.WATER).colour;
+            String saw = String.format("shows %.3f of %.3f, tops %s, colours %s", s0.fill(), t0, java.util.Arrays.toString(s0.tops),
+                java.util.Arrays.stream(s0.colours).mapToObj(Integer::toHexString).toList());
+            ctx.line(name + saw);
+            ctx.check(name + "the published level is the contents'", Math.abs(s0.fill() - t0) < 0.02, saw);
+            // (the glass's foot and top in the model, px: mods.eln.cad.models.StillPot GLASS_Y0/1, Column GLASS_Y0/1)
+            double g0 = row == Row.COLUMN ? 11.1 : 8, g1 = row == Row.COLUMN ? 14.4 : 18;
+            double[] d0 = drawn(s0);
+            if (row == Row.EMPTY) ctx.check(name + "empty, no liquid is drawn in the glass", d0[0] == 0, (int) d0[0] + " vertices");
+            else ctx.check(name + "the liquid is drawn from the glass's foot up to the level", Math.abs(d0[1] - g0) < 0.02 && Math.abs(d0[2] - (g0 + s0.fill() * (g1 - g0))) < 0.02,
+                String.format("%d vertices, y %.2f..%.2f px in a glass %.1f..%.1f", (int) d0[0], d0[1], d0[2], g0, g1));
+            switch (row) {
+                case EMPTY -> ctx.check(name + "an empty pot's glass is empty", s0.fill() < 0.005, saw);
+                case CRUDE -> ctx.check(name + "16 B of crude: half a glass, one layer, not water's colour",
+                    Math.abs(s0.fill() - 0.5) < 0.08 && s0.tops.length == 1 && s0.colours[0] != water, saw);
+                case OIL_ON_WATER -> ctx.check(name + "8 B of heavy oil on 8 B of water: half a glass, the water under (a quarter), each its colour",
+                    Math.abs(s0.fill() - 0.5) < 0.08 && s0.tops.length == 2 && Math.abs(s0.tops[0] - 0.25) < 0.03 && s0.colours[0] == water
+                        && s0.colours[1] == SpeciesRegistry.get().byId(sp("heavy_oil")).colour, saw);
+                case COLUMN -> ctx.check(name + "1 B of residue under 5 B of crude of its 12 B: a twelfth and a half",
+                    s0.tops.length == 2 && Math.abs(s0.tops[0] - 1 / 12f) < 0.001 && Math.abs(s0.tops[1] - 0.5f) < 0.001 && s0.colours[0] != s0.colours[1], saw);
+            }
+            if (row == Row.CRUDE || row == Row.COLUMN) {
+                set(0.51);
+                ctx.check(name + "a change of 1 % asks for no publish", !glass().differs(s0), String.format("%.3f after %.3f", truth(), t0));
+            }
+            // filled (or drained) to 0.6: it asks for a publish, and the glass follows
+            set(0.6);
+            boolean asks = glass().differs(s0);
+            var s1 = shown(el);
+            double t1 = truth();
+            ctx.check(name + "changed to 0.6 it asks for a publish, and the glass shows it", asks && Math.abs(s1.fill() - t1) < 0.02 && Math.abs(s1.fill() - 0.6) < 0.08,
+                String.format("asks %b, shows %.3f of %.3f", asks, s1.fill(), t1));
+            // reloaded as a world load does it: the fresh device publishes the same glass
+            try {
+                var fresh = ((mods.eln.node.transparent.TransparentNode) mods.eln.gametest.Reload.node(ctx.level(), o).fresh).element;
+                var s2 = shown(fresh);
+                ctx.check(name + "reloaded, it publishes the same glass", !s2.differs(s1) && Math.abs(s2.fill() - s1.fill()) < 0.005,
+                    String.format("%.3f after %.3f, %d layers", s2.fill(), s1.fill(), s2.tops.length));
+            } catch (ReflectiveOperationException | RuntimeException e) {
+                ctx.check(name + "reloaded, it publishes the same glass", false, e.toString());
+            }
         }
     }
 

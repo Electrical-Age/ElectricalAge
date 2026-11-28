@@ -75,7 +75,7 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherDescriptor.class,
             mods.eln.transparentnode.energyconverter.EnergyConverterElnToOtherRender::new);
         ElnRenders.transparent(mods.eln.oil.BoilerDescriptor.class, mods.eln.oil.BoilerRender::new);
-        ElnRenders.transparent(mods.eln.oil.StillPotDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
+        ElnRenders.transparent(mods.eln.oil.StillPotDescriptor.class, mods.eln.oil.SightGlassRender::new);
         ElnRenders.transparent(mods.eln.oil.CondenserCoilDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
         ElnRenders.transparent(mods.eln.oil.SteamGeneratorDescriptor.class, mods.eln.oil.SteamGeneratorRender::new);
         ElnRenders.transparent(mods.eln.oil.CompactTurbineDescriptor.class, mods.eln.oil.CompactTurbineRender::new);
@@ -99,7 +99,9 @@ public final class ClientRenders {
         ElnRenders.transparent(mods.eln.robotics.computer.ComputerDescriptor.class, mods.eln.robotics.computer.ComputerRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.capacitorbank.CapacitorBankDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
         ElnRenders.transparent(mods.eln.oil.CondenserDescriptor.class, mods.eln.oil.CondenserRender::new);
-        ElnRenders.transparent(mods.eln.oil.ColumnDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);
+        // (the column's base has a level gauge, its segments none)
+        ElnRenders.transparent(mods.eln.oil.ColumnDescriptor.class, (e, d) -> d.RenderClass == mods.eln.oil.SightGlassRender.class
+            ? new mods.eln.oil.SightGlassRender(e, d) : new mods.eln.node.transparent.FrontDrawnRender(e, d));
         ElnRenders.transparent(mods.eln.oil.FlareStackDescriptor.class, mods.eln.oil.FlareStackRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor.class, mods.eln.transparentnode.heatfurnace.HeatFurnaceRender::new);
         ElnRenders.transparent(mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor.class, mods.eln.node.transparent.FrontDrawnRender::new);

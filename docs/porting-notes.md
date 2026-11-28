@@ -1024,6 +1024,15 @@ In the port:
   no way, though routes started at that pin came down the pillar's side: the router's end only took a cable arriving
   flat along the face, not one coming over the edge onto the pin. It now does, as a start may leave that way
   (Baughn 2026-11-18, #514; `CableAirCases.ToPinOnPillarCase`).
+- The Still Pot's sight glass showed a liquid level in an empty pot (player report, Lashtear 2026-11-28): the level
+  was painted into the glass's texture (the palette's `sightglass`), about four fifths full whatever the pot held, and
+  the column base's level gauge had the same glass. Baughn 2026-11-28: do it properly. The glass is empty glass now and
+  its liquid a part of its own (`level`), drawn to the real level: the pot publishes its liquid layers (each one's top
+  as a share of its 32 B, as Jade's percent, and its main species' colour; water under oil shows as two) when one moves
+  2 % (`oil/SightGlass`, `SightGlassRender`), the column base its residue under its crude, of its 12 B. Network only,
+  nothing saved. `anim.Fill.draw` scaled a part about the block's middle instead of its origin (it read the origin
+  from the .txt floats, where it never is), right only at scale 1: fixed with it, which also puts the Boiler's and
+  Large Boiler's gauge columns on their feet at every level. GameTests `still_pot_sight_glass_*`.
 
 ## Deferred
 

@@ -98,8 +98,9 @@ public final class Palette {
         put("label", 232, 228, 214, 4, (x, y) -> all((y == 6 || y == 9) && x >= 3 && x <= 12 ? -150 : 0));   // two printed lines
         // (Column)
         put("white", 226, 226, 220, 6, null);   // flare stack bands, dial face
-        // (Column)
-        put("sightglass", 210, 222, 226, 4, (x, y) -> y >= 3 ? new int[]{-60, -126, -202} : all(x % 5 == 0 ? -40 : 0));
+        // (Column, StillPot: an empty gauge glass; its liquid is a part of its own, scaled to the level: a level painted
+        // here showed in an empty pot, Lashtear 2026-11-28)
+        put("sightglass", 210, 222, 226, 4, (x, y) -> all(x % 5 == 0 ? -40 : 0));
         // (Column)
         put("lagging", 176, 180, 184, 5, (x, y) -> all(x == 0 || y == 15 ? -34 : x == 1 ? 12 : 0));
         // (Column)

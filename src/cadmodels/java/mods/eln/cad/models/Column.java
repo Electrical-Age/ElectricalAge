@@ -202,7 +202,8 @@ public final class Column {
         double sx = C - APO;
         m.add(box(sx - 1.2, 10.4, 7.35, sx + 0.1, 11.1, 8.65, "brass"));
         m.add(box(sx - 1.2, 14.4, 7.35, sx + 0.1, 15.1, 8.65, "brass"));
-        m.add(prism('y', sx - 0.6, C, 0.4, 11.1, 14.4, "sightglass", 6, false, false));
+        // (the gauge's glass, empty: its liquid is part level)
+        m.add(prism('y', sx - 0.6, C, 0.3, GLASS_Y0, GLASS_Y1, "sightglass", 6, false, false));
         // (the checker: the guard rods met the cocks only along an edge; they moved 0.2 px in, onto the cocks' ends, z 7.35..7.55
         // and 8.45..8.65)
         m.add(box(sx - 1.4, 11.1, 7.35, sx - 0.6, 14.4, 7.55, "darksteel"));
@@ -326,6 +327,18 @@ public final class Column {
         return m;
     }
 
+    /** The base's level gauge: its glass's foot and top (px). */
+    static final double GLASS_Y0 = 11.1, GLASS_Y1 = 14.4;
+
+    /**
+     * The liquid in the base's level gauge (Lashtear 2026-11-28: the glass showed a level when empty, painted into its
+     * texture; Baughn: do it properly): a white column round the glass, about its foot, scaled and tinted by the render
+     * (mods.eln.oil.SightGlass).
+     */
+    static List<Mesh> baseLevel() {
+        return List.of(prism('y', C - APO - 0.6, C, 0.4, GLASS_Y0, GLASS_Y1, "gaugeliquid", 6, false, true));
+    }
+
     static NodeModel node(String name, List<Mesh> main) {
         // "paint" is signal red (heat band, handwheels, flare stack bands): the palette's red
         NodeModel n = new NodeModel(name, "red");
@@ -334,6 +347,10 @@ public final class Column {
     }
 
     public static List<NodeModel> models() {
-        return List.of(node("columnbase", columnBase()), node("columnsegment", columnSegment()), node("flarestack", flareStack()));
+        NodeModel base = node("columnbase", columnBase());
+        base.part("level", baseLevel());
+        base.origin("level", C - APO - 0.6, GLASS_Y0, C);
+        base.txt.addAll(List.of("o level", "f height " + Catalog.fmt((GLASS_Y1 - GLASS_Y0) / 16)));
+        return List.of(base, node("columnsegment", columnSegment()), node("flarestack", flareStack()));
     }
 }

@@ -18,7 +18,7 @@ line up.
   with each of the 4 side faces at the floor centre (7 px wide, 3.5 px high, 4 brass bolts, a brass terminal stud at
   the README "Cable terminals" position (2.25 px up, centred), clamp bar, copper heat bus
   into the jacket), where thermal cables / heaters join (LRDU Down on the 4 horizontal sides). Front: fire porthole on
-  the jacket and a level gauge (amber oil level) on the shell. Crude inlet on z+ and residue drain with a gate valve and
+  the jacket and a level gauge on the shell (an empty glass; part `level` is its liquid, scaled by the render). Crude inlet on z+ and residue drain with a gate valve and
   red handwheel on z-, both with flanges flush with the face at face centre height (y 8), where pipes from other mods
   meet. Ladder with cage on the back from the jacket top up.
 - **columnsegment**: full-height lagged shell, half-flanges at y 0..0.5 (nuts above) and 15.5..16 (nuts below), two

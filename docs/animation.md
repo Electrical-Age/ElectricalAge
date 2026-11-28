@@ -27,7 +27,7 @@ referenced from CLAUDE.md).
 | `Plume` | What a device lets out into the air, one look per kind (Baughn 2026-11-13: the same output looks the same on every device): `STEAM` (white wisps), `SMOKE` (a clean fire's flue gas), `SOOT` (a fouled fire, carbon black), `FLAME_GAS`, `FLAME_LIGHT`, `FLAME_HEAVY`. `Plume.vented(fluid)` / `burnt(fluid)` pick the kind by the fluid's name; `puff(level, x, y, z, halfWidth[, pushX, pushZ])` draws one (the device gives the place and, with an `Emitter`, the rate); `jet()` is the particle of a jet under pressure, sent by the server (`SteamJet`) | every stack, vent and flare; a new outlet picks a kind, a new kind of output gets a kind here |
 | `Led` | A status LED part: full-bright on, dimmed off | ledpower / ledrun parts |
 | `Glow` | A part self-lit in a colour from a per-device `Ramp` of a 0..1 level | fire windows, peepholes (temperature-true colour: `misc.Incandescence`) |
-| `Fill` | A part scaled in y about its origin | gauge glasses, tank levels |
+| `Fill` | A part scaled in y about its origin's height (`Obj3DPart.origin()`: the .txt origin is not among `getFloat`'s values, which give 0 for it) | gauge glasses, tank levels |
 | `Progress` | A machine's job progress run on between publishes at the published rate; `shown()` eases forward and restarts with the next piece | items in process |
 | `Belt`, `BeltPath` | A belt of links wrapped round two pulleys (open belt), running with the drive (`Belt.Run`) | the 230V macerator |
 
@@ -67,6 +67,7 @@ code on purpose.
 | Heat furnace, fuel heat furnace | flicker | hand-written | own |
 | Switch, VU meter, gate sources, fire detector, source, lamp supply, entity sensor, emergency lamp, redstone in/out, bus button/light/floor sensor, turret, data logger | LEDs with halos or mixed states | inline | own |
 | Boiler (gauge glass), oil separator (basin) | levels | `Fill` | lib |
+| Still Pot (sight glass), fractionating column base (level gauge) | the liquid's layers, each in its colour (Lashtear 2026-11-28: the glass showed a painted level when empty; Baughn: do it properly) | `oil/SightGlass` (published by the element on a 2 % change, drawn by `SightGlassRender`), `Fill` a layer | lib |
 | Tanks | layered liquid columns | `TankDescriptor.drawScaled` (layers) | own |
 | Teleporter, math chip, auto miner | blinking / random busy LEDs | hand-written | own |
 | Shafts (all shaft parts, turbines, generator, motor) | rotors | `log(rads+1)/log(1.2)` deg-rate, unsmoothed | special: Baughn's 2015 curve (slow shafts turn visibly, fast ones don't strobe) |
