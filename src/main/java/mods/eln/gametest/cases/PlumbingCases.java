@@ -30,6 +30,8 @@ public final class PlumbingCases {
         cases.add(new PumpMovesWater(false));
         cases.add(new PumpMovesWater(true));
         cases.add(new PumpMovesWater(false, true));
+        cases.add(new RebuildAskedMidStep(false));
+        cases.add(new RebuildAskedMidStep(true));
         cases.add(new PressureValve(ValvePart.REDUCING));
         cases.add(new PressureValve(ValvePart.RELIEF));
         cases.add(new QualitySensor());
@@ -538,6 +540,96 @@ public final class PlumbingCases {
             ctx.check("tank: steam went over the top to B", b.vessel.mWater > 0.001, String.format("%.4f kg", b.vessel.mWater));
             ctx.check("tank: A kept its water (over 80%)", a.vessel.mLiquid() > 0.8 * aWater0, String.format("%.3f of %.3f kg", a.vessel.mLiquid(), aWater0));
             ctx.check("tank: B got far less water than A had", b.vessel.mWater < 0.2 * aWater0, String.format("%.4f kg", b.vessel.mWater));
+        }
+    }
+
+    /**
+     * A rebuild asked for while the networks step waits for the next tick (Incognito crashed 2026-11-28 14:38 on a
+     * ConcurrentModificationException in FluidWorld.process: a device changed the topology after the step's rebuild,
+     * and the heavy-network marks looked its ports up through nodeFor, which rebuilt the networks inside the loop over
+     * them). A heavy tank and pipe step in the background, a light tank after them; a device after both asks for a
+     * rebuild every tick: in its own beforeFluidStep (joins before the networks step), or, duringStep, whenever its
+     * ports are read between its before and after (the heavy marks read every device's ports inside the loop over the
+     * networks). The first row asks in its first ASK ticks, the second after them: both at once rebuilt every network
+     * in the world twice a tick, and a breather test running beside them got no air.
+     */
+    static final class RebuildAskedMidStep extends Big {
+        TankElement a;
+        mods.eln.sim.fluid.FluidDevice asker;
+        IProcess watch;
+        int asked;
+        String note;
+        static final int ASK = 40;
+        final boolean duringStep;
+        boolean inStep, primed;
+        int ticked;
+
+        RebuildAskedMidStep(boolean duringStep) {
+            this.duringStep = duringStep;
+        }
+
+        public String id() {
+            return duringStep ? "fluid_rebuild_asked_inside_the_step_waits" : "fluid_rebuild_asked_mid_step_waits";
+        }
+
+        @Override
+        public boolean checkStalls() {
+            // (a heavy network rebuilt every tick: it falls behind by design)
+            return false;
+        }
+
+        public int ticks() {
+            return 2 * ASK;
+        }
+
+        public void build(TestContext ctx) {
+            BlockPos pa = ctx.at(5, 1, 1);
+            a = tank(ctx, IRON_TANK, pa, Direction.XN);
+            PipeCases.lay(ctx, pa.south(), 0, 8, 4, 0, 8, 4, 16);
+            fill(a.vessel, 0.5 * a.vessel.volume * Water.RHO_L, Water.P_ATM, Water.T_AMBIENT);
+            // (a second, light network after the heavy one: a list rebuilt to one network ends its loop unnoticed)
+            tank(ctx, IRON_TANK, ctx.at(1, 1, 7), Direction.XN);
+            asker = new mods.eln.sim.fluid.FluidDevice() {
+                public Object fluidLevel() {
+                    return a.fluidLevel();
+                }
+
+                public List<FluidPort> fluidPorts() {
+                    if (inStep) {
+                        asked++;
+                        mods.eln.fluid.FluidWorld.changed(this);
+                    }
+                    return List.of();
+                }
+
+                public void beforeFluidStep(double dt) {
+                    boolean mine = ticked++ < ASK != duringStep;
+                    if (!mine) return;
+                    if (!primed) a.vessel.slowSteps = 2 * mods.eln.sim.fluid.CoreStep.HEAVY_AFTER;   // (heavy from its first asking tick)
+                    primed = true;
+                    if (duringStep) inStep = true;
+                    else {
+                        asked++;
+                        mods.eln.fluid.FluidWorld.changed(this);
+                    }
+                }
+
+                public void afterFluidStep(double dt) {
+                    inStep = false;
+                }
+            };
+            mods.eln.fluid.FluidWorld.add(asker);
+            Eln.simulator.addSlowProcess(watch = dt -> {
+                String n = mods.eln.fluid.FluidWorld.heavyAt(a.node.coordonate.pos().asLong());
+                if (n != null) note = n;
+            });
+        }
+
+        public void measure(TestContext ctx) {
+            Eln.simulator.removeSlowProcess(watch);
+            mods.eln.fluid.FluidWorld.remove(asker);
+            ctx.check("rebuild mid-step: the device asked for rebuilds " + (duringStep ? "inside the step" : "in its own step"), asked >= (duringStep ? 1 : ASK - 5), "asked " + asked);
+            ctx.check("rebuild mid-step: the tank's network stepped in the background, and Jade marks it heavy (the marks looked up its ports)", note != null && note.contains("Heavy pipe network"), "" + note);
         }
     }
 

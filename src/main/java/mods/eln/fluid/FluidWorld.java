@@ -391,6 +391,7 @@ public final class FluidWorld implements IProcess {
         // crashed on a ConcurrentModificationException when a steam turbine's casing burst; the ones gone are skipped)
         List<FluidDevice> stepping = new ArrayList<>(devices);
         for (FluidDevice d : stepping) if (devices.contains(d)) d.beforeFluidStep(time);
+        rebuildIfDirty();   // (what a device changed in its own step joins now, before the networks step)
         // a run's wall: its pieces' heat links summed, at their mean wall temperature
         for (var e : lumps.entrySet()) {
             double ua = 0, uat = 0;
@@ -423,17 +424,24 @@ public final class FluidWorld implements IProcess {
         // them), applied here in the list's order. Networks share no node or edge, so the result is as one by one.
         long wall0 = System.nanoTime();
         List<FluidNetwork> solving = new ArrayList<>();
-        for (FluidNetwork n : networks) if (n.begin(time)) solving.add(n);
-        long wall1 = System.nanoTime();
-        boolean pooled = mods.eln.sim.fluid.CoreStep.solveAll(solving);
-        long wall2 = System.nanoTime();
+        boolean pooled;
+        long wall1, wall2;
+        inStep = true;
+        try {
+            for (FluidNetwork n : networks) if (n.begin(time)) solving.add(n);
+            wall1 = System.nanoTime();
+            pooled = mods.eln.sim.fluid.CoreStep.solveAll(solving);
+            wall2 = System.nanoTime();
+            for (FluidNetwork n : networks) {
+                n.finish();
+                if (n.overBudget()) overBudget(n);
+                markIfStuck(n);
+            }
+        } finally {
+            inStep = false;
+        }
         beginNanos += wall1 - wall0;
         solveNanos += wall2 - wall1;
-        for (FluidNetwork n : networks) {
-            n.finish();
-            if (n.overBudget()) overBudget(n);
-            markIfStuck(n);
-        }
         long wall = System.nanoTime() - wall0;
         wallNanos += wall;
         wallTicks++;
@@ -660,8 +668,16 @@ public final class FluidWorld implements IProcess {
         }
     }
 
+    /**
+     * The networks are stepping (begin to finish): a rebuild asked for now waits for the next tick. Lookups made then
+     * (nodeFor, whereIs, the heavy-network marks) rebuilt the networks inside the loop over them (Incognito crashed on
+     * a ConcurrentModificationException 2026-11-28: a steam generator re-aimed its nozzle at a new condenser in its
+     * beforeFluidStep, beside a heavy plant).
+     */
+    private boolean inStep;
+
     private void rebuildIfDirty() {
-        if (!dirty) return;
+        if (!dirty || inStep) return;
         dirty = false;
         apply(plan(devices));
     }
