@@ -543,6 +543,11 @@ public final class CoreStep {
                 fn.backgroundNanos += p.took;
                 fn.backgroundSteps++;
             }
+            if (fn.dumpWanted != null) {   // (the applied state, between background steps: /elnlab fluiddump)
+                var to = fn.dumpWanted;
+                fn.dumpWanted = null;
+                to.accept(mods.eln.fluidcore.NetworkDump.write(net, 0.05));
+            }
             applied = true;   // (this tick has its results: the next step may start, but nothing more is applied or cleared)
         }
         int slow = 0;

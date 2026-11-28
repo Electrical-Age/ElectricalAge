@@ -60,6 +60,15 @@ public final class EaUnits {
      * line for every fluid container; buckets from 1000 mB and no "of", Baughn 2026-11-11). A gas's share is its partial pressure's share of the space above the liquid; "empty" if none counts.
      */
     public static String composition(FluidNode n) {
+        return composition(n, Double.POSITIVE_INFINITY);
+    }
+
+    /**
+     * As composition(n), and also every liquid of at least minLiquidMb (mB) however small its share: a tank's Contents
+     * then names what its Liquid line counts (Baughn 2026-11-28: a tank read "Liquid: 24 mB" over "Contents: 1.0 g air",
+     * 1% of a 12 B tank being 120 mB).
+     */
+    public static String composition(FluidNode n, double minLiquidMb) {
         SpeciesRegistry reg = SpeciesRegistry.get();
         Flash s = n.state;
         double pSum = 0, vGas = Math.max(0, n.volume - n.liquidVolume());   // (not the flash's floor: a full pipe holds no gas)
@@ -68,7 +77,8 @@ public final class EaUnits {
         for (int id = 0; id < n.speciesBound(); id++) {
             Species sp = reg.byId(id);
             double liq = s.liquid(id), vap = s.vapour(id);
-            if (liq > 0 && liq / sp.rhoL > 0.01 * n.volume) parts.put(sp.displayName(), volume(liq / sp.rhoL * Water.RHO_L / KG_PER_MB_WATER) + " " + sp.displayName());
+            double mb = liq / sp.rhoL * Water.RHO_L / KG_PER_MB_WATER;
+            if (liq > 0 && (liq / sp.rhoL > 0.01 * n.volume || mb >= minLiquidMb)) parts.put(sp.displayName(), volume(liq / sp.rhoL * Water.RHO_L / KG_PER_MB_WATER) + " " + sp.displayName());
             if (vap > 0 && pSum > 0 && vap * sp.r / pSum * vGas > 0.01 * n.volume) {
                 String name = id == SpeciesRegistry.WATER ? "steam" : sp.gas() || liq <= 0 ? sp.displayName() : sp.displayName() + " vapour";
                 parts.put(name, grams(vap * 1000) + " " + name);

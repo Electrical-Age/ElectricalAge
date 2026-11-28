@@ -63,13 +63,16 @@ public class TankDescriptor extends TransparentNodeDescriptor {
     }
 
     /** A vessel's Jade headline as a tank shows it (pressure with inline rating/burst warning, contents, liquid, viscosity). */
+    /** The least liquid a tank's Contents names (mB): what its Liquid line shows (to 0.01 mB) is accounted for. */
+    static final double TRACE_MB = 0.1;
+
     public void putProbe(mods.eln.compat.jade.ProbeLines info, mods.eln.sim.fluid.FluidNode v) {
         double fill = Math.min(1, v.liquidVolume() / v.volume);
         String warn = v.P() > 0.85 * burstPa ? " — " + mods.eln.i18n.I18N.tr("near bursting")
             : v.P() > workingPa ? " (" + String.format(mods.eln.i18n.I18N.tr("over %.0f bar rating"), workingPa / 1e5) + ")" : "";
         info.headline(mods.eln.i18n.I18N.tr("Pressure"), String.format("%.2f bar of %s, %s%s", v.P() / 1e5, mods.eln.sim.fluid.EaUnits.contents(v),
             mods.eln.api.Meters.celsius(v.T() - mods.eln.sim.fluid.Water.T0), warn));
-        info.headline(mods.eln.i18n.I18N.tr("Contents"), mods.eln.sim.fluid.EaUnits.composition(v));
+        info.headline(mods.eln.i18n.I18N.tr("Contents"), mods.eln.sim.fluid.EaUnits.composition(v, TRACE_MB));
         info.headline(mods.eln.i18n.I18N.tr("Liquid"), mods.eln.sim.fluid.EaUnits.volume(v.liquidVolume() * mods.eln.sim.fluid.Water.RHO_L
             / mods.eln.sim.fluid.EaUnits.KG_PER_MB_WATER) + ", " + mods.eln.misc.Utils.plotPercent(fill));
         String visc = mods.eln.sim.fluid.EaUnits.viscosity(v);

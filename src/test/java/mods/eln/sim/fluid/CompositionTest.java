@@ -31,6 +31,15 @@ public class CompositionTest {
     }
 
     @Test
+    void aTankNamesItsTraces() {
+        // 25 mB of water left in a 12 B tank: under 1%, so Contents named only the air while Liquid read 25 mB
+        double V = 12000 * EaUnits.KG_PER_MB_WATER / Water.RHO_L;
+        FluidNode n = new FluidNode(V, 0, 1, false).fill(25 * EaUnits.KG_PER_MB_WATER, Water.P_ATM, 300);
+        assertTrue(EaUnits.composition(n).matches("[0-9.]+ g air(, [0-9.]+ g steam)?"), EaUnits.composition(n));
+        assertTrue(EaUnits.composition(n, 0.1).matches("[0-9.]+ g air, ([0-9.]+ g steam, )?2[0-9](\\.[0-9]+)? mB water"), EaUnits.composition(n, 0.1));
+    }
+
+    @Test
     void otherSpeciesAlphabetically() {
         TestSpecies.defineAll();
         int oil = TestSpecies.id("diesel");

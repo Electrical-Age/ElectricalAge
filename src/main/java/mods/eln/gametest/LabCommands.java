@@ -212,19 +212,29 @@ public final class LabCommands {
                     }
                     var net = mods.eln.fluid.FluidWorld.networkOf(d.fluidPorts().get(0).node());
                     String text = net == null ? null : net.dump(0.05);
+                    var src = c.getSource();
+                    java.util.function.Consumer<String> write = t -> {
+                        try {
+                            var dir = java.nio.file.Path.of("fluidcore-fail");
+                            java.nio.file.Files.createDirectories(dir);
+                            var f = dir.resolve("dump-" + pos.getX() + "_" + pos.getY() + "_" + pos.getZ() + ".txt");
+                            java.nio.file.Files.writeString(f, t);
+                            src.sendSuccess(() -> Component.literal("written to " + f.toAbsolutePath()), false);
+                        } catch (java.io.IOException ex) {
+                            src.sendFailure(Component.literal("could not write: " + ex));
+                        }
+                    };
+                    if (text == null && net != null && net.pending()) {
+                        // (a heavy network steps in the background, nearly always mid-step: dump it as its step lands)
+                        net.dumpWanted = write;
+                        src.sendSuccess(() -> Component.literal("a background step is running: the dump is written when it lands"), false);
+                        return 1;
+                    }
                     if (text == null) {
-                        c.getSource().sendFailure(Component.literal("no network stepped there yet"));
+                        src.sendFailure(Component.literal("no network stepped there yet"));
                         return 0;
                     }
-                    try {
-                        var dir = java.nio.file.Path.of("fluidcore-fail");
-                        java.nio.file.Files.createDirectories(dir);
-                        var f = dir.resolve("dump-" + pos.getX() + "_" + pos.getY() + "_" + pos.getZ() + ".txt");
-                        java.nio.file.Files.writeString(f, text);
-                        c.getSource().sendSuccess(() -> Component.literal("written to " + f.toAbsolutePath()), false);
-                    } catch (java.io.IOException ex) {
-                        c.getSource().sendFailure(Component.literal("could not write: " + ex));
-                    }
+                    write.accept(text);
                     return 1;
                 })))
                 .then(Commands.literal("fluidstats").executes(c -> {

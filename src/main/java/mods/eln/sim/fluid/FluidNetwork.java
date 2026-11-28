@@ -136,6 +136,13 @@ public final class FluidNetwork {
         return core == null || core.pending() ? null : mods.eln.fluidcore.NetworkDump.write(core.net, dt);
     }
 
+    /**
+     * A dump asked for while a background step runs (dump gives null then, and a heavy network nearly always has one
+     * running): taken on the server thread when that step's results are applied, before the next one starts (CoreStep.begin).
+     * Lost if the network is rebuilt first.
+     */
+    public java.util.function.Consumer<String> dumpWanted;
+
     /** Is a background step under way (CoreStep)? */
     public boolean pending() {
         return core != null && core.pending();
